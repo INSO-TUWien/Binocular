@@ -34,9 +34,7 @@
   "disallowSpacesInFunctionExpression": {
     "beforeOpeningRoundBrace": true
   },
-  "disallowSpacesInNamedFunctionExpression": {
-    "beforeOpeningRoundBrace": false
-  },
+  "disallowSpacesInNamedFunctionExpression": false,
   "requireOperatorBeforeLineBreak": [
     "?", "=", "+", "-", "/", "*", "==", "===",
     "!=", "!==", ">", ">=", "<", "<="
