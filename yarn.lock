@@ -4,7 +4,32 @@ bluebird@^3.4.6:
   version "3.4.6"
   resolved "https://npm.innovation.rocks/bluebird/-/bluebird-3.4.6.tgz#01da8d821d87813d158967e743d5fe6c62cf8c0f"
 
+deep-extend@~0.4.0:
+  version "0.4.1"
+  resolved "https://npm.innovation.rocks/deep-extend/-/deep-extend-0.4.1.tgz#efe4113d08085f4e6f9687759810f807469e2253"
+
+ini@~1.3.0:
+  version "1.3.4"
+  resolved "https://npm.innovation.rocks/ini/-/ini-1.3.4.tgz#0537cb79daf59b59a1a517dff706c86ec039162e"
+
 lodash@^4.17.2:
   version "4.17.2"
   resolved "https://npm.innovation.rocks/lodash/-/lodash-4.17.2.tgz#34a3055babe04ce42467b607d700072c7ff6bf42"
+
+minimist@^1.2.0:
+  version "1.2.0"
+  resolved "https://npm.innovation.rocks/minimist/-/minimist-1.2.0.tgz#a35008b20f41383eec1fb914f4cd5df79a264284"
+
+rc:
+  version "1.1.6"
+  resolved "https://npm.innovation.rocks/rc/-/rc-1.1.6.tgz#43651b76b6ae53b5c802f1151fa3fc3b059969c9"
+  dependencies:
+    deep-extend "~0.4.0"
+    ini "~1.3.0"
+    minimist "^1.2.0"
+    strip-json-comments "~1.0.4"
+
+strip-json-comments@~1.0.4:
+  version "1.0.4"
+  resolved "https://npm.innovation.rocks/strip-json-comments/-/strip-json-comments-1.0.4.tgz#1e15fbcac97d3ee99bf2d73b4c656b082bbafb91"
 

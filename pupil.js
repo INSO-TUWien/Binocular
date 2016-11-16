@@ -1,3 +1,5 @@
 'use strict';
 
-console.log( 'Hello, world!' );
+const cfg = require( './lib/config.js' );
+
+console.log( 'config:', cfg );
