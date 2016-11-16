@@ -1,0 +1,79 @@
+{
+  "disallowEmptyBlocks": true,
+  "disallowImplicitTypeConversion": ["numeric", "string"],
+  "disallowKeywordsOnNewLine": ["else"],
+  "disallowMixedSpacesAndTabs": true,
+  "disallowMultipleLineStrings": true,
+  "disallowMultipleVarDecl": "exceptUndefined",
+  "disallowNewlineBeforeBlockStatements": true,
+  "disallowOperatorBeforeLineBreak": ["."],
+  "disallowSpaceAfterKeywords": [
+    "if", "for", "while", "do", "switch", "catch"
+  ],
+  "disallowSpaceAfterObjectKeys": true,
+  "disallowSpaceAfterPrefixUnaryOperators": ["++", "--", "+", "-", "~", "!"],
+  "disallowSpaceBeforePostfixUnaryOperators": ["++", "--"],
+  "disallowTrailingComma": true,
+  "maximumLineLength": {
+    "value": 120,
+    "allowUrlComments": true,
+    "allowRegex": true
+  },
+  "requireBlocksOnNewline": 1,
+  "requireCamelCaseOrUpperCaseIdentifiers": true,
+  "requireCapitalizedConstructors": true,
+  "requireCommaBeforeLineBreak": true,
+  "requireCurlyBraces": [
+    "if", "else", "for", "while", "do", "try", "catch", "case", "default"
+  ],
+  "requireLineBreakAfterVariableAssignment": true,
+  "disallowSpacesInCallExpression": true,
+  "disallowSpacesInFunctionDeclaration": {
+    "beforeOpeningRoundBrace": true
+  },
+  "disallowSpacesInFunctionExpression": {
+    "beforeOpeningRoundBrace": true
+  },
+  "disallowSpacesInNamedFunctionExpression": {
+    "beforeOpeningRoundBrace": false
+  },
+  "requireOperatorBeforeLineBreak": [
+    "?", "=", "+", "-", "/", "*", "==", "===",
+    "!=", "!==", ">", ">=", "<", "<="
+  ],
+  "requirePaddingNewLinesAfterUseStrict": true,
+  "requirePaddingNewLinesBeforeExport": true,
+  "requireParenthesesAroundIIFE": true,
+  "requireSemicolons": true,
+  "requireSpaceAfterLineComment": true,
+  "requireSpaceBeforeBlockStatements": true,
+  "requireSpaceBeforeKeywords": [
+      "else",
+      "while",
+      "catch"
+  ],
+  "requireSpaceBeforeObjectValues": false,
+  "requireSpaceBetweenArguments": true,
+  "requireSpacesInAnonymousFunctionExpression": {
+     "beforeOpeningCurlyBrace": true
+   },
+  "requireSpacesInConditionalExpression": false,
+  "requireSpacesInForStatement": false,
+  "requireSpacesInFunctionDeclaration": {
+    "beforeOpeningCurlyBrace": true
+  },
+  "requireSpacesInFunctionExpression": {
+    "beforeOpeningCurlyBrace": true
+  },
+  "requireSpacesInNamedFunctionExpression": {
+      "beforeOpeningCurlyBrace": true
+  },
+  "safeContextKeyword": ["self"],
+  "validateIndentation": 2,
+  "validateLineBreaks": "LF",
+  "validateParameterSeparator": ", ",
+  "validateQuoteMarks": {
+    "escape": true,
+    "mark": "'"
+  }
+}
