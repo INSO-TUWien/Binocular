@@ -15,9 +15,11 @@
   ],
   "author": "Roman Decker <roman.decker@gmail.com>",
   "license": "ISC",
+  "bin": "./pupil.js",
   "dependencies": {
     "bluebird": "^3.4.6",
     "lodash": "^4.17.2",
+    "neo4j": "^2.0.0-RC2",
     "rc": "^1.1.6",
     "react": "^15.4.0",
     "react-dom": "^15.4.0",
