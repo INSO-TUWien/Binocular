@@ -1,0 +1,11 @@
+image: theromanempire/pupil-environment
+
+services:
+ - neo4j
+
+before_script:
+ - yarn
+
+test:
+  script:
+    yarn run test
