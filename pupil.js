@@ -1,5 +1,10 @@
+#!/usr/bin/env node
+
 'use strict';
 
-const cfg = require( './lib/config.js' );
+const db = require( './lib/context.js' ).db;
 
-console.log( 'config:', cfg );
+db.cypherAsync( { query: 'MATCH (n) DETACH DELETE n' } )
+.then( function( results ) {
+  console.log( results );
+} );

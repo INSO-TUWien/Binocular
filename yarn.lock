@@ -1807,6 +1807,13 @@ ncp@0.4.x:
   version "0.4.2"
   resolved "https://npm.innovation.rocks/ncp/-/ncp-0.4.2.tgz#abcc6cbd3ec2ed2a729ff6e7c1fa8f01784a8574"
 
+neo4j@^2.0.0-RC2:
+  version "2.0.0-RC2"
+  resolved "https://npm.innovation.rocks/neo4j/-/neo4j-2.0.0-RC2.tgz#bd328247d0a97b1b16ccb997a694a86ae8620a41"
+  dependencies:
+    request "^2.27.0"
+    underscore "1.7.x"
+
 node-fetch@^1.0.1:
   version "1.6.3"
   resolved "https://npm.innovation.rocks/node-fetch/-/node-fetch-1.6.3.tgz#dc234edd6489982d58e8f0db4f695029abcd8c04"
@@ -2193,7 +2200,7 @@ repeating@^2.0.0:
   dependencies:
     is-finite "^1.0.0"
 
-request@^2.75.0:
+request@^2.27.0, request@^2.75.0:
   version "2.78.0"
   resolved "https://npm.innovation.rocks/request/-/request-2.78.0.tgz#e1c8dec346e1c81923b24acdb337f11decabe9cc"
   dependencies:
@@ -2469,6 +2476,10 @@ uglify-to-browserify@~1.0.0:
 uid-number@~0.0.6:
   version "0.0.6"
   resolved "https://npm.innovation.rocks/uid-number/-/uid-number-0.0.6.tgz#0ea10e8035e8eb5b8e4449f06da1c730663baa81"
+
+underscore@1.7.x:
+  version "1.7.0"
+  resolved "https://npm.innovation.rocks/underscore/-/underscore-1.7.0.tgz#6bbaf0877500d36be34ecaa584e0db9fef035209"
 
 underscore@~1.6.0:
   version "1.6.0"
