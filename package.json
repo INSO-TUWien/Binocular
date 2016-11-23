@@ -21,9 +21,11 @@
   "bin": "./pupil.js",
   "dependencies": {
     "bluebird": "^3.4.6",
+    "event-to-promise": "^0.7.0",
     "express": "^4.14.0",
     "lodash": "^4.17.2",
     "neo4j": "^2.0.0-RC2",
+    "nodegit": "^0.16.0",
     "opn": "^4.0.2",
     "rc": "^1.1.6",
     "react": "^15.4.0",
