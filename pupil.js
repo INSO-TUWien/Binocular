@@ -9,12 +9,12 @@ const Promise = require( 'bluebird' );
 const git = require( './lib/git.js' );
 const path = require( 'path' );
 
-const { app, db } = require( './lib/context.js' );
+const { app, db, argv } = require( './lib/context.js' );
 const config = require( './lib/config.js' );
 
-app.listen( cfg.port, function() {
-  console.log( `Pupil listening on http://localhost:${cfg.port}` );
+app.listen( config.port, function() {
+  console.log( `Pupil listening on http://localhost:${config.port}` );
   if( argv.ui && argv.open ) {
-    opn( `http://localhost:${cfg.port}/` );
+    opn( `http://localhost:${config.port}/` );
   }
 } );
