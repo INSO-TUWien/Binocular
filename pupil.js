@@ -5,10 +5,16 @@
 require( './lib/context.js' );
 
 const _ = require( 'lodash' );
+const Promise = require( 'bluebird' ); 
 const git = require( './lib/git.js' );
+const path = require( 'path' );
 
-git.getAllCommits( '.' )
-.map( function( commit ) {
-  const header = _.head( _.split(commit.message(), '\n', 2) );
-  console.log( `${commit.id()} ${header}` );
+const { app, db } = require( './lib/context.js' );
+const config = require( './lib/config.js' );
+
+app.listen( cfg.port, function() {
+  console.log( `Pupil listening on http://localhost:${cfg.port}` );
+  if( argv.ui && argv.open ) {
+    opn( `http://localhost:${cfg.port}/` );
+  }
 } );
