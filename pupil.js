@@ -25,20 +25,53 @@ return Promise.resolve( git.getRepoPath() )
 
   return Promise.join(
     db.ensureCollection( 'commits' ),
-    git.getAllCommits( this.repoPath )
+    db.ensureEdgeCollection( 'commit-parents' )
   );
 } )
-.spread( function( collection, commits ) {
-  return Promise.map( commits, function( commit ) {
-    return collection.save( {
-      sha: commit.id().toString(),
-      message: commit.message()
-    } );
+.spread( function( commitCollection, parentsCollection ) {
+  this.commitCollection = commitCollection;
+  this.parentsCollection = parentsCollection;
+  
+  
+  return db.ensureGraph( 'commit-network', {
+    edgeDefinitions: [ {
+      collection: 'commit-parents',
+      from: ['commits'],
+      to: ['commits']
+    } ]
+  } );
+} )
+.then( function( network ) {
+  this.network = network;
+
+  return git.getAllCommits( this.repoPath );
+} )
+.map( function( commit ) {
+  
+  const sha = commit.id().toString();
+  return Promise.bind( this )
+  .then( () => this.commitCollection.lookupByKeys([sha]) )
+  .then( function( c ) {
+    if( c.length === 0 ) {
+      console.log( 'Persisting', sha );
+      return this.commitCollection.save( {
+        sha: commit.id().toString(),
+        _key: commit.id().toString(),
+        message: commit.message()
+      } );
+    } else {
+      console.log( 'Omitting', sha, '(already present)' );
+    }
+  } )
+  .thenReturn( commit );
+} )
+.map( function( commit ) {
+
+  return Promise.bind( this )
+  .then( () => commit.parents() )
+  .map( function( parentOid ) {
+    const parent = parentOid.toString();
+
+    this.parentsCollection.save( {}, `commits/${commit.id().toString()}`, `commits/${parent}` );
   } );
 } );
-
-// git.getAllCommits( '.' )
-// .map( function( commit ) {
-//   const header = _.head( _.split(commit.message(), '\n', 2) );
-//   console.log( `${commit.id()} ${header}` );
-// } 
