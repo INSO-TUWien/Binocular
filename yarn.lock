@@ -364,7 +364,7 @@ babel-helpers@^6.16.0:
     babel-runtime "^6.0.0"
     babel-template "^6.16.0"
 
-babel-jest@>5.0.0, babel-jest@^17.0.2:
+babel-jest@^17.0.2:
   version "17.0.2"
   resolved "https://npm.innovation.rocks/babel-jest/-/babel-jest-17.0.2.tgz#8d51e0d03759713c331f108eb0b2eaa4c6efff74"
   dependencies:
@@ -2937,6 +2937,10 @@ jshint:
     shelljs "0.3.x"
     strip-json-comments "1.0.x"
 
+json-loader@^0.5.4:
+  version "0.5.4"
+  resolved "https://npm.innovation.rocks/json-loader/-/json-loader-0.5.4.tgz#8baa1365a632f58a3c46d20175fc6002c96e37de"
+
 json-schema@0.2.3:
   version "0.2.3"
   resolved "https://npm.innovation.rocks/json-schema/-/json-schema-0.2.3.tgz#b480c892e59a2f05954ce727bd3f2a4e882f9e13"
@@ -5153,12 +5157,6 @@ watchpack@^0.2.1:
 webidl-conversions@^3.0.0, webidl-conversions@^3.0.1:
   version "3.0.1"
   resolved "https://npm.innovation.rocks/webidl-conversions/-/webidl-conversions-3.0.1.tgz#24534275e2a7bc6be7bc86611cc16ae0a5654871"
-
-webpack-babel-jest@^1.0.4:
-  version "1.0.4"
-  resolved "https://npm.innovation.rocks/webpack-babel-jest/-/webpack-babel-jest-1.0.4.tgz#1046d362f11416b20725b8c98e67f2f0f252aa9e"
-  dependencies:
-    babel-jest ">5.0.0"
 
 webpack-core@~0.6.0:
   version "0.6.8"
