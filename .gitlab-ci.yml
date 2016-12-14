@@ -12,4 +12,4 @@ before_script:
 
 test:
   script:
-    yarn run test
+    yarn run coverage

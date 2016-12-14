@@ -2,3 +2,5 @@
 /ui/gen
 .pupilrc
 db/
+*.log
+coverage/

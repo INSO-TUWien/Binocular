@@ -2,24 +2,22 @@
 
 import React from 'react';
 import _ from 'lodash';
+import styles from './sidebar.css';
+import PanelLink from './PanelLink.jsx';
 
-export default class Sidebar extends React.Component {
+import classnames from 'classnames';
+
+export default class SidebarPanel extends React.Component {
   render() {
 
     const links = _.map( this.props.visualizations, vis => {
       return (
-        <a href='#'
-           className={this.props.activeVisualization === vis.id ? 'is-active' : ''}
-           key={vis.id}
-           onClick={() => this.props.onSelectVisualization(vis.id)}>
-            {vis.label}
-        </a>
+        <PanelLink key={vis.id} visualization={vis}></PanelLink>
       );
     } );
 
-
     return (
-      <nav className='panel'>
+      <nav className={classnames('panel', styles.sidebar)}>
         <p className='panel-heading'>
           Visualizations
         </p>
