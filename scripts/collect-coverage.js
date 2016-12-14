@@ -6,9 +6,6 @@ const serverCoverage = require( '../coverage/server/coverage.json' );
 const uiCoverage = require( '../coverage/ui/coverage-final.json' );
 const _ = require( 'lodash' );
 
-let totalStatements = 0;
-let coveredStatements = 0;
-
 const stats = {
   s: { total: 0, covered: 0 },
   b: { total: 0, covered: 0 },
@@ -16,13 +13,12 @@ const stats = {
 };
 
 _.each( [serverCoverage, uiCoverage], function( coverage) {
-
-  _.each( coverage, function( info, file ) {
+  _.each( coverage, function( info ) {
 
     collect( 's', info );
     collect( 'b', info );
     collect( 'f', info );
-  } )
+  } );
 } );
 
 console.log( 'Overall coverage:' );
@@ -40,43 +36,18 @@ function collect( type, info ) {
 
     if( Array.isArray(v) ) {
       _.each( v, function( v ) {
-        stats[type].total++;
-        stats[type].covered += v;
+        inc( type, v );
       } );
     } else {
-      stats[type].total++;
-      stats[type].covered += v;
+      inc( type, v );
     }
   } );
+
 }
 
-// _.map( [serverCoverage, uiCoverage], function( coverage ) {
-  
-//   const totalCoverage = _.reduce( coverage, function( total, info, file ) {
-
-//     return {
-//       s: total.s + collectSingle( info.s ),
-//       b: total.b + collectSingle( info.b ),
-//       f: total.f + collectSingle( info.f )
-//     }
-//   }, { s: 0, b: 0, f: 0 } );
-
-  
-//   const n = _.keys( coverage ).length;
-//   totalCoverage.s = totalCoverage.s / n;
-//   totalCoverage.b = totalCoverage.b / n;
-//   totalCoverage.f = totalCoverage.f / n;
-
-//   console.log( `Statements: ${totalCoverage.s}` );
-//   console.log( `Branches: ${totalCoverage.b}` );
-//   console.log( `Functions: ${totalCoverage.f}` );
-  
-// } );
-
-// function collectSingle( coverageData ) {
-//   const total = _.reduce( coverageData, function( total, v ) {
-//     return total + v;
-//   }, 0 );
-
-//   return total / _.keys(coverageData).length;
-// }
+function inc( type, v ) {
+  stats[type].total++;
+  if( v > 0 ) {
+    stats[type].covered++;
+  }
+}
