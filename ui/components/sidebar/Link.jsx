@@ -2,15 +2,16 @@
 
 import React, { PropTypes } from 'react';
 import _ from 'lodash';
+import bulma from 'bulma';
 
-import classnames from 'classnames';
+import cx from 'classnames';
 
 export default class Link extends React.Component {
   render() {
 
     return (
       <a href='#'
-         className={classnames({'is-active': this.props.isActive})}
+         className={cx({[bulma['is-active']]: this.props.isActive})}
          key={this.props.key}
          onClick={e => {
           e.preventDefault();

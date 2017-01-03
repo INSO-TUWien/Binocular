@@ -7,6 +7,8 @@ import App from './components/app.jsx';
 import { Provider } from 'react-redux';
 import app from './reducers';
 import 'bulma';
+import styleInject from 'style-inject';
+import iconFont from 'icons-loader';
 
 const mountingPoint = document.createElement( 'div' );
 mountingPoint.className = 'react-app';
@@ -19,6 +21,8 @@ const store = createStore( app, {
   ],
   activeVisualization: 'ISSUE_IMPACT'
 } );
+
+styleInject( iconFont.css );
 
 window.onload = function() {
   document.body.appendChild( mountingPoint );

@@ -1,0 +1,8 @@
+.configButton {
+  position: absolute;
+  bottom: 0px;
+  right: 0px;
+  font-size: 1.5em;
+  padding: 10px;
+  border-radius: 5px 0px 0px 0px;
+}

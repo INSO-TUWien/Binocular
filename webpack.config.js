@@ -1,6 +1,7 @@
 'use strict';
 
-const path = require('path');
+const path = require( 'path' );
+const IconsPlugin = require( 'icons-loader/IconsPlugin' );
 
 module.exports = {
   entry: './ui/index.jsx',
@@ -27,7 +28,7 @@ module.exports = {
         loader: 'json-loader'
       },
       {
-        test: /\.sass$/,
+        test: /\.s[ac]ss$/,
         loaders: ['style-loader',
                   'css-loader?modules&importLoaders=1&localIdentName=[name]__[local]__[hash:base64:5]',
                   'sass-loader']
@@ -38,7 +39,19 @@ module.exports = {
           'style-loader',
           'css-loader?modules&importLoaders=1&localIdentName=[name]__[local]__[hash:base64:5]'
         ]
+      },
+      {
+        test: /\.svg$/,
+        loader: 'icons-loader'
       }
     ]
-  }
+  },
+  plugins: [
+    new IconsPlugin( {
+      fontName: 'icons',
+      timestamp: Math.round( Date.now() / 1000 ),
+      normalize: true,
+      formats: ['ttf', 'eot', 'woff', 'svg']
+    } )
+  ]
 };
