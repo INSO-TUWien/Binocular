@@ -1,12 +1,61 @@
 'use strict';
 
 const Promise = require( 'bluebird' );
-const { db } = require( '../lib/context.js' );
+const chai = require( 'chai' );
 
-describe('should correctly parse the config', function() {
+const git = require( '../lib/git.js' );
+const fake = require( './fake.js' );
+const helpers = require( './helpers.js' );
 
-  it( 'should work', function() {
-    return Promise.resolve();
+const expect = chai.expect;
+
+describe( 'git', function() {
+
+  const alice = { name: 'Alice Alisson', email: 'alice@gmail.com' };
+  const bob = { name: 'Bob Barker', email: 'bob@gmail.com' };
+
+  describe( '#getAllCommits', function() {
+
+    it( 'should get an empty array for an empty repo', function() {
+
+      return fake.repository()
+      .then( function( repo ) {
+        return git.getAllCommits( repo.path() );
+      } )
+      .then( function( commits ) {
+        expect( commits ).to.have.length( 0 );
+      } );
+    } );
+
+    it( 'should get the commits of a repository', function() {
+
+      return fake.repository()
+      .then( function( repo ) {
+        this.repo = repo;
+
+        return Promise.join(
+          fake.file( repo, 'README.md', fake.lorem(5).paragraphs() ),
+          fake.file( repo, 'some-file.txt', fake.lorem(3).paragraphs() ),
+          fake.file( repo, 'another-file.txt', fake.lorem(10).paragraphs() )
+        );
+      } )
+      .then( function() {
+        return helpers.commit( this.repo, ['README.md'], alice, 'Initial' );
+      } )
+      .then( function() {
+        return helpers.commit( this.repo, ['some-file.txt'], bob );
+      } )
+      .then( function() {
+        return helpers.commit( this.repo, ['another-file.txt'], alice );
+      } )
+      .then( function() {
+        return git.getAllCommits( this.repo.path() );
+      } )
+      .then( function( commits ) {
+        expect( commits ).to.have.length( 3 );
+      } );
+    } );
+
   } );
 
 } );
