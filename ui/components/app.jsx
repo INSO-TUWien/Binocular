@@ -3,10 +3,8 @@
 import React from 'react';
 import Sidebar from './sidebar';
 import ConfigButton from './config-button';
+import ConfigDialog from './config-dialog';
 import styles from './app.css';
-
-import classnames from 'classnames';
-
 
 export default class App extends React.Component {
 
@@ -19,6 +17,7 @@ export default class App extends React.Component {
           <h1>Chart area</h1>
         </div>
         <ConfigButton />
+        <ConfigDialog />
       </div>
     );
   }

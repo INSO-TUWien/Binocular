@@ -1,7 +1,7 @@
 'use strict';
 
 import { connect } from 'react-redux';
-import SidebarPanel from './SidebarPanel.jsx';
+import Sidebar from './Sidebar.jsx';
 
 const mapStateToProps = (state, ownProps) => {
   return {
@@ -13,6 +13,4 @@ const mapDispatchToProps = (dispatch, ownProps) => {
   return {};
 };
 
-const Sidebar = connect( mapStateToProps, mapDispatchToProps )( SidebarPanel );
-
-export default Sidebar;
+export default connect( mapStateToProps, mapDispatchToProps )( Sidebar );

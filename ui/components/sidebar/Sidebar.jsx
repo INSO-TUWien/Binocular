@@ -8,7 +8,7 @@ import PanelLink from './PanelLink.jsx';
 
 import cx from 'classnames';
 
-export default class SidebarPanel extends React.Component {
+export default class Sidebar extends React.Component {
   render() {
 
     const links = _.map( this.props.visualizations, vis => {

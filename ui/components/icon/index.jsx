@@ -8,7 +8,6 @@ class Icon extends React.Component {
   render() {
     let icon = icons[this.props.name];
 
-    console.log( icons );
     if( !icon ) {
       console.warn( 'Unknown icon:', this.props.name );
       return (<span />);
