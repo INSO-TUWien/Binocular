@@ -3,6 +3,7 @@
 import React from 'react';
 import bulma from 'bulma';
 import Message from '../message';
+import Monospaced from '../monospaced';
 
 import cx from 'classnames';
 
@@ -20,7 +21,7 @@ export default class ConfigDialog extends React.Component {
           </div>
           <section className={bulma['modal-card-body']}>
             <Message>
-              Your config will be saved to ...
+              Your config will be saved to <Monospaced>{this.props.config.config}</Monospaced>
             </Message>
             <form>
             </form>

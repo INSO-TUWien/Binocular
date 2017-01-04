@@ -4,7 +4,9 @@ import { connect } from 'react-redux';
 import ConfigDialog from './ConfigDialog.jsx';
 
 const mapStateToProps = (state, ownProps) => {
-  return {};
+  return {
+    config: state.config
+  };
 };
 
 const mapDispatchToProps = (dispatch, ownProps) => {

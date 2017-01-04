@@ -13,6 +13,7 @@ const { app, db, argv } = require( './lib/context.js' );
 const config = require( './lib/config.js' );
 
 app.get( '/commits', require('./lib/endpoints/get-commits.js') );
+app.get( '/config', require('./lib/endpoints/get-config.js') );
 
 return Promise.resolve( git.getRepoPath() )
 .bind( {} )
