@@ -4,7 +4,9 @@ import { connect } from 'react-redux';
 import ConfigButton from './ConfigButton.jsx';
 
 const mapStateToProps = (state, ownProps) => {
-  return {};
+  return {
+    spinning: state.config.isFetching
+  };
 };
 
 const mapDispatchToProps = (dispatch, ownProps) => {

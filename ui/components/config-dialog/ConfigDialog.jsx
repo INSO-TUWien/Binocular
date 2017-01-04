@@ -21,9 +21,10 @@ export default class ConfigDialog extends React.Component {
           </div>
           <section className={bulma['modal-card-body']}>
             <Message>
-              Your config will be saved to <Monospaced>{this.props.config.config}</Monospaced>
+              Configuration will be saved to <Monospaced>{this.props.config.config}</Monospaced>.
             </Message>
             <form>
+              
             </form>
           </section>
           <footer className={bulma['modal-card-foot']}>
