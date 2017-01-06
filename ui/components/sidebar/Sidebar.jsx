@@ -3,8 +3,9 @@
 import React from 'react';
 import _ from 'lodash';
 import styles from './sidebar.css';
-import bulma from 'bulma';
 import PanelLink from './PanelLink.jsx';
+
+console.log( 'sidebar:', styles );
 
 import cx from 'classnames';
 
@@ -18,14 +19,14 @@ export default class Sidebar extends React.Component {
     } );
 
     return (
-      <nav className={cx(bulma['panel'], styles.sidebar)}>
-        <p className={bulma['panel-heading']}>
+      <nav className={cx('panel', styles.sidebar)}>
+        <p className='panel-heading'>
           Visualizations
         </p>
-        <p className={bulma['panel-tabs']}>
+        <p className='panel-tabs'>
           {links}
         </p>
-        <p className={bulma['panel-block']} />
+        <p className='panel-block' />
       </nav>
     );
   }

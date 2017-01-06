@@ -1,35 +1,39 @@
 'use strict';
 
 import React from 'react';
-import bulma from 'bulma';
 import Message from '../message';
 import Monospaced from '../monospaced';
+import Icon from '../icon';
+import FormControl from '../FormControl.jsx';
 
-import cx from 'classnames';
+import styles from './config-dialog.scss';
 
 export default class ConfigDialog extends React.Component {
   render() {
     return (
-      <div className={cx(bulma.modal, bulma['is-active'])}>
-        <div className={bulma['modal-background']} />
-        <div className={bulma['modal-card']}>
-          <div className={bulma['modal-card-head']}>
-            <p className={bulma['modal-card-title']}>
+      <div className='modal is-active'>
+        <div className='modal-background' />
+        <div className='modal-card'>
+          <div className='modal-card-head'>
+            <p className='modal-card-title'>
               Configuration
             </p>
-            <button className={bulma['delete']} />
+            <button className='delete' />
           </div>
-          <section className={bulma['modal-card-body']}>
+          <section className='modal-card-body'>
             <Message>
               Configuration will be saved to <Monospaced>{this.props.config.config}</Monospaced>.
             </Message>
             <form>
-              
+              <FormControl type='text'
+                           label='GitLab-URL:'
+                           icon='gitlab'
+                           placeholder='http://www.gitlab.com/' />
             </form>
           </section>
-          <footer className={bulma['modal-card-foot']}>
-            <a href='#' className={cx(bulma.button, bulma['is-primary'])}>OK</a>
-            <a href='#' className={bulma.button}>Cancel</a>
+          <footer className='modal-card-foot'>
+            <a href='#' className='button is-primary'>OK</a>
+            <a href='#' className='button'>Cancel</a>
           </footer>
         </div>
       </div>

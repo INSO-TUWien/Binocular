@@ -8,6 +8,8 @@ import App from './components/app.jsx';
 import { Provider } from 'react-redux';
 import app from './reducers';
 import 'bulma';
+import 'font-awesome/css/font-awesome.css';
+import './global.scss';
 import styleInject from 'style-inject';
 import iconFont from 'icons-loader';
 import thunk from 'redux-thunk';

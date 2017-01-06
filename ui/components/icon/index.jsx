@@ -1,25 +1,16 @@
 import React from 'react';
 
 import styles from './icon.css';
-import icons from '../../icons';
+import cx from 'classnames';
 
 class Icon extends React.Component {
 
   render() {
-    let icon = icons[this.props.name];
-
-    if( !icon ) {
-      console.warn( 'Unknown icon:', this.props.name );
-      return (<span />);
-    }
+    let icon = `fa-${this.props.name}`;
 
     return (
-      <span
-        className={styles.icon}
-        style={
-          { fontFamily: icon.fontName }
-        }>
-        {icon.unicode}
+      <span className='icon'>
+        <i className={cx('fa', icon)} />
       </span>
     );
   }
