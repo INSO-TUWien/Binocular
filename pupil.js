@@ -8,6 +8,7 @@ const _ = require( 'lodash' );
 const Promise = require( 'bluebird' ); 
 const git = require( './lib/git.js' );
 const path = require( 'path' );
+const opn = require( 'opn' );
 
 const { app, db, argv } = require( './lib/context.js' );
 const config = require( './lib/config.js' );
@@ -15,7 +16,7 @@ const config = require( './lib/config.js' );
 app.get( '/commits', require('./lib/endpoints/get-commits.js') );
 app.get( '/config', require('./lib/endpoints/get-config.js') );
 
-return Promise.resolve( git.getRepoPath() )
+Promise.resolve( git.getRepoPath() )
 .bind( {} )
 .then( function( repoPath ) {
   const name = path.basename( path.dirname(repoPath) );
@@ -68,7 +69,7 @@ function saveCommit( collection, commit ) {
   } )
   .then( function( commitData ) {
     return collection.save( commitData );
-  } )
+  } );
 }
 
 function getFiles( commit ) {
@@ -93,6 +94,6 @@ function getHunks( patch ) {
     return {
       newLines: hunk.newLines(),
       oldLines: hunk.oldLines()
-    }
+    };
   } );
 }

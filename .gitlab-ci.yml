@@ -1,15 +1,14 @@
 image: theromanempire/pupil-environment
 
-services:
- - neo4j
-
-variables:
-  NEO4J_AUTH: none
-  pupil_neo4j__url: http://neo4j:7474/
-
 before_script:
  - yarn
 
 test:
+  stage: test
   script:
     yarn run coverage
+
+lint:
+  stage: test
+  script:
+    yarn run check
