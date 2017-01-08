@@ -11,7 +11,6 @@ import 'bulma';
 import 'font-awesome/css/font-awesome.css';
 import './global.scss';
 import styleInject from 'style-inject';
-import iconFont from 'icons-loader';
 import thunk from 'redux-thunk';
 import createLogger from 'redux-logger';
 import actions, { fetchConfig } from './actions.jsx';
@@ -33,8 +32,6 @@ const store = createStore( app, {
     lastFetched: null
   }
 }, applyMiddleware(thunk, logger) );
-
-styleInject( iconFont.css );
 
 window.onload = function() {
   document.body.appendChild( mountingPoint );

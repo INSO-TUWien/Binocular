@@ -1,7 +1,6 @@
 'use strict';
 
 const path = require( 'path' );
-const IconsPlugin = require( 'icons-loader/IconsPlugin' );
 
 const cssModulesLoader = 'css-loader?modules&importLoaders=1&localIdentName=[name]__[local]__[hash:base64:5]';
 const cssLoaders = [
@@ -72,18 +71,9 @@ module.exports = {
         test: /\.(ttf|eot|woff|svg)/,
         include: [path.resolve( __dirname, 'node_modules' )],
         loader: 'file-loader'
-      },
-      {
-        test: /\.svg$/,
-        loader: 'icons-loader'
       }
     ]
   },
   plugins: [
-    new IconsPlugin( {
-      fontName: 'icons',
-      timestamp: Math.round( Date.now() / 1000 ),
-      formats: ['ttf', 'eot', 'woff', 'svg']
-    } )
   ]
 };
