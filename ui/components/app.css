@@ -1,0 +1,8 @@
+.app {
+  display: flex;
+  align-items: stretch;
+  align-content: stretch;
+}
+.chartPanel {
+  flex-grow: 1;
+}

@@ -1,4 +1,5 @@
 {
+  "excludeFiles": ["./node_modules/**/*", "./coverage/**/*", "./ui/gen/**/*"],
   "disallowEmptyBlocks": true,
   "disallowImplicitTypeConversion": ["numeric", "string"],
   "disallowKeywordsOnNewLine": ["else"],

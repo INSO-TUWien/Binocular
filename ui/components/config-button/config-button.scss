@@ -1,0 +1,18 @@
+.configButton {
+  position: absolute;
+  bottom: 0px;
+  right: 0px;
+  font-size: 1.5em;
+  padding: 10px;
+  border-radius: 5px 0px 0px 0px;
+}
+
+.spinning {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  100% { 
+    transform: rotate(360deg);
+  }
+}

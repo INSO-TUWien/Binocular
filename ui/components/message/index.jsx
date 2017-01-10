@@ -1,16 +1,14 @@
 'use strict';
 
 import { connect } from 'react-redux';
-import Sidebar from './Sidebar.jsx';
+import Message from './Message.jsx';
 
 const mapStateToProps = (state, ownProps) => {
-  return {
-    visualizations: state.visualizations
-  };
+  return {};
 };
 
 const mapDispatchToProps = (dispatch, ownProps) => {
   return {};
 };
 
-export default connect( mapStateToProps, mapDispatchToProps )( Sidebar );
+export default connect( mapStateToProps, mapDispatchToProps )( Message );
