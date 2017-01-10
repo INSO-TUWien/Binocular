@@ -43,13 +43,24 @@ class ConfigDialog extends React.Component {
                       type='text'
                       label='URL:'
                       placeholder='http://www.gitlab.com/' />
+              <Field component={FormControl}
+                      name='gitlabToken'
+                      type='text'
+                      label='Private token:'
+                      placeholder='Generate this token in your GitLab' >
+                <a href='https://docs.gitlab.com/ee/api/README.html#personal-access-tokens'
+                   target='_blank'
+                   className='button is-info'>
+                  ?
+                </a>
+              </Field>
             </div>
 
             <div className='box'>
               <h2 className='subtitle'><Icon name='database' /> ArangoDB</h2>
               <label className='label'>Host & port:</label>
-              <p className='control is-grouped'>
 
+              <div className='control is-grouped'>
                 <Field component={FormControl}
                        name='arangoHost'
                        type='text'
@@ -61,10 +72,10 @@ class ConfigDialog extends React.Component {
                        name='arangoPort'
                        type='text'
                        placeholder='8529' />
-              </p>
+              </div>
 
               <label className='label'>Credentials:</label>
-              <p className='control is-grouped'>
+              <div className='control is-grouped'>
                 <Field component={FormControl}
                        name='arangoUser'
                        type='text'
@@ -73,7 +84,7 @@ class ConfigDialog extends React.Component {
                 <Field component={FormControl}
                        name='arangoPassword'
                        type='password' />
-              </p>
+              </div>
             </div>
           </section>
           <footer className='modal-card-foot'>
