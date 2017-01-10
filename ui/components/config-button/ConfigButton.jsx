@@ -13,7 +13,7 @@ export default class ConfigButton extends React.Component {
     return (
       <div className={cx('box', styles.configButton)}>
         <div className={cx({[styles.spinning]: this.props.spinning})}>
-          <a href='#'>
+          <a href='#' onClick={this.props.onClick}>
             <Icon name='cog' />
           </a>
         </div>

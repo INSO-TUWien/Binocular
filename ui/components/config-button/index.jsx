@@ -10,7 +10,9 @@ const mapStateToProps = (state, ownProps) => {
 };
 
 const mapDispatchToProps = (dispatch, ownProps) => {
-  return {};
+  return {
+    onClick: id => console.log('clicked!')
+  };
 };
 
 export default connect( mapStateToProps, mapDispatchToProps )( ConfigButton );

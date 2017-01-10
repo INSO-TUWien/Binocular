@@ -5,7 +5,11 @@ import ConfigDialog from './ConfigDialog.jsx';
 
 const mapStateToProps = (state, ownProps) => {
   return {
-    config: state.config
+    target: state.config.config,
+    initialValues: {
+      arangoHost: 'localhost',
+      arangoPort: '123'
+    }
   };
 };
 
