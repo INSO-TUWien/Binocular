@@ -4,7 +4,6 @@ import React from 'react';
 import cx from 'classnames';
 
 export default function({ input, label, type, meta, icon, placeholder }) {
-  console.log( 'value:', input.value, 'meta:', meta );
   return (
     <div>
       {!!label &&
@@ -12,6 +11,7 @@ export default function({ input, label, type, meta, icon, placeholder }) {
       }
       <p className={cx('control', {'has-icon': !!icon} )}>
         <input className={cx('input', { 'is-danger': !!meta.error })}
+               type={type}
                placeholder={placeholder}
                {...input} />
         {!!icon &&

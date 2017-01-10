@@ -5,8 +5,6 @@ import _ from 'lodash';
 import styles from './sidebar.css';
 import PanelLink from './PanelLink.jsx';
 
-console.log( 'sidebar:', styles );
-
 import cx from 'classnames';
 
 export default class Sidebar extends React.Component {

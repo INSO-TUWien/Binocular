@@ -1,7 +1,9 @@
 'use strict';
 
 import { connect } from 'react-redux';
+
 import ConfigButton from './ConfigButton.jsx';
+import { showConfig } from '../../actions.jsx';
 
 const mapStateToProps = (state, ownProps) => {
   return {
@@ -11,7 +13,7 @@ const mapStateToProps = (state, ownProps) => {
 
 const mapDispatchToProps = (dispatch, ownProps) => {
   return {
-    onClick: id => console.log('clicked!')
+    onClick: id => dispatch( showConfig() )
   };
 };
 

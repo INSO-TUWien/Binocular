@@ -4,15 +4,18 @@ import 'babel-polyfill';
 import React from 'react';
 import { createStore, applyMiddleware } from 'redux';
 import { render } from 'react-dom';
-import App from './components/app.jsx';
 import { Provider } from 'react-redux';
-import app from './reducers';
-import 'bulma';
-import 'font-awesome/css/font-awesome.css';
-import './global.scss';
+import { Router, Route, browserHistory } from 'react-router';
 import styleInject from 'style-inject';
 import thunk from 'redux-thunk';
 import createLogger from 'redux-logger';
+
+import 'bulma';
+import 'font-awesome/css/font-awesome.css';
+
+import App from './components/app.jsx';
+import app from './reducers';
+import './global.scss';
 import actions, { fetchConfig } from './actions.jsx';
 
 const mountingPoint = document.createElement( 'div' );
@@ -29,7 +32,8 @@ const store = createStore( app, {
   ],
   config: {
     isFetching: false,
-    lastFetched: null
+    lastFetched: null,
+    isShown: false
   }
 }, applyMiddleware(thunk, logger) );
 
@@ -38,7 +42,9 @@ window.onload = function() {
 
   render(
     <Provider store={store}>
-      <App />
+      <Router history={browserHistory}>
+        <Route path='/' component={App} />
+      </Router>
     </Provider>,
     mountingPoint
   );

@@ -10,8 +10,7 @@ const cssLoaders = [
     include: path.resolve(__dirname, 'node_modules'),
     exclude: path.resolve(__dirname, 'ui'),
     loaders: ['style-loader', 'css-loader', 'sass-loader']
-  },
-  {
+  }, {
     test: /\.css$/,
     include: path.resolve(__dirname, 'node_modules'),
     exclude: path.resolve(__dirname, 'ui'),
@@ -75,5 +74,8 @@ module.exports = {
     ]
   },
   plugins: [
-  ]
+  ],
+  devServer: {
+    historyApiFallback: true
+  }
 };

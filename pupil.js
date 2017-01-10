@@ -15,11 +15,14 @@ const Indexer = require( './lib/RepositoryIndexer.js' );
 
 app.get( '/commits', require('./lib/endpoints/get-commits.js') );
 app.get( '/config', require('./lib/endpoints/get-config.js') );
+app.post( '/config', require('./lib/endpoints/update-config.js') );
 
-app.listen( config.port, function() {
-  console.log( `Pupil listening on http://localhost:${config.port}` );
+const port = config.get().port;
+
+app.listen( port, function() {
+  console.log( `Pupil listening on http://localhost:${port}` );
   if( argv.ui && argv.open ) {
-    opn( `http://localhost:${config.port}/` );
+    opn( `http://localhost:${port}/` );
   }
 } );
 
@@ -28,10 +31,9 @@ Promise.resolve( git.getRepoPath() ) .bind( {} )
 
   const indexer = new Indexer( repoPath );
   const name = path.basename( path.dirname(repoPath) );
-  this.dbName = config.arango.database || name;
+  this.dbName = config.get().arango.database || name;
 
-  config.config = config.config || path.resolve( repoPath, '../.pupilrc' );
-
+  config.setSource( path.resolve(repoPath, '../.pupilrc') );
   config.on( 'updated', reIndex );
 
   reIndex();
