@@ -26,9 +26,17 @@ export default class ConfigDialog extends React.Component {
             </Message>
             <form>
               <FormControl type='text'
-                           label='GitLab-URL:'
-                           icon='gitlab'
-                           placeholder='http://www.gitlab.com/' />
+                          label='GitLab-URL:'
+                          icon='gitlab'
+                          placeholder='http://www.gitlab.com/' />
+
+              <FormControl type='text'
+                          label='ArangoDB-Host:'
+                          placeholder='localhost' />
+              <FormControl type='text'
+                          label='ArangoDB-Port:'
+                          placeholder='8529' />
+
             </form>
           </section>
           <footer className='modal-card-foot'>

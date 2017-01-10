@@ -1,22 +1,14 @@
 'use strict';
 
 import { RECEIVE_CONFIGURATION, REQUEST_CONFIGURATION } from '../actions.jsx';
+import { handleActions } from 'redux-actions';
 import _ from 'lodash';
 
-const config = (state = { lastFetched: null, isFetching: false }, action) => {
+export default handleActions( {
+  REQUEST_CONFIGURATION: (state, action) => _.assign( {}, state, { isFetching: true } ),
 
-  if( action.type === REQUEST_CONFIGURATION ) {
-    return _.assign( {}, state, { isFetching: true } );
-  }
-
-  if( action.type === RECEIVE_CONFIGURATION ) {
-    return _.merge( {}, state, action.config, {
-      isFetching: false,
-      lastFetched: action.receivedAt
-    } );
-  }
-
-  return state;
-};
-
-export default config;
+  RECEIVE_CONFIGURATION: (state, action) => _.merge( {}, state, action.payload, {
+    isFetching: false,
+    receivedAt: action.meta.receivedAt
+  } )
+}, { lastFetched: null, isFetching: null } );
