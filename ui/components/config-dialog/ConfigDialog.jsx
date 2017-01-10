@@ -36,33 +36,45 @@ class ConfigDialog extends React.Component {
             <Message>
               Configuration will be saved to <Monospaced>{this.props.target}</Monospaced>.
             </Message>
-            <Field component={FormControl}
-                    name='gitlabUrl'
-                    type='text'
-                    label='GitLab-URL:'
-                    icon='gitlab'
-                    placeholder='http://www.gitlab.com/' />
+            <div className='box'>
+              <h2 className='subtitle'><Icon name='gitlab' /> GitLab</h2>
+              <Field component={FormControl}
+                      name='gitlabUrl'
+                      type='text'
+                      label='URL:'
+                      placeholder='http://www.gitlab.com/' />
+            </div>
 
-            <Field component={FormControl}
-                    name='arangoHost'
-                    type='text'
-                    label='ArangoDB-Host:'
-                    placeholder='localhost' />
-            <Field component={FormControl}
-                    validate={validatePort}
-                    name='arangoPort'
-                    type='text'
-                    label='ArangoDB-Port:'
-                    placeholder='8529' />
-            <Field component={FormControl}
-                    name='arangoUser'
-                    type='text'
-                    label='ArangoDB-User:'
-                    placeholder='root' />
-            <Field component={FormControl}
-                    name='arangoPassword'
-                    type='password'
-                    label='ArangoDB-Password:' />
+            <div className='box'>
+              <h2 className='subtitle'><Icon name='database' /> ArangoDB</h2>
+              <label className='label'>Host & port:</label>
+              <p className='control is-grouped'>
+
+                <Field component={FormControl}
+                       name='arangoHost'
+                       type='text'
+                       is-expanded={true}
+                       placeholder='localhost' />
+
+                <Field component={FormControl}
+                       validate={validatePort}
+                       name='arangoPort'
+                       type='text'
+                       placeholder='8529' />
+              </p>
+
+              <label className='label'>Credentials:</label>
+              <p className='control is-grouped'>
+                <Field component={FormControl}
+                       name='arangoUser'
+                       type='text'
+                       is-expanded={true}
+                       placeholder='root' />
+                <Field component={FormControl}
+                       name='arangoPassword'
+                       type='password' />
+              </p>
+            </div>
           </section>
           <footer className='modal-card-foot'>
             <button type='submit' className='button is-primary'>OK</button>

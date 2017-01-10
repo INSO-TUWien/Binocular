@@ -31,7 +31,10 @@ const mapDispatchToProps = (dispatch, ownProps) => {
         }
       };
 
-      dispatch( postConfig(config) );
+      return dispatch( postConfig(config) )
+      .then( function() {
+        return dispatch( hideConfig() );
+      } );
     },
     onCancel: () => dispatch( hideConfig() )
   };
