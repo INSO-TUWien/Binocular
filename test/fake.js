@@ -5,22 +5,24 @@ const Promise = require( 'bluebird' );
 const temp = Promise.promisifyAll( require('temp') );
 const fs = require( 'fs-extra-promise' );
 const Random = require( 'random-js' );
-const path = require( 'path' ); const nodegit = require( 'nodegit' );
+const path = require( 'path' );
+const nodegit = require( 'nodegit' );
 const faker = require( 'faker' );
 const fakerHelpers = require( 'faker/lib/helpers.js' )( faker );
 const firstNames = require( 'faker/lib/locales/en/name/first_name.js' );
 const lastNames = require( 'faker/lib/locales/en/name/last_name.js' );
 const emailProviders = require( 'faker/lib/locales/en/internet/free_email.js' );
 const lorem = require( 'lorem-ipsum' );
-const wrap = require( 'wordwrap' );
 
 const helpers = require( './helpers.js' );
+const Repository = require( '../lib/git.js' );
+
 
 const neutralVerbs = ['removed'];
 const positiveVerbs = ['improved', 'added', 'refactored', 'adjusted', 'tweaked', ...neutralVerbs];
 const negativeVerbs = ['fixed', 'repaired', ...neutralVerbs];
 
-const neutralNouns = ['file', 'function', 'module', 'class', 'interface']
+const neutralNouns = ['file', 'function', 'module', 'class', 'interface'];
 const positiveNouns = ['feature', 'function', 'documentation', ...neutralNouns];
 const negativeNouns = ['problem', 'bug', 'issue', ...neutralNouns];
 
@@ -54,6 +56,9 @@ const fake = {
     } )
     .then( function() {
       return nodegit.Repository.init( this.repoPath, 0 );
+    } )
+    .then( function( repo ) {
+      return Repository.fromRepo( repo );
     } );
   },
 
@@ -74,8 +79,8 @@ const fake = {
   },
 
   file: function( dirPath, filePath, contents ) {
-    if( dirPath instanceof nodegit.Repository ) {
-      dirPath = path.join( dirPath.path(), '..' );
+    if( dirPath instanceof Repository ) {
+      dirPath = dirPath.getRoot();
     }
 
     const fullPath = path.join( dirPath, filePath );

@@ -1,0 +1,12 @@
+.control.has-icon:not(.has-icon-right) .icon {
+  left: 1.25rem;
+  -webkit-transform: translateX(-50%) translateY(-50%);
+  transform: translateX(-50%) translateY(-50%);
+}
+.control.has-icon .icon {
+  color: #dbdbdb;
+  pointer-events: none;
+  position: absolute;
+  top: 1.17rem;
+  z-index: 4;
+}

@@ -1,13 +1,8 @@
 'use strict';
 
 import { SWITCH_VISUALIZATION, switchVisualization } from '../actions.jsx';
+import { handleAction } from 'redux-actions';
 
-const activeVisualization = (state = {}, action) => {
-  if( action.type !== SWITCH_VISUALIZATION ) {
-    return state;
-  }
-
-  return action.id;
-};
-
-export default activeVisualization;
+export default handleAction( 'SWITCH_VISUALIZATION', function( state, action ) {
+  return action.payload;
+}, {} );

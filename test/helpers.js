@@ -1,7 +1,6 @@
 'use strict';
 
 const Promise = require( 'bluebird' );
-const nodegit = require( 'nodegit' );
 
 const helpers = {
   stage: function( repo, filePath ) {

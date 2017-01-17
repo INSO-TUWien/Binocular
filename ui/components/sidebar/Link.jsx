@@ -3,14 +3,14 @@
 import React, { PropTypes } from 'react';
 import _ from 'lodash';
 
-import classnames from 'classnames';
+import cx from 'classnames';
 
 export default class Link extends React.Component {
   render() {
 
     return (
       <a href='#'
-         className={classnames({'is-active': this.props.isActive})}
+         className={cx({'is-active': this.props.isActive})}
          key={this.props.key}
          onClick={e => {
           e.preventDefault();
