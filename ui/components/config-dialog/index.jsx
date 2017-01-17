@@ -13,7 +13,9 @@ const mapStateToProps = (state, ownProps) => {
     target: _.get( state, 'config.data.config' ),
     initialValues: {
       arangoHost: _.get( state, 'config.data.arango.host' ),
-      arangoPort: port
+      arangoPort: port,
+      gitlabUrl: _.get( state, 'config.data.gitlab.url' ),
+      gitlabToken: _.get( state, 'config.data.gitlab.token' ),
     }
   };
 };
@@ -28,6 +30,10 @@ const mapDispatchToProps = (dispatch, ownProps) => {
           port: values.arangoPort,
           user: values.arangoUser,
           password: values.arangoPassword
+        },
+        gitlab: {
+          url: values.gitlabUrl,
+          token: values.gitlabToken
         }
       };
 

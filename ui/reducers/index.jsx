@@ -14,7 +14,8 @@ const app = combineReducers( {
       const config = action.payload;
       return _.merge( {}, state, {
         values: {
-          gitlabUrl: config.gitlabUrl,
+          gitlabUrl: _.get( config, 'gitlab.url' ),
+          gitlabToken: _.get( config, 'gitlab.token' ),
           arangoHost: _.get( config, 'arango.host' ),
           arangoPort: _.get( config, 'arango.port' ),
           arangoUser: _.get( config, 'arango.user' ),

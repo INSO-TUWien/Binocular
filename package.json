@@ -53,6 +53,7 @@
     "less-loader": "^2.2.3",
     "lodash": "^4.17.2",
     "lorem-ipsum": "^1.0.3",
+    "node-gitlab": "^1.5.0",
     "node-sass": "^3.13.1",
     "nodegit": "^0.16.0",
     "opn": "^4.0.2",
