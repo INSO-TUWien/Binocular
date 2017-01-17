@@ -3,7 +3,6 @@
 const Promise = require( 'bluebird' );
 const chai = require( 'chai' );
 
-const git = require( '../lib/git.js' );
 const fake = require( './fake.js' );
 const helpers = require( './helpers.js' );
 
@@ -20,7 +19,7 @@ describe( 'git', function() {
 
       return fake.repository()
       .then( function( repo ) {
-        return git.getAllCommits( repo.path() );
+        return repo.getAllCommits();
       } )
       .then( function( commits ) {
         expect( commits ).to.have.length( 0 );
@@ -40,16 +39,16 @@ describe( 'git', function() {
         );
       } )
       .then( function() {
-        return helpers.commit( this.repo, ['README.md'], alice, 'Initial' );
+        return helpers.commit( this.repo.repo, ['README.md'], alice, 'Initial' );
       } )
       .then( function() {
-        return helpers.commit( this.repo, ['some-file.txt'], bob );
+        return helpers.commit( this.repo.repo, ['some-file.txt'], bob );
       } )
       .then( function() {
-        return helpers.commit( this.repo, ['another-file.txt'], alice );
+        return helpers.commit( this.repo.repo, ['another-file.txt'], alice );
       } )
       .then( function() {
-        return git.getAllCommits( this.repo.path() );
+        return this.repo.getAllCommits();
       } )
       .then( function( commits ) {
         expect( commits ).to.have.length( 3 );

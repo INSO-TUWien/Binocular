@@ -15,6 +15,8 @@ const emailProviders = require( 'faker/lib/locales/en/internet/free_email.js' );
 const lorem = require( 'lorem-ipsum' );
 
 const helpers = require( './helpers.js' );
+const Repository = require( '../lib/git.js' );
+
 
 const neutralVerbs = ['removed'];
 const positiveVerbs = ['improved', 'added', 'refactored', 'adjusted', 'tweaked', ...neutralVerbs];
@@ -54,6 +56,9 @@ const fake = {
     } )
     .then( function() {
       return nodegit.Repository.init( this.repoPath, 0 );
+    } )
+    .then( function( repo ) {
+      return Repository.fromRepo( repo );
     } );
   },
 
@@ -74,8 +79,8 @@ const fake = {
   },
 
   file: function( dirPath, filePath, contents ) {
-    if( dirPath instanceof nodegit.Repository ) {
-      dirPath = path.join( dirPath.path(), '..' );
+    if( dirPath instanceof Repository ) {
+      dirPath = dirPath.getRoot();
     }
 
     const fullPath = path.join( dirPath, filePath );
