@@ -16,7 +16,7 @@ import 'font-awesome/css/font-awesome.css';
 import App from './components/app.jsx';
 import app from './reducers';
 import './global.scss';
-import actions, { fetchConfig } from './actions.jsx';
+import { fetchConfig, fetchCommits, addNotification } from './actions.jsx';
 
 const mountingPoint = document.createElement( 'div' );
 mountingPoint.className = 'react-app';
@@ -24,17 +24,18 @@ mountingPoint.className = 'react-app';
 const logger = createLogger();
 
 const store = createStore( app, {
-  activeVisualization: 'ISSUE_IMPACT',
+  activeVisualization: 'CODE_OWNERSHIP_RIVER',
   visualizations: [
-    { id: 'ISSUE_IMPACT', label: 'Issue Impact' },
+    { id: 'ISSUE_IMPACT', label: 'Issue Impact', module: null },
     { id: 'CODE_OWNERSHIP_RIVER', label: 'Code ownership river' },
-    { id: 'HOTSPOT_DIALS', label: 'Hotspot Dials' }
+    { id: 'HOTSPOT_DIALS', label: 'Hotspot Dials', module: null }
   ],
   config: {
     isFetching: false,
     lastFetched: null,
-    isShown: true
-  }
+    isShown: false
+  },
+  notifications: []
 }, applyMiddleware(thunk, logger) );
 
 window.onload = function() {
@@ -55,3 +56,5 @@ store.dispatch( fetchConfig() )
 .then( function() {
   console.log( store.getState() );
 } );
+
+store.dispatch( fetchCommits() );

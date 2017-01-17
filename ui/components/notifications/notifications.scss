@@ -1,0 +1,23 @@
+.notifications {
+  float: left;
+  position: relative;
+  right: 50%;
+  margin-top: 10px;
+}
+
+.enter {
+  opacity: 0.01;
+}
+
+.enterActive {
+  opacity: 1;
+  transition: opacity 500ms ease-in;
+}
+
+.leave {
+  opacity: 1;
+}
+
+.leaveActive {
+  transition: opacity 300ms easy-in;
+}

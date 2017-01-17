@@ -11,11 +11,12 @@ export const switchVisualization = createAction( 'SWITCH_VISUALIZATION', vis => 
 export const showConfig = createAction( 'SHOW_CONFIGURATION' );
 export const hideConfig = createAction( 'HIDE_CONFIGURATION' );
 export const requestConfig = createAction( 'REQUEST_CONFIGURATION' );
-export const receiveConfig = createAction(
-  'RECEIVE_CONFIGURATION',
-  config => config,
-  () => ({ receivedAt: new Date() })
-);
+export const receiveConfig = timestampedActionFactory( 'RECEIVE_CONFIGURATION' );
+export const requestCommits = createAction( 'REQUEST_COMMITS' );
+export const receiveCommits = timestampedActionFactory( 'RECEIVE_COMMITS' );
+export const receiveCommitsError = createAction( 'RECEIVE_COMMITS_ERROR' );
+export const removeNotification = createAction( 'REMOVE_NOTIFICATION' );
+export const addNotification = createAction( 'ADD_NOTIFICATION' );
 
 export function postConfig( config ) {
   return function( dispatch ) {
@@ -33,12 +34,27 @@ export function postConfig( config ) {
   };
 }
 
-export function fetchConfig() {
-  return function( dispatch ) {
-    dispatch( requestConfig() );
+export const fetchConfig = fetchFactory( 'config', requestConfig, receiveConfig );
+export const fetchCommits = fetchFactory( 'commits', requestCommits, receiveCommits, receiveCommitsError );
 
-    return Promise.resolve( fetch(endpointUrl('config')) )
-    .then( resp => resp.json() )
-    .then( json => dispatch(receiveConfig(json)) );
+function timestampedActionFactory( action ) {
+  return createAction( action, id => id, () => ({ receivedAt: new Date() }) );
+}
+
+function fetchFactory( endpoint, requestActionCreator, receiveActionCreator, errorActionCreator ) {
+  return function() {
+    return function( dispatch ) {
+      dispatch( requestActionCreator() );
+
+      let ret = Promise.resolve( fetch(endpointUrl(endpoint)) )
+      .then( resp => resp.json() )
+      .then( json => dispatch(receiveActionCreator(json)) );
+
+      if( errorActionCreator ) {
+        ret = ret.catch( e => dispatch(errorActionCreator(e)) );
+      }
+
+      return ret;
+    };
   };
 }
