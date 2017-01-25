@@ -1,13 +1,12 @@
 #!/usr/bin/env node
 
-'use strict';
+'use strict'; const ctx = require( './lib/context.js' );
 
-const ctx = require( './lib/context.js' );
-
-const Repository = require( './lib/git.js' );
 const opn = require( 'opn' );
 const Promise = require( 'bluebird' );
+const _ = require( 'lodash' );
 
+const Repository = require( './lib/git.js' );
 const { app, argv } = require( './lib/context.js' );
 const config = require( './lib/config.js' );
 const LocalIndexer = require( './lib/indexers/LocalIndexer.js' );
@@ -31,12 +30,15 @@ let localIndexer, gitlabIndexer;
 Repository.fromPath()
 .then( function( repo ) {
   ctx.repo = repo;
-  
+
+  require( './lib/setup-db.js' );
+
   localIndexer = new LocalIndexer( repo );
   gitlabIndexer = new GitLabIndexer( repo );
 
   return guessGitLabApiUrl( repo );
 } )
+.delay( 2500 )
 .then( function( url ) {
 
   config.setSource( ctx.repo.pathFromRoot('.pupilrc') );
@@ -55,18 +57,16 @@ Repository.fromPath()
       localIndexer.index(),
       gitlabIndexer.index()
     )
+    .then( () => ctx.models.Commit.deduceUsers() )
+    .then( () => ctx.models.Issue.deduceUsers() )
     .catch( e => e.name === 'Gitlab401Error', function() {
       console.warn( 'Unable to access GitLab API. Please configure a valid private access token in the UI.' );
-    } )
-    .catch( e => e.statusCode === 401, function() {
-      console.warn( 'Unable to access database, please provide correct credentials in configuration UI.' );
     } );
   }
 } )
 .then( function() {
   return guessGitLabApiUrl( ctx.repo );
 } );
-
 
 
 function guessGitLabApiUrl( repo ) {
