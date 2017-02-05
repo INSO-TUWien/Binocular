@@ -41,7 +41,6 @@ Repository.fromPath()
 .then( function( url ) {
 
   config.setSource( ctx.repo.pathFromRoot('.pupilrc') );
-  config.ensure( 'arango.database', ctx.repo.getName() );
   config.ensure( 'gitlab.url', url );
 
   config.on( 'updated', reIndex );

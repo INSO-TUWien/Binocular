@@ -33,7 +33,7 @@ const store = createStore( app, {
   config: {
     isFetching: false,
     lastFetched: null,
-    isShown: true
+    isShown: false
   }
 }, applyMiddleware(thunk, logger) );
 
