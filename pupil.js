@@ -4,7 +4,6 @@
 
 const opn = require( 'opn' );
 const Promise = require( 'bluebird' );
-const _ = require( 'lodash' );
 
 const Repository = require( './lib/git.js' );
 const { app, argv } = require( './lib/context.js' );
