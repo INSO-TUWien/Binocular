@@ -56,36 +56,6 @@ class ConfigDialog extends React.Component {
               </Field>
             </div>
 
-            <div className='box'>
-              <h2 className='subtitle'><Icon name='database' /> ArangoDB</h2>
-              <label className='label'>Host & port:</label>
-
-              <div className='control is-grouped'>
-                <Field component={FormControl}
-                       name='arangoHost'
-                       type='text'
-                       is-expanded={true}
-                       placeholder='localhost' />
-
-                <Field component={FormControl}
-                       validate={validatePort}
-                       name='arangoPort'
-                       type='text'
-                       placeholder='8529' />
-              </div>
-
-              <label className='label'>Credentials:</label>
-              <div className='control is-grouped'>
-                <Field component={FormControl}
-                       name='arangoUser'
-                       type='text'
-                       is-expanded={true}
-                       placeholder='root' />
-                <Field component={FormControl}
-                       name='arangoPassword'
-                       type='password' />
-              </div>
-            </div>
           </section>
           <footer className='modal-card-foot'>
             <button type='submit' className='button is-primary'>OK</button>

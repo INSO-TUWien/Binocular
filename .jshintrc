@@ -72,5 +72,6 @@
 
     // Custom Globals
     "globals"       : {
+      "File": true
     }        // additional predefined global variables
 }
