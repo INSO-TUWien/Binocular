@@ -54,11 +54,13 @@ Repository.fromPath()
     gitlabIndexer.configure( config.get().gitlab );
 
     return Promise.join(
-      localIndexer.index(),
+      localIndexer.index()/* ,
       gitlabIndexer.index()
+      */
     )
     .then( () => ctx.models.Commit.deduceUsers() )
     .then( () => ctx.models.Issue.deduceUsers() )
+    .then( () => ctx.models.BlameHunk.deduceUsers() )
     .catch( e => e.name === 'Gitlab401Error', function() {
       console.warn( 'Unable to access GitLab API. Please configure a valid private access token in the UI.' );
     } );

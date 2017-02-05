@@ -14,7 +14,8 @@
     "jshint": "jshint . --exclude node_modules",
     "jscs": "jscs .",
     "check": "npm run jshint && npm run jscs",
-    "dev": "nodemon --config .nodemonrc ./pupil.js --no-ui & webpack-dev-server -d --content-base ui/ --inline --hot",
+    "dev": "npm run dev-server & webpack-dev-server -d --content-base ui/ --inline --hot",
+    "dev-server": "nodemon --config .nodemonrc ./pupil.js --no-ui",
     "build": "webpack",
     "postinstall": "npm run build"
   },
@@ -71,6 +72,7 @@
     "redux-thunk": "^2.1.0",
     "sass-loader": "^4.0.2",
     "sequelize": "^3.30.0",
+    "sql-formatter": "^1.1.2",
     "sqlite3": "^3.1.8",
     "style-inject": "^0.1.1",
     "style-loader": "^0.13.1",

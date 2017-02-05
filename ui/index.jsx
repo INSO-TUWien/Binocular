@@ -36,7 +36,7 @@ const store = createStore( app, {
     isShown: false
   },
   notifications: []
-}, applyMiddleware(thunk, logger) );
+}, applyMiddleware(thunk/*, logger*/) );
 
 window.onload = function() {
   document.body.appendChild( mountingPoint );
