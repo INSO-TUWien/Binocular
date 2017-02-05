@@ -1,6 +1,8 @@
 #!/usr/bin/env node
 
-'use strict'; const ctx = require( './lib/context.js' );
+'use strict';
+
+const ctx = require( './lib/context.js' );
 
 const opn = require( 'opn' );
 const Promise = require( 'bluebird' );
