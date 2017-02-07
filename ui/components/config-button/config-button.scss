@@ -5,6 +5,11 @@
   font-size: 1.5em;
   padding: 10px;
   border-radius: 5px 0px 0px 0px;
+  opacity: 0.5;
+}
+
+.configButton:hover {
+  opacity: 1;
 }
 
 .spinning {

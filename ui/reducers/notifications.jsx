@@ -7,10 +7,13 @@ let nextId = 0;
 
 export default handleActions( {
 
-  RECEIVE_COMMITS_ERROR: (notifications, action) => [
-    notification( 'danger', `Error receiving commits: ${action.payload.message}` ),
-    ...notifications
-  ],
+  RECEIVE_COMMITS_ERROR: (notifications, action) => {
+    console.error( action.payload );
+    return [
+      notification( 'danger', `Error receiving commits: ${action.payload.message}` ),
+      ...notifications
+    ];
+  },
 
   ADD_NOTIFICATION: (notifications, action) => [
     ...notifications,

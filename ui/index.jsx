@@ -52,9 +52,5 @@ window.onload = function() {
 };
 
 
-store.dispatch( fetchConfig() )
-.then( function() {
-  console.log( store.getState() );
-} );
-
+store.dispatch( fetchConfig() );
 store.dispatch( fetchCommits() );
