@@ -28,7 +28,7 @@ app.listen( port, function() {
 
 let localIndexer, gitlabIndexer;
 
-Repository.fromPath()
+Repository.fromPath( ctx.targetPath )
 .then( function( repo ) {
   ctx.repo = repo;
 

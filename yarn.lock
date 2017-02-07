@@ -5756,7 +5756,7 @@ yargs@^4.7.1:
     y18n "^3.2.1"
     yargs-parser "^2.4.1"
 
-yargs@^6.3.0, yargs@^6.4.0:
+yargs@^6.3.0, yargs@^6.6.0:
   version "6.6.0"
   resolved "https://npm.innovation.rocks/yargs/-/yargs-6.6.0.tgz#782ec21ef403345f830a808ca3d513af56065208"
   dependencies:

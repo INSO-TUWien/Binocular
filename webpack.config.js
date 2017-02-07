@@ -49,7 +49,7 @@ module.exports = {
   output: {
     path: path.resolve( __dirname, 'ui/gen/' ),
     filename: 'bundle.js',
-    publicPath: '/assets'
+    publicPath: '/assets/'
   },
   module: {
     loaders: [
