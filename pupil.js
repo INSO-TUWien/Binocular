@@ -19,7 +19,7 @@ app.post( '/config', require('./lib/endpoints/update-config.js') );
 
 const port = config.get().port;
 
-app.listen( port, function() {
+const server = app.listen( port, function() {
   console.log( `Pupil listening on http://localhost:${port}` );
   if( argv.ui && argv.open ) {
     opn( `http://localhost:${port}/` );
@@ -68,6 +68,21 @@ Repository.fromPath( ctx.targetPath )
 } )
 .then( function() {
   return guessGitLabApiUrl( ctx.repo );
+} );
+
+process.on( 'SIGINT', function() {
+  if( ctx.quitRequested ) {
+    console.log( 'Shutting down immediately!' );
+    process.exit( 1 );
+  }
+
+  ctx.quitRequested = true;
+  console.log( 'Let me finish up here, ... (Ctrl+C to force quit)' );
+
+  server.close();
+
+  localIndexer.stop();
+  gitlabIndexer.stop();
 } );
 
 
