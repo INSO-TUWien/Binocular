@@ -6,6 +6,8 @@ import { createStore, applyMiddleware } from 'redux';
 import { render } from 'react-dom';
 import { Provider } from 'react-redux';
 import { Router, Route, browserHistory } from 'react-router';
+import createSocketIoMiddleware from 'redux-socket.io';
+import io from 'socket.io-client';
 import styleInject from 'style-inject';
 import thunk from 'redux-thunk';
 import createLogger from 'redux-logger';
@@ -17,11 +19,15 @@ import App from './components/app.jsx';
 import app from './reducers';
 import './global.scss';
 import { fetchConfig, fetchCommits, addNotification } from './actions.jsx';
+import { endpointUrl } from './utils.jsx';
 
 const mountingPoint = document.createElement( 'div' );
 mountingPoint.className = 'react-app';
 
 const logger = createLogger();
+
+let socket = io( { path: '/wsapi' } );
+let mw = createSocketIoMiddleware( socket, 'api/' );
 
 const store = createStore( app, {
   activeVisualization: 'CODE_OWNERSHIP_RIVER',
@@ -36,7 +42,7 @@ const store = createStore( app, {
     isShown: false
   },
   notifications: []
-}, applyMiddleware(thunk/*, logger*/) );
+}, applyMiddleware(thunk, mw, logger) );
 
 window.onload = function() {
   document.body.appendChild( mountingPoint );
@@ -50,7 +56,6 @@ window.onload = function() {
     mountingPoint
   );
 };
-
 
 store.dispatch( fetchConfig() );
 store.dispatch( fetchCommits() );

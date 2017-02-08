@@ -76,6 +76,16 @@ module.exports = {
   plugins: [
   ],
   devServer: {
-    historyApiFallback: true
+    historyApiFallback: true,
+    proxy: {
+      '/api': {
+        target: 'http://localhost:48763/',
+        secure: false
+      },
+      '/wsapi': {
+        target: 'ws://localhost:48763',
+        ws: true
+      }
+    }
   }
 };

@@ -33,17 +33,9 @@ export default class CodeOwnershipRiver extends React.Component {
 
   render() {
 
-    console.log( 'rendering!' );
-
     const commits = _.map( this.props.commits.data, function( c, i ) {
       return _.merge( {}, c, { date: parseTime(c.date), commitCount: i + 1 } );
     } );
-
-    window.d3 = d3;
-
-    window.commits = commits;
-    window.commit = commits[0];
-    window.parseTime = parseTime;
 
     const fullWidth = this.state.dimensions.width;
     const fullHeight = this.state.dimensions.height;

@@ -4,6 +4,7 @@ import visualizations from './visualizations.jsx';
 import config from './config.jsx';
 import commits from './commits.jsx';
 import notifications from './notifications.jsx';
+import progress from './progress.jsx';
 import { reducer as formReducer } from 'redux-form';
 import { handleAction } from 'redux-actions';
 
@@ -13,6 +14,7 @@ const app = combineReducers( {
   config,
   commits,
   notifications,
+  progress,
   form: formReducer.plugin( {
     configForm: handleAction( 'RECEIVE_CONFIGURATION', function( state, action ) {
       const config = action.payload;

@@ -128,6 +128,14 @@ const fake = {
     }
 
     return pickOne( verbs ) + ' ' + pickOne( nouns );
+  },
+
+  hex: function( len ) {
+    return random.hex( len );
+  },
+
+  shuffle: function( array ) {
+    return random.shuffle( array );
   }
 
 };

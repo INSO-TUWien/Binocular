@@ -8,18 +8,19 @@ const opn = require( 'opn' );
 const Promise = require( 'bluebird' );
 
 const Repository = require( './lib/git.js' );
-const { app, argv } = require( './lib/context.js' );
+const { app, argv, httpServer, io } = require( './lib/context.js' );
 const config = require( './lib/config.js' );
 const LocalIndexer = require( './lib/indexers/LocalIndexer.js' );
 const GitLabIndexer = require( './lib/indexers/GitLabIndexer.js' );
+const ProgressReporter = require( './lib/progress-reporter.js' );
 
-app.get( '/commits', require('./lib/endpoints/get-commits.js') );
-app.get( '/config', require('./lib/endpoints/get-config.js') );
-app.post( '/config', require('./lib/endpoints/update-config.js') );
+app.get( '/api/commits', require('./lib/endpoints/get-commits.js') );
+app.get( '/api/config', require('./lib/endpoints/get-config.js') );
+app.post( '/api/config', require('./lib/endpoints/update-config.js') );
 
 const port = config.get().port;
 
-const server = app.listen( port, function() {
+const server = httpServer.listen( port, function() {
   console.log( `Pupil listening on http://localhost:${port}` );
   if( argv.ui && argv.open ) {
     opn( `http://localhost:${port}/` );
@@ -28,14 +29,16 @@ const server = app.listen( port, function() {
 
 let localIndexer, gitlabIndexer;
 
+let reporter = new ProgressReporter( io );
+
 Repository.fromPath( ctx.targetPath )
 .then( function( repo ) {
   ctx.repo = repo;
 
   require( './lib/setup-db.js' );
 
-  localIndexer = new LocalIndexer( repo );
-  gitlabIndexer = new GitLabIndexer( repo );
+  localIndexer = new LocalIndexer( repo, reporter );
+  gitlabIndexer = new GitLabIndexer( repo, reporter );
 
   return guessGitLabApiUrl( repo );
 } )
