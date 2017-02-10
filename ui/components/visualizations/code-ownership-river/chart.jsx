@@ -12,7 +12,6 @@ const parseTime = d3.timeParse( '%Y-%m-%dT%H:%M:%S.000Z' );
 
 export default class CodeOwnershipRiver extends React.Component {
 
-
   constructor() {
     super();
 

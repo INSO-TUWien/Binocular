@@ -57,9 +57,8 @@ Repository.fromPath( ctx.targetPath )
     gitlabIndexer.configure( config.get().gitlab );
 
     return Promise.join(
-      localIndexer.index()/* ,
+      localIndexer.index(),
       gitlabIndexer.index()
-      */
     )
     .then( () => ctx.models.Commit.deduceUsers() )
     .then( () => ctx.models.Issue.deduceUsers() )

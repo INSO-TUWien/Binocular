@@ -6,6 +6,7 @@
 
 .chartPanel {
   flex-grow: 1;
+  position: relative;
 }
 .chartPanel svg {
   width: 100%;
