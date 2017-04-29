@@ -1,8 +1,11 @@
 'use strict';
 
-const path = require( 'path' );
+const webpack = require('webpack');
+const path = require('path');
 
-const cssModulesLoader = 'css-loader?modules&importLoaders=1&localIdentName=[name]__[local]__[hash:base64:5]';
+const cssModulesLoader =
+  'css-loader?modules&importLoaders=1&localIdentName=[name]__[local]__[hash:base64:5]';
+
 const cssLoaders = [
   // loaders for loading external css
   {
@@ -10,14 +13,12 @@ const cssLoaders = [
     include: path.resolve(__dirname, 'node_modules'),
     exclude: path.resolve(__dirname, 'ui'),
     loaders: ['style-loader', 'css-loader', 'sass-loader']
-  }, {
+  },
+  {
     test: /\.css$/,
     include: path.resolve(__dirname, 'node_modules'),
     exclude: path.resolve(__dirname, 'ui'),
-    loaders: [
-      'style-loader',
-      'css-loader'
-    ]
+    loaders: ['style-loader', 'css-loader']
   },
 
   // loaders for custom css
@@ -28,10 +29,7 @@ const cssLoaders = [
   },
   {
     test: /\.s[ac]ss$/,
-    exclude: [
-      path.resolve(__dirname, 'node_modules'),
-      path.resolve(__dirname, 'ui/global.scss')
-    ],
+    exclude: [path.resolve(__dirname, 'node_modules'), path.resolve(__dirname, 'ui/global.scss')],
     loaders: ['style-loader', cssModulesLoader, 'sass-loader']
   },
   {
@@ -42,38 +40,31 @@ const cssLoaders = [
 ];
 
 module.exports = {
-  entry: './ui/index.jsx',
-  resolve: {
-    extensions: ['', '.js', '.jsx']
+  devtool: 'source-map',
+  entry: {
+    app: ['babel-polyfill', 'react-hot-loader/patch', './ui/src/index']
   },
   output: {
-    path: path.resolve( __dirname, 'ui/gen/' ),
+    path: path.resolve(__dirname, './ui/assets'),
     filename: 'bundle.js',
-    publicPath: '/assets/'
+    publicPath: 'assets/'
   },
   module: {
-    loaders: [
-      {
-        test: /\.jsx?$/,
-        loader: 'babel-loader',
-        exclude: /node_modules/,
-        query: {
-          presets: ['es2015', 'react']
-        }
-      },
-      {
-        test: /\.json/,
-        loader: 'json-loader'
-      },
+    rules: [
+      { test: /\.jsx?$/, exclude: /node_modules/, loader: 'babel-loader' },
+      { test: /\.json/, loader: 'json-loader' },
       ...cssLoaders,
       {
         test: /\.(ttf|eot|woff|svg)/,
-        include: [path.resolve( __dirname, 'node_modules' )],
+        include: [path.resolve(__dirname, 'node_modules')],
         loader: 'file-loader'
       }
     ]
   },
   plugins: [
+    new webpack.ProvidePlugin({
+      React: 'react'
+    })
   ],
   devServer: {
     historyApiFallback: true,

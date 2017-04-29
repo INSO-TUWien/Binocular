@@ -1,5 +1,6 @@
 /node_modules
-/ui/gen
+/ui/assets
+.pupil
 .pupilrc
 db/
 *.log
