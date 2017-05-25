@@ -1,0 +1,16 @@
+{
+  "name": "demo-graphql",
+  "version": "2.0.0",
+  "description": "GraphQL Foxx Demo",
+  "engines": {
+    "arangodb": "^3.1.0"
+  },
+  "author": "Alan Plum",
+  "license": "Apache 2",
+  "main": "index.js",
+  "scripts": {
+    "setup": "scripts/setup.js",
+    "teardown": "scripts/teardown.js"
+  },
+  "tests": "test/**/*.js"
+}
