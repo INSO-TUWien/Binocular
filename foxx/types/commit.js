@@ -7,6 +7,7 @@ const db = arangodb.db;
 const aql = arangodb.aql;
 const commitsToBlameHunks = db._collection('commits-blameHunks');
 const blameHunksToFiles = db._collection('blameHunks-files');
+const commitsToStakeholders = db._collection('commits-stakeholders');
 
 module.exports = new gql.GraphQLObjectType({
   name: 'Commit',
@@ -62,6 +63,23 @@ module.exports = new gql.GraphQLObjectType({
                     RETURN file`
             )
             .toArray();
+        }
+      },
+      stakeholder: {
+        type: require('./stakeholder.js'),
+        description: 'The author of this commit',
+        resolve(commit, args) {
+          return db
+            ._query(
+              aql`
+            FOR
+            stakeholder
+            IN
+            INBOUND ${commit} ${commitsToStakeholders}
+              RETURN stakeholder
+          `
+            )
+            .toArray()[0];
         }
       }
     };

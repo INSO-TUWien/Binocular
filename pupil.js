@@ -21,8 +21,11 @@ const path = require('path');
 const Commit = require('./lib/models/Commit.js');
 const File = require('./lib/models/File.js');
 const BlameHunk = require('./lib/models/BlameHunk.js');
+const Stakeholder = require('./lib/models/Stakeholder.js');
 const CommitBlameHunkConnection = require('./lib/models/CommitBlameHunkConnection.js');
 const BlameHunkFileConnection = require('./lib/models/BlameHunkFileConnection.js');
+const CommitStakeholderConnection = require('./lib/models/CommitStakeholderConnection.js');
+const BlameHunkStakeholderConnection = require('./lib/models/BlameHunkStakeholderConnection.js');
 
 app.get('/api/commits', require('./lib/endpoints/get-commits.js'));
 app.get('/api/config', require('./lib/endpoints/get-config.js'));
@@ -68,7 +71,7 @@ Repository.fromPath(ctx.targetPath)
       gitlabIndexer.configure(config.get().gitlab);
 
       return (Promise.join(localIndexer.index() /*, gitlabIndexer.index()*/)
-          // .then(() => ctx.models.Commit.deduceUsers())
+          .then(() => Commit.deduceStakeholders())
           // .then(() => ctx.models.Issue.deduceUsers())
           // .then(() => ctx.models.BlameHunk.deduceUsers())
           .catch(e => e.name === 'Gitlab401Error', function() {
@@ -108,83 +111,6 @@ function guessGitLabApiUrl(repo) {
   });
 }
 
-// #!/usr/bin/env node
-
-// 'use strict';
-
-// require( './lib/context.js' );
-
-// const _ = require( 'lodash' );
-// const Promise = require( 'bluebird' );
-// const git = require( './lib/git.js' );
-// const path = require( 'path' );
-
-// const { db } = require( './lib/context.js' );
-// const config = require( './lib/config.js' );
-
-// return Promise.resolve( git.getRepoPath() )
-// .bind( {} )
-// .then( function( repoPath ) {
-//   const name = path.basename( path.dirname(repoPath) );
-//   this.dbName = config.arango.database || name;
-//   this.repoPath = repoPath;
-
-//   return db.ensureDatabase( this.dbName );
-// } )
-// .then( function() {
-
-//   return Promise.join(
-//     db.ensureCollection( 'commits' ),
-//     db.ensureEdgeCollection( 'commit-parents' )
-//   );
-// } )
-// .spread( function( commitCollection, parentsCollection ) {
-//   this.commitCollection = commitCollection;
-//   this.parentsCollection = parentsCollection;
-
-//   return db.ensureGraph( 'commit-network', {
-//     edgeDefinitions: [ {
-//       collection: 'commit-parents',
-//       from: ['commits'],
-//       to: ['commits']
-//     } ]
-//   } );
-// } )
-// .then( function( network ) {
-//   this.network = network;
-
-//   return git.getAllCommits( this.repoPath );
-// } )
-// .map( function( commit ) {
-
-//   const sha = commit.id().toString();
-//   return Promise.bind( this )
-//   .then( () => this.commitCollection.lookupByKeys([sha]) )
-//   .then( function( c ) {
-//     if( c.length === 0 ) {
-//       console.log( 'Persisting', sha );
-//       return this.commitCollection.save( {
-//         sha: commit.id().toString(),
-//         _key: commit.id().toString(),
-//         message: commit.message()
-//       } );
-//     } else {
-//       console.log( 'Omitting', sha, '(already present)' );
-//     }
-//   } )
-//   .thenReturn( commit );
-// } )
-// .map( function( commit ) {
-
-//   return Promise.bind( this )
-//   .then( () => commit.parents() )
-//   .map( function( parentOid ) {
-//     const parent = parentOid.toString();
-
-//     this.parentsCollection.save( {}, `commits/${commit.id().toString()}`, `commits/${parent}` );
-//   } );
-// } );
-
 function ensureDb(repo) {
   return ctx.db
     .ensureDatabase(repo.getName())
@@ -199,8 +125,11 @@ function ensureDb(repo) {
         Commit.ensureCollection(),
         File.ensureCollection(),
         BlameHunk.ensureCollection(),
+        Stakeholder.ensureCollection(),
         CommitBlameHunkConnection.ensureCollection(),
-        BlameHunkFileConnection.ensureCollection()
+        BlameHunkFileConnection.ensureCollection(),
+        CommitStakeholderConnection.ensureCollection(),
+        BlameHunkStakeholderConnection.ensureCollection()
       );
     });
 }

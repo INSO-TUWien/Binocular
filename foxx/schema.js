@@ -7,6 +7,7 @@ const aql = arangodb.aql;
 
 const commits = db._collection('commits');
 const files = db._collection('files');
+const stakeholders = db._collection('stakeholders');
 
 const queryType = new gql.GraphQLObjectType({
   name: 'Query',
@@ -49,6 +50,20 @@ const queryType = new gql.GraphQLObjectType({
         },
         resolve(root, args) {
           return files.firstExample({ path: args.path });
+        }
+      },
+      stakeholders: {
+        type: new gql.GraphQLList(require('./types/stakeholder.js')),
+        args: {},
+        resolve(root, args) {
+          return db
+            ._query(
+              aql`FOR stakeholder
+                  IN
+                  ${stakeholders}
+                    RETURN stakeholder`
+            )
+            .toArray();
         }
       }
     };
