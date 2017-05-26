@@ -29,8 +29,6 @@ export default class CodeOwnershipRiver extends React.Component {
   updateD3(/* props */) {}
 
   render() {
-    console.log(this.props.commits);
-
     const commitData = _.get(this.props, 'commits.data.commits', []);
     const commits = _.map(commitData, function(c, i) {
       return _.merge({}, c, { date: parseTime(c.date), commitCount: i + 1 });
@@ -75,7 +73,5 @@ export default class CodeOwnershipRiver extends React.Component {
     );
   }
 
-  makeBar(d) {
-    console.log('makeBar called with', d);
-  }
+  makeBar(d) {}
 }

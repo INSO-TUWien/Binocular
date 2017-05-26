@@ -33,7 +33,7 @@ const store = createStore(
       isShown: false
     }
   },
-  applyMiddleware(thunk, socketIo, logger)
+  applyMiddleware(thunk, socketIo /*, logger*/)
 );
 
 render(

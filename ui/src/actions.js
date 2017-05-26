@@ -18,6 +18,7 @@ export const receiveCommits = timestampedActionFactory('RECEIVE_COMMITS');
 export const receiveCommitsError = createAction('RECEIVE_COMMITS_ERROR');
 export const removeNotification = createAction('REMOVE_NOTIFICATION');
 export const addNotification = createAction('ADD_NOTIFICATION');
+export const switchConfigTab = createAction('SWITCH_CONFIG_TAB', tab => tab);
 
 export function postConfig(config) {
   return function(dispatch) {
@@ -38,7 +39,6 @@ export function postConfig(config) {
 }
 
 export const fetchConfig = fetchFactory('config', requestConfig, receiveConfig);
-// export const fetchCommits = fetchFactory( 'commits', requestCommits, receiveCommits, receiveCommitsError );
 
 export const fetchCommits = makeThunk(
   function(dispatch, getState) {

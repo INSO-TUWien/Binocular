@@ -47,6 +47,7 @@ let reporter = new ProgressReporter(io);
 Repository.fromPath(ctx.targetPath)
   .tap(function(repo) {
     ctx.repo = repo;
+    config.setSource(repo.pathFromRoot('.pupilrc'));
 
     require('./lib/setup-db.js');
 
@@ -60,9 +61,7 @@ Repository.fromPath(ctx.targetPath)
   })
   .delay(2500)
   .then(function(url) {
-    config.setSource(ctx.repo.pathFromRoot('.pupilrc'));
     config.ensure('gitlab.url', url);
-
     config.on('updated', reIndex);
 
     return reIndex();
