@@ -55,5 +55,4 @@ if (module.hot) {
   });
 }
 
-store.dispatch(fetchConfig());
-store.dispatch(fetchCommits());
+store.dispatch(fetchConfig()).then(() => store.dispatch(fetchCommits()));

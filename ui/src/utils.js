@@ -1,6 +1,6 @@
 'use strict';
 
-export function endpointUrl( suffix ) {
+export function endpointUrl(suffix) {
   return getBaseUrl() + suffix;
 }
 

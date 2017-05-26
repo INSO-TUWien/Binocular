@@ -41,14 +41,12 @@ export const fetchConfig = fetchFactory('config', requestConfig, receiveConfig);
 // export const fetchCommits = fetchFactory( 'commits', requestCommits, receiveCommits, receiveCommitsError );
 
 export const fetchCommits = makeThunk(
-  function() {
+  function(dispatch, getState) {
+    const { config } = getState();
     return reachGraphQL(
-      'http://localhost:8529/_db/pupil/pupil-ql',
+      `http://${config.data.arango.host}:${config.data.arango.port}/_db/pupil/pupil-ql`,
       `{
        commits {
-         sha
-         message
-         signature
          date
        }
      }`,
@@ -66,10 +64,10 @@ function timestampedActionFactory(action) {
 
 function makeThunk(fn, requestActionCreator, receiveActionCreator, errorActionCreator) {
   return function() {
-    return function(dispatch) {
+    return function(dispatch, getState) {
       dispatch(requestActionCreator());
 
-      let ret = Promise.resolve( fn(dispatch) ).tap(result => {
+      let ret = Promise.resolve(fn(dispatch, getState)).tap(result => {
         dispatch(receiveActionCreator(result));
       });
 
