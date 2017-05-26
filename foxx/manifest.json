@@ -1,16 +1,14 @@
 {
-  "name": "demo-graphql",
-  "version": "2.0.0",
-  "description": "GraphQL Foxx Demo",
+  "name": "pupil-graphql",
+  "version": "1.0.0",
+  "description": "GraphQl-Interface for pupil",
   "engines": {
     "arangodb": "^3.1.0"
   },
-  "author": "Alan Plum",
-  "license": "Apache 2",
+  "author": "Roman Decker",
+  "license": "ISC",
   "main": "index.js",
   "scripts": {
-    "setup": "scripts/setup.js",
-    "teardown": "scripts/teardown.js"
   },
   "tests": "test/**/*.js"
 }

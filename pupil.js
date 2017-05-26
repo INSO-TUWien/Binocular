@@ -186,14 +186,21 @@ function guessGitLabApiUrl(repo) {
 // } );
 
 function ensureDb(repo) {
-  return ctx.db.ensureDatabase(repo.getName()).then(function() {
-    return Promise.join(
-      ctx.db.ensureService(path.join(__dirname, 'foxx'), '/pupil-ql'),
-      Commit.ensureCollection(),
-      File.ensureCollection(),
-      BlameHunk.ensureCollection(),
-      CommitBlameHunkConnection.ensureCollection(),
-      BlameHunkFileConnection.ensureCollection()
-    );
-  });
+  return ctx.db
+    .ensureDatabase(repo.getName())
+    .then(function() {
+      if (argv.clean) {
+        return ctx.db.truncate();
+      }
+    })
+    .then(function() {
+      return Promise.join(
+        ctx.db.ensureService(path.join(__dirname, 'foxx'), '/pupil-ql'),
+        Commit.ensureCollection(),
+        File.ensureCollection(),
+        BlameHunk.ensureCollection(),
+        CommitBlameHunkConnection.ensureCollection(),
+        BlameHunkFileConnection.ensureCollection()
+      );
+    });
 }
