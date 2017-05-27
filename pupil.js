@@ -21,11 +21,13 @@ const path = require('path');
 const Commit = require('./lib/models/Commit.js');
 const File = require('./lib/models/File.js');
 const BlameHunk = require('./lib/models/BlameHunk.js');
+const Issue = require('./lib/models/Issue.js');
 const Stakeholder = require('./lib/models/Stakeholder.js');
 const CommitBlameHunkConnection = require('./lib/models/CommitBlameHunkConnection.js');
 const BlameHunkFileConnection = require('./lib/models/BlameHunkFileConnection.js');
 const CommitStakeholderConnection = require('./lib/models/CommitStakeholderConnection.js');
 const BlameHunkStakeholderConnection = require('./lib/models/BlameHunkStakeholderConnection.js');
+const IssueStakeholderConnection = require('./lib/models/IssueStakeholderConnection.js');
 
 app.get('/api/commits', require('./lib/endpoints/get-commits.js'));
 app.get('/api/config', require('./lib/endpoints/get-config.js'));
@@ -69,9 +71,9 @@ Repository.fromPath(ctx.targetPath)
     function reIndex() {
       gitlabIndexer.configure(config.get().gitlab);
 
-      return (Promise.join(localIndexer.index() /*, gitlabIndexer.index()*/)
+      return (Promise.join(localIndexer.index(), gitlabIndexer.index())
           .then(() => Commit.deduceStakeholders())
-          // .then(() => ctx.models.Issue.deduceUsers())
+          .then(() => Issue.deduceStakeholders())
           // .then(() => ctx.models.BlameHunk.deduceUsers())
           .catch(e => e.name === 'Gitlab401Error', function() {
             console.warn(
@@ -128,7 +130,8 @@ function ensureDb(repo) {
         CommitBlameHunkConnection.ensureCollection(),
         BlameHunkFileConnection.ensureCollection(),
         CommitStakeholderConnection.ensureCollection(),
-        BlameHunkStakeholderConnection.ensureCollection()
+        BlameHunkStakeholderConnection.ensureCollection(),
+        IssueStakeholderConnection.ensureCollection()
       );
     });
 }

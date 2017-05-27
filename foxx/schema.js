@@ -8,6 +8,7 @@ const aql = arangodb.aql;
 const commits = db._collection('commits');
 const files = db._collection('files');
 const stakeholders = db._collection('stakeholders');
+const issues = db._collection('issues');
 
 const queryType = new gql.GraphQLObjectType({
   name: 'Query',
@@ -62,6 +63,21 @@ const queryType = new gql.GraphQLObjectType({
                   IN
                   ${stakeholders}
                     RETURN stakeholder`
+            )
+            .toArray();
+        }
+      },
+      issues: {
+        type: new gql.GraphQLList(require('./types/issue.js')),
+        args: {},
+        resolve(root, args) {
+          return db
+            ._query(
+              aql`FOR issue
+                  IN
+                  ${issues}
+                    SORT issue.created_at ASC
+                    RETURN issue`
             )
             .toArray();
         }

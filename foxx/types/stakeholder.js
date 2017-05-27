@@ -19,6 +19,18 @@ module.exports = new gql.GraphQLObjectType({
         type: gql.GraphQLString,
         description: 'The path of the file, relative to the repository root'
       },
+      gitlabName: {
+        type: gql.GraphQLString,
+        description: 'The name of the stakeholder, according to GitLab'
+      },
+      gitlabWebUrl: {
+        type: gql.GraphQLString,
+        description: "The GitLab-Web-URL to the stakeholder's GitLab profile"
+      },
+      gitlabAvatarUrl: {
+        type: gql.GraphQLString,
+        description: "The URL to the stakeholder's gitlab avatar picture"
+      },
       commits: {
         type: new gql.GraphQLList(require('./commit.js')),
         description: 'The commits made by this stakeholder',
