@@ -35,7 +35,7 @@ app.post('/api/config', require('./lib/endpoints/update-config.js'));
 
 const port = config.get().port;
 
-const server = httpServer.listen(port, function() {
+httpServer.listen(port, function() {
   console.log(`Pupil listening on http://localhost:${port}`);
   if (argv.ui && argv.open) {
     opn(`http://localhost:${port}/`);
@@ -92,11 +92,9 @@ process.on('SIGINT', function() {
     process.exit(1);
   }
 
-  ctx.quitRequested = true;
   console.log('Let me finish up here, ... (Ctrl+C to force quit)');
 
-  server.close();
-
+  ctx.quit();
   localIndexer.stop();
   gitlabIndexer.stop();
 });
@@ -127,6 +125,7 @@ function ensureDb(repo) {
         File.ensureCollection(),
         BlameHunk.ensureCollection(),
         Stakeholder.ensureCollection(),
+        Issue.ensureCollection(),
         CommitBlameHunkConnection.ensureCollection(),
         BlameHunkFileConnection.ensureCollection(),
         CommitStakeholderConnection.ensureCollection(),
