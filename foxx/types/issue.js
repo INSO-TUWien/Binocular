@@ -76,42 +76,6 @@ module.exports = new gql.GraphQLObjectType({
             .toArray()[0];
         }
       }
-
-      // hunks: {
-      // type: new gql.GraphQLList(blameHunkType),
-      // description: 'The hunks in this commit',
-      // args: {},
-      // resolve(commit, args) {
-      //   return db
-      //     ._query(
-      //       aql`FOR hunk
-      //           IN
-      //           INBOUND ${commit} ${commitsToBlameHunks}
-      //           SORT hunk._key ASC
-      //             RETURN hunk`
-      //     )
-      //     .toArray();
-      // }
-      // },
-      // files: {
-      // type: new gql.GraphQLList(require('./file.js')),
-      // description: 'The files touched by this commit',
-      // args: {},
-      // resolve(commit, args) {
-      //   return db
-      //     ._query(
-      //       aql`FOR hunk
-      //         IN
-      //         INBOUND ${commit} ${commitsToBlameHunks}
-      //           FOR file
-      //           IN
-      //           INBOUND
-      //           hunk ${blameHunksToFiles}
-      //             RETURN file`
-      //     )
-      //     .toArray();
-      // }
-      // },
     };
   }
 });
