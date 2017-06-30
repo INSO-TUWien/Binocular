@@ -33,7 +33,7 @@ const store = createStore(
       isShown: false
     }
   },
-  applyMiddleware(thunk, socketIo, logger)
+  applyMiddleware(thunk, socketIo /*, logger*/)
 );
 
 render(
@@ -55,5 +55,4 @@ if (module.hot) {
   });
 }
 
-store.dispatch(fetchConfig());
-store.dispatch(fetchCommits());
+store.dispatch(fetchConfig()).then(() => store.dispatch(fetchCommits()));

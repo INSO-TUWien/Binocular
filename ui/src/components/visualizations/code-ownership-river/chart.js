@@ -8,11 +8,9 @@ import _ from 'lodash';
 import styles from './styles.scss';
 import Axis from './Axis.js';
 
-
-const parseTime = d3.timeParse( '%Y-%m-%dT%H:%M:%S.000Z' );
+const parseTime = d3.timeParse('%Y-%m-%dT%H:%M:%S.000Z');
 
 export default class CodeOwnershipRiver extends React.Component {
-
   constructor() {
     super();
 
@@ -24,18 +22,17 @@ export default class CodeOwnershipRiver extends React.Component {
     };
   }
 
-  componentWillReceiveProps( props ) {
-    this.updateD3( props );
+  componentWillReceiveProps(props) {
+    this.updateD3(props);
   }
 
-  updateD3( /* props */ ) {
-  }
+  updateD3(/* props */) {}
 
   render() {
-
-    const commits = _.map( this.props.commits.data, function( c, i ) {
-      return _.merge( {}, c, { date: parseTime(c.date), commitCount: i + 1 } );
-    } );
+    const commitData = _.get(this.props, 'commits.data.commits', []);
+    const commits = _.map(commitData, function(c, i) {
+      return _.merge({}, c, { date: parseTime(c.date), commitCount: i + 1 });
+    });
 
     const fullWidth = this.state.dimensions.width;
     const fullHeight = this.state.dimensions.height;
@@ -44,36 +41,31 @@ export default class CodeOwnershipRiver extends React.Component {
 
     const width = fullWidth * wPct;
     const height = fullHeight * hPct;
-    const wMargin = (fullWidth - width)/2;
-    const hMargin = (fullHeight - height)/2;
+    const wMargin = (fullWidth - width) / 2;
+    const hMargin = (fullHeight - height) / 2;
 
     const translate = `translate(${wMargin}, ${hMargin})`;
 
-    const x = d3.scaleTime()
-          .rangeRound( [0, width] )
-          .domain( d3.extent(commits, c => c.date) );
+    const x = d3.scaleTime().rangeRound([0, width]).domain(d3.extent(commits, c => c.date));
 
-    const y = d3.scaleLinear()
-          .rangeRound( [height, 0] )
-          .domain( d3.extent(commits, c => c.commitCount) );
+    const y = d3
+      .scaleLinear()
+      .rangeRound([height, 0])
+      .domain(d3.extent(commits, c => c.commitCount));
 
-    const line = d3.line()
-          .x( c => x(c.date) )
-          .y( c => y(c.commitCount) );
-
+    const line = d3.line().x(c => x(c.date)).y(c => y(c.commitCount));
 
     // const yAxis = d3.axisLeft( y );
     // const xAxis = d3.axisBottom( x );
 
-
     return (
-      <Measure onMeasure={dimensions => this.setState({dimensions})}>
+      <Measure onMeasure={dimensions => this.setState({ dimensions })}>
         <div>
           <svg className={styles.chart}>
             <g transform={translate}>
-              <path d={line(commits)} stroke='black' strokeWidth='1' fill='none' />
-              <Axis orient='left' ticks='10' scale={y} />
-              <Axis orient='bottom' scale={x} y={height} />
+              <path d={line(commits)} stroke="black" strokeWidth="1" fill="none" />
+              <Axis orient="left" ticks="10" scale={y} />
+              <Axis orient="bottom" scale={x} y={height} />
             </g>
           </svg>
         </div>
@@ -81,7 +73,5 @@ export default class CodeOwnershipRiver extends React.Component {
     );
   }
 
-  makeBar( d ) {
-    console.log( 'makeBar called with', d );
-  }
+  makeBar(d) {}
 }

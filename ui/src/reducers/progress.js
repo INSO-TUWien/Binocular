@@ -2,14 +2,14 @@
 
 import { handleActions } from 'redux-actions';
 
-export default handleActions( {
-
-  message: (state, action) => {
-    console.log( action );
-    return action.report;
+export default handleActions(
+  {
+    message: (state, action) => {
+      return action.report;
+    }
+  },
+  {
+    commits: { total: 1, processed: 0 },
+    issues: { total: 1, processed: 0 }
   }
-
-}, {
-  commits: { total: 1, processed: 0 },
-  issues: { total: 1, processed: 0 }
-} );
+);

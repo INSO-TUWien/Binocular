@@ -4,54 +4,93 @@ import Promise from 'bluebird';
 import fetch from 'isomorphic-fetch';
 import { endpointUrl } from './utils.js';
 import { createAction } from 'redux-actions';
+import { reachGraphQL } from 'react-reach';
 
 export const Visualizations = ['ISSUE_IMPACT', 'CODE_OWNERSHIP_RIVER', 'HOTSPOT_DIALS'];
 
-export const switchVisualization = createAction( 'SWITCH_VISUALIZATION', vis => vis );
-export const showConfig = createAction( 'SHOW_CONFIGURATION' );
-export const hideConfig = createAction( 'HIDE_CONFIGURATION' );
-export const requestConfig = createAction( 'REQUEST_CONFIGURATION' );
-export const receiveConfig = timestampedActionFactory( 'RECEIVE_CONFIGURATION' );
-export const requestCommits = createAction( 'REQUEST_COMMITS' );
-export const receiveCommits = timestampedActionFactory( 'RECEIVE_COMMITS' );
-export const receiveCommitsError = createAction( 'RECEIVE_COMMITS_ERROR' );
-export const removeNotification = createAction( 'REMOVE_NOTIFICATION' );
-export const addNotification = createAction( 'ADD_NOTIFICATION' );
+export const switchVisualization = createAction('SWITCH_VISUALIZATION', vis => vis);
+export const showConfig = createAction('SHOW_CONFIGURATION');
+export const hideConfig = createAction('HIDE_CONFIGURATION');
+export const requestConfig = createAction('REQUEST_CONFIGURATION');
+export const receiveConfig = timestampedActionFactory('RECEIVE_CONFIGURATION');
+export const requestCommits = createAction('REQUEST_COMMITS');
+export const receiveCommits = timestampedActionFactory('RECEIVE_COMMITS');
+export const receiveCommitsError = createAction('RECEIVE_COMMITS_ERROR');
+export const removeNotification = createAction('REMOVE_NOTIFICATION');
+export const addNotification = createAction('ADD_NOTIFICATION');
+export const switchConfigTab = createAction('SWITCH_CONFIG_TAB', tab => tab);
 
-export function postConfig( config ) {
-  return function( dispatch ) {
-    dispatch( requestConfig() );
+export function postConfig(config) {
+  return function(dispatch) {
+    dispatch(requestConfig());
 
-    return Promise.resolve( fetch( endpointUrl('config'), {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(config)
-    } ) )
-    .then( resp => resp.json() )
-    .then( json => dispatch(receiveConfig(json)) );
+    return Promise.resolve(
+      fetch(endpointUrl('config'), {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(config)
+      })
+    )
+      .then(resp => resp.json())
+      .then(json => dispatch(receiveConfig(json)));
   };
 }
 
-export const fetchConfig = fetchFactory( 'config', requestConfig, receiveConfig );
-export const fetchCommits = fetchFactory( 'commits', requestCommits, receiveCommits, receiveCommitsError );
+export const fetchConfig = fetchFactory('config', requestConfig, receiveConfig);
 
-function timestampedActionFactory( action ) {
-  return createAction( action, id => id, () => ({ receivedAt: new Date() }) );
+export const fetchCommits = makeThunk(
+  function(dispatch, getState) {
+    const { config } = getState();
+    return reachGraphQL(
+      `http://${config.data.arango.host}:${config.data.arango.port}/_db/pupil/pupil-ql`,
+      `{
+       commits {
+         date
+       }
+     }`,
+      {}
+    );
+  },
+  requestCommits,
+  receiveCommits,
+  receiveCommitsError
+);
+
+function timestampedActionFactory(action) {
+  return createAction(action, id => id, () => ({ receivedAt: new Date() }));
 }
 
-function fetchFactory( endpoint, requestActionCreator, receiveActionCreator, errorActionCreator ) {
+function makeThunk(fn, requestActionCreator, receiveActionCreator, errorActionCreator) {
   return function() {
-    return function( dispatch ) {
-      dispatch( requestActionCreator() );
+    return function(dispatch, getState) {
+      dispatch(requestActionCreator());
 
-      let ret = Promise.resolve( fetch(endpointUrl(endpoint)) )
-      .then( resp => resp.json() )
-      .then( json => dispatch(receiveActionCreator(json)) );
+      let ret = Promise.resolve(fn(dispatch, getState)).tap(result => {
+        dispatch(receiveActionCreator(result));
+      });
 
-      if( errorActionCreator ) {
-        ret = ret.catch( e => dispatch(errorActionCreator(e)) );
+      if (errorActionCreator) {
+        ret = ret.catch(e => dispatch(errorActionCreator(e)));
+      }
+
+      return ret;
+    };
+  };
+}
+
+function fetchFactory(endpoint, requestActionCreator, receiveActionCreator, errorActionCreator) {
+  return function() {
+    return function(dispatch) {
+      dispatch(requestActionCreator());
+
+      let ret = Promise.resolve(fetch(endpointUrl(endpoint)))
+        .then(resp => resp.json())
+        .then(json => dispatch(receiveActionCreator(json)));
+
+      if (errorActionCreator) {
+        ret = ret.catch(e => dispatch(errorActionCreator(e)));
       }
 
       return ret;

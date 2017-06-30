@@ -29,12 +29,15 @@ const cssLoaders = [
   },
   {
     test: /\.s[ac]ss$/,
-    exclude: [path.resolve(__dirname, 'node_modules'), path.resolve(__dirname, 'ui/global.scss')],
+    exclude: [
+      path.resolve(__dirname, 'node_modules'),
+      path.resolve(__dirname, 'ui/src/global.scss')
+    ],
     loaders: ['style-loader', cssModulesLoader, 'sass-loader']
   },
   {
     test: /global\.scss$/,
-    include: path.resolve(__dirname, 'ui/global.scss'),
+    include: path.resolve(__dirname, 'ui/src/global.scss'),
     loaders: ['style-loader', 'css-loader', 'sass-loader']
   }
 ];

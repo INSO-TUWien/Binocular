@@ -1,0 +1,14 @@
+{
+  "name": "pupil-graphql",
+  "version": "1.0.0",
+  "description": "GraphQl-Interface for pupil",
+  "engines": {
+    "arangodb": "^3.1.0"
+  },
+  "author": "Roman Decker",
+  "license": "ISC",
+  "main": "index.js",
+  "scripts": {
+  },
+  "tests": "test/**/*.js"
+}
