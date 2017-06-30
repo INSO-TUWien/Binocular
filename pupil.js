@@ -114,7 +114,7 @@ function guessGitLabApiUrl(repo) {
 
 function ensureDb(repo) {
   return ctx.db
-    .ensureDatabase(repo.getName())
+    .ensureDatabase('pupil-' + repo.getName())
     .then(function() {
       if (argv.clean) {
         return ctx.db.truncate();
