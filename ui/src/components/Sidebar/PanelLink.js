@@ -1,7 +1,7 @@
 'use strict';
 
 import { connect } from 'react-redux';
-import { switchVisualization } from '../../actions.js';
+import { switchVisualization } from '../../sagas.js';
 import Link from './Link.js';
 
 const mapStateToProps = (state, ownProps) => {
@@ -13,10 +13,10 @@ const mapStateToProps = (state, ownProps) => {
 
 const mapDispatchToProps = (dispatch, ownProps) => {
   return {
-    onClick: () => dispatch( switchVisualization(ownProps.visualization.id) )
+    onClick: () => dispatch(switchVisualization(ownProps.visualization.id))
   };
 };
 
-const PanelLink = connect( mapStateToProps, mapDispatchToProps )( Link );
+const PanelLink = connect(mapStateToProps, mapDispatchToProps)(Link);
 
 export default PanelLink;

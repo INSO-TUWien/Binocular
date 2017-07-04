@@ -5,9 +5,10 @@ import thunk from 'redux-thunk';
 import { logger } from 'redux-logger';
 import io from 'socket.io-client';
 import createSocketIoMiddleware from 'redux-socket.io';
+import createSagaMiddleware from 'redux-saga';
+import { root } from './sagas.js';
 
 import customErrorReporter from './customErrorReporter.js';
-import { fetchConfig, fetchCommits } from './actions.js';
 import Root from './components/Root.js';
 import app from './reducers';
 
@@ -15,8 +16,9 @@ import 'bulma';
 import 'font-awesome/css/font-awesome.css';
 import './global.scss';
 
-let socket = io({ path: '/wsapi' });
-let socketIo = createSocketIoMiddleware(socket, 'api/');
+const socket = io({ path: '/wsapi' });
+const socketIo = createSocketIoMiddleware(socket, 'api/');
+const saga = createSagaMiddleware();
 
 const store = createStore(
   app,
@@ -33,8 +35,10 @@ const store = createStore(
       isShown: false
     }
   },
-  applyMiddleware(thunk, socketIo /*, logger*/)
+  applyMiddleware(thunk, socketIo, saga, logger)
 );
+
+saga.run(root);
 
 render(
   <AppContainer errorReporter={customErrorReporter}>
@@ -55,4 +59,4 @@ if (module.hot) {
   });
 }
 
-store.dispatch(fetchConfig()).then(() => store.dispatch(fetchCommits()));
+// store.dispatch(fetchConfig()).then(() => store.dispatch(fetchCommits()));

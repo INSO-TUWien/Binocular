@@ -23,9 +23,9 @@
   ],
   "author": "Roman Decker <roman.decker@gmail.com>",
   "license": "ISC",
-   "bin": {
-     "pupil": "./pupil.js"
-   },
+  "bin": {
+    "pupil": "./pupil.js"
+  },
   "dependencies": {
     "adm-zip": "^0.4.7",
     "arangojs": "^5.6.1",
@@ -80,6 +80,7 @@
     "redux-actions": "^2.0.2",
     "redux-form": "^6.7.0",
     "redux-logger": "^3.0.1",
+    "redux-saga": "^0.15.4",
     "redux-socket.io": "^1.3.1",
     "redux-thunk": "^2.2.0",
     "request-promise": "^4.2.1",
