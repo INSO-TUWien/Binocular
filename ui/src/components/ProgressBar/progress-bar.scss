@@ -1,54 +1,71 @@
 @import '~bulma';
 
 .hoverTarget {
-  height: 30px;
-  width: 100%;
-  float: left;
   position: absolute;
-  top: 0;
-  left: 0;
-  opacity: 100%;
-  clear: both;
+  top: 0px;
+  right: 0px;
 
-  .barContainer {
-    height: 1px;
-    width: 100%;
-    display: flex;
-    align-items: stretch;
+  height: 50px;
+  width: 50px;
+  $transition-time: 0.5s;
+  transition: width $transition-time ease-in-out, height $transition-time ease-in-out;
 
-    transition: height 0.3s;
-  }
+  .donut {
 
-  .info {
-    position: absolute;
-    top: 0;
-    left: 0;
-    padding: 2px;
-    height: 0px;
-    overflow: hidden;
+    $ring-width: 5;
+    $ring-color: $grey-light;
+    $fill-color: #00fa9a;
+
+    .text {
+      text-anchor: middle;
+      alignment-baseline: middle;
+      font-size: 10;
+      fill: $grey;
+    }
+
+    .text.details {
+      display: none;
+      font-size: 4;
+    }
+
+    .hole {
+      fill: white;
+    }
+
+    .ring, .segment {
+      fill: transparent;
+    }
+
+    .ring {
+      stroke-width: $ring-width - 1;
+      stroke: $ring-color;
+    }
+
+    .segment {
+      stroke-width: $ring-width;
+      stroke: $fill-color;
+    }
   }
 }
 
 .hoverTarget:hover {
-  height: 83px;
+  height: 150px;
+  width: 150px;
 
-  .barContainer {
-    height: 100%;
-    border-bottom: 1px solid $grey-lighter;
-  }
+  .donut {
+    $colors: #00EE76 #00CD66 #008B45;
+    @for $i from 1 through length($colors) {
+      .segment:nth-child(#{$i}) {
+        stroke: nth($colors, $i);
+      }
+    }
 
-  .info {
-    height: 100%;
-  }
-}
+    .text {
+      display: none;
+    }
 
-.fillerContainer {
-  position: relative;
-  transition: width 1s;
-
-  .filler {
-    background-color: $green;
-    height: 100%;
-    width: 100%;
+    .text.details {
+      display: block;
+    }
   }
 }

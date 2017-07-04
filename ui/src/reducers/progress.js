@@ -5,6 +5,7 @@ import { handleActions } from 'redux-actions';
 export default handleActions(
   {
     message: (state, action) => {
+      console.log('action:', action);
       return action.report;
     }
   },
