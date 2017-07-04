@@ -44,7 +44,7 @@ export const fetchCommits = makeThunk(
   function(dispatch, getState) {
     const { config } = getState();
     return reachGraphQL(
-      `http://${config.data.arango.host}:${config.data.arango.port}/_db/pupil/pupil-ql`,
+      `http://${config.data.arango.host}:${config.data.arango.port}/_db/pupil-${config.data.repoName}/pupil-ql`,
       `{
        commits {
          date
