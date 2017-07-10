@@ -3,20 +3,22 @@
 import React from 'react';
 import * as d3 from 'd3';
 
-export default class Axis extends React.Component {
+import styles from './styles.scss';
+
+export default class GridLines extends React.Component {
   constructor() {
     super();
   }
 
   comonentDidMount() {
-    this.updateD3();
+    this.renderGridLines();
   }
 
   componentDidUpdate() {
-    this.updateD3();
+    this.renderGridLines();
   }
 
-  updateD3() {
+  renderGridLines() {
     const methodNames = {
       left: 'axisLeft',
       right: 'axisRight',
@@ -36,10 +38,12 @@ export default class Axis extends React.Component {
       axis.scale(this.props.scale);
     }
 
-    if (this.props.tickSize) {
-      axis.tickSize(this.props.tickSize);
+    if (this.props.length) {
+      axis.tickSize(this.props.length);
     }
 
+    axis.tickFormat(() => '');
+    axis.tickSizeOuter(0);
     d3.select(this.g).call(axis);
   }
 
@@ -48,10 +52,6 @@ export default class Axis extends React.Component {
     const y = this.props.y || 0;
     let translate = `translate(${x}, ${y})`;
 
-    return (
-      <g>
-        <g className="axis" ref={g => (this.g = g)} transform={translate} />
-      </g>
-    );
+    return <g className={styles.grid} ref={g => (this.g = g)} transform={translate} />;
   }
 }

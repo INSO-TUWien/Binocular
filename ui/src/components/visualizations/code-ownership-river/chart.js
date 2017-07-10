@@ -7,6 +7,7 @@ import _ from 'lodash';
 
 import styles from './styles.scss';
 import Axis from './Axis.js';
+import GridLines from './GridLines.js';
 
 const parseTime = d3.timeParse('%Y-%m-%dT%H:%M:%S.000Z');
 
@@ -22,8 +23,15 @@ export default class CodeOwnershipRiver extends React.Component {
     };
   }
 
-  componentWillReceiveProps(props) {
-    this.updateD3(props);
+  componentDidMount() {
+    this.updateD3();
+  }
+
+  componentDidUpdate() {
+    this.updateD3();
+
+    const zoom = d3.zoom().scaleExtent([1, 10]).on('zoom', () => this.zoom());
+    d3.select(this.svg).call(zoom);
   }
 
   updateD3(/* props */) {}
@@ -46,26 +54,30 @@ export default class CodeOwnershipRiver extends React.Component {
 
     const translate = `translate(${wMargin}, ${hMargin})`;
 
-    const x = d3.scaleTime().rangeRound([0, width]).domain(d3.extent(commits, c => c.date));
+    const domain = d3.extent(commits, c => c.date);
 
-    const y = d3
+    this.x = d3.scaleTime().rangeRound([0, width]).domain(domain);
+    this.y = d3
       .scaleLinear()
       .rangeRound([height, 0])
       .domain(d3.extent(commits, c => c.commitCount));
 
-    const line = d3.line().x(c => x(c.date)).y(c => y(c.commitCount));
-
-    // const yAxis = d3.axisLeft( y );
-    // const xAxis = d3.axisBottom( x );
+    const line = d3
+      .line()
+      .x(c => this.x(c.date))
+      .y(c => this.y(c.commitCount))
+      .defined(c => c.date > domain[0] && c.date < domain[1]);
 
     return (
       <Measure onMeasure={dimensions => this.setState({ dimensions })}>
         <div>
-          <svg className={styles.chart}>
+          <svg className={styles.chart} ref={svg => (this.svg = svg)}>
             <g transform={translate}>
+              <GridLines orient="left" ticks="10" scale={this.y} length={-width} />
+              <GridLines orient="bottom" scale={this.x} y={height} length={-height} />
+              <Axis orient="left" ticks="10" scale={this.y} />
+              <Axis orient="bottom" scale={this.x} y={height} />
               <path d={line(commits)} stroke="black" strokeWidth="1" fill="none" />
-              <Axis orient="left" ticks="10" scale={y} />
-              <Axis orient="bottom" scale={x} y={height} />
             </g>
           </svg>
         </div>
@@ -73,5 +85,8 @@ export default class CodeOwnershipRiver extends React.Component {
     );
   }
 
-  makeBar(d) {}
+  zoom() {
+    // d3.event.transform.rescaleX(this.x);
+    // d3.event.transform.rescaleY(this.y);
+  }
 }
