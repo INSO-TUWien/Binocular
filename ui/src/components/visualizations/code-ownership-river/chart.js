@@ -5,8 +5,8 @@ import Measure from 'react-measure';
 import * as d3 from 'd3';
 import styles from './styles.scss';
 import _ from 'lodash';
-import GridLines from './GridLines.js';
 import Axis from './Axis.js';
+import GridLines from './GridLines.js';
 
 const parseTime = d3.timeParse('%Y-%m-%dT%H:%M:%S.000Z');
 
