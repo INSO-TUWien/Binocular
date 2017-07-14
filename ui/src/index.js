@@ -1,6 +1,5 @@
 import { render } from 'react-dom';
 import { createStore, applyMiddleware } from 'redux';
-import thunk from 'redux-thunk';
 import { logger } from 'redux-logger';
 import io from 'socket.io-client';
 import createSocketIoMiddleware from 'redux-socket.io';
@@ -33,7 +32,7 @@ const store = createStore(
       isShown: false
     }
   },
-  applyMiddleware(thunk, socketIo, saga /*, logger*/)
+  applyMiddleware(socketIo, saga /*, logger*/)
 );
 
 saga.run(root);
@@ -46,5 +45,3 @@ if (module.hot) {
     render(<NewRoot store={store} />, document.getElementById('root'));
   });
 }
-
-// store.dispatch(fetchConfig()).then(() => store.dispatch(fetchCommits()));

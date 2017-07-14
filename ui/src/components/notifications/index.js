@@ -2,18 +2,18 @@
 
 import { connect } from 'react-redux';
 import Notifications from './Notifications.js';
-import { removeNotification } from '../../actions.js';
+import { removeNotification } from '../../sagas.js';
 
-const mapStateToProps = (state = []/*, ownProps*/) => {
+const mapStateToProps = (state = [] /*, ownProps*/) => {
   return {
     notifications: state.notifications
   };
 };
 
-const mapDispatchToProps = (dispatch/*, ownProps*/) => {
+const mapDispatchToProps = (dispatch /*, ownProps*/) => {
   return {
-    onCloseNotification: id => dispatch( removeNotification(id) )
+    onCloseNotification: id => dispatch(removeNotification(id))
   };
 };
 
-export default connect( mapStateToProps, mapDispatchToProps )( Notifications );
+export default connect(mapStateToProps, mapDispatchToProps)(Notifications);
