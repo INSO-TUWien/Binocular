@@ -39,11 +39,12 @@ export default class GridLines extends React.Component {
     }
 
     if (this.props.length) {
-      axis.tickSize(this.props.length);
+      axis.tickSize(-this.props.length);
     }
 
-    axis.tickFormat(() => '');
-    axis.tickSizeOuter(0);
+    axis.tickSizeOuter(10);
+    axis.tickFormat('');
+
     d3.select(this.g).call(axis);
   }
 
@@ -52,6 +53,6 @@ export default class GridLines extends React.Component {
     const y = this.props.y || 0;
     let translate = `translate(${x}, ${y})`;
 
-    return <g className={styles.grid} ref={g => (this.g = g)} transform={translate} />;
+    return <g className={styles.grid} ref={g => this.g = g} transform={translate} />;
   }
 }
