@@ -100,18 +100,20 @@ export default class CodeOwnershipRiver extends React.Component {
       .defined(c => _.inRange(x(c.date), dims.width) && _.inRange(y(c.commitCount), dims.height));
 
     return (
-      <Measure onMeasure={dims => this.updateDimensions(dims)}>
-        <div>
-          <svg className={styles.chart} ref={svg => this.elems.svg = svg}>
-            <g transform={translate}>
-              <GridLines orient="left" scale={y} ticks="10" length={dims.width} />
-              <GridLines orient="bottom" scale={x} y={dims.height} length={dims.height} />
-              <Axis orient="left" ticks="10" scale={y} />
-              <Axis orient="bottom" scale={x} y={dims.height} />
-              <path d={line(this.state.commits)} stroke="black" strokeWidth="1" fill="none" />
-            </g>
-          </svg>
-        </div>
+      <Measure bounds onResize={dims => this.updateDimensions(dims.bounds)}>
+        {({ measureRef }) => (
+          <div ref={measureRef}>
+            <svg className={styles.chart} ref={svg => this.elems.svg = svg}>
+              <g transform={translate}>
+                <GridLines orient="left" scale={y} ticks="10" length={dims.width} />
+                <GridLines orient="bottom" scale={x} y={dims.height} length={dims.height} />
+                <Axis orient="left" ticks="10" scale={y} />
+                <Axis orient="bottom" scale={x} y={dims.height} />
+                <path d={line(this.state.commits)} stroke="black" strokeWidth="1" fill="none" />
+              </g>
+            </svg>
+          </div>
+        )}
       </Measure>
     );
   }
