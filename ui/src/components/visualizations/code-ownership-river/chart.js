@@ -44,8 +44,8 @@ export default class CodeOwnershipRiver extends React.Component {
   updateDimensions(dimensions) {
     const fullWidth = dimensions.width;
     const fullHeight = dimensions.height;
-    const wPct = 0.8;
-    const hPct = 0.6;
+    const wPct = 0.7;
+    const hPct = 0.7;
 
     const width = fullWidth * wPct;
     const height = fullHeight * hPct;
@@ -90,6 +90,7 @@ export default class CodeOwnershipRiver extends React.Component {
     const y = this.state.transform.rescaleY(this.scales.y);
 
     const line = d3.line().x(c => x(c.date)).y(c => y(c.commitCount));
+    const today = new Date();
 
     return (
       <Measure bounds onResize={dims => this.updateDimensions(dims.bounds)}>
@@ -98,7 +99,7 @@ export default class CodeOwnershipRiver extends React.Component {
             tabIndex="1"
             ref={measureRef}
             onKeyPress={e => this.onKeyPress(e)}
-            className={styles.container}>
+            className={styles.chartContainer}>
             <svg className={styles.chart} ref={svg => this.elems.svg = svg}>
               <defs>
                 <clipPath id="chart">
@@ -108,8 +109,18 @@ export default class CodeOwnershipRiver extends React.Component {
               <g transform={translate}>
                 <GridLines orient="left" scale={y} ticks="10" length={dims.width} />
                 <GridLines orient="bottom" scale={x} y={dims.height} length={dims.height} />
-                <Axis orient="left" ticks="10" scale={y} />
-                <Axis orient="bottom" scale={x} y={dims.height} />
+                <g>
+                  <Axis orient="left" ticks="10" scale={y} />
+                  <text x={-dims.height / 2} y={-50} textAnchor="middle" transform="rotate(-90)">
+                    Number of Commits
+                  </text>
+                </g>
+                <g>
+                  <Axis orient="bottom" scale={x} y={dims.height} />
+                  <text x={dims.width / 2} y={dims.height + 50} textAnchor="middle">
+                    Time
+                  </text>
+                </g>
                 <path
                   clipPath="url(#chart)"
                   d={line(this.state.commits)}
@@ -140,10 +151,18 @@ export default class CodeOwnershipRiver extends React.Component {
   componentDidUpdate() {
     const svg = d3.select(this.elems.svg);
 
+    const x = this.state.transform.rescaleX(this.scales.x);
+    const y = this.state.transform.rescaleY(this.scales.y);
+
+    const yMax = this.scales.y.domain()[1];
+    console.log('raw max:', yMax);
+    console.log('normal scaled max:', this.scales.y(yMax));
+    console.log('zoom-scaled max:', y(yMax));
+
     const zoom = d3
       .zoom()
-      .translateExtent([[0, 0], [Infinity, Infinity]])
-      .scaleExtent([0, Infinity])
+      .translateExtent([[0, 0], [Infinity, 1000]])
+      .scaleExtent([1, Infinity])
       .on('zoom', () => this.updateZoom(d3.event));
     svg.call(zoom);
   }
