@@ -43,14 +43,20 @@ const cssLoaders = [
 ];
 
 module.exports = {
-  devtool: 'eval-source-map',
-  entry: {
-    app: ['babel-polyfill', 'react-hot-loader/patch', './ui/src/index']
-  },
+  devtool: 'cheap-eval-source-map',
+  entry: [
+    require.resolve('babel-polyfill'),
+    require.resolve('react-dev-utils/webpackHotDevClient'),
+    require.resolve('react-error-overlay'),
+    './ui/src/index'
+  ],
   output: {
     path: path.resolve(__dirname, './ui/assets'),
+    pathinfo: true,
     filename: 'bundle.js',
-    publicPath: 'assets/'
+    publicPath: 'assets/',
+    devtoolModuleFilenameTemplate: info =>
+      path.resolve(info.absoluteResourcePath).replace(/\\/g, '/')
   },
   module: {
     rules: [

@@ -69,18 +69,20 @@ export default class CodeOwnershipRiver extends React.Component {
       .defined(c => c.date > domain[0] && c.date < domain[1]);
 
     return (
-      <Measure onMeasure={dimensions => this.setState({ dimensions })}>
-        <div>
-          <svg className={styles.chart} ref={svg => (this.svg = svg)}>
-            <g transform={translate}>
-              <GridLines orient="left" ticks="10" scale={this.y} length={-width} />
-              <GridLines orient="bottom" scale={this.x} y={height} length={-height} />
-              <Axis orient="left" ticks="10" scale={this.y} />
-              <Axis orient="bottom" scale={this.x} y={height} />
-              <path d={line(commits)} stroke="black" strokeWidth="1" fill="none" />
-            </g>
-          </svg>
-        </div>
+      <Measure bounds onResize={contentRect => this.setState({ dimensions: contentRect.bounds })}>
+        {({ measureRef }) => (
+          <div ref={measureRef}>
+            <svg className={styles.chart} ref={svg => this.svg = svg}>
+              <g transform={translate}>
+                <GridLines orient="left" ticks="10" scale={this.y} length={-width} />
+                <GridLines orient="bottom" scale={this.x} y={height} length={-height} />
+                <Axis orient="left" ticks="10" scale={this.y} />
+                <Axis orient="bottom" scale={this.x} y={height} />
+                <path d={line(commits)} stroke="black" strokeWidth="1" fill="none" />
+              </g>
+            </svg>
+          </div>
+        )}
       </Measure>
     );
   }
