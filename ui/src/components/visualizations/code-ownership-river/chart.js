@@ -3,47 +3,47 @@
 import React from 'react';
 import Measure from 'react-measure';
 import * as d3 from 'd3';
-import _ from 'lodash';
-
 import styles from './styles.scss';
+import _ from 'lodash';
 import Axis from './Axis.js';
 import GridLines from './GridLines.js';
 
 const parseTime = d3.timeParse('%Y-%m-%dT%H:%M:%S.000Z');
 
 export default class CodeOwnershipRiver extends React.Component {
-  constructor() {
-    super();
+  constructor(props) {
+    super(props);
 
+    const commits = extractCommitData(props);
+    this.elems = {};
     this.state = {
       dimensions: {
+        fullWidth: 0,
+        fullHeight: 0,
         width: 0,
-        height: 0
-      }
+        height: 0,
+        wMargin: 0,
+        hMargin: 0
+      },
+      transform: d3.zoomIdentity,
+      commits
     };
+
+    this.scales = {
+      x: d3.scaleTime().rangeRound([0, 0]),
+      y: d3.scaleLinear().rangeRound([0, 0])
+    };
+
+    this.updateDomain(commits);
   }
 
-  componentDidMount() {
-    this.updateD3();
+  updateZoom(evt) {
+    this.setState({ transform: evt.transform });
   }
 
-  componentDidUpdate() {
-    this.updateD3();
-
-    const zoom = d3.zoom().scaleExtent([1, 10]).on('zoom', () => this.zoom());
-    d3.select(this.svg).call(zoom);
-  }
-
-  updateD3(/* props */) {}
-
-  render() {
-    const commitData = _.get(this.props, 'commits.data.commits', []);
-    const commits = _.map(commitData, function(c, i) {
-      return _.merge({}, c, { date: parseTime(c.date), commitCount: i + 1 });
-    });
-
-    const fullWidth = this.state.dimensions.width;
-    const fullHeight = this.state.dimensions.height;
+  updateDimensions(dimensions) {
+    const fullWidth = dimensions.width;
+    const fullHeight = dimensions.height;
     const wPct = 0.8;
     const hPct = 0.6;
 
@@ -52,32 +52,63 @@ export default class CodeOwnershipRiver extends React.Component {
     const wMargin = (fullWidth - width) / 2;
     const hMargin = (fullHeight - height) / 2;
 
-    const translate = `translate(${wMargin}, ${hMargin})`;
+    this.scales.x.rangeRound([0, width]);
+    this.scales.y.rangeRound([height, 0]);
 
-    const domain = d3.extent(commits, c => c.date);
+    this.setState({
+      dimensions: {
+        fullWidth,
+        fullHeight,
+        width,
+        height,
+        wMargin,
+        hMargin
+      }
+    });
+  }
 
-    this.x = d3.scaleTime().rangeRound([0, width]).domain(domain);
-    this.y = d3
-      .scaleLinear()
-      .rangeRound([height, 0])
-      .domain(d3.extent(commits, c => c.commitCount));
+  updateDomain(commits) {
+    const dateExtent = d3.extent(commits, c => c.date);
+    const countExtent = d3.extent(commits, c => c.commitCount);
+    this.scales.x.domain(dateExtent);
+    this.scales.y.domain(countExtent);
+  }
+
+  componentWillReceiveProps(nextProps) {
+    console.log('willReceiveProps called!');
+    const commits = extractCommitData(nextProps);
+    this.updateDomain(commits);
+
+    console.log('got new commits:', commits.length);
+    this.setState({ commits });
+  }
+
+  render() {
+    console.log('render() called!');
+    console.log('rendering', _.get(this, 'state.commits.length'));
+    const dims = this.state.dimensions;
+
+    const translate = `translate(${dims.wMargin}, ${dims.hMargin})`;
+
+    const x = this.state.transform.rescaleX(this.scales.x);
+    const y = this.state.transform.rescaleY(this.scales.y);
 
     const line = d3
       .line()
-      .x(c => this.x(c.date))
-      .y(c => this.y(c.commitCount))
-      .defined(c => c.date > domain[0] && c.date < domain[1]);
+      .x(c => x(c.date))
+      .y(c => y(c.commitCount))
+      .defined(c => _.inRange(x(c.date), dims.width) && _.inRange(y(c.commitCount), dims.height));
 
     return (
-      <Measure onMeasure={dimensions => this.setState({ dimensions })}>
+      <Measure onMeasure={dims => this.updateDimensions(dims)}>
         <div>
-          <svg className={styles.chart} ref={svg => (this.svg = svg)}>
+          <svg className={styles.chart} ref={svg => this.elems.svg = svg}>
             <g transform={translate}>
-              <GridLines orient="left" ticks="10" scale={this.y} length={-width} />
-              <GridLines orient="bottom" scale={this.x} y={height} length={-height} />
-              <Axis orient="left" ticks="10" scale={this.y} />
-              <Axis orient="bottom" scale={this.x} y={height} />
-              <path d={line(commits)} stroke="black" strokeWidth="1" fill="none" />
+              <GridLines orient="left" scale={y} ticks="10" length={dims.width} />
+              <GridLines orient="bottom" scale={x} y={dims.height} length={dims.height} />
+              <Axis orient="left" ticks="10" scale={y} />
+              <Axis orient="bottom" scale={x} y={dims.height} />
+              <path d={line(this.state.commits)} stroke="black" strokeWidth="1" fill="none" />
             </g>
           </svg>
         </div>
@@ -85,8 +116,17 @@ export default class CodeOwnershipRiver extends React.Component {
     );
   }
 
-  zoom() {
-    // d3.event.transform.rescaleX(this.x);
-    // d3.event.transform.rescaleY(this.y);
+  componentDidUpdate() {
+    const svg = d3.select(this.elems.svg);
+
+    const zoom = d3.zoom().on('zoom', () => this.updateZoom(d3.event));
+    svg.call(zoom);
   }
+}
+
+function extractCommitData(props) {
+  const commitData = _.get(props, 'commits.data.commits', []);
+  return _.map(commitData, function(c, i) {
+    return _.merge({}, c, { date: parseTime(c.date), commitCount: i + 1 });
+  });
 }

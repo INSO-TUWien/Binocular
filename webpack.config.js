@@ -67,7 +67,8 @@ module.exports = {
   plugins: [
     new webpack.ProvidePlugin({
       React: 'react'
-    })
+    }),
+    new webpack.LoaderOptionsPlugin({ debug: true })
   ],
   devServer: {
     historyApiFallback: true,
