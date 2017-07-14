@@ -6,17 +6,19 @@ import * as d3 from 'd3';
 import styles from './styles.scss';
 
 export default class GridLines extends React.Component {
+  constructor() {
+    super();
+  }
+
   comonentDidMount() {
-    this.renderAxis();
+    this.renderGridLines();
   }
 
   componentDidUpdate() {
-    this.renderAxis();
+    this.renderGridLines();
   }
 
-  renderAxis() {
-    const node = this.refs.grid;
-
+  renderGridLines() {
     const methodNames = {
       left: 'axisLeft',
       right: 'axisRight',
@@ -43,7 +45,7 @@ export default class GridLines extends React.Component {
     axis.tickSizeOuter(10);
     axis.tickFormat('');
 
-    d3.select(node).call(axis);
+    d3.select(this.g).call(axis);
   }
 
   render() {
@@ -51,6 +53,6 @@ export default class GridLines extends React.Component {
     const y = this.props.y || 0;
     let translate = `translate(${x}, ${y})`;
 
-    return <g className={styles.grid} ref="grid" transform={translate} />;
+    return <g className={styles.grid} ref={g => this.g = g} transform={translate} />;
   }
 }

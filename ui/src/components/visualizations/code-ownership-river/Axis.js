@@ -4,19 +4,19 @@ import React from 'react';
 import * as d3 from 'd3';
 
 export default class Axis extends React.Component {
+  constructor() {
+    super();
+  }
 
   comonentDidMount() {
-    this.renderAxis();
+    this.updateD3();
   }
 
   componentDidUpdate() {
-    this.renderAxis();
+    this.updateD3();
   }
 
-  renderAxis() {
-
-    const node = this.refs.axis;
-
+  updateD3() {
     const methodNames = {
       left: 'axisLeft',
       right: 'axisRight',
@@ -28,26 +28,30 @@ export default class Axis extends React.Component {
 
     const axis = d3[axisMethodName]();
 
-    if( this.props.ticks ) {
-      axis.ticks( this.props.ticks );
+    if (this.props.ticks) {
+      axis.ticks(this.props.ticks);
     }
 
-    if( this.props.scale ) {
-      axis.scale( this.props.scale );
+    if (this.props.scale) {
+      axis.scale(this.props.scale);
     }
 
+    if (this.props.tickSize) {
+      axis.tickSize(this.props.tickSize);
+    }
 
-    d3.select( node ).call( axis );
+    d3.select(this.g).call(axis);
   }
 
   render() {
-
     const x = this.props.x || 0;
     const y = this.props.y || 0;
     let translate = `translate(${x}, ${y})`;
 
     return (
-      <g className='axis' ref='axis' transform={translate} />
+      <g>
+        <g className="axis" ref={g => (this.g = g)} transform={translate} />
+      </g>
     );
   }
 }

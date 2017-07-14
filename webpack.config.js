@@ -43,7 +43,7 @@ const cssLoaders = [
 ];
 
 module.exports = {
-  devtool: 'source-map',
+  devtool: 'eval-source-map',
   entry: {
     app: ['babel-polyfill', 'react-hot-loader/patch', './ui/src/index']
   },
