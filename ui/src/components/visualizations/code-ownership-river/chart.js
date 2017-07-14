@@ -89,23 +89,34 @@ export default class CodeOwnershipRiver extends React.Component {
     const x = this.state.transform.rescaleX(this.scales.x);
     const y = this.state.transform.rescaleY(this.scales.y);
 
-    const line = d3
-      .line()
-      .x(c => x(c.date))
-      .y(c => y(c.commitCount))
-      .defined(c => _.inRange(x(c.date), dims.width) && _.inRange(y(c.commitCount), dims.height));
+    const line = d3.line().x(c => x(c.date)).y(c => y(c.commitCount));
 
     return (
       <Measure bounds onResize={dims => this.updateDimensions(dims.bounds)}>
         {({ measureRef }) => (
-          <div ref={measureRef}>
+          <div
+            tabIndex="1"
+            ref={measureRef}
+            onKeyPress={e => this.onKeyPress(e)}
+            className={styles.container}>
             <svg className={styles.chart} ref={svg => this.elems.svg = svg}>
+              <defs>
+                <clipPath id="chart">
+                  <rect x="0" y="0" width={dims.width} height={dims.height} />
+                </clipPath>
+              </defs>
               <g transform={translate}>
                 <GridLines orient="left" scale={y} ticks="10" length={dims.width} />
                 <GridLines orient="bottom" scale={x} y={dims.height} length={dims.height} />
                 <Axis orient="left" ticks="10" scale={y} />
                 <Axis orient="bottom" scale={x} y={dims.height} />
-                <path d={line(this.state.commits)} stroke="black" strokeWidth="1" fill="none" />
+                <path
+                  clipPath="url(#chart)"
+                  d={line(this.state.commits)}
+                  stroke="black"
+                  strokeWidth="1"
+                  fill="none"
+                />
               </g>
             </svg>
           </div>
@@ -114,10 +125,26 @@ export default class CodeOwnershipRiver extends React.Component {
     );
   }
 
+  onKeyPress(e) {
+    if (e.key === '=') {
+      this.resetZoom();
+    }
+  }
+
+  resetZoom() {
+    this.setState({
+      transform: d3.zoomIdentity
+    });
+  }
+
   componentDidUpdate() {
     const svg = d3.select(this.elems.svg);
 
-    const zoom = d3.zoom().on('zoom', () => this.updateZoom(d3.event));
+    const zoom = d3
+      .zoom()
+      .translateExtent([[0, 0], [Infinity, Infinity]])
+      .scaleExtent([0, Infinity])
+      .on('zoom', () => this.updateZoom(d3.event));
     svg.call(zoom);
   }
 }
