@@ -4,9 +4,36 @@
   outline: none;
 }
 
-.svg {
+svg.chart {
   width: 100%;
   height: 100%;
+
+  g.commitCount {
+    path {
+      stroke: black;
+    }
+
+    $commit-stroke: $green;
+    $commit-fill-hover: lighten( $commit-stroke, 30% ); 
+    $commit-fill: transparentize($commit-fill-hover, 0.5);
+
+
+    .commit {
+
+      circle {
+        stroke-width: 2;
+        stroke: $commit-stroke;
+        fill: $commit-fill;
+      }
+      cursor: hand;
+    }
+
+    .commit:hover {
+      circle {
+        fill: $commit-fill-hover;
+      }
+    }
+  }
 }
 
 .grid line {

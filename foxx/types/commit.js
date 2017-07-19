@@ -18,9 +18,18 @@ module.exports = new gql.GraphQLObjectType({
         type: new gql.GraphQLNonNull(gql.GraphQLString),
         resolve: e => e._key
       },
+      shortSha: {
+        type: new gql.GraphQLNonNull(gql.GraphQLString),
+        resolve: e => e._key.substring(0, 7)
+      },
       message: {
         type: gql.GraphQLString,
         description: 'The commit message'
+      },
+      messageHeader: {
+        type: gql.GraphQLString,
+        description: 'Header of the commit message',
+        resolve: c => c.message.split('\n')[0]
       },
       signature: {
         type: gql.GraphQLString,

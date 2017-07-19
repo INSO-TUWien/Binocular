@@ -32,7 +32,7 @@ const store = createStore(
       isShown: false
     }
   },
-  applyMiddleware(socketIo, saga /*, logger*/)
+  applyMiddleware(socketIo, saga, logger)
 );
 
 saga.run(root);

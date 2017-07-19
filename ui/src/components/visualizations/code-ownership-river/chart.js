@@ -3,10 +3,13 @@
 import React from 'react';
 import Measure from 'react-measure';
 import * as d3 from 'd3';
+import cx from 'classnames';
+
 import styles from './styles.scss';
 import _ from 'lodash';
 import Axis from './Axis.js';
 import GridLines from './GridLines.js';
+import CommitMarker from './CommitMarker.js';
 
 const parseTime = d3.timeParse('%Y-%m-%dT%H:%M:%S.000Z');
 
@@ -90,7 +93,27 @@ export default class CodeOwnershipRiver extends React.Component {
     const y = this.state.transform.rescaleY(this.scales.y);
 
     const line = d3.line().x(c => x(c.date)).y(c => y(c.commitCount));
-    const today = new Date();
+
+    const fullDomain = this.scales.x.domain();
+    const visibleDomain = x.domain();
+
+    const fullSpan = fullDomain[1].getTime() - fullDomain[0].getTime();
+    const visibleSpan = visibleDomain[1].getTime() - visibleDomain[0].getTime();
+
+    const commitsPerMillisecond = this.state.commits.length / fullSpan;
+    const estimatedVisibleCommitCount = commitsPerMillisecond * visibleSpan;
+
+    const commitMarkers = this.state.commits.map(c => {
+      return (
+        <CommitMarker
+          key={c.sha}
+          commit={c}
+          x={x(c.date)}
+          y={y(c.commitCount)}
+          onClick={() => this.props.onCommitClick(c)}
+        />
+      );
+    });
 
     return (
       <Measure bounds onResize={dims => this.updateDimensions(dims.bounds)}>
@@ -121,13 +144,22 @@ export default class CodeOwnershipRiver extends React.Component {
                     Time
                   </text>
                 </g>
-                <path
-                  clipPath="url(#chart)"
-                  d={line(this.state.commits)}
-                  stroke="black"
-                  strokeWidth="1"
-                  fill="none"
-                />
+                <g>
+                  <Axis orient="left" ticks="10" scale={y} />
+                  <text x={-dims.height / 2} y={-50} textAnchor="middle" transform="rotate(-90)">
+                    Number of Commits
+                  </text>
+                </g>
+                <g>
+                  <Axis orient="bottom" scale={x} y={dims.height} />
+                  <text x={dims.width / 2} y={dims.height + 50} textAnchor="middle">
+                    Time
+                  </text>
+                </g>
+                <g clipPath="url(#chart)" className={cx(styles.commitCount)}>
+                  <path d={line(this.state.commits)} fill="none" />
+                  {estimatedVisibleCommitCount < 30 && commitMarkers}
+                </g>
               </g>
             </svg>
           </div>
@@ -137,7 +169,7 @@ export default class CodeOwnershipRiver extends React.Component {
   }
 
   onKeyPress(e) {
-    if (e.key === '=') {
+    if (e.key === '=' || e.key === '0') {
       this.resetZoom();
     }
   }
@@ -151,14 +183,6 @@ export default class CodeOwnershipRiver extends React.Component {
   componentDidUpdate() {
     const svg = d3.select(this.elems.svg);
 
-    const x = this.state.transform.rescaleX(this.scales.x);
-    const y = this.state.transform.rescaleY(this.scales.y);
-
-    const yMax = this.scales.y.domain()[1];
-    console.log('raw max:', yMax);
-    console.log('normal scaled max:', this.scales.y(yMax));
-    console.log('zoom-scaled max:', y(yMax));
-
     const zoom = d3
       .zoom()
       .translateExtent([[0, 0], [Infinity, 1000]])
@@ -171,6 +195,6 @@ export default class CodeOwnershipRiver extends React.Component {
 function extractCommitData(props) {
   const commitData = _.get(props, 'commits.data.commits', []);
   return _.map(commitData, function(c, i) {
-    return _.merge({}, c, { date: parseTime(c.date), commitCount: i + 1 });
+    return _.merge({}, c, { sha: c.sha, date: parseTime(c.date), commitCount: i + 1 });
   });
 }

@@ -5,7 +5,7 @@ import fetch from 'isomorphic-fetch';
 import { endpointUrl } from './utils.js';
 import { createAction } from 'redux-actions';
 import { reachGraphQL } from 'react-reach';
-import { all, put, select, takeEvery } from 'redux-saga/effects';
+import { all, put, select, takeEvery, call, fork } from 'redux-saga/effects';
 
 export const Visualizations = ['ISSUE_IMPACT', 'CODE_OWNERSHIP_RIVER', 'HOTSPOT_DIALS'];
 
@@ -20,11 +20,22 @@ export const receiveCommitsError = createAction('RECEIVE_COMMITS_ERROR');
 export const removeNotification = createAction('REMOVE_NOTIFICATION');
 export const addNotification = createAction('ADD_NOTIFICATION');
 export const switchConfigTab = createAction('SWITCH_CONFIG_TAB', tab => tab);
+export const showCommit = createAction('SHOW_COMMIT');
 
 export function* root() {
   yield* fetchConfig();
   yield* fetchCommits();
-  yield* watchMessages();
+  yield fork(watchShowCommits);
+  yield fork(watchMessages);
+}
+
+function* watchShowCommits() {
+  yield takeEvery('SHOW_COMMIT', openCommit);
+}
+
+function* openCommit(a) {
+  const { config } = yield select();
+  window.open(`${config.data.projectUrl}/commit/${a.payload.sha}`);
 }
 
 export function* watchMessages() {
@@ -37,8 +48,10 @@ export const fetchCommits = fetchFactory(
     return yield reachGraphQL(
       `http://${config.data.arango.host}:${config.data.arango.port}/_db/pupil-${config.data.repoName}/pupil-ql`,
       `{
-      commits {
-        date
+      commits {,
+        sha,
+        date,
+        messageHeader
       }
     }`,
       {}
