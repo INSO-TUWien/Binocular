@@ -17,7 +17,7 @@ const queryType = new gql.GraphQLObjectType({
       commits: {
         type: new gql.GraphQLList(require('./types/commit.js')),
         args: {},
-        resolve(root, args) {
+        resolve(/*root, args*/) {
           return db
             ._query(
               aql`FOR commit
@@ -56,7 +56,7 @@ const queryType = new gql.GraphQLObjectType({
       stakeholders: {
         type: new gql.GraphQLList(require('./types/stakeholder.js')),
         args: {},
-        resolve(root, args) {
+        resolve(/*root, args*/) {
           return db
             ._query(
               aql`FOR stakeholder
@@ -70,7 +70,7 @@ const queryType = new gql.GraphQLObjectType({
       issues: {
         type: new gql.GraphQLList(require('./types/issue.js')),
         args: {},
-        resolve(root, args) {
+        resolve(/*root, args*/) {
           return db
             ._query(
               aql`FOR issue

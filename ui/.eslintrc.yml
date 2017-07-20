@@ -1,26 +1,23 @@
 env:
   es6: true
-  browser: true
-extends: 'eslint:recommended'
+  node: true
+extends:
+  - eslint:recommended
+  - prettier
 parserOptions:
+  sourceType: module
   ecmaFeatures:
     experimentalObjectRestSpread: true
     jsx: true
-  sourceType: module
-plugins:
-  - react
 rules:
+  prettier/prettier:
+    - error
+    - singleQuote: true
+      printWidth: 100
   no-console: off
-  indent:
-    - error
-    - 2
-  linebreak-style:
-    - error
-    - unix
   quotes:
     - error
     - single
-  semi:
-    - error
-    - always
-  react/jsx-uses-vars: 1
+    - avoidEscape: true
+plugins:
+  - prettier
