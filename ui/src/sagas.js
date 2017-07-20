@@ -45,8 +45,7 @@ export const fetchCommits = fetchFactory(
   function*() {
     const { config } = yield select();
     return yield reachGraphQL(
-      `http://${config.data.arango.host}:${config.data.arango.port}/_db/pupil-${config.data
-        .repoName}/pupil-ql`,
+      `${config.data.arango.webUrl}_db/pupil-${config.data.repoName}/pupil-ql`,
       `{
       commits {,
         sha,

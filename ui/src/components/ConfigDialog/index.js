@@ -14,7 +14,7 @@ const mapStateToProps = (state /*, ownProps*/) => {
     initialValues: {
       gitlabUrl: _.get(state, 'config.data.gitlab.url'),
       gitlabToken: _.get(state, 'config.data.gitlab.token'),
-      arangoHost: _.get(state, 'config.data.arango.host', 'asdf'),
+      arangoHost: _.get(state, 'config.data.arango.host'),
       arangoPort: _.get(state, 'config.data.arango.port'),
       arangoUser: _.get(state, 'config.data.arango.user'),
       arangoPassword: _.get(state, 'config.data.arango.password')

@@ -16,7 +16,8 @@
     "dev": "webpack-dev-server -d --content-base ui/ --inline --hot & npm run dev-server --",
     "dev-server": "nodemon --config .nodemonrc ./pupil.js --no-ui",
     "build": "webpack",
-    "prepublish": "npm run build"
+    "prepublish": "npm run build",
+    "dockerize": "whalify generate-installer && ./node_modules/.bin/whalify build"
   },
   "keywords": [
     "git"
@@ -129,6 +130,7 @@
     "nodemon": "^1.11.0",
     "prettier": "^1.5.3",
     "react-hot-loader": "^3.0.0-beta.7",
-    "webpack-dev-server": "^2.5.1"
+    "webpack-dev-server": "^2.5.1",
+    "whalify": "0.0.9"
   }
 }
