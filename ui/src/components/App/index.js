@@ -6,7 +6,7 @@ import ConfigDialog from '../ConfigDialog';
 import ProgressBar from '../ProgressBar';
 import CodeOwnershipRiver from '../visualizations/code-ownership-river';
 
-const App = () => (
+const App = () =>
   <div className={styles.app}>
     <Sidebar />
     <div className={styles.chartPanel}>
@@ -15,8 +15,7 @@ const App = () => (
     </div>
     <ConfigButton />
     <ConfigDialog />
-  </div>
-);
+  </div>;
 
 App.propTypes = {
   children: PropTypes.object

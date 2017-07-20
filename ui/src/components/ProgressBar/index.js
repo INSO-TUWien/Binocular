@@ -4,15 +4,14 @@ import { connect } from 'react-redux';
 
 import ProgressBar from './ProgressBar.js';
 
-const mapStateToProps = (state/*, ownProps*/) => {
+const mapStateToProps = (state /*, ownProps*/) => {
   return {
     progress: state.progress
   };
 };
 
 const mapDispatchToProps = (/*dispatch, ownProps*/) => {
-  return {
-  };
+  return {};
 };
 
-export default connect( mapStateToProps, mapDispatchToProps )( ProgressBar );
+export default connect(mapStateToProps, mapDispatchToProps)(ProgressBar);

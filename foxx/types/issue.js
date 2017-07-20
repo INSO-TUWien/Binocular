@@ -1,13 +1,13 @@
 'use strict';
 
 const gql = require('graphql-sync');
-const blameHunkType = require('./blameHunk.js');
 const arangodb = require('@arangodb');
 const db = arangodb.db;
 const aql = arangodb.aql;
-const commitsToBlameHunks = db._collection('commits-blameHunks');
-const blameHunksToFiles = db._collection('blameHunks-files');
-const commitsToStakeholders = db._collection('commits-stakeholders');
+// const blameHunkType = require('./blameHunk.js');
+// const commitsToBlameHunks = db._collection('commits-blameHunks');
+// const blameHunksToFiles = db._collection('blameHunks-files');
+// const commitsToStakeholders = db._collection('commits-stakeholders');
 const issuesToStakeholders = db._collection('issues-stakeholders');
 
 module.exports = new gql.GraphQLObjectType({
@@ -62,7 +62,7 @@ module.exports = new gql.GraphQLObjectType({
       creator: {
         type: require('./stakeholder.js'),
         description: 'The creator of this issue',
-        resolve(issue, args) {
+        resolve(issue /*, args*/) {
           return db
             ._query(
               aql`

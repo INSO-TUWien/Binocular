@@ -31,7 +31,7 @@ module.exports = new gql.GraphQLObjectType({
         type: fileType,
         description: 'The hunks in this commit',
         args: {},
-        resolve(hunk, args) {
+        resolve(hunk /*, args*/) {
           return db
             ._query(
               aql`

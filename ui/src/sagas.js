@@ -1,11 +1,10 @@
 'use strict';
 
-import Promise from 'bluebird';
 import fetch from 'isomorphic-fetch';
 import { endpointUrl } from './utils.js';
 import { createAction } from 'redux-actions';
 import { reachGraphQL } from 'react-reach';
-import { all, put, select, takeEvery, call, fork } from 'redux-saga/effects';
+import { put, select, takeEvery, fork } from 'redux-saga/effects';
 
 export const Visualizations = ['ISSUE_IMPACT', 'CODE_OWNERSHIP_RIVER', 'HOTSPOT_DIALS'];
 
@@ -46,7 +45,8 @@ export const fetchCommits = fetchFactory(
   function*() {
     const { config } = yield select();
     return yield reachGraphQL(
-      `http://${config.data.arango.host}:${config.data.arango.port}/_db/pupil-${config.data.repoName}/pupil-ql`,
+      `http://${config.data.arango.host}:${config.data.arango.port}/_db/pupil-${config.data
+        .repoName}/pupil-ql`,
       `{
       commits {,
         sha,

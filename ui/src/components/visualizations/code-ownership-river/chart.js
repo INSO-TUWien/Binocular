@@ -117,13 +117,13 @@ export default class CodeOwnershipRiver extends React.Component {
 
     return (
       <Measure bounds onResize={dims => this.updateDimensions(dims.bounds)}>
-        {({ measureRef }) => (
+        {({ measureRef }) =>
           <div
             tabIndex="1"
             ref={measureRef}
             onKeyPress={e => this.onKeyPress(e)}
             className={styles.chartContainer}>
-            <svg className={styles.chart} ref={svg => this.elems.svg = svg}>
+            <svg className={styles.chart} ref={svg => (this.elems.svg = svg)}>
               <defs>
                 <clipPath id="chart">
                   <rect x="0" y="0" width={dims.width} height={dims.height} />
@@ -162,8 +162,7 @@ export default class CodeOwnershipRiver extends React.Component {
                 </g>
               </g>
             </svg>
-          </div>
-        )}
+          </div>}
       </Measure>
     );
   }

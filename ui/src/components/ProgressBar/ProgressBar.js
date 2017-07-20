@@ -49,8 +49,12 @@ const ProgressBar = props => {
         </text>
         <g transform="translate(21 19)">
           <text className={cx(styles.text, styles.details)} x="0" y="0">
-            <tspan x="0">{commits.processed}/{commits.total} Commits</tspan>
-            <tspan x="0" dy="1.5em">{issues.processed}/{issues.total} Issues</tspan>
+            <tspan x="0">
+              {commits.processed}/{commits.total} Commits
+            </tspan>
+            <tspan x="0" dy="1.5em">
+              {issues.processed}/{issues.total} Issues
+            </tspan>
           </text>
         </g>
       </svg>

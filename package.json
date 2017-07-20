@@ -6,13 +6,13 @@
   "scripts": {
     "test": "npm run test-server && npm run test-ui",
     "test-server": "mocha --reporter spec test",
-    "test-ui": "jest --config .jestrc",
+    "test-ui": "jest --config .jestrc.json",
     "coverage": "npm run coverage-server && npm run coverage-ui && npm run collect-coverage",
     "coverage-server": "istanbul cover --dir coverage/server ./node_modules/.bin/_mocha -- --reporter spec",
-    "coverage-ui": "jest --config .jestrc-coverage",
+    "coverage-ui": "jest --config .jestrc-coverage.json",
     "collect-coverage": "./scripts/collect-coverage.js",
     "eslint": "eslint .",
-    "check": "npm run jshint && npm run jscs",
+    "check": "npm run eslint",
     "dev": "webpack-dev-server -d --content-base ui/ --inline --hot & npm run dev-server --",
     "dev-server": "nodemon --config .nodemonrc ./pupil.js --no-ui",
     "build": "webpack",
@@ -121,10 +121,13 @@
   },
   "devDependencies": {
     "eslint": "^3.19.0",
+    "eslint-config-prettier": "^2.3.0",
+    "eslint-plugin-prettier": "^2.1.2",
     "eslint-plugin-react": "^7.1.0",
     "istanbul": "^0.4.5",
     "mocha": "^3.1.2",
     "nodemon": "^1.11.0",
+    "prettier": "^1.5.3",
     "react-hot-loader": "^3.0.0-beta.7",
     "webpack-dev-server": "^2.5.1"
   }

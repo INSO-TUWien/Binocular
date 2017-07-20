@@ -23,7 +23,7 @@ module.exports = new gql.GraphQLObjectType({
       commits: {
         type: new gql.GraphQLList(require('./commit.js')),
         description: 'The commits touching this file',
-        resolve(file, args) {
+        resolve(file /*, args*/) {
           return db
             ._query(
               aql`FOR hunk

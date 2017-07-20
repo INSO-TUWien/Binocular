@@ -2,7 +2,7 @@ import PropTypes from 'prop-types';
 import Redbox from 'redbox-react';
 
 const customErrorReporter = ({ error }) => {
-  console.error( error );
+  console.error(error);
   return <Redbox error={error} />;
 };
 
