@@ -34,7 +34,7 @@ module.exports = new gql.GraphQLObjectType({
       commits: {
         type: new gql.GraphQLList(require('./commit.js')),
         description: 'The commits made by this stakeholder',
-        resolve(stakeholder, args) {
+        resolve(stakeholder /*, args*/) {
           return db
             ._query(
               aql`FOR commit

@@ -2,6 +2,10 @@
 
 import { handleAction } from 'redux-actions';
 
-export default handleAction( 'SWITCH_VISUALIZATION', function( state, action ) {
-  return action.payload;
-}, {} );
+export default handleAction(
+  'SWITCH_VISUALIZATION',
+  function(state, action) {
+    return action.payload;
+  },
+  {}
+);

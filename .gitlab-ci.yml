@@ -1,14 +1,18 @@
-image: theromanempire/pupil-environment
+image: node:8
+
+services:
+ - name: arangodb/arangodb:3.1.25
+   alias: arango
 
 before_script:
- - yarn
+ - npm install
 
 test:
   stage: test
   script:
-    yarn run coverage
+    npm run coverage
 
 lint:
   stage: test
   script:
-    yarn run check
+    npm run check

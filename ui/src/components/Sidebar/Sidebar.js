@@ -13,9 +13,7 @@ const Sidebar = props => {
 
   return (
     <nav className={cx('panel', styles.sidebar)}>
-      <p className="panel-heading">
-        Visualizations
-      </p>
+      <p className="panel-heading">Visualizations</p>
       <p className="panel-tabs">
         {links}
       </p>

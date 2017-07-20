@@ -15,9 +15,7 @@ const ConfigDialog = props => {
       <div className="modal-background" onClick={props.onCancel} />
       <div className="modal-card">
         <div className="modal-card-head">
-          <p className="modal-card-title">
-            Configuration
-          </p>
+          <p className="modal-card-title">Configuration</p>
           <button className="delete" onClick={props.onCancel} />
         </div>
         <section className="modal-card-body">
@@ -29,13 +27,17 @@ const ConfigDialog = props => {
             <ul>
               <li className={cx({ 'is-active': props.activeTab === 'gitlab' })}>
                 <a onClick={() => props.onSwitchTab('gitlab')}>
-                  <span className="icon is-small"><i className="fa fa-gitlab" /></span>
+                  <span className="icon is-small">
+                    <i className="fa fa-gitlab" />
+                  </span>
                   <span>GitLab</span>
                 </a>
               </li>
               <li className={cx({ 'is-active': props.activeTab === 'arango' })}>
                 <a onClick={() => props.onSwitchTab('arango')}>
-                  <span className="icon is-small"><i className="fa fa-database" /></span>
+                  <span className="icon is-small">
+                    <i className="fa fa-database" />
+                  </span>
                   <span>ArangoDB</span>
                 </a>
               </li>
@@ -100,8 +102,12 @@ const ConfigDialog = props => {
             </div>}
         </section>
         <footer className="modal-card-foot">
-          <button type="submit" className="button is-primary">OK</button>
-          <a href="#" className="button" onClick={props.onCancel}>Cancel</a>
+          <button type="submit" className="button is-primary">
+            OK
+          </button>
+          <a href="#" className="button" onClick={props.onCancel}>
+            Cancel
+          </a>
         </footer>
       </div>
     </form>

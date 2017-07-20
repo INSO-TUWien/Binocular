@@ -1,6 +1,6 @@
 env:
   es6: true
-  node: true
+  browser: true
 extends:
   - eslint:recommended
   - prettier
@@ -14,10 +14,13 @@ rules:
     - error
     - singleQuote: true
       printWidth: 100
+      jsxBracketSameLine: true
   no-console: off
   quotes:
     - error
     - single
     - avoidEscape: true
+  react/jsx-uses-vars: 1
 plugins:
   - prettier
+  - react

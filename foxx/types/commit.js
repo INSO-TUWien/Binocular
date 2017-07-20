@@ -43,7 +43,7 @@ module.exports = new gql.GraphQLObjectType({
         type: new gql.GraphQLList(blameHunkType),
         description: 'The hunks in this commit',
         args: {},
-        resolve(commit, args) {
+        resolve(commit /*, args*/) {
           return db
             ._query(
               aql`FOR hunk
@@ -59,7 +59,7 @@ module.exports = new gql.GraphQLObjectType({
         type: new gql.GraphQLList(require('./file.js')),
         description: 'The files touched by this commit',
         args: {},
-        resolve(commit, args) {
+        resolve(commit /*, args*/) {
           return db
             ._query(
               aql`FOR hunk
@@ -77,7 +77,7 @@ module.exports = new gql.GraphQLObjectType({
       stakeholder: {
         type: require('./stakeholder.js'),
         description: 'The author of this commit',
-        resolve(commit, args) {
+        resolve(commit /*, args*/) {
           return db
             ._query(
               aql`

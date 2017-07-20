@@ -5,11 +5,11 @@ import cx from 'classnames';
 import Labeled from './Labeled.js';
 
 export default function FormControl(props) {
-  const { input, label, type, meta, icon, placeholder } = props;
+  const { input, label, type, meta, placeholder } = props;
 
-  const fieldClasses = cx( 'field', {
+  const fieldClasses = cx('field', {
     'has-addons': !!props.children
-  } );
+  });
 
   const pClasses = cx('control', {
     'is-expanded': !!props.children
@@ -24,7 +24,10 @@ export default function FormControl(props) {
           placeholder={placeholder}
           {...input}
         />
-        {!!meta.error && <span className="help is-danger">{meta.error}</span>}
+        {!!meta.error &&
+          <span className="help is-danger">
+            {meta.error}
+          </span>}
       </p>
       {props.children}
     </div>

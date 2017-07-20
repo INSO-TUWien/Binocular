@@ -3,7 +3,7 @@
 import { connect } from 'react-redux';
 import Sidebar from './Sidebar.js';
 
-const mapStateToProps = (state/*, ownProps*/) => {
+const mapStateToProps = (state /*, ownProps*/) => {
   return {
     visualizations: state.visualizations
   };
@@ -13,4 +13,4 @@ const mapDispatchToProps = (/*dispatch, ownProps*/) => {
   return {};
 };
 
-export default connect( mapStateToProps, mapDispatchToProps )( Sidebar );
+export default connect(mapStateToProps, mapDispatchToProps)(Sidebar);
