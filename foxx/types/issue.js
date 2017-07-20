@@ -59,6 +59,10 @@ module.exports = new gql.GraphQLObjectType({
         type: gql.GraphQLString,
         description: 'Web URL of the issue'
       },
+      created_at: {
+        type: gql.GraphQLString,
+        description: 'Creation date of the issue'
+      },
       creator: {
         type: require('./stakeholder.js'),
         description: 'The creator of this issue',

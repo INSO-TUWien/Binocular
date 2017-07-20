@@ -30,6 +30,12 @@ const store = createStore(
       { id: 'CODE_OWNERSHIP_RIVER', label: 'Code ownership river' },
       { id: 'HOTSPOT_DIALS', label: 'Hotspot Dials' }
     ],
+    codeOwnershipData: {
+      data: {
+        commits: [],
+        issues: []
+      }
+    },
     config: {
       isFetching: false,
       lastFetched: null,

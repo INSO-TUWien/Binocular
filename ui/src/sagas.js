@@ -13,9 +13,9 @@ export const showConfig = createAction('SHOW_CONFIGURATION');
 export const hideConfig = createAction('HIDE_CONFIGURATION');
 export const requestConfig = createAction('REQUEST_CONFIGURATION');
 export const receiveConfig = timestampedActionFactory('RECEIVE_CONFIGURATION');
-export const requestCommits = createAction('REQUEST_COMMITS');
-export const receiveCommits = timestampedActionFactory('RECEIVE_COMMITS');
-export const receiveCommitsError = createAction('RECEIVE_COMMITS_ERROR');
+export const requestCommits = createAction('REQUEST_CODE_OWNERSHIP_DATA');
+export const receiveCommits = timestampedActionFactory('RECEIVE_CODE_OWNERSHIP_DATA');
+export const receiveCommitsError = createAction('RECEIVE_CODE_OWNERSHIP_DATA_ERROR');
 export const removeNotification = createAction('REMOVE_NOTIFICATION');
 export const addNotification = createAction('ADD_NOTIFICATION');
 export const switchConfigTab = createAction('SWITCH_CONFIG_TAB', tab => tab);
@@ -54,12 +54,18 @@ export const fetchCommits = fetchFactory(
     return yield reachGraphQL(
       `${config.data.arango.webUrl}_db/pupil-${config.data.repoName}/pupil-ql`,
       `{
-      commits {,
-        sha,
-        date,
-        messageHeader
-      }
-    }`,
+         commits {,
+           sha,
+           date,
+           messageHeader
+         },
+         issues {
+           iid,
+           title,
+           created_at,
+           web_url
+         }
+      }`,
       {}
     );
   },

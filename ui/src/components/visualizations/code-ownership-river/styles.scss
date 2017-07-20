@@ -11,11 +11,12 @@ svg.chart {
   g.commitCount {
     path {
       stroke: black;
+      fill: transparentize($blue,0.5);
     }
 
     $commit-stroke: $green;
     $commit-fill-hover: lighten( $commit-stroke, 30% ); 
-    $commit-fill: transparentize($commit-fill-hover, 0.5);
+    $commit-fill: transparentize($commit-fill-hover, 0.75);
 
 
     .commit {
@@ -32,6 +33,13 @@ svg.chart {
       circle {
         fill: $commit-fill-hover;
       }
+    }
+  }
+
+  g.issueCount {
+    path {
+      stroke: black;
+      fill: transparentize($turquoise, 0.75);
     }
   }
 }

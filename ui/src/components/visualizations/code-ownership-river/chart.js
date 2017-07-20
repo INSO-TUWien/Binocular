@@ -11,13 +11,14 @@ import Axis from './Axis.js';
 import GridLines from './GridLines.js';
 import CommitMarker from './CommitMarker.js';
 
-const parseTime = d3.timeParse('%Y-%m-%dT%H:%M:%S.000Z');
+const parseTime = d3.timeParse('%Y-%m-%dT%H:%M:%S.%LZ');
 
 export default class CodeOwnershipRiver extends React.Component {
   constructor(props) {
     super(props);
 
     const commits = extractCommitData(props);
+    const issues = extractIssueData(props);
     this.elems = {};
     this.state = {
       dimensions: {
@@ -29,7 +30,8 @@ export default class CodeOwnershipRiver extends React.Component {
         hMargin: 0
       },
       transform: d3.zoomIdentity,
-      commits
+      commits,
+      issues
     };
 
     this.scales = {
@@ -37,7 +39,7 @@ export default class CodeOwnershipRiver extends React.Component {
       y: d3.scaleLinear().rangeRound([0, 0])
     };
 
-    this.updateDomain(commits);
+    this.updateDomain(commits, issues);
   }
 
   updateZoom(evt) {
@@ -70,18 +72,28 @@ export default class CodeOwnershipRiver extends React.Component {
     });
   }
 
-  updateDomain(commits) {
-    const dateExtent = d3.extent(commits, c => c.date);
-    const countExtent = d3.extent(commits, c => c.commitCount);
-    this.scales.x.domain(dateExtent);
-    this.scales.y.domain(countExtent);
+  updateDomain(commits, issues) {
+    const commitDateExtent = d3.extent(commits, c => c.date);
+    const commitCountExtent = d3.extent(commits, c => c.count);
+    const issueDateExtent = d3.extent(issues, t => t.date);
+    const issueCountExtent = d3.extent(issues, t => t.count);
+
+    this.scales.x.domain([
+      Math.min(commitDateExtent[0], issueDateExtent[0]),
+      Math.max(commitDateExtent[1], issueDateExtent[1])
+    ]);
+    this.scales.y.domain([
+      Math.min(commitCountExtent[0], issueCountExtent[0]),
+      Math.max(commitCountExtent[1], issueCountExtent[1])
+    ]);
   }
 
   componentWillReceiveProps(nextProps) {
     const commits = extractCommitData(nextProps);
-    this.updateDomain(commits);
+    const issues = extractIssueData(nextProps);
+    this.updateDomain(commits, issues);
 
-    this.setState({ commits });
+    this.setState({ commits, issues });
   }
 
   render() {
@@ -92,7 +104,7 @@ export default class CodeOwnershipRiver extends React.Component {
     const x = this.state.transform.rescaleX(this.scales.x);
     const y = this.state.transform.rescaleY(this.scales.y);
 
-    const line = d3.line().x(c => x(c.date)).y(c => y(c.commitCount));
+    const line = d3.line().x(d => x(d.date)).y(d => y(d.count));
 
     const fullDomain = this.scales.x.domain();
     const visibleDomain = x.domain();
@@ -109,11 +121,17 @@ export default class CodeOwnershipRiver extends React.Component {
           key={c.sha}
           commit={c}
           x={x(c.date)}
-          y={y(c.commitCount)}
+          y={y(c.count)}
           onClick={() => this.props.onCommitClick(c)}
         />
       );
     });
+
+    const surround = data => [
+      { count: 0, date: this.scales.x.domain()[0] },
+      ...data,
+      { count: 0, date: this.scales.x.domain()[1] }
+    ];
 
     return (
       <Measure bounds onResize={dims => this.updateDimensions(dims.bounds)}>
@@ -135,19 +153,7 @@ export default class CodeOwnershipRiver extends React.Component {
                 <g>
                   <Axis orient="left" ticks="10" scale={y} />
                   <text x={-dims.height / 2} y={-50} textAnchor="middle" transform="rotate(-90)">
-                    Number of Commits
-                  </text>
-                </g>
-                <g>
-                  <Axis orient="bottom" scale={x} y={dims.height} />
-                  <text x={dims.width / 2} y={dims.height + 50} textAnchor="middle">
-                    Time
-                  </text>
-                </g>
-                <g>
-                  <Axis orient="left" ticks="10" scale={y} />
-                  <text x={-dims.height / 2} y={-50} textAnchor="middle" transform="rotate(-90)">
-                    Number of Commits
+                    Amount
                   </text>
                 </g>
                 <g>
@@ -157,8 +163,11 @@ export default class CodeOwnershipRiver extends React.Component {
                   </text>
                 </g>
                 <g clipPath="url(#chart)" className={cx(styles.commitCount)}>
-                  <path d={line(this.state.commits)} fill="none" />
+                  <path d={line(surround(this.state.commits))} />
                   {estimatedVisibleCommitCount < 30 && commitMarkers}
+                </g>
+                <g clipPath="url(#chart)" className={cx(styles.issueCount)}>
+                  <path d={line(surround(this.state.issues))} />
                 </g>
               </g>
             </svg>
@@ -192,8 +201,15 @@ export default class CodeOwnershipRiver extends React.Component {
 }
 
 function extractCommitData(props) {
-  const commitData = _.get(props, 'commits.data.commits', []);
+  const commitData = _.get(props, 'commits', []);
   return _.map(commitData, function(c, i) {
-    return _.merge({}, c, { sha: c.sha, date: parseTime(c.date), commitCount: i + 1 });
+    return _.merge({}, c, { sha: c.sha, date: parseTime(c.date), count: i + 1 });
+  });
+}
+
+function extractIssueData(props) {
+  const issueData = _.get(props, 'issues', []);
+  return _.map(issueData, function(t, i) {
+    return _.merge({}, t, { id: t.iid, date: parseTime(t.created_at), count: i + 1 });
   });
 }

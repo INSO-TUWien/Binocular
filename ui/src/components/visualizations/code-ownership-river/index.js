@@ -6,8 +6,10 @@ import Chart from './chart.js';
 import { showCommit } from '../../../sagas.js';
 
 const mapStateToProps = (state /*, ownProps*/) => {
+  console.log(state);
   return {
-    commits: state.commits
+    commits: state.codeOwnershipData.data.commits,
+    issues: state.codeOwnershipData.data.issues
   };
 };
 

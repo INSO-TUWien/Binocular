@@ -7,7 +7,7 @@ let nextId = 0;
 
 export default handleActions(
   {
-    RECEIVE_COMMITS_ERROR: (notifications, action) => {
+    RECEIVE_CODE_OWNERSHIP_DATA_ERROR: (notifications, action) => {
       console.error(action.payload);
       return [
         notification('danger', `Error receiving commits: ${action.payload.message}`),

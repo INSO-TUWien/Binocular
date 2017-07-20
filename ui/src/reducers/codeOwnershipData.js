@@ -5,8 +5,8 @@ import _ from 'lodash';
 
 export default handleActions(
   {
-    REQUEST_COMMITS: state => _.assign({}, state, { isFetching: true }),
-    RECEIVE_COMMITS: (state, action) =>
+    REQUEST_CODE_OWNERSHIP_DATA: state => _.assign({}, state, { isFetching: true }),
+    RECEIVE_CODE_OWNERSHIP_DATA: (state, action) =>
       _.merge({}, state, {
         data: action.payload,
         isFetching: false,

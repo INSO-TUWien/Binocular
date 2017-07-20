@@ -6,7 +6,7 @@ import { handleAction } from 'redux-actions';
 import activeVisualization from './activeVisualization.js';
 import visualizations from './visualizations.js';
 import config from './config.js';
-import commits from './commits.js';
+import codeOwnershipData from './codeOwnershipData.js';
 import notifications from './notifications.js';
 import progress from './progress.js';
 import activeConfigTab from './activeConfigTab.js';
@@ -15,7 +15,7 @@ const app = combineReducers({
   activeVisualization,
   visualizations,
   config,
-  commits,
+  codeOwnershipData,
   notifications,
   progress,
   activeConfigTab,
