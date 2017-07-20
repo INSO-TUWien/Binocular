@@ -4,7 +4,7 @@ import fetch from 'isomorphic-fetch';
 import { endpointUrl } from './utils.js';
 import { createAction } from 'redux-actions';
 import { reachGraphQL } from 'react-reach';
-import { put, select, takeEvery, fork } from 'redux-saga/effects';
+import { put, select, takeEvery, fork, throttle } from 'redux-saga/effects';
 
 export const Visualizations = ['ISSUE_IMPACT', 'CODE_OWNERSHIP_RIVER', 'HOTSPOT_DIALS'];
 
@@ -20,7 +20,7 @@ export const removeNotification = createAction('REMOVE_NOTIFICATION');
 export const addNotification = createAction('ADD_NOTIFICATION');
 export const switchConfigTab = createAction('SWITCH_CONFIG_TAB', tab => tab);
 export const showCommit = createAction('SHOW_COMMIT');
-export const saveConfig = createAction('SAVE_CONFIG');
+export const confirmConfig = createAction('CONFIRM_CONFIG');
 
 export function* root() {
   yield* fetchConfig();
@@ -38,11 +38,14 @@ function* watchShowCommits() {
 }
 
 function* watchConfig() {
-  yield takeEvery('SAVE_CONFIG', postConfig);
+  yield takeEvery('CONFIRM_CONFIG', function*(a) {
+    yield* postConfig(a.payload);
+    yield* hideConfig();
+  });
 }
 
 export function* watchMessages() {
-  yield takeEvery('message', fetchCommits);
+  yield throttle(1000, 'message', fetchCommits);
 }
 
 export const fetchCommits = fetchFactory(
@@ -83,7 +86,7 @@ export const postConfig = fetchFactory(
       body: JSON.stringify(config)
     });
 
-    return resp.json();
+    return yield resp.json();
   },
   requestConfig,
   receiveConfig

@@ -1,6 +1,6 @@
 import { render } from 'react-dom';
 import { createStore, applyMiddleware } from 'redux';
-import { logger } from 'redux-logger';
+import { createLogger } from 'redux-logger';
 import io from 'socket.io-client';
 import createSocketIoMiddleware from 'redux-socket.io';
 import createSagaMiddleware from 'redux-saga';
@@ -16,6 +16,10 @@ import './global.scss';
 const socket = io({ path: '/wsapi' });
 const socketIo = createSocketIoMiddleware(socket, 'api/');
 const saga = createSagaMiddleware();
+
+const logger = createLogger({
+  collapsed: () => true
+});
 
 const store = createStore(
   app,

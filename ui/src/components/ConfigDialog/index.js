@@ -4,7 +4,7 @@ import { connect } from 'react-redux';
 import _ from 'lodash';
 
 import ConfigDialog from './ConfigDialog.js';
-import { saveConfig, hideConfig, switchConfigTab } from '../../sagas.js';
+import { confirmConfig, hideConfig, switchConfigTab } from '../../sagas.js';
 
 const mapStateToProps = (state /*, ownProps*/) => {
   return {
@@ -41,9 +41,7 @@ const mapDispatchToProps = (dispatch /*, ownProps*/) => {
         }
       };
 
-      return dispatch(saveConfig(config)).then(function() {
-        return dispatch(hideConfig());
-      });
+      return dispatch(confirmConfig(config));
     },
     onCancel: e => {
       dispatch(hideConfig());
