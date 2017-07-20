@@ -20,21 +20,25 @@ export const removeNotification = createAction('REMOVE_NOTIFICATION');
 export const addNotification = createAction('ADD_NOTIFICATION');
 export const switchConfigTab = createAction('SWITCH_CONFIG_TAB', tab => tab);
 export const showCommit = createAction('SHOW_COMMIT');
+export const saveConfig = createAction('SAVE_CONFIG');
 
 export function* root() {
   yield* fetchConfig();
   yield* fetchCommits();
   yield fork(watchShowCommits);
   yield fork(watchMessages);
+  yield fork(watchConfig);
 }
 
 function* watchShowCommits() {
-  yield takeEvery('SHOW_COMMIT', openCommit);
+  yield takeEvery('SHOW_COMMIT', function*(a) {
+    const { config } = yield select();
+    window.open(`${config.data.projectUrl}/commit/${a.payload.sha}`);
+  });
 }
 
-function* openCommit(a) {
-  const { config } = yield select();
-  window.open(`${config.data.projectUrl}/commit/${a.payload.sha}`);
+function* watchConfig() {
+  yield takeEvery('SAVE_CONFIG', postConfig);
 }
 
 export function* watchMessages() {
