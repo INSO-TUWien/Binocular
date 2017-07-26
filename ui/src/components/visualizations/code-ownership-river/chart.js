@@ -104,7 +104,9 @@ export default class CodeOwnershipRiver extends React.Component {
     const x = this.state.transform.rescaleX(this.scales.x);
     const y = this.state.transform.rescaleY(this.scales.y);
 
-    const line = d3.line().x(d => x(d.date)).y(d => y(d.count));
+    const commitLine = d3.line().x(c => x(c.date)).y(c => y(c.count));
+    const openIssuesLine = d3.line().x(i => x(i.date)).y(d => y(d.count));
+    const closedIssuesLine = d3.line().x(i => x(i.date)).y(d => y(d.closedCount));
 
     const fullDomain = this.scales.x.domain();
     const visibleDomain = x.domain();
@@ -128,9 +130,9 @@ export default class CodeOwnershipRiver extends React.Component {
     });
 
     const surround = data => [
-      { count: 0, date: this.scales.x.domain()[0] },
+      { count: 0, date: this.scales.x.domain()[0], openCount: 0, closedCount: 0 },
       ...data,
-      { count: 0, date: this.scales.x.domain()[1] }
+      { count: 0, date: this.scales.x.domain()[1], openCount: 0, closedCount: 0 }
     ];
 
     return (
@@ -163,11 +165,14 @@ export default class CodeOwnershipRiver extends React.Component {
                   </text>
                 </g>
                 <g clipPath="url(#chart)" className={cx(styles.commitCount)}>
-                  <path d={line(surround(this.state.commits))} />
+                  <path d={commitLine(surround(this.state.commits))} />
                   {estimatedVisibleCommitCount < 30 && commitMarkers}
                 </g>
-                <g clipPath="url(#chart)" className={cx(styles.issueCount)}>
-                  <path d={line(surround(this.state.issues))} />
+                <g clipPath="url(#chart)" className={cx(styles.openIssuesCount)}>
+                  <path d={openIssuesLine(surround(this.state.issues))} />
+                </g>
+                <g clipPath="url(#chart)" className={cx(styles.closedIssuesCount)}>
+                  <path d={closedIssuesLine(surround(this.state.issues))} />
                 </g>
               </g>
             </svg>
@@ -209,7 +214,43 @@ function extractCommitData(props) {
 
 function extractIssueData(props) {
   const issueData = _.get(props, 'issues', []);
+
+  // holds close dates of still open issues, kept sorted at all times
+  const pendingCloses = [];
+
+  // issues closed so far
+  let closeCountTotal = 0;
+
   return _.map(issueData, function(t, i) {
-    return _.merge({}, t, { id: t.iid, date: parseTime(t.created_at), count: i + 1 });
+    const issueData = _.merge({}, t, {
+      id: t.iid,
+      date: parseTime(t.createdAt),
+      closedAt: parseTime(t.closedAt),
+      count: i + 1
+    });
+
+    // the number of closed issues at the issue's creation time, since
+    // the last time we increased closedCountTotal
+    let closedCount = _.sortedIndex(pendingCloses, issueData.date);
+
+    closeCountTotal += closedCount;
+    issueData.closedCount = closeCountTotal;
+    issueData.openCount = issueData.count - issueData.closedCount;
+
+    // remove all issues that are closed by now from the "pending" list
+    pendingCloses.splice(0, closedCount);
+
+    if (issueData.closedAt) {
+      // issue has a close date, be sure to track it in the "pending" list
+      const insertPos = _.sortedIndex(pendingCloses, issueData.closedAt);
+      pendingCloses.splice(insertPos, 0, issueData.closedAt);
+    } else {
+      // the issue has not yet been closed, indicate that by pushing
+      // null to the end of the pendingCloses list, which will always
+      // stay there
+      pendingCloses.push(null);
+    }
+
+    return issueData;
   });
 }

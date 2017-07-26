@@ -76,7 +76,7 @@ const queryType = new gql.GraphQLObjectType({
               aql`FOR issue
                   IN
                   ${issues}
-                    SORT issue.created_at ASC
+                    SORT issue.createdAt ASC
                     RETURN issue`
             )
             .toArray();

@@ -62,8 +62,9 @@ export const fetchCommits = fetchFactory(
          issues {
            iid,
            title,
-           created_at,
-           web_url
+           createdAt,
+           closedAt,
+           webUrl
          }
       }`,
       {}

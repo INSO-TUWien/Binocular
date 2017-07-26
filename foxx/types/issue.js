@@ -43,7 +43,7 @@ module.exports = new gql.GraphQLObjectType({
         type: gql.GraphQLInt,
         description: 'Number of downvotes on this issue'
       },
-      due_date: {
+      dueDate: {
         type: gql.GraphQLString,
         description: 'The due date of this issue'
       },
@@ -55,11 +55,15 @@ module.exports = new gql.GraphQLObjectType({
         type: gql.GraphQLInt,
         description: 'Weight of the issue'
       },
-      web_url: {
+      webUrl: {
         type: gql.GraphQLString,
         description: 'Web URL of the issue'
       },
-      created_at: {
+      createdAt: {
+        type: gql.GraphQLString,
+        description: 'Creation date of the issue'
+      },
+      closedAt: {
         type: gql.GraphQLString,
         description: 'Creation date of the issue'
       },
