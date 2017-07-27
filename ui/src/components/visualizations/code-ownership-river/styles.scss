@@ -11,7 +11,7 @@ svg.chart {
   g.commitCount {
     path {
       stroke: $blue;
-      fill: transparentize($blue,0.5);
+      fill: $blue;
     }
 
     $commit-stroke: $green;
@@ -39,14 +39,14 @@ svg.chart {
   g.openIssuesCount {
     path {
       stroke: $red;
-      fill: transparentize($red, 0.75);
+      fill: $red;
     }
   }
 
   g.closedIssuesCount {
     path {
-      stroke: none;
-      fill: transparentize($green, 0.75);
+      stroke: $red;
+      fill: $green;
     }
   }
 }
