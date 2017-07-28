@@ -212,10 +212,12 @@ export default class CodeOwnershipRiver extends React.Component {
 
   componentDidUpdate() {
     const svg = d3.select(this.elems.svg);
+    const dims = this.state.dimensions;
 
     const zoom = d3
       .zoom()
-      .translateExtent([[0, 0], [Infinity, 1000]])
+      .extent([[dims.wMargin, dims.hMargin], [dims.width, dims.height]])
+      .translateExtent([[dims.wMargin, dims.hMargin], [dims.width, dims.height]])
       .scaleExtent([1, Infinity])
       .on('zoom', () => this.updateZoom(d3.event));
     svg.call(zoom);
