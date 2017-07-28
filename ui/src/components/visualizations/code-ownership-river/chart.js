@@ -32,7 +32,8 @@ export default class CodeOwnershipRiver extends React.Component {
       },
       transform: d3.zoomIdentity,
       commits,
-      issues
+      issues,
+      isPanning: false
     };
 
     this.scales = {
@@ -160,7 +161,9 @@ export default class CodeOwnershipRiver extends React.Component {
             ref={measureRef}
             onKeyPress={e => this.onKeyPress(e)}
             className={styles.chartContainer}>
-            <svg className={styles.chart} ref={svg => (this.elems.svg = svg)}>
+            <svg
+              className={cx(styles.chart, { [styles.panning]: this.state.isPanning })}
+              ref={svg => (this.elems.svg = svg)}>
               <defs>
                 <clipPath id="chart">
                   <rect x="0" y="0" width={dims.width} height={dims.height} />
@@ -210,17 +213,28 @@ export default class CodeOwnershipRiver extends React.Component {
     });
   }
 
+  componentWillUnmount() {
+    if (this.zoom) {
+      this.zoom.on('zoom', null);
+      this.zoom.on('start', null);
+      this.zoom.on('end', null);
+    }
+  }
+
   componentDidUpdate() {
     const svg = d3.select(this.elems.svg);
     const dims = this.state.dimensions;
 
-    const zoom = d3
+    this.zoom = d3
       .zoom()
       .extent([[dims.wMargin, dims.hMargin], [dims.width, dims.height]])
       .translateExtent([[dims.wMargin, dims.hMargin], [dims.width, dims.height]])
       .scaleExtent([1, Infinity])
-      .on('zoom', () => this.updateZoom(d3.event));
-    svg.call(zoom);
+      .on('zoom', () => this.updateZoom(d3.event))
+      .on('start', () => this.setState({ isPanning: d3.event.sourceEvent.type !== 'wheel' }))
+      .on('end', () => this.setState({ isPanning: false }));
+
+    svg.call(this.zoom);
   }
 }
 

@@ -4,14 +4,17 @@
   outline: none;
 }
 
+
 svg.chart {
   width: 100%;
   height: 100%;
+  cursor: grab;
+  cursor: -webkit-grab;
 
   g.commitCount {
     path {
       stroke: $blue;
-      fill: $blue;
+      fill: lighten($blue, 20%);
     }
 
     $commit-stroke: $green;
@@ -30,6 +33,7 @@ svg.chart {
     }
 
     .commit:hover {
+      cursor: hand;
       circle {
         fill: $commit-fill-hover;
       }
@@ -39,16 +43,21 @@ svg.chart {
   g.openIssuesCount {
     path {
       stroke: $red;
-      fill: $red;
+      fill: lighten($red, 20%);
     }
   }
 
   g.closedIssuesCount {
     path {
-      stroke: $red;
-      fill: $green;
+      stroke: none;
+      fill: lighten($green, 20%);
     }
   }
+}
+
+svg.chart.panning {
+  cursor: grabbing;
+  cursor: -webkit-grabbing;
 }
 
 .grid line {
