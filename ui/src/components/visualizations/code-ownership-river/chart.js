@@ -80,13 +80,16 @@ export default class CodeOwnershipRiver extends React.Component {
     const issueDateExtent = d3.extent(issues, t => t.date);
     const issueCountExtent = d3.extent(issues, t => t.count);
 
+    const min = arr => _.min(_.compact(arr));
+    const max = arr => _.max(_.compact(arr));
+
     this.scales.x.domain([
-      Math.min(commitDateExtent[0], issueDateExtent[0]),
-      Math.max(commitDateExtent[1], issueDateExtent[1])
+      min([commitDateExtent[0], issueDateExtent[0]]),
+      max([commitDateExtent[1], issueDateExtent[1]])
     ]);
     this.scales.y.domain([
-      Math.min(commitCountExtent[0], issueCountExtent[0]),
-      Math.max(commitCountExtent[1], issueCountExtent[1])
+      min([commitCountExtent[0], issueCountExtent[0]]),
+      max([commitCountExtent[1], issueCountExtent[1]])
     ]);
   }
 
@@ -110,7 +113,7 @@ export default class CodeOwnershipRiver extends React.Component {
     const commitLine = d3.line().x(c => x(c.date)).y(c => y(c.count)).context(commitPath);
 
     const openIssuesPath = new ClosingPathContext();
-    const openIssuesLine = d3.line().x(i => x(i.date)).y(d => y(d.count)).context(openIssuesPath);
+    const openIssuesLine = d3.line().x(i => x(i.date)).y(i => y(i.count)).context(openIssuesPath);
 
     const closedIssuesPath = new ClosingPathContext();
     const closedIssuesLine = d3
@@ -155,7 +158,7 @@ export default class CodeOwnershipRiver extends React.Component {
 
     return (
       <Measure bounds onResize={dims => this.updateDimensions(dims.bounds)}>
-        {({ measureRef }) =>
+        {({ measureRef }) => (
           <div
             tabIndex="1"
             ref={measureRef}
@@ -196,7 +199,8 @@ export default class CodeOwnershipRiver extends React.Component {
                 </g>
               </g>
             </svg>
-          </div>}
+          </div>
+        )}
       </Measure>
     );
   }

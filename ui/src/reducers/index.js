@@ -7,6 +7,7 @@ import activeVisualization from './activeVisualization.js';
 import visualizations from './visualizations.js';
 import config from './config.js';
 import codeOwnershipData from './codeOwnershipData.js';
+import codeOwnershipConfig from './codeOwnershipConfig.js';
 import notifications from './notifications.js';
 import progress from './progress.js';
 import activeConfigTab from './activeConfigTab.js';
@@ -16,6 +17,7 @@ const app = combineReducers({
   visualizations,
   config,
   codeOwnershipData,
+  codeOwnershipConfig,
   notifications,
   progress,
   activeConfigTab,

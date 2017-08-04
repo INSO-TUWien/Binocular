@@ -24,7 +24,7 @@ const logger = createLogger({
 const store = createStore(
   app,
   {
-    activeVisualization: 'ISSUE_IMPACT',
+    activeVisualization: 'CODE_OWNERSHIP_RIVER',
     visualizations: [
       { id: 'ISSUE_IMPACT', label: 'Issue Impact' },
       { id: 'CODE_OWNERSHIP_RIVER', label: 'Code ownership river' },
@@ -35,6 +35,9 @@ const store = createStore(
         commits: [],
         issues: []
       }
+    },
+    codeOwnershipConfig: {
+      showIssues: true
     },
     config: {
       isFetching: false,

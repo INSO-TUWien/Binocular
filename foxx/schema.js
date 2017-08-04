@@ -81,6 +81,26 @@ const queryType = new gql.GraphQLObjectType({
             )
             .toArray();
         }
+      },
+      issue: {
+        type: require('./types/issue.js'),
+        args: {
+          iid: {
+            description: 'Project-Internal issue number',
+            type: new gql.GraphQLNonNull(gql.GraphQLInt)
+          }
+        },
+        resolve(root, args) {
+          return db
+            ._query(
+              aql`FOR issue
+                  IN
+                  ${issues}
+                  FILTER issue.iid == ${args.iid}
+                    RETURN issue`
+            )
+            .toArray()[0];
+        }
       }
     };
   }

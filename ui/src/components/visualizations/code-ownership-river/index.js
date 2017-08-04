@@ -6,10 +6,12 @@ import Chart from './chart.js';
 import { showCommit } from '../../../sagas.js';
 
 const mapStateToProps = (state /*, ownProps*/) => {
-  console.log(state);
+  const cfg = state.codeOwnershipConfig;
+  const issues = cfg.showIssues ? state.codeOwnershipData.data.issues : [];
+
   return {
     commits: state.codeOwnershipData.data.commits,
-    issues: state.codeOwnershipData.data.issues
+    issues
   };
 };
 

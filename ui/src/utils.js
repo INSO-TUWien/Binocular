@@ -17,26 +17,36 @@ export class ClosingPathContext {
   }
 
   closePath() {
-    this.commands.push('Z');
+    if (this.commands.length > 0) {
+      this.commands.push('Z');
+    }
   }
 
   closeToBottom() {
-    this.lineTo(this.max.x, this.max.y);
-    this.closePath();
+    if (this.commands.length > 0) {
+      this.lineTo(this.max.x, this.max.y);
+      this.closePath();
+    }
   }
 
   fillToRight(max) {
-    this.lineTo(max, this.last.y);
+    if (this.commands.length > 0 && isNumeric(max)) {
+      this.lineTo(max, this.last.y);
+    }
   }
 
   moveTo(x, y) {
-    this.trackPen(x, y);
-    this.commands.push('M' + x + ',' + y);
+    if (isNumeric(x) && isNumeric(y)) {
+      this.trackPen(x, y);
+      this.commands.push('M' + x + ',' + y);
+    }
   }
 
   lineTo(x, y) {
-    this.trackPen(x, y);
-    this.commands.push('L' + x + ',' + y);
+    if (isNumeric(x) && isNumeric(y)) {
+      this.trackPen(x, y);
+      this.commands.push('L' + x + ',' + y);
+    }
   }
 
   quadraticCurveTo(cpx, cpy, x, y) {
@@ -71,4 +81,8 @@ export class ClosingPathContext {
     const d = this.commands.join(',');
     return d;
   }
+}
+
+function isNumeric(n) {
+  return !isNaN(parseFloat(n)) && isFinite(n);
 }

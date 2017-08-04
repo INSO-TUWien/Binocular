@@ -4,10 +4,7 @@ const gql = require('graphql-sync');
 const arangodb = require('@arangodb');
 const db = arangodb.db;
 const aql = arangodb.aql;
-// const blameHunkType = require('./blameHunk.js');
-// const commitsToBlameHunks = db._collection('commits-blameHunks');
-// const blameHunksToFiles = db._collection('blameHunks-files');
-// const commitsToStakeholders = db._collection('commits-stakeholders');
+const commits = db._collection('commits');
 const issuesToStakeholders = db._collection('issues-stakeholders');
 
 module.exports = new gql.GraphQLObjectType({
@@ -74,14 +71,42 @@ module.exports = new gql.GraphQLObjectType({
           return db
             ._query(
               aql`
-          FOR
-          stakeholder
-          IN
-          OUTBOUND ${issue} ${issuesToStakeholders}
-            RETURN stakeholder
-        `
+              FOR
+              stakeholder
+              IN
+              OUTBOUND ${issue} ${issuesToStakeholders}
+                RETURN stakeholder
+              `
             )
             .toArray()[0];
+        }
+      },
+      commits: {
+        type: new gql.GraphQLList(require('./commit.js')),
+        description: 'All commits mentioning this issue',
+        resolve(issue /*, args*/) {
+          const ret = [];
+          issue.mentions.forEach(m => {
+            if (m.commit) {
+              ret.push(commits.document(m.commit));
+            }
+          });
+
+          return ret;
+        }
+      },
+      mentions: {
+        type: new gql.GraphQLList(require('./commit.js')),
+        description: 'All commits mentioning this issue',
+        resolve(issue /*, args*/) {
+          const ret = [];
+          issue.mentions.forEach(m => {
+            if (m.commit) {
+              ret.push(commits.document(m.commit));
+            }
+          });
+
+          return ret;
         }
       }
     };
