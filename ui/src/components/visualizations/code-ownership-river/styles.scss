@@ -53,6 +53,12 @@ svg.chart {
       fill: lighten($green, 20%);
     }
   }
+
+  g.highlightedIssue {
+    line {
+      stroke: red;
+    }
+  }
 }
 
 svg.chart.panning {
@@ -62,4 +68,25 @@ svg.chart.panning {
 
 .grid line {
   stroke: $grey-lighter;
+}
+
+
+.configContainer {
+  width: 100%;
+
+  form {
+    width: 100%;
+
+    .selectContainer {
+      width: 100%;
+
+      >div {
+        width: 100%;
+
+        :global(.Select-arrow) {
+          display: none;
+        }
+      }
+    }
+  }
 }

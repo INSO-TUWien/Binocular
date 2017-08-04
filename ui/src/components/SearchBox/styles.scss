@@ -1,0 +1,53 @@
+@import '~bulma';
+
+.suggestions {
+  position: absolute;
+  max-height: 8em;
+  width: 100%;
+  overflow: scroll;
+  padding-bottom: calc(0.375em - 1px);
+  padding-left: calc(0.625em - 1px);
+  padding-right: calc(0.625em - 1px);
+  padding-top: calc(0.375em - 1px);
+
+  -webkit-appearance: none;
+  align-items: center;
+  border: 1px solid transparent;
+  border-radius: 3px;
+  box-shadow: none;
+  font-size: 1rem;
+  background-color: $white-bis;
+  border-color: $border;
+  color: $text;
+  box-shadow: inset 0 1px 2px rgba(10, 10, 10, 0.1);
+
+  .suggestion {
+    cursor: hand;
+  }
+
+  .suggestion:hover {
+    background-color: $grey-lighter;
+  }
+}
+
+.isOpen {
+  input {
+    border-bottom: 0;
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+  }
+
+  .suggestions {
+    border-top: 0;
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+  }
+
+}
+
+.hasValue {
+  .icon {
+    pointer-events: auto !important;
+    cursor: hand;
+  }
+}

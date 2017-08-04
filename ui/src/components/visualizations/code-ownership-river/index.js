@@ -11,7 +11,8 @@ const mapStateToProps = (state /*, ownProps*/) => {
 
   return {
     commits: state.codeOwnershipData.data.commits,
-    issues
+    issues,
+    highlightedIssue: state.codeOwnershipConfig.highlightedIssue
   };
 };
 

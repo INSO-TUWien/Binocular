@@ -37,7 +37,8 @@ const store = createStore(
       }
     },
     codeOwnershipConfig: {
-      showIssues: true
+      showIssues: true,
+      highlightedIssue: null
     },
     config: {
       isFetching: false,

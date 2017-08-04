@@ -197,6 +197,21 @@ export default class CodeOwnershipRiver extends React.Component {
                 <g clipPath="url(#chart)" className={cx(styles.closedIssuesCount)}>
                   <path d={closedIssuesPath} />
                 </g>
+                {this.props.highlightedIssue &&
+                  <g clipPath="url(#chart)" className={cx(styles.highlightedIssue)}>
+                    <line
+                      x1={x(parseTime(this.props.highlightedIssue.createdAt))}
+                      y1={0}
+                      x2={x(parseTime(this.props.highlightedIssue.createdAt))}
+                      y2={dims.height}
+                    />
+                    <line
+                      x1={x(parseTime(this.props.highlightedIssue.closedAt))}
+                      y1={0}
+                      x2={x(parseTime(this.props.highlightedIssue.closedAt))}
+                      y2={dims.height}
+                    />
+                  </g>}
               </g>
             </svg>
           </div>
