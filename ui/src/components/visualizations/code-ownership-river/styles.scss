@@ -56,8 +56,24 @@ svg.chart {
 
   g.highlightedIssue {
     line {
-      stroke: red;
+      stroke: $grey;
     }
+  }
+
+  g.today {
+    text {
+      text-anchor: end;
+    }
+    line {
+      stroke: red;
+      stroke-dasharray: 5;
+      stroke-width: 2;
+    }
+  }
+
+  .lineMarker {
+    stroke: $grey;
+    fill: $grey;
   }
 }
 

@@ -11,6 +11,8 @@ import _ from 'lodash';
 import Axis from './Axis.js';
 import GridLines from './GridLines.js';
 import CommitMarker from './CommitMarker.js';
+import Asterisk from '../../svg/Asterisk.js';
+import X from '../../svg/X.js';
 
 const parseTime = d3.timeParse('%Y-%m-%dT%H:%M:%S.%LZ');
 
@@ -33,6 +35,7 @@ export default class CodeOwnershipRiver extends React.Component {
       transform: d3.zoomIdentity,
       commits,
       issues,
+      highlightedIssueData: _.find(issues, i => i.iid === _.get(props, 'highlightedIssue.iid')),
       isPanning: false
     };
 
@@ -98,7 +101,11 @@ export default class CodeOwnershipRiver extends React.Component {
     const issues = extractIssueData(nextProps);
     this.updateDomain(commits, issues);
 
-    this.setState({ commits, issues });
+    this.setState({
+      commits,
+      issues,
+      highlightedIssueData: _.find(issues, i => i.iid === _.get(nextProps, 'highlightedIssue.iid'))
+    });
   }
 
   render() {
@@ -156,6 +163,21 @@ export default class CodeOwnershipRiver extends React.Component {
       );
     });
 
+    let highlightedIssueCoords;
+    if (this.props.highlightedIssue) {
+      const hid = this.state.highlightedIssueData;
+      highlightedIssueCoords = {
+        start: {
+          x: x(hid.date),
+          y: y(hid.openCount + hid.closedCount)
+        },
+        end: {
+          x: hid.closedAt ? x(hid.closedAt) : today,
+          y: y(hid.openCount + hid.closedCount)
+        }
+      };
+    }
+
     return (
       <Measure bounds onResize={dims => this.updateDimensions(dims.bounds)}>
         {({ measureRef }) => (
@@ -170,6 +192,9 @@ export default class CodeOwnershipRiver extends React.Component {
               <defs>
                 <clipPath id="chart">
                   <rect x="0" y="0" width={dims.width} height={dims.height} />
+                </clipPath>
+                <clipPath id="x-only">
+                  <rect x="0" y={-dims.hMargin} width={dims.width} height={dims.fullHeight} />
                 </clipPath>
               </defs>
               <g transform={translate}>
@@ -199,19 +224,38 @@ export default class CodeOwnershipRiver extends React.Component {
                 </g>
                 {this.props.highlightedIssue &&
                   <g clipPath="url(#chart)" className={cx(styles.highlightedIssue)}>
+                    <defs>
+                      <Asterisk markerClass={styles.lineMarker} />
+                      <X markerClass={styles.lineMarker} />
+                    </defs>
                     <line
-                      x1={x(parseTime(this.props.highlightedIssue.createdAt))}
-                      y1={0}
-                      x2={x(parseTime(this.props.highlightedIssue.createdAt))}
+                      className={styles.lineMarker}
+                      x1={highlightedIssueCoords.start.x}
+                      y1={highlightedIssueCoords.start.y}
+                      x2={highlightedIssueCoords.start.x}
                       y2={dims.height}
                     />
                     <line
-                      x1={x(parseTime(this.props.highlightedIssue.closedAt))}
-                      y1={0}
-                      x2={x(parseTime(this.props.highlightedIssue.closedAt))}
+                      className={styles.lineMarker}
+                      x1={highlightedIssueCoords.end.x}
+                      y1={highlightedIssueCoords.end.y}
+                      x2={highlightedIssueCoords.end.x}
                       y2={dims.height}
+                    />
+                    <line
+                      className={styles.lineMarker}
+                      x1={highlightedIssueCoords.start.x}
+                      y1={highlightedIssueCoords.start.y}
+                      x2={highlightedIssueCoords.end.x}
+                      y2={highlightedIssueCoords.end.y}
+                      markerStart="url(#asterisk)"
+                      markerEnd={this.state.highlightedIssueData.closedAt ? 'url(#x)' : ''}
                     />
                   </g>}
+                <g className={styles.today} clipPath="url(#x-only)">
+                  <text x={today} y={-10}>Now</text>
+                  <line x1={today} y1={0} x2={today} y2={dims.height} />
+                </g>
               </g>
             </svg>
           </div>

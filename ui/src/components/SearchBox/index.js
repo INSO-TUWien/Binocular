@@ -16,6 +16,7 @@ export default class SearchBox extends React.Component {
     this.state = {
       options: [],
       searchText: '',
+      selectedIndex: null,
       isOpen: false
     };
   }
@@ -48,6 +49,7 @@ export default class SearchBox extends React.Component {
                 onFocus={() => this.setState({ isOpen: true })}
                 onBlur={() => this.cancel()}
                 onChange={e => this.search(e.target.value)}
+                onKeyDown={this.onKeyDown}
               />
               <span
                 className={cx('icon', 'is-small is-right', styles.icon)}
@@ -70,12 +72,24 @@ export default class SearchBox extends React.Component {
     );
   }
 
-  select(option) {
-    this.setState({ searchText: option.label, isOpen: false, value: option.value });
-    clearTimeout(this.cancelTimer);
-    if (this.props.onChange) {
-      this.props.onChange(option.value);
+  onKeyDown(e) {
+    /*
+    if (e.key === 'Enter') {
+    } else if (e.key === 'ArrowDown' || (e.key === 'j' && e.ctrlKey)) {
+    } else if (e.key === 'ArrowUp' || (e.key === 'k' && e.ctrlKey)) {
     }
+    */
+
+    return false;
+  }
+
+  select(option) {
+    clearTimeout(this.cancelTimer);
+    this.setState({ searchText: option.label, isOpen: false, value: option.value }, () => {
+      if (this.props.onChange) {
+        this.props.onChange(option.value);
+      }
+    });
   }
 
   cancel() {
@@ -85,7 +99,11 @@ export default class SearchBox extends React.Component {
   }
 
   clear() {
-    this.setState({ searchText: '', value: null });
+    this.setState({ searchText: '', value: null }, () => {
+      if (this.props.onChange) {
+        this.props.onChange(null);
+      }
+    });
   }
 
   search(searchText) {
