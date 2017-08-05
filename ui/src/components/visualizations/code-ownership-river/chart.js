@@ -242,18 +242,37 @@ export default class CodeOwnershipRiver extends React.Component {
 
   componentDidUpdate() {
     const svg = d3.select(this.elems.svg);
-    const dims = this.state.dimensions;
 
     this.zoom = d3
       .zoom()
-      .extent([[dims.wMargin, dims.hMargin], [dims.width, dims.height]])
-      .translateExtent([[dims.wMargin, dims.hMargin], [dims.width, dims.height]])
       .scaleExtent([1, Infinity])
-      .on('zoom', () => this.updateZoom(d3.event))
+      .on('zoom', () => {
+        this.constrainZoom(d3.event.transform, 50);
+        this.updateZoom(d3.event);
+      })
       .on('start', () => this.setState({ isPanning: d3.event.sourceEvent.type !== 'wheel' }))
       .on('end', () => this.setState({ isPanning: false }));
 
     svg.call(this.zoom);
+  }
+
+  constrainZoom(t, margin = 0) {
+    const dims = this.state.dimensions;
+    const [xMin, xMax] = this.scales.x.domain().map(d => this.scales.x(d));
+    const [yMin, yMax] = this.scales.y.domain().map(d => this.scales.y(d));
+
+    if (t.invertX(xMin) < -margin) {
+      t.x = -(xMin - margin) * t.k;
+    }
+    if (t.invertX(xMax) > dims.width + margin) {
+      t.x = xMax - (dims.width + margin) * t.k;
+    }
+    if (t.invertY(yMax) < -margin) {
+      t.y = -(yMax - margin) * t.k;
+    }
+    if (t.invertY(yMin) > dims.height) {
+      t.y = yMin - dims.height * t.k;
+    }
   }
 }
 
