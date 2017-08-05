@@ -1,6 +1,6 @@
 'use strict';
 
-import { switchVisualization } from '../src/sagas.js';
+import { switchVisualization } from '../src/sagas';
 
 describe('switchVisualization', function() {
   it('should generate an action holding the visualization to switch to', function() {

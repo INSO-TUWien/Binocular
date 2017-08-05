@@ -65,7 +65,12 @@ Repository.fromPath(ctx.targetPath)
   .delay(2500)
   .then(function(url) {
     config.ensure('gitlab.url', url);
-    config.on('updated', reIndex);
+    config.on('updated', () => {
+      reIndex(); // do not wait for indexing to complete on config update
+
+      // explicitly return null to silence bluebird warning
+      return null;
+    });
 
     return reIndex();
 

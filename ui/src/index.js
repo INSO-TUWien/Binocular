@@ -4,7 +4,7 @@ import { createLogger } from 'redux-logger';
 import io from 'socket.io-client';
 import createSocketIoMiddleware from 'redux-socket.io';
 import createSagaMiddleware from 'redux-saga';
-import { root } from './sagas.js';
+import { root } from './sagas';
 
 import Root from './components/Root.js';
 import app from './reducers';

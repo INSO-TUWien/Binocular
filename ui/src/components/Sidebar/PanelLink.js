@@ -1,7 +1,7 @@
 'use strict';
 
 import { connect } from 'react-redux';
-import { switchVisualization } from '../../sagas.js';
+import { switchVisualization } from '../../sagas';
 import Link from './Link.js';
 
 const mapStateToProps = (state, ownProps) => {

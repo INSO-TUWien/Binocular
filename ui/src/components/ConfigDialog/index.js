@@ -4,7 +4,7 @@ import { connect } from 'react-redux';
 import _ from 'lodash';
 
 import ConfigDialog from './ConfigDialog.js';
-import { confirmConfig, hideConfig, switchConfigTab } from '../../sagas.js';
+import { confirmConfig, hideConfig, switchConfigTab } from '../../sagas/config.js';
 
 const mapStateToProps = (state /*, ownProps*/) => {
   return {

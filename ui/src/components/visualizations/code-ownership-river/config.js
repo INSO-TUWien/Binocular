@@ -30,7 +30,6 @@ const CodeOwnershipRiverConfigComponent = props => {
             <input
               type="checkbox"
               id="show-issues"
-              value={props.highlightedIssue}
               checked={props.showIssues}
               onChange={e => props.onSetShowIssues(e.target.checked)}
             />
