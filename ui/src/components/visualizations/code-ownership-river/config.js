@@ -39,7 +39,9 @@ const CodeOwnershipRiverConfigComponent = props => {
         <div className="field">
           <SearchBox
             placeholder="Highlight issue..."
-            options={props.issues.map(i => ({ value: i, label: `#${i.iid} ${i.title}` }))}
+            options={props.issues}
+            renderOption={i => `#${i.iid} ${i.title}`}
+            value={props.highlightedIssue}
             onChange={issue => props.onSetHighlightedIssue(issue)}
           />
         </div>

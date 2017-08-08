@@ -25,7 +25,7 @@
     cursor: hand;
   }
 
-  .suggestion:hover {
+  .suggestion:hover, .suggestion.isSelected {
     background-color: $grey-lighter;
   }
 }

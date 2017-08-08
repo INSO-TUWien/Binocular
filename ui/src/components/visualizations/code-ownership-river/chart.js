@@ -109,6 +109,10 @@ export default class CodeOwnershipRiver extends React.Component {
   }
 
   render() {
+    if (this.state.commits.length + this.state.issues.length === 0) {
+      return <svg />;
+    }
+
     const dims = this.state.dimensions;
 
     const translate = `translate(${dims.wMargin}, ${dims.hMargin})`;
