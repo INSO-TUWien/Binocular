@@ -1,13 +1,14 @@
 'use strict';
 
 import { createAction } from 'redux-actions';
-import { put } from 'redux-saga/effects';
+import { call, put } from 'redux-saga/effects';
 
 export function fetchFactory(fn, requestActionCreator, receiveActionCreator, errorActionCreator) {
   return function*(...args) {
     yield put(requestActionCreator());
+    let result = null;
     try {
-      const result = yield* fn(...args);
+      result = yield call(fn, ...args);
       yield put(receiveActionCreator(result));
     } catch (e) {
       if (errorActionCreator) {

@@ -88,7 +88,11 @@ module.exports = new gql.GraphQLObjectType({
           const ret = [];
           issue.mentions.forEach(m => {
             if (m.commit) {
-              ret.push(commits.document(m.commit));
+              try {
+                ret.push(commits.document(m.commit));
+              } catch (e) {
+                console.warn(e);
+              }
             }
           });
 
@@ -96,17 +100,10 @@ module.exports = new gql.GraphQLObjectType({
         }
       },
       mentions: {
-        type: new gql.GraphQLList(require('./commit.js')),
-        description: 'All commits mentioning this issue',
-        resolve(issue /*, args*/) {
-          const ret = [];
-          issue.mentions.forEach(m => {
-            if (m.commit) {
-              ret.push(commits.document(m.commit));
-            }
-          });
-
-          return ret;
+        type: new gql.GraphQLList(gql.GraphQLString),
+        description: 'The shas of all commits mentioning this issue',
+        resolve(issue) {
+          return issue.mentions.map(m => m.commit);
         }
       }
     };

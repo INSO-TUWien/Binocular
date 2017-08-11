@@ -14,26 +14,22 @@ export const switchConfigTab = createAction('SWITCH_CONFIG_TAB', tab => tab);
 export const confirmConfig = createAction('CONFIRM_CONFIG');
 
 export const fetchConfig = fetchFactory(
-  function*() {
-    const resp = yield fetch(endpointUrl('config'));
-    return yield resp.json();
+  function() {
+    return fetch(endpointUrl('config')).then(resp => resp.json());
   },
   requestConfig,
   receiveConfig
 );
+
 export const postConfig = fetchFactory(
-  function*(config) {
-    const resp = yield fetch(endpointUrl('config'), {
+  function(config) {
+    return fetch(endpointUrl('config'), {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify(config)
-    });
-
-    const json = yield resp.json();
-
-    return json;
+    }).then(resp => resp.json());
   },
   requestConfig,
   receiveConfig

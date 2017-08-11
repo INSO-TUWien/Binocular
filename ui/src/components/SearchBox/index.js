@@ -44,13 +44,10 @@ export default class SearchBox extends React.Component {
       selectedIndex = Math.min(selectedIndex, suggestions.length - 1);
     }
 
-    console.log('built new suggestions:', suggestions);
-
     return { searchText, suggestions, selectedIndex };
   }
 
   render() {
-    console.log('rendering with', this.state.searchText, 'and', this.props.value);
     this.selectedDiv = null;
     const suggestions = this.state.suggestions.map((r, i) => (
       <div
@@ -101,7 +98,10 @@ export default class SearchBox extends React.Component {
   onKeyDown(e) {
     let { selectedIndex } = this.state;
     if (e.key === 'Enter') {
-      this.select(this.state.suggestions[selectedIndex].original);
+      e.preventDefault();
+      if (this.state.suggestions[selectedIndex]) {
+        this.select(this.state.suggestions[selectedIndex].original);
+      }
       return false;
     } else if (e.key === 'Escape') {
       this.clear();

@@ -60,6 +60,11 @@ svg.chart {
     }
   }
 
+  line.highlightedCommit {
+    stroke-dasharray: 5,5;
+    stroke: $grey;
+  }
+
   g.today {
     text {
       text-anchor: end;

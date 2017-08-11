@@ -4,18 +4,21 @@ import Sidebar from '../Sidebar';
 import ConfigButton from '../ConfigButton';
 import ConfigDialog from '../ConfigDialog';
 import ProgressBar from '../ProgressBar';
+import Notifications from '../notifications';
 import CodeOwnershipRiver from '../visualizations/code-ownership-river';
 
-const App = () =>
+const App = () => (
   <div className={styles.app}>
     <Sidebar />
     <div className={styles.chartPanel}>
       <ProgressBar />
       <CodeOwnershipRiver />
     </div>
+    <Notifications />
     <ConfigButton />
     <ConfigDialog />
-  </div>;
+  </div>
+);
 
 App.propTypes = {
   children: PropTypes.object

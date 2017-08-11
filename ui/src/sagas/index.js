@@ -11,16 +11,16 @@ import { fetchConfig, watchConfig } from './config.js';
 export const Visualizations = ['ISSUE_IMPACT', 'CODE_OWNERSHIP_RIVER', 'HOTSPOT_DIALS'];
 
 export const switchVisualization = createAction('SWITCH_VISUALIZATION', vis => vis);
-export const requestCommits = createAction('REQUEST_CODE_OWNERSHIP_DATA');
-export const receiveCommits = timestampedActionFactory('RECEIVE_CODE_OWNERSHIP_DATA');
-export const receiveCommitsError = createAction('RECEIVE_CODE_OWNERSHIP_DATA_ERROR');
+export const requestCodeOwnershipData = createAction('REQUEST_CODE_OWNERSHIP_DATA');
+export const receiveCodeOwnershipData = timestampedActionFactory('RECEIVE_CODE_OWNERSHIP_DATA');
+export const receiveCodeOwnershipDataError = createAction('RECEIVE_CODE_OWNERSHIP_DATA_ERROR');
 export const removeNotification = createAction('REMOVE_NOTIFICATION');
 export const addNotification = createAction('ADD_NOTIFICATION');
 export const showCommit = createAction('SHOW_COMMIT');
 
 export function* root() {
   yield* fetchConfig();
-  yield* fetchCommits();
+  yield* fetchCodeOwnershipData();
   yield fork(watchShowCommits);
   yield fork(watchMessages);
   yield fork(watchConfig);
@@ -34,12 +34,13 @@ function* watchShowCommits() {
 }
 
 export function* watchMessages() {
-  yield throttle(1000, 'message', fetchCommits);
+  yield throttle(1000, 'message', fetchCodeOwnershipData);
 }
 
-export const fetchCommits = fetchFactory(
+export const fetchCodeOwnershipData = fetchFactory(
   function*() {
     const { config } = yield select();
+
     return yield reachGraphQL(
       `${config.data.arango.webUrl}_db/pupil-${config.data.repoName}/pupil-ql`,
       `{
@@ -53,13 +54,17 @@ export const fetchCommits = fetchFactory(
            title,
            createdAt,
            closedAt,
-           webUrl
+           webUrl,
+           mentions
          }
       }`,
       {}
-    );
+    ).catch(function(e) {
+      console.warn(e);
+      throw new Error('Error querying GraphQl');
+    });
   },
-  requestCommits,
-  receiveCommits,
-  receiveCommitsError
+  requestCodeOwnershipData,
+  receiveCodeOwnershipData,
+  receiveCodeOwnershipDataError
 );

@@ -20,7 +20,7 @@ export default class CodeOwnershipRiver extends React.Component {
   constructor(props) {
     super(props);
 
-    const commits = extractCommitData(props);
+    const { commits, highlightedCommits } = extractCommitData(props);
     const issues = extractIssueData(props);
     this.elems = {};
     this.state = {
@@ -36,6 +36,7 @@ export default class CodeOwnershipRiver extends React.Component {
       commits,
       issues,
       highlightedIssueData: _.find(issues, i => i.iid === _.get(props, 'highlightedIssue.iid')),
+      highlightedCommits,
       isPanning: false
     };
 
@@ -97,14 +98,15 @@ export default class CodeOwnershipRiver extends React.Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    const commits = extractCommitData(nextProps);
+    const { commits, highlightedCommits } = extractCommitData(nextProps);
     const issues = extractIssueData(nextProps);
     this.updateDomain(commits, issues);
 
     this.setState({
       commits,
       issues,
-      highlightedIssueData: _.find(issues, i => i.iid === _.get(nextProps, 'highlightedIssue.iid'))
+      highlightedIssueData: _.find(issues, i => i.iid === _.get(nextProps, 'highlightedIssue.iid')),
+      highlightedCommits
     });
   }
 
@@ -155,7 +157,7 @@ export default class CodeOwnershipRiver extends React.Component {
     const commitsPerMillisecond = this.state.commits.length / fullSpan;
     const estimatedVisibleCommitCount = commitsPerMillisecond * visibleSpan;
 
-    const commitMarkers = this.state.commits.map(c => {
+    const buildCommitMarker = c => {
       return (
         <CommitMarker
           key={c.sha}
@@ -165,9 +167,11 @@ export default class CodeOwnershipRiver extends React.Component {
           onClick={() => this.props.onCommitClick(c)}
         />
       );
-    });
+    };
 
-    let highlightedIssueCoords;
+    const commitMarkers = this.state.commits.map(buildCommitMarker);
+
+    let highlightedIssueCoords, highlightedCommitMarkers;
     if (this.props.highlightedIssue) {
       const hid = this.state.highlightedIssueData;
       highlightedIssueCoords = {
@@ -180,6 +184,28 @@ export default class CodeOwnershipRiver extends React.Component {
           y: y(hid.openCount + hid.closedCount)
         }
       };
+
+      const start = x(parseTime(this.props.highlightedIssue.createdAt).getTime());
+      const end = x(
+        (this.props.highlightedIssue.closedAt
+          ? parseTime(this.props.highlightedIssue.closedAt)
+          : new Date()).getTime()
+      );
+      const dist = end - start;
+      const avg = dist / this.state.highlightedCommits.length;
+
+      highlightedCommitMarkers = this.state.highlightedCommits.map((c, i) => {
+        return (
+          <line
+            className={styles.highlightedCommit}
+            key={c.sha}
+            x1={x(c.date)}
+            y1={y(c.count)}
+            x2={start + i * avg}
+            y2={highlightedIssueCoords.start.y}
+          />
+        );
+      });
     }
 
     return (
@@ -236,26 +262,15 @@ export default class CodeOwnershipRiver extends React.Component {
                       className={styles.lineMarker}
                       x1={highlightedIssueCoords.start.x}
                       y1={highlightedIssueCoords.start.y}
-                      x2={highlightedIssueCoords.start.x}
-                      y2={dims.height}
-                    />
-                    <line
-                      className={styles.lineMarker}
-                      x1={highlightedIssueCoords.end.x}
-                      y1={highlightedIssueCoords.end.y}
-                      x2={highlightedIssueCoords.end.x}
-                      y2={dims.height}
-                    />
-                    <line
-                      className={styles.lineMarker}
-                      x1={highlightedIssueCoords.start.x}
-                      y1={highlightedIssueCoords.start.y}
                       x2={highlightedIssueCoords.end.x}
                       y2={highlightedIssueCoords.end.y}
                       markerStart="url(#asterisk)"
                       markerEnd={this.state.highlightedIssueData.closedAt ? 'url(#x)' : ''}
                     />
                   </g>}
+                <g clipPath="url(#chart)" className={cx(styles.closedIssuesCount)}>
+                  {highlightedCommitMarkers}
+                </g>
                 <g className={styles.today} clipPath="url(#x-only)">
                   <text x={today} y={-10}>Now</text>
                   <line x1={today} y1={0} x2={today} y2={dims.height} />
@@ -326,9 +341,20 @@ export default class CodeOwnershipRiver extends React.Component {
 
 function extractCommitData(props) {
   const commitData = _.get(props, 'commits', []);
-  return _.map(commitData, function(c, i) {
-    return _.merge({}, c, { sha: c.sha, date: parseTime(c.date), count: i + 1 });
+  const mentions = _.get(props, 'highlightedIssue.mentions', []);
+  const highlightedCommits = [];
+
+  const commits = _.map(commitData, function(c, i) {
+    const ret = _.merge({}, c, { sha: c.sha, date: parseTime(c.date), count: i + 1 });
+    if (_.includes(mentions, c.sha)) {
+      console.log('found!');
+      highlightedCommits.push(ret);
+    }
+
+    return ret;
   });
+
+  return { commits, highlightedCommits };
 }
 
 function extractIssueData(props) {

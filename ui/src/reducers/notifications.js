@@ -8,22 +8,21 @@ let nextId = 0;
 export default handleActions(
   {
     RECEIVE_CODE_OWNERSHIP_DATA_ERROR: (notifications, action) => {
-      console.error(action.payload);
+      console.log('action:', action);
       return [
-        notification('danger', `Error receiving commits: ${action.payload.message}`),
+        notification('danger', `Error receiving code ownership data: ${action.payload.message}`),
         ...notifications
       ];
     },
 
-    ADD_NOTIFICATION: (notifications, action) => [
-      ...notifications,
-      notification(action.payload.type, action.payload.message)
-    ],
+    ADD_NOTIFICATION: (notifications, action) => {
+      return [...notifications, notification(action.payload.type, action.payload.message)];
+    },
 
     REMOVE_NOTIFICATION: (notifications, action) =>
       _.filter(notifications, n => n.id !== action.payload)
   },
-  { lastFetched: null, isFetching: null }
+  []
 );
 
 function notification(type, message) {
