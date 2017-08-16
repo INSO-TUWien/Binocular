@@ -79,6 +79,11 @@ svg.chart {
   .lineMarker {
     stroke: $grey;
     fill: $grey;
+    stroke-width: 1.5;
+  }
+
+  .highlightedIssueLine {
+    stroke-width: 4;
   }
 }
 

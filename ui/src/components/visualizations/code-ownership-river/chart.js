@@ -24,6 +24,7 @@ export default class CodeOwnershipRiver extends React.Component {
     const issues = extractIssueData(props);
     this.elems = {};
     this.state = {
+      dirty: true,
       dimensions: {
         fullWidth: 0,
         fullHeight: 0,
@@ -49,7 +50,7 @@ export default class CodeOwnershipRiver extends React.Component {
   }
 
   updateZoom(evt) {
-    this.setState({ transform: evt.transform });
+    this.setState({ transform: evt.transform, dirty: true });
   }
 
   updateDimensions(dimensions) {
@@ -102,12 +103,22 @@ export default class CodeOwnershipRiver extends React.Component {
     const issues = extractIssueData(nextProps);
     this.updateDomain(commits, issues);
 
-    this.setState({
-      commits,
-      issues,
-      highlightedIssueData: _.find(issues, i => i.iid === _.get(nextProps, 'highlightedIssue.iid')),
-      highlightedCommits
-    });
+    this.setState(
+      {
+        commits,
+        issues,
+        highlightedIssueData: _.find(
+          issues,
+          i => i.iid === _.get(nextProps, 'highlightedIssue.iid')
+        ),
+        highlightedCommits
+      },
+      () => {
+        if (!this.state.dirty) {
+          this.resetZoom();
+        }
+      }
+    );
   }
 
   render() {
@@ -210,7 +221,7 @@ export default class CodeOwnershipRiver extends React.Component {
 
     return (
       <Measure bounds onResize={dims => this.updateDimensions(dims.bounds)}>
-        {({ measureRef }) => (
+        {({ measureRef }) =>
           <div
             tabIndex="1"
             ref={measureRef}
@@ -259,6 +270,13 @@ export default class CodeOwnershipRiver extends React.Component {
                       <X markerClass={styles.lineMarker} />
                     </defs>
                     <line
+                      className={styles.highlightedIssueLine}
+                      x1={highlightedIssueCoords.start.x}
+                      y1={highlightedIssueCoords.start.y}
+                      x2={highlightedIssueCoords.end.x}
+                      y2={highlightedIssueCoords.end.y}
+                    />
+                    <line
                       className={styles.lineMarker}
                       x1={highlightedIssueCoords.start.x}
                       y1={highlightedIssueCoords.start.y}
@@ -272,13 +290,14 @@ export default class CodeOwnershipRiver extends React.Component {
                   {highlightedCommitMarkers}
                 </g>
                 <g className={styles.today} clipPath="url(#x-only)">
-                  <text x={today} y={-10}>Now</text>
+                  <text x={today} y={-10}>
+                    Now
+                  </text>
                   <line x1={today} y1={0} x2={today} y2={dims.height} />
                 </g>
               </g>
             </svg>
-          </div>
-        )}
+          </div>}
       </Measure>
     );
   }
@@ -291,6 +310,7 @@ export default class CodeOwnershipRiver extends React.Component {
 
   resetZoom() {
     this.setState({
+      dirty: false,
       transform: d3.zoomIdentity
     });
   }

@@ -29,6 +29,7 @@ const CommitStakeholderConnection = require('./lib/models/CommitStakeholderConne
 const BlameHunkStakeholderConnection = require('./lib/models/BlameHunkStakeholderConnection.js');
 const IssueStakeholderConnection = require('./lib/models/IssueStakeholderConnection.js');
 const IssueCommitConnection = require('./lib/models/IssueCommitConnection.js');
+const CommitCommitConnection = require('./lib/models/CommitCommitConnection.js');
 
 app.get('/api/commits', require('./lib/endpoints/get-commits.js'));
 app.get('/api/config', require('./lib/endpoints/get-config.js'));
@@ -137,7 +138,8 @@ function ensureDb(repo) {
         CommitStakeholderConnection.ensureCollection(),
         BlameHunkStakeholderConnection.ensureCollection(),
         IssueStakeholderConnection.ensureCollection(),
-        IssueCommitConnection.ensureCollection()
+        IssueCommitConnection.ensureCollection(),
+        CommitCommitConnection.ensureCollection()
       );
     });
 }
