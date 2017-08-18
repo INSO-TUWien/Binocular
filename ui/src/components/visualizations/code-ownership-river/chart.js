@@ -15,6 +15,7 @@ import CommitMarker from './CommitMarker.js';
 import Asterisk from '../../svg/Asterisk.js';
 import X from '../../svg/X.js';
 import StackedArea from './StackedArea.js';
+import Legend from '../../Legend';
 
 const parseTime = d3.timeParse('%Y-%m-%dT%H:%M:%S.%LZ');
 
@@ -198,9 +199,17 @@ export default class CodeOwnershipRiver extends React.Component {
     }
 
     const finalCounts = _.last(this.state.commits).counts;
-    const commitColors = getSignatureColors('#fafa6e', '#2a4859', _.keys(finalCounts));
+    const commitColors = getSignatureColors('spectral', _.keys(finalCounts).sort());
 
+    let legend = [];
     const commitSeries = _.map(finalCounts, (count, signature) => {
+      legend.push({
+        name: signature,
+        style: {
+          fill: commitColors[signature]
+        }
+      });
+
       return {
         extract: c => c.counts[signature] || 0,
         style: {
@@ -208,8 +217,24 @@ export default class CodeOwnershipRiver extends React.Component {
         }
       };
     });
+    legend = _.sortBy(legend, c => c.name);
 
-    console.log('commitSeries:', commitSeries);
+    if (this.state.issues.length > 0) {
+      legend.push({
+        name: 'Open Issues',
+        style: {
+          fill: '#ff9eb1',
+          stroke: '#ff3860'
+        }
+      });
+
+      legend.push({
+        name: 'Closed Issues',
+        style: {
+          fill: '#73e79c'
+        }
+      });
+    }
 
     return (
       <Measure bounds onResize={dims => this.updateDimensions(dims.bounds)}>
@@ -306,6 +331,7 @@ export default class CodeOwnershipRiver extends React.Component {
                   <line x1={today} y1={0} x2={today} y2={dims.height} />
                 </g>
               </g>
+              <Legend x="10" y="10" categories={legend} />
             </svg>
           </div>}
       </Measure>
@@ -400,7 +426,6 @@ function extractCommitData(props) {
 
     return ret;
   });
-  console.log(commits);
 
   return { commits, highlightedCommits };
 }
@@ -448,8 +473,8 @@ function extractIssueData(props) {
   });
 }
 
-function getSignatureColors(from, to, kinds) {
-  const colors = chroma.scale([from, to]).mode('lch').colors(kinds.length);
+function getSignatureColors(band, kinds) {
+  const colors = chroma.scale(band).mode('lch').colors(kinds.length);
 
   const ret = {};
   for (let i = 0; i < kinds.length; i++) {
