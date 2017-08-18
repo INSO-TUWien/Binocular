@@ -7,8 +7,6 @@ import { ClosingPathContext } from '../../../utils.js';
 const StackedArea = props => {
   const series = props.series;
 
-  console.log('rendering StackedArea with', props.data.length, 'datums');
-
   const areas = _.map(series, (s, i) => {
     const path = new ClosingPathContext();
 
@@ -44,7 +42,6 @@ const StackedArea = props => {
       area.path.closeToBottom();
     }
 
-    console.log(area);
     paths.push(
       <path key={i} d={area.path} style={area.series.style} className={area.series.className} />
     );

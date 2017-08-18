@@ -4,6 +4,7 @@ import React from 'react';
 import Measure from 'react-measure';
 import * as d3 from 'd3';
 import cx from 'classnames';
+import chroma from 'chroma-js';
 
 import { ClosingPathContext } from '../../../utils.js';
 import styles from './styles.scss';
@@ -196,6 +197,20 @@ export default class CodeOwnershipRiver extends React.Component {
       });
     }
 
+    const finalCounts = _.last(this.state.commits).counts;
+    const commitColors = getSignatureColors('#fafa6e', '#2a4859', _.keys(finalCounts));
+
+    const commitSeries = _.map(finalCounts, (count, signature) => {
+      return {
+        extract: c => c.counts[signature] || 0,
+        style: {
+          fill: commitColors[signature]
+        }
+      };
+    });
+
+    console.log('commitSeries:', commitSeries);
+
     return (
       <Measure bounds onResize={dims => this.updateDimensions(dims.bounds)}>
         {({ measureRef }) =>
@@ -233,7 +248,7 @@ export default class CodeOwnershipRiver extends React.Component {
                 <g clipPath="url(#chart)" className={cx(styles.commitCount)}>
                   <StackedArea
                     data={this.state.commits}
-                    series={[{ extract: c => c.count }]}
+                    series={commitSeries}
                     x={c => x(c.date)}
                     y={values => y(_.sum(values))}
                     fillToRight={today}
@@ -246,7 +261,6 @@ export default class CodeOwnershipRiver extends React.Component {
                     series={[
                       {
                         extract: i => i.closedCount,
-                        color: 'hsl(141, 71%, 48%)',
                         className: styles.closedIssuesCount
                       },
                       {
@@ -360,15 +374,33 @@ function extractCommitData(props) {
   const mentions = _.get(props, 'highlightedIssue.mentions', []);
   const highlightedCommits = [];
 
+  const counts = {};
+
   const commits = _.map(commitData, function(c, i) {
-    const ret = _.merge({}, c, { sha: c.sha, date: parseTime(c.date), count: i + 1 });
+    if (!(c.signature in counts)) {
+      counts[c.signature] = 0;
+    }
+
+    counts[c.signature]++;
+
+    const count = i + 1;
+    const totalLineCount = _(c.linesPerAuthor).values().sum();
+    const lineCountShares = _.mapValues(c.linesPerAuthor, v => v / totalLineCount * count);
+
+    const ret = _.merge({}, c, {
+      sha: c.sha,
+      date: parseTime(c.date),
+      count,
+      counts: _.clone(counts),
+      lineCountShares
+    });
     if (_.includes(mentions, c.sha)) {
-      console.log('found!');
       highlightedCommits.push(ret);
     }
 
     return ret;
   });
+  console.log(commits);
 
   return { commits, highlightedCommits };
 }
@@ -414,4 +446,15 @@ function extractIssueData(props) {
 
     return issueData;
   });
+}
+
+function getSignatureColors(from, to, kinds) {
+  const colors = chroma.scale([from, to]).mode('lch').colors(kinds.length);
+
+  const ret = {};
+  for (let i = 0; i < kinds.length; i++) {
+    ret[kinds[i]] = colors[i];
+  }
+
+  return ret;
 }

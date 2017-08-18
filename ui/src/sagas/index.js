@@ -47,7 +47,9 @@ export const fetchCodeOwnershipData = fetchFactory(
          commits {,
            sha,
            date,
-           messageHeader
+           messageHeader,
+           signature,
+           linesPerAuthor
          },
          issues {
            iid,
