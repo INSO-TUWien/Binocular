@@ -9,6 +9,21 @@ const commitsToBlameHunks = db._collection('commits-blameHunks');
 const blameHunksToFiles = db._collection('blameHunks-files');
 const commitsToStakeholders = db._collection('commits-stakeholders');
 
+const JSONObject = new gql.GraphQLScalarType({
+  name: 'JSONObject',
+  serialize: id => id,
+  parseValue: id => id,
+  parseLiteral: ast => {
+    if (ast.kind !== gql.Kind.OBJECT) {
+      throw new gql.GraphQLError('Query error: Can only parse object but got a: ' + ast.kind, [
+        ast
+      ]);
+    }
+
+    return ast.value;
+  }
+});
+
 module.exports = new gql.GraphQLObjectType({
   name: 'Commit',
   description: 'A single git commit',
@@ -38,6 +53,11 @@ module.exports = new gql.GraphQLObjectType({
       date: {
         type: gql.GraphQLString,
         description: 'The date of the commit'
+      },
+      linesPerAuthor: {
+        type: JSONObject,
+        description:
+          'An object mapping git signatures to total number of lines last edited by that author'
       },
       hunks: {
         type: new gql.GraphQLList(blameHunkType),

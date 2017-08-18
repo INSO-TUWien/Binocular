@@ -13,6 +13,7 @@ import GridLines from './GridLines.js';
 import CommitMarker from './CommitMarker.js';
 import Asterisk from '../../svg/Asterisk.js';
 import X from '../../svg/X.js';
+import StackedArea from './StackedArea.js';
 
 const parseTime = d3.timeParse('%Y-%m-%dT%H:%M:%S.%LZ');
 
@@ -133,31 +134,7 @@ export default class CodeOwnershipRiver extends React.Component {
     const x = this.state.transform.rescaleX(this.scales.x);
     const y = this.state.transform.rescaleY(this.scales.y);
 
-    const commitPath = new ClosingPathContext();
-    const commitLine = d3.line().x(c => x(c.date)).y(c => y(c.count)).context(commitPath);
-
-    const openIssuesPath = new ClosingPathContext();
-    const openIssuesLine = d3.line().x(i => x(i.date)).y(i => y(i.count)).context(openIssuesPath);
-
-    const closedIssuesPath = new ClosingPathContext();
-    const closedIssuesLine = d3
-      .line()
-      .x(i => x(i.date))
-      .y(d => y(d.closedCount))
-      .context(closedIssuesPath);
-
-    commitLine(this.state.commits);
-    openIssuesLine(this.state.issues);
-    closedIssuesLine(this.state.issues);
-
     const today = x(new Date());
-    commitPath.fillToRight(today);
-    openIssuesPath.fillToRight(today);
-    closedIssuesPath.fillToRight(today);
-
-    commitPath.closeToBottom();
-    openIssuesPath.closeToBottom();
-    closedIssuesPath.closeToBottom();
 
     const fullDomain = this.scales.x.domain();
     const visibleDomain = x.domain();
@@ -254,14 +231,33 @@ export default class CodeOwnershipRiver extends React.Component {
                   </text>
                 </g>
                 <g clipPath="url(#chart)" className={cx(styles.commitCount)}>
-                  <path d={commitPath} />
+                  <StackedArea
+                    data={this.state.commits}
+                    series={[{ extract: c => c.count }]}
+                    x={c => x(c.date)}
+                    y={values => y(_.sum(values))}
+                    fillToRight={today}
+                  />
                   {estimatedVisibleCommitCount < 30 && commitMarkers}
                 </g>
                 <g clipPath="url(#chart)" className={cx(styles.openIssuesCount)}>
-                  <path d={openIssuesPath} />
-                </g>
-                <g clipPath="url(#chart)" className={cx(styles.closedIssuesCount)}>
-                  <path d={closedIssuesPath} />
+                  <StackedArea
+                    data={this.state.issues}
+                    series={[
+                      {
+                        extract: i => i.closedCount,
+                        color: 'hsl(141, 71%, 48%)',
+                        className: styles.closedIssuesCount
+                      },
+                      {
+                        extract: i => i.openCount,
+                        className: styles.openIssuesCount
+                      }
+                    ]}
+                    x={i => x(i.date)}
+                    y={values => y(_.sum(values))}
+                    fillToRight={today}
+                  />
                 </g>
                 {this.props.highlightedIssue &&
                   <g clipPath="url(#chart)" className={cx(styles.highlightedIssue)}>

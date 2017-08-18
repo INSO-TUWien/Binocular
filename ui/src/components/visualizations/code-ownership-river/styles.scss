@@ -40,18 +40,14 @@ svg.chart {
     }
   }
 
-  g.openIssuesCount {
-    path {
-      stroke: $red;
-      fill: lighten($red, 20%);
-    }
+  path.openIssuesCount {
+    stroke: $red;
+    fill: lighten($red, 20%);
   }
 
-  g.closedIssuesCount {
-    path {
-      stroke: none;
-      fill: lighten($green, 20%);
-    }
+  path.closedIssuesCount {
+    stroke: none;
+    fill: lighten($green, 20%);
   }
 
   g.highlightedIssue {

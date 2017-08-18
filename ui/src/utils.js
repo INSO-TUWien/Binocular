@@ -29,6 +29,14 @@ export class ClosingPathContext {
     }
   }
 
+  closeToPath(other) {
+    for (let i = other.commands.length - 1; i >= 0; i--) {
+      this.commands.push(other.commands[i]);
+    }
+
+    this.closePath();
+  }
+
   fillToRight(max) {
     if (this.commands.length > 0 && isNumeric(max)) {
       this.lineTo(max, this.last.y);
