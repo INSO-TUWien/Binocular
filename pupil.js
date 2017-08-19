@@ -20,16 +20,15 @@ const ProgressReporter = require('./lib/progress-reporter.js');
 const path = require('path');
 const Commit = require('./lib/models/Commit.js');
 const File = require('./lib/models/File.js');
-const BlameHunk = require('./lib/models/BlameHunk.js');
+const Hunk = require('./lib/models/Hunk.js');
 const Issue = require('./lib/models/Issue.js');
 const Stakeholder = require('./lib/models/Stakeholder.js');
-const CommitBlameHunkConnection = require('./lib/models/CommitBlameHunkConnection.js');
-const BlameHunkFileConnection = require('./lib/models/BlameHunkFileConnection.js');
+const CommitHunkConnection = require('./lib/models/CommitHunkConnection.js');
 const CommitStakeholderConnection = require('./lib/models/CommitStakeholderConnection.js');
-const BlameHunkStakeholderConnection = require('./lib/models/BlameHunkStakeholderConnection.js');
 const IssueStakeholderConnection = require('./lib/models/IssueStakeholderConnection.js');
 const IssueCommitConnection = require('./lib/models/IssueCommitConnection.js');
 const CommitCommitConnection = require('./lib/models/CommitCommitConnection.js');
+const FileHunkConnection = require('./lib/models/FileHunkConnection.js');
 
 app.get('/api/commits', require('./lib/endpoints/get-commits.js'));
 app.get('/api/config', require('./lib/endpoints/get-config.js'));
@@ -78,7 +77,12 @@ Repository.fromPath(ctx.targetPath)
     function reIndex() {
       gitlabIndexer.configure(config.get().gitlab);
 
-      return (Promise.join(localIndexer.index(), gitlabIndexer.index())
+      const indexers = [localIndexer];
+      if (ctx.argv.gitlab) {
+        indexers.push(gitlabIndexer);
+      }
+
+      return (Promise.map(indexers, indexer => indexer.index())
           .then(() => Commit.deduceStakeholders())
           .then(() => Issue.deduceStakeholders())
           // .then(() => ctx.models.BlameHunk.deduceUsers())
@@ -130,16 +134,15 @@ function ensureDb(repo) {
         ctx.db.ensureService(path.join(__dirname, 'foxx'), '/pupil-ql'),
         Commit.ensureCollection(),
         File.ensureCollection(),
-        BlameHunk.ensureCollection(),
+        Hunk.ensureCollection(),
         Stakeholder.ensureCollection(),
         Issue.ensureCollection(),
-        CommitBlameHunkConnection.ensureCollection(),
-        BlameHunkFileConnection.ensureCollection(),
+        CommitHunkConnection.ensureCollection(),
         CommitStakeholderConnection.ensureCollection(),
-        BlameHunkStakeholderConnection.ensureCollection(),
         IssueStakeholderConnection.ensureCollection(),
         IssueCommitConnection.ensureCollection(),
-        CommitCommitConnection.ensureCollection()
+        CommitCommitConnection.ensureCollection(),
+        FileHunkConnection.ensureCollection()
       );
     });
 }

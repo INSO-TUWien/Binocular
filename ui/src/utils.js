@@ -8,6 +8,28 @@ export function getBaseUrl() {
   return `${window.location.protocol}//${window.location.host}/api/`;
 }
 
+export function reduceTo(src, length, eligible = () => true) {
+  if (src.length <= length) {
+    return src;
+  }
+
+  const s = 1 - length / src.length;
+  const ret = [];
+  let c = 0;
+  for (let i = 0; i < src.length; i++) {
+    c += s;
+    if (c < 1 || !eligible(src[i])) {
+      ret.push(src[i]);
+    } else {
+      c--;
+    }
+  }
+
+  return ret;
+}
+
+window.reduceTo = reduceTo;
+
 export class ClosingPathContext {
   constructor() {
     this.commands = [];

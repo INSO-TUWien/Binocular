@@ -6,7 +6,6 @@ import * as d3 from 'd3';
 import cx from 'classnames';
 import chroma from 'chroma-js';
 
-import { ClosingPathContext } from '../../../utils.js';
 import styles from './styles.scss';
 import _ from 'lodash';
 import Axis from './Axis.js';
@@ -84,7 +83,7 @@ export default class CodeOwnershipRiver extends React.Component {
 
   updateDomain(commits, issues) {
     const commitDateExtent = d3.extent(commits, c => c.date);
-    const commitCountExtent = d3.extent(commits, c => c.count);
+    const commitCountExtent = d3.extent(commits, c => _(c.totalStats).values().sumBy('count'));
     const issueDateExtent = d3.extent(issues, t => t.date);
     const issueCountExtent = d3.extent(issues, t => t.count);
 
@@ -190,7 +189,7 @@ export default class CodeOwnershipRiver extends React.Component {
             className={styles.highlightedCommit}
             key={c.sha}
             x1={x(c.date)}
-            y1={y(c.count)}
+            y1={y(_(c.totalStats).values().sumBy('count'))}
             x2={start + i * avg}
             y2={highlightedIssueCoords.start.y}
           />
@@ -198,12 +197,14 @@ export default class CodeOwnershipRiver extends React.Component {
       });
     }
 
-    const finalCounts = _.last(this.state.commits).counts;
-    const commitColors = getSignatureColors('spectral', _.keys(finalCounts).sort());
+    const finalStats = _.last(this.state.commits).totalStats;
+    const commitColors = getSignatureColors('spectral', _.keys(finalStats).sort());
 
-    let legend = [];
-    const commitSeries = _.map(finalCounts, (count, signature) => {
-      legend.push({
+    const commitAttribute = this.props.commitAttribute || 'count';
+
+    const commitLegend = [];
+    const commitSeries = _.map(finalStats, (stats, signature) => {
+      commitLegend.push({
         name: signature,
         style: {
           fill: commitColors[signature]
@@ -211,28 +212,41 @@ export default class CodeOwnershipRiver extends React.Component {
       });
 
       return {
-        extract: c => c.counts[signature] || 0,
+        extract: c => {
+          const stats = c.totalStats[signature];
+          return stats ? stats[commitAttribute] : 0;
+        },
         style: {
           fill: commitColors[signature]
         }
       };
     });
-    legend = _.sortBy(legend, c => c.name);
+
+    const legend = [
+      {
+        name: 'Commits by author',
+        subLegend: _.sortBy(commitLegend, c => c.name)
+      }
+    ];
 
     if (this.state.issues.length > 0) {
       legend.push({
-        name: 'Open Issues',
-        style: {
-          fill: '#ff9eb1',
-          stroke: '#ff3860'
-        }
-      });
-
-      legend.push({
-        name: 'Closed Issues',
-        style: {
-          fill: '#73e79c'
-        }
+        name: 'Issues by state',
+        subLegend: [
+          {
+            name: 'Open Issues',
+            style: {
+              fill: '#ff9eb1',
+              stroke: '#ff3860'
+            }
+          },
+          {
+            name: 'Closed Issues',
+            style: {
+              fill: '#73e79c'
+            }
+          }
+        ]
       });
     }
 
@@ -400,25 +414,30 @@ function extractCommitData(props) {
   const mentions = _.get(props, 'highlightedIssue.mentions', []);
   const highlightedCommits = [];
 
-  const counts = {};
+  const stats = {};
+  const totalStats = {
+    changes: 0,
+    count: 0
+  };
 
-  const commits = _.map(commitData, function(c, i) {
-    if (!(c.signature in counts)) {
-      counts[c.signature] = 0;
+  const commits = _.map(commitData, function(c) {
+    if (!(c.signature in stats)) {
+      stats[c.signature] = { count: 0, changes: 0 };
     }
 
-    counts[c.signature]++;
-
-    const count = i + 1;
-    const totalLineCount = _(c.linesPerAuthor).values().sum();
-    const lineCountShares = _.mapValues(c.linesPerAuthor, v => v / totalLineCount * count);
+    const changes = _.get(c, 'stats.additions', 0) + _.get(c, 'stats.deletions', 0);
+    stats[c.signature].changes += changes;
+    stats[c.signature].count++;
+    totalStats.changes += changes;
+    totalStats.count++;
 
     const ret = _.merge({}, c, {
       sha: c.sha,
       date: parseTime(c.date),
-      count,
-      counts: _.clone(counts),
-      lineCountShares
+      totalStats: _.mapValues(stats, s => ({
+        count: s.count,
+        changes: s.changes / totalStats.changes * totalStats.count
+      }))
     });
     if (_.includes(mentions, c.sha)) {
       highlightedCommits.push(ret);
@@ -427,7 +446,7 @@ function extractCommitData(props) {
     return ret;
   });
 
-  return { commits, highlightedCommits };
+  return { commits: commits, highlightedCommits };
 }
 
 function extractIssueData(props) {

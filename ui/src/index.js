@@ -38,7 +38,8 @@ const store = createStore(
     },
     codeOwnershipConfig: {
       showIssues: true,
-      highlightedIssue: null
+      highlightedIssue: null,
+      commitAttribute: 'count'
     },
     config: {
       isFetching: false,

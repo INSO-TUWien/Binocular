@@ -1,28 +1,13 @@
 'use strict';
 
 const gql = require('graphql-sync');
-const blameHunkType = require('./blameHunk.js');
+const hunkType = require('./hunk.js');
 const arangodb = require('@arangodb');
 const db = arangodb.db;
 const aql = arangodb.aql;
-const commitsToBlameHunks = db._collection('commits-blameHunks');
-const blameHunksToFiles = db._collection('blameHunks-files');
+const commitsToHunks = db._collection('commits-hunks');
+const filesToHunks = db._collection('files-hunks');
 const commitsToStakeholders = db._collection('commits-stakeholders');
-
-const JSONObject = new gql.GraphQLScalarType({
-  name: 'JSONObject',
-  serialize: id => id,
-  parseValue: id => id,
-  parseLiteral: ast => {
-    if (ast.kind !== gql.Kind.OBJECT) {
-      throw new gql.GraphQLError('Query error: Can only parse object but got a: ' + ast.kind, [
-        ast
-      ]);
-    }
-
-    return ast.value;
-  }
-});
 
 module.exports = new gql.GraphQLObjectType({
   name: 'Commit',
@@ -54,13 +39,21 @@ module.exports = new gql.GraphQLObjectType({
         type: gql.GraphQLString,
         description: 'The date of the commit'
       },
-      linesPerAuthor: {
-        type: JSONObject,
-        description:
-          'An object mapping git signatures to total number of lines last edited by that author'
+      stats: {
+        type: new gql.GraphQLObjectType({
+          name: 'Stats',
+          fields: {
+            additions: {
+              type: gql.GraphQLInt
+            },
+            deletions: {
+              type: gql.GraphQLInt
+            }
+          }
+        })
       },
       hunks: {
-        type: new gql.GraphQLList(blameHunkType),
+        type: new gql.GraphQLList(hunkType),
         description: 'The hunks in this commit',
         args: {},
         resolve(commit /*, args*/) {
@@ -68,7 +61,7 @@ module.exports = new gql.GraphQLObjectType({
             ._query(
               aql`FOR hunk
                   IN
-                  INBOUND ${commit} ${commitsToBlameHunks}
+                  INBOUND ${commit} ${commitsToHunks}
                   SORT hunk._key ASC
                     RETURN hunk`
             )
@@ -83,13 +76,12 @@ module.exports = new gql.GraphQLObjectType({
           return db
             ._query(
               aql`FOR hunk
-                IN
-                INBOUND ${commit} ${commitsToBlameHunks}
-                  FOR file
-                  IN
-                  INBOUND
-                  hunk ${blameHunksToFiles}
-                    RETURN file`
+                  IN INBOUND ${commit} ${commitsToHunks}
+                    FOR file
+                    IN
+                    INBOUND
+                    hunk ${filesToHunks}
+                      RETURN DISTINCT file`
             )
             .toArray();
         }

@@ -49,7 +49,10 @@ export const fetchCodeOwnershipData = fetchFactory(
            date,
            messageHeader,
            signature,
-           linesPerAuthor
+           stats {
+             additions,
+             deletions
+           }
          },
          issues {
            iid,

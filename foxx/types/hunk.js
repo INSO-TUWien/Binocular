@@ -4,11 +4,11 @@ const gql = require('graphql-sync');
 const arangodb = require('@arangodb');
 const db = arangodb.db;
 const aql = arangodb.aql;
-const blameHunksToFiles = db._collection('blameHunks-files');
+const filesToHunks = db._collection('files-hunks');
 const fileType = require('./file.js');
 
 module.exports = new gql.GraphQLObjectType({
-  name: 'BlameHunk',
+  name: 'Hunk',
   description: 'A hunk of changes',
   fields() {
     return {
@@ -16,20 +16,23 @@ module.exports = new gql.GraphQLObjectType({
         type: new gql.GraphQLNonNull(gql.GraphQLString),
         resolve: e => e._key
       },
-      startLine: {
+      newStart: {
         type: gql.GraphQLInt,
         description: 'The starting line number of the hunk'
       },
-      lineCount: {
+      newLines: {
         type: gql.GraphQLInt
       },
-      signature: {
-        type: gql.GraphQLString,
-        description: "Author's signature"
+      oldStart: {
+        type: gql.GraphQLInt,
+        description: 'The starting line number of the hunk'
+      },
+      oldLines: {
+        type: gql.GraphQLInt
       },
       file: {
         type: fileType,
-        description: 'The hunks in this commit',
+        description: 'The file this hunk occurs in',
         args: {},
         resolve(hunk /*, args*/) {
           return db
@@ -38,7 +41,7 @@ module.exports = new gql.GraphQLObjectType({
             FOR
             file
             IN
-            INBOUND ${hunk} ${blameHunksToFiles}
+            INBOUND ${hunk} ${filesToHunks}
               RETURN file
           `
             )
