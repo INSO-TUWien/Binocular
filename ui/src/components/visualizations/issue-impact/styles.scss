@@ -1,0 +1,18 @@
+@import '~bulma';
+
+.circle {
+  fill: none;
+  stroke: $grey-lighter;
+}
+
+.issueAxis {
+  stroke: black;
+}
+
+.fileAxis {
+  stroke: black;
+
+  text {
+    text-anchor: middle;
+  }
+}
