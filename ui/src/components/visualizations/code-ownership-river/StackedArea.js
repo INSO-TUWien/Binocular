@@ -43,7 +43,14 @@ const StackedArea = props => {
     }
 
     paths.push(
-      <path key={i} d={area.path} style={area.series.style} className={area.series.className} />
+      <path
+        key={i}
+        d={area.path}
+        style={area.series.style}
+        className={area.series.className}
+        onMouseEnter={area.series.onMouseEnter}
+        onMouseLeave={area.series.onMouseLeave}
+      />
     );
   }
 

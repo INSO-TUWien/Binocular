@@ -18,6 +18,21 @@ import Legend from '../../Legend';
 
 const parseTime = d3.timeParse('%Y-%m-%dT%H:%M:%S.%LZ');
 
+const openIssuesLegend = {
+  name: 'Open issues',
+  style: {
+    fill: '#ff9eb1',
+    stroke: '#ff3860'
+  }
+};
+
+const closedIssuesLegend = {
+  name: 'Closed issues',
+  style: {
+    fill: '#73e79c'
+  }
+};
+
 export default class CodeOwnershipRiver extends React.Component {
   constructor(props) {
     super(props);
@@ -40,7 +55,8 @@ export default class CodeOwnershipRiver extends React.Component {
       issues,
       highlightedIssueData: _.find(issues, i => i.iid === _.get(props, 'highlightedIssue.iid')),
       highlightedCommits,
-      isPanning: false
+      isPanning: false,
+      hoverHint: null
     };
 
     this.scales = {
@@ -152,7 +168,7 @@ export default class CodeOwnershipRiver extends React.Component {
           key={c.sha}
           commit={c}
           x={x(c.date)}
-          y={y(c.count)}
+          y={y(_(c.totalStats).values().sumBy('count'))}
           onClick={() => this.props.onCommitClick(c)}
         />
       );
@@ -204,12 +220,13 @@ export default class CodeOwnershipRiver extends React.Component {
 
     const commitLegend = [];
     const commitSeries = _.map(finalStats, (stats, signature) => {
-      commitLegend.push({
-        name: signature,
+      const legend = {
+        name: (commitAttribute === 'count' ? 'Commits by ' : 'Changes by ') + signature,
         style: {
           fill: commitColors[signature]
         }
-      });
+      };
+      commitLegend.push(legend);
 
       return {
         extract: c => {
@@ -218,7 +235,9 @@ export default class CodeOwnershipRiver extends React.Component {
         },
         style: {
           fill: commitColors[signature]
-        }
+        },
+        onMouseEnter: () => this.activateLegend(legend),
+        onMouseLeave: () => this.activateLegend(null)
       };
     });
 
@@ -232,21 +251,7 @@ export default class CodeOwnershipRiver extends React.Component {
     if (this.state.issues.length > 0) {
       legend.push({
         name: 'Issues by state',
-        subLegend: [
-          {
-            name: 'Open Issues',
-            style: {
-              fill: '#ff9eb1',
-              stroke: '#ff3860'
-            }
-          },
-          {
-            name: 'Closed Issues',
-            style: {
-              fill: '#73e79c'
-            }
-          }
-        ]
+        subLegend: [openIssuesLegend, closedIssuesLegend]
       });
     }
 
@@ -300,11 +305,15 @@ export default class CodeOwnershipRiver extends React.Component {
                     series={[
                       {
                         extract: i => i.closedCount,
-                        className: styles.closedIssuesCount
+                        className: styles.closedIssuesCount,
+                        onMouseEnter: () => this.activateLegend(closedIssuesLegend),
+                        onMouseLeave: () => this.activateLegend(null)
                       },
                       {
                         extract: i => i.openCount,
-                        className: styles.openIssuesCount
+                        className: styles.openIssuesCount,
+                        onMouseEnter: () => this.activateLegend(openIssuesLegend),
+                        onMouseLeave: () => this.activateLegend(null)
                       }
                     ]}
                     x={i => x(i.date)}
@@ -345,7 +354,11 @@ export default class CodeOwnershipRiver extends React.Component {
                   <line x1={today} y1={0} x2={today} y2={dims.height} />
                 </g>
               </g>
-              <Legend x="10" y="10" categories={legend} />
+              <Legend
+                x="10"
+                y="10"
+                categories={this.state.hoverHint ? [this.state.hoverHint] : legend}
+              />
             </svg>
           </div>}
       </Measure>
@@ -406,6 +419,10 @@ export default class CodeOwnershipRiver extends React.Component {
     if (t.invertY(yMin) > dims.height) {
       t.y = yMin - dims.height * t.k;
     }
+  }
+
+  activateLegend(legend) {
+    this.setState({ hoverHint: legend });
   }
 }
 
