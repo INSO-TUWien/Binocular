@@ -1,12 +1,11 @@
 'use strict';
 
 const gql = require('graphql-sync');
-const hunkType = require('./hunk.js');
+const jsonType = require('./json.js');
 const arangodb = require('@arangodb');
 const db = arangodb.db;
 const aql = arangodb.aql;
-const commitsToHunks = db._collection('commits-hunks');
-const filesToHunks = db._collection('files-hunks');
+const commitsToFiles = db._collection('commits-files');
 const commitsToStakeholders = db._collection('commits-stakeholders');
 
 module.exports = new gql.GraphQLObjectType({
@@ -52,36 +51,21 @@ module.exports = new gql.GraphQLObjectType({
           }
         })
       },
-      hunks: {
-        type: new gql.GraphQLList(hunkType),
-        description: 'The hunks in this commit',
-        args: {},
-        resolve(commit /*, args*/) {
-          return db
-            ._query(
-              aql`FOR hunk
-                  IN
-                  INBOUND ${commit} ${commitsToHunks}
-                  SORT hunk._key ASC
-                    RETURN hunk`
-            )
-            .toArray();
-        }
-      },
       files: {
-        type: new gql.GraphQLList(require('./file.js')),
+        type: new gql.GraphQLList(require('./fileInCommit.js')),
         description: 'The files touched by this commit',
         args: {},
         resolve(commit /*, args*/) {
           return db
             ._query(
-              aql`FOR hunk
-                  IN INBOUND ${commit} ${commitsToHunks}
-                    FOR file
-                    IN
-                    INBOUND
-                    hunk ${filesToHunks}
-                      RETURN DISTINCT file`
+              aql`
+              FOR file, edge
+                IN INBOUND ${commit} ${commitsToFiles}
+                RETURN {
+                  file,
+                  lineCount: edge.lineCount,
+                  hunks: edge.hunks
+                }`
             )
             .toArray();
         }

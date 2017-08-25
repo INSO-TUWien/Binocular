@@ -23,12 +23,10 @@ const File = require('./lib/models/File.js');
 const Hunk = require('./lib/models/Hunk.js');
 const Issue = require('./lib/models/Issue.js');
 const Stakeholder = require('./lib/models/Stakeholder.js');
-const CommitHunkConnection = require('./lib/models/CommitHunkConnection.js');
 const CommitStakeholderConnection = require('./lib/models/CommitStakeholderConnection.js');
 const IssueStakeholderConnection = require('./lib/models/IssueStakeholderConnection.js');
 const IssueCommitConnection = require('./lib/models/IssueCommitConnection.js');
 const CommitCommitConnection = require('./lib/models/CommitCommitConnection.js');
-const FileHunkConnection = require('./lib/models/FileHunkConnection.js');
 
 app.get('/api/commits', require('./lib/endpoints/get-commits.js'));
 app.get('/api/config', require('./lib/endpoints/get-config.js'));
@@ -137,12 +135,10 @@ function ensureDb(repo) {
         Hunk.ensureCollection(),
         Stakeholder.ensureCollection(),
         Issue.ensureCollection(),
-        CommitHunkConnection.ensureCollection(),
         CommitStakeholderConnection.ensureCollection(),
         IssueStakeholderConnection.ensureCollection(),
         IssueCommitConnection.ensureCollection(),
-        CommitCommitConnection.ensureCollection(),
-        FileHunkConnection.ensureCollection()
+        CommitCommitConnection.ensureCollection()
       );
     });
 }

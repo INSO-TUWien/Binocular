@@ -20,6 +20,11 @@ export function* root() {
   yield fork(watchShowCommits);
   yield fork(watchMessages);
   yield fork(watchConfig);
+  yield fork(watchVisualization);
+}
+
+function* watchVisualization() {
+  yield takeEvery('SWITCH_VISUALIZATION', refresh);
 }
 
 function* watchShowCommits() {

@@ -28,11 +28,14 @@ export const fetchIssueImpactData = fetchFactory(
            iid,
            commits {
              sha,
-             hunks {
-               newStart,
-               newLines,
-               oldStart,
-               oldLines,
+             files {
+               lineCount,
+               hunks {
+                 newStart,
+                 newLines,
+                 oldStart,
+                 oldLines,
+               },
                file {
                  id,
                  path
