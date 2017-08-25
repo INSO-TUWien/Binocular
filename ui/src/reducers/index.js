@@ -8,6 +8,8 @@ import visualizations from './visualizations.js';
 import config from './config.js';
 import codeOwnershipData from './codeOwnershipData.js';
 import codeOwnershipConfig from './codeOwnershipConfig.js';
+import issueImpactConfig from './issueImpactConfig.js';
+import issueImpactData from './issueImpactData.js';
 import notifications from './notifications.js';
 import progress from './progress.js';
 import activeConfigTab from './activeConfigTab.js';
@@ -18,6 +20,8 @@ const app = combineReducers({
   config,
   codeOwnershipData,
   codeOwnershipConfig,
+  issueImpactData,
+  issueImpactConfig,
   notifications,
   progress,
   activeConfigTab,

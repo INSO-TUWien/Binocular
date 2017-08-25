@@ -41,6 +41,15 @@ const store = createStore(
       highlightedIssue: null,
       commitAttribute: 'count'
     },
+    issueImpactData: {
+      data: {
+        issue: null,
+        issues: []
+      }
+    },
+    issueImpactConfig: {
+      activeIssueId: 1
+    },
     config: {
       isFetching: false,
       lastFetched: null,

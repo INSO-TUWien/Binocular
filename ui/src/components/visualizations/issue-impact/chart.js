@@ -5,11 +5,13 @@ import React from 'react';
 import Measure from 'react-measure';
 import * as d3 from 'd3';
 import cx from 'classnames';
+import knapsack from 'knapsack-js';
 
 import styles from './styles.scss';
 
-const TOTAL_SEPARATOR_SHARE = 0.2;
-const TOTAL_FILE_SHARE = 1 - TOTAL_SEPARATOR_SHARE;
+const MINIMUM_SEMICIRCLE_SEPARATOR_SHARE = 0.2;
+const MAXIMUM_SEMICIRCLE_FILE_SHARE = 1 - MINIMUM_SEMICIRCLE_SEPARATOR_SHARE;
+const FILE_AXIS_DESCRIPTION_OFFSET = 15;
 
 export default class IssueImpact extends React.Component {
   constructor(props) {
@@ -73,14 +75,12 @@ export default class IssueImpact extends React.Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    const { commits, issue, files, totalLength } = extractData(nextProps);
+    console.log('willReceiveProps called!');
+    const { files } = extractData(nextProps);
 
     this.setState(
       {
-        commits,
-        issue,
-        files,
-        totalLength
+        files
       },
       () => {
         if (!this.state.dirty) {
@@ -90,65 +90,82 @@ export default class IssueImpact extends React.Component {
     );
   }
 
-  renderFileAxes(radius, files, half = 'top') {
-    const semicircleOffset = { top: 0, bottom: Math.PI }[half];
+  renderFileAxes(radius, semi) {
+    // const fullSeparatorShare = MINIMUM_SEMICIRCLE_SEPARATOR_SHARE / semi.scaleFactor;
+    // const fullFileShare = 1 - fullSeparatorShare;
 
-    const separatorCount = files.length + 1;
-    const separatorShare = TOTAL_SEPARATOR_SHARE / separatorCount;
+    const fullFileShare = MAXIMUM_SEMICIRCLE_FILE_SHARE * semi.scaleFactor;
+    const fullSeparatorShare = 1 - fullFileShare;
+    const separatorCount = semi.data.length + 1;
+    const separatorShare = fullSeparatorShare / separatorCount;
 
-    let offset = separatorShare;
-    return files.map(file => {
-      const length = file.length / this.state.totalLength * TOTAL_FILE_SHARE * 2;
+    // start at one separator in
+    let offsetShare = separatorShare;
 
-      const startAngle = (1 - offset) * Math.PI + semicircleOffset;
-      const endAngle = (1 - (offset + length)) * Math.PI + semicircleOffset;
+    return semi.data.map(file => {
+      const fileShare = file.length / semi.length * fullFileShare;
 
-      const start = {
-        x: Math.cos(startAngle) * radius,
-        y: -Math.sin(startAngle) * radius
-      };
-      const end = {
-        x: Math.cos(endAngle) * radius,
-        y: -Math.sin(endAngle) * radius
-      };
+      const spreadAngle = angleFromShare(fileShare) / 2;
+      const startAngle = semi.offset + angleFromShare(offsetShare) / 2;
+      const endAngle = semi.offset + angleFromShare(offsetShare + fileShare) / 2;
+      const centerAngle = startAngle + spreadAngle / 2;
+      const center = polarToCartesian(0, 0, radius + FILE_AXIS_DESCRIPTION_OFFSET, centerAngle);
+      const textTranslate = `translate(${center.x}, ${-center.y})`;
+      const textRotate = `rotate(${rad2deg(semi.offset + Math.PI / 2 - centerAngle)})`;
 
-      console.log('start', start);
-      console.log('end', end);
+      const arc = renderArc(0, 0, radius, endAngle, startAngle);
+      console.log(file);
+      commi;
 
-      const textAngleDeg = Math.atan2(start.x - end.x, start.y - end.y) / Math.PI * 360;
-      console.log('textAngleDeg:', textAngleDeg);
+      const hunkMarkers = _.map(file.hunks, hunk => {
+        const startShare = Math.min(hunk.oldStart, hunk.newStart) / file.length;
+        const endShare =
+          Math.max(hunk.oldStart + hunk.oldLines, hunk.newStart + hunk.newLines) / file.length;
 
-      offset += length + separatorShare;
-      const textTranslate = `translate(${(start.x + end.x) / 2},${(start.y + end.y) / 2})`;
-      const textRotate = `rotate(${textAngleDeg})`;
+        const startAngle = semi.offset + angleFromShare(offsetShare + fileShare * startShare) / 2;
+        const endAngle = semi.offset + angleFromShare(offsetShare + fileShare * endShare) / 2;
+
+        const start = polarToCartesian(0, 0, radius, startAngle);
+        const end = polarToCartesian(0, 0, radius, endAngle);
+
+        return (
+          <g>
+            <circle r="2" cx={start.x} cy={-start.y} />
+            <circle r="4" cx={end.x} cy={-end.y} />
+          </g>
+        );
+      });
+
+      // the next segment should be drawn at the end of the current
+      // segment + the separator
+      offsetShare += fileShare + separatorShare;
 
       return (
         <g className={styles.fileAxis}>
-          <circle r="5" cx={start.x} cy={start.y} />
-          <text transform={`${textTranslate} ${textRotate}`}>text here</text>
-          <line x1={start.x} y1={start.y} x2={end.x} y2={end.y} />;
+          {arc}
+          {hunkMarkers}
+          <text transform={`${textTranslate} ${textRotate}`}>
+            {file.name}
+          </text>
         </g>
       );
     });
   }
 
   render() {
-    if (!this.state.issue) {
+    console.log('render called:', this.state);
+    if (!this.props.issue) {
       return <svg />;
     }
 
     const dims = this.state.dimensions;
-    const radius = dims.width / 4;
+    const radius = Math.min(dims.width, dims.height) / 1.9;
     const issueAxisLength = radius * 0.95;
     const translate = `translate(${dims.wMargin}, ${dims.hMargin})`;
 
-    const topFileCount = Math.ceil(this.state.files.length / 2);
-    const bottomFileCount = this.state.files.length - topFileCount;
-    const topFiles = _.take(this.state.files, topFileCount);
-    const bottomFiles = _.take(this.state.files, bottomFileCount);
     const fileAxes = [
-      this.renderFileAxes(radius, topFiles),
-      this.renderFileAxes(radius, bottomFiles, 'bottom')
+      this.renderFileAxes(radius, this.state.files.top),
+      this.renderFileAxes(radius, this.state.files.bottom)
     ];
 
     return (
@@ -190,16 +207,104 @@ export default class IssueImpact extends React.Component {
 }
 
 function extractData(props) {
-  const files = [
-    { length: 600 },
-    { length: 300 },
-    { length: 100 },
-    { length: 1000 },
-    { length: 400 }
-  ];
+  if (!props.issue) {
+    return {
+      issue: null,
+      files: {
+        totalLength: 0,
+        top: [],
+        bottom: []
+      }
+    };
+  }
+
+  const filesById = {};
+  _.each(props.issue.commits, c => {
+    _.each(c.hunks, h => {
+      if (!filesById[h.file.id]) {
+        filesById[h.file.id] = {
+          name: h.file.path,
+          length: 0,
+          hunks: []
+        };
+      }
+
+      const file = filesById[h.file.id];
+      file.hunks.push(h);
+
+      file.length = _.max([file.length, h.oldStart + h.oldLines, h.newStart + h.newLines]);
+    });
+  });
+
+  const files = _.values(filesById);
+
+  const totalLength = _.sumBy(files, 'length');
+  const bottomLength = Math.floor(totalLength / 2);
+
+  const rucksack = _.map(files, (f, i) => ({ [i]: f.length }));
+  const bottomIndexes = knapsack
+    .resolve(bottomLength, rucksack)
+    .map(obj => parseInt(_.keys(obj)[0], 10));
+
+  let top = { data: [], length: 0, offset: 0 };
+  let bottom = { data: [], length: 0, offset: Math.PI };
+
+  _.each(files, (f, i) => {
+    if (_.includes(bottomIndexes, i)) {
+      bottom.data.push(f);
+      bottom.length += f.length;
+    } else {
+      top.data.push(f);
+      top.length += f.length;
+    }
+  });
+
+  if (bottom.data.length > top.data.length) {
+    let swap = bottom;
+    bottom = top;
+    top = swap;
+  }
+
+  const [smallerHalf, largerHalf] = _.sortBy([top, bottom], 'length');
+  const sizeDifference = largerHalf.length - smallerHalf.length;
+
+  largerHalf.scaleFactor = 1;
+  smallerHalf.scaleFactor = smallerHalf.length / largerHalf.length;
+  largerHalf.fullSeparatorShare = MINIMUM_SEMICIRCLE_SEPARATOR_SHARE;
+  smallerHalf.fullSeparatorShare =
+    MINIMUM_SEMICIRCLE_SEPARATOR_SHARE * (1 + sizeDifference / totalLength);
+
   return {
     issue: {},
-    files,
-    totalLength: _.sumBy(files, 'length')
+    files: {
+      totalLength: top.length + bottom.length,
+      top,
+      bottom
+    }
   };
+}
+
+function renderArc(cx, cy, r, startAngle, endAngle) {
+  const start = polarToCartesian(cx, cy, r, endAngle);
+  const end = polarToCartesian(cx, cy, r, startAngle);
+
+  const largeArcFlag = endAngle - startAngle <= Math.PI ? '0' : '1';
+  const d = `M${start.x},${-start.y}A${r},${r},0,${largeArcFlag},0,${end.x},${-end.y}`;
+
+  return <path d={d} />;
+}
+
+function polarToCartesian(cx, cy, r, angle) {
+  return {
+    x: cx + r * Math.cos(angle),
+    y: cy + r * Math.sin(angle)
+  };
+}
+
+function rad2deg(rad) {
+  return rad / Math.PI * 180;
+}
+
+function angleFromShare(share) {
+  return Math.PI * 2 * share;
 }
