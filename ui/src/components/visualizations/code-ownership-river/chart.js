@@ -16,7 +16,7 @@ import X from '../../svg/X.js';
 import StackedArea from './StackedArea.js';
 import Legend from '../../Legend';
 
-const parseTime = d3.timeParse('%Y-%m-%dT%H:%M:%S.%LZ');
+import { parseTime } from '../../../utils.js';
 
 const openIssuesLegend = {
   name: 'Open issues',
@@ -257,7 +257,7 @@ export default class CodeOwnershipRiver extends React.Component {
 
     return (
       <Measure bounds onResize={dims => this.updateDimensions(dims.bounds)}>
-        {({ measureRef }) =>
+        {({ measureRef }) => (
           <div
             tabIndex="1"
             ref={measureRef}
@@ -360,7 +360,8 @@ export default class CodeOwnershipRiver extends React.Component {
                 categories={this.state.hoverHint ? [this.state.hoverHint] : legend}
               />
             </svg>
-          </div>}
+          </div>
+        )}
       </Measure>
     );
   }

@@ -5,7 +5,7 @@ import { select, takeEvery, fork, throttle } from 'redux-saga/effects';
 
 import { fetchConfig, watchConfig } from './config.js';
 import { fetchCodeOwnershipData } from './CodeOwnershipRiver.js';
-import { fetchIssueImpactData } from './IssueImpact.js';
+import { fetchIssueImpactData, watchSetActiveIssue } from './IssueImpact.js';
 
 export const Visualizations = ['ISSUE_IMPACT', 'CODE_OWNERSHIP_RIVER', 'HOTSPOT_DIALS'];
 
@@ -21,6 +21,7 @@ export function* root() {
   yield fork(watchMessages);
   yield fork(watchConfig);
   yield fork(watchVisualization);
+  yield fork(watchSetActiveIssue);
 }
 
 function* watchVisualization() {

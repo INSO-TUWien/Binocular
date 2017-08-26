@@ -7,6 +7,7 @@ import * as d3 from 'd3';
 import cx from 'classnames';
 import knapsack from 'knapsack-js';
 
+import { basename, parseTime, ClosingPathContext } from '../../../utils.js';
 import styles from './styles.scss';
 
 const MINIMUM_SEMICIRCLE_SEPARATOR_SHARE = 0.2;
@@ -17,7 +18,7 @@ export default class IssueImpact extends React.Component {
   constructor(props) {
     super(props);
 
-    const { commits, issue, files, totalLength } = extractData(props);
+    const { commits, issue, files, totalLength, start, end } = extractData(props);
 
     this.elems = {};
     this.state = {
@@ -30,17 +31,15 @@ export default class IssueImpact extends React.Component {
         wMargin: 0,
         hMargin: 0
       },
+      radius: 0,
       transform: d3.zoomIdentity,
       commits,
       issue,
       files,
+      start,
+      end,
       totalLength,
       isPanning: false
-    };
-
-    this.scales = {
-      x: d3.scaleTime().rangeRound([0, 0]),
-      y: d3.scaleLinear().rangeRound([0, 0])
     };
   }
 
@@ -59,9 +58,6 @@ export default class IssueImpact extends React.Component {
     const wMargin = (fullWidth - width) / 2;
     const hMargin = (fullHeight - height) / 2;
 
-    this.scales.x.rangeRound([0, width]);
-    this.scales.y.rangeRound([height, 0]);
-
     this.setState({
       dimensions: {
         fullWidth,
@@ -70,17 +66,19 @@ export default class IssueImpact extends React.Component {
         height,
         wMargin,
         hMargin
-      }
+      },
+      radius: Math.min(width, height) / 1.9
     });
   }
 
   componentWillReceiveProps(nextProps) {
-    console.log('willReceiveProps called!');
-    const { files } = extractData(nextProps);
+    const { files, start, end } = extractData(nextProps);
 
     this.setState(
       {
-        files
+        files,
+        start,
+        end
       },
       () => {
         if (!this.state.dirty) {
@@ -90,10 +88,8 @@ export default class IssueImpact extends React.Component {
     );
   }
 
-  renderFileAxes(radius, semi) {
-    // const fullSeparatorShare = MINIMUM_SEMICIRCLE_SEPARATOR_SHARE / semi.scaleFactor;
-    // const fullFileShare = 1 - fullSeparatorShare;
-
+  renderFileAxes(issueScale, semi) {
+    const radius = this.state.radius;
     const fullFileShare = MAXIMUM_SEMICIRCLE_FILE_SHARE * semi.scaleFactor;
     const fullSeparatorShare = 1 - fullFileShare;
     const separatorCount = semi.data.length + 1;
@@ -105,6 +101,10 @@ export default class IssueImpact extends React.Component {
     return semi.data.map(file => {
       const fileShare = file.length / semi.length * fullFileShare;
 
+      if (fileShare === 0) {
+        return <g />;
+      }
+
       const spreadAngle = angleFromShare(fileShare) / 2;
       const startAngle = semi.offset + angleFromShare(offsetShare) / 2;
       const endAngle = semi.offset + angleFromShare(offsetShare + fileShare) / 2;
@@ -114,13 +114,11 @@ export default class IssueImpact extends React.Component {
       const textRotate = `rotate(${rad2deg(semi.offset + Math.PI / 2 - centerAngle)})`;
 
       const arc = renderArc(0, 0, radius, endAngle, startAngle);
-      console.log(file);
-      commi;
 
-      const hunkMarkers = _.map(file.hunks, hunk => {
+      const hunkMarkers = _.map(file.hunks, (hunk, i) => {
         const startShare = Math.min(hunk.oldStart, hunk.newStart) / file.length;
         const endShare =
-          Math.max(hunk.oldStart + hunk.oldLines, hunk.newStart + hunk.newLines) / file.length;
+          Math.max(hunk.oldStart + hunk.oldLines, hunk.newStart + hunk.newLines - 1) / file.length;
 
         const startAngle = semi.offset + angleFromShare(offsetShare + fileShare * startShare) / 2;
         const endAngle = semi.offset + angleFromShare(offsetShare + fileShare * endShare) / 2;
@@ -128,10 +126,17 @@ export default class IssueImpact extends React.Component {
         const start = polarToCartesian(0, 0, radius, startAngle);
         const end = polarToCartesian(0, 0, radius, endAngle);
 
+        const lineX = issueScale(hunk.commit.date);
+
+        const d = new ClosingPathContext();
+        d.moveTo(start.x, -start.y);
+        d.lineTo(lineX, 0);
+        d.lineTo(end.x, -end.y);
+        d.closePath();
+
         return (
-          <g>
-            <circle r="2" cx={start.x} cy={-start.y} />
-            <circle r="4" cx={end.x} cy={-end.y} />
+          <g key={i}>
+            <path className={styles.changeIndicator} d={d} />
           </g>
         );
       });
@@ -145,7 +150,7 @@ export default class IssueImpact extends React.Component {
           {arc}
           {hunkMarkers}
           <text transform={`${textTranslate} ${textRotate}`}>
-            {file.name}
+            {basename(file.name)}
           </text>
         </g>
       );
@@ -153,24 +158,26 @@ export default class IssueImpact extends React.Component {
   }
 
   render() {
-    console.log('render called:', this.state);
     if (!this.props.issue) {
       return <svg />;
     }
 
     const dims = this.state.dimensions;
-    const radius = Math.min(dims.width, dims.height) / 1.9;
-    const issueAxisLength = radius * 0.95;
+    const issueAxisLength = this.state.radius * 0.95;
+    const issueScale = d3
+      .scaleTime()
+      .rangeRound([-issueAxisLength, issueAxisLength])
+      .domain([this.state.start, this.state.end]);
     const translate = `translate(${dims.wMargin}, ${dims.hMargin})`;
 
     const fileAxes = [
-      this.renderFileAxes(radius, this.state.files.top),
-      this.renderFileAxes(radius, this.state.files.bottom)
+      this.renderFileAxes(issueScale, this.state.files.top),
+      this.renderFileAxes(issueScale, this.state.files.bottom)
     ];
 
     return (
       <Measure bounds onResize={dims => this.updateDimensions(dims.bounds)}>
-        {({ measureRef }) =>
+        {({ measureRef }) => (
           <div
             tabIndex="1"
             ref={measureRef}
@@ -190,7 +197,7 @@ export default class IssueImpact extends React.Component {
               <g transform={translate}>
                 <circle
                   className={styles.circle}
-                  r={radius}
+                  r={this.state.radius}
                   cx={dims.width / 2}
                   cy={dims.height / 2}
                 />
@@ -200,7 +207,8 @@ export default class IssueImpact extends React.Component {
                 </g>
               </g>
             </svg>
-          </div>}
+          </div>
+        )}
       </Measure>
     );
   }
@@ -218,25 +226,33 @@ function extractData(props) {
     };
   }
 
+  let start = parseTime(props.issue.createdAt);
+  let end = parseTime(props.issue.closedAt || new Date());
+
   const filesById = {};
-  _.each(props.issue.commits, c => {
-    _.each(c.hunks, h => {
-      if (!filesById[h.file.id]) {
-        filesById[h.file.id] = {
-          name: h.file.path,
-          length: 0,
-          hunks: []
+  _.each(props.issue.commits, commit => {
+    start = Math.min(parseTime(commit.date).getTime(), start);
+    end = Math.max(parseTime(commit.date), end);
+    _.each(commit.files, f => {
+      if (!filesById[f.id]) {
+        filesById[f.file.id] = {
+          name: f.file.path,
+          length: f.lineCount,
+          hunks: f.hunks.map(h =>
+            _.merge({}, h, {
+              commit: {
+                sha: commit.sha,
+                date: parseTime(commit.date)
+              }
+            })
+          )
         };
       }
-
-      const file = filesById[h.file.id];
-      file.hunks.push(h);
-
-      file.length = _.max([file.length, h.oldStart + h.oldLines, h.newStart + h.newLines]);
     });
   });
 
-  const files = _.values(filesById);
+  // TODO somehow allow user to filter files
+  const files = _.values(filesById).filter(f => f.name !== 'yarn.lock');
 
   const totalLength = _.sumBy(files, 'length');
   const bottomLength = Math.floor(totalLength / 2);
@@ -276,6 +292,8 @@ function extractData(props) {
 
   return {
     issue: {},
+    start: new Date(start),
+    end: new Date(end),
     files: {
       totalLength: top.length + bottom.length,
       top,

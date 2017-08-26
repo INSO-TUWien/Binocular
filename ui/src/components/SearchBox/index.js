@@ -14,6 +14,8 @@ export default class SearchBox extends React.Component {
 
     this.selectedDiv = null;
     this.state = {
+      value: null,
+      displayedText: '',
       searchText: '',
       options: [],
       suggestions: [],
@@ -26,19 +28,21 @@ export default class SearchBox extends React.Component {
 
   componentWillReceiveProps(nextProps) {
     let searchText = nextProps.searchText;
+
     if (nextProps.value) {
-      searchText = this.props.renderOption(nextProps.value);
+      searchText = '';
     }
+
     const suggestions = this.buildSuggestions(searchText, nextProps.options);
-    this.setState(suggestions);
+    this.setState(_.merge({}, suggestions, { value: nextProps.value }));
   }
 
   buildSuggestions(searchText = '', options = []) {
+    let { selectedIndex } = this.state;
+
     const suggestions = fuzzy.filter(searchText, options || [], {
       extract: this.props.renderOption.bind(this)
     });
-
-    let { selectedIndex } = this.state;
 
     if (selectedIndex !== null) {
       selectedIndex = Math.min(selectedIndex, suggestions.length - 1);
@@ -73,7 +77,9 @@ export default class SearchBox extends React.Component {
           className={cx('input')}
           type="text"
           placeholder={this.props.placeholder}
-          value={this.state.searchText}
+          value={
+            this.state.value ? this.props.renderOption(this.state.value) : this.state.searchText
+          }
           onFocus={() => this.setState({ isOpen: true })}
           onBlur={() => this.cancel()}
           onChange={e => this.search(e.target.value)}
@@ -150,7 +156,9 @@ export default class SearchBox extends React.Component {
   }
 
   search(searchText) {
-    const suggestions = this.buildSuggestions(searchText, this.props.options);
-    this.setState(suggestions);
+    this.setState({ value: null }, () => {
+      const suggestions = this.buildSuggestions(searchText, this.props.options);
+      this.setState(suggestions);
+    });
   }
 }

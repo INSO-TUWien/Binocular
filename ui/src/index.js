@@ -48,7 +48,7 @@ const store = createStore(
       }
     },
     issueImpactConfig: {
-      activeIssueId: 1
+      activeIssueId: 10
     },
     config: {
       isFetching: false,

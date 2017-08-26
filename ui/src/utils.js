@@ -1,7 +1,15 @@
 'use strict';
 
+import * as d3 from 'd3';
+
+export const parseTime = d3.timeParse('%Y-%m-%dT%H:%M:%S.%LZ');
+
 export function endpointUrl(suffix) {
   return getBaseUrl() + suffix;
+}
+
+export function basename(path) {
+  return path.substring(path.lastIndexOf('/') + 1);
 }
 
 export function getBaseUrl() {

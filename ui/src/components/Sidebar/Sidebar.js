@@ -7,9 +7,11 @@ import PanelLink from './PanelLink.js';
 import cx from 'classnames';
 
 import CodeOwnershipRiverConfig from '../visualizations/code-ownership-river/config.js';
+import IssueImpactConfig from '../visualizations/issue-impact/config.js';
 
 const configs = {
-  CODE_OWNERSHIP_RIVER: CodeOwnershipRiverConfig
+  CODE_OWNERSHIP_RIVER: CodeOwnershipRiverConfig,
+  ISSUE_IMPACT: IssueImpactConfig
 };
 
 const Sidebar = props => {
