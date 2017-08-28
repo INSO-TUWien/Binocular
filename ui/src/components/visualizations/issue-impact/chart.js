@@ -6,8 +6,9 @@ import Measure from 'react-measure';
 import * as d3 from 'd3';
 import cx from 'classnames';
 import knapsack from 'knapsack-js';
+import chroma from 'chroma-js';
 
-import { basename, parseTime, ClosingPathContext } from '../../../utils.js';
+import { basename, parseTime, ClosingPathContext, getChartColors } from '../../../utils.js';
 import styles from './styles.scss';
 
 const MINIMUM_SEMICIRCLE_SEPARATOR_SHARE = 0.2;
@@ -18,7 +19,7 @@ export default class IssueImpact extends React.Component {
   constructor(props) {
     super(props);
 
-    const { commits, issue, files, totalLength, start, end } = extractData(props);
+    const { commits, issue, files, totalLength, start, end, colors } = extractData(props);
 
     this.elems = {};
     this.state = {
@@ -34,6 +35,7 @@ export default class IssueImpact extends React.Component {
       radius: 0,
       transform: d3.zoomIdentity,
       commits,
+      colors,
       issue,
       files,
       start,
@@ -67,15 +69,16 @@ export default class IssueImpact extends React.Component {
         wMargin,
         hMargin
       },
-      radius: Math.min(width, height) / 1.9
+      radius: Math.min(width, height) / 2
     });
   }
 
   componentWillReceiveProps(nextProps) {
-    const { files, start, end } = extractData(nextProps);
+    const { files, start, end, colors } = extractData(nextProps);
 
     this.setState(
       {
+        colors,
         files,
         start,
         end
@@ -98,7 +101,7 @@ export default class IssueImpact extends React.Component {
     // start at one separator in
     let offsetShare = separatorShare;
 
-    return semi.data.map(file => {
+    return semi.data.map((file, i) => {
       const fileShare = file.length / semi.length * fullFileShare;
 
       if (fileShare === 0) {
@@ -109,11 +112,16 @@ export default class IssueImpact extends React.Component {
       const startAngle = semi.offset + angleFromShare(offsetShare) / 2;
       const endAngle = semi.offset + angleFromShare(offsetShare + fileShare) / 2;
       const centerAngle = startAngle + spreadAngle / 2;
-      const center = polarToCartesian(0, 0, radius + FILE_AXIS_DESCRIPTION_OFFSET, centerAngle);
+      const center = polarToCartesian(
+        0,
+        0,
+        radius + FILE_AXIS_DESCRIPTION_OFFSET * (1 + i % 3),
+        centerAngle
+      );
       const textTranslate = `translate(${center.x}, ${-center.y})`;
       const textRotate = `rotate(${rad2deg(semi.offset + Math.PI / 2 - centerAngle)})`;
 
-      const arc = renderArc(0, 0, radius, endAngle, startAngle);
+      const arcData = getArcData(0, 0, radius, endAngle, startAngle);
 
       const hunkMarkers = _.map(file.hunks, (hunk, i) => {
         const startShare = Math.min(hunk.oldStart, hunk.newStart) / file.length;
@@ -132,11 +140,21 @@ export default class IssueImpact extends React.Component {
         d.moveTo(start.x, -start.y);
         d.lineTo(lineX, 0);
         d.lineTo(end.x, -end.y);
-        d.closePath();
+
+        const closer = getArcData(0, 0, radius, startAngle, endAngle, true).reverse();
+        d.closeToPath(closer, false);
+        const color = this.state.colors[hunk.commit.sha];
 
         return (
           <g key={i}>
-            <path className={styles.changeIndicator} d={d} />
+            <path
+              className={styles.changeIndicator}
+              d={d}
+              style={{
+                fill: color,
+                stroke: chroma(color).darken().hex()
+              }}
+            />
           </g>
         );
       });
@@ -147,8 +165,8 @@ export default class IssueImpact extends React.Component {
 
       return (
         <g className={styles.fileAxis}>
-          {arc}
           {hunkMarkers}
+          <path d={arcData} />
           <text transform={`${textTranslate} ${textRotate}`}>
             {basename(file.name)}
           </text>
@@ -218,6 +236,7 @@ function extractData(props) {
   if (!props.issue) {
     return {
       issue: null,
+      colors: [],
       files: {
         totalLength: 0,
         top: [],
@@ -250,6 +269,8 @@ function extractData(props) {
       }
     });
   });
+
+  const colors = getChartColors('spectral', props.issue.commits.map(c => c.sha));
 
   // TODO somehow allow user to filter files
   const files = _.values(filesById).filter(f => f.name !== 'yarn.lock');
@@ -294,6 +315,7 @@ function extractData(props) {
     issue: {},
     start: new Date(start),
     end: new Date(end),
+    colors,
     files: {
       totalLength: top.length + bottom.length,
       top,
@@ -302,14 +324,15 @@ function extractData(props) {
   };
 }
 
-function renderArc(cx, cy, r, startAngle, endAngle) {
+function getArcData(cx, cy, r, startAngle, endAngle, sweep = false) {
   const start = polarToCartesian(cx, cy, r, endAngle);
   const end = polarToCartesian(cx, cy, r, startAngle);
 
-  const largeArcFlag = endAngle - startAngle <= Math.PI ? '0' : '1';
-  const d = `M${start.x},${-start.y}A${r},${r},0,${largeArcFlag},0,${end.x},${-end.y}`;
+  const ctx = new ClosingPathContext();
+  ctx.moveTo(start.x, -start.y);
+  ctx.arcTo(r, r, 0, endAngle - startAngle > Math.PI, sweep, end.x, end.y);
 
-  return <path d={d} />;
+  return ctx;
 }
 
 function polarToCartesian(cx, cy, r, angle) {

@@ -1,6 +1,8 @@
 'use strict';
 
 import * as d3 from 'd3';
+import _ from 'lodash';
+import chroma from 'chroma-js';
 
 export const parseTime = d3.timeParse('%Y-%m-%dT%H:%M:%S.%LZ');
 
@@ -36,7 +38,16 @@ export function reduceTo(src, length, eligible = () => true) {
   return ret;
 }
 
-window.reduceTo = reduceTo;
+export function getChartColors(band, kinds) {
+  const colors = chroma.scale(band).mode('lch').colors(kinds.length);
+
+  const ret = {};
+  for (let i = 0; i < kinds.length; i++) {
+    ret[kinds[i]] = colors[i];
+  }
+
+  return ret;
+}
 
 export class ClosingPathContext {
   constructor() {
@@ -59,12 +70,14 @@ export class ClosingPathContext {
     }
   }
 
-  closeToPath(other) {
+  closeToPath(other, addCloseCommand = true) {
     for (let i = other.commands.length - 1; i >= 0; i--) {
       this.commands.push(other.commands[i]);
     }
 
-    this.closePath();
+    if (addCloseCommand) {
+      this.closePath();
+    }
   }
 
   fillToRight(max) {
@@ -95,8 +108,10 @@ export class ClosingPathContext {
     console.log('bezierCurveTo', cp1x, cp1y, cp2x, cp2y, x, y);
   }
 
-  arcTo(x1, y1, x2, y2, radius) {
-    console.log('arcTo', x1, y1, x2, y2, radius);
+  arcTo(rx, ry, xRot, largeArcFlag, sweepFlag, x, y) {
+    const arc = largeArcFlag ? '1' : '0';
+    const sweep = sweepFlag ? '1' : '0';
+    this.commands.push(`A${rx},${ry},0,${arc},${sweep},${x},${-y}`);
   }
 
   rect(x, y, w, h) {
@@ -115,8 +130,22 @@ export class ClosingPathContext {
     this.last = { x, y };
   }
 
+  clone() {
+    const clone = new ClosingPathContext();
+    clone.commands = _.clone(this.commands);
+    clone.min = _.clone(this.min);
+    clone.max = _.clone(this.max);
+    clone.last = _.clone(this.last);
+    return clone;
+  }
+
+  reverse() {
+    this.commands.reverse();
+    return this;
+  }
+
   toString() {
-    const d = this.commands.join(',');
+    const d = this.commands.join('');
     return d;
   }
 }

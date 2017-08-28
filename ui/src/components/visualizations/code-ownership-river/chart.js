@@ -16,7 +16,7 @@ import X from '../../svg/X.js';
 import StackedArea from './StackedArea.js';
 import Legend from '../../Legend';
 
-import { parseTime } from '../../../utils.js';
+import { parseTime, getChartColors } from '../../../utils.js';
 
 const openIssuesLegend = {
   name: 'Open issues',
@@ -214,7 +214,7 @@ export default class CodeOwnershipRiver extends React.Component {
     }
 
     const finalStats = _.last(this.state.commits).totalStats;
-    const commitColors = getSignatureColors('spectral', _.keys(finalStats).sort());
+    const commitColors = getChartColors('spectral', _.keys(finalStats).sort());
 
     const commitAttribute = this.props.commitAttribute || 'count';
 
@@ -508,15 +508,4 @@ function extractIssueData(props) {
 
     return issueData;
   });
-}
-
-function getSignatureColors(band, kinds) {
-  const colors = chroma.scale(band).mode('lch').colors(kinds.length);
-
-  const ret = {};
-  for (let i = 0; i < kinds.length; i++) {
-    ret[kinds[i]] = colors[i];
-  }
-
-  return ret;
 }
