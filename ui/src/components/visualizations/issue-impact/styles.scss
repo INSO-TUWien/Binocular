@@ -6,15 +6,17 @@
 }
 
 .issueAxis {
-  stroke: black;
-  stroke-width: 2;
+  path {
+    stroke: black;
+    stroke-width: 2;
+  }
 }
 
 .fileAxis {
   stroke: black;
 
   text {
-    text-anchor: middle;
+    text-anchor: start;
     font-size: 12;
   }
 

@@ -53,7 +53,7 @@ export default class SearchBox extends React.Component {
 
   render() {
     this.selectedDiv = null;
-    const suggestions = this.state.suggestions.map((r, i) => (
+    const suggestions = this.state.suggestions.map((r, i) =>
       <div
         ref={div => {
           if (i === this.state.selectedIndex) {
@@ -65,7 +65,7 @@ export default class SearchBox extends React.Component {
         onClick={() => this.select(r.original)}>
         {this.props.renderOption(r.original)}
       </div>
-    ));
+    );
 
     return (
       <div

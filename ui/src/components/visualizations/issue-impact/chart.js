@@ -7,13 +7,15 @@ import * as d3 from 'd3';
 import cx from 'classnames';
 import knapsack from 'knapsack-js';
 import chroma from 'chroma-js';
+import Axis from '../code-ownership-river/Axis.js';
 
 import { basename, parseTime, ClosingPathContext, getChartColors } from '../../../utils.js';
 import styles from './styles.scss';
 
+const CHART_FILL_RATIO = 0.45;
 const MINIMUM_SEMICIRCLE_SEPARATOR_SHARE = 0.2;
 const MAXIMUM_SEMICIRCLE_FILE_SHARE = 1 - MINIMUM_SEMICIRCLE_SEPARATOR_SHARE;
-const FILE_AXIS_DESCRIPTION_OFFSET = 15;
+const FILE_AXIS_DESCRIPTION_OFFSET = 10;
 
 export default class IssueImpact extends React.Component {
   constructor(props) {
@@ -69,7 +71,7 @@ export default class IssueImpact extends React.Component {
         wMargin,
         hMargin
       },
-      radius: Math.min(width, height) / 2
+      radius: Math.min(width, height) * CHART_FILL_RATIO
     });
   }
 
@@ -111,15 +113,17 @@ export default class IssueImpact extends React.Component {
       const spreadAngle = angleFromShare(fileShare) / 2;
       const startAngle = semi.offset + angleFromShare(offsetShare) / 2;
       const endAngle = semi.offset + angleFromShare(offsetShare + fileShare) / 2;
-      const centerAngle = startAngle + spreadAngle / 2;
-      const center = polarToCartesian(
-        0,
-        0,
-        radius + FILE_AXIS_DESCRIPTION_OFFSET * (1 + i % 3),
-        centerAngle
-      );
+      let centerAngle = startAngle + spreadAngle / 2;
+      const center = polarToCartesian(0, 0, radius + FILE_AXIS_DESCRIPTION_OFFSET, centerAngle);
       const textTranslate = `translate(${center.x}, ${-center.y})`;
-      const textRotate = `rotate(${rad2deg(semi.offset + Math.PI / 2 - centerAngle)})`;
+      let textAnchor = 'start';
+
+      if (centerAngle > Math.PI / 2 && centerAngle < Math.PI * 1.5) {
+        centerAngle -= Math.PI;
+        textAnchor = 'end';
+      }
+
+      const textRotate = `rotate(${rad2deg(-centerAngle)})`;
 
       const arcData = getArcData(0, 0, radius, endAngle, startAngle);
 
@@ -151,7 +155,7 @@ export default class IssueImpact extends React.Component {
               className={styles.changeIndicator}
               d={d}
               style={{
-                fill: color,
+                fill: chroma(color).alpha(0.6).css(),
                 stroke: chroma(color).darken().hex()
               }}
             />
@@ -167,7 +171,7 @@ export default class IssueImpact extends React.Component {
         <g className={styles.fileAxis}>
           {hunkMarkers}
           <path d={arcData} />
-          <text transform={`${textTranslate} ${textRotate}`}>
+          <text transform={`${textTranslate} ${textRotate}`} style={{ textAnchor }}>
             {basename(file.name)}
           </text>
         </g>
@@ -195,7 +199,7 @@ export default class IssueImpact extends React.Component {
 
     return (
       <Measure bounds onResize={dims => this.updateDimensions(dims.bounds)}>
-        {({ measureRef }) => (
+        {({ measureRef }) =>
           <div
             tabIndex="1"
             ref={measureRef}
@@ -221,12 +225,13 @@ export default class IssueImpact extends React.Component {
                 />
                 <g transform={`translate(${dims.width / 2},${dims.height / 2})`}>
                   {fileAxes}
-                  <line className={styles.issueAxis} x1={-issueAxisLength} x2={issueAxisLength} />
+                  <g className={styles.issueAxis}>
+                    <Axis orient="bottom" ticks={8} scale={issueScale} />
+                  </g>
                 </g>
               </g>
             </svg>
-          </div>
-        )}
+          </div>}
       </Measure>
     );
   }
@@ -250,9 +255,17 @@ function extractData(props) {
 
   const filesById = {};
   _.each(props.issue.commits, commit => {
+    if (!_.includes(props.filteredCommits, commit.sha)) {
+      return;
+    }
+
     start = Math.min(parseTime(commit.date).getTime(), start);
     end = Math.max(parseTime(commit.date), end);
     _.each(commit.files, f => {
+      if (!_.includes(props.filteredFiles, f.file.path)) {
+        return;
+      }
+
       if (!filesById[f.id]) {
         filesById[f.file.id] = {
           name: f.file.path,

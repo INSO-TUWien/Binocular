@@ -48,7 +48,8 @@ const store = createStore(
       }
     },
     issueImpactConfig: {
-      activeIssueId: 10
+      activeIssueId: 19,
+      filteredCommits: []
     },
     config: {
       isFetching: false,

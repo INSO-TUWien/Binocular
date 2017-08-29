@@ -7,6 +7,8 @@ import { select, takeEvery } from 'redux-saga/effects';
 import { fetchFactory, timestampedActionFactory } from './utils.js';
 
 export const setActiveIssue = createAction('SET_ACTIVE_ISSUE', i => i);
+export const setFilteredCommits = createAction('SET_FILTERED_COMMITS', cs => cs);
+export const setFilteredFiles = createAction('SET_FILTERED_FILES', fs => fs);
 
 export const requestIssueImpactData = createAction('REQUEST_ISSUE_IMPACT_DATA');
 export const receiveIssueImpactData = timestampedActionFactory('RECEIVE_ISSUE_IMPACT_DATA');
@@ -29,8 +31,11 @@ export const fetchIssueImpactData = fetchFactory(
           title
           createdAt
           closedAt,
+          webUrl
           commits {
             sha
+            shortSha
+            messageHeader
             date
             files {
               lineCount
@@ -61,7 +66,6 @@ export const fetchIssueImpactData = fetchFactory(
       {}
     )
       .then(resp => {
-        console.log('got resp:', resp);
         if (activeIssueId === null) {
           resp.issue = null;
         }

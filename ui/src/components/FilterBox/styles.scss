@@ -1,0 +1,16 @@
+@import '~bulma';
+
+.filterBox {
+  ul {
+    height: 7em;
+    overflow-y: scroll;
+
+    li {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      label {
+        white-space: nowrap;
+      }
+    }
+  }
+}
