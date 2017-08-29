@@ -102,7 +102,7 @@ export default class SearchBox extends React.Component {
   }
 
   onKeyDown(e) {
-    let { selectedIndex } = this.state;
+    let { selectedIndex, isOpen } = this.state;
     if (e.key === 'Enter') {
       e.preventDefault();
       if (this.state.suggestions[selectedIndex]) {
@@ -116,15 +116,17 @@ export default class SearchBox extends React.Component {
 
     if (e.key === 'ArrowDown' || (e.key === 'j' && e.ctrlKey)) {
       selectedIndex = Math.min(this.state.suggestions.length - 1, selectedIndex + 1);
+      isOpen = true;
     } else if (e.key === 'ArrowUp' || (e.key === 'k' && e.ctrlKey)) {
       selectedIndex = Math.max(0, selectedIndex - 1);
+      isOpen = true;
     }
 
     if (this.selectedDiv) {
       this.selectedDiv.scrollIntoView({ block: 'end', behaviour: 'smooth' });
     }
 
-    this.setState({ selectedIndex });
+    this.setState({ selectedIndex, isOpen });
 
     return false;
   }

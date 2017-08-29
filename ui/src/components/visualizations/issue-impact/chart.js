@@ -103,7 +103,7 @@ export default class IssueImpact extends React.Component {
     // start at one separator in
     let offsetShare = separatorShare;
 
-    return semi.data.map((file, i) => {
+    return semi.data.map(file => {
       const fileShare = file.length / semi.length * fullFileShare;
 
       if (fileShare === 0) {
@@ -128,9 +128,10 @@ export default class IssueImpact extends React.Component {
       const arcData = getArcData(0, 0, radius, endAngle, startAngle);
 
       const hunkMarkers = _.map(file.hunks, (hunk, i) => {
-        const startShare = Math.min(hunk.oldStart, hunk.newStart) / file.length;
+        const startShare = Math.min(hunk.oldStart, hunk.newStart - 1) / file.length;
         const endShare =
-          Math.max(hunk.oldStart + hunk.oldLines, hunk.newStart + hunk.newLines - 1) / file.length;
+          Math.max(hunk.oldStart + hunk.oldLines - 1, hunk.newStart + hunk.newLines - 1) /
+          file.length;
 
         const startAngle = semi.offset + angleFromShare(offsetShare + fileShare * startShare) / 2;
         const endAngle = semi.offset + angleFromShare(offsetShare + fileShare * endShare) / 2;

@@ -8,7 +8,6 @@ let nextId = 0;
 export default handleActions(
   {
     RECEIVE_CODE_OWNERSHIP_DATA_ERROR: (notifications, action) => {
-      console.log('action:', action);
       return [
         notification('danger', `Error receiving code ownership data: ${action.payload.message}`),
         ...notifications

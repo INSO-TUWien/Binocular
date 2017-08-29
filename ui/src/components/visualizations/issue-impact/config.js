@@ -30,7 +30,6 @@ const mapDispatchToProps = (dispatch /*, ownProps*/) => {
 };
 
 const IssueImpactConfigComponent = props => {
-  console.log(props);
   return (
     <div className={styles.configContainer}>
       <form>

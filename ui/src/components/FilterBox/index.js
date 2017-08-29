@@ -27,7 +27,6 @@ export default class FilterBox extends React.Component {
   }
 
   render() {
-    console.log('options:', this.state.options);
     const filteredOptions = fuzzy
       .filter(this.state.filterText, this.state.options, {
         extract: o => o.label
