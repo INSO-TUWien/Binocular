@@ -8,6 +8,8 @@ import cx from 'classnames';
 import knapsack from 'knapsack-js';
 import chroma from 'chroma-js';
 import Axis from '../code-ownership-river/Axis.js';
+import Asterisk from '../../svg/Asterisk.js';
+import X from '../../svg/X.js';
 
 import { basename, parseTime, ClosingPathContext, getChartColors } from '../../../utils.js';
 import styles from './styles.scss';
@@ -76,10 +78,11 @@ export default class IssueImpact extends React.Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    const { files, start, end, colors } = extractData(nextProps);
+    const { files, start, end, colors, issue } = extractData(nextProps);
 
     this.setState(
       {
+        issue,
         colors,
         files,
         start,
@@ -106,6 +109,7 @@ export default class IssueImpact extends React.Component {
     return semi.data.map(file => {
       const fileShare = file.length / semi.length * fullFileShare;
 
+      console.log('file:', file);
       if (fileShare === 0) {
         return <g />;
       }
@@ -128,10 +132,12 @@ export default class IssueImpact extends React.Component {
       const arcData = getArcData(0, 0, radius, endAngle, startAngle);
 
       const hunkMarkers = _.map(file.hunks, (hunk, i) => {
-        const startShare = Math.min(hunk.oldStart, hunk.newStart - 1) / file.length;
-        const endShare =
-          Math.max(hunk.oldStart + hunk.oldLines - 1, hunk.newStart + hunk.newLines - 1) /
-          file.length;
+        const minLine = Math.min(hunk.oldStart, hunk.newStart);
+        const maxLine = Math.max(hunk.oldStart + hunk.oldLines, hunk.newStart + hunk.newLines);
+        const startShare = minLine / file.length;
+        const endShare = maxLine / file.length;
+
+        console.log('hunk goes from line', minLine, 'to line', maxLine);
 
         const startAngle = semi.offset + angleFromShare(offsetShare + fileShare * startShare) / 2;
         const endAngle = semi.offset + angleFromShare(offsetShare + fileShare * endShare) / 2;
@@ -181,7 +187,8 @@ export default class IssueImpact extends React.Component {
   }
 
   render() {
-    if (!this.props.issue) {
+    console.log('rendering', this.state);
+    if (!this.state.issue) {
       return <svg />;
     }
 
@@ -200,7 +207,7 @@ export default class IssueImpact extends React.Component {
 
     return (
       <Measure bounds onResize={dims => this.updateDimensions(dims.bounds)}>
-        {({ measureRef }) =>
+        {({ measureRef }) => (
           <div
             tabIndex="1"
             ref={measureRef}
@@ -228,11 +235,22 @@ export default class IssueImpact extends React.Component {
                   {fileAxes}
                   <g className={styles.issueAxis}>
                     <Axis orient="bottom" ticks={8} scale={issueScale} />
+                    <g
+                      className={styles.createMarker}
+                      transform={`translate(${issueScale(this.state.issue.createdAt)}, -5)`}>
+                      <Asterisk />
+                    </g>
+                    <g
+                      className={styles.closeMarker}
+                      transform={`translate(${issueScale(this.state.issue.closedAt)}, -5)`}>
+                      <X />
+                    </g>
                   </g>
                 </g>
               </g>
             </svg>
-          </div>}
+          </div>
+        )}
       </Measure>
     );
   }
@@ -270,7 +288,7 @@ function extractData(props) {
       if (!filesById[f.id]) {
         filesById[f.file.id] = {
           name: f.file.path,
-          length: f.lineCount,
+          length: f.file.maxLength,
           hunks: f.hunks.map(h =>
             _.merge({}, h, {
               commit: {
@@ -326,7 +344,10 @@ function extractData(props) {
     MINIMUM_SEMICIRCLE_SEPARATOR_SHARE * (1 + sizeDifference / totalLength);
 
   return {
-    issue: {},
+    issue: {
+      createdAt: parseTime(props.issue.createdAt),
+      closedAt: parseTime(props.issue.closedAt)
+    },
     start: new Date(start),
     end: new Date(end),
     colors,

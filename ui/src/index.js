@@ -48,7 +48,7 @@ const store = createStore(
       }
     },
     issueImpactConfig: {
-      activeIssueId: 5,
+      activeIssueId: 8,
       filteredCommits: []
     },
     config: {

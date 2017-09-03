@@ -10,6 +10,7 @@ import SearchBox from '../../SearchBox';
 import FilterBox from '../../FilterBox';
 import styles from './styles.scss';
 import emojify from 'emoji-replace';
+import { inflect } from 'inflection';
 
 const mapStateToProps = (state /*, ownProps*/) => {
   return {
@@ -50,7 +51,9 @@ const IssueImpactConfigComponent = props => {
 
         {props.issue &&
           <div className="field">
-            <label className="label">Filter commits</label>
+            <label className="label">
+              Filter {props.issue.commits.length} {inflect('commit', props.issue.commits.length)}
+            </label>
             <FilterBox
               options={props.issue.commits.map(c => ({
                 label: `${c.shortSha} ${emojify(c.messageHeader)}`,
@@ -63,7 +66,9 @@ const IssueImpactConfigComponent = props => {
 
         {props.issue &&
           <div className="field">
-            <label className="label">Filter files</label>
+            <label className="label">
+              Filter {props.files.length} {inflect('file', props.files.length)}
+            </label>
             <FilterBox
               options={props.files.map(f => ({
                 label: f,

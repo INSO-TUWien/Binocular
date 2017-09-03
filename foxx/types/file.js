@@ -20,6 +20,10 @@ module.exports = new gql.GraphQLObjectType({
         type: gql.GraphQLString,
         description: 'The path of the file, relative to the repository root'
       },
+      maxLength: {
+        type: gql.GraphQLInt,
+        description: 'The maximum number of lines this file ever had over the course of the whole project'
+      },
       commits: {
         type: new gql.GraphQLList(require('./commit.js')),
         description: 'The commits touching this file',

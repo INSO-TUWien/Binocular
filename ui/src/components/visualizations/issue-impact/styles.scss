@@ -10,6 +10,18 @@
     stroke: black;
     stroke-width: 2;
   }
+
+  .createMarker {
+    stroke: $red;
+    fill: $red;
+  }
+
+  .closeMarker {
+    path {
+      stroke: $green;
+      fill: $green;
+    }
+  }
 }
 
 .fileAxis {

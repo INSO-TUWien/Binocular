@@ -11,8 +11,8 @@ import _ from 'lodash';
 import Axis from './Axis.js';
 import GridLines from './GridLines.js';
 import CommitMarker from './CommitMarker.js';
-import Asterisk from '../../svg/Asterisk.js';
-import X from '../../svg/X.js';
+import AsteriskMarker from '../../svg/AsteriskMarker.js';
+import XMarker from '../../svg/XMarker.js';
 import StackedArea from './StackedArea.js';
 import Legend from '../../Legend';
 
@@ -324,8 +324,8 @@ export default class CodeOwnershipRiver extends React.Component {
                 {this.props.highlightedIssue &&
                   <g clipPath="url(#chart)" className={cx(styles.highlightedIssue)}>
                     <defs>
-                      <Asterisk markerClass={styles.lineMarker} />
-                      <X markerClass={styles.lineMarker} />
+                      <AsteriskMarker markerClass={styles.lineMarker} />
+                      <XMarker markerClass={styles.lineMarker} />
                     </defs>
                     <line
                       className={styles.highlightedIssueLine}

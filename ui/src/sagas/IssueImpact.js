@@ -48,6 +48,7 @@ export const fetchIssueImpactData = fetchFactory(
               file {
                 id
                 path
+                maxLength
               }
             }
           }
