@@ -5,6 +5,7 @@
 const ctx = require('./lib/context.js');
 
 const opn = require('opn');
+const _ = require('lodash');
 const Promise = require('bluebird');
 
 Promise.config({
@@ -14,8 +15,7 @@ Promise.config({
 const Repository = require('./lib/git.js');
 const { app, argv, httpServer, io } = require('./lib/context.js');
 const config = require('./lib/config.js');
-const LocalIndexer = require('./lib/indexers/LocalIndexer.js');
-const GitLabIndexer = require('./lib/indexers/GitLabIndexer.js');
+const idx = require('./lib/indexers');
 const ProgressReporter = require('./lib/progress-reporter.js');
 const path = require('path');
 const Commit = require('./lib/models/Commit.js');
@@ -41,7 +41,11 @@ httpServer.listen(port, function() {
   }
 });
 
-let localIndexer, gitlabIndexer;
+const indexers = {
+  vcs: null,
+  its: null,
+  ci: null
+};
 
 let reporter = new ProgressReporter(io);
 
@@ -54,15 +58,7 @@ Repository.fromPath(ctx.targetPath)
 
     return ensureDb(repo);
   })
-  .then(function(repo) {
-    localIndexer = new LocalIndexer(repo, reporter);
-    gitlabIndexer = new GitLabIndexer(repo, reporter);
-
-    return guessGitLabApiUrl(repo);
-  })
-  .delay(2500)
-  .then(function(url) {
-    config.ensure('gitlab.url', url);
+  .then(function() {
     config.on('updated', () => {
       reIndex(); // do not wait for indexing to complete on config update
 
@@ -73,26 +69,28 @@ Repository.fromPath(ctx.targetPath)
     return reIndex();
 
     function reIndex() {
-      gitlabIndexer.configure(config.get().gitlab);
+      indexers.vcs = idx.makeVCSIndexer(ctx.repo, reporter);
 
-      const indexers = [localIndexer];
-      if (ctx.argv.gitlab) {
-        indexers.push(gitlabIndexer);
+      if (ctx.argv.its) {
+        indexers.its = idx.makeITSIndexer(ctx.repo, reporter);
       }
 
-      return (Promise.map(indexers, indexer => indexer.index())
-          .then(() => Commit.deduceStakeholders())
-          .then(() => Issue.deduceStakeholders())
-          // .then(() => ctx.models.BlameHunk.deduceUsers())
-          .catch(e => e.name === 'Gitlab401Error', function() {
-            console.warn(
-              'Unable to access GitLab API. Please configure a valid private access token in the UI.'
-            );
-          }) );
+      if (ctx.argv.ci) {
+        indexers.ci = idx.makeCIIndexer(ctx.repo, reporter);
+      }
+
+      return Promise.props(indexers)
+        .thenReturn(_.values(indexers))
+        .filter(indexer => indexer !== null)
+        .map(indexer => indexer.index())
+        .then(() => Commit.deduceStakeholders())
+        .then(() => Issue.deduceStakeholders())
+        .catch(e => e.name === 'Gitlab401Error', function() {
+          console.warn(
+            'Unable to access GitLab API. Please configure a valid private access token in the UI.'
+          );
+        });
     }
-  })
-  .then(function() {
-    return guessGitLabApiUrl(ctx.repo);
   });
 
 process.on('SIGINT', function() {
@@ -104,20 +102,8 @@ process.on('SIGINT', function() {
   console.log('Let me finish up here, ... (Ctrl+C to force quit)');
 
   ctx.quit();
-  localIndexer.stop();
-  gitlabIndexer.stop();
+  _(indexers).values().each(idx => idx.stop());
 });
-
-function guessGitLabApiUrl(repo) {
-  return repo.getOriginUrl().then(function(url) {
-    const match = url.match(/git@(.*):(.*)\/(.*)\.git/);
-    if (match) {
-      return `https://${match[1]}`;
-    } else {
-      return 'https://gitlab.com';
-    }
-  });
-}
 
 function ensureDb(repo) {
   return ctx.db
