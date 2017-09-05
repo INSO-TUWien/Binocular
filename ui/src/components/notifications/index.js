@@ -2,7 +2,7 @@
 
 import { connect } from 'react-redux';
 import Notifications from './Notifications.js';
-import { removeNotification } from '../../sagas';
+import { removeNotification } from '../../sagas/notifications.js';
 
 const mapStateToProps = (state = [] /*, ownProps*/) => {
   return {

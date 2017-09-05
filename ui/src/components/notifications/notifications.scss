@@ -1,8 +1,9 @@
 .notifications {
   float: left;
-  position: relative;
+  position: absolute;
   right: 50%;
   margin-top: 10px;
+  clear: both;
 }
 
 .enter {
@@ -14,10 +15,10 @@
   transition: opacity 500ms ease-in;
 }
 
-.leave {
+.exit {
   opacity: 1;
 }
 
-.leaveActive {
+.exitActive {
   transition: opacity 300ms easy-in;
 }

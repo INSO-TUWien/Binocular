@@ -1,21 +1,27 @@
 'use strict';
 
 import { handleActions } from 'redux-actions';
+import { notification } from '../sagas/notifications.js';
 import _ from 'lodash';
-
-let nextId = 0;
 
 export default handleActions(
   {
     RECEIVE_CODE_OWNERSHIP_DATA_ERROR: (notifications, action) => {
       return [
-        notification('danger', `Error receiving code ownership data: ${action.payload.message}`),
+        notification(`Error receiving code ownership data: ${action.payload.message}`, 'danger'),
+        ...notifications
+      ];
+    },
+
+    RECEIVE_ISSUE_IMPACT_DATA_ERROR: (notifications, action) => {
+      return [
+        notification(`Error receiving issue-impact data: ${action.payload.message}`, 'danger'),
         ...notifications
       ];
     },
 
     ADD_NOTIFICATION: (notifications, action) => {
-      return [...notifications, notification(action.payload.type, action.payload.message)];
+      return [...notifications, action.payload];
     },
 
     REMOVE_NOTIFICATION: (notifications, action) =>
@@ -23,7 +29,3 @@ export default handleActions(
   },
   []
 );
-
-function notification(type, message) {
-  return { id: nextId++, type, message };
-}

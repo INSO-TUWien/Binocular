@@ -5,6 +5,7 @@ import { createAction } from 'redux-actions';
 import { endpointUrl } from '../utils.js';
 import { fetchFactory, timestampedActionFactory } from './utils.js';
 import { put, takeEvery } from 'redux-saga/effects';
+import { addNotification } from './notifications.js';
 
 export const requestConfig = createAction('REQUEST_CONFIGURATION');
 export const receiveConfig = timestampedActionFactory('RECEIVE_CONFIGURATION');
@@ -39,5 +40,6 @@ export function* watchConfig() {
   yield takeEvery('CONFIRM_CONFIG', function*(a) {
     yield* postConfig(a.payload);
     yield put(hideConfig());
+    yield put(addNotification('Configuration updated successfully'));
   });
 }

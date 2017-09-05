@@ -1,27 +1,26 @@
 'use strict';
 
 import { createAction } from 'redux-actions';
-import { select, takeEvery, fork, throttle } from 'redux-saga/effects';
+import { select, takeEvery, fork, throttle, put } from 'redux-saga/effects';
 
 import { fetchConfig, watchConfig } from './config.js';
 import { fetchCodeOwnershipData } from './CodeOwnershipRiver.js';
 import { fetchIssueImpactData, watchSetActiveIssue } from './IssueImpact.js';
+import { watchNotifications } from './notifications.js';
 
 export const Visualizations = ['ISSUE_IMPACT', 'CODE_OWNERSHIP_RIVER', 'HOTSPOT_DIALS'];
 
 export const switchVisualization = createAction('SWITCH_VISUALIZATION', vis => vis);
-export const removeNotification = createAction('REMOVE_NOTIFICATION');
-export const addNotification = createAction('ADD_NOTIFICATION');
 export const showCommit = createAction('SHOW_COMMIT');
 
 export function* root() {
   yield* fetchConfig();
   yield* refresh();
   yield fork(watchShowCommits);
-  yield fork(watchMessages);
   yield fork(watchConfig);
   yield fork(watchVisualization);
   yield fork(watchSetActiveIssue);
+  yield fork(watchNotifications);
 }
 
 function* watchVisualization() {

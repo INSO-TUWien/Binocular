@@ -109,7 +109,6 @@ export default class IssueImpact extends React.Component {
     return semi.data.map(file => {
       const fileShare = file.length / semi.length * fullFileShare;
 
-      console.log('file:', file);
       if (fileShare === 0) {
         return <g />;
       }
@@ -136,8 +135,6 @@ export default class IssueImpact extends React.Component {
         const maxLine = Math.max(hunk.oldStart + hunk.oldLines, hunk.newStart + hunk.newLines);
         const startShare = minLine / file.length;
         const endShare = maxLine / file.length;
-
-        console.log('hunk goes from line', minLine, 'to line', maxLine);
 
         const startAngle = semi.offset + angleFromShare(offsetShare + fileShare * startShare) / 2;
         const endAngle = semi.offset + angleFromShare(offsetShare + fileShare * endShare) / 2;
@@ -187,7 +184,6 @@ export default class IssueImpact extends React.Component {
   }
 
   render() {
-    console.log('rendering', this.state);
     if (!this.state.issue) {
       return <svg />;
     }
@@ -207,7 +203,7 @@ export default class IssueImpact extends React.Component {
 
     return (
       <Measure bounds onResize={dims => this.updateDimensions(dims.bounds)}>
-        {({ measureRef }) => (
+        {({ measureRef }) =>
           <div
             tabIndex="1"
             ref={measureRef}
@@ -249,8 +245,7 @@ export default class IssueImpact extends React.Component {
                 </g>
               </g>
             </svg>
-          </div>
-        )}
+          </div>}
       </Measure>
     );
   }
