@@ -7,9 +7,12 @@ import * as d3 from 'd3';
 import cx from 'classnames';
 import knapsack from 'knapsack-js';
 import chroma from 'chroma-js';
+import TransitionGroup from 'react-transition-group/TransitionGroup';
+import CSSTransition from 'react-transition-group/CSSTransition';
 import Axis from '../code-ownership-river/Axis.js';
 import Asterisk from '../../svg/Asterisk.js';
 import X from '../../svg/X.js';
+import hunkTransitions from './hunkTransitions.scss';
 
 import { basename, parseTime, ClosingPathContext, getChartColors } from '../../../utils.js';
 import styles from './styles.scss';
@@ -153,17 +156,23 @@ export default class IssueImpact extends React.Component {
         d.closeToPath(closer, false);
         const color = this.state.colors[hunk.commit.sha];
 
+        console.log('hunkTransitions:', hunkTransitions);
         return (
-          <g key={i}>
-            <path
-              className={styles.changeIndicator}
-              d={d}
-              style={{
-                fill: chroma(color).alpha(0.6).css(),
-                stroke: chroma(color).darken().hex()
-              }}
-            />
-          </g>
+          <CSSTransition
+            classNames={hunkTransitions}
+            timeout={10000}
+            key={`${hunk.commit.sha}-${file.path}-${i}`}>
+            <g>
+              <path
+                className={styles.changeIndicator}
+                d={d}
+                style={{
+                  fill: chroma(color).alpha(0.6).css(),
+                  stroke: chroma(color).darken().hex()
+                }}
+              />
+            </g>
+          </CSSTransition>
         );
       });
 
@@ -173,7 +182,9 @@ export default class IssueImpact extends React.Component {
 
       return (
         <g className={styles.fileAxis}>
-          {hunkMarkers}
+          <TransitionGroup component="g">
+            {hunkMarkers}
+          </TransitionGroup>
           <path d={arcData} />
           <text transform={`${textTranslate} ${textRotate}`} style={{ textAnchor }}>
             {basename(file.name)}
