@@ -4,6 +4,7 @@ const gql = require('graphql-sync');
 const arangodb = require('@arangodb');
 const db = arangodb.db;
 const aql = arangodb.aql;
+const pagination = require('./pagination.js');
 
 const commits = db._collection('commits');
 const files = db._collection('files');
@@ -16,14 +17,15 @@ const queryType = new gql.GraphQLObjectType({
     return {
       commits: {
         type: new gql.GraphQLList(require('./types/commit.js')),
-        args: {},
-        resolve(/*root, args*/) {
+        args: pagination.paginationArgs,
+        resolve(root, args) {
           return db
             ._query(
               aql`FOR commit
                   IN
                   ${commits}
                   SORT commit.date ASC
+                  ${pagination.limitClause(args)}
                     RETURN commit`
             )
             .toArray();
@@ -55,13 +57,14 @@ const queryType = new gql.GraphQLObjectType({
       },
       stakeholders: {
         type: new gql.GraphQLList(require('./types/stakeholder.js')),
-        args: {},
-        resolve(/*root, args*/) {
+        args: pagination.paginationArgs,
+        resolve(root, args) {
           return db
             ._query(
               aql`FOR stakeholder
                   IN
                   ${stakeholders}
+                    ${pagination.limitClause(args)}
                     RETURN stakeholder`
             )
             .toArray();
@@ -69,14 +72,15 @@ const queryType = new gql.GraphQLObjectType({
       },
       issues: {
         type: new gql.GraphQLList(require('./types/issue.js')),
-        args: {},
-        resolve(/*root, args*/) {
+        args: pagination.paginationArgs,
+        resolve(root, args) {
           return db
             ._query(
               aql`FOR issue
                   IN
                   ${issues}
                     SORT issue.createdAt ASC
+                    ${pagination.limitClause(args)}
                     RETURN issue`
             )
             .toArray();

@@ -1,12 +1,12 @@
 'use strict';
 
 const gql = require('graphql-sync');
-const jsonType = require('./json.js');
 const arangodb = require('@arangodb');
 const db = arangodb.db;
 const aql = arangodb.aql;
 const commitsToFiles = db._collection('commits-files');
 const commitsToStakeholders = db._collection('commits-stakeholders');
+const pagination = require('../pagination.js');
 
 module.exports = new gql.GraphQLObjectType({
   name: 'Commit',
@@ -54,13 +54,14 @@ module.exports = new gql.GraphQLObjectType({
       files: {
         type: new gql.GraphQLList(require('./fileInCommit.js')),
         description: 'The files touched by this commit',
-        args: {},
-        resolve(commit /*, args*/) {
+        args: pagination.paginationArgs,
+        resolve(commit, args) {
           return db
             ._query(
               aql`
               FOR file, edge
                 IN INBOUND ${commit} ${commitsToFiles}
+                ${pagination.limitClause(args)}
                 RETURN {
                   file,
                   lineCount: edge.lineCount,

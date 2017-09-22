@@ -5,6 +5,7 @@ const arangodb = require('@arangodb');
 const db = arangodb.db;
 const aql = arangodb.aql;
 const commitsToStakeholders = db._collection('commits-stakeholders');
+const pagination = require('../pagination.js');
 
 module.exports = new gql.GraphQLObjectType({
   name: 'Stakeholder',
@@ -34,12 +35,14 @@ module.exports = new gql.GraphQLObjectType({
       commits: {
         type: new gql.GraphQLList(require('./commit.js')),
         description: 'The commits made by this stakeholder',
-        resolve(stakeholder /*, args*/) {
+        args: pagination.paginationArgs,
+        resolve(stakeholder, args) {
           return db
             ._query(
               aql`FOR commit
                   IN
                   OUTBOUND ${stakeholder} ${commitsToStakeholders}
+                  ${pagination.limitClause(args)}
                     RETURN commit`
             )
             .toArray();

@@ -6,6 +6,7 @@ const db = arangodb.db;
 const aql = arangodb.aql;
 const commits = db._collection('commits');
 const issuesToStakeholders = db._collection('issues-stakeholders');
+const pagination = require('../pagination.js');
 
 module.exports = new gql.GraphQLObjectType({
   name: 'Issue',
@@ -84,26 +85,27 @@ module.exports = new gql.GraphQLObjectType({
       commits: {
         type: new gql.GraphQLList(require('./commit.js')),
         description: 'All commits mentioning this issue',
-        resolve(issue /*, args*/) {
-          const ret = [];
-          issue.mentions.forEach(m => {
-            if (m.commit) {
-              try {
-                ret.push(commits.document(m.commit));
-              } catch (e) {
-                console.warn(e);
-              }
-            }
-          });
-
-          return ret;
+        args: pagination.paginationArgs,
+        resolve(issue, args) {
+          return db._query(
+            aql`
+                FOR commit IN (
+                    FOR mention IN ${issue.mentions || []}
+                      FILTER mention.commit != NULL
+                      RETURN DOCUMENT(CONCAT("commits/", mention.commit))
+                    )
+                    FILTER commit != NULL
+                    ${pagination.limitClause(args)}
+                    RETURN commit
+               `
+          );
         }
       },
       mentions: {
         type: new gql.GraphQLList(gql.GraphQLString),
         description: 'The shas of all commits mentioning this issue',
         resolve(issue) {
-          return issue.mentions.map(m => m.commit);
+          return (issue.mentions || []).map(m => m.commit);
         }
       }
     };
