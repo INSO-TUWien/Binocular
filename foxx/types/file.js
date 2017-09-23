@@ -5,7 +5,7 @@ const arangodb = require('@arangodb');
 const db = arangodb.db;
 const aql = arangodb.aql;
 const commitsToFiles = db._collection('commits-files');
-const pagination = require('../pagination.js');
+const paginated = require('./paginated.js');
 
 module.exports = new gql.GraphQLObjectType({
   name: 'File',
@@ -24,22 +24,16 @@ module.exports = new gql.GraphQLObjectType({
         type: gql.GraphQLInt,
         description: 'The maximum number of lines this file ever had over the course of the whole project'
       },
-      commits: {
+      commits: paginated({
         type: new gql.GraphQLList(require('./commit.js')),
         description: 'The commits touching this file',
-        args: pagination.paginationArgs,
-        resolve(file, args) {
-          return db
-            ._query(
-              aql`FOR commit
-                  IN
-                  OUTBOUND ${file} ${commitsToFiles}
-                    ${pagination.limitClause(args)}
-                    RETURN commit`
-            )
-            .toArray();
-        }
-      }
+        query: (file, args, limit) => aql`
+          FOR commit
+          IN
+          OUTBOUND ${file} ${commitsToFiles}
+            ${limit}
+            RETURN commit`
+      })
     };
   }
 });

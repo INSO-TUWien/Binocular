@@ -6,7 +6,7 @@ const db = arangodb.db;
 const aql = arangodb.aql;
 const commitsToFiles = db._collection('commits-files');
 const commitsToStakeholders = db._collection('commits-stakeholders');
-const pagination = require('../pagination.js');
+const paginated = require('./paginated.js');
 
 module.exports = new gql.GraphQLObjectType({
   name: 'Commit',
@@ -51,26 +51,19 @@ module.exports = new gql.GraphQLObjectType({
           }
         })
       },
-      files: {
-        type: new gql.GraphQLList(require('./fileInCommit.js')),
+      files: paginated({
+        type: require('./fileInCommit.js'),
         description: 'The files touched by this commit',
-        args: pagination.paginationArgs,
-        resolve(commit, args) {
-          return db
-            ._query(
-              aql`
-              FOR file, edge
-                IN INBOUND ${commit} ${commitsToFiles}
-                ${pagination.limitClause(args)}
-                RETURN {
-                  file,
-                  lineCount: edge.lineCount,
-                  hunks: edge.hunks
-                }`
-            )
-            .toArray();
-        }
-      },
+        query: (commit, args, limit) => aql`
+          FOR file, edge
+            IN INBOUND ${commit} ${commitsToFiles}
+            ${limit}
+            RETURN {
+              file,
+              lineCount: edge.lineCount,
+              hunks: edge.hunks
+            }`
+      }),
       stakeholder: {
         type: require('./stakeholder.js'),
         description: 'The author of this commit',

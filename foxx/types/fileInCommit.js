@@ -1,7 +1,6 @@
 'use strict';
 
 const gql = require('graphql-sync');
-const arangodb = require('@arangodb');
 
 module.exports = new gql.GraphQLObjectType({
   name: 'FileInCommit',

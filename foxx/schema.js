@@ -4,7 +4,7 @@ const gql = require('graphql-sync');
 const arangodb = require('@arangodb');
 const db = arangodb.db;
 const aql = arangodb.aql;
-const pagination = require('./pagination.js');
+const paginated = require('./types/paginated.js');
 
 const commits = db._collection('commits');
 const files = db._collection('files');
@@ -15,22 +15,14 @@ const queryType = new gql.GraphQLObjectType({
   name: 'Query',
   fields() {
     return {
-      commits: {
-        type: new gql.GraphQLList(require('./types/commit.js')),
-        args: pagination.paginationArgs,
-        resolve(root, args) {
-          return db
-            ._query(
-              aql`FOR commit
-                  IN
-                  ${commits}
-                  SORT commit.date ASC
-                  ${pagination.limitClause(args)}
-                    RETURN commit`
-            )
-            .toArray();
-        }
-      },
+      commits: paginated({
+        type: require('./types/commit.js'),
+        query: (root, args, limit) => aql`
+          FOR commit IN ${commits}
+            SORT commit.date ASC
+            ${limit}
+            RETURN commit`
+      }),
       commit: {
         type: require('./types/commit.js'),
         args: {
@@ -55,37 +47,25 @@ const queryType = new gql.GraphQLObjectType({
           return files.firstExample({ path: args.path });
         }
       },
-      stakeholders: {
-        type: new gql.GraphQLList(require('./types/stakeholder.js')),
-        args: pagination.paginationArgs,
-        resolve(root, args) {
-          return db
-            ._query(
-              aql`FOR stakeholder
-                  IN
-                  ${stakeholders}
-                    ${pagination.limitClause(args)}
-                    RETURN stakeholder`
-            )
-            .toArray();
-        }
-      },
-      issues: {
-        type: new gql.GraphQLList(require('./types/issue.js')),
-        args: pagination.paginationArgs,
-        resolve(root, args) {
-          return db
-            ._query(
-              aql`FOR issue
-                  IN
-                  ${issues}
-                    SORT issue.createdAt ASC
-                    ${pagination.limitClause(args)}
-                    RETURN issue`
-            )
-            .toArray();
-        }
-      },
+      stakeholders: paginated({
+        type: require('./types/stakeholder.js'),
+        query: (root, args, limit) => aql`
+          FOR stakeholder
+            IN
+            ${stakeholders}
+            ${limit}
+              RETURN stakeholder`
+      }),
+      issues: paginated({
+        type: require('./types/issue.js'),
+        query: (root, args, limit) => aql`
+          FOR issue
+          IN
+          ${issues}
+            SORT issue.createdAt ASC
+            ${limit}
+            RETURN issue`
+      }),
       issue: {
         type: require('./types/issue.js'),
         args: {

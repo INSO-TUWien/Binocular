@@ -21,23 +21,29 @@ export const fetchCodeOwnershipData = fetchFactory(
     return yield reachGraphQL(
       `${config.data.arango.webUrl}_db/pupil-${config.data.repoName}/pupil-ql`,
       `{
-         commits {,
-           sha,
-           date,
-           messageHeader,
-           signature,
-           stats {
-             additions,
-             deletions
+         commits {
+           count
+           data {
+             sha,
+             date,
+             messageHeader,
+             signature,
+             stats {
+               additions,
+               deletions
+             }
            }
          },
          issues {
-           iid,
-           title,
-           createdAt,
-           closedAt,
-           webUrl,
-           mentions
+           count
+           data {
+             iid,
+             title,
+             createdAt,
+             closedAt,
+             webUrl,
+             mentions
+           }
          }
       }`,
       {}

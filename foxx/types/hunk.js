@@ -1,8 +1,6 @@
 'use strict';
 
 const gql = require('graphql-sync');
-const arangodb = require('@arangodb');
-const db = arangodb.db;
 
 module.exports = new gql.GraphQLObjectType({
   name: 'Hunk',
