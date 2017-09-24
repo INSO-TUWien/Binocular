@@ -10,7 +10,7 @@ const mapStateToProps = (state /*, ownProps*/) => {
   const issues = cfg.showIssues ? state.codeOwnershipData.data.issues : [];
 
   return {
-    commits: state.codeOwnershipData.data.commits,
+    data: state.codeOwnershipData.data,
     commitAttribute: state.codeOwnershipConfig.commitAttribute,
     issues,
     highlightedIssue: state.codeOwnershipConfig.highlightedIssue

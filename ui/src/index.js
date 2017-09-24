@@ -31,10 +31,7 @@ const store = createStore(
       { id: 'HOTSPOT_DIALS', label: 'Hotspot Dials' }
     ],
     codeOwnershipData: {
-      data: {
-        commits: [],
-        issues: []
-      }
+      data: []
     },
     codeOwnershipConfig: {
       showIssues: true,

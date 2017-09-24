@@ -8,6 +8,7 @@ const qb = require('aqb');
 const paginated = require('./types/paginated.js');
 const queryHelpers = require('./query-helpers.js');
 const Timestamp = require('./types/Timestamp.js');
+const Sort = require('./types/Sort.js');
 
 const commits = db._collection('commits');
 const files = db._collection('files');
@@ -22,18 +23,16 @@ const queryType = new gql.GraphQLObjectType({
         type: require('./types/commit.js'),
         args: {
           since: { type: Timestamp },
-          until: { type: Timestamp }
+          until: { type: Timestamp },
+          sort: { type: Sort }
         },
         query: (root, args, limit) => {
-          console.log('got args:', args);
-          let q = qb.for('commit').in('commits').sort('commit.date', 'ASC');
+          let q = qb.for('commit').in('commits').sort('commit.date', args.sort);
 
           q = queryHelpers.addDateFilter('commit.date', 'gte', args.since, q);
           q = queryHelpers.addDateFilter('commit.date', 'lte', args.until, q);
 
           q = q.limit(limit.offset, limit.count).return('commit');
-
-          console.log('with since:', q.toAQL());
 
           return q;
         }
@@ -45,6 +44,16 @@ const queryType = new gql.GraphQLObjectType({
             description: 'sha of the commit',
             type: new gql.GraphQLNonNull(gql.GraphQLString)
           }
+        },
+        resolve(root, args) {
+          return commits.document(args.sha);
+        }
+      },
+      latestCommit: {
+        type: require('./types/commit.js'),
+        args: {
+          since: { type: Timestamp },
+          until: { type: Timestamp }
         },
         resolve(root, args) {
           return commits.document(args.sha);

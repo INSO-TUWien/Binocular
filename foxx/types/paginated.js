@@ -71,7 +71,7 @@ function getCount(innerSchema, root, args) {
 
 function limitClause(args) {
   if (!args.perPage) {
-    return { toAQL: () => '', offset: 0 };
+    return { toAQL: () => '', offset: 0, count: null };
   }
 
   const offset = ((args.page || 1) - 1) * args.perPage;

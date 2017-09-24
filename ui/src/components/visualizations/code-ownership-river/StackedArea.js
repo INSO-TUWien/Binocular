@@ -16,6 +16,7 @@ const StackedArea = props => {
         .x(props.x)
         .y(d => {
           const values = _.take(series, i + 1).map(s => s.extract(d));
+          console.log(values);
           return props.y(values);
         })
         .context(path),

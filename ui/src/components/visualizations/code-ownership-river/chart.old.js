@@ -18,10 +18,27 @@ import Legend from '../../Legend';
 
 import { parseTime, getChartColors } from '../../../utils.js';
 
+const openIssuesLegend = {
+  name: 'Open issues',
+  style: {
+    fill: '#ff9eb1',
+    stroke: '#ff3860'
+  }
+};
+
+const closedIssuesLegend = {
+  name: 'Closed issues',
+  style: {
+    fill: '#73e79c'
+  }
+};
+
 export default class CodeOwnershipRiver extends React.Component {
   constructor(props) {
     super(props);
 
+    const { commits, highlightedCommits } = extractCommitData(props);
+    const issues = extractIssueData(props);
     this.elems = {};
     this.state = {
       dirty: true,
@@ -34,7 +51,12 @@ export default class CodeOwnershipRiver extends React.Component {
         hMargin: 0
       },
       transform: d3.zoomIdentity,
-      isPanning: false
+      commits,
+      issues,
+      highlightedIssueData: _.find(issues, i => i.iid === _.get(props, 'highlightedIssue.iid')),
+      highlightedCommits,
+      isPanning: false,
+      hoverHint: null
     };
 
     this.scales = {
@@ -42,7 +64,7 @@ export default class CodeOwnershipRiver extends React.Component {
       y: d3.scaleLinear().rangeRound([0, 0])
     };
 
-    this.updateDomain(props.data);
+    this.updateDomain(commits, issues);
   }
 
   updateZoom(evt) {
@@ -75,19 +97,19 @@ export default class CodeOwnershipRiver extends React.Component {
     });
   }
 
-  updateDomain(data) {
-    if (!data) {
-      return;
-    }
-
-    const dateExtent = d3.extent(data, d => d.date);
-    const commitCountExtent = d3.extent(data, d => d.commits.total);
-    const issueCountExtent = d3.extent(data, t => t.issues.total);
+  updateDomain(commits, issues) {
+    const commitDateExtent = d3.extent(commits, c => c.date);
+    const commitCountExtent = d3.extent(commits, c => _(c.totalStats).values().sumBy('count'));
+    const issueDateExtent = d3.extent(issues, t => t.date);
+    const issueCountExtent = d3.extent(issues, t => t.count);
 
     const min = arr => _.min(_.compact(arr));
     const max = arr => _.max(_.compact(arr));
 
-    this.scales.x.domain(dateExtent);
+    this.scales.x.domain([
+      min([commitDateExtent[0], issueDateExtent[0]]),
+      max([commitDateExtent[1], issueDateExtent[1]])
+    ]);
     this.scales.y.domain([
       min([commitCountExtent[0], issueCountExtent[0]]),
       max([commitCountExtent[1], issueCountExtent[1]])
@@ -95,11 +117,30 @@ export default class CodeOwnershipRiver extends React.Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    this.updateDomain(nextProps);
+    const { commits, highlightedCommits } = extractCommitData(nextProps);
+    const issues = extractIssueData(nextProps);
+    this.updateDomain(commits, issues);
+
+    this.setState(
+      {
+        commits,
+        issues,
+        highlightedIssueData: _.find(
+          issues,
+          i => i.iid === _.get(nextProps, 'highlightedIssue.iid')
+        ),
+        highlightedCommits
+      },
+      () => {
+        if (!this.state.dirty) {
+          this.resetZoom();
+        }
+      }
+    );
   }
 
   render() {
-    if (!this.props.data || this.props.data.length === 0) {
+    if (this.state.commits.length + this.state.issues.length === 0) {
       return <svg />;
     }
 
@@ -115,22 +156,104 @@ export default class CodeOwnershipRiver extends React.Component {
     const fullDomain = this.scales.x.domain();
     const visibleDomain = x.domain();
 
-    const finalStats = _.last(this.props.data).commits.totalStats;
-    const commitColors = getChartColors('spectral', _.keys(finalStats).sort());
     const fullSpan = fullDomain[1].getTime() - fullDomain[0].getTime();
     const visibleSpan = visibleDomain[1].getTime() - visibleDomain[0].getTime();
 
-    const commitSeries = _.map(finalStats, (stats, signature) => {
-      return {
-        extract: c => {
-          const stats = c.totalStats[signature];
-          return stats ? stats.count : 0;
+    const commitsPerMillisecond = this.state.commits.length / fullSpan;
+    const estimatedVisibleCommitCount = commitsPerMillisecond * visibleSpan;
+
+    const buildCommitMarker = c => {
+      return (
+        <CommitMarker
+          key={c.sha}
+          commit={c}
+          x={x(c.date)}
+          y={y(_(c.totalStats).values().sumBy('count'))}
+          onClick={() => this.props.onCommitClick(c)}
+        />
+      );
+    };
+
+    const commitMarkers = this.state.commits.map(buildCommitMarker);
+
+    let highlightedIssueCoords, highlightedCommitMarkers;
+    if (this.props.highlightedIssue) {
+      const hid = this.state.highlightedIssueData;
+      highlightedIssueCoords = {
+        start: {
+          x: x(hid.date),
+          y: y(hid.openCount + hid.closedCount)
         },
+        end: {
+          x: hid.closedAt ? x(hid.closedAt) : today,
+          y: y(hid.openCount + hid.closedCount)
+        }
+      };
+
+      const start = x(parseTime(this.props.highlightedIssue.createdAt).getTime());
+      const end = x(
+        (this.props.highlightedIssue.closedAt
+          ? parseTime(this.props.highlightedIssue.closedAt)
+          : new Date()).getTime()
+      );
+      const dist = end - start;
+      const avg = dist / this.state.highlightedCommits.length;
+
+      highlightedCommitMarkers = this.state.highlightedCommits.map((c, i) => {
+        return (
+          <line
+            className={styles.highlightedCommit}
+            key={c.sha}
+            x1={x(c.date)}
+            y1={y(_(c.totalStats).values().sumBy('count'))}
+            x2={start + i * avg}
+            y2={highlightedIssueCoords.start.y}
+          />
+        );
+      });
+    }
+
+    const finalStats = _.last(this.state.commits).totalStats;
+    const commitColors = getChartColors('spectral', _.keys(finalStats).sort());
+
+    const commitAttribute = this.props.commitAttribute || 'count';
+
+    const commitLegend = [];
+    const commitSeries = _.map(finalStats, (stats, signature) => {
+      const legend = {
+        name: (commitAttribute === 'count' ? 'Commits by ' : 'Changes by ') + signature,
         style: {
           fill: commitColors[signature]
         }
       };
+      commitLegend.push(legend);
+
+      return {
+        extract: c => {
+          const stats = c.totalStats[signature];
+          return stats ? stats[commitAttribute] : 0;
+        },
+        style: {
+          fill: commitColors[signature]
+        },
+        onMouseEnter: () => this.activateLegend(legend),
+        onMouseLeave: () => this.activateLegend(null)
+      };
     });
+
+    const legend = [
+      {
+        name: 'Commits by author',
+        subLegend: _.sortBy(commitLegend, c => c.name)
+      }
+    ];
+
+    if (this.state.issues.length > 0) {
+      legend.push({
+        name: 'Issues by state',
+        subLegend: [openIssuesLegend, closedIssuesLegend]
+      });
+    }
 
     return (
       <Measure bounds onResize={dims => this.updateDimensions(dims.bounds)}>
@@ -174,6 +297,55 @@ export default class CodeOwnershipRiver extends React.Component {
                     y={values => y(_.sum(values))}
                     fillToRight={today}
                   />
+                  {estimatedVisibleCommitCount < 30 && commitMarkers}
+                </g>
+                <g clipPath="url(#chart)" className={cx(styles.openIssuesCount)}>
+                  <StackedArea
+                    data={this.state.issues}
+                    series={[
+                      {
+                        extract: i => i.closedCount,
+                        className: styles.closedIssuesCount,
+                        onMouseEnter: () => this.activateLegend(closedIssuesLegend),
+                        onMouseLeave: () => this.activateLegend(null)
+                      },
+                      {
+                        extract: i => i.openCount,
+                        className: styles.openIssuesCount,
+                        onMouseEnter: () => this.activateLegend(openIssuesLegend),
+                        onMouseLeave: () => this.activateLegend(null)
+                      }
+                    ]}
+                    x={i => x(i.date)}
+                    y={values => y(_.sum(values))}
+                    fillToRight={today}
+                  />
+                </g>
+                {this.props.highlightedIssue &&
+                  <g clipPath="url(#chart)" className={cx(styles.highlightedIssue)}>
+                    <defs>
+                      <AsteriskMarker markerClass={styles.lineMarker} />
+                      <XMarker markerClass={styles.lineMarker} />
+                    </defs>
+                    <line
+                      className={styles.highlightedIssueLine}
+                      x1={highlightedIssueCoords.start.x}
+                      y1={highlightedIssueCoords.start.y}
+                      x2={highlightedIssueCoords.end.x}
+                      y2={highlightedIssueCoords.end.y}
+                    />
+                    <line
+                      className={styles.lineMarker}
+                      x1={highlightedIssueCoords.start.x}
+                      y1={highlightedIssueCoords.start.y}
+                      x2={highlightedIssueCoords.end.x}
+                      y2={highlightedIssueCoords.end.y}
+                      markerStart="url(#asterisk)"
+                      markerEnd={this.state.highlightedIssueData.closedAt ? 'url(#x)' : ''}
+                    />
+                  </g>}
+                <g clipPath="url(#chart)" className={cx(styles.closedIssuesCount)}>
+                  {highlightedCommitMarkers}
                 </g>
                 <g className={styles.today} clipPath="url(#x-only)">
                   <text x={today} y={-10}>
@@ -182,6 +354,11 @@ export default class CodeOwnershipRiver extends React.Component {
                   <line x1={today} y1={0} x2={today} y2={dims.height} />
                 </g>
               </g>
+              <Legend
+                x="10"
+                y="10"
+                categories={this.state.hoverHint ? [this.state.hoverHint] : legend}
+              />
             </svg>
           </div>
         )}
