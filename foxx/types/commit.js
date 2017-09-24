@@ -7,6 +7,7 @@ const aql = arangodb.aql;
 const commitsToFiles = db._collection('commits-files');
 const commitsToStakeholders = db._collection('commits-stakeholders');
 const paginated = require('./paginated.js');
+const Timestamp = require('./Timestamp.js');
 
 module.exports = new gql.GraphQLObjectType({
   name: 'Commit',
@@ -35,7 +36,7 @@ module.exports = new gql.GraphQLObjectType({
         description: "The commit author's signature"
       },
       date: {
-        type: gql.GraphQLString,
+        type: Timestamp,
         description: 'The date of the commit'
       },
       stats: {

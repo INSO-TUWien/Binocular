@@ -51,25 +51,33 @@ function getCount(innerSchema, root, args) {
   if (typeof innerSchema.count === 'function') {
     return innerSchema.count(root, args);
   } else if (innerSchema.query) {
-    const innerQuery = innerSchema.query(root, args, { toAQL: () => '' });
-    return db
-      ._query({
+    const innerQuery = innerSchema.query(root, args, { toAQL: () => '' }).toAQL();
+
+    let query;
+    if (typeof innerQuery.toAQL === 'function') {
+      query = `RETURN LENGTH(${innerQuery.toAQL()})`;
+    } else if (typeof innerQuery === 'string') {
+      query = `RETURN LENGTH(${innerQuery})`;
+    } else {
+      query = {
         query: `RETURN LENGTH(${innerQuery.query})`,
         bindVars: innerQuery.bindVars
-      })
-      .toArray()[0];
+      };
+    }
+
+    return db._query(query).toArray()[0];
   }
 }
 
 function limitClause(args) {
   if (!args.perPage) {
-    return { toAQL: () => '' };
+    return { toAQL: () => '', offset: 0 };
   }
 
   const offset = ((args.page || 1) - 1) * args.perPage;
   let ret = `LIMIT ${offset}, ${args.perPage}`;
 
-  return { toAQL: () => ret + '\n' };
+  return { toAQL: () => ret + '\n', offset, count: args.perPage };
 }
 
 function createPaginatedType(type) {

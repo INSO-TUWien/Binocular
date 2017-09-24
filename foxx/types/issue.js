@@ -6,6 +6,7 @@ const db = arangodb.db;
 const aql = arangodb.aql;
 const issuesToStakeholders = db._collection('issues-stakeholders');
 const paginated = require('./paginated.js');
+const Timestamp = require('./Timestamp.js');
 
 module.exports = new gql.GraphQLObjectType({
   name: 'Issue',
@@ -57,11 +58,11 @@ module.exports = new gql.GraphQLObjectType({
         description: 'Web URL of the issue'
       },
       createdAt: {
-        type: gql.GraphQLString,
+        type: Timestamp,
         description: 'Creation date of the issue'
       },
       closedAt: {
-        type: gql.GraphQLString,
+        type: Timestamp,
         description: 'Creation date of the issue'
       },
       creator: {

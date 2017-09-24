@@ -4,7 +4,10 @@ const gql = require('graphql-sync');
 const arangodb = require('@arangodb');
 const db = arangodb.db;
 const aql = arangodb.aql;
+const qb = require('aqb');
 const paginated = require('./types/paginated.js');
+const queryHelpers = require('./query-helpers.js');
+const Timestamp = require('./types/Timestamp.js');
 
 const commits = db._collection('commits');
 const files = db._collection('files');
@@ -17,11 +20,23 @@ const queryType = new gql.GraphQLObjectType({
     return {
       commits: paginated({
         type: require('./types/commit.js'),
-        query: (root, args, limit) => aql`
-          FOR commit IN ${commits}
-            SORT commit.date ASC
-            ${limit}
-            RETURN commit`
+        args: {
+          since: { type: Timestamp },
+          until: { type: Timestamp }
+        },
+        query: (root, args, limit) => {
+          console.log('got args:', args);
+          let q = qb.for('commit').in('commits').sort('commit.date', 'ASC');
+
+          q = queryHelpers.addDateFilter('commit.date', 'gte', args.since, q);
+          q = queryHelpers.addDateFilter('commit.date', 'lte', args.until, q);
+
+          q = q.limit(limit.offset, limit.count).return('commit');
+
+          console.log('with since:', q.toAQL());
+
+          return q;
+        }
       }),
       commit: {
         type: require('./types/commit.js'),
