@@ -13,7 +13,6 @@ import issueImpactData from './issueImpactData.js';
 import notifications from './notifications.js';
 import progress from './progress.js';
 import activeConfigTab from './activeConfigTab.js';
-import graphQl from './graphQl.js';
 
 const app = combineReducers({
   activeVisualization,
@@ -26,7 +25,6 @@ const app = combineReducers({
   notifications,
   progress,
   activeConfigTab,
-  graphQl,
   form: formReducer.plugin({
     configForm: handleAction(
       'RECEIVE_CONFIGURATION',

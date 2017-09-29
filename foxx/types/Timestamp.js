@@ -9,7 +9,7 @@ module.exports = new gql.GraphQLScalarType({
   parseValue: value => value,
   parseLiteral: ast => {
     if (ast.kind === gql.Kind.INT) {
-      return new Date(ast.value);
+      return new Date(parseInt(ast.value, 10));
     } else if (ast.kind === gql.Kind.STRING) {
       const ms = Date.parse(ast.value);
 

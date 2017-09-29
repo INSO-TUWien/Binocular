@@ -83,6 +83,10 @@ module.exports = {
         target: 'http://localhost:48763/',
         secure: false
       },
+      '/graphQl': {
+        target: 'http://localhost:48763/',
+        secure: false
+      },
       '/wsapi': {
         target: 'ws://localhost:48763',
         ws: true

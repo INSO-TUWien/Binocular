@@ -16,7 +16,6 @@ const StackedArea = props => {
         .x(props.x)
         .y(d => {
           const values = _.take(series, i + 1).map(s => s.extract(d));
-          console.log(values);
           return props.y(values);
         })
         .context(path),
@@ -33,6 +32,7 @@ const StackedArea = props => {
   });
 
   const paths = [];
+
   for (let i = areas.length - 1; i >= 0; i--) {
     const area = areas[i];
     const areaBelow = i === 0 ? null : areas[i - 1];

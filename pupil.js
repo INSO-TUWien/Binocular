@@ -30,6 +30,8 @@ const CommitCommitConnection = require('./lib/models/CommitCommitConnection.js')
 
 app.get('/api/commits', require('./lib/endpoints/get-commits.js'));
 app.get('/api/config', require('./lib/endpoints/get-config.js'));
+app.get('/graphQl', require('./lib/endpoints/graphQl.js'));
+app.post('/graphQl', require('./lib/endpoints/graphQl.js'));
 app.post('/api/config', require('./lib/endpoints/update-config.js'));
 
 const port = config.get().port;

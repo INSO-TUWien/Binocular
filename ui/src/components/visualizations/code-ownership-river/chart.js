@@ -42,11 +42,14 @@ export default class CodeOwnershipRiver extends React.Component {
       y: d3.scaleLinear().rangeRound([0, 0])
     };
 
-    this.updateDomain(props.data);
+    this.updateDomain(props);
   }
 
   updateZoom(evt) {
     this.setState({ transform: evt.transform, dirty: true });
+    const x = this.state.transform.rescaleX(this.scales.x);
+
+    this.props.onViewportChanged(x.domain());
   }
 
   updateDimensions(dimensions) {
@@ -76,22 +79,15 @@ export default class CodeOwnershipRiver extends React.Component {
   }
 
   updateDomain(data) {
-    if (!data) {
+    if (!data.commits) {
       return;
     }
 
-    const dateExtent = d3.extent(data, d => d.date);
-    const commitCountExtent = d3.extent(data, d => d.commits.total);
-    const issueCountExtent = d3.extent(data, t => t.issues.total);
-
-    const min = arr => _.min(_.compact(arr));
-    const max = arr => _.max(_.compact(arr));
+    const dateExtent = d3.extent(data.commits, d => d.date);
+    const commitCountExtent = [0, _.last(data.commits).count];
 
     this.scales.x.domain(dateExtent);
-    this.scales.y.domain([
-      min([commitCountExtent[0], issueCountExtent[0]]),
-      max([commitCountExtent[1], issueCountExtent[1]])
-    ]);
+    this.scales.y.domain(commitCountExtent);
   }
 
   componentWillReceiveProps(nextProps) {
@@ -99,7 +95,7 @@ export default class CodeOwnershipRiver extends React.Component {
   }
 
   render() {
-    if (!this.props.data || this.props.data.length === 0) {
+    if (!this.props.commits) {
       return <svg />;
     }
 
@@ -115,8 +111,7 @@ export default class CodeOwnershipRiver extends React.Component {
     const fullDomain = this.scales.x.domain();
     const visibleDomain = x.domain();
 
-    const finalStats = _.last(this.props.data).commits.totalStats;
-    const commitColors = getChartColors('spectral', _.keys(finalStats).sort());
+    const finalStats = _.last(this.props.commits).totalStats;
     const fullSpan = fullDomain[1].getTime() - fullDomain[0].getTime();
     const visibleSpan = visibleDomain[1].getTime() - visibleDomain[0].getTime();
 
@@ -127,14 +122,14 @@ export default class CodeOwnershipRiver extends React.Component {
           return stats ? stats.count : 0;
         },
         style: {
-          fill: commitColors[signature]
+          fill: this.props.palette[signature]
         }
       };
     });
 
     return (
       <Measure bounds onResize={dims => this.updateDimensions(dims.bounds)}>
-        {({ measureRef }) => (
+        {({ measureRef }) =>
           <div
             tabIndex="1"
             ref={measureRef}
@@ -168,7 +163,7 @@ export default class CodeOwnershipRiver extends React.Component {
                 </g>
                 <g clipPath="url(#chart)" className={cx(styles.commitCount)}>
                   <StackedArea
-                    data={this.state.commits}
+                    data={this.props.commits}
                     series={commitSeries}
                     x={c => x(c.date)}
                     y={values => y(_.sum(values))}
@@ -183,8 +178,7 @@ export default class CodeOwnershipRiver extends React.Component {
                 </g>
               </g>
             </svg>
-          </div>
-        )}
+          </div>}
       </Measure>
     );
   }
@@ -248,87 +242,4 @@ export default class CodeOwnershipRiver extends React.Component {
   activateLegend(legend) {
     this.setState({ hoverHint: legend });
   }
-}
-
-function extractCommitData(props) {
-  const commitData = _.get(props, 'commits', []);
-  const mentions = _.get(props, 'highlightedIssue.mentions', []);
-  const highlightedCommits = [];
-
-  const stats = {};
-  const totalStats = {
-    changes: 0,
-    count: 0
-  };
-
-  const commits = _.map(commitData, function(c) {
-    if (!(c.signature in stats)) {
-      stats[c.signature] = { count: 0, changes: 0 };
-    }
-
-    const changes = _.get(c, 'stats.additions', 0) + _.get(c, 'stats.deletions', 0);
-    stats[c.signature].changes += changes;
-    stats[c.signature].count++;
-    totalStats.changes += changes;
-    totalStats.count++;
-
-    const ret = _.merge({}, c, {
-      sha: c.sha,
-      date: parseTime(c.date),
-      totalStats: _.mapValues(stats, s => ({
-        count: s.count,
-        changes: s.changes / totalStats.changes * totalStats.count
-      }))
-    });
-    if (_.includes(mentions, c.sha)) {
-      highlightedCommits.push(ret);
-    }
-
-    return ret;
-  });
-
-  return { commits: commits, highlightedCommits };
-}
-
-function extractIssueData(props) {
-  const issueData = _.get(props, 'issues', []);
-
-  // holds close dates of still open issues, kept sorted at all times
-  const pendingCloses = [];
-
-  // issues closed so far
-  let closeCountTotal = 0;
-
-  return _.map(issueData, function(t, i) {
-    const issueData = _.merge({}, t, {
-      id: t.iid,
-      date: parseTime(t.createdAt),
-      closedAt: parseTime(t.closedAt),
-      count: i + 1
-    });
-
-    // the number of closed issues at the issue's creation time, since
-    // the last time we increased closedCountTotal
-    let closedCount = _.sortedIndex(pendingCloses, issueData.date);
-
-    closeCountTotal += closedCount;
-    issueData.closedCount = closeCountTotal;
-    issueData.openCount = issueData.count - issueData.closedCount;
-
-    // remove all issues that are closed by now from the "pending" list
-    pendingCloses.splice(0, closedCount);
-
-    if (issueData.closedAt) {
-      // issue has a close date, be sure to track it in the "pending" list
-      const insertPos = _.sortedIndex(pendingCloses, issueData.closedAt);
-      pendingCloses.splice(insertPos, 0, issueData.closedAt);
-    } else {
-      // the issue has not yet been closed, indicate that by pushing
-      // null to the end of the pendingCloses list, which will always
-      // stay there
-      pendingCloses.push(null);
-    }
-
-    return issueData;
-  });
 }

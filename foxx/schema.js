@@ -34,6 +34,8 @@ const queryType = new gql.GraphQLObjectType({
 
           q = q.limit(limit.offset, limit.count).return('commit');
 
+          console.log('running query:', q.toAQL());
+
           return q;
         }
       }),
@@ -80,6 +82,19 @@ const queryType = new gql.GraphQLObjectType({
             ${limit}
               RETURN stakeholder`
       }),
+      committers: {
+        type: new gql.GraphQLList(gql.GraphQLString),
+        resolve: () => {
+          return db
+            ._query(
+              aql`
+              FOR commit IN ${commits}
+                SORT commit.signature ASC
+                RETURN DISTINCT commit.signature`
+            )
+            .toArray();
+        }
+      },
       issues: paginated({
         type: require('./types/issue.js'),
         query: (root, args, limit) => aql`

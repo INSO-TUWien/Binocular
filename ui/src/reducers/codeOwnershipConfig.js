@@ -9,7 +9,9 @@ export default handleActions(
     SET_HIGHLIGHTED_ISSUE: (state, action) =>
       _.assign({}, state, { highlightedIssue: action.payload }),
     SET_COMMIT_ATTRIBUTE: (state, action) =>
-      _.assign({}, state, { commitAttribute: action.payload })
+      _.assign({}, state, { commitAttribute: action.payload }),
+
+    COR_SET_VIEWPORT: (state, action) => _.assign({}, state, { viewport: action.payload })
   },
-  { showIssues: true, highlightedIssue: null, commitAttribute: 'count' }
+  { showIssues: true, highlightedIssue: null, commitAttribute: 'count', viewport: [] }
 );

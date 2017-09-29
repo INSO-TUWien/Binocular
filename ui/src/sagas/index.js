@@ -1,30 +1,52 @@
 'use strict';
 
 import { createAction } from 'redux-actions';
-import { select, takeEvery, fork, throttle, put } from 'redux-saga/effects';
+import { select, takeEvery, fork, throttle, put, cancel } from 'redux-saga/effects';
 
 import { fetchConfig, watchConfig } from './config.js';
 import { fetchCodeOwnershipData } from './CodeOwnershipRiver.js';
 import { fetchIssueImpactData, watchSetActiveIssue } from './IssueImpact.js';
 import { watchNotifications } from './notifications.js';
+import codeOwnershipRiver from './CodeOwnershipRiver.js';
 
 export const Visualizations = ['ISSUE_IMPACT', 'CODE_OWNERSHIP_RIVER', 'HOTSPOT_DIALS'];
 
 export const switchVisualization = createAction('SWITCH_VISUALIZATION', vis => vis);
 export const showCommit = createAction('SHOW_COMMIT');
+export const requestRefresh = createAction('REQUEST_REFRESH');
+
+const componentSagas = {
+  CODE_OWNERSHIP_RIVER: codeOwnershipRiver
+};
+let currentComponentSaga = null;
+
+function* switchComponentSaga(sagaName) {
+  if (currentComponentSaga) {
+    yield cancel(currentComponentSaga);
+  }
+
+  currentComponentSaga = componentSagas[sagaName];
+  yield fork(currentComponentSaga);
+}
 
 export function* root() {
   yield* fetchConfig();
-  yield* refresh();
+
+  const { activeVisualization } = yield select();
+  yield* switchComponentSaga(activeVisualization);
   yield fork(watchShowCommits);
   yield fork(watchConfig);
   yield fork(watchVisualization);
-  yield fork(watchSetActiveIssue);
   yield fork(watchNotifications);
+  // yield fork(watchSetActiveIssue);
+  // yield fork(watchMessages);
 }
 
 function* watchVisualization() {
-  yield takeEvery('SWITCH_VISUALIZATION', refresh);
+  yield takeEvery('SWITCH_VISUALIZATION', function*() {
+    const { activeVisualization } = yield select();
+    switchComponentSaga(activeVisualization);
+  });
 }
 
 function* watchShowCommits() {
@@ -32,10 +54,6 @@ function* watchShowCommits() {
     const { config } = yield select();
     window.open(`${config.data.projectUrl}/commit/${a.payload.sha}`);
   });
-}
-
-export function* watchMessages() {
-  yield throttle(1000, 'message', refresh);
 }
 
 export function* refresh() {
