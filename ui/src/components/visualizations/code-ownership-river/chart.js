@@ -119,7 +119,11 @@ export default class CodeOwnershipRiver extends React.Component {
       return {
         extract: c => {
           const stats = c.totalStats[signature];
-          return stats ? stats.count : 0;
+          if (this.props.commitAttribute === 'count') {
+            return stats ? stats.count : 0;
+          } else {
+            return stats ? stats.changes / c.changes * c.count : 0;
+          }
         },
         style: {
           fill: this.props.palette[signature]

@@ -75,7 +75,8 @@ export const fetchCodeOwnershipData = fetchFactory(
           stats = statsByAuthor[commit.signature] = {
             count: 0,
             additions: 0,
-            deletions: 0
+            deletions: 0,
+            changes: 0
           };
         }
 
@@ -86,6 +87,7 @@ export const fetchCodeOwnershipData = fetchFactory(
         stats.count++;
         stats.additions += commit.stats.additions;
         stats.deletions += commit.stats.deletions;
+        stats.changes += commit.stats.additions + commit.stats.deletions;
 
         while (dt >= next) {
           const dataPoint = {
@@ -93,6 +95,7 @@ export const fetchCodeOwnershipData = fetchFactory(
             count,
             additions,
             deletions,
+            changes: additions + deletions,
             totalStats: _.cloneDeep(statsByAuthor)
           };
 
@@ -108,6 +111,7 @@ export const fetchCodeOwnershipData = fetchFactory(
           count,
           additions,
           deletions,
+          changes: additions + deletions,
           totalStats: _.cloneDeep(statsByAuthor)
         });
 
