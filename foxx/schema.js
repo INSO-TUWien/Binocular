@@ -34,8 +34,6 @@ const queryType = new gql.GraphQLObjectType({
 
           q = q.limit(limit.offset, limit.count).return('commit');
 
-          console.log('running query:', q.toAQL());
-
           return q;
         }
       }),
@@ -97,13 +95,33 @@ const queryType = new gql.GraphQLObjectType({
       },
       issues: paginated({
         type: require('./types/issue.js'),
-        query: (root, args, limit) => aql`
-          FOR issue
-          IN
-          ${issues}
-            SORT issue.createdAt ASC
-            ${limit}
-            RETURN issue`
+        args: {
+          q: { type: gql.GraphQLString },
+          since: { type: Timestamp },
+          until: { type: Timestamp },
+          sort: { type: Sort }
+        },
+        query: (root, args, limit) => {
+          let q = qb.for('issue').in('issues').sort('issue.createdAt', args.sort);
+
+          if (args.q) {
+            const searchString = qb.str('%' + args.q.replace(/\s+/g, '%') + '%');
+            q = q.filter(
+              qb.LIKE(
+                qb.CONCAT(qb.str('#'), 'issue.iid', qb.str(' '), 'issue.title'),
+                searchString,
+                true
+              )
+            );
+          }
+
+          q = queryHelpers.addDateFilter('issue.createdAt', 'gte', args.since, q);
+          q = queryHelpers.addDateFilter('issue.createdAt', 'lte', args.until, q);
+
+          q = q.limit(limit.offset, limit.count).return('issue');
+
+          return q;
+        }
       }),
       issue: {
         type: require('./types/issue.js'),

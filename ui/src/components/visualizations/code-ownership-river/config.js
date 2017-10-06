@@ -10,6 +10,10 @@ import {
 import SearchBox from '../../SearchBox';
 import styles from './styles.scss';
 
+import { Lokka } from 'lokka';
+import { Transport } from 'lokka-transport-http';
+const graphQl = new Lokka({ transport: new Transport('/graphQl') });
+
 const mapStateToProps = (state /*, ownProps*/) => {
   return {
     issues: _.get(state, 'codeOwnershipData.data.issues'),
@@ -47,6 +51,22 @@ const CodeOwnershipRiverConfigComponent = props => {
             placeholder="Highlight issue..."
             options={props.issues}
             renderOption={i => `#${i.iid} ${i.title}`}
+            search={text => {
+              return graphQl
+                .query(
+                  `
+                  query($q: String) {
+                    issues(page: 1, perPage: 50, q: $q, sort: "DESC") {
+                      data {
+                        iid
+                        title
+                      }
+                    }
+                  }`,
+                  { q: text }
+                )
+                .then(resp => resp.issues.data);
+            }}
             value={props.highlightedIssue}
             onChange={issue => props.onSetHighlightedIssue(issue)}
           />

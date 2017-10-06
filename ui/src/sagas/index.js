@@ -13,7 +13,6 @@ export const Visualizations = ['ISSUE_IMPACT', 'CODE_OWNERSHIP_RIVER', 'HOTSPOT_
 
 export const switchVisualization = createAction('SWITCH_VISUALIZATION', vis => vis);
 export const showCommit = createAction('SHOW_COMMIT');
-export const requestRefresh = createAction('REQUEST_REFRESH');
 
 const componentSagas = {
   CODE_OWNERSHIP_RIVER: codeOwnershipRiver
@@ -54,18 +53,4 @@ function* watchShowCommits() {
     const { config } = yield select();
     window.open(`${config.data.projectUrl}/commit/${a.payload.sha}`);
   });
-}
-
-export function* refresh() {
-  const { activeVisualization } = yield select();
-
-  switch (activeVisualization) {
-    case 'CODE_OWNERSHIP_RIVER':
-      yield fetchCodeOwnershipData();
-      break;
-
-    case 'ISSUE_IMPACT':
-      yield fetchIssueImpactData();
-      break;
-  }
 }

@@ -1,10 +1,10 @@
 'use strict';
 
-import Promise from 'bluebird';
 import React from 'react';
 import _ from 'lodash';
 import PropTypes from 'prop-types';
 import cx from 'classnames';
+import fuzzy from 'fuzzy';
 
 import styles from './styles.scss';
 
@@ -12,30 +12,48 @@ export default class SearchBox extends React.Component {
   constructor(props) {
     super(props);
 
+    this.selectedDiv = null;
     this.state = {
-      isOpen: false,
-      isSearching: false,
-      activeSearch: null,
+      value: null,
+      displayedText: '',
+      searchText: '',
       options: [],
+      suggestions: [],
       selectedIndex: null,
-      dirty: false,
-      searchText: ''
+      isOpen: false
     };
-  }
 
-  componentWillMount() {
-    this.search('');
+    _.merge(this.state, this.buildSuggestions(this.state.searchText, this.state.options));
   }
 
   componentWillReceiveProps(nextProps) {
+    let searchText = nextProps.searchText;
+
     if (nextProps.value) {
-      const idx = _.findIndex(this.state.options, o => o === nextProps.value);
-      this.setState({ selectedIndex: idx });
+      searchText = '';
     }
+
+    const suggestions = this.buildSuggestions(searchText, nextProps.options);
+    this.setState(_.merge({}, suggestions, { value: nextProps.value }));
+  }
+
+  buildSuggestions(searchText = '', options = []) {
+    let { selectedIndex } = this.state;
+
+    const suggestions = fuzzy.filter(searchText, options || [], {
+      extract: this.props.renderOption.bind(this)
+    });
+
+    if (selectedIndex !== null) {
+      selectedIndex = Math.min(selectedIndex, suggestions.length - 1);
+    }
+
+    return { searchText, suggestions, selectedIndex };
   }
 
   render() {
-    const suggestions = this.state.options.map((o, i) =>
+    this.selectedDiv = null;
+    const suggestions = this.state.suggestions.map((r, i) =>
       <div
         ref={div => {
           if (i === this.state.selectedIndex) {
@@ -44,8 +62,8 @@ export default class SearchBox extends React.Component {
         }}
         className={cx(styles.suggestion, { [styles.isSelected]: i === this.state.selectedIndex })}
         key={i}
-        onClick={this.select.bind(this, o)}>
-        {this.props.renderOption(o)}
+        onClick={() => this.select(r.original)}>
+        {this.props.renderOption(r.original)}
       </div>
     );
 
@@ -60,9 +78,7 @@ export default class SearchBox extends React.Component {
           type="text"
           placeholder={this.props.placeholder}
           value={
-            this.props.value && !this.state.dirty
-              ? this.props.renderOption(this.props.value)
-              : this.state.searchText
+            this.state.value ? this.props.renderOption(this.state.value) : this.state.searchText
           }
           onFocus={() => this.setState({ isOpen: true })}
           onBlur={() => this.cancel()}
@@ -72,10 +88,8 @@ export default class SearchBox extends React.Component {
         <span className={cx('icon', 'is-small is-right', styles.icon)} onClick={() => this.clear()}>
           <i
             className={cx('fa', {
-              'fa-close': !!this.props.value,
-              'fa-search': !this.state.value,
-              'fa-circle-o-notch': this.state.isSearching,
-              'fa-spin': this.state.isSearching
+              'fa-close': !!this.state.value,
+              'fa-search': !this.state.value
             })}
           />
         </span>
@@ -87,70 +101,12 @@ export default class SearchBox extends React.Component {
     );
   }
 
-  clear() {
-    if (this.props.onChange) {
-      this.props.onChange(null);
-    }
-
-    this.setState({
-      searchText: '',
-      dirty: false
-    });
-  }
-
-  search(text) {
-    clearTimeout(this.cancelTimer);
-    const activeSearch = Promise.try(() => this.props.search(text)).then(options => {
-      // make sure not to signal end when there is a more recent
-      // search active
-      if (this.state.activeSearch === activeSearch) {
-        this.setState({
-          isSearching: false,
-          activeSearch: null,
-          options,
-          selectedIndex:
-            this.state.selectedIndex === null
-              ? 0
-              : Math.min(this.state.selectedIndex, options.length - 1)
-        });
-      }
-    });
-
-    this.setState(
-      {
-        searchText: text,
-        isSearching: true,
-        dirty: true,
-        activeSearch
-      },
-      () => null
-    );
-  }
-
-  cancel() {
-    this.cancelTimer = setTimeout(() => {
-      this.setState({ isOpen: false });
-
-      if (this.props.onChange) {
-        this.props.onChange(null);
-      }
-    }, 300);
-  }
-
-  select(option) {
-    clearTimeout(this.cancelTimer);
-    if (this.props.onChange) {
-      this.props.onChange(option);
-    }
-    this.setState({ dirty: false, isOpen: false });
-  }
-
   onKeyDown(e) {
     let { selectedIndex, isOpen } = this.state;
     if (e.key === 'Enter') {
       e.preventDefault();
-      if (this.state.options[selectedIndex]) {
-        this.select(this.state.options[selectedIndex]);
+      if (this.state.suggestions[selectedIndex]) {
+        this.select(this.state.suggestions[selectedIndex].original);
       }
       return false;
     } else if (e.key === 'Escape') {
@@ -159,7 +115,7 @@ export default class SearchBox extends React.Component {
     }
 
     if (e.key === 'ArrowDown' || (e.key === 'j' && e.ctrlKey)) {
-      selectedIndex = Math.min(this.state.options.length - 1, selectedIndex + 1);
+      selectedIndex = Math.min(this.state.suggestions.length - 1, selectedIndex + 1);
       isOpen = true;
     } else if (e.key === 'ArrowUp' || (e.key === 'k' && e.ctrlKey)) {
       selectedIndex = Math.max(0, selectedIndex - 1);
@@ -174,11 +130,45 @@ export default class SearchBox extends React.Component {
 
     return false;
   }
+
+  select(option) {
+    clearTimeout(this.cancelTimer);
+    this.setState(
+      { searchText: this.props.renderOption(option), isOpen: false, value: option },
+      () => {
+        if (this.props.onChange) {
+          this.props.onChange(option);
+        }
+      }
+    );
+  }
+
+  cancel() {
+    this.cancelTimer = setTimeout(() => {
+      this.setState({ isOpen: false });
+    }, 300);
+  }
+
+  clear() {
+    this.setState({ searchText: '', value: null }, () => {
+      if (this.props.onChange) {
+        this.props.onChange(null);
+      }
+    });
+  }
+
+  search(searchText) {
+    this.setState({ value: null }, () => {
+      const suggestions = this.buildSuggestions(searchText, this.props.options);
+      this.setState(suggestions);
+    });
+  }
 }
 
 SearchBox.propTypes = {
   renderOption: PropTypes.func.isRequired,
   onChange: PropTypes.func,
+  options: PropTypes.arrayOf(PropTypes.object),
   placeholder: PropTypes.string,
-  search: PropTypes.func.isRequired
+  search: PropTypes.func
 };

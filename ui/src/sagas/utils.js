@@ -23,3 +23,9 @@ export function fetchFactory(fn, requestActionCreator, receiveActionCreator, err
 export function timestampedActionFactory(action) {
   return createAction(action, id => id, () => ({ receivedAt: new Date() }));
 }
+
+export function mapSaga(actionCreator) {
+  return function*() {
+    yield put(actionCreator());
+  };
+}

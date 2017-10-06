@@ -83,11 +83,24 @@ export default class CodeOwnershipRiver extends React.Component {
       return;
     }
 
-    const dateExtent = d3.extent(data.commits, d => d.date);
+    const commitDateExtent = d3.extent(data.commits, d => d.date);
     const commitCountExtent = [0, _.last(data.commits).count];
 
-    this.scales.x.domain(dateExtent);
-    this.scales.y.domain(commitCountExtent);
+    const issueDateExtent = d3.extent(data.issues, d => d.createdAt);
+    const issueCountExtent = d3.extent(data.issues, d => d.count);
+
+    const min = arr => _.min(_.pull(arr, null));
+    const max = arr => _.max(_.pull(arr, null));
+
+    this.scales.x.domain([
+      min([commitDateExtent[0], issueDateExtent[0]]),
+      max([commitDateExtent[1], issueDateExtent[1]])
+    ]);
+
+    this.scales.y.domain([
+      min([commitCountExtent[0], issueCountExtent[0]]),
+      max([commitCountExtent[1], issueCountExtent[1]])
+    ]);
   }
 
   componentWillReceiveProps(nextProps) {
@@ -115,7 +128,17 @@ export default class CodeOwnershipRiver extends React.Component {
     const fullSpan = fullDomain[1].getTime() - fullDomain[0].getTime();
     const visibleSpan = visibleDomain[1].getTime() - visibleDomain[0].getTime();
 
+    const commitLegend = [];
     const commitSeries = _.map(finalStats, (stats, signature) => {
+      const legend = {
+        name: (this.props.commitAttribute === 'count' ? 'Commits by ' : 'Changes by ') + signature,
+        style: {
+          fill: this.props.palette[signature]
+        }
+      };
+
+      commitLegend.push(legend);
+
       return {
         extract: c => {
           const stats = c.totalStats[signature];
@@ -127,9 +150,25 @@ export default class CodeOwnershipRiver extends React.Component {
         },
         style: {
           fill: this.props.palette[signature]
-        }
+        },
+        onMouseEnter: () => this.activateLegend(legend),
+        onMouseLeave: () => this.activateLegend(null)
       };
     });
+
+    const legend = [
+      {
+        name: 'Commits by author',
+        subLegend: commitLegend
+      }
+    ];
+
+    if (this.props.issues.length > 0) {
+      legend.push({
+        name: 'Issues by state',
+        subLegend: [openIssuesLegend, closedIssuesLegend]
+      });
+    }
 
     return (
       <Measure bounds onResize={dims => this.updateDimensions(dims.bounds)}>
@@ -169,7 +208,29 @@ export default class CodeOwnershipRiver extends React.Component {
                   <StackedArea
                     data={this.props.commits}
                     series={commitSeries}
-                    x={c => x(c.date)}
+                    x={d => x(d.date)}
+                    y={values => y(_.sum(values))}
+                    fillToRight={today}
+                  />
+                </g>
+                <g clipPath="url(#chart)" className={cx(styles.openIssuesCount)}>
+                  <StackedArea
+                    data={this.props.issues}
+                    series={[
+                      {
+                        extract: i => i.closedCount,
+                        className: styles.closedIssuesCount,
+                        onMouseEnter: () => this.activateLegend(closedIssuesLegend),
+                        onMouseLeave: () => this.activateLegend(null)
+                      },
+                      {
+                        extract: i => i.openCount,
+                        className: styles.openIssuesCount,
+                        onMouseEnter: () => this.activateLegend(openIssuesLegend),
+                        onMouseLeave: () => this.activateLegend(null)
+                      }
+                    ]}
+                    x={d => x(d.date)}
                     y={values => y(_.sum(values))}
                     fillToRight={today}
                   />
@@ -181,6 +242,11 @@ export default class CodeOwnershipRiver extends React.Component {
                   <line x1={today} y1={0} x2={today} y2={dims.height} />
                 </g>
               </g>
+              <Legend
+                x="10"
+                y="10"
+                categories={this.state.hoverHint ? [this.state.hoverHint] : legend}
+              />
             </svg>
           </div>}
       </Measure>
@@ -247,3 +313,18 @@ export default class CodeOwnershipRiver extends React.Component {
     this.setState({ hoverHint: legend });
   }
 }
+
+const openIssuesLegend = {
+  name: 'Open issues',
+  style: {
+    fill: '#ff9eb1',
+    stroke: '#ff3860'
+  }
+};
+
+const closedIssuesLegend = {
+  name: 'Closed issues',
+  style: {
+    fill: '#73e79c'
+  }
+};
