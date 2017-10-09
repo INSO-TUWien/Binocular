@@ -2,7 +2,7 @@
 
 import _ from 'lodash';
 import * as d3 from 'd3';
-import { ClosingPathContext } from '../../../utils.js';
+import { ClosingPathContext } from '../../utils.js';
 
 const StackedArea = props => {
   const series = props.series;

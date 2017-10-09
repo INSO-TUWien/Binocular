@@ -83,7 +83,7 @@ module.exports = new gql.GraphQLObjectType({
         }
       },
       commits: paginated({
-        type: new gql.GraphQLList(require('./commit.js')),
+        type: require('./commit.js'),
         description: 'All commits mentioning this issue',
         query: (issue, args, limit) => aql`
           FOR commit IN (

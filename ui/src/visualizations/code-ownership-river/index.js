@@ -3,8 +3,8 @@
 import { connect } from 'react-redux';
 
 import Chart from './chart.js';
-import { showCommit } from '../../../sagas';
-import { setViewport } from '../../../sagas/CodeOwnershipRiver.js';
+import { showCommit } from '../../sagas';
+import { setViewport } from './sagas';
 
 const mapStateToProps = (state /*, ownProps*/) => {
   const cfg = state.codeOwnershipConfig;

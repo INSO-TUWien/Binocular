@@ -4,10 +4,10 @@ import { createAction } from 'redux-actions';
 import { select, takeEvery, fork, throttle, put, cancel } from 'redux-saga/effects';
 
 import { fetchConfig, watchConfig } from './config.js';
-import { fetchCodeOwnershipData } from './CodeOwnershipRiver.js';
 import { fetchIssueImpactData, watchSetActiveIssue } from './IssueImpact.js';
 import { watchNotifications } from './notifications.js';
-import codeOwnershipRiver from './CodeOwnershipRiver.js';
+
+import codeOwnershipRiver from '../visualizations/code-ownership-river/sagas';
 
 export const Visualizations = ['ISSUE_IMPACT', 'CODE_OWNERSHIP_RIVER', 'HOTSPOT_DIALS'];
 

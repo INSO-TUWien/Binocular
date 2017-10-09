@@ -11,12 +11,11 @@ import _ from 'lodash';
 import Axis from './Axis.js';
 import GridLines from './GridLines.js';
 import CommitMarker from './CommitMarker.js';
-import AsteriskMarker from '../../svg/AsteriskMarker.js';
-import XMarker from '../../svg/XMarker.js';
 import StackedArea from './StackedArea.js';
-import Legend from '../../Legend';
 
-import { parseTime, getChartColors } from '../../../utils.js';
+import AsteriskMarker from '../../components/svg/AsteriskMarker.js';
+import XMarker from '../../components/svg/XMarker.js';
+import Legend from '../../components/Legend';
 
 export default class CodeOwnershipRiver extends React.Component {
   constructor(props) {
@@ -46,10 +45,11 @@ export default class CodeOwnershipRiver extends React.Component {
   }
 
   updateZoom(evt) {
-    this.setState({ transform: evt.transform, dirty: true });
-    const x = this.state.transform.rescaleX(this.scales.x);
+    this.setState({ transform: evt.transform, dirty: true }, () => {
+      const x = this.state.transform.rescaleX(this.scales.x);
 
-    this.props.onViewportChanged(x.domain());
+      this.props.onViewportChanged(x.domain());
+    });
   }
 
   updateDimensions(dimensions) {
@@ -213,7 +213,33 @@ export default class CodeOwnershipRiver extends React.Component {
                     fillToRight={today}
                   />
                 </g>
-                <g clipPath="url(#chart)" className={cx(styles.openIssuesCount)}>
+                {this.props.highlightedIssue &&
+                  <defs>
+                    <mask id="issue-mask">
+                      <rect
+                        x={0}
+                        y={0}
+                        width={dims.width}
+                        height={dims.height}
+                        style={{ stroke: 'none', fill: '#ffffff', opacity: 0.5 }}
+                      />
+                      <rect
+                        x={x(this.props.highlightedIssue.createdAt)}
+                        y={0}
+                        width={Math.max(
+                          3,
+                          x(this.props.highlightedIssue.closedAt || new Date()) -
+                            x(this.props.highlightedIssue.createdAt)
+                        )}
+                        height={dims.height}
+                        style={{ stroke: 'none', fill: '#ffffff' }}
+                      />
+                    </mask>
+                  </defs>}
+                <g
+                  clipPath="url(#chart)"
+                  mask="url(#issue-mask)"
+                  className={cx(styles.openIssuesCount)}>
                   <StackedArea
                     data={this.props.issues}
                     series={[

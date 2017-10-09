@@ -1,13 +1,9 @@
 'use strict';
 
 import { connect } from 'react-redux';
-import {
-  setActiveIssue,
-  setFilteredCommits,
-  setFilteredFiles
-} from '../../../sagas/IssueImpact.js';
-import SearchBox from '../../SearchBox';
-import FilterBox from '../../FilterBox';
+import { setActiveIssue, setFilteredCommits, setFilteredFiles } from '../../sagas/IssueImpact.js';
+import SearchBox from '../../components/SearchBox';
+import FilterBox from '../../components/FilterBox';
 import styles from './styles.scss';
 import emojify from 'emoji-replace';
 import { inflect } from 'inflection';

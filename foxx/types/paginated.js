@@ -51,7 +51,7 @@ function getCount(innerSchema, root, args) {
   if (typeof innerSchema.count === 'function') {
     return innerSchema.count(root, args);
   } else if (innerSchema.query) {
-    const innerQuery = innerSchema.query(root, args, { toAQL: () => '' }).toAQL();
+    const innerQuery = innerSchema.query(root, args, { toAQL: () => '' });
 
     let query;
     if (typeof innerQuery.toAQL === 'function') {

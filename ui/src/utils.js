@@ -153,3 +153,19 @@ export class ClosingPathContext {
 function isNumeric(n) {
   return !isNaN(parseFloat(n)) && isFinite(n);
 }
+
+export function traversePages(getPage, fn, countFn, pageNumber = 1, perPage = 100) {
+  return getPage(pageNumber, perPage).then(page => {
+    countFn(page.count);
+    _.each(page.data, fn);
+    if (page.data.length + (page.page - 1) * page.perPage < page.count) {
+      return traversePages(getPage, fn, () => null, pageNumber + 1, perPage);
+    }
+  });
+}
+
+import { Lokka } from 'lokka';
+import { Transport } from 'lokka-transport-http';
+const graphQl = new Lokka({ transport: new Transport('/graphQl') });
+
+export { graphQl };

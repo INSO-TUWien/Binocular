@@ -1,13 +1,10 @@
 'use strict';
 
+import Promise from 'bluebird';
 import _ from 'lodash';
 import { connect } from 'react-redux';
-import {
-  setShowIssues,
-  setHighlightedIssue,
-  setCommitAttribute
-} from '../../../sagas/CodeOwnershipRiver.js';
-import SearchBox from '../../SearchBox';
+import { setShowIssues, setHighlightedIssue, setCommitAttribute } from './sagas';
+import SearchBox from '../../components/SearchBox';
 import styles from './styles.scss';
 
 import { Lokka } from 'lokka';
@@ -52,20 +49,23 @@ const CodeOwnershipRiverConfigComponent = props => {
             options={props.issues}
             renderOption={i => `#${i.iid} ${i.title}`}
             search={text => {
-              return graphQl
-                .query(
+              return Promise.resolve(
+                graphQl.query(
                   `
                   query($q: String) {
                     issues(page: 1, perPage: 50, q: $q, sort: "DESC") {
-                      data {
-                        iid
-                        title
-                      }
+                      data { iid title createdAt closedAt }
                     }
                   }`,
                   { q: text }
                 )
-                .then(resp => resp.issues.data);
+              )
+                .then(resp => resp.issues.data)
+                .map(i => {
+                  i.createdAt = new Date(i.createdAt);
+                  i.closedAt = i.closedAt && new Date(i.closedAt);
+                  return i;
+                });
             }}
             value={props.highlightedIssue}
             onChange={issue => props.onSetHighlightedIssue(issue)}

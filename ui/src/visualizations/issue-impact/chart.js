@@ -9,12 +9,13 @@ import knapsack from 'knapsack-js';
 import chroma from 'chroma-js';
 import TransitionGroup from 'react-transition-group/TransitionGroup';
 import CSSTransition from 'react-transition-group/CSSTransition';
-import Axis from '../code-ownership-river/Axis.js';
-import Asterisk from '../../svg/Asterisk.js';
-import X from '../../svg/X.js';
-import hunkTransitions from './hunkTransitions.scss';
 
-import { basename, parseTime, ClosingPathContext, getChartColors } from '../../../utils.js';
+import Axis from '../code-ownership-river/Axis.js';
+import hunkTransitions from './hunkTransitions.scss';
+import Asterisk from '../../components/svg/Asterisk.js';
+import X from '../../components/svg/X.js';
+
+import { basename, parseTime, ClosingPathContext, getChartColors } from '../../utils.js';
 import styles from './styles.scss';
 
 const CHART_FILL_RATIO = 0.45;

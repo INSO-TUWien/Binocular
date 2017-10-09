@@ -4,8 +4,8 @@ import ConfigButton from '../ConfigButton';
 import ConfigDialog from '../ConfigDialog';
 import ProgressBar from '../ProgressBar';
 import Notifications from '../notifications';
-import CodeOwnershipRiver from '../visualizations/code-ownership-river';
-import IssueImpact from '../visualizations/issue-impact';
+import CodeOwnershipRiver from '../../visualizations/code-ownership-river';
+import IssueImpact from '../../visualizations/issue-impact';
 import { connect } from 'react-redux';
 
 const mapStateToProps = state => {

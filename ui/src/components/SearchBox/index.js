@@ -53,7 +53,7 @@ export default class SearchBox extends React.Component {
       <div
         className={cx('control has-icons-right', {
           [styles.isOpen]: this.state.isOpen,
-          [styles.hasValue]: !!this.state.value
+          [styles.hasValue]: !!this.props.value
         })}>
         <input
           className={cx('input')}
@@ -73,7 +73,7 @@ export default class SearchBox extends React.Component {
           <i
             className={cx('fa', {
               'fa-close': !!this.props.value,
-              'fa-search': !this.state.value,
+              'fa-search': !this.props.value,
               'fa-circle-o-notch': this.state.isSearching,
               'fa-spin': this.state.isSearching
             })}
