@@ -4,7 +4,6 @@ const qb = require('aqb');
 
 module.exports = {
   addDateFilter: function(dateField, cmp, comparedValue, q) {
-    console.log('typeof:', typeof comparedValue);
     if (comparedValue) {
       if (typeof comparedValue === 'number') {
         comparedValue = new Date(comparedValue);

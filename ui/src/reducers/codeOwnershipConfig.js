@@ -11,7 +11,19 @@ export default handleActions(
     SET_COMMIT_ATTRIBUTE: (state, action) =>
       _.assign({}, state, { commitAttribute: action.payload }),
 
-    COR_SET_VIEWPORT: (state, action) => _.assign({}, state, { viewport: action.payload })
+    COR_SET_VIEWPORT: (state, action) => _.assign({}, state, { viewport: action.payload }),
+
+    COR_RECEIVE_RELATED_COMMITS: (state, action) => {
+      return _.assign({}, state, {
+        highlightedCommits: action.payload
+      });
+    }
   },
-  { showIssues: true, highlightedIssue: null, commitAttribute: 'count', viewport: [] }
+  {
+    showIssues: true,
+    highlightedIssue: null,
+    highlightedCommits: [],
+    commitAttribute: 'count',
+    viewport: []
+  }
 );

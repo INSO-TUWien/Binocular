@@ -2,7 +2,7 @@
 
 import { createAction } from 'redux-actions';
 
-import { endpointUrl } from '../utils.js';
+import { endpointUrl } from '../utils';
 import { fetchFactory, timestampedActionFactory } from './utils.js';
 import { put, takeEvery } from 'redux-saga/effects';
 import { addNotification } from './notifications.js';

@@ -2,7 +2,7 @@
 
 import _ from 'lodash';
 import * as d3 from 'd3';
-import { ClosingPathContext } from '../../utils.js';
+import { ClosingPathContext } from '../../utils';
 
 const StackedArea = props => {
   const series = props.series;
@@ -24,12 +24,15 @@ const StackedArea = props => {
     };
   });
 
+  console.log('drawing', areas.length, 'lines');
+  console.time('drawing lines');
   _.each(areas, area => {
     area.line(props.data);
     if (props.fillToRight) {
       area.path.fillToRight(props.fillToRight);
     }
   });
+  console.timeEnd('drawing lines');
 
   const paths = [];
 

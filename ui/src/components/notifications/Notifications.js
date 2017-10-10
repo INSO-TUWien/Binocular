@@ -11,7 +11,6 @@ import styles from './notifications.scss';
 export default class Notifications extends React.Component {
   render() {
     const notifications = _.map(this.props.notifications, n => {
-      console.log(n.message);
       return (
         <CSSTransition classNames={styles} timeout={500} key={n.id}>
           <Notification type={n.type} onClose={() => this.props.onCloseNotification(n.id)}>

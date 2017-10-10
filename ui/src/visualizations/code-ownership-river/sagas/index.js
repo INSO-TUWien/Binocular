@@ -7,7 +7,7 @@ import _ from 'lodash';
 import moment from 'moment';
 
 import { fetchFactory, timestampedActionFactory, mapSaga } from '../../../sagas/utils.js';
-import { getChartColors } from '../../../utils.js';
+import { getChartColors } from '../../../utils';
 import getCommitData from './getCommitData.js';
 import getIssueData from './getIssueData.js';
 import fetchRelatedCommits from './fetchRelatedCommits.js';
@@ -61,6 +61,7 @@ function* watchHighlightedIssue() {
 
 export const fetchCodeOwnershipData = fetchFactory(
   function*() {
+    console.time('fetch');
     const { firstCommit, lastCommit, committers, firstIssue, lastIssue } = yield getBounds();
     const firstCommitTimestamp = Date.parse(firstCommit.date);
     const lastCommitTimestamp = Date.parse(lastCommit.date);
@@ -99,6 +100,7 @@ export const fetchCodeOwnershipData = fetchFactory(
       )
     )
       .spread((commits, issues) => {
+        console.timeEnd('fetch');
         return { commits, committers, palette: getChartColors('spectral', committers), issues };
       })
       .catch(function(e) {

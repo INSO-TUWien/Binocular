@@ -1,12 +1,13 @@
 'use strict';
 
 import { createAction } from 'redux-actions';
+import Promise from 'bluebird';
 
-import { traversePages, graphQl } from '../../../utils.js';
-import { fetchFactory } from '../../../sagas/utils.js';
+import { collectPages, graphQl } from '../../../utils';
+import { fetchFactory, timestampedActionFactory } from '../../../sagas/utils.js';
 
 export const requestRelatedCommits = createAction('COR_REQUEST_RELATED_COMMITS');
-export const receiveRelatedCommits = createAction('COR_RECEIVE_RELATED_COMMITS');
+export const receiveRelatedCommits = timestampedActionFactory('COR_RECEIVE_RELATED_COMMITS');
 export const receiveRelatedCommitsError = createAction('COR_RECEIVE_RELATED_COMMITS_ERROR');
 
 export default fetchFactory(
@@ -19,13 +20,10 @@ export default fetchFactory(
 );
 
 function getRelatedCommitData(issue) {
-  return traversePages(
-    getRelatedCommitsPage(issue),
-    commit => {
-      console.log('processing commit', commit);
-    },
-    () => null
-  );
+  return collectPages(getRelatedCommitsPage(issue)).map(commit => {
+    commit.date = new Date(commit.date);
+    return commit;
+  });
 }
 
 const getRelatedCommitsPage = issue => (page, perPage) => {
@@ -33,8 +31,6 @@ const getRelatedCommitsPage = issue => (page, perPage) => {
     .query(
       `query($page: Int, $perPage: Int, $iid: Int!){
          issue (iid: $iid){
-           iid
-           title
            commits (page: $page, perPage: $perPage) {
              count
              data {

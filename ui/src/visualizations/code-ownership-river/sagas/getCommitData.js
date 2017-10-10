@@ -2,7 +2,7 @@
 
 import moment from 'moment';
 import _ from 'lodash';
-import { traversePages, graphQl } from '../../../utils.js';
+import { traversePages, graphQl } from '../../../utils';
 
 export default function getCommitData(commitSpan, significantSpan, granularity, interval) {
   const statsByAuthor = {};
@@ -22,46 +22,42 @@ export default function getCommitData(commitSpan, significantSpan, granularity, 
 
   let next = moment(significantSpan[0]).startOf(granularity.unit).toDate().getTime();
 
-  return traversePages(
-    getCommitsPage(significantSpan[1]),
-    commit => {
-      const dt = Date.parse(commit.date);
+  return traversePages(getCommitsPage(significantSpan[1]), commit => {
+    const dt = Date.parse(commit.date);
 
-      let stats = statsByAuthor[commit.signature];
-      if (!stats) {
-        stats = statsByAuthor[commit.signature] = {
-          count: 0,
-          additions: 0,
-          deletions: 0,
-          changes: 0
-        };
-      }
+    let stats = statsByAuthor[commit.signature];
+    if (!stats) {
+      stats = statsByAuthor[commit.signature] = {
+        count: 0,
+        additions: 0,
+        deletions: 0,
+        changes: 0
+      };
+    }
 
-      count++;
-      additions += commit.stats.additions;
-      deletions += commit.stats.deletions;
+    count++;
+    additions += commit.stats.additions;
+    deletions += commit.stats.deletions;
 
-      stats.count++;
-      stats.additions += commit.stats.additions;
-      stats.deletions += commit.stats.deletions;
-      stats.changes += commit.stats.additions + commit.stats.deletions;
+    stats.count++;
+    stats.additions += commit.stats.additions;
+    stats.deletions += commit.stats.deletions;
+    stats.changes += commit.stats.additions + commit.stats.deletions;
 
-      while (dt >= next) {
-        const dataPoint = {
-          date: new Date(next),
-          count,
-          additions,
-          deletions,
-          changes: additions + deletions,
-          totalStats: _.cloneDeep(statsByAuthor)
-        };
+    while (dt >= next) {
+      const dataPoint = {
+        date: new Date(next),
+        count,
+        additions,
+        deletions,
+        changes: additions + deletions,
+        totalStats: _.cloneDeep(statsByAuthor)
+      };
 
-        data.push(dataPoint);
-        next += interval;
-      }
-    },
-    () => {}
-  ).then(function() {
+      data.push(dataPoint);
+      next += interval;
+    }
+  }).then(function() {
     data.push({
       date: new Date(commitSpan[1]),
       count,

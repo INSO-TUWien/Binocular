@@ -36,6 +36,7 @@ const store = createStore(
     codeOwnershipConfig: {
       showIssues: true,
       highlightedIssue: null,
+      highlightedCommits: [],
       commitAttribute: 'count'
     },
     issueImpactData: {

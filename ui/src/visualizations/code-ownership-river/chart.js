@@ -112,6 +112,7 @@ export default class CodeOwnershipRiver extends React.Component {
       return <svg />;
     }
 
+    console.time('render');
     const dims = this.state.dimensions;
 
     const translate = `translate(${dims.wMargin}, ${dims.hMargin})`;
@@ -121,12 +122,7 @@ export default class CodeOwnershipRiver extends React.Component {
 
     const today = x(new Date());
 
-    const fullDomain = this.scales.x.domain();
-    const visibleDomain = x.domain();
-
     const finalStats = _.last(this.props.commits).totalStats;
-    const fullSpan = fullDomain[1].getTime() - fullDomain[0].getTime();
-    const visibleSpan = visibleDomain[1].getTime() - visibleDomain[0].getTime();
 
     const commitLegend = [];
     const commitSeries = _.map(finalStats, (stats, signature) => {
@@ -163,6 +159,31 @@ export default class CodeOwnershipRiver extends React.Component {
       }
     ];
 
+    const commitMarkers = this.props.highlightedCommits.map((c, i) => {
+      // for each commit marker, we need to recalculate the correct
+      // y-coordinate by checking where that commit would go in our
+      // commit data points
+      const j = _.sortedIndexBy(this.props.commits, c, other => other.date.getTime());
+
+      const cBefore = this.props.commits[j - 1];
+      const cAfter = this.props.commits[j];
+      const span = cAfter.date.getTime() - cBefore.date.getTime();
+      const dist = c.date.getTime() - cBefore.date.getTime();
+      const pct = dist / span;
+
+      const countDiff = cAfter.count - cBefore.count;
+
+      return (
+        <CommitMarker
+          key={i}
+          commit={c}
+          x={x(c.date)}
+          y={y(cBefore.count + countDiff * pct)}
+          onClick={() => this.props.onCommitClick(c)}
+        />
+      );
+    });
+
     if (this.props.issues.length > 0) {
       legend.push({
         name: 'Issues by state',
@@ -170,7 +191,9 @@ export default class CodeOwnershipRiver extends React.Component {
       });
     }
 
-    return (
+    console.log('rendering with', this.props.commits);
+
+    const ret = (
       <Measure bounds onResize={dims => this.updateDimensions(dims.bounds)}>
         {({ measureRef }) =>
           <div
@@ -212,6 +235,7 @@ export default class CodeOwnershipRiver extends React.Component {
                     y={values => y(_.sum(values))}
                     fillToRight={today}
                   />
+                  {commitMarkers}
                 </g>
                 {this.props.highlightedIssue &&
                   <defs>
@@ -277,6 +301,8 @@ export default class CodeOwnershipRiver extends React.Component {
           </div>}
       </Measure>
     );
+    console.timeEnd('render');
+    return ret;
   }
 
   onKeyPress(e) {

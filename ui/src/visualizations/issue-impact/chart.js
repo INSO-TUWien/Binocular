@@ -15,7 +15,7 @@ import hunkTransitions from './hunkTransitions.scss';
 import Asterisk from '../../components/svg/Asterisk.js';
 import X from '../../components/svg/X.js';
 
-import { basename, parseTime, ClosingPathContext, getChartColors } from '../../utils.js';
+import { basename, parseTime, ClosingPathContext, getChartColors } from '../../utils';
 import styles from './styles.scss';
 
 const CHART_FILL_RATIO = 0.45;

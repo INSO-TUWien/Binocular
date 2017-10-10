@@ -1,6 +1,6 @@
 'use strict';
 
-import { graphQl } from '../../../utils.js';
+import { graphQl } from '../../../utils';
 
 export default function getBounds() {
   return graphQl

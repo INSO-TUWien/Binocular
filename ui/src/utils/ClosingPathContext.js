@@ -1,55 +1,8 @@
 'use strict';
 
-import * as d3 from 'd3';
 import _ from 'lodash';
-import chroma from 'chroma-js';
 
-export const parseTime = d3.timeParse('%Y-%m-%dT%H:%M:%S.%LZ');
-
-export function endpointUrl(suffix) {
-  return getBaseUrl() + suffix;
-}
-
-export function basename(path) {
-  return path.substring(path.lastIndexOf('/') + 1);
-}
-
-export function getBaseUrl() {
-  return `${window.location.protocol}//${window.location.host}/api/`;
-}
-
-export function reduceTo(src, length, eligible = () => true) {
-  if (src.length <= length) {
-    return src;
-  }
-
-  const s = 1 - length / src.length;
-  const ret = [];
-  let c = 0;
-  for (let i = 0; i < src.length; i++) {
-    c += s;
-    if (c < 1 || !eligible(src[i])) {
-      ret.push(src[i]);
-    } else {
-      c--;
-    }
-  }
-
-  return ret;
-}
-
-export function getChartColors(band, kinds) {
-  const colors = chroma.scale(band).mode('lch').colors(kinds.length);
-
-  const ret = {};
-  for (let i = 0; i < kinds.length; i++) {
-    ret[kinds[i]] = colors[i];
-  }
-
-  return ret;
-}
-
-export class ClosingPathContext {
+export default class ClosingPathContext {
   constructor() {
     this.commands = [];
     this.min = { x: Infinity, y: Infinity };
@@ -153,19 +106,3 @@ export class ClosingPathContext {
 function isNumeric(n) {
   return !isNaN(parseFloat(n)) && isFinite(n);
 }
-
-export function traversePages(getPage, fn, countFn, pageNumber = 1, perPage = 100) {
-  return getPage(pageNumber, perPage).then(page => {
-    countFn(page.count);
-    _.each(page.data, fn);
-    if (page.data.length + (page.page - 1) * page.perPage < page.count) {
-      return traversePages(getPage, fn, () => null, pageNumber + 1, perPage);
-    }
-  });
-}
-
-import { Lokka } from 'lokka';
-import { Transport } from 'lokka-transport-http';
-const graphQl = new Lokka({ transport: new Transport('/graphQl') });
-
-export { graphQl };
