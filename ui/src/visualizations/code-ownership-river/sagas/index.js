@@ -38,7 +38,7 @@ export default function*() {
 }
 
 function* watchRefreshRequests() {
-  yield throttle(500, 'REQUEST_REFRESH', mapSaga(refresh));
+  yield throttle(2000, 'REQUEST_REFRESH', mapSaga(refresh));
 }
 
 function* watchMessages() {
@@ -83,7 +83,7 @@ export const fetchCodeOwnershipData = fetchFactory(
     const span = lastSignificantTimestamp - firstSignificantTimestamp;
     const granularity = getGranularity(span);
 
-    const interval = moment.duration(1, granularity.unit).asMilliseconds();
+    const interval = granularity.interval.asMilliseconds();
 
     return yield Promise.join(
       getCommitData(
@@ -115,11 +115,12 @@ export const fetchCodeOwnershipData = fetchFactory(
 
 function getGranularity(span) {
   const granularities = [
-    { unit: 'year', limit: moment.duration(100, 'years') },
-    { unit: 'month', limit: moment.duration(100, 'months') },
-    { unit: 'week', limit: moment.duration(100, 'weeks') },
-    { unit: 'day', limit: moment.duration(100, 'day') },
-    { unit: 'hour', limit: moment.duration(100, 'hour') }
+    { interval: moment.duration(1, 'year'), limit: moment.duration(100, 'years') },
+    { interval: moment.duration(9, 'month'), limit: moment.duration(100, 'months') },
+    { interval: moment.duration(1, 'month'), limit: moment.duration(50, 'months') },
+    { interval: moment.duration(1, 'week'), limit: moment.duration(100, 'weeks') },
+    { interval: moment.duration(1, 'day'), limit: moment.duration(100, 'day') },
+    { interval: moment.duration(1, 'hour'), limit: moment.duration(100, 'hour') }
   ];
 
   return _.reduce(granularities, (t, g) => {

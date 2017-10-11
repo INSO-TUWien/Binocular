@@ -6,19 +6,21 @@ import { traversePages, graphQl } from '../../../utils';
 
 export default function getCommitData(commitSpan, significantSpan, granularity, interval) {
   const statsByAuthor = {};
+
+  const totals = {
+    count: 0,
+    additions: 0,
+    deletions: 0,
+    changes: 0
+  };
+
   const data = [
     {
       date: new Date(commitSpan[0]),
-      count: 0,
-      additions: 0,
-      deletions: 0,
-      totalStats: {}
+      totals: _.cloneDeep(totals),
+      statsByAuthor: {}
     }
   ];
-
-  let count = 0,
-    additions = 0,
-    deletions = 0;
 
   let next = moment(significantSpan[0]).startOf(granularity.unit).toDate().getTime();
 
@@ -35,9 +37,10 @@ export default function getCommitData(commitSpan, significantSpan, granularity, 
       };
     }
 
-    count++;
-    additions += commit.stats.additions;
-    deletions += commit.stats.deletions;
+    totals.count++;
+    totals.additions += commit.stats.additions;
+    totals.deletions += commit.stats.deletions;
+    totals.changes += commit.stats.additions + commit.stats.deletions;
 
     stats.count++;
     stats.additions += commit.stats.additions;
@@ -47,11 +50,8 @@ export default function getCommitData(commitSpan, significantSpan, granularity, 
     while (dt >= next) {
       const dataPoint = {
         date: new Date(next),
-        count,
-        additions,
-        deletions,
-        changes: additions + deletions,
-        totalStats: _.cloneDeep(statsByAuthor)
+        totals: _.cloneDeep(totals),
+        statsByAuthor: _.cloneDeep(statsByAuthor)
       };
 
       data.push(dataPoint);
@@ -60,15 +60,67 @@ export default function getCommitData(commitSpan, significantSpan, granularity, 
   }).then(function() {
     data.push({
       date: new Date(commitSpan[1]),
-      count,
-      additions,
-      deletions,
-      changes: additions + deletions,
-      totalStats: _.cloneDeep(statsByAuthor)
+      totals: _.cloneDeep(totals),
+      statsByAuthor: _.cloneDeep(statsByAuthor)
     });
 
-    return data;
+    return group(data);
   });
+}
+
+function group(data) {
+  console.time('group');
+  const lastDatum = _.last(data);
+
+  if (_.keys(lastDatum.statsByAuthor).length < 50) {
+    return data;
+  }
+
+  const meanCommitCount = _.meanBy(_.values(lastDatum.statsByAuthor), 'count');
+  const threshhold = meanCommitCount;
+
+  const applyGroupBy = (stats, predicate) => {
+    const groupStats = {
+      count: 0,
+      additions: 0,
+      deletions: 0,
+      changes: 0
+    };
+    const groupedCommitters = [];
+
+    const groupedStats = _.omitBy(stats, (stats, author) => {
+      if (predicate(stats, author)) {
+        groupStats.count += stats.count;
+        groupStats.additions += stats.additions;
+        groupStats.deletions += stats.deletions;
+        groupStats.changes += stats.changes;
+        groupedCommitters.push(author);
+        return true;
+      }
+    });
+
+    groupedStats.other = groupStats;
+
+    return {
+      groupedStats,
+      groupedCommitters
+    };
+  };
+
+  const { groupedCommitters } = applyGroupBy(lastDatum.statsByAuthor, stats => {
+    return stats.count <= threshhold;
+  });
+
+  _.each(data, datum => {
+    const { groupedStats } = applyGroupBy(datum.statsByAuthor, (stats, author) =>
+      _.includes(groupedCommitters, author)
+    );
+
+    datum.statsByAuthor = groupedStats;
+  });
+
+  console.timeEnd('group');
+  return data;
 }
 
 const getCommitsPage = until => (page, perPage) => {

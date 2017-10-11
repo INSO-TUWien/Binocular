@@ -17,6 +17,8 @@ import AsteriskMarker from '../../components/svg/AsteriskMarker.js';
 import XMarker from '../../components/svg/XMarker.js';
 import Legend from '../../components/Legend';
 
+const dateExtractor = d => d.date;
+
 export default class CodeOwnershipRiver extends React.Component {
   constructor(props) {
     super(props);
@@ -33,22 +35,35 @@ export default class CodeOwnershipRiver extends React.Component {
         hMargin: 0
       },
       transform: d3.zoomIdentity,
-      isPanning: false
+      isPanning: false,
+      lastCommitDataPoint: null,
+      commitLegend: [],
+      commitSeries: []
     };
 
+    const x = d3.scaleTime().rangeRound([0, 0]);
+    const y = d3.scaleLinear().rangeRound([0, 0]);
+
     this.scales = {
-      x: d3.scaleTime().rangeRound([0, 0]),
-      y: d3.scaleLinear().rangeRound([0, 0])
+      x,
+      y,
+      scaledX: x,
+      scaledY: y
+    };
+
+    this.commitExtractors = {
+      x: d => d.date
     };
 
     this.updateDomain(props);
   }
 
   updateZoom(evt) {
-    this.setState({ transform: evt.transform, dirty: true }, () => {
-      const x = this.state.transform.rescaleX(this.scales.x);
+    this.scales.scaledX = evt.transform.rescaleX(this.scales.x);
+    this.scales.scaledY = evt.transform.rescaleY(this.scales.y);
 
-      this.props.onViewportChanged(x.domain());
+    this.setState({ transform: evt.transform, dirty: true }, () => {
+      this.props.onViewportChanged(this.scales.scaledX.domain());
     });
   }
 
@@ -84,7 +99,7 @@ export default class CodeOwnershipRiver extends React.Component {
     }
 
     const commitDateExtent = d3.extent(data.commits, d => d.date);
-    const commitCountExtent = [0, _.last(data.commits).count];
+    const commitCountExtent = [0, _.last(data.commits).totals.count];
 
     const issueDateExtent = d3.extent(data.issues, d => d.createdAt);
     const issueCountExtent = d3.extent(data.issues, d => d.count);
@@ -104,7 +119,49 @@ export default class CodeOwnershipRiver extends React.Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    this.updateDomain(nextProps);
+    const lastCommitDataPoint = _.last(nextProps.commits).statsByAuthor;
+    const commitLegend = [];
+    const commitSeries = _.map(lastCommitDataPoint, (committerIndex, signature) => {
+      const legend = {
+        name:
+          (nextProps.commitAttribute === 'count' ? 'Commits by ' : 'Changes by ') + signature ===
+          'other'
+            ? 'Others'
+            : signature,
+        style: {
+          fill: nextProps.palette[signature]
+        }
+      };
+
+      commitLegend.push(legend);
+
+      return {
+        style: {
+          fill: nextProps.palette[signature]
+        },
+        extractY: d => {
+          const stats = d.statsByAuthor[signature];
+          if (nextProps.commitAttribute === 'count') {
+            return stats ? stats.count : 0;
+          } else {
+            console.log(stats);
+            console.log(d);
+            return stats ? stats.changes / d.totals.changes * d.totals.count : 0;
+          }
+        },
+        onMouseEnter: () => this.activateLegend(legend),
+        onMouseLeave: () => this.activateLegend(null)
+      };
+    });
+
+    this.setState(
+      {
+        lastCommitDataPoint,
+        commitSeries,
+        commitLegend
+      },
+      () => this.updateDomain(nextProps)
+    );
   }
 
   render() {
@@ -112,50 +169,19 @@ export default class CodeOwnershipRiver extends React.Component {
       return <svg />;
     }
 
-    console.time('render');
     const dims = this.state.dimensions;
 
     const translate = `translate(${dims.wMargin}, ${dims.hMargin})`;
 
-    const x = this.state.transform.rescaleX(this.scales.x);
-    const y = this.state.transform.rescaleY(this.scales.y);
+    const x = this.scales.scaledX;
+    const y = this.scales.scaledY;
 
     const today = x(new Date());
-
-    const finalStats = _.last(this.props.commits).totalStats;
-
-    const commitLegend = [];
-    const commitSeries = _.map(finalStats, (stats, signature) => {
-      const legend = {
-        name: (this.props.commitAttribute === 'count' ? 'Commits by ' : 'Changes by ') + signature,
-        style: {
-          fill: this.props.palette[signature]
-        }
-      };
-
-      commitLegend.push(legend);
-
-      return {
-        extract: c => {
-          const stats = c.totalStats[signature];
-          if (this.props.commitAttribute === 'count') {
-            return stats ? stats.count : 0;
-          } else {
-            return stats ? stats.changes / c.changes * c.count : 0;
-          }
-        },
-        style: {
-          fill: this.props.palette[signature]
-        },
-        onMouseEnter: () => this.activateLegend(legend),
-        onMouseLeave: () => this.activateLegend(null)
-      };
-    });
 
     const legend = [
       {
         name: 'Commits by author',
-        subLegend: commitLegend
+        subLegend: this.state.commitLegend
       }
     ];
 
@@ -190,8 +216,6 @@ export default class CodeOwnershipRiver extends React.Component {
         subLegend: [openIssuesLegend, closedIssuesLegend]
       });
     }
-
-    console.log('rendering with', this.props.commits);
 
     const ret = (
       <Measure bounds onResize={dims => this.updateDimensions(dims.bounds)}>
@@ -230,9 +254,11 @@ export default class CodeOwnershipRiver extends React.Component {
                 <g clipPath="url(#chart)" className={cx(styles.commitCount)}>
                   <StackedArea
                     data={this.props.commits}
-                    series={commitSeries}
-                    x={d => x(d.date)}
-                    y={values => y(_.sum(values))}
+                    series={this.state.commitSeries}
+                    x={x}
+                    y={y}
+                    extractX={dateExtractor}
+                    sum={_.sum}
                     fillToRight={today}
                   />
                   {commitMarkers}
@@ -266,22 +292,24 @@ export default class CodeOwnershipRiver extends React.Component {
                   className={cx(styles.openIssuesCount)}>
                   <StackedArea
                     data={this.props.issues}
+                    x={x}
+                    y={y}
                     series={[
                       {
-                        extract: i => i.closedCount,
+                        extractY: i => i.closedCount,
                         className: styles.closedIssuesCount,
                         onMouseEnter: () => this.activateLegend(closedIssuesLegend),
                         onMouseLeave: () => this.activateLegend(null)
                       },
                       {
-                        extract: i => i.openCount,
+                        extractY: i => i.openCount,
                         className: styles.openIssuesCount,
                         onMouseEnter: () => this.activateLegend(openIssuesLegend),
                         onMouseLeave: () => this.activateLegend(null)
                       }
                     ]}
-                    x={d => x(d.date)}
-                    y={values => y(_.sum(values))}
+                    extractX={dateExtractor}
+                    sum={_.sum}
                     fillToRight={today}
                   />
                 </g>
@@ -301,7 +329,6 @@ export default class CodeOwnershipRiver extends React.Component {
           </div>}
       </Measure>
     );
-    console.timeEnd('render');
     return ret;
   }
 

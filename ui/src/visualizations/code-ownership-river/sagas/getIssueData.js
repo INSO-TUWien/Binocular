@@ -12,7 +12,7 @@ export default function getIssueData(issueSpan, significantSpan, granularity, in
   let closeCountTotal = 0,
     count = 0;
 
-  let next = moment(significantSpan[0]).startOf(granularity.unit).toDate().getTime();
+  let next = moment(significantSpan[0]).startOf('day').toDate().getTime();
   const data = [
     {
       date: new Date(issueSpan[0]),
