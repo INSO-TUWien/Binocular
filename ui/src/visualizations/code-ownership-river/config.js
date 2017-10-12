@@ -7,9 +7,7 @@ import { setShowIssues, setHighlightedIssue, setCommitAttribute } from './sagas'
 import SearchBox from '../../components/SearchBox';
 import styles from './styles.scss';
 
-import { Lokka } from 'lokka';
-import { Transport } from 'lokka-transport-http';
-const graphQl = new Lokka({ transport: new Transport('/graphQl') });
+import { graphQl } from '../../utils';
 
 const mapStateToProps = (state /*, ownProps*/) => {
   return {
@@ -46,7 +44,6 @@ const CodeOwnershipRiverConfigComponent = props => {
         <div className="field">
           <SearchBox
             placeholder="Highlight issue..."
-            options={props.issues}
             renderOption={i => `#${i.iid} ${i.title}`}
             search={text => {
               return Promise.resolve(

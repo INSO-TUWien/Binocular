@@ -1,17 +1,20 @@
 'use strict';
 
+import Promise from 'bluebird';
 import { connect } from 'react-redux';
-import { setActiveIssue, setFilteredCommits, setFilteredFiles } from '../../sagas/IssueImpact.js';
+import emojify from 'emoji-replace';
+import { inflect } from 'inflection';
+
+import { setActiveIssue, setFilteredCommits, setFilteredFiles } from './sagas';
 import SearchBox from '../../components/SearchBox';
 import FilterBox from '../../components/FilterBox';
 import styles from './styles.scss';
-import emojify from 'emoji-replace';
-import { inflect } from 'inflection';
+
+import { graphQl } from '../../utils';
 
 const mapStateToProps = (state /*, ownProps*/) => {
   return {
     issue: state.issueImpactData.data.issue,
-    issues: state.issueImpactData.data.issues,
     filteredCommits: state.issueImpactConfig.filteredCommits,
     files: state.issueImpactConfig.files,
     filteredFiles: state.issueImpactConfig.filteredFiles
@@ -34,8 +37,26 @@ const IssueImpactConfigComponent = props => {
           <label className="label">Choose issue to visualize:</label>
           <SearchBox
             placeholder="Select issue..."
-            options={props.issues}
             renderOption={i => `#${i.iid} ${i.title}`}
+            search={text => {
+              return Promise.resolve(
+                graphQl.query(
+                  `
+                  query($q: String) {
+                    issues(page: 1, perPage: 50, q: $q, sort: "DESC") {
+                      data { iid title createdAt closedAt }
+                    }
+                  }`,
+                  { q: text }
+                )
+              )
+                .then(resp => resp.issues.data)
+                .map(i => {
+                  i.createdAt = new Date(i.createdAt);
+                  i.closedAt = i.closedAt && new Date(i.closedAt);
+                  return i;
+                });
+            }}
             value={props.issue}
             onChange={issue => props.onSetIssue(issue)}
           />
@@ -51,7 +72,7 @@ const IssueImpactConfigComponent = props => {
               Filter {props.issue.commits.length} {inflect('commit', props.issue.commits.length)}
             </label>
             <FilterBox
-              options={props.issue.commits.map(c => ({
+              options={props.issue.commits.data.map(c => ({
                 label: `${c.shortSha} ${emojify(c.messageHeader)}`,
                 value: c.sha
               }))}

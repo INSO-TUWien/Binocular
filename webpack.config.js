@@ -43,7 +43,7 @@ const cssLoaders = [
 ];
 
 module.exports = {
-  devtool: 'cheap-eval-source-map',
+  devtool: 'cheap-module-source-map',
   entry: [
     require.resolve('babel-polyfill'),
     require.resolve('react-dev-utils/webpackHotDevClient'),
@@ -74,7 +74,8 @@ module.exports = {
     new webpack.ProvidePlugin({
       React: 'react'
     }),
-    new webpack.LoaderOptionsPlugin({ debug: true })
+    new webpack.LoaderOptionsPlugin({ debug: true }),
+    new webpack.NamedModulesPlugin()
   ],
   devServer: {
     historyApiFallback: true,

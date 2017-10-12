@@ -280,14 +280,14 @@ function extractData(props) {
   let end = parseTime(props.issue.closedAt || new Date());
 
   const filesById = {};
-  _.each(props.issue.commits, commit => {
+  _.each(props.issue.commits.data, commit => {
     if (!_.includes(props.filteredCommits, commit.sha)) {
       return;
     }
 
     start = Math.min(parseTime(commit.date).getTime(), start);
     end = Math.max(parseTime(commit.date), end);
-    _.each(commit.files, f => {
+    _.each(commit.files.data, f => {
       if (!_.includes(props.filteredFiles, f.file.path)) {
         return;
       }
@@ -309,7 +309,7 @@ function extractData(props) {
     });
   });
 
-  const colors = getChartColors('spectral', props.issue.commits.map(c => c.sha));
+  const colors = getChartColors('spectral', props.issue.commits.data.map(c => c.sha));
 
   // TODO somehow allow user to filter files
   const files = _.values(filesById).filter(f => f.name !== 'yarn.lock');

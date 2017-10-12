@@ -24,7 +24,7 @@ const logger = createLogger({
 const store = createStore(
   app,
   {
-    activeVisualization: 'CODE_OWNERSHIP_RIVER',
+    activeVisualization: 'ISSUE_IMPACT',
     visualizations: [
       { id: 'ISSUE_IMPACT', label: 'Issue Impact' },
       { id: 'CODE_OWNERSHIP_RIVER', label: 'Code ownership river' },

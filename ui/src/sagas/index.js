@@ -4,10 +4,10 @@ import { createAction } from 'redux-actions';
 import { select, takeEvery, fork, throttle, put, cancel } from 'redux-saga/effects';
 
 import { fetchConfig, watchConfig } from './config.js';
-import { fetchIssueImpactData, watchSetActiveIssue } from './IssueImpact.js';
 import { watchNotifications } from './notifications.js';
 
 import codeOwnershipRiver from '../visualizations/code-ownership-river/sagas';
+import issueImpact from '../visualizations/issue-impact/sagas';
 
 export const Visualizations = ['ISSUE_IMPACT', 'CODE_OWNERSHIP_RIVER', 'HOTSPOT_DIALS'];
 
@@ -15,7 +15,8 @@ export const switchVisualization = createAction('SWITCH_VISUALIZATION', vis => v
 export const showCommit = createAction('SHOW_COMMIT');
 
 const componentSagas = {
-  CODE_OWNERSHIP_RIVER: codeOwnershipRiver
+  CODE_OWNERSHIP_RIVER: codeOwnershipRiver,
+  ISSUE_IMPACT: issueImpact
 };
 let currentComponentSaga = null;
 

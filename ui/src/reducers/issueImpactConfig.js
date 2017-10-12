@@ -16,7 +16,9 @@ export default handleActions(
     RECEIVE_ISSUE_IMPACT_DATA: (state, action) => {
       const files = action.payload.issue ? getAllFiles(action.payload.issue) : [];
       return _.assign({}, state, {
-        filteredCommits: action.payload.issue ? action.payload.issue.commits.map(c => c.sha) : [],
+        filteredCommits: action.payload.issue
+          ? action.payload.issue.commits.data.map(c => c.sha)
+          : [],
         files,
         filteredFiles: files
       });
@@ -28,8 +30,8 @@ export default handleActions(
 function getAllFiles(issue) {
   const files = {};
 
-  _.each(issue.commits, c => {
-    _.each(c.files, h => {
+  _.each(issue.commits.data, c => {
+    _.each(c.files.data, h => {
       files[h.file.id] = h.file.path;
     });
   });
