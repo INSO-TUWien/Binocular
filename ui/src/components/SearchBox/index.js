@@ -24,7 +24,9 @@ export default class SearchBox extends React.Component {
   }
 
   componentWillMount() {
-    this.search('');
+    if (!this.props.value) {
+      this.search('');
+    }
   }
 
   componentWillReceiveProps(nextProps) {

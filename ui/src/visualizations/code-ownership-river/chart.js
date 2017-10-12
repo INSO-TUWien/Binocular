@@ -24,6 +24,9 @@ export default class CodeOwnershipRiver extends React.Component {
     super(props);
 
     this.elems = {};
+
+    const { commitSeries, lastCommitDataPoint, commitLegend } = this.extractCommitData(props);
+
     this.state = {
       dirty: true,
       dimensions: {
@@ -36,9 +39,9 @@ export default class CodeOwnershipRiver extends React.Component {
       },
       transform: d3.zoomIdentity,
       isPanning: false,
-      lastCommitDataPoint: null,
-      commitLegend: [],
-      commitSeries: []
+      lastCommitDataPoint,
+      commitLegend,
+      commitSeries
     };
 
     const x = d3.scaleTime().rangeRound([0, 0]);
@@ -119,41 +122,7 @@ export default class CodeOwnershipRiver extends React.Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    const lastCommitDataPoint = _.last(nextProps.commits).statsByAuthor;
-    const commitLegend = [];
-    const commitSeries = _.map(lastCommitDataPoint, (committerIndex, signature) => {
-      const legend = {
-        name:
-          (nextProps.commitAttribute === 'count' ? 'Commits by ' : 'Changes by ') + signature ===
-          'other'
-            ? 'Others'
-            : signature,
-        style: {
-          fill: nextProps.palette[signature]
-        }
-      };
-
-      commitLegend.push(legend);
-
-      return {
-        style: {
-          fill: nextProps.palette[signature]
-        },
-        extractY: d => {
-          const stats = d.statsByAuthor[signature];
-          if (nextProps.commitAttribute === 'count') {
-            return stats ? stats.count : 0;
-          } else {
-            console.log(stats);
-            console.log(d);
-            return stats ? stats.changes / d.totals.changes * d.totals.count : 0;
-          }
-        },
-        onMouseEnter: () => this.activateLegend(legend),
-        onMouseLeave: () => this.activateLegend(null)
-      };
-    });
-
+    const { commitSeries, lastCommitDataPoint, commitLegend } = this.extractCommitData(nextProps);
     this.setState(
       {
         lastCommitDataPoint,
@@ -197,14 +166,14 @@ export default class CodeOwnershipRiver extends React.Component {
       const dist = c.date.getTime() - cBefore.date.getTime();
       const pct = dist / span;
 
-      const countDiff = cAfter.count - cBefore.count;
+      const countDiff = cAfter.totals.count - cBefore.totals.count;
 
       return (
         <CommitMarker
           key={i}
           commit={c}
           x={x(c.date)}
-          y={y(cBefore.count + countDiff * pct)}
+          y={y(cBefore.totals.count + countDiff * pct)}
           onClick={() => this.props.onCommitClick(c)}
         />
       );
@@ -390,6 +359,47 @@ export default class CodeOwnershipRiver extends React.Component {
 
   activateLegend(legend) {
     this.setState({ hoverHint: legend });
+  }
+
+  extractCommitData(props) {
+    if (!props.commits || props.commits.length === 0) {
+      return {};
+    }
+
+    const lastCommitDataPoint = _.last(props.commits).statsByAuthor;
+    const commitLegend = [];
+    const commitSeries = _.map(lastCommitDataPoint, (committerIndex, signature) => {
+      const legend = {
+        name:
+          (props.commitAttribute === 'count' ? 'Commits by ' : 'Changes by ') + signature ===
+          'other'
+            ? 'Others'
+            : signature,
+        style: {
+          fill: props.palette[signature]
+        }
+      };
+
+      commitLegend.push(legend);
+
+      return {
+        style: {
+          fill: props.palette[signature]
+        },
+        extractY: d => {
+          const stats = d.statsByAuthor[signature];
+          if (props.commitAttribute === 'count') {
+            return stats ? stats.count : 0;
+          } else {
+            return stats ? stats.changes / d.totals.changes * d.totals.count : 0;
+          }
+        },
+        onMouseEnter: () => this.activateLegend(legend),
+        onMouseLeave: () => this.activateLegend(null)
+      };
+    });
+
+    return { commitSeries, commitLegend };
   }
 }
 
