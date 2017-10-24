@@ -192,7 +192,7 @@ export default class CodeOwnershipRiver extends React.Component {
           <div
             tabIndex="1"
             ref={measureRef}
-            onKeyPress={e => this.onKeyPress(e)}
+            onKeyDown={e => this.onKeyDown(e)}
             className={styles.chartContainer}>
             <svg
               className={cx(styles.chart, { [styles.panning]: this.state.isPanning })}
@@ -301,13 +301,19 @@ export default class CodeOwnershipRiver extends React.Component {
     return ret;
   }
 
-  onKeyPress(e) {
-    if (e.key === '=' || e.key === '0') {
+  onKeyDown(e) {
+    // escape, '0' or '='
+    if (e.keyCode === 27 || e.keyCode === 48 || e.keyCode === 187) {
       this.resetZoom();
     }
   }
 
   resetZoom() {
+    const svg = d3.select(this.elems.svg);
+
+    // this.zoom.transform(svg, d3.zoomIdentity);
+    svg.transition().duration(500).call(this.zoom.transform, d3.zoomIdentity);
+
     this.setState({
       dirty: false,
       transform: d3.zoomIdentity
@@ -332,7 +338,11 @@ export default class CodeOwnershipRiver extends React.Component {
         this.constrainZoom(d3.event.transform, 50);
         this.updateZoom(d3.event);
       })
-      .on('start', () => this.setState({ isPanning: d3.event.sourceEvent.type !== 'wheel' }))
+      .on('start', () =>
+        this.setState({
+          isPanning: d3.event.sourceEvent == null || d3.event.sourceEvent.type !== 'wheel'
+        })
+      )
       .on('end', () => this.setState({ isPanning: false }));
 
     svg.call(this.zoom);
