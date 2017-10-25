@@ -6,7 +6,8 @@ import ProgressBar from './ProgressBar.js';
 
 const mapStateToProps = (state /*, ownProps*/) => {
   return {
-    progress: state.progress
+    progress: state.progress,
+    showWorkIndicator: state.codeOwnershipData.isFetching || state.issueImpactData.isFetching
   };
 };
 

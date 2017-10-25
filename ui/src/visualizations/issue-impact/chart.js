@@ -15,7 +15,7 @@ import hunkTransitions from './hunkTransitions.scss';
 import Asterisk from '../../components/svg/Asterisk.js';
 import X from '../../components/svg/X.js';
 
-import { basename, parseTime, ClosingPathContext, getChartColors } from '../../utils';
+import { basename, parseTime, ClosingPathContext, getChartColors, shortenPath } from '../../utils';
 import styles from './styles.scss';
 
 const CHART_FILL_RATIO = 0.45;
@@ -49,7 +49,8 @@ export default class IssueImpact extends React.Component {
       start,
       end,
       totalLength,
-      isPanning: false
+      isPanning: false,
+      hoveredHunk: null
     };
   }
 
@@ -157,20 +158,23 @@ export default class IssueImpact extends React.Component {
         d.closeToPath(closer, false);
         const color = this.state.colors[hunk.commit.sha];
 
-        console.log('hunkTransitions:', hunkTransitions);
+        const hunkKey = `${hunk.commit.sha}-${file.name}-${i}`;
+        const isHighlighted = hunkKey === this.state.hoveredHunk;
+        const light = chroma(color).alpha(0.6).css();
+        const dark = chroma(color).darken().hex();
+
         return (
-          <CSSTransition
-            classNames={hunkTransitions}
-            timeout={10000}
-            key={`${hunk.commit.sha}-${file.path}-${i}`}>
+          <CSSTransition classNames={hunkTransitions} timeout={10000} key={hunkKey}>
             <g>
               <path
                 className={styles.changeIndicator}
                 d={d}
                 style={{
-                  fill: chroma(color).alpha(0.6).css(),
-                  stroke: chroma(color).darken().hex()
+                  fill: isHighlighted ? dark : light,
+                  stroke: dark
                 }}
+                onMouseEnter={() => this.setState({ hoveredHunk: hunkKey })}
+                onMouseLeave={() => this.setState({ hoveredHunk: null })}
               />
             </g>
           </CSSTransition>
@@ -188,7 +192,7 @@ export default class IssueImpact extends React.Component {
           </TransitionGroup>
           <path d={arcData} />
           <text transform={`${textTranslate} ${textRotate}`} style={{ textAnchor }}>
-            {basename(file.name)}
+            {shortenPath(file.name, 30)}
           </text>
         </g>
       );
@@ -206,7 +210,9 @@ export default class IssueImpact extends React.Component {
       .scaleTime()
       .rangeRound([-issueAxisLength, issueAxisLength])
       .domain([this.state.start, this.state.end]);
-    const translate = `translate(${dims.wMargin}, ${dims.hMargin})`;
+
+    const translate = `translate(${dims.wMargin + this.state.transform.x}, ${dims.hMargin +
+      this.state.transform.y}) scale(${this.state.transform.k})`;
 
     const fileAxes = [
       this.renderFileAxes(issueScale, this.state.files.top),
@@ -261,6 +267,16 @@ export default class IssueImpact extends React.Component {
       </Measure>
     );
   }
+
+  componentDidUpdate() {
+    const svg = d3.select(this.elems.svg);
+
+    this.zoom = d3.zoom().scaleExtent([1, Infinity]).on('zoom', () => {
+      this.updateZoom(d3.event);
+    });
+
+    svg.call(this.zoom);
+  }
 }
 
 function extractData(props) {
@@ -311,8 +327,7 @@ function extractData(props) {
 
   const colors = getChartColors('spectral', props.issue.commits.data.map(c => c.sha));
 
-  // TODO somehow allow user to filter files
-  const files = _.values(filesById).filter(f => f.name !== 'yarn.lock');
+  const files = _.values(filesById);
 
   const totalLength = _.sumBy(files, 'length');
   const bottomLength = Math.floor(totalLength / 2);
@@ -343,6 +358,22 @@ function extractData(props) {
 
   const [smallerHalf, largerHalf] = _.sortBy([top, bottom], 'length');
   const sizeDifference = largerHalf.length - smallerHalf.length;
+
+  const alphaSort = (a, b) => {
+    const an = basename(a.name),
+      bn = basename(b.name);
+
+    if (an < bn) {
+      return -1;
+    } else if (an > bn) {
+      return 1;
+    } else {
+      return 0;
+    }
+  };
+
+  top.data.sort(alphaSort);
+  bottom.data.sort(alphaSort);
 
   largerHalf.scaleFactor = 1;
   smallerHalf.scaleFactor = smallerHalf.length / largerHalf.length;

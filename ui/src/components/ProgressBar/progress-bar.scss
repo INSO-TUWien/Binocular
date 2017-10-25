@@ -46,6 +46,12 @@
       stroke: $fill-color;
     }
   }
+
+  .workIndicator {
+    line {
+      stroke: $grey;
+    }
+  }
 }
 
 .hoverTarget:hover {

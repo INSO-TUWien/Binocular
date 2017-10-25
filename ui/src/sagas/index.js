@@ -25,8 +25,7 @@ function* switchComponentSaga(sagaName) {
     yield cancel(currentComponentSaga);
   }
 
-  currentComponentSaga = componentSagas[sagaName];
-  yield fork(currentComponentSaga);
+  currentComponentSaga = yield fork(componentSagas[sagaName]);
 }
 
 export function* root() {
@@ -38,14 +37,13 @@ export function* root() {
   yield fork(watchConfig);
   yield fork(watchVisualization);
   yield fork(watchNotifications);
-  // yield fork(watchSetActiveIssue);
-  // yield fork(watchMessages);
 }
 
 function* watchVisualization() {
   yield takeEvery('SWITCH_VISUALIZATION', function*() {
     const { activeVisualization } = yield select();
-    switchComponentSaga(activeVisualization);
+    console.log('switching to', activeVisualization);
+    yield switchComponentSaga(activeVisualization);
   });
 }
 

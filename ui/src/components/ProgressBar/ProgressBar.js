@@ -57,6 +57,27 @@ const ProgressBar = props => {
             </tspan>
           </text>
         </g>
+        {props.showWorkIndicator &&
+          <g className={styles.workIndicator}>
+            <line x1="21" y1="27" x2="21" y2="27">
+              <animate
+                attributeName="x1"
+                from="0"
+                to="-10"
+                additive="sum"
+                dur="1s"
+                repeatCount="indefinite"
+              />
+              <animate
+                attributeName="x2"
+                from="0"
+                to="10"
+                additive="sum"
+                dur="1s"
+                repeatCount="indefinite"
+              />
+            </line>
+          </g>}
       </svg>
     </div>
   );

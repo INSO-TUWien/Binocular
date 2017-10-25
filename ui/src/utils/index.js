@@ -30,6 +30,29 @@ export function getChartColors(band, kinds) {
   return ret;
 }
 
+export function shortenPath(path, maxLength, { replacer = '\u2026' } = {}) {
+  const parts = path.split(/\//);
+  const fileName = _.last(parts);
+
+  if (fileName.length + replacer.length >= maxLength) {
+    return fileName;
+  }
+
+  const dirPath = parts.slice(0, -1).join('/');
+  const maxDirPathLength = maxLength - fileName.length - 1;
+
+  const removableLength = dirPath.length - maxDirPathLength + replacer.length;
+
+  if (removableLength <= 0) {
+    return path;
+  }
+
+  const start = dirPath.length / 2 - removableLength / 2;
+  const end = start + removableLength;
+
+  return dirPath.substring(0, start) + replacer + dirPath.substring(end) + '/' + fileName;
+}
+
 export { default as ClosingPathContext } from './ClosingPathContext.js';
 
 export * from './graphQl.js';

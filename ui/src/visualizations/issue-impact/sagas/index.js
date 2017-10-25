@@ -25,7 +25,11 @@ export function* watchSetActiveIssue() {
 
 export const fetchIssueImpactData = fetchFactory(
   function*() {
-    const { config, issueImpactConfig: { activeIssueId } } = yield select();
+    const { issueImpactConfig: { activeIssueId } } = yield select();
+
+    if (activeIssueId === null) {
+      return { issue: null };
+    }
 
     return yield graphQl
       .query(

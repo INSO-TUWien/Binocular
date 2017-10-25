@@ -1,6 +1,7 @@
 'use strict';
 
 import Promise from 'bluebird';
+import _ from 'lodash';
 import { connect } from 'react-redux';
 import emojify from 'emoji-replace';
 import { inflect } from 'inflection';
@@ -72,10 +73,13 @@ const IssueImpactConfigComponent = props => {
               Filter {props.issue.commits.length} {inflect('commit', props.issue.commits.length)}
             </label>
             <FilterBox
-              options={props.issue.commits.data.map(c => ({
-                label: `${c.shortSha} ${emojify(c.messageHeader)}`,
-                value: c.sha
-              }))}
+              options={_(props.issue.commits.data)
+                .uniqBy(c => c.sha)
+                .map(c => ({
+                  label: `${c.shortSha} ${emojify(c.messageHeader)}`,
+                  value: c.sha
+                }))
+                .value()}
               checkedOptions={props.filteredCommits}
               onChange={props.onSetFilteredCommits}
             />
@@ -87,10 +91,13 @@ const IssueImpactConfigComponent = props => {
               Filter {props.files.length} {inflect('file', props.files.length)}
             </label>
             <FilterBox
-              options={props.files.map(f => ({
-                label: f,
-                value: f
-              }))}
+              options={_(props.files)
+                .map(f => ({
+                  label: f,
+                  value: f
+                }))
+                .sortBy('label')
+                .value()}
               checkedOptions={props.filteredFiles}
               onChange={props.onSetFilteredFiles}
             />
