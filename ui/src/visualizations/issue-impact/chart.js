@@ -10,6 +10,7 @@ import chroma from 'chroma-js';
 import TransitionGroup from 'react-transition-group/TransitionGroup';
 import CSSTransition from 'react-transition-group/CSSTransition';
 
+import ZoomableSvg from '../../components/svg/ZoomableSvg.js';
 import Axis from '../code-ownership-river/Axis.js';
 import hunkTransitions from './hunkTransitions.scss';
 import Asterisk from '../../components/svg/Asterisk.js';
@@ -23,7 +24,7 @@ const MINIMUM_SEMICIRCLE_SEPARATOR_SHARE = 0.2;
 const MAXIMUM_SEMICIRCLE_FILE_SHARE = 1 - MINIMUM_SEMICIRCLE_SEPARATOR_SHARE;
 const FILE_AXIS_DESCRIPTION_OFFSET = 10;
 
-export default class IssueImpact extends React.Component {
+export default class IssueImpact extends React.PureComponent {
   constructor(props) {
     super(props);
 
@@ -41,7 +42,6 @@ export default class IssueImpact extends React.Component {
         hMargin: 0
       },
       radius: 0,
-      transform: d3.zoomIdentity,
       commits,
       colors,
       issue,
@@ -52,10 +52,6 @@ export default class IssueImpact extends React.Component {
       isPanning: false,
       hoveredHunk: null
     };
-  }
-
-  updateZoom(evt) {
-    this.setState({ transform: evt.transform, dirty: true });
   }
 
   updateDimensions(dimensions) {
@@ -85,20 +81,13 @@ export default class IssueImpact extends React.Component {
   componentWillReceiveProps(nextProps) {
     const { files, start, end, colors, issue } = extractData(nextProps);
 
-    this.setState(
-      {
-        issue,
-        colors,
-        files,
-        start,
-        end
-      },
-      () => {
-        if (!this.state.dirty) {
-          this.resetZoom();
-        }
-      }
-    );
+    this.setState({
+      issue,
+      colors,
+      files,
+      start,
+      end
+    });
   }
 
   renderFileAxes(issueScale, semi) {
@@ -200,6 +189,7 @@ export default class IssueImpact extends React.Component {
   }
 
   render() {
+    console.log('rendering');
     if (!this.state.issue) {
       return <svg />;
     }
@@ -211,8 +201,7 @@ export default class IssueImpact extends React.Component {
       .rangeRound([-issueAxisLength, issueAxisLength])
       .domain([this.state.start, this.state.end]);
 
-    const translate = `translate(${dims.wMargin + this.state.transform.x}, ${dims.hMargin +
-      this.state.transform.y}) scale(${this.state.transform.k})`;
+    const translate = `translate(${dims.wMargin}, ${dims.hMargin})`;
 
     const fileAxes = [
       this.renderFileAxes(issueScale, this.state.files.top),
@@ -222,14 +211,8 @@ export default class IssueImpact extends React.Component {
     return (
       <Measure bounds onResize={dims => this.updateDimensions(dims.bounds)}>
         {({ measureRef }) =>
-          <div
-            tabIndex="1"
-            ref={measureRef}
-            onKeyPress={e => this.onKeyPress(e)}
-            className={styles.chartContainer}>
-            <svg
-              className={cx(styles.chart, { [styles.panning]: this.state.isPanning })}
-              ref={svg => (this.elems.svg = svg)}>
+          <div tabIndex="1" ref={measureRef} className={styles.chartContainer}>
+            <ZoomableSvg scaleExtent={[1, 10]}>
               <defs>
                 <clipPath id="chart">
                   <rect x="0" y="0" width={dims.width} height={dims.height} />
@@ -262,20 +245,10 @@ export default class IssueImpact extends React.Component {
                   </g>
                 </g>
               </g>
-            </svg>
+            </ZoomableSvg>
           </div>}
       </Measure>
     );
-  }
-
-  componentDidUpdate() {
-    const svg = d3.select(this.elems.svg);
-
-    this.zoom = d3.zoom().scaleExtent([1, Infinity]).on('zoom', () => {
-      this.updateZoom(d3.event);
-    });
-
-    svg.call(this.zoom);
   }
 }
 
