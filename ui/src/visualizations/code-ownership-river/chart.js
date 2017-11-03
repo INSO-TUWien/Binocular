@@ -16,6 +16,8 @@ import StackedArea from './StackedArea.js';
 import AsteriskMarker from '../../components/svg/AsteriskMarker.js';
 import XMarker from '../../components/svg/XMarker.js';
 import Legend from '../../components/Legend';
+import CustomZoomableChartContainer from '../../components/svg/CustomZoomableChartContainer.js';
+import OffsetGroup from '../../components/svg/OffsetGroup.js';
 
 const dateExtractor = d => d.date;
 
@@ -29,15 +31,6 @@ export default class CodeOwnershipRiver extends React.Component {
 
     this.state = {
       dirty: true,
-      dimensions: {
-        fullWidth: 0,
-        fullHeight: 0,
-        width: 0,
-        height: 0,
-        wMargin: 0,
-        hMargin: 0
-      },
-      transform: d3.zoomIdentity,
       isPanning: false,
       lastCommitDataPoint,
       commitLegend,
@@ -59,41 +52,6 @@ export default class CodeOwnershipRiver extends React.Component {
     };
 
     this.updateDomain(props);
-  }
-
-  updateZoom(evt) {
-    this.scales.scaledX = evt.transform.rescaleX(this.scales.x);
-    this.scales.scaledY = evt.transform.rescaleY(this.scales.y);
-
-    this.setState({ transform: evt.transform, dirty: true }, () => {
-      this.props.onViewportChanged(this.scales.scaledX.domain());
-    });
-  }
-
-  updateDimensions(dimensions) {
-    const fullWidth = dimensions.width;
-    const fullHeight = dimensions.height;
-    const wPct = 0.7;
-    const hPct = 0.7;
-
-    const width = fullWidth * wPct;
-    const height = fullHeight * hPct;
-    const wMargin = (fullWidth - width) / 2;
-    const hMargin = (fullHeight - height) / 2;
-
-    this.scales.x.rangeRound([0, width]);
-    this.scales.y.rangeRound([height, 0]);
-
-    this.setState({
-      dimensions: {
-        fullWidth,
-        fullHeight,
-        width,
-        height,
-        wMargin,
-        hMargin
-      }
-    });
   }
 
   updateDomain(data) {
@@ -138,46 +96,12 @@ export default class CodeOwnershipRiver extends React.Component {
       return <svg />;
     }
 
-    const dims = this.state.dimensions;
-
-    const translate = `translate(${dims.wMargin}, ${dims.hMargin})`;
-
-    const x = this.scales.scaledX;
-    const y = this.scales.scaledY;
-
-    const today = x(new Date());
-
     const legend = [
       {
         name: 'Commits by author',
         subLegend: this.state.commitLegend
       }
     ];
-
-    const commitMarkers = this.props.highlightedCommits.map((c, i) => {
-      // for each commit marker, we need to recalculate the correct
-      // y-coordinate by checking where that commit would go in our
-      // commit data points
-      const j = _.sortedIndexBy(this.props.commits, c, other => other.date.getTime());
-
-      const cBefore = this.props.commits[j - 1];
-      const cAfter = this.props.commits[j];
-      const span = cAfter.date.getTime() - cBefore.date.getTime();
-      const dist = c.date.getTime() - cBefore.date.getTime();
-      const pct = dist / span;
-
-      const countDiff = cAfter.totals.count - cBefore.totals.count;
-
-      return (
-        <CommitMarker
-          key={i}
-          commit={c}
-          x={x(c.date)}
-          y={y(cBefore.totals.count + countDiff * pct)}
-          onClick={() => this.props.onCommitClick(c)}
-        />
-      );
-    });
 
     if (this.props.issues.length > 0) {
       legend.push({
@@ -186,17 +110,53 @@ export default class CodeOwnershipRiver extends React.Component {
       });
     }
 
-    const ret = (
-      <Measure bounds onResize={dims => this.updateDimensions(dims.bounds)}>
-        {({ measureRef }) =>
-          <div
-            tabIndex="1"
-            ref={measureRef}
-            onKeyDown={e => this.onKeyDown(e)}
-            className={styles.chartContainer}>
-            <svg
-              className={cx(styles.chart, { [styles.panning]: this.state.isPanning })}
-              ref={svg => (this.elems.svg = svg)}>
+    return (
+      <CustomZoomableChartContainer
+        x={this.scales.x}
+        y={this.scales.y}
+        scaleExtent={[1, Infinity]}
+        onZoom={(e, dims) => {
+          this.constrainZoom(e, dims, 50);
+        }}
+        onViewportChanged={(xDomain, yDomain) => this.props.onViewportChanged(xDomain, yDomain)}
+        onStart={e =>
+          this.setState({
+            isPanning: e.sourceEvent == null || d3.event.sourceEvent.type !== 'wheel'
+          })}
+        onEnd={() => this.setState({ isPanning: false })}
+        className={cx(styles.chart, { [styles.panning]: this.state.isPanning })}>
+        {({ x, y, dims }) => {
+          const today = x(new Date());
+          this.scales.x.rangeRound([0, dims.width]);
+          this.scales.y.rangeRound([dims.height, 0]);
+
+          const commitMarkers = this.props.highlightedCommits.map((c, i) => {
+            // for each commit marker, we need to recalculate the correct
+            // y-coordinate by checking where that commit would go in our
+            // commit data points
+            const j = _.sortedIndexBy(this.props.commits, c, other => other.date.getTime());
+
+            const cBefore = this.props.commits[j - 1];
+            const cAfter = this.props.commits[j];
+            const span = cAfter.date.getTime() - cBefore.date.getTime();
+            const dist = c.date.getTime() - cBefore.date.getTime();
+            const pct = dist / span;
+
+            const countDiff = cAfter.totals.count - cBefore.totals.count;
+
+            return (
+              <CommitMarker
+                key={i}
+                commit={c}
+                x={x(c.date)}
+                y={y(cBefore.totals.count + countDiff * pct)}
+                onClick={() => this.props.onCommitClick(c)}
+              />
+            );
+          });
+
+          return (
+            <g>
               <defs>
                 <clipPath id="chart">
                   <rect x="0" y="0" width={dims.width} height={dims.height} />
@@ -205,7 +165,7 @@ export default class CodeOwnershipRiver extends React.Component {
                   <rect x="0" y={-dims.hMargin} width={dims.width} height={dims.fullHeight} />
                 </clipPath>
               </defs>
-              <g transform={translate}>
+              <OffsetGroup dims={dims}>
                 <GridLines orient="left" scale={y} ticks="10" length={dims.width} />
                 <GridLines orient="bottom" scale={x} y={dims.height} length={dims.height} />
                 <g>
@@ -266,13 +226,14 @@ export default class CodeOwnershipRiver extends React.Component {
                     series={[
                       {
                         extractY: i => i.closedCount,
+                        style: closedIssuesLegend.style,
                         className: styles.closedIssuesCount,
                         onMouseEnter: () => this.activateLegend(closedIssuesLegend),
                         onMouseLeave: () => this.activateLegend(null)
                       },
                       {
                         extractY: i => i.openCount,
-                        className: styles.openIssuesCount,
+                        style: openIssuesLegend.style,
                         onMouseEnter: () => this.activateLegend(openIssuesLegend),
                         onMouseLeave: () => this.activateLegend(null)
                       }
@@ -288,68 +249,44 @@ export default class CodeOwnershipRiver extends React.Component {
                   </text>
                   <line x1={today} y1={0} x2={today} y2={dims.height} />
                 </g>
-              </g>
+              </OffsetGroup>
               <Legend
                 x="10"
                 y="10"
                 categories={this.state.hoverHint ? [this.state.hoverHint] : legend}
               />
-            </svg>
-          </div>}
-      </Measure>
+            </g>
+          );
+        }}
+      </CustomZoomableChartContainer>
+      // <ChartContainer>
+      //   {dims => {
+      //     this.scales.x.rangeRound([0, dims.width]);
+      //     this.scales.y.rangeRound([dims.height, 0]);
+      //     const translate = `translate(${dims.wMargin}, ${dims.hMargin})`;
+      //     return (
+      //       <CustomZoomableSvg
+      //         x={this.scales.x}
+      //         y={this.scales.y}
+      //         scaleExtent={[1, Infinity]}
+      //         onZoom={e => this.constrainZoom(e, dims, 50)}
+      //         onStart={e =>
+      //           this.setState({
+      //             isPanning: e.sourceEvent == null || d3.event.sourceEvent.type !== 'wheel'
+      //           })}
+      //         onEnd={() => this.setState({ isPanning: false })}
+      //         margin={10}
+      //         className={cx(styles.chart, { [styles.panning]: this.state.isPanning })}>
+      //         {({ x, y }) => {
+      //         }}
+      //       </CustomZoomableSvg>
+      //     );
+      //   }}
+      // </ChartContainer>
     );
-    return ret;
   }
 
-  onKeyDown(e) {
-    // escape, '0' or '='
-    if (e.keyCode === 27 || e.keyCode === 48 || e.keyCode === 187) {
-      this.resetZoom();
-    }
-  }
-
-  resetZoom() {
-    const svg = d3.select(this.elems.svg);
-
-    // this.zoom.transform(svg, d3.zoomIdentity);
-    svg.transition().duration(500).call(this.zoom.transform, d3.zoomIdentity);
-
-    this.setState({
-      dirty: false,
-      transform: d3.zoomIdentity
-    });
-  }
-
-  componentWillUnmount() {
-    if (this.zoom) {
-      this.zoom.on('zoom', null);
-      this.zoom.on('start', null);
-      this.zoom.on('end', null);
-    }
-  }
-
-  componentDidUpdate() {
-    const svg = d3.select(this.elems.svg);
-
-    this.zoom = d3
-      .zoom()
-      .scaleExtent([1, Infinity])
-      .on('zoom', () => {
-        this.constrainZoom(d3.event.transform, 50);
-        this.updateZoom(d3.event);
-      })
-      .on('start', () =>
-        this.setState({
-          isPanning: d3.event.sourceEvent == null || d3.event.sourceEvent.type !== 'wheel'
-        })
-      )
-      .on('end', () => this.setState({ isPanning: false }));
-
-    svg.call(this.zoom);
-  }
-
-  constrainZoom(t, margin = 0) {
-    const dims = this.state.dimensions;
+  constrainZoom(t, dims, margin = 0) {
     const [xMin, xMax] = this.scales.x.domain().map(d => this.scales.x(d));
     const [yMin, yMax] = this.scales.y.domain().map(d => this.scales.y(d));
 

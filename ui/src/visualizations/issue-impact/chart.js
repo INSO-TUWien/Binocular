@@ -2,7 +2,6 @@
 
 import _ from 'lodash';
 import React from 'react';
-import Measure from 'react-measure';
 import * as d3 from 'd3';
 import cx from 'classnames';
 import knapsack from 'knapsack-js';
@@ -15,6 +14,7 @@ import Axis from '../code-ownership-river/Axis.js';
 import hunkTransitions from './hunkTransitions.scss';
 import Asterisk from '../../components/svg/Asterisk.js';
 import X from '../../components/svg/X.js';
+import ChartContainer from '../../components/svg/ChartContainer.js';
 
 import { basename, parseTime, ClosingPathContext, getChartColors, shortenPath } from '../../utils';
 import styles from './styles.scss';
@@ -33,15 +33,6 @@ export default class IssueImpact extends React.PureComponent {
     this.elems = {};
     this.state = {
       dirty: true,
-      dimensions: {
-        fullWidth: 0,
-        fullHeight: 0,
-        width: 0,
-        height: 0,
-        wMargin: 0,
-        hMargin: 0
-      },
-      radius: 0,
       commits,
       colors,
       issue,
@@ -52,30 +43,6 @@ export default class IssueImpact extends React.PureComponent {
       isPanning: false,
       hoveredHunk: null
     };
-  }
-
-  updateDimensions(dimensions) {
-    const fullWidth = dimensions.width;
-    const fullHeight = dimensions.height;
-    const wPct = 0.8;
-    const hPct = 0.8;
-
-    const width = fullWidth * wPct;
-    const height = fullHeight * hPct;
-    const wMargin = (fullWidth - width) / 2;
-    const hMargin = (fullHeight - height) / 2;
-
-    this.setState({
-      dimensions: {
-        fullWidth,
-        fullHeight,
-        width,
-        height,
-        wMargin,
-        hMargin
-      },
-      radius: Math.min(width, height) * CHART_FILL_RATIO
-    });
   }
 
   componentWillReceiveProps(nextProps) {
@@ -90,8 +57,7 @@ export default class IssueImpact extends React.PureComponent {
     });
   }
 
-  renderFileAxes(issueScale, semi) {
-    const radius = this.state.radius;
+  renderFileAxes(issueScale, radius, semi) {
     const fullFileShare = MAXIMUM_SEMICIRCLE_FILE_SHARE * semi.scaleFactor;
     const fullSeparatorShare = 1 - fullFileShare;
     const separatorCount = semi.data.length + 1;
@@ -189,29 +155,28 @@ export default class IssueImpact extends React.PureComponent {
   }
 
   render() {
-    console.log('rendering');
     if (!this.state.issue) {
       return <svg />;
     }
 
-    const dims = this.state.dimensions;
-    const issueAxisLength = this.state.radius * 0.95;
-    const issueScale = d3
-      .scaleTime()
-      .rangeRound([-issueAxisLength, issueAxisLength])
-      .domain([this.state.start, this.state.end]);
-
-    const translate = `translate(${dims.wMargin}, ${dims.hMargin})`;
-
-    const fileAxes = [
-      this.renderFileAxes(issueScale, this.state.files.top),
-      this.renderFileAxes(issueScale, this.state.files.bottom)
-    ];
-
     return (
-      <Measure bounds onResize={dims => this.updateDimensions(dims.bounds)}>
-        {({ measureRef }) =>
-          <div tabIndex="1" ref={measureRef} className={styles.chartContainer}>
+      <ChartContainer>
+        {dims => {
+          const radius = Math.min(dims.width, dims.height) * CHART_FILL_RATIO;
+          const issueAxisLength = radius * 0.95;
+          const issueScale = d3
+            .scaleTime()
+            .rangeRound([-issueAxisLength, issueAxisLength])
+            .domain([this.state.start, this.state.end]);
+
+          const fileAxes = [
+            this.renderFileAxes(issueScale, radius, this.state.files.top),
+            this.renderFileAxes(issueScale, radius, this.state.files.bottom)
+          ];
+
+          const translate = `translate(${dims.wMargin}, ${dims.hMargin})`;
+
+          return (
             <ZoomableSvg scaleExtent={[1, 10]}>
               <defs>
                 <clipPath id="chart">
@@ -224,7 +189,7 @@ export default class IssueImpact extends React.PureComponent {
               <g transform={translate}>
                 <circle
                   className={styles.circle}
-                  r={this.state.radius}
+                  r={radius}
                   cx={dims.width / 2}
                   cy={dims.height / 2}
                 />
@@ -246,8 +211,9 @@ export default class IssueImpact extends React.PureComponent {
                 </g>
               </g>
             </ZoomableSvg>
-          </div>}
-      </Measure>
+          );
+        }}
+      </ChartContainer>
     );
   }
 }

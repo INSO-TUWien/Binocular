@@ -22,6 +22,8 @@ export default function getCommitData(commitSpan, significantSpan, granularity, 
     }
   ];
 
+  console.log('using', granularity.interval.humanize());
+
   let next = moment(significantSpan[0]).startOf(granularity.unit).toDate().getTime();
 
   return traversePages(getCommitsPage(significantSpan[1]), commit => {

@@ -11,18 +11,6 @@ export default class StackedArea extends React.PureComponent {
     this.state = {};
   }
 
-  // shouldComponentUpdate(nextProps) {
-  //   console.log('x:', this.props.x !== nextProps.x);
-  //   console.log('y:', this.props.y !== nextProps.y);
-  //   console.log('series:', this.props.series !== nextProps.series);
-  //   console.log('data:', this.props.data !== nextProps.data);
-  //   console.log('sum:', this.props.sum !== nextProps.sum);
-  //   console.log('extractX', this.props.extractX !== nextProps.extractX);
-  //   console.log('extractY', this.props.extractY !== nextProps.extractY);
-  //   console.log('fillToRight', this.props.fillToRight !== nextProps.fillToRight);
-  //   return true;
-  // }
-
   render() {
     const series = this.props.series;
 

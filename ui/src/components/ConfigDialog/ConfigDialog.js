@@ -25,12 +25,12 @@ const ConfigDialog = props => {
 
           <div className="tabs is-centered">
             <ul>
-              <li className={cx({ 'is-active': props.activeTab === 'gitlab' })}>
-                <a onClick={() => props.onSwitchTab('gitlab')}>
+              <li className={cx({ 'is-active': props.activeTab === 'its' })}>
+                <a onClick={() => props.onSwitchTab('its')}>
                   <span className="icon is-small">
-                    <i className="fa fa-gitlab" />
+                    <i className="fa fa-ticket" />
                   </span>
-                  <span>GitLab</span>
+                  <span>ITS</span>
                 </a>
               </li>
               <li className={cx({ 'is-active': props.activeTab === 'arango' })}>
@@ -44,7 +44,7 @@ const ConfigDialog = props => {
             </ul>
           </div>
 
-          {props.activeTab === 'gitlab' &&
+          {props.activeTab === 'its' &&
             <div>
               <Field
                 component={FormControl}
