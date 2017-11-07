@@ -22,8 +22,6 @@ export default function getCommitData(commitSpan, significantSpan, granularity, 
     }
   ];
 
-  console.log('using', granularity.interval.humanize());
-
   let next = moment(significantSpan[0]).startOf(granularity.unit).toDate().getTime();
 
   return traversePages(getCommitsPage(significantSpan[1]), commit => {
@@ -71,7 +69,6 @@ export default function getCommitData(commitSpan, significantSpan, granularity, 
 }
 
 function group(data) {
-  console.time('group');
   const lastDatum = _.last(data);
 
   if (_.keys(lastDatum.statsByAuthor).length < 50) {
@@ -121,7 +118,6 @@ function group(data) {
     datum.statsByAuthor = groupedStats;
   });
 
-  console.timeEnd('group');
   return data;
 }
 

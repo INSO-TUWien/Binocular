@@ -110,6 +110,8 @@ export default class CodeOwnershipRiver extends React.Component {
       });
     }
 
+    console.log('rendering chartcontainer');
+
     return (
       <CustomZoomableChartContainer
         x={this.scales.x}
@@ -126,6 +128,7 @@ export default class CodeOwnershipRiver extends React.Component {
         onEnd={() => this.setState({ isPanning: false })}
         className={cx(styles.chart, { [styles.panning]: this.state.isPanning })}>
         {({ x, y, dims }) => {
+          console.time('innerChart render');
           const today = x(new Date());
           this.scales.x.rangeRound([0, dims.width]);
           this.scales.y.rangeRound([dims.height, 0]);
@@ -155,7 +158,7 @@ export default class CodeOwnershipRiver extends React.Component {
             );
           });
 
-          return (
+          const ret = (
             <g>
               <defs>
                 <clipPath id="chart">
@@ -257,6 +260,9 @@ export default class CodeOwnershipRiver extends React.Component {
               />
             </g>
           );
+
+          console.timeEnd('innerChart render');
+          return ret;
         }}
       </CustomZoomableChartContainer>
       // <ChartContainer>

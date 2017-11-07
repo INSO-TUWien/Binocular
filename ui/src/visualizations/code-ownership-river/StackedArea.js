@@ -12,6 +12,8 @@ export default class StackedArea extends React.PureComponent {
   }
 
   render() {
+    console.time('StackedArea render');
+    console.log(this.props);
     const series = this.props.series;
 
     const areas = _.map(series, (s, i) => {
@@ -62,6 +64,7 @@ export default class StackedArea extends React.PureComponent {
       );
     }
 
+    console.timeEnd('StackedArea render');
     return (
       <g>
         {paths}

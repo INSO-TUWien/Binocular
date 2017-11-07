@@ -61,7 +61,6 @@ function* watchHighlightedIssue() {
 
 export const fetchCodeOwnershipData = fetchFactory(
   function*() {
-    console.time('fetch');
     const { firstCommit, lastCommit, committers, firstIssue, lastIssue } = yield getBounds();
     const firstCommitTimestamp = Date.parse(firstCommit.date);
     const lastCommitTimestamp = Date.parse(lastCommit.date);
@@ -100,7 +99,6 @@ export const fetchCodeOwnershipData = fetchFactory(
       )
     )
       .spread((commits, issues) => {
-        console.timeEnd('fetch');
         return { commits, committers, palette: getChartColors('spectral', committers), issues };
       })
       .catch(function(e) {
