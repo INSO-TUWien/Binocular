@@ -1,5 +1,9 @@
 @import '~bulma';
 
+.chart {
+  outline: none;
+}
+
 .circle {
   fill: none;
   stroke: $grey-lighter;

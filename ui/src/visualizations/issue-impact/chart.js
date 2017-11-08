@@ -9,12 +9,14 @@ import chroma from 'chroma-js';
 import TransitionGroup from 'react-transition-group/TransitionGroup';
 import CSSTransition from 'react-transition-group/CSSTransition';
 
-import ZoomableSvg from '../../components/svg/ZoomableSvg.js';
+import GlobalZoomableSvg from '../../components/svg/GlobalZoomableSvg.js';
+import OffsetGroup from '../../components/svg/OffsetGroup.js';
 import Axis from '../code-ownership-river/Axis.js';
 import hunkTransitions from './hunkTransitions.scss';
 import Asterisk from '../../components/svg/Asterisk.js';
 import X from '../../components/svg/X.js';
 import ChartContainer from '../../components/svg/ChartContainer.js';
+import * as zoomUtils from '../../utils/zoom.js';
 
 import { basename, parseTime, ClosingPathContext, getChartColors, shortenPath } from '../../utils';
 import styles from './styles.scss';
@@ -41,8 +43,13 @@ export default class IssueImpact extends React.PureComponent {
       end,
       totalLength,
       isPanning: false,
-      hoveredHunk: null
+      hoveredHunk: null,
+      transform: d3.zoomIdentity,
+      dimensions: zoomUtils.initialDimensions()
     };
+
+    this.onResize = zoomUtils.onResizeFactory(0.7, 0.7);
+    this.onZoom = zoomUtils.onZoomFactory({ constrain: false });
   }
 
   componentWillReceiveProps(nextProps) {
@@ -159,60 +166,54 @@ export default class IssueImpact extends React.PureComponent {
       return <svg />;
     }
 
+    const dims = this.state.dimensions;
+    const radius = Math.min(dims.width, dims.height) * CHART_FILL_RATIO;
+    const issueAxisLength = radius * 0.95;
+    const issueScale = d3
+      .scaleTime()
+      .rangeRound([-issueAxisLength, issueAxisLength])
+      .domain([this.state.start, this.state.end]);
+
+    const fileAxes = [
+      this.renderFileAxes(issueScale, radius, this.state.files.top),
+      this.renderFileAxes(issueScale, radius, this.state.files.bottom)
+    ];
+
     return (
-      <ChartContainer>
-        {dims => {
-          const radius = Math.min(dims.width, dims.height) * CHART_FILL_RATIO;
-          const issueAxisLength = radius * 0.95;
-          const issueScale = d3
-            .scaleTime()
-            .rangeRound([-issueAxisLength, issueAxisLength])
-            .domain([this.state.start, this.state.end]);
-
-          const fileAxes = [
-            this.renderFileAxes(issueScale, radius, this.state.files.top),
-            this.renderFileAxes(issueScale, radius, this.state.files.bottom)
-          ];
-
-          const translate = `translate(${dims.wMargin}, ${dims.hMargin})`;
-
-          return (
-            <ZoomableSvg scaleExtent={[1, 10]}>
-              <defs>
-                <clipPath id="chart">
-                  <rect x="0" y="0" width={dims.width} height={dims.height} />
-                </clipPath>
-                <clipPath id="x-only">
-                  <rect x="0" y={-dims.hMargin} width={dims.width} height={dims.fullHeight} />
-                </clipPath>
-              </defs>
-              <g transform={translate}>
-                <circle
-                  className={styles.circle}
-                  r={radius}
-                  cx={dims.width / 2}
-                  cy={dims.height / 2}
-                />
-                <g transform={`translate(${dims.width / 2},${dims.height / 2})`}>
-                  {fileAxes}
-                  <g className={styles.issueAxis}>
-                    <Axis orient="bottom" ticks={8} scale={issueScale} />
-                    <g
-                      className={styles.createMarker}
-                      transform={`translate(${issueScale(this.state.issue.createdAt)}, -5)`}>
-                      <Asterisk />
-                    </g>
-                    <g
-                      className={styles.closeMarker}
-                      transform={`translate(${issueScale(this.state.issue.closedAt)}, -5)`}>
-                      <X />
-                    </g>
-                  </g>
+      <ChartContainer onResize={evt => this.onResize(evt)}>
+        <GlobalZoomableSvg
+          className={styles.chart}
+          scaleExtent={[1, 10]}
+          onZoom={evt => this.onZoom(evt)}
+          transform={this.state.transform}>
+          <defs>
+            <clipPath id="chart">
+              <rect x="0" y="0" width={dims.width} height={dims.height} />
+            </clipPath>
+            <clipPath id="x-only">
+              <rect x="0" y={-dims.hMargin} width={dims.width} height={dims.fullHeight} />
+            </clipPath>
+          </defs>
+          <OffsetGroup dims={dims} transform={this.state.transform}>
+            <circle className={styles.circle} r={radius} cx={dims.width / 2} cy={dims.height / 2} />
+            <g transform={`translate(${dims.width / 2},${dims.height / 2})`}>
+              {fileAxes}
+              <g className={styles.issueAxis}>
+                <Axis orient="bottom" ticks={8} scale={issueScale} />
+                <g
+                  className={styles.createMarker}
+                  transform={`translate(${issueScale(this.state.issue.createdAt)}, -5)`}>
+                  <Asterisk />
+                </g>
+                <g
+                  className={styles.closeMarker}
+                  transform={`translate(${issueScale(this.state.issue.closedAt)}, -5)`}>
+                  <X />
                 </g>
               </g>
-            </ZoomableSvg>
-          );
-        }}
+            </g>
+          </OffsetGroup>
+        </GlobalZoomableSvg>
       </ChartContainer>
     );
   }

@@ -1,11 +1,7 @@
 @import '~bulma';
 
-.chartContainer {
-  outline: none;
-}
-
-
 svg.chart {
+  outline: none;
   width: 100%;
   height: 100%;
   cursor: grab;
@@ -21,7 +17,7 @@ svg.chart {
       stroke: $blue;
     }
 
-           $commit-stroke: $green;
+    $commit-stroke: $green;
     $commit-fill-hover: lighten( $commit-stroke, 30% ); 
     $commit-fill: transparentize($commit-fill-hover, 0.75);
 

@@ -25,7 +25,7 @@ const App = connect(mapStateToProps, mapDispatchToProps)(props =>
       {props.activeVisualization === 'ISSUE_IMPACT' && <IssueImpact />}
     </div>
     <Notifications />
-    <ConfigButton />
+    {/*<ConfigButton />*/}
     <ConfigDialog />
   </div>
 );

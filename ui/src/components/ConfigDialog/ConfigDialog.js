@@ -6,8 +6,7 @@ import cx from 'classnames';
 import Message from '../message';
 import Monospaced from '../monospaced';
 import FormControl from '../FormControl.js';
-
-// <h2 className="subtitle"><Icon name="gitlab" /> GitLab</h2>
+import Labeled from '../Labeled.js';
 
 const ConfigDialog = props => {
   return (
@@ -46,6 +45,16 @@ const ConfigDialog = props => {
 
           {props.activeTab === 'its' &&
             <div>
+              <Labeled className="field" label="Type:">
+                <div className="control">
+                  <div className="select">
+                    <Field component="select" name="itsType">
+                      <option value="github">GitHub</option>
+                      <option value="gitlab">GitLab</option>
+                    </Field>
+                  </div>
+                </div>
+              </Labeled>
               <Field
                 component={FormControl}
                 name="gitlabUrl"

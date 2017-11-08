@@ -1,7 +1,7 @@
 'use strict';
 
 const Labeled = props =>
-  <div>
+  <div className={props.className}>
     {!!props.label &&
       <label className="label">
         {props.label}

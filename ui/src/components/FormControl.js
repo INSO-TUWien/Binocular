@@ -15,8 +15,8 @@ export default function FormControl(props) {
     'is-expanded': !!props.children
   });
 
-  const control = (
-    <div className={fieldClasses}>
+  return (
+    <Labeled label={label} className={fieldClasses}>
       <p className={pClasses}>
         <input
           className={cx('input', { 'is-danger': !!meta.error })}
@@ -30,16 +30,6 @@ export default function FormControl(props) {
           </span>}
       </p>
       {props.children}
-    </div>
+    </Labeled>
   );
-
-  if (label) {
-    return (
-      <Labeled label={label}>
-        {control}
-      </Labeled>
-    );
-  }
-
-  return control;
 }
