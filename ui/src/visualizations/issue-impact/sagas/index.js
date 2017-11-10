@@ -62,6 +62,11 @@ export const fetchIssueImpactData = fetchFactory(
                      }
                    }
                  }
+                 builds {
+                   id
+                   duration
+                   status
+                 }
                }
              }
            }
@@ -71,59 +76,6 @@ export const fetchIssueImpactData = fetchFactory(
       .then(resp => {
         return resp;
       });
-
-    // if (activeIssueId !== null) {
-    //   issueQuery = `
-    //     issue(iid:${activeIssueId}) {
-    //       iid
-    //       title
-    //       createdAt
-    //       closedAt,
-    //       webUrl
-    //       commits {
-    //         sha
-    //         shortSha
-    //         messageHeader
-    //         date
-    //         files {
-    //           lineCount
-    //           hunks {
-    //             newStart
-    //             newLines
-    //             oldStart
-    //             oldLines
-    //           }
-    //           file {
-    //             id
-    //             path
-    //             maxLength
-    //           }
-    //         }
-    //       }
-    //     }`;
-    // }
-
-    // return yield reachGraphQL(
-    //   `${config.data.arango.webUrl}_db/pupil-${config.data.repoName}/pupil-ql`,
-    //   `{
-    //      issues {
-    //        iid,
-    //        title
-    //      }
-    //      ${issueQuery}
-    //    }`,
-    //   {}
-    // )
-    //   .then(resp => {
-    //     if (activeIssueId === null) {
-    //       resp.issue = null;
-    //     }
-    //     return resp;
-    //   })
-    //   .catch(function(e) {
-    //     console.warn(e);
-    //     throw new Error('Error querying GraphQl');
-    //   });
   },
   requestIssueImpactData,
   receiveIssueImpactData,

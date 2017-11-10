@@ -30,7 +30,7 @@ export default class IssueImpact extends React.PureComponent {
   constructor(props) {
     super(props);
 
-    const { commits, issue, files, totalLength, start, end, colors } = extractData(props);
+    const { commits, issue, files, builds, totalLength, start, end, colors } = extractData(props);
 
     this.elems = {};
     this.state = {
@@ -41,6 +41,7 @@ export default class IssueImpact extends React.PureComponent {
       files,
       start,
       end,
+      builds,
       totalLength,
       isPanning: false,
       hoveredHunk: null,
@@ -64,25 +65,27 @@ export default class IssueImpact extends React.PureComponent {
     });
   }
 
-  renderFileAxes(issueScale, radius, semi) {
-    const fullFileShare = MAXIMUM_SEMICIRCLE_FILE_SHARE * semi.scaleFactor;
+  renderBuildAxis(issueScale, radius, builds) {}
+
+  renderFileAxis(issueScale, radius, files) {
+    const fullFileShare = MAXIMUM_SEMICIRCLE_FILE_SHARE;
     const fullSeparatorShare = 1 - fullFileShare;
-    const separatorCount = semi.data.length + 1;
+    const separatorCount = files.data.length + 1;
     const separatorShare = fullSeparatorShare / separatorCount;
 
     // start at one separator in
     let offsetShare = separatorShare;
 
-    return semi.data.map(file => {
-      const fileShare = file.length / semi.length * fullFileShare;
+    return files.data.map(file => {
+      const fileShare = file.length / files.totalLength * fullFileShare;
 
       if (fileShare === 0) {
         return <g />;
       }
 
       const spreadAngle = angleFromShare(fileShare) / 2;
-      const startAngle = semi.offset + angleFromShare(offsetShare) / 2;
-      const endAngle = semi.offset + angleFromShare(offsetShare + fileShare) / 2;
+      const startAngle = angleFromShare(offsetShare) / 2;
+      const endAngle = angleFromShare(offsetShare + fileShare) / 2;
       let centerAngle = startAngle + spreadAngle / 2;
       const center = polarToCartesian(0, 0, radius + FILE_AXIS_DESCRIPTION_OFFSET, centerAngle);
       const textTranslate = `translate(${center.x}, ${-center.y})`;
@@ -103,8 +106,8 @@ export default class IssueImpact extends React.PureComponent {
         const startShare = minLine / file.length;
         const endShare = maxLine / file.length;
 
-        const startAngle = semi.offset + angleFromShare(offsetShare + fileShare * startShare) / 2;
-        const endAngle = semi.offset + angleFromShare(offsetShare + fileShare * endShare) / 2;
+        const startAngle = angleFromShare(offsetShare + fileShare * startShare) / 2;
+        const endAngle = angleFromShare(offsetShare + fileShare * endShare) / 2;
 
         const start = polarToCartesian(0, 0, radius, startAngle);
         const end = polarToCartesian(0, 0, radius, endAngle);
@@ -127,7 +130,7 @@ export default class IssueImpact extends React.PureComponent {
 
         return (
           <CSSTransition classNames={hunkTransitions} timeout={10000} key={hunkKey}>
-            <g>
+            <g key={hunkKey}>
               <path
                 className={styles.changeIndicator}
                 d={d}
@@ -174,10 +177,8 @@ export default class IssueImpact extends React.PureComponent {
       .rangeRound([-issueAxisLength, issueAxisLength])
       .domain([this.state.start, this.state.end]);
 
-    const fileAxes = [
-      this.renderFileAxes(issueScale, radius, this.state.files.top),
-      this.renderFileAxes(issueScale, radius, this.state.files.bottom)
-    ];
+    const fileAxis = this.renderFileAxis(issueScale, radius, this.state.files);
+    console.log('rendering builds:', this.state.builds);
 
     return (
       <ChartContainer onResize={evt => this.onResize(evt)}>
@@ -197,7 +198,7 @@ export default class IssueImpact extends React.PureComponent {
           <OffsetGroup dims={dims} transform={this.state.transform}>
             <circle className={styles.circle} r={radius} cx={dims.width / 2} cy={dims.height / 2} />
             <g transform={`translate(${dims.width / 2},${dims.height / 2})`}>
-              {fileAxes}
+              {fileAxis}
               <g className={styles.issueAxis}>
                 <Axis orient="bottom" ticks={8} scale={issueScale} />
                 <g
@@ -226,8 +227,7 @@ function extractData(props) {
       colors: [],
       files: {
         totalLength: 0,
-        top: [],
-        bottom: []
+        data: []
       }
     };
   }
@@ -236,6 +236,8 @@ function extractData(props) {
   let end = parseTime(props.issue.closedAt || new Date());
 
   const filesById = {};
+  const buildsById = {};
+
   _.each(props.issue.commits.data, commit => {
     if (!_.includes(props.filteredCommits, commit.sha)) {
       return;
@@ -263,63 +265,19 @@ function extractData(props) {
         };
       }
     });
+
+    _.each(commit.builds, b => {
+      buildsById[b.id] = b;
+    });
   });
 
   const colors = getChartColors('spectral', props.issue.commits.data.map(c => c.sha));
 
   const files = _.values(filesById);
-
   const totalLength = _.sumBy(files, 'length');
-  const bottomLength = Math.floor(totalLength / 2);
 
-  const rucksack = _.map(files, (f, i) => ({ [i]: f.length }));
-  const bottomIndexes = knapsack
-    .resolve(bottomLength, rucksack)
-    .map(obj => parseInt(_.keys(obj)[0], 10));
-
-  let top = { data: [], length: 0, offset: 0 };
-  let bottom = { data: [], length: 0, offset: Math.PI };
-
-  _.each(files, (f, i) => {
-    if (_.includes(bottomIndexes, i)) {
-      bottom.data.push(f);
-      bottom.length += f.length;
-    } else {
-      top.data.push(f);
-      top.length += f.length;
-    }
-  });
-
-  if (bottom.data.length > top.data.length) {
-    let swap = bottom;
-    bottom = top;
-    top = swap;
-  }
-
-  const [smallerHalf, largerHalf] = _.sortBy([top, bottom], 'length');
-  const sizeDifference = largerHalf.length - smallerHalf.length;
-
-  const alphaSort = (a, b) => {
-    const an = basename(a.name),
-      bn = basename(b.name);
-
-    if (an < bn) {
-      return -1;
-    } else if (an > bn) {
-      return 1;
-    } else {
-      return 0;
-    }
-  };
-
-  top.data.sort(alphaSort);
-  bottom.data.sort(alphaSort);
-
-  largerHalf.scaleFactor = 1;
-  smallerHalf.scaleFactor = smallerHalf.length / largerHalf.length;
-  largerHalf.fullSeparatorShare = MINIMUM_SEMICIRCLE_SEPARATOR_SHARE;
-  smallerHalf.fullSeparatorShare =
-    MINIMUM_SEMICIRCLE_SEPARATOR_SHARE * (1 + sizeDifference / totalLength);
+  const builds = _.values(buildsById);
+  const totalDuration = _.sumBy(builds, 'duration');
 
   return {
     issue: {
@@ -330,9 +288,12 @@ function extractData(props) {
     end: new Date(end),
     colors,
     files: {
-      totalLength: top.length + bottom.length,
-      top,
-      bottom
+      totalLength,
+      data: files
+    },
+    builds: {
+      totalDuration,
+      data: builds
     }
   };
 }

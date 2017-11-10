@@ -64,7 +64,6 @@ export function updateZoomFactory() {
       this.scales.scaledY = evt.transform.rescaleY(this.scales.y);
     }
 
-    console.log('set transform to', evt.transform);
     this.setState({ transform: evt.transform, dirty: true });
   };
 }
