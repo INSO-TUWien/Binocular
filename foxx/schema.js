@@ -14,6 +14,7 @@ const commits = db._collection('commits');
 const files = db._collection('files');
 const stakeholders = db._collection('stakeholders');
 const issues = db._collection('issues');
+const builds = db._collection('builds');
 
 const queryType = new gql.GraphQLObjectType({
   name: 'Query',
@@ -93,6 +94,15 @@ const queryType = new gql.GraphQLObjectType({
             .toArray();
         }
       },
+      builds: paginated({
+        type: require('./types/build.js'),
+        args: {},
+        query: (root, args, limit) => aql`
+          FOR build
+            IN ${builds}
+            ${limit}
+              RETURN build`
+      }),
       issues: paginated({
         type: require('./types/issue.js'),
         args: {

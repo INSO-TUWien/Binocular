@@ -5,6 +5,7 @@ const arangodb = require('@arangodb');
 const db = arangodb.db;
 const aql = arangodb.aql;
 const commitsToFiles = db._collection('commits-files');
+const builds = db._collection('builds');
 const commitsToStakeholders = db._collection('commits-stakeholders');
 const paginated = require('./paginated.js');
 const Timestamp = require('./Timestamp.js');
@@ -80,6 +81,21 @@ module.exports = new gql.GraphQLObjectType({
           `
             )
             .toArray()[0];
+        }
+      },
+      builds: {
+        type: new gql.GraphQLList(require('./build.js')),
+        description: 'Builds started on this commit',
+        resolve(commit) {
+          return db
+            ._query(
+              aql`
+              FOR build
+              IN ${builds}
+              FILTER build.sha == ${commit.sha}
+                RETURN build`
+            )
+            .toArray();
         }
       }
     };

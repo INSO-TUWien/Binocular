@@ -63,7 +63,7 @@ module.exports = new gql.GraphQLObjectType({
       },
       closedAt: {
         type: Timestamp,
-        description: 'Creation date of the issue'
+        description: 'Close date of the issue'
       },
       creator: {
         type: require('./stakeholder.js'),

@@ -22,6 +22,7 @@ const Commit = require('./lib/models/Commit.js');
 const File = require('./lib/models/File.js');
 const Hunk = require('./lib/models/Hunk.js');
 const Issue = require('./lib/models/Issue.js');
+const Build = require('./lib/models/Build.js');
 const Stakeholder = require('./lib/models/Stakeholder.js');
 const CommitStakeholderConnection = require('./lib/models/CommitStakeholderConnection.js');
 const IssueStakeholderConnection = require('./lib/models/IssueStakeholderConnection.js');
@@ -49,7 +50,7 @@ const indexers = {
   ci: null
 };
 
-let reporter = new ProgressReporter(io);
+let reporter = new ProgressReporter(io, ['commits', 'issues', 'builds']);
 
 Repository.fromPath(ctx.targetPath)
   .tap(function(repo) {
@@ -123,6 +124,7 @@ function ensureDb(repo) {
         Hunk.ensureCollection(),
         Stakeholder.ensureCollection(),
         Issue.ensureCollection(),
+        Build.ensureCollection(),
         CommitStakeholderConnection.ensureCollection(),
         IssueStakeholderConnection.ensureCollection(),
         IssueCommitConnection.ensureCollection(),
