@@ -45,10 +45,25 @@ const ProgressBar = props => {
         <g>
           {segments}
         </g>
+
+        {props.showWorkIndicator &&
+          <g className={styles.workIndicator}>
+            <circle cx="21" cy="21" r="14">
+              <animateTransform
+                attributeName="transform"
+                attributeType="XML"
+                type="rotate"
+                from="0 21 21"
+                to="360 21 21"
+                dur="10s"
+                repeatCount="indefinite"
+              />
+            </circle>
+          </g>}
         <text className={styles.text} x="21" y="21">
           {Math.round(processed / total * 100)}%
         </text>
-        <g transform="translate(21 17)">
+        <g transform="translate(21 18)">
           <text className={cx(styles.text, styles.details)} x="0" y="0">
             <tspan x="0">
               {commits.processed}/{commits.total} Commits
@@ -61,27 +76,6 @@ const ProgressBar = props => {
             </tspan>
           </text>
         </g>
-        {props.showWorkIndicator &&
-          <g className={styles.workIndicator}>
-            <line x1="21" y1="27" x2="21" y2="27">
-              <animate
-                attributeName="x1"
-                from="0"
-                to="-10"
-                additive="sum"
-                dur="1s"
-                repeatCount="indefinite"
-              />
-              <animate
-                attributeName="x2"
-                from="0"
-                to="10"
-                additive="sum"
-                dur="1s"
-                repeatCount="indefinite"
-              />
-            </line>
-          </g>}
       </svg>
     </div>
   );

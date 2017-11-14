@@ -290,8 +290,8 @@ function extractData(props) {
     };
   }
 
-  let start = parseTime(props.issue.createdAt);
-  let end = parseTime(props.issue.closedAt || new Date());
+  let start = new Date(props.issue.createdAt);
+  let end = props.issue.closedAt ? new Date(props.issue.closedAt) : new Date();
 
   const filesById = {};
   const buildsById = {};

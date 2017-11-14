@@ -25,7 +25,7 @@
 
     .text.details {
       display: none;
-      font-size: 4;
+      font-size: 3;
     }
 
     .hole {
@@ -48,20 +48,24 @@
   }
 
   .workIndicator {
-    line {
-      stroke: $grey;
+    circle {
+      fill: none;
+      stroke: $white;
+      stroke-width: 5;
+      stroke-dasharray: 4 4;
     }
   }
 }
 
 .hoverTarget:hover {
-  height: 150px;
-  width: 150px;
+  height: 200px;
+  width: 200px;
 
   .donut {
     $colors: #00EE76 #00CD66 #008B45;
     @for $i from 1 through length($colors) {
-      .segment:nth-child(#{$i}) {
+      .segment:nth-child(#{$i
+                          }) {
         stroke: nth($colors, $i);
       }
     }
