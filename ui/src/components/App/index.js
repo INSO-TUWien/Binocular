@@ -1,6 +1,6 @@
 import styles from './app.css';
 import Sidebar from '../Sidebar';
-import ConfigButton from '../ConfigButton';
+// import ConfigButton from '../ConfigButton';
 import ConfigDialog from '../ConfigDialog';
 import ProgressBar from '../ProgressBar';
 import Notifications from '../notifications';

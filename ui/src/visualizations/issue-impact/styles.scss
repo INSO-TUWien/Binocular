@@ -48,6 +48,41 @@
   }
 }
 
+.buildAxis {
+  path.arc {
+    stroke: black;
+    stroke-width: 2;
+    fill: none;
+  }
+
+  path.arc.success {
+    stroke: $green;
+  }
+
+  path.arc.failed {
+    stroke: $red;
+  }
+
+  path.indicatorLine {
+    stroke: $grey;
+    fill: none;
+    stroke-width: 0.5;
+  }
+
+  .job {
+    fill: none;
+    stroke: black;
+  }
+
+  .job.failed {
+    fill: $red;
+  }
+
+  .job.success {
+    fill: $green;
+  }
+}
+
 .configContainer {
   width: 100%;
 

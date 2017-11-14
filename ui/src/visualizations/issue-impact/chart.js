@@ -4,7 +4,6 @@ import _ from 'lodash';
 import React from 'react';
 import * as d3 from 'd3';
 import cx from 'classnames';
-import knapsack from 'knapsack-js';
 import chroma from 'chroma-js';
 import TransitionGroup from 'react-transition-group/TransitionGroup';
 import CSSTransition from 'react-transition-group/CSSTransition';
@@ -17,14 +16,16 @@ import Asterisk from '../../components/svg/Asterisk.js';
 import X from '../../components/svg/X.js';
 import ChartContainer from '../../components/svg/ChartContainer.js';
 import * as zoomUtils from '../../utils/zoom.js';
+import SemiCircleScale from './SemiCircleScale.js';
 
-import { basename, parseTime, ClosingPathContext, getChartColors, shortenPath } from '../../utils';
+import { parseTime, getChartColors, shortenPath } from '../../utils';
 import styles from './styles.scss';
 
 const CHART_FILL_RATIO = 0.45;
-const MINIMUM_SEMICIRCLE_SEPARATOR_SHARE = 0.2;
-const MAXIMUM_SEMICIRCLE_FILE_SHARE = 1 - MINIMUM_SEMICIRCLE_SEPARATOR_SHARE;
-const FILE_AXIS_DESCRIPTION_OFFSET = 10;
+const MINIMUM_VACANT_SEMICIRCLE_SHARE = 0.2;
+const MAXIMUM_OCCUPIED_SEMICIRCLE_SHARE = 1 - MINIMUM_VACANT_SEMICIRCLE_SHARE;
+const AXIS_DESCRIPTION_OFFSET = 10;
+const JOB_RING_WIDTH = 10;
 
 export default class IssueImpact extends React.PureComponent {
   constructor(props) {
@@ -54,73 +55,125 @@ export default class IssueImpact extends React.PureComponent {
   }
 
   componentWillReceiveProps(nextProps) {
-    const { files, start, end, colors, issue } = extractData(nextProps);
+    const { files, start, end, colors, issue, builds } = extractData(nextProps);
 
     this.setState({
       issue,
       colors,
       files,
       start,
-      end
+      end,
+      builds
     });
   }
 
-  renderBuildAxis(issueScale, radius, builds) {}
+  renderBuildAxis(issueScale, radius, builds) {
+    console.log('rendering', builds);
+    const separatorCount = builds.data.length + 1;
+    const separatorShare = MINIMUM_VACANT_SEMICIRCLE_SHARE / separatorCount;
+    const semi = new SemiCircleScale(0, 0, radius, { offset: Math.PI });
+    const outerJobSemi = semi.extrude(JOB_RING_WIDTH);
+    const descriptionSemi = outerJobSemi.extrude(AXIS_DESCRIPTION_OFFSET);
+
+    let offsetShare = separatorShare;
+
+    return builds.data.map(build => {
+      console.log('processing:', build);
+
+      const buildShare = build.duration / builds.totalDuration * MAXIMUM_OCCUPIED_SEMICIRCLE_SHARE;
+      const endShare = offsetShare + buildShare;
+
+      const buildKey = build.id;
+      if (buildShare === 0) {
+        return <g key={build.id} />;
+      }
+
+      const arcData = semi.getArcForShares(offsetShare, endShare);
+
+      const lineStart = issueScale(build.createdAt);
+      const lineEnd = issueScale(build.finishedAt);
+      const pie = semi.getPieForShares(offsetShare, endShare, lineStart, lineEnd);
+
+      let jobOffsetShare = offsetShare;
+      const jobs = build.jobs.map(job => {
+        const jobShare = job.duration / build.duration * buildShare;
+
+        const jobArc = semi.getArcForShares(jobOffsetShare, jobOffsetShare + jobShare);
+        console.log(outerJobSemi);
+        // const outerStart = outerJobSemi.getCoordsForShare(jobOffsetShare);
+        const outerEnd = outerJobSemi.getCoordsForShare(jobOffsetShare + jobShare);
+        jobArc.lineTo(outerEnd.x, -outerEnd.y);
+
+        const outerJobArc = outerJobSemi.getArcForShares(
+          jobOffsetShare + jobShare,
+          jobOffsetShare,
+          true
+        );
+        jobArc.concat(outerJobArc);
+        const innerStart = semi.getCoordsForShare(jobOffsetShare);
+        jobArc.lineTo(innerStart.x, -innerStart.y);
+
+        const jobAnnotation = descriptionSemi.getAnnotationDataForShare(
+          jobOffsetShare + jobShare / 2
+        );
+
+        jobOffsetShare += jobShare;
+
+        return (
+          <g>
+            <text
+              transform={jobAnnotation.transform}
+              style={{ textAnchor: jobAnnotation.textAnchor }}>
+              {job.name}
+            </text>
+            <path d={jobArc} className={cx(styles.job, styles.arc, styles[job.status])} />
+          </g>
+        );
+      });
+
+      offsetShare += buildShare + separatorShare;
+
+      return (
+        <g key={buildKey} className={styles.buildAxis}>
+          <path d={pie} className={styles.indicatorLine} />
+          {jobs}
+          <path d={arcData} className={cx(styles.arc, styles[build.status])} />
+        </g>
+      );
+    });
+  }
 
   renderFileAxis(issueScale, radius, files) {
-    const fullFileShare = MAXIMUM_SEMICIRCLE_FILE_SHARE;
-    const fullSeparatorShare = 1 - fullFileShare;
     const separatorCount = files.data.length + 1;
-    const separatorShare = fullSeparatorShare / separatorCount;
+    const separatorShare = MINIMUM_VACANT_SEMICIRCLE_SHARE / separatorCount;
+    const semi = new SemiCircleScale(0, 0, radius);
+    const annotationSemi = semi.extrude(AXIS_DESCRIPTION_OFFSET);
 
     // start at one separator in
     let offsetShare = separatorShare;
 
     return files.data.map(file => {
-      const fileShare = file.length / files.totalLength * fullFileShare;
+      const fileShare = file.length / files.totalLength * MAXIMUM_OCCUPIED_SEMICIRCLE_SHARE;
 
       if (fileShare === 0) {
         return <g />;
       }
 
-      const spreadAngle = angleFromShare(fileShare) / 2;
-      const startAngle = angleFromShare(offsetShare) / 2;
-      const endAngle = angleFromShare(offsetShare + fileShare) / 2;
-      let centerAngle = startAngle + spreadAngle / 2;
-      const center = polarToCartesian(0, 0, radius + FILE_AXIS_DESCRIPTION_OFFSET, centerAngle);
-      const textTranslate = `translate(${center.x}, ${-center.y})`;
-      let textAnchor = 'start';
+      // const textRotate = `rotate(${rad2deg(-centerAngle)})`;
+      const annotation = annotationSemi.getAnnotationDataForShare(offsetShare + fileShare / 2);
 
-      if (centerAngle > Math.PI / 2 && centerAngle < Math.PI * 1.5) {
-        centerAngle -= Math.PI;
-        textAnchor = 'end';
-      }
-
-      const textRotate = `rotate(${rad2deg(-centerAngle)})`;
-
-      const arcData = getArcData(0, 0, radius, endAngle, startAngle);
+      // const arcData = getArcData(0, 0, radius, endAngle, startAngle);
+      const arcData = semi.getArcForShares(offsetShare, offsetShare + fileShare);
 
       const hunkMarkers = _.map(file.hunks, (hunk, i) => {
         const minLine = Math.min(hunk.oldStart, hunk.newStart);
         const maxLine = Math.max(hunk.oldStart + hunk.oldLines, hunk.newStart + hunk.newLines);
-        const startShare = minLine / file.length;
-        const endShare = maxLine / file.length;
-
-        const startAngle = angleFromShare(offsetShare + fileShare * startShare) / 2;
-        const endAngle = angleFromShare(offsetShare + fileShare * endShare) / 2;
-
-        const start = polarToCartesian(0, 0, radius, startAngle);
-        const end = polarToCartesian(0, 0, radius, endAngle);
+        const startShare = offsetShare + fileShare * (minLine / file.length);
+        const endShare = offsetShare + fileShare * (maxLine / file.length);
 
         const lineX = issueScale(hunk.commit.date);
 
-        const d = new ClosingPathContext();
-        d.moveTo(start.x, -start.y);
-        d.lineTo(lineX, 0);
-        d.lineTo(end.x, -end.y);
-
-        const closer = getArcData(0, 0, radius, startAngle, endAngle, true).reverse();
-        d.closeToPath(closer, false);
+        const pie = semi.getPieForShares(startShare, endShare, lineX, lineX);
         const color = this.state.colors[hunk.commit.sha];
 
         const hunkKey = `${hunk.commit.sha}-${file.name}-${i}`;
@@ -133,7 +186,7 @@ export default class IssueImpact extends React.PureComponent {
             <g key={hunkKey}>
               <path
                 className={styles.changeIndicator}
-                d={d}
+                d={pie}
                 style={{
                   fill: isHighlighted ? dark : light,
                   stroke: dark
@@ -156,7 +209,7 @@ export default class IssueImpact extends React.PureComponent {
             {hunkMarkers}
           </TransitionGroup>
           <path d={arcData} />
-          <text transform={`${textTranslate} ${textRotate}`} style={{ textAnchor }}>
+          <text transform={annotation.transform} style={{ textAnchor: annotation.textAnchor }}>
             {shortenPath(file.name, 30)}
           </text>
         </g>
@@ -178,7 +231,8 @@ export default class IssueImpact extends React.PureComponent {
       .domain([this.state.start, this.state.end]);
 
     const fileAxis = this.renderFileAxis(issueScale, radius, this.state.files);
-    console.log('rendering builds:', this.state.builds);
+    console.log('rendering state', this.state);
+    const buildAxis = this.renderBuildAxis(issueScale, radius, this.state.builds);
 
     return (
       <ChartContainer onResize={evt => this.onResize(evt)}>
@@ -198,7 +252,12 @@ export default class IssueImpact extends React.PureComponent {
           <OffsetGroup dims={dims} transform={this.state.transform}>
             <circle className={styles.circle} r={radius} cx={dims.width / 2} cy={dims.height / 2} />
             <g transform={`translate(${dims.width / 2},${dims.height / 2})`}>
-              {fileAxis}
+              <g className="file-axis">
+                {fileAxis}
+              </g>
+              <g className="build-axis">
+                {buildAxis}
+              </g>
               <g className={styles.issueAxis}>
                 <Axis orient="bottom" ticks={8} scale={issueScale} />
                 <g
@@ -227,6 +286,10 @@ function extractData(props) {
       colors: [],
       files: {
         totalLength: 0,
+        data: []
+      },
+      builds: {
+        totalDuration: 0,
         data: []
       }
     };
@@ -267,7 +330,33 @@ function extractData(props) {
     });
 
     _.each(commit.builds, b => {
-      buildsById[b.id] = b;
+      let totalJobDuration = 0;
+      const jobs = _.map(b.jobs, job => {
+        console.log('job:', job);
+        const startedAt = parseTime(job.createdAt);
+        const finishedAt = parseTime(job.finishedAt);
+        const duration = (finishedAt.getTime() - startedAt.getTime()) / 1000;
+        totalJobDuration += duration;
+        return {
+          id: job.id,
+          name: job.name,
+          stage: job.stage,
+          status: job.status,
+          startedAt,
+          finishedAt,
+          duration
+        };
+      });
+
+      buildsById[b.id] = _.assign({}, b, {
+        createdAt: parseTime(b.createdAt),
+        finishedAt: parseTime(b.finishedAt),
+        jobs: _.map(jobs, job =>
+          _.assign({}, job, {
+            duration: job.duration / totalJobDuration * b.duration
+          })
+        )
+      });
     });
   });
 
@@ -296,30 +385,4 @@ function extractData(props) {
       data: builds
     }
   };
-}
-
-function getArcData(cx, cy, r, startAngle, endAngle, sweep = false) {
-  const start = polarToCartesian(cx, cy, r, endAngle);
-  const end = polarToCartesian(cx, cy, r, startAngle);
-
-  const ctx = new ClosingPathContext();
-  ctx.moveTo(start.x, -start.y);
-  ctx.arcTo(r, r, 0, endAngle - startAngle > Math.PI, sweep, end.x, end.y);
-
-  return ctx;
-}
-
-function polarToCartesian(cx, cy, r, angle) {
-  return {
-    x: cx + r * Math.cos(angle),
-    y: cy + r * Math.sin(angle)
-  };
-}
-
-function rad2deg(rad) {
-  return rad / Math.PI * 180;
-}
-
-function angleFromShare(share) {
-  return Math.PI * 2 * share;
 }

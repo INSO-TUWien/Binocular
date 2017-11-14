@@ -2,7 +2,6 @@
 
 import React from 'react';
 import _ from 'lodash';
-import PropTypes from 'prop-types';
 import cx from 'classnames';
 import fuzzy from 'fuzzy';
 

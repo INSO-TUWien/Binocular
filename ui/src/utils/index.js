@@ -2,7 +2,6 @@
 
 import * as d3 from 'd3';
 import _ from 'lodash';
-import Promise from 'bluebird';
 import chroma from 'chroma-js';
 
 export const parseTime = d3.timeParse('%Y-%m-%dT%H:%M:%S.%LZ');

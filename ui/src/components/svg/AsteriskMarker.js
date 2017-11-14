@@ -2,7 +2,7 @@
 
 import Asterisk from './Asterisk';
 
-const AsteriskMarker = props => (
+const AsteriskMarker = props =>
   <marker
     id={props.id || 'asterisk'}
     className={props.markerClass}
@@ -13,7 +13,6 @@ const AsteriskMarker = props => (
     orient="auto"
     markerUnits="strokeWidth">
     <Asterisk />
-  </marker>
-);
+  </marker>;
 
 export default AsteriskMarker;

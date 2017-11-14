@@ -1,10 +1,8 @@
 'use strict';
 
 import React from 'react';
-import Measure from 'react-measure';
 import * as d3 from 'd3';
 import cx from 'classnames';
-import chroma from 'chroma-js';
 
 import styles from './styles.scss';
 import _ from 'lodash';
@@ -13,8 +11,6 @@ import GridLines from './GridLines.js';
 import CommitMarker from './CommitMarker.js';
 import StackedArea from './StackedArea.js';
 
-import AsteriskMarker from '../../components/svg/AsteriskMarker.js';
-import XMarker from '../../components/svg/XMarker.js';
 import Legend from '../../components/Legend';
 import ZoomableChartContainer from '../../components/svg/ZoomableChartContainer.js';
 import OffsetGroup from '../../components/svg/OffsetGroup.js';

@@ -1,7 +1,6 @@
 'use strict';
 
 import _ from 'lodash';
-import cx from 'classnames';
 import React from 'react';
 import Measure from 'react-measure';
 

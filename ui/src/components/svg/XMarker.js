@@ -2,7 +2,7 @@
 
 import X from './X.js';
 
-const XMarker = props => (
+const XMarker = props =>
   <marker
     id={props.id || 'x'}
     className={props.markerClass}
@@ -13,7 +13,6 @@ const XMarker = props => (
     orient="auto"
     markerUnits="strokeWidth">
     <X />
-  </marker>
-);
+  </marker>;
 
-export default X;
+export default XMarker;

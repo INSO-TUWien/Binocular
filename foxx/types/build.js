@@ -7,6 +7,50 @@ const aql = arangodb.aql;
 const Timestamp = require('./Timestamp.js');
 const commits = db._collection('commits');
 
+const BuildStatus = new gql.GraphQLEnumType({
+  name: 'BuildStatus',
+  values: {
+    failed: {},
+    success: {},
+    pending: {},
+    running: {},
+    cancelded: {},
+    skipped: {}
+  }
+});
+
+const Job = new gql.GraphQLObjectType({
+  name: 'Job',
+  description: 'A job within a CI build',
+  fields() {
+    return {
+      id: {
+        type: new gql.GraphQLNonNull(gql.GraphQLInt)
+      },
+      name: {
+        type: gql.GraphQLString,
+        description: 'Job name'
+      },
+      status: {
+        type: BuildStatus,
+        description: 'Status of the build'
+      },
+      stage: {
+        type: gql.GraphQLString,
+        description: 'Build stage'
+      },
+      createdAt: {
+        type: Timestamp,
+        description: 'Creation date of the build'
+      },
+      finishedAt: {
+        type: Timestamp,
+        description: 'When the build finished'
+      }
+    };
+  }
+});
+
 module.exports = new gql.GraphQLObjectType({
   name: 'Build',
   description: 'A single of a CI build run',
@@ -27,17 +71,7 @@ module.exports = new gql.GraphQLObjectType({
         type: gql.GraphQLString
       },
       status: {
-        type: new gql.GraphQLEnumType({
-          name: 'BuildStatus',
-          values: {
-            failed: {},
-            success: {},
-            pending: {},
-            running: {},
-            cancelded: {},
-            skipped: {}
-          }
-        }),
+        type: BuildStatus,
         description: 'Status of the build'
       },
       createdAt: {
@@ -67,6 +101,10 @@ module.exports = new gql.GraphQLObjectType({
       coverage: {
         type: gql.GraphQLString,
         description: 'Coverage information'
+      },
+      jobs: {
+        type: new gql.GraphQLList(Job),
+        description: 'Jobs in this build'
       },
       commit: {
         type: require('./commit.js'),

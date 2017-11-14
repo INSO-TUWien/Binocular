@@ -22,7 +22,8 @@ module.exports = new gql.GraphQLObjectType({
       },
       maxLength: {
         type: gql.GraphQLInt,
-        description: 'The maximum number of lines this file ever had over the course of the whole project'
+        description:
+          'The maximum number of lines this file ever had over the course of the whole project'
       },
       commits: paginated({
         type: new gql.GraphQLList(require('./commit.js')),

@@ -1,7 +1,6 @@
 'use strict';
 
 import { createAction } from 'redux-actions';
-import Promise from 'bluebird';
 
 import { collectPages, graphQl } from '../../../utils';
 import { fetchFactory, timestampedActionFactory } from '../../../sagas/utils.js';

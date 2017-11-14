@@ -1,11 +1,10 @@
 'use strict';
 
 import { createAction } from 'redux-actions';
-import { reachGraphQL } from 'react-reach';
 import { select, takeEvery, fork } from 'redux-saga/effects';
 
 import { fetchFactory, timestampedActionFactory } from '../../../sagas/utils.js';
-import { traversePages, graphQl } from '../../../utils';
+import { graphQl } from '../../../utils';
 
 export const setActiveIssue = createAction('SET_ACTIVE_ISSUE', i => i);
 export const setFilteredCommits = createAction('SET_FILTERED_COMMITS', cs => cs);
@@ -64,8 +63,18 @@ export const fetchIssueImpactData = fetchFactory(
                  }
                  builds {
                    id
+                   createdAt
+                   finishedAt
                    duration
                    status
+                   jobs {
+                     id
+                     name
+                     stage
+                     status
+                     createdAt
+                     finishedAt
+                   }
                  }
                }
              }

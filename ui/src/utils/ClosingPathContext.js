@@ -97,6 +97,14 @@ export default class ClosingPathContext {
     return this;
   }
 
+  concat(otherPath) {
+    this.commands.push(...otherPath.commands);
+    this.min.x = Math.min(this.min.x, otherPath.min.x);
+    this.min.y = Math.min(this.min.y, otherPath.min.y);
+    this.max.x = Math.max(this.max.x, otherPath.max.x);
+    this.max.y = Math.min(this.max.y, otherPath.max.y);
+  }
+
   toString() {
     const d = this.commands.join('');
     return d;

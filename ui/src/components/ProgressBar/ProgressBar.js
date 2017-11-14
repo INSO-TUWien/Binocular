@@ -7,7 +7,8 @@ import styles from './progress-bar.scss';
 const ProgressBar = props => {
   const commits = props.progress.commits;
   const issues = props.progress.issues;
-  const pieData = [commits, issues].filter(d => d.total !== 0);
+  const builds = props.progress.builds;
+  const pieData = [commits, issues, builds].filter(d => d.total !== 0);
   const shareCount = pieData.length;
 
   const ringRadius = 100 / (2 * Math.PI);
@@ -47,13 +48,16 @@ const ProgressBar = props => {
         <text className={styles.text} x="21" y="21">
           {Math.round(processed / total * 100)}%
         </text>
-        <g transform="translate(21 19)">
+        <g transform="translate(21 17)">
           <text className={cx(styles.text, styles.details)} x="0" y="0">
             <tspan x="0">
               {commits.processed}/{commits.total} Commits
             </tspan>
             <tspan x="0" dy="1.5em">
               {issues.processed}/{issues.total} Issues
+            </tspan>
+            <tspan x="0" dy="1.5em">
+              {builds.processed}/{builds.total} Builds
             </tspan>
           </text>
         </g>

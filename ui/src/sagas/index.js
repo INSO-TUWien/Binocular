@@ -1,7 +1,7 @@
 'use strict';
 
 import { createAction } from 'redux-actions';
-import { select, takeEvery, fork, throttle, put, cancel } from 'redux-saga/effects';
+import { select, takeEvery, fork, cancel } from 'redux-saga/effects';
 
 import { fetchConfig, watchConfig } from './config.js';
 import { watchNotifications } from './notifications.js';
