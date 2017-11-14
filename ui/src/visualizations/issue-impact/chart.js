@@ -68,7 +68,6 @@ export default class IssueImpact extends React.PureComponent {
   }
 
   renderBuildAxis(issueScale, radius, builds) {
-    console.log('rendering', builds);
     const separatorCount = builds.data.length + 1;
     const separatorShare = MINIMUM_VACANT_SEMICIRCLE_SHARE / separatorCount;
     const semi = new SemiCircleScale(0, 0, radius, { offset: Math.PI });
@@ -78,8 +77,6 @@ export default class IssueImpact extends React.PureComponent {
     let offsetShare = separatorShare;
 
     return builds.data.map(build => {
-      console.log('processing:', build);
-
       const buildShare = build.duration / builds.totalDuration * MAXIMUM_OCCUPIED_SEMICIRCLE_SHARE;
       const endShare = offsetShare + buildShare;
 
@@ -99,7 +96,6 @@ export default class IssueImpact extends React.PureComponent {
         const jobShare = job.duration / build.duration * buildShare;
 
         const jobArc = semi.getArcForShares(jobOffsetShare, jobOffsetShare + jobShare);
-        console.log(outerJobSemi);
         // const outerStart = outerJobSemi.getCoordsForShare(jobOffsetShare);
         const outerEnd = outerJobSemi.getCoordsForShare(jobOffsetShare + jobShare);
         jobArc.lineTo(outerEnd.x, -outerEnd.y);
@@ -231,7 +227,6 @@ export default class IssueImpact extends React.PureComponent {
       .domain([this.state.start, this.state.end]);
 
     const fileAxis = this.renderFileAxis(issueScale, radius, this.state.files);
-    console.log('rendering state', this.state);
     const buildAxis = this.renderBuildAxis(issueScale, radius, this.state.builds);
 
     return (
@@ -332,7 +327,6 @@ function extractData(props) {
     _.each(commit.builds, b => {
       let totalJobDuration = 0;
       const jobs = _.map(b.jobs, job => {
-        console.log('job:', job);
         const startedAt = parseTime(job.createdAt);
         const finishedAt = parseTime(job.finishedAt);
         const duration = (finishedAt.getTime() - startedAt.getTime()) / 1000;
