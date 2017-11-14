@@ -116,7 +116,7 @@ export default class IssueImpact extends React.PureComponent {
         jobOffsetShare += jobShare;
 
         return (
-          <g>
+          <g key={job.id}>
             <text
               transform={jobAnnotation.transform}
               style={{ textAnchor: jobAnnotation.textAnchor }}>

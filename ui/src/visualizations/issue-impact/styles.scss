@@ -71,7 +71,8 @@
 
   .job {
     fill: none;
-    stroke: black;
+    stroke: $background !important;
+    stroke-width: 1 !important;
   }
 
   .job.failed {
