@@ -63,7 +63,7 @@ const IssueImpactConfigComponent = props => {
           />
           {props.issue &&
             <a href={props.issue.webUrl} target="_blank">
-              View #{props.issue.iid} on GitLab
+              View #{props.issue.iid} on ITS
             </a>}
         </div>
 
