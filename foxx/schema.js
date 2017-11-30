@@ -9,6 +9,7 @@ const paginated = require('./types/paginated.js');
 const queryHelpers = require('./query-helpers.js');
 const Timestamp = require('./types/Timestamp.js');
 const Sort = require('./types/Sort.js');
+const DateHistogramGranularity = require('./types/DateHistogramGranularity.js');
 
 const commits = db._collection('commits');
 const files = db._collection('files');
@@ -60,6 +61,7 @@ const queryType = new gql.GraphQLObjectType({
           return commits.document(args.sha);
         }
       },
+      commitDateHistogram: makeDateHistogramEndpoint(commits, 'date'),
       file: {
         type: require('./types/file.js'),
         args: {
@@ -152,7 +154,8 @@ const queryType = new gql.GraphQLObjectType({
             )
             .toArray()[0];
         }
-      }
+      },
+      issueDateHistogram: makeDateHistogramEndpoint(issues, 'createdAt')
     };
   }
 });
@@ -164,3 +167,28 @@ const queryType = new gql.GraphQLObjectType({
 module.exports = new gql.GraphQLSchema({
   query: queryType
 });
+
+function makeDateHistogramEndpoint(collection, dateFieldName) {
+  return {
+    type: require('./types/histogram.js')(gql.GraphQLInt),
+    args: {
+      granularity: {
+        type: DateHistogramGranularity
+      }
+    },
+    resolve(root, args) {
+      let q = qb
+        .for('item')
+        .in(collection)
+        .collect('category', args.granularity(`item.${dateFieldName}`))
+        .withCountInto('length')
+        .return({
+          category: 'category',
+          count: 'length'
+        })
+        .toAQL();
+
+      return db._query(q).toArray();
+    }
+  };
+}
