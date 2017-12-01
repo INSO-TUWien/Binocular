@@ -1,0 +1,25 @@
+@import '~bulma';
+
+.chart {
+  outline: none;
+}
+
+.clockFace {
+  circle {
+    fill: none;
+    stroke: black;
+  }
+
+  .ticks {
+    line {
+      stroke-width: 1;
+      stroke: black; 
+      fill: none;
+    }
+
+    text {
+      text-anchor: middle;
+      alignment-baseline: middle;
+    }
+  }
+}

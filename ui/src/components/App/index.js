@@ -6,6 +6,7 @@ import ProgressBar from '../ProgressBar';
 import Notifications from '../notifications';
 import CodeOwnershipRiver from '../../visualizations/code-ownership-river';
 import IssueImpact from '../../visualizations/issue-impact';
+import HotspotDials from '../../visualizations/hotspot-dials';
 import { connect } from 'react-redux';
 
 const mapStateToProps = state => {
@@ -23,6 +24,7 @@ const App = connect(mapStateToProps, mapDispatchToProps)(props =>
       <ProgressBar />
       {props.activeVisualization === 'CODE_OWNERSHIP_RIVER' && <CodeOwnershipRiver />}
       {props.activeVisualization === 'ISSUE_IMPACT' && <IssueImpact />}
+      {props.activeVisualization === 'HOTSPOT_DIALS' && <HotspotDials />}
     </div>
     <Notifications />
     {/*<ConfigButton />*/}

@@ -8,6 +8,7 @@ import { watchNotifications } from './notifications.js';
 
 import codeOwnershipRiver from '../visualizations/code-ownership-river/sagas';
 import issueImpact from '../visualizations/issue-impact/sagas';
+import hotspotDials from '../visualizations/hotspot-dials/sagas';
 
 export const Visualizations = ['ISSUE_IMPACT', 'CODE_OWNERSHIP_RIVER', 'HOTSPOT_DIALS'];
 
@@ -16,7 +17,8 @@ export const showCommit = createAction('SHOW_COMMIT');
 
 const componentSagas = {
   CODE_OWNERSHIP_RIVER: codeOwnershipRiver,
-  ISSUE_IMPACT: issueImpact
+  ISSUE_IMPACT: issueImpact,
+  HOTSPOT_DIALS: hotspotDials
 };
 let currentComponentSaga = null;
 
