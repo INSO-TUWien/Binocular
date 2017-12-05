@@ -4,10 +4,10 @@ import { connect } from 'react-redux';
 import HotspotDials from './chart.js';
 
 const mapStateToProps = state => {
+  console.log('mapping', state.hotspotDialsData.data);
   return {
-    issue: state.issueImpactData.data.issue,
-    filteredCommits: state.issueImpactConfig.filteredCommits,
-    filteredFiles: state.issueImpactConfig.filteredFiles
+    categories: state.hotspotDialsData.data.categories,
+    maximum: state.hotspotDialsData.data.maximum
   };
 };
 

@@ -49,6 +49,15 @@ const store = createStore(
       activeIssueId: 8,
       filteredCommits: []
     },
+    hotspotDialsData: {
+      data: {
+        categories: [],
+        maximum: 0
+      }
+    },
+    hotspotDialsConfig: {
+      category: 'hour'
+    },
     config: {
       isFetching: false,
       lastFetched: null,

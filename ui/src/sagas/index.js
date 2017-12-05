@@ -44,7 +44,6 @@ export function* root() {
 function* watchVisualization() {
   yield takeEvery('SWITCH_VISUALIZATION', function*() {
     const { activeVisualization } = yield select();
-    console.log('switching to', activeVisualization);
     yield switchComponentSaga(activeVisualization);
   });
 }

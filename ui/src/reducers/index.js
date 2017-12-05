@@ -10,6 +10,8 @@ import codeOwnershipData from './codeOwnershipData.js';
 import codeOwnershipConfig from './codeOwnershipConfig.js';
 import issueImpactConfig from './issueImpactConfig.js';
 import issueImpactData from './issueImpactData.js';
+import hotspotDialsData from './hotspotDialsData.js';
+import hotspotDialsConfig from './hotspotDialsConfig.js';
 import notifications from './notifications.js';
 import progress from './progress.js';
 import activeConfigTab from './activeConfigTab.js';
@@ -22,6 +24,8 @@ const app = combineReducers({
   codeOwnershipConfig,
   issueImpactData,
   issueImpactConfig,
+  hotspotDialsData,
+  hotspotDialsConfig,
   notifications,
   progress,
   activeConfigTab,

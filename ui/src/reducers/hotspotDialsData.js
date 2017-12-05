@@ -5,8 +5,9 @@ import _ from 'lodash';
 
 export default handleActions(
   {
-    REQUEST_ISSUE_IMPACT_DATA: state => _.assign({}, state, { isFetching: true }),
-    RECEIVE_ISSUE_IMPACT_DATA: (state, action) => {
+    REQUEST_HOTSPOT_DIALS_DATA: state => _.assign({}, state, { isFetching: true }),
+    RECEIVE_HOTSPOT_DIALS_DATA: (state, action) => {
+      console.log('received hd data:', action.payload);
       return _.assign({}, state, {
         data: action.payload,
         isFetching: false,
