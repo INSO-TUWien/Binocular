@@ -51,8 +51,14 @@ const store = createStore(
     },
     hotspotDialsData: {
       data: {
-        categories: [],
-        maximum: 0
+        commits: {
+          categories: [],
+          maximum: 0
+        },
+        issues: {
+          categories: [],
+          maximum: 0
+        }
       }
     },
     hotspotDialsConfig: {

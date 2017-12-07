@@ -21,6 +21,10 @@ const GlobalZoomableSvg = props => {
       <g transform={`${translate} ${scale}`}>
         {props.children}
       </g>
+      {props.unzoomed &&
+        <g>
+          {props.unzoomed}
+        </g>}
     </ZoomableSvg>
   );
 };

@@ -37,3 +37,19 @@
     stroke: $grey-darker;
   }
 }
+
+.issues {
+  > circle {
+    fill: darken($grey-lighter, 15%);
+  }
+}
+
+.commits {
+  > circle {
+    fill: $white;
+  }
+
+  .spacer {
+    fill: darken($grey-darker, 15%);
+  }
+}
