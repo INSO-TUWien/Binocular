@@ -14,12 +14,22 @@ export const requestIssueImpactData = createAction('REQUEST_ISSUE_IMPACT_DATA');
 export const receiveIssueImpactData = timestampedActionFactory('RECEIVE_ISSUE_IMPACT_DATA');
 export const receiveIssueImpactDataError = createAction('RECEIVE_ISSUE_IMPACT_DATA_ERROR');
 
+export const openCommit = createAction('OPEN_COMMIT');
+
 export default function*() {
   yield fork(watchSetActiveIssue);
+  yield fork(watchOpenCommit);
 }
 
 export function* watchSetActiveIssue() {
   yield takeEvery('SET_ACTIVE_ISSUE', fetchIssueImpactData);
+}
+
+export function* watchOpenCommit() {
+  yield takeEvery('OPEN_COMMIT', function(action) {
+    const commit = action.payload;
+    window.open(commit.webUrl);
+  });
 }
 
 export const fetchIssueImpactData = fetchFactory(
@@ -45,6 +55,7 @@ export const fetchIssueImpactData = fetchFactory(
                  shortSha
                  messageHeader
                  date
+                 webUrl
                  files {
                    data {
                      lineCount

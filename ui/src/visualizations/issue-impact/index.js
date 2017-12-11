@@ -3,6 +3,8 @@
 import { connect } from 'react-redux';
 import IssueImpact from './chart.js';
 
+import { openCommit } from './sagas';
+
 const mapStateToProps = state => {
   return {
     issue: state.issueImpactData.data.issue,
@@ -11,6 +13,8 @@ const mapStateToProps = state => {
   };
 };
 
-const mapDispatchToProps = () => ({});
+const mapDispatchToProps = dispatch => ({
+  onHunkClick: hunk => dispatch(openCommit(hunk.commit))
+});
 
 export default connect(mapStateToProps, mapDispatchToProps)(IssueImpact);

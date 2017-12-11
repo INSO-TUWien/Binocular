@@ -16,6 +16,7 @@ const Repository = require('./lib/git.js');
 const { app, argv, httpServer, io } = require('./lib/context.js');
 const config = require('./lib/config.js');
 const idx = require('./lib/indexers');
+const getUrlProvider = require('./lib/url-providers');
 const ProgressReporter = require('./lib/progress-reporter.js');
 const path = require('path');
 const Commit = require('./lib/models/Commit.js');
@@ -82,7 +83,9 @@ Repository.fromPath(ctx.targetPath)
         indexers.ci = idx.makeCIIndexer(ctx.repo, reporter);
       }
 
-      return Promise.props(indexers)
+      return getUrlProvider(ctx.repo)
+        .then(urlProvider => (ctx.urlProvider = urlProvider))
+        .then(() => Promise.props(indexers))
         .thenReturn(_.values(indexers))
         .filter(indexer => indexer !== null)
         .map(indexer => indexer.index())

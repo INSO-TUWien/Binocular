@@ -6,8 +6,11 @@ import chroma from 'chroma-js';
 
 export const parseTime = d3.timeParse('%Y-%m-%dT%H:%M:%S.%LZ');
 
-export function endpointUrl(suffix) {
-  return getBaseUrl() + suffix;
+export function endpointUrl(suffix, qs = {}) {
+  const url = new URL(getBaseUrl() + suffix);
+  _.each(qs, (value, key) => url.searchParams.append(key, value));
+
+  return url;
 }
 
 export function basename(path) {

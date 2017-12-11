@@ -189,6 +189,7 @@ export default class IssueImpact extends React.PureComponent {
                 }}
                 onMouseEnter={() => this.setState({ hoveredHunk: hunkKey })}
                 onMouseLeave={() => this.setState({ hoveredHunk: null })}
+                onClick={() => this.props.onHunkClick(hunk)}
               />
             </g>
           </CSSTransition>
@@ -316,7 +317,8 @@ function extractData(props) {
             _.merge({}, h, {
               commit: {
                 sha: commit.sha,
-                date: parseTime(commit.date)
+                date: parseTime(commit.date),
+                webUrl: commit.webUrl
               }
             })
           )
