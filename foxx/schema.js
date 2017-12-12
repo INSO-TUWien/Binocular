@@ -61,7 +61,52 @@ const queryType = new gql.GraphQLObjectType({
           return commits.document(args.sha);
         }
       },
-      commitDateHistogram: makeDateHistogramEndpoint(commits, 'date'),
+      commitDateHistogram: makeDateHistogramEndpoint(commits, 'date', {
+        args: {
+          buildFilter: {
+            type: new gql.GraphQLEnumType({
+              name: 'BuildFilter',
+              values: {
+                successful: {
+                  value: 'successful'
+                },
+                failed: {
+                  value: 'failed'
+                },
+                all: {
+                  value: 'all'
+                }
+              }
+            }),
+            description: 'Include/exclude commits that have successful builds'
+          }
+        },
+        makeFilter: args => {
+          if (!args.buildFilter || args.buildFilter === 'all') {
+            return true;
+          }
+
+          const comparatorMap = {
+            successful: 'gt',
+            failed: 'eq'
+          };
+
+          console.log(args.buildFilter);
+
+          return qb[comparatorMap[args.buildFilter]](
+            qb.LENGTH(
+              qb
+                .for('build')
+                .in('builds')
+                .filter(
+                  qb.and(qb.eq('build.sha', 'item.sha'), qb.eq('build.status', qb.str('success')))
+                )
+                .return(1)
+            ),
+            0
+          );
+        }
+      }),
       file: {
         type: require('./types/file.js'),
         args: {
@@ -168,18 +213,25 @@ module.exports = new gql.GraphQLSchema({
   query: queryType
 });
 
-function makeDateHistogramEndpoint(collection, dateFieldName) {
+function makeDateHistogramEndpoint(collection, dateFieldName, { makeFilter, args } = {}) {
   return {
     type: require('./types/histogram.js')(gql.GraphQLInt),
-    args: {
-      granularity: {
-        type: DateHistogramGranularity
-      }
-    },
+    args: Object.assign(
+      {
+        granularity: {
+          type: DateHistogramGranularity
+        }
+      },
+      args
+    ),
     resolve(root, args) {
-      let q = qb
-        .for('item')
-        .in(collection)
+      let q = qb.for('item').in(collection);
+
+      if (makeFilter) {
+        q = q.filter(makeFilter(args));
+      }
+
+      q = q
         .collect('category', args.granularity(`item.${dateFieldName}`))
         .withCountInto('length')
         .return({

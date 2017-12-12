@@ -40,6 +40,10 @@ module.exports = new gql.GraphQLObjectType({
         type: Timestamp,
         description: 'The date of the commit'
       },
+      webUrl: {
+        type: gql.GraphQLString,
+        description: 'Web-url (if available) of this commit'
+      },
       stats: {
         type: new gql.GraphQLObjectType({
           name: 'Stats',

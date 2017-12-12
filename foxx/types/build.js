@@ -39,6 +39,10 @@ const Job = new gql.GraphQLObjectType({
         type: gql.GraphQLString,
         description: 'Build stage'
       },
+      webUrl: {
+        type: gql.GraphQLString,
+        description: 'Web-url of this job'
+      },
       createdAt: {
         type: Timestamp,
         description: 'Creation date of the build'
@@ -73,6 +77,10 @@ module.exports = new gql.GraphQLObjectType({
       status: {
         type: BuildStatus,
         description: 'Status of the build'
+      },
+      webUrl: {
+        type: gql.GraphQLString,
+        description: 'Web-url of this build'
       },
       createdAt: {
         type: Timestamp,

@@ -3,7 +3,6 @@
 import React from 'react';
 import * as d3 from 'd3';
 import _ from 'lodash';
-import chroma from 'chroma-js';
 
 import GlobalZoomableSvg from '../../components/svg/GlobalZoomableSvg.js';
 import OffsetGroup from '../../components/svg/OffsetGroup.js';
@@ -12,6 +11,7 @@ import Legend from '../../components/Legend';
 import * as zoomUtils from '../../utils/zoom.js';
 import { getChartColors } from '../../utils';
 import Dial from './Dial.js';
+import DoubleDial from './DoubleDial.js';
 
 import styles from './styles.scss';
 
@@ -68,6 +68,8 @@ export default class HotspotDials extends React.PureComponent {
       }
     ];
 
+    const CommitDial = this.props.splitCommits ? DoubleDial : Dial;
+
     return (
       <ChartContainer onResize={evt => this.onResize(evt)}>
         <GlobalZoomableSvg
@@ -78,7 +80,7 @@ export default class HotspotDials extends React.PureComponent {
           unzoomed={<Legend x="10" y="10" categories={legend} />}>
           <OffsetGroup dims={dims} transform={this.state.transform}>
             <g className={styles.clockFace} transform={`translate(${center.x}, ${center.y})`}>
-              <Dial
+              <CommitDial
                 id="commits"
                 className={styles.commits}
                 radius={radius}
@@ -87,6 +89,7 @@ export default class HotspotDials extends React.PureComponent {
                 categories={this.props.commits.categories}
                 showLabels={true}
                 palette={commitPalette}
+                split={true}
               />
               <Dial
                 id="isses"

@@ -5,6 +5,7 @@ import HotspotDials from './chart.js';
 
 const mapStateToProps = state => {
   return {
+    splitCommits: state.hotspotDialsConfig.splitCommits,
     commits: {
       categories: state.hotspotDialsData.data.commits.categories,
       maximum: state.hotspotDialsData.data.commits.maximum

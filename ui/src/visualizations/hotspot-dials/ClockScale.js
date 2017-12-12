@@ -1,17 +1,11 @@
 'use strict';
 
-import _ from 'lodash';
-
 import { ClosingPathContext } from '../../utils';
 
 const OFFSET = -Math.PI / 2;
 
 export default class SemiCircleScale {
-  constructor(cx, cy, radius, options) {
-    options = _.defaults({}, options, {
-      offset: 0
-    });
-
+  constructor(cx, cy, radius) {
     this.cx = cx;
     this.cy = cy;
     this.r = radius;
@@ -79,10 +73,6 @@ export default class SemiCircleScale {
         `translate(${coords.x}, ${-coords.y}) ` + `rotate(${SemiCircleScale.rad2deg(textAngle)})`,
       textAnchor: anchor
     };
-  }
-
-  extrude(d) {
-    return new SemiCircleScale(this.cx, this.cy, this.r + d, { offset: OFFSET });
   }
 
   static rad2deg(rad) {

@@ -62,7 +62,8 @@ const store = createStore(
       }
     },
     hotspotDialsConfig: {
-      category: 'hour'
+      category: 'hour',
+      splitCommits: true
     },
     config: {
       isFetching: false,

@@ -2,7 +2,7 @@
 
 import { connect } from 'react-redux';
 
-import { setCategory } from './sagas';
+import { setCategory, setSplitCommits } from './sagas';
 
 import styles from './styles.scss';
 
@@ -14,7 +14,8 @@ const mapStateToProps = (state /*, ownProps*/) => {
 
 const mapDispatchToProps = (dispatch /*, ownProps*/) => {
   return {
-    onSetCategory: cat => dispatch(setCategory(cat))
+    onSetCategory: cat => dispatch(setCategory(cat)),
+    onSetSplitCommits: b => dispatch(setSplitCommits(b))
   };
 };
 
@@ -35,6 +36,18 @@ const HotspotDialsConfigComponent = props => {
               </select>
             </div>
           </div>
+        </div>
+        <div className="field">
+          <label className="label">Display:</label>
+          <label className="checkbox" htmlFor="split-commits" data-tooltip="asdf">
+            <input
+              type="checkbox"
+              id="split-commits"
+              checked={props.splitCommits}
+              onChange={e => props.onSetSplitCommits(e.target.checked)}
+            />
+            Split commits into good and bad
+          </label>
         </div>
       </form>
     </div>

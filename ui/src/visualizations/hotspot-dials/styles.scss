@@ -23,6 +23,12 @@
     }
   }
 
+  .counts {
+    text {
+      font-size: 12px;
+    }
+  }
+
   .innerDial {
     fill: white;
   }
@@ -39,17 +45,44 @@
 }
 
 .issues {
-  > circle {
+  > circle.outer {
+    stroke: none;
+  }
+
+  > circle.spacer {
     fill: darken($grey-lighter, 15%);
   }
 }
 
 .commits {
+  > circle.outer {
+    stroke: none;
+  }
+
   > circle {
     fill: $white;
   }
 
   .spacer {
-    fill: darken($grey-darker, 15%);
+    fill: darken($grey-lighter, 15%);
   }
+}
+
+
+circle.midRadius {
+  stroke: black;
+  stroke-width: 2;
+  fill: none;
+}
+
+text.axisDescription {
+  font-size: 12px;
+}
+
+text.axisDescription.upper {
+  text-anchor: end;
+}
+
+text.axisDescription.lower {
+  text-anchor: start;
 }

@@ -1,15 +1,16 @@
 'use strict';
 
 import { createAction } from 'redux-actions';
-import { select, takeEvery, fork } from 'redux-saga/effects';
+import { select, takeEvery, fork, throttle } from 'redux-saga/effects';
 import _ from 'lodash';
 import moment from 'moment';
 import Promise from 'bluebird';
 
-import { fetchFactory, timestampedActionFactory } from '../../../sagas/utils.js';
+import { fetchFactory, timestampedActionFactory, mapSaga } from '../../../sagas/utils.js';
 import { graphQl } from '../../../utils';
 
-export const setCategory = createAction('SET_CATEGORY', cat => cat);
+export const setCategory = createAction('SET_CATEGORY');
+export const setSplitCommits = createAction('SET_SPLIT_COMMITS');
 
 export const requestHotspotDialsData = createAction('REQUEST_HOTSPOT_DIALS_DATA');
 export const receiveHotspotDialsData = timestampedActionFactory('RECEIVE_HOTSPOT_DIALS_DATA');
@@ -18,10 +19,28 @@ export const receiveHotspotDialsDataError = createAction('RECEIVE_HOTSPOT_DIALS_
 export default function*() {
   yield fetchHotspotDialsData();
   yield fork(watchSetCategory);
+  yield fork(watchRefreshRequests);
+  yield fork(watchMessages);
+  yield fork(watchRefresh);
 }
+
+const requestRefresh = createAction('REQUEST_REFRESH');
+const refresh = createAction('REFRESH');
 
 export function* watchSetCategory() {
   yield takeEvery('SET_CATEGORY', fetchHotspotDialsData);
+}
+
+function* watchRefreshRequests() {
+  yield throttle(2000, 'REQUEST_REFRESH', mapSaga(refresh));
+}
+
+function* watchMessages() {
+  yield takeEvery('message', mapSaga(requestRefresh));
+}
+
+function* watchRefresh() {
+  yield takeEvery('REFRESH', fetchHotspotDialsData);
 }
 
 export const fetchHotspotDialsData = fetchFactory(
@@ -69,6 +88,14 @@ export const fetchHotspotDialsData = fetchFactory(
              category
              count
            }
+           goodCommits: commitDateHistogram(granularity: $granularity, buildFilter: successful) {
+             category
+             count
+           }
+           badCommits: commitDateHistogram(granularity: $granularity, buildFilter: failed) {
+             category
+             count
+           }
            issueDateHistogram(granularity: $granularity) {
              category
              count
@@ -77,7 +104,12 @@ export const fetchHotspotDialsData = fetchFactory(
         { granularity: hotspotDialsConfig.category }
       )
     )
-      .then(resp => [resp.commitDateHistogram, resp.issueDateHistogram])
+      .then(resp => [
+        resp.commitDateHistogram,
+        resp.goodCommits,
+        resp.badCommits,
+        resp.issueDateHistogram
+      ])
       .map(histogram => {
         histogram = _.sortBy(histogram, 'category');
 
@@ -99,7 +131,20 @@ export const fetchHotspotDialsData = fetchFactory(
           categories: histogram
         };
       })
-      .spread((commits, issues) => ({ commits, issues }));
+      .spread((commits, issues, goodCommits, badCommits) => ({
+        commits: {
+          maximum: badCommits.maximum + goodCommits.maximum,
+          categories: _.zipWith(badCommits.categories, goodCommits.categories, (a, b) => ({
+            category: a.category,
+            count: a.count + b.count,
+            badCount: a.count,
+            goodCount: b.count,
+            label: a.label,
+            detailedLabel: a.detailedLabel
+          }))
+        },
+        issues
+      }));
   },
   requestHotspotDialsData,
   receiveHotspotDialsData,

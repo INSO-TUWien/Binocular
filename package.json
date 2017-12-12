@@ -46,6 +46,7 @@
     "bluebird": "^3.4.6",
     "body-parser": "^1.15.2",
     "bulma": "^0.6.1",
+    "bulma-tooltip": "^0.1.1",
     "case-sensitive-paths-webpack-plugin": "2.1.1",
     "chai": "^3.5.0",
     "chalk": "1.1.3",

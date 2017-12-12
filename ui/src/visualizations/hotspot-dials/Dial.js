@@ -1,4 +1,3 @@
-import _ from 'lodash';
 import * as d3 from 'd3';
 import ClockScale from './ClockScale.js';
 import ClosingPathContext from '../../utils/ClosingPathContext.js';
@@ -21,6 +20,7 @@ export default function Dial(props) {
 
   const dataPoints = [];
   const slices = [];
+
   const points = props.categories.map((cat, i) => {
     const coords = clock.getCoordsForShare(
       (cat.category - 1) / props.categories.length,
@@ -78,7 +78,6 @@ export default function Dial(props) {
   const curveMaskId = `curve-${props.id}`;
   const clockMaskId = `clock-${props.id}`;
 
-  console.log('palette:', props.palette[0]);
   const segments = slices.map((s, i) =>
     <path
       key={i}
@@ -99,7 +98,7 @@ export default function Dial(props) {
           <path d={curvePath} className={styles.curve} />
         </clipPath>
       </defs>
-      <circle r={props.radius} cx="0" cy="0" />
+      <circle className={styles.outer} r={props.radius} cx="0" cy="0" />
       <g className={styles.ticks}>
         {tickMarks}
         {segments}
