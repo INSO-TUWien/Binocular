@@ -23,9 +23,16 @@
     }
   }
 
+  line.tick {
+    stroke-width: 1;
+    stroke: $grey; 
+  }
+
   .counts {
     text {
       font-size: 12px;
+      text-anchor: middle;
+      alignment-baseline: middle;
     }
   }
 
