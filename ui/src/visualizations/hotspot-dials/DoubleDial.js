@@ -90,14 +90,14 @@ export default function Dial(props) {
         y={axisTextCoords.y}
         className={cx(styles.axisDescription, styles.upper)}
         transform={`rotate(${axisTextAngle} ${axisTextCoords.x} ${axisTextCoords.y})`}>
-        &lt; Good&nbsp;
+        &#9666; Good&nbsp;
       </text>
       <text
         x={axisTextCoords.x}
         y={axisTextCoords.y}
         className={cx(styles.axisDescription, styles.lower)}
         transform={`rotate(${axisTextAngle} ${axisTextCoords.x} ${axisTextCoords.y})`}>
-        &nbsp;Bad &gt;
+        &nbsp;Bad &#9656;
       </text>
     </g>
   );

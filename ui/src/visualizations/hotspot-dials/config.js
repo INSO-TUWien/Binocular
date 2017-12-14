@@ -8,7 +8,8 @@ import styles from './styles.scss';
 
 const mapStateToProps = (state /*, ownProps*/) => {
   return {
-    category: state.hotspotDialsConfig.category
+    category: state.hotspotDialsConfig.category,
+    splitCommits: state.hotspotDialsConfig.splitCommits
   };
 };
 
@@ -39,7 +40,7 @@ const HotspotDialsConfigComponent = props => {
         </div>
         <div className="field">
           <label className="label">Display:</label>
-          <label className="checkbox" htmlFor="split-commits" data-tooltip="asdf">
+          <label className="checkbox" htmlFor="split-commits">
             <input
               type="checkbox"
               id="split-commits"

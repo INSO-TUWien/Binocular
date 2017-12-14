@@ -13,7 +13,7 @@
   .ticks {
     line {
       stroke-width: 1;
-      stroke: $grey; 
+      stroke: $grey;
       fill: none;
     }
 
@@ -25,7 +25,7 @@
 
   line.tick {
     stroke-width: 1;
-    stroke: $grey; 
+    stroke: $grey;
   }
 
   .counts {
@@ -83,13 +83,15 @@ circle.midRadius {
 }
 
 text.axisDescription {
-  font-size: 12px;
+  font-size: 13px;
 }
 
 text.axisDescription.upper {
   text-anchor: end;
+  fill: darken($green, 5%);
 }
 
 text.axisDescription.lower {
   text-anchor: start;
+  fill: $red;
 }
