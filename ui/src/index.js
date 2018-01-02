@@ -25,6 +25,11 @@ const store = createStore(
   app,
   {
     activeVisualization: 'HOTSPOT_DIALS',
+    visualizations: {
+      codeOwnershipRiver: {},
+      issueImpact: {},
+      hotspotDials: {}
+    },
     visualizations: [
       { id: 'ISSUE_IMPACT', label: 'Issue Impact' },
       { id: 'CODE_OWNERSHIP_RIVER', label: 'Code ownership river' },

@@ -6,12 +6,9 @@ import { handleAction } from 'redux-actions';
 import activeVisualization from './activeVisualization.js';
 import visualizations from './visualizations.js';
 import config from './config.js';
-import codeOwnershipData from './codeOwnershipData.js';
-import codeOwnershipConfig from './codeOwnershipConfig.js';
-import issueImpactConfig from './issueImpactConfig.js';
-import issueImpactData from './issueImpactData.js';
-import hotspotDialsData from './hotspotDialsData.js';
-import hotspotDialsConfig from './hotspotDialsConfig.js';
+import codeOwnershipRiver from '../visualizations/code-ownership-river/reducers';
+import issueImpact from '../visualizations/issue-impact/reducers';
+import hotspotDials from '../visualizations/hotspot-dials/reducers';
 import notifications from './notifications.js';
 import progress from './progress.js';
 import activeConfigTab from './activeConfigTab.js';
@@ -20,12 +17,12 @@ const app = combineReducers({
   activeVisualization,
   visualizations,
   config,
-  codeOwnershipData,
-  codeOwnershipConfig,
-  issueImpactData,
-  issueImpactConfig,
-  hotspotDialsData,
-  hotspotDialsConfig,
+  codeOwnershipData: codeOwnershipRiver.data,
+  codeOwnershipConfig: codeOwnershipRiver.config,
+  issueImpactData: issueImpact.data,
+  issueImpactConfig: issueImpact.config,
+  hotspotDialsData: hotspotDials.data,
+  hotspotDialsConfig: hotspotDials.config,
   notifications,
   progress,
   activeConfigTab,
