@@ -14,11 +14,13 @@ import styles from './styles.scss';
 import { graphQl } from '../../utils';
 
 const mapStateToProps = (state /*, ownProps*/) => {
+  const iiState = state.visualizations.issueImpact.state;
+
   return {
-    issue: state.issueImpactData.data.issue,
-    filteredCommits: state.issueImpactConfig.filteredCommits,
-    files: state.issueImpactConfig.files,
-    filteredFiles: state.issueImpactConfig.filteredFiles
+    issue: iiState.data.data.issue,
+    filteredCommits: iiState.config.filteredCommits,
+    files: iiState.config.files,
+    filteredFiles: iiState.config.filteredFiles
   };
 };
 

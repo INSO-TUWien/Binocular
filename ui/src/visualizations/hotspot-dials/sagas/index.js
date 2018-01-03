@@ -45,7 +45,9 @@ function* watchRefresh() {
 
 export const fetchHotspotDialsData = fetchFactory(
   function*() {
-    const { hotspotDialsConfig } = yield select();
+    const state = yield select();
+
+    const config = state.visualizations.hotspotDials.state.config;
 
     const categories = {
       hour: {
@@ -79,7 +81,7 @@ export const fetchHotspotDialsData = fetchFactory(
       }
     };
 
-    const category = categories[hotspotDialsConfig.category];
+    const category = categories[config.category];
 
     return yield Promise.resolve(
       graphQl.query(
@@ -101,7 +103,7 @@ export const fetchHotspotDialsData = fetchFactory(
              count
            }
          }`,
-        { granularity: hotspotDialsConfig.category }
+        { granularity: config.category }
       )
     )
       .then(resp => [

@@ -4,17 +4,17 @@ import React from 'react';
 import * as d3 from 'd3';
 import cx from 'classnames';
 
-import styles from './styles.scss';
+import styles from '../styles.scss';
 import _ from 'lodash';
 import Axis from './Axis.js';
 import GridLines from './GridLines.js';
 import CommitMarker from './CommitMarker.js';
 import StackedArea from './StackedArea.js';
 
-import Legend from '../../components/Legend';
-import ZoomableChartContainer from '../../components/svg/ZoomableChartContainer.js';
-import OffsetGroup from '../../components/svg/OffsetGroup.js';
-import * as zoomUtils from '../../utils/zoom.js';
+import Legend from '../../../components/Legend';
+import ZoomableChartContainer from '../../../components/svg/ZoomableChartContainer.js';
+import OffsetGroup from '../../../components/svg/OffsetGroup.js';
+import * as zoomUtils from '../../../utils/zoom.js';
 
 const dateExtractor = d => d.date;
 

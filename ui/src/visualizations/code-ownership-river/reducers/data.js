@@ -16,5 +16,9 @@ export default handleActions(
       return ret;
     }
   },
-  { lastFetched: null, isFetching: null }
+  {
+    data: {},
+    lastFetched: null,
+    isFetching: null
+  }
 );

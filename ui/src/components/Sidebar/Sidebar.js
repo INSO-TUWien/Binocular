@@ -6,22 +6,12 @@ import PanelLink from './PanelLink.js';
 
 import cx from 'classnames';
 
-import CodeOwnershipRiverConfig from '../../visualizations/code-ownership-river/config.js';
-import IssueImpactConfig from '../../visualizations/issue-impact/config.js';
-import HotspotDialsConfig from '../../visualizations/hotspot-dials/config.js';
-
-const configs = {
-  CODE_OWNERSHIP_RIVER: CodeOwnershipRiverConfig,
-  ISSUE_IMPACT: IssueImpactConfig,
-  HOTSPOT_DIALS: HotspotDialsConfig
-};
-
 const Sidebar = props => {
   const links = _.map(props.visualizations, vis => {
     return <PanelLink key={vis.id} visualization={vis} />;
   });
 
-  const ChartConfig = configs[props.activeVisualization];
+  const ConfigComponent = props.visualizations[props.activeVisualization].ConfigComponent;
 
   return (
     <nav className={cx('panel', styles.sidebar)}>
@@ -30,7 +20,7 @@ const Sidebar = props => {
         {links}
       </p>
       <div className={cx('panel-block', styles.configuration)}>
-        {props.activeVisualization in configs && <ChartConfig />}
+        {props.activeVisualization in props.visualizations && <ConfigComponent />}
       </div>
     </nav>
   );

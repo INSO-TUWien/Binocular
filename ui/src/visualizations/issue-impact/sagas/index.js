@@ -34,7 +34,8 @@ export function* watchOpenCommit() {
 
 export const fetchIssueImpactData = fetchFactory(
   function*() {
-    const { issueImpactConfig: { activeIssueId } } = yield select();
+    const state = yield select();
+    const activeIssueId = state.visualizations.issueImpact.state.config.activeIssueId;
 
     if (activeIssueId === null) {
       return { issue: null };

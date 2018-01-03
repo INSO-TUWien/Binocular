@@ -14,5 +14,12 @@ export default handleActions(
       });
     }
   },
-  { lastFetched: null, isFetching: null }
+  {
+    data: {
+      issue: null,
+      issues: []
+    },
+    lastFetched: null,
+    isFetching: null
+  }
 );

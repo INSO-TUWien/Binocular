@@ -1,7 +1,7 @@
 'use strict';
 
 import React from 'react';
-import styles from './styles.scss';
+import styles from '../styles.scss';
 import emojify from 'emoji-replace';
 
 export default class CommitMarker extends React.Component {

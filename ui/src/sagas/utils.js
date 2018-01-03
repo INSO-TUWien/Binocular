@@ -12,6 +12,7 @@ export function fetchFactory(fn, requestActionCreator, receiveActionCreator, err
       yield put(receiveActionCreator(result));
     } catch (e) {
       if (errorActionCreator) {
+        console.error(e);
         yield put(errorActionCreator(e));
       } else {
         throw e;

@@ -14,5 +14,18 @@ export default handleActions(
       });
     }
   },
-  { lastFetched: null, isFetching: null }
+  {
+    data: {
+      commits: {
+        categories: [],
+        maximum: 0
+      },
+      issues: {
+        categories: [],
+        maximum: 0
+      }
+    },
+    lastFetched: null,
+    isFetching: null
+  }
 );

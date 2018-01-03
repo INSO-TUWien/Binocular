@@ -7,9 +7,11 @@ import { setCategory, setSplitCommits } from './sagas';
 import styles from './styles.scss';
 
 const mapStateToProps = (state /*, ownProps*/) => {
+  const hdState = state.visualizations.hotspotDials.state;
+
   return {
-    category: state.hotspotDialsConfig.category,
-    splitCommits: state.hotspotDialsConfig.splitCommits
+    category: hdState.config.category,
+    splitCommits: hdState.config.splitCommits
   };
 };
 

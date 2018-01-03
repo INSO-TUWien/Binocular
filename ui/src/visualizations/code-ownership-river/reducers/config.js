@@ -24,6 +24,6 @@ export default handleActions(
     highlightedIssue: null,
     highlightedCommits: [],
     commitAttribute: 'count',
-    viewport: []
+    viewport: [0, null]
   }
 );

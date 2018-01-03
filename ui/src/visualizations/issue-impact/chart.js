@@ -10,7 +10,7 @@ import CSSTransition from 'react-transition-group/CSSTransition';
 
 import GlobalZoomableSvg from '../../components/svg/GlobalZoomableSvg.js';
 import OffsetGroup from '../../components/svg/OffsetGroup.js';
-import Axis from '../code-ownership-river/Axis.js';
+import Axis from '../code-ownership-river/chart/Axis.js';
 import hunkTransitions from './hunkTransitions.scss';
 import Asterisk from '../../components/svg/Asterisk.js';
 import X from '../../components/svg/X.js';
@@ -148,11 +148,11 @@ export default class IssueImpact extends React.PureComponent {
     // start at one separator in
     let offsetShare = separatorShare;
 
-    return files.data.map(file => {
+    return files.data.map((file, i) => {
       const fileShare = file.length / files.totalLength * MAXIMUM_OCCUPIED_SEMICIRCLE_SHARE;
 
       if (fileShare === 0) {
-        return <g />;
+        return <g key={i} />;
       }
 
       // const textRotate = `rotate(${rad2deg(-centerAngle)})`;
@@ -201,7 +201,7 @@ export default class IssueImpact extends React.PureComponent {
       offsetShare += fileShare + separatorShare;
 
       return (
-        <g className={styles.fileAxis}>
+        <g className={styles.fileAxis} key={i}>
           <TransitionGroup component="g">
             {hunkMarkers}
           </TransitionGroup>

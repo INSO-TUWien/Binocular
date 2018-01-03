@@ -10,11 +10,13 @@ import styles from './styles.scss';
 import { graphQl } from '../../utils';
 
 const mapStateToProps = (state /*, ownProps*/) => {
+  const corState = state.visualizations.codeOwnershipRiver.state;
+
   return {
-    issues: _.get(state, 'codeOwnershipData.data.issues'),
-    showIssues: state.codeOwnershipConfig.showIssues,
-    highlightedIssue: state.codeOwnershipConfig.highlightedIssue,
-    commitAttribute: state.codeOwnershipConfig.commitAttribute
+    issues: corState.data.issues,
+    showIssues: corState.config.showIssues,
+    highlightedIssue: corState.config.highlightedIssue,
+    commitAttribute: corState.config.commitAttribute
   };
 };
 

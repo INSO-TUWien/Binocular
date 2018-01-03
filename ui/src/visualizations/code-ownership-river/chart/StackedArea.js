@@ -3,7 +3,7 @@
 import _ from 'lodash';
 import React from 'react';
 import * as d3 from 'd3';
-import { ClosingPathContext } from '../../utils';
+import { ClosingPathContext } from '../../../utils';
 
 export default class StackedArea extends React.PureComponent {
   constructor(props) {

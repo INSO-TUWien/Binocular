@@ -70,7 +70,8 @@ export const fetchCodeOwnershipData = fetchFactory(
       : firstCommitTimestamp;
     const lastIssueTimestamp = lastIssue ? Date.parse(lastIssue.createdAt) : lastCommitTimestamp;
 
-    const { codeOwnershipConfig: { viewport = [0, null] } } = yield select();
+    const state = yield select();
+    const viewport = state.visualizations.codeOwnershipRiver.state.config.viewport || [0, null];
 
     const firstSignificantTimestamp = Math.max(
       viewport[0],

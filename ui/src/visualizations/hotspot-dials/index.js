@@ -2,21 +2,35 @@
 
 import { connect } from 'react-redux';
 import HotspotDials from './chart.js';
+import ConfigComponent from './config.js';
+import saga from './sagas';
+import reducer from './reducers';
 
 const mapStateToProps = state => {
+  const hdState = state.visualizations.hotspotDials.state;
+
   return {
-    splitCommits: state.hotspotDialsConfig.splitCommits,
+    splitCommits: hdState.config.splitCommits,
     commits: {
-      categories: state.hotspotDialsData.data.commits.categories,
-      maximum: state.hotspotDialsData.data.commits.maximum
+      categories: hdState.data.data.commits.categories,
+      maximum: hdState.data.data.commits.maximum
     },
     issues: {
-      categories: state.hotspotDialsData.data.issues.categories,
-      maximum: state.hotspotDialsData.data.issues.maximum
+      categories: hdState.data.data.issues.categories,
+      maximum: hdState.data.data.issues.maximum
     }
   };
 };
 
 const mapDispatchToProps = () => ({});
 
-export default connect(mapStateToProps, mapDispatchToProps)(HotspotDials);
+const ChartComponent = connect(mapStateToProps, mapDispatchToProps)(HotspotDials);
+
+export default {
+  id: 'hotspotDials',
+  label: 'HotspotDials',
+  ChartComponent,
+  ConfigComponent,
+  saga,
+  reducer
+};

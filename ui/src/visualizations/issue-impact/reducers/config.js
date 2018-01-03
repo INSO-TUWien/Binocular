@@ -24,7 +24,12 @@ export default handleActions(
       });
     }
   },
-  { activeIssueId: 1, filteredCommits: [], files: [], filteredFiles: [] }
+  {
+    activeIssueId: 1,
+    filteredCommits: [],
+    files: [],
+    filteredFiles: []
+  }
 );
 
 function getAllFiles(issue) {

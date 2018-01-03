@@ -1,34 +1,15 @@
 'use strict';
 
-import { connect } from 'react-redux';
+import ChartComponent from './chart';
+import ConfigComponent from './config.js';
+import saga from './sagas';
+import reducer from './reducers';
 
-import Chart from './chart.js';
-import { showCommit } from '../../sagas';
-import { setViewport } from './sagas';
-
-const mapStateToProps = (state /*, ownProps*/) => {
-  const cfg = state.codeOwnershipConfig;
-  const issues = cfg.showIssues ? state.codeOwnershipData.data.issues : [];
-
-  return {
-    palette: state.codeOwnershipData.data.palette,
-    commits: state.codeOwnershipData.data.commits,
-    commitAttribute: state.codeOwnershipConfig.commitAttribute,
-    issues,
-    highlightedIssue: state.codeOwnershipConfig.highlightedIssue,
-    highlightedCommits: state.codeOwnershipConfig.highlightedCommits
-  };
+export default {
+  id: 'codeOwnershipRiver',
+  label: 'Code Ownership River',
+  saga,
+  reducer,
+  ChartComponent,
+  ConfigComponent
 };
-
-const mapDispatchToProps = (dispatch /*, ownProps*/) => {
-  return {
-    onCommitClick: function(c) {
-      dispatch(showCommit(c));
-    },
-    onViewportChanged: function(v) {
-      dispatch(setViewport(v));
-    }
-  };
-};
-
-export default connect(mapStateToProps, mapDispatchToProps)(Chart);
