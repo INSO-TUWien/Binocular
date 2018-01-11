@@ -1,7 +1,6 @@
 'use strict';
 
 import Promise from 'bluebird';
-import _ from 'lodash';
 import { connect } from 'react-redux';
 import { setShowIssues, setHighlightedIssue, setCommitAttribute } from './sagas';
 import SearchBox from '../../components/SearchBox';

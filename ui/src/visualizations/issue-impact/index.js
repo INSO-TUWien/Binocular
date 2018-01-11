@@ -3,10 +3,8 @@
 import { connect } from 'react-redux';
 import IssueImpact from './chart.js';
 import ConfigComponent from './config.js';
-import saga from './sagas';
+import saga, { openHunk, openJob } from './sagas';
 import reducer from './reducers';
-
-import { openCommit } from './sagas';
 
 const mapStateToProps = state => {
   const iiState = state.visualizations.issueImpact.state;
@@ -19,7 +17,8 @@ const mapStateToProps = state => {
 };
 
 const mapDispatchToProps = dispatch => ({
-  onHunkClick: hunk => dispatch(openCommit(hunk.commit))
+  onHunkClick: hunk => dispatch(openHunk(hunk)),
+  onJobClick: job => dispatch(openJob(job))
 });
 
 const ChartComponent = connect(mapStateToProps, mapDispatchToProps)(IssueImpact);

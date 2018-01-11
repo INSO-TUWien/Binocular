@@ -5,7 +5,6 @@ import { handleAction } from 'redux-actions';
 
 import activeVisualization from './activeVisualization.js';
 import config from './config.js';
-import hotspotDials from '../visualizations/hotspot-dials/reducers';
 import notifications from './notifications.js';
 import progress from './progress.js';
 import activeConfigTab from './activeConfigTab.js';

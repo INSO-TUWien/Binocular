@@ -20,6 +20,10 @@ module.exports = new gql.GraphQLObjectType({
       },
       oldLines: {
         type: gql.GraphQLInt
+      },
+      webUrl: {
+        type: gql.GraphQLString,
+        description: 'Url (if available) to this hunk in the ITS'
       }
     };
   }

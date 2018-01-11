@@ -15,10 +15,14 @@ export const receiveIssueImpactData = timestampedActionFactory('RECEIVE_ISSUE_IM
 export const receiveIssueImpactDataError = createAction('RECEIVE_ISSUE_IMPACT_DATA_ERROR');
 
 export const openCommit = createAction('OPEN_COMMIT');
+export const openHunk = createAction('OPEN_HUNK');
+export const openJob = createAction('OPEN_JOB');
 
 export default function*() {
   yield fork(watchSetActiveIssue);
   yield fork(watchOpenCommit);
+  yield fork(watchOpenHunk);
+  yield fork(watchOpenJob);
 }
 
 export function* watchSetActiveIssue() {
@@ -26,10 +30,19 @@ export function* watchSetActiveIssue() {
 }
 
 export function* watchOpenCommit() {
-  yield takeEvery('OPEN_COMMIT', function(action) {
-    const commit = action.payload;
-    window.open(commit.webUrl);
-  });
+  yield takeEvery('OPEN_COMMIT', openByWebUrl);
+}
+
+export function* watchOpenHunk() {
+  yield takeEvery('OPEN_HUNK', openByWebUrl);
+}
+
+export function* watchOpenJob() {
+  yield takeEvery('OPEN_JOB', openByWebUrl);
+}
+
+function openByWebUrl(action) {
+  window.open(action.payload.webUrl);
 }
 
 export const fetchIssueImpactData = fetchFactory(
@@ -65,6 +78,7 @@ export const fetchIssueImpactData = fetchFactory(
                        newLines
                        oldStart
                        oldLines
+                       webUrl
                      }
                      file {
                        id
@@ -79,6 +93,7 @@ export const fetchIssueImpactData = fetchFactory(
                    finishedAt
                    duration
                    status
+                   webUrl
                    jobs {
                      id
                      name
@@ -86,6 +101,7 @@ export const fetchIssueImpactData = fetchFactory(
                      status
                      createdAt
                      finishedAt
+                     webUrl
                    }
                  }
                }

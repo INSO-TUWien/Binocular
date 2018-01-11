@@ -122,7 +122,11 @@ export default class IssueImpact extends React.PureComponent {
               style={{ textAnchor: jobAnnotation.textAnchor }}>
               {job.name}
             </text>
-            <path d={jobArc} className={cx(styles.job, styles.arc, styles[job.status])} />
+            <path
+              d={jobArc}
+              className={cx(styles.job, styles.arc, styles[job.status])}
+              onClick={() => this.props.onJobClick(job)}
+            />
           </g>
         );
       });
@@ -338,6 +342,7 @@ function extractData(props) {
           name: job.name,
           stage: job.stage,
           status: job.status,
+          webUrl: job.webUrl,
           startedAt,
           finishedAt,
           duration
