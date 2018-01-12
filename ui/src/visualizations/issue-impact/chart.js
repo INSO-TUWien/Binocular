@@ -331,23 +331,30 @@ function extractData(props) {
     });
 
     _.each(commit.builds, b => {
+      if (!b.finishedAt) {
+        return;
+      }
+
       let totalJobDuration = 0;
-      const jobs = _.map(b.jobs, job => {
-        const startedAt = parseTime(job.createdAt);
-        const finishedAt = parseTime(job.finishedAt);
-        const duration = (finishedAt.getTime() - startedAt.getTime()) / 1000;
-        totalJobDuration += duration;
-        return {
-          id: job.id,
-          name: job.name,
-          stage: job.stage,
-          status: job.status,
-          webUrl: job.webUrl,
-          startedAt,
-          finishedAt,
-          duration
-        };
-      });
+      const jobs = _(b.jobs)
+        .filter(job => !job.finishedAt)
+        .map(job => {
+          const startedAt = parseTime(job.createdAt);
+          const finishedAt = parseTime(job.finishedAt || job.createdAt);
+          const duration = (finishedAt.getTime() - startedAt.getTime()) / 1000;
+          totalJobDuration += duration;
+          return {
+            id: job.id,
+            name: job.name,
+            stage: job.stage,
+            status: job.status,
+            webUrl: job.webUrl,
+            startedAt,
+            finishedAt,
+            duration
+          };
+        })
+        .value();
 
       buildsById[b.id] = _.assign({}, b, {
         createdAt: parseTime(b.createdAt),
