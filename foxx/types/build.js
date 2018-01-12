@@ -110,6 +110,28 @@ module.exports = new gql.GraphQLObjectType({
         type: gql.GraphQLString,
         description: 'Coverage information'
       },
+      stats: {
+        type: new gql.GraphQLObjectType({
+          name: 'BuildStats',
+          fields: {
+            success: {
+              type: gql.GraphQLInt
+            },
+            failed: {
+              type: gql.GraphQLInt
+            },
+            running: {
+              type: gql.GraphQLInt
+            },
+            pending: {
+              type: gql.GraphQLInt
+            },
+            canceled: {
+              type: gql.GraphQLInt
+            }
+          }
+        })
+      },
       jobs: {
         type: new gql.GraphQLList(Job),
         description: 'Jobs in this build'

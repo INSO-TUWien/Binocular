@@ -91,8 +91,6 @@ const queryType = new gql.GraphQLObjectType({
             failed: 'eq'
           };
 
-          console.log(args.buildFilter);
-
           return qb[comparatorMap[args.buildFilter]](
             qb.LENGTH(
               qb
@@ -145,10 +143,16 @@ const queryType = new gql.GraphQLObjectType({
         type: require('./types/build.js'),
         args: {},
         query: (root, args, limit) => aql`
-          FOR build
-            IN ${builds}
+          FOR build IN ${builds}
+            SORT build.finishedAt DESC
             ${limit}
-              RETURN build`
+            LET countsByStatus = (
+              FOR other IN ${builds}
+                FILTER other.finishedAt <= build.createdAt
+                COLLECT status = other.status WITH COUNT INTO statusCount
+                RETURN { [status]: statusCount }
+            )
+            RETURN MERGE(build, { stats: MERGE(countsByStatus) })`
       }),
       issues: paginated({
         type: require('./types/issue.js'),
