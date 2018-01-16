@@ -10,10 +10,11 @@ import { fetchFactory, timestampedActionFactory, mapSaga } from '../../../sagas/
 import { getChartColors } from '../../../utils';
 import getCommitData from './getCommitData.js';
 import getIssueData from './getIssueData.js';
+import getBuildData from './getBuildData.js';
 import fetchRelatedCommits from './fetchRelatedCommits.js';
 import getBounds from './getBounds.js';
 
-export const setShowIssues = createAction('SET_SHOW_ISSUES', b => b);
+export const setOverlay = createAction('SET_OVERLAY', b => b);
 export const setHighlightedIssue = createAction('SET_HIGHLIGHTED_ISSUE', i => i);
 export const setCommitAttribute = createAction('SET_COMMIT_ATTRIBUTE', i => i);
 
@@ -97,10 +98,22 @@ export const fetchCodeOwnershipData = fetchFactory(
         [firstSignificantTimestamp, lastSignificantTimestamp],
         granularity,
         interval
+      ),
+      getBuildData(
+        [firstCommitTimestamp, lastCommitTimestamp],
+        [firstSignificantTimestamp, lastSignificantTimestamp],
+        granularity,
+        interval
       )
     )
-      .spread((commits, issues) => {
-        return { commits, committers, palette: getChartColors('spectral', committers), issues };
+      .spread((commits, issues, builds) => {
+        return {
+          commits,
+          committers,
+          palette: getChartColors('spectral', committers),
+          issues,
+          builds
+        };
       })
       .catch(function(e) {
         console.error(e.stack);

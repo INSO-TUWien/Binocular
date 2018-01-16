@@ -2,7 +2,7 @@
 
 import Promise from 'bluebird';
 import { connect } from 'react-redux';
-import { setShowIssues, setHighlightedIssue, setCommitAttribute } from './sagas';
+import { setOverlay, setHighlightedIssue, setCommitAttribute } from './sagas';
 import SearchBox from '../../components/SearchBox';
 import styles from './styles.scss';
 
@@ -13,7 +13,7 @@ const mapStateToProps = (state /*, ownProps*/) => {
 
   return {
     issues: corState.data.issues,
-    showIssues: corState.config.showIssues,
+    overlay: corState.config.overlay,
     highlightedIssue: corState.config.highlightedIssue,
     commitAttribute: corState.config.commitAttribute
   };
@@ -21,7 +21,7 @@ const mapStateToProps = (state /*, ownProps*/) => {
 
 const mapDispatchToProps = (dispatch /*, ownProps*/) => {
   return {
-    onSetShowIssues: isShown => dispatch(setShowIssues(isShown)),
+    onSetOverlay: overlay => dispatch(setOverlay(overlay)),
     onSetHighlightedIssue: issue => dispatch(setHighlightedIssue(issue)),
     onChangeCommitAttribute: attr => dispatch(setCommitAttribute(attr))
   };
@@ -32,16 +32,42 @@ const CodeOwnershipRiverConfigComponent = props => {
     <div className={styles.configContainer}>
       <form>
         <div className="field">
-          <label className="checkbox" htmlFor="show-issues">
-            <input
-              type="checkbox"
-              id="show-issues"
-              checked={props.showIssues}
-              onChange={e => props.onSetShowIssues(e.target.checked)}
-            />
-            Show issues
-          </label>
+          <div className="control">
+            <label className="label">Categorize commits by:</label>
+            <label className="radio">
+              <input
+                name="commitAttribute"
+                type="radio"
+                checked={props.commitAttribute === 'count'}
+                onChange={() => props.onChangeCommitAttribute('count')}
+              />
+              Count
+            </label>
+            <label className="radio">
+              <input
+                name="commitAttribute"
+                type="radio"
+                checked={props.commitAttribute === 'changes'}
+                onChange={() => props.onChangeCommitAttribute('changes')}
+              />
+              Changes
+            </label>
+          </div>
         </div>
+
+        <div className="field">
+          <div className="control">
+            <label className="label">Overlay:</label>
+            <div className="select">
+              <select value={props.overlay} onChange={e => props.onSetOverlay(e.target.value)}>
+                <option value="none">None</option>
+                <option value="issues">Issues</option>
+                <option value="builds">CI Builds</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
         <div className="field">
           <SearchBox
             placeholder="Highlight issue..."
@@ -68,30 +94,6 @@ const CodeOwnershipRiverConfigComponent = props => {
             value={props.highlightedIssue}
             onChange={issue => props.onSetHighlightedIssue(issue)}
           />
-        </div>
-
-        <div className="field">
-          <div className="control">
-            <label className="label">Categorize commits by:</label>
-            <label className="radio">
-              <input
-                name="commitAttribute"
-                type="radio"
-                checked={props.commitAttribute === 'count'}
-                onChange={() => props.onChangeCommitAttribute('count')}
-              />
-              Count
-            </label>
-            <label className="radio">
-              <input
-                name="commitAttribute"
-                type="radio"
-                checked={props.commitAttribute === 'changes'}
-                onChange={() => props.onChangeCommitAttribute('changes')}
-              />
-              Changes
-            </label>
-          </div>
         </div>
       </form>
     </div>

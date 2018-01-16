@@ -5,7 +5,7 @@ import _ from 'lodash';
 
 export default handleActions(
   {
-    SET_SHOW_ISSUES: (state, action) => _.assign({}, state, { showIssues: action.payload }),
+    SET_OVERLAY: (state, action) => _.assign({}, state, { overlay: action.payload }),
     SET_HIGHLIGHTED_ISSUE: (state, action) =>
       _.assign({}, state, { highlightedIssue: action.payload, highlightedCommits: [] }),
     SET_COMMIT_ATTRIBUTE: (state, action) =>
@@ -20,7 +20,7 @@ export default handleActions(
     }
   },
   {
-    showIssues: true,
+    overlay: 'builds',
     highlightedIssue: null,
     highlightedCommits: [],
     commitAttribute: 'count',

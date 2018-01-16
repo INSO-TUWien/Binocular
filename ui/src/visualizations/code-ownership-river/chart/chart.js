@@ -65,17 +65,20 @@ export default class CodeOwnershipRiver extends React.Component {
     const issueDateExtent = d3.extent(data.issues, d => d.createdAt);
     const issueCountExtent = d3.extent(data.issues, d => d.count);
 
+    const buildDateExtent = d3.extent(data.builds, b => b.date);
+    const buildCountExtent = d3.extent(data.builds, b => b.stats.total);
+
     const min = arr => _.min(_.pull(arr, null));
     const max = arr => _.max(_.pull(arr, null));
 
     this.scales.x.domain([
-      min([commitDateExtent[0], issueDateExtent[0]]),
-      max([commitDateExtent[1], issueDateExtent[1]])
+      min([commitDateExtent[0], issueDateExtent[0], buildDateExtent[0]]),
+      max([commitDateExtent[1], issueDateExtent[1], buildDateExtent[1]])
     ]);
 
     this.scales.y.domain([
-      min([commitCountExtent[0], issueCountExtent[0]]),
-      max([commitCountExtent[1], issueCountExtent[1]])
+      min([commitCountExtent[0], issueCountExtent[0], buildCountExtent[0]]),
+      max([commitCountExtent[1], issueCountExtent[1], buildCountExtent[1]])
     ]);
   }
 
@@ -107,6 +110,15 @@ export default class CodeOwnershipRiver extends React.Component {
       legend.push({
         name: 'Issues by state',
         subLegend: [openIssuesLegend, closedIssuesLegend]
+      });
+    }
+
+    console.log('builds:', this.props.builds);
+
+    if (this.props.builds.length > 0) {
+      legend.push({
+        name: 'Builds by state',
+        subLegend: [successfulBuildsLegend, unsuccessfulBuildsLegend]
       });
     }
 
@@ -243,6 +255,31 @@ export default class CodeOwnershipRiver extends React.Component {
                 fillToRight={today}
               />
             </g>
+            <g clipPath="url(#chart)" mask="url(#issue-mask)">
+              <StackedArea
+                data={this.props.builds}
+                x={x}
+                y={y}
+                series={[
+                  {
+                    extractY: b => b.stats.success,
+                    style: successfulBuildsLegend.style,
+                    className: '',
+                    onMouseEnter: () => this.activateLegend(successfulBuildsLegend),
+                    onMouseLeave: () => this.activateLegend(null)
+                  },
+                  {
+                    extractY: b => b.stats.failed,
+                    style: unsuccessfulBuildsLegend.style,
+                    onMouseEnter: () => this.activateLegend(unsuccessfulBuildsLegend),
+                    onMouseLeave: () => this.activateLegend(null)
+                  }
+                ]}
+                extractX={dateExtractor}
+                sum={_.sum}
+                fillToRight={today}
+              />
+            </g>
             <g className={styles.today} clipPath="url(#x-only)">
               <text x={today} y={-10}>
                 Now
@@ -316,6 +353,21 @@ const openIssuesLegend = {
 
 const closedIssuesLegend = {
   name: 'Closed issues',
+  style: {
+    fill: '#73e79c'
+  }
+};
+
+const unsuccessfulBuildsLegend = {
+  name: 'Unsuccessful builds',
+  style: {
+    fill: '#ff9eb1',
+    stroke: '#ff3860'
+  }
+};
+
+const successfulBuildsLegend = {
+  name: 'Successful builds',
   style: {
     fill: '#73e79c'
   }

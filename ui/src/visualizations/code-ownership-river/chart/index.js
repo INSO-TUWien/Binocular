@@ -9,13 +9,15 @@ import { setViewport } from '../sagas';
 const mapStateToProps = (state /*, ownProps*/) => {
   const corState = state.visualizations.codeOwnershipRiver.state;
 
-  const issues = corState.config.showIssues ? corState.data.data.issues : [];
+  const issues = corState.config.overlay === 'issues' ? corState.data.data.issues : [];
+  const builds = corState.config.overlay === 'builds' ? corState.data.data.builds : [];
 
   return {
     palette: corState.data.data.palette,
     commits: corState.data.data.commits,
     commitAttribute: corState.config.commitAttribute,
     issues,
+    builds,
     highlightedIssue: corState.config.highlightedIssue,
     highlightedCommits: corState.config.highlightedCommits
   };

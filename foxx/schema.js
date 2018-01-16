@@ -144,7 +144,7 @@ const queryType = new gql.GraphQLObjectType({
         args: {},
         query: (root, args, limit) => aql`
           FOR build IN ${builds}
-            SORT build.finishedAt DESC
+            SORT build.createdAt ASC
             ${limit}
             LET countsByStatus = (
               FOR other IN ${builds}
