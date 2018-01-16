@@ -4,11 +4,21 @@
   align-content: stretch;
 }
 
-.chartPanel {
+.mainPane {
   flex-grow: 1;
   position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  align-content: stretch;
 }
-.chartPanel svg {
-  width: 100%;
-  height: 100%;
+
+.mainPane > div {
+  flex: 1;
+  display: flex;
+}
+
+.chartPanel {
+  flex-grow: 1;
+  display: flex;
 }

@@ -55,6 +55,12 @@ export function shortenPath(path, maxLength, { replacer = '\u2026' } = {}) {
   return dirPath.substring(0, start) + replacer + dirPath.substring(end) + '/' + fileName;
 }
 
+export function callSafe(fn) {
+  if (fn) {
+    return e => fn(e);
+  }
+}
+
 export { default as ClosingPathContext } from './ClosingPathContext.js';
 
 export * from './graphQl.js';

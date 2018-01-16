@@ -1,6 +1,7 @@
 'use strict';
 
 import { connect } from 'react-redux';
+import { Tooltip } from 'react-tippy';
 
 import { setCategory, setSplitCommits } from './sagas';
 
@@ -42,15 +43,23 @@ const HotspotDialsConfigComponent = props => {
         </div>
         <div className="field">
           <label className="label">Display:</label>
-          <label className="checkbox" htmlFor="split-commits">
-            <input
-              type="checkbox"
-              id="split-commits"
-              checked={props.splitCommits}
-              onChange={e => props.onSetSplitCommits(e.target.checked)}
-            />
-            Split commits into good and bad
-          </label>
+          <Tooltip
+            position="bottom"
+            arrow={true}
+            arrowSize="big"
+            theme="transparent"
+            title="A commit is considered good if there exists at least one successful build in the CI-system">
+            <label className="checkbox" htmlFor="split-commits">
+              <input
+                type="checkbox"
+                id="split-commits"
+                checked={props.splitCommits}
+                onChange={e => props.onSetSplitCommits(e.target.checked)}
+              />
+              Split commits into good and bad
+              <sup className="fa fa-question-circle" aria-hidden="true" />
+            </label>
+          </Tooltip>
         </div>
       </form>
     </div>

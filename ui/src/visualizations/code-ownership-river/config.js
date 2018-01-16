@@ -4,6 +4,7 @@ import Promise from 'bluebird';
 import { connect } from 'react-redux';
 import { setOverlay, setHighlightedIssue, setCommitAttribute } from './sagas';
 import SearchBox from '../../components/SearchBox';
+import TabCombo from '../../components/TabCombo.js';
 import styles from './styles.scss';
 
 import { graphQl } from '../../utils';
@@ -28,6 +29,7 @@ const mapDispatchToProps = (dispatch /*, ownProps*/) => {
 };
 
 const CodeOwnershipRiverConfigComponent = props => {
+  console.log('rerendering config with', props);
   return (
     <div className={styles.configContainer}>
       <form>
@@ -58,43 +60,46 @@ const CodeOwnershipRiverConfigComponent = props => {
         <div className="field">
           <div className="control">
             <label className="label">Overlay:</label>
-            <div className="select">
-              <select value={props.overlay} onChange={e => props.onSetOverlay(e.target.value)}>
-                <option value="none">None</option>
-                <option value="issues">Issues</option>
-                <option value="builds">CI Builds</option>
-              </select>
-            </div>
+            <TabCombo
+              value={props.overlay}
+              onChange={value => props.onSetOverlay(value)}
+              options={[
+                { label: 'None', icon: 'close', value: 'none' },
+                { label: 'Issues', icon: 'ticket', value: 'issues' },
+                { label: 'CI Builds', icon: 'server', value: 'builds' }
+              ]}
+            />
           </div>
         </div>
 
-        <div className="field">
-          <SearchBox
-            placeholder="Highlight issue..."
-            renderOption={i => `#${i.iid} ${i.title}`}
-            search={text => {
-              return Promise.resolve(
-                graphQl.query(
-                  `
+        {props.overlay === 'issues' &&
+          <div className="field">
+            <SearchBox
+              placeholder="Highlight issue..."
+              renderOption={i => `#${i.iid} ${i.title}`}
+              search={text => {
+                return Promise.resolve(
+                  graphQl.query(
+                    `
                   query($q: String) {
                     issues(page: 1, perPage: 50, q: $q, sort: "DESC") {
                       data { iid title createdAt closedAt }
                     }
                   }`,
-                  { q: text }
+                    { q: text }
+                  )
                 )
-              )
-                .then(resp => resp.issues.data)
-                .map(i => {
-                  i.createdAt = new Date(i.createdAt);
-                  i.closedAt = i.closedAt && new Date(i.closedAt);
-                  return i;
-                });
-            }}
-            value={props.highlightedIssue}
-            onChange={issue => props.onSetHighlightedIssue(issue)}
-          />
-        </div>
+                  .then(resp => resp.issues.data)
+                  .map(i => {
+                    i.createdAt = new Date(i.createdAt);
+                    i.closedAt = i.closedAt && new Date(i.closedAt);
+                    return i;
+                  });
+              }}
+              value={props.highlightedIssue}
+              onChange={issue => props.onSetHighlightedIssue(issue)}
+            />
+          </div>}
       </form>
     </div>
   );

@@ -36,6 +36,7 @@ export default function*() {
   yield fork(watchViewport);
   yield fork(watchRefresh);
   yield fork(watchHighlightedIssue);
+  yield fork(watchToggleHelp);
 }
 
 function* watchRefreshRequests() {
@@ -48,6 +49,10 @@ function* watchMessages() {
 
 function* watchViewport() {
   yield takeEvery('COR_SET_VIEWPORT', mapSaga(requestRefresh));
+}
+
+function* watchToggleHelp() {
+  yield takeEvery('TOGGLE_HELP', mapSaga(refresh));
 }
 
 function* watchRefresh() {

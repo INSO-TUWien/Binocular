@@ -11,6 +11,7 @@ import Root from './components/Root.js';
 import makeAppReducer from './reducers';
 
 import 'bulma';
+import 'react-tippy/dist/tippy.css';
 import 'font-awesome/css/font-awesome.css';
 import './global.scss';
 

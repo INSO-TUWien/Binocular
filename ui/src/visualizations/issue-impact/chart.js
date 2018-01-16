@@ -337,7 +337,7 @@ function extractData(props) {
 
       let totalJobDuration = 0;
       const jobs = _(b.jobs)
-        .filter(job => !job.finishedAt)
+        .filter(job => job.finishedAt)
         .map(job => {
           const startedAt = parseTime(job.createdAt);
           const finishedAt = parseTime(job.finishedAt || job.createdAt);

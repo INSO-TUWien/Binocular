@@ -17,6 +17,7 @@ export default visualizations => {
       label: () => vis.label,
       ConfigComponent: () => vis.ConfigComponent,
       ChartComponent: () => vis.ChartComponent,
+      HelpComponent: () => vis.HelpComponent || (() => <div />),
       saga: () => vis.saga,
       reducer: () => vis.reducer,
       state: vis.reducer
@@ -30,6 +31,7 @@ export default visualizations => {
     notifications,
     progress,
     activeConfigTab,
+    showHelp: handleAction('TOGGLE_HELP', state => !state, true),
     form: formReducer.plugin({
       configForm: handleAction(
         'RECEIVE_CONFIGURATION',

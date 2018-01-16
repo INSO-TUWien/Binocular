@@ -113,8 +113,6 @@ export default class CodeOwnershipRiver extends React.Component {
       });
     }
 
-    console.log('builds:', this.props.builds);
-
     if (this.props.builds.length > 0) {
       legend.push({
         name: 'Builds by state',

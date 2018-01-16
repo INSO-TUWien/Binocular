@@ -2,6 +2,7 @@
 
 import ChartContainer from './ChartContainer.js';
 import ZoomableSvg from './ZoomableSvg.js';
+import { callSafe } from '../../utils';
 
 const ZoomableChartContainer = function(props) {
   return (
@@ -20,9 +21,3 @@ const ZoomableChartContainer = function(props) {
 };
 
 export default ZoomableChartContainer;
-
-function callSafe(fn) {
-  if (fn) {
-    return e => fn(e);
-  }
-}

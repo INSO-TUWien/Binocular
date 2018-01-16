@@ -8,6 +8,7 @@ import { watchNotifications } from './notifications.js';
 
 export const switchVisualization = createAction('SWITCH_VISUALIZATION', vis => vis);
 export const showCommit = createAction('SHOW_COMMIT');
+export const toggleHelp = createAction('TOGGLE_HELP');
 
 let currentComponentSaga = null;
 
