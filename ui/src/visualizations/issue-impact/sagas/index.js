@@ -16,6 +16,7 @@ export const receiveIssueImpactDataError = createAction('RECEIVE_ISSUE_IMPACT_DA
 
 export const openCommit = createAction('OPEN_COMMIT');
 export const openHunk = createAction('OPEN_HUNK');
+export const openFile = createAction('OPEN_FILE');
 export const openJob = createAction('OPEN_JOB');
 
 export default function*() {
@@ -23,6 +24,7 @@ export default function*() {
   yield fork(watchOpenCommit);
   yield fork(watchOpenHunk);
   yield fork(watchOpenJob);
+  yield fork(watchOpenFile);
 }
 
 export function* watchSetActiveIssue() {
@@ -39,6 +41,10 @@ export function* watchOpenHunk() {
 
 export function* watchOpenJob() {
   yield takeEvery('OPEN_JOB', openByWebUrl);
+}
+
+export function* watchOpenFile() {
+  yield takeEvery('OPEN_FILE', openByWebUrl);
 }
 
 function openByWebUrl(action) {
@@ -83,6 +89,7 @@ export const fetchIssueImpactData = fetchFactory(
                      file {
                        id
                        path
+                       webUrl
                        maxLength
                      }
                    }

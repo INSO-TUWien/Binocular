@@ -11,6 +11,7 @@ import CSSTransition from 'react-transition-group/CSSTransition';
 import GlobalZoomableSvg from '../../components/svg/GlobalZoomableSvg.js';
 import OffsetGroup from '../../components/svg/OffsetGroup.js';
 import Axis from '../code-ownership-river/chart/Axis.js';
+import CommitMarker from '../code-ownership-river/chart/CommitMarker.js';
 import hunkTransitions from './hunkTransitions.scss';
 import Asterisk from '../../components/svg/Asterisk.js';
 import X from '../../components/svg/X.js';
@@ -46,6 +47,7 @@ export default class IssueImpact extends React.PureComponent {
       totalLength,
       isPanning: false,
       hoveredHunk: null,
+      hoveredFile: null,
       transform: d3.zoomIdentity,
       dimensions: zoomUtils.initialDimensions()
     };
@@ -191,8 +193,8 @@ export default class IssueImpact extends React.PureComponent {
                   fill: isHighlighted ? dark : light,
                   stroke: dark
                 }}
-                onMouseEnter={() => this.setState({ hoveredHunk: hunkKey })}
-                onMouseLeave={() => this.setState({ hoveredHunk: null })}
+                onMouseEnter={() => this.setState({ hoveredHunk: hunkKey, hoveredFile: file.name })}
+                onMouseLeave={() => this.setState({ hoveredHunk: null, hoveredFile: null })}
                 onClick={() => this.props.onHunkClick(hunk)}
               />
             </g>
@@ -204,14 +206,22 @@ export default class IssueImpact extends React.PureComponent {
       // segment + the separator
       offsetShare += fileShare + separatorShare;
 
+      const isHighlighted = file.name === this.state.hoveredFile;
+
       return (
         <g className={styles.fileAxis} key={i}>
           <TransitionGroup component="g">
             {hunkMarkers}
           </TransitionGroup>
           <path d={arcData} />
-          <text transform={annotation.transform} style={{ textAnchor: annotation.textAnchor }}>
-            {shortenPath(file.name, 30)}
+          <text
+            transform={annotation.transform}
+            className={cx({ [styles.isHighlighted]: isHighlighted })}
+            style={{ textAnchor: annotation.textAnchor }}
+            onClick={() => this.props.onFileClick(file)}
+            onMouseEnter={() => this.setState({ hoveredFile: file.name })}
+            onMouseLeave={() => this.setState({ hoveredFile: null })}>
+            {isHighlighted ? file.name : shortenPath(file.name, 30)}
           </text>
         </g>
       );
@@ -220,7 +230,11 @@ export default class IssueImpact extends React.PureComponent {
 
   render() {
     if (!this.state.issue) {
-      return <svg />;
+      return (
+        <div className={styles.filler}>
+          <p>Please select an issue to visualize from the sidebar.</p>
+        </div>
+      );
     }
 
     const dims = this.state.dimensions;
@@ -233,6 +247,10 @@ export default class IssueImpact extends React.PureComponent {
 
     const fileAxis = this.renderFileAxis(issueScale, radius, this.state.files);
     const buildAxis = this.renderBuildAxis(issueScale, radius, this.state.builds);
+
+    const commitMarkers = _.map(this.props.issue.commits.data, commit => {
+      return <CommitMarker x={issueScale(new Date(commit.date))} y={0} commit={commit} />;
+    });
 
     return (
       <ChartContainer onResize={evt => this.onResize(evt)}>
@@ -270,6 +288,7 @@ export default class IssueImpact extends React.PureComponent {
                   transform={`translate(${issueScale(this.state.issue.closedAt)}, -5)`}>
                   <X />
                 </g>
+                {commitMarkers}
               </g>
             </g>
           </OffsetGroup>
@@ -317,6 +336,7 @@ function extractData(props) {
         filesById[f.file.id] = {
           name: f.file.path,
           length: f.file.maxLength,
+          webUrl: f.file.webUrl,
           hunks: f.hunks.map(h =>
             _.merge({}, h, {
               commit: {

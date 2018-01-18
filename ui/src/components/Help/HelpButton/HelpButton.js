@@ -7,10 +7,10 @@ import Icon from '../../icon';
 import styles from './help-button.scss';
 
 const HelpButton = props =>
-  <div className={cx('box', styles.helpButton)}>
+  <div className={cx(styles.helpButton)} style={{ bottom: props.y }}>
     <div className={cx({ [styles.spinning]: props.spinning })}>
       <a href="#" onClick={props.onClick}>
-        <Icon name="question" />
+        <Icon name={props.icon} />
       </a>
     </div>
   </div>;

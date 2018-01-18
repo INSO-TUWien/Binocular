@@ -3,6 +3,7 @@
 import { connect } from 'react-redux';
 import HotspotDials from './chart.js';
 import ConfigComponent from './config.js';
+import HelpComponent from './help.js';
 import saga from './sagas';
 import reducer from './reducers';
 
@@ -31,6 +32,7 @@ export default {
   label: 'HotspotDials',
   ChartComponent,
   ConfigComponent,
+  HelpComponent,
   saga,
   reducer
 };

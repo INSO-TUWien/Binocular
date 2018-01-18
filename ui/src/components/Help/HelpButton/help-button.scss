@@ -4,7 +4,6 @@
   right: 0px;
   font-size: 1.5em;
   padding: 10px;
-  border-radius: 5px 0px 0px 0px !important;
   margin-bottom: 0 !important;
   opacity: 0.5;
 }
@@ -13,12 +12,3 @@
   opacity: 1;
 }
 
-.spinning {
-  animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-  100% {
-    transform: rotate(360deg);
-  }
-}

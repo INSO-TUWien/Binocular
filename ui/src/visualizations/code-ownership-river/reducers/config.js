@@ -20,7 +20,7 @@ export default handleActions(
     }
   },
   {
-    overlay: 'builds',
+    overlay: 'issues',
     highlightedIssue: null,
     highlightedCommits: [],
     commitAttribute: 'count',

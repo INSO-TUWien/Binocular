@@ -17,27 +17,6 @@ svg.chart {
       stroke: $blue;
     }
 
-    $commit-stroke: $green;
-    $commit-fill-hover: lighten( $commit-stroke, 30% ); 
-    $commit-fill: transparentize($commit-fill-hover, 0.75);
-
-
-    .commit {
-
-      circle {
-        stroke-width: 2;
-        stroke: $commit-stroke;
-        fill: $commit-fill;
-      }
-      cursor: hand;
-    }
-
-    .commit:hover {
-      cursor: hand;
-      circle {
-        fill: $commit-fill-hover;
-      }
-    }
   }
 
   g.highlightedIssue {

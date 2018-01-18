@@ -3,7 +3,8 @@
 import { connect } from 'react-redux';
 import IssueImpact from './chart.js';
 import ConfigComponent from './config.js';
-import saga, { openHunk, openJob } from './sagas';
+import HelpComponent from './help.js';
+import saga, { openHunk, openJob, openFile } from './sagas';
 import reducer from './reducers';
 
 const mapStateToProps = state => {
@@ -18,6 +19,7 @@ const mapStateToProps = state => {
 
 const mapDispatchToProps = dispatch => ({
   onHunkClick: hunk => dispatch(openHunk(hunk)),
+  onFileClick: file => dispatch(openFile(file)),
   onJobClick: job => dispatch(openJob(job))
 });
 
@@ -29,5 +31,6 @@ export default {
   saga,
   reducer,
   ChartComponent,
-  ConfigComponent
+  ConfigComponent,
+  HelpComponent
 };

@@ -1,41 +1,57 @@
 import styles from './app.css';
 import Sidebar from '../Sidebar';
 // import ConfigButton from '../ConfigButton';
+import Measure from 'react-measure';
 import HelpButton from '../Help/HelpButton';
 import Help from '../Help';
 import ConfigDialog from '../ConfigDialog';
 import ProgressBar from '../ProgressBar';
 import Notifications from '../notifications';
+import React from 'react';
 import { connect } from 'react-redux';
 
 const mapStateToProps = state => {
   return {
-    visualization: state.visualizations[state.activeVisualization]
+    visualization: state.visualizations[state.activeVisualization],
+    showHelp: state.showHelp
   };
 };
 
 const mapDispatchToProps = () => ({});
 
-const App = connect(mapStateToProps, mapDispatchToProps)(props => {
-  const ChartComponent = props.visualization.ChartComponent;
-  const HelpComponent = props.visualization.HelpComponent;
+class App extends React.PureComponent {
+  constructor(props) {
+    super(props);
 
-  return (
-    <div className={styles.app}>
-      <Sidebar />
-      <div className={styles.mainPane}>
-        <ProgressBar />
-        <ChartComponent />
-        <Help>
-          <HelpComponent />
-        </Help>
+    this.state = {
+      helpPos: 0
+    };
+  }
+
+  render() {
+    const ChartComponent = this.props.visualization.ChartComponent;
+    const HelpComponent = this.props.visualization.HelpComponent;
+
+    return (
+      <div className={styles.app}>
+        <Sidebar />
+        <div className={styles.mainPane}>
+          <ProgressBar />
+          <ChartComponent />
+          {this.props.showHelp &&
+            <Help onResize={e => this.setState({ helpPos: e.bounds.height })}>
+              <HelpComponent />
+            </Help>}
+        </div>
+        <Notifications />
+        <HelpButton
+          y={this.props.showHelp ? this.state.helpPos : 0}
+          icon={this.props.showHelp ? 'close' : 'question'}
+        />
+        <ConfigDialog />
       </div>
-      <Notifications />
-      <HelpButton />
-      {/*<ConfigButton />*/}
-      <ConfigDialog />
-    </div>
-  );
-});
+    );
+  }
+}
 
-export default App;
+export default connect(mapStateToProps, mapDispatchToProps)(App);

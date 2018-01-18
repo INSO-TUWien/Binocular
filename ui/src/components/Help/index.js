@@ -4,6 +4,9 @@ import Promise from 'bluebird';
 import _ from 'lodash';
 import { connect } from 'react-redux';
 import cx from 'classnames';
+import Measure from 'react-measure';
+
+import { callSafe } from '../../utils';
 
 import styles from './styles.scss';
 
@@ -19,9 +22,12 @@ const mapDispatchToProps = (dispatch /*, ownProps*/) => {
 
 const HelpComponent = props => {
   return (
-    <div className={cx(styles.help, { [styles.shown]: props.shown })}>
-      {props.children}
-    </div>
+    <Measure bounds onResize={callSafe(props.onResize)}>
+      {({ measureRef }) =>
+        <div className={cx(styles.help, { [styles.shown]: props.shown })} ref={measureRef}>
+          {props.children}
+        </div>}
+    </Measure>
   );
 };
 

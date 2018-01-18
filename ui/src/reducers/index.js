@@ -31,7 +31,7 @@ export default visualizations => {
     notifications,
     progress,
     activeConfigTab,
-    showHelp: handleAction('TOGGLE_HELP', state => !state, true),
+    showHelp: handleAction('TOGGLE_HELP', state => !state, false),
     form: formReducer.plugin({
       configForm: handleAction(
         'RECEIVE_CONFIGURATION',
