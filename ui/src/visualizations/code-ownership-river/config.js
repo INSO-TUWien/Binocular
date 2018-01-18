@@ -29,7 +29,6 @@ const mapDispatchToProps = (dispatch /*, ownProps*/) => {
 };
 
 const CodeOwnershipRiverConfigComponent = props => {
-  console.log('rerendering config with', props);
   return (
     <div className={styles.configContainer}>
       <form>

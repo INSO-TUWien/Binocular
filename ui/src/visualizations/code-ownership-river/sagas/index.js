@@ -14,9 +14,10 @@ import getBuildData from './getBuildData.js';
 import fetchRelatedCommits from './fetchRelatedCommits.js';
 import getBounds from './getBounds.js';
 
-export const setOverlay = createAction('SET_OVERLAY', b => b);
-export const setHighlightedIssue = createAction('SET_HIGHLIGHTED_ISSUE', i => i);
-export const setCommitAttribute = createAction('SET_COMMIT_ATTRIBUTE', i => i);
+export const setOverlay = createAction('SET_OVERLAY');
+export const setHighlightedIssue = createAction('SET_HIGHLIGHTED_ISSUE');
+export const setCommitAttribute = createAction('SET_COMMIT_ATTRIBUTE');
+export const openCommit = createAction('OPEN_COMMIT');
 
 export const requestCodeOwnershipData = createAction('REQUEST_CODE_OWNERSHIP_DATA');
 export const receiveCodeOwnershipData = timestampedActionFactory('RECEIVE_CODE_OWNERSHIP_DATA');
@@ -32,6 +33,9 @@ export default function*() {
 
   yield fork(watchRefreshRequests);
   yield fork(watchMessages);
+
+  yield fork(watchOpenCommit);
+
   // keep looking for viewport changes to re-fetch
   yield fork(watchViewport);
   yield fork(watchRefresh);
@@ -45,6 +49,12 @@ function* watchRefreshRequests() {
 
 function* watchMessages() {
   yield takeEvery('message', mapSaga(requestRefresh));
+}
+
+export function* watchOpenCommit() {
+  yield takeEvery('OPEN_COMMIT', function(a) {
+    window.open(a.payload.webUrl);
+  });
 }
 
 function* watchViewport() {

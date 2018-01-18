@@ -4,7 +4,7 @@ import { connect } from 'react-redux';
 import IssueImpact from './chart.js';
 import ConfigComponent from './config.js';
 import HelpComponent from './help.js';
-import saga, { openHunk, openJob, openFile } from './sagas';
+import saga, { openHunk, openJob, openFile, openCommit } from './sagas';
 import reducer from './reducers';
 
 const mapStateToProps = state => {
@@ -20,7 +20,8 @@ const mapStateToProps = state => {
 const mapDispatchToProps = dispatch => ({
   onHunkClick: hunk => dispatch(openHunk(hunk)),
   onFileClick: file => dispatch(openFile(file)),
-  onJobClick: job => dispatch(openJob(job))
+  onJobClick: job => dispatch(openJob(job)),
+  onCommitClick: commit => dispatch(openCommit(commit))
 });
 
 const ChartComponent = connect(mapStateToProps, mapDispatchToProps)(IssueImpact);

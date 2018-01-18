@@ -3,8 +3,7 @@
 import { connect } from 'react-redux';
 
 import Chart from './chart.js';
-import { showCommit } from '../../../sagas';
-import { setViewport } from '../sagas';
+import { setViewport, openCommit } from '../sagas';
 
 const mapStateToProps = (state /*, ownProps*/) => {
   const corState = state.visualizations.codeOwnershipRiver.state;
@@ -26,7 +25,7 @@ const mapStateToProps = (state /*, ownProps*/) => {
 const mapDispatchToProps = (dispatch /*, ownProps*/) => {
   return {
     onCommitClick: function(c) {
-      dispatch(showCommit(c));
+      dispatch(openCommit(c));
     },
     onViewportChanged: function(v) {
       dispatch(setViewport(v));

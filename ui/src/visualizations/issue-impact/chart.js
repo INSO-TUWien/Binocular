@@ -249,7 +249,15 @@ export default class IssueImpact extends React.PureComponent {
     const buildAxis = this.renderBuildAxis(issueScale, radius, this.state.builds);
 
     const commitMarkers = _.map(this.props.issue.commits.data, commit => {
-      return <CommitMarker x={issueScale(new Date(commit.date))} y={0} commit={commit} />;
+      return (
+        <CommitMarker
+          key={commit.sha}
+          x={issueScale(new Date(commit.date))}
+          y={0}
+          commit={commit}
+          onClick={() => this.props.onCommitClick(commit)}
+        />
+      );
     });
 
     return (

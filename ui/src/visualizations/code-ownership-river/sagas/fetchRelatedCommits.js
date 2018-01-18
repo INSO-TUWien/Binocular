@@ -38,6 +38,7 @@ const getRelatedCommitsPage = issue => (page, perPage) => {
                message
                messageHeader
                signature
+               webUrl
                date
              }
            }
