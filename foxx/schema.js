@@ -204,7 +204,7 @@ const queryType = new gql.GraphQLObjectType({
             .toArray()[0];
         }
       },
-      issueDateHistogram: makeDateHistogramEndpoint(issues, 'createdAt')
+      issueDateHistogram: makeDateHistogramEndpoint(issues)
     };
   }
 });
@@ -218,16 +218,24 @@ module.exports = new gql.GraphQLSchema({
 });
 
 function makeDateHistogramEndpoint(collection, dateFieldName, { makeFilter, args } = {}) {
+  const extendedArgs = Object.assign(
+    {
+      granularity: {
+        type: new gql.GraphQLNonNull(DateHistogramGranularity)
+      }
+    },
+    args
+  );
+
+  if (!dateFieldName) {
+    extendedArgs.dateField = {
+      type: new gql.GraphQLNonNull(gql.GraphQLString)
+    };
+  }
+
   return {
     type: require('./types/histogram.js')(gql.GraphQLInt),
-    args: Object.assign(
-      {
-        granularity: {
-          type: DateHistogramGranularity
-        }
-      },
-      args
-    ),
+    args: extendedArgs,
     resolve(root, args) {
       let q = qb.for('item').in(collection);
 
@@ -236,7 +244,7 @@ function makeDateHistogramEndpoint(collection, dateFieldName, { makeFilter, args
       }
 
       q = q
-        .collect('category', args.granularity(`item.${dateFieldName}`))
+        .collect('category', args.granularity(`item.${dateFieldName || args.dateField}`))
         .withCountInto('length')
         .return({
           category: 'category',

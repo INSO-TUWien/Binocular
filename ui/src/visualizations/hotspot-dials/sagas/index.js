@@ -11,6 +11,7 @@ import { graphQl } from '../../../utils';
 
 export const setCategory = createAction('SET_CATEGORY');
 export const setSplitCommits = createAction('SET_SPLIT_COMMITS');
+export const setIssueField = createAction('SET_ISSUE_FIELD');
 
 export const requestHotspotDialsData = createAction('REQUEST_HOTSPOT_DIALS_DATA');
 export const receiveHotspotDialsData = timestampedActionFactory('RECEIVE_HOTSPOT_DIALS_DATA');
@@ -22,6 +23,7 @@ export default function*() {
   yield fork(watchRefreshRequests);
   yield fork(watchMessages);
   yield fork(watchRefresh);
+  yield fork(watchSetIssueField);
 }
 
 const requestRefresh = createAction('REQUEST_REFRESH');
@@ -29,6 +31,10 @@ const refresh = createAction('REFRESH');
 
 export function* watchSetCategory() {
   yield takeEvery('SET_CATEGORY', fetchHotspotDialsData);
+}
+
+export function* watchSetIssueField() {
+  yield takeEvery('SET_ISSUE_FIELD', fetchHotspotDialsData);
 }
 
 function* watchRefreshRequests() {
@@ -85,7 +91,7 @@ export const fetchHotspotDialsData = fetchFactory(
 
     return yield Promise.resolve(
       graphQl.query(
-        `query($granularity: DateGranularity!) {
+        `query($granularity: DateGranularity!, $dateField: String!) {
            commitDateHistogram(granularity: $granularity) {
              category
              count
@@ -98,12 +104,12 @@ export const fetchHotspotDialsData = fetchFactory(
              category
              count
            }
-           issueDateHistogram(granularity: $granularity) {
+           issueDateHistogram(granularity: $granularity, dateField: $dateField) {
              category
              count
            }
          }`,
-        { granularity: config.category }
+        { granularity: config.category, dateField: config.issueField }
       )
     )
       .then(resp => [
@@ -113,7 +119,7 @@ export const fetchHotspotDialsData = fetchFactory(
         resp.issueDateHistogram
       ])
       .map(histogram => {
-        histogram = _.sortBy(histogram, 'category');
+        histogram = _(histogram).filter(c => c.category !== null).sortBy('category').value();
 
         for (let i = 0; i < category.count; i++) {
           if (!histogram[i] || histogram[i].category !== i + category.offset) {
@@ -133,7 +139,7 @@ export const fetchHotspotDialsData = fetchFactory(
           categories: histogram
         };
       })
-      .spread((commits, issues, goodCommits, badCommits) => ({
+      .spread((commits, goodCommits, badCommits, issues) => ({
         commits: {
           maximum: badCommits.maximum + goodCommits.maximum,
           categories: _.zipWith(badCommits.categories, goodCommits.categories, (a, b) => ({

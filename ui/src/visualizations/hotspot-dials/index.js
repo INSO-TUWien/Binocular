@@ -19,7 +19,8 @@ const mapStateToProps = state => {
     issues: {
       categories: hdState.data.data.issues.categories,
       maximum: hdState.data.data.issues.maximum
-    }
+    },
+    issueField: hdState.config.issueField
   };
 };
 

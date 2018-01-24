@@ -2,8 +2,9 @@
 
 import { connect } from 'react-redux';
 import { Tooltip } from 'react-tippy';
+import TabCombo from '../../components/TabCombo.js';
 
-import { setCategory, setSplitCommits } from './sagas';
+import { setCategory, setSplitCommits, setIssueField } from './sagas';
 
 import styles from './styles.scss';
 
@@ -12,14 +13,16 @@ const mapStateToProps = (state /*, ownProps*/) => {
 
   return {
     category: hdState.config.category,
-    splitCommits: hdState.config.splitCommits
+    splitCommits: hdState.config.splitCommits,
+    issueField: hdState.config.issueField
   };
 };
 
 const mapDispatchToProps = (dispatch /*, ownProps*/) => {
   return {
     onSetCategory: cat => dispatch(setCategory(cat)),
-    onSetSplitCommits: b => dispatch(setSplitCommits(b))
+    onSetSplitCommits: b => dispatch(setSplitCommits(b)),
+    onSetIssueField: f => dispatch(setIssueField(f))
   };
 };
 
@@ -60,6 +63,19 @@ const HotspotDialsConfigComponent = props => {
               <sup className="fa fa-question-circle" aria-hidden="true" />
             </label>
           </Tooltip>
+        </div>
+        <div className="field">
+          <div className="control">
+            <label className="label">Show issues by:</label>
+            <TabCombo
+              value={props.issueField}
+              onChange={value => props.onSetIssueField(value)}
+              options={[
+                { label: 'Creation date', icon: 'certificate', value: 'createdAt' },
+                { label: 'Closing date', icon: 'window-close-o', value: 'closedAt' }
+              ]}
+            />
+          </div>
         </div>
       </form>
     </div>

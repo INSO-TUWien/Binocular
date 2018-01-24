@@ -60,7 +60,7 @@ export default class HotspotDials extends React.PureComponent {
         }))
       },
       {
-        name: 'Inner dial: Total number of issues created',
+        name: 'Inner dial: Total number of issues',
         subLegend: this.props.commits.categories.map((cat, i) => ({
           name: cat.detailedLabel,
           style: { fill: issuePalette[i] }
