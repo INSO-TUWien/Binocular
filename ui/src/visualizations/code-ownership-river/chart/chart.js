@@ -309,10 +309,8 @@ export default class CodeOwnershipRiver extends React.Component {
     const commitSeries = _.map(lastCommitDataPoint, (committerIndex, signature) => {
       const legend = {
         name:
-          (props.commitAttribute === 'count' ? 'Commits by ' : 'Changes by ') + signature ===
-          'other'
-            ? 'Others'
-            : signature,
+          (props.commitAttribute === 'count' ? 'Commits by ' : 'Changes by ') +
+          (signature === 'other' ? props.otherCount + ' Others' : signature),
         style: {
           fill: props.palette[signature]
         }

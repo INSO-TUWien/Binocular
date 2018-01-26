@@ -122,10 +122,13 @@ export const fetchCodeOwnershipData = fetchFactory(
       )
     )
       .spread((commits, issues, builds) => {
+        const aggregatedAuthors = _.keys(_.last(commits).statsByAuthor);
+
         return {
+          otherCount: committers.length - aggregatedAuthors.length,
           commits,
           committers,
-          palette: getChartColors('spectral', committers),
+          palette: getChartColors('spectral', aggregatedAuthors),
           issues,
           builds
         };

@@ -13,6 +13,7 @@ const mapStateToProps = (state /*, ownProps*/) => {
 
   return {
     palette: corState.data.data.palette,
+    otherCount: corState.data.data.otherCount,
     commits: corState.data.data.commits,
     commitAttribute: corState.config.commitAttribute,
     issues,
