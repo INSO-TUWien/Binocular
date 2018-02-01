@@ -2,7 +2,7 @@
 
 import React from 'react';
 import styles from './CommitMarker.scss';
-import emojify from 'emoji-replace';
+import emojify from '../../../utils';
 
 export default class CommitMarker extends React.Component {
   constructor(props) {

@@ -3,7 +3,6 @@
 import Promise from 'bluebird';
 import _ from 'lodash';
 import { connect } from 'react-redux';
-import emojify from 'emoji-replace';
 import { inflect } from 'inflection';
 
 import { setActiveIssue, setFilteredCommits, setFilteredFiles } from './sagas';
@@ -11,7 +10,7 @@ import SearchBox from '../../components/SearchBox';
 import FilterBox from '../../components/FilterBox';
 import styles from './styles.scss';
 
-import { graphQl } from '../../utils';
+import { graphQl, emojify } from '../../utils';
 
 const mapStateToProps = (state /*, ownProps*/) => {
   const iiState = state.visualizations.issueImpact.state;

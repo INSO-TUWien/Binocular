@@ -3,6 +3,7 @@
 import * as d3 from 'd3';
 import _ from 'lodash';
 import chroma from 'chroma-js';
+import emojifyReplace from 'emoji-replace';
 
 export const parseTime = d3.timeParse('%Y-%m-%dT%H:%M:%S.%LZ');
 
@@ -59,6 +60,17 @@ export function callSafe(fn) {
   if (fn) {
     return e => fn(e);
   }
+}
+
+const brokenEmojis = {
+  ':white-check-mark:': ':white_check_mark:'
+};
+
+export function emojify(str) {
+  // replace all broken emojis with a working replacement
+  _.each(brokenEmojis, (working, broken) => (str = str.split(broken).join(working)));
+
+  return emojifyReplace(str);
 }
 
 export { default as ClosingPathContext } from './ClosingPathContext.js';
