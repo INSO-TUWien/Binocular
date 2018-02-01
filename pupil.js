@@ -73,6 +73,7 @@ Repository.fromPath(ctx.targetPath)
     return reIndex();
 
     function reIndex() {
+      console.log('Indexing data...');
       indexers.vcs = idx.makeVCSIndexer(ctx.repo, reporter);
 
       if (ctx.argv.its) {
@@ -91,6 +92,8 @@ Repository.fromPath(ctx.targetPath)
         .map(indexer => indexer.index())
         .then(() => Commit.deduceStakeholders())
         .then(() => Issue.deduceStakeholders())
+        .then(() => createManualIssueReferences(config.get('issueReferences')))
+        .then(() => console.log('Indexing finished'))
         .catch(e => e.name === 'Gitlab401Error', function() {
           console.warn(
             'Unable to access GitLab API. Please configure a valid private access token in the UI.'
@@ -134,4 +137,36 @@ function ensureDb(repo) {
         CommitCommitConnection.ensureCollection()
       );
     });
+}
+
+function createManualIssueReferences(issueReferences) {
+  return Promise.map(_.keys(issueReferences), sha => {
+    const iid = issueReferences[sha];
+
+    return Promise.join(
+      Commit.findOneBySha(sha),
+      Issue.findOneByIid(iid)
+    ).spread((commit, issue) => {
+      if (!commit) {
+        console.warn(`Ignored issue #${iid} referencing non-existing commit ${sha}`);
+        return;
+      }
+      if (!issue) {
+        console.warn(
+          `Ignored issue #${iid} referencing commit ${sha} because the issue does not exist`
+        );
+        return;
+      }
+
+      const existingMention = _.find(issue.mentions, mention => mention.commit === sha);
+      if (!existingMention) {
+        issue.mentions.push({
+          createdAt: commit.date,
+          commit: sha,
+          manual: true
+        });
+        return issue.save();
+      }
+    });
+  });
 }
