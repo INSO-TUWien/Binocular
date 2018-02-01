@@ -3,5 +3,5 @@
   "transform": {
     ".*": "<rootDir>/../../node_modules/babel-jest"
   },
-  "moduleFileExtensions": ["js", "jsx"]
+  "moduleFileExtensions": ["js", "jsx", "json"]
 }
