@@ -1,7 +1,5 @@
 'use strict';
 
-import Promise from 'bluebird';
-import _ from 'lodash';
 import { connect } from 'react-redux';
 import cx from 'classnames';
 import Measure from 'react-measure';
@@ -16,7 +14,7 @@ const mapStateToProps = (state /*, ownProps*/) => {
   };
 };
 
-const mapDispatchToProps = (dispatch /*, ownProps*/) => {
+const mapDispatchToProps = (/*dispatch, ownProps*/) => {
   return {};
 };
 

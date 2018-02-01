@@ -1,7 +1,6 @@
 import styles from './app.css';
 import Sidebar from '../Sidebar';
 // import ConfigButton from '../ConfigButton';
-import Measure from 'react-measure';
 import HelpButton from '../Help/HelpButton';
 import Help from '../Help';
 import ConfigDialog from '../ConfigDialog';
