@@ -25,7 +25,8 @@
   "author": "Roman Decker <roman.decker@gmail.com>",
   "license": "ISC",
   "bin": {
-    "pupil": "./pupil.js"
+    "pupil": "./pupil.js",
+    "zivsed": "./pupil.js"
   },
   "dependencies": {
     "adm-zip": "^0.4.7",

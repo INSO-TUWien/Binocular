@@ -11,12 +11,14 @@ export default handleActions(
 
     REQUEST_CONFIGURATION: state => _.assign({}, state, { isFetching: true }),
 
-    RECEIVE_CONFIGURATION: (state, action) =>
-      _.merge({}, state, {
+    RECEIVE_CONFIGURATION: (state, action) => {
+      document.title = action.payload.repoName + ' | ZIVSED';
+      return _.merge({}, state, {
         data: action.payload,
         isFetching: false,
         receivedAt: action.meta.receivedAt
-      })
+      });
+    }
   },
   { lastFetched: null, isFetching: null }
 );

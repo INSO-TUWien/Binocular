@@ -19,6 +19,10 @@ export default fetchFactory(
 );
 
 function getRelatedCommitData(issue) {
+  if (!issue) {
+    return [];
+  }
+
   return collectPages(getRelatedCommitsPage(issue)).map(commit => {
     commit.date = new Date(commit.date);
     return commit;

@@ -93,8 +93,9 @@ export const fetchCodeOwnershipData = fetchFactory(
       viewport[0],
       Math.min(firstCommitTimestamp, firstIssueTimestamp)
     );
-    const lastSignificantTimestamp =
-      viewport[1] || Math.max(lastCommitTimestamp, lastIssueTimestamp);
+    const lastSignificantTimestamp = viewport[1]
+      ? viewport[1].getTime()
+      : Math.max(lastCommitTimestamp, lastIssueTimestamp);
 
     const span = lastSignificantTimestamp - firstSignificantTimestamp;
     const granularity = getGranularity(span);
@@ -123,12 +124,13 @@ export const fetchCodeOwnershipData = fetchFactory(
     )
       .spread((commits, issues, builds) => {
         const aggregatedAuthors = _.keys(_.last(commits).statsByAuthor);
+        const palette = getChartColors('spectral', [...committers, 'other']);
 
         return {
           otherCount: committers.length - aggregatedAuthors.length,
           commits,
           committers,
-          palette: getChartColors('spectral', aggregatedAuthors),
+          palette,
           issues,
           builds
         };

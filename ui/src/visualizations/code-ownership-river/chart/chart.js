@@ -77,8 +77,18 @@ export default class CodeOwnershipRiver extends React.Component {
     ]);
 
     this.scales.y.domain([
-      min([commitCountExtent[0], issueCountExtent[0], buildCountExtent[0]]),
-      max([commitCountExtent[1], issueCountExtent[1], buildCountExtent[1]])
+      min([
+        this.scales.y.domain()[0],
+        commitCountExtent[0],
+        issueCountExtent[0],
+        buildCountExtent[0]
+      ]),
+      max([
+        this.scales.y.domain()[1],
+        commitCountExtent[1],
+        issueCountExtent[1],
+        buildCountExtent[1]
+      ])
     ]);
   }
 

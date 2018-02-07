@@ -39,7 +39,7 @@ app.post('/api/config', require('./lib/endpoints/update-config.js'));
 const port = config.get().port;
 
 httpServer.listen(port, function() {
-  console.log(`Pupil listening on http://localhost:${port}`);
+  console.log(`Listening on http://localhost:${port}`);
   if (argv.ui && argv.open) {
     opn(`http://localhost:${port}/`);
   }
