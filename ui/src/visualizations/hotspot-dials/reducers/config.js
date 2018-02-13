@@ -11,7 +11,7 @@ export default handleActions(
   },
   {
     category: 'hour',
-    splitCommits: true,
+    splitCommits: false,
     issueField: 'createdAt'
   }
 );
