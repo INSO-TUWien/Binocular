@@ -63,7 +63,8 @@ export function callSafe(fn) {
 }
 
 const brokenEmojis = {
-  ':white-check-mark:': ':white_check_mark:'
+  ':white-check-mark:': ':white_check_mark:',
+  ':construction-worker:': ':construction_worker_man:'
 };
 
 export function emojify(str) {
