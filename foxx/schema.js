@@ -17,6 +17,8 @@ const stakeholders = db._collection('stakeholders');
 const issues = db._collection('issues');
 const builds = db._collection('builds');
 
+const ISSUE_NUMBER_REGEX = /^#?(\d+).*$/;
+
 const queryType = new gql.GraphQLObjectType({
   name: 'Query',
   fields() {
@@ -163,18 +165,34 @@ const queryType = new gql.GraphQLObjectType({
           sort: { type: Sort }
         },
         query: (root, args, limit) => {
-          let q = qb.for('issue').in('issues').sort('issue.createdAt', args.sort);
+          let exactQuery = [];
+          let fuzzyQuery = qb.for('issue').in('issues').sort('issue.createdAt', args.sort);
 
           if (args.q) {
             const searchString = qb.str('%' + args.q.replace(/\s+/g, '%') + '%');
-            q = q.filter(
+            fuzzyQuery = fuzzyQuery.filter(
               qb.LIKE(
                 qb.CONCAT(qb.str('#'), 'issue.iid', qb.str(' '), 'issue.title'),
                 searchString,
                 true
               )
             );
+
+            const issueNumberMatch = args.q.match(ISSUE_NUMBER_REGEX);
+            if (issueNumberMatch) {
+              exactQuery = qb
+                .for('issue')
+                .in('issues')
+                .filter(qb.eq('issue.iid', issueNumberMatch[1]))
+                .return('issue');
+
+              fuzzyQuery = fuzzyQuery.filter(qb.neq('issue.iid', issueNumberMatch[1]));
+            }
           }
+
+          fuzzyQuery = fuzzyQuery.return('issue');
+
+          let q = qb.let('fullList', qb.APPEND(exactQuery, fuzzyQuery)).for('issue').in('fullList');
 
           q = queryHelpers.addDateFilter('issue.createdAt', 'gte', args.since, q);
           q = queryHelpers.addDateFilter('issue.createdAt', 'lte', args.until, q);

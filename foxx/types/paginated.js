@@ -77,6 +77,8 @@ function limitClause(args) {
   const offset = ((args.page || 1) - 1) * args.perPage;
   let ret = `LIMIT ${offset}, ${args.perPage}`;
 
+  console.log('setting up limit', ret, offset, args);
+
   return { toAQL: () => ret + '\n', offset, count: args.perPage };
 }
 
