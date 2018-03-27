@@ -1,5 +1,9 @@
 'use strict';
 
+/**
+ * The GraphQL-Schema exposed by our FOXX service
+ */
+
 const gql = require('graphql-sync');
 const arangodb = require('@arangodb');
 const db = arangodb.db;
@@ -31,7 +35,10 @@ const queryType = new gql.GraphQLObjectType({
           sort: { type: Sort }
         },
         query: (root, args, limit) => {
-          let q = qb.for('commit').in('commits').sort('commit.date', args.sort);
+          let q = qb
+            .for('commit')
+            .in('commits')
+            .sort('commit.date', args.sort);
 
           q = queryHelpers.addDateFilter('commit.date', 'gte', args.since, q);
           q = queryHelpers.addDateFilter('commit.date', 'lte', args.until, q);
@@ -166,7 +173,10 @@ const queryType = new gql.GraphQLObjectType({
         },
         query: (root, args, limit) => {
           let exactQuery = [];
-          let fuzzyQuery = qb.for('issue').in('issues').sort('issue.createdAt', args.sort);
+          let fuzzyQuery = qb
+            .for('issue')
+            .in('issues')
+            .sort('issue.createdAt', args.sort);
 
           if (args.q) {
             const searchString = qb.str('%' + args.q.replace(/\s+/g, '%') + '%');
@@ -192,7 +202,10 @@ const queryType = new gql.GraphQLObjectType({
 
           fuzzyQuery = fuzzyQuery.return('issue');
 
-          let q = qb.let('fullList', qb.APPEND(exactQuery, fuzzyQuery)).for('issue').in('fullList');
+          let q = qb
+            .let('fullList', qb.APPEND(exactQuery, fuzzyQuery))
+            .for('issue')
+            .in('fullList');
 
           q = queryHelpers.addDateFilter('issue.createdAt', 'gte', args.since, q);
           q = queryHelpers.addDateFilter('issue.createdAt', 'lte', args.until, q);
@@ -227,10 +240,6 @@ const queryType = new gql.GraphQLObjectType({
   }
 });
 
-// This is the GraphQL schema object we need to execute
-// queries. See "controller.js" for an example of how it
-// is used. Also see the "test" folder for more in-depth
-// examples.
 module.exports = new gql.GraphQLSchema({
   query: queryType
 });

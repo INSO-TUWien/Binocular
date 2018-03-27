@@ -1,6 +1,9 @@
 #!/usr/bin/env node
-
 'use strict';
+
+/**
+ * Main entry point of the pupil application
+ */
 
 const ctx = require('./lib/context.js');
 
@@ -30,10 +33,15 @@ const IssueStakeholderConnection = require('./lib/models/IssueStakeholderConnect
 const IssueCommitConnection = require('./lib/models/IssueCommitConnection.js');
 const CommitCommitConnection = require('./lib/models/CommitCommitConnection.js');
 
+// set up the endpoints
 app.get('/api/commits', require('./lib/endpoints/get-commits.js'));
 app.get('/api/config', require('./lib/endpoints/get-config.js'));
+
+// proxy to the FOXX-service
 app.get('/graphQl', require('./lib/endpoints/graphQl.js'));
 app.post('/graphQl', require('./lib/endpoints/graphQl.js'));
+
+// configuration endpoint (not really used atm)
 app.post('/api/config', require('./lib/endpoints/update-config.js'));
 
 const port = config.get().port;
@@ -53,16 +61,19 @@ const indexers = {
 
 let reporter = new ProgressReporter(io, ['commits', 'issues', 'builds']);
 
+// kickstart the indexing process
 Repository.fromPath(ctx.targetPath)
   .tap(function(repo) {
     ctx.repo = repo;
     config.setSource(repo.pathFromRoot('.pupilrc'));
 
+    // configure everything in the context
     require('./lib/setup-db.js');
 
     return ensureDb(repo);
   })
   .then(function() {
+    // be sure to re-index when the configuration changes
     config.on('updated', () => {
       reIndex(); // do not wait for indexing to complete on config update
 
@@ -70,6 +81,7 @@ Repository.fromPath(ctx.targetPath)
       return null;
     });
 
+    // immediately run all indexers
     return reIndex();
 
     function reIndex() {
@@ -111,9 +123,14 @@ process.on('SIGINT', function() {
   console.log('Let me finish up here, ... (Ctrl+C to force quit)');
 
   ctx.quit();
-  _(indexers).values().each(idx => idx.stop());
+  _(indexers)
+    .values()
+    .each(idx => idx.stop());
 });
 
+/**
+ * Ensures that the db is set up correctly and the GraphQL-Service is installed
+ */
 function ensureDb(repo) {
   return ctx.db
     .ensureDatabase('pupil-' + repo.getName())
@@ -143,30 +160,29 @@ function createManualIssueReferences(issueReferences) {
   return Promise.map(_.keys(issueReferences), sha => {
     const iid = issueReferences[sha];
 
-    return Promise.join(
-      Commit.findOneBySha(sha),
-      Issue.findOneByIid(iid)
-    ).spread((commit, issue) => {
-      if (!commit) {
-        console.warn(`Ignored issue #${iid} referencing non-existing commit ${sha}`);
-        return;
-      }
-      if (!issue) {
-        console.warn(
-          `Ignored issue #${iid} referencing commit ${sha} because the issue does not exist`
-        );
-        return;
-      }
+    return Promise.join(Commit.findOneBySha(sha), Issue.findOneByIid(iid)).spread(
+      (commit, issue) => {
+        if (!commit) {
+          console.warn(`Ignored issue #${iid} referencing non-existing commit ${sha}`);
+          return;
+        }
+        if (!issue) {
+          console.warn(
+            `Ignored issue #${iid} referencing commit ${sha} because the issue does not exist`
+          );
+          return;
+        }
 
-      const existingMention = _.find(issue.mentions, mention => mention.commit === sha);
-      if (!existingMention) {
-        issue.mentions.push({
-          createdAt: commit.date,
-          commit: sha,
-          manual: true
-        });
-        return issue.save();
+        const existingMention = _.find(issue.mentions, mention => mention.commit === sha);
+        if (!existingMention) {
+          issue.mentions.push({
+            createdAt: commit.date,
+            commit: sha,
+            manual: true
+          });
+          return issue.save();
+        }
       }
-    });
+    );
   });
 }
