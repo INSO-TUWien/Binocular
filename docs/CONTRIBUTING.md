@@ -1,6 +1,10 @@
 Contributing to pupil
 =====================
 
+***Should you wish to work on pupil, please use
+[prettier](https://github.com/prettier/prettier) to keep your code
+formatted!***
+
 This document aims to give a general overview of pupil's internal
 architecture.
 
