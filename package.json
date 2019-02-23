@@ -142,7 +142,7 @@
     "eslint-plugin-prettier": "^2.1.2",
     "eslint-plugin-react": "^7.1.0",
     "istanbul": "^0.4.5",
-    "mocha": "^3.1.2",
+    "mocha": "^6.0.1",
     "nodemon": "^1.18.10",
     "prettier": "^1.5.3",
     "react-hot-loader": "^3.0.0-beta.7",
