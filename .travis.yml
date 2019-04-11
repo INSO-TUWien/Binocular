@@ -5,7 +5,7 @@ node_js:
 addons:
   apt:
     packages:
-      - libstdc++6
+      - libstdc++-4.9-dev
 
 cache:
   directories:
