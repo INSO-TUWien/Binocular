@@ -5,9 +5,9 @@ node_js:
 addons:
   apt:
     sources:
-      - ubuntu-toolchain-r-test
+      - ubuntu-toolchain-r-test # See documentation https://www.npmjs.com/package/nodegit
     packages:
-      - libstdc++-4.9-dev
+      - libstdc++-4.9-dev # See documentation https://www.npmjs.com/package/nodegit
 
 cache:
   directories:
