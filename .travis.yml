@@ -1,0 +1,14 @@
+language: node_js
+node_js:
+  - "8"
+
+addons:
+  apt:
+    sources:
+      - ubuntu-toolchain-r-test # See documentation https://www.npmjs.com/package/nodegit
+    packages:
+      - libstdc++-4.9-dev # See documentation https://www.npmjs.com/package/nodegit
+
+cache:
+  directories:
+    - "node_modules"

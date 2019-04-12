@@ -1,6 +1,8 @@
 Pupil
 =====
 
+[![Build Status](https://travis-ci.org/juliankotrba/Binocular.svg?branch=master)](https://travis-ci.org/juliankotrba/Binocular)
+
 Pupil is a tool for visualizing data from various software-engineering
 tools. It works as a command-line tool run from a git-repository. When
 run, pupil will gather data from the repository and the GitLab
