@@ -8,7 +8,7 @@ export default class Axis extends React.Component {
     super();
   }
 
-  comonentDidMount() {
+  componentDidMount() {
     this.updateD3();
   }
 
