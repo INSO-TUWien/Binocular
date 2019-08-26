@@ -23,11 +23,12 @@ const logger = createLogger({
   collapsed: () => true
 });
 
+import dashboard from './visualizations/dashboard';
 import codeOwnershipRiver from './visualizations/code-ownership-river';
 import issueImpact from './visualizations/issue-impact';
 import hotspotDials from './visualizations/hotspot-dials';
 
-const visualizationModules = [codeOwnershipRiver, issueImpact, hotspotDials];
+const visualizationModules = [dashboard, codeOwnershipRiver, issueImpact, hotspotDials];
 
 const visualizations = {};
 _.each(visualizationModules, viz => {
