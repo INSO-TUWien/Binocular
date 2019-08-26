@@ -31,7 +31,7 @@ const mapDispatchToProps = (dispatch /*, ownProps*/) => {
 };
 
 const CodeOwnershipRiverConfigComponent = props => {
-  var testArray = [{name: "dev1", color: "#fedfed", checked: true}, {name: "dev2", color: "#defdef", checked: true}, {name: "dev3", color: "#aaaaaa", checked: true}];
+  var testArray = [{key: 1, name: "dev1", color: "#fedfed", checked: true}, {key: 2, name: "dev2", color: "#defdef", checked: true}, {key: 3, name: "dev3", color: "#aaaaaa", checked: true}];
   return (
     <div className={styles.configContainer}>
       <form>
