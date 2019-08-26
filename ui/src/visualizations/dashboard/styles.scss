@@ -25,3 +25,9 @@
     }
   }
 }
+
+.configContainer{
+  .field + .field {
+    border-top: 1px solid #dbdbdb;
+  }
+}
