@@ -19,6 +19,14 @@
   .legend .background {
     fill: white;
   }
+
+  .checkboxLegendLine {
+    background: #dbdbdb;
+    margin: 5px;
+    .field {
+      cursor: pointer;
+    }
+  }
 }
 
 .buttonContainer{

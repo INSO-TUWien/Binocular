@@ -47,12 +47,14 @@ class CheckboxLegendLine extends React.Component{
   render()
   {
     return (
-      <div className="checkbox-legend-line">
-        <svg className={styles.icon} width={ICON_WIDTH} height={ICON_HEIGHT}>
-          <rect width={ICON_HEIGHT} height={ICON_WIDTH} fill={this.state.color}/>
-        </svg>
-        <input type="checkbox" name={this.state.text} value={this.state.text} checked/>
-        <text>{this.state.text}</text>
+      <div className={styles.checkboxLegendLine}>
+        <label className={styles.field}>
+          <svg className={styles.icon} width={ICON_WIDTH} height={ICON_HEIGHT}>
+            <rect width={ICON_HEIGHT} height={ICON_WIDTH} fill={this.state.color}/>
+          </svg>
+          <input type="checkbox" name={this.state.text} value={this.state.text}/>
+          {this.state.text}
+        </label>
       </div>
     );
   }

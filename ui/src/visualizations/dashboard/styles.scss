@@ -30,4 +30,8 @@
   .field + .field {
     border-top: 1px solid #dbdbdb;
   }
+
+  .checkboxLabel {
+    cursor: pointer;
+  }
 }

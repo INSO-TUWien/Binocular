@@ -55,7 +55,7 @@ const CodeOwnershipRiverConfigComponent = props => {
             <label className="label">CI Builds</label>
             <LegendCompact text="failed" color="#db303a"/>
             <LegendCompact text="succeeded" color="#50ff5a"/>
-            <label className="field"><input name="showDevsInCI" type="checkbox"/> Show developers in CI Builds</label>
+            <label className={styles.checkboxLabel}><input name="showDevsInCI" type="checkbox"/> Show developers in CI Builds</label>
           </div>
         </div>
         <div className={styles.field}>
