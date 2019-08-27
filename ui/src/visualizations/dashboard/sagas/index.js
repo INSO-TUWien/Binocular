@@ -14,6 +14,13 @@ import getBuildData from './getBuildData.js';
 import fetchRelatedCommits from './fetchRelatedCommits.js';
 import getBounds from './getBounds.js';
 
+export const setResolution = createAction('SET_RESOLUTION');
+export const setShowDevs = createAction('SET_SHOW_DEVS');
+export const setShowIssues = createAction('SET_SHOW_ISSUES');
+export const setSelectedAuthors = createAction('SET_SELECTED_AUTHORS');
+export const setAvailableAuthors = createAction('SET_AVAILABLE_AUTHORS');
+export const setDisplayMetric = createAction('SET_DISPLAY_METRIC');
+
 export const setOverlay = createAction('SET_OVERLAY');
 export const setHighlightedIssue = createAction('SET_HIGHLIGHTED_ISSUE');
 export const setCommitAttribute = createAction('SET_COMMIT_ATTRIBUTE');

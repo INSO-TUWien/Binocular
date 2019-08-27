@@ -2,7 +2,7 @@
 
 import Promise from 'bluebird';
 import { connect } from 'react-redux';
-import { setOverlay, setHighlightedIssue, setCommitAttribute } from './sagas';
+import {setOverlay, setHighlightedIssue, setCommitAttribute, setResolution, setShowDevs, setShowIssues, setDisplayMetric} from './sagas';
 import SearchBox from '../../components/SearchBox';
 import TabCombo from '../../components/TabCombo.js';
 import styles from './styles.scss';
@@ -14,24 +14,51 @@ import CheckboxLegend from '../../components/CheckboxLegend';
 const mapStateToProps = (state /*, ownProps*/) => {
   const dashboardState = state.visualizations.dashboard.state;
 
-  return {
+  return {//TODO remove old state
     issues: dashboardState.data.issues,
     overlay: dashboardState.config.overlay,
     highlightedIssue: dashboardState.config.highlightedIssue,
-    commitAttribute: dashboardState.config.commitAttribute
+    commitAttribute: dashboardState.config.commitAttribute,
+    resolution: dashboardState.config.chartResolution,
+    showDevs: dashboardState.config.showDevsInCI,
+    showIssues: dashboardState.config.showIssues,
+    availableDevs: dashboardState.data.data.committers,
+    selectedDevs: dashboardState.config.selectedAuthors,
+    devColors: dashboardState.data.data.palette,
+    metric: dashboardState.config.displayMetric
   };
 };
 
 const mapDispatchToProps = (dispatch /*, ownProps*/) => {
   return {
+    onClickResolution: resolution => dispatch(setResolution(resolution)),
+    onClickShowDevs: showDevs => dispatch(setShowDevs(showDevs)),
+    onClickIssues: showIssues => dispatch(setShowIssues(showIssues)),
+    //TODO incorporate selected devs in CheckBoxLegend
+    onClickMetric: metric => dispatch(setDisplayMetric(metric)),
+    //TODO remove old methods
     onSetOverlay: overlay => dispatch(setOverlay(overlay)),
     onSetHighlightedIssue: issue => dispatch(setHighlightedIssue(issue)),
     onChangeCommitAttribute: attr => dispatch(setCommitAttribute(attr))
   };
 };
 
+function assembleColors(devs, palette) {
+  let ret = [];
+  _.each(devs, function(elem){
+    ret.push({name: elem, color: palette[elem]});
+  });
+  return ret;
+}
+
 const CodeOwnershipRiverConfigComponent = props => {
-  var testArray = [{key: 1, name: "dev1", color: "#fedfed", checked: true}, {key: 2, name: "dev2", color: "#defdef", checked: true}, {key: 3, name: "dev3", color: "#aaaaaa", checked: true}];
+  //var testArray = [{name: "dev1", color: "#fedfed"}, {name: "dev2", color: "#defdef"}, {name: "dev3", color: "#aaaaaa"}];
+  //console.log("Test!");
+  var testArray = [];
+  if(props.availableDevs) {
+    testArray = assembleColors(props.availableDevs, props.devColors); //[{name: "dev1 <dev1@email.com>", color: "#ffffff"}, ...] (See function assembleColors)
+  }
+  //TODO compute or get colors
   return (
     <div className={styles.configContainer}>
       <form>
@@ -47,6 +74,7 @@ const CodeOwnershipRiverConfigComponent = props => {
                 {label: 'Weeks', icon: '', value: 'weeks'},
                 {label: 'Days', icon: '', value: 'days'}
               ]}
+              onChange={value => props.onClickResolution(value)}
             />
           </div>
         </div>
@@ -71,6 +99,7 @@ const CodeOwnershipRiverConfigComponent = props => {
                 {label: 'Open', icon: '', value: 'open'},
                 {label: 'Closed', icon: '', value: 'closed'}
               ]}
+              onChange={value => props.onClickIssues(value)}
             />
           </div>
         </div>
@@ -85,6 +114,7 @@ const CodeOwnershipRiverConfigComponent = props => {
                 {label: '# lines changed', icon: '', value: 'linesChanged'},
                 {label: '# commits', icon: '', value: 'commits'}
               ]}
+              onChange={value => props.onClickMetric(value)}
             />
           </div>
         </div>
