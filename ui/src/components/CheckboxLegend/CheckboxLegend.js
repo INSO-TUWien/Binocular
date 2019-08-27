@@ -13,15 +13,15 @@ export default class CheckboxLegend extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      content: props.content   //[{key: 1, name: "dev1", color: "#ffffff", checked: bool}, ...] note: key = developer id in git
+      content: props.content   //[{name: "dev1 <dev1@email.com>", color: "#ffffff"}, ...] name = git signature
     }
     ;
   }
 
   render() {
     let items = [];
-    _.each(this.state.content, (elem) => {
-      items.push(<CheckboxLegendLine key={elem.key} text={elem.name} color={elem.color} checked={elem.checked}/>);
+    _.each(this.props.content, (elem) => {
+      items.push(<CheckboxLegendLine id={elem.name} text={elem.name} color={elem.color}/>);
     })
     return (<div>
       <div className={styles.legend}>
@@ -42,7 +42,7 @@ class CheckboxLegendLine extends React.Component{
       text: props.text,
       color: props.color,
       checked: props.checked,
-      key: props.key
+      id: props.id
   }
   }
   render()
