@@ -6,20 +6,20 @@ import Chart from './chart.js';
 import { setViewport, openCommit } from '../sagas';
 
 const mapStateToProps = (state /*, ownProps*/) => {
-  const corState = state.visualizations.dashboard.state;
+  const dashState = state.visualizations.dashboard.state;
 
-  const issues = corState.config.overlay === 'issues' ? corState.data.data.issues : [];
-  const builds = corState.config.overlay === 'builds' ? corState.data.data.builds : [];
+  const issues = dashState.config.overlay === 'issues' ? dashState.data.data.issues : [];
+  const builds = dashState.config.overlay === 'builds' ? dashState.data.data.builds : [];
 
   return {
-    palette: corState.data.data.palette,
-    otherCount: corState.data.data.otherCount,
-    commits: corState.data.data.commits,
-    commitAttribute: corState.config.commitAttribute,
+    palette: dashState.data.data.palette,
+    otherCount: dashState.data.data.otherCount,
+    commits: dashState.data.data.commits,
+    commitAttribute: dashState.config.commitAttribute,
     issues,
     builds,
-    highlightedIssue: corState.config.highlightedIssue,
-    highlightedCommits: corState.config.highlightedCommits
+    highlightedIssue: dashState.config.highlightedIssue,
+    highlightedCommits: dashState.config.highlightedCommits
   };
 };
 

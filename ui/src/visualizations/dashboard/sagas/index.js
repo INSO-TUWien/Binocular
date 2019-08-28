@@ -26,9 +26,9 @@ export const setHighlightedIssue = createAction('SET_HIGHLIGHTED_ISSUE');
 export const setCommitAttribute = createAction('SET_COMMIT_ATTRIBUTE');
 export const openCommit = createAction('OPEN_COMMIT');
 
-export const requestCodeOwnershipData = createAction('REQUEST_CODE_OWNERSHIP_DATA');
-export const receiveCodeOwnershipData = timestampedActionFactory('RECEIVE_CODE_OWNERSHIP_DATA');
-export const receiveCodeOwnershipDataError = createAction('RECEIVE_CODE_OWNERSHIP_DATA_ERROR');
+export const requestDashboardData = createAction('REQUEST_DASHBOARD_DATA');
+export const receiveDashboardData = timestampedActionFactory('RECEIVE_DASHBOARD_DATA');
+export const receiveDashboardDataError = createAction('RECEIVE_DASHBOARD_DATA_ERROR');
 
 export const requestRefresh = createAction('REQUEST_REFRESH');
 const refresh = createAction('REFRESH');
@@ -36,7 +36,7 @@ export const setViewport = createAction('COR_SET_VIEWPORT');
 
 export default function*() {
   // fetch data once on entry
-  yield* fetchCodeOwnershipData();
+  yield* fetchDashboardData();
 
   yield fork(watchRefreshRequests);
   yield fork(watchMessages);
@@ -73,7 +73,7 @@ function* watchToggleHelp() {
 }
 
 function* watchRefresh() {
-  yield takeEvery('REFRESH', fetchCodeOwnershipData);
+  yield takeEvery('REFRESH', fetchDashboardData);
 }
 
 function* watchHighlightedIssue() {
@@ -82,7 +82,7 @@ function* watchHighlightedIssue() {
   });
 }
 
-export const fetchCodeOwnershipData = fetchFactory(
+export const fetchDashboardData = fetchFactory(
   function*() {
     const { firstCommit, lastCommit, committers, firstIssue, lastIssue } = yield getBounds();
     const firstCommitTimestamp = Date.parse(firstCommit.date);
@@ -147,9 +147,9 @@ export const fetchCodeOwnershipData = fetchFactory(
         throw e;
       });
   },
-  requestCodeOwnershipData,
-  receiveCodeOwnershipData,
-  receiveCodeOwnershipDataError
+  requestDashboardData,
+  receiveDashboardData,
+  receiveDashboardDataError
 );
 
 function getGranularity(span) {
