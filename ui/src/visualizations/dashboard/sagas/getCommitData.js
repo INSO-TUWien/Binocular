@@ -27,15 +27,13 @@ export default function getCommitData(commitSpan, significantSpan, granularity, 
   return traversePages(getCommitsPage(significantSpan[1]), commit => {
     const dt = Date.parse(commit.date);
 
-    let stats = statsByAuthor[commit.signature];
-    if (!stats) {
-      stats = statsByAuthor[commit.signature] = {
+    let stats = statsByAuthor[commit.signature] = {
         count: 0,
         additions: 0,
         deletions: 0,
         changes: 0
       };
-    }
+
 
     totals.count++;
     totals.additions += commit.stats.additions;
