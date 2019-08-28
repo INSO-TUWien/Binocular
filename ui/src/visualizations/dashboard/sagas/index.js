@@ -21,11 +21,6 @@ export const setSelectedAuthors = createAction('SET_SELECTED_AUTHORS');
 export const setAvailableAuthors = createAction('SET_AVAILABLE_AUTHORS');
 export const setDisplayMetric = createAction('SET_DISPLAY_METRIC');
 
-export const setOverlay = createAction('SET_OVERLAY');
-export const setHighlightedIssue = createAction('SET_HIGHLIGHTED_ISSUE');
-export const setCommitAttribute = createAction('SET_COMMIT_ATTRIBUTE');
-export const openCommit = createAction('OPEN_COMMIT');
-
 export const requestDashboardData = createAction('REQUEST_DASHBOARD_DATA');
 export const receiveDashboardData = timestampedActionFactory('RECEIVE_DASHBOARD_DATA');
 export const receiveDashboardDataError = createAction('RECEIVE_DASHBOARD_DATA_ERROR');
@@ -46,7 +41,6 @@ export default function*() {
   // keep looking for viewport changes to re-fetch
   yield fork(watchViewport);
   yield fork(watchRefresh);
-  yield fork(watchHighlightedIssue);
   yield fork(watchToggleHelp);
 }
 
@@ -76,11 +70,6 @@ function* watchRefresh() {
   yield takeEvery('REFRESH', fetchDashboardData);
 }
 
-function* watchHighlightedIssue() {
-  yield takeEvery('SET_HIGHLIGHTED_ISSUE', function*(a) {
-    return yield fetchRelatedCommits(a.payload);
-  });
-}
 
 export const fetchDashboardData = fetchFactory(
   function*() {

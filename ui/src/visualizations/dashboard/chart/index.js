@@ -3,7 +3,7 @@
 import { connect } from 'react-redux';
 
 import Chart from './chart.js';
-import { setViewport, openCommit } from '../sagas';
+import { setViewport } from '../sagas';
 
 const mapStateToProps = (state /*, ownProps*/) => {
   const dashState = state.visualizations.dashboard.state;

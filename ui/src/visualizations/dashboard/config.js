@@ -14,11 +14,7 @@ import CheckboxLegend from '../../components/CheckboxLegend';
 const mapStateToProps = (state /*, ownProps*/) => {
   const dashboardState = state.visualizations.dashboard.state;
 
-  return {//TODO remove old state
-    issues: dashboardState.data.issues,
-    overlay: dashboardState.config.overlay,
-    highlightedIssue: dashboardState.config.highlightedIssue,
-    commitAttribute: dashboardState.config.commitAttribute,
+  return {
     resolution: dashboardState.config.chartResolution,
     showDevs: dashboardState.config.showDevsInCI,
     showIssues: dashboardState.config.showIssues,
@@ -35,11 +31,7 @@ const mapDispatchToProps = (dispatch /*, ownProps*/) => {
     onClickShowDevs: showDevs => dispatch(setShowDevs(showDevs)),
     onClickIssues: showIssues => dispatch(setShowIssues(showIssues)),
     //TODO incorporate selected devs in CheckBoxLegend
-    onClickMetric: metric => dispatch(setDisplayMetric(metric)),
-    //TODO remove old methods
-    onSetOverlay: overlay => dispatch(setOverlay(overlay)),
-    onSetHighlightedIssue: issue => dispatch(setHighlightedIssue(issue)),
-    onChangeCommitAttribute: attr => dispatch(setCommitAttribute(attr))
+    onClickMetric: metric => dispatch(setDisplayMetric(metric))
   };
 };
 

@@ -6,14 +6,7 @@ import cx from 'classnames';
 
 import styles from '../styles.scss';
 import _ from 'lodash';
-import Axis from './Axis.js';
-import GridLines from './GridLines.js';
-import CommitMarker from './CommitMarker.js';
-import StackedArea from './StackedArea.js';
 
-import Legend from '../../../components/Legend';
-import ZoomableChartContainer from '../../../components/svg/ZoomableChartContainer.js';
-import OffsetGroup from '../../../components/svg/OffsetGroup.js';
 import * as zoomUtils from '../../../utils/zoom.js';
 import ThemeRiverChart from '../../../components/ThemeRiverChart';
 
@@ -108,8 +101,7 @@ export default class Dashboard extends React.Component {
   }
 
   render() {
-
-
+    console.log("blep render parent");
     return (
       <div className={styles.chartContainer}>
         <div className={styles.chartLine}>

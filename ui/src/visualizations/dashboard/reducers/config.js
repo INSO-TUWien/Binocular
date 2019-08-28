@@ -11,12 +11,6 @@ export default handleActions(
     SET_SELECTED_AUTHORS: (state, action) => _.assign({}, state, {selectedAuthors: action.payload}),
     SET_AVAILABLE_AUTHORS: (state, action) => _.assign({}, state, {availableAuthors: action.payload}),
     SET_DISPLAY_METRIC: (state, action) => _.assign({}, state, {displayMetric: action.payload}),
-    //TODO remove old handlers
-    SET_OVERLAY: (state, action) => _.assign({}, state, { overlay: action.payload }),
-    SET_HIGHLIGHTED_ISSUE: (state, action) =>
-      _.assign({}, state, { highlightedIssue: action.payload, highlightedCommits: [] }),
-    SET_COMMIT_ATTRIBUTE: (state, action) =>
-      _.assign({}, state, { commitAttribute: action.payload }),
 
     COR_SET_VIEWPORT: (state, action) => _.assign({}, state, { viewport: action.payload }),
 
@@ -32,12 +26,6 @@ export default handleActions(
     showIssues: 'all',              //Filter for issues, can be 'all', 'open' or 'closed'
     selectedAuthors: [],            //Authors checked in the CheckBoxLegend, Array of objects: [{id: 1234, gitSignature: 'Dev1 <Dev1@email.com>'}, ...]
     availableAuthors: [],                 //All authors that should be displayed in CheckBoxLegend, Same format as above
-    displayMetric: '#linesChanged', //display metric for Changes-Chart, can be '#linesChanged' or '#commits'
-    //TODO remove old states
-    overlay: 'issues',
-    highlightedIssue: null,
-    highlightedCommits: [],
-    commitAttribute: 'count',
-    viewport: [0, null]
+    displayMetric: '#linesChanged' //display metric for Changes-Chart, can be '#linesChanged' or '#commits'
   }
 );
