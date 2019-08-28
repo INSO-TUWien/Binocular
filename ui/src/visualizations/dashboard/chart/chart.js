@@ -15,24 +15,27 @@ import Legend from '../../../components/Legend';
 import ZoomableChartContainer from '../../../components/svg/ZoomableChartContainer.js';
 import OffsetGroup from '../../../components/svg/OffsetGroup.js';
 import * as zoomUtils from '../../../utils/zoom.js';
+import ThemeRiverChart from '../../../components/ThemeRiverChart';
 
 const dateExtractor = d => d.date;
 
-export default class CodeOwnershipRiver extends React.Component {
+export default class Dashboard extends React.Component {
   constructor(props) {
     super(props);
 
     this.elems = {};
 
-    const { commitSeries, lastCommitDataPoint, commitLegend } = this.extractCommitData(props);
+    const { commitSeries, commitLegend, commitChartData } = this.extractCommitData(props);
 
     this.state = {
       dirty: true,
       isPanning: false,
-      lastCommitDataPoint,
       commitLegend,
       commitSeries,
-      dimensions: zoomUtils.initialDimensions()
+      commitChartData,
+      dimensions: zoomUtils.initialDimensions(),
+      commits: props.commits,
+      palette: props.palette
     };
 
     const x = d3.scaleTime().rangeRound([0, 0]);
@@ -93,12 +96,12 @@ export default class CodeOwnershipRiver extends React.Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    const { commitSeries, lastCommitDataPoint, commitLegend } = this.extractCommitData(nextProps);
+    const { commitSeries, commitLegend, commitChartData } = this.extractCommitData(nextProps);
     this.setState(
       {
-        lastCommitDataPoint,
         commitSeries,
-        commitLegend
+        commitLegend,
+        commitChartData
       },
       () => this.updateDomain(nextProps)
     );
@@ -151,7 +154,6 @@ export default class CodeOwnershipRiver extends React.Component {
     const commitSeries = _.map(lastCommitDataPoint, (committerIndex, signature) => {
       const legend = {
         name:
-          (props.commitAttribute === 'count' ? 'Commits by ' : 'Changes by ') +
           (signature === 'other' ? props.otherCount + ' Others' : signature),
         style: {
           fill: props.palette[signature]
@@ -176,8 +178,20 @@ export default class CodeOwnershipRiver extends React.Component {
         onMouseLeave: () => this.activateLegend(null)
       };
     });
+    const commitChartData = [];
+    _.each(props.commits, function(commit){                     //commit has structure {date, totals: {count, additions, deletions, changes}, statsByAuthor: {}} (see next line)}
+      let obj = {date: commit.date};
+      _.each(commitLegend, function(legendEntry){                       //commitLegend to iterate over authorNames, commitLegend has structure [{name, style}, ...]
+        if(legendEntry.name in commit.statsByAuthor)
+          obj[legendEntry.name] = commit.statsByAuthor[legendEntry.name].changes;         //Insert number of changes with the author name as key, statsByAuthor has structure {{authorName: {count, additions, deletions, changes}}, ...}
+        else
+          obj[legendEntry.name] = 0;
+      });
+      commitChartData.push(obj);                                //Add object to list of objects
+    });
+    //Output in commitChartData has format [{author1: 123, author2: 123, ...}, ...], e.g. series names are the authors with their corresponding values
 
-    return { commitSeries, commitLegend };
+    return { commitSeries, commitLegend, commitChartData };
   }
 }
 
