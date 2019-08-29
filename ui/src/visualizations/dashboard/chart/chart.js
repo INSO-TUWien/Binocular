@@ -21,15 +21,15 @@ export default class Dashboard extends React.Component {
     const { commitSeries, commitLegend, commitChartData, maxChange } = this.extractCommitData(props);
 
     this.state = {
-      dirty: true,
+      dirty: true,        //TODO check if necessary
       isPanning: false,
       commitLegend,
       commitSeries,
-      commitChartData,
+      commitChartData,    //Data for commit changes
       dimensions: zoomUtils.initialDimensions(),
-      commits: props.commits,
-      palette: props.palette,
-      maxChange: maxChange
+      commits: props.commits, //Raw commit data
+      palette: props.palette, //Color palette
+      maxChange: maxChange    //Maximum change in commit changes graph, used for y-axis scaling
     };
 
     const x = d3.scaleTime().rangeRound([0, 0]);
@@ -89,6 +89,10 @@ export default class Dashboard extends React.Component {
     ]);
   }
 
+  /**
+   * Update computed commit data
+   * @param nextProps props that are passed
+   */
   componentWillReceiveProps(nextProps) {
     const { commitSeries, commitLegend, commitChartData, maxChange } = this.extractCommitData(nextProps);
     this.setState(

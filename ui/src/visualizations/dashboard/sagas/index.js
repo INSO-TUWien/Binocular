@@ -70,7 +70,9 @@ function* watchRefresh() {
   yield takeEvery('REFRESH', fetchDashboardData);
 }
 
-
+/**
+ * Fetch data for dashboard, this still includes old functions that were copied over.
+ */
 export const fetchDashboardData = fetchFactory(
   function*() {
     const { firstCommit, lastCommit, committers, firstIssue, lastIssue } = yield getBounds();

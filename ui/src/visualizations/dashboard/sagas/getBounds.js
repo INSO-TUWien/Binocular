@@ -2,6 +2,10 @@
 
 import { graphQl } from '../../../utils';
 
+/**
+ * Get first and last commit, as well as first and last issue
+ * @returns {*} (see below)
+ */
 export default function getBounds() {
   return graphQl
     .query(
