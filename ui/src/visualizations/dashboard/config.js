@@ -41,9 +41,9 @@ function assembleColors(devs, palette) {
 }
 
 const DashboardConfigComponent = props => {
-  var testArray = [];
+  var colorsArray = [];
   if(props.availableDevs) {
-    testArray = assembleColors(props.availableDevs, props.devColors); //[{name: "dev1 <dev1@email.com>", color: "#ffffff"}, ...] (See function assembleColors)
+    colorsArray = assembleColors(props.availableDevs, props.devColors); //[{name: "dev1 <dev1@email.com>", color: "#ffffff"}, ...] (See function assembleColors)
   }
   //TODO compute or get colors
   return (
@@ -93,7 +93,7 @@ const DashboardConfigComponent = props => {
         <div className={styles.field}>
           <div className="control">
             <label className="label">Changes</label>
-            <CheckboxLegend content={testArray}/>
+            <CheckboxLegend content={colorsArray}/>
             <label className="label">Change Measurement:</label>
             <TabCombo
               value={'linesChanged'}
