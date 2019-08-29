@@ -1,13 +1,10 @@
 'use strict';
 
-import Promise from 'bluebird';
 import { connect } from 'react-redux';
-import {setOverlay, setHighlightedIssue, setCommitAttribute, setResolution, setShowDevs, setShowIssues, setDisplayMetric} from './sagas';
-import SearchBox from '../../components/SearchBox';
+import {setResolution, setShowDevs, setShowIssues, setDisplayMetric} from './sagas';
 import TabCombo from '../../components/TabCombo.js';
 import styles from './styles.scss';
 
-import { graphQl } from '../../utils';
 import LegendCompact from '../../components/LegendCompact';
 import CheckboxLegend from '../../components/CheckboxLegend';
 
@@ -44,8 +41,6 @@ function assembleColors(devs, palette) {
 }
 
 const DashboardConfigComponent = props => {
-  //var testArray = [{name: "dev1", color: "#fedfed"}, {name: "dev2", color: "#defdef"}, {name: "dev3", color: "#aaaaaa"}];
-  //console.log("Test!");
   var testArray = [];
   if(props.availableDevs) {
     testArray = assembleColors(props.availableDevs, props.devColors); //[{name: "dev1 <dev1@email.com>", color: "#ffffff"}, ...] (See function assembleColors)
