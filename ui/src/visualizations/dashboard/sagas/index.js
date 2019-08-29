@@ -83,7 +83,7 @@ export const fetchDashboardData = fetchFactory(
     const lastIssueTimestamp = lastIssue ? Date.parse(lastIssue.createdAt) : lastCommitTimestamp;
 
     const state = yield select();
-    const viewport = state.visualizations.codeOwnershipRiver.state.config.viewport || [0, null];
+    const viewport = state.visualizations.dashboard.state.config.viewport || [0, null];
 
     const firstSignificantTimestamp = Math.max(
       viewport[0],
