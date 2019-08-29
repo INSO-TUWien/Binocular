@@ -18,7 +18,7 @@ export default class Dashboard extends React.Component {
 
     this.elems = {};
 
-    const { commitSeries, commitLegend, commitChartData } = this.extractCommitData(props);
+    const { commitSeries, commitLegend, commitChartData, maxChange } = this.extractCommitData(props);
 
     this.state = {
       dirty: true,
@@ -28,7 +28,8 @@ export default class Dashboard extends React.Component {
       commitChartData,
       dimensions: zoomUtils.initialDimensions(),
       commits: props.commits,
-      palette: props.palette
+      palette: props.palette,
+      maxChange: maxChange
     };
 
     const x = d3.scaleTime().rangeRound([0, 0]);
@@ -89,19 +90,19 @@ export default class Dashboard extends React.Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    const { commitSeries, commitLegend, commitChartData } = this.extractCommitData(nextProps);
+    const { commitSeries, commitLegend, commitChartData, maxChange } = this.extractCommitData(nextProps);
     this.setState(
       {
         commitSeries,
         commitLegend,
-        commitChartData
+        commitChartData,
+        maxChange: maxChange
       },
       () => this.updateDomain(nextProps)
     );
   }
 
   render() {
-    console.log("blep render parent");
     return (
       <div className={styles.chartContainer}>
         <div className={styles.chartLine}>
@@ -170,8 +171,11 @@ export default class Dashboard extends React.Component {
       };
     });
     const commitChartData = [];
+    let maxChange = 0;
     _.each(props.commits, function(commit){                     //commit has structure {date, totals: {count, additions, deletions, changes}, statsByAuthor: {}} (see next line)}
       let obj = {date: commit.date};
+      if(commit.totals.changes > maxChange)
+        maxChange = commit.totals.changes;
       _.each(commitLegend, function(legendEntry){                       //commitLegend to iterate over authorNames, commitLegend has structure [{name, style}, ...]
         if(legendEntry.name in commit.statsByAuthor)
           obj[legendEntry.name] = commit.statsByAuthor[legendEntry.name].changes;         //Insert number of changes with the author name as key, statsByAuthor has structure {{authorName: {count, additions, deletions, changes}}, ...}
@@ -182,7 +186,7 @@ export default class Dashboard extends React.Component {
     });
     //Output in commitChartData has format [{author1: 123, author2: 123, ...}, ...], e.g. series names are the authors with their corresponding values
 
-    return { commitSeries, commitLegend, commitChartData };
+    return { commitSeries, commitLegend, commitChartData, maxChange };
   }
 }
 
