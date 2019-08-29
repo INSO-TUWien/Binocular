@@ -130,7 +130,7 @@ export default class Dashboard extends React.Component {
             Changes
           </div>
           <div className={styles.chart}>
-            
+            <ThemeRiverChart content={this.state.commitChartData} palette={this.props.palette} maxChange={this.state.maxChange}/>
           </div>
         </div>
       </div>
