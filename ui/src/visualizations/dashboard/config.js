@@ -43,7 +43,7 @@ function assembleColors(devs, palette) {
   return ret;
 }
 
-const CodeOwnershipRiverConfigComponent = props => {
+const DashboardConfigComponent = props => {
   //var testArray = [{name: "dev1", color: "#fedfed"}, {name: "dev2", color: "#defdef"}, {name: "dev3", color: "#aaaaaa"}];
   //console.log("Test!");
   var testArray = [];
@@ -115,8 +115,8 @@ const CodeOwnershipRiverConfigComponent = props => {
   );
 };
 
-const CodeOwnershipRiverConfig = connect(mapStateToProps, mapDispatchToProps)(
-  CodeOwnershipRiverConfigComponent
+const DashboardConfig = connect(mapStateToProps, mapDispatchToProps)(
+  DashboardConfigComponent
 );
 
-export default CodeOwnershipRiverConfig;
+export default DashboardConfig;
