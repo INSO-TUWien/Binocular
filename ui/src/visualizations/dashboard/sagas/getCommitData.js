@@ -4,6 +4,15 @@ import moment from 'moment';
 import _ from 'lodash';
 import { traversePages, graphQl } from '../../../utils';
 
+/**
+ * Get commit data from the database.
+ * @param commitSpan Array of two time values (ms), first commit and last commit.
+ * @param significantSpan Array of two time values (ms), first significant and last significant commit
+ * (only these will actually be returned, used for zooming, the rest of the time will be empty data).
+ * @param granularity Influences how many data points will be aggregated into a single point (hours, days, weeks, months, years). See sagas/index.js for granularities.
+ * @param interval Interval in milliseconds derived from the granularity.
+ * @returns {*}
+ */
 export default function getCommitData(commitSpan, significantSpan, granularity, interval) {
   const statsByAuthor = {};
 
@@ -14,109 +23,34 @@ export default function getCommitData(commitSpan, significantSpan, granularity, 
     changes: 0
   };
 
-  const data = [
-    {
-      date: new Date(commitSpan[0]),
-      totals: _.cloneDeep(totals),
-      statsByAuthor: {}
-    }
-  ];
+  const data = [];
 
-  let next = moment(significantSpan[0]).startOf(granularity.unit).toDate().getTime();
+  let commitList = [];
 
   return traversePages(getCommitsPage(significantSpan[1]), commit => {
-    const dt = Date.parse(commit.date);
-
-    let stats = statsByAuthor[commit.signature] = {
-        count: 0,
-        additions: 0,
-        deletions: 0,
-        changes: 0
-      };
-
-
-    totals.count++;
-    totals.additions += commit.stats.additions;
-    totals.deletions += commit.stats.deletions;
-    totals.changes += commit.stats.additions + commit.stats.deletions;
-
-    stats.count++;
-    stats.additions += commit.stats.additions;
-    stats.deletions += commit.stats.deletions;
-    stats.changes += commit.stats.additions + commit.stats.deletions;
-
-    while (dt >= next) {
-      const dataPoint = {
-        date: new Date(next),
-        totals: _.cloneDeep(totals),
-        statsByAuthor: _.cloneDeep(statsByAuthor)
-      };
-
-      data.push(dataPoint);
-      next += interval;
-    }
+    commitList.push(commit);
   }).then(function() {
-    data.push({
-      date: new Date(commitSpan[1]),
-      totals: _.cloneDeep(totals),
-      statsByAuthor: _.cloneDeep(statsByAuthor)
-    });
+    let curr = moment(significantSpan[0]).startOf(granularity.unit).toDate().getTime();
+    let next = curr + interval;
+    let debug = commitList;
+    for(let i=0; curr < significantSpan[1]; curr = next, next += interval){       //Iterate through time buckets
+      let obj = {date: curr, totals: {count: 0, changes: 0}, statsByAuthor: {}};  //Save date of time bucket, create object
+      for(; i < commitList.length && Date.parse(commitList[i].date) < next; i++){             //Iterate through commits that fall into this time bucket
+        let changes = commitList[i].stats.additions + commitList[i].stats.deletions;
+        let commitAuthor = commitList[i].signature;
+        obj.totals.count++;
+        obj.totals.changes += changes;
+        if(commitAuthor in obj.statsByAuthor)                                     //If author is already in statsByAuthor, add to previous values
+          obj.statsByAuthor[commitAuthor] = {count: obj.statsByAuthor[commitAuthor].count+1, changes: obj.statsByAuthor[commitAuthor].changes + changes};
+        else                                                                      //Else create new values
+          obj.statsByAuthor[commitAuthor] = {count: 1, changes: changes};
 
-    return group(data);
-  });
-}
-
-function group(data) {
-  const lastDatum = _.last(data);
-
-  if (_.keys(lastDatum.statsByAuthor).length < 50) {
-    return data;
-  }
-
-  const meanCommitCount = _.meanBy(_.values(lastDatum.statsByAuthor), 'count');
-  const threshhold = meanCommitCount;
-
-  const applyGroupBy = (stats, predicate) => {
-    const groupStats = {
-      count: 0,
-      additions: 0,
-      deletions: 0,
-      changes: 0
-    };
-    const groupedCommitters = [];
-
-    const groupedStats = _.omitBy(stats, (stats, author) => {
-      if (predicate(stats, author)) {
-        groupStats.count += stats.count;
-        groupStats.additions += stats.additions;
-        groupStats.deletions += stats.deletions;
-        groupStats.changes += stats.changes;
-        groupedCommitters.push(author);
-        return true;
       }
-    });
+      data.push(obj);
+    }
 
-    groupedStats.other = groupStats;
-
-    return {
-      groupedStats,
-      groupedCommitters
-    };
-  };
-
-  const { groupedCommitters } = applyGroupBy(lastDatum.statsByAuthor, stats => {
-    return stats.count <= threshhold;
+    return data;
   });
-
-  _.each(data, datum => {
-    const { groupedStats } = applyGroupBy(datum.statsByAuthor, (stats, author) =>
-      _.includes(groupedCommitters, author)
-    );
-
-    datum.statsByAuthor = groupedStats;
-  });
-
-  return data;
 }
 
 const getCommitsPage = until => (page, perPage) => {

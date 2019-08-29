@@ -125,7 +125,7 @@ export default class Dashboard extends React.Component {
             Changes
           </div>
           <div className={styles.chart}>
-
+            
           </div>
         </div>
       </div>
@@ -141,9 +141,8 @@ export default class Dashboard extends React.Component {
       return {};
     }
 
-    const lastCommitDataPoint = _.last(props.commits).statsByAuthor;
     const commitLegend = [];
-    const commitSeries = _.map(lastCommitDataPoint, (committerIndex, signature) => {
+    const commitSeries = _.map(Object.keys(props.palette), (signature) => {
       const legend = {
         name:
           (signature === 'other' ? props.otherCount + ' Others' : signature),
