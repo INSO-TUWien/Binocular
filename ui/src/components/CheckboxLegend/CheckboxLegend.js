@@ -21,7 +21,7 @@ export default class CheckboxLegend extends React.Component {
   render() {
     let items = [];
     _.each(this.props.content, (elem) => {
-      items.push(<CheckboxLegendLine id={elem.name} text={elem.name} color={elem.color}/>);
+      items.push(<CheckboxLegendLine key={elem.name} text={elem.name} color={elem.color}/>);
     })
     return (<div>
       <div className={styles.legend}>
