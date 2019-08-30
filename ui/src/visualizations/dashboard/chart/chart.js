@@ -19,8 +19,6 @@ export default class Dashboard extends React.Component {
       commitLegend,
       commitSeries,
       commitChartData,    //Data for commit changes
-      commits: props.commits, //Raw commit data
-      palette: props.palette, //Color palette
       maxChange: maxChange    //Maximum change in commit changes graph, used for y-axis scaling
     };
   }
