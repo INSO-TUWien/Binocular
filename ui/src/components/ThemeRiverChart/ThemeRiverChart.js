@@ -86,7 +86,12 @@ export default class ThemeRiverChart extends React.Component {
 
     svg.append("g")
       .attr("transform", "translate(" + paddingLeft + ",0)")
-      .call(d3.axisLeft(y));
+      .call(d3.axisLeft(y).tickFormat(function(d){
+        if(d > 0)
+          return d*2;
+        else
+          return d*(-2);
+      }));
   }
 
   render() {
