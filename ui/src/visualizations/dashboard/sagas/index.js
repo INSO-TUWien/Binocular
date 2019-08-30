@@ -121,11 +121,10 @@ export const fetchDashboardData = fetchFactory(
       )
     )
       .spread((commits, issues, builds) => {
-        const aggregatedAuthors = _.keys(_.last(commits).statsByAuthor);
-        const palette = getChartColors('spectral', [...committers, 'other']);
+        const palette = getChartColors('spectral', [...committers]);    //TODO maybe insert 'other' back here
 
         return {
-          otherCount: committers.length - aggregatedAuthors.length,
+          otherCount: 0,
           commits,
           committers,
           palette,
