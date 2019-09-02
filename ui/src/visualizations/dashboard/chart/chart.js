@@ -103,7 +103,7 @@ export default class Dashboard extends React.Component {
 
     //---- STEP 1: AGGREGATE ISSUES PER TIME INTERVAL ----
     let data = [];
-    let granularity = Dashboard.getGranularity('weeks');
+    let granularity = Dashboard.getGranularity(props.chartResolution);
     let interval = granularity.asMilliseconds();
     let curr = moment(props.firstSignificantTimestamp).startOf(granularity.unit).toDate().getTime();
     let next = curr + interval;
@@ -155,7 +155,7 @@ export default class Dashboard extends React.Component {
 
     //---- STEP 1: AGGREGATE BUILDS PER TIME INTERVAL ----
     let data = [];
-    let granularity = Dashboard.getGranularity('weeks');
+    let granularity = Dashboard.getGranularity(props.chartResolution);
     let interval = granularity.asMilliseconds();
     let curr = moment(props.firstSignificantTimestamp).startOf(granularity.unit).toDate().getTime();
     let next = curr + interval;
@@ -193,7 +193,7 @@ export default class Dashboard extends React.Component {
     //---- STEP 1: AGGREGATE COMMITS GROUPED BY AUTHORS PER TIME INTERVAL ----
     let data = [];
     //let granularity = Dashboard.getGranularity(props.resolution);
-    let granularity = Dashboard.getGranularity('weeks');
+    let granularity = Dashboard.getGranularity(props.chartResolution);
     let interval = granularity.asMilliseconds();
     let curr = moment(props.firstSignificantTimestamp).startOf(granularity.unit).toDate().getTime();
     let next = curr + interval;

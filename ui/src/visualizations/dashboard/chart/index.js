@@ -18,7 +18,10 @@ const mapStateToProps = (state /*, ownProps*/) => {
     firstSignificantTimestamp: dashState.data.data.firstSignificantTimestamp,
     lastSignificantTimestamp: dashState.data.data.lastSignificantTimestamp,
     highlightedIssue: dashState.config.highlightedIssue,
-    highlightedCommits: dashState.config.highlightedCommits
+    highlightedCommits: dashState.config.highlightedCommits,
+    chartResolution: dashState.config.chartResolution,
+    showIssues: dashState.config.showIssues,
+    displayMetric: dashState.config.displayMetric
   };
 };
 
