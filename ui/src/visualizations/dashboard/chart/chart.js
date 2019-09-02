@@ -239,12 +239,16 @@ export default class Dashboard extends React.Component {
     let commitScale = 0;
     _.each(data, function(commit){                     //commit has structure {date, totals: {count, additions, deletions, changes}, statsByAuthor: {}} (see next line)}
       let obj = {date: commit.date};
-      if(commit.totals.changes > commitScale)
-        commitScale = commit.totals.changes;
+      let totalChanges = (props.displayMetric === 'linesChanged') ? commit.totals.changes : commit.totals.count;  //UI Filter for change measurement
+      if(totalChanges > commitScale)
+        commitScale = totalChanges;
       _.each(props.committers, function(committer){                       //commitLegend to iterate over authorNames, commitLegend has structure [{name, style}, ...]
-        if(committer in commit.statsByAuthor)
-          obj[committer] = commit.statsByAuthor[committer].changes;         //Insert number of changes with the author name as key, statsByAuthor has structure {{authorName: {count, additions, deletions, changes}}, ...}
-        else
+        if(committer in commit.statsByAuthor) {
+          if(props.displayMetric === 'linesChanged')
+            obj[committer] = commit.statsByAuthor[committer].changes;         //Insert number of changes with the author name as key, statsByAuthor has structure {{authorName: {count, additions, deletions, changes}}, ...}
+          else
+            obj[committer] = commit.statsByAuthor[committer].count;
+        }else
           obj[committer] = 0;
       });
       commitChartData.push(obj);                                //Add object to list of objects
