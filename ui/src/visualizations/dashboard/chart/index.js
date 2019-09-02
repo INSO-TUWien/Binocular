@@ -12,6 +12,7 @@ const mapStateToProps = (state /*, ownProps*/) => {
     palette: dashState.data.data.palette,
     otherCount: dashState.data.data.otherCount,
     commits: dashState.data.data.commits,
+    committers: dashState.data.data.committers,
     commitAttribute: dashState.config.commitAttribute,
     issues: dashState.data.data.issues,
     builds: dashState.data.data.builds,
