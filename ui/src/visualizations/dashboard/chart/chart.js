@@ -101,7 +101,27 @@ export default class Dashboard extends React.Component {
     if(!props.issues || props.issues.length === 0)
       return {};
 
-    //---- STEP 1: AGGREGATE ISSUES PER TIME INTERVAL ----
+    //---- STEP 1: FILTER ISSUES ----
+    let filteredIssues = [];
+    switch(props.showIssues){
+      case 'all':
+        filteredIssues = props.issues;
+        break;
+      case 'open':
+        _.each(props.issues, (issue) => {
+          if(issue.closedAt == null)
+            filteredIssues.push(issue);
+        });
+        break;
+      case 'closed':
+        _.each(props.issues, (issue) => {
+          if(issue.closedAt)
+            filteredIssues.push(issue);
+        });
+        break;
+    }
+
+    //---- STEP 2: AGGREGATE ISSUES PER TIME INTERVAL ----
     let data = [];
     let granularity = Dashboard.getGranularity(props.chartResolution);
     let interval = granularity.asMilliseconds();
@@ -113,18 +133,18 @@ export default class Dashboard extends React.Component {
     for(let i=0, j=0; curr < props.lastSignificantTimestamp; curr = next, next += interval){                   //Iterate through time buckets
       let obj = {date: curr, count: 0, openCount: 0, closedCount: 0};                            //Save date of time bucket, create object
 
-      while(i < props.issues.length && createdDate < next && createdDate >= curr){               //Iterate through issues that fall into this time bucket (open date)
+      while(i < filteredIssues.length && createdDate < next && createdDate >= curr){               //Iterate through issues that fall into this time bucket (open date)
         if(createdDate > curr && createdDate < next){
           obj.count++;
           obj.openCount++;
         }
-        if(props.issues[i].closedAt) {    //If issues are closed, save close date in sorted list
-          const closedDate = Date.parse(props.issues[i].closedAt);
+        if(filteredIssues[i].closedAt) {    //If issues are closed, save close date in sorted list
+          const closedDate = Date.parse(filteredIssues[i].closedAt);
           const insertPos = _.sortedIndex(sortedCloseDates, closedDate);
           sortedCloseDates.splice(insertPos, 0, closedDate);
         }
-        if(++i < props.issues.length)
-          createdDate = Date.parse(props.issues[i].createdAt);
+        if(++i < filteredIssues.length)
+          createdDate = Date.parse(filteredIssues[i].createdAt);
       }
       for(;j < sortedCloseDates.length && sortedCloseDates[j] < next && sortedCloseDates[j] >= curr; j++){         //Iterate through issues that fall into this time bucket (closed date)
         if(sortedCloseDates[j] > curr && sortedCloseDates[j] < next){
@@ -136,6 +156,7 @@ export default class Dashboard extends React.Component {
       data.push(obj);
     }
 
+    //---- STEP 3: CONSTRUCT CHART DATA FROM AGGREGATED ISSUES ----
     const issueChartData = [];
     const issueScale = [0,0];
     _.each(data, function(issue){
