@@ -8,16 +8,13 @@ import { setViewport } from '../sagas';
 const mapStateToProps = (state /*, ownProps*/) => {
   const dashState = state.visualizations.dashboard.state;
 
-  const issues = dashState.config.overlay === 'issues' ? dashState.data.data.issues : [];
-  const builds = dashState.config.overlay === 'builds' ? dashState.data.data.builds : [];
-
   return {
     palette: dashState.data.data.palette,
     otherCount: dashState.data.data.otherCount,
     commits: dashState.data.data.commits,
     commitAttribute: dashState.config.commitAttribute,
-    issues,
-    builds,
+    issues: dashState.data.data.issues,
+    builds: dashState.data.data.builds,
     highlightedIssue: dashState.config.highlightedIssue,
     highlightedCommits: dashState.config.highlightedCommits
   };
