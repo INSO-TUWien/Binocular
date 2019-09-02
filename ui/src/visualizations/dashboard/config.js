@@ -54,7 +54,7 @@ const DashboardConfigComponent = props => {
             <label className="label">General Settings</label>
             <p className="field">Chart resolution:</p>
             <TabCombo
-              value={'years'}
+              value={props.resolution}
               options={[
                 {label: 'Years', icon: '', value: 'years'},
                 {label: 'Months', icon: '', value: 'months'},
@@ -80,7 +80,7 @@ const DashboardConfigComponent = props => {
             <LegendCompact text="closed" color="#8099e8"/>
             <label className="label">Show issues:</label>
             <TabCombo
-              value={'all'}
+              value={props.showIssues}
               options={[
                 {label: 'All', icon: '', value: 'all'},
                 {label: 'Open', icon: '', value: 'open'},
@@ -96,7 +96,7 @@ const DashboardConfigComponent = props => {
             <CheckboxLegend content={colorsArray}/>
             <label className="label">Change Measurement:</label>
             <TabCombo
-              value={'linesChanged'}
+              value={props.metric}
               options={[
                 {label: '# lines changed', icon: '', value: 'linesChanged'},
                 {label: '# commits', icon: '', value: 'commits'}
