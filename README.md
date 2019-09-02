@@ -105,3 +105,7 @@ visualizations.
 
 For an explanation of pupil's architecture, please see the [Contribution
 guidelines for this project](docs/CONTRIBUTING.md)
+
+
+### to run an arangoDB instance using docker
+`` docker run -p 8529:8529 -e ARANGO_ROOT_PASSWORD='!ARANGO_ROOT_PASSWORD!'  -e ARANGO_ROOT_USER=root  arangodb/arangodb``

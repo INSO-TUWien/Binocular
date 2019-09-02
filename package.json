@@ -29,6 +29,9 @@
     "zivsed": "./pupil.js"
   },
   "dependencies": {
+    "@fortawesome/fontawesome-svg-core": "^1.2.19",
+    "@fortawesome/free-solid-svg-icons": "^5.9.0",
+    "@fortawesome/react-fontawesome": "^0.1.4",
     "adm-zip": "^0.4.13",
     "apollo-client": "^1.9.3",
     "apollo-client-preset": "0.1.0-1",
@@ -98,6 +101,7 @@
     "nodegit": "^0.24.1",
     "object-assign": "4.1.1",
     "opn": "^4.0.2",
+    "paths-js": "^0.4.9",
     "postcss-flexbugs-fixes": "3.0.0",
     "postcss-loader": "2.0.6",
     "promise": "^7.1.1",
@@ -105,6 +109,7 @@
     "random-js": "^1.0.8",
     "rc": "^1.2.8",
     "react": "^15.6.1",
+    "react-calendar": "^2.19.0",
     "react-dom": "^15.6.1",
     "react-error-overlay": "^1.0.9",
     "react-measure": "^2.0.2",

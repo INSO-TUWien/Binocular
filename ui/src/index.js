@@ -26,8 +26,9 @@ const logger = createLogger({
 import codeOwnershipRiver from './visualizations/code-ownership-river';
 import issueImpact from './visualizations/issue-impact';
 import hotspotDials from './visualizations/hotspot-dials';
+import codeOwnershipTransfer from './visualizations/code-ownership-transfer';
 
-const visualizationModules = [codeOwnershipRiver, issueImpact, hotspotDials];
+const visualizationModules = [codeOwnershipRiver, issueImpact, hotspotDials, codeOwnershipTransfer];
 
 const visualizations = {};
 _.each(visualizationModules, viz => {
