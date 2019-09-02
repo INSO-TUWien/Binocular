@@ -22,7 +22,8 @@ const mapStateToProps = (state /*, ownProps*/) => {
     highlightedCommits: dashState.config.highlightedCommits,
     chartResolution: dashState.config.chartResolution,
     showIssues: dashState.config.showIssues,
-    displayMetric: dashState.config.displayMetric
+    displayMetric: dashState.config.displayMetric,
+    selectedAuthors: dashState.config.selectedAuthors
   };
 };
 

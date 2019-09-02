@@ -48,6 +48,7 @@ export default class Dashboard extends React.Component {
   }
 
   render() {
+    console.log(this.props.selectedAuthors);
     return (
       <div className={styles.chartContainer}>
         <div className={styles.chartLine}>
@@ -90,7 +91,8 @@ export default class Dashboard extends React.Component {
                              paddings={{top: 20, left: 40, bottom: 20}}
                              yScale={2}
                              yDims={this.state.commitScale}
-                             d3offset={d3.stackOffsetSilhouette}/>
+                             d3offset={d3.stackOffsetSilhouette}
+                             keys={this.props.selectedAuthors}/>
           </div>
         </div>
       </div>

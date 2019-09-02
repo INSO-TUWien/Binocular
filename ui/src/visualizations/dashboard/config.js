@@ -1,7 +1,7 @@
 'use strict';
 
 import { connect } from 'react-redux';
-import {setResolution, setShowDevs, setShowIssues, setDisplayMetric} from './sagas';
+import {setResolution, setShowDevs, setShowIssues, setDisplayMetric, setSelectedAuthors} from './sagas';
 import TabCombo from '../../components/TabCombo.js';
 import styles from './styles.scss';
 
@@ -15,10 +15,9 @@ const mapStateToProps = (state /*, ownProps*/) => {
     resolution: dashboardState.config.chartResolution,
     showDevs: dashboardState.config.showDevsInCI,
     showIssues: dashboardState.config.showIssues,
-    availableDevs: dashboardState.data.data.committers,
-    selectedDevs: dashboardState.config.selectedAuthors,
-    devColors: dashboardState.data.data.palette,
-    metric: dashboardState.config.displayMetric
+    palette: dashboardState.data.data.palette,
+    metric: dashboardState.config.displayMetric,
+    selectedAuthors: dashboardState.config.selectedAuthors
   };
 };
 
@@ -28,24 +27,12 @@ const mapDispatchToProps = (dispatch /*, ownProps*/) => {
     onClickShowDevs: showDevs => dispatch(setShowDevs(showDevs)),
     onClickIssues: showIssues => dispatch(setShowIssues(showIssues)),
     //TODO incorporate selected devs in CheckBoxLegend
-    onClickMetric: metric => dispatch(setDisplayMetric(metric))
+    onClickMetric: metric => dispatch(setDisplayMetric(metric)),
+    onClickCheckboxLegend: selected => dispatch(setSelectedAuthors(selected))
   };
 };
 
-function assembleColors(devs, palette) {
-  let ret = [];
-  _.each(devs, function(elem){
-    ret.push({name: elem, color: palette[elem]});
-  });
-  return ret;
-}
-
 const DashboardConfigComponent = props => {
-  var colorsArray = [];
-  if(props.availableDevs) {
-    colorsArray = assembleColors(props.availableDevs, props.devColors); //[{name: "dev1 <dev1@email.com>", color: "#ffffff"}, ...] (See function assembleColors)
-  }
-  //TODO compute or get colors
   return (
     <div className={styles.configContainer}>
       <form>
@@ -93,7 +80,7 @@ const DashboardConfigComponent = props => {
         <div className={styles.field}>
           <div className="control">
             <label className="label">Changes</label>
-            <CheckboxLegend content={colorsArray}/>
+            <CheckboxLegend palette={props.palette} onClick={props.onClickCheckboxLegend.bind(this)}/>
             <label className="label">Change Measurement:</label>
             <TabCombo
               value={props.metric}

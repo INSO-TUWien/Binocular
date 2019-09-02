@@ -13,16 +13,41 @@ export default class CheckboxLegend extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      content: props.content   //[{name: "dev1 <dev1@email.com>", color: "#ffffff"}, ...] name = git signature
+      initialized: false,
+      selected: [] //[name1, name2, ...]
     }
     ;
   }
 
+  componentWillReceiveProps(nextProps, nextContext) {
+    if(nextProps.palette && this.state.initialized === false)
+      this.setState({initialized: true, selected: Object.keys(nextProps.palette)});
+  }
+
+  clickCallback(key, checked){
+    if(checked) {   //Add to selected
+      let selected = this.state.selected;
+      selected.push(key);
+      this.setState({selected: selected}, () => this.props.onClick(selected));
+    }
+    else {          //Remove from selected
+      let selected = this.state.selected;
+      selected.splice(selected.indexOf(key),1);
+      this.setState({selected: selected}, () => this.props.onClick(selected));
+    }
+  }
+
   render() {
     let items = [];
-    _.each(this.props.content, (elem) => {
-      items.push(<CheckboxLegendLine key={elem.name} text={elem.name} color={elem.color}/>);
-    })
+    if(this.state.initialized) {
+      _.each(Object.keys(this.props.palette), (key) => {
+        if (this.state.selected.indexOf(key) > -1) {
+          items.push(<CheckboxLegendLine key={key} text={key} color={this.props.palette[key]} checked={true} onClick={this.clickCallback.bind(this)}/>);
+        } else {
+          items.push(<CheckboxLegendLine key={key} text={key} color={this.props.palette[key]} checked={false} onClick={this.clickCallback.bind(this)}/>);
+        }
+      });
+    }
     return (<div>
       <div className={styles.legend}>
         {items}
@@ -45,6 +70,13 @@ class CheckboxLegendLine extends React.Component{
       id: props.id
   }
   }
+
+  clickHandler(){
+    let oldChecked = this.state.checked;
+    this.setState({checked: !oldChecked});
+    this.props.onClick(this.state.text, !oldChecked);
+  }
+
   render()
   {
     return (
@@ -53,7 +85,7 @@ class CheckboxLegendLine extends React.Component{
           <svg className={styles.icon} width={ICON_WIDTH} height={ICON_HEIGHT}>
             <rect width={ICON_HEIGHT} height={ICON_WIDTH} fill={this.state.color}/>
           </svg>
-          <input type="checkbox" name={this.state.text} value={this.state.text}/>
+          <input type="checkbox" name={this.state.text} value={this.state.text} checked={this.state.checked} onChange={this.clickHandler.bind(this)}/>
           {this.state.text}
         </label>
       </div>
