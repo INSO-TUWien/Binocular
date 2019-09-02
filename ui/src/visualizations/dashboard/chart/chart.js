@@ -13,15 +13,17 @@ export default class Dashboard extends React.Component {
   constructor(props) {
     super(props);
 
-    const { commitSeries, commitLegend, commitChartData, issueChartData, commitScale, issueScale } = this.extractCommitData(props);
+    const { commitSeries, commitLegend, commitChartData, issueChartData, ciChartData, commitScale, issueScale, ciScale } = this.extractCommitData(props);
 
     this.state = {
       commitLegend,
       commitSeries,
       commitChartData,    //Data for commit changes
       issueChartData,
+      ciChartData,
       commitScale: commitScale,    //Maximum change in commit changes graph, used for y-axis scaling
-      issueScale: issueScale
+      issueScale: issueScale,
+      ciScale: ciScale
     };
   }
 
@@ -30,15 +32,17 @@ export default class Dashboard extends React.Component {
    * @param nextProps props that are passed
    */
   componentWillReceiveProps(nextProps) {
-    const { commitSeries, commitLegend, commitChartData, issueChartData, commitScale, issueScale } = this.extractCommitData(nextProps);
+    const { commitSeries, commitLegend, commitChartData, issueChartData, ciChartData, commitScale, issueScale, ciScale } = this.extractCommitData(nextProps);
     this.setState(
       {
         commitSeries,
         commitLegend,
         commitChartData,
         issueChartData,
+        ciChartData,
         commitScale: commitScale,
-        issueScale: issueScale
+        issueScale: issueScale,
+        ciScale: ciScale
       });
   }
 
@@ -50,7 +54,14 @@ export default class Dashboard extends React.Component {
             CI System
           </div>
           <div className={styles.chart}>
-
+            <ThemeRiverChart content={this.state.ciChartData}
+                             palette={{succeeded: "#26ca3b", failed: "#e23b41"}}
+                             paddings={{top: 10, left: 40, bottom: 10}}
+                             xAxisCenter={true}
+                             yScale={1}
+                             yDims={this.state.ciScale}
+                             d3offset={d3.stackOffsetDiverging}
+                             d3bugfix={{seriesNumber: 1}}/>
           </div>
         </div>
         <div className={styles.chartLine}>
@@ -144,6 +155,16 @@ export default class Dashboard extends React.Component {
         issueScale[0] = issue.closedCount*(-1);
     });
 
-    return { commitSeries, commitLegend, commitChartData, issueChartData, commitScale: [commitScale/-2, commitScale/2], issueScale: issueScale };
+    const ciChartData = [];
+    const ciScale = [0,0];
+    _.each(props.builds, function(build){
+      ciChartData.push({date: build.date, succeeded: build.succeeded, failed: (build.failed > 0) ? (build.failed*(-1)) : 0});
+      if(ciScale[1] < build.succeeded)
+        ciScale[1] = build.succeeded;
+      if(ciScale[0] > build.failed*(-1))
+        ciScale[0] = build.failed*(-1);
+    });
+
+    return { commitSeries, commitLegend, commitChartData, issueChartData, ciChartData, commitScale: [commitScale/-2, commitScale/2], issueScale: issueScale, ciScale: ciScale };
   }
 }
