@@ -13,13 +13,11 @@ export default class Dashboard extends React.Component {
   constructor(props) {
     super(props);
 
-    const { commitSeries, commitLegend, commitChartData, commitScale} = this.extractCommitData(props);
+    const {commitChartData, commitScale} = this.extractCommitData(props);
     const {issueChartData, issueScale} = this.extractIssueData(props);
     const {ciChartData, ciScale} = this.extractCIData(props);
 
     this.state = {
-      commitLegend,
-      commitSeries,
       commitChartData,    //Data for commit changes
       issueChartData,
       ciChartData,
@@ -34,13 +32,11 @@ export default class Dashboard extends React.Component {
    * @param nextProps props that are passed
    */
   componentWillReceiveProps(nextProps) {
-    const { commitSeries, commitLegend, commitChartData, commitScale} = this.extractCommitData(nextProps);
+    const {commitChartData, commitScale} = this.extractCommitData(nextProps);
     const {issueChartData, issueScale} = this.extractIssueData(nextProps);
     const {ciChartData, ciScale} = this.extractCIData(nextProps);
     this.setState(
       {
-        commitSeries,
-        commitLegend,
         commitChartData,
         issueChartData,
         ciChartData,
@@ -139,34 +135,6 @@ export default class Dashboard extends React.Component {
       return {};
     }
 
-    const commitLegend = [];
-    const commitSeries = _.map(Object.keys(props.palette), (signature) => {
-      const legend = {
-        name:
-          (signature === 'other' ? props.otherCount + ' Others' : signature),
-        style: {
-          fill: props.palette[signature]
-        }
-      };
-
-      commitLegend.push(legend);
-
-      return {
-        style: {
-          fill: props.palette[signature]
-        },
-        extractY: d => {
-          const stats = d.statsByAuthor[signature];
-          if (props.commitAttribute === 'count') {
-            return stats ? stats.count : 0;
-          } else {
-            return stats ? stats.changes / d.totals.changes * d.totals.count : 0;
-          }
-        },
-        onMouseEnter: () => this.activateLegend(legend),
-        onMouseLeave: () => this.activateLegend(null)
-      };
-    });
     const commitChartData = [];
     let commitScale = 0;
     _.each(props.commits, function(commit){                     //commit has structure {date, totals: {count, additions, deletions, changes}, statsByAuthor: {}} (see next line)}
@@ -183,6 +151,6 @@ export default class Dashboard extends React.Component {
     });
     //Output in commitChartData has format [{author1: 123, author2: 123, ...}, ...], e.g. series names are the authors with their corresponding values
 
-    return { commitSeries, commitLegend, commitChartData, commitScale: [commitScale/-2, commitScale/2]};
+    return { commitChartData, commitScale: [commitScale/-2, commitScale/2]};
   }
 }
