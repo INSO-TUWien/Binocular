@@ -10,9 +10,6 @@ import {faUser} from '@fortawesome/free-solid-svg-icons';
 import {faUsers} from '@fortawesome/free-solid-svg-icons';
 import {faFile} from '@fortawesome/free-solid-svg-icons';
 import {faCheckCircle} from '@fortawesome/free-solid-svg-icons';
-import SearchBox from "../../components/SearchBox";
-import Promise from "bluebird";
-import {graphQl} from "../../utils";
 
 
 const mapStateToProps = (state /*, ownProps*/) => {
