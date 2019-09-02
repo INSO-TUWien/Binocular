@@ -5,41 +5,28 @@ import _ from 'lodash';
 import { traversePages, graphQl } from '../../../utils';
 
 export default function getBuildData(buildSpan, significantSpan, granularity, interval) {
-  let next = moment(significantSpan[0]).startOf('day').toDate().getTime();
-  const data = [
-    {
-      date: new Date(buildSpan[0]),
-      stats: {
-        success: 0,
-        failed: 0,
-        pending: 0,
-        canceled: 0
-      }
-    }
-  ];
+  let data = [];
+  let buildList = [];
 
   return traversePages(getBuildsPage, build => {
-    const createdAt = Date.parse(build.createdAt);
-
-    while (createdAt >= next) {
-      const dataPoint = {
-        date: new Date(next),
-        stats: _.defaults(
-          {
-            total:
-              (build.stats.success || 0) +
-              (build.stats.failed || 0) +
-              (build.stats.pending || 0) +
-              (build.stats.canceled || 0)
-          },
-          build.stats
-        )
-      };
-
-      data.push(dataPoint);
-      next += interval;
+    buildList.push(build);
+  }).then(function() {
+    let curr = moment(significantSpan[0]).startOf(granularity.unit).toDate().getTime();
+    let next = curr + interval;
+    let debug = buildList;
+    for(let i=0; curr < significantSpan[1]; curr = next, next += interval){       //Iterate through time buckets
+      let obj = {date: curr, succeeded: 0, failed: 0};  //Save date of time bucket, create object
+      for(; i < buildList.length && Date.parse(buildList[i].createdAt) < next; i++){             //Iterate through commits that fall into this time bucket
+        let buildDate = Date.parse(buildList[i].createdAt);
+        if(buildDate >= curr && buildDate < next){
+          obj.succeeded += (buildList[i].stats.success || 0);
+          obj.failed += (buildList[i].stats.failed || 0);
+        }
+      }
+      data.push(obj);
     }
-  }).then(() => data);
+    return data;
+  });
 }
 
 const getBuildsPage = (page, perPage) => {
