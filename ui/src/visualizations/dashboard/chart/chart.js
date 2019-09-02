@@ -8,6 +8,7 @@ import _ from 'lodash';
 
 import * as zoomUtils from '../../../utils/zoom.js';
 import ThemeRiverChart from '../../../components/ThemeRiverChart';
+import moment from 'moment';
 
 export default class Dashboard extends React.Component {
   constructor(props) {
@@ -100,9 +101,44 @@ export default class Dashboard extends React.Component {
     if(!props.issues || props.issues.length === 0)
       return {};
 
+    //---- STEP 1: AGGREGATE ISSUES PER TIME INTERVAL ----
+    let data = [];
+    let granularity = Dashboard.getGranularity('weeks');
+    let interval = granularity.asMilliseconds();
+    let curr = moment(props.firstSignificantTimestamp).startOf(granularity.unit).toDate().getTime();
+    let next = curr + interval;
+    let sortedCloseDates = [];
+    let createdDate = Date.parse(props.issues[0].createdAt);
+
+    for(let i=0, j=0; curr < props.lastSignificantTimestamp; curr = next, next += interval){                   //Iterate through time buckets
+      let obj = {date: curr, count: 0, openCount: 0, closedCount: 0};                            //Save date of time bucket, create object
+
+      while(i < props.issues.length && createdDate < next && createdDate >= curr){               //Iterate through issues that fall into this time bucket (open date)
+        if(createdDate > curr && createdDate < next){
+          obj.count++;
+          obj.openCount++;
+        }
+        if(props.issues[i].closedAt) {    //If issues are closed, save close date in sorted list
+          const closedDate = Date.parse(props.issues[i].closedAt);
+          const insertPos = _.sortedIndex(sortedCloseDates, closedDate);
+          sortedCloseDates.splice(insertPos, 0, closedDate);
+        }
+        if(++i < props.issues.length)
+          createdDate = Date.parse(props.issues[i].createdAt);
+      }
+      for(;j < sortedCloseDates.length && sortedCloseDates[j] < next && sortedCloseDates[j] >= curr; j++){         //Iterate through issues that fall into this time bucket (closed date)
+        if(sortedCloseDates[j] > curr && sortedCloseDates[j] < next){
+          sortedCloseDates.splice(j,1);
+          obj.count++;
+          obj.closedCount++;
+        }
+      }
+      data.push(obj);
+    }
+
     const issueChartData = [];
     const issueScale = [0,0];
-    _.each(props.issues, function(issue){
+    _.each(data, function(issue){
       issueChartData.push({date: issue.date, openCount: issue.openCount, closedCount: (issue.closedCount > 0) ? (issue.closedCount*(-1)) : 0});
       if(issueScale[1] < issue.openCount)
         issueScale[1] = issue.openCount;
@@ -117,9 +153,28 @@ export default class Dashboard extends React.Component {
     if(!props.builds || props.builds.length === 0)
       return {};
 
-    const ciChartData = [];
-    const ciScale = [0,0];
-    _.each(props.builds, function(build){
+    //---- STEP 1: AGGREGATE BUILDS PER TIME INTERVAL ----
+    let data = [];
+    let granularity = Dashboard.getGranularity('weeks');
+    let interval = granularity.asMilliseconds();
+    let curr = moment(props.firstSignificantTimestamp).startOf(granularity.unit).toDate().getTime();
+    let next = curr + interval;
+    for(let i=0; curr < props.lastSignificantTimestamp; curr = next, next += interval){       //Iterate through time buckets
+      let obj = {date: curr, succeeded: 0, failed: 0};  //Save date of time bucket, create object
+      for(; i < props.builds.length && Date.parse(props.builds[i].createdAt) < next; i++){             //Iterate through commits that fall into this time bucket
+        let buildDate = Date.parse(props.builds[i].createdAt);
+        if(buildDate >= curr && buildDate < next){
+          obj.succeeded += (props.builds[i].stats.success || 0);
+          obj.failed += (props.builds[i].stats.failed || 0);
+        }
+      }
+      data.push(obj);
+    }
+
+    //--- STEP 2: CONSTRUCT CHART DATA FROM AGGREGATED BUILDS ----
+    let ciChartData = [];
+    let ciScale = [0,0];
+    _.each(data, function(build){
       ciChartData.push({date: build.date, succeeded: build.succeeded, failed: (build.failed > 0) ? (build.failed*(-1)) : 0});
       if(ciScale[1] < build.succeeded)
         ciScale[1] = build.succeeded;
@@ -135,9 +190,33 @@ export default class Dashboard extends React.Component {
       return {};
     }
 
+    //---- STEP 1: AGGREGATE COMMITS GROUPED BY AUTHORS PER TIME INTERVAL ----
+    let data = [];
+    //let granularity = Dashboard.getGranularity(props.resolution);
+    let granularity = Dashboard.getGranularity('weeks');
+    let interval = granularity.asMilliseconds();
+    let curr = moment(props.firstSignificantTimestamp).startOf(granularity.unit).toDate().getTime();
+    let next = curr + interval;
+    for(let i=0; curr < props.lastSignificantTimestamp; curr = next, next += interval){       //Iterate through time buckets
+      let obj = {date: curr, totals: {count: 0, changes: 0}, statsByAuthor: {}};  //Save date of time bucket, create object
+      for(; i < props.commits.length && Date.parse(props.commits[i].date) < next; i++){             //Iterate through commits that fall into this time bucket
+        let changes = props.commits[i].stats.additions + props.commits[i].stats.deletions;
+        let commitAuthor = props.commits[i].signature;
+        obj.totals.count++;
+        obj.totals.changes += changes;
+        if(commitAuthor in obj.statsByAuthor)                                     //If author is already in statsByAuthor, add to previous values
+          obj.statsByAuthor[commitAuthor] = {count: obj.statsByAuthor[commitAuthor].count+1, changes: obj.statsByAuthor[commitAuthor].changes + changes};
+        else                                                                      //Else create new values
+          obj.statsByAuthor[commitAuthor] = {count: 1, changes: changes};
+
+      }
+      data.push(obj);
+    }
+
+    //--- STEP 2: CONSTRUCT CHART DATA FROM AGGREGATED COMMITS ----
     const commitChartData = [];
     let commitScale = 0;
-    _.each(props.commits, function(commit){                     //commit has structure {date, totals: {count, additions, deletions, changes}, statsByAuthor: {}} (see next line)}
+    _.each(data, function(commit){                     //commit has structure {date, totals: {count, additions, deletions, changes}, statsByAuthor: {}} (see next line)}
       let obj = {date: commit.date};
       if(commit.totals.changes > commitScale)
         commitScale = commit.totals.changes;
@@ -152,5 +231,18 @@ export default class Dashboard extends React.Component {
     //Output in commitChartData has format [{author1: 123, author2: 123, ...}, ...], e.g. series names are the authors with their corresponding values
 
     return { commitChartData, commitScale: [commitScale/-2, commitScale/2]};
+  }
+
+  static getGranularity(resolution) {
+    switch(resolution){
+      case 'years':
+        return moment.duration(1, 'year');
+      case 'months':
+        return moment.duration(1, 'month');
+      case 'weeks':
+        return moment.duration(1, 'week');
+      case 'days':
+        return moment.duration(1, 'day');
+    }
   }
 }

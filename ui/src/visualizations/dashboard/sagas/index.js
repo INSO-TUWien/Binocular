@@ -103,22 +103,13 @@ export const fetchDashboardData = fetchFactory(
     return yield Promise.join(
       getCommitData(
         [firstCommitTimestamp, lastCommitTimestamp],
-        [firstSignificantTimestamp, lastSignificantTimestamp],
-        granularity,
-        interval
+        [firstSignificantTimestamp, lastSignificantTimestamp]
       ),
       getIssueData(
         [firstIssueTimestamp, lastIssueTimestamp],
-        [firstSignificantTimestamp, lastSignificantTimestamp],
-        granularity,
-        interval
+        [firstSignificantTimestamp, lastSignificantTimestamp]
       ),
-      getBuildData(
-        [firstCommitTimestamp, lastCommitTimestamp],
-        [firstSignificantTimestamp, lastSignificantTimestamp],
-        granularity,
-        interval
-      )
+      getBuildData()
     )
       .spread((commits, issues, builds) => {
         const palette = getChartColors('spectral', [...committers]);    //TODO maybe insert 'other' back here
@@ -129,7 +120,9 @@ export const fetchDashboardData = fetchFactory(
           committers,
           palette,
           issues,
-          builds
+          builds,
+          firstSignificantTimestamp,
+          lastSignificantTimestamp
         };
       })
       .catch(function(e) {

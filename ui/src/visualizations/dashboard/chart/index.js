@@ -15,6 +15,8 @@ const mapStateToProps = (state /*, ownProps*/) => {
     commitAttribute: dashState.config.commitAttribute,
     issues: dashState.data.data.issues,
     builds: dashState.data.data.builds,
+    firstSignificantTimestamp: dashState.data.data.firstSignificantTimestamp,
+    lastSignificantTimestamp: dashState.data.data.lastSignificantTimestamp,
     highlightedIssue: dashState.config.highlightedIssue,
     highlightedCommits: dashState.config.highlightedCommits
   };
