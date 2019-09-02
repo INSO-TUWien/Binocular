@@ -58,7 +58,14 @@ export default class Dashboard extends React.Component {
             Issues
           </div>
           <div className={styles.chart}>
-
+            <ThemeRiverChart content={this.state.issueChartData}
+                             palette={{openCount: "#3461eb", closedCount: "#8099e8"}}
+                             paddings={{top: 10, left: 40, bottom: 10}}
+                             xAxisCenter={true}
+                             yScale={1}
+                             yDims={this.state.issueScale}
+                             d3offset={d3.stackOffsetDiverging}
+                             d3bugfix={{seriesNumber: 1}}/>
           </div>
         </div>
         <div className={styles.chartLine}>
@@ -130,11 +137,11 @@ export default class Dashboard extends React.Component {
     const issueChartData = [];
     const issueScale = [0,0];
     _.each(props.issues, function(issue){
-      issueChartData.push({date: issue.date, openCount: issue.openCount, closedCount: issue.closedCount*(-1)});
-      if(issueScale[0] < issue.openCount)
-        issueScale[0] = issue.openCount;
-      if(issueScale[1] < issue.closedCount)
-        issueScale[1] = issue.closedCount;
+      issueChartData.push({date: issue.date, openCount: issue.openCount, closedCount: (issue.closedCount > 0) ? (issue.closedCount*(-1)) : 0});
+      if(issueScale[1] < issue.openCount)
+        issueScale[1] = issue.openCount;
+      if(issueScale[0] > issue.closedCount*(-1))
+        issueScale[0] = issue.closedCount*(-1);
     });
 
     return { commitSeries, commitLegend, commitChartData, issueChartData, commitScale: [commitScale/-2, commitScale/2], issueScale: issueScale };
