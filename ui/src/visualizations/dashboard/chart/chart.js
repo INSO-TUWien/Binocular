@@ -57,7 +57,7 @@ export default class Dashboard extends React.Component {
           <div className={styles.chart}>
             <ThemeRiverChart content={this.state.ciChartData}
                              palette={{succeeded: "#26ca3b", failed: "#e23b41"}}
-                             paddings={{top: 10, left: 40, bottom: 10}}
+                             paddings={{top: 20, left: 40, bottom: 20}}
                              xAxisCenter={true}
                              yScale={1}
                              yDims={this.state.ciScale}
@@ -72,7 +72,7 @@ export default class Dashboard extends React.Component {
           <div className={styles.chart}>
             <ThemeRiverChart content={this.state.issueChartData}
                              palette={{openCount: "#3461eb", closedCount: "#8099e8"}}
-                             paddings={{top: 10, left: 40, bottom: 10}}
+                             paddings={{top: 20, left: 40, bottom: 20}}
                              xAxisCenter={true}
                              yScale={1}
                              yDims={this.state.issueScale}
@@ -87,7 +87,7 @@ export default class Dashboard extends React.Component {
           <div className={styles.chart}>
             <ThemeRiverChart content={this.state.commitChartData}
                              palette={this.props.palette}
-                             paddings={{top: 10, left: 40, bottom: 20}}
+                             paddings={{top: 20, left: 40, bottom: 20}}
                              yScale={2}
                              yDims={this.state.commitScale}
                              d3offset={d3.stackOffsetSilhouette}/>
