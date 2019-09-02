@@ -4,7 +4,7 @@ import saga from './sagas';
 import reducer from './reducers';
 import HelpComponent from './help.js';
 import ConfigComponent from './config.js';
-import ChartComponent from './chart';
+import ChartComponent from './chart.js';
 
 
 export default {

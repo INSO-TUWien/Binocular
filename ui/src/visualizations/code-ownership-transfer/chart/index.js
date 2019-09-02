@@ -6,7 +6,7 @@ import Chart from './chart.js';
 import { setViewport, openCommit } from '../sagas';
 
 const mapStateToProps = (state /*, ownProps*/) => {
-  const corState = state.visualizations.codeOwnershipRiver.state;
+  const corState = state.visualizations.codeOwnershipTransfer.state;
 
   const issues = corState.config.overlay === 'issues' ? corState.data.data.issues : [];
   const builds = corState.config.overlay === 'builds' ? corState.data.data.builds : [];

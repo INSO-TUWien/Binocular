@@ -5,13 +5,14 @@ import {connect} from 'react-redux';
 import {setOverlay, setHighlightedIssue, setCommitAttribute} from './sagas';
 import TabCombo from '../../components/TabCombo.js';
 import styles from './styles.scss';
-import Calendar from 'react-calendar';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 import {faUser} from '@fortawesome/free-solid-svg-icons';
 import {faUsers} from '@fortawesome/free-solid-svg-icons';
 import {faFile} from '@fortawesome/free-solid-svg-icons';
-import {faCheckDouble} from '@fortawesome/free-solid-svg-icons';
 import {faCheckCircle} from '@fortawesome/free-solid-svg-icons';
+import SearchBox from "../../components/SearchBox";
+import Promise from "bluebird";
+import {graphQl} from "../../utils";
 
 
 const mapStateToProps = (state /*, ownProps*/) => {
@@ -49,9 +50,8 @@ const CodeOwnershipTransferConfigComponent = props => {
               onChange={value => props.onSetOverlay(value)}
               options={[
                 {label: 'Developers', icon: 'users', value: 'developers'},
-                {label: 'Files', icon: 'file', value: 'files'},
-                {label: 'Commits', icon: 'check', value: 'commits'}
-              ]}
+                {label: 'Files', icon: 'file', value: 'files'}
+                ]}
             />
           </div>
         </div>
@@ -66,9 +66,7 @@ const CodeOwnershipTransferConfigComponent = props => {
                   <FontAwesomeIcon icon={faUser}/>&nbsp;&nbsp;Developer:</p>
                 <p>
                   <FontAwesomeIcon icon={faFile}/>&nbsp;&nbsp;Owned Files:</p>
-                <p>
-                  <FontAwesomeIcon icon={faCheckCircle}/>&nbsp;&nbsp;Number of commits:</p>
-              </div>
+                </div>
             </div>
           </div>
           <div className="control">
@@ -109,21 +107,6 @@ const CodeOwnershipTransferConfigComponent = props => {
           </div>
         </div>}
 
-        {props.overlay === 'commits' &&
-        <div className="field">
-          <div>
-            <Calendar
-            />
-          </div>
-          <div style={divStyle}>
-            <div className="card">
-              <div className="card-content">
-                <p><FontAwesomeIcon icon={faCheckDouble}/>&nbsp;&nbsp;Number of Commits:</p>
-                <p><FontAwesomeIcon icon={faFile}/>&nbsp;&nbsp;Number of Files:</p>
-              </div>
-            </div>
-          </div>
-        </div>}
 
       </form>
     </div>

@@ -18,7 +18,7 @@ import * as zoomUtils from '../../../utils/zoom.js';
 
 const dateExtractor = d => d.date;
 
-export default class CodeOwnershipRiver extends React.Component {
+export default class CodeOwnershipTransfer extends React.Component {
   constructor(props) {
     super(props);
 
