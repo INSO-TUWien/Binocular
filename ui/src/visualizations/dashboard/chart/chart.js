@@ -62,7 +62,12 @@ export default class Dashboard extends React.Component {
             Changes
           </div>
           <div className={styles.chart}>
-            <ThemeRiverChart content={this.state.commitChartData} palette={this.props.palette} maxChange={this.state.maxChange}/>
+            <ThemeRiverChart content={this.state.commitChartData}
+                             palette={this.props.palette}
+                             paddings={{top: 10, left: 40, bottom: 20}}
+                             yScale={2}
+                             yDims={[this.state.maxChange/-2,this.state.maxChange/2]}
+                             d3offset={d3.stackOffsetSilhouette}/>
           </div>
         </div>
       </div>

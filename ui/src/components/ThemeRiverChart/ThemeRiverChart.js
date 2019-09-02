@@ -27,13 +27,14 @@ export default class ThemeRiverChart extends React.Component {
    */
   drawChart(commitData) {
     let data = commitData;
+    let yScale = this.props.yScale;
 
     //Keys are the names of the developers, date is excluded
     let keys = Object.keys(data[0]).slice(1);
 
     //Stack function for a ThemeRiver chart, using the keys provided
     let stack = d3.stack()
-      .offset(d3.stackOffsetSilhouette)
+      .offset(this.props.d3offset)
       .keys(keys);
 
     //Data formatted for d3
@@ -44,8 +45,10 @@ export default class ThemeRiverChart extends React.Component {
     let clientRect = svg.node().getBoundingClientRect();
     let width = clientRect.width;
     let height = clientRect.height;
-    let paddingLeft = 40;
-    let paddingBottom = 20;
+    let paddingLeft = (this.props.paddings.left) ? this.props.paddings.left : 0;
+    let paddingBottom = (this.props.paddings.bottom) ? this.props.paddings.bottom : 0;
+    let paddingTop = (this.props.paddings.top) ? this.props.paddings.top : 0;
+    let paddingRight = (this.props.paddings.right) ? this.props.paddings.right : 0;
 
     //Remove old data
     svg.selectAll("*").remove();
@@ -53,13 +56,13 @@ export default class ThemeRiverChart extends React.Component {
     //X axis scaled with the first and last date
     let x = d3.scaleTime()
       .domain([stackedData[0][0].data.date, stackedData[0][stackedData[0].length-1].data.date])
-      .range([paddingLeft, width]);
+      .range([paddingLeft, width-paddingRight]);
     //let x = this.state.xScale;
 
     //Y axis scaled with the maximum amount of change (half in each direction)
     let y = d3.scaleLinear()
-      .domain([this.props.maxChange/-2, this.props.maxChange/2])
-      .range([height - paddingBottom, 0]);
+      .domain([this.props.yDims[0], this.props.yDims[1]])
+      .range([height - paddingBottom, paddingTop]);
 
     //Area generator for the chart
     let area = d3.area()
@@ -88,9 +91,9 @@ export default class ThemeRiverChart extends React.Component {
       .attr("transform", "translate(" + paddingLeft + ",0)")
       .call(d3.axisLeft(y).tickFormat(function(d){
         if(d > 0)
-          return d*2;
+          return d*yScale;
         else
-          return d*(-2);
+          return d*(-1)*yScale;
       }));
   }
 
