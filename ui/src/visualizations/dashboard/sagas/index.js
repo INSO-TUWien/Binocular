@@ -11,7 +11,6 @@ import { getChartColors } from '../../../utils';
 import getCommitData from './getCommitData.js';
 import getIssueData from './getIssueData.js';
 import getBuildData from './getBuildData.js';
-import fetchRelatedCommits from './fetchRelatedCommits.js';
 import getBounds from './getBounds.js';
 
 export const setResolution = createAction('SET_RESOLUTION');
@@ -52,16 +51,6 @@ function* watchMessages() {
   yield takeEvery('message', mapSaga(requestRefresh));
 }
 
-export function* watchOpenCommit() {
-  yield takeEvery('OPEN_COMMIT', function(a) {
-    window.open(a.payload.webUrl);
-  });
-}
-
-function* watchViewport() {
-  yield takeEvery('COR_SET_VIEWPORT', mapSaga(requestRefresh));
-}
-
 function* watchToggleHelp() {
   yield takeEvery('TOGGLE_HELP', mapSaga(refresh));
 }
@@ -94,11 +83,6 @@ export const fetchDashboardData = fetchFactory(
     const lastSignificantTimestamp = viewport[1]
       ? viewport[1].getTime()
       : Math.max(lastCommitTimestamp, lastIssueTimestamp);
-
-    const span = lastSignificantTimestamp - firstSignificantTimestamp;
-    const granularity = getGranularity(span);
-
-    const interval = granularity.interval.asMilliseconds();
 
     return yield Promise.join(
       getCommitData(
@@ -134,22 +118,3 @@ export const fetchDashboardData = fetchFactory(
   receiveDashboardData,
   receiveDashboardDataError
 );
-
-function getGranularity(span) {
-  const granularities = [
-    { interval: moment.duration(1, 'year'), limit: moment.duration(100, 'years') },
-    { interval: moment.duration(9, 'month'), limit: moment.duration(100, 'months') },
-    { interval: moment.duration(1, 'month'), limit: moment.duration(50, 'months') },
-    { interval: moment.duration(1, 'week'), limit: moment.duration(100, 'weeks') },
-    { interval: moment.duration(1, 'day'), limit: moment.duration(100, 'day') },
-    { interval: moment.duration(1, 'hour'), limit: moment.duration(100, 'hour') }
-  ];
-
-  return _.reduce(granularities, (t, g) => {
-    if (span < g.limit.asMilliseconds()) {
-      return g;
-    } else {
-      return t;
-    }
-  });
-}

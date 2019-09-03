@@ -6,7 +6,6 @@ import * as d3 from 'd3';
 import styles from '../styles.scss';
 import _ from 'lodash';
 
-import * as zoomUtils from '../../../utils/zoom.js';
 import StackedAreaChart from '../../../components/StackedAreaChart';
 import moment from 'moment';
 

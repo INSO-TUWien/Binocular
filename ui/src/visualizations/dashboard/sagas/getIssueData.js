@@ -1,7 +1,5 @@
 'use strict';
 
-import moment from 'moment';
-import _ from 'lodash';
 import { traversePages, graphQl } from '../../../utils';
 
 export default function getIssueData(issueSpan, significantSpan) {

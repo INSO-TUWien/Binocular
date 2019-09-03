@@ -10,15 +10,7 @@ export default handleActions(
     SET_SHOW_ISSUES: (state, action) => _.assign({}, state, {showIssues: action.payload}),
     SET_SELECTED_AUTHORS: (state, action) => _.assign({}, state, {selectedAuthors: [...action.payload]}),
     SET_AVAILABLE_AUTHORS: (state, action) => _.assign({}, state, {availableAuthors: action.payload}),
-    SET_DISPLAY_METRIC: (state, action) => _.assign({}, state, {displayMetric: action.payload}),
-
-    COR_SET_VIEWPORT: (state, action) => _.assign({}, state, { viewport: action.payload }),
-
-    COR_RECEIVE_RELATED_COMMITS: (state, action) => {
-      return _.assign({}, state, {
-        highlightedCommits: action.payload
-      });
-    }
+    SET_DISPLAY_METRIC: (state, action) => _.assign({}, state, {displayMetric: action.payload})
   },
   {
     chartResolution: 'months',      //chart bucket size, can be 'years', 'months', 'weeks' or 'days'
