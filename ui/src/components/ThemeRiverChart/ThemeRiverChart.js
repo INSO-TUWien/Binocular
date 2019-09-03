@@ -32,7 +32,7 @@ export default class ThemeRiverChart extends React.Component {
     //Keys are the names of the developers, date is excluded
     let keys;
     if(this.props.keys)
-      keys = this.props.keys;
+      keys = (this.props.keys.length > 0) ? this.props.keys : Object.keys(data[0]).slice(1);
     else
       keys = Object.keys(data[0]).slice(1);
 
