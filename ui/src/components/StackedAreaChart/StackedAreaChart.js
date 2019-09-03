@@ -26,13 +26,28 @@ export default class StackedAreaChart extends React.Component {
     this.state = {
       content: props.content,   //[{name: "dev1", color: "#ffffff", checked: bool}, ...]
       palette: props.palette,
-      componentMounted: false
+      componentMounted: false,
+      zooming: false,
+      zoomed: false,
+      zoomedDims: [0,0]
     };
+    window.addEventListener("resize", () => this.setState({zooming: false, zoomed: false}));
   }
 
   componentDidMount() {
     //Needed to restrict d3 to only access DOM when the component is already mounted
     this.setState({componentMounted: true});
+  }
+
+
+  componentWillUnmount() {
+    this.setState({componentMounted: false});
+  }
+
+  componentWillReceiveProps(nextProps, nextContext) {
+    if(nextProps.content.length !== this.props.content.length){
+      this.setState({zooming: false, zoomed: false});
+    }
   }
 
   /**
@@ -81,15 +96,35 @@ export default class StackedAreaChart extends React.Component {
     svg.selectAll('*').remove();
 
     //X axis scaled with the first and last date
-    let x = d3.scaleTime()
-      .domain([stackedData[0][0].data.date, stackedData[0][stackedData[0].length - 1].data.date])
-      .rangeRound([paddingLeft, width - paddingRight]);
+    let x;
+    if(this.state.zoomed === true){
+      x = d3.scaleTime()
+        .domain(this.state.zoomedDims)
+        .range([paddingLeft, width - paddingRight]);
+    }else {
+      x = d3.scaleTime()
+        .domain([stackedData[0][0].data.date, stackedData[0][stackedData[0].length - 1].data.date])
+        .range([paddingLeft, width - paddingRight]);
+    }
     //let x = this.state.xScale;
 
     //Y axis scaled with the maximum amount of change (half in each direction)
     let y = d3.scaleLinear()
       .domain([this.props.yDims[0], this.props.yDims[1]])
-      .rangeRound([height - paddingBottom, paddingTop]);
+      .range([height - paddingBottom, paddingTop]);
+
+
+    let clip = svg.append("defs").append("svg:clipPath")
+      .attr("id", "clip")
+      .append("svg:rect")
+      .attr("width", width )
+      .attr("height", height )
+      .attr("x", 0)
+      .attr("y", 0);
+
+    let brush = d3.brushX()
+      .extent([[0,0], [width,height]])
+      .on("end", updateZoom.bind(this));
 
     //Area generator for the chart
     let area = d3.area()
@@ -101,8 +136,15 @@ export default class StackedAreaChart extends React.Component {
     //Color palette with the form {author1: color1, ...}
     let palette = this.props.palette;
 
+    let brushArea = svg.append('g')
+      .attr("clip-path", "url(#clip)");
+
+    brushArea.append('g')
+      .attr("class", "brush")
+      .call(brush);
+
     //Append data to svg using the area generator and palette
-    svg.selectAll()
+    brushArea.selectAll()
       .data(stackedData)
       .enter().append('path')
       .attr('class', 'layer')
@@ -110,12 +152,13 @@ export default class StackedAreaChart extends React.Component {
       .attr('d', area);
 
     //Append visible x-axis on the bottom, with an offset so it's actually visible
+    let xAxis;
     if(this.props.xAxisCenter) {
-      svg.append('g')
+      xAxis = svg.append('g')
         .attr('transform', 'translate(0,' + y(0) + ')')
         .call(d3.axisBottom(x));
     }else {
-      svg.append('g')
+      xAxis = svg.append('g')
         .attr('transform', 'translate(0,' + (height - paddingBottom) + ')')
         .call(d3.axisBottom(x));
     }
@@ -128,12 +171,53 @@ export default class StackedAreaChart extends React.Component {
         else
           return d * (-1) * yScale;
       }));
+
+
+    function updateZoom() {
+      let extent = d3.event.selection;
+      console.log(extent);
+      if(extent){
+        x.domain([x.invert(extent[0]), x.invert(extent[1])])
+          .range([paddingLeft, width - paddingRight]);
+        brushArea.select(".brush").call(brush.move, null);
+      }else{
+        return;
+      }
+
+      this.setState({zooming: true}, () => {
+        xAxis.transition().duration(500).call(d3.axisBottom(x));
+        brushArea
+          .selectAll('.layer')
+          .transition()
+          .duration(500)
+          .attr("d", area)
+          .on("end", this.setState([{zooming: false}]));
+
+        this.setState({zoomed: true, zoomedDims: [x.invert(extent[0]), x.invert(extent[1])]});
+      })
+
+    }
+
+    // If user double click, reinitialize the chart
+    svg.on("dblclick", () => {
+      x.domain([stackedData[0][0].data.date, stackedData[0][stackedData[0].length - 1].data.date]);
+      xAxis.transition(500).call(d3.axisBottom(x));
+      brushArea
+        .selectAll('.layer')
+        .transition(500)
+        .attr("d", area).on("end", this.setState({zooming: false, zoomed: false}));
+
+
+    });
+
+
   }
 
   render() {
 
     //Only draw the chart if there is data for it and the component is mounted (d3 requirement)
-    if (this.state.componentMounted && this.props.content) {
+    if (this.state.componentMounted && this.props.content && !this.state.zooming) {
+      console.log("draw chart");
       this.drawChart(this.props.content);
     }
 
