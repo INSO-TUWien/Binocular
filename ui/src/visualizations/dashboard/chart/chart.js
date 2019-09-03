@@ -132,10 +132,12 @@ export default class Dashboard extends React.Component {
     let createdDate = Date.parse(props.issues[0].createdAt);
 
     for(let i=0, j=0; curr.isSameOrBefore(end); curr.add(1,props.chartResolution), next.add(1,props.chartResolution)){                   //Iterate through time buckets
-      let obj = {date: curr.toDate().getTime(), count: 0, openCount: 0, closedCount: 0};                            //Save date of time bucket, create object
+      let currTimestamp = curr.toDate().getTime();
+      let nextTimestamp = next.toDate().getTime();
+      let obj = {date: currTimestamp, count: 0, openCount: 0, closedCount: 0};                            //Save date of time bucket, create object
 
-      while(i < filteredIssues.length && createdDate < next.toDate().getTime() && createdDate >= curr.toDate().getTime()){               //Iterate through issues that fall into this time bucket (open date)
-        if(createdDate > curr.toDate().getTime() && createdDate < next.toDate().getTime()){
+      while(i < filteredIssues.length && createdDate < nextTimestamp && createdDate >= currTimestamp){               //Iterate through issues that fall into this time bucket (open date)
+        if(createdDate > currTimestamp && createdDate < nextTimestamp){
           obj.count++;
           obj.openCount++;
         }
@@ -147,8 +149,8 @@ export default class Dashboard extends React.Component {
         if(++i < filteredIssues.length)
           createdDate = Date.parse(filteredIssues[i].createdAt);
       }
-      for(;j < sortedCloseDates.length && sortedCloseDates[j] < next.toDate().getTime() && sortedCloseDates[j] >= curr.toDate().getTime(); j++){         //Iterate through issues that fall into this time bucket (closed date)
-        if(sortedCloseDates[j] > curr.toDate().getTime() && sortedCloseDates[j] < next.toDate().getTime()){
+      for(;j < sortedCloseDates.length && sortedCloseDates[j] < nextTimestamp && sortedCloseDates[j] >= currTimestamp; j++){         //Iterate through issues that fall into this time bucket (closed date)
+        if(sortedCloseDates[j] > currTimestamp && sortedCloseDates[j] < nextTimestamp){
           sortedCloseDates.splice(j,1);
           obj.count++;
           obj.closedCount++;
@@ -182,10 +184,12 @@ export default class Dashboard extends React.Component {
     let end = moment(props.lastSignificantTimestamp).endOf(granularity.unit).add(1,props.chartResolution);
     let next = moment(curr).add(1,props.chartResolution);
     for(let i=0; curr.isSameOrBefore(end); curr.add(1,props.chartResolution), next.add(1,props.chartResolution)){       //Iterate through time buckets
-      let obj = {date: curr.toDate().getTime(), succeeded: 0, failed: 0};  //Save date of time bucket, create object
-      for(; i < props.builds.length && Date.parse(props.builds[i].createdAt) < next.toDate().getTime(); i++){             //Iterate through commits that fall into this time bucket
+      let currTimestamp = curr.toDate().getTime();
+      let nextTimestamp = next.toDate().getTime();
+      let obj = {date: currTimestamp, succeeded: 0, failed: 0};  //Save date of time bucket, create object
+      for(; i < props.builds.length && Date.parse(props.builds[i].createdAt) < nextTimestamp; i++){             //Iterate through commits that fall into this time bucket
         let buildDate = Date.parse(props.builds[i].createdAt);
-        if(buildDate >= curr.toDate().getTime() && buildDate < next.toDate().getTime()){
+        if(buildDate >= currTimestamp && buildDate < nextTimestamp){
           obj.succeeded += (props.builds[i].stats.success || 0);
           obj.failed += (props.builds[i].stats.failed || 0);
         }
@@ -220,8 +224,10 @@ export default class Dashboard extends React.Component {
     let end = moment(props.lastSignificantTimestamp).endOf(granularity.unit).add(1,props.chartResolution);
     let next = moment(curr).add(1, props.chartResolution);
     for(let i=0; curr.isSameOrBefore(end); curr.add(1,props.chartResolution), next.add(1,props.chartResolution)){       //Iterate through time buckets
-      let obj = {date: curr.toDate().getTime(), totals: {count: 0, changes: 0}, statsByAuthor: {}};  //Save date of time bucket, create object
-      for(; i < props.commits.length && Date.parse(props.commits[i].date) < next.toDate().getTime(); i++){             //Iterate through commits that fall into this time bucket
+      let currTimestamp = curr.toDate().getTime();
+      let nextTimestamp = next.toDate().getTime();
+      let obj = {date: currTimestamp, totals: {count: 0, changes: 0}, statsByAuthor: {}};  //Save date of time bucket, create object
+      for(; i < props.commits.length && Date.parse(props.commits[i].date) < nextTimestamp; i++){             //Iterate through commits that fall into this time bucket
         let changes = props.commits[i].stats.additions + props.commits[i].stats.deletions;
         let commitAuthor = props.commits[i].signature;
         obj.totals.count++;
@@ -239,7 +245,6 @@ export default class Dashboard extends React.Component {
     const commitChartData = [];
     _.each(data, function(commit){                     //commit has structure {date, totals: {count, additions, deletions, changes}, statsByAuthor: {}} (see next line)}
       let obj = {date: commit.date};
-      let totalChanges = (props.displayMetric === 'linesChanged') ? commit.totals.changes : commit.totals.count;  //UI Filter for change measurement
       _.each(props.committers, function(committer){                       //commitLegend to iterate over authorNames, commitLegend has structure [{name, style}, ...]
         if(committer in commit.statsByAuthor) {   //If committer has data and isn't filtered, read it
           if(props.displayMetric === 'linesChanged')
