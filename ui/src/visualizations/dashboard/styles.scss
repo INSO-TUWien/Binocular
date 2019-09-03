@@ -5,6 +5,15 @@
   width: auto;
   flex-direction: column;
   margin: 5px;
+  justify-content: center;
+  align-items: center;
+
+  .loadingHintContainer{
+    .loadingHint {
+      font-size: 40px;
+      text-align: center;
+    }
+  }
 
   .chartLine{
     background: #d8d8d8;

@@ -48,52 +48,59 @@ export default class Dashboard extends React.Component {
   }
 
   render() {
+    let ciChart = (<div className={styles.chartLine}>
+      <div className={styles.text}>
+        CI System
+      </div>
+      <div className={styles.chart}>
+        <StackedAreaChart content={this.state.ciChartData}
+                          palette={{succeeded: "#26ca3b", failed: "#e23b41"}}
+                          paddings={{top: 20, left: 40, bottom: 20}}
+                          xAxisCenter={true}
+                          yScale={1}
+                          yDims={this.state.ciScale}
+                          d3offset={d3.stackOffsetDiverging}
+                          d3bugfix={{seriesNumber: 1}}/>
+      </div>
+    </div>);
+    let issueChart = (<div className={styles.chartLine}>
+      <div className={styles.text}>
+        Issues
+      </div>
+      <div className={styles.chart}>
+        <StackedAreaChart content={this.state.issueChartData}
+                          palette={{openCount: "#3461eb", closedCount: "#8099e8"}}
+                          paddings={{top: 20, left: 40, bottom: 20}}
+                          xAxisCenter={true}
+                          yScale={1}
+                          yDims={this.state.issueScale}
+                          d3offset={d3.stackOffsetDiverging}
+                          d3bugfix={{seriesNumber: 1}}/>
+      </div>
+    </div>);
+    let commitChart = (<div className={styles.chartLine}>
+        <div className={styles.text}>
+          Changes
+        </div>
+        <div className={styles.chart}>
+          <StackedAreaChart content={this.state.commitChartData}
+                            palette={this.props.palette}
+                            paddings={{top: 20, left: 40, bottom: 20}}
+                            yScale={2}
+                            yDims={this.state.commitScale}
+                            d3offset={d3.stackOffsetSilhouette}
+                            keys={this.props.selectedAuthors}/>
+        </div>
+      </div>);
+    let loadingHint = (<div className={styles.loadingHintContainer}>
+      <h1 className={styles.loadingHint}>Loading Chart Data...</h1>
+    </div>);
     return (
       <div className={styles.chartContainer}>
-        <div className={styles.chartLine}>
-          <div className={styles.text}>
-            CI System
-          </div>
-          <div className={styles.chart}>
-            <StackedAreaChart content={this.state.ciChartData}
-                              palette={{succeeded: "#26ca3b", failed: "#e23b41"}}
-                              paddings={{top: 20, left: 40, bottom: 20}}
-                              xAxisCenter={true}
-                              yScale={1}
-                              yDims={this.state.ciScale}
-                              d3offset={d3.stackOffsetDiverging}
-                              d3bugfix={{seriesNumber: 1}}/>
-          </div>
-        </div>
-        <div className={styles.chartLine}>
-          <div className={styles.text}>
-            Issues
-          </div>
-          <div className={styles.chart}>
-            <StackedAreaChart content={this.state.issueChartData}
-                              palette={{openCount: "#3461eb", closedCount: "#8099e8"}}
-                              paddings={{top: 20, left: 40, bottom: 20}}
-                              xAxisCenter={true}
-                              yScale={1}
-                              yDims={this.state.issueScale}
-                              d3offset={d3.stackOffsetDiverging}
-                              d3bugfix={{seriesNumber: 1}}/>
-          </div>
-        </div>
-        <div className={styles.chartLine}>
-          <div className={styles.text}>
-            Changes
-          </div>
-          <div className={styles.chart}>
-            <StackedAreaChart content={this.state.commitChartData}
-                              palette={this.props.palette}
-                              paddings={{top: 20, left: 40, bottom: 20}}
-                              yScale={2}
-                              yDims={this.state.commitScale}
-                              d3offset={d3.stackOffsetSilhouette}
-                              keys={this.props.selectedAuthors}/>
-          </div>
-        </div>
+        {(this.state.ciChartData == null && this.state.issueChartData == null && this.state.commitChartData == null && loadingHint)}
+        {(this.state.ciChartData && ciChart)}
+        {(this.state.issueChartData && issueChart)}
+        {(this.state.commitChartData && commitChart)}
       </div>
     );
   }
