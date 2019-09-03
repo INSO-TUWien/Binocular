@@ -30,7 +30,11 @@ export default class ThemeRiverChart extends React.Component {
     let yScale = this.props.yScale;
 
     //Keys are the names of the developers, date is excluded
-    let keys = Object.keys(data[0]).slice(1);
+    let keys;
+    if(this.props.keys)
+      keys = this.props.keys;
+    else
+      keys = Object.keys(data[0]).slice(1);
 
     //Stack function for a ThemeRiver chart, using the keys provided
     let stack = d3.stack()

@@ -48,7 +48,6 @@ export default class Dashboard extends React.Component {
   }
 
   render() {
-    console.log(this.props.selectedAuthors);
     return (
       <div className={styles.chartContainer}>
         <div className={styles.chartLine}>
@@ -238,14 +237,11 @@ export default class Dashboard extends React.Component {
 
     //--- STEP 2: CONSTRUCT CHART DATA FROM AGGREGATED COMMITS ----
     const commitChartData = [];
-    let commitScale = 0;
     _.each(data, function(commit){                     //commit has structure {date, totals: {count, additions, deletions, changes}, statsByAuthor: {}} (see next line)}
       let obj = {date: commit.date};
       let totalChanges = (props.displayMetric === 'linesChanged') ? commit.totals.changes : commit.totals.count;  //UI Filter for change measurement
-      if(totalChanges > commitScale)
-        commitScale = totalChanges;
       _.each(props.committers, function(committer){                       //commitLegend to iterate over authorNames, commitLegend has structure [{name, style}, ...]
-        if(committer in commit.statsByAuthor) {
+        if(committer in commit.statsByAuthor) {   //If committer has data and isn't filtered, read it
           if(props.displayMetric === 'linesChanged')
             obj[committer] = commit.statsByAuthor[committer].changes;         //Insert number of changes with the author name as key, statsByAuthor has structure {{authorName: {count, additions, deletions, changes}}, ...}
           else
@@ -256,6 +252,19 @@ export default class Dashboard extends React.Component {
       commitChartData.push(obj);                                //Add object to list of objects
     });
     //Output in commitChartData has format [{author1: 123, author2: 123, ...}, ...], e.g. series names are the authors with their corresponding values
+
+    //---- STEP 3: SCALING AND FILTERING ----
+    console.log(props.selectedAuthors);
+    let commitScale = 0;
+    _.each(commitChartData, (dataPoint) => {
+      let filteredTotals = 0;
+      _.each(Object.keys(dataPoint).splice(1), (key) => {
+        if(props.selectedAuthors.indexOf(key) > -1)
+          filteredTotals += dataPoint[key];
+      });
+      if(filteredTotals > commitScale)
+        commitScale = filteredTotals;
+    });
 
     return { commitChartData, commitScale: [commitScale/-2, commitScale/2]};
   }
