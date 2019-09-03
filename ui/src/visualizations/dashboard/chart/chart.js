@@ -7,7 +7,7 @@ import styles from '../styles.scss';
 import _ from 'lodash';
 
 import * as zoomUtils from '../../../utils/zoom.js';
-import ThemeRiverChart from '../../../components/ThemeRiverChart';
+import StackedAreaChart from '../../../components/StackedAreaChart';
 import moment from 'moment';
 
 export default class Dashboard extends React.Component {
@@ -55,14 +55,14 @@ export default class Dashboard extends React.Component {
             CI System
           </div>
           <div className={styles.chart}>
-            <ThemeRiverChart content={this.state.ciChartData}
-                             palette={{succeeded: "#26ca3b", failed: "#e23b41"}}
-                             paddings={{top: 20, left: 40, bottom: 20}}
-                             xAxisCenter={true}
-                             yScale={1}
-                             yDims={this.state.ciScale}
-                             d3offset={d3.stackOffsetDiverging}
-                             d3bugfix={{seriesNumber: 1}}/>
+            <StackedAreaChart content={this.state.ciChartData}
+                              palette={{succeeded: "#26ca3b", failed: "#e23b41"}}
+                              paddings={{top: 20, left: 40, bottom: 20}}
+                              xAxisCenter={true}
+                              yScale={1}
+                              yDims={this.state.ciScale}
+                              d3offset={d3.stackOffsetDiverging}
+                              d3bugfix={{seriesNumber: 1}}/>
           </div>
         </div>
         <div className={styles.chartLine}>
@@ -70,14 +70,14 @@ export default class Dashboard extends React.Component {
             Issues
           </div>
           <div className={styles.chart}>
-            <ThemeRiverChart content={this.state.issueChartData}
-                             palette={{openCount: "#3461eb", closedCount: "#8099e8"}}
-                             paddings={{top: 20, left: 40, bottom: 20}}
-                             xAxisCenter={true}
-                             yScale={1}
-                             yDims={this.state.issueScale}
-                             d3offset={d3.stackOffsetDiverging}
-                             d3bugfix={{seriesNumber: 1}}/>
+            <StackedAreaChart content={this.state.issueChartData}
+                              palette={{openCount: "#3461eb", closedCount: "#8099e8"}}
+                              paddings={{top: 20, left: 40, bottom: 20}}
+                              xAxisCenter={true}
+                              yScale={1}
+                              yDims={this.state.issueScale}
+                              d3offset={d3.stackOffsetDiverging}
+                              d3bugfix={{seriesNumber: 1}}/>
           </div>
         </div>
         <div className={styles.chartLine}>
@@ -85,13 +85,13 @@ export default class Dashboard extends React.Component {
             Changes
           </div>
           <div className={styles.chart}>
-            <ThemeRiverChart content={this.state.commitChartData}
-                             palette={this.props.palette}
-                             paddings={{top: 20, left: 40, bottom: 20}}
-                             yScale={2}
-                             yDims={this.state.commitScale}
-                             d3offset={d3.stackOffsetSilhouette}
-                             keys={this.props.selectedAuthors}/>
+            <StackedAreaChart content={this.state.commitChartData}
+                              palette={this.props.palette}
+                              paddings={{top: 20, left: 40, bottom: 20}}
+                              yScale={2}
+                              yDims={this.state.commitScale}
+                              d3offset={d3.stackOffsetSilhouette}
+                              keys={this.props.selectedAuthors}/>
           </div>
         </div>
       </div>

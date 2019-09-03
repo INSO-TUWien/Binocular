@@ -3,10 +3,10 @@
 import React from 'react';
 import * as d3 from 'd3';
 
-import styles from './themeRiverChart.scss';
+import styles from './stackedAreaChart.scss';
 
 
-export default class ThemeRiverChart extends React.Component {
+export default class StackedAreaChart extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
