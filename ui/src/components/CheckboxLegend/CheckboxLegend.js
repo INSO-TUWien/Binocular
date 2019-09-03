@@ -40,6 +40,18 @@ export default class CheckboxLegend extends React.Component {
     }
   }
 
+  selectAll(){
+    if(this.props.palette == null)
+      return;
+    let selected = Object.keys(this.props.palette);
+    this.setState({selected: selected}, () => this.props.onClick(selected));
+  }
+
+  deselectAll(){
+    let selected = [];
+    this.setState({selected: selected}, () => this.props.onClick(selected));
+  }
+
   render() {
     let items = [];
     if(this.state.initialized) {
@@ -56,8 +68,8 @@ export default class CheckboxLegend extends React.Component {
         {items}
       </div>
       <div className={styles.buttonContainer}>
-        <button type="button" className={[styles.changesButtonLeft, "button"].join(" ")}>Select All</button>
-        <button type="button" className={[styles.changesButtonRight, "button"].join(" ")}>Deselect All</button>
+        <button type="button" onClick={this.selectAll.bind(this)} className={[styles.changesButtonLeft, "button"].join(" ")}>Select All</button>
+        <button type="button" onClick={this.deselectAll.bind(this)} className={[styles.changesButtonRight, "button"].join(" ")}>Deselect All</button>
       </div>
     </div>);
   }
