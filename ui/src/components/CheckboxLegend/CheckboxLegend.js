@@ -9,6 +9,12 @@ import styles from './checkboxLegend.scss';
 const ICON_WIDTH = 15;
 const ICON_HEIGHT = 15;
 
+/**
+ * Legend with each entry containing a color, a checkbox and a name. Used for filtering of series in a chart.
+ * Takes the following props:
+ *  - palette (Format: {seriesName1: color, sseriesName2: color, ...}) Color palette with the keys being the names that should be displayed.
+ *  - onClick (Format: (arg) => {...}, arg being [seriesName1, seriesName2, ...]) Callback function for when something is clicked. The function argument contains the selected entries.
+ */
 export default class CheckboxLegend extends React.Component {
   constructor(props) {
     super(props);
@@ -26,6 +32,10 @@ export default class CheckboxLegend extends React.Component {
     }
   }
 
+  /**
+   * onClick function for a checkbox entry
+   * @param key string name of the entry that was clicked.
+   */
   clickCallback(key){
     let checked = this.state.selected.indexOf(key) !== -1;
     if(!checked) {   //Add to selected
@@ -40,6 +50,9 @@ export default class CheckboxLegend extends React.Component {
     }
   }
 
+  /**
+   * onClick method for the selectAll button
+   */
   selectAll(){
     if(this.props.palette == null)
       return;
@@ -47,6 +60,9 @@ export default class CheckboxLegend extends React.Component {
     this.setState({selected: selected}, () => this.props.onClick(selected));
   }
 
+  /**
+   * onclick method for the deselectAll button
+   */
   deselectAll(){
     let selected = [];
     this.setState({selected: selected}, () => this.props.onClick(selected));
@@ -75,6 +91,13 @@ export default class CheckboxLegend extends React.Component {
   }
 }
 
+/**
+ * A single line of the checkboxLegend (text, color)
+ * Takes props:
+ *  - text: Text to display
+ *  - color: Color to display (Format: "#ffffff")
+ *  - key: Unique key of the checkbox, usually the same as text.
+ */
 class CheckboxLegendLine extends React.Component{
   constructor(props) {
     super(props)
