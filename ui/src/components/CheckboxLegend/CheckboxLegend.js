@@ -26,8 +26,9 @@ export default class CheckboxLegend extends React.Component {
     }
   }
 
-  clickCallback(key, checked){
-    if(checked) {   //Add to selected
+  clickCallback(key){
+    let checked = this.state.selected.indexOf(key) !== -1;
+    if(!checked) {   //Add to selected
       let selected = this.state.selected;
       selected.push(key);
       this.setState({selected: selected}, () => this.props.onClick(selected));
@@ -68,15 +69,12 @@ class CheckboxLegendLine extends React.Component{
     this.state = {
       text: props.text,
       color: props.color,
-      checked: props.checked,
       id: props.id
   }
   }
 
   clickHandler(){
-    let oldChecked = this.state.checked;
-    this.setState({checked: !oldChecked});
-    this.props.onClick(this.state.text, !oldChecked);
+    this.props.onClick(this.state.text);
   }
 
   render()
@@ -87,7 +85,7 @@ class CheckboxLegendLine extends React.Component{
           <svg className={styles.icon} width={ICON_WIDTH} height={ICON_HEIGHT}>
             <rect width={ICON_HEIGHT} height={ICON_WIDTH} fill={this.state.color}/>
           </svg>
-          <input type="checkbox" name={this.state.text} value={this.state.text} checked={this.state.checked} onChange={this.clickHandler.bind(this)}/>
+          <input type="checkbox" name={this.state.text} value={this.state.text} checked={this.props.checked} onChange={this.clickHandler.bind(this)}/>
           {this.state.text}
         </label>
       </div>
