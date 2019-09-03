@@ -2,7 +2,7 @@
 
 import React from 'react';
 import {connect} from 'react-redux';
-import {setOverlay, setHighlightedIssue, setCommitAttribute} from './sagas';
+import {setOverlay, setCommitAttribute} from './sagas';
 import TabCombo from '../../components/TabCombo.js';
 import styles from './styles.scss';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
@@ -12,14 +12,15 @@ import {faFile} from '@fortawesome/free-solid-svg-icons';
 import {faCheckCircle} from '@fortawesome/free-solid-svg-icons';
 
 
+
+
+
 const mapStateToProps = (state /*, ownProps*/) => {
   const corState = state.visualizations.codeOwnershipTransfer.state; //!!!!
 
   return {
-    issues: corState.data.issues,
+    commit: corState.data.commit,
     overlay: corState.config.overlay,
-    highlightedIssue: corState.config.highlightedIssue,
-    commitAttribute: corState.config.commitAttribute
   };
 };
 
@@ -31,7 +32,6 @@ let divStyle = {
 const mapDispatchToProps = (dispatch /*, ownProps*/) => {
   return {
     onSetOverlay: overlay => dispatch(setOverlay(overlay)),
-    onSetHighlightedIssue: issue => dispatch(setHighlightedIssue(issue)),
     onChangeCommitAttribute: attr => dispatch(setCommitAttribute(attr))
   };
 };
@@ -48,14 +48,13 @@ const CodeOwnershipTransferConfigComponent = props => {
               options={[
                 {label: 'Developers', icon: 'users', value: 'developers'},
                 {label: 'Files', icon: 'file', value: 'files'}
-                ]}
+              ]}
             />
           </div>
         </div>
 
         {props.overlay === 'developers' &&
         <div className="field">
-          <input placeholder="Search..."/>
           <div style={divStyle}>
             <div className="card">
               <div className="card-content">
@@ -63,7 +62,7 @@ const CodeOwnershipTransferConfigComponent = props => {
                   <FontAwesomeIcon icon={faUser}/>&nbsp;&nbsp;Developer:</p>
                 <p>
                   <FontAwesomeIcon icon={faFile}/>&nbsp;&nbsp;Owned Files:</p>
-                </div>
+              </div>
             </div>
           </div>
           <div className="control">
@@ -88,6 +87,7 @@ const CodeOwnershipTransferConfigComponent = props => {
             </label>
           </div>
         </div>}
+
 
         {props.overlay === 'files' &&
         <div className="field">
