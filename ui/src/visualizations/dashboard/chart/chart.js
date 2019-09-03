@@ -258,8 +258,7 @@ export default class Dashboard extends React.Component {
     });
     //Output in commitChartData has format [{author1: 123, author2: 123, ...}, ...], e.g. series names are the authors with their corresponding values
 
-    //---- STEP 3: SCALING AND FILTERING ----
-    console.log(props.selectedAuthors);
+    //---- STEP 3: SCALING AND FILTERING ---- 
     let commitScale = 0;
     _.each(commitChartData, (dataPoint) => {
       let filteredTotals = 0;
