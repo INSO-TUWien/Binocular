@@ -125,17 +125,17 @@ export default class Dashboard extends React.Component {
     //---- STEP 2: AGGREGATE ISSUES PER TIME INTERVAL ----
     let data = [];
     let granularity = Dashboard.getGranularity(props.chartResolution);
-    let interval = granularity.asMilliseconds();
-    let curr = moment(props.firstSignificantTimestamp).startOf(granularity.unit).toDate().getTime();
-    let next = curr + interval;
+    let curr = moment(props.firstSignificantTimestamp).startOf(granularity.unit).subtract(1,props.chartResolution);
+    let next = moment(curr).add(1,props.chartResolution);
+    let end = moment(props.lastSignificantTimestamp).endOf(granularity.unit).add(1,props.chartResolution)
     let sortedCloseDates = [];
     let createdDate = Date.parse(props.issues[0].createdAt);
 
-    for(let i=0, j=0; curr < props.lastSignificantTimestamp; curr = next, next += interval){                   //Iterate through time buckets
-      let obj = {date: curr, count: 0, openCount: 0, closedCount: 0};                            //Save date of time bucket, create object
+    for(let i=0, j=0; curr.isSameOrBefore(end); curr.add(1,props.chartResolution), next.add(1,props.chartResolution)){                   //Iterate through time buckets
+      let obj = {date: curr.toDate().getTime(), count: 0, openCount: 0, closedCount: 0};                            //Save date of time bucket, create object
 
-      while(i < filteredIssues.length && createdDate < next && createdDate >= curr){               //Iterate through issues that fall into this time bucket (open date)
-        if(createdDate > curr && createdDate < next){
+      while(i < filteredIssues.length && createdDate < next.toDate().getTime() && createdDate >= curr.toDate().getTime()){               //Iterate through issues that fall into this time bucket (open date)
+        if(createdDate > curr.toDate().getTime() && createdDate < next.toDate().getTime()){
           obj.count++;
           obj.openCount++;
         }
@@ -147,8 +147,8 @@ export default class Dashboard extends React.Component {
         if(++i < filteredIssues.length)
           createdDate = Date.parse(filteredIssues[i].createdAt);
       }
-      for(;j < sortedCloseDates.length && sortedCloseDates[j] < next && sortedCloseDates[j] >= curr; j++){         //Iterate through issues that fall into this time bucket (closed date)
-        if(sortedCloseDates[j] > curr && sortedCloseDates[j] < next){
+      for(;j < sortedCloseDates.length && sortedCloseDates[j] < next.toDate().getTime() && sortedCloseDates[j] >= curr.toDate().getTime(); j++){         //Iterate through issues that fall into this time bucket (closed date)
+        if(sortedCloseDates[j] > curr.toDate().getTime() && sortedCloseDates[j] < next.toDate().getTime()){
           sortedCloseDates.splice(j,1);
           obj.count++;
           obj.closedCount++;
@@ -178,14 +178,14 @@ export default class Dashboard extends React.Component {
     //---- STEP 1: AGGREGATE BUILDS PER TIME INTERVAL ----
     let data = [];
     let granularity = Dashboard.getGranularity(props.chartResolution);
-    let interval = granularity.asMilliseconds();
-    let curr = moment(props.firstSignificantTimestamp).startOf(granularity.unit).toDate().getTime();
-    let next = curr + interval;
-    for(let i=0; curr < props.lastSignificantTimestamp; curr = next, next += interval){       //Iterate through time buckets
-      let obj = {date: curr, succeeded: 0, failed: 0};  //Save date of time bucket, create object
-      for(; i < props.builds.length && Date.parse(props.builds[i].createdAt) < next; i++){             //Iterate through commits that fall into this time bucket
+    let curr = moment(props.firstSignificantTimestamp).startOf(granularity.unit).subtract(1,props.chartResolution);
+    let end = moment(props.lastSignificantTimestamp).endOf(granularity.unit).add(1,props.chartResolution);
+    let next = moment(curr).add(1,props.chartResolution);
+    for(let i=0; curr.isSameOrBefore(end); curr.add(1,props.chartResolution), next.add(1,props.chartResolution)){       //Iterate through time buckets
+      let obj = {date: curr.toDate().getTime(), succeeded: 0, failed: 0};  //Save date of time bucket, create object
+      for(; i < props.builds.length && Date.parse(props.builds[i].createdAt) < next.toDate().getTime(); i++){             //Iterate through commits that fall into this time bucket
         let buildDate = Date.parse(props.builds[i].createdAt);
-        if(buildDate >= curr && buildDate < next){
+        if(buildDate >= curr.toDate().getTime() && buildDate < next.toDate().getTime()){
           obj.succeeded += (props.builds[i].stats.success || 0);
           obj.failed += (props.builds[i].stats.failed || 0);
         }
@@ -216,12 +216,12 @@ export default class Dashboard extends React.Component {
     let data = [];
     //let granularity = Dashboard.getGranularity(props.resolution);
     let granularity = Dashboard.getGranularity(props.chartResolution);
-    let interval = granularity.asMilliseconds();
-    let curr = moment(props.firstSignificantTimestamp).startOf(granularity.unit).toDate().getTime();
-    let next = curr + interval;
-    for(let i=0; curr < props.lastSignificantTimestamp; curr = next, next += interval){       //Iterate through time buckets
-      let obj = {date: curr, totals: {count: 0, changes: 0}, statsByAuthor: {}};  //Save date of time bucket, create object
-      for(; i < props.commits.length && Date.parse(props.commits[i].date) < next; i++){             //Iterate through commits that fall into this time bucket
+    let curr = moment(props.firstSignificantTimestamp).startOf(granularity.unit).subtract(1,props.chartResolution);
+    let end = moment(props.lastSignificantTimestamp).endOf(granularity.unit).add(1,props.chartResolution);
+    let next = moment(curr).add(1, props.chartResolution);
+    for(let i=0; curr.isSameOrBefore(end); curr.add(1,props.chartResolution), next.add(1,props.chartResolution)){       //Iterate through time buckets
+      let obj = {date: curr.toDate().getTime(), totals: {count: 0, changes: 0}, statsByAuthor: {}};  //Save date of time bucket, create object
+      for(; i < props.commits.length && Date.parse(props.commits[i].date) < next.toDate().getTime(); i++){             //Iterate through commits that fall into this time bucket
         let changes = props.commits[i].stats.additions + props.commits[i].stats.deletions;
         let commitAuthor = props.commits[i].signature;
         obj.totals.count++;
@@ -272,13 +272,13 @@ export default class Dashboard extends React.Component {
   static getGranularity(resolution) {
     switch(resolution){
       case 'years':
-        return moment.duration(1, 'year');
+        return {interval: moment.duration(1, 'year'), unit: 'year'};
       case 'months':
-        return moment.duration(1, 'month');
+        return {interval: moment.duration(1, 'month'), unit: 'month'};
       case 'weeks':
-        return moment.duration(1, 'week');
+        return {interval: moment.duration(1, 'week'), unit: 'week'};
       case 'days':
-        return moment.duration(1, 'day');
+        return {interval: moment.duration(1, 'day'), unit: 'day'};
     }
   }
 }
