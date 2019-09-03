@@ -55,7 +55,7 @@ export default class Dashboard extends React.Component {
       <div className={styles.chart}>
         <StackedAreaChart content={this.state.ciChartData}
                           palette={{succeeded: "#26ca3b", failed: "#e23b41"}}
-                          paddings={{top: 20, left: 40, bottom: 20}}
+                          paddings={{top: 20, left: 60, bottom: 20, right: 40}}
                           xAxisCenter={true}
                           yScale={1}
                           yDims={this.state.ciScale}
@@ -70,7 +70,7 @@ export default class Dashboard extends React.Component {
       <div className={styles.chart}>
         <StackedAreaChart content={this.state.issueChartData}
                           palette={{openCount: "#3461eb", closedCount: "#8099e8"}}
-                          paddings={{top: 20, left: 40, bottom: 20}}
+                          paddings={{top: 20, left: 60, bottom: 20, right: 40}}
                           xAxisCenter={true}
                           yScale={1}
                           yDims={this.state.issueScale}
@@ -85,7 +85,7 @@ export default class Dashboard extends React.Component {
         <div className={styles.chart}>
           <StackedAreaChart content={this.state.commitChartData}
                             palette={this.props.palette}
-                            paddings={{top: 20, left: 40, bottom: 20}}
+                            paddings={{top: 20, left: 60, bottom: 20, right: 40}}
                             yScale={2}
                             yDims={this.state.commitScale}
                             d3offset={d3.stackOffsetSilhouette}
