@@ -79,8 +79,6 @@ const DashboardConfigComponent = props => {
         </div>
         <div className={styles.field}>
           <div className="control">
-            <label className="label">Changes</label>
-            <CheckboxLegend palette={props.palette} onClick={props.onClickCheckboxLegend.bind(this)}/>
             <label className="label">Change Measurement:</label>
             <TabCombo
               value={props.metric}
@@ -90,6 +88,8 @@ const DashboardConfigComponent = props => {
               ]}
               onChange={value => props.onClickMetric(value)}
             />
+            <label className="label">Changes</label>
+            <CheckboxLegend palette={props.palette} onClick={props.onClickCheckboxLegend.bind(this)}/>
           </div>
         </div>
       </form>
