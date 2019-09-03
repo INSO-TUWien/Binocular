@@ -100,16 +100,11 @@ export default class CheckboxLegend extends React.Component {
  */
 class CheckboxLegendLine extends React.Component{
   constructor(props) {
-    super(props)
-    this.state = {
-      text: props.text,
-      color: props.color,
-      id: props.id
-  }
+    super(props);
   }
 
   clickHandler(){
-    this.props.onClick(this.state.text);
+    this.props.onClick(this.props.text);
   }
 
   render()
@@ -118,10 +113,10 @@ class CheckboxLegendLine extends React.Component{
       <div className={styles.checkboxLegendLine}>
         <label className={styles.field}>
           <svg className={styles.icon} width={ICON_WIDTH} height={ICON_HEIGHT}>
-            <rect width={ICON_HEIGHT} height={ICON_WIDTH} fill={this.state.color}/>
+            <rect width={ICON_HEIGHT} height={ICON_WIDTH} fill={this.props.color}/>
           </svg>
-          <input type="checkbox" name={this.state.text} value={this.state.text} checked={this.props.checked} onChange={this.clickHandler.bind(this)}/>
-          {this.state.text}
+          <input type="checkbox" name={this.props.text} value={this.props.text} checked={this.props.checked} onChange={this.clickHandler.bind(this)}/>
+          {this.props.text}
         </label>
       </div>
     );
