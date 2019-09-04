@@ -44,12 +44,6 @@ export default class StackedAreaChart extends React.Component {
     this.setState({componentMounted: false});
   }
 
-  componentWillReceiveProps(nextProps, nextContext) {
-    if(nextProps.content.length !== this.props.content.length){
-      this.setState({zooming: false, zoomed: false});
-    }
-  }
-
   /**
    * Draw the chart onto the svg element
    * @param commitData commit Data in the format [{date: date, author1: changes, author2: changes, author3: changes, author4: changes, ...}, ...]
@@ -97,22 +91,19 @@ export default class StackedAreaChart extends React.Component {
 
     //X axis scaled with the first and last date
     let x;
+
+    x = d3.scaleTime()
+      .domain([stackedData[0][0].data.date, stackedData[0][stackedData[0].length - 1].data.date])
+      .range([paddingLeft, width - paddingRight]);
+
     if(this.state.zoomed === true){
-      x = d3.scaleTime()
-        .domain(this.state.zoomedDims)
-        .range([paddingLeft, width - paddingRight]);
-    }else {
-      x = d3.scaleTime()
-        .domain([stackedData[0][0].data.date, stackedData[0][stackedData[0].length - 1].data.date])
-        .range([paddingLeft, width - paddingRight]);
+        x.domain(this.state.zoomedDims);
     }
-    //let x = this.state.xScale;
 
     //Y axis scaled with the maximum amount of change (half in each direction)
     let y = d3.scaleLinear()
       .domain([this.props.yDims[0], this.props.yDims[1]])
       .range([height - paddingBottom, paddingTop]);
-
 
     let clip = svg.append("defs").append("svg:clipPath")
       .attr("id", "clip")
@@ -174,8 +165,9 @@ export default class StackedAreaChart extends React.Component {
 
     function updateZoom() {
       let extent = d3.event.selection;
-      console.log(extent);
+      let zoomedDims;
       if(extent){
+        zoomedDims = [x.invert(extent[0]), x.invert(extent[1])];
         x.domain([x.invert(extent[0]), x.invert(extent[1])])
           .range([paddingLeft, width - paddingRight]);
         brushArea.select(".brush").call(brush.move, null);
@@ -190,11 +182,8 @@ export default class StackedAreaChart extends React.Component {
           .transition()
           .duration(500)
           .attr("d", area)
-          .on("end", this.setState([{zooming: false}]));
-
-        this.setState({zoomed: true, zoomedDims: [x.invert(extent[0]), x.invert(extent[1])]});
+          .on("end", () => this.setState({zoomed: true, zooming: false, zoomedDims: zoomedDims}));
       })
-
     }
 
     // If user double click, reinitialize the chart
@@ -205,8 +194,6 @@ export default class StackedAreaChart extends React.Component {
         .selectAll('.layer')
         .transition(500)
         .attr("d", area).on("end", this.setState({zooming: false, zoomed: false}));
-
-
     });
 
 
@@ -216,7 +203,6 @@ export default class StackedAreaChart extends React.Component {
 
     //Only draw the chart if there is data for it and the component is mounted (d3 requirement)
     if (this.state.componentMounted && this.props.content && !this.state.zooming) {
-      console.log("draw chart");
       this.drawChart(this.props.content);
     }
 
