@@ -45,8 +45,9 @@ export default class StackedAreaChart extends React.Component {
   }
 
   /**
-   * Draw the chart onto the svg element
-   * @param commitData commit Data in the format [{date: date, author1: changes, author2: changes, author3: changes, author4: changes, ...}, ...]
+   * Calculate data for the chart.
+   * @param data Chart data in the format [{date: timestamp(ms), series1: value, series2: value, series3: value, series4: value, ...}, ...]
+   * @returns Stacked chart data for d3 functions
    */
   calculateChartData(data){
     //Keys are the names of the developers, date is excluded
@@ -77,6 +78,11 @@ export default class StackedAreaChart extends React.Component {
     return stackedData;
   }
 
+  /**
+   * Get dimensions and padding of element
+   * @param svg Svg-Element to get dimensions and paddings of
+   * @returns {width, height, {paddings: {top: *, left: *, bottom: *, right: *}, width: *, height: *}} Values self-explanatory. All values in pixels.
+   */
   getDimsAndPaddings(svg){
     let clientRect = svg.node().getBoundingClientRect();
     let width = clientRect.width;
@@ -89,6 +95,20 @@ export default class StackedAreaChart extends React.Component {
     return {width, height, paddings: {left: paddingLeft, bottom: paddingBottom, top: paddingTop, right: paddingRight}};
   }
 
+  /**
+   * Draw the chart onto the svg element.
+   * @param svg element to draw on (e.g. d3.select(this.ref))
+   * @param data stacked data from the calculateChartData function
+   * @param area d3 area generator
+   * @param brush d3 brush generator
+   * @param yScale yScale factor from props (for applying formatting to the y axis)
+   * @param x d3 x-scale from method createScales
+   * @param y d3 y-scale from method createScales
+   * @param height element height from getDimsAndPaddings method (required for axis formatting)
+   * @param width element width from getDimsAndPaddings method (required for axis formatting)
+   * @param paddings paddings of element from getDimsAndPaddings method ()
+   * @returns {{brushArea: *, xAxis: *}} brushArea: Area that has all the contents appended to it, xAxis: d3 x-Axis for later transitioning (for zooming)
+   */
   drawChart(svg, data, area, brush, yScale, x, y, height, width, paddings){
     //Remove old data
     svg.selectAll('*').remove();
@@ -142,6 +162,15 @@ export default class StackedAreaChart extends React.Component {
     return {brushArea, xAxis};
   }
 
+  /**
+   *
+   * @param xDims Dimensions of x-data in format [timestamp, timestamp] (timestamp = .getTime(), e.g. timestamp in milliseconds)
+   * @param xRange Range of x-data in format [xLeft, xRight] (values in pixels relative to parent, e.g. insert left padding/right padding to have spacing)
+   * @param yDims Dimensions of y-data in format [lowestNumber, highestNumber] (number = e.g. max/min values of data)
+   * @param yRange Range of y-data in format [yBottom, yTop] (values in pixels relative to parent, e.g. insert top padding/bottom padding to have spacing.
+   *        CAUTION: y-pixels start at the top, so yBottom should be e.g. width-paddingBottom and yTop should be e.g. paddingTop)
+   * @returns {{x: *, y: *}} d3 x and y scales. x scale as time scale, y scale as linear scale.
+   */
   createScales(xDims, xRange, yDims, yRange){
     let x;
 
@@ -161,6 +190,19 @@ export default class StackedAreaChart extends React.Component {
     return {x, y};
   }
 
+  /**
+   * Callback function for brush-zoom functionality. Should be called when brush ends. (.on("end"...)
+   * @param extent Call d3.event.selection inside an anonymous/arrow function, put that anonymous/arrow function as the .on callback method
+   * @param x d3 x Scale provided by createScales function
+   * @param y d3 y Scale provided by createScales function
+   * @param xAxis d3 x-Axis provided by drawChart function
+   * @param height height provided by getDimsAndPaddings function
+   * @param width width provided by getDimsAndPaddings function
+   * @param paddings paddings provided by getDimsAndPaddings function
+   * @param brush brush generator
+   * @param brushArea Area that the path, x/y-Axis and brush-functionality live on (see drawChart)
+   * @param area d3 Area generator (for area graphs)
+   */
   updateZoom(extent, x, y, xAxis, height, width, paddings, brush, brushArea, area) {
     let zoomedDims;
     if(extent){
@@ -184,6 +226,9 @@ export default class StackedAreaChart extends React.Component {
   }
 
 
+  /**
+   * Update the chart element. May only be called if this.props.content is not empty and the component is mounted.
+   */
   updateElement() {
     //Initialization
     let data = this.props.content;                                //Rename for less writing
