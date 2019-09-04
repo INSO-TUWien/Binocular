@@ -70,7 +70,7 @@ export default class StackedAreaChart extends React.Component {
 
     //Brush generator for brush-zoom functionality, with referenced callback-function
     let brush = d3.brushX()
-      .extent([[0,0], [width,height]]);
+      .extent([[paddings.left,0], [width-paddings.right,height]]);
 
     //Draw the chart (and brush box) using everything provided
     let {brushArea, xAxis} = this.drawChart(svg, stackedData, area, brush, yScale, x, y, height, width, paddings);
