@@ -139,10 +139,6 @@ export default class StackedAreaChart extends React.Component {
     let brushArea = svg.append('g')
       .attr("clip-path", "url(#clip)");
 
-    brushArea.append('g')
-      .attr("class", "brush")
-      .call(brush);
-
     //Append data to svg using the area generator and palette
     brushArea.selectAll()
       .data(stackedData)
@@ -154,16 +150,16 @@ export default class StackedAreaChart extends React.Component {
     //Append visible x-axis on the bottom, with an offset so it's actually visible
     let xAxis;
     if(this.props.xAxisCenter) {
-      xAxis = svg.append('g')
+      xAxis = brushArea.append('g')
         .attr('transform', 'translate(0,' + y(0) + ')')
         .call(d3.axisBottom(x));
     }else {
-      xAxis = svg.append('g')
+      xAxis = brushArea.append('g')
         .attr('transform', 'translate(0,' + (height - paddingBottom) + ')')
         .call(d3.axisBottom(x));
     }
 
-    svg.append('g')
+    brushArea.append('g')
       .attr('transform', 'translate(' + paddingLeft + ',0)')
       .call(d3.axisLeft(y).tickFormat(function (d) {
         if (d > 0)
@@ -172,6 +168,9 @@ export default class StackedAreaChart extends React.Component {
           return d * (-1) * yScale;
       }));
 
+    brushArea.append('g')
+      .attr("class", "brush")
+      .call(brush);
 
     function updateZoom() {
       let extent = d3.event.selection;
