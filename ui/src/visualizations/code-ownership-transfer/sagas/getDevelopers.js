@@ -38,12 +38,12 @@ export default function getDevelopers() {
       dataDev.push(commit.signature);
     }
   }).then(function () {
-    console.log('local dev:', dataDev);
-    for (let i = 0; i < dataDev.length; i++) {
-      arrayOfDev.push(dataDev[i]);
+    if(arrayOfDev.length !== dataDev.length) {
+      for (let i = 0; i < dataDev.length; i++) {
+        arrayOfDev.push(dataDev[i]);
+      }
     }
     console.log('global dev array:', arrayOfDev);
-    return dataDev;
   });
 
 }

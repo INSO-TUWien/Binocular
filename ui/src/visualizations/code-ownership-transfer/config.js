@@ -40,8 +40,9 @@ const CodeOwnershipTransferConfigComponent = props => {
 
 
   let devOptions = [];
+  devOptions.push(<option value="" key="0">Select Developer</option>);
   for( let i = 0; i < arrayOfDev.length; i++) {
-    d.push(<option value={arrayOfDev[i]} key={arrayOfDev[i]}>{arrayOfDev[i]}</option>);
+    devOptions.push(<option value={arrayOfDev[i]} key={i+1}>{arrayOfDev[i]}</option>);
   }
   console.log('Developers Select Options', devOptions);
 
@@ -76,7 +77,7 @@ const CodeOwnershipTransferConfigComponent = props => {
             <div className="card">
               <div className="card-content">
                 <p>
-                  <FontAwesomeIcon icon={faUser}/>&nbsp;&nbsp;Developer:</p>
+                  <FontAwesomeIcon icon={faUser}/>&nbsp;&nbsp;Developer: {props.category && <span>{props.category}</span>}</p>
                 <p>
                   <FontAwesomeIcon icon={faFile}/>&nbsp;&nbsp;Owned Files:</p>
               </div>

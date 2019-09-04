@@ -56,6 +56,7 @@ export const fetchIssueImpactData = fetchFactory(
     const state = yield select();
     const activeIssueId = state.visualizations.issueImpact.state.config.activeIssueId;
 
+    console.log('issue',activeIssueId );
     if (activeIssueId === null) {
       return { issue: null };
     }

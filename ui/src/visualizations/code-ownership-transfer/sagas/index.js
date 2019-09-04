@@ -2,7 +2,7 @@
 
 import Promise from 'bluebird';
 import {createAction} from 'redux-actions';
-import {throttle, fork, takeEvery} from 'redux-saga/effects';
+import {throttle, fork, takeEvery, select} from 'redux-saga/effects';
 
 
 import {fetchFactory, timestampedActionFactory, mapSaga} from '../../../sagas/utils.js';
@@ -10,6 +10,8 @@ import {fetchFactory, timestampedActionFactory, mapSaga} from '../../../sagas/ut
 import fetchRelatedCommits from './fetchRelatedCommits.js';
 
 import getDevelopers from "./getDevelopers";
+
+export const setCategory = createAction('SET_CATEGORY');
 
 export const setOverlay = createAction('SET_OVERLAY');
 export const setCommitAttribute = createAction('SET_COMMIT_ATTRIBUTE');
@@ -45,7 +47,7 @@ function* watchRefreshRequests() {
 }
 
 export function* watchSetCategory() {
-  yield takeEvery('SET_CATEGORY', fetchHotspotDialsData);
+  yield takeEvery('SET_CATEGORY', fetchCodeOwnershipData);
 }
 
 function* watchMessages() {
@@ -78,6 +80,10 @@ function* watchHighlightedIssue() {
 
 export const fetchCodeOwnershipData = fetchFactory(
   function* () {
+    const state = yield select();
+
+    const config = state.visualizations.codeOwnershipTransfer.state.config.category;
+    console.log('Config', config);
 
     return yield Promise.join(
       getDevelopers()
