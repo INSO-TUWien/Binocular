@@ -63,8 +63,8 @@ const CodeOwnershipRiverConfigComponent = props => {
               value={props.overlay}
               onChange={value => props.onSetOverlay(value)}
               options={[
-                { label: 'None', icon: 'close', value: 'none' },
-                { label: 'Issues', icon: 'ticket', value: 'issues' },
+                { label: 'None', icon: 'times', value: 'none' },
+                { label: 'Issues', icon: 'ticket-alt', value: 'issues' },
                 { label: 'CI Builds', icon: 'server', value: 'builds' }
               ]}
             />

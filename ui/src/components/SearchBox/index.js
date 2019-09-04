@@ -74,7 +74,7 @@ export default class SearchBox extends React.Component {
         <span className={cx('icon', 'is-small is-right', styles.icon)} onClick={() => this.clear()}>
           <i
             className={cx('fa', {
-              'fa-close': !!this.props.value,
+              'fa-times': !!this.props.value,
               'fa-search': !this.props.value,
               'fa-circle-o-notch': this.state.isSearching,
               'fa-spin': this.state.isSearching

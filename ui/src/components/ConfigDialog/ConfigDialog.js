@@ -27,7 +27,7 @@ const ConfigDialog = props => {
               <li className={cx({ 'is-active': props.activeTab === 'its' })}>
                 <a onClick={() => props.onSwitchTab('its')}>
                   <span className="icon is-small">
-                    <i className="fa fa-ticket" />
+                    <i className="fa fa-ticket-alt" />
                   </span>
                   <span>ITS</span>
                 </a>

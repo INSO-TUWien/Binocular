@@ -15,7 +15,7 @@ export default () =>
     <h2>Interaction</h2>
     <ul>
       <li>
-        <i className="fa fa-hand-grab-o" /> Click and drag on a diagram to zoom in. Double-click to reset.
+        <i className="fa fa-hand-rock" /> Click and drag on a diagram to zoom in. Double-click to reset.
       </li>
     </ul>
 
