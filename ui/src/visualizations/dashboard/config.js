@@ -24,9 +24,8 @@ const mapStateToProps = (state /*, ownProps*/) => {
 const mapDispatchToProps = (dispatch /*, ownProps*/) => {
   return {
     onClickResolution: resolution => dispatch(setResolution(resolution)),
-    onClickShowDevs: showDevs => dispatch(setShowDevs(showDevs)),
+    onClickShowDevs: showDevs => dispatch(setShowDevs(showDevs)),   //TODO remove this if the feature is dropped
     onClickIssues: showIssues => dispatch(setShowIssues(showIssues)),
-    //TODO incorporate selected devs in CheckBoxLegend
     onClickMetric: metric => dispatch(setDisplayMetric(metric)),
     onClickCheckboxLegend: selected => dispatch(setSelectedAuthors(selected))
   };
@@ -43,10 +42,10 @@ const DashboardConfigComponent = props => {
             <TabCombo
               value={props.resolution}
               options={[
-                {label: 'Years', icon: '', value: 'years'},
-                {label: 'Months', icon: '', value: 'months'},
-                {label: 'Weeks', icon: '', value: 'weeks'},
-                {label: 'Days', icon: '', value: 'days'}
+                {label: 'Years', icon: 'calendar-plus', value: 'years'},
+                {label: 'Months', icon: 'calendar', value: 'months'},
+                {label: 'Weeks', icon: 'calendar-week', value: 'weeks'},
+                {label: 'Days', icon: 'calendar-day', value: 'days'}
               ]}
               onChange={value => props.onClickResolution(value)}
             />
@@ -69,9 +68,9 @@ const DashboardConfigComponent = props => {
             <TabCombo
               value={props.showIssues}
               options={[
-                {label: 'All', icon: '', value: 'all'},
-                {label: 'Open', icon: '', value: 'open'},
-                {label: 'Closed', icon: '', value: 'closed'}
+                {label: 'All', icon: 'database', value: 'all'},
+                {label: 'Open', icon: 'folder-open', value: 'open'},
+                {label: 'Closed', icon: 'folder', value: 'closed'}
               ]}
               onChange={value => props.onClickIssues(value)}
             />
@@ -83,8 +82,8 @@ const DashboardConfigComponent = props => {
             <TabCombo
               value={props.metric}
               options={[
-                {label: '# lines changed', icon: '', value: 'linesChanged'},
-                {label: '# commits', icon: '', value: 'commits'}
+                {label: '# lines changed', icon: 'file-alt', value: 'linesChanged'},
+                {label: '# commits', icon: 'cloud-upload-alt', value: 'commits'}
               ]}
               onChange={value => props.onClickMetric(value)}
             />
