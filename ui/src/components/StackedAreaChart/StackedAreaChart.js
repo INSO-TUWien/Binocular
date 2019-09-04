@@ -48,10 +48,7 @@ export default class StackedAreaChart extends React.Component {
    * Draw the chart onto the svg element
    * @param commitData commit Data in the format [{date: date, author1: changes, author2: changes, author3: changes, author4: changes, ...}, ...]
    */
-  drawChart(commitData) {
-    let data = commitData;
-    let yScale = this.props.yScale;
-
+  calculateChartData(data){
     //Keys are the names of the developers, date is excluded
     let keys;
     if(this.props.keys)
@@ -62,6 +59,7 @@ export default class StackedAreaChart extends React.Component {
     //Stack function for a ThemeRiver chart, using the keys provided
     let stack = d3.stack()
       .offset(this.props.d3offset)
+      .order(d3.stackOrderInsideOut)
       .keys(keys);
 
     //Data formatted for d3
@@ -76,8 +74,10 @@ export default class StackedAreaChart extends React.Component {
       })
     }
 
-    let svg = d3.select(this.ref);  //Select svg from render method
-    //Get width and height of svg in browser
+    return stackedData;
+  }
+
+  getDimsAndPaddings(svg){
     let clientRect = svg.node().getBoundingClientRect();
     let width = clientRect.width;
     let height = clientRect.height;
@@ -86,57 +86,33 @@ export default class StackedAreaChart extends React.Component {
     let paddingTop = (this.props.paddings.top) ? this.props.paddings.top : 0;
     let paddingRight = (this.props.paddings.right) ? this.props.paddings.right : 0;
 
+    return {width, height, paddings: {left: paddingLeft, bottom: paddingBottom, top: paddingTop, right: paddingRight}};
+  }
+
+  drawChart(svg, data, area, brush, yScale, x, y, height, width, paddings){
     //Remove old data
     svg.selectAll('*').remove();
 
-    //X axis scaled with the first and last date
-    let x;
+    //Color palette with the form {author1: color1, ...}
+    let palette = this.props.palette;
+    let brushArea = svg.append('g');
 
-    x = d3.scaleTime()
-      .domain([stackedData[0][0].data.date, stackedData[0][stackedData[0].length - 1].data.date])
-      .range([paddingLeft, width - paddingRight]);
-
-    if(this.state.zoomed === true){
-        x.domain(this.state.zoomedDims);
-    }
-
-    //Y axis scaled with the maximum amount of change (half in each direction)
-    let y = d3.scaleLinear()
-      .domain([this.props.yDims[0], this.props.yDims[1]])
-      .range([height - paddingBottom, paddingTop]);
+    //Append data to svg using the area generator and palette
+    brushArea.selectAll()
+      .data(data)
+      .enter().append('path')
+      .attr('class', 'layer')
+      .style('fill', function (d) { return palette[d.key]; })
+      .attr('d', area)
+      .attr("clip-path", "url(#clip)");
 
     let clip = svg.append("defs").append("svg:clipPath")
       .attr("id", "clip")
       .append("svg:rect")
-      .attr("width", width )
-      .attr("height", height )
-      .attr("x", 0)
-      .attr("y", 0);
-
-    let brush = d3.brushX()
-      .extent([[0,0], [width,height]])
-      .on("end", updateZoom.bind(this));
-
-    //Area generator for the chart
-    let area = d3.area()
-      .x(function (d) { return x(d.data.date) })
-      .y0(function (d) { return y(d[0]) })
-      .y1(function (d) { return y(d[1]) })
-      .curve(d3.curveMonotoneX);
-
-    //Color palette with the form {author1: color1, ...}
-    let palette = this.props.palette;
-
-    let brushArea = svg.append('g')
-      .attr("clip-path", "url(#clip)");
-
-    //Append data to svg using the area generator and palette
-    brushArea.selectAll()
-      .data(stackedData)
-      .enter().append('path')
-      .attr('class', 'layer')
-      .style('fill', function (d) { return palette[d.key]; })
-      .attr('d', area);
+      .attr("width", width - paddings.left - paddings.right )
+      .attr("height", height - paddings.top - paddings.bottom )
+      .attr("x", paddings.left)
+      .attr("y", paddings.top);
 
     //Append visible x-axis on the bottom, with an offset so it's actually visible
     let xAxis;
@@ -146,12 +122,12 @@ export default class StackedAreaChart extends React.Component {
         .call(d3.axisBottom(x));
     }else {
       xAxis = brushArea.append('g')
-        .attr('transform', 'translate(0,' + (height - paddingBottom) + ')')
+        .attr('transform', 'translate(0,' + (height - paddings.bottom) + ')')
         .call(d3.axisBottom(x));
     }
 
     brushArea.append('g')
-      .attr('transform', 'translate(' + paddingLeft + ',0)')
+      .attr('transform', 'translate(' + paddings.left + ',0)')
       .call(d3.axisLeft(y).tickFormat(function (d) {
         if (d > 0)
           return d * yScale;
@@ -163,30 +139,85 @@ export default class StackedAreaChart extends React.Component {
       .attr("class", "brush")
       .call(brush);
 
-    function updateZoom() {
-      let extent = d3.event.selection;
-      let zoomedDims;
-      if(extent){
-        zoomedDims = [x.invert(extent[0]), x.invert(extent[1])];
-        x.domain([x.invert(extent[0]), x.invert(extent[1])])
-          .range([paddingLeft, width - paddingRight]);
-        brushArea.select(".brush").call(brush.move, null);
-      }else{
-        return;
-      }
+    return {brushArea, xAxis};
+  }
 
-      this.setState({zooming: true}, () => {
-        xAxis.transition().duration(500).call(d3.axisBottom(x));
-        brushArea
-          .selectAll('.layer')
-          .transition()
-          .duration(500)
-          .attr("d", area)
-          .on("end", () => this.setState({zoomed: true, zooming: false, zoomedDims: zoomedDims}));
-      })
+  createScales(xDims, xRange, yDims, yRange){
+    let x;
+
+    x = d3.scaleTime()
+      .domain(xDims)
+      .range(xRange);
+
+    if(this.state.zoomed === true){
+      x.domain(this.state.zoomedDims);
     }
 
-    // If user double click, reinitialize the chart
+    //Y axis scaled with the maximum amount of change (half in each direction)
+    let y = d3.scaleLinear()
+      .domain(yDims)
+      .range(yRange);
+
+    return {x, y};
+  }
+
+  updateZoom(extent, x, y, xAxis, height, width, paddings, brush, brushArea, area) {
+    let zoomedDims;
+    if(extent){
+      zoomedDims = [x.invert(extent[0]), x.invert(extent[1])];
+      x.domain([x.invert(extent[0]), x.invert(extent[1])])
+        .range([paddings.left, width - paddings.right]);
+      brushArea.select(".brush").call(brush.move, null);
+    }else{
+      return;
+    }
+
+    this.setState({zooming: true}, () => {
+      xAxis.transition().duration(500).call(d3.axisBottom(x));
+      brushArea
+        .selectAll('.layer')
+        .transition()
+        .duration(500)
+        .attr("d", area)
+        .on("end", () => this.setState({zoomed: true, zooming: false, zoomedDims: zoomedDims}));
+    })
+  }
+
+
+  updateElement() {
+    //Initialization
+    let data = this.props.content;                                //Rename for less writing
+    let stackedData = this.calculateChartData(data);              //Get d3-friendly data
+    let yScale = this.props.yScale;                               //Multiplicator for the values on the y-scale
+    let svg = d3.select(this.ref);                                //Select parent svg from render method
+    let {width, height, paddings} = this.getDimsAndPaddings(svg); //Get width and height of svg in browser
+
+    //Get X and Y scales, which translate data values into pixel values
+    let {x, y} = this.createScales([data[0].date, data[data.length - 1].date],
+      [paddings.left, width - paddings.right],
+      this.props.yDims,
+      [height - paddings.bottom, paddings.top]);
+
+    //Area generator for the chart
+    let area = d3.area()
+      .x(function (d) { return x(d.data.date) })
+      .y0(function (d) { return y(d[0]) })
+      .y1(function (d) { return y(d[1]) })
+      .curve(d3.curveMonotoneX);
+
+    //Brush generator for brush-zoom functionality, with referenced callback-function
+    let brush = d3.brushX()
+      .extent([[0,0], [width,height]]);
+
+    //Draw the chart (and brush box) using everything provided
+    let {brushArea, xAxis} = this.drawChart(svg, stackedData, area, brush, yScale, x, y, height, width, paddings);
+
+    //Set callback for brush-zoom functionality
+    brush.on("end", () => {
+      this.updateZoom(d3.event.selection, x, y, xAxis, height, width, paddings, brush, brushArea, area)
+    });
+
+    //Set callback to reset zoom on double-click
     svg.on("dblclick", () => {
       x.domain([stackedData[0][0].data.date, stackedData[0][stackedData[0].length - 1].data.date]);
       xAxis.transition(500).call(d3.axisBottom(x));
@@ -195,15 +226,12 @@ export default class StackedAreaChart extends React.Component {
         .transition(500)
         .attr("d", area).on("end", this.setState({zooming: false, zoomed: false}));
     });
-
-
   }
 
   render() {
-
-    //Only draw the chart if there is data for it and the component is mounted (d3 requirement)
+    //Only update the chart if there is data for it and the component is mounted (d3 requirement)
     if (this.state.componentMounted && this.props.content && !this.state.zooming) {
-      this.drawChart(this.props.content);
+      this.updateElement();
     }
 
     return <svg className={styles.chartSvg}
