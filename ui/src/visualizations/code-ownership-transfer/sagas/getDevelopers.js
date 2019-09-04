@@ -2,9 +2,9 @@
 
 import {graphQl, traversePages} from "../../../utils";
 
+export const arrayOfDev = [];
 
-
-const getCommitsPage = (page, perPage) => {
+export const getCommitsPage = (page, perPage) => {
   return graphQl
     .query(
       `query($page: Int, $perPage: Int, $until: Timestamp) {
@@ -33,12 +33,17 @@ const getCommitsPage = (page, perPage) => {
 export default function getDevelopers() {
 
   const dataDev = [];
-  return traversePages(getCommitsPage, commit => {
+  traversePages(getCommitsPage, commit => {
     if(!dataDev.includes(commit.signature)) {
       dataDev.push(commit.signature);
-      console.log('OUR DEVELOPERS', dataDev);
     }
+  }).then(function () {
+    console.log('local dev:', dataDev);
+    for (let i = 0; i < dataDev.length; i++) {
+      arrayOfDev.push(dataDev[i]);
+    }
+    console.log('global dev array:', arrayOfDev);
+    return dataDev;
   });
-
 
 }

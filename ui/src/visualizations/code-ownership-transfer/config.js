@@ -2,7 +2,7 @@
 
 import React from 'react';
 import {connect} from 'react-redux';
-import {setOverlay, setCommitAttribute} from './sagas';
+import {setOverlay, setCommitAttribute, setCategory} from './sagas';
 import TabCombo from '../../components/TabCombo.js';
 import styles from './styles.scss';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
@@ -10,16 +10,14 @@ import {faUser} from '@fortawesome/free-solid-svg-icons';
 import {faUsers} from '@fortawesome/free-solid-svg-icons';
 import {faFile} from '@fortawesome/free-solid-svg-icons';
 import {faCheckCircle} from '@fortawesome/free-solid-svg-icons';
-
-
-
-
+import {arrayOfDev} from "./sagas/getDevelopers";
 
 const mapStateToProps = (state /*, ownProps*/) => {
   const corState = state.visualizations.codeOwnershipTransfer.state; //!!!!
 
   return {
-    commit: corState.data.commit,
+    category: corState.config.category,
+    commit: corState.config.commit,
     overlay: corState.config.overlay,
   };
 };
@@ -32,11 +30,21 @@ let divStyle = {
 const mapDispatchToProps = (dispatch /*, ownProps*/) => {
   return {
     onSetOverlay: overlay => dispatch(setOverlay(overlay)),
-    onChangeCommitAttribute: attr => dispatch(setCommitAttribute(attr))
+    onChangeCommitAttribute: attr => dispatch(setCommitAttribute(attr)),
+    onSetCategory: cat => dispatch(setCategory(cat)),
+
   };
 };
 
 const CodeOwnershipTransferConfigComponent = props => {
+
+
+  let devOptions = [];
+  for( let i = 0; i < arrayOfDev.length; i++) {
+    d.push(<option value={arrayOfDev[i]} key={arrayOfDev[i]}>{arrayOfDev[i]}</option>);
+  }
+  console.log('Developers Select Options', devOptions);
+
   return (
     <div className={styles.configContainer}>
       <form>
@@ -55,6 +63,15 @@ const CodeOwnershipTransferConfigComponent = props => {
 
         {props.overlay === 'developers' &&
         <div className="field">
+          <div className="control">
+            <div className="select">
+              <select
+                value={props.category}
+                onChange={evt => props.onSetCategory(evt.target.value)}>
+                {devOptions}
+              </select>
+            </div>
+          </div>
           <div style={divStyle}>
             <div className="card">
               <div className="card-content">

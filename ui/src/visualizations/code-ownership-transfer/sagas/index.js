@@ -12,7 +12,6 @@ import fetchRelatedCommits from './fetchRelatedCommits.js';
 import getDevelopers from "./getDevelopers";
 
 export const setOverlay = createAction('SET_OVERLAY');
-export const setHighlightedIssue = createAction('SET_HIGHLIGHTED_ISSUE');
 export const setCommitAttribute = createAction('SET_COMMIT_ATTRIBUTE');
 export const openCommit = createAction('OPEN_COMMIT');
 
@@ -35,6 +34,7 @@ export default function* () {
 
   // keep looking for viewport changes to re-fetch
   yield fork(watchViewport);
+  yield fork(watchSetCategory);
   yield fork(watchRefresh);
   yield fork(watchHighlightedIssue);
   yield fork(watchToggleHelp);
@@ -42,6 +42,10 @@ export default function* () {
 
 function* watchRefreshRequests() {
   yield throttle(2000, 'REQUEST_REFRESH', mapSaga(refresh));
+}
+
+export function* watchSetCategory() {
+  yield takeEvery('SET_CATEGORY', fetchHotspotDialsData);
 }
 
 function* watchMessages() {
