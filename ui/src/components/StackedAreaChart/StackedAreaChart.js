@@ -252,7 +252,7 @@ export default class StackedAreaChart extends React.Component {
     let zoomedDims;
     if(extent){
       zoomedDims = [x.invert(extent[0]), x.invert(extent[1])];
-      x.domain([x.invert(extent[0]), x.invert(extent[1])])
+      x.domain(zoomedDims)
         .range([paddings.left, width - paddings.right]);
       brushArea.select(".brush").call(brush.move, null);
     }else{
