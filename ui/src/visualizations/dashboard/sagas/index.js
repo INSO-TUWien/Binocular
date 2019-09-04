@@ -35,10 +35,7 @@ export default function*() {
   yield fork(watchRefreshRequests);
   yield fork(watchMessages);
 
-  yield fork(watchOpenCommit);
-
   // keep looking for viewport changes to re-fetch
-  yield fork(watchViewport);
   yield fork(watchRefresh);
   yield fork(watchToggleHelp);
 }
