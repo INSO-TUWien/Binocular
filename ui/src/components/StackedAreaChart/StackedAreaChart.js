@@ -45,6 +45,53 @@ export default class StackedAreaChart extends React.Component {
   }
 
   /**
+   * Update the chart element. May only be called if this.props.content is not empty and the component is mounted.
+   */
+  updateElement() {
+    //Initialization
+    let data = this.props.content;                                //Rename for less writing
+    let stackedData = this.calculateChartData(data);              //Get d3-friendly data
+    let yScale = this.props.yScale;                               //Multiplicator for the values on the y-scale
+    let svg = d3.select(this.ref);                                //Select parent svg from render method
+    let {width, height, paddings} = this.getDimsAndPaddings(svg); //Get width and height of svg in browser
+
+    //Get X and Y scales, which translate data values into pixel values
+    let {x, y} = this.createScales([data[0].date, data[data.length - 1].date],
+      [paddings.left, width - paddings.right],
+      this.props.yDims,
+      [height - paddings.bottom, paddings.top]);
+
+    //Area generator for the chart
+    let area = d3.area()
+      .x(function (d) { return x(d.data.date) })
+      .y0(function (d) { return y(d[0]) })
+      .y1(function (d) { return y(d[1]) })
+      .curve(d3.curveMonotoneX);
+
+    //Brush generator for brush-zoom functionality, with referenced callback-function
+    let brush = d3.brushX()
+      .extent([[0,0], [width,height]]);
+
+    //Draw the chart (and brush box) using everything provided
+    let {brushArea, xAxis} = this.drawChart(svg, stackedData, area, brush, yScale, x, y, height, width, paddings);
+
+    //Set callback for brush-zoom functionality
+    brush.on("end", () => {
+      this.updateZoom(d3.event.selection, x, y, xAxis, height, width, paddings, brush, brushArea, area)
+    });
+
+    //Set callback to reset zoom on double-click
+    svg.on("dblclick", () => {
+      x.domain([stackedData[0][0].data.date, stackedData[0][stackedData[0].length - 1].data.date]);
+      xAxis.transition(500).call(d3.axisBottom(x));
+      brushArea
+        .selectAll('.layer')
+        .transition(500)
+        .attr("d", area).on("end", this.setState({zooming: false, zoomed: false}));
+    });
+  }
+
+  /**
    * Calculate data for the chart.
    * @param data Chart data in the format [{date: timestamp(ms), series1: value, series2: value, series3: value, series4: value, ...}, ...]
    * @returns Stacked chart data for d3 functions
@@ -93,6 +140,32 @@ export default class StackedAreaChart extends React.Component {
     let paddingRight = (this.props.paddings.right) ? this.props.paddings.right : 0;
 
     return {width, height, paddings: {left: paddingLeft, bottom: paddingBottom, top: paddingTop, right: paddingRight}};
+  }
+
+  /**
+   *
+   * @param xDims Dimensions of x-data in format [timestamp, timestamp] (timestamp = .getTime(), e.g. timestamp in milliseconds)
+   * @param xRange Range of x-data in format [xLeft, xRight] (values in pixels relative to parent, e.g. insert left padding/right padding to have spacing)
+   * @param yDims Dimensions of y-data in format [lowestNumber, highestNumber] (number = e.g. max/min values of data)
+   * @param yRange Range of y-data in format [yBottom, yTop] (values in pixels relative to parent, e.g. insert top padding/bottom padding to have spacing.
+   *        CAUTION: y-pixels start at the top, so yBottom should be e.g. width-paddingBottom and yTop should be e.g. paddingTop)
+   * @returns {{x: *, y: *}} d3 x and y scales. x scale as time scale, y scale as linear scale.
+   */
+  createScales(xDims, xRange, yDims, yRange){
+    let x = d3.scaleTime()
+      .domain(xDims)
+      .range(xRange);
+
+    if(this.state.zoomed === true){
+      x.domain(this.state.zoomedDims);
+    }
+
+    //Y axis scaled with the maximum amount of change (half in each direction)
+    let y = d3.scaleLinear()
+      .domain(yDims)
+      .range(yRange);
+
+    return {x, y};
   }
 
   /**
@@ -163,34 +236,6 @@ export default class StackedAreaChart extends React.Component {
   }
 
   /**
-   *
-   * @param xDims Dimensions of x-data in format [timestamp, timestamp] (timestamp = .getTime(), e.g. timestamp in milliseconds)
-   * @param xRange Range of x-data in format [xLeft, xRight] (values in pixels relative to parent, e.g. insert left padding/right padding to have spacing)
-   * @param yDims Dimensions of y-data in format [lowestNumber, highestNumber] (number = e.g. max/min values of data)
-   * @param yRange Range of y-data in format [yBottom, yTop] (values in pixels relative to parent, e.g. insert top padding/bottom padding to have spacing.
-   *        CAUTION: y-pixels start at the top, so yBottom should be e.g. width-paddingBottom and yTop should be e.g. paddingTop)
-   * @returns {{x: *, y: *}} d3 x and y scales. x scale as time scale, y scale as linear scale.
-   */
-  createScales(xDims, xRange, yDims, yRange){
-    let x;
-
-    x = d3.scaleTime()
-      .domain(xDims)
-      .range(xRange);
-
-    if(this.state.zoomed === true){
-      x.domain(this.state.zoomedDims);
-    }
-
-    //Y axis scaled with the maximum amount of change (half in each direction)
-    let y = d3.scaleLinear()
-      .domain(yDims)
-      .range(yRange);
-
-    return {x, y};
-  }
-
-  /**
    * Callback function for brush-zoom functionality. Should be called when brush ends. (.on("end"...)
    * @param extent Call d3.event.selection inside an anonymous/arrow function, put that anonymous/arrow function as the .on callback method
    * @param x d3 x Scale provided by createScales function
@@ -225,56 +270,8 @@ export default class StackedAreaChart extends React.Component {
     })
   }
 
-
-  /**
-   * Update the chart element. May only be called if this.props.content is not empty and the component is mounted.
-   */
-  updateElement() {
-    //Initialization
-    let data = this.props.content;                                //Rename for less writing
-    let stackedData = this.calculateChartData(data);              //Get d3-friendly data
-    let yScale = this.props.yScale;                               //Multiplicator for the values on the y-scale
-    let svg = d3.select(this.ref);                                //Select parent svg from render method
-    let {width, height, paddings} = this.getDimsAndPaddings(svg); //Get width and height of svg in browser
-
-    //Get X and Y scales, which translate data values into pixel values
-    let {x, y} = this.createScales([data[0].date, data[data.length - 1].date],
-      [paddings.left, width - paddings.right],
-      this.props.yDims,
-      [height - paddings.bottom, paddings.top]);
-
-    //Area generator for the chart
-    let area = d3.area()
-      .x(function (d) { return x(d.data.date) })
-      .y0(function (d) { return y(d[0]) })
-      .y1(function (d) { return y(d[1]) })
-      .curve(d3.curveMonotoneX);
-
-    //Brush generator for brush-zoom functionality, with referenced callback-function
-    let brush = d3.brushX()
-      .extent([[0,0], [width,height]]);
-
-    //Draw the chart (and brush box) using everything provided
-    let {brushArea, xAxis} = this.drawChart(svg, stackedData, area, brush, yScale, x, y, height, width, paddings);
-
-    //Set callback for brush-zoom functionality
-    brush.on("end", () => {
-      this.updateZoom(d3.event.selection, x, y, xAxis, height, width, paddings, brush, brushArea, area)
-    });
-
-    //Set callback to reset zoom on double-click
-    svg.on("dblclick", () => {
-      x.domain([stackedData[0][0].data.date, stackedData[0][stackedData[0].length - 1].data.date]);
-      xAxis.transition(500).call(d3.axisBottom(x));
-      brushArea
-        .selectAll('.layer')
-        .transition(500)
-        .attr("d", area).on("end", this.setState({zooming: false, zoomed: false}));
-    });
-  }
-
   render() {
-    //Only update the chart if there is data for it and the component is mounted (d3 requirement)
+    //Only update the chart if there is data for it and the component is mounted and it is not currently in a zoom transition (d3 requirement)
     if (this.state.componentMounted && this.props.content && !this.state.zooming) {
       this.updateElement();
     }
