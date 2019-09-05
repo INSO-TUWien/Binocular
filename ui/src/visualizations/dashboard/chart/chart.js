@@ -92,7 +92,7 @@ export default class Dashboard extends React.Component {
         </div>
       </div>);
     let loadingHint = (<div className={styles.loadingHintContainer}>
-      <h1 className={styles.loadingHint}>Loading Chart Data...</h1>
+      <h1 className={styles.loadingHint}>Loading... <i className="fas fa-spinner fa-pulse"/></h1>
     </div>);
     return (
       <div className={styles.chartContainer}>

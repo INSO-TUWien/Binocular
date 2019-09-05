@@ -79,9 +79,15 @@ export default class CheckboxLegend extends React.Component {
         }
       });
     }
+
+    let loading = (
+      <p>Loading... <i className="fas fa-spinner fa-pulse"/></p>
+    );
+
     return (<div>
       <div className={styles.legend}>
-        {items}
+        {(items.length === 0 || items)}
+        {(items.length > 0 || loading)}
       </div>
       <div className={styles.buttonContainer}>
         <button type="button" onClick={this.selectAll.bind(this)} className={[styles.changesButtonLeft, "button"].join(" ")}>Select All</button>
