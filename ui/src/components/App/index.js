@@ -45,7 +45,7 @@ class App extends React.PureComponent {
         <Notifications />
         <HelpButton
           y={this.props.showHelp ? this.state.helpPos : 0}
-          icon={this.props.showHelp ? 'close' : 'question'}
+          icon={this.props.showHelp ? 'times' : 'question'}
         />
         <ConfigDialog />
       </div>
