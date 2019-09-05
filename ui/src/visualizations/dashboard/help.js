@@ -7,30 +7,33 @@ import styles from './styles.scss';
 export default () =>
   <div className={cx('box', styles.help)}>
     <h1 className="title">Dashboard Help</h1>
-    <p>
-      You can see multiple charts, showing CI (Continuous Integration) builds (split by succeeded/failed),
-      issues (split by opened/closed) and Commit Changes (split by developer) over time.
-    </p>
-
     <h2>Interaction</h2>
     <ul>
       <li>
-        <i className="fa fa-hand-rock" /> Click and drag on a diagram to zoom in. Double-click to reset.
+        <i className="fa fa-hand-rock"/> Click and drag (left-to-right) on a diagram to zoom in.
+      </li>
+      <li>
+        <i className="fa fa-mouse-pointer"/> Double-Click a diagram to reset the zoom level.
       </li>
     </ul>
 
     <h2>Sidebar</h2>
-    <p>Use the sidebar to switch through chart resolutions. The resolution changes how data is aggregated.</p>
-    <p>Tick "Show developers in CI Builds" to not only show when runs succeded/failed, but who caused them to suceed/fail.</p>
-    <p>Filter issues by open or closed. Open will only show issues that are open today, closed will do the same with closed issues.</p>
-    <p>Use the legend in changes to see who is who, and untick developers to hide them from the graphs. Use the buttons on the bototm
-    to select or deselect all developers.</p>
-    <p>You can swap the change measurement between number of lines changed and number of commits.</p>
     <ul>
-      <li>When "# commits" is selected, commits are graphed according to their absolute counts</li>
       <li>
-        When "# lines changed" is selected, commits are graphed according to the relative amount of changes
-        (i.e., number of lines changed) by each author.
+        <i className="fa fa-calendar"/> Change the chart resolution to change the size of time-buckets where data is
+        aggregated.
+      </li>
+      <li>
+        <i className="fa fa-ticket-alt"/> Change the issues shown to display either all, only currently open or only
+        currently closed issues.
+      </li>
+      <li>
+        <i className="fa fa-ruler-vertical"/> Change the metric of the changes graph to either use number of lines changed
+        or number of commits as the scale for the y-Axis.
+      </li>
+      <li>
+        <i className="fa fa-list"/> In the legend, you can filter the authors that are displayed in the changes graph. There
+        are also buttons for selecting all or none for quick interaction.
       </li>
     </ul>
   </div>;
