@@ -9,7 +9,6 @@
 .sidebar .configuration {
   flex-grow: 1;
   align-items: flex-start;
-  padding-top: 2em;
 }
 
 .sidebar:not(:last-child) {
