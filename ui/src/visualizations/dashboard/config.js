@@ -1,6 +1,6 @@
 'use strict';
 
-import { connect } from 'react-redux';
+import {connect} from 'react-redux';
 import {setResolution, setShowDevs, setShowIssues, setDisplayMetric, setSelectedAuthors} from './sagas';
 import TabCombo from '../../components/TabCombo.js';
 import styles from './styles.scss';
@@ -34,7 +34,7 @@ const mapDispatchToProps = (dispatch /*, ownProps*/) => {
 const DashboardConfigComponent = props => {
   return (
     <div className={styles.configContainer}>
-      <form>
+      <form className={styles.form}>
         <div className={styles.field}>
           <div className="control">
             <label className="label">General Settings</label>
@@ -56,7 +56,8 @@ const DashboardConfigComponent = props => {
             <label className="label">CI Builds</label>
             <LegendCompact text="succeeded" color="#26ca3b"/>
             <LegendCompact text="failed" color="#e23b41"/>
-            <label className={styles.checkboxLabel}><input name="showDevsInCI" type="checkbox"/> Show developers in CI Builds</label>
+            <label className={styles.checkboxLabel}><input name="showDevsInCI" type="checkbox"/> Show developers in CI
+              Builds</label>
           </div>
         </div>
         <div className={styles.field}>
@@ -64,7 +65,7 @@ const DashboardConfigComponent = props => {
             <label className="label">Issues</label>
             <LegendCompact text="opened" color="#3461eb"/>
             <LegendCompact text="closed" color="#8099e8"/>
-            <label className="label">Show issues:</label>
+            <p className="field">Show issues:</p>
             <TabCombo
               value={props.showIssues}
               options={[
@@ -77,8 +78,9 @@ const DashboardConfigComponent = props => {
           </div>
         </div>
         <div className={styles.field}>
-          <div className="control">
-            <label className="label">Change Measurement:</label>
+          <label className="label">Changes</label>
+          <div style={{marginBottom: '0.5em'}}>
+            <p className="field">Change Measurement:</p>
             <TabCombo
               value={props.metric}
               options={[
@@ -87,9 +89,9 @@ const DashboardConfigComponent = props => {
               ]}
               onChange={value => props.onClickMetric(value)}
             />
-            <label className="label">Changes</label>
-            <CheckboxLegend palette={props.palette} onClick={props.onClickCheckboxLegend.bind(this)}/>
           </div>
+          <p className="field">Legend:</p>
+          <CheckboxLegend palette={props.palette} onClick={props.onClickCheckboxLegend.bind(this)}/>
         </div>
       </form>
     </div>
