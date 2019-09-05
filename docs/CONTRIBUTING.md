@@ -131,13 +131,14 @@ I will try to explain the libraries that seemed the most important to me, and th
 
 ### React
 The User Interface is built with react.js, a framework where you can define Components that you can write once and re-use as many times as you want.
-Each component has a render() method, where you can return HTML-Elements or other React-Elements in so-called JSX-Syntax (basically returning HTML plaintext in javascript).
-Basically, if you define a Component called MyComponent, you can later use it by typing <MyComponent/> in the return statement of a render() method.
-You can also pass values to a component using properties (props) like you would in HTML: <MyComponent prop1="Hello"/>. You can even compute things like so: <MyComponent prop1={1+1}/>
+Each component has a `render()` method, where you can return HTML-Elements or other React-Elements in so-called JSX-Syntax (basically returning HTML plaintext in javascript).
+Basically, if you define a Component called MyComponent, you can later use it by typing `<MyComponent/>` in the return statement of a `render()` method.
+You can also pass values to a component using properties (props) like you would in HTML: `<MyComponent prop1="Hello"/>´. You can even compute things like so: `<MyComponent prop1={1+1}/>`
 Each element also has a local state where you can save whatever you want.
 To take a look at react in detail, please check out https://reactjs.org/docs/getting-started.html
 I found the "Guide to Main Concepts" to be more helpful than the practical tutorial.
 React is the best place to start in order to understand the structure of this application.
+P.S.: If you can, try to re-use your components as many times as possible, or even re-use components that are already there (written by others). 
 
 ### Bulma
 Before you start styling everything manually to match everything else, you should have a look at Bulma. 
@@ -149,7 +150,7 @@ If you already have a class assigned, you can just add more classes spaced out b
 ### Redux
 The state of the application is managed with Redux. It is used for things like the state of a UI element, but also e.g. fetching data from the database.
 The state is stored in a certalized store element and split up into smaller chunks for each component, using something called "reducers".
-The state can only be changed using "actions" that you define, which you need to dispatch using a method (called dispatch()).
+The state can only be changed using "actions" that you define, which you need to dispatch using a method (called `dispatch()`).
 https://redux.js.org/
 
 ### Redux-Saga
@@ -158,7 +159,7 @@ It basically works like a second thread that executes redux actions every time s
 https://github.com/redux-saga/redux-saga
 
 ### React-Redux
-React-Redux has some functions that help with putting React and Redux together. (mapStateToprops, mapDispatchToProps, connect)
+React-Redux has some functions that help with putting React and Redux together. (`mapStateToprops, mapDispatchToProps, connect`)
 https://react-redux.js.org/
 
 ### D3
@@ -189,3 +190,4 @@ The default for the web interface is http://localhost:8529/
 Please make sure ArangoDB is running.
 https://www.arangodb.com/arangodb-training-center/
 To see how content is queried, please see "GraphQL-Interface" above.
+You can also access the GraphiQL interface over the web interface (click services -> pupil-ql -> show interface).
