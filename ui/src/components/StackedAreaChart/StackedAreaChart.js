@@ -52,7 +52,7 @@ export default class StackedAreaChart extends React.Component {
     let data = this.props.content;                                //Rename for less writing
     let stackedData = this.calculateChartData(data);              //Get d3-friendly data
     let yScale = this.props.yScale;                               //Multiplicator for the values on the y-scale
-    let svg = d3.select(this.ref);                                //Select parent svg from render method
+    let svg = d3.select(this.svgRef);                                //Select parent svg from render method
     let {width, height, paddings} = this.getDimsAndPaddings(svg); //Get width and height of svg in browser
 
     //Get X and Y scales, which translate data values into pixel values
@@ -73,7 +73,7 @@ export default class StackedAreaChart extends React.Component {
       .extent([[paddings.left,0], [width-paddings.right,height]]);
 
     //Draw the chart (and brush box) using everything provided
-    let {brushArea, xAxis} = this.drawChart(svg, stackedData, area, brush, yScale, x, y, height, width, paddings);
+    let {brushArea, xAxis} = this.drawChart(svg, this.props.content, stackedData, area, brush, yScale, x, y, height, width, paddings);
 
     //Set callback for brush-zoom functionality
     brush.on("end", () => {
@@ -107,7 +107,7 @@ export default class StackedAreaChart extends React.Component {
     //Stack function for a ThemeRiver chart, using the keys provided
     let stack = d3.stack()
       .offset(this.props.d3offset)
-      .order(d3.stackOrderInsideOut)
+      .order(d3.stackOrderReverse)
       .keys(keys);
 
     //Data formatted for d3
@@ -168,9 +168,12 @@ export default class StackedAreaChart extends React.Component {
     return {x, y};
   }
 
+
+
   /**
    * Draw the chart onto the svg element.
    * @param svg element to draw on (e.g. d3.select(this.ref))
+   * @param rawData raw, unstacked data, needed for tooltips
    * @param data stacked data from the calculateChartData function
    * @param area d3 area generator
    * @param brush d3 brush generator
@@ -182,30 +185,33 @@ export default class StackedAreaChart extends React.Component {
    * @param paddings paddings of element from getDimsAndPaddings method ()
    * @returns {{brushArea: *, xAxis: *}} brushArea: Area that has all the contents appended to it, xAxis: d3 x-Axis for later transitioning (for zooming)
    */
-  drawChart(svg, data, area, brush, yScale, x, y, height, width, paddings){
+  drawChart(svg, rawData, data, area, brush, yScale, x, y, height, width, paddings){
     //Remove old data
     svg.selectAll('*').remove();
 
     //Color palette with the form {author1: color1, ...}
     let palette = this.props.palette;
+    let zoomed = this.state.zoomed;
     let brushArea = svg.append('g');
+
+    let tooltip = d3.select(this.tooltipRef);
+
+    brushArea.append('g')
+      .attr("class", "brush")
+      .call(brush);
 
     //Append data to svg using the area generator and palette
     brushArea.selectAll()
       .data(data)
       .enter().append('path')
       .attr('class', 'layer')
+      .attr('id', function(d) {return d.key;})
       .style('fill', function (d) { return palette[d.key]; })
       .attr('d', area)
-      .attr("clip-path", "url(#clip)");
-
-    let clip = svg.append("defs").append("svg:clipPath")
-      .attr("id", "clip")
-      .append("svg:rect")
-      .attr("width", width - paddings.left - paddings.right )
-      .attr("height", height - paddings.top - paddings.bottom )
-      .attr("x", paddings.left)
-      .attr("y", paddings.top);
+      .attr("clip-path", "url(#clip)")
+      .on("mouseover", mouseover)
+      .on("mousemove", mousemove)
+      .on("mouseout", mouseout);
 
     //Append visible x-axis on the bottom, with an offset so it's actually visible
     let xAxis;
@@ -219,6 +225,8 @@ export default class StackedAreaChart extends React.Component {
         .call(d3.axisBottom(x));
     }
 
+    let bisectDate = d3.bisector(function(d) { return d.date; });
+
     brushArea.append('g')
       .attr('transform', 'translate(' + paddings.left + ',0)')
       .call(d3.axisLeft(y).tickFormat(function (d) {
@@ -228,9 +236,33 @@ export default class StackedAreaChart extends React.Component {
           return d * (-1) * yScale;
       }));
 
-    brushArea.append('g')
-      .attr("class", "brush")
-      .call(brush);
+    function mouseover(){
+      tooltip.style('display', 'inline');
+    }
+    function mousemove(){
+      if(d3.event == null)
+        return;
+
+      let mouseoverDate = x.invert(d3.event.layerX-paddings.left);
+      let nearestDateIndex = bisectDate.right(rawData, mouseoverDate);
+      let nearestDataPoint = rawData[nearestDateIndex-1];
+      tooltip
+        .html(new Date(nearestDataPoint.date).toLocaleDateString() + " " + nearestDataPoint[d3.select(this).attr('id')])
+        .style('position', 'absolute')
+        .style('left', (d3.event.layerX - 80) + 'px')
+        .style('top', (d3.event.layerY - 12) + 'px');
+    }
+    function mouseout(){
+      tooltip.style('display', 'none');
+    }
+
+    let clip = svg.append("defs").append("svg:clipPath")
+      .attr("id", "clip")
+      .append("svg:rect")
+      .attr("width", width - paddings.left - paddings.right )
+      .attr("height", height - paddings.top - paddings.bottom )
+      .attr("x", paddings.left)
+      .attr("y", paddings.top);
 
     return {brushArea, xAxis};
   }
@@ -275,9 +307,14 @@ export default class StackedAreaChart extends React.Component {
     if (this.state.componentMounted && this.props.content && !this.state.zooming) {
       this.updateElement();
     }
+    //
 
-    return <svg className={styles.chartSvg}
-                ref={(svg) => (this.ref = svg)}/>;
+    return (<div className={styles.chartDiv}>
+      <svg className={styles.chartSvg}
+           ref={(svg) => (this.svgRef = svg)}/>
+      <div className={styles.tooltip}
+           ref={(div) => (this.tooltipRef = div)}/>
+    </div>);
 
   }
 }
