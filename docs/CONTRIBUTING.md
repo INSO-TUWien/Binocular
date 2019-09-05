@@ -146,6 +146,7 @@ It is a css framework that has (among other things) pre-made styles for common e
 For example, instead of styling a button yourself, you can just create a Button like this: `<button className="button">Button</button>`
 The class "button" (className is transformed into class by React) tells bulma you want it styled like a button, and you don't have to do anything more.
 If you already have a class assigned, you can just add more classes spaced out by a whitespace " ".
+https://bulma.io/documentation/
 
 ### Redux
 The state of the application is managed with Redux. It is used for things like the state of a UI element, but also e.g. fetching data from the database.
