@@ -4,7 +4,7 @@
   height: 100%;
   width: auto;
   flex-direction: column;
-  margin: 5px;
+  padding: 5px;
   justify-content: center;
 
   .loadingHintContainer{
@@ -51,7 +51,7 @@
 
 .help {
   width: 100%;
-  overflow-y: scroll;
+  overflow-y: auto;
   font-size: 1.5em;
 
   h2 {
