@@ -139,6 +139,13 @@ To take a look at react in detail, please check out https://reactjs.org/docs/get
 I found the "Guide to Main Concepts" to be more helpful than the practical tutorial.
 React is the best place to start in order to understand the structure of this application.
 
+### Bulma
+Before you start styling everything manually to match everything else, you should have a look at Bulma. 
+It is a css framework that has (among other things) pre-made styles for common elements.
+For example, instead of styling a buttom yourself, you can just create a Button like this: `<button className="button">Button</button>`
+The class "button" (className is transformed into class by React) tells bulma you want it styled like a button, and you don't have to do anything more.
+If you already have a class assigned, you can just add more classes spaced out by a whitespace " ".
+
 ### Redux
 The state of the application is managed with Redux. It is used for things like the state of a UI element, but also e.g. fetching data from the database.
 The state is stored in a certalized store element and split up into smaller chunks for each component, using something called "reducers".
