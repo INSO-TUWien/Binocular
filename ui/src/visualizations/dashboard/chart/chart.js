@@ -88,7 +88,7 @@ export default class Dashboard extends React.Component {
           <StackedAreaChart content={this.state.commitChartData}
                             palette={this.props.palette}
                             paddings={{top: 20, left: 60, bottom: 20, right: 40}}
-                            yScale={2}
+                            yScale={1}
                             yDims={this.state.commitScale}
                             d3offset={d3.stackOffsetSilhouette}
                             keys={this.props.selectedAuthors}
