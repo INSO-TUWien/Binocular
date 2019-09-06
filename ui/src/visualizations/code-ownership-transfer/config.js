@@ -11,6 +11,10 @@ import {faUsers} from '@fortawesome/free-solid-svg-icons';
 import {faFile} from '@fortawesome/free-solid-svg-icons';
 import {faCheckCircle} from '@fortawesome/free-solid-svg-icons';
 import {arrayOfDev} from "./sagas/getDevelopers";
+import Promise from "bluebird";
+import {graphQl} from "../../utils";
+import SearchBox from "../../components/SearchBox";
+import {setActiveIssue} from "../issue-impact/sagas";
 
 const mapStateToProps = (state /*, ownProps*/) => {
   const corState = state.visualizations.codeOwnershipTransfer.state; //!!!!
@@ -19,6 +23,7 @@ const mapStateToProps = (state /*, ownProps*/) => {
     category: corState.config.category,
     commit: corState.config.commit,
     overlay: corState.config.overlay,
+    file: corState.data.data.file
   };
 };
 
@@ -32,6 +37,8 @@ const mapDispatchToProps = (dispatch /*, ownProps*/) => {
     onSetOverlay: overlay => dispatch(setOverlay(overlay)),
     onChangeCommitAttribute: attr => dispatch(setCommitAttribute(attr)),
     onSetCategory: cat => dispatch(setCategory(cat)),
+    onSetIssue: issue => dispatch(setActiveIssue(issue)),
+
 
   };
 };
@@ -116,8 +123,26 @@ const CodeOwnershipTransferConfigComponent = props => {
 
         {props.overlay === 'files' &&
         <div className="field">
-          <input placeholder="Search for file..."/>
-          <div style={divStyle}>
+          <SearchBox
+            placeholder="Select file..."
+            renderOption={i => `${i.path}`}
+            search={text => {
+              return Promise.resolve(
+                graphQl.query(
+                  `
+                  query($q: String) {
+                    files(page: 1, perPage: 50, q: $q, sort: "DESC") {
+                      data { path }
+                    }
+                  }`,
+                  { q: text }
+                )
+              )
+                .then(resp => resp.files.data)
+            }}
+            value={props.file}
+            onChange={file => props.onSetIssue(file)}
+          />          <div style={divStyle}>
             <div className="card">
               <div className="card-content">
                 <p><FontAwesomeIcon icon={faFile}/>&nbsp;&nbsp;Chosen File:</p>

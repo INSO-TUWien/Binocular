@@ -10,6 +10,7 @@ import {fetchFactory, timestampedActionFactory, mapSaga} from '../../../sagas/ut
 import fetchRelatedCommits from './fetchRelatedCommits.js';
 
 import getDevelopers from "./getDevelopers";
+import getFiles from "./getAllFiles";
 
 export const setCategory = createAction('SET_CATEGORY');
 
@@ -86,7 +87,7 @@ export const fetchCodeOwnershipData = fetchFactory(
     console.log('Config', config.numOfCommits);
 
     return yield Promise.join(
-      getDevelopers()
+      getDevelopers(),
     )
 
   },

@@ -126,6 +126,57 @@ const queryType = new gql.GraphQLObjectType({
           return files.firstExample({ path: args.path });
         }
       },
+      files: paginated({
+        type: require('./types/file.js'),
+        args: {
+          q: { type: gql.GraphQLString },
+          sort: { type: Sort }
+        },
+        query: (root, args, limit) => {
+          let exactQuery = [];
+          let fuzzyQuery = qb
+            .for('file')
+            .in('files')
+            .sort('file.path', args.sort);
+
+          if (args.q) {
+            const searchString = qb.str('%' + args.q.replace(/\s+/g, '%') + '%');
+            fuzzyQuery = fuzzyQuery.filter(
+              qb.LIKE(
+                qb.CONCAT('file.path'),
+                searchString,
+                true
+              )
+            );
+
+          //   const fileNumberMatch = args.q.match(ISSUE_NUMBER_REGEX);
+          //   if (fileNumberMatch) {
+          //     exactQuery = qb
+          //       .for('file')
+          //       .in('files')
+          //       .filter(qb.eq('file.path', fileNumberMatch[1]))
+          //       .return('file');
+          //
+          //     fuzzyQuery = fuzzyQuery.filter(qb.neq('file.path', fileNumberMatch[1]));
+          //   }
+           }
+
+          fuzzyQuery = fuzzyQuery.return('file');
+
+          let q = qb
+            .let('fullList', qb.APPEND(exactQuery, fuzzyQuery))
+            .for('file')
+            .in('fullList');
+
+          q = q.limit(limit.offset, limit.count).return('file');
+
+          return q;
+        }
+      }),
+
+
+
+
       stakeholders: paginated({
         type: require('./types/stakeholder.js'),
         query: (root, args, limit) => aql`
