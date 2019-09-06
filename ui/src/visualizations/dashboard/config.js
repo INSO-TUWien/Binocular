@@ -37,8 +37,7 @@ const DashboardConfigComponent = props => {
       <form className={styles.form}>
         <div className={styles.field}>
           <div className="control">
-            <label className="label">General Settings</label>
-            <p className="field">Chart resolution:</p>
+            <label className="label">Time Bucket Size:</label>
             <TabCombo
               value={props.resolution}
               options={[
@@ -54,18 +53,15 @@ const DashboardConfigComponent = props => {
         <div className={styles.field}>
           <div className="control">
             <label className="label">CI Builds</label>
-            <LegendCompact text="succeeded" color="#26ca3b"/>
-            <LegendCompact text="failed" color="#e23b41"/>
-            <label className={styles.checkboxLabel}><input name="showDevsInCI" type="checkbox"/> Show developers in CI
-              Builds</label>
+            <LegendCompact text="Succeeded" color="#26ca3b"/>
+            <LegendCompact text="Failed" color="#e23b41"/>
           </div>
         </div>
         <div className={styles.field}>
           <div className="control">
             <label className="label">Issues</label>
-            <LegendCompact text="opened" color="#3461eb"/>
-            <LegendCompact text="closed" color="#8099e8"/>
-            <p className="field">Show issues:</p>
+            <LegendCompact text="Opened" color="#3461eb"/>
+            <LegendCompact text="Closed" color="#8099e8"/>
             <TabCombo
               value={props.showIssues}
               options={[
@@ -80,7 +76,6 @@ const DashboardConfigComponent = props => {
         <div className={styles.field}>
           <label className="label">Changes</label>
           <div style={{marginBottom: '0.5em'}}>
-            <p className="field">Change Measurement:</p>
             <TabCombo
               value={props.metric}
               options={[
@@ -90,7 +85,7 @@ const DashboardConfigComponent = props => {
               onChange={value => props.onClickMetric(value)}
             />
           </div>
-          <p className="field">Legend:</p>
+          <label className="label">Authors:</label>
           <CheckboxLegend palette={props.palette} onClick={props.onClickCheckboxLegend.bind(this)}/>
         </div>
       </form>
