@@ -4,6 +4,7 @@ import React from 'react';
 import * as d3 from 'd3';
 
 import styles from './stackedAreaChart.scss';
+import cx from 'classnames';
 
 /**
  * Stacked area chart
@@ -19,6 +20,7 @@ import styles from './stackedAreaChart.scss';
  *    The d3 library has a bug where if you use d3.stackOffsetDiverging and have a series with strictly negative or zero values, it will still put positive values in it for unknown reasons.
  *    To remedy this, if you set the seriesNumber, all positive values in that series index will be set to 0.
  *  - keys (optional) (Format: [seriesName1, seriesName2, ...]) Filters the chart, only showing the provided keys and leaving everything else out.
+ *  - resolution (Format: 'years'/'months'/'weeks'/'days') Needed for date format in tooltips.
  */
 export default class StackedAreaChart extends React.Component {
   constructor(props) {
@@ -193,6 +195,7 @@ export default class StackedAreaChart extends React.Component {
     let palette = this.props.palette;
     let zoomed = this.state.zoomed;
     let brushArea = svg.append('g');
+    let resolution = this.props.resolution;
 
     let tooltip = d3.select(this.tooltipRef);
 
@@ -246,14 +249,81 @@ export default class StackedAreaChart extends React.Component {
       let mouseoverDate = x.invert(d3.event.layerX-paddings.left);
       let nearestDateIndex = bisectDate.right(rawData, mouseoverDate);
       let nearestDataPoint = rawData[nearestDateIndex-1];
+      let key = d3.select(this).attr('id');
+      let text = key.split(" <", 1);  //Remove git signature email
+      let value = nearestDataPoint[key];
+      let chartValues = findChartValues(data, key, nearestDataPoint.date);
+      let formattedDate = formatDate(new Date(nearestDataPoint.date), resolution);
+      if(value < 0)
+        value *= (-1);
+
       tooltip
-        .html(new Date(nearestDataPoint.date).toLocaleDateString() + " " + nearestDataPoint[d3.select(this).attr('id')])
+        .html(formattedDate +  '<hr/>' + '<div style=\"background: ' + palette[key] + '\">' + '</div>' + text + ": " + value)
         .style('position', 'absolute')
-        .style('left', (d3.event.layerX - 80) + 'px')
-        .style('top', (d3.event.layerY - 12) + 'px');
+        .style('left', (d3.event.layerX) + 'px')
+        .style('top', (d3.event.layerY - 50) + 'px');
+      brushArea.select('.' + styles.indicatorLine)
+        .remove();
+      brushArea.selectAll('.' + styles.indicatorCircle)
+        .remove();
+      brushArea.append('line')
+        .attr('class', styles.indicatorLine)
+        .attr('x1', x(nearestDataPoint.date))
+        .attr('x2', x(nearestDataPoint.date))
+        .attr('y1', y(chartValues.y1))
+        .attr('y2', y(chartValues.y2));
+
+      brushArea.append('circle')
+        .attr('class', styles.indicatorCircle)
+        .attr('cx', x(nearestDataPoint.date))
+        .attr('cy', y(chartValues.y2))
+        .attr('r', 5)
+        .style('fill', palette[key]);
+
+      brushArea.append('circle')
+        .attr('class', styles.indicatorCircle)
+        .attr('cx', x(nearestDataPoint.date))
+        .attr('cy', y(chartValues.y1))
+        .attr('r', 5)
+        .style('fill', palette[key]);
     }
     function mouseout(){
       tooltip.style('display', 'none');
+      brushArea.select('.' + styles.indicatorLine)
+        .remove();
+      brushArea.selectAll('.' + styles.indicatorCircle)
+        .remove();
+    }
+
+    function formatDate(date, resolution){
+      const monthNames=["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+      const dayNames=["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+      switch(resolution){
+        case 'years':
+          return "" + date.getFullYear();
+        case 'months':
+          return "" + monthNames[date.getMonth()] + " " + date.getFullYear();
+        case 'weeks':
+          return "Week starting at " + dayNames[date.getDay()] + ", " + date.toLocaleDateString();
+        case 'days':
+          return dayNames[date.getDay()] + ", " + date.toLocaleDateString();
+      }
+    }
+
+    function findChartValues(data, key, timeValue){
+      let foundValues = [];
+      _.each(data, (series) => {
+        if(series.key === key){
+          _.each(series, (dataPoint) => {
+            if(dataPoint.data.date === timeValue) {
+              foundValues = dataPoint;
+              return false;
+            }
+          });
+          return false;
+        }
+      });
+      return {y1: foundValues[0], y2: foundValues[1]};
     }
 
     let clip = svg.append("defs").append("svg:clipPath")
@@ -266,6 +336,8 @@ export default class StackedAreaChart extends React.Component {
 
     return {brushArea, xAxis};
   }
+
+
 
   /**
    * Callback function for brush-zoom functionality. Should be called when brush ends. (.on("end"...)

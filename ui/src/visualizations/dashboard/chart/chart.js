@@ -59,7 +59,8 @@ export default class Dashboard extends React.Component {
                           yScale={1}
                           yDims={this.state.ciScale}
                           d3offset={d3.stackOffsetDiverging}
-                          d3bugfix={{seriesNumber: 1}}/>
+                          d3bugfix={{seriesNumber: 1}}
+                          resolution={this.props.chartResolution}/>
       </div>
     </div>);
     let issueChart = (<div className={styles.chartLine}>
@@ -74,7 +75,8 @@ export default class Dashboard extends React.Component {
                           yScale={1}
                           yDims={this.state.issueScale}
                           d3offset={d3.stackOffsetDiverging}
-                          d3bugfix={{seriesNumber: 1}}/>
+                          d3bugfix={{seriesNumber: 1}}
+                          resolution={this.props.chartResolution}/>
       </div>
     </div>);
     let commitChart = (<div className={styles.chartLine}>
@@ -88,7 +90,8 @@ export default class Dashboard extends React.Component {
                             yScale={2}
                             yDims={this.state.commitScale}
                             d3offset={d3.stackOffsetSilhouette}
-                            keys={this.props.selectedAuthors}/>
+                            keys={this.props.selectedAuthors}
+                            resolution={this.props.chartResolution}/>
         </div>
       </div>);
     let loadingHint = (<div className={styles.loadingHintContainer}>
