@@ -40,12 +40,18 @@ const CodeOwnershipTransferConfigComponent = props => {
 
 
   let devOptions = [];
+  let numOfCommitDev = 0;
   devOptions.push(<option value="" key="0">Select Developer</option>);
   for( let i = 0; i < arrayOfDev.length; i++) {
-    devOptions.push(<option value={arrayOfDev[i]} key={i+1}>{arrayOfDev[i]}</option>);
+    devOptions.push(<option value={arrayOfDev[i].name} key={i+1}>{arrayOfDev[i].name}</option>);
   }
   console.log('Developers Select Options', devOptions);
 
+  for (let i = 0; i < arrayOfDev.length; i++) {
+    if(props.category === arrayOfDev[i].name) {
+      numOfCommitDev = arrayOfDev[i].numOfCommits;
+    }
+  }
   return (
     <div className={styles.configContainer}>
       <form>
@@ -77,7 +83,8 @@ const CodeOwnershipTransferConfigComponent = props => {
             <div className="card">
               <div className="card-content">
                 <p>
-                  <FontAwesomeIcon icon={faUser}/>&nbsp;&nbsp;Developer: {props.category && <span>{props.category}</span>}</p>
+                  <FontAwesomeIcon icon={faUser}/>&nbsp;&nbsp;Developer:  <span>{props.category}</span></p>
+                <p><FontAwesomeIcon icon={faCheckCircle}/>&nbsp;&nbsp;Number of Commits:  <span>{numOfCommitDev}</span></p>
                 <p>
                   <FontAwesomeIcon icon={faFile}/>&nbsp;&nbsp;Owned Files:</p>
               </div>

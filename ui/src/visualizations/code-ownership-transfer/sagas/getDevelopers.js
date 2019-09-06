@@ -1,6 +1,7 @@
 'use strict';
 
 import {graphQl, traversePages} from "../../../utils";
+import {Developer} from "../../../../../foxx/types/developer";
 
 export const arrayOfDev = [];
 
@@ -26,19 +27,29 @@ export const getCommitsPage = (page, perPage) => {
           }`,
       {page, perPage}
     )
-    .then(resp =>  resp.commits);
+    .then(resp => resp.commits);
 };
 
 
 export default function getDevelopers() {
 
   const dataDev = [];
+  const nameDev = [];
   traversePages(getCommitsPage, commit => {
-    if(!dataDev.includes(commit.signature)) {
-      dataDev.push(commit.signature);
+
+    if (!nameDev.includes(commit.signature)) {
+      let tempDev = new Developer(commit.signature, 1);
+      dataDev.push(tempDev);
+      nameDev.push(commit.signature);
+    } else {
+      for (let i = 0; i < dataDev.length; i++) {
+        if (dataDev[i].name === commit.signature) {
+          dataDev[i].numOfCommits++;
+        }
+      }
     }
   }).then(function () {
-    if(arrayOfDev.length !== dataDev.length) {
+    if (arrayOfDev.length !== dataDev.length) {
       for (let i = 0; i < dataDev.length; i++) {
         arrayOfDev.push(dataDev[i]);
       }
@@ -47,3 +58,5 @@ export default function getDevelopers() {
   });
 
 }
+
+

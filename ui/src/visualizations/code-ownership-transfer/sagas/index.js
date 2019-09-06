@@ -83,7 +83,7 @@ export const fetchCodeOwnershipData = fetchFactory(
     const state = yield select();
 
     const config = state.visualizations.codeOwnershipTransfer.state.config.category;
-    console.log('Config', config);
+    console.log('Config', config.numOfCommits);
 
     return yield Promise.join(
       getDevelopers()
