@@ -14,7 +14,7 @@ import {arrayOfDev} from "./sagas/getDevelopers";
 import Promise from "bluebird";
 import {graphQl} from "../../utils";
 import SearchBox from "../../components/SearchBox";
-import {setActiveIssue} from "../issue-impact/sagas";
+import {setActiveFile} from "./sagas";
 
 const mapStateToProps = (state /*, ownProps*/) => {
   const corState = state.visualizations.codeOwnershipTransfer.state; //!!!!
@@ -23,7 +23,8 @@ const mapStateToProps = (state /*, ownProps*/) => {
     category: corState.config.category,
     commit: corState.config.commit,
     overlay: corState.config.overlay,
-    file: corState.data.data.file
+    files: corState.data.files,
+    chosenFile: corState.config.chosenFile
   };
 };
 
@@ -37,7 +38,7 @@ const mapDispatchToProps = (dispatch /*, ownProps*/) => {
     onSetOverlay: overlay => dispatch(setOverlay(overlay)),
     onChangeCommitAttribute: attr => dispatch(setCommitAttribute(attr)),
     onSetCategory: cat => dispatch(setCategory(cat)),
-    onSetIssue: issue => dispatch(setActiveIssue(issue)),
+    onSetFile: file => dispatch(setActiveFile(file)),
 
 
   };
@@ -59,6 +60,9 @@ const CodeOwnershipTransferConfigComponent = props => {
       numOfCommitDev = arrayOfDev[i].numOfCommits;
     }
   }
+
+  console.log('PROP FILE', props.file);
+
   return (
     <div className={styles.configContainer}>
       <form>
@@ -140,12 +144,13 @@ const CodeOwnershipTransferConfigComponent = props => {
               )
                 .then(resp => resp.files.data)
             }}
-            value={props.file}
-            onChange={file => props.onSetIssue(file)}
-          />          <div style={divStyle}>
+            value={props.chosenFile}
+            onChange={file => props.onSetFile(file)}
+          />
+          <div style={divStyle}>
             <div className="card">
               <div className="card-content">
-                <p><FontAwesomeIcon icon={faFile}/>&nbsp;&nbsp;Chosen File:</p>
+                <p><FontAwesomeIcon icon={faFile}/>&nbsp;&nbsp;Chosen File: {props.chosenFile.path}</p>
                 <p><FontAwesomeIcon icon={faUsers}/>&nbsp;&nbsp;Number of Developers:</p>
                 <p><FontAwesomeIcon icon={faUser}/>&nbsp;&nbsp;Owner:</p>
                 <p><FontAwesomeIcon icon={faCheckCircle}/>&nbsp;&nbsp;Number of Commits:</p>

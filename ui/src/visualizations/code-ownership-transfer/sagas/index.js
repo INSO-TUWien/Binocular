@@ -10,13 +10,13 @@ import {fetchFactory, timestampedActionFactory, mapSaga} from '../../../sagas/ut
 import fetchRelatedCommits from './fetchRelatedCommits.js';
 
 import getDevelopers from "./getDevelopers";
-import getFiles from "./getAllFiles";
 
 export const setCategory = createAction('SET_CATEGORY');
+export const setActiveFile = createAction('SET_ACTIVE_FILE');
+
 
 export const setOverlay = createAction('SET_OVERLAY');
 export const setCommitAttribute = createAction('SET_COMMIT_ATTRIBUTE');
-export const openCommit = createAction('OPEN_COMMIT');
 
 export const requestCodeOwnershipData = createAction('REQUEST_CODE_OWNERSHIP_TRANSFER_DATA');
 export const receiveCodeOwnershipData = timestampedActionFactory('RECEIVE_CODE_OWNERSHIP_TRANSFER_DATA');
@@ -33,14 +33,20 @@ export default function* () {
   yield fork(watchRefreshRequests);
   yield fork(watchMessages);
 
-  yield fork(watchOpenCommit);
 
   // keep looking for viewport changes to re-fetch
+  yield fork(watchSetActiveFile);
   yield fork(watchViewport);
   yield fork(watchSetCategory);
   yield fork(watchRefresh);
   yield fork(watchHighlightedIssue);
   yield fork(watchToggleHelp);
+}
+
+export function* watchSetActiveFile() {
+  yield takeEvery('SET_ACTIVE_FILE', function*(a) {
+    return yield fetchCodeOwnershipData(a.payload);
+  });
 }
 
 function* watchRefreshRequests() {
@@ -55,11 +61,6 @@ function* watchMessages() {
   yield takeEvery('message', mapSaga(requestRefresh));
 }
 
-export function* watchOpenCommit() {
-  yield takeEvery('OPEN_COMMIT', function (a) {
-    window.open(a.payload.webUrl);
-  });
-}
 
 function* watchViewport() {
   yield takeEvery('COR_SET_VIEWPORT', mapSaga(requestRefresh));
@@ -83,8 +84,12 @@ export const fetchCodeOwnershipData = fetchFactory(
   function* () {
     const state = yield select();
 
-    const config = state.visualizations.codeOwnershipTransfer.state.config.category;
-    console.log('Config', config.numOfCommits);
+    const activeFile = state.visualizations.codeOwnershipTransfer.state.config.chosenFile;
+    console.log('File', activeFile);
+
+    // if(activeFile === '') {
+    //   return;
+    // }
 
     return yield Promise.join(
       getDevelopers(),
