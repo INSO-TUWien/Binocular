@@ -228,7 +228,7 @@ export default class StackedAreaChart extends React.Component {
         .call(d3.axisBottom(x));
     }
 
-    let bisectDate = d3.bisector(function(d) { return d.date; });
+    let bisectDate = d3.bisector((d) => d.date).left;
 
     brushArea.append('g')
       .attr('transform', 'translate(' + paddings.left + ',0)')
@@ -242,13 +242,21 @@ export default class StackedAreaChart extends React.Component {
     function mouseover(){
       tooltip.style('display', 'inline');
     }
+
+
     function mousemove(){
       if(d3.event == null)
         return;
 
-      let mouseoverDate = x.invert(d3.event.layerX-paddings.left);
-      let nearestDateIndex = bisectDate.right(rawData, mouseoverDate);
-      let nearestDataPoint = rawData[nearestDateIndex-1];
+      let mouseoverDate = x.invert(d3.mouse(svg.node())[0]);
+      let nearestDateIndex = bisectDate(rawData, mouseoverDate);
+      let candidate1 = rawData[nearestDateIndex];
+      let candidate2 = rawData[nearestDateIndex - 1];
+      let nearestDataPoint;
+      if(Math.abs(mouseoverDate - candidate1.date) < Math.abs(mouseoverDate - candidate2.date))
+        nearestDataPoint = candidate1;
+      else
+        nearestDataPoint = candidate2;
       let key = d3.select(this).attr('id');
       let text = key.split(" <", 1);  //Remove git signature email
       let value = nearestDataPoint[key];
@@ -260,8 +268,8 @@ export default class StackedAreaChart extends React.Component {
       tooltip
         .html(formattedDate +  '<hr/>' + '<div style=\"background: ' + palette[key] + '\">' + '</div>' + text + ": " + value)
         .style('position', 'absolute')
-        .style('left', (d3.event.layerX) + 'px')
-        .style('top', (d3.event.layerY - 50) + 'px');
+        .style('left', (d3.event.layerX - 20) + 'px')
+        .style('top', (d3.event.layerY - 70) + 'px');
       brushArea.select('.' + styles.indicatorLine)
         .remove();
       brushArea.selectAll('.' + styles.indicatorCircle)
