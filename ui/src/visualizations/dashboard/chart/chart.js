@@ -8,6 +8,7 @@ import _ from 'lodash';
 
 import StackedAreaChart from '../../../components/StackedAreaChart';
 import moment from 'moment';
+import cx from 'classnames';
 
 export default class Dashboard extends React.Component {
   constructor(props) {
@@ -48,7 +49,7 @@ export default class Dashboard extends React.Component {
 
   render() {
     let ciChart = (<div className={styles.chartLine}>
-      <div className={styles.text}>
+      <div className={cx(styles.text, "label")}>
         CI System
       </div>
       <div className={styles.chart}>
@@ -64,7 +65,7 @@ export default class Dashboard extends React.Component {
       </div>
     </div>);
     let issueChart = (<div className={styles.chartLine}>
-      <div className={styles.text}>
+      <div className={cx(styles.text, "label")}>
         Issues
       </div>
       <div className={styles.chart}>
@@ -80,7 +81,7 @@ export default class Dashboard extends React.Component {
       </div>
     </div>);
     let commitChart = (<div className={styles.chartLine}>
-        <div className={styles.text}>
+        <div className={cx(styles.text, "label")}>
           Changes
         </div>
         <div className={styles.chart}>

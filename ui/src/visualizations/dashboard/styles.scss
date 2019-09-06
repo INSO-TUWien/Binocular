@@ -18,12 +18,14 @@
     background: #d8d8d8;
     flex-grow: 1;
     margin: 5px;
-    padding: 10px;
+    padding: 5px;
     display: flex;
     align-items: center;
 
     .text{
-      width: 80px;
+      writing-mode: vertical-lr;
+      transform: rotate(-180deg);
+      margin-right: 10px;
     }
 
     .chart{
