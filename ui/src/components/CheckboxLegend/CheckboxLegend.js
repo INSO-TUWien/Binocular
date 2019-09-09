@@ -6,6 +6,7 @@ import chroma from 'chroma-js';
 import Measure from 'react-measure';
 
 import styles from './checkboxLegend.scss';
+import LegendCompact from '../LegendCompact';
 
 const ICON_WIDTH = 15;
 const ICON_HEIGHT = 15;
@@ -83,8 +84,23 @@ export default class CheckboxLegend extends React.Component {
       checked = Object.keys(this.props.palette).length === this.state.selected.length;
     }
 
+    let explanation;
+    if(this.props.palette) {
+      if (this.props.split) {
+        let keys = Object.keys(this.props.palette);
+        let color1 = this.props.palette[keys[0]];
+        let color2 = this.props.palette[keys[1]];
+        explanation = <LegendCompact text="Additions | Deletions (# lines per author)" color={color1} color2={color2}/>
+      } else {
+        let keys = Object.keys(this.props.palette);
+        let color = this.props.palette[keys[0]];
+        explanation = <LegendCompact text="Number of commits (per author)" color={color}/>
+      }
+    }
+
     return (<div>
       <label className="label"><input type="checkbox" checked={checked} onChange={this.selectAllAuthors.bind(this)}/>{this.props.title}</label>
+      {explanation}
       <div className={styles.legend}>
         {(items.length === 0 || items)}
         {(items.length > 0 || loading)}
@@ -119,7 +135,7 @@ class CheckboxLegendLine extends React.Component{
       rects = <rect width={ICON_HEIGHT} height={ICON_WIDTH} fill={this.props.color}/>;
     }
 
-    
+
 
     return (
       <div className={styles.checkboxLegendLine}>
