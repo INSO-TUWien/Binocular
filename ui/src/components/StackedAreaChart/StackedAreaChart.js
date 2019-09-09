@@ -193,6 +193,8 @@ export default class StackedAreaChart extends React.Component {
       var direction = d3.event.deltaY > 0 ? 'down' : 'up';
       let zoomedDims = [...this.props.yDims];
       let top = zoomedDims[1], bottom = zoomedDims[0];
+      if(this.props.keys.length === 0)  //If everything is filtered, do nothing
+        return;
       if (this.state.zoomedVertical) {
         top = this.state.verticalZoomDims[1];
         bottom = this.state.verticalZoomDims[0];
