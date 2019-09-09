@@ -88,7 +88,7 @@ const DashboardConfigComponent = props => {
               onChange={value => props.onClickMetric(value)}
             />
           </div>
-          <CheckboxLegend palette={props.palette} onClick={props.onClickCheckboxLegend.bind(this)} title="Authors:"/>
+          <CheckboxLegend palette={props.palette} onClick={props.onClickCheckboxLegend.bind(this)} title="Authors:" split={props.metric === "linesChanged"}/>
         </div>
       </form>
     </div>
