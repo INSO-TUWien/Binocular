@@ -81,7 +81,7 @@ export default class StackedAreaChart extends React.Component {
 
     //Set callback for brush-zoom functionality
     brush.on("end", () => {
-      this.updateZoom(d3.event.selection, x, y, xAxis, height, width, paddings, brush, brushArea, area)
+      this.updateZoom(d3.event.selection, x, xAxis, brush, brushArea, area)
     });
 
     //Set callback to reset zoom on double-click
@@ -410,21 +410,16 @@ export default class StackedAreaChart extends React.Component {
    * Callback function for brush-zoom functionality. Should be called when brush ends. (.on("end"...)
    * @param extent Call d3.event.selection inside an anonymous/arrow function, put that anonymous/arrow function as the .on callback method
    * @param x d3 x Scale provided by createScales function
-   * @param y d3 y Scale provided by createScales function
    * @param xAxis d3 x-Axis provided by drawChart function
-   * @param height height provided by getDimsAndPaddings function
-   * @param width width provided by getDimsAndPaddings function
-   * @param paddings paddings provided by getDimsAndPaddings function
    * @param brush brush generator
    * @param brushArea Area that the path, x/y-Axis and brush-functionality live on (see drawChart)
    * @param area d3 Area generator (for area graphs)
    */
-  updateZoom(extent, x, y, xAxis, height, width, paddings, brush, brushArea, area) {
+  updateZoom(extent, x, xAxis, brush, brushArea, area) {
     let zoomedDims;
     if(extent){
       zoomedDims = [x.invert(extent[0]), x.invert(extent[1])];
-      x.domain(zoomedDims)
-        .range([paddings.left, width - paddings.right]);
+      x.domain(zoomedDims);
       brushArea.select(".brush").call(brush.move, null);
     }else{
       return;
