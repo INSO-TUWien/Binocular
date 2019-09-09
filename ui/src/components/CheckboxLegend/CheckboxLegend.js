@@ -50,22 +50,14 @@ export default class CheckboxLegend extends React.Component {
     }
   }
 
-  /**
-   * onClick method for the selectAll button
-   */
-  selectAll(){
-    if(this.props.palette == null)
-      return;
-    let selected = Object.keys(this.props.palette);
-    this.setState({selected: selected}, () => this.props.onClick(selected));
-  }
-
-  /**
-   * onclick method for the deselectAll button
-   */
-  deselectAll(){
-    let selected = [];
-    this.setState({selected: selected}, () => this.props.onClick(selected));
+  selectAllAuthors(){
+    let ticked = Object.keys(this.props.palette).length === this.state.selected.length;
+    if(ticked){
+      this.setState({selected: []}, () => this.props.onClick([]));
+    }else{
+      let selected = Object.keys(this.props.palette);
+      this.setState({selected: selected}, () => this.props.onClick(selected));
+    }
   }
 
   render() {
@@ -84,14 +76,16 @@ export default class CheckboxLegend extends React.Component {
       <p>Loading... <i className="fas fa-spinner fa-pulse"/></p>
     );
 
+    let checked = false;
+    if(this.state.selected && this.props.palette){
+      checked = Object.keys(this.props.palette).length === this.state.selected.length;
+    }
+
     return (<div>
+      <label className="label"><input type="checkbox" checked={checked} onChange={this.selectAllAuthors.bind(this)}/>{this.props.title}</label>
       <div className={styles.legend}>
         {(items.length === 0 || items)}
         {(items.length > 0 || loading)}
-      </div>
-      <div className={styles.buttonContainer}>
-        <button type="button" onClick={this.selectAll.bind(this)} className={[styles.changesButtonLeft, "button"].join(" ")}>Select All</button>
-        <button type="button" onClick={this.deselectAll.bind(this)} className={[styles.changesButtonRight, "button"].join(" ")}>Deselect All</button>
       </div>
     </div>);
   }

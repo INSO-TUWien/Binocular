@@ -88,8 +88,7 @@ const DashboardConfigComponent = props => {
               onChange={value => props.onClickMetric(value)}
             />
           </div>
-          <label className="label">Authors:</label>
-          <CheckboxLegend palette={props.palette} onClick={props.onClickCheckboxLegend.bind(this)}/>
+          <CheckboxLegend palette={props.palette} onClick={props.onClickCheckboxLegend.bind(this)} title="Authors:"/>
         </div>
       </form>
     </div>
