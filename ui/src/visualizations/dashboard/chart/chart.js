@@ -110,11 +110,16 @@ export default class Dashboard extends React.Component {
     let loadingHint = (<div className={styles.loadingHintContainer}>
       <h1 className={styles.loadingHint}>Loading... <i className="fas fa-spinner fa-pulse"/></h1>
     </div>);
+    
+    let selectChartHint = (<div className={styles.loadingHintContainer}>
+      <h1 className={styles.loadingHint}>Please select a chart.</h1>
+    </div>);
 
 
     return (
       <div className={styles.chartContainer}>
         {(this.state.ciChartData == null && this.state.issueChartData == null && this.state.commitChartData == null && loadingHint)}
+        {(!this.props.showCIChart && !this.props.showIssueChart && !this.props.showChangesChart && selectChartHint)}
         {(this.state.ciChartData && this.props.showCIChart && ciChart)}
         {(this.state.issueChartData && this.props.showIssueChart && issueChart)}
         {(this.state.commitChartData && this.props.showChangesChart && commitChart)}
