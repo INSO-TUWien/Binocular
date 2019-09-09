@@ -91,6 +91,8 @@ export default class StackedAreaChart extends React.Component {
         .transition(500)
         .attr("d", area).on("end", this.setState({zooming: false, zoomed: false}));
     });
+
+
   }
 
   /**
@@ -382,19 +384,20 @@ export default class StackedAreaChart extends React.Component {
     })
   }
 
-  render() {
+  //Draw chart after it updated
+  componentDidUpdate(prevProps, prevState){
     //Only update the chart if there is data for it and the component is mounted and it is not currently in a zoom transition (d3 requirement)
-    if (this.state.componentMounted && this.props.content && !this.state.zooming) {
+    if(this.state.componentMounted && this.props.content && !this.state.zooming){
       this.updateElement();
     }
-    //
+  }
 
+  render() {
     return (<div className={styles.chartDiv}>
       <svg className={styles.chartSvg}
            ref={(svg) => (this.svgRef = svg)}/>
       <div className={styles.tooltip}
            ref={(div) => (this.tooltipRef = div)}/>
     </div>);
-
   }
 }

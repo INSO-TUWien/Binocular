@@ -1,7 +1,7 @@
 'use strict';
 
 import {connect} from 'react-redux';
-import {setResolution, setShowDevs, setShowIssues, setDisplayMetric, setSelectedAuthors} from './sagas';
+import {setResolution, setShowIssues, setDisplayMetric, setSelectedAuthors, setShowCIChart, setShowIssueChart, setShowChangesChart} from './sagas';
 import TabCombo from '../../components/TabCombo.js';
 import styles from './styles.scss';
 
@@ -13,21 +13,25 @@ const mapStateToProps = (state /*, ownProps*/) => {
 
   return {
     resolution: dashboardState.config.chartResolution,
-    showDevs: dashboardState.config.showDevsInCI,
     showIssues: dashboardState.config.showIssues,
     palette: dashboardState.data.data.palette,
     metric: dashboardState.config.displayMetric,
-    selectedAuthors: dashboardState.config.selectedAuthors
+    selectedAuthors: dashboardState.config.selectedAuthors,
+    showCIChart: dashboardState.config.showCIChart,
+    showIssueChart: dashboardState.config.showIssueChart,
+    showChangesChart: dashboardState.config.showChangesChart
   };
 };
 
 const mapDispatchToProps = (dispatch /*, ownProps*/) => {
   return {
     onClickResolution: resolution => dispatch(setResolution(resolution)),
-    onClickShowDevs: showDevs => dispatch(setShowDevs(showDevs)),   //TODO remove this if the feature is dropped
     onClickIssues: showIssues => dispatch(setShowIssues(showIssues)),
     onClickMetric: metric => dispatch(setDisplayMetric(metric)),
-    onClickCheckboxLegend: selected => dispatch(setSelectedAuthors(selected))
+    onClickCheckboxLegend: selected => dispatch(setSelectedAuthors(selected)),
+    onClickShowCIChart: showCIChart => dispatch(setShowCIChart(showCIChart)),
+    onClickShowIssueChart: showIssueChart => dispatch(setShowIssueChart(showIssueChart)),
+    onClickShowChangesChart: showChangesChart => dispatch(setShowChangesChart(showChangesChart))
   };
 };
 
@@ -48,9 +52,15 @@ const DashboardConfigComponent = props => {
               ]}
               onChange={value => props.onClickResolution(value)}
             />
-            <p className={styles.checkboxLabel}><input name="showCI" type="checkbox"/> Show CI Graph </p>
-            <p className={styles.checkboxLabel}><input name="showIssues" type="checkbox"/> Show Issues Graph </p>
-            <p className={styles.checkboxLabel}><input name="showChanges" type="checkbox"/> Show Changes Graph </p>
+            <p className={styles.checkboxLabel}><input name="showCI" type="checkbox"
+                                                       onChange={() => props.onClickShowCIChart(!props.showCIChart)}
+                                                       checked={props.showCIChart}/> Show CI Chart </p>
+            <p className={styles.checkboxLabel}><input name="showIssues" type="checkbox"
+                                                       onChange={() => props.onClickShowIssueChart(!props.showIssueChart)}
+                                                       checked={props.showIssueChart}/> Show Issues Chart </p>
+            <p className={styles.checkboxLabel}><input name="showChanges" type="checkbox"
+                                                       onChange={() => props.onClickShowChangesChart(!props.showChangesChart)}
+                                                       checked={props.showChangesChart}/> Show Changes Chart </p>
           </div>
         </div>
         <div className={styles.field}>

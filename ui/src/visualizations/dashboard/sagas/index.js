@@ -14,11 +14,12 @@ import getBuildData from './getBuildData.js';
 import getBounds from './getBounds.js';
 
 export const setResolution = createAction('SET_RESOLUTION');
-export const setShowDevs = createAction('SET_SHOW_DEVS');
 export const setShowIssues = createAction('SET_SHOW_ISSUES');
 export const setSelectedAuthors = createAction('SET_SELECTED_AUTHORS');
-export const setAvailableAuthors = createAction('SET_AVAILABLE_AUTHORS');
 export const setDisplayMetric = createAction('SET_DISPLAY_METRIC');
+export const setShowCIChart = createAction('SET_SHOW_CI_CHART');
+export const setShowIssueChart = createAction('SET_SHOW_ISSUE_CHART');
+export const setShowChangesChart = createAction('SET_SHOW_CHANGES_CHART');
 
 export const requestDashboardData = createAction('REQUEST_DASHBOARD_DATA');
 export const receiveDashboardData = timestampedActionFactory('RECEIVE_DASHBOARD_DATA');

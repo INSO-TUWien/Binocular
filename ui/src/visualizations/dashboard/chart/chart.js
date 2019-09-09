@@ -58,7 +58,8 @@ export default class Dashboard extends React.Component {
         CI Builds
       </div>
       <div className={styles.chart}>
-        <StackedAreaChart content={this.state.ciChartData}
+        <StackedAreaChart name="CI"
+                          content={this.state.ciChartData}
                           palette={{succeeded: "#26ca3b", failed: "#e23b41"}}
                           paddings={{top: 20, left: 60, bottom: 20, right: 40}}
                           xAxisCenter={true}
@@ -74,7 +75,8 @@ export default class Dashboard extends React.Component {
         Issues
       </div>
       <div className={styles.chart}>
-        <StackedAreaChart content={this.state.issueChartData}
+        <StackedAreaChart name="issues"
+                          content={this.state.issueChartData}
                           palette={{openCount: "#3461eb", closedCount: "#8099e8"}}
                           paddings={{top: 20, left: 60, bottom: 20, right: 40}}
                           xAxisCenter={true}
@@ -101,7 +103,8 @@ export default class Dashboard extends React.Component {
           Changes
         </div>
         <div className={styles.chart}>
-          <StackedAreaChart content={this.state.commitChartData}
+          <StackedAreaChart name="changes"
+                            content={this.state.commitChartData}
                             palette={commitPalette}
                             paddings={{top: 20, left: 60, bottom: 20, right: 40}}
                             xAxisCenter={commitCenterAxis}
@@ -115,12 +118,14 @@ export default class Dashboard extends React.Component {
     let loadingHint = (<div className={styles.loadingHintContainer}>
       <h1 className={styles.loadingHint}>Loading... <i className="fas fa-spinner fa-pulse"/></h1>
     </div>);
+
+
     return (
       <div className={styles.chartContainer}>
         {(this.state.ciChartData == null && this.state.issueChartData == null && this.state.commitChartData == null && loadingHint)}
-        {(this.state.ciChartData && ciChart)}
-        {(this.state.issueChartData && issueChart)}
-        {(this.state.commitChartData && commitChart)}
+        {(this.state.ciChartData && this.props.showCIChart && ciChart)}
+        {(this.state.issueChartData && this.props.showIssueChart && issueChart)}
+        {(this.state.commitChartData && this.props.showChangesChart && commitChart)}
       </div>
     );
   }

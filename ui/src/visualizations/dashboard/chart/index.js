@@ -21,7 +21,10 @@ const mapStateToProps = (state /*, ownProps*/) => {
     chartResolution: dashState.config.chartResolution,
     showIssues: dashState.config.showIssues,
     displayMetric: dashState.config.displayMetric,
-    selectedAuthors: dashState.config.selectedAuthors
+    selectedAuthors: dashState.config.selectedAuthors,
+    showCIChart: dashState.config.showCIChart,
+    showIssueChart: dashState.config.showIssueChart,
+    showChangesChart: dashState.config.showChangesChart
   };
 };
 
