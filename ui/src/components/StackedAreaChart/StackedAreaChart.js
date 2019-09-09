@@ -13,7 +13,6 @@ import cx from 'classnames';
  *  - palette (Format: {seriesName1: color1, seriesName2: color2, ...}, color in format "#ffffff" as string)
  *  - paddings (optional) (Format: {top: number, left: number, right: number, bottom: number}, number being amount of pixels) Each field in the object is optional and can be left out)
  *  - xAxisCenter (optional) (Format: true/false, whether the x axis should be at the 0 line (true), or at the bottom (false/unspecified))
- *  - yScale (Format: number, will be multiplied with the y-Axis values. Useful if you want a themeRiver, which extends to both top and bottom, hence a yScale of 2 is needed)
  *  - yDims (Format: [topValue, bottomValue], limits of the y-Axis on top/bottom, should correspond to data.)
  *  - d3offset (Format: d3.stackOffsetNone/d3.stackOffsetDiverging/d3.stackOffsetSilhouette/... determines the way data is stacked, check d3 docs)
  *  - keys (optional) (Format: [seriesName1, seriesName2, ...]) Filters the chart, only showing the provided keys and leaving everything else out.
@@ -257,12 +256,7 @@ export default class StackedAreaChart extends React.Component {
 
     let yAxis = brushArea.append('g')
       .attr('transform', 'translate(' + paddings.left + ',0)')
-      .call(d3.axisLeft(y).tickFormat(function (d) {
-        if (d > 0)
-          return d * yScale;
-        else
-          return d * (-1) * yScale;
-      }));
+      .call(d3.axisLeft(y));
 
     function mouseover(){
       tooltip.style('display', 'inline');

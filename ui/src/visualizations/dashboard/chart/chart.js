@@ -63,7 +63,6 @@ export default class Dashboard extends React.Component {
                           palette={{succeeded: "#26ca3b", failed: "#e23b41"}}
                           paddings={{top: 10, left: 60, bottom: 20, right: 30}}
                           xAxisCenter={true}
-                          yScale={1}
                           yDims={this.state.ciScale}
                           d3offset={d3.stackOffsetDiverging}
                           resolution={this.props.chartResolution}/>
@@ -79,7 +78,6 @@ export default class Dashboard extends React.Component {
                           palette={{openCount: "#3461eb", closedCount: "#8099e8"}}
                           paddings={{top: 10, left: 60, bottom: 20, right: 30}}
                           xAxisCenter={true}
-                          yScale={1}
                           yDims={this.state.issueScale}
                           d3offset={d3.stackOffsetDiverging}
                           resolution={this.props.chartResolution}/>
@@ -106,7 +104,6 @@ export default class Dashboard extends React.Component {
                             palette={commitPalette}
                             paddings={{top: 10, left: 60, bottom: 20, right: 30}}
                             xAxisCenter={commitCenterAxis}
-                            yScale={1}
                             yDims={this.state.commitScale}
                             d3offset={commitOffset}
                             keys={this.state.selectedAuthors}
