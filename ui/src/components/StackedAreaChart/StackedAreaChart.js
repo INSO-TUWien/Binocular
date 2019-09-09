@@ -89,8 +89,6 @@ export default class StackedAreaChart extends React.Component {
         .transition(500)
         .attr("d", area).on("end", this.setState({zooming: false, zoomed: false}));
     });
-
-
   }
 
   /**
@@ -258,15 +256,16 @@ export default class StackedAreaChart extends React.Component {
       .attr('transform', 'translate(' + paddings.left + ',0)')
       .call(d3.axisLeft(y));
 
+    //Mouseover for tooltip
     function mouseover(){
       tooltip.style('display', 'inline');
     }
-
-
+    //Mousemove for tooltip
     function mousemove(){
       if(d3.event == null)
         return;
 
+      //Calculate values and text for tooltip
       let mouseoverDate = x.invert(d3.mouse(svg.node())[0]);
       let nearestDateIndex = bisectDate(rawData, mouseoverDate);
       let candidate1 = rawData[nearestDateIndex];
@@ -284,6 +283,7 @@ export default class StackedAreaChart extends React.Component {
       if(value < 0)
         value *= (-1);
 
+      //Render tooltip
       tooltip
         .html(formattedDate +  '<hr/>' + '<div style=\"background: ' + palette[key] + '\">' + '</div>' + text + ": " + Math.round(value))
         .style('position', 'absolute')
@@ -314,6 +314,7 @@ export default class StackedAreaChart extends React.Component {
         .attr('r', 5)
         .style('fill', palette[key]);
     }
+    //Mouseout function for tooltip
     function mouseout(){
       tooltip.style('display', 'none');
       brushArea.select('.' + styles.indicatorLine)
@@ -321,7 +322,7 @@ export default class StackedAreaChart extends React.Component {
       brushArea.selectAll('.' + styles.indicatorCircle)
         .remove();
     }
-
+    //Formats the date for the tooltip
     function formatDate(date, resolution){
       const monthNames=["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
       const dayNames=["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
@@ -336,7 +337,7 @@ export default class StackedAreaChart extends React.Component {
           return dayNames[date.getDay()] + ", " + date.toLocaleDateString();
       }
     }
-
+    //Finds the chart values (for the displayed line) for the moused-over data-point
     function findChartValues(data, key, timeValue){
       let foundValues = [];
       _.each(data, (series) => {
@@ -364,6 +365,14 @@ export default class StackedAreaChart extends React.Component {
     return {brushArea, xAxis};
   }
 
+  /**
+   * Update the vertical zoom (mouse wheel zoom) with new values
+   * @param dims Y-Dimensions for new zoom level
+   * @param y Y-Scale from d3
+   * @param yAxis Y-Axis from d3
+   * @param area Area that the paths are drawn on
+   * @param areaGenerator Area generator for those paths
+   */
   updateVerticalZoom(dims, y, yAxis, area, areaGenerator){
     y.domain(dims);
 
@@ -374,7 +383,13 @@ export default class StackedAreaChart extends React.Component {
     this.setState({zoomedVertical: true, zooming: false, verticalZoomDims: dims});
   }
 
-
+  /**
+   * Reset the vertical zoom to default values.
+   * @param y Y-Scale from d3
+   * @param yAxis Y-Axis from d3
+   * @param area Area that the paths are drawn on
+   * @param areaGenerator Area generator for those paths
+   */
   resetVerticalZoom(y, yAxis, area, areaGenerator){
     y.domain(this.props.yDims);
 
@@ -385,9 +400,7 @@ export default class StackedAreaChart extends React.Component {
 
     this.setState({zoomedVertical: false, verticalZoomDims: [0,0]});
   }
-
-
-
+  
   /**
    * Callback function for brush-zoom functionality. Should be called when brush ends. (.on("end"...)
    * @param extent Call d3.event.selection inside an anonymous/arrow function, put that anonymous/arrow function as the .on callback method
