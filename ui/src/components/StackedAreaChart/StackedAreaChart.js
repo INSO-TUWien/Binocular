@@ -196,7 +196,7 @@ export default class StackedAreaChart extends React.Component {
       if (this.state.zoomedVertical) {
         top = this.state.verticalZoomDims[1];
         bottom = this.state.verticalZoomDims[0];
-        if (direction === 'up'){
+        if (direction === 'up' && top/2 > 1 && bottom/2 < -1){ //Zoom limit
           this.updateVerticalZoom([bottom/2, top/2], y, yAxis, brushArea, area);
         }else if(direction === 'down'){
           if(top*2 > zoomedDims[1] || bottom*2 < zoomedDims[0]){
@@ -215,8 +215,6 @@ export default class StackedAreaChart extends React.Component {
           this.updateVerticalZoom(zoomedDims, y, yAxis, brushArea, area);
         }
       }
-      console.log(direction);
-
     });
 
     let tooltip = d3.select(this.tooltipRef);
