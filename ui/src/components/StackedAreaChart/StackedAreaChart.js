@@ -298,13 +298,15 @@ export default class StackedAreaChart extends React.Component {
         .attr('x1', x(nearestDataPoint.date))
         .attr('x2', x(nearestDataPoint.date))
         .attr('y1', y(chartValues.y1))
-        .attr('y2', y(chartValues.y2));
+        .attr('y2', y(chartValues.y2))
+        .attr("clip-path", "url(#clip)");
 
       brushArea.append('circle')
         .attr('class', styles.indicatorCircle)
         .attr('cx', x(nearestDataPoint.date))
         .attr('cy', y(chartValues.y2))
         .attr('r', 5)
+        .attr("clip-path", "url(#clip)")
         .style('fill', palette[key]);
 
       brushArea.append('circle')
@@ -312,6 +314,7 @@ export default class StackedAreaChart extends React.Component {
         .attr('cx', x(nearestDataPoint.date))
         .attr('cy', y(chartValues.y1))
         .attr('r', 5)
+        .attr("clip-path", "url(#clip)")
         .style('fill', palette[key]);
     }
     //Mouseout function for tooltip
@@ -357,10 +360,10 @@ export default class StackedAreaChart extends React.Component {
     let clip = svg.append("defs").append("svg:clipPath")
       .attr("id", "clip")
       .append("svg:rect")
-      .attr("width", width - paddings.left - paddings.right )
-      .attr("height", height - paddings.top - paddings.bottom )
-      .attr("x", paddings.left)
-      .attr("y", paddings.top);
+      .attr("width", width)
+      .attr("height", height)
+      .attr("x", 0)
+      .attr("y", 0);
 
     return {brushArea, xAxis};
   }
@@ -400,7 +403,7 @@ export default class StackedAreaChart extends React.Component {
 
     this.setState({zoomedVertical: false, verticalZoomDims: [0,0]});
   }
-  
+
   /**
    * Callback function for brush-zoom functionality. Should be called when brush ends. (.on("end"...)
    * @param extent Call d3.event.selection inside an anonymous/arrow function, put that anonymous/arrow function as the .on callback method
