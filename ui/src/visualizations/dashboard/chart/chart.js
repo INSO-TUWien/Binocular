@@ -58,8 +58,7 @@ export default class Dashboard extends React.Component {
         CI Builds
       </div>
       <div className={styles.chart}>
-        <StackedAreaChart name="CI"
-                          content={this.state.ciChartData}
+        <StackedAreaChart content={this.state.ciChartData}
                           palette={{succeeded: "#26ca3b", failed: "#e23b41"}}
                           paddings={{top: 10, left: 60, bottom: 20, right: 30}}
                           xAxisCenter={true}
@@ -73,8 +72,7 @@ export default class Dashboard extends React.Component {
         Issues
       </div>
       <div className={styles.chart}>
-        <StackedAreaChart name="issues"
-                          content={this.state.issueChartData}
+        <StackedAreaChart content={this.state.issueChartData}
                           palette={{openCount: "#3461eb", closedCount: "#8099e8"}}
                           paddings={{top: 10, left: 60, bottom: 20, right: 30}}
                           xAxisCenter={true}
@@ -99,8 +97,7 @@ export default class Dashboard extends React.Component {
           Changes
         </div>
         <div className={styles.chart}>
-          <StackedAreaChart name="changes"
-                            content={this.state.commitChartData}
+          <StackedAreaChart content={this.state.commitChartData}
                             palette={commitPalette}
                             paddings={{top: 10, left: 60, bottom: 20, right: 30}}
                             xAxisCenter={commitCenterAxis}
