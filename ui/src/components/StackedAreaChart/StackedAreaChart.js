@@ -426,11 +426,11 @@ export default class StackedAreaChart extends React.Component {
     }
 
     this.setState({zooming: true}, () => {
-      xAxis.transition().duration(500).call(d3.axisBottom(x));
+      xAxis.transition().duration(250).call(d3.axisBottom(x));
       brushArea
         .selectAll('.layer')
         .transition()
-        .duration(500)
+        .duration(250)
         .attr("d", area)
         .on("end", () => this.setState({zoomed: true, zooming: false, zoomedDims: zoomedDims}));
     })
