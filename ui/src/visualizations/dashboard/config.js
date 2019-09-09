@@ -48,6 +48,9 @@ const DashboardConfigComponent = props => {
               ]}
               onChange={value => props.onClickResolution(value)}
             />
+            <p className={styles.checkboxLabel}><input name="showCI" type="checkbox"/> Show CI Graph </p>
+            <p className={styles.checkboxLabel}><input name="showIssues" type="checkbox"/> Show Issues Graph </p>
+            <p className={styles.checkboxLabel}><input name="showChanges" type="checkbox"/> Show Changes Graph </p>
           </div>
         </div>
         <div className={styles.field}>

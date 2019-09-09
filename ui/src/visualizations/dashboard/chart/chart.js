@@ -9,12 +9,13 @@ import _ from 'lodash';
 import StackedAreaChart from '../../../components/StackedAreaChart';
 import moment from 'moment';
 import cx from 'classnames';
+import chroma from 'chroma-js';
 
 export default class Dashboard extends React.Component {
   constructor(props) {
     super(props);
 
-    const {commitChartData, commitScale} = this.extractCommitData(props);
+    const {commitChartData, commitScale, commitPalette, selectedAuthors} = this.extractCommitData(props);
     const {issueChartData, issueScale} = this.extractIssueData(props);
     const {ciChartData, ciScale} = this.extractCIData(props);
 
@@ -22,9 +23,11 @@ export default class Dashboard extends React.Component {
       commitChartData,    //Data for commit changes
       issueChartData,
       ciChartData,
-      commitScale: commitScale,    //Maximum change in commit changes graph, used for y-axis scaling
-      issueScale: issueScale,
-      ciScale: ciScale
+      commitScale,    //Maximum change in commit changes graph, used for y-axis scaling
+      issueScale,
+      ciScale,
+      commitPalette,
+      selectedAuthors
     };
   }
 
@@ -33,7 +36,7 @@ export default class Dashboard extends React.Component {
    * @param nextProps props that are passed
    */
   componentWillReceiveProps(nextProps) {
-    const {commitChartData, commitScale} = this.extractCommitData(nextProps);
+    const {commitChartData, commitScale, commitPalette, selectedAuthors} = this.extractCommitData(nextProps);
     const {issueChartData, issueScale} = this.extractIssueData(nextProps);
     const {ciChartData, ciScale} = this.extractCIData(nextProps);
     this.setState(
@@ -41,16 +44,18 @@ export default class Dashboard extends React.Component {
         commitChartData,
         issueChartData,
         ciChartData,
-        commitScale: commitScale,
-        issueScale: issueScale,
-        ciScale: ciScale
+        commitScale,
+        issueScale,
+        ciScale,
+        commitPalette,
+        selectedAuthors
       });
   }
 
   render() {
     let ciChart = (<div className={styles.chartLine}>
       <div className={cx(styles.text, "label")}>
-        CI System
+        CI Builds
       </div>
       <div className={styles.chart}>
         <StackedAreaChart content={this.state.ciChartData}
@@ -80,18 +85,30 @@ export default class Dashboard extends React.Component {
                           resolution={this.props.chartResolution}/>
       </div>
     </div>);
+    let commitOffset, commitPalette, commitCenterAxis;
+    if(this.props.displayMetric === "linesChanged"){
+      commitOffset = d3.stackOffsetDiverging;
+      commitPalette = this.state.commitPalette;
+      commitCenterAxis = true;
+    }else{
+      commitOffset = d3.stackOffsetSilhouette;
+      commitPalette = this.props.palette;
+      commitCenterAxis = false;
+    }
+
     let commitChart = (<div className={styles.chartLine}>
         <div className={cx(styles.text, "label")}>
           Changes
         </div>
         <div className={styles.chart}>
           <StackedAreaChart content={this.state.commitChartData}
-                            palette={this.props.palette}
+                            palette={commitPalette}
                             paddings={{top: 20, left: 60, bottom: 20, right: 40}}
+                            xAxisCenter={commitCenterAxis}
                             yScale={1}
                             yDims={this.state.commitScale}
-                            d3offset={d3.stackOffsetSilhouette}
-                            keys={this.props.selectedAuthors}
+                            d3offset={commitOffset}
+                            keys={this.state.selectedAuthors}
                             resolution={this.props.chartResolution}/>
         </div>
       </div>);
@@ -236,16 +253,18 @@ export default class Dashboard extends React.Component {
     for(let i=0; curr.isSameOrBefore(end); curr.add(1,props.chartResolution), next.add(1,props.chartResolution)){       //Iterate through time buckets
       let currTimestamp = curr.toDate().getTime();
       let nextTimestamp = next.toDate().getTime();
-      let obj = {date: currTimestamp, totals: {count: 0, changes: 0}, statsByAuthor: {}};  //Save date of time bucket, create object
+      let obj = {date: currTimestamp, totals: {count: 0, additions: 0, deletions: 0}, statsByAuthor: {}};  //Save date of time bucket, create object
       for(; i < props.commits.length && Date.parse(props.commits[i].date) < nextTimestamp; i++){             //Iterate through commits that fall into this time bucket
-        let changes = props.commits[i].stats.additions + props.commits[i].stats.deletions;
+        let additions = props.commits[i].stats.additions;
+        let deletions = props.commits[i].stats.deletions;
         let commitAuthor = props.commits[i].signature;
         obj.totals.count++;
-        obj.totals.changes += changes;
+        obj.totals.additions += additions;
+        obj.totals.deletions += deletions;
         if(commitAuthor in obj.statsByAuthor)                                     //If author is already in statsByAuthor, add to previous values
-          obj.statsByAuthor[commitAuthor] = {count: obj.statsByAuthor[commitAuthor].count+1, changes: obj.statsByAuthor[commitAuthor].changes + changes};
+          obj.statsByAuthor[commitAuthor] = {count: obj.statsByAuthor[commitAuthor].count+1, additions: obj.statsByAuthor[commitAuthor].additions + additions, deletions: obj.statsByAuthor[commitAuthor].deletions + deletions};
         else                                                                      //Else create new values
-          obj.statsByAuthor[commitAuthor] = {count: 1, changes: changes};
+          obj.statsByAuthor[commitAuthor] = {count: 1, additions: additions, deletions: deletions};
 
       }
       data.push(obj);
@@ -253,34 +272,68 @@ export default class Dashboard extends React.Component {
 
     //--- STEP 2: CONSTRUCT CHART DATA FROM AGGREGATED COMMITS ----
     const commitChartData = [];
+    let palette = {};
     _.each(data, function(commit){                     //commit has structure {date, totals: {count, additions, deletions, changes}, statsByAuthor: {}} (see next line)}
       let obj = {date: commit.date};
       _.each(props.committers, function(committer){                       //commitLegend to iterate over authorNames, commitLegend has structure [{name, style}, ...]
         if(committer in commit.statsByAuthor) {   //If committer has data and isn't filtered, read it
-          if(props.displayMetric === 'linesChanged')
-            obj[committer] = commit.statsByAuthor[committer].changes;         //Insert number of changes with the author name as key, statsByAuthor has structure {{authorName: {count, additions, deletions, changes}}, ...}
+          if(props.displayMetric === 'linesChanged') {
+            obj["(Additions) " + committer] = commit.statsByAuthor[committer].additions;         //Insert number of changes with the author name as key, statsByAuthor has structure {{authorName: {count, additions, deletions, changes}}, ...}
+            obj["(Deletions) " + committer] = commit.statsByAuthor[committer].deletions*(-1);
+            palette["(Additions) " + committer] = props.palette[committer];
+            palette["(Deletions) " + committer] = chroma(props.palette[committer]).brighten().hex();
+          }
           else
             obj[committer] = commit.statsByAuthor[committer].count;
         }else
-          obj[committer] = 0;
+          if(props.displayMetric === 'linesChanged') {
+            obj["(Additions) " + committer] = 0;
+            obj["(Deletions) " + committer] = 0;
+          }else {
+            obj[committer] = 0;
+          }
       });
       commitChartData.push(obj);                                //Add object to list of objects
     });
     //Output in commitChartData has format [{author1: 123, author2: 123, ...}, ...], e.g. series names are the authors with their corresponding values
 
-    //---- STEP 3: SCALING AND FILTERING ---- 
-    let commitScale = 0;
+    //---- STEP 3: SCALING ----
+    let commitScale = [0, 0];
     _.each(commitChartData, (dataPoint) => {
-      let filteredTotals = 0;
+      let positiveTotals = 0;
+      let negativeTotals = 0;
       _.each(Object.keys(dataPoint).splice(1), (key) => {
-        if(props.selectedAuthors.indexOf(key) > -1)
-          filteredTotals += dataPoint[key];
+        let debug = key.split(") ");
+        if(key.includes("(Additions) ") && props.selectedAuthors.indexOf(key.split(") ")[1]) > -1) {
+          positiveTotals += dataPoint[key];
+        }
+        else if(key.includes("(Deletions) ") && props.selectedAuthors.indexOf(key.split(") ")[1]) > -1) {
+          negativeTotals += dataPoint[key];
+        }
+        else if(props.selectedAuthors.indexOf(key) > -1) {
+          positiveTotals += dataPoint[key]/2;
+          negativeTotals -= dataPoint[key]/2;
+        }
       });
-      if(filteredTotals > commitScale)
-        commitScale = filteredTotals;
+      if(positiveTotals > commitScale[1])
+        commitScale[1] = positiveTotals;
+      if(negativeTotals < commitScale[0])
+        commitScale[0] = negativeTotals;
     });
 
-    return { commitChartData, commitScale: [commitScale/-2, commitScale/2]};
+    //---- STEP 4: FORMATTING FILTERS ----
+    let selectedAuthors = [];
+    let keys = Object.keys(commitChartData[0]).splice(1);
+
+    _.each(keys, (key) => {
+      let concatKey = key;
+      if(key.includes("(Additions) ") || key.includes("(Deletions) "))
+        concatKey = key.split(") ")[1];
+      if(props.selectedAuthors.indexOf(concatKey) > -1)
+        selectedAuthors.push(key);
+    });
+
+    return { commitChartData, commitScale, commitPalette: palette, selectedAuthors};
   }
 
   static getGranularity(resolution) {
