@@ -199,6 +199,15 @@ const queryType = new gql.GraphQLObjectType({
             .toArray();
         }
       },
+      allFiles: paginated({
+        type: require('./types/file.js'),
+        query: (root, args, limit) => aql`
+          FOR path
+            IN
+            ${files}
+              RETURN path`
+
+      }),
       builds: paginated({
         type: require('./types/build.js'),
         args: {},

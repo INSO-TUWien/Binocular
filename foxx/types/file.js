@@ -29,15 +29,20 @@ module.exports = new gql.GraphQLObjectType({
         type: gql.GraphQLString,
         description: 'The URL (if available) to the master-version of this file on the ITS'
       },
-      commits: paginated({
+      commits: ({
         type: new gql.GraphQLList(require('./commit.js')),
         description: 'The commits touching this file',
-        query: (file, args, limit) => aql`
-          FOR commit
+        resolve(file, args, limit) {
+          return db
+            ._query(
+              aql`FOR commit
           IN
           OUTBOUND ${file} ${commitsToFiles}
             ${limit}
             RETURN commit`
+            )
+            .toArray();
+        }
       })
     };
   }

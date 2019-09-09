@@ -15,6 +15,7 @@ import Promise from "bluebird";
 import {graphQl} from "../../utils";
 import SearchBox from "../../components/SearchBox";
 import {setActiveFile} from "./sagas";
+import {arrayOfFiles} from "./sagas/getAllFiles";
 
 const mapStateToProps = (state /*, ownProps*/) => {
   const corState = state.visualizations.codeOwnershipTransfer.state; //!!!!
@@ -49,6 +50,8 @@ const CodeOwnershipTransferConfigComponent = props => {
 
   let devOptions = [];
   let numOfCommitDev = 0;
+  let numOfCommitFile = 0;
+  let numOfDevFile = 0;
   devOptions.push(<option value="" key="0">Select Developer</option>);
   for( let i = 0; i < arrayOfDev.length; i++) {
     devOptions.push(<option value={arrayOfDev[i].name} key={i+1}>{arrayOfDev[i].name}</option>);
@@ -58,6 +61,13 @@ const CodeOwnershipTransferConfigComponent = props => {
   for (let i = 0; i < arrayOfDev.length; i++) {
     if(props.category === arrayOfDev[i].name) {
       numOfCommitDev = arrayOfDev[i].numOfCommits;
+    }
+  }
+
+  for(let i = 0; i < arrayOfFiles.length; i++) {
+    if(props.chosenFile.path ===  arrayOfFiles[i].path){
+      numOfCommitFile = arrayOfFiles[i].numOfCommits;
+      numOfDevFile = arrayOfFiles[i].numOfDev;
     }
   }
 
@@ -151,9 +161,9 @@ const CodeOwnershipTransferConfigComponent = props => {
             <div className="card">
               <div className="card-content">
                 <p><FontAwesomeIcon icon={faFile}/>&nbsp;&nbsp;Chosen File: {props.chosenFile.path}</p>
-                <p><FontAwesomeIcon icon={faUsers}/>&nbsp;&nbsp;Number of Developers:</p>
+                <p><FontAwesomeIcon icon={faUsers}/>&nbsp;&nbsp;Number of Developers: <span>{numOfDevFile}</span></p>
                 <p><FontAwesomeIcon icon={faUser}/>&nbsp;&nbsp;Owner:</p>
-                <p><FontAwesomeIcon icon={faCheckCircle}/>&nbsp;&nbsp;Number of Commits:</p>
+                <p><FontAwesomeIcon icon={faCheckCircle}/>&nbsp;&nbsp;Number of Commits: <span>{numOfCommitFile}</span></p>
               </div>
             </div>
           </div>

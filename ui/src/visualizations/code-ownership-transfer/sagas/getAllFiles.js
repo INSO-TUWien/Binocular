@@ -1,27 +1,51 @@
 'use strict';
 
 import {graphQl, traversePages} from "../../../utils";
+import {FileFilter} from "../entity/fileFilter";
 
-export const getAllFiles = () => {
+export const arrayOfFiles = [];
+
+export const getOneFile = (page, perPage) => {
   return graphQl
     .query(
-      `query($path: String!) {
-             file(path: $path) {
-               path,
-               maxLength
+      `query($page: Int, $perPage: Int){
+             allFiles(page: $page, perPage: $perPage){
+             count
+               page
+               perPage
+               data {
+                 path
+                 commits{
+                  signature
+                  sha
+                  message
+                 }
+                }
              }
-          }`
-    ).then(resp => resp.files);
+       }`,
+      {page, perPage}
+    )
+    .then(resp =>  resp.allFiles);
 };
 
-export default function getFiles() {
-  const fileList = [];
-  traversePages(getAllFiles, file => {
-      fileList.push(file);
-      console.log(file);
 
+export default function getFiles() {
+  let list = [];
+  traversePages(getOneFile, file => {
+    let devList = [];
+    for( let i = 0; i< file.commits.length; i++) {
+      if(!devList.includes(file.commits[i].signature)){
+        devList.push(file.commits[i].signature);
+      }
     }
-  ).then(function () {
-    console.log('ALL Files:', fileList);
+    let tempFile = new FileFilter(file.path, file.commits.length, devList.length);
+    list.push(file);
+    arrayOfFiles.push(tempFile);
+  }).then(function () {
+
+    console.log('Files with commits:', list);
+    console.log('Files filter list:', arrayOfFiles);
+
   });
+
 }

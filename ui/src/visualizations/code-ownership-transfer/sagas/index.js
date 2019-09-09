@@ -10,6 +10,8 @@ import {fetchFactory, timestampedActionFactory, mapSaga} from '../../../sagas/ut
 import fetchRelatedCommits from './fetchRelatedCommits.js';
 
 import getDevelopers from "./getDevelopers";
+import getFiles from "./getAllFiles";
+
 
 export const setCategory = createAction('SET_CATEGORY');
 export const setActiveFile = createAction('SET_ACTIVE_FILE');
@@ -41,6 +43,7 @@ export default function* () {
   yield fork(watchRefresh);
   yield fork(watchHighlightedIssue);
   yield fork(watchToggleHelp);
+  yield fork(watchSetOverlay);
 }
 
 export function* watchSetActiveFile() {
@@ -70,6 +73,10 @@ function* watchToggleHelp() {
   yield takeEvery('TOGGLE_HELP', mapSaga(refresh));
 }
 
+function* watchSetOverlay() {
+  yield takeEvery('SET_OVERLAY', fetchCodeOwnershipData);
+}
+
 function* watchRefresh() {
   yield takeEvery('REFRESH', fetchCodeOwnershipData);
 }
@@ -87,13 +94,18 @@ export const fetchCodeOwnershipData = fetchFactory(
     const activeFile = state.visualizations.codeOwnershipTransfer.state.config.chosenFile;
     console.log('File', activeFile);
 
+    // getFiles(activeFile);
+
     // if(activeFile === '') {
     //   return;
     // }
 
+
     return yield Promise.join(
       getDevelopers(),
+      getFiles()
     )
+
 
   },
   requestCodeOwnershipData,
