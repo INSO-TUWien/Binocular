@@ -56,13 +56,13 @@ const DashboardConfigComponent = props => {
         <div className={styles.field}>
           <div className="control">
             <label className="label">CI Builds</label>
-            <LegendCompact text="Succeeded/Failed" color="#26ca3b" color2="#e23b41"/>
+            <LegendCompact text="Succeeded | Failed" color="#26ca3b" color2="#e23b41"/>
           </div>
         </div>
         <div className={styles.field}>
           <div className="control">
             <label className="label">Issues</label>
-            <LegendCompact text="Opened/Closed" color="#3461eb" color2="#8099e8"/>
+            <LegendCompact text="Opened | Closed" color="#3461eb" color2="#8099e8"/>
             <TabCombo
               value={props.showIssues}
               options={[
