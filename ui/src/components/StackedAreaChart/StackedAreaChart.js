@@ -31,7 +31,9 @@ export default class StackedAreaChart extends React.Component {
       componentMounted: false,
       zooming: false,
       zoomed: false,
-      zoomedDims: [0,0]
+      zoomedDims: [0,0],
+      zoomedVertical: false,
+      verticalZoomDims: [0,0]
     };
     window.addEventListener("resize", () => this.setState({zooming: false, zoomed: false}));
   }
@@ -169,6 +171,9 @@ export default class StackedAreaChart extends React.Component {
       .domain(yDims)
       .range(yRange);
 
+    if(this.state.zoomedVertical === true)
+      y.domain(this.state.verticalZoomDims);
+
     return {x, y};
   }
 
@@ -198,6 +203,36 @@ export default class StackedAreaChart extends React.Component {
     let zoomed = this.state.zoomed;
     let brushArea = svg.append('g');
     let resolution = this.props.resolution;
+
+    svg.on("wheel", () => {
+      var direction = d3.event.deltaY > 0 ? 'down' : 'up';
+      let zoomedDims = [...this.props.yDims];
+      let top = zoomedDims[1], bottom = zoomedDims[0];
+      if (this.state.zoomedVertical) {
+        top = this.state.verticalZoomDims[1];
+        bottom = this.state.verticalZoomDims[0];
+        if (direction === 'up'){
+          this.updateVerticalZoom([bottom/2, top/2], y, yAxis, brushArea, area);
+        }else if(direction === 'down'){
+          if(top*2 > zoomedDims[1] || bottom*2 < zoomedDims[0]){
+            this.resetVerticalZoom(y, yAxis, brushArea, area);
+          }else{
+            this.updateVerticalZoom([bottom*2, top*2], y, yAxis, brushArea, area);
+          }
+        }
+      } else {
+        if (direction === 'up') {
+          if (top > Math.abs(bottom)) {
+            zoomedDims = [top / -2, top / 2];
+          } else if (Math.abs(bottom) > top) {
+            zoomedDims = [bottom / 2, Math.abs(bottom / 2)];
+          }
+          this.updateVerticalZoom(zoomedDims, y, yAxis, brushArea, area);
+        }
+      }
+      console.log(direction);
+
+    });
 
     let tooltip = d3.select(this.tooltipRef);
 
@@ -232,7 +267,7 @@ export default class StackedAreaChart extends React.Component {
 
     let bisectDate = d3.bisector((d) => d.date).left;
 
-    brushArea.append('g')
+    let yAxis = brushArea.append('g')
       .attr('transform', 'translate(' + paddings.left + ',0)')
       .call(d3.axisLeft(y).tickFormat(function (d) {
         if (d > 0)
@@ -345,6 +380,28 @@ export default class StackedAreaChart extends React.Component {
       .attr("y", paddings.top);
 
     return {brushArea, xAxis};
+  }
+
+  updateVerticalZoom(dims, y, yAxis, area, areaGenerator){
+    y.domain(dims);
+
+    yAxis.call(d3.axisLeft(y));
+    area
+      .selectAll('.layer')
+      .attr("d", areaGenerator);
+    this.setState({zoomedVertical: true, zooming: false, verticalZoomDims: dims});
+  }
+
+
+  resetVerticalZoom(y, yAxis, area, areaGenerator){
+    y.domain(this.props.yDims);
+
+    yAxis.call(d3.axisLeft(y));
+    area
+      .selectAll('.layer')
+      .attr("d", areaGenerator);
+
+    this.setState({zoomedVertical: false, verticalZoomDims: [0,0]});
   }
 
 
