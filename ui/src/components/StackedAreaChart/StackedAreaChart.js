@@ -209,7 +209,7 @@ export default class StackedAreaChart extends React.Component {
         if (direction === 'up') {
           if (top > Math.abs(bottom)) {
             zoomedDims = [top / -2, top / 2];
-          } else if (Math.abs(bottom) > top) {
+          } else if (Math.abs(bottom) >= top) {
             zoomedDims = [bottom / 2, Math.abs(bottom / 2)];
           }
           this.updateVerticalZoom(zoomedDims, y, yAxis, brushArea, area);
