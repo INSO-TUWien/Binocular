@@ -66,7 +66,6 @@ export default class Dashboard extends React.Component {
                           yScale={1}
                           yDims={this.state.ciScale}
                           d3offset={d3.stackOffsetDiverging}
-                          d3bugfix={{seriesNumber: 1}}
                           resolution={this.props.chartResolution}/>
       </div>
     </div>);
@@ -83,7 +82,6 @@ export default class Dashboard extends React.Component {
                           yScale={1}
                           yDims={this.state.issueScale}
                           d3offset={d3.stackOffsetDiverging}
-                          d3bugfix={{seriesNumber: 1}}
                           resolution={this.props.chartResolution}/>
       </div>
     </div>);
@@ -195,7 +193,7 @@ export default class Dashboard extends React.Component {
     const issueChartData = [];
     const issueScale = [0,0];
     _.each(data, function(issue){
-      issueChartData.push({date: issue.date, openCount: issue.openCount, closedCount: (issue.closedCount > 0) ? (issue.closedCount*(-1)) : 0});
+      issueChartData.push({date: issue.date, openCount: issue.openCount, closedCount: (issue.closedCount > 0) ? (issue.closedCount*(-1)) : -0.001});  //-0.001 for stack layout to realize it belongs on the bottom
       if(issueScale[1] < issue.openCount)
         issueScale[1] = issue.openCount;
       if(issueScale[0] > issue.closedCount*(-1))
@@ -223,7 +221,7 @@ export default class Dashboard extends React.Component {
         let buildDate = Date.parse(props.builds[i].createdAt);
         if(buildDate >= currTimestamp && buildDate < nextTimestamp){
           obj.succeeded += (props.builds[i].stats.success || 0);
-          obj.failed += (props.builds[i].stats.failed || 0);
+          obj.failed += (props.builds[i].stats.failed || -0.001); //-0.001 for stack layout to realize it belongs on the bottom
         }
       }
       data.push(obj);
@@ -293,7 +291,7 @@ export default class Dashboard extends React.Component {
         }else
           if(props.displayMetric === 'linesChanged') {
             obj["(Additions) " + committer] = 0;
-            obj["(Deletions) " + committer] = 0;
+            obj["(Deletions) " + committer] = -0.001; //-0.001 for stack layout to realize it belongs on the bottom
           }else {
             obj[committer] = 0;
           }

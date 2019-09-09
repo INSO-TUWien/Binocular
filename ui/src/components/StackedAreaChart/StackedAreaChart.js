@@ -16,9 +16,6 @@ import cx from 'classnames';
  *  - yScale (Format: number, will be multiplied with the y-Axis values. Useful if you want a themeRiver, which extends to both top and bottom, hence a yScale of 2 is needed)
  *  - yDims (Format: [topValue, bottomValue], limits of the y-Axis on top/bottom, should correspond to data.)
  *  - d3offset (Format: d3.stackOffsetNone/d3.stackOffsetDiverging/d3.stackOffsetSilhouette/... determines the way data is stacked, check d3 docs)
- *  - d3bugfix (optional) (Format: {seriesNumber: number}, number being the index of the series that the bugfix should be applied to)
- *    The d3 library has a bug where if you use d3.stackOffsetDiverging and have a series with strictly negative or zero values, it will still put positive values in it for unknown reasons.
- *    To remedy this, if you set the seriesNumber, all positive values in that series index will be set to 0.
  *  - keys (optional) (Format: [seriesName1, seriesName2, ...]) Filters the chart, only showing the provided keys and leaving everything else out.
  *  - resolution (Format: 'years'/'months'/'weeks'/'days') Needed for date format in tooltips.
  */
@@ -118,15 +115,6 @@ export default class StackedAreaChart extends React.Component {
 
     //Data formatted for d3
     let stackedData = stack(data);
-
-    if (this.props.d3bugfix) {
-      _.each(stackedData[this.props.d3bugfix.seriesNumber], function (elem) {
-        if (elem[0] > 0 || elem[1] > 0) {
-          elem[0] = 0;
-          elem[1] = 0;
-        }
-      })
-    }
 
     return stackedData;
   }
@@ -303,7 +291,7 @@ export default class StackedAreaChart extends React.Component {
         value *= (-1);
 
       tooltip
-        .html(formattedDate +  '<hr/>' + '<div style=\"background: ' + palette[key] + '\">' + '</div>' + text + ": " + value)
+        .html(formattedDate +  '<hr/>' + '<div style=\"background: ' + palette[key] + '\">' + '</div>' + text + ": " + Math.round(value))
         .style('position', 'absolute')
         .style('left', (d3.event.layerX - 20) + 'px')
         .style('top', (d3.event.layerY - 70) + 'px');
