@@ -12,19 +12,16 @@ const ICON_HEIGHT = 15;
 export default class LegendCompact extends React.Component {
   constructor(props) {
     super(props);
-    this.state = {
-      text: props.text,     //String, text to display
-      color: props.color    //String, hex code
-    };
   }
 
   render() {
     return (<div className={styles.legend}>
       <svg className={styles.icon} width={ICON_WIDTH} height={ICON_HEIGHT}>
-        <rect width={ICON_HEIGHT} height={ICON_WIDTH} fill={this.state.color} />
+        <rect width={ICON_WIDTH/2} height={ICON_HEIGHT} fill={this.props.color}/>
+        <rect width={ICON_WIDTH/2} height={ICON_HEIGHT} x={ICON_WIDTH/2} fill={this.props.color2}/>
       </svg>
       <text>
-        {this.state.text}
+        {this.props.text}
       </text>
     </div>);
   }
