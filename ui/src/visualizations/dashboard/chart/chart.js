@@ -61,7 +61,7 @@ export default class Dashboard extends React.Component {
         <StackedAreaChart name="CI"
                           content={this.state.ciChartData}
                           palette={{succeeded: "#26ca3b", failed: "#e23b41"}}
-                          paddings={{top: 20, left: 60, bottom: 20, right: 40}}
+                          paddings={{top: 10, left: 60, bottom: 20, right: 30}}
                           xAxisCenter={true}
                           yScale={1}
                           yDims={this.state.ciScale}
@@ -78,7 +78,7 @@ export default class Dashboard extends React.Component {
         <StackedAreaChart name="issues"
                           content={this.state.issueChartData}
                           palette={{openCount: "#3461eb", closedCount: "#8099e8"}}
-                          paddings={{top: 20, left: 60, bottom: 20, right: 40}}
+                          paddings={{top: 10, left: 60, bottom: 20, right: 30}}
                           xAxisCenter={true}
                           yScale={1}
                           yDims={this.state.issueScale}
@@ -106,7 +106,7 @@ export default class Dashboard extends React.Component {
           <StackedAreaChart name="changes"
                             content={this.state.commitChartData}
                             palette={commitPalette}
-                            paddings={{top: 20, left: 60, bottom: 20, right: 40}}
+                            paddings={{top: 10, left: 60, bottom: 20, right: 30}}
                             xAxisCenter={commitCenterAxis}
                             yScale={1}
                             yDims={this.state.commitScale}
