@@ -360,9 +360,9 @@ export default class StackedAreaChart extends React.Component {
     let clip = svg.append("defs").append("svg:clipPath")
       .attr("id", "clip")
       .append("svg:rect")
-      .attr("width", width)
+      .attr("width", width - paddings.right)
       .attr("height", height)
-      .attr("x", 0)
+      .attr("x", paddings.left)
       .attr("y", 0);
 
     return {brushArea, xAxis};
