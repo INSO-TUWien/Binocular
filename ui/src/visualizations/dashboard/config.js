@@ -41,7 +41,7 @@ const DashboardConfigComponent = props => {
       <form className={styles.form}>
         <div className={styles.field}>
           <div className="control">
-            <label className="label">Time Bucket Size:</label>
+            <label className="label">General Chart Settings</label>
             <TabCombo
               value={props.resolution}
               options={[
@@ -52,15 +52,15 @@ const DashboardConfigComponent = props => {
               ]}
               onChange={value => props.onClickResolution(value)}
             />
-            <p className={styles.checkboxLabel}><input name="showCI" type="checkbox"
+            <div><label className={styles.checkboxLabel}><input name="showCI" type="checkbox"
                                                        onChange={() => props.onClickShowCIChart(!props.showCIChart)}
-                                                       checked={props.showCIChart}/> Show CI Chart </p>
-            <p className={styles.checkboxLabel}><input name="showIssues" type="checkbox"
+                                                       checked={props.showCIChart}/> Show CI Chart </label></div>
+            <div><label className={styles.checkboxLabel}><input name="showIssues" type="checkbox"
                                                        onChange={() => props.onClickShowIssueChart(!props.showIssueChart)}
-                                                       checked={props.showIssueChart}/> Show Issues Chart </p>
-            <p className={styles.checkboxLabel}><input name="showChanges" type="checkbox"
+                                                       checked={props.showIssueChart}/> Show Issues Chart </label></div>
+            <div><label className={styles.checkboxLabel}><input name="showChanges" type="checkbox"
                                                        onChange={() => props.onClickShowChangesChart(!props.showChangesChart)}
-                                                       checked={props.showChangesChart}/> Show Changes Chart </p>
+                                                       checked={props.showChangesChart}/> Show Changes Chart </label></div>
           </div>
         </div>
         <div className={styles.field}>
