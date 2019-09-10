@@ -29,6 +29,7 @@ export default handleActions(
     chosenFile: '',
     highlightedCommits: [],
     commitAttribute: 'count',
-    viewport: [0, null]
+    viewport: [0, null],
+    files:''
   }
 );

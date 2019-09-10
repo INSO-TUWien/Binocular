@@ -1,7 +1,7 @@
 'use strict';
 
 import {graphQl, traversePages} from "../../../utils";
-import {Developer} from "../../../../../foxx/types/developer";
+import {Developer} from "../entity/developer";
 
 export const arrayOfDev = [];
 

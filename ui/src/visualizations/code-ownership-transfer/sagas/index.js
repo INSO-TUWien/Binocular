@@ -10,7 +10,7 @@ import {fetchFactory, timestampedActionFactory, mapSaga} from '../../../sagas/ut
 import fetchRelatedCommits from './fetchRelatedCommits.js';
 
 import getDevelopers from "./getDevelopers";
-import getFiles from "./getAllFiles";
+import getFiles, {fileList} from "./getAllFiles";
 
 
 export const setCategory = createAction('SET_CATEGORY');
@@ -91,14 +91,20 @@ export const fetchCodeOwnershipData = fetchFactory(
   function* () {
     const state = yield select();
 
+
     const activeFile = state.visualizations.codeOwnershipTransfer.state.config.chosenFile;
-    console.log('File', activeFile);
 
-    // getFiles(activeFile);
-
-    // if(activeFile === '') {
-    //   return;
-    // }
+    //sort commits by date for selected file
+    if(activeFile !== '') {
+      for (let i = 0; i < fileList.length; i++) {
+        if(fileList[i].path === activeFile.path) {
+          fileList[i].commits.sort(function(a,b) {
+              return new Date(a.date) - new Date(b.date);
+            });
+          console.log('SELECTED FILE', fileList[i]);
+        }
+      }
+    }
 
 
     return yield Promise.join(

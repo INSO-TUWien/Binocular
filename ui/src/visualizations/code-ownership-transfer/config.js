@@ -39,9 +39,7 @@ const mapDispatchToProps = (dispatch /*, ownProps*/) => {
     onSetOverlay: overlay => dispatch(setOverlay(overlay)),
     onChangeCommitAttribute: attr => dispatch(setCommitAttribute(attr)),
     onSetCategory: cat => dispatch(setCategory(cat)),
-    onSetFile: file => dispatch(setActiveFile(file)),
-
-
+    onSetFile: file => dispatch(setActiveFile(file))
   };
 };
 
@@ -71,7 +69,6 @@ const CodeOwnershipTransferConfigComponent = props => {
     }
   }
 
-  console.log('PROP FILE', props.file);
 
   return (
     <div className={styles.configContainer}>
@@ -168,8 +165,6 @@ const CodeOwnershipTransferConfigComponent = props => {
             </div>
           </div>
         </div>}
-
-
       </form>
     </div>
   );

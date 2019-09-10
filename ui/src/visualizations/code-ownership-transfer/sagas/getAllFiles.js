@@ -2,8 +2,11 @@
 
 import {graphQl, traversePages} from "../../../utils";
 import {FileFilter} from "../entity/fileFilter";
+import {CommitEnt} from "../entity/commitEnt";
+import {FileEnt} from "../entity/fileEnt";
 
 export const arrayOfFiles = [];
+export const fileList = [];
 
 export const getOneFile = (page, perPage) => {
   return graphQl
@@ -18,7 +21,7 @@ export const getOneFile = (page, perPage) => {
                  commits{
                   signature
                   sha
-                  message
+                  date
                  }
                 }
              }
@@ -28,9 +31,25 @@ export const getOneFile = (page, perPage) => {
     .then(resp =>  resp.allFiles);
 };
 
+function getListOfFiles(list) {
+  if(list.length !== fileList.length) {
+    for (let i = 0; i < list.length; i++) {
+      let commitList = [];
+      for (let j = 0; j < list[i].commits.length; j++) {
+        let tempCommit = new CommitEnt(list[i].commits[j].signature,list[i].commits[j].date, list[i].commits[j].sha, []);
+        commitList.push(tempCommit);
+      }
+      let tempFile = new FileEnt(list[i].path, commitList);
+      fileList.push(tempFile);
+    }
+  }
+  console.log('FILE LIST: ', fileList);
+}
+
 
 export default function getFiles() {
   let list = [];
+  let fileList = [];
   traversePages(getOneFile, file => {
     let devList = [];
     for( let i = 0; i< file.commits.length; i++) {
@@ -40,11 +59,16 @@ export default function getFiles() {
     }
     let tempFile = new FileFilter(file.path, file.commits.length, devList.length);
     list.push(file);
-    arrayOfFiles.push(tempFile);
+    fileList.push(tempFile);
   }).then(function () {
-
-    console.log('Files with commits:', list);
+    if(arrayOfFiles.length !== fileList.length){
+      for (let i = 0; i < fileList.length; i++) {
+        arrayOfFiles.push(fileList[i]);
+      }
+      getListOfFiles(list);
+    }
     console.log('Files filter list:', arrayOfFiles);
+    console.log('FILE LIST: ', fileList);
 
   });
 
