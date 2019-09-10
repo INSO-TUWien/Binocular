@@ -66,14 +66,15 @@ export default class CheckboxLegend extends React.Component {
   render() {
     let items = [];
     if(this.state.initialized) {
+      let otherCommitters = this.props.otherCommitters;
       _.each(Object.keys(this.props.palette), (key) => {
         let text = key;
-        if(text === 'others' && this.props.otherCommitters)
-          text = '' + this.props.otherCommitters + ' Others';
+        if(text === 'others' && otherCommitters)
+          text = '' + otherCommitters + ' Others';
         if (this.state.selected.indexOf(key) > -1) {
-          items.push(<CheckboxLegendLine key={key} text={text} color={this.props.palette[key]} checked={true} onClick={this.clickCallback.bind(this)} split={this.props.split}/>);
+          items.push(<CheckboxLegendLine id={key} key={key} text={text} color={this.props.palette[key]} checked={true} onClick={this.clickCallback.bind(this)} split={this.props.split}/>);
         } else {
-          items.push(<CheckboxLegendLine key={key} text={text} color={this.props.palette[key]} checked={false} onClick={this.clickCallback.bind(this)} split={this.props.split}/>);
+          items.push(<CheckboxLegendLine id={key} key={key} text={text} color={this.props.palette[key]} checked={false} onClick={this.clickCallback.bind(this)} split={this.props.split}/>);
         }
       });
     }
@@ -125,7 +126,7 @@ class CheckboxLegendLine extends React.Component{
   }
 
   clickHandler(){
-    this.props.onClick(this.props.text);
+    this.props.onClick(this.props.id);
   }
 
   render()
