@@ -67,10 +67,13 @@ export default class CheckboxLegend extends React.Component {
     let items = [];
     if(this.state.initialized) {
       _.each(Object.keys(this.props.palette), (key) => {
+        let text = key;
+        if(text === 'others' && this.props.otherCommitters)
+          text = '' + this.props.otherCommitters + ' Others';
         if (this.state.selected.indexOf(key) > -1) {
-          items.push(<CheckboxLegendLine key={key} text={key} color={this.props.palette[key]} checked={true} onClick={this.clickCallback.bind(this)} split={this.props.split}/>);
+          items.push(<CheckboxLegendLine key={key} text={text} color={this.props.palette[key]} checked={true} onClick={this.clickCallback.bind(this)} split={this.props.split}/>);
         } else {
-          items.push(<CheckboxLegendLine key={key} text={key} color={this.props.palette[key]} checked={false} onClick={this.clickCallback.bind(this)} split={this.props.split}/>);
+          items.push(<CheckboxLegendLine key={key} text={text} color={this.props.palette[key]} checked={false} onClick={this.clickCallback.bind(this)} split={this.props.split}/>);
         }
       });
     }

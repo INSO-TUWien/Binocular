@@ -252,19 +252,27 @@ export default class Dashboard extends React.Component {
     let curr = moment(props.firstSignificantTimestamp).startOf(granularity.unit).subtract(1,props.chartResolution);
     let end = moment(props.lastSignificantTimestamp).endOf(granularity.unit).add(1,props.chartResolution);
     let next = moment(curr).add(1, props.chartResolution);
-    for(let i=0; curr.isSameOrBefore(end); curr.add(1,props.chartResolution), next.add(1,props.chartResolution)){       //Iterate through time buckets
+    let totalChangesPerAuthor = {};
+    let totalChanges = 0;
+    for (let i = 0; curr.isSameOrBefore(end); curr.add(1, props.chartResolution), next.add(1, props.chartResolution)) {       //Iterate through time buckets
       let currTimestamp = curr.toDate().getTime();
       let nextTimestamp = next.toDate().getTime();
-      let obj = {date: currTimestamp, totals: {count: 0, additions: 0, deletions: 0}, statsByAuthor: {}};  //Save date of time bucket, create object
-      for(; i < props.commits.length && Date.parse(props.commits[i].date) < nextTimestamp; i++){             //Iterate through commits that fall into this time bucket
+      let obj = {date: currTimestamp, statsByAuthor: {}};  //Save date of time bucket, create object
+      for (; i < props.commits.length && Date.parse(props.commits[i].date) < nextTimestamp; i++) {             //Iterate through commits that fall into this time bucket
         let additions = props.commits[i].stats.additions;
         let deletions = props.commits[i].stats.deletions;
+        let changes = additions + deletions;
         let commitAuthor = props.commits[i].signature;
-        obj.totals.count++;
-        obj.totals.additions += additions;
-        obj.totals.deletions += deletions;
-        if(commitAuthor in obj.statsByAuthor)                                     //If author is already in statsByAuthor, add to previous values
-          obj.statsByAuthor[commitAuthor] = {count: obj.statsByAuthor[commitAuthor].count+1, additions: obj.statsByAuthor[commitAuthor].additions + additions, deletions: obj.statsByAuthor[commitAuthor].deletions + deletions};
+        if (totalChangesPerAuthor[commitAuthor] == null)
+          totalChangesPerAuthor[commitAuthor] = 0;
+        totalChangesPerAuthor[commitAuthor] += changes;
+        totalChanges += changes;
+        if (commitAuthor in obj.statsByAuthor)                                     //If author is already in statsByAuthor, add to previous values
+          obj.statsByAuthor[commitAuthor] = {
+            count: obj.statsByAuthor[commitAuthor].count + 1,
+            additions: obj.statsByAuthor[commitAuthor].additions + additions,
+            deletions: obj.statsByAuthor[commitAuthor].deletions + deletions
+          };
         else                                                                      //Else create new values
           obj.statsByAuthor[commitAuthor] = {count: 1, additions: additions, deletions: deletions};
 
@@ -272,28 +280,49 @@ export default class Dashboard extends React.Component {
       data.push(obj);
     }
 
-    //--- STEP 2: CONSTRUCT CHART DATA FROM AGGREGATED COMMITS ----
+    //---- STEP 2: CONSTRUCT CHART DATA FROM AGGREGATED COMMITS ----
     const commitChartData = [];
-    let palette = {};
-    _.each(data, function(commit){                     //commit has structure {date, totals: {count, additions, deletions, changes}, statsByAuthor: {}} (see next line)}
+    let commitChartPalette = {};
+    let chartIsSplit = props.displayMetric === 'linesChanged';
+    if(chartIsSplit){
+      commitChartPalette['(Additions) others'] = props.palette['others'];
+      commitChartPalette['(Deletions) others'] = props.palette['others'];
+    }else{
+      commitChartPalette['others'] = props.palette['others'];
+    }
+    _.each(data, function (commit) {                     //commit has structure {date, statsByAuthor: {}} (see next line)}
       let obj = {date: commit.date};
-      _.each(props.committers, function(committer){                       //commitLegend to iterate over authorNames, commitLegend has structure [{name, style}, ...]
-        if(committer in commit.statsByAuthor) {   //If committer has data and isn't filtered, read it
-          if(props.displayMetric === 'linesChanged') {
-            obj["(Additions) " + committer] = commit.statsByAuthor[committer].additions;         //Insert number of changes with the author name as key, statsByAuthor has structure {{authorName: {count, additions, deletions, changes}}, ...}
-            obj["(Deletions) " + committer] = commit.statsByAuthor[committer].deletions*(-1) - 0.001; //-0.001 for stack layout to realize it belongs on the bottom
-            palette["(Additions) " + committer] = chroma(props.palette[committer]).hex();
-            palette["(Deletions) " + committer] = chroma(props.palette[committer]).darken(0.5).hex();
-          }
-          else
+      if(chartIsSplit){
+        obj['(Additions) others'] = 0;
+        obj['(Deletions) others'] = -0.001;
+      }else{
+        obj['others'] = 0;
+      }
+      _.each(props.committers, function (committer) {                       //commitLegend to iterate over authorNames, commitLegend has structure [{name, style}, ...]
+        if (committer in commit.statsByAuthor && committer in props.palette) {   //If committer has data
+          if (chartIsSplit) {
+            obj['(Additions) ' + committer] = commit.statsByAuthor[committer].additions;         //Insert number of changes with the author name as key, statsByAuthor has structure {{authorName: {count, additions, deletions, changes}}, ...}
+            obj['(Deletions) ' + committer] = commit.statsByAuthor[committer].deletions * (-1) - 0.001; //-0.001 for stack layout to realize it belongs on the bottom
+            commitChartPalette['(Additions) ' + committer] = chroma(props.palette[committer]).hex();
+            commitChartPalette['(Deletions) ' + committer] = chroma(props.palette[committer]).darken(0.5).hex();
+          } else
             obj[committer] = commit.statsByAuthor[committer].count;
-        }else
-          if(props.displayMetric === 'linesChanged') {
-            obj["(Additions) " + committer] = 0;
-            obj["(Deletions) " + committer] = -0.001; //-0.001 for stack layout to realize it belongs on the bottom
-          }else {
+        } else if (committer in commit.statsByAuthor && !(committer in props.palette)) {
+          if (chartIsSplit) {
+            obj['(Additions) others'] += commit.statsByAuthor[committer].additions;
+            obj['(Deletions) others'] += commit.statsByAuthor[committer].deletions * (-1) - 0.001;
+          } else {
+            obj['others'] += commit.statsByAuthor[committer].changes;
+          }
+        } else {
+          if (chartIsSplit) {
+            obj['(Additions) ' + committer] = 0;
+            obj['(Deletions) ' + committer] = -0.001; //-0.001 for stack layout to realize it belongs on the bottom
+          } else {
             obj[committer] = 0;
           }
+        }
+
       });
       commitChartData.push(obj);                                //Add object to list of objects
     });
@@ -335,7 +364,7 @@ export default class Dashboard extends React.Component {
         selectedAuthors.push(key);
     });
 
-    return { commitChartData, commitScale, commitPalette: palette, selectedAuthors};
+    return {commitChartData, commitScale, commitPalette: commitChartPalette, selectedAuthors};
   }
 
   static getGranularity(resolution) {

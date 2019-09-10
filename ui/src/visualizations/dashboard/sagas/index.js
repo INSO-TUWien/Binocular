@@ -94,7 +94,8 @@ export const fetchDashboardData = fetchFactory(
       getBuildData()
     )
       .spread((commits, issues, builds) => {
-        const palette = getChartColors('spectral', [...committers]);    //TODO maybe insert 'other' back here
+        let palette = getPalette(commits, 15, committers.length);
+
 
         return {
           otherCount: 0,
@@ -116,3 +117,39 @@ export const fetchDashboardData = fetchFactory(
   receiveDashboardData,
   receiveDashboardDataError
 );
+
+function getPalette(commits, maxNumberOfColors, numOfCommitters){
+  let palette = getChartColors('spectral', 15, numOfCommitters);    //TODO maybe insert 'other' back here
+
+  let totals = {};
+  _.each(commits, (commit) => {
+    let changes = commit.stats.additions + commit.stats.deletions;
+    if(totals[commit.signature]){
+      totals[commit.signature] += changes;
+    }else{
+      totals[commit.signature] = changes;
+    }
+  });
+
+  let sortable = [];
+  _.each(Object.keys(totals), (key) => {
+    sortable.push([key, totals[key]]);
+  });
+
+  sortable.sort((a, b) => {
+    return b[1] - a[1];
+  });
+
+  let returnPalette = {};
+
+  for (let i = 0; i < palette.length-1; i++) {
+    returnPalette[sortable[i][0]] = palette[i];
+  }
+  if (sortable.length > maxNumberOfColors) {
+    returnPalette['others'] = palette[maxNumberOfColors - 1];
+  } else if (sortable.length <= maxNumberOfColors) {
+    returnPalette[sortable[sortable.length - 1][0]] = palette[palette.length - 1];
+  }
+
+  return returnPalette;
+}

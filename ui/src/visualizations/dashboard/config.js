@@ -12,6 +12,7 @@ const mapStateToProps = (state /*, ownProps*/) => {
   const dashboardState = state.visualizations.dashboard.state;
 
   return {
+    committers: dashboardState.data.data.committers,
     resolution: dashboardState.config.chartResolution,
     showIssues: dashboardState.config.showIssues,
     palette: dashboardState.data.data.palette,
@@ -36,6 +37,12 @@ const mapDispatchToProps = (dispatch /*, ownProps*/) => {
 };
 
 const DashboardConfigComponent = props => {
+  let otherCommitters;
+  if(props.palette && ('others' in props.palette)){
+    otherCommitters = props.committers.length - (Object.keys(props.palette).length-1);
+  }
+
+
   return (
     <div className={styles.configContainer}>
       <form className={styles.form}>
@@ -96,7 +103,11 @@ const DashboardConfigComponent = props => {
               onChange={value => props.onClickMetric(value)}
             />
           </div>
-          <CheckboxLegend palette={props.palette} onClick={props.onClickCheckboxLegend.bind(this)} title="Authors:" split={props.metric === "linesChanged"}/>
+          <CheckboxLegend palette={props.palette}
+                          onClick={props.onClickCheckboxLegend.bind(this)}
+                          title="Authors:"
+                          split={props.metric === "linesChanged"}
+                          otherCommitters={otherCommitters}/>
         </div>
       </form>
     </div>
