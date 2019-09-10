@@ -282,8 +282,8 @@ export default class Dashboard extends React.Component {
           if(props.displayMetric === 'linesChanged') {
             obj["(Additions) " + committer] = commit.statsByAuthor[committer].additions;         //Insert number of changes with the author name as key, statsByAuthor has structure {{authorName: {count, additions, deletions, changes}}, ...}
             obj["(Deletions) " + committer] = commit.statsByAuthor[committer].deletions*(-1) - 0.001; //-0.001 for stack layout to realize it belongs on the bottom
-            palette["(Additions) " + committer] = props.palette[committer];
-            palette["(Deletions) " + committer] = chroma(props.palette[committer]).brighten().hex();
+            palette["(Additions) " + committer] = chroma(props.palette[committer]).hex();
+            palette["(Deletions) " + committer] = chroma(props.palette[committer]).darken(0.5).hex();
           }
           else
             obj[committer] = commit.statsByAuthor[committer].count;

@@ -88,8 +88,8 @@ export default class CheckboxLegend extends React.Component {
     if(this.props.palette) {
       if (this.props.split) {
         let keys = Object.keys(this.props.palette);
-        let color1 = this.props.palette[keys[0]];
-        let color2 = this.props.palette[keys[1]];
+        let color1 = chroma(this.props.palette[keys[0]]).hex();
+        let color2 = chroma(this.props.palette[keys[0]]).darken(0.5).hex();
         explanation = <LegendCompact text="Additions | Deletions (# lines per author)" color={color1} color2={color2}/>
       } else {
         let keys = Object.keys(this.props.palette);
@@ -129,8 +129,8 @@ class CheckboxLegendLine extends React.Component{
   {
     let rects;
     if(this.props.split){
-      rects = (<g><rect width={ICON_HEIGHT/2} height={ICON_WIDTH} fill={this.props.color}/>
-      <rect x={ICON_WIDTH/2} width={ICON_HEIGHT/2} height={ICON_WIDTH} fill={chroma(this.props.color).brighten().hex()}/></g>);
+      rects = (<g><rect width={ICON_HEIGHT/2} height={ICON_WIDTH} fill={chroma(this.props.color).hex()}/>
+      <rect x={ICON_WIDTH/2} width={ICON_HEIGHT/2} height={ICON_WIDTH} fill={chroma(this.props.color).darken(0.5).hex()}/></g>);
     }else{
       rects = <rect width={ICON_HEIGHT} height={ICON_WIDTH} fill={this.props.color}/>;
     }
