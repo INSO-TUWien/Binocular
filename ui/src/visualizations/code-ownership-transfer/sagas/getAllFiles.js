@@ -46,7 +46,11 @@ function getListOfFiles(list) {
     for (let i = 0; i < list.length; i++) {
       let commitList = [];
       for (let j = 0; j < list[i].commits.length; j++) {
-        let tempCommit = new CommitEnt(list[i].commits[j].signature,list[i].commits[j].date, list[i].commits[j].sha, []);
+        let hunkList = [];
+        for (let k = 0; k <list[i].commits[j].hunks.length; k++) {
+          hunkList.push(list[i].commits[j].hunks[k]);
+        }
+        let tempCommit = new CommitEnt(list[i].commits[j].commit.signature,list[i].commits[j].commit.date, list[i].commits[j].commit.sha, hunkList,list[i].commits[j].lineCount);
         commitList.push(tempCommit);
       }
       let tempFile = new FileEnt(list[i].path, commitList);
