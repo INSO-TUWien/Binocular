@@ -13,10 +13,13 @@ export default () =>
         <i className="fa fa-hand-rock"/> Click and drag (left-to-right) on a diagram to zoom in horizontally.
       </li>
       <li>
-        <i className="fa fa-mouse-pointer"/> Double-Click a diagram to reset the zoom level.
+        <i className="fa fa-hand-pointer"/> Double-Click a diagram to reset the zoom level.
       </li>
       <li>
         <i className="fa fa-search"/> Scroll with the mouse to zoom in and out vertically.
+      </li>
+      <li>
+        <i className="fa fa-mouse-pointer"/> Hover over chart data to show the closest data point.
       </li>
     </ul>
 
@@ -27,11 +30,14 @@ export default () =>
         aggregated.
       </li>
       <li>
+        <i className="far fa-square"/> Tick or untick charts to show and hide them.
+      </li>
+      <li>
         <i className="fa fa-ticket-alt"/> Change the issues shown to display either all, only currently open or only
         currently closed issues.
       </li>
       <li>
-        <i className="fa fa-ruler-vertical"/> Change the metric of the changes graph to either use number of lines changed
+        <i className="fa fa-ruler"/> Change the metric of the changes graph to either use number of lines changed
         or number of commits as the scale for the y-Axis.
       </li>
       <li>
