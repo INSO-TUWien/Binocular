@@ -60,7 +60,7 @@ export default class Dashboard extends React.Component {
       <div className={styles.chart}>
         <StackedAreaChart content={this.state.ciChartData}
                           palette={{succeeded: "#26ca3b", failed: "#e23b41"}}
-                          paddings={{top: 10, left: 60, bottom: 20, right: 30}}
+                          paddings={{top: 20, left: 60, bottom: 20, right: 30}}
                           xAxisCenter={true}
                           yDims={this.state.ciScale}
                           d3offset={d3.stackOffsetDiverging}
@@ -74,7 +74,7 @@ export default class Dashboard extends React.Component {
       <div className={styles.chart}>
         <StackedAreaChart content={this.state.issueChartData}
                           palette={{openCount: "#3461eb", closedCount: "#8099e8"}}
-                          paddings={{top: 10, left: 60, bottom: 20, right: 30}}
+                          paddings={{top: 20, left: 60, bottom: 20, right: 30}}
                           xAxisCenter={true}
                           yDims={this.state.issueScale}
                           d3offset={d3.stackOffsetDiverging}
@@ -99,7 +99,7 @@ export default class Dashboard extends React.Component {
         <div className={styles.chart}>
           <StackedAreaChart content={this.state.commitChartData}
                             palette={commitPalette}
-                            paddings={{top: 10, left: 60, bottom: 20, right: 30}}
+                            paddings={{top: 20, left: 60, bottom: 20, right: 30}}
                             xAxisCenter={commitCenterAxis}
                             yDims={this.state.commitScale}
                             d3offset={commitOffset}
@@ -110,7 +110,7 @@ export default class Dashboard extends React.Component {
     let loadingHint = (<div className={styles.loadingHintContainer}>
       <h1 className={styles.loadingHint}>Loading... <i className="fas fa-spinner fa-pulse"/></h1>
     </div>);
-    
+
     let selectChartHint = (<div className={styles.loadingHintContainer}>
       <h1 className={styles.loadingHint}>Please select a chart.</h1>
     </div>);
