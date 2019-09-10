@@ -312,9 +312,9 @@ export default class Dashboard extends React.Component {
             obj['(Additions) others'] += commit.statsByAuthor[committer].additions;
             obj['(Deletions) others'] += commit.statsByAuthor[committer].deletions * (-1) - 0.001;
           } else {
-            obj['others'] += commit.statsByAuthor[committer].changes;
+            obj['others'] += (commit.statsByAuthor[committer].additions + commit.statsByAuthor[committer].deletions);
           }
-        } else {
+        } else if (committer in props.palette){
           if (chartIsSplit) {
             obj['(Additions) ' + committer] = 0;
             obj['(Deletions) ' + committer] = -0.001; //-0.001 for stack layout to realize it belongs on the bottom
@@ -334,7 +334,6 @@ export default class Dashboard extends React.Component {
       let positiveTotals = 0;
       let negativeTotals = 0;
       _.each(Object.keys(dataPoint).splice(1), (key) => {
-        let debug = key.split(") ");
         if(key.includes("(Additions) ") && props.selectedAuthors.indexOf(key.split(") ")[1]) > -1) {
           positiveTotals += dataPoint[key];
         }
