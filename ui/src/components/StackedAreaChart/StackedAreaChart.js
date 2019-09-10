@@ -201,7 +201,7 @@ export default class StackedAreaChart extends React.Component {
         if (direction === 'up' && top/2 > 1 && bottom/2 < -1){ //Zoom limit
           this.updateVerticalZoom([bottom/2, top/2], y, yAxis, brushArea, area);
         }else if(direction === 'down'){
-          if(top*2 > zoomedDims[1] || bottom*2 < zoomedDims[0]){
+          if(top*2 > zoomedDims[1] && bottom*2 < zoomedDims[0]){
             this.resetVerticalZoom(y, yAxis, brushArea, area);
           }else{
             this.updateVerticalZoom([bottom*2, top*2], y, yAxis, brushArea, area);
@@ -210,9 +210,9 @@ export default class StackedAreaChart extends React.Component {
       } else {
         if (direction === 'up') {
           if (top > Math.abs(bottom)) {
-            zoomedDims = [top / -2, top / 2];
+            zoomedDims = [top / -1, top];
           } else if (Math.abs(bottom) >= top) {
-            zoomedDims = [bottom / 2, Math.abs(bottom / 2)];
+            zoomedDims = [bottom, Math.abs(bottom)];
           }
           this.updateVerticalZoom(zoomedDims, y, yAxis, brushArea, area);
         }
