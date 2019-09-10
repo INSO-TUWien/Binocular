@@ -14,6 +14,9 @@ module.exports = new gql.GraphQLObjectType({
       file: {
         type: require('./file.js')
       },
+      commit: {
+        type: require('./commit.js')
+      },
       lineCount: {
         type: gql.GraphQLInt,
         description: 'The number of lines in this file at this commit'

@@ -30,16 +30,20 @@ module.exports = new gql.GraphQLObjectType({
         description: 'The URL (if available) to the master-version of this file on the ITS'
       },
       commits: ({
-        type: new gql.GraphQLList(require('./commit.js')),
+        type: new gql.GraphQLList(require('./fileInCommit.js')),
         description: 'The commits touching this file',
         resolve(file, args, limit) {
           return db
             ._query(
-              aql`FOR commit
+              aql`FOR commit, edge
           IN
           OUTBOUND ${file} ${commitsToFiles}
             ${limit}
-            RETURN commit`
+            RETURN {
+              commit,
+              lineCount: edge.lineCount,
+              hunks: edge.hunks
+             }`
             )
             .toArray();
         }

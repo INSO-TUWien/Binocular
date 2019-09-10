@@ -19,9 +19,19 @@ export const getOneFile = (page, perPage) => {
                data {
                  path
                  commits{
+                 lineCount
+                     hunks {
+                       newStart
+                       newLines
+                       oldStart
+                       oldLines
+                       webUrl
+                     }
+                     commit {
                   signature
                   sha
                   date
+                  }
                  }
                 }
              }
@@ -69,6 +79,8 @@ export default function getFiles() {
     }
     console.log('Files filter list:', arrayOfFiles);
     console.log('FILE LIST: ', fileList);
+    console.log('HUNKS: ', list);
+
 
   });
 
