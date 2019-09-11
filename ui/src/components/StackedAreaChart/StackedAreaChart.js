@@ -18,7 +18,7 @@ import cx from 'classnames';
  *  - keys (optional) (Format: [seriesName1, seriesName2, ...]) Filters the chart, only showing the provided keys and leaving everything else out.
  *  - resolution (Format: 'years'/'months'/'weeks'/'days') Needed for date format in tooltips.
  *  - displayNegative (optional) (Format: true/false) Display negative numbers on y-scale.
- *  - order (optional) (Format: [string, string, ...]) Strings containing the keys in desired order.
+ *  - order (optional) (Format: [string, string, ...]) Strings containing the keys in desired order (largest to smallest).
  */
 export default class StackedAreaChart extends React.Component {
   constructor(props) {
