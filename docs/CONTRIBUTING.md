@@ -178,16 +178,18 @@ You will notice that in most tutorials, d3 is used for everything. However, reac
 This is done by using refs:
 
 ```
-	d3.select(this.ref).doSomething();
-
 	<svg ref={(var) => (this.ref = var)}/>
 
+	d3.select(this.ref).doSomething();
 ```
 
 You can rename "var" and "ref" to anything you like, e.g. `(svg) => (this.myRef = svg)`.
 
 CAUTION: You can only use d3 select calls once the React component is mounted in the DOM, a.k.a. actually rendered in the webpage.
-The react method componentDidMount() is called once the component is mounted into the DOM.
+The react method `componentDidMount()` is called once the component is mounted into the DOM. `componentDidUnmount()` has similar behavior when unmounted.
+I recommend keeping track of whether the component is mounted in the component state.
+I always call my d3 modifications in componentDidUpdate(), because it is called after the render() function and you want to append things to
+the element returned in render().
 CAUTION(2): The different versions of d3 have different API calls, some things might work in Version 3 that won't work in Version 4.
 As of September 2019, v4.4 is used. I have pasted a link to the documentation of that version below. When you google stuff, always include v4 in the query.
 https://devdocs.io/d3~4/
