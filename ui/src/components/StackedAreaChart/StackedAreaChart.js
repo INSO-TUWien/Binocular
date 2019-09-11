@@ -256,7 +256,12 @@ export default class StackedAreaChart extends React.Component {
 
     let yAxis = brushArea.append('g')
       .attr('transform', 'translate(' + paddings.left + ',0)')
-      .call(d3.axisLeft(y).tickFormat((d) => Math.abs(d)));
+      .call(d3.axisLeft(y).tickFormat((d) => {
+        if(this.props.displayNegative)
+          return d;
+        else
+          return Math.abs(d)
+      }));
 
     //Mouseover for tooltip
     function mouseover(){

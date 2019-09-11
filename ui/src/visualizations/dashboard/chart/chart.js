@@ -104,7 +104,8 @@ export default class Dashboard extends React.Component {
                             yDims={this.state.commitScale}
                             d3offset={commitOffset}
                             keys={this.state.selectedAuthors}
-                            resolution={this.props.chartResolution}/>
+                            resolution={this.props.chartResolution}
+                            displayNegative={true}/>
         </div>
       </div>);
     let loadingHint = (<div className={styles.loadingHintContainer}>
