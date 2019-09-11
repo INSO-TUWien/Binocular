@@ -87,7 +87,7 @@ export default class Dashboard extends React.Component {
       commitPalette = this.state.commitPalette;
       commitCenterAxis = true;
     }else{
-      commitOffset = d3.stackOffsetSilhouette;
+      commitOffset = d3.stackOffsetNone;
       commitPalette = this.props.palette;
       commitCenterAxis = false;
     }
@@ -341,8 +341,7 @@ export default class Dashboard extends React.Component {
           negativeTotals += dataPoint[key];
         }
         else if(props.selectedAuthors.indexOf(key) > -1) {
-          positiveTotals += dataPoint[key]/2;
-          negativeTotals -= dataPoint[key]/2;
+          positiveTotals += dataPoint[key];
         }
       });
       if(positiveTotals > commitScale[1])
