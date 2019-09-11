@@ -126,7 +126,7 @@ function getPalette(commits, maxNumberOfColors, numOfCommitters){
     return colors;
   }
 
-  let palette = chartColors('spectral', 15, numOfCommitters);    //TODO maybe insert 'other' back here
+  let palette = chartColors('spectral', 15, numOfCommitters);
 
   let totals = {};
   _.each(commits, (commit) => {
