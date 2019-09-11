@@ -25,13 +25,12 @@ export default class StackedAreaChart extends React.Component {
       content: props.content,   //[{name: "dev1", color: "#ffffff", checked: bool}, ...]
       palette: props.palette,
       componentMounted: false,
-      zooming: false,
       zoomed: false,
       zoomedDims: [0,0],
       zoomedVertical: false,
       verticalZoomDims: [0,0]
     };
-    window.addEventListener("resize", () => this.setState({zooming: false, zoomed: false}));
+    window.addEventListener("resize", () => this.forceUpdate());
   }
 
   componentDidMount() {
@@ -83,11 +82,11 @@ export default class StackedAreaChart extends React.Component {
     //Set callback to reset zoom on double-click
     svg.on("dblclick", () => {
       x.domain([stackedData[0][0].data.date, stackedData[0][stackedData[0].length - 1].data.date]);
-      xAxis.transition(500).call(d3.axisBottom(x));
+      xAxis.call(d3.axisBottom(x));
       brushArea
         .selectAll('.layer')
-        .transition(500)
-        .attr("d", area).on("end", this.setState({zooming: false, zoomed: false}));
+        .attr("d", area);
+      this.setState({zoomed: false});
     });
   }
 
@@ -383,7 +382,7 @@ export default class StackedAreaChart extends React.Component {
     area
       .selectAll('.layer')
       .attr("d", areaGenerator);
-    this.setState({zoomedVertical: true, zooming: false, verticalZoomDims: dims});
+    this.setState({zoomedVertical: true, verticalZoomDims: dims});
   }
 
   /**
@@ -423,21 +422,17 @@ export default class StackedAreaChart extends React.Component {
       return;
     }
 
-    this.setState({zooming: true}, () => {
-      xAxis.transition().duration(250).call(d3.axisBottom(x));
-      brushArea
-        .selectAll('.layer')
-        .transition()
-        .duration(250)
-        .attr("d", area)
-        .on("end", () => this.setState({zoomed: true, zooming: false, zoomedDims: zoomedDims}));
-    })
+    xAxis.call(d3.axisBottom(x));
+    brushArea
+      .selectAll('.layer')
+      .attr("d", area);
+    this.setState({zoomed: true, zoomedDims: zoomedDims})
   }
 
   //Draw chart after it updated
   componentDidUpdate(prevProps, prevState){
     //Only update the chart if there is data for it and the component is mounted and it is not currently in a zoom transition (d3 requirement)
-    if(this.state.componentMounted && this.props.content && !this.state.zooming){
+    if(this.state.componentMounted && this.props.content){
       this.updateElement();
     }
   }
