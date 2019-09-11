@@ -59,7 +59,7 @@ export default class Dashboard extends React.Component {
       </div>
       <div className={styles.chart}>
         <StackedAreaChart content={this.state.ciChartData}
-                          palette={{succeeded: "#26ca3b", failed: "#e23b41"}}
+                          palette={{Succeeded: "#26ca3b", Failed: "#e23b41"}}
                           paddings={{top: 20, left: 60, bottom: 20, right: 30}}
                           xAxisCenter={true}
                           yDims={this.state.ciScale}
@@ -73,7 +73,7 @@ export default class Dashboard extends React.Component {
       </div>
       <div className={styles.chart}>
         <StackedAreaChart content={this.state.issueChartData}
-                          palette={{openCount: "#3461eb", closedCount: "#8099e8"}}
+                          palette={{Opened: "#3461eb", Closed: "#8099e8"}}
                           paddings={{top: 20, left: 60, bottom: 20, right: 30}}
                           xAxisCenter={true}
                           yDims={this.state.issueScale}
@@ -192,7 +192,7 @@ export default class Dashboard extends React.Component {
     const issueChartData = [];
     const issueScale = [0,0];
     _.each(data, function(issue){
-      issueChartData.push({date: issue.date, openCount: issue.openCount, closedCount: (issue.closedCount > 0) ? (issue.closedCount*(-1)) : -0.001});  //-0.001 for stack layout to realize it belongs on the bottom
+      issueChartData.push({date: issue.date, Opened: issue.openCount, Closed: (issue.closedCount > 0) ? (issue.closedCount*(-1)) : -0.001});  //-0.001 for stack layout to realize it belongs on the bottom
       if(issueScale[1] < issue.openCount)
         issueScale[1] = issue.openCount;
       if(issueScale[0] > issue.closedCount*(-1))
@@ -230,7 +230,7 @@ export default class Dashboard extends React.Component {
     let ciChartData = [];
     let ciScale = [0,0];
     _.each(data, function(build){
-      ciChartData.push({date: build.date, succeeded: build.succeeded, failed: (build.failed > 0) ? (build.failed*(-1)) : 0});
+      ciChartData.push({date: build.date, Succeeded: build.succeeded, Failed: (build.failed > 0) ? (build.failed*(-1)) : 0});
       if(ciScale[1] < build.succeeded)
         ciScale[1] = build.succeeded;
       if(ciScale[0] > build.failed*(-1))
