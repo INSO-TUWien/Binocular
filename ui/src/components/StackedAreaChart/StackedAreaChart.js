@@ -18,6 +18,7 @@ import cx from 'classnames';
  *  - keys (optional) (Format: [seriesName1, seriesName2, ...]) Filters the chart, only showing the provided keys and leaving everything else out.
  *  - resolution (Format: 'years'/'months'/'weeks'/'days') Needed for date format in tooltips.
  *  - displayNegative (optional) (Format: true/false) Display negative numbers on y-scale.
+ *  - order (optional) (Format: [string, string, ...]) Strings containing the keys in desired order.
  */
 export default class StackedAreaChart extends React.Component {
   constructor(props) {
@@ -50,7 +51,7 @@ export default class StackedAreaChart extends React.Component {
   updateElement() {
     //Initialization
     let data = this.props.content;                                //Rename for less writing
-    let stackedData = this.calculateChartData(data);              //Get d3-friendly data
+    let stackedData = this.calculateChartData(data, this.props.order);              //Get d3-friendly data
     let yScale = this.props.yScale;                               //Multiplicator for the values on the y-scale
     let svg = d3.select(this.svgRef);                                //Select parent svg from render method
     let {width, height, paddings} = this.getDimsAndPaddings(svg); //Get width and height of svg in browser
@@ -96,7 +97,7 @@ export default class StackedAreaChart extends React.Component {
    * @param data Chart data in the format [{date: timestamp(ms), series1: value, series2: value, series3: value, series4: value, ...}, ...]
    * @returns Stacked chart data for d3 functions
    */
-  calculateChartData(data){
+  calculateChartData(data, order){
     //Keys are the names of the developers, date is excluded
     let keys;
     if(this.props.keys)
@@ -104,11 +105,26 @@ export default class StackedAreaChart extends React.Component {
     else
       keys = Object.keys(data[0]).slice(1);
 
+
+    let orderedKeys = [];
+    if(order) {
+      _.each(order, (orderElem) => {
+        if (keys.includes("(Additions) " + orderElem) && keys.includes("(Deletions) " + orderElem)) {
+          orderedKeys.push("(Additions) " + orderElem);
+          orderedKeys.push("(Deletions) " + orderElem);
+        } else if (keys.includes(orderElem)) {
+          orderedKeys.push(orderElem);
+        }
+      });
+    } else {
+      orderedKeys = keys;
+    }
+
     //Stack function for a ThemeRiver chart, using the keys provided
     let stack = d3.stack()
       .offset(this.props.d3offset)
       .order(d3.stackOrderReverse)
-      .keys(keys);
+      .keys(orderedKeys);
 
     //Data formatted for d3
     let stackedData = stack(data);
@@ -367,7 +383,7 @@ export default class StackedAreaChart extends React.Component {
     let clip = svg.append("defs").append("svg:clipPath")
       .attr("id", "clip")
       .append("svg:rect")
-      .attr("width", width - paddings.right)
+      .attr("width", width - paddings.right - paddings.left)
       .attr("height", height)
       .attr("x", paddings.left)
       .attr("y", 0);

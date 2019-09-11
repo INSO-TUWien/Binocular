@@ -53,6 +53,8 @@ export default class Dashboard extends React.Component {
   }
 
   render() {
+    if(this.props.palette)
+      console.log(Object.keys(this.props.palette));
     let ciChart = (<div className={styles.chartLine}>
       <div className={cx(styles.text, "label")}>
         CI Builds
@@ -81,7 +83,9 @@ export default class Dashboard extends React.Component {
                           resolution={this.props.chartResolution}/>
       </div>
     </div>);
-    let commitOffset, commitPalette, commitCenterAxis;
+    let commitOffset, commitPalette, commitCenterAxis, commitOrder;
+    if(this.props.palette)
+      commitOrder = Object.keys(this.props.palette);
     if(this.props.displayMetric === "linesChanged"){
       commitOffset = d3.stackOffsetDiverging;
       commitPalette = this.state.commitPalette;
@@ -105,7 +109,8 @@ export default class Dashboard extends React.Component {
                             d3offset={commitOffset}
                             keys={this.state.selectedAuthors}
                             resolution={this.props.chartResolution}
-                            displayNegative={true}/>
+                            displayNegative={true}
+                            order={commitOrder}/>
         </div>
       </div>);
     let loadingHint = (<div className={styles.loadingHintContainer}>
