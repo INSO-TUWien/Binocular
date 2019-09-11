@@ -99,6 +99,17 @@ ui
        │   │   └── index.js
        │   ├── sagas              # Sagas/Actions for the visualization
        │   └── styles.scss        # Styles for the visualization
+       ├── dashboard
+       │   ├── chart             
+       │   ├── config.js         
+       │   ├── help.js           
+       │   ├── index.js          
+       │   ├── reducers          
+       │   │   ├── config.js     
+       │   │   ├── data.js       
+       │   │   └── index.js
+       │   ├── sagas             
+       │   └── styles.scss       
        ├── hotspot-dials
        │   ├── chart.js
        │   ├── help.js
