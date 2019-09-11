@@ -12,6 +12,7 @@ import getCommitData from './getCommitData.js';
 import getIssueData from './getIssueData.js';
 import getBuildData from './getBuildData.js';
 import getBounds from './getBounds.js';
+import chroma from 'chroma-js';
 
 export const setResolution = createAction('SET_RESOLUTION');
 export const setShowIssues = createAction('SET_SHOW_ISSUES');
@@ -119,7 +120,13 @@ export const fetchDashboardData = fetchFactory(
 );
 
 function getPalette(commits, maxNumberOfColors, numOfCommitters){
-  let palette = getChartColors('spectral', 15, numOfCommitters);    //TODO maybe insert 'other' back here
+  function chartColors(band, maxLength, length) {
+    let len = (length > maxLength) ? maxLength : length;
+    const colors = chroma.scale(band).mode('lch').colors(len);
+    return colors;
+  }
+
+  let palette = chartColors('spectral', 15, numOfCommitters);    //TODO maybe insert 'other' back here
 
   let totals = {};
   _.each(commits, (commit) => {

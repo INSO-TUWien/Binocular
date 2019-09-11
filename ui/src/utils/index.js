@@ -22,10 +22,15 @@ export function getBaseUrl() {
   return `${window.location.protocol}//${window.location.host}/api/`;
 }
 
-export function getChartColors(band, maxLength, length) {
-  let len = (length > maxLength) ? maxLength : length;
-  const colors = chroma.scale(band).mode('lch').colors(len);
-  return colors;
+export function getChartColors(band, kinds) {
+  const colors = chroma.scale(band).mode('lch').colors(kinds.length);
+
+  const ret = {};
+  for (let i = 0; i < kinds.length; i++) {
+    ret[kinds[i]] = colors[i];
+  }
+
+  return ret;
 }
 
 export function shortenPath(path, maxLength, { replacer = '\u2026' } = {}) {
