@@ -180,9 +180,11 @@ This is done by using refs:
 ```
 	d3.select(this.ref).doSomething();
 
-	<svg ref={this.ref}/>
+	<svg ref={(var) => (this.ref = var)}/>
 
 ```
+
+You can rename "var" and "ref" to anything you like, e.g. `(svg) => (this.myRef = svg)`.
 
 CAUTION: You can only use d3 select calls once the React component is mounted in the DOM, a.k.a. actually rendered in the webpage.
 The react method componentDidMount() is called once the component is mounted into the DOM.
