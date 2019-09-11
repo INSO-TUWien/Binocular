@@ -125,7 +125,7 @@ ui
 
 To add another visualization, check the source code of the existing ones.
 
-## Explanation of used Libraries (For newbies, from a newbie)
+## Tips to get started (For newbies, from a newbie)
 If you wish to add another visualization, the amount of used libraries/frameworks can be a little daunting.
 I will try to explain the libraries that seemed the most important to me, and that were the biggest hurdle.
 
