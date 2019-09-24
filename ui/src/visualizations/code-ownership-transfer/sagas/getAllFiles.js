@@ -67,8 +67,8 @@ export default function getFiles() {
   traversePages(getOneFile, file => {
     let devList = [];
     for( let i = 0; i< file.commits.length; i++) {
-      if(!devList.includes(file.commits[i].signature)){
-        devList.push(file.commits[i].signature);
+      if(!devList.includes(file.commits[i].commit.signature)){
+        devList.push(file.commits[i].commit.signature);
       }
     }
     let tempFile = new FileFilter(file.path, file.commits.length, devList.length);
