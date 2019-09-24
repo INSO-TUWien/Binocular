@@ -11,6 +11,7 @@ import fetchRelatedCommits from './fetchRelatedCommits.js';
 
 import getDevelopers from "./getDevelopers";
 import getFiles, {fileList} from "./getAllFiles";
+import getOwnershipList from "./getOwner"
 
 
 export const setCategory = createAction('SET_CATEGORY');
@@ -101,7 +102,8 @@ export const fetchCodeOwnershipData = fetchFactory(
           fileList[i].commits.sort(function(a,b) {
               return new Date(a.date) - new Date(b.date);
             });
-          console.log('SELECTED FILE', fileList[i]);
+          //function to get ownership of the file
+          getOwnershipList(fileList[i]);
         }
       }
     }

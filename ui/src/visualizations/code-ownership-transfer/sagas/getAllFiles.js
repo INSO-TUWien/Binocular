@@ -81,11 +81,13 @@ export default function getFiles() {
       }
       getListOfFiles(list);
     }
-    console.log('Files filter list:', arrayOfFiles);
-    console.log('FILE LIST: ', fileList);
+    for (let i = 0; i <arrayOfFiles.length; i++) {
+      if(arrayOfFiles[i].numOfDev > 1) {
+        console.log('!!!!', arrayOfFiles[i]);
+      }
+    }
+    // console.log('FILE LIST: ', fileList);
     console.log('HUNKS: ', list);
-
-
   });
 
 }
