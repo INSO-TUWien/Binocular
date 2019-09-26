@@ -16,6 +16,7 @@ import {graphQl} from "../../utils";
 import SearchBox from "../../components/SearchBox";
 import {setActiveFile} from "./sagas";
 import {arrayOfFiles} from "./sagas/getAllFiles";
+import {ownershipOfFileList} from "./sagas/getOwner";
 
 const mapStateToProps = (state /*, ownProps*/) => {
   const corState = state.visualizations.codeOwnershipTransfer.state; //!!!!
@@ -50,11 +51,12 @@ const CodeOwnershipTransferConfigComponent = props => {
   let numOfCommitDev = 0;
   let numOfCommitFile = 0;
   let numOfDevFile = 0;
+  let ownerOfFile = '';
+  let fileName = '';
   devOptions.push(<option value="" key="0">Select Developer</option>);
   for( let i = 0; i < arrayOfDev.length; i++) {
     devOptions.push(<option value={arrayOfDev[i].name} key={i+1}>{arrayOfDev[i].name}</option>);
   }
-  console.log('Developers Select Options', devOptions);
 
   for (let i = 0; i < arrayOfDev.length; i++) {
     if(props.category === arrayOfDev[i].name) {
@@ -62,12 +64,39 @@ const CodeOwnershipTransferConfigComponent = props => {
     }
   }
 
-  for(let i = 0; i < arrayOfFiles.length; i++) {
-    if(props.chosenFile.path ===  arrayOfFiles[i].path){
-      numOfCommitFile = arrayOfFiles[i].numOfCommits;
-      numOfDevFile = arrayOfFiles[i].numOfDev;
+  if(props.chosenFile) {
+    for(let i = 0; i < arrayOfFiles.length; i++) {
+      if(props.chosenFile.path ===  arrayOfFiles[i].path){
+        fileName = arrayOfFiles[i].path;
+        numOfCommitFile = arrayOfFiles[i].numOfCommits;
+        numOfDevFile = arrayOfFiles[i].numOfDev;
+      }
     }
   }
+
+
+  if(fileName !== '') {
+    //get owner of file
+    if(ownershipOfFileList.length > 0) {
+      let lastFileStatus = ownershipOfFileList[ownershipOfFileList.length - 1];
+      //Count how many lines after last commit is owned by which developer
+      let counts = {};
+      lastFileStatus.forEach(function(x) { counts[x] = (counts[x] || 0)+1; });
+
+      let val = 0;
+      let dev  = '';
+      for( let k in counts) {
+        console.log('Developer', k, 'ownes', counts[k]);
+        if (val < counts[k]) {
+          val = counts[k];
+          dev = k;
+        }
+      }
+      ownerOfFile = dev;
+    }
+  }
+
+
 
 
   return (
@@ -101,7 +130,7 @@ const CodeOwnershipTransferConfigComponent = props => {
             <div className="card">
               <div className="card-content">
                 <p>
-                  <FontAwesomeIcon icon={faUser}/>&nbsp;&nbsp;Developer:  <span>{props.category}</span></p>
+                  <FontAwesomeIcon icon={faUser}/>&nbsp;&nbsp;Developer:  {props.category}</p>
                 <p><FontAwesomeIcon icon={faCheckCircle}/>&nbsp;&nbsp;Number of Commits:  <span>{numOfCommitDev}</span></p>
                 <p>
                   <FontAwesomeIcon icon={faFile}/>&nbsp;&nbsp;Owned Files:</p>
@@ -157,9 +186,9 @@ const CodeOwnershipTransferConfigComponent = props => {
           <div style={divStyle}>
             <div className="card">
               <div className="card-content">
-                <p><FontAwesomeIcon icon={faFile}/>&nbsp;&nbsp;Chosen File: {props.chosenFile.path}</p>
+                <p><FontAwesomeIcon icon={faFile}/>&nbsp;&nbsp;Chosen File: <span>{fileName}</span></p>
                 <p><FontAwesomeIcon icon={faUsers}/>&nbsp;&nbsp;Number of Developers: <span>{numOfDevFile}</span></p>
-                <p><FontAwesomeIcon icon={faUser}/>&nbsp;&nbsp;Owner:</p>
+                <p><FontAwesomeIcon icon={faUser}/>&nbsp;&nbsp;Owner: <span>{ownerOfFile}</span></p>
                 <p><FontAwesomeIcon icon={faCheckCircle}/>&nbsp;&nbsp;Number of Commits: <span>{numOfCommitFile}</span></p>
               </div>
             </div>

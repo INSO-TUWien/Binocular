@@ -92,8 +92,14 @@ export const fetchCodeOwnershipData = fetchFactory(
   function* () {
     const state = yield select();
 
-
     const activeFile = state.visualizations.codeOwnershipTransfer.state.config.chosenFile;
+
+    console.log('choose:', activeFile);
+
+
+    if (activeFile === null) {
+      return {chosenFile: null}
+    }
 
     //sort commits by date for selected file
     if(activeFile !== '') {

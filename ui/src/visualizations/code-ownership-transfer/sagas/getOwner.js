@@ -1,9 +1,9 @@
 'use strict';
-
+export let ownershipOfFileList = [];
 
 export default function getOwnershipList(selectedFile) {
+  ownershipOfFileList = [];
   console.log('Ownership for file', selectedFile);
-  let ownershipOfFileList = [];
   let ownersPerLine = [];
   for (let i = 0; i < selectedFile.commits.length; i++) {
     for (let k = 0; k < selectedFile.commits[i].hunks.length; k++) {
@@ -66,5 +66,4 @@ export default function getOwnershipList(selectedFile) {
     ownershipOfFileList.push(ownersPerLine);
   }
   console.log('List for visualization', ownershipOfFileList);
-
 }
