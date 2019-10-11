@@ -1,61 +1,25 @@
 @import '~bulma';
 
-svg.chart {
-  flex: 1;
+
+.chart {
   outline: none;
-  width: 100%;
-  cursor: grab;
-  cursor: -webkit-grab;
-
-  g.commitCount {
-    path {
-      stroke: none;
-      fill: lighten($blue, 20%);
-    }
-
-    path:first-child {
-      stroke: $blue;
-    }
-
-  }
-
-  g.highlightedIssue {
-    line {
-      stroke: $grey;
-    }
-  }
-
-  line.highlightedCommit {
-    stroke-dasharray: 5,5;
-    stroke: $grey;
-  }
-
-  g.today {
-    text {
-      text-anchor: end;
-    }
-    line {
-      stroke: red;
-      stroke-dasharray: 5;
-      stroke-width: 2;
-    }
-  }
-
-  .lineMarker {
-    stroke: $grey;
-    fill: $grey;
-    stroke-width: 1.5;
-  }
-
-  .highlightedIssueLine {
-    stroke-width: 4;
-  }
+  flex: 1;
+  overflow-x: scroll;
 }
 
-svg.chart.panning {
-  cursor: grabbing;
-  cursor: -webkit-grabbing;
+svg{
+  overflow: auto !important;
 }
+
+
+
+.scrollBox a  {
+  display: inline-block;
+  text-align: center;
+  padding: 14px;
+  text-decoration: none;
+}
+
 
 .grid line {
   stroke: $grey-lighter;
@@ -113,5 +77,21 @@ svg.chart.panning {
 .filler {
   justify-content: center;
   align-items: center;
+  overflow-x: auto !important;
   color: $grey;
+  width: 900px;
+  margin-top:50px;
+  margin-left: 30px;
+  position:relative;
+
+}
+
+svg::-webkit-scrollbar:horizontal {
+  height: 11px;
+}
+
+svg::-webkit-scrollbar-thumb {
+  border-radius: 8px;
+  border: 2px solid white; /* should match background, can't be transparent */
+  background-color: rgba(0, 0, 0, .5);
 }

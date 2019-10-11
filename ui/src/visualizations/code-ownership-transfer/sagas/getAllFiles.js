@@ -81,13 +81,7 @@ export default function getFiles() {
       }
       getListOfFiles(list);
     }
-    // for (let i = 0; i <arrayOfFiles.length; i++) {
-    //   if(arrayOfFiles[i].numOfDev > 1) {
-    //     console.log('!!!!', arrayOfFiles[i]);
-    //   }
-    // }
-    // console.log('FILE LIST: ', fileList);
-    console.log('HUNKS: ', list);
+    //console.log('HUNKS: ', list);
   });
 
 }

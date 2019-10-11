@@ -44,13 +44,15 @@ const mapDispatchToProps = (dispatch /*, ownProps*/) => {
   };
 };
 
+export var numOfDevFile = 0;
+
+
 const CodeOwnershipTransferConfigComponent = props => {
 
 
   let devOptions = [];
   let numOfCommitDev = 0;
   let numOfCommitFile = 0;
-  let numOfDevFile = 0;
   let ownerOfFile = '';
   let fileName = '';
   devOptions.push(<option value="" key="0">Select Developer</option>);
@@ -130,7 +132,7 @@ const CodeOwnershipTransferConfigComponent = props => {
             <div className="card">
               <div className="card-content">
                 <p>
-                  <FontAwesomeIcon icon={faUser}/>&nbsp;&nbsp;Developer:  {props.category}</p>
+                  <FontAwesomeIcon icon={faUser}/>&nbsp;&nbsp;Developer: <span> {props.category}</span></p>
                 <p><FontAwesomeIcon icon={faCheckCircle}/>&nbsp;&nbsp;Number of Commits:  <span>{numOfCommitDev}</span></p>
                 <p>
                   <FontAwesomeIcon icon={faFile}/>&nbsp;&nbsp;Owned Files:</p>

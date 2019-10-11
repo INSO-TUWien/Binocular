@@ -33,14 +33,9 @@ export default handleActions(
 );
 
 function getAllFiles(issue) {
-  console.log('Isueee', issue);
   const files = {};
-
   _.each(issue.commits.data, c => {
-    console.log('Commit', c);
     _.each(c.files.data, h => {
-      console.log('????', h);
-
       files[h.file.id] = h.file.path;
     });
   });

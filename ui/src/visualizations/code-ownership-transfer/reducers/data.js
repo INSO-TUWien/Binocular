@@ -18,6 +18,7 @@ export default handleActions(
   },
   {
     data: {
+      chosenFile: null
     },
     lastFetched: null,
     isFetching: null

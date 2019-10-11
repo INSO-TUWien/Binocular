@@ -28,6 +28,7 @@ export const receiveCodeOwnershipDataError = createAction('RECEIVE_CODE_OWNERSHI
 export const requestRefresh = createAction('REQUEST_REFRESH');
 const refresh = createAction('REFRESH');
 export const setViewport = createAction('COR_SET_VIEWPORT');
+export var selectedFile = '';
 
 export default function* () {
   // fetch data once on entry
@@ -94,7 +95,7 @@ export const fetchCodeOwnershipData = fetchFactory(
 
     const activeFile = state.visualizations.codeOwnershipTransfer.state.config.chosenFile;
 
-    console.log('choose:', activeFile);
+    console.log('Active file:', activeFile);
 
 
     if (activeFile === null) {
@@ -109,6 +110,7 @@ export const fetchCodeOwnershipData = fetchFactory(
               return new Date(a.date) - new Date(b.date);
             });
           //function to get ownership of the file
+          selectedFile = fileList[i];
           getOwnershipList(fileList[i]);
         }
       }
