@@ -149,16 +149,6 @@ const queryType = new gql.GraphQLObjectType({
               )
             );
 
-          //   const fileNumberMatch = args.q.match(ISSUE_NUMBER_REGEX);
-          //   if (fileNumberMatch) {
-          //     exactQuery = qb
-          //       .for('file')
-          //       .in('files')
-          //       .filter(qb.eq('file.path', fileNumberMatch[1]))
-          //       .return('file');
-          //
-          //     fuzzyQuery = fuzzyQuery.filter(qb.neq('file.path', fileNumberMatch[1]));
-          //   }
            }
 
           fuzzyQuery = fuzzyQuery.return('file');

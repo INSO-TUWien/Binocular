@@ -2,28 +2,35 @@
 
 
 .chart {
-  outline: none;
-  flex: 1;
-  overflow-x: scroll;
+  margin-top: 60px;
 }
 
 svg{
   overflow: auto !important;
 }
 
+.boxChart  {
+  border-width:1px;
+  border-style:solid;
+  border-color: lightgrey;
+  margin-top: 20px;
+  padding-bottom: 10px;
+  min-width: 400px !important;
+};
 
 
-.scrollBox a  {
-  display: inline-block;
-  text-align: center;
-  padding: 14px;
-  text-decoration: none;
-}
 
 
 .grid line {
   stroke: $grey-lighter;
 }
+
+.selectStyle{
+  width: 360px;
+  height: 40px;
+}
+
+
 
 
 .configContainer {
@@ -74,6 +81,15 @@ svg{
   }
 }
 
+.fileName{
+  color: grey;
+  align-items: center;
+  justify-content: center;
+  margin-left: 50px;
+  font-size: 22px;
+}
+
+
 .filler {
   justify-content: center;
   align-items: center;
@@ -83,6 +99,7 @@ svg{
   margin-top:50px;
   margin-left: 30px;
   position:relative;
+  margin-right: 10px;
 
 }
 

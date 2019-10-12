@@ -12,6 +12,7 @@ import fetchRelatedCommits from './fetchRelatedCommits.js';
 import getDevelopers from "./getDevelopers";
 import getFiles, {fileList} from "./getAllFiles";
 import getOwnershipList from "./getOwner"
+import getFilesForDeveloper from "./getFilesForDeveloper";
 
 
 export const setCategory = createAction('SET_CATEGORY');
@@ -94,9 +95,15 @@ export const fetchCodeOwnershipData = fetchFactory(
     const state = yield select();
 
     const activeFile = state.visualizations.codeOwnershipTransfer.state.config.chosenFile;
+    const developer = state.visualizations.codeOwnershipTransfer.state.config.category;
 
+    console.log('Chosen Developer', developer);
     console.log('Active file:', activeFile);
 
+
+    if (!activeFile) {
+      selectedFile = null;
+    }
 
     if (activeFile === null) {
       return {chosenFile: null}
@@ -105,10 +112,17 @@ export const fetchCodeOwnershipData = fetchFactory(
     //sort commits by date for selected file
     if(activeFile !== '') {
       for (let i = 0; i < fileList.length; i++) {
-        if(fileList[i].path === activeFile.path) {
+        if(fileList[i].path === activeFile.path ) {
           fileList[i].commits.sort(function(a,b) {
               return new Date(a.date) - new Date(b.date);
             });
+          //function to get ownership of the file
+          selectedFile = fileList[i];
+          getOwnershipList(fileList[i]);
+        } else if (fileList[i].path === activeFile.label) {
+          fileList[i].commits.sort(function(a,b) {
+            return new Date(a.date) - new Date(b.date);
+          });
           //function to get ownership of the file
           selectedFile = fileList[i];
           getOwnershipList(fileList[i]);
@@ -116,6 +130,9 @@ export const fetchCodeOwnershipData = fetchFactory(
       }
     }
 
+    if(developer) {
+      getFilesForDeveloper(developer);
+    }
 
     return yield Promise.join(
       getDevelopers(),

@@ -27,7 +27,7 @@ export const getOneFile = (page, perPage) => {
                        oldLines
                        webUrl
                      }
-                     commit {
+                  commit {
                   signature
                   sha
                   date
@@ -81,7 +81,6 @@ export default function getFiles() {
       }
       getListOfFiles(list);
     }
-    //console.log('HUNKS: ', list);
   });
 
 }

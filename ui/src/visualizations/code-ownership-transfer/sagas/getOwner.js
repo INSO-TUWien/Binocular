@@ -103,8 +103,11 @@ export default function getOwnershipList(selectedFile) {
   let nodeVis = [];
   let tempNode = [];
    temp2Node = [];
+  // nodes = [{name: 'dev1', commit: 0}, {name: 'dev2', commit: 0}, {name: 'dev1', commit: 1}, {name: 'dev2', commit: 1}, {name: 'dev3', commit: 1}, {name: 'dev3', commit: 2}, {name: 'dev3', commit: 3}, {name: 'dev3', commit: 4 }];
+  // links = [ [{name: 'dev1', commit: 0, value: 20, commitDoneBy: 'dev1' }, {name: 'dev2', commit: 0, value: 10, commitDoneBy: 'dev1' }], [{name: 'dev1', commit: 1, value: 10, commitDoneBy: 'dev3'}, {name: 'dev2', commit: 1, value: 5, commitDoneBy: 'dev3'}, {name: 'dev3', commit: 1, value: 25, commitDoneBy: 'dev3'}],
+  //   [{name: 'dev3', commit: 2, value: 30, commitDoneBy: 'dev3' }]];
+
   const colors = chroma.scale('spectral').mode('lch').colors((nodes.length*2));
-  console.log(colors)
   let num = 1;
   for (let i = 0; i < nodes.length; i++) {
     if(!tempNode.includes(nodes[i].name)){
@@ -123,11 +126,6 @@ export default function getOwnershipList(selectedFile) {
   }
 
 
-
-
-      // nodes = [{name: 'dev1', commit: 0}, {name: 'dev2', commit: 0}, {name: 'dev1', commit: 1}, {name: 'dev2', commit: 1}, {name: 'dev3', commit: 1}, {name: 'dev3', commit: 2}, {name: 'dev3', commit: 3}, {name: 'dev3', commit: 4 }];
-      // links = [ [{name: 'dev1', commit: 0, value: 20, commitDoneBy: 'dev1' }, {name: 'dev2', commit: 0, value: 10, commitDoneBy: 'dev1' }], [{name: 'dev1', commit: 1, value: 10, commitDoneBy: 'dev3'}, {name: 'dev2', commit: 1, value: 5, commitDoneBy: 'dev3'}, {name: 'dev3', commit: 1, value: 25, commitDoneBy: 'dev3'}],
-      // [{name: 'dev3', commit: 2, value: 30, commitDoneBy: 'dev3' }]];
     let temp = [];
     let numberOfLinesEnd = 0;
 

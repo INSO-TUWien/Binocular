@@ -17,6 +17,11 @@ import SearchBox from "../../components/SearchBox";
 import {setActiveFile} from "./sagas";
 import {arrayOfFiles} from "./sagas/getAllFiles";
 import {ownershipOfFileList} from "./sagas/getOwner";
+import {filesForDev, numOfCommits} from "./sagas/getFilesForDeveloper";
+import Select from 'react-select';
+import 'react-select/dist/react-select.css';
+
+
 
 const mapStateToProps = (state /*, ownProps*/) => {
   const corState = state.visualizations.codeOwnershipTransfer.state; //!!!!
@@ -45,10 +50,24 @@ const mapDispatchToProps = (dispatch /*, ownProps*/) => {
 };
 
 export var numOfDevFile = 0;
+export var developerChosen = '';
+
+ function onGetFile(props){
+  if(developerChosen) {
+    console.log('FIle', filesForDev);
+
+    return <Select className={styles.selectStyle}
+                   name="form-field-name"
+                   value={props.chosenFile}
+                   onChange={file => props.onSetFile(file)}
+                   options={filesForDev}
+    />
+  }
+}
+
 
 
 const CodeOwnershipTransferConfigComponent = props => {
-
 
   let devOptions = [];
   let numOfCommitDev = 0;
@@ -62,6 +81,7 @@ const CodeOwnershipTransferConfigComponent = props => {
 
   for (let i = 0; i < arrayOfDev.length; i++) {
     if(props.category === arrayOfDev[i].name) {
+      developerChosen = arrayOfDev[i].name;
       numOfCommitDev = arrayOfDev[i].numOfCommits;
     }
   }
@@ -101,6 +121,7 @@ const CodeOwnershipTransferConfigComponent = props => {
 
 
 
+
   return (
     <div className={styles.configContainer}>
       <form>
@@ -133,32 +154,12 @@ const CodeOwnershipTransferConfigComponent = props => {
               <div className="card-content">
                 <p>
                   <FontAwesomeIcon icon={faUser}/>&nbsp;&nbsp;Developer: <span> {props.category}</span></p>
-                <p><FontAwesomeIcon icon={faCheckCircle}/>&nbsp;&nbsp;Number of Commits:  <span>{numOfCommitDev}</span></p>
-                <p>
-                  <FontAwesomeIcon icon={faFile}/>&nbsp;&nbsp;Owned Files:</p>
+                <p><FontAwesomeIcon icon={faCheckCircle}/>&nbsp;&nbsp;Number of Commits:  <span>{numOfCommits}</span></p>
               </div>
             </div>
           </div>
-          <div className="control">
-            <label className="label">Show visualization by:</label>
-            <label className="radio">
-              <input
-                name="commitAttribute"
-                type="radio"
-                checked={props.commitAttribute === 'count'}
-                onChange={() => props.onChangeCommitAttribute('count')}
-              />
-              Commits
-            </label>
-            <label className="radio">
-              <input
-                name="commitAttribute"
-                type="radio"
-                checked={props.commitAttribute === 'changes'}
-                onChange={() => props.onChangeCommitAttribute('changes')}
-              />
-              Ownership of file
-            </label>
+          <div className="field">
+            {onGetFile(props)}
           </div>
         </div>}
 
