@@ -15,13 +15,13 @@ export default () =>
     <h2>Interaction</h2>
     <ul>
       <li>
-        <i className="fa fa-arrows-v" /> Use the mouse wheel to zoom into the visualization
+        <i className="fa fa-expand-arrows-alt" /> Use the mouse wheel to zoom into the visualization
       </li>
       <li>
-        <i className="fa fa-hand-grab-o" /> Drag the mouse to pan around the chart when zoomed in
+        <i className="fa fa-hand-rock" /> Drag the mouse to pan around the chart when zoomed in
       </li>
       <li>
-        <i className="fa fa-keyboard-o" /> Press the "0" or "=" keys to reset the viewport
+        <i className="fa fa-keyboard" /> Press the "0" or "=" keys to reset the viewport
       </li>
     </ul>
 
@@ -46,7 +46,7 @@ export default () =>
     <p>Use the sidebar to toggle additional overlays:</p>
     <ul>
       <li>
-        <i className="fa fa-ticket" /> Issue overlay: Shows the open and closed issue count on top
+        <i className="fa fa-ticket-alt" /> Issue overlay: Shows the open and closed issue count on top
         of the commits. Additionally, a single issue can be highlighted from the sidebar, which will
         cause the issue's lifetime (e.g. creation until close) in the chart. Additionally, when an
         issue is highlighted, all commits associated with that issue are shown as green circles on

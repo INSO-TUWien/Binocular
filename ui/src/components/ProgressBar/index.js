@@ -5,11 +5,14 @@ import { connect } from 'react-redux';
 import ProgressBar from './ProgressBar.js';
 
 const mapStateToProps = (state /*, ownProps*/) => {
+  const dashState = state.visualizations.dashboard.state;
   const corState = state.visualizations.codeOwnershipRiver.state;
+  const hotState = state.visualizations.hotspotDials.state;
+  const impactState = state.visualizations.issueImpact.state;
 
   return {
     progress: state.progress,
-    showWorkIndicator: corState.data.isFetching // TODO add others
+    showWorkIndicator: (dashState.data.isFetching || corState.data.isFetching || hotState.data.isFetching || impactState.data.isFetching)
   };
 };
 

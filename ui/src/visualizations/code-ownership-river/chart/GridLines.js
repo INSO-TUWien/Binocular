@@ -10,7 +10,7 @@ export default class GridLines extends React.Component {
     super();
   }
 
-  comonentDidMount() {
+  componentDidMount() {
     this.renderGridLines();
   }
 

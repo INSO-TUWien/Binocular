@@ -1,0 +1,30 @@
+.legend {
+  border: 1px solid #dbdbdb;
+
+  text {
+    alignment-baseline: middle;
+  }
+
+  .icon {
+    float: left;
+    margin-top: 5px;
+    margin-right: 5px;
+    margin-left: 5px;
+  }
+
+  .background {
+    fill: rgba(255, 255, 255, 0.8)
+  }
+
+  .legend .background {
+    fill: white;
+  }
+
+  .checkboxLegendLine {
+    background: #dbdbdb;
+    margin: 5px;
+    .field {
+      cursor: pointer;
+    }
+  }
+}

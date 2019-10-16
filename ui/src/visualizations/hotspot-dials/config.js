@@ -72,7 +72,7 @@ const HotspotDialsConfigComponent = props => {
               onChange={value => props.onSetIssueField(value)}
               options={[
                 { label: 'Creation date', icon: 'certificate', value: 'createdAt' },
-                { label: 'Closing date', icon: 'window-close-o', value: 'closedAt' }
+                { label: 'Closing date', icon: 'window-close', value: 'closedAt' }
               ]}
             />
           </div>
