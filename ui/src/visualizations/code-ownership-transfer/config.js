@@ -22,7 +22,6 @@ import Select from 'react-select';
 import 'react-select/dist/react-select.css';
 
 
-
 const mapStateToProps = (state /*, ownProps*/) => {
   const corState = state.visualizations.codeOwnershipTransfer.state; //!!!!
 
@@ -52,7 +51,8 @@ const mapDispatchToProps = (dispatch /*, ownProps*/) => {
 export var numOfDevFile = 0;
 export var developerChosen = '';
 
- function onGetFile(props){
+
+function onGetFile(props){
   if(developerChosen) {
     console.log('FIle', filesForDev);
 
@@ -67,6 +67,8 @@ export var developerChosen = '';
 
 
 
+
+
 const CodeOwnershipTransferConfigComponent = props => {
 
   let devOptions = [];
@@ -74,6 +76,7 @@ const CodeOwnershipTransferConfigComponent = props => {
   let numOfCommitFile = 0;
   let ownerOfFile = '';
   let fileName = '';
+
   devOptions.push(<option value="" key="0">Select Developer</option>);
   for( let i = 0; i < arrayOfDev.length; i++) {
     devOptions.push(<option value={arrayOfDev[i].name} key={i+1}>{arrayOfDev[i].name}</option>);
@@ -101,13 +104,18 @@ const CodeOwnershipTransferConfigComponent = props => {
     //get owner of file
     if(ownershipOfFileList.length > 0) {
       let lastFileStatus = ownershipOfFileList[ownershipOfFileList.length - 1];
+      if (!lastFileStatus.length) {
+        ownerOfFile = 'This file is deleted';
+        console.log('FILE OWNER', ownerOfFile);
+      } else {
       //Count how many lines after last commit is owned by which developer
       let counts = {};
-      lastFileStatus.forEach(function(x) { counts[x] = (counts[x] || 0)+1; });
-
+      lastFileStatus.forEach(function (x) {
+        counts[x] = (counts[x] || 0) + 1;
+      });
       let val = 0;
-      let dev  = '';
-      for( let k in counts) {
+      let dev = '';
+      for (let k in counts) {
         console.log('Developer', k, 'ownes', counts[k]);
         if (val < counts[k]) {
           val = counts[k];
@@ -116,11 +124,8 @@ const CodeOwnershipTransferConfigComponent = props => {
       }
       ownerOfFile = dev;
     }
+    }
   }
-
-
-
-
 
   return (
     <div className={styles.configContainer}>

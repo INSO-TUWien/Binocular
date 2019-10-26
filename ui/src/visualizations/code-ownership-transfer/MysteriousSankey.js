@@ -4,7 +4,11 @@ import { sankey, sankeyLinkHorizontal } from "d3-sankey";
 import chroma from "chroma-js";
 import styles from './styles.scss';
 
+function pathColor(link) {
 
+    return chroma('white');
+
+}
 
 const SankeyNode = ({ name,lines, x0, x1, y0, y1, color }) => (
   <rect x={x0} y={y0} width={x1 - x0 } height={y1 - y0} fill={color}>
@@ -13,15 +17,15 @@ const SankeyNode = ({ name,lines, x0, x1, y0, y1, color }) => (
 );
 
 const SankeyLink = ({ link, color }) => (
-  <path
-    d={sankeyLinkHorizontal()(link)}
-    style={{
-      fill: "none",
-      strokeOpacity: ".3",
-      stroke: color,
-      strokeWidth: Math.max(2, link.width  )
-    }}
-  />
+    <path
+      d={sankeyLinkHorizontal()(link)}
+      style={{
+        fill: "none",
+        strokeOpacity: ".3",
+        stroke: color,
+        strokeWidth: Math.max(2, link.width)
+      }}
+    />
 );
 
 const MysteriousSankey = ({ data, width, height }) => {
@@ -29,6 +33,7 @@ const MysteriousSankey = ({ data, width, height }) => {
     .nodeWidth(15)
     .nodePadding(10)
     .extent([[1, 1], [width - 1, height - 5]])(data);
+
 
   const color = chroma.scale("Set3").classes(nodes.length);
   const colorScale = d3
@@ -49,7 +54,7 @@ const MysteriousSankey = ({ data, width, height }) => {
       {links.map((link, i) => (
         <SankeyLink
           link={link}
-          color={color(colorScale(link.source.color)).hex()}
+          color={link.width === 0 ? chroma('white') : color(colorScale(link.source.color)).hex()}
         />
       ))}
     </g>

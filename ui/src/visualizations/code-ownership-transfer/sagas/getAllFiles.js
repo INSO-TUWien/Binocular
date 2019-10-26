@@ -57,6 +57,7 @@ function getListOfFiles(list) {
       fileList.push(tempFile);
     }
   }
+  console.log('AAAA',fileList.sort((a,b) => a.commits.length - b.commits.length));
   console.log('FILE LIST: ', fileList);
 }
 
