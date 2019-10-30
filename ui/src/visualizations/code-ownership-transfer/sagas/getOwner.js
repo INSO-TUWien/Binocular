@@ -6,9 +6,11 @@ export let arrayForVisualization = [];
 import chroma from "chroma-js";
 
 export var temp2Node;
+export var deletedFile = false;
 
 
 export default function getOwnershipList(selectedFile) {
+  deletedFile = false;
   ownershipOfFileList = [];
   arrayForVisualization = [];
   let commitedBy = [];
@@ -187,8 +189,28 @@ export default function getOwnershipList(selectedFile) {
   if (links.length === 1) {
     temp.push(links);
   }
+  if(!links[links.length - 1].length){
+    let counts = {};
+    nodeVis.push({name: 'File is deleted', color: chroma('black')});
+    temp2Node.push({name: 'File is deleted', color: chroma('black')});
+    console.log('Last commit is empty array', links[links.length - 1]);
+    for (let i = ownershipOfFileList.length -1; i > 0; i--) {
+      if(ownershipOfFileList[i].length > 0) {
+        ownershipOfFileList[i].forEach(function (x) {
+          counts[x] = (counts[x] || 0) + 1;
+        });
+         break;
+      }
+    }
+    let num = Object.keys(counts).length;
+    let add = 0;
+    for (let i = 1; i <= num; i++) {
+      temp.push({source: temp[temp.length - i - add].target, target: nodeVis[nodeVis.length - 1], value: temp[temp.length - i - add].value});
+      add++;
+    }
+    deletedFile = true;
+  }
 
-  console.log('LAST COMMIT', temp[temp.length-1]);
   console.log('Visualization array:', temp);
   arrayForVisualization = {nodes: nodeVis, links: temp};
 }

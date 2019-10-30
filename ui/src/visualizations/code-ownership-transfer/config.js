@@ -16,7 +16,7 @@ import {graphQl} from "../../utils";
 import SearchBox from "../../components/SearchBox";
 import {setActiveFile} from "./sagas";
 import {arrayOfFiles} from "./sagas/getAllFiles";
-import {ownershipOfFileList} from "./sagas/getOwner";
+import {arrayForVisualization, deletedFile, ownershipOfFileList} from "./sagas/getOwner";
 import {filesForDev, numOfCommits} from "./sagas/getFilesForDeveloper";
 import Select from 'react-select';
 import 'react-select/dist/react-select.css';
@@ -50,11 +50,14 @@ const mapDispatchToProps = (dispatch /*, ownProps*/) => {
 
 export var numOfDevFile = 0;
 export var developerChosen = '';
+let numOfCommitFile = 0;
+let ownerOfFile = '';
+let fileName = '';
 
 
 function onGetFile(props){
   if(developerChosen) {
-    console.log('FIle', filesForDev);
+    console.log('File', filesForDev);
 
     return <Select className={styles.selectStyle}
                    name="form-field-name"
@@ -65,6 +68,23 @@ function onGetFile(props){
   }
 }
 
+function fileInfo() {
+  if(developerChosen) {
+
+    return (
+      <div style={divStyle}>
+        <div className="card">
+          <div className="card-content">
+            <p><FontAwesomeIcon icon={faFile}/>&nbsp;&nbsp;Chosen File: <span>{fileName}</span></p>
+            <p><FontAwesomeIcon icon={faUsers}/>&nbsp;&nbsp;Number of Developers: <span>{numOfDevFile}</span></p>
+            <p><FontAwesomeIcon icon={faUser}/>&nbsp;&nbsp;Owner: <span>{ownerOfFile}</span></p>
+            <p><FontAwesomeIcon icon={faCheckCircle}/>&nbsp;&nbsp;Number of Commits: <span>{numOfCommitFile}</span></p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+}
 
 
 
@@ -73,9 +93,7 @@ const CodeOwnershipTransferConfigComponent = props => {
 
   let devOptions = [];
   let numOfCommitDev = 0;
-  let numOfCommitFile = 0;
-  let ownerOfFile = '';
-  let fileName = '';
+
 
   devOptions.push(<option value="" key="0">Select Developer</option>);
   for( let i = 0; i < arrayOfDev.length; i++) {
@@ -95,18 +113,28 @@ const CodeOwnershipTransferConfigComponent = props => {
         fileName = arrayOfFiles[i].path;
         numOfCommitFile = arrayOfFiles[i].numOfCommits;
         numOfDevFile = arrayOfFiles[i].numOfDev;
+
       }
+    }
+    if(deletedFile) {
+      numOfDevFile --;
     }
   }
 
-
-  if(fileName !== '') {
+  if(!arrayForVisualization || arrayForVisualization.length === 0 ){
+    ownerOfFile = 'No owner';
+    numOfCommitFile = 0;
+    numOfDevFile = 0;
+  } else if(!arrayForVisualization.nodes.length || !arrayForVisualization.links.length  || arrayForVisualization.nodes[0].name === 'File is deleted') {
+    ownerOfFile = 'No owner';
+    numOfCommitFile = 0;
+    numOfDevFile = 0;
+  } else if(fileName !== '') {
     //get owner of file
     if(ownershipOfFileList.length > 0) {
       let lastFileStatus = ownershipOfFileList[ownershipOfFileList.length - 1];
       if (!lastFileStatus.length) {
         ownerOfFile = 'This file is deleted';
-        console.log('FILE OWNER', ownerOfFile);
       } else {
       //Count how many lines after last commit is owned by which developer
       let counts = {};
@@ -166,6 +194,7 @@ const CodeOwnershipTransferConfigComponent = props => {
           <div className="field">
             {onGetFile(props)}
           </div>
+          {/*{fileInfo()}*/}
         </div>}
 
 

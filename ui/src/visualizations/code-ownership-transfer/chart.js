@@ -9,9 +9,18 @@ import * as zoomUtils from '../../utils/zoom.js';
 import styles from './styles.scss';
 import {selectedFile} from "./sagas";
 import ChartContainer from "../../components/svg/ChartContainer";
-import {arrayForVisualization, temp2Node} from "./sagas/getOwner";
+import {arrayForVisualization, deletedFile, temp2Node} from "./sagas/getOwner";
 
-
+function checkIfFileIsDeleted() {
+  if(deletedFile) {
+    return(
+      <p>
+        <a className={styles.msg}>Message:</a>
+        <a className={styles.fileName}>File is deleted</a>
+      </p>
+    );
+  }
+}
 
 export default class TransferCodeOwnership extends React.PureComponent {
   constructor(props) {
@@ -70,26 +79,32 @@ export default class TransferCodeOwnership extends React.PureComponent {
     }
 
     console.log('nodes-links array for SankeyD: ', arrayForVisualization);
-    if(!arrayForVisualization.nodes.length || !arrayForVisualization.links.length ){
+    if(!arrayForVisualization || arrayForVisualization.length === 0 ){
       return (
         <div className={styles.filler}>
-          <p>This file does not have owner.</p>
+          <p className={styles.noOwner}>This file does not have an owner.</p>
+        </div>
+      );
+    }else  if(!arrayForVisualization.nodes.length || !arrayForVisualization.links.length  || arrayForVisualization.nodes[0].name === 'File is deleted' ){
+      return (
+        <div className={styles.filler}>
+          <p className={styles.noOwner}>This file does not have an owner.</p>
         </div>
       );
     }
 
-    if(arrayForVisualization.links.length === 1) {
+    if(arrayForVisualization.links.length === 1 && arrayForVisualization.nodes[0].name !== 'File is deleted') {
       return (
         <ChartContainer onResize={evt => this.onResize(evt)}>
           <div className={styles.filler} >
             <div className={styles.boxChart}  style={{width: 700}} >
-              <div className={styles.fileName}>There is only 1 commit. The visualization can not be shown. The owner of the file is <b style={{color:temp2Node[0].color}}>{temp2Node[0].name}</b></div>
-              {temp2Node.map((value, index) => {
-                return <svg width="550" height="40px"><rect x="50" y="20" width="20" height="20"
-                                                            fill={temp2Node[index].color}/>
-                  <text x="72" y="37" width="15px" height="15px" fill='black'>{temp2Node[index].name}</text>
-                </svg>
-              })}
+              <div className={styles.fileName}>There is only 1 commit. The visualization can not be shown. <p>The owner of the file is <b style={{color:temp2Node[0].color}}>{temp2Node[0].name}</b></p></div>
+              {/*{temp2Node.map((value, index) => {*/}
+              {/*  return <svg width="550" height="40px"><rect x="50" y="20" width="20" height="20"*/}
+              {/*                                              fill={temp2Node[index].color}/>*/}
+              {/*    <text x="72" y="37" width="15px" height="15px" fill='black'>{temp2Node[index].name}</text>*/}
+              {/*  </svg>*/}
+              {/*})}*/}
             </div>
           </div>
         </ChartContainer>
@@ -105,7 +120,7 @@ export default class TransferCodeOwnership extends React.PureComponent {
         <ChartContainer onResize={evt => this.onResize(evt)}>
           <div className={styles.filler} >
             <div className={styles.boxChart}  style={{width: 40*data.links.length}} >
-              {/*<div className={styles.fileName}>{selectedFile.path}</div>*/}
+              {checkIfFileIsDeleted()}
               <svg  width={40*data.links.length} height="120px" className={styles.chart}>
                 {data && (
                   <MysteriousSankey data={data} width={40*data.links.length} height={90}/>
@@ -131,11 +146,11 @@ export default class TransferCodeOwnership extends React.PureComponent {
 
       <ChartContainer onResize={evt => this.onResize(evt)}>
         <div className={styles.filler} >
-          <div className={styles.boxChart}  style={{width: 70*data.links.length}} >
-            {/*<div className={styles.fileName}>{selectedFile.path}</div>*/}
-            <svg  width={70*data.links.length} height="120px" className={styles.chart}>
+          <div className={styles.boxChart}  style={{width: 30*data.links.length}} >
+            {checkIfFileIsDeleted()}
+            <svg  width={30*data.links.length} height="120px" className={styles.chart}>
               {data && (
-                <MysteriousSankey data={data} width={70*data.links.length} height={80}/>
+                <MysteriousSankey data={data} width={30*data.links.length} height={80}/>
               )}
             </svg>
               {temp2Node.map((value, index) => {
