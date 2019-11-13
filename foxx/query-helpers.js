@@ -22,5 +22,15 @@ module.exports = {
     }
 
     return q;
+  },
+  addRevisionFilter: function(revision, cmp, comparedValue, q) {
+    if (comparedValue) {
+      let queryRevision = qb.str(comparedValue);
+
+      const instanceRevision = qb.NUMBER(revision);
+      return q.filter(qb[cmp](instanceRevision, queryRevision));
+    }
+
+    return q;
   }
 };

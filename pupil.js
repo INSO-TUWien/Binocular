@@ -28,10 +28,14 @@ const Hunk = require('./lib/models/Hunk.js');
 const Issue = require('./lib/models/Issue.js');
 const Build = require('./lib/models/Build.js');
 const Stakeholder = require('./lib/models/Stakeholder.js');
+const Clone = require('./lib/models/Clone.js');
 const CommitStakeholderConnection = require('./lib/models/CommitStakeholderConnection.js');
 const IssueStakeholderConnection = require('./lib/models/IssueStakeholderConnection.js');
 const IssueCommitConnection = require('./lib/models/IssueCommitConnection.js');
 const CommitCommitConnection = require('./lib/models/CommitCommitConnection.js');
+const CloneCloneConnection = require('./lib/models/CloneCloneConnection.js');
+const CloneCommitConnection = require('./lib/models/CloneCommitConnection.js');
+const CloneFileConnection = require('./lib/models/CloneFileConnection.js');
 
 // set up the endpoints
 app.get('/api/commits', require('./lib/endpoints/get-commits.js'));
@@ -56,10 +60,11 @@ httpServer.listen(port, function() {
 const indexers = {
   vcs: null,
   its: null,
-  ci: null
+  ci: null,
+  clones: null
 };
 
-let reporter = new ProgressReporter(io, ['commits', 'issues', 'builds']);
+let reporter = new ProgressReporter(io, ['commits', 'issues', 'builds', 'clones']);
 
 // kickstart the indexing process
 Repository.fromPath(ctx.targetPath)
@@ -96,6 +101,10 @@ Repository.fromPath(ctx.targetPath)
         indexers.ci = idx.makeCIIndexer(ctx.repo, reporter);
       }
 
+      if (ctx.argv.clones) {
+        indexers.clones = idx.makeClonesIndexer(ctx.repo, reporter);
+      }
+
       return getUrlProvider(ctx.repo)
         .then(urlProvider => (ctx.urlProvider = urlProvider))
         .then(() => Promise.props(indexers))
@@ -123,9 +132,7 @@ process.on('SIGINT', function() {
   console.log('Let me finish up here, ... (Ctrl+C to force quit)');
 
   ctx.quit();
-  _(indexers)
-    .values()
-    .each(idx => idx.stop());
+  _(indexers).values().each(idx => idx.stop());
 });
 
 /**
@@ -148,10 +155,14 @@ function ensureDb(repo) {
         Stakeholder.ensureCollection(),
         Issue.ensureCollection(),
         Build.ensureCollection(),
+        Clone.ensureCollection(),
         CommitStakeholderConnection.ensureCollection(),
         IssueStakeholderConnection.ensureCollection(),
         IssueCommitConnection.ensureCollection(),
-        CommitCommitConnection.ensureCollection()
+        CommitCommitConnection.ensureCollection(),
+        CloneCloneConnection.ensureCollection(),
+        CloneCommitConnection.ensureCollection(),
+        CloneFileConnection.ensureCollection()
       );
     });
 }
@@ -160,29 +171,30 @@ function createManualIssueReferences(issueReferences) {
   return Promise.map(_.keys(issueReferences), sha => {
     const iid = issueReferences[sha];
 
-    return Promise.join(Commit.findOneBySha(sha), Issue.findOneByIid(iid)).spread(
-      (commit, issue) => {
-        if (!commit) {
-          console.warn(`Ignored issue #${iid} referencing non-existing commit ${sha}`);
-          return;
-        }
-        if (!issue) {
-          console.warn(
-            `Ignored issue #${iid} referencing commit ${sha} because the issue does not exist`
-          );
-          return;
-        }
-
-        const existingMention = _.find(issue.mentions, mention => mention.commit === sha);
-        if (!existingMention) {
-          issue.mentions.push({
-            createdAt: commit.date,
-            commit: sha,
-            manual: true
-          });
-          return issue.save();
-        }
+    return Promise.join(
+      Commit.findOneBySha(sha),
+      Issue.findOneByIid(iid)
+    ).spread((commit, issue) => {
+      if (!commit) {
+        console.warn(`Ignored issue #${iid} referencing non-existing commit ${sha}`);
+        return;
       }
-    );
+      if (!issue) {
+        console.warn(
+          `Ignored issue #${iid} referencing commit ${sha} because the issue does not exist`
+        );
+        return;
+      }
+
+      const existingMention = _.find(issue.mentions, mention => mention.commit === sha);
+      if (!existingMention) {
+        issue.mentions.push({
+          createdAt: commit.date,
+          commit: sha,
+          manual: true
+        });
+        return issue.save();
+      }
+    });
   });
 }

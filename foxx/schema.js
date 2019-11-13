@@ -20,6 +20,7 @@ const files = db._collection('files');
 const stakeholders = db._collection('stakeholders');
 const issues = db._collection('issues');
 const builds = db._collection('builds');
+const clones = db._collection('clones');
 
 const ISSUE_NUMBER_REGEX = /^#?(\d+).*$/;
 
@@ -35,10 +36,7 @@ const queryType = new gql.GraphQLObjectType({
           sort: { type: Sort }
         },
         query: (root, args, limit) => {
-          let q = qb
-            .for('commit')
-            .in('commits')
-            .sort('commit.date', args.sort);
+          let q = qb.for('commit').in('commits').sort('commit.date', args.sort);
 
           q = queryHelpers.addDateFilter('commit.date', 'gte', args.since, q);
           q = queryHelpers.addDateFilter('commit.date', 'lte', args.until, q);
@@ -173,10 +171,7 @@ const queryType = new gql.GraphQLObjectType({
         },
         query: (root, args, limit) => {
           let exactQuery = [];
-          let fuzzyQuery = qb
-            .for('issue')
-            .in('issues')
-            .sort('issue.createdAt', args.sort);
+          let fuzzyQuery = qb.for('issue').in('issues').sort('issue.createdAt', args.sort);
 
           if (args.q) {
             const searchString = qb.str('%' + args.q.replace(/\s+/g, '%') + '%');
@@ -202,10 +197,7 @@ const queryType = new gql.GraphQLObjectType({
 
           fuzzyQuery = fuzzyQuery.return('issue');
 
-          let q = qb
-            .let('fullList', qb.APPEND(exactQuery, fuzzyQuery))
-            .for('issue')
-            .in('fullList');
+          let q = qb.let('fullList', qb.APPEND(exactQuery, fuzzyQuery)).for('issue').in('fullList');
 
           q = queryHelpers.addDateFilter('issue.createdAt', 'gte', args.since, q);
           q = queryHelpers.addDateFilter('issue.createdAt', 'lte', args.until, q);
@@ -235,7 +227,39 @@ const queryType = new gql.GraphQLObjectType({
             .toArray()[0];
         }
       },
-      issueDateHistogram: makeDateHistogramEndpoint(issues)
+      issueDateHistogram: makeDateHistogramEndpoint(issues),
+      clones: paginated({
+        type: require('./types/clone.js'),
+        args: {
+          since: { type: Timestamp },
+          until: { type: Timestamp },
+          sort: { type: Sort }
+        },
+        query: (root, args, limit) => {
+          let q = qb.for('clone').in('clones').sort('clone.commit.date', args.sort);
+
+          q = queryHelpers.addDateFilter('clone.commit.date', 'gte', args.since, q);
+          q = queryHelpers.addDateFilter('clone.commit.date', 'lte', args.until, q);
+          q = queryHelpers.addRevisionFilter('clone.commit.sha', 'gte', args.since, q);
+          q = queryHelpers.addRevisionFilter('clone.commit.sha', 'lte', args.until, q);
+
+          q = q.limit(limit.offset, limit.count).return('clone');
+
+          return q;
+        }
+      }),
+      clone: {
+        type: require('./types/clone.js'),
+        args: {
+          fingerprint: {
+            description: 'fingerprint of the clone',
+            type: new gql.GraphQLNonNull(gql.GraphQLString)
+          }
+        },
+        resolve(root, args) {
+          return clones.document(args.fingerprint);
+        }
+      }
     };
   }
 });

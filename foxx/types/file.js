@@ -20,6 +20,10 @@ module.exports = new gql.GraphQLObjectType({
         type: gql.GraphQLString,
         description: 'The path of the file, relative to the repository root'
       },
+      package: {
+        type: gql.GraphQLString,
+        description: 'The package of the file'
+      },
       maxLength: {
         type: gql.GraphQLInt,
         description:

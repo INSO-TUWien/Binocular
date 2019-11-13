@@ -11,6 +11,6 @@ const createGraphqlRouter = require('@arangodb/foxx/graphql');
 // This is a regular Foxx router.
 const router = createGraphqlRouter({ schema, graphiql: true })
   .summary('GraphQL endpoint')
-  .description('GraphQL endpoint for the Star Wars GraphQL example.');
+  .description('GraphQL endpoint for pupil.');
 
 module.context.use(router);
