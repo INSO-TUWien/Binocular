@@ -21,6 +21,7 @@ const stakeholders = db._collection('stakeholders');
 const issues = db._collection('issues');
 const builds = db._collection('builds');
 const clones = db._collection('clones');
+const lastrevision = db._collection('lastrevision');
 
 const ISSUE_NUMBER_REGEX = /^#?(\d+).*$/;
 
@@ -258,6 +259,18 @@ const queryType = new gql.GraphQLObjectType({
         },
         resolve(root, args) {
           return clones.document(args.fingerprint);
+        }
+      },
+      lastrevision: {
+        type: require('./types/LastRevision.js'),
+        args: {
+          sha: {
+            description: 'SHA of the last indexed revision',
+            type: new gql.GraphQLNonNull(gql.GraphQLString)
+          }
+        },
+        resolve(root, args) {
+          return lastrevision.document(args.sha);
         }
       }
     };
