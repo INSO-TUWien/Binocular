@@ -29,6 +29,7 @@ const Issue = require('./lib/models/Issue.js');
 const Build = require('./lib/models/Build.js');
 const Stakeholder = require('./lib/models/Stakeholder.js');
 const Clone = require('./lib/models/Clone.js');
+const LastRevision = require('./lib/models/LastRevision.js');
 const CommitStakeholderConnection = require('./lib/models/CommitStakeholderConnection.js');
 const IssueStakeholderConnection = require('./lib/models/IssueStakeholderConnection.js');
 const IssueCommitConnection = require('./lib/models/IssueCommitConnection.js');
@@ -156,6 +157,7 @@ function ensureDb(repo) {
         Issue.ensureCollection(),
         Build.ensureCollection(),
         Clone.ensureCollection(),
+        LastRevision.ensureCollection(),
         CommitStakeholderConnection.ensureCollection(),
         IssueStakeholderConnection.ensureCollection(),
         IssueCommitConnection.ensureCollection(),
