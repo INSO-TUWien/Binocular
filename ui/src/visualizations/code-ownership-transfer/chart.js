@@ -119,11 +119,11 @@ export default class TransferCodeOwnership extends React.PureComponent {
       return(
         <ChartContainer onResize={evt => this.onResize(evt)}>
           <div className={styles.filler} >
-            <div className={styles.boxChart}  style={{width: 40*data.links.length}} >
+            <div className={styles.boxChart}  style={{width: 20*data.links.length}} >
               {checkIfFileIsDeleted()}
-              <svg  width={40*data.links.length} height="120px" className={styles.chart}>
+              <svg  width={20*data.links.length} height="180px" className={styles.chart}>
                 {data && (
-                  <MysteriousSankey data={data} width={40*data.links.length} height={90}/>
+                  <MysteriousSankey data={data} width={20*data.links.length} height={140}/>
                 )}
               </svg>
               {temp2Node.map((value, index) => {
