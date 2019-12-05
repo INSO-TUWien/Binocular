@@ -61,6 +61,12 @@ json.
  - `port`: Port
  - `user`: username
  - `password`: password
+- `clonedetection`: Object holding clone detection options; clone detection requires to manually checkout the repo to be analyzed upfront; other indexers must be                             finished to 100% for full functionality of clone detection
+ - `name`: name of the clone detection tool to be used, currently only Simian is supported
+ - `toolexec`: path to the clone detection tool executeable
+ - `clonedir`: path to the directory where the files containing clone information will be stored
+ - `revfile`: path&name of the file containing the list of revisions to be indexed
+ - `clonesenabled`: specify true if you want to enable clone detection or false otherwise
 
 
 A sample configuration file looks like this:
@@ -83,6 +89,13 @@ A sample configuration file looks like this:
     "port": 8529,
     "user": "YOUR_ARANGODB_USER",
     "password": "YOUR_ARANGODB_PASSWORD"
+  },
+  "clonedetection": {
+    "name": "Simian",
+    "toolexec": "YOUR_PATH_TO_CLONEDETECTOR",
+    "clonedir": "YOUR_CLONE_DIR",
+    "revfile": "YOUR_REVISIONS_FILE",
+    "clonesenabled": "true"
   }
 }
 ```

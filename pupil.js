@@ -34,7 +34,6 @@ const CommitStakeholderConnection = require('./lib/models/CommitStakeholderConne
 const IssueStakeholderConnection = require('./lib/models/IssueStakeholderConnection.js');
 const IssueCommitConnection = require('./lib/models/IssueCommitConnection.js');
 const CommitCommitConnection = require('./lib/models/CommitCommitConnection.js');
-const CloneCloneConnection = require('./lib/models/CloneCloneConnection.js');
 const CloneCommitConnection = require('./lib/models/CloneCommitConnection.js');
 const CloneFileConnection = require('./lib/models/CloneFileConnection.js');
 
@@ -162,7 +161,6 @@ function ensureDb(repo) {
         IssueStakeholderConnection.ensureCollection(),
         IssueCommitConnection.ensureCollection(),
         CommitCommitConnection.ensureCollection(),
-        CloneCloneConnection.ensureCollection(),
         CloneCommitConnection.ensureCollection(),
         CloneFileConnection.ensureCollection()
       );
