@@ -5,19 +5,18 @@ const arangodb = require('@arangodb');
 const aql = arangodb.aql;
 const db = arangodb.db;
 const clonesToFiles = db._collection('clones-files');
+const clonesToCommits = db._collection('clones-commits');
+const paginated = require('./paginated.js');
 
 module.exports = new gql.GraphQLObjectType({
   name: 'Clone',
   description: 'A duplicated piece of source code.',
   fields() {
     return {
-      id: {
-        type: new gql.GraphQLNonNull(gql.GraphQLString),
-        resolve: e => e._key
-      },
       fingerprint: {
         type: new gql.GraphQLNonNull(gql.GraphQLString),
-        description: 'The fingerprint of the duplicated sourcecode'
+        description: 'The fingerprint of the duplicated sourcecode',
+        resolve: e => e._key
       },
       sourcecode: {
         type: new gql.GraphQLNonNull(gql.GraphQLString),
@@ -29,20 +28,24 @@ module.exports = new gql.GraphQLObjectType({
       },
       revisions: {
         type: new gql.GraphQLList(gql.GraphQLString),
-        description: 'A list of all revisions the clone occurs in',
-        resolve(clone) {
-          return db._query(
-            aql`
-              FOR c
-              IN clones
-              FILTER c.fingerprint == ${clone.fingerprint}
-                RETURN c.revision`
-          );
+        description: 'The revisions a clone occurs in',
+        resolve(clone /*, args*/) {
+          return db
+            ._query(
+              aql`
+            FOR
+            commit
+            IN
+            INBOUND ${clone} ${clonesToCommits}
+              RETURN commit.sha
+          `
+            )
+            .toArray();
         }
       },
-      files: {
+      files: paginated({
         type: require('./cloneInFile.js'),
-        description: 'The files the clone occurs in',
+        description: 'The files touched by this commit',
         query: (clone, args, limit) => aql`
           FOR file, edge
             IN INBOUND ${clone} ${clonesToFiles}
@@ -54,6 +57,23 @@ module.exports = new gql.GraphQLObjectType({
               path: edge.path,
               revision: edge.revision
             }`
+      }),
+      commits: {
+        type: new gql.GraphQLList(require('./commit.js')),
+        description: 'The commits a clone occurs in',
+        resolve(clone /*, args*/) {
+          return db
+            ._query(
+              aql`
+            FOR
+            commit
+            IN
+            INBOUND ${clone} ${clonesToCommits}
+              RETURN commit
+          `
+            )
+            .toArray();
+        }
       }
     };
   }

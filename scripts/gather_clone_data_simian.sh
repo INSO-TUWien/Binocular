@@ -47,10 +47,10 @@ do
 done
 
 cd $CLONEDIR
-# remove all files that contain no clones
+ remove all files that contain no clones
 grep -rL '<block sourceFile' *.xml | xargs rm -f
 
-# remove first 3 lines of Simian report as it is just license info
+ remove first 3 lines of Simian report as it is just license info
 sed -i '1,3d' *.xml
 
 echo Finished clone detection
