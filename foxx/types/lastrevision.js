@@ -12,9 +12,8 @@ module.exports = new gql.GraphQLObjectType({
         resolve: e => e._key
       },
       sha: {
-        type: new gql.GraphQLNonNull(gql.GraphQLString),
-        description: 'The sha of the commmit',
-        resolve: e => e._key
+        type: gql.GraphQLString,
+        description: 'The sha of the commmit'
       }
     };
   }

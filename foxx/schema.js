@@ -21,7 +21,7 @@ const stakeholders = db._collection('stakeholders');
 const issues = db._collection('issues');
 const builds = db._collection('builds');
 const clones = db._collection('clones');
-const lastrevision = db._collection('lastrevision');
+const lastrevision = db._collection('lastRevisions');
 
 const ISSUE_NUMBER_REGEX = /^#?(\d+).*$/;
 
@@ -229,6 +229,16 @@ const queryType = new gql.GraphQLObjectType({
         }
       },
       issueDateHistogram: makeDateHistogramEndpoint(issues),
+      revisions: {
+        type: require('./types/commit.js'),
+        args: {},
+        query: (root, args, limit) => aql`
+                  FOR commit
+                  IN
+                  ${commits}
+                  ${limit}
+                    RETURN commit.sha`
+      },
       clones: paginated({
         type: require('./types/clone.js'),
         args: {
@@ -257,20 +267,29 @@ const queryType = new gql.GraphQLObjectType({
             type: new gql.GraphQLNonNull(gql.GraphQLString)
           }
         },
-        resolve(root, args) {
-          return clones.document(args.fingerprint);
+        resolve(root, args, limit) {
+          return db
+            ._query(
+              aql`FOR c
+              IN
+              ${clones}
+              ${limit}
+                FILTER c.fingerprint == ${args.fingerprint}
+                RETURN c`
+            )
+            .toArray()[0];
         }
       },
       lastrevision: {
-        type: require('./types/LastRevision.js'),
+        type: require('./types/lastrevision.js'),
         args: {
-          sha: {
-            description: 'SHA of the last indexed revision',
+          id: {
+            description: 'ID of the document - lastrevision',
             type: new gql.GraphQLNonNull(gql.GraphQLString)
           }
         },
         resolve(root, args) {
-          return lastrevision.document(args.sha);
+          return lastrevision.document(args.id);
         }
       }
     };

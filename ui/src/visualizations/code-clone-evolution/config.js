@@ -1,7 +1,9 @@
 'use strict';
 
+import Promise from 'bluebird';
 import { connect } from 'react-redux';
 import { setClone, setStartRevision, setEndRevision, setPackage, setCloneType } from './sagas';
+import SearchBox from '../../components/SearchBox';
 import styles from './styles.scss';
 
 import { graphQl } from '../../utils';
