@@ -2,24 +2,34 @@
 
 import Promise from 'bluebird';
 import { createAction } from 'redux-actions';
+import { select, takeEvery, fork, throttle } from 'redux-saga/effects';
 import _ from 'lodash';
 
 import { fetchFactory, timestampedActionFactory, mapSaga } from '../../../sagas/utils.js';
-import getFilesAndLinks from './getFilesAndLinks.js';
+import getGraphData from './getGraphData.js';
 
-export const requestFilesAndLinks = createAction('REQUEST_FILES_AND_LINKS');
-export const receiveFilesAndLinks = timestampedActionFactory('RECEIVE_FILES_AND_LINKS');
-export const receiveFilesAndLinksError = createAction('RECEIVE_FILES_AND_LINKS_ERROR');
+export const setDepth = createAction('SET_DEPTH');
+
+export const requestDependencyGraphData = createAction('REQUEST_DEPENDENCY_GRAPH_DATA');
+export const receiveDependencyGraphData = timestampedActionFactory('RECEIVE_DEPENDENCY_GRAPH_DATA');
+export const receiveDependencyGraphDataError = createAction('RECEIVE_DEPENDENCY_GRAPH_DATA_ERROR');
 
 export default function*() {
-  // fetch data once on entry
-  yield* fetchFilesAndLinks();
+  yield fetchDependencyGraphData();
+  yield fork(watchSetCategory);
 }
 
-export const fetchFilesAndLinks = fetchFactory(
+export function* watchSetCategory() {
+  yield takeEvery('SET_DEPTH', fetchDependencyGraphData);
+}
+
+export const fetchDependencyGraphData = fetchFactory(
   function*() {
+    const state = yield select();
+    const config = state.visualizations.dependencyGraph.state.config;
+
     return yield Promise.join(
-      getFilesAndLinks()
+      getGraphData(config)
     )
       .spread((filesAndLinks) => {
         return {
@@ -31,7 +41,7 @@ export const fetchFilesAndLinks = fetchFactory(
         throw e;
       });
   },
-  requestFilesAndLinks,
-  receiveFilesAndLinks,
-  receiveFilesAndLinksError
+  requestDependencyGraphData,
+  receiveDependencyGraphData,
+  receiveDependencyGraphDataError
 );

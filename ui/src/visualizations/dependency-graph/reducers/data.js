@@ -5,8 +5,8 @@ import _ from 'lodash';
 
 export default handleActions(
   {
-    REQUEST_FILES_AND_LINKS: state => _.assign({}, state, { isFetching: true }),
-    RECEIVE_FILES_AND_LINKS: (state, action) => {
+    REQUEST_DEPENDENCY_GRAPH_DATA: state => _.assign({}, state, { isFetching: true }),
+    RECEIVE_DEPENDENCY_GRAPH_DATA: (state, action) => {
       const ret = _.assign({}, state, {
         data: action.payload,
         isFetching: false,

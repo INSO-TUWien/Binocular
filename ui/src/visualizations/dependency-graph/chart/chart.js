@@ -38,18 +38,30 @@ export default class DependencyGraph extends React.Component {
   }
 
   componentDidUpdate() {
+    var svg = d3.select(this.refs.graphSvg),
+    width = 2000,
+    height = 2000;
+
+    svg.html("");
+
     if(!!this.state.filesAndLinks 
         && !!this.state.filesAndLinks.nodes 
         && !!this.state.filesAndLinks.links) {
 
       var nodes = this.state.filesAndLinks.nodes;
       var links = this.state.filesAndLinks.links;
+
       var minLineCount = this.state.filesAndLinks.minLineCount;
       var maxLineCount = this.state.filesAndLinks.maxLineCount;
+      var minCommitCount = this.state.filesAndLinks.minCommitCount;
+      var maxCommitCount = this.state.filesAndLinks.maxCommitCount;
+      var meanCommitCount = this.state.filesAndLinks.meanCommitCount;
 
-      var svg = d3.select(this.refs.graphSvg),
-      width = 2000,
-      height = 2000;
+      var minFolderLineCount = this.state.filesAndLinks.minFolderLineCount;
+      var maxFolderLineCount = this.state.filesAndLinks.maxFolderLineCount;
+      var minFolderCommitCount = this.state.filesAndLinks.minFolderCommitCount;
+      var maxFolderCommitCount = this.state.filesAndLinks.maxFolderCommitCount;
+      var meanFolderCommitCount = this.state.filesAndLinks.meanFolderCommitCount;
 
       var color = d3.scaleOrdinal(d3.schemeCategory20);
       
@@ -63,7 +75,7 @@ export default class DependencyGraph extends React.Component {
           .selectAll("line")
           .data(links)
           .enter().append("line")
-            .attr("stroke-width", function(d) { return d.commitCount > 2 ? d.commitCount/2 : "0"; })
+            .attr("stroke-width", function(d) { return d.commitCount > 20 ? d.commitCount/20 : "0"; })
             .attr("stroke", "black")
             .attr("stroke-opacity", "0.6");
       
@@ -72,16 +84,40 @@ export default class DependencyGraph extends React.Component {
           .selectAll("g")
           .data(nodes)
           .enter().append("g");
-          
+
+        var fileColor = d3.scaleLinear()
+          .domain([minCommitCount, maxCommitCount])
+          .range(["lightblue", "darkblue"]);
+
+        var folderColor = d3.scaleLinear()
+          .domain([minFolderCommitCount, maxFolderCommitCount])
+          .range(["lightblue", "darkblue"]);
+
         var circles = node.append("circle")
             .attr("r", function(d) {
               var offset = 10 - minLineCount;
               var scale = (60 - 10) / (maxLineCount - minLineCount);
               var r = offset + scale * d.lineCount;
-              console.log(r); 
-              return r; 
+              
+              if(d.type == "folder") {
+                var offset = 10 - minFolderLineCount;
+                var scale = (60 - 10) / (maxFolderLineCount - minFolderLineCount);
+                var r = offset + scale * d.lineCount;
+              }
+
+              r = r < 10 ? 10 : r;
+              r = r > 60 ? 60 : r;
+
+              return r;
             })
-            .attr("fill", "grey")
+            .attr("fill", function(d) { return d.type == "file" ? fileColor(d.commitCount) : folderColor(d.commitCount); })
+            .attr("stroke", function(d) {
+              if(d.type == "file") {
+                return "black";
+              } else {
+                return "red";
+              }
+            })
             .call(d3.drag()
                 .on("start", dragstarted)
                 .on("drag", dragged)
@@ -95,7 +131,7 @@ export default class DependencyGraph extends React.Component {
             .attr('y', 3);
       
         node.append("title")
-            .text(function(d) { return d.path; });
+            .text(function(d) { return d.path + " (" + d.lineCount + " lines, " + d.commitCount + " commits)"; });
       
         simulation
             .nodes(nodes)
