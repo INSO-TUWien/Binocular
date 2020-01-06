@@ -9,6 +9,8 @@ import { fetchFactory, timestampedActionFactory, mapSaga } from '../../../sagas/
 import getGraphData from './getGraphData.js';
 
 export const setDepth = createAction('SET_DEPTH');
+export const setMeanPercentageOfCombinedCommitsThreshold = createAction('SET_COMBINED_THRESHHOLD');
+export const setMeanPercentageOfMaxCommitsThreshold = createAction('SET_MAX_THRESHHOLD');
 
 export const requestDependencyGraphData = createAction('REQUEST_DEPENDENCY_GRAPH_DATA');
 export const receiveDependencyGraphData = timestampedActionFactory('RECEIVE_DEPENDENCY_GRAPH_DATA');
@@ -16,11 +18,21 @@ export const receiveDependencyGraphDataError = createAction('RECEIVE_DEPENDENCY_
 
 export default function*() {
   yield fetchDependencyGraphData();
-  yield fork(watchSetCategory);
+  yield fork(watchSetDepth);
+  yield fork(watchSetCombinedThreshhold);
+  yield fork(watchSetMaxThreshhold);
 }
 
-export function* watchSetCategory() {
+export function* watchSetDepth() {
   yield takeEvery('SET_DEPTH', fetchDependencyGraphData);
+}
+
+export function* watchSetCombinedThreshhold() {
+  yield takeEvery('SET_COMBINED_THRESHHOLD', fetchDependencyGraphData);
+}
+
+export function* watchSetMaxThreshhold() {
+  yield takeEvery('SET_MAX_THRESHHOLD', fetchDependencyGraphData);
 }
 
 export const fetchDependencyGraphData = fetchFactory(

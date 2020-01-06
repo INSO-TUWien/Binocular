@@ -56,6 +56,10 @@ export default class DependencyGraph extends React.Component {
       var minCommitCount = this.state.filesAndLinks.minCommitCount;
       var maxCommitCount = this.state.filesAndLinks.maxCommitCount;
       var meanCommitCount = this.state.filesAndLinks.meanCommitCount;
+      var totalCommitCount = this.state.filesAndLinks.totalCommitCount;
+
+      var meanPercentageOfCombinedCommitsThreshold = this.state.filesAndLinks.meanPercentageOfCombinedCommitsThreshold;
+      var meanPercentageOfMaxCommitsThreshold = this.state.filesAndLinks.meanPercentageOfMaxCommitsThreshold;
 
       var minFolderLineCount = this.state.filesAndLinks.minFolderLineCount;
       var maxFolderLineCount = this.state.filesAndLinks.maxFolderLineCount;
@@ -74,10 +78,28 @@ export default class DependencyGraph extends React.Component {
             .attr("class", "links")
           .selectAll("line")
           .data(links)
-          .enter().append("line")
-            .attr("stroke-width", function(d) { return d.commitCount > 20 ? d.commitCount/20 : "0"; })
-            .attr("stroke", "black")
-            .attr("stroke-opacity", "0.6");
+          .enter().append("polygon")
+            /*.attr("stroke-width", function(d) {
+              var sourceNode = nodes.filter(node => node.id == d.source)[0];
+              var targetNode = nodes.filter(node => node.id == d.target)[0];
+
+              var sourceCommits = sourceNode.commitCount;
+              var targetCommits = targetNode.commitCount;
+              var combinedCommits = d.commitCount;
+
+              var sourcePercentage = 100 / sourceCommits * combinedCommits;
+              var targetPercentage = 100 / targetCommits * combinedCommits;
+              var totalPercentage = 100 / (sourceCommits + targetCommits) * combinedCommits;
+
+              var offset = 1;
+              var scale = (20 - 1) / 100;
+              var strokeWidth = offset + scale * totalPercentage;
+
+              return strokeWidth; 
+            })*/
+            .attr("stroke", "none")
+            .attr("opacity", "0.6")
+            .attr("fill", "grey");
       
         var node = svg.append("g")
             .attr("class", "nodes")
@@ -141,16 +163,49 @@ export default class DependencyGraph extends React.Component {
             .links(links);
 
     function ticked() {
-        link
-            .attr("x1", function(d) { return d.source.x; })
-            .attr("y1", function(d) { return d.source.y; })
-            .attr("x2", function(d) { return d.target.x; })
-            .attr("y2", function(d) { return d.target.y; });
+      link
+          .attr("points", function(d) { return getConnectionPoints(d); })
+          .attr("transform", function(d) { return getConnectionTransform(d); });
 
-        node
-            .attr("transform", function(d) {
-              return "translate(" + d.x + "," + d.y + ")";
-            })
+      node
+          .attr("transform", function(d) {
+            return "translate(" + d.x + "," + d.y + ")";
+          })
+      }
+
+      function getConnectionPoints(link) {
+        var sourceCommits = link.source.commitCount;
+        var targetCommits = link.target.commitCount;
+        var combinedCommits = link.commitCount;
+
+        var sourcePercentage = 100 / sourceCommits * combinedCommits;
+        var targetPercentage = 100 / targetCommits * combinedCommits;
+
+        var sourcePercentageOfMaxCommits = 100 / (link.source.type == "file" ? maxCommitCount : maxFolderCommitCount) * sourceCommits;
+        var targetPercentageOfMaxCommits = 100 / (link.target.type == "file" ? maxCommitCount : maxFolderCommitCount) * targetCommits;
+
+        var distance = Math.hypot(link.target.x - link.source.x, link.target.y - link.source.y);
+
+        var offset = 1;
+        var scale = (200 - 1) / 100;
+
+        var sourceWidth = offset + scale * sourcePercentage * sourcePercentageOfMaxCommits / 100;
+        var targetWidth = offset + scale * targetPercentage * targetPercentageOfMaxCommits / 100;
+
+        if(((sourcePercentage + targetPercentage) / 2 >= meanPercentageOfCombinedCommitsThreshold)
+            && ((sourcePercentageOfMaxCommits + targetPercentageOfMaxCommits) / 2 >= meanPercentageOfMaxCommitsThreshold)) {
+          return (link.source.x) + "," + (link.source.y + sourceWidth/2)
+                + " " + (link.source.x) + "," + (link.source.y - sourceWidth/2) 
+                + " " + (link.source.x + distance) + "," + (link.source.y - targetWidth/2)
+                + " " + (link.source.x + distance) + "," + (link.source.y + targetWidth/2);
+        } else {
+          return "";
+        }
+      }
+
+      function getConnectionTransform(link) {
+        var angle = Math.atan2(link.target.y - link.source.y, link.target.x - link.source.x) * 180 / Math.PI;
+        return "rotate(" + angle + " " + link.source.x + " " + link.source.y + ")";
       }
       
       function dragstarted(d) {

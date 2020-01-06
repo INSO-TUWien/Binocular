@@ -37,33 +37,42 @@ function commitsToNodesAndLinks(commits, config) {
 
   commits.forEach(commit => {
     var fileCount = 0;
+
+    var processedNodes = Array();
     commit.files.data.forEach(file => {
       var node = createOrUpdateNode(file, fileArray, depth);
 
-      for(var i = fileCount+1; i < commit.files.data.length; i++) {
-        var targetNode = createNode(commit.files.data[i], depth);
+      if(!processedNodes.includes(node.id)) {
+        processedNodes.push(node.id);
 
-        if(!links.some(link => link.target == targetNode.id && link.source == node.id)
-            && !links.some(link => link.target == node.id && link.source == targetNode.id)) {
-            links.push({ target: targetNode.id, source: node.id, commitCount: 1 });
-        } else {
-          if(links.some(link => link.target == targetNode.id && link.source == node.id)) {
-            var matchingLinks = links.filter(link => link.target == targetNode.id && link.source == node.id);
-            
-            matchingLinks.forEach(matchingLink => {
-              matchingLink.commitCount++;
-            });
-          }
-          if(links.some(link => link.target == node.id && link.source == targetNode.id)) {
-            var matchingLinks = links.filter(link => link.target == node.id && link.source == targetNode.id);
-            
-            matchingLinks.forEach(matchingLink => {
-              matchingLink.commitCount++;
-            });
+        var processedTargetNodes = Array();
+        for(var i = fileCount+1; i < commit.files.data.length; i++) {
+          var targetNode = createNode(commit.files.data[i], depth);
+
+          if(node.id != targetNode.id && !processedTargetNodes.includes(targetNode.id)) {
+            processedTargetNodes.push(targetNode.id);
+
+            if(!links.some(link => link.target == targetNode.id && link.source == node.id)
+                && !links.some(link => link.target == node.id && link.source == targetNode.id)) {
+                links.push({ target: targetNode.id, source: node.id, commitCount: 1 });
+            } else {
+              if(links.some(link => link.target == targetNode.id && link.source == node.id)) {
+                var matchingLinks = links.filter(link => link.target == targetNode.id && link.source == node.id);
+
+                matchingLinks.forEach(matchingLink => {
+                  matchingLink.commitCount++;
+                });
+              } else if(links.some(link => link.target == node.id && link.source == targetNode.id)) {
+                var matchingLinks = links.filter(link => link.target == node.id && link.source == targetNode.id);
+                
+                matchingLinks.forEach(matchingLink => {
+                  matchingLink.commitCount++;
+                });
+              }
+            }
           }
         }
       }
-
       fileCount++;
     });
   });
@@ -121,7 +130,10 @@ function commitsToNodesAndLinks(commits, config) {
     maxFolderLineCount: maxFolderLineCount,
     minFolderCommitCount: minFolderCommitCount,
     maxFolderCommitCount: maxFolderCommitCount,
-    meanFolderCommitCount: meanFolderCommitCount };
+    meanFolderCommitCount: meanFolderCommitCount,
+    totalCommitCount: (fileCommitSum + folderCommitSum),
+    meanPercentageOfCombinedCommitsThreshold: config.meanPercentageOfCombinedCommitsThreshold,
+    meanPercentageOfMaxCommitsThreshold: config.meanPercentageOfMaxCommitsThreshold };
 }
 
 function createOrUpdateNode(file, fileArray, depth) {
