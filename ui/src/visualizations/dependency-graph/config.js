@@ -6,16 +6,26 @@ import { setDepth, setMeanPercentageOfCombinedCommitsThreshold, setMeanPercentag
 import SearchBox from '../../components/SearchBox';
 import TabCombo from '../../components/TabCombo.js';
 import styles from './styles.scss';
+import SuperTreeview from 'react-super-treeview';
+import React from 'react';
+import ReactDOM from 'react-dom';
 
 import { graphQl } from '../../utils';
 
 const mapStateToProps = (state /*, ownProps*/) => {
   const dgState = state.visualizations.dependencyGraph.state;
+  
+  var fileTree = dgState.config.fileTree;
+
+  if(!!dgState.data.data.filesAndLinks) {
+    fileTree = dgState.data.data.filesAndLinks.fileTree.children;
+  }
 
   return {
     depth: dgState.config.depth,
     meanPercentageOfCombinedCommitsThreshold: dgState.config.meanPercentageOfCombinedCommitsThreshold,
-    meanPercentageOfMaxCommitsThreshold: dgState.config.meanPercentageOfMaxCommitsThreshold
+    meanPercentageOfMaxCommitsThreshold: dgState.config.meanPercentageOfMaxCommitsThreshold,
+    fileTree: fileTree
   };
 };
 
@@ -68,6 +78,18 @@ const DependencyGraphConfigComponent = props => {
             </div>
           </div>
         </div>
+        <SuperTreeview 
+          data={ props.fileTree }
+          onUpdateCb={(updatedData)=>{
+            //TODO: update
+            props.fileTree = updatedData;
+          }}
+          isCheckable={(node, depth)=>{
+            return true;
+          }}
+          isExpandable={(node, depth) => { return false; }}
+          noChildrenAvailableMessage=""
+        />
       </form>
     </div>
   );

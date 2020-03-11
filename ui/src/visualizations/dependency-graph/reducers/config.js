@@ -12,6 +12,7 @@ export default handleActions(
   {
     depth: 1,
     meanPercentageOfCombinedCommitsThreshold: 40,
-    meanPercentageOfMaxCommitsThreshold: 40
+    meanPercentageOfMaxCommitsThreshold: 40,
+    fileTree: []
   }
 );

@@ -34,13 +34,20 @@ function commitsToNodesAndLinks(commits, config) {
 
   var fileArray = Array();
   var links = Array();
+  var fileTree = {
+    id: 0,
+    parentId: null,
+    path: "",
+    children: []
+  };
+  var nodeInTreeIds = {};
 
   commits.forEach(commit => {
     var fileCount = 0;
 
     var processedNodes = Array();
     commit.files.data.forEach(file => {
-      var node = createOrUpdateNode(file, fileArray, depth);
+      var node = createOrUpdateNode(file, fileArray, depth, fileTree, nodeInTreeIds);
 
       if(!processedNodes.includes(node.id)) {
         processedNodes.push(node.id);
@@ -133,10 +140,12 @@ function commitsToNodesAndLinks(commits, config) {
     meanFolderCommitCount: meanFolderCommitCount,
     totalCommitCount: (fileCommitSum + folderCommitSum),
     meanPercentageOfCombinedCommitsThreshold: config.meanPercentageOfCombinedCommitsThreshold,
-    meanPercentageOfMaxCommitsThreshold: config.meanPercentageOfMaxCommitsThreshold };
+    meanPercentageOfMaxCommitsThreshold: config.meanPercentageOfMaxCommitsThreshold,
+    fileTree: fileTree
+   };
 }
 
-function createOrUpdateNode(file, fileArray, depth) {
+function createOrUpdateNode(file, fileArray, depth, fileTree, nodesInTreeIds) {
   if(getDepth(file) <= depth) {  //file
     if(!!fileArray[getFileId(file)]) {
       fileArray[getFileId(file)].path = file.file.path;
@@ -144,6 +153,8 @@ function createOrUpdateNode(file, fileArray, depth) {
       fileArray[getFileId(file)].commitCount++;
     } else {
       fileArray[getFileId(file)] = { id: getFileId(file), path: file.file.path, lineCount: file.lineCount, commitCount: 1, type: "file" };
+
+      addNodeToFileTree(fileTree, nodesInTreeIds, file.file.path, "file", getFileId(file));
     }
 
     return fileArray[getFileId(file)];
@@ -162,6 +173,8 @@ function createOrUpdateNode(file, fileArray, depth) {
       let files = Array();
       files.push(file);
       fileArray[getFolderId(folderPath)] = { id: getFolderId(folderPath), path: folderPath, lineCount: file.lineCount, commitCount: 1, type: "folder", files: files };
+
+      addNodeToFileTree(fileTree, nodesInTreeIds, folderPath, "folder", null);
     }
 
     return fileArray[getFolderId(folderPath)];
@@ -174,6 +187,51 @@ function createNode(file, depth) {
   } else {                            //folder
     var folderPath = getFolderPath(file, depth);
     return { id: getFolderId(folderPath) , path: folderPath, fileCount: 1, commitCount: 1, type: "folder" };
+  }
+}
+
+function addNodeToFileTree(fileTree, nodesInTreeIds, path, type, fileId) {
+  addNodeToFileTreeRecursive(fileTree, nodesInTreeIds, path, type, fileId);
+}
+
+function addNodeToFileTreeRecursive(rootNode, nodesInTreeIds, path, type, fileId) {
+  let parts = path.split("/");
+
+  if(parts.length == 0) {
+    return;
+  } else {
+    let nodeToAdd = parts[0];
+
+    let t = "folder";
+    if(parts.length == 1) {
+      t = type;
+    }
+
+    let id = getFolderId(rootNode.path + "/" + nodeToAdd);
+    if(t == "file") {
+      id = fileId;
+    }
+
+    let node = nodesInTreeIds[id];
+    if(node == null || typeof node == "undefined") {
+      node = {
+        id: id,
+        parentId: rootNode.id,
+        path: rootNode.path + "/" + nodeToAdd,
+        children: [],
+        type: t,
+        name: (rootNode.path + "/" + nodeToAdd).substr(1),
+        isExpanded: t == "folder" ? true : false,
+        isChecked: true
+      }
+
+      rootNode.children.push(node);
+      nodesInTreeIds[id] = node;
+    }    
+
+    if(parts.length > 1) {
+      addNodeToFileTreeRecursive(node, nodesInTreeIds, path.substring(path.indexOf('/')+1), type, fileId);
+    }
   }
 }
 

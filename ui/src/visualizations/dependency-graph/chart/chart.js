@@ -79,24 +79,6 @@ export default class DependencyGraph extends React.Component {
           .selectAll("line")
           .data(links)
           .enter().append("polygon")
-            /*.attr("stroke-width", function(d) {
-              var sourceNode = nodes.filter(node => node.id == d.source)[0];
-              var targetNode = nodes.filter(node => node.id == d.target)[0];
-
-              var sourceCommits = sourceNode.commitCount;
-              var targetCommits = targetNode.commitCount;
-              var combinedCommits = d.commitCount;
-
-              var sourcePercentage = 100 / sourceCommits * combinedCommits;
-              var targetPercentage = 100 / targetCommits * combinedCommits;
-              var totalPercentage = 100 / (sourceCommits + targetCommits) * combinedCommits;
-
-              var offset = 1;
-              var scale = (20 - 1) / 100;
-              var strokeWidth = offset + scale * totalPercentage;
-
-              return strokeWidth; 
-            })*/
             .attr("stroke", "none")
             .attr("opacity", "0.6")
             .attr("fill", "grey");
@@ -189,8 +171,8 @@ export default class DependencyGraph extends React.Component {
         var offset = 1;
         var scale = (200 - 1) / 100;
 
-        var sourceWidth = offset + scale * sourcePercentage * sourcePercentageOfMaxCommits / 100;
-        var targetWidth = offset + scale * targetPercentage * targetPercentageOfMaxCommits / 100;
+        var sourceWidth = offset + scale * sourcePercentage * ((sourcePercentageOfMaxCommits + targetPercentageOfMaxCommits) / 2) / 100;
+        var targetWidth = offset + scale * targetPercentage * ((sourcePercentageOfMaxCommits + targetPercentageOfMaxCommits) / 2) / 100;
 
         if(((sourcePercentage + targetPercentage) / 2 >= meanPercentageOfCombinedCommitsThreshold)
             && ((sourcePercentageOfMaxCommits + targetPercentageOfMaxCommits) / 2 >= meanPercentageOfMaxCommitsThreshold)) {
