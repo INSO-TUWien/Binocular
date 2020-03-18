@@ -24,7 +24,7 @@ export default function getGraphData(config) {
           }
         }`
     )
-    .then(resp => commitsToNodesAndLinks(resp.commits.data, config));
+    .then(resp => commitsToNodesAndLinks(resp.commits.data, config))
 };
 
 function commitsToNodesAndLinks(commits, config) {
@@ -42,6 +42,11 @@ function commitsToNodesAndLinks(commits, config) {
   };
   var nodeInTreeIds = {};
 
+  filteredPaths = [];
+  if(config.fileTree.length >= 0) {
+    setFilteredIds(config.fileTree);
+  }
+
   commits.forEach(commit => {
     var fileCount = 0;
 
@@ -49,32 +54,36 @@ function commitsToNodesAndLinks(commits, config) {
     commit.files.data.forEach(file => {
       var node = createOrUpdateNode(file, fileArray, depth, fileTree, nodeInTreeIds);
 
-      if(!processedNodes.includes(node.id)) {
-        processedNodes.push(node.id);
+      if(!!node) {
+        if(!processedNodes.includes(node.id)) {
+          processedNodes.push(node.id);
 
-        var processedTargetNodes = Array();
-        for(var i = fileCount+1; i < commit.files.data.length; i++) {
-          var targetNode = createNode(commit.files.data[i], depth);
+          var processedTargetNodes = Array();
+          for(var i = fileCount+1; i < commit.files.data.length; i++) {
+            var targetNode = createNode(commit.files.data[i], depth);
 
-          if(node.id != targetNode.id && !processedTargetNodes.includes(targetNode.id)) {
-            processedTargetNodes.push(targetNode.id);
+            if(!!targetNode) {
+              if(node.id != targetNode.id && !processedTargetNodes.includes(targetNode.id)) {
+                processedTargetNodes.push(targetNode.id);
 
-            if(!links.some(link => link.target == targetNode.id && link.source == node.id)
-                && !links.some(link => link.target == node.id && link.source == targetNode.id)) {
-                links.push({ target: targetNode.id, source: node.id, commitCount: 1 });
-            } else {
-              if(links.some(link => link.target == targetNode.id && link.source == node.id)) {
-                var matchingLinks = links.filter(link => link.target == targetNode.id && link.source == node.id);
+                if(!links.some(link => link.target == targetNode.id && link.source == node.id)
+                    && !links.some(link => link.target == node.id && link.source == targetNode.id)) {
+                    links.push({ target: targetNode.id, source: node.id, commitCount: 1 });
+                } else {
+                  if(links.some(link => link.target == targetNode.id && link.source == node.id)) {
+                    var matchingLinks = links.filter(link => link.target == targetNode.id && link.source == node.id);
 
-                matchingLinks.forEach(matchingLink => {
-                  matchingLink.commitCount++;
-                });
-              } else if(links.some(link => link.target == node.id && link.source == targetNode.id)) {
-                var matchingLinks = links.filter(link => link.target == node.id && link.source == targetNode.id);
-                
-                matchingLinks.forEach(matchingLink => {
-                  matchingLink.commitCount++;
-                });
+                    matchingLinks.forEach(matchingLink => {
+                      matchingLink.commitCount++;
+                    });
+                  } else if(links.some(link => link.target == node.id && link.source == targetNode.id)) {
+                    var matchingLinks = links.filter(link => link.target == node.id && link.source == targetNode.id);
+                    
+                    matchingLinks.forEach(matchingLink => {
+                      matchingLink.commitCount++;
+                    });
+                  }
+                }
               }
             }
           }
@@ -147,6 +156,9 @@ function commitsToNodesAndLinks(commits, config) {
 
 function createOrUpdateNode(file, fileArray, depth, fileTree, nodesInTreeIds) {
   if(getDepth(file) <= depth) {  //file
+    if(!isNodeInFilteredFiles(getFileId(file), file.file.path)) {
+      return null;
+    }
     if(!!fileArray[getFileId(file)]) {
       fileArray[getFileId(file)].path = file.file.path;
       fileArray[getFileId(file)].lineCount = file.lineCount;
@@ -161,6 +173,9 @@ function createOrUpdateNode(file, fileArray, depth, fileTree, nodesInTreeIds) {
   } else {                            //folder
     var folderPath = getFolderPath(file, depth);
 
+    if(!isNodeInFilteredFiles(getFolderId(folderPath), folderPath)) {
+      return null;
+    }
     if(!!fileArray[getFolderId(folderPath)]) {
       fileArray[getFolderId(folderPath)].path = folderPath;
       fileArray[getFolderId(folderPath)].commitCount++;
@@ -183,9 +198,15 @@ function createOrUpdateNode(file, fileArray, depth, fileTree, nodesInTreeIds) {
 
 function createNode(file, depth) {
   if(getDepth(file) <= depth) {  //file
+    if(!isNodeInFilteredFiles(getFileId(file), file.file.path)) {
+      return null;
+    }
     return { id: getFileId(file), path: file.file.path, lineCount: file.lineCount, commitCount: 1, type: "file" };
   } else {                            //folder
     var folderPath = getFolderPath(file, depth);
+    if(!isNodeInFilteredFiles(getFolderId(folderPath), folderPath)) {
+      return null;
+    }
     return { id: getFolderId(folderPath) , path: folderPath, fileCount: 1, commitCount: 1, type: "folder" };
   }
 }
@@ -275,4 +296,40 @@ function getFileId(file) {
   let id = "10" + "-" + file.file.id;
   id = id.replace("-", "");
   return id;
+}
+
+var filteredPaths = [];
+function setFilteredIds(fileTree) {
+  if(!!fileTree) {
+    fileTree.forEach(child => {
+      setFilteredIdsRecursive(child);
+    });
+  }
+}
+
+function setFilteredIdsRecursive(node) {
+  if(node.isChecked) {
+    filteredPaths.push(node.path);
+  }
+
+  if(!!node.children) {
+    node.children.forEach(child => {
+      setFilteredIdsRecursive(child);
+    });
+  }
+}
+
+function isNodeInFilteredFiles(id, path) {
+  if(filteredPaths.length <= 0) {
+    return true;
+  }
+
+  var b = false;
+  filteredPaths.forEach(p => {
+    if(path.includes(p.substr(1))) {
+      return b = true;;
+    }
+  });
+
+  return b;
 }

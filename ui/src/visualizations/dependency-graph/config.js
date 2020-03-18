@@ -2,7 +2,7 @@
 
 import Promise from 'bluebird';
 import { connect } from 'react-redux';
-import { setDepth, setMeanPercentageOfCombinedCommitsThreshold, setMeanPercentageOfMaxCommitsThreshold } from './sagas';
+import { reloadData, setDepth, setMeanPercentageOfCombinedCommitsThreshold, setMeanPercentageOfMaxCommitsThreshold, setFiles } from './sagas';
 import SearchBox from '../../components/SearchBox';
 import TabCombo from '../../components/TabCombo.js';
 import styles from './styles.scss';
@@ -17,7 +17,7 @@ const mapStateToProps = (state /*, ownProps*/) => {
   
   var fileTree = dgState.config.fileTree;
 
-  if(!!dgState.data.data.filesAndLinks) {
+  if(!!dgState.data.data.filesAndLinks && dgState.config.reloaded) {
     fileTree = dgState.data.data.filesAndLinks.fileTree.children;
   }
 
@@ -33,7 +33,9 @@ const mapDispatchToProps = (dispatch /*, ownProps*/) => {
   return {
     onSetDepth: depth => dispatch(setDepth(depth)),
     onSetMeanPercentageOfCombinedCommitsThreshold: meanPercentageOfCombinedCommitsThreshold => dispatch(setMeanPercentageOfCombinedCommitsThreshold(meanPercentageOfCombinedCommitsThreshold)),
-    onSetMeanPercentageOfMaxCommitsThreshold: meanPercentageOfMaxCommitsThreshold => dispatch(setMeanPercentageOfMaxCommitsThreshold(meanPercentageOfMaxCommitsThreshold))
+    onSetMeanPercentageOfMaxCommitsThreshold: meanPercentageOfMaxCommitsThreshold => dispatch(setMeanPercentageOfMaxCommitsThreshold(meanPercentageOfMaxCommitsThreshold)),
+    onSetFiles: fileTree => dispatch(setFiles(fileTree)),
+    onReloadData: fileTree => dispatch(reloadData(fileTree))
   };
 };
 
@@ -78,16 +80,17 @@ const DependencyGraphConfigComponent = props => {
             </div>
           </div>
         </div>
-        <SuperTreeview 
+        <button type="button" onClick={evt => props.onReloadData(props.fileTree)}>Set Files</button>
+        <SuperTreeview
           data={ props.fileTree }
           onUpdateCb={(updatedData)=>{
-            //TODO: update
-            props.fileTree = updatedData;
+            props.onSetFiles(updatedData)
           }}
           isCheckable={(node, depth)=>{
             return true;
           }}
           isExpandable={(node, depth) => { return false; }}
+          isDeletable={(node, depth) => { return false; }}
           noChildrenAvailableMessage=""
         />
       </form>
