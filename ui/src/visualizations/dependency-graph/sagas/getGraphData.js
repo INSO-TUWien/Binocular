@@ -11,6 +11,7 @@ export default function getGraphData(config) {
           commits {
             data {
               sha
+              date
               files {
                 data {
                   lineCount
@@ -31,6 +32,10 @@ function commitsToNodesAndLinks(commits, config) {
   var depth = config.depth;
   var fileLineCountsQuantile = 10;
   var folderLineCountsQuantile = 10;
+  var fromTimestamp = config.fromTimestamp;
+  var toTimestamp = config.toTimestamp;
+
+  console.log(fromTimestamp + " - " + toTimestamp);
 
   var fileArray = Array();
   var links = Array();
@@ -48,49 +53,53 @@ function commitsToNodesAndLinks(commits, config) {
   }
 
   commits.forEach(commit => {
-    var fileCount = 0;
+    var commitTimestamp = Date.parse(commit.date);
 
-    var processedNodes = Array();
-    commit.files.data.forEach(file => {
-      var node = createOrUpdateNode(file, fileArray, depth, fileTree, nodeInTreeIds);
+    if((fromTimestamp == 0 || commitTimestamp >= fromTimestamp) && (toTimestamp == 0 || commitTimestamp <= toTimestamp)) {
+      var fileCount = 0;
 
-      if(!!node) {
-        if(!processedNodes.includes(node.id)) {
-          processedNodes.push(node.id);
+      var processedNodes = Array();
+      commit.files.data.forEach(file => {
+        var node = createOrUpdateNode(file, fileArray, depth, fileTree, nodeInTreeIds);
 
-          var processedTargetNodes = Array();
-          for(var i = fileCount+1; i < commit.files.data.length; i++) {
-            var targetNode = createNode(commit.files.data[i], depth);
+        if(!!node) {
+          if(!processedNodes.includes(node.id)) {
+            processedNodes.push(node.id);
 
-            if(!!targetNode) {
-              if(node.id != targetNode.id && !processedTargetNodes.includes(targetNode.id)) {
-                processedTargetNodes.push(targetNode.id);
+            var processedTargetNodes = Array();
+            for(var i = fileCount+1; i < commit.files.data.length; i++) {
+              var targetNode = createNode(commit.files.data[i], depth);
 
-                if(!links.some(link => link.target == targetNode.id && link.source == node.id)
-                    && !links.some(link => link.target == node.id && link.source == targetNode.id)) {
-                    links.push({ target: targetNode.id, source: node.id, commitCount: 1 });
-                } else {
-                  if(links.some(link => link.target == targetNode.id && link.source == node.id)) {
-                    var matchingLinks = links.filter(link => link.target == targetNode.id && link.source == node.id);
+              if(!!targetNode) {
+                if(node.id != targetNode.id && !processedTargetNodes.includes(targetNode.id)) {
+                  processedTargetNodes.push(targetNode.id);
 
-                    matchingLinks.forEach(matchingLink => {
-                      matchingLink.commitCount++;
-                    });
-                  } else if(links.some(link => link.target == node.id && link.source == targetNode.id)) {
-                    var matchingLinks = links.filter(link => link.target == node.id && link.source == targetNode.id);
-                    
-                    matchingLinks.forEach(matchingLink => {
-                      matchingLink.commitCount++;
-                    });
+                  if(!links.some(link => link.target == targetNode.id && link.source == node.id)
+                      && !links.some(link => link.target == node.id && link.source == targetNode.id)) {
+                      links.push({ target: targetNode.id, source: node.id, commitCount: 1 });
+                  } else {
+                    if(links.some(link => link.target == targetNode.id && link.source == node.id)) {
+                      var matchingLinks = links.filter(link => link.target == targetNode.id && link.source == node.id);
+
+                      matchingLinks.forEach(matchingLink => {
+                        matchingLink.commitCount++;
+                      });
+                    } else if(links.some(link => link.target == node.id && link.source == targetNode.id)) {
+                      var matchingLinks = links.filter(link => link.target == node.id && link.source == targetNode.id);
+                      
+                      matchingLinks.forEach(matchingLink => {
+                        matchingLink.commitCount++;
+                      });
+                    }
                   }
                 }
               }
             }
           }
         }
-      }
-      fileCount++;
-    });
+        fileCount++;
+      });
+    }
   });
 
   var nodes = Array();

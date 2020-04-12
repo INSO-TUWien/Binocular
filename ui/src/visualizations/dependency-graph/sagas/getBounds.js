@@ -6,7 +6,6 @@ export default function getBounds() {
   return graphQl
     .query(
       `{
-         committers
          firstCommit: commits( perPage: 1, sort: "ASC" ) {
            data {
              date
@@ -18,26 +17,11 @@ export default function getBounds() {
              date
              stats { additions deletions }
            }
-         },
-         firstIssue: issues( perPage: 1, sort: "ASC" ) {
-           data {
-             createdAt
-             closedAt
-           }
-         },
-         lastIssue: issues( perPage: 1, sort: "DESC" ) {
-           data {
-             createdAt
-             closedAt
-           }
          }
        }`
     )
     .then(resp => ({
       firstCommit: resp.firstCommit.data[0],
-      lastCommit: resp.lastCommit.data[0],
-      firstIssue: resp.firstIssue.data[0],
-      lastIssue: resp.lastIssue.data[0],
-      committers: resp.committers
+      lastCommit: resp.lastCommit.data[0]
     }));
 }

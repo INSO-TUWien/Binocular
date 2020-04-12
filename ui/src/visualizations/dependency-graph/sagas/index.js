@@ -7,6 +7,7 @@ import _ from 'lodash';
 
 import { fetchFactory, timestampedActionFactory, mapSaga } from '../../../sagas/utils.js';
 import getGraphData from './getGraphData.js';
+import getBounds from './getBounds.js';
 
 export const setDepth = createAction('SET_DEPTH');
 export const setMeanPercentageOfCombinedCommitsThreshold = createAction('SET_COMBINED_THRESHHOLD');
@@ -47,12 +48,19 @@ export const fetchDependencyGraphData = fetchFactory(
     const state = yield select();
     const config = state.visualizations.dependencyGraph.state.config;
 
+    const { firstCommit, lastCommit } = yield getBounds();
+    const firstCommitTimestamp = Date.parse(firstCommit.date);
+    const lastCommitTimestamp = Date.parse(lastCommit.date);
+
     return yield Promise.join(
-      getGraphData(config)
+      getGraphData(config),
+      getBounds()
     )
       .spread((filesAndLinks) => {
         return {
-          filesAndLinks: filesAndLinks
+          filesAndLinks: filesAndLinks,
+          firstCommitTimestamp: firstCommitTimestamp,
+          lastCommitTimestamp: lastCommitTimestamp
         };
       })
       .catch(function(e) {

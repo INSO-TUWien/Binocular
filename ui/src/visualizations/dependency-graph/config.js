@@ -9,8 +9,15 @@ import styles from './styles.scss';
 import SuperTreeview from 'react-super-treeview';
 import React from 'react';
 import ReactDOM from 'react-dom';
+import Nouislider from 'react-nouislider';
+import "nouislider/distribute/nouislider.css";
+import moment from 'moment';
 
-import { graphQl } from '../../utils';
+var range = <Nouislider
+                range={{min: 0, max: 1}}
+                start={[0, 100]}
+                tooltips
+              />
 
 const mapStateToProps = (state /*, ownProps*/) => {
   const dgState = state.visualizations.dependencyGraph.state;
@@ -21,11 +28,44 @@ const mapStateToProps = (state /*, ownProps*/) => {
     fileTree = dgState.data.data.filesAndLinks.fileTree.children;
   }
 
+  var fromTimestamp = dgState.config.fromTimestamp;
+  var toTimestamp = dgState.config.toTimestamp;
+  var firstCommitTimestamp = 0;
+  var lastCommitTimestamp = 1;
+
+  if(!!dgState.data.data.firstCommitTimestamp && !!dgState.data.data.lastCommitTimestamp) {
+    firstCommitTimestamp = dgState.data.data.firstCommitTimestamp;
+    lastCommitTimestamp = dgState.data.data.lastCommitTimestamp;
+  }
+
+  if(!!dgState.data.data.firstCommitTimestamp && !!dgState.data.data.lastCommitTimestamp 
+    && dgState.config.fromTimestamp == 0 && dgState.config.toTimestamp == 0) {
+    fromTimestamp = dgState.data.data.firstCommitTimestamp;
+    toTimestamp = dgState.data.data.lastCommitTimestamp;
+  }
+
+  range = <Nouislider
+                range={{min: firstCommitTimestamp, max: lastCommitTimestamp}}
+                start={[fromTimestamp, toTimestamp]}
+                tooltips={[{to: function(value) {
+                  return moment.unix(Math.round(parseInt(value)/1000)).format("DD.MM.YYYY");
+                }}, {to: function(value) {
+                  return moment.unix(Math.round(parseInt(value)/1000)).format("DD.MM.YYYY");
+                }}]}
+                step={86400}
+                onSlide={data => {
+                  dgState.config.fromTimestamp = data[0];
+                  dgState.config.toTimestamp = data[1];
+                }}
+              />
+
   return {
     depth: dgState.config.depth,
     meanPercentageOfCombinedCommitsThreshold: dgState.config.meanPercentageOfCombinedCommitsThreshold,
     meanPercentageOfMaxCommitsThreshold: dgState.config.meanPercentageOfMaxCommitsThreshold,
-    fileTree: fileTree
+    fileTree: fileTree,
+    fromTimestamp: fromTimestamp,
+    toTimestamp: toTimestamp
   };
 };
 
@@ -35,7 +75,7 @@ const mapDispatchToProps = (dispatch /*, ownProps*/) => {
     onSetMeanPercentageOfCombinedCommitsThreshold: meanPercentageOfCombinedCommitsThreshold => dispatch(setMeanPercentageOfCombinedCommitsThreshold(meanPercentageOfCombinedCommitsThreshold)),
     onSetMeanPercentageOfMaxCommitsThreshold: meanPercentageOfMaxCommitsThreshold => dispatch(setMeanPercentageOfMaxCommitsThreshold(meanPercentageOfMaxCommitsThreshold)),
     onSetFiles: fileTree => dispatch(setFiles(fileTree)),
-    onReloadData: fileTree => dispatch(reloadData(fileTree))
+    onReloadData: reloadFiletree => dispatch(reloadData(reloadFiletree))
   };
 };
 
@@ -80,7 +120,14 @@ const DependencyGraphConfigComponent = props => {
             </div>
           </div>
         </div>
-        <button type="button" onClick={evt => props.onReloadData(props.fileTree)}>Set Files</button>
+        <br></br>
+        <br></br>
+        <div style={{width: "90%", marginLeft: "5%"}}>
+          {range} 
+        </div>
+        <br/>
+        <button type="button" onClick={evt => props.onReloadData(true)}>Set Time Range</button>
+        <button type="button" onClick={evt => props.onReloadData(false)}>Set Files</button>
         <SuperTreeview
           data={ props.fileTree }
           onUpdateCb={(updatedData)=>{
