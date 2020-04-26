@@ -120,6 +120,7 @@ const DependencyGraphConfigComponent = props => {
             </div>
           </div>
         </div>
+        <label className="label">Time range:</label>
         <br></br>
         <br></br>
         <div style={{width: "90%", marginLeft: "5%"}}>
@@ -127,6 +128,7 @@ const DependencyGraphConfigComponent = props => {
         </div>
         <br/>
         <button type="button" onClick={evt => props.onReloadData(true)}>Set Time Range</button>
+        <label className="label">Files:</label>
         <button type="button" onClick={evt => props.onReloadData(false)}>Set Files</button>
         <SuperTreeview
           data={ props.fileTree }
