@@ -99,14 +99,12 @@ export default class DependencyGraph extends React.Component {
 
         var circles = node.append("circle")
             .attr("r", function(d) {
-              var offset = 10 - minLineCount;
-              var scale = (60 - 10) / (maxLineCount - minLineCount);
-              var r = offset + scale * d.lineCount;
-              
               if(d.type == "folder") {
-                var offset = 10 - minFolderLineCount;
-                var scale = (60 - 10) / (maxFolderLineCount - minFolderLineCount);
-                var r = offset + scale * d.lineCount;
+                var range = (maxFolderLineCount - minFolderLineCount);
+                var r = (((d.lineCount - minFolderLineCount) * 40) / range) + 10;
+              } else {
+                var range = (maxLineCount - minLineCount);
+                var r = (((d.lineCount - minLineCount) * 40) / range) + 10;
               }
 
               r = r < 10 ? 10 : r;
