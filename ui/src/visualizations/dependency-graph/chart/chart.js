@@ -104,7 +104,7 @@ export default class DependencyGraph extends React.Component {
                 var r = (((d.lineCount - minFolderLineCount) * 40) / range) + 10;
               } else {
                 var range = (maxLineCount - minLineCount);
-                var r = (((d.lineCount - minLineCount) * 40) / range) + 10;
+                var r = (((d.lineCount - minLineCount) * 40) / (maxLineCount - minLineCount)) + 10;
               }
 
               r = r < 10 ? 10 : r;

@@ -31,11 +31,8 @@ export default function getGraphData(config) {
 function commitsToNodesAndLinks(commits, config) {
   var depth = config.depth;
   var fileLineCountsQuantile = 10;
-  var folderLineCountsQuantile = 10;
   var fromTimestamp = config.fromTimestamp;
   var toTimestamp = config.toTimestamp;
-
-  console.log(fromTimestamp + " - " + toTimestamp);
 
   var fileArray = Array();
   var links = Array();
@@ -43,13 +40,17 @@ function commitsToNodesAndLinks(commits, config) {
     id: 0,
     parentId: null,
     path: "",
-    children: []
+    children: [],
+    type: "folder",
+    name: "Select All",
+    isExpanded: true,
+    isChecked: true
   };
   var nodeInTreeIds = {};
 
   filteredPaths = [];
-  if(config.fileTree.length >= 0) {
-    setFilteredIds(config.fileTree);
+  if(config.fileTree.length > 0) {
+    setFilteredIds(config.fileTree[0].children);
   }
 
   commits.forEach(commit => {
@@ -138,8 +139,8 @@ function commitsToNodesAndLinks(commits, config) {
   var maxCommitCount = fileCommitCountsArray[fileCommitCountsArray.length-1];
   var meanCommitCount = fileCommitSum / fileCommitCountsArray.length;
 
-  var minFolderLineCount = folderLineCountsArray[Math.round(folderLineCountsArray.length/folderLineCountsQuantile)];
-  var maxFolderLineCount = folderLineCountsArray[Math.round(folderLineCountsArray.length - (folderLineCountsArray.length/folderLineCountsQuantile))];
+  var minFolderLineCount = folderLineCountsArray[0];
+  var maxFolderLineCount = folderLineCountsArray[folderLineCountsArray.length-1];
   var minFolderCommitCount = folderCommitCountsArray[0];
   var maxFolderCommitCount = folderCommitCountsArray[folderCommitCountsArray.length-1];
   var meanFolderCommitCount = folderCommitSum / folderCommitCountsArray.length;

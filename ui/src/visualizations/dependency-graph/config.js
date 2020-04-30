@@ -25,7 +25,7 @@ const mapStateToProps = (state /*, ownProps*/) => {
   var fileTree = dgState.config.fileTree;
 
   if(!!dgState.data.data.filesAndLinks && dgState.config.reloaded) {
-    fileTree = dgState.data.data.filesAndLinks.fileTree.children;
+    fileTree = [dgState.data.data.filesAndLinks.fileTree];
   }
 
   var fromTimestamp = dgState.config.fromTimestamp;
@@ -133,7 +133,10 @@ const DependencyGraphConfigComponent = props => {
         <SuperTreeview
           data={ props.fileTree }
           onUpdateCb={(updatedData)=>{
-            props.onSetFiles(updatedData)
+            props.onSetFiles(updatedData);
+          }}
+          onCheckToggleCb={(updatedNode)=>{
+            setChildrenRecursive(updatedNode, null);
           }}
           isCheckable={(node, depth)=>{
             return true;
@@ -146,6 +149,20 @@ const DependencyGraphConfigComponent = props => {
     </div>
   );
 };
+
+function setChildrenRecursive(children, parent) {
+  for(var i = 0; i < children.length; i++) {
+    if(!!parent) {
+      children[i].isChecked = parent.isChecked;
+    }
+
+    if(!!children[i].children && children[i].children.length > 0) {
+      children[i].children = setChildrenRecursive(children[i].children, children[i]);
+    }
+  }
+
+  return children;
+}
 
 const DependencyGraphConfig = connect(mapStateToProps, mapDispatchToProps)(
   DependencyGraphConfigComponent
