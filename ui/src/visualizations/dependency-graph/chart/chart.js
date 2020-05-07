@@ -97,28 +97,50 @@ export default class DependencyGraph extends React.Component {
           .domain([minFolderCommitCount, maxFolderCommitCount])
           .range(["lightblue", "darkblue"]);
 
-        var circles = node.append("circle")
+        node.filter(function(d){ return d.type == "file"; }).append("circle")
             .attr("r", function(d) {
-              if(d.type == "folder") {
-                var range = (maxFolderLineCount - minFolderLineCount);
-                var r = (((d.lineCount - minFolderLineCount) * 40) / range) + 10;
-              } else {
-                var range = (maxLineCount - minLineCount);
-                var r = (((d.lineCount - minLineCount) * 40) / (maxLineCount - minLineCount)) + 10;
-              }
+              
+              var range = (maxLineCount - minLineCount);
+              var r = (((d.lineCount - minLineCount) * 40) / (maxLineCount - minLineCount)) + 10;
 
               r = r < 10 ? 10 : r;
               r = r > 60 ? 60 : r;
 
               return r;
             })
-            .attr("fill", function(d) { return d.type == "file" ? fileColor(d.commitCount) : folderColor(d.commitCount); })
+            .attr("fill", function(d) { return fileColor(d.commitCount); })
             .attr("stroke", function(d) {
-              if(d.type == "file") {
-                return "black";
-              } else {
-                return "red";
-              }
+              return "black";
+            })
+            .call(d3.drag()
+                .on("start", dragstarted)
+                .on("drag", dragged)
+                .on("end", dragended));
+
+          node.filter(function(d){ return d.type == "folder"; }).append("rect")
+            .attr("width", function(d) {
+              
+              var range = (maxFolderLineCount - minFolderLineCount);
+              var r = (((d.lineCount - minFolderLineCount) * 60) / range) + 20;
+              
+              r = r < 20 ? 20 : r;
+              r = r > 80 ? 80 : r;
+
+              return r;
+            })
+            .attr("height", function(d) {
+              
+              var range = (maxFolderLineCount - minFolderLineCount);
+              var r = (((d.lineCount - minFolderLineCount) * 60) / range) + 20;
+              
+              r = r < 20 ? 20 : r;
+              r = r > 80 ? 80 : r;
+
+              return r;
+            })
+            .attr("fill", function(d) { return folderColor(d.commitCount); })
+            .attr("stroke", function(d) {
+              return "black";
             })
             .call(d3.drag()
                 .on("start", dragstarted)
