@@ -106,6 +106,10 @@ export default class DependencyGraph extends React.Component {
               r = r < 10 ? 10 : r;
               r = r > 60 ? 60 : r;
 
+              if(isNaN(r)) {
+                r = 40;
+              }
+
               return r;
             })
             .attr("fill", function(d) { return fileColor(d.commitCount); })
@@ -126,6 +130,10 @@ export default class DependencyGraph extends React.Component {
               r = r < 20 ? 20 : r;
               r = r > 80 ? 80 : r;
 
+              if(isNaN(r)) {
+                r = 60;
+              }
+
               return r;
             })
             .attr("height", function(d) {
@@ -135,6 +143,10 @@ export default class DependencyGraph extends React.Component {
               
               r = r < 20 ? 20 : r;
               r = r > 80 ? 80 : r;
+
+              if(isNaN(r)) {
+                r = 60;
+              }
 
               return r;
             })

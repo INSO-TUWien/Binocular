@@ -28,11 +28,20 @@ export default function getGraphData(config) {
     .then(resp => commitsToNodesAndLinks(resp.commits.data, config))
 };
 
+var filteredPaths = [];
+var folderIds = {};
+var meanPercentageOfCombinedCommitsThreshold = 40;
+var meanPercentageOfMaxCommitsThreshold = 40;
+
 function commitsToNodesAndLinks(commits, config) {
   var depth = config.depth;
   var fileLineCountsQuantile = 10;
   var fromTimestamp = config.fromTimestamp;
   var toTimestamp = config.toTimestamp;
+  var showLinkedFiles = config.showLinkedFiles;
+
+  meanPercentageOfCombinedCommitsThreshold = config.meanPercentageOfCombinedCommitsThreshold;
+  meanPercentageOfMaxCommitsThreshold = config.meanPercentageOfMaxCommitsThreshold;
 
   var fileArray = Array();
   var links = Array();
@@ -61,7 +70,7 @@ function commitsToNodesAndLinks(commits, config) {
 
       var processedNodes = Array();
       commit.files.data.forEach(file => {
-        var node = createOrUpdateNode(file, fileArray, depth, fileTree, nodeInTreeIds);
+        var node = createOrUpdateNode(file, fileArray, depth, fileTree, nodeInTreeIds, showLinkedFiles);
 
         if(!!node) {
           if(!processedNodes.includes(node.id)) {
@@ -69,7 +78,7 @@ function commitsToNodesAndLinks(commits, config) {
 
             var processedTargetNodes = Array();
             for(var i = fileCount+1; i < commit.files.data.length; i++) {
-              var targetNode = createNode(commit.files.data[i], depth);
+              var targetNode = createNode(commit.files.data[i], depth, showLinkedFiles);
 
               if(!!targetNode) {
                 if(node.id != targetNode.id && !processedTargetNodes.includes(targetNode.id)) {
@@ -113,37 +122,58 @@ function commitsToNodesAndLinks(commits, config) {
 
   fileArray.forEach(file => {
     if(!!file) {
-      nodes.push(file);
-
       if(file.type == "file") {
-        fileLineCountsArray.push(file.lineCount);
         fileCommitCountsArray.push(file.commitCount);
         fileCommitSum += file.commitCount;
       } else if(file.type == "folder") {
-        folderLineCountsArray.push(file.lineCount);
         folderCommitCountsArray.push(file.commitCount);
         folderCommitSum += file.commitCount;
       }
     }
   });
 
-  fileLineCountsArray.sort(function(a, b){return a-b});
   fileCommitCountsArray.sort(function(a, b){return a-b});
-
-  folderLineCountsArray.sort(function(a, b){return a-b});
   folderCommitCountsArray.sort(function(a, b){return a-b});
 
-  var minLineCount = fileLineCountsArray[Math.round(fileLineCountsArray.length/fileLineCountsQuantile)];
-  var maxLineCount = fileLineCountsArray[Math.round(fileLineCountsArray.length - (fileLineCountsArray.length/fileLineCountsQuantile))];
   var minCommitCount = fileCommitCountsArray[0];
   var maxCommitCount = fileCommitCountsArray[fileCommitCountsArray.length-1];
   var meanCommitCount = fileCommitSum / fileCommitCountsArray.length;
 
-  var minFolderLineCount = folderLineCountsArray[0];
-  var maxFolderLineCount = folderLineCountsArray[folderLineCountsArray.length-1];
   var minFolderCommitCount = folderCommitCountsArray[0];
   var maxFolderCommitCount = folderCommitCountsArray[folderCommitCountsArray.length-1];
   var meanFolderCommitCount = folderCommitSum / folderCommitCountsArray.length;
+
+  fileArray.forEach(file => {
+    if(!!file) {
+      if(isNodeLinkedToSelectedNode(file, links, fileArray, maxCommitCount, maxFolderCommitCount) || !showLinkedFiles) {
+        nodes.push(file);
+
+        if(file.type == "file") {
+          fileLineCountsArray.push(file.lineCount);
+        } else if(file.type == "folder") {
+          folderLineCountsArray.push(file.lineCount);
+        }
+      } else {
+        removeLinksWithNode(file, links);
+      }
+    }
+  });
+
+  fileLineCountsArray.sort(function(a, b){return a-b});
+
+  folderLineCountsArray.sort(function(a, b){return a-b});
+
+
+  var minLineCount = fileLineCountsArray[Math.round(fileLineCountsArray.length/fileLineCountsQuantile)];
+  var maxLineCount = fileLineCountsArray[Math.round(fileLineCountsArray.length - (fileLineCountsArray.length/fileLineCountsQuantile))];
+
+  if(fileLineCountsArray.length < fileLineCountsQuantile) {
+    minLineCount = fileLineCountsArray[0];
+    maxLineCount = fileLineCountsArray[fileLineCountsArray.length - 1];
+  }
+
+  var minFolderLineCount = folderLineCountsArray[0];
+  var maxFolderLineCount = folderLineCountsArray[folderLineCountsArray.length-1];
 
   return { nodes: nodes, 
     links: links, 
@@ -164,9 +194,9 @@ function commitsToNodesAndLinks(commits, config) {
    };
 }
 
-function createOrUpdateNode(file, fileArray, depth, fileTree, nodesInTreeIds) {
+function createOrUpdateNode(file, fileArray, depth, fileTree, nodesInTreeIds, showLinkedFiles) {
   if(getDepth(file) <= depth) {  //file
-    if(!isNodeInFilteredFiles(getFileId(file), file.file.path)) {
+    if(!isNodeInFilteredFiles(getFileId(file), file.file.path, showLinkedFiles)) {
       return null;
     }
     if(!!fileArray[getFileId(file)]) {
@@ -183,7 +213,7 @@ function createOrUpdateNode(file, fileArray, depth, fileTree, nodesInTreeIds) {
   } else {                            //folder
     var folderPath = getFolderPath(file, depth);
 
-    if(!isNodeInFilteredFiles(getFolderId(folderPath), folderPath)) {
+    if(!isNodeInFilteredFiles(getFolderId(folderPath), folderPath, showLinkedFiles)) {
       return null;
     }
     if(!!fileArray[getFolderId(folderPath)]) {
@@ -206,15 +236,15 @@ function createOrUpdateNode(file, fileArray, depth, fileTree, nodesInTreeIds) {
   }
 }
 
-function createNode(file, depth) {
+function createNode(file, depth, showLinkedFiles) {
   if(getDepth(file) <= depth) {  //file
-    if(!isNodeInFilteredFiles(getFileId(file), file.file.path)) {
+    if(!isNodeInFilteredFiles(getFileId(file), file.file.path, showLinkedFiles)) {
       return null;
     }
     return { id: getFileId(file), path: file.file.path, lineCount: file.lineCount, commitCount: 1, type: "file" };
   } else {                            //folder
     var folderPath = getFolderPath(file, depth);
-    if(!isNodeInFilteredFiles(getFolderId(folderPath), folderPath)) {
+    if(!isNodeInFilteredFiles(getFolderId(folderPath), folderPath, showLinkedFiles)) {
       return null;
     }
     return { id: getFolderId(folderPath) , path: folderPath, fileCount: 1, commitCount: 1, type: "folder" };
@@ -291,7 +321,6 @@ function getFolderPath(file, depth) {
   return folderPath;
 }
 
-var folderIds = {};
 function getFolderId(folderPath) {
   if(!!folderIds[folderPath]) {
     return folderIds[folderPath];
@@ -308,7 +337,6 @@ function getFileId(file) {
   return id;
 }
 
-var filteredPaths = [];
 function setFilteredIds(fileTree) {
   if(!!fileTree) {
     fileTree.forEach(child => {
@@ -329,8 +357,8 @@ function setFilteredIdsRecursive(node) {
   }
 }
 
-function isNodeInFilteredFiles(id, path) {
-  if(filteredPaths.length <= 0) {
+function isNodeInFilteredFiles(id, path, showLinkedFiles) {
+  if(filteredPaths.length <= 0 || showLinkedFiles) {
     return true;
   }
 
@@ -342,4 +370,63 @@ function isNodeInFilteredFiles(id, path) {
   });
 
   return b;
+}
+
+function isNodeLinkedToSelectedNode(node, links, fileArray, maxCommitCount, maxFolderCommitCount) {
+  var b = false;
+
+  if(isNodeInFilteredFiles(node.id, node.path, false)) {
+    return true;
+  }
+
+  if(filteredPaths.length > 0) {
+    links.forEach(link => {
+      if(showLink(link.commitCount, fileArray[link.source], fileArray[link.target], maxCommitCount, maxFolderCommitCount) 
+        && linkContainsNodeAndSelectedNode(link, node, fileArray)) {
+
+        b = true;
+      }
+    });
+  } else {
+    b = true;
+  }
+
+  return b;
+}
+
+function showLink(combinedCommits, source, target, maxCommitCount, maxFolderCommitCount) {
+  var sourceCommits = source.commitCount;
+  var targetCommits = target.commitCount;
+
+  var sourcePercentage = 100 / sourceCommits * combinedCommits;
+  var targetPercentage = 100 / targetCommits * combinedCommits;
+
+  var sourcePercentageOfMaxCommits = 100 / (source.type == "file" ? maxCommitCount : maxFolderCommitCount) * sourceCommits;
+  var targetPercentageOfMaxCommits = 100 / (target.type == "file" ? maxCommitCount : maxFolderCommitCount) * targetCommits;
+
+  if(((sourcePercentage + targetPercentage) / 2 >= meanPercentageOfCombinedCommitsThreshold)
+      && ((sourcePercentageOfMaxCommits + targetPercentageOfMaxCommits) / 2 >= meanPercentageOfMaxCommitsThreshold)) {
+    return true;
+  }
+
+  return false;
+}
+
+function linkContainsNodeAndSelectedNode(link, node, fileArray) {
+  if(link.target == node.id && isNodeInFilteredFiles(link.source, fileArray[link.source].path, false)) {
+    return true;
+  }
+
+  if(link.source == node.id && isNodeInFilteredFiles(link.target, fileArray[link.target].path, false)) {
+    return true;
+  }
+}
+
+function removeLinksWithNode(file, links) {
+  var i = links.length;
+  while (i--) {
+    if (links[i].target == file.id || links[i].source == file.id) {
+      links.splice(i, 1);
+    }
+  }
 }

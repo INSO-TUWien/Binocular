@@ -2,7 +2,7 @@
 
 import Promise from 'bluebird';
 import { connect } from 'react-redux';
-import { reloadData, setDepth, setMeanPercentageOfCombinedCommitsThreshold, setMeanPercentageOfMaxCommitsThreshold, setFiles } from './sagas';
+import { reloadData, setDepth, setMeanPercentageOfCombinedCommitsThreshold, setMeanPercentageOfMaxCommitsThreshold, setFiles, setShowLinkedFiles } from './sagas';
 import SearchBox from '../../components/SearchBox';
 import TabCombo from '../../components/TabCombo.js';
 import styles from './styles.scss';
@@ -24,7 +24,7 @@ const mapStateToProps = (state /*, ownProps*/) => {
   
   var fileTree = dgState.config.fileTree;
 
-  if(!!dgState.data.data.filesAndLinks && dgState.config.reloaded) {
+  if(!!dgState.data.data.filesAndLinks && (dgState.config.reloaded || fileTree.length <= 0)) {
     fileTree = [dgState.data.data.filesAndLinks.fileTree];
   }
 
@@ -65,7 +65,8 @@ const mapStateToProps = (state /*, ownProps*/) => {
     meanPercentageOfMaxCommitsThreshold: dgState.config.meanPercentageOfMaxCommitsThreshold,
     fileTree: fileTree,
     fromTimestamp: fromTimestamp,
-    toTimestamp: toTimestamp
+    toTimestamp: toTimestamp,
+    showLinkedFiles: dgState.config.showLinkedFiles
   };
 };
 
@@ -75,7 +76,8 @@ const mapDispatchToProps = (dispatch /*, ownProps*/) => {
     onSetMeanPercentageOfCombinedCommitsThreshold: meanPercentageOfCombinedCommitsThreshold => dispatch(setMeanPercentageOfCombinedCommitsThreshold(meanPercentageOfCombinedCommitsThreshold)),
     onSetMeanPercentageOfMaxCommitsThreshold: meanPercentageOfMaxCommitsThreshold => dispatch(setMeanPercentageOfMaxCommitsThreshold(meanPercentageOfMaxCommitsThreshold)),
     onSetFiles: fileTree => dispatch(setFiles(fileTree)),
-    onReloadData: reloadFiletree => dispatch(reloadData(reloadFiletree))
+    onReloadData: reloadFiletree => dispatch(reloadData(reloadFiletree)),
+    onClickShowLinkedFiles: showLinkedFiles => dispatch(setShowLinkedFiles(showLinkedFiles))
   };
 };
 
@@ -130,6 +132,9 @@ const DependencyGraphConfigComponent = props => {
         <button type="button" onClick={evt => props.onReloadData(true)}>Set Time Range</button>
         <label className="label">Files:</label>
         <button type="button" onClick={evt => props.onReloadData(false)}>Set Files</button>
+        <div><label><input name="showLinkedFiles" type="checkbox"
+                                                       onChange={() => props.onClickShowLinkedFiles(!props.showLinkedFiles)}
+                                                       checked={props.showLinkedFiles}/> Show linked files </label></div>
         <SuperTreeview
           data={ props.fileTree }
           onUpdateCb={(updatedData)=>{

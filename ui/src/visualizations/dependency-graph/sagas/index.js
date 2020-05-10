@@ -14,6 +14,7 @@ export const setMeanPercentageOfCombinedCommitsThreshold = createAction('SET_COM
 export const setMeanPercentageOfMaxCommitsThreshold = createAction('SET_MAX_THRESHHOLD');
 export const setFiles = createAction('SET_FILES');
 export const reloadData = createAction('RELOAD_DATA');
+export const setShowLinkedFiles = createAction('SET_SHOW_LINKED_FILES');
 
 export const requestDependencyGraphData = createAction('REQUEST_DEPENDENCY_GRAPH_DATA');
 export const receiveDependencyGraphData = timestampedActionFactory('RECEIVE_DEPENDENCY_GRAPH_DATA');
