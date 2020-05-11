@@ -32,6 +32,7 @@ var filteredPaths = [];
 var folderIds = {};
 var meanPercentageOfCombinedCommitsThreshold = 40;
 var meanPercentageOfMaxCommitsThreshold = 40;
+var showAllFilesAfterReload = false;
 
 function commitsToNodesAndLinks(commits, config) {
   var depth = config.depth;
@@ -39,6 +40,8 @@ function commitsToNodesAndLinks(commits, config) {
   var fromTimestamp = config.fromTimestamp;
   var toTimestamp = config.toTimestamp;
   var showLinkedFiles = config.showLinkedFiles;
+
+  showAllFilesAfterReload = config.showAllFilesAfterReload;
 
   meanPercentageOfCombinedCommitsThreshold = config.meanPercentageOfCombinedCommitsThreshold;
   meanPercentageOfMaxCommitsThreshold = config.meanPercentageOfMaxCommitsThreshold;
@@ -175,7 +178,13 @@ function commitsToNodesAndLinks(commits, config) {
   var minFolderLineCount = folderLineCountsArray[0];
   var maxFolderLineCount = folderLineCountsArray[folderLineCountsArray.length-1];
 
-  return { nodes: nodes, 
+  if(config.fileTree.length <= 0 && !showAllFilesAfterReload) {
+    nodes = [];
+    links = [];
+  }
+
+  return { 
+    nodes: nodes, 
     links: links, 
     minLineCount: minLineCount, 
     maxLineCount: maxLineCount, 
@@ -358,7 +367,7 @@ function setFilteredIdsRecursive(node) {
 }
 
 function isNodeInFilteredFiles(id, path, showLinkedFiles) {
-  if(filteredPaths.length <= 0 || showLinkedFiles) {
+  if((filteredPaths.length <= 0) || showLinkedFiles) {
     return true;
   }
 

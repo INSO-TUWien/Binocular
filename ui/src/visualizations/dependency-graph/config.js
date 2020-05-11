@@ -2,7 +2,7 @@
 
 import Promise from 'bluebird';
 import { connect } from 'react-redux';
-import { reloadData, setDepth, setMeanPercentageOfCombinedCommitsThreshold, setMeanPercentageOfMaxCommitsThreshold, setFiles, setShowLinkedFiles } from './sagas';
+import { reloadData, setDepth, setMeanPercentageOfCombinedCommitsThreshold, setMeanPercentageOfMaxCommitsThreshold, setFiles, setShowLinkedFiles, setShowAllFilesAfterReload } from './sagas';
 import SearchBox from '../../components/SearchBox';
 import TabCombo from '../../components/TabCombo.js';
 import styles from './styles.scss';
@@ -66,7 +66,8 @@ const mapStateToProps = (state /*, ownProps*/) => {
     fileTree: fileTree,
     fromTimestamp: fromTimestamp,
     toTimestamp: toTimestamp,
-    showLinkedFiles: dgState.config.showLinkedFiles
+    showLinkedFiles: dgState.config.showLinkedFiles,
+    showAllFilesAfterReload: dgState.config.showAllFilesAfterReload
   };
 };
 
@@ -77,7 +78,8 @@ const mapDispatchToProps = (dispatch /*, ownProps*/) => {
     onSetMeanPercentageOfMaxCommitsThreshold: meanPercentageOfMaxCommitsThreshold => dispatch(setMeanPercentageOfMaxCommitsThreshold(meanPercentageOfMaxCommitsThreshold)),
     onSetFiles: fileTree => dispatch(setFiles(fileTree)),
     onReloadData: reloadFiletree => dispatch(reloadData(reloadFiletree)),
-    onClickShowLinkedFiles: showLinkedFiles => dispatch(setShowLinkedFiles(showLinkedFiles))
+    onClickShowLinkedFiles: showLinkedFiles => dispatch(setShowLinkedFiles(showLinkedFiles)),
+    onClickShowAllFilesAfterReload: showAllFilesAfterReload => dispatch(setShowAllFilesAfterReload(showAllFilesAfterReload))
   };
 };
 
@@ -135,6 +137,9 @@ const DependencyGraphConfigComponent = props => {
         <div><label><input name="showLinkedFiles" type="checkbox"
                                                        onChange={() => props.onClickShowLinkedFiles(!props.showLinkedFiles)}
                                                        checked={props.showLinkedFiles}/> Show linked files </label></div>
+        <div><label><input name="showAllFilesAfterReload" type="checkbox"
+                                                       onChange={() => props.onClickShowAllFilesAfterReload(!props.showAllFilesAfterReload)}
+                                                       checked={props.showAllFilesAfterReload}/> Show all files after reload </label></div>
         <SuperTreeview
           data={ props.fileTree }
           onUpdateCb={(updatedData)=>{

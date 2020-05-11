@@ -10,7 +10,8 @@ export default handleActions(
     SET_MAX_THRESHHOLD: (state, action) => _.assign({}, state, { meanPercentageOfMaxCommitsThreshold: parseInt(action.payload, 10), reloaded: false }),
     SET_FILES: (state, action) => _.assign({}, state, { fileTree: action.payload, reloaded: false }),
     RELOAD_DATA: (state, action) => _.assign({}, state, { reloaded: action.payload }),
-    SET_SHOW_LINKED_FILES: (state, action) => _.assign({}, state, { showLinkedFiles: action.payload, reloaded: false })
+    SET_SHOW_LINKED_FILES: (state, action) => _.assign({}, state, { showLinkedFiles: action.payload, reloaded: false }),
+    SET_SHOW_ALL_FILES_AFTER_RELOAD: (state, action) => _.assign({}, state, { showAllFilesAfterReload: action.payload, reloaded: false })
   },
   {
     depth: 1,
@@ -20,6 +21,7 @@ export default handleActions(
     reloaded: true,
     fromTimestamp: 0,
     toTimestamp: 0,
-    showLinkedFiles: false
+    showLinkedFiles: false,
+    showAllFilesAfterReload: false
   }
 );
