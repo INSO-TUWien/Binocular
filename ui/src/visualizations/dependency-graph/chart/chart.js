@@ -161,10 +161,11 @@ export default class DependencyGraph extends React.Component {
       
         var lables = node.append("text")
             .text(function(d) {
-              'text';
+              return d.path;
             })
             .attr('x', 6)
-            .attr('y', 3);
+            .attr('y', 3)
+            .style("font-size", "18px");
       
         node.append("title")
             .text(function(d) { return d.path + " (" + d.lineCount + " lines, " + d.commitCount + " commits)"; });
