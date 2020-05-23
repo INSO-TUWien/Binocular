@@ -17,7 +17,10 @@
     "dev-server": "nodemon --config .nodemonrc ./pupil.js --no-ui",
     "build": "webpack",
     "prepublish": "npm run build",
-    "dockerize": "whalify generate-installer && ./node_modules/.bin/whalify build"
+    "dockerize": "whalify generate-installer && ./node_modules/.bin/whalify build",
+    "fix:root": "eslint --fix .",
+    "fix:ui": "eslint --fix --ignore-path ui/.eslintignore -c ui/.eslintrc.yml ui",
+    "fix": "npm run fix:root && npm run fix:ui"
   },
   "keywords": [
     "git"
@@ -138,6 +141,7 @@
   },
   "devDependencies": {
     "eslint": "^3.19.0",
+    "eslint-config-lambdas": "^0.3.0",
     "eslint-config-prettier": "^2.3.0",
     "eslint-plugin-prettier": "^2.1.2",
     "eslint-plugin-react": "^7.1.0",

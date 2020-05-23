@@ -4,7 +4,9 @@ env:
 extends:
   - eslint:recommended
   - prettier
+  - lambdas
 parserOptions:
+  ecmaVersion: 8
   sourceType: module
   ecmaFeatures:
     experimentalObjectRestSpread: true
@@ -13,9 +15,12 @@ rules:
   prettier/prettier:
     - error
     - singleQuote: true
-      printWidth: 100
+      printWidth: 140
       jsxBracketSameLine: true
   no-console: off
+  max-len: ["error", { "code": 140 }]
+  comma-dangle: ["error", "never"]
+  operator-linebreak: ['error', 'after', { "overrides": { "?": "before", ":": "before"} }]
   quotes:
     - error
     - single
