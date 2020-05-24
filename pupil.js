@@ -106,14 +106,14 @@ Repository.fromPath(ctx.targetPath)
         .then(() => Issue.deduceStakeholders())
         .then(() => createManualIssueReferences(config.get('issueReferences')))
         .then(() => console.log('Indexing finished'))
-        .catch(e => e.name === 'Gitlab401Error', function() {
+        .catch(e => 'name' in e && e.name === 'Gitlab401Error', function() {
           console.warn('Unable to access GitLab API. Please configure a valid private access token in the UI.');
         });
     }
   });
 
 process.on('SIGINT', function() {
-  if (ctx.quitRequested) {
+  if (ctx.isStopping()) {
     console.log('Shutting down immediately!');
     process.exit(1);
   }
@@ -121,7 +121,7 @@ process.on('SIGINT', function() {
   console.log('Let me finish up here, ... (Ctrl+C to force quit)');
 
   ctx.quit();
-  _(indexers).values().each(idx => idx.stop());
+  _(indexers).values().each(async indexPromise => (await indexPromise).stop());
 });
 
 /**
