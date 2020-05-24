@@ -18,12 +18,7 @@ export default function FormControl(props) {
   return (
     <Labeled label={label} className={fieldClasses}>
       <p className={pClasses}>
-        <input
-          className={cx('input', { 'is-danger': !!meta.error })}
-          type={type}
-          placeholder={placeholder}
-          {...input}
-        />
+        <input className={cx('input', { 'is-danger': !!meta.error })} type={type} placeholder={placeholder} {...input} />
         {!!meta.error &&
           <span className="help is-danger">
             {meta.error}

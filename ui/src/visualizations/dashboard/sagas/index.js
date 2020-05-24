@@ -4,10 +4,8 @@ import Promise from 'bluebird';
 import { createAction } from 'redux-actions';
 import { select, throttle, fork, takeEvery } from 'redux-saga/effects';
 import _ from 'lodash';
-import moment from 'moment';
 
 import { fetchFactory, timestampedActionFactory, mapSaga } from '../../../sagas/utils.js';
-import { getChartColors } from '../../../utils';
 import getCommitData from './getCommitData.js';
 import getIssueData from './getIssueData.js';
 import getBuildData from './getBuildData.js';
@@ -67,36 +65,22 @@ export const fetchDashboardData = fetchFactory(
     const firstCommitTimestamp = Date.parse(firstCommit.date);
     const lastCommitTimestamp = Date.parse(lastCommit.date);
 
-    const firstIssueTimestamp = firstIssue
-      ? Date.parse(firstIssue.createdAt)
-      : firstCommitTimestamp;
+    const firstIssueTimestamp = firstIssue ? Date.parse(firstIssue.createdAt) : firstCommitTimestamp;
     const lastIssueTimestamp = lastIssue ? Date.parse(lastIssue.createdAt) : lastCommitTimestamp;
 
     const state = yield select();
     const viewport = state.visualizations.dashboard.state.config.viewport || [0, null];
 
-    const firstSignificantTimestamp = Math.max(
-      viewport[0],
-      Math.min(firstCommitTimestamp, firstIssueTimestamp)
-    );
-    const lastSignificantTimestamp = viewport[1]
-      ? viewport[1].getTime()
-      : Math.max(lastCommitTimestamp, lastIssueTimestamp);
+    const firstSignificantTimestamp = Math.max(viewport[0], Math.min(firstCommitTimestamp, firstIssueTimestamp));
+    const lastSignificantTimestamp = viewport[1] ? viewport[1].getTime() : Math.max(lastCommitTimestamp, lastIssueTimestamp);
 
     return yield Promise.join(
-      getCommitData(
-        [firstCommitTimestamp, lastCommitTimestamp],
-        [firstSignificantTimestamp, lastSignificantTimestamp]
-      ),
-      getIssueData(
-        [firstIssueTimestamp, lastIssueTimestamp],
-        [firstSignificantTimestamp, lastSignificantTimestamp]
-      ),
+      getCommitData([firstCommitTimestamp, lastCommitTimestamp], [firstSignificantTimestamp, lastSignificantTimestamp]),
+      getIssueData([firstIssueTimestamp, lastIssueTimestamp], [firstSignificantTimestamp, lastSignificantTimestamp]),
       getBuildData()
     )
       .spread((commits, issues, builds) => {
-        let palette = getPalette(commits, 15, committers.length);
-
+        const palette = getPalette(commits, 15, committers.length);
 
         return {
           otherCount: 0,
@@ -119,27 +103,26 @@ export const fetchDashboardData = fetchFactory(
   receiveDashboardDataError
 );
 
-function getPalette(commits, maxNumberOfColors, numOfCommitters){
+function getPalette(commits, maxNumberOfColors, numOfCommitters) {
   function chartColors(band, maxLength, length) {
-    let len = (length > maxLength) ? maxLength : length;
-    const colors = chroma.scale(band).mode('lch').colors(len);
-    return colors;
+    const len = length > maxLength ? maxLength : length;
+    return chroma.scale(band).mode('lch').colors(len);
   }
 
-  let palette = chartColors('spectral', 15, numOfCommitters);
+  const palette = chartColors('spectral', 15, numOfCommitters);
 
-  let totals = {};
-  _.each(commits, (commit) => {
-    let changes = commit.stats.additions + commit.stats.deletions;
-    if(totals[commit.signature]){
+  const totals = {};
+  _.each(commits, commit => {
+    const changes = commit.stats.additions + commit.stats.deletions;
+    if (totals[commit.signature]) {
       totals[commit.signature] += changes;
-    }else{
+    } else {
       totals[commit.signature] = changes;
     }
   });
 
-  let sortable = [];
-  _.each(Object.keys(totals), (key) => {
+  const sortable = [];
+  _.each(Object.keys(totals), key => {
     sortable.push([key, totals[key]]);
   });
 
@@ -147,9 +130,9 @@ function getPalette(commits, maxNumberOfColors, numOfCommitters){
     return b[1] - a[1];
   });
 
-  let returnPalette = {};
+  const returnPalette = {};
 
-  for (let i = 0; i < palette.length-1; i++) {
+  for (let i = 0; i < palette.length - 1; i++) {
     returnPalette[sortable[i][0]] = palette[i];
   }
   if (sortable.length > maxNumberOfColors) {

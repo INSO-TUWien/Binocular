@@ -3,7 +3,7 @@
 import { traversePages, graphQl } from '../../../utils';
 
 export default function getBuildData() {
-  let buildList = [];
+  const buildList = [];
 
   return traversePages(getBuildsPage, build => {
     buildList.push(build);

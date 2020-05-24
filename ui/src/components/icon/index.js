@@ -3,7 +3,7 @@ import cx from 'classnames';
 import PropTypes from 'prop-types';
 
 const Icon = props => {
-  let icon = `fa-${props.name}`;
+  const icon = `fa-${props.name}`;
 
   return (
     <span className={styles.icon}>

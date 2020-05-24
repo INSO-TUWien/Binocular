@@ -26,11 +26,7 @@ export default function getBuildData(buildSpan, significantSpan, granularity, in
         date: new Date(next),
         stats: _.defaults(
           {
-            total:
-              (build.stats.success || 0) +
-              (build.stats.failed || 0) +
-              (build.stats.pending || 0) +
-              (build.stats.canceled || 0)
+            total: (build.stats.success || 0) + (build.stats.failed || 0) + (build.stats.pending || 0) + (build.stats.canceled || 0)
           },
           build.stats
         )

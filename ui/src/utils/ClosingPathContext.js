@@ -125,9 +125,7 @@ export default class ClosingPathContext {
       // take care to always take the smaller angle, or else our curve
       // might loop around its points
       const unitNormal =
-        aNext - aPrev < Math.PI / 2
-          ? { x: -unitMidPoint.y, y: unitMidPoint.x }
-          : { x: unitMidPoint.y, y: -unitMidPoint.x };
+        aNext - aPrev < Math.PI / 2 ? { x: -unitMidPoint.y, y: unitMidPoint.x } : { x: unitMidPoint.y, y: -unitMidPoint.x };
 
       // determine the entry anchor for the current point
       const entryAnchor = {
@@ -154,14 +152,7 @@ export default class ClosingPathContext {
     if (close) {
       // we still need to draw the closing line segment from the last
       // point to the first
-      this.bezierCurveTo(
-        exitAnchor.x,
-        exitAnchor.y,
-        firstEntryAnchor.x,
-        firstEntryAnchor.y,
-        points[0].x,
-        points[0].y
-      );
+      this.bezierCurveTo(exitAnchor.x, exitAnchor.y, firstEntryAnchor.x, firstEntryAnchor.y, points[0].x, points[0].y);
       this.closePath();
     }
   }

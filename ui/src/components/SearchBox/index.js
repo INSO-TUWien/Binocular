@@ -61,11 +61,7 @@ export default class SearchBox extends React.Component {
           className={cx('input')}
           type="text"
           placeholder={this.props.placeholder}
-          value={
-            this.props.value && !this.state.dirty
-              ? this.props.renderOption(this.props.value)
-              : this.state.searchText
-          }
+          value={this.props.value && !this.state.dirty ? this.props.renderOption(this.props.value) : this.state.searchText}
           onFocus={() => this.setState({ isOpen: true })}
           onBlur={() => this.cancel()}
           onChange={e => this.search(e.target.value)}
@@ -110,10 +106,7 @@ export default class SearchBox extends React.Component {
           isSearching: false,
           activeSearch: null,
           options,
-          selectedIndex:
-            this.state.selectedIndex === null
-              ? 0
-              : Math.min(this.state.selectedIndex, options.length - 1)
+          selectedIndex: this.state.selectedIndex === null ? 0 : Math.min(this.state.selectedIndex, options.length - 1)
         });
       }
     });

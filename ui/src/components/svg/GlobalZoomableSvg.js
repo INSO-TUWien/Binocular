@@ -13,11 +13,7 @@ const GlobalZoomableSvg = props => {
   const scale = `scale(${transform.k})`;
 
   return (
-    <ZoomableSvg
-      className={props.className}
-      x={d3.scaleLinear()}
-      y={d3.scaleLinear()}
-      onZoom={props.onZoom}>
+    <ZoomableSvg className={props.className} x={d3.scaleLinear()} y={d3.scaleLinear()} onZoom={props.onZoom}>
       <g transform={`${translate} ${scale}`}>
         {props.children}
       </g>

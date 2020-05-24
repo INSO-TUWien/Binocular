@@ -59,7 +59,7 @@ const indexers = {
   ci: null
 };
 
-let reporter = new ProgressReporter(io, ['commits', 'issues', 'builds']);
+const reporter = new ProgressReporter(io, ['commits', 'issues', 'builds']);
 
 // kickstart the indexing process
 Repository.fromPath(ctx.targetPath)
@@ -107,9 +107,7 @@ Repository.fromPath(ctx.targetPath)
         .then(() => createManualIssueReferences(config.get('issueReferences')))
         .then(() => console.log('Indexing finished'))
         .catch(e => e.name === 'Gitlab401Error', function() {
-          console.warn(
-            'Unable to access GitLab API. Please configure a valid private access token in the UI.'
-          );
+          console.warn('Unable to access GitLab API. Please configure a valid private access token in the UI.');
         });
     }
   });
@@ -123,9 +121,7 @@ process.on('SIGINT', function() {
   console.log('Let me finish up here, ... (Ctrl+C to force quit)');
 
   ctx.quit();
-  _(indexers)
-    .values()
-    .each(idx => idx.stop());
+  _(indexers).values().each(idx => idx.stop());
 });
 
 /**
@@ -160,29 +156,25 @@ function createManualIssueReferences(issueReferences) {
   return Promise.map(_.keys(issueReferences), sha => {
     const iid = issueReferences[sha];
 
-    return Promise.join(Commit.findOneBySha(sha), Issue.findOneByIid(iid)).spread(
-      (commit, issue) => {
-        if (!commit) {
-          console.warn(`Ignored issue #${iid} referencing non-existing commit ${sha}`);
-          return;
-        }
-        if (!issue) {
-          console.warn(
-            `Ignored issue #${iid} referencing commit ${sha} because the issue does not exist`
-          );
-          return;
-        }
-
-        const existingMention = _.find(issue.mentions, mention => mention.commit === sha);
-        if (!existingMention) {
-          issue.mentions.push({
-            createdAt: commit.date,
-            commit: sha,
-            manual: true
-          });
-          return issue.save();
-        }
+    return Promise.join(Commit.findOneBySha(sha), Issue.findOneByIid(iid)).spread((commit, issue) => {
+      if (!commit) {
+        console.warn(`Ignored issue #${iid} referencing non-existing commit ${sha}`);
+        return;
       }
-    );
+      if (!issue) {
+        console.warn(`Ignored issue #${iid} referencing commit ${sha} because the issue does not exist`);
+        return;
+      }
+
+      const existingMention = _.find(issue.mentions, mention => mention.commit === sha);
+      if (!existingMention) {
+        issue.mentions.push({
+          createdAt: commit.date,
+          commit: sha,
+          manual: true
+        });
+        return issue.save();
+      }
+    });
   });
 }

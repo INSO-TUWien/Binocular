@@ -35,10 +35,7 @@ const queryType = new gql.GraphQLObjectType({
           sort: { type: Sort }
         },
         query: (root, args, limit) => {
-          let q = qb
-            .for('commit')
-            .in('commits')
-            .sort('commit.date', args.sort);
+          let q = qb.for('commit').in('commits').sort('commit.date', args.sort);
 
           q = queryHelpers.addDateFilter('commit.date', 'gte', args.since, q);
           q = queryHelpers.addDateFilter('commit.date', 'lte', args.until, q);
@@ -105,9 +102,7 @@ const queryType = new gql.GraphQLObjectType({
               qb
                 .for('build')
                 .in('builds')
-                .filter(
-                  qb.and(qb.eq('build.sha', 'item.sha'), qb.eq('build.status', qb.str('success')))
-                )
+                .filter(qb.and(qb.eq('build.sha', 'item.sha'), qb.eq('build.status', qb.str('success'))))
                 .return(1)
             ),
             0
@@ -173,28 +168,15 @@ const queryType = new gql.GraphQLObjectType({
         },
         query: (root, args, limit) => {
           let exactQuery = [];
-          let fuzzyQuery = qb
-            .for('issue')
-            .in('issues')
-            .sort('issue.createdAt', args.sort);
+          let fuzzyQuery = qb.for('issue').in('issues').sort('issue.createdAt', args.sort);
 
           if (args.q) {
             const searchString = qb.str('%' + args.q.replace(/\s+/g, '%') + '%');
-            fuzzyQuery = fuzzyQuery.filter(
-              qb.LIKE(
-                qb.CONCAT(qb.str('#'), 'issue.iid', qb.str(' '), 'issue.title'),
-                searchString,
-                true
-              )
-            );
+            fuzzyQuery = fuzzyQuery.filter(qb.LIKE(qb.CONCAT(qb.str('#'), 'issue.iid', qb.str(' '), 'issue.title'), searchString, true));
 
             const issueNumberMatch = args.q.match(ISSUE_NUMBER_REGEX);
             if (issueNumberMatch) {
-              exactQuery = qb
-                .for('issue')
-                .in('issues')
-                .filter(qb.eq('issue.iid', issueNumberMatch[1]))
-                .return('issue');
+              exactQuery = qb.for('issue').in('issues').filter(qb.eq('issue.iid', issueNumberMatch[1])).return('issue');
 
               fuzzyQuery = fuzzyQuery.filter(qb.neq('issue.iid', issueNumberMatch[1]));
             }
@@ -202,10 +184,7 @@ const queryType = new gql.GraphQLObjectType({
 
           fuzzyQuery = fuzzyQuery.return('issue');
 
-          let q = qb
-            .let('fullList', qb.APPEND(exactQuery, fuzzyQuery))
-            .for('issue')
-            .in('fullList');
+          let q = qb.let('fullList', qb.APPEND(exactQuery, fuzzyQuery)).for('issue').in('fullList');
 
           q = queryHelpers.addDateFilter('issue.createdAt', 'gte', args.since, q);
           q = queryHelpers.addDateFilter('issue.createdAt', 'lte', args.until, q);

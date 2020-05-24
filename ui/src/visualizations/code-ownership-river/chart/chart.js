@@ -77,18 +77,8 @@ export default class CodeOwnershipRiver extends React.Component {
     ]);
 
     this.scales.y.domain([
-      min([
-        this.scales.y.domain()[0],
-        commitCountExtent[0],
-        issueCountExtent[0],
-        buildCountExtent[0]
-      ]),
-      max([
-        this.scales.y.domain()[1],
-        commitCountExtent[1],
-        issueCountExtent[1],
-        buildCountExtent[1]
-      ])
+      min([this.scales.y.domain()[0], commitCountExtent[0], issueCountExtent[0], buildCountExtent[0]]),
+      max([this.scales.y.domain()[1], commitCountExtent[1], issueCountExtent[1], buildCountExtent[1]])
     ]);
   }
 
@@ -172,7 +162,7 @@ export default class CodeOwnershipRiver extends React.Component {
         onResize={dims => this.onResize(dims)}
         onStart={e =>
           this.setState({
-            isPanning: e.sourceEvent == null || d3.event.sourceEvent.type !== 'wheel'
+            isPanning: e.sourceEvent === null || d3.event.sourceEvent.type !== 'wheel'
           })}
         onEnd={() => this.setState({ isPanning: false })}
         className={cx(styles.chart, { [styles.panning]: this.state.isPanning })}>
@@ -215,30 +205,17 @@ export default class CodeOwnershipRiver extends React.Component {
             {this.props.highlightedIssue &&
               <defs>
                 <mask id="issue-mask">
-                  <rect
-                    x={0}
-                    y={0}
-                    width={dims.width}
-                    height={dims.height}
-                    style={{ stroke: 'none', fill: '#ffffff', opacity: 0.5 }}
-                  />
+                  <rect x={0} y={0} width={dims.width} height={dims.height} style={{ stroke: 'none', fill: '#ffffff', opacity: 0.5 }} />
                   <rect
                     x={x(this.props.highlightedIssue.createdAt)}
                     y={0}
-                    width={Math.max(
-                      3,
-                      x(this.props.highlightedIssue.closedAt || new Date()) -
-                        x(this.props.highlightedIssue.createdAt)
-                    )}
+                    width={Math.max(3, x(this.props.highlightedIssue.closedAt || new Date()) - x(this.props.highlightedIssue.createdAt))}
                     height={dims.height}
                     style={{ stroke: 'none', fill: '#ffffff' }}
                   />
                 </mask>
               </defs>}
-            <g
-              clipPath="url(#chart)"
-              mask="url(#issue-mask)"
-              className={cx(styles.openIssuesCount)}>
+            <g clipPath="url(#chart)" mask="url(#issue-mask)" className={cx(styles.openIssuesCount)}>
               <StackedArea
                 data={this.props.issues}
                 x={x}
@@ -295,11 +272,7 @@ export default class CodeOwnershipRiver extends React.Component {
               <line x1={today} y1={0} x2={today} y2={dims.height} />
             </g>
           </OffsetGroup>
-          <Legend
-            x="10"
-            y="10"
-            categories={this.state.hoverHint ? [this.state.hoverHint] : legend}
-          />
+          <Legend x="10" y="10" categories={this.state.hoverHint ? [this.state.hoverHint] : legend} />
         </g>
       </ZoomableChartContainer>
     );

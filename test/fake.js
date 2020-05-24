@@ -101,12 +101,7 @@ const fake = {
       email = null;
     }
 
-    return nodegit.Signature.create(
-      name,
-      email || fake.emailFor(name),
-      (date || new Date()).getTime(),
-      0
-    );
+    return nodegit.Signature.create(name, email || fake.emailFor(name), (date || new Date()).getTime(), 0);
   },
 
   lorem: function(count) {

@@ -11,10 +11,7 @@ export default function Dial(props) {
     return <circle r={props.radius} cx="0" cy="0" />;
   }
 
-  const scale = d3
-    .scaleLinear()
-    .domain([0, props.maximum])
-    .range([props.minimumFillRate, MAXIMUM_FILL_RATE]);
+  const scale = d3.scaleLinear().domain([0, props.maximum]).range([props.minimumFillRate, MAXIMUM_FILL_RATE]);
 
   const clock = new ClockScale(0, 0, props.radius);
 
@@ -22,15 +19,9 @@ export default function Dial(props) {
   const slices = [];
 
   const points = props.categories.map(cat => {
-    const coords = clock.getCoordsForShare(
-      (cat.category - 1) / props.categories.length,
-      scale(cat.count)
-    );
+    const coords = clock.getCoordsForShare((cat.category - 1) / props.categories.length, scale(cat.count));
 
-    const textCoords = clock.getCoordsForShare(
-      (cat.category - 1) / props.categories.length,
-      props.minimumFillRate * 1.25
-    );
+    const textCoords = clock.getCoordsForShare((cat.category - 1) / props.categories.length, props.minimumFillRate * 1.25);
 
     dataPoints.push(
       <g key={`dataPoint-${cat.category}`}>
@@ -80,13 +71,7 @@ export default function Dial(props) {
 
   const segments = slices.map((s, i) => {
     return (
-      <path
-        key={`segment-${i}`}
-        d={s}
-        className={styles.segment}
-        style={{ fill: props.palette[i] }}
-        clipPath={`url(#${curveMaskId})`}
-      />
+      <path key={`segment-${i}`} d={s} className={styles.segment} style={{ fill: props.palette[i] }} clipPath={`url(#${curveMaskId})`} />
     );
   });
 

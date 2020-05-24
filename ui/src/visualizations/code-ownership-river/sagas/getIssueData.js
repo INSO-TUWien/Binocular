@@ -30,7 +30,7 @@ export default function getIssueData(issueSpan, significantSpan, granularity, in
 
     // the number of closed issues at the issue's creation time, since
     // the last time we increased closedCountTotal
-    let closedCount = _.sortedIndex(pendingCloses, createdAt);
+    const closedCount = _.sortedIndex(pendingCloses, createdAt);
     closeCountTotal += closedCount;
 
     // remove all issues that are closed by now from the "pending" list

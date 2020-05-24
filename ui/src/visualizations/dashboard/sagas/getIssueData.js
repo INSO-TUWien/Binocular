@@ -3,7 +3,7 @@
 import { traversePages, graphQl } from '../../../utils';
 
 export default function getIssueData(issueSpan, significantSpan) {
-  let issueList = [];
+  const issueList = [];
 
   return traversePages(getIssuesPage(significantSpan[1]), issue => {
     issueList.push(issue);
