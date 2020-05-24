@@ -18,7 +18,7 @@ Promise.config({
 const Repository = require('./lib/git.js');
 const { app, argv, httpServer, io } = require('./lib/context.js');
 const config = require('./lib/config.js');
-const idx = require('./lib/indexers');
+const GetIndexer = require('./lib/indexers');
 const getUrlProvider = require('./lib/url-providers');
 const ProgressReporter = require('./lib/progress-reporter.js');
 const path = require('path');
@@ -32,6 +32,7 @@ const CommitStakeholderConnection = require('./lib/models/CommitStakeholderConne
 const IssueStakeholderConnection = require('./lib/models/IssueStakeholderConnection.js');
 const IssueCommitConnection = require('./lib/models/IssueCommitConnection.js');
 const CommitCommitConnection = require('./lib/models/CommitCommitConnection.js');
+const ConfigurationError = require('./lib/errors/ConfigurationError');
 
 // set up the endpoints
 app.get('/api/commits', require('./lib/endpoints/get-commits.js'));
@@ -75,42 +76,109 @@ Repository.fromPath(ctx.targetPath)
   .then(function() {
     // be sure to re-index when the configuration changes
     config.on('updated', () => {
-      reIndex(); // do not wait for indexing to complete on config update
+      reIndex(indexers, ctx, reporter); // do not wait for indexing to complete on config update
 
       // explicitly return null to silence bluebird warning
       return null;
     });
 
     // immediately run all indexers
-    return reIndex();
-
-    function reIndex() {
-      console.log('Indexing data...');
-      indexers.vcs = idx.makeVCSIndexer(ctx.repo, reporter);
-
-      if (ctx.argv.its) {
-        indexers.its = idx.makeITSIndexer(ctx.repo, reporter);
-      }
-
-      if (ctx.argv.ci) {
-        indexers.ci = idx.makeCIIndexer(ctx.repo, reporter);
-      }
-
-      return getUrlProvider(ctx.repo)
-        .then(urlProvider => (ctx.urlProvider = urlProvider))
-        .then(() => Promise.props(indexers))
-        .thenReturn(_.values(indexers))
-        .filter(indexer => indexer !== null)
-        .map(indexer => indexer.index())
-        .then(() => Commit.deduceStakeholders())
-        .then(() => Issue.deduceStakeholders())
-        .then(() => createManualIssueReferences(config.get('issueReferences')))
-        .then(() => console.log('Indexing finished'))
-        .catch(e => 'name' in e && e.name === 'Gitlab401Error', function() {
-          console.warn('Unable to access GitLab API. Please configure a valid private access token in the UI.');
-        });
-    }
+    return reIndex(indexers, ctx, reporter);
   });
+
+/**
+ * adds all indexers if they has not been set and executes the indexing job.
+ *
+ * @param indexers object that holds the indexers of the three data sources
+ * @param context contains the context of the whole service
+ * @param reporter contains the reporter object that holds the current progress of the indexers
+ * @returns {*}
+ */
+function reIndex(indexers, context, reporter) {
+  console.log('Indexing data...');
+
+  return (
+    getUrlProvider(context.repo)
+      .then(urlProvider => (ctx.urlProvider = urlProvider))
+      .then(() => Promise.all(getIndexer(indexers, context, reporter)))
+      .filter(indexer => indexer !== null)
+      // start indexing of available indexer
+      .map(indexer => indexer.index())
+      .then(() => Commit.deduceStakeholders())
+      .then(() => Issue.deduceStakeholders())
+      .then(() => createManualIssueReferences(config.get('issueReferences')))
+      .then(() => console.log('Indexing finished'))
+      .catch(
+        error => error && 'name' in error && error.name === 'Gitlab401Error',
+        () => {
+          console.warn('Unable to access GitLab API. Please configure a valid private access token in the UI.');
+        }
+      )
+      .catch(
+        error => error && 'name' in error,
+        error => {
+          console.warn(error.name, error.message);
+        }
+      )
+  );
+}
+
+/**
+ * Add all handlers to the indexer object if they has not been set already.
+ * If an optional indexer fails relating to a configuration issue, the index should be null.
+ *
+ * @param indexers object that holds the indexers of the three data sources
+ * @param context contains the context of the whole service
+ * @param reporter contains the reporter object that holds the current progress of the indexers
+ * @returns {*}
+ */
+async function getIndexer(indexers, context, reporter) {
+  if (!indexers) {
+    indexers = {};
+  }
+
+  // stores all indexer to call them async
+  const indexHandler = [];
+  indexHandler.push(async () => (indexers.vcs ? indexers.vcs : (indexers.vcs = await GetIndexer.makeVCSIndexer(context.repo, reporter))));
+
+  if (context.argv.its) {
+    indexHandler.push(optionalIndexerHandler.bind(this, 'its', context.repo, reporter, GetIndexer.makeITSIndexer));
+  }
+
+  if (context.argv.ci) {
+    indexHandler.push(optionalIndexerHandler.bind(this, 'ci', context.repo, reporter, GetIndexer.makeCIIndexer));
+  }
+
+  //wait until all indexers have been finished
+  return indexHandler.map(async index => await index());
+}
+
+/**
+ * call and handle the configuration of optional indexers
+ *
+ * @param key contains the name of the indexer
+ * @param repository contains the repository
+ * @param reporter contains the reporter object that holds the current progress of the indexers
+ * @param asyncIndexCreator contains the creator function for the corresponding indexer
+ * @returns {Promise<*>} returns the indexer if the indexer has been created successfully, otherwise it will return null
+ */
+async function optionalIndexerHandler(key, repository, reporter, asyncIndexCreator) {
+  try {
+    if (!indexers[key]) {
+      indexers[key] = await asyncIndexCreator(repository, reporter);
+    }
+  } catch (error) {
+    if (error) {
+      if ('name' in error && ConfigurationError.name) {
+        console.warn(`The following indexer "${key}" failed with "${error.name}" and holds the following message: ${error.message}`);
+      } else {
+        throw error;
+      }
+    }
+    indexers[key] = null;
+  }
+  return indexers[key];
+}
 
 process.on('SIGINT', function() {
   if (ctx.isStopping()) {
@@ -121,7 +189,12 @@ process.on('SIGINT', function() {
   console.log('Let me finish up here, ... (Ctrl+C to force quit)');
 
   ctx.quit();
-  _(indexers).values().each(async indexPromise => (await indexPromise).stop());
+  _(indexers).values().filter(indexer => indexer !== null).each(async indexPromise => {
+    const index = await indexPromise;
+    if (index) {
+      index.stop();
+    }
+  });
 });
 
 /**
