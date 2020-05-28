@@ -33,6 +33,7 @@ const IssueStakeholderConnection = require('./lib/models/IssueStakeholderConnect
 const IssueCommitConnection = require('./lib/models/IssueCommitConnection.js');
 const CommitCommitConnection = require('./lib/models/CommitCommitConnection.js');
 const ConfigurationError = require('./lib/errors/ConfigurationError');
+const DatabaseError = require('./lib/errors/DatabaseError');
 
 // set up the endpoints
 app.get('/api/commits', require('./lib/endpoints/get-commits.js'));
@@ -47,13 +48,6 @@ app.post('/api/config', require('./lib/endpoints/update-config.js'));
 
 const port = config.get().port;
 
-httpServer.listen(port, function() {
-  console.log(`Listening on http://localhost:${port}`);
-  if (argv.ui && argv.open) {
-    opn(`http://localhost:${port}/`);
-  }
-});
-
 const indexers = {
   vcs: null,
   its: null,
@@ -61,30 +55,41 @@ const indexers = {
 };
 
 const reporter = new ProgressReporter(io, ['commits', 'issues', 'builds']);
+let databaseConnection = null;
 
-// kickstart the indexing process
-Repository.fromPath(ctx.targetPath)
-  .tap(function(repo) {
-    ctx.repo = repo;
-    config.setSource(repo.pathFromRoot('.pupilrc'));
+/**
+ * init and start database if it has not been started and start indexers
+ * @returns {Promise<*>}
+ */
+async function startDatabase() {
+  const repository = await Repository.fromPath(ctx.targetPath);
 
+  ctx.repo = repository;
+  config.setSource(repository.pathFromRoot('.pupilrc'));
+
+  if (databaseConnection === null) {
     // configure everything in the context
     require('./lib/setup-db.js');
+    try {
+      databaseConnection = await ensureDb(repository);
+    } catch (error) {
+      if (error && error.name === DatabaseError.name) {
+        databaseConnection = null;
+        console.error(`A ${error.name} occurred and returns the following message: ${error.message}!`);
+        return;
+      }
+      throw error;
+    }
+  }
 
-    return ensureDb(repo);
-  })
-  .then(function() {
-    // be sure to re-index when the configuration changes
-    config.on('updated', () => {
-      reIndex(indexers, ctx, reporter); // do not wait for indexing to complete on config update
+  // immediately run all indexers
+  return reIndex(indexers, ctx, reporter);
+}
 
-      // explicitly return null to silence bluebird warning
-      return null;
-    });
-
-    // immediately run all indexers
-    return reIndex(indexers, ctx, reporter);
-  });
+// be sure to re-index when the configuration changes
+config.on('updated', async () => {
+  return await startDatabase();
+});
 
 /**
  * adds all indexers if they has not been set and executes the indexing job.
@@ -180,7 +185,9 @@ async function optionalIndexerHandler(key, repository, reporter, asyncIndexCreat
   return indexers[key];
 }
 
-process.on('SIGINT', function() {
+process.on('SIGINT', stop);
+
+async function stop() {
   if (ctx.isStopping()) {
     console.log('Shutting down immediately!');
     process.exit(1);
@@ -189,13 +196,13 @@ process.on('SIGINT', function() {
   console.log('Let me finish up here, ... (Ctrl+C to force quit)');
 
   ctx.quit();
-  _(indexers).values().filter(indexer => indexer !== null).each(async indexPromise => {
+  await _(indexers).values().filter(indexer => indexer !== null).each(async indexPromise => {
     const index = await indexPromise;
     if (index) {
       index.stop();
     }
   });
-});
+}
 
 /**
  * Ensures that the db is set up correctly and the GraphQL-Service is installed
@@ -203,12 +210,15 @@ process.on('SIGINT', function() {
 function ensureDb(repo) {
   return ctx.db
     .ensureDatabase('pupil-' + repo.getName())
+    .catch(e => {
+      throw new DatabaseError(e.message);
+    })
     .then(function() {
       if (argv.clean) {
         return ctx.db.truncate();
       }
     })
-    .then(function() {
+    .then(() => {
       return Promise.join(
         ctx.db.ensureService(path.join(__dirname, 'foxx'), '/pupil-ql'),
         Commit.ensureCollection(),
@@ -251,3 +261,31 @@ function createManualIssueReferences(issueReferences) {
     });
   });
 }
+
+/**
+ * catches errors and stops all services gracefully
+ *
+ * @param fn contains the actual service entry-point that should be observed
+ * @returns {Promise<void>}
+ */
+async function catcher(fn) {
+  try {
+    await fn();
+  } catch (error) {
+    console.error(error);
+    await stop();
+  }
+}
+
+// start services
+(async () =>
+  await catcher(() => {
+    httpServer.listen(port, function() {
+      console.log(`Listening on http://localhost:${port}`);
+      if (argv.ui && argv.open) {
+        opn(`http://localhost:${port}/`);
+      }
+    });
+  }))();
+
+(async () => catcher(startDatabase))();
