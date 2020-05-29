@@ -265,12 +265,12 @@ function createManualIssueReferences(issueReferences) {
 /**
  * catches errors and stops all services gracefully
  *
- * @param fn contains the actual service entry-point that should be observed
+ * @param serviceEntry contains the actual service entry-point that should be observed
  * @returns {Promise<void>}
  */
-async function catcher(fn) {
+async function serviceStarter(serviceEntry) {
   try {
-    await fn();
+    await serviceEntry();
   } catch (error) {
     console.error(error);
     try {
@@ -282,9 +282,9 @@ async function catcher(fn) {
 }
 
 // start services
-(async () =>
-  await catcher(() => {
-    httpServer.listen(port, function() {
+(() =>
+  serviceStarter(() => {
+    httpServer.listen(port, () => {
       console.log(`Listening on http://localhost:${port}`);
       if (argv.ui && argv.open) {
         opn(`http://localhost:${port}/`);
@@ -292,4 +292,4 @@ async function catcher(fn) {
     });
   }))();
 
-(async () => catcher(startDatabase))();
+(() => serviceStarter(startDatabase))();
