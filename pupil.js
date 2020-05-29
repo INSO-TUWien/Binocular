@@ -273,7 +273,11 @@ async function catcher(fn) {
     await fn();
   } catch (error) {
     console.error(error);
-    await stop();
+    try {
+      await stop();
+      // eslint-disable-next-line no-empty
+    } catch (ignore) {}
+    throw error;
   }
 }
 
