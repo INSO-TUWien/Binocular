@@ -104,16 +104,30 @@ async function reIndex(indexers, context, reporter) {
 
   try {
     ctx.urlProvider = await getUrlProvider(context.repo);
-    const providers = await getIndexer(indexers, context, reporter);
+    const providers = await Promise.all(getIndexer(indexers, context, reporter));
 
     // start indexer
-    providers.filter(indexer => indexer !== null).map(async indexer => {
-      const provider = await indexer;
-      if (provider) {
-        console.log(`${provider.constructor.name} fetching data...`);
-        provider.index();
-      }
+    const activeIndexers = await Promise.all(
+      providers.filter(indexer => indexer !== null).map(async indexer => {
+        const provider = indexer;
+        if (provider) {
+          console.log(`${provider.constructor.name} fetching data...`);
+          await provider.index();
+          console.log(`${provider.constructor.name} ${provider.isStopping() ? 'stopped' : 'finished'}...`);
+          return provider;
+        }
+      })
+    );
+
+    // make sure that the services has not been stopped
+    const activeProviders = activeIndexers.filter(provider => {
+      return !provider || !provider.isStopping();
     });
+
+    if (activeProviders.length < 1) {
+      console.log('All indexers stopped!');
+      return;
+    }
 
     // setup references
     Commit.deduceStakeholders();
@@ -125,8 +139,8 @@ async function reIndex(indexers, context, reporter) {
     } else {
       throw error;
     }
-    console.log('Indexing finished');
   }
+  console.log('Indexing finished');
 }
 
 /**
@@ -197,12 +211,15 @@ async function stop() {
   console.log('Let me finish up here, ... (Ctrl+C to force quit)');
 
   ctx.quit();
-  await _(indexers).values().filter(indexer => indexer !== null).each(async indexPromise => {
-    const index = await indexPromise;
-    if (index) {
-      index.stop();
-    }
-  });
+  await Promise.all(
+    _(indexers).values().filter(indexer => indexer !== null).each(async indexPromise => {
+      const index = await indexPromise;
+      if (index) {
+        index.stop();
+      }
+    })
+  );
+  config.stop();
 }
 
 /**
@@ -283,7 +300,7 @@ async function serviceStarter(serviceEntry) {
 }
 
 // start services
-(() =>
+Promise.all([
   serviceStarter(() => {
     httpServer.listen(port, () => {
       console.log(`Listening on http://localhost:${port}`);
@@ -291,6 +308,6 @@ async function serviceStarter(serviceEntry) {
         opn(`http://localhost:${port}/`);
       }
     });
-  }))();
-
-(() => serviceStarter(startDatabase))();
+  }),
+  serviceStarter(startDatabase)
+]);
