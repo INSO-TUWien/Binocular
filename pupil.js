@@ -99,33 +99,34 @@ config.on('updated', async () => {
  * @param reporter contains the reporter object that holds the current progress of the indexers
  * @returns {*}
  */
-function reIndex(indexers, context, reporter) {
+async function reIndex(indexers, context, reporter) {
   console.log('Indexing data...');
 
-  return (
-    getUrlProvider(context.repo)
-      .then(urlProvider => (ctx.urlProvider = urlProvider))
-      .then(() => Promise.all(getIndexer(indexers, context, reporter)))
-      .filter(indexer => indexer !== null)
-      // start indexing of available indexer
-      .map(indexer => indexer.index())
-      .then(() => Commit.deduceStakeholders())
-      .then(() => Issue.deduceStakeholders())
-      .then(() => createManualIssueReferences(config.get('issueReferences')))
-      .then(() => console.log('Indexing finished'))
-      .catch(
-        error => error && 'name' in error && error.name === 'Gitlab401Error',
-        () => {
-          console.warn('Unable to access GitLab API. Please configure a valid private access token in the UI.');
-        }
-      )
-      .catch(
-        error => error && 'name' in error,
-        error => {
-          console.warn(error.name, error.message);
-        }
-      )
-  );
+  try {
+    ctx.urlProvider = await getUrlProvider(context.repo);
+    const providers = await getIndexer(indexers, context, reporter);
+
+    // start indexer
+    providers.filter(indexer => indexer !== null).map(async indexer => {
+      const provider = await indexer;
+      if (provider) {
+        console.log(`${provider.constructor.name} fetching data...`);
+        provider.index();
+      }
+    });
+
+    // setup references
+    Commit.deduceStakeholders();
+    Issue.deduceStakeholders();
+    createManualIssueReferences(config.get('issueReferences'));
+  } catch (error) {
+    if (error && 'name' in error && error.name === 'Gitlab401Error') {
+      console.warn('Unable to access GitLab API. Please configure a valid private access token in the UI.');
+    } else {
+      throw error;
+    }
+    console.log('Indexing finished');
+  }
 }
 
 /**

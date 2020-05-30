@@ -140,6 +140,7 @@
     "yargs": "^6.6.0"
   },
   "devDependencies": {
+    "debug": "^4.1.1",
     "eslint": "^3.19.0",
     "eslint-config-lambdas": "^0.3.0",
     "eslint-config-prettier": "^2.3.0",
