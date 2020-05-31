@@ -22,6 +22,7 @@ const GetIndexer = require('./lib/indexers');
 const getUrlProvider = require('./lib/url-providers');
 const ProgressReporter = require('./lib/progress-reporter.js');
 const path = require('path');
+const fs = require('fs');
 const Commit = require('./lib/models/Commit.js');
 const File = require('./lib/models/File.js');
 const Hunk = require('./lib/models/Hunk.js');
@@ -47,6 +48,7 @@ app.post('/graphQl', require('./lib/endpoints/graphQl.js'));
 app.post('/api/config', require('./lib/endpoints/update-config.js'));
 
 const port = config.get().port;
+let repoWatcher;
 
 const indexers = {
   vcs: null,
@@ -80,6 +82,12 @@ async function startDatabase() {
       }
       throw error;
     }
+  }
+
+  // reindex on repository updates
+  if (!repoWatcher) {
+    const repoPath = await repository.getPath();
+    repoWatcher = fs.watch(repoPath, () => reIndex(indexers, ctx, reporter));
   }
 
   // immediately run all indexers
@@ -220,6 +228,10 @@ async function stop() {
     })
   );
   config.stop();
+
+  if (repoWatcher) {
+    repoWatcher.close();
+  }
 }
 
 /**
