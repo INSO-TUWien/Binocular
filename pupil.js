@@ -1,6 +1,17 @@
 #!/usr/bin/env node
 'use strict';
 
+// init timestamp for output
+require('log-timestamp');
+
+function threadLog(thread) {
+  console.log(`[thread=${thread}]`, [...arguments].slice(1).join(' '));
+}
+
+function threadWarn(thread) {
+  console.warn(`[thread=${thread}]`, [...arguments].slice(1).join(' '));
+}
+
 /**
  * Main entry point of the pupil application
  */
@@ -49,7 +60,10 @@ app.post('/api/config', require('./lib/endpoints/update-config.js'));
 
 const port = config.get().port;
 let repoWatcher;
+let previousHeadTimestamp;
+let indexingProcess = 0;
 
+let activeIndexingQueue = Promise.resolve();
 const indexers = {
   vcs: null,
   its: null,
@@ -75,6 +89,11 @@ async function startDatabase() {
     try {
       databaseConnection = await ensureDb(repository);
     } catch (error) {
+      if (repoWatcher) {
+        repoWatcher.close();
+        repoWatcher = null;
+      }
+
       if (error && error.name === DatabaseError.name) {
         databaseConnection = null;
         console.error(`A ${error.name} occurred and returns the following message: ${error.message}!`);
@@ -84,14 +103,39 @@ async function startDatabase() {
     }
   }
 
-  // reindex on repository updates
-  if (!repoWatcher) {
-    const repoPath = await repository.getPath();
-    repoWatcher = fs.watch(repoPath, () => reIndex(indexers, ctx, reporter));
-  }
-
   // immediately run all indexers
-  return reIndex(indexers, ctx, reporter);
+  return (activeIndexingQueue = Promise.all([
+    repoUpdateHandler(repository),
+    reIndex(indexers, ctx, reporter, activeIndexingQueue, indexingProcess++)
+  ]));
+}
+
+/**
+ * setup reindex on repository updates
+ *
+ * @param repository contains the repository of the defined context
+ * @returns {Promise<void>}
+ */
+async function repoUpdateHandler(repository) {
+  if (repoWatcher) {
+    return;
+  }
+  // path to the repository head file
+  const headPath = await repository.getHeadPath();
+
+  previousHeadTimestamp = fs.statSync(headPath).mtime.valueOf();
+  // create watchdog of the head file to detect changes
+  repoWatcher = fs.watch(headPath, (event, file) => {
+    if (file) {
+      const currentFileTime = fs.statSync(headPath).mtime.valueOf();
+      if (currentFileTime === previousHeadTimestamp) {
+        return;
+      }
+      previousHeadTimestamp = currentFileTime;
+      threadLog(indexingProcess++, 'Repository update: Restart all indexers!');
+      activeIndexingQueue = reIndex(indexers, ctx, reporter, activeIndexingQueue, indexingProcess);
+    }
+  });
 }
 
 // be sure to re-index when the configuration changes
@@ -100,28 +144,45 @@ config.on('updated', async () => {
 });
 
 /**
+ * restart indexing process if it has be started already
+ *
+ * @param indexers object that holds the indexers of the three data sources
+ * @param context contains the context of the whole service
+ * @param reporter contains the reporter object that holds the current progress of the indexers
+ * @param currentQueuePosition get the current async function of the indexing queue
+ * @param indexingThread match the messages to the corresponding thread
+ * @returns {*}
+ */
+async function reIndex(indexers, context, reporter, currentQueuePosition, indexingThread) {
+  await stopIndexers();
+  await currentQueuePosition;
+  return indexing(indexers, ctx, reporter, indexingThread);
+}
+
+/**
  * adds all indexers if they has not been set and executes the indexing job.
  *
  * @param indexers object that holds the indexers of the three data sources
  * @param context contains the context of the whole service
  * @param reporter contains the reporter object that holds the current progress of the indexers
+ * @param indexingThread match the messages to the corresponding thread
  * @returns {*}
  */
-async function reIndex(indexers, context, reporter) {
-  console.log('Indexing data...');
+async function indexing(indexers, context, reporter, indexingThread) {
+  threadLog(indexingThread, 'Indexing data...');
 
   try {
     ctx.urlProvider = await getUrlProvider(context.repo);
-    const providers = await Promise.all(getIndexer(indexers, context, reporter));
+    const providers = await Promise.all(getIndexer(indexers, context, reporter, indexingThread));
 
     // start indexer
     const activeIndexers = await Promise.all(
       providers.filter(indexer => indexer !== null).map(async indexer => {
         const provider = indexer;
         if (provider) {
-          console.log(`${provider.constructor.name} fetching data...`);
+          threadLog(indexingThread, `${provider.constructor.name} fetching data...`);
           await provider.index();
-          console.log(`${provider.constructor.name} ${provider.isStopping() ? 'stopped' : 'finished'}...`);
+          threadLog(indexingThread, `${provider.constructor.name} ${provider.isStopping() ? 'stopped' : 'finished'}...`);
           return provider;
         }
       })
@@ -133,7 +194,7 @@ async function reIndex(indexers, context, reporter) {
     });
 
     if (activeProviders.length < 1) {
-      console.log('All indexers stopped!');
+      threadLog(indexingThread, 'All indexers stopped!');
       return;
     }
 
@@ -143,38 +204,39 @@ async function reIndex(indexers, context, reporter) {
     createManualIssueReferences(config.get('issueReferences'));
   } catch (error) {
     if (error && 'name' in error && error.name === 'Gitlab401Error') {
-      console.warn('Unable to access GitLab API. Please configure a valid private access token in the UI.');
+      threadWarn(indexingThread, 'Unable to access GitLab API. Please configure a valid private access token in the UI.');
     } else {
       throw error;
     }
   }
-  console.log('Indexing finished');
+  threadLog(indexingThread, 'Indexing finished');
 }
 
 /**
  * Add all handlers to the indexer object if they has not been set already.
  * If an optional indexer fails relating to a configuration issue, the index should be null.
  *
+ * @param indexingThread match the messages to the corresponding thread
  * @param indexers object that holds the indexers of the three data sources
  * @param context contains the context of the whole service
  * @param reporter contains the reporter object that holds the current progress of the indexers
  * @returns {*}
  */
-async function getIndexer(indexers, context, reporter) {
+async function getIndexer(indexers, context, reporter, indexingThread) {
   if (!indexers) {
     indexers = {};
   }
 
   // stores all indexer to call them async
   const indexHandler = [];
-  indexHandler.push(async () => (indexers.vcs ? indexers.vcs : (indexers.vcs = await GetIndexer.makeVCSIndexer(context.repo, reporter))));
+  indexHandler.push(async () => (indexers.vcs = await GetIndexer.makeVCSIndexer(context.repo, reporter, true)));
 
   if (context.argv.its) {
-    indexHandler.push(optionalIndexerHandler.bind(this, 'its', context.repo, reporter, GetIndexer.makeITSIndexer));
+    indexHandler.push(optionalIndexerHandler.bind(this, indexingThread, 'its', context.repo, reporter, GetIndexer.makeITSIndexer));
   }
 
   if (context.argv.ci) {
-    indexHandler.push(optionalIndexerHandler.bind(this, 'ci', context.repo, reporter, GetIndexer.makeCIIndexer));
+    indexHandler.push(optionalIndexerHandler.bind(this, indexingThread, 'ci', context.repo, reporter, GetIndexer.makeCIIndexer));
   }
 
   //wait until all indexers have been finished
@@ -184,21 +246,23 @@ async function getIndexer(indexers, context, reporter) {
 /**
  * call and handle the configuration of optional indexers
  *
+ * @param indexingThread match the messages to the corresponding thread
  * @param key contains the name of the indexer
  * @param repository contains the repository
  * @param reporter contains the reporter object that holds the current progress of the indexers
  * @param asyncIndexCreator contains the creator function for the corresponding indexer
  * @returns {Promise<*>} returns the indexer if the indexer has been created successfully, otherwise it will return null
  */
-async function optionalIndexerHandler(key, repository, reporter, asyncIndexCreator) {
+async function optionalIndexerHandler(indexingThread, key, repository, reporter, asyncIndexCreator) {
   try {
-    if (!indexers[key]) {
-      indexers[key] = await asyncIndexCreator(repository, reporter);
-    }
+    indexers[key] = await asyncIndexCreator(repository, reporter, true);
   } catch (error) {
     if (error) {
       if ('name' in error && ConfigurationError.name) {
-        console.warn(`The following indexer "${key}" failed with "${error.name}" and holds the following message: ${error.message}`);
+        threadWarn(
+          indexingThread,
+          `The following indexer "${key}" failed with "${error.name}" and holds the following message: ${error.message}`
+        );
       } else {
         throw error;
       }
@@ -219,6 +283,25 @@ async function stop() {
   console.log('Let me finish up here, ... (Ctrl+C to force quit)');
 
   ctx.quit();
+  config.stop();
+
+  if (repoWatcher) {
+    repoWatcher.close();
+    repoWatcher = null;
+  }
+
+  if (activeIndexingQueue) {
+    await activeIndexingQueue;
+    activeIndexingQueue = null;
+  }
+}
+
+/**
+ * stop all indexers and wait until the indexing process has stopped
+ *
+ * @returns {Promise<*>}
+ */
+async function stopIndexers() {
   await Promise.all(
     _(indexers).values().filter(indexer => indexer !== null).each(async indexPromise => {
       const index = await indexPromise;
@@ -227,11 +310,6 @@ async function stop() {
       }
     })
   );
-  config.stop();
-
-  if (repoWatcher) {
-    repoWatcher.close();
-  }
 }
 
 /**
