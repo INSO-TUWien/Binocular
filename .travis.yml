@@ -13,8 +13,15 @@ cache:
   directories:
     - "node_modules"
 
-script:
-  # Run linting
-  - npm run eslint
+jobs:
+  include:
+    # Run linting
+    - stage: lint
+      script: npm run eslint
     # Run tests
-  - npm run test
+    - stage: test
+      script: npm run test
+
+stages:
+  - lint
+  - test
