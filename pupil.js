@@ -2,7 +2,8 @@
 'use strict';
 
 // init timestamp for output
-require('log-timestamp');
+const Moment = require('moment');
+require('log-timestamp')(() => '[' + Moment().format('DD-MM-YYYY, HH:mm:ss') + ']');
 
 function threadLog(thread) {
   console.log(`[thread=${thread}]`, [...arguments].slice(1).join(' '));
@@ -291,6 +292,7 @@ async function stop() {
   }
 
   if (activeIndexingQueue) {
+    await stopIndexers();
     await activeIndexingQueue;
     activeIndexingQueue = null;
   }
