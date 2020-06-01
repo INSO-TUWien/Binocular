@@ -17,6 +17,7 @@ rules:
   max-len: ["error", { "code": 140 }]
   comma-dangle: ["error", "never"]
   operator-linebreak: ['error', 'after', { "overrides": { "?": "before", ":": "before"} }]
+  linebreak-style: ["error", "unix"]
   quotes:
     - error
     - single
