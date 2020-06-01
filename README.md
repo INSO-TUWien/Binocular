@@ -1,7 +1,7 @@
 Pupil
 =====
 
-[![Build Status](https://travis-ci.org/juliankotrba/Binocular.svg?branch=master)](https://travis-ci.org/juliankotrba/Binocular)
+[![Build Status](https://travis-ci.org/INSO-TUWien/Binocular.svg?branch=feature%2F10)](https://travis-ci.org/INSO-TUWien/Binocular)
 
 Pupil is a tool for visualizing data from various software-engineering
 tools. It works as a command-line tool run from a git-repository. When
