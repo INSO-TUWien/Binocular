@@ -175,8 +175,8 @@ async function indexing(indexers, context, reporter, indexingThread) {
   threadLog(indexingThread, 'Indexing data...');
 
   try {
-    context.vcsUrlProvider = await UrlProvider.getVcsUrlProvider(context.repo);
-    context.ciUrlProvider = await UrlProvider.getCiUrlProvider(context.repo);
+    context.vcsUrlProvider = await UrlProvider.getVcsUrlProvider(context.repo, reporter, context);
+    context.ciUrlProvider = await UrlProvider.getCiUrlProvider(context.repo, reporter, context);
     const providers = await Promise.all(getIndexer(indexers, context, reporter, indexingThread));
 
     // start indexer
@@ -233,14 +233,14 @@ async function getIndexer(indexers, context, reporter, indexingThread) {
 
   // stores all indexer to call them async
   const indexHandler = [];
-  indexHandler.push(async () => (indexers.vcs = await GetIndexer.makeVCSIndexer(context.repo, reporter, true)));
+  indexHandler.push(async () => (indexers.vcs = await GetIndexer.makeVCSIndexer(context.repo, reporter, context, true)));
 
   if (context.argv.its) {
-    indexHandler.push(optionalIndexerHandler.bind(this, indexingThread, 'its', context.repo, reporter, GetIndexer.makeITSIndexer));
+    indexHandler.push(optionalIndexerHandler.bind(this, indexingThread, 'its', context.repo, reporter, context, GetIndexer.makeITSIndexer));
   }
 
   if (context.argv.ci) {
-    indexHandler.push(optionalIndexerHandler.bind(this, indexingThread, 'ci', context.repo, reporter, GetIndexer.makeCIIndexer));
+    indexHandler.push(optionalIndexerHandler.bind(this, indexingThread, 'ci', context.repo, reporter, context, GetIndexer.makeCIIndexer));
   }
 
   //wait until all indexers have been finished
@@ -254,12 +254,13 @@ async function getIndexer(indexers, context, reporter, indexingThread) {
  * @param key contains the name of the indexer
  * @param repository contains the repository
  * @param reporter contains the reporter object that holds the current progress of the indexers
+ * @param context contains the context of the application
  * @param asyncIndexCreator contains the creator function for the corresponding indexer
  * @returns {Promise<*>} returns the indexer if the indexer has been created successfully, otherwise it will return null
  */
-async function optionalIndexerHandler(indexingThread, key, repository, reporter, asyncIndexCreator) {
+async function optionalIndexerHandler(indexingThread, key, repository, reporter, context, asyncIndexCreator) {
   try {
-    indexers[key] = await asyncIndexCreator(repository, reporter, true);
+    indexers[key] = await asyncIndexCreator(repository, reporter, context, true);
   } catch (error) {
     if (error) {
       if ('name' in error && ConfigurationError.name) {
