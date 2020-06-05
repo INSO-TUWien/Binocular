@@ -31,7 +31,7 @@ const Repository = require('./lib/git.js');
 const { app, argv, httpServer, io } = require('./lib/context.js');
 const config = require('./lib/config.js');
 const GetIndexer = require('./lib/indexers');
-const getUrlProvider = require('./lib/url-providers');
+const UrlProvider = require('./lib/url-providers');
 const ProgressReporter = require('./lib/progress-reporter.js');
 const path = require('path');
 const fs = require('fs');
@@ -76,19 +76,21 @@ let databaseConnection = null;
 
 /**
  * init and start database if it has not been started and start indexers
+ * @param context get current context
+ *
  * @returns {Promise<*>}
  */
-async function startDatabase() {
+async function startDatabase(context) {
   const repository = await Repository.fromPath(ctx.targetPath);
 
-  ctx.repo = repository;
+  context.repo = repository;
   config.setSource(repository.pathFromRoot('.pupilrc'));
 
   if (databaseConnection === null) {
     // configure everything in the context
     require('./lib/setup-db.js');
     try {
-      databaseConnection = await ensureDb(repository);
+      databaseConnection = await ensureDb(repository, context);
     } catch (error) {
       if (repoWatcher) {
         repoWatcher.close();
@@ -173,7 +175,8 @@ async function indexing(indexers, context, reporter, indexingThread) {
   threadLog(indexingThread, 'Indexing data...');
 
   try {
-    ctx.urlProvider = await getUrlProvider(context.repo);
+    context.vcsUrlProvider = await UrlProvider.getVcsUrlProvider(context.repo);
+    context.ciUrlProvider = await UrlProvider.getCiUrlProvider(context.repo);
     const providers = await Promise.all(getIndexer(indexers, context, reporter, indexingThread));
 
     // start indexer
@@ -316,21 +319,23 @@ async function stopIndexers() {
 
 /**
  * Ensures that the db is set up correctly and the GraphQL-Service is installed
+ * @param repo contains the repository
+ * @param context get the current context
  */
-function ensureDb(repo) {
-  return ctx.db
+function ensureDb(repo, context) {
+  return context.db
     .ensureDatabase('pupil-' + repo.getName())
     .catch(e => {
       throw new DatabaseError(e.message);
     })
     .then(function() {
       if (argv.clean) {
-        return ctx.db.truncate();
+        return context.db.truncate();
       }
     })
     .then(() => {
       return Promise.join(
-        ctx.db.ensureService(path.join(__dirname, 'foxx'), '/pupil-ql'),
+        context.db.ensureService(path.join(__dirname, 'foxx'), '/pupil-ql'),
         Commit.ensureCollection(),
         File.ensureCollection(),
         Hunk.ensureCollection(),
@@ -401,5 +406,5 @@ Promise.all([
       }
     });
   }),
-  serviceStarter(startDatabase)
+  serviceStarter(startDatabase.bind(this, ctx))
 ]);
