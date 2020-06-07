@@ -136,6 +136,7 @@ async function repoUpdateHandler(repository) {
       repoWatcher.working = true;
       const currentFileTime = fs.statSync(headPath).mtime.valueOf();
       if (currentFileTime === repoWatcher.headTimestamp) {
+        repoWatcher.working = false;
         return;
       }
 
@@ -147,8 +148,8 @@ async function repoUpdateHandler(repository) {
         repoWatcher.headSHA = sha;
         threadLog(indexingProcess++, 'Repository update: Restart all indexers!');
         activeIndexingQueue = reIndex(indexers, ctx, reporter, activeIndexingQueue, indexingProcess);
-        repoWatcher.working = false;
       }
+      repoWatcher.working = false;
     }
   });
 }
