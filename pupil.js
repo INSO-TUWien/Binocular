@@ -21,7 +21,7 @@ const ctx = require('./lib/context.js');
 
 const opn = require('opn');
 const _ = require('lodash');
-const Promise = require('bluebird');
+const Promise = _.defaults(require('bluebird'), { config: () => {} });
 
 Promise.config({
   longStackTraces: true
@@ -60,8 +60,12 @@ app.post('/graphQl', require('./lib/endpoints/graphQl.js'));
 app.post('/api/config', require('./lib/endpoints/update-config.js'));
 
 const port = config.get().port;
-let repoWatcher;
-let previousHeadTimestamp;
+const repoWatcher = {
+  listener: null,
+  working: false,
+  headTimestamp: null,
+  headSHA: ''
+};
 let indexingProcess = 0;
 
 let activeIndexingQueue = Promise.resolve();
@@ -92,10 +96,7 @@ async function startDatabase(context) {
     try {
       databaseConnection = await ensureDb(repository, context);
     } catch (error) {
-      if (repoWatcher) {
-        repoWatcher.close();
-        repoWatcher = null;
-      }
+      stopRepoListener();
 
       if (error && error.name === DatabaseError.name) {
         databaseConnection = null;
@@ -120,25 +121,58 @@ async function startDatabase(context) {
  * @returns {Promise<void>}
  */
 async function repoUpdateHandler(repository) {
-  if (repoWatcher) {
+  if (repoWatcher.listener) {
     return;
   }
   // path to the repository head file
   const headPath = await repository.getHeadPath();
 
-  previousHeadTimestamp = fs.statSync(headPath).mtime.valueOf();
+  repoWatcher.headSHA = await readFirstLine(headPath);
+
+  repoWatcher.headTimestamp = fs.statSync(headPath).mtime.valueOf();
   // create watchdog of the head file to detect changes
-  repoWatcher = fs.watch(headPath, (event, file) => {
-    if (file) {
+  repoWatcher.listener = fs.watch(headPath, async (event, file) => {
+    if (file && !repoWatcher.working) {
+      repoWatcher.working = true;
       const currentFileTime = fs.statSync(headPath).mtime.valueOf();
-      if (currentFileTime === previousHeadTimestamp) {
+      if (currentFileTime === repoWatcher.headTimestamp) {
         return;
       }
-      previousHeadTimestamp = currentFileTime;
-      threadLog(indexingProcess++, 'Repository update: Restart all indexers!');
-      activeIndexingQueue = reIndex(indexers, ctx, reporter, activeIndexingQueue, indexingProcess);
+
+      repoWatcher.headTimestamp = currentFileTime;
+      const sha = await readFirstLine(headPath);
+
+      // make sure that the reindex is only triggered if the content has really changed
+      if (sha.length > 0 && sha !== repoWatcher.headSHA) {
+        repoWatcher.headSHA = sha;
+        threadLog(indexingProcess++, 'Repository update: Restart all indexers!');
+        activeIndexingQueue = reIndex(indexers, ctx, reporter, activeIndexingQueue, indexingProcess);
+        repoWatcher.working = false;
+      }
     }
   });
+}
+
+/**
+ * read first line of the following file until the the first tab or newlines appear
+ *
+ * @param file
+ * @returns {Promise<*>}
+ */
+async function readFirstLine(file) {
+  return new Promise((resolve, reject) =>
+    fs.readFile(file, 'utf8', (err, content) => {
+      if (err) {
+        return reject(err);
+      } else if (content && content.length > 0) {
+        const match = content.match(/^([^\n\t]*)/);
+        if (match && match.length > 1) {
+          return resolve(match[1]);
+        }
+      }
+      return resolve('');
+    })
+  );
 }
 
 // be sure to re-index when the configuration changes
@@ -280,6 +314,9 @@ async function optionalIndexerHandler(indexingThread, key, repository, reporter,
 process.on('SIGINT', stop);
 
 async function stop() {
+  // must be closed before brute-force killing
+  stopRepoListener();
+
   if (ctx.isStopping()) {
     console.log('Shutting down immediately!');
     process.exit(1);
@@ -290,16 +327,23 @@ async function stop() {
   ctx.quit();
   config.stop();
 
-  if (repoWatcher) {
-    repoWatcher.close();
-    repoWatcher = null;
-  }
-
   if (activeIndexingQueue) {
     await stopIndexers();
     await activeIndexingQueue;
     activeIndexingQueue = null;
   }
+}
+
+/**
+ * close change listener
+ */
+function stopRepoListener() {
+  if (!repoWatcher.listener) {
+    return;
+  }
+  repoWatcher.listener.close();
+  repoWatcher.listener = null;
+  repoWatcher.working = false;
 }
 
 /**
