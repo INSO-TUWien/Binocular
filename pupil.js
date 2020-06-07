@@ -64,7 +64,7 @@ const repoWatcher = {
   listener: null,
   working: false,
   headTimestamp: null,
-  headSHA: ''
+  headBranches: []
 };
 let indexingProcess = 0;
 
@@ -127,7 +127,7 @@ async function repoUpdateHandler(repository) {
   // path to the repository head file
   const headPath = await repository.getHeadPath();
 
-  repoWatcher.headSHA = await readFirstLine(headPath);
+  repoWatcher.headBranches = await getFetchedBranches(headPath);
 
   repoWatcher.headTimestamp = fs.statSync(headPath).mtime.valueOf();
   // create watchdog of the head file to detect changes
@@ -141,11 +141,11 @@ async function repoUpdateHandler(repository) {
       }
 
       repoWatcher.headTimestamp = currentFileTime;
-      const sha = await readFirstLine(headPath);
+      const branches = await getFetchedBranches(headPath);
 
       // make sure that the reindex is only triggered if the content has really changed
-      if (sha.length > 0 && sha !== repoWatcher.headSHA) {
-        repoWatcher.headSHA = sha;
+      if (branches.length > 0 && !_.isEqual(repoWatcher.headBranches, branches)) {
+        repoWatcher.headBranches = branches;
         threadLog(indexingProcess++, 'Repository update: Restart all indexers!');
         activeIndexingQueue = reIndex(indexers, ctx, reporter, activeIndexingQueue, indexingProcess);
       }
@@ -155,23 +155,28 @@ async function repoUpdateHandler(repository) {
 }
 
 /**
- * read first line of the following file until the the first tab or newlines appear
+ * get all fetched branches that are stored in the corresponding file
  *
  * @param file
  * @returns {Promise<*>}
  */
-async function readFirstLine(file) {
+async function getFetchedBranches(file) {
   return new Promise((resolve, reject) =>
     fs.readFile(file, 'utf8', (err, content) => {
       if (err) {
         return reject(err);
       } else if (content && content.length > 0) {
-        const match = content.match(/^([^\n\t]*)/);
-        if (match && match.length > 1) {
-          return resolve(match[1]);
+        const branchMatcher = /^([^\n\t]*).*?['"]([^\n\t]*)['"].*?$/gm;
+        const branches = [];
+        let match;
+        while ((match = branchMatcher.exec(content))) {
+          if (match.length === 3) {
+            branches.push({ branch: match[2], sha: match[1] });
+          }
         }
+        return resolve(branches);
       }
-      return resolve('');
+      return resolve([]);
     })
   );
 }
