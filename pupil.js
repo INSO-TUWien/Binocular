@@ -110,7 +110,7 @@ async function startDatabase(context) {
   // immediately run all indexers
   return (activeIndexingQueue = Promise.all([
     repoUpdateHandler(repository),
-    reIndex(indexers, ctx, reporter, activeIndexingQueue, indexingProcess++)
+    reIndex(indexers, ctx, reporter, activeIndexingQueue, ++indexingProcess)
   ]));
 }
 
@@ -146,7 +146,7 @@ async function repoUpdateHandler(repository) {
       // make sure that the reindex is only triggered if the content has really changed
       if (branches.length > 0 && !_.isEqual(repoWatcher.headBranches, branches)) {
         repoWatcher.headBranches = branches;
-        threadLog(indexingProcess++, 'Repository update: Restart all indexers!');
+        threadLog(++indexingProcess, 'Repository update: Restart all indexers!');
         activeIndexingQueue = reIndex(indexers, ctx, reporter, activeIndexingQueue, indexingProcess);
       }
       repoWatcher.working = false;
