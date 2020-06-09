@@ -208,8 +208,7 @@ export default class IssueImpact extends React.PureComponent {
             style={{ textAnchor: annotation.textAnchor }}
             onClick={() => this.props.onFileClick(file)}
             onMouseEnter={() => this.setState({ hoveredFile: file.name })}
-            onMouseLeave={() => this.setState({ hoveredFile: null })}
-          >
+            onMouseLeave={() => this.setState({ hoveredFile: null })}>
             {isHighlighted ? file.name : shortenPath(file.name, 30)}
           </text>
         </g>
