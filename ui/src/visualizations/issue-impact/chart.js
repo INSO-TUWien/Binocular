@@ -19,7 +19,7 @@ import ChartContainer from '../../components/svg/ChartContainer.js';
 import * as zoomUtils from '../../utils/zoom.js';
 import SemiCircleScale from './SemiCircleScale.js';
 
-import { parseTime, getChartColors, shortenPath } from '../../utils';
+import { getChartColors, parseTime, shortenPath } from '../../utils';
 import styles from './styles.scss';
 
 const CHART_FILL_RATIO = 0.45;
@@ -208,7 +208,8 @@ export default class IssueImpact extends React.PureComponent {
             style={{ textAnchor: annotation.textAnchor }}
             onClick={() => this.props.onFileClick(file)}
             onMouseEnter={() => this.setState({ hoveredFile: file.name })}
-            onMouseLeave={() => this.setState({ hoveredFile: null })}>
+            onMouseLeave={() => this.setState({ hoveredFile: null })}
+          >
             {isHighlighted ? file.name : shortenPath(file.name, 30)}
           </text>
         </g>
@@ -345,8 +346,8 @@ function extractData(props) {
         .filter(job => job.finishedAt)
         .map(job => {
           const startedAt = parseTime(job.createdAt);
-          const finishedAt = parseTime(job.finishedAt || job.createdAt);
-          const duration = (finishedAt.getTime() - startedAt.getTime()) / 1000;
+          const finishedAt = parseTime(job.finishedAt);
+          const duration = finishedAt ? (finishedAt.getTime() - startedAt.getTime()) / 1000 : 0;
           totalJobDuration += duration;
           return {
             id: job.id,
