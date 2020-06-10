@@ -36,6 +36,7 @@
   "dependencies": {
     "@fortawesome/fontawesome-free": "^5.10.2",
     "adm-zip": "^0.4.13",
+    "antlr4": "^4.8.0",
     "apollo-client": "^1.9.3",
     "apollo-client-preset": "0.1.0-1",
     "arangojs": "^5.7.0",
