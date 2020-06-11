@@ -27,7 +27,7 @@ Promise.config({
   longStackTraces: true
 });
 
-const Repository = require('./lib/git.js');
+const Repository = require('./lib/core/provider/git.js');
 const { app, argv, httpServer, io } = require('./lib/context.js');
 const config = require('./lib/config.js');
 const GetIndexer = require('./lib/indexers');
@@ -92,7 +92,7 @@ async function startDatabase(context) {
 
   if (databaseConnection === null) {
     // configure everything in the context
-    require('./lib/setup-db.js');
+    require('./lib/core/db/setup-db.js');
     try {
       databaseConnection = await ensureDb(repository, context);
     } catch (error) {
