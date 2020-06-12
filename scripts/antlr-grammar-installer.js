@@ -67,7 +67,7 @@ class AntlrGrammarInstaller {
         files.map(file => {
           try {
             antlrTools.compile({
-              language: 'JavaScript', // Only support for JavaScript & TypeScript
+              language: 'JavaScript',
               grammarFiles: [file],
               outputDirectory: path.resolve(this.generationDir, structure)
             });
