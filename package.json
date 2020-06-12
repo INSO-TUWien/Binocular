@@ -22,7 +22,9 @@
     "dockerize": "whalify generate-installer && ./node_modules/.bin/whalify build",
     "fix:root": "eslint --fix .",
     "fix:ui": "eslint --fix --ignore-path ui/.eslintignore -c ui/.eslintrc.yml ui",
-    "fix": "npm run fix:root && npm run fix:ui"
+    "fix": "npm run fix:root && npm run fix:ui",
+    "languages:download": "node ./scripts/antlr-grammar-installer.js --antlr-dl",
+    "languages:gen": "node ./scripts/antlr-grammar-installer.js --antlr-gen"
   },
   "keywords": [
     "git"
@@ -35,7 +37,6 @@
   },
   "dependencies": {
     "@fortawesome/fontawesome-free": "^5.10.2",
-    "adm-zip": "^0.4.13",
     "antlr4": "^4.8.0",
     "apollo-client": "^1.9.3",
     "apollo-client-preset": "0.1.0-1",
@@ -146,6 +147,7 @@
     "yargs": "^6.6.0"
   },
   "devDependencies": {
+    "antlr4-tool": "^1.1.0",
     "debug": "^4.1.1",
     "eslint": "^3.19.0",
     "eslint-config-lambdas": "^0.3.0",
@@ -157,8 +159,10 @@
     "nodemon": "^1.18.10",
     "prettier": "^1.5.3",
     "react-hot-loader": "^3.0.0-beta.7",
+    "rimraf": "^3.0.2",
     "sinon": "^1.17.7",
     "sinon-chai": "^2.14.0",
+    "unzipper": "^0.10.11",
     "webpack-dev-server": "^2.5.1",
     "whalify": "0.0.9"
   }
