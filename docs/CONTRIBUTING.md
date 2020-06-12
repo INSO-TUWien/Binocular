@@ -215,3 +215,13 @@ Please make sure ArangoDB is running.
 https://www.arangodb.com/arangodb-training-center/
 To see how content is queried, please see "GraphQL-Interface" above.
 You can also access the GraphiQL interface over the web interface (click services -> pupil-ql -> show interface).
+
+### Antlr4
+
+#### Grammars download/generation
+The script target `npm run script languages:download` downloads the latest version  of the antlr4 grammars and the script `npm run script
+languages:gen` generates all downloaded grammars and store them in the **_lib/languages_** folder. The generation tool requires a
+working java environment to generate javascript classes out of the given grammars.
+Furthermore, the install-process does not execute the antlr targets since it is not desired to regenerate the committed languages by
+default. 
+  
