@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+import public "../messages/registration.message.proto";
+
+package comm;
+option java_package = "com.inso.tuwien.binocular.comm";
+option go_package = "github.com/INSO-TUWien/Binocular/services/grpc/com/go/comm";
+
+service RegistrationService {
+  // register new service to the gateway
+  rpc register(RegistrationRequest) returns (RegistrationResponse);
+  // unregister service from gateway
+  rpc unregister(RegistrationRequest) returns (RegistrationResponse);
+  // service gets disconnected from the service
+  rpc disconnect(RegistrationRequest) returns (RegistrationResponse);
+}

@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+package comm;
+option java_package = "com.inso.tuwien.binocular.comm";
+option go_package = "github.com/INSO-TUWien/Binocular/services/grpc/com/go/comm";
+
+message RegistrationRequest {
+  string greeting = 1;
+}
+
+message RegistrationResponse {
+  string reply = 1;
+}

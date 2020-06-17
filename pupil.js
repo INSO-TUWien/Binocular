@@ -47,6 +47,7 @@ const IssueCommitConnection = require('./lib/models/IssueCommitConnection.js');
 const CommitCommitConnection = require('./lib/models/CommitCommitConnection.js');
 const ConfigurationError = require('./lib/errors/ConfigurationError');
 const DatabaseError = require('./lib/errors/DatabaseError');
+const GateWayService = require('./lib/gateway-service');
 
 // set up the endpoints
 app.get('/api/commits', require('./lib/endpoints/get-commits.js'));
@@ -74,6 +75,8 @@ const indexers = {
   its: null,
   ci: null
 };
+
+const services = [];
 
 const reporter = new ProgressReporter(io, ['commits', 'issues', 'builds']);
 let databaseConnection = null;
@@ -330,6 +333,8 @@ async function stop() {
 
   console.log('Let me finish up here, ... (Ctrl+C to force quit)');
 
+  const stopSrvs = services.filter(srv => srv && typeof srv.stop === 'function').map(srv => srv.stop());
+
   ctx.quit();
   config.stop();
 
@@ -338,6 +343,7 @@ async function stop() {
     await activeIndexingQueue;
     activeIndexingQueue = null;
   }
+  await Promise.all(stopSrvs);
 }
 
 /**
@@ -457,5 +463,13 @@ Promise.all([
       }
     });
   }),
-  serviceStarter(startDatabase.bind(this, ctx))
+  serviceStarter(startDatabase.bind(this, ctx)),
+  serviceStarter(
+    (async (context, config) => {
+      const gateway = new GateWayService();
+      services.push(gateway);
+
+      gateway.configure(config.get('gateway'));
+    }).bind(this, ctx, config)
+  )
 ]);
