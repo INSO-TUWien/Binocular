@@ -5,9 +5,16 @@ option java_package = "com.inso.tuwien.binocular.comm";
 option go_package = "github.com/INSO-TUWien/Binocular/services/grpc/com/go/comm";
 
 message RegistrationRequest {
-  string greeting = 1;
+  string token = 1;
 }
 
 message RegistrationResponse {
-  string reply = 1;
+  string signature = 1;
+}
+
+message UnregisterRequest {
+  string signature = 1;
+}
+
+message UnregisterResponse {
 }
