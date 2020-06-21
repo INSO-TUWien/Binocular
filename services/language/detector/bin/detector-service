@@ -1,0 +1,17 @@
+#!/usr/bin/env ruby
+
+require 'bundler/setup'
+require 'detector'
+require 'config/config'
+require 'service/registration'
+require 'service/language_service'
+require 'grpc'
+
+config = Binocular::Config.create_config('pupil', '.')
+registration_service = Binocular::Service::Registration.new(config)
+rpc_service = GRPC::RpcServer.new
+language_service = Binocular::Service::LanguageService.new(config, registration_service, rpc_service)
+
+detector = Binocular::Service::Detector.new(config, registration_service, language_service)
+detector.listen
+detector.stop

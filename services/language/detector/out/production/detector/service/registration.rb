@@ -1,0 +1,2 @@
+class Registration
+end

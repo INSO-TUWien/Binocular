@@ -1,23 +1,26 @@
 #!/usr/bin/env node
 'use strict';
 
+const antlrTools = require('antlr4-tool');
+const fs = require('fs');
+const mkdirp = require('mkdirp');
 const request = require('request-promise');
+const path = require('path');
+const rimraf = require('rimraf');
 const { Readable } = require('stream');
 const unzipper = require('unzipper');
-const rimraf = require('rimraf');
-const path = require('path');
-const fs = require('fs');
 const { promisify } = require('util');
 const readdir = promisify(fs.readdir);
 const stat = promisify(fs.stat);
-const antlrTools = require('antlr4-tool');
+const log = require('debug')('antlr-grammar-installer');
+const result = require('debug')('antlr-grammar-installer:result');
 
 class AntlrGrammarInstaller {
   constructor() {
     this.zipUrl = 'https://codeload.github.com/antlr/grammars-v4/zip/master';
     this.root = path.resolve('node_modules', 'antlr4-grammars');
     this.grammarsDir = path.resolve(this.root, 'grammars-v4-master');
-    this.generationDir = path.resolve('lib', 'languages');
+    this.generationDir = path.resolve('languages', 'src');
   }
 
   /**
@@ -59,26 +62,45 @@ class AntlrGrammarInstaller {
   async generate() {
     const grammars = await getFiles(this.grammarsDir, /.*\.g4/, /.*?(examples|test)[\\\/].*/);
 
+    const genPath = path.resolve(this.generationDir);
+    mkdirp.sync(genPath);
+    const cwd = process.cwd();
+    process.chdir(genPath);
+
+    const success = [];
+    const failed = [];
+
     // generating all found grammars
-    return generate(
+    const generator = await generate(
       grammars,
       (structure, files) => {
         console.log(`Generating ${structure}...`);
+        log(`Switch to folder ${process.cwd()}...`);
         files.map(file => {
           try {
-            antlrTools.compile({
-              language: 'JavaScript',
+            const stdout = antlrTools.compile({
+              language: 'ts',
               grammarFiles: [file],
-              outputDirectory: path.resolve(this.generationDir, structure)
+              outputDirectory: genPath
             });
+            log(stdout);
+            success.push(path.relative(this.grammarsDir, file));
           } catch (err) {
-            console.error(structure, err.message);
             process.exitCode = 1;
+            failed.push(path.relative(this.grammarsDir, file));
           }
+          log(`${structure} finished!`);
         });
       },
       this.grammarsDir
     );
+    process.chdir(cwd);
+    log(`Switch to folder ${process.cwd()}...`);
+
+    success.forEach(filePath => result(`${filePath} finished successfully!`));
+    failed.forEach(filePath => result(`${filePath} finished with errors!`));
+    result(`Statistic: success:${success.length}, failed:${failed.length}`);
+    return generator;
   }
 }
 
@@ -93,7 +115,7 @@ class AntlrGrammarInstaller {
  */
 async function generate(grammar, callback, rootPath = '.', i = 0) {
   const structure = path.relative(rootPath, grammar.path);
-  const grammarsGenerator = await Promise.all(grammar.subDir.map(async grammar => generate(grammar, callback, rootPath, i + 1)));
+  const grammarsGenerator = await Promise.all(grammar.subDir.map(grammar => generate(grammar, callback, rootPath, i + 1)));
 
   if (typeof callback === 'function' && grammar.files.length) {
     grammarsGenerator.push(callback(structure, grammar.files));

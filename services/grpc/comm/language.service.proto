@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+import public "registration.message.proto";
+import public "language.message.proto";
+
+package binocular.comm;
+option java_package = "at.inso.tuwien.binocular.comm";
+option go_package = "github.com/INSO-TUWien/Binocular/services/grpc/comm";
+
+service LanguageDetectionService {
+  // service gets disconnected by the gateway
+  rpc disconnect(UnregisterRequest) returns (UnregisterResponse);
+}

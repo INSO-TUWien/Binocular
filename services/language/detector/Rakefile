@@ -1,0 +1,32 @@
+require "bundler/gem_tasks"
+require "rake"
+require 'pathname'
+
+# generating grpc interfaces into lib/api
+task :gen_api, [:path] do |t, args|
+  if args.empty? || args[:path].nil?
+    puts 'usage: gen_api PATH'
+  else
+    path = Pathname.new(args[:path]).expand_path
+    project_dir = Pathname.new(File.dirname(__FILE__))
+    api_dir = project_dir.join('lib', 'api')
+
+    if path.exist?
+      if path.directory?
+        path.children.each do |child|
+          unless child.directory?
+            puts "generating #{child.basename} from #{child.dirname} into #{api_dir.relative_path_from(project_dir)}"
+            system "grpc_tools_ruby_protoc -I#{child.dirname} --ruby_out=#{api_dir} --grpc_out=#{api_dir} #{child}"
+          end
+        end
+      elsif path.file?
+        puts "generating #{path.basename} from #{path.dirname} into #{api_dir.relative_path_from(project_dir)}"
+        system "grpc_tools_ruby_protoc -I#{path.dirname} --ruby_out=#{api_dir} --grpc_out=#{api_dir} #{path}"
+      else
+        puts 'usage: gen_api PATH'
+      end
+    else
+      puts 'usage: gen_api PATH'
+    end
+  end
+end
