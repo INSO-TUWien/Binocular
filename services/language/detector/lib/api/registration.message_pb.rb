@@ -21,6 +21,11 @@ Google::Protobuf::DescriptorPool.generated_pool.build do
     end
     add_message "binocular.comm.UnregisterResponse" do
     end
+    add_message "binocular.comm.HeartbeatRequest" do
+      optional :token, :string, 1
+    end
+    add_message "binocular.comm.EmptyResponse" do
+    end
     add_enum "binocular.comm.ServiceType" do
       value :None, 0
       value :LanguageDetectionService, 1
@@ -35,6 +40,8 @@ module Binocular
     RegistrationResponse = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("binocular.comm.RegistrationResponse").msgclass
     UnregisterRequest = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("binocular.comm.UnregisterRequest").msgclass
     UnregisterResponse = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("binocular.comm.UnregisterResponse").msgclass
+    HeartbeatRequest = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("binocular.comm.HeartbeatRequest").msgclass
+    EmptyResponse = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("binocular.comm.EmptyResponse").msgclass
     ServiceType = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("binocular.comm.ServiceType").enummodule
   end
 end

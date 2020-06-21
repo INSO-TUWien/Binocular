@@ -19,6 +19,8 @@ module Binocular
         rpc :register, RegistrationRequest, RegistrationResponse
         # unregister service from gateway
         rpc :unregister, UnregisterRequest, UnregisterResponse
+        # heartbeat
+        rpc :pulse, HeartbeatRequest, EmptyResponse
       end
 
       Stub = Service.rpc_stub_class

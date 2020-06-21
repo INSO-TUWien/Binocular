@@ -36,9 +36,13 @@ module Binocular
           until @stop_mutex.with_read_lock{@stop} do
             @logger.info("try to register to the server #{@server_address}")
             begin
-              register
+              if @token_mutex.with_read_lock{@token.nil?}
+                register
+              else
+                heartbeat
+              end
               # hold until registration revoked
-              @semaphore.acquire(1)
+              @semaphore.try_acquire(1, @config.data.dig('gateway','heartbeat'))
               # drain all additionals
               @semaphore.acquire(@semaphore.available_permits)
             rescue GRPC::BadStatus
@@ -52,7 +56,7 @@ module Binocular
                 @rpc_service.stop
               else
                 # wait until retry
-                sleep(@config.data.dig('gateway','heartbeat'))
+                sleep(@config.data.dig('gateway','reconnect'))
               end
             end
           end
@@ -86,11 +90,12 @@ module Binocular
 
       # disconnect from the gateway
       def unregister
-        if @token_mutex.with_read_lock{@token.nil?}
+        token = @token_mutex.with_read_lock{@token}
+        if token.nil?
           return
         end
 
-        request = Binocular::Comm::UnregisterRequest.new(token: @token_mutex.with_read_lock{@token})
+        request = Binocular::Comm::UnregisterRequest.new(token: @token)
         begin
           @stub.unregister(request)
           @token_mutex.with_write_lock {@token = nil}
@@ -99,6 +104,27 @@ module Binocular
         rescue
           @token_mutex.with_write_lock {@token = nil}
           @semaphore.release
+          raise $!
+        end
+      end
+
+      # disconnect from the gateway
+      def heartbeat
+        token = @token_mutex.with_read_lock{@token}
+        if token.nil?
+          return
+        end
+
+        request = Binocular::Comm::HeartbeatRequest.new(token: token)
+        begin
+          @stub.pulse(request)
+          @logger.debug("heartbeat from the gateway listening on #{@server_address}")
+        rescue GRPC::BadStatus
+          error = $!
+          # skip if error.code is connection refused
+          if !error.nil? && error.code == 14
+            @token_mutex.with_write_lock {@token = nil}
+          end
           raise $!
         end
       end

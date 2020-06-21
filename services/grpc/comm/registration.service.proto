@@ -11,4 +11,6 @@ service RegistrationService {
   rpc register(RegistrationRequest) returns (RegistrationResponse);
   // unregister service from gateway
   rpc unregister(UnregisterRequest) returns (UnregisterResponse);
+  // heartbeat
+  rpc pulse(HeartbeatRequest) returns (EmptyResponse);
 }

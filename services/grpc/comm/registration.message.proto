@@ -30,3 +30,10 @@ message UnregisterRequest {
 
 message UnregisterResponse {
 }
+
+message HeartbeatRequest {
+  string token = 1;
+}
+
+message EmptyResponse {
+}

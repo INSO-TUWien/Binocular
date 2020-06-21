@@ -26,7 +26,8 @@ module Binocular
           'address' => '127.0.0.1',
           'port' => 48_764,
           'timeout' => 30,
-          'heartbeat' => 60,
+          'reconnect' => 60,
+          'heartbeat' => 300,
           'logger' => {
               'level' => 'INFO',
               'file' => STDOUT
