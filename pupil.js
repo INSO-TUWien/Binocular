@@ -130,6 +130,10 @@ async function repoUpdateHandler(repository) {
   // path to the repository head file
   const headPath = await repository.getHeadPath();
 
+  if (!fs.existsSync(headPath)) {
+    return;
+  }
+
   repoWatcher.headBranches = await getFetchedBranches(headPath);
 
   repoWatcher.headTimestamp = fs.statSync(headPath).mtime.valueOf();
@@ -164,6 +168,9 @@ async function repoUpdateHandler(repository) {
  * @returns {Promise<*>}
  */
 async function getFetchedBranches(file) {
+  if (!fs.existsSync(file)) {
+    return [];
+  }
   return new Promise((resolve, reject) =>
     fs.readFile(file, 'utf8', (err, content) => {
       if (err) {
