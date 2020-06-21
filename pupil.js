@@ -193,7 +193,7 @@ async function getFetchedBranches(file) {
 
 // be sure to re-index when the configuration changes
 config.on('updated', async () => {
-  return await startDatabase();
+  return await startDatabase(ctx);
 });
 
 /**
