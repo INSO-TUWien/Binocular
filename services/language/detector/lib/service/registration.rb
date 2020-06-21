@@ -9,9 +9,11 @@ module Binocular
     class Registration
 
       # initialises all needed data
-      # @param [Binocular::Config] config contains the merged  config file data
-      def initialize(config)
+      # @param [Binocular::Config] config contains the merged config file data
+      # @param [GRPC::RpcServer] rpc_service contains the grpc server
+      def initialize(config, rpc_service)
         @config = config
+        @rpc_service = rpc_service
         @server_address = "#{config.data.dig('gateway','address')}:#{config.data.dig('gateway','port')}"
         @stub = Binocular::Comm::RegistrationService::Stub.new(@server_address, :this_channel_is_insecure)
         @logger = Logger.new(config.data.dig('languageService','logger', 'file'))
@@ -36,8 +38,12 @@ module Binocular
           rescue GRPC::BadStatus
             error = $!
             # skip if error.code is connection refused
-            if error.nil? || error.code != 14
-              raise error
+            if !error.nil? && error.code != 14
+              @logger.error("The GRPC call failed with the following error #{error.code} and meessage: #{error.details}")
+              # shutdown registration service
+              close
+              # shutdown language service
+              @rpc_service.stop
             end
           end
         end
@@ -54,7 +60,10 @@ module Binocular
 
       # stops the gateway connection service
       def close
-        @connector = nil
+        unless @connector.nil?
+          @connector.shutdown
+          @connector = nil
+        end
       end
 
       # try to connect to the gateway

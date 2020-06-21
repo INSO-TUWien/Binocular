@@ -8,8 +8,8 @@ require 'service/language_service'
 require 'grpc'
 
 config = Binocular::Config.create_config('pupil', '.')
-registration_service = Binocular::Service::Registration.new(config)
 rpc_service = GRPC::RpcServer.new
+registration_service = Binocular::Service::Registration.new(config, rpc_service)
 language_service = Binocular::Service::LanguageService.new(config, registration_service, rpc_service)
 
 detector = Binocular::Service::Detector.new(config, registration_service, language_service)
