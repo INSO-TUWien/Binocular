@@ -4,14 +4,13 @@
   position: absolute;
   top: 0px;
   right: 0px;
-
+  z-index: 1;
   height: 50px;
   width: 50px;
   $transition-time: 0.5s;
   transition: width $transition-time ease-in-out, height $transition-time ease-in-out;
 
   .donut {
-
     $ring-width: 5;
     $ring-color: $grey-light;
     $fill-color: #00fa9a;

@@ -1,0 +1,19 @@
+:global .CodeMirror {
+  font-family: monospace;
+  height: auto;
+  width: 100%;
+  color: black;
+  direction: ltr;
+  position: relative;
+  z-index: 0;
+  background: transparent;
+}
+
+:global .react-codemirror2{
+  width: 100%;
+  position: absolute;
+}
+
+:global html{
+  overflow: hidden;
+}

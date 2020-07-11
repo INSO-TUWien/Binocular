@@ -3,7 +3,7 @@
   height: 100%;
   display: flex;
   flex-direction: column;
-  overflow-y: auto;
+  overflow-x: auto;
 }
 
 .sidebar .configuration {
@@ -13,4 +13,14 @@
 
 .sidebar:not(:last-child) {
   margin-bottom: 0 !important;
+}
+
+.link {
+  white-space: nowrap;
+}
+
+.tabs {
+  overflow-x: scroll;
+  justify-content: start !important;
+  overflow-y: hidden;
 }

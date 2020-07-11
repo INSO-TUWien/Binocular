@@ -1,0 +1,81 @@
+@import '~bulma';
+
+.chart {
+  outline: none;
+  flex: 1;
+}
+
+
+.configContainer {
+  width: 100%;
+
+  form {
+    width: 100%;
+
+    .selectContainer {
+      width: 100%;
+
+      >div {
+        width: 100%;
+
+        :global(.Select-arrow) {
+          display: none;
+        }
+      }
+    }
+  }
+}
+
+.help {
+  width: 100%;
+  overflow-y: scroll;
+  font-size: 1.5em;
+
+  h2 {
+    font-size: 1.2em;
+    font-weight: bold;
+  }
+
+  h3 {
+    font-size: 1.1em;
+    font-weight: bold;
+  }
+
+  ul {
+    list-style-type: circle;
+    margin-left: 1.5em;
+  }
+
+  p {
+    margin-bottom: 1em;
+  }
+}
+
+.filler {
+  justify-content: center;
+  align-items: center;
+  color: $grey;
+}
+
+.codeView{
+  height: calc(100vh - 100px);
+  overflow-y: scroll;
+  position: absolute;
+  top:100px;
+  width: 100%;
+}
+
+.heatmapContainer{
+  margin: 0;
+}
+.rowSummaryContainer{
+  margin: 0;
+  position: absolute;
+  top: 0;
+  right: 0;
+}
+
+.barChartContainer{
+  position: absolute;
+  left: 32px;
+}
