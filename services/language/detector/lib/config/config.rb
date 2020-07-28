@@ -8,7 +8,7 @@ module Binocular
     # merge all config files together
     def initialize(files)
       @data = defaults.to_hash
-      files&.each do |file|
+      files.each do |file|
         config = JSON.parse(File.read(file))
         @data.deep_merge!(config)
       end
@@ -57,14 +57,17 @@ module Binocular
     # check in path for existing files
     def self.get_config_path(home, root, appname, path)
       unless appname.nil?
-        [travel(appname, path),
-         home.join(".#{appname}rc"),
-         home.join(".#{appname}", 'config'),
-         home.join('.config', appname),
-         home.join('.config', appname, 'config'),
-         root.join('etc', ".#{appname}rc"),
-         root.join('etc', ".#{appname}", 'config')].flatten.keep_if(&:exist?)
+        return [
+           travel(appname, path),
+           home.join(".#{appname}rc"),
+           home.join(".#{appname}", 'config'),
+           home.join('.config', appname),
+           home.join('.config', appname, 'config'),
+           root.join('etc', ".#{appname}rc"),
+           root.join('etc', ".#{appname}", 'config')
+        ].flatten.keep_if(&:exist?)
       end
+      return []
     end
 
     # search until root dir for the app rc file

@@ -4,16 +4,16 @@ require 'rugged'
 require 'json'
 require 'linguist'
 require 'config/config'
-require 'service/registration'
-require 'service/language_service'
+require 'service/i_service'
 require 'logger'
 require 'grpc'
 
 module Binocular
   class Detector
+    include Binocular::Service::IService
     # @param [Binocular::Config] config contains the merged config file data
-    # @param [Binocular::Service::Registration] registration_service contains the gateway communication service
-    # @param [Binocular::Service::LanguageService] language_service contains the language
+    # @param [Binocular::Service::IRegistrationService] registration_service contains the gateway communication service
+    # @param [Binocular::Service::ILanguageService] language_service contains the language
     #                                              that holds the grpc communication for language detection
     def initialize(config, registration_service, language_service)
       @config = config
@@ -24,11 +24,11 @@ module Binocular
     end
 
     # start gateway communication and language server
-    def listen
+    def start
       begin
         begin
-          @registration_service.listen
-          @language_service.listen
+          @registration_service.start
+          @language_service.start
         rescue GRPC::BadStatus
           error = $!
           @logger.error("The GRPC call failed with the following error #{error.code} and meessage: #{error.details}")
@@ -42,8 +42,8 @@ module Binocular
     def stop
       begin
         @logger.info("stopping service...")
-        @registration_service.close
-        @registration_service.unregister
+        @registration_service.stop
+        @language_service.stop
         @logger.info("service stopped!")
       rescue GRPC::BadStatus
         error = $!

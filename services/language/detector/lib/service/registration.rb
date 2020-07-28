@@ -2,12 +2,12 @@ require 'grpc'
 require 'api/registration.service_services_pb'
 require 'concurrent'
 require 'logger'
-
+require 'service/i_service'
 
 module Binocular
   module Service
-    class Registration
-
+    class RegistrationService
+      include Binocular::Service::IRegistrationService
       # initialises all needed data
       # @param [Binocular::Config] config contains the merged config file data
       # @param [GRPC::RpcServer] rpc_service contains the grpc server
@@ -30,13 +30,13 @@ module Binocular
       end
 
       # start listening service to connect to the gateway if it is available
-      def listen
+      def start
         @stop_mutex.with_write_lock {@stop = false}
         Thread.new {
           until @stop_mutex.with_read_lock{@stop} do
-            @logger.info("try to register to the server #{@server_address}")
             begin
               if @token_mutex.with_read_lock{@token.nil?}
+                @logger.info("try to register to the server #{@server_address}")
                 register
               else
                 heartbeat
@@ -51,7 +51,7 @@ module Binocular
               if !error.nil? && error.code != 14
                 @logger.error("The GRPC call failed with the following error #{error.code} and meessage: #{error.details}")
                 # shutdown registration service
-                close
+                self.stop
                 # shutdown language service
                 @rpc_service.stop
               else
@@ -70,10 +70,13 @@ module Binocular
       end
 
       # stops the gateway connection service
-      def close
+      def stop
         @stop_mutex.with_write_lock {@stop = true}
         @semaphore.release
+        unregister
       end
+
+      private
 
       # try to connect to the gateway
       def register
@@ -108,7 +111,7 @@ module Binocular
         end
       end
 
-      # disconnect from the gateway
+      # check gateway connection
       def heartbeat
         token = @token_mutex.with_read_lock{@token}
         if token.nil?

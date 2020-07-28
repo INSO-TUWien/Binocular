@@ -1,15 +1,17 @@
 
 require 'grpc'
 require 'api/language.service_services_pb'
-require 'service/registration'
+require 'service/i_service'
+
 
 module Binocular
   module Service
     class LanguageService < Binocular::Comm::LanguageDetectionService::Service
+      include Binocular::Service::ILanguageService
       
       # initialises all needed data
       # @param [Binocular::Config] config contains the merged config file data
-      # @param [Binocular::Service::Registration] register contains the gateway communication service
+      # @param [Binocular::Service::IRegistrationService] register contains the gateway communication service
       # @param [GRPC::RpcServer] rpc_service contains the grpc server
       def initialize(config, register, rpc_service)
         @register = register
@@ -24,13 +26,13 @@ module Binocular
       end
 
       # start the language detection service to listen for grpc requests
-      def listen
+      def start
         @logger.info("Start language service listening on #{@server_address}")
         @rpc_service.run_till_terminated_or_interrupted([1, 'int', 'SIGQUIT'])
         @logger.info("Stopped language service...")
       end
 
-      def close
+      def stop
         @rpc_service.stop
       end
 
