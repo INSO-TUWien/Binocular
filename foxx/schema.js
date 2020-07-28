@@ -20,6 +20,7 @@ const files = db._collection('files');
 const stakeholders = db._collection('stakeholders');
 const issues = db._collection('issues');
 const builds = db._collection('builds');
+const languages = db._collection('languages');
 
 const ISSUE_NUMBER_REGEX = /^#?(\d+).*$/;
 
@@ -119,6 +120,18 @@ const queryType = new gql.GraphQLObjectType({
         },
         resolve(root, args) {
           return files.firstExample({ path: args.path });
+        }
+      },
+      language: {
+        type: require('./types/language.js'),
+        args: {
+          name: {
+            description: 'name of language',
+            type: new gql.GraphQLNonNull(gql.GraphQLString)
+          }
+        },
+        resolve(root, args) {
+          return languages.firstExample({ name: args.name });
         }
       },
       stakeholders: paginated({

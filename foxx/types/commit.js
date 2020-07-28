@@ -7,6 +7,7 @@ const aql = arangodb.aql;
 const commitsToFiles = db._collection('commits-files');
 const builds = db._collection('builds');
 const commitsToStakeholders = db._collection('commits-stakeholders');
+const commitsToLanguages = db._collection('commits-languages');
 const paginated = require('./paginated.js');
 const Timestamp = require('./Timestamp.js');
 
@@ -45,17 +46,8 @@ module.exports = new gql.GraphQLObjectType({
         description: 'Web-url (if available) of this commit'
       },
       stats: {
-        type: new gql.GraphQLObjectType({
-          name: 'Stats',
-          fields: {
-            additions: {
-              type: gql.GraphQLInt
-            },
-            deletions: {
-              type: gql.GraphQLInt
-            }
-          }
-        })
+        type: require('./stats'),
+        description: 'The changing stats of the commit'
       },
       files: paginated({
         type: require('./fileInCommit.js'),
@@ -101,7 +93,19 @@ module.exports = new gql.GraphQLObjectType({
             )
             .toArray();
         }
-      }
+      },
+      languages: paginated({
+        type: require('./languageInCommit.js'),
+        description: 'languages in a commit',
+        query: (commit, args, limit) => aql`
+          FOR language, edge
+            IN INBOUND ${commit} ${commitsToLanguages}
+            ${limit}
+            RETURN {
+              language,
+              stats: edge.stats
+            }`
+      })
     };
   }
 });

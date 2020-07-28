@@ -28,6 +28,10 @@ module.exports = new gql.GraphQLObjectType({
         type: gql.GraphQLString,
         description: 'The URL (if available) to the master-version of this file on the ITS'
       },
+      language: {
+        type: require('./language'),
+        description: 'The used programming language in this file'
+      },
       commits: paginated({
         type: require('./commit.js'),
         description: 'The commits touching this file',
