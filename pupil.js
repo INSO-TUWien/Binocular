@@ -48,6 +48,16 @@ const CommitCommitConnection = require('./lib/models/CommitCommitConnection.js')
 const ConfigurationError = require('./lib/errors/ConfigurationError');
 const DatabaseError = require('./lib/errors/DatabaseError');
 const GateWayService = require('./lib/gateway-service');
+const grpc = require('grpc');
+const protoLoader = require('@grpc/proto-loader');
+const commPath = path.resolve(__dirname, 'services', 'grpc', 'comm');
+
+const LanguageDetectorPackageDefinition = protoLoader.loadSync(path.join(commPath, 'language.service.proto'), {
+  enums: String
+});
+
+const LanguageComm = grpc.loadPackageDefinition(LanguageDetectorPackageDefinition).binocular.comm;
+const LanguageDetectionService = (LanguageComm || { LanguageDetectionService: () => {} }).LanguageDetectionService;
 
 // set up the endpoints
 app.get('/api/commits', require('./lib/endpoints/get-commits.js'));
@@ -313,7 +323,7 @@ async function optionalIndexerHandler(indexingThread, key, repository, reporter,
     indexers[key] = await asyncIndexCreator(repository, reporter, context, true);
   } catch (error) {
     if (error) {
-      if ('name' in error && ConfigurationError.name) {
+      if ('name' in error && error.name === ConfigurationError.name) {
         threadWarn(
           indexingThread,
           `The following indexer "${key}" failed with "${error.name}" and holds the following message: ${error.message}`
@@ -461,22 +471,30 @@ async function serviceStarter(serviceEntry) {
 }
 
 // start services
-Promise.all([
-  serviceStarter(() => {
-    httpServer.listen(port, () => {
-      console.log(`Listening on http://localhost:${port}`);
-      if (argv.ui && argv.open) {
-        opn(`http://localhost:${port}/`);
-      }
-    });
-  }),
-  serviceStarter(startDatabase.bind(this, ctx)),
-  serviceStarter(
+Promise.all(
+  [
+    () => {
+      // start web server
+      httpServer.listen(port, () => {
+        console.log(`Listening on http://localhost:${port}`);
+        if (argv.ui && argv.open) {
+          opn(`http://localhost:${port}/`);
+        }
+      });
+    },
+    // start database
+    startDatabase.bind(this, ctx),
+    // start gateway
     (async (context, config) => {
       const gateway = new GateWayService();
       services.push(gateway);
 
-      gateway.configure(config.get('gateway'));
+      await gateway.configure(config.get('gateway'));
+      gateway.addServiceHandler('LanguageDetectionService', service => {
+        service.comm = new LanguageDetectionService(`${service.client.address}:${service.client.port}`, grpc.credentials.createInsecure());
+      });
+
+      return gateway.start();
     }).bind(this, ctx, config)
-  )
-]);
+  ].map(entryPoint => serviceStarter(entryPoint))
+);
