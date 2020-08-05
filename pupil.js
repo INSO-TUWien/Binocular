@@ -37,6 +37,7 @@ const path = require('path');
 const fs = require('fs');
 const Commit = require('./lib/models/Commit.js');
 const File = require('./lib/models/File.js');
+const Language = require('./lib/models/Language.js');
 const Hunk = require('./lib/models/Hunk.js');
 const Issue = require('./lib/models/Issue.js');
 const Build = require('./lib/models/Build.js');
@@ -88,16 +89,18 @@ const indexers = {
 
 const services = [];
 
+const gatewayService = new GateWayService();
 const reporter = new ProgressReporter(io, ['commits', 'issues', 'builds']);
 let databaseConnection = null;
 
 /**
  * init and start database if it has not been started and start indexers
  * @param context get current context
+ * @param gateway holds gateway service to handle various remote services
  *
  * @returns {Promise<*>}
  */
-async function startDatabase(context) {
+async function startDatabase(context, gateway) {
   const repository = await Repository.fromPath(ctx.targetPath);
 
   context.repo = repository;
@@ -122,8 +125,8 @@ async function startDatabase(context) {
 
   // immediately run all indexers
   return (activeIndexingQueue = Promise.all([
-    repoUpdateHandler(repository),
-    reIndex(indexers, ctx, reporter, activeIndexingQueue, ++indexingProcess)
+    repoUpdateHandler(repository, context, gateway),
+    reIndex(indexers, context, reporter, gateway, activeIndexingQueue, ++indexingProcess)
   ]));
 }
 
@@ -131,9 +134,12 @@ async function startDatabase(context) {
  * setup reindex on repository updates
  *
  * @param repository contains the repository of the defined context
+ * @param context holds the current program context
+ * @param gateway holds gateway service to handle various remote services
+ *
  * @returns {Promise<void>}
  */
-async function repoUpdateHandler(repository) {
+async function repoUpdateHandler(repository, context, gateway) {
   if (repoWatcher.listener) {
     return;
   }
@@ -164,7 +170,7 @@ async function repoUpdateHandler(repository) {
       if (branches.length > 0 && !_.isEqual(repoWatcher.headBranches, branches)) {
         repoWatcher.headBranches = branches;
         threadLog(++indexingProcess, 'Repository update: Restart all indexers!');
-        activeIndexingQueue = reIndex(indexers, ctx, reporter, activeIndexingQueue, indexingProcess);
+        activeIndexingQueue = reIndex(indexers, context, reporter, gateway, activeIndexingQueue, indexingProcess);
       }
       repoWatcher.working = false;
     }
@@ -203,7 +209,7 @@ async function getFetchedBranches(file) {
 
 // be sure to re-index when the configuration changes
 config.on('updated', async () => {
-  return await startDatabase(ctx);
+  return await startDatabase(ctx, gatewayService);
 });
 
 /**
@@ -212,14 +218,16 @@ config.on('updated', async () => {
  * @param indexers object that holds the indexers of the three data sources
  * @param context contains the context of the whole service
  * @param reporter contains the reporter object that holds the current progress of the indexers
+ * @param gateway holds gateway service to handle various remote services
  * @param currentQueuePosition get the current async function of the indexing queue
  * @param indexingThread match the messages to the corresponding thread
+ *
  * @returns {*}
  */
-async function reIndex(indexers, context, reporter, currentQueuePosition, indexingThread) {
+async function reIndex(indexers, context, reporter, gateway, currentQueuePosition, indexingThread) {
   await stopIndexers();
   await currentQueuePosition;
-  return indexing(indexers, ctx, reporter, indexingThread);
+  return indexing(indexers, ctx, reporter, gateway, indexingThread);
 }
 
 /**
@@ -228,10 +236,11 @@ async function reIndex(indexers, context, reporter, currentQueuePosition, indexi
  * @param indexers object that holds the indexers of the three data sources
  * @param context contains the context of the whole service
  * @param reporter contains the reporter object that holds the current progress of the indexers
+ * @param gateway holds gateway service to handle various remote services
  * @param indexingThread match the messages to the corresponding thread
  * @returns {*}
  */
-async function indexing(indexers, context, reporter, indexingThread) {
+async function indexing(indexers, context, reporter, gateway, indexingThread) {
   threadLog(indexingThread, 'Indexing data...');
 
   try {
@@ -241,14 +250,19 @@ async function indexing(indexers, context, reporter, indexingThread) {
 
     // start indexer
     const activeIndexers = await Promise.all(
-      providers.filter(indexer => indexer !== null).map(async indexer => {
-        const provider = indexer;
-        if (provider) {
-          threadLog(indexingThread, `${provider.constructor.name} fetching data...`);
-          await provider.index();
-          threadLog(indexingThread, `${provider.constructor.name} ${provider.isStopping() ? 'stopped' : 'finished'}...`);
-          return provider;
+      providers.filter(exist => exist).map(async indexer => {
+        if (!indexer) {
+          return;
         }
+
+        if ('setGateway' in indexer) {
+          indexer.setGateway(gateway);
+        }
+
+        threadLog(indexingThread, `${indexer.constructor.name} fetching data...`);
+        await indexer.index();
+        threadLog(indexingThread, `${indexer.constructor.name} ${indexer.isStopping() ? 'stopped' : 'finished'}...`);
+        return indexer;
       })
     );
 
@@ -263,6 +277,15 @@ async function indexing(indexers, context, reporter, indexingThread) {
     }
 
     // setup references
+    File.deduceLanguage()
+      .then(cursor => cursor.all())
+      .map(hunks => (hunks ? { path: hunks.path, hunks: _.flatten(hunks.hunks) } : null))
+      .filter(exist => exist)
+      .each(hunks => {
+        console.log(hunks);
+      });
+
+    //Commit.deduceLanguages();
     Commit.deduceStakeholders();
     Issue.deduceStakeholders();
     createManualIssueReferences(config.get('issueReferences'));
@@ -293,7 +316,9 @@ async function getIndexer(indexers, context, reporter, indexingThread) {
 
   // stores all indexer to call them async
   const indexHandler = [];
-  indexHandler.push(async () => (indexers.vcs = await GetIndexer.makeVCSIndexer(context.repo, reporter, context, true)));
+  indexHandler.push(
+    async () => (indexers.vcs = await GetIndexer.makeVCSIndexer(context.repo, context.vcsUrlProvider, reporter, context, true))
+  );
 
   if (context.argv.its) {
     indexHandler.push(optionalIndexerHandler.bind(this, indexingThread, 'its', context.repo, reporter, context, GetIndexer.makeITSIndexer));
@@ -350,7 +375,7 @@ async function stop() {
 
   console.log('Let me finish up here, ... (Ctrl+C to force quit)');
 
-  const stopSrvs = services.filter(srv => srv && typeof srv.stop === 'function').map(srv => srv.stop());
+  const stopServers = services.filter(srv => srv && typeof srv.stop === 'function').map(srv => srv.stop());
 
   ctx.quit();
   config.stop();
@@ -360,7 +385,7 @@ async function stop() {
     await activeIndexingQueue;
     activeIndexingQueue = null;
   }
-  await Promise.all(stopSrvs);
+  await Promise.all(stopServers);
 }
 
 /**
@@ -411,6 +436,7 @@ function ensureDb(repo, context) {
       return Promise.join(
         context.db.ensureService(path.join(__dirname, 'foxx'), '/pupil-ql'),
         Commit.ensureCollection(),
+        Language.ensureCollection(),
         File.ensureCollection(),
         Hunk.ensureCollection(),
         Stakeholder.ensureCollection(),
@@ -483,10 +509,9 @@ Promise.all(
       });
     },
     // start database
-    startDatabase.bind(this, ctx),
+    startDatabase.bind(this, ctx, gatewayService),
     // start gateway
-    (async (context, config) => {
-      const gateway = new GateWayService();
+    (async (context, config, gateway) => {
       services.push(gateway);
 
       await gateway.configure(config.get('gateway'));
@@ -495,6 +520,6 @@ Promise.all(
       });
 
       return gateway.start();
-    }).bind(this, ctx, config)
+    }).bind(this, ctx, config, gatewayService)
   ].map(entryPoint => serviceStarter(entryPoint))
 );
