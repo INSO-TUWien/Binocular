@@ -165,7 +165,7 @@ export default class DependencyGraph extends React.Component {
             })
             .attr('x', 6)
             .attr('y', 3)
-            .style("font-size", "18px");
+            .style("font-size", "38px");
       
         node.append("title")
             .text(function(d) { return d.path + " (" + d.lineCount + " lines, " + d.commitCount + " commits)"; });
