@@ -22,10 +22,7 @@
     "dockerize": "whalify generate-installer && ./node_modules/.bin/whalify build",
     "fix:root": "eslint --fix .",
     "fix:ui": "eslint --fix --ignore-path ui/.eslintignore -c ui/.eslintrc.yml ui",
-    "fix": "npm run fix:root && npm run fix:ui",
-    "languages:download": "node ./scripts/antlr-grammar-installer.js --antlr-dl",
-    "languages:gen": "node ./scripts/antlr-grammar-installer.js --antlr-gen",
-    "language": "node antlr4 -Dlanguage=JavaScript -lib . -o languages/src/objc node_modules/antlr4-grammars/objc/ObjectiveCParser.g4"
+    "fix": "npm run fix:root && npm run fix:ui"
   },
   "keywords": [
     "git"
@@ -39,7 +36,6 @@
   "dependencies": {
     "@fortawesome/fontawesome-free": "^5.10.2",
     "@grpc/proto-loader": "^0.5.4",
-    "antlr4": "^4.8.0",
     "apollo-client": "^1.9.3",
     "apollo-client-preset": "0.1.0-1",
     "arangojs": "^5.7.0",
@@ -151,7 +147,6 @@
     "yargs": "^6.6.0"
   },
   "devDependencies": {
-    "antlr4-tool": "^1.1.0",
     "debug": "^4.1.1",
     "eslint": "^3.19.0",
     "eslint-config-lambdas": "^0.3.0",
