@@ -90,7 +90,7 @@ const indexers = {
 const services = [];
 
 const gatewayService = new GateWayService();
-const reporter = new ProgressReporter(io, ['commits', 'issues', 'builds']);
+const reporter = new ProgressReporter(io, ['commits', 'issues', 'builds', 'language']);
 let databaseConnection = null;
 
 /**
@@ -282,7 +282,7 @@ async function indexing(indexers, context, reporter, gateway, indexingThread) {
       .map(hunks => (hunks ? { path: hunks.path, hunks: _.flatten(hunks.hunks) } : null))
       .filter(exist => exist)
       .each(hunks => {
-        console.log(hunks);
+        //console.log(hunks);
       });
 
     //Commit.deduceLanguages();
@@ -517,6 +517,7 @@ Promise.all(
       await gateway.configure(config.get('gateway'));
       gateway.addServiceHandler('LanguageDetectionService', service => {
         service.comm = new LanguageDetectionService(`${service.client.address}:${service.client.port}`, grpc.credentials.createInsecure());
+        reIndex(indexers, context, reporter, gateway, activeIndexingQueue, ++indexingProcess);
       });
 
       return gateway.start();
