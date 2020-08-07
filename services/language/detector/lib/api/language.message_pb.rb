@@ -6,16 +6,13 @@ require 'google/protobuf'
 Google::Protobuf::DescriptorPool.generated_pool.build do
   add_file("language.message.proto", :syntax => :proto3) do
     add_message "binocular.comm.Language" do
-      optional :sha, :string, 1
-      optional :type, :string, 2
-      optional :count, :uint64, 3
+      optional :name, :string, 1
+      optional :shortName, :string, 2
     end
     add_message "binocular.comm.LanguageDetectionRequest" do
-      optional :repository, :string, 1
-      optional :commitSha, :string, 2
-    end
-    add_message "binocular.comm.LanguageDetectionResponse" do
-      repeated :languages, :message, 1, "binocular.comm.Language"
+      optional :token, :string, 1
+      optional :path, :string, 2
+      optional :content, :string, 3
     end
   end
 end
@@ -24,6 +21,5 @@ module Binocular
   module Comm
     Language = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("binocular.comm.Language").msgclass
     LanguageDetectionRequest = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("binocular.comm.LanguageDetectionRequest").msgclass
-    LanguageDetectionResponse = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("binocular.comm.LanguageDetectionResponse").msgclass
   end
 end

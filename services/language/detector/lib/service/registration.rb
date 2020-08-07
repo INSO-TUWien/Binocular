@@ -85,7 +85,7 @@ module Binocular
         end
 
         client = Binocular::Comm::Client.new(address: @config.data.dig('languageService','address'), port: @config.data.dig('languageService','port'))
-        request = Binocular::Comm::RegistrationRequest.new(client: client, type: Binocular::Comm::ServiceType::LanguageDetectionService)
+        request = Binocular::Comm::RegistrationRequest.new(client: client, type: Binocular::Comm::ServiceType::LanguageDetection)
         response = @stub.register(request)
         @token_mutex.with_write_lock {@token = response.token}
         @logger.info("register to the gateway listening on #{@server_address}")

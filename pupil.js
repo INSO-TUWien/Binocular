@@ -515,7 +515,7 @@ Promise.all(
       services.push(gateway);
 
       await gateway.configure(config.get('gateway'));
-      gateway.addServiceHandler('LanguageDetectionService', service => {
+      gateway.addServiceHandler('LanguageDetection', service => {
         service.comm = new LanguageDetectionService(`${service.client.address}:${service.client.port}`, grpc.credentials.createInsecure());
         reIndex(indexers, context, reporter, gateway, activeIndexingQueue, ++indexingProcess);
       });

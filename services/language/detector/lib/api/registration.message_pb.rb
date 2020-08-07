@@ -28,7 +28,7 @@ Google::Protobuf::DescriptorPool.generated_pool.build do
     end
     add_enum "binocular.comm.ServiceType" do
       value :None, 0
-      value :LanguageDetectionService, 1
+      value :LanguageDetection, 1
     end
   end
 end

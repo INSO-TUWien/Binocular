@@ -6,7 +6,7 @@ option go_package = "github.com/INSO-TUWien/Binocular/services/grpc/comm";
 
 enum ServiceType {
   None = 0;
-  LanguageDetectionService = 1;
+  LanguageDetection = 1;
 }
 
 message Client {

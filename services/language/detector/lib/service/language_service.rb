@@ -36,6 +36,15 @@ module Binocular
         @rpc_service.stop
       end
 
+      # receives the file and its content from the gateway
+      # @param [Binocular::Comm::LanguageDetectionRequest] request contains a given file and its content
+      def detect_languages(request, _unused_call)
+        if @register.token == request.token
+          return Binocular::Comm::Language.new(name:'TypeScript', shortName: 'TS')
+        end
+        raise GRPC::BadStatus.new(GRPC::Core::StatusCodes::INVALID_ARGUMENT, "The provided token does not match with the one provided by the gateway!")
+      end
+
       # disconnects this service if the token is equal
       # @param [Binocular::Comm::UnregisterRequest] request contains the token that has to be equal to the register token received from the gateway once
       def disconnect(request, _unused_call)

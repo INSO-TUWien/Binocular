@@ -15,6 +15,8 @@ module Binocular
         self.unmarshal_class_method = :decode
         self.service_name = 'binocular.comm.LanguageDetectionService'
 
+        # file based language detection service call
+        rpc :detectLanguages, LanguageDetectionRequest, Language
         # service gets disconnected by the gateway
         rpc :disconnect, UnregisterRequest, UnregisterResponse
       end

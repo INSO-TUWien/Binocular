@@ -13,7 +13,7 @@ module Binocular
     include Binocular::Service::IService
     # @param [Binocular::Config] config contains the merged config file data
     # @param [Binocular::Service::IRegistrationService] registration_service contains the gateway communication service
-    # @param [Binocular::Service::ILanguageService] language_service contains the language
+    # @param [Binocular::Service::ILanguageService] language_service contains the service
     #                                              that holds the grpc communication for language detection
     def initialize(config, registration_service, language_service)
       @config = config

@@ -5,16 +5,12 @@ option java_package = "at.inso.tuwien.binocular.comm";
 option go_package = "github.com/INSO-TUWien/Binocular/services/grpc/comm";
 
 message Language {
-  string sha = 1;
-  string type = 2;
-  uint64 count = 3;
+  string name = 1;
+  string shortName = 2;
 }
 
 message LanguageDetectionRequest {
-  string repository = 1;
-  string commitSha = 2;
-}
-
-message LanguageDetectionResponse {
-  repeated Language languages = 1;
+  string token = 1;
+  string path = 2;
+  string content = 3;
 }
