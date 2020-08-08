@@ -39,7 +39,12 @@ module Binocular
                 @logger.info("try to register to the server #{@server_address}")
                 register
               else
-                heartbeat
+                begin
+                  heartbeat
+                rescue GRPC::BadStatus
+                  @logger.info("losing the connection to the gateway listen on #{@server_address}")
+                  raise $!
+                end
               end
               # hold until registration revoked
               @semaphore.try_acquire(1, @config.data.dig('gateway','heartbeat'))
@@ -66,6 +71,7 @@ module Binocular
       # called if the gateway disconnects from this service
       def disconnect
         @token_mutex.with_write_lock {@token = nil}
+        @logger.info("disconnected from the gateway listening on #{@server_address}")
         @semaphore.release
       end
 
