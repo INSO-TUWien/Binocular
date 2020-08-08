@@ -46,6 +46,7 @@ const CommitStakeholderConnection = require('./lib/models/CommitStakeholderConne
 const IssueStakeholderConnection = require('./lib/models/IssueStakeholderConnection.js');
 const IssueCommitConnection = require('./lib/models/IssueCommitConnection.js');
 const CommitCommitConnection = require('./lib/models/CommitCommitConnection.js');
+const LanguageFileConnection = require('./lib/models/LanguageFileConnection');
 const ConfigurationError = require('./lib/errors/ConfigurationError');
 const DatabaseError = require('./lib/errors/DatabaseError');
 const GateWayService = require('./lib/gateway-service');
@@ -442,6 +443,7 @@ function ensureDb(repo, context) {
         Stakeholder.ensureCollection(),
         Issue.ensureCollection(),
         Build.ensureCollection(),
+        LanguageFileConnection.ensureCollection(),
         CommitStakeholderConnection.ensureCollection(),
         IssueStakeholderConnection.ensureCollection(),
         IssueCommitConnection.ensureCollection(),
