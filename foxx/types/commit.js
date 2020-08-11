@@ -59,6 +59,7 @@ module.exports = new gql.GraphQLObjectType({
             RETURN {
               file,
               lineCount: edge.lineCount,
+              stats: edge.stats,
               hunks: edge.hunks
             }`
       }),
@@ -99,7 +100,7 @@ module.exports = new gql.GraphQLObjectType({
         description: 'languages in a commit',
         query: (commit, args, limit) => aql`
           FOR language, edge
-            IN INBOUND ${commit} ${commitsToLanguages}
+            IN OUTBOUND ${commit} ${commitsToLanguages}
             ${limit}
             RETURN {
               language,
