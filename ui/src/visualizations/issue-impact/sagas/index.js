@@ -86,6 +86,9 @@ export const fetchIssueImpactData = fetchFactory(
                        oldLines
                        webUrl
                      }
+                     stats {
+                      
+                     }
                      file {
                        id
                        path
