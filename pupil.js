@@ -46,6 +46,7 @@ const CommitStakeholderConnection = require('./lib/models/CommitStakeholderConne
 const IssueStakeholderConnection = require('./lib/models/IssueStakeholderConnection.js');
 const IssueCommitConnection = require('./lib/models/IssueCommitConnection.js');
 const CommitCommitConnection = require('./lib/models/CommitCommitConnection.js');
+const CommitLanguageConnection = require('./lib/models/CommitLanguageConnection');
 const LanguageFileConnection = require('./lib/models/LanguageFileConnection');
 const ConfigurationError = require('./lib/errors/ConfigurationError');
 const DatabaseError = require('./lib/errors/DatabaseError');
@@ -91,7 +92,7 @@ const indexers = {
 const services = [];
 
 const gatewayService = new GateWayService();
-const reporter = new ProgressReporter(io, ['commits', 'issues', 'builds', 'language']);
+const reporter = new ProgressReporter(io, ['commits', 'issues', 'builds', 'languages', 'filesLanguage']);
 let databaseConnection = null;
 
 /**
@@ -226,7 +227,7 @@ config.on('updated', async () => {
  * @returns {*}
  */
 async function reIndex(indexers, context, reporter, gateway, currentQueuePosition, indexingThread) {
-  await stopIndexers();
+  await stopIndexers(gateway);
   await currentQueuePosition;
   return indexing(indexers, ctx, reporter, gateway, indexingThread);
 }
@@ -243,6 +244,7 @@ async function reIndex(indexers, context, reporter, gateway, currentQueuePositio
  */
 async function indexing(indexers, context, reporter, gateway, indexingThread) {
   threadLog(indexingThread, 'Indexing data...');
+  gateway.startIndexing();
 
   try {
     context.vcsUrlProvider = await UrlProvider.getVcsUrlProvider(context.repo, reporter, context);
@@ -277,16 +279,6 @@ async function indexing(indexers, context, reporter, gateway, indexingThread) {
       return;
     }
 
-    // setup references
-    File.deduceLanguage()
-      .then(cursor => cursor.all())
-      .map(hunks => (hunks ? { path: hunks.path, hunks: _.flatten(hunks.hunks) } : null))
-      .filter(exist => exist)
-      .each(hunks => {
-        //console.log(hunks);
-      });
-
-    //Commit.deduceLanguages();
     Commit.deduceStakeholders();
     Issue.deduceStakeholders();
     createManualIssueReferences(config.get('issueReferences'));
@@ -382,7 +374,7 @@ async function stop() {
   config.stop();
 
   if (activeIndexingQueue) {
-    await stopIndexers();
+    await stopIndexers(gatewayService);
     await activeIndexingQueue;
     activeIndexingQueue = null;
   }
@@ -406,7 +398,8 @@ function stopRepoListener() {
  *
  * @returns {Promise<*>}
  */
-async function stopIndexers() {
+async function stopIndexers(gateway) {
+  gateway.stopIndexing();
   await Promise.all(
     _(indexers).values().filter(indexer => indexer !== null).each(async indexPromise => {
       const index = await indexPromise;
@@ -447,7 +440,8 @@ function ensureDb(repo, context) {
         CommitStakeholderConnection.ensureCollection(),
         IssueStakeholderConnection.ensureCollection(),
         IssueCommitConnection.ensureCollection(),
-        CommitCommitConnection.ensureCollection()
+        CommitCommitConnection.ensureCollection(),
+        CommitLanguageConnection.ensureCollection()
       );
     });
 }
