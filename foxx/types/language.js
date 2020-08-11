@@ -12,12 +12,9 @@ module.exports = new gql.GraphQLObjectType({
   description: 'A language in the git-repository related to a commit',
   fields() {
     return {
-      id: {
-        type: new gql.GraphQLNonNull(gql.GraphQLString),
-        resolve: e => e._key
-      },
       name: {
         type: gql.GraphQLString,
+        resolve: e => e._key,
         description: 'The name of the particular language'
       },
       shortName: {
