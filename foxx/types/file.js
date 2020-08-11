@@ -35,7 +35,7 @@ module.exports = new gql.GraphQLObjectType({
         query: (file, args, limit) => aql`
           FOR language
           IN
-          OUTBOUND ${file} ${LanguagesToFiles}
+          INBOUND ${file} ${LanguagesToFiles}
             ${limit}
             RETURN language`
       },
