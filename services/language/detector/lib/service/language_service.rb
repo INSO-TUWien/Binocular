@@ -40,7 +40,26 @@ module Binocular
       # @param [Binocular::Comm::LanguageDetectionRequest] request contains a given file and its content
       def detect_languages(request, _unused_call)
         if @register.token == request.token
-          return Binocular::Comm::Language.new(:name => "TypeScript", :shortName => "TS")
+          begin
+            @logger.info("Processing #{request.path}")
+            fileBlob = Linguist::Blob.new(request.path, request.content)
+            language = Linguist.detect(fileBlob)
+            if language.nil?
+              return nil
+            end
+            @logger.info("#{request.path} processed successfully")
+            return Binocular::Comm::Language.new(
+              :id => language.language_id,
+              :name => language.name,
+              :popular => language.popular?,
+              :aliases => language.aliases,
+              :color => language.color
+            )
+          rescue
+            error = $!
+            @logger.error(error.message)
+            return nil
+          end
         end
         raise GRPC::BadStatus.new(GRPC::Core::StatusCodes::INVALID_ARGUMENT, "The provided token does not match with the one provided by the gateway!")
       end

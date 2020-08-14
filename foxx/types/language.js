@@ -12,14 +12,26 @@ module.exports = new gql.GraphQLObjectType({
   description: 'A language in the git-repository related to a commit',
   fields() {
     return {
-      name: {
-        type: gql.GraphQLString,
+      id: {
+        type: new gql.GraphQLNonNull(gql.GraphQLInt),
         resolve: e => e._key,
+        description: 'The GitHub linguist id of the particular language'
+      },
+      name: {
+        type: new gql.GraphQLNonNull(gql.GraphQLString),
         description: 'The name of the particular language'
       },
-      shortName: {
+      aliases: {
+        type: new gql.GraphQLList(gql.GraphQLString),
+        description: 'All aliases of the particular language'
+      },
+      popular: {
+        type: gql.GraphQLBoolean,
+        description: 'Whether or not this language is popular'
+      },
+      color: {
         type: gql.GraphQLString,
-        description: 'The short name of the particular language'
+        description: 'Holds the hex code of the color of the particular language that is used in the GitHub ui'
       },
       commits: paginated({
         type: require('./commit.js'),

@@ -5,8 +5,11 @@ option java_package = "at.inso.tuwien.binocular.comm";
 option go_package = "github.com/INSO-TUWien/Binocular/services/grpc/comm";
 
 message Language {
-  string name = 1;
-  string shortName = 2;
+  sint32 id = 1;
+  string name = 2;
+  repeated string aliases = 3;
+  bool popular = 4;
+  string color = 5;
 }
 
 message LanguageDetectionRequest {

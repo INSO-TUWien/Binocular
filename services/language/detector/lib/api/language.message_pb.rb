@@ -6,8 +6,11 @@ require 'google/protobuf'
 Google::Protobuf::DescriptorPool.generated_pool.build do
   add_file("language.message.proto", :syntax => :proto3) do
     add_message "binocular.comm.Language" do
-      optional :name, :string, 1
-      optional :shortName, :string, 2
+      optional :id, :sint32, 1
+      optional :name, :string, 2
+      repeated :aliases, :string, 3
+      optional :popular, :bool, 4
+      optional :color, :string, 5
     end
     add_message "binocular.comm.LanguageDetectionRequest" do
       optional :token, :string, 1
