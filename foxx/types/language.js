@@ -13,7 +13,7 @@ module.exports = new gql.GraphQLObjectType({
   fields() {
     return {
       id: {
-        type: new gql.GraphQLNonNull(gql.GraphQLInt),
+        type: new gql.GraphQLNonNull(gql.GraphQLString),
         resolve: e => e._key,
         description: 'The GitHub linguist id of the particular language'
       },
