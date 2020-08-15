@@ -48,6 +48,15 @@ module Binocular
               return nil
             end
             @logger.info("#{request.path} processed successfully")
+            if language.group.nil?
+              return Binocular::Comm::Language.new(
+                  :id =>  language.group.language_id,
+              :name => language.group.name,
+              :popular => language.group.popular?,
+              :aliases => language.group.aliases,
+              :color => language.group.color
+              )
+            end
             return Binocular::Comm::Language.new(
               :id => language.language_id,
               :name => language.name,
