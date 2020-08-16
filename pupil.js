@@ -41,12 +41,16 @@ const Language = require('./lib/models/Language.js');
 const Hunk = require('./lib/models/Hunk.js');
 const Issue = require('./lib/models/Issue.js');
 const Build = require('./lib/models/Build.js');
+const Module = require('./lib/models/Module');
 const Stakeholder = require('./lib/models/Stakeholder.js');
 const CommitStakeholderConnection = require('./lib/models/CommitStakeholderConnection.js');
 const IssueStakeholderConnection = require('./lib/models/IssueStakeholderConnection.js');
 const IssueCommitConnection = require('./lib/models/IssueCommitConnection.js');
 const CommitCommitConnection = require('./lib/models/CommitCommitConnection.js');
 const CommitLanguageConnection = require('./lib/models/CommitLanguageConnection');
+const CommitModuleConnection = require('./lib/models/CommitModuleConnection');
+const ModuleModuleConnection = require('./lib/models/ModuleModuleConnection');
+const ModuleFileConnection = require('./lib/models/ModuleFileConnection');
 const LanguageFileConnection = require('./lib/models/LanguageFileConnection');
 const ConfigurationError = require('./lib/errors/ConfigurationError');
 const DatabaseError = require('./lib/errors/DatabaseError');
@@ -92,7 +96,7 @@ const indexers = {
 const services = [];
 
 const gatewayService = new GateWayService();
-const reporter = new ProgressReporter(io, ['commits', 'issues', 'builds', 'languages', 'filesLanguage']);
+const reporter = new ProgressReporter(io, ['commits', 'issues', 'builds', 'languages', 'filesLanguage', 'modules']);
 let databaseConnection = null;
 
 /**
@@ -436,12 +440,16 @@ function ensureDb(repo, context) {
         Stakeholder.ensureCollection(),
         Issue.ensureCollection(),
         Build.ensureCollection(),
+        Module.ensureCollection(),
         LanguageFileConnection.ensureCollection(),
         CommitStakeholderConnection.ensureCollection(),
         IssueStakeholderConnection.ensureCollection(),
         IssueCommitConnection.ensureCollection(),
         CommitCommitConnection.ensureCollection(),
-        CommitLanguageConnection.ensureCollection()
+        CommitLanguageConnection.ensureCollection(),
+        CommitModuleConnection.ensureCollection(),
+        ModuleModuleConnection.ensureCollection(),
+        ModuleFileConnection.ensureCollection()
       );
     });
 }
@@ -483,12 +491,11 @@ async function serviceStarter(serviceEntry) {
   try {
     await serviceEntry();
   } catch (error) {
-    console.error(error);
+    console.trace(error.stack);
     try {
       await stop();
       // eslint-disable-next-line no-empty
     } catch (ignore) {}
-    throw error;
   }
 }
 
