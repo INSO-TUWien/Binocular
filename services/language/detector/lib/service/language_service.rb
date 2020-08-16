@@ -42,11 +42,28 @@ module Binocular
         if @register.token == request.token
           begin
             @logger.info("Processing #{request.path}")
+            generated = Linguist::Generated.generated?(request.path, request.content)
+
+            if generated
+              @logger.info("#{request.path} is a generated file!")
+              return nil
+            end
+
+            # file is to small to detect
+            if request.content.length < 15
+              @logger.info("#{request.path} is too small!")
+              return nil
+            end
+
             fileBlob = Linguist::Blob.new(request.path, request.content)
             language = Linguist.detect(fileBlob)
             if language.nil?
               return nil
             end
+
+            detect_event = Linguist.instrumenter.events.last
+            detect_event_payload = detect_event[:args].first
+
             @logger.info("#{request.path} processed successfully")
             if language.group.nil?
               return Binocular::Comm::Language.new(
