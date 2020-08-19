@@ -55,7 +55,7 @@ const Module = new gql.GraphQLObjectType({
           INBOUND ${module} ${ModulesToModules}
             ${limit}
             RETURN module`
-      }),
+      })
     };
   }
 });
