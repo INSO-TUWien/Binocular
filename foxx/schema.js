@@ -18,6 +18,7 @@ const DateHistogramGranularity = require('./types/DateHistogramGranularity.js');
 const commits = db._collection('commits');
 const files = db._collection('files');
 const stakeholders = db._collection('stakeholders');
+const modules = db._collection('modules');
 const issues = db._collection('issues');
 const builds = db._collection('builds');
 const languages = db._collection('languages');
@@ -122,8 +123,17 @@ const queryType = new gql.GraphQLObjectType({
           return files.firstExample({ path: args.path });
         }
       },
+      languages: paginated({
+        type: require('./types/language'),
+        query: (root, args, limit) => aql`
+          FOR language
+            IN
+            ${languages}
+            ${limit}
+              RETURN language`
+      }),
       language: {
-        type: require('./types/language.js'),
+        type: require('./types/language'),
         args: {
           name: {
             description: 'name of language',
@@ -132,6 +142,27 @@ const queryType = new gql.GraphQLObjectType({
         },
         resolve(root, args) {
           return languages.firstExample({ name: args.name });
+        }
+      },
+      modules: paginated({
+        type: require('./types/module'),
+        query: (root, args, limit) => aql`
+          FOR module
+            IN
+            ${modules}
+            ${limit}
+              RETURN module`
+      }),
+      module: {
+        type: require('./types/module'),
+        args: {
+          path: {
+            description: 'path of module',
+            type: new gql.GraphQLNonNull(gql.GraphQLString)
+          }
+        },
+        resolve(root, args) {
+          return modules.firstExample({ path: args.path });
         }
       },
       stakeholders: paginated({

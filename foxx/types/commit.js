@@ -8,6 +8,7 @@ const commitsToFiles = db._collection('commits-files');
 const builds = db._collection('builds');
 const commitsToStakeholders = db._collection('commits-stakeholders');
 const commitsToLanguages = db._collection('commits-languages');
+const CommitsToModules = db._collection('commits-modules');
 const paginated = require('./paginated.js');
 const Timestamp = require('./Timestamp.js');
 
@@ -96,14 +97,27 @@ module.exports = new gql.GraphQLObjectType({
         }
       },
       languages: paginated({
-        type: require('./languageInCommit.js'),
-        description: 'languages in a commit',
+        type: require('./languageInCommit'),
+        description: 'languages modified in the particular commit',
         query: (commit, args, limit) => aql`
           FOR language, edge
-            IN OUTBOUND ${commit} ${commitsToLanguages}
+            IN INBOUND ${commit} ${commitsToLanguages}
             ${limit}
             RETURN {
               language,
+              stats: edge.stats
+            }`
+      }),
+      modules: paginated({
+        type: require('./moduleInCommit'),
+        description: 'modules modified in the particular commit',
+        query: (commit, args, limit) => aql`
+          FOR module, edge
+            IN INBOUND ${commit} ${CommitsToModules}
+            ${limit}
+            RETURN {
+              module,
+              webUrl: edge.webUrl,
               stats: edge.stats
             }`
       })

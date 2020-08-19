@@ -12,11 +12,12 @@ module.exports = new gql.GraphQLObjectType({
         resolve: e => e._key
       },
       language: {
-        type: require('./language.js')
+        type: require('./language.js'),
+        description: 'The language that touches the commit'
       },
-      lineCount: {
-        type: gql.GraphQLInt,
-        description: 'The number of lines in this file at this commit'
+      commit: {
+        type: require('./commit'),
+        description: 'contains the commit that touches the corresponding language'
       },
       stats: {
         type: require('./stats'),
