@@ -36,21 +36,23 @@ module Binocular
         @rpc_service.stop
       end
 
-      # receives the file and its content from the gateway
+      # receives the file and its content from the gateway and detect the corresponding language
       # @param [Binocular::Comm::LanguageDetectionRequest] request contains a given file and its content
       def detect_languages(request, _unused_call)
         if @register.token == request.token
           begin
             @logger.info("Processing #{request.path}")
 
-            fileBlob = Linguist::Blob.new(request.path, request.content)
-            language = Linguist.detect(fileBlob)
+            file_blob = Linguist::Blob.new(request.path, request.content)
+            language = Linguist.detect(file_blob)
+
             if language.nil?
               @logger.warn("#{request.path} cannot be detected!")
               return Binocular::Comm::Language.new
             end
 
             @logger.info("#{request.path} processed successfully")
+            # try to get the main category to prevent various subtypes of the same language
             if language.group.nil?
               return Binocular::Comm::Language.new(
                   :id =>  language.group.language_id,
