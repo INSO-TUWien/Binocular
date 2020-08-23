@@ -14,3 +14,11 @@
 .sidebar:not(:last-child) {
   margin-bottom: 0 !important;
 }
+
+.sidebar .panel-tabs {
+  flex-wrap:wrap;
+}
+
+.sidebar .panel-tabs a {
+  flex: 1 1 50%;
+}
