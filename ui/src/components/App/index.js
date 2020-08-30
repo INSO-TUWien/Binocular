@@ -1,6 +1,5 @@
 import styles from './app.css';
 import Sidebar from '../Sidebar';
-// import ConfigButton from '../ConfigButton';
 import HelpButton from '../Help/HelpButton';
 import Help from '../Help';
 import ConfigDialog from '../ConfigDialog';
@@ -23,27 +22,29 @@ class App extends React.PureComponent {
     super(props);
 
     this.state = {
-      helpPos: 0
+      helpPos: 0,
+      collapsed: false
     };
   }
 
   render() {
     const ChartComponent = this.props.visualization.ChartComponent;
     const HelpComponent = this.props.visualization.HelpComponent;
+    const { helpPos, collapsed } = this.state;
 
     return (
       <div className={styles.app}>
-        <Sidebar />
+        <Sidebar collapsed={collapsed} onToggle={e => this.setState({ collapsed: e })} />
         <div className={styles.mainPane}>
           <ProgressBar />
-          <ChartComponent />
-          {this.props.showHelp &&
+          <ChartComponent sidebarOpen={!collapsed} />
+          {helpPos &&
             <Help onResize={e => this.setState({ helpPos: e.bounds.height })}>
               <HelpComponent />
             </Help>}
         </div>
         <Notifications />
-        <HelpButton y={this.props.showHelp ? this.state.helpPos : 0} icon={this.props.showHelp ? 'times' : 'question'} />
+        <HelpButton y={helpPos ? this.state.helpPos : 0} icon={helpPos ? 'times' : 'question'} />
         <ConfigDialog />
       </div>
     );

@@ -41,7 +41,7 @@ export default class StackedAreaChart extends React.Component {
       zoomedVertical: false,
       verticalZoomDims: [0, 0]
     };
-    window.addEventListener('resize', () => this.forceUpdate());
+    window.addEventListener('resize', () => this.updateElement());
   }
 
   componentDidMount() {
