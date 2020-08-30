@@ -87,7 +87,8 @@ export const fetchIssueImpactData = fetchFactory(
                        webUrl
                      }
                      stats {
-                      
+                      additions
+                      deletions
                      }
                      file {
                        id
