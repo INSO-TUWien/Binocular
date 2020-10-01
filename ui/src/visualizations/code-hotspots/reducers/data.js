@@ -17,7 +17,8 @@ export default handleActions(
   {
     data: {
       fileURL: null,
-      branch:null
+      branch:null,
+      files:[]
     },
     lastFetched: null,
     isFetching: null

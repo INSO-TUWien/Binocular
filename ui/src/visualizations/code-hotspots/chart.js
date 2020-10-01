@@ -12,7 +12,6 @@ require('codemirror/mode/javascript/javascript');
 import "./codeMirror.css";
 import ColorMixer from "./colorMixer";
 
-const BASE_URL = "https://raw.githubusercontent.com/INSO-TUWien/Binocular/";
 let code ="No File Selected";
 
 let HEATMAP_LOW_COLOR = '#ABEBC6';
@@ -27,14 +26,14 @@ export default class CodeHotspots extends React.PureComponent {
     this.state = {
       code:"",
       branch:"master",
-      fileURL:"/pupil.js"
+      fileURL:"https://raw.githubusercontent.com/INSO-TUWien/Binocular/master/pupil.js"
     };
   }
 
   componentWillReceiveProps(nextProps) {
     const { fileURL,branch } = nextProps;
     var xhr = new XMLHttpRequest();
-    xhr.open("GET", BASE_URL+branch+"/"+fileURL, true);
+    xhr.open("GET", fileURL.replace("/blob", "").replace("github.com","raw.githubusercontent.com"), true);
     xhr.onload = function (e) {
       if (xhr.readyState === 4) {
         if (xhr.status === 200) {
@@ -65,7 +64,7 @@ export default class CodeHotspots extends React.PureComponent {
 
   render() {
     var xhr = new XMLHttpRequest();
-    xhr.open("GET", BASE_URL+this.state.branch+"/"+this.state.fileURL, true);
+    xhr.open("GET",  this.state.fileURL.replace("/blob", "").replace("github.com","raw.githubusercontent.com"), true);
     xhr.onload = function (e) {
       if (xhr.readyState === 4) {
         if (xhr.status === 200) {
@@ -92,7 +91,7 @@ export default class CodeHotspots extends React.PureComponent {
             }}
           />
           <div className={styles.heatmapContainer}>
-            <svg className='chartHeatmat'></svg>
+            <svg className='chartHeatmap'></svg>
           </div>
           <div className={styles.rowSummaryContainer}>
             <svg className='chartRowSummary'></svg>
@@ -128,7 +127,7 @@ export default class CodeHotspots extends React.PureComponent {
 
 
     //Setting chart width and adjusting for margins
-    const chart = d3.select('.chartHeatmat')
+    const chart = d3.select('.chartHeatmap')
       .attr('width', width + margins.right + margins.left)
       .attr('height', height + margins.top + margins.bottom)
       .append('g')

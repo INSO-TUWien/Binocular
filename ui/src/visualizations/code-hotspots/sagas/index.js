@@ -29,8 +29,9 @@ export const fetchFileUrl = fetchFactory(
     const state = yield select();
     const fileURL = state.visualizations.codeHotspots.state.config.fileURL;
     const branch = state.visualizations.codeHotspots.state.config.branch;
+    const files = state.visualizations.codeHotspots.state.config.files;
 
-    return {fileURL,branch}
+    return {fileURL,branch,files}
     },
   requestCodeHotspotsData,
   receiveCodeHotspotsData,

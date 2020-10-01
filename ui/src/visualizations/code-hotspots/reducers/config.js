@@ -13,7 +13,8 @@ export default handleActions(
         branch: action.payload ? action.payload : null })
   },
   {
-    fileURL: "/pupil.js",
-    branch: "master"
+    fileURL: "https://raw.githubusercontent.com/INSO-TUWien/Binocular/master/pupil.js",
+    branch: "master",
+    files:[]
   }
 );

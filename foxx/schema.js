@@ -114,6 +114,22 @@ const queryType = new gql.GraphQLObjectType({
           );
         }
       }),
+      files: paginated({
+        type: require('./types/file.js'),
+        args: {
+          sort: { type: Sort }
+        },
+        query: (root, args, limit) => {
+          let q = qb
+            .for('file')
+            .in('files')
+            .sort('file.path', args.sort);
+
+          q = q.limit(limit.offset, limit.count).return('file');
+
+          return q;
+        }
+      }),
       file: {
         type: require('./types/file.js'),
         args: {

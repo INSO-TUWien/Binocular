@@ -16,7 +16,8 @@ const mapStateToProps = state => {
   const iiState = state.visualizations.codeHotspots.state;
   return {
     fileURL: iiState.data.data.fileURL,
-    branch: iiState.data.data.branch
+    branch: iiState.data.data.branch,
+    files: iiState.data.data.files
   };
 };
 
