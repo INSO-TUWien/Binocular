@@ -30,7 +30,7 @@ module.exports = new gql.GraphQLObjectType({
         description: 'The URL (if available) to the master-version of this file on the ITS'
       },
       commits: paginated({
-        type: new gql.GraphQLList(require('./commit.js')),
+        type: require('./commit.js'),
         description: 'The commits touching this file',
         query: (file, args, limit) => aql`
           FOR commit
