@@ -10,6 +10,7 @@ import {
 
 import {
   setActiveFile,
+  setActivePath,
   setActiveBranch
 } from './sagas';
 import styles from './styles.scss';
@@ -25,6 +26,7 @@ const mapStateToProps = (state /*, ownProps*/) => {
 
   return {
     fileURL: iiState.data.data.fileURL,
+    path: iiState.data.data.path,
     branch: iiState.data.data.branch,
     files: iiState.data.data.files};
 };
@@ -32,6 +34,7 @@ const mapStateToProps = (state /*, ownProps*/) => {
 const mapDispatchToProps = (dispatch /*, ownProps*/) => {
   return {
     onSetFile: url => dispatch(setActiveFile(url)),
+    onSetPath: path => dispatch(setActivePath(path)),
     onSetBranch: branch => dispatch(setActiveBranch(branch))
   };
 };
@@ -57,8 +60,8 @@ const CodeHotspotsConfigComponent = props => {
           files={props.files}
           detailRenderer={FileDetails}
           onSelectFile={(data) => {
-            console.log(data)
             props.onSetFile(data.webUrl);
+            props.onSetPath(data.key);
           }}
         />
       </div>

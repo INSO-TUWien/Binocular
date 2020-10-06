@@ -6,6 +6,7 @@ import { select, takeEvery, fork } from 'redux-saga/effects';
 import { fetchFactory, timestampedActionFactory } from '../../../sagas/utils.js';
 
 export const setActiveFile = createAction('SET_ACTIVE_FILE', f => f);
+export const setActivePath = createAction('SET_ACTIVE_PATH', p => p);
 export const setActiveBranch = createAction('SET_ACTIVE_BRANCH', b => b);
 
 export const requestCodeHotspotsData = createAction('REQUEST_CODE_HOTSPOTS_DATA');
@@ -20,6 +21,7 @@ export default function*() {
 export function* watchSetActiveFile() {
   yield takeEvery('SET_ACTIVE_FILE', fetchFileUrl);
   yield takeEvery('SET_ACTIVE_BRANCH', fetchFileUrl);
+  yield takeEvery('SET_ACTIVE_PATH', fetchFileUrl);
 
 }
 
@@ -29,9 +31,10 @@ export const fetchFileUrl = fetchFactory(
     const state = yield select();
     const fileURL = state.visualizations.codeHotspots.state.config.fileURL;
     const branch = state.visualizations.codeHotspots.state.config.branch;
+    const path = state.visualizations.codeHotspots.state.config.path;
     const files = state.visualizations.codeHotspots.state.config.files;
 
-    return {fileURL,branch,files}
+    return {fileURL,branch,files,path}
     },
   requestCodeHotspotsData,
   receiveCodeHotspotsData,

@@ -8,6 +8,9 @@ export default handleActions(
     SET_ACTIVE_FILE: (state, action) =>
       _.assign({}, state, {
         fileURL: action.payload ? action.payload : null }),
+    SET_ACTIVE_PATH: (state, action) =>
+      _.assign({}, state, {
+        path: action.payload ? action.payload : null }),
     SET_ACTIVE_BRANCH: (state, action) =>
       _.assign({}, state, {
         branch: action.payload ? action.payload : null })
@@ -15,6 +18,7 @@ export default handleActions(
   {
     fileURL: "https://raw.githubusercontent.com/INSO-TUWien/Binocular/master/pupil.js",
     branch: "master",
+    path: "pupil.js",
     files:[]
   }
 );

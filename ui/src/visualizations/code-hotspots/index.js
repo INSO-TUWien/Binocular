@@ -17,6 +17,7 @@ const mapStateToProps = state => {
   return {
     fileURL: iiState.data.data.fileURL,
     branch: iiState.data.data.branch,
+    path: iiState.data.data.path,
     files: iiState.data.data.files
   };
 };
