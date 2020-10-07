@@ -1,5 +1,5 @@
 import * as d3 from 'd3';
-import ColorMixer from './colorMixer';
+import ColorMixer from './helper/colorMixer';
 import _ from 'lodash';
 
 let HEATMAP_LOW_COLOR = '#ABEBC6';
@@ -14,7 +14,7 @@ export default class charts {
     for (let i in rawData.data) {
       let commit = rawData.data[i];
       for (let j = 0; j < lines; j++) {
-        data.push({"version":i,"row":j,"value":0})
+        data.push({"version":i,"row":j,"value":0,"message":commit.message})
       }
 
 
@@ -57,7 +57,7 @@ export default class charts {
 
     const width = document.getElementsByClassName("CodeMirror")[0].clientWidth-60,
       height = 24*lines,
-      margins = {top:28, right: 0, bottom: 0, left: 30};
+      margins = {top:28, right: 0, bottom: 0, left: 40};
 
 
     //Setting chart width and adjusting for margins
@@ -107,16 +107,16 @@ export default class charts {
       }
     }
     const legendData = [
-      {'interval': maxValue/10, 'color': ColorMixer.mix(HEATMAP_LOW_COLOR,HEATMAP_HEIGHT_COLOR,0)},
-      {'interval': maxValue/10*2, 'color': ColorMixer.mix(HEATMAP_LOW_COLOR,HEATMAP_HEIGHT_COLOR,0.1)},
-      {'interval': maxValue/10*3, 'color': ColorMixer.mix(HEATMAP_LOW_COLOR,HEATMAP_HEIGHT_COLOR,0.2)},
-      {'interval': maxValue/10*4, 'color': ColorMixer.mix(HEATMAP_LOW_COLOR,HEATMAP_HEIGHT_COLOR,0.3)},
-      {'interval': maxValue/10*5, 'color': ColorMixer.mix(HEATMAP_LOW_COLOR,HEATMAP_HEIGHT_COLOR,0.4)},
-      {'interval': maxValue/10*6, 'color': ColorMixer.mix(HEATMAP_LOW_COLOR,HEATMAP_HEIGHT_COLOR,0.5)},
-      {'interval': maxValue/10*7, 'color': ColorMixer.mix(HEATMAP_LOW_COLOR,HEATMAP_HEIGHT_COLOR,0.6)},
-      {'interval': maxValue/10*8, 'color': ColorMixer.mix(HEATMAP_LOW_COLOR,HEATMAP_HEIGHT_COLOR,0.7)},
-      {'interval': maxValue/10*9, 'color': ColorMixer.mix(HEATMAP_LOW_COLOR,HEATMAP_HEIGHT_COLOR,0.8)},
-      {'interval': maxValue, 'color': ColorMixer.mix(HEATMAP_LOW_COLOR,HEATMAP_HEIGHT_COLOR,0.9)}
+      {'interval': maxValue/10, 'color': ColorMixer.mix(HEATMAP_LOW_COLOR,HEATMAP_HEIGHT_COLOR,0.1)},
+      {'interval': maxValue/10*2, 'color': ColorMixer.mix(HEATMAP_LOW_COLOR,HEATMAP_HEIGHT_COLOR,0.2)},
+      {'interval': maxValue/10*3, 'color': ColorMixer.mix(HEATMAP_LOW_COLOR,HEATMAP_HEIGHT_COLOR,0.3)},
+      {'interval': maxValue/10*4, 'color': ColorMixer.mix(HEATMAP_LOW_COLOR,HEATMAP_HEIGHT_COLOR,0.4)},
+      {'interval': maxValue/10*5, 'color': ColorMixer.mix(HEATMAP_LOW_COLOR,HEATMAP_HEIGHT_COLOR,0.5)},
+      {'interval': maxValue/10*6, 'color': ColorMixer.mix(HEATMAP_LOW_COLOR,HEATMAP_HEIGHT_COLOR,0.6)},
+      {'interval': maxValue/10*7, 'color': ColorMixer.mix(HEATMAP_LOW_COLOR,HEATMAP_HEIGHT_COLOR,0.7)},
+      {'interval': maxValue/10*8, 'color': ColorMixer.mix(HEATMAP_LOW_COLOR,HEATMAP_HEIGHT_COLOR,0.8)},
+      {'interval': maxValue/10*9, 'color': ColorMixer.mix(HEATMAP_LOW_COLOR,HEATMAP_HEIGHT_COLOR,0.9)},
+      {'interval': maxValue, 'color': ColorMixer.mix(HEATMAP_LOW_COLOR,HEATMAP_HEIGHT_COLOR,1)}
     ];
 
 
@@ -155,7 +155,8 @@ export default class charts {
   }
 
   static generateBarChart(data,commits) {
-    d3.select('.barChart > *').remove();
+    d3.select('.bar').remove();
+    d3.select('.tooltip').remove();
 
 
     let combinedData = []
@@ -163,7 +164,7 @@ export default class charts {
 
     for (let i = 0; i < data.length; i++) {
       if (combinedData[data[i].version] == undefined) {
-        combinedData[data[i].version] = {"version": data[i].version, "row": data[i].row, "value": data[i].value};
+        combinedData[data[i].version] = {"version": data[i].version, "row": data[i].row, "value": data[i].value,"message":data[i].message};
       } else {
         combinedData[data[i].version].value += data[i].value;
         if (combinedData[data[i].version].value > maxValue) {
@@ -173,16 +174,16 @@ export default class charts {
     }
 
     const legendData = [
-      {'interval': maxValue / 10, 'color': ColorMixer.mix(HEATMAP_LOW_COLOR, HEATMAP_HEIGHT_COLOR, 0)},
-      {'interval': maxValue / 10 * 2, 'color': ColorMixer.mix(HEATMAP_LOW_COLOR, HEATMAP_HEIGHT_COLOR, 0.1)},
-      {'interval': maxValue / 10 * 3, 'color': ColorMixer.mix(HEATMAP_LOW_COLOR, HEATMAP_HEIGHT_COLOR, 0.2)},
-      {'interval': maxValue / 10 * 4, 'color': ColorMixer.mix(HEATMAP_LOW_COLOR, HEATMAP_HEIGHT_COLOR, 0.3)},
-      {'interval': maxValue / 10 * 5, 'color': ColorMixer.mix(HEATMAP_LOW_COLOR, HEATMAP_HEIGHT_COLOR, 0.4)},
-      {'interval': maxValue / 10 * 6, 'color': ColorMixer.mix(HEATMAP_LOW_COLOR, HEATMAP_HEIGHT_COLOR, 0.5)},
-      {'interval': maxValue / 10 * 7, 'color': ColorMixer.mix(HEATMAP_LOW_COLOR, HEATMAP_HEIGHT_COLOR, 0.6)},
-      {'interval': maxValue / 10 * 8, 'color': ColorMixer.mix(HEATMAP_LOW_COLOR, HEATMAP_HEIGHT_COLOR, 0.7)},
-      {'interval': maxValue / 10 * 9, 'color': ColorMixer.mix(HEATMAP_LOW_COLOR, HEATMAP_HEIGHT_COLOR, 0.8)},
-      {'interval': maxValue, 'color': ColorMixer.mix(HEATMAP_LOW_COLOR, HEATMAP_HEIGHT_COLOR, 0.9)}
+      {'interval': maxValue / 10, 'color': ColorMixer.mix(HEATMAP_LOW_COLOR, HEATMAP_HEIGHT_COLOR, 0.1)},
+      {'interval': maxValue / 10 * 2, 'color': ColorMixer.mix(HEATMAP_LOW_COLOR, HEATMAP_HEIGHT_COLOR, 0.2)},
+      {'interval': maxValue / 10 * 3, 'color': ColorMixer.mix(HEATMAP_LOW_COLOR, HEATMAP_HEIGHT_COLOR, 0.3)},
+      {'interval': maxValue / 10 * 4, 'color': ColorMixer.mix(HEATMAP_LOW_COLOR, HEATMAP_HEIGHT_COLOR, 0.4)},
+      {'interval': maxValue / 10 * 5, 'color': ColorMixer.mix(HEATMAP_LOW_COLOR, HEATMAP_HEIGHT_COLOR, 0.5)},
+      {'interval': maxValue / 10 * 6, 'color': ColorMixer.mix(HEATMAP_LOW_COLOR, HEATMAP_HEIGHT_COLOR, 0.6)},
+      {'interval': maxValue / 10 * 7, 'color': ColorMixer.mix(HEATMAP_LOW_COLOR, HEATMAP_HEIGHT_COLOR, 0.7)},
+      {'interval': maxValue / 10 * 8, 'color': ColorMixer.mix(HEATMAP_LOW_COLOR, HEATMAP_HEIGHT_COLOR, 0.8)},
+      {'interval': maxValue / 10 * 9, 'color': ColorMixer.mix(HEATMAP_LOW_COLOR, HEATMAP_HEIGHT_COLOR, 0.9)},
+      {'interval': maxValue, 'color': ColorMixer.mix(HEATMAP_LOW_COLOR, HEATMAP_HEIGHT_COLOR, 10)}
     ];
 
     const colorScale = d => {
@@ -203,7 +204,33 @@ export default class charts {
       .attr("width", w)
       .attr("height", h)
       .attr("class", "bar");
-    barChart
+
+    //Background
+    let groupBack = barChart
+      .append("g")
+      .attr("width", w)
+      .attr("height", h)
+      .attr("class", "background");
+    groupBack
+      .selectAll("rect")
+      .data(combinedData)
+      .enter()
+      .append("rect")
+      .attr("fill", "#EEEEEE88")
+      .attr("class", "sBar")
+      .attr("x", (d, i) => i * w / commits)
+      .attr("y", 0)
+      .attr("width", w / commits)
+      .attr("height", h);
+
+
+    //Bars
+    let groupData = barChart
+      .append("g")
+      .attr("width", w)
+      .attr("height", h)
+      .attr("class", "data");
+    groupData
       .selectAll("rect")
       .data(combinedData)
       .enter()
@@ -215,7 +242,59 @@ export default class charts {
         return h - h / maxValue * d.value;
       })
       .attr("width", w / commits)
-      .attr("height", (d, i) => h / maxValue * d.value);
+      .attr("height", (d, i) => {
+        return h / maxValue * d.value;
+      });
+
+
+    //tooltip
+    let div = d3
+      .select('.barChart')
+      .append("div")
+      .attr("class", "tooltip")
+      .style("position", "absolute")
+      .style("opacity", 0)
+      .style("background-color", "#FFFFFFDD")
+      .style("box-shadow", "0px 0px 10px #555555")
+      .style("max-width","30rem")
+      .style("border-radius","4px")
+      .style("padding","1rem");
+
+    //Info show
+    let groupInfo = barChart
+      .append("g")
+      .attr("width", w)
+      .attr("height", h)
+      .attr("class", "info");
+    groupInfo
+      .selectAll("rect")
+      .data(combinedData)
+      .enter()
+      .append("rect")
+      .attr("fill", "#00000000")
+      .attr("class", "sBar")
+      .attr("x", (d, i) => i * w / commits)
+      .attr("y", 0)
+      .attr("width", w / commits)
+      .attr("height", h)
+      .on("mouseover", function(d,i) {
+        div.transition()
+          .duration(200)
+          .style("opacity", 1);
+        div	.html("<div style='font-weight: bold'>Version: "+d.version+"</div>" +
+          "<div>"+d.message+"</div>"+
+          "<hr>"+
+          "<div>Lines Changed: "+d.value+"</div>")
+          .style("left", (i * w / commits) + "px")
+          .style("top", (h) + "px");
+      })
+      .on("mouseout", function(d) {
+        div.transition()
+          .duration(500)
+          .style("opacity", 0);
+      });
+
+
   }
 
 }

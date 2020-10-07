@@ -1,12 +1,8 @@
 'use strict';
 
-import _ from 'lodash';
 import {
   connect
 } from 'react-redux';
-import {
-  inflect
-} from 'inflection';
 
 import {
   setActiveFile,
@@ -14,24 +10,20 @@ import {
   setActiveBranch
 } from './sagas';
 import styles from './styles.scss';
-import codeHotspots from "./index";
 
 import FileBrowser from 'react-keyed-file-browser'
-import { graphQl } from '../../utils';
-import Promise from "bluebird";
-
 
 const mapStateToProps = (state /*, ownProps*/) => {
-  const iiState = state.visualizations.codeHotspots.state;
+  const State = state.visualizations.codeHotspots.state;
 
   return {
-    fileURL: iiState.data.data.fileURL,
-    path: iiState.data.data.path,
-    branch: iiState.data.data.branch,
-    files: iiState.data.data.files};
+    fileURL: State.data.data.fileURL,
+    path: State.data.data.path,
+    branch: State.data.data.branch,
+    files: State.data.data.files};
 };
 
-const mapDispatchToProps = (dispatch /*, ownProps*/) => {
+const mapDispatchToProps = (dispatch /*, ownProps*/) =>{
   return {
     onSetFile: url => dispatch(setActiveFile(url)),
     onSetPath: path => dispatch(setActivePath(path)),
@@ -40,18 +32,10 @@ const mapDispatchToProps = (dispatch /*, ownProps*/) => {
 };
 
 const CodeHotspotsConfigComponent = props => {
-
-  requestFileStructure().then(function (resp){
-    for (let i in resp) {
-      props.files.push({key:resp[i].path,webUrl:resp[i].webUrl})
-    }
-  });
-
-
   return (
     <div>
       <div className={styles.configContainer}> Branch:</div>
-      <input type={"text"} defaultValue={"master"} onChange={e => {
+      <input className={"input"} type={"text"} defaultValue={"master"} onChange={e => {
         props.onSetBranch(e.target.value)
       }}/>
 
@@ -85,17 +69,3 @@ class FileDetails extends React.Component {
   }
 }
 
-function requestFileStructure(){
-  return Promise.resolve(
-    graphQl.query(
-      `
-      query{
-       files(sort: "ASC"){
-          data{path,webUrl}
-        }
-      }
-      `,
-      {}
-    ))
-    .then(resp => resp.files.data);
-}

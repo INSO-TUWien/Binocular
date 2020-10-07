@@ -8,6 +8,7 @@ import { fetchFactory, timestampedActionFactory } from '../../../sagas/utils.js'
 export const setActiveFile = createAction('SET_ACTIVE_FILE', f => f);
 export const setActivePath = createAction('SET_ACTIVE_PATH', p => p);
 export const setActiveBranch = createAction('SET_ACTIVE_BRANCH', b => b);
+export const setActiveFiles = createAction('SET_ACTIVE_FILES', f => f);
 
 export const requestCodeHotspotsData = createAction('REQUEST_CODE_HOTSPOTS_DATA');
 export const receiveCodeHotspotsData = timestampedActionFactory('RECEIVE_CODE_HOTSPOTS_DATA');
@@ -22,6 +23,7 @@ export function* watchSetActiveFile() {
   yield takeEvery('SET_ACTIVE_FILE', fetchFileUrl);
   yield takeEvery('SET_ACTIVE_BRANCH', fetchFileUrl);
   yield takeEvery('SET_ACTIVE_PATH', fetchFileUrl);
+  yield takeEvery('SET_ACTIVE_FILES', fetchFileUrl);
 
 }
 

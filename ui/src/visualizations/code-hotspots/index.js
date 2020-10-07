@@ -3,26 +3,30 @@
 import {
   connect
 } from 'react-redux';
-import CodeHotspots from './chart.js';
+import CodeHotspots from './chart/chart.js';
 import ConfigComponent from './config.js';
 import HelpComponent from './help.js';
 import saga, {
-  changeFile
+  setActiveBranch, setActiveFile, setActiveFiles, setActivePath
 } from './sagas';
 import reducer from './reducers';
 
 
 const mapStateToProps = state => {
-  const iiState = state.visualizations.codeHotspots.state;
+  const State = state.visualizations.codeHotspots.state;
   return {
-    fileURL: iiState.data.data.fileURL,
-    branch: iiState.data.data.branch,
-    path: iiState.data.data.path,
-    files: iiState.data.data.files
+    fileURL: State.data.data.fileURL,
+    branch: State.data.data.branch,
+    path: State.data.data.path,
+    files: State.data.data.files
   };
 };
 
 const mapDispatchToProps = dispatch => ({
+    onSetFile: url => dispatch(setActiveFile(url)),
+    onSetPath: path => dispatch(setActivePath(path)),
+    onSetBranch: branch => dispatch(setActiveBranch(branch)),
+    onSetFiles: files => dispatch(setActiveFiles(files))
 });
 
 const ChartComponent = connect(mapStateToProps, mapDispatchToProps)(CodeHotspots);

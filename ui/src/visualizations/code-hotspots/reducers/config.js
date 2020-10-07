@@ -13,12 +13,15 @@ export default handleActions(
         path: action.payload ? action.payload : null }),
     SET_ACTIVE_BRANCH: (state, action) =>
       _.assign({}, state, {
-        branch: action.payload ? action.payload : null })
+        branch: action.payload ? action.payload : null }),
+    SET_ACTIVE_FILES: (state, action) =>
+      _.assign({}, state, {
+        files: action.payload ? action.payload : null })
   },
   {
-    fileURL: "https://raw.githubusercontent.com/INSO-TUWien/Binocular/master/pupil.js",
+    fileURL: "",
     branch: "master",
-    path: "pupil.js",
+    path: "",
     files:[]
   }
 );
