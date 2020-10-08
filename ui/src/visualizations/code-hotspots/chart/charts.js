@@ -29,6 +29,12 @@ export default class charts {
               data[cellIndex].value += 1;
             }
           }
+          for (let k = 0; k < hunk.oldLines; k++) {
+            let cellIndex = _.findIndex(data,{version:i,row:hunk.oldStart+k-1});
+            if(cellIndex!==-1){
+              data[cellIndex].value += 1;
+            }
+          }
         }
         commits++;
       }
@@ -43,19 +49,19 @@ export default class charts {
     d3.select('.chartHeatmap > *').remove();
 
     const legendData = [
-      {'interval': 1, 'color': ColorMixer.mix(HEATMAP_LOW_COLOR,HEATMAP_HEIGHT_COLOR,0)},
-      {'interval': 2, 'color': ColorMixer.mix(HEATMAP_LOW_COLOR,HEATMAP_HEIGHT_COLOR,0.1)},
-      {'interval': 3, 'color': ColorMixer.mix(HEATMAP_LOW_COLOR,HEATMAP_HEIGHT_COLOR,0.2)},
-      {'interval': 4, 'color': ColorMixer.mix(HEATMAP_LOW_COLOR,HEATMAP_HEIGHT_COLOR,0.3)},
-      {'interval': 5, 'color': ColorMixer.mix(HEATMAP_LOW_COLOR,HEATMAP_HEIGHT_COLOR,0.4)},
-      {'interval': 6, 'color': ColorMixer.mix(HEATMAP_LOW_COLOR,HEATMAP_HEIGHT_COLOR,0.5)},
-      {'interval': 7, 'color': ColorMixer.mix(HEATMAP_LOW_COLOR,HEATMAP_HEIGHT_COLOR,0.6)},
-      {'interval': 8, 'color': ColorMixer.mix(HEATMAP_LOW_COLOR,HEATMAP_HEIGHT_COLOR,0.7)},
-      {'interval': 9, 'color': ColorMixer.mix(HEATMAP_LOW_COLOR,HEATMAP_HEIGHT_COLOR,0.8)},
-      {'interval': 10, 'color': ColorMixer.mix(HEATMAP_LOW_COLOR,HEATMAP_HEIGHT_COLOR,0.9)}
+      {'interval': 0.5, 'color': ColorMixer.mix(HEATMAP_LOW_COLOR,HEATMAP_HEIGHT_COLOR,0)},
+      {'interval': 1, 'color': ColorMixer.mix(HEATMAP_LOW_COLOR,HEATMAP_HEIGHT_COLOR,0.1)},
+      {'interval': 1.5, 'color': ColorMixer.mix(HEATMAP_LOW_COLOR,HEATMAP_HEIGHT_COLOR,0.2)},
+      {'interval': 2, 'color': ColorMixer.mix(HEATMAP_LOW_COLOR,HEATMAP_HEIGHT_COLOR,0.3)},
+      {'interval': 2.5, 'color': ColorMixer.mix(HEATMAP_LOW_COLOR,HEATMAP_HEIGHT_COLOR,0.4)},
+      {'interval': 3, 'color': ColorMixer.mix(HEATMAP_LOW_COLOR,HEATMAP_HEIGHT_COLOR,0.5)},
+      {'interval': 3.5, 'color': ColorMixer.mix(HEATMAP_LOW_COLOR,HEATMAP_HEIGHT_COLOR,0.6)},
+      {'interval': 4, 'color': ColorMixer.mix(HEATMAP_LOW_COLOR,HEATMAP_HEIGHT_COLOR,0.7)},
+      {'interval': 4.5, 'color': ColorMixer.mix(HEATMAP_LOW_COLOR,HEATMAP_HEIGHT_COLOR,0.8)},
+      {'interval': 5, 'color': ColorMixer.mix(HEATMAP_LOW_COLOR,HEATMAP_HEIGHT_COLOR,0.9)}
     ];
 
-    const width = document.getElementsByClassName("CodeMirror")[0].clientWidth-60,
+    const width = document.getElementsByClassName("CodeMirror")[0].clientWidth-80,
       height = 24*lines,
       margins = {top:28, right: 0, bottom: 0, left: 40};
 
@@ -91,7 +97,8 @@ export default class charts {
   }
 
   static generateRowSummary(data,lines){
-    d3.select('.chartRowSummary > *').remove();
+    d3.select('.chartRow').remove();
+    d3.select('.tooltipRow').remove();
 
     let combinedData=[]
     let maxValue =0;
@@ -127,8 +134,10 @@ export default class charts {
 
     //Setting chart width and adjusting for margins
     const chart = d3.select('.chartRowSummary')
+      .append("svg")
       .attr('width', width + margins.right + margins.left)
       .attr('height', height + margins.top + margins.bottom)
+      .attr("class", "chartRow")
       .append('g')
       .attr('transform','translate(' + margins.left + ',' + margins.top + ')');
 
@@ -144,6 +153,20 @@ export default class charts {
       return ColorMixer.mix(HEATMAP_LOW_COLOR,HEATMAP_HEIGHT_COLOR,1);
     };
 
+    //tooltip
+    let div = d3
+      .select('.chartRowSummary')
+      .append("div")
+      .attr("class", "tooltipRow")
+      .style("position", "absolute")
+      .style("opacity", 0)
+      .style("background-color", "#FFFFFFDD")
+      .style("box-shadow", "0px 0px 10px #555555")
+      .style("max-width","30rem")
+      .style("border-radius","4px")
+      .style("padding","1rem");
+
+    //chart
     chart.selectAll('g')
       .data(combinedData).enter().append('g')
       .append('rect')
@@ -152,11 +175,29 @@ export default class charts {
       .style('fill', colorScale)
       .attr('width', barWidth)
       .attr('height', barHeight)
+      .attr('z-index', "10")
+      .on("mouseover", function(d,i) {
+        div.transition()
+          .duration(200)
+          .style("opacity", 1);
+        div	.html("<div style='font-weight: bold'>Row: "+d.row+"</div>" +
+          "<div>Changes: "+d.value+"</div>")
+          .style("right", (30) + "px")
+          .style("top", ((d.row) * barHeight) + "px");
+      })
+      .on("mouseout", function(d) {
+        div.transition()
+          .duration(500)
+          .style("opacity", 0);
+      });
+
+
+
   }
 
   static generateBarChart(data,commits) {
-    d3.select('.bar').remove();
-    d3.select('.tooltip').remove();
+    d3.select('.chartVersion').remove();
+    d3.select('.tooltipVersion').remove();
 
 
     let combinedData = []
@@ -196,14 +237,14 @@ export default class charts {
     };
 
 
-    const w = document.getElementsByClassName("CodeMirror")[0].clientWidth - 60;
+    const w = document.getElementsByClassName("CodeMirror")[0].clientWidth - 80;
     const h = 100;
     const barChart = d3
       .select('.barChart')
       .append("svg")
       .attr("width", w)
       .attr("height", h)
-      .attr("class", "bar");
+      .attr("class", "chartVersion");
 
     //Background
     let groupBack = barChart
@@ -251,14 +292,15 @@ export default class charts {
     let div = d3
       .select('.barChart')
       .append("div")
-      .attr("class", "tooltip")
+      .attr("class", "tooltipVersion")
       .style("position", "absolute")
       .style("opacity", 0)
       .style("background-color", "#FFFFFFDD")
       .style("box-shadow", "0px 0px 10px #555555")
-      .style("max-width","30rem")
+      .style("width","300px")
       .style("border-radius","4px")
-      .style("padding","1rem");
+      .style("padding","1rem")
+      .style("z-index","9");
 
     //Info show
     let groupInfo = barChart
@@ -284,8 +326,8 @@ export default class charts {
         div	.html("<div style='font-weight: bold'>Version: "+d.version+"</div>" +
           "<div>"+d.message+"</div>"+
           "<hr>"+
-          "<div>Lines Changed: "+d.value+"</div>")
-          .style("left", (i * w / commits) + "px")
+          "<div>Changes: "+d.value+"</div>")
+          .style("right", (w-(i * w / commits)-300)>0?(w-(i * w / commits)-300):0 + "px")
           .style("top", (h) + "px");
       })
       .on("mouseout", function(d) {

@@ -10,6 +10,7 @@ import vcsData from "./vcsData";
 import charts from "./charts";
 import Promise from 'bluebird';
 import {graphQl} from '../../../utils';
+import Loading from "./helper/loading";
 
 let code ="No File Selected";
 
@@ -52,6 +53,7 @@ export default class CodeHotspots extends React.PureComponent {
     this.requestData();
 
     return (<div>
+        <div className={"loadingContainer"}></div>
         <div className={styles.codeView}>
           <CodeMirror
             value={this.state.code}
@@ -66,7 +68,7 @@ export default class CodeHotspots extends React.PureComponent {
             <svg className='chartHeatmap'></svg>
           </div>
           <div className={styles.rowSummaryContainer}>
-            <svg className='chartRowSummary'></svg>
+            <div className='chartRowSummary'></div>
           </div>
         </div >
         <div className={styles.barChartContainer}>
@@ -80,15 +82,18 @@ export default class CodeHotspots extends React.PureComponent {
   requestData(){
     if(this.state.path !==""){
       var xhr = new XMLHttpRequest();
+      Loading.insert();
       xhr.open("GET",  this.state.fileURL.replace("/blob", "").replace("github.com","raw.githubusercontent.com").replace("master",this.state.branch), true);
       xhr.onload = function (e) {
         if (xhr.readyState === 4) {
           if (xhr.status === 200) {
-            this.setState({code: xhr.responseText});
             let lines = xhr.responseText.split(/\r\n|\r|\n/).length
             let path = this.state.path
+            let currThis = this;
             vcsData.getChangeData(path).then(function (resp){
               charts.updateAllChartsWithChanges(resp,lines,path);
+              currThis.setState({code: xhr.responseText});
+              Loading.remove();
             });
           } else {
             console.error(xhr.statusText);
