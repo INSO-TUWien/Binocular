@@ -4,7 +4,7 @@ import {
   connect
 } from 'react-redux';
 import CodeHotspots from './chart/chart.js';
-import ConfigComponent from './config.js';
+import ConfigComponent from './config/config.js';
 import HelpComponent from './help.js';
 import saga, {
   setActiveBranch, setActiveFile, setActiveFiles, setActivePath
