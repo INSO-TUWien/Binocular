@@ -16,10 +16,11 @@ export default handleActions(
   },
   {
     data: {
-      fileURL: null,
-      branch:null,
+      fileURL: "",
+      branch:"master",
       files:[],
-      path:null
+      branches:[],
+      path:""
     },
     lastFetched: null,
     isFetching: null

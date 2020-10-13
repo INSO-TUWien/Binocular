@@ -16,12 +16,16 @@ export default handleActions(
         branch: action.payload ? action.payload : null }),
     SET_ACTIVE_FILES: (state, action) =>
       _.assign({}, state, {
-        files: action.payload ? action.payload : null })
+        files: action.payload ? action.payload : null }),
+    SET_ACTIVE_BRANCHES: (state, action) =>
+      _.assign({}, state, {
+        branches: action.payload ? action.payload : null })
   },
   {
     fileURL: "",
     branch: "master",
     path: "",
-    files:[]
+    files:[],
+    branches:[]
   }
 );

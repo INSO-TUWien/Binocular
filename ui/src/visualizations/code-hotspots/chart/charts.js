@@ -8,13 +8,13 @@ let HEATMAP_HEIGHT_COLOR = '#E6B0AA';
 
 
 export default class charts {
-  static updateAllChartsWithChanges(rawData,lines,path){
+  static updateAllChartsWithChanges(rawData,lines,path,currThis){
     let data=[];
     let commits=0;
     for (let i in rawData.data) {
       let commit = rawData.data[i];
       for (let j = 0; j < lines; j++) {
-        data.push({"version":i,"row":j,"value":0,"message":commit.message})
+        data.push({"version":i,"row":j,"value":0,"message":commit.message,"sha":commit.sha,"signature":commit.signature})
       }
 
 
@@ -39,9 +39,9 @@ export default class charts {
         commits++;
       }
     }
-    this.generateHeatmap(data,lines,commits);
     this.generateRowSummary(data,lines);
-    this.generateBarChart(data,commits);
+    this.generateHeatmap(data,lines,commits);
+    this.generateBarChart(data,commits,currThis);
   }
 
   static generateHeatmap(data,lines,commits){
@@ -108,8 +108,8 @@ export default class charts {
         combinedData[data[i].row]={"version":data[i].version,"row":data[i].row,"value":data[i].value};
       }else{
         combinedData[data[i].row].value += data[i].value;
-        if(combinedData[data[i].version].value>maxValue){
-          maxValue=combinedData[data[i].version].value;
+        if(combinedData[data[i].row].value>maxValue){
+          maxValue=combinedData[data[i].row].value;
         }
       }
     }
@@ -190,12 +190,9 @@ export default class charts {
           .duration(500)
           .style("opacity", 0);
       });
-
-
-
   }
 
-  static generateBarChart(data,commits) {
+  static generateBarChart(data,commits,currThis) {
     d3.select('.chartVersion').remove();
     d3.select('.tooltipVersion').remove();
 
@@ -205,7 +202,7 @@ export default class charts {
 
     for (let i = 0; i < data.length; i++) {
       if (combinedData[data[i].version] == undefined) {
-        combinedData[data[i].version] = {"version": data[i].version, "row": data[i].row, "value": data[i].value,"message":data[i].message};
+        combinedData[data[i].version] = {"version": data[i].version, "row": data[i].row, "value": data[i].value,"message":data[i].message,"sha":data[i].sha,"signature":data[i].signature};
       } else {
         combinedData[data[i].version].value += data[i].value;
         if (combinedData[data[i].version].value > maxValue) {
@@ -326,6 +323,8 @@ export default class charts {
         div	.html("<div style='font-weight: bold'>Version: "+d.version+"</div>" +
           "<div>"+d.message+"</div>"+
           "<hr>"+
+          "<div>"+d.signature+"</div>"+
+          "<hr>"+
           "<div>Changes: "+d.value+"</div>")
           .style("right", (w-(i * w / commits)-300)>0?(w-(i * w / commits)-300):0 + "px")
           .style("top", (h) + "px");
@@ -334,9 +333,10 @@ export default class charts {
         div.transition()
           .duration(500)
           .style("opacity", 0);
+      })
+      .on("click",function(d){
+        currThis.setState({sha:d.sha})
       });
-
-
   }
 
 }

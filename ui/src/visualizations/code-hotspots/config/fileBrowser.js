@@ -43,11 +43,13 @@ export default class FileBrowser extends React.PureComponent{
     let convertedData = this.convertData(this.props.files)
 
     return <div>
-      <h1>Files:</h1>
-      <FileStruct
-        data={convertedData}
-        props={this.props.props}
-      />
+      <div className={"label"}>Files:</div>
+      <div className={styles.fileBrowser}>
+        <FileStruct
+          data={convertedData}
+          props={this.props.props}
+        />
+      </div>
     </div>;
   }
 

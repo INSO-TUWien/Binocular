@@ -1,4 +1,4 @@
-import { graphQl } from '../../../utils';
+import { graphQl } from '../../../../utils';
 import Promise from 'bluebird';
 
 
@@ -14,6 +14,8 @@ export default class vcsData{
           commits{
             data{
               message
+              sha
+              signature
               stats{
                 additions
                 deletions

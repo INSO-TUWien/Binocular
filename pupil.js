@@ -27,6 +27,7 @@ const File = require('./lib/models/File.js');
 const Hunk = require('./lib/models/Hunk.js');
 const Issue = require('./lib/models/Issue.js');
 const Build = require('./lib/models/Build.js');
+const Branch = require('./lib/models/Branch.js');
 const Stakeholder = require('./lib/models/Stakeholder.js');
 const CommitStakeholderConnection = require('./lib/models/CommitStakeholderConnection.js');
 const IssueStakeholderConnection = require('./lib/models/IssueStakeholderConnection.js');
@@ -69,18 +70,16 @@ Repository.fromPath(ctx.targetPath)
 
     // configure everything in the context
     require('./lib/setup-db.js');
-
     return ensureDb(repo);
   })
   .then(function() {
-    // be sure to re-index when the configuration changes
+    // be sure to re-index when the configuration changeslet test = ctx.repo.getAllBranches();
     config.on('updated', () => {
       reIndex(); // do not wait for indexing to complete on config update
 
       // explicitly return null to silence bluebird warning
       return null;
     });
-
     // immediately run all indexers
     return reIndex();
 
@@ -148,6 +147,7 @@ function ensureDb(repo) {
         Stakeholder.ensureCollection(),
         Issue.ensureCollection(),
         Build.ensureCollection(),
+        Branch.ensureCollection(),
         CommitStakeholderConnection.ensureCollection(),
         IssueStakeholderConnection.ensureCollection(),
         IssueCommitConnection.ensureCollection(),

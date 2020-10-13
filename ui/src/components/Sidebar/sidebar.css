@@ -23,4 +23,5 @@
   overflow-x: scroll;
   justify-content: start !important;
   overflow-y: hidden;
+  min-height: 3rem;
 }

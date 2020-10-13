@@ -251,6 +251,22 @@ const queryType = new gql.GraphQLObjectType({
             .toArray()[0];
         }
       },
+      branches: paginated({
+        type: require('./types/branch.js'),
+        args: {
+          sort: { type: Sort }
+        },
+        query: (root, args, limit) => {
+          let q = qb
+            .for('branch')
+            .in('branches')
+            .sort('branch.id', args.sort);
+
+          q = q.limit(limit.offset, limit.count).return('branch');
+
+          return q;
+        }
+      }),
       issueDateHistogram: makeDateHistogramEndpoint(issues)
     };
   }

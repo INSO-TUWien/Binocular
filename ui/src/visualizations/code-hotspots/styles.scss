@@ -6,24 +6,10 @@
 }
 
 
-.configContainer {
-  width: 100%;
-~
-  form {
-    width: 100%;
-
-    .selectContainer {
-      width: 100%;
-
-      >div {
-        width: 100%;
-
-        :global(.Select-arrow) {
-          display: none;
-        }
-      }
-    }
-  }
+.config{
+  width:100%;
+  height: 100%;
+  overflow: hidden;
 }
 
 .help {
@@ -93,6 +79,11 @@
   z-index: 999;
 }
 
+.error{
+  background-color: #ED4337DD !important;
+  color: white !important;
+}
+
 .loader {
   border: 16px solid #f3f3f3;
   border-top: 16px solid #3498db;
@@ -102,11 +93,19 @@
   animation: spin 2s linear infinite;
 }
 
-.config{
-  width:100%;
-}
-
 @keyframes spin {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
+}
+
+.w100{
+  width: 100%;
+}
+
+.mg1{
+  margin: 1rem;
+}
+
+.pr{
+  position: relative;
 }
