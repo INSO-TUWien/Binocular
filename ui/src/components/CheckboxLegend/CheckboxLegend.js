@@ -28,7 +28,7 @@ export default class CheckboxLegend extends React.Component {
     ;
   }
 
-  componentWillReceiveProps(nextProps, nextContext) {
+  UNSAFE_componentWillReceiveProps(nextProps, nextContext) {
     if(nextProps.palette && this.state.initialized === false) {
       let selected = Object.keys(nextProps.palette);
       this.setState({initialized: true, selected: selected}, () => this.props.onClick(selected));

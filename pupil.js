@@ -114,6 +114,7 @@ Repository.fromPath(ctx.targetPath)
     }
   });
 
+process.on('error', (error) => console.log(error));
 process.on('SIGINT', function() {
   if (ctx.quitRequested) {
     console.log('Shutting down immediately!');

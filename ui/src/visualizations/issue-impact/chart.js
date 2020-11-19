@@ -56,7 +56,7 @@ export default class IssueImpact extends React.PureComponent {
     this.onZoom = zoomUtils.onZoomFactory({ constrain: false });
   }
 
-  componentWillReceiveProps(nextProps) {
+  UNSAFE_componentWillReceiveProps(nextProps) {
     const { files, start, end, colors, issue, builds } = extractData(nextProps);
 
     this.setState({

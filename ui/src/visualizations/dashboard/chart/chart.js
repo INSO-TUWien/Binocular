@@ -35,7 +35,7 @@ export default class Dashboard extends React.Component {
    * Update computed commit data
    * @param nextProps props that are passed
    */
-  componentWillReceiveProps(nextProps) {
+  UNSAFE_componentWillReceiveProps(nextProps) {
     const {commitChartData, commitScale, commitPalette, selectedAuthors} = this.extractCommitData(nextProps);
     const {issueChartData, issueScale} = this.extractIssueData(nextProps);
     const {ciChartData, ciScale} = this.extractCIData(nextProps);

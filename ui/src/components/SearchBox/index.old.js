@@ -26,7 +26,7 @@ export default class SearchBox extends React.Component {
     _.merge(this.state, this.buildSuggestions(this.state.searchText, this.state.options));
   }
 
-  componentWillReceiveProps(nextProps) {
+  UNSAFE_componentWillReceiveProps(nextProps) {
     let searchText = nextProps.searchText;
 
     if (nextProps.value) {

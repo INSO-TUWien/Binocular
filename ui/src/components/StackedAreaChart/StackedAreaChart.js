@@ -77,8 +77,8 @@ export default class StackedAreaChart extends React.Component {
     let {brushArea, xAxis} = this.drawChart(svg, this.props.content, stackedData, area, brush, yScale, x, y, height, width, paddings);
 
     //Set callback for brush-zoom functionality
-    brush.on("end", () => {
-      this.updateZoom(d3.event.selection, x, xAxis, brush, brushArea, area)
+    brush.on("end", (event) => {
+      this.updateZoom(event.selection, x, xAxis, brush, brushArea, area)
     });
 
     //Set callback to reset zoom on double-click
@@ -205,8 +205,8 @@ export default class StackedAreaChart extends React.Component {
     let brushArea = svg.append('g');
     let resolution = this.props.resolution;
 
-    svg.on("wheel", () => {
-      var direction = d3.event.deltaY > 0 ? 'down' : 'up';
+    svg.on("wheel", (event) => {
+      var direction = event.deltaY > 0 ? 'down' : 'up';
       let zoomedDims = [...this.props.yDims];
       let top = zoomedDims[1], bottom = zoomedDims[0];
       if(this.props.keys && this.props.keys.length === 0)  //If everything is filtered, do nothing
@@ -284,12 +284,12 @@ export default class StackedAreaChart extends React.Component {
       tooltip.style('display', 'inline');
     }
     //Mousemove for tooltip
-    function mousemove(){
-      if(d3.event == null)
+    function mousemove(event){
+      if(event == null)
         return;
 
       //Calculate values and text for tooltip
-      let mouseoverDate = x.invert(d3.mouse(svg.node())[0]);
+      let mouseoverDate = x.invert(d3.pointer(event)[0]);
       let nearestDateIndex = bisectDate(rawData, mouseoverDate);
       let candidate1 = rawData[nearestDateIndex];
       let candidate2 = rawData[nearestDateIndex - 1];
@@ -310,8 +310,8 @@ export default class StackedAreaChart extends React.Component {
       tooltip
         .html(formattedDate +  '<hr/>' + '<div style=\"background: ' + palette[key] + '\">' + '</div>' + text + ": " + Math.round(value))
         .style('position', 'absolute')
-        .style('left', (d3.event.layerX - 20) + 'px')
-        .style('top', (d3.event.layerY - 70) + 'px');
+        .style('left', (event.layerX - 20) + 'px')
+        .style('top', (event.layerY - 70) + 'px');
       brushArea.select('.' + styles.indicatorLine)
         .remove();
       brushArea.selectAll('.' + styles.indicatorCircle)

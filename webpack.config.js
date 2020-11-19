@@ -3,8 +3,15 @@
 const webpack = require('webpack');
 const path = require('path');
 
-const cssModulesLoader =
-  'css-loader?modules&importLoaders=1&localIdentName=[name]__[local]__[hash:base64:5]';
+const cssModulesLoader = {
+  loader: 'css-loader',
+  options: {
+    importLoaders: 1,
+    modules: {
+      localIdentName: '[name]__[local]__[hash:base64:5]'
+    }
+  }
+}
 
 const cssLoaders = [
   // loaders for loading external css
@@ -12,20 +19,30 @@ const cssLoaders = [
     test: /\.s[ac]ss$/,
     include: path.resolve(__dirname, 'node_modules'),
     exclude: path.resolve(__dirname, 'ui'),
-    loaders: ['style-loader', 'css-loader', 'sass-loader']
+    use: [
+      { loader: 'style-loader' },
+      { loader: 'css-loader' },
+      { loader: 'sass-loader' }
+    ]
   },
   {
     test: /\.css$/,
     include: path.resolve(__dirname, 'node_modules'),
     exclude: path.resolve(__dirname, 'ui'),
-    loaders: ['style-loader', 'css-loader']
+    use: [
+      { loader: 'style-loader' },
+      { loader: 'css-loader' },
+    ]
   },
 
   // loaders for custom css
   {
     test: /\.css$/,
     exclude: path.resolve(__dirname, 'node_modules'),
-    loaders: ['style-loader', cssModulesLoader]
+    use: [
+      { loader: 'style-loader' },
+      cssModulesLoader
+    ]
   },
   {
     test: /\.s[ac]ss$/,
@@ -33,19 +50,27 @@ const cssLoaders = [
       path.resolve(__dirname, 'node_modules'),
       path.resolve(__dirname, 'ui/src/global.scss')
     ],
-    loaders: ['style-loader', cssModulesLoader, 'sass-loader']
+    use: [
+      { loader: 'style-loader' },
+      cssModulesLoader,
+      { loader: 'sass-loader' }
+    ]
   },
   {
     test: /global\.scss$/,
     include: path.resolve(__dirname, 'ui/src/global.scss'),
-    loaders: ['style-loader', 'css-loader', 'sass-loader']
+    use: [
+      { loader: 'style-loader' },
+      { loader: 'css-loader' },
+      { loader: 'sass-loader' }
+    ]
   }
 ];
 
 module.exports = {
+  mode: 'production',
   devtool: 'cheap-module-source-map',
   entry: [
-    require.resolve('babel-polyfill'),
     require.resolve('react-dev-utils/webpackHotDevClient'),
     require.resolve('react-error-overlay'),
     './ui/src/index'
@@ -55,13 +80,10 @@ module.exports = {
     pathinfo: true,
     filename: 'bundle.js',
     publicPath: 'assets/',
-    devtoolModuleFilenameTemplate: info =>
-      path.resolve(info.absoluteResourcePath).replace(/\\/g, '/')
   },
   module: {
     rules: [
       { test: /\.jsx?$/, exclude: /node_modules/, loader: 'babel-loader' },
-      { test: /\.json/, loader: 'json-loader' },
       ...cssLoaders,
       {
         test: /\.(ttf|eot|woff|svg)/,
@@ -72,10 +94,10 @@ module.exports = {
   },
   plugins: [
     new webpack.ProvidePlugin({
-      React: 'react'
+      React: 'react',
+      process: 'process/browser'
     }),
     new webpack.LoaderOptionsPlugin({ debug: true }),
-    new webpack.NamedModulesPlugin()
   ],
   devServer: {
     historyApiFallback: true,
@@ -92,6 +114,14 @@ module.exports = {
         target: 'ws://localhost:48763',
         ws: true
       }
+    }
+  },
+  resolve: {
+    alias: {
+      http: "stream-http",
+      https: "https-browserify",
+      stream: "stream-browserify",
+      zlib: "browserify-zlib"
     }
   }
 };

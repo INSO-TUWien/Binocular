@@ -23,13 +23,13 @@ export default class SearchBox extends React.Component {
     };
   }
 
-  componentWillMount() {
+  UNSAFE_componentWillMount() {
     if (!this.props.value) {
       this.search('');
     }
   }
 
-  componentWillReceiveProps(nextProps) {
+  UNSAFE_componentWillReceiveProps(nextProps) {
     if (nextProps.value) {
       const idx = _.findIndex(this.state.options, o => o === nextProps.value);
       this.setState({ selectedIndex: idx });

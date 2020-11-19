@@ -17,7 +17,7 @@ export default class FilterBox extends React.Component {
     _.merge(this.state, this.extractOptions(props));
   }
 
-  componentWillReceiveProps(nextProps) {
+  UNSAFE_componentWillReceiveProps(nextProps) {
     this.setState(this.extractOptions(nextProps));
   }
 

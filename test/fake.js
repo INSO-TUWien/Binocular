@@ -25,12 +25,10 @@ const neutralNouns = ['file', 'function', 'module', 'class', 'interface'];
 const positiveNouns = ['feature', 'function', 'documentation', ...neutralNouns];
 const negativeNouns = ['problem', 'bug', 'issue', ...neutralNouns];
 
-const mt = Random.engines.mt19937();
+// seed with a fixed value for reproducible tests
+const mt = Random.MersenneTwister19937.seed(4); // chosen by fair dice roll, guaranteed to be random ;)
 
-// seed with a fixed value for reproducacble tests
-mt.seed(4); // chosen by fair dice roll, guaranteed to be random ;)
-
-const random = new Random(mt);
+const random = new Random.Random(mt);
 
 const fake = {
   integer: function(...args) {
@@ -115,7 +113,7 @@ const fake = {
     const ret = {};
 
     _.each(units, function(unit) {
-      ret[unit] = () => lorem({ count, units: unit });
+      ret[unit] = () => lorem.loremIpsum({ count: count, units: unit });
     });
 
     return ret;

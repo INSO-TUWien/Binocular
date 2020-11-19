@@ -9,7 +9,7 @@ export default class Message extends React.Component {
     this.state = {};
   }
 
-  componentWillReceiveProps(nextProps) {
+  UNSAFE_componentWillReceiveProps(nextProps) {
     console.log('next children:', nextProps.children);
     _.each(nextProps.children, child => {
       console.log(child.props);

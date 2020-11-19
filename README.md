@@ -21,7 +21,7 @@ thing - naming is hard `¯\_(ツ)_/¯`.
 
 ## Dependencies
 
-* node.js >= 8
+* node.js >= 10.23.0
 * ArangoDB (tested with 3.1.28)
 
 ## Installation

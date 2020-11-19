@@ -27,9 +27,9 @@ export default class LegendCompact extends React.Component {
       <svg className={styles.icon} width={ICON_WIDTH} height={ICON_HEIGHT}>
         {rects}
       </svg>
-      <text>
+      <span>
         {this.props.text}
-      </text>
+      </span>
     </div>);
   }
 }
