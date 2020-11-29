@@ -1,0 +1,38 @@
+@import '~bulma';
+
+$color-width: 14px;
+$border-radius: 2px;
+
+.container {
+  width: calc(#{$color-width} + #{$border-radius});
+  margin-left: 10px;
+  margin-right: 10px;
+}
+.color {
+  width: #{$color-width};
+  height: #{$color-width};
+  border-radius: #{$border-radius};
+}
+
+.swatch {
+  padding: 5px;
+  background: #fff;
+  border-radius: 1px;
+  box-shadow: 0 0 0 1px rgba(0,0,0,.1);
+  display: inline-block;
+  cursor: pointer;
+}
+
+.popover {
+  position: absolute;
+  z-index: 2;
+  right: -8px;
+}
+
+.cover {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+}

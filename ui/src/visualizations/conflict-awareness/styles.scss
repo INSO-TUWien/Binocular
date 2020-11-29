@@ -1,0 +1,39 @@
+@import '~bulma';
+
+.configContainer {
+  width: 100%;
+
+  form {
+    width: 100%;
+
+    .selectContainer {
+      width: 100%;
+
+      >div {
+        width: 100%;
+
+        :global(.Select-arrow) {
+          display: none;
+        }
+      }
+    }
+  }
+}
+
+.colorPickContainer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.branchSelectionContainer {
+  border: 2px solid #ccc;
+  width: 100%;
+  height: 150px;
+}
+
+.colorPickLabel {
+  @extend .label;
+  width: 100%;
+  margin-bottom: 0 !important;
+}
