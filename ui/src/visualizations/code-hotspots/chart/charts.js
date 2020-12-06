@@ -1,20 +1,30 @@
 import * as d3 from 'd3';
 import ColorMixer from './helper/colorMixer';
+import DeveloperList from './helper/developerList';
+import HunkHandler from './helper/hunkHandler';
+
 import _ from 'lodash';
 
 let HEATMAP_LOW_COLOR = '#ABEBC6';
 let HEATMAP_HEIGHT_COLOR = '#E6B0AA';
+let EVEN_COLOR = '#FFFFFFFF';
+let ODD_COLOR = '#EEEEEE55';
 
 
 
 export default class charts {
-  static updateAllChartsWithChanges(rawData,lines,path,currThis){
+  static updateAllChartsWithChangesPerVersion(rawData,lines,path,currThis){
     let data=[];
     let commits=0;
+
+    let legendSteps = 20;
+
+    let maxValue =0;
+
     for (let i in rawData.data) {
       let commit = rawData.data[i];
       for (let j = 0; j < lines; j++) {
-        data.push({"version":i,"row":j,"value":0,"message":commit.message,"sha":commit.sha,"signature":commit.signature})
+        data.push({"column":i,"row":j,"value":0,"message":commit.message,"sha":commit.sha,"signature":commit.signature})
       }
 
 
@@ -23,43 +33,68 @@ export default class charts {
       if(file!==undefined){
         for (let j in file.hunks) {
           let hunk = file.hunks[j];
-          for (let k = 0; k < hunk.newLines; k++) {
-            let cellIndex = _.findIndex(data,{version:i,row:hunk.newStart+k-1});
-            if(cellIndex!==-1){
-              data[cellIndex].value += 1;
-            }
-          }
-          for (let k = 0; k < hunk.oldLines; k++) {
-            let cellIndex = _.findIndex(data,{version:i,row:hunk.oldStart+k-1});
-            if(cellIndex!==-1){
-              data[cellIndex].value += 1;
-            }
+          let tmpMaxValue = HunkHandler.handle(hunk,data,i,maxValue);
+          if(tmpMaxValue>maxValue){
+            maxValue=tmpMaxValue;
           }
         }
         commits++;
       }
     }
-    this.generateRowSummary(data,lines);
-    this.generateHeatmap(data,lines,commits);
-    this.generateBarChart(data,commits,currThis);
+    this.generateRowSummary(data,lines,0,legendSteps);
+    this.generateHeatmap(data,lines,commits,0,maxValue,legendSteps);
+    this.generateBarChart(data,commits,currThis,0,legendSteps);
   }
 
-  static generateHeatmap(data,lines,commits){
+  static updateAllChartsWithChangesPerDeveloper(rawData,lines,path,currThis){
+    let data=[];
+    let devs = [];
+
+    let legendSteps = 20;
+
+    let maxValue =0;
+
+    for (let commit of rawData.data) {
+      if(!devs.includes(commit.signature)){
+        devs.push(commit.signature);
+      }
+    }
+
+    for (let i in devs){
+      for (let j = 0; j < lines; j++) {
+        data.push({"column":i,"row":j,"value":0,"message":"","sha":"","signature":devs[i]})
+      }
+    }
+
+    for (let i in rawData.data) {
+      let commit = rawData.data[i];
+      let files = commit.files.data;
+      let file = _.filter(files, {file:{path: path}})[0];
+      if(file!==undefined){
+        for (let j in file.hunks) {
+          let hunk = file.hunks[j];
+          let tmpMaxValue = HunkHandler.handle(hunk,data,devs.indexOf(commit.signature),maxValue);
+          if(tmpMaxValue>maxValue){
+            maxValue=tmpMaxValue;
+          }
+        }
+      }
+    }
+    this.generateRowSummary(data,lines,1,legendSteps);
+    this.generateHeatmap(data,lines,devs.length,1,maxValue,legendSteps);
+    this.generateBarChart(data,devs.length,currThis,1,legendSteps);
+
+  }
+
+  static generateHeatmap(data,lines,columns,mode,maxValue,legendSteps){
 
     d3.select('.chartHeatmap > *').remove();
 
-    const legendData = [
-      {'interval': 0.5, 'color': ColorMixer.mix(HEATMAP_LOW_COLOR,HEATMAP_HEIGHT_COLOR,0)},
-      {'interval': 1, 'color': ColorMixer.mix(HEATMAP_LOW_COLOR,HEATMAP_HEIGHT_COLOR,0.1)},
-      {'interval': 1.5, 'color': ColorMixer.mix(HEATMAP_LOW_COLOR,HEATMAP_HEIGHT_COLOR,0.2)},
-      {'interval': 2, 'color': ColorMixer.mix(HEATMAP_LOW_COLOR,HEATMAP_HEIGHT_COLOR,0.3)},
-      {'interval': 2.5, 'color': ColorMixer.mix(HEATMAP_LOW_COLOR,HEATMAP_HEIGHT_COLOR,0.4)},
-      {'interval': 3, 'color': ColorMixer.mix(HEATMAP_LOW_COLOR,HEATMAP_HEIGHT_COLOR,0.5)},
-      {'interval': 3.5, 'color': ColorMixer.mix(HEATMAP_LOW_COLOR,HEATMAP_HEIGHT_COLOR,0.6)},
-      {'interval': 4, 'color': ColorMixer.mix(HEATMAP_LOW_COLOR,HEATMAP_HEIGHT_COLOR,0.7)},
-      {'interval': 4.5, 'color': ColorMixer.mix(HEATMAP_LOW_COLOR,HEATMAP_HEIGHT_COLOR,0.8)},
-      {'interval': 5, 'color': ColorMixer.mix(HEATMAP_LOW_COLOR,HEATMAP_HEIGHT_COLOR,0.9)}
-    ];
+    const legendData = [];
+
+    for (let i = 1; i <= legendSteps; i++) {
+      legendData.push({'interval': maxValue/legendSteps*i, 'color': ColorMixer.mix(HEATMAP_LOW_COLOR,HEATMAP_HEIGHT_COLOR,1.0/legendSteps*i)})
+    }
 
     const width = document.getElementsByClassName("CodeMirror")[0].clientWidth-80,
       height = 24*lines,
@@ -74,11 +109,18 @@ export default class charts {
       .attr('transform','translate(' + margins.left + ',' + margins.top + ')');
 
 
-    const barWidth = width / commits,
+    const barWidth = width / columns,
       barHeight = 24;
 
     const colorScale = d => {
       for (let i = 0; i < legendData.length; i++) {
+        if(d.value===0){
+          if(d.row%2===0){
+            return EVEN_COLOR;
+          }else{
+            return ODD_COLOR;
+          }
+        }
         if (d.value < legendData[i].interval) {
           return legendData[i].color;
         }
@@ -89,42 +131,54 @@ export default class charts {
     chart.selectAll('g')
       .data(data).enter().append('g')
       .append('rect')
-      .attr('x', d => {return (d.version - 0) * barWidth})
+      .attr('x', d => {return (d.column - 0) * barWidth})
       .attr('y', d => {return (d.row - 1) * barHeight})
       .style('fill', colorScale)
       .attr('width', barWidth)
       .attr('height', barHeight)
   }
 
-  static generateRowSummary(data,lines){
+  static generateRowSummary(data,lines,mode,legendSteps){
     d3.select('.chartRow').remove();
     d3.select('.tooltipRow').remove();
 
     let combinedData=[]
     let maxValue =0;
 
-    for (let i = 0; i < data.length; i++) {
-      if(combinedData[data[i].row]==undefined){
-        combinedData[data[i].row]={"version":data[i].version,"row":data[i].row,"value":data[i].value};
-      }else{
-        combinedData[data[i].row].value += data[i].value;
-        if(combinedData[data[i].row].value>maxValue){
-          maxValue=combinedData[data[i].row].value;
+    switch (mode){
+      case 1:
+        for (let i = 0; i < data.length; i++) {
+          if(combinedData[data[i].row]===undefined){
+            combinedData[data[i].row]={"column":data[i].column,"row":data[i].row,"value":data[i].value,"developer":[]};
+            combinedData[data[i].row].developer.push({"signature":data[i].signature,"value":data[i].value})
+          }else{
+            combinedData[data[i].row].value += data[i].value;
+            combinedData[data[i].row].developer.push({"signature":data[i].signature,"value":data[i].value})
+            if(combinedData[data[i].row].value>maxValue){
+              maxValue=combinedData[data[i].row].value;
+            }
+          }
         }
-      }
+        break;
+      default:
+        for (let i = 0; i < data.length; i++) {
+          if(combinedData[data[i].row]===undefined){
+            combinedData[data[i].row]={"column":data[i].column,"row":data[i].row,"value":data[i].value};
+          }else{
+            combinedData[data[i].row].value += data[i].value;
+            if(combinedData[data[i].row].value>maxValue){
+              maxValue=combinedData[data[i].row].value;
+            }
+          }
+        }
+        break;
     }
-    const legendData = [
-      {'interval': maxValue/10, 'color': ColorMixer.mix(HEATMAP_LOW_COLOR,HEATMAP_HEIGHT_COLOR,0.1)},
-      {'interval': maxValue/10*2, 'color': ColorMixer.mix(HEATMAP_LOW_COLOR,HEATMAP_HEIGHT_COLOR,0.2)},
-      {'interval': maxValue/10*3, 'color': ColorMixer.mix(HEATMAP_LOW_COLOR,HEATMAP_HEIGHT_COLOR,0.3)},
-      {'interval': maxValue/10*4, 'color': ColorMixer.mix(HEATMAP_LOW_COLOR,HEATMAP_HEIGHT_COLOR,0.4)},
-      {'interval': maxValue/10*5, 'color': ColorMixer.mix(HEATMAP_LOW_COLOR,HEATMAP_HEIGHT_COLOR,0.5)},
-      {'interval': maxValue/10*6, 'color': ColorMixer.mix(HEATMAP_LOW_COLOR,HEATMAP_HEIGHT_COLOR,0.6)},
-      {'interval': maxValue/10*7, 'color': ColorMixer.mix(HEATMAP_LOW_COLOR,HEATMAP_HEIGHT_COLOR,0.7)},
-      {'interval': maxValue/10*8, 'color': ColorMixer.mix(HEATMAP_LOW_COLOR,HEATMAP_HEIGHT_COLOR,0.8)},
-      {'interval': maxValue/10*9, 'color': ColorMixer.mix(HEATMAP_LOW_COLOR,HEATMAP_HEIGHT_COLOR,0.9)},
-      {'interval': maxValue, 'color': ColorMixer.mix(HEATMAP_LOW_COLOR,HEATMAP_HEIGHT_COLOR,1)}
-    ];
+
+    const legendData = [];
+
+    for (let i = 1; i <= legendSteps; i++) {
+      legendData.push({'interval': maxValue/legendSteps*i, 'color': ColorMixer.mix(HEATMAP_LOW_COLOR,HEATMAP_HEIGHT_COLOR,1.0/legendSteps*i)})
+    }
 
 
     const width = 28,
@@ -162,67 +216,97 @@ export default class charts {
       .style("opacity", 0)
       .style("background-color", "#FFFFFFDD")
       .style("box-shadow", "0px 0px 10px #555555")
-      .style("max-width","30rem")
+      .style("width","40rem")
       .style("border-radius","4px")
       .style("padding","1rem");
 
     //chart
-    chart.selectAll('g')
-      .data(combinedData).enter().append('g')
-      .append('rect')
-      .attr('x', d => {return (d.version - 0) * barWidth})
-      .attr('y', d => {return (d.row - 1) * barHeight})
-      .style('fill', colorScale)
-      .attr('width', barWidth)
-      .attr('height', barHeight)
-      .attr('z-index', "10")
-      .on("mouseover", function(d,i) {
-        div.transition()
-          .duration(200)
-          .style("opacity", 1);
-        div	.html("<div style='font-weight: bold'>Row: "+d.row+"</div>" +
-          "<div>Changes: "+d.value+"</div>")
-          .style("right", (30) + "px")
-          .style("top", ((d.row) * barHeight) + "px");
-      })
-      .on("mouseout", function(d) {
-        div.transition()
-          .duration(500)
-          .style("opacity", 0);
-      });
+
+    switch (mode){
+      case 1:
+        chart.selectAll('g')
+          .data(combinedData).enter().append('g')
+          .append('rect')
+          .attr('x', d => {return (d.column - 0) * barWidth})
+          .attr('y', d => {return (d.row - 1) * barHeight})
+          .style('fill', colorScale)
+          .attr('width', barWidth)
+          .attr('height', barHeight)
+          .attr('z-index', "10")
+          .on("mouseover", function(d,i) {
+            div.transition()
+              .duration(200)
+              .style("opacity", 1);
+            div	.html("<div style='font-weight: bold'>Row: "+(d.row+1)+"</div>" +
+              "<div>Changes: "+d.value+"</div>"+
+              "<hr>"+
+              DeveloperList.generate(d.developer)
+              )
+              .style("right", (30) + "px")
+              .style("top", ((d.row) * barHeight) + "px");
+          })
+          .on("mouseout", function(d) {
+            div.transition()
+              .duration(500)
+              .style("opacity", 0);
+          });
+
+        break;
+      default:
+        chart.selectAll('g')
+          .data(combinedData).enter().append('g')
+          .append('rect')
+          .attr('x', d => {return (d.column - 0) * barWidth})
+          .attr('y', d => {return (d.row - 1) * barHeight})
+          .style('fill', colorScale)
+          .attr('width', barWidth)
+          .attr('height', barHeight)
+          .attr('z-index', "10")
+          .on("mouseover", function(d,i) {
+            div.transition()
+              .duration(200)
+              .style("opacity", 1);
+            div	.html("<div style='font-weight: bold'>Row: "+(d.row+1)+"</div>" +
+              "<div>Changes: "+d.value+"</div>")
+              .style("right", (30) + "px")
+              .style("top", ((d.row) * barHeight) + "px");
+          })
+          .on("mouseout", function(d) {
+            div.transition()
+              .duration(500)
+              .style("opacity", 0);
+          });
+
+        break;
+    }
+
+
   }
 
-  static generateBarChart(data,commits,currThis) {
-    d3.select('.chartVersion').remove();
-    d3.select('.tooltipVersion').remove();
+  static generateBarChart(data,columns,currThis,mode,legendSteps) {
+    d3.select('.chartColumns').remove();
+    d3.select('.tooltipColumns').remove();
 
 
     let combinedData = []
     let maxValue = 0;
 
     for (let i = 0; i < data.length; i++) {
-      if (combinedData[data[i].version] == undefined) {
-        combinedData[data[i].version] = {"version": data[i].version, "row": data[i].row, "value": data[i].value,"message":data[i].message,"sha":data[i].sha,"signature":data[i].signature};
+      if (combinedData[data[i].column] === undefined) {
+        combinedData[data[i].column] = {"column": data[i].column, "row": data[i].row, "value": data[i].value,"message":data[i].message,"sha":data[i].sha,"signature":data[i].signature};
       } else {
-        combinedData[data[i].version].value += data[i].value;
-        if (combinedData[data[i].version].value > maxValue) {
-          maxValue = combinedData[data[i].version].value;
+        combinedData[data[i].column].value += data[i].value;
+        if (combinedData[data[i].column].value > maxValue) {
+          maxValue = combinedData[data[i].column].value;
         }
       }
     }
 
-    const legendData = [
-      {'interval': maxValue / 10, 'color': ColorMixer.mix(HEATMAP_LOW_COLOR, HEATMAP_HEIGHT_COLOR, 0.1)},
-      {'interval': maxValue / 10 * 2, 'color': ColorMixer.mix(HEATMAP_LOW_COLOR, HEATMAP_HEIGHT_COLOR, 0.2)},
-      {'interval': maxValue / 10 * 3, 'color': ColorMixer.mix(HEATMAP_LOW_COLOR, HEATMAP_HEIGHT_COLOR, 0.3)},
-      {'interval': maxValue / 10 * 4, 'color': ColorMixer.mix(HEATMAP_LOW_COLOR, HEATMAP_HEIGHT_COLOR, 0.4)},
-      {'interval': maxValue / 10 * 5, 'color': ColorMixer.mix(HEATMAP_LOW_COLOR, HEATMAP_HEIGHT_COLOR, 0.5)},
-      {'interval': maxValue / 10 * 6, 'color': ColorMixer.mix(HEATMAP_LOW_COLOR, HEATMAP_HEIGHT_COLOR, 0.6)},
-      {'interval': maxValue / 10 * 7, 'color': ColorMixer.mix(HEATMAP_LOW_COLOR, HEATMAP_HEIGHT_COLOR, 0.7)},
-      {'interval': maxValue / 10 * 8, 'color': ColorMixer.mix(HEATMAP_LOW_COLOR, HEATMAP_HEIGHT_COLOR, 0.8)},
-      {'interval': maxValue / 10 * 9, 'color': ColorMixer.mix(HEATMAP_LOW_COLOR, HEATMAP_HEIGHT_COLOR, 0.9)},
-      {'interval': maxValue, 'color': ColorMixer.mix(HEATMAP_LOW_COLOR, HEATMAP_HEIGHT_COLOR, 10)}
-    ];
+    const legendData = [];
+
+    for (let i = 1; i <= legendSteps; i++) {
+      legendData.push({'interval': maxValue/legendSteps*i, 'color': ColorMixer.mix(HEATMAP_LOW_COLOR,HEATMAP_HEIGHT_COLOR,1.0/legendSteps*i)})
+    }
 
     const colorScale = d => {
       for (let i = 0; i < legendData.length; i++) {
@@ -241,7 +325,7 @@ export default class charts {
       .append("svg")
       .attr("width", w)
       .attr("height", h)
-      .attr("class", "chartVersion");
+      .attr("class", "chartColumns");
 
     //Background
     let groupBack = barChart
@@ -256,9 +340,9 @@ export default class charts {
       .append("rect")
       .attr("fill", "#EEEEEE88")
       .attr("class", "sBar")
-      .attr("x", (d, i) => i * w / commits)
+      .attr("x", (d, i) => i * w / columns)
       .attr("y", 0)
-      .attr("width", w / commits)
+      .attr("width", w / columns)
       .attr("height", h);
 
 
@@ -275,11 +359,11 @@ export default class charts {
       .append("rect")
       .attr("fill", colorScale)
       .attr("class", "sBar")
-      .attr("x", (d, i) => i * w / commits)
+      .attr("x", (d, i) => i * w / columns)
       .attr("y", (d, i) => {
         return h - h / maxValue * d.value;
       })
-      .attr("width", w / commits)
+      .attr("width", w / columns)
       .attr("height", (d, i) => {
         return h / maxValue * d.value;
       });
@@ -289,7 +373,7 @@ export default class charts {
     let div = d3
       .select('.barChart')
       .append("div")
-      .attr("class", "tooltipVersion")
+      .attr("class", "tooltipColumns")
       .style("position", "absolute")
       .style("opacity", 0)
       .style("background-color", "#FFFFFFDD")
@@ -305,38 +389,72 @@ export default class charts {
       .attr("width", w)
       .attr("height", h)
       .attr("class", "info");
-    groupInfo
-      .selectAll("rect")
-      .data(combinedData)
-      .enter()
-      .append("rect")
-      .attr("fill", "#00000000")
-      .attr("class", "sBar")
-      .attr("x", (d, i) => i * w / commits)
-      .attr("y", 0)
-      .attr("width", w / commits)
-      .attr("height", h)
-      .on("mouseover", function(d,i) {
-        div.transition()
-          .duration(200)
-          .style("opacity", 1);
-        div	.html("<div style='font-weight: bold'>Version: "+d.version+"</div>" +
-          "<div>"+d.message+"</div>"+
-          "<hr>"+
-          "<div>"+d.signature+"</div>"+
-          "<hr>"+
-          "<div>Changes: "+d.value+"</div>")
-          .style("right", (w-(i * w / commits)-300)>0?(w-(i * w / commits)-300):0 + "px")
-          .style("top", (h) + "px");
-      })
-      .on("mouseout", function(d) {
-        div.transition()
-          .duration(500)
-          .style("opacity", 0);
-      })
-      .on("click",function(d){
-        currThis.setState({sha:d.sha})
-      });
+
+    switch (mode){
+      case 1:
+        groupInfo
+          .selectAll("rect")
+          .data(combinedData)
+          .enter()
+          .append("rect")
+          .attr("fill", "#00000000")
+          .attr("class", "sBar")
+          .attr("x", (d, i) => i * w / columns)
+          .attr("y", 0)
+          .attr("width", w / columns)
+          .attr("height", h)
+          .on("mouseover", function(d,i) {
+            div.transition()
+              .duration(200)
+              .style("opacity", 1);
+            div	.html("<div style='font-weight: bold'>Developer: "+(parseInt(d.column)+1)+"</div>" +
+              "<div>"+d.signature+"</div>"+
+              "<hr>"+
+              "<div>Changes: "+d.value+"</div>")
+              .style("right", (w-(i * w / columns)-300)>0?(w-(i * w / columns)-300):0 + "px")
+              .style("top", (h) + "px");
+          })
+          .on("mouseout", function(d) {
+            div.transition()
+              .duration(500)
+              .style("opacity", 0);
+          });
+        break;
+      default:
+        groupInfo
+          .selectAll("rect")
+          .data(combinedData)
+          .enter()
+          .append("rect")
+          .attr("fill", "#00000000")
+          .attr("class", "sBar")
+          .attr("x", (d, i) => i * w / columns)
+          .attr("y", 0)
+          .attr("width", w / columns)
+          .attr("height", h)
+          .on("mouseover", function(d,i) {
+            div.transition()
+              .duration(200)
+              .style("opacity", 1);
+            div	.html("<div style='font-weight: bold'>Version: "+d.column+"</div>" +
+              "<div>"+d.message+"</div>"+
+              "<hr>"+
+              "<div>"+d.signature+"</div>"+
+              "<hr>"+
+              "<div>Changes: "+d.value+"</div>")
+              .style("right", (w-(i * w / columns)-300)>0?(w-(i * w / columns)-300):0 + "px")
+              .style("top", (h) + "px");
+          })
+          .on("mouseout", function(d) {
+            div.transition()
+              .duration(500)
+              .style("opacity", 0);
+          })
+          .on("click",function(d){
+            currThis.setState({sha:d.sha})
+          });
+        break;
+    }
   }
 
 }

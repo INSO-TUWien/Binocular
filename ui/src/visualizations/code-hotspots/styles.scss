@@ -98,6 +98,15 @@
   100% { transform: rotate(360deg); }
 }
 
+.menubar{
+  background-color: #EEEEEE;
+}
+
+.selected{
+  background-color: #3273dc;
+  color: whitesmoke !important;
+}
+
 .w100{
   width: 100%;
 }
@@ -109,3 +118,8 @@
 .pr{
   position: relative;
 }
+
+.inline{
+  display: inline;
+}
+

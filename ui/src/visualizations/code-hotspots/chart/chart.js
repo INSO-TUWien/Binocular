@@ -43,7 +43,8 @@ export default class CodeHotspots extends React.PureComponent {
       branch:"master",
       fileURL:"",
       path:"",
-      sha:""
+      sha:"",
+      mode:0  //modes: 0...Changes/Version  1...Changes/Developer
     };
   }
 
@@ -64,7 +65,21 @@ export default class CodeHotspots extends React.PureComponent {
 
     return (<div className={styles.w100}>
         <div className={"loadingContainer"}></div>
+
         <div className={styles.w100}>
+          <div className={styles.menubar}>
+            <div className={styles.inline}><button id={"CpVButton"}  className={"button "+styles.mg1+" "+styles.selected} onClick={(e)=>{
+              this.setState({mode:0});
+              document.getElementById("CpVButton").classList.add(styles.selected);
+              document.getElementById("CpDButton").classList.remove(styles.selected);
+
+            }}>Changes/Version</button></div>
+            <div className={styles.inline}><button id={"CpDButton"} className={"button "+styles.mg1} onClick={(e)=>{
+              this.setState({mode:1});
+              document.getElementById("CpVButton").classList.remove(styles.selected);
+              document.getElementById("CpDButton").classList.add(styles.selected);
+            }}>Changes/Developer</button></div>
+          </div>
           {
             this.state.sha!==""&&
             <div><button className={"button "+styles.mg1} onClick={(e)=>{
@@ -107,11 +122,22 @@ export default class CodeHotspots extends React.PureComponent {
       xhr.onload = function (e) {
         if (xhr.readyState === 4) {
           if (xhr.status === 200) {
-            let lines = xhr.responseText.split(/\r\n|\r|\n/).length
-            let path = this.state.path
+            let lines = xhr.responseText.split(/\r\n|\r|\n/).length;
+            let path = this.state.path;
+            let mode = this.state.mode;
             let currThis = this;
             vcsData.getChangeData(path).then(function (resp){
-              charts.updateAllChartsWithChanges(resp,lines,path,currThis);
+              switch (mode){
+                case 0:
+                  charts.updateAllChartsWithChangesPerVersion(resp,lines,path,currThis);
+                  break;
+                case 1:
+                  charts.updateAllChartsWithChangesPerDeveloper(resp,lines,path,currThis);
+                  break;
+                default:
+                  charts.updateAllChartsWithChangesPerVersion(resp,lines,path,currThis);
+                  break;
+              }
               currThis.setState({code: xhr.responseText});
               Loading.remove();
             });
