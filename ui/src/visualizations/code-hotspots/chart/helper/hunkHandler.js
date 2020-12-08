@@ -14,6 +14,7 @@ export default class HunkHandler {
         }
       }
     }
+
     for (let k = 0; k < hunk.oldLines; k++) {
       let cellIndex = _.findIndex(data,{column:""+column,row:hunk.oldStart+k-1});
       if(cellIndex!==-1){

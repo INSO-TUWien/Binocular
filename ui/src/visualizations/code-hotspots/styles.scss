@@ -44,15 +44,17 @@
 }
 
 .codeView{
-  height: calc(100vh - 100px);
+  height: calc(100vh - 130px);
   overflow-y: scroll;
+  overflow-x: hidden;
   position: absolute;
   top:100px;
   width: 100%;
 }
 
 .heatmapContainer{
-  margin: 0;
+  width: 100%;
+  margin: 0 0 0 40px;
 }
 .rowSummaryContainer{
   margin: 0;
@@ -64,6 +66,7 @@
 .barChartContainer{
   position: absolute;
   left: 40px;
+  width: calc(100% - 120px);
 }
 
 .loaderContainer{
@@ -100,6 +103,7 @@
 
 .menubar{
   background-color: #EEEEEE;
+  margin-bottom: 1rem;
 }
 
 .selected{

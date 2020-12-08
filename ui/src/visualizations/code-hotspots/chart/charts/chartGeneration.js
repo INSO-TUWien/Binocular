@@ -25,15 +25,17 @@ export default class chartGeneration {
       legendData.push({'interval': maxValue/legendSteps*i, 'color': ColorMixer.mix(HEATMAP_LOW_COLOR,HEATMAP_HEIGH_COLOR,1.0/legendSteps*i)})
     }
 
-    const width = document.getElementsByClassName("CodeMirror")[0].clientWidth-80,
+    const width = document.getElementById('barChartContainer').clientWidth,
       height = 24*lines,
-      margins = {top:28, right: 0, bottom: 0, left: 40};
+      margins = {top:28, right: 0, bottom: 0, left: 0};
 
 
     //Setting chart width and adjusting for margins
     const chart = d3.select('.chartHeatmap')
-      .attr('width', width + margins.right + margins.left)
+      .attr('width', "calc(100% - 105px)")
       .attr('height', height + margins.top + margins.bottom)
+      .attr("viewBox","0 0 "+width+" "+height)
+      .attr('preserveAspectRatio','none')
       .append('g')
       .attr('transform','translate(' + margins.left + ',' + margins.top + ')');
 
@@ -265,8 +267,10 @@ export default class chartGeneration {
     const barChart = d3
       .select('.barChart')
       .append("svg")
-      .attr("width", w)
+      .attr("width", '100%')
       .attr("height", h)
+      .attr("viewBox","0 0 "+w+" "+h)
+      .attr('preserveAspectRatio','none')
       .attr("class", "chartColumns");
 
     //Background

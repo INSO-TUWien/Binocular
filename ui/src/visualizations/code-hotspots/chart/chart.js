@@ -117,7 +117,7 @@ export default class CodeHotspots extends React.PureComponent {
                 <div className='chartRowSummary'></div>
               </div>
             </div >
-            <div className={styles.barChartContainer}>
+            <div id={"barChartContainer"} className={styles.barChartContainer}>
               <div className={'barChart'}></div>
             </div>
           </div>
