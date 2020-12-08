@@ -41,7 +41,7 @@ const CodeHotspotsConfigComponent = props => {
   }
   return (
     <div className={styles.config}>
-      <div className={"label"}> Branch:</div>
+      <div className={styles.label}> Branch:</div>
       <div className={"select"}>
         <select value={props.branch} onChange={e => {
           props.onSetBranch(e.target.value)}}>

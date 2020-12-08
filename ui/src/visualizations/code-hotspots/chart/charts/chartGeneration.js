@@ -1,99 +1,28 @@
 import * as d3 from 'd3';
-import ColorMixer from './helper/colorMixer';
-import DeveloperList from './helper/developerList';
-import HunkHandler from './helper/hunkHandler';
-
-import _ from 'lodash';
+import ColorMixer from '../helper/colorMixer';
+import DeveloperList from '../helper/developerList';
 
 let HEATMAP_LOW_COLOR = '#ABEBC6';
-let HEATMAP_HEIGHT_COLOR = '#E6B0AA';
+let HEATMAP_HEIGH_COLOR = '#E6B0AA';
+let HEATMAP_MAX_COLOR = '#d5796f';
 let EVEN_COLOR = '#FFFFFFFF';
 let ODD_COLOR = '#EEEEEE55';
 
-
-
-export default class charts {
-  static updateAllChartsWithChangesPerVersion(rawData,lines,path,currThis){
-    let data=[];
-    let commits=0;
-
-    let legendSteps = 20;
-
-    let maxValue =0;
-
-    for (let i in rawData.data) {
-      let commit = rawData.data[i];
-      for (let j = 0; j < lines; j++) {
-        data.push({"column":i,"row":j,"value":0,"message":commit.message,"sha":commit.sha,"signature":commit.signature})
-      }
-
-
-      let files = commit.files.data;
-      let file = _.filter(files, {file:{path: path}})[0];
-      if(file!==undefined){
-        for (let j in file.hunks) {
-          let hunk = file.hunks[j];
-          let tmpMaxValue = HunkHandler.handle(hunk,data,i,maxValue);
-          if(tmpMaxValue>maxValue){
-            maxValue=tmpMaxValue;
-          }
-        }
-        commits++;
-      }
-    }
-    this.generateRowSummary(data,lines,0,legendSteps);
-    this.generateHeatmap(data,lines,commits,0,maxValue,legendSteps);
-    this.generateBarChart(data,commits,currThis,0,legendSteps);
-  }
-
-  static updateAllChartsWithChangesPerDeveloper(rawData,lines,path,currThis){
-    let data=[];
-    let devs = [];
-
-    let legendSteps = 20;
-
-    let maxValue =0;
-
-    for (let commit of rawData.data) {
-      if(!devs.includes(commit.signature)){
-        devs.push(commit.signature);
-      }
-    }
-
-    for (let i in devs){
-      for (let j = 0; j < lines; j++) {
-        data.push({"column":i,"row":j,"value":0,"message":"","sha":"","signature":devs[i]})
-      }
-    }
-
-    for (let i in rawData.data) {
-      let commit = rawData.data[i];
-      let files = commit.files.data;
-      let file = _.filter(files, {file:{path: path}})[0];
-      if(file!==undefined){
-        for (let j in file.hunks) {
-          let hunk = file.hunks[j];
-          let tmpMaxValue = HunkHandler.handle(hunk,data,devs.indexOf(commit.signature),maxValue);
-          if(tmpMaxValue>maxValue){
-            maxValue=tmpMaxValue;
-          }
-        }
-      }
-    }
-    this.generateRowSummary(data,lines,1,legendSteps);
-    this.generateHeatmap(data,lines,devs.length,1,maxValue,legendSteps);
-    this.generateBarChart(data,devs.length,currThis,1,legendSteps);
-
-  }
-
-  static generateHeatmap(data,lines,columns,mode,maxValue,legendSteps){
+export default class chartGeneration {
+  static generateHeatmap(data,lines,columns,currThis,mode,maxValue,legendSteps){
 
     d3.select('.chartHeatmap > *').remove();
 
     const legendData = [];
 
+    if(!currThis.state.dataScaleMode){
+      maxValue = currThis.state.dataScaleHeatmap;
+    }else{
+      currThis.state.dataScaleHeatmap = maxValue;
+    }
+
     for (let i = 1; i <= legendSteps; i++) {
-      legendData.push({'interval': maxValue/legendSteps*i, 'color': ColorMixer.mix(HEATMAP_LOW_COLOR,HEATMAP_HEIGHT_COLOR,1.0/legendSteps*i)})
+      legendData.push({'interval': maxValue/legendSteps*i, 'color': ColorMixer.mix(HEATMAP_LOW_COLOR,HEATMAP_HEIGH_COLOR,1.0/legendSteps*i)})
     }
 
     const width = document.getElementsByClassName("CodeMirror")[0].clientWidth-80,
@@ -125,7 +54,7 @@ export default class charts {
           return legendData[i].color;
         }
       }
-      return ColorMixer.mix(HEATMAP_LOW_COLOR,HEATMAP_HEIGHT_COLOR,1);
+      return HEATMAP_MAX_COLOR;
     };
 
     chart.selectAll('g')
@@ -138,12 +67,13 @@ export default class charts {
       .attr('height', barHeight)
   }
 
-  static generateRowSummary(data,lines,mode,legendSteps){
+  static generateRowSummary(data,lines,currThis,mode,legendSteps){
     d3.select('.chartRow').remove();
     d3.select('.tooltipRow').remove();
 
     let combinedData=[]
     let maxValue =0;
+
 
     switch (mode){
       case 1:
@@ -176,8 +106,14 @@ export default class charts {
 
     const legendData = [];
 
+    if(!currThis.state.dataScaleMode){
+      maxValue = currThis.state.dataScaleRow;
+    }else{
+      currThis.state.dataScaleRow = maxValue;
+    }
+
     for (let i = 1; i <= legendSteps; i++) {
-      legendData.push({'interval': maxValue/legendSteps*i, 'color': ColorMixer.mix(HEATMAP_LOW_COLOR,HEATMAP_HEIGHT_COLOR,1.0/legendSteps*i)})
+      legendData.push({'interval': maxValue/legendSteps*i, 'color': ColorMixer.mix(HEATMAP_LOW_COLOR,HEATMAP_HEIGH_COLOR,1.0/legendSteps*i)})
     }
 
 
@@ -204,7 +140,7 @@ export default class charts {
           return legendData[i].color;
         }
       }
-      return ColorMixer.mix(HEATMAP_LOW_COLOR,HEATMAP_HEIGHT_COLOR,1);
+      return HEATMAP_MAX_COLOR;
     };
 
     //tooltip
@@ -241,7 +177,7 @@ export default class charts {
               "<div>Changes: "+d.value+"</div>"+
               "<hr>"+
               DeveloperList.generate(d.developer)
-              )
+            )
               .style("right", (30) + "px")
               .style("top", ((d.row) * barHeight) + "px");
           })
@@ -304,8 +240,14 @@ export default class charts {
 
     const legendData = [];
 
+    if(!currThis.state.dataScaleMode){
+      maxValue = currThis.state.dataScaleColumns;
+    }else{
+      currThis.state.dataScaleColumns = maxValue;
+    }
+
     for (let i = 1; i <= legendSteps; i++) {
-      legendData.push({'interval': maxValue/legendSteps*i, 'color': ColorMixer.mix(HEATMAP_LOW_COLOR,HEATMAP_HEIGHT_COLOR,1.0/legendSteps*i)})
+      legendData.push({'interval': maxValue/legendSteps*i, 'color': ColorMixer.mix(HEATMAP_LOW_COLOR,HEATMAP_HEIGH_COLOR,1.0/legendSteps*i)})
     }
 
     const colorScale = d => {
@@ -314,7 +256,7 @@ export default class charts {
           return legendData[i].color;
         }
       }
-      return ColorMixer.mix(HEATMAP_LOW_COLOR, HEATMAP_HEIGHT_COLOR, 1);
+      return HEATMAP_MAX_COLOR;
     };
 
 
@@ -456,5 +398,4 @@ export default class charts {
         break;
     }
   }
-
 }

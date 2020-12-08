@@ -1,5 +1,6 @@
 import React from 'react';
 import styles from "../css/fileBrowser.scss"
+import {folder_white,folder_open_white} from "../images/icons"
 import * as ReactDOM from 'react-dom';
 
 export default class FileBrowser extends React.PureComponent{
@@ -73,13 +74,17 @@ class FileStruct extends React.PureComponent {
             }else if(currData.type==="folder"){
               return <div  key={currData.name}>
                 <button className={styles.button+" "+(i%2===0?styles.ACEven:styles.ACOdd)} onClick={(e)=>{
-                  let panel = e.currentTarget.nextSibling;
+                  let target = e.currentTarget;
+                  let panel = target.nextSibling;
                   if (panel.style.display === "block") {
                     panel.style.display = "none";
+                    target.innerHTML = "<span class='"+styles.icon+"'>"+folder_white+"</span>"+currData.name;
                   } else {
                     panel.style.display = "block";
+                    target.innerHTML = "<span class='"+styles.icon+"'>"+folder_open_white+"</span>"+currData.name;
+
                   }
-                }}>{currData.name}</button>
+                }}><span className={styles.icon} dangerouslySetInnerHTML={{__html:folder_white}}/>{currData.name}</button>
                 <div id={""+i+"panel"+currData.name} className={styles.panel}>
                   <FileStruct
                     data={currData}

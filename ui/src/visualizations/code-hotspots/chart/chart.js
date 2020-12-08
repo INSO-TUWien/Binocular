@@ -7,14 +7,17 @@ import 'codemirror/lib/codemirror.css';
 require('codemirror/mode/javascript/javascript');
 import "../css/codeMirror.css";
 import vcsData from "./helper/vcsData";
-import charts from "./charts";
+import chartUpdater from "./charts/chartUpdater";
 import Promise from 'bluebird';
 import {graphQl} from '../../../utils';
 import Loading from "./helper/loading";
 import ModeSwitcher from './helper/modeSwitcher';
+import Settings from './settings/settings'
 
 let code ="No File Selected";
-
+let prevPath="";
+let prevMode=0;
+let prevSha="";
 
 
 export default class CodeHotspots extends React.PureComponent {
@@ -44,7 +47,13 @@ export default class CodeHotspots extends React.PureComponent {
       fileURL:"",
       path:"",
       sha:"",
-      mode:0  //modes: 0...Changes/Version  1...Changes/Developer
+      mode:0,  //modes: 0...Changes/Version  1...Changes/Developer
+
+      //Settings
+      dataScaleMode:true,
+      dataScaleHeatmap:0,
+      dataScaleColumns:0,
+      dataScaleRow:0
     };
   }
 
@@ -68,11 +77,14 @@ export default class CodeHotspots extends React.PureComponent {
 
         <div className={styles.w100}>
           <div className={styles.menubar}>
+            <Settings
+              state={this.state}
+              currThis={this}
+            />
             <div className={styles.inline}><button id={"CpVButton"}  className={"button "+styles.mg1+" "+styles.selected} onClick={(e)=>{
               this.setState({mode:0});
               document.getElementById("CpVButton").classList.add(styles.selected);
               document.getElementById("CpDButton").classList.remove(styles.selected);
-
             }}>Changes/Version</button></div>
             <div className={styles.inline}><button id={"CpDButton"} className={"button "+styles.mg1} onClick={(e)=>{
               this.setState({mode:1});
@@ -116,42 +128,54 @@ export default class CodeHotspots extends React.PureComponent {
 
   requestData(){
     if(this.state.path !==""){
-      var xhr = new XMLHttpRequest();
       Loading.insert();
-      xhr.open("GET",  this.state.fileURL.replace("/blob", "").replace("github.com","raw.githubusercontent.com").replace("master",this.state.sha===""?this.state.branch:this.state.sha), true);
-      xhr.onload = function (e) {
-        if (xhr.readyState === 4) {
-          if (xhr.status === 200) {
-            let lines = xhr.responseText.split(/\r\n|\r|\n/).length;
-            let path = this.state.path;
-            let mode = this.state.mode;
-            let currThis = this;
-            vcsData.getChangeData(path).then(function (resp){
-              switch (mode){
-                case 0:
-                  charts.updateAllChartsWithChangesPerVersion(resp,lines,path,currThis);
-                  break;
-                case 1:
-                  charts.updateAllChartsWithChangesPerDeveloper(resp,lines,path,currThis);
-                  break;
-                default:
-                  charts.updateAllChartsWithChangesPerVersion(resp,lines,path,currThis);
-                  break;
-              }
-              currThis.setState({code: xhr.responseText});
-              Loading.remove();
-            });
-          } else {
-            Loading.setErrorText(xhr.statusText);
-            console.error(xhr.statusText);
+      if(this.state.path!==this.prevPath||this.state.mode!==this.prevMode||this.state.sha!==this.prevSha){
+        var xhr = new XMLHttpRequest();
+        xhr.open("GET",  this.state.fileURL.replace("/blob", "").replace("github.com","raw.githubusercontent.com").replace("master",this.state.sha===""?this.state.branch:this.state.sha), true);
+        xhr.onload = function (e) {
+          if (xhr.readyState === 4) {
+            if (xhr.status === 200) {
+              let lines = xhr.responseText.split(/\r\n|\r|\n/).length;
+              let path = this.state.path;
+              let mode = this.state.mode;
+              let currThis = this;
+              vcsData.getChangeData(path).then(function (resp){
+                switch (mode){
+                  case 1:
+                    chartUpdater.updateAllChartsWithChangesPerDeveloper(resp,lines,path,currThis,true);
+                    break;
+                  default:
+                    chartUpdater.updateAllChartsWithChangesPerVersion(resp,lines,path,currThis,true);
+                    break;
+                }
+                currThis.setState({code: xhr.responseText});
+                Loading.remove();
+              });
+            } else {
+              Loading.setErrorText(xhr.statusText);
+              console.error(xhr.statusText);
+            }
           }
+        }.bind(this);
+        xhr.onerror = function (e) {
+          Loading.setErrorText(xhr.statusText);
+          console.error(xhr.statusText);
+        };
+        xhr.send(null);
+      }else{
+        switch (this.state.mode){
+          case 1:
+            chartUpdater.updateAllChartsWithChangesPerDeveloper(null,null,null,this,false);
+            break;
+          default:
+            chartUpdater.updateAllChartsWithChangesPerVersion(null,null,null,this,false);
+            break;
         }
-      }.bind(this);
-      xhr.onerror = function (e) {
-        Loading.setErrorText(xhr.statusText);
-        console.error(xhr.statusText);
-      };
-      xhr.send(null);
+        Loading.remove();
+      }
+      this.prevPath = this.state.path;
+      this.prevMode = this.state.mode;
+      this.prevSha = this.state.sha;
     }
   }
 
