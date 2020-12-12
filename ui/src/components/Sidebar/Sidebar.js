@@ -6,13 +6,10 @@ import PanelLink from './PanelLink.js';
 
 import cx from 'classnames';
 
-export default props => {
-  const links = _.map(props.visualizations, vis => {
-    return <PanelLink key={vis.id} visualization={vis} />;
-  });
-  const { onToggle, collapsed } = props;
+export default ({ visualizations, activeVisualization, onToggle, collapsed }) => {
+  const links = _.map(visualizations, vis => <PanelLink key={vis.id} visualization={vis} />);
 
-  const ConfigComponent = props.visualizations[props.activeVisualization].ConfigComponent;
+  const ConfigComponent = visualizations[activeVisualization].ConfigComponent;
 
   if (collapsed) {
     return (
@@ -39,7 +36,7 @@ export default props => {
         {links}
       </p>
       <div className={cx('panel-block', styles.configuration)}>
-        {props.activeVisualization in props.visualizations && <ConfigComponent />}
+        {activeVisualization in visualizations && <ConfigComponent />}
       </div>
     </nav>
   );

@@ -8,14 +8,15 @@ const ProgressBar = props => {
   const commits = props.progress.commits;
   const issues = props.progress.issues;
   const builds = props.progress.builds;
-  const pieData = [commits, issues, builds].filter(d => d.total !== 0);
+  const languages = props.progress.languages;
+  const pieData = [commits, issues, builds, languages].filter(d => d.total !== 0);
   const shareCount = pieData.length;
 
   const ringRadius = 100 / (2 * Math.PI);
 
   let dashOffset = 0;
   const segments = pieData.map(function(d, i) {
-    const share = Math.round(d.processed / d.total * 100 / shareCount);
+    const share = d.processed / d.total * 100 / shareCount;
     const rest = 100 - share;
 
     const segment = (
@@ -63,7 +64,7 @@ const ProgressBar = props => {
         <text className={styles.text} x="21" y="21">
           {Math.round(processed / total * 100)}%
         </text>
-        <g transform="translate(21 18)">
+        <g transform="translate(21 17)">
           <text className={cx(styles.text, styles.details)} x="0" y="0">
             <tspan x="0">
               {commits.processed}/{commits.total} Commits
@@ -73,6 +74,9 @@ const ProgressBar = props => {
             </tspan>
             <tspan x="0" dy="1.5em">
               {builds.processed}/{builds.total} Builds
+            </tspan>
+            <tspan x="0" dy="1.5em">
+              {languages.processed} Languages
             </tspan>
           </text>
         </g>

@@ -56,7 +56,11 @@ export default class CheckboxLegend extends React.Component {
   }
 
   selectAllAuthors() {
-    const ticked = Object.keys(this.props.palette).length === this.state.selected.length;
+    if (!this.props.palette) {
+      return;
+    }
+
+    const ticked = this.props.palette && Object.keys(this.props.palette).length === this.state.selected.length;
     if (ticked) {
       this.setState({ selected: [] }, () => this.props.onClick([]));
     } else {
@@ -130,7 +134,7 @@ export default class CheckboxLegend extends React.Component {
     return (
       <div>
         <label className="label">
-          <input type="checkbox" checked={checked} onChange={this.selectAllAuthors.bind(this)} />
+          <input type="checkbox" checked={checked} onChange={this.selectAllAuthors.bind(this)} disabled={!this.props.palette} />
           {this.props.title}
         </label>
         {explanation}
