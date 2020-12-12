@@ -61,7 +61,7 @@ export default class LanguageModuleRiver extends React.Component {
       commitOrder = Object.keys(this.props.palette);
     }
 
-    const commitOffset = d3.stackOffsetDiverging;
+    const commitOffset = d3.stackOffsetWiggle;
     const commitPalette = this.state.commitPalette;
 
     const commitChart = (
@@ -72,7 +72,7 @@ export default class LanguageModuleRiver extends React.Component {
             content={this.state.commitChartData}
             palette={commitPalette}
             paddings={{ top: 20, left: 60, bottom: 20, right: 30 }}
-            xAxisCenter={false}
+            xAxisCenter={true}
             yDims={this.state.commitScale}
             d3offset={commitOffset}
             keys={this.state.selectedAuthors}
