@@ -22,25 +22,23 @@ const mapStateToProps = (state /*, ownProps*/) => {
   return {
     committers: languageModuleRiverState.data.data.committers,
     resolution: languageModuleRiverState.config.chartResolution,
-    // showIssues: languageModuleRiverState.config.showIssues,
+    showIssues: languageModuleRiverState.config.showIssues,
     palette: languageModuleRiverState.data.data.palette,
     metric: languageModuleRiverState.config.displayMetric,
     selectedAuthors: languageModuleRiverState.config.selectedAuthors,
-    // showCIChart: languageModuleRiverState.config.showCIChart,
-    // showIssueChart: languageModuleRiverState.config.showIssueChart,
-    showChangesChart: languageModuleRiverState.config.showChangesChart
+    showCIChart: languageModuleRiverState.config.showCIChart,
+    showIssueChart: languageModuleRiverState.config.showIssueChart
   };
 };
 
 const mapDispatchToProps = (dispatch /*, ownProps*/) => {
   return {
     onClickResolution: resolution => dispatch(setResolution(resolution)),
-    //onClickIssues: showIssues => dispatch(setShowIssues(showIssues)),
+    onClickIssues: showIssues => dispatch(setShowIssues(showIssues)),
     //onClickMetric: metric => dispatch(setDisplayMetric(metric)),
     onClickCheckboxLegend: selected => dispatch(setSelectedAuthors(selected)),
-    //onClickShowCIChart: showCIChart => dispatch(setShowCIChart(showCIChart)),
-    //onClickShowIssueChart: showIssueChart => dispatch(setShowIssueChart(showIssueChart)),
-    onClickShowChangesChart: showChangesChart => dispatch(setShowChangesChart(showChangesChart))
+    onClickShowCIChart: showCIChart => dispatch(setShowCIChart(showCIChart)),
+    onClickShowIssueChart: showIssueChart => dispatch(setShowIssueChart(showIssueChart))
   };
 };
 
@@ -66,7 +64,7 @@ const LangModRiverConfigComponent = props => {
               ]}
               onChange={value => props.onClickResolution(value)}
             />
-            {/*<div>
+            <div>
               <label className={styles.checkboxLabel}>
                 <input
                   name="showCI"
@@ -74,7 +72,7 @@ const LangModRiverConfigComponent = props => {
                   onChange={() => props.onClickShowCIChart(!props.showCIChart)}
                   checked={props.showCIChart}
                 />{' '}
-                Show CI Chart{' '}
+                Show CI{' '}
               </label>
             </div>
             <div>
@@ -85,23 +83,12 @@ const LangModRiverConfigComponent = props => {
                   onChange={() => props.onClickShowIssueChart(!props.showIssueChart)}
                   checked={props.showIssueChart}
                 />{' '}
-                Show Issues Chart{' '}
+                Show Issues{' '}
               </label>
             </div>
-            <div>
-              <label className={styles.checkboxLabel}>
-                <input
-                  name="showChanges"
-                  type="checkbox"
-                  onChange={() => props.onClickShowChangesChart(!props.showChangesChart)}
-                  checked={props.showChangesChart}
-                />{' '}
-                Show Changes Chart{' '}
-              </label>
-            </div>*/}
           </div>
         </div>
-        {/*        <div className={styles.field}>
+        <div className={styles.field}>
           <div className="control">
             <label className="label">CI Builds</label>
             <LegendCompact text="Succeeded | Failed" color="#26ca3b" color2="#e23b41" />
@@ -121,7 +108,7 @@ const LangModRiverConfigComponent = props => {
               onChange={value => props.onClickIssues(value)}
             />
           </div>
-        </div>*/}
+        </div>
         <div className={styles.field}>
           <label className="label">Changes</label>
           {/*<div style={{ marginBottom: '0.5em' }}>

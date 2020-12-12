@@ -6,7 +6,7 @@ import Chart from './chart.js';
 import { setViewport } from '../sagas';
 
 const mapStateToProps = (state /*, ownProps*/) => {
-  const dashState = state.visualizations.dashboard.state;
+  const dashState = state.visualizations.languageModuleRiver.state;
 
   return {
     palette: dashState.data.data.palette,
@@ -23,8 +23,7 @@ const mapStateToProps = (state /*, ownProps*/) => {
     displayMetric: dashState.config.displayMetric,
     selectedAuthors: dashState.config.selectedAuthors,
     showCIChart: dashState.config.showCIChart,
-    showIssueChart: dashState.config.showIssueChart,
-    showChangesChart: dashState.config.showChangesChart
+    showIssueChart: dashState.config.showIssueChart
   };
 };
 

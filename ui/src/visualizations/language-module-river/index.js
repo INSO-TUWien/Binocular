@@ -7,7 +7,7 @@ import saga from './sagas';
 import reducer from './reducers';
 
 export default {
-  id: 'language-module-river',
+  id: 'languageModuleRiver',
   label: 'Language-Module River',
   saga,
   reducer,

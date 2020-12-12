@@ -12,25 +12,25 @@ import getBuildData from './getBuildData.js';
 import getBounds from './getBounds.js';
 import chroma from 'chroma-js';
 
-export const setResolution = createAction('SET_RESOLUTION');
-export const setShowIssues = createAction('SET_SHOW_ISSUES');
-export const setSelectedAuthors = createAction('SET_SELECTED_AUTHORS');
-export const setDisplayMetric = createAction('SET_DISPLAY_METRIC');
-export const setShowCIChart = createAction('SET_SHOW_CI_CHART');
-export const setShowIssueChart = createAction('SET_SHOW_ISSUE_CHART');
-export const setShowChangesChart = createAction('SET_SHOW_CHANGES_CHART');
+export const setResolution = createAction('SET_LANGUAGE_MODULE_RIVER_RESOLUTION');
+export const setShowIssues = createAction('SET_LANGUAGE_MODULE_RIVER_SHOW_ISSUES');
+export const setSelectedAuthors = createAction('SET_LANGUAGE_MODULE_RIVER_SELECTED_AUTHORS');
+export const setDisplayMetric = createAction('SET_LANGUAGE_MODULE_RIVER_DISPLAY_METRIC');
+export const setShowCIChart = createAction('SET_LANGUAGE_MODULE_RIVER_SHOW_CI');
+export const setShowIssueChart = createAction('SET_LANGUAGE_MODULE_RIVER_SHOW_ISSUE');
+export const setShowChangesChart = createAction('SET_LANGUAGE_MODULE_RIVER_SHOW_CHANGES_CHART');
 
-export const requestDashboardData = createAction('REQUEST_DASHBOARD_DATA');
-export const receiveDashboardData = timestampedActionFactory('RECEIVE_DASHBOARD_DATA');
-export const receiveDashboardDataError = createAction('RECEIVE_DASHBOARD_DATA_ERROR');
+export const requestLanguageModuleRiverData = createAction('REQUEST_LANGUAGE_MODULE_RIVER_DATA');
+export const receiveLanguageModuleRiverData = timestampedActionFactory('RECEIVE_LANGUAGE_MODULE_RIVER_DATA');
+export const receiveLanguageModuleRiverDataError = createAction('RECEIVE_LANGUAGE_MODULE_RIVER_DATA_ERROR');
 
 export const requestRefresh = createAction('REQUEST_REFRESH');
 const refresh = createAction('REFRESH');
-export const setViewport = createAction('COR_SET_VIEWPORT');
+export const setViewport = createAction('COR_SET_LANGUAGE_MODULE_RIVER_VIEWPORT');
 
 export default function*() {
   // fetch data once on entry
-  yield* fetchDashboardData();
+  yield* fetchLanguageModuleRiverData();
 
   yield fork(watchRefreshRequests);
   yield fork(watchMessages);
@@ -53,13 +53,13 @@ function* watchToggleHelp() {
 }
 
 function* watchRefresh() {
-  yield takeEvery('REFRESH', fetchDashboardData);
+  yield takeEvery('REFRESH', fetchLanguageModuleRiverData);
 }
 
 /**
- * Fetch data for dashboard, this still includes old functions that were copied over.
+ * Fetch data for languageModuleRiver, this still includes old functions that were copied over.
  */
-export const fetchDashboardData = fetchFactory(
+export const fetchLanguageModuleRiverData = fetchFactory(
   function*() {
     const { firstCommit, lastCommit, committers, firstIssue, lastIssue } = yield getBounds();
     const firstCommitTimestamp = Date.parse(firstCommit.date);
@@ -69,7 +69,7 @@ export const fetchDashboardData = fetchFactory(
     const lastIssueTimestamp = lastIssue ? Date.parse(lastIssue.createdAt) : lastCommitTimestamp;
 
     const state = yield select();
-    const viewport = state.visualizations.dashboard.state.config.viewport || [0, null];
+    const viewport = state.visualizations.languageModuleRiver.state.config.viewport || [0, null];
 
     const firstSignificantTimestamp = Math.max(viewport[0], Math.min(firstCommitTimestamp, firstIssueTimestamp));
     const lastSignificantTimestamp = viewport[1] ? viewport[1].getTime() : Math.max(lastCommitTimestamp, lastIssueTimestamp);
@@ -98,9 +98,9 @@ export const fetchDashboardData = fetchFactory(
         throw e;
       });
   },
-  requestDashboardData,
-  receiveDashboardData,
-  receiveDashboardDataError
+  requestLanguageModuleRiverData,
+  receiveLanguageModuleRiverData,
+  receiveLanguageModuleRiverDataError
 );
 
 function getPalette(commits, maxNumberOfColors, numOfCommitters) {

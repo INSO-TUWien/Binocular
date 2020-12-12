@@ -6,7 +6,7 @@ import styles from './styles.scss';
 
 export default () =>
   <div className={cx('box', styles.help)}>
-    <h1 className="title">Dashboard Help</h1>
+    <h1 className="title">LanguageModuleRiver Help</h1>
     <h2>Interaction</h2>
     <ul>
       <li>

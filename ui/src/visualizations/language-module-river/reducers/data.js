@@ -5,8 +5,8 @@ import _ from 'lodash';
 
 export default handleActions(
   {
-    REQUEST_DASHBOARD_DATA: state => _.assign({}, state, { isFetching: true }),
-    RECEIVE_DASHBOARD_DATA: (state, action) => {
+    REQUEST_LANGUAGE_MODULE_RIVER_DATA: state => _.assign({}, state, { isFetching: true }),
+    RECEIVE_LANGUAGE_MODULE_RIVER_DATA: (state, action) => {
       const ret = _.assign({}, state, {
         data: action.payload,
         isFetching: false,

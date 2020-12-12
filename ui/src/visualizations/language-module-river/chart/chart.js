@@ -11,7 +11,7 @@ import moment from 'moment';
 import cx from 'classnames';
 import chroma from 'chroma-js';
 
-export default class Dashboard extends React.Component {
+export default class LanguageModuleRiver extends React.Component {
   constructor(props) {
     super(props);
 
@@ -55,51 +55,15 @@ export default class Dashboard extends React.Component {
     if (this.props.palette) {
       console.log(Object.keys(this.props.palette));
     }
-    const ciChart = (
-      <div className={styles.chartLine}>
-        <div className={cx(styles.text, 'label')}>CI Builds</div>
-        <div className={styles.chart}>
-          <StackedAreaChart
-            content={this.state.ciChartData}
-            palette={{ Succeeded: '#26ca3b', Failed: '#e23b41' }}
-            paddings={{ top: 20, left: 60, bottom: 20, right: 30 }}
-            xAxisCenter={true}
-            yDims={this.state.ciScale}
-            d3offset={d3.stackOffsetDiverging}
-            resolution={this.props.chartResolution}
-          />
-        </div>
-      </div>
-    );
-    const issueChart = (
-      <div className={styles.chartLine}>
-        <div className={cx(styles.text, 'label')}>Issues</div>
-        <div className={styles.chart}>
-          <StackedAreaChart
-            content={this.state.issueChartData}
-            palette={{ Opened: '#3461eb', Closed: '#8099e8' }}
-            paddings={{ top: 20, left: 60, bottom: 20, right: 30 }}
-            xAxisCenter={true}
-            yDims={this.state.issueScale}
-            d3offset={d3.stackOffsetDiverging}
-            resolution={this.props.chartResolution}
-          />
-        </div>
-      </div>
-    );
-    let commitOffset, commitPalette, commitCenterAxis, commitOrder;
+
+    let commitOrder;
     if (this.props.palette) {
       commitOrder = Object.keys(this.props.palette);
     }
-    if (this.props.displayMetric === 'linesChanged') {
-      commitOffset = d3.stackOffsetDiverging;
-      commitPalette = this.state.commitPalette;
-      commitCenterAxis = true;
-    } else {
-      commitOffset = d3.stackOffsetNone;
-      commitPalette = this.props.palette;
-      commitCenterAxis = false;
-    }
+
+    const commitOffset = d3.stackOffsetDiverging;
+    const commitPalette = this.state.commitPalette;
+    const commitCenterAxis = true;
 
     const commitChart = (
       <div className={styles.chartLine}>
@@ -120,6 +84,7 @@ export default class Dashboard extends React.Component {
         </div>
       </div>
     );
+
     const loadingHint = (
       <div className={styles.loadingHintContainer}>
         <h1 className={styles.loadingHint}>
@@ -128,19 +93,10 @@ export default class Dashboard extends React.Component {
       </div>
     );
 
-    const selectChartHint = (
-      <div className={styles.loadingHintContainer}>
-        <h1 className={styles.loadingHint}>Please select a chart.</h1>
-      </div>
-    );
-
     return (
       <div className={styles.chartContainer}>
         {this.state.ciChartData === null && this.state.issueChartData === null && this.state.commitChartData === null && loadingHint}
-        {!this.props.showCIChart && !this.props.showIssueChart && !this.props.showChangesChart && selectChartHint}
-        {this.state.ciChartData && this.props.showCIChart && ciChart}
-        {this.state.issueChartData && this.props.showIssueChart && issueChart}
-        {this.state.commitChartData && this.props.showChangesChart && commitChart}
+        {this.state.commitChartData && commitChart}
       </div>
     );
   }
@@ -175,7 +131,7 @@ export default class Dashboard extends React.Component {
 
     //---- STEP 2: AGGREGATE ISSUES PER TIME INTERVAL ----
     const data = [];
-    const granularity = Dashboard.getGranularity(props.chartResolution);
+    const granularity = LanguageModuleRiver.getGranularity(props.chartResolution);
     const curr = moment(props.firstSignificantTimestamp).startOf(granularity.unit).subtract(1, props.chartResolution);
     const next = moment(curr).add(1, props.chartResolution);
     const end = moment(props.lastSignificantTimestamp).endOf(granularity.unit).add(1, props.chartResolution);
@@ -242,7 +198,7 @@ export default class Dashboard extends React.Component {
 
     //---- STEP 1: AGGREGATE BUILDS PER TIME INTERVAL ----
     const data = [];
-    const granularity = Dashboard.getGranularity(props.chartResolution);
+    const granularity = LanguageModuleRiver.getGranularity(props.chartResolution);
     const curr = moment(props.firstSignificantTimestamp).startOf(granularity.unit).subtract(1, props.chartResolution);
     const end = moment(props.lastSignificantTimestamp).endOf(granularity.unit).add(1, props.chartResolution);
     const next = moment(curr).add(1, props.chartResolution);
@@ -285,8 +241,8 @@ export default class Dashboard extends React.Component {
 
     //---- STEP 1: AGGREGATE COMMITS GROUPED BY AUTHORS PER TIME INTERVAL ----
     const data = [];
-    //let granularity = Dashboard.getGranularity(props.resolution);
-    const granularity = Dashboard.getGranularity(props.chartResolution);
+    //let granularity = LanguageModuleRiver.getGranularity(props.resolution);
+    const granularity = LanguageModuleRiver.getGranularity(props.chartResolution);
     const curr = moment(props.firstSignificantTimestamp).startOf(granularity.unit).subtract(1, props.chartResolution);
     const end = moment(props.lastSignificantTimestamp).endOf(granularity.unit).add(1, props.chartResolution);
     const next = moment(curr).add(1, props.chartResolution);
