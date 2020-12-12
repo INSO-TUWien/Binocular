@@ -15,7 +15,6 @@ import chroma from 'chroma-js';
 export const setResolution = createAction('SET_LANGUAGE_MODULE_RIVER_RESOLUTION');
 export const setShowIssues = createAction('SET_LANGUAGE_MODULE_RIVER_SHOW_ISSUES');
 export const setSelectedAuthors = createAction('SET_LANGUAGE_MODULE_RIVER_SELECTED_AUTHORS');
-export const setDisplayMetric = createAction('SET_LANGUAGE_MODULE_RIVER_DISPLAY_METRIC');
 export const setShowCIChart = createAction('SET_LANGUAGE_MODULE_RIVER_SHOW_CI');
 export const setShowIssueChart = createAction('SET_LANGUAGE_MODULE_RIVER_SHOW_ISSUE');
 export const setShowChangesChart = createAction('SET_LANGUAGE_MODULE_RIVER_SHOW_CHANGES_CHART');

@@ -20,7 +20,6 @@ const mapStateToProps = (state /*, ownProps*/) => {
     lastSignificantTimestamp: dashState.data.data.lastSignificantTimestamp,
     chartResolution: dashState.config.chartResolution,
     showIssues: dashState.config.showIssues,
-    displayMetric: dashState.config.displayMetric,
     selectedAuthors: dashState.config.selectedAuthors,
     showCIChart: dashState.config.showCIChart,
     showIssueChart: dashState.config.showIssueChart

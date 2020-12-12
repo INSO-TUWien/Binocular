@@ -63,7 +63,6 @@ export default class LanguageModuleRiver extends React.Component {
 
     const commitOffset = d3.stackOffsetDiverging;
     const commitPalette = this.state.commitPalette;
-    const commitCenterAxis = true;
 
     const commitChart = (
       <div className={styles.chartLine}>
@@ -73,7 +72,7 @@ export default class LanguageModuleRiver extends React.Component {
             content={this.state.commitChartData}
             palette={commitPalette}
             paddings={{ top: 20, left: 60, bottom: 20, right: 30 }}
-            xAxisCenter={commitCenterAxis}
+            xAxisCenter={false}
             yDims={this.state.commitScale}
             d3offset={commitOffset}
             keys={this.state.selectedAuthors}
@@ -285,51 +284,30 @@ export default class LanguageModuleRiver extends React.Component {
     //---- STEP 2: CONSTRUCT CHART DATA FROM AGGREGATED COMMITS ----
     const commitChartData = [];
     const commitChartPalette = {};
-    const chartIsSplit = props.displayMetric === 'linesChanged';
-    if (chartIsSplit) {
-      commitChartPalette['(Additions) others'] = props.palette['others'];
-      commitChartPalette['(Deletions) others'] = props.palette['others'];
-    } else {
-      commitChartPalette['others'] = props.palette['others'];
-    }
+    commitChartPalette['(Additions) others'] = props.palette['others'];
+    commitChartPalette['(Deletions) others'] = props.palette['others'];
     _.each(data, function(commit) {
       //commit has structure {date, statsByAuthor: {}} (see next line)}
       const obj = { date: commit.date };
-      if (chartIsSplit) {
-        obj['(Additions) others'] = 0;
-        obj['(Deletions) others'] = -0.001;
-      } else {
-        obj['others'] = 0;
-      }
+      obj['(Additions) others'] = 0;
+      obj['(Deletions) others'] = -0.001;
       _.each(props.committers, function(committer) {
         //commitLegend to iterate over authorNames, commitLegend has structure [{name, style}, ...]
         if (committer in commit.statsByAuthor && committer in props.palette) {
           //If committer has data
-          if (chartIsSplit) {
-            //Insert number of changes with the author name as key,
-            //statsByAuthor has structure {{authorName: {count, additions, deletions, changes}}, ...}
-            obj['(Additions) ' + committer] = commit.statsByAuthor[committer].additions;
-            //-0.001 for stack layout to realize it belongs on the bottom
-            obj['(Deletions) ' + committer] = commit.statsByAuthor[committer].deletions * -1 - 0.001;
-            commitChartPalette['(Additions) ' + committer] = chroma(props.palette[committer]).hex();
-            commitChartPalette['(Deletions) ' + committer] = chroma(props.palette[committer]).darken(0.5).hex();
-          } else {
-            obj[committer] = commit.statsByAuthor[committer].count;
-          }
+          //Insert number of changes with the author name as key,
+          //statsByAuthor has structure {{authorName: {count, additions, deletions, changes}}, ...}
+          obj['(Additions) ' + committer] = commit.statsByAuthor[committer].additions;
+          //-0.001 for stack layout to realize it belongs on the bottom
+          obj['(Deletions) ' + committer] = commit.statsByAuthor[committer].deletions * -1 - 0.001;
+          commitChartPalette['(Additions) ' + committer] = chroma(props.palette[committer]).hex();
+          commitChartPalette['(Deletions) ' + committer] = chroma(props.palette[committer]).darken(0.5).hex();
         } else if (committer in commit.statsByAuthor && !(committer in props.palette)) {
-          if (chartIsSplit) {
-            obj['(Additions) others'] += commit.statsByAuthor[committer].additions;
-            obj['(Deletions) others'] += commit.statsByAuthor[committer].deletions * -1 - 0.001;
-          } else {
-            obj['others'] += commit.statsByAuthor[committer].additions + commit.statsByAuthor[committer].deletions;
-          }
+          obj['(Additions) others'] += commit.statsByAuthor[committer].additions;
+          obj['(Deletions) others'] += commit.statsByAuthor[committer].deletions * -1 - 0.001;
         } else if (committer in props.palette) {
-          if (chartIsSplit) {
-            obj['(Additions) ' + committer] = 0;
-            obj['(Deletions) ' + committer] = -0.001; //-0.001 for stack layout to realize it belongs on the bottom
-          } else {
-            obj[committer] = 0;
-          }
+          obj['(Additions) ' + committer] = 0;
+          obj['(Deletions) ' + committer] = -0.001; //-0.001 for stack layout to realize it belongs on the bottom
         }
       });
       commitChartData.push(obj); //Add object to list of objects

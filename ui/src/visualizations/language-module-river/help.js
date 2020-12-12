@@ -36,10 +36,6 @@ export default () =>
         issues.
       </li>
       <li>
-        <i className="fa fa-ruler" /> Change the metric of the changes graph to either use number of lines changed or number of commits as
-        the scale for the y-Axis.
-      </li>
-      <li>
         <i className="fa fa-filter" /> In the legend, you can filter the authors that are displayed in the changes graph. The checkbox on
         the top selects/deselects all authors.
       </li>
