@@ -93,8 +93,8 @@ export default class StackedAreaChart extends React.Component {
     const { brushArea, xAxis } = this.drawChart(svg, this.props.content, stackedData, area, brush, yScale, x, y, height, width, paddings);
 
     //Set callback for brush-zoom functionality
-    brush.on('end', () => {
-      this.updateZoom(d3.event.selection, x, xAxis, brush, brushArea, area);
+    brush.on('end', event => {
+      this.updateZoom(event.selection, x, xAxis, brush, brushArea, area);
     });
 
     //Set callback to reset zoom on double-click
@@ -213,8 +213,8 @@ export default class StackedAreaChart extends React.Component {
     const brushArea = svg.append('g');
     const resolution = this.props.resolution;
 
-    svg.on('wheel', () => {
-      var direction = d3.event.deltaY > 0 ? 'down' : 'up';
+    svg.on('wheel', event => {
+      var direction = event.deltaY > 0 ? 'down' : 'up';
       let zoomedDims = [...this.props.yDims];
       let top = zoomedDims[1],
         bottom = zoomedDims[0];
@@ -295,13 +295,15 @@ export default class StackedAreaChart extends React.Component {
       tooltip.style('display', 'inline');
     }
     //Mousemove for tooltip
-    function mousemove() {
-      if (d3.event === null) {
+    function mousemove(event) {
+      if (event === undefined || event === null) {
         return;
       }
 
       //Calculate values and text for tooltip
-      const mouseoverDate = x.invert(d3.mouse(svg.node())[0]);
+      const node = svg.node();
+      const pointer = d3.pointer(event, node);
+      const mouseoverDate = x.invert(pointer[0]);
       const nearestDateIndex = bisectDate(rawData, mouseoverDate);
       const candidate1 = rawData[nearestDateIndex];
       const candidate2 = rawData[nearestDateIndex - 1];
@@ -324,8 +326,8 @@ export default class StackedAreaChart extends React.Component {
       tooltip
         .html(formattedDate + '<hr/>' + '<div style="background: ' + palette[key] + '">' + '</div>' + text + ': ' + Math.round(value))
         .style('position', 'absolute')
-        .style('left', d3.event.layerX - 20 + 'px')
-        .style('top', d3.event.layerY - 70 + 'px');
+        .style('left', event.layerX - 20 + 'px')
+        .style('top', event.layerY + (node.getBoundingClientRect() || { y: 0 }).y - 70 + 'px');
       brushArea.select('.' + styles.indicatorLine).remove();
       brushArea.selectAll('.' + styles.indicatorCircle).remove();
       brushArea
@@ -457,7 +459,7 @@ export default class StackedAreaChart extends React.Component {
 
   /**
    * Callback function for brush-zoom functionality. Should be called when brush ends. (.on("end"...)
-   * @param extent Call d3.event.selection inside an anonymous/arrow function, put that anonymous/arrow function as the .on callback method
+   * @param extent Call event.selection inside an anonymous/arrow function, put that anonymous/arrow function as the .on callback method
    * @param x d3 x Scale provided by createScales function
    * @param xAxis d3 x-Axis provided by drawChart function
    * @param brush brush generator

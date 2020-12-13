@@ -162,7 +162,7 @@ export default class CodeOwnershipRiver extends React.Component {
         onResize={dims => this.onResize(dims)}
         onStart={e =>
           this.setState({
-            isPanning: e.sourceEvent === null || d3.event.sourceEvent.type !== 'wheel'
+            isPanning: e.sourceEvent === null || e.sourceEvent.type !== 'wheel'
           })}
         onEnd={() => this.setState({ isPanning: false })}
         className={cx(styles.chart, { [styles.panning]: this.state.isPanning })}>
