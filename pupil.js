@@ -23,6 +23,7 @@ const getUrlProvider = require('./lib/url-providers');
 const ProgressReporter = require('./lib/progress-reporter.js');
 const path = require('path');
 const Commit = require('./lib/models/Commit.js');
+const Branch = require('./lib/models/Branch.js');
 const File = require('./lib/models/File.js');
 const Hunk = require('./lib/models/Hunk.js');
 const Issue = require('./lib/models/Issue.js');
@@ -32,6 +33,7 @@ const CommitStakeholderConnection = require('./lib/models/CommitStakeholderConne
 const IssueStakeholderConnection = require('./lib/models/IssueStakeholderConnection.js');
 const IssueCommitConnection = require('./lib/models/IssueCommitConnection.js');
 const CommitCommitConnection = require('./lib/models/CommitCommitConnection.js');
+const CommitBranchConnection = require('./lib/models/CommitBranchConnection.js');
 
 // set up the endpoints
 app.get('/api/commits', require('./lib/endpoints/get-commits.js'));
@@ -144,6 +146,7 @@ function ensureDb(repo) {
       return Promise.join(
         ctx.db.ensureService(path.join(__dirname, 'foxx'), '/pupil-ql'),
         Commit.ensureCollection(),
+        Branch.ensureCollection(),
         File.ensureCollection(),
         Hunk.ensureCollection(),
         Stakeholder.ensureCollection(),
@@ -152,7 +155,8 @@ function ensureDb(repo) {
         CommitStakeholderConnection.ensureCollection(),
         IssueStakeholderConnection.ensureCollection(),
         IssueCommitConnection.ensureCollection(),
-        CommitCommitConnection.ensureCollection()
+        CommitCommitConnection.ensureCollection(),
+        CommitBranchConnection.ensureCollection()
       );
     });
 }

@@ -7,6 +7,7 @@ const aql = arangodb.aql;
 const commitsToFiles = db._collection('commits-files');
 const builds = db._collection('builds');
 const commitsToStakeholders = db._collection('commits-stakeholders');
+const commitsToBranches = db._collection('commits-branches');
 const paginated = require('./paginated.js');
 const Timestamp = require('./Timestamp.js');
 
@@ -34,11 +35,19 @@ module.exports = new gql.GraphQLObjectType({
       },
       signature: {
         type: gql.GraphQLString,
-        description: "The commit author's signature"
+        description: "The committer's signature",
       },
       date: {
         type: Timestamp,
-        description: 'The date of the commit'
+        description: 'The date of the commit',
+      },
+      author: {
+        type: gql.GraphQLString,
+        description: "The commit author's signature",
+      },
+      authorDate: {
+        type: Timestamp,
+        description: 'The date of the commit from the author',
       },
       webUrl: {
         type: gql.GraphQLString,
@@ -101,7 +110,24 @@ module.exports = new gql.GraphQLObjectType({
             )
             .toArray();
         }
-      }
+      },
+      branches: {
+        type: require('./branch.js'),
+        description: 'The branches the commit is in',
+        resolve(commit) {
+          return db
+            ._query(
+              aql`
+            FOR
+            branch
+            IN
+            INBOUND ${commit} ${commitsToBranches}
+              RETURN branch
+          `
+            )
+            .toArray();
+        },
+      },
     };
   }
 });
