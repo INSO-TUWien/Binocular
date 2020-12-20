@@ -147,9 +147,10 @@ export default class StackedAreaChart extends React.Component {
    *          Values self-explanatory. All values in pixels.
    */
   getDimsAndPaddings(svg) {
-    const clientRect = svg.node().getBoundingClientRect();
-    const width = clientRect.width;
-    const height = clientRect.height;
+    const node = !svg || typeof svg.node !== 'function' ? { getBoundingClientRec: () => ({}) } : svg.node();
+    const clientRect = node ? node.getBoundingClientRect() : {};
+    const width = clientRect.width ? clientRect.width : 0;
+    const height = clientRect.height ? clientRect.height : 0;
     const paddingLeft = this.props.paddings.left ? this.props.paddings.left : 0;
     const paddingBottom = this.props.paddings.bottom ? this.props.paddings.bottom : 0;
     const paddingTop = this.props.paddings.top ? this.props.paddings.top : 0;
@@ -260,12 +261,8 @@ export default class StackedAreaChart extends React.Component {
       .enter()
       .append('path')
       .attr('class', 'layer')
-      .attr('id', function(d) {
-        return d.key;
-      })
-      .style('fill', function(d) {
-        return palette[d.key];
-      })
+      .attr('id', d => d.key)
+      .style('fill', d => palette[d.key])
       .attr('d', area)
       .attr('clip-path', 'url(#clip)')
       .on('mouseover', mouseover)
