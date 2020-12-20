@@ -6,10 +6,10 @@ import * as d3 from 'd3';
 import styles from '../styles.scss';
 import _ from 'lodash';
 
-import StackedAreaChart from '../../../components/StackedAreaChart';
 import moment from 'moment';
-import cx from 'classnames';
 import chroma from 'chroma-js';
+import { DataRiverChart } from './DataRiverChart';
+import { RiverData, BuildStat } from './RiverData';
 
 export default class LanguageModuleRiver extends React.Component {
   constructor(props) {
@@ -37,15 +37,15 @@ export default class LanguageModuleRiver extends React.Component {
    */
   componentWillReceiveProps(nextProps) {
     const { commitChartData, commitScale, commitPalette, selectedAuthors } = this.extractCommitData(nextProps);
-    const { issueChartData, issueScale } = this.extractIssueData(nextProps);
-    const { ciChartData, ciScale } = this.extractCIData(nextProps);
+    //const { issueChartData, issueScale } = this.extractIssueData(nextProps);
+    //const { ciChartData, ciScale } = this.extractCIData(nextProps);
     this.setState({
       commitChartData,
-      issueChartData,
-      ciChartData,
+      //issueChartData,
+      //ciChartData,
       commitScale,
-      issueScale,
-      ciScale,
+      //issueScale,
+      //ciScale,
       commitPalette,
       selectedAuthors
     });
@@ -61,10 +61,10 @@ export default class LanguageModuleRiver extends React.Component {
       commitOrder = Object.keys(this.props.palette);
     }
 
-    const commitOffset = d3.stackOffsetWiggle;
+    const commitOffset = d3.stackOffsetDiverging;
     const commitPalette = this.state.commitPalette;
 
-    const commitChart = (
+    /*const commitChart = (
       <div className={styles.chartLine}>
         <div className={cx(styles.text, 'label')}>Changes</div>
         <div className={styles.chart}>
@@ -82,7 +82,22 @@ export default class LanguageModuleRiver extends React.Component {
           />
         </div>
       </div>
-    );
+    );*/
+
+    var mockData = [
+      new RiverData('a1', 'js', 'Michi', BuildStat.Success, 1, 2),
+      new RiverData('a2', 'js', 'Michi', BuildStat.Failed, 4, 2),
+      new RiverData('a3', 'js', 'Michi', BuildStat.Skipped, 140, 12),
+      new RiverData('a4', 'js', 'Michi', BuildStat.Success, 14, 120),
+      new RiverData('a5', 'js', 'Michi', BuildStat.Success, 200, 12)
+    ];
+
+    const palette = chroma.scale('spectral').mode('lch').colors(mockData.length).reduce((map, color, index) => {
+      map[mockData[index].sha] = color;
+      return map;
+    }, {});
+
+    const commitChart = <DataRiverChart dataset={mockData} colorPalette={palette} />;
 
     const loadingHint = (
       <div className={styles.loadingHintContainer}>
@@ -300,8 +315,8 @@ export default class LanguageModuleRiver extends React.Component {
           obj['(Additions) ' + committer] = commit.statsByAuthor[committer].additions;
           //-0.001 for stack layout to realize it belongs on the bottom
           obj['(Deletions) ' + committer] = commit.statsByAuthor[committer].deletions * -1 - 0.001;
-          commitChartPalette['(Additions) ' + committer] = chroma(props.palette[committer]).hex();
-          commitChartPalette['(Deletions) ' + committer] = chroma(props.palette[committer]).darken(0.5).hex();
+          commitChartPalette['(Additions) ' + committer] = chroma(props.palette[committer]).alpha(0.85).hex('rgba');
+          commitChartPalette['(Deletions) ' + committer] = chroma(props.palette[committer]).alpha(0.85).darken(0.5).hex('rgba');
         } else if (committer in commit.statsByAuthor && !(committer in props.palette)) {
           obj['(Additions) others'] += commit.statsByAuthor[committer].additions;
           obj['(Deletions) others'] += commit.statsByAuthor[committer].deletions * -1 - 0.001;
