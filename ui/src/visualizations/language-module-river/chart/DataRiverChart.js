@@ -19,12 +19,9 @@ export class DataRiverChart extends React.Component {
       height = 500 - margin.top - margin.bottom;
 
     const sankeyChart = d3Sankey()
-      .nodeId(d => {
-        //
-        return `${d.sha}-${d.attribute}`;
-      })
+      .nodeId(d => `${d.sha}-${d.attribute}`)
       .nodeAlign((node, n) => {
-        return sankeyCenter(node, n);
+        return node.index; //sankeyCenter(node, n);
       })
       .nodeWidth(5)
       .nodePadding(0)
@@ -39,15 +36,26 @@ export class DataRiverChart extends React.Component {
     const svg = d3.select(this.ref).append('svg').attr('viewBox', [0, 0, width, height]);
 
     const data = this.dataset.reduce(
-      (set, item) => {
-        set.nodes.forEach(node =>
+      (set, item, index) => {
+        /*set.nodes.forEach(node =>
           set.links.push({
             source: `${node.sha}-${node.attribute}`,
             target: `${item.sha}-${item.attribute}`,
             value: item.additions + item.deletions
           })
-        );
+        );*/
+
         item.value = item.additions + item.deletions;
+
+        if (index > 0) {
+          const node = set.nodes[index - 1];
+          set.links.push({
+            source: `${node.sha}-${node.attribute}`,
+            target: `${item.sha}-${item.attribute}`,
+            value: item.value
+          });
+        }
+
         set.nodes.push(item);
         return set;
       },
@@ -62,13 +70,23 @@ export class DataRiverChart extends React.Component {
       .selectAll('rect')
       .data(nodes)
       .join('rect')
-      .attr('x', d => d.x0)
-      .attr('y', d => d.y0)
-      .attr('height', d => d.y1 - d.y0)
-      .attr('width', d => d.x1 - d.x0)
+      .attr('x', d => {
+        return d.x0;
+      })
+      .attr('y', d => {
+        return d.y0;
+      })
+      .attr('height', d => {
+        return d.y1 - d.y0;
+      })
+      .attr('width', d => {
+        return d.x1 - d.x0;
+      })
       .attr('fill', this.color.bind(this))
       .append('title')
-      .text(d => `${d.name}\n value: ${d.value}`);
+      .text(d => {
+        return `${d.name}\n value: ${d.value}`;
+      });
 
     const link = svg
       .append('g')
@@ -83,18 +101,19 @@ export class DataRiverChart extends React.Component {
       .append('linearGradient')
       .attr('id', d => (d.uid = `link-${d.index}`))
       .attr('gradientUnits', 'userSpaceOnUse')
-      .attr('x1', d => d.source.x1)
-      .attr('x2', d => d.target.x0);
+      .attr('x1', d => {
+        return d.source.x1;
+      })
+      .attr('x2', d => {
+        return d.target.x0;
+      });
 
     gradient.append('stop').attr('offset', '0%').attr('stop-color', d => this.color(d.source));
 
     gradient.append('stop').attr('offset', '100%').attr('stop-color', d => this.color(d.target));
 
-    link
-      .append('path')
-      .attr('d', sankeyLinkHorizontal())
-      .attr('stroke', d => `url(#${d.uid})`)
-      .attr('stroke-width', d => Math.max(1, d.width));
+    const linkHorizontal = sankeyLinkHorizontal();
+    link.append('path').attr('d', linkHorizontal).attr('stroke', d => `url(#${d.uid})`).attr('stroke-width', d => Math.max(1, d.width));
 
     link.append('title').text(d => `${d.source.name} -> ${d.target.name}`);
 
@@ -105,11 +124,19 @@ export class DataRiverChart extends React.Component {
       .selectAll('text')
       .data(nodes)
       .join('text')
-      .attr('x', d => (d.x0 < width / 2 ? d.x1 + 6 : d.x0 - 6))
-      .attr('y', d => (d.y1 + d.y0) / 2)
+      .attr('x', d => {
+        return d.x0 < width / 2 ? d.x1 + 6 : d.x0 - 6;
+      })
+      .attr('y', d => {
+        return (d.y1 + d.y0) / 2;
+      })
       .attr('dy', '0.35em')
-      .attr('text-anchor', d => (d.x0 < width / 2 ? 'start' : 'end'))
-      .text(d => `${d.sha}:${d.name}`);
+      .attr('text-anchor', d => {
+        return d.x0 < width / 2 ? 'start' : 'end';
+      })
+      .text(d => {
+        return `${d.sha}:${d.name}`;
+      });
   }
 
   render() {

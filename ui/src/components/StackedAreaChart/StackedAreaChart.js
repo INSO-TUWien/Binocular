@@ -5,9 +5,6 @@ import React from 'react';
 import * as d3 from 'd3';
 
 import styles from './stackedAreaChart.scss';
-// TODO: remove?
-// eslint-disable-next-line no-unused-vars
-import cx from 'classnames';
 
 /**
  * Stacked area chart

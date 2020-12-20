@@ -6,9 +6,11 @@ import * as d3 from 'd3';
 import styles from '../styles.scss';
 import _ from 'lodash';
 
+import StackedAreaChart from '../../../components/StackedAreaChart/StackedAreaChart';
 import moment from 'moment';
 import chroma from 'chroma-js';
 import { DataRiverChart } from './DataRiverChart';
+import cx from 'classnames';
 import { RiverData, BuildStat } from './RiverData';
 
 export default class LanguageModuleRiver extends React.Component {
@@ -64,7 +66,7 @@ export default class LanguageModuleRiver extends React.Component {
     const commitOffset = d3.stackOffsetDiverging;
     const commitPalette = this.state.commitPalette;
 
-    /*const commitChart = (
+    const commitChart = (
       <div className={styles.chartLine}>
         <div className={cx(styles.text, 'label')}>Changes</div>
         <div className={styles.chart}>
@@ -82,13 +84,13 @@ export default class LanguageModuleRiver extends React.Component {
           />
         </div>
       </div>
-    );*/
+    );
 
     var mockData = [
-      new RiverData('a1', 'js', 'Michi', BuildStat.Success, 1, 2),
+      new RiverData('a1', 'js', 'Michi', BuildStat.Success, 100000, 2),
       new RiverData('a2', 'js', 'Michi', BuildStat.Failed, 4, 2),
       new RiverData('a3', 'js', 'Michi', BuildStat.Skipped, 140, 12),
-      new RiverData('a4', 'js', 'Michi', BuildStat.Success, 14, 120),
+      new RiverData('a4', 'js', 'Michi', BuildStat.Success, 100004, 120),
       new RiverData('a5', 'js', 'Michi', BuildStat.Success, 200, 12)
     ];
 
@@ -97,7 +99,7 @@ export default class LanguageModuleRiver extends React.Component {
       return map;
     }, {});
 
-    const commitChart = <DataRiverChart dataset={mockData} colorPalette={palette} />;
+    //const commitChart = <DataRiverChart dataset={mockData} colorPalette={palette} />;
 
     const loadingHint = (
       <div className={styles.loadingHintContainer}>
