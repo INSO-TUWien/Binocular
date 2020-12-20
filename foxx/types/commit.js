@@ -6,8 +6,10 @@ const db = arangodb.db;
 const aql = arangodb.aql;
 const commitsToFiles = db._collection('commits-files');
 const builds = db._collection('builds');
+const commits = db._collection('commits');
 const commitsToStakeholders = db._collection('commits-stakeholders');
 const commitsToBranches = db._collection('commits-branches');
+const commitsToCommits = db._collection('commits-commits');
 const paginated = require('./paginated.js');
 const Timestamp = require('./Timestamp.js');
 
@@ -112,18 +114,33 @@ module.exports = new gql.GraphQLObjectType({
         }
       },
       branches: {
-        type: require('./branch.js'),
+        type: new gql.GraphQLList(require('./branch.js')),
         description: 'The branches the commit is in',
         resolve(commit) {
           return db
             ._query(
               aql`
-            FOR
-            branch
-            IN
-            INBOUND ${commit} ${commitsToBranches}
-              RETURN branch
-          `
+              FOR c IN ${commits}
+                FILTER c._id == ${commit._id}
+                FOR b IN 1..1 OUTBOUND c ${commitsToBranches}
+                  RETURN b
+              `
+            )
+            .toArray();
+        },
+      },
+      parents: {
+        type: new gql.GraphQLList(require('./commit.js')),
+        description: 'The parents of the commit',
+        resolve(commit) {
+          return db
+            ._query(
+              aql`
+              FOR c IN ${commits}
+                FILTER c._id == ${commit._id}
+                FOR b IN 1..1 OUTBOUND c ${commitsToCommits}
+                  RETURN b
+              `
             )
             .toArray();
         },
