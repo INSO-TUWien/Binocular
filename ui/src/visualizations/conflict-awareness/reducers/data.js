@@ -5,21 +5,20 @@ import _ from 'lodash';
 
 export default handleActions(
   {
-    REQUEST_ISSUE_IMPACT_DATA: state => _.assign({}, state, { isFetching: true }),
-    RECEIVE_ISSUE_IMPACT_DATA: (state, action) => {
+    REQUEST_CONFLICT_AWARENESS_DATA: (state) => _.assign({}, state, { isFetching: true }),
+    RECEIVE_CONFLICT_AWARENESS_DATA: (state, action) => {
       return _.assign({}, state, {
         data: action.payload,
         isFetching: false,
-        receivedAt: action.meta.receivedAt
+        receivedAt: action.meta.receivedAt,
       });
-    }
+    },
   },
   {
     data: {
-      issue: null,
-      issues: []
+      commits: [],
     },
     lastFetched: null,
-    isFetching: null
+    isFetching: null,
   }
 );
