@@ -1,12 +1,11 @@
 'use strict';
 
 import React from 'react';
-import * as d3 from 'd3';
+import { min, max, stackOffsetDiverging } from 'd3';
 
 import styles from '../styles.scss';
 import _ from 'lodash';
 
-import StackedAreaChart from '../../../components/StackedAreaChart/StackedAreaChart';
 import moment from 'moment';
 import chroma from 'chroma-js';
 import { DataRiverChartComponent } from '../../../components/DataRiverChart/data-river-chart.component';
@@ -69,7 +68,8 @@ export default class LanguageModuleRiver extends React.Component {
           if (index) {
             /*node[3] =
             node[0] = stream[index - 1][0] + 10;
-            node[1] = stream[index - 1][0] + 10;*/
+            node[1] = stream[index - 1][0] + 10;
+            */
           } else {
             // y offset
             node[3] = 0;
@@ -79,9 +79,9 @@ export default class LanguageModuleRiver extends React.Component {
           node[1] = Math.sign(node[1]) >= 0 ? node[1] + 20 : node[1] - 20;*/
         })
       );
-      console.log('before:', series, order);
-      d3.stackOffsetDiverging(series, order);
-      console.log('after:', series, order);
+      //console.log('before:', series, order);
+      stackOffsetDiverging(series, order);
+      //console.log('after:', series, order);
     }; //d3.stackOffsetDiverging;
     const commitPalette = this.state.commitPalette;
 
@@ -89,7 +89,7 @@ export default class LanguageModuleRiver extends React.Component {
       <div className={styles.chartLine}>
         <div className={cx(styles.text, 'label')}>Changes</div>
         <div className={styles.chart}>
-          <StackedAreaChart
+          <DataRiverChartComponent
             content={this.state.commitChartData}
             palette={commitPalette}
             paddings={{ top: 20, left: 60, bottom: 20, right: 30 }}
@@ -106,7 +106,7 @@ export default class LanguageModuleRiver extends React.Component {
     );
 
     const addDays = (date, days) => {
-      var result = new Date(date);
+      const result = new Date(date);
       result.setDate(result.getDate() + days);
       return result;
     };

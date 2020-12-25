@@ -26,8 +26,21 @@ import { formatDate } from '../../utils/date';
  *  - order (optional) (Format: [string, string, ...]) Strings containing the keys in desired order (largest to smallest).
  */
 export default class ScalableBaseChart extends React.Component {
-  constructor(props) {
+  constructor(
+    props,
+    styles = {
+      chartDiv: false,
+      chartSvg: false
+    }
+  ) {
     super(props);
+
+    if (!styles.chartDiv || !styles.chartSvg || !styles.tooltip) {
+      throw new Error('The provided styles are invalid!');
+    }
+
+    this.styles = Object.freeze(styles);
+
     this.state = {
       content: props.content, //[{name: "dev1", color: "#ffffff", checked: bool}, ...]
       palette: props.palette,
@@ -51,6 +64,28 @@ export default class ScalableBaseChart extends React.Component {
   }
 
   /**
+   *
+   * @param scaleX
+   * @param scaleY
+   * @returns {*}
+   */
+  createAreaFunction(scaleX, scaleY) {
+    //Area generator for the chart
+    return d3
+      .area()
+      .x(function(d) {
+        return scaleX(d.data.date);
+      })
+      .y0(function(d) {
+        return scaleY(d[0]);
+      })
+      .y1(function(d) {
+        return scaleY(d[1]);
+      })
+      .curve(d3.curveMonotoneX);
+  }
+
+  /**
    * Update the chart element. May only be called if this.props.content is not empty and the component is mounted.
    */
   updateElement() {
@@ -62,45 +97,50 @@ export default class ScalableBaseChart extends React.Component {
     const { width, height, paddings } = this.getDimsAndPaddings(svg); //Get width and height of svg in browser
 
     //Get X and Y scales, which translate data values into pixel values
-    const { x, y } = this.createScales(
-      [data[0].date, data[data.length - 1].date],
-      [paddings.left, width - paddings.right],
-      this.props.yDims,
-      [height - paddings.bottom, paddings.top]
-    );
+    const { x, y } = this.createScales(this.getXDims(data), [paddings.left, width - paddings.right], this.props.yDims, [
+      height - paddings.bottom,
+      paddings.top
+    ]);
 
-    //Area generator for the chart
-    const area = d3
-      .area()
-      .x(function(d) {
-        return x(d.data.date);
-      })
-      .y0(function(d) {
-        return y(d[0]);
-      })
-      .y1(function(d) {
-        return y(d[1]);
-      })
-      .curve(d3.curveMonotoneX);
+    const area = this.createAreaFunction(x, y);
 
     //Brush generator for brush-zoom functionality, with referenced callback-function
     const brush = d3.brushX().extent([[paddings.left, 0], [width - paddings.right, height]]);
+
+    //Remove old data
+    svg.selectAll('*').remove();
 
     //Draw the chart (and brush box) using everything provided
     const { brushArea, xAxis } = this.drawChart(svg, this.props.content, stackedData, area, brush, yScale, x, y, height, width, paddings);
 
     //Set callback for brush-zoom functionality
-    brush.on('end', event => {
-      this.updateZoom(event.selection, x, xAxis, brush, brushArea, area);
-    });
-
+    brush.on('end', event => this.updateZoom(event.selection, x, xAxis, brush, brushArea, area));
     //Set callback to reset zoom on double-click
-    svg.on('dblclick', () => {
-      x.domain([stackedData[0][0].data.date, stackedData[0][stackedData[0].length - 1].data.date]);
-      xAxis.call(d3.axisBottom(x));
-      brushArea.selectAll('.layer').attr('d', area);
-      this.setState({ zoomed: false });
-    });
+    svg.on('dblclick', () => this.resetZoom(x, stackedData, xAxis, brushArea, area));
+  }
+
+  /**
+   *
+   * @param data
+   * @returns {[]}
+   */
+  getXDims(data) {
+    return [d3.min(data, d => d.date), d3.max(data, d => d.date)];
+  }
+
+  /**
+   *
+   * @param x
+   * @param stackedData
+   * @param xAxis
+   * @param brushArea
+   * @param area
+   */
+  resetZoom(x, stackedData, xAxis, brushArea, area) {
+    x.domain([stackedData[0][0].data.date, stackedData[0][stackedData[0].length - 1].data.date]);
+    xAxis.call(d3.axisBottom(x));
+    brushArea.selectAll('.layer').attr('d', area);
+    this.setState({ zoomed: false });
   }
 
   /**
@@ -112,6 +152,7 @@ export default class ScalableBaseChart extends React.Component {
   calculateChartData(data, order) {
     //Keys are the names of the developers, date is excluded
     let keys;
+
     if (this.props.keys) {
       keys = this.props.keys.length > 0 ? this.props.keys : Object.keys(data[0]).slice(1);
     } else keys = Object.keys(data[0]).slice(1);
@@ -203,16 +244,207 @@ export default class ScalableBaseChart extends React.Component {
    *               xAxis: d3 x-Axis for later transitioning (for zooming)
    */
   drawChart(svg, rawData, data, area, brush, yScale, x, y, height, width, paddings) {
-    //Remove old data
-    svg.selectAll('*').remove();
-
     //Color palette with the form {author1: color1, ...}
     const palette = this.props.palette;
     const brushArea = svg.append('g');
     const resolution = this.props.resolution;
 
-    svg.on('wheel', event => {
-      var direction = event.deltaY > 0 ? 'down' : 'up';
+    const yAxis = brushArea.append('g').attr('transform', 'translate(' + paddings.left + ',0)').call(
+      d3.axisLeft(y).tickFormat(d => {
+        if (this.props.displayNegative) {
+          return d;
+        } else return Math.abs(d);
+      })
+    );
+
+    const scrollEvent = this.createScrollEvent(svg, y, yAxis, brushArea, area);
+    svg.on('wheel', scrollEvent);
+
+    const tooltip = d3.select(this.tooltipRef);
+
+    this.setBrushArea(brushArea, brush, data, palette, area, tooltip, svg, x, rawData, resolution, y);
+
+    //Append visible x-axis on the bottom, with an offset so it's actually visible
+    let xAxis;
+    if (this.props.xAxisCenter) {
+      xAxis = brushArea.append('g').attr('transform', 'translate(0,' + y(0) + ')').call(d3.axisBottom(x));
+    } else {
+      xAxis = brushArea.append('g').attr('transform', 'translate(0,' + (height - paddings.bottom) + ')').call(d3.axisBottom(x));
+    }
+
+    return { brushArea, xAxis };
+  }
+
+  /**
+   *
+   * @param brushArea
+   * @param brush
+   * @param data
+   * @param palette
+   * @param area
+   * @param tooltip
+   * @param svg
+   * @param x
+   * @param rawData
+   * @param resolution
+   * @param y
+   */
+  setBrushArea(brushArea, brush, data, palette, area, tooltip, svg, x, rawData, resolution, y) {
+    brushArea.append('g').attr('class', 'brush').call(brush);
+
+    const bisectDate = d3.bisector(d => d.date).left;
+    const _this = this;
+
+    //Append data to svg using the area generator and palette
+    brushArea
+      .selectAll()
+      .data(data)
+      .enter()
+      .append('path')
+      .attr('class', 'layer')
+      .attr('id', d => d.key)
+      .style('fill', d => palette[d.key])
+      .attr('d', area)
+      .attr('clip-path', 'url(#clip)')
+      .on('mouseover', () => tooltip.style('display', 'inline'))
+      .on('mouseout', () => {
+        tooltip.style('display', 'none');
+        brushArea.select('.' + this.styles.indicatorLine).remove();
+        brushArea.selectAll('.' + this.styles.indicatorCircle).remove();
+      })
+      .on('mousemove', function(event) {
+        if (event === undefined || event === null) {
+          return;
+        }
+
+        //Calculate values and text for tooltip
+        const node = svg.node();
+        const pointer = d3.pointer(event, node);
+        const mouseoverDate = x.invert(pointer[0]);
+        _this.createdTooltipNode(
+          this,
+          bisectDate,
+          rawData,
+          mouseoverDate,
+          data,
+          resolution,
+          tooltip,
+          palette,
+          event,
+          node,
+          brushArea,
+          x,
+          y
+        );
+      });
+  }
+
+  /**
+   *
+   * @param path
+   * @param bisectDate
+   * @param rawData
+   * @param mouseoverDate
+   * @param data
+   * @param resolution
+   * @param tooltip
+   * @param palette
+   * @param event
+   * @param node
+   * @param brushArea
+   * @param x
+   * @param y
+   */
+  createdTooltipNode(path, bisectDate, rawData, mouseoverDate, data, resolution, tooltip, palette, event, node, brushArea, x, y) {
+    const nearestDateIndex = bisectDate(rawData, mouseoverDate);
+    const candidate1 = rawData[nearestDateIndex];
+    const candidate2 = rawData[nearestDateIndex - 1];
+    let nearestDataPoint;
+    if (Math.abs(mouseoverDate - candidate1.date) < Math.abs(mouseoverDate - candidate2.date)) {
+      nearestDataPoint = candidate1;
+    } else {
+      nearestDataPoint = candidate2;
+    }
+    const key = d3.select(path).attr('id');
+    const text = key.split(' <', 1); //Remove git signature email
+    let value = nearestDataPoint[key];
+    const chartValues = this.findChartValues(data, key, nearestDataPoint.date);
+    const formattedDate = formatDate(new Date(nearestDataPoint.date), resolution);
+    if (value < 0) {
+      value *= -1;
+    }
+
+    //Render tooltip
+    tooltip
+      .html(formattedDate + '<hr/>' + '<div style="background: ' + palette[key] + '">' + '</div>' + text + ': ' + Math.round(value))
+      .style('position', 'absolute')
+      .style('left', event.layerX - 20 + 'px')
+      .style('top', event.layerY + (node.getBoundingClientRect() || { y: 0 }).y - 70 + 'px');
+    brushArea.select('.' + this.styles.indicatorLine).remove();
+    brushArea.selectAll('.' + this.styles.indicatorCircle).remove();
+    brushArea
+      .append('line')
+      .attr('class', this.styles.indicatorLine)
+      .attr('x1', x(nearestDataPoint.date))
+      .attr('x2', x(nearestDataPoint.date))
+      .attr('y1', y(chartValues.y1))
+      .attr('y2', y(chartValues.y2))
+      .attr('clip-path', 'url(#clip)');
+
+    brushArea
+      .append('circle')
+      .attr('class', this.styles.indicatorCircle)
+      .attr('cx', x(nearestDataPoint.date))
+      .attr('cy', y(chartValues.y2))
+      .attr('r', 5)
+      .attr('clip-path', 'url(#clip)')
+      .style('fill', palette[key]);
+
+    brushArea
+      .append('circle')
+      .attr('class', this.styles.indicatorCircle)
+      .attr('cx', x(nearestDataPoint.date))
+      .attr('cy', y(chartValues.y1))
+      .attr('r', 5)
+      .attr('clip-path', 'url(#clip)')
+      .style('fill', palette[key]);
+  }
+
+  /**
+   * Finds the chart values (for the displayed line) for the moused-over data-point
+   * @param data
+   * @param key
+   * @param timeValue
+   * @returns {{y1: *, y2: *}}
+   */
+  findChartValues(data, key, timeValue) {
+    let foundValues = [];
+    _.each(data, series => {
+      if (series.key === key) {
+        _.each(series, dataPoint => {
+          if (dataPoint.data.date === timeValue) {
+            foundValues = dataPoint;
+            return false;
+          }
+        });
+        return false;
+      }
+    });
+    return { y1: foundValues[0], y2: foundValues[1] };
+  }
+
+  /**
+   *
+   * @param svg
+   * @param y
+   * @param yAxis
+   * @param brushArea
+   * @param area
+   * @returns {function(*): (undefined)}
+   */
+  createScrollEvent(svg, y, yAxis, brushArea, area) {
+    return event => {
+      const direction = event.deltaY > 0 ? 'down' : 'up';
       let zoomedDims = [...this.props.yDims];
       let top = zoomedDims[1],
         bottom = zoomedDims[0];
@@ -220,6 +452,7 @@ export default class ScalableBaseChart extends React.Component {
         //If everything is filtered, do nothing
         return;
       }
+
       if (this.state.zoomedVertical) {
         top = this.state.verticalZoomDims[1];
         bottom = this.state.verticalZoomDims[0];
@@ -233,161 +466,20 @@ export default class ScalableBaseChart extends React.Component {
             this.updateVerticalZoom([bottom * 2, top * 2], y, yAxis, brushArea, area);
           }
         }
-      } else {
-        if (direction === 'up') {
-          if (bottom === 0) {
-            zoomedDims = [bottom, top / 2];
-          } else if (top > Math.abs(bottom)) {
-            zoomedDims = [top / -1, top];
-          } else if (Math.abs(bottom) >= top) {
-            zoomedDims = [bottom, Math.abs(bottom)];
-          }
-          this.updateVerticalZoom(zoomedDims, y, yAxis, brushArea, area);
-        }
-      }
-    });
-
-    const tooltip = d3.select(this.tooltipRef);
-
-    brushArea.append('g').attr('class', 'brush').call(brush);
-
-    //Append data to svg using the area generator and palette
-    brushArea
-      .selectAll()
-      .data(data)
-      .enter()
-      .append('path')
-      .attr('class', 'layer')
-      .attr('id', d => d.key)
-      .style('fill', d => palette[d.key])
-      .attr('d', area)
-      .attr('clip-path', 'url(#clip)')
-      .on('mouseover', mouseover)
-      .on('mousemove', mousemove)
-      .on('mouseout', mouseout);
-
-    //Append visible x-axis on the bottom, with an offset so it's actually visible
-    let xAxis;
-    if (this.props.xAxisCenter) {
-      xAxis = brushArea.append('g').attr('transform', 'translate(0,' + y(0) + ')').call(d3.axisBottom(x));
-    } else {
-      xAxis = brushArea.append('g').attr('transform', 'translate(0,' + (height - paddings.bottom) + ')').call(d3.axisBottom(x));
-    }
-
-    const bisectDate = d3.bisector(d => d.date).left;
-
-    const yAxis = brushArea.append('g').attr('transform', 'translate(' + paddings.left + ',0)').call(
-      d3.axisLeft(y).tickFormat(d => {
-        if (this.props.displayNegative) {
-          return d;
-        } else return Math.abs(d);
-      })
-    );
-
-    //Mouseover for tooltip
-    function mouseover() {
-      tooltip.style('display', 'inline');
-    }
-    //Mousemove for tooltip
-    function mousemove(event) {
-      if (event === undefined || event === null) {
         return;
       }
 
-      //Calculate values and text for tooltip
-      const node = svg.node();
-      const pointer = d3.pointer(event, node);
-      const mouseoverDate = x.invert(pointer[0]);
-      const nearestDateIndex = bisectDate(rawData, mouseoverDate);
-      const candidate1 = rawData[nearestDateIndex];
-      const candidate2 = rawData[nearestDateIndex - 1];
-      let nearestDataPoint;
-      if (Math.abs(mouseoverDate - candidate1.date) < Math.abs(mouseoverDate - candidate2.date)) {
-        nearestDataPoint = candidate1;
-      } else {
-        nearestDataPoint = candidate2;
-      }
-      const key = d3.select(this).attr('id');
-      const text = key.split(' <', 1); //Remove git signature email
-      let value = nearestDataPoint[key];
-      const chartValues = findChartValues(data, key, nearestDataPoint.date);
-      const formattedDate = formatDate(new Date(nearestDataPoint.date), resolution);
-      if (value < 0) {
-        value *= -1;
-      }
-
-      //Render tooltip
-      tooltip
-        .html(formattedDate + '<hr/>' + '<div style="background: ' + palette[key] + '">' + '</div>' + text + ': ' + Math.round(value))
-        .style('position', 'absolute')
-        .style('left', event.layerX - 20 + 'px')
-        .style('top', event.layerY + (node.getBoundingClientRect() || { y: 0 }).y - 70 + 'px');
-      brushArea.select('.' + this.styles.indicatorLine).remove();
-      brushArea.selectAll('.' + this.styles.indicatorCircle).remove();
-      brushArea
-        .append('line')
-        .attr('class', this.styles.indicatorLine)
-        .attr('x1', x(nearestDataPoint.date))
-        .attr('x2', x(nearestDataPoint.date))
-        .attr('y1', y(chartValues.y1))
-        .attr('y2', y(chartValues.y2))
-        .attr('clip-path', 'url(#clip)');
-
-      brushArea
-        .append('circle')
-        .attr('class', this.styles.indicatorCircle)
-        .attr('cx', x(nearestDataPoint.date))
-        .attr('cy', y(chartValues.y2))
-        .attr('r', 5)
-        .attr('clip-path', 'url(#clip)')
-        .style('fill', palette[key]);
-
-      brushArea
-        .append('circle')
-        .attr('class', this.styles.indicatorCircle)
-        .attr('cx', x(nearestDataPoint.date))
-        .attr('cy', y(chartValues.y1))
-        .attr('r', 5)
-        .attr('clip-path', 'url(#clip)')
-        .style('fill', palette[key]);
-    }
-    //Mouseout function for tooltip
-    function mouseout() {
-      tooltip.style('display', 'none');
-      brushArea.select('.' + this.styles.indicatorLine).remove();
-      brushArea.selectAll('.' + this.styles.indicatorCircle).remove();
-    }
-
-    //Finds the chart values (for the displayed line) for the moused-over data-point
-    function findChartValues(data, key, timeValue) {
-      let foundValues = [];
-      _.each(data, series => {
-        if (series.key === key) {
-          _.each(series, dataPoint => {
-            if (dataPoint.data.date === timeValue) {
-              foundValues = dataPoint;
-              return false;
-            }
-          });
-          return false;
+      if (direction === 'up') {
+        if (bottom === 0) {
+          zoomedDims = [bottom, top / 2];
+        } else if (top > Math.abs(bottom)) {
+          zoomedDims = [top / -1, top];
+        } else if (Math.abs(bottom) >= top) {
+          zoomedDims = [bottom, Math.abs(bottom)];
         }
-      });
-      return { y1: foundValues[0], y2: foundValues[1] };
-    }
-
-    // TODO: remove?
-    // eslint-disable-next-line no-unused-vars
-    const clip = svg
-      .append('defs')
-      .append('svg:clipPath')
-      .attr('id', 'clip')
-      .append('svg:rect')
-      .attr('width', width - paddings.right - paddings.left)
-      .attr('height', height)
-      .attr('x', paddings.left)
-      .attr('y', 0);
-
-    return { brushArea, xAxis };
+        this.updateVerticalZoom(zoomedDims, y, yAxis, brushArea, area);
+      }
+    };
   }
 
   /**
