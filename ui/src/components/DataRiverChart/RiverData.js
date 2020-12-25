@@ -7,15 +7,16 @@ export class RiverData {
   constructor() {
     if (arguments.length === 1 && typeof arguments[0] === 'object') {
       this.copyCtor(arguments[0]);
-    } else if (arguments.length >= 2) {
+    } else if (arguments.length >= 3) {
       this.init.apply(this, arguments);
     } else {
       throw new Error('invalid arguments!');
     }
   }
 
-  init(sha, attribute, name = '', buildStat = 0, additions = 0, deletions = 0) {
+  init(date, sha, attribute, name = '', buildStat = 0, additions = 0, deletions = 0) {
     this.data = Object.freeze({
+      date,
       sha,
       attribute,
       name,
@@ -27,6 +28,10 @@ export class RiverData {
 
   copyCtor(data) {
     this.data = Object.freeze(Object.assign({}, data.data, { buildStat: BuildStat.valueOf(data.buildStat) }));
+  }
+
+  get date() {
+    return this.data.date;
   }
 
   get name() {

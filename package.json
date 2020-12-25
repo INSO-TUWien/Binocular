@@ -22,7 +22,9 @@
     "dockerize": "whalify generate-installer && ./node_modules/.bin/whalify build",
     "fix:root": "eslint --fix .",
     "fix:ui": "eslint --fix --ignore-path ui/.eslintignore -c ui/.eslintrc.yml ui",
-    "fix": "npm run fix:root && npm run fix:ui"
+    "fix": "npm run fix:root && npm run fix:ui",
+    "build:lamosp": "cd services/language/detector && bundler install",
+    "start:lamosp": "cd services/language/detector && bundle exec binocular-language-detector"
   },
   "keywords": [
     "git"

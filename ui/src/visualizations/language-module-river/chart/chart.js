@@ -9,9 +9,9 @@ import _ from 'lodash';
 import StackedAreaChart from '../../../components/StackedAreaChart/StackedAreaChart';
 import moment from 'moment';
 import chroma from 'chroma-js';
-import { DataRiverChart } from './DataRiverChart';
+import { DataRiverChartComponent } from '../../../components/DataRiverChart/data-river-chart.component';
 import cx from 'classnames';
-import { RiverData, BuildStat } from './RiverData';
+import { RiverData, BuildStat } from '../../../components/DataRiverChart/RiverData';
 
 export default class LanguageModuleRiver extends React.Component {
   constructor(props) {
@@ -63,7 +63,26 @@ export default class LanguageModuleRiver extends React.Component {
       commitOrder = Object.keys(this.props.palette);
     }
 
-    const commitOffset = d3.stackOffsetDiverging;
+    const commitOffset = (series, order) => {
+      series.forEach(stream =>
+        stream.forEach((node, index) => {
+          if (index) {
+            /*node[3] =
+            node[0] = stream[index - 1][0] + 10;
+            node[1] = stream[index - 1][0] + 10;*/
+          } else {
+            // y offset
+            node[3] = 0;
+          }
+
+          /*node[0] = Math.sign(node[0]) >= 0 ? node[0] + 20 : node[0] - 20;
+          node[1] = Math.sign(node[1]) >= 0 ? node[1] + 20 : node[1] - 20;*/
+        })
+      );
+      console.log('before:', series, order);
+      d3.stackOffsetDiverging(series, order);
+      console.log('after:', series, order);
+    }; //d3.stackOffsetDiverging;
     const commitPalette = this.state.commitPalette;
 
     const commitChart = (
@@ -86,12 +105,19 @@ export default class LanguageModuleRiver extends React.Component {
       </div>
     );
 
-    var mockData = [
-      new RiverData('a1', 'js', 'Michi', BuildStat.Success, 100000, 2),
-      new RiverData('a2', 'js', 'Michi', BuildStat.Failed, 4, 2),
-      new RiverData('a3', 'js', 'Michi', BuildStat.Skipped, 140, 12),
-      new RiverData('a4', 'js', 'Michi', BuildStat.Success, 100004, 120),
-      new RiverData('a5', 'js', 'Michi', BuildStat.Success, 200, 12)
+    const addDays = (date, days) => {
+      var result = new Date(date);
+      result.setDate(result.getDate() + days);
+      return result;
+    };
+
+    const date = new Date('2020-10-17');
+    const mockData = [
+      new RiverData(addDays(date, 1), 'a1', 'js', 'Michi', BuildStat.Success, 100000, 2),
+      new RiverData(addDays(date, 2), 'a2', 'js', 'Michi', BuildStat.Failed, 4, 2),
+      new RiverData(addDays(date, 3), 'a3', 'js', 'Michi', BuildStat.Skipped, 140, 12),
+      new RiverData(addDays(date, 4), 'a4', 'js', 'Michi', BuildStat.Success, 100004, 120),
+      new RiverData(addDays(date, 5), 'a5', 'js', 'Michi', BuildStat.Success, 200, 12)
     ];
 
     const palette = chroma.scale('spectral').mode('lch').colors(mockData.length).reduce((map, color, index) => {
@@ -99,7 +125,7 @@ export default class LanguageModuleRiver extends React.Component {
       return map;
     }, {});
 
-    //const commitChart = <DataRiverChart dataset={mockData} colorPalette={palette} />;
+    //const commitChart = <DataRiverChartComponent dataset={mockData} colorPalette={palette} />;
 
     const loadingHint = (
       <div className={styles.loadingHintContainer}>
