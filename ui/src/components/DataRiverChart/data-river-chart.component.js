@@ -5,9 +5,9 @@ import * as d3 from 'd3';
 import chroma from 'chroma-js';
 import { RiverData } from './RiverData';
 import styles from './data-river-chart.component.scss';
-import ScalableBaseChart from '../ScalableBaseChart';
+import ScalableBaseChartComponent from '../ScalableBaseChart';
 
-export class DataRiverChartComponent extends ScalableBaseChart {
+export class DataRiverChartComponent extends ScalableBaseChartComponent {
   constructor(props) {
     super(props, styles);
   }

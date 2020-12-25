@@ -1,7 +1,7 @@
 'use strict';
 
 import styles from './stackedAreaChart.scss';
-import ScalableBaseChart from '../ScalableBaseChart';
+import ScalableBaseChartComponent from '../ScalableBaseChart';
 import * as d3 from 'd3';
 import _ from 'lodash';
 import { formatDate } from '../../utils/date';
@@ -26,7 +26,7 @@ import { formatDate } from '../../utils/date';
  *  - displayNegative (optional) (Format: true/false) Display negative numbers on y-scale.
  *  - order (optional) (Format: [string, string, ...]) Strings containing the keys in desired order (largest to smallest).
  */
-export default class StackedAreaChart extends ScalableBaseChart {
+export default class StackedAreaChart extends ScalableBaseChartComponent {
   constructor(props) {
     super(props, styles);
   }

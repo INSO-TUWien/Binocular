@@ -4,6 +4,7 @@ import _ from 'lodash';
 import React from 'react';
 import * as d3 from 'd3';
 import { formatDate } from '../../utils/date';
+import * as baseStyles from './scalable-base-chart.component.scss';
 
 /**
  * Stacked area chart
@@ -25,21 +26,11 @@ import { formatDate } from '../../utils/date';
  *  - displayNegative (optional) (Format: true/false) Display negative numbers on y-scale.
  *  - order (optional) (Format: [string, string, ...]) Strings containing the keys in desired order (largest to smallest).
  */
-export default class ScalableBaseChart extends React.Component {
-  constructor(
-    props,
-    styles = {
-      chartDiv: false,
-      chartSvg: false
-    }
-  ) {
+export default class ScalableBaseChartComponent extends React.Component {
+  constructor(props, styles) {
     super(props);
 
-    if (!styles.chartDiv || !styles.chartSvg || !styles.tooltip) {
-      throw new Error('The provided styles are invalid!');
-    }
-
-    this.styles = Object.freeze(styles);
+    this.styles = Object.freeze(Object.assign({}, baseStyles, styles));
 
     this.state = {
       content: props.content, //[{name: "dev1", color: "#ffffff", checked: bool}, ...]
@@ -48,8 +39,7 @@ export default class ScalableBaseChart extends React.Component {
       zoomed: false,
       zoomedDims: [0, 0],
       zoomedVertical: false,
-      verticalZoomDims: [0, 0],
-      styles: props.styles || {}
+      verticalZoomDims: [0, 0]
     };
     window.addEventListener('resize', () => this.updateElement());
   }

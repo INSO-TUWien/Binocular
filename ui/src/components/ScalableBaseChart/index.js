@@ -1,5 +1,5 @@
 'use strict';
 
-import ScalableBaseChart from './scalable-base-chart.js';
+import ScalableBaseChartComponent from './scalable-base-chart.component.js';
 
-export default ScalableBaseChart;
+export default ScalableBaseChartComponent;
