@@ -3,7 +3,6 @@
 import _ from 'lodash';
 import React from 'react';
 import * as d3 from 'd3';
-import { formatDate } from '../../utils/date';
 import * as baseStyles from './scalable-base-chart.component.scss';
 import { NoImplementationException } from '../../utils/exception/NoImplementationException';
 
@@ -43,15 +42,6 @@ export default class ScalableBaseChartComponent extends React.Component {
       verticalZoomDims: [0, 0]
     };
     window.addEventListener('resize', () => this.updateElement());
-  }
-
-  componentDidMount() {
-    //Needed to restrict d3 to only access DOM when the component is already mounted
-    this.setState({ componentMounted: true });
-  }
-
-  componentWillUnmount() {
-    this.setState({ componentMounted: false });
   }
 
   /**
@@ -97,6 +87,58 @@ export default class ScalableBaseChartComponent extends React.Component {
   // eslint-disable-next-line no-unused-vars
   calculateChartData(data, order) {
     throw new NoImplementationException('Base class is abstract and requires implementation!');
+  }
+
+  /**
+   *
+   * @param path
+   * @param bisectDate
+   * @param rawData
+   * @param mouseoverDate
+   * @param data
+   * @param resolution
+   * @param tooltip
+   * @param palette
+   * @param event
+   * @param node
+   * @param brushArea
+   * @param x
+   * @param y
+   */
+  createdTooltipNode(path, bisectDate, rawData, mouseoverDate, data, resolution, tooltip, palette, event, node, brushArea, x, y) {
+    throw new NoImplementationException('Base class is abstract and requires implementation!');
+  }
+
+  // eslint-disable-next-line no-unused-vars
+  getBrushId(data) {
+    throw new NoImplementationException('Base class is abstract and requires implementation!');
+  }
+
+  componentDidMount() {
+    //Needed to restrict d3 to only access DOM when the component is already mounted
+    this.setState({ componentMounted: true });
+  }
+
+  componentWillUnmount() {
+    this.setState({ componentMounted: false });
+  }
+
+  //Draw chart after it updated
+  componentDidUpdate() {
+    //Only update the chart if there is data for it and the component is mounted.
+    //it is not currently in a zoom transition (d3 requirement)
+    if (this.state.componentMounted && this.props.content) {
+      this.updateElement();
+    }
+  }
+
+  render() {
+    return (
+      <div className={this.styles.chartDiv}>
+        <svg className={this.styles.chartSvg} ref={svg => (this.svgRef = svg)} />
+        <div className={this.styles.tooltip} ref={div => (this.tooltipRef = div)} />
+      </div>
+    );
   }
 
   /**
@@ -201,15 +243,6 @@ export default class ScalableBaseChartComponent extends React.Component {
     const brushArea = svg.append('g');
     const resolution = this.props.resolution;
 
-    const yAxis = brushArea.append('g').attr('transform', 'translate(' + paddings.left + ',0)');
-
-    if (!this.props.hideVertical) {
-      yAxis.call(d3.axisLeft(y).tickFormat(d => (this.props.displayNegative ? d : Math.abs(d))));
-    }
-
-    const scrollEvent = this.createScrollEvent(svg, y, yAxis, brushArea, area);
-    svg.on('wheel', scrollEvent);
-
     const tooltip = d3.select(this.tooltipRef);
 
     this.setBrushArea(brushArea, brush, data, palette, area, tooltip, svg, x, rawData, resolution, y);
@@ -222,12 +255,15 @@ export default class ScalableBaseChartComponent extends React.Component {
       xAxis = brushArea.append('g').attr('transform', 'translate(0,' + (height - paddings.bottom) + ')').call(d3.axisBottom(x));
     }
 
-    return { brushArea, xAxis };
-  }
+    const yAxis = brushArea.append('g').attr('transform', 'translate(' + paddings.left + ',0)');
 
-  // eslint-disable-next-line no-unused-vars
-  getBrushId(data) {
-    throw new NoImplementationException('Base class is abstract and requires implementation!');
+    if (!this.props.hideVertical) {
+      yAxis.call(d3.axisLeft(y).tickFormat(d => (this.props.displayNegative ? d : Math.abs(d))));
+    }
+
+    svg.on('wheel', this.createScrollEvent(svg, y, yAxis, brushArea, area));
+
+    return { brushArea, xAxis };
   }
 
   /**
@@ -295,80 +331,6 @@ export default class ScalableBaseChartComponent extends React.Component {
   }
 
   /**
-   *
-   * @param path
-   * @param bisectDate
-   * @param rawData
-   * @param mouseoverDate
-   * @param data
-   * @param resolution
-   * @param tooltip
-   * @param palette
-   * @param event
-   * @param node
-   * @param brushArea
-   * @param x
-   * @param y
-   */
-  createdTooltipNode(path, bisectDate, rawData, mouseoverDate, data, resolution, tooltip, palette, event, node, brushArea, x, y) {
-    const nearestDateIndex = bisectDate(rawData, mouseoverDate);
-    const candidate1 = rawData[nearestDateIndex];
-    const candidate2 = rawData[nearestDateIndex - 1];
-
-    let nearestDataPoint;
-
-    if (Math.abs(mouseoverDate - candidate1.date) < Math.abs(mouseoverDate - candidate2.date)) {
-      nearestDataPoint = candidate1;
-    } else {
-      nearestDataPoint = candidate2;
-    }
-
-    const key = d3.select(path).attr('id');
-    const text = key.split(' <', 1); //Remove git signature email
-    let value = nearestDataPoint[key];
-    const chartValues = this.findChartValues(data, key, nearestDataPoint.date);
-    const formattedDate = formatDate(new Date(nearestDataPoint.date), resolution);
-    if (value < 0) {
-      value *= -1;
-    }
-
-    //Render tooltip
-    tooltip
-      .html(formattedDate + '<hr/>' + '<div style="background: ' + palette[key] + '">' + '</div>' + text + ': ' + Math.round(value))
-      .style('position', 'absolute')
-      .style('left', event.layerX - 20 + 'px')
-      .style('top', event.layerY + (node.getBoundingClientRect() || { y: 0 }).y - 70 + 'px');
-    brushArea.select('.' + this.styles.indicatorLine).remove();
-    brushArea.selectAll('.' + this.styles.indicatorCircle).remove();
-    brushArea
-      .append('line')
-      .attr('class', this.styles.indicatorLine)
-      .attr('x1', x(nearestDataPoint.date))
-      .attr('x2', x(nearestDataPoint.date))
-      .attr('y1', y(chartValues.y1))
-      .attr('y2', y(chartValues.y2))
-      .attr('clip-path', 'url(#clip)');
-
-    brushArea
-      .append('circle')
-      .attr('class', this.styles.indicatorCircle)
-      .attr('cx', x(nearestDataPoint.date))
-      .attr('cy', y(chartValues.y2))
-      .attr('r', 5)
-      .attr('clip-path', 'url(#clip)')
-      .style('fill', palette[key]);
-
-    brushArea
-      .append('circle')
-      .attr('class', this.styles.indicatorCircle)
-      .attr('cx', x(nearestDataPoint.date))
-      .attr('cy', y(chartValues.y1))
-      .attr('r', 5)
-      .attr('clip-path', 'url(#clip)')
-      .style('fill', palette[key]);
-  }
-
-  /**
    * Finds the chart values (for the displayed line) for the moused-over data-point
    * @param data
    * @param key
@@ -398,7 +360,7 @@ export default class ScalableBaseChartComponent extends React.Component {
    * @param yAxis
    * @param brushArea
    * @param area
-   * @returns {function(*): (undefined)}
+   * @returns scroll event
    */
   createScrollEvent(svg, y, yAxis, brushArea, area) {
     return event => {
@@ -494,23 +456,5 @@ export default class ScalableBaseChartComponent extends React.Component {
     xAxis.call(d3.axisBottom(x));
     brushArea.selectAll('.layer').attr('d', area);
     this.setState({ zoomed: true, zoomedDims: zoomedDims });
-  }
-
-  //Draw chart after it updated
-  componentDidUpdate() {
-    //Only update the chart if there is data for it and the component is mounted.
-    //it is not currently in a zoom transition (d3 requirement)
-    if (this.state.componentMounted && this.props.content) {
-      this.updateElement();
-    }
-  }
-
-  render() {
-    return (
-      <div className={this.styles.chartDiv}>
-        <svg className={this.styles.chartSvg} ref={svg => (this.svgRef = svg)} />
-        <div className={this.styles.tooltip} ref={div => (this.tooltipRef = div)} />
-      </div>
-    );
   }
 }
