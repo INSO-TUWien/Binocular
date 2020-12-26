@@ -140,16 +140,13 @@ export default class ScalableBaseChartComponent extends React.Component {
    *          Values self-explanatory. All values in pixels.
    */
   getDimsAndPaddings(svg) {
+    const paddings = this.props.paddings || { left: 0, right: 0, top: 0, bottom: 0 };
     const node = !svg || typeof svg.node !== 'function' ? { getBoundingClientRec: () => ({}) } : svg.node();
     const clientRect = node ? node.getBoundingClientRect() : {};
-    const width = clientRect.width ? clientRect.width : 0;
-    const height = clientRect.height ? clientRect.height : 0;
-    const paddingLeft = this.props.paddings.left ? this.props.paddings.left : 0;
-    const paddingBottom = this.props.paddings.bottom ? this.props.paddings.bottom : 0;
-    const paddingTop = this.props.paddings.top ? this.props.paddings.top : 0;
-    const paddingRight = this.props.paddings.right ? this.props.paddings.right : 0;
+    const width = clientRect.width || 0;
+    const height = clientRect.height || 0;
 
-    return { width, height, paddings: { left: paddingLeft, bottom: paddingBottom, top: paddingTop, right: paddingRight } };
+    return { width, height, paddings };
   }
 
   /**
@@ -204,13 +201,11 @@ export default class ScalableBaseChartComponent extends React.Component {
     const brushArea = svg.append('g');
     const resolution = this.props.resolution;
 
-    const yAxis = brushArea.append('g').attr('transform', 'translate(' + paddings.left + ',0)').call(
-      d3.axisLeft(y).tickFormat(d => {
-        if (this.props.displayNegative) {
-          return d;
-        } else return Math.abs(d);
-      })
-    );
+    const yAxis = brushArea.append('g').attr('transform', 'translate(' + paddings.left + ',0)');
+
+    if (!this.props.hideVertical) {
+      yAxis.call(d3.axisLeft(y).tickFormat(d => (this.props.displayNegative ? d : Math.abs(d))));
+    }
 
     const scrollEvent = this.createScrollEvent(svg, y, yAxis, brushArea, area);
     svg.on('wheel', scrollEvent);
@@ -230,8 +225,9 @@ export default class ScalableBaseChartComponent extends React.Component {
     return { brushArea, xAxis };
   }
 
+  // eslint-disable-next-line no-unused-vars
   getBrushId(data) {
-    return data.key;
+    throw new NoImplementationException('Base class is abstract and requires implementation!');
   }
 
   /**

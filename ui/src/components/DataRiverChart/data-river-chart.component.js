@@ -11,6 +11,10 @@ export class DataRiverChartComponent extends ScalableBaseChartComponent {
   constructor(props) {
     super(props, styles);
   }
+
+  calculateChartData(data, order) {
+    return super.calculateChartData(data, order);
+  }
 }
 
 const createId = node => `${node.sha}-${node.attribute}`;

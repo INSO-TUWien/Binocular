@@ -182,26 +182,7 @@ export default class StackedAreaChart extends ScalableBaseChartComponent {
       .style('fill', palette[key]);
   }
 
-  /**
-   * Finds the chart values (for the displayed line) for the moused-over data-point
-   * @param data
-   * @param key
-   * @param timeValue
-   * @returns {{y1: *, y2: *}}
-   */
-  findChartValues(data, key, timeValue) {
-    let foundValues = [];
-    _.each(data, series => {
-      if (series.key === key) {
-        _.each(series, dataPoint => {
-          if (dataPoint.data.date === timeValue) {
-            foundValues = dataPoint;
-            return false;
-          }
-        });
-        return false;
-      }
-    });
-    return { y1: foundValues[0], y2: foundValues[1] };
+  getBrushId(data) {
+    return data.key;
   }
 }
