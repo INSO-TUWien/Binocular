@@ -5,6 +5,7 @@ import React from 'react';
 import * as d3 from 'd3';
 import { formatDate } from '../../utils/date';
 import * as baseStyles from './scalable-base-chart.component.scss';
+import { NoImplementationException } from '../../utils/exception/NoImplementationException';
 
 /**
  * Stacked area chart
@@ -59,20 +60,43 @@ export default class ScalableBaseChartComponent extends React.Component {
    * @param scaleY
    * @returns {*}
    */
+  // eslint-disable-next-line no-unused-vars
   createAreaFunction(scaleX, scaleY) {
-    //Area generator for the chart
-    return d3
-      .area()
-      .x(function(d) {
-        return scaleX(d.data.date);
-      })
-      .y0(function(d) {
-        return scaleY(d[0]);
-      })
-      .y1(function(d) {
-        return scaleY(d[1]);
-      })
-      .curve(d3.curveMonotoneX);
+    throw new NoImplementationException('Base class is abstract and requires implementation!');
+  }
+
+  /**
+   *
+   * @param data
+   * @returns {[]}
+   */
+  // eslint-disable-next-line no-unused-vars
+  getXDims(data) {
+    throw new NoImplementationException('Base class is abstract and requires implementation!');
+  }
+
+  /**
+   *
+   * @param x
+   * @param stackedData
+   * @param xAxis
+   * @param brushArea
+   * @param area
+   */
+  // eslint-disable-next-line no-unused-vars
+  resetZoom(x, stackedData, xAxis, brushArea, area) {
+    throw new NoImplementationException('Base class is abstract and requires implementation!');
+  }
+
+  /**
+   * Calculate data for the chart.
+   * @param data Chart data in the format [{date: timestamp(ms), series1: value, series2: value, series3: value, series4: value, ...}, ...]
+   * @param order
+   * @returns Stacked chart data for d3 functions
+   */
+  // eslint-disable-next-line no-unused-vars
+  calculateChartData(data, order) {
+    throw new NoImplementationException('Base class is abstract and requires implementation!');
   }
 
   /**
@@ -107,65 +131,6 @@ export default class ScalableBaseChartComponent extends React.Component {
     brush.on('end', event => this.updateZoom(event.selection, x, xAxis, brush, brushArea, area));
     //Set callback to reset zoom on double-click
     svg.on('dblclick', () => this.resetZoom(x, stackedData, xAxis, brushArea, area));
-  }
-
-  /**
-   *
-   * @param data
-   * @returns {[]}
-   */
-  getXDims(data) {
-    return [d3.min(data, d => d.date), d3.max(data, d => d.date)];
-  }
-
-  /**
-   *
-   * @param x
-   * @param stackedData
-   * @param xAxis
-   * @param brushArea
-   * @param area
-   */
-  resetZoom(x, stackedData, xAxis, brushArea, area) {
-    x.domain([stackedData[0][0].data.date, stackedData[0][stackedData[0].length - 1].data.date]);
-    xAxis.call(d3.axisBottom(x));
-    brushArea.selectAll('.layer').attr('d', area);
-    this.setState({ zoomed: false });
-  }
-
-  /**
-   * Calculate data for the chart.
-   * @param data Chart data in the format [{date: timestamp(ms), series1: value, series2: value, series3: value, series4: value, ...}, ...]
-   * @param order
-   * @returns Stacked chart data for d3 functions
-   */
-  calculateChartData(data, order) {
-    //Keys are the names of the developers, date is excluded
-    let keys;
-
-    if (this.props.keys) {
-      keys = this.props.keys.length > 0 ? this.props.keys : Object.keys(data[0]).slice(1);
-    } else keys = Object.keys(data[0]).slice(1);
-
-    let orderedKeys = [];
-    if (order) {
-      _.each(order, orderElem => {
-        if (keys.includes('(Additions) ' + orderElem) && keys.includes('(Deletions) ' + orderElem)) {
-          orderedKeys.push('(Additions) ' + orderElem);
-          orderedKeys.push('(Deletions) ' + orderElem);
-        } else if (keys.includes(orderElem)) {
-          orderedKeys.push(orderElem);
-        }
-      });
-    } else {
-      orderedKeys = keys;
-    }
-
-    //Stack function for a ThemeRiver chart, using the keys provided
-    const stack = d3.stack().offset(this.props.d3offset).order(d3.stackOrderReverse).keys(orderedKeys);
-
-    //Data formatted for d3
-    return stack(data);
   }
 
   /**
@@ -265,6 +230,10 @@ export default class ScalableBaseChartComponent extends React.Component {
     return { brushArea, xAxis };
   }
 
+  getBrushId(data) {
+    return data.key;
+  }
+
   /**
    *
    * @param brushArea
@@ -292,8 +261,8 @@ export default class ScalableBaseChartComponent extends React.Component {
       .enter()
       .append('path')
       .attr('class', 'layer')
-      .attr('id', d => d.key)
-      .style('fill', d => palette[d.key])
+      .attr('id', this.getBrushId)
+      .style('fill', d => palette[this.getBrushId(d)])
       .attr('d', area)
       .attr('clip-path', 'url(#clip)')
       .on('mouseover', () => tooltip.style('display', 'inline'))
@@ -349,12 +318,15 @@ export default class ScalableBaseChartComponent extends React.Component {
     const nearestDateIndex = bisectDate(rawData, mouseoverDate);
     const candidate1 = rawData[nearestDateIndex];
     const candidate2 = rawData[nearestDateIndex - 1];
+
     let nearestDataPoint;
+
     if (Math.abs(mouseoverDate - candidate1.date) < Math.abs(mouseoverDate - candidate2.date)) {
       nearestDataPoint = candidate1;
     } else {
       nearestDataPoint = candidate2;
     }
+
     const key = d3.select(path).attr('id');
     const text = key.split(' <', 1); //Remove git signature email
     let value = nearestDataPoint[key];

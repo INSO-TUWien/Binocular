@@ -33,6 +33,15 @@ export default class StackedAreaChart extends ScalableBaseChartComponent {
 
   /**
    *
+   * @param data
+   * @returns {[]}
+   */
+  getXDims(data) {
+    return [d3.min(data, d => d.date), d3.max(data, d => d.date)];
+  }
+
+  /**
+   *
    * @param scaleX
    * @param scaleY
    * @returns {*}
