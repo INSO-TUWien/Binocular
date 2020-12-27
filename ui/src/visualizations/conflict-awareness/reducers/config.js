@@ -6,8 +6,10 @@ import _ from 'lodash';
 export default handleActions(
   {
     SET_COLOR: (state, action) => {
-      let colorFromKey = {};
-      colorFromKey[`color.${action.payload.key}`] = action.payload.color;
+      let colorFromKey = {
+        color: {},
+      };
+      colorFromKey.color[`${action.payload.key}`] = action.payload.color;
       return _.assign({}, state, colorFromKey);
     },
   },

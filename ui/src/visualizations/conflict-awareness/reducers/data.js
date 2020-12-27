@@ -16,7 +16,8 @@ export default handleActions(
   },
   {
     data: {
-      commits: [],
+      commits: undefined,
+      branches: undefined,
     },
     lastFetched: null,
     isFetching: null,

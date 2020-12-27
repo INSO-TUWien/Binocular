@@ -34,13 +34,10 @@ const getCommitsPage = (page, perPage) => {
                  sha
                  date
                  messageHeader
+                 message
                  signature
                  author
                  authorDate
-                 stats {
-                   additions
-                   deletions
-                 }
                  branches {
                   branchName
                  }

@@ -4,6 +4,7 @@ import { createAction } from 'redux-actions';
 import { fetchFactory, timestampedActionFactory } from '../../../sagas/utils';
 import Promise from 'bluebird';
 import getCommitData from './getCommitData';
+import getBranchData from './getBranchData';
 
 export const setColor = createAction('SET_COLOR', (color, key) => {
   return { color, key };
@@ -24,17 +25,18 @@ export default function* () {
  */
 export const fetchConflictAwarenessData = fetchFactory(
   function* () {
-    return yield Promise.join(getCommitData())
-      .spread((commits) => {
+    return yield Promise.join(getCommitData(), getBranchData())
+      .spread((commits, branches) => {
         return {
           commits,
+          branches,
         };
       })
-      .catch(function (e) {
+      .catch((e) => {
         console.error(e.stack);
         throw e;
       });
   },
   requestConflictAwarenessData,
-  receiveConflictAwarenessData,
+  receiveConflictAwarenessData
 );

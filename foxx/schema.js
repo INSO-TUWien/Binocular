@@ -20,6 +20,7 @@ const files = db._collection('files');
 const stakeholders = db._collection('stakeholders');
 const issues = db._collection('issues');
 const builds = db._collection('builds');
+const branches = db._collection('branches');
 
 const ISSUE_NUMBER_REGEX = /^#?(\d+).*$/;
 
@@ -235,7 +236,13 @@ const queryType = new gql.GraphQLObjectType({
             .toArray()[0];
         }
       },
-      issueDateHistogram: makeDateHistogramEndpoint(issues)
+      issueDateHistogram: makeDateHistogramEndpoint(issues),
+      branches: paginated({
+        type: require('./types/branch.js'),
+        query: () => aql`
+          FOR branch IN ${branches}
+            RETURN branch`,
+      }),
     };
   }
 });

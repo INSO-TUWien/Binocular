@@ -53,7 +53,7 @@ export default class ColorPicker extends React.Component {
    */
   handleChange(color) {
     this.setState({ color: color.rgb });
-    this.props.setColor(this.state.color);
+    this.props.setColor(color.rgb);
   }
 
   render() {
