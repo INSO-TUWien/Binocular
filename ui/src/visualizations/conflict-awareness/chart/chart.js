@@ -175,9 +175,9 @@ export default class ConflictAwareness extends React.Component {
           style: `stroke: ${this.state.colorBaseProject}; fill: ${this.state.colorBaseProject}; stroke-width: 1px;`,
           sha: node.sha,
           signature: node.signature,
-          date: node.date.toString(),
+          date: `${node.date.toDateString()} ${node.date.toTimeString().substr(0, 9)}`,
           author: node.author,
-          authorDate: node.authorDate.toString(),
+          authorDate: `${node.authorDate.toDateString()} ${node.authorDate.toTimeString().substr(0, 9)}`,
           messageHeader: node.messageHeader,
           message: node.message,
         }),
@@ -223,10 +223,10 @@ export default class ConflictAwareness extends React.Component {
         const tooltipText =
           '<div style="max-width: 500px">' +
           `<p style="text-align: center"><b>${node.sha}</b></p>` +
-          `Committed by ${node.signature}</br>` +
-          `on ${node.date.toLocaleString()}</br>` +
-          `Authored by ${node.author}</br></br>` +
-          `on ${node.authorDate.toLocaleString()}</br>` +
+          `Committed by ${node.signature.replace(/</g, '&lt').replace(/>/g, '&gt')}</br>` +
+          `(${node.date})</br></br>` +
+          `Authored by ${node.author.replace(/</g, '&lt').replace(/>/g, '&gt')}</br>` +
+          `(${node.authorDate})</br></br>` +
           `<i>${node.messageHeader}</i>` +
           '</div>';
 
