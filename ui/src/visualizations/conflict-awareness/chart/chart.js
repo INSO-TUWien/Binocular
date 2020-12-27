@@ -172,9 +172,7 @@ export default class ConflictAwareness extends React.Component {
           shape: 'circle' /*'elipse'*/,
           width: 15,
           height: 15,
-          style: `stroke: ${_getRGBAStringFromColor(
-            this.state.colorBaseProject
-          )}; fill: ${_getRGBAStringFromColor(this.state.colorBaseProject)}; stroke-width: 1px;`,
+          style: `stroke: ${this.state.colorBaseProject}; fill: ${this.state.colorBaseProject}; stroke-width: 1px;`,
           sha: node.sha,
           signature: node.signature,
           date: node.date.toString(),
@@ -192,9 +190,7 @@ export default class ConflictAwareness extends React.Component {
       (link) =>
         g.setEdge(link.source, link.target, {
           arrowhead: 'undirected',
-          style: `stroke: ${_getRGBAStringFromColor(
-            this.state.colorBaseProject
-          )}; fill: none; stroke-width: 2px;`,
+          style: `stroke: ${this.state.colorBaseProject}; fill: none; stroke-width: 2px;`,
         }),
       this
     );
@@ -300,14 +296,7 @@ function _getGraphDOMElements() {
 }
 
 function _colorGraph(inner, color) {
-  inner
-    .selectAll('g.node circle')
-    .style('fill', _getRGBAStringFromColor(color))
-    .style('stroke', _getRGBAStringFromColor(color));
+  inner.selectAll('g.node circle').style('fill', `${color}`).style('stroke', `${color}`);
 
-  inner.selectAll('g.edgePath path').style('stroke', _getRGBAStringFromColor(color));
-}
-
-function _getRGBAStringFromColor(color) {
-  return `rgba(${color.r}, ${color.g}, ${color.b}, ${color.a})`;
+  inner.selectAll('g.edgePath path').style('stroke', `${color}`);
 }

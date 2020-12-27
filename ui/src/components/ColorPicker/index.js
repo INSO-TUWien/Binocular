@@ -52,8 +52,8 @@ export default class ColorPicker extends React.Component {
    * @param color new color which was selected
    */
   handleChange(color) {
-    this.setState({ color: color.rgb });
-    this.props.setColor(color.rgb);
+    this.setState({ color: color.hex });
+    this.props.setColor(color.hex);
   }
 
   render() {
@@ -64,7 +64,7 @@ export default class ColorPicker extends React.Component {
           <div
             className={styles.color}
             style={{
-              background: `rgba(${this.state.color.r}, ${this.state.color.g}, ${this.state.color.b}, ${this.state.color.a})`,
+              background: `${this.state.color}`,
             }}
           />
         </div>

@@ -15,24 +15,9 @@ export default handleActions(
   },
   {
     color: {
-      baseProject: {
-        r: '241',
-        g: '112',
-        b: '19',
-        a: '1',
-      },
-      otherProject: {
-        r: '1',
-        g: '85',
-        b: '254',
-        a: '1',
-      },
-      combined: {
-        r: '24',
-        g: '142',
-        b: '1',
-        a: '1',
-      },
+      baseProject: '#F17013',
+      otherProject: '#0155FE',
+      combined: '#188E01',
     },
   }
 );
