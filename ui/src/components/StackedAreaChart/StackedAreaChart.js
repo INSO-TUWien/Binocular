@@ -40,6 +40,10 @@ export default class StackedAreaChart extends ScalableBaseChartComponent {
     return [d3.min(data, d => d.date), d3.max(data, d => d.date)];
   }
 
+  getYDims(data) {
+    return this.props.yDims;
+  }
+
   /**
    *
    * @param scaleX
@@ -66,14 +70,11 @@ export default class StackedAreaChart extends ScalableBaseChartComponent {
    * Calculate data for the chart.
    * @param data Chart data in the format [{date: timestamp(ms), series1: value, series2: value, series3: value, series4: value, ...}, ...]
    * @param order
-   * @returns Stacked chart data for d3 functions
+   * @returns Stacked chart data for d3 functions and preprocessed data { stackedData, data }
    */
   calculateChartData(data, order) {
     //Keys are the names of the developers, date is excluded
-    let keys;
-    if (this.props.keys) {
-      keys = this.props.keys.length > 0 ? this.props.keys : Object.keys(data[0]).slice(1);
-    } else keys = Object.keys(data[0]).slice(1);
+    const keys = this.props.keys && this.props.keys.length > 0 ? this.props.keys : Object.keys(data[0]).slice(1);
 
     let orderedKeys = [];
     if (order) {
@@ -93,7 +94,8 @@ export default class StackedAreaChart extends ScalableBaseChartComponent {
     const stack = d3.stack().offset(this.props.d3offset).order(d3.stackOrderReverse).keys(orderedKeys);
 
     //Data formatted for d3
-    return stack(data);
+    const stackedData = stack(data);
+    return { stackedData, data };
   }
 
   /**

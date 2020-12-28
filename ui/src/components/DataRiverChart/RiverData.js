@@ -14,7 +14,7 @@ export class RiverData {
     }
   }
 
-  init(date, sha, attribute, name = '', buildStat = 0, additions = 0, deletions = 0) {
+  init(date, sha, attribute, name = '', buildStat = 0, buildWeight = 1, additions = 0, deletions = 0) {
     this.data = Object.freeze({
       date,
       sha,
@@ -22,7 +22,8 @@ export class RiverData {
       name,
       additions,
       deletions,
-      buildStat: BuildStat.valueOf(buildStat)
+      buildStat: BuildStat.valueOf(buildStat),
+      buildWeight
     });
   }
 
@@ -46,12 +47,20 @@ export class RiverData {
     return this.data.buildStat;
   }
 
+  get buildWeight() {
+    return this.data.buildWeight;
+  }
+
   get additions() {
     return this.data.additions;
   }
 
   get deletions() {
     return this.data.deletions;
+  }
+
+  get totalDiff() {
+    return this.data.additions + this.data.deletions;
   }
 
   get attribute() {

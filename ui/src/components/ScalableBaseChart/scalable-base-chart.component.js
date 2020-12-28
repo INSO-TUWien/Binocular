@@ -45,6 +45,10 @@ export default class ScalableBaseChartComponent extends React.Component {
   }
 
   /**
+   * START OF ABSTRACT
+   */
+
+  /**
    *
    * @param scaleX
    * @param scaleY
@@ -67,14 +71,25 @@ export default class ScalableBaseChartComponent extends React.Component {
 
   /**
    *
+   * @param data
+   * @returns {[]}
+   */
+  // eslint-disable-next-line no-unused-vars
+  getYDims(data) {
+    throw new NoImplementationException('Base class is abstract and requires implementation!');
+  }
+
+  /**
+   *
    * @param x
    * @param stackedData
    * @param xAxis
    * @param brushArea
    * @param area
+   * @param data
    */
   // eslint-disable-next-line no-unused-vars
-  resetZoom(x, stackedData, xAxis, brushArea, area) {
+  resetZoom(x, stackedData, xAxis, brushArea, area, data) {
     throw new NoImplementationException('Base class is abstract and requires implementation!');
   }
 
@@ -82,7 +97,7 @@ export default class ScalableBaseChartComponent extends React.Component {
    * Calculate data for the chart.
    * @param data Chart data in the format [{date: timestamp(ms), series1: value, series2: value, series3: value, series4: value, ...}, ...]
    * @param order
-   * @returns Stacked chart data for d3 functions
+   * @returns Stacked chart data for d3 functions and preprocessed data { stackedData, data }
    */
   // eslint-disable-next-line no-unused-vars
   calculateChartData(data, order) {
@@ -113,6 +128,10 @@ export default class ScalableBaseChartComponent extends React.Component {
   getBrushId(data) {
     throw new NoImplementationException('Base class is abstract and requires implementation!');
   }
+
+  /**
+   * END OF ABSTRACT
+   */
 
   componentDidMount() {
     //Needed to restrict d3 to only access DOM when the component is already mounted
@@ -146,14 +165,13 @@ export default class ScalableBaseChartComponent extends React.Component {
    */
   updateElement() {
     //Initialization
-    const data = this.props.content; //Rename for less writing
-    const stackedData = this.calculateChartData(data, this.props.order); //Get d3-friendly data
+    const { stackedData, data } = this.calculateChartData(this.props.content, this.props.order); //Get d3-friendly data
     const yScale = this.props.yScale; //Multiplicator for the values on the y-scale
     const svg = d3.select(this.svgRef); //Select parent svg from render method
     const { width, height, paddings } = this.getDimsAndPaddings(svg); //Get width and height of svg in browser
 
     //Get X and Y scales, which translate data values into pixel values
-    const { x, y } = this.createScales(this.getXDims(data), [paddings.left, width - paddings.right], this.props.yDims, [
+    const { x, y } = this.createScales(this.getXDims(data), [paddings.left, width - paddings.right], this.getYDims(data), [
       height - paddings.bottom,
       paddings.top
     ]);
@@ -172,7 +190,7 @@ export default class ScalableBaseChartComponent extends React.Component {
     //Set callback for brush-zoom functionality
     brush.on('end', event => this.updateZoom(event.selection, x, xAxis, brush, brushArea, area));
     //Set callback to reset zoom on double-click
-    svg.on('dblclick', () => this.resetZoom(x, stackedData, xAxis, brushArea, area));
+    svg.on('dblclick', () => this.resetZoom(x, stackedData, xAxis, brushArea, area, data));
   }
 
   /**
@@ -219,6 +237,10 @@ export default class ScalableBaseChartComponent extends React.Component {
     }
 
     return { x, y };
+  }
+
+  getColor(palette, d) {
+    return palette[this.getBrushId(d)];
   }
 
   /**
@@ -294,7 +316,7 @@ export default class ScalableBaseChartComponent extends React.Component {
       .append('path')
       .attr('class', 'layer')
       .attr('id', this.getBrushId)
-      .style('fill', d => palette[this.getBrushId(d)])
+      .style('fill', this.getColor.bind(_this, palette))
       .attr('d', area)
       .attr('clip-path', 'url(#clip)')
       .on('mouseover', () => tooltip.style('display', 'inline'))
@@ -365,7 +387,7 @@ export default class ScalableBaseChartComponent extends React.Component {
   createScrollEvent(svg, y, yAxis, brushArea, area) {
     return event => {
       const direction = event.deltaY > 0 ? 'down' : 'up';
-      let zoomedDims = [...this.props.yDims];
+      let zoomedDims = [...this.getYDims(this.props.content)];
       let top = zoomedDims[1],
         bottom = zoomedDims[0];
       if (this.props.keys && this.props.keys.length === 0) {
@@ -426,7 +448,7 @@ export default class ScalableBaseChartComponent extends React.Component {
    * @param areaGenerator Area generator for those paths
    */
   resetVerticalZoom(y, yAxis, area, areaGenerator) {
-    y.domain(this.props.yDims);
+    y.domain(this.getYDims(this.props.content));
 
     yAxis.call(d3.axisLeft(y));
     area.selectAll('.layer').attr('d', areaGenerator);
