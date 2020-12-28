@@ -6,7 +6,6 @@ const db = arangodb.db;
 const aql = arangodb.aql;
 const commitsToFiles = db._collection('commits-files');
 const builds = db._collection('builds');
-const commits = db._collection('commits');
 const commitsToStakeholders = db._collection('commits-stakeholders');
 const commitsToBranches = db._collection('commits-branches');
 const commitsToCommits = db._collection('commits-commits');
@@ -120,30 +119,30 @@ module.exports = new gql.GraphQLObjectType({
           return db
             ._query(
               aql`
-              FOR c IN ${commits}
-                FILTER c._id == ${commit._id}
-                FOR b IN 1..1 OUTBOUND c ${commitsToBranches}
-                  RETURN b
+              FOR c IN OUTBOUND ${commit} ${commitsToBranches}
+                RETURN c
               `
             )
             .toArray();
         },
       },
-      parents: {
+      children: {
         type: new gql.GraphQLList(require('./commit.js')),
-        description: 'The parents of the commit',
+        description: 'The children of the commit',
         resolve(commit) {
           return db
             ._query(
               aql`
-              FOR c IN ${commits}
-                FILTER c._id == ${commit._id}
-                FOR b IN 1..1 OUTBOUND c ${commitsToCommits}
-                  RETURN b
+              FOR c IN OUTBOUND ${commit} ${commitsToCommits}
+                  RETURN c
               `
             )
             .toArray();
         },
+      },
+      projects: {
+        type: new gql.GraphQLList(gql.GraphQLString),
+        description: 'The projects the commit is in',
       },
     };
   }

@@ -4,7 +4,7 @@ import moment from 'moment';
 import _ from 'lodash';
 import { traversePages, graphQl } from '../../../utils';
 
-export default function getCommitData(commitSpan, significantSpan, granularity, interval) {
+export default function getCommitData(commitSpan, significantSpan, granularity, interval, projects) {
   const statsByAuthor = {};
 
   const totals = {
@@ -24,7 +24,7 @@ export default function getCommitData(commitSpan, significantSpan, granularity, 
 
   let next = moment(significantSpan[0]).startOf(granularity.unit).toDate().getTime();
 
-  return traversePages(getCommitsPage(significantSpan[1]), commit => {
+  return traversePages(getCommitsPage(significantSpan[1], projects), commit => {
     const dt = Date.parse(commit.date);
 
     let stats = statsByAuthor[commit.signature];
@@ -121,11 +121,11 @@ function group(data) {
   return data;
 }
 
-const getCommitsPage = until => (page, perPage) => {
+const getCommitsPage = (until, projects) => (page, perPage) => {
   return graphQl
     .query(
-      `query($page: Int, $perPage: Int, $until: Timestamp) {
-             commits(page: $page, perPage: $perPage, until: $until) {
+      `query($page: Int, $perPage: Int, $until: Timestamp, $projects: [String]) {
+             commits(page: $page, perPage: $perPage, until: $until, projects: $projects) {
                count
                page
                perPage
@@ -141,7 +141,7 @@ const getCommitsPage = until => (page, perPage) => {
                }
              }
           }`,
-      { page, perPage, until }
+      { page, perPage, until, projects }
     )
     .then(resp => resp.commits);
 };

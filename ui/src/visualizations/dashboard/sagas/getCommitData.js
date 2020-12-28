@@ -7,26 +7,25 @@ import { traversePages, graphQl } from '../../../utils';
  * @param commitSpan Array of two time values (ms), first commit and last commit.
  * @param significantSpan Array of two time values (ms), first significant and last significant commit
  * (only these will actually be returned, used for zooming, the rest of the time will be empty data).
- * @param granularity Influences how many data points will be aggregated into a single point (hours, days, weeks, months, years). See sagas/index.js for granularities.
- * @param interval Interval in milliseconds derived from the granularity.
+ * @param projects {[string]} containing the fullName of the base project
  * @returns {*}
  */
-export default function getCommitData(commitSpan, significantSpan) {
+export default function getCommitData(commitSpan, significantSpan, projects) {
 
   let commitList = [];
 
-  return traversePages(getCommitsPage(significantSpan[1]), commit => {
+  return traversePages(getCommitsPage(significantSpan[1], projects), (commit) => {
     commitList.push(commit);
   }).then(function() {
     return commitList;
   });
 }
 
-const getCommitsPage = until => (page, perPage) => {
+const getCommitsPage = (until, projects) => (page, perPage) => {
   return graphQl
     .query(
-      `query($page: Int, $perPage: Int, $until: Timestamp) {
-             commits(page: $page, perPage: $perPage, until: $until) {
+      `query($page: Int, $perPage: Int, $until: Timestamp, $projects: [String]) {
+             commits(page: $page, perPage: $perPage, until: $until, projects: $projects) {
                count
                page
                perPage
@@ -42,7 +41,7 @@ const getCommitsPage = until => (page, perPage) => {
                }
              }
           }`,
-      { page, perPage, until }
+      { page, perPage, until, projects }
     )
     .then(resp => resp.commits);
 };

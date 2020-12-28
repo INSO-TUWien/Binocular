@@ -20,7 +20,6 @@ const files = db._collection('files');
 const stakeholders = db._collection('stakeholders');
 const issues = db._collection('issues');
 const builds = db._collection('builds');
-const branches = db._collection('branches');
 
 const ISSUE_NUMBER_REGEX = /^#?(\d+).*$/;
 
@@ -33,12 +32,25 @@ const queryType = new gql.GraphQLObjectType({
         args: {
           since: { type: Timestamp },
           until: { type: Timestamp },
-          sort: { type: Sort }
+          sort: { type: Sort },
+          projects: { type: new gql.GraphQLList(gql.GraphQLString) },
         },
         query: (root, args, limit) => {
+          let filterProjectsString = '';
+          // filter commits to provide only those, whose commits projects contains at least one of the provided projects list
+          if (args.projects && args.projects.length > 0) {
+            args.projects.forEach((project) => {
+              filterProjectsString = `${filterProjectsString} POSITION(commit.projects, '${project}') OR`;
+            });
+            filterProjectsString = filterProjectsString.substr(0, filterProjectsString.length - 3); // remove the last " OR" from the filter
+          } else {
+            // no projects provided -> no project filtering
+            filterProjectsString = 'true'; // needed because an empty filter will lead to an syntax error
+          }
           let q = qb
             .for('commit')
             .in('commits')
+            .filter(qb.expr(filterProjectsString))
             .sort('commit.date', args.sort);
 
           q = queryHelpers.addDateFilter('commit.date', 'gte', args.since, q);
@@ -239,9 +251,23 @@ const queryType = new gql.GraphQLObjectType({
       issueDateHistogram: makeDateHistogramEndpoint(issues),
       branches: paginated({
         type: require('./types/branch.js'),
-        query: () => aql`
-          FOR branch IN ${branches}
-            RETURN branch`,
+        query: (root, args) => {
+          let filterProjectsString = '*';
+          // filter branches to provide only those, whose branches headShas objects contains at least one of the provided projects list
+          if (args.projects && args.projects.length > 0) {
+            filterProjectsString = `${filterProjectsString} FILTER`;
+            args.projects.forEach((project) => {
+              filterProjectsString = `${filterProjectsString} CURRENT.project == '${project}' OR`;
+            });
+            filterProjectsString = filterProjectsString.substr(0, filterProjectsString.length - 3);
+          }
+
+          return qb
+            .for('branch')
+            .in('branches')
+            .filter(qb.expr(`LENGTH(branch.headShas[${filterProjectsString}]) > 0`))
+            .return('branch');
+        },
       }),
     };
   }

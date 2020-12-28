@@ -83,10 +83,15 @@ export const fetchDashboardData = fetchFactory(
       ? viewport[1].getTime()
       : Math.max(lastCommitTimestamp, lastIssueTimestamp);
 
+    // the fullName of the project, is needed to specify the project from which the commits should be retrieved
+    // due to the ConflictAwareness visualisation, data from multiple projects can be stored in the database
+    const project = `${state.config.data.repoOwner}/${state.config.data.repoName}`;
+
     return yield Promise.join(
       getCommitData(
         [firstCommitTimestamp, lastCommitTimestamp],
-        [firstSignificantTimestamp, lastSignificantTimestamp]
+        [firstSignificantTimestamp, lastSignificantTimestamp],
+        [project],
       ),
       getIssueData(
         [firstIssueTimestamp, lastIssueTimestamp],

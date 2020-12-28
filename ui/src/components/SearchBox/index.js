@@ -24,7 +24,8 @@ export default class SearchBox extends React.Component {
   }
 
   UNSAFE_componentWillMount() {
-    if (!this.props.value) {
+    // add check for disabled, because in disabled search boxes nothing can be selected -> so search
+    if (!this.props.disabled && !this.props.value) {
       this.search('');
     }
   }
@@ -66,6 +67,7 @@ export default class SearchBox extends React.Component {
               ? this.props.renderOption(this.props.value)
               : this.state.searchText
           }
+          disabled={this.props.disabled}
           onFocus={() => this.setState({ isOpen: true })}
           onBlur={() => this.cancel()}
           onChange={e => this.search(e.target.value)}
@@ -182,5 +184,6 @@ SearchBox.propTypes = {
   renderOption: PropTypes.func.isRequired,
   onChange: PropTypes.func,
   placeholder: PropTypes.string,
-  search: PropTypes.func.isRequired
+  search: PropTypes.func.isRequired,
+  disabled: PropTypes.bool, // boolean which indicates if the search box should be disabled
 };

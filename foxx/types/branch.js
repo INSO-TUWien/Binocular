@@ -15,9 +15,21 @@ module.exports = new gql.GraphQLObjectType({
         type: new gql.GraphQLNonNull(gql.GraphQLString),
         description: 'The name of the branch',
       },
-      headSha: {
-        type: new gql.GraphQLNonNull(gql.GraphQLString),
-        description: 'The sha of the branches head',
+      headShas: {
+        type: new gql.GraphQLList(
+          new gql.GraphQLObjectType({
+            name: 'HeadShas',
+            fields: {
+              project: {
+                type: gql.GraphQLString,
+              },
+              headSha: {
+                type: gql.GraphQLString,
+              },
+            },
+          })
+        ),
+        description: 'Project-specific headShas of the branch',
       },
     };
   },

@@ -102,12 +102,17 @@ export const fetchCodeOwnershipData = fetchFactory(
 
     const interval = granularity.interval.asMilliseconds();
 
+    // the fullName of the project, is needed to specify the project from which the commits should be retrieved
+    // due to the ConflictAwareness visualisation, data from multiple projects can be stored in the database
+    const project = `${state.config.data.repoOwner}/${state.config.data.repoName}`;
+
     return yield Promise.join(
       getCommitData(
         [firstCommitTimestamp, lastCommitTimestamp],
         [firstSignificantTimestamp, lastSignificantTimestamp],
         granularity,
-        interval
+        interval,
+        [project]
       ),
       getIssueData(
         [firstIssueTimestamp, lastIssueTimestamp],

@@ -13,6 +13,7 @@ import makeAppReducer from './reducers';
 import 'bulma';
 import 'react-tippy/dist/tippy.css';
 import '@fortawesome/fontawesome-free/css/all.css';
+import 'codemirror/lib/codemirror.css';
 import './global.scss';
 
 const socket = io({ path: '/wsapi' });
