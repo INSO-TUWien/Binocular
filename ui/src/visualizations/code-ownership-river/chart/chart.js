@@ -15,7 +15,6 @@ import Legend from '../../../components/Legend';
 import ZoomableChartContainer from '../../../components/svg/ZoomableChartContainer.js';
 import OffsetGroup from '../../../components/svg/OffsetGroup.js';
 import * as zoomUtils from '../../../utils/zoom.js';
-import StackedAreaChart from '../../../components/StackedAreaChart';
 
 const dateExtractor = d => d.date;
 

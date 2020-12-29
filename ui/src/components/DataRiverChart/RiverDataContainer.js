@@ -43,6 +43,10 @@ export class RiverDataContainer {
     return (this.data.values || []).find(item => item.name === key);
   }
 
+  indexOf(key) {
+    return (this.data.values || []).indexOf(key);
+  }
+
   getValue(key) {
     let value = this.find(key);
     if (!this.data.leaf && !value) {
@@ -70,5 +74,13 @@ export class RiverDataContainer {
       return this.value;
     }
     return this.values.map(container => container.grouped);
+  }
+
+  forEach(cb) {
+    this.values.forEach(cb);
+  }
+
+  get length() {
+    return this.data.leaf ? 1 : this.values.length;
   }
 }

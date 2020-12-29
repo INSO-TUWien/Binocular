@@ -14,7 +14,7 @@ export class RiverData {
     }
   }
 
-  init(date, sha, attribute, name = '', buildStat = 0, buildWeight = 1, additions = 0, deletions = 0) {
+  init(date, attribute, name, sha = null, buildStat = 0, buildWeight = 1, additions = 0, deletions = 0, buildSuccessRate = 0.0) {
     this.data = Object.freeze({
       date,
       sha,
@@ -25,10 +25,12 @@ export class RiverData {
       buildStat: BuildStat.valueOf(buildStat),
       buildWeight
     });
+    this._buildSuccessRate = buildSuccessRate;
   }
 
   copyCtor(data) {
     this.data = Object.freeze(Object.assign({}, data.data, { buildStat: BuildStat.valueOf(data.buildStat) }));
+    this.buildSuccessRate = data._buildSuccessRate;
   }
 
   get date() {
@@ -65,6 +67,18 @@ export class RiverData {
 
   get attribute() {
     return this.data.attribute;
+  }
+
+  get buildSuccessRate() {
+    return this._buildSuccessRate;
+  }
+
+  set buildSuccessRate(buildSuccessRate) {
+    this._buildSuccessRate = Number.isNaN(+buildSuccessRate) || isNaN(+buildSuccessRate) ? 0.0 : +buildSuccessRate;
+  }
+
+  equal(data) {
+    return _.isEqual(this.data, data) || _.isEqual(this.data, (data || {}).data);
   }
 }
 

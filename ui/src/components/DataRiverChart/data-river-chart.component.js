@@ -5,11 +5,10 @@ import chroma from 'chroma-js';
 import { BuildStat, RiverData } from './RiverData';
 import styles from './data-river-chart.component.scss';
 import ScalableBaseChartComponent from '../ScalableBaseChart';
-import { NoImplementationException } from '../../utils/exception/NoImplementationException';
 import _ from 'lodash';
 import { RiverDataContainer } from './RiverDataContainer';
 import { InvalidArgumentException } from '../../utils/exception/InvalidArgumentException';
-import { formatDate } from '../../utils/date';
+import RiverTooltip from './river-tooltip';
 
 export class DataRiverChartComponent extends ScalableBaseChartComponent {
   constructor(props) {
@@ -87,7 +86,6 @@ export class DataRiverChartComponent extends ScalableBaseChartComponent {
    * @param order
    * @returns Stacked chart data for d3 functions and preprocessed data { stackedData, data }
    */
-  // eslint-disable-next-line no-unused-vars
   calculateChartData(data, order) {
     //Keys are the names of the developers, date is excluded
     //const keys = this.props.keys && this.props.keys.length > 0 ? this.props.keys : Object.keys(data[0]).slice(1);
@@ -104,17 +102,41 @@ export class DataRiverChartComponent extends ScalableBaseChartComponent {
     data = data.map(record => new RiverData(record)).sort((o1, o2) => (o1 < o2 ? -1 : o1 > o2 ? 1 : 0));
 
     const reorganizedData = this.preprocessData(data);
-    const streamData = _.flatMap(reorganizedData.grouped);
+    const streamData = _.flatMap(reorganizedData.grouped.map(record => record.sort()));
 
     //Data formatted for d3
-    stackedData = streamData.reduce((stack, stream, index) => {
+    stackedData = this.createStackedData(streamData);
+
+    const colors = chroma.scale('spectral').mode('lch').colors(stackedData.length).map(color => chroma(color).alpha(0.85).hex('rgba'));
+
+    stackedData.forEach((stack, index) => (stack.color = colors[index]));
+
+    const keys = /*this.props.keys && this.props.keys.length > 0
+        ? this.props.keys
+        : */ stackedData
+      .filter(stream => stream.length)
+      .map(stream => createStreamId(stream[0]));
+
+    d3.stackOffsetDiverging(stackedData, Object.keys(keys));
+
+    // console.log({ stackedData, data });
+    return { stackedData, data };
+  }
+
+  /**
+   *
+   * @param streamData
+   * @returns {[]}
+   */
+  createStackedData(streamData) {
+    return streamData.reduce((stack, stream, index) => {
       const additionStream = this.createStack(stream, index * 2, record => [
-        this.calcYDim(record.y),
-        this.calcYDim(record.y) + record.additions
+        this.calcYDim(record.buildSuccessRate),
+        this.calcYDim(record.buildSuccessRate) + record.additions
       ]);
       const deletionStream = this.createStack(stream, index * 2 + 1, record => [
-        this.calcYDim(record.y) - record.deletions,
-        this.calcYDim(record.y)
+        this.calcYDim(record.buildSuccessRate) - record.deletions,
+        this.calcYDim(record.buildSuccessRate)
       ]);
 
       if (additionStream && additionStream.length) {
@@ -129,20 +151,43 @@ export class DataRiverChartComponent extends ScalableBaseChartComponent {
       }
       return stack;
     }, []);
+  }
 
-    const colors = chroma.scale('spectral').mode('lch').colors(stackedData.length).map(color => chroma(color).alpha(0.85).hex('rgba'));
+  /**
+   *
+   * @param data
+   * @returns {*}
+   */
+  preprocessData(data) {
+    const maxDiff = d3.max(data, d => d.additions + d.deletions);
+    const dateTicks = data.map(record => record.date);
 
-    stackedData.forEach((stack, index) => (stack.color = colors[index]));
+    return data.reduce((current, record) => {
+      const container = current.getValue(record.name).getValue(record.attribute);
 
-    const keys = /*this.props.keys && this.props.keys.length > 0
-        ? this.props.keys
-        : */ stackedData
-      .filter(stream => stream.length)
-      .map(stream => createStreamId(stream[0]));
+      // init all existing date nodes
+      if (!container.length) {
+        dateTicks.forEach(date => (container.getValue(date.getTime()).value = new RiverData(date, record.attribute, record.name)));
+      }
 
-    d3.stackOffsetDiverging(stackedData, Object.keys(keys));
+      const prevIndex = container.indexOf(record.date.getTime()) - 1;
+      const previous = prevIndex >= 0 ? container.values[prevIndex].value : undefined;
+      const leaf = container.getValue(record.date.getTime());
 
-    return { stackedData, data };
+      // set ci success rate
+      record.buildSuccessRate =
+        (previous ? previous.buildSuccessRate : 0.0) +
+        (record.buildStat === BuildStat.Success
+          ? record.buildWeight * record.totalDiff / maxDiff
+          : record.buildStat === BuildStat.Failed ? -record.buildWeight * record.totalDiff / maxDiff : 0.0);
+      leaf.value = record;
+
+      // set build rate for all future items until a new existing datapoint
+      dateTicks.forEach((date, i) => {
+        if (i > prevIndex + 1) container.getValue(date.getTime()).value.buildSuccessRate = record.buildSuccessRate;
+      });
+      return current;
+    }, new RiverDataContainer(''));
   }
 
   /**
@@ -170,28 +215,6 @@ export class DataRiverChartComponent extends ScalableBaseChartComponent {
     return dataStream;
   }
 
-  /**
-   *
-   * @param data
-   * @returns {*}
-   */
-  preprocessData(data) {
-    const maxDiff = d3.max(data, d => d.additions + d.deletions);
-
-    return data.reduce((current, record) => {
-      const container = current.getValue(record.name).getValue(record.attribute);
-      const previous = container.values.length ? container.values[container.values.length - 1].value : undefined;
-      const leaf = container.getValue(record.date.getTime());
-      record.y =
-        (previous ? previous.y : 0.0) +
-        (record.buildStat === BuildStat.Success
-          ? record.buildWeight * record.totalDiff / maxDiff
-          : record.buildStat === BuildStat.Failed ? -record.buildWeight * record.totalDiff / maxDiff : 0.0);
-      leaf.value = record;
-      return current;
-    }, new RiverDataContainer(''));
-  }
-
   calcYDim(y) {
     return y * 10000;
   }
@@ -217,59 +240,64 @@ export class DataRiverChartComponent extends ScalableBaseChartComponent {
     const candidate1 = rawData[nearestDateIndex];
     const candidate2 = rawData[nearestDateIndex - 1];
     let nearestDataPoint;
+    if (!candidate1 || !candidate2) {
+      return;
+    }
     if (Math.abs(mouseoverDate - candidate1.date) < Math.abs(mouseoverDate - candidate2.date)) {
       nearestDataPoint = candidate1;
     } else {
       nearestDataPoint = candidate2;
     }
-    const key = d3.select(path).attr('id');
-    const text = key.split(' <', 1); //Remove git signature email
-    let value = nearestDataPoint[key];
-    const chartValues = this.findChartValues(data, key, nearestDataPoint.date);
-    const formattedDate = formatDate(new Date(nearestDataPoint.date), resolution);
-    if (value < 0) {
-      value *= -1;
+
+    if (this.nearestDataPoint && nearestDataPoint === this.nearestDataPoint) {
+      return;
     }
 
-    //Render tooltip
-    tooltip
-      .html(formattedDate + '<hr/>' + '<div style="background: ' + palette[key] + '">' + '</div>' + text + ': ' + Math.round(value))
-      .style('position', 'absolute')
-      .style('left', event.layerX - 20 + 'px')
-      .style('top', event.layerY + (node.getBoundingClientRect() || { y: 0 }).y - 70 + 'px');
-    brushArea.select('.' + this.styles.indicatorLine).remove();
-    brushArea.selectAll('.' + this.styles.indicatorCircle).remove();
-    brushArea
-      .append('line')
-      .attr('class', this.styles.indicatorLine)
-      .attr('x1', x(nearestDataPoint.date))
-      .attr('x2', x(nearestDataPoint.date))
-      .attr('y1', y(chartValues.y1))
-      .attr('y2', y(chartValues.y2))
-      .attr('clip-path', 'url(#clip)');
+    //console.log(nearestDataPoint);
+    this.nearestDataPoint = nearestDataPoint;
 
-    brushArea
-      .append('circle')
-      .attr('class', this.styles.indicatorCircle)
-      .attr('cx', x(nearestDataPoint.date))
-      .attr('cy', y(chartValues.y2))
-      .attr('r', 5)
-      .attr('clip-path', 'url(#clip)')
-      .style('fill', palette[key]);
+    this.setState({
+      tooltipData: nearestDataPoint,
+      tooltipLeft: event.layerX - 20 - (node.getBoundingClientRect() || { x: 0 }).x + 'px',
+      tooltipTop: event.layerY + (node.getBoundingClientRect() || { y: 0 }).y + 'px'
+    });
+  }
 
-    brushArea
-      .append('circle')
-      .attr('class', this.styles.indicatorCircle)
-      .attr('cx', x(nearestDataPoint.date))
-      .attr('cy', y(chartValues.y1))
-      .attr('r', 5)
-      .attr('clip-path', 'url(#clip)')
-      .style('fill', palette[key]);
+  onMouseover(tooltip, event) {
+    this.setState({
+      tooltipStyle: {
+        position: 'absolute',
+        display: 'inline'
+      }
+    });
+  }
+
+  onMouseLeave(tooltip, brushArea, event) {
+    //
+    this.setState({
+      tooltipStyle: {}
+    });
   }
 
   // eslint-disable-next-line no-unused-vars
   getBrushId(data) {
     return data.key;
+  }
+
+  render() {
+    return (
+      <div className={this.styles.chartDiv}>
+        <svg className={this.styles.chartSvg} ref={svg => (this.svgRef = svg)} />
+        <RiverTooltip
+          ref={div => (this.tooltipRef = div)}
+          data={this.state.tooltipData}
+          tooltipTop={this.state.tooltipTop}
+          tooltipLeft={this.state.tooltipLeft}
+          style={this.state.tooltipStyle}
+          attribute={this.props.attribute}
+        />
+      </div>
+    );
   }
 }
 

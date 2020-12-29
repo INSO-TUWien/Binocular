@@ -77,17 +77,17 @@ export default class LanguageModuleRiver extends React.Component {
     let mockData;
     if (commitOrder) {
       mockData = [
-        new RiverData(addDays(date, 1), 'a1', 'ts', commitOrder[0], BuildStat.Failed, 1, 100, 2),
-        new RiverData(addDays(date, 1), 'a1', 'js', commitOrder[0], BuildStat.Success, 0.1, 1000, 2),
-        new RiverData(addDays(date, 2), 'a2', 'js', commitOrder[0], BuildStat.Failed, 1, 4, 2000),
-        new RiverData(addDays(date, 3), 'a3', 'js', commitOrder[0], BuildStat.Skipped, 1, 140, 1200),
-        new RiverData(addDays(date, 4), 'a4', 'js', commitOrder[0], BuildStat.Success, 1, 1004, 120),
-        new RiverData(addDays(date, 5), 'a5', 'js', commitOrder[0], BuildStat.Success, 1, 200, 12),
-        new RiverData(addDays(date, 5), 'a5', 'ts', commitOrder[0], BuildStat.Success, 1, 1000, 2),
-        new RiverData(addDays(date, 6), 'a6', 'js', commitOrder[0], BuildStat.Success, 1, 2002, 2),
-        new RiverData(addDays(date, 3), 'a7', 'js', commitOrder[1], BuildStat.Success, 1, 1000, 2),
-        new RiverData(addDays(date, 4), 'a8', 'js', commitOrder[1], BuildStat.Success, 1, 2002, 2100),
-        new RiverData(addDays(date, 5), 'a9', 'js', commitOrder[1], BuildStat.Failed, 1, 1002, 20)
+        new RiverData(addDays(date, 1), 'ts', commitOrder[0], 'a1', BuildStat.Failed, 1, 100, 2),
+        new RiverData(addDays(date, 1), 'js', commitOrder[0], 'a1', BuildStat.Success, 0.1, 1000, 2),
+        new RiverData(addDays(date, 2), 'js', commitOrder[0], 'a2', BuildStat.Failed, 1, 4, 2000),
+        new RiverData(addDays(date, 3), 'js', commitOrder[0], 'a3', BuildStat.Skipped, 1, 140, 1200),
+        new RiverData(addDays(date, 4), 'js', commitOrder[0], 'a4', BuildStat.Success, 1, 1004, 120),
+        new RiverData(addDays(date, 5), 'js', commitOrder[0], 'a5', BuildStat.Success, 1, 200, 12),
+        new RiverData(addDays(date, 5), 'ts', commitOrder[0], 'a5', BuildStat.Success, 1, 1000, 2),
+        new RiverData(addDays(date, 6), 'js', commitOrder[0], 'a6', BuildStat.Success, 1, 2002, 2),
+        new RiverData(addDays(date, 3), 'js', commitOrder[1], 'a7', BuildStat.Success, 1, 1000, 2),
+        new RiverData(addDays(date, 4), 'js', commitOrder[1], 'a8', BuildStat.Success, 1, 2002, 2100),
+        new RiverData(addDays(date, 5), 'js', commitOrder[1], 'a9', BuildStat.Failed, 1, 1002, 20)
       ];
     }
 
@@ -113,6 +113,7 @@ export default class LanguageModuleRiver extends React.Component {
             displayNegative={true}
             order={commitOrder}
             hideVertical={true}
+            attribute={'Language'}
           />
         </div>
       </div>

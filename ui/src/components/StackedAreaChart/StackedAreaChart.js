@@ -40,6 +40,7 @@ export default class StackedAreaChart extends ScalableBaseChartComponent {
     return [d3.min(data, d => d.date), d3.max(data, d => d.date)];
   }
 
+  // eslint-disable-next-line no-unused-vars
   getYDims(data) {
     return this.props.yDims;
   }
@@ -186,5 +187,15 @@ export default class StackedAreaChart extends ScalableBaseChartComponent {
 
   getBrushId(data) {
     return data.key;
+  }
+
+  onMouseover(tooltip, event) {
+    tooltip.style('display', 'inline');
+  }
+
+  onMouseLeave(tooltip, brushArea, event) {
+    tooltip.style('display', 'none');
+    brushArea.select('.' + this.styles.indicatorLine).remove();
+    brushArea.selectAll('.' + this.styles.indicatorCircle).remove();
   }
 }

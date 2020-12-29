@@ -5,6 +5,7 @@ import React from 'react';
 import * as d3 from 'd3';
 import * as baseStyles from './scalable-base-chart.component.scss';
 import { NoImplementationException } from '../../utils/exception/NoImplementationException';
+import { hash } from '../../utils/crypto-utils';
 
 /**
  * Stacked area chart
@@ -39,7 +40,8 @@ export default class ScalableBaseChartComponent extends React.Component {
       zoomed: false,
       zoomedDims: [0, 0],
       zoomedVertical: false,
-      verticalZoomDims: [0, 0]
+      verticalZoomDims: [0, 0],
+      data: { data: [], stackedData: [] }
     };
     window.addEventListener('resize', () => this.updateElement());
   }
@@ -129,6 +131,14 @@ export default class ScalableBaseChartComponent extends React.Component {
     throw new NoImplementationException('Base class is abstract and requires implementation!');
   }
 
+  onMouseover(tooltip, event) {
+    throw new NoImplementationException('Base class is abstract and requires implementation!');
+  }
+
+  onMouseLeave(tooltip, brushArea, event) {
+    throw new NoImplementationException('Base class is abstract and requires implementation!');
+  }
+
   /**
    * END OF ABSTRACT
    */
@@ -160,12 +170,35 @@ export default class ScalableBaseChartComponent extends React.Component {
     );
   }
 
+  hasUpdate() {
+    const keysHash = hash(this.props.keys || []);
+    return { hashes: { keysHash }, hasChanges: this.state.data.keysHash !== keysHash };
+  }
+
   /**
    * Update the chart element. May only be called if this.props.content is not empty and the component is mounted.
    */
   updateElement() {
     //Initialization
-    const { stackedData, data } = this.calculateChartData(this.props.content, this.props.order); //Get d3-friendly data
+    const contentHash = hash(this.props.content || []);
+    const orderHash = hash(this.props.order || []);
+
+    const { hashes, hasChanges } = this.hasUpdate();
+
+    //Get d3-friendly data
+    if (this.state.data.hash !== contentHash || this.state.data.orderHash !== orderHash || hasChanges) {
+      this.setState({
+        data: Object.assign({ hash: contentHash, orderHash }, hashes, this.calculateChartData(this.props.content, this.props.order))
+      });
+    }
+
+    const { stackedData, data } = this.state.data;
+
+    // cannot proceed without data
+    if (!data || !stackedData || !stackedData.length) {
+      return;
+    }
+
     const yScale = this.props.yScale; //Multiplicator for the values on the y-scale
     const svg = d3.select(this.svgRef); //Select parent svg from render method
     const { width, height, paddings } = this.getDimsAndPaddings(svg); //Get width and height of svg in browser
@@ -185,7 +218,7 @@ export default class ScalableBaseChartComponent extends React.Component {
     svg.selectAll('*').remove();
 
     //Draw the chart (and brush box) using everything provided
-    const { brushArea, xAxis } = this.drawChart(svg, this.props.content, stackedData, area, brush, yScale, x, y, height, width, paddings);
+    const { brushArea, xAxis } = this.drawChart(svg, data, stackedData, area, brush, yScale, x, y, height, width, paddings);
 
     //Set callback for brush-zoom functionality
     brush.on('end', event => this.updateZoom(event.selection, x, xAxis, brush, brushArea, area));
@@ -315,16 +348,16 @@ export default class ScalableBaseChartComponent extends React.Component {
       .enter()
       .append('path')
       .attr('class', 'layer')
-      .attr('id', this.getBrushId)
-      .style('fill', this.getColor.bind(_this, palette))
+      .attr('id', _this.getBrushId)
+      .style('fill', this.getColor.bind(this, palette))
       .attr('d', area)
       .attr('clip-path', 'url(#clip)')
-      .on('mouseover', () => tooltip.style('display', 'inline'))
+      .on('mouseover', this.onMouseover.bind(this, tooltip))
       .on('mouseout', () => {
-        tooltip.style('display', 'none');
-        brushArea.select('.' + this.styles.indicatorLine).remove();
-        brushArea.selectAll('.' + this.styles.indicatorCircle).remove();
+        //
+        this.onMouseLeave.bind(this, tooltip, brushArea);
       })
+      .on('mouseleave', this.onMouseLeave.bind(this, tooltip, brushArea))
       .on('mousemove', function(event) {
         if (event === undefined || event === null) {
           return;
@@ -387,7 +420,7 @@ export default class ScalableBaseChartComponent extends React.Component {
   createScrollEvent(svg, y, yAxis, brushArea, area) {
     return event => {
       const direction = event.deltaY > 0 ? 'down' : 'up';
-      let zoomedDims = [...this.getYDims(this.props.content)];
+      let zoomedDims = [...this.getYDims(this.state.data.data)];
       let top = zoomedDims[1],
         bottom = zoomedDims[0];
       if (this.props.keys && this.props.keys.length === 0) {
@@ -448,7 +481,7 @@ export default class ScalableBaseChartComponent extends React.Component {
    * @param areaGenerator Area generator for those paths
    */
   resetVerticalZoom(y, yAxis, area, areaGenerator) {
-    y.domain(this.getYDims(this.props.content));
+    y.domain(this.getYDims(this.state.data.data));
 
     yAxis.call(d3.axisLeft(y));
     area.selectAll('.layer').attr('d', areaGenerator);
