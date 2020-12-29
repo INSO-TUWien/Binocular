@@ -15,7 +15,6 @@
 .tooltip{
   text-align    : left;
   max-width     : 500px;
-  max-height    : 200px;
   padding       : 8px;
   border        : none;
   border-radius : 8px;
@@ -30,6 +29,7 @@
     flex-flow: row;
     justify-content:center;
     text-align: left;
+    border-bottom: 1px solid;
 
     .additional {
       padding: 5px;
@@ -63,15 +63,20 @@
     li {
       display: flex;
       flex-flow: row;
-      padding: 2px 0;
+      padding: 5px 0 3px 0;
+      border-bottom: 1px solid;
 
       i {
         flex: 1;
         padding-right: 5px;
+        text-transform: capitalize;
       }
 
       span {
         flex: 50% 1;
+        justify-content: center;
+        flex-flow: column;
+        display: flex;
       }
     }
   }

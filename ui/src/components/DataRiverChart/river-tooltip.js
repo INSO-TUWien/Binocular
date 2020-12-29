@@ -1,5 +1,5 @@
 import styles from './data-river-chart.component.scss';
-import { RiverData } from './RiverData';
+import { BuildStat, RiverData } from './RiverData';
 
 import React from 'react';
 import MouseTooltip from 'react-sticky-mouse-tooltip';
@@ -19,15 +19,16 @@ class RiverTooltip extends React.Component {
   }
 
   render() {
-    const { name, date, sha, attribute, deletions, additions } = this.state.data || {};
+    const { name, date, sha, attribute, deletions, additions, buildStat, buildWeight, buildSuccessRate } = this.state.data || {};
     const isVisible = !this.state.hide && !!this.state.data && this.state.data instanceof RiverData && !!this.state.attribute;
+    const style = this.state.color ? { borderColor: this.state.color } : null;
     return (
       <MouseTooltip
         className={styles.tooltip}
         visible={isVisible}
         offsetX={this.state.tooltipLeft || 15}
         offsetY={this.state.tooltipTop || 10}>
-        <h1>
+        <h1 style={this.state.color ? { borderColor: this.state.color } : null}>
           {this.state.additional
             ? <span className={styles.additional} style={this.state.color ? { backgroundColor: this.state.color } : null}>
                 <span>
@@ -41,21 +42,8 @@ class RiverTooltip extends React.Component {
               </span>
             : null}
         </h1>
-        <hr />
         <ul>
-          <li>
-            <i>sha</i>
-            <span>
-              {sha}
-            </span>
-          </li>
-          <li>
-            <i>date</i>
-            <span>
-              {date ? date.toLocaleString() : ''}
-            </span>
-          </li>
-          <li>
+          <li style={style}>
             <i>
               {this.props.attribute}
             </i>
@@ -63,16 +51,46 @@ class RiverTooltip extends React.Component {
               {attribute}
             </span>
           </li>
-          <li>
-            <i>additions</i>
+          <li style={style}>
+            <i>date</i>
             <span>
-              {additions}
+              {date ? date.toLocaleString() : ''}
             </span>
           </li>
-          <li>
+          <li style={style}>
+            <i>additions</i>
+            <span>
+              {formatInteger(additions)}
+            </span>
+          </li>
+          <li style={style}>
             <i>deletions</i>
             <span>
-              {deletions}
+              {formatInteger(deletions)}
+            </span>
+          </li>
+          <li style={style}>
+            <i>build</i>
+            <span>
+              {buildStat ? buildStat.name : BuildStat.None.name}
+            </span>
+          </li>
+          <li style={style}>
+            <i>build weight</i>
+            <span>
+              {formatNumber(buildWeight)}
+            </span>
+          </li>
+          <li style={style}>
+            <i>build rate</i>
+            <span>
+              {formatNumber(buildSuccessRate * 100.0) + '%'}
+            </span>
+          </li>
+          <li style={style}>
+            <i>sha</i>
+            <span>
+              {sha}
             </span>
           </li>
         </ul>
@@ -80,5 +98,8 @@ class RiverTooltip extends React.Component {
     );
   }
 }
+
+const formatInteger = value => (+value).toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+const formatNumber = value => (+value).toLocaleString(undefined, { minimumFractionDigits: 4, maximumFractionDigits: 4 });
 
 export default RiverTooltip;

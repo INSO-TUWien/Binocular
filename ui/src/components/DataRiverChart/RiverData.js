@@ -25,7 +25,7 @@ export class RiverData {
       buildStat: BuildStat.valueOf(buildStat),
       buildWeight
     });
-    this._buildSuccessRate = buildSuccessRate;
+    this.buildSuccessRate = buildSuccessRate;
   }
 
   copyCtor(data) {
