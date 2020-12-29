@@ -235,48 +235,72 @@ export class DataRiverChartComponent extends ScalableBaseChartComponent {
    * @param x
    * @param y
    */
-  createdTooltipNode(path, bisectDate, rawData, mouseoverDate, data, resolution, tooltip, palette, event, node, brushArea, x, y) {
-    const nearestDateIndex = bisectDate(rawData, mouseoverDate);
-    const candidate1 = rawData[nearestDateIndex];
-    const candidate2 = rawData[nearestDateIndex - 1];
+  createdTooltipNode(path, bisectDate, rawData, mouseoverDate, data, resolution, tooltip, palette, event, node, brushArea, x, y, stream) {
+    const realDataStream = stream.filter(record => record && record.data && record.data.sha && record.data.sha.length > 0);
+    const nearestDateIndex = bisectDate(realDataStream.map(record => record.data), mouseoverDate);
+    const candidate1 = realDataStream[nearestDateIndex] || realDataStream[realDataStream.length - 1];
+    const candidate2 = realDataStream[nearestDateIndex - 1] || realDataStream[0];
     let nearestDataPoint;
     if (!candidate1 || !candidate2) {
       return;
     }
-    if (Math.abs(mouseoverDate - candidate1.date) < Math.abs(mouseoverDate - candidate2.date)) {
+    if (Math.abs(mouseoverDate - candidate1.data.date) < Math.abs(mouseoverDate - candidate2.data.date)) {
       nearestDataPoint = candidate1;
     } else {
       nearestDataPoint = candidate2;
     }
 
-    if (this.nearestDataPoint && nearestDataPoint === this.nearestDataPoint) {
-      return;
-    }
+    tooltip.attr('data', nearestDataPoint.data);
+    tooltip.attr('additional', nearestDataPoint.key.direction);
+    brushArea
+      .append('line')
+      .attr('class', this.styles.indicatorLine)
+      .attr('x1', x(nearestDataPoint.data.date))
+      .attr('x2', x(nearestDataPoint.data.date))
+      .attr('y1', y(nearestDataPoint[0]))
+      .attr('y2', y(nearestDataPoint[1]))
+      .attr('clip-path', 'url(#clip)');
 
-    //console.log(nearestDataPoint);
-    this.nearestDataPoint = nearestDataPoint;
+    brushArea
+      .append('circle')
+      .attr('class', this.styles.indicatorCircle)
+      .attr('cx', x(nearestDataPoint.data.date))
+      .attr('cy', y(nearestDataPoint[1]))
+      .attr('r', 5)
+      .attr('clip-path', 'url(#clip)')
+      .style('fill', nearestDataPoint.data.color);
 
-    this.setState({
-      tooltipData: nearestDataPoint,
-      tooltipLeft: event.layerX - 20 - (node.getBoundingClientRect() || { x: 0 }).x + 'px',
-      tooltipTop: event.layerY + (node.getBoundingClientRect() || { y: 0 }).y + 'px'
-    });
+    brushArea
+      .append('circle')
+      .attr('class', this.styles.indicatorCircle)
+      .attr('cx', x(nearestDataPoint.data.date))
+      .attr('cy', y(nearestDataPoint[0]))
+      .attr('r', 5)
+      .attr('clip-path', 'url(#clip)')
+      .style('fill', nearestDataPoint.data.color);
   }
 
-  onMouseover(tooltip, event) {
-    this.setState({
-      tooltipStyle: {
-        position: 'absolute',
-        display: 'inline'
-      }
-    });
+  /**
+   *
+   * @param tooltip
+   * @param event
+   * @param stream
+   */
+  // eslint-disable-next-line no-unused-vars
+  onMouseover(tooltip, event, stream) {
+    event.preventDefault();
   }
 
-  onMouseLeave(tooltip, brushArea, event) {
-    //
-    this.setState({
-      tooltipStyle: {}
-    });
+  /**
+   *
+   * @param tooltip
+   * @param brushArea
+   * @param event
+   * @param stream
+   */
+  // eslint-disable-next-line no-unused-vars
+  onMouseLeave(tooltip, brushArea, event, stream) {
+    tooltip.attr('data', null);
   }
 
   // eslint-disable-next-line no-unused-vars
@@ -288,14 +312,7 @@ export class DataRiverChartComponent extends ScalableBaseChartComponent {
     return (
       <div className={this.styles.chartDiv}>
         <svg className={this.styles.chartSvg} ref={svg => (this.svgRef = svg)} />
-        <RiverTooltip
-          ref={div => (this.tooltipRef = div)}
-          data={this.state.tooltipData}
-          tooltipTop={this.state.tooltipTop}
-          tooltipLeft={this.state.tooltipLeft}
-          style={this.state.tooltipStyle}
-          attribute={this.props.attribute}
-        />
+        <RiverTooltip ref={div => (this.tooltipRef = div)} attribute={this.props.attribute} />
       </div>
     );
   }

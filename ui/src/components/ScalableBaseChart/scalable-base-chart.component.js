@@ -131,11 +131,26 @@ export default class ScalableBaseChartComponent extends React.Component {
     throw new NoImplementationException('Base class is abstract and requires implementation!');
   }
 
-  onMouseover(tooltip, event) {
+  /**
+   *
+   * @param tooltip
+   * @param event
+   * @param stream
+   */
+  // eslint-disable-next-line no-unused-vars
+  onMouseover(tooltip, event, stream) {
     throw new NoImplementationException('Base class is abstract and requires implementation!');
   }
 
-  onMouseLeave(tooltip, brushArea, event) {
+  /**
+   *
+   * @param tooltip
+   * @param brushArea
+   * @param event
+   * @param stream
+   */
+  // eslint-disable-next-line no-unused-vars
+  onMouseLeave(tooltip, brushArea, event, stream) {
     throw new NoImplementationException('Base class is abstract and requires implementation!');
   }
 
@@ -353,12 +368,8 @@ export default class ScalableBaseChartComponent extends React.Component {
       .attr('d', area)
       .attr('clip-path', 'url(#clip)')
       .on('mouseover', this.onMouseover.bind(this, tooltip))
-      .on('mouseout', () => {
-        //
-        this.onMouseLeave.bind(this, tooltip, brushArea);
-      })
-      .on('mouseleave', this.onMouseLeave.bind(this, tooltip, brushArea))
-      .on('mousemove', function(event) {
+      .on('mouseout', this.onMouseLeave.bind(this, tooltip))
+      .on('mousemove', function(event, stream) {
         if (event === undefined || event === null) {
           return;
         }
@@ -367,6 +378,10 @@ export default class ScalableBaseChartComponent extends React.Component {
         const node = svg.node();
         const pointer = d3.pointer(event, node);
         const mouseoverDate = x.invert(pointer[0]);
+
+        brushArea.select('.' + _this.styles.indicatorLine).remove();
+        brushArea.selectAll('.' + _this.styles.indicatorCircle).remove();
+
         _this.createdTooltipNode(
           this,
           bisectDate,
@@ -380,7 +395,8 @@ export default class ScalableBaseChartComponent extends React.Component {
           node,
           brushArea,
           x,
-          y
+          y,
+          stream
         );
       });
   }

@@ -8,10 +8,11 @@
   height:100%;
 }
 
+.layer{
+  pointer-events:all;
+}
 
 .tooltip{
-  display: none;
-  position      : absolute;
   text-align    : left;
   max-width     : 500px;
   max-height    : 200px;

@@ -130,7 +130,7 @@ export default class StackedAreaChart extends ScalableBaseChartComponent {
    * @param x
    * @param y
    */
-  createdTooltipNode(path, bisectDate, rawData, mouseoverDate, data, resolution, tooltip, palette, event, node, brushArea, x, y) {
+  createdTooltipNode(path, bisectDate, rawData, mouseoverDate, data, resolution, tooltip, palette, event, node, brushArea, x, y, stream) {
     const nearestDateIndex = bisectDate(rawData, mouseoverDate);
     const candidate1 = rawData[nearestDateIndex];
     const candidate2 = rawData[nearestDateIndex - 1];
@@ -189,11 +189,26 @@ export default class StackedAreaChart extends ScalableBaseChartComponent {
     return data.key;
   }
 
-  onMouseover(tooltip, event) {
+  /**
+   *
+   * @param tooltip
+   * @param event
+   * @param stream
+   */
+  // eslint-disable-next-line no-unused-vars
+  onMouseover(tooltip, event, stream) {
     tooltip.style('display', 'inline');
   }
 
-  onMouseLeave(tooltip, brushArea, event) {
+  /**
+   *
+   * @param tooltip
+   * @param brushArea
+   * @param event
+   * @param stream
+   */
+  // eslint-disable-next-line no-unused-vars
+  onMouseLeave(tooltip, brushArea, event, stream) {
     tooltip.style('display', 'none');
     brushArea.select('.' + this.styles.indicatorLine).remove();
     brushArea.selectAll('.' + this.styles.indicatorCircle).remove();
