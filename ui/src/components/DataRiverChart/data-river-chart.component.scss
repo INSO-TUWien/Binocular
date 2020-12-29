@@ -24,6 +24,31 @@
   color         : white;
   pointer-events: none;
 
+  h1 {
+    padding: 5px;
+    display: flex;
+    flex-flow: row;
+    justify-content:center;
+    text-align: left;
+
+    .additional {
+      padding: 5px;
+      border-radius: 5px;
+      text-shadow: -1px 0 black, 0 1px black, 1px 0 black, 0 -1px black;
+      color:white;
+      text-transform: capitalize;
+      letter-spacing: 0.15em;
+      justify-content:center;
+      text-align: center;
+      display: inline-flex;
+      flex-flow: column;
+    }
+
+    .name {
+      padding: 5px;
+    }
+  }
+
   hr{
     margin: 0.2em auto;
   }
@@ -33,13 +58,16 @@
     flex-flow: column;
     justify-content: left;
     text-align: left;
+    padding: 5px;
 
     li {
       display: flex;
       flex-flow: row;
+      padding: 2px 0;
 
       i {
         flex: 1;
+        padding-right: 5px;
       }
 
       span {

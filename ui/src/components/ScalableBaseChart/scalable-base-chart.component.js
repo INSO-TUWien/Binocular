@@ -368,7 +368,7 @@ export default class ScalableBaseChartComponent extends React.Component {
       .attr('d', area)
       .attr('clip-path', 'url(#clip)')
       .on('mouseover', this.onMouseover.bind(this, tooltip))
-      .on('mouseout', this.onMouseLeave.bind(this, tooltip))
+      .on('mouseout', this.onMouseLeave.bind(this, tooltip, brushArea))
       .on('mousemove', function(event, stream) {
         if (event === undefined || event === null) {
           return;

@@ -129,7 +129,7 @@ export class DataRiverChartComponent extends ScalableBaseChartComponent {
    * @returns {[]}
    */
   createStackedData(streamData) {
-    return streamData.reduce((stack, stream, index) => {
+    const streamStack = streamData.reduce((stack, stream, index) => {
       const additionStream = this.createStack(stream, index * 2, record => [
         this.calcYDim(record.buildSuccessRate),
         this.calcYDim(record.buildSuccessRate) + record.additions
@@ -142,6 +142,7 @@ export class DataRiverChartComponent extends ScalableBaseChartComponent {
       if (additionStream && additionStream.length) {
         additionStream.key.direction = 'addition';
         additionStream.key[0] = additionStream.index;
+        additionStream.forEach(addition => (addition.key.direction = additionStream.key.direction));
         stack.push(additionStream);
       }
       if (deletionStream && deletionStream.length) {
@@ -151,6 +152,8 @@ export class DataRiverChartComponent extends ScalableBaseChartComponent {
       }
       return stack;
     }, []);
+    streamStack.forEach(stream => stream.forEach(record => (record.key.direction = stream.key.direction)));
+    return streamStack;
   }
 
   /**
@@ -252,6 +255,7 @@ export class DataRiverChartComponent extends ScalableBaseChartComponent {
 
     tooltip.attr('data', nearestDataPoint.data);
     tooltip.attr('additional', nearestDataPoint.key.direction);
+    tooltip.attr('color', stream.color);
     brushArea
       .append('line')
       .attr('class', this.styles.indicatorLine)
@@ -268,7 +272,7 @@ export class DataRiverChartComponent extends ScalableBaseChartComponent {
       .attr('cy', y(nearestDataPoint[1]))
       .attr('r', 5)
       .attr('clip-path', 'url(#clip)')
-      .style('fill', nearestDataPoint.data.color);
+      .style('fill', stream.color);
 
     brushArea
       .append('circle')
@@ -277,7 +281,7 @@ export class DataRiverChartComponent extends ScalableBaseChartComponent {
       .attr('cy', y(nearestDataPoint[0]))
       .attr('r', 5)
       .attr('clip-path', 'url(#clip)')
-      .style('fill', nearestDataPoint.data.color);
+      .style('fill', stream.color);
   }
 
   /**
@@ -301,6 +305,8 @@ export class DataRiverChartComponent extends ScalableBaseChartComponent {
   // eslint-disable-next-line no-unused-vars
   onMouseLeave(tooltip, brushArea, event, stream) {
     tooltip.attr('data', null);
+    brushArea.select('.' + this.styles.indicatorLine).remove();
+    brushArea.selectAll('.' + this.styles.indicatorCircle).remove();
   }
 
   // eslint-disable-next-line no-unused-vars

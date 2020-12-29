@@ -28,10 +28,16 @@ class RiverTooltip extends React.Component {
         offsetX={this.state.tooltipLeft || 15}
         offsetY={this.state.tooltipTop || 10}>
         <h1>
-          {name}
           {this.state.additional
-            ? <span>
-                {this.state.additional}
+            ? <span className={styles.additional} style={this.state.color ? { backgroundColor: this.state.color } : null}>
+                <span>
+                  {this.state.additional}
+                </span>
+              </span>
+            : null}
+          {name
+            ? <span className={styles.name}>
+                {name}
               </span>
             : null}
         </h1>
