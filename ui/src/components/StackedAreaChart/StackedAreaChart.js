@@ -156,34 +156,8 @@ export default class StackedAreaChart extends ScalableBaseChartComponent {
       .style('position', 'absolute')
       .style('left', event.layerX - 20 + 'px')
       .style('top', event.layerY + (node.getBoundingClientRect() || { y: 0 }).y - 70 + 'px');
-    brushArea.select('.' + this.styles.indicatorLine).remove();
-    brushArea.selectAll('.' + this.styles.indicatorCircle).remove();
-    brushArea
-      .append('line')
-      .attr('class', this.styles.indicatorLine)
-      .attr('x1', x(nearestDataPoint.date))
-      .attr('x2', x(nearestDataPoint.date))
-      .attr('y1', y(chartValues.y1))
-      .attr('y2', y(chartValues.y2))
-      .attr('clip-path', 'url(#clip)');
 
-    brushArea
-      .append('circle')
-      .attr('class', this.styles.indicatorCircle)
-      .attr('cx', x(nearestDataPoint.date))
-      .attr('cy', y(chartValues.y2))
-      .attr('r', 5)
-      .attr('clip-path', 'url(#clip)')
-      .style('fill', palette[key]);
-
-    brushArea
-      .append('circle')
-      .attr('class', this.styles.indicatorCircle)
-      .attr('cx', x(nearestDataPoint.date))
-      .attr('cy', y(chartValues.y1))
-      .attr('r', 5)
-      .attr('clip-path', 'url(#clip)')
-      .style('fill', palette[key]);
+    this.paintDataPoint(brushArea, x(nearestDataPoint.date), y(chartValues.y1), y(chartValues.y2), palette[key]);
   }
 
   /**

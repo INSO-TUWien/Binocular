@@ -286,32 +286,7 @@ export class DataRiverChartComponent extends ScalableBaseChartComponent {
     tooltip.attr('data', nearestDataPoint.data);
     tooltip.attr('additional', nearestDataPoint.key.direction);
     tooltip.attr('color', stream.color);
-    brushArea
-      .append('line')
-      .attr('class', this.styles.indicatorLine)
-      .attr('x1', x(nearestDataPoint.data.date))
-      .attr('x2', x(nearestDataPoint.data.date))
-      .attr('y1', y(nearestDataPoint[0]))
-      .attr('y2', y(nearestDataPoint[1]))
-      .attr('clip-path', 'url(#clip)');
-
-    brushArea
-      .append('circle')
-      .attr('class', this.styles.indicatorCircle)
-      .attr('cx', x(nearestDataPoint.data.date))
-      .attr('cy', y(nearestDataPoint[1]))
-      .attr('r', 5)
-      .attr('clip-path', 'url(#clip)')
-      .style('fill', stream.color);
-
-    brushArea
-      .append('circle')
-      .attr('class', this.styles.indicatorCircle)
-      .attr('cx', x(nearestDataPoint.data.date))
-      .attr('cy', y(nearestDataPoint[0]))
-      .attr('r', 5)
-      .attr('clip-path', 'url(#clip)')
-      .style('fill', stream.color);
+    this.paintDataPoint(brushArea, x(nearestDataPoint.data.date), y(nearestDataPoint[0]), y(nearestDataPoint[1]), stream.color);
   }
 
   /**

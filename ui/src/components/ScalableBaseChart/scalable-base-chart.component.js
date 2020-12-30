@@ -496,4 +496,33 @@ export default class ScalableBaseChartComponent extends React.Component {
     brushArea.selectAll('.layer').attr('d', area);
     this.setState({ zoomed: true, zoomedDims: zoomedDims });
   }
+
+  paintDataPoint(brushArea, x, y0, y1, color) {
+    brushArea
+      .append('line')
+      .attr('class', this.styles.indicatorLine)
+      .attr('x1', x)
+      .attr('x2', x)
+      .attr('y1', y0)
+      .attr('y2', y1)
+      .attr('clip-path', 'url(#clip)');
+
+    brushArea
+      .append('circle')
+      .attr('class', this.styles.indicatorCircle)
+      .attr('cx', x)
+      .attr('cy', y1)
+      .attr('r', 5)
+      .attr('clip-path', 'url(#clip)')
+      .style('fill', color);
+
+    brushArea
+      .append('circle')
+      .attr('class', this.styles.indicatorCircle)
+      .attr('cx', x)
+      .attr('cy', y0)
+      .attr('r', 5)
+      .attr('clip-path', 'url(#clip)')
+      .style('fill', color);
+  }
 }
