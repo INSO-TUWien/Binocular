@@ -46,8 +46,8 @@ export class DataRiverChartComponent extends ScalableBaseChartComponent {
   // eslint-disable-next-line no-unused-vars
   getXDims(data) {
     return this.state.data.stackedData[0]
-      ? [d3.min(this.state.data.stackedData[0], d => d.data.date), d3.max(this.state.data.stackedData[0], d => d.data.date)]
-      : [d3.min(data, d => d.date), d3.max(data, d => d.date)];
+      ? [d3.min(this.state.data.stackedData[0], d => d.data.date), new Date()]
+      : [d3.min(data, d => d.date), new Date()];
   }
 
   /**
@@ -57,13 +57,12 @@ export class DataRiverChartComponent extends ScalableBaseChartComponent {
    */
   // eslint-disable-next-line no-unused-vars
   getYDims(data) {
-    const maxDiff = d3.max(data, d => d.totalDiff);
+    const maxDiff = d3.max(data, d => d.totalDiff) || 1;
     return [-maxDiff, maxDiff];
   }
 
   /**
    *
-   * @param palette
    * @param d
    * @returns {*}
    */
@@ -116,7 +115,7 @@ export class DataRiverChartComponent extends ScalableBaseChartComponent {
     const streamData = _.flatMap(reorganizedData.grouped.map(record => record.sort()));
 
     //Data formatted for d3
-    stackedData = this.createStackedData(streamData);
+    stackedData = this.createStackedData(streamData, this.props.keys);
 
     const colors = chroma.scale('spectral').mode('lch').colors(stackedData.length).map(color => chroma(color).alpha(0.85).hex('rgba'));
 
@@ -126,7 +125,7 @@ export class DataRiverChartComponent extends ScalableBaseChartComponent {
         ? this.props.keys
         : */ stackedData
       .filter(stream => stream.length)
-      .map(stream => createStreamId(stream[0]));
+      .map(stream => createStreamKey(stream[0]));
 
     //d3.stackOffsetDiverging(stackedData, Object.keys(keys));
 
@@ -137,32 +136,38 @@ export class DataRiverChartComponent extends ScalableBaseChartComponent {
   /**
    *
    * @param streamData
+   * @param keys
    * @returns {[]}
    */
-  createStackedData(streamData) {
-    const streamStack = streamData.reduce((stack, stream, index) => {
-      const additionStream = this.createStack(stream, index * 2, record => [
-        this.calcYDim(record.buildSuccessRate),
-        this.calcYDim(record.buildSuccessRate) + record.additions
-      ]);
-      const deletionStream = this.createStack(stream, index * 2 + 1, record => [
-        this.calcYDim(record.buildSuccessRate) - record.deletions,
-        this.calcYDim(record.buildSuccessRate)
-      ]);
+  createStackedData(streamData, keys) {
+    const streamStack = streamData
+      .filter(
+        stream => !keys || (keys.length && !!keys.find(key => key && key.name === stream[0].name && key.attribute === stream[0].attribute))
+      )
+      .reduce((stack, stream, index) => {
+        const additionStream = this.createStack(stream, index * 2, record => [
+          this.calcYDim(record.buildSuccessRate),
+          this.calcYDim(record.buildSuccessRate) + record.additions + (record.sha === null ? 1 : 0)
+        ]);
+        const deletionStream = this.createStack(stream, index * 2 + 1, record => [
+          this.calcYDim(record.buildSuccessRate) - record.deletions - (record.sha === null ? 1 : 0),
+          this.calcYDim(record.buildSuccessRate)
+        ]);
 
-      if (additionStream && additionStream.length) {
-        additionStream.key.direction = 'addition';
-        additionStream.key[0] = additionStream.index;
-        additionStream.forEach(addition => (addition.key.direction = additionStream.key.direction));
-        stack.push(additionStream);
-      }
-      if (deletionStream && deletionStream.length) {
-        deletionStream.key.direction = 'deletions';
-        deletionStream.key[0] = deletionStream.index;
-        stack.push(deletionStream);
-      }
-      return stack;
-    }, []);
+        if (additionStream && additionStream.length) {
+          additionStream.key.direction = 'addition';
+          additionStream.key[0] = additionStream.index;
+          additionStream.forEach(addition => (addition.key.direction = additionStream.key.direction));
+          stack.push(additionStream);
+        }
+
+        if (deletionStream && deletionStream.length) {
+          deletionStream.key.direction = 'deletions';
+          deletionStream.key[0] = deletionStream.index;
+          stack.push(deletionStream);
+        }
+        return stack;
+      }, []);
     streamStack.forEach(stream => stream.forEach(record => (record.key.direction = stream.key.direction)));
     return streamStack;
   }
@@ -188,7 +193,7 @@ export class DataRiverChartComponent extends ScalableBaseChartComponent {
     const dateTicks = [
       new Date(data[0].date.getTime() - dateDiff),
       ...data.map(record => record.date),
-      new Date(data[data.length - 1].date.getTime() + dateDiff)
+      new Date(data[0].date.getTime() + dateDiff)
     ];
 
     return data.reduce((current, record) => {
@@ -212,8 +217,8 @@ export class DataRiverChartComponent extends ScalableBaseChartComponent {
       leaf.value = record;
 
       // set build rate for all future items until a new existing datapoint
-      dateTicks.forEach((date, i) => {
-        if (i > prevIndex + 1) container.getValue(date.getTime()).value.buildSuccessRate = record.buildSuccessRate;
+      dateTicks.forEach(date => {
+        if (date.getTime() > record.date.getTime()) container.getValue(date.getTime()).value.buildSuccessRate = record.buildSuccessRate;
       });
       return current;
     }, new RiverDataContainer(''));
@@ -231,7 +236,7 @@ export class DataRiverChartComponent extends ScalableBaseChartComponent {
       const dataPoint = offset(record);
       dataPoint.index = pointIndex;
       dataPoint.data = record;
-      dataPoint.key = createStreamId(record);
+      dataPoint.key = createStreamKey(record);
       return dataPoint;
     });
 
@@ -245,7 +250,7 @@ export class DataRiverChartComponent extends ScalableBaseChartComponent {
   }
 
   calcYDim(y) {
-    return y * 10000;
+    return y * 1000;
   }
 
   /**
@@ -354,7 +359,7 @@ export class DataRiverChartComponent extends ScalableBaseChartComponent {
  * @param node
  * @returns {{name: *, attribute: ((function(): (undefined|*))|{boundary: string, values: string[]}), direction: string}}
  */
-const createStreamId = node => {
+export const createStreamKey = node => {
   const record = {
     attribute: node.attribute,
     name: node.name,

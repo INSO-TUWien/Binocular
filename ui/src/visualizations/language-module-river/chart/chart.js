@@ -8,7 +8,7 @@ import _ from 'lodash';
 
 import moment from 'moment';
 import chroma from 'chroma-js';
-import { DataRiverChartComponent } from '../../../components/DataRiverChart/data-river-chart.component';
+import { createStreamKey, DataRiverChartComponent } from '../../../components/DataRiverChart/data-river-chart.component';
 import cx from 'classnames';
 import { RiverData, BuildStat } from '../../../components/DataRiverChart/RiverData';
 
@@ -108,11 +108,19 @@ export default class LanguageModuleRiver extends React.Component {
             xAxisCenter={true}
             //yDims={this.state.commitScale}
             d3offset={commitOffset}
-            keys={this.state.selectedAuthors}
+            keys={
+              this.state.selectedAuthors
+                ? this.state.selectedAuthors.map(author => author.replace(/\((.*)\)\s+/gi, '')).reduce((data, author) => {
+                  data.push(createStreamKey({ name: author, attribute: 'js' }));
+                  data.push(createStreamKey({ name: author, attribute: 'ts' }));
+                  return data;
+                }, [])
+                : undefined
+            }
             resolution={this.props.chartResolution}
             displayNegative={true}
             order={commitOrder}
-            hideVertical={true}
+            hideVertical={false}
             attribute={'Language'}
           />
         </div>

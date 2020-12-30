@@ -208,7 +208,7 @@ export default class ScalableBaseChartComponent extends React.Component {
     const { stackedData, data } = this.state.data;
 
     // cannot proceed without data
-    if (!data || !stackedData || !stackedData.length) {
+    if (!data || !stackedData) {
       return;
     }
 
@@ -333,6 +333,17 @@ export default class ScalableBaseChartComponent extends React.Component {
 
     svg.on('wheel', this.createScrollEvent(svg, y, yAxis, brushArea, area));
 
+    // required to support event handling
+    svg
+      .append('defs')
+      .append('svg:clipPath')
+      .attr('id', 'clip')
+      .append('svg:rect')
+      .attr('width', width - paddings.right - paddings.left)
+      .attr('height', height)
+      .attr('x', paddings.left)
+      .attr('y', 0);
+
     return { brushArea, xAxis };
   }
 
@@ -356,7 +367,7 @@ export default class ScalableBaseChartComponent extends React.Component {
 
     //Append data to svg using the area generator and palette
     brushArea
-      .selectAll()
+      .selectAll('path')
       .data(data)
       .enter()
       .append('path')
