@@ -45,7 +45,9 @@ export class DataRiverChartComponent extends ScalableBaseChartComponent {
    */
   // eslint-disable-next-line no-unused-vars
   getXDims(data) {
-    return [d3.min(data, d => d.date), d3.max(data, d => d.date)];
+    return this.state.data.stackedData[0]
+      ? [d3.min(this.state.data.stackedData[0], d => d.data.date), d3.max(this.state.data.stackedData[0], d => d.data.date)]
+      : [d3.min(data, d => d.date), d3.max(data, d => d.date)];
   }
 
   /**
@@ -59,7 +61,13 @@ export class DataRiverChartComponent extends ScalableBaseChartComponent {
     return [-maxDiff, maxDiff];
   }
 
-  getColor(palette, d) {
+  /**
+   *
+   * @param palette
+   * @param d
+   * @returns {*}
+   */
+  getColor(d) {
     return d.color;
   }
 
@@ -99,7 +107,10 @@ export class DataRiverChartComponent extends ScalableBaseChartComponent {
       throw new InvalidArgumentException('The provided data are not of the type RiverData!');
     }
 
-    data = data.map(record => new RiverData(record)).sort((o1, o2) => (o1 < o2 ? -1 : o1 > o2 ? 1 : 0));
+    data = data
+      .filter(record => record && record instanceof RiverData)
+      .map(record => new RiverData(record))
+      .sort((record1, record2) => (record1.date < record2.date ? -1 : record1.date > record2.date ? 1 : 0));
 
     const reorganizedData = this.preprocessData(data);
     const streamData = _.flatMap(reorganizedData.grouped.map(record => record.sort()));
@@ -117,7 +128,7 @@ export class DataRiverChartComponent extends ScalableBaseChartComponent {
       .filter(stream => stream.length)
       .map(stream => createStreamId(stream[0]));
 
-    d3.stackOffsetDiverging(stackedData, Object.keys(keys));
+    //d3.stackOffsetDiverging(stackedData, Object.keys(keys));
 
     // console.log({ stackedData, data });
     return { stackedData, data };
@@ -163,7 +174,22 @@ export class DataRiverChartComponent extends ScalableBaseChartComponent {
    */
   preprocessData(data) {
     const maxDiff = d3.max(data, d => d.additions + d.deletions);
-    const dateTicks = data.map(record => record.date);
+
+    //calculate minimum x difference
+    const dateDiff =
+      data
+        .map(record => record.date)
+        .filter(date => date && !Number.isNaN(date.getTime()) && !isNaN(date.getTime()))
+        .map(date => date.getTime())
+        .map((date, i, dates) => date - dates[i - 1])
+        .filter(diff => !Number.isNaN(diff) && !isNaN(diff) && diff > 0)
+        .sort()[0] || 1;
+
+    const dateTicks = [
+      new Date(data[0].date.getTime() - dateDiff),
+      ...data.map(record => record.date),
+      new Date(data[data.length - 1].date.getTime() + dateDiff)
+    ];
 
     return data.reduce((current, record) => {
       const container = current.getValue(record.name).getValue(record.attribute);
@@ -229,16 +255,15 @@ export class DataRiverChartComponent extends ScalableBaseChartComponent {
    * @param rawData
    * @param mouseoverDate
    * @param data
-   * @param resolution
    * @param tooltip
-   * @param palette
    * @param event
    * @param node
    * @param brushArea
    * @param x
    * @param y
+   * @param stream
    */
-  createdTooltipNode(path, bisectDate, rawData, mouseoverDate, data, resolution, tooltip, palette, event, node, brushArea, x, y, stream) {
+  createdTooltipNode(path, bisectDate, rawData, mouseoverDate, data, tooltip, event, node, brushArea, x, y, stream) {
     const realDataStream = stream.filter(record => record && record.data && record.data.sha && record.data.sha.length > 0);
     const nearestDateIndex = bisectDate(realDataStream.map(record => record.data), mouseoverDate);
     const candidate1 = realDataStream[nearestDateIndex] || realDataStream[realDataStream.length - 1];

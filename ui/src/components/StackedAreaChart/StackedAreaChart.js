@@ -121,16 +121,17 @@ export default class StackedAreaChart extends ScalableBaseChartComponent {
    * @param rawData
    * @param mouseoverDate
    * @param data
-   * @param resolution
    * @param tooltip
-   * @param palette
    * @param event
    * @param node
    * @param brushArea
    * @param x
    * @param y
+   * @param stream
    */
-  createdTooltipNode(path, bisectDate, rawData, mouseoverDate, data, resolution, tooltip, palette, event, node, brushArea, x, y, stream) {
+  // eslint-disable-next-line no-unused-vars
+  createdTooltipNode(path, bisectDate, rawData, mouseoverDate, data, tooltip, event, node, brushArea, x, y, stream) {
+    const palette = this.state.palette;
     const nearestDateIndex = bisectDate(rawData, mouseoverDate);
     const candidate1 = rawData[nearestDateIndex];
     const candidate2 = rawData[nearestDateIndex - 1];
@@ -144,7 +145,7 @@ export default class StackedAreaChart extends ScalableBaseChartComponent {
     const text = key.split(' <', 1); //Remove git signature email
     let value = nearestDataPoint[key];
     const chartValues = this.findChartValues(data, key, nearestDataPoint.date);
-    const formattedDate = formatDate(new Date(nearestDataPoint.date), resolution);
+    const formattedDate = formatDate(new Date(nearestDataPoint.date), this.props.resolution);
     if (value < 0) {
       value *= -1;
     }
@@ -185,6 +186,11 @@ export default class StackedAreaChart extends ScalableBaseChartComponent {
       .style('fill', palette[key]);
   }
 
+  /**
+   *
+   * @param data
+   * @returns {*}
+   */
   getBrushId(data) {
     return data.key;
   }
@@ -212,5 +218,28 @@ export default class StackedAreaChart extends ScalableBaseChartComponent {
     tooltip.style('display', 'none');
     brushArea.select('.' + this.styles.indicatorLine).remove();
     brushArea.selectAll('.' + this.styles.indicatorCircle).remove();
+  }
+
+  /**
+   * Finds the chart values (for the displayed line) for the moused-over data-point
+   * @param data
+   * @param key
+   * @param timeValue
+   * @returns {{y1: *, y2: *}}
+   */
+  findChartValues(data, key, timeValue) {
+    let foundValues = [];
+    _.each(data, series => {
+      if (series.key === key) {
+        _.each(series, dataPoint => {
+          if (dataPoint.data.date === timeValue) {
+            foundValues = dataPoint;
+            return false;
+          }
+        });
+        return false;
+      }
+    });
+    return { y1: foundValues[0], y2: foundValues[1] };
   }
 }

@@ -113,16 +113,14 @@ export default class ScalableBaseChartComponent extends React.Component {
    * @param rawData
    * @param mouseoverDate
    * @param data
-   * @param resolution
    * @param tooltip
-   * @param palette
    * @param event
    * @param node
    * @param brushArea
    * @param x
    * @param y
    */
-  createdTooltipNode(path, bisectDate, rawData, mouseoverDate, data, resolution, tooltip, palette, event, node, brushArea, x, y) {
+  createdTooltipNode(path, bisectDate, rawData, mouseoverDate, data, tooltip, event, node, brushArea, x, y) {
     throw new NoImplementationException('Base class is abstract and requires implementation!');
   }
 
@@ -287,8 +285,13 @@ export default class ScalableBaseChartComponent extends React.Component {
     return { x, y };
   }
 
-  getColor(palette, d) {
-    return palette[this.getBrushId(d)];
+  /**
+   *
+   * @param d
+   * @returns {*}
+   */
+  getColor(d) {
+    return this.state.palette[this.getBrushId(d)];
   }
 
   /**
@@ -308,14 +311,11 @@ export default class ScalableBaseChartComponent extends React.Component {
    *               xAxis: d3 x-Axis for later transitioning (for zooming)
    */
   drawChart(svg, rawData, data, area, brush, yScale, x, y, height, width, paddings) {
-    //Color palette with the form {author1: color1, ...}
-    const palette = this.props.palette;
     const brushArea = svg.append('g');
-    const resolution = this.props.resolution;
 
     const tooltip = d3.select(this.tooltipRef);
 
-    this.setBrushArea(brushArea, brush, data, palette, area, tooltip, svg, x, rawData, resolution, y);
+    this.setBrushArea(brushArea, brush, data, area, tooltip, svg, x, rawData, y);
 
     //Append visible x-axis on the bottom, with an offset so it's actually visible
     let xAxis;
@@ -341,16 +341,14 @@ export default class ScalableBaseChartComponent extends React.Component {
    * @param brushArea
    * @param brush
    * @param data
-   * @param palette
    * @param area
    * @param tooltip
    * @param svg
    * @param x
    * @param rawData
-   * @param resolution
    * @param y
    */
-  setBrushArea(brushArea, brush, data, palette, area, tooltip, svg, x, rawData, resolution, y) {
+  setBrushArea(brushArea, brush, data, area, tooltip, svg, x, rawData, y) {
     brushArea.append('g').attr('class', 'brush').call(brush);
 
     const bisectDate = d3.bisector(d => d.date).left;
@@ -364,16 +362,13 @@ export default class ScalableBaseChartComponent extends React.Component {
       .append('path')
       .attr('class', 'layer')
       .attr('id', _this.getBrushId)
-      .style('fill', this.getColor.bind(this, palette))
+      //Color palette with the form {author1: color1, ...}
+      .style('fill', this.getColor.bind(this))
       .attr('d', area)
       .attr('clip-path', 'url(#clip)')
       .on('mouseover', this.onMouseover.bind(this, tooltip))
       .on('mouseout', this.onMouseLeave.bind(this, tooltip, brushArea))
       .on('mousemove', function(event, stream) {
-        if (event === undefined || event === null) {
-          return;
-        }
-
         //Calculate values and text for tooltip
         const node = svg.node();
         const pointer = d3.pointer(event, node);
@@ -382,46 +377,8 @@ export default class ScalableBaseChartComponent extends React.Component {
         brushArea.select('.' + _this.styles.indicatorLine).remove();
         brushArea.selectAll('.' + _this.styles.indicatorCircle).remove();
 
-        _this.createdTooltipNode(
-          this,
-          bisectDate,
-          rawData,
-          mouseoverDate,
-          data,
-          resolution,
-          tooltip,
-          palette,
-          event,
-          node,
-          brushArea,
-          x,
-          y,
-          stream
-        );
+        _this.createdTooltipNode(this, bisectDate, rawData, mouseoverDate, data, tooltip, event, node, brushArea, x, y, stream);
       });
-  }
-
-  /**
-   * Finds the chart values (for the displayed line) for the moused-over data-point
-   * @param data
-   * @param key
-   * @param timeValue
-   * @returns {{y1: *, y2: *}}
-   */
-  findChartValues(data, key, timeValue) {
-    let foundValues = [];
-    _.each(data, series => {
-      if (series.key === key) {
-        _.each(series, dataPoint => {
-          if (dataPoint.data.date === timeValue) {
-            foundValues = dataPoint;
-            return false;
-          }
-        });
-        return false;
-      }
-    });
-    return { y1: foundValues[0], y2: foundValues[1] };
   }
 
   /**
