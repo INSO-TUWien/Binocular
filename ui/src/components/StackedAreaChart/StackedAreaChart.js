@@ -171,24 +171,27 @@ export default class StackedAreaChart extends ScalableBaseChartComponent {
 
   /**
    *
-   * @param tooltip
-   * @param event
-   * @param stream
-   */
-  // eslint-disable-next-line no-unused-vars
-  onMouseover(tooltip, event, stream) {
-    tooltip.style('display', 'inline');
-  }
-
-  /**
-   *
+   * @param path
    * @param tooltip
    * @param brushArea
    * @param event
    * @param stream
    */
   // eslint-disable-next-line no-unused-vars
-  onMouseLeave(tooltip, brushArea, event, stream) {
+  onMouseover(path, tooltip, brushArea, event, stream) {
+    tooltip.style('display', 'inline');
+  }
+
+  /**
+   *
+   * @param path
+   * @param tooltip
+   * @param brushArea
+   * @param event
+   * @param stream
+   */
+  // eslint-disable-next-line no-unused-vars
+  onMouseLeave(path, tooltip, brushArea, event, stream) {
     tooltip.style('display', 'none');
     brushArea.select('.' + this.styles.indicatorLine).remove();
     brushArea.selectAll('.' + this.styles.indicatorCircle).remove();

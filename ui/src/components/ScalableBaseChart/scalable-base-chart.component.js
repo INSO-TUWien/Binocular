@@ -131,24 +131,27 @@ export default class ScalableBaseChartComponent extends React.Component {
 
   /**
    *
-   * @param tooltip
-   * @param event
-   * @param stream
-   */
-  // eslint-disable-next-line no-unused-vars
-  onMouseover(tooltip, event, stream) {
-    throw new NoImplementationException('Base class is abstract and requires implementation!');
-  }
-
-  /**
-   *
+   * @param path
    * @param tooltip
    * @param brushArea
    * @param event
    * @param stream
    */
   // eslint-disable-next-line no-unused-vars
-  onMouseLeave(tooltip, brushArea, event, stream) {
+  onMouseover(path, tooltip, brushArea, event, stream) {
+    throw new NoImplementationException('Base class is abstract and requires implementation!');
+  }
+
+  /**
+   *
+   * @param path
+   * @param tooltip
+   * @param brushArea
+   * @param event
+   * @param stream
+   */
+  // eslint-disable-next-line no-unused-vars
+  onMouseLeave(path, tooltip, brushArea, event, stream) {
     throw new NoImplementationException('Base class is abstract and requires implementation!');
   }
 
@@ -366,19 +369,24 @@ export default class ScalableBaseChartComponent extends React.Component {
     const _this = this;
 
     //Append data to svg using the area generator and palette
-    brushArea
+    const pathStreams = brushArea
       .selectAll('path')
       .data(data)
       .enter()
       .append('path')
-      .attr('class', 'layer')
+      .classed(this.styles.layer, !!this.styles.layer)
+      .classed('layer', true)
       .attr('id', _this.getBrushId)
       //Color palette with the form {author1: color1, ...}
       .style('fill', this.getColor.bind(this))
       .attr('d', area)
       .attr('clip-path', 'url(#clip)')
-      .on('mouseover', this.onMouseover.bind(this, tooltip))
-      .on('mouseout', this.onMouseLeave.bind(this, tooltip, brushArea))
+      .on('mouseover', function(event, stream) {
+        return _this.onMouseover.bind(_this, this, tooltip, brushArea)(event, stream);
+      })
+      .on('mouseout', function(event, stream) {
+        return _this.onMouseLeave.bind(_this, this, tooltip, brushArea)(event, stream);
+      })
       .on('mousemove', function(event, stream) {
         //Calculate values and text for tooltip
         const node = svg.node();
@@ -390,7 +398,18 @@ export default class ScalableBaseChartComponent extends React.Component {
 
         _this.createdTooltipNode(this, bisectDate, rawData, mouseoverDate, data, tooltip, event, node, brushArea, x, y, stream);
       });
+
+    this.additionalPathDefs(brushArea, pathStreams, data);
   }
+
+  /**
+   *
+   * @param brushArea
+   * @param pathStreams
+   * @param data
+   */
+  // eslint-disable-next-line no-unused-vars
+  additionalPathDefs(brushArea, pathStreams, data) {}
 
   /**
    *
@@ -497,6 +516,15 @@ export default class ScalableBaseChartComponent extends React.Component {
     this.setState({ zoomed: true, zoomedDims: zoomedDims });
   }
 
+  /**
+   * visualizes the data representation on the given path
+   *
+   * @param brushArea
+   * @param x contains date on x axis
+   * @param y0 contains lower y referring to the y axis
+   * @param y1 contains upper y referring to the y axis
+   * @param color defines the color or the cycles
+   */
   paintDataPoint(brushArea, x, y0, y1, color) {
     brushArea
       .append('line')

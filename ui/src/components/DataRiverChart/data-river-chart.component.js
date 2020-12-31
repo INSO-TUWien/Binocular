@@ -9,6 +9,7 @@ import _ from 'lodash';
 import { RiverDataContainer } from './RiverDataContainer';
 import { InvalidArgumentException } from '../../utils/exception/InvalidArgumentException';
 import RiverTooltip from './river-tooltip';
+import { hash } from '../../utils/crypto-utils';
 
 export class DataRiverChartComponent extends ScalableBaseChartComponent {
   constructor(props) {
@@ -67,7 +68,7 @@ export class DataRiverChartComponent extends ScalableBaseChartComponent {
    * @returns {*}
    */
   getColor(d) {
-    return d.color;
+    return `url(#color-${d.key.toId()})`;
   }
 
   /**
@@ -114,18 +115,36 @@ export class DataRiverChartComponent extends ScalableBaseChartComponent {
     const reorganizedData = this.preprocessData(data);
     const streamData = _.flatMap(reorganizedData.grouped.map(record => record.sort()));
 
+    const keys = this.props.keys ? this.props.keys : stackedData.filter(stream => stream.length).map(stream => createStreamKey(stream[0]));
     //Data formatted for d3
-    stackedData = this.createStackedData(streamData, this.props.keys);
+    stackedData = this.createStackedData(streamData, keys);
+    if (order && order.length) {
+      stackedData.sort(
+        (streamA, streamB) =>
+          order.indexOf(streamA.key.name) < order.indexOf(streamB.key.name)
+            ? -1
+            : order.indexOf(streamA.key.name) > order.indexOf(streamB.key.name) ? 1 : 0
+      );
+    }
 
-    const colors = chroma.scale('spectral').mode('lch').colors(stackedData.length).map(color => chroma(color).alpha(0.85).hex('rgba'));
+    const attributes = Array.from(new Set(data.map(record => record.attribute)));
+    const colors = chroma
+      .scale(['#88fa6e', '#10a3f0'])
+      .mode('lch')
+      .colors(attributes.length)
+      .map(color => chroma(color).alpha(0.9).hex('rgba'));
 
-    stackedData.forEach((stack, index) => (stack.color = colors[index]));
-
-    const keys = /*this.props.keys && this.props.keys.length > 0
-        ? this.props.keys
-        : */ stackedData
-      .filter(stream => stream.length)
-      .map(stream => createStreamKey(stream[0]));
+    stackedData.forEach(stack => {
+      const nameColorKey = Object.keys(this.props.palette).find(
+        colorKey =>
+          colorKey.toLowerCase().includes(stack.key.name.toLowerCase()) &&
+          colorKey.toLowerCase().includes(stack.key.direction.toLowerCase())
+      );
+      return (stack.color = {
+        attribute: chroma(colors[attributes.indexOf(stack.key.attribute)]).alpha(0.9).hex('rgba'),
+        name: chroma(this.props.palette[nameColorKey]).alpha(0.9).hex('rgba')
+      });
+    });
 
     //d3.stackOffsetDiverging(stackedData, Object.keys(keys));
 
@@ -147,10 +166,10 @@ export class DataRiverChartComponent extends ScalableBaseChartComponent {
       .reduce((stack, stream, index) => {
         const additionStream = this.createStack(stream, index * 2, record => [
           this.calcYDim(record.buildSuccessRate),
-          this.calcYDim(record.buildSuccessRate) + record.additions + (record.sha === null ? 1 : 0)
+          this.calcYDim(record.buildSuccessRate) + record.additions + (record.sha === null ? 0.001 : 0)
         ]);
         const deletionStream = this.createStack(stream, index * 2 + 1, record => [
-          this.calcYDim(record.buildSuccessRate) - record.deletions - (record.sha === null ? 1 : 0),
+          this.calcYDim(record.buildSuccessRate) - record.deletions - (record.sha === null ? 0.001 : 0),
           this.calcYDim(record.buildSuccessRate)
         ]);
 
@@ -255,6 +274,34 @@ export class DataRiverChartComponent extends ScalableBaseChartComponent {
 
   /**
    *
+   * @param brushArea
+   * @param pathStreams
+   * @param data
+   */
+  additionalPathDefs(brushArea, pathStreams, data) {
+    const gradients = brushArea
+      .append('defs')
+      .selectAll('pattern')
+      .data(data)
+      .enter()
+      .append('pattern')
+      .attr('width', 10)
+      .attr('height', 10)
+      .attr('id', d => `color-${d.key.toId()}`)
+      .attr('patternUnits', 'userSpaceOnUse')
+      .attr('x', (d, i) => `${i * 2}`)
+      .attr('y', (d, i) => `${i * 2}`);
+
+    /*.attr('patternTransform', (d, i) => `rotate(${(i * 360 / data.length + 1 * i) % 360} 50 50)`)*/
+    gradients.append('rect').attr('fill', d => d.color.name).attr('width', '100%').attr('height', '100%');
+
+    gradients.append('circle').attr('fill', d => d.color.attribute).attr('cx', '5').attr('cy', '5').attr('r', 2);
+
+    //pathStreams.attr('stroke', d => d.color.attribute);
+  }
+
+  /**
+   *
    * @param path
    * @param bisectDate
    * @param rawData
@@ -285,38 +332,48 @@ export class DataRiverChartComponent extends ScalableBaseChartComponent {
 
     tooltip.attr('data', nearestDataPoint.data);
     tooltip.attr('additional', nearestDataPoint.key.direction);
-    tooltip.attr('color', stream.color);
-    this.paintDataPoint(brushArea, x(nearestDataPoint.data.date), y(nearestDataPoint[0]), y(nearestDataPoint[1]), stream.color);
+    tooltip.attr('color', `${stream.color.name} repeat`);
+    tooltip.attr('borderColor', stream.color.attribute);
+    this.paintDataPoint(brushArea, x(nearestDataPoint.data.date), y(nearestDataPoint[0]), y(nearestDataPoint[1]), stream.color.name);
   }
 
   /**
    *
-   * @param tooltip
-   * @param event
-   * @param stream
-   */
-  // eslint-disable-next-line no-unused-vars
-  onMouseover(tooltip, event, stream) {
-    event.preventDefault();
-  }
-
-  /**
-   *
+   * @param path
    * @param tooltip
    * @param brushArea
    * @param event
    * @param stream
    */
   // eslint-disable-next-line no-unused-vars
-  onMouseLeave(tooltip, brushArea, event, stream) {
+  onMouseover(path, tooltip, brushArea, event, stream) {
+    this.state.data.stackedData.filter(dataStream => dataStream.key.eqPrimKey(stream.key)).forEach(dataStream => {
+      d3.select(`#${this.getBrushId(dataStream)}`).raise();
+    });
+    event.preventDefault();
+  }
+
+  /**
+   *
+   * @param path
+   * @param tooltip
+   * @param brushArea
+   * @param event
+   * @param stream
+   */
+  // eslint-disable-next-line no-unused-vars
+  onMouseLeave(path, tooltip, brushArea, event, stream) {
     tooltip.attr('data', null);
     brushArea.select('.' + this.styles.indicatorLine).remove();
     brushArea.selectAll('.' + this.styles.indicatorCircle).remove();
+    brushArea.selectAll('.layer').sort((streamA, streamB) => {
+      return streamA.index - streamB.index;
+    });
   }
 
   // eslint-disable-next-line no-unused-vars
   getBrushId(data) {
-    return data.key;
+    return `stream-${data.key.toId()}`;
   }
 
   render() {
@@ -343,8 +400,14 @@ export const createStreamKey = node => {
   record.eq = function(item) {
     return record === item || !Object.keys(record).filter(key => typeof record[key] === 'function').find(key => record[key] !== item[key]);
   };
+  record.eqPrimKey = function(item) {
+    return record === item || (record.name === item.name && record.attribute === item.attribute);
+  };
   record.toString = function() {
     return `${record.direction}-${record.attribute}-${record.name}`;
+  };
+  record.toId = function() {
+    return hash(`${record.direction}-${record.attribute}-${record.name}`);
   };
   return record;
 };

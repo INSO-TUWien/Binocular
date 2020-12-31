@@ -10,6 +10,7 @@
 
 .layer{
   pointer-events:all;
+  stroke-width: 1px;
 }
 
 .tooltip{
@@ -32,7 +33,7 @@
     border-bottom: 1px solid;
 
     .additional {
-      padding: 5px;
+      padding: 3px;
       border-radius: 5px;
       text-shadow: -1px 0 black, 0 1px black, 1px 0 black, 0 -1px black;
       color:white;
@@ -42,6 +43,7 @@
       text-align: center;
       display: inline-flex;
       flex-flow: column;
+      //border: 3px solid;
     }
 
     .name {

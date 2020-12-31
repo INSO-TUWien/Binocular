@@ -21,16 +21,18 @@ class RiverTooltip extends React.Component {
   render() {
     const { name, date, sha, attribute, deletions, additions, buildStat, buildWeight, buildSuccessRate } = this.state.data || {};
     const isVisible = !this.state.hide && !!this.state.data && this.state.data instanceof RiverData && !!this.state.attribute;
-    const style = this.state.color ? { borderColor: this.state.color } : null;
+    const style = this.state.borderColor ? { borderColor: this.state.borderColor } : null;
     return (
       <MouseTooltip
         className={styles.tooltip}
         visible={isVisible}
         offsetX={this.state.tooltipLeft || 15}
         offsetY={this.state.tooltipTop || 10}>
-        <h1 style={this.state.color ? { borderColor: this.state.color } : null}>
+        <h1 style={style}>
           {this.state.additional
-            ? <span className={styles.additional} style={this.state.color ? { backgroundColor: this.state.color } : null}>
+            ? <span
+                className={styles.additional}
+                style={Object.assign({}, style, this.state.color ? { background: this.state.color } : {})}>
                 <span>
                   {this.state.additional}
                 </span>
