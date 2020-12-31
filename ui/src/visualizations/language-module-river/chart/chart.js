@@ -62,9 +62,6 @@ export default class LanguageModuleRiver extends React.Component {
       commitOrder = Object.keys(this.props.palette);
     }
 
-    const commitOffset = (series, order) => {
-      series, order;
-    }; //d3.stackOffsetDiverging;
     const commitPalette = this.state.commitPalette;
 
     const addDays = (date, days) => {
@@ -97,6 +94,17 @@ export default class LanguageModuleRiver extends React.Component {
       return map;
     }, {});*/
 
+    const selectedAuthors = (this.state.selectedAuthors || []).map(author => author.replace(/\((.*)\)\s+/gi, '')).reduce((data, author) => {
+      data.push(
+        createStreamKey({ name: author, attribute: 'js' }),
+        createStreamKey({
+          name: author,
+          attribute: 'ts'
+        })
+      );
+      return data;
+    }, []);
+
     const commitChart = (
       <div className={styles.chartLine}>
         <div className={cx(styles.text, 'label')}>Attribute River</div>
@@ -107,20 +115,12 @@ export default class LanguageModuleRiver extends React.Component {
             paddings={{ top: 20, left: 60, bottom: 20, right: 30 }}
             xAxisCenter={true}
             //yDims={this.state.commitScale}
-            d3offset={commitOffset}
-            keys={
-              this.state.selectedAuthors
-                ? this.state.selectedAuthors.map(author => author.replace(/\((.*)\)\s+/gi, '')).reduce((data, author) => {
-                    data.push(createStreamKey({ name: author, attribute: 'js' }));
-                    data.push(createStreamKey({ name: author, attribute: 'ts' }));
-                  return data;
-                }, [])
-                : undefined
-            }
+            keys={this.state.selectedAuthors ? selectedAuthors : undefined}
             resolution={this.props.chartResolution}
             displayNegative={true}
             order={commitOrder}
             hideVertical={false}
+            disableVerticalZoom={true}
             attribute={'Language'}
           />
         </div>

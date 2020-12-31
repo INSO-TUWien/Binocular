@@ -334,7 +334,7 @@ export default class ScalableBaseChartComponent extends React.Component {
       yAxis.call(d3.axisLeft(y).tickFormat(d => (this.props.displayNegative ? d : Math.abs(d))));
     }
 
-    svg.on('wheel', this.createScrollEvent(svg, y, yAxis, brushArea, area));
+    svg.on('wheel', !this.props.disableVerticalZoom ? this.createScrollEvent(svg, y, yAxis, brushArea, area) : null);
 
     // required to support event handling
     svg

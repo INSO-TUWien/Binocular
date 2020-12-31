@@ -285,19 +285,19 @@ export class DataRiverChartComponent extends ScalableBaseChartComponent {
       .data(data)
       .enter()
       .append('pattern')
-      .attr('width', 10)
-      .attr('height', 10)
+      .attr('width', 20)
+      .attr('height', 20)
       .attr('id', d => `color-${d.key.toId()}`)
       .attr('patternUnits', 'userSpaceOnUse')
-      .attr('x', (d, i) => `${i * 2}`)
-      .attr('y', (d, i) => `${i * 2}`);
+      .attr('x', (d, i) => `${i * 15}`)
+      .attr('y', (d, i) => `${i * 25}`)
+      .attr('patternTransform', (d, i) => `rotate(${(i * 360 / data.length + 1 * i) % 360} 50 50)`);
 
-    /*.attr('patternTransform', (d, i) => `rotate(${(i * 360 / data.length + 1 * i) % 360} 50 50)`)*/
-    gradients.append('rect').attr('fill', d => d.color.name).attr('width', '100%').attr('height', '100%');
+    gradients.append('rect').attr('fill', d => d.color.attribute).attr('width', '100%').attr('height', '100%');
 
-    gradients.append('circle').attr('fill', d => d.color.attribute).attr('cx', '5').attr('cy', '5').attr('r', 2);
+    gradients.append('circle').attr('fill', d => d.color.name).attr('cx', 10).attr('cy', 10).attr('r', 10.5);
 
-    //pathStreams.attr('stroke', d => d.color.attribute);
+    pathStreams.attr('opacity', 0.9);
   }
 
   /**
