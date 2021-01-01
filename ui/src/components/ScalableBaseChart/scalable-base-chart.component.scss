@@ -7,6 +7,10 @@
   width: 100%;
 }
 
+.axis {
+  pointer-events: none;
+}
+
 .indicatorLine{
   stroke: black;
   stroke-width: 1;

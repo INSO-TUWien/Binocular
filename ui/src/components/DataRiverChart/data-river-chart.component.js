@@ -109,7 +109,10 @@ export class DataRiverChartComponent extends ScalableBaseChartComponent {
    * @param paddings
    */
   additionalAxes(brushArea, scales, width, height, paddings) {
-    const issueAxis = brushArea.append('g').attr('transform', 'translate(' + (width - paddings.right) + ',0)');
+    const issueAxis = brushArea
+      .append('g')
+      .attr('class', this.styles.axis)
+      .attr('transform', 'translate(' + (width - paddings.right) + ',0)');
 
     if (!this.props.hideVertical) {
       issueAxis.call(d3.axisRight(scales.issue));

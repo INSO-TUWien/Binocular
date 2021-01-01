@@ -348,9 +348,17 @@ export default class ScalableBaseChartComponent extends React.Component {
    */
   createXAxis(brushArea, scales, width, height, paddings) {
     if (this.props.xAxisCenter) {
-      return brushArea.append('g').attr('transform', 'translate(0,' + scales.y(0) + ')').call(d3.axisBottom(scales.x));
+      return brushArea
+        .append('g')
+        .attr('class', this.styles.axis)
+        .attr('transform', 'translate(0,' + scales.y(0) + ')')
+        .call(d3.axisBottom(scales.x));
     }
-    return brushArea.append('g').attr('transform', 'translate(0,' + (height - paddings.bottom) + ')').call(d3.axisBottom(scales.x));
+    return brushArea
+      .append('g')
+      .attr('class', this.styles.axis)
+      .attr('transform', 'translate(0,' + (height - paddings.bottom) + ')')
+      .call(d3.axisBottom(scales.x));
   }
 
   /**
