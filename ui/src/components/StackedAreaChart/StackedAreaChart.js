@@ -33,36 +33,34 @@ export default class StackedAreaChart extends ScalableBaseChartComponent {
 
   /**
    *
-   * @param data
    * @returns {[]}
    */
-  getXDims(data) {
-    return [d3.min(data, d => d.date), d3.max(data, d => d.date)];
+  getXDims() {
+    return [d3.min(this.state.data.data, d => d.date), d3.max(this.state.data.data, d => d.date)];
   }
 
   // eslint-disable-next-line no-unused-vars
-  getYDims(data) {
+  getYDims() {
     return this.props.yDims;
   }
 
   /**
    *
-   * @param scaleX
-   * @param scaleY
+   * @param scales
    * @returns {*}
    */
-  createAreaFunction(scaleX, scaleY) {
+  createAreaFunction(scales) {
     //Area generator for the chart
     return d3
       .area()
       .x(function(d) {
-        return scaleX(d.data.date);
+        return scales.x(d.data.date);
       })
       .y0(function(d) {
-        return scaleY(d[0]);
+        return scales.y(d[0]);
       })
       .y1(function(d) {
-        return scaleY(d[1]);
+        return scales.y(d[1]);
       })
       .curve(d3.curveMonotoneX);
   }
@@ -101,15 +99,17 @@ export default class StackedAreaChart extends ScalableBaseChartComponent {
 
   /**
    *
-   * @param x
-   * @param stackedData
-   * @param xAxis
+   * @param scales
+   * @param axes
    * @param brushArea
    * @param area
    */
-  resetZoom(x, stackedData, xAxis, brushArea, area) {
-    x.domain([stackedData[0][0].data.date, stackedData[0][stackedData[0].length - 1].data.date]);
-    xAxis.call(d3.axisBottom(x));
+  resetZoom(scales, axes, brushArea, area) {
+    scales.x.domain([
+      this.state.data.stackedData[0][0].data.date,
+      this.state.data.stackedData[0][this.state.data.stackedData[0].length - 1].data.date
+    ]);
+    axes.x.call(d3.axisBottom(scales.x));
     brushArea.selectAll('.layer').attr('d', area);
     this.setState({ zoomed: false });
   }
@@ -118,23 +118,20 @@ export default class StackedAreaChart extends ScalableBaseChartComponent {
    *
    * @param path
    * @param bisectDate
-   * @param rawData
    * @param mouseoverDate
-   * @param data
    * @param tooltip
    * @param event
    * @param node
    * @param brushArea
-   * @param x
-   * @param y
+   * @param scales
    * @param stream
    */
   // eslint-disable-next-line no-unused-vars
-  createdTooltipNode(path, bisectDate, rawData, mouseoverDate, data, tooltip, event, node, brushArea, x, y, stream) {
+  createdTooltipNode(path, bisectDate, mouseoverDate, tooltip, event, node, brushArea, scales, stream) {
     const palette = this.state.palette;
-    const nearestDateIndex = bisectDate(rawData, mouseoverDate);
-    const candidate1 = rawData[nearestDateIndex];
-    const candidate2 = rawData[nearestDateIndex - 1];
+    const nearestDateIndex = bisectDate(this.state.data.data, mouseoverDate);
+    const candidate1 = this.state.data.data[nearestDateIndex];
+    const candidate2 = this.state.data.data[nearestDateIndex - 1];
     let nearestDataPoint;
     if (Math.abs(mouseoverDate - candidate1.date) < Math.abs(mouseoverDate - candidate2.date)) {
       nearestDataPoint = candidate1;
@@ -144,7 +141,7 @@ export default class StackedAreaChart extends ScalableBaseChartComponent {
     const key = d3.select(path).attr('id');
     const text = key.split(' <', 1); //Remove git signature email
     let value = nearestDataPoint[key];
-    const chartValues = this.findChartValues(data, key, nearestDataPoint.date);
+    const chartValues = this.findChartValues(this.state.data.stackedData, key, nearestDataPoint.date);
     const formattedDate = formatDate(new Date(nearestDataPoint.date), this.props.resolution);
     if (value < 0) {
       value *= -1;
@@ -157,7 +154,7 @@ export default class StackedAreaChart extends ScalableBaseChartComponent {
       .style('left', event.layerX - 20 + 'px')
       .style('top', event.layerY + (node.getBoundingClientRect() || { y: 0 }).y - 70 + 'px');
 
-    this.paintDataPoint(brushArea, x(nearestDataPoint.date), y(chartValues.y1), y(chartValues.y2), palette[key]);
+    this.paintDataPoint(brushArea, scales.x(nearestDataPoint.date), scales.y(chartValues.y1), scales.y(chartValues.y2), palette[key]);
   }
 
   /**

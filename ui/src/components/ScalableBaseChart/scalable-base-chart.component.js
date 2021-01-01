@@ -52,46 +52,33 @@ export default class ScalableBaseChartComponent extends React.Component {
 
   /**
    *
-   * @param scaleX
-   * @param scaleY
+   * @param scales
    * @returns {*}
    */
   // eslint-disable-next-line no-unused-vars
-  createAreaFunction(scaleX, scaleY) {
+  createAreaFunction(scales) {
     throw new NoImplementationException('Base class is abstract and requires implementation!');
   }
 
-  /**
-   *
-   * @param data
-   * @returns {[]}
-   */
   // eslint-disable-next-line no-unused-vars
-  getXDims(data) {
+  getXDims() {
     throw new NoImplementationException('Base class is abstract and requires implementation!');
   }
 
-  /**
-   *
-   * @param data
-   * @returns {[]}
-   */
   // eslint-disable-next-line no-unused-vars
-  getYDims(data) {
+  getYDims() {
     throw new NoImplementationException('Base class is abstract and requires implementation!');
   }
 
   /**
    *
-   * @param x
-   * @param stackedData
-   * @param xAxis
+   * @param scales
+   * @param axes
    * @param brushArea
    * @param area
-   * @param data
    */
   // eslint-disable-next-line no-unused-vars
-  resetZoom(x, stackedData, xAxis, brushArea, area, data) {
+  resetZoom(scales, axes, brushArea, area) {
     throw new NoImplementationException('Base class is abstract and requires implementation!');
   }
 
@@ -110,17 +97,14 @@ export default class ScalableBaseChartComponent extends React.Component {
    *
    * @param path
    * @param bisectDate
-   * @param rawData
    * @param mouseoverDate
-   * @param data
    * @param tooltip
    * @param event
    * @param node
    * @param brushArea
-   * @param x
-   * @param y
+   * @param scales
    */
-  createdTooltipNode(path, bisectDate, rawData, mouseoverDate, data, tooltip, event, node, brushArea, x, y) {
+  createdTooltipNode(path, bisectDate, mouseoverDate, tooltip, event, node, brushArea, scales) {
     throw new NoImplementationException('Base class is abstract and requires implementation!');
   }
 
@@ -203,11 +187,21 @@ export default class ScalableBaseChartComponent extends React.Component {
 
     //Get d3-friendly data
     if (this.state.data.hash !== contentHash || this.state.data.orderHash !== orderHash || hasChanges) {
-      this.setState({
-        data: Object.assign({ hash: contentHash, orderHash }, hashes, this.calculateChartData(this.props.content, this.props.order))
-      });
+      this.setState(
+        {
+          data: Object.assign({ hash: contentHash, orderHash }, hashes, this.calculateChartData(this.props.content, this.props.order))
+        },
+        this.visualizeData
+      );
+    } else {
+      this.visualizeData();
     }
+  }
 
+  /**
+   *
+   */
+  visualizeData() {
     const { stackedData, data } = this.state.data;
 
     // cannot proceed without data
@@ -219,13 +213,12 @@ export default class ScalableBaseChartComponent extends React.Component {
     const svg = d3.select(this.svgRef); //Select parent svg from render method
     const { width, height, paddings } = this.getDimsAndPaddings(svg); //Get width and height of svg in browser
 
-    //Get X and Y scales, which translate data values into pixel values
-    const { x, y } = this.createScales(this.getXDims(data), [paddings.left, width - paddings.right], this.getYDims(data), [
+    //Get and set all required scales, which translate data values into pixel values
+    const scales = this.createScales(this.getXDims(data), [paddings.left, width - paddings.right], this.getYDims(data), [
       height - paddings.bottom,
       paddings.top
     ]);
-
-    const area = this.createAreaFunction(x, y);
+    const area = this.createAreaFunction(scales);
 
     //Brush generator for brush-zoom functionality, with referenced callback-function
     const brush = d3.brushX().extent([[paddings.left, 0], [width - paddings.right, height]]);
@@ -234,12 +227,12 @@ export default class ScalableBaseChartComponent extends React.Component {
     svg.selectAll('*').remove();
 
     //Draw the chart (and brush box) using everything provided
-    const { brushArea, xAxis } = this.drawChart(svg, data, stackedData, area, brush, yScale, x, y, height, width, paddings);
+    const { brushArea, axes } = this.drawChart(svg, area, brush, yScale, scales, height, width, paddings);
 
     //Set callback for brush-zoom functionality
-    brush.on('end', event => this.updateZoom(event.selection, x, xAxis, brush, brushArea, area));
+    brush.on('end', event => this.updateZoom(event.selection, scales, axes, brush, brushArea, area));
     //Set callback to reset zoom on double-click
-    svg.on('dblclick', () => this.resetZoom(x, stackedData, xAxis, brushArea, area, data));
+    svg.on('dblclick', () => this.resetZoom(scales, axes, brushArea, area));
   }
 
   /**
@@ -300,41 +293,42 @@ export default class ScalableBaseChartComponent extends React.Component {
   /**
    * Draw the chart onto the svg element.
    * @param svg element to draw on (e.g. d3.select(this.ref))
-   * @param rawData raw, unstacked data, needed for tooltips
-   * @param data stacked data from the calculateChartData function
    * @param area d3 area generator
    * @param brush d3 brush generator
    * @param yScale yScale factor from props (for applying formatting to the y axis)
-   * @param x d3 x-scale from method createScales
-   * @param y d3 y-scale from method createScales
+   * @param scales: x d3 x-scale from method createScales
+   *                y d3 y-scale from method createScales
    * @param height element height from getDimsAndPaddings method (required for axis formatting)
    * @param width element width from getDimsAndPaddings method (required for axis formatting)
    * @param paddings paddings of element from getDimsAndPaddings method ()
    * @returns {{brushArea: *, xAxis: *}} brushArea: Area that has all the contents appended to it,
    *               xAxis: d3 x-Axis for later transitioning (for zooming)
    */
-  drawChart(svg, rawData, data, area, brush, yScale, x, y, height, width, paddings) {
+  drawChart(svg, area, brush, yScale, scales, height, width, paddings) {
     const brushArea = svg.append('g');
 
     const tooltip = d3.select(this.tooltipRef);
 
-    this.setBrushArea(brushArea, brush, data, area, tooltip, svg, x, rawData, y);
+    this.setBrushArea(brushArea, brush, area, tooltip, svg, scales);
 
     //Append visible x-axis on the bottom, with an offset so it's actually visible
-    let xAxis;
+    const axes = {};
     if (this.props.xAxisCenter) {
-      xAxis = brushArea.append('g').attr('transform', 'translate(0,' + y(0) + ')').call(d3.axisBottom(x));
+      axes.x = brushArea.append('g').attr('transform', 'translate(0,' + scales.y(0) + ')').call(d3.axisBottom(scales.x));
     } else {
-      xAxis = brushArea.append('g').attr('transform', 'translate(0,' + (height - paddings.bottom) + ')').call(d3.axisBottom(x));
+      axes.x = brushArea.append('g').attr('transform', 'translate(0,' + (height - paddings.bottom) + ')').call(d3.axisBottom(scales.x));
     }
 
-    const yAxis = brushArea.append('g').attr('transform', 'translate(' + paddings.left + ',0)');
+    axes.y = brushArea.append('g').attr('transform', 'translate(' + paddings.left + ',0)');
 
     if (!this.props.hideVertical) {
-      yAxis.call(d3.axisLeft(y).tickFormat(d => (this.props.displayNegative ? d : Math.abs(d))));
+      axes.y.call(d3.axisLeft(scales.y).tickFormat(d => (this.props.displayNegative ? d : Math.abs(d))));
     }
 
-    svg.on('wheel', !this.props.disableVerticalZoom ? this.createScrollEvent(svg, y, yAxis, brushArea, area) : null);
+    this.additionalAxis(brushArea, width, paddings, scales);
+
+    // set vertical zoom option if available
+    svg.on('wheel', !this.props.disableVerticalZoom ? this.createScrollEvent(svg, scales, axes, brushArea, area) : null);
 
     // required to support event handling
     svg
@@ -347,22 +341,29 @@ export default class ScalableBaseChartComponent extends React.Component {
       .attr('x', paddings.left)
       .attr('y', 0);
 
-    return { brushArea, xAxis };
+    return { brushArea, axes };
   }
 
   /**
    *
    * @param brushArea
+   * @param width
+   * @param paddings
+   * @param scales
+   */
+  // eslint-disable-next-line no-unused-vars
+  additionalAxis(brushArea, width, paddings, scales) {}
+
+  /**
+   *
+   * @param brushArea
    * @param brush
-   * @param data
    * @param area
    * @param tooltip
    * @param svg
-   * @param x
-   * @param rawData
-   * @param y
+   * @param scales
    */
-  setBrushArea(brushArea, brush, data, area, tooltip, svg, x, rawData, y) {
+  setBrushArea(brushArea, brush, area, tooltip, svg, scales) {
     brushArea.append('g').attr('class', 'brush').call(brush);
 
     const bisectDate = d3.bisector(d => d.date).left;
@@ -370,8 +371,10 @@ export default class ScalableBaseChartComponent extends React.Component {
 
     //Append data to svg using the area generator and palette
     const pathStreams = brushArea
+      .append('g')
+      .attr('class', 'layers')
       .selectAll('path')
-      .data(data)
+      .data(this.state.data.stackedData)
       .enter()
       .append('path')
       .classed(this.styles.layer, !!this.styles.layer)
@@ -381,7 +384,7 @@ export default class ScalableBaseChartComponent extends React.Component {
       .style('fill', this.getColor.bind(this))
       .attr('d', area)
       .attr('clip-path', 'url(#clip)')
-      .on('mouseover', function(event, stream) {
+      .on('mouseenter', function(event, stream) {
         return _this.onMouseover.bind(_this, this, tooltip, brushArea)(event, stream);
       })
       .on('mouseout', function(event, stream) {
@@ -391,36 +394,35 @@ export default class ScalableBaseChartComponent extends React.Component {
         //Calculate values and text for tooltip
         const node = svg.node();
         const pointer = d3.pointer(event, node);
-        const mouseoverDate = x.invert(pointer[0]);
+        const mouseoverDate = scales.x.invert(pointer[0]);
 
         brushArea.select('.' + _this.styles.indicatorLine).remove();
         brushArea.selectAll('.' + _this.styles.indicatorCircle).remove();
 
-        _this.createdTooltipNode(this, bisectDate, rawData, mouseoverDate, data, tooltip, event, node, brushArea, x, y, stream);
+        _this.createdTooltipNode(this, bisectDate, mouseoverDate, tooltip, event, node, brushArea, scales, stream);
       });
 
-    this.additionalPathDefs(brushArea, pathStreams, data);
+    this.additionalPathDefs(brushArea, pathStreams);
   }
 
   /**
    *
    * @param brushArea
    * @param pathStreams
-   * @param data
    */
   // eslint-disable-next-line no-unused-vars
-  additionalPathDefs(brushArea, pathStreams, data) {}
+  additionalPathDefs(brushArea, pathStreams) {}
 
   /**
    *
    * @param svg
-   * @param y
-   * @param yAxis
+   * @param scales
+   * @param axes
    * @param brushArea
    * @param area
    * @returns scroll event
    */
-  createScrollEvent(svg, y, yAxis, brushArea, area) {
+  createScrollEvent(svg, scales, axes, brushArea, area) {
     return event => {
       const direction = event.deltaY > 0 ? 'down' : 'up';
       let zoomedDims = [...this.getYDims(this.state.data.data)];
@@ -436,12 +438,12 @@ export default class ScalableBaseChartComponent extends React.Component {
         bottom = this.state.verticalZoomDims[0];
         if (direction === 'up' && top / 2 > 1 && (bottom / 2 < -1 || bottom === 0)) {
           //Zoom limit
-          this.updateVerticalZoom([bottom / 2, top / 2], y, yAxis, brushArea, area);
+          this.updateVerticalZoom([bottom / 2, top / 2], scales, axes, brushArea, area);
         } else if (direction === 'down') {
           if (top * 2 > zoomedDims[1] && (bottom * 2 < zoomedDims[0] || bottom === 0)) {
-            this.resetVerticalZoom(y, yAxis, brushArea, area);
+            this.resetVerticalZoom(scales, axes, brushArea, area);
           } else {
-            this.updateVerticalZoom([bottom * 2, top * 2], y, yAxis, brushArea, area);
+            this.updateVerticalZoom([bottom * 2, top * 2], scales, axes, brushArea, area);
           }
         }
         return;
@@ -455,7 +457,7 @@ export default class ScalableBaseChartComponent extends React.Component {
         } else if (Math.abs(bottom) >= top) {
           zoomedDims = [bottom, Math.abs(bottom)];
         }
-        this.updateVerticalZoom(zoomedDims, y, yAxis, brushArea, area);
+        this.updateVerticalZoom(zoomedDims, scales, axes, brushArea, area);
       }
     };
   }
@@ -463,30 +465,30 @@ export default class ScalableBaseChartComponent extends React.Component {
   /**
    * Update the vertical zoom (mouse wheel zoom) with new values
    * @param dims Y-Dimensions for new zoom level
-   * @param y Y-Scale from d3
-   * @param yAxis Y-Axis from d3
+   * @param scales Y-Scale from d3
+   * @param axes Y-Axis from d3
    * @param area Area that the paths are drawn on
    * @param areaGenerator Area generator for those paths
    */
-  updateVerticalZoom(dims, y, yAxis, area, areaGenerator) {
-    y.domain(dims);
+  updateVerticalZoom(dims, scales, axes, area, areaGenerator) {
+    scales.y.domain(dims);
 
-    yAxis.call(d3.axisLeft(y));
+    axes.y.call(d3.axisLeft(scales.y));
     area.selectAll('.layer').attr('d', areaGenerator);
     this.setState({ zoomedVertical: true, verticalZoomDims: dims });
   }
 
   /**
    * Reset the vertical zoom to default values.
-   * @param y Y-Scale from d3
-   * @param yAxis Y-Axis from d3
+   * @param scales Y-Scale from d3
+   * @param axes Y-Axis from d3
    * @param area Area that the paths are drawn on
    * @param areaGenerator Area generator for those paths
    */
-  resetVerticalZoom(y, yAxis, area, areaGenerator) {
-    y.domain(this.getYDims(this.state.data.data));
+  resetVerticalZoom(scales, axes, area, areaGenerator) {
+    scales.y.domain(this.getYDims(this.state.data.data));
 
-    yAxis.call(d3.axisLeft(y));
+    axes.y.call(d3.axisLeft(scales.y));
     area.selectAll('.layer').attr('d', areaGenerator);
 
     this.setState({ zoomedVertical: false, verticalZoomDims: [0, 0] });
@@ -495,23 +497,23 @@ export default class ScalableBaseChartComponent extends React.Component {
   /**
    * Callback function for brush-zoom functionality. Should be called when brush ends. (.on("end"...)
    * @param extent Call event.selection inside an anonymous/arrow function, put that anonymous/arrow function as the .on callback method
-   * @param x d3 x Scale provided by createScales function
-   * @param xAxis d3 x-Axis provided by drawChart function
+   * @param scales x d3 x Scale provided by createScales function
+   * @param axes x d3 x-Axis provided by drawChart function
    * @param brush brush generator
    * @param brushArea Area that the path, x/y-Axis and brush-functionality live on (see drawChart)
    * @param area d3 Area generator (for area graphs)
    */
-  updateZoom(extent, x, xAxis, brush, brushArea, area) {
+  updateZoom(extent, scales, axes, brush, brushArea, area) {
     let zoomedDims;
     if (extent) {
-      zoomedDims = [x.invert(extent[0]), x.invert(extent[1])];
-      x.domain(zoomedDims);
+      zoomedDims = [scales.x.invert(extent[0]), scales.x.invert(extent[1])];
+      scales.x.domain(zoomedDims);
       brushArea.select('.brush').call(brush.move, null);
     } else {
       return;
     }
 
-    xAxis.call(d3.axisBottom(x));
+    axes.x.call(d3.axisBottom(scales.x));
     brushArea.selectAll('.layer').attr('d', area);
     this.setState({ zoomed: true, zoomedDims: zoomedDims });
   }

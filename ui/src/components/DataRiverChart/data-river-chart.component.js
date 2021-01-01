@@ -18,23 +18,21 @@ export class DataRiverChartComponent extends ScalableBaseChartComponent {
 
   /**
    *
-   * @param scaleX
-   * @param scaleY
+   * @param scales
    * @returns {*}
    */
-  // eslint-disable-next-line no-unused-vars
-  createAreaFunction(scaleX, scaleY) {
+  createAreaFunction(scales) {
     //Area generator for the chart
     return d3
       .area()
       .x(function(d) {
-        return scaleX(d.data.date);
+        return scales.x(d.data.date);
       })
       .y0(function(d) {
-        return scaleY(d[0]);
+        return scales.y(d[0]);
       })
       .y1(function(d) {
-        return scaleY(d[1]);
+        return scales.y(d[1]);
       })
       .curve(d3.curveMonotoneX);
   }
@@ -57,8 +55,8 @@ export class DataRiverChartComponent extends ScalableBaseChartComponent {
    * @returns {[]}
    */
   // eslint-disable-next-line no-unused-vars
-  getYDims(data) {
-    const maxDiff = d3.max(data, d => d.totalDiff) || 1;
+  getYDims() {
+    const maxDiff = d3.max(this.state.data.data, d => d.totalDiff) || 1;
     return [-maxDiff, maxDiff];
   }
 
@@ -73,19 +71,48 @@ export class DataRiverChartComponent extends ScalableBaseChartComponent {
 
   /**
    *
-   * @param x
-   * @param stackedData
-   * @param xAxis
+   * @param scales
+   * @param axes
    * @param brushArea
    * @param area
-   * @param data
    */
   // eslint-disable-next-line no-unused-vars
-  resetZoom(x, stackedData, xAxis, brushArea, area, data) {
-    x.domain(this.getXDims(data));
-    xAxis.call(d3.axisBottom(x));
+  resetZoom(scales, axes, brushArea, area) {
+    scales.x.domain(this.getXDims());
+    axes.x.call(d3.axisBottom(scales.x));
     brushArea.selectAll('.layer').attr('d', area);
     this.setState({ zoomed: false });
+  }
+
+  /**
+   *
+   * @param xDims
+   * @param xRange
+   * @param yDims
+   * @param yRange
+   * @returns {{issue: *, x: *, y: *}}
+   */
+  createScales(xDims, xRange, yDims, yRange) {
+    //Y axis scaled with the maximum amount of change (half in each direction)
+    const issue = d3.scaleLinear().domain(yDims).range(yRange);
+    const scales = super.createScales(xDims, xRange, yDims, yRange);
+    scales.issue = issue;
+    return scales;
+  }
+
+  /**
+   *
+   * @param brushArea
+   * @param width
+   * @param paddings
+   * @param scales
+   */
+  additionalAxes(brushArea, width, paddings, scales) {
+    const issueAxis = brushArea.append('g').attr('transform', 'translate(' + (width - paddings.right) + ',0)');
+
+    if (!this.props.hideVertical) {
+      issueAxis.call(d3.axisRight(scales.y).tickFormat(d => (this.props.displayNegative ? d : Math.abs(d))));
+    }
   }
 
   /**
@@ -146,9 +173,6 @@ export class DataRiverChartComponent extends ScalableBaseChartComponent {
       });
     });
 
-    //d3.stackOffsetDiverging(stackedData, Object.keys(keys));
-
-    // console.log({ stackedData, data });
     return { stackedData, data };
   }
 
@@ -276,13 +300,12 @@ export class DataRiverChartComponent extends ScalableBaseChartComponent {
    *
    * @param brushArea
    * @param pathStreams
-   * @param data
    */
-  additionalPathDefs(brushArea, pathStreams, data) {
+  additionalPathDefs(brushArea, pathStreams) {
     const gradients = brushArea
       .append('defs')
       .selectAll('pattern')
-      .data(data)
+      .data(this.state.data.stackedData)
       .enter()
       .append('pattern')
       .attr('width', 20)
@@ -291,7 +314,7 @@ export class DataRiverChartComponent extends ScalableBaseChartComponent {
       .attr('patternUnits', 'userSpaceOnUse')
       .attr('x', (d, i) => `${i * 15}`)
       .attr('y', (d, i) => `${i * 25}`)
-      .attr('patternTransform', (d, i) => `rotate(${(i * 360 / data.length + 1 * i) % 360} 50 50)`);
+      .attr('patternTransform', (d, i) => `rotate(${(i * 360 / this.state.data.stackedData.length + 1 * i) % 360} 50 50)`);
 
     gradients.append('rect').attr('fill', d => d.color.attribute).attr('width', '100%').attr('height', '100%');
 
@@ -304,18 +327,15 @@ export class DataRiverChartComponent extends ScalableBaseChartComponent {
    *
    * @param path
    * @param bisectDate
-   * @param rawData
    * @param mouseoverDate
-   * @param data
    * @param tooltip
    * @param event
    * @param node
    * @param brushArea
-   * @param x
-   * @param y
+   * @param scales
    * @param stream
    */
-  createdTooltipNode(path, bisectDate, rawData, mouseoverDate, data, tooltip, event, node, brushArea, x, y, stream) {
+  createdTooltipNode(path, bisectDate, mouseoverDate, tooltip, event, node, brushArea, scales, stream) {
     const realDataStream = stream.filter(record => record && record.data && record.data.sha && record.data.sha.length > 0);
     const nearestDateIndex = bisectDate(realDataStream.map(record => record.data), mouseoverDate);
     const candidate1 = realDataStream[nearestDateIndex] || realDataStream[realDataStream.length - 1];
@@ -334,7 +354,13 @@ export class DataRiverChartComponent extends ScalableBaseChartComponent {
     tooltip.attr('additional', nearestDataPoint.key.direction);
     tooltip.attr('color', `${stream.color.name} repeat`);
     tooltip.attr('borderColor', stream.color.attribute);
-    this.paintDataPoint(brushArea, x(nearestDataPoint.data.date), y(nearestDataPoint[0]), y(nearestDataPoint[1]), stream.color.name);
+    this.paintDataPoint(
+      brushArea,
+      scales.x(nearestDataPoint.data.date),
+      scales.y(nearestDataPoint[0]),
+      scales.y(nearestDataPoint[1]),
+      stream.color.name
+    );
   }
 
   /**
@@ -348,7 +374,7 @@ export class DataRiverChartComponent extends ScalableBaseChartComponent {
   // eslint-disable-next-line no-unused-vars
   onMouseover(path, tooltip, brushArea, event, stream) {
     this.state.data.stackedData.filter(dataStream => dataStream.key.eqPrimKey(stream.key)).forEach(dataStream => {
-      d3.select(`#${this.getBrushId(dataStream)}`).raise();
+      d3.select(`#${this.getBrushId(dataStream)}`).raise().attr('opacity', 1);
     });
     event.preventDefault();
   }
@@ -366,7 +392,7 @@ export class DataRiverChartComponent extends ScalableBaseChartComponent {
     tooltip.attr('data', null);
     brushArea.select('.' + this.styles.indicatorLine).remove();
     brushArea.selectAll('.' + this.styles.indicatorCircle).remove();
-    brushArea.selectAll('.layer').sort((streamA, streamB) => {
+    brushArea.selectAll('.layer').attr('opacity', 0.9).sort((streamA, streamB) => {
       return streamA.index - streamB.index;
     });
   }
