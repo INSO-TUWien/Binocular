@@ -309,7 +309,7 @@ export default class ScalableBaseChartComponent extends React.Component {
 
     const tooltip = d3.select(this.tooltipRef);
 
-    this.setBrushArea(brushArea, brush, area, tooltip, svg, scales);
+    this.setBrushArea(brushArea.append('g'), brush, area, tooltip, svg, scales);
 
     //Append visible x-axis on the bottom, with an offset so it's actually visible
     const axes = Object.assign(
@@ -371,7 +371,7 @@ export default class ScalableBaseChartComponent extends React.Component {
    * @returns {*}
    */
   createYAxis(brushArea, scales, width, height, paddings) {
-    const yAxis = brushArea.append('g').attr('transform', 'translate(' + paddings.left + ',0)');
+    const yAxis = brushArea.append('g').attr('class', this.styles.axis).attr('transform', 'translate(' + paddings.left + ',0)');
 
     if (!this.props.hideVertical) {
       yAxis.call(d3.axisLeft(scales.y).tickFormat(d => (this.props.displayNegative ? d : Math.abs(d))));

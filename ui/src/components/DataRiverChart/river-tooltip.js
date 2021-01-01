@@ -3,6 +3,7 @@ import { BuildStat, RiverData } from './RiverData';
 
 import React from 'react';
 import MouseTooltip from 'react-sticky-mouse-tooltip';
+import { formatInteger, formatNumber } from '../../utils/format';
 
 class RiverTooltip extends React.Component {
   constructor(props) {
@@ -100,8 +101,4 @@ class RiverTooltip extends React.Component {
     );
   }
 }
-
-const formatInteger = value => (+value).toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 });
-const formatNumber = value => (+value).toLocaleString(undefined, { minimumFractionDigits: 4, maximumFractionDigits: 4 });
-
 export default RiverTooltip;

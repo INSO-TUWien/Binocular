@@ -10,6 +10,7 @@ import { RiverDataContainer } from './RiverDataContainer';
 import { InvalidArgumentException } from '../../utils/exception/InvalidArgumentException';
 import RiverTooltip from './river-tooltip';
 import { hash } from '../../utils/crypto-utils';
+import { formatPercentage } from '../../utils/format';
 
 export class DataRiverChartComponent extends ScalableBaseChartComponent {
   constructor(props) {
@@ -25,39 +26,42 @@ export class DataRiverChartComponent extends ScalableBaseChartComponent {
     //Area generator for the chart
     return d3
       .area()
-      .x(function(d) {
-        return scales.x(d.data.date);
-      })
-      .y0(function(d) {
-        return scales.y(d[0]);
-      })
-      .y1(function(d) {
-        return scales.y(d[1]);
-      })
+      .x(d => scales.x(d.data.date))
+      .y0(d => this.getPoint.bind(this, scales)(d).y0)
+      .y1(d => this.getPoint.bind(this, scales)(d).y1)
       .curve(d3.curveMonotoneX);
   }
 
   /**
    *
-   * @param data
-   * @returns {[]}
+   * @param scales
+   * @param dataPoint
+   * @returns {{y0: number, y1: number}}
    */
-  // eslint-disable-next-line no-unused-vars
-  getXDims(data) {
-    return this.state.data.stackedData[0]
-      ? [d3.min(this.state.data.stackedData[0], d => d.data.date), new Date()]
-      : [d3.min(data, d => d.date), new Date()];
+  getPoint(scales, dataPoint) {
+    const rate = scales.y(dataPoint.data.buildSuccessRate);
+    const offset = scales.diff(0);
+    return { y0: rate + scales.diff(dataPoint[0]) - offset, y1: rate + scales.diff(dataPoint[1]) - offset };
   }
 
   /**
    *
-   * @param data
+   * @returns {[]}
+   */
+  // eslint-disable-next-line no-unused-vars
+  getXDims() {
+    return this.state.data.stackedData[0]
+      ? [d3.min(this.state.data.stackedData[0], d => d.data.date), new Date()]
+      : [d3.min(this.state.data.data, d => d.date), new Date()];
+  }
+
+  /**
+   *
    * @returns {[]}
    */
   // eslint-disable-next-line no-unused-vars
   getYDims() {
-    const maxDiff = d3.max(this.state.data.data, d => d.totalDiff) || 1;
-    return [-maxDiff, maxDiff];
+    return [-d3.max(this.state.data.data, d => d.deletions) || 1, d3.max(this.state.data.data, d => d.additions) || 1];
   }
 
   /**
@@ -94,10 +98,37 @@ export class DataRiverChartComponent extends ScalableBaseChartComponent {
    */
   createScales(xDims, xRange, yDims, yRange) {
     //Y axis scaled with the maximum amount of change (half in each direction)
-    const issue = d3.scaleOrdinal().domain(['Close', 'Open']).range(yRange);
     const scales = super.createScales(xDims, xRange, yDims, yRange);
-    scales.issue = issue;
-    return scales;
+
+    const scale = {
+      height: d3.scaleLinear().domain([0.0, 100.0]).range(yRange),
+      width: d3.scaleLinear().domain([0.0, 100.0]).range(xRange)
+    };
+
+    return Object.assign({}, scales, {
+      scale,
+      issue: d3.scaleOrdinal().domain(['Close', 'Open']).range(yRange),
+      y: d3.scaleLinear().domain([-1.0, 1.0]).range([scale.height(25), scale.height(75)]),
+      diff: d3.scaleLinear().domain(yDims).range([(scale.height(80) - scale.height(100)) * 0.3, 0])
+    });
+  }
+
+  /**
+   *
+   * @param brushArea
+   * @param scales
+   * @param width
+   * @param height
+   * @param paddings
+   * @returns {*}
+   */
+  createYAxis(brushArea, scales, width, height, paddings) {
+    const yAxis = brushArea.append('g').attr('class', this.styles.axis).attr('transform', 'translate(' + paddings.left + ',0)');
+
+    if (!this.props.hideVertical) {
+      yAxis.call(d3.axisLeft(scales.y).tickFormat(d => `${formatPercentage((d * 100 + 100) / 2.0)}%`));
+    }
+    return yAxis;
   }
 
   /**
@@ -194,13 +225,10 @@ export class DataRiverChartComponent extends ScalableBaseChartComponent {
         stream => !keys || (keys.length && !!keys.find(key => key && key.name === stream[0].name && key.attribute === stream[0].attribute))
       )
       .reduce((stack, stream, index) => {
-        const additionStream = this.createStack(stream, index * 2, record => [
-          this.calcYDim(record.buildSuccessRate),
-          this.calcYDim(record.buildSuccessRate) + record.additions + (record.sha === null ? 0.001 : 0)
-        ]);
+        const additionStream = this.createStack(stream, index * 2, record => [0, record.additions + (record.sha === null ? 0.001 : 0)]);
         const deletionStream = this.createStack(stream, index * 2 + 1, record => [
-          this.calcYDim(record.buildSuccessRate) - record.deletions - (record.sha === null ? 0.001 : 0),
-          this.calcYDim(record.buildSuccessRate)
+          -record.deletions - (record.sha === null ? 0.001 : 0),
+          0
         ]);
 
         if (additionStream && additionStream.length) {
@@ -263,6 +291,10 @@ export class DataRiverChartComponent extends ScalableBaseChartComponent {
         (record.buildStat === BuildStat.Success
           ? record.buildWeight * record.totalDiff / maxDiff
           : record.buildStat === BuildStat.Failed ? -record.buildWeight * record.totalDiff / maxDiff : 0.0);
+
+      // define range of success rate
+      record.buildSuccessRate =
+        record.buildSuccessRate >= 0.0 ? Math.min(record.buildSuccessRate, 1.0) : Math.min(record.buildSuccessRate, -1.0);
       leaf.value = record;
 
       // set build rate for all future items until a new existing datapoint
@@ -296,10 +328,6 @@ export class DataRiverChartComponent extends ScalableBaseChartComponent {
     dataStream.index = index;
     dataStream.key = dataStream[0].key;
     return dataStream;
-  }
-
-  calcYDim(y) {
-    return y * 1000;
   }
 
   /**
@@ -360,13 +388,8 @@ export class DataRiverChartComponent extends ScalableBaseChartComponent {
     tooltip.attr('additional', nearestDataPoint.key.direction);
     tooltip.attr('color', `${stream.color.name} repeat`);
     tooltip.attr('borderColor', stream.color.attribute);
-    this.paintDataPoint(
-      brushArea,
-      scales.x(nearestDataPoint.data.date),
-      scales.y(nearestDataPoint[0]),
-      scales.y(nearestDataPoint[1]),
-      stream.color.name
-    );
+    const dataPoint = this.getPoint(scales, nearestDataPoint);
+    this.paintDataPoint(brushArea, scales.x(nearestDataPoint.data.date), dataPoint.y0, dataPoint.y1, stream.color.name);
   }
 
   /**
