@@ -112,7 +112,7 @@ export default class LanguageModuleRiver extends React.Component {
           <DataRiverChartComponent
             content={mockData}
             palette={commitPalette}
-            paddings={{ top: 20, left: 60, bottom: 20, right: 30 }}
+            paddings={{ top: 40, left: 60, bottom: 40, right: 60 }}
             xAxisCenter={true}
             //yDims={this.state.commitScale}
             keys={this.state.selectedAuthors ? selectedAuthors : undefined}

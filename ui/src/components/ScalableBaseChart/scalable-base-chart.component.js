@@ -1,6 +1,5 @@
 'use strict';
 
-import _ from 'lodash';
 import React from 'react';
 import * as d3 from 'd3';
 import * as baseStyles from './scalable-base-chart.component.scss';
@@ -104,6 +103,7 @@ export default class ScalableBaseChartComponent extends React.Component {
    * @param brushArea
    * @param scales
    */
+  // eslint-disable-next-line no-unused-vars
   createdTooltipNode(path, bisectDate, mouseoverDate, tooltip, event, node, brushArea, scales) {
     throw new NoImplementationException('Base class is abstract and requires implementation!');
   }
@@ -312,20 +312,13 @@ export default class ScalableBaseChartComponent extends React.Component {
     this.setBrushArea(brushArea, brush, area, tooltip, svg, scales);
 
     //Append visible x-axis on the bottom, with an offset so it's actually visible
-    const axes = {};
-    if (this.props.xAxisCenter) {
-      axes.x = brushArea.append('g').attr('transform', 'translate(0,' + scales.y(0) + ')').call(d3.axisBottom(scales.x));
-    } else {
-      axes.x = brushArea.append('g').attr('transform', 'translate(0,' + (height - paddings.bottom) + ')').call(d3.axisBottom(scales.x));
-    }
-
-    axes.y = brushArea.append('g').attr('transform', 'translate(' + paddings.left + ',0)');
-
-    if (!this.props.hideVertical) {
-      axes.y.call(d3.axisLeft(scales.y).tickFormat(d => (this.props.displayNegative ? d : Math.abs(d))));
-    }
-
-    this.additionalAxis(brushArea, width, paddings, scales);
+    const axes = Object.assign(
+      {
+        x: this.createXAxis(brushArea, scales, width, height, paddings),
+        y: this.createYAxis(brushArea, scales, width, height, paddings)
+      },
+      this.additionalAxes(brushArea, scales, width, height, paddings)
+    );
 
     // set vertical zoom option if available
     svg.on('wheel', !this.props.disableVerticalZoom ? this.createScrollEvent(svg, scales, axes, brushArea, area) : null);
@@ -347,12 +340,47 @@ export default class ScalableBaseChartComponent extends React.Component {
   /**
    *
    * @param brushArea
-   * @param width
-   * @param paddings
    * @param scales
+   * @param width
+   * @param height
+   * @param paddings
+   * @returns {*}
+   */
+  createXAxis(brushArea, scales, width, height, paddings) {
+    if (this.props.xAxisCenter) {
+      return brushArea.append('g').attr('transform', 'translate(0,' + scales.y(0) + ')').call(d3.axisBottom(scales.x));
+    }
+    return brushArea.append('g').attr('transform', 'translate(0,' + (height - paddings.bottom) + ')').call(d3.axisBottom(scales.x));
+  }
+
+  /**
+   *
+   * @param brushArea
+   * @param scales
+   * @param width
+   * @param height
+   * @param paddings
+   * @returns {*}
+   */
+  createYAxis(brushArea, scales, width, height, paddings) {
+    const yAxis = brushArea.append('g').attr('transform', 'translate(' + paddings.left + ',0)');
+
+    if (!this.props.hideVertical) {
+      yAxis.call(d3.axisLeft(scales.y).tickFormat(d => (this.props.displayNegative ? d : Math.abs(d))));
+    }
+    return yAxis;
+  }
+
+  /**
+   *
+   * @param brushArea
+   * @param scales
+   * @param width
+   * @param height
+   * @param paddings
    */
   // eslint-disable-next-line no-unused-vars
-  additionalAxis(brushArea, width, paddings, scales) {}
+  additionalAxes(brushArea, scales, width, height, paddings) {}
 
   /**
    *

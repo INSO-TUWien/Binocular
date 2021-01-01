@@ -94,7 +94,7 @@ export class DataRiverChartComponent extends ScalableBaseChartComponent {
    */
   createScales(xDims, xRange, yDims, yRange) {
     //Y axis scaled with the maximum amount of change (half in each direction)
-    const issue = d3.scaleLinear().domain(yDims).range(yRange);
+    const issue = d3.scaleOrdinal().domain(['Close', 'Open']).range(yRange);
     const scales = super.createScales(xDims, xRange, yDims, yRange);
     scales.issue = issue;
     return scales;
@@ -103,15 +103,16 @@ export class DataRiverChartComponent extends ScalableBaseChartComponent {
   /**
    *
    * @param brushArea
-   * @param width
-   * @param paddings
    * @param scales
+   * @param width
+   * @param height
+   * @param paddings
    */
-  additionalAxes(brushArea, width, paddings, scales) {
+  additionalAxes(brushArea, scales, width, height, paddings) {
     const issueAxis = brushArea.append('g').attr('transform', 'translate(' + (width - paddings.right) + ',0)');
 
     if (!this.props.hideVertical) {
-      issueAxis.call(d3.axisRight(scales.y).tickFormat(d => (this.props.displayNegative ? d : Math.abs(d))));
+      issueAxis.call(d3.axisRight(scales.issue));
     }
   }
 
@@ -154,6 +155,7 @@ export class DataRiverChartComponent extends ScalableBaseChartComponent {
       );
     }
 
+    //TODO: remove mocked
     const attributes = Array.from(new Set(data.map(record => record.attribute)));
     const colors = chroma
       .scale(['#88fa6e', '#10a3f0'])
@@ -161,6 +163,7 @@ export class DataRiverChartComponent extends ScalableBaseChartComponent {
       .colors(attributes.length)
       .map(color => chroma(color).alpha(0.9).hex('rgba'));
 
+    // add color set to stream
     stackedData.forEach(stack => {
       const nameColorKey = Object.keys(this.props.palette).find(
         colorKey =>
@@ -236,7 +239,7 @@ export class DataRiverChartComponent extends ScalableBaseChartComponent {
     const dateTicks = [
       new Date(data[0].date.getTime() - dateDiff),
       ...data.map(record => record.date),
-      new Date(data[0].date.getTime() + dateDiff)
+      new Date(data[data.length - 1].date.getTime() + dateDiff)
     ];
 
     return data.reduce((current, record) => {
