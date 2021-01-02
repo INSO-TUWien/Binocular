@@ -1,16 +1,16 @@
 'use strict';
 
 import React from 'react';
-import { min, max, stackOffsetDiverging } from 'd3';
 
 import styles from '../styles.scss';
 import _ from 'lodash';
 
 import moment from 'moment';
 import chroma from 'chroma-js';
-import { createStreamKey, DataRiverChartComponent } from '../../../components/DataRiverChart/data-river-chart.component';
+import { DataRiverChartComponent } from '../../../components/DataRiverChart/data-river-chart.component';
 import cx from 'classnames';
 import { RiverData, BuildStat } from '../../../components/DataRiverChart/RiverData';
+import StreamKey from '../../../components/DataRiverChart/StreamKey';
 
 export default class LanguageModuleRiver extends React.Component {
   constructor(props) {
@@ -106,8 +106,8 @@ export default class LanguageModuleRiver extends React.Component {
 
     const selectedAuthors = (this.state.selectedAuthors || []).map(author => author.replace(/\((.*)\)\s+/gi, '')).reduce((data, author) => {
       data.push(
-        createStreamKey({ name: author, attribute: 'js' }),
-        createStreamKey({
+        new StreamKey({ name: author, attribute: 'js' }),
+        new StreamKey({
           name: author,
           attribute: 'ts'
         })

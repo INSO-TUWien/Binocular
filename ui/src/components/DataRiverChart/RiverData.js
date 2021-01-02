@@ -94,7 +94,7 @@ export class RiverData {
 /**
  * represents a build state enum
  *
- * @type {unknown[]}
+ * @type {Readonly<{}>}
  */
 export const BuildStat = Object.freeze(
   (() => {

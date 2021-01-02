@@ -9,8 +9,8 @@ import _ from 'lodash';
 import { RiverDataContainer } from './RiverDataContainer';
 import { InvalidArgumentException } from '../../utils/exception/InvalidArgumentException';
 import RiverTooltip from './river-tooltip';
-import { hash } from '../../utils/crypto-utils';
 import { formatPercentage } from '../../utils/format';
+import StreamKey from './StreamKey';
 
 export class DataRiverChartComponent extends ScalableBaseChartComponent {
   constructor(props) {
@@ -177,7 +177,7 @@ export class DataRiverChartComponent extends ScalableBaseChartComponent {
     const reorganizedData = this.preprocessData(data);
     const streamData = _.flatMap(reorganizedData.grouped.map(record => record.sort()));
 
-    const keys = this.props.keys ? this.props.keys : stackedData.filter(stream => stream.length).map(stream => createStreamKey(stream[0]));
+    const keys = this.props.keys ? this.props.keys : stackedData.filter(stream => stream.length).map(stream => new StreamKey(stream[0]));
     //Data formatted for d3
     stackedData = this.createStackedData(streamData, keys);
     if (order && order.length) {
@@ -204,10 +204,12 @@ export class DataRiverChartComponent extends ScalableBaseChartComponent {
           colorKey.toLowerCase().includes(stack.key.name.toLowerCase()) &&
           colorKey.toLowerCase().includes(stack.key.direction.toLowerCase())
       );
-      return (stack.color = {
+      const color = {
         attribute: chroma(colors[attributes.indexOf(stack.key.attribute)]).alpha(0.9).hex('rgba'),
         name: chroma(this.props.palette[nameColorKey]).alpha(0.9).hex('rgba')
-      });
+      };
+      stack.forEach(node => (node.color = color));
+      stack.color = color;
     });
 
     return { stackedData, data };
@@ -320,7 +322,7 @@ export class DataRiverChartComponent extends ScalableBaseChartComponent {
       const dataPoint = offset(record);
       dataPoint.index = pointIndex;
       dataPoint.data = record;
-      dataPoint.key = createStreamKey(record);
+      dataPoint.key = new StreamKey(record);
       return dataPoint;
     });
 
@@ -445,31 +447,5 @@ export class DataRiverChartComponent extends ScalableBaseChartComponent {
     );
   }
 }
-
-/**
- *
- * @param node
- * @returns {{name: *, attribute: ((function(): (undefined|*))|{boundary: string, values: string[]}), direction: string}}
- */
-export const createStreamKey = node => {
-  const record = {
-    attribute: node.attribute,
-    name: node.name,
-    direction: ''
-  };
-  record.eq = function(item) {
-    return record === item || !Object.keys(record).filter(key => typeof record[key] === 'function').find(key => record[key] !== item[key]);
-  };
-  record.eqPrimKey = function(item) {
-    return record === item || (record.name === item.name && record.attribute === item.attribute);
-  };
-  record.toString = function() {
-    return `${record.direction}-${record.attribute}-${record.name}`;
-  };
-  record.toId = function() {
-    return hash(`${record.direction}-${record.attribute}-${record.name}`);
-  };
-  return record;
-};
 
 export default DataRiverChartComponent;
