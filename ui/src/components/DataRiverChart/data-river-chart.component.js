@@ -109,7 +109,7 @@ export class DataRiverChartComponent extends ScalableBaseChartComponent {
       scale,
       issue: d3.scaleOrdinal().domain(['Close', 'Open']).range(yRange),
       y: d3.scaleLinear().domain([-1.0, 1.0]).range([scale.height(25), scale.height(75)]),
-      diff: d3.scaleLinear().domain(yDims).range([(scale.height(80) - scale.height(100)) * 0.3, 0])
+      diff: d3.scaleLinear().domain(yDims).range([scale.height(70) - scale.height(100), 0])
     });
   }
 
@@ -295,6 +295,9 @@ export class DataRiverChartComponent extends ScalableBaseChartComponent {
       // define range of success rate
       record.buildSuccessRate =
         record.buildSuccessRate >= 0.0 ? Math.min(record.buildSuccessRate, 1.0) : Math.min(record.buildSuccessRate, -1.0);
+
+      record.trend = Math.sign(record.buildSuccessRate - previous.buildSuccessRate);
+
       leaf.value = record;
 
       // set build rate for all future items until a new existing datapoint
@@ -375,9 +378,11 @@ export class DataRiverChartComponent extends ScalableBaseChartComponent {
     const candidate1 = realDataStream[nearestDateIndex] || realDataStream[realDataStream.length - 1];
     const candidate2 = realDataStream[nearestDateIndex - 1] || realDataStream[0];
     let nearestDataPoint;
+
     if (!candidate1 || !candidate2) {
       return;
     }
+
     if (Math.abs(mouseoverDate - candidate1.data.date) < Math.abs(mouseoverDate - candidate2.data.date)) {
       nearestDataPoint = candidate1;
     } else {
@@ -386,8 +391,8 @@ export class DataRiverChartComponent extends ScalableBaseChartComponent {
 
     tooltip.attr('data', nearestDataPoint.data);
     tooltip.attr('additional', nearestDataPoint.key.direction);
-    tooltip.attr('color', `${stream.color.name} repeat`);
-    tooltip.attr('borderColor', stream.color.attribute);
+    tooltip.attr('color', `${stream.color.name}`);
+    tooltip.attr('attrColor', stream.color.attribute);
     const dataPoint = this.getPoint(scales, nearestDataPoint);
     this.paintDataPoint(brushArea, scales.x(nearestDataPoint.data.date), dataPoint.y0, dataPoint.y1, stream.color.name);
   }

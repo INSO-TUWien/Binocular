@@ -26,6 +26,7 @@ export class RiverData {
       buildWeight
     });
     this.buildSuccessRate = buildSuccessRate;
+    this._trend = 0;
   }
 
   copyCtor(data) {
@@ -75,6 +76,14 @@ export class RiverData {
 
   set buildSuccessRate(buildSuccessRate) {
     this._buildSuccessRate = Number.isNaN(+buildSuccessRate) || isNaN(+buildSuccessRate) ? 0.0 : +buildSuccessRate;
+  }
+
+  get trend() {
+    return this._trend;
+  }
+
+  set trend(value) {
+    this._trend = Number.isNaN(+value) || isNaN(+value) ? 0.0 : +value;
   }
 
   equal(data) {
