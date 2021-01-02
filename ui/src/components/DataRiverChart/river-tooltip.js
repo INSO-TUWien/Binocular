@@ -87,7 +87,7 @@ class RiverTooltip extends React.Component {
           <li style={style}>
             <i>build rate</i>
             <span>
-              {formatNumber(buildSuccessRate * 100.0) + '%'}
+              {formatNumber((buildSuccessRate * 100.0 + 100.0) / 2) + '%'}
             </span>
           </li>
           <li style={style}>

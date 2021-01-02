@@ -44,7 +44,7 @@ export class RiverDataContainer {
   }
 
   indexOf(key) {
-    return (this.data.values || []).indexOf(key);
+    return (this.data.values || []).map(item => item.name).indexOf(key);
   }
 
   getValue(key) {
