@@ -130,7 +130,7 @@ export default class LanguageModuleRiver extends React.Component {
             displayNegative={true}
             order={commitOrder}
             hideVertical={false}
-            disableVerticalZoom={true}
+            disableVerticalZoom={false}
             attribute={'Language'}
           />
         </div>

@@ -461,7 +461,7 @@ export default class ScalableBaseChartComponent extends React.Component {
   createScrollEvent(svg, scales, axes, brushArea, area) {
     return event => {
       const direction = event.deltaY > 0 ? 'down' : 'up';
-      let zoomedDims = [...this.getYDims(this.state.data.data)];
+      let zoomedDims = [...this.getYDims()];
       let top = zoomedDims[1],
         bottom = zoomedDims[0];
       if (this.props.keys && this.props.keys.length === 0) {

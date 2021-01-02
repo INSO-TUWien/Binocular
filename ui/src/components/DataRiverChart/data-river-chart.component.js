@@ -27,8 +27,8 @@ export class DataRiverChartComponent extends ScalableBaseChartComponent {
     return d3
       .area()
       .x(d => scales.x(d.data.date))
-      .y0(d => this.getPoint.bind(this, scales)(d).y0)
-      .y1(d => this.getPoint.bind(this, scales)(d).y1)
+      .y0(d => this.getPoint(scales, d).y0)
+      .y1(d => this.getPoint(scales, d).y1)
       .curve(d3.curveMonotoneX);
   }
 
@@ -61,7 +61,7 @@ export class DataRiverChartComponent extends ScalableBaseChartComponent {
    */
   // eslint-disable-next-line no-unused-vars
   getYDims() {
-    return [-d3.max(this.state.data.data, d => d.deletions) || 1, d3.max(this.state.data.data, d => d.additions) || 1];
+    return this.state.yDims;
   }
 
   /**
@@ -89,6 +89,36 @@ export class DataRiverChartComponent extends ScalableBaseChartComponent {
   }
 
   /**
+   * Update the vertical zoom (mouse wheel zoom) with new values
+   * @param dims Y-Dimensions for new zoom level
+   * @param scales Y-Scale from d3
+   * @param axes Y-Axis from d3
+   * @param area Area that the paths are drawn on
+   * @param areaGenerator Area generator for those paths
+   */
+  updateVerticalZoom(dims, scales, axes, area, areaGenerator) {
+    scales.diff.domain(dims);
+
+    area.selectAll('.layer').attr('d', areaGenerator);
+    this.setState({ zoomedVertical: true, verticalZoomDims: dims });
+  }
+
+  /**
+   * Reset the vertical zoom to default values.
+   * @param scales Y-Scale from d3
+   * @param axes Y-Axis from d3
+   * @param area Area that the paths are drawn on
+   * @param areaGenerator Area generator for those paths
+   */
+  resetVerticalZoom(scales, axes, area, areaGenerator) {
+    scales.diff.domain(this.getYDims());
+
+    area.selectAll('.layer').attr('d', areaGenerator);
+
+    this.setState({ zoomedVertical: false, verticalZoomDims: [0, 0] });
+  }
+
+  /**
    *
    * @param xDims
    * @param xRange
@@ -109,7 +139,7 @@ export class DataRiverChartComponent extends ScalableBaseChartComponent {
       scale,
       issue: d3.scaleOrdinal().domain(['Close', 'Open']).range(yRange),
       y: d3.scaleLinear().domain([-1.0, 1.0]).range([scale.height(25), scale.height(75)]),
-      diff: d3.scaleLinear().domain(yDims).range([scale.height(70) - scale.height(100), 0])
+      diff: d3.scaleLinear().domain(scales.y.domain()).range([scale.height(70) - scale.height(100), 0])
     });
   }
 
@@ -211,6 +241,12 @@ export class DataRiverChartComponent extends ScalableBaseChartComponent {
       stack.forEach(node => (node.color = color));
       stack.color = color;
     });
+
+    this.setState(prev =>
+      Object.assign({}, prev, {
+        yDims: [-d3.max(this.state.data.data, d => d.deletions) || 1, d3.max(this.state.data.data, d => d.additions) || 1]
+      })
+    );
 
     return { stackedData, data };
   }
