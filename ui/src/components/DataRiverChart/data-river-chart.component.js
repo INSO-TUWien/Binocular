@@ -211,12 +211,7 @@ export class DataRiverChartComponent extends ScalableBaseChartComponent {
     //Data formatted for d3
     stackedData = this.createStackedData(streamData, keys);
     if (order && order.length) {
-      stackedData.sort(
-        (streamA, streamB) =>
-          order.indexOf(streamA.key.name) < order.indexOf(streamB.key.name)
-            ? -1
-            : order.indexOf(streamA.key.name) > order.indexOf(streamB.key.name) ? 1 : 0
-      );
+      stackedData.sort((streamA, streamB) => order.indexOf(streamA.key.name) - order.indexOf(streamB.key.name));
     }
 
     //TODO: remove mocked
@@ -332,7 +327,7 @@ export class DataRiverChartComponent extends ScalableBaseChartComponent {
 
       // define range of success rate
       record.buildSuccessRate =
-        record.buildSuccessRate >= 0.0 ? Math.min(record.buildSuccessRate, 1.0) : Math.min(record.buildSuccessRate, -1.0);
+        record.buildSuccessRate >= 0.0 ? Math.min(record.buildSuccessRate, 1.0) : Math.max(record.buildSuccessRate, -1.0);
 
       record.trend = Math.sign(record.buildSuccessRate - previous.buildSuccessRate);
 
