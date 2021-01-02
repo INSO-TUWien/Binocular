@@ -445,8 +445,12 @@ export class DataRiverChartComponent extends ScalableBaseChartComponent {
    */
   // eslint-disable-next-line no-unused-vars
   onMouseover(path, tooltip, brushArea, event, stream) {
-    this.state.data.stackedData.filter(dataStream => dataStream.key.eqPrimKey(stream.key)).forEach(dataStream => {
-      d3.select(`#${this.getBrushId(dataStream)}`).raise().attr('opacity', 1);
+    this.state.data.stackedData.forEach(dataStream => {
+      if (dataStream.key.eqPrimKey(stream.key)) {
+        d3.select(`#${this.getBrushId(dataStream)}`).raise().attr('opacity', 1);
+      } else {
+        d3.select(`#${this.getBrushId(dataStream)}`).attr('opacity', 0.5);
+      }
     });
     event.preventDefault();
   }
