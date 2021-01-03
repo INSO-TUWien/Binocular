@@ -11,6 +11,7 @@ import { DataRiverChartComponent } from '../../../components/DataRiverChart/data
 import cx from 'classnames';
 import { RiverData, BuildStat } from '../../../components/DataRiverChart/RiverData';
 import StreamKey from '../../../components/DataRiverChart/StreamKey';
+import IssueStream from '../../../components/DataRiverChart/IssueStream';
 
 export default class LanguageModuleRiver extends React.Component {
   constructor(props) {
@@ -62,7 +63,17 @@ export default class LanguageModuleRiver extends React.Component {
       commitOrder = Object.keys(this.props.palette);
     }
 
-    const commitPalette = this.state.commitPalette;
+    //TODO: remove mocked
+    const attributes = { js: 'JavaScript', ts: 'Typescript' };
+
+    const commitPalette = Object.assign(
+      {},
+      this.state.commitPalette || {},
+      chroma.scale(['#88fa6e', '#10a3f0']).mode('lch').colors(attributes.length).reduce((collection, color, index) => {
+        collection[attributes[Object.keys(attributes)[index]]] = chroma(color).alpha(0.9).hex('rgba');
+        return collection;
+      }, {})
+    );
 
     const addDays = (date, days) => {
       const result = new Date(date);
@@ -74,29 +85,45 @@ export default class LanguageModuleRiver extends React.Component {
     let mockData;
     if (commitOrder) {
       mockData = [
-        new RiverData(addDays(date, 1), 'ts', commitOrder[0], 'a1', BuildStat.Failed, 1, 100, 2),
-        new RiverData(addDays(date, 1), 'js', commitOrder[1], 'b1', BuildStat.Success, 0.1, 1000, 2),
-        new RiverData(addDays(date, 2), 'js', commitOrder[1], 'b2', BuildStat.Failed, 1, 4, 2000),
-        new RiverData(addDays(date, 3), 'js', commitOrder[1], 'b3', BuildStat.Skipped, 1, 140, 1200),
-        new RiverData(addDays(date, 4), 'js', commitOrder[1], 'b4', BuildStat.Success, 1, 1004, 120),
-        new RiverData(addDays(date, 5), 'js', commitOrder[1], 'b5', BuildStat.Success, 1, 200, 12),
-        new RiverData(addDays(date, 5), 'ts', commitOrder[0], 'a5', BuildStat.Success, 1, 1000, 2),
-        new RiverData(addDays(date, 6), 'js', commitOrder[2], 'c6', BuildStat.Success, 1, 2002, 2),
-        new RiverData(addDays(date, 3), 'js', commitOrder[2], 'c7', BuildStat.Success, 1, 1000, 2),
-        new RiverData(addDays(date, 4), 'js', commitOrder[2], 'c8', BuildStat.Success, 1, 2002, 2100),
-        new RiverData(addDays(date, 5), 'js', commitOrder[2], 'c9', BuildStat.Failed, 1, 1002, 20),
+        new RiverData(addDays(date, 1), attributes['ts'], commitOrder[0], 'a1', BuildStat.Failed, 1, 100, 2),
+        new RiverData(addDays(date, 1), attributes['js'], commitOrder[1], 'a1', BuildStat.Success, 0.1, 1000, 2),
+        new RiverData(addDays(date, 2), attributes['js'], commitOrder[1], 'a2', BuildStat.Failed, 1, 4, 2000),
+        new RiverData(addDays(date, 3), attributes['js'], commitOrder[1], 'a3', BuildStat.Skipped, 1, 140, 1200),
+        new RiverData(addDays(date, 4), attributes['js'], commitOrder[1], 'a4', BuildStat.Success, 1, 1004, 120),
+        new RiverData(addDays(date, 5), attributes['js'], commitOrder[1], 'a5', BuildStat.Success, 1, 200, 12),
+        new RiverData(addDays(date, 5), attributes['ts'], commitOrder[0], 'a5', BuildStat.Success, 1, 1000, 2),
+        new RiverData(addDays(date, 6), attributes['js'], commitOrder[2], 'c6', BuildStat.Success, 1, 2002, 2),
+        new RiverData(addDays(date, 3), attributes['js'], commitOrder[2], 'c7', BuildStat.Success, 1, 1000, 2),
+        new RiverData(addDays(date, 4), attributes['js'], commitOrder[2], 'c8', BuildStat.Success, 1, 2002, 2100),
+        new RiverData(addDays(date, 5), attributes['js'], commitOrder[2], 'c9', BuildStat.Failed, 1, 1002, 20),
         // new stream,
-        new RiverData(addDays(date, 0), 'js', commitOrder[3], 'd0', BuildStat.Success, 1, 3000, 0),
-        new RiverData(addDays(date, 1), 'js', commitOrder[3], 'd1', BuildStat.Failed, 1, 0, 3000),
-        new RiverData(addDays(date, 2), 'js', commitOrder[3], 'd2', BuildStat.Skipped, 1, 1500, 1500),
-        new RiverData(addDays(date, 3), 'js', commitOrder[3], 'd3', BuildStat.Success, 1, 3000, 3000),
-        new RiverData(addDays(date, 4), 'js', commitOrder[3], 'd4', BuildStat.Success, 1, 3000, 3000),
-        new RiverData(addDays(date, 5), 'js', commitOrder[3], 'd5', BuildStat.Failed, 1, 500, 500),
-        new RiverData(addDays(date, 6), 'js', commitOrder[3], 'd6', BuildStat.Skipped, 1, 600, 400),
-        new RiverData(addDays(date, 7), 'js', commitOrder[3], 'd7', BuildStat.Failed, 1, 400, 900),
-        new RiverData(addDays(date, 8), 'js', commitOrder[3], 'd8', BuildStat.Success, 1, 200, 300)
+        new RiverData(addDays(date, 0), attributes['js'], commitOrder[3], 'd0', BuildStat.Success, 1, 3000, 0),
+        new RiverData(addDays(date, 1), attributes['js'], commitOrder[3], 'd1', BuildStat.Failed, 1, 0, 3000),
+        new RiverData(addDays(date, 2), attributes['js'], commitOrder[3], 'd2', BuildStat.Skipped, 1, 1500, 1500),
+        new RiverData(addDays(date, 3), attributes['js'], commitOrder[3], 'd3', BuildStat.Success, 1, 3000, 3000),
+        new RiverData(addDays(date, 4), attributes['js'], commitOrder[3], 'd4', BuildStat.Success, 1, 3000, 3000),
+        new RiverData(addDays(date, 5), attributes['js'], commitOrder[3], 'd5', BuildStat.Failed, 1, 500, 500),
+        new RiverData(addDays(date, 6), attributes['js'], commitOrder[3], 'd6', BuildStat.Skipped, 1, 600, 400),
+        new RiverData(addDays(date, 7), attributes['js'], commitOrder[3], 'd7', BuildStat.Failed, 1, 400, 900),
+        new RiverData(addDays(date, 8), attributes['js'], commitOrder[3], 'd8', BuildStat.Success, 1, 200, 300)
       ];
     }
+
+    const issueStreams = [
+      new IssueStream('#10', 'https://github.com/INSO-TUWien/Binocular/issues/10')
+        .setStart(date)
+        .pushCommits(
+          Array.from(Array(5).keys()).reduce((data, key) => {
+            data.push(`a${key + 1}`);
+            data.push(`d${key + 1}`);
+            return data;
+          }, [])
+        )
+        .setEnd(addDays(date, 5)),
+      new IssueStream('#10', 'https://github.com/INSO-TUWien/Binocular/issues/10')
+        .setStart(addDays(date, 5))
+        .pushCommits(Array.from(Array(3).keys()).map(key => `d${key + 6}`))
+    ];
 
     /*
     const palette = chroma.scale('spectral').mode('lch').colors(mockData.length).reduce((map, color, index) => {
@@ -106,10 +133,10 @@ export default class LanguageModuleRiver extends React.Component {
 
     const selectedAuthors = (this.state.selectedAuthors || []).map(author => author.replace(/\((.*)\)\s+/gi, '')).reduce((data, author) => {
       data.push(
-        new StreamKey({ name: author, attribute: 'js' }),
+        new StreamKey({ name: author, attribute: attributes['js'] }),
         new StreamKey({
           name: author,
-          attribute: 'ts'
+          attribute: attributes['ts']
         })
       );
       return data;
@@ -122,16 +149,14 @@ export default class LanguageModuleRiver extends React.Component {
           <DataRiverChartComponent
             content={mockData}
             palette={commitPalette}
-            paddings={{ top: 40, left: 60, bottom: 40, right: 60 }}
+            paddings={{ top: 40, left: 60, bottom: 40, right: 50 }}
             xAxisCenter={true}
-            //yDims={this.state.commitScale}
             keys={this.state.selectedAuthors ? selectedAuthors : undefined}
             resolution={this.props.chartResolution}
             displayNegative={true}
             order={commitOrder}
-            hideVertical={false}
-            disableVerticalZoom={false}
             attribute={'Language'}
+            issueStreams={issueStreams}
           />
         </div>
       </div>

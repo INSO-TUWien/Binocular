@@ -214,7 +214,7 @@ export default class ScalableBaseChartComponent extends React.Component {
     const { width, height, paddings } = this.getDimsAndPaddings(svg); //Get width and height of svg in browser
 
     //Get and set all required scales, which translate data values into pixel values
-    const scales = this.createScales(this.getXDims(data), [paddings.left, width - paddings.right], this.getYDims(data), [
+    const scales = this.createScales(this.getXDims(), [paddings.left, width - paddings.right], this.getYDims(), [
       height - paddings.bottom,
       paddings.top
     ]);

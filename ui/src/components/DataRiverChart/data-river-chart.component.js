@@ -138,7 +138,7 @@ export class DataRiverChartComponent extends ScalableBaseChartComponent {
     return Object.assign({}, scales, {
       scale,
       issue: d3.scaleOrdinal().domain(['Close', 'Open']).range(yRange),
-      y: d3.scaleLinear().domain([-1.0, 1.0]).range([scale.height(25), scale.height(75)]),
+      y: d3.scaleLinear().domain([-1.0, 1.0]).range([scale.height(20), scale.height(80)]),
       diff: d3.scaleLinear().domain(scales.y.domain()).range([scale.height(70) - scale.height(100), 0])
     });
   }
@@ -214,14 +214,6 @@ export class DataRiverChartComponent extends ScalableBaseChartComponent {
       stackedData.sort((streamA, streamB) => order.indexOf(streamA.key.name) - order.indexOf(streamB.key.name));
     }
 
-    //TODO: remove mocked
-    const attributes = Array.from(new Set(data.map(record => record.attribute)));
-    const colors = chroma
-      .scale(['#88fa6e', '#10a3f0'])
-      .mode('lch')
-      .colors(attributes.length)
-      .map(color => chroma(color).alpha(0.9).hex('rgba'));
-
     // add color set to stream
     stackedData.forEach(stack => {
       const nameColorKey = Object.keys(this.props.palette).find(
@@ -230,13 +222,14 @@ export class DataRiverChartComponent extends ScalableBaseChartComponent {
           colorKey.toLowerCase().includes(stack.key.direction.toLowerCase())
       );
       const color = {
-        attribute: chroma(colors[attributes.indexOf(stack.key.attribute)]).alpha(0.9).hex('rgba'),
-        name: chroma(this.props.palette[nameColorKey]).alpha(0.9).hex('rgba')
+        attribute: chroma(this.props.palette[stack.key.attribute]).alpha(0.85).hex('rgba'),
+        name: chroma(this.props.palette[nameColorKey]).alpha(0.85).hex('rgba')
       };
       stack.forEach(node => (node.color = color));
       stack.color = color;
     });
 
+    // set yDims associated with the presented data
     this.setState(prev =>
       Object.assign({}, prev, {
         yDims: [-d3.max(this.state.data.data, d => d.deletions) || 1, d3.max(this.state.data.data, d => d.additions) || 1]
@@ -316,7 +309,6 @@ export class DataRiverChartComponent extends ScalableBaseChartComponent {
 
       const prevIndex = container.indexOf(record.date.getTime()) - 1;
       const previous = prevIndex >= 0 ? container.values[prevIndex].value : undefined;
-      const leaf = container.getValue(record.date.getTime());
 
       // set ci success rate
       record.buildSuccessRate =
@@ -331,7 +323,8 @@ export class DataRiverChartComponent extends ScalableBaseChartComponent {
 
       record.trend = Math.sign(record.buildSuccessRate - previous.buildSuccessRate);
 
-      leaf.value = record;
+      // add record to container
+      container.getValue(record.date.getTime()).value = record;
 
       // set build rate for all future items until a new existing datapoint
       dateTicks.forEach(date => {
@@ -410,22 +403,18 @@ export class DataRiverChartComponent extends ScalableBaseChartComponent {
     const nearestDateIndex = bisectDate(realDataStream.map(record => record.data), mouseoverDate);
     const candidate1 = realDataStream[nearestDateIndex] || realDataStream[realDataStream.length - 1];
     const candidate2 = realDataStream[nearestDateIndex - 1] || realDataStream[0];
-    let nearestDataPoint;
 
     if (!candidate1 || !candidate2) {
       return;
     }
-
-    if (Math.abs(mouseoverDate - candidate1.data.date) < Math.abs(mouseoverDate - candidate2.data.date)) {
-      nearestDataPoint = candidate1;
-    } else {
-      nearestDataPoint = candidate2;
-    }
+    const nearestDataPoint =
+      Math.abs(mouseoverDate - candidate1.data.date) < Math.abs(mouseoverDate - candidate2.data.date) ? candidate1 : candidate2;
 
     tooltip.attr('data', nearestDataPoint.data);
     tooltip.attr('additional', nearestDataPoint.key.direction);
     tooltip.attr('color', `${stream.color.name}`);
     tooltip.attr('attrColor', stream.color.attribute);
+
     const dataPoint = this.getPoint(scales, nearestDataPoint);
     this.paintDataPoint(brushArea, scales.x(nearestDataPoint.data.date), dataPoint.y0, dataPoint.y1, stream.color.name);
   }
@@ -463,9 +452,7 @@ export class DataRiverChartComponent extends ScalableBaseChartComponent {
     tooltip.attr('data', null);
     brushArea.select('.' + this.styles.indicatorLine).remove();
     brushArea.selectAll('.' + this.styles.indicatorCircle).remove();
-    brushArea.selectAll('.layer').attr('opacity', 0.9).sort((streamA, streamB) => {
-      return streamA.index - streamB.index;
-    });
+    brushArea.selectAll('.layer').attr('opacity', 0.9).sort((streamA, streamB) => streamA.index - streamB.index);
   }
 
   // eslint-disable-next-line no-unused-vars
