@@ -430,24 +430,29 @@ export default class ScalableBaseChartComponent extends React.Component {
         //Calculate values and text for tooltip
         const node = svg.node();
         const pointer = d3.pointer(event, node);
-        const mouseoverDate = scales.x.invert(pointer[0]);
+        const mouseoverDate = pointer ? scales.x.invert(pointer[0]) : undefined;
 
         brushArea.select('.' + _this.styles.indicatorLine).remove();
         brushArea.selectAll('.' + _this.styles.indicatorCircle).remove();
 
+        if (!mouseoverDate) {
+          return;
+        }
+
         _this.createdTooltipNode(this, bisectDate, mouseoverDate, tooltip, event, node, brushArea, scales, stream);
       });
 
-    this.additionalPathDefs(brushArea, pathStreams);
+    this.additionalPathDefs(brushArea, pathStreams, scales);
   }
 
   /**
    *
    * @param brushArea
    * @param pathStreams
+   * @param scales
    */
   // eslint-disable-next-line no-unused-vars
-  additionalPathDefs(brushArea, pathStreams) {}
+  additionalPathDefs(brushArea, pathStreams, scales) {}
 
   /**
    *

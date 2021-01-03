@@ -70,10 +70,13 @@ export default class LanguageModuleRiver extends React.Component {
       {},
       this.state.commitPalette || {},
       chroma.scale(['#88fa6e', '#10a3f0']).mode('lch').colors(attributes.length).reduce((collection, color, index) => {
-        collection[attributes[Object.keys(attributes)[index]]] = chroma(color).alpha(0.9).hex('rgba');
+        collection[attributes[Object.keys(attributes)[index]]] = chroma(color).hex('rgba');
         return collection;
       }, {})
     );
+
+    commitPalette['Open'] = chroma('blue').hex();
+    commitPalette['Close'] = chroma('green').hex();
 
     const addDays = (date, days) => {
       const result = new Date(date);
@@ -124,12 +127,6 @@ export default class LanguageModuleRiver extends React.Component {
         .setStart(addDays(date, 5))
         .pushCommits(Array.from(Array(3).keys()).map(key => `d${key + 6}`))
     ];
-
-    /*
-    const palette = chroma.scale('spectral').mode('lch').colors(mockData.length).reduce((map, color, index) => {
-      map[mockData[index].sha] = color;
-      return map;
-    }, {});*/
 
     const selectedAuthors = (this.state.selectedAuthors || []).map(author => author.replace(/\((.*)\)\s+/gi, '')).reduce((data, author) => {
       data.push(

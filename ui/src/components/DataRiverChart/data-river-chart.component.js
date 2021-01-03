@@ -11,6 +11,7 @@ import { InvalidArgumentException } from '../../utils/exception/InvalidArgumentE
 import RiverTooltip from './river-tooltip';
 import { formatPercentage } from '../../utils/format';
 import StreamKey from './StreamKey';
+import { hash } from '../../utils/crypto-utils';
 
 export class DataRiverChartComponent extends ScalableBaseChartComponent {
   constructor(props) {
@@ -124,7 +125,7 @@ export class DataRiverChartComponent extends ScalableBaseChartComponent {
    * @param xRange
    * @param yDims
    * @param yRange
-   * @returns {{issue: *, x: *, y: *}}
+   * @returns {{x: *, y: *} & {issue: *, pattern: *, scale: {width: *, height: *}, y: *, diff: *}}
    */
   createScales(xDims, xRange, yDims, yRange) {
     //Y axis scaled with the maximum amount of change (half in each direction)
@@ -132,14 +133,22 @@ export class DataRiverChartComponent extends ScalableBaseChartComponent {
 
     const scale = {
       height: d3.scaleLinear().domain([0.0, 100.0]).range(yRange),
-      width: d3.scaleLinear().domain([0.0, 100.0]).range(xRange)
+      width: d3.scaleLinear().domain([100.0, 0.0]).range(xRange)
     };
 
     return Object.assign({}, scales, {
       scale,
       issue: d3.scaleOrdinal().domain(['Close', 'Open']).range(yRange),
       y: d3.scaleLinear().domain([-1.0, 1.0]).range([scale.height(20), scale.height(80)]),
-      diff: d3.scaleLinear().domain(scales.y.domain()).range([scale.height(70) - scale.height(100), 0])
+      diff: d3.scaleLinear().domain(scales.y.domain()).range([scale.height(70) - scale.height(100), 0]),
+      // define design pattern values
+      pattern: d3
+        .scaleLinear()
+        .domain([0, d3.max(scales.y.domain())])
+        .range([
+          Math.max(Math.min(scale.height(0) - scale.height(1), scale.width(0) - scale.width(1)), 1),
+          Math.max(Math.min(scale.height(0) - scale.height(2), scale.width(0) - scale.width(2)), 5)
+        ])
     });
   }
 
@@ -181,24 +190,54 @@ export class DataRiverChartComponent extends ScalableBaseChartComponent {
   }
 
   /**
+   *
+   * @returns {{hasChanges: (boolean), hashes: {keysHash: string} & {issueHash: string}}}
+   */
+  hasUpdate() {
+    const update = super.hasUpdate();
+    const issueHash = hash(this.props.issueStreams || []);
+
+    return {
+      hashes: Object.assign(update.hashes, { issueHash }),
+      hasChanges: update.hasChanges || this.state.data.issueHash !== issueHash
+    };
+  }
+
+  /**
    * Calculate data for the chart.
    * @param data Chart data in the format [{date: timestamp(ms), series1: value, series2: value, series3: value, series4: value, ...}, ...]
    * @param order
    * @returns Stacked chart data for d3 functions and preprocessed data { stackedData, data }
    */
   calculateChartData(data, order) {
-    //Keys are the names of the developers, date is excluded
-    //const keys = this.props.keys && this.props.keys.length > 0 ? this.props.keys : Object.keys(data[0]).slice(1);
-    let stackedData = [];
-
     if (!data.length) {
-      return { stackedData, data };
+      return { stackedData: [], data };
     }
 
     if (data.find(record => !(record instanceof RiverData))) {
       throw new InvalidArgumentException('The provided data are not of the type RiverData!');
     }
 
+    const streamingData = this.processStreamData(data, order);
+
+    // set yDims associated with the presented data
+    this.setState(prev =>
+      Object.assign({}, prev, {
+        yDims: [-d3.max(this.state.data.data, d => d.deletions) || 1, d3.max(this.state.data.data, d => d.additions) || 1]
+      })
+    );
+
+    return streamingData;
+  }
+
+  /**
+   *
+   * @param data
+   * @param stackedData
+   * @param order
+   * @returns {{data: *, stackedData: *[]}}
+   */
+  processStreamData(data, stackedData, order) {
     data = data
       .filter(record => record && record instanceof RiverData)
       .map(record => new RiverData(record))
@@ -215,6 +254,16 @@ export class DataRiverChartComponent extends ScalableBaseChartComponent {
     }
 
     // add color set to stream
+    this.setStreamColors(stackedData);
+
+    return { data, stackedData };
+  }
+
+  /**
+   *
+   * @param stackedData
+   */
+  setStreamColors(stackedData) {
     stackedData.forEach(stack => {
       const nameColorKey = Object.keys(this.props.palette).find(
         colorKey =>
@@ -228,15 +277,6 @@ export class DataRiverChartComponent extends ScalableBaseChartComponent {
       stack.forEach(node => (node.color = color));
       stack.color = color;
     });
-
-    // set yDims associated with the presented data
-    this.setState(prev =>
-      Object.assign({}, prev, {
-        yDims: [-d3.max(this.state.data.data, d => d.deletions) || 1, d3.max(this.state.data.data, d => d.additions) || 1]
-      })
-    );
-
-    return { stackedData, data };
   }
 
   /**
@@ -299,6 +339,17 @@ export class DataRiverChartComponent extends ScalableBaseChartComponent {
       new Date(data[data.length - 1].date.getTime() + dateDiff)
     ];
 
+    return this.createOrganizeDataStreams(data, dateTicks, maxDiff);
+  }
+
+  /**
+   *
+   * @param data
+   * @param dateTicks
+   * @param maxDiff
+   * @returns RiverDataContainer
+   */
+  createOrganizeDataStreams(data, dateTicks, maxDiff) {
     return data.reduce((current, record) => {
       const container = current.getValue(record.name).getValue(record.attribute);
 
@@ -310,7 +361,7 @@ export class DataRiverChartComponent extends ScalableBaseChartComponent {
       const prevIndex = container.indexOf(record.date.getTime()) - 1;
       const previous = prevIndex >= 0 ? container.values[prevIndex].value : undefined;
 
-      // set ci success rate
+      // calculate ci success rate
       record.buildSuccessRate =
         (previous ? previous.buildSuccessRate : 0.0) +
         (record.buildStat === BuildStat.Success
@@ -356,6 +407,14 @@ export class DataRiverChartComponent extends ScalableBaseChartComponent {
 
     dataStream.index = index;
     dataStream.key = dataStream[0].key;
+
+    const size = Math.max(d3.max(dataStream, d => d.data.additions), d3.max(dataStream, d => d.data.deletions), 1);
+    dataStream.pattern = {
+      size: size,
+      position: scale => scale(size) / 2,
+      radius: scale => scale(size) / 2 + 0.5,
+      offset: scale => scale(size) * 0.75
+    };
     return dataStream;
   }
 
@@ -363,25 +422,31 @@ export class DataRiverChartComponent extends ScalableBaseChartComponent {
    *
    * @param brushArea
    * @param pathStreams
+   * @param scales
    */
-  additionalPathDefs(brushArea, pathStreams) {
+  additionalPathDefs(brushArea, pathStreams, scales) {
     const gradients = brushArea
       .append('defs')
       .selectAll('pattern')
       .data(this.state.data.stackedData)
       .enter()
       .append('pattern')
-      .attr('width', 20)
-      .attr('height', 20)
-      .attr('id', d => `color-${d.key.toId()}`)
+      .attr('width', stream => scales.pattern(stream.pattern.size))
+      .attr('height', stream => scales.pattern(stream.pattern.size))
+      .attr('id', stream => `color-${stream.key.toId()}`)
       .attr('patternUnits', 'userSpaceOnUse')
-      .attr('x', (d, i) => `${i * 15}`)
-      .attr('y', (d, i) => `${i * 25}`)
+      .attr('x', (stream, i) => stream.pattern.offset(scales.pattern))
+      .attr('y', (stream, i) => stream.pattern.offset(scales.pattern))
       .attr('patternTransform', (d, i) => `rotate(${(i * 360 / this.state.data.stackedData.length + 1 * i) % 360} 50 50)`);
 
     gradients.append('rect').attr('fill', d => d.color.attribute).attr('width', '100%').attr('height', '100%');
 
-    gradients.append('circle').attr('fill', d => d.color.name).attr('cx', 10).attr('cy', 10).attr('r', 10.5);
+    gradients
+      .append('circle')
+      .attr('fill', d => d.color.name)
+      .attr('cx', stream => stream.pattern.position(scales.pattern))
+      .attr('cy', stream => stream.pattern.position(scales.pattern))
+      .attr('r', stream => stream.pattern.radius(scales.pattern));
 
     pathStreams.attr('opacity', 0.9);
   }
