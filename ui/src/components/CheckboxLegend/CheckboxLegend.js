@@ -30,8 +30,16 @@ export default class CheckboxLegend extends React.Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    if (nextProps.palette && this.state.initialized === false) {
-      const selected = Object.keys(nextProps.palette);
+    this.selectData(nextProps);
+  }
+
+  componentDidMount() {
+    this.selectData(this.props);
+  }
+
+  selectData(props) {
+    if (props.palette && this.state.initialized === false) {
+      const selected = Object.keys(props.palette);
       this.setState({ initialized: true, selected: selected }, () => this.props.onClick(selected));
     }
   }
@@ -71,7 +79,7 @@ export default class CheckboxLegend extends React.Component {
 
   render() {
     const items = [];
-    if (this.state.initialized) {
+    if (this.state.initialized || (this.state.selected && this.state.selected.length)) {
       const otherCommitters = this.props.otherCommitters;
       _.each(Object.keys(this.props.palette), key => {
         let text = key;

@@ -456,13 +456,7 @@ export class DataRiverChartComponent extends ScalableBaseChartComponent {
         []
       );
 
-      stream.forEach(ticketPoint => {
-        ticketPoint.values = issueStream.filter(dataPoint => dataPoint.data.sha === ticketPoint.sha);
-      });
-      console.log(stream);
-
-      // issueStream.stream = issueStreams.push();
-      // return issueStreams;
+      stream.forEach(ticketPoint => (ticketPoint.values = issueStream.filter(dataPoint => dataPoint.data.sha === ticketPoint.sha)));
     });
 
     return issueStreams;

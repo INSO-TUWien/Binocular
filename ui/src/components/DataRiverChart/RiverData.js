@@ -111,7 +111,9 @@ export const BuildStat = Object.freeze(
     }, {});
 
     data.valueOf = value => {
-      const foundKey = Object.keys(data).find(item => data[item] === value || data[item].name === value || data[item].value === value);
+      const foundKey = Object.keys(data).find(
+        key => value && (data[key] === value || data[key].name.toUpperCase() === `${value}`.toUpperCase() || data[key].value === value)
+      );
       return foundKey ? data[foundKey] : data.None;
     };
 
