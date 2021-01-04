@@ -22,32 +22,35 @@ const mapStateToProps = (state /*, ownProps*/) => {
   };
 };
 
-const mapDispatchToProps = (dispatch /*, ownProps*/) => {
-  return {
-    onSwitchTab: tab => {
-      dispatch(switchConfigTab(tab));
-    },
-    onSubmit: values => {
-      const config = {
-        gitlab: {
-          url: values.gitlabUrl,
-          token: values.gitlabToken
-        },
-        arango: {
-          host: values.arangoHost,
-          port: values.arangoPort,
-          user: values.arangoUser,
-          password: values.arangoPassword
-        }
-      };
+const mapDispatchToProps = (dispatch, ownProps) => {
+  return Object.assign(
+    {
+      onSwitchTab: tab => {
+        dispatch(switchConfigTab(tab));
+      },
+      onSubmit: values => {
+        const config = {
+          gitlab: {
+            url: values.gitlabUrl,
+            token: values.gitlabToken
+          },
+          arango: {
+            host: values.arangoHost,
+            port: values.arangoPort,
+            user: values.arangoUser,
+            password: values.arangoPassword
+          }
+        };
 
-      return dispatch(confirmConfig(config));
+        return dispatch(confirmConfig(config));
+      },
+      onCancel: e => {
+        dispatch(hideConfig());
+        e.preventDefault();
+      }
     },
-    onCancel: e => {
-      dispatch(hideConfig());
-      e.preventDefault();
-    }
-  };
+    ownProps
+  );
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(ConfigDialog);

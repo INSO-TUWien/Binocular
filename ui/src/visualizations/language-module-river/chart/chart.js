@@ -139,11 +139,16 @@ export default class LanguageModuleRiver extends React.Component {
       return data;
     }, []);
 
+    const attribute = 'Language';
+
     const commitChart = (
       <div className={styles.chartLine}>
-        <div className={cx(styles.text, 'label')}>Attribute River</div>
+        <div className={cx(styles.text, 'label')}>
+          {attribute} River
+        </div>
         <div className={styles.chart}>
           <DataRiverChartComponent
+            sidebarOpen={this.props.sidebarOpen}
             content={mockData}
             palette={commitPalette}
             paddings={{ top: 40, left: 60, bottom: 40, right: 50 }}
@@ -152,7 +157,7 @@ export default class LanguageModuleRiver extends React.Component {
             resolution={this.props.chartResolution}
             displayNegative={true}
             order={commitOrder}
-            attribute={'Language'}
+            attribute={attribute}
             issueStreams={issueStreams}
           />
         </div>

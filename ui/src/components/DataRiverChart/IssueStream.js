@@ -2,7 +2,7 @@
 
 export default class IssueStream {
   constructor() {
-    if (arguments.length === 1 && typeof arguments[0] === 'object') {
+    if (arguments.length === 1 && arguments[0] instanceof IssueStream) {
       this.copyCtor(arguments[0]);
     } else if (arguments.length >= 1) {
       this.init.apply(this, arguments);
@@ -21,6 +21,7 @@ export default class IssueStream {
 
   copyCtor(data) {
     this.data = Object.freeze(Object.assign({}, data.data));
+    this.__values = data.values;
   }
 
   prependCommit(sha) {
@@ -52,6 +53,18 @@ export default class IssueStream {
     return this.__values.slice(0);
   }
 
+  forEach(fn) {
+    this.__values.forEach(fn);
+  }
+
+  find(fn) {
+    return this.__values.find(fn);
+  }
+
+  map(fn) {
+    return this.__values.map(fn);
+  }
+
   get start() {
     return Object.assign({}, this.__start);
   }
@@ -63,7 +76,8 @@ export default class IssueStream {
     return {
       sha,
       status,
-      date
+      date,
+      values: []
     };
   }
 }
@@ -73,7 +87,7 @@ export default class IssueStream {
  *
  * @type {Readonly<{}>}
  */
-const IssueStat = Object.freeze(
+export const IssueStat = Object.freeze(
   (() => {
     const plainEnum = {
       None: 0,

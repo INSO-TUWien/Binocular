@@ -12,6 +12,7 @@ import RiverTooltip from './river-tooltip';
 import { formatPercentage } from '../../utils/format';
 import StreamKey from './StreamKey';
 import { hash } from '../../utils/crypto-utils';
+import IssueStream, { IssueStat } from './IssueStream';
 
 export class DataRiverChartComponent extends ScalableBaseChartComponent {
   constructor(props) {
@@ -138,7 +139,7 @@ export class DataRiverChartComponent extends ScalableBaseChartComponent {
 
     return Object.assign({}, scales, {
       scale,
-      issue: d3.scaleOrdinal().domain(['Close', 'Open']).range(yRange),
+      issue: d3.scaleOrdinal().domain([IssueStat.Close.name, IssueStat.Open.name]).range(yRange),
       y: d3.scaleLinear().domain([-1.0, 1.0]).range([scale.height(20), scale.height(80)]),
       diff: d3.scaleLinear().domain(scales.y.domain()).range([scale.height(70) - scale.height(100), 0]),
       // define design pattern values
@@ -223,7 +224,7 @@ export class DataRiverChartComponent extends ScalableBaseChartComponent {
     // set yDims associated with the presented data
     this.setState(prev =>
       Object.assign({}, prev, {
-        yDims: [-d3.max(this.state.data.data, d => d.deletions) || 1, d3.max(this.state.data.data, d => d.additions) || 1]
+        yDims: [-d3.max(data, d => d.deletions) || 1, d3.max(data, d => d.additions) || 1]
       })
     );
 
@@ -256,14 +257,17 @@ export class DataRiverChartComponent extends ScalableBaseChartComponent {
     // add color set to stream
     this.setStreamColors(stackedData);
 
-    return { data, stackedData };
+    const issueStreams = this.processIssueStreams(data, stackedData);
+
+    return { data, stackedData, issueStreams };
   }
 
   /**
    *
    * @param stackedData
+   * @param skipChildren
    */
-  setStreamColors(stackedData) {
+  setStreamColors(stackedData, skipChildren) {
     stackedData.forEach(stack => {
       const nameColorKey = Object.keys(this.props.palette).find(
         colorKey =>
@@ -274,45 +278,40 @@ export class DataRiverChartComponent extends ScalableBaseChartComponent {
         attribute: chroma(this.props.palette[stack.key.attribute]).alpha(0.85).hex('rgba'),
         name: chroma(this.props.palette[nameColorKey]).alpha(0.85).hex('rgba')
       };
-      stack.forEach(node => (node.color = color));
+      if (!skipChildren) {
+        stack.forEach(node => (node.color = color));
+      }
       stack.color = color;
     });
   }
 
   /**
    *
-   * @param streamData
+   * @param dataStreams
    * @param keys
    * @returns {[]}
    */
-  createStackedData(streamData, keys) {
-    const streamStack = streamData
+  createStackedData(dataStreams, keys) {
+    return dataStreams
       .filter(
         stream => !keys || (keys.length && !!keys.find(key => key && key.name === stream[0].name && key.attribute === stream[0].attribute))
       )
-      .reduce((stack, stream, index) => {
-        const additionStream = this.createStack(stream, index * 2, record => [0, record.additions + (record.sha === null ? 0.001 : 0)]);
-        const deletionStream = this.createStack(stream, index * 2 + 1, record => [
-          -record.deletions - (record.sha === null ? 0.001 : 0),
-          0
-        ]);
+      .reduce((stack, dataStream, index) => {
+        const stream = {
+          additions: this.createStack(dataStream, index * 2, record => [0, record.additions + (record.sha === null ? 0.001 : 0)]),
+          deletions: this.createStack(dataStream, index * 2 + 1, record => [-record.deletions - (record.sha === null ? 0.001 : 0), 0])
+        };
 
-        if (additionStream && additionStream.length) {
-          additionStream.key.direction = 'addition';
-          additionStream.key[0] = additionStream.index;
-          additionStream.forEach(addition => (addition.key.direction = additionStream.key.direction));
-          stack.push(additionStream);
-        }
-
-        if (deletionStream && deletionStream.length) {
-          deletionStream.key.direction = 'deletions';
-          deletionStream.key[0] = deletionStream.index;
-          stack.push(deletionStream);
-        }
+        Object.keys(stream).forEach(key => {
+          if (stream[key] && stream[key].length) {
+            stream[key].key.direction = key;
+            stream[key].key[0] = stream[key].index;
+            stream[key].forEach(dataPoint => (dataPoint.key.direction = key));
+            stack.push(stream[key]);
+          }
+        });
         return stack;
       }, []);
-    streamStack.forEach(stream => stream.forEach(record => (record.key.direction = stream.key.direction)));
-    return streamStack;
   }
 
   /**
@@ -358,21 +357,7 @@ export class DataRiverChartComponent extends ScalableBaseChartComponent {
         dateTicks.forEach(date => (container.getValue(date.getTime()).value = new RiverData(date, record.attribute, record.name)));
       }
 
-      const prevIndex = container.indexOf(record.date.getTime()) - 1;
-      const previous = prevIndex >= 0 ? container.values[prevIndex].value : undefined;
-
-      // calculate ci success rate
-      record.buildSuccessRate =
-        (previous ? previous.buildSuccessRate : 0.0) +
-        (record.buildStat === BuildStat.Success
-          ? record.buildWeight * record.totalDiff / maxDiff
-          : record.buildStat === BuildStat.Failed ? -record.buildWeight * record.totalDiff / maxDiff : 0.0);
-
-      // define range of success rate
-      record.buildSuccessRate =
-        record.buildSuccessRate >= 0.0 ? Math.min(record.buildSuccessRate, 1.0) : Math.max(record.buildSuccessRate, -1.0);
-
-      record.trend = Math.sign(record.buildSuccessRate - previous.buildSuccessRate);
+      this.calculateBuildRates(container, record, maxDiff);
 
       // add record to container
       container.getValue(record.date.getTime()).value = record;
@@ -383,6 +368,30 @@ export class DataRiverChartComponent extends ScalableBaseChartComponent {
       });
       return current;
     }, new RiverDataContainer(''));
+  }
+
+  /**
+   *
+   * @param container
+   * @param record
+   * @param maxDiff
+   */
+  calculateBuildRates(container, record, maxDiff) {
+    const prevIndex = container.indexOf(record.date.getTime()) - 1;
+    const previous = prevIndex >= 0 ? container.values[prevIndex].value : undefined;
+
+    // calculate ci success rate
+    record.buildSuccessRate =
+      (previous ? previous.buildSuccessRate : 0.0) +
+      (record.buildStat === BuildStat.Success
+        ? record.buildWeight * record.totalDiff / maxDiff
+        : record.buildStat === BuildStat.Failed ? -record.buildWeight * record.totalDiff / maxDiff : 0.0);
+
+    // define range of success rate
+    record.buildSuccessRate =
+      record.buildSuccessRate >= 0.0 ? Math.min(record.buildSuccessRate, 1.0) : Math.max(record.buildSuccessRate, -1.0);
+
+    record.trend = Math.sign(record.buildSuccessRate - previous.buildSuccessRate);
   }
 
   /**
@@ -408,14 +417,55 @@ export class DataRiverChartComponent extends ScalableBaseChartComponent {
     dataStream.index = index;
     dataStream.key = dataStream[0].key;
 
-    const size = Math.max(d3.max(dataStream, d => d.data.additions), d3.max(dataStream, d => d.data.deletions), 1);
+    const size = stream => Math.max(d3.max(stream, d => d.data.additions), d3.max(stream, d => d.data.deletions), 1);
     dataStream.pattern = {
-      size: size,
-      position: scale => scale(size) / 2,
-      radius: scale => scale(size) / 2 + 0.5,
-      offset: scale => scale(size) * 0.75
+      size,
+      position: (scale, stream) => scale(size(stream)) / 2,
+      radius: (scale, stream) => scale(size(stream)) / 2 + 0.5,
+      offset: (scale, stream) => scale(size(stream)) * 0.75
     };
     return dataStream;
+  }
+
+  /**
+   *
+   * @param data
+   * @param stackedData
+   */
+  processIssueStreams(data, stackedData) {
+    //console.log(data, stackedData, this.props.issueStreams);
+    if (!this.props.issueStreams || !this.props.issueStreams.length) {
+      return undefined;
+    }
+
+    const issueStreams = this.props.issueStreams.map(stream => new IssueStream(stream));
+
+    issueStreams.forEach(stream => {
+      const issueStream = stackedData.reduce(
+        (stack, data) => [
+          ...stack,
+          ...data.filter(
+            record =>
+              record &&
+              record.data &&
+              record.data.sha &&
+              record.data.sha.length > 0 &&
+              !!stream.find(issue => record.data.sha === issue.sha)
+          )
+        ],
+        []
+      );
+
+      stream.forEach(ticketPoint => {
+        ticketPoint.values = issueStream.filter(dataPoint => dataPoint.data.sha === ticketPoint.sha);
+      });
+      console.log(stream);
+
+      // issueStream.stream = issueStreams.push();
+      // return issueStreams;
+    });
+
+    return issueStreams;
   }
 
   /**
@@ -431,12 +481,12 @@ export class DataRiverChartComponent extends ScalableBaseChartComponent {
       .data(this.state.data.stackedData)
       .enter()
       .append('pattern')
-      .attr('width', stream => scales.pattern(stream.pattern.size))
-      .attr('height', stream => scales.pattern(stream.pattern.size))
+      .attr('width', stream => scales.pattern(stream.pattern.size(stream)))
+      .attr('height', stream => scales.pattern(stream.pattern.size(stream)))
       .attr('id', stream => `color-${stream.key.toId()}`)
       .attr('patternUnits', 'userSpaceOnUse')
-      .attr('x', (stream, i) => stream.pattern.offset(scales.pattern))
-      .attr('y', (stream, i) => stream.pattern.offset(scales.pattern))
+      .attr('x', stream => stream.pattern.offset(scales.pattern, stream))
+      .attr('y', stream => stream.pattern.offset(scales.pattern, stream))
       .attr('patternTransform', (d, i) => `rotate(${(i * 360 / this.state.data.stackedData.length + 1 * i) % 360} 50 50)`);
 
     gradients.append('rect').attr('fill', d => d.color.attribute).attr('width', '100%').attr('height', '100%');
@@ -444,9 +494,9 @@ export class DataRiverChartComponent extends ScalableBaseChartComponent {
     gradients
       .append('circle')
       .attr('fill', d => d.color.name)
-      .attr('cx', stream => stream.pattern.position(scales.pattern))
-      .attr('cy', stream => stream.pattern.position(scales.pattern))
-      .attr('r', stream => stream.pattern.radius(scales.pattern));
+      .attr('cx', stream => stream.pattern.position(scales.pattern, stream))
+      .attr('cy', stream => stream.pattern.position(scales.pattern, stream))
+      .attr('r', stream => stream.pattern.radius(scales.pattern, stream));
 
     pathStreams.attr('opacity', 0.9);
   }
