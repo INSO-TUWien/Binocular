@@ -40,19 +40,19 @@ export default class IssueStream {
     return this;
   }
 
-  pushCommits(shas) {
-    shas.forEach(sha => this.__values.push(new IssueData(sha, IssueStat.InProcess)));
+  pushCommits(commits) {
+    commits.forEach(commit => this.__values.push(new IssueData(commit.sha, IssueStat.InProcess, commit.webUrl)));
     return this;
   }
 
   setStart(date) {
-    this.__start = new IssueData(null, IssueStat.Open, date);
+    this.__start = new IssueData(null, IssueStat.Open, this.webUrl, date);
     delete this.__start.__values;
     return this;
   }
 
   setEnd(date) {
-    this.__end = new IssueData(null, IssueStat.Close, date);
+    this.__end = new IssueData(null, IssueStat.Close, this.webUrl, date);
     delete this.__end.__values;
     return this;
   }
@@ -105,10 +105,11 @@ export class IssueData {
     }
   }
 
-  init(sha, status = IssueStat.None, date = null) {
+  init(sha, status = IssueStat.None, webUrl = '#', date = null) {
     this.data = Object.freeze({
       sha,
       status,
+      webUrl,
       date
     });
     this.values = [];
@@ -129,6 +130,10 @@ export class IssueData {
 
   get date() {
     return this.data.date;
+  }
+
+  get webUrl() {
+    return this.data.webUrl;
   }
 }
 

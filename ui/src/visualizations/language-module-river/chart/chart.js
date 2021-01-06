@@ -75,10 +75,10 @@ export default class LanguageModuleRiver extends React.Component {
       }, {})
     );
 
-    commitPalette['#10'] = chroma('pink').hex();
-    commitPalette['Open'] = chroma('blue').hex();
-    commitPalette['In Process'] = chroma('yellow').hex();
-    commitPalette['Close'] = chroma('green').hex();
+    commitPalette['#10'] = chroma('#d739fe').hex();
+    commitPalette['Open'] = chroma('skyblue').hex();
+    commitPalette['In Process'] = '#d6e349';
+    commitPalette['Close'] = '#63c56c';
 
     const addDays = (date, days) => {
       const result = new Date(date);
@@ -119,14 +119,14 @@ export default class LanguageModuleRiver extends React.Component {
         .setStart(addDays(date, -5))
         .pushCommits(
           Array.from(Array(5).keys()).reduce((data, key) => {
-            data.push(`a${key + 1}`);
-            data.push(`d${key + 1}`);
+            data.push({ sha: `a${key + 1}`, webUrl: `https://github.com/INSO-TUWien/Binocular/commit/a${key + 1}` });
+            data.push({ sha: `d${key + 1}`, webUrl: `https://github.com/INSO-TUWien/Binocular/commit/d${key + 1}` });
             return data;
           }, [])
         )
         .setEnd(addDays(date, 5)),
       new IssueStream('#10', 'https://github.com/INSO-TUWien/Binocular/issues/10')
-        .setStart(addDays(date, 5))
+        .setStart(addDays(date, 6))
         .pushCommits(Array.from(Array(3).keys()).map(key => `d${key + 6}`))
     ];
 

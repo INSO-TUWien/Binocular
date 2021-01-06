@@ -20,7 +20,7 @@
   border        : none;
   border-radius : 8px;
   font          : 12px sans-serif;
-  background    : black;
+  background    : rgba(61, 59, 59, 0.95);
   color         : white;
   pointer-events: none;
 
@@ -61,6 +61,10 @@
     text-align: left;
     padding: 5px;
 
+    i {
+      text-transform: capitalize;
+    }
+
    > li {
       display: flex;
       flex-flow: row;
@@ -70,7 +74,6 @@
      > i {
         flex: 1;
         padding-right: 5px;
-        text-transform: capitalize;
       }
 
       > span {

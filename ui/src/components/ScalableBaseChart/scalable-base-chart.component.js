@@ -447,10 +447,20 @@ export default class ScalableBaseChartComponent extends React.Component {
     this.additionalPathDefs(brushArea, pathStreams, scales);
   }
 
+  /**
+   *
+   * @param data
+   * @returns {number}
+   */
   getLayerStrokeWidth(data) {
     return 0;
   }
 
+  /**
+   *
+   * @param data
+   * @returns {undefined}
+   */
   getLayerStrokeColor(data) {
     return undefined;
   }

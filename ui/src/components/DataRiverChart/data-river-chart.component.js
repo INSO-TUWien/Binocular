@@ -132,7 +132,7 @@ export class DataRiverChartComponent extends ScalableBaseChartComponent {
    * @param xRange
    * @param yDims
    * @param yRange
-   * @returns {{x: *, y: *} & {issue: *, pattern: *, scale: {width: *, height: *}, y: *, diff: *}}
+   * @returns {{x: *, y: *} & {width: *, height: *} & {issue: *, pattern: *, y: *, diff: *}}
    */
   createScales(xDims, xRange, yDims, yRange) {
     //Y axis scaled with the maximum amount of change (half in each direction)
@@ -143,8 +143,7 @@ export class DataRiverChartComponent extends ScalableBaseChartComponent {
       width: d3.scaleLinear().domain([100.0, 0.0]).range(xRange)
     };
 
-    return Object.assign({}, scales, {
-      scale,
+    return Object.assign({}, scales, scale, {
       issue: d3
         .scaleOrdinal()
         .domain(IssueStat.getAvailable)
@@ -556,10 +555,20 @@ export class DataRiverChartComponent extends ScalableBaseChartComponent {
     }
     super.setBrushArea(brushArea, brush, area, tooltip, svg, scales);
 
+    this.paintIssueDataPoints(scales, brushArea, tooltip);
+  }
+
+  paintIssueDataPoints(scales, brushArea, tooltip) {
     const issueDataPoints = this.getIssueDataPoints();
 
     const radius = Math.max((scales.x(issueDataPoints[1].data.date) - scales.x(issueDataPoints[0].data.date)) * 0.01, 5);
     const size = d => Math.max(d.data.additions || 0, d.data.deletions || 1, 1);
+    issueDataPoints.forEach(
+      d => (d.radius = Math.min(Math.max((scales.diff(0) - scales.diff(size(d))) / 100 * radius, 5), scales.height(50)))
+    );
+    issueDataPoints.sort((a, b) => b.radius - a.radius);
+
+    const _this = this;
 
     brushArea
       .append('g')
@@ -567,26 +576,43 @@ export class DataRiverChartComponent extends ScalableBaseChartComponent {
       .data(issueDataPoints)
       .enter()
       .append('a')
-      .attr('href', '#')
+      .attr('href', d => (d.issue ? d.issue.webUrl : d.webUrl))
+      .attr('target', '_blank')
+      .attr('rel', 'noopener noreferrer')
       .append('circle')
       .classed('issue-nodes', true)
       .attr('fill', d => d.stream.color.ticket)
       .attr('cx', d => scales.x(d.data.date))
       .attr('cy', d => (d instanceof IssueData ? scales.issue(d.status.name) : scales.y(d.buildSuccessRate)))
-      .attr('r', d => Math.max((scales.diff(0) - scales.diff(size(d))) / 100, radius))
-      .attr('stroke-width', d => (!(d instanceof IssueData) && !d.issue ? 0 : 2))
+      .attr('r', d => d.radius)
+      .attr('stroke-width', d => (!(d instanceof IssueData) && !d.issue ? 0 : 3))
       .attr('stroke', d => d.stream.color[d instanceof IssueData ? d.status.name : d.issue ? d.issue.status.name : undefined])
-      .on('mouseenter', function(event, dataPoint) {
+      .on('mouseenter', (event, dataPoint) => {
+        tooltip.attr('additional', dataPoint.stream.ticketId);
+        tooltip.attr('color', `${dataPoint.stream.color.ticket}`);
+
         if (dataPoint instanceof IssueData) {
+          tooltip.attr('issue', dataPoint);
+          tooltip.attr('data', { name: 'Ticket Status', date: dataPoint.date });
+          tooltip.attr('attrColor', dataPoint.stream.color[dataPoint.status.name]);
+          tooltip.attr('statusColor', dataPoint.stream.color[dataPoint.status.name]);
           return;
         }
-        tooltip.attr('additional', dataPoint.stream.ticketId);
-        tooltip.attr('data', dataPoint.data);
-        tooltip.attr('color', `${dataPoint.stream.color.ticket}`);
-        tooltip.attr('attrColor', dataPoint.stream.color[dataPoint.issue.status.name]);
+
+        tooltip.attr('issue', dataPoint.issue);
+        tooltip.attr('data', dataPoint);
+        tooltip.attr('attrColor', this.findColor(dataPoint.attribute));
+        tooltip.attr('statusColor', dataPoint.stream.color[dataPoint.issue.status.name]);
+
+        this.raiseFilteredStreams(dataPoint.data);
+
+        const normalizedPoint = [-dataPoint.deletions, dataPoint.additions];
+        normalizedPoint.data = dataPoint;
+        const coords = this.getPoint(scales, normalizedPoint);
+        this.paintDataPoint(brushArea, scales.x(normalizedPoint.data.date), coords.y0, coords.y1, dataPoint.stream.color.ticket);
       })
-      .on('mouseout', function() {
-        tooltip.attr('data', null);
+      .on('mouseout', function(event, stream) {
+        return _this.onMouseLeave.bind(_this, this, tooltip, brushArea)(event, stream);
       });
   }
 
@@ -623,14 +649,6 @@ export class DataRiverChartComponent extends ScalableBaseChartComponent {
         }, [])
       )
     );
-  }
-
-  getLayerStrokeWidth(data) {
-    return data && data.stream && data.stream instanceof IssueStream ? 5 : 0;
-  }
-
-  getLayerStrokeColor(data) {
-    return data && data.stream && data.stream instanceof IssueStream ? data.color.ticket : undefined;
   }
 
   /**
@@ -715,6 +733,19 @@ export class DataRiverChartComponent extends ScalableBaseChartComponent {
     this.paintDataPoint(brushArea, scales.x(nearestDataPoint.data.date), dataPoint.y0, dataPoint.y1, nearestDataPoint.color.name);
   }
 
+  raiseFilteredStreams(key, streamCb) {
+    this.state.data.stackedData.forEach(dataStream => {
+      if (dataStream.key.eqPrimKey(key)) {
+        d3.select(`#${this.getBrushId(dataStream)}`).raise().attr('opacity', 1);
+        if (typeof streamCb === 'function') {
+          streamCb(dataStream, key);
+        }
+      } else {
+        d3.select(`#${this.getBrushId(dataStream)}`).attr('opacity', 0.5);
+      }
+    });
+  }
+
   /**
    *
    * @param path
@@ -725,13 +756,7 @@ export class DataRiverChartComponent extends ScalableBaseChartComponent {
    */
   // eslint-disable-next-line no-unused-vars
   onMouseover(path, tooltip, brushArea, event, stream) {
-    this.state.data.stackedData.forEach(dataStream => {
-      if (dataStream.key.eqPrimKey(stream.key)) {
-        d3.select(`#${this.getBrushId(dataStream)}`).raise().attr('opacity', 1);
-      } else {
-        d3.select(`#${this.getBrushId(dataStream)}`).attr('opacity', 0.5);
-      }
-    });
+    this.raiseFilteredStreams(stream.key);
     event.preventDefault();
   }
 
