@@ -408,16 +408,18 @@ export default class ScalableBaseChartComponent extends React.Component {
     //Append data to svg using the area generator and palette
     const pathStreams = brushArea
       .append('g')
-      .attr('class', 'layers')
       .selectAll('path')
       .data(this.state.data.stackedData)
       .enter()
       .append('path')
+      .attr('class', data => `layers ${_this.getBrushClass(data)}`)
       .classed(this.styles.layer, !!this.styles.layer)
       .classed('layer', true)
       .attr('id', _this.getBrushId)
       //Color palette with the form {author1: color1, ...}
       .style('fill', this.getColor.bind(this))
+      .attr('stroke-width', this.getLayerStrokeWidth.bind(this))
+      .attr('stroke', this.getLayerStrokeColor.bind(this))
       .attr('d', area)
       .attr('clip-path', 'url(#clip)')
       .on('mouseenter', function(event, stream) {
@@ -443,6 +445,18 @@ export default class ScalableBaseChartComponent extends React.Component {
       });
 
     this.additionalPathDefs(brushArea, pathStreams, scales);
+  }
+
+  getLayerStrokeWidth(data) {
+    return 0;
+  }
+
+  getLayerStrokeColor(data) {
+    return undefined;
+  }
+
+  getBrushClass() {
+    return '';
   }
 
   /**

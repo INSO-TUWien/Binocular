@@ -12,7 +12,7 @@ import RiverTooltip from './river-tooltip';
 import { formatPercentage } from '../../utils/format';
 import StreamKey from './StreamKey';
 import { hash } from '../../utils/crypto-utils';
-import IssueStream, { IssueStat } from './IssueStream';
+import IssueStream, { IssueColor, IssueData, IssueStat } from './IssueStream';
 
 export class DataRiverChartComponent extends ScalableBaseChartComponent {
   constructor(props) {
@@ -29,8 +29,14 @@ export class DataRiverChartComponent extends ScalableBaseChartComponent {
     return d3
       .area()
       .x(d => scales.x(d.data.date))
-      .y0(d => this.getPoint(scales, d).y0)
-      .y1(d => this.getPoint(scales, d).y1)
+      .y0(d => {
+        const y0 = d instanceof IssueData ? scales.issue(d.status.name) : this.getPoint(scales, d).y0;
+        return y0;
+      })
+      .y1(d => {
+        const y1 = d instanceof IssueData ? scales.issue(d.status.name) + 0.01 : this.getPoint(scales, d).y1;
+        return y1;
+      })
       .curve(d3.curveMonotoneX);
   }
 
@@ -50,18 +56,22 @@ export class DataRiverChartComponent extends ScalableBaseChartComponent {
    *
    * @returns {[]}
    */
-  // eslint-disable-next-line no-unused-vars
   getXDims() {
-    return this.state.data.stackedData[0]
-      ? [d3.min(this.state.data.stackedData[0], d => d.data.date), new Date()]
-      : [d3.min(this.state.data.data, d => d.date), new Date()];
+    const dates = Array.from(
+      new Set(
+        this.state.data.stackedData
+          ? this.state.data.stackedData.reduce((stack, stream) => [...stack, ...stream.map(data => data.data.date)], [])
+          : this.state.data.data.map(data => data.date)
+      )
+    );
+
+    return [d3.min(dates), new Date()];
   }
 
   /**
    *
    * @returns {[]}
    */
-  // eslint-disable-next-line no-unused-vars
   getYDims() {
     return this.state.yDims;
   }
@@ -82,7 +92,6 @@ export class DataRiverChartComponent extends ScalableBaseChartComponent {
    * @param brushArea
    * @param area
    */
-  // eslint-disable-next-line no-unused-vars
   resetZoom(scales, axes, brushArea, area) {
     scales.x.domain(this.getXDims());
     axes.x.call(d3.axisBottom(scales.x));
@@ -139,9 +148,17 @@ export class DataRiverChartComponent extends ScalableBaseChartComponent {
 
     return Object.assign({}, scales, {
       scale,
-      issue: d3.scaleOrdinal().domain([IssueStat.Close.name, IssueStat.Open.name]).range(yRange),
+      issue: d3
+        .scaleOrdinal()
+        .domain(IssueStat.getAvailable)
+        .range(
+          IssueStat.getAvailable.map((_, i, values) =>
+            scale.height(i === 0 ? 100.0 : i === values.length - 1 ? 0.0 : 100.0 / (values.length - 1.0) * i)
+          )
+        ),
       y: d3.scaleLinear().domain([-1.0, 1.0]).range([scale.height(20), scale.height(80)]),
       diff: d3.scaleLinear().domain(scales.y.domain()).range([scale.height(70) - scale.height(100), 0]),
+
       // define design pattern values
       pattern: d3
         .scaleLinear()
@@ -248,18 +265,29 @@ export class DataRiverChartComponent extends ScalableBaseChartComponent {
     const streamData = _.flatMap(reorganizedData.grouped.map(record => record.sort()));
 
     const keys = this.props.keys ? this.props.keys : stackedData.filter(stream => stream.length).map(stream => new StreamKey(stream[0]));
+
     //Data formatted for d3
     stackedData = this.createStackedData(streamData, keys);
+
     if (order && order.length) {
       stackedData.sort((streamA, streamB) => order.indexOf(streamA.key.name) - order.indexOf(streamB.key.name));
     }
 
     // add color set to stream
-    this.setStreamColors(stackedData);
+    this.setRiverStreamColors(stackedData);
 
-    const issueStreams = this.processIssueStreams(data, stackedData);
+    const issueStreams = this.preProcessIssueStreams(stackedData);
+    const stackedIssues = this.processIssueStreams(issueStreams);
 
-    return { data, stackedData, issueStreams };
+    this.setIssueStreamColors(stackedIssues);
+
+    return { data, stackedData: [...stackedIssues, ...stackedData], issueStreams };
+  }
+
+  findColor(name) {
+    const key = Object.keys(this.props.palette).find(colorKey => name.toUpperCase() === colorKey.toUpperCase()) || null;
+    const color = key ? this.props.palette[key] : undefined;
+    return color ? chroma(color).alpha(0.85).hex('rgba') : color;
   }
 
   /**
@@ -267,21 +295,36 @@ export class DataRiverChartComponent extends ScalableBaseChartComponent {
    * @param stackedData
    * @param skipChildren
    */
-  setStreamColors(stackedData, skipChildren) {
+  setRiverStreamColors(stackedData, skipChildren) {
     stackedData.forEach(stack => {
       const nameColorKey = Object.keys(this.props.palette).find(
         colorKey =>
           colorKey.toLowerCase().includes(stack.key.name.toLowerCase()) &&
           colorKey.toLowerCase().includes(stack.key.direction.toLowerCase())
       );
+
       const color = {
         attribute: chroma(this.props.palette[stack.key.attribute]).alpha(0.85).hex('rgba'),
-        name: chroma(this.props.palette[nameColorKey]).alpha(0.85).hex('rgba')
+        name: this.findColor(nameColorKey)
       };
+
       if (!skipChildren) {
         stack.forEach(node => (node.color = color));
       }
+
       stack.color = color;
+    });
+  }
+
+  /**
+   *
+   * @param stackedData
+   */
+  setIssueStreamColors(stackedData) {
+    const colors = IssueStat.getAvailable.map(key => this.findColor(key));
+    stackedData.filter(stack => stack.stream instanceof IssueStream).forEach(stack => {
+      stack.color = new (IssueColor.bind.apply(IssueColor, [undefined, this.findColor(stack.key.name), ...colors]))();
+      stack.stream.color = stack.color;
     });
   }
 
@@ -322,6 +365,15 @@ export class DataRiverChartComponent extends ScalableBaseChartComponent {
   preprocessData(data) {
     const maxDiff = d3.max(data, d => d.additions + d.deletions);
 
+    return this.createOrganizeDataStreams(data, this.calculateDateDiff(data).dateTicks, maxDiff);
+  }
+
+  /**
+   *
+   * @param data
+   * @returns {{dateDiff: (*|number), dateTicks: *[]}}
+   */
+  calculateDateDiff(data) {
     //calculate minimum x difference
     const dateDiff =
       data
@@ -332,13 +384,14 @@ export class DataRiverChartComponent extends ScalableBaseChartComponent {
         .filter(diff => !Number.isNaN(diff) && !isNaN(diff) && diff > 0)
         .sort()[0] || 1;
 
-    const dateTicks = [
-      new Date(data[0].date.getTime() - dateDiff),
-      ...data.map(record => record.date),
-      new Date(data[data.length - 1].date.getTime() + dateDiff)
-    ];
-
-    return this.createOrganizeDataStreams(data, dateTicks, maxDiff);
+    return {
+      dateDiff,
+      dateTicks: [
+        new Date(data[0].date.getTime() - dateDiff),
+        ...data.map(record => record.date),
+        new Date(data[data.length - 1].date.getTime() + dateDiff)
+      ]
+    };
   }
 
   /**
@@ -429,11 +482,9 @@ export class DataRiverChartComponent extends ScalableBaseChartComponent {
 
   /**
    *
-   * @param data
    * @param stackedData
    */
-  processIssueStreams(data, stackedData) {
-    //console.log(data, stackedData, this.props.issueStreams);
+  preProcessIssueStreams(stackedData) {
     if (!this.props.issueStreams || !this.props.issueStreams.length) {
       return undefined;
     }
@@ -456,10 +507,115 @@ export class DataRiverChartComponent extends ScalableBaseChartComponent {
         []
       );
 
-      stream.forEach(ticketPoint => (ticketPoint.values = issueStream.filter(dataPoint => dataPoint.data.sha === ticketPoint.sha)));
+      stream.forEach(ticketPoint => {
+        ticketPoint.values = issueStream.filter(dataPoint => dataPoint.data.sha === ticketPoint.sha);
+        ticketPoint.points = Array.from(new Set(ticketPoint.values.map(record => record.data)));
+      });
+
+      stream.__values.sort(
+        (point1, point2) =>
+          d3.min(point1.points, point => point.data.date.getTime()) - d3.min(point2.points, point => point.data.date.getTime())
+      );
     });
 
     return issueStreams;
+  }
+
+  /**
+   *
+   * @param issueStreams
+   * @returns {*}
+   */
+  processIssueStreams(issueStreams) {
+    return issueStreams.reduce((streams, stream) => {
+      const maxStreamCount = d3.max(stream.values, ticketDataPoint => ticketDataPoint.points.length);
+      const data = [];
+      for (let i = 0; i < maxStreamCount * 2; i++) {
+        const issueStream = [stream.start, ...stream.map(dataPoint => dataPoint.values[i % dataPoint.values.length])];
+        if (stream.isClosed) {
+          issueStream.push(stream.end);
+        }
+        issueStream.stream = stream;
+        issueStream.key = new StreamKey({ data: { name: stream.ticketId, direction: i } });
+        data.push(issueStream);
+      }
+      return [...streams, ...data];
+    }, []);
+  }
+
+  /**
+   *
+   * @param brushArea
+   * @param brush
+   * @param area
+   * @param tooltip
+   * @param svg
+   * @param scales
+   */
+  setBrushArea(brushArea, brush, area, tooltip, svg, scales) {
+    if (!this.state.data.stackedData || !this.state.data.stackedData.length) {
+      return;
+    }
+    super.setBrushArea(brushArea, brush, area, tooltip, svg, scales);
+
+    const issueDataPoints = Array.from(
+      new Set(
+        this.state.data.issueStreams.reduce((dataStream, stream) => {
+          const dataPoints = stream.values.reduce((data, item) => [...data, ...item.points], []);
+          dataPoints.forEach(item => {
+            item.color = stream.color;
+            item.stream = stream;
+          });
+          const start = stream.start;
+          start.color = stream.color;
+          start.stream = stream;
+          dataStream = [...dataStream, start, ...dataPoints];
+          if (stream.isClosed) {
+            const end = stream.end;
+            end.color = stream.color;
+            end.stream = stream;
+            dataStream.push(end);
+          }
+          return dataStream;
+        }, [])
+      )
+    );
+
+    const radius = Math.max((scales.x(issueDataPoints[1].data.date) - scales.x(issueDataPoints[0].data.date)) * 0.01, 5);
+
+    brushArea
+      .append('g')
+      .selectAll('a')
+      .data(issueDataPoints)
+      .enter()
+      .append('a')
+      .attr('href', '#')
+      .append('circle')
+      .classed('issue', true)
+      .attr('fill', d => d.color.ticket)
+      .attr('cx', d => scales.x(d.data.date))
+      .attr('cy', d => (d instanceof IssueData ? scales.issue(d.status.name) : scales.y(d.buildSuccessRate)))
+      .attr('r', radius)
+      .on('mouseenter', function(event, stream) {
+        if (stream instanceof IssueData) {
+          return;
+        }
+        tooltip.attr('additional', stream.stream.ticketId);
+        tooltip.attr('data', stream.data);
+        tooltip.attr('color', `${stream.color.ticket}`);
+        tooltip.attr('attrColor', stream.color.ticket);
+      })
+      .on('mouseout', function() {
+        tooltip.attr('data', null);
+      });
+  }
+
+  getLayerStrokeWidth(data) {
+    return 0;
+  }
+
+  getLayerStrokeColor(data) {
+    return undefined;
   }
 
   /**
@@ -469,10 +625,11 @@ export class DataRiverChartComponent extends ScalableBaseChartComponent {
    * @param scales
    */
   additionalPathDefs(brushArea, pathStreams, scales) {
-    const gradients = brushArea
-      .append('defs')
+    const defs = brushArea.append('defs');
+
+    const pattern = defs
       .selectAll('pattern')
-      .data(this.state.data.stackedData)
+      .data(this.state.data.stackedData.filter(data => data && !data.stream && !(data.stream instanceof IssueData)))
       .enter()
       .append('pattern')
       .attr('width', stream => scales.pattern(stream.pattern.size(stream)))
@@ -483,9 +640,9 @@ export class DataRiverChartComponent extends ScalableBaseChartComponent {
       .attr('y', stream => stream.pattern.offset(scales.pattern, stream))
       .attr('patternTransform', (d, i) => `rotate(${(i * 360 / this.state.data.stackedData.length + 1 * i) % 360} 50 50)`);
 
-    gradients.append('rect').attr('fill', d => d.color.attribute).attr('width', '100%').attr('height', '100%');
+    pattern.append('rect').attr('fill', d => d.color.attribute).attr('width', '100%').attr('height', '100%');
 
-    gradients
+    pattern
       .append('circle')
       .attr('fill', d => d.color.name)
       .attr('cx', stream => stream.pattern.position(scales.pattern, stream))
@@ -493,6 +650,21 @@ export class DataRiverChartComponent extends ScalableBaseChartComponent {
       .attr('r', stream => stream.pattern.radius(scales.pattern, stream));
 
     pathStreams.attr('opacity', 0.9);
+
+    const gradients = defs
+      .selectAll('linearGradient')
+      .data(Array.from(new Set(this.state.data.stackedData.filter(data => data && data.stream && data.stream instanceof IssueStream))))
+      .enter()
+      .append('linearGradient')
+      .attr('id', stream => `color-${stream.key.toId()}`);
+
+    gradients.append('stop').attr('offset', '0%').attr('stop-color', stream => stream.color[IssueStat.Open.name]);
+    gradients.append('stop').attr('offset', '20%').attr('stop-color', stream => stream.color['InProcess']);
+    gradients.append('stop').attr('offset', '80%').attr('stop-color', stream => stream.color['InProcess']);
+    gradients
+      .append('stop')
+      .attr('offset', '100%')
+      .attr('stop-color', stream => (stream.stream.isClosed ? stream.color[IssueStat.Close.name] : undefined));
   }
 
   /**
@@ -521,11 +693,11 @@ export class DataRiverChartComponent extends ScalableBaseChartComponent {
 
     tooltip.attr('data', nearestDataPoint.data);
     tooltip.attr('additional', nearestDataPoint.key.direction);
-    tooltip.attr('color', `${stream.color.name}`);
-    tooltip.attr('attrColor', stream.color.attribute);
+    tooltip.attr('color', `${nearestDataPoint.color.name}`);
+    tooltip.attr('attrColor', nearestDataPoint.color.attribute);
 
     const dataPoint = this.getPoint(scales, nearestDataPoint);
-    this.paintDataPoint(brushArea, scales.x(nearestDataPoint.data.date), dataPoint.y0, dataPoint.y1, stream.color.name);
+    this.paintDataPoint(brushArea, scales.x(nearestDataPoint.data.date), dataPoint.y0, dataPoint.y1, nearestDataPoint.color.name);
   }
 
   /**
@@ -566,7 +738,11 @@ export class DataRiverChartComponent extends ScalableBaseChartComponent {
 
   // eslint-disable-next-line no-unused-vars
   getBrushId(data) {
-    return `stream-${data.key.toId()}`;
+    return data.stream ? `issue-${data.key.toId()}` : `stream-${data.key.toId()}`;
+  }
+
+  getBrushClass(data) {
+    return data.stream ? 'issues' : 'changes';
   }
 
   render() {

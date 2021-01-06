@@ -71,7 +71,7 @@ class RiverTooltip extends React.Component {
 
   render() {
     const { name, date, sha, attribute, deletions, additions, buildStat, buildWeight, buildSuccessRate, trend } = this.state.data || {};
-    const isVisible = !this.state.hide && !!this.state.data && this.state.data instanceof RiverData && !!this.state.attribute;
+    const isVisible = !this.state.hide && !!this.state.data && !!this.state.attribute;
     const style = this.state.attrColor ? { borderColor: this.state.attrColor } : null;
     const { offsetX, offsetY } = this.calculateOffset();
 

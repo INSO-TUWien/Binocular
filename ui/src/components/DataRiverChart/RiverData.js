@@ -1,5 +1,7 @@
 'use strict';
 
+import { createEnum } from '../../utils/Enum';
+
 /**
  * represents the unchangeable river associated data
  */
@@ -93,30 +95,11 @@ export class RiverData {
 
 /**
  * represents a build state enum
- *
- * @type {Readonly<{}>}
  */
-export const BuildStat = Object.freeze(
-  (() => {
-    const plainEnum = {
-      None: 0,
-      Abort: 1,
-      Failed: 2,
-      Success: 4,
-      Skipped: 8
-    };
-    const data = Object.keys(plainEnum).reduce((item, key) => {
-      item[key] = { value: plainEnum[key], name: key };
-      return item;
-    }, {});
-
-    data.valueOf = value => {
-      const foundKey = Object.keys(data).find(
-        key => value && (data[key] === value || data[key].name.toUpperCase() === `${value}`.toUpperCase() || data[key].value === value)
-      );
-      return foundKey ? data[foundKey] : data.None;
-    };
-
-    return data;
-  })()
-);
+export const BuildStat = createEnum({
+  None: 0,
+  Abort: 1,
+  Failed: 2,
+  Success: 4,
+  Skipped: 8
+});

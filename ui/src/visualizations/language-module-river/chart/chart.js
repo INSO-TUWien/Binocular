@@ -75,7 +75,9 @@ export default class LanguageModuleRiver extends React.Component {
       }, {})
     );
 
+    commitPalette['#10'] = chroma('pink').hex();
     commitPalette['Open'] = chroma('blue').hex();
+    commitPalette['In Process'] = chroma('yellow').hex();
     commitPalette['Close'] = chroma('green').hex();
 
     const addDays = (date, days) => {
@@ -114,7 +116,7 @@ export default class LanguageModuleRiver extends React.Component {
 
     const issueStreams = [
       new IssueStream('#10', 'https://github.com/INSO-TUWien/Binocular/issues/10')
-        .setStart(date)
+        .setStart(addDays(date, -5))
         .pushCommits(
           Array.from(Array(5).keys()).reduce((data, key) => {
             data.push(`a${key + 1}`);
@@ -151,7 +153,7 @@ export default class LanguageModuleRiver extends React.Component {
             sidebarOpen={this.props.sidebarOpen}
             content={mockData}
             palette={commitPalette}
-            paddings={{ top: 40, left: 60, bottom: 40, right: 50 }}
+            paddings={{ top: 40, left: 60, bottom: 40, right: 70 }}
             xAxisCenter={true}
             keys={this.state.selectedAuthors ? selectedAuthors : undefined}
             resolution={this.props.chartResolution}
