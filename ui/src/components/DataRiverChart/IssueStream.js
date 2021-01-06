@@ -144,7 +144,7 @@ export class IssueColor {
       });
 
     create('ticket', 0);
-    Object.keys(IssueStat).map((key, i) => i && create(key, i));
+    Object.keys(IssueStat).map((key, i) => i && create(IssueStat[key].name, i));
   }
 }
 

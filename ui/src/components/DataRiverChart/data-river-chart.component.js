@@ -29,14 +29,8 @@ export class DataRiverChartComponent extends ScalableBaseChartComponent {
     return d3
       .area()
       .x(d => scales.x(d.data.date))
-      .y0(d => {
-        const y0 = d instanceof IssueData ? scales.issue(d.status.name) : this.getPoint(scales, d).y0;
-        return y0;
-      })
-      .y1(d => {
-        const y1 = d instanceof IssueData ? scales.issue(d.status.name) + 0.01 : this.getPoint(scales, d).y1;
-        return y1;
-      })
+      .y0(d => this.getPoint(scales, d).y0)
+      .y1(d => this.getPoint(scales, d).y1)
       .curve(d3.curveMonotoneX);
   }
 
@@ -59,8 +53,11 @@ export class DataRiverChartComponent extends ScalableBaseChartComponent {
   getXDims() {
     const dates = Array.from(
       new Set(
-        this.state.data.stackedData
-          ? this.state.data.stackedData.reduce((stack, stream) => [...stack, ...stream.map(data => data.data.date)], [])
+        this.state.data.stackedData && this.state.data.stackedIssues
+          ? [...this.state.data.stackedIssues, ...this.state.data.stackedData].reduce(
+              (stack, stream) => [...stack, ...stream.filter(exist => exist).map(data => data.data.date)],
+              []
+            )
           : this.state.data.data.map(data => data.date)
       )
     );
@@ -279,9 +276,9 @@ export class DataRiverChartComponent extends ScalableBaseChartComponent {
     const issueStreams = this.preProcessIssueStreams(stackedData);
     const stackedIssues = this.processIssueStreams(issueStreams);
 
-    this.setIssueStreamColors(stackedIssues);
+    this.setIssueStreamColors(issueStreams);
 
-    return { data, stackedData: [...stackedIssues, ...stackedData], issueStreams };
+    return { data, stackedData, issueStreams, stackedIssues };
   }
 
   findColor(name) {
@@ -318,13 +315,12 @@ export class DataRiverChartComponent extends ScalableBaseChartComponent {
 
   /**
    *
-   * @param stackedData
+   * @param issueStreams
    */
-  setIssueStreamColors(stackedData) {
+  setIssueStreamColors(issueStreams) {
     const colors = IssueStat.getAvailable.map(key => this.findColor(key));
-    stackedData.filter(stack => stack.stream instanceof IssueStream).forEach(stack => {
-      stack.color = new (IssueColor.bind.apply(IssueColor, [undefined, this.findColor(stack.key.name), ...colors]))();
-      stack.stream.color = stack.color;
+    issueStreams.forEach(stack => {
+      stack.color = new (IssueColor.bind.apply(IssueColor, [undefined, this.findColor(stack.ticketId), ...colors]))();
     });
   }
 
@@ -531,7 +527,9 @@ export class DataRiverChartComponent extends ScalableBaseChartComponent {
       const maxStreamCount = d3.max(stream.values, ticketDataPoint => ticketDataPoint.points.length);
       const data = [];
       for (let i = 0; i < maxStreamCount * 2; i++) {
-        const issueStream = [stream.start, ...stream.map(dataPoint => dataPoint.values[i % dataPoint.values.length])];
+        const issueStream = [stream.start, ...stream.map(dataPoint => dataPoint.values[i % dataPoint.values.length])].filter(
+          exist => exist
+        );
         if (stream.isClosed) {
           issueStream.push(stream.end);
         }
@@ -558,30 +556,10 @@ export class DataRiverChartComponent extends ScalableBaseChartComponent {
     }
     super.setBrushArea(brushArea, brush, area, tooltip, svg, scales);
 
-    const issueDataPoints = Array.from(
-      new Set(
-        this.state.data.issueStreams.reduce((dataStream, stream) => {
-          const dataPoints = stream.values.reduce((data, item) => [...data, ...item.points], []);
-          dataPoints.forEach(item => {
-            item.color = stream.color;
-            item.stream = stream;
-          });
-          const start = stream.start;
-          start.color = stream.color;
-          start.stream = stream;
-          dataStream = [...dataStream, start, ...dataPoints];
-          if (stream.isClosed) {
-            const end = stream.end;
-            end.color = stream.color;
-            end.stream = stream;
-            dataStream.push(end);
-          }
-          return dataStream;
-        }, [])
-      )
-    );
+    const issueDataPoints = this.getIssueDataPoints();
 
     const radius = Math.max((scales.x(issueDataPoints[1].data.date) - scales.x(issueDataPoints[0].data.date)) * 0.01, 5);
+    const size = d => Math.max(d.data.additions || 0, d.data.deletions || 1, 1);
 
     brushArea
       .append('g')
@@ -591,31 +569,68 @@ export class DataRiverChartComponent extends ScalableBaseChartComponent {
       .append('a')
       .attr('href', '#')
       .append('circle')
-      .classed('issue', true)
-      .attr('fill', d => d.color.ticket)
+      .classed('issue-nodes', true)
+      .attr('fill', d => d.stream.color.ticket)
       .attr('cx', d => scales.x(d.data.date))
       .attr('cy', d => (d instanceof IssueData ? scales.issue(d.status.name) : scales.y(d.buildSuccessRate)))
-      .attr('r', radius)
-      .on('mouseenter', function(event, stream) {
-        if (stream instanceof IssueData) {
+      .attr('r', d => Math.max((scales.diff(0) - scales.diff(size(d))) / 100, radius))
+      .attr('stroke-width', d => (!(d instanceof IssueData) && !d.issue ? 0 : 2))
+      .attr('stroke', d => d.stream.color[d instanceof IssueData ? d.status.name : d.issue ? d.issue.status.name : undefined])
+      .on('mouseenter', function(event, dataPoint) {
+        if (dataPoint instanceof IssueData) {
           return;
         }
-        tooltip.attr('additional', stream.stream.ticketId);
-        tooltip.attr('data', stream.data);
-        tooltip.attr('color', `${stream.color.ticket}`);
-        tooltip.attr('attrColor', stream.color.ticket);
+        tooltip.attr('additional', dataPoint.stream.ticketId);
+        tooltip.attr('data', dataPoint.data);
+        tooltip.attr('color', `${dataPoint.stream.color.ticket}`);
+        tooltip.attr('attrColor', dataPoint.stream.color[dataPoint.issue.status.name]);
       })
       .on('mouseout', function() {
         tooltip.attr('data', null);
       });
   }
 
+  /**
+   *
+   * @returns {any[]}
+   */
+  getIssueDataPoints() {
+    return Array.from(
+      new Set(
+        this.state.data.issueStreams.reduce((dataStream, stream) => {
+          const dataPoints = stream.values.reduce(
+            (data, item) => [
+              ...data,
+              ...item.points.map(d => {
+                d.issue = item;
+                return d;
+              })
+            ],
+            []
+          );
+          dataPoints.forEach(item => {
+            item.stream = stream;
+          });
+          const start = stream.start;
+          start.stream = stream;
+          dataStream = [...dataStream, start, ...dataPoints];
+          if (stream.isClosed) {
+            const end = stream.end;
+            end.stream = stream;
+            dataStream.push(end);
+          }
+          return dataStream;
+        }, [])
+      )
+    );
+  }
+
   getLayerStrokeWidth(data) {
-    return 0;
+    return data && data.stream && data.stream instanceof IssueStream ? 5 : 0;
   }
 
   getLayerStrokeColor(data) {
-    return undefined;
+    return data && data.stream && data.stream instanceof IssueStream ? data.color.ticket : undefined;
   }
 
   /**
@@ -659,8 +674,8 @@ export class DataRiverChartComponent extends ScalableBaseChartComponent {
       .attr('id', stream => `color-${stream.key.toId()}`);
 
     gradients.append('stop').attr('offset', '0%').attr('stop-color', stream => stream.color[IssueStat.Open.name]);
-    gradients.append('stop').attr('offset', '20%').attr('stop-color', stream => stream.color['InProcess']);
-    gradients.append('stop').attr('offset', '80%').attr('stop-color', stream => stream.color['InProcess']);
+    gradients.append('stop').attr('offset', '20%').attr('stop-color', stream => stream.color[IssueStat.InProcess.name]);
+    gradients.append('stop').attr('offset', '80%').attr('stop-color', stream => stream.color[IssueStat.InProcess.name]);
     gradients
       .append('stop')
       .attr('offset', '100%')
