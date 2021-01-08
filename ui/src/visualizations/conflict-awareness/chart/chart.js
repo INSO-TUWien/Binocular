@@ -195,18 +195,10 @@ export default class ConflictAwareness extends React.Component {
         : false;
 
       // set the class and the color of the node according to its project membership
-      let nodeClass = 'baseProject';
-      let nodeColor = this.state.colorBaseProject;
-      if (isInBaseProject && isInOtherProject) {
-        nodeClass = 'combined';
-        nodeColor = this.state.colorCombined;
-      } else if (isInOtherProject) {
-        nodeClass = 'otherProject';
-        nodeColor = this.state.colorOtherProject;
-      }
+      let { clazz, color } = _getClassAndColor(this.state, isInBaseProject, isInOtherProject);
 
       // add the class and the color of the node for the edges later on
-      edgeClassesAndColors.set(node.sha, [nodeClass, nodeColor]);
+      edgeClassesAndColors.set(node.sha, [clazz, color]);
 
       // set the commit-node in the graph
       g.setNode(node.sha, {
@@ -214,8 +206,8 @@ export default class ConflictAwareness extends React.Component {
         shape: 'circle' /*'elipse'*/,
         width: 15,
         height: 15,
-        class: nodeClass,
-        style: `stroke: ${nodeColor}; fill: ${nodeColor}; stroke-width: 1px;`,
+        class: `${clazz} ${node.sha}`,
+        style: `stroke: ${color}; fill: ${color}; stroke-width: 1px;`,
         sha: node.sha,
         signature: node.signature,
         date: `${node.date.toDateString()} ${node.date.toTimeString().substr(0, 9)}`,
@@ -514,4 +506,67 @@ function _resetDiffAndHideModal(self) {
   const diffModal = _getDiffModal();
   diffModal.style('visibility', 'hidden');
   self.state.diffs = undefined;
+}
+
+/**
+ * Retrieves the CSS class and color based on the membership of the base project and/or the other project.
+ * @param state {any} state to get the different color options from it
+ * @param isInBaseProject {boolean} indicator if the element is in the base project
+ * @param isInOtherProject {boolean} indicator if the element is in the other project
+ * @returns {{color: *, clazz: string}}
+ * @private
+ */
+function _getClassAndColor(state, isInBaseProject, isInOtherProject) {
+  // default: element is only in the base project
+  let clazz = 'baseProject';
+  let color = state.colorBaseProject;
+
+  if (isInBaseProject && isInOtherProject) {
+    // element is in both projects
+    clazz = 'combined';
+    color = state.colorCombined;
+  } else if (isInOtherProject) {
+    // element is only in the other project
+    clazz = 'otherProject';
+    color = state.colorOtherProject;
+  }
+
+  return { clazz, color };
+}
+
+/**
+ * Highlights all commits containing the newIssueID.
+ * Resets the node design of all commits containing the oldIssueID.
+ * @param oldIssueID {string} issueID from the previous filter
+ * @param newIssueID {string} issueID from the current filter
+ * @param allCommits {[any]} list of all commits
+ * @private
+ */
+function _highlightCommitsFromIssue(oldIssueID, newIssueID, allCommits) {
+  let { inner } = _getGraphDOMElements();
+
+  // reset the last highlighting
+  if (oldIssueID) {
+    // get all commits from the last issue filter (searched by id + title case insensitive
+    let oldIssueCommits = allCommits.filter((commit) =>
+      commit.message.toLowerCase().includes(oldIssueID.toLowerCase())
+    );
+    // change the node back to the previous design (not highlighted
+    oldIssueCommits.forEach((commit) => {
+      const node = inner.select(`g[class*='${commit.sha}'] circle`);
+      node.style('stroke', node.style('fill'));
+    });
+  }
+
+  // a new highlighting was set
+  if (newIssueID) {
+    // get all commits form the new filter (searched by id + title case insensitive)
+    let newIssueCommits = allCommits.filter((commit) =>
+      commit.message.toLowerCase().includes(newIssueID.toLowerCase())
+    );
+    // color the border of each commit black
+    newIssueCommits.forEach((commit) =>
+      inner.select(`g[class*='${commit.sha}'] circle`).style('stroke', 'black')
+    );
+  }
 }
