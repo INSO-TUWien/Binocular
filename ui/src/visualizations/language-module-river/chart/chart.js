@@ -12,6 +12,7 @@ import cx from 'classnames';
 import { RiverData, BuildStat } from '../../../components/DataRiverChart/RiverData';
 import StreamKey from '../../../components/DataRiverChart/StreamKey';
 import IssueStream from '../../../components/DataRiverChart/IssueStream';
+import generateColorPattern from '../../../utils/colors';
 
 export default class LanguageModuleRiver extends React.Component {
   constructor(props) {
@@ -39,15 +40,13 @@ export default class LanguageModuleRiver extends React.Component {
    */
   componentWillReceiveProps(nextProps) {
     const { commitChartData, commitScale, commitPalette, selectedAuthors } = this.extractCommitData(nextProps);
-    //const { issueChartData, issueScale } = this.extractIssueData(nextProps);
-    //const { ciChartData, ciScale } = this.extractCIData(nextProps);
+    const { issueChartData } = this.extractIssueData(nextProps);
+    const { ciChartData } = this.extractCIData(nextProps);
     this.setState({
       commitChartData,
-      //issueChartData,
-      //ciChartData,
+      issueChartData,
+      ciChartData,
       commitScale,
-      //issueScale,
-      //ciScale,
       commitPalette,
       selectedAuthors
     });
@@ -66,18 +65,21 @@ export default class LanguageModuleRiver extends React.Component {
     //TODO: remove mocked
     const attributes = { js: 'JavaScript', ts: 'Typescript' };
 
-    const commitPalette = Object.assign(
-      {},
-      this.state.commitPalette || {},
+    let commitPalette = Object.assign({}, this.state.commitPalette || {});
+
+    commitPalette['#10'] = chroma('#d739fe').hex();
+
+    const pattern = generateColorPattern(Math.ceil((Object.keys(commitPalette) || []).length / 2));
+    commitPalette = Object.keys(commitPalette).reduce(
+      (colors, key, i) => Object.assign(colors, { [key]: i % 2 === 0 ? pattern[i / 2] : chroma(pattern[(i - 1) / 2]).darken(3).css() }),
       chroma.scale(['#88fa6e', '#10a3f0']).mode('lch').colors(attributes.length).reduce((collection, color, index) => {
         collection[attributes[Object.keys(attributes)[index]]] = chroma(color).hex('rgba');
         return collection;
       }, {})
     );
 
-    commitPalette['#10'] = chroma('#d739fe').hex();
     commitPalette['Open'] = chroma('skyblue').hex();
-    commitPalette['In Process'] = '#d6e349';
+    commitPalette['In Process'] = '#ffe12e';
     commitPalette['Close'] = '#63c56c';
 
     const addDays = (date, days) => {
@@ -90,27 +92,27 @@ export default class LanguageModuleRiver extends React.Component {
     let mockData;
     if (commitOrder) {
       mockData = [
-        new RiverData(addDays(date, 1), attributes['ts'], commitOrder[0], 'a1', BuildStat.Failed, 1, 100, 2),
-        new RiverData(addDays(date, 1), attributes['js'], commitOrder[1], 'a1', BuildStat.Success, 0.1, 1000, 2),
-        new RiverData(addDays(date, 2), attributes['js'], commitOrder[1], 'a2', BuildStat.Failed, 1, 4, 2000),
-        new RiverData(addDays(date, 3), attributes['js'], commitOrder[1], 'a3', BuildStat.Skipped, 1, 140, 1200),
-        new RiverData(addDays(date, 4), attributes['js'], commitOrder[1], 'a4', BuildStat.Success, 1, 1004, 120),
-        new RiverData(addDays(date, 5), attributes['js'], commitOrder[1], 'a5', BuildStat.Success, 1, 200, 12),
-        new RiverData(addDays(date, 5), attributes['ts'], commitOrder[0], 'a5', BuildStat.Success, 1, 1000, 2),
-        new RiverData(addDays(date, 6), attributes['js'], commitOrder[2], 'c6', BuildStat.Success, 1, 2002, 2),
-        new RiverData(addDays(date, 3), attributes['js'], commitOrder[2], 'c7', BuildStat.Success, 1, 1000, 2),
-        new RiverData(addDays(date, 4), attributes['js'], commitOrder[2], 'c8', BuildStat.Success, 1, 2002, 2100),
-        new RiverData(addDays(date, 5), attributes['js'], commitOrder[2], 'c9', BuildStat.Failed, 1, 1002, 20),
+        new RiverData(addDays(date, 1), attributes['ts'], commitOrder[0], ['a1'], BuildStat.Failed, 1, 100, 2),
+        new RiverData(addDays(date, 1), attributes['js'], commitOrder[1], ['a1'], BuildStat.Success, 0.1, 1000, 2),
+        new RiverData(addDays(date, 2), attributes['js'], commitOrder[1], ['a2'], BuildStat.Failed, 1, 4, 2000),
+        new RiverData(addDays(date, 3), attributes['js'], commitOrder[1], ['a3'], BuildStat.Skipped, 1, 140, 1200),
+        new RiverData(addDays(date, 4), attributes['js'], commitOrder[1], ['a4'], BuildStat.Success, 1, 1004, 120),
+        new RiverData(addDays(date, 5), attributes['js'], commitOrder[1], ['a5'], BuildStat.Success, 1, 200, 12),
+        new RiverData(addDays(date, 5), attributes['ts'], commitOrder[0], ['a5'], BuildStat.Success, 1, 1000, 2),
+        new RiverData(addDays(date, 6), attributes['js'], commitOrder[2], ['c6'], BuildStat.Success, 1, 2002, 2),
+        new RiverData(addDays(date, 3), attributes['js'], commitOrder[2], ['c7'], BuildStat.Success, 1, 1000, 2),
+        new RiverData(addDays(date, 4), attributes['js'], commitOrder[2], ['c8'], BuildStat.Success, 1, 2002, 2100),
+        new RiverData(addDays(date, 5), attributes['js'], commitOrder[2], ['c9'], BuildStat.Failed, 1, 1002, 20),
         // new stream,
-        new RiverData(addDays(date, 0), attributes['js'], commitOrder[3], 'd0', BuildStat.Success, 1, 3000, 0),
-        new RiverData(addDays(date, 1), attributes['js'], commitOrder[3], 'd1', BuildStat.Failed, 1, 0, 3000),
-        new RiverData(addDays(date, 2), attributes['js'], commitOrder[3], 'd2', BuildStat.Skipped, 1, 1500, 1500),
-        new RiverData(addDays(date, 3), attributes['js'], commitOrder[3], 'd3', BuildStat.Success, 1, 3000, 3000),
-        new RiverData(addDays(date, 4), attributes['js'], commitOrder[3], 'd4', BuildStat.Success, 1, 3000, 3000),
-        new RiverData(addDays(date, 5), attributes['js'], commitOrder[3], 'd5', BuildStat.Failed, 1, 500, 500),
-        new RiverData(addDays(date, 6), attributes['js'], commitOrder[3], 'd6', BuildStat.Skipped, 1, 600, 400),
-        new RiverData(addDays(date, 7), attributes['js'], commitOrder[3], 'd7', BuildStat.Failed, 1, 400, 900),
-        new RiverData(addDays(date, 8), attributes['js'], commitOrder[3], 'd8', BuildStat.Success, 1, 200, 300)
+        new RiverData(addDays(date, 0), attributes['js'], commitOrder[3], ['d0'], BuildStat.Success, 1, 3000, 0),
+        new RiverData(addDays(date, 1), attributes['js'], commitOrder[3], ['d1'], BuildStat.Failed, 1, 0, 3000),
+        new RiverData(addDays(date, 2), attributes['js'], commitOrder[3], ['d2'], BuildStat.Skipped, 1, 1500, 1500),
+        new RiverData(addDays(date, 3), attributes['js'], commitOrder[3], ['d3'], BuildStat.Success, 1, 3000, 3000),
+        new RiverData(addDays(date, 4), attributes['js'], commitOrder[3], ['d4'], BuildStat.Success, 1, 3000, 3000),
+        new RiverData(addDays(date, 5), attributes['js'], commitOrder[3], ['d5'], BuildStat.Failed, 1, 500, 500),
+        new RiverData(addDays(date, 6), attributes['js'], commitOrder[3], ['d6'], BuildStat.Skipped, 1, 600, 400),
+        new RiverData(addDays(date, 7), attributes['js'], commitOrder[3], ['d7'], BuildStat.Failed, 1, 400, 900),
+        new RiverData(addDays(date, 8), attributes['js'], commitOrder[3], ['d8'], BuildStat.Success, 1, 200, 300)
       ];
     }
 

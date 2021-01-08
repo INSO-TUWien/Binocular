@@ -16,10 +16,10 @@ export class RiverData {
     }
   }
 
-  init(date, attribute, name, sha = null, buildStat = 0, buildWeight = 1, additions = 0, deletions = 0, buildSuccessRate = 0.0) {
+  init(date, attribute, name, shas = [], buildStat = 0, buildWeight = 1, additions = 0, deletions = 0, buildSuccessRate = 0.0) {
     this.data = Object.freeze({
       date,
-      sha,
+      shas,
       attribute,
       name,
       additions,
@@ -44,8 +44,8 @@ export class RiverData {
     return this.data.name;
   }
 
-  get sha() {
-    return this.data.sha;
+  get shas() {
+    return this.data.shas;
   }
 
   get buildStat() {

@@ -219,6 +219,7 @@ export class DataRiverChartComponent extends ScalableBaseChartComponent {
 
   /**
    * Calculate data for the chart.
+   *
    * @param data Chart data in the format [{date: timestamp(ms), series1: value, series2: value, series3: value, series4: value, ...}, ...]
    * @param order
    * @returns Stacked chart data for d3 functions and preprocessed data { stackedData, data }
@@ -280,6 +281,11 @@ export class DataRiverChartComponent extends ScalableBaseChartComponent {
     return { data, stackedData, issueStreams, stackedIssues };
   }
 
+  /**
+   *
+   * @param name
+   * @returns {void|*}
+   */
   findColor(name) {
     const key = Object.keys(this.props.palette).find(colorKey => name.toUpperCase() === colorKey.toUpperCase()) || null;
     const color = key ? this.props.palette[key] : undefined;
@@ -336,8 +342,8 @@ export class DataRiverChartComponent extends ScalableBaseChartComponent {
       )
       .reduce((stack, dataStream, index) => {
         const stream = {
-          additions: this.createStack(dataStream, index * 2, record => [0, record.additions + (record.sha === null ? 0.001 : 0)]),
-          deletions: this.createStack(dataStream, index * 2 + 1, record => [-record.deletions - (record.sha === null ? 0.001 : 0), 0])
+          additions: this.createStack(dataStream, index * 2, record => [0, record.additions + (!record.shas.length ? 0.001 : 0)]),
+          deletions: this.createStack(dataStream, index * 2 + 1, record => [-record.deletions - (!record.shas.length ? 0.001 : 0), 0])
         };
 
         Object.keys(stream).forEach(key => {
@@ -494,16 +500,16 @@ export class DataRiverChartComponent extends ScalableBaseChartComponent {
             record =>
               record &&
               record.data &&
-              record.data.sha &&
-              record.data.sha.length > 0 &&
-              !!stream.find(issue => record.data.sha === issue.sha)
+              record.data.shas &&
+              record.data.shas.length > 0 &&
+              !!record.data.shas.find(sha => !!stream.find(issue => sha === issue.sha))
           )
         ],
         []
       );
 
       stream.forEach(ticketPoint => {
-        ticketPoint.values = issueStream.filter(dataPoint => dataPoint.data.sha === ticketPoint.sha);
+        ticketPoint.values = issueStream.filter(dataPoint => !!dataPoint.data.shas.find(sha => sha === ticketPoint.sha));
         ticketPoint.points = Array.from(new Set(ticketPoint.values.map(record => record.data)));
       });
 
@@ -570,6 +576,8 @@ export class DataRiverChartComponent extends ScalableBaseChartComponent {
 
     const _this = this;
 
+    const getColor = d => d.stream.color[d instanceof IssueData ? d.status.name : d.issue ? d.issue.status.name : undefined];
+
     brushArea
       .append('g')
       .selectAll('a')
@@ -581,15 +589,15 @@ export class DataRiverChartComponent extends ScalableBaseChartComponent {
       .attr('rel', 'noopener noreferrer')
       .append('circle')
       .classed('issue-nodes', true)
-      .attr('fill', d => d.stream.color.ticket)
+      .attr('fill', d => d.stream.color.ticket || getColor(d))
       .attr('cx', d => scales.x(d.data.date))
       .attr('cy', d => (d instanceof IssueData ? scales.issue(d.status.name) : scales.y(d.buildSuccessRate)))
       .attr('r', d => d.radius)
       .attr('stroke-width', d => (!(d instanceof IssueData) && !d.issue ? 0 : 3))
-      .attr('stroke', d => d.stream.color[d instanceof IssueData ? d.status.name : d.issue ? d.issue.status.name : undefined])
+      .attr('stroke', getColor)
       .on('mouseenter', (event, dataPoint) => {
         tooltip.attr('additional', dataPoint.stream.ticketId);
-        tooltip.attr('color', `${dataPoint.stream.color.ticket}`);
+        tooltip.attr('color', `${dataPoint.stream.color.ticket || getColor(dataPoint)}`);
 
         if (dataPoint instanceof IssueData) {
           tooltip.attr('issue', dataPoint);
@@ -609,7 +617,13 @@ export class DataRiverChartComponent extends ScalableBaseChartComponent {
         const normalizedPoint = [-dataPoint.deletions, dataPoint.additions];
         normalizedPoint.data = dataPoint;
         const coords = this.getPoint(scales, normalizedPoint);
-        this.paintDataPoint(brushArea, scales.x(normalizedPoint.data.date), coords.y0, coords.y1, dataPoint.stream.color.ticket);
+        this.paintDataPoint(
+          brushArea,
+          scales.x(normalizedPoint.data.date),
+          coords.y0,
+          coords.y1,
+          dataPoint.stream.color.ticket || getColor(dataPoint)
+        );
       })
       .on('mouseout', function(event, stream) {
         return _this.onMouseLeave.bind(_this, this, tooltip, brushArea)(event, stream);
@@ -713,7 +727,7 @@ export class DataRiverChartComponent extends ScalableBaseChartComponent {
    * @param stream
    */
   createdTooltipNode(path, bisectDate, mouseoverDate, tooltip, event, node, brushArea, scales, stream) {
-    const realDataStream = stream.filter(record => record && record.data && record.data.sha && record.data.sha.length > 0);
+    const realDataStream = stream.filter(record => record && record.data && record.data.shas && record.data.shas.length > 0);
     const nearestDateIndex = bisectDate(realDataStream.map(record => record.data), mouseoverDate);
     const candidate1 = realDataStream[nearestDateIndex] || realDataStream[realDataStream.length - 1];
     const candidate2 = realDataStream[nearestDateIndex - 1] || realDataStream[0];

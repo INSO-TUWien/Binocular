@@ -70,7 +70,7 @@ class RiverTooltip extends React.Component {
   }
 
   render() {
-    const { name, date, sha, attribute, deletions, additions, buildStat, buildWeight, buildSuccessRate, trend } = this.state.data || {};
+    const { name, date, shas, attribute, deletions, additions, buildStat, buildWeight, buildSuccessRate, trend } = this.state.data || {};
 
     const status = (this.state.data || {}).status || (this.state.issue || {}).status;
     const isVisible = !this.state.hide && !!this.state.data && !!this.state.attribute;
@@ -186,11 +186,11 @@ class RiverTooltip extends React.Component {
                   </span>
                 </li>
               : null}
-            {sha
+            {shas && length in shas
               ? <li style={style}>
-                  <i>sha</i>
+                  <i>commits</i>
                   <span>
-                    {sha}
+                    {shas.length}
                   </span>
                 </li>
               : null}

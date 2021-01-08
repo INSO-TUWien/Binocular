@@ -11,6 +11,7 @@ import getIssueData from './getIssueData.js';
 import getBuildData from './getBuildData.js';
 import getBounds from './getBounds.js';
 import chroma from 'chroma-js';
+import getLanguageData from './getLanguageData';
 
 export const setResolution = createAction('SET_LANGUAGE_MODULE_RIVER_RESOLUTION');
 export const setShowIssues = createAction('SET_LANGUAGE_MODULE_RIVER_SHOW_ISSUES');
@@ -76,9 +77,10 @@ export const fetchLanguageModuleRiverData = fetchFactory(
     return yield Promise.join(
       getCommitData([firstCommitTimestamp, lastCommitTimestamp], [firstSignificantTimestamp, lastSignificantTimestamp]),
       getIssueData([firstIssueTimestamp, lastIssueTimestamp], [firstSignificantTimestamp, lastSignificantTimestamp]),
-      getBuildData()
+      getBuildData(),
+      getLanguageData()
     )
-      .spread((commits, issues, builds) => {
+      .spread((commits, issues, builds, languages) => {
         const palette = getPalette(commits, 15, committers.length);
 
         return {
