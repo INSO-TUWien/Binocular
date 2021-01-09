@@ -9,7 +9,7 @@ import { createEnum } from '../../../utils/Enum';
  * (only these will actually be returned, used for zooming, the rest of the time will be empty data).
  * @returns {*}
  */
-export default function getCommitData(significantSpan) {
+export default function getCommitData(significantSpan = []) {
   const commitList = [];
 
   return traversePages(getCommitsPage(significantSpan[1]), commit => {

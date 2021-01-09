@@ -2,7 +2,7 @@
 
 import { traversePages, graphQl } from '../../../utils';
 
-export default function getIssueData(issueSpan, significantSpan) {
+export default function getIssueData(significantSpan = []) {
   const issueList = [];
 
   return traversePages(getIssuesPage(significantSpan[1]), issue => {

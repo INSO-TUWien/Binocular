@@ -1,23 +1,35 @@
 'use strict';
 
 import { connect } from 'react-redux';
-import { setResolution, setShowIssues, setSelectedAuthors, setShowCIChart, setShowIssueChart } from './sagas';
+import {
+  setResolution,
+  setShowIssues,
+  setSelectedAuthors,
+  setShowCIChart,
+  setShowIssueChart,
+  setSelectedModules,
+  setSelectedLanguages,
+  setChartAttribute
+} from './sagas';
 import TabCombo from '../../components/TabCombo.js';
 import styles from './styles.scss';
 
-import LegendCompact from '../../components/LegendCompact';
 import CheckboxLegend from '../../components/CheckboxLegend';
 
-// eslint-disable-next-line no-unused-vars
-const mapStateToProps = (state, ownProps) => {
+const mapStateToProps = state => {
   const languageModuleRiverState = state.visualizations.languageModuleRiver.state;
 
   return {
     committers: languageModuleRiverState.data.data.committers,
     resolution: languageModuleRiverState.config.chartResolution,
+    riverAttribute: languageModuleRiverState.config.chartAttribute,
     showIssues: languageModuleRiverState.config.showIssues,
-    palette: languageModuleRiverState.data.data.palette,
+    attributes: languageModuleRiverState.data.data.attributes,
+    languages: languageModuleRiverState.data.data.languages,
+    modules: languageModuleRiverState.data.data.modules,
     selectedAuthors: languageModuleRiverState.config.selectedAuthors,
+    selectedLanguages: languageModuleRiverState.config.selectedLanguages,
+    selectedModules: languageModuleRiverState.config.selectedModules,
     showCIChart: languageModuleRiverState.config.showCIChart,
     showIssueChart: languageModuleRiverState.config.showIssueChart
   };
@@ -27,8 +39,11 @@ const mapDispatchToProps = (dispatch, ownProps) => {
   return Object.assign(
     {
       onClickResolution: resolution => dispatch(setResolution(resolution)),
+      onClickAttribute: resolution => dispatch(setChartAttribute(resolution)),
       onClickIssues: showIssues => dispatch(setShowIssues(showIssues)),
-      onClickCheckboxLegend: selected => dispatch(setSelectedAuthors(selected)),
+      onClickAuthors: selected => dispatch(setSelectedAuthors(selected)),
+      onClickLanguages: selected => dispatch(setSelectedLanguages(selected)),
+      onClickModules: selected => dispatch(setSelectedModules(selected)),
       onClickShowCIChart: showCIChart => dispatch(setShowCIChart(showCIChart)),
       onClickShowIssueChart: showIssueChart => dispatch(setShowIssueChart(showIssueChart))
     },
@@ -37,10 +52,22 @@ const mapDispatchToProps = (dispatch, ownProps) => {
 };
 
 const LangModRiverConfigComponent = props => {
-  let otherCommitters;
-  if (props.palette && 'others' in props.palette) {
-    otherCommitters = props.committers.length - (Object.keys(props.palette).length - 1);
-  }
+  const attributeKeys = Object.keys(props.attributes || {}).filter(key => key !== 'offset');
+  const palette = attributeKeys.reduce(
+    (attributes, key) =>
+      Object.assign(attributes, {
+        [key]: props.attributes[key].colors.reduce((colors, attribute) => Object.assign(colors, { [attribute.key]: attribute.color }), {})
+      }),
+    {}
+  );
+
+  const overflow = attributeKeys.reduce(
+    (attributes, key) =>
+      Object.assign(attributes, {
+        [key]: props.attributes[key].overflow || 0
+      }),
+    {}
+  );
 
   return (
     <div className={styles.configContainer}>
@@ -58,55 +85,52 @@ const LangModRiverConfigComponent = props => {
               ]}
               onChange={value => props.onClickResolution(value)}
             />
-            <div>
-              <label className={styles.checkboxLabel}>
-                <input
-                  name="showCI"
-                  type="checkbox"
-                  onChange={() => props.onClickShowCIChart(!props.showCIChart)}
-                  checked={props.showCIChart}
-                />{' '}
-                Show CI{' '}
-              </label>
-            </div>
-            <div>
-              <label className={styles.checkboxLabel}>
-                <input
-                  name="showIssues"
-                  type="checkbox"
-                  onChange={() => props.onClickShowIssueChart(!props.showIssueChart)}
-                  checked={props.showIssueChart}
-                />{' '}
-                Show Issues{' '}
-              </label>
-            </div>
           </div>
         </div>
         <div className={styles.field}>
-          <div className="control">
-            <label className="label">Issues</label>
-            <LegendCompact text="Opened | Closed" color="#3461eb" color2="#8099e8" />
-            <TabCombo
-              value={props.showIssues}
-              options={[
-                { label: 'All', icon: 'database', value: 'all' },
-                { label: 'Open', icon: 'folder-open', value: 'open' },
-                { label: 'Closed', icon: 'folder', value: 'closed' }
-              ]}
-              onChange={value => props.onClickIssues(value)}
-            />
-          </div>
+          <label className="label">River Attribute Settings</label>
+          <TabCombo
+            value={props.riverAttribute}
+            options={[
+              { label: 'Languages', icon: 'file-code', value: 'languages' },
+              { label: 'Modules', icon: 'folder-open', value: 'modules' }
+            ]}
+            onChange={value => props.onClickAttribute(value)}
+          />
         </div>
         <div className={styles.field}>
           <label className="label">Changes</label>
           <CheckboxLegend
-            palette={props.palette}
-            onClick={props.onClickCheckboxLegend.bind(this)}
+            palette={palette.authors}
+            onClick={props.onClickAuthors.bind(this)}
             title="Authors:"
             split={true}
-            otherCommitters={otherCommitters}
+            otherCommitters={overflow.authors}
           />
         </div>
+        {props.riverAttribute === 'languages'
+          ? <div className={styles.field}>
+              <CheckboxLegend
+                palette={palette.languages}
+                onClick={props.onClickLanguages.bind(this)}
+                title="Available Languages:"
+                explanation={'Number of lines per Language'}
+                split={false}
+                otherCommitters={overflow.languages}
+              />
+            </div>
+          : props.riverAttribute === 'modules'
+            ? <div className={styles.field}>
+                <CheckboxLegend
+                  palette={palette.modules}
+                  onClick={props.onClickLanguages.bind(this)}
+                  title="Available Modules:"
+                  explanation={'Number of lines per Modules'}
+                  split={false}
+                  otherCommitters={overflow.modules}
+                />
+              </div>
+            : null}
       </form>
     </div>
   );

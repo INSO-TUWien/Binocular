@@ -12,25 +12,23 @@ import cx from 'classnames';
 import { RiverData, BuildStat } from '../../../components/DataRiverChart/RiverData';
 import StreamKey from '../../../components/DataRiverChart/StreamKey';
 import IssueStream from '../../../components/DataRiverChart/IssueStream';
-import generateColorPattern from '../../../utils/colors';
 
 export default class LanguageModuleRiver extends React.Component {
   constructor(props) {
     super(props);
 
-    const { commitChartData, commitScale, commitPalette, selectedAuthors } = this.extractCommitData(props);
-    const { issueChartData, issueScale } = this.extractIssueData(props);
-    const { ciChartData, ciScale } = this.extractCIData(props);
+    //const { commitChartData, commitPalette, selectedAuthors } = this.extractCommitData(props);
+    //const { issueChartData } = this.extractIssueData(props);
+    const { ciChartData } = this.extractCIData(props);
 
     this.state = {
-      commitChartData, //Data for commit changes
-      issueChartData,
+      commitChartData: [], //Data for commit changes
+      issueChartData: [],
       ciChartData,
-      commitScale, //Maximum change in commit changes graph, used for y-axis scaling
-      issueScale,
-      ciScale,
-      commitPalette,
-      selectedAuthors
+      commitPalette: {},
+      selectedAuthors: [],
+      selectedLanguages: [],
+      selectedModules: []
     };
   }
 
@@ -39,51 +37,43 @@ export default class LanguageModuleRiver extends React.Component {
    * @param nextProps props that are passed
    */
   componentWillReceiveProps(nextProps) {
-    const { commitChartData, commitScale, commitPalette, selectedAuthors } = this.extractCommitData(nextProps);
-    const { issueChartData } = this.extractIssueData(nextProps);
+    //const { commitChartData, commitPalette, selectedAuthors } = this.extractCommitData(nextProps);
+    //const { issueChartData } = this.extractIssueData(nextProps);
     const { ciChartData } = this.extractCIData(nextProps);
-    this.setState({
-      commitChartData,
-      issueChartData,
-      ciChartData,
-      commitScale,
-      commitPalette,
-      selectedAuthors
-    });
+    this.setState(prev =>
+      Object.assign(prev, {
+        commitChartData: [],
+        issueChartData: [],
+        ciChartData,
+        commitPalette: {},
+        selectedAuthors: [],
+        selectedLanguages: [],
+        selectedModules: []
+      })
+    );
   }
 
   render() {
-    if (this.props.palette) {
-      console.log(Object.keys(this.props.palette));
-    }
+    const attributes = this.props.attributes;
 
     let commitOrder;
-    if (this.props.palette) {
-      commitOrder = Object.keys(this.props.palette);
+    if (attributes && attributes.authors) {
+      commitOrder = Object.keys(attributes.authors);
     }
 
     //TODO: remove mocked
-    const attributes = { js: 'JavaScript', ts: 'Typescript' };
+    const xattributes = { js: 'JavaScript', ts: 'Typescript' };
 
     const commitPalette = Object.assign(
       {},
       this.state.commitPalette || {},
-      chroma.scale(['#88fa6e', '#10a3f0']).mode('lch').colors(attributes.length).reduce((collection, color, index) => {
-        collection[attributes[Object.keys(attributes)[index]]] = chroma(color).hex('rgba');
+      chroma.scale(['#88fa6e', '#10a3f0']).mode('lch').colors(xattributes.length).reduce((collection, color, index) => {
+        collection[xattributes[Object.keys(xattributes)[index]]] = chroma(color).hex('rgba');
         return collection;
       }, {})
     );
 
     commitPalette['#10'] = chroma('#d739fe').hex();
-
-    /*const pattern = generateColorPattern(Math.ceil((Object.keys(commitPalette) || []).length / 2));
-    commitPalette = Object.keys(commitPalette).reduce(
-      (colors, key, i) => Object.assign(colors, { [key]: i % 2 === 0 ? pattern[i / 2] : chroma(pattern[(i - 1) / 2]).darken(3).css() }),
-      chroma.scale(['#88fa6e', '#10a3f0']).mode('lch').colors(attributes.length).reduce((collection, color, index) => {
-        collection[attributes[Object.keys(attributes)[index]]] = chroma(color).hex('rgba');
-        return collection;
-      }, {})
-    );*/
 
     commitPalette['Open'] = chroma('skyblue').hex();
     commitPalette['In Process'] = '#ffe12e';
@@ -99,27 +89,27 @@ export default class LanguageModuleRiver extends React.Component {
     let mockData;
     if (commitOrder) {
       mockData = [
-        new RiverData(addDays(date, 1), attributes['ts'], commitOrder[0], ['a1'], BuildStat.Failed, 1, 100, 2),
-        new RiverData(addDays(date, 1), attributes['js'], commitOrder[1], ['a1'], BuildStat.Success, 0.1, 1000, 2),
-        new RiverData(addDays(date, 2), attributes['js'], commitOrder[1], ['a2'], BuildStat.Failed, 1, 4, 2000),
-        new RiverData(addDays(date, 3), attributes['js'], commitOrder[1], ['a3'], BuildStat.Skipped, 1, 140, 1200),
-        new RiverData(addDays(date, 4), attributes['js'], commitOrder[1], ['a4'], BuildStat.Success, 1, 1004, 120),
-        new RiverData(addDays(date, 5), attributes['js'], commitOrder[1], ['a5'], BuildStat.Success, 1, 200, 12),
-        new RiverData(addDays(date, 5), attributes['ts'], commitOrder[0], ['a5'], BuildStat.Success, 1, 1000, 2),
-        new RiverData(addDays(date, 6), attributes['js'], commitOrder[2], ['c6'], BuildStat.Success, 1, 2002, 2),
-        new RiverData(addDays(date, 3), attributes['js'], commitOrder[2], ['c7'], BuildStat.Success, 1, 1000, 2),
-        new RiverData(addDays(date, 4), attributes['js'], commitOrder[2], ['c8'], BuildStat.Success, 1, 2002, 2100),
-        new RiverData(addDays(date, 5), attributes['js'], commitOrder[2], ['c9'], BuildStat.Failed, 1, 1002, 20),
-        // new stream,
-        new RiverData(addDays(date, 0), attributes['js'], commitOrder[3], ['d0'], BuildStat.Success, 1, 3000, 0),
-        new RiverData(addDays(date, 1), attributes['js'], commitOrder[3], ['d1'], BuildStat.Failed, 1, 0, 3000),
-        new RiverData(addDays(date, 2), attributes['js'], commitOrder[3], ['d2'], BuildStat.Skipped, 1, 1500, 1500),
-        new RiverData(addDays(date, 3), attributes['js'], commitOrder[3], ['d3'], BuildStat.Success, 1, 3000, 3000),
-        new RiverData(addDays(date, 4), attributes['js'], commitOrder[3], ['d4'], BuildStat.Success, 1, 3000, 3000),
-        new RiverData(addDays(date, 5), attributes['js'], commitOrder[3], ['d5'], BuildStat.Failed, 1, 500, 500),
-        new RiverData(addDays(date, 6), attributes['js'], commitOrder[3], ['d6'], BuildStat.Skipped, 1, 600, 400),
-        new RiverData(addDays(date, 7), attributes['js'], commitOrder[3], ['d7'], BuildStat.Failed, 1, 400, 900),
-        new RiverData(addDays(date, 8), attributes['js'], commitOrder[3], ['d8'], BuildStat.Success, 1, 200, 300)
+        new RiverData(addDays(date, 1), xattributes['ts'], commitOrder[0], ['a1'], BuildStat.Failed, 1, 100, 2),
+        new RiverData(addDays(date, 1), xattributes['js'], commitOrder[1], ['a1'], BuildStat.Success, 0.1, 1000, 2),
+        new RiverData(addDays(date, 2), xattributes['js'], commitOrder[1], ['a2'], BuildStat.Failed, 1, 4, 2000),
+        new RiverData(addDays(date, 3), xattributes['js'], commitOrder[1], ['a3'], BuildStat.Skipped, 1, 140, 1200),
+        new RiverData(addDays(date, 4), xattributes['js'], commitOrder[1], ['a4'], BuildStat.Success, 1, 1004, 120),
+        new RiverData(addDays(date, 5), xattributes['js'], commitOrder[1], ['a5'], BuildStat.Success, 1, 200, 12),
+        new RiverData(addDays(date, 5), xattributes['ts'], commitOrder[0], ['a5'], BuildStat.Success, 1, 1000, 2),
+        new RiverData(addDays(date, 6), xattributes['js'], commitOrder[2], ['c6'], BuildStat.Success, 1, 2002, 2),
+        new RiverData(addDays(date, 3), xattributes['js'], commitOrder[2], ['c7'], BuildStat.Success, 1, 1000, 2),
+        new RiverData(addDays(date, 4), xattributes['js'], commitOrder[2], ['c8'], BuildStat.Success, 1, 2002, 2100),
+        new RiverData(addDays(date, 5), xattributes['js'], commitOrder[2], ['c9'], BuildStat.Failed, 1, 1002, 20),
+        // new stream,x
+        new RiverData(addDays(date, 0), xattributes['js'], commitOrder[3], ['d0'], BuildStat.Success, 1, 3000, 0),
+        new RiverData(addDays(date, 1), xattributes['js'], commitOrder[3], ['d1'], BuildStat.Failed, 1, 0, 3000),
+        new RiverData(addDays(date, 2), xattributes['js'], commitOrder[3], ['d2'], BuildStat.Skipped, 1, 1500, 1500),
+        new RiverData(addDays(date, 3), xattributes['js'], commitOrder[3], ['d3'], BuildStat.Success, 1, 3000, 3000),
+        new RiverData(addDays(date, 4), xattributes['js'], commitOrder[3], ['d4'], BuildStat.Success, 1, 3000, 3000),
+        new RiverData(addDays(date, 5), xattributes['js'], commitOrder[3], ['d5'], BuildStat.Failed, 1, 500, 500),
+        new RiverData(addDays(date, 6), xattributes['js'], commitOrder[3], ['d6'], BuildStat.Skipped, 1, 600, 400),
+        new RiverData(addDays(date, 7), xattributes['js'], commitOrder[3], ['d7'], BuildStat.Failed, 1, 400, 900),
+        new RiverData(addDays(date, 8), xattributes['js'], commitOrder[3], ['d8'], BuildStat.Success, 1, 200, 300)
       ];
     }
 
@@ -141,10 +131,10 @@ export default class LanguageModuleRiver extends React.Component {
 
     const selectedAuthors = (this.state.selectedAuthors || []).map(author => author.replace(/\((.*)\)\s+/gi, '')).reduce((data, author) => {
       data.push(
-        new StreamKey({ name: author, attribute: attributes['js'] }),
+        new StreamKey({ name: author, attribute: xattributes['js'] }),
         new StreamKey({
           name: author,
-          attribute: attributes['ts']
+          attribute: xattributes['ts']
         })
       );
       return data;
@@ -193,6 +183,11 @@ export default class LanguageModuleRiver extends React.Component {
     );
   }
 
+  /**
+   *
+   * @param props
+   * @returns {{}|{issueChartData: [], issueScale: number[]}}
+   */
   extractIssueData(props) {
     if (!props.issues || props.issues.length === 0) {
       return {};
@@ -283,6 +278,11 @@ export default class LanguageModuleRiver extends React.Component {
     return { issueChartData, issueScale };
   }
 
+  /**
+   *
+   * @param props
+   * @returns {{}|{ciScale: number[], ciChartData: []}}
+   */
   extractCIData(props) {
     if (!props.builds || props.builds.length === 0) {
       return {};
@@ -323,9 +323,14 @@ export default class LanguageModuleRiver extends React.Component {
       }
     });
 
-    return { ciChartData, ciScale };
+    return { ciChartData };
   }
 
+  /**
+   *
+   * @param props
+   * @returns {{}|{commitChartData: [], selectedAuthors: [], commitScale: number[], commitPalette: {}}}
+   */
   extractCommitData(props) {
     if (!props.commits || props.commits.length === 0) {
       return {};
@@ -377,8 +382,8 @@ export default class LanguageModuleRiver extends React.Component {
     //---- STEP 2: CONSTRUCT CHART DATA FROM AGGREGATED COMMITS ----
     const commitChartData = [];
     const commitChartPalette = {};
-    commitChartPalette['(Additions) others'] = props.palette['others'];
-    commitChartPalette['(Deletions) others'] = props.palette['others'];
+    commitChartPalette['(Additions) others'] = props.attributes['others'];
+    commitChartPalette['(Deletions) others'] = props.attributes['others'];
     _.each(data, function(commit) {
       //commit has structure {date, statsByAuthor: {}} (see next line)}
       const obj = { date: commit.date };
@@ -386,19 +391,19 @@ export default class LanguageModuleRiver extends React.Component {
       obj['(Deletions) others'] = -0.001;
       _.each(props.committers, function(committer) {
         //commitLegend to iterate over authorNames, commitLegend has structure [{name, style}, ...]
-        if (committer in commit.statsByAuthor && committer in props.palette) {
+        if (committer in commit.statsByAuthor && committer in props.attributes) {
           //If committer has data
           //Insert number of changes with the author name as key,
           //statsByAuthor has structure {{authorName: {count, additions, deletions, changes}}, ...}
           obj['(Additions) ' + committer] = commit.statsByAuthor[committer].additions;
           //-0.001 for stack layout to realize it belongs on the bottom
           obj['(Deletions) ' + committer] = commit.statsByAuthor[committer].deletions * -1 - 0.001;
-          commitChartPalette['(Additions) ' + committer] = chroma(props.palette[committer]).alpha(0.85).hex('rgba');
-          commitChartPalette['(Deletions) ' + committer] = chroma(props.palette[committer]).alpha(0.85).darken(0.5).hex('rgba');
-        } else if (committer in commit.statsByAuthor && !(committer in props.palette)) {
+          commitChartPalette['(Additions) ' + committer] = chroma(props.attributes[committer]).alpha(0.85).hex('rgba');
+          commitChartPalette['(Deletions) ' + committer] = chroma(props.attributes[committer]).alpha(0.85).darken(0.5).hex('rgba');
+        } else if (committer in commit.statsByAuthor && !(committer in props.attributes)) {
           obj['(Additions) others'] += commit.statsByAuthor[committer].additions;
           obj['(Deletions) others'] += commit.statsByAuthor[committer].deletions * -1 - 0.001;
-        } else if (committer in props.palette) {
+        } else if (committer in props.attributes) {
           obj['(Additions) ' + committer] = 0;
           obj['(Deletions) ' + committer] = -0.001; //-0.001 for stack layout to realize it belongs on the bottom
         }
@@ -447,6 +452,11 @@ export default class LanguageModuleRiver extends React.Component {
     return { commitChartData, commitScale, commitPalette: commitChartPalette, selectedAuthors };
   }
 
+  /**
+   *
+   * @param resolution
+   * @returns {{unit: string, interval: moment.Duration}|{unit: string, interval: number}}
+   */
   static getGranularity(resolution) {
     switch (resolution) {
       case 'years':

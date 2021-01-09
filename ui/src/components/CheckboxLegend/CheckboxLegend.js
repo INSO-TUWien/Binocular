@@ -19,6 +19,7 @@ const ICON_HEIGHT = 15;
  *            Callback function for when something is clicked. The function argument contains the selected entries.
  *  - split (Format: true/false)
  *            Split the colors into itself and a brighter version of itself (using chroma-js .brighten())
+ *  - explanation:(string) set custom explanation
  */
 export default class CheckboxLegend extends React.Component {
   constructor(props) {
@@ -131,11 +132,19 @@ export default class CheckboxLegend extends React.Component {
         const keys = Object.keys(this.props.palette);
         const color1 = chroma(this.props.palette[keys[0]]).hex();
         const color2 = chroma(this.props.palette[keys[0]]).darken(0.5).hex();
-        explanation = <LegendCompact text="Additions | Deletions (# lines per author)" color={color1} color2={color2} />;
+        explanation = (
+          <LegendCompact
+            text={this.props.explanation ? this.props.explanation : 'Additions | Deletions (# lines per author)'}
+            color={color1}
+            color2={color2}
+          />
+        );
       } else {
         const keys = Object.keys(this.props.palette);
         const color = this.props.palette[keys[0]];
-        explanation = <LegendCompact text="Number of commits (per author)" color={color} />;
+        explanation = (
+          <LegendCompact text={this.props.explanation ? this.props.explanation : 'Number of commits (per author)'} color={color} />
+        );
       }
     }
 

@@ -2,22 +2,24 @@
 
 import Promise from 'bluebird';
 import { createAction } from 'redux-actions';
-import { select, throttle, fork, takeEvery } from 'redux-saga/effects';
-import _ from 'lodash';
+import { throttle, fork, takeEvery } from 'redux-saga/effects';
 
 import { fetchFactory, timestampedActionFactory, mapSaga } from '../../../sagas/utils.js';
 import getCommitData from './getCommitData.js';
 import getIssueData from './getIssueData.js';
 import getBuildData from './getBuildData.js';
 import getBounds from './getBounds.js';
-import chroma from 'chroma-js';
 import getLanguageData from './getLanguageData';
 import getModuleData from './getModuleData';
 import generateColorPattern from '../../../utils/colors';
+import { nextPrime } from '../../../utils/math';
 
 export const setResolution = createAction('SET_LANGUAGE_MODULE_RIVER_RESOLUTION');
+export const setChartAttribute = createAction('SET_LANGUAGE_MODULE_RIVER_CHART_ATTRIBUTE');
 export const setShowIssues = createAction('SET_LANGUAGE_MODULE_RIVER_SHOW_ISSUES');
 export const setSelectedAuthors = createAction('SET_LANGUAGE_MODULE_RIVER_SELECTED_AUTHORS');
+export const setSelectedLanguages = createAction('SET_LANGUAGE_MODULE_RIVER_SELECTED_LANGUAGES');
+export const setSelectedModules = createAction('SET_LANGUAGE_MODULE_RIVER_SELECTED_MODULES');
 export const setShowCIChart = createAction('SET_LANGUAGE_MODULE_RIVER_SHOW_CI');
 export const setShowIssueChart = createAction('SET_LANGUAGE_MODULE_RIVER_SHOW_ISSUE');
 export const setShowChangesChart = createAction('SET_LANGUAGE_MODULE_RIVER_SHOW_CHANGES_CHART');
@@ -59,7 +61,7 @@ function* watchRefresh() {
 }
 
 /**
- * Fetch data for languageModuleRiver, this still includes old functions that were copied over.
+ * Fetch data for languageModuleRiver, this still includes old functions that were copied over from dashboard.
  */
 export const fetchLanguageModuleRiverData = fetchFactory(
   function*() {
@@ -70,27 +72,23 @@ export const fetchLanguageModuleRiverData = fetchFactory(
     const firstIssueTimestamp = firstIssue ? Date.parse(firstIssue.createdAt) : firstCommitTimestamp;
     const lastIssueTimestamp = lastIssue ? Date.parse(lastIssue.createdAt) : lastCommitTimestamp;
 
-    const state = yield select();
-    const viewport = state.visualizations.languageModuleRiver.state.config.viewport || [0, null];
-
-    const firstSignificantTimestamp = Math.max(viewport[0], Math.min(firstCommitTimestamp, firstIssueTimestamp));
-    const lastSignificantTimestamp = viewport[1] ? viewport[1].getTime() : Math.max(lastCommitTimestamp, lastIssueTimestamp);
+    const firstSignificantTimestamp = Math.min(firstCommitTimestamp, firstIssueTimestamp);
+    const lastSignificantTimestamp = Math.max(lastCommitTimestamp, lastIssueTimestamp);
 
     return yield Promise.join(
       getCommitData([firstSignificantTimestamp, lastSignificantTimestamp]),
-      getIssueData([firstIssueTimestamp, lastIssueTimestamp], [firstSignificantTimestamp, lastSignificantTimestamp]),
-      getBuildData([firstSignificantTimestamp, lastSignificantTimestamp]),
+      getIssueData([firstSignificantTimestamp, lastSignificantTimestamp]),
+      getBuildData(),
       getLanguageData(),
       getModuleData()
     )
       .spread((commits, issues, builds, languages, modules) => {
-        const palette = getPalette(commits, 100);
+        const attributes = organizeAttributes(commits, 100);
 
         return {
-          otherCount: 0,
           commits,
           committers,
-          palette,
+          attributes,
           issues,
           builds,
           languages,
@@ -118,10 +116,13 @@ export const fetchLanguageModuleRiverData = fetchFactory(
  * @param maxModules
  * @returns {any}
  */
-function getPalette(commits, maxNumberOfColors, maxAuthors = 15, maxLanguages = 15, maxModules = 40) {
+function organizeAttributes(commits, maxNumberOfColors, maxAuthors = 15, maxLanguages = 15, maxModules = 40) {
   const max = { authors: maxAuthors, languages: maxLanguages, modules: maxModules };
 
-  const colors = generateColorPattern(Math.min(maxNumberOfColors, Object.keys(max).reduce((sum, count) => sum + count, 0)));
+  // using prime allows the algorithm to create a mostly observable unique color pattern
+  const colors = generateColorPattern(
+    Math.min(nextPrime(maxNumberOfColors), nextPrime(Object.keys(max).reduce((sum, key) => sum + max[key], 0)))
+  );
 
   const totals = calculateTotals(commits);
 
@@ -142,10 +143,22 @@ function getPalette(commits, maxNumberOfColors, maxAuthors = 15, maxLanguages = 
     (attributes, attribute) => {
       const elementCount = Math.min(orderedList[attribute].length, max[attribute]);
       const offset = attributes.offset + elementCount;
-      attributes[attribute] = colors.slice(attributes.offset, offset).map((color, i, colorPalette) => ({
-        key: i < colorPalette.length - 1 ? orderedList[attribute][i].name : 'others',
-        color
-      }));
+      const overflow = orderedList[attribute].length - elementCount;
+      const hasOverflow = overflow > 0;
+      attributes[attribute] = {
+        colors: colors.slice(attributes.offset, offset).map((color, i, colorPalette) => ({
+          key: hasOverflow && i >= colorPalette.length - 1 ? 'others' : orderedList[attribute][i].name,
+          color
+        })),
+        order: hasOverflow ? orderedList[attribute].slice(0, elementCount - 1) : orderedList[attribute],
+        overflow
+      };
+      if (hasOverflow) {
+        attributes[attribute].order[elementCount - 1] = {
+          name: 'other',
+          changes: orderedList[attribute].slice(elementCount - 1).reduce((sum, element) => sum + element.changes, 0)
+        };
+      }
       attributes.offset = offset;
       return attributes;
     },
