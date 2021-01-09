@@ -65,18 +65,25 @@ export default class LanguageModuleRiver extends React.Component {
     //TODO: remove mocked
     const attributes = { js: 'JavaScript', ts: 'Typescript' };
 
-    let commitPalette = Object.assign({}, this.state.commitPalette || {});
+    const commitPalette = Object.assign(
+      {},
+      this.state.commitPalette || {},
+      chroma.scale(['#88fa6e', '#10a3f0']).mode('lch').colors(attributes.length).reduce((collection, color, index) => {
+        collection[attributes[Object.keys(attributes)[index]]] = chroma(color).hex('rgba');
+        return collection;
+      }, {})
+    );
 
     commitPalette['#10'] = chroma('#d739fe').hex();
 
-    const pattern = generateColorPattern(Math.ceil((Object.keys(commitPalette) || []).length / 2));
+    /*const pattern = generateColorPattern(Math.ceil((Object.keys(commitPalette) || []).length / 2));
     commitPalette = Object.keys(commitPalette).reduce(
       (colors, key, i) => Object.assign(colors, { [key]: i % 2 === 0 ? pattern[i / 2] : chroma(pattern[(i - 1) / 2]).darken(3).css() }),
       chroma.scale(['#88fa6e', '#10a3f0']).mode('lch').colors(attributes.length).reduce((collection, color, index) => {
         collection[attributes[Object.keys(attributes)[index]]] = chroma(color).hex('rgba');
         return collection;
       }, {})
-    );
+    );*/
 
     commitPalette['Open'] = chroma('skyblue').hex();
     commitPalette['In Process'] = '#ffe12e';

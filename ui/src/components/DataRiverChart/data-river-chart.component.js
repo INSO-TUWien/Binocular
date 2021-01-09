@@ -564,6 +564,12 @@ export class DataRiverChartComponent extends ScalableBaseChartComponent {
     this.paintIssueDataPoints(scales, brushArea, tooltip);
   }
 
+  /**
+   *
+   * @param scales
+   * @param brushArea
+   * @param tooltip
+   */
   paintIssueDataPoints(scales, brushArea, tooltip) {
     const issueDataPoints = this.getIssueDataPoints();
 
@@ -790,11 +796,21 @@ export class DataRiverChartComponent extends ScalableBaseChartComponent {
     brushArea.selectAll('.layer').attr('opacity', 0.9).sort((streamA, streamB) => streamA.index - streamB.index);
   }
 
+  /**
+   *
+   * @param data
+   * @returns {string}
+   */
   // eslint-disable-next-line no-unused-vars
   getBrushId(data) {
     return data.stream ? `issue-${data.key.toId()}` : `stream-${data.key.toId()}`;
   }
 
+  /**
+   *
+   * @param data
+   * @returns {string}
+   */
   getBrushClass(data) {
     return data.stream ? 'issues' : 'changes';
   }

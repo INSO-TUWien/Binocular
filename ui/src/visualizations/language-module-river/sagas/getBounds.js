@@ -14,13 +14,11 @@ export default function getBounds() {
          firstCommit: commits( perPage: 1, sort: "ASC" ) {
            data {
              date
-             stats { additions deletions }
            }
          }
          lastCommit: commits( perPage: 1, sort: "DESC" ) {
            data {
              date
-             stats { additions deletions }
            }
          },
          firstIssue: issues( perPage: 1, sort: "ASC" ) {

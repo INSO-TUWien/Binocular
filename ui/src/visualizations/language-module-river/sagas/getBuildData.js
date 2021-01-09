@@ -24,12 +24,10 @@ const getBuildsPage = (page, perPage) => {
         count
         data {
           id
-          createdAt
-          stats {
-            success
-            failed
-            pending
-            canceled
+          sha
+          status
+          jobs {
+            status
           }
         }
       }
