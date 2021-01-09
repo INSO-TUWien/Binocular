@@ -77,6 +77,16 @@ export default class ConflictAwareness extends React.Component {
       updatedProps.otherProject = nextProps.otherProject;
     }
 
+    // a new filter for highlighting commits of an issue was selected
+    if (nextProps.issueForFilter !== prevState.issueForFilter) {
+      updatedProps.issueForFilter = nextProps.issueForFilter;
+      _highlightCommitsFromIssue(
+        prevState.issueForFilter,
+        nextProps.issueForFilter,
+        nextProps.commits
+      );
+    }
+
     if (_.isEmpty(updatedProps)) {
       // No state update necessary
       return null;

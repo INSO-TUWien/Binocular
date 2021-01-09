@@ -2,13 +2,22 @@
 
 import { connect } from 'react-redux';
 
-import { setColor, setOtherProject, updateConflictAwarenessData } from './sagas';
+import {
+  setColor,
+  setIssueForFilter,
+  setIssueSelector,
+  setOtherProject,
+  setSelectedIssue,
+  updateConflictAwarenessData,
+} from './sagas';
 import styles from './styles.scss';
 
 import cx from 'classnames';
 import ColorPicker from '../../components/ColorPicker';
 import React from 'react';
 import SearchBox from '../../components/SearchBox';
+
+let issueNumber = ''; // issueNumber (ID) for highlighting the commits of the issue
 
 const mapStateToProps = (state) => {
   const caState = state.visualizations.conflictAwareness.state;
@@ -20,12 +29,38 @@ const mapStateToProps = (state) => {
     colorCombined: caState.config.color.combined, // the color of the commits/edges found in both projects
     parent: caState.data.data.parent, // the parent of the base project
     forks: caState.data.data.forks, // the forks of the base project
+    issues: caState.data.data.issues, // the issues of the base project for the filter list
     otherProject: caState.config.otherProject, // the selected parent/fork
+    issueForFilter: caState.config.issueForFilter, // the issueID whose commits should be highlighted
+    issueSelector: caState.config.issueSelector, // indicator if the issue selection should be via a list of GitHub issues or by text entry
+    selectedIssue: caState.config.selectedIssue, // issue which was selected in the list
   };
 };
 
 const mapDispatchToProps = (dispatch) => {
   return {
+    // sets the issueNumber of the selected issue and highlights its commits
+    onSetSelectedIssue: (selectedIssue) => {
+      if (selectedIssue) {
+        issueNumber = `#${selectedIssue.iid}`;
+      } else {
+        issueNumber = '';
+      }
+      dispatch(setIssueForFilter(issueNumber));
+      dispatch(setSelectedIssue(selectedIssue));
+    },
+    // when the issue filter selector is changed to text or list based
+    // if text based: resets the issueNumber, filter and the selectedIssue
+    onSetIssueSelector: (selector) => {
+      if (selector === 'text') {
+        issueNumber = '';
+        dispatch(setIssueForFilter(issueNumber));
+        dispatch(setSelectedIssue(undefined));
+      }
+      dispatch(setIssueSelector(selector));
+    },
+    // when a new issue is selected (text and list based) for highlighting its commits
+    onSetIssueForFilter: () => dispatch(setIssueForFilter(issueNumber)),
     onSetColor: (color, key) => dispatch(setColor(color, key)),
     // when a (new) parent/forks of the base project is changed
     onSetOtherProject: (otherProject, repoFullName) => {
@@ -84,10 +119,67 @@ const ConflictAwarenessConfigComponent = (props) => {
           </div>
         </div>
 
-        {/* Properties for the Issue selection TODO: replace textbox with selection */}
+        {/* Properties for the Issue selection */}
         <div className="field">
           <label className="label">Issue:</label>
-          <input type="text" />
+          {/* radio button for text based commit issue highlighting */}
+          <label className="radio">
+            <input
+              name="issueFilterSelection"
+              type="radio"
+              checked={props.issueSelector === 'text'}
+              onChange={() => props.onSetIssueSelector('text')}
+            />
+            Textual Issue ID
+          </label>
+
+          {/* radio button for list based commit issue highlighting */}
+          <label className="radio">
+            <input
+              name="issueFilterSelection"
+              type="radio"
+              checked={props.issueSelector === 'list'}
+              onChange={() => props.onSetIssueSelector('list')}
+            />
+            GitHub Issues
+          </label>
+
+          {/* text based commit filter highlighting */}
+          {props.issueSelector === 'text' && (
+            <div className={styles.colorPickContainer}>
+              {/* text field */}
+              <input
+                type="search"
+                className={cx('input')}
+                onChange={(event) => (issueNumber = event.target.value)}
+                onKeyPress={(event) => {
+                  if (event.key === 'Enter') {
+                    props.onSetIssueForFilter();
+                  }
+                }}
+              />
+              {/* search button */}
+              <a className="button ml-3" href="#" onClick={() => props.onSetIssueForFilter()}>
+                <i className="fas fa-search" />
+              </a>
+            </div>
+          )}
+
+          {/* list based commit filter highlighting */}
+          {props.issueSelector === 'list' && (
+            // search box with issues
+            <SearchBox
+              placeholder="Select issue..."
+              renderOption={(issue) => `#${issue.iid} ${issue.title}`}
+              search={(text) => {
+                return props.issues.filter((issue) =>
+                  `#${issue.iid} ${issue.title}`.toLowerCase().includes(text.toLowerCase())
+                );
+              }}
+              value={props.selectedIssue}
+              onChange={(issue) => props.onSetSelectedIssue(issue)}
+            />
+          )}
         </div>
       </form>
     </div>

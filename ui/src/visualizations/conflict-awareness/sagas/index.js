@@ -9,6 +9,22 @@ import { endpointUrl } from '../../../utils';
 import { fork, takeEvery } from 'redux-saga/effects';
 import getParentAndForks from './get-parent-and-forks';
 import indexProject from './index-project';
+import getIssueData from './get-issue-data';
+
+// updates the selected issue from the list
+export const setSelectedIssue = createAction(
+  'SET_SELECTED_ISSUE',
+  (selectedIssue) => selectedIssue
+);
+
+// updates the issueSelector for showing a list of GitHub issues or a text field
+export const setIssueSelector = createAction(
+  'SET_ISSUE_SELECTOR',
+  (issueSelector) => issueSelector
+);
+
+// sets a new issueID for highlighting its commits
+export const setIssueForFilter = createAction('SET_ISSUE_FOR_FILTER', (issueID) => issueID);
 
 // sets a new color for a specific project (key - baseProject/otherProject/combined)
 export const setColor = createAction('SET_COLOR', (color, key) => {
@@ -60,16 +76,19 @@ export const fetchConflictAwarenessData = fetchFactory(
       .then(() => {
         // get the parent and the forks of the base project if requested
         let parentAndForksPromise = Promise.resolve(); // only needed to have shorter code for the decision if the data should be requested or not
+        let issuesPromise = Promise.resolve(); // only needed to have shorter code for the decision if the data should be requested or not
         if (shouldGetParentAndForks) {
           parentAndForksPromise = getParentAndForks();
+          issuesPromise = getIssueData();
         }
         return Promise.join(
           getCommitData(projects),
           getBranchData(projects),
-          parentAndForksPromise
+          parentAndForksPromise,
+          issuesPromise
         );
       })
-      .then(([commits, branches, parentAndForks]) => {
+      .then(([commits, branches, parentAndForks, issues]) => {
         // return the retrieved data for the state
         let data = {
           commits,
@@ -78,6 +97,9 @@ export const fetchConflictAwarenessData = fetchFactory(
         if (parentAndForks) {
           data.parent = parentAndForks.parent;
           data.forks = parentAndForks.forks;
+        }
+        if (issues) {
+          data.issues = issues;
         }
         return data;
       })
