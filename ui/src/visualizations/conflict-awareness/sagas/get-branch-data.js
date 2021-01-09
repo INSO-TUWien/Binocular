@@ -25,8 +25,8 @@ export default function getBranchData(projects) {
 const getBranchesPage = (projects) => (page, perPage) => {
   return graphQl
     .query(
-      `query($page: Int, $perPage: Int) {
-         branches(page: $page, perPage: $perPage) {
+      `query($page: Int, $perPage: Int, $projects: [String]) {
+         branches(page: $page, perPage: $perPage, projects: $projects) {
            count
            page
            perPage

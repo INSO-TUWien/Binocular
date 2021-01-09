@@ -251,6 +251,9 @@ const queryType = new gql.GraphQLObjectType({
       issueDateHistogram: makeDateHistogramEndpoint(issues),
       branches: paginated({
         type: require('./types/branch.js'),
+        args: {
+          projects: { type: new gql.GraphQLList(gql.GraphQLString) },
+        },
         query: (root, args) => {
           let filterProjectsString = '*';
           // filter branches to provide only those, whose branches headShas objects contains at least one of the provided projects list
