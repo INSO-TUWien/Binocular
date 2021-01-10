@@ -145,18 +145,23 @@ function organizeAttributes(commits, maxNumberOfColors, maxAuthors = 15, maxLang
       const offset = attributes.offset + elementCount;
       const overflow = orderedList[attribute].length - elementCount;
       const hasOverflow = overflow > 0;
+      const others = orderedList[attribute].slice(elementCount - 1);
       attributes[attribute] = {
         colors: colors.slice(attributes.offset, offset).map((color, i, colorPalette) => ({
           key: hasOverflow && i >= colorPalette.length - 1 ? 'others' : orderedList[attribute][i].name,
           color
         })),
+        // store all ordered values of a given attribute
         order: hasOverflow ? orderedList[attribute].slice(0, elementCount - 1) : orderedList[attribute],
-        overflow
+        overflow,
+        // contains all others
+        others: others.map(data => data.name)
       };
+      // if overflow exists sum all overflowing values together
       if (hasOverflow) {
         attributes[attribute].order[elementCount - 1] = {
-          name: 'other',
-          changes: orderedList[attribute].slice(elementCount - 1).reduce((sum, element) => sum + element.changes, 0)
+          name: 'others',
+          changes: others.reduce((sum, element) => sum + element.changes, 0)
         };
       }
       attributes.offset = offset;

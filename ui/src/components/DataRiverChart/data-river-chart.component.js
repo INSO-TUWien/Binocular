@@ -246,8 +246,8 @@ export class DataRiverChartComponent extends ScalableBaseChartComponent {
   /**
    * Calculate data for the chart.
    *
-   * @param data Chart data in the format [{date: timestamp(ms), series1: value, series2: value, series3: value, series4: value, ...}, ...]
-   * @param order
+   * @param data Chart data in the format [RiverData, ...]
+   * @param order contains the order to draw the data streams
    * @returns Stacked chart data for d3 functions and preprocessed data { stackedData, data }
    */
   calculateChartData(data, order) {
@@ -365,6 +365,7 @@ export class DataRiverChartComponent extends ScalableBaseChartComponent {
   }
 
   /**
+   *
    *
    * @param dataStreams
    * @param keys

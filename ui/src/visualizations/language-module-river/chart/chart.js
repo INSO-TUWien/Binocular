@@ -55,9 +55,16 @@ export default class LanguageModuleRiver extends React.Component {
     const attributes = this.props.attributes;
 
     let commitOrder;
-    if (attributes && attributes.authors) {
-      commitOrder = attributes.authors.order.map(author => author.name);
+    if (attributes && this.props.chartAttribute && attributes.authors && attributes[this.props.chartAttribute]) {
+      commitOrder = _.flatMap(
+        attributes.authors.order.map(author =>
+          attributes[this.props.chartAttribute].order.map(
+            attribute => new StreamKey({ name: author.name, attribute: attribute.name, changes: author.changes + attribute.changes })
+          )
+        )
+      ).sort((order1, order2) => order2.data.changes - order1.data.changes);
     }
+    const { authorPalette, attributePalette } = this.createStreamColorPalette(attributes);
 
     const issuePalette = { '#10': chroma('#d739fe').hex() };
 
@@ -70,34 +77,6 @@ export default class LanguageModuleRiver extends React.Component {
       result.setDate(result.getDate() + days);
       return result;
     };
-
-    const authorPalette = (this.state.selectedAuthors || []).reduce((authors, authorName) => {
-      const author =
-        this.props.attributes && this.props.attributes.authors
-          ? this.props.attributes.authors.colors.find(color => color.key === authorName)
-          : undefined;
-      if (author) {
-        authors[`(Additions) ${author.key}`] = author.color;
-        authors[`(Deletions) ${author.key}`] = chroma(author.color).darken(1).css();
-      }
-      return authors;
-    }, {});
-
-    const selectedAttribute =
-      this.props.chartAttribute === 'languages'
-        ? this.props.selectedLanguages
-        : this.props.chartAttribute === 'modules' ? this.props.selectedModules : undefined;
-
-    const attributePalette = (selectedAttribute || []).reduce((attributes, attributeName) => {
-      const attribute =
-        this.props.attributes && this.props.attributes[this.props.chartAttribute]
-          ? this.props.attributes[this.props.chartAttribute].colors.find(color => color.key === attributeName)
-          : undefined;
-      if (attribute) {
-        attributes[`${attribute.key}`] = attribute.color;
-      }
-      return attributes;
-    }, {});
 
     const date = new Date('2020-10-17');
 
@@ -143,8 +122,6 @@ export default class LanguageModuleRiver extends React.Component {
       </div>
     );
 
-    //const commitChart = <DataRiverChartComponent dataset={mockData} colorPalette={palette} />;
-
     const loadingHint = (
       <div className={styles.loadingHintContainer}>
         <h1 className={styles.loadingHint}>
@@ -162,27 +139,76 @@ export default class LanguageModuleRiver extends React.Component {
   }
 
   /**
+   * create all required stream palettes to visualize the give attributes and each available author
    *
-   * @param props
-   * @returns {{riverData: *}}
+   * @param attributes contains the property attributes that holds the color specific information referring to each attribute and author
+   * @returns {{authorPalette: T, attributePalette: T}}
+   */
+  createStreamColorPalette(attributes) {
+    const authorPalette = (this.state.selectedAuthors || []).reduce((authors, authorName) => {
+      const author = attributes && attributes.authors ? attributes.authors.colors.find(color => color.key === authorName) : undefined;
+      if (author) {
+        authors[`(Additions) ${author.key}`] = author.color;
+        authors[`(Deletions) ${author.key}`] = chroma(author.color).darken(1).css();
+      }
+      return authors;
+    }, {});
+
+    const selectedAttribute =
+      this.props.chartAttribute === 'languages'
+        ? this.props.selectedLanguages
+        : this.props.chartAttribute === 'modules' ? this.props.selectedModules : undefined;
+
+    const attributePalette = (selectedAttribute || []).reduce((attributePalette, attributeName) => {
+      const attribute =
+        attributes && attributes[this.props.chartAttribute]
+          ? attributes[this.props.chartAttribute].colors.find(color => color.key === attributeName)
+          : undefined;
+      if (attribute) {
+        attributePalette[`${attribute.key}`] = attribute.color;
+      }
+      return attributePalette;
+    }, {});
+    return { authorPalette, attributePalette };
+  }
+
+  /**
+   * filter, organize and create river data referring to the given attribute and associated with the provided data
+   *
+   * @param props contains the latest chart properties to create the corresponding riverData streams
+   * @returns {{riverData: RiverData[]}}
    */
   extractRiverData(props) {
     if (!props || !props.commits || props.commits.length === 0 || !props.chartAttribute) {
       return [];
     }
 
+    const getOthers = key =>
+      props.attributes && props.attributes[key] && props.attributes[key].others ? props.attributes[key].others : [];
+    const attr = {
+      authors: getOthers('authors'),
+      [props.chartAttribute]: getOthers(props.chartAttribute)
+    };
+
     const attributeStreams = {
       commits:
         props.chartAttribute === 'languages'
-          ? this.extractCommitAttribute(props.commits, commit => commit.languages, commit => commit.language.name)
+          ? this.extractCommitAttribute(
+              props.commits,
+              commit => commit.languages,
+              commit => commit.language.name,
+              attr.authors,
+              attr.languages
+            )
           : props.chartAttribute === 'modules'
-            ? this.extractCommitAttribute(props.commits, commit => commit.modules, commit => commit.module.path)
+            ? this.extractCommitAttribute(props.commits, commit => commit.modules, commit => commit.module.path, attr.authors, attr.modules)
             : undefined,
       selectedAttributes:
         props.chartAttribute === 'languages'
           ? props.selectedLanguages
           : props.chartAttribute === 'modules' ? props.selectedModules : undefined
     };
+
     if (!attributeStreams.commits || !attributeStreams.selectedAttributes) {
       throw new InvalidArgumentException(`The provided data river attribute '${props.chartAttribute}' is unknown!`);
     }
@@ -246,19 +272,8 @@ export default class LanguageModuleRiver extends React.Component {
             aggregatedPerDate.deletions += commitStream[i].stats.deletions;
             aggregatedPerDate.shas.push(commitStream[i].sha);
           }
-          // group all builds that matches the stored shas
-          const aggregatedBuilds = _.groupBy(
-            aggregatedPerDate.shas.reduce((builds, sha) => {
-              if (!groupedBuilds[sha]) {
-                return builds;
-              }
-              return builds.concat(groupedBuilds[sha].map(build => build.status));
-            }, [])
-          );
-          const status = Object.keys(aggregatedBuilds).sort((a, b) => aggregatedBuilds[b].length - aggregatedBuilds[a].length);
-          const total = status.reduce((sum, key) => sum + aggregatedBuilds[key].length, 0);
-          aggregatedPerDate.buildStat = BuildStat.valueOf(status[0]);
-          aggregatedPerDate.buildWeight = total ? aggregatedBuilds[status[0]].length / total : 0;
+
+          this.setCalculatedBuildRate(aggregatedPerDate, groupedBuilds);
 
           // add build if the aggregated data point holds any data
           if (aggregatedPerDate.shas.length) {
@@ -271,20 +286,55 @@ export default class LanguageModuleRiver extends React.Component {
   }
 
   /**
+   * calculates the build rate referring to all builds that are associated with the aggregated shas and add its result
+   *
+   * @param aggregatedPerDate contains the required shas and receives the build results as new properties
+   * @param groupedBuilds contains all available builds
+   */
+  setCalculatedBuildRate(aggregatedPerDate, groupedBuilds) {
+    // group all builds that matches the stored shas
+    const aggregatedBuilds = _.groupBy(
+      aggregatedPerDate.shas.reduce((builds, sha) => {
+        if (!groupedBuilds[sha]) {
+          return builds;
+        }
+        return builds.concat(groupedBuilds[sha].map(build => build.status));
+      }, [])
+    );
+
+    const status = Object.keys(aggregatedBuilds).sort((a, b) => aggregatedBuilds[b].length - aggregatedBuilds[a].length);
+    const total = status.reduce((sum, key) => sum + aggregatedBuilds[key].length, 0);
+    aggregatedPerDate.buildStat = BuildStat.valueOf(status[0]);
+    aggregatedPerDate.buildWeight = total ? aggregatedBuilds[status[0]].length / total : 0;
+  }
+
+  /**
    * extract and reorganize all contributor and attribute specific data and organize them in separate streams
    *
    * @param commits
    * @param commitFn
    * @param attributeFn
+   * @param others
+   * @param othersAttribute
    * @returns {unknown[]}
    */
-  extractCommitAttribute(commits, commitFn, attributeFn) {
+  extractCommitAttribute(commits, commitFn, attributeFn, others = [], othersAttribute = []) {
     const attributes = _.flatMap(commits, commit =>
-      commitFn(commit).data.map(data =>
-        Object.assign({ sha: commit.sha, date: commit.date, messageHeader: commit.messageHeader, signature: commit.signature }, data, {
-          attribute: attributeFn(data)
-        })
-      )
+      commitFn(commit).data.map(data => {
+        const attribute = attributeFn(data);
+        return Object.assign(
+          {
+            sha: commit.sha,
+            date: commit.date,
+            messageHeader: commit.messageHeader,
+            signature: others.find(name => name === commit.signature) ? 'others' : commit.signature
+          },
+          data,
+          {
+            attribute: othersAttribute.find(name => name === attribute) ? 'others' : attribute
+          }
+        );
+      })
     );
 
     const grouped = _.groupBy(attributes, 'signature');
