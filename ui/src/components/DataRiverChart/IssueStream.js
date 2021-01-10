@@ -156,4 +156,4 @@ export class IssueColor {
 /**
  * represents a build state enum
  */
-export const IssueStat = createEnum(['None', 'Open', 'In Process', 'Close']);
+export const IssueStat = createEnum(['None', 'Open', 'In Progress', 'Close']);

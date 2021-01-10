@@ -1,5 +1,7 @@
 'use strict';
 
+import moment from 'moment';
+
 const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
 //Formats the date for the tooltip
@@ -28,6 +30,26 @@ export function formatDate(date, resolution) {
     case 'days':
       return dayNames[date.getDay()] + ', ' + date.toLocaleDateString();
     default:
-      return '';
+      return date.toLocaleDateString();
+  }
+}
+
+/**
+ *
+ * @param resolution
+ * @returns {{unit: string, interval: moment.Duration}|{unit: string, interval: number}}
+ */
+export function getGranularityDuration(resolution) {
+  switch (resolution) {
+    case 'years':
+      return { interval: moment.duration(1, 'year'), unit: 'year' };
+    case 'months':
+      return { interval: moment.duration(1, 'month'), unit: 'month' };
+    case 'weeks':
+      return { interval: moment.duration(1, 'week'), unit: 'week' };
+    case 'days':
+      return { interval: moment.duration(1, 'day'), unit: 'day' };
+    default:
+      return { interval: 0, unit: '' };
   }
 }

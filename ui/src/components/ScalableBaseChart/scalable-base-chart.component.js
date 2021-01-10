@@ -7,7 +7,7 @@ import { NoImplementationException } from '../../utils/exception/NoImplementatio
 import { hash } from '../../utils/crypto-utils';
 
 /**
- * Stacked area chart
+ * ScalableBaseChartComponent
  * Takes the following props:
  *  - content (Format: [{date: timestamp(ms), seriesName1: number, seriesName2, number, ...}, ...],
  *             e.g. array of data points with date and series values)

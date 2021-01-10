@@ -9,26 +9,26 @@ import moment from 'moment';
 import chroma from 'chroma-js';
 import { DataRiverChartComponent } from '../../../components/DataRiverChart/data-river-chart.component';
 import cx from 'classnames';
-import { RiverData, BuildStat } from '../../../components/DataRiverChart/RiverData';
+import { BuildStat, RiverData } from '../../../components/DataRiverChart/RiverData';
 import StreamKey from '../../../components/DataRiverChart/StreamKey';
-import IssueStream from '../../../components/DataRiverChart/IssueStream';
+import IssueStream, { IssueStat } from '../../../components/DataRiverChart/IssueStream';
+import { InvalidArgumentException } from '../../../utils/exception/InvalidArgumentException';
+import { getGranularityDuration } from '../../../utils/date';
 
 export default class LanguageModuleRiver extends React.Component {
   constructor(props) {
     super(props);
 
-    //const { commitChartData, commitPalette, selectedAuthors } = this.extractCommitData(props);
+    const { riverData } = this.extractRiverData(props);
     //const { issueChartData } = this.extractIssueData(props);
-    const { ciChartData } = this.extractCIData(props);
 
     this.state = {
-      commitChartData: [], //Data for commit changes
+      commitChartData: riverData, //Data for commit changes
       issueChartData: [],
-      ciChartData,
       commitPalette: {},
-      selectedAuthors: [],
-      selectedLanguages: [],
-      selectedModules: []
+      selectedAuthors: props.selectedAuthors,
+      selectedLanguages: props.selectedLanguages,
+      selectedModules: props.selectedModules
     };
   }
 
@@ -37,18 +37,16 @@ export default class LanguageModuleRiver extends React.Component {
    * @param nextProps props that are passed
    */
   componentWillReceiveProps(nextProps) {
-    //const { commitChartData, commitPalette, selectedAuthors } = this.extractCommitData(nextProps);
-    //const { issueChartData } = this.extractIssueData(nextProps);
-    const { ciChartData } = this.extractCIData(nextProps);
+    const { riverData } = this.extractRiverData(nextProps);
+
     this.setState(prev =>
       Object.assign(prev, {
-        commitChartData: [],
+        commitChartData: riverData,
         issueChartData: [],
-        ciChartData,
         commitPalette: {},
-        selectedAuthors: [],
-        selectedLanguages: [],
-        selectedModules: []
+        selectedAuthors: nextProps.selectedAuthors,
+        selectedLanguages: nextProps.selectedLanguages,
+        selectedModules: nextProps.selectedModules
       })
     );
   }
@@ -58,26 +56,14 @@ export default class LanguageModuleRiver extends React.Component {
 
     let commitOrder;
     if (attributes && attributes.authors) {
-      commitOrder = Object.keys(attributes.authors);
+      commitOrder = attributes.authors.order.map(author => author.name);
     }
 
-    //TODO: remove mocked
-    const xattributes = { js: 'JavaScript', ts: 'Typescript' };
+    const issuePalette = { '#10': chroma('#d739fe').hex() };
 
-    const commitPalette = Object.assign(
-      {},
-      this.state.commitPalette || {},
-      chroma.scale(['#88fa6e', '#10a3f0']).mode('lch').colors(xattributes.length).reduce((collection, color, index) => {
-        collection[xattributes[Object.keys(xattributes)[index]]] = chroma(color).hex('rgba');
-        return collection;
-      }, {})
-    );
-
-    commitPalette['#10'] = chroma('#d739fe').hex();
-
-    commitPalette['Open'] = chroma('skyblue').hex();
-    commitPalette['In Process'] = '#ffe12e';
-    commitPalette['Close'] = '#63c56c';
+    issuePalette[IssueStat.Open.name] = chroma('skyblue').hex();
+    issuePalette[IssueStat.InProgress.name] = '#ffe12e';
+    issuePalette[IssueStat.Close.name] = '#63c56c';
 
     const addDays = (date, days) => {
       const result = new Date(date);
@@ -85,33 +71,35 @@ export default class LanguageModuleRiver extends React.Component {
       return result;
     };
 
+    const authorPalette = (this.state.selectedAuthors || []).reduce((authors, authorName) => {
+      const author =
+        this.props.attributes && this.props.attributes.authors
+          ? this.props.attributes.authors.colors.find(color => color.key === authorName)
+          : undefined;
+      if (author) {
+        authors[`(Additions) ${author.key}`] = author.color;
+        authors[`(Deletions) ${author.key}`] = chroma(author.color).darken(1).css();
+      }
+      return authors;
+    }, {});
+
+    const selectedAttribute =
+      this.props.chartAttribute === 'languages'
+        ? this.props.selectedLanguages
+        : this.props.chartAttribute === 'modules' ? this.props.selectedModules : undefined;
+
+    const attributePalette = (selectedAttribute || []).reduce((attributes, attributeName) => {
+      const attribute =
+        this.props.attributes && this.props.attributes[this.props.chartAttribute]
+          ? this.props.attributes[this.props.chartAttribute].colors.find(color => color.key === attributeName)
+          : undefined;
+      if (attribute) {
+        attributes[`${attribute.key}`] = attribute.color;
+      }
+      return attributes;
+    }, {});
+
     const date = new Date('2020-10-17');
-    let mockData;
-    if (commitOrder) {
-      mockData = [
-        new RiverData(addDays(date, 1), xattributes['ts'], commitOrder[0], ['a1'], BuildStat.Failed, 1, 100, 2),
-        new RiverData(addDays(date, 1), xattributes['js'], commitOrder[1], ['a1'], BuildStat.Success, 0.1, 1000, 2),
-        new RiverData(addDays(date, 2), xattributes['js'], commitOrder[1], ['a2'], BuildStat.Failed, 1, 4, 2000),
-        new RiverData(addDays(date, 3), xattributes['js'], commitOrder[1], ['a3'], BuildStat.Skipped, 1, 140, 1200),
-        new RiverData(addDays(date, 4), xattributes['js'], commitOrder[1], ['a4'], BuildStat.Success, 1, 1004, 120),
-        new RiverData(addDays(date, 5), xattributes['js'], commitOrder[1], ['a5'], BuildStat.Success, 1, 200, 12),
-        new RiverData(addDays(date, 5), xattributes['ts'], commitOrder[0], ['a5'], BuildStat.Success, 1, 1000, 2),
-        new RiverData(addDays(date, 6), xattributes['js'], commitOrder[2], ['c6'], BuildStat.Success, 1, 2002, 2),
-        new RiverData(addDays(date, 3), xattributes['js'], commitOrder[2], ['c7'], BuildStat.Success, 1, 1000, 2),
-        new RiverData(addDays(date, 4), xattributes['js'], commitOrder[2], ['c8'], BuildStat.Success, 1, 2002, 2100),
-        new RiverData(addDays(date, 5), xattributes['js'], commitOrder[2], ['c9'], BuildStat.Failed, 1, 1002, 20),
-        // new stream,x
-        new RiverData(addDays(date, 0), xattributes['js'], commitOrder[3], ['d0'], BuildStat.Success, 1, 3000, 0),
-        new RiverData(addDays(date, 1), xattributes['js'], commitOrder[3], ['d1'], BuildStat.Failed, 1, 0, 3000),
-        new RiverData(addDays(date, 2), xattributes['js'], commitOrder[3], ['d2'], BuildStat.Skipped, 1, 1500, 1500),
-        new RiverData(addDays(date, 3), xattributes['js'], commitOrder[3], ['d3'], BuildStat.Success, 1, 3000, 3000),
-        new RiverData(addDays(date, 4), xattributes['js'], commitOrder[3], ['d4'], BuildStat.Success, 1, 3000, 3000),
-        new RiverData(addDays(date, 5), xattributes['js'], commitOrder[3], ['d5'], BuildStat.Failed, 1, 500, 500),
-        new RiverData(addDays(date, 6), xattributes['js'], commitOrder[3], ['d6'], BuildStat.Skipped, 1, 600, 400),
-        new RiverData(addDays(date, 7), xattributes['js'], commitOrder[3], ['d7'], BuildStat.Failed, 1, 400, 900),
-        new RiverData(addDays(date, 8), xattributes['js'], commitOrder[3], ['d8'], BuildStat.Success, 1, 200, 300)
-      ];
-    }
 
     const issueStreams = [
       new IssueStream('#10', 'https://github.com/INSO-TUWien/Binocular/issues/10')
@@ -129,18 +117,7 @@ export default class LanguageModuleRiver extends React.Component {
         .pushCommits(Array.from(Array(3).keys()).map(key => `d${key + 6}`))
     ];
 
-    const selectedAuthors = (this.state.selectedAuthors || []).map(author => author.replace(/\((.*)\)\s+/gi, '')).reduce((data, author) => {
-      data.push(
-        new StreamKey({ name: author, attribute: xattributes['js'] }),
-        new StreamKey({
-          name: author,
-          attribute: xattributes['ts']
-        })
-      );
-      return data;
-    }, []);
-
-    const attribute = 'Language';
+    const attribute = this.props.chartAttribute || '';
 
     const commitChart = (
       <div className={styles.chartLine}>
@@ -150,11 +127,12 @@ export default class LanguageModuleRiver extends React.Component {
         <div className={styles.chart}>
           <DataRiverChartComponent
             sidebarOpen={this.props.sidebarOpen}
-            content={mockData}
-            palette={commitPalette}
+            content={this.state.commitChartData}
+            authorPalette={authorPalette}
+            attributePalette={attributePalette}
+            issuePalette={issuePalette}
             paddings={{ top: 40, left: 60, bottom: 40, right: 70 }}
             xAxisCenter={true}
-            keys={this.state.selectedAuthors ? selectedAuthors : undefined}
             resolution={this.props.chartResolution}
             displayNegative={true}
             order={commitOrder}
@@ -177,9 +155,144 @@ export default class LanguageModuleRiver extends React.Component {
 
     return (
       <div className={styles.chartContainer}>
-        {this.state.ciChartData === null && this.state.issueChartData === null && this.state.commitChartData === null && loadingHint}
+        {!this.state.commitChartData && loadingHint}
         {this.state.commitChartData && commitChart}
       </div>
+    );
+  }
+
+  /**
+   *
+   * @param props
+   * @returns {{riverData: *}}
+   */
+  extractRiverData(props) {
+    if (!props || !props.commits || props.commits.length === 0 || !props.chartAttribute) {
+      return [];
+    }
+
+    const attributeStreams = {
+      commits:
+        props.chartAttribute === 'languages'
+          ? this.extractCommitAttribute(props.commits, commit => commit.languages, commit => commit.language.name)
+          : props.chartAttribute === 'modules'
+            ? this.extractCommitAttribute(props.commits, commit => commit.modules, commit => commit.module.path)
+            : undefined,
+      selectedAttributes:
+        props.chartAttribute === 'languages'
+          ? props.selectedLanguages
+          : props.chartAttribute === 'modules' ? props.selectedModules : undefined
+    };
+    if (!attributeStreams.commits || !attributeStreams.selectedAttributes) {
+      throw new InvalidArgumentException(`The provided data river attribute '${props.chartAttribute}' is unknown!`);
+    }
+
+    const commits = attributeStreams.commits.filter(
+      stream =>
+        stream &&
+        stream.length &&
+        stream[0] &&
+        props.selectedAuthors.find(author => author === stream[0].signature) &&
+        attributeStreams.selectedAttributes.find(attribute => attribute === stream[0].attribute)
+    );
+
+    const granularity = getGranularityDuration(props.chartResolution);
+    const riverData = this.createAggregatedRiverData(commits, props, granularity);
+
+    return { riverData };
+  }
+
+  /**
+   * creates a list of all aggregated commits referring to the given commit stream and timespan
+   *
+   * @param commits contains the pre-organized commit stream grouped by the signature and attribute
+   * @param props holds the chart properties to gather specific information
+   * @param granularity defines the timespan granularity
+   * @returns [RiverData] get a list of all aggregated commits
+   */
+  createAggregatedRiverData(commits, props, granularity) {
+    const jobs = _.flatMap(props.builds, build => build.jobs.map(job => Object.assign(job, { sha: build.sha })));
+    const groupedBuilds = _.groupBy(jobs, 'sha');
+
+    // aggregate all commits referring to a given commit stream and the corresponding timespan aggregation
+    // and flat the data streams to one stream
+    return _.flatMap(
+      commits.map(commitStream => {
+        const aggregatedCommits = [];
+
+        if (!commitStream || !commitStream.length) {
+          return aggregatedCommits;
+        }
+
+        const curr = moment(props.firstSignificantTimestamp).startOf(granularity.unit).subtract(1, props.chartResolution);
+        const end = moment(props.lastSignificantTimestamp).endOf(granularity.unit).add(1, props.chartResolution);
+        const next = moment(curr).add(1, props.chartResolution);
+
+        // aggregate commits of a stream between a given timespan
+        for (let i = 0; curr.isSameOrBefore(end); curr.add(1, props.chartResolution), next.add(1, props.chartResolution)) {
+          const nextTimestamp = next.toDate().getTime();
+          const aggregatedPerDate = {
+            date: curr.toDate(),
+            name: commitStream[0].signature,
+            shas: [],
+            attribute: commitStream[0].attribute,
+            additions: 0,
+            deletions: 0
+          };
+
+          // aggregate commit stream stats
+          for (; i < commitStream.length && Date.parse(commitStream[i].date) < nextTimestamp; i++) {
+            aggregatedPerDate.additions += commitStream[i].stats.additions;
+            aggregatedPerDate.deletions += commitStream[i].stats.deletions;
+            aggregatedPerDate.shas.push(commitStream[i].sha);
+          }
+          // group all builds that matches the stored shas
+          const aggregatedBuilds = _.groupBy(
+            aggregatedPerDate.shas.reduce((builds, sha) => {
+              if (!groupedBuilds[sha]) {
+                return builds;
+              }
+              return builds.concat(groupedBuilds[sha].map(build => build.status));
+            }, [])
+          );
+          const status = Object.keys(aggregatedBuilds).sort((a, b) => aggregatedBuilds[b].length - aggregatedBuilds[a].length);
+          const total = status.reduce((sum, key) => sum + aggregatedBuilds[key].length, 0);
+          aggregatedPerDate.buildStat = BuildStat.valueOf(status[0]);
+          aggregatedPerDate.buildWeight = total ? aggregatedBuilds[status[0]].length / total : 0;
+
+          // add build if the aggregated data point holds any data
+          if (aggregatedPerDate.shas.length) {
+            aggregatedCommits.push(new RiverData({ data: aggregatedPerDate }));
+          }
+        }
+        return aggregatedCommits;
+      })
+    );
+  }
+
+  /**
+   * extract and reorganize all contributor and attribute specific data and organize them in separate streams
+   *
+   * @param commits
+   * @param commitFn
+   * @param attributeFn
+   * @returns {unknown[]}
+   */
+  extractCommitAttribute(commits, commitFn, attributeFn) {
+    const attributes = _.flatMap(commits, commit =>
+      commitFn(commit).data.map(data =>
+        Object.assign({ sha: commit.sha, date: commit.date, messageHeader: commit.messageHeader, signature: commit.signature }, data, {
+          attribute: attributeFn(data)
+        })
+      )
+    );
+
+    const grouped = _.groupBy(attributes, 'signature');
+    return _.flatMap(
+      Object.keys(grouped).map(key => {
+        const organized = _.groupBy(grouped[key], 'attribute');
+        return Object.keys(organized).map(organizedKey => organized[organizedKey]);
+      })
     );
   }
 
@@ -218,7 +331,7 @@ export default class LanguageModuleRiver extends React.Component {
 
     //---- STEP 2: AGGREGATE ISSUES PER TIME INTERVAL ----
     const data = [];
-    const granularity = LanguageModuleRiver.getGranularity(props.chartResolution);
+    const granularity = getGranularityDuration(props.chartResolution);
     const curr = moment(props.firstSignificantTimestamp).startOf(granularity.unit).subtract(1, props.chartResolution);
     const next = moment(curr).add(1, props.chartResolution);
     const end = moment(props.lastSignificantTimestamp).endOf(granularity.unit).add(1, props.chartResolution);
@@ -276,199 +389,5 @@ export default class LanguageModuleRiver extends React.Component {
     });
 
     return { issueChartData, issueScale };
-  }
-
-  /**
-   *
-   * @param props
-   * @returns {{}|{ciScale: number[], ciChartData: []}}
-   */
-  extractCIData(props) {
-    if (!props.builds || props.builds.length === 0) {
-      return {};
-    }
-
-    //---- STEP 1: AGGREGATE BUILDS PER TIME INTERVAL ----
-    const data = [];
-    const granularity = LanguageModuleRiver.getGranularity(props.chartResolution);
-    const curr = moment(props.firstSignificantTimestamp).startOf(granularity.unit).subtract(1, props.chartResolution);
-    const end = moment(props.lastSignificantTimestamp).endOf(granularity.unit).add(1, props.chartResolution);
-    const next = moment(curr).add(1, props.chartResolution);
-    for (let i = 0; curr.isSameOrBefore(end); curr.add(1, props.chartResolution), next.add(1, props.chartResolution)) {
-      //Iterate through time buckets
-      const currTimestamp = curr.toDate().getTime();
-      const nextTimestamp = next.toDate().getTime();
-      const obj = { date: currTimestamp, succeeded: 0, failed: 0 }; //Save date of time bucket, create object
-      for (; i < props.builds.length && Date.parse(props.builds[i].createdAt) < nextTimestamp; i++) {
-        //Iterate through commits that fall into this time bucket
-        const buildDate = Date.parse(props.builds[i].createdAt);
-        if (buildDate >= currTimestamp && buildDate < nextTimestamp) {
-          obj.succeeded += props.builds[i].stats.success || 0;
-          obj.failed += props.builds[i].stats.failed || -0.001; //-0.001 for stack layout to realize it belongs on the bottom
-        }
-      }
-      data.push(obj);
-    }
-
-    //--- STEP 2: CONSTRUCT CHART DATA FROM AGGREGATED BUILDS ----
-    const ciChartData = [];
-    const ciScale = [0, 0];
-    _.each(data, function(build) {
-      ciChartData.push({ date: build.date, Succeeded: build.succeeded, Failed: build.failed > 0 ? build.failed * -1 : 0 });
-      if (ciScale[1] < build.succeeded) {
-        ciScale[1] = build.succeeded;
-      }
-      if (ciScale[0] > build.failed * -1) {
-        ciScale[0] = build.failed * -1;
-      }
-    });
-
-    return { ciChartData };
-  }
-
-  /**
-   *
-   * @param props
-   * @returns {{}|{commitChartData: [], selectedAuthors: [], commitScale: number[], commitPalette: {}}}
-   */
-  extractCommitData(props) {
-    if (!props.commits || props.commits.length === 0) {
-      return {};
-    }
-
-    //---- STEP 1: AGGREGATE COMMITS GROUPED BY AUTHORS PER TIME INTERVAL ----
-    const data = [];
-    //let granularity = LanguageModuleRiver.getGranularity(props.resolution);
-    const granularity = LanguageModuleRiver.getGranularity(props.chartResolution);
-    const curr = moment(props.firstSignificantTimestamp).startOf(granularity.unit).subtract(1, props.chartResolution);
-    const end = moment(props.lastSignificantTimestamp).endOf(granularity.unit).add(1, props.chartResolution);
-    const next = moment(curr).add(1, props.chartResolution);
-    const totalChangesPerAuthor = {};
-    // TODO: remove?
-    // eslint-disable-next-line no-unused-vars
-    let totalChanges = 0;
-    for (let i = 0; curr.isSameOrBefore(end); curr.add(1, props.chartResolution), next.add(1, props.chartResolution)) {
-      //Iterate through time buckets
-      const currTimestamp = curr.toDate().getTime();
-      const nextTimestamp = next.toDate().getTime();
-      const obj = { date: currTimestamp, statsByAuthor: {} }; //Save date of time bucket, create object
-      for (; i < props.commits.length && Date.parse(props.commits[i].date) < nextTimestamp; i++) {
-        //Iterate through commits that fall into this time bucket
-        const additions = props.commits[i].stats.additions;
-        const deletions = props.commits[i].stats.deletions;
-        const changes = additions + deletions;
-        const commitAuthor = props.commits[i].signature;
-        if (totalChangesPerAuthor[commitAuthor] === null) {
-          totalChangesPerAuthor[commitAuthor] = 0;
-        }
-        totalChangesPerAuthor[commitAuthor] += changes;
-        totalChanges += changes;
-        if (
-          commitAuthor in obj.statsByAuthor //If author is already in statsByAuthor, add to previous values
-        ) {
-          obj.statsByAuthor[commitAuthor] = {
-            count: obj.statsByAuthor[commitAuthor].count + 1,
-            additions: obj.statsByAuthor[commitAuthor].additions + additions,
-            deletions: obj.statsByAuthor[commitAuthor].deletions + deletions
-          };
-        } else {
-          //Else create new values
-          obj.statsByAuthor[commitAuthor] = { count: 1, additions: additions, deletions: deletions };
-        }
-      }
-      data.push(obj);
-    }
-
-    //---- STEP 2: CONSTRUCT CHART DATA FROM AGGREGATED COMMITS ----
-    const commitChartData = [];
-    const commitChartPalette = {};
-    commitChartPalette['(Additions) others'] = props.attributes['others'];
-    commitChartPalette['(Deletions) others'] = props.attributes['others'];
-    _.each(data, function(commit) {
-      //commit has structure {date, statsByAuthor: {}} (see next line)}
-      const obj = { date: commit.date };
-      obj['(Additions) others'] = 0;
-      obj['(Deletions) others'] = -0.001;
-      _.each(props.committers, function(committer) {
-        //commitLegend to iterate over authorNames, commitLegend has structure [{name, style}, ...]
-        if (committer in commit.statsByAuthor && committer in props.attributes) {
-          //If committer has data
-          //Insert number of changes with the author name as key,
-          //statsByAuthor has structure {{authorName: {count, additions, deletions, changes}}, ...}
-          obj['(Additions) ' + committer] = commit.statsByAuthor[committer].additions;
-          //-0.001 for stack layout to realize it belongs on the bottom
-          obj['(Deletions) ' + committer] = commit.statsByAuthor[committer].deletions * -1 - 0.001;
-          commitChartPalette['(Additions) ' + committer] = chroma(props.attributes[committer]).alpha(0.85).hex('rgba');
-          commitChartPalette['(Deletions) ' + committer] = chroma(props.attributes[committer]).alpha(0.85).darken(0.5).hex('rgba');
-        } else if (committer in commit.statsByAuthor && !(committer in props.attributes)) {
-          obj['(Additions) others'] += commit.statsByAuthor[committer].additions;
-          obj['(Deletions) others'] += commit.statsByAuthor[committer].deletions * -1 - 0.001;
-        } else if (committer in props.attributes) {
-          obj['(Additions) ' + committer] = 0;
-          obj['(Deletions) ' + committer] = -0.001; //-0.001 for stack layout to realize it belongs on the bottom
-        }
-      });
-      commitChartData.push(obj); //Add object to list of objects
-    });
-    //Output in commitChartData has format [{author1: 123, author2: 123, ...}, ...],
-    //e.g. series names are the authors with their corresponding values
-
-    //---- STEP 3: SCALING ----
-    const commitScale = [0, 0];
-    _.each(commitChartData, dataPoint => {
-      let positiveTotals = 0;
-      let negativeTotals = 0;
-      _.each(Object.keys(dataPoint).splice(1), key => {
-        if (key.includes('(Additions) ') && props.selectedAuthors.indexOf(key.split(') ')[1]) > -1) {
-          positiveTotals += dataPoint[key];
-        } else if (key.includes('(Deletions) ') && props.selectedAuthors.indexOf(key.split(') ')[1]) > -1) {
-          negativeTotals += dataPoint[key];
-        } else if (props.selectedAuthors.indexOf(key) > -1) {
-          positiveTotals += dataPoint[key];
-        }
-      });
-      if (positiveTotals > commitScale[1]) {
-        commitScale[1] = positiveTotals;
-      }
-      if (negativeTotals < commitScale[0]) {
-        commitScale[0] = negativeTotals;
-      }
-    });
-
-    //---- STEP 4: FORMATTING FILTERS ----
-    const selectedAuthors = [];
-    const keys = Object.keys(commitChartData[0]).splice(1);
-
-    _.each(keys, key => {
-      let concatKey = key;
-      if (key.includes('(Additions) ') || key.includes('(Deletions) ')) {
-        concatKey = key.split(') ')[1];
-      }
-      if (props.selectedAuthors.indexOf(concatKey) > -1) {
-        selectedAuthors.push(key);
-      }
-    });
-
-    return { commitChartData, commitScale, commitPalette: commitChartPalette, selectedAuthors };
-  }
-
-  /**
-   *
-   * @param resolution
-   * @returns {{unit: string, interval: moment.Duration}|{unit: string, interval: number}}
-   */
-  static getGranularity(resolution) {
-    switch (resolution) {
-      case 'years':
-        return { interval: moment.duration(1, 'year'), unit: 'year' };
-      case 'months':
-        return { interval: moment.duration(1, 'month'), unit: 'month' };
-      case 'weeks':
-        return { interval: moment.duration(1, 'week'), unit: 'week' };
-      case 'days':
-        return { interval: moment.duration(1, 'day'), unit: 'day' };
-      default:
-        return { interval: 0, unit: '' };
-    }
   }
 }

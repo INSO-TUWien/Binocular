@@ -32,8 +32,9 @@ export class RiverData {
   }
 
   copyCtor(data) {
-    this.data = Object.freeze(Object.assign({}, data.data, { buildStat: BuildStat.valueOf(data.buildStat) }));
+    this.data = Object.freeze(Object.assign({}, data.data, { buildStat: BuildStat.valueOf(data.data.buildStat) }));
     this.buildSuccessRate = data._buildSuccessRate;
+    this.trend = data._trend;
   }
 
   get date() {
@@ -96,10 +97,4 @@ export class RiverData {
 /**
  * represents a build state enum
  */
-export const BuildStat = createEnum({
-  None: 0,
-  Abort: 1,
-  Failed: 2,
-  Success: 4,
-  Skipped: 8
-});
+export const BuildStat = createEnum(['None', 'Skipped', 'Canceled', 'Failed', 'Errored', 'Success']);

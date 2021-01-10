@@ -14,6 +14,26 @@ import StreamKey from './StreamKey';
 import { hash } from '../../utils/crypto-utils';
 import IssueStream, { IssueColor, IssueData, IssueStat } from './IssueStream';
 
+/**
+ * ScalableBaseChartComponent
+ * Takes the following props:
+ *  - content (Format: [RiverData, ...],
+ *             e.g. array of data points with date and series values)
+ *  - authorPalette (Format: {seriesName1: color1, seriesName2: color2, ...}, color as string)
+ *  - attributePalette (Format: {attribute1:color1, attribute2: color2...}, color as string)
+ *  - issuePalette (Format: {IssueStat[]:{color1, color2...}, issueTicketName:color, ...}, color as string)
+ *  - paddings (optional) (Format: {top: number, left: number, right: number, bottom: number},
+ *             number being amount of pixels) Each field in the object is optional and can be left out)
+ *  - xAxisCenter (optional) (Format: true/false,
+ *             whether the x axis should be at the 0 line (true), or at the bottom (false/unspecified))
+ *  - yDims (Format: [topValue, bottomValue],
+ *             limits of the y-Axis on top/bottom, should correspond to data.)
+ *  - keys (optional) (Format: [seriesName1, seriesName2, ...])
+ *             Filters the chart, only showing the provided keys and leaving everything else out.
+ *  - resolution (Format: 'years'/'months'/'weeks'/'days') Needed for date format in tooltips.
+ *  - displayNegative (optional) (Format: true/false) Display negative numbers on y-scale.
+ *  - order (optional) (Format: [string, string, ...]) Strings containing the keys in desired order (largest to smallest).
+ */
 export class DataRiverChartComponent extends ScalableBaseChartComponent {
   constructor(props) {
     super(props, styles);
@@ -61,8 +81,9 @@ export class DataRiverChartComponent extends ScalableBaseChartComponent {
           : this.state.data.data.map(data => data.date)
       )
     );
+    dates.push(new Date());
 
-    return [d3.min(dates), new Date()];
+    return [d3.min(dates), d3.max(dates)];
   }
 
   /**
@@ -70,7 +91,12 @@ export class DataRiverChartComponent extends ScalableBaseChartComponent {
    * @returns {[]}
    */
   getYDims() {
-    return this.state.yDims;
+    return (
+      this.state.yDims || [
+        d3.max(this.state.data.data, data => data.deletions) || 0,
+        d3.max(this.state.data.data, data => data.additions) || 0
+      ]
+    );
   }
 
   /**
@@ -248,11 +274,10 @@ export class DataRiverChartComponent extends ScalableBaseChartComponent {
   /**
    *
    * @param data
-   * @param stackedData
    * @param order
    * @returns {{data: *, stackedData: *[]}}
    */
-  processStreamData(data, stackedData, order) {
+  processStreamData(data, order) {
     data = data
       .filter(record => record && record instanceof RiverData)
       .map(record => new RiverData(record))
@@ -261,10 +286,10 @@ export class DataRiverChartComponent extends ScalableBaseChartComponent {
     const reorganizedData = this.preprocessData(data);
     const streamData = _.flatMap(reorganizedData.grouped.map(record => record.sort()));
 
-    const keys = this.props.keys ? this.props.keys : stackedData.filter(stream => stream.length).map(stream => new StreamKey(stream[0]));
+    const keys = this.props.keys ? this.props.keys : streamData.filter(stream => stream.length).map(stream => new StreamKey(stream[0]));
 
     //Data formatted for d3
-    stackedData = this.createStackedData(streamData, keys);
+    const stackedData = this.createStackedData(streamData, keys);
 
     if (order && order.length) {
       stackedData.sort((streamA, streamB) => order.indexOf(streamA.key.name) - order.indexOf(streamB.key.name));
@@ -282,13 +307,16 @@ export class DataRiverChartComponent extends ScalableBaseChartComponent {
   }
 
   /**
-   *
+   * @param colorPalette
    * @param name
    * @returns {void|*}
    */
-  findColor(name) {
-    const key = Object.keys(this.props.palette).find(colorKey => name.toUpperCase() === colorKey.toUpperCase()) || null;
-    const color = key ? this.props.palette[key] : undefined;
+  findColor(colorPalette, name) {
+    if (!name || !colorPalette) {
+      return name;
+    }
+    const key = Object.keys(colorPalette).find(colorKey => name.toUpperCase() === colorKey.toUpperCase()) || null;
+    const color = key ? colorPalette[key] : undefined;
     return color ? chroma(color).alpha(0.85).hex('rgba') : color;
   }
 
@@ -299,15 +327,18 @@ export class DataRiverChartComponent extends ScalableBaseChartComponent {
    */
   setRiverStreamColors(stackedData, skipChildren) {
     stackedData.forEach(stack => {
-      const nameColorKey = Object.keys(this.props.palette).find(
+      const nameColorKey = Object.keys(this.props.authorPalette || {}).find(
         colorKey =>
           colorKey.toLowerCase().includes(stack.key.name.toLowerCase()) &&
           colorKey.toLowerCase().includes(stack.key.direction.toLowerCase())
       );
 
       const color = {
-        attribute: chroma(this.props.palette[stack.key.attribute]).alpha(0.85).hex('rgba'),
-        name: this.findColor(nameColorKey)
+        attribute:
+          this.props.attributePalette && stack.key.attribute in this.props.attributePalette
+            ? chroma(this.props.attributePalette[stack.key.attribute]).alpha(0.85).hex('rgba')
+            : undefined,
+        name: this.findColor(this.props.authorPalette, nameColorKey)
       };
 
       if (!skipChildren) {
@@ -323,9 +354,13 @@ export class DataRiverChartComponent extends ScalableBaseChartComponent {
    * @param issueStreams
    */
   setIssueStreamColors(issueStreams) {
-    const colors = IssueStat.getAvailable.map(key => this.findColor(key));
+    const colors = IssueStat.getAvailable.map(key => this.findColor(this.props.issuePalette, key));
     issueStreams.forEach(stack => {
-      stack.color = new (IssueColor.bind.apply(IssueColor, [undefined, this.findColor(stack.ticketId), ...colors]))();
+      stack.color = new (IssueColor.bind.apply(IssueColor, [
+        undefined,
+        this.findColor(this.props.issuePalette, stack.ticketId),
+        ...colors
+      ]))();
     });
   }
 
@@ -439,7 +474,9 @@ export class DataRiverChartComponent extends ScalableBaseChartComponent {
       (previous ? previous.buildSuccessRate : 0.0) +
       (record.buildStat === BuildStat.Success
         ? record.buildWeight * record.totalDiff / maxDiff
-        : record.buildStat === BuildStat.Failed ? -record.buildWeight * record.totalDiff / maxDiff : 0.0);
+        : record.buildStat === BuildStat.Failed || record.buildStat === BuildStat.Errored
+          ? -record.buildWeight * record.totalDiff / maxDiff
+          : 0.0);
 
     // define range of success rate
     record.buildSuccessRate =
@@ -615,7 +652,7 @@ export class DataRiverChartComponent extends ScalableBaseChartComponent {
 
         tooltip.attr('issue', dataPoint.issue);
         tooltip.attr('data', dataPoint);
-        tooltip.attr('attrColor', this.findColor(dataPoint.attribute));
+        tooltip.attr('attrColor', this.findColor(this.props.attributePalette, dataPoint.attribute));
         tooltip.attr('statusColor', dataPoint.stream.color[dataPoint.issue.status.name]);
 
         this.raiseFilteredStreams(dataPoint.data);
@@ -712,8 +749,8 @@ export class DataRiverChartComponent extends ScalableBaseChartComponent {
       .attr('id', stream => `color-${stream.key.toId()}`);
 
     gradients.append('stop').attr('offset', '0%').attr('stop-color', stream => stream.color[IssueStat.Open.name]);
-    gradients.append('stop').attr('offset', '20%').attr('stop-color', stream => stream.color[IssueStat.InProcess.name]);
-    gradients.append('stop').attr('offset', '80%').attr('stop-color', stream => stream.color[IssueStat.InProcess.name]);
+    gradients.append('stop').attr('offset', '20%').attr('stop-color', stream => stream.color[IssueStat.InProgress.name]);
+    gradients.append('stop').attr('offset', '80%').attr('stop-color', stream => stream.color[IssueStat.InProgress.name]);
     gradients
       .append('stop')
       .attr('offset', '100%')
@@ -819,7 +856,7 @@ export class DataRiverChartComponent extends ScalableBaseChartComponent {
     return (
       <div className={this.styles.chartDiv}>
         <svg className={this.styles.chartSvg} ref={svg => (this.svgRef = svg)} />
-        <RiverTooltip ref={div => (this.tooltipRef = div)} attribute={this.props.attribute} />
+        <RiverTooltip ref={div => (this.tooltipRef = div)} attribute={this.props.attribute} resolution={this.props.resolution} />
       </div>
     );
   }

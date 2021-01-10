@@ -116,7 +116,7 @@ export const fetchLanguageModuleRiverData = fetchFactory(
  * @param maxModules
  * @returns {any}
  */
-function organizeAttributes(commits, maxNumberOfColors, maxAuthors = 15, maxLanguages = 15, maxModules = 40) {
+function organizeAttributes(commits, maxNumberOfColors, maxAuthors = 15, maxLanguages = 15, maxModules = 60) {
   const max = { authors: maxAuthors, languages: maxLanguages, modules: maxModules };
 
   // using prime allows the algorithm to create a mostly observable unique color pattern

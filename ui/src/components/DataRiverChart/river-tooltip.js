@@ -5,6 +5,7 @@ import React from 'react';
 import MouseTooltip from 'react-sticky-mouse-tooltip';
 import { formatInteger, formatNumber } from '../../utils/format';
 import cx from 'classnames';
+import { formatDate } from '../../utils/date';
 
 class RiverTooltip extends React.Component {
   constructor(props) {
@@ -131,7 +132,7 @@ class RiverTooltip extends React.Component {
               ? <li style={style}>
                   <i>date</i>
                   <span>
-                    {date.toLocaleString()}
+                    {this.props.resolution ? formatDate(date, this.props.resolution) : date.toLocaleString()}
                   </span>
                 </li>
               : null}

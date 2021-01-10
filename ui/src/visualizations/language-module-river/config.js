@@ -103,7 +103,7 @@ const LangModRiverConfigComponent = props => {
           <CheckboxLegend
             palette={palette.authors}
             onClick={props.onClickAuthors.bind(this)}
-            title="Authors:"
+            title={`Authors: [${(props.committers || []).length}]`}
             split={true}
             otherCommitters={overflow.authors}
           />
@@ -113,7 +113,7 @@ const LangModRiverConfigComponent = props => {
               <CheckboxLegend
                 palette={palette.languages}
                 onClick={props.onClickLanguages.bind(this)}
-                title="Available Languages:"
+                title={`Available Languages: [${(props.languages || []).length}]`}
                 explanation={'Number of lines per Language'}
                 split={false}
                 otherCommitters={overflow.languages}
@@ -123,9 +123,9 @@ const LangModRiverConfigComponent = props => {
             ? <div className={styles.field}>
                 <CheckboxLegend
                   palette={palette.modules}
-                  onClick={props.onClickLanguages.bind(this)}
-                  title="Available Modules:"
-                  explanation={'Number of lines per Modules'}
+                  onClick={props.onClickModules.bind(this)}
+                  title={`Available Modules: [${(props.modules || []).length}]`}
+                  explanation={'Number of lines per Module'}
                   split={false}
                   otherCommitters={overflow.modules}
                 />
