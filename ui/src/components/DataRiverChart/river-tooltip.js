@@ -1,5 +1,5 @@
 import styles from './data-river-chart.component.scss';
-import { BuildStat, RiverData } from './RiverData';
+import { BuildStat } from './RiverData';
 
 import React from 'react';
 import MouseTooltip from 'react-sticky-mouse-tooltip';

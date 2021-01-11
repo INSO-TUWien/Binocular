@@ -452,6 +452,7 @@ export default class ScalableBaseChartComponent extends React.Component {
    * @param data
    * @returns {number}
    */
+  // eslint-disable-next-line no-unused-vars
   getLayerStrokeWidth(data) {
     return 0;
   }
@@ -461,6 +462,7 @@ export default class ScalableBaseChartComponent extends React.Component {
    * @param data
    * @returns {undefined}
    */
+  // eslint-disable-next-line no-unused-vars
   getLayerStrokeColor(data) {
     return undefined;
   }
