@@ -13,16 +13,14 @@ import getLanguageData from './getLanguageData';
 import getModuleData from './getModuleData';
 import generateColorPattern from '../../../utils/colors';
 import { nextPrime } from '../../../utils/math';
+import fetchRelatedCommits from './fetchRelatedCommits.js';
 
 export const setResolution = createAction('SET_LANGUAGE_MODULE_RIVER_RESOLUTION');
 export const setChartAttribute = createAction('SET_LANGUAGE_MODULE_RIVER_CHART_ATTRIBUTE');
-export const setShowIssues = createAction('SET_LANGUAGE_MODULE_RIVER_SHOW_ISSUES');
 export const setSelectedAuthors = createAction('SET_LANGUAGE_MODULE_RIVER_SELECTED_AUTHORS');
 export const setSelectedLanguages = createAction('SET_LANGUAGE_MODULE_RIVER_SELECTED_LANGUAGES');
 export const setSelectedModules = createAction('SET_LANGUAGE_MODULE_RIVER_SELECTED_MODULES');
-export const setShowCIChart = createAction('SET_LANGUAGE_MODULE_RIVER_SHOW_CI');
-export const setShowIssueChart = createAction('SET_LANGUAGE_MODULE_RIVER_SHOW_ISSUE');
-export const setShowChangesChart = createAction('SET_LANGUAGE_MODULE_RIVER_SHOW_CHANGES_CHART');
+export const setHighlightedIssue = createAction('SET_LANGUAGE_MODULE_RIVER_HIGHLIGHTED_ISSUE');
 
 export const requestLanguageModuleRiverData = createAction('REQUEST_LANGUAGE_MODULE_RIVER_DATA');
 export const receiveLanguageModuleRiverData = timestampedActionFactory('RECEIVE_LANGUAGE_MODULE_RIVER_DATA');
@@ -30,7 +28,6 @@ export const receiveLanguageModuleRiverDataError = createAction('RECEIVE_LANGUAG
 
 export const requestRefresh = createAction('REQUEST_REFRESH');
 const refresh = createAction('REFRESH');
-export const setViewport = createAction('COR_SET_LANGUAGE_MODULE_RIVER_VIEWPORT');
 
 export default function*() {
   // fetch data once on entry
@@ -42,6 +39,7 @@ export default function*() {
   // keep looking for viewport changes to re-fetch
   yield fork(watchRefresh);
   yield fork(watchToggleHelp);
+  yield fork(watchHighlightedIssue);
 }
 
 function* watchRefreshRequests() {
@@ -58,6 +56,12 @@ function* watchToggleHelp() {
 
 function* watchRefresh() {
   yield takeEvery('REFRESH', fetchLanguageModuleRiverData);
+}
+
+function* watchHighlightedIssue() {
+  yield takeEvery('SET_LANGUAGE_MODULE_RIVER_HIGHLIGHTED_ISSUE', function*(a) {
+    return yield fetchRelatedCommits(a.payload);
+  });
 }
 
 /**

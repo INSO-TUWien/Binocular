@@ -66,35 +66,21 @@ export default class LanguageModuleRiver extends React.Component {
     }
     const { authorPalette, attributePalette } = this.createStreamColorPalette(attributes);
 
-    const issuePalette = { '#10': chroma('#d739fe').hex() };
-
-    issuePalette[IssueStat.Open.name] = chroma('skyblue').hex();
-    issuePalette[IssueStat.InProgress.name] = '#ffe12e';
-    issuePalette[IssueStat.Close.name] = '#63c56c';
-
-    const addDays = (date, days) => {
-      const result = new Date(date);
-      result.setDate(result.getDate() + days);
-      return result;
+    const issuePalette = {
+      [IssueStat.Open.name]: chroma('skyblue').hex(),
+      [IssueStat.InProgress.name]: '#ffe12e',
+      [IssueStat.Close.name]: '#63c56c'
     };
 
-    const date = new Date('2020-10-17');
+    const issueStream = this.props.highlightedIssue
+      ? new IssueStream(this.props.highlightedIssue.iid, this.props.highlightedIssue.webUrl)
+          .setStart(Date.parse(this.props.highlightedIssue.createdAt))
+          .pushCommits(this.props.highlightedCommits)
+      : undefined;
 
-    const issueStreams = [
-      new IssueStream('#10', 'https://github.com/INSO-TUWien/Binocular/issues/10')
-        .setStart(addDays(date, -5))
-        .pushCommits(
-          Array.from(Array(5).keys()).reduce((data, key) => {
-            data.push({ sha: `a${key + 1}`, webUrl: `https://github.com/INSO-TUWien/Binocular/commit/a${key + 1}` });
-            data.push({ sha: `d${key + 1}`, webUrl: `https://github.com/INSO-TUWien/Binocular/commit/d${key + 1}` });
-            return data;
-          }, [])
-        )
-        .setEnd(addDays(date, 5)),
-      new IssueStream('#10', 'https://github.com/INSO-TUWien/Binocular/issues/10')
-        .setStart(addDays(date, 6))
-        .pushCommits(Array.from(Array(3).keys()).map(key => `d${key + 6}`))
-    ];
+    if (issueStream && this.props.highlightedIssue.closedAt) {
+      issueStream.setEnd(Date.parse(this.props.highlightedIssue.closedAt));
+    }
 
     const attribute = this.props.chartAttribute || '';
 
@@ -116,7 +102,7 @@ export default class LanguageModuleRiver extends React.Component {
             displayNegative={true}
             order={commitOrder}
             attribute={attribute}
-            issueStreams={issueStreams}
+            issueStreams={issueStream ? [issueStream] : []}
           />
         </div>
       </div>

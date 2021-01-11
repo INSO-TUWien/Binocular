@@ -525,7 +525,7 @@ export class DataRiverChartComponent extends ScalableBaseChartComponent {
    */
   preProcessIssueStreams(stackedData) {
     if (!this.props.issueStreams || !this.props.issueStreams.length) {
-      return undefined;
+      return [];
     }
 
     const issueStreams = this.props.issueStreams.map(stream => new IssueStream(stream));
@@ -609,9 +609,16 @@ export class DataRiverChartComponent extends ScalableBaseChartComponent {
    * @param tooltip
    */
   paintIssueDataPoints(scales, brushArea, tooltip) {
+    if (!this.state.data.issueStreams || !this.state.data.issueStreams.length) {
+      return;
+    }
+
     const issueDataPoints = this.getIssueDataPoints();
 
-    const radius = Math.max((scales.x(issueDataPoints[1].data.date) - scales.x(issueDataPoints[0].data.date)) * 0.01, 5);
+    const radius = Math.max(
+      issueDataPoints.length > 1 ? (scales.x(issueDataPoints[1].data.date) - scales.x(issueDataPoints[0].data.date)) * 0.01 : 0,
+      5
+    );
     const size = d => Math.max(d.data.additions || 0, d.data.deletions || 1, 1);
     issueDataPoints.forEach(
       d => (d.radius = Math.min(Math.max((scales.diff(0) - scales.diff(size(d))) / 100 * radius, 5), scales.height(50)))
@@ -679,6 +686,9 @@ export class DataRiverChartComponent extends ScalableBaseChartComponent {
    * @returns {any[]}
    */
   getIssueDataPoints() {
+    if (!this.state.data.issueStreams || !this.state.data.issueStreams.length) {
+      return [];
+    }
     return Array.from(
       new Set(
         this.state.data.issueStreams.reduce((dataStream, stream) => {

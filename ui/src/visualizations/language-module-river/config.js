@@ -3,18 +3,19 @@
 import { connect } from 'react-redux';
 import {
   setResolution,
-  setShowIssues,
   setSelectedAuthors,
-  setShowCIChart,
-  setShowIssueChart,
   setSelectedModules,
   setSelectedLanguages,
-  setChartAttribute
+  setChartAttribute,
+  setHighlightedIssue
 } from './sagas';
 import TabCombo from '../../components/TabCombo.js';
 import styles from './styles.scss';
 
 import CheckboxLegend from '../../components/CheckboxLegend';
+import SearchBox from '../../components/SearchBox';
+import Promise from 'bluebird';
+import { graphQl } from '../../utils';
 
 const mapStateToProps = state => {
   const languageModuleRiverState = state.visualizations.languageModuleRiver.state;
@@ -23,15 +24,13 @@ const mapStateToProps = state => {
     committers: languageModuleRiverState.data.data.committers,
     resolution: languageModuleRiverState.config.chartResolution,
     riverAttribute: languageModuleRiverState.config.chartAttribute,
-    showIssues: languageModuleRiverState.config.showIssues,
     attributes: languageModuleRiverState.data.data.attributes,
     languages: languageModuleRiverState.data.data.languages,
     modules: languageModuleRiverState.data.data.modules,
     selectedAuthors: languageModuleRiverState.config.selectedAuthors,
     selectedLanguages: languageModuleRiverState.config.selectedLanguages,
     selectedModules: languageModuleRiverState.config.selectedModules,
-    showCIChart: languageModuleRiverState.config.showCIChart,
-    showIssueChart: languageModuleRiverState.config.showIssueChart
+    highlightedIssue: languageModuleRiverState.config.highlightedIssue
   };
 };
 
@@ -39,13 +38,11 @@ const mapDispatchToProps = (dispatch, ownProps) => {
   return Object.assign(
     {
       onClickResolution: resolution => dispatch(setResolution(resolution)),
+      onSetHighlightedIssue: issue => dispatch(setHighlightedIssue(issue)),
       onClickAttribute: resolution => dispatch(setChartAttribute(resolution)),
-      onClickIssues: showIssues => dispatch(setShowIssues(showIssues)),
       onClickAuthors: selected => dispatch(setSelectedAuthors(selected)),
       onClickLanguages: selected => dispatch(setSelectedLanguages(selected)),
-      onClickModules: selected => dispatch(setSelectedModules(selected)),
-      onClickShowCIChart: showCIChart => dispatch(setShowCIChart(showCIChart)),
-      onClickShowIssueChart: showIssueChart => dispatch(setShowIssueChart(showIssueChart))
+      onClickModules: selected => dispatch(setSelectedModules(selected))
     },
     ownProps
   );
@@ -86,6 +83,33 @@ const LangModRiverConfigComponent = props => {
               onChange={value => props.onClickResolution(value)}
             />
           </div>
+        </div>
+        <div className="field">
+          <SearchBox
+            placeholder="Highlight issue..."
+            renderOption={i => `#${i.iid} ${i.title}`}
+            search={text => {
+              return Promise.resolve(
+                graphQl.query(
+                  `
+                  query($q: String) {
+                    issues(page: 1, perPage: 50, q: $q, sort: "DESC") {
+                      data { iid title createdAt closedAt webUrl }
+                    }
+                  }`,
+                  { q: text }
+                )
+              )
+                .then(resp => resp.issues.data)
+                .map(i => {
+                  i.createdAt = new Date(i.createdAt);
+                  i.closedAt = i.closedAt && new Date(i.closedAt);
+                  return i;
+                });
+            }}
+            value={props.highlightedIssue}
+            onChange={issue => props.onSetHighlightedIssue(issue)}
+          />
         </div>
         <div className={styles.field}>
           <label className="label">River Attribute Settings</label>

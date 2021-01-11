@@ -21,7 +21,9 @@ const mapStateToProps = (state /*, ownProps*/) => {
     chartAttribute: languageModuleRiverState.config.chartAttribute,
     selectedAuthors: languageModuleRiverState.config.selectedAuthors,
     selectedLanguages: languageModuleRiverState.config.selectedLanguages,
-    selectedModules: languageModuleRiverState.config.selectedModules
+    selectedModules: languageModuleRiverState.config.selectedModules,
+    highlightedIssue: languageModuleRiverState.config.highlightedIssue,
+    highlightedCommits: languageModuleRiverState.config.highlightedCommits
   };
 };
 
