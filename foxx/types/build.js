@@ -16,7 +16,8 @@ const BuildStatus = new gql.GraphQLEnumType({
     pending: {},
     running: {},
     canceled: {},
-    skipped: {}
+    skipped: {},
+    created: {}
   }
 });
 
