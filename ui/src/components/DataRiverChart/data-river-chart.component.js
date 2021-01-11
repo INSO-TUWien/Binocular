@@ -640,7 +640,10 @@ export class DataRiverChartComponent extends ScalableBaseChartComponent {
       .attr('rel', 'noopener noreferrer')
       .append('circle')
       .classed('issue-nodes', true)
-      .attr('fill', d => d.stream.color.ticket || getColor(d))
+      .attr('fill', d => {
+        const color = d.stream.color.ticket || getColor(d);
+        return color ? chroma(color).alpha(0.6).css() : color;
+      })
       .attr('cx', d => scales.x(d.data.date))
       .attr('cy', d => (d instanceof IssueData ? scales.issue(d.status.name) : scales.y(d.buildSuccessRate)))
       .attr('r', d => d.radius)

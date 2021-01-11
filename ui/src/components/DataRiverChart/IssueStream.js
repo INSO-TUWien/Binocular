@@ -41,18 +41,26 @@ export default class IssueStream {
   }
 
   pushCommits(commits) {
-    commits.forEach(commit => this.__values.push(new IssueData(commit.sha, IssueStat.InProcess, commit.webUrl)));
+    commits.forEach(commit => this.__values.push(new IssueData(commit.sha, IssueStat.InProgress, commit.webUrl)));
     return this;
   }
 
-  setStart(date) {
-    this.__start = new IssueData(null, IssueStat.Open, this.webUrl, date);
+  setStart(dateValue) {
+    if (!dateValue) {
+      return;
+    }
+    const date = dateValue instanceof Date ? dateValue : Date.parse(dateValue);
+    this.__start = new IssueData(null, IssueStat.Open, this.webUrl, isNaN(date) ? new Date(dateValue) : date);
     delete this.__start.__values;
     return this;
   }
 
-  setEnd(date) {
-    this.__end = new IssueData(null, IssueStat.Close, this.webUrl, date);
+  setEnd(dateValue) {
+    if (!dateValue) {
+      return;
+    }
+    const date = dateValue instanceof Date ? dateValue : Date.parse(dateValue);
+    this.__end = new IssueData(null, IssueStat.Close, this.webUrl, isNaN(date) ? new Date(dateValue) : date);
     delete this.__end.__values;
     return this;
   }
