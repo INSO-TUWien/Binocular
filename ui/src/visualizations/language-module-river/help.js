@@ -44,6 +44,12 @@ export default () =>
         issues.
       </li>
       <li>
+        <i className="fa fa-file-code" /> Change the data river chart and sidebar to handle language specific data.
+      </li>
+      <li>
+        <i className="fa fa-folder-open" /> Change the data river chart and sidebar to handle module specific data.
+      </li>
+      <li>
         <i className="far fa-square" /> Tick or untick charts to show and hide them.
       </li>
       <li>

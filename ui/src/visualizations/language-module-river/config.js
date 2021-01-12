@@ -1,6 +1,8 @@
 'use strict';
 
 import { connect } from 'react-redux';
+// eslint-disable-next-line no-unused-vars
+import React from 'react';
 import {
   setResolution,
   setSelectedAuthors,

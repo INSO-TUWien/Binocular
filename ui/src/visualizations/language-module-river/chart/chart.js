@@ -7,7 +7,7 @@ import _ from 'lodash';
 
 import moment from 'moment';
 import chroma from 'chroma-js';
-import { DataRiverChartComponent } from '../../../components/DataRiverChart/data-river-chart.component';
+import DataRiverChartComponent from '../../../components/DataRiverChart';
 import cx from 'classnames';
 import { BuildStat, RiverData } from '../../../components/DataRiverChart/RiverData';
 import StreamKey from '../../../components/DataRiverChart/StreamKey';

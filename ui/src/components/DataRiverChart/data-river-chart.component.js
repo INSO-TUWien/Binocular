@@ -1,5 +1,8 @@
 'use strict';
 
+// eslint-disable-next-line no-unused-vars
+import React from 'react';
+
 import * as d3 from 'd3';
 import chroma from 'chroma-js';
 import { BuildStat, RiverData } from './RiverData';
@@ -35,7 +38,7 @@ import IssueStream, { IssueColor, IssueData, IssueStat } from './IssueStream';
  *  - order (optional) (Format: [string, string, ...]) Strings containing the keys in desired order (largest to smallest).
  *  - useIssueAxis (optional) (Format: true/false, if true the issue stream data receives a given offset and the give axis is shown)
  */
-export class DataRiverChartComponent extends ScalableBaseChartComponent {
+export default class DataRiverChartComponent extends ScalableBaseChartComponent {
   constructor(props) {
     super(props, styles);
   }
@@ -892,5 +895,3 @@ export class DataRiverChartComponent extends ScalableBaseChartComponent {
     );
   }
 }
-
-export default DataRiverChartComponent;
