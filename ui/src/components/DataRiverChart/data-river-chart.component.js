@@ -33,6 +33,7 @@ import IssueStream, { IssueColor, IssueData, IssueStat } from './IssueStream';
  *  - resolution (Format: 'years'/'months'/'weeks'/'days') Needed for date format in tooltips.
  *  - displayNegative (optional) (Format: true/false) Display negative numbers on y-scale.
  *  - order (optional) (Format: [string, string, ...]) Strings containing the keys in desired order (largest to smallest).
+ *  - useIssueAxis (optional) (Format: true/false, if true the issue stream data receives a given offset and the give axis is shown)
  */
 export class DataRiverChartComponent extends ScalableBaseChartComponent {
   constructor(props) {
@@ -205,7 +206,18 @@ export class DataRiverChartComponent extends ScalableBaseChartComponent {
     const yAxis = brushArea.append('g').attr('class', this.styles.axis).attr('transform', 'translate(' + paddings.left + ',0)');
 
     if (!this.props.hideVertical) {
-      yAxis.call(d3.axisLeft(scales.y).tickFormat(d => `${formatPercentage((d * 100 + 100) / 2.0)}%`));
+      yAxis.call(d3.axisLeft(scales.y).tickFormat(d => `${formatPercentage(d)}`));
+
+      // text label for the y axis
+      yAxis
+        .append('text')
+        .attr('transform', 'rotate(-90)')
+        .attr('y', Math.min(-paddings.left + 20, 0))
+        .attr('x', 0 - height / 2)
+        .attr('dy', '1em')
+        .attr('class', this.styles['issue-axis'])
+        .attr('fill', 'currentColor')
+        .text('build success trend');
     }
     return yAxis;
   }
@@ -224,7 +236,7 @@ export class DataRiverChartComponent extends ScalableBaseChartComponent {
       .attr('class', this.styles.axis)
       .attr('transform', 'translate(' + (width - paddings.right) + ',0)');
 
-    if (!this.props.hideVertical) {
+    if (!this.props.hideVertical && this.props.useIssueAxis) {
       issueAxis.call(d3.axisRight(scales.issue));
     }
   }
@@ -490,12 +502,12 @@ export class DataRiverChartComponent extends ScalableBaseChartComponent {
    *
    * @param stream
    * @param index
-   * @param offset
+   * @param offsetFn contains a function to create a corresponding [y0, y1] value for river data
    * @returns {{length}|*|*[]}
    */
-  createStack(stream, index, offset) {
+  createStack(stream, index, offsetFn) {
     const dataStream = stream.map((record, pointIndex) => {
-      const dataPoint = offset(record);
+      const dataPoint = offsetFn(record);
       dataPoint.index = pointIndex;
       dataPoint.data = record;
       dataPoint.key = new StreamKey(record);
@@ -645,11 +657,14 @@ export class DataRiverChartComponent extends ScalableBaseChartComponent {
         return color ? chroma(color).alpha(0.6).css() : color;
       })
       .attr('cx', d => scales.x(d.data.date))
-      .attr('cy', d => (d instanceof IssueData ? scales.issue(d.status.name) : scales.y(d.buildSuccessRate)))
+      .attr(
+        'cy',
+        d => (d instanceof IssueData ? (this.props.useIssueAxis ? scales.issue(d.status.name) : scales.y(0)) : scales.y(d.buildSuccessRate))
+      )
       .attr('r', d => d.radius)
       .attr('stroke-width', d => (!(d instanceof IssueData) && !d.issue ? 0 : 3))
       .attr('stroke', getColor)
-      .on('mouseenter', (event, dataPoint) => {
+      .on('mouseenter', function(event, dataPoint) {
         tooltip.attr('additional', dataPoint.stream.ticketId);
         tooltip.attr('color', `${dataPoint.stream.color.ticket || getColor(dataPoint)}`);
 
@@ -660,18 +675,19 @@ export class DataRiverChartComponent extends ScalableBaseChartComponent {
           tooltip.attr('statusColor', dataPoint.stream.color[dataPoint.status.name]);
           return;
         }
+        d3.select(this).classed(_this.styles['issue-nodes--active'], true);
 
         tooltip.attr('issue', dataPoint.issue);
         tooltip.attr('data', dataPoint);
-        tooltip.attr('attrColor', this.findColor(this.props.attributePalette, dataPoint.attribute));
+        tooltip.attr('attrColor', _this.findColor(_this.props.attributePalette, dataPoint.attribute));
         tooltip.attr('statusColor', dataPoint.stream.color[dataPoint.issue.status.name]);
 
-        this.raiseFilteredStreams(dataPoint.data);
+        _this.raiseFilteredStreams(dataPoint.data);
 
         const normalizedPoint = [-dataPoint.deletions, dataPoint.additions];
         normalizedPoint.data = dataPoint;
-        const coords = this.getPoint(scales, normalizedPoint);
-        this.paintDataPoint(
+        const coords = _this.getPoint(scales, normalizedPoint);
+        _this.paintDataPoint(
           brushArea,
           scales.x(normalizedPoint.data.date),
           coords.y0,
@@ -680,6 +696,7 @@ export class DataRiverChartComponent extends ScalableBaseChartComponent {
         );
       })
       .on('mouseout', function(event, stream) {
+        d3.select(this).classed(_this.styles['issue-nodes--active'], false);
         return _this.onMouseLeave.bind(_this, this, tooltip, brushArea)(event, stream);
       });
   }

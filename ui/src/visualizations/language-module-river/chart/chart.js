@@ -20,7 +20,6 @@ export default class LanguageModuleRiver extends React.Component {
     super(props);
 
     const { riverData } = this.extractRiverData(props);
-    //const { issueChartData } = this.extractIssueData(props);
 
     this.state = {
       commitChartData: riverData, //Data for commit changes
@@ -96,7 +95,7 @@ export default class LanguageModuleRiver extends React.Component {
             authorPalette={authorPalette}
             attributePalette={attributePalette}
             issuePalette={issuePalette}
-            paddings={{ top: 40, left: 60, bottom: 40, right: 70 }}
+            paddings={{ top: 40, left: 80, bottom: 40, right: 30 }}
             xAxisCenter={true}
             resolution={this.props.chartResolution}
             displayNegative={true}
@@ -330,100 +329,5 @@ export default class LanguageModuleRiver extends React.Component {
         return Object.keys(organized).map(organizedKey => organized[organizedKey]);
       })
     );
-  }
-
-  /**
-   *
-   * @param props
-   * @returns {{}|{issueChartData: [], issueScale: number[]}}
-   */
-  extractIssueData(props) {
-    if (!props.issues || props.issues.length === 0) {
-      return {};
-    }
-
-    //---- STEP 1: FILTER ISSUES ----
-    let filteredIssues = [];
-    switch (props.showIssues) {
-      case 'all':
-        filteredIssues = props.issues;
-        break;
-      case 'open':
-        _.each(props.issues, issue => {
-          if (issue.closedAt === null) {
-            filteredIssues.push(issue);
-          }
-        });
-        break;
-      case 'closed':
-        _.each(props.issues, issue => {
-          if (issue.closedAt) {
-            filteredIssues.push(issue);
-          }
-        });
-        break;
-      default:
-    }
-
-    //---- STEP 2: AGGREGATE ISSUES PER TIME INTERVAL ----
-    const data = [];
-    const granularity = getGranularityDuration(props.chartResolution);
-    const curr = moment(props.firstSignificantTimestamp).startOf(granularity.unit).subtract(1, props.chartResolution);
-    const next = moment(curr).add(1, props.chartResolution);
-    const end = moment(props.lastSignificantTimestamp).endOf(granularity.unit).add(1, props.chartResolution);
-    const sortedCloseDates = [];
-    let createdDate = Date.parse(props.issues[0].createdAt);
-
-    for (let i = 0, j = 0; curr.isSameOrBefore(end); curr.add(1, props.chartResolution), next.add(1, props.chartResolution)) {
-      //Iterate through time buckets
-      const currTimestamp = curr.toDate().getTime();
-      const nextTimestamp = next.toDate().getTime();
-      const obj = { date: currTimestamp, count: 0, openCount: 0, closedCount: 0 }; //Save date of time bucket, create object
-
-      while (i < filteredIssues.length && createdDate < nextTimestamp && createdDate >= currTimestamp) {
-        //Iterate through issues that fall into this time bucket (open date)
-        if (createdDate > currTimestamp && createdDate < nextTimestamp) {
-          obj.count++;
-          obj.openCount++;
-        }
-        if (filteredIssues[i].closedAt) {
-          //If issues are closed, save close date in sorted list
-          const closedDate = Date.parse(filteredIssues[i].closedAt);
-          const insertPos = _.sortedIndex(sortedCloseDates, closedDate);
-          sortedCloseDates.splice(insertPos, 0, closedDate);
-        }
-        if (++i < filteredIssues.length) {
-          createdDate = Date.parse(filteredIssues[i].createdAt);
-        }
-      }
-      for (; j < sortedCloseDates.length && sortedCloseDates[j] < nextTimestamp && sortedCloseDates[j] >= currTimestamp; j++) {
-        //Iterate through issues that fall into this time bucket (closed date)
-        if (sortedCloseDates[j] > currTimestamp && sortedCloseDates[j] < nextTimestamp) {
-          sortedCloseDates.splice(j, 1);
-          obj.count++;
-          obj.closedCount++;
-        }
-      }
-      data.push(obj);
-    }
-
-    //---- STEP 3: CONSTRUCT CHART DATA FROM AGGREGATED ISSUES ----
-    const issueChartData = [];
-    const issueScale = [0, 0];
-    _.each(data, function(issue) {
-      issueChartData.push({
-        date: issue.date,
-        Opened: issue.openCount,
-        Closed: issue.closedCount > 0 ? issue.closedCount * -1 : -0.001
-      }); //-0.001 for stack layout to realize it belongs on the bottom
-      if (issueScale[1] < issue.openCount) {
-        issueScale[1] = issue.openCount;
-      }
-      if (issueScale[0] > issue.closedCount * -1) {
-        issueScale[0] = issue.closedCount * -1;
-      }
-    });
-
-    return { issueChartData, issueScale };
   }
 }

@@ -10,7 +10,18 @@
 
 .layer{
   pointer-events:all;
-  //stroke-width: 1px;
+}
+
+.issue-nodes {
+  &--active{
+    opacity: 0.3;
+  }
+}
+
+.issue-axis{
+  font-size: larger;
+  text-anchor:middle;
+  text-transform: capitalize;
 }
 
 .tooltip{

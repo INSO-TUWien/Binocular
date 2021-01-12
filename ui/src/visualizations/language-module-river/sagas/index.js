@@ -6,7 +6,6 @@ import { throttle, fork, takeEvery } from 'redux-saga/effects';
 
 import { fetchFactory, timestampedActionFactory, mapSaga } from '../../../sagas/utils.js';
 import getCommitData from './getCommitData.js';
-import getIssueData from './getIssueData.js';
 import getBuildData from './getBuildData.js';
 import getBounds from './getBounds.js';
 import getLanguageData from './getLanguageData';
@@ -81,19 +80,17 @@ export const fetchLanguageModuleRiverData = fetchFactory(
 
     return yield Promise.join(
       getCommitData([firstSignificantTimestamp, lastSignificantTimestamp]),
-      getIssueData([firstSignificantTimestamp, lastSignificantTimestamp]),
       getBuildData(),
       getLanguageData(),
       getModuleData()
     )
-      .spread((commits, issues, builds, languages, modules) => {
+      .spread((commits, builds, languages, modules) => {
         const attributes = organizeAttributes(commits, 100);
 
         return {
           commits,
           committers,
           attributes,
-          issues,
           builds,
           languages,
           modules,
