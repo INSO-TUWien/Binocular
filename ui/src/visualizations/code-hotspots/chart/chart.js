@@ -139,18 +139,22 @@ export default class CodeHotspots extends React.PureComponent {
               let path = this.state.path;
               let mode = this.state.mode;
               let currThis = this;
-              vcsData.getChangeData(path).then(function (resp){
-                switch (mode){
-                  case 1:
-                    chartUpdater.updateAllChartsWithChangesPerDeveloper(resp,lines,path,currThis,true);
-                    break;
-                  default:
+              switch (mode) {
+                case 1:
+                  vcsData.getChangeData(path).then(function (resp) {
+                    chartUpdater.updateAllChartsWithChangesPerDeveloper(resp, lines, path, currThis, true);
+                    currThis.setState({code: xhr.responseText});
+                    Loading.remove();
+                  });
+                  break;
+                default:
+                  vcsData.getChangeData(path).then(function (resp){
                     chartUpdater.updateAllChartsWithChangesPerVersion(resp,lines,path,currThis,true);
-                    break;
-                }
-                currThis.setState({code: xhr.responseText});
-                Loading.remove();
-              });
+                    currThis.setState({code: xhr.responseText});
+                    Loading.remove();
+                  });
+                  break;
+              }
             } else {
               Loading.setErrorText(xhr.statusText);
               console.error(xhr.statusText);

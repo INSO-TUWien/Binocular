@@ -378,6 +378,7 @@ export default class chartGeneration {
           .attr("y", 0)
           .attr("width", w / columns)
           .attr("height", h)
+          .style("cursor", "pointer")
           .on("mouseover", function(d,i) {
             div.transition()
               .duration(200)

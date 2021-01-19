@@ -70,6 +70,30 @@ module.exports = new gql.GraphQLObjectType({
               hunks: edge.hunks
             }`
       }),
+      file: {
+        type: require('./fileInCommit.js'),
+        args:{
+          path: {
+            description: 'Path of the file',
+            type: new gql.GraphQLNonNull(gql.GraphQLString)
+          }
+        },
+        description: 'The file with path touched by this commit',
+        resolve(commit, args) {
+          return db
+            ._query(
+              aql`
+          FOR file, edge
+            IN INBOUND ${commit} ${commitsToFiles}
+            FILTER file.path == ${args.path}
+            RETURN {
+              file,
+              lineCount: edge.lineCount,
+              hunks: edge.hunks
+            }`)
+            .toArray()[0];
+        }
+      },
       stakeholder: {
         type: require('./stakeholder.js'),
         description: 'The author of this commit',
