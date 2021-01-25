@@ -3,8 +3,7 @@
 import _ from 'lodash';
 
 export default class HunkHandler {
-  static handle (hunk,data,column) {
-    let maxValue=0;
+  static handle (hunk,data,column,maxValue) {
     for (let k = 0; k < hunk.newLines; k++) {
       let cellIndex = _.findIndex(data,{column:""+column,row:hunk.newStart+k-1});
       if(cellIndex!==-1){

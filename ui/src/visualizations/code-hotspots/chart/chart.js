@@ -85,12 +85,21 @@ export default class CodeHotspots extends React.PureComponent {
               this.setState({mode:0});
               document.getElementById("CpVButton").classList.add(styles.selected);
               document.getElementById("CpDButton").classList.remove(styles.selected);
+              document.getElementById("CpIButton").classList.remove(styles.selected);
             }}>Changes/Version</button></div>
             <div className={styles.inline}><button id={"CpDButton"} className={"button "+styles.mg1} onClick={(e)=>{
               this.setState({mode:1});
               document.getElementById("CpVButton").classList.remove(styles.selected);
               document.getElementById("CpDButton").classList.add(styles.selected);
+              document.getElementById("CpIButton").classList.remove(styles.selected);
             }}>Changes/Developer</button></div>
+            <div className={styles.inline}><button id={"CpIButton"} className={"button "+styles.mg1} onClick={(e)=>{
+              this.setState({mode:2});
+              document.getElementById("CpVButton").classList.remove(styles.selected);
+              document.getElementById("CpDButton").classList.remove(styles.selected);
+              document.getElementById("CpIButton").classList.add(styles.selected);
+            }}>Changes/Issue</button></div>
+
           </div>
           {
             this.state.sha!==""&&
@@ -147,6 +156,13 @@ export default class CodeHotspots extends React.PureComponent {
                     Loading.remove();
                   });
                   break;
+                case 2:
+                  vcsData.getIssueData(path).then(function (resp) {
+                    chartUpdater.updateAllChartsWithChangesPerIssue(resp, lines, path, currThis, true);
+                    currThis.setState({code: xhr.responseText});
+                    Loading.remove();
+                  });
+                  break;
                 default:
                   vcsData.getChangeData(path).then(function (resp){
                     chartUpdater.updateAllChartsWithChangesPerVersion(resp,lines,path,currThis,true);
@@ -170,6 +186,9 @@ export default class CodeHotspots extends React.PureComponent {
         switch (this.state.mode){
           case 1:
             chartUpdater.updateAllChartsWithChangesPerDeveloper(null,null,null,this,false);
+            break;
+          case 2:
+            chartUpdater.updateAllChartsWithChangesPerIssue(null,null,null,this,false);
             break;
           default:
             chartUpdater.updateAllChartsWithChangesPerVersion(null,null,null,this,false);

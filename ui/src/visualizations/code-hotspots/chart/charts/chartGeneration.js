@@ -1,6 +1,6 @@
 import * as d3 from 'd3';
 import ColorMixer from '../helper/colorMixer';
-import DeveloperList from '../helper/developerList';
+import ListGeneration from '../helper/listGeneration';
 
 let HEATMAP_LOW_COLOR = '#ABEBC6';
 let HEATMAP_HEIGH_COLOR = '#E6B0AA';
@@ -82,10 +82,24 @@ export default class chartGeneration {
         for (let i = 0; i < data.length; i++) {
           if(combinedData[data[i].row]===undefined){
             combinedData[data[i].row]={"column":data[i].column,"row":data[i].row,"value":data[i].value,"developer":[]};
-            combinedData[data[i].row].developer.push({"signature":data[i].signature,"value":data[i].value})
+            combinedData[data[i].row].developer.push({"dev":data[i].dev,"value":data[i].value})
           }else{
             combinedData[data[i].row].value += data[i].value;
-            combinedData[data[i].row].developer.push({"signature":data[i].signature,"value":data[i].value})
+            combinedData[data[i].row].developer.push({"dev":data[i].dev,"value":data[i].value})
+            if(combinedData[data[i].row].value>maxValue){
+              maxValue=combinedData[data[i].row].value;
+            }
+          }
+        }
+        break;
+      case 2:
+        for (let i = 0; i < data.length; i++) {
+          if(combinedData[data[i].row]===undefined){
+            combinedData[data[i].row]={"column":data[i].column,"row":data[i].row,"value":data[i].value,"issues":[]};
+            combinedData[data[i].row].issues.push({"title":data[i].title,"value":data[i].value})
+          }else{
+            combinedData[data[i].row].value += data[i].value;
+            combinedData[data[i].row].issues.push({"title":data[i].title,"value":data[i].value})
             if(combinedData[data[i].row].value>maxValue){
               maxValue=combinedData[data[i].row].value;
             }
@@ -178,7 +192,36 @@ export default class chartGeneration {
             div	.html("<div style='font-weight: bold'>Row: "+(d.row+1)+"</div>" +
               "<div>Changes: "+d.value+"</div>"+
               "<hr>"+
-              DeveloperList.generate(d.developer)
+              ListGeneration.generateDeveloperList(d.developer)
+            )
+              .style("right", (30) + "px")
+              .style("top", ((d.row) * barHeight) + "px");
+          })
+          .on("mouseout", function(d) {
+            div.transition()
+              .duration(500)
+              .style("opacity", 0);
+          });
+
+        break;
+      case 2:
+        chart.selectAll('g')
+          .data(combinedData).enter().append('g')
+          .append('rect')
+          .attr('x', d => {return (d.column - 0) * barWidth})
+          .attr('y', d => {return (d.row - 1) * barHeight})
+          .style('fill', colorScale)
+          .attr('width', barWidth)
+          .attr('height', barHeight)
+          .attr('z-index', "10")
+          .on("mouseover", function(d,i) {
+            div.transition()
+              .duration(200)
+              .style("opacity", 1);
+            div	.html("<div style='font-weight: bold'>Row: "+(d.row+1)+"</div>" +
+              "<div>Changes: "+d.value+"</div>"+
+              "<hr>"+
+              ListGeneration.generateIssueList(d.issues)
             )
               .style("right", (30) + "px")
               .style("top", ((d.row) * barHeight) + "px");
@@ -228,16 +271,59 @@ export default class chartGeneration {
 
     let combinedData = []
     let maxValue = 0;
-
-    for (let i = 0; i < data.length; i++) {
-      if (combinedData[data[i].column] === undefined) {
-        combinedData[data[i].column] = {"column": data[i].column, "row": data[i].row, "value": data[i].value,"message":data[i].message,"sha":data[i].sha,"signature":data[i].signature};
-      } else {
-        combinedData[data[i].column].value += data[i].value;
-        if (combinedData[data[i].column].value > maxValue) {
-          maxValue = combinedData[data[i].column].value;
+    switch (mode) {
+      case 1:
+        for (let i = 0; i < data.length; i++) {
+          if (combinedData[data[i].column] === undefined) {
+            combinedData[data[i].column] = {"column": data[i].column,
+              "row": data[i].row,
+              "value": data[i].value,
+              "message":data[i].message,
+              "sha":data[i].sha,
+              "dev":data[i].dev}
+          } else {
+            combinedData[data[i].column].value += data[i].value;
+            if (combinedData[data[i].column].value > maxValue) {
+              maxValue = combinedData[data[i].column].value;
+            }
+          }
         }
-      }
+
+        break;
+      case 2:
+        for (let i = 0; i < data.length; i++) {
+          if (combinedData[data[i].column] === undefined) {
+            combinedData[data[i].column] = {"column": data[i].column,
+              "row": data[i].row,
+              "value": data[i].value,
+              "message":data[i].message,
+              "sha":data[i].sha,
+              "title":data[i].title,
+              "description":data[i].description,
+              "iid":data[i].iid};
+          } else {
+            combinedData[data[i].column].value += data[i].value;
+            if (combinedData[data[i].column].value > maxValue) {
+              maxValue = combinedData[data[i].column].value;
+            }
+          }
+        }
+
+        break;
+      default:
+        for (let i = 0; i < data.length; i++) {
+          if (combinedData[data[i].column] === undefined) {
+            combinedData[data[i].column] = {"column": data[i].column, "row": data[i].row, "value": data[i].value,"message":data[i].message,"sha":data[i].sha,"signature":data[i].signature};
+          } else {
+            combinedData[data[i].column].value += data[i].value;
+            if (combinedData[data[i].column].value > maxValue) {
+              maxValue = combinedData[data[i].column].value;
+            }
+          }
+        }
+
+        break;
+
     }
 
     const legendData = [];
@@ -354,7 +440,38 @@ export default class chartGeneration {
               .duration(200)
               .style("opacity", 1);
             div	.html("<div style='font-weight: bold'>Developer: "+(parseInt(d.column)+1)+"</div>" +
-              "<div>"+d.signature+"</div>"+
+              "<div>"+d.dev+"</div>"+
+              "<hr>"+
+              "<div>Changes: "+d.value+"</div>")
+              .style("right", (w-(i * w / columns)-300)>0?(w-(i * w / columns)-300):0 + "px")
+              .style("top", (h) + "px");
+          })
+          .on("mouseout", function(d) {
+            div.transition()
+              .duration(500)
+              .style("opacity", 0);
+          });
+        break;
+      case 2:
+        groupInfo
+          .selectAll("rect")
+          .data(combinedData)
+          .enter()
+          .append("rect")
+          .attr("fill", "#00000000")
+          .attr("class", "sBar")
+          .attr("x", (d, i) => i * w / columns)
+          .attr("y", 0)
+          .attr("width", w / columns)
+          .attr("height", h)
+          .on("mouseover", function(d,i) {
+            div.transition()
+              .duration(200)
+              .style("opacity", 1);
+            div	.html("<div style='font-weight: bold'>Issue: "+d.iid+"</div>" +
+              "<div>"+d.title+"</div>"+
+              "<hr>"+
+              "<div>"+d.description+"</div>"+
               "<hr>"+
               "<div>Changes: "+d.value+"</div>")
               .style("right", (w-(i * w / columns)-300)>0?(w-(i * w / columns)-300):0 + "px")
