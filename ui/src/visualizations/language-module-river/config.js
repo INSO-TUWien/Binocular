@@ -95,7 +95,7 @@ const LangModRiverConfigComponent = props => {
                 graphQl.query(
                   `
                   query($q: String) {
-                    issues(page: 1, perPage: 50, q: $q, sort: "DESC") {
+                    issues(q: $q, sort: "DESC") {
                       data { iid title createdAt closedAt webUrl }
                     }
                   }`,

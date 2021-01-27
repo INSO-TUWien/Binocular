@@ -10,8 +10,12 @@ export { graphQl };
 
 export function traversePages(getPage, fn, pageNumber = 1, perPage = 1000) {
   return Promise.resolve(getPage(pageNumber, perPage)).then(page => {
-    _.each(page.data, fn);
-    if (page.data.length + (page.page - 1) * page.perPage < page.count) {
+    if (!page) {
+      return;
+    }
+    const data = page.data || [];
+    _.each(data, fn);
+    if (data.length + (page.page - 1) * page.perPage < page.count) {
       return traversePages(getPage, fn, pageNumber + 1, perPage);
     }
   });

@@ -15,17 +15,12 @@ export default function getBuildData() {
 const getBuildsPage = (page, perPage) => {
   return graphQl
     .query(
-      `
-    query($page: Int, $perPage: Int) {
-      builds(page: $page, perPage: $perPage) {
-        count
+      `query($page: Int, $perPage: Int) {
+      baseBuilds(page: $page, perPage: $perPage) {
         page
         perPage
-        count
         data {
-          id
           sha
-          status
           jobs {
             status
           }
@@ -34,5 +29,5 @@ const getBuildsPage = (page, perPage) => {
     }`,
       { page, perPage }
     )
-    .then(resp => resp.builds);
+    .then(resp => resp.baseBuilds);
 };
