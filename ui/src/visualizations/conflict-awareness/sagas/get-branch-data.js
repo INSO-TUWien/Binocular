@@ -31,6 +31,7 @@ const getBranchesPage = (projects) => (page, perPage) => {
            page
            perPage
            data {
+             branchKey
              branchName
              headShas {
                 project

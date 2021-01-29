@@ -39,6 +39,19 @@ export default handleActions(
         receivedAt: action.meta.receivedAt,
       });
     },
+
+    // request a diff of a commit
+    REQUEST_REBASE_CHECK: (state) =>
+      _.merge({}, state, { isFetching: true, data: { rebaseCheck: undefined } }),
+
+    // receive the diff of a commit
+    RECEIVE_REBASE_CHECK: (state, action) => {
+      return _.merge({}, state, {
+        data: action.payload,
+        isFetching: false,
+        receivedAt: action.meta.receivedAt,
+      });
+    },
   },
   {
     data: {},

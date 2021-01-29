@@ -47,15 +47,26 @@ export const updateConflictAwarenessData = createAction(
   }
 );
 
-// get requested diffs of a specific commit sha
+// get requested diff of a specific commit sha
 export const requestDiff = createAction('REQUEST_DIFF');
 export const receiveDiff = timestampedActionFactory('RECEIVE_DIFF');
 export const getDiff = createAction('GET_DIFF');
+
+// get requested diff of a specific commit sha
+export const requestRebaseCheck = createAction('REQUEST_REBASE_CHECK');
+export const receiveRebaseCheck = timestampedActionFactory('RECEIVE_REBASE_CHECK');
+export const getRebaseCheck = createAction(
+  'GET_REBASE_CHECK',
+  (headSha, rebaseRepo, rebaseBranch, upstreamRepo, upstreamBranch) => {
+    return { headSha, rebaseRepo, rebaseBranch, upstreamRepo, upstreamBranch };
+  }
+);
 
 // inits all watchers
 export default function* () {
   yield fork(watchDiff);
   yield fork(watchUpdateConflictAwarenessData);
+  yield fork(watchCheckRebase);
 }
 
 /**
@@ -130,11 +141,50 @@ export const fetchDiff = fetchFactory(
 );
 
 /**
+ * Checks if a rebase is possible without conflicts or not.
+ * If not, the data of the conflict will be returned.
+ */
+export const fetchRebaseCheck = fetchFactory(
+  function (headSha, rebaseRepo, rebaseBranch, upstreamRepo, upstreamBranch) {
+    return fetch(endpointUrl('check/rebase'), {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        headSha,
+        rebaseRepo,
+        rebaseBranch,
+        upstreamRepo,
+        upstreamBranch,
+      }),
+    }).then((resp) => resp.json());
+  },
+  requestRebaseCheck,
+  receiveRebaseCheck
+);
+
+/**
  * Watches all getDiff actions and fetches the diff of a specific commit sha.
  */
 export function* watchDiff() {
   yield takeEvery('GET_DIFF', function* (a) {
     yield* fetchDiff(a.payload);
+  });
+}
+
+/**
+ * Watches all getDiff actions and fetches the diff of a specific commit sha.
+ */
+export function* watchCheckRebase() {
+  yield takeEvery('GET_REBASE_CHECK', function* (a) {
+    yield* fetchRebaseCheck(
+      a.payload.headSha,
+      a.payload.rebaseRepo,
+      a.payload.rebaseBranch,
+      a.payload.upstreamRepo,
+      a.payload.upstreamBranch
+    );
   });
 }
 
