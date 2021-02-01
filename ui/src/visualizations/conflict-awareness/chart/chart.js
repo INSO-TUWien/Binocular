@@ -108,6 +108,24 @@ export default class ConflictAwareness extends React.Component {
       updatedProps.rebaseCheck = nextProps.rebaseCheck;
     }
 
+    // a new check for a merge was performed
+    if (!equals(nextProps.mergeCheck, prevState.mergeCheck) && nextProps.mergeCheck) {
+      // the merge shows no conflicts -> show success message
+      if (nextProps.mergeCheck.success) {
+        _showMergeSuccessModal(
+          nextProps.mergeCheck.fromRepo,
+          nextProps.mergeCheck.fromBranch,
+          nextProps.mergeCheck.toRepo,
+          nextProps.mergeCheck.toBranch
+        );
+      } else {
+        // the merge shows conflicts -> show them in a modal
+        _showMergeConflictModal(nextProps.mergeCheck);
+      }
+
+      updatedProps.mergeCheck = nextProps.mergeCheck;
+    }
+
     if (_.isEmpty(updatedProps)) {
       // No state update necessary
       return null;
@@ -401,9 +419,8 @@ export default class ConflictAwareness extends React.Component {
 
           // a special key for a merge or rebase check was pressed during the click
           if (event.shiftKey || event.ctrlKey) {
-            // shift key checks for a rebase
+            // ctrl key checks for a rebase
             if (event.ctrlKey) {
-              // TODO: backend + show
               this.props.onCheckRebase(
                 selectedBranch.headSha,
                 this._getProjectFromCSSClass(selectedBranch.clazz),
@@ -411,13 +428,14 @@ export default class ConflictAwareness extends React.Component {
                 this._getProjectFromCSSClass(branchID.clazz),
                 branchID.branchName
               );
-              console.log(
-                `Rebase branch ${selectedBranch.branchName} onto ${branchID.branchName}.`
-              );
             } else if (event.shiftKey) {
-              // ctrl key checks for a merge
-              // TODO: backend + show
-              console.log(`Merge branch ${selectedBranch.branchName} into ${branchID.branchName}.`);
+              // shift key checks for a merge
+              this.props.onCheckMerge(
+                this._getProjectFromCSSClass(selectedBranch.clazz),
+                selectedBranch.branchName,
+                this._getProjectFromCSSClass(branchID.clazz),
+                branchID.branchName
+              );
             }
 
             // reset the highlighting and the selectedBranch
@@ -740,7 +758,7 @@ function _getSuccessModal() {
 
 /**
  * Shows the successModal containing a success message that the rebase of
- * 'rebaseBranch' (project 'onto') can be rebased onto 'upstreamBranch' (project 'rebaseRepo')
+ * 'rebaseBranch' (project 'rebaseRepo') can be rebased onto 'upstreamBranch' (project 'upstreamRepo')
  * can be made without conflicts.
  * @param rebaseRepo {string} the project of 'rebaseBranch'
  * @param rebaseBranch {string} the branch which is rebased onto 'upstreamBranch'
@@ -751,7 +769,25 @@ function _getSuccessModal() {
 function _showRebaseSuccessModal(rebaseRepo, rebaseBranch, upstreamRepo, upstreamBranch) {
   _getSuccessModal()
     .text(
-      `No conflict was detected. The rebase of "${rebaseBranch}" (project "${rebaseRepo}") onto branch ${upstreamBranch} (project "${upstreamRepo}") is possible.`
+      `No conflict was detected. The rebase of "${rebaseBranch}" (project "${rebaseRepo}") onto branch "${upstreamBranch}" (project "${upstreamRepo}") is possible.`
+    )
+    .style('visibility', 'visible');
+}
+
+/**
+ * Shows the successModal containing a success message that the merge of
+ * 'fromBranch' (project 'fromRepo') can be merged into 'toBranch' (project 'toRepo')
+ * can be made without conflicts.
+ * @param fromRepo {string} the project of 'fromBranch'
+ * @param fromBranch {string} the branch which is merged into 'toBranch'
+ * @param toRepo {string} the project of 'toBranch'
+ * @param toBranch {string} the branch which is merged into
+ * @private
+ */
+function _showMergeSuccessModal(fromRepo, fromBranch, toRepo, toBranch) {
+  _getSuccessModal()
+    .text(
+      `No conflict was detected. The merge of "${fromBranch}" (project "${fromRepo}") onto branch "${toBranch}" (project "${toRepo}") is possible.`
     )
     .style('visibility', 'visible');
 }
@@ -767,8 +803,8 @@ function _hideSuccessModal(self) {
 }
 
 /**
- * Sets up and shows the files containing conflicting code in expandable and
- * shrinkable cards. The conflicts are highlighted.
+ * Sets up and shows the files of a rebase containing conflicting code
+ * in expandable and shrinkable cards. The conflicts are highlighted.
  * @param checkRebase {*} the conflict information from the rebase
  * @private
  */
@@ -783,21 +819,102 @@ function _showRebaseConflictModal(checkRebase) {
   } = checkRebase;
 
   // modal which should show the conflict data
-  const rebaseConflictModal = _getRebaseConflictModal();
-  // metadata for setting up the click events for expanding/shrinking the card bodies
-  const clickEventMetadatas = [];
+  const conflictModal = _getConflictModal();
 
-  let modalFirstPartHtml = `<p class="has-text-centered">Conflicts detected while rebasing ${rebaseBranch} (project ${rebaseRepo}) onto ${upstreamBranch} (project ${upstreamRepo}).</p>
+  // create the header of the modal containing a message which rebase was checked
+  let modalFirstPartHtml = `
+    <p class="has-text-centered">Conflicts detected while rebasing "${rebaseBranch}" (project "${rebaseRepo}") onto "${upstreamBranch}" (project "${upstreamRepo}").</p>
     <p><b>Commits:</b></p>
-    <ul style="height: 150px; overflow: hidden; overflow-y: scroll;">`;
+    <ul style="height: 150px; overflow: hidden; overflow-y: scroll;">
+    `;
 
+  // add the commits to the header with the information if they were successful,
+  // resulted in a conflict or were not checked due to the previous conflict
   commitsOfRebase.forEach((commitOfRebase) => {
     modalFirstPartHtml =
       modalFirstPartHtml + `<li>${commitOfRebase.sha} - ${commitOfRebase.conflictText}</li>`;
   });
 
-  modalFirstPartHtml = modalFirstPartHtml + '</ul><p><b>Conflicts:</b></p>';
-  rebaseConflictModal.html(modalFirstPartHtml);
+  // close the commit list and set the html in the modal
+  // the whole header html must be set, because otherwise the first <ul>
+  // will automatically closed by the html() function to provide a valid HTML
+  modalFirstPartHtml = modalFirstPartHtml + '</ul>';
+  conflictModal.html(modalFirstPartHtml);
+
+  // appends the conflict cards to the modal
+  _createConflictsCardSection(conflictDatas, conflictModal);
+
+  // show the conflict modal
+  _getConflictModal().style('visibility', 'visible');
+}
+
+/**
+ * Sets up and shows the files of a merge containing conflicting code
+ * in expandable and shrinkable cards. The conflicts are highlighted.
+ * @param checkMerge {*} the conflict information from the merge
+ * @private
+ */
+function _showMergeConflictModal(checkMerge) {
+  const { fromRepo, fromBranch, toRepo, toBranch, conflictDatas } = checkMerge;
+
+  // modal which should show the conflict data
+  const conflictModal = _getConflictModal();
+
+  // create the header of the modal containing a message which merge was checked
+  conflictModal.html(`
+    <p class="has-text-centered">Conflicts detected while merging "${fromBranch}" (project "${fromRepo}") into "${toBranch}" (project "${toRepo}").</p> 
+    `);
+
+  // appends the conflict cards to the modal
+  _createConflictsCardSection(conflictDatas, conflictModal);
+
+  // show the conflict modal
+  _getConflictModal().style('visibility', 'visible');
+}
+
+/**
+ * Closes the Modal which shows the conflict and resets the rebaseCheck object in the state.
+ * @param self {ConflictAwareness} this instance
+ * @private
+ */
+function _resetRebaseCheckAndHideModal(self) {
+  const conflictModal = _getConflictModal();
+  conflictModal.style('visibility', 'hidden');
+  self.state.rebaseCheck = undefined;
+}
+
+/**
+ * Closes the Modal which shows the conflict and resets the mergeCheck object in the state.
+ * @param self {ConflictAwareness} this instance
+ * @private
+ */
+function _resetMergeCheckAndHideModal(self) {
+  const conflictModal = _getConflictModal();
+  conflictModal.style('visibility', 'hidden');
+  self.state.mergeCheck = undefined;
+}
+
+/**
+ * Gets the conflictModal.
+ * @returns {*}
+ * @private
+ */
+function _getConflictModal() {
+  return d3.select('#conflictModal');
+}
+
+/**
+ * Appends expandable conflict cards to the conflictModal.
+ * @param conflictDatas [] array that holds information about the conflict
+ * @private
+ */
+function _createConflictsCardSection(conflictDatas) {
+  // metadata for setting up the click events for expanding/shrinking the card bodies
+  const clickEventMetadatas = [];
+  const conflictModal = _getConflictModal();
+
+  // header of the conflict cards section
+  conflictModal.html(conflictModal.html() + '<p><b>Conflicts:</b></p>');
 
   // for each file containing conflicts, create an expendable card
   // showing the file's code in codemirror and highlighting the conflicting parts
@@ -809,8 +926,8 @@ function _showRebaseConflictModal(checkRebase) {
     const textAreaID = 'textAreaID' + i;
 
     // append the newly created card within the modal
-    rebaseConflictModal.html(
-      rebaseConflictModal.html() +
+    conflictModal.html(
+      conflictModal.html() +
         _createExpandableCard(
           cardContentID,
           cardHeaderID,
@@ -867,29 +984,6 @@ function _showRebaseConflictModal(checkRebase) {
       _toggleCardContentVisibility(clickEventMetaData.cardContentID, clickEventMetaData.cardArrowID)
     );
   });
-
-  // show the conflict modal
-  _getRebaseConflictModal().style('visibility', 'visible');
-}
-
-/**
- * Closes the Modal which shows the diff and resets the diff object in the state.
- * @param self {ConflictAwareness} this instance
- * @private
- */
-function _resetRebaseCheckAndHideModal(self) {
-  const rebaseConflictModal = _getRebaseConflictModal();
-  rebaseConflictModal.style('visibility', 'hidden');
-  self.state.rebaseCheck = undefined;
-}
-
-/**
- * Gets the rebaseConflictModal.
- * @returns {*}
- * @private
- */
-function _getRebaseConflictModal() {
-  return d3.select('#rebaseConflictModal');
 }
 
 /**
@@ -960,7 +1054,7 @@ function _appendBasicModalToSelector(selector) {
 }
 
 /**
- * Add Modals to the DOM for diffs and rebase checks.
+ * Add Modals to the DOM for diffs and rebase/merge/cherry pick checks.
  * @private
  */
 function _addModals() {
@@ -972,7 +1066,7 @@ function _addModals() {
   _appendBasicModalToSelector('body')
     .style('background-color', 'white')
     .style('height', '90%')
-    .attr('id', 'rebaseConflictModal');
+    .attr('id', 'conflictModal');
 
   _appendBasicModalToSelector('#modalContainer')
     .style('background-color', 'lawngreen')
@@ -980,7 +1074,7 @@ function _addModals() {
 }
 
 /**
- * Hide diffModal, successModal and rebaseConflictModal when pressing esc
+ * Hide diffModal, successModal and conflictModal when pressing esc
  * or clicking on svg.
  * @private
  */
@@ -988,7 +1082,7 @@ function _hideModals(self) {
   const { svg } = _getGraphDOMElements();
   const diffModal = _getDiffModal();
   const successModal = _getSuccessModal();
-  const rebaseConflictModal = _getRebaseConflictModal();
+  const conflictModal = _getConflictModal();
 
   // hide modals when esc pressed
   d3.select('body').on('keydown', (event) => {
@@ -1003,9 +1097,10 @@ function _hideModals(self) {
         _hideSuccessModal(self);
       }
 
-      // hide rebaseConflictModal if visible, when clicking on the body
-      if (_isVisible(rebaseConflictModal)) {
+      // hide conflictModal if visible, when clicking on the body
+      if (_isVisible(conflictModal)) {
         _resetRebaseCheckAndHideModal(self);
+        _resetMergeCheckAndHideModal(self);
       }
     }
   });
@@ -1022,9 +1117,10 @@ function _hideModals(self) {
       _hideSuccessModal(self);
     }
 
-    // hide rebaseConflictModal if visible, when clicking on the svg
-    if (_isVisible(rebaseConflictModal)) {
+    // hide conflictModal if visible, when clicking on the svg
+    if (_isVisible(conflictModal)) {
       _resetRebaseCheckAndHideModal(self);
+      _resetMergeCheckAndHideModal(self);
     }
   });
 }

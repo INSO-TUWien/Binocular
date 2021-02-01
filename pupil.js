@@ -42,6 +42,7 @@ app.get('/api/parent/fork', require('./lib/endpoints/get-forks.js')); // endpoin
 app.post('/api/index', require('./lib/endpoints/index-project.js')); // endpoint for triggering the indexing of a git project
 app.post('/api/diff', require('./lib/endpoints/get-diffs.js')); // endpoint for getting the diffs of a specific commit
 app.post('/api/check/rebase', require('./lib/endpoints/check-rebase.js')); // endpoint for checking if a rebase would be successful or resolves in a conflict
+app.post('/api/check/merge', require('./lib/endpoints/check-merge.js')); // endpoint for checking if a merge would be successful or resolves in a conflict
 
 // proxy to the FOXX-service
 app.get('/graphQl', require('./lib/endpoints/graphQl.js'));

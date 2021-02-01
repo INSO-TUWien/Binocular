@@ -3,7 +3,7 @@
 import { connect } from 'react-redux';
 
 import Chart from './chart.js';
-import { getDiff, getRebaseCheck, updateConflictAwarenessData } from '../sagas';
+import {getDiff, getMergeCheck, getRebaseCheck, updateConflictAwarenessData} from '../sagas';
 
 const mapStateToProps = (state) => {
   const caState = state.visualizations.conflictAwareness.state;
@@ -13,7 +13,8 @@ const mapStateToProps = (state) => {
     branches: caState.data.data.branches, // the branches of the base project and the parent/fork (if one was selected)
     diff: caState.data.data.diff, // the diffs of a commit
     issues: caState.data.data.issues, // the issues of the base project for the filter list
-    rebaseCheck: caState.data.data.rebaseCheck,
+    rebaseCheck: caState.data.data.rebaseCheck, // the result of the rebase check
+    mergeCheck: caState.data.data.mergeCheck, // the result of the merge check
     colorBaseProject: caState.config.color.baseProject, // the color for the commits/edges of the base project
     colorOtherProject: caState.config.color.otherProject, // the color for the commits/edges of the parent/fork
     colorCombined: caState.config.color.combined, // the color of the commits/edges found in both projects
@@ -30,6 +31,8 @@ const mapDispatchToProps = (dispatch /*, ownProps*/) => {
       dispatch(updateConflictAwarenessData([repoFullName], true)),
     onCheckRebase: (headSha, rebaseRepo, rebaseBranch, upstreamRepo, upstreamBranch) =>
       dispatch(getRebaseCheck(headSha, rebaseRepo, rebaseBranch, upstreamRepo, upstreamBranch)),
+    onCheckMerge: (fromRepo, fromBranch, toRepo, toBranch) =>
+      dispatch(getMergeCheck(fromRepo, fromBranch, toRepo, toBranch)),
   };
 };
 

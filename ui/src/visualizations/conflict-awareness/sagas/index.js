@@ -52,7 +52,7 @@ export const requestDiff = createAction('REQUEST_DIFF');
 export const receiveDiff = timestampedActionFactory('RECEIVE_DIFF');
 export const getDiff = createAction('GET_DIFF');
 
-// get requested diff of a specific commit sha
+// check if a rebase is possible without conflicts or not
 export const requestRebaseCheck = createAction('REQUEST_REBASE_CHECK');
 export const receiveRebaseCheck = timestampedActionFactory('RECEIVE_REBASE_CHECK');
 export const getRebaseCheck = createAction(
@@ -62,11 +62,22 @@ export const getRebaseCheck = createAction(
   }
 );
 
+// check if a merge is possible without conflicts or not
+export const requestMergeCheck = createAction('REQUEST_MERGE_CHECK');
+export const receiveMergeCheck = timestampedActionFactory('RECEIVE_MERGE_CHECK');
+export const getMergeCheck = createAction(
+  'GET_MERGE_CHECK',
+  (fromRepo, fromBranch, toRepo, toBranch) => {
+    return { fromRepo, fromBranch, toRepo, toBranch };
+  }
+);
+
 // inits all watchers
 export default function* () {
   yield fork(watchDiff);
   yield fork(watchUpdateConflictAwarenessData);
   yield fork(watchCheckRebase);
+  yield fork(watchCheckMerge);
 }
 
 /**
@@ -165,6 +176,29 @@ export const fetchRebaseCheck = fetchFactory(
 );
 
 /**
+ * Checks if a merge is possible without conflicts or not.
+ * If not, the data of the conflict will be returned.
+ */
+export const fetchMergeCheck = fetchFactory(
+  function (fromRepo, fromBranch, toRepo, toBranch) {
+    return fetch(endpointUrl('check/merge'), {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        fromRepo,
+        fromBranch,
+        toRepo,
+        toBranch,
+      }),
+    }).then((resp) => resp.json());
+  },
+  requestMergeCheck,
+  receiveMergeCheck
+);
+
+/**
  * Watches all getDiff actions and fetches the diff of a specific commit sha.
  */
 export function* watchDiff() {
@@ -174,7 +208,7 @@ export function* watchDiff() {
 }
 
 /**
- * Watches all getDiff actions and fetches the diff of a specific commit sha.
+ * Watches all getRebase actions and checks if a rebase will be successful or causes a conflict.
  */
 export function* watchCheckRebase() {
   yield takeEvery('GET_REBASE_CHECK', function* (a) {
@@ -184,6 +218,20 @@ export function* watchCheckRebase() {
       a.payload.rebaseBranch,
       a.payload.upstreamRepo,
       a.payload.upstreamBranch
+    );
+  });
+}
+
+/**
+ * Watches all getMergeCheck actions and checks if a merge will be successful or causes a conflict.
+ */
+export function* watchCheckMerge() {
+  yield takeEvery('GET_MERGE_CHECK', function* (a) {
+    yield* fetchMergeCheck(
+      a.payload.fromRepo,
+      a.payload.fromBranch,
+      a.payload.toRepo,
+      a.payload.toBranch
     );
   });
 }

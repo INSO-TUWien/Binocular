@@ -40,12 +40,25 @@ export default handleActions(
       });
     },
 
-    // request a diff of a commit
+    // request a rebase check
     REQUEST_REBASE_CHECK: (state) =>
       _.merge({}, state, { isFetching: true, data: { rebaseCheck: undefined } }),
 
-    // receive the diff of a commit
+    // receive the result of a rebase check
     RECEIVE_REBASE_CHECK: (state, action) => {
+      return _.merge({}, state, {
+        data: action.payload,
+        isFetching: false,
+        receivedAt: action.meta.receivedAt,
+      });
+    },
+
+    // request a merge check
+    REQUEST_MERGE_CHECK: (state) =>
+      _.merge({}, state, { isFetching: true, data: { rebaseCheck: undefined } }),
+
+    // receive the result of a merge check
+    RECEIVE_MERGE_CHECK: (state, action) => {
       return _.merge({}, state, {
         data: action.payload,
         isFetching: false,
