@@ -159,7 +159,7 @@ export default class ConflictAwareness extends React.Component {
       _addModals();
 
       // add events to hide modals
-      _hideModals(this);
+      _hideModals(prevProps);
 
       // add zoom and other stuff
       this._setZoomSupportAndPositionGraph(svg, inner, g);
@@ -675,13 +675,13 @@ function _setDiffModalHtml(diff) {
 
 /**
  * Closes the Modal which shows the diff and resets the diff object in the state.
- * @param self {ConflictAwareness} this instance
+ * @param prevProps {*} the props
  * @private
  */
-function _resetDiffAndHideModal(self) {
+function _resetDiffAndHideModal(prevProps) {
   const diffModal = _getDiffModal();
   diffModal.style('visibility', 'hidden');
-  self.state.diff = undefined;
+  prevProps.onResetStateProperty('diff');
 }
 
 /**
@@ -874,24 +874,24 @@ function _showMergeConflictModal(checkMerge) {
 
 /**
  * Closes the Modal which shows the conflict and resets the rebaseCheck object in the state.
- * @param self {ConflictAwareness} this instance
+ * @param prevProps {*} the props
  * @private
  */
-function _resetRebaseCheckAndHideModal(self) {
+function _resetRebaseCheckAndHideModal(prevProps) {
   const conflictModal = _getConflictModal();
   conflictModal.style('visibility', 'hidden');
-  self.state.rebaseCheck = undefined;
+  prevProps.onResetStateProperty('rebaseCheck');
 }
 
 /**
  * Closes the Modal which shows the conflict and resets the mergeCheck object in the state.
- * @param self {ConflictAwareness} this instance
+ * @param prevProps {*} the props
  * @private
  */
-function _resetMergeCheckAndHideModal(self) {
+function _resetMergeCheckAndHideModal(prevProps) {
   const conflictModal = _getConflictModal();
   conflictModal.style('visibility', 'hidden');
-  self.state.mergeCheck = undefined;
+  prevProps.onResetStateProperty('mergeCheck');
 }
 
 /**
@@ -1076,9 +1076,10 @@ function _addModals() {
 /**
  * Hide diffModal, successModal and conflictModal when pressing esc
  * or clicking on svg.
+ * @param prevProps the props
  * @private
  */
-function _hideModals(self) {
+function _hideModals(prevProps) {
   const { svg } = _getGraphDOMElements();
   const diffModal = _getDiffModal();
   const successModal = _getSuccessModal();
@@ -1089,18 +1090,18 @@ function _hideModals(self) {
     // hide modals if visible, when esc pressed
     if (event.key === 'Escape') {
       if (_isVisible(diffModal)) {
-        _resetDiffAndHideModal(self);
+        _resetDiffAndHideModal(prevProps);
       }
 
       // hide successModal if visible, when clicking on the body
       if (_isVisible(successModal)) {
-        _hideSuccessModal(self);
+        _hideSuccessModal(prevProps);
       }
 
       // hide conflictModal if visible, when clicking on the body
       if (_isVisible(conflictModal)) {
-        _resetRebaseCheckAndHideModal(self);
-        _resetMergeCheckAndHideModal(self);
+        _resetRebaseCheckAndHideModal(prevProps);
+        _resetMergeCheckAndHideModal(prevProps);
       }
     }
   });
@@ -1109,18 +1110,18 @@ function _hideModals(self) {
   svg.on('click', () => {
     // hide diffModal if visible, when clicking on the svg
     if (_isVisible(diffModal)) {
-      _resetDiffAndHideModal(self);
+      _resetDiffAndHideModal(prevProps);
     }
 
     // hide successModal if visible, when clicking on the svg
     if (_isVisible(successModal)) {
-      _hideSuccessModal(self);
+      _hideSuccessModal(prevProps);
     }
 
     // hide conflictModal if visible, when clicking on the svg
     if (_isVisible(conflictModal)) {
-      _resetRebaseCheckAndHideModal(self);
-      _resetMergeCheckAndHideModal(self);
+      _resetRebaseCheckAndHideModal(prevProps);
+      _resetMergeCheckAndHideModal(prevProps);
     }
   });
 }

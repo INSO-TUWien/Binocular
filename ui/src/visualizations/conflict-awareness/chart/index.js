@@ -3,7 +3,13 @@
 import { connect } from 'react-redux';
 
 import Chart from './chart.js';
-import {getDiff, getMergeCheck, getRebaseCheck, updateConflictAwarenessData} from '../sagas';
+import {
+  getDiff,
+  getMergeCheck,
+  getRebaseCheck,
+  resetStateProperty,
+  updateConflictAwarenessData,
+} from '../sagas';
 
 const mapStateToProps = (state) => {
   const caState = state.visualizations.conflictAwareness.state;
@@ -26,6 +32,7 @@ const mapStateToProps = (state) => {
 
 const mapDispatchToProps = (dispatch /*, ownProps*/) => {
   return {
+    onResetStateProperty: (stateProperty) => dispatch(resetStateProperty(stateProperty)),
     onGetDiff: (commitSha) => dispatch(getDiff(commitSha)),
     onUpdateConflictAwarenessData: (repoFullName) =>
       dispatch(updateConflictAwarenessData([repoFullName], true)),

@@ -34,6 +34,12 @@ export const setColor = createAction('SET_COLOR', (color, key) => {
 // sets a selected other project (parent or fork of the base project)
 export const setOtherProject = createAction('SET_OTHER_PROJECT', (otherProject) => otherProject);
 
+// sets the property of the state to undefined
+export const resetStateProperty = createAction(
+  'RESET_STATE_PROPERTY',
+  (stateProperty) => stateProperty
+);
+
 // gets the branches and commits of specific projects, gets the parent/forks of the base project (if requested) and
 // triggers the indexing of a specific project (if requested)
 export const requestConflictAwarenessData = createAction('REQUEST_CONFLICT_AWARENESS_DATA');

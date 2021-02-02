@@ -5,6 +5,13 @@ import _ from 'lodash';
 
 export default handleActions(
   {
+    // sets a state property to undefined
+    RESET_STATE_PROPERTY: (state, action) => {
+      const data = {};
+      data[action.payload] = undefined;
+      return _.assign({}, state, { data });
+    },
+
     // request the conflict awareness data and reset the previous received ones
     REQUEST_CONFLICT_AWARENESS_DATA: (state) => {
       // reset the previously retrieved data
