@@ -16,6 +16,7 @@
   width: 100%;
   overflow-y: scroll;
   font-size: 1.5em;
+  height: 100%;
 
   h2 {
     font-size: 1.2em;
@@ -146,5 +147,10 @@
   display: block;
   font-size: 2rem;
   font-weight: 700;
+}
+
+.highlighted{
+  position: fixed;
+  border: red dashed 5px;
 }
 

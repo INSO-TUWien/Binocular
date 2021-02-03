@@ -120,9 +120,9 @@ export default class CodeHotspots extends React.PureComponent {
                 }}
               />
               <div className={styles.heatmapContainer}>
-                <svg className='chartHeatmap'></svg>
+                <svg  id={"heatmap"} className='chartHeatmap'></svg>
               </div>
-              <div className={styles.rowSummaryContainer}>
+              <div id={"rowSummaryContainer"} className={styles.rowSummaryContainer}>
                 <div className='chartRowSummary'></div>
               </div>
             </div >

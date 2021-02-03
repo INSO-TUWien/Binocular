@@ -42,13 +42,13 @@ const CodeHotspotsConfigComponent = props => {
   return (
     <div className={styles.config}>
       <div className={styles.label}> Branch:</div>
-      <div className={"select"}>
+      <div id={"branchSelector"} className={"select"}>
         <select value={props.branch} onChange={e => {
           props.onSetBranch(e.target.value)}}>
           {options}
         </select>
       </div>
-      <div>
+      <div  id={"fileSelector"}>
         <FileBrowser
           files={props.files}
           props={props}
