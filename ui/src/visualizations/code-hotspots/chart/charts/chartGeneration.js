@@ -34,7 +34,7 @@ export default class chartGeneration {
     const chart = d3.select('.chartHeatmap')
       .attr('width', "calc(100% - 105px)")
       .attr('height', height + margins.top + margins.bottom)
-      .attr("viewBox","0 0 "+width+" "+height)
+      .attr("viewBox","0 0 "+width+" "+(height + margins.top + margins.bottom))
       .attr('preserveAspectRatio','none')
       .append('g')
       .attr('transform','translate(' + margins.left + ',' + margins.top + ')');
@@ -60,7 +60,7 @@ export default class chartGeneration {
     };
 
     chart.selectAll('g')
-      .data(data).enter().append('g')
+      .data(data).enter()
       .append('rect')
       .attr('x', d => {return (d.column - 0) * barWidth})
       .attr('y', d => {return (d.row - 1) * barHeight})
