@@ -1,0 +1,190 @@
+@mixin sl-flex($direction: row, $align: flex-start, $justify: flex-start) {
+  display: flex;
+  flex-flow: $direction nowrap;
+  align-items: $align;
+  justify-content: $justify;
+}
+
+.configContainer {
+  margin: -0.5em -0.75em;
+  width: calc(100% + 1.5em);
+  height: calc(100% + 1em);
+  position: relative;
+
+  :global {
+    .config-wrapper {
+      @include sl-flex(column, stretch);
+    }
+
+    form {
+      flex-shrink: 0;
+      margin: 0;
+    }
+
+    .results {
+      flex: 1;
+      @include sl-flex(column, stretch);
+      overflow-y: scroll;
+      border-top: 1px solid rgba(0, 0, 0, 0.2);
+
+      .result {
+        flex: 0 0 64px;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+        display: flex;
+        flex-flow: row nowrap;
+        align-items: center;
+        justify-content: flex-start;
+        padding: 2px 16px;
+      }
+
+      .icon {
+        flex: 0 0 32px;
+        height: 32px;
+        background: darkgray;
+        margin-right: 16px;
+      }
+
+      .info {
+        flex: 1;
+        display: flex;
+        flex-flow: column nowrap;
+        align-items: flex-start;
+        justify-content: space-between;
+      }
+
+      .type, .file {
+        font-size: .75em;
+        line-height: 100%;
+      }
+    }
+  }
+}
+
+.help {
+  width: 100%;
+  overflow-y: scroll;
+  font-size: 1.5em;
+
+  h2 {
+    font-size: 1.2em;
+    font-weight: bold;
+  }
+
+  h3 {
+    font-size: 1.1em;
+    font-weight: bold;
+  }
+
+  ul {
+    list-style-type: circle;
+    margin-left: 1.5em;
+  }
+
+  p {
+    margin-bottom: 1em;
+  }
+}
+
+:global {
+  div[class^="app__mainPane"] > div[class^="progress-bar"] {
+    z-index: 3;
+  }
+  div[class^="app__app"] > div[class^="help"] {
+    z-index: 3;
+  }
+  div[class^="app__mainPane"] > div[class^="styles__help"] {
+    z-index: 2;
+  }
+}
+
+.chartContainer {
+  @include sl-flex(column, stretch);
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 1;
+
+  :global {
+
+    .header {
+      flex: 0 0 91px;
+      border-bottom: 1px solid #ededed;
+    }
+
+    .timeline {
+      @include sl-flex(row-reverse, stretch);
+      flex: 1;
+      overflow: auto hidden;
+    }
+
+    .tl-column {
+      @include sl-flex(column, stretch);
+      flex: 0 0 48px;
+      box-shadow: 1px 0 0 0 #dbdbdb inset;
+
+      &:last-child {
+        box-shadow: none;
+      }
+    }
+
+    .tl-date {
+      @include sl-flex(column, center, flex-end);
+      flex: 0 0 107px;
+      border-bottom: 1px solid #dbdbdb;
+      padding: 6px 0;
+    }
+
+    .tl-dow {
+      line-height: 100%;
+      margin-bottom: 12px;
+    }
+
+    .tl-month {
+      line-height: 100%;
+      font-weight: bolder;
+    }
+
+    .tl-day {
+      line-height: 100%;
+      font-size: 1.75em;
+    }
+
+    .tl-row {
+      @include sl-flex(column, stretch, center);
+      flex: 0 0 64px;
+      border-bottom: 1px solid #dbdbdb;
+      overflow: hidden;
+    }
+
+    .tl-bar {
+      @include sl-flex(row, center, center);
+      background: lightblue;
+      flex: 0 0 32px;
+
+      &.tl-start {
+        margin-left: 8px;
+        border-radius: 16px 0 0 16px;
+        justify-content: flex-start;
+        padding-left: 4px;
+      }
+
+      &.tl-end {
+        margin-right: 8px;
+        border-radius: 0 16px 16px 0;
+        justify-content: flex-end;
+        padding-right: 4px;
+      }
+
+    }
+
+    .tl-button {
+      flex: 0 0 24px;
+      background: darkcyan;
+      height: 24px;
+      border-radius: 12px;
+    }
+
+  }
+}

@@ -5,7 +5,6 @@ import io from 'socket.io-client';
 import createSocketIoMiddleware from 'redux-socket.io';
 import createSagaMiddleware from 'redux-saga';
 import { root } from './sagas';
-import _ from 'lodash';
 
 import Root from './components/Root.js';
 import makeAppReducer from './reducers';
@@ -27,20 +26,21 @@ import dashboard from './visualizations/dashboard';
 import codeOwnershipRiver from './visualizations/code-ownership-river';
 import issueImpact from './visualizations/issue-impact';
 import hotspotDials from './visualizations/hotspot-dials';
+import symbolLifespan from './visualizations/symbol-lifespan';
 
-const visualizationModules = [dashboard, codeOwnershipRiver, issueImpact, hotspotDials];
+const visualizationModules = [dashboard, codeOwnershipRiver, issueImpact, hotspotDials, symbolLifespan];
 
 const visualizations = {};
-_.each(visualizationModules, viz => {
-  visualizations[viz.id] = viz;
-});
+for (let visualization of visualizationModules) {
+  visualizations[visualization.id] = visualization;
+}
 
 const app = makeAppReducer(visualizationModules);
 
 const store = createStore(
   app,
   {
-    activeVisualization: _.keys(visualizations)[0],
+    activeVisualization: Object.keys(visualizations)[0],
     visualizations,
     config: {
       isFetching: false,
