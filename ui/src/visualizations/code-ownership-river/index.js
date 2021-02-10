@@ -8,7 +8,7 @@ import reducer from './reducers';
 
 export default {
   id: 'codeOwnershipRiver',
-  label: 'Code Ownership River',
+  label: 'Ownership',
   saga,
   reducer,
   ChartComponent,

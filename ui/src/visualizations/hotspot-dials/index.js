@@ -30,7 +30,7 @@ const ChartComponent = connect(mapStateToProps, mapDispatchToProps)(HotspotDials
 
 export default {
   id: 'hotspotDials',
-  label: 'HotspotDials',
+  label: 'Hotspots',
   ChartComponent,
   ConfigComponent,
   HelpComponent,
