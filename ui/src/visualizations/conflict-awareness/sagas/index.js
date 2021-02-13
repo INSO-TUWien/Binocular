@@ -78,12 +78,23 @@ export const getMergeCheck = createAction(
   }
 );
 
+// check if cherry picks are possible without conflicts or not
+export const requestCherryPickCheck = createAction('REQUEST_CHERRY_PICK_CHECK');
+export const receiveCherryPickCheck = timestampedActionFactory('RECEIVE_CHERRY_PICK_CHECK');
+export const getCherryPickCheck = createAction(
+  'GET_CHERRY_PICK_CHECK',
+  (cherryPickCommitInfos, otherRepo, toRepo, toBranch) => {
+    return { cherryPickCommitInfos, otherRepo, toRepo, toBranch };
+  }
+);
+
 // inits all watchers
 export default function* () {
   yield fork(watchDiff);
   yield fork(watchUpdateConflictAwarenessData);
   yield fork(watchCheckRebase);
   yield fork(watchCheckMerge);
+  yield fork(watchCheckCherryPick);
 }
 
 /**
@@ -205,6 +216,29 @@ export const fetchMergeCheck = fetchFactory(
 );
 
 /**
+ * Checks if cherry picks are possible without conflicts or not.
+ * If not, the data of the conflict will be returned.
+ */
+export const fetchCherryPickCheck = fetchFactory(
+  function (cherryPickCommitInfos, otherRepo, toRepo, toBranch) {
+    return fetch(endpointUrl('check/cherrypick'), {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        cherryPickCommitInfos,
+        otherRepo,
+        toRepo,
+        toBranch,
+      }),
+    }).then((resp) => resp.json());
+  },
+  requestCherryPickCheck,
+  receiveCherryPickCheck
+);
+
+/**
  * Watches all getDiff actions and fetches the diff of a specific commit sha.
  */
 export function* watchDiff() {
@@ -236,6 +270,20 @@ export function* watchCheckMerge() {
     yield* fetchMergeCheck(
       a.payload.fromRepo,
       a.payload.fromBranch,
+      a.payload.toRepo,
+      a.payload.toBranch
+    );
+  });
+}
+
+/**
+ * Watches all getCherryPick actions and checks if cherry picks will be successful or causes a conflict.
+ */
+export function* watchCheckCherryPick() {
+  yield takeEvery('GET_CHERRY_PICK_CHECK', function* (a) {
+    yield* fetchCherryPickCheck(
+      a.payload.cherryPickCommitInfos,
+      a.payload.otherRepo,
       a.payload.toRepo,
       a.payload.toBranch
     );

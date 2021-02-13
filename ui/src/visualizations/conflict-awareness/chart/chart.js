@@ -14,6 +14,7 @@ import { equals } from '../../../utils/compare';
 
 let codeMirror; // codeMirror instance for showing the diff of a commit
 let selectedNodes = []; // the nodes which are selected by the user
+let selectedNodeInfos = [];
 let selectedBranch; // the branch which is selected by the user
 
 export default class ConflictAwareness extends React.Component {
@@ -126,6 +127,22 @@ export default class ConflictAwareness extends React.Component {
       updatedProps.mergeCheck = nextProps.mergeCheck;
     }
 
+    // a new check for a merge was performed
+    if (
+      !equals(nextProps.cherryPickCheck, prevState.cherryPickCheck) &&
+      nextProps.cherryPickCheck
+    ) {
+      // the cherry picks show no conflicts -> show success message
+      if (nextProps.cherryPickCheck.success) {
+        _showCherryPickSuccessModal();
+      } else {
+        // the merge shows conflicts -> show them in a modal
+        _showCherryPickConflictModal(nextProps.cherryPickCheck);
+      }
+
+      updatedProps.cherryPickCheck = nextProps.cherryPickCheck;
+    }
+
     if (_.isEmpty(updatedProps)) {
       // No state update necessary
       return null;
@@ -160,6 +177,23 @@ export default class ConflictAwareness extends React.Component {
 
       // add events to hide modals
       _hideModals(prevProps);
+
+      inner.selectAll('g.node circle').on('click', function (event) {
+        if (!event.ctrlKey) {
+          selectedNodes.forEach((node) =>
+            node.style('stroke-width', '1px').style('stroke', node.style('fill'))
+          );
+          selectedNodes = [];
+        }
+        const clickedNode = d3.select(this);
+        clickedNode.style('stroke-width', '5px').style('stroke', 'black');
+        selectedNodes.push(clickedNode);
+        const node = _getNodeFromEvent(event, g);
+        selectedNodeInfos.push({
+          sha: node.sha,
+          fromRepo: node.repo,
+        });
+      });
 
       // add zoom and other stuff
       this._setZoomSupportAndPositionGraph(svg, inner, g);
@@ -249,7 +283,11 @@ export default class ConflictAwareness extends React.Component {
         : false;
 
       // set the class and the color of the node according to its project membership
-      let { clazz, color } = _getClassAndColor(this.state, isInBaseProject, isInOtherProject);
+      let { clazz, color, repo } = _getClassColorAndRepo(
+        this.state,
+        isInBaseProject,
+        isInOtherProject
+      );
 
       // add the class and the color of the node for the edges later on
       edgeClassesAndColors.set(node.sha, [clazz, color]);
@@ -263,6 +301,7 @@ export default class ConflictAwareness extends React.Component {
         height: 15,
         class: `${clazz} ${node.sha}`,
         style: `stroke: ${color}; fill: ${color}; stroke-width: 1px;`,
+        repo: repo,
         sha: node.sha,
         signature: node.signature,
         date: `${node.date.toDateString()} ${node.date.toTimeString().substr(0, 9)}`,
@@ -395,7 +434,7 @@ export default class ConflictAwareness extends React.Component {
   }
 
   /**
-   * Set up the events for checks, if a rebase, merge or cherry pick(s) are successfull
+   * Set up the events for checks, if a rebase, merge or cherry pick(s) are successful
    * or resolves in a conflict.
    * @private
    */
@@ -405,15 +444,25 @@ export default class ConflictAwareness extends React.Component {
     this.state.branchIDs.forEach((branchID) => {
       inner.select(`span.${branchID.clazz}.${branchID.branchKey}`).on('click', (event) => {
         if (selectedNodes.length > 0) {
+          let otherRepo = this.props.repoFullName;
+          if (
+            this.props.repoFullName === this._getProjectFromCSSClass(branchID.clazz) &&
+            this.props.otherProject
+          ) {
+            otherRepo = this.props.otherProject.fullName;
+          }
+
           // cherry pick selected nodes onto branch
-          // TODO: impl
-          selectedNodes.forEach((node) => {
-            console.log(
-              `Cherry-Pick commit ${node.node().__data__} into branch ${branchID.branchName}.`
-            );
-            node.style('stroke-width', '1px');
-          });
+          this.props.onCheckCherryPick(
+            selectedNodeInfos,
+            otherRepo,
+            this._getProjectFromCSSClass(branchID.clazz),
+            branchID.branchName
+          );
+
+          selectedNodes.forEach((node) => node.style('stroke-width', '1px'));
           selectedNodes = [];
+          selectedNodeInfos = [];
         } else if (selectedBranch && !equals(selectedBranch, branchID)) {
           // a branch was already selected, and a new one is currently selected
 
@@ -443,6 +492,8 @@ export default class ConflictAwareness extends React.Component {
             selectedBranch = undefined;
           } else {
             // no special key was pressed during the click
+            selectedNodes = [];
+            selectedNodeInfos = [];
 
             // a branch was already selected --> reset the highlighting of the previous selectedBranch
             if (selectedBranch) {
@@ -564,7 +615,7 @@ function extractData(props) {
             : false;
 
           // get the css class and color of the node and label based on the project memberships
-          let { clazz, color } = _getClassAndColor(props, isInBaseProject, isInOtherProject);
+          let { clazz, color } = _getClassColorAndRepo(props, isInBaseProject, isInOtherProject);
 
           // add the branch to the label including its key as class (is needed for later selections)
           label =
@@ -686,16 +737,18 @@ function _resetDiffAndHideModal(prevProps) {
 
 /**
  * Retrieves the CSS class and color based on the membership of the base project and/or the other project.
+ * Also includes the membership. If the item is in both projects, the membership of the baseProject is returned
  * @param state {any} state to get the different color options from it
  * @param isInBaseProject {boolean} indicator if the element is in the base project
  * @param isInOtherProject {boolean} indicator if the element is in the other project
- * @returns {{color: *, clazz: string}}
+ * @returns {{color: *, clazz: string, repo: string}}
  * @private
  */
-function _getClassAndColor(state, isInBaseProject, isInOtherProject) {
+function _getClassColorAndRepo(state, isInBaseProject, isInOtherProject) {
   // default: element is only in the base project
   let clazz = 'baseProject';
   let color = state.colorBaseProject;
+  let repo = state.repoFullName;
 
   if (isInBaseProject && isInOtherProject) {
     // element is in both projects
@@ -705,9 +758,10 @@ function _getClassAndColor(state, isInBaseProject, isInOtherProject) {
     // element is only in the other project
     clazz = 'otherProject';
     color = state.colorOtherProject;
+    repo = state.otherProject.fullName;
   }
 
-  return { clazz, color };
+  return { clazz, color, repo };
 }
 
 /**
@@ -793,13 +847,23 @@ function _showMergeSuccessModal(fromRepo, fromBranch, toRepo, toBranch) {
 }
 
 /**
+ * Shows the successModal containing a success message that the cherry picks of the selected commits
+ * were without conflicts.
+ * @private
+ */
+function _showCherryPickSuccessModal() {
+  _getSuccessModal()
+    .text('The selected Commits can be cherry picked without conflicts.')
+    .style('visibility', 'visible');
+}
+
+/**
  * Hides the successModal.
  * @param self {ConflictAwareness} this instance
  * @private
  */
 function _hideSuccessModal(self) {
   _getSuccessModal().style('visibility', 'hidden');
-  self.state.rebaseCheck = undefined;
 }
 
 /**
@@ -822,27 +886,42 @@ function _showRebaseConflictModal(checkRebase) {
   const conflictModal = _getConflictModal();
 
   // create the header of the modal containing a message which rebase was checked
-  let modalFirstPartHtml = `
-    <p class="has-text-centered">Conflicts detected while rebasing "${rebaseBranch}" (project "${rebaseRepo}") onto "${upstreamBranch}" (project "${upstreamRepo}").</p>
-    <p><b>Commits:</b></p>
-    <ul style="height: 150px; overflow: hidden; overflow-y: scroll;">
-    `;
+  conflictModal.html(
+    `<p class="has-text-centered">Conflicts detected while rebasing "${rebaseBranch}" (project "${rebaseRepo}") onto "${upstreamBranch}" (project "${upstreamRepo}").</p>`
+  );
 
-  // add the commits to the header with the information if they were successful,
-  // resulted in a conflict or were not checked due to the previous conflict
-  commitsOfRebase.forEach((commitOfRebase) => {
-    modalFirstPartHtml =
-      modalFirstPartHtml + `<li>${commitOfRebase.sha} - ${commitOfRebase.conflictText}</li>`;
-  });
-
-  // close the commit list and set the html in the modal
-  // the whole header html must be set, because otherwise the first <ul>
-  // will automatically closed by the html() function to provide a valid HTML
-  modalFirstPartHtml = modalFirstPartHtml + '</ul>';
-  conflictModal.html(modalFirstPartHtml);
+  // appends the commit section to the modal
+  _createCommitsSection(commitsOfRebase);
 
   // appends the conflict cards to the modal
-  _createConflictsCardSection(conflictDatas, conflictModal);
+  _createConflictsCardSection(conflictDatas);
+
+  // show the conflict modal
+  _getConflictModal().style('visibility', 'visible');
+}
+
+/**
+ * Sets up and shows the files of a rebase containing conflicting code
+ * in expandable and shrinkable cards. The conflicts are highlighted.
+ * @param checkCherryPick {*} the conflict information from the cherry pick(s)
+ * @private
+ */
+function _showCherryPickConflictModal(checkCherryPick) {
+  const { toRepo, toBranch, conflictDatas, cherryPickCommitInfos } = checkCherryPick;
+
+  // modal which should show the conflict data
+  const conflictModal = _getConflictModal();
+
+  // create the header of the modal
+  conflictModal.html(
+    `<p class="has-text-centered">Conflicts detected while cherry picking the selected commits onto "${toBranch}" (project "${toRepo}").</p>`
+  );
+
+  // appends the commit section to the modal
+  _createCommitsSection(cherryPickCommitInfos);
+
+  // appends the conflict cards to the modal
+  _createConflictsCardSection(conflictDatas);
 
   // show the conflict modal
   _getConflictModal().style('visibility', 'visible');
@@ -866,7 +945,7 @@ function _showMergeConflictModal(checkMerge) {
     `);
 
   // appends the conflict cards to the modal
-  _createConflictsCardSection(conflictDatas, conflictModal);
+  _createConflictsCardSection(conflictDatas);
 
   // show the conflict modal
   _getConflictModal().style('visibility', 'visible');
@@ -901,6 +980,31 @@ function _resetMergeCheckAndHideModal(prevProps) {
  */
 function _getConflictModal() {
   return d3.select('#conflictModal');
+}
+
+/**
+ * Appends the commit section to the conflictModal which shows which commits are processed.
+ * @param commits [] commit array
+ * @private
+ */
+function _createCommitsSection(commits) {
+  const conflictModal = _getConflictModal();
+  let commitSectionHtml = `
+    <p><b>Commits:</b></p>
+    <ul style="height: 150px; overflow: hidden; overflow-y: scroll;">
+    `;
+
+  // add the commits to the header with the information if they were successful,
+  // resulted in a conflict or were not checked due to the previous conflict
+  commits.forEach((commit) => {
+    commitSectionHtml = commitSectionHtml + `<li>${commit.sha} - ${commit.conflictText}</li>`;
+  });
+
+  // close the commit list and set the html in the modal
+  // the whole header html must be set, because otherwise the first <ul>
+  // will automatically closed by the html() function to provide a valid HTML
+  commitSectionHtml = commitSectionHtml + '</ul>';
+  conflictModal.html(conflictModal.html() + commitSectionHtml);
 }
 
 /**

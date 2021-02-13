@@ -4,6 +4,7 @@ import { connect } from 'react-redux';
 
 import Chart from './chart.js';
 import {
+  getCherryPickCheck,
   getDiff,
   getMergeCheck,
   getRebaseCheck,
@@ -21,6 +22,7 @@ const mapStateToProps = (state) => {
     issues: caState.data.data.issues, // the issues of the base project for the filter list
     rebaseCheck: caState.data.data.rebaseCheck, // the result of the rebase check
     mergeCheck: caState.data.data.mergeCheck, // the result of the merge check
+    cherryPickCheck: caState.data.data.cherryPickCheck, // the result of the cherry pick check
     colorBaseProject: caState.config.color.baseProject, // the color for the commits/edges of the base project
     colorOtherProject: caState.config.color.otherProject, // the color for the commits/edges of the parent/fork
     colorCombined: caState.config.color.combined, // the color of the commits/edges found in both projects
@@ -30,7 +32,7 @@ const mapStateToProps = (state) => {
   };
 };
 
-const mapDispatchToProps = (dispatch /*, ownProps*/) => {
+const mapDispatchToProps = (dispatch) => {
   return {
     onResetStateProperty: (stateProperty) => dispatch(resetStateProperty(stateProperty)),
     onGetDiff: (commitSha) => dispatch(getDiff(commitSha)),
@@ -40,6 +42,8 @@ const mapDispatchToProps = (dispatch /*, ownProps*/) => {
       dispatch(getRebaseCheck(headSha, rebaseRepo, rebaseBranch, upstreamRepo, upstreamBranch)),
     onCheckMerge: (fromRepo, fromBranch, toRepo, toBranch) =>
       dispatch(getMergeCheck(fromRepo, fromBranch, toRepo, toBranch)),
+    onCheckCherryPick: (cherryPickCommitInfos, otherRepo, toRepo, toBranch) =>
+      dispatch(getCherryPickCheck(cherryPickCommitInfos, otherRepo, toRepo, toBranch)),
   };
 };
 

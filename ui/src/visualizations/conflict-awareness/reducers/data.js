@@ -62,10 +62,23 @@ export default handleActions(
 
     // request a merge check
     REQUEST_MERGE_CHECK: (state) =>
-      _.merge({}, state, { isFetching: true, data: { rebaseCheck: undefined } }),
+      _.merge({}, state, { isFetching: true, data: { mergeCheck: undefined } }),
 
     // receive the result of a merge check
     RECEIVE_MERGE_CHECK: (state, action) => {
+      return _.merge({}, state, {
+        data: action.payload,
+        isFetching: false,
+        receivedAt: action.meta.receivedAt,
+      });
+    },
+
+    // request a cherry pick check
+    REQUEST_CHERRY_PICK_CHECK: (state) =>
+      _.merge({}, state, { isFetching: true, data: { cherryPickCheck: undefined } }),
+
+    // receive the result of a cherry pick check
+    RECEIVE_CHERRY_PICK_CHECK: (state, action) => {
       return _.merge({}, state, {
         data: action.payload,
         isFetching: false,
