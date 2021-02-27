@@ -40,6 +40,60 @@ export const resetStateProperty = createAction(
   (stateProperty) => stateProperty
 );
 
+// adds/removes a branch of the base project to/from the excluded branches list
+export const switchExcludedBranchesBaseProject = createAction(
+  'SWITCH_EXCLUDED_BRANCHES_BASE_PROJECT',
+  (switchedBranch) => switchedBranch
+);
+
+// adds/removes a branch of the other project to/from the excluded branches list
+export const switchExcludedBranchesOtherProject = createAction(
+  'SWITCH_EXCLUDED_BRANCHES_OTHER_PROJECT',
+  (switchedBranch) => switchedBranch
+);
+
+// toggles the checked property of a branch in the base project
+export const switchBranchCheckedBaseProject = createAction(
+  'SWITCH_BRANCH_CHECKED_BASE_PROJECT',
+  (branch) => branch
+);
+
+// toggles the checked property of a branch in the other project
+export const switchBranchCheckedOtherProject = createAction(
+  'SWITCH_BRANCH_CHECKED_OTHER_PROJECT',
+  (branch) => branch
+);
+
+// switches the checked flag of all branches of the base project to isChecked
+export const switchAllBranchCheckedBaseProject = createAction(
+  'SWITCH_ALL_BRANCH_CHECKED_BASE_PROJECT',
+  (isChecked) => isChecked
+);
+
+// switches the checked flag of all branches of the other project to isChecked
+export const switchAllBranchCheckedOtherProject = createAction(
+  'SWITCH_ALL_BRANCH_CHECKED_OTHER_PROJECT',
+  (isChecked) => isChecked
+);
+
+// switches the checked property of the show all branches checkbox for the base project
+// and sets the excluded branches of the base project accordingly
+export const switchShowAllBranchesBaseProject = createAction(
+  'SWITCH_SHOW_ALL_BRANCHES_BASE_PROJECT',
+  (isChecked, branches) => {
+    return { isChecked, branches };
+  }
+);
+
+// switches the checked property of the show all branches checkbox for the other project
+// and sets the excluded branches of the other project accordingly
+export const switchShowAllBranchesOtherProject = createAction(
+  'SWITCH_SHOW_ALL_BRANCHES_OTHER_PROJECT',
+  (isChecked, branches) => {
+    return { isChecked, branches };
+  }
+);
+
 // gets the branches and commits of specific projects, gets the parent/forks of the base project (if requested) and
 // triggers the indexing of a specific project (if requested)
 export const requestConflictAwarenessData = createAction('REQUEST_CONFLICT_AWARENESS_DATA');
@@ -140,6 +194,28 @@ export const fetchConflictAwarenessData = fetchFactory(
         if (issues) {
           data.issues = issues;
         }
+        // the branch names of the base project and a flag if they are checked in the config section
+        data.branchesBaseProject = branches
+          .filter(
+            (branch) =>
+              branch.headShas.filter((headSha) => headSha.project === projects[0]).length > 0
+          )
+          .map((branch) => {
+            return { branchName: branch.branchName, checked: true };
+          });
+
+        // the branches of the other project (if selected) and a flag if they are checked in the config section
+        if (projects[1]) {
+          data.branchesOtherProject = branches
+            .filter(
+              (branch) =>
+                branch.headShas.filter((headSha) => headSha.project === projects[1]).length > 0
+            )
+            .map((branch) => {
+              return { branchName: branch.branchName, checked: true };
+            });
+        }
+
         return data;
       })
       .catch((e) => {

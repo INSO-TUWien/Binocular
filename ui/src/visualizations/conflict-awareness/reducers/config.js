@@ -28,9 +28,82 @@ export default handleActions(
       colorFromKey.color[`${action.payload.key}`] = action.payload.color;
       return _.assign({}, state, colorFromKey);
     },
+
     // a (new) project/fork was selected
     SET_OTHER_PROJECT: (state, action) => {
       return _.assign({}, state, { otherProject: action.payload });
+    },
+
+    // adds/removes a branch of the base project to/from the excluded branches list
+    SWITCH_EXCLUDED_BRANCHES_BASE_PROJECT: (state, action) => {
+      let excludedBranchesBaseProject = state.excludedBranchesBaseProject;
+      if (!action.payload.checked) {
+        excludedBranchesBaseProject.push(action.payload.branchName);
+      } else {
+        excludedBranchesBaseProject = excludedBranchesBaseProject.filter(
+          (branch) => branch !== action.payload.branchName
+        );
+      }
+      return _.assign({}, state, {
+        showAllBranchesBaseProjectChecked: excludedBranchesBaseProject.length === 0,
+        excludedBranchesBaseProject,
+      });
+    },
+
+    // adds/removes a branch of the other project to/from the excluded branches list
+    SWITCH_EXCLUDED_BRANCHES_OTHER_PROJECT: (state, action) => {
+      let excludedBranchesOtherProject = state.excludedBranchesOtherProject;
+      if (!action.payload.checked) {
+        excludedBranchesOtherProject.push(action.payload.branchName);
+      } else {
+        excludedBranchesOtherProject = excludedBranchesOtherProject.filter(
+          (branch) => branch !== action.payload.branchName
+        );
+      }
+      return _.assign({}, state, {
+        showAllBranchesOtherProjectChecked: excludedBranchesOtherProject.length === 0,
+        excludedBranchesOtherProject,
+      });
+    },
+
+    // switches the checked property of the show all branches checkbox for the base project
+    // and sets the excluded branches of the base project accordingly
+    SWITCH_SHOW_ALL_BRANCHES_BASE_PROJECT: (state, action) => {
+      let excludedBranchesBaseProject;
+      // all branches of the base should be excluded in the graph
+      if (!action.payload.isChecked) {
+        excludedBranchesBaseProject = _.assign(
+          [],
+          action.payload.branches.map((branch) => branch.branchName)
+        );
+      } else {
+        // all branches of the base project should be shown in the graph
+        excludedBranchesBaseProject = [];
+      }
+      return _.assign({}, state, {
+        showAllBranchesBaseProjectChecked: action.payload.isChecked,
+        excludedBranchesBaseProject,
+      });
+    },
+
+    // switches the checked property of the show all branches checkbox for the other project
+    // and sets the excluded branches of the other project accordingly
+    SWITCH_SHOW_ALL_BRANCHES_OTHER_PROJECT: (state, action) => {
+      let excludedBranchesOtherProject;
+      // all branches of the other project should be excluded in the graph
+      if (!action.payload.isChecked) {
+        excludedBranchesOtherProject = _.assign(
+          [],
+          action.payload.branches.map((branch) => branch.branchName)
+        );
+      } else {
+        // all branches of the base project should be shown in the graph
+        excludedBranchesOtherProject = [];
+      }
+      return _.assign({}, state, {
+        showAllBranchesOtherProjectChecked: action.payload.isChecked,
+        excludedBranchesOtherProject,
+      });
     },
   },
   {
@@ -40,5 +113,9 @@ export default handleActions(
       combined: '#188E01',
     },
     issueSelector: 'text',
+    excludedBranchesBaseProject: [],
+    excludedBranchesOtherProject: [],
+    showAllBranchesBaseProjectChecked: true,
+    showAllBranchesOtherProjectChecked: true,
   }
 );

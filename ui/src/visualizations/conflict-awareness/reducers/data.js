@@ -12,6 +12,38 @@ export default handleActions(
       return _.assign({}, state, { data });
     },
 
+    // switches the checked flag of a branch of the base project
+    SWITCH_BRANCH_CHECKED_BASE_PROJECT: (state, action) => {
+      const branchesBaseProject = state.data.branchesBaseProject;
+      branchesBaseProject.filter(
+        (branch) => branch.branchName === action.payload.branchName
+      )[0].checked = action.payload.checked;
+      return _.merge({}, state, { data: { branchesBaseProject } });
+    },
+
+    // switches the checked flag of a branch of the other project
+    SWITCH_BRANCH_CHECKED_OTHER_PROJECT: (state, action) => {
+      const branchesOtherProject = state.data.branchesOtherProject;
+      branchesOtherProject.filter(
+        (branch) => branch.branchName === action.payload.branchName
+      )[0].checked = action.payload.checked;
+      return _.merge({}, state, { data: { branchesOtherProject } });
+    },
+
+    // switches the checked flag of all branches of the base project
+    SWITCH_ALL_BRANCH_CHECKED_BASE_PROJECT: (state, action) => {
+      const branchesBaseProject = state.data.branchesBaseProject;
+      branchesBaseProject.forEach((branch) => (branch.checked = action.payload));
+      return _.merge({}, state, { data: { branchesBaseProject } });
+    },
+
+    // switches the checked flag of all branches of the other project
+    SWITCH_ALL_BRANCH_CHECKED_OTHER_PROJECT: (state, action) => {
+      const branchesOtherProject = state.data.branchesOtherProject;
+      branchesOtherProject.forEach((branch) => (branch.checked = action.payload));
+      return _.merge({}, state, { data: { branchesOtherProject } });
+    },
+
     // request the conflict awareness data and reset the previous received ones
     REQUEST_CONFLICT_AWARENESS_DATA: (state) => {
       // reset the previously retrieved data

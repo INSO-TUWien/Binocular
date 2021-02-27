@@ -18,6 +18,10 @@ const mapStateToProps = (state) => {
   return {
     commits: caState.data.data.commits, // the commits of the base project and the parent/fork (if one was selected)
     branches: caState.data.data.branches, // the branches of the base project and the parent/fork (if one was selected)
+    branchesBaseProject: caState.data.data.branchesBaseProject, // the branch names of the base project, and a flag if they are checked in the config
+    branchesOtherProject: caState.data.data.branchesOtherProject, // the branch names of the parent/fork (if one was selected), and a flag if they are checked in the config
+    excludedBranchesBaseProject: caState.config.excludedBranchesBaseProject, // the branches of the base project which should be excluded from the graph
+    excludedBranchesOtherProject: caState.config.excludedBranchesOtherProject, // the branches of the other project which should be excluded from the graph
     diff: caState.data.data.diff, // the diffs of a commit
     issues: caState.data.data.issues, // the issues of the base project for the filter list
     rebaseCheck: caState.data.data.rebaseCheck, // the result of the rebase check

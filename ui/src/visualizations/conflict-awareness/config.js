@@ -8,6 +8,14 @@ import {
   setIssueSelector,
   setOtherProject,
   setSelectedIssue,
+  switchAllBranchCheckedBaseProject,
+  switchAllBranchCheckedOtherProject,
+  switchBranchCheckedBaseProject,
+  switchBranchCheckedOtherProject,
+  switchExcludedBranchesBaseProject,
+  switchExcludedBranchesOtherProject,
+  switchShowAllBranchesBaseProject,
+  switchShowAllBranchesOtherProject,
   updateConflictAwarenessData,
 } from './sagas';
 import styles from './styles.scss';
@@ -34,6 +42,12 @@ const mapStateToProps = (state) => {
     issueForFilter: caState.config.issueForFilter, // the issueID whose commits should be highlighted
     issueSelector: caState.config.issueSelector, // indicator if the issue selection should be via a list of GitHub issues or by text entry
     selectedIssue: caState.config.selectedIssue, // issue which was selected in the list
+    branchesBaseProject: caState.data.data.branchesBaseProject, // the branch names of the base project and a flag if they are checked in the config
+    branchesOtherProject: caState.data.data.branchesOtherProject, // the branch names of the parent/fork (if one was selected) and a flag if they are checked in the config
+    excludedBranchesBaseProject: caState.config.excludedBranchesBaseProject, // the branches of the base project which should be excluded in the graph
+    excludedBranchesOtherProject: caState.config.excludedBranchesOtherProject, // the branches of the other project which should be excluded in the graph
+    showAllBranchesBaseProjectChecked: caState.config.showAllBranchesBaseProjectChecked, // a flag indicating if all branches of the base project should be excluded or not
+    showAllBranchesOtherProjectChecked: caState.config.showAllBranchesOtherProjectChecked, // a flag indicating if all branches of the other project should be excluded or not
   };
 };
 
@@ -74,6 +88,32 @@ const mapDispatchToProps = (dispatch) => {
         ])
       );
     },
+    // when a branch of the base project is unchecked, switch its checked property
+    // and add/remove it to/form the excluded branches list
+    onSwitchBranchSelectionBaseProject: (excludedBranch) => {
+      dispatch(switchBranchCheckedBaseProject(excludedBranch));
+      dispatch(switchExcludedBranchesBaseProject(excludedBranch));
+    },
+    // when a branch from the other project is unchecked, switch its checked property
+    // and add/remove it to/from the excluded branches list
+    onSwitchBranchSelectionOtherProject: (excludedBranch) => {
+      dispatch(switchBranchCheckedOtherProject(excludedBranch));
+      dispatch(switchExcludedBranchesOtherProject(excludedBranch));
+    },
+    // when the all checkbox for the branches of the base project is switched,
+    // switch the checked property of all base project branches accordingly
+    // and update the excluded branches
+    onSwitchShowAllBranchesBaseProject: (isShowAllBranchesBaseProjectChecked, branches) => {
+      dispatch(switchShowAllBranchesBaseProject(isShowAllBranchesBaseProjectChecked, branches));
+      dispatch(switchAllBranchCheckedBaseProject(isShowAllBranchesBaseProjectChecked));
+    },
+    // when the all checkbox for the branches of the other project is switched,
+    // switch the checked property of all other project branches accordingly
+    // and update the excluded branches
+    onSwitchShowAllBranchesOtherProject: (isShowAllBranchesOtherProjectChecked, branches) => {
+      dispatch(switchShowAllBranchesOtherProject(isShowAllBranchesOtherProjectChecked, branches));
+      dispatch(switchAllBranchCheckedOtherProject(isShowAllBranchesOtherProjectChecked));
+    },
   };
 };
 
@@ -95,7 +135,11 @@ const ConflictAwarenessConfigComponent = (props) => {
           'Main Project:',
           'baseProject',
           props.colorBaseProject,
-          getInputElement()
+          getInputElement(),
+          props.branchesBaseProject,
+          props.onSwitchBranchSelectionBaseProject,
+          props.onSwitchShowAllBranchesBaseProject,
+          props.showAllBranchesBaseProjectChecked
         )}
 
         {/* Properties for the selected Parent/Fork (Label, ProjectName, ColorPicker, BranchSelection*/}
@@ -104,7 +148,11 @@ const ConflictAwarenessConfigComponent = (props) => {
           'Parent/Fork:',
           'otherProject',
           props.colorOtherProject,
-          getSearchBoxElement(props)
+          getSearchBoxElement(props),
+          props.branchesOtherProject,
+          props.onSwitchBranchSelectionOtherProject,
+          props.onSwitchShowAllBranchesOtherProject,
+          props.showAllBranchesOtherProjectChecked
         )}
 
         {/* Properties for the combined Commits */}
@@ -186,7 +234,17 @@ const ConflictAwarenessConfigComponent = (props) => {
   );
 };
 
-const projectProperties = (props, label, projectKey, propsColor, elementInFrontOfColorPicker) => {
+const projectProperties = (
+  props,
+  label,
+  projectKey,
+  propsColor,
+  elementInFrontOfColorPicker,
+  branches,
+  onSwitchBranchSelectionFunction,
+  onSwitchShowAllBranches,
+  currentShowAllSelection
+) => {
   return (
     <div className="field">
       {/* Label */}
@@ -203,11 +261,32 @@ const projectProperties = (props, label, projectKey, propsColor, elementInFrontO
       </div>
       {/* BranchSelection, select all checkbox */}
       <label>
-        <input type="checkbox" className="checkbox" />
+        <input
+          type="checkbox"
+          className="checkbox"
+          checked={currentShowAllSelection}
+          onChange={() => onSwitchShowAllBranches(!currentShowAllSelection, branches)}
+        />
         all
       </label>
       <div className={styles.branchSelectionContainer}>
-        {/* TODO: add branches as checkboxes */}
+        {branches &&
+          branches.map((branch) => {
+            return (
+              <div>
+                <label>
+                  <input
+                    type="checkbox"
+                    key={branch.branchName}
+                    checked={branch.checked}
+                    onChange={() => switchBranchSelection(branch, onSwitchBranchSelectionFunction)}
+                  />
+                  {branch.branchName}
+                </label>
+                <br />
+              </div>
+            );
+          })}
       </div>
     </div>
   );
@@ -247,6 +326,16 @@ const getSearchBoxElement = (props) => {
 
 const getInputElement = () => {
   return <input type="text" disabled={true} className={cx('input')} value="Test" />;
+};
+
+/**
+ * Switches the checked property of branch and calls the reducer.
+ * @param branch the branch whose checked property should be switched
+ * @param onSwitchBranchSelectionFunction the reducer which should be called
+ */
+const switchBranchSelection = (branch, onSwitchBranchSelectionFunction) => {
+  branch.checked = !branch.checked;
+  onSwitchBranchSelectionFunction(branch);
 };
 
 const ConflictAwarenessConfig = connect(
