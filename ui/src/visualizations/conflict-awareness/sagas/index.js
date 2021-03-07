@@ -94,6 +94,33 @@ export const switchShowAllBranchesOtherProject = createAction(
   }
 );
 
+// sets the filterBeforeDate element
+export const setFilterBeforeDate = createAction(
+  'SET_FILTER_BEFORE_DATE',
+  (filterBeforeDate) => filterBeforeDate
+);
+
+// sets the filterAfterDate element
+export const setFilterAfterDate = createAction(
+  'SET_FILTER_AFTER_DATE',
+  (filterAfterDate) => filterAfterDate
+);
+
+// sets the filterAuthor element
+export const setFilterAuthor = createAction('SET_FILTER_AUTHOR', (filterAuthor) => filterAuthor);
+
+// sets the filterCommitter element
+export const setFilterCommitter = createAction(
+  'SET_FILTER_COMMITTER',
+  (filterCommitter) => filterCommitter
+);
+
+// sets the filterSubtree element
+export const setFilterSubtree = createAction(
+  'SET_FILTER_SUBTREE',
+  (filterSubtree) => filterSubtree
+);
+
 // gets the branches and commits of specific projects, gets the parent/forks of the base project (if requested) and
 // triggers the indexing of a specific project (if requested)
 export const requestConflictAwarenessData = createAction('REQUEST_CONFLICT_AWARENESS_DATA');
@@ -215,6 +242,28 @@ export const fetchConflictAwarenessData = fetchFactory(
               return { branchName: branch.branchName, checked: true };
             });
         }
+
+        // get the distinct committers of all commits
+        const committers = [];
+        commits
+          .map((commit) => commit.signature)
+          .forEach((committer) => {
+            if (!committers.includes(committer)) {
+              committers.push(committer);
+            }
+            data.committers = committers;
+          });
+
+        // get the distinct authors of all commits
+        const authors = [];
+        commits
+          .map((commit) => commit.author)
+          .forEach((author) => {
+            if (!authors.includes(author)) {
+              authors.push(author);
+            }
+            data.authors = authors;
+          });
 
         return data;
       })

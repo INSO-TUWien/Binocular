@@ -105,6 +105,31 @@ export default handleActions(
         excludedBranchesOtherProject,
       });
     },
+
+    // updates the filterBeforeDate element
+    SET_FILTER_BEFORE_DATE: (state, action) => {
+      return _.assign({}, state, { filterBeforeDate: action.payload });
+    },
+
+    // updates the filterAfterDate element
+    SET_FILTER_AFTER_DATE: (state, action) => {
+      return _.assign({}, state, { filterAfterDate: action.payload });
+    },
+
+    // updates the filterAuthor element
+    SET_FILTER_AUTHOR: (state, action) => {
+      return _.assign({}, state, { filterAuthor: action.payload });
+    },
+
+    // updates the filterCommitter element
+    SET_FILTER_COMMITTER: (state, action) => {
+      return _.assign({}, state, { filterCommitter: action.payload });
+    },
+
+    // updates the filterSubtree element
+    SET_FILTER_SUBTREE: (state, action) => {
+      return _.assign({}, state, { filterSubtree: action.payload });
+    },
   },
   {
     color: {
@@ -117,5 +142,25 @@ export default handleActions(
     excludedBranchesOtherProject: [],
     showAllBranchesBaseProjectChecked: true,
     showAllBranchesOtherProjectChecked: true,
+    filterAfterDate: {
+      date: undefined,
+      show: true,
+    },
+    filterBeforeDate: {
+      date: undefined,
+      show: true,
+    },
+    filterAuthor: {
+      author: '',
+      show: true,
+    },
+    filterCommitter: {
+      committer: '',
+      show: true,
+    },
+    filterSubtree: {
+      subtree: undefined,
+      show: true,
+    },
   }
 );

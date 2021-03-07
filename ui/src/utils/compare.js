@@ -31,6 +31,12 @@ export function equals(x, y) {
     return false;
   }
 
+  // x and y are dates (x and y must be the same type due to previous step)
+  if (x instanceof Date) {
+    // check if the dates are equal
+    return x.getTime() === y.getTime();
+  }
+
   for (let p in x) {
     // Inherited properties were tested using x.constructor === y.constructor
     // eslint-disable-next-line no-prototype-builtins

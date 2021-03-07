@@ -33,6 +33,11 @@ const mapStateToProps = (state) => {
     otherProject: caState.config.otherProject, // the selected parent/fork
     issueForFilter: caState.config.issueForFilter, // the issueID whose commits should be highlighted
     repoFullName: `${state.config.data.repoOwner}/${state.config.data.repoName}`, // the name of the base repo (owner/repository name)
+    filterAfterDate: caState.config.filterAfterDate,
+    filterBeforeDate: caState.config.filterBeforeDate,
+    filterAuthor: caState.config.filterAuthor,
+    filterCommitter: caState.config.filterCommitter,
+    filterSubtree: caState.config.filterSubtree,
   };
 };
 

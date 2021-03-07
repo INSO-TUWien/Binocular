@@ -47,7 +47,12 @@ export default class ConflictAwareness extends React.Component {
     if (
       !equals(nextProps.branches, prevState.branches) ||
       !equals(prevState.excludedBranchesBaseProject, nextProps.excludedBranchesBaseProject) ||
-      !equals(prevState.excludedBranchesOtherProject, nextProps.excludedBranchesOtherProject)
+      !equals(prevState.excludedBranchesOtherProject, nextProps.excludedBranchesOtherProject) ||
+      !equals(nextProps.filterAfterDate, prevState.filterAfterDate) ||
+      !equals(nextProps.filterBeforeDate, prevState.filterBeforeDate) ||
+      !equals(nextProps.filterAuthor, prevState.filterAuthor) ||
+      !equals(nextProps.filterCommitter, prevState.filterCommitter) ||
+      !equals(nextProps.filterSubtree, prevState.filterSubtree)
     ) {
       let { commitNodes, commitChildLinks, branchIDs } = extractData(nextProps);
       updatedProps.branches = nextProps.branches;
@@ -304,7 +309,7 @@ export default class ConflictAwareness extends React.Component {
         width: 15,
         height: 15,
         class: `${clazz} ${node.sha}`,
-        style: `stroke: ${color}; fill: ${color}; stroke-width: 1px;`,
+        style: `stroke: ${color}; fill: ${color}; stroke-width: 1px; ${node.additionalStyle}`,
         repo: repo,
         sha: node.sha,
         signature: node.signature,
@@ -613,182 +618,258 @@ function extractData(props) {
       // clone the commit in order to be able to modify it safely
       const commitClone = _.assign({}, commit);
 
-      // filter out all unused projects (projects which
-      // are not the base project and the selected other project if existing)
-      commitClone.projects = commitClone.projects.filter(
-        (project) =>
-          project === props.repoFullName ||
-          (props.otherProject && project === props.otherProject.fullName)
-      );
+      // check if the commit should be hidden in the graph or should be toned down
+      const additionalStyle = _checkFilters(props, commitClone);
 
-      // remove unselected branches of the base project from the branchesHeadShas
-      // so that it is not shown in the label of the HEAD
-      // if multiple branches refer to it
-      commitClone.branches.forEach((branch) => {
-        if (props.excludedBranchesBaseProject.includes(branch.branchName)) {
-          let branchHeadCommit = branchesHeadShas.get(commitClone.sha);
-          // the current commit is a head
-          if (branchHeadCommit) {
-            const branchMetadata = branchHeadCommit.get(branch.branchName);
-            // check if the current branch is in the base project, if yes: check if it should be removed
-            if (branchMetadata && branchMetadata.projects.includes(props.repoFullName)) {
-              // if the commit is only in the base project, delete the whole branch entry, because it was excluded
-              if (branchMetadata.projects.length === 1) {
-                branchHeadCommit.delete(branch.branchName);
-              } else {
-                // if the commit is a head of multiple projects, remove the project from the list,
-                // such that the branch name will not be shown in the node label
-                if (branchMetadata.projects.includes(props.repoFullName)) {
-                  branchMetadata.projects = branchMetadata.projects.splice(
-                    branchMetadata.projects.indexOf(props.repoFullName),
-                    1
-                  );
-                }
-              }
-            }
-          }
-        }
-
-        // remove unselected branches of the other project from the branchesHeadShas
-        // so that it is not shown in the label of the HEAD
-        // if multiple branches refer to it
-        if (props.otherProject && props.excludedBranchesOtherProject.includes(branch.branchName)) {
-          let branchHeadCommit = branchesHeadShas.get(commitClone.sha);
-          // the current commit is a head
-          if (branchHeadCommit) {
-            const branchMetadata = branchHeadCommit.get(branch.branchName);
-            // check if the current branch is in the other project, if yes: check if it should be removed
-            if (branchMetadata && branchMetadata.projects.includes(props.otherProject.fullName)) {
-              // if the commit is only in the other project, delete the whole branch entry, because it was excluded
-              if (branchMetadata.projects.length === 1) {
-                branchHeadCommit.delete(branch.branchName);
-              } else {
-                // if the commit is a head of multiple projects, remove the project from the list,
-                // such that the branch name will not be shown in the node label
-                if (branchMetadata.projects.includes(props.otherProject.fullName)) {
-                  branchMetadata.projects = branchMetadata.projects.splice(
-                    branchMetadata.projects.indexOf(props.otherProject.fullName),
-                    1
-                  );
-                }
-              }
-            }
-          }
-        }
-      });
-
-      // if the branches of the last commit differ from the branches of the current commit
-      // check if the commit is still in the base project and in the other project if selected
-      // if the branches does not differ, the values from the last check are used
-      if (!equals(lastBranchesChecked, commitClone.branches)) {
-        // update the last branches which were checked to the current branch list
-        lastBranchesChecked = _.assign(
-          [],
-          commitClone.branches.map((branch) => branch.branchName)
+      // the node should be shown in the graph
+      if (additionalStyle !== null) {
+        // filter out all unused projects (projects which
+        // are not the base project and the selected other project if existing)
+        commitClone.projects = commitClone.projects.filter(
+          (project) =>
+            project === props.repoFullName ||
+            (props.otherProject && project === props.otherProject.fullName)
         );
 
-        // get the branches of the base project which should be shown
-        // (overall branches - excluded branches)
-        branchesToShowBaseProject = props.branchesBaseProject
-          .map((branch) => branch.branchName)
-          .filter((branch) => !props.excludedBranchesBaseProject.includes(branch));
-
-        // get the branches of the other project which should be shown
-        // (overall branches - excluded branches)
-        branchesToShowOtherProject = props.branchesOtherProject
-          ? props.branchesOtherProject
-              .map((branch) => branch.branchName)
-              .filter((branch) => !props.excludedBranchesOtherProject.includes(branch))
-          : [];
-
-        // reset the flags indicating in which project the commit is
-        isInBaseProject = false;
-        isInOtherProject = false;
-
-        for (let i = 0; i < lastBranchesChecked.length; i = i + 1) {
-          const branch = lastBranchesChecked[i];
-          if (isInBaseProject && isInOtherProject) {
-            break;
-          } else {
-            if (branchesToShowBaseProject.includes(branch)) {
-              isInBaseProject = true;
+        // remove unselected branches of the base project from the branchesHeadShas
+        // so that it is not shown in the label of the HEAD
+        // if multiple branches refer to it
+        commitClone.branches.forEach((branch) => {
+          if (props.excludedBranchesBaseProject.includes(branch.branchName)) {
+            let branchHeadCommit = branchesHeadShas.get(commitClone.sha);
+            // the current commit is a head
+            if (branchHeadCommit) {
+              const branchMetadata = branchHeadCommit.get(branch.branchName);
+              // check if the current branch is in the base project, if yes: check if it should be removed
+              if (branchMetadata && branchMetadata.projects.includes(props.repoFullName)) {
+                // if the commit is only in the base project, delete the whole branch entry, because it was excluded
+                if (branchMetadata.projects.length === 1) {
+                  branchHeadCommit.delete(branch.branchName);
+                } else {
+                  // if the commit is a head of multiple projects, remove the project from the list,
+                  // such that the branch name will not be shown in the node label
+                  if (branchMetadata.projects.includes(props.repoFullName)) {
+                    branchMetadata.projects = branchMetadata.projects.splice(
+                      branchMetadata.projects.indexOf(props.repoFullName),
+                      1
+                    );
+                  }
+                }
+              }
             }
-            if (branchesToShowOtherProject.includes(branch)) {
-              isInOtherProject = true;
+          }
+
+          // remove unselected branches of the other project from the branchesHeadShas
+          // so that it is not shown in the label of the HEAD
+          // if multiple branches refer to it
+          if (
+            props.otherProject &&
+            props.excludedBranchesOtherProject.includes(branch.branchName)
+          ) {
+            let branchHeadCommit = branchesHeadShas.get(commitClone.sha);
+            // the current commit is a head
+            if (branchHeadCommit) {
+              const branchMetadata = branchHeadCommit.get(branch.branchName);
+              // check if the current branch is in the other project, if yes: check if it should be removed
+              if (branchMetadata && branchMetadata.projects.includes(props.otherProject.fullName)) {
+                // if the commit is only in the other project, delete the whole branch entry, because it was excluded
+                if (branchMetadata.projects.length === 1) {
+                  branchHeadCommit.delete(branch.branchName);
+                } else {
+                  // if the commit is a head of multiple projects, remove the project from the list,
+                  // such that the branch name will not be shown in the node label
+                  if (branchMetadata.projects.includes(props.otherProject.fullName)) {
+                    branchMetadata.projects = branchMetadata.projects.splice(
+                      branchMetadata.projects.indexOf(props.otherProject.fullName),
+                      1
+                    );
+                  }
+                }
+              }
+            }
+          }
+        });
+
+        // if the branches of the last commit differ from the branches of the current commit
+        // check if the commit is still in the base project and in the other project if selected
+        // if the branches does not differ, the values from the last check are used
+        if (!equals(lastBranchesChecked, commitClone.branches)) {
+          // update the last branches which were checked to the current branch list
+          lastBranchesChecked = _.assign(
+            [],
+            commitClone.branches.map((branch) => branch.branchName)
+          );
+
+          // get the branches of the base project which should be shown
+          // (overall branches - excluded branches)
+          branchesToShowBaseProject = props.branchesBaseProject
+            .map((branch) => branch.branchName)
+            .filter((branch) => !props.excludedBranchesBaseProject.includes(branch));
+
+          // get the branches of the other project which should be shown
+          // (overall branches - excluded branches)
+          branchesToShowOtherProject = props.branchesOtherProject
+            ? props.branchesOtherProject
+                .map((branch) => branch.branchName)
+                .filter((branch) => !props.excludedBranchesOtherProject.includes(branch))
+            : [];
+
+          // reset the flags indicating in which project the commit is
+          isInBaseProject = false;
+          isInOtherProject = false;
+
+          for (let i = 0; i < lastBranchesChecked.length; i = i + 1) {
+            const branch = lastBranchesChecked[i];
+            if (isInBaseProject && isInOtherProject) {
+              break;
+            } else {
+              if (branchesToShowBaseProject.includes(branch)) {
+                isInBaseProject = true;
+              }
+              if (branchesToShowOtherProject.includes(branch)) {
+                isInOtherProject = true;
+              }
             }
           }
         }
-      }
 
-      // if the commit is not in the base project, remove the base project from the commits project list
-      if (!isInBaseProject && commitClone.projects.includes(props.repoFullName)) {
-        commitClone.projects.splice(commitClone.projects.indexOf(props.repoFullName), 1);
-      }
-
-      // if the commit is not in the other project, remove the other project from the commits project list
-      if (
-        props.otherProject &&
-        !isInOtherProject &&
-        commitClone.projects.includes(props.otherProject.fullName)
-      ) {
-        commitClone.projects.splice(commitClone.projects.indexOf(props.otherProject.fullName), 1);
-      }
-
-      // if the commit is still in at least one project, after the excluded branches are removed,
-      // add it to the graph
-      if (commitClone.projects.length > 0) {
-        let label = '';
-        let labelType = '';
-
-        // set the branch names as the label of the commit, if its a head
-        if (branchesHeadShas.has(commitClone.sha)) {
-          // get the branches where the commit is a head
-          const branchProjects = branchesHeadShas.get(commitClone.sha);
-          branchProjects.forEach((metadata, branchName) => {
-            // check in which projects the commit is the head the branch
-            const isInBaseProject = metadata.projects.includes(props.repoFullName);
-            const isInOtherProject = props.otherProject
-              ? metadata.projects.includes(props.otherProject.fullName)
-              : false;
-
-            // get the css class and color of the node and label based on the project memberships
-            let { clazz, color } = _getClassColorAndRepo(props, isInBaseProject, isInOtherProject);
-
-            // add the branch to the label including its key as class (is needed for later selections)
-            label =
-              label +
-              `<span class='${clazz} ${metadata.branchKey}' style='color: ${color}; cursor: pointer'>${branchName}</span></br>`;
-
-            // save important data of the branches for later handling
-            branchIDs.push({
-              headSha: commitClone.sha,
-              branchKey: metadata.branchKey,
-              branchName,
-              clazz,
-            });
-          });
-
-          labelType = 'html';
-          label = `<div style="text-align: center">${label}</div>`;
+        // if the commit is not in the base project, remove the base project from the commits project list
+        if (!isInBaseProject && commitClone.projects.includes(props.repoFullName)) {
+          commitClone.projects.splice(commitClone.projects.indexOf(props.repoFullName), 1);
         }
 
-        // clone the commit, parse its dates, set the label and add it to the list
-        const commitNode = _.cloneDeep(commitClone);
-        commitNode.date = parseTime(commitNode.date);
-        commitNode.authorDate = parseTime(commitNode.authorDate);
-        commitNode.label = label;
-        commitNode.labelType = labelType;
-        commitNodes.push(commitNode);
+        // if the commit is not in the other project, remove the other project from the commits project list
+        if (
+          props.otherProject &&
+          !isInOtherProject &&
+          commitClone.projects.includes(props.otherProject.fullName)
+        ) {
+          commitClone.projects.splice(commitClone.projects.indexOf(props.otherProject.fullName), 1);
+        }
 
-        // for each child of the commit, set add the parent - child relationship to the list
-        commitClone.children.forEach((childCommit) => {
-          commitChildLinks.push({ source: commitClone.sha, target: childCommit.sha });
-        });
+        // if the commit is still in at least one project, after the excluded branches are removed,
+        // add it to the graph
+        if (commitClone.projects.length > 0) {
+          let label = '';
+          let labelType = '';
+
+          // set the branch names as the label of the commit, if its a head
+          if (branchesHeadShas.has(commitClone.sha)) {
+            // get the branches where the commit is a head
+            const branchProjects = branchesHeadShas.get(commitClone.sha);
+            branchProjects.forEach((metadata, branchName) => {
+              // check in which projects the commit is the head the branch
+              const isInBaseProject = metadata.projects.includes(props.repoFullName);
+              const isInOtherProject = props.otherProject
+                ? metadata.projects.includes(props.otherProject.fullName)
+                : false;
+
+              // get the css class and color of the node and label based on the project memberships
+              let { clazz, color } = _getClassColorAndRepo(
+                props,
+                isInBaseProject,
+                isInOtherProject
+              );
+
+              // add the branch to the label including its key as class (is needed for later selections)
+              label =
+                label +
+                `<span class='${clazz} ${metadata.branchKey}' style='color: ${color}; cursor: pointer'>${branchName}</span></br>`;
+
+              // save important data of the branches for later handling
+              branchIDs.push({
+                headSha: commitClone.sha,
+                branchKey: metadata.branchKey,
+                branchName,
+                clazz,
+              });
+            });
+
+            labelType = 'html';
+            label = `<div style="text-align: center">${label}</div>`;
+          }
+
+          // clone the commit, parse its dates, set the label,
+          // sets the additional style if it should be toned down and add it to the list
+          const commitNode = _.cloneDeep(commitClone);
+          commitNode.date = parseTime(commitNode.date);
+          commitNode.authorDate = parseTime(commitNode.authorDate);
+          commitNode.label = label;
+          commitNode.labelType = labelType;
+          commitNode.additionalStyle = additionalStyle;
+          commitNodes.push(commitNode);
+
+          // for each child of the commit, set add the parent - child relationship to the list
+          commitClone.children.forEach((childCommit) => {
+            commitChildLinks.push({ source: commitClone.sha, target: childCommit.sha });
+          });
+        }
       }
     });
   }
 
   return { commitNodes, commitChildLinks, branchIDs };
+}
+
+/**
+ * Checks if a commit should be hidden in the graph or should toned down according to the set filters.
+ * @param props {any} the props including the filter
+ * @param commit {any} the commit which should be checked according to the set filter
+ * @returns {string|null} null if the commit should not be shown in the graph,
+ * otherwise the additional style the commit node should have ('' if the node should be highlighted,
+ * opacity 0.5 if the node should be toned down)
+ * @private
+ */
+function _checkFilters(props, commit) {
+  let additionalStyle = '';
+
+  // the commit was not committed after the provided date
+  if (
+    props.filterAfterDate.date &&
+    props.filterAfterDate.date.getTime() > parseTime(commit.date).getTime()
+  ) {
+    // not showing filters have more priority than highlighted filter
+    if (props.filterAfterDate.showOnly) {
+      return null;
+    } else {
+      additionalStyle = 'opacity: 0.5;';
+    }
+  }
+
+  // the commit was not committed before the provided date
+  if (
+    props.filterBeforeDate.date &&
+    props.filterBeforeDate.date.getTime() < parseTime(commit.date).getTime()
+  ) {
+    // not showing filters have more priority than highlighted filter
+    if (props.filterBeforeDate.showOnly) {
+      return null;
+    } else {
+      additionalStyle = 'opacity: 0.5;';
+    }
+  }
+
+  // the commit has a different committer than the user selected in the filter
+  if (props.filterCommitter.committer && props.filterCommitter.committer !== commit.signature) {
+    // not showing filters have more priority than highlighted filter
+    if (props.filterCommitter.showOnly) {
+      return null;
+    } else {
+      additionalStyle = 'opacity: 0.5;';
+    }
+  }
+
+  // the commit has a different author than the user selected in the filter
+  if (props.filterAuthor.author && props.filterAuthor.author !== commit.author) {
+    // not showing filters have more priority than highlighted filter
+    if (props.filterAuthor.showOnly) {
+      return null;
+    } else {
+      additionalStyle = 'opacity: 0.5;';
+    }
+  }
+
+  return additionalStyle;
 }
 
 /**

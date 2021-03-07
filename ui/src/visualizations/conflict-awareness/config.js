@@ -4,6 +4,11 @@ import { connect } from 'react-redux';
 
 import {
   setColor,
+  setFilterAfterDate,
+  setFilterAuthor,
+  setFilterBeforeDate,
+  setFilterCommitter,
+  setFilterSubtree,
   setIssueForFilter,
   setIssueSelector,
   setOtherProject,
@@ -20,10 +25,14 @@ import {
 } from './sagas';
 import styles from './styles.scss';
 
+import _ from 'lodash';
 import cx from 'classnames';
 import ColorPicker from '../../components/ColorPicker';
+import DatePicker from 'react-datepicker';
 import React from 'react';
 import SearchBox from '../../components/SearchBox';
+
+import 'react-datepicker/dist/react-datepicker.min.css';
 
 let issueNumber = ''; // issueNumber (ID) for highlighting the commits of the issue
 
@@ -38,6 +47,8 @@ const mapStateToProps = (state) => {
     parent: caState.data.data.parent, // the parent of the base project
     forks: caState.data.data.forks, // the forks of the base project
     issues: caState.data.data.issues, // the issues of the base project for the filter list
+    authors: caState.data.data.authors, // the distinct authors of the commits
+    committers: caState.data.data.committers, // the distinct committers of the commits
     otherProject: caState.config.otherProject, // the selected parent/fork
     issueForFilter: caState.config.issueForFilter, // the issueID whose commits should be highlighted
     issueSelector: caState.config.issueSelector, // indicator if the issue selection should be via a list of GitHub issues or by text entry
@@ -48,6 +59,11 @@ const mapStateToProps = (state) => {
     excludedBranchesOtherProject: caState.config.excludedBranchesOtherProject, // the branches of the other project which should be excluded in the graph
     showAllBranchesBaseProjectChecked: caState.config.showAllBranchesBaseProjectChecked, // a flag indicating if all branches of the base project should be excluded or not
     showAllBranchesOtherProjectChecked: caState.config.showAllBranchesOtherProjectChecked, // a flag indicating if all branches of the other project should be excluded or not
+    filterAfterDate: caState.config.filterAfterDate, // the filter for all the commits after a specific date
+    filterBeforeDate: caState.config.filterBeforeDate, // the filter for all commits before a specific date
+    filterAuthor: caState.config.filterAuthor, // the filter for commits of a specific author
+    filterCommitter: caState.config.filterCommitter, // the filter for commits of a specific committer
+    filterSubtree: caState.config.filterSubtree, // the filter for commits of a specific subtree
   };
 };
 
@@ -114,6 +130,16 @@ const mapDispatchToProps = (dispatch) => {
       dispatch(switchShowAllBranchesOtherProject(isShowAllBranchesOtherProjectChecked, branches));
       dispatch(switchAllBranchCheckedOtherProject(isShowAllBranchesOtherProjectChecked));
     },
+    // update the filterBeforeDate element
+    onSetFilterBeforeDate: (filterBeforeDate) => dispatch(setFilterBeforeDate(filterBeforeDate)),
+    // update the filterAfterDate element
+    onSetFilterAfterDate: (filterAfterDate) => dispatch(setFilterAfterDate(filterAfterDate)),
+    // update the filterAuthor element
+    onSetFilterAuthor: (filterAuthor) => dispatch(setFilterAuthor(filterAuthor)),
+    // update the filterCommitter element
+    onSetFilterCommitter: (filterCommitter) => dispatch(setFilterCommitter(filterCommitter)),
+    // update the filterSubtree element
+    onSetFilterSubtree: (filterSubtree) => dispatch(setFilterSubtree(filterSubtree)),
   };
 };
 
@@ -227,6 +253,141 @@ const ConflictAwarenessConfigComponent = (props) => {
               value={props.selectedIssue}
               onChange={(issue) => props.onSetSelectedIssue(issue)}
             />
+          )}
+        </div>
+
+        {/* section for the filters */}
+        <div className="field">
+          <label className="label">Filter:</label>
+
+          {/* afterDate filter */}
+          <div>
+            After:
+            {/* date picker */}
+            <DatePicker
+              selected={props.filterAfterDate.date}
+              onChange={(date) => {
+                const filterAfterDate = _.assign({}, props.filterAfterDate);
+                filterAfterDate.date = date;
+                props.onSetFilterAfterDate(filterAfterDate);
+              }}
+            />
+            {/* radio button showing if the other commits should be toned down */}
+            <label className="radio">
+              <input
+                name="highlightAfterDate"
+                type="radio"
+                checked={!props.filterAfterDate.showOnly}
+                onChange={() => {
+                  const filterAfterDate = _.assign({}, props.filterAfterDate);
+                  filterAfterDate.showOnly = !props.filterAfterDate.showOnly;
+                  props.onSetFilterAfterDate(filterAfterDate);
+                }}
+              />
+              highlight
+            </label>
+            {/* radio button showing if the other commits should be hidden in the graph */}
+            <label className="radio">
+              <input
+                name="highlightAfterDate"
+                type="radio"
+                checked={props.filterAfterDate.showOnly}
+                onChange={() => {
+                  const filterAfterDate = _.assign({}, props.filterAfterDate);
+                  filterAfterDate.showOnly = !props.filterAfterDate.showOnly;
+                  props.onSetFilterAfterDate(filterAfterDate);
+                }}
+              />
+              show only
+            </label>
+          </div>
+
+          {/* beforeDate filter */}
+          <div>
+            Before:
+            {/* date picker */}
+            <DatePicker
+              selected={props.filterBeforeDate.date}
+              onChange={(date) => {
+                const filterBeforeDate = _.assign({}, props.filterBeforeDate);
+                filterBeforeDate.date = date;
+                props.onSetFilterBeforeDate(filterBeforeDate);
+              }}
+            />
+            {/* radio button showing if the other commits should be toned down */}
+            <label className="radio">
+              <input
+                name="highlightBeforeDate"
+                type="radio"
+                checked={!props.filterBeforeDate.showOnly}
+                onChange={() => {
+                  const filterBeforeDate = _.assign({}, props.filterBeforeDate);
+                  filterBeforeDate.showOnly = !props.filterBeforeDate.showOnly;
+                  props.onSetFilterBeforeDate(filterBeforeDate);
+                }}
+              />
+              highlight
+            </label>
+            {/* radio button showing if the other commits should be hidden in the graph */}
+            <label className="radio">
+              <input
+                name="highlightBeforeDate"
+                type="radio"
+                checked={props.filterBeforeDate.showOnly}
+                onChange={() => {
+                  const filterBeforeDate = _.assign({}, props.filterBeforeDate);
+                  filterBeforeDate.showOnly = !props.filterBeforeDate.showOnly;
+                  props.onSetFilterBeforeDate(filterBeforeDate);
+                }}
+              />
+              show only
+            </label>
+          </div>
+
+          {/* author filter */}
+          {props.authors && (
+            <div>
+              Author:
+              {/* search box including all distinct authors of all commits */}
+              <SearchBox
+                placeholder="Select author..."
+                renderOption={(author) => author}
+                search={(text) => {
+                  return props.authors.filter((author) =>
+                    author.toLowerCase().includes(text.toLowerCase())
+                  );
+                }}
+                value={props.filterAuthor.author}
+                onChange={(author) => {
+                  const filterAuthor = _.assign({}, props.filterAuthor);
+                  filterAuthor.author = author;
+                  props.onSetFilterAuthor(filterAuthor);
+                }}
+              />
+            </div>
+          )}
+
+          {/* committer filter */}
+          {props.committers && (
+            <div>
+              Committer:
+              {/* search box including all distinct committers of all commits */}
+              <SearchBox
+                placeholder="Select committer..."
+                renderOption={(committer) => committer}
+                search={(text) => {
+                  return props.committers.filter((committer) =>
+                    committer.toLowerCase().includes(text.toLowerCase())
+                  );
+                }}
+                value={props.filterCommitter.committer}
+                onChange={(committer) => {
+                  const filterCommitter = _.assign({}, props.filterCommitter);
+                  filterCommitter.committer = committer;
+                  props.onSetFilterCommitter(filterCommitter);
+                }}
+              />
+            </div>
           )}
         </div>
       </form>
