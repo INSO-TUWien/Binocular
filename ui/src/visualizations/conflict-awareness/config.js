@@ -96,13 +96,19 @@ const mapDispatchToProps = (dispatch) => {
     onSetOtherProject: (otherProject, repoFullName) => {
       // set it in the state
       dispatch(setOtherProject(otherProject));
-      // and update the conflict awareness data (without getting parents/forks again, incl. triggering selected project indexing)
-      dispatch(
-        updateConflictAwarenessData([repoFullName, otherProject.fullName], false, [
-          otherProject.ownerName,
-          otherProject.name,
-        ])
-      );
+      // an other project was selected
+      if (otherProject) {
+        // and update the conflict awareness data (without getting parents/forks again, incl. triggering selected project indexing)
+        dispatch(
+          updateConflictAwarenessData([repoFullName, otherProject.fullName], false, [
+            otherProject.ownerName,
+            otherProject.name,
+          ])
+        );
+      } else {
+        // the other project was deselected
+        dispatch(updateConflictAwarenessData([repoFullName], false));
+      }
     },
     // when a branch of the base project is unchecked, switch its checked property
     // and add/remove it to/form the excluded branches list
