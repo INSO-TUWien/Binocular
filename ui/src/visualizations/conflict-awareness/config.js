@@ -161,7 +161,7 @@ const ConflictAwarenessConfigComponent = (props) => {
           'Main Project:',
           'baseProject',
           props.colorBaseProject,
-          getInputElement(),
+          getInputElement(props.repoFullName),
           props.branchesBaseProject,
           props.onSwitchBranchSelectionBaseProject,
           props.onSwitchShowAllBranchesBaseProject,
@@ -485,8 +485,13 @@ const getSearchBoxElement = (props) => {
   );
 };
 
-const getInputElement = () => {
-  return <input type="text" disabled={true} className={cx('input')} value="Test" />;
+/**
+ * Gets the disabled input element with the provided text in it.
+ * @param repoFullName {string} the text which should be displayed in the input
+ * @returns {JSX.Element} the disabled input element
+ */
+const getInputElement = (repoFullName) => {
+  return <input type="text" disabled={true} className={cx('input')} value={repoFullName} />;
 };
 
 /**
