@@ -9,6 +9,7 @@ import {
   getMergeCheck,
   getRebaseCheck,
   resetStateProperty,
+  setIsLoading,
   updateConflictAwarenessData,
 } from '../sagas';
 
@@ -16,6 +17,7 @@ const mapStateToProps = (state) => {
   const caState = state.visualizations.conflictAwareness.state;
 
   return {
+    isLoading: caState.data.data.isLoading,
     commits: caState.data.data.commits, // the commits of the base project and the parent/fork (if one was selected)
     branches: caState.data.data.branches, // the branches of the base project and the parent/fork (if one was selected)
     branchesBaseProject: caState.data.data.branchesBaseProject, // the branch names of the base project, and a flag if they are checked in the config
@@ -53,6 +55,7 @@ const mapDispatchToProps = (dispatch) => {
       dispatch(getMergeCheck(fromRepo, fromBranch, toRepo, toBranch)),
     onCheckCherryPick: (cherryPickCommitInfos, otherRepo, toRepo, toBranch) =>
       dispatch(getCherryPickCheck(cherryPickCommitInfos, otherRepo, toRepo, toBranch)),
+    onSetIsLoading: (isLoading) => dispatch(setIsLoading(isLoading)),
   };
 };
 

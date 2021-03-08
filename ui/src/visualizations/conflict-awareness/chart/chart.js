@@ -35,6 +35,11 @@ export default class ConflictAwareness extends React.Component {
     // element which stores the props which were updated
     const updatedProps = {};
 
+    // data is currently fetched or is finished fetching
+    if (nextProps.isLoading !== prevState.isLoading) {
+      updatedProps.isLoading = nextProps.isLoading;
+    }
+
     // get the conflict awareness data if the repoFullName was changed
     // this can only occur when the view is mounted
     // is done this way because the updateConflictAwarenessData is reused for the initial data retrieve and for updates
@@ -60,6 +65,13 @@ export default class ConflictAwareness extends React.Component {
       updatedProps.commitNodes = commitNodes;
       updatedProps.commitChildLinks = commitChildLinks;
       updatedProps.branchIDs = branchIDs;
+      updatedProps.excludedBranchesBaseProject = nextProps.excludedBranchesBaseProject;
+      updatedProps.excludedBranchesOtherProject = nextProps.excludedBranchesOtherProject;
+      updatedProps.filterAfterDate = nextProps.filterAfterDate;
+      updatedProps.filterBeforeDate = nextProps.filterBeforeDate;
+      updatedProps.filterAuthor = nextProps.filterAuthor;
+      updatedProps.filterCommitter = nextProps.filterCommitter;
+      updatedProps.filterSubtree = nextProps.filterSubtree;
     }
 
     // the diffs of a commit were retrieved -> put them into the modal
@@ -214,6 +226,8 @@ export default class ConflictAwareness extends React.Component {
 
       // set labels above node
       inner.selectAll('g.nodes g.label').attr('transform', 'translate(0,-40)');
+
+      prevProps.onSetIsLoading(false);
     } else if (prevState.colorBaseProject !== this.state.colorBaseProject) {
       // recolor the commits/edges of the base project
       let { inner } = _getGraphDOMElements();
@@ -233,7 +247,15 @@ export default class ConflictAwareness extends React.Component {
     if (this.state.commitNodes) {
       return (
         <ChartContainer onResize={(evt) => this.onResize(evt)}>
-          <div id="modalContainer">
+          <div
+            id="loadingContainer"
+            hidden={this.state.isLoading ? '' : 'hidden'}
+            className={styles.loadingHintContainer}>
+            <h1 className={styles.loadingHint}>
+              Loading... <i className="fas fa-spinner fa-pulse" />
+            </h1>
+          </div>
+          <div id="modalContainer" style={this.state.isLoading ? { opacity: 0 } : { opacity: 1 }}>
             <svg id="test" className={styles.chart} width="960" height="10">
               <g />
             </svg>
@@ -241,7 +263,13 @@ export default class ConflictAwareness extends React.Component {
         </ChartContainer>
       );
     } else {
-      return <p>not loaded</p>;
+      return (
+        <div className={styles.loadingHintContainer}>
+          <h1 className={styles.loadingHint}>
+            Loading... <i className="fas fa-spinner fa-pulse" />
+          </h1>
+        </div>
+      );
     }
   }
 
@@ -911,7 +939,7 @@ function _colorGraph(inner, color, classKey) {
  */
 function _getNodeFromEvent(event, g) {
   // in firefox, the toElement does not exist as in Chrome, therefore the if clause
-  return g.node(event.toElement ? event.toElement.__data__ : event.originalTarget.__data__);
+  return g.node(event.target ? event.target.__data__ : event.originalTarget.__data__);
 }
 
 /**

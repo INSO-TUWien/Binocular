@@ -11,6 +11,8 @@ import getParentAndForks from './get-parent-and-forks';
 import indexProject from './index-project';
 import getIssueData from './get-issue-data';
 
+export const setIsLoading = createAction('SET_IS_LOADING', (isLoading) => isLoading);
+
 // updates the selected issue from the list
 export const setSelectedIssue = createAction(
   'SET_SELECTED_ISSUE',

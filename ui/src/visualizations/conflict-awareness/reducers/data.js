@@ -5,6 +5,9 @@ import _ from 'lodash';
 
 export default handleActions(
   {
+    SET_IS_LOADING: (state, action) => {
+      return _.merge({}, state, { data: { isLoading: action.payload } });
+    },
     // sets a state property to undefined
     RESET_STATE_PROPERTY: (state, action) => {
       const data = {};
@@ -14,7 +17,7 @@ export default handleActions(
 
     // switches the checked flag of a branch of the base project
     SWITCH_BRANCH_CHECKED_BASE_PROJECT: (state, action) => {
-      const branchesBaseProject = state.data.branchesBaseProject;
+      const branchesBaseProject = _.assign([], state.data.branchesBaseProject);
       branchesBaseProject.filter(
         (branch) => branch.branchName === action.payload.branchName
       )[0].checked = action.payload.checked;
@@ -54,6 +57,7 @@ export default handleActions(
       data.commitChildLinks = undefined;
       data.parent = state.data.parent;
       data.forks = state.data.forks;
+      data.isLoading = true;
 
       return _.assign({}, state, { isFetching: true, data: data });
     },

@@ -36,7 +36,7 @@ export default handleActions(
 
     // adds/removes a branch of the base project to/from the excluded branches list
     SWITCH_EXCLUDED_BRANCHES_BASE_PROJECT: (state, action) => {
-      let excludedBranchesBaseProject = state.excludedBranchesBaseProject;
+      let excludedBranchesBaseProject = _.assign([], state.excludedBranchesBaseProject);
       if (!action.payload.checked) {
         excludedBranchesBaseProject.push(action.payload.branchName);
       } else {
