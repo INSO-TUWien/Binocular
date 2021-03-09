@@ -926,6 +926,9 @@ function _colorGraph(inner, color, classKey) {
     .style('fill', `${color}`)
     .style('stroke', `${color}`);
 
+  // recolor node labels (branch names)
+  inner.selectAll(`span.${classKey}`).style('color', `${color}`);
+
   // recolor edges
   inner.selectAll(`g.edgePath.${classKey} path`).style('stroke', `${color}`);
 }
