@@ -26,7 +26,7 @@ export default handleActions(
         color: {},
       };
       colorFromKey.color[`${action.payload.key}`] = action.payload.color;
-      return _.assign({}, state, colorFromKey);
+      return _.merge({}, state, colorFromKey);
     },
 
     // a (new) project/fork was selected
