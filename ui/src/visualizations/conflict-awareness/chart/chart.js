@@ -201,9 +201,7 @@ export default class ConflictAwareness extends React.Component {
 
       inner.selectAll('g.node circle').on('click', function (event) {
         if (!event.ctrlKey) {
-          selectedNodes.forEach((node) =>
-            node.style('stroke-width', '1px').style('stroke', node.style('fill'))
-          );
+          selectedNodes.forEach((node) => _resetCommitSelectionHighlighting(node));
           selectedNodes = [];
         }
         const clickedNode = d3.select(this);
@@ -222,6 +220,7 @@ export default class ConflictAwareness extends React.Component {
       this._setLabelCurrentActionTooltipOnHover(inner);
       this._setCodeChangesModalOnDoubleClick(svg, inner, g);
       this._setUpCherryPickMergeAndRebaseCheck();
+      _resetNodeAndBranchSelection();
 
       svg.attr('height', '98vh' /*g.graph().height * initialScale + 40*/);
 
@@ -533,7 +532,8 @@ export default class ConflictAwareness extends React.Component {
             branchID.branchName
           );
 
-          selectedNodes.forEach((node) => node.style('stroke-width', '1px'));
+          // reset the selected commits
+          selectedNodes.forEach((node) => _resetCommitSelectionHighlighting(node));
           selectedNodes = [];
           selectedNodeInfos = [];
         } else if (selectedBranch && !equals(selectedBranch, branchID)) {
@@ -561,7 +561,7 @@ export default class ConflictAwareness extends React.Component {
             }
 
             // reset the highlighting and the selectedBranch
-            this._resetBranchNameHighlighting(selectedBranch);
+            _resetBranchNameHighlighting(selectedBranch);
             selectedBranch = undefined;
           } else {
             // no special key was pressed during the click
@@ -570,42 +570,24 @@ export default class ConflictAwareness extends React.Component {
 
             // a branch was already selected --> reset the highlighting of the previous selectedBranch
             if (selectedBranch) {
-              this._resetBranchNameHighlighting(selectedBranch);
+              _resetBranchNameHighlighting(selectedBranch);
             }
 
             // set the currently selected branch and highlight it
             selectedBranch = branchID;
-            this._highlightBranchName(selectedBranch);
+            _highlightBranchName(selectedBranch);
           }
         } else if (selectedBranch && equals(selectedBranch, branchID)) {
           // the same branch was selected again -> reset its highlighting and the selectedBranch
-          this._resetBranchNameHighlighting(inner, selectedBranch);
+          _resetBranchNameHighlighting(inner, selectedBranch);
           selectedBranch = undefined;
         } else {
           // no branch was previously selected -> highlight the currently selected branch
           selectedBranch = branchID;
-          this._highlightBranchName(selectedBranch);
+          _highlightBranchName(selectedBranch);
         }
       });
     });
-  }
-
-  /**
-   * Highlights a branch with a solid border.
-   * @param branch {*} to which a highlighting should be added
-   * @private
-   */
-  _highlightBranchName(branch) {
-    d3.select(`span.${branch.clazz}.${branch.branchKey}`).style('border', 'black solid 2px');
-  }
-
-  /**
-   * Removes the border highlighting of the branch.
-   * @param branch {*} from which the highlighting should be removed
-   * @private
-   */
-  _resetBranchNameHighlighting(branch) {
-    d3.select(`span.${branch.clazz}.${branch.branchKey}`).style('border', '');
   }
 
   /**
@@ -624,6 +606,47 @@ export default class ConflictAwareness extends React.Component {
         return this.state.repoFullName;
     }
   }
+}
+
+/**
+ * Highlights a branch with a solid border.
+ * @param branch {*} to which a highlighting should be added
+ * @private
+ */
+function _highlightBranchName(branch) {
+  d3.select(`span.${branch.clazz}.${branch.branchKey}`).style('border', 'black solid 2px');
+}
+
+/**
+ * Removes the border highlighting of the branch.
+ * @param branch {*} from which the highlighting should be removed
+ * @private
+ */
+function _resetBranchNameHighlighting(branch) {
+  d3.select(`span.${branch.clazz}.${branch.branchKey}`).style('border', '');
+}
+
+function _resetCommitSelectionHighlighting(node) {
+  node.style('stroke-width', '1px').style('stroke', node.style('fill'));
+}
+
+function _resetNodeAndBranchSelection() {
+  d3.select('body').on('keydown', (event) => {
+    if (event.key === 'Escape') {
+      // reset selected nodes
+      if (selectedNodes.length > 0) {
+        selectedNodes.forEach((node) => _resetCommitSelectionHighlighting(node));
+        selectedNodes = [];
+        selectedNodeInfos = [];
+      }
+
+      // reset selected branch
+      if (selectedBranch) {
+        _resetBranchNameHighlighting(selectedBranch);
+        selectedBranch = undefined;
+      }
+    }
+  });
 }
 
 /**
