@@ -197,7 +197,7 @@ export default class ConflictAwareness extends React.Component {
       _addModals();
 
       // add events to hide modals
-      _hideModals(prevProps);
+      _hideModalsOnClickOutside(prevProps);
 
       inner.selectAll('g.node circle').on('click', function (event) {
         if (!event.ctrlKey) {
@@ -220,7 +220,7 @@ export default class ConflictAwareness extends React.Component {
       this._setLabelCurrentActionTooltipOnHover(inner);
       this._setCodeChangesModalOnDoubleClick(svg, inner, g);
       this._setUpCherryPickMergeAndRebaseCheck();
-      _resetNodeAndBranchSelection();
+      _handleEscapePress(prevProps);
 
       svg.attr('height', '98vh' /*g.graph().height * initialScale + 40*/);
 
@@ -626,11 +626,21 @@ function _resetBranchNameHighlighting(branch) {
   d3.select(`span.${branch.clazz}.${branch.branchKey}`).style('border', '');
 }
 
+/**
+ * Returns the highlighting of a selected node.
+ * @param node {*} the node which highlighting should be reset
+ * @private
+ */
 function _resetCommitSelectionHighlighting(node) {
   node.style('stroke-width', '1px').style('stroke', node.style('fill'));
 }
 
-function _resetNodeAndBranchSelection() {
+/**
+ * Closes visible modals and resets the selected nodes and branches on key press Escape.
+ * @param prevProps the props, needed to call the onResetStateProperty reducer function
+ * @private
+ */
+function _handleEscapePress(prevProps) {
   d3.select('body').on('keydown', (event) => {
     if (event.key === 'Escape') {
       // reset selected nodes
@@ -644,6 +654,27 @@ function _resetNodeAndBranchSelection() {
       if (selectedBranch) {
         _resetBranchNameHighlighting(selectedBranch);
         selectedBranch = undefined;
+      }
+
+      // hide modals
+      const diffModal = _getDiffModal();
+      const successModal = _getSuccessModal();
+      const conflictModal = _getConflictModal();
+
+      // hide diffModal if visible
+      if (_isVisible(diffModal)) {
+        _resetDiffAndHideModal(prevProps);
+      }
+
+      // hide successModal if visible
+      if (_isVisible(successModal)) {
+        _hideSuccessModal();
+      }
+
+      // hide conflictModal if visible
+      if (_isVisible(conflictModal)) {
+        _resetRebaseCheckAndHideModal(prevProps);
+        _resetMergeCheckAndHideModal(prevProps);
       }
     }
   });
@@ -1496,35 +1527,13 @@ function _addModals() {
  * @param prevProps the props
  * @private
  */
-function _hideModals(prevProps) {
-  const { svg } = _getGraphDOMElements();
+function _hideModalsOnClickOutside(prevProps) {
   const diffModal = _getDiffModal();
   const successModal = _getSuccessModal();
   const conflictModal = _getConflictModal();
 
-  // hide modals when esc pressed
-  d3.select('body').on('keydown', (event) => {
-    // hide modals if visible, when esc pressed
-    if (event.key === 'Escape') {
-      if (_isVisible(diffModal)) {
-        _resetDiffAndHideModal(prevProps);
-      }
-
-      // hide successModal if visible, when clicking on the body
-      if (_isVisible(successModal)) {
-        _hideSuccessModal();
-      }
-
-      // hide conflictModal if visible, when clicking on the body
-      if (_isVisible(conflictModal)) {
-        _resetRebaseCheckAndHideModal(prevProps);
-        _resetMergeCheckAndHideModal(prevProps);
-      }
-    }
-  });
-
   // hide modals when svg is clicked
-  svg.on('click', () => {
+  d3.select('#root').on('click', () => {
     // hide diffModal if visible, when clicking on the svg
     if (_isVisible(diffModal)) {
       _resetDiffAndHideModal(prevProps);
