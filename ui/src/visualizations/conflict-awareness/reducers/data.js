@@ -10,7 +10,7 @@ export default handleActions(
     },
     // sets a state property to undefined
     RESET_STATE_PROPERTY: (state, action) => {
-      const data = {};
+      const data = _.assign({}, state.data);
       data[action.payload] = undefined;
       return _.assign({}, state, { data });
     },
