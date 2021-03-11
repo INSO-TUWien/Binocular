@@ -219,6 +219,7 @@ export default class ConflictAwareness extends React.Component {
       // add zoom and other stuff
       this._setZoomSupportAndPositionGraph(svg, inner, g);
       this._setNodeMetadataTooltipOnHover(inner, g);
+      this._setLabelCurrentActionTooltipOnHover(inner);
       this._setCodeChangesModalOnDoubleClick(svg, inner, g);
       this._setUpCherryPickMergeAndRebaseCheck();
 
@@ -385,6 +386,53 @@ export default class ConflictAwareness extends React.Component {
    * @private
    */
   _setNodeMetadataTooltipOnHover(inner, g) {
+    this._setTooltipOnNodes(inner.selectAll('g.node circle'), (event) => {
+      const node = _getNodeFromEvent(event, g);
+      return (
+        '<div style="max-width: 500px">' +
+        `<p style="text-align: center"><b>${node.sha}</b></p>` +
+        `Committed by ${node.signature.replace(/</g, '&lt').replace(/>/g, '&gt')}</br>` +
+        `(${node.date})</br></br>` +
+        `Authored by ${node.author.replace(/</g, '&lt').replace(/>/g, '&gt')}</br>` +
+        `(${node.authorDate})</br></br>` +
+        `<i>${node.messageHeader}</i>` +
+        '</div>'
+      );
+    });
+  }
+
+  /**
+   * Sets up tooltips over branch names showing which action the user will do
+   * (selecting a branch, try merging, try rebasing or try cherry picking).
+   * @param inner the g child of the svg element
+   * @private
+   */
+  _setLabelCurrentActionTooltipOnHover(inner) {
+    this._setTooltipOnNodes(
+      inner.selectAll('span.baseProject,span.otherProject,span.combined'),
+      (event) => {
+        let tooltipText = `Select branch '${event.target.innerText}'.`;
+
+        if (selectedNodes.length > 0) {
+          tooltipText = `Try cherry-picking selected commits to '${event.target.innerText}'.`;
+        } else if (selectedBranch && event.ctrlKey) {
+          tooltipText = `Try rebasing selected branch on '${event.target.innerText}'.`;
+        } else if (selectedBranch && event.shiftKey) {
+          tooltipText = `Try merging selected branch into '${event.target.innerText}'.`;
+        }
+
+        return tooltipText;
+      }
+    );
+  }
+
+  /**
+   * Sets up a tooltip on hovering over the provided nodes showing the text retured from the getTooltipText method.
+   * @param nodes {*} the selected nodes to apply show the tooltip on mouseover (d3)
+   * @param getTooltipText {function(event): string} the text/html which should be shown in the tooltip
+   * @private
+   */
+  _setTooltipOnNodes(nodes, getTooltipText) {
     const tooltip = d3
       .select('body')
       .append('div')
@@ -400,23 +448,11 @@ export default class ConflictAwareness extends React.Component {
       .text('Simple Tooltip...');
 
     // set up the hover events for each commit-nodes
-    inner
-      .selectAll('g.node circle')
+    nodes
 
       // show tooltip when mouse is over the node
       .on('mouseover', (event) => {
-        const node = _getNodeFromEvent(event, g);
-        const tooltipText =
-          '<div style="max-width: 500px">' +
-          `<p style="text-align: center"><b>${node.sha}</b></p>` +
-          `Committed by ${node.signature.replace(/</g, '&lt').replace(/>/g, '&gt')}</br>` +
-          `(${node.date})</br></br>` +
-          `Authored by ${node.author.replace(/</g, '&lt').replace(/>/g, '&gt')}</br>` +
-          `(${node.authorDate})</br></br>` +
-          `<i>${node.messageHeader}</i>` +
-          '</div>';
-
-        tooltip.html(tooltipText).style('visibility', 'visible');
+        tooltip.html(getTooltipText(event)).style('visibility', 'visible');
       })
 
       // move tooltip with mouse
