@@ -93,6 +93,7 @@
     "rc": "^1.2.8",
     "react": "^16.14.0",
     "react-color": "^2.19.3",
+    "react-contexify": "^5.0.0",
     "react-datepicker": "3.6.0",
     "react-dom": "^16.14.0",
     "react-measure": "^2.5.2",

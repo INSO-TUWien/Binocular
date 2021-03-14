@@ -12,6 +12,16 @@ import { parseTime } from '../../../utils';
 import styles from '../styles.scss';
 import { equals } from '../../../utils/compare';
 
+import { Menu, Item, useContextMenu } from 'react-contexify';
+import 'react-contexify/dist/ReactContexify.css';
+
+// data for the context menu of the commit nodes
+const COMMIT_NODE_MENU_ID = 'commit-node-menu-id';
+const { show } = useContextMenu({
+  id: COMMIT_NODE_MENU_ID,
+});
+let commitForShaCopying; // the node from which the context menu was opened at last
+
 let codeMirror; // codeMirror instance for showing the diff of a commit
 let selectedNodes = []; // the nodes which are selected by the user
 let selectedNodeInfos = [];
@@ -243,6 +253,7 @@ export default class ConflictAwareness extends React.Component {
       this._setLabelCurrentActionTooltipOnHover(inner);
       this._setCodeChangesModalOnDoubleClick(svg, inner, g);
       this._setUpCommitNodeSelectionEvent(prevProps, g);
+      this._setUpCommitNodeContextMenuEvent(g);
       this._setUpCherryPickMergeAndRebaseCheck();
       _handleEscapePress(prevProps);
 
@@ -284,6 +295,13 @@ export default class ConflictAwareness extends React.Component {
               <g />
             </svg>
           </div>
+
+          {/* the context menu for a commit node */}
+          <Menu id={COMMIT_NODE_MENU_ID}>
+            <Item id="copySha" onClick={_handleCommitContextMenuItemSelection}>
+              Copy Sha to Clipboard
+            </Item>
+          </Menu>
         </ChartContainer>
       );
     } else {
@@ -708,6 +726,24 @@ export default class ConflictAwareness extends React.Component {
   }
 
   /**
+   * Sets up the custom context menu for commit nodes.
+   * @param g
+   * @private
+   */
+  _setUpCommitNodeContextMenuEvent(g) {
+    d3.selectAll('g.node circle').on('contextmenu', (event) => {
+      // prevent the default behaviour of the right click
+      event.preventDefault();
+
+      // store the selected commit
+      commitForShaCopying = _getNodeFromEvent(event, g);
+
+      // show the custom context menu
+      show(event);
+    });
+  }
+
+  /**
    * Gets the full name of a repo based on the css class.
    * If the clazz is combined, the full name of the base repo is returned,
    * because there is no difference of the element in both repos.
@@ -725,7 +761,37 @@ export default class ConflictAwareness extends React.Component {
   }
 }
 
- /**
+/**
+ * Provides the logic for the context menu of a commit node.
+ * @param event
+ * @private
+ */
+function _handleCommitContextMenuItemSelection({ event }) {
+  switch (event.currentTarget.id) {
+    case 'copySha': {
+      // get the sha from the selected node
+      const text = commitForShaCopying.sha;
+      // write it to the clipboard
+      navigator.clipboard
+        .writeText(text)
+        .then(() => {
+          // show a success message and close it automatically after 3 seconds
+          _showSuccessModal('Copied the selected SHA to the clipboard.');
+          setTimeout(_hideSuccessModal, 3000);
+        })
+        .catch((e) => {
+          // unable to copy the sha to the clipboard
+          console.error(e);
+          // show an error message and close it automatically after 3 seconds
+          _showErrorModal('Unable to copy the selected SHA to the clipboard.');
+          setTimeout(_hideErrorModal, 3000);
+        });
+      break;
+    }
+  }
+}
+
+/**
  * Retrieves the commit node which has the provided sha as class.
  * @param sha {string} the class indicator of the commit node which should be retrieved
  * @returns {*}
@@ -1332,11 +1398,9 @@ function _getSuccessModal() {
  * @private
  */
 function _showRebaseSuccessModal(rebaseRepo, rebaseBranch, upstreamRepo, upstreamBranch) {
-  _getSuccessModal()
-    .text(
-      `No conflict was detected. The rebase of "${rebaseBranch}" (project "${rebaseRepo}") onto branch "${upstreamBranch}" (project "${upstreamRepo}") is possible.`
-    )
-    .style('visibility', 'visible');
+  _showSuccessModal(
+    `No conflict was detected. The rebase of "${rebaseBranch}" (project "${rebaseRepo}") onto branch "${upstreamBranch}" (project "${upstreamRepo}") is possible.`
+  );
 }
 
 /**
@@ -1350,11 +1414,9 @@ function _showRebaseSuccessModal(rebaseRepo, rebaseBranch, upstreamRepo, upstrea
  * @private
  */
 function _showMergeSuccessModal(fromRepo, fromBranch, toRepo, toBranch) {
-  _getSuccessModal()
-    .text(
-      `No conflict was detected. The merge of "${fromBranch}" (project "${fromRepo}") onto branch "${toBranch}" (project "${toRepo}") is possible.`
-    )
-    .style('visibility', 'visible');
+  _showSuccessModal(
+    `No conflict was detected. The merge of "${fromBranch}" (project "${fromRepo}") onto branch "${toBranch}" (project "${toRepo}") is possible.`
+  );
 }
 
 /**
@@ -1363,9 +1425,16 @@ function _showMergeSuccessModal(fromRepo, fromBranch, toRepo, toBranch) {
  * @private
  */
 function _showCherryPickSuccessModal() {
-  _getSuccessModal()
-    .text('The selected Commits can be cherry picked without conflicts.')
-    .style('visibility', 'visible');
+  _showSuccessModal('The selected Commits can be cherry picked without conflicts.');
+}
+
+/**
+ * Shows the successModal with the given text.
+ * @param text {string} the text of the success modal
+ * @private
+ */
+function _showSuccessModal(text) {
+  _getSuccessModal().text(text).style('visibility', 'visible');
 }
 
 /**
