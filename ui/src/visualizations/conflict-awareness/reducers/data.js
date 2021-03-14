@@ -121,6 +121,23 @@ export default handleActions(
         receivedAt: action.meta.receivedAt,
       });
     },
+
+    // request the commit shas the requested commit depends on (not recursive)
+    REQUEST_COMMIT_DEPENDENCIES: (state) => {
+      let newState = _.assign({}, state);
+      newState.isFetching = true;
+      newState.data.commitDependencies = undefined;
+      return newState;
+    },
+
+    // receive the commit shas the requested commit depends on (not recursive)
+    RECEIVE_COMMIT_DEPENDENCIES: (state, action) => {
+      return _.merge({}, state, {
+        data: action.payload,
+        isFetching: false,
+        receivedAt: action.meta.receivedAt,
+      });
+    },
   },
   {
     data: {},

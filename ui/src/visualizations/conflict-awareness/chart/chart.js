@@ -16,6 +16,7 @@ let codeMirror; // codeMirror instance for showing the diff of a commit
 let selectedNodes = []; // the nodes which are selected by the user
 let selectedNodeInfos = [];
 let selectedBranch; // the branch which is selected by the user
+let commitDependenciesWithDependentCommits = new Map(); // map containing the shas of the commit dependencies as key, and a list of shas of the commits which depend on the key
 
 export default class ConflictAwareness extends React.Component {
   constructor(props) {
@@ -164,6 +165,43 @@ export default class ConflictAwareness extends React.Component {
       updatedProps.cherryPickCheck = nextProps.cherryPickCheck;
     }
 
+    // new commit dependencies were retrieved
+    if (!equals(nextProps.commitDependencies, prevState.commitDependencies)) {
+      if (nextProps.commitDependencies) {
+        // the commit dependencies could have been retrieved
+        if (nextProps.commitDependencies.success) {
+          // add all dependencies to the map and mark them
+          nextProps.commitDependencies.commitDependencyShas.forEach((sha) => {
+            if (sha) {
+              // the node was not selected by the user
+              // (if the user already selected the node, than the _highlightCommitDependencies would overwrite this styling)
+              if (!selectedNodes.filter((selectedNode) => selectedNode.data()[0] === sha)[0]) {
+                _highlightCommitDependencies(sha);
+              }
+
+              // the commit is already a dependency from another commit
+              if (commitDependenciesWithDependentCommits.has(sha)) {
+                // add the dependent commit to the list
+                commitDependenciesWithDependentCommits
+                  .get(sha)
+                  .push(nextProps.commitDependencies.sha);
+              } else {
+                // the commit was not marked as a dependency previously, set an map entry
+                commitDependenciesWithDependentCommits.set(sha, [nextProps.commitDependencies.sha]);
+              }
+            }
+          });
+        } else {
+          // the commit dependencies y
+          _showErrorModal(
+            `Unable determine the dependencies of the selected commit (${nextProps.commitDependencies.sha}).`
+          );
+        }
+      }
+
+      updatedProps.commitDependencies = nextProps.commitDependencies;
+    }
+
     if (_.isEmpty(updatedProps)) {
       // No state update necessary
       return null;
@@ -199,26 +237,12 @@ export default class ConflictAwareness extends React.Component {
       // add events to hide modals
       _hideModalsOnClickOutside(prevProps);
 
-      inner.selectAll('g.node circle').on('click', function (event) {
-        if (!event.ctrlKey) {
-          selectedNodes.forEach((node) => _resetCommitSelectionHighlighting(node));
-          selectedNodes = [];
-        }
-        const clickedNode = d3.select(this);
-        clickedNode.style('stroke-width', '5px').style('stroke', 'black');
-        selectedNodes.push(clickedNode);
-        const node = _getNodeFromEvent(event, g);
-        selectedNodeInfos.push({
-          sha: node.sha,
-          fromRepo: node.repo,
-        });
-      });
-
       // add zoom and other stuff
       this._setZoomSupportAndPositionGraph(svg, inner, g);
       this._setNodeMetadataTooltipOnHover(inner, g);
       this._setLabelCurrentActionTooltipOnHover(inner);
       this._setCodeChangesModalOnDoubleClick(svg, inner, g);
+      this._setUpCommitNodeSelectionEvent(prevProps, g);
       this._setUpCherryPickMergeAndRebaseCheck();
       _handleEscapePress(prevProps);
 
@@ -533,7 +557,7 @@ export default class ConflictAwareness extends React.Component {
           );
 
           // reset the selected commits
-          selectedNodes.forEach((node) => _resetCommitSelectionHighlighting(node));
+          selectedNodes.forEach((node) => _resetCommitHighlighting(node));
           selectedNodes = [];
           selectedNodeInfos = [];
         } else if (selectedBranch && !equals(selectedBranch, branchID)) {
@@ -591,6 +615,99 @@ export default class ConflictAwareness extends React.Component {
   }
 
   /**
+   * Selects the clicked commit node.
+   * If the ctrl key is not pressed during the click, reset the previous selection.
+   * Otherwise the clicked node will be added to the current selection.
+   * If a selected commit node is clicked again (with ctrl key), then the commit node
+   * will be removed from the current selection.
+   * @param prevProps the props
+   * @param g
+   * @private
+   */
+  _setUpCommitNodeSelectionEvent(prevProps, g) {
+    d3.selectAll('g.node circle').on('click', function (event) {
+      // check if the ctrl key is pressed during the click, if not: reset the current selection
+      if (!event.ctrlKey) {
+        // remove the highlighting of all commits which are marked as dependency
+        // and reset the commitDependency map
+        commitDependenciesWithDependentCommits.forEach((value, key) => {
+          const commitNode = _getCommitNodeFromShaClass(key);
+          _resetCommitHighlighting(commitNode);
+        });
+        commitDependenciesWithDependentCommits = new Map();
+
+        // remove the highlighting of all commits which are selected
+        // and reset the selected nodes list
+        selectedNodes.forEach((node) => _resetCommitHighlighting(node));
+        selectedNodes = [];
+      }
+
+      // the commit node which was clicked
+      const clickedNode = d3.select(this);
+      // the commit stored within the commit node DOM element
+      const commitNode = _getNodeFromEvent(event, g);
+
+      // clickedCommit is a dependency -> reset the highlighting in order to overwrite it
+      if (clickedNode.style('stroke-dasharray') !== 'none') {
+        _resetCommitHighlighting(clickedNode);
+      }
+
+      // check if the clicked code was already selected
+      const alreadySelectedNode = selectedNodes.filter(
+        (selectedNode) => selectedNode.data()[0] === clickedNode.data()[0]
+      )[0];
+
+      // node was already selected -> node should be deselected
+      if (alreadySelectedNode) {
+        // remove its commit dependencies
+        commitDependenciesWithDependentCommits.forEach((value, key) => {
+          if (value.includes(commitNode.sha)) {
+            // check if dependency commit is selected
+            // if not: remove its highlighting, otherwise let the selection highlighting be
+            if (
+              selectedNodes.filter((selectedNode) => selectedNode.data()[0] === key).length === 0
+            ) {
+              _resetCommitHighlighting(_getCommitNodeFromShaClass(key));
+            }
+
+            // if the commit dependency is a dependency for more commits than the selected one
+            // remove the selected commit node from the list
+            if (value.length > 1) {
+              value.splice(value.indexOf(commitNode.sha), 1);
+            } else {
+              // the commit dependency is a dependency for only the selected commit
+              // remove the commit dependency completely from the map
+              commitDependenciesWithDependentCommits.delete(key);
+            }
+          }
+        });
+
+        // remove clicked node from selectedNodes and reset its styling
+        selectedNodes.splice(selectedNodes.indexOf(alreadySelectedNode), 1);
+        _resetCommitHighlighting(clickedNode);
+
+        // the selected commit is still a commit dependency -> mark it as one
+        if (commitDependenciesWithDependentCommits.has(commitNode.sha)) {
+          _highlightCommitDependencies(commitNode.sha);
+        }
+      } else {
+        // the node was not already selected -> select it
+
+        // mark the node as selected and push it to the selected nodes
+        clickedNode.style('stroke-width', '5px').style('stroke', 'black');
+        selectedNodes.push(clickedNode);
+        selectedNodeInfos.push({
+          sha: commitNode.sha,
+          fromRepo: commitNode.repo,
+        });
+
+        // get all commit shas the selected commits depends on (not recursive)
+        prevProps.onGetCommitDependencies(commitNode.sha);
+      }
+    });
+  }
+
+  /**
    * Gets the full name of a repo based on the css class.
    * If the clazz is combined, the full name of the base repo is returned,
    * because there is no difference of the element in both repos.
@@ -605,6 +722,31 @@ export default class ConflictAwareness extends React.Component {
       default:
         return this.state.repoFullName;
     }
+  }
+}
+
+ /**
+ * Retrieves the commit node which has the provided sha as class.
+ * @param sha {string} the class indicator of the commit node which should be retrieved
+ * @returns {*}
+ * @private
+ */
+function _getCommitNodeFromShaClass(sha) {
+  return d3.select(`g[class*='${sha}'] circle`);
+}
+
+/**
+ * Highlights the commit node with the provided sha as commit dependency.
+ * @param sha {string} the sha of the commit which should be highlighted
+ * @private
+ */
+function _highlightCommitDependencies(sha) {
+  // get the node from the graph
+  const node = _getCommitNodeFromShaClass(sha);
+
+  // if the node was not filtered out previously, mark them as depending commit
+  if (node) {
+    node.style('stroke', 'black').style('stroke-width', '5px').style('stroke-dasharray', '5,5');
   }
 }
 
@@ -627,54 +769,80 @@ function _resetBranchNameHighlighting(branch) {
 }
 
 /**
- * Returns the highlighting of a selected node.
+ * Returns the highlighting of a highlighted node.
  * @param node {*} the node which highlighting should be reset
  * @private
  */
-function _resetCommitSelectionHighlighting(node) {
-  node.style('stroke-width', '1px').style('stroke', node.style('fill'));
+function _resetCommitHighlighting(node) {
+  node
+    .style('stroke-width', '1px')
+    .style('stroke', node.style('fill'))
+    .style('stroke-dasharray', null);
 }
 
 /**
- * Closes visible modals and resets the selected nodes and branches on key press Escape.
+ * Closes visible modals and (if no modal is visible) resets the selected nodes and branches on key press Escape.
  * @param prevProps the props, needed to call the onResetStateProperty reducer function
  * @private
  */
 function _handleEscapePress(prevProps) {
   d3.select('body').on('keydown', (event) => {
     if (event.key === 'Escape') {
-      // reset selected nodes
-      if (selectedNodes.length > 0) {
-        selectedNodes.forEach((node) => _resetCommitSelectionHighlighting(node));
-        selectedNodes = [];
-        selectedNodeInfos = [];
-      }
-
-      // reset selected branch
-      if (selectedBranch) {
-        _resetBranchNameHighlighting(selectedBranch);
-        selectedBranch = undefined;
-      }
-
-      // hide modals
+      // modals which can be shown
       const diffModal = _getDiffModal();
       const successModal = _getSuccessModal();
+      const errorModal = _getErrorModal();
       const conflictModal = _getConflictModal();
 
-      // hide diffModal if visible
-      if (_isVisible(diffModal)) {
-        _resetDiffAndHideModal(prevProps);
-      }
+      // reset selected nodes and the selected branch if no modal is shown
+      if (
+        !_isVisible(diffModal) &&
+        !_isVisible(successModal) &&
+        !_isVisible(conflictModal) &&
+        !_isVisible(errorModal)
+      ) {
+        // reset selected nodes
+        if (selectedNodes.length > 0) {
+          selectedNodes.forEach((node) => _resetCommitHighlighting(node));
+          selectedNodes = [];
+          selectedNodeInfos = [];
+        }
 
-      // hide successModal if visible
-      if (_isVisible(successModal)) {
-        _hideSuccessModal();
-      }
+        // reset selected branch
+        if (selectedBranch) {
+          _resetBranchNameHighlighting(selectedBranch);
+          selectedBranch = undefined;
+        }
 
-      // hide conflictModal if visible
-      if (_isVisible(conflictModal)) {
-        _resetRebaseCheckAndHideModal(prevProps);
-        _resetMergeCheckAndHideModal(prevProps);
+        // reset the commit dependencies
+        commitDependenciesWithDependentCommits.forEach((value, key) => {
+          let commitNode = _getCommitNodeFromShaClass(key);
+          _resetCommitHighlighting(commitNode);
+        });
+        commitDependenciesWithDependentCommits = new Map();
+      } else {
+        // if a modal is shown, hide it without resetting the selected nodes and the selected branch
+
+        // hide diffModal if visible
+        if (_isVisible(diffModal)) {
+          _resetDiffAndHideModal(prevProps);
+        }
+
+        // hide successModal if visible
+        if (_isVisible(successModal)) {
+          _hideSuccessModal();
+        }
+
+        // hide conflictModal if visible
+        if (_isVisible(conflictModal)) {
+          _resetRebaseCheckAndHideModal(prevProps);
+          _resetMergeCheckAndHideModal(prevProps);
+        }
+
+        // hide errorModal if visible
+        if (_isVisible(errorModal)) {
+          _hideErrorModal();
+        }
       }
     }
   });
@@ -1118,8 +1286,6 @@ function _getClassColorAndRepo(state, isInBaseProject, isInOtherProject) {
  * @private
  */
 function _highlightCommitsFromIssue(oldIssueID, newIssueID, allCommits) {
-  let { inner } = _getGraphDOMElements();
-
   // reset the last highlighting
   if (oldIssueID) {
     // get all commits from the last issue filter (searched by id + title case insensitive
@@ -1128,7 +1294,7 @@ function _highlightCommitsFromIssue(oldIssueID, newIssueID, allCommits) {
     );
     // change the node back to the previous design (not highlighted
     oldIssueCommits.forEach((commit) => {
-      const node = inner.select(`g[class*='${commit.sha}'] circle`);
+      const node = _getCommitNodeFromShaClass(commit.sha);
       node.style('stroke', node.style('fill'));
     });
   }
@@ -1141,7 +1307,7 @@ function _highlightCommitsFromIssue(oldIssueID, newIssueID, allCommits) {
     );
     // color the border of each commit black
     newIssueCommits.forEach((commit) =>
-      inner.select(`g[class*='${commit.sha}'] circle`).style('stroke', 'black')
+      _getCommitNodeFromShaClass(commit.sha).style('stroke', 'black')
     );
   }
 }
@@ -1208,6 +1374,33 @@ function _showCherryPickSuccessModal() {
  */
 function _hideSuccessModal() {
   _getSuccessModal().style('visibility', 'hidden');
+}
+
+/**
+ * Gets the errorModal.
+ * @returns {*} the errorModal DOM element
+ * @private
+ */
+function _getErrorModal() {
+  return d3.select('#errorModal');
+}
+
+/**
+ * Shows the errorModal containing the provided message.
+ * can be made without conflicts.
+ * @param message {string} the message which should be shown in the modal
+ * @private
+ */
+function _showErrorModal(message) {
+  _getErrorModal().text(message).style('visibility', 'visible');
+}
+
+/**
+ * Hides the errorModal.
+ * @private
+ */
+function _hideErrorModal() {
+  _getErrorModal().style('visibility', 'hidden');
 }
 
 /**
@@ -1502,7 +1695,7 @@ function _appendBasicModalToSelector(selector) {
 }
 
 /**
- * Add Modals to the DOM for diffs and rebase/merge/cherry pick checks.
+ * Add Modals to the DOM for diffs, rebase/merge/cherry pick checks and general error messages.
  * @private
  */
 function _addModals() {
@@ -1519,11 +1712,15 @@ function _addModals() {
   _appendBasicModalToSelector('#modalContainer')
     .style('background-color', 'lawngreen')
     .attr('id', 'successModal');
+
+  _appendBasicModalToSelector('#modalContainer')
+    .style('background-color', 'darksalmon')
+    .attr('id', 'errorModal');
 }
 
 /**
  * Hide diffModal, successModal and conflictModal when pressing esc
- * or clicking on svg.
+ * or clicking on the "root" element.
  * @param prevProps the props
  * @private
  */
@@ -1531,23 +1728,29 @@ function _hideModalsOnClickOutside(prevProps) {
   const diffModal = _getDiffModal();
   const successModal = _getSuccessModal();
   const conflictModal = _getConflictModal();
+  const errorModal = _getErrorModal();
 
   // hide modals when svg is clicked
   d3.select('#root').on('click', () => {
-    // hide diffModal if visible, when clicking on the svg
+    // hide diffModal if visible
     if (_isVisible(diffModal)) {
       _resetDiffAndHideModal(prevProps);
     }
 
-    // hide successModal if visible, when clicking on the svg
+    // hide successModal if visible
     if (_isVisible(successModal)) {
       _hideSuccessModal();
     }
 
-    // hide conflictModal if visible, when clicking on the svg
+    // hide conflictModal if visible
     if (_isVisible(conflictModal)) {
       _resetRebaseCheckAndHideModal(prevProps);
       _resetMergeCheckAndHideModal(prevProps);
+    }
+
+    // hide errorModal if visible
+    if (_isVisible(errorModal)) {
+      _hideErrorModal();
     }
   });
 }

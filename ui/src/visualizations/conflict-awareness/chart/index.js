@@ -5,6 +5,7 @@ import { connect } from 'react-redux';
 import Chart from './chart.js';
 import {
   getCherryPickCheck,
+  getCommitDependencies,
   getDiff,
   getMergeCheck,
   getRebaseCheck,
@@ -29,6 +30,7 @@ const mapStateToProps = (state) => {
     rebaseCheck: caState.data.data.rebaseCheck, // the result of the rebase check
     mergeCheck: caState.data.data.mergeCheck, // the result of the merge check
     cherryPickCheck: caState.data.data.cherryPickCheck, // the result of the cherry pick check
+    commitDependencies: caState.data.data.commitDependencies, // the shas of the commits the previously clicked commit node depends on (not recursive)
     colorBaseProject: caState.config.color.baseProject, // the color for the commits/edges of the base project
     colorOtherProject: caState.config.color.otherProject, // the color for the commits/edges of the parent/fork
     colorCombined: caState.config.color.combined, // the color of the commits/edges found in both projects
@@ -55,6 +57,7 @@ const mapDispatchToProps = (dispatch) => {
       dispatch(getMergeCheck(fromRepo, fromBranch, toRepo, toBranch)),
     onCheckCherryPick: (cherryPickCommitInfos, otherRepo, toRepo, toBranch) =>
       dispatch(getCherryPickCheck(cherryPickCommitInfos, otherRepo, toRepo, toBranch)),
+    onGetCommitDependencies: (sha) => dispatch(getCommitDependencies(sha)),
     onSetIsLoading: (isLoading) => dispatch(setIsLoading(isLoading)),
   };
 };

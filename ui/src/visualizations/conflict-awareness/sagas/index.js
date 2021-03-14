@@ -171,6 +171,13 @@ export const getCherryPickCheck = createAction(
   }
 );
 
+// get the commit shas the requested commit depends on (not recursive)
+export const requestCommitDependencies = createAction('REQUEST_COMMIT_DEPENDENCIES');
+export const receiveCommitDependencies = timestampedActionFactory('RECEIVE_COMMIT_DEPENDENCIES');
+export const getCommitDependencies = createAction('GET_COMMIT_DEPENDENCIES', (sha) => {
+  return { sha };
+});
+
 // inits all watchers
 export default function* () {
   yield fork(watchDiff);
@@ -178,6 +185,7 @@ export default function* () {
   yield fork(watchCheckRebase);
   yield fork(watchCheckMerge);
   yield fork(watchCheckCherryPick);
+  yield fork(watchGetCommitDependencies);
 }
 
 /**
@@ -366,6 +374,26 @@ export const fetchCherryPickCheck = fetchFactory(
 );
 
 /**
+ * Gets the shas of the commits, the requested commit depends on (not recursive).
+ * If the commit dependencies cannot be retrieved, success = false.
+ */
+export const fetchCommitDependencies = fetchFactory(
+  function (sha) {
+    return fetch(endpointUrl('commit/dependencies'), {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        sha,
+      }),
+    }).then((resp) => resp.json());
+  },
+  requestCommitDependencies,
+  receiveCommitDependencies
+);
+
+/**
  * Watches all getDiff actions and fetches the diff of a specific commit sha.
  */
 export function* watchDiff() {
@@ -414,6 +442,15 @@ export function* watchCheckCherryPick() {
       a.payload.toRepo,
       a.payload.toBranch
     );
+  });
+}
+
+/**
+ * Watches all getCommitDependencies actions and retrieved all commit shas the requested commit depends on (not recursive).
+ */
+export function* watchGetCommitDependencies() {
+  yield takeEvery('GET_COMMIT_DEPENDENCIES', function* (a) {
+    yield* fetchCommitDependencies(a.payload.sha);
   });
 }
 
