@@ -25,6 +25,7 @@ let selectedNodes = []; // the nodes which are selected by the user
 let selectedNodeInfos = [];
 let selectedBranch; // the branch which is selected by the user
 let commitDependenciesWithDependentCommits = new Map(); // map containing the shas of the commit dependencies as key, and a list of shas of the commits which depend on the key
+let commitShasOfSubtree = []; // the commit shas of a subtree
 
 export default class ConflictAwareness extends React.Component {
   constructor(props) {
@@ -69,6 +70,21 @@ export default class ConflictAwareness extends React.Component {
       !equals(nextProps.filterCommitter, prevState.filterCommitter) ||
       !equals(nextProps.filterSubtree, prevState.filterSubtree)
     ) {
+      // if the subtree filter has changed, calculate the shas in the selected subtree
+      // or reset the list if the subtree filter was resettet
+      if (!equals(nextProps.filterSubtree, prevState.filterSubtree)) {
+        commitShasOfSubtree = [];
+
+        // subtree filter is set -> calulate all shas of the subtree
+        if (nextProps.filterSubtree.subtree) {
+          _getSubtreeCommitShas(
+            nextProps.filterSubtree.subtree,
+            commitShasOfSubtree,
+            nextProps.commits
+          );
+        }
+      }
+
       let clonedCommits = _.assign([], nextProps.commits);
       let collapsedSections = nextProps.collapsedSections;
 
@@ -909,6 +925,29 @@ function _handleCommitContextMenuItemSelection({ event, props }) {
 }
 
 /**
+ * Pushes all child commit shas (incl. commitSha) into the shas list.
+ * @param commitSha {string} the sha where to get the shas of it's subtree (incl. commitSha)
+ * @param shas {[string]} list of shas which are included in the subtree (will be filled)
+ * @param allCommits {[*]} list of all commits
+ * @private
+ */
+function _getSubtreeCommitShas(commitSha, shas, allCommits) {
+  // get the commit
+  let commit = allCommits.filter((_commit) => _commit.sha === commitSha)[0];
+
+  // if the commit exists in the commit list (check needed if a child is in another project which is not shown)
+  if (commit) {
+    // push sha into the list and calculate the subtree for all the commits children
+    shas.push(commit.sha);
+    if (commit.children.length > 0) {
+      commit.children.forEach((commitSha) => {
+        _getSubtreeCommitShas(commitSha.sha, shas, allCommits);
+      });
+    }
+  }
+}
+
+/**
  * Provides the logic for the context menu of a collapsed node.
  * @param event
  * @param props the provided props from the react-contexify context menu
@@ -1243,8 +1282,8 @@ function _removeUnusedProjectsFromCommit(commit, isInProjectInfo, props) {
     // (overall branches - excluded branches)
     branchesToShowOtherProject = props.branchesOtherProject
       ? props.branchesOtherProject
-        .map((branch) => branch.branchName)
-        .filter((branch) => !props.excludedBranchesOtherProject.includes(branch))
+          .map((branch) => branch.branchName)
+          .filter((branch) => !props.excludedBranchesOtherProject.includes(branch))
       : [];
 
     // reset the flags indicating in which project the commit is
@@ -1482,6 +1521,19 @@ function _checkFilters(props, commit) {
       return null;
     } else {
       additionalStyle = 'opacity: 0.5;';
+    }
+  }
+
+  // the subtree filter is selected
+  if (commitShasOfSubtree.length > 0) {
+    // the commit is not in the selected subtree
+    if (!commitShasOfSubtree.includes(commit.sha)) {
+      // not showing filters have more priority than highlighted filters
+      if (props.filterSubtree.showOnly) {
+        return null;
+      } else {
+        additionalStyle = 'opacity: 0.5;';
+      }
     }
   }
 
@@ -1902,13 +1954,13 @@ function _createConflictsCardSection(conflictDatas) {
     // append the newly created card within the modal
     conflictModal.html(
       conflictModal.html() +
-      _createExpandableCard(
-        cardContentID,
-        cardHeaderID,
-        cardArrowID,
-        textAreaID,
-        conflictDatas[i].path
-      )
+        _createExpandableCard(
+          cardContentID,
+          cardHeaderID,
+          cardArrowID,
+          textAreaID,
+          conflictDatas[i].path
+        )
     );
 
     // save the necessary IDs of the card for setting up the expand/shrink
@@ -2256,7 +2308,7 @@ function _createCompactedCollapsedSections(props) {
         }
       });
     }
-      // the child has no children (is a leaf)
+    // the child has no children (is a leaf)
     // -> put the collapsed section with no nodes and no child in the list
     else if (commit.children.length === 0) {
       collapsedSections.push({

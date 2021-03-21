@@ -281,6 +281,9 @@ const ConflictAwarenessConfigComponent = (props) => {
             <DatePicker
               selected={props.filterAfterDate.date}
               onChange={(date) => {
+                if (!date) {
+                  date = '';
+                }
                 const filterAfterDate = _.assign({}, props.filterAfterDate);
                 filterAfterDate.date = date;
                 props.onSetFilterAfterDate(filterAfterDate);
@@ -323,6 +326,9 @@ const ConflictAwarenessConfigComponent = (props) => {
             <DatePicker
               selected={props.filterBeforeDate.date}
               onChange={(date) => {
+                if (!date) {
+                  date = '';
+                }
                 const filterBeforeDate = _.assign({}, props.filterBeforeDate);
                 filterBeforeDate.date = date;
                 props.onSetFilterBeforeDate(filterBeforeDate);
@@ -373,6 +379,9 @@ const ConflictAwarenessConfigComponent = (props) => {
                 }}
                 value={props.filterAuthor.author}
                 onChange={(author) => {
+                  if (!author) {
+                    author = '';
+                  }
                   const filterAuthor = _.assign({}, props.filterAuthor);
                   filterAuthor.author = author;
                   props.onSetFilterAuthor(filterAuthor);
@@ -396,6 +405,9 @@ const ConflictAwarenessConfigComponent = (props) => {
                 }}
                 value={props.filterCommitter.committer}
                 onChange={(committer) => {
+                  if (!committer) {
+                    committer = '';
+                  }
                   const filterCommitter = _.assign({}, props.filterCommitter);
                   filterCommitter.committer = committer;
                   props.onSetFilterCommitter(filterCommitter);
@@ -403,6 +415,49 @@ const ConflictAwarenessConfigComponent = (props) => {
               />
             </div>
           )}
+
+          {/* subtree filter */}
+          <div>
+            Subtree:
+            {/* input field */}
+            <input
+              type="text"
+              placeholder="Commit Sha"
+              onChange={(event) => {
+                const filterSubtree = _.assign({}, props.filterSubtree);
+                filterSubtree.subtree = event.target.value;
+                props.onSetFilterSubtree(filterSubtree);
+              }}
+            />
+            {/* radio button showing if the other commits should be toned down */}
+            <label className="radio">
+              <input
+                name="highlightSubtree"
+                type="radio"
+                checked={!props.filterSubtree.showOnly}
+                onChange={() => {
+                  const filterSubtree = _.assign({}, props.filterSubtree);
+                  filterSubtree.showOnly = false;
+                  props.onSetFilterSubtree(filterSubtree);
+                }}
+              />
+              highlight
+            </label>
+            {/* radio button showing if the other commits should be hidden in the graph */}
+            <label className="radio">
+              <input
+                name="highlightSubtree"
+                type="radio"
+                checked={props.filterSubtree.showOnly}
+                onChange={() => {
+                  const filterSubtree = _.assign({}, props.filterSubtree);
+                  filterSubtree.showOnly = true;
+                  props.onSetFilterSubtree(filterSubtree);
+                }}
+              />
+              show only
+            </label>
+          </div>
         </div>
       </form>
     </div>
