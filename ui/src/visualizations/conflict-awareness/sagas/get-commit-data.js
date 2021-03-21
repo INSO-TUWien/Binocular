@@ -44,6 +44,9 @@ const getCommitsPage = (projects) => (page, perPage) => {
                  children {
                   sha
                  }
+                 parents {
+                  sha
+                 }
                  projects
                }
              }

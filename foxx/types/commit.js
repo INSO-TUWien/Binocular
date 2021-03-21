@@ -140,6 +140,20 @@ module.exports = new gql.GraphQLObjectType({
             .toArray();
         },
       },
+      parents: {
+        type: new gql.GraphQLList(require('./commit.js')),
+        description: 'The parents of the commit',
+        resolve(commit) {
+          return db
+            ._query(
+              aql`
+              FOR c IN INBOUND ${commit} ${commitsToCommits}
+                  RETURN c
+              `
+            )
+            .toArray();
+        },
+      },
       projects: {
         type: new gql.GraphQLList(gql.GraphQLString),
         description: 'The projects the commit is in',

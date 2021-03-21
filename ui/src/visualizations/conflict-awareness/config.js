@@ -4,6 +4,8 @@ import { connect } from 'react-redux';
 
 import {
   setColor,
+  setCompactAll,
+  setExpandAll,
   setFilterAfterDate,
   setFilterAuthor,
   setFilterBeforeDate,
@@ -64,6 +66,8 @@ const mapStateToProps = (state) => {
     filterAuthor: caState.config.filterAuthor, // the filter for commits of a specific author
     filterCommitter: caState.config.filterCommitter, // the filter for commits of a specific committer
     filterSubtree: caState.config.filterSubtree, // the filter for commits of a specific subtree
+    compactAll: caState.data.data.compactAll, // a flag indicating if the graph should be completely compacted
+    expandAll: caState.data.data.expandAll, // a flag indicating if the graph should be completely expanded
   };
 };
 
@@ -146,6 +150,8 @@ const mapDispatchToProps = (dispatch) => {
     onSetFilterCommitter: (filterCommitter) => dispatch(setFilterCommitter(filterCommitter)),
     // update the filterSubtree element
     onSetFilterSubtree: (filterSubtree) => dispatch(setFilterSubtree(filterSubtree)),
+    onSetCompactAll: (shouldCompactAll) => dispatch(setCompactAll(shouldCompactAll)),
+    onSetExpandAll: (shouldExpandAll) => dispatch(setExpandAll(shouldExpandAll)),
   };
 };
 
@@ -153,12 +159,14 @@ const ConflictAwarenessConfigComponent = (props) => {
   return (
     <div className={styles.configContainer}>
       <form>
-        {/* Checkbox for Compact View */}
+        {/* buttons to compact or expand the whole graph */}
         <div className="field">
-          <label>
-            <input type="checkbox" className="checkbox" />
-            Compact View
-          </label>
+          <a className="button" onClick={() => props.onSetCompactAll(true)}>
+            Compact all
+          </a>
+          <a className="button" onClick={() => props.onSetExpandAll(true)}>
+            Expand all
+          </a>
         </div>
 
         {/* Properties for the BaseProject (Label, ProjectName, ColorPicker, BranchSelection*/}
@@ -286,7 +294,7 @@ const ConflictAwarenessConfigComponent = (props) => {
                 checked={!props.filterAfterDate.showOnly}
                 onChange={() => {
                   const filterAfterDate = _.assign({}, props.filterAfterDate);
-                  filterAfterDate.showOnly = !props.filterAfterDate.showOnly;
+                  filterAfterDate.showOnly = false;
                   props.onSetFilterAfterDate(filterAfterDate);
                 }}
               />
@@ -300,7 +308,7 @@ const ConflictAwarenessConfigComponent = (props) => {
                 checked={props.filterAfterDate.showOnly}
                 onChange={() => {
                   const filterAfterDate = _.assign({}, props.filterAfterDate);
-                  filterAfterDate.showOnly = !props.filterAfterDate.showOnly;
+                  filterAfterDate.showOnly = true;
                   props.onSetFilterAfterDate(filterAfterDate);
                 }}
               />
@@ -328,7 +336,7 @@ const ConflictAwarenessConfigComponent = (props) => {
                 checked={!props.filterBeforeDate.showOnly}
                 onChange={() => {
                   const filterBeforeDate = _.assign({}, props.filterBeforeDate);
-                  filterBeforeDate.showOnly = !props.filterBeforeDate.showOnly;
+                  filterBeforeDate.showOnly = false;
                   props.onSetFilterBeforeDate(filterBeforeDate);
                 }}
               />
@@ -342,7 +350,7 @@ const ConflictAwarenessConfigComponent = (props) => {
                 checked={props.filterBeforeDate.showOnly}
                 onChange={() => {
                   const filterBeforeDate = _.assign({}, props.filterBeforeDate);
-                  filterBeforeDate.showOnly = !props.filterBeforeDate.showOnly;
+                  filterBeforeDate.showOnly = true;
                   props.onSetFilterBeforeDate(filterBeforeDate);
                 }}
               />

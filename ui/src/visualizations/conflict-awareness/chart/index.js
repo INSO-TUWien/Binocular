@@ -4,13 +4,19 @@ import { connect } from 'react-redux';
 
 import Chart from './chart.js';
 import {
+  expandCollapsedNode,
   getCherryPickCheck,
   getCommitDependencies,
   getDiff,
   getMergeCheck,
   getRebaseCheck,
   resetStateProperty,
+  setBranchesHeadShas,
+  setCollapsedSections,
+  setCompactAll,
+  setExpandAll,
   setIsLoading,
+  setNodeToCompactSection,
   updateConflictAwarenessData,
 } from '../sagas';
 
@@ -37,11 +43,17 @@ const mapStateToProps = (state) => {
     otherProject: caState.config.otherProject, // the selected parent/fork
     issueForFilter: caState.config.issueForFilter, // the issueID whose commits should be highlighted
     repoFullName: `${state.config.data.repoOwner}/${state.config.data.repoName}`, // the name of the base repo (owner/repository name)
-    filterAfterDate: caState.config.filterAfterDate,
-    filterBeforeDate: caState.config.filterBeforeDate,
-    filterAuthor: caState.config.filterAuthor,
-    filterCommitter: caState.config.filterCommitter,
-    filterSubtree: caState.config.filterSubtree,
+    filterAfterDate: caState.config.filterAfterDate, // the filter for all the commits after a specific date
+    filterBeforeDate: caState.config.filterBeforeDate, // the filter for all commits before a specific date
+    filterAuthor: caState.config.filterAuthor, // the filter for commits of a specific author
+    filterCommitter: caState.config.filterCommitter, // the filter for commits of a specific committer
+    filterSubtree: caState.config.filterSubtree, // the filter for commits of a specific subtree
+    compactAll: caState.data.data.compactAll, // a flag indicating if the graph should be completely compacted
+    expandAll: caState.data.data.expandAll, // a flag indicating if the graph should be completely expanded
+    collapsedSections: caState.data.data.collapsedSections, // the current showing collapsed sections
+    nodeToExpand: caState.data.data.nodeToExpand, // the parentSha and the childSha of the compacted view which should be expanded
+    nodeToCompactSection: caState.data.data.nodeToCompactSection, // the sha of the commit which section should be compacted
+    branchesHeadShas: caState.data.data.branchesHeadShas, // information about the branches heads
   };
 };
 
@@ -59,6 +71,14 @@ const mapDispatchToProps = (dispatch) => {
       dispatch(getCherryPickCheck(cherryPickCommitInfos, otherRepo, toRepo, toBranch)),
     onGetCommitDependencies: (sha) => dispatch(getCommitDependencies(sha)),
     onSetIsLoading: (isLoading) => dispatch(setIsLoading(isLoading)),
+    onSetNodeToCompactSection: (nodeToCompactSection) =>
+      dispatch(setNodeToCompactSection(nodeToCompactSection)),
+    onExpandCollapsedNode: (nodeToExpand) => dispatch(expandCollapsedNode(nodeToExpand)),
+    onSetExpandAll: (shouldExpandAll) => dispatch(setExpandAll(shouldExpandAll)),
+    onSetCompactAll: (shouldCompactAll) => dispatch(setCompactAll(shouldCompactAll)),
+    onSetCollapsedSections: (collapsedSections) =>
+      dispatch(setCollapsedSections(collapsedSections)),
+    onSetBranchesHeadSha: (branchesHeadShas) => dispatch(setBranchesHeadShas(branchesHeadShas)),
   };
 };
 

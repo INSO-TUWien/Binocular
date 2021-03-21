@@ -143,24 +143,24 @@ export default handleActions(
     showAllBranchesBaseProjectChecked: true,
     showAllBranchesOtherProjectChecked: true,
     filterAfterDate: {
-      date: undefined,
-      show: true,
+      date: '',
+      showOnly: false,
     },
     filterBeforeDate: {
-      date: undefined,
-      show: true,
+      date: '',
+      showOnly: false,
     },
     filterAuthor: {
       author: '',
-      show: true,
+      showOnly: false,
     },
     filterCommitter: {
       committer: '',
-      show: true,
+      showOnly: false,
     },
     filterSubtree: {
       subtree: undefined,
-      show: true,
+      showOnly: false,
     },
   }
 );

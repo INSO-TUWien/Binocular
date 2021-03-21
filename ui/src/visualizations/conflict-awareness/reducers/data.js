@@ -47,6 +47,44 @@ export default handleActions(
       return _.merge({}, state, { data: { branchesOtherProject } });
     },
 
+    // sets the commit sha which commit section should be compacted
+    SET_NODE_TO_COMPACT_SECTION: (state, action) => {
+      let newState = _.cloneDeep(state);
+      newState.data.nodeToCompactSection = action.payload;
+      return newState;
+    },
+
+    // sets the information which compactedNode should be expanded
+    EXPAND_COLLAPSED_NODE: (state, action) => {
+      let newState = _.cloneDeep(state);
+      newState.data.nodeToExpand = action.payload;
+      return newState;
+    },
+
+    // sets the collapsed sections of the graph
+    SET_COLLAPSED_SECTIONS: (state, action) => {
+      let newState = _.assign({}, state);
+      newState.data.collapsedSections = action.payload;
+      return newState;
+    },
+
+    // sets the flag indicating to compact the whole graph
+    SET_COMPACT_ALL: (state, action) => {
+      return _.merge({}, state, { data: { compactAll: action.payload } });
+    },
+
+    // sets the flag indicating to expand the whole graph
+    SET_EXPAND_ALL: (state, action) => {
+      return _.merge({}, state, { data: { expandAll: action.payload } });
+    },
+
+    // sets the information of the branches heads
+    SET_BRANCHES_HEAD_SHAS: (state, action) => {
+      let newState = _.assign({}, state);
+      newState.data.branchesHeadShas = action.payload;
+      return newState;
+    },
+
     // request the conflict awareness data and reset the previous received ones
     REQUEST_CONFLICT_AWARENESS_DATA: (state) => {
       // reset the previously retrieved data

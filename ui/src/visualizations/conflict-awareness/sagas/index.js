@@ -123,6 +123,39 @@ export const setFilterSubtree = createAction(
   (filterSubtree) => filterSubtree
 );
 
+// sets the collapsed sections of the graph
+export const setCollapsedSections = createAction(
+  'SET_COLLAPSED_SECTIONS',
+  (collapsedSections) => collapsedSections
+);
+
+// sets the flag indicating to compact the whole graph
+export const setCompactAll = createAction(
+  'SET_COMPACT_ALL',
+  (shouldCompactAll) => shouldCompactAll
+);
+
+// sets the flag indicating to expand the whole graph
+export const setExpandAll = createAction('SET_EXPAND_ALL', (shouldExpandAll) => shouldExpandAll);
+
+// sets the information which compactedNode should be expanded
+export const expandCollapsedNode = createAction(
+  'EXPAND_COLLAPSED_NODE',
+  (nodeToExpand) => nodeToExpand
+);
+
+// sets the commit sha which commit section should be compacted
+export const setNodeToCompactSection = createAction(
+  'SET_NODE_TO_COMPACT_SECTION',
+  (nodeToCompactSection) => nodeToCompactSection
+);
+
+// sets the information of the branches heads
+export const setBranchesHeadShas = createAction(
+  'SET_BRANCHES_HEAD_SHAS',
+  (branchesHeadShas) => branchesHeadShas
+);
+
 // gets the branches and commits of specific projects, gets the parent/forks of the base project (if requested) and
 // triggers the indexing of a specific project (if requested)
 export const requestConflictAwarenessData = createAction('REQUEST_CONFLICT_AWARENESS_DATA');
@@ -275,6 +308,8 @@ export const fetchConflictAwarenessData = fetchFactory(
             data.authors = authors;
           });
 
+        // set the trigger to expand the whole graph
+        data.expandAll = true;
         return data;
       })
       .catch((e) => {
