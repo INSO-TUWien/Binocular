@@ -161,13 +161,17 @@ const ConflictAwarenessConfigComponent = (props) => {
       <form>
         {/* buttons to compact or expand the whole graph */}
         <div className="field">
-          <a className="button" onClick={() => props.onSetCompactAll(true)}>
-            Compact all
-          </a>
-          <a className="button" onClick={() => props.onSetExpandAll(true)}>
-            Expand all
-          </a>
+          <div className={styles.collapseButtonsContainer}>
+            <a className="button" onClick={() => props.onSetCompactAll(true)}>
+              Compact all
+            </a>
+            <a className="button" onClick={() => props.onSetExpandAll(true)}>
+              Expand all
+            </a>
+          </div>
         </div>
+
+        <hr />
 
         {/* Properties for the BaseProject (Label, ProjectName, ColorPicker, BranchSelection*/}
         {projectProperties(
@@ -182,6 +186,8 @@ const ConflictAwarenessConfigComponent = (props) => {
           props.showAllBranchesBaseProjectChecked
         )}
 
+        <hr />
+
         {/* Properties for the selected Parent/Fork (Label, ProjectName, ColorPicker, BranchSelection*/}
         {projectProperties(
           props,
@@ -195,6 +201,8 @@ const ConflictAwarenessConfigComponent = (props) => {
           props.showAllBranchesOtherProjectChecked
         )}
 
+        <hr />
+
         {/* Properties for the combined Commits */}
         <div className="field">
           <div className={styles.colorPickContainer}>
@@ -206,6 +214,8 @@ const ConflictAwarenessConfigComponent = (props) => {
             />
           </div>
         </div>
+
+        <hr />
 
         {/* Properties for the Issue selection */}
         <div className="field">
@@ -270,6 +280,8 @@ const ConflictAwarenessConfigComponent = (props) => {
           )}
         </div>
 
+        <hr />
+
         {/* section for the filters */}
         <div className="field">
           <label className="label">Filter:</label>
@@ -279,7 +291,10 @@ const ConflictAwarenessConfigComponent = (props) => {
             After:
             {/* date picker */}
             <DatePicker
+              wrapperClassName={styles.width100}
               selected={props.filterAfterDate.date}
+              className={cx('input')}
+              placeholderText="Select date..."
               onChange={(date) => {
                 if (!date) {
                   date = '';
@@ -319,12 +334,17 @@ const ConflictAwarenessConfigComponent = (props) => {
             </label>
           </div>
 
+          <br />
+
           {/* beforeDate filter */}
           <div>
             Before:
             {/* date picker */}
             <DatePicker
+              wrapperClassName={styles.width100}
               selected={props.filterBeforeDate.date}
+              className={cx('input')}
+              placeholderText="Select date..."
               onChange={(date) => {
                 if (!date) {
                   date = '';
@@ -364,6 +384,8 @@ const ConflictAwarenessConfigComponent = (props) => {
             </label>
           </div>
 
+          <br />
+
           {/* author filter */}
           {props.authors && (
             <div>
@@ -389,6 +411,8 @@ const ConflictAwarenessConfigComponent = (props) => {
               />
             </div>
           )}
+
+          <br />
 
           {/* committer filter */}
           {props.committers && (
@@ -416,12 +440,15 @@ const ConflictAwarenessConfigComponent = (props) => {
             </div>
           )}
 
+          <br />
+
           {/* subtree filter */}
           <div>
             Subtree:
             {/* input field */}
             <input
               type="text"
+              className={cx('input')}
               placeholder="Commit Sha"
               onChange={(event) => {
                 const filterSubtree = _.assign({}, props.filterSubtree);
