@@ -478,7 +478,7 @@ export default class ConflictAwareness extends React.Component {
         });
       } else {
         // the node is a collapsed node
-        edgeClassesAndColors.set(node.id, ['', node.color]);
+        edgeClassesAndColors.set(node.id, [node.clazz, node.color]);
 
         // collapsed nodes are ellipses with the number of commits it 'holds'
         g.setNode(node.id, {
@@ -1565,6 +1565,11 @@ function _colorGraph(inner, color, classKey) {
     .selectAll(`g.node.${classKey} circle`)
     .style('fill', `${color}`)
     .style('stroke', `${color}`);
+
+  // recolor collapsed node
+  inner
+    .selectAll(`g.node.${classKey} ellipse`)
+    .style('stroke', color);
 
   // recolor node labels (branch names)
   inner.selectAll(`span.${classKey}`).style('color', `${color}`);
