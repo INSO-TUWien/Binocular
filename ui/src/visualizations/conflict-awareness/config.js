@@ -409,6 +409,34 @@ const ConflictAwarenessConfigComponent = (props) => {
                   props.onSetFilterAuthor(filterAuthor);
                 }}
               />
+              {/* radio button showing if the other commits should be toned down */}
+              <label className="radio">
+                <input
+                  name="highlightAuthor"
+                  type="radio"
+                  checked={!props.filterAuthor.showOnly}
+                  onChange={() => {
+                    const filterAuthor = _.assign({}, props.filterAuthor);
+                    filterAuthor.showOnly = false;
+                    props.onSetFilterAuthor(filterAuthor);
+                  }}
+                />
+                highlight
+              </label>
+              {/* radio button showing if the other commits should be compacted in the graph */}
+              <label className="radio">
+                <input
+                  name="highlightAuthor"
+                  type="radio"
+                  checked={props.filterAuthor.showOnly}
+                  onChange={() => {
+                    const filterAuthor = _.assign({}, props.filterAuthor);
+                    filterAuthor.showOnly = true;
+                    props.onSetFilterAuthor(filterAuthor);
+                  }}
+                />
+                show only
+              </label>
             </div>
           )}
 
@@ -437,6 +465,34 @@ const ConflictAwarenessConfigComponent = (props) => {
                   props.onSetFilterCommitter(filterCommitter);
                 }}
               />
+              {/* radio button showing if the other commits should be toned down */}
+              <label className="radio">
+                <input
+                  name="highlightCommitter"
+                  type="radio"
+                  checked={!props.filterCommitter.showOnly}
+                  onChange={() => {
+                    const filterCommitter = _.assign({}, props.filterCommitter);
+                    filterCommitter.showOnly = false;
+                    props.onSetFilterCommitter(filterCommitter);
+                  }}
+                />
+                highlight
+              </label>
+              {/* radio button showing if the other commits should be compacted in the graph */}
+              <label className="radio">
+                <input
+                  name="highlightCommitter"
+                  type="radio"
+                  checked={props.filterCommitter.showOnly}
+                  onChange={() => {
+                    const filterCommitter = _.assign({}, props.filterCommitter);
+                    filterCommitter.showOnly = true;
+                    props.onSetFilterCommitter(filterCommitter);
+                  }}
+                />
+                show only
+              </label>
             </div>
           )}
 

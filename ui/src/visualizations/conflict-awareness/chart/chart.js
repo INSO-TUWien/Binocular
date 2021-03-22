@@ -66,8 +66,12 @@ export default class ConflictAwareness extends React.Component {
       !equals(prevState.excludedBranchesOtherProject, nextProps.excludedBranchesOtherProject) ||
       !equals(nextProps.filterAfterDate, prevState.filterAfterDate) ||
       !equals(nextProps.filterBeforeDate, prevState.filterBeforeDate) ||
-      !equals(nextProps.filterAuthor, prevState.filterAuthor) ||
-      !equals(nextProps.filterCommitter, prevState.filterCommitter) ||
+      (!equals(nextProps.filterAuthor, prevState.filterAuthor) &&
+        nextProps.filterAuthor.author &&
+        !nextProps.filterAuthor.showOnly) ||
+      (!equals(nextProps.filterCommitter, prevState.filterCommitter) &&
+        nextProps.filterCommitter.committer &&
+        !nextProps.filterCommitter.showOnly) ||
       !equals(nextProps.filterSubtree, prevState.filterSubtree)
     ) {
       // if the subtree filter has changed, calculate the shas in the selected subtree
@@ -251,16 +255,38 @@ export default class ConflictAwareness extends React.Component {
     // the whole graph should be expanded
     if (nextProps.expandAll !== prevState.expandAll) {
       if (nextProps.expandAll) {
-        let collapsedSections = _createExpandedCollapsedSections(nextProps.commits);
-        nextProps.onSetCollapsedSections(collapsedSections);
+        // the expandAll function is only usable with
+        // no filterAuthor or filterCommitter (with show only option set) used
+        if (
+          (nextProps.filterAuthor.author && nextProps.filterAuthor.showOnly) ||
+          (nextProps.filterCommitter.committer && nextProps.filterCommitter.showOnly)
+        ) {
+          _showErrorModal(
+            'Unable to expand the graph when filtering after an author or a committer with "show only" option.'
+          );
+          nextProps.onSetExpandAll(false);
+        } else {
+          let collapsedSections = _createExpandedCollapsedSections(nextProps.commits);
+          nextProps.onSetCollapsedSections(collapsedSections);
+        }
       }
 
       updatedProps.expandAll = nextProps.expandAll;
     }
 
     // the whole graph should be compacted
-    if (nextProps.compactAll !== prevState.compactAll) {
-      if (nextProps.compactAll) {
+    if (
+      nextProps.compactAll !== prevState.compactAll ||
+      (!equals(nextProps.filterAuthor, prevState.filterAuthor) && nextProps.filterAuthor.showOnly) ||
+      (!equals(nextProps.filterCommitter, prevState.filterCommitter) && nextProps.filterCommitter.showOnly)
+    ) {
+      // if the graph should be compacted OR
+      // the author/committer filter is set with showOnly
+      if (
+        nextProps.compactAll ||
+        (nextProps.filterAuthor.author && nextProps.filterAuthor.showOnly) ||
+        (nextProps.filterCommitter.committer && nextProps.filterCommitter.showOnly)
+      ) {
         // create fully compacted sections
         const collapsedSections = _createCompactedCollapsedSections(nextProps);
 
@@ -273,7 +299,19 @@ export default class ConflictAwareness extends React.Component {
 
     // a compacted node should be expanded
     if (!equals(nextProps.nodeToExpand, prevState.nodeToExpand)) {
-      _expandCompactedNode(nextProps);
+      // the expandAll function is only usable with
+      // no filterAuthor or filterCommitter (with show only option set) used
+      if (
+        (nextProps.filterAuthor.author && nextProps.filterAuthor.showOnly) ||
+        (nextProps.filterCommitter.committer && nextProps.filterCommitter.showOnly)
+      ) {
+        _showErrorModal(
+          'Unable to expand the node when filtering after an author or a committer with "show only" option.'
+        );
+        nextProps.onExpandCollapsedNode(undefined);
+      } else {
+        _expandCompactedNode(nextProps);
+      }
       updatedProps.nodeToExpand = nextProps.nodeToExpand;
     }
 
@@ -1506,22 +1544,20 @@ function _checkFilters(props, commit) {
 
   // the commit has a different committer than the user selected in the filter
   if (props.filterCommitter.committer && props.filterCommitter.committer !== commit.signature) {
-    // not showing filters have more priority than highlighted filter
-    if (props.filterCommitter.showOnly) {
-      return null;
-    } else {
-      additionalStyle = 'opacity: 0.5;';
-    }
+    // if the filterCommitter is shown, the show only option will be handled differently
+    // this filter will compact the whole graph
+    // each node with the specific author will be handled as branching node
+    // each branching node with a different committer will be toned down
+    additionalStyle = 'opacity: 0.5;';
   }
 
   // the commit has a different author than the user selected in the filter
   if (props.filterAuthor.author && props.filterAuthor.author !== commit.author) {
-    // not showing filters have more priority than highlighted filter
-    if (props.filterAuthor.showOnly) {
-      return null;
-    } else {
-      additionalStyle = 'opacity: 0.5;';
-    }
+    // if the filterAuthor is shown, the show only option will be handled differently
+    // this filter will compact the whole graph
+    // each node with the specific author will be handled as branching node
+    // each branching node with a different author will be toned down
+    additionalStyle = 'opacity: 0.5;';
   }
 
   // the subtree filter is selected
@@ -2214,11 +2250,19 @@ function _createCompactedCollapsedSections(props) {
   // get all the branching nodes (nodes which have multiple parents, multiple children
   // or nodes which are heads of branches)
   // these nodes should not be compacted and will be the borders for the collapsed sections
+  // if the filterAuthor and filterCommit is set with the show only option, these node will also
+  // be included to preserve the basic git history
   let fromCommitShas = commitClones.filter(
     (commit) =>
       commit.parents.length !== 1 ||
       commit.children.length !== 1 ||
-      props.branchesHeadShas.has(commit.sha)
+      props.branchesHeadShas.has(commit.sha) ||
+      (props.filterAuthor.showOnly &&
+        props.filterAuthor.author &&
+        props.filterAuthor.author === commit.author) ||
+      (props.filterCommitter.showOnly &&
+        props.filterCommitter.committer &&
+        props.filterCommitter.committer === commit.signature)
   );
 
   // for each branching node, create a collapsed section
