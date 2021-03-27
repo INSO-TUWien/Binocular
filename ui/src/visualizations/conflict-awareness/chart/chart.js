@@ -75,11 +75,11 @@ export default class ConflictAwareness extends React.Component {
       !equals(nextProps.filterSubtree, prevState.filterSubtree)
     ) {
       // if the subtree filter has changed, calculate the shas in the selected subtree
-      // or reset the list if the subtree filter was resettet
+      // or reset the list if the subtree filter was reset
       if (!equals(nextProps.filterSubtree, prevState.filterSubtree)) {
         commitShasOfSubtree = [];
 
-        // subtree filter is set -> calulate all shas of the subtree
+        // subtree filter is set -> calculate all shas of the subtree
         if (nextProps.filterSubtree.subtree) {
           _getSubtreeCommitShas(
             nextProps.filterSubtree.subtree,
@@ -336,9 +336,15 @@ export default class ConflictAwareness extends React.Component {
     ) {
       let { svg, inner } = _getGraphDOMElements();
       svg.innerHtml = '';
+      svg.attr('width', '960'); // needed because transition cannot read with 100% which results in an error
 
       // init the graph for the commits/edges
-      let g = new dagreD3.graphlib.Graph().setGraph({ rankdir: 'BT', ranker: 'tight-tree' });
+      let g = new dagreD3.graphlib.Graph().setGraph({
+        rankdir: 'BT',
+        ranker: 'tight-tree',
+        nodesep: 100,
+        ranksep: 100,
+      });
 
       // Default to assigning a new object as a label for each new edge.
       g.setDefaultEdgeLabel(function () {
@@ -371,7 +377,9 @@ export default class ConflictAwareness extends React.Component {
 
       // set the branch labels above node
       inner.selectAll('g.node circle').each(function () {
-        d3.select(this.parentNode).select('g.label').attr('transform', 'translate(0,-40)');
+        d3.select(this.parentNode)
+          .select('g.label')
+          .attr('transform', 'translate(0,-45) rotate(-45)');
       });
 
       prevProps.onSetIsLoading(false);
@@ -589,14 +597,15 @@ export default class ConflictAwareness extends React.Component {
     this._setTooltipOnNodes(
       inner.selectAll('span.baseProject,span.otherProject,span.combined'),
       (event) => {
-        let tooltipText = `Select branch '${event.target.innerText}'.`;
+        let name = event.target.getAttribute('name');
+        let tooltipText = `Select branch '${name}'.`;
 
         if (selectedNodes.length > 0) {
-          tooltipText = `Try cherry-picking selected commits to '${event.target.innerText}'.`;
+          tooltipText = `Try cherry-picking selected commits to '${name}'.`;
         } else if (selectedBranch && event.ctrlKey) {
-          tooltipText = `Try rebasing selected branch on '${event.target.innerText}'.`;
+          tooltipText = `Try rebasing selected branch on '${name}'.`;
         } else if (selectedBranch && event.shiftKey) {
-          tooltipText = `Try merging selected branch into '${event.target.innerText}'.`;
+          tooltipText = `Try merging selected branch into '${name}'.`;
         }
 
         return tooltipText;
@@ -1381,6 +1390,7 @@ function extractData(props, collapsedSections, branchesHeadShas) {
         if (branchesHeadShas.has(parent.sha)) {
           // get the branches where the commit is a head
           const branchProjects = branchesHeadShas.get(parent.sha);
+          let index = 0;
           branchProjects.forEach((metadata, branchName) => {
             // check in which projects the commit is the head the branch
             const isInBaseProject = metadata.projects.includes(props.repoFullName);
@@ -1391,22 +1401,31 @@ function extractData(props, collapsedSections, branchesHeadShas) {
             // get the css class and color of the node and label based on the project memberships
             let { clazz, color } = _getClassColorAndRepo(props, isInBaseProject, isInOtherProject);
 
+            if (index % 3 === 0) {
+              label = label + '<br />';
+            }
             // add the branch to the label including its key as class (is needed for later selections)
             label =
               label +
-              `<span class='${clazz} ${metadata.branchKey}' style='color: ${color}; cursor: pointer'>${branchName}</span></br>`;
+              `<span name='${branchName}' class='${clazz} ${metadata.branchKey}' style='color: ${color}; cursor: pointer'>${metadata.branchRef}</span>, `;
 
             // save important data of the branches for later handling
             branchIDs.push({
               headSha: parent.sha,
               branchKey: metadata.branchKey,
+              branchRef: metadata.branchRef,
               branchName,
               clazz,
             });
+
+            index = index + 1;
           });
 
           labelType = 'html';
-          label = `<div style="text-align: center">${label}</div>`;
+          label = `<div style="text-align: center; background-color: white;">${label.substring(
+            6,
+            label.length - 2
+          )}</div>`;
         }
 
         // check if the sections parent node is not already set
@@ -1603,9 +1622,7 @@ function _colorGraph(inner, color, classKey) {
     .style('stroke', `${color}`);
 
   // recolor collapsed node
-  inner
-    .selectAll(`g.node.${classKey} ellipse`)
-    .style('stroke', color);
+  inner.selectAll(`g.node.${classKey} ellipse`).style('stroke', color);
 
   // recolor node labels (branch names)
   inner.selectAll(`span.${classKey}`).style('color', `${color}`);

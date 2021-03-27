@@ -1,12 +1,12 @@
 'use strict';
 
-import { createAction } from 'redux-actions';
-import { fetchFactory, timestampedActionFactory } from '../../../sagas/utils';
+import {createAction} from 'redux-actions';
+import {fetchFactory, timestampedActionFactory} from '../../../sagas/utils';
 import Promise from 'bluebird';
 import getCommitData from './get-commit-data';
 import getBranchData from './get-branch-data';
-import { endpointUrl } from '../../../utils';
-import { fork, takeEvery } from 'redux-saga/effects';
+import {endpointUrl} from '../../../utils';
+import {fork, takeEvery} from 'redux-saga/effects';
 import getParentAndForks from './get-parent-and-forks';
 import indexProject from './index-project';
 import getIssueData from './get-issue-data';
@@ -252,6 +252,14 @@ export const fetchConflictAwarenessData = fetchFactory(
         );
       })
       .then(([commits, branches, parentAndForks, issues]) => {
+        // calculate each branch ref
+        branches.forEach((branch) => {
+          branch.branchRef = branch.branchName
+            .split('/')
+            .map((split) => split.substring(0, 3))
+            .join('/');
+        });
+
         // return the retrieved data for the state
         let data = {
           commits,
@@ -271,7 +279,7 @@ export const fetchConflictAwarenessData = fetchFactory(
               branch.headShas.filter((headSha) => headSha.project === projects[0]).length > 0
           )
           .map((branch) => {
-            return { branchName: branch.branchName, checked: true };
+            return { branchRef: branch.branchRef, branchName: branch.branchName, checked: true };
           });
 
         // the branches of the other project (if selected) and a flag if they are checked in the config section
@@ -282,7 +290,7 @@ export const fetchConflictAwarenessData = fetchFactory(
                 branch.headShas.filter((headSha) => headSha.project === projects[1]).length > 0
             )
             .map((branch) => {
-              return { branchName: branch.branchName, checked: true };
+              return { branchRef: branch.branchRef, branchName: branch.branchName, checked: true };
             });
         }
 
@@ -308,8 +316,8 @@ export const fetchConflictAwarenessData = fetchFactory(
             data.authors = authors;
           });
 
-        // set the trigger to expand the whole graph
-        data.expandAll = true;
+        // set the trigger to compact the whole graph
+        data.compactAll = true;
         return data;
       })
       .catch((e) => {

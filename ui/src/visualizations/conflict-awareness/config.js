@@ -590,11 +590,11 @@ const projectProperties = (
                 <label>
                   <input
                     type="checkbox"
-                    key={branch.branchName}
+                    key={projectKey + branch.branchName}
                     checked={branch.checked}
                     onChange={() => switchBranchSelection(branch, onSwitchBranchSelectionFunction)}
                   />
-                  {branch.branchName}
+                  <b>{branch.branchRef}:</b> {branch.branchName}
                 </label>
                 <br />
               </div>
