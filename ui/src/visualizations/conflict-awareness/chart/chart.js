@@ -32,10 +32,7 @@ export default class ConflictAwareness extends React.Component {
     super(props);
 
     this.elems = {};
-    this.state = {
-      transform: d3.zoomIdentity,
-      dimensions: zoomUtils.initialDimensions(),
-    };
+    this.state = {};
 
     this.onResize = zoomUtils.onResizeFactory(0.7, 0.7);
     this.onZoom = zoomUtils.onZoomFactory({ constrain: false });
@@ -1187,7 +1184,8 @@ function _handleEscapePress(prevProps) {
  * Filter out collapsedSections according to set filters and prepares their projects according to un-/selected branches.
  * @param props the props
  * @param collapsedSections {[]} the precalculated, not filtered/prepared collapsedSections
- * @returns {{branchesHeadShas: undefined, collapsedSectionClones: undefined}|{branchesHeadShas: Map<any, any>, collapsedSectionClones: []}}
+ * @param branchesHeadShas {Map<any, any>} map of the head shas of the branches and their projects
+ * @returns collapsedSectionClones
  */
 function prepareForDataExtraction(props, collapsedSections, branchesHeadShas) {
   // the commits are already retrieved, get all the
@@ -1326,8 +1324,8 @@ function _removeUnusedProjectsFromCommit(commit, isInProjectInfo, props) {
   // check if the commit is still in the base project and in the other project if selected
   // if the branches does not differ, the values from the last check are used
   if (!equals(isInProjectInfo.lastBranchesChecked, commit.branches)) {
-    let branchesToShowBaseProject = [];
-    let branchesToShowOtherProject = [];
+    let branchesToShowBaseProject;
+    let branchesToShowOtherProject;
 
     // update the last branches which were checked to the current branch list
     isInProjectInfo.lastBranchesChecked = _.assign(
@@ -2274,6 +2272,7 @@ function _createExpandedCollapsedSections(commits) {
  * (each commit which has only one child and one parent, is not a leaf or
  * is not a head of a branch will be in a compacted node)
  * @param props the props
+ * @param branchesHeadShas {Map<any, any>} map of the head shas of the branches and their projects
  * @returns {[]} the compacted collapsed sections
  */
 function _createCompactedCollapsedSections(props, branchesHeadShas) {
