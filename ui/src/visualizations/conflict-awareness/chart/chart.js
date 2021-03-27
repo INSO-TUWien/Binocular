@@ -89,40 +89,79 @@ export default class ConflictAwareness extends React.Component {
         }
       }
 
-      let clonedCommits = _.assign([], nextProps.commits);
-      let collapsedSections = nextProps.collapsedSections;
+      if (nextProps.commits) {
+        const branchesHeadShas = new Map();
 
-      // the collapsedSections were not calculated before -> calculate the graph to be completely expanded
-      if (!nextProps.collapsedSections) {
-        collapsedSections = _createExpandedCollapsedSections(clonedCommits);
+        // get all headSha objects of the branches
+        nextProps.branches.forEach((branch) =>
+          branch.headShas.forEach((headShaObject) => {
+            let branchesHeadSha = branchesHeadShas.get(headShaObject.headSha);
+            // head of the branch was not processed -> create new entry
+            if (!branchesHeadSha) {
+              branchesHeadSha = new Map();
+              branchesHeadSha.set(branch.branchName, {
+                branchRef: branch.branchRef,
+                branchKey: branch.branchKey,
+                projects: [headShaObject.project],
+              });
+            } else {
+              // head of the branch was already processed and therefore has an entry in the map
+              let branchesMetadata = branchesHeadSha.get(branch.branchName);
+              // branch was not processed
+              if (!branchesMetadata) {
+                branchesMetadata = {
+                  branchRef: branch.branchRef,
+                  branchKey: branch.branchKey,
+                  projects: [headShaObject.project],
+                };
+              } else {
+                // branch was already processed -> update the project if its not in the list
+                if (!branchesMetadata.projects.includes(headShaObject.project)) {
+                  branchesMetadata.projects.push(headShaObject.project);
+                }
+              }
+              branchesHeadSha.set(branch.branchName, branchesMetadata);
+            }
+
+            branchesHeadShas.set(headShaObject.headSha, branchesHeadSha);
+          })
+        );
+
+        let collapsedSections = nextProps.collapsedSections;
+
+        // the collapsedSections were not calculated before -> calculate the graph to be completely expanded
+        if (!nextProps.collapsedSections) {
+          collapsedSections = _createCompactedCollapsedSections(nextProps, branchesHeadShas);
+        }
+
+        // prepare the data for the graph
+        let collapsedSectionClones = prepareForDataExtraction(
+          nextProps,
+          collapsedSections,
+          branchesHeadShas
+        );
+        let { commitNodes, commitChildLinks, branchIDs } = extractData(
+          nextProps,
+          collapsedSectionClones,
+          branchesHeadShas
+        );
+        updatedProps.branches = nextProps.branches;
+        updatedProps.commits = nextProps.commits;
+        updatedProps.commitNodes = commitNodes;
+        updatedProps.commitChildLinks = commitChildLinks;
+        updatedProps.branchIDs = branchIDs;
+        updatedProps.excludedBranchesBaseProject = nextProps.excludedBranchesBaseProject;
+        updatedProps.excludedBranchesOtherProject = nextProps.excludedBranchesOtherProject;
+        updatedProps.filterAfterDate = nextProps.filterAfterDate;
+        updatedProps.filterBeforeDate = nextProps.filterBeforeDate;
+        updatedProps.filterAuthor = nextProps.filterAuthor;
+        updatedProps.filterCommitter = nextProps.filterCommitter;
+        updatedProps.filterSubtree = nextProps.filterSubtree;
+        updatedProps.collapsedSections = collapsedSections;
+        updatedProps.branchesHeadShas = branchesHeadShas;
+
+        nextProps.onSetBranchesHeadSha(branchesHeadShas);
       }
-
-      // prepare the data for the graph
-      let { collapsedSectionClones, branchesHeadShas } = prepareForDataExtraction(
-        nextProps,
-        collapsedSections
-      );
-      let { commitNodes, commitChildLinks, branchIDs } = extractData(
-        nextProps,
-        collapsedSectionClones,
-        branchesHeadShas
-      );
-      updatedProps.branches = nextProps.branches;
-      updatedProps.commits = nextProps.commits;
-      updatedProps.commitNodes = commitNodes;
-      updatedProps.commitChildLinks = commitChildLinks;
-      updatedProps.branchIDs = branchIDs;
-      updatedProps.excludedBranchesBaseProject = nextProps.excludedBranchesBaseProject;
-      updatedProps.excludedBranchesOtherProject = nextProps.excludedBranchesOtherProject;
-      updatedProps.filterAfterDate = nextProps.filterAfterDate;
-      updatedProps.filterBeforeDate = nextProps.filterBeforeDate;
-      updatedProps.filterAuthor = nextProps.filterAuthor;
-      updatedProps.filterCommitter = nextProps.filterCommitter;
-      updatedProps.filterSubtree = nextProps.filterSubtree;
-      updatedProps.collapsedSections = collapsedSections;
-      updatedProps.branchesHeadShas = branchesHeadShas;
-
-      nextProps.onSetBranchesHeadSha(branchesHeadShas);
     }
 
     // the diffs of a commit were retrieved -> put them into the modal
@@ -277,8 +316,10 @@ export default class ConflictAwareness extends React.Component {
     // the whole graph should be compacted
     if (
       nextProps.compactAll !== prevState.compactAll ||
-      (!equals(nextProps.filterAuthor, prevState.filterAuthor) && nextProps.filterAuthor.showOnly) ||
-      (!equals(nextProps.filterCommitter, prevState.filterCommitter) && nextProps.filterCommitter.showOnly)
+      (!equals(nextProps.filterAuthor, prevState.filterAuthor) &&
+        nextProps.filterAuthor.showOnly) ||
+      (!equals(nextProps.filterCommitter, prevState.filterCommitter) &&
+        nextProps.filterCommitter.showOnly)
     ) {
       // if the graph should be compacted OR
       // the author/committer filter is set with showOnly
@@ -288,7 +329,10 @@ export default class ConflictAwareness extends React.Component {
         (nextProps.filterCommitter.committer && nextProps.filterCommitter.showOnly)
       ) {
         // create fully compacted sections
-        const collapsedSections = _createCompactedCollapsedSections(nextProps);
+        const collapsedSections = _createCompactedCollapsedSections(
+          nextProps,
+          nextProps.branchesHeadShas || updatedProps.branchesHeadShas
+        );
 
         // put the fully compacted collapsed sections to the state
         nextProps.onSetCollapsedSections(collapsedSections);
@@ -1140,42 +1184,9 @@ function _handleEscapePress(prevProps) {
  * @param collapsedSections {[]} the precalculated, not filtered/prepared collapsedSections
  * @returns {{branchesHeadShas: undefined, collapsedSectionClones: undefined}|{branchesHeadShas: Map<any, any>, collapsedSectionClones: []}}
  */
-function prepareForDataExtraction(props, collapsedSections) {
+function prepareForDataExtraction(props, collapsedSections, branchesHeadShas) {
   // the commits are already retrieved, get all the
   if (props.commits) {
-    const branches = props.branches;
-    const branchesHeadShas = new Map();
-
-    // get all headSha objects of the branches
-    branches.forEach((branch) =>
-      branch.headShas.forEach((headShaObject) => {
-        let branchesHeadSha = branchesHeadShas.get(headShaObject.headSha);
-        // head of the branch was not processed -> create new entry
-        if (!branchesHeadSha) {
-          branchesHeadSha = new Map();
-          branchesHeadSha.set(branch.branchName, {
-            branchKey: branch.branchKey,
-            projects: [headShaObject.project],
-          });
-        } else {
-          // head of the branch was already processed and therefore has an entry in the map
-          let branchesMetadata = branchesHeadSha.get(branch.branchName);
-          // branch was not processed
-          if (!branchesMetadata) {
-            branchesMetadata = { branchKey: branch.branchKey, projects: [headShaObject.project] };
-          } else {
-            // branch was already processed -> update the project if its not in the list
-            if (!branchesMetadata.projects.includes(headShaObject.project)) {
-              branchesMetadata.projects.push(headShaObject.project);
-            }
-          }
-          branchesHeadSha.set(branch.branchName, branchesMetadata);
-        }
-
-        branchesHeadShas.set(headShaObject.headSha, branchesHeadSha);
-      })
-    );
-
     // prepare the collapsed sections which should be shown according to
     // set filters and to selected branches
     let isInProjectInfo = {
@@ -1298,11 +1309,11 @@ function prepareForDataExtraction(props, collapsedSections) {
       collapsedSectionClones.push(collapsedSectionClone);
     });
 
-    return { collapsedSectionClones, branchesHeadShas };
+    return collapsedSectionClones;
   }
 
   // the commits are currently not retrieved -> the info cannot be calculated at the moment
-  return { collapsedSectionClones: undefined, branchesHeadShas: undefined };
+  return undefined;
 }
 
 function _removeUnusedProjectsFromCommit(commit, isInProjectInfo, props) {
@@ -2260,132 +2271,136 @@ function _createExpandedCollapsedSections(commits) {
  * @param props the props
  * @returns {[]} the compacted collapsed sections
  */
-function _createCompactedCollapsedSections(props) {
-  const commitClones = _.cloneDeep(props.commits);
-  let collapsedSections = [];
+function _createCompactedCollapsedSections(props, branchesHeadShas) {
+  if (props.commits && branchesHeadShas) {
+    const commitClones = _.cloneDeep(props.commits);
+    let collapsedSections = [];
 
-  // get all the branching nodes (nodes which have multiple parents, multiple children
-  // or nodes which are heads of branches)
-  // these nodes should not be compacted and will be the borders for the collapsed sections
-  // if the filterAuthor and filterCommit is set with the show only option, these node will also
-  // be included to preserve the basic git history
-  let fromCommitShas = commitClones.filter(
-    (commit) =>
-      commit.parents.length !== 1 ||
-      commit.children.length !== 1 ||
-      props.branchesHeadShas.has(commit.sha) ||
-      (props.filterAuthor.showOnly &&
-        props.filterAuthor.author &&
-        props.filterAuthor.author === commit.author) ||
-      (props.filterCommitter.showOnly &&
-        props.filterCommitter.committer &&
-        props.filterCommitter.committer === commit.signature)
-  );
+    // get all the branching nodes (nodes which have multiple parents, multiple children
+    // or nodes which are heads of branches)
+    // these nodes should not be compacted and will be the borders for the collapsed sections
+    // if the filterAuthor and filterCommit is set with the show only option, these node will also
+    // be included to preserve the basic git history
+    let fromCommitShas = commitClones.filter(
+      (commit) =>
+        commit.parents.length !== 1 ||
+        commit.children.length !== 1 ||
+        branchesHeadShas.has(commit.sha) ||
+        (props.filterAuthor.showOnly &&
+          props.filterAuthor.author &&
+          props.filterAuthor.author === commit.author) ||
+        (props.filterCommitter.showOnly &&
+          props.filterCommitter.committer &&
+          props.filterCommitter.committer === commit.signature)
+    );
 
-  // for each branching node, create a collapsed section
-  fromCommitShas.forEach((commit) => {
-    // the node has one child which is also a branching node
-    // -> no commits will be compacted
-    if (
-      commit.children.length === 1 &&
-      fromCommitShas.filter((_commit) => _commit.sha === commit.children[0]).length > 0
-    ) {
-      // get the child
-      const commitChild = commitClones.filter(
-        (_commit) => _commit.sha === commit.children[0].sha
-      )[0];
+    // for each branching node, create a collapsed section
+    fromCommitShas.forEach((commit) => {
+      // the node has one child which is also a branching node
+      // -> no commits will be compacted
+      if (
+        commit.children.length === 1 &&
+        fromCommitShas.filter((_commit) => _commit.sha === commit.children[0]).length > 0
+      ) {
+        // get the child
+        const commitChild = commitClones.filter(
+          (_commit) => _commit.sha === commit.children[0].sha
+        )[0];
 
-      // add the simple collapsed sections to the list
-      collapsedSections.push({
-        parent: commit,
-        nodes: [],
-        child: commitChild,
-      });
-    }
-    // the nodes has one child which is not a branching node
-    else if (
-      commit.children.length === 1 &&
-      fromCommitShas.filter((_commit) => _commit.sha === commit.children[0]).length === 0
-    ) {
-      // get the child
-      const commitChild = commitClones.filter(
-        (_commit) => _commit.sha === commit.children[0].sha
-      )[0];
+        // add the simple collapsed sections to the list
+        collapsedSections.push({
+          parent: commit,
+          nodes: [],
+          child: commitChild,
+        });
+      }
+      // the nodes has one child which is not a branching node
+      else if (
+        commit.children.length === 1 &&
+        fromCommitShas.filter((_commit) => _commit.sha === commit.children[0]).length === 0
+      ) {
+        // get the child
+        const commitChild = commitClones.filter(
+          (_commit) => _commit.sha === commit.children[0].sha
+        )[0];
 
-      // get the nodes between the current branching node and the next one (in child path)
-      const nodes = [];
-      const jsonChild = _getCommitSection(commitChild, nodes, fromCommitShas, commitClones);
+        // get the nodes between the current branching node and the next one (in child path)
+        const nodes = [];
+        const jsonChild = _getCommitSection(commitChild, nodes, fromCommitShas, commitClones);
 
-      // add the collapsed section with the calculated nodes and last child to the list
-      collapsedSections.push({
-        parent: commit,
-        nodes,
-        child: jsonChild,
-      });
-    }
-    // the node has multiple children
-    else if (commit.children.length > 1) {
-      // get the child commits
-      const children = commitClones.filter((_commit) =>
-        commit.children.map((obj) => obj.sha).includes(_commit.sha)
-      );
+        // add the collapsed section with the calculated nodes and last child to the list
+        collapsedSections.push({
+          parent: commit,
+          nodes,
+          child: jsonChild,
+        });
+      }
+      // the node has multiple children
+      else if (commit.children.length > 1) {
+        // get the child commits
+        const children = commitClones.filter((_commit) =>
+          commit.children.map((obj) => obj.sha).includes(_commit.sha)
+        );
 
-      // create a collapsed section with each child
-      children.forEach((child) => {
-        // the child commit has no further children -> no compacting needed
-        if (child.children.length === 0) {
-          collapsedSections.push({
-            parent: commit,
-            nodes: [],
-            child,
-          });
-        }
-        // the child has one child which is also a branching node
-        else if (
-          child.children.length === 1 &&
-          fromCommitShas.filter((__commit) => __commit.sha === child.children[0]).length > 0
-        ) {
-          // get the child commit of child
-          const childOfChild = fromCommitShas.filter(
-            (__commit) => __commit.sha === child.children[0]
-          )[0];
+        // create a collapsed section with each child
+        children.forEach((child) => {
+          // the child commit has no further children -> no compacting needed
+          if (child.children.length === 0) {
+            collapsedSections.push({
+              parent: commit,
+              nodes: [],
+              child,
+            });
+          }
+          // the child has one child which is also a branching node
+          else if (
+            child.children.length === 1 &&
+            fromCommitShas.filter((__commit) => __commit.sha === child.children[0]).length > 0
+          ) {
+            // get the child commit of child
+            const childOfChild = fromCommitShas.filter(
+              (__commit) => __commit.sha === child.children[0]
+            )[0];
 
-          // put the collapsed section with the single node to the list
-          collapsedSections.push({
-            parent: commit,
-            nodes: [child],
-            child: childOfChild,
-          });
-        }
-        // the child has one commit which is not a branching node
-        else if (
-          child.children.length === 1 &&
-          fromCommitShas.filter((__commit) => __commit.sha === child.children[0]).length === 0
-        ) {
-          // get all the nodes which should be collapsed and the last child for the collapsed section
-          // and put it into the list
-          const nodes = [];
-          const jsonChild = _getCommitSection(child, nodes, fromCommitShas, commitClones);
-          collapsedSections.push({
-            parent: commit,
-            nodes,
-            child: jsonChild,
-          });
-        }
-      });
-    }
-    // the child has no children (is a leaf)
-    // -> put the collapsed section with no nodes and no child in the list
-    else if (commit.children.length === 0) {
-      collapsedSections.push({
-        parent: commit,
-        nodes: [],
-        child: null,
-      });
-    }
-  });
+            // put the collapsed section with the single node to the list
+            collapsedSections.push({
+              parent: commit,
+              nodes: [child],
+              child: childOfChild,
+            });
+          }
+          // the child has one commit which is not a branching node
+          else if (
+            child.children.length === 1 &&
+            fromCommitShas.filter((__commit) => __commit.sha === child.children[0]).length === 0
+          ) {
+            // get all the nodes which should be collapsed and the last child for the collapsed section
+            // and put it into the list
+            const nodes = [];
+            const jsonChild = _getCommitSection(child, nodes, fromCommitShas, commitClones);
+            collapsedSections.push({
+              parent: commit,
+              nodes,
+              child: jsonChild,
+            });
+          }
+        });
+      }
+      // the child has no children (is a leaf)
+      // -> put the collapsed section with no nodes and no child in the list
+      else if (commit.children.length === 0) {
+        collapsedSections.push({
+          parent: commit,
+          nodes: [],
+          child: null,
+        });
+      }
+    });
 
-  return collapsedSections;
+    return collapsedSections;
+  } else {
+    return undefined;
+  }
 }
 
 /**
