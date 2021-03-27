@@ -418,6 +418,7 @@ export default class ConflictAwareness extends React.Component {
       _handleEscapePress(prevProps);
 
       svg.attr('height', '98vh' /*g.graph().height * initialScale + 40*/);
+      svg.attr('width', '100%');
 
       // set the branch labels above node
       inner.selectAll('g.node circle').each(function () {
@@ -454,7 +455,11 @@ export default class ConflictAwareness extends React.Component {
               Loading... <i className="fas fa-spinner fa-pulse" />
             </h1>
           </div>
-          <div id="modalContainer" style={this.state.isLoading ? { opacity: 0 } : { opacity: 1 }}>
+          <div
+            id="modalContainer"
+            style={
+              this.state.isLoading ? { opacity: 0, width: '100%' } : { opacity: 1, width: '100%' }
+            }>
             <svg id="test" className={styles.chart} width="960" height="10">
               <g />
             </svg>
