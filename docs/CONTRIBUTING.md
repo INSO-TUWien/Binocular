@@ -215,3 +215,5 @@ Please make sure ArangoDB is running.
 https://www.arangodb.com/arangodb-training-center/
 To see how content is queried, please see "GraphQL-Interface" above.
 You can also access the GraphiQL interface over the web interface (click services -> pupil-ql -> show interface).
+  
+### Gateway (under construction)

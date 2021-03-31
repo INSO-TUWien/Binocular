@@ -19,7 +19,7 @@ import ChartContainer from '../../components/svg/ChartContainer.js';
 import * as zoomUtils from '../../utils/zoom.js';
 import SemiCircleScale from './SemiCircleScale.js';
 
-import { parseTime, getChartColors, shortenPath } from '../../utils';
+import { getChartColors, parseTime, shortenPath } from '../../utils';
 import styles from './styles.scss';
 
 const CHART_FILL_RATIO = 0.45;
@@ -102,33 +102,21 @@ export default class IssueImpact extends React.PureComponent {
         const outerEnd = outerJobSemi.getCoordsForShare(jobOffsetShare + jobShare);
         jobArc.lineTo(outerEnd.x, -outerEnd.y);
 
-        const outerJobArc = outerJobSemi.getArcForShares(
-          jobOffsetShare + jobShare,
-          jobOffsetShare,
-          true
-        );
+        const outerJobArc = outerJobSemi.getArcForShares(jobOffsetShare + jobShare, jobOffsetShare, true);
         jobArc.concat(outerJobArc);
         const innerStart = semi.getCoordsForShare(jobOffsetShare);
         jobArc.lineTo(innerStart.x, -innerStart.y);
 
-        const jobAnnotation = descriptionSemi.getAnnotationDataForShare(
-          jobOffsetShare + jobShare / 2
-        );
+        const jobAnnotation = descriptionSemi.getAnnotationDataForShare(jobOffsetShare + jobShare / 2);
 
         jobOffsetShare += jobShare;
 
         return (
           <g key={job.id}>
-            <text
-              transform={jobAnnotation.transform}
-              style={{ textAnchor: jobAnnotation.textAnchor }}>
+            <text transform={jobAnnotation.transform} style={{ textAnchor: jobAnnotation.textAnchor }}>
               {job.name}
             </text>
-            <path
-              d={jobArc}
-              className={cx(styles.job, styles.arc, styles[job.status])}
-              onClick={() => this.props.onJobClick(job)}
-            />
+            <path d={jobArc} className={cx(styles.job, styles.arc, styles[job.status])} onClick={() => this.props.onJobClick(job)} />
           </g>
         );
       });
@@ -240,10 +228,7 @@ export default class IssueImpact extends React.PureComponent {
     const dims = this.state.dimensions;
     const radius = Math.min(dims.width, dims.height) * CHART_FILL_RATIO;
     const issueAxisLength = radius * 0.95;
-    const issueScale = d3
-      .scaleTime()
-      .rangeRound([-issueAxisLength, issueAxisLength])
-      .domain([this.state.start, this.state.end]);
+    const issueScale = d3.scaleTime().rangeRound([-issueAxisLength, issueAxisLength]).domain([this.state.start, this.state.end]);
 
     const fileAxis = this.renderFileAxis(issueScale, radius, this.state.files);
     const buildAxis = this.renderBuildAxis(issueScale, radius, this.state.builds);
@@ -262,11 +247,7 @@ export default class IssueImpact extends React.PureComponent {
 
     return (
       <ChartContainer onResize={evt => this.onResize(evt)}>
-        <GlobalZoomableSvg
-          className={styles.chart}
-          scaleExtent={[1, 10]}
-          onZoom={evt => this.onZoom(evt)}
-          transform={this.state.transform}>
+        <GlobalZoomableSvg className={styles.chart} scaleExtent={[1, 10]} onZoom={evt => this.onZoom(evt)} transform={this.state.transform}>
           <defs>
             <clipPath id="chart">
               <rect x="0" y="0" width={dims.width} height={dims.height} />
@@ -286,14 +267,10 @@ export default class IssueImpact extends React.PureComponent {
               </g>
               <g className={styles.issueAxis}>
                 <Axis orient="bottom" ticks={8} scale={issueScale} />
-                <g
-                  className={styles.createMarker}
-                  transform={`translate(${issueScale(this.state.issue.createdAt)}, -5)`}>
+                <g className={styles.createMarker} transform={`translate(${issueScale(this.state.issue.createdAt)}, -5)`}>
                   <Asterisk />
                 </g>
-                <g
-                  className={styles.closeMarker}
-                  transform={`translate(${issueScale(this.state.issue.closedAt)}, -5)`}>
+                <g className={styles.closeMarker} transform={`translate(${issueScale(this.state.issue.closedAt)}, -5)`}>
                   <X />
                 </g>
                 {commitMarkers}
@@ -368,8 +345,8 @@ function extractData(props) {
         .filter(job => job.finishedAt)
         .map(job => {
           const startedAt = parseTime(job.createdAt);
-          const finishedAt = parseTime(job.finishedAt || job.createdAt);
-          const duration = (finishedAt.getTime() - startedAt.getTime()) / 1000;
+          const finishedAt = parseTime(job.finishedAt);
+          const duration = finishedAt ? (finishedAt.getTime() - startedAt.getTime()) / 1000 : 0;
           totalJobDuration += duration;
           return {
             id: job.id,

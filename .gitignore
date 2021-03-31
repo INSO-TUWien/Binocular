@@ -7,3 +7,7 @@ db/
 coverage/
 .whalify/
 .idea
+.bundle
+*.gem
+out
+pkg

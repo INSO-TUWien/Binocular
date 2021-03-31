@@ -11,6 +11,7 @@ const BuildStatus = new gql.GraphQLEnumType({
   name: 'BuildStatus',
   values: {
     failed: {},
+    errored: {},
     success: {},
     pending: {},
     running: {},

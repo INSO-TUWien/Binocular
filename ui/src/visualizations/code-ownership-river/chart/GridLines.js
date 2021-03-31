@@ -51,7 +51,7 @@ export default class GridLines extends React.Component {
   render() {
     const x = this.props.x || 0;
     const y = this.props.y || 0;
-    let translate = `translate(${x}, ${y})`;
+    const translate = `translate(${x}, ${y})`;
 
     return <g className={styles.grid} ref={g => (this.g = g)} transform={translate} />;
   }

@@ -1,0 +1,39 @@
+syntax = "proto3";
+
+package binocular.comm;
+option java_package = "at.inso.tuwien.binocular.comm";
+option go_package = "github.com/INSO-TUWien/Binocular/services/grpc/comm";
+
+enum ServiceType {
+  None = 0;
+  LanguageDetection = 1;
+}
+
+message Client {
+  string address = 1;
+  uint32 port = 2;
+
+}
+
+message RegistrationRequest {
+  Client client = 1;
+  ServiceType type = 2;
+}
+
+message RegistrationResponse {
+  string token = 1;
+}
+
+message UnregisterRequest {
+  string token = 1;
+}
+
+message UnregisterResponse {
+}
+
+message HeartbeatRequest {
+  string token = 1;
+}
+
+message EmptyResponse {
+}

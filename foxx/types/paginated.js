@@ -75,7 +75,7 @@ function limitClause(args) {
   }
 
   const offset = ((args.page || 1) - 1) * args.perPage;
-  let ret = `LIMIT ${offset}, ${args.perPage}`;
+  const ret = `LIMIT ${offset}, ${args.perPage}`;
 
   console.log('setting up limit', ret, offset, args);
 

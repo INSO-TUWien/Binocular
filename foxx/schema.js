@@ -18,8 +18,10 @@ const DateHistogramGranularity = require('./types/DateHistogramGranularity.js');
 const commits = db._collection('commits');
 const files = db._collection('files');
 const stakeholders = db._collection('stakeholders');
+const modules = db._collection('modules');
 const issues = db._collection('issues');
 const builds = db._collection('builds');
+const languages = db._collection('languages');
 
 const ISSUE_NUMBER_REGEX = /^#?(\d+).*$/;
 
@@ -35,10 +37,7 @@ const queryType = new gql.GraphQLObjectType({
           sort: { type: Sort }
         },
         query: (root, args, limit) => {
-          let q = qb
-            .for('commit')
-            .in('commits')
-            .sort('commit.date', args.sort);
+          let q = qb.for('commit').in('commits').sort('commit.date', args.sort);
 
           q = queryHelpers.addDateFilter('commit.date', 'gte', args.since, q);
           q = queryHelpers.addDateFilter('commit.date', 'lte', args.until, q);
@@ -105,9 +104,7 @@ const queryType = new gql.GraphQLObjectType({
               qb
                 .for('build')
                 .in('builds')
-                .filter(
-                  qb.and(qb.eq('build.sha', 'item.sha'), qb.eq('build.status', qb.str('success')))
-                )
+                .filter(qb.and(qb.eq('build.sha', 'item.sha'), qb.eq('build.status', qb.str('success'))))
                 .return(1)
             ),
             0
@@ -124,6 +121,48 @@ const queryType = new gql.GraphQLObjectType({
         },
         resolve(root, args) {
           return files.firstExample({ path: args.path });
+        }
+      },
+      languages: paginated({
+        type: require('./types/language'),
+        query: (root, args, limit) => aql`
+          FOR language
+            IN
+            ${languages}
+            ${limit}
+              RETURN language`
+      }),
+      language: {
+        type: require('./types/language'),
+        args: {
+          name: {
+            description: 'name of language',
+            type: new gql.GraphQLNonNull(gql.GraphQLString)
+          }
+        },
+        resolve(root, args) {
+          return languages.firstExample({ name: args.name });
+        }
+      },
+      modules: paginated({
+        type: require('./types/module'),
+        query: (root, args, limit) => aql`
+          FOR module
+            IN
+            ${modules}
+            ${limit}
+              RETURN module`
+      }),
+      module: {
+        type: require('./types/module'),
+        args: {
+          path: {
+            description: 'path of module',
+            type: new gql.GraphQLNonNull(gql.GraphQLString)
+          }
+        },
+        resolve(root, args) {
+          return modules.firstExample({ path: args.path });
         }
       },
       stakeholders: paginated({
@@ -173,28 +212,15 @@ const queryType = new gql.GraphQLObjectType({
         },
         query: (root, args, limit) => {
           let exactQuery = [];
-          let fuzzyQuery = qb
-            .for('issue')
-            .in('issues')
-            .sort('issue.createdAt', args.sort);
+          let fuzzyQuery = qb.for('issue').in('issues').sort('issue.createdAt', args.sort);
 
           if (args.q) {
             const searchString = qb.str('%' + args.q.replace(/\s+/g, '%') + '%');
-            fuzzyQuery = fuzzyQuery.filter(
-              qb.LIKE(
-                qb.CONCAT(qb.str('#'), 'issue.iid', qb.str(' '), 'issue.title'),
-                searchString,
-                true
-              )
-            );
+            fuzzyQuery = fuzzyQuery.filter(qb.LIKE(qb.CONCAT(qb.str('#'), 'issue.iid', qb.str(' '), 'issue.title'), searchString, true));
 
             const issueNumberMatch = args.q.match(ISSUE_NUMBER_REGEX);
             if (issueNumberMatch) {
-              exactQuery = qb
-                .for('issue')
-                .in('issues')
-                .filter(qb.eq('issue.iid', issueNumberMatch[1]))
-                .return('issue');
+              exactQuery = qb.for('issue').in('issues').filter(qb.eq('issue.iid', issueNumberMatch[1])).return('issue');
 
               fuzzyQuery = fuzzyQuery.filter(qb.neq('issue.iid', issueNumberMatch[1]));
             }
@@ -202,10 +228,7 @@ const queryType = new gql.GraphQLObjectType({
 
           fuzzyQuery = fuzzyQuery.return('issue');
 
-          let q = qb
-            .let('fullList', qb.APPEND(exactQuery, fuzzyQuery))
-            .for('issue')
-            .in('fullList');
+          let q = qb.let('fullList', qb.APPEND(exactQuery, fuzzyQuery)).for('issue').in('fullList');
 
           q = queryHelpers.addDateFilter('issue.createdAt', 'gte', args.since, q);
           q = queryHelpers.addDateFilter('issue.createdAt', 'lte', args.until, q);

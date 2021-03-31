@@ -19,10 +19,7 @@ module.exports = new gql.GraphQLScalarType({
 
       return new Date(ms);
     } else {
-      throw new gql.GraphQLError(
-        'Query error: Can only parse int or string but got a: ' + ast.kind,
-        [ast]
-      );
+      throw new gql.GraphQLError('Query error: Can only parse int or string but got a: ' + ast.kind, [ast]);
     }
   }
 });

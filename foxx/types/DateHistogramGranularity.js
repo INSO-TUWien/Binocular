@@ -22,12 +22,10 @@ module.exports = new gql.GraphQLEnumType({
       value: fieldName => qb.DATE_HOUR(fieldName)
     },
     halfHour: {
-      value: fieldName =>
-        qb.add(qb.mul(qb.DATE_HOUR(fieldName), 2), qb.FLOOR(qb.div(qb.DATE_MINUTE(fieldName), 30)))
+      value: fieldName => qb.add(qb.mul(qb.DATE_HOUR(fieldName), 2), qb.FLOOR(qb.div(qb.DATE_MINUTE(fieldName), 30)))
     },
     quarterHour: {
-      value: fieldName =>
-        qb.add(qb.mul(qb.DATE_HOUR(fieldName), 4), qb.FLOOR(qb.div(qb.DATE_MINUTE(fieldName), 15)))
+      value: fieldName => qb.add(qb.mul(qb.DATE_HOUR(fieldName), 4), qb.FLOOR(qb.div(qb.DATE_MINUTE(fieldName), 15)))
     }
   }
 });

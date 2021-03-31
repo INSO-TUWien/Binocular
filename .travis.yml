@@ -12,3 +12,9 @@ addons:
 cache:
   directories:
     - "node_modules"
+
+script:
+  # Run linting
+  - npm run eslint
+    # Run tests
+  - npm run test

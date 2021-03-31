@@ -41,15 +41,9 @@ export default class HotspotDials extends React.PureComponent {
       y: dims.height / 2
     };
 
-    const commitPalette = getChartColors(
-      'spectral',
-      _.range(0, this.props.commits.categories.length)
-    );
+    const commitPalette = getChartColors('spectral', _.range(0, this.props.commits.categories.length));
 
-    const issuePalette = getChartColors(
-      ['orange', 'red', 'brown'],
-      _.range(0, this.props.commits.categories.length)
-    );
+    const issuePalette = getChartColors(['orange', 'red', 'brown'], _.range(0, this.props.commits.categories.length));
 
     const legend = [
       {

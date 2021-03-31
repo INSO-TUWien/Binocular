@@ -34,9 +34,7 @@ const HotspotDialsConfigComponent = props => {
           <label className="label">Granularity:</label>
           <div className="control">
             <div className="select">
-              <select
-                value={props.category}
-                onChange={evt => props.onSetCategory(evt.target.value)}>
+              <select value={props.category} onChange={evt => props.onSetCategory(evt.target.value)}>
                 <option value="hour">By hour</option>
                 <option value="dayOfWeek">By day of week</option>
                 <option value="month">By month</option>
@@ -82,8 +80,6 @@ const HotspotDialsConfigComponent = props => {
   );
 };
 
-const HotspotDialsConfig = connect(mapStateToProps, mapDispatchToProps)(
-  HotspotDialsConfigComponent
-);
+const HotspotDialsConfig = connect(mapStateToProps, mapDispatchToProps)(HotspotDialsConfigComponent);
 
 export default HotspotDialsConfig;

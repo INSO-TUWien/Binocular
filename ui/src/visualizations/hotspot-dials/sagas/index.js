@@ -67,9 +67,7 @@ export const fetchHotspotDialsData = fetchFactory(
         },
         label: cat => (cat === 0 ? '12' : cat.toString()),
         detailedLabel: cat =>
-          cat === 0
-            ? '12:00 PM - 12:59 PM (and 0:00 AM - 0:59 AM)'
-            : `${cat}:00 AM - ${cat}:59 AM (and ${cat}:00 PM - ${cat}:59 PM)`
+          cat === 0 ? '12:00 PM - 12:59 PM (and 0:00 AM - 0:59 AM)' : `${cat}:00 AM - ${cat}:59 AM (and ${cat}:00 PM - ${cat}:59 PM)`
       },
       dayOfWeek: {
         offset: 0,
@@ -112,12 +110,7 @@ export const fetchHotspotDialsData = fetchFactory(
         { granularity: config.category, dateField: config.issueField }
       )
     )
-      .then(resp => [
-        resp.commitDateHistogram,
-        resp.goodCommits,
-        resp.badCommits,
-        resp.issueDateHistogram
-      ])
+      .then(resp => [resp.commitDateHistogram, resp.goodCommits, resp.badCommits, resp.issueDateHistogram])
       .map(histogram => {
         histogram = _(histogram).filter(c => c.category !== null).sortBy('category').value();
 

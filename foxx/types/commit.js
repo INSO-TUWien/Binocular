@@ -7,6 +7,8 @@ const aql = arangodb.aql;
 const commitsToFiles = db._collection('commits-files');
 const builds = db._collection('builds');
 const commitsToStakeholders = db._collection('commits-stakeholders');
+const commitsToLanguages = db._collection('commits-languages');
+const CommitsToModules = db._collection('commits-modules');
 const paginated = require('./paginated.js');
 const Timestamp = require('./Timestamp.js');
 
@@ -45,17 +47,8 @@ module.exports = new gql.GraphQLObjectType({
         description: 'Web-url (if available) of this commit'
       },
       stats: {
-        type: new gql.GraphQLObjectType({
-          name: 'Stats',
-          fields: {
-            additions: {
-              type: gql.GraphQLInt
-            },
-            deletions: {
-              type: gql.GraphQLInt
-            }
-          }
-        })
+        type: require('./stats'),
+        description: 'The changing stats of the commit'
       },
       files: paginated({
         type: require('./fileInCommit.js'),
@@ -67,6 +60,7 @@ module.exports = new gql.GraphQLObjectType({
             RETURN {
               file,
               lineCount: edge.lineCount,
+              stats: edge.stats,
               hunks: edge.hunks
             }`
       }),
@@ -101,7 +95,32 @@ module.exports = new gql.GraphQLObjectType({
             )
             .toArray();
         }
-      }
+      },
+      languages: paginated({
+        type: require('./languageInCommit'),
+        description: 'languages modified in the particular commit',
+        query: (commit, args, limit) => aql`
+          FOR language, edge
+            IN INBOUND ${commit} ${commitsToLanguages}
+            ${limit}
+            RETURN {
+              language,
+              stats: edge.stats
+            }`
+      }),
+      modules: paginated({
+        type: require('./moduleInCommit'),
+        description: 'modules modified in the particular commit',
+        query: (commit, args, limit) => aql`
+          FOR module, edge
+            IN INBOUND ${commit} ${CommitsToModules}
+            ${limit}
+            RETURN {
+              module,
+              webUrl: edge.webUrl,
+              stats: edge.stats
+            }`
+      })
     };
   }
 });
