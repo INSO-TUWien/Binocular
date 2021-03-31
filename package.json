@@ -163,7 +163,7 @@
     "sinon": "^1.17.7",
     "sinon-chai": "^2.14.0",
     "unzipper": "^0.10.11",
-    "webpack-dev-server": "^2.5.1",
+    "webpack-dev-server": "^3.1.11",
     "whalify": "0.0.9"
   }
 }
