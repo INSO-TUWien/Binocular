@@ -125,7 +125,7 @@
     "request-promise": "^4.2.2",
     "resize-observer-polyfill": "^1.4.2",
     "sass-loader": "^6.0.3",
-    "socket.io": "^1.7.2",
+    "socket.io": "^2.4.0",
     "socket.io-client": "^1.7.2",
     "style-inject": "^0.1.2",
     "style-loader": "^0.18.2",
