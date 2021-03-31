@@ -26,6 +26,7 @@ let selectedNodeInfos = [];
 let selectedBranch; // the branch which is selected by the user
 let commitDependenciesWithDependentCommits = new Map(); // map containing the shas of the commit dependencies as key, and a list of shas of the commits which depend on the key
 let commitShasOfSubtree = []; // the commit shas of a subtree
+let commitShasOfBranch = new Map(); // the target commit shas of a branch as key, the current ingoing edge color as value
 
 export default class ConflictAwareness extends React.Component {
   constructor(props) {
@@ -604,7 +605,7 @@ export default class ConflictAwareness extends React.Component {
       if (classAndColor) {
         g.setEdge(link.source, link.target, {
           arrowhead: 'undirected', // edge without arrow head
-          class: classAndColor[0], // class for coloring the edges (only needed for d3 selection, is only a pseudo css class)
+          class: `${classAndColor[0]} ${link.target}`, // class for coloring the edges (only needed for d3 selection, is only a pseudo css class) and for branch hover edge highlighting
           style: `stroke: ${classAndColor[1]}; fill: none; stroke-width: 2px;`,
         });
       }
@@ -655,6 +656,40 @@ export default class ConflictAwareness extends React.Component {
         }
 
         return tooltipText;
+      },
+      (event) => {
+        // get the branch name which is hovered
+        let name = event.target.getAttribute('name');
+
+        // get all the target nodes of the nodes in the graph
+        this.state.commitNodes
+          .filter((commit) => {
+            let branches = commit.branches.map((branch) => branch.branchName);
+            return (
+              branches.includes(name) && ((commit.sha && commit.parents.length > 0) || commit.id)
+            );
+          })
+          .forEach((commit) => commitShasOfBranch.set(commit.sha || commit.id), '');
+
+        // save current color of the edge and mark it
+        commitShasOfBranch.forEach((color, sha) => {
+          const path = d3.selectAll(`g[class$=' ${sha}']`).select('path');
+          if (path.node()) {
+            commitShasOfBranch.set(sha, path.style('stroke'));
+            path.style('stroke', 'black').style('stroke-width', '5px');
+          }
+        });
+      },
+      () => {
+        // reset the edge coloring
+        commitShasOfBranch.forEach((color, sha) =>
+          d3
+            .selectAll(`g[class$=' ${sha}']`)
+            .select('path')
+            .style('stroke', color)
+            .style('stroke-width', '2px')
+        );
+        commitShasOfBranch = new Map();
       }
     );
   }
@@ -663,9 +698,16 @@ export default class ConflictAwareness extends React.Component {
    * Sets up a tooltip on hovering over the provided nodes showing the text retured from the getTooltipText method.
    * @param nodes {*} the selected nodes to apply show the tooltip on mouseover (d3)
    * @param getTooltipText {function(event): string} the text/html which should be shown in the tooltip
+   * @param mouseoverFunction {function(event): void} the function which will additionally called at the mouseover event
+   * @param mouseoutFunction {function(event): void} the function which will additionally called at the mouseout event
    * @private
    */
-  _setTooltipOnNodes(nodes, getTooltipText) {
+  _setTooltipOnNodes(
+    nodes,
+    getTooltipText,
+    mouseoverFunction = () => {},
+    mouseoutFunction = () => {}
+  ) {
     const tooltip = d3
       .select('body')
       .append('div')
@@ -683,9 +725,10 @@ export default class ConflictAwareness extends React.Component {
     // set up the hover events for each commit-nodes
     nodes
 
-      // show tooltip when mouse is over the node
+      // show tooltip when mouse is over the node and call provided function
       .on('mouseover', (event) => {
         tooltip.html(getTooltipText(event)).style('visibility', 'visible');
+        mouseoverFunction(event);
       })
 
       // move tooltip with mouse
@@ -693,9 +736,10 @@ export default class ConflictAwareness extends React.Component {
         tooltip.style('top', event.pageY - 10 + 'px').style('left', event.pageX + 10 + 'px');
       })
 
-      // hide tooltip if mouse moves out of the node
-      .on('mouseout', () => {
-        return tooltip.style('visibility', 'hidden');
+      // hide tooltip if mouse moves out of the node and call provided function
+      .on('mouseout', (event) => {
+        tooltip.style('visibility', 'hidden');
+        mouseoutFunction(event);
       });
   }
 
@@ -1489,10 +1533,11 @@ function extractData(props, collapsedSections, branchesHeadShas) {
 
           // create the cluster node
           const clusterNode = {};
-          clusterNode.id = `${parent.sha} - ${child.sha}`;
+          clusterNode.id = `${parent.sha}-${child.sha}`;
           clusterNode.label = nodes.length;
           clusterNode.clazz = clazz;
           clusterNode.color = color;
+          clusterNode.branches = child.branches; // needed for branch edges highlighting
           commitNodes.push(clusterNode);
 
           // push the links from the parent and the cluster node,
