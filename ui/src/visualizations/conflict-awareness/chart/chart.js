@@ -752,9 +752,28 @@ export default class ConflictAwareness extends React.Component {
    */
   _setCodeChangesModalOnDoubleClick(svg, inner, g) {
     const modal = _getDiffModal();
+    modal.html('');
+    modal.append('p').classed('has-text-centered', true).attr('id', 'diffModalSha');
+
+    modal.html(modal.html() + `
+     <div class="card is-fullwidth">
+       <header id="diffModalMessageCardHeader" class="card-header">
+         <p class="card-header-title">Commit Message</p>
+         <a class="card-header-icon card-toggle">
+          <i id="diffModalMessageCardArrow" class="fa fa-angle-up"></i>
+         </a>
+       </header>
+       <div id="diffModalMessageCardContent" class="card-content" style="white-space: pre-wrap"></div>
+     </div>
+     `);
+    d3.select(`#diffModalMessageCardHeader`).on('click', () =>
+      _toggleCardContentVisibility('diffModalMessageCardContent', 'diffModalMessageCardArrow')
+    );
+
+    modal.append('diff').classed('loadingHintContainer', true).classed(styles.loadingHintContainer, true).append('h1').attr('id', 'diffModalLoadingIndicator').classed(styles.loadingHint, true).html('Loading... <i className="fas fa-spinner fa-pulse" />')
 
     // add a textarea to the modal, needed for CodeMirror
-    modal.append('textarea').attr('id', 'diffModalTextArea');
+    modal.append('textarea').attr('id', 'diffModalTextArea').attr('hidden', 'true');
 
     // set up the hover events for each commit-nodes
     inner
@@ -762,9 +781,12 @@ export default class ConflictAwareness extends React.Component {
 
       // show the diffs modal at doublie click on a commit-node
       .on('dblclick', (event) => {
+        const node = _getNodeFromEvent(event, g);
         modal.style('visibility', 'visible');
 
-        const node = _getNodeFromEvent(event, g);
+        d3.select('#diffModalSha').text(node.sha);
+        d3.select('#diffModalMessageCardContent').text(node.message);
+        d3.select('#diffModalLoadingIndicator').attr('hidden', null);
         this.props.onGetDiff(node.sha);
       });
   }
@@ -1149,10 +1171,12 @@ function _resetBranchNameHighlighting(branch) {
  * @private
  */
 function _resetCommitHighlighting(node) {
-  node
-    .style('stroke-width', '1px')
-    .style('stroke', node.style('fill'))
-    .style('stroke-dasharray', null);
+  if (node.node()) {
+    node
+      .style('stroke-width', '1px')
+      .style('stroke', node.style('fill'))
+      .style('stroke-dasharray', null);
+  }
 }
 
 /**
@@ -1717,23 +1741,19 @@ function _getDiffModal() {
  * @private
  */
 function _setDiffModalHtml(diff) {
+  d3.select('#diffModalLoadingIndicator').attr('hidden', true);
   // get the diff modal and set the diff as text
   const diffModalTextArea = d3.select('#diffModalTextArea');
   diffModalTextArea.text(diff);
 
-  // if no codeMirror instance exists, create it and bind it to the diff modal
-  if (!codeMirror) {
-    require(['codemirror/lib/codemirror', 'codemirror/mode/diff/diff'], function (CodeMirror) {
-      codeMirror = CodeMirror.fromTextArea(document.getElementById('diffModalTextArea'), {
-        lineNumbers: true,
-        mode: 'diff',
-        readOnly: true,
-      });
+  // create codeMirror and bind it to the diff modal
+  require(['codemirror/lib/codemirror', 'codemirror/mode/diff/diff'], function (CodeMirror) {
+    codeMirror = CodeMirror.fromTextArea(document.getElementById('diffModalTextArea'), {
+      lineNumbers: true,
+      mode: 'diff',
+      readOnly: true,
     });
-  } else {
-    // codeMirror is already initialised -> update its diff
-    codeMirror.setValue(diffModalTextArea.text());
-  }
+  });
 }
 
 /**
@@ -1742,6 +1762,8 @@ function _setDiffModalHtml(diff) {
  * @private
  */
 function _resetDiffAndHideModal(prevProps) {
+  d3.select('#diffModalTextArea').html('');
+  codeMirror.setValue('');
   const diffModal = _getDiffModal();
   diffModal.style('visibility', 'hidden');
   prevProps.onResetStateProperty('diff');
