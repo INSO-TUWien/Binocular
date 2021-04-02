@@ -230,7 +230,7 @@ export default class ConflictAwareness extends React.Component {
         );
       } else {
         // the merge shows conflicts -> show them in a modal
-        _showMergeConflictModal(nextProps.mergeCheck);
+        _showMergeConflictModal(nextProps.mergeCheck, nextProps.branchesHeadShas, nextProps.commits);
       }
 
       updatedProps.mergeCheck = nextProps.mergeCheck;
@@ -836,6 +836,14 @@ export default class ConflictAwareness extends React.Component {
           selectedNodes.forEach((node) => _resetCommitHighlighting(node));
           selectedNodes = [];
           selectedNodeInfos = [];
+
+          // remove the highlighting of all commits which are marked as dependency
+          // and reset the commitDependency map
+          commitDependenciesWithDependentCommits.forEach((value, key) => {
+            const commitNode = _getCommitNodeFromShaClass(key);
+            _resetCommitHighlighting(commitNode);
+          });
+          commitDependenciesWithDependentCommits = new Map();
         } else if (selectedBranch && !equals(selectedBranch, branchID)) {
           // a branch was already selected, and a new one is currently selected
 
@@ -916,6 +924,7 @@ export default class ConflictAwareness extends React.Component {
         // and reset the selected nodes list
         selectedNodes.forEach((node) => _resetCommitHighlighting(node));
         selectedNodes = [];
+        selectedNodeInfos = [];
       }
 
       // the commit node which was clicked
@@ -959,7 +968,9 @@ export default class ConflictAwareness extends React.Component {
         });
 
         // remove clicked node from selectedNodes and reset its styling
-        selectedNodes.splice(selectedNodes.indexOf(alreadySelectedNode), 1);
+        const index = selectedNodes.indexOf(alreadySelectedNode);
+        selectedNodes.splice(index, 1);
+        selectedNodeInfos.splice(index, 1);
         _resetCommitHighlighting(clickedNode);
 
         // the selected commit is still a commit dependency -> mark it as one
@@ -975,6 +986,8 @@ export default class ConflictAwareness extends React.Component {
         selectedNodeInfos.push({
           sha: commitNode.sha,
           fromRepo: commitNode.repo,
+          date: commitNode.date,
+          author: commitNode.author,
         });
 
         // get all commit shas the selected commits depends on (not recursive)
@@ -1994,22 +2007,103 @@ function _showCherryPickConflictModal(checkCherryPick) {
  * @param checkMerge {*} the conflict information from the merge
  * @private
  */
-function _showMergeConflictModal(checkMerge) {
+function _showMergeConflictModal(checkMerge, branchesHeadShas, commits) {
   const { fromRepo, fromBranch, toRepo, toBranch, conflictDatas } = checkMerge;
 
+  // retrieve the authors of the commits that belong to the merge
+  // these commits are all commits which have exactly one reference of the branches of the merge
+  // if the commit has no reference of either branch, it does not belong to the merge (this is a commit of a separate branch)
+  // if the commit has a reference to each branch, it is already merged and also do not belong to the merge
+  let headShaFromBranch;
+  let headShaToBranch;
+  let authors = [];
+
+  // get the heads of the merges branches
+  branchesHeadShas.forEach((valueBranches, shaKey) => {
+    valueBranches.forEach((valueBranchInfos, branchName) => {
+      if (fromBranch === branchName && valueBranchInfos.projects.includes(fromRepo)) {
+        headShaFromBranch = commits.filter((commit) => commit.sha === shaKey)[0];
+      }
+
+      if (toBranch === branchName && valueBranchInfos.projects.includes(toRepo)) {
+        headShaToBranch = commits.filter((commit) => commit.sha === shaKey)[0];
+      }
+    });
+  });
+
+  _getAuthorsForMergeConflict(headShaFromBranch, toBranch, toRepo, commits, authors);
+  _getAuthorsForMergeConflict(headShaToBranch, fromBranch, fromRepo, commits, authors);
+
   // modal which should show the conflict data
-  const conflictModal = _getConflictModal();
+  let conflictModal = _getConflictModal();
 
   // create the header of the modal containing a message which merge was checked
   conflictModal.html(`
     <p class="has-text-centered">Conflicts detected while merging "${fromBranch}" (project "${fromRepo}") into "${toBranch}" (project "${toRepo}").</p> 
-    `);
+  `);
+
+  // add shrinkable authors card section
+  conflictModal.html(
+    conflictModal.html() +
+      `<div class="card is-fullwidth">
+         <header id="authorsCardHeader" class="card-header">
+           <p class="card-header-title">Authors</p>
+           <a class="card-header-icon card-toggle">
+            <i id="authorsCardArrow" class="fa fa-angle-up"></i>
+           </a>
+         </header>
+         <div id="authorsCardContent" class="card-content" style="white-space: pre-wrap">${authors
+           .map((author) => author.replace(/</g, '&lt').replace(/>/g, '&gt'))
+           .join('\n')}</div>
+       </div>
+        <br />`
+  );
 
   // appends the conflict cards to the modal
   _createConflictsCardSection(conflictDatas);
 
   // show the conflict modal
   _getConflictModal().style('visibility', 'visible');
+
+  d3.select('#authorsCardHeader').on('click', () =>
+    _toggleCardContentVisibility('authorsCardContent', 'authorsCardArrow')
+  );
+}
+
+/**
+ * Saves all (distinct) authors of all parent commits of currentCommit (inclusive), until the parents have a specific branch of a specific project.
+ * @param currentCommit {*} the commit from which the author should be added to the list (if requirements meet)
+ * @param untilHasBranch {string} the specific branch
+ * @param untilHasProject {string} the specific commit
+ * @param commits {[*]} list of all commits
+ * @param authors {[string]} distict list of autors of the selected commits
+ * @private
+ */
+function _getAuthorsForMergeConflict(
+  currentCommit,
+  untilHasBranch,
+  untilHasProject,
+  commits,
+  authors
+) {
+  // commit doesn't has branch and project
+  if (
+    !(
+      currentCommit.branches.map((branch) => branch.branchName).includes(untilHasBranch) &&
+      currentCommit.projects.includes(untilHasProject)
+    )
+  ) {
+    // add commits author if not in array
+    if (!authors.includes(currentCommit.author)) {
+      authors.push(currentCommit.author);
+    }
+
+    // repeat for all parents
+    currentCommit.parents.forEach((parent) => {
+      const parentCommit = commits.filter((commit) => commit.sha === parent.sha)[0];
+      _getAuthorsForMergeConflict(parentCommit, untilHasBranch, untilHasProject, commits, authors);
+    });
+  }
 }
 
 /**
@@ -2058,13 +2152,17 @@ function _createCommitsSection(commits) {
   // add the commits to the header with the information if they were successful,
   // resulted in a conflict or were not checked due to the previous conflict
   commits.forEach((commit) => {
-    commitSectionHtml = commitSectionHtml + `<li>${commit.sha} - ${commit.conflictText}</li>`;
+    commitSectionHtml =
+      commitSectionHtml +
+      `<li>${commit.sha} (${commit.author.replace(/</g, '&lt').replace(/>/g, '&gt')}) - ${
+        commit.conflictText
+      }</li>`;
   });
 
   // close the commit list and set the html in the modal
   // the whole header html must be set, because otherwise the first <ul>
   // will automatically closed by the html() function to provide a valid HTML
-  commitSectionHtml = commitSectionHtml + '</ul>';
+  commitSectionHtml = commitSectionHtml + '</ul><br />';
   conflictModal.html(conflictModal.html() + commitSectionHtml);
 }
 
