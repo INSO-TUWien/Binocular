@@ -52,7 +52,7 @@ export default handleActions(
 
     // adds/removes a branch of the other project to/from the excluded branches list
     SWITCH_EXCLUDED_BRANCHES_OTHER_PROJECT: (state, action) => {
-      let excludedBranchesOtherProject = state.excludedBranchesOtherProject;
+      let excludedBranchesOtherProject = _.assign([], state.excludedBranchesOtherProject);
       if (!action.payload.checked) {
         excludedBranchesOtherProject.push(action.payload.branchName);
       } else {
