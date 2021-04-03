@@ -85,10 +85,24 @@ export default handleActions(
       return newState;
     },
 
+    // sets the basic layout of the graph
+    SET_LAYOUT: (state, action) => {
+      let newState = _.assign({}, state);
+      newState.data.layout = action.payload;
+      return newState;
+    },
+
+    // sets a flag if the location of the graph should be reset
+    SHOULD_RESET_LOCATION: (state, action) => {
+      let newState = _.assign({}, state);
+      newState.data.shouldResetLocation = action.payload;
+      return newState;
+    },
+
     // request the conflict awareness data and reset the previous received ones
     REQUEST_CONFLICT_AWARENESS_DATA: (state) => {
       // reset the previously retrieved data
-      let data = {};
+      let data = state.data;
       data.commits = undefined;
       data.branches = undefined;
       data.commitNodes = undefined;
@@ -178,7 +192,9 @@ export default handleActions(
     },
   },
   {
-    data: {},
+    data: {
+      layout: 'BT',
+    },
     lastFetched: null,
     isFetching: null,
   }

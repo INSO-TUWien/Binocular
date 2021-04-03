@@ -1,12 +1,12 @@
 'use strict';
 
-import {createAction} from 'redux-actions';
-import {fetchFactory, timestampedActionFactory} from '../../../sagas/utils';
+import { createAction } from 'redux-actions';
+import { fetchFactory, timestampedActionFactory } from '../../../sagas/utils';
 import Promise from 'bluebird';
 import getCommitData from './get-commit-data';
 import getBranchData from './get-branch-data';
-import {endpointUrl} from '../../../utils';
-import {fork, takeEvery} from 'redux-saga/effects';
+import { endpointUrl } from '../../../utils';
+import { fork, takeEvery } from 'redux-saga/effects';
 import getParentAndForks from './get-parent-and-forks';
 import indexProject from './index-project';
 import getIssueData from './get-issue-data';
@@ -154,6 +154,15 @@ export const setNodeToCompactSection = createAction(
 export const setBranchesHeadShas = createAction(
   'SET_BRANCHES_HEAD_SHAS',
   (branchesHeadShas) => branchesHeadShas
+);
+
+// sets the basic layout of the graph
+export const setLayout = createAction('SET_LAYOUT', (layout) => layout);
+
+// indicates if the graph location should be reset
+export const shouldResetLocation = createAction(
+  'SHOULD_RESET_LOCATION',
+  (shouldResetLocation) => shouldResetLocation
 );
 
 // gets the branches and commits of specific projects, gets the parent/forks of the base project (if requested) and

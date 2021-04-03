@@ -13,8 +13,9 @@ import {
   setFilterSubtree,
   setIssueForFilter,
   setIssueSelector,
+  setLayout,
   setOtherProject,
-  setSelectedIssue,
+  setSelectedIssue, shouldResetLocation,
   switchAllBranchCheckedBaseProject,
   switchAllBranchCheckedOtherProject,
   switchBranchCheckedBaseProject,
@@ -68,6 +69,8 @@ const mapStateToProps = (state) => {
     filterSubtree: caState.config.filterSubtree, // the filter for commits of a specific subtree
     compactAll: caState.data.data.compactAll, // a flag indicating if the graph should be completely compacted
     expandAll: caState.data.data.expandAll, // a flag indicating if the graph should be completely expanded
+    layout: caState.data.data.layout, // the base layout of the graph
+    shouldResetLocation: caState.data.data.shouldResetLocation, // flag which indicates if the graph location should be reset
   };
 };
 
@@ -150,8 +153,14 @@ const mapDispatchToProps = (dispatch) => {
     onSetFilterCommitter: (filterCommitter) => dispatch(setFilterCommitter(filterCommitter)),
     // update the filterSubtree element
     onSetFilterSubtree: (filterSubtree) => dispatch(setFilterSubtree(filterSubtree)),
+    // sets the flag to compact the whole graph
     onSetCompactAll: (shouldCompactAll) => dispatch(setCompactAll(shouldCompactAll)),
+    // sets the flag to expand the whole graph
     onSetExpandAll: (shouldExpandAll) => dispatch(setExpandAll(shouldExpandAll)),
+    // sets the basic layout of the graph
+    onSetLayout: (layout) => dispatch(setLayout(layout)),
+    // sets the flag indicating if the location of the graph should be reset
+    onShouldResetLocation: (resetLocation) => dispatch(shouldResetLocation(resetLocation)),
   };
 };
 
@@ -159,6 +168,72 @@ const ConflictAwarenessConfigComponent = (props) => {
   return (
     <div className={styles.configContainer}>
       <form>
+        <div className="field">
+          <label className="label">Layout (earliest - latest):</label>
+          <table className={styles.width100}>
+            <td>
+              <tr>
+                {/* radio button for bottom - top layout */}
+                <label className="radio">
+                  <input
+                    name="layoutSelection"
+                    type="radio"
+                    checked={props.layout === 'BT'}
+                    onChange={() => props.onSetLayout('BT')}
+                  />
+                  Bottom - Top
+                </label>
+              </tr>
+              <tr>
+                {/* radio button for top - bottom layout */}
+                <label className="radio">
+                  <input
+                    name="layoutSelection"
+                    type="radio"
+                    checked={props.layout === 'TB'}
+                    onChange={() => props.onSetLayout('TB')}
+                  />
+                  Top - Bottom
+                </label>
+              </tr>
+            </td>
+            <td>
+              <tr>
+                {/* radio button for left - right layout */}
+                <label className="radio">
+                  <input
+                    name="layoutSelection"
+                    type="radio"
+                    checked={props.layout === 'LR'}
+                    onChange={() => props.onSetLayout('LR')}
+                  />
+                  Left - Right
+                </label>
+              </tr>
+              <tr>
+                {/* radio button for right - left layout */}
+                <label className="radio">
+                  <input
+                    name="layoutSelection"
+                    type="radio"
+                    checked={props.layout === 'RL'}
+                    onChange={() => props.onSetLayout('RL')}
+                  />
+                  Right - Left
+                </label>
+              </tr>
+            </td>
+            {/* button to reset the location if the user lost the graph */}
+            <td>
+              <a className="button" onClick={() => props.onShouldResetLocation(true)}>
+                Reset Location
+              </a>
+            </td>
+          </table>
+        </div>
+
+        <hr />
+
         {/* buttons to compact or expand the whole graph */}
         <div className="field">
           <div className={styles.collapseButtonsContainer}>

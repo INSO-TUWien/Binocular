@@ -16,7 +16,7 @@ import {
   setCompactAll,
   setExpandAll,
   setIsLoading,
-  setNodeToCompactSection,
+  setNodeToCompactSection, shouldResetLocation,
   updateConflictAwarenessData,
 } from '../sagas';
 
@@ -54,6 +54,8 @@ const mapStateToProps = (state) => {
     nodeToExpand: caState.data.data.nodeToExpand, // the parentSha and the childSha of the compacted view which should be expanded
     nodeToCompactSection: caState.data.data.nodeToCompactSection, // the sha of the commit which section should be compacted
     branchesHeadShas: caState.data.data.branchesHeadShas, // information about the branches heads
+    layout: caState.data.data.layout, // the base layout of the graph
+    shouldResetLocation: caState.data.data.shouldResetLocation, // flag which indicates if the graph location should be reset
   };
 };
 
@@ -79,6 +81,7 @@ const mapDispatchToProps = (dispatch) => {
     onSetCollapsedSections: (collapsedSections) =>
       dispatch(setCollapsedSections(collapsedSections)),
     onSetBranchesHeadSha: (branchesHeadShas) => dispatch(setBranchesHeadShas(branchesHeadShas)),
+    onShouldResetLocation: (resetLocation) => dispatch(shouldResetLocation(resetLocation)),
   };
 };
 

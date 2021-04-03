@@ -30,6 +30,8 @@ let commitShasOfBranch = new Map(); // the target commit shas of a branch as key
 
 let lastTransform;
 let zoom;
+let currentLayout;
+let g;
 
 export default class ConflictAwareness extends React.Component {
   constructor(props) {
@@ -73,7 +75,8 @@ export default class ConflictAwareness extends React.Component {
       (!equals(nextProps.filterCommitter, prevState.filterCommitter) &&
         nextProps.filterCommitter.committer &&
         !nextProps.filterCommitter.showOnly) ||
-      !equals(nextProps.filterSubtree, prevState.filterSubtree)
+      !equals(nextProps.filterSubtree, prevState.filterSubtree) ||
+      !equals(nextProps.layout, prevState.layout)
     ) {
       // if the subtree filter has changed, calculate the shas in the selected subtree
       // or reset the list if the subtree filter was reset
@@ -158,6 +161,8 @@ export default class ConflictAwareness extends React.Component {
         updatedProps.filterAuthor = nextProps.filterAuthor;
         updatedProps.filterCommitter = nextProps.filterCommitter;
         updatedProps.filterSubtree = nextProps.filterSubtree;
+        updatedProps.layout = nextProps.layout;
+        currentLayout = nextProps.layout;
         updatedProps.collapsedSections = collapsedSections;
         updatedProps.branchesHeadShas = branchesHeadShas;
 
@@ -233,7 +238,11 @@ export default class ConflictAwareness extends React.Component {
         );
       } else {
         // the merge shows conflicts -> show them in a modal
-        _showMergeConflictModal(nextProps.mergeCheck, nextProps.branchesHeadShas, nextProps.commits);
+        _showMergeConflictModal(
+          nextProps.mergeCheck,
+          nextProps.branchesHeadShas,
+          nextProps.commits
+        );
       }
 
       updatedProps.mergeCheck = nextProps.mergeCheck;
@@ -366,6 +375,19 @@ export default class ConflictAwareness extends React.Component {
       updatedProps.nodeToCompactSection = nextProps.nodeToCompactSection;
     }
 
+    // resets the location of the graph, helps if the user is lost
+    if (nextProps.shouldResetLocation !== prevState.shouldResetLocation) {
+      if (nextProps.shouldResetLocation) {
+        let { svg } = _getGraphDOMElements();
+        svg
+          // center the graph
+          .call(zoom.transform, d3.zoomIdentity.translate(20, 20).scale(1));
+
+        nextProps.onShouldResetLocation(false);
+      }
+      updatedProps.shouldResetLocation = nextProps.shouldResetLocation;
+    }
+
     if (_.isEmpty(updatedProps)) {
       // No state update necessary
       return null;
@@ -376,8 +398,8 @@ export default class ConflictAwareness extends React.Component {
 
   componentDidUpdate(prevProps, prevState) {
     if (
-      !equals(prevState.commitNodes, this.state.commitNodes) &&
-      this.state.commitNodes.length > 0
+      !equals(prevState.layout, this.state.layout) ||
+      (!equals(prevState.commitNodes, this.state.commitNodes) && this.state.commitNodes.length > 0)
     ) {
       let { svg, inner } = _getGraphDOMElements();
       if (zoom) {
@@ -387,8 +409,8 @@ export default class ConflictAwareness extends React.Component {
       svg.attr('width', '960'); // needed because transition cannot read with 100% which results in an error
 
       // init the graph for the commits/edges
-      let g = new dagreD3.graphlib.Graph().setGraph({
-        rankdir: 'BT',
+      g = new dagreD3.graphlib.Graph().setGraph({
+        rankdir: this.state.layout,
         ranker: 'tight-tree',
         nodesep: 100,
         ranksep: 100,
@@ -428,7 +450,10 @@ export default class ConflictAwareness extends React.Component {
       inner.selectAll('g.node circle').each(function () {
         d3.select(this.parentNode)
           .select('g.label')
-          .attr('transform', 'translate(0,-45) rotate(-45)');
+          .attr(
+            'transform',
+            currentLayout === 'TB' ? 'translate(0,45) rotate(-45)' : 'translate(0,-45) rotate(-45)'
+          );
       });
 
       prevProps.onSetIsLoading(false);
@@ -764,7 +789,9 @@ export default class ConflictAwareness extends React.Component {
     modal.html('');
     modal.append('p').classed('has-text-centered', true).attr('id', 'diffModalSha');
 
-    modal.html(modal.html() + `
+    modal.html(
+      modal.html() +
+        `
      <div class="card is-fullwidth">
        <header id="diffModalMessageCardHeader" class="card-header">
          <p class="card-header-title">Commit Message</p>
@@ -774,12 +801,20 @@ export default class ConflictAwareness extends React.Component {
        </header>
        <div id="diffModalMessageCardContent" class="card-content" style="white-space: pre-wrap"></div>
      </div>
-     `);
-    d3.select(`#diffModalMessageCardHeader`).on('click', () =>
+     `
+    );
+    d3.select('#diffModalMessageCardHeader').on('click', () =>
       _toggleCardContentVisibility('diffModalMessageCardContent', 'diffModalMessageCardArrow')
     );
 
-    modal.append('diff').classed('loadingHintContainer', true).classed(styles.loadingHintContainer, true).append('h1').attr('id', 'diffModalLoadingIndicator').classed(styles.loadingHint, true).html('Loading... <i className="fas fa-spinner fa-pulse" />')
+    modal
+      .append('diff')
+      .classed('loadingHintContainer', true)
+      .classed(styles.loadingHintContainer, true)
+      .append('h1')
+      .attr('id', 'diffModalLoadingIndicator')
+      .classed(styles.loadingHint, true)
+      .html('Loading... <i className="fas fa-spinner fa-pulse" />');
 
     // add a textarea to the modal, needed for CodeMirror
     modal.append('textarea').attr('id', 'diffModalTextArea').attr('hidden', 'true');
