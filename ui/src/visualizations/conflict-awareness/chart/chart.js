@@ -28,6 +28,9 @@ let commitDependenciesWithDependentCommits = new Map(); // map containing the sh
 let commitShasOfSubtree = []; // the commit shas of a subtree
 let commitShasOfBranch = new Map(); // the target commit shas of a branch as key, the current ingoing edge color as value
 
+let lastTransform;
+let zoom;
+
 export default class ConflictAwareness extends React.Component {
   constructor(props) {
     super(props);
@@ -377,6 +380,9 @@ export default class ConflictAwareness extends React.Component {
       this.state.commitNodes.length > 0
     ) {
       let { svg, inner } = _getGraphDOMElements();
+      if (zoom) {
+        svg.call(zoom.transform, d3.zoomIdentity.translate(0, 0).scale(1));
+      }
       svg.innerHtml = '';
       svg.attr('width', '960'); // needed because transition cannot read with 100% which results in an error
 
@@ -500,12 +506,15 @@ export default class ConflictAwareness extends React.Component {
    * @private
    */
   _setZoomSupportAndPositionGraph(svg, inner, g) {
-    const initialScale = 1;
-
-    // Set up zoom support
-    const zoom = d3.zoom().on('zoom', function (event) {
-      inner.attr('transform', event.transform);
-    });
+    if (!zoom) {
+      // Set up zoom support
+      zoom = d3.zoom().on('zoom', function (event) {
+        inner.attr('transform', event.transform);
+        if (event.transform.x !== 0 || event.transform.y !== 0 || event.transform.k !== 1) {
+          lastTransform = event.transform;
+        }
+      });
+    }
 
     svg
       .call(zoom)
@@ -513,9 +522,9 @@ export default class ConflictAwareness extends React.Component {
       // center the graph
       .call(
         zoom.transform,
-        d3.zoomIdentity
-          .translate((svg.attr('width') - g.graph().width * initialScale) / 2, 20)
-          .scale(initialScale)
+        lastTransform
+          ? d3.zoomIdentity.translate(lastTransform.x, lastTransform.y).scale(lastTransform.k)
+          : d3.zoomIdentity.translate((svg.attr('width') - g.graph().width) / 2, 20).scale(1)
       )
       .on('dblclick.zoom', null); // disable zoom on double click
   }
