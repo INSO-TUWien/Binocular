@@ -1873,7 +1873,7 @@ function _highlightCommitsFromIssue(oldIssueID, newIssueID, allCommits) {
     // change the node back to the previous design (not highlighted
     oldIssueCommits.forEach((commit) => {
       const node = _getCommitNodeFromShaClass(commit.sha);
-      node.style('stroke', node.style('fill'));
+      node.style('stroke', node.style('fill')).style('stroke-width', '1px').style('stroke-dasharray', 'none');
     });
   }
 
@@ -1885,7 +1885,7 @@ function _highlightCommitsFromIssue(oldIssueID, newIssueID, allCommits) {
     );
     // color the border of each commit black
     newIssueCommits.forEach((commit) =>
-      _getCommitNodeFromShaClass(commit.sha).style('stroke', 'black')
+      _getCommitNodeFromShaClass(commit.sha).style('stroke', 'black').style('stroke-width', '5px').style('stroke-dasharray', '20,10,5,5,5,10')
     );
   }
 }
