@@ -370,6 +370,7 @@ const ConflictAwarenessConfigComponent = (props) => {
               selected={props.filterAfterDate.date}
               className={cx('input')}
               placeholderText="Select date..."
+              isClearable={true}
               onChange={(date) => {
                 if (!date) {
                   date = '';
@@ -420,6 +421,7 @@ const ConflictAwarenessConfigComponent = (props) => {
               selected={props.filterBeforeDate.date}
               className={cx('input')}
               placeholderText="Select date..."
+              isClearable={true}
               onChange={(date) => {
                 if (!date) {
                   date = '';
@@ -578,7 +580,7 @@ const ConflictAwarenessConfigComponent = (props) => {
             Subtree:
             {/* input field */}
             <input
-              type="text"
+              type="search"
               className={cx('input')}
               placeholder="Commit Sha"
               onChange={(event) => {
