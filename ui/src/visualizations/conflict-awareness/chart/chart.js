@@ -610,6 +610,7 @@ export default class ConflictAwareness extends React.Component {
         // collapsed nodes are ellipses with the number of commits it 'holds'
         g.setNode(node.id, {
           label: node.label,
+          labelType: node.labelType,
           shape: 'ellipse',
           width: 60,
           height: 25,
@@ -1329,10 +1330,26 @@ function prepareForDataExtraction(props, collapsedSections, branchesHeadShas) {
       const collapsedSectionClone = _.cloneDeep(collapsedSection);
 
       // check if the commit should be hidden in the graph or should be toned down
-      collapsedSectionClone.parent.additionalStyle = _checkFilters(props, collapsedSection.parent);
+      collapsedSectionClone.parent.additionalStyle = _checkFilters(
+        props,
+        collapsedSectionClone.parent
+      );
 
-      // the node should be shown in the graph
-      if (collapsedSectionClone.parent.additionalStyle !== null) {
+      // check if the nodes between two branching nodes should be hidden in the graph or toned down
+      if (collapsedSectionClone.nodes.length >= 1) {
+        collapsedSectionClone.nodes.forEach((commitNode) => {
+          commitNode.additionalStyle = _checkFilters(props, commitNode);
+        });
+      }
+      // the parent node should be shown in the graph
+      // or at least one of the nodes between branching nodes should be shown in the graph
+      if (
+        collapsedSectionClone.parent.additionalStyle !== null ||
+        (collapsedSectionClone.nodes.length === 1 && collapsedSectionClone.nodes[0]) ||
+        (collapsedSectionClone.nodes.length > 1 &&
+          collapsedSectionClone.nodes.filter((node) => node.additionalStyle === null).length !==
+            collapsedSectionClone.nodes.length)
+      ) {
         // filter out all unused projects of the parent (projects which
         // are not the base project and the selected other project if existing)
         collapsedSectionClone.parent.projects = collapsedSectionClone.parent.projects.filter(
@@ -1569,7 +1586,11 @@ function extractData(props, collapsedSections, branchesHeadShas) {
 
         // check if the sections parent node is not already set
         // (can happen if the node has more than one children)
-        if (commitNodes.filter((commitNode) => commitNode.sha === parent.sha).length === 0) {
+        // and if the node should be shown according to the filters
+        if (
+          commitNodes.filter((commitNode) => commitNode.sha === parent.sha).length === 0 &&
+          parent.additionalStyle !== null
+        ) {
           // clone the commit, parse its dates, set the label,
           // sets the additional style if it should be toned down and add it to the list
           const commitNode = _.cloneDeep(parent);
@@ -1581,14 +1602,16 @@ function extractData(props, collapsedSections, branchesHeadShas) {
         }
 
         // the collapsed section has no nodes which should be collapsed
-        // -> only add the link vom the sections parent to the child
-        if (nodes.length === 0 && child) {
+        // -> only add the link vom the sections parent to the child,
+        // if the section should be shown according to the filters
+        if (nodes.length === 0 && child && parent.additionalStyle !== null) {
           commitChildLinks.push({ source: parent.sha, target: child.sha });
-        } else if (nodes.length === 1) {
+        } else if (nodes.length === 1 && nodes[0].additionalStyle !== null) {
           // The collapsed section has only one section which should be collapsed
           // it makes no sense to collapse a single node, therefore the node itself should be shown
           // and the links between the sections parent and the node,
           // and the link between the node and the sections child must be created
+          // if the node should be shown according to the filters
           const commitNode = _.cloneDeep(nodes[0]);
           commitNode.date = parseTime(nodes[0].date);
           commitNode.authorDate = parseTime(nodes[0].authorDate);
@@ -1596,7 +1619,10 @@ function extractData(props, collapsedSections, branchesHeadShas) {
           commitNode.labelType = '';
           commitNodes.push(commitNode);
 
-          commitChildLinks.push({ source: parent.sha, target: commitNode.sha });
+          // add the link to from the parent to the node, if the parent should be shown according to the filters
+          if (parent.additionalStyle !== null) {
+            commitChildLinks.push({ source: parent.sha, target: commitNode.sha });
+          }
           commitChildLinks.push({ source: commitNode.sha, target: child.sha });
         } else if (nodes.length > 1) {
           // the collapsed section has multiple commits which should be collapsed
@@ -1612,18 +1638,28 @@ function extractData(props, collapsedSections, branchesHeadShas) {
           // get the clazz and color which the clusterNode should have in the graph
           const { clazz, color } = _getClassColorAndRepo(props, isInBaseProject, isInOtherProject);
 
+          // get the count of all nodes that should will suite the set filters
+          // if some nodes in the collapsed section do not fit the filters
+          // show the number of nodes that fit the filter
+          const filterCount = nodes.filter((node) => node.additionalStyle === '').length;
+
           // create the cluster node
           const clusterNode = {};
           clusterNode.id = `${parent.sha}-${child.sha}`;
-          clusterNode.label = nodes.length;
+          clusterNode.label =
+            filterCount === nodes.length ? nodes.length : `${filterCount}/<br />${nodes.length}`;
+          clusterNode.labelType = 'html';
           clusterNode.clazz = clazz;
           clusterNode.color = color;
           clusterNode.branches = child.branches; // needed for branch edges highlighting
           commitNodes.push(clusterNode);
 
           // push the links from the parent and the cluster node,
+          // if the parent should be shown according to the filter,
           // and from the cluster node to the child to the links list
-          commitChildLinks.push({ source: parent.sha, target: clusterNode.id });
+          if (parent.additionalStyle !== null) {
+            commitChildLinks.push({ source: parent.sha, target: clusterNode.id });
+          }
           commitChildLinks.push({ source: clusterNode.id, target: child.sha });
         }
       }
@@ -1873,7 +1909,10 @@ function _highlightCommitsFromIssue(oldIssueID, newIssueID, allCommits) {
     // change the node back to the previous design (not highlighted
     oldIssueCommits.forEach((commit) => {
       const node = _getCommitNodeFromShaClass(commit.sha);
-      node.style('stroke', node.style('fill')).style('stroke-width', '1px').style('stroke-dasharray', 'none');
+      node
+        .style('stroke', node.style('fill'))
+        .style('stroke-width', '1px')
+        .style('stroke-dasharray', 'none');
     });
   }
 
@@ -1885,7 +1924,10 @@ function _highlightCommitsFromIssue(oldIssueID, newIssueID, allCommits) {
     );
     // color the border of each commit black
     newIssueCommits.forEach((commit) =>
-      _getCommitNodeFromShaClass(commit.sha).style('stroke', 'black').style('stroke-width', '5px').style('stroke-dasharray', '20,10,5,5,5,10')
+      _getCommitNodeFromShaClass(commit.sha)
+        .style('stroke', 'black')
+        .style('stroke-width', '5px')
+        .style('stroke-dasharray', '20,10,5,5,5,10')
     );
   }
 }
