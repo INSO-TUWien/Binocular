@@ -15,8 +15,11 @@ import {
   setCollapsedSections,
   setCompactAll,
   setExpandAll,
+  setFilterAuthor,
+  setFilterCommitter,
   setIsLoading,
-  setNodeToCompactSection, shouldResetLocation,
+  setNodeToCompactSection,
+  shouldResetLocation,
   updateConflictAwarenessData,
 } from '../sagas';
 
@@ -82,6 +85,8 @@ const mapDispatchToProps = (dispatch) => {
       dispatch(setCollapsedSections(collapsedSections)),
     onSetBranchesHeadSha: (branchesHeadShas) => dispatch(setBranchesHeadShas(branchesHeadShas)),
     onShouldResetLocation: (resetLocation) => dispatch(shouldResetLocation(resetLocation)),
+    onSetFilterAuthor: (filterAuthor) => dispatch(setFilterAuthor(filterAuthor)),
+    onSetFilterCommitter: (filterCommitter) => dispatch(setFilterCommitter(filterCommitter)),
   };
 };
 

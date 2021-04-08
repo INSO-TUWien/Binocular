@@ -70,10 +70,8 @@ export default class ConflictAwareness extends React.Component {
       !equals(nextProps.filterAfterDate, prevState.filterAfterDate) ||
       !equals(nextProps.filterBeforeDate, prevState.filterBeforeDate) ||
       (!equals(nextProps.filterAuthor, prevState.filterAuthor) &&
-        nextProps.filterAuthor.author &&
         !nextProps.filterAuthor.showOnly) ||
       (!equals(nextProps.filterCommitter, prevState.filterCommitter) &&
-        nextProps.filterCommitter.committer &&
         !nextProps.filterCommitter.showOnly) ||
       !equals(nextProps.filterSubtree, prevState.filterSubtree) ||
       !equals(nextProps.layout, prevState.layout)
@@ -335,17 +333,24 @@ export default class ConflictAwareness extends React.Component {
       // the author/committer filter is set with showOnly
       if (
         nextProps.compactAll ||
-        (nextProps.filterAuthor.author && nextProps.filterAuthor.showOnly) ||
-        (nextProps.filterCommitter.committer && nextProps.filterCommitter.showOnly)
+        (!equals(nextProps.filterAuthor, prevState.filterAuthor) &&
+          nextProps.filterAuthor.showOnly) ||
+        (!equals(nextProps.filterCommitter, prevState.filterCommitter) &&
+          nextProps.filterCommitter.showOnly)
       ) {
         // create fully compacted sections
         const collapsedSections = _createCompactedCollapsedSections(
           nextProps,
           nextProps.branchesHeadShas || updatedProps.branchesHeadShas
         );
+        nextProps.onSetFilterAuthor(nextProps.filterAuthor);
+        nextProps.onSetFilterCommitter(nextProps.filterCommitter);
 
         // put the fully compacted collapsed sections to the state
         nextProps.onSetCollapsedSections(collapsedSections);
+
+        updatedProps.filterAuthor = nextProps.filterAuthor;
+        updatedProps.filterCommitter = nextProps.filterCommitter;
       }
 
       updatedProps.compactAll = nextProps.compactAll;
