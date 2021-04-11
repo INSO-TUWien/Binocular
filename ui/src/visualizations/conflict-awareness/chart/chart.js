@@ -74,7 +74,8 @@ export default class ConflictAwareness extends React.Component {
       (!equals(nextProps.filterCommitter, prevState.filterCommitter) &&
         !nextProps.filterCommitter.showOnly) ||
       !equals(nextProps.filterSubtree, prevState.filterSubtree) ||
-      !equals(nextProps.layout, prevState.layout)
+      !equals(nextProps.layout, prevState.layout) ||
+      !equals(nextProps.issueForFilter, prevState.issueForFilter)
     ) {
       // if the subtree filter has changed, calculate the shas in the selected subtree
       // or reset the list if the subtree filter was reset
@@ -163,6 +164,7 @@ export default class ConflictAwareness extends React.Component {
         currentLayout = nextProps.layout;
         updatedProps.collapsedSections = collapsedSections;
         updatedProps.branchesHeadShas = branchesHeadShas;
+        updatedProps.issueForFilter = nextProps.issueForFilter;
 
         nextProps.onSetBranchesHeadSha(branchesHeadShas);
       }
@@ -194,16 +196,6 @@ export default class ConflictAwareness extends React.Component {
     // a (new) parent/fork was selected
     if (!_.isEqual(nextProps.otherProject, prevState.otherProject)) {
       updatedProps.otherProject = nextProps.otherProject;
-    }
-
-    // a new filter for highlighting commits of an issue was selected
-    if (nextProps.issueForFilter !== prevState.issueForFilter) {
-      updatedProps.issueForFilter = nextProps.issueForFilter;
-      _highlightCommitsFromIssue(
-        prevState.issueForFilter,
-        nextProps.issueForFilter,
-        nextProps.commits
-      );
     }
 
     // a new check for a rebase was performed
@@ -596,7 +588,11 @@ export default class ConflictAwareness extends React.Component {
           width: 15,
           height: 15,
           class: `${clazz} ${node.sha}`,
-          style: `stroke: ${color}; fill: ${color}; stroke-width: 1px; ${node.additionalStyle}`,
+          style: `stroke: ${
+            node.setIssueHighlight ? 'black' : color
+          }; fill: ${color}; stroke-width: ${node.setIssueHighlight ? '5px' : '1px'}; ${
+            node.setIssueHighlight ? 'stroke-dasharray: 20,10,5,5,5,10;' : ''
+          } ${node.additionalStyle}`,
           repo: repo,
           sha: node.sha,
           signature: node.signature,
@@ -1344,6 +1340,13 @@ function prepareForDataExtraction(props, collapsedSections, branchesHeadShas) {
       if (collapsedSectionClone.nodes.length >= 1) {
         collapsedSectionClone.nodes.forEach((commitNode) => {
           commitNode.additionalStyle = _checkFilters(props, commitNode);
+          // mark commitNode if it should be highlighted according to the issue filter
+          if (
+            props.issueForFilter &&
+            commitNode.message.toLowerCase().includes(props.issueForFilter.toLowerCase())
+          ) {
+            commitNode.isCommitFromIssue = true;
+          }
         });
       }
       // the parent node should be shown in the graph
@@ -1603,6 +1606,15 @@ function extractData(props, collapsedSections, branchesHeadShas) {
           commitNode.authorDate = parseTime(commitNode.authorDate);
           commitNode.label = label;
           commitNode.labelType = labelType;
+
+          // mark commitNode if it should be highlighted according to the issue filter
+          if (
+            props.issueForFilter &&
+            commitNode.message.toLowerCase().includes(props.issueForFilter.toLowerCase())
+          ) {
+            commitNode.setIssueHighlight = true;
+          }
+
           commitNodes.push(commitNode);
         }
 
@@ -1622,6 +1634,15 @@ function extractData(props, collapsedSections, branchesHeadShas) {
           commitNode.authorDate = parseTime(nodes[0].authorDate);
           commitNode.label = '';
           commitNode.labelType = '';
+
+          // mark commitNode if it should be highlighted according to the issue filter
+          if (
+            props.issueForFilter &&
+            commitNode.message.toLowerCase().includes(props.issueForFilter.toLowerCase())
+          ) {
+            commitNode.setIssueHighlight = true;
+          }
+
           commitNodes.push(commitNode);
 
           // add the link to from the parent to the node, if the parent should be shown according to the filters
@@ -1643,10 +1664,13 @@ function extractData(props, collapsedSections, branchesHeadShas) {
           // get the clazz and color which the clusterNode should have in the graph
           const { clazz, color } = _getClassColorAndRepo(props, isInBaseProject, isInOtherProject);
 
-          // get the count of all nodes that should will suite the set filters
+          // get the count of all nodes that should will suite the set filters (including issue filter)
           // if some nodes in the collapsed section do not fit the filters
           // show the number of nodes that fit the filter
-          const filterCount = nodes.filter((node) => node.additionalStyle === '').length;
+          const filterCount = nodes.filter(
+            (node) =>
+              (!props.issueForFilter || node.isCommitFromIssue) && node.additionalStyle === ''
+          ).length;
 
           // create the cluster node
           const clusterNode = {};
@@ -1894,47 +1918,6 @@ function _getClassColorAndRepo(state, isInBaseProject, isInOtherProject) {
   }
 
   return { clazz, color, repo };
-}
-
-/**
- * Highlights all commits containing the newIssueID.
- * Resets the node design of all commits containing the oldIssueID.
- * @param oldIssueID {string} issueID from the previous filter
- * @param newIssueID {string} issueID from the current filter
- * @param allCommits {[any]} list of all commits
- * @private
- */
-function _highlightCommitsFromIssue(oldIssueID, newIssueID, allCommits) {
-  // reset the last highlighting
-  if (oldIssueID) {
-    // get all commits from the last issue filter (searched by id + title case insensitive
-    let oldIssueCommits = allCommits.filter((commit) =>
-      commit.message.toLowerCase().includes(oldIssueID.toLowerCase())
-    );
-    // change the node back to the previous design (not highlighted
-    oldIssueCommits.forEach((commit) => {
-      const node = _getCommitNodeFromShaClass(commit.sha);
-      node
-        .style('stroke', node.style('fill'))
-        .style('stroke-width', '1px')
-        .style('stroke-dasharray', 'none');
-    });
-  }
-
-  // a new highlighting was set
-  if (newIssueID) {
-    // get all commits form the new filter (searched by id + title case insensitive)
-    let newIssueCommits = allCommits.filter((commit) =>
-      commit.message.toLowerCase().includes(newIssueID.toLowerCase())
-    );
-    // color the border of each commit black
-    newIssueCommits.forEach((commit) =>
-      _getCommitNodeFromShaClass(commit.sha)
-        .style('stroke', 'black')
-        .style('stroke-width', '5px')
-        .style('stroke-dasharray', '20,10,5,5,5,10')
-    );
-  }
 }
 
 /**
