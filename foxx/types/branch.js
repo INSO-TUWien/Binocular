@@ -1,11 +1,6 @@
 'use strict';
 
 const gql = require('graphql-sync');
-const arangodb = require('@arangodb');
-const db = arangodb.db;
-const aql = arangodb.aql;
-const commitsToFiles = db._collection('commits-files');
-const paginated = require('./paginated.js');
 
 module.exports = new gql.GraphQLObjectType({
   name: 'Branch',
@@ -22,8 +17,7 @@ module.exports = new gql.GraphQLObjectType({
       },
       active: {
         type: gql.GraphQLString,
-        description:
-          'True if this is the current active branch on your system.'
+        description: 'True if this is the current active branch on your system.'
       }
     };
   }

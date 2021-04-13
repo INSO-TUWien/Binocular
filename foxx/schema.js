@@ -117,10 +117,7 @@ const queryType = new gql.GraphQLObjectType({
           sort: { type: Sort }
         },
         query: (root, args, limit) => {
-          let q = qb
-            .for('file')
-            .in('files')
-            .sort('file.path', args.sort);
+          let q = qb.for('file').in('files').sort('file.path', args.sort);
 
           q = q.limit(limit.offset, limit.count).return('file');
 
@@ -280,10 +277,7 @@ const queryType = new gql.GraphQLObjectType({
           sort: { type: Sort }
         },
         query: (root, args, limit) => {
-          let q = qb
-            .for('branch')
-            .in('branches')
-            .sort('branch.id', args.sort);
+          let q = qb.for('branch').in('branches').sort('branch.id', args.sort);
 
           q = q.limit(limit.offset, limit.count).return('branch');
 
