@@ -16,7 +16,7 @@ module.exports = {
         val = qb.str(comparedValue);
       }
 
-      let queryDate = qb.DATE_TIMESTAMP(val);
+      const queryDate = qb.DATE_TIMESTAMP(val);
       const instanceDate = qb.DATE_TIMESTAMP(dateField);
       return q.filter(qb[cmp](instanceDate, queryDate));
     }

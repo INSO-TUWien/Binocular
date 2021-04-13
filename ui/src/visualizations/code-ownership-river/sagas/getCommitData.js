@@ -111,9 +111,7 @@ function group(data) {
   });
 
   _.each(data, datum => {
-    const { groupedStats } = applyGroupBy(datum.statsByAuthor, (stats, author) =>
-      _.includes(groupedCommitters, author)
-    );
+    const { groupedStats } = applyGroupBy(datum.statsByAuthor, (stats, author) => _.includes(groupedCommitters, author));
 
     datum.statsByAuthor = groupedStats;
   });

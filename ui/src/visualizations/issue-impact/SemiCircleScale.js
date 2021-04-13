@@ -74,8 +74,7 @@ export default class SemiCircleScale {
     textAngle *= -1;
 
     return {
-      transform:
-        `translate(${coords.x}, ${-coords.y}) ` + `rotate(${SemiCircleScale.rad2deg(textAngle)})`,
+      transform: `translate(${coords.x}, ${-coords.y}) ` + `rotate(${SemiCircleScale.rad2deg(textAngle)})`,
       textAnchor: anchor
     };
   }

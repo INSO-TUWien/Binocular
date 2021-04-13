@@ -5,6 +5,7 @@ const arangodb = require('@arangodb');
 const db = arangodb.db;
 const aql = arangodb.aql;
 const commitsToFiles = db._collection('commits-files');
+const LanguagesToFiles = db._collection('languages-files');
 const paginated = require('./paginated.js');
 
 module.exports = new gql.GraphQLObjectType({
@@ -22,12 +23,21 @@ module.exports = new gql.GraphQLObjectType({
       },
       maxLength: {
         type: gql.GraphQLInt,
-        description:
-          'The maximum number of lines this file ever had over the course of the whole project'
+        description: 'The maximum number of lines this file ever had over the course of the whole project'
       },
       webUrl: {
         type: gql.GraphQLString,
         description: 'The URL (if available) to the master-version of this file on the ITS'
+      },
+      language: {
+        type: require('./language'),
+        description: 'The used programming language in this file',
+        query: (file, args, limit) => aql`
+          FOR language
+          IN
+          INBOUND ${file} ${LanguagesToFiles}
+            ${limit}
+            RETURN language`
       },
       commits: paginated({
         type: require('./commit.js'),

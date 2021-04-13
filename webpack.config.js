@@ -3,8 +3,7 @@
 const webpack = require('webpack');
 const path = require('path');
 
-const cssModulesLoader =
-  'css-loader?modules&importLoaders=1&localIdentName=[name]__[local]__[hash:base64:5]';
+const cssModulesLoader = 'css-loader?modules&importLoaders=1&localIdentName=[name]__[local]__[hash:base64:5]';
 
 const cssLoaders = [
   // loaders for loading external css
@@ -29,10 +28,7 @@ const cssLoaders = [
   },
   {
     test: /\.s[ac]ss$/,
-    exclude: [
-      path.resolve(__dirname, 'node_modules'),
-      path.resolve(__dirname, 'ui/src/global.scss')
-    ],
+    exclude: [path.resolve(__dirname, 'node_modules'), path.resolve(__dirname, 'ui/src/global.scss')],
     loaders: ['style-loader', cssModulesLoader, 'sass-loader']
   },
   {
@@ -55,8 +51,7 @@ module.exports = {
     pathinfo: true,
     filename: 'bundle.js',
     publicPath: 'assets/',
-    devtoolModuleFilenameTemplate: info =>
-      path.resolve(info.absoluteResourcePath).replace(/\\/g, '/')
+    devtoolModuleFilenameTemplate: info => path.resolve(info.absoluteResourcePath).replace(/\\/g, '/')
   },
   module: {
     rules: [

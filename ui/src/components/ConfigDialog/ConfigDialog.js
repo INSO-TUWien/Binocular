@@ -55,13 +55,7 @@ const ConfigDialog = props => {
                   </div>
                 </div>
               </Labeled>
-              <Field
-                component={FormControl}
-                name="gitlabUrl"
-                type="text"
-                label="URL:"
-                placeholder="http://www.gitlab.com/"
-              />
+              <Field component={FormControl} name="gitlabUrl" type="text" label="URL:" placeholder="http://www.gitlab.com/" />
               <Field
                 component={FormControl}
                 name="gitlabToken"
@@ -69,10 +63,7 @@ const ConfigDialog = props => {
                 label="Private token:"
                 placeholder="Generate this token in your GitLab">
                 <p className="control">
-                  <a
-                    href="https://docs.gitlab.com/ee/api/README.html#personal-access-tokens"
-                    target="_blank"
-                    className="button is-info">
+                  <a href="https://docs.gitlab.com/ee/api/README.html#personal-access-tokens" target="_blank" className="button is-info">
                     ?
                   </a>
                 </p>
@@ -80,34 +71,10 @@ const ConfigDialog = props => {
             </div>}
           {props.activeTab === 'arango' &&
             <div>
-              <Field
-                component={FormControl}
-                name="arangoHost"
-                type="text"
-                label="Host:"
-                placeholder="localhost"
-              />
-              <Field
-                component={FormControl}
-                name="arangoPort"
-                type="text"
-                label="Port:"
-                placeholder="8529"
-              />
-              <Field
-                component={FormControl}
-                name="arangoUser"
-                type="text"
-                label="Username:"
-                placeholder="root"
-              />
-              <Field
-                component={FormControl}
-                name="arangoPassword"
-                type="password"
-                label="Password:"
-                placeholder="*********"
-              />
+              <Field component={FormControl} name="arangoHost" type="text" label="Host:" placeholder="localhost" />
+              <Field component={FormControl} name="arangoPort" type="text" label="Port:" placeholder="8529" />
+              <Field component={FormControl} name="arangoUser" type="text" label="Username:" placeholder="root" />
+              <Field component={FormControl} name="arangoPassword" type="password" label="Password:" placeholder="*********" />
             </div>}
         </section>
         <footer className="modal-card-foot">

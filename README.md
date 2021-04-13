@@ -1,7 +1,7 @@
 Pupil
 =====
 
-[![Build Status](https://travis-ci.org/juliankotrba/Binocular.svg?branch=master)](https://travis-ci.org/juliankotrba/Binocular)
+[![Build Status](https://travis-ci.org/INSO-TUWien/Binocular.svg?branch=feature%2F10)](https://travis-ci.org/INSO-TUWien/Binocular)
 
 Pupil is a tool for visualizing data from various software-engineering
 tools. It works as a command-line tool run from a git-repository. When
@@ -57,12 +57,21 @@ json.
 - `github`: Object holding github configuration options
   - `auth`: Can hold any options that the [github npm-module] can take, check its documentation.
 - `arango`: Object holding arangodb-configuration
- - `host`: Hostname
- - `port`: Port
- - `user`: username
- - `password`: password
-
-
+  - `host`: Hostname
+  - `port`: Port
+  - `user`: username
+  - `password`: password
+- `travis`: Object holding travis-ci configuration options
+  - `token`: (_**Optional for public repositories**_) holds the different access tokens for public and private repositories (https://blog.travis-ci.com/2013-01-28-token-token-token)
+    - `access`: Access tokens are used to interact with the Travis API
+    - `travis`:  If you want to display the status image for a private repository.
+  - `timeout`: (_**Optional**_) set the timeout to cancel api request  
+- `indexers`: (_**Optional**_) Object holding indexer configuration options.
+              Should only be used if the repository could not detect the indexers automatically.
+  - `its`: Holds the name of the issue tracking system indexer,for instance, gitlab or github
+  - `ci`: Since the CI indexer importer is searching for the corresponding file in the repository, it can be necessary to specify the
+          correct indexer like, for example, travis.
+         
 A sample configuration file looks like this:
 
 ``` javascript
@@ -83,6 +92,10 @@ A sample configuration file looks like this:
     "port": 8529,
     "user": "YOUR_ARANGODB_USER",
     "password": "YOUR_ARANGODB_PASSWORD"
+  },
+  "indexers": {
+    "its": "github",
+    "ci": "travis" 
   }
 }
 ```

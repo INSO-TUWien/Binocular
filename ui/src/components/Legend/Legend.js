@@ -35,21 +35,13 @@ export default class Legend extends React.Component {
           onMouseLeave={() => this.setState({ expand: null })}>
           {(this.state.expand === null || this.state.expand === i) &&
             <g>
-              <LegendIcon
-                width={ICON_WIDTH}
-                height={ICON_HEIGHT}
-                styles={cat.style ? [cat.style] : cat.subLegend.map(l => l.style)}
-              />
+              <LegendIcon width={ICON_WIDTH} height={ICON_HEIGHT} styles={cat.style ? [cat.style] : cat.subLegend.map(l => l.style)} />
               <text x={ICON_WIDTH + ICON_HORIZONTAL_MARGIN} y={ICON_HEIGHT / 2 + 1}>
                 {cat.name}
               </text>
               {cat.subLegend &&
                 this.state.expand === i &&
-                <Legend
-                  x={ICON_WIDTH + ICON_HORIZONTAL_MARGIN}
-                  y={ICON_HEIGHT + ICON_VERTICAL_MARGIN}
-                  categories={cat.subLegend}
-                />}
+                <Legend x={ICON_WIDTH + ICON_HORIZONTAL_MARGIN} y={ICON_HEIGHT + ICON_VERTICAL_MARGIN} categories={cat.subLegend} />}
             </g>}
         </g>
       );
@@ -59,11 +51,7 @@ export default class Legend extends React.Component {
 
     return (
       <g transform={transform} className={styles.legend}>
-        <rect
-          width={this.state.dims.width}
-          height={this.state.dims.height}
-          className={styles.background}
-        />
+        <rect width={this.state.dims.width} height={this.state.dims.height} className={styles.background} />
         <Measure bounds onResize={dims => this.setState({ dims: dims.bounds })}>
           {({ measureRef }) =>
             <g ref={measureRef}>

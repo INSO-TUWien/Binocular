@@ -6,9 +6,7 @@ module.exports = new gql.GraphQLScalarType({
   parseValue: value => value,
   parseLiteral: ast => {
     if (ast.kind !== gql.Kind.OBJECT) {
-      throw new gql.GraphQLError('Query error: Can only parse object but got a: ' + ast.kind, [
-        ast
-      ]);
+      throw new gql.GraphQLError('Query error: Can only parse object but got a: ' + ast.kind, [ast]);
     }
     return ast.value;
   }

@@ -18,6 +18,10 @@ module.exports = new gql.GraphQLObjectType({
         type: gql.GraphQLInt,
         description: 'The number of lines in this file at this commit'
       },
+      stats: {
+        type: require('./stats'),
+        description: 'The number of lines added and removed in this file at this commit'
+      },
       hunks: {
         type: new gql.GraphQLList(require('./hunk.js')),
         description: 'The hunks that affect this file'

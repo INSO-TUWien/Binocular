@@ -81,21 +81,14 @@ export const fetchCodeOwnershipData = fetchFactory(
     const firstCommitTimestamp = Date.parse(firstCommit.date);
     const lastCommitTimestamp = Date.parse(lastCommit.date);
 
-    const firstIssueTimestamp = firstIssue
-      ? Date.parse(firstIssue.createdAt)
-      : firstCommitTimestamp;
+    const firstIssueTimestamp = firstIssue ? Date.parse(firstIssue.createdAt) : firstCommitTimestamp;
     const lastIssueTimestamp = lastIssue ? Date.parse(lastIssue.createdAt) : lastCommitTimestamp;
 
     const state = yield select();
     const viewport = state.visualizations.codeOwnershipRiver.state.config.viewport || [0, null];
 
-    const firstSignificantTimestamp = Math.max(
-      viewport[0],
-      Math.min(firstCommitTimestamp, firstIssueTimestamp)
-    );
-    const lastSignificantTimestamp = viewport[1]
-      ? viewport[1].getTime()
-      : Math.max(lastCommitTimestamp, lastIssueTimestamp);
+    const firstSignificantTimestamp = Math.max(viewport[0], Math.min(firstCommitTimestamp, firstIssueTimestamp));
+    const lastSignificantTimestamp = viewport[1] ? viewport[1].getTime() : Math.max(lastCommitTimestamp, lastIssueTimestamp);
 
     const span = lastSignificantTimestamp - firstSignificantTimestamp;
     const granularity = getGranularity(span);
@@ -109,12 +102,7 @@ export const fetchCodeOwnershipData = fetchFactory(
         granularity,
         interval
       ),
-      getIssueData(
-        [firstIssueTimestamp, lastIssueTimestamp],
-        [firstSignificantTimestamp, lastSignificantTimestamp],
-        granularity,
-        interval
-      ),
+      getIssueData([firstIssueTimestamp, lastIssueTimestamp], [firstSignificantTimestamp, lastSignificantTimestamp], granularity, interval),
       getBuildData(
         [firstCommitTimestamp, lastCommitTimestamp],
         [firstSignificantTimestamp, lastSignificantTimestamp],

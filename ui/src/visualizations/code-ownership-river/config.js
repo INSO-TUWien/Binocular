@@ -104,8 +104,6 @@ const CodeOwnershipRiverConfigComponent = props => {
   );
 };
 
-const CodeOwnershipRiverConfig = connect(mapStateToProps, mapDispatchToProps)(
-  CodeOwnershipRiverConfigComponent
-);
+const CodeOwnershipRiverConfig = connect(mapStateToProps, mapDispatchToProps)(CodeOwnershipRiverConfigComponent);
 
 export default CodeOwnershipRiverConfig;

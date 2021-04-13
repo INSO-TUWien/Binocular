@@ -1,0 +1,11 @@
+/node_modules
+/ui/assets
+.pupil
+.pupilrc
+db/
+*.log
+coverage/
+.whalify/
+.idea
+.bundle
+*.gem

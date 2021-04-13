@@ -3,7 +3,19 @@
   height: 100%;
   display: flex;
   flex-direction: column;
-  overflow-x: auto;
+  overflow-y: auto;
+}
+
+.sidebar .panel-heading {
+  display: flex;
+}
+
+.sidebar .panel-heading span {
+  flex: 2 1 auto;
+}
+
+.sidebar .panel-heading .button {
+  cursor: pointer;
 }
 
 .sidebar .configuration {
@@ -15,13 +27,10 @@
   margin-bottom: 0 !important;
 }
 
-.link {
-  white-space: nowrap;
+.sidebar .panel-tabs {
+  flex-wrap:wrap;
 }
 
-.tabs {
-  overflow-x: scroll;
-  justify-content: start !important;
-  overflow-y: hidden;
-  min-height: 3rem;
+.sidebar .panel-tabs a {
+  flex: 1 1 50%;
 }
