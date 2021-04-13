@@ -41,6 +41,7 @@ const Language = require('./lib/models/Language.js');
 const Hunk = require('./lib/models/Hunk.js');
 const Issue = require('./lib/models/Issue.js');
 const Build = require('./lib/models/Build.js');
+const Branch = require('./lib/models/Branch.js');
 const Module = require('./lib/models/Module');
 const Stakeholder = require('./lib/models/Stakeholder.js');
 const CommitStakeholderConnection = require('./lib/models/CommitStakeholderConnection.js');
@@ -440,6 +441,7 @@ function ensureDb(repo, context) {
         Stakeholder.ensureCollection(),
         Issue.ensureCollection(),
         Build.ensureCollection(),
+        Branch.ensureCollection(),
         Module.ensureCollection(),
         LanguageFileConnection.ensureCollection(),
         CommitStakeholderConnection.ensureCollection(),

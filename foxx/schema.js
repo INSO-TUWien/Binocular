@@ -111,6 +111,22 @@ const queryType = new gql.GraphQLObjectType({
           );
         }
       }),
+      files: paginated({
+        type: require('./types/file.js'),
+        args: {
+          sort: { type: Sort }
+        },
+        query: (root, args, limit) => {
+          let q = qb
+            .for('file')
+            .in('files')
+            .sort('file.path', args.sort);
+
+          q = q.limit(limit.offset, limit.count).return('file');
+
+          return q;
+        }
+      }),
       file: {
         type: require('./types/file.js'),
         args: {
@@ -258,6 +274,22 @@ const queryType = new gql.GraphQLObjectType({
             .toArray()[0];
         }
       },
+      branches: paginated({
+        type: require('./types/branch.js'),
+        args: {
+          sort: { type: Sort }
+        },
+        query: (root, args, limit) => {
+          let q = qb
+            .for('branch')
+            .in('branches')
+            .sort('branch.id', args.sort);
+
+          q = q.limit(limit.offset, limit.count).return('branch');
+
+          return q;
+        }
+      }),
       issueDateHistogram: makeDateHistogramEndpoint(issues)
     };
   }

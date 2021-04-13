@@ -1,0 +1,156 @@
+@import '~bulma';
+
+.chart {
+  outline: none;
+  flex: 1;
+}
+
+
+.config{
+  width:100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+.help {
+  width: 100%;
+  overflow-y: scroll;
+  font-size: 1.5em;
+  height: 100%;
+
+  h2 {
+    font-size: 1.2em;
+    font-weight: bold;
+  }
+
+  h3 {
+    font-size: 1.1em;
+    font-weight: bold;
+  }
+
+  ul {
+    list-style-type: circle;
+    margin-left: 1.5em;
+  }
+
+  p {
+    margin-bottom: 1em;
+  }
+}
+
+.filler {
+  justify-content: center;
+  align-items: center;
+  color: $grey;
+}
+
+.codeView{
+  height: calc(100vh - 130px);
+  overflow-y: scroll;
+  overflow-x: hidden;
+  position: absolute;
+  top:100px;
+  width: 100%;
+}
+
+.heatmapContainer{
+  width: 100%;
+  margin: 0 0 0 40px;
+}
+.rowSummaryContainer{
+  margin: 0;
+  position: absolute;
+  top: 0;
+  right: 0;
+}
+
+.barChartContainer{
+  position: absolute;
+  left: 40px;
+  width: calc(100% - 120px);
+}
+
+.loaderContainer{
+  position: absolute;
+  width: 10rem;
+  height: 10rem;
+  right: calc(50vw - 5rem);
+  top: calc(50vh - 5rem);
+  padding: 1rem;
+  background-color:#FFFFFFDD;
+  box-shadow:0 0 10px #555555;
+  border-radius:4px;
+  z-index: 999;
+}
+
+.error{
+  background-color: #ED4337DD !important;
+  color: white !important;
+}
+
+.loader {
+  border: 16px solid #f3f3f3;
+  border-top: 16px solid #3498db;
+  border-radius: 50%;
+  width: 100%;
+  height: 100%;
+  animation: spin 2s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.menubar{
+  background-color: #EEEEEE;
+  margin-bottom: 1rem;
+}
+
+.selected{
+  background-color: #3273dc;
+  color: whitesmoke !important;
+}
+
+.w100{
+  width: 100%;
+}
+
+.mg1{
+  margin: 1rem;
+}
+
+.pr{
+  position: relative;
+}
+
+.inline{
+  display: inline;
+}
+
+.label{
+  color: #363636;
+  display: block;
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.subLabel{
+  color: #363636;
+  display: block;
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+.headline{
+  color: #363636;
+  display: block;
+  font-size: 2rem;
+  font-weight: 700;
+}
+
+.highlighted{
+  position: fixed;
+  border: red dashed 5px;
+}
+
