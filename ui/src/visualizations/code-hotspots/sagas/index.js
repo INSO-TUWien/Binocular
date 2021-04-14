@@ -15,7 +15,6 @@ export const requestCodeHotspotsData = createAction('REQUEST_CODE_HOTSPOTS_DATA'
 export const receiveCodeHotspotsData = timestampedActionFactory('RECEIVE_CODE_HOTSPOTS_DATA');
 export const receiveCodeHotspotsDataError = createAction('RECEIVE_CODE_HOTSPOTS_DATA_ERROR');
 
-
 export default function*() {
   yield fork(watchSetActiveFile);
 }
@@ -30,7 +29,6 @@ export function* watchSetActiveFile() {
 
 export const fetchFileUrl = fetchFactory(
   function*() {
-
     const state = yield select();
     const fileURL = state.visualizations.codeHotspots.state.config.fileURL;
     const branch = state.visualizations.codeHotspots.state.config.branch;
@@ -38,10 +36,9 @@ export const fetchFileUrl = fetchFactory(
     const files = state.visualizations.codeHotspots.state.config.files;
     const branches = state.visualizations.codeHotspots.state.config.branches;
 
-    return {fileURL,branch,files,path,branches}
-    },
+    return { fileURL, branch, files, path, branches };
+  },
   requestCodeHotspotsData,
   receiveCodeHotspotsData,
   receiveCodeHotspotsDataError
 );
-
