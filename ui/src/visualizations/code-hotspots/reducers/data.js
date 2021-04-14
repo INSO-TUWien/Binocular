@@ -12,15 +12,15 @@ export default handleActions(
         isFetching: false,
         receivedAt: action.meta.receivedAt
       });
-    },
+    }
   },
   {
     data: {
-      fileURL: "",
-      branch:"master",
-      files:[],
-      branches:[],
-      path:""
+      fileURL: '',
+      branch: 'master',
+      files: [],
+      branches: [],
+      path: ''
     },
     lastFetched: null,
     isFetching: null

@@ -8,7 +8,17 @@ import styles from './sidebar.css';
 
 export default class Link extends React.Component {
   render() {
-    return ( <a href = "#" className = {cx({'is-active ': this.props.isActive}, styles.link)}key = {this.props.key}onClick = {e => {e.preventDefault();this.props.onClick();}}> {this.props.children} </a>
+    return (
+      <a
+        href="#"
+        className={cx({ 'is-active ': this.props.isActive }, styles.link)}
+        key={this.props.key}
+        onClick={e => {
+          e.preventDefault();
+          this.props.onClick();
+        }}>
+        {this.props.children}
+      </a>
     );
   }
 }

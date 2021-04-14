@@ -1,10 +1,8 @@
 import { graphQl } from '../../../../utils';
 import Promise from 'bluebird';
 
-
-export default class vcsData{
-
-  static async getChangeData(path){
+export default class vcsData {
+  static async getChangeData(path) {
     return Promise.resolve(
       graphQl.query(
         `
@@ -39,13 +37,12 @@ export default class vcsData{
         }
       }
       `,
-        {file:path}
-      ))
-      .then(resp => resp.file.commits);
-
+        { file: path }
+      )
+    ).then(resp => resp.file.commits);
   }
 
-  static async getIssueData(path){
+  static async getIssueData(path) {
     return Promise.resolve(
       graphQl.query(
         `
@@ -82,10 +79,8 @@ export default class vcsData{
           }
       }
       `,
-        {file:path}
-      ))
-      .then(resp => resp.issues);
-
+        { file: path }
+      )
+    ).then(resp => resp.issues);
   }
-
 }

@@ -1,19 +1,10 @@
-import {
-  render
-} from 'react-dom';
-import {
-  createStore,
-  applyMiddleware
-} from 'redux';
-import {
-  createLogger
-} from 'redux-logger';
+import { render } from 'react-dom';
+import { createStore, applyMiddleware } from 'redux';
+import { createLogger } from 'redux-logger';
 import io from 'socket.io-client';
 import createSocketIoMiddleware from 'redux-socket.io';
 import createSagaMiddleware from 'redux-saga';
-import {
-  root
-} from './sagas';
+import { root } from './sagas';
 import _ from 'lodash';
 
 import Root from './components/Root.js';
@@ -40,7 +31,6 @@ import issueImpact from './visualizations/issue-impact';
 import hotspotDials from './visualizations/hotspot-dials';
 import codeHotspots from './visualizations/code-hotspots';
 
-
 const visualizationModules = [dashboard, codeOwnershipRiver, issueImpact, hotspotDials, codeHotspots];
 
 const visualizations = {};
@@ -51,7 +41,8 @@ _.each(visualizationModules, viz => {
 const app = makeAppReducer(visualizationModules);
 
 const store = createStore(
-  app, {
+  app,
+  {
     activeVisualization: _.keys(visualizations)[0],
     visualizations,
     config: {
@@ -65,10 +56,10 @@ const store = createStore(
 
 saga.run(root);
 
-render( < Root store = {store}/>, document.getElementById('root'));
+render(<Root store={store} />, document.getElementById('root'));
 if (module.hot) {
-    module.hot.accept('./components/Root', () => {
-        const NewRoot = require('./components/Root').default;
-        render( < NewRoot store = {store}/>, document.getElementById('root'));
-    });
+  module.hot.accept('./components/Root', () => {
+    const NewRoot = require('./components/Root').default;
+    render(<NewRoot store={store} />, document.getElementById('root'));
+  });
 }

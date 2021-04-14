@@ -66,7 +66,7 @@ module.exports = new gql.GraphQLObjectType({
       }),
       file: {
         type: require('./fileInCommit.js'),
-        args:{
+        args: {
           path: {
             description: 'Path of the file',
             type: new gql.GraphQLNonNull(gql.GraphQLString)
@@ -84,7 +84,8 @@ module.exports = new gql.GraphQLObjectType({
               file,
               lineCount: edge.lineCount,
               hunks: edge.hunks
-            }`)
+            }`
+            )
             .toArray()[0];
         }
       },
