@@ -10,6 +10,7 @@ import {
   getDiff,
   getMergeCheck,
   getRebaseCheck,
+  setReloadedFlag,
   resetStateProperty,
   setBranchesHeadShas,
   setCollapsedSections,
@@ -59,11 +60,13 @@ const mapStateToProps = (state) => {
     branchesHeadShas: caState.data.data.branchesHeadShas, // information about the branches heads
     layout: caState.data.data.layout, // the base layout of the graph
     shouldResetLocation: caState.data.data.shouldResetLocation, // flag which indicates if the graph location should be reset
+    reloaded: caState.data.data.reloaded, // flag that the mount of the visualisation was reloaded (example: open Conflict Awareness tab; switch to other tab; go back to Conflict Awareness tab) -> uses the last state of the visualisation
   };
 };
 
 const mapDispatchToProps = (dispatch) => {
   return {
+    onSetReloadedFlag: () => dispatch(setReloadedFlag()),
     onResetStateProperty: (stateProperty) => dispatch(resetStateProperty(stateProperty)),
     onGetDiff: (commitSha) => dispatch(getDiff(commitSha)),
     onUpdateConflictAwarenessData: (repoFullName) =>

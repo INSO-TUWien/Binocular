@@ -53,16 +53,17 @@ export default class ConflictAwareness extends React.Component {
       updatedProps.isLoading = nextProps.isLoading;
     }
 
-    // get the conflict awareness data if the repoFullName was changed
+    // get the conflict awareness data if the repoFullName was changed and the reloaded flag is not set
     // this can only occur when the view is mounted
     // is done this way because the updateConflictAwarenessData is reused for the initial data retrieve and for updates
-    if (nextProps.repoFullName !== prevState.repoFullName) {
+    if (nextProps.repoFullName !== prevState.repoFullName && !nextProps.reloaded) {
       updatedProps.repoFullName = nextProps.repoFullName;
       nextProps.onUpdateConflictAwarenessData(nextProps.repoFullName);
     }
 
     // the branches will be retrieved in the same event as the commits (and branches are typically fewer than commits for the comparison)
     if (
+      (nextProps.reloaded !== prevState.reloaded && nextProps.reloaded) ||
       !equals(nextProps.collapsedSections, prevState.collapsedSections) ||
       !equals(nextProps.branches, prevState.branches) ||
       !equals(prevState.excludedBranchesBaseProject, nextProps.excludedBranchesBaseProject) ||
@@ -393,8 +394,17 @@ export default class ConflictAwareness extends React.Component {
     }
   }
 
+  /**
+   * Save flag that the tab was switched.
+   * Needed to reload the visualisation again after switching back again.
+   */
+  componentWillUnmount() {
+    this.props.onSetReloadedFlag();
+  }
+
   componentDidUpdate(prevProps, prevState) {
     if (
+      prevProps.reloaded !== this.state.reloaded ||
       !equals(prevState.layout, this.state.layout) ||
       (!equals(prevState.commitNodes, this.state.commitNodes) && this.state.commitNodes.length > 0)
     ) {
@@ -454,6 +464,9 @@ export default class ConflictAwareness extends React.Component {
       });
 
       prevProps.onSetIsLoading(false);
+      if (prevProps.reloaded) {
+        this.setState({ reloaded: true });
+      }
     } else if (prevState.colorBaseProject !== this.state.colorBaseProject) {
       // recolor the commits/edges of the base project
       let { inner } = _getGraphDOMElements();
@@ -531,7 +544,7 @@ export default class ConflictAwareness extends React.Component {
     if (!zoom) {
       // Set up zoom support
       zoom = d3.zoom().on('zoom', function (event) {
-        inner.attr('transform', event.transform);
+        d3.select('#test g').attr('transform', event.transform);
         if (event.transform.x !== 0 || event.transform.y !== 0 || event.transform.k !== 1) {
           lastTransform = event.transform;
         }

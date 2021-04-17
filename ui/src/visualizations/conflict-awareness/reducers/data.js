@@ -8,11 +8,19 @@ export default handleActions(
     SET_IS_LOADING: (state, action) => {
       return _.merge({}, state, { data: { isLoading: action.payload } });
     },
+
     // sets a state property to undefined
     RESET_STATE_PROPERTY: (state, action) => {
       const data = _.assign({}, state.data);
       data[action.payload] = undefined;
       return _.assign({}, state, { data });
+    },
+
+    // sets a reload flag
+    SET_RELOADED_FLAG: (state) => {
+      const newState = _.cloneDeep(state);
+      newState.data.reloaded = true;
+      return newState;
     },
 
     // switches the checked flag of a branch of the base project

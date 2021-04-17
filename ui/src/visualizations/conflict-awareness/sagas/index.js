@@ -42,6 +42,9 @@ export const resetStateProperty = createAction(
   (stateProperty) => stateProperty
 );
 
+// sets the flag that the mount of the visualisation was reloaded -> uses the last state of the visualisation
+export const setReloadedFlag = createAction('SET_RELOADED_FLAG', () => {});
+
 // adds/removes a branch of the base project to/from the excluded branches list
 export const switchExcludedBranchesBaseProject = createAction(
   'SWITCH_EXCLUDED_BRANCHES_BASE_PROJECT',
