@@ -113,6 +113,8 @@ export default handleActions(
       let data = state.data;
       data.commits = undefined;
       data.branches = undefined;
+      data.branchesBaseProject = undefined;
+      data.branchesOtherProject = undefined;
       data.commitNodes = undefined;
       data.commitChildLinks = undefined;
       data.parent = state.data.parent;
