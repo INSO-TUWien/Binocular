@@ -11,6 +11,7 @@ export default handleActions(
   {
     commits: { total: 1, processed: 0 },
     issues: { total: 1, processed: 0 },
-    builds: { total: 1, processed: 0 }
+    builds: { total: 1, processed: 0 },
+    languages: { total: 0, processed: 0 }
   }
 );

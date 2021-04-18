@@ -97,7 +97,7 @@ const indexers = {
 const services = [];
 
 const gatewayService = new GateWayService();
-const reporter = new ProgressReporter(io, ['commits', 'issues', 'builds', 'languages', 'filesLanguage', 'modules']);
+const reporter = new ProgressReporter(io, ['commits', 'issues', 'builds', 'files', 'languages', 'filesLanguage', 'modules']);
 let databaseConnection = null;
 
 /**
@@ -124,17 +124,18 @@ async function startDatabase(context, gateway) {
       if (error && error.name === DatabaseError.name) {
         databaseConnection = null;
         console.error(`A ${error.name} occurred and returns the following message: ${error.message}!`);
-        return;
+        console.log('wait 1 minute until retry!');
+        setTimeout(startDatabase.bind(context, gateway), 60000);
       }
       throw error;
     }
-  }
 
-  // immediately run all indexers
-  return (activeIndexingQueue = Promise.all([
-    repoUpdateHandler(repository, context, gateway),
-    reIndex(indexers, context, reporter, gateway, activeIndexingQueue, ++indexingProcess)
-  ]));
+    // immediately run all indexers
+    return (activeIndexingQueue = Promise.all([
+      repoUpdateHandler(repository, context, gateway),
+      reIndex(indexers, context, reporter, gateway, activeIndexingQueue, ++indexingProcess)
+    ]));
+  }
 }
 
 /**

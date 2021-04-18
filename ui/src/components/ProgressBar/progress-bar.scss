@@ -24,7 +24,7 @@
 
     .text.details {
       display: none;
-      font-size: 3;
+      font-size: 2.2;
     }
 
     .hole {
@@ -57,14 +57,13 @@
 }
 
 .hoverTarget:hover {
-  height: 200px;
-  width: 200px;
+  height: 400px;
+  width: 400px;
 
   .donut {
-    $colors: #00EE76 #00CD66 #008B45;
+    $colors: #00EE76 #00CD66 #008B45 #008B2C;
     @for $i from 1 through length($colors) {
-      .segment:nth-child(#{$i
-                          }) {
+      .segment:nth-child(#{$i}) {
         stroke: nth($colors, $i);
       }
     }
@@ -75,6 +74,10 @@
 
     .text.details {
       display: block;
+    }
+
+    .ring {
+      fill: rgba(250,250,250,0.8);
     }
   }
 }
