@@ -1423,7 +1423,6 @@ function prepareForDataExtraction(props, collapsedSections, branchesHeadShas) {
             props.otherProject &&
             props.excludedBranchesOtherProject.includes(branch.branchName)
           ) {
-            // TODO: if something is off -> changed 'collapsedSectionClone.sha' to collapsedSectionClone.parent.sha
             let branchHeadCommit = branchesHeadShas.get(collapsedSectionClone.parent.sha);
             // the current commit is a head
             if (branchHeadCommit) {

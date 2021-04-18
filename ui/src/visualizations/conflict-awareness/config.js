@@ -15,7 +15,8 @@ import {
   setIssueSelector,
   setLayout,
   setOtherProject,
-  setSelectedIssue, shouldResetLocation,
+  setSelectedIssue,
+  shouldResetLocation,
   switchAllBranchCheckedBaseProject,
   switchAllBranchCheckedOtherProject,
   switchBranchCheckedBaseProject,
@@ -640,7 +641,6 @@ const projectProperties = (
       {/* Label */}
       <label className="label">{label}</label>
       <div className={styles.colorPickContainer}>
-        {/* ProjectName TODO: add ProjectName */}
         {elementInFrontOfColorPicker}
         {/* ColorPicker */}
         <ColorPicker
@@ -686,8 +686,7 @@ const getSearchBoxElement = (props) => {
   return (
     <div className={styles.width100}>
       {/* show disabled selection box if no fork and parent is available */}
-      {/* TODO: add check for parent and fork length */}
-      {!props.forks && (
+      {(!props.forks || props.forks.length === 0) && !props.parent && (
         <SearchBox
           placeholder="Select Parent/Fork..."
           disabled={true}
@@ -696,13 +695,21 @@ const getSearchBoxElement = (props) => {
         />
       )}
       {/* show selection box if at least a fork or parent is available */}
-      {/* TODO: add check for parent and fork length */}
-      {props.forks && (
+      {((props.forks && props.forks.length > 0) || props.parent) && (
         <SearchBox
           placeholder="Select Parent/Fork..."
-          renderOption={(i) => `${i.fullName}`}
+          renderOption={(i) => `${i.fullName} (${i.type})`}
           search={(text) => {
-            return props.forks.filter((fork) =>
+            const otherProjectsList = props.forks;
+            otherProjectsList.forEach((fork) => (fork.type = 'Fork'));
+
+            // add parent on top of the list if existing
+            if (props.parent) {
+              props.parent.type = 'Parent';
+              otherProjectsList.unshift(props.parent);
+            }
+
+            return otherProjectsList.filter((fork) =>
               fork.fullName.toLowerCase().includes(text.toLowerCase())
             );
           }}
