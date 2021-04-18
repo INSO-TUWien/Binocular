@@ -35,6 +35,7 @@ import ColorPicker from '../../components/ColorPicker';
 import DatePicker from 'react-datepicker';
 import React from 'react';
 import SearchBox from '../../components/SearchBox';
+import { equals } from '../../utils/compare';
 
 import 'react-datepicker/dist/react-datepicker.min.css';
 
@@ -714,7 +715,13 @@ const getSearchBoxElement = (props) => {
             );
           }}
           value={props.otherProject}
-          onChange={(otherProject) => props.onSetOtherProject(otherProject, props.repoFullName)}
+          onChange={(otherProject) => {
+            // update other project if at least one the selected one or the other project
+            // in the props is set and they are not equal
+            if ((otherProject || props.otherProject) && !equals(otherProject, props.otherProject)) {
+              props.onSetOtherProject(otherProject, props.repoFullName);
+            }
+          }}
         />
       )}
     </div>
