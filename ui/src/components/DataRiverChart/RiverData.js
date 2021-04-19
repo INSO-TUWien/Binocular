@@ -1,6 +1,7 @@
 'use strict';
 
 import _ from 'lodash';
+import { createEnum } from '../../utils/Enum';
 
 /**
  * represents the unchangeable river associated data
@@ -27,7 +28,8 @@ export class RiverData {
       buildStat: BuildStat.valueOf(buildStat),
       buildWeight
     });
-    this._buildSuccessRate = buildSuccessRate;
+    this.buildSuccessRate = buildSuccessRate;
+    this._trend = 0;
   }
 
   copyCtor(data) {
@@ -79,6 +81,14 @@ export class RiverData {
     this._buildSuccessRate = Number.isNaN(+buildSuccessRate) || isNaN(+buildSuccessRate) ? 0.0 : +buildSuccessRate;
   }
 
+  get trend() {
+    return this._trend;
+  }
+
+  set trend(value) {
+    this._trend = Number.isNaN(+value) || isNaN(+value) ? 0.0 : +value;
+  }
+
   equal(data) {
     return _.isEqual(this.data, data) || _.isEqual(this.data, (data || {}).data);
   }
@@ -86,28 +96,11 @@ export class RiverData {
 
 /**
  * represents a build state enum
- *
- * @type {unknown[]}
  */
-export const BuildStat = Object.freeze(
-  (() => {
-    const plainEnum = {
-      None: 0,
-      Abort: 1,
-      Failed: 2,
-      Success: 4,
-      Skipped: 8
-    };
-    const data = Object.keys(plainEnum).reduce((item, key) => {
-      item[key] = { value: plainEnum[key], name: key };
-      return item;
-    }, {});
-
-    data.valueOf = value => {
-      const foundKey = Object.keys(data).find(item => data[item] === value || data[item].name === value || data[item].value === value);
-      return foundKey ? data[foundKey] : data.None;
-    };
-
-    return data;
-  })()
-);
+export const BuildStat = createEnum({
+  None: 0,
+  Abort: 1,
+  Failed: 2,
+  Success: 4,
+  Skipped: 8
+});

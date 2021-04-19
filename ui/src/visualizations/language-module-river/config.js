@@ -8,7 +8,8 @@ import styles from './styles.scss';
 import LegendCompact from '../../components/LegendCompact';
 import CheckboxLegend from '../../components/CheckboxLegend';
 
-const mapStateToProps = (state /*, ownProps*/) => {
+// eslint-disable-next-line no-unused-vars
+const mapStateToProps = (state, ownProps) => {
   const languageModuleRiverState = state.visualizations.languageModuleRiver.state;
 
   return {
@@ -22,14 +23,17 @@ const mapStateToProps = (state /*, ownProps*/) => {
   };
 };
 
-const mapDispatchToProps = (dispatch /*, ownProps*/) => {
-  return {
-    onClickResolution: resolution => dispatch(setResolution(resolution)),
-    onClickIssues: showIssues => dispatch(setShowIssues(showIssues)),
-    onClickCheckboxLegend: selected => dispatch(setSelectedAuthors(selected)),
-    onClickShowCIChart: showCIChart => dispatch(setShowCIChart(showCIChart)),
-    onClickShowIssueChart: showIssueChart => dispatch(setShowIssueChart(showIssueChart))
-  };
+const mapDispatchToProps = (dispatch, ownProps) => {
+  return Object.assign(
+    {
+      onClickResolution: resolution => dispatch(setResolution(resolution)),
+      onClickIssues: showIssues => dispatch(setShowIssues(showIssues)),
+      onClickCheckboxLegend: selected => dispatch(setSelectedAuthors(selected)),
+      onClickShowCIChart: showCIChart => dispatch(setShowCIChart(showCIChart)),
+      onClickShowIssueChart: showIssueChart => dispatch(setShowIssueChart(showIssueChart))
+    },
+    ownProps
+  );
 };
 
 const LangModRiverConfigComponent = props => {

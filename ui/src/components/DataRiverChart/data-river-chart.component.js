@@ -9,6 +9,10 @@ import _ from 'lodash';
 import { RiverDataContainer } from './RiverDataContainer';
 import { InvalidArgumentException } from '../../utils/exception/InvalidArgumentException';
 import RiverTooltip from './river-tooltip';
+import { formatPercentage } from '../../utils/format';
+import StreamKey from './StreamKey';
+import { hash } from '../../utils/crypto-utils';
+import IssueStream, { IssueColor, IssueData, IssueStat } from './IssueStream';
 
 export class DataRiverChartComponent extends ScalableBaseChartComponent {
   constructor(props) {
@@ -17,67 +21,204 @@ export class DataRiverChartComponent extends ScalableBaseChartComponent {
 
   /**
    *
-   * @param scaleX
-   * @param scaleY
+   * @param scales
    * @returns {*}
    */
-  // eslint-disable-next-line no-unused-vars
-  createAreaFunction(scaleX, scaleY) {
+  createAreaFunction(scales) {
     //Area generator for the chart
     return d3
       .area()
-      .x(function(d) {
-        return scaleX(d.data.date);
+      .x(d => scales.x(d.data.date))
+      .y0(d => {
+        const y0 = d instanceof IssueData ? scales.issue(d.status.name) : this.getPoint(scales, d).y0;
+        return y0;
       })
-      .y0(function(d) {
-        return scaleY(d[0]);
-      })
-      .y1(function(d) {
-        return scaleY(d[1]);
+      .y1(d => {
+        const y1 = d instanceof IssueData ? scales.issue(d.status.name) + 0.01 : this.getPoint(scales, d).y1;
+        return y1;
       })
       .curve(d3.curveMonotoneX);
   }
 
   /**
    *
-   * @param data
-   * @returns {[]}
+   * @param scales
+   * @param dataPoint
+   * @returns {{y0: number, y1: number}}
    */
-  // eslint-disable-next-line no-unused-vars
-  getXDims(data) {
-    return [d3.min(data, d => d.date), d3.max(data, d => d.date)];
+  getPoint(scales, dataPoint) {
+    const rate = scales.y(dataPoint.data.buildSuccessRate);
+    const offset = scales.diff(0);
+    return { y0: rate + scales.diff(dataPoint[0]) - offset, y1: rate + scales.diff(dataPoint[1]) - offset };
   }
 
   /**
    *
-   * @param data
    * @returns {[]}
    */
-  // eslint-disable-next-line no-unused-vars
-  getYDims(data) {
-    const maxDiff = d3.max(data, d => d.totalDiff);
-    return [-maxDiff, maxDiff];
-  }
+  getXDims() {
+    const dates = Array.from(
+      new Set(
+        this.state.data.stackedData
+          ? this.state.data.stackedData.reduce((stack, stream) => [...stack, ...stream.map(data => data.data.date)], [])
+          : this.state.data.data.map(data => data.date)
+      )
+    );
 
-  getColor(palette, d) {
-    return d.color;
+    return [d3.min(dates), new Date()];
   }
 
   /**
    *
-   * @param x
-   * @param stackedData
-   * @param xAxis
+   * @returns {[]}
+   */
+  getYDims() {
+    return this.state.yDims;
+  }
+
+  /**
+   *
+   * @param d
+   * @returns {*}
+   */
+  getColor(d) {
+    return `url(#color-${d.key.toId()})`;
+  }
+
+  /**
+   *
+   * @param scales
+   * @param axes
    * @param brushArea
    * @param area
-   * @param data
    */
-  // eslint-disable-next-line no-unused-vars
-  resetZoom(x, stackedData, xAxis, brushArea, area, data) {
-    x.domain(this.getXDims(data));
-    xAxis.call(d3.axisBottom(x));
+  resetZoom(scales, axes, brushArea, area) {
+    scales.x.domain(this.getXDims());
+    axes.x.call(d3.axisBottom(scales.x));
     brushArea.selectAll('.layer').attr('d', area);
     this.setState({ zoomed: false });
+  }
+
+  /**
+   * Update the vertical zoom (mouse wheel zoom) with new values
+   * @param dims Y-Dimensions for new zoom level
+   * @param scales Y-Scale from d3
+   * @param axes Y-Axis from d3
+   * @param area Area that the paths are drawn on
+   * @param areaGenerator Area generator for those paths
+   */
+  updateVerticalZoom(dims, scales, axes, area, areaGenerator) {
+    scales.diff.domain(dims);
+
+    area.selectAll('.layer').attr('d', areaGenerator);
+    this.setState({ zoomedVertical: true, verticalZoomDims: dims });
+  }
+
+  /**
+   * Reset the vertical zoom to default values.
+   * @param scales Y-Scale from d3
+   * @param axes Y-Axis from d3
+   * @param area Area that the paths are drawn on
+   * @param areaGenerator Area generator for those paths
+   */
+  resetVerticalZoom(scales, axes, area, areaGenerator) {
+    scales.diff.domain(this.getYDims());
+
+    area.selectAll('.layer').attr('d', areaGenerator);
+
+    this.setState({ zoomedVertical: false, verticalZoomDims: [0, 0] });
+  }
+
+  /**
+   *
+   * @param xDims
+   * @param xRange
+   * @param yDims
+   * @param yRange
+   * @returns {{x: *, y: *} & {issue: *, pattern: *, scale: {width: *, height: *}, y: *, diff: *}}
+   */
+  createScales(xDims, xRange, yDims, yRange) {
+    //Y axis scaled with the maximum amount of change (half in each direction)
+    const scales = super.createScales(xDims, xRange, yDims, yRange);
+
+    const scale = {
+      height: d3.scaleLinear().domain([0.0, 100.0]).range(yRange),
+      width: d3.scaleLinear().domain([100.0, 0.0]).range(xRange)
+    };
+
+    return Object.assign({}, scales, {
+      scale,
+      issue: d3
+        .scaleOrdinal()
+        .domain(IssueStat.getAvailable)
+        .range(
+          IssueStat.getAvailable.map((_, i, values) =>
+            scale.height(i === 0 ? 100.0 : i === values.length - 1 ? 0.0 : 100.0 / (values.length - 1.0) * i)
+          )
+        ),
+      y: d3.scaleLinear().domain([-1.0, 1.0]).range([scale.height(20), scale.height(80)]),
+      diff: d3.scaleLinear().domain(scales.y.domain()).range([scale.height(70) - scale.height(100), 0]),
+
+      // define design pattern values
+      pattern: d3
+        .scaleLinear()
+        .domain([0, d3.max(scales.y.domain())])
+        .range([
+          Math.max(Math.min(scale.height(0) - scale.height(1), scale.width(0) - scale.width(1)), 1),
+          Math.max(Math.min(scale.height(0) - scale.height(2), scale.width(0) - scale.width(2)), 5)
+        ])
+    });
+  }
+
+  /**
+   *
+   * @param brushArea
+   * @param scales
+   * @param width
+   * @param height
+   * @param paddings
+   * @returns {*}
+   */
+  createYAxis(brushArea, scales, width, height, paddings) {
+    const yAxis = brushArea.append('g').attr('class', this.styles.axis).attr('transform', 'translate(' + paddings.left + ',0)');
+
+    if (!this.props.hideVertical) {
+      yAxis.call(d3.axisLeft(scales.y).tickFormat(d => `${formatPercentage((d * 100 + 100) / 2.0)}%`));
+    }
+    return yAxis;
+  }
+
+  /**
+   *
+   * @param brushArea
+   * @param scales
+   * @param width
+   * @param height
+   * @param paddings
+   */
+  additionalAxes(brushArea, scales, width, height, paddings) {
+    const issueAxis = brushArea
+      .append('g')
+      .attr('class', this.styles.axis)
+      .attr('transform', 'translate(' + (width - paddings.right) + ',0)');
+
+    if (!this.props.hideVertical) {
+      issueAxis.call(d3.axisRight(scales.issue));
+    }
+  }
+
+  /**
+   *
+   * @returns {{hasChanges: (boolean), hashes: {keysHash: string} & {issueHash: string}}}
+   */
+  hasUpdate() {
+    const update = super.hasUpdate();
+    const issueHash = hash(this.props.issueStreams || []);
+
+    return {
+      hashes: Object.assign(update.hashes, { issueHash }),
+      hasChanges: update.hasChanges || this.state.data.issueHash !== issueHash
+    };
   }
 
   /**
@@ -87,70 +228,133 @@ export class DataRiverChartComponent extends ScalableBaseChartComponent {
    * @returns Stacked chart data for d3 functions and preprocessed data { stackedData, data }
    */
   calculateChartData(data, order) {
-    //Keys are the names of the developers, date is excluded
-    //const keys = this.props.keys && this.props.keys.length > 0 ? this.props.keys : Object.keys(data[0]).slice(1);
-    let stackedData = [];
-
     if (!data.length) {
-      return { stackedData, data };
+      return { stackedData: [], data };
     }
 
     if (data.find(record => !(record instanceof RiverData))) {
       throw new InvalidArgumentException('The provided data are not of the type RiverData!');
     }
 
-    data = data.map(record => new RiverData(record)).sort((o1, o2) => (o1 < o2 ? -1 : o1 > o2 ? 1 : 0));
+    const streamingData = this.processStreamData(data, order);
 
-    const reorganizedData = this.preprocessData(data);
-    const streamData = _.flatMap(reorganizedData.grouped.map(record => record.sort()));
+    // set yDims associated with the presented data
+    this.setState(prev =>
+      Object.assign({}, prev, {
+        yDims: [-d3.max(data, d => d.deletions) || 1, d3.max(data, d => d.additions) || 1]
+      })
+    );
 
-    //Data formatted for d3
-    stackedData = this.createStackedData(streamData);
-
-    const colors = chroma.scale('spectral').mode('lch').colors(stackedData.length).map(color => chroma(color).alpha(0.85).hex('rgba'));
-
-    stackedData.forEach((stack, index) => (stack.color = colors[index]));
-
-    const keys = /*this.props.keys && this.props.keys.length > 0
-        ? this.props.keys
-        : */ stackedData
-      .filter(stream => stream.length)
-      .map(stream => createStreamId(stream[0]));
-
-    d3.stackOffsetDiverging(stackedData, Object.keys(keys));
-
-    // console.log({ stackedData, data });
-    return { stackedData, data };
+    return streamingData;
   }
 
   /**
    *
-   * @param streamData
+   * @param data
+   * @param stackedData
+   * @param order
+   * @returns {{data: *, stackedData: *[]}}
+   */
+  processStreamData(data, stackedData, order) {
+    data = data
+      .filter(record => record && record instanceof RiverData)
+      .map(record => new RiverData(record))
+      .sort((record1, record2) => (record1.date < record2.date ? -1 : record1.date > record2.date ? 1 : 0));
+
+    const reorganizedData = this.preprocessData(data);
+    const streamData = _.flatMap(reorganizedData.grouped.map(record => record.sort()));
+
+    const keys = this.props.keys ? this.props.keys : stackedData.filter(stream => stream.length).map(stream => new StreamKey(stream[0]));
+
+    //Data formatted for d3
+    stackedData = this.createStackedData(streamData, keys);
+
+    if (order && order.length) {
+      stackedData.sort((streamA, streamB) => order.indexOf(streamA.key.name) - order.indexOf(streamB.key.name));
+    }
+
+    // add color set to stream
+    this.setRiverStreamColors(stackedData);
+
+    const issueStreams = this.preProcessIssueStreams(stackedData);
+    const stackedIssues = this.processIssueStreams(issueStreams);
+
+    this.setIssueStreamColors(stackedIssues);
+
+    return { data, stackedData: [...stackedIssues, ...stackedData], issueStreams };
+  }
+
+  findColor(name) {
+    const key = Object.keys(this.props.palette).find(colorKey => name.toUpperCase() === colorKey.toUpperCase()) || null;
+    const color = key ? this.props.palette[key] : undefined;
+    return color ? chroma(color).alpha(0.85).hex('rgba') : color;
+  }
+
+  /**
+   *
+   * @param stackedData
+   * @param skipChildren
+   */
+  setRiverStreamColors(stackedData, skipChildren) {
+    stackedData.forEach(stack => {
+      const nameColorKey = Object.keys(this.props.palette).find(
+        colorKey =>
+          colorKey.toLowerCase().includes(stack.key.name.toLowerCase()) &&
+          colorKey.toLowerCase().includes(stack.key.direction.toLowerCase())
+      );
+
+      const color = {
+        attribute: chroma(this.props.palette[stack.key.attribute]).alpha(0.85).hex('rgba'),
+        name: this.findColor(nameColorKey)
+      };
+
+      if (!skipChildren) {
+        stack.forEach(node => (node.color = color));
+      }
+
+      stack.color = color;
+    });
+  }
+
+  /**
+   *
+   * @param stackedData
+   */
+  setIssueStreamColors(stackedData) {
+    const colors = IssueStat.getAvailable.map(key => this.findColor(key));
+    stackedData.filter(stack => stack.stream instanceof IssueStream).forEach(stack => {
+      stack.color = new (IssueColor.bind.apply(IssueColor, [undefined, this.findColor(stack.key.name), ...colors]))();
+      stack.stream.color = stack.color;
+    });
+  }
+
+  /**
+   *
+   * @param dataStreams
+   * @param keys
    * @returns {[]}
    */
-  createStackedData(streamData) {
-    return streamData.reduce((stack, stream, index) => {
-      const additionStream = this.createStack(stream, index * 2, record => [
-        this.calcYDim(record.buildSuccessRate),
-        this.calcYDim(record.buildSuccessRate) + record.additions
-      ]);
-      const deletionStream = this.createStack(stream, index * 2 + 1, record => [
-        this.calcYDim(record.buildSuccessRate) - record.deletions,
-        this.calcYDim(record.buildSuccessRate)
-      ]);
+  createStackedData(dataStreams, keys) {
+    return dataStreams
+      .filter(
+        stream => !keys || (keys.length && !!keys.find(key => key && key.name === stream[0].name && key.attribute === stream[0].attribute))
+      )
+      .reduce((stack, dataStream, index) => {
+        const stream = {
+          additions: this.createStack(dataStream, index * 2, record => [0, record.additions + (record.sha === null ? 0.001 : 0)]),
+          deletions: this.createStack(dataStream, index * 2 + 1, record => [-record.deletions - (record.sha === null ? 0.001 : 0), 0])
+        };
 
-      if (additionStream && additionStream.length) {
-        additionStream.key.direction = 'addition';
-        additionStream.key[0] = additionStream.index;
-        stack.push(additionStream);
-      }
-      if (deletionStream && deletionStream.length) {
-        deletionStream.key.direction = 'deletions';
-        deletionStream.key[0] = deletionStream.index;
-        stack.push(deletionStream);
-      }
-      return stack;
-    }, []);
+        Object.keys(stream).forEach(key => {
+          if (stream[key] && stream[key].length) {
+            stream[key].key.direction = key;
+            stream[key].key[0] = stream[key].index;
+            stream[key].forEach(dataPoint => (dataPoint.key.direction = key));
+            stack.push(stream[key]);
+          }
+        });
+        return stack;
+      }, []);
   }
 
   /**
@@ -160,8 +364,44 @@ export class DataRiverChartComponent extends ScalableBaseChartComponent {
    */
   preprocessData(data) {
     const maxDiff = d3.max(data, d => d.additions + d.deletions);
-    const dateTicks = data.map(record => record.date);
 
+    return this.createOrganizeDataStreams(data, this.calculateDateDiff(data).dateTicks, maxDiff);
+  }
+
+  /**
+   *
+   * @param data
+   * @returns {{dateDiff: (*|number), dateTicks: *[]}}
+   */
+  calculateDateDiff(data) {
+    //calculate minimum x difference
+    const dateDiff =
+      data
+        .map(record => record.date)
+        .filter(date => date && !Number.isNaN(date.getTime()) && !isNaN(date.getTime()))
+        .map(date => date.getTime())
+        .map((date, i, dates) => date - dates[i - 1])
+        .filter(diff => !Number.isNaN(diff) && !isNaN(diff) && diff > 0)
+        .sort()[0] || 1;
+
+    return {
+      dateDiff,
+      dateTicks: [
+        new Date(data[0].date.getTime() - dateDiff),
+        ...data.map(record => record.date),
+        new Date(data[data.length - 1].date.getTime() + dateDiff)
+      ]
+    };
+  }
+
+  /**
+   *
+   * @param data
+   * @param dateTicks
+   * @param maxDiff
+   * @returns RiverDataContainer
+   */
+  createOrganizeDataStreams(data, dateTicks, maxDiff) {
     return data.reduce((current, record) => {
       const container = current.getValue(record.name).getValue(record.attribute);
 
@@ -170,24 +410,41 @@ export class DataRiverChartComponent extends ScalableBaseChartComponent {
         dateTicks.forEach(date => (container.getValue(date.getTime()).value = new RiverData(date, record.attribute, record.name)));
       }
 
-      const prevIndex = container.indexOf(record.date.getTime()) - 1;
-      const previous = prevIndex >= 0 ? container.values[prevIndex].value : undefined;
-      const leaf = container.getValue(record.date.getTime());
+      this.calculateBuildRates(container, record, maxDiff);
 
-      // set ci success rate
-      record.buildSuccessRate =
-        (previous ? previous.buildSuccessRate : 0.0) +
-        (record.buildStat === BuildStat.Success
-          ? record.buildWeight * record.totalDiff / maxDiff
-          : record.buildStat === BuildStat.Failed ? -record.buildWeight * record.totalDiff / maxDiff : 0.0);
-      leaf.value = record;
+      // add record to container
+      container.getValue(record.date.getTime()).value = record;
 
       // set build rate for all future items until a new existing datapoint
-      dateTicks.forEach((date, i) => {
-        if (i > prevIndex + 1) container.getValue(date.getTime()).value.buildSuccessRate = record.buildSuccessRate;
+      dateTicks.forEach(date => {
+        if (date.getTime() > record.date.getTime()) container.getValue(date.getTime()).value.buildSuccessRate = record.buildSuccessRate;
       });
       return current;
     }, new RiverDataContainer(''));
+  }
+
+  /**
+   *
+   * @param container
+   * @param record
+   * @param maxDiff
+   */
+  calculateBuildRates(container, record, maxDiff) {
+    const prevIndex = container.indexOf(record.date.getTime()) - 1;
+    const previous = prevIndex >= 0 ? container.values[prevIndex].value : undefined;
+
+    // calculate ci success rate
+    record.buildSuccessRate =
+      (previous ? previous.buildSuccessRate : 0.0) +
+      (record.buildStat === BuildStat.Success
+        ? record.buildWeight * record.totalDiff / maxDiff
+        : record.buildStat === BuildStat.Failed ? -record.buildWeight * record.totalDiff / maxDiff : 0.0);
+
+    // define range of success rate
+    record.buildSuccessRate =
+      record.buildSuccessRate >= 0.0 ? Math.min(record.buildSuccessRate, 1.0) : Math.max(record.buildSuccessRate, -1.0);
+
+    record.trend = Math.sign(record.buildSuccessRate - previous.buildSuccessRate);
   }
 
   /**
@@ -202,7 +459,7 @@ export class DataRiverChartComponent extends ScalableBaseChartComponent {
       const dataPoint = offset(record);
       dataPoint.index = pointIndex;
       dataPoint.data = record;
-      dataPoint.key = createStreamId(record);
+      dataPoint.key = new StreamKey(record);
       return dataPoint;
     });
 
@@ -212,100 +469,280 @@ export class DataRiverChartComponent extends ScalableBaseChartComponent {
 
     dataStream.index = index;
     dataStream.key = dataStream[0].key;
+
+    const size = stream => Math.max(d3.max(stream, d => d.data.additions), d3.max(stream, d => d.data.deletions), 1);
+    dataStream.pattern = {
+      size,
+      position: (scale, stream) => scale(size(stream)) / 2,
+      radius: (scale, stream) => scale(size(stream)) / 2 + 0.5,
+      offset: (scale, stream) => scale(size(stream)) * 0.75
+    };
     return dataStream;
   }
 
-  calcYDim(y) {
-    return y * 10000;
+  /**
+   *
+   * @param stackedData
+   */
+  preProcessIssueStreams(stackedData) {
+    if (!this.props.issueStreams || !this.props.issueStreams.length) {
+      return undefined;
+    }
+
+    const issueStreams = this.props.issueStreams.map(stream => new IssueStream(stream));
+
+    issueStreams.forEach(stream => {
+      const issueStream = stackedData.reduce(
+        (stack, data) => [
+          ...stack,
+          ...data.filter(
+            record =>
+              record &&
+              record.data &&
+              record.data.sha &&
+              record.data.sha.length > 0 &&
+              !!stream.find(issue => record.data.sha === issue.sha)
+          )
+        ],
+        []
+      );
+
+      stream.forEach(ticketPoint => {
+        ticketPoint.values = issueStream.filter(dataPoint => dataPoint.data.sha === ticketPoint.sha);
+        ticketPoint.points = Array.from(new Set(ticketPoint.values.map(record => record.data)));
+      });
+
+      stream.__values.sort(
+        (point1, point2) =>
+          d3.min(point1.points, point => point.data.date.getTime()) - d3.min(point2.points, point => point.data.date.getTime())
+      );
+    });
+
+    return issueStreams;
+  }
+
+  /**
+   *
+   * @param issueStreams
+   * @returns {*}
+   */
+  processIssueStreams(issueStreams) {
+    return issueStreams.reduce((streams, stream) => {
+      const maxStreamCount = d3.max(stream.values, ticketDataPoint => ticketDataPoint.points.length);
+      const data = [];
+      for (let i = 0; i < maxStreamCount * 2; i++) {
+        const issueStream = [stream.start, ...stream.map(dataPoint => dataPoint.values[i % dataPoint.values.length])];
+        if (stream.isClosed) {
+          issueStream.push(stream.end);
+        }
+        issueStream.stream = stream;
+        issueStream.key = new StreamKey({ data: { name: stream.ticketId, direction: i } });
+        data.push(issueStream);
+      }
+      return [...streams, ...data];
+    }, []);
+  }
+
+  /**
+   *
+   * @param brushArea
+   * @param brush
+   * @param area
+   * @param tooltip
+   * @param svg
+   * @param scales
+   */
+  setBrushArea(brushArea, brush, area, tooltip, svg, scales) {
+    if (!this.state.data.stackedData || !this.state.data.stackedData.length) {
+      return;
+    }
+    super.setBrushArea(brushArea, brush, area, tooltip, svg, scales);
+
+    const issueDataPoints = Array.from(
+      new Set(
+        this.state.data.issueStreams.reduce((dataStream, stream) => {
+          const dataPoints = stream.values.reduce((data, item) => [...data, ...item.points], []);
+          dataPoints.forEach(item => {
+            item.color = stream.color;
+            item.stream = stream;
+          });
+          const start = stream.start;
+          start.color = stream.color;
+          start.stream = stream;
+          dataStream = [...dataStream, start, ...dataPoints];
+          if (stream.isClosed) {
+            const end = stream.end;
+            end.color = stream.color;
+            end.stream = stream;
+            dataStream.push(end);
+          }
+          return dataStream;
+        }, [])
+      )
+    );
+
+    const radius = Math.max((scales.x(issueDataPoints[1].data.date) - scales.x(issueDataPoints[0].data.date)) * 0.01, 5);
+
+    brushArea
+      .append('g')
+      .selectAll('a')
+      .data(issueDataPoints)
+      .enter()
+      .append('a')
+      .attr('href', '#')
+      .append('circle')
+      .classed('issue', true)
+      .attr('fill', d => d.color.ticket)
+      .attr('cx', d => scales.x(d.data.date))
+      .attr('cy', d => (d instanceof IssueData ? scales.issue(d.status.name) : scales.y(d.buildSuccessRate)))
+      .attr('r', radius)
+      .on('mouseenter', function(event, stream) {
+        if (stream instanceof IssueData) {
+          return;
+        }
+        tooltip.attr('additional', stream.stream.ticketId);
+        tooltip.attr('data', stream.data);
+        tooltip.attr('color', `${stream.color.ticket}`);
+        tooltip.attr('attrColor', stream.color.ticket);
+      })
+      .on('mouseout', function() {
+        tooltip.attr('data', null);
+      });
+  }
+
+  getLayerStrokeWidth(data) {
+    return 0;
+  }
+
+  getLayerStrokeColor(data) {
+    return undefined;
+  }
+
+  /**
+   *
+   * @param brushArea
+   * @param pathStreams
+   * @param scales
+   */
+  additionalPathDefs(brushArea, pathStreams, scales) {
+    const defs = brushArea.append('defs');
+
+    const pattern = defs
+      .selectAll('pattern')
+      .data(this.state.data.stackedData.filter(data => data && !data.stream && !(data.stream instanceof IssueData)))
+      .enter()
+      .append('pattern')
+      .attr('width', stream => scales.pattern(stream.pattern.size(stream)))
+      .attr('height', stream => scales.pattern(stream.pattern.size(stream)))
+      .attr('id', stream => `color-${stream.key.toId()}`)
+      .attr('patternUnits', 'userSpaceOnUse')
+      .attr('x', stream => stream.pattern.offset(scales.pattern, stream))
+      .attr('y', stream => stream.pattern.offset(scales.pattern, stream))
+      .attr('patternTransform', (d, i) => `rotate(${(i * 360 / this.state.data.stackedData.length + 1 * i) % 360} 50 50)`);
+
+    pattern.append('rect').attr('fill', d => d.color.attribute).attr('width', '100%').attr('height', '100%');
+
+    pattern
+      .append('circle')
+      .attr('fill', d => d.color.name)
+      .attr('cx', stream => stream.pattern.position(scales.pattern, stream))
+      .attr('cy', stream => stream.pattern.position(scales.pattern, stream))
+      .attr('r', stream => stream.pattern.radius(scales.pattern, stream));
+
+    pathStreams.attr('opacity', 0.9);
+
+    const gradients = defs
+      .selectAll('linearGradient')
+      .data(Array.from(new Set(this.state.data.stackedData.filter(data => data && data.stream && data.stream instanceof IssueStream))))
+      .enter()
+      .append('linearGradient')
+      .attr('id', stream => `color-${stream.key.toId()}`);
+
+    gradients.append('stop').attr('offset', '0%').attr('stop-color', stream => stream.color[IssueStat.Open.name]);
+    gradients.append('stop').attr('offset', '20%').attr('stop-color', stream => stream.color['InProcess']);
+    gradients.append('stop').attr('offset', '80%').attr('stop-color', stream => stream.color['InProcess']);
+    gradients
+      .append('stop')
+      .attr('offset', '100%')
+      .attr('stop-color', stream => (stream.stream.isClosed ? stream.color[IssueStat.Close.name] : undefined));
   }
 
   /**
    *
    * @param path
    * @param bisectDate
-   * @param rawData
    * @param mouseoverDate
-   * @param data
-   * @param resolution
    * @param tooltip
-   * @param palette
    * @param event
    * @param node
    * @param brushArea
-   * @param x
-   * @param y
+   * @param scales
+   * @param stream
    */
-  createdTooltipNode(path, bisectDate, rawData, mouseoverDate, data, resolution, tooltip, palette, event, node, brushArea, x, y, stream) {
+  createdTooltipNode(path, bisectDate, mouseoverDate, tooltip, event, node, brushArea, scales, stream) {
     const realDataStream = stream.filter(record => record && record.data && record.data.sha && record.data.sha.length > 0);
     const nearestDateIndex = bisectDate(realDataStream.map(record => record.data), mouseoverDate);
     const candidate1 = realDataStream[nearestDateIndex] || realDataStream[realDataStream.length - 1];
     const candidate2 = realDataStream[nearestDateIndex - 1] || realDataStream[0];
-    let nearestDataPoint;
+
     if (!candidate1 || !candidate2) {
       return;
     }
-    if (Math.abs(mouseoverDate - candidate1.data.date) < Math.abs(mouseoverDate - candidate2.data.date)) {
-      nearestDataPoint = candidate1;
-    } else {
-      nearestDataPoint = candidate2;
-    }
+    const nearestDataPoint =
+      Math.abs(mouseoverDate - candidate1.data.date) < Math.abs(mouseoverDate - candidate2.data.date) ? candidate1 : candidate2;
 
     tooltip.attr('data', nearestDataPoint.data);
     tooltip.attr('additional', nearestDataPoint.key.direction);
-    brushArea
-      .append('line')
-      .attr('class', this.styles.indicatorLine)
-      .attr('x1', x(nearestDataPoint.data.date))
-      .attr('x2', x(nearestDataPoint.data.date))
-      .attr('y1', y(nearestDataPoint[0]))
-      .attr('y2', y(nearestDataPoint[1]))
-      .attr('clip-path', 'url(#clip)');
+    tooltip.attr('color', `${nearestDataPoint.color.name}`);
+    tooltip.attr('attrColor', nearestDataPoint.color.attribute);
 
-    brushArea
-      .append('circle')
-      .attr('class', this.styles.indicatorCircle)
-      .attr('cx', x(nearestDataPoint.data.date))
-      .attr('cy', y(nearestDataPoint[1]))
-      .attr('r', 5)
-      .attr('clip-path', 'url(#clip)')
-      .style('fill', nearestDataPoint.data.color);
-
-    brushArea
-      .append('circle')
-      .attr('class', this.styles.indicatorCircle)
-      .attr('cx', x(nearestDataPoint.data.date))
-      .attr('cy', y(nearestDataPoint[0]))
-      .attr('r', 5)
-      .attr('clip-path', 'url(#clip)')
-      .style('fill', nearestDataPoint.data.color);
+    const dataPoint = this.getPoint(scales, nearestDataPoint);
+    this.paintDataPoint(brushArea, scales.x(nearestDataPoint.data.date), dataPoint.y0, dataPoint.y1, nearestDataPoint.color.name);
   }
 
   /**
    *
+   * @param path
    * @param tooltip
+   * @param brushArea
    * @param event
    * @param stream
    */
   // eslint-disable-next-line no-unused-vars
-  onMouseover(tooltip, event, stream) {
+  onMouseover(path, tooltip, brushArea, event, stream) {
+    this.state.data.stackedData.forEach(dataStream => {
+      if (dataStream.key.eqPrimKey(stream.key)) {
+        d3.select(`#${this.getBrushId(dataStream)}`).raise().attr('opacity', 1);
+      } else {
+        d3.select(`#${this.getBrushId(dataStream)}`).attr('opacity', 0.5);
+      }
+    });
     event.preventDefault();
   }
 
   /**
    *
+   * @param path
    * @param tooltip
    * @param brushArea
    * @param event
    * @param stream
    */
   // eslint-disable-next-line no-unused-vars
-  onMouseLeave(tooltip, brushArea, event, stream) {
+  onMouseLeave(path, tooltip, brushArea, event, stream) {
     tooltip.attr('data', null);
+    brushArea.select('.' + this.styles.indicatorLine).remove();
+    brushArea.selectAll('.' + this.styles.indicatorCircle).remove();
+    brushArea.selectAll('.layer').attr('opacity', 0.9).sort((streamA, streamB) => streamA.index - streamB.index);
   }
 
   // eslint-disable-next-line no-unused-vars
   getBrushId(data) {
-    return data.key;
+    return data.stream ? `issue-${data.key.toId()}` : `stream-${data.key.toId()}`;
+  }
+
+  getBrushClass(data) {
+    return data.stream ? 'issues' : 'changes';
   }
 
   render() {
@@ -317,25 +754,5 @@ export class DataRiverChartComponent extends ScalableBaseChartComponent {
     );
   }
 }
-
-/**
- *
- * @param node
- * @returns {{name: *, attribute: ((function(): (undefined|*))|{boundary: string, values: string[]}), direction: string}}
- */
-const createStreamId = node => {
-  const record = {
-    attribute: node.attribute,
-    name: node.name,
-    direction: ''
-  };
-  record.eq = function(item) {
-    return record === item || !Object.keys(record).filter(key => typeof record[key] === 'function').find(key => record[key] !== item[key]);
-  };
-  record.toString = function() {
-    return `${record.direction}-${record.attribute}-${record.name}`;
-  };
-  return record;
-};
 
 export default DataRiverChartComponent;

@@ -33,36 +33,34 @@ export default class StackedAreaChart extends ScalableBaseChartComponent {
 
   /**
    *
-   * @param data
    * @returns {[]}
    */
-  getXDims(data) {
-    return [d3.min(data, d => d.date), d3.max(data, d => d.date)];
+  getXDims() {
+    return [d3.min(this.state.data.data, d => d.date), d3.max(this.state.data.data, d => d.date)];
   }
 
   // eslint-disable-next-line no-unused-vars
-  getYDims(data) {
+  getYDims() {
     return this.props.yDims;
   }
 
   /**
    *
-   * @param scaleX
-   * @param scaleY
+   * @param scales
    * @returns {*}
    */
-  createAreaFunction(scaleX, scaleY) {
+  createAreaFunction(scales) {
     //Area generator for the chart
     return d3
       .area()
       .x(function(d) {
-        return scaleX(d.data.date);
+        return scales.x(d.data.date);
       })
       .y0(function(d) {
-        return scaleY(d[0]);
+        return scales.y(d[0]);
       })
       .y1(function(d) {
-        return scaleY(d[1]);
+        return scales.y(d[1]);
       })
       .curve(d3.curveMonotoneX);
   }
@@ -101,15 +99,17 @@ export default class StackedAreaChart extends ScalableBaseChartComponent {
 
   /**
    *
-   * @param x
-   * @param stackedData
-   * @param xAxis
+   * @param scales
+   * @param axes
    * @param brushArea
    * @param area
    */
-  resetZoom(x, stackedData, xAxis, brushArea, area) {
-    x.domain([stackedData[0][0].data.date, stackedData[0][stackedData[0].length - 1].data.date]);
-    xAxis.call(d3.axisBottom(x));
+  resetZoom(scales, axes, brushArea, area) {
+    scales.x.domain([
+      this.state.data.stackedData[0][0].data.date,
+      this.state.data.stackedData[0][this.state.data.stackedData[0].length - 1].data.date
+    ]);
+    axes.x.call(d3.axisBottom(scales.x));
     brushArea.selectAll('.layer').attr('d', area);
     this.setState({ zoomed: false });
   }
@@ -118,22 +118,20 @@ export default class StackedAreaChart extends ScalableBaseChartComponent {
    *
    * @param path
    * @param bisectDate
-   * @param rawData
    * @param mouseoverDate
-   * @param data
-   * @param resolution
    * @param tooltip
-   * @param palette
    * @param event
    * @param node
    * @param brushArea
-   * @param x
-   * @param y
+   * @param scales
+   * @param stream
    */
-  createdTooltipNode(path, bisectDate, rawData, mouseoverDate, data, resolution, tooltip, palette, event, node, brushArea, x, y, stream) {
-    const nearestDateIndex = bisectDate(rawData, mouseoverDate);
-    const candidate1 = rawData[nearestDateIndex];
-    const candidate2 = rawData[nearestDateIndex - 1];
+  // eslint-disable-next-line no-unused-vars
+  createdTooltipNode(path, bisectDate, mouseoverDate, tooltip, event, node, brushArea, scales, stream) {
+    const palette = this.state.palette;
+    const nearestDateIndex = bisectDate(this.state.data.data, mouseoverDate);
+    const candidate1 = this.state.data.data[nearestDateIndex];
+    const candidate2 = this.state.data.data[nearestDateIndex - 1];
     let nearestDataPoint;
     if (Math.abs(mouseoverDate - candidate1.date) < Math.abs(mouseoverDate - candidate2.date)) {
       nearestDataPoint = candidate1;
@@ -143,8 +141,8 @@ export default class StackedAreaChart extends ScalableBaseChartComponent {
     const key = d3.select(path).attr('id');
     const text = key.split(' <', 1); //Remove git signature email
     let value = nearestDataPoint[key];
-    const chartValues = this.findChartValues(data, key, nearestDataPoint.date);
-    const formattedDate = formatDate(new Date(nearestDataPoint.date), resolution);
+    const chartValues = this.findChartValues(this.state.data.stackedData, key, nearestDataPoint.date);
+    const formattedDate = formatDate(new Date(nearestDataPoint.date), this.props.resolution);
     if (value < 0) {
       value *= -1;
     }
@@ -155,62 +153,67 @@ export default class StackedAreaChart extends ScalableBaseChartComponent {
       .style('position', 'absolute')
       .style('left', event.layerX - 20 + 'px')
       .style('top', event.layerY + (node.getBoundingClientRect() || { y: 0 }).y - 70 + 'px');
-    brushArea.select('.' + this.styles.indicatorLine).remove();
-    brushArea.selectAll('.' + this.styles.indicatorCircle).remove();
-    brushArea
-      .append('line')
-      .attr('class', this.styles.indicatorLine)
-      .attr('x1', x(nearestDataPoint.date))
-      .attr('x2', x(nearestDataPoint.date))
-      .attr('y1', y(chartValues.y1))
-      .attr('y2', y(chartValues.y2))
-      .attr('clip-path', 'url(#clip)');
 
-    brushArea
-      .append('circle')
-      .attr('class', this.styles.indicatorCircle)
-      .attr('cx', x(nearestDataPoint.date))
-      .attr('cy', y(chartValues.y2))
-      .attr('r', 5)
-      .attr('clip-path', 'url(#clip)')
-      .style('fill', palette[key]);
-
-    brushArea
-      .append('circle')
-      .attr('class', this.styles.indicatorCircle)
-      .attr('cx', x(nearestDataPoint.date))
-      .attr('cy', y(chartValues.y1))
-      .attr('r', 5)
-      .attr('clip-path', 'url(#clip)')
-      .style('fill', palette[key]);
+    this.paintDataPoint(brushArea, scales.x(nearestDataPoint.date), scales.y(chartValues.y1), scales.y(chartValues.y2), palette[key]);
   }
 
+  /**
+   *
+   * @param data
+   * @returns {*}
+   */
   getBrushId(data) {
     return data.key;
   }
 
   /**
    *
-   * @param tooltip
-   * @param event
-   * @param stream
-   */
-  // eslint-disable-next-line no-unused-vars
-  onMouseover(tooltip, event, stream) {
-    tooltip.style('display', 'inline');
-  }
-
-  /**
-   *
+   * @param path
    * @param tooltip
    * @param brushArea
    * @param event
    * @param stream
    */
   // eslint-disable-next-line no-unused-vars
-  onMouseLeave(tooltip, brushArea, event, stream) {
+  onMouseover(path, tooltip, brushArea, event, stream) {
+    tooltip.style('display', 'inline');
+  }
+
+  /**
+   *
+   * @param path
+   * @param tooltip
+   * @param brushArea
+   * @param event
+   * @param stream
+   */
+  // eslint-disable-next-line no-unused-vars
+  onMouseLeave(path, tooltip, brushArea, event, stream) {
     tooltip.style('display', 'none');
     brushArea.select('.' + this.styles.indicatorLine).remove();
     brushArea.selectAll('.' + this.styles.indicatorCircle).remove();
+  }
+
+  /**
+   * Finds the chart values (for the displayed line) for the moused-over data-point
+   * @param data
+   * @param key
+   * @param timeValue
+   * @returns {{y1: *, y2: *}}
+   */
+  findChartValues(data, key, timeValue) {
+    let foundValues = [];
+    _.each(data, series => {
+      if (series.key === key) {
+        _.each(series, dataPoint => {
+          if (dataPoint.data.date === timeValue) {
+            foundValues = dataPoint;
+            return false;
+          }
+        });
+        return false;
+      }
+    });
+    return { y1: foundValues[0], y2: foundValues[1] };
   }
 }
