@@ -199,7 +199,7 @@ export default class chartGeneration {
           .attr('width', barWidth)
           .attr('height', barHeight)
           .attr('z-index', '10')
-          .on('mouseover', function(d, i) {
+          .on('mouseover', function(event, d) {
             div.transition().duration(200).style('opacity', 1);
             div
               .html(
@@ -215,7 +215,7 @@ export default class chartGeneration {
               .style('right', 30 + 'px')
               .style('top', d.row * barHeight + 'px');
           })
-          .on('mouseout', function(d) {
+          .on('mouseout', function() {
             div.transition().duration(500).style('opacity', 0);
           });
 
@@ -237,7 +237,7 @@ export default class chartGeneration {
           .attr('width', barWidth)
           .attr('height', barHeight)
           .attr('z-index', '10')
-          .on('mouseover', function(d, i) {
+          .on('mouseover', function(event, d) {
             div.transition().duration(200).style('opacity', 1);
             div
               .html(
@@ -253,7 +253,7 @@ export default class chartGeneration {
               .style('right', 30 + 'px')
               .style('top', d.row * barHeight + 'px');
           })
-          .on('mouseout', function(d) {
+          .on('mouseout', function() {
             div.transition().duration(500).style('opacity', 0);
           });
 
@@ -275,14 +275,14 @@ export default class chartGeneration {
           .attr('width', barWidth)
           .attr('height', barHeight)
           .attr('z-index', '10')
-          .on('mouseover', function(d, i) {
+          .on('mouseover', function(event, d) {
             div.transition().duration(200).style('opacity', 1);
             div
               .html("<div style='font-weight: bold'>Row: " + (d.row + 1) + '</div>' + '<div>Changes: ' + d.value + '</div>')
               .style('right', 30 + 'px')
               .style('top', d.row * barHeight + 'px');
           })
-          .on('mouseout', function(d) {
+          .on('mouseout', function() {
             div.transition().duration(500).style('opacity', 0);
           });
 
@@ -458,7 +458,8 @@ export default class chartGeneration {
           .attr('y', 0)
           .attr('width', w / columns)
           .attr('height', h)
-          .on('mouseover', function(d, i) {
+          .on('mouseover', function(event, d) {
+            const i = d.column;
             div.transition().duration(200).style('opacity', 1);
             div
               .html(
@@ -476,7 +477,7 @@ export default class chartGeneration {
               .style('right', w - i * w / columns - 300 > 0 ? w - i * w / columns - 300 : 0 + 'px')
               .style('top', h + 'px');
           })
-          .on('mouseout', function(d) {
+          .on('mouseout', function() {
             div.transition().duration(500).style('opacity', 0);
           });
         break;
@@ -492,7 +493,8 @@ export default class chartGeneration {
           .attr('y', 0)
           .attr('width', w / columns)
           .attr('height', h)
-          .on('mouseover', function(d, i) {
+          .on('mouseover', function(event, d) {
+            const i = d.column;
             div.transition().duration(200).style('opacity', 1);
             div
               .html(
@@ -514,7 +516,7 @@ export default class chartGeneration {
               .style('right', w - i * w / columns - 300 > 0 ? w - i * w / columns - 300 : 0 + 'px')
               .style('top', h + 'px');
           })
-          .on('mouseout', function(d) {
+          .on('mouseout', function() {
             div.transition().duration(500).style('opacity', 0);
           });
         break;
@@ -531,7 +533,8 @@ export default class chartGeneration {
           .attr('width', w / columns)
           .attr('height', h)
           .style('cursor', 'pointer')
-          .on('mouseover', function(d, i) {
+          .on('mouseover', function(event, d) {
+            const i = d.column;
             div.transition().duration(200).style('opacity', 1);
             div
               .html(
@@ -553,10 +556,10 @@ export default class chartGeneration {
               .style('right', w - i * w / columns - 300 > 0 ? w - i * w / columns - 300 : 0 + 'px')
               .style('top', h + 'px');
           })
-          .on('mouseout', function(d) {
+          .on('mouseout', function() {
             div.transition().duration(500).style('opacity', 0);
           })
-          .on('click', function(d) {
+          .on('click', function(event, d) {
             currThis.setState({ sha: d.sha });
           });
         break;
