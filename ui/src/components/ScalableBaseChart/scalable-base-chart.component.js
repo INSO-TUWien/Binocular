@@ -7,7 +7,7 @@ import { NoImplementationException } from '../../utils/exception/NoImplementatio
 import { hash } from '../../utils/crypto-utils';
 
 /**
- * Stacked area chart
+ * ScalableBaseChartComponent
  * Takes the following props:
  *  - content (Format: [{date: timestamp(ms), seriesName1: number, seriesName2, number, ...}, ...],
  *             e.g. array of data points with date and series values)
@@ -447,10 +447,22 @@ export default class ScalableBaseChartComponent extends React.Component {
     this.additionalPathDefs(brushArea, pathStreams, scales);
   }
 
+  /**
+   *
+   * @param data
+   * @returns {number}
+   */
+  // eslint-disable-next-line no-unused-vars
   getLayerStrokeWidth(data) {
     return 0;
   }
 
+  /**
+   *
+   * @param data
+   * @returns {undefined}
+   */
+  // eslint-disable-next-line no-unused-vars
   getLayerStrokeColor(data) {
     return undefined;
   }

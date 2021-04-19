@@ -3,40 +3,28 @@
 import { connect } from 'react-redux';
 
 import Chart from './chart.js';
-import { setViewport } from '../sagas';
 
 const mapStateToProps = (state /*, ownProps*/) => {
-  const dashState = state.visualizations.languageModuleRiver.state;
+  const languageModuleRiverState = state.visualizations.languageModuleRiver.state;
 
   return {
-    palette: dashState.data.data.palette,
-    otherCount: dashState.data.data.otherCount,
-    commits: dashState.data.data.commits,
-    committers: dashState.data.data.committers,
-    commitAttribute: dashState.config.commitAttribute,
-    issues: dashState.data.data.issues,
-    builds: dashState.data.data.builds,
-    firstSignificantTimestamp: dashState.data.data.firstSignificantTimestamp,
-    lastSignificantTimestamp: dashState.data.data.lastSignificantTimestamp,
-    chartResolution: dashState.config.chartResolution,
-    showIssues: dashState.config.showIssues,
-    selectedAuthors: dashState.config.selectedAuthors,
-    showCIChart: dashState.config.showCIChart,
-    showIssueChart: dashState.config.showIssueChart
+    attributes: languageModuleRiverState.data.data.attributes,
+    languages: languageModuleRiverState.data.data.languages,
+    modules: languageModuleRiverState.data.data.modules,
+    commits: languageModuleRiverState.data.data.commits,
+    committers: languageModuleRiverState.data.data.committers,
+    issues: languageModuleRiverState.data.data.issues,
+    builds: languageModuleRiverState.data.data.builds,
+    firstSignificantTimestamp: languageModuleRiverState.data.data.firstSignificantTimestamp,
+    lastSignificantTimestamp: languageModuleRiverState.data.data.lastSignificantTimestamp,
+    chartResolution: languageModuleRiverState.config.chartResolution,
+    chartAttribute: languageModuleRiverState.config.chartAttribute,
+    selectedAuthors: languageModuleRiverState.config.selectedAuthors,
+    selectedLanguages: languageModuleRiverState.config.selectedLanguages,
+    selectedModules: languageModuleRiverState.config.selectedModules,
+    highlightedIssue: languageModuleRiverState.config.highlightedIssue,
+    highlightedCommits: languageModuleRiverState.config.highlightedCommits
   };
 };
 
-const mapDispatchToProps = (dispatch /*, ownProps*/) => {
-  return {
-    onCommitClick: function(c) {
-      //TODO: set correct function current behavior unknown
-      // eslint-disable-next-line no-undef
-      dispatch(openCommit(c));
-    },
-    onViewportChanged: function(v) {
-      dispatch(setViewport(v));
-    }
-  };
-};
-
-export default connect(mapStateToProps, mapDispatchToProps)(Chart);
+export default connect(mapStateToProps)(Chart);

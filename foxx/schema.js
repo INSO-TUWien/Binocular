@@ -200,6 +200,15 @@ const queryType = new gql.GraphQLObjectType({
             .toArray();
         }
       },
+      baseBuilds: paginated({
+        type: require('./types/build.js'),
+        args: {},
+        query: (root, args, limit) => aql`
+          FOR build IN ${builds}
+            SORT build.createdAt ASC
+            ${limit}
+            RETURN build`
+      }),
       builds: paginated({
         type: require('./types/build.js'),
         args: {},

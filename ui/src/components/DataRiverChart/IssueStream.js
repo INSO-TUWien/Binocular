@@ -40,19 +40,27 @@ export default class IssueStream {
     return this;
   }
 
-  pushCommits(shas) {
-    shas.forEach(sha => this.__values.push(new IssueData(sha, IssueStat.InProcess)));
+  pushCommits(commits) {
+    commits.forEach(commit => this.__values.push(new IssueData(commit.sha, IssueStat.InProgress, commit.webUrl)));
     return this;
   }
 
-  setStart(date) {
-    this.__start = new IssueData(null, IssueStat.Open, date);
+  setStart(dateValue) {
+    if (!dateValue) {
+      return;
+    }
+    const date = dateValue instanceof Date ? dateValue : Date.parse(dateValue);
+    this.__start = new IssueData(null, IssueStat.Open, this.webUrl, isNaN(date) ? new Date(dateValue) : date);
     delete this.__start.__values;
     return this;
   }
 
-  setEnd(date) {
-    this.__end = new IssueData(null, IssueStat.Close, date);
+  setEnd(dateValue) {
+    if (!dateValue) {
+      return;
+    }
+    const date = dateValue instanceof Date ? dateValue : Date.parse(dateValue);
+    this.__end = new IssueData(null, IssueStat.Close, this.webUrl, isNaN(date) ? new Date(dateValue) : date);
     delete this.__end.__values;
     return this;
   }
@@ -105,10 +113,11 @@ export class IssueData {
     }
   }
 
-  init(sha, status = IssueStat.None, date = null) {
+  init(sha, status = IssueStat.None, webUrl = '#', date = null) {
     this.data = Object.freeze({
       sha,
       status,
+      webUrl,
       date
     });
     this.values = [];
@@ -130,6 +139,10 @@ export class IssueData {
   get date() {
     return this.data.date;
   }
+
+  get webUrl() {
+    return this.data.webUrl;
+  }
 }
 
 export class IssueColor {
@@ -144,11 +157,11 @@ export class IssueColor {
       });
 
     create('ticket', 0);
-    Object.keys(IssueStat).map((key, i) => i && create(key, i));
+    Object.keys(IssueStat).map((key, i) => i && create(IssueStat[key].name, i));
   }
 }
 
 /**
  * represents a build state enum
  */
-export const IssueStat = createEnum(['None', 'Open', 'In Process', 'Close']);
+export const IssueStat = createEnum(['None', 'Open', 'In Progress', 'Close']);

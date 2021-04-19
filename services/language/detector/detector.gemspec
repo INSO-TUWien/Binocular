@@ -26,7 +26,7 @@ Gem::Specification.new do |s|
 
   s.add_dependency 'charlock_holmes', '~> 0.7.7'
   s.add_dependency 'escape_utils',    '~> 1.2.0'
-  s.add_dependency 'github-linguist', '~> 7.9.0'
+  s.add_dependency 'github-linguist', '~> 7.12.2'
   s.add_dependency 'hash-deep-merge', '~> 0.1.1'
   s.add_dependency 'mini_mime',       '~> 1.0'
   s.add_dependency 'rugged',          '~> 0.25.1'

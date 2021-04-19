@@ -17,10 +17,10 @@ export class RiverData {
     }
   }
 
-  init(date, attribute, name, sha = null, buildStat = 0, buildWeight = 1, additions = 0, deletions = 0, buildSuccessRate = 0.0) {
+  init(date, attribute, name, shas = [], buildStat = 0, buildWeight = 1, additions = 0, deletions = 0, buildSuccessRate = 0.0) {
     this.data = Object.freeze({
       date,
-      sha,
+      shas,
       attribute,
       name,
       additions,
@@ -33,8 +33,9 @@ export class RiverData {
   }
 
   copyCtor(data) {
-    this.data = Object.freeze(Object.assign({}, data.data, { buildStat: BuildStat.valueOf(data.buildStat) }));
+    this.data = Object.freeze(Object.assign({}, data.data, { buildStat: BuildStat.valueOf(data.data.buildStat) }));
     this.buildSuccessRate = data._buildSuccessRate;
+    this.trend = data._trend;
   }
 
   get date() {
@@ -45,8 +46,8 @@ export class RiverData {
     return this.data.name;
   }
 
-  get sha() {
-    return this.data.sha;
+  get shas() {
+    return this.data.shas;
   }
 
   get buildStat() {
@@ -97,10 +98,4 @@ export class RiverData {
 /**
  * represents a build state enum
  */
-export const BuildStat = createEnum({
-  None: 0,
-  Abort: 1,
-  Failed: 2,
-  Success: 4,
-  Skipped: 8
-});
+export const BuildStat = createEnum(['None', 'Skipped', 'Canceled', 'Failed', 'Errored', 'Success']);
