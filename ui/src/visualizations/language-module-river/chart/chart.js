@@ -1,15 +1,16 @@
 'use strict';
 
 import React from 'react';
-import * as d3 from 'd3';
+import { min, max, stackOffsetDiverging } from 'd3';
 
 import styles from '../styles.scss';
 import _ from 'lodash';
 
 import moment from 'moment';
 import chroma from 'chroma-js';
-import { DataRiverChart } from './DataRiverChart';
-import { RiverData, BuildStat } from './RiverData';
+import { DataRiverChartComponent } from '../../../components/DataRiverChart/data-river-chart.component';
+import cx from 'classnames';
+import { RiverData, BuildStat } from '../../../components/DataRiverChart/RiverData';
 
 export default class LanguageModuleRiver extends React.Component {
   constructor(props) {
@@ -61,43 +62,64 @@ export default class LanguageModuleRiver extends React.Component {
       commitOrder = Object.keys(this.props.palette);
     }
 
-    const commitOffset = d3.stackOffsetDiverging;
+    const commitOffset = (series, order) => {
+      series, order;
+    }; //d3.stackOffsetDiverging;
     const commitPalette = this.state.commitPalette;
 
-    /*const commitChart = (
+    const addDays = (date, days) => {
+      const result = new Date(date);
+      result.setDate(result.getDate() + days);
+      return result;
+    };
+
+    const date = new Date('2020-10-17');
+    let mockData;
+    if (commitOrder) {
+      mockData = [
+        new RiverData(addDays(date, 1), 'ts', commitOrder[0], 'a1', BuildStat.Failed, 1, 100, 2),
+        new RiverData(addDays(date, 1), 'js', commitOrder[0], 'a1', BuildStat.Success, 0.1, 1000, 2),
+        new RiverData(addDays(date, 2), 'js', commitOrder[0], 'a2', BuildStat.Failed, 1, 4, 2000),
+        new RiverData(addDays(date, 3), 'js', commitOrder[0], 'a3', BuildStat.Skipped, 1, 140, 1200),
+        new RiverData(addDays(date, 4), 'js', commitOrder[0], 'a4', BuildStat.Success, 1, 1004, 120),
+        new RiverData(addDays(date, 5), 'js', commitOrder[0], 'a5', BuildStat.Success, 1, 200, 12),
+        new RiverData(addDays(date, 5), 'ts', commitOrder[0], 'a5', BuildStat.Success, 1, 1000, 2),
+        new RiverData(addDays(date, 6), 'js', commitOrder[0], 'a6', BuildStat.Success, 1, 2002, 2),
+        new RiverData(addDays(date, 3), 'js', commitOrder[1], 'a7', BuildStat.Success, 1, 1000, 2),
+        new RiverData(addDays(date, 4), 'js', commitOrder[1], 'a8', BuildStat.Success, 1, 2002, 2100),
+        new RiverData(addDays(date, 5), 'js', commitOrder[1], 'a9', BuildStat.Failed, 1, 1002, 20)
+      ];
+    }
+
+    /*
+    const palette = chroma.scale('spectral').mode('lch').colors(mockData.length).reduce((map, color, index) => {
+      map[mockData[index].sha] = color;
+      return map;
+    }, {});*/
+
+    const commitChart = (
       <div className={styles.chartLine}>
-        <div className={cx(styles.text, 'label')}>Changes</div>
+        <div className={cx(styles.text, 'label')}>Attribute River</div>
         <div className={styles.chart}>
-          <StackedAreaChart
-            content={this.state.commitChartData}
+          <DataRiverChartComponent
+            content={mockData}
             palette={commitPalette}
             paddings={{ top: 20, left: 60, bottom: 20, right: 30 }}
             xAxisCenter={true}
-            yDims={this.state.commitScale}
+            //yDims={this.state.commitScale}
             d3offset={commitOffset}
             keys={this.state.selectedAuthors}
             resolution={this.props.chartResolution}
             displayNegative={true}
             order={commitOrder}
+            hideVertical={true}
+            attribute={'Language'}
           />
         </div>
       </div>
-    );*/
+    );
 
-    var mockData = [
-      new RiverData('a1', 'js', 'Michi', BuildStat.Success, 1, 2),
-      new RiverData('a2', 'js', 'Michi', BuildStat.Failed, 4, 2),
-      new RiverData('a3', 'js', 'Michi', BuildStat.Skipped, 140, 12),
-      new RiverData('a4', 'js', 'Michi', BuildStat.Success, 14, 120),
-      new RiverData('a5', 'js', 'Michi', BuildStat.Success, 200, 12)
-    ];
-
-    const palette = chroma.scale('spectral').mode('lch').colors(mockData.length).reduce((map, color, index) => {
-      map[mockData[index].sha] = color;
-      return map;
-    }, {});
-
-    const commitChart = <DataRiverChart dataset={mockData} colorPalette={palette} />;
+    //const commitChart = <DataRiverChartComponent dataset={mockData} colorPalette={palette} />;
 
     const loadingHint = (
       <div className={styles.loadingHintContainer}>

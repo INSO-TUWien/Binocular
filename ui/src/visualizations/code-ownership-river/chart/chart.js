@@ -122,6 +122,7 @@ export default class CodeOwnershipRiver extends React.Component {
 
     const x = this.scales.scaledX;
     const y = this.scales.scaledY;
+
     const dims = this.state.dimensions;
     const today = x(new Date());
     this.scales.x.rangeRound([0, dims.width]);
@@ -190,10 +191,11 @@ export default class CodeOwnershipRiver extends React.Component {
                 Time
               </text>
             </g>
-            <g clipPath="url(#chart)" className={cx(styles.commitCount)}>
+            <g id="StackedArea1" clipPath="url(#chart)" className={cx(styles.commitCount)}>
               <StackedArea
                 data={this.props.commits}
                 series={this.state.commitSeries}
+                d3offset={d3.stackOffsetDiverging}
                 x={x}
                 y={y}
                 extractX={dateExtractor}
@@ -215,7 +217,7 @@ export default class CodeOwnershipRiver extends React.Component {
                   />
                 </mask>
               </defs>}
-            <g clipPath="url(#chart)" mask="url(#issue-mask)" className={cx(styles.openIssuesCount)}>
+            <g id="StackedArea2" clipPath="url(#chart)" mask="url(#issue-mask)" className={cx(styles.openIssuesCount)}>
               <StackedArea
                 data={this.props.issues}
                 x={x}
@@ -240,7 +242,7 @@ export default class CodeOwnershipRiver extends React.Component {
                 fillToRight={today}
               />
             </g>
-            <g clipPath="url(#chart)" mask="url(#issue-mask)">
+            <g id="StackedArea4" clipPath="url(#chart)" mask="url(#issue-mask)">
               <StackedArea
                 data={this.props.builds}
                 x={x}
@@ -307,6 +309,7 @@ export default class CodeOwnershipRiver extends React.Component {
         },
         extractY: d => {
           const stats = d.statsByAuthor[signature];
+
           if (props.commitAttribute === 'count') {
             return stats ? stats.count : 0;
           } else {

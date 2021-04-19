@@ -22,7 +22,9 @@
     "dockerize": "whalify generate-installer && ./node_modules/.bin/whalify build",
     "fix:root": "eslint --fix .",
     "fix:ui": "eslint --fix --ignore-path ui/.eslintignore -c ui/.eslintrc.yml ui",
-    "fix": "npm run fix:root && npm run fix:ui"
+    "fix": "npm run fix:root && npm run fix:ui",
+    "build:lamosp": "cd services/language/detector && bundler install",
+    "start:lamosp": "cd services/language/detector && bundle exec binocular-language-detector"
   },
   "keywords": [
     "git"
@@ -127,12 +129,14 @@
     "react-error-overlay": "^1.0.9",
     "react-keyed-file-browser": "^1.8.0",
     "react-measure": "^2.0.2",
+    "react-native-crypto": "^2.2.0",
     "react-reach": "^0.4.1",
     "react-redux": "^5.0.5",
     "react-redux-form": "^1.13.0",
     "react-router-dom": "^4.1.1",
     "react-scripts": "^2.1.8",
     "react-scroll": "^1.5.5",
+    "react-sticky-mouse-tooltip": "0.0.1",
     "react-tippy": "^1.2.2",
     "react-transition-group": "^2.2.0",
     "redux": "^3.7.2",
