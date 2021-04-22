@@ -200,56 +200,62 @@ export default class ConflictAwareness extends React.Component {
     }
 
     // a new check for a rebase was performed
-    if (!equals(nextProps.rebaseCheck, prevState.rebaseCheck) && nextProps.rebaseCheck) {
-      // the rebase shows no conflicts -> show success message
-      if (nextProps.rebaseCheck.success) {
-        _showRebaseSuccessModal(
-          nextProps.rebaseCheck.rebaseRepo,
-          nextProps.rebaseCheck.rebaseBranch,
-          nextProps.rebaseCheck.upstreamRepo,
-          nextProps.rebaseCheck.upstreamBranch
-        );
-      } else {
-        // the rebase shows conflicts -> show them in a modal
-        _showRebaseConflictModal(nextProps.rebaseCheck);
+    if (!equals(nextProps.rebaseCheck, prevState.rebaseCheck)) {
+      if (nextProps.rebaseCheck) {
+        // the rebase shows no conflicts -> show success message
+        if (nextProps.rebaseCheck.success) {
+          _showRebaseSuccessModal(
+            nextProps.rebaseCheck.rebaseRepo,
+            nextProps.rebaseCheck.rebaseBranch,
+            nextProps.rebaseCheck.upstreamRepo,
+            nextProps.rebaseCheck.upstreamBranch
+          );
+        } else {
+          // the rebase shows conflicts -> show them in a modal
+          _showRebaseConflictModal(nextProps.rebaseCheck);
+        }
+        nextProps.onResetStateProperty('rebaseCheck');
       }
 
       updatedProps.rebaseCheck = nextProps.rebaseCheck;
     }
 
     // a new check for a merge was performed
-    if (!equals(nextProps.mergeCheck, prevState.mergeCheck) && nextProps.mergeCheck) {
-      // the merge shows no conflicts -> show success message
-      if (nextProps.mergeCheck.success) {
-        _showMergeSuccessModal(
-          nextProps.mergeCheck.fromRepo,
-          nextProps.mergeCheck.fromBranch,
-          nextProps.mergeCheck.toRepo,
-          nextProps.mergeCheck.toBranch
-        );
-      } else {
-        // the merge shows conflicts -> show them in a modal
-        _showMergeConflictModal(
-          nextProps.mergeCheck,
-          nextProps.branchesHeadShas,
-          nextProps.commits
-        );
+    if (!equals(nextProps.mergeCheck, prevState.mergeCheck)) {
+      if (nextProps.mergeCheck) {
+        // the merge shows no conflicts -> show success message
+        if (nextProps.mergeCheck.success) {
+          _showMergeSuccessModal(
+            nextProps.mergeCheck.fromRepo,
+            nextProps.mergeCheck.fromBranch,
+            nextProps.mergeCheck.toRepo,
+            nextProps.mergeCheck.toBranch
+          );
+        } else {
+          // the merge shows conflicts -> show them in a modal
+          _showMergeConflictModal(
+            nextProps.mergeCheck,
+            nextProps.branchesHeadShas,
+            nextProps.commits
+          );
+        }
+        nextProps.onResetStateProperty('mergeCheck');
       }
 
       updatedProps.mergeCheck = nextProps.mergeCheck;
     }
 
     // a new check for a merge was performed
-    if (
-      !equals(nextProps.cherryPickCheck, prevState.cherryPickCheck) &&
-      nextProps.cherryPickCheck
-    ) {
-      // the cherry picks show no conflicts -> show success message
-      if (nextProps.cherryPickCheck.success) {
-        _showCherryPickSuccessModal();
-      } else {
-        // the merge shows conflicts -> show them in a modal
-        _showCherryPickConflictModal(nextProps.cherryPickCheck);
+    if (!equals(nextProps.cherryPickCheck, prevState.cherryPickCheck)) {
+      if (nextProps.cherryPickCheck) {
+        // the cherry picks show no conflicts -> show success message
+        if (nextProps.cherryPickCheck.success) {
+          _showCherryPickSuccessModal();
+        } else {
+          // the merge shows conflicts -> show them in a modal
+          _showCherryPickConflictModal(nextProps.cherryPickCheck);
+        }
+        nextProps.onResetStateProperty('cherryPickCheck');
       }
 
       updatedProps.cherryPickCheck = nextProps.cherryPickCheck;
