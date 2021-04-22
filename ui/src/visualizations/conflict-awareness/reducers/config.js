@@ -34,6 +34,16 @@ export default handleActions(
       return _.assign({}, state, { otherProject: action.payload });
     },
 
+    // reset the excludedBranches lists and showAllBranches flags
+    RESET_EXCLUDED_BRANCHES: (state) => {
+      return _.assign({}, state, {
+        excludedBranchesBaseProject: [],
+        showAllBranchesBaseProjectChecked: true,
+        excludedBranchesOtherProject: [],
+        showAllBranchesOtherProjectChecked: true,
+      });
+    },
+
     // adds/removes a branch of the base project to/from the excluded branches list
     SWITCH_EXCLUDED_BRANCHES_BASE_PROJECT: (state, action) => {
       let excludedBranchesBaseProject = _.assign([], state.excludedBranchesBaseProject);

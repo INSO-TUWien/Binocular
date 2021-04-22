@@ -3,6 +3,7 @@
 import { connect } from 'react-redux';
 
 import {
+  resetExcludedBranches,
   setColor,
   setCompactAll,
   setExpandAll,
@@ -114,9 +115,11 @@ const mapDispatchToProps = (dispatch) => {
             otherProject.name,
           ])
         );
+        dispatch(resetExcludedBranches());
       } else {
         // the other project was deselected
         dispatch(updateConflictAwarenessData([repoFullName], false));
+        dispatch(resetExcludedBranches());
       }
     },
     // when a branch of the base project is unchecked, switch its checked property
