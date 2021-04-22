@@ -62,8 +62,10 @@ httpServer.listen(port, function() {
   }
 });
 
+// map that saves the vcsIndexers for different project (key = "owner/name" of the repository)
+ctx.vcsIndexers = new Map();
+
 const indexers = {
-  vcs: null,
   its: null,
   ci: null
 };
@@ -95,7 +97,12 @@ Repository.fromPath(ctx.targetPath)
 
     function reIndex() {
       console.log('Indexing data...');
-      indexers.vcs = idx.makeVCSIndexer(ctx.repo, reporter);
+
+      // create the indexer for the base repository if not already done
+      const repoKey = `${ctx.repo.getOwner()}/${ctx.repo.getName()}`;
+      if (!ctx.vcsIndexers.has(repoKey)) {
+        ctx.vcsIndexers.set(repoKey, idx.makeVCSIndexer(ctx.repo, reporter));
+      }
 
       if (ctx.argv.its) {
         indexers.its = idx.makeITSIndexer(ctx.repo, reporter);
@@ -107,6 +114,8 @@ Repository.fromPath(ctx.targetPath)
 
       return getUrlProvider(ctx.repo)
         .then(urlProvider => (ctx.urlProvider = urlProvider))
+        .thenReturn(ctx.vcsIndexers.values())
+        .map((vcsIndexer) => vcsIndexer.index())
         .then(() => Promise.props(indexers))
         .thenReturn(_.values(indexers))
         .filter(indexer => indexer !== null)
@@ -136,6 +145,11 @@ process.on('SIGINT', function() {
   _(indexers)
     .values()
     .each(idx => idx.stop());
+
+  // stop the vcs indexers of all stored repositories
+  for (let vcsIndexer of ctx.vcsIndexers.values()) {
+    vcsIndexer.stop();
+  }
 });
 
 /**

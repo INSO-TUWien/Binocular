@@ -46,7 +46,9 @@ const mapStateToProps = (state) => {
   const caState = state.visualizations.conflictAwareness.state;
 
   return {
-    repoFullName: `${state.config.data.repoOwner}/${state.config.data.repoName}`, // the name of the base repo (owner/repository name)
+    repoFullName: `${state.config.data.repoOwner}/${state.config.data.repoName}`, // the key of the base repo (owner/repository name)
+    repoOwner: state.config.data.repoOwner, // the owner of the base repo
+    repoName: state.config.data.repoName, // the name of the base repo
     colorBaseProject: caState.config.color.baseProject, // the color for the commits/edges of the base project
     colorOtherProject: caState.config.color.otherProject, // the color for the commits/edges of the parent/fork
     colorCombined: caState.config.color.combined, // the color of the commits/edges found in both projects
@@ -103,7 +105,7 @@ const mapDispatchToProps = (dispatch) => {
     onSetIssueForFilter: () => dispatch(setIssueForFilter(issueNumber)),
     onSetColor: (color, key) => dispatch(setColor(color, key)),
     // when a (new) parent/forks of the base project is changed
-    onSetOtherProject: (otherProject, repoFullName) => {
+    onSetOtherProject: (otherProject, repoFullName, repoOwner, repoName) => {
       // set it in the state
       dispatch(setOtherProject(otherProject));
       // an other project was selected
@@ -111,14 +113,14 @@ const mapDispatchToProps = (dispatch) => {
         // and update the conflict awareness data (without getting parents/forks again, incl. triggering selected project indexing)
         dispatch(
           updateConflictAwarenessData([repoFullName, otherProject.fullName], false, [
-            otherProject.ownerName,
-            otherProject.name,
+            [repoOwner, repoName],
+            [otherProject.ownerName, otherProject.name],
           ])
         );
         dispatch(resetExcludedBranches());
       } else {
         // the other project was deselected
-        dispatch(updateConflictAwarenessData([repoFullName], false));
+        dispatch(updateConflictAwarenessData([repoFullName], false, [[repoOwner, repoName]]));
         dispatch(resetExcludedBranches());
       }
     },
@@ -722,7 +724,12 @@ const getSearchBoxElement = (props) => {
             // update other project if at least one the selected one or the other project
             // in the props is set and they are not equal
             if ((otherProject || props.otherProject) && !equals(otherProject, props.otherProject)) {
-              props.onSetOtherProject(otherProject, props.repoFullName);
+              props.onSetOtherProject(
+                otherProject,
+                props.repoFullName,
+                props.repoOwner,
+                props.repoName
+              );
             }
           }}
         />

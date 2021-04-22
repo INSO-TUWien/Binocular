@@ -241,14 +241,20 @@ export default function* () {
  * the commits and branches of specific projects,
  * the parent and forks of the base project (if requested) and
  * triggers the indexing of a project (if requested).
+ * @param projects {[string]} the projects to get the commit and branch data from
+ * @param shouldGetParentAndForks {boolean} flag that indicates if the parent/fork list should be retrieved (only needed at first call)
+ * @param ownerAndProjectsToIndex {[[string]]} array containing the [owner, name] of the projects that should be indexed
  */
 export const fetchConflictAwarenessData = fetchFactory(
-  function* (projects = [], shouldGetParentAndForks = true, ownerAndProjectToIndex = []) {
-    // triggers the indexing of a project if one the owner and the repository was provided
+  function* (projects = [], shouldGetParentAndForks = true, ownerAndProjectsToIndex = []) {
+    // triggers the indexing of the projects if the owners and the repository names were provided
     let indexingPromise = Promise.resolve(); // only needed to start the Promise chain if no project should be indexed
-    if (ownerAndProjectToIndex.length > 0) {
-      indexingPromise = indexProject(ownerAndProjectToIndex[0], ownerAndProjectToIndex[1]);
-    }
+    ownerAndProjectsToIndex.forEach((ownerAndProjectToIndex) => {
+      indexingPromise = Promise.join(
+        indexingPromise,
+        indexProject(ownerAndProjectToIndex[0], ownerAndProjectToIndex[1])
+      );
+    });
 
     return yield indexingPromise
       .then(() => {
