@@ -28,7 +28,7 @@ module Binocular
       # start the language detection service to listen for grpc requests
       def start
         @logger.info("Start language service listening on #{@server_address}")
-        @rpc_service.run_till_terminated_or_interrupted([1, 'int', 'SIGQUIT'])
+        @rpc_service.run_till_terminated_or_interrupted(['INT', 'TERM'])
         @logger.info("Stopped language service...")
       end
 
