@@ -29,7 +29,7 @@ Gem::Specification.new do |s|
   s.add_dependency 'github-linguist', '~> 7.12.2'
   s.add_dependency 'hash-deep-merge', '~> 0.1.1'
   s.add_dependency 'mini_mime',       '~> 1.0'
-  s.add_dependency 'rugged',          '~> 0.25.1'
+  s.add_dependency 'rugged',          '~> 1.1.0'
   s.add_dependency 'grpc',            '~> 1.28.0'
   s.add_dependency 'grpc-tools',      '~> 1.28.0'
   s.add_dependency 'concurrent-ruby', '~> 1.1.6'
