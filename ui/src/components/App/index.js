@@ -30,6 +30,7 @@ class App extends React.PureComponent {
   render() {
     const ChartComponent = this.props.visualization.ChartComponent;
     const HelpComponent = this.props.visualization.HelpComponent;
+    const { showHelp } = this.props;
     const { helpPos, collapsed } = this.state;
 
     return (
@@ -38,14 +39,14 @@ class App extends React.PureComponent {
         <div className={styles.mainPane}>
           <ProgressBar />
           <ChartComponent sidebarOpen={!collapsed} />
-          {helpPos
+          {showHelp
             ? <Help onResize={e => this.setState({ helpPos: e.bounds.height })}>
                 <HelpComponent sidebarOpen={!collapsed} />
               </Help>
             : ''}
         </div>
         <Notifications />
-        <HelpButton y={helpPos ? this.state.helpPos : 0} icon={helpPos ? 'times' : 'question'} />
+        <HelpButton y={showHelp ? helpPos : 0} icon={showHelp ? 'times' : 'question'} />
         <ConfigDialog sidebarOpen={!collapsed} />
       </div>
     );
