@@ -1,9 +1,11 @@
-require "bundler/gem_tasks"
-require "rake"
+# frozen_string_literal: true
+
+require 'bundler/gem_tasks'
+require 'rake'
 require 'pathname'
 
 # generating grpc interfaces into lib/api
-task :gen_api, [:path] do |t, args|
+task :gen_api, [:path] do |_t, args|
   if args.empty? || args[:path].nil?
     puts 'usage: gen_api PATH'
   else
@@ -12,9 +14,8 @@ task :gen_api, [:path] do |t, args|
 end
 
 task :build do
-  gen_api(File.join('..','..', 'grpc', 'comm'))
+  gen_api(File.join('..', '..', 'grpc', 'comm'))
 end
-
 
 def gen_api(pathName)
   path = Pathname.new(pathName).expand_path
