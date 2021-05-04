@@ -149,26 +149,27 @@ export default class ConflictAwareness extends React.Component {
           collapsedSectionClones,
           branchesHeadShas
         );
-        updatedProps.branches = nextProps.branches;
-        updatedProps.commits = nextProps.commits;
         updatedProps.commitNodes = commitNodes;
         updatedProps.commitChildLinks = commitChildLinks;
         updatedProps.branchIDs = branchIDs;
-        updatedProps.excludedBranchesBaseProject = nextProps.excludedBranchesBaseProject;
-        updatedProps.excludedBranchesOtherProject = nextProps.excludedBranchesOtherProject;
-        updatedProps.filterAfterDate = nextProps.filterAfterDate;
-        updatedProps.filterBeforeDate = nextProps.filterBeforeDate;
-        updatedProps.filterAuthor = nextProps.filterAuthor;
-        updatedProps.filterCommitter = nextProps.filterCommitter;
-        updatedProps.filterSubtree = nextProps.filterSubtree;
-        updatedProps.layout = nextProps.layout;
-        currentLayout = nextProps.layout;
         updatedProps.collapsedSections = collapsedSections;
         updatedProps.branchesHeadShas = branchesHeadShas;
-        updatedProps.issueForFilter = nextProps.issueForFilter;
 
         nextProps.onSetBranchesHeadSha(branchesHeadShas);
       }
+
+      updatedProps.branches = nextProps.branches;
+      updatedProps.commits = nextProps.commits;
+      updatedProps.excludedBranchesBaseProject = nextProps.excludedBranchesBaseProject;
+      updatedProps.excludedBranchesOtherProject = nextProps.excludedBranchesOtherProject;
+      updatedProps.filterAfterDate = nextProps.filterAfterDate;
+      updatedProps.filterBeforeDate = nextProps.filterBeforeDate;
+      updatedProps.filterAuthor = nextProps.filterAuthor;
+      updatedProps.filterCommitter = nextProps.filterCommitter;
+      updatedProps.filterSubtree = nextProps.filterSubtree;
+      updatedProps.layout = nextProps.layout;
+      currentLayout = nextProps.layout;
+      updatedProps.issueForFilter = nextProps.issueForFilter;
     }
 
     // the diffs of a commit were retrieved -> put them into the modal
