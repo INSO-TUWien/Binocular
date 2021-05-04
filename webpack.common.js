@@ -47,6 +47,10 @@ const cssLoaders = [
     include: path.resolve(__dirname, 'ui/src/global.scss'),
     use: [{ loader: 'style-loader' }, { loader: 'css-loader' }, { loader: 'sass-loader' }],
   },
+  {
+    test: /\.(png|jpg)$/,
+    use: [{ loader: 'url-loader?limit=8192' }],
+  },
 ];
 
 module.exports = {
