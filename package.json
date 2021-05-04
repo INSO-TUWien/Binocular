@@ -112,7 +112,7 @@
     "moment": "^2.26.0",
     "node-gitlab": "^1.6.1",
     "node-sass": "^4.14.1",
-    "nodegit": "^0.24.3",
+    "nodegit": "^0.27.0",
     "object-assign": "4.1.1",
     "opn": "^4.0.2",
     "postcss-flexbugs-fixes": "3.0.0",
