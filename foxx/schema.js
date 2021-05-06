@@ -35,10 +35,7 @@ const queryType = new gql.GraphQLObjectType({
           sort: { type: Sort }
         },
         query: (root, args, limit) => {
-          let q = qb
-            .for('commit')
-            .in('commits')
-            .sort('commit.date', args.sort);
+          let q = qb.for('commit').in('commits').sort('commit.date', args.sort);
 
           q = queryHelpers.addDateFilter('commit.date', 'gte', args.since, q);
           q = queryHelpers.addDateFilter('commit.date', 'lte', args.until, q);
@@ -126,6 +123,38 @@ const queryType = new gql.GraphQLObjectType({
           return files.firstExample({ path: args.path });
         }
       },
+      allFiles: {
+        type: new gql.GraphQLList(require('./types/file.js')),
+        resolve: () => {
+          return db._query(
+            aql`
+              FOR file IN files
+                RETURN file`
+          );
+        }
+      },
+      blame: {
+        type: new gql.GraphQLList(require('./types/blame.js')),
+        args: {
+          fileID: {
+            description: 'File id for the blame',
+            type: new gql.GraphQLNonNull(gql.GraphQLInt)
+          }
+        },
+        resolve: (root, args) => {
+          return db._query(`
+              FOR v,e IN OUTBOUND "files/${args.fileID}" \`commits-files\`
+              RETURN {
+                  commitsFiles:
+                      {
+                          lineCount: e.lineCount,
+                          hunks: e.hunks
+                      },
+                  commit: v
+              }
+              `);
+        }
+      },
       stakeholders: paginated({
         type: require('./types/stakeholder.js'),
         query: (root, args, limit) => aql`
@@ -173,10 +202,7 @@ const queryType = new gql.GraphQLObjectType({
         },
         query: (root, args, limit) => {
           let exactQuery = [];
-          let fuzzyQuery = qb
-            .for('issue')
-            .in('issues')
-            .sort('issue.createdAt', args.sort);
+          let fuzzyQuery = qb.for('issue').in('issues').sort('issue.createdAt', args.sort);
 
           if (args.q) {
             const searchString = qb.str('%' + args.q.replace(/\s+/g, '%') + '%');
@@ -202,10 +228,7 @@ const queryType = new gql.GraphQLObjectType({
 
           fuzzyQuery = fuzzyQuery.return('issue');
 
-          let q = qb
-            .let('fullList', qb.APPEND(exactQuery, fuzzyQuery))
-            .for('issue')
-            .in('fullList');
+          let q = qb.let('fullList', qb.APPEND(exactQuery, fuzzyQuery)).for('issue').in('fullList');
 
           q = queryHelpers.addDateFilter('issue.createdAt', 'gte', args.since, q);
           q = queryHelpers.addDateFilter('issue.createdAt', 'lte', args.until, q);

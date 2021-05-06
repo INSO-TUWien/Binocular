@@ -27,8 +27,9 @@ import dashboard from './visualizations/dashboard';
 import codeOwnershipRiver from './visualizations/code-ownership-river';
 import issueImpact from './visualizations/issue-impact';
 import hotspotDials from './visualizations/hotspot-dials';
+import codeEditor from './visualizations/code-editor';
 
-const visualizationModules = [dashboard, codeOwnershipRiver, issueImpact, hotspotDials];
+const visualizationModules = [dashboard, codeOwnershipRiver, issueImpact, hotspotDials, codeEditor];
 
 const visualizations = {};
 _.each(visualizationModules, viz => {
@@ -40,7 +41,7 @@ const app = makeAppReducer(visualizationModules);
 const store = createStore(
   app,
   {
-    activeVisualization: _.keys(visualizations)[0],
+    activeVisualization: _.keys(visualizations)[4],
     visualizations,
     config: {
       isFetching: false,

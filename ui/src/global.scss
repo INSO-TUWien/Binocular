@@ -1,3 +1,16 @@
 .hidden {
   display: none;
 }
+
+.CodeMirror
+{
+  font-family: Arial, monospace;
+  font-size: 16px;
+  line-height: 2em !important;
+  width: 100% !important;
+  height: 100% !important;
+}
+
+.CodeMirror-lines {
+  padding: 0px !important;
+}

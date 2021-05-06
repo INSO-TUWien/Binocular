@@ -11,7 +11,6 @@
   transition: width $transition-time ease-in-out, height $transition-time ease-in-out;
 
   .donut {
-
     $ring-width: 5;
     $ring-color: $grey-light;
     $fill-color: #00fa9a;
@@ -58,6 +57,7 @@
 }
 
 .hoverTarget:hover {
+  z-index: 1;
   height: 200px;
   width: 200px;
 

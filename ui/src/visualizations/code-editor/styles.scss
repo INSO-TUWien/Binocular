@@ -1,0 +1,178 @@
+@import '~bulma';
+
+svg.chart {
+  flex: 1;
+  outline: none;
+  width: 100%;
+  cursor: grab;
+  cursor: -webkit-grab;
+
+  g.commitCount {
+    path {
+      stroke: none;
+      fill: lighten($blue, 20%);
+    }
+
+    path:first-child {
+      stroke: $blue;
+    }
+
+  }
+
+  g.highlightedIssue {
+    line {
+      stroke: $grey;
+    }
+  }
+
+  line.highlightedCommit {
+    stroke-dasharray: 5,5;
+    stroke: $grey;
+  }
+
+  g.today {
+    text {
+      text-anchor: end;
+    }
+    line {
+      stroke: red;
+      stroke-dasharray: 5;
+      stroke-width: 2;
+    }
+  }
+
+  .lineMarker {
+    stroke: $grey;
+    fill: $grey;
+    stroke-width: 1.5;
+  }
+
+  .highlightedIssueLine {
+    stroke-width: 4;
+  }
+}
+
+svg.chart.panning {
+  cursor: grabbing;
+  cursor: -webkit-grabbing;
+}
+
+.grid line {
+  stroke: $grey-lighter;
+}
+
+
+.configContainer {
+  width: 100%;
+
+  form {
+    width: 100%;
+
+    .selectContainer {
+      width: 100%;
+
+      >div {
+        width: 100%;
+
+        :global(.Select-arrow) {
+          display: none;
+        }
+      }
+    }
+  }
+}
+
+.help {
+  width: 100%;
+  overflow-y: scroll;
+  font-size: 1.5em;
+
+  h2 {
+    font-size: 1.2em;
+    font-weight: bold;
+  }
+
+  h3 {
+    font-size: 1.1em;
+    font-weight: bold;
+  }
+
+  ul {
+    list-style-type: circle;
+    margin-left: 1.5em;
+  }
+
+  p {
+    margin-bottom: 1em;
+  }
+}
+.codeEditorContainer {
+  padding-top: 3em;
+  //flex: 1;
+  width: 100%;
+  height: 100%;
+}
+
+.codeEditor {
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+
+.codeOverlay {
+  position:absolute;
+  z-index: 9999;
+  width: calc(100% - 2.2em);
+  height: inherit;
+  pointer-events: none;
+  opacity: 1;
+  margin-left: 2.2em;
+  overflow-y: scroll;
+  //overflow-y: scroll;
+}
+
+.codeOverlayItem {
+  height: 2em;
+  //margin-bottom: 0.2em;
+  //margin-top: 0.2em;
+}
+
+.selectedBar {
+  position: absolute;
+  text-align: center;
+  width: 60px;
+  height: 28px;
+  padding: 2px;
+  font: 15px sans-serif;
+  //background: lightsteelblue;
+  border: 0px;
+  //border-radius: 8px;
+  pointer-events: none;
+  font-weight: bold;
+}
+
+.checkBox {
+  padding: 0.5em 0.75em;
+}
+
+.authorShadow {
+  text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
+}
+
+.authorLayout {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.authorDot {
+  padding-right: 10px;
+}
+
+.resultHeader {
+  text-align: center;
+}
+
+.pieChart {
+  padding-top: 25px;
+}
