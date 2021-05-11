@@ -11,6 +11,7 @@
     "coverage-server": "istanbul cover --dir coverage/server ./node_modules/.bin/_mocha -- --reporter spec",
     "coverage-ui": "jest --config .jestrc-coverage.json",
     "collect-coverage": "./scripts/collect-coverage.js",
+    "depcheck": "depcheck",
     "eslint:ui": "eslint --ignore-path ui/.eslintignore -c ui/.eslintrc.yml ui",
     "eslint:root": "eslint .",
     "eslint": "npm run eslint:root && npm run eslint:ui",
@@ -162,6 +163,7 @@
   },
   "devDependencies": {
     "debug": "^4.1.1",
+    "depcheck": "^1.4.0",
     "eslint": "^3.19.0",
     "eslint-config-lambdas": "^0.3.0",
     "eslint-config-prettier": "^2.3.0",
