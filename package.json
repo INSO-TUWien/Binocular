@@ -1,7 +1,7 @@
 {
-  "name": "pupil",
-  "version": "0.0.1",
-  "description": "Visualize project parameters from different sources.",
+  "name": "binocular",
+  "version": "0.1.0",
+  "description": "Time-based visualizations of combined software engineering data",
   "main": "pupil.js",
   "scripts": {
     "test": "npm run test-server && npm run test-ui",
@@ -30,8 +30,35 @@
   "keywords": [
     "git"
   ],
-  "author": "Roman Decker <roman.decker@gmail.com>",
-  "license": "ISC",
+  "contributors": [
+    {
+      "name": "Roman Decker",
+      "email": "roman.decker@gmail.com"
+    },
+    {
+      "name": "Johann Grabner"
+    },
+    {
+      "name": "Julian Kotrba"
+    },
+    {
+      "name": "Alexander Nemetz-Fiedler"
+    },
+    {
+      "name": "Michael Thurner"
+    },
+    {
+      "name": "Maximilian Zenz"
+    },
+    {
+      "name": "Raphael Lackner"
+    }
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/INSO-TUWien/Binocular.git"
+  },
   "bin": {
     "pupil": "./pupil.js",
     "zivsed": "./pupil.js"
