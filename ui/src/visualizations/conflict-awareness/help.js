@@ -9,6 +9,7 @@ import commitSelectedImage from './help-images/commitSelected.png';
 import commitFilterInImage from './help-images/commitFilterIn.png';
 import commitFilteredOutImage from './help-images/commitFilteredOut.png';
 import dependencyCommitImage from './help-images/dependencyCommit.png';
+import commitFromIssue from './help-images/commitIssue.png';
 
 export default () => (
   <div className={cx('box', styles.help)}>
@@ -29,16 +30,26 @@ export default () => (
     <h3>Layout</h3>
     <p>
       Change the layout of the commit graph. The earliest commit is the initial commit and the
-      latest commits are the branch heads. The <b><i>Reset Location</i></b> button resets the graph
-      location to its initial position and zoom level.
+      latest commits are the branch heads. The{' '}
+      <b>
+        <i>Reset Location</i>
+      </b>{' '}
+      button resets the graph location to its initial position and zoom level.
     </p>
     <h3>Graph Expansion/Compaction</h3>
     <p>
       Branching nodes are commits that do not have only one parent and one child, and commits that
-      are heads of branches. The <b><i>Compact all</i></b> button compacts the whole graph. That means that
-      all commits between two branching nodes will be grouped into a clustered node. The{' '}
-      <b><i>Expand all</i></b> button expands the whole graph. That means all clustered nodes will be
-      replaced with the actual commit history they hold.
+      are heads of branches. The{' '}
+      <b>
+        <i>Compact all</i>
+      </b>{' '}
+      button compacts the whole graph. That means that all commits between two branching nodes will
+      be grouped into a clustered node. The{' '}
+      <b>
+        <i>Expand all</i>
+      </b>{' '}
+      button expands the whole graph. That means all clustered commits will be replaced with the
+      actual commit history they hold.
     </p>
     <h3>Base Project</h3>
     <p>
@@ -72,21 +83,39 @@ export default () => (
       adding a new filter.
     </p>
     <p>
-      The <b><i>After</i></b> filter highlights/shows all commits that are committed after a specific date
-      (inclusive).
+      The{' '}
+      <b>
+        <i>After</i>
+      </b>{' '}
+      filter highlights/shows all commits that are committed after a specific date (inclusive).
     </p>
     <p>
-      The <b><i>Before</i></b> filter highlights/shows all commits that are committed befor a specific date
-      (inclusive).
+      The{' '}
+      <b>
+        <i>Before</i>
+      </b>{' '}
+      filter highlights/shows all commits that are committed befor a specific date (inclusive).
     </p>
     <p>
-      The <b><i>Committer</i></b> filter highlights all commits from a selected committer.
+      The{' '}
+      <b>
+        <i>Committer</i>
+      </b>{' '}
+      filter highlights all commits from a selected committer.
     </p>
     <p>
-      The <b><i>Author</i></b> filter highlights all commits from a specific author.
+      The{' '}
+      <b>
+        <i>Author</i>
+      </b>{' '}
+      filter highlights all commits from a specific author.
     </p>
     <p>
-      The <b><i>Subtree</i></b> filter highlights/shows all children of a specific commit (inclusive).
+      The{' '}
+      <b>
+        <i>Subtree</i>
+      </b>{' '}
+      filter highlights/shows all children of a specific commit (inclusive).
     </p>
     <p>
       All filter provide a highlight and show option. The highlight option highlights all commits
@@ -98,63 +127,99 @@ export default () => (
     </p>
     <h2>Node Highlights</h2>
     <figure style={{ width: '100px', display: 'inline-table', margin: '10px' }}>
-      <img src={commitSelectedImage}></img>
+      <img src={commitSelectedImage} />
       <figcaption>selected commit</figcaption>
     </figure>
     <figure style={{ width: '100px', display: 'inline-table', margin: '10px' }}>
-      <img src={dependencyCommitImage}></img>
+      <img src={dependencyCommitImage} />
       <figcaption>dependency of a selected commit</figcaption>
     </figure>
     <figure style={{ width: '100px', display: 'inline-table', margin: '10px' }}>
-      <img src={commitFilterInImage}></img>
+      <img src={commitFromIssue} />
+      <figcaption>commit of a selected issue</figcaption>
+    </figure>
+    <figure style={{ width: '100px', display: 'inline-table', margin: '10px' }}>
+      <img src={commitFilterInImage} />
       <figcaption>commit which meet all set filters</figcaption>
     </figure>
     <figure style={{ width: '100px', display: 'inline-table', margin: '10px' }}>
-      <img src={commitFilteredOutImage}></img>
+      <img src={commitFilteredOutImage} />
       <figcaption>commit which not meet al set filters</figcaption>
     </figure>
     <figure style={{ width: '150px', display: 'inline-table', margin: '10px' }}>
-      <img src={clusteredNodeAllImage}></img>
-      <figcaption>clustered node - all commits within meet the set filters</figcaption>
+      <img src={clusteredNodeAllImage} />
+      <figcaption>clustered commits - all commits within meet the set filters</figcaption>
     </figure>
     <figure style={{ width: '150px', display: 'inline-table', margin: '10px' }}>
-      <img src={clusteredNodeFilteredImage}></img>
-      <figcaption>clustered node - some commits within meet the set filters</figcaption>
+      <img src={clusteredNodeFilteredImage} />
+      <figcaption>clustered commits - some commits within meet the set filters</figcaption>
     </figure>
     <h2>Actions</h2>
     <p>
-      <b><i>Hover over commit:</i></b> show basic metadata (sha, author & time, committer & time, short
-      message)
+      <b>
+        <i>Hover over commit:</i>
+      </b>{' '}
+      show basic metadata (sha, author & time, committer & time, short message)
     </p>
     <p>
-      <b><i>Double click on commit:</i></b> show detailed metadata (sha, commit message, diff)
+      <b>
+        <i>Double click on commit:</i>
+      </b>{' '}
+      show detailed metadata (sha, commit message, diff)
     </p>
     <p>
-      <b><i>Left click on commit:</i></b> select a commit
+      <b>
+        <i>Left click on commit:</i>
+      </b>{' '}
+      select a commit
     </p>
     <p>
-      <b><i>Left click on commit + strg key:</i></b> multi-select commits
+      <b>
+        <i>Left click on commit + strg key:</i>
+      </b>{' '}
+      multi-select commits
     </p>
     <p>
-      <b><i>Right click on commit:</i></b> copy sha/collapse section
+      <b>
+        <i>Right click on commit:</i>
+      </b>{' '}
+      copy sha/collapse section
     </p>
     <p>
-      <b><i>Right click on clustered node:</i></b> expand section
+      <b>
+        <i>Right click on clustered commits:</i>
+      </b>{' '}
+      expand section
     </p>
     <p>
-      <b><i>Hover over branch-reference:</i></b> show action + highlight history path
+      <b>
+        <i>Hover over branch-reference:</i>
+      </b>{' '}
+      show action + highlight history path
     </p>
     <p>
-      <b><i>Click on branch-reference (nothing selected):</i></b> select branch
+      <b>
+        <i>Click on branch-reference (nothing selected):</i>
+      </b>{' '}
+      select branch
     </p>
     <p>
-      <b><i>Click on branch-reference + commit(s) selected:</i></b> start conflict check: cherry-pick(s)
+      <b>
+        <i>Click on branch-reference + commit(s) selected:</i>
+      </b>{' '}
+      start conflict check: cherry-pick(s)
     </p>
     <p>
-      <b><i>Click on branch-reference + strg key + branch selected:</i></b> start conflict check: rebase
+      <b>
+        <i>Click on branch-reference + strg key + branch selected:</i>
+      </b>{' '}
+      start conflict check: rebase
     </p>
     <p>
-      <b><i>Click on branch-reference + shift key + branch selected:</i></b> start conflict check: merge
+      <b>
+        <i>Click on branch-reference + shift key + branch selected:</i>
+      </b>{' '}
+      start conflict check: merge
     </p>
   </div>
 );
