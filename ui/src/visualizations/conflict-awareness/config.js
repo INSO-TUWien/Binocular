@@ -655,6 +655,7 @@ const projectProperties = (
           setColor={(color) => props.onSetColor(color, projectKey)}
         />
       </div>
+      <br />
       {/* BranchSelection, select all checkbox */}
       <label>
         <input
@@ -663,7 +664,7 @@ const projectProperties = (
           checked={currentShowAllSelection}
           onChange={() => onSwitchShowAllBranches(!currentShowAllSelection, branches)}
         />
-        all
+        Show/Hide all Branches
       </label>
       <div className={styles.branchSelectionContainer}>
         {branches &&
