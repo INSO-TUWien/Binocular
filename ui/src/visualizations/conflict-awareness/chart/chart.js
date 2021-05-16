@@ -2140,7 +2140,7 @@ function _showMergeConflictModal(checkMerge, branchesHeadShas, commits) {
     conflictModal.html() +
       `<div class="card is-fullwidth">
          <header id="authorsCardHeader" class="card-header">
-           <p class="card-header-title">Authors</p>
+           <p class="card-header-title">Authors of merged Commits</p>
            <a class="card-header-icon card-toggle">
             <i id="authorsCardArrow" class="fa fa-angle-up"></i>
            </a>
@@ -2169,7 +2169,7 @@ function _showMergeConflictModal(checkMerge, branchesHeadShas, commits) {
  * @param untilHasBranch {string} the specific branch
  * @param untilHasProject {string} the specific commit
  * @param commits {[*]} list of all commits
- * @param authors {[string]} distict list of autors of the selected commits
+ * @param authors {[string]} distinct list of authors of the selected commits
  * @private
  */
 function _getAuthorsForMergeConflict(
