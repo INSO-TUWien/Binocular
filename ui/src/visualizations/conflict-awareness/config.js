@@ -672,11 +672,10 @@ const projectProperties = (
         {branches &&
           branches.map((branch) => {
             return (
-              <div>
+              <div key={projectKey + branch.branchName}>
                 <label>
                   <input
                     type="checkbox"
-                    key={projectKey + branch.branchName}
                     checked={branch.checked}
                     onChange={() => switchBranchSelection(branch, onSwitchBranchSelectionFunction)}
                   />
