@@ -178,64 +178,66 @@ const ConflictAwarenessConfigComponent = (props) => {
         <div className="field">
           <label className="label">Layout (earliest - latest):</label>
           <table className={styles.width100}>
-            <td>
+            <tbody>
               <tr>
-                {/* radio button for bottom - top layout */}
-                <label className="radio">
-                  <input
-                    name="layoutSelection"
-                    type="radio"
-                    checked={props.layout === 'BT'}
-                    onChange={() => props.onSetLayout('BT')}
-                  />
-                  Bottom - Top
-                </label>
+                <td>
+                  {/* radio button for bottom - top layout */}
+                  <label className="radio">
+                    <input
+                      name="layoutSelection"
+                      type="radio"
+                      checked={props.layout === 'BT'}
+                      onChange={() => props.onSetLayout('BT')}
+                    />
+                    Bottom - Top
+                  </label>
+                </td>
+                <td>
+                  {/* radio button for top - bottom layout */}
+                  <label className="radio">
+                    <input
+                      name="layoutSelection"
+                      type="radio"
+                      checked={props.layout === 'TB'}
+                      onChange={() => props.onSetLayout('TB')}
+                    />
+                    Top - Bottom
+                  </label>
+                </td>
+                {/* button to reset the location if the user lost the graph */}
+                <td rowSpan="2">
+                  <a className="button" onClick={() => props.onShouldResetLocation(true)}>
+                    Reset Location
+                  </a>
+                </td>
               </tr>
               <tr>
-                {/* radio button for top - bottom layout */}
-                <label className="radio">
-                  <input
-                    name="layoutSelection"
-                    type="radio"
-                    checked={props.layout === 'TB'}
-                    onChange={() => props.onSetLayout('TB')}
-                  />
-                  Top - Bottom
-                </label>
+                <td>
+                  {/* radio button for left - right layout */}
+                  <label className="radio">
+                    <input
+                      name="layoutSelection"
+                      type="radio"
+                      checked={props.layout === 'LR'}
+                      onChange={() => props.onSetLayout('LR')}
+                    />
+                    Left - Right
+                  </label>
+                </td>
+                <td>
+                  {/* radio button for right - left layout */}
+                  <label className="radio">
+                    <input
+                      name="layoutSelection"
+                      type="radio"
+                      checked={props.layout === 'RL'}
+                      onChange={() => props.onSetLayout('RL')}
+                    />
+                    Right - Left
+                  </label>
+                </td>
               </tr>
-            </td>
-            <td>
-              <tr>
-                {/* radio button for left - right layout */}
-                <label className="radio">
-                  <input
-                    name="layoutSelection"
-                    type="radio"
-                    checked={props.layout === 'LR'}
-                    onChange={() => props.onSetLayout('LR')}
-                  />
-                  Left - Right
-                </label>
-              </tr>
-              <tr>
-                {/* radio button for right - left layout */}
-                <label className="radio">
-                  <input
-                    name="layoutSelection"
-                    type="radio"
-                    checked={props.layout === 'RL'}
-                    onChange={() => props.onSetLayout('RL')}
-                  />
-                  Right - Left
-                </label>
-              </tr>
-            </td>
-            {/* button to reset the location if the user lost the graph */}
-            <td>
-              <a className="button" onClick={() => props.onShouldResetLocation(true)}>
-                Reset Location
-              </a>
-            </td>
+            </tbody>
           </table>
         </div>
 
