@@ -502,6 +502,12 @@ async function serviceStarter(serviceEntry) {
   }
 }
 
+// don't start services if Binocular is run in offline mode
+if (ctx.argv.offline) {
+  console.log("OFFLINE MODE");
+  process.exit(0)
+}
+
 // start services
 Promise.all(
   [
