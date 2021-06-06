@@ -1,8 +1,8 @@
 import { render } from 'react-dom';
 import { createStore, applyMiddleware } from 'redux';
 import { createLogger } from 'redux-logger';
-import io from 'socket.io-client';
-import createSocketIoMiddleware from 'redux-socket.io';
+// import io from 'socket.io-client';
+// import createSocketIoMiddleware from 'redux-socket.io';
 import createSagaMiddleware from 'redux-saga';
 import { root } from './sagas';
 import _ from 'lodash';
@@ -14,9 +14,13 @@ import 'bulma';
 import 'react-tippy/dist/tippy.css';
 import '@fortawesome/fontawesome-free/css/all.css';
 import './global.scss';
+import { importData } from './db';
 
-const socket = io({ path: '/wsapi' });
-const socketIo = createSocketIoMiddleware(socket, 'api/');
+// import JSON data to pouchDB database and triple store if not already present
+importData();
+
+// const socket = io({ path: '/wsapi' });
+// const socketIo = createSocketIoMiddleware(socket, 'api/');
 const saga = createSagaMiddleware();
 
 const logger = createLogger({
@@ -50,7 +54,8 @@ const store = createStore(
       isShown: false
     }
   },
-  applyMiddleware(socketIo, saga, logger)
+  applyMiddleware(saga, logger)
+  // applyMiddleware(socketIo, saga, logger)
 );
 
 saga.run(root);

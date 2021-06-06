@@ -12,7 +12,7 @@ export default handleActions(
     REQUEST_CONFIGURATION: state => _.assign({}, state, { isFetching: true }),
 
     RECEIVE_CONFIGURATION: (state, action) => {
-      document.title = action.payload.repoName + ' | ZIVSED';
+      document.title = 'Binocular (Offline Artifact)';
       return _.merge({}, state, {
         data: action.payload,
         isFetching: false,

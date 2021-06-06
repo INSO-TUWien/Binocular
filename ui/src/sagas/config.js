@@ -16,7 +16,8 @@ export const confirmConfig = createAction('CONFIRM_CONFIG');
 
 export const fetchConfig = fetchFactory(
   function() {
-    return fetch(endpointUrl('config')).then(resp => resp.json());
+    // irrelevant for now, since offline variant does not need configuration
+    return {};
   },
   requestConfig,
   receiveConfig

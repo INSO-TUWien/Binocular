@@ -1,35 +1,15 @@
 'use strict';
 
-import { traversePages, graphQl } from '../../../utils';
+import { findAll } from '../../../db';
 
 export default function getIssueData(issueSpan, significantSpan) {
-  const issueList = [];
+  // return all issues, filtering according to parameters can be added in the future
+  return findAll('issues').then(res => {
+    res.docs = res.docs.sort((a, b) => {
+      return new Date(a.createdAt) - new Date(b.createdAt);
+    });
 
-  return traversePages(getIssuesPage(significantSpan[1]), issue => {
-    issueList.push(issue);
-  }).then(function() {
-    return issueList;
+    return res.docs;
   });
 }
 
-const getIssuesPage = until => (page, perPage) => {
-  return graphQl
-    .query(
-      `
-    query($page: Int, $perPage: Int, $until: Timestamp) {
-      issues(page: $page, perPage: $perPage, until: $until) {
-        count
-        page
-        perPage
-        count
-        data {
-          title
-          createdAt
-          closedAt
-        }
-      }
-    }`,
-      { page, perPage, until }
-    )
-    .then(resp => resp.issues);
-};

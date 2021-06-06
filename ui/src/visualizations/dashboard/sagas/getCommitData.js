@@ -1,6 +1,7 @@
 'use strict';
 
-import { traversePages, graphQl } from '../../../utils';
+import { findAll } from '../../../db';
+import commitList from '../../../../arango_export/commits.json';
 
 /**
  * Get commit data from the database.
@@ -10,36 +11,12 @@ import { traversePages, graphQl } from '../../../utils';
  * @returns {*}
  */
 export default function getCommitData(commitSpan, significantSpan) {
-  const commitList = [];
+  // return all commits, filtering according to parameters can be added in the future
+  return findAll('commits').then(res => {
+    res.docs = res.docs.sort((a, b) => {
+      return new Date(a.date) - new Date(b.date);
+    });
 
-  return traversePages(getCommitsPage(significantSpan[1]), commit => {
-    commitList.push(commit);
-  }).then(function() {
-    return commitList;
+    return res.docs;
   });
 }
-
-const getCommitsPage = until => (page, perPage) => {
-  return graphQl
-    .query(
-      `query($page: Int, $perPage: Int, $until: Timestamp) {
-             commits(page: $page, perPage: $perPage, until: $until) {
-               count
-               page
-               perPage
-               data {
-                 sha
-                 date
-                 messageHeader
-                 signature
-                 stats {
-                   additions
-                   deletions
-                 }
-               }
-             }
-          }`,
-      { page, perPage, until }
-    )
-    .then(resp => resp.commits);
-};

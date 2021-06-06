@@ -13,3 +13,4 @@ out
 pkg
 .grandle
 .DS_Store
+arango_export/

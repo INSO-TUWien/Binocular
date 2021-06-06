@@ -37,7 +37,7 @@ class App extends React.PureComponent {
       <div className={styles.app}>
         <Sidebar collapsed={collapsed} onToggle={() => this.setState(prevState => ({ collapsed: !prevState.collapsed }))} />
         <div className={styles.mainPane}>
-          <ProgressBar />
+          {/* <ProgressBar /> */}
           <ChartComponent sidebarOpen={!collapsed} />
           {showHelp
             ? <Help onResize={e => this.setState({ helpPos: e.bounds.height })}>

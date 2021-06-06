@@ -53,7 +53,7 @@ export default class Dashboard extends React.Component {
 
   render() {
     if (this.props.palette) {
-      console.log(Object.keys(this.props.palette));
+      // console.log(Object.keys(this.props.palette));
     }
     const ciChart = (
       <div className={styles.chartLine}>

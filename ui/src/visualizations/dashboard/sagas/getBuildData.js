@@ -1,15 +1,16 @@
 'use strict';
 
 import { traversePages, graphQl } from '../../../utils';
+import buildList from '../../../../arango_export/builds.json';
 
 export default function getBuildData() {
-  const buildList = [];
+  return buildList;
 
-  return traversePages(getBuildsPage, build => {
-    buildList.push(build);
-  }).then(function() {
-    return buildList;
-  });
+  // return traversePages(getBuildsPage, build => {
+  //   buildList.push(build);
+  // }).then(function() {
+  //   return buildList;
+  // });
 }
 
 const getBuildsPage = (page, perPage) => {
