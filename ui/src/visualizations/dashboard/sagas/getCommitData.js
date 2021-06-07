@@ -1,6 +1,6 @@
 'use strict';
 
-import { findAll } from '../../../db';
+import { findAll } from '../../../database';
 
 /**
  * Get commit data from the database.

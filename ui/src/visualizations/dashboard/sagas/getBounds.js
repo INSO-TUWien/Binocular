@@ -1,6 +1,6 @@
 'use strict';
 
-import { findAll } from '../../../db';
+import { findAll } from '../../../database';
 
 /**
  * Get first and last commit, as well as first and last issue

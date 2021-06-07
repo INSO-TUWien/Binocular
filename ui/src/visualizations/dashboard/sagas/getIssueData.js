@@ -1,6 +1,6 @@
 'use strict';
 
-import { findAll } from '../../../db';
+import { findAll } from '../../../database';
 
 export default function getIssueData(issueSpan, significantSpan) {
   // return all issues, filtering according to parameters can be added in the future

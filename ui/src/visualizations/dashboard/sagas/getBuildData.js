@@ -1,6 +1,6 @@
 'use strict';
 
-import { findAll } from '../../../db';
+import { findAll } from '../../../database';
 
 export default function getBuildData() {
   return findAll('builds').then(res => {

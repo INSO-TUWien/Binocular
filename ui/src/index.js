@@ -14,7 +14,7 @@ import 'bulma';
 import 'react-tippy/dist/tippy.css';
 import '@fortawesome/fontawesome-free/css/all.css';
 import './global.scss';
-import { importData } from './db';
+import { importData } from './database';
 
 // import JSON data to pouchDB database and triple store if not already present
 importData();
