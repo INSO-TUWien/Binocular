@@ -529,10 +529,9 @@ const servicesList = [
   }).bind(this, ctx, config, gatewayService)
 ];
 
-Promise.all(servicesList.map(entryPoint => serviceStarter(entryPoint))).then(async () => {
+Promise.all(servicesList.map(entryPoint => serviceStarter(entryPoint))).then(() => {
   // if no-server flag set stop immediately after indexing
   if (!ctx.argv.server) {
     stop();
-    process.exit(0);
   }
 });
