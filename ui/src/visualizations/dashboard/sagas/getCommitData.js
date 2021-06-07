@@ -1,7 +1,6 @@
 'use strict';
 
 import { findAll } from '../../../db';
-import commitList from '../../../../arango_export/commits.json';
 
 /**
  * Get commit data from the database.

@@ -1,41 +1,22 @@
 'use strict';
 
-import { traversePages, graphQl } from '../../../utils';
-import buildList from '../../../../arango_export/builds.json';
+import { findAll } from '../../../db';
 
 export default function getBuildData() {
-  return buildList;
+  return findAll('builds').then(res => {
+    // add stats object to each build
+    let stats = { success: 0, failed: 0, pending: 0, canceled: 0 };
 
-  // return traversePages(getBuildsPage, build => {
-  //   buildList.push(build);
-  // }).then(function() {
-  //   return buildList;
-  // });
-}
-
-const getBuildsPage = (page, perPage) => {
-  return graphQl
-    .query(
-      `
-    query($page: Int, $perPage: Int) {
-      builds(page: $page, perPage: $perPage) {
-        count
-        page
-        perPage
-        count
-        data {
-          id
-          createdAt
-          stats {
-            success
-            failed
-            pending
-            canceled
-          }
-        }
+    return res.docs.map(build => {
+      if (build.status === 'success') {
+        stats.success++;
+      } else if (build.status === 'errored') {
+        stats.failed++;
       }
-    }`,
-      { page, perPage }
-    )
-    .then(resp => resp.builds);
-};
+
+      build.stats = Object.assign({}, stats);
+
+      return build;
+    });
+  });
+}
