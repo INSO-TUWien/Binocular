@@ -37,8 +37,8 @@ const relations = {
 };
 
 // create database, index on _id and triple store
-const db = new PouchDB('Binocular_collections');
-const tripleStore = new PouchDB('Binocular_triple');
+const db = new PouchDB('Binocular_collections_' + Date.now());
+const tripleStore = new PouchDB('Binocular_triple_' + Date.now());
 
 db.createIndex({
   index: { fields: ['_id'] }
