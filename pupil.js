@@ -502,37 +502,37 @@ async function serviceStarter(serviceEntry) {
   }
 }
 
-// don't start services if Binocular is run in offline mode
-if (ctx.argv.offline) {
-  console.log('OFFLINE MODE');
-  process.exit(0);
-}
+// list all services
+const servicesList = [
+  () => {
+    // start web server
+    httpServer.listen(port, () => {
+      console.log(`Listening on http://localhost:${port}`);
+      if (argv.ui && argv.open) {
+        opn(`http://localhost:${port}/`);
+      }
+    });
+  },
+  // start database
+  startDatabase.bind(this, ctx, gatewayService),
+  // start gateway
+  (async (context, config, gateway) => {
+    services.push(gateway);
 
-// start services
-Promise.all(
-  [
-    () => {
-      // start web server
-      httpServer.listen(port, () => {
-        console.log(`Listening on http://localhost:${port}`);
-        if (argv.ui && argv.open) {
-          opn(`http://localhost:${port}/`);
-        }
-      });
-    },
-    // start database
-    startDatabase.bind(this, ctx, gatewayService),
-    // start gateway
-    (async (context, config, gateway) => {
-      services.push(gateway);
+    await gateway.configure(config.get('gateway'));
+    gateway.addServiceHandler('LanguageDetection', service => {
+      service.comm = new LanguageDetectionService(`${service.client.address}:${service.client.port}`, grpc.credentials.createInsecure());
+      reIndex(indexers, context, reporter, gateway, activeIndexingQueue, ++indexingProcess);
+    });
 
-      await gateway.configure(config.get('gateway'));
-      gateway.addServiceHandler('LanguageDetection', service => {
-        service.comm = new LanguageDetectionService(`${service.client.address}:${service.client.port}`, grpc.credentials.createInsecure());
-        reIndex(indexers, context, reporter, gateway, activeIndexingQueue, ++indexingProcess);
-      });
+    return gateway.start();
+  }).bind(this, ctx, config, gatewayService)
+];
 
-      return gateway.start();
-    }).bind(this, ctx, config, gatewayService)
-  ].map(entryPoint => serviceStarter(entryPoint))
-);
+Promise.all(servicesList.map(entryPoint => serviceStarter(entryPoint))).then(async () => {
+  // if no-server flag set stop immediately after indexing
+  if (!ctx.argv.server) {
+    stop();
+    process.exit(0);
+  }
+});
