@@ -12,7 +12,7 @@ export default handleActions(
     REQUEST_CONFIGURATION: state => _.assign({}, state, { isFetching: true }),
 
     RECEIVE_CONFIGURATION: (state, action) => {
-      document.title = 'Binocular (Offline Artifact)';
+      document.title = 'Binocular';
       return _.merge({}, state, {
         data: action.payload,
         isFetching: false,
