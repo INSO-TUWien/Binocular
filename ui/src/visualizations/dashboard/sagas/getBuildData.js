@@ -10,7 +10,7 @@ export default function getBuildData() {
     return res.docs.map(build => {
       if (build.status === 'success') {
         stats.success++;
-      } else if (build.status === 'errored') {
+      } else if (build.status === 'failed' || build.status === 'errored') {
         stats.failed++;
       }
 
