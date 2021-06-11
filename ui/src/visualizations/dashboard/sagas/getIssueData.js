@@ -12,4 +12,3 @@ export default function getIssueData(issueSpan, significantSpan) {
     return res.docs;
   });
 }
-
