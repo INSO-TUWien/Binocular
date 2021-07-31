@@ -1,17 +1,45 @@
 import * as d3 from 'd3';
+import loadingStyles from '../../css/loading.scss';
 import styles from '../../styles.scss';
 
 export default class Loading {
   static insert() {
     d3.select('#loading').remove();
+    /*d3
+      .select('.loadingContainer')
+      .append('div')
+      .attr('id', 'loading')
+      .html('<div class=' + styles.loaderContainer + '><div class=' + styles.loader + '></div></div>');*/
     d3
       .select('.loadingContainer')
       .append('div')
       .attr('id', 'loading')
-      .html('<div class=' + styles.loaderContainer + '><div class=' + styles.loader + '></div></div>');
+      .html(
+        '<div class=' +
+          loadingStyles.loaderContainer +
+          '>' +
+          '<div class=' +
+          loadingStyles.loadingBarBack +
+          '>' +
+          '<div id="loadingBarFront" class=' +
+          loadingStyles.loadingBarFront +
+          '>' +
+          '</div></div>' +
+          '<div id="loadingBarText" class="' +
+          loadingStyles.loadingBarText +
+          '">Loading ...</div>' +
+          '</div>'
+      );
+  }
+
+  static setState(percent, text) {
+    console.log('LOADING: ' + percent + '% , ' + text);
+    d3.select('#loadingBarFront').style('width', percent + '%');
+    d3.select('#loadingBarText').text(text);
   }
 
   static remove() {
+    console.log('LOADING FINISHED');
     d3.select('#loading').remove();
   }
 
@@ -23,9 +51,9 @@ export default class Loading {
       .attr('id', 'loading')
       .html(
         "<div class='" +
-          styles.loaderContainer +
+          loadingStyles.loaderContainer +
           ' ' +
-          styles.error +
+          loadingStyles.error +
           "'><div style='font-weight: bold'>Error:</div><div>" +
           text +
           '</div></div>'

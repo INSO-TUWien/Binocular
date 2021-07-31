@@ -121,6 +121,7 @@
     "graphql-client": "^1.1.0",
     "graphql-tag": "^2.4.2",
     "grpc": "^1.24.3",
+    "hamsters.js": "^5.3.2",
     "html-webpack-plugin": "2.29.0",
     "inflection": "^1.12.0",
     "isomorphic-fetch": "^2.2.1",
@@ -158,6 +159,7 @@
     "react-keyed-file-browser": "^1.8.0",
     "react-measure": "^2.0.2",
     "react-native-crypto": "^2.2.0",
+    "react-native-threads": "^0.0.19",
     "react-reach": "^0.4.1",
     "react-redux": "^5.0.5",
     "react-redux-form": "^1.13.0",
@@ -184,6 +186,7 @@
     "temp": "^0.8.3",
     "url-join": "^2.0.2",
     "url-loader": "0.5.9",
+    "web-worker": "^1.0.0",
     "webpack": "^3.2.0",
     "wordwrap": "^1.0.0",
     "yargs": "^6.6.0"

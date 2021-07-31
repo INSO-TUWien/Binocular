@@ -8,21 +8,20 @@ require('codemirror/mode/javascript/javascript');
 import '../css/codeMirror.css';
 import vcsData from './helper/vcsData';
 import chartUpdater from './charts/chartUpdater';
-import Promise from 'bluebird';
+import BluebirdPromise from 'bluebird';
 import { graphQl } from '../../../utils';
 import Loading from './helper/loading';
 import ModeSwitcher from './helper/modeSwitcher';
 import Settings from './settings/settings';
 
-const code = 'No File Selected';
 const prevPath = '';
 const prevMode = 0;
 const prevSha = '';
+const lightRefresh = false;
 
 export default class CodeHotspots extends React.PureComponent {
   constructor(props) {
     super(props);
-
     this.requestFileStructure().then(function(resp) {
       const files = [];
       for (const i in resp) {
@@ -46,7 +45,8 @@ export default class CodeHotspots extends React.PureComponent {
       fileURL: '',
       path: '',
       sha: '',
-      mode: 0, //modes: 0...Changes/Version  1...Changes/Developer
+      mode: 0, //modes: 0...Changes/Version  1...Changes/Developer  2...Changes/Issue
+      data: {},
 
       //Settings
       dataScaleMode: true,
@@ -58,16 +58,18 @@ export default class CodeHotspots extends React.PureComponent {
 
   componentWillReceiveProps(nextProps) {
     const { fileURL, branch, path } = nextProps;
-    this.setState({ path: path });
-    this.setState({ branch: branch });
-    this.setState({ fileURL: fileURL });
+    this.setState({ path: path, branch: branch, fileURL: fileURL });
   }
 
   componentDidMount() {}
 
   render() {
-    this.requestData();
-
+    if (!this.lightRefresh) {
+      this.requestData();
+    } else {
+      this.generateCharts();
+    }
+    this.lightRefresh = false;
     return (
       <div className={styles.w100}>
         <div className={'loadingContainer'} />
@@ -128,6 +130,7 @@ export default class CodeHotspots extends React.PureComponent {
           <div className={styles.w100 + ' ' + styles.pr}>
             <div className={styles.codeView}>
               <CodeMirror
+                id={'codeView'}
                 value={this.state.code}
                 options={{
                   mode: ModeSwitcher.modeFromExtension(this.state.path.split('.').pop()),
@@ -156,7 +159,8 @@ export default class CodeHotspots extends React.PureComponent {
     if (this.state.path !== '') {
       Loading.insert();
       if (this.state.path !== this.prevPath || this.state.mode !== this.prevMode || this.state.sha !== this.prevSha) {
-        var xhr = new XMLHttpRequest();
+        Loading.setState(0, 'Requesting Source Code');
+        const xhr = new XMLHttpRequest();
         xhr.open(
           'GET',
           this.state.fileURL
@@ -171,28 +175,25 @@ export default class CodeHotspots extends React.PureComponent {
               const lines = xhr.responseText.split(/\r\n|\r|\n/).length;
               const path = this.state.path;
               const mode = this.state.mode;
-              const currThis = this;
+
               switch (mode) {
-                case 1:
-                  vcsData.getChangeData(path).then(function(resp) {
-                    chartUpdater.updateAllChartsWithChangesPerDeveloper(resp, lines, path, currThis, true);
-                    currThis.setState({ code: xhr.responseText });
-                    Loading.remove();
-                  });
-                  break;
                 case 2:
-                  vcsData.getIssueData(path).then(function(resp) {
-                    chartUpdater.updateAllChartsWithChangesPerIssue(resp, lines, path, currThis, true);
-                    currThis.setState({ code: xhr.responseText });
-                    Loading.remove();
-                  });
+                  Loading.setState(33, 'Requesting Issue Data');
+                  vcsData.getIssueData(path).then(
+                    function(resp) {
+                      this.lightRefresh = true;
+                      this.setState({ code: xhr.responseText, data: resp });
+                    }.bind(this)
+                  );
                   break;
                 default:
-                  vcsData.getChangeData(path).then(function(resp) {
-                    chartUpdater.updateAllChartsWithChangesPerVersion(resp, lines, path, currThis, true);
-                    currThis.setState({ code: xhr.responseText });
-                    Loading.remove();
-                  });
+                  Loading.setState(33, 'Requesting VCS Data');
+                  vcsData.getChangeData(path).then(
+                    function(resp) {
+                      this.lightRefresh = true;
+                      this.setState({ code: xhr.responseText, data: resp });
+                    }.bind(this)
+                  );
                   break;
               }
             } else {
@@ -207,17 +208,8 @@ export default class CodeHotspots extends React.PureComponent {
         };
         xhr.send(null);
       } else {
-        switch (this.state.mode) {
-          case 1:
-            chartUpdater.updateAllChartsWithChangesPerDeveloper(null, null, null, this, false);
-            break;
-          case 2:
-            chartUpdater.updateAllChartsWithChangesPerIssue(null, null, null, this, false);
-            break;
-          default:
-            chartUpdater.updateAllChartsWithChangesPerVersion(null, null, null, this, false);
-            break;
-        }
+        Loading.setState(100, 'Updating Charts');
+        chartUpdater.updateCharts(this, this.state.mode);
         Loading.remove();
       }
       this.prevPath = this.state.path;
@@ -226,8 +218,45 @@ export default class CodeHotspots extends React.PureComponent {
     }
   }
 
+  generateCharts() {
+    const lines = this.state.code.split(/\r\n|\r|\n/).length;
+    switch (this.state.mode) {
+      case 1:
+        Loading.setState(66, 'Transforming Developer Data');
+        chartUpdater.transformChangesPerDeveloperData(this.state.data, lines, this.state.path);
+        Loading.setState(100, 'Generating Charts');
+        chartUpdater.updateCharts(this, 1);
+        Loading.remove();
+        break;
+      case 2:
+        Loading.setState(66, 'Transforming Issue Data');
+        chartUpdater.transformChangesPerIssueData(this.state.data, lines, this.state.path);
+        Loading.setState(100, 'Generating Charts');
+        chartUpdater.updateCharts(this, 2);
+        Loading.remove();
+        break;
+      default:
+        Loading.setState(66, 'Transforming Version Data');
+        setTimeout(
+          function() {
+            chartUpdater.transformChangesPerVersionData(this.state.data, lines, this.state.path);
+            Loading.setState(100, 'Generating Charts');
+            setTimeout(
+              function() {
+                chartUpdater.updateCharts(this, 0);
+                Loading.remove();
+              }.bind(this),
+              0
+            );
+          }.bind(this),
+          0
+        );
+        break;
+    }
+  }
+
   requestFileStructure() {
-    return Promise.resolve(
+    return BluebirdPromise.resolve(
       graphQl.query(
         `
       query{
@@ -242,7 +271,7 @@ export default class CodeHotspots extends React.PureComponent {
   }
 
   getAllBranches() {
-    return Promise.resolve(
+    return BluebirdPromise.resolve(
       graphQl.query(
         `
       query{

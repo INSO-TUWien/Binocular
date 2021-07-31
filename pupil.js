@@ -70,6 +70,7 @@ const LanguageDetectionService = (LanguageComm || { LanguageDetectionService: ()
 // set up the endpoints
 app.get('/api/commits', require('./lib/endpoints/get-commits.js'));
 app.get('/api/config', require('./lib/endpoints/get-config.js'));
+app.get('/api/fileSourceCode', require('./lib/endpoints/get-fileSourceCode.js'));
 
 // proxy to the FOXX-service
 app.get('/graphQl', require('./lib/endpoints/graphQl.js'));

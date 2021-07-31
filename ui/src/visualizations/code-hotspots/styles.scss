@@ -70,38 +70,6 @@
   width: calc(100% - 120px);
 }
 
-.loaderContainer{
-  position: absolute;
-  width: 10rem;
-  height: 10rem;
-  right: calc(50vw - 5rem);
-  top: calc(50vh - 5rem);
-  padding: 1rem;
-  background-color:#FFFFFFDD;
-  box-shadow:0 0 10px #555555;
-  border-radius:4px;
-  z-index: 999;
-}
-
-.error{
-  background-color: #ED4337DD !important;
-  color: white !important;
-}
-
-.loader {
-  border: 16px solid #f3f3f3;
-  border-top: 16px solid #3498db;
-  border-radius: 50%;
-  width: 100%;
-  height: 100%;
-  animation: spin 2s linear infinite;
-}
-
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
-
 .menubar{
   background-color: #EEEEEE;
   margin-bottom: 1rem;
