@@ -1,4 +1,5 @@
 import * as d3 from 'd3';
+import * as d3Collection from 'd3-collection';
 import ColorMixer from '../helper/colorMixer';
 import ListGeneration from '../helper/listGeneration';
 
@@ -9,7 +10,8 @@ const EVEN_COLOR = '#FFFFFFFF';
 const ODD_COLOR = '#EEEEEE55';
 
 export default class chartGeneration {
-  static generateHeatmap(data, lines, columns, currThis, mode, maxValue, legendSteps) {
+  static generateHeatmap(data, lines, importantColumns, currThis, mode, maxValue, legendSteps) {
+    const columns = importantColumns.length;
     d3.select('.chartHeatmap > *').remove();
 
     const legendData = [];
@@ -66,7 +68,7 @@ export default class chartGeneration {
       .enter()
       .append('rect')
       .attr('x', d => {
-        return (d.column - 0) * barWidth;
+        return (importantColumns.indexOf(d.column) - 0) * barWidth;
       })
       .attr('y', d => {
         return (d.row - 1) * barHeight;
@@ -80,51 +82,80 @@ export default class chartGeneration {
     d3.select('.chartRow').remove();
     d3.select('.tooltipRow').remove();
 
-    const combinedData = [];
-    let maxValue = 0;
+    let combinedData;
+    //let maxValue = 0;
 
     switch (mode) {
       case 1:
-        for (let i = 0; i < data.length; i++) {
-          if (combinedData[data[i].row] === undefined) {
-            combinedData[data[i].row] = { column: data[i].column, row: data[i].row, value: data[i].value, developer: [] };
-            combinedData[data[i].row].developer.push({ dev: data[i].dev, value: data[i].value });
-          } else {
-            combinedData[data[i].row].value += data[i].value;
-            combinedData[data[i].row].developer.push({ dev: data[i].dev, value: data[i].value });
-            if (combinedData[data[i].row].value > maxValue) {
-              maxValue = combinedData[data[i].row].value;
-            }
-          }
-        }
+        combinedData = d3Collection
+          .nest()
+          .key(d => d.row)
+          .rollup(function(v) {
+            const devs = v.map(g => g.dev);
+            const values = v.map(g => g.value);
+            return {
+              column: v[0].column,
+              value: d3.sum(v, g => g.value),
+              developer: devs
+                .map(function(v, i) {
+                  return { dev: v, value: values[i] };
+                })
+                .filter(d => d.value !== 0)
+            };
+          })
+          .entries(data)
+          .map(function(d) {
+            const row = d.key;
+            const res = d.value;
+            res.row = row;
+            return res;
+          });
         break;
       case 2:
-        for (let i = 0; i < data.length; i++) {
-          if (combinedData[data[i].row] === undefined) {
-            combinedData[data[i].row] = { column: data[i].column, row: data[i].row, value: data[i].value, issues: [] };
-            combinedData[data[i].row].issues.push({ title: data[i].title, value: data[i].value });
-          } else {
-            combinedData[data[i].row].value += data[i].value;
-            combinedData[data[i].row].issues.push({ title: data[i].title, value: data[i].value });
-            if (combinedData[data[i].row].value > maxValue) {
-              maxValue = combinedData[data[i].row].value;
-            }
-          }
-        }
+        combinedData = d3Collection
+          .nest()
+          .key(d => d.row)
+          .rollup(function(v) {
+            const titles = v.map(g => g.title);
+            const values = v.map(g => g.value);
+            return {
+              column: v[0].column,
+              value: d3.sum(v, g => g.value),
+              issues: titles
+                .map(function(v, i) {
+                  return { title: v, value: values[i] };
+                })
+                .filter(d => d.value !== 0)
+            };
+          })
+          .entries(data)
+          .map(function(d) {
+            const row = d.key;
+            const res = d.value;
+            res.row = row;
+            return res;
+          });
         break;
       default:
-        for (let i = 0; i < data.length; i++) {
-          if (combinedData[data[i].row] === undefined) {
-            combinedData[data[i].row] = { column: data[i].column, row: data[i].row, value: data[i].value };
-          } else {
-            combinedData[data[i].row].value += data[i].value;
-            if (combinedData[data[i].row].value > maxValue) {
-              maxValue = combinedData[data[i].row].value;
-            }
-          }
-        }
+        combinedData = d3Collection
+          .nest()
+          .key(d => d.row)
+          .rollup(function(v) {
+            return {
+              column: v[0].column,
+              value: d3.sum(v, g => g.value)
+            };
+          })
+          .entries(data)
+          .map(function(d) {
+            const row = d.key;
+            const res = d.value;
+            res.row = row;
+            return res;
+          });
         break;
     }
+    let maxValue = d3.max(combinedData, d => d.value);
 
     const legendData = [];
 
@@ -189,9 +220,7 @@ export default class chartGeneration {
           .enter()
           .append('g')
           .append('rect')
-          .attr('x', d => {
-            return (d.column - 0) * barWidth;
-          })
+          .attr('x', 0)
           .attr('y', d => {
             return (d.row - 1) * barHeight;
           })
@@ -227,9 +256,7 @@ export default class chartGeneration {
           .enter()
           .append('g')
           .append('rect')
-          .attr('x', d => {
-            return (d.column - 0) * barWidth;
-          })
+          .attr('x', 0)
           .attr('y', d => {
             return (d.row - 1) * barHeight;
           })
@@ -265,9 +292,7 @@ export default class chartGeneration {
           .enter()
           .append('g')
           .append('rect')
-          .attr('x', d => {
-            return (d.column - 0) * barWidth;
-          })
+          .attr('x', 0)
           .attr('y', d => {
             return (d.row - 1) * barHeight;
           })
@@ -290,75 +315,68 @@ export default class chartGeneration {
     }
   }
 
-  static generateBarChart(data, columns, currThis, mode, legendSteps) {
+  static generateColumnChart(data, columns, currThis, mode, legendSteps) {
     d3.select('.chartColumns').remove();
     d3.select('.tooltipColumns').remove();
 
-    const combinedData = [];
-    let maxValue = 0;
+    let combinedData = {};
     switch (mode) {
       case 1:
-        for (let i = 0; i < data.length; i++) {
-          if (combinedData[data[i].column] === undefined) {
-            combinedData[data[i].column] = {
-              column: data[i].column,
-              row: data[i].row,
-              value: data[i].value,
-              message: data[i].message,
-              sha: data[i].sha,
-              dev: data[i].dev
+        combinedData = d3Collection
+          .nest()
+          .key(d => d.column)
+          .rollup(function(v) {
+            return {
+              column: v[0].column,
+              value: d3.sum(v, g => g.value),
+              message: v[0].message,
+              sha: v[0].sha,
+              dev: v[0].dev
             };
-          } else {
-            combinedData[data[i].column].value += data[i].value;
-            if (combinedData[data[i].column].value > maxValue) {
-              maxValue = combinedData[data[i].column].value;
-            }
-          }
-        }
-
+          })
+          .entries(data)
+          .map(d => d.value);
         break;
       case 2:
-        for (let i = 0; i < data.length; i++) {
-          if (combinedData[data[i].column] === undefined) {
-            combinedData[data[i].column] = {
-              column: data[i].column,
-              row: data[i].row,
-              value: data[i].value,
-              message: data[i].message,
-              sha: data[i].sha,
-              title: data[i].title,
-              description: data[i].description,
-              iid: data[i].iid
+        combinedData = d3Collection
+          .nest()
+          .key(d => d.column)
+          .rollup(function(v) {
+            return {
+              column: v[0].column,
+              value: d3.sum(v, g => g.value),
+              message: v[0].message,
+              sha: v[0].sha,
+              title: v[0].title,
+              description: v[0].description,
+              iid: v[0].iid
             };
-          } else {
-            combinedData[data[i].column].value += data[i].value;
-            if (combinedData[data[i].column].value > maxValue) {
-              maxValue = combinedData[data[i].column].value;
-            }
-          }
-        }
-
+          })
+          .entries(data)
+          .map(d => d.value)
+          .filter(d => d.value !== 0);
         break;
       default:
-        for (let i = 0; i < data.length; i++) {
-          if (combinedData[data[i].column] === undefined) {
-            combinedData[data[i].column] = {
-              column: data[i].column,
-              row: data[i].row,
-              value: data[i].value,
-              message: data[i].message,
-              sha: data[i].sha,
-              signature: data[i].signature
+        combinedData = d3Collection
+          .nest()
+          .key(d => d.column)
+          .rollup(function(v) {
+            return {
+              column: v[0].column,
+              value: d3.sum(v, g => g.value),
+              message: v[0].message,
+              sha: v[0].sha,
+              signature: v[0].signature
             };
-          } else {
-            combinedData[data[i].column].value += data[i].value;
-            if (combinedData[data[i].column].value > maxValue) {
-              maxValue = combinedData[data[i].column].value;
-            }
-          }
-        }
-
+          })
+          .entries(data)
+          .map(d => d.value);
         break;
+    }
+    let maxValue = d3.max(combinedData, d => d.value);
+
+    for (let i = 0; i < combinedData.length; i++) {
+      combinedData[i].i = i;
     }
 
     const legendData = [];
@@ -405,9 +423,9 @@ export default class chartGeneration {
       .append('rect')
       .attr('fill', '#EEEEEE88')
       .attr('class', 'sBar')
-      .attr('x', (d, i) => i * w / columns)
+      .attr('x', (d, i) => i * w / combinedData.length)
       .attr('y', 0)
-      .attr('width', w / columns)
+      .attr('width', w / combinedData.length)
       .attr('height', h);
 
     //Bars
@@ -419,12 +437,12 @@ export default class chartGeneration {
       .append('rect')
       .attr('fill', colorScale)
       .attr('class', 'sBar')
-      .attr('x', (d, i) => i * w / columns)
-      .attr('y', (d, i) => {
+      .attr('x', (d, i) => i * w / combinedData.length)
+      .attr('y', d => {
         return h - h / maxValue * d.value;
       })
-      .attr('width', w / columns)
-      .attr('height', (d, i) => {
+      .attr('width', w / combinedData.length)
+      .attr('height', d => {
         return h / maxValue * d.value;
       });
 
@@ -454,12 +472,11 @@ export default class chartGeneration {
           .append('rect')
           .attr('fill', '#00000000')
           .attr('class', 'sBar')
-          .attr('x', (d, i) => i * w / columns)
+          .attr('x', (d, i) => i * w / combinedData.length)
           .attr('y', 0)
-          .attr('width', w / columns)
+          .attr('width', w / combinedData.length)
           .attr('height', h)
           .on('mouseover', function(event, d) {
-            const i = d.column;
             div.transition().duration(200).style('opacity', 1);
             div
               .html(
@@ -474,7 +491,7 @@ export default class chartGeneration {
                   d.value +
                   '</div>'
               )
-              .style('right', w - i * w / columns - 300 > 0 ? w - i * w / columns - 300 : 0 + 'px')
+              .style('right', w - d.i * w / combinedData.length - 300 > 0 ? w - d.i * w / combinedData.length - 300 : 0 + 'px')
               .style('top', h + 'px');
           })
           .on('mouseout', function() {
@@ -489,12 +506,11 @@ export default class chartGeneration {
           .append('rect')
           .attr('fill', '#00000000')
           .attr('class', 'sBar')
-          .attr('x', (d, i) => i * w / columns)
+          .attr('x', (d, i) => i * w / combinedData.length)
           .attr('y', 0)
-          .attr('width', w / columns)
+          .attr('width', w / combinedData.length)
           .attr('height', h)
           .on('mouseover', function(event, d) {
-            const i = d.column;
             div.transition().duration(200).style('opacity', 1);
             div
               .html(
@@ -505,15 +521,12 @@ export default class chartGeneration {
                   d.title +
                   '</div>' +
                   '<hr>' +
-                  '<div>' +
-                  d.description +
-                  '</div>' +
-                  '<hr>' +
+                  (d.description !== '' ? '<div>' + d.description + '</div>' + '<hr>' : '') +
                   '<div>Changes: ' +
                   d.value +
                   '</div>'
               )
-              .style('right', w - i * w / columns - 300 > 0 ? w - i * w / columns - 300 : 0 + 'px')
+              .style('right', w - d.i * w / combinedData.length - 300 > 0 ? w - d.i * w / combinedData.length - 300 : 0 + 'px')
               .style('top', h + 'px');
           })
           .on('mouseout', function() {
@@ -528,13 +541,12 @@ export default class chartGeneration {
           .append('rect')
           .attr('fill', '#00000000')
           .attr('class', 'sBar')
-          .attr('x', (d, i) => i * w / columns)
+          .attr('x', (d, i) => i * w / combinedData.length)
           .attr('y', 0)
-          .attr('width', w / columns)
+          .attr('width', w / combinedData.length)
           .attr('height', h)
           .style('cursor', 'pointer')
           .on('mouseover', function(event, d) {
-            const i = d.column;
             div.transition().duration(200).style('opacity', 1);
             div
               .html(
@@ -553,7 +565,7 @@ export default class chartGeneration {
                   d.value +
                   '</div>'
               )
-              .style('right', w - i * w / columns - 300 > 0 ? w - i * w / columns - 300 : 0 + 'px')
+              .style('right', w - d.i * w / combinedData.length - 300 > 0 ? w - d.i * w / combinedData.length - 300 : 0 + 'px')
               .style('top', h + 'px');
           })
           .on('mouseout', function() {
@@ -564,5 +576,6 @@ export default class chartGeneration {
           });
         break;
     }
+    return combinedData.map(d => d.column);
   }
 }

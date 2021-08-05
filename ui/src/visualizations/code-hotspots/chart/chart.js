@@ -14,11 +14,6 @@ import Loading from './helper/loading';
 import ModeSwitcher from './helper/modeSwitcher';
 import Settings from './settings/settings';
 
-const prevPath = '';
-const prevMode = 0;
-const prevSha = '';
-const lightRefresh = false;
-
 export default class CodeHotspots extends React.PureComponent {
   constructor(props) {
     super(props);
@@ -81,7 +76,7 @@ export default class CodeHotspots extends React.PureComponent {
               <button
                 id={'CpVButton'}
                 className={'button ' + styles.mg1 + ' ' + styles.selected}
-                onClick={e => {
+                onClick={() => {
                   this.setState({ mode: 0 });
                   document.getElementById('CpVButton').classList.add(styles.selected);
                   document.getElementById('CpDButton').classList.remove(styles.selected);
@@ -94,7 +89,7 @@ export default class CodeHotspots extends React.PureComponent {
               <button
                 id={'CpDButton'}
                 className={'button ' + styles.mg1}
-                onClick={e => {
+                onClick={() => {
                   this.setState({ mode: 1 });
                   document.getElementById('CpVButton').classList.remove(styles.selected);
                   document.getElementById('CpDButton').classList.add(styles.selected);
@@ -107,7 +102,7 @@ export default class CodeHotspots extends React.PureComponent {
               <button
                 id={'CpIButton'}
                 className={'button ' + styles.mg1}
-                onClick={e => {
+                onClick={() => {
                   this.setState({ mode: 2 });
                   document.getElementById('CpVButton').classList.remove(styles.selected);
                   document.getElementById('CpDButton').classList.remove(styles.selected);
@@ -121,7 +116,7 @@ export default class CodeHotspots extends React.PureComponent {
             <div>
               <button
                 className={'button ' + styles.mg1}
-                onClick={e => {
+                onClick={() => {
                   this.setState({ sha: '' });
                 }}>
                 Back to current Version
@@ -169,10 +164,9 @@ export default class CodeHotspots extends React.PureComponent {
             .replace('master', this.state.sha === '' ? this.state.branch : this.state.sha),
           true
         );
-        xhr.onload = function(e) {
+        xhr.onload = function() {
           if (xhr.readyState === 4) {
             if (xhr.status === 200) {
-              const lines = xhr.responseText.split(/\r\n|\r|\n/).length;
               const path = this.state.path;
               const mode = this.state.mode;
 
@@ -202,7 +196,7 @@ export default class CodeHotspots extends React.PureComponent {
             }
           }
         }.bind(this);
-        xhr.onerror = function(e) {
+        xhr.onerror = function() {
           Loading.setErrorText(xhr.statusText);
           console.error(xhr.statusText);
         };
@@ -223,17 +217,37 @@ export default class CodeHotspots extends React.PureComponent {
     switch (this.state.mode) {
       case 1:
         Loading.setState(66, 'Transforming Developer Data');
-        chartUpdater.transformChangesPerDeveloperData(this.state.data, lines, this.state.path);
-        Loading.setState(100, 'Generating Charts');
-        chartUpdater.updateCharts(this, 1);
-        Loading.remove();
+        setTimeout(
+          function() {
+            chartUpdater.transformChangesPerDeveloperData(this.state.data, lines, this.state.path);
+            Loading.setState(100, 'Generating Charts');
+            setTimeout(
+              function() {
+                chartUpdater.updateCharts(this, 1);
+                Loading.remove();
+              }.bind(this),
+              0
+            );
+          }.bind(this),
+          0
+        );
         break;
       case 2:
         Loading.setState(66, 'Transforming Issue Data');
-        chartUpdater.transformChangesPerIssueData(this.state.data, lines, this.state.path);
-        Loading.setState(100, 'Generating Charts');
-        chartUpdater.updateCharts(this, 2);
-        Loading.remove();
+        setTimeout(
+          function() {
+            chartUpdater.transformChangesPerIssueData(this.state.data, lines);
+            Loading.setState(100, 'Generating Charts');
+            setTimeout(
+              function() {
+                chartUpdater.updateCharts(this, 2);
+                Loading.remove();
+              }.bind(this),
+              0
+            );
+          }.bind(this),
+          0
+        );
         break;
       default:
         Loading.setState(66, 'Transforming Version Data');

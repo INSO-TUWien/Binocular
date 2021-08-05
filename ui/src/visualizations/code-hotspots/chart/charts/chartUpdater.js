@@ -3,16 +3,6 @@ import chartGeneration from './chartGeneration';
 
 import _ from 'lodash';
 
-let storedData;
-let storedLines;
-let storedCommits;
-let storedDevs;
-let storedIssues;
-let storedMaxValue;
-let storedLegendSteps;
-let mode = 0;
-let currThis;
-
 export default class chartUpdater {
   static transformChangesPerVersionData(rawData, lines, path) {
     const data = [];
@@ -84,7 +74,7 @@ export default class chartUpdater {
     this.storedLegendSteps = legendSteps;
   }
 
-  static transformChangesPerIssueData(rawData, lines, path) {
+  static transformChangesPerIssueData(rawData, lines) {
     const data = [];
     const legendSteps = 20;
     let maxValue = 0;
@@ -136,23 +126,22 @@ export default class chartUpdater {
   }
 
   static updateCharts(currThis, mode) {
-    this.mode = mode;
-    this.currThis = currThis;
-    chartGeneration.generateRowSummary(this.storedData, this.storedLines, this.currThis, this.mode, this.storedLegendSteps);
+    const importantColumns = chartGeneration.generateColumnChart(
+      this.storedData,
+      mode === 1 ? this.storedDevs.length : mode === 2 ? this.storedIssues.length : this.storedCommits,
+      currThis,
+      mode,
+      this.storedLegendSteps
+    );
+    this.storedData = this.storedData.filter(d => importantColumns.includes(d.column));
+    chartGeneration.generateRowSummary(this.storedData, this.storedLines, currThis, mode, this.storedLegendSteps);
     chartGeneration.generateHeatmap(
       this.storedData,
       this.storedLines,
-      this.mode === 1 ? this.storedDevs.length : this.mode === 2 ? this.storedIssues.length : this.storedCommits,
-      this.currThis,
-      this.mode,
+      importantColumns,
+      currThis,
+      mode,
       this.storedMaxValue,
-      this.storedLegendSteps
-    );
-    chartGeneration.generateBarChart(
-      this.storedData,
-      this.mode === 1 ? this.storedDevs.length : this.mode === 2 ? this.storedIssues.length : this.storedCommits,
-      this.currThis,
-      this.mode,
       this.storedLegendSteps
     );
   }
