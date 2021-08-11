@@ -125,7 +125,7 @@ export default class chartUpdater {
     this.storedLegendSteps = legendSteps;
   }
 
-  static updateCharts(currThis, mode) {
+  static generateCharts(currThis, mode) {
     const importantColumns = chartGeneration.generateColumnChart(
       this.storedData,
       mode === 1 ? this.storedDevs.length : mode === 2 ? this.storedIssues.length : this.storedCommits,
@@ -136,6 +136,27 @@ export default class chartUpdater {
     this.storedData = this.storedData.filter(d => importantColumns.includes(d.column));
     chartGeneration.generateRowSummary(this.storedData, this.storedLines, currThis, mode, this.storedLegendSteps);
     chartGeneration.generateHeatmap(
+      this.storedData,
+      this.storedLines,
+      importantColumns,
+      currThis,
+      mode,
+      this.storedMaxValue,
+      this.storedLegendSteps
+    );
+  }
+
+  static updateCharts(currThis, mode) {
+    const importantColumns = chartGeneration.updateColumnChart(
+      this.storedData,
+      mode === 1 ? this.storedDevs.length : mode === 2 ? this.storedIssues.length : this.storedCommits,
+      currThis,
+      mode,
+      this.storedLegendSteps
+    );
+    this.storedData = this.storedData.filter(d => importantColumns.includes(d.column));
+    chartGeneration.updateRowSummary(this.storedData, this.storedLines, currThis, mode, this.storedLegendSteps);
+    chartGeneration.updateHeatmap(
       this.storedData,
       this.storedLines,
       importantColumns,

@@ -41,14 +41,17 @@ export default class CodeHotspots extends React.PureComponent {
       path: '',
       sha: '',
       mode: 0, //modes: 0...Changes/Version  1...Changes/Developer  2...Changes/Issue
-      data: {},
-
-      //Settings
-      dataScaleMode: true,
-      dataScaleHeatmap: 0,
-      dataScaleColumns: 0,
-      dataScaleRow: 0
+      data: {}
     };
+
+    this.updateScale = false;
+    this.dataScaleHeatmap = -1;
+    this.dataScaleColumns = -1;
+    this.dataScaleRow = -1;
+
+    this.combinedColumnData = {};
+    this.combinedRowData = {};
+    this.combinedHeatmapData = {};
   }
 
   componentWillReceiveProps(nextProps) {
@@ -59,23 +62,27 @@ export default class CodeHotspots extends React.PureComponent {
   componentDidMount() {}
 
   render() {
-    if (!this.lightRefresh) {
-      this.requestData();
-    } else {
+    if (this.dataChanged) {
       this.generateCharts();
+      this.dataChanged = false;
+    } else {
+      if (this.codeChanged) {
+        this.codeChanged = false;
+      } else {
+        this.requestData();
+      }
     }
-    this.lightRefresh = false;
     return (
       <div className={styles.w100}>
         <div className={'loadingContainer'} />
 
         <div className={styles.w100}>
           <div className={styles.menubar}>
-            <Settings state={this.state} currThis={this} />
+            <Settings currThis={this} />
             <div className={styles.inline}>
               <button
                 id={'CpVButton'}
-                className={'button ' + styles.mg1 + ' ' + styles.selected}
+                className={'button ' + styles.mg1 + ' ' + styles.button + ' ' + styles.selected}
                 onClick={() => {
                   this.setState({ mode: 0 });
                   document.getElementById('CpVButton').classList.add(styles.selected);
@@ -88,7 +95,7 @@ export default class CodeHotspots extends React.PureComponent {
             <div className={styles.inline}>
               <button
                 id={'CpDButton'}
-                className={'button ' + styles.mg1}
+                className={'button ' + styles.mg1 + ' ' + styles.button}
                 onClick={() => {
                   this.setState({ mode: 1 });
                   document.getElementById('CpVButton').classList.remove(styles.selected);
@@ -101,7 +108,7 @@ export default class CodeHotspots extends React.PureComponent {
             <div className={styles.inline}>
               <button
                 id={'CpIButton'}
-                className={'button ' + styles.mg1}
+                className={'button ' + styles.mg1 + ' ' + styles.button}
                 onClick={() => {
                   this.setState({ mode: 2 });
                   document.getElementById('CpVButton').classList.remove(styles.selected);
@@ -115,7 +122,7 @@ export default class CodeHotspots extends React.PureComponent {
           {this.state.sha !== '' &&
             <div>
               <button
-                className={'button ' + styles.mg1}
+                className={'button ' + styles.mg1 + ' ' + styles.button}
                 onClick={() => {
                   this.setState({ sha: '' });
                 }}>
@@ -153,42 +160,63 @@ export default class CodeHotspots extends React.PureComponent {
   requestData() {
     if (this.state.path !== '') {
       Loading.insert();
-      if (this.state.path !== this.prevPath || this.state.mode !== this.prevMode || this.state.sha !== this.prevSha) {
+      if (this.updateScale) {
+        Loading.setState(100, 'Updating Charts');
+        setTimeout(
+          function() {
+            chartUpdater.updateCharts(this, this.state.mode);
+            this.state.updateScale = false;
+            Loading.remove();
+          }.bind(this),
+          0
+        );
+      } else {
         Loading.setState(0, 'Requesting Source Code');
         const xhr = new XMLHttpRequest();
         xhr.open(
           'GET',
           this.state.fileURL
-            .replace('/blob', '')
             .replace('github.com', 'raw.githubusercontent.com')
-            .replace('master', this.state.sha === '' ? this.state.branch : this.state.sha),
+            .replace(/\/blob\/(\w|\W)*\//, '/' + (this.state.sha === '' ? this.state.branch : this.state.sha) + '/'),
           true
         );
         xhr.onload = function() {
           if (xhr.readyState === 4) {
             if (xhr.status === 200) {
-              const path = this.state.path;
-              const mode = this.state.mode;
+              if (this.state.path === this.prevPath && this.state.sha !== this.prevSha) {
+                this.prevSha = this.state.sha;
+                this.codeChanged = true;
+                Loading.remove();
+                this.setState({ code: xhr.responseText });
+              } else {
+                const path = this.state.path;
+                const mode = this.state.mode;
+                this.prevPath = this.state.path;
+                this.prevMode = this.state.mode;
+                this.prevSha = this.state.sha;
 
-              switch (mode) {
-                case 2:
-                  Loading.setState(33, 'Requesting Issue Data');
-                  vcsData.getIssueData(path).then(
-                    function(resp) {
-                      this.lightRefresh = true;
-                      this.setState({ code: xhr.responseText, data: resp });
-                    }.bind(this)
-                  );
-                  break;
-                default:
-                  Loading.setState(33, 'Requesting VCS Data');
-                  vcsData.getChangeData(path).then(
-                    function(resp) {
-                      this.lightRefresh = true;
-                      this.setState({ code: xhr.responseText, data: resp });
-                    }.bind(this)
-                  );
-                  break;
+                switch (mode) {
+                  case 2:
+                    Loading.setState(33, 'Requesting Issue Data');
+                    vcsData.getIssueData(path).then(
+                      function(resp) {
+                        this.codeChanged = true;
+                        this.dataChanged = true;
+                        this.setState({ code: xhr.responseText, data: resp });
+                      }.bind(this)
+                    );
+                    break;
+                  default:
+                    Loading.setState(33, 'Requesting VCS Data');
+                    vcsData.getChangeData(path).then(
+                      function(resp) {
+                        this.codeChanged = true;
+                        this.dataChanged = true;
+                        this.setState({ code: xhr.responseText, data: resp });
+                      }.bind(this)
+                    );
+                    break;
+                }
               }
             } else {
               Loading.setErrorText(xhr.statusText);
@@ -201,14 +229,7 @@ export default class CodeHotspots extends React.PureComponent {
           console.error(xhr.statusText);
         };
         xhr.send(null);
-      } else {
-        Loading.setState(100, 'Updating Charts');
-        chartUpdater.updateCharts(this, this.state.mode);
-        Loading.remove();
       }
-      this.prevPath = this.state.path;
-      this.prevMode = this.state.mode;
-      this.prevSha = this.state.sha;
     }
   }
 
@@ -223,7 +244,7 @@ export default class CodeHotspots extends React.PureComponent {
             Loading.setState(100, 'Generating Charts');
             setTimeout(
               function() {
-                chartUpdater.updateCharts(this, 1);
+                chartUpdater.generateCharts(this, 1);
                 Loading.remove();
               }.bind(this),
               0
@@ -240,7 +261,7 @@ export default class CodeHotspots extends React.PureComponent {
             Loading.setState(100, 'Generating Charts');
             setTimeout(
               function() {
-                chartUpdater.updateCharts(this, 2);
+                chartUpdater.generateCharts(this, 2);
                 Loading.remove();
               }.bind(this),
               0
@@ -257,7 +278,7 @@ export default class CodeHotspots extends React.PureComponent {
             Loading.setState(100, 'Generating Charts');
             setTimeout(
               function() {
-                chartUpdater.updateCharts(this, 0);
+                chartUpdater.generateCharts(this, 0);
                 Loading.remove();
               }.bind(this),
               0

@@ -76,7 +76,7 @@
 }
 
 .selected{
-  background-color: #3273dc;
+  background-color: #3273dc !important;
   color: whitesmoke !important;
 }
 
@@ -122,3 +122,10 @@
   border: red dashed 5px;
 }
 
+.button{
+  background-color: whitesmoke;
+}
+
+.button:hover{
+  background-color: lightgray;
+}

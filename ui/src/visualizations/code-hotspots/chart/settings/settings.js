@@ -28,7 +28,23 @@ export default class Settings extends React.PureComponent {
         </button>
         <div className={settingsStyles.panel}>
           <div id={'settingsPanel'} className={settingsStyles.settingsPanel}>
-            <div className={styles.headline}>Settings</div>
+            <div className={styles.headline}>
+              <span>Settings</span>
+              <button
+                id={'SaveButton'}
+                className={'button ' + settingsStyles.saveButton}
+                onClick={() => {
+                  this.props.currThis.dataScaleHeatmap = document.getElementById('dataScaleHeatmap').value;
+                  this.props.currThis.dataScaleColumns = document.getElementById('dataScaleColumns').value;
+                  this.props.currThis.dataScaleRow = document.getElementById('dataScaleRows').value;
+                  this.props.currThis.updateScale = true;
+                  this.props.currThis.forceUpdate();
+                  console.log('Parameters saved!');
+                }}>
+                Save
+              </button>
+            </div>
+
             <hr />
             <div className={settingsStyles.scrollArea}>
               <div className={styles.label}>Data scale:</div>
@@ -40,53 +56,30 @@ export default class Settings extends React.PureComponent {
                   className="switch is-rounded is-outlined is-info"
                   defaultChecked="true"
                   onChange={event => {
-                    const state = event.target.checked;
-                    if (state) {
+                    if (event.target.checked) {
                       document.getElementById('dataScaleContainer').classList.remove(settingsStyles.showElm);
                       document.getElementById('dataScaleContainer').classList.add(settingsStyles.hideElm);
+                      document.getElementById('dataScaleHeatmap').value = -1;
+                      document.getElementById('dataScaleColumns').value = -1;
+                      document.getElementById('dataScaleRows').value = -1;
                     } else {
                       document.getElementById('dataScaleContainer').classList.add(settingsStyles.showElm);
                       document.getElementById('dataScaleContainer').classList.remove(settingsStyles.hideElm);
+                      document.getElementById('dataScaleHeatmap').value = this.props.currThis.dataScaleHeatmap;
+                      document.getElementById('dataScaleColumns').value = this.props.currThis.dataScaleColumns;
+                      document.getElementById('dataScaleRows').value = this.props.currThis.dataScaleRow;
                     }
-                    this.props.currThis.setState({ dataScaleMode: state });
                   }}
                 />
                 <label htmlFor="dataScaleSwitch">Custom / Automatic Data Scale</label>
               </div>
               <div id="dataScaleContainer" className={settingsStyles.shAnimation + ' ' + settingsStyles.hideElm}>
                 <div className={styles.subLabel}>Heatmap Scale:</div>
-                <input
-                  id="dataScaleHeatmap"
-                  min="0"
-                  className={'input'}
-                  type="number"
-                  value={this.props.state.dataScaleHeatmap}
-                  onChange={event => {
-                    this.props.currThis.setState({ dataScaleHeatmap: event.target.value });
-                  }}
-                />
+                <input id="dataScaleHeatmap" min="0" className={'input'} type="number" />
                 <div className={styles.subLabel}>Column summary Scale:</div>
-                <input
-                  id="dataScaleColumns"
-                  min="0"
-                  className={'input'}
-                  type="number"
-                  value={this.props.state.dataScaleColumns}
-                  onChange={event => {
-                    this.props.currThis.setState({ dataScaleColumns: event.target.value });
-                  }}
-                />
+                <input id="dataScaleColumns" min="0" className={'input'} type="number" />
                 <div className={styles.subLabel}>Row summary Scale:</div>
-                <input
-                  id="dataScaleRows"
-                  min="0"
-                  className={'input'}
-                  type="number"
-                  value={this.props.state.dataScaleRow}
-                  onChange={event => {
-                    this.props.currThis.setState({ dataScaleRow: event.target.value });
-                  }}
-                />
+                <input id="dataScaleRows" min="0" className={'input'} type="number" />
               </div>
               <hr />
             </div>

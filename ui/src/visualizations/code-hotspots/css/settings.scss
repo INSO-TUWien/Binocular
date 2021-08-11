@@ -10,10 +10,10 @@
 .settingsPanel {
   position: absolute;
   background-color: white;
-  z-index: 999;
+  z-index: 998;
   padding: 1rem;
   border-radius: 4px;
-  box-shadow: 0px 0px 10px #555555;
+  box-shadow: 0 0 10px #555555;
   min-width: 50rem;
   left: -4rem;
   top: 4.5rem;
@@ -36,4 +36,16 @@
 
 .hideElm{
   max-height: 0;
+}
+
+.saveButton{
+  background-color: #4882e0;
+  color: whitesmoke;
+  font-weight: bold;
+  float: right;
+}
+
+.saveButton:hover{
+  background-color: #2262ca;
+  color: whitesmoke;
 }

@@ -1,5 +1,5 @@
 .loaderContainer{
-  position: absolute;
+  position: fixed;
   width: 20rem;
   height: 5rem;
   right: calc(50vw - 10rem);
@@ -24,7 +24,7 @@
 
 .loadingBarFront{
   height: 100%;
-  width: 0%;
+  width: 0;
   background: linear-gradient(90deg, #b6daf2, #124364);
   background-size: 100% 100%;
 
