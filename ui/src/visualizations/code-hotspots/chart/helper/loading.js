@@ -59,4 +59,13 @@ export default class Loading {
           '</div></div>'
       );
   }
+
+  static showBackgroundRefresh(text) {
+    d3.select('#backgroundRefreshIndicator').attr('hidden', null);
+    d3.select('#backgroundRefreshIndicatorText').text(text);
+  }
+
+  static hideBackgroundRefresh() {
+    d3.select('#backgroundRefreshIndicator').attr('hidden', true);
+  }
 }

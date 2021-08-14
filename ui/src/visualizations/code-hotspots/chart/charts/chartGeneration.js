@@ -2,6 +2,7 @@ import * as d3 from 'd3';
 import * as d3Collection from 'd3-collection';
 import ColorMixer from '../helper/colorMixer';
 import ListGeneration from '../helper/listGeneration';
+import Loading from '../helper/loading';
 
 const HEATMAP_LOW_COLOR = '#ABEBC6';
 const HEATMAP_HEIGH_COLOR = '#E6B0AA';
@@ -19,7 +20,7 @@ export default class chartGeneration {
       height = 24 * lines,
       margins = { top: 28, right: 0, bottom: 0, left: 0 };
     //Setting chart width and adjusting for margins
-    d3
+    const chart = d3
       .select('.chartHeatmap')
       .attr('width', 'calc(100% - 105px)')
       .attr('height', height + margins.top + margins.bottom)
@@ -28,18 +29,24 @@ export default class chartGeneration {
       .append('g')
       .attr('transform', 'translate(' + margins.left + ',' + margins.top + ')')
       .attr('id', 'heatmapChart');
-
-    this.updateHeatmap(data, lines, importantColumns, currThis, mode, maxValue, legendSteps);
+    setTimeout(
+      function() {
+        this.updateHeatmap(data, lines, importantColumns, currThis, mode, maxValue, legendSteps);
+      }.bind(this)
+    );
+    for (const rowKey of d3Collection.nest().key(d => d.row).entries(currThis.combinedHeatmapData).map(d => d.key)) {
+      chart.append('g').attr('id', 'row' + rowKey);
+    }
   }
 
   static updateHeatmap(data, lines, importantColumns, currThis, mode, maxValue, legendSteps) {
     const columns = importantColumns.length;
-
     if (currThis.dataScaleHeatmap > 0) {
       maxValue = currThis.dataScaleHeatmap;
     } else {
       currThis.dataScaleHeatmap = maxValue;
     }
+
     const width = document.getElementById('barChartContainer').clientWidth;
     const barWidth = width / columns,
       barHeight = 24;
@@ -66,26 +73,34 @@ export default class chartGeneration {
       }
       return HEATMAP_MAX_COLOR;
     };
-
-    const cells = d3.select('#heatmapChart').selectAll('cell').data(currThis.combinedHeatmapData);
-    cells
-      .enter()
-      .append('rect')
-      .attr('x', d => {
-        return (importantColumns.indexOf(d.column) - 0) * barWidth;
-      })
-      .attr('y', d => {
-        return (d.row - 1) * barHeight;
-      })
-      .style('fill', colorScale)
-      .attr('width', barWidth)
-      .attr('height', barHeight);
-    cells.exit().remove();
+    Loading.showBackgroundRefresh('Heatmap generation in progress!');
+    const rowDataArray = d3Collection.nest().key(d => d.row).entries(currThis.combinedHeatmapData).map(d => d.values);
+    for (const [i, rowData] of rowDataArray.entries()) {
+      setTimeout(function() {
+        const cells = d3.select('#row' + rowData[0].row).selectAll('rect').data(rowData);
+        cells
+          .enter()
+          .append('rect')
+          .attr('x', d => {
+            return (importantColumns.indexOf(d.column) - 0) * barWidth;
+          })
+          .attr('y', d => {
+            return (d.row - 1) * barHeight;
+          })
+          .style('fill', colorScale)
+          .attr('width', barWidth)
+          .attr('height', barHeight);
+        cells.exit().remove();
+        if (i === rowDataArray.length - 1) {
+          Loading.hideBackgroundRefresh();
+        }
+      });
+    }
   }
 
   static generateRowSummary(data, lines, currThis, mode, legendSteps) {
-    d3.select('.chartRow').remove();
-    d3.select('.tooltipRow').remove();
+    d3.select('#chartRow').remove();
+    d3.select('#tooltipRow').remove();
     //let maxValue = 0;
 
     switch (mode) {
@@ -187,7 +202,11 @@ export default class chartGeneration {
       .style('padding', '1rem');
 
     //chart
-    this.updateRowSummary(data, lines, currThis, mode, legendSteps);
+    setTimeout(
+      function() {
+        this.updateRowSummary(data, lines, currThis, mode, legendSteps);
+      }.bind(this)
+    );
   }
 
   static updateRowSummary(data, lines, currThis, mode, legendSteps) {
@@ -222,7 +241,7 @@ export default class chartGeneration {
       return HEATMAP_MAX_COLOR;
     };
 
-    const bars = chart.selectAll('bar').data(currThis.combinedRowData);
+    const bars = chart.selectAll('rect').data(currThis.combinedRowData);
 
     //tooltip
 
@@ -322,65 +341,11 @@ export default class chartGeneration {
   }
 
   static generateColumnChart(data, columns, currThis, mode, legendSteps) {
-    d3.select('.chartColumns').remove();
-    d3.select('.tooltipColumns').remove();
+    d3.select('#chartColumns').remove();
+    d3.select('#tooltipColumns').remove();
 
     const w = document.getElementsByClassName('CodeMirror')[0].clientWidth - 80;
     const h = 100;
-
-    switch (mode) {
-      case 1:
-        currThis.combinedColumnData = d3Collection
-          .nest()
-          .key(d => d.column)
-          .rollup(function(v) {
-            return {
-              column: v[0].column,
-              value: d3.sum(v, g => g.value),
-              message: v[0].message,
-              sha: v[0].sha,
-              dev: v[0].dev
-            };
-          })
-          .entries(data)
-          .map(d => d.value);
-        break;
-      case 2:
-        currThis.combinedColumnData = d3Collection
-          .nest()
-          .key(d => d.column)
-          .rollup(function(v) {
-            return {
-              column: v[0].column,
-              value: d3.sum(v, g => g.value),
-              message: v[0].message,
-              sha: v[0].sha,
-              title: v[0].title,
-              description: v[0].description,
-              iid: v[0].iid
-            };
-          })
-          .entries(data)
-          .map(d => d.value)
-          .filter(d => d.value !== 0);
-        break;
-      default:
-        currThis.combinedColumnData = d3Collection
-          .nest()
-          .key(d => d.column)
-          .rollup(function(v) {
-            return {
-              column: v[0].column,
-              value: d3.sum(v, g => g.value),
-              message: v[0].message,
-              sha: v[0].sha,
-              signature: v[0].signature
-            };
-          })
-          .entries(data)
-          .map(d => d.value);
-        break;
-    }
 
     for (let i = 0; i < currThis.combinedColumnData.length; i++) {
       currThis.combinedColumnData[i].i = i;
@@ -393,10 +358,11 @@ export default class chartGeneration {
       .attr('height', h)
       .attr('viewBox', '0 0 ' + w + ' ' + h)
       .attr('preserveAspectRatio', 'none')
-      .attr('class', 'chartColumns');
+      .attr('class', 'chartColumns')
+      .attr('id', 'chartColumns');
 
     //Background
-    const groupBack = barChart.append('g').attr('width', w).attr('height', h).attr('class', 'background');
+    const groupBack = barChart.append('g').attr('width', w).attr('height', h).attr('id', 'background');
     groupBack
       .selectAll('rect')
       .data(currThis.combinedColumnData)
@@ -416,6 +382,7 @@ export default class chartGeneration {
       .select('.barChart')
       .append('div')
       .attr('class', 'tooltipColumns')
+      .attr('id', 'tooltipColumns')
       .style('position', 'absolute')
       .style('opacity', 0)
       .style('background-color', '#FFFFFFDD')
@@ -426,7 +393,7 @@ export default class chartGeneration {
       .style('z-index', '9');
 
     //Info show
-    const groupInfo = barChart.append('g').attr('width', w).attr('height', h).attr('class', 'info');
+    const groupInfo = barChart.append('g').attr('width', w).attr('height', h).attr('id', 'info');
 
     switch (mode) {
       case 1:
@@ -556,7 +523,67 @@ export default class chartGeneration {
           });
         break;
     }
-    return this.updateColumnChart(data, columns, currThis, mode, legendSteps);
+    setTimeout(
+      function() {
+        this.updateColumnChart(data, columns, currThis, mode, legendSteps);
+      }.bind(this)
+    );
+  }
+
+  static updateColumnData(data, currThis, mode) {
+    switch (mode) {
+      case 1:
+        currThis.combinedColumnData = d3Collection
+          .nest()
+          .key(d => d.column)
+          .rollup(function(v) {
+            return {
+              column: v[0].column,
+              value: d3.sum(v, g => g.value),
+              message: v[0].message,
+              sha: v[0].sha,
+              dev: v[0].dev
+            };
+          })
+          .entries(data)
+          .map(d => d.value);
+        break;
+      case 2:
+        currThis.combinedColumnData = d3Collection
+          .nest()
+          .key(d => d.column)
+          .rollup(function(v) {
+            return {
+              column: v[0].column,
+              value: d3.sum(v, g => g.value),
+              message: v[0].message,
+              sha: v[0].sha,
+              title: v[0].title,
+              description: v[0].description,
+              iid: v[0].iid
+            };
+          })
+          .entries(data)
+          .map(d => d.value)
+          .filter(d => d.value !== 0);
+        break;
+      default:
+        currThis.combinedColumnData = d3Collection
+          .nest()
+          .key(d => d.column)
+          .rollup(function(v) {
+            return {
+              column: v[0].column,
+              value: d3.sum(v, g => g.value),
+              message: v[0].message,
+              sha: v[0].sha,
+              signature: v[0].signature
+            };
+          })
+          .entries(data)
+          .map(d => d.value);
+        break;
+    }
   }
 
   static updateColumnChart(data, columns, currThis, mode, legendSteps) {
@@ -564,12 +591,12 @@ export default class chartGeneration {
     const h = 100;
 
     let maxValue = d3.max(currThis.combinedColumnData, d => d.value);
-
     if (currThis.dataScaleColumns > 0) {
       maxValue = currThis.dataScaleColumns;
     } else {
       currThis.dataScaleColumns = maxValue;
     }
+
     const legendData = [];
 
     for (let i = 1; i <= legendSteps; i++) {
@@ -588,7 +615,7 @@ export default class chartGeneration {
     };
 
     //Bars
-    const bars = d3.select('#columnChart').selectAll('bars').data(currThis.combinedColumnData);
+    const bars = d3.select('#columnChart').selectAll('rect').data(currThis.combinedColumnData);
     bars
       .enter()
       .append('rect')
@@ -598,12 +625,10 @@ export default class chartGeneration {
       .attr('y', d => {
         return h - h / maxValue * d.value;
       })
-      .transition()
       .attr('width', w / currThis.combinedColumnData.length)
       .attr('height', d => {
         return h / maxValue * d.value;
       });
-    bars.exit().transition().remove();
-    return currThis.combinedColumnData.map(d => d.column);
+    bars.exit().remove();
   }
 }

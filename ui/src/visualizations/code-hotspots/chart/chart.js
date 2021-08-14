@@ -12,7 +12,8 @@ import BluebirdPromise from 'bluebird';
 import { graphQl } from '../../../utils';
 import Loading from './helper/loading';
 import ModeSwitcher from './helper/modeSwitcher';
-import Settings from './settings/settings';
+import Settings from './components/settings';
+import BackgroundRefreshIndicator from './components/backgroundRefreshIndicator';
 
 export default class CodeHotspots extends React.PureComponent {
   constructor(props) {
@@ -44,7 +45,7 @@ export default class CodeHotspots extends React.PureComponent {
       data: {}
     };
 
-    this.updateScale = false;
+    this.updateParametrization = false;
     this.dataScaleHeatmap = -1;
     this.dataScaleColumns = -1;
     this.dataScaleRow = -1;
@@ -62,20 +63,28 @@ export default class CodeHotspots extends React.PureComponent {
   componentDidMount() {}
 
   render() {
-    if (this.dataChanged) {
-      this.generateCharts();
-      this.dataChanged = false;
+    if (this.prevMode !== this.state.mode) {
+      this.dataScaleHeatmap = -1;
+      this.dataScaleColumns = -1;
+      this.dataScaleRow = -1;
+      this.requestData();
     } else {
-      if (this.codeChanged) {
-        this.codeChanged = false;
+      if (this.dataChanged) {
+        this.dataChanged = false;
+        this.generateCharts();
       } else {
-        this.requestData();
+        if (!this.codeChanged || this.updateParametrization) {
+          this.requestData();
+        } else {
+          this.codeChanged = false;
+        }
       }
     }
+
     return (
       <div className={styles.w100}>
         <div className={'loadingContainer'} />
-
+        <BackgroundRefreshIndicator />
         <div className={styles.w100}>
           <div className={styles.menubar}>
             <Settings currThis={this} />
@@ -160,7 +169,7 @@ export default class CodeHotspots extends React.PureComponent {
   requestData() {
     if (this.state.path !== '') {
       Loading.insert();
-      if (this.updateScale) {
+      if (this.updateParametrization) {
         Loading.setState(100, 'Updating Charts');
         setTimeout(
           function() {

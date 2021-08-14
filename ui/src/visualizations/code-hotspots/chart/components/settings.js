@@ -37,7 +37,7 @@ export default class Settings extends React.PureComponent {
                   this.props.currThis.dataScaleHeatmap = document.getElementById('dataScaleHeatmap').value;
                   this.props.currThis.dataScaleColumns = document.getElementById('dataScaleColumns').value;
                   this.props.currThis.dataScaleRow = document.getElementById('dataScaleRows').value;
-                  this.props.currThis.updateScale = true;
+                  this.props.currThis.updateParametrization = true;
                   this.props.currThis.forceUpdate();
                   console.log('Parameters saved!');
                 }}>

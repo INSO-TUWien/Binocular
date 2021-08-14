@@ -126,7 +126,10 @@ export default class chartUpdater {
   }
 
   static generateCharts(currThis, mode) {
-    const importantColumns = chartGeneration.generateColumnChart(
+    chartGeneration.updateColumnData(this.storedData, currThis, mode);
+    const importantColumns = currThis.combinedColumnData.map(d => d.column);
+
+    chartGeneration.generateColumnChart(
       this.storedData,
       mode === 1 ? this.storedDevs.length : mode === 2 ? this.storedIssues.length : this.storedCommits,
       currThis,
@@ -147,23 +150,37 @@ export default class chartUpdater {
   }
 
   static updateCharts(currThis, mode) {
-    const importantColumns = chartGeneration.updateColumnChart(
-      this.storedData,
-      mode === 1 ? this.storedDevs.length : mode === 2 ? this.storedIssues.length : this.storedCommits,
-      currThis,
-      mode,
-      this.storedLegendSteps
+    const importantColumns = currThis.combinedColumnData.map(d => d.column);
+    setTimeout(
+      function() {
+        chartGeneration.updateColumnChart(
+          this.storedData,
+          mode === 1 ? this.storedDevs.length : mode === 2 ? this.storedIssues.length : this.storedCommits,
+          currThis,
+          mode,
+          this.storedLegendSteps
+        );
+      }.bind(this)
     );
     this.storedData = this.storedData.filter(d => importantColumns.includes(d.column));
-    chartGeneration.updateRowSummary(this.storedData, this.storedLines, currThis, mode, this.storedLegendSteps);
-    chartGeneration.updateHeatmap(
-      this.storedData,
-      this.storedLines,
-      importantColumns,
-      currThis,
-      mode,
-      this.storedMaxValue,
-      this.storedLegendSteps
+
+    setTimeout(
+      function() {
+        chartGeneration.updateRowSummary(this.storedData, this.storedLines, currThis, mode, this.storedLegendSteps);
+      }.bind(this)
+    );
+    setTimeout(
+      function() {
+        chartGeneration.updateHeatmap(
+          this.storedData,
+          this.storedLines,
+          importantColumns,
+          currThis,
+          mode,
+          this.storedMaxValue,
+          this.storedLegendSteps
+        );
+      }.bind(this)
     );
   }
 }
