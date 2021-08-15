@@ -18,6 +18,7 @@ import BackgroundRefreshIndicator from './components/backgroundRefreshIndicator'
 export default class CodeHotspots extends React.PureComponent {
   constructor(props) {
     super(props);
+
     this.requestFileStructure().then(function(resp) {
       const files = [];
       for (const i in resp) {
@@ -25,19 +26,22 @@ export default class CodeHotspots extends React.PureComponent {
       }
       props.onSetFiles(files);
     });
-
+    let activeBranch = 'master';
     this.getAllBranches().then(function(resp) {
       for (const i in resp) {
         if (resp[i].active === 'true') {
+          activeBranch = resp[i].branch;
           props.onSetBranch(resp[i].branch);
         }
       }
       props.onSetBranches(resp);
     });
+
     this.elems = {};
     this.state = {
       code: 'No File Selected',
       branch: 'master',
+      checkedOutBranch: activeBranch,
       fileURL: '',
       path: '',
       sha: '',
@@ -186,7 +190,8 @@ export default class CodeHotspots extends React.PureComponent {
           'GET',
           this.state.fileURL
             .replace('github.com', 'raw.githubusercontent.com')
-            .replace(/\/blob\/(\w|\W)*\//, '/' + (this.state.sha === '' ? this.state.branch : this.state.sha) + '/'),
+            .replace('/blob', '')
+            .replace(this.state.checkedOutBranch, this.state.sha === '' ? this.state.branch : this.state.sha),
           true
         );
         xhr.onload = function() {

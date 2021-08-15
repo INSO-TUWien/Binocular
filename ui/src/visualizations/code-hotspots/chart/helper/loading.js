@@ -66,6 +66,7 @@ export default class Loading {
   }
 
   static hideBackgroundRefresh() {
+    console.log('Backgroundrefresh Finished!');
     d3.select('#backgroundRefreshIndicator').attr('hidden', true);
   }
 }
