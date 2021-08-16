@@ -15,7 +15,15 @@ export default class chartUpdater {
     for (const i in rawData.data) {
       const commit = rawData.data[i];
       for (let j = 0; j < lines; j++) {
-        data.push({ column: i, row: j, value: 0, message: commit.message, sha: commit.sha, signature: commit.signature });
+        data.push({
+          column: i,
+          row: j,
+          value: 0,
+          message: commit.message,
+          sha: commit.sha,
+          branch: commit.branch,
+          signature: commit.signature
+        });
       }
 
       const files = commit.files.data;

@@ -500,6 +500,10 @@ export default class chartGeneration {
                   '</div>' +
                   '<hr>' +
                   '<div>' +
+                  d.branch +
+                  '</div>' +
+                  '<hr>' +
+                  '<div>' +
                   d.signature +
                   '</div>' +
                   '<hr>' +
@@ -577,6 +581,7 @@ export default class chartGeneration {
               value: d3.sum(v, g => g.value),
               message: v[0].message,
               sha: v[0].sha,
+              branch: v[0].branch,
               signature: v[0].signature
             };
           })

@@ -38,6 +38,10 @@ module.exports = new gql.GraphQLObjectType({
         type: gql.GraphQLString,
         description: "The commit author's signature"
       },
+      branch: {
+        type: gql.GraphQLString,
+        description: "The commit author's signature"
+      },
       date: {
         type: Timestamp,
         description: 'The date of the commit'
