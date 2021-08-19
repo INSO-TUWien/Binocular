@@ -67,7 +67,7 @@ export default class CodeHotspots extends React.PureComponent {
   componentDidMount() {}
 
   render() {
-    if (this.prevMode !== this.state.mode) {
+    if (this.prevMode !== this.state.mode || this.state.path !== this.prevPath) {
       this.dataScaleHeatmap = -1;
       this.dataScaleColumns = -1;
       this.dataScaleRow = -1;

@@ -1,6 +1,7 @@
 import React from 'react';
 import styles from '../css/fileBrowser.scss';
 import { folder_white, folder_open_white } from '../images/icons';
+import Search from './search';
 
 export default class FileBrowser extends React.PureComponent {
   constructor(props) {
@@ -41,20 +42,25 @@ export default class FileBrowser extends React.PureComponent {
     //this.props.props.onSetFile("https://github.com/INSO-TUWien/Binocular/blob/master/pupil.js");
     //this.props.props.onSetPath("pupil.js");
     const fileCount = this.props.files.length;
-    const convertedData = this.convertData(this.props.files.filter(d => d.key.includes(this.state.searchTerm)));
-    const filteredFileCount = this.props.files.filter(d => d.key.includes(this.state.searchTerm)).length;
+
+    const filteredData = Search.performSearch(this.props.files, this.state.searchTerm);
+    const convertedData = this.convertData(filteredData);
+    const filteredFileCount = filteredData.length;
 
     return (
       <div>
         <div className={'label'}>Files:</div>
-        <input
-          id={'fileSearch'}
-          className={styles.searchBox}
-          placeholder={'Search for files'}
-          onChange={e => {
-            this.setState({ searchTerm: e.target.value });
-          }}
-        />
+        <div className={styles.searchBoxHint}>
+          <input
+            id={'fileSearch'}
+            className={styles.searchBox}
+            placeholder={'Search for files'}
+            onChange={e => {
+              this.setState({ searchTerm: e.target.value });
+            }}
+          />
+          <span>i: -f [term] search file; -t [term] search file type</span>
+        </div>
         {fileCount === 0 ? <div>Loading Files ...</div> : filteredFileCount === 0 ? <div>No Files found!</div> : null}
         <div className={styles.fileBrowser}>
           <FileStruct data={convertedData} searchTerm={this.state.searchTerm} props={this.props.props} />
