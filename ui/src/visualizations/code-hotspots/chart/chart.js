@@ -196,46 +196,53 @@ export default class CodeHotspots extends React.PureComponent {
         );
         xhr.onload = function() {
           if (xhr.readyState === 4) {
-            if (xhr.status === 200) {
-              if (this.state.path === this.prevPath && this.state.sha !== this.prevSha) {
-                this.prevSha = this.state.sha;
-                this.codeChanged = true;
-                Loading.remove();
-                this.setState({ code: xhr.responseText });
-              } else {
-                const path = this.state.path;
-                const mode = this.state.mode;
-                this.prevPath = this.state.path;
-                this.prevMode = this.state.mode;
-                this.prevSha = this.state.sha;
-
-                switch (mode) {
-                  case 2:
-                    Loading.setState(33, 'Requesting Issue Data');
-                    vcsData.getIssueData(path).then(
-                      function(resp) {
-                        this.codeChanged = true;
-                        this.dataChanged = true;
-                        this.setState({ code: xhr.responseText, data: resp });
-                      }.bind(this)
-                    );
-                    break;
-                  default:
-                    Loading.setState(33, 'Requesting VCS Data');
-                    vcsData.getChangeData(path).then(
-                      function(resp) {
-                        this.codeChanged = true;
-                        this.dataChanged = true;
-                        this.setState({ code: xhr.responseText, data: resp });
-                      }.bind(this)
-                    );
-                    break;
-                }
-              }
+            //if (xhr.status === 200) {
+            if (this.state.path === this.prevPath && this.state.sha !== this.prevSha) {
+              this.prevSha = this.state.sha;
+              this.codeChanged = true;
+              Loading.remove();
+              this.setState({ code: xhr.responseText });
             } else {
+              const path = this.state.path;
+              const mode = this.state.mode;
+              this.prevPath = this.state.path;
+              this.prevMode = this.state.mode;
+              this.prevSha = this.state.sha;
+
+              switch (mode) {
+                case 2:
+                  Loading.setState(33, 'Requesting Issue Data');
+                  vcsData.getIssueData(path).then(
+                    function(resp) {
+                      this.codeChanged = true;
+                      this.dataChanged = true;
+                      this.setState({
+                        code: xhr.status === 200 ? xhr.responseText : 'No commit code in current selected Branch!',
+                        data: resp
+                      });
+                    }.bind(this)
+                  );
+                  break;
+                default:
+                  Loading.setState(33, 'Requesting VCS Data');
+                  vcsData.getChangeData(path).then(
+                    function(resp) {
+                      this.codeChanged = true;
+                      this.dataChanged = true;
+                      this.setState({
+                        code: xhr.status === 200 ? xhr.responseText : 'No commit code in current selected Branch!',
+                        data: resp
+                      });
+                    }.bind(this)
+                  );
+                  break;
+              }
+            }
+
+            /*} else {
               Loading.setErrorText(xhr.statusText);
               console.error(xhr.statusText);
-            }
+            }*/
           }
         }.bind(this);
         xhr.onerror = function() {

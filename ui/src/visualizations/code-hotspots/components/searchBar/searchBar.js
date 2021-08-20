@@ -26,7 +26,7 @@ export default class searchBar extends React.PureComponent {
           }}
           onBlur={e => {
             if (e.target.parentElement.children[0].innerHTML === '') {
-              e.target.parentElement.children[0].innerHTML = '<span className={styles.placeholder}>Search for files!</span>';
+              e.target.parentElement.children[0].innerHTML = '<span class="' + styles.placeholder + '">Search for files!</span>';
             }
           }}
           onChange={e => {

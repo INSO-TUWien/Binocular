@@ -39,7 +39,9 @@ export default class FileBrowser extends React.PureComponent {
   }
 
   componentWillReceiveProps(nextProps) {
-    this.setState({ filteredData: nextProps.files });
+    if (this.state.filteredData.length === 0) {
+      this.setState({ filteredData: nextProps.files });
+    }
   }
 
   render() {
