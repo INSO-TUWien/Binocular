@@ -1,5 +1,5 @@
 import React from 'react';
-import settingsStyles from '../../css/settings.scss';
+import settingsStyles from './settings.scss';
 import styles from '../../styles.scss';
 import { settings_black, settings_white } from '../../images/icons';
 require('bulma-switch');

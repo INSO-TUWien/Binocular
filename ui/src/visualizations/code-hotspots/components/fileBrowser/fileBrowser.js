@@ -1,13 +1,13 @@
 import React from 'react';
-import styles from '../css/fileBrowser.scss';
-import { folder_white, folder_open_white } from '../images/icons';
-import Search from './search';
+import styles from './fileBrowser.scss';
+import { folder_white, folder_open_white } from '../../images/icons';
+import SearchBar from '../searchBar/searchBar';
 
 export default class FileBrowser extends React.PureComponent {
   constructor(props) {
     super(props);
     this.state = {
-      searchTerm: ''
+      filteredData: this.props.files
     };
   }
 
@@ -38,32 +38,28 @@ export default class FileBrowser extends React.PureComponent {
     }
   }
 
-  render() {
-    //this.props.props.onSetFile("https://github.com/INSO-TUWien/Binocular/blob/master/pupil.js");
-    //this.props.props.onSetPath("pupil.js");
-    const fileCount = this.props.files.length;
+  componentWillReceiveProps(nextProps) {
+    this.setState({ filteredData: nextProps.files });
+  }
 
-    const filteredData = Search.performSearch(this.props.files, this.state.searchTerm);
-    const convertedData = this.convertData(filteredData);
-    const filteredFileCount = filteredData.length;
+  render() {
+    const fileCount = this.props.files.length;
+    const convertedData = this.convertData(this.state.filteredData);
+    const filteredFileCount = this.state.filteredData.length;
 
     return (
       <div>
         <div className={'label'}>Files:</div>
-        <div className={styles.searchBoxHint}>
-          <input
-            id={'fileSearch'}
-            className={styles.searchBox}
-            placeholder={'Search for files'}
-            onChange={e => {
-              this.setState({ searchTerm: e.target.value });
-            }}
-          />
-          <span>i: -f [term] search file; -t [term] search file type</span>
-        </div>
+        <SearchBar
+          searchType={'fileSearch'}
+          data={this.props.files}
+          onSearchChanged={function(data) {
+            this.setState({ filteredData: data });
+          }.bind(this)}
+        />
         {fileCount === 0 ? <div>Loading Files ...</div> : filteredFileCount === 0 ? <div>No Files found!</div> : null}
         <div className={styles.fileBrowser}>
-          <FileStruct data={convertedData} searchTerm={this.state.searchTerm} props={this.props.props} />
+          <FileStruct data={convertedData} foldOut={fileCount !== filteredFileCount} props={this.props.props} />
         </div>
       </div>
     );
@@ -110,11 +106,8 @@ class FileStruct extends React.PureComponent {
                   />
                   {data.name}
                 </button>
-                <div
-                  id={'' + i + 'panel' + data.name}
-                  className={styles.panel}
-                  style={{ display: this.props.searchTerm === '' ? 'none' : 'block' }}>
-                  <FileStruct data={data} searchTerm={this.props.searchTerm} props={this.props.props} />
+                <div id={'' + i + 'panel' + data.name} className={styles.panel} style={{ display: this.props.foldOut ? 'block' : 'none' }}>
+                  <FileStruct data={data} foldOut={this.props.foldOut} props={this.props.props} />
                 </div>
               </div>
             );

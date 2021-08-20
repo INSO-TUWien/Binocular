@@ -4,7 +4,7 @@ import { connect } from 'react-redux';
 
 import { setActiveFile, setActivePath, setActiveBranch } from '../sagas';
 import styles from '../styles.scss';
-import FileBrowser from './fileBrowser';
+import FileBrowser from '../components/fileBrowser/fileBrowser';
 
 const mapStateToProps = (state /*, ownProps*/) => {
   const State = state.visualizations.codeHotspots.state;

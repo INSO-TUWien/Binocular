@@ -1,6 +1,6 @@
 'use strict';
-export default class Search {
-  static performSearch(dataSet, searchTerm) {
+export default class SearchAlgorithm {
+  static performFileSearch(dataSet, searchTerm) {
     let filteredDataSet = dataSet;
     const searchTermChunks = searchTerm.toLowerCase().split(' ');
 
@@ -12,7 +12,9 @@ export default class Search {
         case '-file':
           if (i < searchTermChunks.length - 1) {
             i++;
-            filteredDataSet = filteredDataSet.filter(d => d.key.split('/')[d.key.split('/').length - 1].includes(searchTermChunks[i]));
+            filteredDataSet = filteredDataSet.filter(d =>
+              d.key.split('/')[d.key.split('/').length - 1].split('.')[0].includes(searchTermChunks[i])
+            );
           }
           break;
         case '-t':

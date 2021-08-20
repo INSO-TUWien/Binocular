@@ -12,8 +12,8 @@ import BluebirdPromise from 'bluebird';
 import { graphQl } from '../../../utils';
 import Loading from './helper/loading';
 import ModeSwitcher from './helper/modeSwitcher';
-import Settings from './components/settings';
-import BackgroundRefreshIndicator from './components/backgroundRefreshIndicator';
+import Settings from '../components/settings/settings';
+import BackgroundRefreshIndicator from '../components/backgroundRefreshIndicator/backgroundRefreshIndicator';
 
 export default class CodeHotspots extends React.PureComponent {
   constructor(props) {
