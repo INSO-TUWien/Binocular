@@ -39,11 +39,7 @@ export default class chartUpdater {
         commits++;
       }
     }
-    this.storedData = data;
-    this.storedLines = lines;
-    this.storedCommits = commits;
-    this.storedMaxValue = maxValue;
-    this.storedLegendSteps = legendSteps;
+    return { data: data, lines: lines, commits: commits, maxValue: maxValue, legendSteps: legendSteps };
   }
 
   static transformChangesPerDeveloperData(rawData, lines, path) {
@@ -75,11 +71,7 @@ export default class chartUpdater {
         }
       }
     }
-    this.storedData = data;
-    this.storedLines = lines;
-    this.storedDevs = devs;
-    this.storedMaxValue = maxValue;
-    this.storedLegendSteps = legendSteps;
+    return { data: data, lines: lines, devs: devs, maxValue: maxValue, legendSteps: legendSteps };
   }
 
   static transformChangesPerIssueData(rawData, lines) {
@@ -126,68 +118,50 @@ export default class chartUpdater {
         }
       }
     }
-    this.storedData = data;
-    this.storedLines = lines;
-    this.storedIssues = issues;
-    this.storedMaxValue = maxValue;
-    this.storedLegendSteps = legendSteps;
+
+    return { data: data, lines: lines, issues: issues, maxValue: maxValue, legendSteps: legendSteps };
   }
 
-  static generateCharts(currThis, mode) {
-    chartGeneration.updateColumnData(this.storedData, currThis, mode);
-    const importantColumns = currThis.combinedColumnData.map(d => d.column);
-
+  static generateCharts(currThis, mode, data) {
+    const combinedColumnData = chartGeneration.updateColumnData(data.data, currThis, mode);
+    currThis.combinedColumnData = combinedColumnData;
+    const importantColumns = combinedColumnData.map(d => d.column);
+    console.log(importantColumns.length);
     chartGeneration.generateColumnChart(
-      this.storedData,
-      mode === 1 ? this.storedDevs.length : mode === 2 ? this.storedIssues.length : this.storedCommits,
+      currThis.combinedColumnData,
+      mode === 1 ? data.devs.length : mode === 2 ? data.issues.length : data.commits,
       currThis,
       mode,
-      this.storedLegendSteps
+      data.legendSteps
     );
-    this.storedData = this.storedData.filter(d => importantColumns.includes(d.column));
-    chartGeneration.generateRowSummary(this.storedData, this.storedLines, currThis, mode, this.storedLegendSteps);
-    chartGeneration.generateHeatmap(
-      this.storedData,
-      this.storedLines,
-      importantColumns,
-      currThis,
-      mode,
-      this.storedMaxValue,
-      this.storedLegendSteps
-    );
+    const filteredData = data.data.filter(d => importantColumns.includes(d.column));
+    chartGeneration.generateRowSummary(filteredData, data.lines, currThis, mode, data.legendSteps);
+    chartGeneration.generateHeatmap(filteredData, data.lines, importantColumns, currThis, mode, data.maxValue, data.legendSteps);
   }
 
-  static updateCharts(currThis, mode) {
+  static updateCharts(currThis, mode, data) {
     const importantColumns = currThis.combinedColumnData.map(d => d.column);
     setTimeout(
       function() {
         chartGeneration.updateColumnChart(
-          this.storedData,
-          mode === 1 ? this.storedDevs.length : mode === 2 ? this.storedIssues.length : this.storedCommits,
+          currThis.combinedColumnData,
+          mode === 1 ? data.devs.length : mode === 2 ? data.issues.length : data.commits,
           currThis,
           mode,
-          this.storedLegendSteps
+          data.legendSteps
         );
       }.bind(this)
     );
-    this.storedData = this.storedData.filter(d => importantColumns.includes(d.column));
+    const filteredData = data.data.filter(d => importantColumns.includes(d.column));
 
     setTimeout(
       function() {
-        chartGeneration.updateRowSummary(this.storedData, this.storedLines, currThis, mode, this.storedLegendSteps);
+        chartGeneration.updateRowSummary(filteredData, data.lines, currThis, mode, data.legendSteps);
       }.bind(this)
     );
     setTimeout(
       function() {
-        chartGeneration.updateHeatmap(
-          this.storedData,
-          this.storedLines,
-          importantColumns,
-          currThis,
-          mode,
-          this.storedMaxValue,
-          this.storedLegendSteps
-        );
+        chartGeneration.updateHeatmap(filteredData, data.lines, importantColumns, currThis, mode, data.maxValue, data.legendSteps);
       }.bind(this)
     );
   }

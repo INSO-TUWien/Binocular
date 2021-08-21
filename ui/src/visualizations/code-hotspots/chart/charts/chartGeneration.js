@@ -535,9 +535,10 @@ export default class chartGeneration {
   }
 
   static updateColumnData(data, currThis, mode) {
+    let combinedColumnData;
     switch (mode) {
       case 1:
-        currThis.combinedColumnData = d3Collection
+        combinedColumnData = d3Collection
           .nest()
           .key(d => d.column)
           .rollup(function(v) {
@@ -553,7 +554,7 @@ export default class chartGeneration {
           .map(d => d.value);
         break;
       case 2:
-        currThis.combinedColumnData = d3Collection
+        combinedColumnData = d3Collection
           .nest()
           .key(d => d.column)
           .rollup(function(v) {
@@ -572,7 +573,7 @@ export default class chartGeneration {
           .filter(d => d.value !== 0);
         break;
       default:
-        currThis.combinedColumnData = d3Collection
+        combinedColumnData = d3Collection
           .nest()
           .key(d => d.column)
           .rollup(function(v) {
@@ -589,6 +590,7 @@ export default class chartGeneration {
           .map(d => d.value);
         break;
     }
+    return combinedColumnData;
   }
 
   static updateColumnChart(data, columns, currThis, mode, legendSteps) {

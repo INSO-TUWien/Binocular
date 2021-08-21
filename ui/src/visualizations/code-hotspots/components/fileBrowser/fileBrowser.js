@@ -52,13 +52,18 @@ export default class FileBrowser extends React.PureComponent {
     return (
       <div>
         <div className={'label'}>Files:</div>
-        <SearchBar
-          searchType={'fileSearch'}
-          data={this.props.files}
-          onSearchChanged={function(data) {
-            this.setState({ filteredData: data });
-          }.bind(this)}
-        />
+        <div style={{ margin: '1rem 0' }}>
+          <SearchBar
+            searchType={'fileSearch'}
+            data={this.props.files}
+            placeholder={'Search for files!'}
+            hint={'-f [term] search file; -t [term] search file type'}
+            onSearchChanged={function(data) {
+              this.setState({ filteredData: data });
+            }.bind(this)}
+          />
+        </div>
+
         {fileCount === 0 ? <div>Loading Files ...</div> : filteredFileCount === 0 ? <div>No Files found!</div> : null}
         <div className={styles.fileBrowser}>
           <FileStruct data={convertedData} foldOut={fileCount !== filteredFileCount} props={this.props.props} />
@@ -104,7 +109,7 @@ class FileStruct extends React.PureComponent {
                   }}>
                   <span
                     className={styles.icon}
-                    dangerouslySetInnerHTML={{ __html: this.props.searchTerm === '' ? folder_white : folder_open_white }}
+                    dangerouslySetInnerHTML={{ __html: this.props.foldOut ? folder_open_white : folder_white }}
                   />
                   {data.name}
                 </button>

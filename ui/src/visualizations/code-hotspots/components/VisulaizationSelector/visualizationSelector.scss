@@ -1,0 +1,14 @@
+.button{
+  background-color: whitesmoke;
+  height: 3rem;
+}
+
+.button:hover{
+  background-color: lightgray;
+}
+
+
+.selected{
+  background-color: #3273dc !important;
+  color: whitesmoke !important;
+}

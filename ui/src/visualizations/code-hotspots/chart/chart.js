@@ -14,6 +14,8 @@ import Loading from './helper/loading';
 import ModeSwitcher from './helper/modeSwitcher';
 import Settings from '../components/settings/settings';
 import BackgroundRefreshIndicator from '../components/backgroundRefreshIndicator/backgroundRefreshIndicator';
+import VisualizationSelector from '../components/VisulaizationSelector/visualizationSelector';
+import SearchBar from '../components/searchBar/searchBar';
 
 export default class CodeHotspots extends React.PureComponent {
   constructor(props) {
@@ -46,7 +48,8 @@ export default class CodeHotspots extends React.PureComponent {
       path: '',
       sha: '',
       mode: 0, //modes: 0...Changes/Version  1...Changes/Developer  2...Changes/Issue
-      data: {}
+      data: {},
+      filteredData: {}
     };
 
     this.updateParametrization = false;
@@ -84,53 +87,37 @@ export default class CodeHotspots extends React.PureComponent {
         }
       }
     }
-
     return (
       <div className={styles.w100}>
         <div className={'loadingContainer'} />
         <BackgroundRefreshIndicator />
         <div className={styles.w100}>
           <div className={styles.menubar}>
-            <Settings currThis={this} />
-            <div className={styles.inline}>
-              <button
-                id={'CpVButton'}
-                className={'button ' + styles.mg1 + ' ' + styles.button + ' ' + styles.selected}
-                onClick={() => {
-                  this.setState({ mode: 0 });
-                  document.getElementById('CpVButton').classList.add(styles.selected);
-                  document.getElementById('CpDButton').classList.remove(styles.selected);
-                  document.getElementById('CpIButton').classList.remove(styles.selected);
-                }}>
-                Changes/Version
-              </button>
-            </div>
-            <div className={styles.inline}>
-              <button
-                id={'CpDButton'}
-                className={'button ' + styles.mg1 + ' ' + styles.button}
-                onClick={() => {
-                  this.setState({ mode: 1 });
-                  document.getElementById('CpVButton').classList.remove(styles.selected);
-                  document.getElementById('CpDButton').classList.add(styles.selected);
-                  document.getElementById('CpIButton').classList.remove(styles.selected);
-                }}>
-                Changes/Developer
-              </button>
-            </div>
-            <div className={styles.inline}>
-              <button
-                id={'CpIButton'}
-                className={'button ' + styles.mg1 + ' ' + styles.button}
-                onClick={() => {
-                  this.setState({ mode: 2 });
-                  document.getElementById('CpVButton').classList.remove(styles.selected);
-                  document.getElementById('CpDButton').classList.remove(styles.selected);
-                  document.getElementById('CpIButton').classList.add(styles.selected);
-                }}>
-                Changes/Issue
-              </button>
-            </div>
+            <span style={{ float: 'left' }}>
+              {' '}<Settings currThis={this} />
+            </span>
+            <span className={styles.verticalSeparator} />
+            <span style={{ float: 'left' }}>
+              {' '}<VisualizationSelector
+                changeMode={mode => {
+                  this.setState({ mode: mode });
+                }}
+              />
+            </span>
+            <span className={styles.verticalSeparator} />
+            <span className={styles.mg1} style={{ width: '20rem', float: 'left' }}>
+              <SearchBar
+                searchType={this.state.mode === 1 ? 'developerSearch' : this.state.mode === 2 ? 'issueSearch' : 'commitSearch'}
+                data={this.state.data}
+                placeholder={'Search for ' + (this.state.mode === 1 ? 'Developer' : this.state.mode === 2 ? 'Issues' : 'Commits') + '!'}
+                hint={''}
+                onSearchChanged={function(data) {
+                  this.dataChanged = true;
+                  this.setState({ filteredData: data });
+                  this.forceUpdate();
+                }.bind(this)}
+              />
+            </span>
           </div>
           {this.state.sha !== '' &&
             <div>
@@ -177,7 +164,7 @@ export default class CodeHotspots extends React.PureComponent {
         Loading.setState(100, 'Updating Charts');
         setTimeout(
           function() {
-            chartUpdater.updateCharts(this, this.state.mode);
+            chartUpdater.updateCharts(this, this.state.mode, this.state.filteredData);
             this.state.updateScale = false;
             Loading.remove();
           }.bind(this),
@@ -210,39 +197,75 @@ export default class CodeHotspots extends React.PureComponent {
               this.prevSha = this.state.sha;
 
               switch (mode) {
+                case 1:
+                  Loading.setState(33, 'Requesting Developer Data');
+                  vcsData.getChangeData(path).then(
+                    function(resp) {
+                      Loading.setState(66, 'Transforming Developer Data');
+                      setTimeout(
+                        function() {
+                          const lines = (xhr.status === 200 ? xhr.responseText : '').split(/\r\n|\r|\n/).length;
+                          const data = chartUpdater.transformChangesPerDeveloperData(resp, lines, this.state.path);
+                          this.codeChanged = true;
+                          this.dataChanged = true;
+                          this.setState({
+                            code: xhr.status === 200 ? xhr.responseText : 'No commit code in current selected Branch!',
+                            data: data,
+                            filteredData: data
+                          });
+                        }.bind(this),
+                        0
+                      );
+                    }.bind(this)
+                  );
+                  break;
                 case 2:
                   Loading.setState(33, 'Requesting Issue Data');
                   vcsData.getIssueData(path).then(
                     function(resp) {
-                      this.codeChanged = true;
-                      this.dataChanged = true;
-                      this.setState({
-                        code: xhr.status === 200 ? xhr.responseText : 'No commit code in current selected Branch!',
-                        data: resp
-                      });
+                      Loading.setState(66, 'Transforming Issue Data');
+                      setTimeout(
+                        function() {
+                          const lines = (xhr.status === 200 ? xhr.responseText : '').split(/\r\n|\r|\n/).length;
+                          const data = chartUpdater.transformChangesPerIssueData(resp, lines);
+                          this.codeChanged = true;
+                          this.dataChanged = true;
+                          this.setState({
+                            code: xhr.status === 200 ? xhr.responseText : 'No commit code in current selected Branch!',
+                            data: data,
+                            filteredData: data
+                          });
+                        }.bind(this),
+                        0
+                      );
                     }.bind(this)
                   );
                   break;
                 default:
-                  Loading.setState(33, 'Requesting VCS Data');
+                  Loading.setState(33, 'Requesting Version Data');
                   vcsData.getChangeData(path).then(
                     function(resp) {
-                      this.codeChanged = true;
-                      this.dataChanged = true;
-                      this.setState({
-                        code: xhr.status === 200 ? xhr.responseText : 'No commit code in current selected Branch!',
-                        data: resp
-                      });
+                      Loading.setState(66, 'Transforming Version Data');
+                      setTimeout(
+                        function() {
+                          const lines = (xhr.status === 200 ? xhr.responseText : '').split(/\r\n|\r|\n/).length;
+                          const data = chartUpdater.transformChangesPerVersionData(resp, lines, this.state.path);
+
+                          this.codeChanged = true;
+                          this.dataChanged = true;
+                          this.setState({
+                            code: xhr.status === 200 ? xhr.responseText : 'No commit code in current selected Branch!',
+                            data: data,
+                            filteredData: data
+                          });
+                        }.bind(this),
+                        0
+                      );
                     }.bind(this)
                   );
                   break;
               }
             }
-
-            /*} else {
-              Loading.setErrorText(xhr.statusText);
-              console.error(xhr.statusText);
-            }*/
           }
         }.bind(this);
         xhr.onerror = function() {
@@ -255,60 +278,14 @@ export default class CodeHotspots extends React.PureComponent {
   }
 
   generateCharts() {
-    const lines = this.state.code.split(/\r\n|\r|\n/).length;
-    switch (this.state.mode) {
-      case 1:
-        Loading.setState(66, 'Transforming Developer Data');
-        setTimeout(
-          function() {
-            chartUpdater.transformChangesPerDeveloperData(this.state.data, lines, this.state.path);
-            Loading.setState(100, 'Generating Charts');
-            setTimeout(
-              function() {
-                chartUpdater.generateCharts(this, 1);
-                Loading.remove();
-              }.bind(this),
-              0
-            );
-          }.bind(this),
-          0
-        );
-        break;
-      case 2:
-        Loading.setState(66, 'Transforming Issue Data');
-        setTimeout(
-          function() {
-            chartUpdater.transformChangesPerIssueData(this.state.data, lines);
-            Loading.setState(100, 'Generating Charts');
-            setTimeout(
-              function() {
-                chartUpdater.generateCharts(this, 2);
-                Loading.remove();
-              }.bind(this),
-              0
-            );
-          }.bind(this),
-          0
-        );
-        break;
-      default:
-        Loading.setState(66, 'Transforming Version Data');
-        setTimeout(
-          function() {
-            chartUpdater.transformChangesPerVersionData(this.state.data, lines, this.state.path);
-            Loading.setState(100, 'Generating Charts');
-            setTimeout(
-              function() {
-                chartUpdater.generateCharts(this, 0);
-                Loading.remove();
-              }.bind(this),
-              0
-            );
-          }.bind(this),
-          0
-        );
-        break;
-    }
+    Loading.setState(100, 'Generating Charts');
+    setTimeout(
+      function() {
+        chartUpdater.generateCharts(this, this.state.mode, this.state.filteredData);
+        Loading.remove();
+      }.bind(this),
+      0
+    );
   }
 
   requestFileStructure() {

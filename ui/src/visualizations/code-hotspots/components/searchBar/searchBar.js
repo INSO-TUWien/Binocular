@@ -9,16 +9,16 @@ export default class searchBar extends React.PureComponent {
   }
 
   render() {
-    const { searchType, data, onSearchChanged } = this.props;
+    const { searchType, data, onSearchChanged, placeholder, hint } = this.props;
     return (
       <div className={styles.searchBoxHint}>
         <div className={styles.searchBox}>
-          <span className={styles.placeholder}>Search for files!</span>
+          <span className={styles.placeholder}>
+            {placeholder}
+          </span>
         </div>
         <input
-          id={'fileSearch'}
           className={styles.searchBoxInput}
-          placeholder={'Search for files'}
           onFocus={e => {
             if (e.target.parentElement.children[0].innerHTML.includes('placeholder')) {
               e.target.parentElement.children[0].innerHTML = '';
@@ -26,7 +26,7 @@ export default class searchBar extends React.PureComponent {
           }}
           onBlur={e => {
             if (e.target.parentElement.children[0].innerHTML === '') {
-              e.target.parentElement.children[0].innerHTML = '<span class="' + styles.placeholder + '">Search for files!</span>';
+              e.target.parentElement.children[0].innerHTML = '<span class="' + styles.placeholder + '">' + placeholder + '</span>';
             }
           }}
           onChange={e => {
@@ -39,6 +39,10 @@ export default class searchBar extends React.PureComponent {
                 e.target.parentElement.children[0].innerHTML = SearchTextHighlighting.performFileSearchTextHighlighting(e.target.value);
                 onSearchChanged(SearchAlgorithm.performFileSearch(data, e.target.value));
                 break;
+              case 'commitSearch':
+                e.target.parentElement.children[0].innerHTML = e.target.value;
+                onSearchChanged(SearchAlgorithm.performCommitSearch(data, e.target.value));
+                break;
               default:
                 e.target.parentElement.children[0].innerHTML = e.target.value;
                 onSearchChanged(data);
@@ -46,7 +50,10 @@ export default class searchBar extends React.PureComponent {
             }
           }}
         />
-        <span>i: -f [term] search file; -t [term] search file type</span>
+        <span>
+          <span style={{ fontWeight: 'bold' }}>i:&nbsp;</span>
+          {hint}
+        </span>
       </div>
     );
   }

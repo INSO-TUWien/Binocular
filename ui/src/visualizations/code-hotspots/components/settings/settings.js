@@ -7,10 +7,11 @@ require('bulma-switch');
 export default class Settings extends React.PureComponent {
   render() {
     return (
-      <div className={styles.inline}>
+      <span>
         <button
           id={'SettingsButton'}
           className={'button ' + styles.mg1}
+          style={{ width: '3rem', height: '3rem' }}
           onClick={e => {
             const target = e.currentTarget;
             const panel = target.nextSibling;
@@ -85,7 +86,7 @@ export default class Settings extends React.PureComponent {
             </div>
           </div>
         </div>
-      </div>
+      </span>
     );
   }
 }
