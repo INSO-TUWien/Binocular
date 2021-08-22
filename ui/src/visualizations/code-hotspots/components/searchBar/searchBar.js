@@ -40,7 +40,7 @@ export default class searchBar extends React.PureComponent {
                 onSearchChanged(SearchAlgorithm.performFileSearch(data, e.target.value));
                 break;
               case 'commitSearch':
-                e.target.parentElement.children[0].innerHTML = e.target.value;
+                e.target.parentElement.children[0].innerHTML = SearchTextHighlighting.performCommitSearchTextHighlighting(e.target.value);
                 onSearchChanged(SearchAlgorithm.performCommitSearch(data, e.target.value));
                 break;
               default:
@@ -51,7 +51,7 @@ export default class searchBar extends React.PureComponent {
           }}
         />
         <span>
-          <span style={{ fontWeight: 'bold' }}>i:&nbsp;</span>
+          <div className={styles.info}>i</div>
           {hint}
         </span>
       </div>

@@ -36,20 +36,81 @@ export default class SearchAlgorithm {
   }
 
   static performCommitSearch(dataSet, searchTerm) {
-    /**
-     * branch
-     * column
-     * message
-     * row
-     * sha
-     * signature
-     * value
-     */
-
     let filteredDataSet = dataSet.data;
+    let firstLineNumber = 1;
+    let code = dataSet.code;
     const searchTermChunks = searchTerm.toLowerCase().split(' ');
     for (let i = 0; i < searchTermChunks.length; i++) {
       switch (searchTermChunks[i]) {
+        case '-m':
+        case '-message':
+          if (i < searchTermChunks.length - 1) {
+            i++;
+            filteredDataSet = filteredDataSet.filter(d => d.message.toLowerCase().includes(searchTermChunks[i]));
+          }
+          break;
+        case '-s':
+        case '-sha':
+          if (i < searchTermChunks.length - 1) {
+            i++;
+            filteredDataSet = filteredDataSet.filter(d => d.sha.toLowerCase().includes(searchTermChunks[i]));
+          }
+          break;
+        case '-d':
+        case '-developer':
+          if (i < searchTermChunks.length - 1) {
+            i++;
+            filteredDataSet = filteredDataSet.filter(d => d.signature.toLowerCase().includes(searchTermChunks[i]));
+          }
+          break;
+        case '-b':
+        case '-branch':
+          if (i < searchTermChunks.length - 1) {
+            i++;
+            filteredDataSet = filteredDataSet.filter(d => d.branch.toLowerCase().includes(searchTermChunks[i]));
+          }
+          break;
+        case '-l':
+        case '-line':
+        case '-lines':
+          if (i < searchTermChunks.length - 1) {
+            i++;
+            const searchTermChunk = searchTermChunks[i];
+            if (searchTermChunk.includes('-')) {
+              if (searchTermChunk.startsWith('-')) {
+                const endNr = parseInt(searchTermChunk.substring(1));
+                if (!isNaN(endNr)) {
+                  code = code.split(/\r\n|\r|\n/).filter((e, i) => i < endNr).join('\n');
+                  filteredDataSet = filteredDataSet.filter(d => d.row < endNr);
+                }
+              } else if (searchTermChunk.endsWith('-')) {
+                const startNr = parseInt(searchTermChunk.substring(0, searchTermChunk.length - 1));
+                if (!isNaN(startNr)) {
+                  firstLineNumber = startNr;
+                  code = code.split(/\r\n|\r|\n/).filter((e, i) => i >= startNr - 1).join('\n');
+                  filteredDataSet = filteredDataSet.filter(d => d.row >= startNr - 1);
+                }
+              } else {
+                const rowSearchTermChunks = searchTermChunk.split('-');
+                const startNr = parseInt(rowSearchTermChunks[0]);
+                const endNr = parseInt(rowSearchTermChunks[1]);
+                if (!isNaN(startNr) && !isNaN(endNr)) {
+                  firstLineNumber = startNr;
+                  code = code.split(/\r\n|\r|\n/).filter((e, i) => i >= startNr - 1 && i < endNr).join('\n');
+                  filteredDataSet = filteredDataSet.filter(d => d.row >= startNr - 1 && d.row < endNr);
+                }
+              }
+            } else {
+              const lineNr = parseInt(searchTermChunk);
+              if (!isNaN(lineNr)) {
+                firstLineNumber = lineNr;
+                code = code.split(/\r\n|\r|\n/).find((e, i) => i === lineNr - 1);
+                filteredDataSet = filteredDataSet.filter(d => d.row === lineNr - 1);
+              }
+            }
+          }
+
+          break;
         default:
           filteredDataSet = filteredDataSet.filter(
             d =>
@@ -68,6 +129,8 @@ export default class SearchAlgorithm {
       devs: dataSet.devs,
       issues: dataSet.issues,
       maxValue: dataSet.maxValue,
+      code: code,
+      firstLineNumber: firstLineNumber,
       legendSteps: dataSet.legendSteps
     };
   }

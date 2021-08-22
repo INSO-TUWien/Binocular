@@ -27,6 +27,67 @@ export default class SearchTextHighlighting {
     return this.performTextHighlighting(searchTerm, highlightSet);
   }
 
+  static performCommitSearchTextHighlighting(searchTerm) {
+    const highlightSet = [
+      {
+        modifier: '-m',
+        color: '#4cd964',
+        secondary_color: '#def8e2'
+      },
+      {
+        modifier: '-message',
+        color: '#4cd964',
+        secondary_color: '#def8e2'
+      },
+      {
+        modifier: '-s',
+        color: '#ffcc00',
+        secondary_color: '#fff7d8'
+      },
+      {
+        modifier: '-sha',
+        color: '#ffcc00',
+        secondary_color: '#fff7d8'
+      },
+      {
+        modifier: '-d',
+        color: '#ff9500',
+        secondary_color: '#fff7eb'
+      },
+      {
+        modifier: '-developer',
+        color: '#ff9500',
+        secondary_color: '#fff7eb'
+      },
+      {
+        modifier: '-b',
+        color: '#5856d6',
+        secondary_color: '#e4e4f8'
+      },
+      {
+        modifier: '-branch',
+        color: '#5856d6',
+        secondary_color: '#e4e4f8'
+      },
+      {
+        modifier: '-l',
+        color: '#007aff',
+        secondary_color: '#ebf5ff'
+      },
+      {
+        modifier: '-line',
+        color: '#007aff',
+        secondary_color: '#ebf5ff'
+      },
+      {
+        modifier: '-lines',
+        color: '#007aff',
+        secondary_color: '#ebf5ff'
+      }
+    ];
+    return this.performTextHighlighting(searchTerm, highlightSet);
+  }
+
   static performTextHighlighting(searchTerm, highlightSet) {
     let htmlString = searchTerm;
     const searchTermChunks = searchTerm.split(' ');

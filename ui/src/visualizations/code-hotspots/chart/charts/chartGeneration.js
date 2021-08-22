@@ -11,11 +11,9 @@ const EVEN_COLOR = '#FFFFFFFF';
 const ODD_COLOR = '#EEEEEE55';
 
 export default class chartGeneration {
-  static generateHeatmap(data, lines, importantColumns, currThis, mode, maxValue, legendSteps) {
+  static generateHeatmap(data, lines, importantColumns, currThis, mode, maxValue, legendSteps, firstLineNumber) {
     d3.select('.chartHeatmap > *').remove();
-
     currThis.combinedHeatmapData = data;
-
     const width = document.getElementById('barChartContainer').clientWidth,
       height = 24 * lines,
       margins = { top: 28, right: 0, bottom: 0, left: 0 };
@@ -29,24 +27,23 @@ export default class chartGeneration {
       .append('g')
       .attr('transform', 'translate(' + margins.left + ',' + margins.top + ')')
       .attr('id', 'heatmapChart');
-    setTimeout(
-      function() {
-        this.updateHeatmap(data, lines, importantColumns, currThis, mode, maxValue, legendSteps);
-      }.bind(this)
-    );
     for (const rowKey of d3Collection.nest().key(d => d.row).entries(currThis.combinedHeatmapData).map(d => d.key)) {
       chart.append('g').attr('id', 'row' + rowKey);
     }
+    setTimeout(
+      function() {
+        this.updateHeatmap(data, lines, importantColumns, currThis, mode, maxValue, legendSteps, firstLineNumber);
+      }.bind(this)
+    );
   }
 
-  static updateHeatmap(data, lines, importantColumns, currThis, mode, maxValue, legendSteps) {
+  static updateHeatmap(data, lines, importantColumns, currThis, mode, maxValue, legendSteps, firstLineNumber) {
     const columns = importantColumns.length;
     if (currThis.dataScaleHeatmap > 0) {
       maxValue = currThis.dataScaleHeatmap;
     } else {
       currThis.dataScaleHeatmap = maxValue;
     }
-
     const width = document.getElementById('barChartContainer').clientWidth;
     const barWidth = width / columns,
       barHeight = 24;
@@ -85,7 +82,7 @@ export default class chartGeneration {
             return (importantColumns.indexOf(d.column) - 0) * barWidth;
           })
           .attr('y', d => {
-            return (d.row - 1) * barHeight;
+            return (d.row - firstLineNumber) * barHeight;
           })
           .style('fill', colorScale)
           .attr('width', barWidth)
@@ -98,11 +95,10 @@ export default class chartGeneration {
     }
   }
 
-  static generateRowSummary(data, lines, currThis, mode, legendSteps) {
+  static generateRowSummary(data, lines, currThis, mode, legendSteps, firstLineNumber) {
     d3.select('#chartRow').remove();
     d3.select('#tooltipRow').remove();
     //let maxValue = 0;
-
     switch (mode) {
       case 1:
         currThis.combinedRowData = d3Collection
@@ -184,9 +180,9 @@ export default class chartGeneration {
       .append('svg')
       .attr('width', width + margins.right + margins.left)
       .attr('height', height + margins.top + margins.bottom)
+      .attr('id', 'chartRow')
       .append('g')
-      .attr('transform', 'translate(' + margins.left + ',' + margins.top + ')')
-      .attr('id', 'chartRow');
+      .attr('transform', 'translate(' + margins.left + ',' + margins.top + ')');
 
     d3
       .select('.chartRowSummary')
@@ -204,12 +200,12 @@ export default class chartGeneration {
     //chart
     setTimeout(
       function() {
-        this.updateRowSummary(data, lines, currThis, mode, legendSteps);
+        this.updateRowSummary(data, lines, currThis, mode, legendSteps, firstLineNumber);
       }.bind(this)
     );
   }
 
-  static updateRowSummary(data, lines, currThis, mode, legendSteps) {
+  static updateRowSummary(data, lines, currThis, mode, legendSteps, firstLineNumber) {
     const chart = d3.select('#chartRow');
     const tooltipp = d3.select('#tooltipRow');
 
@@ -252,7 +248,7 @@ export default class chartGeneration {
           .append('rect')
           .attr('x', 0)
           .attr('y', d => {
-            return (d.row - 1) * barHeight;
+            return (d.row - firstLineNumber) * barHeight;
           })
           .style('fill', colorScale)
           .attr('width', barWidth)
@@ -263,7 +259,7 @@ export default class chartGeneration {
             tooltipp
               .html(
                 "<div style='font-weight: bold'>Row: " +
-                  (d.row + 1) +
+                  (parseInt(d.row) + 1) +
                   '</div>' +
                   '<div>Changes: ' +
                   d.value +
@@ -272,7 +268,7 @@ export default class chartGeneration {
                   ListGeneration.generateDeveloperList(d.developer)
               )
               .style('right', 30 + 'px')
-              .style('top', d.row * barHeight + 'px');
+              .style('top', (d.row - firstLineNumber) * barHeight + 'px');
           })
           .on('mouseout', function() {
             tooltipp.transition().duration(500).style('opacity', 0);
@@ -285,7 +281,7 @@ export default class chartGeneration {
           .append('rect')
           .attr('x', 0)
           .attr('y', d => {
-            return (d.row - 1) * barHeight;
+            return (d.row - firstLineNumber) * barHeight;
           })
           .style('fill', colorScale)
           .attr('width', barWidth)
@@ -296,7 +292,7 @@ export default class chartGeneration {
             tooltipp
               .html(
                 "<div style='font-weight: bold'>Row: " +
-                  (d.row + 1) +
+                  (parseInt(d.row) + 1) +
                   '</div>' +
                   '<div>Changes: ' +
                   d.value +
@@ -305,7 +301,7 @@ export default class chartGeneration {
                   ListGeneration.generateIssueList(d.issues)
               )
               .style('right', 30 + 'px')
-              .style('top', d.row * barHeight + 'px');
+              .style('top', (d.row - firstLineNumber) * barHeight + 'px');
           })
           .on('mouseout', function() {
             tooltipp.transition().duration(500).style('opacity', 0);
@@ -318,7 +314,7 @@ export default class chartGeneration {
           .append('rect')
           .attr('x', 0)
           .attr('y', d => {
-            return (d.row - 1) * barHeight;
+            return (d.row - firstLineNumber) * barHeight;
           })
           .style('fill', colorScale)
           .attr('width', barWidth)
@@ -327,9 +323,9 @@ export default class chartGeneration {
           .on('mouseover', function(event, d) {
             tooltipp.transition().duration(200).style('opacity', 1);
             tooltipp
-              .html("<div style='font-weight: bold'>Row: " + (d.row + 1) + '</div>' + '<div>Changes: ' + d.value + '</div>')
+              .html("<div style='font-weight: bold'>Row: " + (parseInt(d.row) + 1) + '</div>' + '<div>Changes: ' + d.value + '</div>')
               .style('right', 30 + 'px')
-              .style('top', d.row * barHeight + 'px');
+              .style('top', (d.row - firstLineNumber) * barHeight + 'px');
           })
           .on('mouseout', function() {
             tooltipp.transition().duration(500).style('opacity', 0);
@@ -495,6 +491,10 @@ export default class chartGeneration {
                 "<div style='font-weight: bold'>Version: " +
                   d.column +
                   '</div>' +
+                  "<div style='font-style: italic;color: #AAAAAA;'>" +
+                  d.date +
+                  '</div>' +
+                  '<hr>' +
                   '<div>' +
                   d.message +
                   '</div>' +
@@ -581,6 +581,7 @@ export default class chartGeneration {
               column: v[0].column,
               value: d3.sum(v, g => g.value),
               message: v[0].message,
+              date: v[0].date,
               sha: v[0].sha,
               branch: v[0].branch,
               signature: v[0].signature

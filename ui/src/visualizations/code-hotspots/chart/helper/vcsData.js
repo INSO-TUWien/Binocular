@@ -8,35 +8,35 @@ export default class vcsData {
         `
         query($file: String!) {
           file(path: $file){
-            path
-            commits{
-              data{
-                message
-                sha
-                signature
-                branch
-                stats{
-                  additions
-                  deletions
-                }
-                files{
+              path
+              maxLength
+              commits{
                   data{
-                    file{
-                    path
-                    }
-                    lineCount
-                    hunks{
-                      newStart
-                      newLines
-                      oldStart
-                      oldLines
-                    }
+                      message
+                      sha
+                      signature
+                      branch
+                      date
+                      stats{
+                          additions
+                          deletions
+                      }
+                      file(path: $file){
+                          file{
+                              path
+                          }
+                          lineCount
+                          hunks{
+                              newStart
+                              newLines
+                              oldStart
+                              oldLines
+                          }
+                      }
                   }
-                }
               }
-            }
           }
-        }
+      }
       `,
         { file: path }
       )

@@ -1,10 +1,8 @@
 import HunkHandler from '../helper/hunkHandler';
 import chartGeneration from './chartGeneration';
 
-import _ from 'lodash';
-
 export default class chartUpdater {
-  static transformChangesPerVersionData(rawData, lines, path) {
+  static transformChangesPerVersionData(rawData, lines) {
     const data = [];
     let commits = 0;
 
@@ -21,13 +19,14 @@ export default class chartUpdater {
           value: 0,
           message: commit.message,
           sha: commit.sha,
+          date: commit.date,
           branch: commit.branch,
           signature: commit.signature
         });
       }
 
-      const files = commit.files.data;
-      const file = _.filter(files, { file: { path: path } })[0];
+      const file = commit.file;
+
       if (file !== undefined) {
         for (const j in file.hunks) {
           const hunk = file.hunks[j];
@@ -42,7 +41,7 @@ export default class chartUpdater {
     return { data: data, lines: lines, commits: commits, maxValue: maxValue, legendSteps: legendSteps };
   }
 
-  static transformChangesPerDeveloperData(rawData, lines, path) {
+  static transformChangesPerDeveloperData(rawData, lines) {
     const data = [];
     const legendSteps = 20;
     let maxValue = 0;
@@ -59,8 +58,8 @@ export default class chartUpdater {
     }
     for (const i in rawData.data) {
       const commit = rawData.data[i];
-      const files = commit.files.data;
-      const file = _.filter(files, { file: { path: path } })[0];
+
+      const file = commit.file;
       if (file !== undefined) {
         for (const j in file.hunks) {
           const hunk = file.hunks[j];
@@ -126,7 +125,6 @@ export default class chartUpdater {
     const combinedColumnData = chartGeneration.updateColumnData(data.data, currThis, mode);
     currThis.combinedColumnData = combinedColumnData;
     const importantColumns = combinedColumnData.map(d => d.column);
-    console.log(importantColumns.length);
     chartGeneration.generateColumnChart(
       currThis.combinedColumnData,
       mode === 1 ? data.devs.length : mode === 2 ? data.issues.length : data.commits,
@@ -135,8 +133,17 @@ export default class chartUpdater {
       data.legendSteps
     );
     const filteredData = data.data.filter(d => importantColumns.includes(d.column));
-    chartGeneration.generateRowSummary(filteredData, data.lines, currThis, mode, data.legendSteps);
-    chartGeneration.generateHeatmap(filteredData, data.lines, importantColumns, currThis, mode, data.maxValue, data.legendSteps);
+    chartGeneration.generateRowSummary(filteredData, data.lines, currThis, mode, data.legendSteps, data.firstLineNumber);
+    chartGeneration.generateHeatmap(
+      filteredData,
+      data.lines,
+      importantColumns,
+      currThis,
+      mode,
+      data.maxValue,
+      data.legendSteps,
+      data.firstLineNumber
+    );
   }
 
   static updateCharts(currThis, mode, data) {
@@ -156,12 +163,21 @@ export default class chartUpdater {
 
     setTimeout(
       function() {
-        chartGeneration.updateRowSummary(filteredData, data.lines, currThis, mode, data.legendSteps);
+        chartGeneration.updateRowSummary(filteredData, data.lines, currThis, mode, data.legendSteps, data.firstLineNumber);
       }.bind(this)
     );
     setTimeout(
       function() {
-        chartGeneration.updateHeatmap(filteredData, data.lines, importantColumns, currThis, mode, data.maxValue, data.legendSteps);
+        chartGeneration.updateHeatmap(
+          filteredData,
+          data.lines,
+          importantColumns,
+          currThis,
+          mode,
+          data.maxValue,
+          data.legendSteps,
+          data.firstLineNumber
+        );
       }.bind(this)
     );
   }

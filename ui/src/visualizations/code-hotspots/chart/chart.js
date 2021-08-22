@@ -49,7 +49,7 @@ export default class CodeHotspots extends React.PureComponent {
       sha: '',
       mode: 0, //modes: 0...Changes/Version  1...Changes/Developer  2...Changes/Issue
       data: {},
-      filteredData: {}
+      filteredData: { code: 'No File Selected', firstLineNumber: 1 }
     };
 
     this.updateParametrization = false;
@@ -110,7 +110,13 @@ export default class CodeHotspots extends React.PureComponent {
                 searchType={this.state.mode === 1 ? 'developerSearch' : this.state.mode === 2 ? 'issueSearch' : 'commitSearch'}
                 data={this.state.data}
                 placeholder={'Search for ' + (this.state.mode === 1 ? 'Developer' : this.state.mode === 2 ? 'Issues' : 'Commits') + '!'}
-                hint={''}
+                hint={
+                  '-m [term] search commit message; ' +
+                  '-s [term] search commit sha; ' +
+                  '-d [term] search developer; ' +
+                  '-b [term] search branch; ' +
+                  '-l [term] search line or multible lines'
+                }
                 onSearchChanged={function(data) {
                   this.dataChanged = true;
                   this.setState({ filteredData: data });
@@ -133,12 +139,14 @@ export default class CodeHotspots extends React.PureComponent {
             <div className={styles.codeView}>
               <CodeMirror
                 id={'codeView'}
-                value={this.state.code}
+                ref={'codeView'}
+                value={this.state.filteredData.code}
                 options={{
                   mode: ModeSwitcher.modeFromExtension(this.state.path.split('.').pop()),
                   theme: 'default',
                   lineNumbers: true,
-                  readOnly: true
+                  readOnly: true,
+                  firstLineNumber: this.state.filteredData.firstLineNumber
                 }}
               />
               <div className={styles.heatmapContainer}>
@@ -205,9 +213,11 @@ export default class CodeHotspots extends React.PureComponent {
                       setTimeout(
                         function() {
                           const lines = (xhr.status === 200 ? xhr.responseText : '').split(/\r\n|\r|\n/).length;
-                          const data = chartUpdater.transformChangesPerDeveloperData(resp, lines, this.state.path);
+                          const data = chartUpdater.transformChangesPerDeveloperData(resp, lines);
                           this.codeChanged = true;
                           this.dataChanged = true;
+                          data.code = xhr.status === 200 ? xhr.responseText : 'No commit code in current selected Branch!';
+                          data.firstLineNumber = 1;
                           this.setState({
                             code: xhr.status === 200 ? xhr.responseText : 'No commit code in current selected Branch!',
                             data: data,
@@ -230,6 +240,8 @@ export default class CodeHotspots extends React.PureComponent {
                           const data = chartUpdater.transformChangesPerIssueData(resp, lines);
                           this.codeChanged = true;
                           this.dataChanged = true;
+                          data.code = xhr.status === 200 ? xhr.responseText : 'No commit code in current selected Branch!';
+                          data.firstLineNumber = 1;
                           this.setState({
                             code: xhr.status === 200 ? xhr.responseText : 'No commit code in current selected Branch!',
                             data: data,
@@ -249,10 +261,12 @@ export default class CodeHotspots extends React.PureComponent {
                       setTimeout(
                         function() {
                           const lines = (xhr.status === 200 ? xhr.responseText : '').split(/\r\n|\r|\n/).length;
-                          const data = chartUpdater.transformChangesPerVersionData(resp, lines, this.state.path);
+                          const data = chartUpdater.transformChangesPerVersionData(resp, lines);
 
                           this.codeChanged = true;
                           this.dataChanged = true;
+                          data.code = xhr.status === 200 ? xhr.responseText : 'No commit code in current selected Branch!';
+                          data.firstLineNumber = 1;
                           this.setState({
                             code: xhr.status === 200 ? xhr.responseText : 'No commit code in current selected Branch!',
                             data: data,
