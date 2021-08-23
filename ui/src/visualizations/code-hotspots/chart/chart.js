@@ -16,6 +16,7 @@ import Settings from '../components/settings/settings';
 import BackgroundRefreshIndicator from '../components/backgroundRefreshIndicator/backgroundRefreshIndicator';
 import VisualizationSelector from '../components/VisulaizationSelector/visualizationSelector';
 import SearchBar from '../components/searchBar/searchBar';
+import searchAlgorithm from '../components/searchBar/searchAlgorithm';
 
 export default class CodeHotspots extends React.PureComponent {
   constructor(props) {
@@ -28,38 +29,44 @@ export default class CodeHotspots extends React.PureComponent {
       }
       props.onSetFiles(files);
     });
-    let activeBranch = 'master';
-    this.getAllBranches().then(function(resp) {
-      for (const i in resp) {
-        if (resp[i].active === 'true') {
-          activeBranch = resp[i].branch;
-          props.onSetBranch(resp[i].branch);
-        }
-      }
-      props.onSetBranches(resp);
-    });
 
     this.elems = {};
     this.state = {
       code: 'No File Selected',
-      branch: 'master',
-      checkedOutBranch: activeBranch,
+      branch: 'main',
+      checkedOutBranch: 'main',
       fileURL: '',
       path: '',
       sha: '',
       mode: 0, //modes: 0...Changes/Version  1...Changes/Developer  2...Changes/Issue
       data: {},
-      filteredData: { code: 'No File Selected', firstLineNumber: 1 }
+      filteredData: { code: 'No File Selected', firstLineNumber: 1, searchTerm: '' },
+      displayProps: {
+        dataScaleHeatmap: 0,
+        dataScaleColumns: 0,
+        dataScaleRows: 0,
+        customDataScale: false
+      }
     };
-
-    this.updateParametrization = false;
-    this.dataScaleHeatmap = -1;
-    this.dataScaleColumns = -1;
-    this.dataScaleRow = -1;
 
     this.combinedColumnData = {};
     this.combinedRowData = {};
     this.combinedHeatmapData = {};
+    this.dataChanged = false;
+    this.codeChanged = false;
+    this.getAllBranches().then(
+      function(resp) {
+        let activeBranch = 'main';
+        for (const i in resp) {
+          if (resp[i].active === 'true') {
+            activeBranch = resp[i].branch;
+            props.onSetBranch(resp[i].branch);
+          }
+        }
+        props.onSetBranches(resp);
+        this.setState({ checkedOutBranch: activeBranch });
+      }.bind(this)
+    );
   }
 
   componentWillReceiveProps(nextProps) {
@@ -70,17 +77,15 @@ export default class CodeHotspots extends React.PureComponent {
   componentDidMount() {}
 
   render() {
+    console.log(this.dataChanged);
     if (this.prevMode !== this.state.mode || this.state.path !== this.prevPath) {
-      this.dataScaleHeatmap = -1;
-      this.dataScaleColumns = -1;
-      this.dataScaleRow = -1;
       this.requestData();
     } else {
       if (this.dataChanged) {
         this.dataChanged = false;
         this.generateCharts();
       } else {
-        if (!this.codeChanged || this.updateParametrization) {
+        if (!this.codeChanged) {
           this.requestData();
         } else {
           this.codeChanged = false;
@@ -94,7 +99,14 @@ export default class CodeHotspots extends React.PureComponent {
         <div className={styles.w100}>
           <div className={styles.menubar}>
             <span style={{ float: 'left' }}>
-              {' '}<Settings currThis={this} />
+              <Settings
+                displayProps={this.state.displayProps}
+                displayPropsChanged={newDisplayProps => {
+                  this.dataChanged = true;
+                  this.setState({ displayProps: newDisplayProps });
+                  this.forceUpdate();
+                }}
+              />
             </span>
             <span className={styles.verticalSeparator} />
             <span style={{ float: 'left' }}>
@@ -120,7 +132,6 @@ export default class CodeHotspots extends React.PureComponent {
                 onSearchChanged={function(data) {
                   this.dataChanged = true;
                   this.setState({ filteredData: data });
-                  this.forceUpdate();
                 }.bind(this)}
               />
             </span>
@@ -168,126 +179,124 @@ export default class CodeHotspots extends React.PureComponent {
   requestData() {
     if (this.state.path !== '') {
       Loading.insert();
-      if (this.updateParametrization) {
-        Loading.setState(100, 'Updating Charts');
-        setTimeout(
-          function() {
-            chartUpdater.updateCharts(this, this.state.mode, this.state.filteredData);
-            this.state.updateScale = false;
+      Loading.setState(0, 'Requesting Source Code');
+      const xhr = new XMLHttpRequest();
+      xhr.open(
+        'GET',
+        this.state.fileURL
+          .replace('github.com', 'raw.githubusercontent.com')
+          .replace('/blob', '')
+          .replace(this.state.checkedOutBranch, this.state.sha === '' ? this.state.branch : this.state.sha),
+        true
+      );
+      xhr.onload = function() {
+        if (xhr.readyState === 4) {
+          //if (xhr.status === 200) {
+          if (this.state.path === this.prevPath && this.state.sha !== this.prevSha) {
+            this.prevSha = this.state.sha;
+            this.codeChanged = true;
+            this.dataChanged = false;
             Loading.remove();
-          }.bind(this),
-          0
-        );
-      } else {
-        Loading.setState(0, 'Requesting Source Code');
-        const xhr = new XMLHttpRequest();
-        xhr.open(
-          'GET',
-          this.state.fileURL
-            .replace('github.com', 'raw.githubusercontent.com')
-            .replace('/blob', '')
-            .replace(this.state.checkedOutBranch, this.state.sha === '' ? this.state.branch : this.state.sha),
-          true
-        );
-        xhr.onload = function() {
-          if (xhr.readyState === 4) {
-            //if (xhr.status === 200) {
-            if (this.state.path === this.prevPath && this.state.sha !== this.prevSha) {
-              this.prevSha = this.state.sha;
-              this.codeChanged = true;
-              Loading.remove();
-              this.setState({ code: xhr.responseText });
-            } else {
-              const path = this.state.path;
-              const mode = this.state.mode;
-              this.prevPath = this.state.path;
-              this.prevMode = this.state.mode;
-              this.prevSha = this.state.sha;
+            const data = this.state.data;
+            data.code = xhr.responseText;
+            this.setState({
+              data: data,
+              filteredData: this.state.mode === 0 ? searchAlgorithm.performCommitSearch(data, this.state.filteredData.searchTerm) : data
+            });
+          } else {
+            const path = this.state.path;
+            const mode = this.state.mode;
+            this.prevPath = this.state.path;
+            this.prevMode = this.state.mode;
+            this.prevSha = this.state.sha;
 
-              switch (mode) {
-                case 1:
-                  Loading.setState(33, 'Requesting Developer Data');
-                  vcsData.getChangeData(path).then(
-                    function(resp) {
-                      Loading.setState(66, 'Transforming Developer Data');
-                      setTimeout(
-                        function() {
-                          const lines = (xhr.status === 200 ? xhr.responseText : '').split(/\r\n|\r|\n/).length;
-                          const data = chartUpdater.transformChangesPerDeveloperData(resp, lines);
-                          this.codeChanged = true;
-                          this.dataChanged = true;
-                          data.code = xhr.status === 200 ? xhr.responseText : 'No commit code in current selected Branch!';
-                          data.firstLineNumber = 1;
-                          this.setState({
-                            code: xhr.status === 200 ? xhr.responseText : 'No commit code in current selected Branch!',
-                            data: data,
-                            filteredData: data
-                          });
-                        }.bind(this),
-                        0
-                      );
-                    }.bind(this)
-                  );
-                  break;
-                case 2:
-                  Loading.setState(33, 'Requesting Issue Data');
-                  vcsData.getIssueData(path).then(
-                    function(resp) {
-                      Loading.setState(66, 'Transforming Issue Data');
-                      setTimeout(
-                        function() {
-                          const lines = (xhr.status === 200 ? xhr.responseText : '').split(/\r\n|\r|\n/).length;
-                          const data = chartUpdater.transformChangesPerIssueData(resp, lines);
-                          this.codeChanged = true;
-                          this.dataChanged = true;
-                          data.code = xhr.status === 200 ? xhr.responseText : 'No commit code in current selected Branch!';
-                          data.firstLineNumber = 1;
-                          this.setState({
-                            code: xhr.status === 200 ? xhr.responseText : 'No commit code in current selected Branch!',
-                            data: data,
-                            filteredData: data
-                          });
-                        }.bind(this),
-                        0
-                      );
-                    }.bind(this)
-                  );
-                  break;
-                default:
-                  Loading.setState(33, 'Requesting Version Data');
-                  vcsData.getChangeData(path).then(
-                    function(resp) {
-                      Loading.setState(66, 'Transforming Version Data');
-                      setTimeout(
-                        function() {
-                          const lines = (xhr.status === 200 ? xhr.responseText : '').split(/\r\n|\r|\n/).length;
-                          const data = chartUpdater.transformChangesPerVersionData(resp, lines);
+            switch (mode) {
+              case 1:
+                Loading.setState(33, 'Requesting Developer Data');
+                vcsData.getChangeData(path).then(
+                  function(resp) {
+                    Loading.setState(66, 'Transforming Developer Data');
+                    setTimeout(
+                      function() {
+                        const lines = (xhr.status === 200 ? xhr.responseText : '').split(/\r\n|\r|\n/).length;
+                        const data = chartUpdater.transformChangesPerDeveloperData(resp, lines);
+                        //this.codeChanged = true;
+                        this.dataChanged = true;
+                        data.code = xhr.status === 200 ? xhr.responseText : 'No commit code in current selected Branch!';
+                        data.firstLineNumber = 1;
+                        data.searchTerm = '';
 
-                          this.codeChanged = true;
-                          this.dataChanged = true;
-                          data.code = xhr.status === 200 ? xhr.responseText : 'No commit code in current selected Branch!';
-                          data.firstLineNumber = 1;
-                          this.setState({
-                            code: xhr.status === 200 ? xhr.responseText : 'No commit code in current selected Branch!',
-                            data: data,
-                            filteredData: data
-                          });
-                        }.bind(this),
-                        0
-                      );
-                    }.bind(this)
-                  );
-                  break;
-              }
+                        this.setState({
+                          code: xhr.status === 200 ? xhr.responseText : 'No commit code in current selected Branch!',
+                          data: data,
+                          filteredData: data
+                        });
+                      }.bind(this),
+                      0
+                    );
+                  }.bind(this)
+                );
+                break;
+              case 2:
+                Loading.setState(33, 'Requesting Issue Data');
+                vcsData.getIssueData(path).then(
+                  function(resp) {
+                    Loading.setState(66, 'Transforming Issue Data');
+                    setTimeout(
+                      function() {
+                        const lines = (xhr.status === 200 ? xhr.responseText : '').split(/\r\n|\r|\n/).length;
+                        const data = chartUpdater.transformChangesPerIssueData(resp, lines);
+                        //this.codeChanged = true;
+                        this.dataChanged = true;
+                        data.code = xhr.status === 200 ? xhr.responseText : 'No commit code in current selected Branch!';
+                        data.firstLineNumber = 1;
+                        data.searchTerm = '';
+                        this.setState({
+                          code: xhr.status === 200 ? xhr.responseText : 'No commit code in current selected Branch!',
+                          data: data,
+                          filteredData: data
+                        });
+                      }.bind(this),
+                      0
+                    );
+                  }.bind(this)
+                );
+                break;
+              default:
+                Loading.setState(33, 'Requesting Version Data');
+                vcsData.getChangeData(path).then(
+                  function(resp) {
+                    Loading.setState(66, 'Transforming Version Data');
+                    setTimeout(
+                      function() {
+                        const lines = (xhr.status === 200 ? xhr.responseText : '').split(/\r\n|\r|\n/).length;
+                        const data = chartUpdater.transformChangesPerVersionData(resp, lines);
+
+                        //this.codeChanged = true;
+                        this.dataChanged = true;
+                        data.code = xhr.status === 200 ? xhr.responseText : 'No commit code in current selected Branch!';
+                        data.firstLineNumber = 1;
+                        data.searchTerm = '';
+                        this.setState({
+                          code: xhr.status === 200 ? xhr.responseText : 'No commit code in current selected Branch!',
+                          data: data,
+                          filteredData: data
+                        });
+                      }.bind(this),
+                      0
+                    );
+                  }.bind(this)
+                );
+                break;
             }
           }
-        }.bind(this);
-        xhr.onerror = function() {
-          Loading.setErrorText(xhr.statusText);
-          console.error(xhr.statusText);
-        };
-        xhr.send(null);
-      }
+        }
+      }.bind(this);
+      xhr.onerror = function() {
+        Loading.setErrorText(xhr.statusText);
+        console.error(xhr.statusText);
+      };
+      xhr.send(null);
     }
   }
 
@@ -295,7 +304,7 @@ export default class CodeHotspots extends React.PureComponent {
     Loading.setState(100, 'Generating Charts');
     setTimeout(
       function() {
-        chartUpdater.generateCharts(this, this.state.mode, this.state.filteredData);
+        chartUpdater.generateCharts(this, this.state.mode, this.state.filteredData, this.state.displayProps);
         Loading.remove();
       }.bind(this),
       0

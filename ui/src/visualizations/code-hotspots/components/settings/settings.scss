@@ -49,3 +49,17 @@
   background-color: #2262ca;
   color: whitesmoke;
 }
+
+.settingsButton{
+  width: 3rem;
+  height: 3rem;
+  border-radius: 50%;
+  transition: 0.2s ease-in-out;
+}
+
+.selected{
+  background-color: #3273dc !important;
+  color: whitesmoke !important;
+  transform: rotate(90deg);
+}
+

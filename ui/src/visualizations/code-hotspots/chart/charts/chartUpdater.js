@@ -121,7 +121,7 @@ export default class chartUpdater {
     return { data: data, lines: lines, issues: issues, maxValue: maxValue, legendSteps: legendSteps };
   }
 
-  static generateCharts(currThis, mode, data) {
+  static generateCharts(currThis, mode, data, displayProps) {
     const combinedColumnData = chartGeneration.updateColumnData(data.data, currThis, mode);
     currThis.combinedColumnData = combinedColumnData;
     const importantColumns = combinedColumnData.map(d => d.column);
@@ -130,10 +130,11 @@ export default class chartUpdater {
       mode === 1 ? data.devs.length : mode === 2 ? data.issues.length : data.commits,
       currThis,
       mode,
-      data.legendSteps
+      data.legendSteps,
+      displayProps
     );
     const filteredData = data.data.filter(d => importantColumns.includes(d.column));
-    chartGeneration.generateRowSummary(filteredData, data.lines, currThis, mode, data.legendSteps, data.firstLineNumber);
+    chartGeneration.generateRowSummary(filteredData, data.lines, currThis, mode, data.legendSteps, data.firstLineNumber, displayProps);
     chartGeneration.generateHeatmap(
       filteredData,
       data.lines,
@@ -142,43 +143,8 @@ export default class chartUpdater {
       mode,
       data.maxValue,
       data.legendSteps,
-      data.firstLineNumber
-    );
-  }
-
-  static updateCharts(currThis, mode, data) {
-    const importantColumns = currThis.combinedColumnData.map(d => d.column);
-    setTimeout(
-      function() {
-        chartGeneration.updateColumnChart(
-          currThis.combinedColumnData,
-          mode === 1 ? data.devs.length : mode === 2 ? data.issues.length : data.commits,
-          currThis,
-          mode,
-          data.legendSteps
-        );
-      }.bind(this)
-    );
-    const filteredData = data.data.filter(d => importantColumns.includes(d.column));
-
-    setTimeout(
-      function() {
-        chartGeneration.updateRowSummary(filteredData, data.lines, currThis, mode, data.legendSteps, data.firstLineNumber);
-      }.bind(this)
-    );
-    setTimeout(
-      function() {
-        chartGeneration.updateHeatmap(
-          filteredData,
-          data.lines,
-          importantColumns,
-          currThis,
-          mode,
-          data.maxValue,
-          data.legendSteps,
-          data.firstLineNumber
-        );
-      }.bind(this)
+      data.firstLineNumber,
+      displayProps
     );
   }
 }

@@ -131,7 +131,8 @@ export default class SearchAlgorithm {
       maxValue: dataSet.maxValue,
       code: code,
       firstLineNumber: firstLineNumber,
-      legendSteps: dataSet.legendSteps
+      legendSteps: dataSet.legendSteps,
+      searchTerm: searchTerm
     };
   }
 }

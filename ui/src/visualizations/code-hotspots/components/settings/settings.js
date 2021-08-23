@@ -5,22 +5,32 @@ import { settings_black, settings_white } from '../../images/icons';
 require('bulma-switch');
 
 export default class Settings extends React.PureComponent {
+  constructor(props) {
+    super(props);
+    this.state = {
+      displayProps: {}
+    };
+  }
+
+  componentWillReceiveProps(nextProps) {
+    this.setState({ displayProps: nextProps.displayProps });
+  }
+
   render() {
     return (
       <span>
         <button
           id={'SettingsButton'}
-          className={'button ' + styles.mg1}
-          style={{ width: '3rem', height: '3rem' }}
+          className={'button ' + styles.mg1 + ' ' + settingsStyles.settingsButton}
           onClick={e => {
             const target = e.currentTarget;
             const panel = target.nextSibling;
-            if (document.getElementById('SettingsButton').classList.contains(styles.selected)) {
-              document.getElementById('SettingsButton').classList.remove(styles.selected);
+            if (document.getElementById('SettingsButton').classList.contains(settingsStyles.selected)) {
+              document.getElementById('SettingsButton').classList.remove(settingsStyles.selected);
               target.innerHTML = "<span class='" + settingsStyles.icon + "'>" + settings_black + '</span>';
               panel.style.display = 'none';
             } else {
-              document.getElementById('SettingsButton').classList.add(styles.selected);
+              document.getElementById('SettingsButton').classList.add(settingsStyles.selected);
               target.innerHTML = "<span class='" + settingsStyles.icon + "'>" + settings_white + '</span>';
               panel.style.display = 'inline';
             }
@@ -35,12 +45,8 @@ export default class Settings extends React.PureComponent {
                 id={'SaveButton'}
                 className={'button ' + settingsStyles.saveButton}
                 onClick={() => {
-                  this.props.currThis.dataScaleHeatmap = document.getElementById('dataScaleHeatmap').value;
-                  this.props.currThis.dataScaleColumns = document.getElementById('dataScaleColumns').value;
-                  this.props.currThis.dataScaleRow = document.getElementById('dataScaleRows').value;
-                  this.props.currThis.updateParametrization = true;
-                  this.props.currThis.forceUpdate();
                   console.log('Parameters saved!');
+                  this.props.displayPropsChanged(this.state.displayProps);
                 }}>
                 Save
               </button>
@@ -56,31 +62,62 @@ export default class Settings extends React.PureComponent {
                   name="dataScaleSwitch"
                   className="switch is-rounded is-outlined is-info"
                   defaultChecked="true"
-                  onChange={event => {
-                    if (event.target.checked) {
+                  onChange={e => {
+                    if (e.target.checked) {
                       document.getElementById('dataScaleContainer').classList.remove(settingsStyles.showElm);
                       document.getElementById('dataScaleContainer').classList.add(settingsStyles.hideElm);
-                      document.getElementById('dataScaleHeatmap').value = -1;
-                      document.getElementById('dataScaleColumns').value = -1;
-                      document.getElementById('dataScaleRows').value = -1;
                     } else {
                       document.getElementById('dataScaleContainer').classList.add(settingsStyles.showElm);
                       document.getElementById('dataScaleContainer').classList.remove(settingsStyles.hideElm);
-                      document.getElementById('dataScaleHeatmap').value = this.props.currThis.dataScaleHeatmap;
-                      document.getElementById('dataScaleColumns').value = this.props.currThis.dataScaleColumns;
-                      document.getElementById('dataScaleRows').value = this.props.currThis.dataScaleRow;
                     }
+                    const currDisplayProps = this.state.displayProps;
+                    document.getElementById('dataScaleHeatmap').value = currDisplayProps.dataScaleHeatmap;
+                    document.getElementById('dataScaleColumns').value = currDisplayProps.dataScaleColumns;
+                    document.getElementById('dataScaleRows').value = currDisplayProps.dataScaleRows;
+
+                    currDisplayProps.customDataScale = !e.target.checked;
+                    this.setState({ displayProps: currDisplayProps });
                   }}
                 />
                 <label htmlFor="dataScaleSwitch">Custom / Automatic Data Scale</label>
               </div>
               <div id="dataScaleContainer" className={settingsStyles.shAnimation + ' ' + settingsStyles.hideElm}>
                 <div className={styles.subLabel}>Heatmap Scale:</div>
-                <input id="dataScaleHeatmap" min="0" className={'input'} type="number" />
+                <input
+                  id="dataScaleHeatmap"
+                  min="0"
+                  className={'input'}
+                  type="number"
+                  onChange={e => {
+                    const currDisplayProps = this.state.displayProps;
+                    currDisplayProps.dataScaleHeatmap = parseInt(e.target.value);
+                    this.setState({ displayProps: currDisplayProps });
+                  }}
+                />
                 <div className={styles.subLabel}>Column summary Scale:</div>
-                <input id="dataScaleColumns" min="0" className={'input'} type="number" />
+                <input
+                  id="dataScaleColumns"
+                  min="0"
+                  className={'input'}
+                  type="number"
+                  onChange={e => {
+                    const currDisplayProps = this.state.displayProps;
+                    currDisplayProps.dataScaleColumns = parseInt(e.target.value);
+                    this.setState({ displayProps: currDisplayProps });
+                  }}
+                />
                 <div className={styles.subLabel}>Row summary Scale:</div>
-                <input id="dataScaleRows" min="0" className={'input'} type="number" />
+                <input
+                  id="dataScaleRows"
+                  min="0"
+                  className={'input'}
+                  type="number"
+                  onChange={e => {
+                    const currDisplayProps = this.state.displayProps;
+                    currDisplayProps.dataScaleRows = parseInt(e.target.value);
+                    this.setState({ displayProps: currDisplayProps });
+                  }}
+                />
               </div>
               <hr />
             </div>

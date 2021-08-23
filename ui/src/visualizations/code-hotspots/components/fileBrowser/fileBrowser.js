@@ -52,7 +52,7 @@ export default class FileBrowser extends React.PureComponent {
     return (
       <div>
         <div className={'label'}>Files:</div>
-        <div style={{ margin: '1rem 0' }}>
+        <div style={{ margin: '1rem 0', height: '3rem' }}>
           <SearchBar
             searchType={'fileSearch'}
             data={this.props.files}

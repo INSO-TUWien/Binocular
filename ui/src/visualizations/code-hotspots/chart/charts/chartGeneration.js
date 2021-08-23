@@ -5,18 +5,18 @@ import ListGeneration from '../helper/listGeneration';
 import Loading from '../helper/loading';
 
 const HEATMAP_LOW_COLOR = '#ABEBC6';
-const HEATMAP_HEIGH_COLOR = '#E6B0AA';
+const HEATMAP_HIGH_COLOR = '#E6B0AA';
 const HEATMAP_MAX_COLOR = '#d5796f';
 const EVEN_COLOR = '#FFFFFFFF';
 const ODD_COLOR = '#EEEEEE55';
 
 export default class chartGeneration {
-  static generateHeatmap(data, lines, importantColumns, currThis, mode, maxValue, legendSteps, firstLineNumber) {
+  static generateHeatmap(data, lines, importantColumns, currThis, mode, maxValue, legendSteps, firstLineNumber, displayProps) {
     d3.select('.chartHeatmap > *').remove();
     currThis.combinedHeatmapData = data;
     const width = document.getElementById('barChartContainer').clientWidth,
       height = 24 * lines,
-      margins = { top: 28, right: 0, bottom: 0, left: 0 };
+      margins = { top: 24, right: 0, bottom: 0, left: 0 };
     //Setting chart width and adjusting for margins
     const chart = d3
       .select('.chartHeatmap')
@@ -32,18 +32,19 @@ export default class chartGeneration {
     }
     setTimeout(
       function() {
-        this.updateHeatmap(data, lines, importantColumns, currThis, mode, maxValue, legendSteps, firstLineNumber);
+        this.updateHeatmap(data, lines, importantColumns, currThis, mode, maxValue, legendSteps, firstLineNumber, displayProps);
       }.bind(this)
     );
   }
 
-  static updateHeatmap(data, lines, importantColumns, currThis, mode, maxValue, legendSteps, firstLineNumber) {
+  static updateHeatmap(data, lines, importantColumns, currThis, mode, maxValue, legendSteps, firstLineNumber, displayProps) {
     const columns = importantColumns.length;
-    if (currThis.dataScaleHeatmap > 0) {
-      maxValue = currThis.dataScaleHeatmap;
+    if (displayProps.customDataScale) {
+      maxValue = displayProps.dataScaleHeatmap;
     } else {
-      currThis.dataScaleHeatmap = maxValue;
+      displayProps.dataScaleHeatmap = maxValue;
     }
+
     const width = document.getElementById('barChartContainer').clientWidth;
     const barWidth = width / columns,
       barHeight = 24;
@@ -52,7 +53,7 @@ export default class chartGeneration {
     for (let i = 1; i <= legendSteps; i++) {
       legendData.push({
         interval: maxValue / legendSteps * i,
-        color: ColorMixer.mix(HEATMAP_LOW_COLOR, HEATMAP_HEIGH_COLOR, 1.0 / legendSteps * i)
+        color: ColorMixer.mix(HEATMAP_LOW_COLOR, HEATMAP_HIGH_COLOR, 1.0 / legendSteps * i)
       });
     }
     const colorScale = d => {
@@ -95,7 +96,7 @@ export default class chartGeneration {
     }
   }
 
-  static generateRowSummary(data, lines, currThis, mode, legendSteps, firstLineNumber) {
+  static generateRowSummary(data, lines, currThis, mode, legendSteps, firstLineNumber, displayProps) {
     d3.select('#chartRow').remove();
     d3.select('#tooltipRow').remove();
     //let maxValue = 0;
@@ -200,12 +201,12 @@ export default class chartGeneration {
     //chart
     setTimeout(
       function() {
-        this.updateRowSummary(data, lines, currThis, mode, legendSteps, firstLineNumber);
+        this.updateRowSummary(data, lines, currThis, mode, legendSteps, firstLineNumber, displayProps);
       }.bind(this)
     );
   }
 
-  static updateRowSummary(data, lines, currThis, mode, legendSteps, firstLineNumber) {
+  static updateRowSummary(data, lines, currThis, mode, legendSteps, firstLineNumber, displayProps) {
     const chart = d3.select('#chartRow');
     const tooltipp = d3.select('#tooltipRow');
 
@@ -213,16 +214,16 @@ export default class chartGeneration {
 
     const legendData = [];
 
-    if (currThis.dataScaleRow > 0) {
-      maxValue = currThis.dataScaleRow;
+    if (displayProps.customDataScale) {
+      maxValue = displayProps.dataScaleRows;
     } else {
-      currThis.dataScaleRow = maxValue;
+      displayProps.dataScaleRows = maxValue;
     }
 
     for (let i = 1; i <= legendSteps; i++) {
       legendData.push({
         interval: maxValue / legendSteps * i,
-        color: ColorMixer.mix(HEATMAP_LOW_COLOR, HEATMAP_HEIGH_COLOR, 1.0 / legendSteps * i)
+        color: ColorMixer.mix(HEATMAP_LOW_COLOR, HEATMAP_HIGH_COLOR, 1.0 / legendSteps * i)
       });
     }
 
@@ -248,7 +249,7 @@ export default class chartGeneration {
           .append('rect')
           .attr('x', 0)
           .attr('y', d => {
-            return (d.row - firstLineNumber) * barHeight;
+            return (d.row - firstLineNumber + 1) * barHeight;
           })
           .style('fill', colorScale)
           .attr('width', barWidth)
@@ -268,7 +269,7 @@ export default class chartGeneration {
                   ListGeneration.generateDeveloperList(d.developer)
               )
               .style('right', 30 + 'px')
-              .style('top', (d.row - firstLineNumber) * barHeight + 'px');
+              .style('top', (d.row - firstLineNumber + 1) * barHeight + 'px');
           })
           .on('mouseout', function() {
             tooltipp.transition().duration(500).style('opacity', 0);
@@ -281,7 +282,7 @@ export default class chartGeneration {
           .append('rect')
           .attr('x', 0)
           .attr('y', d => {
-            return (d.row - firstLineNumber) * barHeight;
+            return (d.row - firstLineNumber + 1) * barHeight;
           })
           .style('fill', colorScale)
           .attr('width', barWidth)
@@ -301,7 +302,7 @@ export default class chartGeneration {
                   ListGeneration.generateIssueList(d.issues)
               )
               .style('right', 30 + 'px')
-              .style('top', (d.row - firstLineNumber) * barHeight + 'px');
+              .style('top', (d.row - firstLineNumber + 1) * barHeight + 'px');
           })
           .on('mouseout', function() {
             tooltipp.transition().duration(500).style('opacity', 0);
@@ -314,7 +315,7 @@ export default class chartGeneration {
           .append('rect')
           .attr('x', 0)
           .attr('y', d => {
-            return (d.row - firstLineNumber) * barHeight;
+            return (d.row - firstLineNumber + 1) * barHeight;
           })
           .style('fill', colorScale)
           .attr('width', barWidth)
@@ -325,7 +326,7 @@ export default class chartGeneration {
             tooltipp
               .html("<div style='font-weight: bold'>Row: " + (parseInt(d.row) + 1) + '</div>' + '<div>Changes: ' + d.value + '</div>')
               .style('right', 30 + 'px')
-              .style('top', (d.row - firstLineNumber) * barHeight + 'px');
+              .style('top', (d.row - firstLineNumber + 1) * barHeight + 'px');
           })
           .on('mouseout', function() {
             tooltipp.transition().duration(500).style('opacity', 0);
@@ -336,7 +337,67 @@ export default class chartGeneration {
     bars.exit().remove();
   }
 
-  static generateColumnChart(data, columns, currThis, mode, legendSteps) {
+  static updateColumnData(data, currThis, mode) {
+    let combinedColumnData;
+    switch (mode) {
+      case 1:
+        combinedColumnData = d3Collection
+          .nest()
+          .key(d => d.column)
+          .rollup(function(v) {
+            return {
+              column: v[0].column,
+              value: d3.sum(v, g => g.value),
+              message: v[0].message,
+              sha: v[0].sha,
+              dev: v[0].dev
+            };
+          })
+          .entries(data)
+          .map(d => d.value);
+        break;
+      case 2:
+        combinedColumnData = d3Collection
+          .nest()
+          .key(d => d.column)
+          .rollup(function(v) {
+            return {
+              column: v[0].column,
+              value: d3.sum(v, g => g.value),
+              message: v[0].message,
+              sha: v[0].sha,
+              title: v[0].title,
+              description: v[0].description,
+              iid: v[0].iid
+            };
+          })
+          .entries(data)
+          .map(d => d.value)
+          .filter(d => d.value !== 0);
+        break;
+      default:
+        combinedColumnData = d3Collection
+          .nest()
+          .key(d => d.column)
+          .rollup(function(v) {
+            return {
+              column: v[0].column,
+              value: d3.sum(v, g => g.value),
+              message: v[0].message,
+              date: v[0].date,
+              sha: v[0].sha,
+              branch: v[0].branch,
+              signature: v[0].signature
+            };
+          })
+          .entries(data)
+          .map(d => d.value);
+        break;
+    }
+    return combinedColumnData;
+  }
+
+  static generateColumnChart(data, columns, currThis, mode, legendSteps, displayProps) {
     d3.select('#chartColumns').remove();
     d3.select('#tooltipColumns').remove();
 
@@ -492,10 +553,10 @@ export default class chartGeneration {
                   d.column +
                   '</div>' +
                   "<div style='font-style: italic;color: #AAAAAA;'>" +
-                  d.date +
+                  d.date.substring(0, d.date.length - 5).split('T').join(' ') +
                   '</div>' +
                   '<hr>' +
-                  '<div>' +
+                  "<div style='word-wrap: break-word'>" +
                   d.message +
                   '</div>' +
                   '<hr>' +
@@ -505,6 +566,10 @@ export default class chartGeneration {
                   '<hr>' +
                   '<div>' +
                   d.signature +
+                  '</div>' +
+                  '<hr>' +
+                  "<div style='font-style: italic;color: #AAAAAA; word-wrap: anywhere'>" +
+                  d.sha +
                   '</div>' +
                   '<hr>' +
                   '<div>Changes: ' +
@@ -529,80 +594,20 @@ export default class chartGeneration {
     }
     setTimeout(
       function() {
-        this.updateColumnChart(data, columns, currThis, mode, legendSteps);
+        this.updateColumnChart(data, columns, currThis, mode, legendSteps, displayProps);
       }.bind(this)
     );
   }
 
-  static updateColumnData(data, currThis, mode) {
-    let combinedColumnData;
-    switch (mode) {
-      case 1:
-        combinedColumnData = d3Collection
-          .nest()
-          .key(d => d.column)
-          .rollup(function(v) {
-            return {
-              column: v[0].column,
-              value: d3.sum(v, g => g.value),
-              message: v[0].message,
-              sha: v[0].sha,
-              dev: v[0].dev
-            };
-          })
-          .entries(data)
-          .map(d => d.value);
-        break;
-      case 2:
-        combinedColumnData = d3Collection
-          .nest()
-          .key(d => d.column)
-          .rollup(function(v) {
-            return {
-              column: v[0].column,
-              value: d3.sum(v, g => g.value),
-              message: v[0].message,
-              sha: v[0].sha,
-              title: v[0].title,
-              description: v[0].description,
-              iid: v[0].iid
-            };
-          })
-          .entries(data)
-          .map(d => d.value)
-          .filter(d => d.value !== 0);
-        break;
-      default:
-        combinedColumnData = d3Collection
-          .nest()
-          .key(d => d.column)
-          .rollup(function(v) {
-            return {
-              column: v[0].column,
-              value: d3.sum(v, g => g.value),
-              message: v[0].message,
-              date: v[0].date,
-              sha: v[0].sha,
-              branch: v[0].branch,
-              signature: v[0].signature
-            };
-          })
-          .entries(data)
-          .map(d => d.value);
-        break;
-    }
-    return combinedColumnData;
-  }
-
-  static updateColumnChart(data, columns, currThis, mode, legendSteps) {
+  static updateColumnChart(data, columns, currThis, mode, legendSteps, displayProps) {
     const w = document.getElementsByClassName('CodeMirror')[0].clientWidth - 80;
     const h = 100;
 
     let maxValue = d3.max(currThis.combinedColumnData, d => d.value);
-    if (currThis.dataScaleColumns > 0) {
-      maxValue = currThis.dataScaleColumns;
+    if (displayProps.customDataScale) {
+      maxValue = displayProps.dataScaleColumns;
     } else {
-      currThis.dataScaleColumns = maxValue;
+      displayProps.dataScaleColumns = maxValue;
     }
 
     const legendData = [];
@@ -610,7 +615,7 @@ export default class chartGeneration {
     for (let i = 1; i <= legendSteps; i++) {
       legendData.push({
         interval: maxValue / legendSteps * i,
-        color: ColorMixer.mix(HEATMAP_LOW_COLOR, HEATMAP_HEIGH_COLOR, 1.0 / legendSteps * i)
+        color: ColorMixer.mix(HEATMAP_LOW_COLOR, HEATMAP_HIGH_COLOR, 1.0 / legendSteps * i)
       });
     }
     const colorScale = d => {
