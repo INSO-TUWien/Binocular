@@ -16,6 +16,14 @@
       @include sl-flex(column, stretch);
     }
 
+    .button.is-link:focus:not(:active) {
+      box-shadow: none;
+    }
+
+    .button.is-link.is-light:active {
+      background-color: #c8d4e8;
+    }
+
     form {
       flex-shrink: 0;
       margin: 0;
