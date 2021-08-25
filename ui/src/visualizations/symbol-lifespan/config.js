@@ -21,11 +21,56 @@ export default class SymbolLifespanConfig extends React.PureComponent {
       { label: 'Date removed', value: 'd', order: 'date', defaultOrder: 'desc' },
       { label: 'Date last changed', value: 'c', order: 'date', defaultOrder: 'desc' }
     ];
+    this.filterCategories = [
+      {
+        label: 'With symbol type',
+        value: 'include',
+        options: [
+          { label: 'Function names', value: 'function' },
+          { label: 'Class names', value: 'class' },
+          { label: 'Plain object keys', value: 'key' },
+          { label: 'Class members', value: 'static' },
+          { label: 'Instance members', value: 'instance' },
+          { label: 'Function parameters', value: 'param' },
+          { label: 'Local variables', value: 'local' },
+          { label: 'Statement labels', value: 'label' },
+          { label: 'Import aliases', value: 'import' },
+        ],
+        initial: [
+          'function',
+          'class',
+          'key',
+          'static',
+          'instance',
+          'param',
+          'local',
+          'label',
+          'import',
+        ]
+      },
+      {
+        label: 'Unless they are',
+        value: 'exclude',
+        options: [
+          { label: 'Global variables', value: 'global' },
+          { label: 'Reassignable', value: 'let' },
+          { label: 'Anonymous function parameters', value: 'anonymous' },
+          { label: 'Optional function parameters', value: 'optional' },
+          { label: 'Loop variables', value: 'loop' },
+          { label: 'Single-letter variables', value: 'short' },
+          { label: 'Initialized on declaration', value: 'initialized' }
+        ],
+        initial: []
+      }
+    ];
     this.state = {
       searchTermInput: '',
       searchTermCurrent: '',
       activeZoom: this.zoomGranularities[0].value,
       sortCriteria: this.sortOptions[0].value,
+      filters: this.filterCategories
+        .map(c => ({ [c.value]: c.initial }))
+        .reduce((a, v) => Object.assign({}, a, v)),
       openSubmenu: null
     };
   }
@@ -62,6 +107,20 @@ export default class SymbolLifespanConfig extends React.PureComponent {
     });
   }
 
+  changeFilters(ev, cat) {
+    const { name, checked } = ev.target;
+    let catFilters = this.state.filters[cat.value].slice(); // Copy array for snapshot behavior
+    // Add or remove name depending on the checkbox state
+    if (checked) {
+      catFilters.push(name);
+    } else {
+      catFilters = catFilters.filter(n => n !== name); // Makes sure to remove duplicates, as well
+    }
+    // Deep state patching is not supported, so create plain object patch and apply it with Object.assign
+    const newFilters = { [cat.value]: catFilters };
+    this.setState({
+      filters: Object.assign({}, this.state.filters, newFilters)
+    });
   }
 
   render() {
@@ -139,6 +198,30 @@ export default class SymbolLifespanConfig extends React.PureComponent {
                 </div>
               ))}
             </section>
+          </section>
+          <section className="submenu px-4 pb-4" style={showIfSubmenuOpen('filter')}>
+            <h3 className="is-size-6 has-text-weight-medium">Only include results&hellip;</h3>
+            {this.filterCategories.map(c => (
+              <section key={c.value} onChange={e => this.changeFilters(e, c)}>
+                <h4 className="is-size-6 mt-3">{c.label}:</h4>
+                {c.options
+                  .filter(o => !o.ts)
+                  .map(o => (
+                    <div className="control pt-2" key={o.value}>
+                      <label className="checkbox">
+                        <input
+                          type="checkbox"
+                          name={o.value}
+                          checked={this.state.filters[c.value].includes(o.value)}
+                          defaultChecked={this.state.filters[c.value].includes(o.value)}
+                        />
+                        &ensp;{o.label}
+                        {o.ts && <sup className="has-text-link">TS</sup>}
+                      </label>
+                    </div>
+                  ))}
+              </section>
+            ))}
           </section>
           <section className="results">
             {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(n => {
