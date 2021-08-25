@@ -14,10 +14,18 @@ export default class SymbolLifespanConfig extends React.PureComponent {
       { label: 'Months', value: 'm' }
     ];
     this.submenus = [{ label: 'Sort', value: 'sort' }, { label: 'Filter', value: 'filter' }];
+    this.sortOptions = [
+      { label: 'Relevance', value: 'v', order: null },
+      { label: 'Lifespan length', value: 'l', order: 'number', defaultOrder: 'desc' },
+      { label: 'Date added', value: 'a', order: 'date', defaultOrder: 'desc' },
+      { label: 'Date removed', value: 'd', order: 'date', defaultOrder: 'desc' },
+      { label: 'Date last changed', value: 'c', order: 'date', defaultOrder: 'desc' }
+    ];
     this.state = {
       searchTermInput: '',
       searchTermCurrent: '',
       activeZoom: this.zoomGranularities[0].value,
+      sortCriteria: this.sortOptions[0].value,
       openSubmenu: null
     };
   }
@@ -45,6 +53,12 @@ export default class SymbolLifespanConfig extends React.PureComponent {
     const openSubmenu = this.state.openSubmenu;
     this.setState({
       openSubmenu: openSubmenu === menu.value ? null : menu.value
+    });
+  }
+
+  changeSortCriteria(ev) {
+    this.setState({
+      sortCriteria: ev.target.value
     });
   }
 
@@ -108,6 +122,24 @@ export default class SymbolLifespanConfig extends React.PureComponent {
               </div>
             </div>
           </form>
+          <section className="submenu px-4 pb-4" style={showIfSubmenuOpen('sort')}>
+            <h3 className="is-size-6 has-text-weight-medium">Sort results by&hellip;</h3>
+            <section onChange={e => this.changeSortCriteria(e)}>
+              {this.sortOptions.map(o => (
+                <div className="control pt-2" key={o.value}>
+                  <label className="radio">
+                    <input
+                      type="radio"
+                      name="sl-sort"
+                      value={o.value}
+                      defaultChecked={o.value === this.state.sortCriteria}
+                    />
+                    &ensp;{o.label}
+                  </label>
+                </div>
+              ))}
+            </section>
+          </section>
           <section className="results">
             {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(n => {
               return (
