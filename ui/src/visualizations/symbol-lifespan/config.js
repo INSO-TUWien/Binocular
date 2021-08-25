@@ -28,6 +28,10 @@ export default class SymbolLifespanConfig extends React.PureComponent {
         options: [
           { label: 'Function names', value: 'function' },
           { label: 'Class names', value: 'class' },
+          { label: 'Interface names', value: 'interface', ts: true },
+          { label: 'Enum names', value: 'enum', ts: true },
+          { label: 'Type alias names', value: 'alias', ts: true },
+          { label: 'Type parameters', value: 'type', ts: true },
           { label: 'Plain object keys', value: 'key' },
           { label: 'Class members', value: 'static' },
           { label: 'Instance members', value: 'instance' },
@@ -35,10 +39,15 @@ export default class SymbolLifespanConfig extends React.PureComponent {
           { label: 'Local variables', value: 'local' },
           { label: 'Statement labels', value: 'label' },
           { label: 'Import aliases', value: 'import' },
+          { label: 'Ambient module names', value: 'module', ts: true }
         ],
         initial: [
           'function',
           'class',
+          'interface',
+          'enum',
+          'alias',
+          'type',
           'key',
           'static',
           'instance',
@@ -46,6 +55,7 @@ export default class SymbolLifespanConfig extends React.PureComponent {
           'local',
           'label',
           'import',
+          'module'
         ]
       },
       {
@@ -54,8 +64,12 @@ export default class SymbolLifespanConfig extends React.PureComponent {
         options: [
           { label: 'Global variables', value: 'global' },
           { label: 'Reassignable', value: 'let' },
+          { label: 'Readonly', value: 'readonly', ts: true },
           { label: 'Anonymous function parameters', value: 'anonymous' },
           { label: 'Optional function parameters', value: 'optional' },
+          { label: 'Function type parameters', value: 'function-type', ts: true },
+          { label: 'Ambient declarations', value: 'ambient', ts: true },
+          { label: 'Export aliases', value: 'export', ts: true },
           { label: 'Loop variables', value: 'loop' },
           { label: 'Single-letter variables', value: 'short' },
           { label: 'Initialized on declaration', value: 'initialized' }
