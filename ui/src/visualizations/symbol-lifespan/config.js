@@ -1,16 +1,29 @@
 'use strict';
 
 import React from 'react';
+import cx from 'classnames';
 
 import styles from './styles.scss';
 
 export default class SymbolLifespanConfig extends React.PureComponent {
   constructor(props) {
     super(props);
+    this.zoomGranularities = [
+      { label: 'Days', value: 'd' },
+      { label: 'Weeks', value: 'w' },
+      { label: 'Months', value: 'm' }
+    ];
     this.state = {
       searchTermInput: '',
       searchTermCurrent: '',
+      activeZoom: this.zoomGranularities[0].value,
     };
+  }
+
+  changeZoom(granularity) {
+    this.setState({
+      activeZoom: granularity.value
+    });
   }
 
   changeSearchTerm(ev) {
@@ -29,6 +42,7 @@ export default class SymbolLifespanConfig extends React.PureComponent {
   }
 
   render() {
+    const buttonClasses = 'button is-link is-light is-small is-rounded';
     return (
       <div className={styles.configContainer}>
         <div className="config-wrapper is-overlay">
@@ -51,17 +65,19 @@ export default class SymbolLifespanConfig extends React.PureComponent {
             </div>
             <div className="field is-grouped is-justify-content-space-between">
               <div className="field has-addons mb-0">
-                <div className="control">
-                  <button className="button is-link is-light is-small is-rounded is-active">
-                    Days
-                  </button>
-                </div>
-                <div className="control">
-                  <button className="button is-link is-light is-small is-rounded">Weeks</button>
-                </div>
-                <div className="control">
-                  <button className="button is-link is-light is-small is-rounded">Months</button>
-                </div>
+                {this.zoomGranularities.map(g => (
+                  <div className="control" key={g.value}>
+                    <button
+                      type="button"
+                      className={cx(
+                        buttonClasses,
+                        this.state.activeZoom === g.value && 'is-active'
+                      )}
+                      onClick={() => this.changeZoom(g)}>
+                      {g.label}
+                    </button>
+                  </div>
+                ))}
               </div>
               <div className="field is-grouped">
                 <div className="control mr-3">
