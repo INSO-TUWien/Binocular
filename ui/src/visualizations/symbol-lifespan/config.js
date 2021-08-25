@@ -7,21 +7,46 @@ import styles from './styles.scss';
 export default class SymbolLifespanConfig extends React.PureComponent {
   constructor(props) {
     super(props);
+    this.state = {
+      searchTermInput: '',
+      searchTermCurrent: '',
+    };
+  }
+
+  changeSearchTerm(ev) {
+    this.setState({
+      searchTermInput: ev.target.value
+    });
+  }
+
+  search(ev) {
+    this.setState({
+      searchTermCurrent: this.state.searchTermInput
+    });
+    ev.preventDefault();
+  }
+
   }
 
   render() {
     return (
       <div className={styles.configContainer}>
         <div className="config-wrapper is-overlay">
-          <form className="m-3">
+          <form className="m-3" onSubmit={e => this.search(e)}>
             <div className="field">
-              <div className="control">
+              <div className="control has-icons-right">
                 <input
+                  id="term"
                   className="input is-rounded"
                   type="text"
-                  placeholder="Enter a symbol..."
-                  defaultValue={'loader'}
+                  placeholder="Enter a symbol name..."
+                  value={this.state.searchTermInput}
+                  onChange={e => this.changeSearchTerm(e)}
+                  autoComplete="off"
                 />
+                <span className="icon is-small is-right">
+                  <i className="fas fa-search" />
+                </span>
               </div>
             </div>
             <div className="field is-grouped is-justify-content-space-between">
