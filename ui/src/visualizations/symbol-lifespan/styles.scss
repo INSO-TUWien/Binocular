@@ -16,6 +16,10 @@
       @include sl-flex(column, stretch);
     }
 
+    .mt-n1 {
+      margin-top: -0.25rem;
+    }
+
     .button.is-link:focus:not(:active) {
       box-shadow: none;
     }
@@ -27,6 +31,15 @@
     form {
       flex-shrink: 0;
       margin: 0;
+    }
+
+    .submenu {
+      width: 100%;
+      position: absolute;
+      background-color: white;
+      top: 106px;
+      z-index: 1;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.2);
     }
 
     .results {

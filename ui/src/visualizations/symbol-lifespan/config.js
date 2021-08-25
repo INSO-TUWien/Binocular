@@ -13,10 +13,12 @@ export default class SymbolLifespanConfig extends React.PureComponent {
       { label: 'Weeks', value: 'w' },
       { label: 'Months', value: 'm' }
     ];
+    this.submenus = [{ label: 'Sort', value: 'sort' }, { label: 'Filter', value: 'filter' }];
     this.state = {
       searchTermInput: '',
       searchTermCurrent: '',
       activeZoom: this.zoomGranularities[0].value,
+      openSubmenu: null
     };
   }
 
@@ -39,10 +41,20 @@ export default class SymbolLifespanConfig extends React.PureComponent {
     ev.preventDefault();
   }
 
+  toggleMenu(menu) {
+    const openSubmenu = this.state.openSubmenu;
+    this.setState({
+      openSubmenu: openSubmenu === menu.value ? null : menu.value
+    });
+  }
+
   }
 
   render() {
     const buttonClasses = 'button is-link is-light is-small is-rounded';
+    const showIfSubmenuOpen = menu => ({
+      display: this.state.openSubmenu === menu ? 'block' : 'none'
+    });
     return (
       <div className={styles.configContainer}>
         <div className="config-wrapper is-overlay">
@@ -80,12 +92,19 @@ export default class SymbolLifespanConfig extends React.PureComponent {
                 ))}
               </div>
               <div className="field is-grouped">
-                <div className="control mr-3">
-                  <button className="button is-link is-light is-small is-rounded">Sort</button>
-                </div>
-                <div className="control">
-                  <button className="button is-link is-light is-small is-rounded">Filter</button>
-                </div>
+                {this.submenus.map((m, i, a) => (
+                  <div className={cx('control', i < a.length - 1 && 'mr-3')} key={m.value}>
+                    <button
+                      className={cx(
+                        buttonClasses,
+                        this.state.openSubmenu === m.value && 'is-active'
+                      )}
+                      type="button"
+                      onClick={() => this.toggleMenu(m)}>
+                      {m.label}
+                    </button>
+                  </div>
+                ))}
               </div>
             </div>
           </form>
