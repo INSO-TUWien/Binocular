@@ -122,7 +122,14 @@ export default class chartUpdater {
   }
 
   static generateCharts(currThis, mode, data, displayProps) {
-    const combinedColumnData = chartGeneration.updateColumnData(data.data, currThis, mode);
+    let filteredData = data.data;
+    if (mode === 0) {
+      filteredData = data.data.filter(
+        d => new Date(d.date) >= new Date(displayProps.dateRange.from) && new Date(d.date) <= new Date(displayProps.dateRange.to)
+      );
+    }
+
+    const combinedColumnData = chartGeneration.updateColumnData(filteredData, currThis, mode);
     currThis.combinedColumnData = combinedColumnData;
     const importantColumns = combinedColumnData.map(d => d.column);
     chartGeneration.generateColumnChart(
@@ -133,7 +140,7 @@ export default class chartUpdater {
       data.legendSteps,
       displayProps
     );
-    const filteredData = data.data.filter(d => importantColumns.includes(d.column));
+    filteredData = filteredData.filter(d => importantColumns.includes(d.column));
     chartGeneration.generateRowSummary(filteredData, data.lines, currThis, mode, data.legendSteps, data.firstLineNumber, displayProps);
     chartGeneration.generateHeatmap(
       filteredData,

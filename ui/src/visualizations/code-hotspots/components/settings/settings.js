@@ -2,13 +2,14 @@ import React from 'react';
 import settingsStyles from './settings.scss';
 import styles from '../../styles.scss';
 import { settings_black, settings_white } from '../../images/icons';
+import DateRangeFilter from '../dateRangeFilter/dateRangeFilter';
 require('bulma-switch');
 
 export default class Settings extends React.PureComponent {
   constructor(props) {
     super(props);
     this.state = {
-      displayProps: {}
+      displayProps: { dateRange: {} }
     };
   }
 
@@ -120,6 +121,18 @@ export default class Settings extends React.PureComponent {
                 />
               </div>
               <hr />
+              <div className={styles.label}>Date Range:</div>
+              <div>
+                <DateRangeFilter
+                  from={this.state.displayProps.dateRange.from}
+                  to={this.state.displayProps.dateRange.to}
+                  onDateChanged={data => {
+                    const currDisplayProps = this.state.displayProps;
+                    currDisplayProps.dateRange = data;
+                    this.setState({ displayProps: currDisplayProps });
+                  }}
+                />
+              </div>
             </div>
           </div>
         </div>

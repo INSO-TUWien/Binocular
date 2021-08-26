@@ -45,7 +45,11 @@ export default class CodeHotspots extends React.PureComponent {
         dataScaleHeatmap: 0,
         dataScaleColumns: 0,
         dataScaleRows: 0,
-        customDataScale: false
+        customDataScale: false,
+        dateRange: {
+          from: '',
+          to: ''
+        }
       }
     };
 
@@ -77,7 +81,6 @@ export default class CodeHotspots extends React.PureComponent {
   componentDidMount() {}
 
   render() {
-    console.log(this.dataChanged);
     if (this.prevMode !== this.state.mode || this.state.path !== this.prevPath) {
       this.requestData();
     } else {
@@ -277,10 +280,23 @@ export default class CodeHotspots extends React.PureComponent {
                         data.code = xhr.status === 200 ? xhr.responseText : 'No commit code in current selected Branch!';
                         data.firstLineNumber = 1;
                         data.searchTerm = '';
+
+                        const currDisplayProps = this.state.displayProps;
+                        currDisplayProps.dateRange.from = data.data[0].date.split('.')[0];
+                        currDisplayProps.dateRange.from = currDisplayProps.dateRange.from.substring(
+                          0,
+                          currDisplayProps.dateRange.from.length - 3
+                        );
+                        currDisplayProps.dateRange.to = data.data[data.data.length - 1].date.split('.')[0];
+                        currDisplayProps.dateRange.to = currDisplayProps.dateRange.to.substring(
+                          0,
+                          currDisplayProps.dateRange.to.length - 3
+                        );
                         this.setState({
                           code: xhr.status === 200 ? xhr.responseText : 'No commit code in current selected Branch!',
                           data: data,
-                          filteredData: data
+                          filteredData: data,
+                          displayProps: currDisplayProps
                         });
                       }.bind(this),
                       0
