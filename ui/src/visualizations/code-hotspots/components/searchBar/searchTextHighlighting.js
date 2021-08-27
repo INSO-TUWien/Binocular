@@ -88,6 +88,68 @@ export default class SearchTextHighlighting {
     return this.performTextHighlighting(searchTerm, highlightSet);
   }
 
+  static performDeveloperSearchTextHighlighting(searchTerm) {
+    const highlightSet = [
+      {
+        modifier: '-n',
+        color: '#4cd964',
+        secondary_color: '#def8e2'
+      },
+      {
+        modifier: '-name',
+        color: '#4cd964',
+        secondary_color: '#def8e2'
+      },
+      {
+        modifier: '-e',
+        color: '#ffcc00',
+        secondary_color: '#fff7d8'
+      },
+      {
+        modifier: '-email',
+        color: '#ffcc00',
+        secondary_color: '#fff7d8'
+      }
+    ];
+    return this.performTextHighlighting(searchTerm, highlightSet);
+  }
+
+  static performIssueSearchTextHighlighting(searchTerm) {
+    const highlightSet = [
+      {
+        modifier: '-t',
+        color: '#4cd964',
+        secondary_color: '#def8e2'
+      },
+      {
+        modifier: '-title',
+        color: '#4cd964',
+        secondary_color: '#def8e2'
+      },
+      {
+        modifier: '-d',
+        color: '#ffcc00',
+        secondary_color: '#fff7d8'
+      },
+      {
+        modifier: '-description',
+        color: '#ffcc00',
+        secondary_color: '#fff7d8'
+      },
+      {
+        modifier: '-i',
+        color: '#ff9500',
+        secondary_color: '#fff7eb'
+      },
+      {
+        modifier: '-iid',
+        color: '#ff9500',
+        secondary_color: '#fff7eb'
+      }
+    ];
+    return this.performTextHighlighting(searchTerm, highlightSet);
+  }
+
   static performTextHighlighting(searchTerm, highlightSet) {
     let htmlString = searchTerm;
     const searchTermChunks = searchTerm.split(' ');

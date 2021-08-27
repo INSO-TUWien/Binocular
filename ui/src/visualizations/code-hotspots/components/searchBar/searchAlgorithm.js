@@ -135,4 +135,96 @@ export default class SearchAlgorithm {
       searchTerm: searchTerm
     };
   }
+
+  static performDeveloperSearch(dataSet, searchTerm) {
+    let filteredDataSet = dataSet.data;
+    const firstLineNumber = 1;
+    const code = dataSet.code;
+    const searchTermChunks = searchTerm.toLowerCase().split(' ');
+    for (let i = 0; i < searchTermChunks.length; i++) {
+      switch (searchTermChunks[i]) {
+        case '-n':
+        case '-name':
+          if (i < searchTermChunks.length - 1) {
+            i++;
+            filteredDataSet = filteredDataSet.filter(d => d.dev.split(' <')[0].toLowerCase().includes(searchTermChunks[i]));
+          }
+          break;
+        case '-e':
+        case '-email':
+          if (i < searchTermChunks.length - 1) {
+            i++;
+            filteredDataSet = filteredDataSet.filter(d => d.dev.split(' <')[1].toLowerCase().includes(searchTermChunks[i]));
+          }
+          break;
+        default:
+          filteredDataSet = filteredDataSet.filter(d => d.dev.toLowerCase().includes(searchTermChunks[i]));
+          break;
+      }
+    }
+    return {
+      data: filteredDataSet,
+      lines: dataSet.lines,
+      commits: dataSet.commits,
+      devs: dataSet.devs,
+      issues: dataSet.issues,
+      maxValue: dataSet.maxValue,
+      code: code,
+      firstLineNumber: firstLineNumber,
+      legendSteps: dataSet.legendSteps,
+      searchTerm: searchTerm
+    };
+  }
+
+  static performIssueSearch(dataSet, searchTerm) {
+    let filteredDataSet = dataSet.data;
+    const firstLineNumber = 1;
+    const code = dataSet.code;
+    const searchTermChunks = searchTerm.toLowerCase().split(' ');
+    for (let i = 0; i < searchTermChunks.length; i++) {
+      switch (searchTermChunks[i]) {
+        case '-t':
+        case '-title':
+          if (i < searchTermChunks.length - 1) {
+            i++;
+            filteredDataSet = filteredDataSet.filter(d => d.title.toLowerCase().includes(searchTermChunks[i]));
+          }
+          break;
+        case '-d':
+        case '-description':
+          if (i < searchTermChunks.length - 1) {
+            i++;
+            filteredDataSet = filteredDataSet.filter(d => ('' + d.description).toLowerCase().includes(searchTermChunks[i]));
+          }
+          break;
+        case '-i':
+        case '-iid':
+          if (i < searchTermChunks.length - 1) {
+            i++;
+            filteredDataSet = filteredDataSet.filter(d => d.iid.toLowerCase().includes(searchTermChunks[i]));
+          }
+          break;
+        default:
+          filteredDataSet = filteredDataSet.filter(
+            d =>
+              d.title.toLowerCase().includes(searchTermChunks[i]) ||
+              ('' + d.description).toLowerCase().includes(searchTermChunks[i]) ||
+              d.iid.toLowerCase().includes(searchTermChunks[i])
+          );
+          break;
+      }
+    }
+    return {
+      data: filteredDataSet,
+      lines: dataSet.lines,
+      commits: dataSet.commits,
+      devs: dataSet.devs,
+      issues: dataSet.issues,
+      maxValue: dataSet.maxValue,
+      code: code,
+      firstLineNumber: firstLineNumber,
+      legendSteps: dataSet.legendSteps,
+      searchTerm: searchTerm
+    };
+  }
 }

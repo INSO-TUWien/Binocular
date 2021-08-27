@@ -126,11 +126,15 @@ export default class CodeHotspots extends React.PureComponent {
                 data={this.state.data}
                 placeholder={'Search for ' + (this.state.mode === 1 ? 'Developer' : this.state.mode === 2 ? 'Issues' : 'Commits') + '!'}
                 hint={
-                  '-m [term] search commit message; ' +
-                  '-s [term] search commit sha; ' +
-                  '-d [term] search developer; ' +
-                  '-b [term] search branch; ' +
-                  '-l [term] search line or multible lines'
+                  this.state.mode === 1
+                    ? '-n [term] search developer name; ' + '-e [term] search developer email'
+                    : this.state.mode === 2
+                      ? '-t [term] search title; ' + '-d [term] search description; ' + '-i [term] search iid'
+                      : '-m [term] search commit message; ' +
+                        '-s [term] search commit sha; ' +
+                        '-d [term] search developer; ' +
+                        '-b [term] search branch; ' +
+                        '-l [term] search line or multible lines'
                 }
                 onSearchChanged={function(data) {
                   this.dataChanged = true;

@@ -451,7 +451,6 @@ export default class chartGeneration {
 
     //Info show
     const groupInfo = barChart.append('g').attr('width', w).attr('height', h).attr('id', 'info');
-
     switch (mode) {
       case 1:
         groupInfo
@@ -467,13 +466,14 @@ export default class chartGeneration {
           .attr('height', h)
           .on('mouseover', function(event, d) {
             div.transition().duration(200).style('opacity', 1);
+            const currDev = d.dev.split('>').join('');
             div
               .html(
-                "<div style='font-weight: bold'>Developer: " +
-                  (parseInt(d.column) + 1) +
+                "<div style='font-weight: bold'>" +
+                  currDev.split(' <')[0] +
                   '</div>' +
                   '<div>' +
-                  d.dev +
+                  currDev.split(' <')[1] +
                   '</div>' +
                   '<hr>' +
                   '<div>Changes: ' +

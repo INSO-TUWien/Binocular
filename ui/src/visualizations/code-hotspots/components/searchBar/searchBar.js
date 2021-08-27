@@ -43,6 +43,16 @@ export default class searchBar extends React.PureComponent {
                 e.target.parentElement.children[0].innerHTML = SearchTextHighlighting.performCommitSearchTextHighlighting(e.target.value);
                 onSearchChanged(SearchAlgorithm.performCommitSearch(data, e.target.value));
                 break;
+              case 'developerSearch':
+                e.target.parentElement.children[0].innerHTML = SearchTextHighlighting.performDeveloperSearchTextHighlighting(
+                  e.target.value
+                );
+                onSearchChanged(SearchAlgorithm.performDeveloperSearch(data, e.target.value));
+                break;
+              case 'issueSearch':
+                e.target.parentElement.children[0].innerHTML = SearchTextHighlighting.performIssueSearchTextHighlighting(e.target.value);
+                onSearchChanged(SearchAlgorithm.performIssueSearch(data, e.target.value));
+                break;
               default:
                 e.target.parentElement.children[0].innerHTML = e.target.value;
                 onSearchChanged(data);
