@@ -387,6 +387,7 @@ export default class chartGeneration {
               date: v[0].date,
               sha: v[0].sha,
               branch: v[0].branch,
+              brants: v[0].parents,
               signature: v[0].signature
             };
           })
@@ -590,6 +591,11 @@ export default class chartGeneration {
           .on('click', function(event, d) {
             currThis.setState({ sha: d.sha });
           });
+        setTimeout(
+          function() {
+            this.generateBranchView(data, columns, currThis);
+          }.bind(this)
+        );
         break;
     }
     setTimeout(
@@ -643,5 +649,104 @@ export default class chartGeneration {
         return h / maxValue * d.value;
       });
     bars.exit().remove();
+  }
+
+  static generateBranchView(data, columns, currThis) {
+    d3.select('#chartBranchView').remove();
+    const w = document.getElementsByClassName('CodeMirror')[0].clientWidth - 80;
+    const h = 50;
+
+    for (let i = 0; i < currThis.combinedColumnData.length; i++) {
+      currThis.combinedColumnData[i].i = i;
+    }
+
+    const versionSize = Math.min(w / currThis.combinedColumnData.length, 20) - 4;
+
+    const branches = d3Collection.nest().key(d => d.branch).entries(currThis.combinedColumnData);
+
+    d3
+      .select('.branchView')
+      .append('svg')
+      .attr('width', '100%')
+      .attr('height', h)
+      .attr('viewBox', '0 0 ' + w + ' ' + h)
+      .attr('preserveAspectRatio', 'none')
+      .attr('class', 'chartBranchView')
+      .attr('id', 'chartBranchView');
+
+    //commits
+    const commits = d3.select('#chartBranchView').selectAll('rect').data(currThis.combinedColumnData);
+    const branchLines = d3.select('#chartBranchView');
+    let offset = 0;
+    const firstCommitCount = parseInt(branches[0].values[0].column);
+    for (const branch of branches) {
+      for (let i = 0; i < branch.values.length - 1; i++) {
+        const c1 = parseInt(branch.values[i].column) - firstCommitCount;
+        const c2 = parseInt(branch.values[i + 1].column) - firstCommitCount;
+        if (c1 + 1 === c2) {
+          branchLines
+            .append('line')
+            .style('stroke', ColorMixer.rainbow(branches.length, branches.findIndex(v => v.key === branch.values[i].branch)))
+            .style('stroke-width', 5)
+            .style('stroke-linecap', 'round')
+            .attr('y1', h / 2)
+            .attr('x1', w / (currThis.combinedColumnData.length * 2) + c1 * w / currThis.combinedColumnData.length)
+            .attr('y2', h / 2)
+            .attr('x2', w / (currThis.combinedColumnData.length * 2) + c2 * w / currThis.combinedColumnData.length);
+        } else {
+          offset++;
+          let currOffset = 0;
+          if (offset % 2 === 0) {
+            currOffset = -Math.floor(offset / 2);
+          } else {
+            currOffset = Math.floor(offset / 2) + offset % 2;
+          }
+          currOffset = currOffset * 10;
+          branchLines
+            .append('line')
+            .style('stroke', ColorMixer.rainbow(branches.length, branches.findIndex(v => v.key === branch.values[i].branch)))
+            .style('stroke-width', 5)
+            .style('stroke-linecap', 'round')
+            .attr('y1', h / 2)
+            .attr('x1', w / (currThis.combinedColumnData.length * 2) + c1 * w / currThis.combinedColumnData.length)
+            .attr('y2', h / 2 + currOffset)
+            .attr('x2', w / (currThis.combinedColumnData.length * 2) + (c1 + 1) * w / currThis.combinedColumnData.length);
+
+          branchLines
+            .append('line')
+            .style('stroke', ColorMixer.rainbow(branches.length, branches.findIndex(v => v.key === branch.values[i].branch)))
+            .style('stroke-width', 5)
+            .style('stroke-linecap', 'round')
+            .attr('y1', h / 2 + currOffset)
+            .attr('x1', w / (currThis.combinedColumnData.length * 2) + (c1 + 1) * w / currThis.combinedColumnData.length)
+            .attr('y2', h / 2 + currOffset)
+            .attr('x2', w / (currThis.combinedColumnData.length * 2) + (c2 - 1) * w / currThis.combinedColumnData.length);
+
+          branchLines
+            .append('line')
+            .style('stroke', ColorMixer.rainbow(branches.length, branches.findIndex(v => v.key === branch.values[i].branch)))
+            .style('stroke-width', 5)
+            .style('stroke-linecap', 'round')
+            .attr('y1', h / 2 + currOffset)
+            .attr('x1', w / (currThis.combinedColumnData.length * 2) + (c2 - 1) * w / currThis.combinedColumnData.length)
+            .attr('y2', h / 2)
+            .attr('x2', w / (currThis.combinedColumnData.length * 2) + c2 * w / currThis.combinedColumnData.length);
+        }
+      }
+    }
+    commits
+      .enter()
+      .append('rect')
+      .attr('fill', d => ColorMixer.rainbow(branches.length, branches.findIndex(v => v.key === d.branch)))
+      .attr('class', 'sBar')
+      .attr('x', (d, i) => i * w / currThis.combinedColumnData.length + w / (currThis.combinedColumnData.length * 2) - versionSize / 2)
+      .attr('y', h / 2 - versionSize / 2)
+      .attr('width', versionSize)
+      .attr('height', versionSize)
+      .style('stroke', 'whitesmoke')
+      .style('stroke-width', '2px')
+      .attr('rx', '100%')
+      .attr('ry', '100%');
+    commits.exit().remove();
   }
 }

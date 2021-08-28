@@ -14,7 +14,7 @@ export default class VisualizationSelector extends React.PureComponent {
         <span>
           <button
             id={'CpVButton'}
-            className={'button ' + styles.mg1 + ' ' + visualizationSelectorStyles.button + ' ' + visualizationSelectorStyles.selected}
+            className={'button ' + styles.mg1 + ' ' + styles.button + ' ' + visualizationSelectorStyles.selected}
             onClick={() => {
               changeMode(0);
               document.getElementById('CpVButton').classList.add(visualizationSelectorStyles.selected);
@@ -27,7 +27,7 @@ export default class VisualizationSelector extends React.PureComponent {
         <span>
           <button
             id={'CpDButton'}
-            className={'button ' + styles.mg1 + ' ' + visualizationSelectorStyles.button}
+            className={'button ' + styles.mg1 + ' ' + styles.button}
             onClick={() => {
               changeMode(1);
               document.getElementById('CpVButton').classList.remove(visualizationSelectorStyles.selected);
@@ -40,7 +40,7 @@ export default class VisualizationSelector extends React.PureComponent {
         <span>
           <button
             id={'CpIButton'}
-            className={'button ' + styles.mg1 + ' ' + visualizationSelectorStyles.button}
+            className={'button ' + styles.mg1 + ' ' + styles.button}
             onClick={() => {
               changeMode(2);
               document.getElementById('CpVButton').classList.remove(visualizationSelectorStyles.selected);

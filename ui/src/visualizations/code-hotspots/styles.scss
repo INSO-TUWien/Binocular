@@ -44,36 +44,15 @@
   color: $grey;
 }
 
-.codeView{
-  height: calc(100vh - 15rem);
-  overflow-y: scroll;
-  overflow-x: hidden;
-  position: absolute;
-  top:100px;
-  width: 100%;
+.button{
+  background-color: white;
+  height: 3rem;
+  width: 12rem;
 }
 
-.heatmapContainer{
-  width: 100%;
-  margin: 0 0 0 40px;
-}
-.rowSummaryContainer{
-  margin: 0;
-  position: absolute;
-  top: 0;
-  right: 0;
-}
-
-.barChartContainer{
-  position: absolute;
-  left: 40px;
-  width: calc(100% - 120px);
-}
-
-.menubar{
-  background-color: #EEEEEE;
-  margin-bottom: 1rem;
-  height: 5rem;
+.button:hover{
+  border-bottom-color:  #3273dc;
+  /*background-color: lightgray;*/
 }
 
 

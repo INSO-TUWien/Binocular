@@ -16,6 +16,7 @@ export default class vcsData {
                       sha
                       signature
                       branch
+                      parents
                       date
                       stats{
                           additions

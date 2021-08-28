@@ -21,6 +21,7 @@ export default class chartUpdater {
           sha: commit.sha,
           date: commit.date,
           branch: commit.branch,
+          parents: commit.parents,
           signature: commit.signature
         });
       }

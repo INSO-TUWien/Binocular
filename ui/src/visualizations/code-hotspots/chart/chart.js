@@ -17,6 +17,7 @@ import BackgroundRefreshIndicator from '../components/backgroundRefreshIndicator
 import VisualizationSelector from '../components/VisulaizationSelector/visualizationSelector';
 import SearchBar from '../components/searchBar/searchBar';
 import searchAlgorithm from '../components/searchBar/searchAlgorithm';
+import chartStyles from './chart.scss';
 
 export default class CodeHotspots extends React.PureComponent {
   constructor(props) {
@@ -100,7 +101,7 @@ export default class CodeHotspots extends React.PureComponent {
         <div className={'loadingContainer'} />
         <BackgroundRefreshIndicator />
         <div className={styles.w100}>
-          <div className={styles.menubar}>
+          <div className={chartStyles.menubar}>
             <span style={{ float: 'left' }}>
               <Settings
                 displayProps={this.state.displayProps}
@@ -154,7 +155,15 @@ export default class CodeHotspots extends React.PureComponent {
               </button>
             </div>}
           <div className={styles.w100 + ' ' + styles.pr}>
-            <div className={styles.codeView}>
+            <div id={'barChartContainer'} className={chartStyles.barChartContainer}>
+              <div className={'barChart'} />
+            </div>
+            {this.state.mode === 0
+              ? <div className={chartStyles.branchView}>
+                  <div className={'branchView'} />
+                </div>
+              : ''}
+            <div className={chartStyles.codeView}>
               <CodeMirror
                 id={'codeView'}
                 ref={'codeView'}
@@ -167,15 +176,12 @@ export default class CodeHotspots extends React.PureComponent {
                   firstLineNumber: this.state.filteredData.firstLineNumber
                 }}
               />
-              <div className={styles.heatmapContainer}>
+              <div className={chartStyles.heatmapContainer}>
                 <svg id={'heatmap'} className="chartHeatmap" />
               </div>
-              <div id={'rowSummaryContainer'} className={styles.rowSummaryContainer}>
+              <div id={'rowSummaryContainer'} className={chartStyles.rowSummaryContainer}>
                 <div className="chartRowSummary" />
               </div>
-            </div>
-            <div id={'barChartContainer'} className={styles.barChartContainer}>
-              <div className={'barChart'} />
             </div>
           </div>
         </div>
