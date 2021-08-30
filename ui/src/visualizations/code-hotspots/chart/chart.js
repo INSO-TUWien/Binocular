@@ -143,17 +143,19 @@ export default class CodeHotspots extends React.PureComponent {
                 }.bind(this)}
               />
             </span>
+            {this.state.sha !== '' &&
+              <span>
+                <span className={styles.verticalSeparator} />
+                <button
+                  className={'button ' + styles.mg1 + ' ' + styles.button}
+                  onClick={() => {
+                    this.setState({ sha: '' });
+                  }}>
+                  Back to current Version
+                </button>
+              </span>}
           </div>
-          {this.state.sha !== '' &&
-            <div>
-              <button
-                className={'button ' + styles.mg1 + ' ' + styles.button}
-                onClick={() => {
-                  this.setState({ sha: '' });
-                }}>
-                Back to current Version
-              </button>
-            </div>}
+
           <div className={styles.w100 + ' ' + styles.pr}>
             <div id={'barChartContainer'} className={chartStyles.barChartContainer}>
               <div className={'barChart'} />
