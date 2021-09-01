@@ -1,76 +1,78 @@
 import HunkHandler from '../helper/hunkHandler';
 import chartGeneration from './chartGeneration';
+import * as d3Collection from 'd3-collection';
+import * as d3 from 'd3';
 
 export default class chartUpdater {
   static transformChangesPerVersionData(rawData, lines) {
-    const data = [];
-    let commits = 0;
+    const commits = 0;
 
     const legendSteps = 20;
 
     let maxValue = 0;
 
-    for (const i in rawData.data) {
-      const commit = rawData.data[i];
-      for (let j = 0; j < lines; j++) {
-        data.push({
-          column: i,
-          row: j,
-          value: 0,
-          message: commit.message,
-          sha: commit.sha,
-          date: commit.date,
-          branch: commit.branch,
-          parents: commit.parents,
-          signature: commit.signature
+    const data = rawData.data
+      .map((commit, i) => {
+        let rowData = new Array(lines).fill({ value: 0 }, 0, lines).map((row, j) => {
+          return {
+            row: j,
+            value: row.value,
+            column: i,
+            message: commit.message,
+            sha: commit.sha,
+            date: commit.date,
+            branch: commit.branch,
+            parents: commit.parents,
+            signature: commit.signature
+          };
         });
-      }
-
-      const file = commit.file;
-
-      if (file !== undefined) {
-        for (const j in file.hunks) {
-          const hunk = file.hunks[j];
-          const tmpMaxValue = HunkHandler.handle(hunk, data, i, maxValue);
-          if (tmpMaxValue > maxValue) {
-            maxValue = tmpMaxValue;
-          }
+        if (commit.file !== undefined) {
+          commit.file.hunks.forEach(hunk => {
+            rowData = rowData.filter(row => {
+              if (
+                (row.row >= hunk.newStart - 1 && row.row < hunk.newStart + hunk.newLines - 1) ||
+                (row.row >= hunk.oldStart - 1 && row.row < hunk.oldStart + hunk.oldLines - 1)
+              ) {
+                row.value = row.value + 1;
+              }
+              if (row.value > maxValue) {
+                maxValue = row.value;
+              }
+              return row;
+            });
+          });
         }
-        commits++;
-      }
-    }
+
+        return rowData;
+      })
+      .flat();
     return { data: data, lines: lines, commits: commits, maxValue: maxValue, legendSteps: legendSteps };
   }
 
   static transformChangesPerDeveloperData(rawData, lines) {
-    const data = [];
     const legendSteps = 20;
     let maxValue = 0;
-    const devs = [];
-    for (const commit of rawData.data) {
-      if (!devs.includes(commit.signature)) {
-        devs.push(commit.signature);
-      }
-    }
-    for (const i in devs) {
-      for (let j = 0; j < lines; j++) {
-        data.push({ column: i, row: j, value: 0, message: '', sha: '', dev: devs[i] });
-      }
-    }
-    for (const i in rawData.data) {
-      const commit = rawData.data[i];
 
-      const file = commit.file;
-      if (file !== undefined) {
-        for (const j in file.hunks) {
-          const hunk = file.hunks[j];
-          const tmpMaxValue = HunkHandler.handle(hunk, data, devs.indexOf(commit.signature), maxValue);
-          if (tmpMaxValue > maxValue) {
-            maxValue = tmpMaxValue;
-          }
-        }
-      }
-    }
+    const versionData = this.transformChangesPerVersionData(rawData, lines).data;
+    const groupedDevData = d3Collection.nest().key(k => k.signature).entries(versionData);
+
+    const devs = groupedDevData.map(entry => entry.key);
+    const data = groupedDevData
+      .map((entry, i) => {
+        return d3Collection
+          .nest()
+          .key(k => k.row)
+          .rollup(d => {
+            const value = d3.sum(d, v => v.value);
+            if (value > maxValue) {
+              maxValue = value;
+            }
+            return { column: i, row: d[0].row, value: value, dev: d[0].signature };
+          })
+          .entries(entry.values)
+          .map(d => d.value);
+      })
+      .flat();
     return { data: data, lines: lines, devs: devs, maxValue: maxValue, legendSteps: legendSteps };
   }
 
