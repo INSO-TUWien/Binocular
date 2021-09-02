@@ -30,17 +30,18 @@ export default class SymbolLifespanConfig extends React.PureComponent {
     });
   }
 
-  changeSearchTerm(ev) {
+  changeSearchTerm(event) {
     this.setState({
-      searchTermInput: ev.target.value
+      searchTermInput: event.target.value
     });
   }
 
-  search(ev) {
+  search(event) {
+    const searchTerm = this.state.searchTermInput;
     this.setState({
-      searchTermCurrent: this.state.searchTermInput
+      searchTermCurrent: searchTerm
     });
-    ev.preventDefault();
+    event.preventDefault();
   }
 
   toggleSubmenu(menu) {
