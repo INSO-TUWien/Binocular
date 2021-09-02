@@ -4,18 +4,11 @@ import React from 'react';
 import cx from 'classnames';
 
 import styles from './styles.scss';
-import { Submenu, ZoomGranularity } from './enum';
+import { SortCriterion, Submenu, ZoomGranularity } from './enum';
 
 export default class SymbolLifespanConfig extends React.PureComponent {
   constructor(props) {
     super(props);
-    this.sortOptions = [
-      { label: 'Relevance', value: 'v', order: null },
-      { label: 'Lifespan length', value: 'l', order: 'number', defaultOrder: 'desc' },
-      { label: 'Date added', value: 'a', order: 'date', defaultOrder: 'desc' },
-      { label: 'Date removed', value: 'd', order: 'date', defaultOrder: 'desc' },
-      { label: 'Date last changed', value: 'c', order: 'date', defaultOrder: 'desc' }
-    ];
     this.filterCategories = [
       {
         label: 'With symbol type',
@@ -74,14 +67,15 @@ export default class SymbolLifespanConfig extends React.PureComponent {
     ];
     this.zoomGranularities = ZoomGranularity.values;
     this.submenus = Submenu.values.filter(m => m !== Submenu.NONE);
+    this.sortCriteria = SortCriterion.values;
     this.state = {
       searchTermInput: '',
       searchTermCurrent: '',
-      sortCriteria: this.sortOptions[0].value,
       filters: this.filterCategories
         .map(c => ({ [c.value]: c.initial }))
         .reduce((a, v) => Object.assign({}, a, v)),
       granularity: ZoomGranularity.DAYS,
+      sortCriterion: SortCriterion.RELEVANCE,
       openSubmenu: Submenu.NONE
     };
   }
@@ -113,9 +107,10 @@ export default class SymbolLifespanConfig extends React.PureComponent {
     });
   }
 
-  changeSortCriteria(ev) {
+  changeSortCriterion(event) {
+    const sortCriterion = SortCriterion.fromValue(event.target.value);
     this.setState({
-      sortCriteria: ev.target.value
+      sortCriterion
     });
   }
 
@@ -189,17 +184,17 @@ export default class SymbolLifespanConfig extends React.PureComponent {
           </form>
           <section className="submenu px-4 pb-4" style={showIfSubmenuOpen(Submenu.SORT)}>
             <h3 className="is-size-6 has-text-weight-medium">Sort results by&hellip;</h3>
-            <section onChange={e => this.changeSortCriteria(e)}>
-              {this.sortOptions.map(o => (
-                <div className="control pt-2" key={o.value}>
+            <section onChange={e => this.changeSortCriterion(e)}>
+              {this.sortCriteria.map(c => (
+                <div className="control pt-2" key={c.value}>
                   <label className="radio">
                     <input
                       type="radio"
                       name="sl-sort"
-                      value={o.value}
-                      defaultChecked={o.value === this.state.sortCriteria}
+                      value={c.value}
+                      defaultChecked={c === this.state.sortCriterion}
                     />
-                    &ensp;{o.label}
+                    &ensp;{c.label}
                   </label>
                 </div>
               ))}
