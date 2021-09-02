@@ -59,6 +59,9 @@ export default class vcsData {
                   message
                   sha
                   signature
+                  branch
+                  date
+                  parents
                   stats{
                     additions
                     deletions

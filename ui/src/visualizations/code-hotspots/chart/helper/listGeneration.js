@@ -52,4 +52,22 @@ export default class ListGeneration {
     issueListHTML += '</ul></div>';
     return issueListHTML;
   }
+
+  static generateCommitList(commitData) {
+    let commitListHTML = '<div><ul>';
+    commitData.forEach((commit, i) => {
+      const color = i % 2 === 0 ? '#eeeeee' : '#dddddd';
+      commitListHTML +=
+        "<li style='background-color: " +
+        color +
+        "'>" +
+        "<span style='display: inline-block;margin-left: 5px;word-wrap: anywhere'>" +
+        commit.sha +
+        '</span>' +
+        '</li>';
+    });
+
+    commitListHTML += '</ul></div>';
+    return commitListHTML;
+  }
 }

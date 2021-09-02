@@ -1,6 +1,7 @@
 import * as d3 from 'd3';
 import * as d3Collection from 'd3-collection';
 import ColorMixer from '../../helper/colorMixer';
+import ListGeneration from '../../helper/listGeneration';
 
 const HEATMAP_LOW_COLOR = '#ABEBC6';
 const HEATMAP_HIGH_COLOR = '#E6B0AA';
@@ -38,7 +39,8 @@ export default class columnChartGeneration {
               sha: v[0].sha,
               title: v[0].title,
               description: v[0].description,
-              iid: v[0].iid
+              iid: v[0].iid,
+              commits: v[0].commits
             };
           })
           .entries(data)
@@ -119,7 +121,6 @@ export default class columnChartGeneration {
       .style('border-radius', '4px')
       .style('padding', '1rem')
       .style('z-index', '9');
-
     //Info show
     const groupInfo = barChart.append('g').attr('width', w).attr('height', h).attr('id', 'info');
     switch (mode) {
@@ -187,6 +188,14 @@ export default class columnChartGeneration {
                   '</div>' +
                   '<hr>' +
                   (d.description !== '' ? '<div>' + d.description + '</div>' + '<hr>' : '') +
+                  '<div> Commits linked to this issue: ' +
+                  d.commits.length +
+                  '</div>' +
+                  '<hr>' +
+                  '<div>' +
+                  ListGeneration.generateCommitList(d.commits) +
+                  '</div>' +
+                  '<hr>' +
                   '<div>Changes: ' +
                   d.value +
                   '</div>'

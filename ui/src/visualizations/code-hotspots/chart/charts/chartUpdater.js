@@ -1,4 +1,3 @@
-import HunkHandler from '../helper/hunkHandler';
 import chartGeneration from './chartGeneration';
 import * as d3Collection from 'd3-collection';
 import * as d3 from 'd3';
@@ -13,7 +12,7 @@ export default class chartUpdater {
 
     const data = rawData.data
       .map((commit, i) => {
-        let rowData = new Array(lines).fill({ value: 0 }, 0, lines).map((row, j) => {
+        const columnData = new Array(lines).fill({ value: 0 }, 0, lines).map((row, j) => {
           return {
             row: j,
             value: row.value,
@@ -28,22 +27,22 @@ export default class chartUpdater {
         });
         if (commit.file !== undefined) {
           commit.file.hunks.forEach(hunk => {
-            rowData = rowData.filter(row => {
+            columnData.filter(column => {
               if (
-                (row.row >= hunk.newStart - 1 && row.row < hunk.newStart + hunk.newLines - 1) ||
-                (row.row >= hunk.oldStart - 1 && row.row < hunk.oldStart + hunk.oldLines - 1)
+                (column.row >= hunk.newStart - 1 && column.row < hunk.newStart + hunk.newLines - 1) ||
+                (column.row >= hunk.oldStart - 1 && column.row < hunk.oldStart + hunk.oldLines - 1)
               ) {
-                row.value = row.value + 1;
+                column.value = column.value + 1;
               }
-              if (row.value > maxValue) {
-                maxValue = row.value;
+              if (column.value > maxValue) {
+                maxValue = column.value;
               }
-              return row;
+              return column;
             });
           });
         }
 
-        return rowData;
+        return columnData;
       })
       .flat();
     return { data: data, lines: lines, commits: commits, maxValue: maxValue, legendSteps: legendSteps };
@@ -77,50 +76,54 @@ export default class chartUpdater {
   }
 
   static transformChangesPerIssueData(rawData, lines) {
-    const data = [];
     const legendSteps = 20;
     let maxValue = 0;
     const issues = [];
-    const issuesDescriptions = [];
-    const issuesIID = [];
-    for (const issue of rawData.data) {
-      if (!issues.includes(issue.title)) {
-        issues.push(issue.title);
-        issuesDescriptions.push(issue.description);
-        issuesIID.push(issue.iid);
-      }
-    }
-    for (const i in issues) {
-      for (let j = 0; j < lines; j++) {
-        data.push({
-          column: i,
-          row: j,
-          value: 0,
-          message: '',
-          sha: '',
-          title: issues[i],
-          description: issuesDescriptions[i],
-          iid: issuesIID[i]
-        });
-      }
-    }
-    for (const i in rawData.data) {
-      const issue = rawData.data[i];
-      for (const j in issue.commits.data) {
-        const commit = issue.commits.data[j];
-        const file = commit.file;
-        if (file !== null) {
-          for (const k in file.hunks) {
-            const hunk = file.hunks[k];
-            const tmpMaxValue = HunkHandler.handle(hunk, data, issues.indexOf(issue.title), maxValue);
-            if (tmpMaxValue > maxValue) {
-              maxValue = tmpMaxValue;
-            }
-          }
-        }
-      }
-    }
 
+    const data = rawData.data
+      .filter(issue => issue.commits.data.length > 0)
+      .map((issue, i) => {
+        issues.push(issue.title);
+        const columnData = new Array(lines).fill({ value: 0 }, 0, lines).map((row, j) => {
+          return {
+            row: j,
+            value: row.value,
+            column: i,
+            title: issue.title,
+            description: issue.description,
+            iid: issue.iid,
+            commits: []
+          };
+        });
+        issue.commits.data.forEach(commit => {
+          if (commit.file !== null) {
+            commit.file.hunks.forEach(hunk => {
+              columnData.filter(column => {
+                if (
+                  (column.row >= hunk.newStart - 1 && column.row < hunk.newStart + hunk.newLines - 1) ||
+                  (column.row >= hunk.oldStart - 1 && column.row < hunk.oldStart + hunk.oldLines - 1)
+                ) {
+                  column.value = column.value + 1;
+                }
+                if (column.value > maxValue) {
+                  maxValue = column.value;
+                }
+                column.commits.push({
+                  message: commit.message,
+                  sha: commit.sha,
+                  date: commit.date,
+                  branch: commit.branch,
+                  parents: commit.parents,
+                  signature: commit.signature
+                });
+                return column;
+              });
+            });
+          }
+        });
+        return columnData;
+      })
+      .flat();
     return { data: data, lines: lines, issues: issues, maxValue: maxValue, legendSteps: legendSteps };
   }
 
