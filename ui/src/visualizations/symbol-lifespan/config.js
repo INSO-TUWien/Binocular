@@ -4,12 +4,11 @@ import React from 'react';
 import cx from 'classnames';
 
 import styles from './styles.scss';
-import { ZoomGranularity } from './enum';
+import { Submenu, ZoomGranularity } from './enum';
 
 export default class SymbolLifespanConfig extends React.PureComponent {
   constructor(props) {
     super(props);
-    this.submenus = [{ label: 'Sort', value: 'sort' }, { label: 'Filter', value: 'filter' }];
     this.sortOptions = [
       { label: 'Relevance', value: 'v', order: null },
       { label: 'Lifespan length', value: 'l', order: 'number', defaultOrder: 'desc' },
@@ -74,6 +73,7 @@ export default class SymbolLifespanConfig extends React.PureComponent {
       }
     ];
     this.zoomGranularities = ZoomGranularity.values;
+    this.submenus = Submenu.values.filter(m => m !== Submenu.NONE);
     this.state = {
       searchTermInput: '',
       searchTermCurrent: '',
@@ -82,7 +82,7 @@ export default class SymbolLifespanConfig extends React.PureComponent {
         .map(c => ({ [c.value]: c.initial }))
         .reduce((a, v) => Object.assign({}, a, v)),
       granularity: ZoomGranularity.DAYS,
-      openSubmenu: null
+      openSubmenu: Submenu.NONE
     };
   }
 
@@ -105,10 +105,11 @@ export default class SymbolLifespanConfig extends React.PureComponent {
     ev.preventDefault();
   }
 
-  toggleMenu(menu) {
+  toggleSubmenu(menu) {
     const openSubmenu = this.state.openSubmenu;
+    const newSubmenu = openSubmenu === menu ? Submenu.NONE : menu;
     this.setState({
-      openSubmenu: openSubmenu === menu.value ? null : menu.value
+      openSubmenu: newSubmenu
     });
   }
 
@@ -176,12 +177,9 @@ export default class SymbolLifespanConfig extends React.PureComponent {
                 {this.submenus.map((m, i, a) => (
                   <div className={cx('control', i < a.length - 1 && 'mr-3')} key={m.value}>
                     <button
-                      className={cx(
-                        buttonClasses,
-                        this.state.openSubmenu === m.value && 'is-active'
-                      )}
+                      className={cx(buttonClasses, m === this.state.openSubmenu && 'is-active')}
                       type="button"
-                      onClick={() => this.toggleMenu(m)}>
+                      onClick={() => this.toggleSubmenu(m)}>
                       {m.label}
                     </button>
                   </div>
@@ -189,7 +187,7 @@ export default class SymbolLifespanConfig extends React.PureComponent {
               </div>
             </div>
           </form>
-          <section className="submenu px-4 pb-4" style={showIfSubmenuOpen('sort')}>
+          <section className="submenu px-4 pb-4" style={showIfSubmenuOpen(Submenu.SORT)}>
             <h3 className="is-size-6 has-text-weight-medium">Sort results by&hellip;</h3>
             <section onChange={e => this.changeSortCriteria(e)}>
               {this.sortOptions.map(o => (
@@ -207,8 +205,8 @@ export default class SymbolLifespanConfig extends React.PureComponent {
               ))}
             </section>
           </section>
-          <section className="submenu px-4 pb-4" style={showIfSubmenuOpen('filter')}>
-            <h3 className="is-size-6 has-text-weight-medium">Only include results&hellip;</h3>
+          <section className="submenu px-4 pb-4" style={showIfSubmenuOpen(Submenu.FILTER)}>
+            <h3 className="is-size-6 has-text-weight-medium">Only find symbols&hellip;</h3>
             {this.filterCategories.map(c => (
               <section key={c.value} onChange={e => this.changeFilters(e, c)}>
                 <h4 className="is-size-6 mt-3">{c.label}:</h4>
