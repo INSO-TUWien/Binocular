@@ -4,78 +4,22 @@ import React from 'react';
 import cx from 'classnames';
 
 import styles from './styles.scss';
-import { SortCriterion, Submenu, ZoomGranularity } from './enum';
+import { FilterCategory, InclusionFilter, SortCriterion, Submenu, ZoomGranularity } from './enum';
 
 export default class SymbolLifespanConfig extends React.PureComponent {
   constructor(props) {
     super(props);
-    this.filterCategories = [
-      {
-        label: 'With symbol type',
-        value: 'include',
-        options: [
-          { label: 'Function names', value: 'function' },
-          { label: 'Class names', value: 'class' },
-          { label: 'Interface names', value: 'interface', ts: true },
-          { label: 'Enum names', value: 'enum', ts: true },
-          { label: 'Type alias names', value: 'alias', ts: true },
-          { label: 'Type parameters', value: 'type', ts: true },
-          { label: 'Plain object keys', value: 'key' },
-          { label: 'Class members', value: 'static' },
-          { label: 'Instance members', value: 'instance' },
-          { label: 'Function parameters', value: 'param' },
-          { label: 'Local variables', value: 'local' },
-          { label: 'Statement labels', value: 'label' },
-          { label: 'Import aliases', value: 'import' },
-          { label: 'Ambient module names', value: 'module', ts: true }
-        ],
-        initial: [
-          'function',
-          'class',
-          'interface',
-          'enum',
-          'alias',
-          'type',
-          'key',
-          'static',
-          'instance',
-          'param',
-          'local',
-          'label',
-          'import',
-          'module'
-        ]
-      },
-      {
-        label: 'Unless they are',
-        value: 'exclude',
-        options: [
-          { label: 'Global variables', value: 'global' },
-          { label: 'Reassignable', value: 'let' },
-          { label: 'Readonly', value: 'readonly', ts: true },
-          { label: 'Anonymous function parameters', value: 'anonymous' },
-          { label: 'Optional function parameters', value: 'optional' },
-          { label: 'Function type parameters', value: 'function-type', ts: true },
-          { label: 'Ambient declarations', value: 'ambient', ts: true },
-          { label: 'Export aliases', value: 'export', ts: true },
-          { label: 'Loop variables', value: 'loop' },
-          { label: 'Single-letter variables', value: 'short' },
-          { label: 'Initialized on declaration', value: 'initialized' }
-        ],
-        initial: []
-      }
-    ];
     this.zoomGranularities = ZoomGranularity.values;
     this.submenus = Submenu.values.filter(m => m !== Submenu.NONE);
     this.sortCriteria = SortCriterion.values;
+    this.filterCategories = FilterCategory.values;
     this.state = {
       searchTermInput: '',
       searchTermCurrent: '',
-      filters: this.filterCategories
-        .map(c => ({ [c.value]: c.initial }))
-        .reduce((a, v) => Object.assign({}, a, v)),
       granularity: ZoomGranularity.DAYS,
       sortCriterion: SortCriterion.RELEVANCE,
+      [FilterCategory.INCLUSION_FILTERS.value]: InclusionFilter.values.slice(),
+      [FilterCategory.EXCLUSION_FILTERS.value]: [],
       openSubmenu: Submenu.NONE
     };
   }
@@ -114,19 +58,19 @@ export default class SymbolLifespanConfig extends React.PureComponent {
     });
   }
 
-  changeFilters(ev, cat) {
-    const { name, checked } = ev.target;
-    let catFilters = this.state.filters[cat.value].slice(); // Copy array for snapshot behavior
-    // Add or remove name depending on the checkbox state
+  changeFilters(event, category) {
+    const { name, checked } = event.target;
+    const options = category.options;
+    const option = options.fromValue(name);
+    console.debug(`${category} ${name} ${checked}`);
+    let filters = this.state[category.value].slice();
     if (checked) {
-      catFilters.push(name);
+      filters.push(option);
     } else {
-      catFilters = catFilters.filter(n => n !== name); // Makes sure to remove duplicates, as well
+      filters = filters.filter(o => o !== option); // Makes sure to remove duplicates, as well
     }
-    // Deep state patching is not supported, so create plain object patch and apply it with Object.assign
-    const newFilters = { [cat.value]: catFilters };
     this.setState({
-      filters: Object.assign({}, this.state.filters, newFilters)
+      [category.value]: filters
     });
   }
 
@@ -203,18 +147,21 @@ export default class SymbolLifespanConfig extends React.PureComponent {
           <section className="submenu px-4 pb-4" style={showIfSubmenuOpen(Submenu.FILTER)}>
             <h3 className="is-size-6 has-text-weight-medium">Only find symbols&hellip;</h3>
             {this.filterCategories.map(c => (
-              <section key={c.value} onChange={e => this.changeFilters(e, c)}>
-                <h4 className="is-size-6 mt-3">{c.label}:</h4>
-                {c.options
+              <section
+                className="columns flex-wrap mb-0"
+                key={c.value}
+                onChange={e => this.changeFilters(e, c)}>
+                <h4 className="column is-12 is-size-6 mt-3 pb-1">{c.label}</h4>
+                {c.options.values
                   .filter(o => !o.ts)
                   .map(o => (
-                    <div className="control pt-2" key={o.value}>
+                    <div className="column is-6 control px-3 py-1" key={o.value}>
                       <label className="checkbox">
                         <input
                           type="checkbox"
+                          className="mr-0"
                           name={o.value}
-                          checked={this.state.filters[c.value].includes(o.value)}
-                          defaultChecked={this.state.filters[c.value].includes(o.value)}
+                          checked={this.state[c.value].includes(o)}
                         />
                         &ensp;{o.label}
                         {o.ts && <sup className="has-text-link">TS</sup>}

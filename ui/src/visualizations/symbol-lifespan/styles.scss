@@ -20,6 +20,10 @@
       margin-top: -0.25rem;
     }
 
+    .flex-wrap {
+      flex-wrap: wrap;
+    }
+
     .button.is-link:focus:not(:active) {
       box-shadow: none;
     }
@@ -45,7 +49,7 @@
     .results {
       flex: 1;
       @include sl-flex(column, stretch);
-      overflow-y: scroll;
+      //overflow-y: scroll;
       border-top: 1px solid rgba(0, 0, 0, 0.2);
 
       .result {
