@@ -4,15 +4,11 @@ import React from 'react';
 import cx from 'classnames';
 
 import styles from './styles.scss';
+import { ZoomGranularity } from './enum';
 
 export default class SymbolLifespanConfig extends React.PureComponent {
   constructor(props) {
     super(props);
-    this.zoomGranularities = [
-      { label: 'Days', value: 'd' },
-      { label: 'Weeks', value: 'w' },
-      { label: 'Months', value: 'm' }
-    ];
     this.submenus = [{ label: 'Sort', value: 'sort' }, { label: 'Filter', value: 'filter' }];
     this.sortOptions = [
       { label: 'Relevance', value: 'v', order: null },
@@ -77,21 +73,22 @@ export default class SymbolLifespanConfig extends React.PureComponent {
         initial: []
       }
     ];
+    this.zoomGranularities = ZoomGranularity.values;
     this.state = {
       searchTermInput: '',
       searchTermCurrent: '',
-      activeZoom: this.zoomGranularities[0].value,
       sortCriteria: this.sortOptions[0].value,
       filters: this.filterCategories
         .map(c => ({ [c.value]: c.initial }))
         .reduce((a, v) => Object.assign({}, a, v)),
+      granularity: ZoomGranularity.DAYS,
       openSubmenu: null
     };
   }
 
-  changeZoom(granularity) {
+  changeGranularity(granularity) {
     this.setState({
-      activeZoom: granularity.value
+      granularity
     });
   }
 
@@ -168,11 +165,8 @@ export default class SymbolLifespanConfig extends React.PureComponent {
                   <div className="control" key={g.value}>
                     <button
                       type="button"
-                      className={cx(
-                        buttonClasses,
-                        this.state.activeZoom === g.value && 'is-active'
-                      )}
-                      onClick={() => this.changeZoom(g)}>
+                      className={cx(buttonClasses, g === this.state.granularity && 'is-active')}
+                      onClick={() => this.changeGranularity(g)}>
                       {g.label}
                     </button>
                   </div>
