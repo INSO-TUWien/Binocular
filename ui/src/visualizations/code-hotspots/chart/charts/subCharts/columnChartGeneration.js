@@ -10,6 +10,8 @@ const HEATMAP_MAX_COLOR = '#d5796f';
 export default class columnChartGeneration {
   static updateColumnData(data, currThis, mode) {
     let combinedColumnData;
+    currThis.tooltipLocked = false;
+
     switch (mode) {
       case 1:
         combinedColumnData = d3Collection
@@ -35,12 +37,10 @@ export default class columnChartGeneration {
             return {
               column: v[0].column,
               value: d3.sum(v, g => g.value),
-              message: v[0].message,
-              sha: v[0].sha,
               title: v[0].title,
               description: v[0].description,
               iid: v[0].iid,
-              commits: v[0].commits
+              commits: d3Collection.nest().key(c => c.sha).entries(v[0].commits).map(c => c.values[0])
             };
           })
           .entries(data)
@@ -176,40 +176,49 @@ export default class columnChartGeneration {
           .attr('y', 0)
           .attr('width', w / currThis.combinedColumnData.length)
           .attr('height', h)
-          .on('mousemove', function(event, d) {
-            tooltipp.transition().duration(200).style('opacity', 1);
-            tooltipp
-              .html(
-                "<div style='font-weight: bold'>Issue: " +
-                  d.iid +
-                  '</div>' +
-                  '<div>' +
-                  d.title +
-                  '</div>' +
-                  '<hr>' +
-                  (d.description !== '' ? '<div>' + d.description + '</div>' + '<hr>' : '') +
-                  '<div> Commits linked to this issue: ' +
-                  d.commits.length +
-                  '</div>' +
-                  '<hr>' +
-                  '<div>' +
-                  ListGeneration.generateCommitList(d.commits) +
-                  '</div>' +
-                  '<hr>' +
-                  '<div>Changes: ' +
-                  d.value +
-                  '</div>'
-              )
-              .style(
-                'right',
-                w - d.i * w / currThis.combinedColumnData.length - 300 > 0
-                  ? w - d.i * w / currThis.combinedColumnData.length - 300
-                  : 0 + 'px'
-              )
-              .style('top', h + 'px');
+          .on('mouseover', function(event, d) {
+            if (!currThis.tooltipLocked) {
+              tooltipp.transition().duration(200).style('opacity', 1);
+              tooltipp
+                .style('border', '3px solid transparent')
+                .style(
+                  'right',
+                  w - d.i * w / currThis.combinedColumnData.length - 300 > 0
+                    ? w - d.i * w / currThis.combinedColumnData.length - 300
+                    : 0 + 'px'
+                )
+                .style('top', h + 'px');
+              tooltipp.selectAll('*').remove();
+              const hint = tooltipp
+                .append('div')
+                .style('color', '#AAAAAA')
+                .style('background-color', '#eeeeee')
+                .style('border-radius', '4px');
+              hint.append('span').html('(i)').style('margin', '0 1rem').style('font-style', 'bold');
+              hint.append('span').html('click to fix tooltip').style('font-style', 'italic');
+              tooltipp.append('div').style('font-weight', 'bold').html('Issue: ' + d.iid);
+              tooltipp.append('div').html(d.title);
+              tooltipp.append('hr');
+              if (d.description !== '') {
+                tooltipp.append('div').html(d.description);
+                tooltipp.append('hr');
+              }
+              tooltipp.append('div').html('Commits linked to this issue: ' + d.commits.length);
+              tooltipp.append('hr');
+              const commitList = tooltipp.append('div');
+              ListGeneration.generateCommitList(commitList, d.commits, currThis);
+              tooltipp.append('hr');
+              tooltipp.append('div').html('Changes: ' + d.value);
+            }
           })
           .on('mouseout', function() {
-            tooltipp.transition().duration(500).style('opacity', 0).style('top', '-1500px');
+            if (!currThis.tooltipLocked) {
+              tooltipp.transition().duration(500).style('opacity', 0).style('top', '-1500px');
+            }
+          })
+          .on('click', function() {
+            currThis.tooltipLocked = !currThis.tooltipLocked;
+            tooltipp.style('border', currThis.tooltipLocked ? '3px solid #3498db' : '3px solid transparent');
           });
         break;
       default:
