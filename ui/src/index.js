@@ -29,8 +29,9 @@ import issueImpact from './visualizations/issue-impact';
 import hotspotDials from './visualizations/hotspot-dials';
 import codeHotspots from './visualizations/code-hotspots';
 import languageModuleRiver from './visualizations/language-module-river';
+import codeFlow from './visualizations/code-flow';
 
-const visualizationModules = [dashboard, codeOwnershipRiver, issueImpact, hotspotDials, codeHotspots, languageModuleRiver];
+const visualizationModules = [dashboard, codeOwnershipRiver, issueImpact, hotspotDials, codeHotspots, languageModuleRiver, codeFlow];
 
 const visualizations = {};
 _.each(visualizationModules, viz => {
