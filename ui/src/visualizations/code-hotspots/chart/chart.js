@@ -50,7 +50,8 @@ export default class CodeHotspots extends React.PureComponent {
         dateRange: {
           from: '',
           to: ''
-        }
+        },
+        heatMapStyle: 0
       }
     };
 
