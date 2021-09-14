@@ -108,7 +108,9 @@ export default class rowChartGeneration {
       .style('box-shadow', '0px 0px 10px #555555')
       .style('width', '40rem')
       .style('border-radius', '4px')
-      .style('padding', '1rem');
+      .style('padding', '1rem')
+      .style('backdrop-filter', 'blur(2px)')
+      .style('-webkit-backdrop-filter', 'blur(2px)');
 
     //chart
     setTimeout(
@@ -210,8 +212,7 @@ export default class rowChartGeneration {
                   '<div>Changes: ' +
                   d.value +
                   '</div>' +
-                  '<hr>' +
-                  ListGeneration.generateIssueList(d.issues)
+                  (d.issues.length > 0 ? '<hr>' + ListGeneration.generateIssueList(d.issues) : '')
               )
               .style('right', 30 + 'px')
               .style('top', (d.row - firstLineNumber + 1) * barHeight + 'px');

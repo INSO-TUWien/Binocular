@@ -66,7 +66,7 @@ export default class chartUpdater {
             if (value > maxValue) {
               maxValue = value;
             }
-            return { column: i, row: d[0].row, value: value, dev: d[0].signature };
+            return { column: i, row: d[0].row, value: value, dev: d[0].signature, commits: d };
           })
           .entries(entry.values)
           .map(d => d.value);

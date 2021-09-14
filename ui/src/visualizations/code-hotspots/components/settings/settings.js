@@ -61,7 +61,7 @@ export default class Settings extends React.PureComponent {
                   id="dataScaleSwitch"
                   type="checkbox"
                   name="dataScaleSwitch"
-                  className="switch is-rounded is-outlined is-info"
+                  className={'switch is-rounded is-outlined is-info'}
                   defaultChecked={true}
                   onChange={e => {
                     if (e.target.checked) {
@@ -80,7 +80,9 @@ export default class Settings extends React.PureComponent {
                     this.setState({ displayProps: currDisplayProps });
                   }}
                 />
-                <label htmlFor="dataScaleSwitch">Custom / Automatic Data Scale</label>
+                <label htmlFor="dataScaleSwitch" className={styles.switch}>
+                  Custom / Automatic Data Scale
+                </label>
               </div>
               <div id="dataScaleContainer" className={settingsStyles.shAnimation + ' ' + settingsStyles.hideElm}>
                 <div className={styles.subLabel}>Heatmap Scale:</div>
@@ -139,11 +141,11 @@ export default class Settings extends React.PureComponent {
                 <div className="buttons has-addons">
                   <button
                     id={'heatmapStyleClassic'}
-                    className="button is-info"
+                    className={'button ' + settingsStyles.buttonRowSelected}
                     onClick={() => {
-                      document.getElementById('heatmapStyleClassic').classList.add('is-info');
-                      document.getElementById('heatmapStyleCompact').classList.remove('is-info');
-                      document.getElementById('heatmapStyleModerate').classList.remove('is-info');
+                      document.getElementById('heatmapStyleClassic').classList.add(settingsStyles.buttonRowSelected);
+                      document.getElementById('heatmapStyleCompact').classList.remove(settingsStyles.buttonRowSelected);
+                      document.getElementById('heatmapStyleModerate').classList.remove(settingsStyles.buttonRowSelected);
                       const currDisplayProps = this.state.displayProps;
                       currDisplayProps.heatMapStyle = 0;
                       this.setState({ displayProps: currDisplayProps });
@@ -152,11 +154,11 @@ export default class Settings extends React.PureComponent {
                   </button>
                   <button
                     id={'heatmapStyleCompact'}
-                    className="button"
+                    className={'button'}
                     onClick={() => {
-                      document.getElementById('heatmapStyleClassic').classList.remove('is-info');
-                      document.getElementById('heatmapStyleCompact').classList.add('is-info');
-                      document.getElementById('heatmapStyleModerate').classList.remove('is-info');
+                      document.getElementById('heatmapStyleClassic').classList.remove(settingsStyles.buttonRowSelected);
+                      document.getElementById('heatmapStyleCompact').classList.add(settingsStyles.buttonRowSelected);
+                      document.getElementById('heatmapStyleModerate').classList.remove(settingsStyles.buttonRowSelected);
                       const currDisplayProps = this.state.displayProps;
                       currDisplayProps.heatMapStyle = 1;
                       this.setState({ displayProps: currDisplayProps });
@@ -165,11 +167,11 @@ export default class Settings extends React.PureComponent {
                   </button>
                   <button
                     id={'heatmapStyleModerate'}
-                    className="button"
+                    className={'button'}
                     onClick={() => {
-                      document.getElementById('heatmapStyleClassic').classList.remove('is-info');
-                      document.getElementById('heatmapStyleCompact').classList.remove('is-info');
-                      document.getElementById('heatmapStyleModerate').classList.add('is-info');
+                      document.getElementById('heatmapStyleClassic').classList.remove(settingsStyles.buttonRowSelected);
+                      document.getElementById('heatmapStyleCompact').classList.remove(settingsStyles.buttonRowSelected);
+                      document.getElementById('heatmapStyleModerate').classList.add(settingsStyles.buttonRowSelected);
                       const currDisplayProps = this.state.displayProps;
                       currDisplayProps.heatMapStyle = 2;
                       this.setState({ displayProps: currDisplayProps });
@@ -177,6 +179,7 @@ export default class Settings extends React.PureComponent {
                     Moderate
                   </button>
                 </div>
+                <hr />
               </div>
             </div>
           </div>

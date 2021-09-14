@@ -9,6 +9,8 @@
   box-shadow:0 0 10px #555555;
   border-radius:4px;
   z-index: 999;
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
 }
 
 .error{
@@ -48,6 +50,8 @@
   bottom: 1rem;
   z-index: 999;
   overflow: hidden;
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
 }
 
 .backgroundRefreshIndicatorText{

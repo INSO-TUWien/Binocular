@@ -217,7 +217,12 @@ export default class CodeHotspots extends React.PureComponent {
             data.code = xhr.responseText;
             this.setState({
               data: data,
-              filteredData: this.state.mode === 0 ? searchAlgorithm.performCommitSearch(data, this.state.filteredData.searchTerm) : data
+              filteredData:
+                this.state.mode === 2
+                  ? searchAlgorithm.performIssueSearch(data, this.state.filteredData.searchTerm)
+                  : this.state.mode === 1
+                    ? searchAlgorithm.performDeveloperSearch(data, this.state.filteredData.searchTerm)
+                    : this.state.mode === 0 ? searchAlgorithm.performCommitSearch(data, this.state.filteredData.searchTerm) : data
             });
           } else {
             const path = this.state.path;

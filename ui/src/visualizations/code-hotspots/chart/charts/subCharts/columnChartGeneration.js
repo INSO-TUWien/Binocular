@@ -23,7 +23,8 @@ export default class columnChartGeneration {
               value: d3.sum(v, g => g.value),
               message: v[0].message,
               sha: v[0].sha,
-              dev: v[0].dev
+              dev: v[0].dev,
+              commits: v[0].commits
             };
           })
           .entries(data)
@@ -120,7 +121,12 @@ export default class columnChartGeneration {
       .style('width', '300px')
       .style('border-radius', '4px')
       .style('padding', '1rem')
-      .style('z-index', '9');
+      .style('z-index', '9')
+      .style('max-height', '50vh')
+      .style('overflow-y', 'scroll')
+      .style('backdrop-filter', 'blur(2px)')
+      .style('-webkit-backdrop-filter', 'blur(2px)');
+
     //Info show
     const groupInfo = barChart.append('g').attr('width', w).attr('height', h).attr('id', 'info');
     switch (mode) {
@@ -136,32 +142,67 @@ export default class columnChartGeneration {
           .attr('y', 0)
           .attr('width', w / currThis.combinedColumnData.length)
           .attr('height', h)
-          .on('mousemove', function(event, d) {
-            tooltipp.transition().duration(200).style('opacity', 1);
-            const currDev = d.dev.split('>').join('');
-            tooltipp
-              .html(
-                "<div style='font-weight: bold'>" +
-                  currDev.split(' <')[0] +
-                  '</div>' +
-                  '<div>' +
-                  currDev.split(' <')[1] +
-                  '</div>' +
-                  '<hr>' +
-                  '<div>Changes: ' +
-                  d.value +
-                  '</div>'
-              )
-              .style(
-                'right',
-                w - d.i * w / currThis.combinedColumnData.length - 300 > 0
-                  ? w - d.i * w / currThis.combinedColumnData.length - 300
-                  : 0 + 'px'
-              )
-              .style('top', h + 'px');
+          .on('mouseover', function(event, d) {
+            if (!currThis.tooltipLocked) {
+              tooltipp.transition().duration(200).style('opacity', 1);
+              const currDev = d.dev.split('>').join('');
+              tooltipp
+                .style('border', '3px solid transparent')
+                .style(
+                  'right',
+                  w - d.i * w / currThis.combinedColumnData.length - 300 > 0
+                    ? w - d.i * w / currThis.combinedColumnData.length - 300
+                    : 0 + 'px'
+                )
+                .style('top', h + 'px');
+              tooltipp.selectAll('*').remove();
+              const hint = tooltipp
+                .append('div')
+                .style('color', '#AAAAAA')
+                .style('background-color', '#eeeeee')
+                .style('border-radius', '4px');
+              hint.append('span').html('(i)').style('margin', '0 1rem').style('font-style', 'bold');
+              hint.append('span').html('click to fix tooltip').style('font-style', 'italic');
+              tooltipp.append('div').style('font-weight', 'bold').html(currDev.split(' <')[0]);
+              tooltipp.append('div').html(currDev.split(' <')[1]);
+              tooltipp.append('hr');
+              tooltipp.append('div').html('Commits linked to this issue: ' + d.commits.length);
+              tooltipp.append('hr');
+              const commitList = tooltipp.append('div');
+              ListGeneration.generateCommitList(commitList, d.commits, currThis);
+              tooltipp.append('hr');
+              tooltipp.append('div').html('Changes: ' + d.value);
+
+              /* tooltipp
+                 .html(
+                   "<div style='font-weight: bold'>" +
+                   currDev.split(' <')[0] +
+                   '</div>' +
+                   '<div>' +
+                   currDev.split(' <')[1] +
+                   '</div>' +
+                   '<hr>' +
+                   '<div>Changes: ' +
+                   d.value +
+                   '</div>'
+                 )
+                 .style(
+                   'right',
+                   w - d.i * w / currThis.combinedColumnData.length - 300 > 0
+                     ? w - d.i * w / currThis.combinedColumnData.length - 300
+                     : 0 + 'px'
+                 )
+                 .style('top', h + 'px');*/
+            }
           })
           .on('mouseout', function() {
-            tooltipp.transition().duration(500).style('opacity', 0).style('top', '-1500px');
+            if (!currThis.tooltipLocked) {
+              tooltipp.transition().duration(500).style('opacity', 0).style('top', '-1500px');
+            }
+          })
+          .on('click', function() {
+            currThis.tooltipLocked = !currThis.tooltipLocked;
+            tooltipp.style('border', currThis.tooltipLocked ? '3px solid #3498db' : '3px solid transparent');
           });
         break;
       case 2:
@@ -203,7 +244,7 @@ export default class columnChartGeneration {
                 tooltipp.append('div').html(d.description);
                 tooltipp.append('hr');
               }
-              tooltipp.append('div').html('Commits linked to this issue: ' + d.commits.length);
+              tooltipp.append('div').html('Commits linked to this developer: ' + d.commits.length);
               tooltipp.append('hr');
               const commitList = tooltipp.append('div');
               ListGeneration.generateCommitList(commitList, d.commits, currThis);
