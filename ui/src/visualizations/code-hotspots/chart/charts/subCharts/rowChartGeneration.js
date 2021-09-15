@@ -103,7 +103,7 @@ export default class rowChartGeneration {
       .attr('class', 'tooltipRow')
       .attr('id', 'tooltipRow')
       .style('position', 'absolute')
-      .style('opacity', 0)
+      .style('display', 'none')
       .style('background-color', '#FFFFFFDD')
       .style('box-shadow', '0px 0px 10px #555555')
       .style('width', '40rem')
@@ -170,7 +170,7 @@ export default class rowChartGeneration {
           .attr('height', barHeight)
           .attr('z-index', '10')
           .on('mouseover', function(event, d) {
-            tooltipp.transition().duration(200).style('opacity', 1);
+            tooltipp.transition().duration(200).style('display', 'block');
             tooltipp
               .html(
                 "<div style='font-weight: bold'>Row: " +
@@ -186,7 +186,7 @@ export default class rowChartGeneration {
               .style('top', (d.row - firstLineNumber + 1) * barHeight + 'px');
           })
           .on('mouseout', function() {
-            tooltipp.transition().duration(500).style('opacity', 0);
+            tooltipp.transition().duration(500).style('display', 'none');
           });
 
         break;
@@ -203,7 +203,7 @@ export default class rowChartGeneration {
           .attr('height', barHeight)
           .attr('z-index', '10')
           .on('mouseover', function(event, d) {
-            tooltipp.transition().duration(200).style('opacity', 1);
+            tooltipp.transition().duration(200).style('display', 'block');
             tooltipp
               .html(
                 "<div style='font-weight: bold'>Row: " +
@@ -218,7 +218,7 @@ export default class rowChartGeneration {
               .style('top', (d.row - firstLineNumber + 1) * barHeight + 'px');
           })
           .on('mouseout', function() {
-            tooltipp.transition().duration(500).style('opacity', 0);
+            tooltipp.transition().duration(500).style('display', 'none');
           });
 
         break;
@@ -235,14 +235,14 @@ export default class rowChartGeneration {
           .attr('height', barHeight)
           .attr('z-index', '10')
           .on('mouseover', function(event, d) {
-            tooltipp.transition().duration(200).style('opacity', 1);
+            tooltipp.transition().duration(200).style('display', 'block');
             tooltipp
               .html("<div style='font-weight: bold'>Row: " + (parseInt(d.row) + 1) + '</div>' + '<div>Changes: ' + d.value + '</div>')
               .style('right', 30 + 'px')
               .style('top', (d.row - firstLineNumber + 1) * barHeight + 'px');
           })
           .on('mouseout', function() {
-            tooltipp.transition().duration(500).style('opacity', 0);
+            tooltipp.transition().duration(500).style('display', 'none');
           });
 
         break;

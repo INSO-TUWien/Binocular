@@ -48,6 +48,7 @@ const CodeHotspotsConfigComponent = props => {
           {options}
         </select>
       </div>
+      <hr />
       <div id={'fileSelector'}>
         <FileBrowser files={props.files} props={props} />
       </div>

@@ -115,14 +115,14 @@ export default class columnChartGeneration {
       .attr('class', 'tooltipColumns')
       .attr('id', 'tooltipColumns')
       .style('position', 'absolute')
-      .style('opacity', 0)
+      .style('display', 'none')
       .style('background-color', '#FFFFFFDD')
       .style('box-shadow', '0px 0px 10px #555555')
       .style('width', '300px')
       .style('border-radius', '4px')
       .style('padding', '1rem')
       .style('z-index', '9')
-      .style('max-height', '50vh')
+      .style('max-height', '70vh')
       .style('overflow-y', 'scroll')
       .style('backdrop-filter', 'blur(2px)')
       .style('-webkit-backdrop-filter', 'blur(2px)');
@@ -144,7 +144,7 @@ export default class columnChartGeneration {
           .attr('height', h)
           .on('mouseover', function(event, d) {
             if (!currThis.tooltipLocked) {
-              tooltipp.transition().duration(200).style('opacity', 1);
+              tooltipp.transition().duration(200).style('display', 'block');
               const currDev = d.dev.split('>').join('');
               tooltipp
                 .style('border', '3px solid transparent')
@@ -172,32 +172,11 @@ export default class columnChartGeneration {
               ListGeneration.generateCommitList(commitList, d.commits, currThis);
               tooltipp.append('hr');
               tooltipp.append('div').html('Changes: ' + d.value);
-
-              /* tooltipp
-                 .html(
-                   "<div style='font-weight: bold'>" +
-                   currDev.split(' <')[0] +
-                   '</div>' +
-                   '<div>' +
-                   currDev.split(' <')[1] +
-                   '</div>' +
-                   '<hr>' +
-                   '<div>Changes: ' +
-                   d.value +
-                   '</div>'
-                 )
-                 .style(
-                   'right',
-                   w - d.i * w / currThis.combinedColumnData.length - 300 > 0
-                     ? w - d.i * w / currThis.combinedColumnData.length - 300
-                     : 0 + 'px'
-                 )
-                 .style('top', h + 'px');*/
             }
           })
           .on('mouseout', function() {
             if (!currThis.tooltipLocked) {
-              tooltipp.transition().duration(500).style('opacity', 0).style('top', '-1500px');
+              tooltipp.transition().duration(500).style('display', 'none');
             }
           })
           .on('click', function() {
@@ -219,7 +198,7 @@ export default class columnChartGeneration {
           .attr('height', h)
           .on('mouseover', function(event, d) {
             if (!currThis.tooltipLocked) {
-              tooltipp.transition().duration(200).style('opacity', 1);
+              tooltipp.transition().duration(200).style('display', 'block');
               tooltipp
                 .style('border', '3px solid transparent')
                 .style(
@@ -254,7 +233,7 @@ export default class columnChartGeneration {
           })
           .on('mouseout', function() {
             if (!currThis.tooltipLocked) {
-              tooltipp.transition().duration(500).style('opacity', 0).style('top', '-1500px');
+              tooltipp.transition().duration(500).style('display', 'none');
             }
           })
           .on('click', function() {
@@ -276,7 +255,7 @@ export default class columnChartGeneration {
           .attr('height', h)
           .style('cursor', 'pointer')
           .on('mousemove', function(event, d) {
-            tooltipp.transition().duration(200).style('opacity', 1);
+            tooltipp.transition().duration(200).style('display', 'block');
             tooltipp
               .html(
                 "<div style='font-weight: bold'>Version: " +
@@ -302,6 +281,11 @@ export default class columnChartGeneration {
                   d.sha +
                   '</div>' +
                   '<hr>' +
+                  "<div style='font-style: italic;color: #AAAAAA; word-wrap: anywhere'>" +
+                  'Parent(s): ' +
+                  d.parents +
+                  '</div>' +
+                  '<hr>' +
                   '<div>Changes: ' +
                   d.value +
                   '</div>'
@@ -315,7 +299,7 @@ export default class columnChartGeneration {
               .style('top', h + 'px');
           })
           .on('mouseout', function() {
-            tooltipp.transition().duration(500).style('opacity', 0).style('top', '-1500px');
+            tooltipp.transition().duration(500).style('display', 'none');
           })
           .on('click', function(event, d) {
             currThis.setState({ sha: d.sha });
@@ -409,143 +393,17 @@ export default class columnChartGeneration {
     //commits
     const commits = d3.select('#chartBranchView').selectAll('rect').data(currThis.combinedColumnData);
     const branchLines = d3.select('#chartBranchView');
-    let offset = 0;
+    const offset = 0;
     const firstCommitCount = parseInt(branches[0].values[0].column);
     for (const branch of branches) {
-      for (let i = 0; i < branch.values.length - 1; i++) {
-        const c1 = parseInt(branch.values[i].column) - firstCommitCount;
-        const c2 = parseInt(branch.values[i + 1].column) - firstCommitCount;
-        if (i === 0) {
-          for (const parentSha of branch.values[i].parents.split(',')) {
-            const parent = currThis.combinedColumnData.find(d => d.sha === parentSha);
-            if (parent !== undefined) {
-              if (parseInt(parent.column) + 1 < c1) {
-                branchLines
-                  .append('line')
-                  .style('stroke', ColorMixer.rainbow(branches.length, branches.findIndex(v => v.key === branch.values[i].branch)))
-                  .style('stroke-width', 5)
-                  .style('stroke-linecap', 'round')
-                  .attr('y1', h / 2)
-                  .attr(
-                    'x1',
-                    w / (currThis.combinedColumnData.length * 2) +
-                      (parent.column - firstCommitCount) * w / currThis.combinedColumnData.length
-                  )
-                  .attr('y2', 5)
-                  .attr(
-                    'x2',
-                    w / (currThis.combinedColumnData.length * 2) +
-                      (parent.column - firstCommitCount + 1) * w / currThis.combinedColumnData.length
-                  );
-                branchLines
-                  .append('line')
-                  .style('stroke', ColorMixer.rainbow(branches.length, branches.findIndex(v => v.key === branch.values[i].branch)))
-                  .style('stroke-width', 5)
-                  .style('stroke-linecap', 'round')
-                  .attr('y1', 5)
-                  .attr(
-                    'x1',
-                    w / (currThis.combinedColumnData.length * 2) +
-                      (parent.column - firstCommitCount + 1) * w / currThis.combinedColumnData.length
-                  )
-                  .attr('y2', 5)
-                  .attr('x2', w / (currThis.combinedColumnData.length * 2) + (c1 - 1) * w / currThis.combinedColumnData.length);
-                branchLines
-                  .append('line')
-                  .style('stroke', ColorMixer.rainbow(branches.length, branches.findIndex(v => v.key === branch.values[i].branch)))
-                  .style('stroke-width', 5)
-                  .style('stroke-linecap', 'round')
-                  .attr('y1', 5)
-                  .attr('x1', w / (currThis.combinedColumnData.length * 2) + (c1 - 1) * w / currThis.combinedColumnData.length)
-                  .attr('y2', h / 2)
-                  .attr('x2', w / (currThis.combinedColumnData.length * 2) + c1 * w / currThis.combinedColumnData.length);
-              } else {
-                branchLines
-                  .append('line')
-                  .style('stroke', ColorMixer.rainbow(branches.length, branches.findIndex(v => v.key === branch.values[i].branch)))
-                  .style('stroke-width', 5)
-                  .style('stroke-linecap', 'round')
-                  .attr('y1', h / 2)
-                  .attr(
-                    'x1',
-                    w / (currThis.combinedColumnData.length * 2) +
-                      (parent.column - firstCommitCount) * w / currThis.combinedColumnData.length
-                  )
-                  .attr('y2', h / 2)
-                  .attr('x2', w / (currThis.combinedColumnData.length * 2) + c1 * w / currThis.combinedColumnData.length);
-              }
-            } else {
-              branchLines
-                .append('line')
-                .style('stroke', ColorMixer.rainbow(branches.length, branches.findIndex(v => v.key === branch.values[i].branch)))
-                .style('stroke-width', 5)
-                .style('stroke-linecap', 'round')
-                .attr('y1', 10)
-                .attr('x1', w / (currThis.combinedColumnData.length * 2) + (c1 - 1) * w / currThis.combinedColumnData.length)
-                .attr('y2', h / 2)
-                .attr('x2', w / (currThis.combinedColumnData.length * 2) + c1 * w / currThis.combinedColumnData.length);
-
-              branchLines
-                .append('line')
-                .style('stroke', ColorMixer.rainbow(branches.length, branches.findIndex(v => v.key === branch.values[i].branch)))
-                .style('stroke-width', 5)
-                .style('stroke-linecap', 'round')
-                .style('stroke-dasharray', '1, 10')
-                .attr('y1', 10)
-                .attr('x1', w / (currThis.combinedColumnData.length * 2) + (c1 - 2) * w / currThis.combinedColumnData.length)
-                .attr('y2', 10)
-                .attr('x2', w / (currThis.combinedColumnData.length * 2) + (c1 - 1) * w / currThis.combinedColumnData.length);
-            }
-          }
-        }
-        if (c1 + 1 === c2) {
-          branchLines
-            .append('line')
-            .style('stroke', ColorMixer.rainbow(branches.length, branches.findIndex(v => v.key === branch.values[i].branch)))
-            .style('stroke-width', 5)
-            .style('stroke-linecap', 'round')
-            .attr('y1', h / 2)
-            .attr('x1', w / (currThis.combinedColumnData.length * 2) + c1 * w / currThis.combinedColumnData.length)
-            .attr('y2', h / 2)
-            .attr('x2', w / (currThis.combinedColumnData.length * 2) + c2 * w / currThis.combinedColumnData.length);
-        } else {
-          offset++;
-          let currOffset = 0;
-          if (offset % 2 === 0) {
-            currOffset = -Math.floor(offset / 2);
-          } else {
-            currOffset = Math.floor(offset / 2) + offset % 2;
-          }
-          currOffset = Math.min(Math.max(currOffset * 5, -h / 2 + 5), h / 2 - 5);
-          branchLines
-            .append('line')
-            .style('stroke', ColorMixer.rainbow(branches.length, branches.findIndex(v => v.key === branch.values[i].branch)))
-            .style('stroke-width', 5)
-            .style('stroke-linecap', 'round')
-            .attr('y1', h / 2)
-            .attr('x1', w / (currThis.combinedColumnData.length * 2) + c1 * w / currThis.combinedColumnData.length)
-            .attr('y2', h / 2 + currOffset)
-            .attr('x2', w / (currThis.combinedColumnData.length * 2) + (c1 + 1) * w / currThis.combinedColumnData.length);
-
-          branchLines
-            .append('line')
-            .style('stroke', ColorMixer.rainbow(branches.length, branches.findIndex(v => v.key === branch.values[i].branch)))
-            .style('stroke-width', 5)
-            .style('stroke-linecap', 'round')
-            .attr('y1', h / 2 + currOffset)
-            .attr('x1', w / (currThis.combinedColumnData.length * 2) + (c1 + 1) * w / currThis.combinedColumnData.length)
-            .attr('y2', h / 2 + currOffset)
-            .attr('x2', w / (currThis.combinedColumnData.length * 2) + (c2 - 1) * w / currThis.combinedColumnData.length);
-
-          branchLines
-            .append('line')
-            .style('stroke', ColorMixer.rainbow(branches.length, branches.findIndex(v => v.key === branch.values[i].branch)))
-            .style('stroke-width', 5)
-            .style('stroke-linecap', 'round')
-            .attr('y1', h / 2 + currOffset)
-            .attr('x1', w / (currThis.combinedColumnData.length * 2) + (c2 - 1) * w / currThis.combinedColumnData.length)
-            .attr('y2', h / 2)
-            .attr('x2', w / (currThis.combinedColumnData.length * 2) + c2 * w / currThis.combinedColumnData.length);
+      if (branch.values.length === 1) {
+        const c1 = parseInt(branch.values[0].column) - firstCommitCount;
+        this.drawBranchConnections(0, branch, currThis, c1, branchLines, branches, h, w, firstCommitCount, null, offset);
+      } else {
+        for (let i = 0; i < branch.values.length - 1; i++) {
+          const c1 = parseInt(branch.values[i].column) - firstCommitCount;
+          const c2 = parseInt(branch.values[i + 1].column) - firstCommitCount;
+          this.drawBranchConnections(i, branch, currThis, c1, branchLines, branches, h, w, firstCommitCount, c2, offset);
         }
       }
     }
@@ -563,7 +421,7 @@ export default class columnChartGeneration {
       .attr('rx', '100%')
       .attr('ry', '100%')
       .on('mousemove', function(event, d) {
-        tooltipp.transition().duration(200).style('opacity', 1);
+        tooltipp.transition().duration(200).style('display', 'block');
         tooltipp
           .html(
             "<div style='font-weight: bold'>Version: " +
@@ -589,6 +447,11 @@ export default class columnChartGeneration {
               d.sha +
               '</div>' +
               '<hr>' +
+              "<div style='font-style: italic;color: #AAAAAA; word-wrap: anywhere'>" +
+              'Parent(s): ' +
+              d.parents +
+              '</div>' +
+              '<hr>' +
               '<div>Changes: ' +
               d.value +
               '</div>'
@@ -602,11 +465,146 @@ export default class columnChartGeneration {
           .style('top', h + 100 + 'px');
       })
       .on('mouseout', function() {
-        tooltipp.transition().duration(500).style('opacity', 0).style('top', '-1500px');
+        tooltipp.transition().duration(500).style('display', 'none');
       })
       .on('click', function(event, d) {
         currThis.setState({ sha: d.sha });
       });
     commits.exit().remove();
+  }
+
+  static drawBranchConnections(i, branch, currThis, c1, branchLines, branches, h, w, firstCommitCount, c2, offset) {
+    if (i === 0) {
+      for (const parentSha of branch.values[i].parents.split(',')) {
+        const parent = currThis.combinedColumnData.find(d => d.sha === parentSha);
+        if (parent !== undefined) {
+          if (parseInt(parent.column) + 1 < c1) {
+            branchLines
+              .append('line')
+              .style('stroke', ColorMixer.rainbow(branches.length, branches.findIndex(v => v.key === branch.values[i].branch)))
+              .style('stroke-width', 5)
+              .style('stroke-linecap', 'round')
+              .attr('y1', h / 2)
+              .attr(
+                'x1',
+                w / (currThis.combinedColumnData.length * 2) + (parent.column - firstCommitCount) * w / currThis.combinedColumnData.length
+              )
+              .attr('y2', 5)
+              .attr(
+                'x2',
+                w / (currThis.combinedColumnData.length * 2) +
+                  (parent.column - firstCommitCount + 1) * w / currThis.combinedColumnData.length
+              );
+            branchLines
+              .append('line')
+              .style('stroke', ColorMixer.rainbow(branches.length, branches.findIndex(v => v.key === branch.values[i].branch)))
+              .style('stroke-width', 5)
+              .style('stroke-linecap', 'round')
+              .attr('y1', 5)
+              .attr(
+                'x1',
+                w / (currThis.combinedColumnData.length * 2) +
+                  (parent.column - firstCommitCount + 1) * w / currThis.combinedColumnData.length
+              )
+              .attr('y2', 5)
+              .attr('x2', w / (currThis.combinedColumnData.length * 2) + (c1 - 1) * w / currThis.combinedColumnData.length);
+            branchLines
+              .append('line')
+              .style('stroke', ColorMixer.rainbow(branches.length, branches.findIndex(v => v.key === branch.values[i].branch)))
+              .style('stroke-width', 5)
+              .style('stroke-linecap', 'round')
+              .attr('y1', 5)
+              .attr('x1', w / (currThis.combinedColumnData.length * 2) + (c1 - 1) * w / currThis.combinedColumnData.length)
+              .attr('y2', h / 2)
+              .attr('x2', w / (currThis.combinedColumnData.length * 2) + c1 * w / currThis.combinedColumnData.length);
+          } else {
+            branchLines
+              .append('line')
+              .style('stroke', ColorMixer.rainbow(branches.length, branches.findIndex(v => v.key === branch.values[i].branch)))
+              .style('stroke-width', 5)
+              .style('stroke-linecap', 'round')
+              .attr('y1', h / 2)
+              .attr(
+                'x1',
+                w / (currThis.combinedColumnData.length * 2) + (parent.column - firstCommitCount) * w / currThis.combinedColumnData.length
+              )
+              .attr('y2', h / 2)
+              .attr('x2', w / (currThis.combinedColumnData.length * 2) + c1 * w / currThis.combinedColumnData.length);
+          }
+        } else {
+          branchLines
+            .append('line')
+            .style('stroke', ColorMixer.rainbow(branches.length, branches.findIndex(v => v.key === branch.values[i].branch)))
+            .style('stroke-width', 5)
+            .style('stroke-linecap', 'round')
+            .attr('y1', 10)
+            .attr('x1', w / (currThis.combinedColumnData.length * 2) + (c1 - 1) * w / currThis.combinedColumnData.length)
+            .attr('y2', h / 2)
+            .attr('x2', w / (currThis.combinedColumnData.length * 2) + c1 * w / currThis.combinedColumnData.length);
+
+          branchLines
+            .append('line')
+            .style('stroke', ColorMixer.rainbow(branches.length, branches.findIndex(v => v.key === branch.values[i].branch)))
+            .style('stroke-width', 5)
+            .style('stroke-linecap', 'round')
+            .style('stroke-dasharray', '1, 10')
+            .attr('y1', 10)
+            .attr('x1', w / (currThis.combinedColumnData.length * 2) + (c1 - 2) * w / currThis.combinedColumnData.length)
+            .attr('y2', 10)
+            .attr('x2', w / (currThis.combinedColumnData.length * 2) + (c1 - 1) * w / currThis.combinedColumnData.length);
+        }
+      }
+    }
+    if (c2 !== null) {
+      if (c1 + 1 === c2) {
+        branchLines
+          .append('line')
+          .style('stroke', ColorMixer.rainbow(branches.length, branches.findIndex(v => v.key === branch.values[i].branch)))
+          .style('stroke-width', 5)
+          .style('stroke-linecap', 'round')
+          .attr('y1', h / 2)
+          .attr('x1', w / (currThis.combinedColumnData.length * 2) + c1 * w / currThis.combinedColumnData.length)
+          .attr('y2', h / 2)
+          .attr('x2', w / (currThis.combinedColumnData.length * 2) + c2 * w / currThis.combinedColumnData.length);
+      } else {
+        offset++;
+        let currOffset;
+        if (offset % 2 === 0) {
+          currOffset = -Math.floor(offset / 2);
+        } else {
+          currOffset = Math.floor(offset / 2) + offset % 2;
+        }
+        currOffset = Math.min(Math.max(currOffset * 5, -h / 2 + 5), h / 2 - 5);
+        branchLines
+          .append('line')
+          .style('stroke', ColorMixer.rainbow(branches.length, branches.findIndex(v => v.key === branch.values[i].branch)))
+          .style('stroke-width', 5)
+          .style('stroke-linecap', 'round')
+          .attr('y1', h / 2)
+          .attr('x1', w / (currThis.combinedColumnData.length * 2) + c1 * w / currThis.combinedColumnData.length)
+          .attr('y2', h / 2 + currOffset)
+          .attr('x2', w / (currThis.combinedColumnData.length * 2) + (c1 + 1) * w / currThis.combinedColumnData.length);
+
+        branchLines
+          .append('line')
+          .style('stroke', ColorMixer.rainbow(branches.length, branches.findIndex(v => v.key === branch.values[i].branch)))
+          .style('stroke-width', 5)
+          .style('stroke-linecap', 'round')
+          .attr('y1', h / 2 + currOffset)
+          .attr('x1', w / (currThis.combinedColumnData.length * 2) + (c1 + 1) * w / currThis.combinedColumnData.length)
+          .attr('y2', h / 2 + currOffset)
+          .attr('x2', w / (currThis.combinedColumnData.length * 2) + (c2 - 1) * w / currThis.combinedColumnData.length);
+
+        branchLines
+          .append('line')
+          .style('stroke', ColorMixer.rainbow(branches.length, branches.findIndex(v => v.key === branch.values[i].branch)))
+          .style('stroke-width', 5)
+          .style('stroke-linecap', 'round')
+          .attr('y1', h / 2 + currOffset)
+          .attr('x1', w / (currThis.combinedColumnData.length * 2) + (c2 - 1) * w / currThis.combinedColumnData.length)
+          .attr('y2', h / 2)
+          .attr('x2', w / (currThis.combinedColumnData.length * 2) + c2 * w / currThis.combinedColumnData.length);
+      }
+    }
   }
 }

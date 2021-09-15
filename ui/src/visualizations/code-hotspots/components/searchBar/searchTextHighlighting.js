@@ -109,6 +109,21 @@ export default class SearchTextHighlighting {
         modifier: '-email',
         color: '#ffcc00',
         secondary_color: '#fff7d8'
+      },
+      {
+        modifier: '-l',
+        color: '#007aff',
+        secondary_color: '#ebf5ff'
+      },
+      {
+        modifier: '-line',
+        color: '#007aff',
+        secondary_color: '#ebf5ff'
+      },
+      {
+        modifier: '-lines',
+        color: '#007aff',
+        secondary_color: '#ebf5ff'
       }
     ];
     return this.performTextHighlighting(searchTerm, highlightSet);
@@ -145,6 +160,21 @@ export default class SearchTextHighlighting {
         modifier: '-iid',
         color: '#ff9500',
         secondary_color: '#fff7eb'
+      },
+      {
+        modifier: '-l',
+        color: '#007aff',
+        secondary_color: '#ebf5ff'
+      },
+      {
+        modifier: '-line',
+        color: '#007aff',
+        secondary_color: '#ebf5ff'
+      },
+      {
+        modifier: '-lines',
+        color: '#007aff',
+        secondary_color: '#ebf5ff'
       }
     ];
     return this.performTextHighlighting(searchTerm, highlightSet);

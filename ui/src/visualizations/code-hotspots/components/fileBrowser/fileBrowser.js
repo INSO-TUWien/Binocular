@@ -52,7 +52,7 @@ export default class FileBrowser extends React.PureComponent {
     return (
       <div>
         <div className={'label'}>Files:</div>
-        <div style={{ margin: '1rem 0', height: '3rem' }}>
+        <div id={'fileSearch'} style={{ margin: '1rem 0', height: '3rem' }}>
           <SearchBar
             searchType={'fileSearch'}
             data={this.props.files}
@@ -85,8 +85,7 @@ class FileStruct extends React.PureComponent {
                 className={styles.button + ' ' + (i % 2 === 0 ? styles.BCEven : styles.BCOdd)}
                 key={data.name}
                 onClick={() => {
-                  this.props.props.onSetFile(data.url);
-                  this.props.props.onSetPath(data.path);
+                  this.clickFile(data.url, data.path);
                 }}>
                 {data.name}
               </div>
@@ -125,7 +124,7 @@ class FileStruct extends React.PureComponent {
   }
 
   clickFile(Url, Path) {
-    console.log(Url);
-    console.log(Path);
+    this.props.props.onSetFile(Url);
+    this.props.props.onSetPath(Path);
   }
 }

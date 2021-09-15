@@ -95,6 +95,7 @@
 
 .highlighted{
   position: fixed;
+  z-index: 9999;
   border: red dashed 5px;
 }
 
@@ -111,4 +112,8 @@
 
 .branchSelect{
   width:100%;
+}
+
+.branchSelect>select{
+  border-color: #cccccc;
 }

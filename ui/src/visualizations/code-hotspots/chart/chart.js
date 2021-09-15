@@ -122,16 +122,19 @@ export default class CodeHotspots extends React.PureComponent {
               />
             </span>
             <span className={styles.verticalSeparator} />
-            <span className={styles.mg1} style={{ width: '20rem', float: 'left' }}>
+            <span id={'mainSearch'} className={styles.mg1} style={{ width: '20rem', float: 'left' }}>
               <SearchBar
                 searchType={this.state.mode === 1 ? 'developerSearch' : this.state.mode === 2 ? 'issueSearch' : 'commitSearch'}
                 data={this.state.data}
                 placeholder={'Search for ' + (this.state.mode === 1 ? 'Developer' : this.state.mode === 2 ? 'Issues' : 'Commits') + '!'}
                 hint={
                   this.state.mode === 1
-                    ? '-n [term] search developer name; ' + '-e [term] search developer email'
+                    ? '-n [term] search developer name; ' + '-e [term] search developer email' + '-l [term] search line or multible lines'
                     : this.state.mode === 2
-                      ? '-t [term] search title; ' + '-d [term] search description; ' + '-i [term] search iid'
+                      ? '-t [term] search title; ' +
+                        '-d [term] search description; ' +
+                        '-i [term] search iid' +
+                        '-l [term] search line or multible lines'
                       : '-m [term] search commit message; ' +
                         '-s [term] search commit sha; ' +
                         '-d [term] search developer; ' +

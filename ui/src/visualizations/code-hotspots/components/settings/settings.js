@@ -153,19 +153,6 @@ export default class Settings extends React.PureComponent {
                     Classic
                   </button>
                   <button
-                    id={'heatmapStyleCompact'}
-                    className={'button'}
-                    onClick={() => {
-                      document.getElementById('heatmapStyleClassic').classList.remove(settingsStyles.buttonRowSelected);
-                      document.getElementById('heatmapStyleCompact').classList.add(settingsStyles.buttonRowSelected);
-                      document.getElementById('heatmapStyleModerate').classList.remove(settingsStyles.buttonRowSelected);
-                      const currDisplayProps = this.state.displayProps;
-                      currDisplayProps.heatMapStyle = 1;
-                      this.setState({ displayProps: currDisplayProps });
-                    }}>
-                    Compact
-                  </button>
-                  <button
                     id={'heatmapStyleModerate'}
                     className={'button'}
                     onClick={() => {
@@ -177,6 +164,19 @@ export default class Settings extends React.PureComponent {
                       this.setState({ displayProps: currDisplayProps });
                     }}>
                     Moderate
+                  </button>
+                  <button
+                    id={'heatmapStyleCompact'}
+                    className={'button'}
+                    onClick={() => {
+                      document.getElementById('heatmapStyleClassic').classList.remove(settingsStyles.buttonRowSelected);
+                      document.getElementById('heatmapStyleCompact').classList.add(settingsStyles.buttonRowSelected);
+                      document.getElementById('heatmapStyleModerate').classList.remove(settingsStyles.buttonRowSelected);
+                      const currDisplayProps = this.state.displayProps;
+                      currDisplayProps.heatMapStyle = 1;
+                      this.setState({ displayProps: currDisplayProps });
+                    }}>
+                    Compact
                   </button>
                 </div>
                 <hr />
