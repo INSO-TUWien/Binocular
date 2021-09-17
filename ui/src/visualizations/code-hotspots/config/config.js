@@ -4,7 +4,7 @@ import { connect } from 'react-redux';
 
 import { setActiveFile, setActivePath, setActiveBranch } from '../sagas';
 import styles from '../styles.scss';
-import FileBrowser from './fileBrowser';
+import FileBrowser from '../components/fileBrowser/fileBrowser';
 
 const mapStateToProps = (state /*, ownProps*/) => {
   const State = state.visualizations.codeHotspots.state;
@@ -38,8 +38,9 @@ const CodeHotspotsConfigComponent = props => {
   return (
     <div className={styles.config}>
       <div className={styles.label}> Branch:</div>
-      <div id={'branchSelector'} className={'select'}>
+      <div id={'branchSelector'} className={'select ' + styles.branchSelect}>
         <select
+          className={styles.branchSelect}
           value={props.branch}
           onChange={e => {
             props.onSetBranch(e.target.value);
@@ -47,6 +48,7 @@ const CodeHotspotsConfigComponent = props => {
           {options}
         </select>
       </div>
+      <hr />
       <div id={'fileSelector'}>
         <FileBrowser files={props.files} props={props} />
       </div>
