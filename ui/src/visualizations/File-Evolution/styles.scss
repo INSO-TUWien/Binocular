@@ -33,3 +33,20 @@
 .configContainer{
 }
 
+
+.chartContainer{
+.chartDiv {
+  width: 500px;
+  height: 100vh;
+  overflow-x: scroll;
+  overflow-y: scroll;
+}
+  svg{
+    position: relative;
+    overflow: scroll;
+  }
+
+  foreignObject{
+    overflow: scroll;
+  }
+}
