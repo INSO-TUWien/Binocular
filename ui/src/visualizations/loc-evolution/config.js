@@ -10,7 +10,7 @@ import styles from './styles.scss';
 import { graphQl } from '../../utils';
 
 const mapStateToProps = (state /*, ownProps*/) => {
-  const corState = state.visualizations.codeOwnershipRiver.state;
+  const corState = state.visualizations.locEvolution.state;
 
   return {
     issues: corState.data.issues,
@@ -28,7 +28,7 @@ const mapDispatchToProps = (dispatch /*, ownProps*/) => {
   };
 };
 
-const CodeOwnershipRiverConfigComponent = props => {
+const locEvolutionConfigComponent = props => {
   return (
     <div className={styles.configContainer}>
       <form>
@@ -104,6 +104,6 @@ const CodeOwnershipRiverConfigComponent = props => {
   );
 };
 
-const CodeOwnershipRiverConfig = connect(mapStateToProps, mapDispatchToProps)(CodeOwnershipRiverConfigComponent);
+const LocEvolutionConfig = connect(mapStateToProps, mapDispatchToProps)(locEvolutionConfigComponent);
 
-export default CodeOwnershipRiverConfig;
+export default LocEvolutionConfig;

@@ -18,14 +18,13 @@ import * as zoomUtils from '../../../utils/zoom.js';
 
 const dateExtractor = d => d.date;
 
-export default class CodeOwnershipRiver extends React.Component {
+export default class locEvolution extends React.Component {
   constructor(props) {
     super(props);
 
     this.elems = {};
 
     const { commitSeries, lastCommitDataPoint, commitLegend } = this.extractCommitData(props);
-
     this.state = {
       dirty: true,
       isPanning: false,
