@@ -1,3 +1,9 @@
+'use strict';
+
+import React from 'react';
+import * as d3 from 'd3';
+
+
 // set the dimensions and margins of the graph
 var margin = { top: 20, right: 30, bottom: 0, left: 10 },
     width = 1200 - margin.left - margin.right,
@@ -13,14 +19,14 @@ var svg = d3.select("#my_dataviz")
         "translate(" + margin.left + "," + margin.top + ")");
 
 // Parse the Data
-d3.csv("../mockdata.csv", function (data) {
+d3.csv("../../../../assets/mockdata.csv", function (data) {
 
     // List of groups = header of the csv files
-    var keys = data.columns.slice(1)
+    var keys = Object.keys(data).slice(1)
 
     // Add X axis
     var x = d3.scaleLinear()
-        .domain(d3.extent(data, function (d) { return d.date; }))
+        .domain(d3.extent(Object.values(data), function (d) { return d.date; }))
         .range([100, width - 100]);
     svg.append("g")
         .attr("transform", "translate(0," + height * 0.8 + ")")
@@ -74,7 +80,7 @@ d3.csv("../mockdata.csv", function (data) {
     var stackedData = d3.stack()
         .offset(d3.stackOffsetSilhouette)
         .keys(keys)
-        (data)
+        (Object.values(data))
 
     // create a tooltip
     var Tooltip = svg
@@ -98,7 +104,7 @@ d3.csv("../mockdata.csv", function (data) {
         mousex = mousex[0];
         var invertedx = x.invert(mousex);
         year = Math.floor(invertedx)
-        result = recursiveFunction(data, year, 0, data.length)
+        result = recursiveFunction(Object.values(data), year, 0, data.length)
         //dmp = data[(year - 2000)] //CHANGE ME ---- I AM CHEATING HERE
         //var result = Object.keys(dmp).map((key) => [String(key), dmp[key]]);
         for (let index = 0; index < result.length; index++) {
@@ -122,30 +128,30 @@ d3.csv("../mockdata.csv", function (data) {
 
     //Binary Search Here
     let recursiveFunction = function (arr, x, start, end) {
-       
+
         // Base Condition
         if (start > end) return false;
-       
+
         // Find the middle index
-        let mid=Math.floor((start + end)/2);
-       
+        let mid = Math.floor((start + end) / 2);
+
         //Make Data accessible
         dmp = arr[mid]
         objectArray = Object.keys(dmp).map((key) => [String(key), dmp[key]]);
         value = parseInt(objectArray[0][1], 10);
 
         // Compare value at mid with given key x
-        if (value===x) return objectArray;
-              
+        if (value === x) return objectArray;
+
         // If element at mid is greater than x,
         // search in the left half of mid
-        if(value > x) 
-            return recursiveFunction(arr, x, start, mid-1);
+        if (value > x)
+            return recursiveFunction(arr, x, start, mid - 1);
         else
-      
+
             // If element at mid is smaller than x,
             // search in the right half of mid
-            return recursiveFunction(arr, x, mid+1, end);
+            return recursiveFunction(arr, x, mid + 1, end);
     }
 
     var mouseleave = function (d) {
