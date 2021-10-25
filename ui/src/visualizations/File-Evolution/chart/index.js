@@ -8,11 +8,13 @@ const mapStateToProps = (state /*, ownProps*/) => {
   const FileEvolutionState = state.visualizations.fileEvolution.state;
   console.log(FileEvolutionState);
   return {
+    files: FileEvolutionState.data.data.files,
     branches: FileEvolutionState.data.data.branches,
     committers: FileEvolutionState.data.data.committers,
     commits: FileEvolutionState.data.data.commits,
     authorsColorPalette: FileEvolutionState.data.data.authorsColorPalette,
     branchesColorPalette: FileEvolutionState.data.data.branchesColorPalette,
+    commitFiles: FileEvolutionState.data.data.commitFiles,
     selectedAuthors: FileEvolutionState.config.selectedAuthors,
     selectedBranches: FileEvolutionState.config.selectedBranches,
     commitBoxHeight: FileEvolutionState.config.commitBoxHeight,
@@ -20,7 +22,8 @@ const mapStateToProps = (state /*, ownProps*/) => {
     commitBoxColor: FileEvolutionState.config.commitBoxColor,
     showCommitDate: FileEvolutionState.config.showCommitDate,
     showCommitAuthor: FileEvolutionState.config.showCommitAuthor,
-    showCommitMessage: FileEvolutionState.config.showCommitMessage
+    showCommitMessage: FileEvolutionState.config.showCommitMessage,
+    showCommitFiles: FileEvolutionState.config.showCommitFiles
   };
 };
 

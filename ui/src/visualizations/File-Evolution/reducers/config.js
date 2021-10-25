@@ -12,16 +12,18 @@ export default handleActions(
     SET_SELECTED_BRANCHES: (state, action) => _.assign({}, state, { selectedBranches: [...action.payload] }),
     SET_SHOW_COMMIT_DATE: (state, action) => _.assign({}, state, { showCommitDate: action.payload }),
     SET_SHOW_COMMIT_MESSAGE: (state, action) => _.assign({}, state, { showCommitMessage: action.payload }),
-    SET_SHOW_COMMIT_AUTHOR: (state, action) => _.assign({}, state, { showCommitAuthor: action.payload })
+    SET_SHOW_COMMIT_AUTHOR: (state, action) => _.assign({}, state, { showCommitAuthor: action.payload }),
+    SET_SHOW_COMMIT_FILES: (state, action) => _.assign({}, state, { showCommitFiles: action.payload })
   },
   {
-    commitBoxWidth: 100,
-    commitBoxHeight: 100,
+    commitBoxWidth: 200,
+    commitBoxHeight: 200,
     commitBoxColor: 'author',
     selectedAuthors: [],
     selectedBranches: [],
     showCommitDate: true,
     showCommitMessage: 'header',
-    showCommitAuthor: false
+    showCommitAuthor: false,
+    showCommitFiles: true
   }
 );
