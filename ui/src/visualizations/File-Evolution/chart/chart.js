@@ -43,11 +43,20 @@ export default class FileEvolution extends React.Component {
 
     function getCommitInfo(props, commit) {
       //TODO font size
+
       const commitInfo = [];
       if (props.showCommitMessage === 'header') {
-        commitInfo.push(<text fontSize="smaller">{commit.messageHeader}</text>);
+        commitInfo.push(
+          <a href={commit.webUrl}>
+            <text fontSize="smaller">{commit.messageHeader}</text>
+          </a>
+        );
       } else if (props.showCommitMessage === 'all') {
-        commitInfo.push(<text fontSize="smaller">{commit.message}</text>);
+        commitInfo.push(
+          <a href={commit.webUrl}>
+            <text fontSize="smaller">{commit.message}</text>
+          </a>
+        );
       }
       if (props.showCommitDate) {
         if (commitInfo.length > 0) {
@@ -60,6 +69,21 @@ export default class FileEvolution extends React.Component {
           commitInfo.push(<hr />);
         }
         commitInfo.push(<text fontSize="smaller">{commit.signature}</text>);
+      }
+      if (props.showCommitFiles) {
+        if (commitInfo.length > 0) {
+          commitInfo.push(<hr />);
+        }
+        const files = props.commitFiles[commit.sha];
+        for (const f in files) {
+          const file = files[f];
+          commitInfo.push(
+            <a href={file.webUrl}>
+              <text fontSize="smaller">{file.path}</text>
+            </a>
+          );
+          commitInfo.push(<br />);
+        }
       }
       return commitInfo;
     }
@@ -99,7 +123,7 @@ export default class FileEvolution extends React.Component {
     const height = this.props.commitBoxHeight;
     const commitRects = [];
     let x = 20;
-    let y = 20;
+    const y = 20;
     for (const i in commitData) {
       const commit = commitData[i];
       if (this.props.selectedAuthors.indexOf(commit.signature) > -1) {

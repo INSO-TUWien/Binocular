@@ -11,7 +11,8 @@ import {
   setSelectedBranches,
   setShowCommitDate,
   setShowCommitMessage,
-  setShowCommitAuthor
+  setShowCommitAuthor,
+  setShowCommitFiles
 } from './sagas';
 
 import React from 'react';
@@ -35,7 +36,8 @@ const mapStateToProps = (state /*, ownProps*/) => {
     commitBoxColor: FileEvolutionState.config.commitBoxColor,
     showCommitDate: FileEvolutionState.config.showCommitDate,
     showCommitAuthor: FileEvolutionState.config.showCommitAuthor,
-    showCommitMessage: FileEvolutionState.config.showCommitMessage
+    showCommitMessage: FileEvolutionState.config.showCommitMessage,
+    showCommitFiles: FileEvolutionState.config.showCommitFiles
   };
 };
 
@@ -47,6 +49,7 @@ const mapDispatchToProps = (dispatch /*, ownProps*/) => {
     onSetCommitBoxWidth: commitBoxWidth => dispatch(setCommitBoxWidth(commitBoxWidth)),
     onClickShowCommitBoxDate: showCommitDate => dispatch(setShowCommitDate(showCommitDate)),
     onClickShowCommitBoxAuthor: showCommitAuthor => dispatch(setShowCommitAuthor(showCommitAuthor)),
+    onClickShowCommitBoxFiles: showCommitFiles => dispatch(setShowCommitFiles(showCommitFiles)),
     onSetShowCommitMessage: showCommitMessage => dispatch(setShowCommitMessage(showCommitMessage)),
     onClickCommitBoxColor: commitBoxColor => dispatch(setCommitBoxColor(commitBoxColor))
   };
@@ -112,12 +115,21 @@ const FileEvolutionConfigComponent = props => {
             </label>
             <label className={styles.checkboxLabel}>
               <input
-                name="showAuthor"
+                name="showDate"
                 type="checkbox"
                 onChange={() => props.onClickShowCommitBoxDate(!props.showCommitDate)}
                 checked={props.showCommitDate}
               />{' '}
               Show Date{' '}
+            </label>
+            <label className={styles.checkboxLabel}>
+              <input
+                name="showFiles"
+                type="checkbox"
+                onChange={() => props.onClickShowCommitBoxFiles(!props.showCommitFiles)}
+                checked={props.showCommitFiles}
+              />{' '}
+              Show Files{' '}
             </label>
 
             <label className={styles.label}>Show Message</label>

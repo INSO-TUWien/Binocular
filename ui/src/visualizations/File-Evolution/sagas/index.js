@@ -8,6 +8,7 @@ import { fetchFactory, timestampedActionFactory, mapSaga } from '../../../sagas/
 import getCommitData from './getCommitData.js';
 import getBranches from './getBranches.js';
 import getCommiters from './getCommiters.js';
+import getFiles from './getFiles.js';
 
 export const setCommitBoxHeight = createAction('SET_COMMIT_BOX_HEIGHT');
 export const setCommitBoxWidth = createAction('SET_COMMIT_BOX_WIDTH');
@@ -19,6 +20,7 @@ export const setSelectedBranches = createAction('SET_SELECTED_BRANCHES');
 export const setShowCommitDate = createAction('SET_SHOW_COMMIT_DATE');
 export const setShowCommitMessage = createAction('SET_SHOW_COMMIT_MESSAGE');
 export const setShowCommitAuthor = createAction('SET_SHOW_COMMIT_AUTHOR');
+export const setShowCommitFiles = createAction('SET_SHOW_COMMIT_FILES');
 
 export const requestFileEvolutionData = createAction('REQUEST_FILE_EVOLUTION_DATA');
 export const receiveFileEvolutionData = timestampedActionFactory('RECEIVE_FILE_EVOLUTION_DATA');
@@ -61,11 +63,15 @@ function* watchRefresh() {
 export const fetchFileEvolutionData = fetchFactory(
   function*() {
     //const commiters = yield getCommiters();
-    return yield Promise.join(getCommitData(), getBranches(), getCommiters())
-      .spread((commits, branches, commiters) => {
+    return yield Promise.join(getCommitData(), getBranches(), getCommiters(), getFiles())
+      .spread((commits, branches, commiters, files) => {
+        console.log(files);
         const authorsColorPalette = getAuthorColorPalette(commiters);
         const branchesColorPalette = getBranchesColorPalette(branches);
+        const commitFiles = addFilesToCommit(files, commits);
         return {
+          files,
+          commitFiles,
           commits,
           branches,
           commiters,
@@ -82,6 +88,22 @@ export const fetchFileEvolutionData = fetchFactory(
   receiveFileEvolutionData,
   receiveFileEvolutionDataError
 );
+
+function addFilesToCommit(files, commits) {
+  const commitFiles = {};
+  for (const c in commits) {
+    const sha = '' + commits[c].sha;
+    commitFiles[sha] = [];
+  }
+  for (const f in files) {
+    const file = files[f];
+    for (const c in files[f].commits.data) {
+      const fileSha = '' + files[f].commits.data[c].sha;
+      commitFiles[fileSha].push(file);
+    }
+  }
+  return commitFiles;
+}
 
 function getAuthorColorPalette(commiters) {
   //TODO Color???
