@@ -19,7 +19,7 @@ import OffsetGroup from '../../../components/svg/OffsetGroup.js';
 import * as zoomUtils from '../../../utils/zoom.js';
 
 const dateExtractor = d => d.date;
-const arr = new Array();
+const arr = new Array();  //test mit var
 const testkeys = new Array();
 
 async function visualize() {
@@ -127,19 +127,21 @@ async function visualize() {
   }
 
   var mousemove = function (d, i) {
-    mousex = d3.mouse(this);
-    mousex = mousex[0];
+    var coordinates = d3.pointer(d);
+    var mousex = coordinates[0];
+    var mousey = coordinates[1];
     var invertedx = x.invert(mousex);
-    year = Math.floor(invertedx)
-    result = recursiveFunction(arr, year, 0, arr.length)
-    //dmp = data[(year - 2000)] //CHANGE ME ---- I AM CHEATING HERE
-    //var result = Object.keys(dmp).map((key) => [String(key), dmp[key]]);
+    var year = Math.floor(invertedx); //year which corresponds with the x position of the mouse in the chart
+    //var result = recursiveFunction(arr, year, 0, arr.length)
+    var dmp = arr[(year - 2000)] //CHANGE ME ---- I AM CHEATING HERE
+    var result = Object.keys(dmp).map((key) => [String(key), dmp[key]]); //Object from the Data corresponding to the current selected year, e.g. row in the csv
+    var file = d3.select(this).data()[0].key; //currently selected/highlighted file
     for (let index = 0; index < result.length; index++) {
-      if (result[index][0] === keys[i]) {
-        yVal = parseInt(result[index][1], 10)
+      if (result[index][0] === file) {
+        var yVal = parseInt(result[index][1], 10)
       }
     }
-    Tooltip.text("Value of " + keys[i] + " in " + year + " is: " + yVal)
+    Tooltip.text("Value of " + file + " in " + year + " is: " + yVal)
 
     /* --------------------------- White Vertical Line Here --------------
     svg.append("line")
@@ -154,18 +156,21 @@ async function visualize() {
   }
 
   //Binary Search Here
-  let recursiveFunction = function (arr, x, start, end) {
+  /*let recursiveFunction = function (tempArr, x, start, end) {
 
     // Base Condition
-    if (start > end) return false;
+    if (start >= end) return false;
 
     // Find the middle index
     let mid = Math.floor((start + end) / 2);
+    //console.warn("Mid: " + mid + " " + end)
 
     //Make Data accessible
-    dmp = arr[mid]
-    objectArray = Object.keys(dmp).map((key) => [String(key), dmp[key]]);
-    value = parseInt(objectArray[0][1], 10);
+    var dmp = tempArr[mid]
+    //console.warn("dmp: " + dmp)
+    var objectArray = Object.keys(dmp).map((key) => [String(key), dmp[key]]);
+    var value = parseInt(objectArray[0][1], 10);
+    //console.warn("value = " + value)
 
     // Compare value at mid with given key x
     if (value === x) return objectArray;
@@ -173,13 +178,13 @@ async function visualize() {
     // If element at mid is greater than x,
     // search in the left half of mid
     if (value > x)
-      return recursiveFunction(arr, x, start, mid - 1);
+      return recursiveFunction(tempArr, x, start, mid - 1);
     else
 
       // If element at mid is smaller than x,
       // search in the right half of mid
-      return recursiveFunction(arr, x, mid + 1, end);
-  }
+      return recursiveFunction(tempArr, x, mid + 1, end);
+  }*/
 
   var mouseleave = function (d) {
     Tooltip.style("opacity", 0)
@@ -188,11 +193,11 @@ async function visualize() {
   }
 
   var mouseclick = function (d, i) {
-    mousex = d3.mouse(this);
+    var mousex = d3.pointer(this);
     mousex = mousex[0];
     var invertedx = x.invert(mousex);
-    year = Math.floor(invertedx)
-    dmp = arr[(year - 2000)] //CHANGE ME ---- I AM CHEATING HERE
+    var year = Math.floor(invertedx)
+    var dmp = arr[(year - 2000)] //CHANGE ME ---- I AM CHEATING HERE
     var result = Object.keys(dmp).map((key) => [String(key), dmp[key]]);
     for (let index = 0; index < result.length; index++) {
       if (result[index][0] === keys[i]) {
@@ -211,8 +216,8 @@ async function visualize() {
   // Area generator
   var area = d3.area()
     .x(function (d) { return x(d.data.date); })
-    .y0(function (d) {return y(d[0]); })
-    .y1(function (d) {return y(d[1]); })
+    .y0(function (d) { return y(d[0]); })
+    .y1(function (d) { return y(d[1]); })
 
   // Show the areas
   svg.selectAll("mylayers")
@@ -293,7 +298,6 @@ export default class locEvolution extends React.Component {
   }
 
   componentDidMount() {
-    visualize();
   }
 
   componentWillReceiveProps(nextProps) {
@@ -309,6 +313,7 @@ export default class locEvolution extends React.Component {
   }
 
   render() {
+    visualize();
     return (
       <div id="my_dataviz"></div>
     )
