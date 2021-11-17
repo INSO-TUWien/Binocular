@@ -40,11 +40,11 @@ export default () =>
         the scale for the y-Axis.
       </li>
       <li>
-        <i className="fa fa-filter" /> In the legend, you can filter the authors that are displayed in the changes graph. The checkbox on
-        the top selects/deselects all authors.
+        <i className="fa fa-filter" /> In the legend, you can filter the issues that are displayed in the changes graph. The checkbox on the
+        the top selects/deselects all issues.
       </li>
       <li>
-        <i className="fa fa-sort" /> The legend is sorted by overall contribution to the project. The authors that contributed the most are
+        <i className="fa fa-sort" /> The legend is sorted by overall contribution to the project. The issues that contributed the most are
         on top. "Others" is an exception, they are always at the bottom.
       </li>
     </ul>

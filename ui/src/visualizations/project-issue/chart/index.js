@@ -31,8 +31,6 @@ const mapStateToProps = (state /*, ownProps*/) => {
 const mapDispatchToProps = (dispatch /*, ownProps*/) => {
   return {
     onCommitClick: function(c) {
-      //TODO: set correct function current behavior unknown
-      // eslint-disable-next-line no-undef
       dispatch(openCommit(c));
     },
     onViewportChanged: function(v) {

@@ -23,7 +23,7 @@ const mapStateToProps = (state /*, ownProps*/) => {
     committers: projectIssueState.data.data.committers,
     resolution: projectIssueState.config.chartResolution,
     showIssues: projectIssueState.config.showIssues,
-    palette: projectIssueState.data.data.palette,
+    palette: projectIssueState.data.data.issues,
     metric: projectIssueState.config.displayMetric,
     selectedAuthors: projectIssueState.config.selectedAuthors,
     showCIChart: projectIssueState.config.showCIChart,
@@ -45,9 +45,9 @@ const mapDispatchToProps = (dispatch /*, ownProps*/) => {
 };
 
 const ProjectIssueConfigComponent = props => {
-  let otherCommitters;
+  let otherIssues;
   if (props.palette && 'others' in props.palette) {
-    otherCommitters = props.committers.length - (Object.keys(props.palette).length - 1);
+    otherIssues = props.committers.length - (Object.keys(props.palette).length - 1);
   }
 
   return (
@@ -121,7 +121,7 @@ const ProjectIssueConfigComponent = props => {
             onClick={props.onClickCheckboxLegend.bind(this)}
             title="Issues:"
             split={props.metric === 'linesChanged'}
-            otherCommitters={otherCommitters}
+            otherCommiters={otherIssues}
           />
         </div>
       </form>

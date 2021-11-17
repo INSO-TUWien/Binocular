@@ -2,6 +2,10 @@
 
 import { traversePages, graphQl } from '../../../utils';
 
+/**
+ * Get build data from the database.
+ * @returns {*} (see below)
+ */
 export default function getBuildData() {
   const buildList = [];
 
