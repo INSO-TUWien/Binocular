@@ -6,9 +6,9 @@ import {
   setShowIssues,
   setDisplayMetric,
   setSelectedAuthors,
-  setShowCIChart,
-  setShowIssueChart,
-  setShowChangesChart
+  setShowNormalizedChart,
+  setShowStandardChart,
+  setShowMilestoneChart
 } from './sagas';
 import TabCombo from '../../components/TabCombo.js';
 import styles from './styles.scss';
@@ -23,12 +23,12 @@ const mapStateToProps = (state /*, ownProps*/) => {
     committers: projectIssueState.data.data.committers,
     resolution: projectIssueState.config.chartResolution,
     showIssues: projectIssueState.config.showIssues,
-    palette: projectIssueState.data.data.issues,
+    palette: projectIssueState.data.data.palette,
     metric: projectIssueState.config.displayMetric,
     selectedAuthors: projectIssueState.config.selectedAuthors,
-    showCIChart: projectIssueState.config.showCIChart,
-    showIssueChart: projectIssueState.config.showIssueChart,
-    showChangesChart: projectIssueState.config.showChangesChart
+    showNormalizedChart: projectIssueState.config.showNormalizedChart,
+    showStandardChart: projectIssueState.config.showStandardChart,
+    showMilestoneChart: projectIssueState.config.showMilestoneChart
   };
 };
 
@@ -38,9 +38,9 @@ const mapDispatchToProps = (dispatch /*, ownProps*/) => {
     onClickIssues: showIssues => dispatch(setShowIssues(showIssues)),
     onClickMetric: metric => dispatch(setDisplayMetric(metric)),
     onClickCheckboxLegend: selected => dispatch(setSelectedAuthors(selected)),
-    onClickShowCIChart: showCIChart => dispatch(setShowCIChart(showCIChart)),
-    onClickShowIssueChart: showIssueChart => dispatch(setShowIssueChart(showIssueChart)),
-    onClickShowChangesChart: showChangesChart => dispatch(setShowChangesChart(showChangesChart))
+    onClickShowNormalizedChart: showNormalizedChart => dispatch(setShowNormalizedChart(showNormalizedChart)),
+    onClickShowStandardChart: showStandardChart => dispatch(setShowStandardChart(showStandardChart)),
+    onClickShowMilestoneChart: showMilestoneChart => dispatch(setShowMilestoneChart(showMilestoneChart))
   };
 };
 
@@ -68,10 +68,10 @@ const ProjectIssueConfigComponent = props => {
             <div>
               <label className={styles.checkboxLabel}>
                 <input
-                  name="showCI"
+                  name="showStandardChart"
                   type="checkbox"
-                  onChange={() => props.onClickShowCIChart(!props.showCIChart)}
-                  checked={props.showCIChart}
+                  onChange={() => props.onClickShowStandardChart(!props.showStandardChart)}
+                  checked={props.showStandardChart}
                 />{' '}
                 Show standard Chart{' '}
               </label>
@@ -79,10 +79,10 @@ const ProjectIssueConfigComponent = props => {
             <div>
               <label className={styles.checkboxLabel}>
                 <input
-                  name="showIssues"
+                  name="showNormalizedChart"
                   type="checkbox"
-                  onChange={() => props.onClickShowIssueChart(!props.showIssueChart)}
-                  checked={props.showIssueChart}
+                  onChange={() => props.onClickShowNormalizedChart(!props.showNormalizedChart)}
+                  checked={props.showNormalizedChart}
                 />{' '}
                 Show normalized Chart{' '}
               </label>
@@ -90,10 +90,10 @@ const ProjectIssueConfigComponent = props => {
             <div>
               <label className={styles.checkboxLabel}>
                 <input
-                  name="showChanges"
+                  name="showMilestoneChart"
                   type="checkbox"
-                  onChange={() => props.onClickShowChangesChart(!props.showChangesChart)}
-                  checked={props.showChangesChart}
+                  onChange={() => props.onClickShowMilestoneChart(!props.showMilestoneChart)}
+                  checked={props.showMilestoneChart}
                 />{' '}
                 Show milestone Chart{' '}
               </label>
@@ -119,8 +119,9 @@ const ProjectIssueConfigComponent = props => {
           <CheckboxLegend
             palette={props.palette}
             onClick={props.onClickCheckboxLegend.bind(this)}
-            title="Issues:"
-            split={props.metric === 'linesChanged'}
+            title={'Issues:'}
+            explanation={'Number of issues'}
+            split={false}
             otherCommiters={otherIssues}
           />
         </div>

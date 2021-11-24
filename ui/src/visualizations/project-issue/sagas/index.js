@@ -16,9 +16,9 @@ export const setResolution = createAction('SET_RESOLUTION');
 export const setShowIssues = createAction('SET_SHOW_ISSUES');
 export const setSelectedAuthors = createAction('SET_SELECTED_AUTHORS');
 export const setDisplayMetric = createAction('SET_DISPLAY_METRIC');
-export const setShowCIChart = createAction('SET_SHOW_CI_CHART');
-export const setShowIssueChart = createAction('SET_SHOW_ISSUE_CHART');
-export const setShowChangesChart = createAction('SET_SHOW_CHANGES_CHART');
+export const setShowNormalizedChart = createAction('SET_SHOW_NORMALIZED_CHART');
+export const setShowStandardChart = createAction('SET_SHOW_STANDARD_CHART');
+export const setShowMilestoneChart = createAction('SET_SHOW_MILESTONE_CHART');
 
 export const requestProjectIssueData = createAction('REQUEST_PROJECT_ISSUE_DATA');
 export const receiveProjectIssueData = timestampedActionFactory('RECEIVE_PROJECT_ISSUE_DATA');
@@ -80,7 +80,7 @@ export const fetchProjectIssueData = fetchFactory(
       getBuildData()
     )
       .spread((commits, issues, builds) => {
-        const palette = getPalette(commits, 15, committers.length);
+        const palette = getPalette(issues, 15, issues.length);
 
         return {
           otherCount: 0,
@@ -103,21 +103,21 @@ export const fetchProjectIssueData = fetchFactory(
   receiveProjectIssueDataError
 );
 
-function getPalette(commits, maxNumberOfColors, numOfCommitters) {
+function getPalette(issues, maxNumberOfColors, numOfIssues) {
   function chartColors(band, maxLength, length) {
     const len = length > maxLength ? maxLength : length;
     return chroma.scale(band).mode('lch').colors(len);
   }
 
-  const palette = chartColors('spectral', 15, numOfCommitters);
+  const palette = chartColors('spectral', 100, numOfIssues);
 
   const totals = {};
-  _.each(commits, commit => {
-    const changes = commit.stats.additions + commit.stats.deletions;
-    if (totals[commit.signature]) {
-      totals[commit.signature] += changes;
+  _.each(issues, issue => {
+    const changes = 1;
+    if (totals[issue.signature]) {
+      totals[issue.title] += changes;
     } else {
-      totals[commit.signature] = changes;
+      totals[issue.signature] = changes;
     }
   });
 

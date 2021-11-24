@@ -33,6 +33,7 @@ const getIssuesPage = until => (page, perPage) => {
           title
           createdAt
           closedAt
+          state
         }
       }
     }`,
