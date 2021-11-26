@@ -6,7 +6,7 @@ import * as d3 from 'd3';
 import styles from '../styles.scss';
 import _ from 'lodash';
 
-import StackedAreaChart from '../../../components/StackedAreaChart';
+import ViolinPlot from '../../../components/ViolinPlot';
 import moment from 'moment';
 import cx from 'classnames';
 import chroma from 'chroma-js';
@@ -59,7 +59,7 @@ export default class ProjectIssue extends React.Component {
       <div className={styles.chartLine}>
         <div className={cx(styles.text, 'label')}>Issues</div>
         <div className={styles.chart}>
-          <StackedAreaChart
+          <ViolinPlot
             content={this.state.issueChartData}
             palette={{ Opened: '#3461eb', Closed: '#8099e8' }}
             paddings={{ top: 20, left: 60, bottom: 20, right: 30 }}
