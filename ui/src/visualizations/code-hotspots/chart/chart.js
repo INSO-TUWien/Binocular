@@ -39,6 +39,7 @@ export default class CodeHotspots extends React.PureComponent {
       fileURL: '',
       path: '',
       sha: '',
+      compareSha: '',
       mode: 0, //modes: 0...Changes/Version  1...Changes/Developer  2...Changes/Issue
       data: {},
       filteredData: { code: 'No File Selected', firstLineNumber: 1, searchTerm: '' },
@@ -94,6 +95,7 @@ export default class CodeHotspots extends React.PureComponent {
           this.requestData();
         } else {
           this.codeChanged = false;
+          chartUpdater.updateColumnChart(this, this.state.mode, this.state.filteredData, this.state.displayProps);
         }
       }
     }
@@ -154,6 +156,7 @@ export default class CodeHotspots extends React.PureComponent {
                   className={'button ' + styles.mg1 + ' ' + styles.button}
                   onClick={() => {
                     this.setState({ sha: '' });
+                    this.setState({ compareSha: '' });
                   }}>
                   Back to current Version
                 </button>
@@ -211,8 +214,9 @@ export default class CodeHotspots extends React.PureComponent {
       xhr.onload = function() {
         if (xhr.readyState === 4) {
           //if (xhr.status === 200) {
-          if (this.state.path === this.prevPath && this.state.sha !== this.prevSha) {
+          if (this.state.path === this.prevPath && (this.state.sha !== this.prevSha || this.state.prevCompareSha !== this.compareSha)) {
             this.prevSha = this.state.sha;
+            this.prevCompareSha = this.state.compareSha;
             this.codeChanged = true;
             this.dataChanged = false;
             Loading.remove();
@@ -233,6 +237,7 @@ export default class CodeHotspots extends React.PureComponent {
             this.prevPath = this.state.path;
             this.prevMode = this.state.mode;
             this.prevSha = this.state.sha;
+            this.prevCompareSha = this.state.compareSha;
 
             switch (mode) {
               case 1:

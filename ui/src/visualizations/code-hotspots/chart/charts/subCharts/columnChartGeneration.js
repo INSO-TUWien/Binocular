@@ -74,7 +74,6 @@ export default class columnChartGeneration {
   static generateColumnChart(data, columns, currThis, mode, legendSteps, displayProps) {
     d3.select('#chartColumns').remove();
     d3.select('#tooltipColumns').remove();
-
     const w = document.getElementsByClassName('CodeMirror')[0].clientWidth - 80;
     const h = 100;
 
@@ -107,6 +106,7 @@ export default class columnChartGeneration {
       .attr('height', h);
 
     barChart.append('g').attr('width', w).attr('height', h).attr('id', 'columnChart');
+    const selection = barChart.append('g').attr('width', w).attr('height', h).attr('id', 'selection');
 
     //tooltip
     const tooltipp = d3
@@ -242,6 +242,27 @@ export default class columnChartGeneration {
           });
         break;
       default:
+        //Background
+        selection
+          .selectAll('rect')
+          .data(currThis.combinedColumnData)
+          .enter()
+          .append('rect')
+          .attr('fill', '#00000000')
+          .attr('class', 'sBar')
+          .attr('x', (d, i) => i * w / currThis.combinedColumnData.length + 2)
+          .attr('y', 2)
+          .attr('width', w / currThis.combinedColumnData.length - 4)
+          .attr('height', h - 4)
+          .attr(
+            'stroke',
+            d =>
+              d.sha.localeCompare(currThis.state.sha) === 0
+                ? '#3273dc'
+                : d.sha.localeCompare(currThis.state.compareSha) === 0 ? '#4cd964' : '#00000000'
+          )
+          .attr('stroke-width', 4);
+
         groupInfo
           .selectAll('rect')
           .data(currThis.combinedColumnData)
@@ -302,7 +323,11 @@ export default class columnChartGeneration {
             tooltipp.transition().duration(500).style('display', 'none');
           })
           .on('click', function(event, d) {
-            currThis.setState({ sha: d.sha });
+            if (event.shiftKey) {
+              currThis.setState({ compareSha: d.sha });
+            } else {
+              currThis.setState({ sha: d.sha });
+            }
           });
         setTimeout(
           function() {
@@ -345,7 +370,6 @@ export default class columnChartGeneration {
       }
       return HEATMAP_MAX_COLOR;
     };
-
     //Bars
     const bars = d3.select('#columnChart').selectAll('rect').data(currThis.combinedColumnData);
     bars
@@ -416,7 +440,13 @@ export default class columnChartGeneration {
       .attr('y', h / 2 - versionSize / 2)
       .attr('width', versionSize)
       .attr('height', versionSize)
-      .style('stroke', 'whitesmoke')
+      .attr(
+        'stroke',
+        d =>
+          d.sha.localeCompare(currThis.state.sha) === 0
+            ? '#3273dc'
+            : d.sha.localeCompare(currThis.state.compareSha) === 0 ? '#4cd964' : '#00000000'
+      )
       .style('stroke-width', '2px')
       .attr('rx', '100%')
       .attr('ry', '100%')
@@ -468,7 +498,11 @@ export default class columnChartGeneration {
         tooltipp.transition().duration(500).style('display', 'none');
       })
       .on('click', function(event, d) {
-        currThis.setState({ sha: d.sha });
+        if (event.shiftKey) {
+          currThis.setState({ compareSha: d.sha });
+        } else {
+          currThis.setState({ sha: d.sha });
+        }
       });
     commits.exit().remove();
   }

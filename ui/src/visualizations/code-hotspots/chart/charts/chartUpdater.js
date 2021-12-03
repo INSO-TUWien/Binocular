@@ -160,4 +160,23 @@ export default class chartUpdater {
       displayProps
     );
   }
+
+  static updateColumnChart(currThis, mode, data, displayProps) {
+    let filteredData = data.data;
+    if (mode === 0) {
+      filteredData = data.data.filter(
+        d => new Date(d.date) >= new Date(displayProps.dateRange.from) && new Date(d.date) <= new Date(displayProps.dateRange.to)
+      );
+    }
+
+    currThis.combinedColumnData = chartGeneration.updateColumnData(filteredData, currThis, mode);
+    chartGeneration.generateColumnChart(
+      currThis.combinedColumnData,
+      mode === 1 ? data.devs.length : mode === 2 ? data.issues.length : data.commits,
+      currThis,
+      mode,
+      data.legendSteps,
+      displayProps
+    );
+  }
 }
