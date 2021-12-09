@@ -47,6 +47,7 @@ module.exports = new gql.GraphQLObjectType({
           IN
           OUTBOUND ${file} ${commitsToFiles}
             ${limit}
+            SORT commit.date ASC
             RETURN commit`
       })
     };
