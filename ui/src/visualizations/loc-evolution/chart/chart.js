@@ -29,25 +29,45 @@ const testkeys = new Array();
 
 async function visualize() {
 
-  console.log("---------------------------")
-  let queryRes = await getRelatedCommits("ui/src/visualizations/code-ownership-transfer/chart.js", 10);
-  //var myfuck = fetchRelatedCommits.getRelatedCommits
-  //var myfuck = fetchFactory.getRelatedCommits("ui/src/visualizations/code-ownership-transfer/chart.js", 10)
-  console.log(queryRes.file.commits)
-  console.log("---------------------------")
-  
-  let commits = queryRes.file.commits.data
-  //let changesArr = new Array[commits.length]
+  //let allFilesArr = new Array();
+  let prefix = "ui/src/visualizations/code-ownership-river/chart/";
+  let allFilesArr = ["Axis.js", "chart.js", "CommitMarker.js", "CommitMarker.scss", "GridLines.js", "index.js", "StackedArea.js"]
+  let fileArrayWithCommitData = Array(allFilesArr.length);
 
-  //for-loop here
-  let struct = new Object();
-  struct.date = commits[0].date;
-  struct.additons = commits[0].files.data[0].stats.additions;
-  struct.deletions = commits[0].files.data[0].stats.deletions;
-  struct.netchanges = 0;
-  console.log(struct)
-  //add to changesArr here
-  
+  //for each file we want in our Visualization, we need to send a query to the DB to fetch all the commits in which the file is mentioned. From the commits, we get data like
+  //additions, deletions and date of commit, which is all needed for our Visualization
+  for (const indFile of allFilesArr) {
+    let queryRes = await getRelatedCommits(prefix + indFile, 100);
+    //var mycoolvar = fetchRelatedCommits.getRelatedCommits
+    //var mycoolvar = fetchFactory.getRelatedCommits("ui/src/visualizations/code-ownership-transfer/chart.js", 10)
+
+    let commits = queryRes.file.commits.data
+    let changesArr = new Array(commits.length)
+
+    //for each of the commits where the file has been featured, we look into the commit to find the date and number of additions & deletions on this file
+    for (let j = 0; j < commits.length; j++) {
+      let struct = new Object();
+      struct.date = commits[j].date;
+      let fileArr = commits[j].files.data;
+      for (let i = 0; i < fileArr.length; i++) { //the query on the commits doesn't let us restrict the filename, therefore we need to check all the files in the commit and pick ours
+        if (fileArr[i].file.path === prefix + indFile) { //need to make filename dynamic here
+          struct.additions = fileArr[i].stats.additions;
+          struct.deletions = fileArr[i].stats.deletions;
+        }
+      }
+
+      struct.netchanges = struct.additions - struct.deletions;
+      changesArr[j] = struct;
+    }
+    let fileWithData = new Object();
+    fileWithData.path = prefix;
+    fileWithData.name = indFile;
+    fileWithData.detailsArr = changesArr;
+
+    fileArrayWithCommitData.push(fileWithData);
+  }
+  console.log(fileArrayWithCommitData);
+
   // Parse the Data
   d3.csv("../../../../assets/mockdata.csv", async function (data) {
     arr.push(data)
@@ -156,7 +176,7 @@ async function visualize() {
     var invertedx = x.invert(mousex);
     var year = Math.floor(invertedx); //year which corresponds with the x position of the mouse in the chart
     //var result = recursiveFunction(arr, year, 0, arr.length)
-    var dmp = arr[(year - 2000)] 
+    var dmp = arr[(year - 2000)]
     var result = Object.keys(dmp).map((key) => [String(key), dmp[key]]); //Object from the Data corresponding to the current selected year, e.g. row in the csv
     var file = d3.select(this).data()[0].key; //currently selected/highlighted file
     for (let index = 0; index < result.length; index++) {
@@ -447,5 +467,5 @@ async function getRelatedCommits(filename, perPage) {
       { filename, perPage }
     )
     .then(resp => myresp = resp)
-    return myresp
+  return myresp
 };
