@@ -6,6 +6,10 @@ import { myprototyp } from './prototyp.js'
 import cx from 'classnames';
 import ScriptTag from 'react-script-tag';
 
+
+import { collectPages, graphQl } from '../../../utils';
+import { fetchFactory, timestampedActionFactory } from '../../../sagas/utils.js';
+
 import styles from '../styles.scss';
 import _ from 'lodash';
 import Axis from './Axis.js';
@@ -17,6 +21,7 @@ import Legend from '../../../components/Legend';
 import ZoomableChartContainer from '../../../components/svg/ZoomableChartContainer.js';
 import OffsetGroup from '../../../components/svg/OffsetGroup.js';
 import * as zoomUtils from '../../../utils/zoom.js';
+import fetchRelatedCommits from '../sagas/fetchRelatedCommits.js';
 
 const dateExtractor = d => d.date;
 const arr = new Array();  //test mit var
@@ -24,6 +29,25 @@ const testkeys = new Array();
 
 async function visualize() {
 
+  console.log("---------------------------")
+  let queryRes = await getRelatedCommits("ui/src/visualizations/code-ownership-transfer/chart.js", 10);
+  //var myfuck = fetchRelatedCommits.getRelatedCommits
+  //var myfuck = fetchFactory.getRelatedCommits("ui/src/visualizations/code-ownership-transfer/chart.js", 10)
+  console.log(queryRes.file.commits)
+  console.log("---------------------------")
+  
+  let commits = queryRes.file.commits.data
+  //let changesArr = new Array[commits.length]
+
+  //for-loop here
+  let struct = new Object();
+  struct.date = commits[0].date;
+  struct.additons = commits[0].files.data[0].stats.additions;
+  struct.deletions = commits[0].files.data[0].stats.deletions;
+  struct.netchanges = 0;
+  console.log(struct)
+  //add to changesArr here
+  
   // Parse the Data
   d3.csv("../../../../assets/mockdata.csv", async function (data) {
     arr.push(data)
@@ -129,11 +153,10 @@ async function visualize() {
   var mousemove = function (d, i) {
     var coordinates = d3.pointer(d);
     var mousex = coordinates[0];
-    var mousey = coordinates[1];
     var invertedx = x.invert(mousex);
     var year = Math.floor(invertedx); //year which corresponds with the x position of the mouse in the chart
     //var result = recursiveFunction(arr, year, 0, arr.length)
-    var dmp = arr[(year - 2000)] //CHANGE ME ---- I AM CHEATING HERE
+    var dmp = arr[(year - 2000)] 
     var result = Object.keys(dmp).map((key) => [String(key), dmp[key]]); //Object from the Data corresponding to the current selected year, e.g. row in the csv
     var file = d3.select(this).data()[0].key; //currently selected/highlighted file
     for (let index = 0; index < result.length; index++) {
@@ -197,7 +220,7 @@ async function visualize() {
     mousex = mousex[0];
     var invertedx = x.invert(mousex);
     var year = Math.floor(invertedx)
-    var dmp = arr[(year - 2000)] //CHANGE ME ---- I AM CHEATING HERE
+    var dmp = arr[(year - 2000)]
     var result = Object.keys(dmp).map((key) => [String(key), dmp[key]]);
     for (let index = 0; index < result.length; index++) {
       if (result[index][0] === keys[i]) {
@@ -392,4 +415,37 @@ const successfulBuildsLegend = {
   style: {
     fill: '#73e79c'
   }
+};
+
+
+async function getRelatedCommits(filename, perPage) {
+  var myresp;
+  await graphQl
+    .query(
+      `query commitsForSpecificFile($filename: String!, $perPage: Int) {
+        file(path: $filename) {
+          id
+          path
+          commits(page: 1, perPage: $perPage) {
+            data {
+              date
+              files {
+                data {
+                  file {
+                    path
+                  }
+                  stats {
+                    additions
+                    deletions
+                  }
+                }
+              }
+            }
+          }
+        }
+      }`,
+      { filename, perPage }
+    )
+    .then(resp => myresp = resp)
+    return myresp
 };
