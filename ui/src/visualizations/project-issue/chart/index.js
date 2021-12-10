@@ -21,7 +21,7 @@ const mapStateToProps = (state /*, ownProps*/) => {
     chartResolution: projectIssueState.config.chartResolution,
     showIssues: projectIssueState.config.showIssues,
     displayMetric: projectIssueState.config.displayMetric,
-    selectedAuthors: projectIssueState.config.selectedAuthors,
+    selectedIssues: projectIssueState.config.selectedIssues,
     showNormalizedChart: projectIssueState.config.showNormalizedChart,
     showStandardChart: projectIssueState.config.showStandardChart,
     showMilestoneChart: projectIssueState.config.showMilestoneChart

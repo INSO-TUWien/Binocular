@@ -14,7 +14,7 @@ import chroma from 'chroma-js';
 
 export const setResolution = createAction('SET_RESOLUTION');
 export const setShowIssues = createAction('SET_SHOW_ISSUES');
-export const setSelectedAuthors = createAction('SET_SELECTED_AUTHORS');
+export const setselectedIssues = createAction('SET_SELECTED_ISSUES');
 export const setDisplayMetric = createAction('SET_DISPLAY_METRIC');
 export const setShowNormalizedChart = createAction('SET_SHOW_NORMALIZED_CHART');
 export const setShowStandardChart = createAction('SET_SHOW_STANDARD_CHART');
@@ -80,7 +80,7 @@ export const fetchProjectIssueData = fetchFactory(
       getBuildData()
     )
       .spread((commits, issues, builds) => {
-        const palette = getPalette(issues, 15, issues.length);
+        const palette = getPalette(issues, 5, 5);
 
         return {
           otherCount: 0,
@@ -109,7 +109,7 @@ function getPalette(issues, maxNumberOfColors, numOfIssues) {
     return chroma.scale(band).mode('lch').colors(len);
   }
 
-  const palette = chartColors('spectral', 100, numOfIssues);
+  const palette = chartColors('spectral', maxNumberOfColors, numOfIssues);
 
   const totals = {};
   _.each(issues, issue => {

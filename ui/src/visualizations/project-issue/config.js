@@ -5,7 +5,7 @@ import {
   setResolution,
   setShowIssues,
   setDisplayMetric,
-  setSelectedAuthors,
+  setselectedIssues,
   setShowNormalizedChart,
   setShowStandardChart,
   setShowMilestoneChart
@@ -25,7 +25,7 @@ const mapStateToProps = (state /*, ownProps*/) => {
     showIssues: projectIssueState.config.showIssues,
     palette: projectIssueState.data.data.palette,
     metric: projectIssueState.config.displayMetric,
-    selectedAuthors: projectIssueState.config.selectedAuthors,
+    selectedIssues: projectIssueState.config.selectedIssues,
     showNormalizedChart: projectIssueState.config.showNormalizedChart,
     showStandardChart: projectIssueState.config.showStandardChart,
     showMilestoneChart: projectIssueState.config.showMilestoneChart
@@ -37,7 +37,7 @@ const mapDispatchToProps = (dispatch /*, ownProps*/) => {
     onClickResolution: resolution => dispatch(setResolution(resolution)),
     onClickIssues: showIssues => dispatch(setShowIssues(showIssues)),
     onClickMetric: metric => dispatch(setDisplayMetric(metric)),
-    onClickCheckboxLegend: selected => dispatch(setSelectedAuthors(selected)),
+    onClickCheckboxLegend: selected => dispatch(setselectedIssues(selected)),
     onClickShowNormalizedChart: showNormalizedChart => dispatch(setShowNormalizedChart(showNormalizedChart)),
     onClickShowStandardChart: showStandardChart => dispatch(setShowStandardChart(showStandardChart)),
     onClickShowMilestoneChart: showMilestoneChart => dispatch(setShowMilestoneChart(showMilestoneChart))
