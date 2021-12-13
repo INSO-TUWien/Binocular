@@ -33,7 +33,6 @@ async function visualize() {
   //Here we will have to change to take the path + files from user selected input, this serves as a placeholder until that functionality is implemented
   let prefix = "ui/src/visualizations/code-ownership-river/chart/";
   let allFilesArr = ["Axis.js", "chart.js", "CommitMarker.js", "CommitMarker.scss", "GridLines.js", "index.js", "StackedArea.js"]
-  let fileArrayWithCommitData = Array(allFilesArr.length);
 
   //for each file we want in our Visualization, we need to send a query to the DB to fetch all the commits in which the file is mentioned. From the commits, we get data like
   //additions, deletions and date of commit, which is all needed for our Visualization
@@ -44,7 +43,6 @@ async function visualize() {
     //var mycoolvar = fetchFactory.getRelatedCommits("ui/src/visualizations/code-ownership-transfer/chart.js", 10)
 
     let commits = queryRes.file.commits.data
-    let changesArr = new Array(commits.length)
 
     //for each of the commits where the file has been featured, we look into the commit to find the date and number of additions & deletions on this file
     for (let j = 0; j < commits.length; j++) {
@@ -96,7 +94,6 @@ async function visualize() {
   console.log("+++++++++++++++++++++++")
   console.log(dataArr)
   console.log("+++++++++++++++++++++++")
-  //console.warn(testkeys)
 
   // set the dimensions and margins of the graph
   var margin = { top: 50, right: 30, bottom: 0, left: 10 },
@@ -115,12 +112,14 @@ async function visualize() {
   var keys = allFilesArr;
 
   // Add X axis
-  var x = d3.scaleLinear()
+  var xScale = d3.scaleLinear()
     .domain([2018, 2021])
-    .range([100, width - 100]);
+    .domain([2018, 2021])
+    .range([0, width - 100]);
+    
   svg.append("g")
     .attr("transform", "translate(0,320)")
-    .call(d3.axisBottom(x).tickSize(-height * .7).tickValues([2018, 2019, 2020, 2021])) //CHANGE ME
+    .call(d3.axisBottom(xScale).tickSize(-height * .7).tickValues([2018, 2019, 2020, 2021])) //CHANGE ME
     .select(".domain").remove()
   // Customization
   svg.selectAll(".tick line").attr("stroke", "#b8b8b8")
@@ -133,7 +132,7 @@ async function visualize() {
     .text("Time (year)");
 
   // Add Y axis
-  var y = d3.scaleLinear()
+  var yScale = d3.scaleLinear()
     .domain([-500, 400])
     .range([height, 0]);
 
@@ -165,11 +164,14 @@ async function visualize() {
     .attr("text-anchor", "left")
     .style("alignment-baseline", "middle")
 
-  //stack the data?
-  var stackedData = d3.stack() //error here: "d is undefined"
+  //stack the data
+  var stackGen = d3.stack()
     .offset(d3.stackOffsetSilhouette)
-    .keys(keys)
-    //(dataArr) //before here was (arr) if something doesn't work most likely unter anderem hier
+    .keys(keys);
+
+  var stackedSeries = stackGen(dataArr)
+  console.log(stackedSeries)
+
 
   // create a tooltip
   var Tooltip = svg
@@ -268,22 +270,16 @@ async function visualize() {
     Tooltip.text("Value of " + keys[i] + " in " + year + " is: " + yVal)
   }
 
-  //BIG CHANGES HERE - CHECK WITH SAFEFILE
-  var values = dataArr.values()
-  for (let index = 0; index < values.length; index++) {
-    const element = values[index];
-    console.log(element)
-  }
-
   // Area generator
+  var data = dataArr
   var area = d3.area()
-    .x(function (d) { return x(d.date); })
-    .y0(function (d) { return y(d[0]); })
-    .y1(function (d) { return y(d[1]); })
+    .x(function (d) { return xScale(d.data.date); })
+    .y0(function (d) { return yScale(d[0]); })
+    .y1(function (d) { return yScale(d[1]); });
 
-  // Show the areas
+  // Show the areas -------------------------- For some reason this doesn't work. Stacking works, maybe error here or in Area Generator
   svg.selectAll("mylayers")
-    .data(stackedData)
+    .data(stackedSeries)
     .enter()
     .append("path")
     .attr("class", "myArea")
@@ -292,8 +288,7 @@ async function visualize() {
     .on("mouseover", mouseover)
     .on("mousemove", mousemove)
     .on("mouseleave", mouseleave)
-    .on("click", mouseclick)
-
+    .on("click", mouseclick);
 }
 
 export default class locEvolution extends React.Component {
