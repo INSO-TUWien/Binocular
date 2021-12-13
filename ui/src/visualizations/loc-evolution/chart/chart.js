@@ -24,12 +24,13 @@ import * as zoomUtils from '../../../utils/zoom.js';
 import fetchRelatedCommits from '../sagas/fetchRelatedCommits.js';
 
 const dateExtractor = d => d.date;
-const arr = new Array();  //test mit var
 const testkeys = new Array();
 
 async function visualize() {
 
-  //let allFilesArr = new Array();
+  const dataArr = new Array();
+
+  //Here we will have to change to take the path + files from user selected input, this serves as a placeholder until that functionality is implemented
   let prefix = "ui/src/visualizations/code-ownership-river/chart/";
   let allFilesArr = ["Axis.js", "chart.js", "CommitMarker.js", "CommitMarker.scss", "GridLines.js", "index.js", "StackedArea.js"]
   let fileArrayWithCommitData = Array(allFilesArr.length);
@@ -38,6 +39,7 @@ async function visualize() {
   //additions, deletions and date of commit, which is all needed for our Visualization
   for (const indFile of allFilesArr) {
     let queryRes = await getRelatedCommits(prefix + indFile, 100);
+    //comments are here because we maybe outsource this function / the data-request in the future
     //var mycoolvar = fetchRelatedCommits.getRelatedCommits
     //var mycoolvar = fetchFactory.getRelatedCommits("ui/src/visualizations/code-ownership-transfer/chart.js", 10)
 
@@ -46,35 +48,56 @@ async function visualize() {
 
     //for each of the commits where the file has been featured, we look into the commit to find the date and number of additions & deletions on this file
     for (let j = 0; j < commits.length; j++) {
-      let struct = new Object();
-      struct.date = commits[j].date;
       let fileArr = commits[j].files.data;
       for (let i = 0; i < fileArr.length; i++) { //the query on the commits doesn't let us restrict the filename, therefore we need to check all the files in the commit and pick ours
-        if (fileArr[i].file.path === prefix + indFile) { //need to make filename dynamic here
-          struct.additions = fileArr[i].stats.additions;
-          struct.deletions = fileArr[i].stats.deletions;
+        if (fileArr[i].file.path === prefix + indFile) {
+          let additions = fileArr[i].stats.additions;
+          let deletions = fileArr[i].stats.deletions;
+          let netchanges = additions - deletions;
+
+          let tempObject = new Object();
+          tempObject.date = commits[j].date;
+          tempObject[indFile] = netchanges;
+          dataArr.push(tempObject);
         }
       }
-
-      struct.netchanges = struct.additions - struct.deletions;
-      changesArr[j] = struct;
     }
-    let fileWithData = new Object();
-    fileWithData.path = prefix;
-    fileWithData.name = indFile;
-    fileWithData.detailsArr = changesArr;
-
-    fileArrayWithCommitData.push(fileWithData);
   }
-  console.log(fileArrayWithCommitData);
 
-  // Parse the Data
-  d3.csv("../../../../assets/mockdata.csv", async function (data) {
-    arr.push(data)
-    testkeys.push(data.date)
-  })
+  //Sort for date
+  dataArr.sort((a, b) => a.date.localeCompare(b.date));
 
+  //Merging of the Objects with same Date, e.g. Obj1{date: 1.1., file1: x}, Obj2{date: 1.1., file2: y} => Obj1{date 1.1., file1:x, file2:y}
+  let flag = true;
+  while (flag) { //do this while there are still duplicate dates in the Object Array
+    for (let index = 0; index < dataArr.length - 1; index++) {
+      if (dataArr[index + 1].date == dataArr[index].date) { //check for each Object whether other Objects with same dates exist, if so, merge them
+        dataArr[index] = Object.assign(dataArr[index], dataArr[index + 1]) //merging of the objects
+        dataArr.splice(index + 1, 1) //removing the second Object from the Array
+      }
+    }
+    //Check whether there are still duplicate Datetimes in the Array
+    var valueArr = dataArr.map(function (item) { return item.date });
+    var isDuplicate = valueArr.some(function (item, idx) {
+      return valueArr.indexOf(item) != idx
+    });
+    flag = isDuplicate;
+  }
+
+  //Filling the Objects with Files, which haven't had commits on a specific Date
+  for (const filename of allFilesArr) {
+    for (const obj of dataArr) {
+      if(!obj.hasOwnProperty(filename)){
+        obj[filename] = 0;
+      }
+    }
+  }
+
+  console.log("+++++++++++++++++++++++")
+  console.log(dataArr)
+  console.log("+++++++++++++++++++++++")
   //console.warn(testkeys)
+
   // set the dimensions and margins of the graph
   var margin = { top: 50, right: 30, bottom: 0, left: 10 },
     width = 1200 - margin.left - margin.right,
@@ -89,20 +112,15 @@ async function visualize() {
     .attr("transform",
       "translate(10,20)");
 
-  // List of groups = header of the csv files
-  //var keys = testkeys
-  //var keys = arr.columns.slice(1);
-  var keys = ["file1", "file2", "file3", "file4", "file5", "file6", "file7", "file9", "file8", "file10"]
+  var keys = allFilesArr;
 
   // Add X axis
   var x = d3.scaleLinear()
-    //.domain(d3.extent(Object.values(data), function (d) { return d.date; }))   <-------- date ist ein problem hier!
-    .domain([2000, 2018])
+    .domain([2018, 2021])
     .range([100, width - 100]);
   svg.append("g")
     .attr("transform", "translate(0,320)")
-    .call(d3.axisBottom(x).tickSize(-height * .7).tickValues([2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010,
-      2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018]))
+    .call(d3.axisBottom(x).tickSize(-height * .7).tickValues([2018, 2019, 2020, 2021])) //CHANGE ME
     .select(".domain").remove()
   // Customization
   svg.selectAll(".tick line").attr("stroke", "#b8b8b8")
@@ -148,10 +166,10 @@ async function visualize() {
     .style("alignment-baseline", "middle")
 
   //stack the data?
-  var stackedData = d3.stack()
+  var stackedData = d3.stack() //error here: "d is undefined"
     .offset(d3.stackOffsetSilhouette)
     .keys(keys)
-    (arr)
+    //(dataArr) //before here was (arr) if something doesn't work most likely unter anderem hier
 
   // create a tooltip
   var Tooltip = svg
@@ -170,7 +188,7 @@ async function visualize() {
       .style("opacity", 1)
   }
 
-  var mousemove = function (d, i) {
+  var mousemove = function (d, i) { //not changed yet - but not priority yet
     var coordinates = d3.pointer(d);
     var mousex = coordinates[0];
     var invertedx = x.invert(mousex);
@@ -250,15 +268,16 @@ async function visualize() {
     Tooltip.text("Value of " + keys[i] + " in " + year + " is: " + yVal)
   }
 
-  var values = arr.values()
+  //BIG CHANGES HERE - CHECK WITH SAFEFILE
+  var values = dataArr.values()
   for (let index = 0; index < values.length; index++) {
     const element = values[index];
-    console.warn(element);
+    console.log(element)
   }
 
   // Area generator
   var area = d3.area()
-    .x(function (d) { return x(d.data.date); })
+    .x(function (d) { return x(d.date); })
     .y0(function (d) { return y(d[0]); })
     .y1(function (d) { return y(d[1]); })
 
