@@ -42,8 +42,6 @@ module.exports = {
   devtool: 'cheap-module-source-map',
   entry: [
     require.resolve('babel-polyfill'),
-    require.resolve('react-dev-utils/webpackHotDevClient'),
-    require.resolve('react-error-overlay'),
     './ui/src/index'
   ],
   output: {
@@ -72,21 +70,4 @@ module.exports = {
     new webpack.LoaderOptionsPlugin({ debug: true }),
     new webpack.NamedModulesPlugin()
   ],
-  devServer: {
-    historyApiFallback: true,
-    proxy: {
-      '/api': {
-        target: 'http://localhost:48763/',
-        secure: false
-      },
-      '/graphQl': {
-        target: 'http://localhost:48763/',
-        secure: false
-      },
-      '/wsapi': {
-        target: 'ws://localhost:48763',
-        ws: true
-      }
-    }
-  }
 };

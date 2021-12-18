@@ -1,8 +1,6 @@
 import { render } from 'react-dom';
 import { createStore, applyMiddleware } from 'redux';
 import { createLogger } from 'redux-logger';
-// import io from 'socket.io-client';
-// import createSocketIoMiddleware from 'redux-socket.io';
 import createSagaMiddleware from 'redux-saga';
 import { root } from './sagas';
 import _ from 'lodash';
@@ -19,8 +17,6 @@ import { importData } from './database';
 // import JSON data to pouchDB database and triple store if not already present
 importData();
 
-// const socket = io({ path: '/wsapi' });
-// const socketIo = createSocketIoMiddleware(socket, 'api/');
 const saga = createSagaMiddleware();
 
 const logger = createLogger({
@@ -55,7 +51,6 @@ const store = createStore(
     }
   },
   applyMiddleware(saga, logger)
-  // applyMiddleware(socketIo, saga, logger)
 );
 
 saga.run(root);
