@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "description": "Time-based visualizations of combined software engineering data",
   "main": "pupil.js",
+  "homepage": ".",
   "scripts": {
     "test": "npm run test-server && npm run test-ui",
     "test-server": "mocha --reporter spec test",
