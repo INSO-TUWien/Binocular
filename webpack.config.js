@@ -40,10 +40,7 @@ const cssLoaders = [
 
 module.exports = {
   devtool: 'cheap-module-source-map',
-  entry: [
-    require.resolve('babel-polyfill'),
-    './ui/src/index'
-  ],
+  entry: [require.resolve('babel-polyfill'), './ui/src/index'],
   output: {
     path: path.resolve(__dirname, './ui/assets'),
     pathinfo: true,
@@ -69,5 +66,5 @@ module.exports = {
     }),
     new webpack.LoaderOptionsPlugin({ debug: true }),
     new webpack.NamedModulesPlugin()
-  ],
+  ]
 };
