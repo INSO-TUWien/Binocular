@@ -29,8 +29,17 @@ import issueImpact from './visualizations/issue-impact';
 import hotspotDials from './visualizations/hotspot-dials';
 import codeHotspots from './visualizations/code-hotspots';
 import languageModuleRiver from './visualizations/language-module-river';
+import activeConflictAwareness from './visualizations/active-conflict-awareness';
 
-const visualizationModules = [dashboard, codeOwnershipRiver, issueImpact, hotspotDials, codeHotspots, languageModuleRiver];
+const visualizationModules = [
+  dashboard,
+  codeOwnershipRiver,
+  issueImpact,
+  hotspotDials,
+  activeConflictAwareness,
+  codeHotspots,
+  languageModuleRiver
+];
 
 const visualizations = {};
 _.each(visualizationModules, viz => {
