@@ -12,7 +12,7 @@ const fakerHelpers = require('faker/lib/helpers.js')(faker);
 const firstNames = require('faker/lib/locales/en/name/first_name.js');
 const lastNames = require('faker/lib/locales/en/name/last_name.js');
 const emailProviders = require('faker/lib/locales/en/internet/free_email.js');
-const lorem = require('lorem-ipsum');
+const lorem = require("lorem-ipsum").loremIpsum;
 
 const helpers = require('./helpers.js');
 const Repository = require('../lib/core/provider/git.js');
@@ -25,12 +25,10 @@ const neutralNouns = ['file', 'function', 'module', 'class', 'interface'];
 const positiveNouns = ['feature', 'function', 'documentation', ...neutralNouns];
 const negativeNouns = ['problem', 'bug', 'issue', ...neutralNouns];
 
-const mt = Random.engines.mt19937();
+// seed with a fixed value for reproducible tests
+const mt = Random.MersenneTwister19937.seed(4); // chosen by fair dice roll, guaranteed to be random ;)
 
-// seed with a fixed value for reproducacble tests
-mt.seed(4); // chosen by fair dice roll, guaranteed to be random ;)
-
-const random = new Random(mt);
+const random = new Random.Random(mt);
 
 const fake = {
   integer: function(...args) {

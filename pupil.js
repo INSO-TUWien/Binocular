@@ -19,7 +19,7 @@ function threadWarn(thread) {
 
 const ctx = require('./lib/context.js');
 
-const opn = require('opn');
+const open = require('open');
 const _ = require('lodash');
 const Promise = _.defaults(require('bluebird'), { config: () => {} });
 
@@ -362,6 +362,8 @@ async function optionalIndexerHandler(indexingThread, key, repository, reporter,
   return indexers[key];
 }
 
+process.on('error', (error) => console.log(error));
+
 process.on('SIGINT', stop);
 
 async function stop() {
@@ -511,7 +513,7 @@ Promise.all(
       httpServer.listen(port, () => {
         console.log(`Listening on http://localhost:${port}`);
         if (argv.ui && argv.open) {
-          opn(`http://localhost:${port}/`);
+          open(`http://localhost:${port}/`);
         }
       });
     },
