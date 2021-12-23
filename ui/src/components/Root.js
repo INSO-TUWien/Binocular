@@ -3,7 +3,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { Provider } from 'react-redux';
-import { BrowserRouter as Router, Route } from 'react-router-dom';
+import {BrowserRouter as Router, Route, Routes} from 'react-router-dom';
 import App from '../components/App';
 
 export default class Root extends React.Component {
@@ -18,7 +18,9 @@ export default class Root extends React.Component {
     return (
       <Provider store={this.props.store}>
         <Router>
-          <Route exact path="/" component={App} />
+          <Routes>
+            <Route exact path="/" element={<App/>} />
+          </Routes>
         </Router>
       </Provider>
     );
