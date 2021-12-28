@@ -68,7 +68,7 @@
     "@babel/runtime": "^7.16.5",
     "@fortawesome/fontawesome-free": "^5.15.4",
     "@grpc/proto-loader": "^0.6.7",
-    "@octokit/rest": "^18.12.0",
+    "@octokit/rest": "^16.43.2",
     "adm-zip": "^0.5.9",
     "arangojs": "^7.6.1",
     "archiver": "^5.3.0",
