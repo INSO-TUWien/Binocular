@@ -66,6 +66,10 @@ module.exports = {
         include: [path.resolve(__dirname, 'node_modules')],
         loader: 'file-loader',
       },
+      {
+        test: /\.json$/,
+        use: 'json-loader'
+      }
     ],
   },
   plugins: [
