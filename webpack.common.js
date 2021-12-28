@@ -65,10 +65,6 @@ module.exports = {
         test: /\.(ttf|eot|woff|svg)/,
         include: [path.resolve(__dirname, 'node_modules')],
         loader: 'file-loader',
-      },
-      {
-        test: /\.json$/,
-        use: 'json-loader'
       }
     ],
   },
