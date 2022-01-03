@@ -74,7 +74,7 @@ export default class columnChartGeneration {
   static generateColumnChart(data, columns, currThis, mode, legendSteps, displayProps) {
     d3.select('#chartColumns').remove();
     d3.select('#tooltipColumns').remove();
-    const w = document.getElementsByClassName('CodeMirror')[0].clientWidth - 80;
+    const w = document.getElementById('codeViewContainer').clientWidth - 80;
     const h = 100;
 
     for (let i = 0; i < currThis.combinedColumnData.length; i++) {
@@ -344,7 +344,7 @@ export default class columnChartGeneration {
   }
 
   static updateColumnChart(data, columns, currThis, mode, legendSteps, displayProps) {
-    const w = document.getElementsByClassName('CodeMirror')[0].clientWidth - 80;
+    const w = document.getElementById('codeViewContainer').clientWidth - 80;
     const h = 100;
 
     let maxValue = d3.max(currThis.combinedColumnData, d => d.value);
@@ -390,7 +390,7 @@ export default class columnChartGeneration {
 
   static generateBranchView(data, columns, currThis) {
     d3.select('#chartBranchView').remove();
-    const w = document.getElementsByClassName('CodeMirror')[0].clientWidth - 80;
+    const w = document.getElementById('codeViewContainer').clientWidth - 80;
     const h = 50;
 
     for (let i = 0; i < currThis.combinedColumnData.length; i++) {

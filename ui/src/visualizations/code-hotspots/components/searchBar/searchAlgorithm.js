@@ -39,6 +39,7 @@ export default class SearchAlgorithm {
     let filteredDataSet = dataSet.data;
     let firstLineNumber = 1;
     let code = dataSet.code;
+    let secondaryCode = dataSet.secondaryCode;
     const searchTermChunks = searchTerm.toLowerCase().split(' ');
     for (let i = 0; i < searchTermChunks.length; i++) {
       switch (searchTermChunks[i]) {
@@ -81,6 +82,7 @@ export default class SearchAlgorithm {
                 const endNr = parseInt(searchTermChunk.substring(1));
                 if (!isNaN(endNr)) {
                   code = code.split(/\r\n|\r|\n/).filter((e, i) => i < endNr).join('\n');
+                  secondaryCode = secondaryCode.split(/\r\n|\r|\n/).filter((e, i) => i < endNr).join('\n');
                   filteredDataSet = filteredDataSet.filter(d => d.row < endNr);
                 }
               } else if (searchTermChunk.endsWith('-')) {
@@ -88,6 +90,7 @@ export default class SearchAlgorithm {
                 if (!isNaN(startNr)) {
                   firstLineNumber = startNr;
                   code = code.split(/\r\n|\r|\n/).filter((e, i) => i >= startNr - 1).join('\n');
+                  secondaryCode = secondaryCode.split(/\r\n|\r|\n/).filter((e, i) => i >= startNr - 1).join('\n');
                   filteredDataSet = filteredDataSet.filter(d => d.row >= startNr - 1);
                 }
               } else {
@@ -97,6 +100,7 @@ export default class SearchAlgorithm {
                 if (!isNaN(startNr) && !isNaN(endNr)) {
                   firstLineNumber = startNr;
                   code = code.split(/\r\n|\r|\n/).filter((e, i) => i >= startNr - 1 && i < endNr).join('\n');
+                  secondaryCode = secondaryCode.split(/\r\n|\r|\n/).filter((e, i) => i >= startNr - 1 && i < endNr).join('\n');
                   filteredDataSet = filteredDataSet.filter(d => d.row >= startNr - 1 && d.row < endNr);
                 }
               }
@@ -105,6 +109,7 @@ export default class SearchAlgorithm {
               if (!isNaN(lineNr)) {
                 firstLineNumber = lineNr;
                 code = code.split(/\r\n|\r|\n/).find((e, i) => i === lineNr - 1);
+                secondaryCode = secondaryCode.split(/\r\n|\r|\n/).find((e, i) => i === lineNr - 1);
                 filteredDataSet = filteredDataSet.filter(d => d.row === lineNr - 1);
               }
             }
@@ -130,6 +135,7 @@ export default class SearchAlgorithm {
       issues: dataSet.issues,
       maxValue: dataSet.maxValue,
       code: code,
+      secondaryCode: secondaryCode,
       firstLineNumber: firstLineNumber,
       legendSteps: dataSet.legendSteps,
       searchTerm: searchTerm
@@ -140,6 +146,7 @@ export default class SearchAlgorithm {
     let filteredDataSet = dataSet.data;
     let firstLineNumber = 1;
     let code = dataSet.code;
+    let secondaryCode = dataSet.secondaryCode;
     const searchTermChunks = searchTerm.toLowerCase().split(' ');
     for (let i = 0; i < searchTermChunks.length; i++) {
       switch (searchTermChunks[i]) {
@@ -171,6 +178,7 @@ export default class SearchAlgorithm {
                 const endNr = parseInt(searchTermChunk.substring(1));
                 if (!isNaN(endNr)) {
                   code = code.split(/\r\n|\r|\n/).filter((e, i) => i < endNr).join('\n');
+                  secondaryCode = secondaryCode.split(/\r\n|\r|\n/).filter((e, i) => i < endNr).join('\n');
                   filteredDataSet = filteredDataSet.filter(d => d.row < endNr);
                 }
               } else if (searchTermChunk.endsWith('-')) {
@@ -178,6 +186,7 @@ export default class SearchAlgorithm {
                 if (!isNaN(startNr)) {
                   firstLineNumber = startNr;
                   code = code.split(/\r\n|\r|\n/).filter((e, i) => i >= startNr - 1).join('\n');
+                  secondaryCode = secondaryCode.split(/\r\n|\r|\n/).filter((e, i) => i >= startNr - 1).join('\n');
                   filteredDataSet = filteredDataSet.filter(d => d.row >= startNr - 1);
                 }
               } else {
@@ -187,6 +196,7 @@ export default class SearchAlgorithm {
                 if (!isNaN(startNr) && !isNaN(endNr)) {
                   firstLineNumber = startNr;
                   code = code.split(/\r\n|\r|\n/).filter((e, i) => i >= startNr - 1 && i < endNr).join('\n');
+                  secondaryCode = secondaryCode.split(/\r\n|\r|\n/).filter((e, i) => i >= startNr - 1 && i < endNr).join('\n');
                   filteredDataSet = filteredDataSet.filter(d => d.row >= startNr - 1 && d.row < endNr);
                 }
               }
@@ -195,6 +205,7 @@ export default class SearchAlgorithm {
               if (!isNaN(lineNr)) {
                 firstLineNumber = lineNr;
                 code = code.split(/\r\n|\r|\n/).find((e, i) => i === lineNr - 1);
+                secondaryCode = secondaryCode.split(/\r\n|\r|\n/).find((e, i) => i === lineNr - 1);
                 filteredDataSet = filteredDataSet.filter(d => d.row === lineNr - 1);
               }
             }
@@ -211,6 +222,7 @@ export default class SearchAlgorithm {
       issues: dataSet.issues,
       maxValue: dataSet.maxValue,
       code: code,
+      secondaryCode: secondaryCode,
       firstLineNumber: firstLineNumber,
       legendSteps: dataSet.legendSteps,
       searchTerm: searchTerm

@@ -34,6 +34,7 @@ export default class CodeHotspots extends React.PureComponent {
     this.elems = {};
     this.state = {
       code: 'No File Selected',
+      secondaryCode: 'No File Selected',
       branch: 'main',
       checkedOutBranch: 'main',
       fileURL: '',
@@ -42,7 +43,7 @@ export default class CodeHotspots extends React.PureComponent {
       compareSha: '',
       mode: 0, //modes: 0...Changes/Version  1...Changes/Developer  2...Changes/Issue
       data: {},
-      filteredData: { code: 'No File Selected', firstLineNumber: 1, searchTerm: '' },
+      filteredData: { code: 'No File Selected', secondaryCode: 'No File Selected', firstLineNumber: 1, searchTerm: '' },
       displayProps: {
         dataScaleHeatmap: 0,
         dataScaleColumns: 0,
@@ -172,19 +173,48 @@ export default class CodeHotspots extends React.PureComponent {
                   <div className={'branchView'} />
                 </div>
               : ''}
-            <div className={chartStyles.codeView}>
-              <CodeMirror
-                id={'codeView'}
-                ref={'codeView'}
-                value={this.state.filteredData.code}
-                options={{
-                  mode: ModeSwitcher.modeFromExtension(this.state.path.split('.').pop()),
-                  theme: 'default',
-                  lineNumbers: true,
-                  readOnly: true,
-                  firstLineNumber: this.state.filteredData.firstLineNumber
-                }}
-              />
+            {this.state.compareSha === ''
+              ? ''
+              : <div className={chartStyles.codeViewIndicators}>
+                  <div className={chartStyles.codeViewPrimaryIndicator} />
+                  <div className={chartStyles.codeViewSecondaryIndicator} />
+                </div>}
+            <div className={chartStyles.codeView} id={'codeViewContainer'}>
+              <div
+                className={
+                  this.state.compareSha === ''
+                    ? chartStyles.codeViewWidthFull
+                    : chartStyles.codeViewWidthHalf + ' ' + chartStyles.codeViewPrimary
+                }>
+                <CodeMirror
+                  id={'codeView'}
+                  ref={'codeView'}
+                  value={this.state.filteredData.code}
+                  options={{
+                    mode: ModeSwitcher.modeFromExtension(this.state.path.split('.').pop()),
+                    theme: 'default',
+                    lineNumbers: true,
+                    readOnly: true,
+                    firstLineNumber: this.state.filteredData.firstLineNumber
+                  }}
+                />
+              </div>
+              {this.state.compareSha === ''
+                ? ''
+                : <div className={chartStyles.codeViewWidthHalf + ' ' + chartStyles.codeViewSecondary}>
+                    <CodeMirror
+                      id={'codeViewSecondary'}
+                      ref={'codeViewSecondary'}
+                      value={this.state.filteredData.secondaryCode}
+                      options={{
+                        mode: ModeSwitcher.modeFromExtension(this.state.path.split('.').pop()),
+                        theme: 'default',
+                        lineNumbers: true,
+                        readOnly: true,
+                        firstLineNumber: this.state.filteredData.firstLineNumber
+                      }}
+                    />
+                  </div>}
               <div className={chartStyles.heatmapContainer}>
                 <svg id={'heatmap'} className="chartHeatmap" />
               </div>
@@ -202,8 +232,8 @@ export default class CodeHotspots extends React.PureComponent {
     if (this.state.path !== '') {
       Loading.insert();
       Loading.setState(0, 'Requesting Source Code');
-      const xhr = new XMLHttpRequest();
-      xhr.open(
+      const sourceCodeRequest = new XMLHttpRequest();
+      sourceCodeRequest.open(
         'GET',
         this.state.fileURL
           .replace('github.com', 'raw.githubusercontent.com')
@@ -211,26 +241,56 @@ export default class CodeHotspots extends React.PureComponent {
           .replace(this.state.checkedOutBranch, this.state.sha === '' ? this.state.branch : this.state.sha),
         true
       );
-      xhr.onload = function() {
-        if (xhr.readyState === 4) {
+      sourceCodeRequest.onload = function() {
+        if (sourceCodeRequest.readyState === 4) {
           //if (xhr.status === 200) {
-          if (this.state.path === this.prevPath && (this.state.sha !== this.prevSha || this.state.prevCompareSha !== this.compareSha)) {
+          if (this.state.path === this.prevPath && (this.state.sha !== this.prevSha || this.state.compareSha !== this.prevCompareSha)) {
             this.prevSha = this.state.sha;
             this.prevCompareSha = this.state.compareSha;
             this.codeChanged = true;
             this.dataChanged = false;
             Loading.remove();
             const data = this.state.data;
-            data.code = xhr.responseText;
-            this.setState({
-              data: data,
-              filteredData:
-                this.state.mode === 2
-                  ? searchAlgorithm.performIssueSearch(data, this.state.filteredData.searchTerm)
-                  : this.state.mode === 1
-                    ? searchAlgorithm.performDeveloperSearch(data, this.state.filteredData.searchTerm)
-                    : this.state.mode === 0 ? searchAlgorithm.performCommitSearch(data, this.state.filteredData.searchTerm) : data
-            });
+            data.code = sourceCodeRequest.responseText;
+            data.secondaryCode = sourceCodeRequest.responseText;
+            if (this.state.compareSha !== '') {
+              Loading.setState(50, 'Requesting Comparison Source Code');
+              const secondarySourceCodeRequest = new XMLHttpRequest();
+              secondarySourceCodeRequest.open(
+                'GET',
+                this.state.fileURL
+                  .replace('github.com', 'raw.githubusercontent.com')
+                  .replace('/blob', '')
+                  .replace(this.state.checkedOutBranch, this.state.compareSha),
+                true
+              );
+              const currThis = this;
+              secondarySourceCodeRequest.onload = function() {
+                data.secondaryCode = secondarySourceCodeRequest.responseText;
+                currThis.setState({
+                  data: data,
+                  filteredData:
+                    currThis.state.mode === 2
+                      ? searchAlgorithm.performIssueSearch(data, currThis.state.filteredData.searchTerm)
+                      : currThis.state.mode === 1
+                        ? searchAlgorithm.performDeveloperSearch(data, currThis.state.filteredData.searchTerm)
+                        : currThis.state.mode === 0
+                          ? searchAlgorithm.performCommitSearch(data, currThis.state.filteredData.searchTerm)
+                          : data
+                });
+              };
+              secondarySourceCodeRequest.send(null);
+            } else {
+              this.setState({
+                data: data,
+                filteredData:
+                  this.state.mode === 2
+                    ? searchAlgorithm.performIssueSearch(data, this.state.filteredData.searchTerm)
+                    : this.state.mode === 1
+                      ? searchAlgorithm.performDeveloperSearch(data, this.state.filteredData.searchTerm)
+                      : this.state.mode === 0 ? searchAlgorithm.performCommitSearch(data, this.state.filteredData.searchTerm) : data
+              });
+            }
           } else {
             const path = this.state.path;
             const mode = this.state.mode;
@@ -247,16 +307,21 @@ export default class CodeHotspots extends React.PureComponent {
                     Loading.setState(66, 'Transforming Developer Data');
                     setTimeout(
                       function() {
-                        const lines = (xhr.status === 200 ? xhr.responseText : '').split(/\r\n|\r|\n/).length;
+                        const lines = (sourceCodeRequest.status === 200 ? sourceCodeRequest.responseText : '').split(/\r\n|\r|\n/).length;
                         const data = chartUpdater.transformChangesPerDeveloperData(resp, lines);
                         //this.codeChanged = true;
                         this.dataChanged = true;
-                        data.code = xhr.status === 200 ? xhr.responseText : 'No commit code in current selected Branch!';
+                        // eslint-disable-next-line max-len
+                        data.code =
+                          sourceCodeRequest.status === 200 ? sourceCodeRequest.responseText : 'No commit code in current selected Branch!';
                         data.firstLineNumber = 1;
                         data.searchTerm = '';
 
                         this.setState({
-                          code: xhr.status === 200 ? xhr.responseText : 'No commit code in current selected Branch!',
+                          code:
+                            sourceCodeRequest.status === 200
+                              ? sourceCodeRequest.responseText
+                              : 'No commit code in current selected Branch!',
                           data: data,
                           filteredData: data
                         });
@@ -273,15 +338,19 @@ export default class CodeHotspots extends React.PureComponent {
                     Loading.setState(66, 'Transforming Issue Data');
                     setTimeout(
                       function() {
-                        const lines = (xhr.status === 200 ? xhr.responseText : '').split(/\r\n|\r|\n/).length;
+                        const lines = (sourceCodeRequest.status === 200 ? sourceCodeRequest.responseText : '').split(/\r\n|\r|\n/).length;
                         const data = chartUpdater.transformChangesPerIssueData(resp, lines);
                         //this.codeChanged = true;
                         this.dataChanged = true;
-                        data.code = xhr.status === 200 ? xhr.responseText : 'No commit code in current selected Branch!';
+                        data.code =
+                          sourceCodeRequest.status === 200 ? sourceCodeRequest.responseText : 'No commit code in current selected Branch!';
                         data.firstLineNumber = 1;
                         data.searchTerm = '';
                         this.setState({
-                          code: xhr.status === 200 ? xhr.responseText : 'No commit code in current selected Branch!',
+                          code:
+                            sourceCodeRequest.status === 200
+                              ? sourceCodeRequest.responseText
+                              : 'No commit code in current selected Branch!',
                           data: data,
                           filteredData: data
                         });
@@ -298,12 +367,13 @@ export default class CodeHotspots extends React.PureComponent {
                     Loading.setState(66, 'Transforming Version Data');
                     setTimeout(
                       function() {
-                        const lines = (xhr.status === 200 ? xhr.responseText : '').split(/\r\n|\r|\n/).length;
+                        const lines = (sourceCodeRequest.status === 200 ? sourceCodeRequest.responseText : '').split(/\r\n|\r|\n/).length;
                         const data = chartUpdater.transformChangesPerVersionData(resp, lines);
 
                         //this.codeChanged = true;
                         this.dataChanged = true;
-                        data.code = xhr.status === 200 ? xhr.responseText : 'No commit code in current selected Branch!';
+                        data.code =
+                          sourceCodeRequest.status === 200 ? sourceCodeRequest.responseText : 'No commit code in current selected Branch!';
                         data.firstLineNumber = 1;
                         data.searchTerm = '';
 
@@ -319,7 +389,10 @@ export default class CodeHotspots extends React.PureComponent {
                           currDisplayProps.dateRange.to.length - 3
                         );
                         this.setState({
-                          code: xhr.status === 200 ? xhr.responseText : 'No commit code in current selected Branch!',
+                          code:
+                            sourceCodeRequest.status === 200
+                              ? sourceCodeRequest.responseText
+                              : 'No commit code in current selected Branch!',
                           data: data,
                           filteredData: data,
                           displayProps: currDisplayProps
@@ -334,11 +407,11 @@ export default class CodeHotspots extends React.PureComponent {
           }
         }
       }.bind(this);
-      xhr.onerror = function() {
-        Loading.setErrorText(xhr.statusText);
-        console.error(xhr.statusText);
+      sourceCodeRequest.onerror = function() {
+        Loading.setErrorText(sourceCodeRequest.statusText);
+        console.error(sourceCodeRequest.statusText);
       };
-      xhr.send(null);
+      sourceCodeRequest.send(null);
     }
   }
 
