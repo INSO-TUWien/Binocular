@@ -85,25 +85,14 @@ export default class columnChartGeneration {
       .select('.barChart')
       .append('svg')
       .attr('width', '100%')
-      .attr('height', h)
-      .attr('viewBox', '0 0 ' + w + ' ' + h)
+      .attr('height', h + 6)
+      .attr('viewBox', '0 0 ' + w + ' ' + (h + 6))
       .attr('preserveAspectRatio', 'none')
       .attr('class', 'chartColumns')
       .attr('id', 'chartColumns');
 
     //Background
     const groupBack = barChart.append('g').attr('width', w).attr('height', h).attr('id', 'background');
-    groupBack
-      .selectAll('rect')
-      .data(currThis.combinedColumnData)
-      .enter()
-      .append('rect')
-      .attr('fill', '#EEEEEE88')
-      .attr('class', 'sBar')
-      .attr('x', (d, i) => i * w / currThis.combinedColumnData.length)
-      .attr('y', 0)
-      .attr('width', w / currThis.combinedColumnData.length)
-      .attr('height', h);
 
     barChart.append('g').attr('width', w).attr('height', h).attr('id', 'columnChart');
     const selection = barChart.append('g').attr('width', w).attr('height', h).attr('id', 'selection');
@@ -131,6 +120,17 @@ export default class columnChartGeneration {
     const groupInfo = barChart.append('g').attr('width', w).attr('height', h).attr('id', 'info');
     switch (mode) {
       case 1:
+        groupBack
+          .selectAll('rect')
+          .data(currThis.combinedColumnData)
+          .enter()
+          .append('rect')
+          .attr('fill', '#EEEEEE88')
+          .attr('class', 'sBar')
+          .attr('x', (d, i) => i * w / currThis.combinedColumnData.length)
+          .attr('y', 0)
+          .attr('width', w / currThis.combinedColumnData.length)
+          .attr('height', h);
         groupInfo
           .selectAll('rect')
           .data(currThis.combinedColumnData)
@@ -185,6 +185,17 @@ export default class columnChartGeneration {
           });
         break;
       case 2:
+        groupBack
+          .selectAll('rect')
+          .data(currThis.combinedColumnData)
+          .enter()
+          .append('rect')
+          .attr('fill', '#EEEEEE88')
+          .attr('class', 'sBar')
+          .attr('x', (d, i) => i * w / currThis.combinedColumnData.length)
+          .attr('y', 0)
+          .attr('width', w / currThis.combinedColumnData.length)
+          .attr('height', h);
         groupInfo
           .selectAll('rect')
           .data(currThis.combinedColumnData)
@@ -243,6 +254,23 @@ export default class columnChartGeneration {
         break;
       default:
         //Background
+        groupBack
+          .selectAll('rect')
+          .data(currThis.combinedColumnData)
+          .enter()
+          .append('rect')
+          .attr(
+            'fill',
+            d =>
+              d.sha.localeCompare(currThis.state.selectedCommit.sha) === 0
+                ? '#3273dc22'
+                : d.sha.localeCompare(currThis.state.selectedCompareCommit.sha) === 0 ? '#4cd96422' : '#EEEEEE88'
+          )
+          .attr('class', 'sBar')
+          .attr('x', (d, i) => i * w / currThis.combinedColumnData.length)
+          .attr('y', 0)
+          .attr('width', w / currThis.combinedColumnData.length)
+          .attr('height', h);
         selection
           .selectAll('rect')
           .data(currThis.combinedColumnData)
@@ -251,17 +279,16 @@ export default class columnChartGeneration {
           .attr('fill', '#00000000')
           .attr('class', 'sBar')
           .attr('x', (d, i) => i * w / currThis.combinedColumnData.length + 2)
-          .attr('y', 2)
+          .attr('y', h + 2)
           .attr('width', w / currThis.combinedColumnData.length - 4)
-          .attr('height', h - 4)
+          .attr('height', 4)
           .attr(
-            'stroke',
+            'fill',
             d =>
-              d.sha.localeCompare(currThis.state.sha) === 0
+              d.sha.localeCompare(currThis.state.selectedCommit.sha) === 0
                 ? '#3273dc'
-                : d.sha.localeCompare(currThis.state.compareSha) === 0 ? '#4cd964' : '#00000000'
-          )
-          .attr('stroke-width', 4);
+                : d.sha.localeCompare(currThis.state.selectedCompareCommit.sha) === 0 ? '#4cd964' : '#00000000'
+          );
 
         groupInfo
           .selectAll('rect')
@@ -324,9 +351,9 @@ export default class columnChartGeneration {
           })
           .on('click', function(event, d) {
             if (event.shiftKey) {
-              currThis.setState({ compareSha: d.sha });
+              currThis.setState({ selectedCompareCommit: { commitID: d.column, sha: d.sha } });
             } else {
-              currThis.setState({ sha: d.sha });
+              currThis.setState({ selectedCommit: { commitID: d.column, sha: d.sha } });
             }
           });
         setTimeout(
@@ -443,9 +470,9 @@ export default class columnChartGeneration {
       .attr(
         'stroke',
         d =>
-          d.sha.localeCompare(currThis.state.sha) === 0
+          d.sha.localeCompare(currThis.state.selectedCommit.sha) === 0
             ? '#3273dc'
-            : d.sha.localeCompare(currThis.state.compareSha) === 0 ? '#4cd964' : '#00000000'
+            : d.sha.localeCompare(currThis.state.selectedCompareCommit.sha) === 0 ? '#4cd964' : '#00000000'
       )
       .style('stroke-width', '2px')
       .attr('rx', '100%')
@@ -499,9 +526,9 @@ export default class columnChartGeneration {
       })
       .on('click', function(event, d) {
         if (event.shiftKey) {
-          currThis.setState({ compareSha: d.sha });
+          currThis.setState({ selectedCompareCommit: { commitID: d.column, sha: d.sha } });
         } else {
-          currThis.setState({ sha: d.sha });
+          currThis.setState({ selectedCommit: { commitID: d.column, sha: d.sha } });
         }
       });
     commits.exit().remove();

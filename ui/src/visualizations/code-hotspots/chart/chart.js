@@ -39,8 +39,14 @@ export default class CodeHotspots extends React.PureComponent {
       checkedOutBranch: 'main',
       fileURL: '',
       path: '',
-      sha: '',
-      compareSha: '',
+      selectedCommit: {
+        commitID: 0,
+        sha: ''
+      },
+      selectedCompareCommit: {
+        commitID: 0,
+        sha: ''
+      },
       mode: 0, //modes: 0...Changes/Version  1...Changes/Developer  2...Changes/Issue
       data: {},
       filteredData: { code: 'No File Selected', secondaryCode: 'No File Selected', firstLineNumber: 1, searchTerm: '' },
@@ -100,6 +106,7 @@ export default class CodeHotspots extends React.PureComponent {
         }
       }
     }
+
     return (
       <div className={styles.w100}>
         <div className={'loadingContainer'} />
@@ -150,21 +157,31 @@ export default class CodeHotspots extends React.PureComponent {
                 }.bind(this)}
               />
             </span>
-            {this.state.sha !== '' &&
+            {this.state.selectedCommit.sha !== '' &&
               <span>
                 <span className={styles.verticalSeparator} />
                 <button
                   className={'button ' + styles.mg1 + ' ' + styles.button}
                   onClick={() => {
-                    this.setState({ sha: '' });
-                    this.setState({ compareSha: '' });
+                    this.setState({
+                      selectedCommit: {
+                        commitID: 0,
+                        sha: ''
+                      }
+                    });
+                    this.setState({
+                      selectedCompareCommit: {
+                        commitID: 0,
+                        sha: ''
+                      }
+                    });
                   }}>
                   Back to current Version
                 </button>
               </span>}
           </div>
 
-          <div className={styles.w100 + ' ' + styles.pr}>
+          <div className={styles.w100 + ' ' + styles.pa}>
             <div id={'barChartContainer'} className={chartStyles.barChartContainer}>
               <div className={'barChart'} />
             </div>
@@ -173,23 +190,39 @@ export default class CodeHotspots extends React.PureComponent {
                   <div className={'branchView'} />
                 </div>
               : ''}
-            {this.state.compareSha === ''
+            {this.state.selectedCompareCommit.sha === ''
               ? ''
               : <div className={chartStyles.codeViewIndicators}>
-                  <div className={chartStyles.codeViewPrimaryIndicator} />
-                  <div className={chartStyles.codeViewSecondaryIndicator} />
+                  <div
+                    className={
+                      this.state.selectedCommit.commitID <= this.state.selectedCompareCommit.commitID
+                        ? chartStyles.codeViewPrimaryIndicator
+                        : chartStyles.codeViewSecondaryIndicator
+                    }
+                  />
+                  <div
+                    className={
+                      this.state.selectedCommit.commitID > this.state.selectedCompareCommit.commitID
+                        ? chartStyles.codeViewPrimaryIndicator
+                        : chartStyles.codeViewSecondaryIndicator
+                    }
+                  />
                 </div>}
             <div className={chartStyles.codeView} id={'codeViewContainer'}>
               <div
                 className={
-                  this.state.compareSha === ''
+                  this.state.selectedCompareCommit.sha === ''
                     ? chartStyles.codeViewWidthFull
                     : chartStyles.codeViewWidthHalf + ' ' + chartStyles.codeViewPrimary
                 }>
                 <CodeMirror
                   id={'codeView'}
                   ref={'codeView'}
-                  value={this.state.filteredData.code}
+                  value={
+                    this.state.selectedCommit.commitID <= this.state.selectedCompareCommit.commitID
+                      ? this.state.filteredData.code
+                      : this.state.filteredData.secondaryCode
+                  }
                   options={{
                     mode: ModeSwitcher.modeFromExtension(this.state.path.split('.').pop()),
                     theme: 'default',
@@ -199,13 +232,17 @@ export default class CodeHotspots extends React.PureComponent {
                   }}
                 />
               </div>
-              {this.state.compareSha === ''
+              {this.state.selectedCompareCommit.sha === ''
                 ? ''
                 : <div className={chartStyles.codeViewWidthHalf + ' ' + chartStyles.codeViewSecondary}>
                     <CodeMirror
                       id={'codeViewSecondary'}
                       ref={'codeViewSecondary'}
-                      value={this.state.filteredData.secondaryCode}
+                      value={
+                        this.state.selectedCommit.commitID > this.state.selectedCompareCommit.commitID
+                          ? this.state.filteredData.code
+                          : this.state.filteredData.secondaryCode
+                      }
                       options={{
                         mode: ModeSwitcher.modeFromExtension(this.state.path.split('.').pop()),
                         theme: 'default',
@@ -238,22 +275,25 @@ export default class CodeHotspots extends React.PureComponent {
         this.state.fileURL
           .replace('github.com', 'raw.githubusercontent.com')
           .replace('/blob', '')
-          .replace(this.state.checkedOutBranch, this.state.sha === '' ? this.state.branch : this.state.sha),
+          .replace(this.state.checkedOutBranch, this.state.selectedCommit.sha === '' ? this.state.branch : this.state.selectedCommit.sha),
         true
       );
       sourceCodeRequest.onload = function() {
         if (sourceCodeRequest.readyState === 4) {
           //if (xhr.status === 200) {
-          if (this.state.path === this.prevPath && (this.state.sha !== this.prevSha || this.state.compareSha !== this.prevCompareSha)) {
-            this.prevSha = this.state.sha;
-            this.prevCompareSha = this.state.compareSha;
+          if (
+            this.state.path === this.prevPath &&
+            (this.state.selectedCommit.sha !== this.prevSha || this.state.selectedCompareCommit.sha !== this.prevCompareSha)
+          ) {
+            this.prevSha = this.state.selectedCommit.sha;
+            this.prevCompareSha = this.state.selectedCompareCommit.sha;
             this.codeChanged = true;
             this.dataChanged = false;
             Loading.remove();
             const data = this.state.data;
             data.code = sourceCodeRequest.responseText;
             data.secondaryCode = sourceCodeRequest.responseText;
-            if (this.state.compareSha !== '') {
+            if (this.state.selectedCompareCommit.sha !== '') {
               Loading.setState(50, 'Requesting Comparison Source Code');
               const secondarySourceCodeRequest = new XMLHttpRequest();
               secondarySourceCodeRequest.open(
@@ -261,7 +301,7 @@ export default class CodeHotspots extends React.PureComponent {
                 this.state.fileURL
                   .replace('github.com', 'raw.githubusercontent.com')
                   .replace('/blob', '')
-                  .replace(this.state.checkedOutBranch, this.state.compareSha),
+                  .replace(this.state.checkedOutBranch, this.state.selectedCompareCommit.sha),
                 true
               );
               const currThis = this;
@@ -296,8 +336,8 @@ export default class CodeHotspots extends React.PureComponent {
             const mode = this.state.mode;
             this.prevPath = this.state.path;
             this.prevMode = this.state.mode;
-            this.prevSha = this.state.sha;
-            this.prevCompareSha = this.state.compareSha;
+            this.prevSha = this.state.selectedCommit.sha;
+            this.prevCompareSha = this.state.selectedCompareCommit.sha;
 
             switch (mode) {
               case 1:

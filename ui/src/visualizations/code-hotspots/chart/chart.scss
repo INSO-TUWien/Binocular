@@ -25,15 +25,17 @@
 }
 
 .codeViewPrimaryIndicator{
-  position: absolute;
+  //position: absolute;
+  display: inline-block;
   background-color: #3273dc;
   width: 50%;
   height: 1rem;
 }
 
 .codeViewSecondaryIndicator{
-  position: absolute;
-  left: 50%;
+  display: inline-block;
+  //position: absolute;
+  //left: 50%;
   background-color: #4cd964;
   width: 50%;
   height: 1rem;
