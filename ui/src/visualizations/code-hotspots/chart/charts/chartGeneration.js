@@ -1,20 +1,35 @@
 import heatmapChartGeneration from './subCharts/heatmapChartGeneration';
 import rowChartGeneration from './subCharts/rowChartGeneration';
 import columnChartGeneration from './subCharts/columnChartGeneration';
+import hunkChartGeneration from './subCharts/hunkChartGeneration';
 
 export default class chartGeneration {
-  static generateHeatmap(data, lines, importantColumns, currThis, mode, maxValue, legendSteps, firstLineNumber, displayProps) {
-    heatmapChartGeneration.generateHeatmap(
-      data,
-      lines,
-      importantColumns,
-      currThis,
-      mode,
-      maxValue,
-      legendSteps,
-      firstLineNumber,
-      displayProps
-    );
+  static generateHeatmap(data, rawData, lines, importantColumns, currThis, mode, maxValue, legendSteps, firstLineNumber, displayProps) {
+    if (displayProps.mainVisualizationMode === 1 && mode === 0) {
+      hunkChartGeneration.generateHunkChart(
+        rawData,
+        lines,
+        importantColumns,
+        currThis,
+        mode,
+        maxValue,
+        legendSteps,
+        firstLineNumber,
+        displayProps
+      );
+    } else {
+      heatmapChartGeneration.generateHeatmap(
+        data,
+        lines,
+        importantColumns,
+        currThis,
+        mode,
+        maxValue,
+        legendSteps,
+        firstLineNumber,
+        displayProps
+      );
+    }
   }
 
   static updateHeatmap(data, lines, importantColumns, currThis, mode, maxValue, legendSteps, firstLineNumber, displayProps) {

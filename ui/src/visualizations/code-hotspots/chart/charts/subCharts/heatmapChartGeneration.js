@@ -11,21 +11,21 @@ const ODD_COLOR = '#EEEEEE55';
 
 export default class heatmapChartGeneration {
   static generateHeatmap(data, lines, importantColumns, currThis, mode, maxValue, legendSteps, firstLineNumber, displayProps) {
-    d3.select('.chartHeatmap > *').remove();
+    d3.select('.chartMain > *').remove();
     currThis.combinedHeatmapData = data;
     const width = document.getElementById('barChartContainer').clientWidth,
       height = 24 * lines,
       margins = { top: 24, right: 0, bottom: 0, left: 0 };
     //Setting chart width and adjusting for margins
     const chart = d3
-      .select('.chartHeatmap')
+      .select('.chartMain')
       .attr('width', 'calc(100% - 105px)')
       .attr('height', height + margins.top + margins.bottom)
       .attr('viewBox', '0 0 ' + width + ' ' + (height + margins.top + margins.bottom))
       .attr('preserveAspectRatio', 'none')
       .append('g')
       .attr('transform', 'translate(' + margins.left + ',' + margins.top + ')')
-      .attr('id', 'heatmapChart');
+      .attr('id', 'chartMain');
     for (const rowKey of d3Collection.nest().key(d => d.row).entries(currThis.combinedHeatmapData).map(d => d.key)) {
       chart.append('g').attr('id', 'row' + rowKey);
     }

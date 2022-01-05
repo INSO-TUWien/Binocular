@@ -150,6 +150,7 @@ export default class chartUpdater {
     chartGeneration.generateRowSummary(filteredData, data.lines, currThis, mode, data.legendSteps, data.firstLineNumber, displayProps);
     chartGeneration.generateHeatmap(
       filteredData,
+      data.rawData,
       data.lines,
       importantColumns,
       currThis,

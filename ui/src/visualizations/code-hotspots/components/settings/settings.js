@@ -136,6 +136,43 @@ export default class Settings extends React.PureComponent {
                 />
               </div>
               <hr />
+              <div className={styles.label}>Main Visualization Mode:</div>
+              <div className="field">
+                <div className="buttons has-addons">
+                  <button
+                    id={'mainVisualizationModeHeatmap'}
+                    className={'button ' + settingsStyles.buttonRowSelected}
+                    onClick={() => {
+                      document.getElementById('mainVisualizationModeHeatmap').classList.add(settingsStyles.buttonRowSelected);
+                      document.getElementById('mainVisualizationModeHunks').classList.remove(settingsStyles.buttonRowSelected);
+                      const currDisplayProps = this.state.displayProps;
+                      currDisplayProps.mainVisualizationMode = 0;
+                      document.getElementById('heatmapStyleClassic').disabled = false;
+                      document.getElementById('heatmapStyleCompact').disabled = false;
+                      document.getElementById('heatmapStyleModerate').disabled = false;
+                      this.setState({ displayProps: currDisplayProps });
+                    }}>
+                    Heatmap
+                  </button>
+                  <button
+                    id={'mainVisualizationModeHunks'}
+                    className={'button'}
+                    onClick={() => {
+                      document.getElementById('mainVisualizationModeHeatmap').classList.remove(settingsStyles.buttonRowSelected);
+                      document.getElementById('mainVisualizationModeHunks').classList.add(settingsStyles.buttonRowSelected);
+                      const currDisplayProps = this.state.displayProps;
+                      currDisplayProps.mainVisualizationMode = 1;
+                      document.getElementById('heatmapStyleClassic').disabled = true;
+                      document.getElementById('heatmapStyleCompact').disabled = true;
+                      document.getElementById('heatmapStyleModerate').disabled = true;
+                      this.setState({ displayProps: currDisplayProps });
+                    }}>
+                    Hunks
+                  </button>
+                </div>
+                <span>Hunk view only available in Changes/Version mode!</span>
+              </div>
+              <hr />
               <div className={styles.label}>Heatmap Style:</div>
               <div className="field">
                 <div className="buttons has-addons">
@@ -179,8 +216,8 @@ export default class Settings extends React.PureComponent {
                     Compact
                   </button>
                 </div>
-                <hr />
               </div>
+              <hr />
             </div>
           </div>
         </div>

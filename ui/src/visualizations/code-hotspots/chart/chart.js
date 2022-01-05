@@ -59,7 +59,8 @@ export default class CodeHotspots extends React.PureComponent {
           from: '',
           to: ''
         },
-        heatMapStyle: 0
+        heatMapStyle: 0,
+        mainVisualizationMode: 0
       }
     };
 
@@ -253,7 +254,7 @@ export default class CodeHotspots extends React.PureComponent {
                     />
                   </div>}
               <div className={chartStyles.heatmapContainer}>
-                <svg id={'heatmap'} className="chartHeatmap" />
+                <svg id={'chartMain'} className="chartMain" />
               </div>
               <div id={'rowSummaryContainer'} className={chartStyles.rowSummaryContainer}>
                 <div className="chartRowSummary" />
@@ -356,7 +357,7 @@ export default class CodeHotspots extends React.PureComponent {
                           sourceCodeRequest.status === 200 ? sourceCodeRequest.responseText : 'No commit code in current selected Branch!';
                         data.firstLineNumber = 1;
                         data.searchTerm = '';
-
+                        data.rawData = resp;
                         this.setState({
                           code:
                             sourceCodeRequest.status === 200
@@ -386,6 +387,7 @@ export default class CodeHotspots extends React.PureComponent {
                           sourceCodeRequest.status === 200 ? sourceCodeRequest.responseText : 'No commit code in current selected Branch!';
                         data.firstLineNumber = 1;
                         data.searchTerm = '';
+                        data.rawData = resp;
                         this.setState({
                           code:
                             sourceCodeRequest.status === 200
@@ -416,7 +418,7 @@ export default class CodeHotspots extends React.PureComponent {
                           sourceCodeRequest.status === 200 ? sourceCodeRequest.responseText : 'No commit code in current selected Branch!';
                         data.firstLineNumber = 1;
                         data.searchTerm = '';
-
+                        data.rawData = resp;
                         const currDisplayProps = this.state.displayProps;
                         currDisplayProps.dateRange.from = data.data[0].date.split('.')[0];
                         currDisplayProps.dateRange.from = currDisplayProps.dateRange.from.substring(
