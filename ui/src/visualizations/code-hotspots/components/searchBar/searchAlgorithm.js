@@ -138,7 +138,8 @@ export default class SearchAlgorithm {
       secondaryCode: secondaryCode,
       firstLineNumber: firstLineNumber,
       legendSteps: dataSet.legendSteps,
-      searchTerm: searchTerm
+      searchTerm: searchTerm,
+      rawData: dataSet.rawData
     };
   }
 
@@ -225,7 +226,8 @@ export default class SearchAlgorithm {
       secondaryCode: secondaryCode,
       firstLineNumber: firstLineNumber,
       legendSteps: dataSet.legendSteps,
-      searchTerm: searchTerm
+      searchTerm: searchTerm,
+      rawData: dataSet.rawData
     };
   }
 
@@ -318,7 +320,8 @@ export default class SearchAlgorithm {
       code: code,
       firstLineNumber: firstLineNumber,
       legendSteps: dataSet.legendSteps,
-      searchTerm: searchTerm
+      searchTerm: searchTerm,
+      rawData: dataSet.rawData
     };
   }
 }

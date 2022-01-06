@@ -4,7 +4,7 @@ import columnChartGeneration from './subCharts/columnChartGeneration';
 import hunkChartGeneration from './subCharts/hunkChartGeneration';
 
 export default class chartGeneration {
-  static generateHeatmap(data, rawData, lines, importantColumns, currThis, mode, maxValue, legendSteps, firstLineNumber, displayProps) {
+  static generateMainChart(data, rawData, lines, importantColumns, currThis, mode, maxValue, legendSteps, firstLineNumber, displayProps) {
     if (displayProps.mainVisualizationMode === 1 && mode === 0) {
       hunkChartGeneration.generateHunkChart(
         rawData,
@@ -32,18 +32,32 @@ export default class chartGeneration {
     }
   }
 
-  static updateHeatmap(data, lines, importantColumns, currThis, mode, maxValue, legendSteps, firstLineNumber, displayProps) {
-    heatmapChartGeneration.updateHeatmap(
-      data,
-      lines,
-      importantColumns,
-      currThis,
-      mode,
-      maxValue,
-      legendSteps,
-      firstLineNumber,
-      displayProps
-    );
+  static updateMainChart(data, rawData, lines, importantColumns, currThis, mode, maxValue, legendSteps, firstLineNumber, displayProps) {
+    if (displayProps.mainVisualizationMode === 1 && mode === 0) {
+      hunkChartGeneration.generateHunkChart(
+        rawData,
+        lines,
+        importantColumns,
+        currThis,
+        mode,
+        maxValue,
+        legendSteps,
+        firstLineNumber,
+        displayProps
+      );
+    } else {
+      heatmapChartGeneration.updateHeatmap(
+        data,
+        lines,
+        importantColumns,
+        currThis,
+        mode,
+        maxValue,
+        legendSteps,
+        firstLineNumber,
+        displayProps
+      );
+    }
   }
 
   static generateRowSummary(data, lines, currThis, mode, legendSteps, firstLineNumber, displayProps) {

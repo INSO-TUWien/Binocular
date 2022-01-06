@@ -148,7 +148,7 @@ export default class chartUpdater {
     );
     filteredData = filteredData.filter(d => importantColumns.includes(d.column));
     chartGeneration.generateRowSummary(filteredData, data.lines, currThis, mode, data.legendSteps, data.firstLineNumber, displayProps);
-    chartGeneration.generateHeatmap(
+    chartGeneration.generateMainChart(
       filteredData,
       data.rawData,
       data.lines,
@@ -177,6 +177,31 @@ export default class chartUpdater {
       currThis,
       mode,
       data.legendSteps,
+      displayProps
+    );
+  }
+
+  static updateMainChart(currThis, mode, data, displayProps) {
+    let filteredData = data.data;
+    if (mode === 0) {
+      filteredData = data.data.filter(
+        d => new Date(d.date) >= new Date(displayProps.dateRange.from) && new Date(d.date) <= new Date(displayProps.dateRange.to)
+      );
+    }
+    const combinedColumnData = chartGeneration.updateColumnData(filteredData, currThis, mode);
+    const importantColumns = combinedColumnData.map(d => d.column);
+
+    filteredData = filteredData.filter(d => importantColumns.includes(d.column));
+    chartGeneration.updateMainChart(
+      filteredData,
+      data.rawData,
+      data.lines,
+      importantColumns,
+      currThis,
+      mode,
+      data.maxValue,
+      data.legendSteps,
+      data.firstLineNumber,
       displayProps
     );
   }

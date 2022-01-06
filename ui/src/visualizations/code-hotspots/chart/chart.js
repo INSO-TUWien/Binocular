@@ -104,6 +104,7 @@ export default class CodeHotspots extends React.PureComponent {
         } else {
           this.codeChanged = false;
           chartUpdater.updateColumnChart(this, this.state.mode, this.state.filteredData, this.state.displayProps);
+          chartUpdater.updateMainChart(this, this.state.mode, this.state.filteredData, this.state.displayProps);
         }
       }
     }

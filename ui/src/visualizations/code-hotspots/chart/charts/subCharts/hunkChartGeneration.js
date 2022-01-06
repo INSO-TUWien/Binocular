@@ -23,24 +23,70 @@ export default class hunkChartGeneration {
       .append('g')
       .attr('transform', 'translate(' + margins.left + ',' + margins.top + ')')
       .attr('id', 'chartMain');
-    console.log(data);
-    for (const commitKey in data.data) {
+
+    chart.append('g').attr('id', 'commitBackground');
+    let filteredData = data.data;
+
+    if (currThis.state.selectedCompareCommit.sha !== '') {
+      filteredData = filteredData.filter((d, i) => {
+        let earlierVersion, laterVersion;
+        if (currThis.state.selectedCommit.commitID <= currThis.state.selectedCompareCommit.commitID) {
+          earlierVersion = currThis.state.selectedCommit.commitID;
+          laterVersion = currThis.state.selectedCompareCommit.commitID;
+        } else {
+          earlierVersion = currThis.state.selectedCompareCommit.commitID;
+          laterVersion = currThis.state.selectedCommit.commitID;
+        }
+        return i >= earlierVersion + 1 && i <= laterVersion + 1;
+      });
+    }
+    for (const commitKey in filteredData) {
       chart.append('g').attr('id', 'commit' + commitKey);
     }
     setTimeout(
       function() {
-        this.updateHunkChart(data, lines, importantColumns, currThis, mode, maxValue, legendSteps, firstLineNumber, displayProps);
+        this.updateHunkChart(
+          { data: filteredData },
+          lines,
+          importantColumns,
+          currThis,
+          mode,
+          maxValue,
+          legendSteps,
+          firstLineNumber,
+          displayProps
+        );
       }.bind(this)
     );
   }
 
   static updateHunkChart(data, lines, importantColumns, currThis, mode, maxValue, legendSteps, firstLineNumber, displayProps) {
-    const columns = importantColumns.length;
-
+    let columns = data.data.length;
     const width = document.getElementById('barChartContainer').clientWidth;
-    const barWidth = width / columns,
-      barHeight = 24;
+    let barWidth = width / columns;
+    const barHeight = 24;
     Loading.showBackgroundRefresh('HunkChart generation in progress!');
+
+    if (columns < importantColumns.length) {
+      columns = columns - 1;
+      barWidth = width / 2 / columns;
+    }
+
+    d3
+      .select('#commitBackground')
+      .selectAll('rect')
+      .data(Array.from(Array(lines).keys()))
+      .enter()
+      .append('rect')
+      .attr('x', 0)
+      .attr('y', d => {
+        return d * barHeight;
+      })
+      .style('fill', d => {
+        return d % 2 === 1 ? '#FFFFFF' : '#FAFAFA';
+      })
+      .attr('width', width)
+      .attr('height', barHeight);
 
     for (const commitKey in data.data) {
       d3
@@ -50,10 +96,11 @@ export default class hunkChartGeneration {
         .enter()
         .append('path')
         .attr('d', d => {
-          const x1 = commitKey * barWidth + 1;
+          console.log(commitKey === columns ? width / 2 : barWidth);
+          const x1 = commitKey * barWidth;
           const y11 = (d.oldStart - firstLineNumber - 1) * barHeight;
           const y12 = (d.oldStart - firstLineNumber - 1 + d.oldLines) * barHeight;
-          const x2 = commitKey * barWidth + barWidth - 1;
+          const x2 = commitKey * barWidth + (parseInt(commitKey) === parseInt(columns) ? width / 2 : barWidth);
           const y21 = (d.newStart - firstLineNumber - 1) * barHeight;
           const y22 = (d.newStart - firstLineNumber - 1 + d.newLines) * barHeight;
           return (
@@ -101,40 +148,6 @@ export default class hunkChartGeneration {
             : d.newLines > d.oldLines ? HUNK_ADDITION_COLOR_STROKE : HUNK_CHANGE_COLOR_STROKE;
         });
 
-      /*d3
-        .select('#commit' + commitKey)
-        .selectAll('rect')
-        .data(data.data[commitKey].file.hunks)
-        .enter()
-        .append('path')
-        .attr('d', d => {
-          return d3.line().curve(d3.curveBasis)([
-            [commitKey * barWidth, (d.oldStart - firstLineNumber - 1) * barHeight],
-            [commitKey * barWidth + barWidth / 3, (d.oldStart - firstLineNumber - 1) * barHeight],
-            [commitKey * barWidth + barWidth - barWidth / 3, (d.newStart - firstLineNumber - 1) * barHeight],
-            [commitKey * barWidth + barWidth, (d.newStart - firstLineNumber - 1) * barHeight]
-          ]);
-        })
-        .attr('fill', 'none')
-        .attr('stroke', 'green');*/
-
-      /*d3
-        .select('#commit' + commitKey)
-        .selectAll('rect')
-        .data(data.data[commitKey].file.hunks)
-        .enter()
-        .append('path')
-        .attr('d', d => {
-          return d3.line()([
-            [commitKey * barWidth, (d.oldStart - firstLineNumber - 1) * barHeight],
-            [commitKey * barWidth, (d.oldStart - firstLineNumber - 1 + d.oldLines) * barHeight],
-            [commitKey * barWidth + barWidth, (d.newStart - firstLineNumber - 1 + d.newLines) * barHeight],
-            [commitKey * barWidth + barWidth, (d.newStart - firstLineNumber - 1) * barHeight]
-          ]);
-        })
-        .style('fill', d => {
-          return d.newLines > d.oldLines ? HUNK_DELETION_COLOR : d.newLines < d.oldLines ? HUNK_ADDITION_COLOR : HUNK_CHANGE_COLOR;
-        });*/
       Loading.hideBackgroundRefresh();
     }
   }
