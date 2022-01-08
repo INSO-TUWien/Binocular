@@ -9,7 +9,6 @@ export default class chartUpdater {
     const legendSteps = 20;
 
     let maxValue = 0;
-
     const data = rawData.data
       .map((commit, i) => {
         const columnData = new Array(lines).fill({ value: 0 }, 0, lines).map((row, j) => {
@@ -45,6 +44,7 @@ export default class chartUpdater {
         return columnData;
       })
       .flat();
+
     return { data: data, lines: lines, commits: commits, maxValue: maxValue, legendSteps: legendSteps };
   }
 

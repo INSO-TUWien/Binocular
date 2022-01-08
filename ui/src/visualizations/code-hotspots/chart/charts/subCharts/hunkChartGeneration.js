@@ -25,6 +25,7 @@ export default class hunkChartGeneration {
       .attr('id', 'chartMain');
 
     chart.append('g').attr('id', 'commitBackground');
+
     let filteredData = data.data;
 
     if (currThis.state.selectedCompareCommit.sha !== '') {

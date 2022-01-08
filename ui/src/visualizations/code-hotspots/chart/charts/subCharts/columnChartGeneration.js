@@ -11,7 +11,6 @@ export default class columnChartGeneration {
   static updateColumnData(data, currThis, mode) {
     let combinedColumnData;
     currThis.tooltipLocked = false;
-
     switch (mode) {
       case 1:
         combinedColumnData = d3Collection
