@@ -29,6 +29,7 @@ const testkeys = new Array();
 async function visualize() {
 
   const dataArr = new Array();
+  let dateArr = new Array();
 
   //Here we will have to change to take the path + files from user selected input, this serves as a placeholder until that functionality is implemented
   let prefix = "ui/src/visualizations/code-ownership-river/chart/";
@@ -54,7 +55,8 @@ async function visualize() {
           let netchanges = additions - deletions;
 
           let tempObject = new Object();
-          tempObject.date = commits[j].date;
+          tempObject.date = Date.parse(commits[j].date); //convert strings to timestamps
+          dateArr.push(tempObject.date);
           tempObject[indFile] = netchanges;
           dataArr.push(tempObject);
         }
@@ -63,7 +65,8 @@ async function visualize() {
   }
 
   //Sort for date
-  dataArr.sort((a, b) => a.date.localeCompare(b.date));
+  dataArr.sort((a, b) => a.date-b.date);
+  dateArr.sort((a, b) => a-b);
 
   //Merging of the Objects with same Date, e.g. Obj1{date: 1.1., file1: x}, Obj2{date: 1.1., file2: y} => Obj1{date 1.1., file1:x, file2:y}
   let flag = true;
@@ -91,10 +94,6 @@ async function visualize() {
     }
   }
 
-  console.log("+++++++++++++++++++++++")
-  console.log(dataArr)
-  console.log("+++++++++++++++++++++++")
-
   // set the dimensions and margins of the graph
   var margin = { top: 50, right: 30, bottom: 0, left: 10 },
     width = 1200 - margin.left - margin.right,
@@ -112,14 +111,14 @@ async function visualize() {
   var keys = allFilesArr;
 
   // Add X axis
+  // Skala zu Timestamp machen hier
   var xScale = d3.scaleLinear()
-    .domain([2018, 2021])
-    .domain([2018, 2021])
+    .domain([Math.min(...dateArr), Math.max(...dateArr)])
     .range([0, width - 100]);
 
   svg.append("g")
     .attr("transform", "translate(0,320)")
-    .call(d3.axisBottom(xScale).tickSize(-height * .7).tickValues([2018, 2019, 2020, 2021])) //CHANGE ME
+    .call(d3.axisBottom(xScale).tickSize(-height * .7))
     .select(".domain").remove()
   // Customization
   svg.selectAll(".tick line").attr("stroke", "#b8b8b8")
@@ -273,7 +272,7 @@ async function visualize() {
   // Area generator
   var data = dataArr
   var area = d3.area()
-    .x(function (d) { return xScale(d.data.date); })
+    .x(function (d) { return xScale(d.data.date); }) 
     .y0(function (d) { return yScale(d[0]); })
     .y1(function (d) { return yScale(d[1]); });
 
@@ -300,7 +299,7 @@ export default class locEvolution extends React.Component {
     this.state = {
       elements
     };
-    console.warn("Blub: " + this.state.elements)
+    //console.warn("Blub: " + this.state.elements)
     this.updateDomain(props);
     this.onResize = zoomUtils.onResizeFactory(0.7, 0.7);
     this.onZoom = zoomUtils.onZoomFactory({ constrain: true, margin: 50 });
