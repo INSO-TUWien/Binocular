@@ -55,7 +55,7 @@ async function visualize() {
           let netchanges = additions - deletions;
 
           let tempObject = new Object();
-          tempObject.date = Date.parse(commits[j].date); //convert strings to timestamps
+          tempObject.date = new Date(commits[j].date); //convert strings to timestamps
           dateArr.push(tempObject.date);
           tempObject[indFile] = netchanges;
           dataArr.push(tempObject);
@@ -65,8 +65,8 @@ async function visualize() {
   }
 
   //Sort for date
-  dataArr.sort((a, b) => a.date-b.date);
-  dateArr.sort((a, b) => a-b);
+  dataArr.sort((a, b) => a.date - b.date);
+  dateArr.sort((a, b) => a - b);
 
   //Merging of the Objects with same Date, e.g. Obj1{date: 1.1., file1: x}, Obj2{date: 1.1., file2: y} => Obj1{date 1.1., file1:x, file2:y}
   let flag = true;
@@ -110,16 +110,22 @@ async function visualize() {
 
   var keys = allFilesArr;
 
+  var minDate = Math.min(...dateArr);
+  var maxDate = Math.max(...dateArr);
+  console.warn("Min Date: ", minDate, "\r\n Max Date: ", maxDate)
+
   // Add X axis
   // Skala zu Timestamp machen hier
   var xScale = d3.scaleLinear()
-    .domain([Math.min(...dateArr), Math.max(...dateArr)])
+    .domain([minDate, maxDate])
     .range([0, width - 100]);
+
 
   svg.append("g")
     .attr("transform", "translate(0,320)")
-    .call(d3.axisBottom(xScale).tickSize(-height * .7))
+    .call(d3.axisBottom(xScale).tickSize(-height * .7).tickFormat(d3.timeYears(minDate, maxDate, 31556952000))) //a year in milliseconds
     .select(".domain").remove()
+
   // Customization
   svg.selectAll(".tick line").attr("stroke", "#b8b8b8")
 
@@ -272,7 +278,7 @@ async function visualize() {
   // Area generator
   var data = dataArr
   var area = d3.area()
-    .x(function (d) { return xScale(d.data.date); }) 
+    .x(function (d) { return xScale(d.data.date); })
     .y0(function (d) { return yScale(d[0]); })
     .y1(function (d) { return yScale(d[1]); });
 
@@ -320,7 +326,7 @@ export default class locEvolution extends React.Component {
 
   render() {
     visualize();
-    return (      
+    return (
       <div id="my_dataviz"></div>
     )
   }
