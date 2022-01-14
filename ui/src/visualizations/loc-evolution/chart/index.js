@@ -7,19 +7,12 @@ import { setViewport, openCommit } from '../sagas';
 
 const mapStateToProps = (state /*, ownProps*/) => {
   const corState = state.visualizations.locEvolution.state;
-
-  const issues = corState.config.overlay === 'issues' ? corState.data.data.issues : [];
-  const builds = corState.config.overlay === 'builds' ? corState.data.data.builds : [];
+  const elements = ["File12", "File22", "File32"]; // IT IS THIS ONE HERE - muss es nor vor dem anderen herkrigen, dann ist es nicht mehr undefined et voilà!!
+  corState.elements = elements;
+  state.visualizations.locEvolution.state.elements = elements;
 
   return {
-    palette: corState.data.data.palette,
-    otherCount: corState.data.data.otherCount,
-    commits: corState.data.data.commits,
-    commitAttribute: corState.config.commitAttribute,
-    issues,
-    builds,
-    highlightedIssue: corState.config.highlightedIssue,
-    highlightedCommits: corState.config.highlightedCommits
+    elements: corState.elements
   };
 };
 

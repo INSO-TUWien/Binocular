@@ -14,7 +14,6 @@ import styles from '../styles.scss';
 import _ from 'lodash';
 import Axis from './Axis.js';
 import GridLines from './GridLines.js';
-import CommitMarker from './CommitMarker.js';
 import StackedArea from './StackedArea.js';
 
 import Legend from '../../../components/Legend';
@@ -22,6 +21,7 @@ import ZoomableChartContainer from '../../../components/svg/ZoomableChartContain
 import OffsetGroup from '../../../components/svg/OffsetGroup.js';
 import * as zoomUtils from '../../../utils/zoom.js';
 import fetchRelatedCommits from '../sagas/fetchRelatedCommits.js';
+import LocEvolutionConfig from '../config.js';
 
 const dateExtractor = d => d.date;
 const testkeys = new Array();
@@ -85,7 +85,7 @@ async function visualize() {
   //Filling the Objects with Files, which haven't had commits on a specific Date
   for (const filename of allFilesArr) {
     for (const obj of dataArr) {
-      if(!obj.hasOwnProperty(filename)){
+      if (!obj.hasOwnProperty(filename)) {
         obj[filename] = 0;
       }
     }
@@ -116,7 +116,7 @@ async function visualize() {
     .domain([2018, 2021])
     .domain([2018, 2021])
     .range([0, width - 100]);
-    
+
   svg.append("g")
     .attr("transform", "translate(0,320)")
     .call(d3.axisBottom(xScale).tickSize(-height * .7).tickValues([2018, 2019, 2020, 2021])) //CHANGE ME
@@ -295,83 +295,33 @@ export default class locEvolution extends React.Component {
   constructor(props) {
     super(props);
 
+    const elements = this.extractCommitData(props);
     this.elems = {};
-
-    const { commitSeries, lastCommitDataPoint, commitLegend } = this.extractCommitData(props);
     this.state = {
-      dirty: true,
-      isPanning: false,
-      lastCommitDataPoint,
-      commitLegend,
-      commitSeries,
-      dimensions: zoomUtils.initialDimensions()
+      elements
     };
-
-    const x = d3.scaleTime().rangeRound([0, 0]);
-    const y = d3.scaleLinear().rangeRound([0, 0]);
-
-    this.scales = {
-      x,
-      y,
-      scaledX: x,
-      scaledY: y
-    };
-
-    this.commitExtractors = {
-      x: d => d.date
-    };
-
+    console.warn("Blub: " + this.state.elements)
     this.updateDomain(props);
     this.onResize = zoomUtils.onResizeFactory(0.7, 0.7);
     this.onZoom = zoomUtils.onZoomFactory({ constrain: true, margin: 50 });
   }
 
   updateDomain(data) {
+
     if (!data.commits) {
       return;
     }
-
-    const commitDateExtent = d3.extent(data.commits, d => d.date);
-    const commitCountExtent = [0, _.last(data.commits).totals.count];
-
-    const issueDateExtent = d3.extent(data.issues, d => d.createdAt);
-    const issueCountExtent = d3.extent(data.issues, d => d.count);
-
-    const buildDateExtent = d3.extent(data.builds, b => b.date);
-    const buildCountExtent = d3.extent(data.builds, b => b.stats.total);
-
-    const min = arr => _.min(_.pull(arr, null));
-    const max = arr => _.max(_.pull(arr, null));
-
-    this.scales.x.domain([
-      min([commitDateExtent[0], issueDateExtent[0], buildDateExtent[0]]),
-      max([commitDateExtent[1], issueDateExtent[1], buildDateExtent[1]])
-    ]);
-
-    this.scales.y.domain([
-      min([this.scales.y.domain()[0], commitCountExtent[0], issueCountExtent[0], buildCountExtent[0]]),
-      max([this.scales.y.domain()[1], commitCountExtent[1], issueCountExtent[1], buildCountExtent[1]])
-    ]);
   }
 
   componentDidMount() {
   }
 
   componentWillReceiveProps(nextProps) {
-    const { commitSeries, lastCommitDataPoint, commitLegend } = this.extractCommitData(nextProps);
-    this.setState(
-      {
-        lastCommitDataPoint,
-        commitSeries,
-        commitLegend
-      },
-      () => this.updateDomain(nextProps)
-    );
   }
 
   render() {
     visualize();
-    return (
+    return (      
       <div id="my_dataviz"></div>
     )
   }
@@ -381,43 +331,8 @@ export default class locEvolution extends React.Component {
   }
 
   extractCommitData(props) {
-    if (!props.commits || props.commits.length === 0) {
-      return {};
-    }
-
-    const lastCommitDataPoint = _.last(props.commits).statsByAuthor;
-    const commitLegend = [];
-    const commitSeries = _.map(lastCommitDataPoint, (committerIndex, signature) => {
-      const legend = {
-        name:
-          (props.commitAttribute === 'count' ? 'Commits by ' : 'Changes by ') +
-          (signature === 'other' ? props.otherCount + ' Others' : signature),
-        style: {
-          fill: props.palette[signature]
-        }
-      };
-
-      commitLegend.push(legend);
-
-      return {
-        style: {
-          fill: props.palette[signature]
-        },
-        extractY: d => {
-          const stats = d.statsByAuthor[signature];
-
-          if (props.commitAttribute === 'count') {
-            return stats ? stats.count : 0;
-          } else {
-            return stats ? stats.changes / d.totals.changes * d.totals.count : 0;
-          }
-        },
-        onMouseEnter: () => this.activateLegend(legend),
-        onMouseLeave: () => this.activateLegend(null)
-      };
-    });
-
-    return { commitSeries, commitLegend };
+    const elements = ["File11", "File21", "File31"];
+    return elements;
   }
 }
 

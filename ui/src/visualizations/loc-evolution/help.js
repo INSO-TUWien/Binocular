@@ -6,7 +6,7 @@ import styles from './styles.scss';
 
 export default () =>
   <div className={cx('box', styles.help)}>
-    <h1 className="title">Code Ownership River Help</h1>
+    <h1 className="title">LoC-Evolution Help</h1>
     <p>
       This chart shows the amount of commits created by each developer. Each developer is assigned a color and the respective commit counts
       are stacked cumulatively on the vertical axis.
