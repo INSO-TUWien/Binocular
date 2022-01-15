@@ -29,7 +29,7 @@ const testkeys = new Array();
 async function visualize() {
 
   const dataArr = new Array();
-  let dateArr = new Array();
+  const dateArr = new Array();
 
   //Here we will have to change to take the path + files from user selected input, this serves as a placeholder until that functionality is implemented
   let prefix = "ui/src/visualizations/code-ownership-river/chart/";
@@ -70,30 +70,39 @@ async function visualize() {
 
   //Merging of the Objects with same Date, e.g. Obj1{date: 1.1., file1: x}, Obj2{date: 1.1., file2: y} => Obj1{date 1.1., file1:x, file2:y}
   let flag = true;
+  let tempDateArr = new Array();
   while (flag) { //do this while there are still duplicate dates in the Object Array
-    for (let index = 0; index < dataArr.length - 1; index++) {
-      if (dataArr[index + 1].date == dataArr[index].date) { //check for each Object whether other Objects with same dates exist, if so, merge them
+    tempDateArr = [];
+    for (let index = 0; index < dataArr.length-1; index++) {
+      if (+dataArr[index + 1].date.getTime() === +dataArr[index].date.getTime()) { //check for each Object whether other Objects with same dates exist, if so, merge them
         dataArr[index] = Object.assign(dataArr[index], dataArr[index + 1]) //merging of the objects
         dataArr.splice(index + 1, 1) //removing the second Object from the Array
       }
+      tempDateArr.push(dataArr[index].date.toLocaleTimeString())
     }
     //Check whether there are still duplicate Datetimes in the Array
-    var valueArr = dataArr.map(function (item) { return item.date });
-    var isDuplicate = valueArr.some(function (item, idx) {
-      return valueArr.indexOf(item) != idx
-    });
-    flag = isDuplicate;
+    flag = hasDuplicates(tempDateArr)
   }
+  
+  console.warn("first: ",  JSON.stringify(dataArr))
+  const maxValues = new Array();
 
   //Filling the Objects with Files, which haven't had commits on a specific Date
   for (const filename of allFilesArr) {
-    for (const obj of dataArr) {
-      if (!obj.hasOwnProperty(filename)) {
-        obj[filename] = 0;
+    let tempVar = 0;
+    let i = 0;
+    for (i; i < dataArr.length; i++) {
+      if (!dataArr[i].hasOwnProperty(filename)) {
+        dataArr[i][filename] = tempVar;
+      } else {
+        dataArr[i][filename] += tempVar
+        tempVar = dataArr[i][filename]
       }
     }
+    maxValues.push(tempVar)
   }
 
+  console.warn("2nd: ", JSON.stringify(dataArr))
   // set the dimensions and margins of the graph
   var margin = { top: 50, right: 30, bottom: 0, left: 0 },
     width = 1200 - margin.left - margin.right,
@@ -112,7 +121,6 @@ async function visualize() {
 
   var minDate = Math.min(...dateArr);
   var maxDate = Math.max(...dateArr);
-  console.warn("Min Date: ", minDate, "\r\n Max Date: ", maxDate)
 
   // Add X axis
   // Skala zu Timestamp machen hier
@@ -139,8 +147,8 @@ async function visualize() {
 
   // Add Y axis
   var yScale = d3.scaleLinear()
-    .domain([-500, 400])
-    .range([height, 0]);
+    .domain([-200, 500])
+    .range([100, height]);
 
   // color palette
   var color = d3.scaleOrdinal()
@@ -404,3 +412,10 @@ async function getRelatedCommits(filename, perPage) {
     .then(resp => myresp = resp)
   return myresp
 };
+
+function hasDuplicates(a) {
+
+  const noDups = new Set(a);
+
+  return a.length !== noDups.size;
+}
