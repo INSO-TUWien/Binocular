@@ -95,7 +95,7 @@ async function visualize() {
   }
 
   // set the dimensions and margins of the graph
-  var margin = { top: 50, right: 30, bottom: 0, left: 10 },
+  var margin = { top: 50, right: 30, bottom: 0, left: 0 },
     width = 1200 - margin.left - margin.right,
     height = 500 - margin.top - margin.bottom;
 
@@ -118,12 +118,13 @@ async function visualize() {
   // Skala zu Timestamp machen hier
   var xScale = d3.scaleLinear()
     .domain([minDate, maxDate])
+    .nice()
     .range([0, width - 100]);
 
 
   svg.append("g")
     .attr("transform", "translate(0,320)")
-    .call(d3.axisBottom(xScale).tickSize(-height * .7).tickFormat(d3.timeYears(minDate, maxDate, 31556952000))) //a year in milliseconds
+    .call(d3.axisBottom(xScale).tickSize(-height * .7).tickFormat(d3.timeFormat("%Y-%m-%d")))
     .select(".domain").remove()
 
   // Customization
