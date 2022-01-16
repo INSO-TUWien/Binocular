@@ -129,9 +129,12 @@ export default class chartUpdater {
 
   static generateCharts(currThis, mode, data, displayProps) {
     let filteredData = data.data;
+
     if (mode === 0) {
       filteredData = data.data.filter(
-        d => new Date(d.date) >= new Date(displayProps.dateRange.from) && new Date(d.date) <= new Date(displayProps.dateRange.to)
+        d =>
+          new Date(d.date.split('.')[0]) >= new Date(displayProps.dateRange.from) &&
+          new Date(d.date.split('.')[0]) <= new Date(displayProps.dateRange.to)
       );
     }
 

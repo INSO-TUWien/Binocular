@@ -283,6 +283,7 @@ export default class CodeHotspots extends React.PureComponent {
       sourceCodeRequest.onload = function() {
         if (sourceCodeRequest.readyState === 4) {
           //if (xhr.status === 200) {
+
           if (
             this.state.path === this.prevPath &&
             (this.state.selectedCommit.sha !== this.prevSha || this.state.selectedCompareCommit.sha !== this.prevCompareSha)
@@ -412,7 +413,6 @@ export default class CodeHotspots extends React.PureComponent {
                       function() {
                         const lines = (sourceCodeRequest.status === 200 ? sourceCodeRequest.responseText : '').split(/\r\n|\r|\n/).length;
                         const data = chartUpdater.transformChangesPerVersionData(resp, lines);
-
                         //this.codeChanged = true;
                         this.dataChanged = true;
                         data.code =
@@ -422,15 +422,7 @@ export default class CodeHotspots extends React.PureComponent {
                         data.rawData = resp;
                         const currDisplayProps = this.state.displayProps;
                         currDisplayProps.dateRange.from = data.data[0].date.split('.')[0];
-                        currDisplayProps.dateRange.from = currDisplayProps.dateRange.from.substring(
-                          0,
-                          currDisplayProps.dateRange.from.length - 3
-                        );
                         currDisplayProps.dateRange.to = data.data[data.data.length - 1].date.split('.')[0];
-                        currDisplayProps.dateRange.to = currDisplayProps.dateRange.to.substring(
-                          0,
-                          currDisplayProps.dateRange.to.length - 3
-                        );
                         this.setState({
                           code:
                             sourceCodeRequest.status === 200

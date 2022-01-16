@@ -67,6 +67,7 @@ export default class columnChartGeneration {
           .map(d => d.value);
         break;
     }
+
     return combinedColumnData;
   }
 

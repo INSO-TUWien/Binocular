@@ -91,13 +91,21 @@ export default class hunkChartGeneration {
 
     for (const commitKey in data.data) {
       d3
+        .select('#commitBackground')
+        .append('line')
+        .style('stroke', '#00000033')
+        .attr('x1', commitKey * barWidth)
+        .attr('y1', -barHeight)
+        .attr('x2', commitKey * barWidth)
+        .attr('y2', barHeight * lines);
+
+      d3
         .select('#commit' + commitKey)
         .selectAll('rect')
         .data(data.data[commitKey].file.hunks)
         .enter()
         .append('path')
         .attr('d', d => {
-          console.log(commitKey === columns ? width / 2 : barWidth);
           const x1 = commitKey * barWidth;
           const y11 = (d.oldStart - firstLineNumber - 1) * barHeight;
           const y12 = (d.oldStart - firstLineNumber - 1 + d.oldLines) * barHeight;
@@ -148,8 +156,7 @@ export default class hunkChartGeneration {
             ? HUNK_DELETION_COLOR_STROKE
             : d.newLines > d.oldLines ? HUNK_ADDITION_COLOR_STROKE : HUNK_CHANGE_COLOR_STROKE;
         });
-
-      Loading.hideBackgroundRefresh();
     }
+    Loading.hideBackgroundRefresh();
   }
 }
