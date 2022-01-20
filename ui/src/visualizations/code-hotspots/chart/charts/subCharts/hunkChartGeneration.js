@@ -28,8 +28,22 @@ export default class hunkChartGeneration {
 
     let filteredData = data.data;
 
+    //Filter date
+    filteredData = filteredData
+      .map((d, i) => {
+        d.commitID = i;
+        return d;
+      })
+      .filter(d => {
+        return (
+          new Date(d.date.split('.')[0]) >= new Date(displayProps.dateRange.from) &&
+          new Date(d.date.split('.')[0]) <= new Date(displayProps.dateRange.to)
+        );
+      });
+
+    //filter if 2 commits are selected
     if (currThis.state.selectedCompareCommit.sha !== '') {
-      filteredData = filteredData.filter((d, i) => {
+      filteredData = filteredData.filter(d => {
         let earlierVersion, laterVersion;
         if (currThis.state.selectedCommit.commitID <= currThis.state.selectedCompareCommit.commitID) {
           earlierVersion = currThis.state.selectedCommit.commitID;
@@ -38,9 +52,11 @@ export default class hunkChartGeneration {
           earlierVersion = currThis.state.selectedCompareCommit.commitID;
           laterVersion = currThis.state.selectedCommit.commitID;
         }
-        return i >= earlierVersion + 1 && i <= laterVersion + 1;
+        return d.commitID >= earlierVersion + 1 && d.commitID <= laterVersion + 1;
       });
     }
+    console.log(filteredData);
+
     for (const commitKey in filteredData) {
       chart.append('g').attr('id', 'commit' + commitKey);
     }
