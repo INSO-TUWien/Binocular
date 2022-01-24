@@ -14,19 +14,22 @@ import chroma from 'chroma-js';
 
 export const setResolution = createAction('SET_RESOLUTION');
 export const setShowIssues = createAction('SET_SHOW_ISSUES');
-export const setselectedIssues = createAction('SET_SELECTED_ISSUES');
+export const setSelectedIssues = createAction('SET_SELECTED_ISSUES');
 export const setDisplayMetric = createAction('SET_DISPLAY_METRIC');
 export const setShowNormalizedChart = createAction('SET_SHOW_NORMALIZED_CHART');
 export const setShowStandardChart = createAction('SET_SHOW_STANDARD_CHART');
 export const setShowMilestoneChart = createAction('SET_SHOW_MILESTONE_CHART');
+
+export const openCommit = createAction('OPEN_COMMIT');
 
 export const requestProjectIssueData = createAction('REQUEST_PROJECT_ISSUE_DATA');
 export const receiveProjectIssueData = timestampedActionFactory('RECEIVE_PROJECT_ISSUE_DATA');
 export const receiveProjectIssueDataError = createAction('RECEIVE_PROJECT_ISSUE_DATA_ERROR');
 
 export const requestRefresh = createAction('REQUEST_REFRESH');
-const refresh = createAction('REFRESH');
 export const setViewport = createAction('COR_SET_VIEWPORT');
+
+const refresh = createAction('REFRESH');
 
 export default function*() {
   // fetch data once on entry
@@ -35,9 +38,15 @@ export default function*() {
   yield fork(watchRefreshRequests);
   yield fork(watchMessages);
 
+  yield fork(watchOpenCommit);
+
   // keep looking for viewport changes to re-fetch
   yield fork(watchRefresh);
   yield fork(watchToggleHelp);
+}
+
+export function* watchOpenCommit() {
+  yield takeEvery('OPEN_COMMIT', openByWebUrl);
 }
 
 function* watchRefreshRequests() {
@@ -54,6 +63,10 @@ function* watchToggleHelp() {
 
 function* watchRefresh() {
   yield takeEvery('REFRESH', fetchProjectIssueData);
+}
+
+function openByWebUrl(action) {
+  window.open(action.payload.webUrl);
 }
 
 /**
@@ -80,7 +93,7 @@ export const fetchProjectIssueData = fetchFactory(
       getBuildData()
     )
       .spread((commits, issues, builds) => {
-        const palette = getPalette(issues, 5, 5);
+        const palette = getPalette(issues, 20, 20);
 
         return {
           otherCount: 0,

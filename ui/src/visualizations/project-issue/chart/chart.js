@@ -9,13 +9,12 @@ import _ from 'lodash';
 import ViolinPlot from '../../../components/ViolinPlot';
 import moment from 'moment';
 import cx from 'classnames';
-import chroma from 'chroma-js';
 
 export default class ProjectIssue extends React.Component {
   constructor(props) {
     super(props);
 
-    const { issueChartData, issueScale, selectedIssues } = this.extractIssueData(props);
+    const { issueChartData, issueScale, selectedIssues } = this.extractIssueDataOld(props);
 
     this.state = {
       issueChartData,
@@ -29,7 +28,8 @@ export default class ProjectIssue extends React.Component {
    * @param nextProps props that are passed
    */
   componentWillReceiveProps(nextProps) {
-    const { issueChartData, issueScale, selectedIssues } = this.extractIssueData(nextProps);
+    const { issueChartData, issueScale, selectedIssues } = this.extractIssueDataOld(nextProps);
+
     this.setState({
       issueChartData,
       issueScale,
@@ -38,9 +38,6 @@ export default class ProjectIssue extends React.Component {
   }
 
   render() {
-    if (this.props.palette) {
-      console.log(Object.keys(this.props.palette));
-    }
     console.log(this.state.selectedIssues);
     let issueChart;
 
@@ -61,6 +58,8 @@ export default class ProjectIssue extends React.Component {
           </div>
         </div>
       );
+
+      /*
       for (let i = 1; i < this.state.selectedIssues.length; i++) {
         issueChart =
           issueChart +
@@ -82,6 +81,7 @@ export default class ProjectIssue extends React.Component {
             </div>
           );
       }
+       */
     }
 
     const loadingHint = (
@@ -107,7 +107,7 @@ export default class ProjectIssue extends React.Component {
     );
   }
 
-  extractIssueData(props) {
+  extractIssueDataOld(props) {
     if (!props.issues || props.issues.length === 0) {
       return {};
     }
@@ -196,14 +196,67 @@ export default class ProjectIssue extends React.Component {
 
     //---- STEP 4: FORMATTING FILTERS ----
     const selectedIssues = [];
-    const keys = Object.keys(issueChartData[0]).splice(1);
-
+    const keys = props.selectedIssues;
     _.each(keys, key => {
-      let concatKey = key;
-      if (key.includes('(Additions) ') || key.includes('(Deletions) ')) {
-        concatKey = key.split(') ')[1];
+      if (props.selectedIssues.indexOf(key) > -1) {
+        selectedIssues.push(key);
       }
-      if (props.selectedIssues.indexOf(concatKey) > -1) {
+    });
+
+    return { issueChartData, issueScale, selectedIssues };
+  }
+
+  extractIssueDataNew(props) {
+    if (!props.issues || props.issues.length === 0) {
+      return {};
+    }
+
+    //---- STEP 1: FILTER ISSUES ----
+    let filteredIssues = [];
+    switch (props.showIssues) {
+      case 'all':
+        filteredIssues = props.issues;
+        break;
+      case 'open':
+        _.each(props.issues, issue => {
+          if (issue.closedAt === null) {
+            filteredIssues.push(issue);
+          }
+        });
+        break;
+      case 'closed':
+        _.each(props.issues, issue => {
+          if (issue.closedAt) {
+            filteredIssues.push(issue);
+          }
+        });
+        break;
+      default:
+    }
+
+    //---- STEP 2: CONSTRUCT CHART DATA FROM AGGREGATED ISSUES ----
+    const issueChartData = [];
+    const issueScale = [0, 0];
+    _.each(filteredIssues, function(issue) {
+      issueChartData.push({
+        title: issue.title,
+        date: issue.createdAt,
+        Opened: 3,
+        Closed: 1 > 0 ? -1 : -0.001
+      });
+      if (issueScale[1] < issue.openCount) {
+        issueScale[1] = issue.openCount;
+      }
+      if (issueScale[0] > issue.closedCount * -1) {
+        issueScale[0] = issue.closedCount * -1;
+      }
+    });
+
+    //---- STEP 3: FORMATTING FILTERS ----
+    const selectedIssues = [];
+    const keys = props.selectedIssues;
+    _.each(keys, key => {
+      if (props.selectedIssues.indexOf(key) > -1) {
         selectedIssues.push(key);
       }
     });

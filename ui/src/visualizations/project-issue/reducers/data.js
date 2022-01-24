@@ -7,13 +7,11 @@ export default handleActions(
   {
     REQUEST_PROJECT_ISSUE_DATA: state => _.assign({}, state, { isFetching: true }),
     RECEIVE_PROJECT_ISSUE_DATA: (state, action) => {
-      const ret = _.assign({}, state, {
+      return _.assign({}, state, {
         data: action.payload,
         isFetching: false,
         receivedAt: action.meta.receivedAt
       });
-
-      return ret;
     }
   },
   {

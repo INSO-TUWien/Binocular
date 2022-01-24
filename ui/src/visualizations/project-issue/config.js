@@ -5,7 +5,7 @@ import {
   setResolution,
   setShowIssues,
   setDisplayMetric,
-  setselectedIssues,
+  setSelectedIssues,
   setShowNormalizedChart,
   setShowStandardChart,
   setShowMilestoneChart
@@ -20,7 +20,7 @@ const mapStateToProps = (state /*, ownProps*/) => {
   const projectIssueState = state.visualizations.projectIssue.state;
 
   return {
-    committers: projectIssueState.data.data.committers,
+    issues: projectIssueState.data.data.issues,
     resolution: projectIssueState.config.chartResolution,
     showIssues: projectIssueState.config.showIssues,
     palette: projectIssueState.data.data.palette,
@@ -37,7 +37,7 @@ const mapDispatchToProps = (dispatch /*, ownProps*/) => {
     onClickResolution: resolution => dispatch(setResolution(resolution)),
     onClickIssues: showIssues => dispatch(setShowIssues(showIssues)),
     onClickMetric: metric => dispatch(setDisplayMetric(metric)),
-    onClickCheckboxLegend: selected => dispatch(setselectedIssues(selected)),
+    onClickCheckboxLegend: selected => dispatch(setSelectedIssues(selected)),
     onClickShowNormalizedChart: showNormalizedChart => dispatch(setShowNormalizedChart(showNormalizedChart)),
     onClickShowStandardChart: showStandardChart => dispatch(setShowStandardChart(showStandardChart)),
     onClickShowMilestoneChart: showMilestoneChart => dispatch(setShowMilestoneChart(showMilestoneChart))
@@ -47,7 +47,7 @@ const mapDispatchToProps = (dispatch /*, ownProps*/) => {
 const ProjectIssueConfigComponent = props => {
   let otherIssues;
   if (props.palette && 'others' in props.palette) {
-    otherIssues = props.committers.length - (Object.keys(props.palette).length - 1);
+    otherIssues = props.issues.length - (Object.keys(props.palette).length - 1);
   }
 
   return (
@@ -122,7 +122,7 @@ const ProjectIssueConfigComponent = props => {
             title={'Issues:'}
             explanation={'Number of issues'}
             split={false}
-            otherCommiters={otherIssues}
+            otherCommitters={otherIssues}
           />
         </div>
       </form>

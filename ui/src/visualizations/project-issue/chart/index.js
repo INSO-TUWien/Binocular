@@ -4,6 +4,7 @@ import { connect } from 'react-redux';
 
 import Chart from './chart.js';
 import { setViewport } from '../sagas';
+import { openCommit } from '../sagas';
 
 const mapStateToProps = (state /*, ownProps*/) => {
   const projectIssueState = state.visualizations.projectIssue.state;
