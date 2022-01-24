@@ -14,12 +14,13 @@ export default class ProjectIssue extends React.Component {
   constructor(props) {
     super(props);
 
-    const { issueChartData, issueScale, selectedIssues } = this.extractIssueDataOld(props);
+    const { issueChartData, issueScale, selectedIssues, issueData } = this.extractIssueData(props);
 
     this.state = {
       issueChartData,
       issueScale,
-      selectedIssues
+      selectedIssues,
+      issueData
     };
   }
 
@@ -28,18 +29,20 @@ export default class ProjectIssue extends React.Component {
    * @param nextProps props that are passed
    */
   componentWillReceiveProps(nextProps) {
-    const { issueChartData, issueScale, selectedIssues } = this.extractIssueDataOld(nextProps);
+    const { issueChartData, issueScale, selectedIssues, issueData } = this.extractIssueData(nextProps);
 
     this.setState({
       issueChartData,
       issueScale,
-      selectedIssues
+      selectedIssues,
+      issueData
     });
   }
 
   render() {
-    console.log(this.state.selectedIssues);
+    console.log(this.state.issueData);
     let issueChart;
+    let count = 0;
 
     if (this.state.selectedIssues) {
       issueChart = (
@@ -58,9 +61,12 @@ export default class ProjectIssue extends React.Component {
           </div>
         </div>
       );
+      count += 1;
 
-      /*
       for (let i = 1; i < this.state.selectedIssues.length; i++) {
+        count += 1;
+
+        /*
         issueChart =
           issueChart +
           '' +
@@ -80,9 +86,10 @@ export default class ProjectIssue extends React.Component {
               </div>
             </div>
           );
+         */
       }
-       */
     }
+    console.log(count);
 
     const loadingHint = (
       <div className={styles.loadingHintContainer}>
@@ -107,7 +114,7 @@ export default class ProjectIssue extends React.Component {
     );
   }
 
-  extractIssueDataOld(props) {
+  extractIssueData(props) {
     if (!props.issues || props.issues.length === 0) {
       return {};
     }
@@ -194,7 +201,7 @@ export default class ProjectIssue extends React.Component {
       }
     });
 
-    //---- STEP 4: FORMATTING FILTERS ----
+    //---- STEP 4: FORMATTING FILTERS AND CONSTRUCT NEW ISSUE DATA----
     const selectedIssues = [];
     const keys = props.selectedIssues;
     _.each(keys, key => {
@@ -203,65 +210,19 @@ export default class ProjectIssue extends React.Component {
       }
     });
 
-    return { issueChartData, issueScale, selectedIssues };
-  }
-
-  extractIssueDataNew(props) {
-    if (!props.issues || props.issues.length === 0) {
-      return {};
-    }
-
-    //---- STEP 1: FILTER ISSUES ----
-    let filteredIssues = [];
-    switch (props.showIssues) {
-      case 'all':
-        filteredIssues = props.issues;
-        break;
-      case 'open':
-        _.each(props.issues, issue => {
-          if (issue.closedAt === null) {
-            filteredIssues.push(issue);
-          }
-        });
-        break;
-      case 'closed':
-        _.each(props.issues, issue => {
-          if (issue.closedAt) {
-            filteredIssues.push(issue);
-          }
-        });
-        break;
-      default:
-    }
-
-    //---- STEP 2: CONSTRUCT CHART DATA FROM AGGREGATED ISSUES ----
-    const issueChartData = [];
-    const issueScale = [0, 0];
+    //---- STEP 5: CONSTRUCT NEW ISSUE DATA ----
+    const issueData = [];
     _.each(filteredIssues, function(issue) {
-      issueChartData.push({
-        title: issue.title,
-        date: issue.createdAt,
-        Opened: 3,
-        Closed: 1 > 0 ? -1 : -0.001
-      });
-      if (issueScale[1] < issue.openCount) {
-        issueScale[1] = issue.openCount;
-      }
-      if (issueScale[0] > issue.closedCount * -1) {
-        issueScale[0] = issue.closedCount * -1;
+      if (props.selectedIssues.indexOf(issue.title) > -1) {
+        issueData.push({
+          title: issue.title,
+          createdAt: issue.createdAt,
+          closedAt: issue.closedAt
+        });
       }
     });
 
-    //---- STEP 3: FORMATTING FILTERS ----
-    const selectedIssues = [];
-    const keys = props.selectedIssues;
-    _.each(keys, key => {
-      if (props.selectedIssues.indexOf(key) > -1) {
-        selectedIssues.push(key);
-      }
-    });
-
-    return { issueChartData, issueScale, selectedIssues };
+    return { issueChartData, issueScale, selectedIssues, issueData };
   }
 
   static getGranularity(resolution) {
