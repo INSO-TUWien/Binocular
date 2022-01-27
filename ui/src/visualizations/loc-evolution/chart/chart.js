@@ -23,9 +23,6 @@ import * as zoomUtils from '../../../utils/zoom.js';
 import fetchRelatedCommits from '../sagas/fetchRelatedCommits.js';
 import LocEvolutionConfig from '../config.js';
 
-const dateExtractor = d => d.date;
-const testkeys = new Array();
-
 async function visualize() {
 
   const dataArr = new Array();
@@ -73,7 +70,7 @@ async function visualize() {
   let tempDateArr = new Array();
   while (flag) { //do this while there are still duplicate dates in the Object Array
     tempDateArr = [];
-    for (let index = 0; index < dataArr.length-1; index++) {
+    for (let index = 0; index < dataArr.length - 1; index++) {
       if (+dataArr[index + 1].date.getTime() === +dataArr[index].date.getTime()) { //check for each Object whether other Objects with same dates exist, if so, merge them
         dataArr[index] = Object.assign(dataArr[index], dataArr[index + 1]) //merging of the objects
         dataArr.splice(index + 1, 1) //removing the second Object from the Array
@@ -83,8 +80,6 @@ async function visualize() {
     //Check whether there are still duplicate Datetimes in the Array
     flag = hasDuplicates(tempDateArr)
   }
-  
-  console.warn("first: ",  JSON.stringify(dataArr))
   const maxValues = new Array();
 
   //Filling the Objects with Files, which haven't had commits on a specific Date
@@ -314,10 +309,14 @@ export default class locEvolution extends React.Component {
     this.state = {
       elements
     };
-    //console.warn("Blub: " + this.state.elements)
     this.updateDomain(props);
     this.onResize = zoomUtils.onResizeFactory(0.7, 0.7);
     this.onZoom = zoomUtils.onZoomFactory({ constrain: true, margin: 50 });
+    visualize(); //works in constructor, as well as in componentDidMount() Method
+  }
+
+  get getFiles(){
+    return files;
   }
 
   updateDomain(data) {
@@ -328,13 +327,17 @@ export default class locEvolution extends React.Component {
   }
 
   componentDidMount() {
+    //visualize();
   }
 
   componentWillReceiveProps(nextProps) {
+    const { fileURL, branch, path } = nextProps;
+    this.setState({ path: path });
+    this.setState({ branch: branch });
+    this.setState({ fileURL: fileURL });
   }
 
   render() {
-    visualize();
     return (
       <div id="my_dataviz"></div>
     )

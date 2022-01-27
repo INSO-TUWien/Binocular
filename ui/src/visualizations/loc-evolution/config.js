@@ -11,29 +11,59 @@ import styles from './styles.scss';
 import { graphQl } from '../../utils';
 import { Button } from 'react-scroll';
 
-const elementNames = ["File1", "File2", "File3", "File4", "File5"]; //change to get Filenames from State
+const elementNames = ["Axis.js", "chart.js", "CommitMarker.js", "CommitMarker.scss", "GridLines.js", "index.js", "StackedArea.js"]; //change to get Filenames from State
+const files = [];
+
+async function populateFiles() {
+  files.length = 0;
+  requestFileStructure().then(function (resp) {
+    console.warn(resp)
+    for (const i in resp) {
+      files.push(resp[i].path);
+    }
+  });
+}
+
+async function requestFileStructure() {
+  files.length = 0;
+  const resp = await Promise.resolve(
+    graphQl.query(
+      `
+    query{
+     files(sort: "ASC"){
+        data{path,webUrl}
+      }
+    }
+    `,
+      {}
+    )
+  );
+  return resp.files.data;
+}
 
 const mapStateToProps = (state /*, ownProps*/) => {
   const corState = state.visualizations.locEvolution.state;
+
   var temp;
   if (typeof corState.elements === 'undefined') {
     temp = elementNames;
   } else {
     temp = corState.elements
   }
-  //console.warn(temp);
-  //console.warn(state.visualizations.codeHotspots.state.data.data.files);
   return {
     issues: corState.data.issues,
     overlay: corState.config.overlay,
     highlightedIssue: corState.config.highlightedIssue,
     commitAttribute: corState.config.commitAttribute,
-    elements: temp
+    elements: temp,
+    //files: state.visualizations.codeHotspots.state.data.data.files
+    files: files
   };
 };
 
 const mapDispatchToProps = (dispatch /*, ownProps*/) => {
   return {
+    onSetFile: url => dispatch(setActiveFile(url)),
     onChangeCommitAttribute: attr => dispatch(setCommitAttribute(attr))
   };
 };
@@ -41,36 +71,39 @@ const mapDispatchToProps = (dispatch /*, ownProps*/) => {
 //LEGEND STUFF HERE
 
 const locEvolutionConfigComponent = props => {
+  populateFiles();
+  //console.warn(files)
+  const options = [];
+  /*for (const i in files) {
+    options.push(
+      <option key={i}>
+        {files[i].key}
+      </option>
+    );
+  }*/
+
+  for (const i in elementNames) {
+    options.push(
+      <option key={i}>
+        {elementNames[i]}
+      </option>
+    );
+  }
   return (
     <div className={styles.configContainer}>
       <form>
         <div className="field">
           <div className="control">
-            <label className="label">Granularity Type:</label>
-            <label className="radio">
-              <input
-                name="commitAttribute"
-                type="radio"
-                checked={props.commitAttribute === 'count'}
-                onChange={() => props.onChangeCommitAttribute('count')}
-              />
-              Folders
-            </label>
-            <label className="radio">
-              <input
-                name="commitAttribute"
-                type="radio"
-                checked={props.commitAttribute === 'changes'}
-                onChange={() => props.onChangeCommitAttribute('changes')}
-              />
-              Files
-            </label>
-          </div>
-        </div>
-
-        <div className="field">
-          <div className="control">
             <label className="label">Show LoC-Evolution for:</label>
+            <div id={'branchSelector'} className={'select'}>
+              <select
+                //value={props.branch}
+                value={1, 2, 3}
+                onChange={e => {
+                }}>
+                {options}
+              </select>
+            </div>
           </div>
         </div>
 
