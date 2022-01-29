@@ -13,6 +13,7 @@ import { Button } from 'react-scroll';
 
 const elementNames = ["Axis.js", "chart.js", "CommitMarker.js", "CommitMarker.scss", "GridLines.js", "index.js", "StackedArea.js"]; //change to get Filenames from State
 const files = [];
+const optionsB= [];
 
 async function populateFiles() {
   files.length = 0;
@@ -20,6 +21,11 @@ async function populateFiles() {
     console.warn(resp)
     for (const i in resp) {
       files.push(resp[i].path);
+      optionsB.push(
+        <option key={i}>
+          {resp[i].path}
+        </option>
+      );
     }
   });
 }
@@ -74,21 +80,21 @@ const locEvolutionConfigComponent = props => {
   populateFiles();
   //console.warn(files)
   const options = [];
-  /*for (const i in files) {
+  for (const i in files) {
     options.push(
       <option key={i}>
         {files[i].key}
       </option>
     );
-  }*/
+  }
 
-  for (const i in elementNames) {
+  /*for (const i in elementNames) {
     options.push(
       <option key={i}>
         {elementNames[i]}
       </option>
     );
-  }
+  }*/
   return (
     <div className={styles.configContainer}>
       <form>
@@ -101,7 +107,7 @@ const locEvolutionConfigComponent = props => {
                 value={1, 2, 3}
                 onChange={e => {
                 }}>
-                {options}
+                {optionsB}
               </select>
             </div>
           </div>

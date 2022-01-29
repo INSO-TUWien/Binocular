@@ -200,63 +200,39 @@ async function visualize() {
   }
 
   var mousemove = function (d, i) { //not changed yet - but not priority yet
+    //svg.select("line").remove();
     var coordinates = d3.pointer(d);
     var mousex = coordinates[0];
-    var invertedx = x.invert(mousex);
-    var year = Math.floor(invertedx); //year which corresponds with the x position of the mouse in the chart
-    //var result = recursiveFunction(arr, year, 0, arr.length)
-    var dmp = arr[(year - 2000)]
-    var result = Object.keys(dmp).map((key) => [String(key), dmp[key]]); //Object from the Data corresponding to the current selected year, e.g. row in the csv
+    var invertedx = xScale.invert(mousex);
+    var hoverDate = new Date(invertedx);
+    var currIndex = 0;
+    var currFileValue;
+    var closeDatesArr = findClosest(dateArr, hoverDate);
+    var closeDateBefore = closeDatesArr[0];
     var file = d3.select(this).data()[0].key; //currently selected/highlighted file
-    for (let index = 0; index < result.length; index++) {
-      if (result[index][0] === file) {
-        var yVal = parseInt(result[index][1], 10)
+    console.warn(dataArr);
+    console.warn(stackedSeries);
+    for (let i = 0; i < dataArr.length; i++) {
+      if (dataArr[i].date === closeDateBefore) {
+        currIndex = i;
+        currFileValue = dataArr[i][file]
       }
     }
-    Tooltip.text("Value of " + file + " in " + year + " is: " + yVal)
+    const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
+    Tooltip.text("On " + months[hoverDate.getMonth()] + " " + hoverDate.getDate() + ", " + hoverDate.getFullYear() + " the File: " + 
+    file + " had a total line count of: " + currFileValue + ". The last commit to the file was on " +  months[closeDateBefore.getMonth()] + " " + closeDateBefore.getDate() + 
+    ", " + closeDateBefore.getFullYear() + " and added " + currFileValue + " lines of Code.");
 
-    /* --------------------------- White Vertical Line Here --------------
-    svg.append("line")
+    /* --------------------------- White Vertical Line Here -------------- */
+    /*svg.append("line")
       .attr("x1", mousex)
       .attr("y1", 0)
       .attr("x2", mousex)
       .attr("y2", height - margin.top - margin.bottom)
       .style("stroke-width", 2)
       .style("stroke", "white")
-      .style("fill", "none");
-      */
+      .style("fill", "none");*/
   }
-
-  //Binary Search Here
-  /*let recursiveFunction = function (tempArr, x, start, end) {
-
-    // Base Condition
-    if (start >= end) return false;
-
-    // Find the middle index
-    let mid = Math.floor((start + end) / 2);
-    //console.warn("Mid: " + mid + " " + end)
-
-    //Make Data accessible
-    var dmp = tempArr[mid]
-    //console.warn("dmp: " + dmp)
-    var objectArray = Object.keys(dmp).map((key) => [String(key), dmp[key]]);
-    var value = parseInt(objectArray[0][1], 10);
-    //console.warn("value = " + value)
-
-    // Compare value at mid with given key x
-    if (value === x) return objectArray;
-
-    // If element at mid is greater than x,
-    // search in the left half of mid
-    if (value > x)
-      return recursiveFunction(tempArr, x, start, mid - 1);
-    else
-
-      // If element at mid is smaller than x,
-      // search in the right half of mid
-      return recursiveFunction(tempArr, x, mid + 1, end);
-  }*/
 
   var mouseleave = function (d) {
     Tooltip.style("opacity", 0)
@@ -300,6 +276,15 @@ async function visualize() {
     .on("click", mouseclick);
 }
 
+function findClosest(a, x) {
+  var lo, hi;
+  for (var i = a.length; i--;) {
+    if (a[i] <= x && (lo === undefined || lo < a[i])) lo = a[i];
+    if (a[i] >= x && (hi === undefined || hi > a[i])) hi = a[i];
+  }
+  return [lo, hi];
+}
+
 export default class locEvolution extends React.Component {
   constructor(props) {
     super(props);
@@ -312,10 +297,10 @@ export default class locEvolution extends React.Component {
     this.updateDomain(props);
     this.onResize = zoomUtils.onResizeFactory(0.7, 0.7);
     this.onZoom = zoomUtils.onZoomFactory({ constrain: true, margin: 50 });
-    visualize(); //works in constructor, as well as in componentDidMount() Method
+    visualize();
   }
 
-  get getFiles(){
+  get getFiles() {
     return files;
   }
 
