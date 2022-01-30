@@ -17,6 +17,7 @@ export default class vcsData {
                       signature
                       branch
                       parents
+                      history
                       date
                       stats{
                           additions

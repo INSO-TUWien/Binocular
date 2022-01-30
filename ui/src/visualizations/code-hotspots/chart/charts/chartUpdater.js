@@ -21,6 +21,7 @@ export default class chartUpdater {
             date: commit.date,
             branch: commit.branch,
             parents: commit.parents,
+            history: commit.history,
             signature: commit.signature
           };
         });
@@ -44,7 +45,6 @@ export default class chartUpdater {
         return columnData;
       })
       .flat();
-
     return { data: data, lines: lines, commits: commits, maxValue: maxValue, legendSteps: legendSteps };
   }
 

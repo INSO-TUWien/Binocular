@@ -60,6 +60,7 @@ export default class columnChartGeneration {
               sha: v[0].sha,
               branch: v[0].branch,
               parents: v[0].parents,
+              history: v[0].history,
               signature: v[0].signature
             };
           })
@@ -67,7 +68,6 @@ export default class columnChartGeneration {
           .map(d => d.value);
         break;
     }
-
     return combinedColumnData;
   }
 
@@ -535,12 +535,23 @@ export default class columnChartGeneration {
   }
 
   static drawBranchConnections(i, branch, currThis, c1, branchLines, branches, h, w, firstCommitCount, c2, offset) {
-    const branchOutHeight = 10;
+    const branchOutHeight = 5;
 
     if (i === 0) {
       for (const parentSha of branch.values[i].parents.split(',')) {
-        const parent = currThis.combinedColumnData.find(d => d.sha === parentSha);
+        let parent = currThis.combinedColumnData.find(d => d.sha === parentSha);
+        if (parent === undefined) {
+          for (const historyParentSha of branch.values[i].history.split(',')) {
+            parent = currThis.combinedColumnData.find(d => d.sha === historyParentSha);
+            if (parent !== undefined && parent.sha !== branch.values[i].sha) {
+              break;
+            }
+          }
+        }
         if (parent !== undefined) {
+          offset++;
+          let currOffset = (offset % 2 === 0 ? -1 : 1) * Math.floor(offset / 2) + offset % 2;
+          currOffset = Math.min(Math.max(currOffset * branchOutHeight, -h / 2 + 5), h / 2 - 5);
           if (parseInt(parent.column) + 1 < c1) {
             branchLines
               .append('line')
@@ -555,11 +566,11 @@ export default class columnChartGeneration {
                 'x1',
                 w / (currThis.combinedColumnData.length * 2) + (parent.column - firstCommitCount) * w / currThis.combinedColumnData.length
               )
-              .attr('y2', 5)
+              .attr('y2', h / 2 + currOffset)
               .attr(
                 'x2',
                 w / (currThis.combinedColumnData.length * 2) +
-                  (parent.column - firstCommitCount + 1) * w / currThis.combinedColumnData.length
+                  (parent.column - firstCommitCount + 0.5) * w / currThis.combinedColumnData.length
               );
             branchLines
               .append('line')
@@ -569,13 +580,13 @@ export default class columnChartGeneration {
               )
               .style('stroke-width', 5)
               .style('stroke-linecap', 'round')
-              .attr('y1', 5)
+              .attr('y1', h / 2 + currOffset)
               .attr(
                 'x1',
                 w / (currThis.combinedColumnData.length * 2) +
-                  (parent.column - firstCommitCount + 1) * w / currThis.combinedColumnData.length
+                  (parent.column - firstCommitCount + 0.5) * w / currThis.combinedColumnData.length
               )
-              .attr('y2', 5)
+              .attr('y2', h / 2 + currOffset)
               .attr('x2', w / (currThis.combinedColumnData.length * 2) + (c1 - 0.5) * w / currThis.combinedColumnData.length);
             branchLines
               .append('line')
@@ -585,7 +596,7 @@ export default class columnChartGeneration {
               )
               .style('stroke-width', 5)
               .style('stroke-linecap', 'round')
-              .attr('y1', 5)
+              .attr('y1', h / 2 + currOffset)
               .attr('x1', w / (currThis.combinedColumnData.length * 2) + (c1 - 0.5) * w / currThis.combinedColumnData.length)
               .attr('y2', h / 2)
               .attr('x2', w / (currThis.combinedColumnData.length * 2) + c1 * w / currThis.combinedColumnData.length);
