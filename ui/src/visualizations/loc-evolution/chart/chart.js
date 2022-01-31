@@ -142,8 +142,8 @@ async function visualize() {
 
   // Add Y axis
   var yScale = d3.scaleLinear()
-    .domain([-200, 500])
-    .range([100, height]);
+    .domain([-20, 50])
+    .range([100, height-50]);
 
   // color palette
   var color = d3.scaleOrdinal()
@@ -210,18 +210,32 @@ async function visualize() {
     var closeDatesArr = findClosest(dateArr, hoverDate);
     var closeDateBefore = closeDatesArr[0];
     var file = d3.select(this).data()[0].key; //currently selected/highlighted file
-    console.warn(dataArr);
-    console.warn(stackedSeries);
+    //find the commit nearest to the date reflecting the mouse's x position and associated total LoC count for said date
     for (let i = 0; i < dataArr.length; i++) {
       if (dataArr[i].date === closeDateBefore) {
         currIndex = i;
         currFileValue = dataArr[i][file]
       }
     }
+
+    // Iterate over DataArr to search for the last commit containing the given file and extracting the amount of LoC changed in said commit
+    var j = currIndex;
+    var lastCommitValue = 0;
+    while(j >= 0 || dataArr[j].date >= minDate){
+      lastCommitValue = currFileValue - dataArr[j][file];
+      if(lastCommitValue != 0){
+        break;
+      }
+      j--;
+    }
+    var addSubtractString = "";
+    addSubtractString = ((lastCommitValue > 0) ? "added " : "deleted ");
+    lastCommitValue = Math.abs(lastCommitValue);
+
     const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
     Tooltip.text("On " + months[hoverDate.getMonth()] + " " + hoverDate.getDate() + ", " + hoverDate.getFullYear() + " the File: " + 
     file + " had a total line count of: " + currFileValue + ". The last commit to the file was on " +  months[closeDateBefore.getMonth()] + " " + closeDateBefore.getDate() + 
-    ", " + closeDateBefore.getFullYear() + " and added " + currFileValue + " lines of Code.");
+    ", " + closeDateBefore.getFullYear() + " and " + addSubtractString + "a net total of " + lastCommitValue + " lines of Code.");
 
     /* --------------------------- White Vertical Line Here -------------- */
     /*svg.append("line")
