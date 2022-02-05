@@ -8,6 +8,11 @@ const HUNK_ADDITION_COLOR_STROKE = '#ABEBC6';
 const HUNK_CHANGE_COLOR_STROKE = '#7FB9FE';
 const HUNK_DELETION_COLOR_STROKE = '#d5796f';
 
+const LINE_FLOW_COLOR = 'transparent';
+const LINE_FLOW_COLOR_SELECTED = '#0000FFAA';
+
+let lastCommit = 0;
+
 export default class hunkChartGeneration {
   static generateHunkChart(data, lines, importantColumns, currThis, mode, maxValue, legendSteps, firstLineNumber, displayProps) {
     d3.select('.chartMain > *').remove();
@@ -106,6 +111,8 @@ export default class hunkChartGeneration {
       .attr('height', barHeight);
 
     for (const commitKey in data.data) {
+      d3.select('#commit' + commitKey + ' > *').remove();
+
       d3
         .select('#commitBackground')
         .append('line')
@@ -172,7 +179,106 @@ export default class hunkChartGeneration {
             ? HUNK_DELETION_COLOR_STROKE
             : d.newLines > d.oldLines ? HUNK_ADDITION_COLOR_STROKE : HUNK_CHANGE_COLOR_STROKE;
         });
+
+      for (let i = 0; i < lines; i++) {
+        setTimeout(
+          function() {
+            if (data.data[commitKey].file.hunks.length === 0) {
+              d3
+                .select('#commit' + commitKey)
+                .append('path')
+                .attr('class', 'lineFlow lineFlowLine' + i)
+                .attr('d', () => {
+                  const x1 = commitKey * barWidth;
+                  const x2 = commitKey * barWidth + (parseInt(commitKey) === parseInt(columns) ? width / 2 : barWidth);
+                  const y1 = i * barHeight - barHeight / 2;
+                  const y2 = i * barHeight - barHeight / 2;
+
+                  return (
+                    'M ' +
+                    x1 +
+                    ' ' +
+                    y1 +
+                    ' C ' +
+                    (x1 + barWidth / 2) +
+                    ' ' +
+                    y1 +
+                    ' ' +
+                    (x2 - barWidth / 2) +
+                    ' ' +
+                    y2 +
+                    ' ' +
+                    x2 +
+                    ' ' +
+                    y2
+                  );
+                })
+                .datum({ oldLineNumber: i })
+                .attr('fill', 'transparent')
+                .attr('stroke', LINE_FLOW_COLOR);
+            } else {
+              let oldLine = i;
+              let end = false;
+              for (const hunk of data.data[commitKey].file.hunks.filter(h => h.newStart - 1 <= i)) {
+                if (i >= hunk.newStart - 1 && i <= hunk.newStart + hunk.newLines - 2) {
+                  oldLine = hunk.oldStart - 1;
+                  end = true;
+                } else {
+                  oldLine -= hunk.newLines - hunk.oldLines;
+                }
+              }
+              d3
+                .select('#commit' + commitKey)
+                .append('path')
+                .attr('class', 'lineFlow lineFlowLine' + i)
+                .attr('d', () => {
+                  const x1 = commitKey * barWidth;
+                  const x2 = commitKey * barWidth + (parseInt(commitKey) === parseInt(columns) ? width / 2 : barWidth);
+                  const y1 = oldLine * barHeight - barHeight / 2;
+                  const y2 = i * barHeight - barHeight / 2;
+
+                  return (
+                    'M ' +
+                    x1 +
+                    ' ' +
+                    y1 +
+                    ' C ' +
+                    (x1 + barWidth / 2) +
+                    ' ' +
+                    y1 +
+                    ' ' +
+                    (x2 - barWidth / 2) +
+                    ' ' +
+                    y2 +
+                    ' ' +
+                    x2 +
+                    ' ' +
+                    y2
+                  );
+                })
+                .datum({ oldLineNumber: oldLine, end: end })
+                .attr('fill', 'transparent')
+                .attr('stroke', LINE_FLOW_COLOR);
+            }
+          }.bind(this)
+        );
+      }
+      lastCommit = commitKey;
     }
     Loading.hideBackgroundRefresh();
+  }
+
+  static interact(line) {
+    d3.selectAll('.lineFlow').attr('stroke', LINE_FLOW_COLOR);
+    let currentLineFlow = d3.select('#commit' + lastCommit).select('.lineFlowLine' + line);
+    currentLineFlow.attr('stroke', LINE_FLOW_COLOR_SELECTED);
+    for (let i = 1; i <= lastCommit; i++) {
+      if (currentLineFlow.datum().end) {
+        break;
+      }
+      line = currentLineFlow.datum().oldLineNumber;
+      currentLineFlow = d3.select('#commit' + (lastCommit - i)).select('.lineFlowLine' + line);
+      currentLineFlow.attr('stroke', LINE_FLOW_COLOR_SELECTED);
+    }
   }
 }
