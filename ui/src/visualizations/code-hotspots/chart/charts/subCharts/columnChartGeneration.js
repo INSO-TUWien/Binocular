@@ -351,9 +351,9 @@ export default class columnChartGeneration {
           })
           .on('click', function(event, d) {
             if (event.shiftKey) {
-              currThis.setState({ selectedCompareCommit: { commitID: d.column, sha: d.sha } });
+              currThis.setState({ selectedCompareCommit: { commitID: d.column - 1, sha: d.sha } });
             } else {
-              currThis.setState({ selectedCommit: { commitID: d.column, sha: d.sha } });
+              currThis.setState({ selectedCommit: { commitID: d.column - 1, sha: d.sha } });
             }
           });
         setTimeout(
