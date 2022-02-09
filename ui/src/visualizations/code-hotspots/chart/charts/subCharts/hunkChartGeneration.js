@@ -89,8 +89,10 @@ export default class hunkChartGeneration {
     const barHeight = 24;
     Loading.showBackgroundRefresh('HunkChart generation in progress!');
 
-    if (columns < importantColumns.length) {
-      columns = columns - 1;
+    const compareMode = columns < importantColumns.length;
+
+    if (compareMode) {
+      columns = columns - 2;
       barWidth = width / 2 / columns;
     }
 
@@ -110,7 +112,7 @@ export default class hunkChartGeneration {
       .attr('width', width)
       .attr('height', barHeight);
 
-    for (const commitKey in data.data) {
+    for (let commitKey = compareMode ? 1 : 0; commitKey < data.data.length; commitKey++) {
       setTimeout(
         function() {
           d3.select('#commit' + data.data[commitKey].commitID + ' > *').remove();
@@ -119,9 +121,15 @@ export default class hunkChartGeneration {
             .select('#commitBackground')
             .append('line')
             .style('stroke', '#00000033')
-            .attr('x1', commitKey * barWidth)
+            .attr(
+              'x1',
+              (commitKey - (compareMode ? 1 : 0)) * barWidth + (parseInt(commitKey - 1) === parseInt(columns) ? width / 2 : barWidth)
+            )
             .attr('y1', -barHeight)
-            .attr('x2', commitKey * barWidth)
+            .attr(
+              'x2',
+              (commitKey - (compareMode ? 1 : 0)) * barWidth + (parseInt(commitKey - 1) === parseInt(columns) ? width / 2 : barWidth)
+            )
             .attr('y2', barHeight * lines);
 
           d3
@@ -131,10 +139,13 @@ export default class hunkChartGeneration {
             .enter()
             .append('path')
             .attr('d', d => {
-              const x1 = commitKey * barWidth;
-              const y11 = (d.oldStart - firstLineNumber - 1) * barHeight;
-              const y12 = (d.oldStart - firstLineNumber - 1 + d.oldLines) * barHeight;
-              const x2 = commitKey * barWidth + (parseInt(commitKey) === parseInt(columns) ? width / 2 : barWidth);
+              const lineOffset = d.newLines < d.oldLines ? 0 : d.newLines > d.oldLines ? 0 : -1;
+
+              const x1 = (commitKey - (compareMode ? 1 : 0)) * barWidth;
+              const y11 = (d.oldStart - firstLineNumber + lineOffset) * barHeight;
+              const y12 = (d.oldStart - firstLineNumber + lineOffset + d.oldLines) * barHeight;
+              const x2 =
+                (commitKey - (compareMode ? 1 : 0)) * barWidth + (parseInt(commitKey - 1) === parseInt(columns) ? width / 2 : barWidth);
               const y21 = (d.newStart - firstLineNumber - 1) * barHeight;
               const y22 = (d.newStart - firstLineNumber - 1 + d.newLines) * barHeight;
               return (
@@ -199,8 +210,9 @@ export default class hunkChartGeneration {
                 .append('path')
                 .attr('class', 'lineFlow lineFlowLine' + i)
                 .attr('d', () => {
-                  const x1 = commitKey * barWidth;
-                  const x2 = commitKey * barWidth + (parseInt(commitKey) === parseInt(columns) ? width / 2 : barWidth);
+                  const x1 = (commitKey - (compareMode ? 1 : 0)) * barWidth;
+                  const x2 =
+                    (commitKey - (compareMode ? 1 : 0)) * barWidth + (parseInt(commitKey - 1) === parseInt(columns) ? width / 2 : barWidth);
                   const y1 = i * barHeight - barHeight / 2;
                   const y2 = i * barHeight - barHeight / 2;
 
@@ -243,8 +255,9 @@ export default class hunkChartGeneration {
                 .append('path')
                 .attr('class', 'lineFlow lineFlowLine' + i)
                 .attr('d', () => {
-                  const x1 = commitKey * barWidth;
-                  const x2 = commitKey * barWidth + (parseInt(commitKey) === parseInt(columns) ? width / 2 : barWidth);
+                  const x1 = (commitKey - (compareMode ? 1 : 0)) * barWidth;
+                  const x2 =
+                    (commitKey - (compareMode ? 1 : 0)) * barWidth + (parseInt(commitKey - 1) === parseInt(columns) ? width / 2 : barWidth);
                   const y1 = oldLine * barHeight - barHeight / 2;
                   const y2 = i * barHeight - barHeight / 2;
 
