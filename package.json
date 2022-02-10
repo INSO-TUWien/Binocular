@@ -104,7 +104,7 @@
     "lorem-ipsum": "^1.0.3",
     "moment": "^2.26.0",
     "node-gitlab": "^1.6.1",
-    "node-sass": "^4.13.1",
+    "node-sass": "^7.0.0",
     "nodegit": "^0.24.3",
     "object-assign": "4.1.1",
     "opn": "^4.0.2",
