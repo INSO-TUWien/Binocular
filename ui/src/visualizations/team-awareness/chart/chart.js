@@ -3,11 +3,13 @@
 import React from 'react';
 
 export default class TeamArwareness extends React.Component {
-    constructor(props) {
-        super(props);
-    }
+  constructor(props) {
+    super(props);
+  }
 
-    render() {
-        return (<h1>Hello World</h1>);
-    }
+  render() {
+    console.log('Chraph state');
+    console.log(this.props);
+    return <h1>Hello World</h1>;
+  }
 }

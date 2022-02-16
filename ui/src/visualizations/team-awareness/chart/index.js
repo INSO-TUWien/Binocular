@@ -1,5 +1,19 @@
 'use strict';
 
-import chart from './chart.js';
+import { connect } from 'react-redux';
+import { getState } from '../util/util.js';
+import Chart from './chart.js';
 
-export default chart;
+const mapStateToProps = (appState /*, chartState */) => {
+  const vizState = getState(appState);
+  return {
+    data: {
+      stakeholders: vizState.data.data.stakeholders,
+      activity: vizState.data.data.activity
+    }
+  };
+};
+
+const mapDispatchToProps = () => ({});
+
+export default connect(mapStateToProps, mapDispatchToProps)(Chart);

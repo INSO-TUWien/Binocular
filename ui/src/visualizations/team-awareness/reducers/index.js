@@ -1,5 +1,7 @@
 'use strict';
 
-import { handleActions } from 'redux-actions';
+import { combineReducers } from 'redux';
+import data from './data';
+import config from './config';
 
-export default handleActions({},{});
+export default combineReducers({ config, data });

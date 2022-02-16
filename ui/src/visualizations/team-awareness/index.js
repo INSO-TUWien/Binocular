@@ -1,17 +1,27 @@
 'use strict';
 
-import ChartComponent from './chart';
+import TeamAwarenessComponent from './chart';
 import ConfigComponent from './config';
 import HelpComponent from './help';
 import saga from './sagas';
 import reducer from './reducers';
+import { connect } from 'react-redux';
+
+const mapStateToProps = () => {
+  return {};
+};
+const mapDispatchToProps = () => {
+  return {};
+};
+
+const ChartComponent = connect(mapStateToProps, mapDispatchToProps)(TeamAwarenessComponent);
 
 export default {
-    id: "teamArwareness",
-    label: "Team Arwareness",
-    saga,
-    reducer,
-    ChartComponent,
-    ConfigComponent,
-    HelpComponent
+  id: 'teamAwareness',
+  label: 'Team Awareness',
+  saga,
+  reducer,
+  ChartComponent,
+  ConfigComponent,
+  HelpComponent
 };

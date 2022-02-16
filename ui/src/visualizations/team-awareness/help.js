@@ -2,15 +2,12 @@
 
 import React from 'react';
 
-
 export default class HelpComponent extends React.Component {
-    constructor(props) {
-        super(props);
-    }
+  constructor(props) {
+    super(props);
+  }
 
-    render() {
-        return (
-            <h1 className="title">Team Arwareness Help 1</h1>
-        );
-    }
+  render() {
+    return <h1 className="title">Team Awareness Help 1</h1>;
+  }
 }
