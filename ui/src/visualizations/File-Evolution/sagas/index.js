@@ -18,7 +18,9 @@ export const setSelectedAuthors = createAction('SET_SELECTED_AUTHORS');
 export const setSelectedBranches = createAction('SET_SELECTED_BRANCHES');
 
 export const setShowCommitDate = createAction('SET_SHOW_COMMIT_DATE');
+export const setShowCommitSha = createAction('SET_SHOW_COMMIT_SHA');
 export const setShowCommitMessage = createAction('SET_SHOW_COMMIT_MESSAGE');
+export const setShowCommitWeblink = createAction('SET_SHOW_COMMIT_WEBLINK');
 export const setShowCommitAuthor = createAction('SET_SHOW_COMMIT_AUTHOR');
 export const setShowCommitFiles = createAction('SET_SHOW_COMMIT_FILES');
 
@@ -65,7 +67,7 @@ export const fetchFileEvolutionData = fetchFactory(
     //const commiters = yield getCommiters();
     return yield Promise.join(getCommitData(), getBranches(), getCommiters(), getFiles())
       .spread((commits, branches, commiters, files) => {
-        console.log(files);
+        console.log(commits);
         const authorsColorPalette = getAuthorColorPalette(commiters);
         const branchesColorPalette = getBranchesColorPalette(branches);
         const commitFiles = addFilesToCommit(files, commits);
@@ -128,6 +130,11 @@ function getBranchesColorPalette(branches) {
     }
     colorPalette[branches[i].branch] = randomColor;
   }
+  let randomColor = '#' + Math.floor(Math.random() * 16777215).toString(16);
+  while (randomColor.length !== 7) {
+    randomColor = randomColor + '0';
+  }
+  colorPalette['tags/v1.0.0'] = randomColor;
   console.log(colorPalette);
   return colorPalette;
 }

@@ -19,11 +19,13 @@ export default class FileEvolution extends React.Component {
     const commitBoxes = this.getCommitsDraw(space);
     //const svgHeight = (commitRects.length / 2 + 1) * this.props.commitBoxHeight + (commitRects.length / 2) * space;
     const svgHeight = this.props.commitBoxHeight + space;
-    const svgWidth = (commitBoxes.length / 2 + 1) * this.props.commitBoxHeight + (commitBoxes.length / 2) * space;
+    const svgWidth = (commitBoxes.length / 2 + 1) * this.props.commitBoxHeight + commitBoxes.length / 2 * space;
     return (
       <div className={styles.chartContainer}>
         <div id={'myChartDiv'} className={styles.chartDiv}>
-          <svg style={{ width: svgWidth, height: svgHeight }}>{commitBoxes}</svg>
+          <svg style={{ width: svgWidth, height: svgHeight }}>
+            {commitBoxes}
+          </svg>
         </div>
       </div>
     );
@@ -36,50 +38,86 @@ export default class FileEvolution extends React.Component {
         color = props.authorsColorPalette[commit.signature];
       } else if (props.commitBoxColor === 'branch') {
         //TODO branch color
-        color = 'yellow';
+        color = props.branchesColorPalette[getBranch(props, commit)];
+        if (color === undefined) {
+          color = 'red';
+        }
       }
       return color;
     }
 
+    function getBranch(props, commit) {
+      let branch = '';
+      for (const b in props.branches) {
+        const branchName = props.branches[b].branch;
+        if (commit.branch.includes(branchName)) {
+          branch = branchName;
+          break;
+        }
+      }
+      return branch;
+    }
+
     function getCommitInfo(props, commit) {
       //TODO font size
-
       const commitInfo = [];
-      if (props.showCommitMessage === 'header') {
+
+      commitInfo.push(
+        <h1>
+          {commit.messageHeader}
+        </h1>
+      );
+      commitInfo.push(<hr />);
+      if (props.showCommitMessage) {
         commitInfo.push(
-          <a href={commit.webUrl}>
-            <text fontSize="smaller">{commit.messageHeader}</text>
-          </a>
+          <text fontSize="smaller">
+            Message: {commit.message}
+          </text>
         );
-      } else if (props.showCommitMessage === 'all') {
+      }
+      if (props.showCommitSha === 'short') {
         commitInfo.push(
-          <a href={commit.webUrl}>
-            <text fontSize="smaller">{commit.message}</text>
-          </a>
+          <text fontSize="smaller">
+            Short SHA: {commit.shortSha}
+          </text>
         );
+      } else if (props.showCommitSha === 'all') {
+        commitInfo.push(<text fontSize="smaller">SHA: {commit.sha}</text>);
       }
       if (props.showCommitDate) {
-        if (commitInfo.length > 0) {
-          commitInfo.push(<hr />);
-        }
-        commitInfo.push(<text fontSize="smaller">{commit.date}</text>);
+        commitInfo.push(
+          <text fontSize="smaller">
+            Date: {commit.date}
+          </text>
+        );
       }
       if (props.showCommitAuthor) {
-        if (commitInfo.length > 0) {
-          commitInfo.push(<hr />);
-        }
-        commitInfo.push(<text fontSize="smaller">{commit.signature}</text>);
+        commitInfo.push(
+          <text fontSize="smaller">
+            Author: {commit.signature}
+          </text>
+        );
+      }
+      if (props.showCommitWeblink) {
+        commitInfo.push(
+          <a href={commit.webUrl}>
+            <text fontSize="smaller">
+              URL: {commit.webUrl}
+            </text>
+          </a>
+        );
       }
       if (props.showCommitFiles) {
-        if (commitInfo.length > 0) {
-          commitInfo.push(<hr />);
-        }
+        commitInfo.push(<text fontSize="smaller">Files:</text>);
+        commitInfo.push(<br />);
         const files = props.commitFiles[commit.sha];
         for (const f in files) {
           const file = files[f];
           commitInfo.push(
             <a href={file.webUrl}>
-              <text fontSize="smaller">{file.path}</text>
+              <text fontSize="smaller">
+                {file.path}
+              </text>
             </a>
           );
           commitInfo.push(<br />);
@@ -98,8 +136,8 @@ export default class FileEvolution extends React.Component {
       const pointsForLine = '' + lineXstart.toString() + ',' + lineY.toString() + ' ' + lineXend.toString() + ',' + lineY.toString();
 
       const arrowHeadYup = y + height / 4;
-      const arrowHeadYdown = y + (height / 4) * 3;
-      const arrowHeadX = lineXstart + ((lineXend - lineXstart) / 4) * 3;
+      const arrowHeadYdown = y + height / 4 * 3;
+      const arrowHeadX = lineXstart + (lineXend - lineXstart) / 4 * 3;
       const pointsForArrowHead =
         '' +
         arrowHeadX.toString() +
@@ -118,6 +156,7 @@ export default class FileEvolution extends React.Component {
       arrow.push(<polyline points={pointsForArrowHead} fill="none" stroke="black" />);
       return arrow;
     }
+
     const commitData = this.props.commits;
     const width = this.props.commitBoxWidth;
     const height = this.props.commitBoxHeight;
@@ -127,24 +166,26 @@ export default class FileEvolution extends React.Component {
     for (const i in commitData) {
       const commit = commitData[i];
       if (this.props.selectedAuthors.indexOf(commit.signature) > -1) {
-        const color = getBoxColor(this.props, commit);
-        commitRects.push(
-          <g width={width} height={height}>
-            <rect x={x} y={y} width={width} height={height} fill={color}></rect>
-            <foreignObject x={x} y={y} width={width} height={height}>
-              {getCommitInfo(this.props, commit)}
-            </foreignObject>
-          </g>
-        );
+        if (this.props.selectedBranches.indexOf(getBranch(this.props, commit)) > -1) {
+          const color = getBoxColor(this.props, commit);
+          commitRects.push(
+            <g width={width} height={height}>
+              <rect x={x} y={y} width={width} height={height} fill={color} />
+              <foreignObject x={x} y={y} width={width} height={height}>
+                {getCommitInfo(this.props, commit)}
+              </foreignObject>
+            </g>
+          );
 
-        commitRects.push(
-          <g width={width} height={height}>
-            {getArrow(x, y, height, width)}
-          </g>
-        );
+          commitRects.push(
+            <g width={width} height={height}>
+              {getArrow(x, y, height, width)}
+            </g>
+          );
 
-        x = x + width + space;
-        //y = y + height + space; //TODO auskommentieren
+          x = x + width + space;
+          //y = y + height + space; //TODO auskommentieren
+        }
       }
     }
     commitRects.pop(); //remove last arrow

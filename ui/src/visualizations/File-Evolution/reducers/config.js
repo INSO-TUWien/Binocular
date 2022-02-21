@@ -11,9 +11,11 @@ export default handleActions(
     SET_SELECTED_AUTHORS: (state, action) => _.assign({}, state, { selectedAuthors: [...action.payload] }),
     SET_SELECTED_BRANCHES: (state, action) => _.assign({}, state, { selectedBranches: [...action.payload] }),
     SET_SHOW_COMMIT_DATE: (state, action) => _.assign({}, state, { showCommitDate: action.payload }),
-    SET_SHOW_COMMIT_MESSAGE: (state, action) => _.assign({}, state, { showCommitMessage: action.payload }),
+    SET_SHOW_COMMIT_SHA: (state, action) => _.assign({}, state, { showCommitSha: action.payload }),
     SET_SHOW_COMMIT_AUTHOR: (state, action) => _.assign({}, state, { showCommitAuthor: action.payload }),
-    SET_SHOW_COMMIT_FILES: (state, action) => _.assign({}, state, { showCommitFiles: action.payload })
+    SET_SHOW_COMMIT_FILES: (state, action) => _.assign({}, state, { showCommitFiles: action.payload }),
+    SET_SHOW_COMMIT_WEBLINK: (state, action) => _.assign({}, state, { showCommitWeblink: action.payload }),
+    SET_SHOW_COMMIT_MESSAGE: (state, action) => _.assign({}, state, { showCommitMessage: action.payload })
   },
   {
     commitBoxWidth: 200,
@@ -22,8 +24,10 @@ export default handleActions(
     selectedAuthors: [],
     selectedBranches: [],
     showCommitDate: true,
-    showCommitMessage: 'header',
+    showCommitSha: 'short',
     showCommitAuthor: false,
-    showCommitFiles: true
+    showCommitFiles: true,
+    showCommitMessage: true,
+    showCommitWeblink: false
   }
 );

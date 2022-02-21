@@ -12,7 +12,8 @@ import {
   setShowCommitDate,
   setShowCommitMessage,
   setShowCommitAuthor,
-  setShowCommitFiles
+  setShowCommitFiles,
+  setShowCommitSha, setShowCommitWeblink
 } from './sagas';
 
 import React from 'react';
@@ -37,6 +38,7 @@ const mapStateToProps = (state /*, ownProps*/) => {
     showCommitDate: FileEvolutionState.config.showCommitDate,
     showCommitAuthor: FileEvolutionState.config.showCommitAuthor,
     showCommitMessage: FileEvolutionState.config.showCommitMessage,
+    showCommitSha: FileEvolutionState.config.showCommitSha,
     showCommitFiles: FileEvolutionState.config.showCommitFiles
   };
 };
@@ -50,7 +52,9 @@ const mapDispatchToProps = (dispatch /*, ownProps*/) => {
     onClickShowCommitBoxDate: showCommitDate => dispatch(setShowCommitDate(showCommitDate)),
     onClickShowCommitBoxAuthor: showCommitAuthor => dispatch(setShowCommitAuthor(showCommitAuthor)),
     onClickShowCommitBoxFiles: showCommitFiles => dispatch(setShowCommitFiles(showCommitFiles)),
-    onSetShowCommitMessage: showCommitMessage => dispatch(setShowCommitMessage(showCommitMessage)),
+    onClickShowCommitBoxMessage: showCommitMessage => dispatch(setShowCommitMessage(showCommitMessage)),
+    onClickShowCommitBoxWeblink: showCommitWeblink => dispatch(setShowCommitWeblink(showCommitWeblink)),
+    onSetShowCommitSha: showCommitSha => dispatch(setShowCommitSha(showCommitSha)),
     onClickCommitBoxColor: commitBoxColor => dispatch(setCommitBoxColor(commitBoxColor))
   };
 };
@@ -113,6 +117,7 @@ const FileEvolutionConfigComponent = props => {
               />{' '}
               Show Author{' '}
             </label>
+            <br/>
             <label className={styles.checkboxLabel}>
               <input
                 name="showDate"
@@ -122,6 +127,7 @@ const FileEvolutionConfigComponent = props => {
               />{' '}
               Show Date{' '}
             </label>
+            <br/>
             <label className={styles.checkboxLabel}>
               <input
                 name="showFiles"
@@ -131,16 +137,36 @@ const FileEvolutionConfigComponent = props => {
               />{' '}
               Show Files{' '}
             </label>
+            <br/>
+            <label className={styles.checkboxLabel}>
+              <input
+                name="showMessage"
+                type="checkbox"
+                onChange={() => props.onClickShowCommitBoxMessage(!props.showCommitMessage)}
+                checked={props.showCommitMessage}
+              />{' '}
+              Show Message{' '}
+            </label>
+            <br/>
+            <label className={styles.checkboxLabel}>
+              <input
+                name="showWeblink"
+                type="checkbox"
+                onChange={() => props.onClickShowCommitBoxWeblink(!props.showCommitWeblink)}
+                checked={props.showCommitWeblink}
+              />{' '}
+              Show Weblink{' '}
+            </label>
 
-            <label className={styles.label}>Show Message</label>
+            <label className={styles.label}>Show Sha</label>
             <TabCombo
-              value={props.showCommitMessage}
+              value={props.showCommitSha}
               options={[
                 { label: 'None', icon: 'times', value: 'none' },
-                { label: 'Header', icon: 'file-alt', value: 'header' },
+                { label: 'Short', icon: 'file-alt', value: 'short' },
                 { label: 'All', icon: 'database', value: 'all' }
               ]}
-              onChange={value => props.onSetShowCommitMessage(value)}
+              onChange={value => props.onSetShowCommitSha(value)}
             />
           </div>
           <div className="control">

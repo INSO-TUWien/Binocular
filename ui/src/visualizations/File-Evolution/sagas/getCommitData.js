@@ -25,6 +25,8 @@ const getCommitsPage = until => (page, perPage) => {
                data {
                  sha
                  date
+                 branch
+                 shortSha
                  message
                  messageHeader
                  signature

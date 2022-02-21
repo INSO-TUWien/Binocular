@@ -23,6 +23,8 @@ const mapStateToProps = (state /*, ownProps*/) => {
     showCommitDate: FileEvolutionState.config.showCommitDate,
     showCommitAuthor: FileEvolutionState.config.showCommitAuthor,
     showCommitMessage: FileEvolutionState.config.showCommitMessage,
+    showCommitWeblink: FileEvolutionState.config.showCommitWeblink,
+    showCommitSha: FileEvolutionState.config.showCommitSha,
     showCommitFiles: FileEvolutionState.config.showCommitFiles
   };
 };
