@@ -51,6 +51,7 @@ export default class ViolinPlot extends ScalableBaseChartComponent {
    */
   createAreaFunction(scales) {
     //Area generator for the chart
+    //FIXME
     return d3
       .area()
       .x(function(d) {
@@ -72,11 +73,12 @@ export default class ViolinPlot extends ScalableBaseChartComponent {
    * @returns violin plot chart data for d3 functions and preprocessed data { stackedData, data }
    */
   calculateChartData(data, order) {
-    //Keys are the names of the developers, date is excluded
+    //Keys are the names of the developers,  date is excluded
     const keys = this.props.keys && this.props.keys.length > 0 ? this.props.keys : Object.keys(data[0]).slice(1);
 
     let orderedKeys = [];
     if (order) {
+      //FIXME
       _.each(order, orderElem => {
         if (keys.includes('(Additions) ' + orderElem) && keys.includes('(Deletions) ' + orderElem)) {
           orderedKeys.push('(Additions) ' + orderElem);
@@ -90,6 +92,7 @@ export default class ViolinPlot extends ScalableBaseChartComponent {
     }
 
     //Stack function for a ThemeRiver chart, using the keys provided
+    //FIXME
     const stack = d3.stack().offset(this.props.d3offset).order(d3.stackOrderReverse).keys(orderedKeys);
 
     //Data formatted for d3

@@ -40,14 +40,26 @@ export default class ProjectIssue extends React.Component {
   }
 
   render() {
+    let chartTitle = 'Issues';
+    let issueOne;
     console.log(this.state.issueData);
+    if (this.state.issueData) {
+      const issueDataLength = this.state.issueData.length;
+      console.log(issueDataLength);
+      for (let i = 0; i < issueDataLength; i++) {
+        issueOne = this.state.issueData[0];
+        chartTitle = this.state.issueData[0].title;
+        const issue = this.state.issueData[i];
+      }
+    }
     let issueChart;
-    let count = 0;
 
     if (this.state.selectedIssues) {
       issueChart = (
         <div className={styles.chartLine}>
-          <div className={cx(styles.text, 'label')}>Issues</div>
+          <div className={cx(styles.text, 'label')}>
+            {chartTitle}
+          </div>
           <div className={styles.chart}>
             <ViolinPlot
               content={this.state.issueChartData}
@@ -61,10 +73,9 @@ export default class ProjectIssue extends React.Component {
           </div>
         </div>
       );
-      count += 1;
 
       for (let i = 1; i < this.state.selectedIssues.length; i++) {
-        count += 1;
+        null;
 
         /*
         issueChart =
@@ -89,7 +100,6 @@ export default class ProjectIssue extends React.Component {
          */
       }
     }
-    console.log(count);
 
     const loadingHint = (
       <div className={styles.loadingHintContainer}>
