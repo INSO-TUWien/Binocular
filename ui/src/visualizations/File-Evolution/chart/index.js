@@ -20,12 +20,14 @@ const mapStateToProps = (state /*, ownProps*/) => {
     commitBoxHeight: FileEvolutionState.config.commitBoxHeight,
     commitBoxWidth: FileEvolutionState.config.commitBoxWidth,
     commitBoxColor: FileEvolutionState.config.commitBoxColor,
+    commitBoxSort: FileEvolutionState.config.commitBoxSort,
     showCommitDate: FileEvolutionState.config.showCommitDate,
     showCommitAuthor: FileEvolutionState.config.showCommitAuthor,
     showCommitMessage: FileEvolutionState.config.showCommitMessage,
     showCommitWeblink: FileEvolutionState.config.showCommitWeblink,
     showCommitSha: FileEvolutionState.config.showCommitSha,
-    showCommitFiles: FileEvolutionState.config.showCommitFiles
+    showCommitFiles: FileEvolutionState.config.showCommitFiles,
+    showCommitBranch: FileEvolutionState.config.showCommitBranch
   };
 };
 

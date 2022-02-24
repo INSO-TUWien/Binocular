@@ -35,9 +35,11 @@
 
 
 .chartContainer{
+  height: 100%;
+  width: auto;
 .chartDiv {
-  width: 500px;
   height: 100vh;
+  width: 100vw;
   overflow-x: scroll;
   overflow-y: scroll;
 }

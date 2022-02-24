@@ -13,6 +13,7 @@ import getFiles from './getFiles.js';
 export const setCommitBoxHeight = createAction('SET_COMMIT_BOX_HEIGHT');
 export const setCommitBoxWidth = createAction('SET_COMMIT_BOX_WIDTH');
 export const setCommitBoxColor = createAction('SET_COMMIT_BOX_COLOR');
+export const setCommitBoxSort = createAction('SET_COMMIT_BOX_SORT');
 
 export const setSelectedAuthors = createAction('SET_SELECTED_AUTHORS');
 export const setSelectedBranches = createAction('SET_SELECTED_BRANCHES');
@@ -23,6 +24,7 @@ export const setShowCommitMessage = createAction('SET_SHOW_COMMIT_MESSAGE');
 export const setShowCommitWeblink = createAction('SET_SHOW_COMMIT_WEBLINK');
 export const setShowCommitAuthor = createAction('SET_SHOW_COMMIT_AUTHOR');
 export const setShowCommitFiles = createAction('SET_SHOW_COMMIT_FILES');
+export const setShowCommitBranch = createAction('SET_SHOW_COMMIT_BRANCH');
 
 export const requestFileEvolutionData = createAction('REQUEST_FILE_EVOLUTION_DATA');
 export const receiveFileEvolutionData = timestampedActionFactory('RECEIVE_FILE_EVOLUTION_DATA');
