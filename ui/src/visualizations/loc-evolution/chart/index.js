@@ -12,6 +12,7 @@ const mapStateToProps = (state /*, ownProps*/) => {
   state.visualizations.locEvolution.state.elements = elements;
 
   return {
+    highlightedFolder: corState.config.highlightedFolder,
     elements: corState.elements
   };
 };

@@ -13,6 +13,7 @@ import fetchRelatedCommits from './fetchRelatedCommits.js';
 export const setOverlay = createAction('SET_OVERLAY');
 export const setHighlightedIssue = createAction('SET_HIGHLIGHTED_ISSUE');
 export const setCommitAttribute = createAction('SET_COMMIT_ATTRIBUTE');
+export const setActiveFolder = createAction('SET_HIGHLIGHTED_FOLDER');
 export const openCommit = createAction('OPEN_COMMIT');
 
 export const requestCodeOwnershipData = createAction('REQUEST_CODE_OWNERSHIP_DATA');

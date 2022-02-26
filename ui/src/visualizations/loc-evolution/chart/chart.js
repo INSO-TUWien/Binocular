@@ -23,7 +23,23 @@ import * as zoomUtils from '../../../utils/zoom.js';
 import fetchRelatedCommits from '../sagas/fetchRelatedCommits.js';
 import LocEvolutionConfig from '../config.js';
 
-async function visualize() {
+async function visualize(props) {
+
+  d3.select("#my_dataviz").selectAll("*").remove();
+
+  // set the dimensions and margins of the graph
+  var margin = { top: 50, right: 30, bottom: 0, left: 0 },
+    width = 1200 - margin.left - margin.right,
+    height = 500 - margin.top - margin.bottom;
+
+  // append the svg object to the body of the page
+  var svg = d3.select("#my_dataviz")
+    .append("svg")
+    .attr("width", width + margin.left + margin.right)
+    .attr("height", height + margin.top + margin.bottom)
+    .append("g")
+    .attr("transform",
+      "translate(10,20)");
 
   const dataArr = new Array();
   const dateArr = new Array();
@@ -31,7 +47,8 @@ async function visualize() {
   var fileNameList = [];
 
   //Here we will have to change to take the path + files from user selected input, this serves as a placeholder until that functionality is implemented
-  let prefix = "ui/src/visualizations/code-ownership-river/chart/";
+  //let prefix = "ui/src/visualizations/code-ownership-river/chart/";
+  let prefix = props.highlightedFolder;
 
   //Query for File Names
   const resp = await Promise.resolve(
@@ -52,15 +69,13 @@ async function visualize() {
   for (const i in fileNameArr) {
     var currPath = "";
     currPath = fileNameArr[i].path;
-    if(currPath.includes(prefix)){ //check whether the path contains the desired directory
+    if (currPath.includes(prefix)) { //check whether the path contains the desired directory
       currPath = currPath.substring(currPath.lastIndexOf("/") + 1); //Remove the directory from the filename
       if (currPath.length > 0 && !fileNameList.includes(currPath)) {
         fileNameList.push(currPath);
       }
     }
   }
-
-  console.warn(fileNameList)
 
   //for each file we want in our Visualization, we need to send a query to the DB to fetch all the commits in which the file is mentioned. From the commits, we get data like
   //additions, deletions and date of commit, which is all needed for our Visualization
@@ -126,21 +141,6 @@ async function visualize() {
     }
     maxValues.push(tempVar)
   }
-
-  console.warn("2nd: ", JSON.stringify(dataArr))
-  // set the dimensions and margins of the graph
-  var margin = { top: 50, right: 30, bottom: 0, left: 0 },
-    width = 1200 - margin.left - margin.right,
-    height = 500 - margin.top - margin.bottom;
-
-  // append the svg object to the body of the page
-  var svg = d3.select("#my_dataviz")
-    .append("svg")
-    .attr("width", width + margin.left + margin.right)
-    .attr("height", height + margin.top + margin.bottom)
-    .append("g")
-    .attr("transform",
-      "translate(10,20)");
 
   var keys = fileNameList;
 
@@ -209,8 +209,6 @@ async function visualize() {
     .keys(keys);
 
   var stackedSeries = stackGen(dataArr)
-  console.log(stackedSeries)
-
 
   // create a tooltip
   var Tooltip = svg
@@ -341,7 +339,9 @@ export default class locEvolution extends React.Component {
     this.updateDomain(props);
     this.onResize = zoomUtils.onResizeFactory(0.7, 0.7);
     this.onZoom = zoomUtils.onZoomFactory({ constrain: true, margin: 50 });
-    visualize();
+    console.warn(this.props.highlightedFolder);
+    //visualize("ui/src/visualizations/code-ownership-river/chart/");
+    //visualize(props);
   }
 
   get getFiles() {
@@ -349,14 +349,13 @@ export default class locEvolution extends React.Component {
   }
 
   updateDomain(data) {
-
     if (!data.commits) {
       return;
     }
   }
 
   componentDidMount() {
-    //visualize();
+    //visualize(this.props);
   }
 
   componentWillReceiveProps(nextProps) {
@@ -367,6 +366,7 @@ export default class locEvolution extends React.Component {
   }
 
   render() {
+    visualize(this.props);
     return (
       <div id="my_dataviz"></div>
     )

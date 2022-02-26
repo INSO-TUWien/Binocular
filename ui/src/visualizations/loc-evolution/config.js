@@ -2,7 +2,7 @@
 
 import Promise from 'bluebird';
 import { connect } from 'react-redux';
-import { setOverlay, setHighlightedIssue, setCommitAttribute } from './sagas';
+import { setOverlay, setHighlightedIssue, setCommitAttribute, setActiveFolder } from './sagas';
 import SearchBox from '../../components/SearchBox';
 import TabCombo from '../../components/TabCombo.js';
 import styles from './styles.scss';
@@ -10,6 +10,7 @@ import styles from './styles.scss';
 
 import { graphQl } from '../../utils';
 import { Button } from 'react-scroll';
+import e from 'cors';
 
 const elementNames = ["Axis.js", "chart.js", "CommitMarker.js", "CommitMarker.scss", "GridLines.js", "index.js", "StackedArea.js"]; //change to get Filenames from State
 const files = [];
@@ -20,7 +21,6 @@ async function populateFiles() {
   files.length = 0;
   requestFileStructure().then(function (resp) {
     filterFolders(resp);
-    console.warn(folderList)
     for (const i in folderList) {
       files.push(folderList[i]);
       optionsB.push(
@@ -73,6 +73,7 @@ const mapStateToProps = (state /*, ownProps*/) => {
     issues: corState.data.issues,
     overlay: corState.config.overlay,
     highlightedIssue: corState.config.highlightedIssue,
+    highlightedFolder: corState.config.highlightedFolder,
     commitAttribute: corState.config.commitAttribute,
     elements: temp,
     //files: state.visualizations.codeHotspots.state.data.data.files
@@ -83,7 +84,8 @@ const mapStateToProps = (state /*, ownProps*/) => {
 const mapDispatchToProps = (dispatch /*, ownProps*/) => {
   return {
     onSetFile: url => dispatch(setActiveFile(url)),
-    onChangeCommitAttribute: attr => dispatch(setCommitAttribute(attr))
+    onChangeCommitAttribute: attr => dispatch(setCommitAttribute(attr)),
+    onChangeFolderName: folder => dispatch(setActiveFolder(folder))
   };
 };
 
@@ -116,10 +118,9 @@ const locEvolutionConfigComponent = props => {
             <label className="label">Show LoC-Evolution for:</label>
             <div id={'branchSelector'} className={'select'}>
               <select
-                //value={props.branch}
-                value={1, 2, 3}
-                onChange={e => {
-                }}>
+                value={props.highlightedFolder}
+                onChange={e => props.onChangeFolderName(e.target.value)}
+                >
                 {optionsB}
               </select>
             </div>
