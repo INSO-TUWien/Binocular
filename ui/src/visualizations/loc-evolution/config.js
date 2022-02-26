@@ -13,21 +13,34 @@ import { Button } from 'react-scroll';
 
 const elementNames = ["Axis.js", "chart.js", "CommitMarker.js", "CommitMarker.scss", "GridLines.js", "index.js", "StackedArea.js"]; //change to get Filenames from State
 const files = [];
-const optionsB= [];
+const optionsB = [];
+const folderList = [];
 
 async function populateFiles() {
   files.length = 0;
   requestFileStructure().then(function (resp) {
-    console.warn(resp)
-    for (const i in resp) {
-      files.push(resp[i].path);
+    filterFolders(resp);
+    console.warn(folderList)
+    for (const i in folderList) {
+      files.push(folderList[i]);
       optionsB.push(
         <option key={i}>
-          {resp[i].path}
+          {folderList[i]}
         </option>
       );
     }
   });
+}
+
+function filterFolders(queryResponse) {
+  for (const i in queryResponse) {
+    var currPath = "";
+    currPath = queryResponse[i].path;
+    currPath = currPath.substring(0,currPath.lastIndexOf("/")+1)
+    if (currPath.length > 0 && !folderList.includes(currPath)) {
+      folderList.push(currPath);
+    }
+  }
 }
 
 async function requestFileStructure() {

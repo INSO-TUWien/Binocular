@@ -27,14 +27,44 @@ async function visualize() {
 
   const dataArr = new Array();
   const dateArr = new Array();
+  var fileNameArr = new Array();
+  var fileNameList = [];
 
   //Here we will have to change to take the path + files from user selected input, this serves as a placeholder until that functionality is implemented
   let prefix = "ui/src/visualizations/code-ownership-river/chart/";
-  let allFilesArr = ["Axis.js", "chart.js", "CommitMarker.js", "CommitMarker.scss", "GridLines.js", "index.js", "StackedArea.js"]
+
+  //Query for File Names
+  const resp = await Promise.resolve(
+    graphQl.query(
+      `
+    query{
+     files(sort: "ASC"){
+        data{path,webUrl}
+      }
+    }
+    `,
+      {}
+    )
+  );
+  fileNameArr = resp.files.data;
+
+  //Filter them for currently selected Folder
+  for (const i in fileNameArr) {
+    var currPath = "";
+    currPath = fileNameArr[i].path;
+    if(currPath.includes(prefix)){ //check whether the path contains the desired directory
+      currPath = currPath.substring(currPath.lastIndexOf("/") + 1); //Remove the directory from the filename
+      if (currPath.length > 0 && !fileNameList.includes(currPath)) {
+        fileNameList.push(currPath);
+      }
+    }
+  }
+
+  console.warn(fileNameList)
 
   //for each file we want in our Visualization, we need to send a query to the DB to fetch all the commits in which the file is mentioned. From the commits, we get data like
   //additions, deletions and date of commit, which is all needed for our Visualization
-  for (const indFile of allFilesArr) {
+  for (const indFile of fileNameList) {
     let queryRes = await getRelatedCommits(prefix + indFile, 100);
     //comments are here because we maybe outsource this function / the data-request in the future
     //var mycoolvar = fetchRelatedCommits.getRelatedCommits
@@ -83,7 +113,7 @@ async function visualize() {
   const maxValues = new Array();
 
   //Filling the Objects with Files, which haven't had commits on a specific Date
-  for (const filename of allFilesArr) {
+  for (const filename of fileNameList) {
     let tempVar = 0;
     let i = 0;
     for (i; i < dataArr.length; i++) {
@@ -112,7 +142,7 @@ async function visualize() {
     .attr("transform",
       "translate(10,20)");
 
-  var keys = allFilesArr;
+  var keys = fileNameList;
 
   var minDate = Math.min(...dateArr);
   var maxDate = Math.max(...dateArr);
@@ -143,14 +173,14 @@ async function visualize() {
   // Add Y axis
   var yScale = d3.scaleLinear()
     .domain([-20, 50])
-    .range([100, height-50]);
+    .range([100, height - 50]);
 
   // color palette
   var color = d3.scaleOrdinal()
     .domain(keys)
     .range(d3.schemeSpectral[10]); //Color Change here
 
-  //LEGEND AQUI
+  //LEGEND
   // Add one dot in the legend for each name.
   svg.selectAll("mydots")
     .data(keys)
@@ -199,7 +229,7 @@ async function visualize() {
       .style("opacity", 1)
   }
 
-  var mousemove = function (d, i) { //not changed yet - but not priority yet
+  var mousemove = function (d, i) {
     //svg.select("line").remove();
     var coordinates = d3.pointer(d);
     var mousex = coordinates[0];
@@ -221,9 +251,9 @@ async function visualize() {
     // Iterate over DataArr to search for the last commit containing the given file and extracting the amount of LoC changed in said commit
     var j = currIndex;
     var lastCommitValue = 0;
-    while(j >= 0 || dataArr[j].date >= minDate){
+    while (j >= 0 || dataArr[j].date >= minDate) {
       lastCommitValue = currFileValue - dataArr[j][file];
-      if(lastCommitValue != 0){
+      if (lastCommitValue != 0) {
         break;
       }
       j--;
@@ -233,9 +263,9 @@ async function visualize() {
     lastCommitValue = Math.abs(lastCommitValue);
 
     const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
-    Tooltip.text("On " + months[hoverDate.getMonth()] + " " + hoverDate.getDate() + ", " + hoverDate.getFullYear() + " the File: " + 
-    file + " had a total line count of: " + currFileValue + ". The last commit to the file was on " +  months[closeDateBefore.getMonth()] + " " + closeDateBefore.getDate() + 
-    ", " + closeDateBefore.getFullYear() + " and " + addSubtractString + "a net total of " + lastCommitValue + " lines of Code.");
+    Tooltip.text("On " + months[hoverDate.getMonth()] + " " + hoverDate.getDate() + ", " + hoverDate.getFullYear() + " the File: " +
+      file + " had a total line count of: " + currFileValue + ". The last commit to the file was on " + months[closeDateBefore.getMonth()] + " " + closeDateBefore.getDate() +
+      ", " + closeDateBefore.getFullYear() + " and " + addSubtractString + "a net total of " + lastCommitValue + " lines of Code.");
 
     /* --------------------------- White Vertical Line Here -------------- */
     /*svg.append("line")
@@ -276,7 +306,7 @@ async function visualize() {
     .y0(function (d) { return yScale(d[0]); })
     .y1(function (d) { return yScale(d[1]); });
 
-  // Show the areas -------------------------- For some reason this doesn't work. Stacking works, maybe error here or in Area Generator
+  // Show the areas
   svg.selectAll("mylayers")
     .data(stackedSeries)
     .enter()
