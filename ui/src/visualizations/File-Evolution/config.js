@@ -59,7 +59,7 @@ const mapDispatchToProps = (dispatch /*, ownProps*/) => {
     onClickShowCommitBoxBranch: showCommitBranch => dispatch(setShowCommitBranch(showCommitBranch)),
     onSetShowCommitSha: showCommitSha => dispatch(setShowCommitSha(showCommitSha)),
     onClickCommitBoxColor: commitBoxColor => dispatch(setCommitBoxColor(commitBoxColor)),
-    onClickCommitBoxSortBy: commitBoxSort => dispatch(setCommitBoxSort(commitBoxSort))
+    onClickCommitBoxSort: commitBoxSort => dispatch(setCommitBoxSort(commitBoxSort))
   };
 };
 
@@ -111,8 +111,11 @@ const FileEvolutionConfigComponent = props => {
             <label className={styles.label}>Sort by</label>
             <TabCombo
               value={props.commitBoxSort}
-              options={[{ label: 'Date', icon: 'file-alt', value: 'date' }, { label: 'Branch', icon: 'cloud-upload-alt', value: 'branch' }]}
-              onChange={value => props.onClickCommitBoxSortBy(value)}
+              options={[
+                { label: 'Date', icon: 'file-alt', value: 'date' },
+                { label: 'Branch', icon: 'cloud-upload-alt', value: 'branch' }
+              ]}
+              onChange={value => props.onClickCommitBoxSort(value)}
             />
           </div>
           <div className="control">

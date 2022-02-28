@@ -20,6 +20,7 @@ export default class FileEvolution extends React.Component {
     //const svgHeight = (commitRects.length / 2 + 1) * this.props.commitBoxHeight + (commitRects.length / 2) * space;
     // const svgHeight = this.props.commitBoxHeight + space;
     const svgHeight = (this.props.commitBoxHeight + space) * 25; //TODO anzahl branch
+    //console.log(this.props.branches.size())
     const svgWidth = (commitBoxes.length / 2 + 1) * this.props.commitBoxHeight + commitBoxes.length / 2 * space;
     return (
       <div className={styles.chartContainer}>
@@ -181,6 +182,55 @@ export default class FileEvolution extends React.Component {
       arrow.push(<polyline points={pointsForArrowHead} fill="none" stroke="black" />);
       return arrow;
     }
+
+    function getBranchNoCommitInfo(props, xStart, height, width, branchCommitPosition) {
+      const branchNoCommitInfo = [];
+      const xPosStart = 20;
+      for (const b in props.branches) {
+        const branchName = props.branches[b].branch;
+        const xPos = branchCommitPosition[branchName]['x'];
+        const yPos = branchCommitPosition[branchName]['y'];
+        if (xPos === xStart) {
+          branchNoCommitInfo.push(
+            <g width={width} height={height}>
+              <rect x={xPos} y={yPos} width={width} height={height} fill={props.branchesColorPalette[branchName]} />
+              <foreignObject x={xPos} y={yPos} width={width} height={height} class="branchInfo">
+                <h1>There are no Commits in this Branch or this Branch ist not selected</h1>
+              </foreignObject>
+            </g>
+          );
+          console.log(branchNoCommitInfo);
+        }
+      }
+      return branchNoCommitInfo;
+    }
+
+    function getBranchHeadline(props, space, yStart, xStart, height) {
+      const branchHeadline = [];
+      const namePrints = [];
+      const branchPos = getBranchCommitPosition(props, space, yStart, xStart, height);
+      const xPos = 20;
+      for (const b in props.branches) {
+        const branchName = props.branches[b].branch;
+        const yPos = commitBoxPosition[branchName]['y'] - space / 2;
+        const widthHeadline = 200;
+        const heightHeadline = space;
+        branchHeadline.push(
+          <g width={widthHeadline} height={heightHeadline}>
+            <foreignObject x={xPos} y={yPos} width={widthHeadline} height={heightHeadline} class="branchName">
+              <h1>
+                <b>
+                  Branch: {branchName}
+                </b>
+              </h1>
+            </foreignObject>
+          </g>
+        );
+        console.log(branchHeadline);
+      }
+      return branchHeadline;
+    }
+
     function getBranchCommitPosition(props, space, y, x, height) {
       let newY = y;
       const pos = {};
@@ -195,7 +245,6 @@ export default class FileEvolution extends React.Component {
         newY = newY + space + height;
         //}
       }
-      console.log(pos);
       return pos;
     }
 
@@ -203,10 +252,14 @@ export default class FileEvolution extends React.Component {
     const width = this.props.commitBoxWidth;
     const height = this.props.commitBoxHeight;
     const commitRects = [];
-    let x = 20;
+    const xStart = 20;
+    let x = xStart;
     let y = space;
     const commitBoxPosition = getBranchCommitPosition(this.props, space, y, x, height);
     console.log(commitBoxPosition);
+    if (this.props.commitBoxSort === 'branch') {
+      commitRects.push(getBranchHeadline(this.props, space, y, x, height));
+    }
     for (const i in commitData) {
       const commit = commitData[i];
 
@@ -214,18 +267,19 @@ export default class FileEvolution extends React.Component {
         if (this.props.selectedBranches.indexOf(getBranch(this.props, commit)) > -1) {
           if (this.props.commitBoxSort === 'date') {
             const color = getBoxColor(this.props, commit);
+            if (x !== xStart) {
+              commitRects.push(
+                <g width={width} height={height}>
+                  {getArrow(x - width - space, y, height, width)}
+                </g>
+              );
+            }
             commitRects.push(
               <g width={width} height={height}>
                 <rect x={x} y={y} width={width} height={height} fill={color} />
-                <foreignObject x={x} y={y} width={width} height={height}>
+                <foreignObject x={x} y={y} width={width} height={height} class="commitInfo">
                   {getCommitInfo(this.props, commit)}
                 </foreignObject>
-              </g>
-            );
-
-            commitRects.push(
-              <g width={width} height={height}>
-                {getArrow(x, y, height, width)}
               </g>
             );
 
@@ -239,18 +293,20 @@ export default class FileEvolution extends React.Component {
               x = commitBoxPosition[getBranch(this.props, commit)]['x'];
               y = commitBoxPosition[getBranch(this.props, commit)]['y'];
 
-              commitRects.push(
-                <g width={width} height={height}>
-                  <rect x={x} y={y} width={width} height={height} fill={getBoxColor(this.props, commit)} />
-                  <foreignObject x={x} y={y} width={width} height={height}>
-                    {getCommitInfo(this.props, commit)}
-                  </foreignObject>
-                </g>
-              );
+              if (x !== xStart) {
+                commitRects.push(
+                  <g width={width} height={height}>
+                    {getArrow(x - width - space, y, height, width)}
+                  </g>
+                );
+              }
 
               commitRects.push(
                 <g width={width} height={height}>
-                  {getArrow(x, y, height, width)}
+                  <rect x={x} y={y} width={width} height={height} fill={getBoxColor(this.props, commit)} />
+                  <foreignObject x={x} y={y} width={width} height={height} class="commitInfo">
+                    {getCommitInfo(this.props, commit)}
+                  </foreignObject>
                 </g>
               );
 
@@ -261,7 +317,11 @@ export default class FileEvolution extends React.Component {
         } //selected Branches
       } //selected Authors
     }
-    commitRects.pop(); //remove last arrow
+
+    if (this.props.commitBoxSort === 'branch') {
+      commitRects.push(getBranchNoCommitInfo(this.props, xStart, height, 500, commitBoxPosition));
+    }
+    //commitRects.pop(); //remove last arrow
     return commitRects;
   }
 }
