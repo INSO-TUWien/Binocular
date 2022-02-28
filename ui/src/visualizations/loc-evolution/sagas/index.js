@@ -14,6 +14,7 @@ export const setOverlay = createAction('SET_OVERLAY');
 export const setHighlightedIssue = createAction('SET_HIGHLIGHTED_ISSUE');
 export const setCommitAttribute = createAction('SET_COMMIT_ATTRIBUTE');
 export const setActiveFolder = createAction('SET_HIGHLIGHTED_FOLDER');
+export const setFilteredFiles = createAction('SET_FILTERED_FILES', fs => fs);
 export const openCommit = createAction('OPEN_COMMIT');
 
 export const requestCodeOwnershipData = createAction('REQUEST_CODE_OWNERSHIP_DATA');

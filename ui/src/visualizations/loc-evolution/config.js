@@ -2,9 +2,10 @@
 
 import Promise from 'bluebird';
 import { connect } from 'react-redux';
-import { setOverlay, setHighlightedIssue, setCommitAttribute, setActiveFolder } from './sagas';
+import { setOverlay, setHighlightedIssue, setCommitAttribute, setActiveFolder, setFilteredFiles } from './sagas';
 import SearchBox from '../../components/SearchBox';
 import TabCombo from '../../components/TabCombo.js';
+import FilterBox from '../../components/FilterBox';
 import styles from './styles.scss';
 
 
@@ -16,6 +17,7 @@ const elementNames = ["Axis.js", "chart.js", "CommitMarker.js", "CommitMarker.sc
 const files = [];
 const optionsB = [];
 const folderList = [];
+var fileNameList = [];
 
 async function populateFiles() {
   files.length = 0;
@@ -36,13 +38,35 @@ function filterFolders(queryResponse) {
   for (const i in queryResponse) {
     var currPath = "";
     currPath = queryResponse[i].path;
-    currPath = currPath.substring(0,currPath.lastIndexOf("/")+1)
+    currPath = currPath.substring(0, currPath.lastIndexOf("/") + 1)
     if (currPath.length > 0 && !folderList.includes(currPath)) {
       folderList.push(currPath);
     }
   }
 }
 
+//Filter Files for currently selected Folder
+async function filterFiles(highlightedFolder) {
+  fileNameList = [];
+  console.warn(highlightedFolder);
+  requestFileStructure().then(function (resp) {
+    console.warn(highlightedFolder);
+    var prefix = highlightedFolder;
+    for (const i in resp) {
+      var currPath = "";
+      currPath = resp[i].path;
+      if (currPath.includes(prefix)) { //check whether the path contains the desired directory
+        currPath = currPath.substring(currPath.lastIndexOf("/") + 1); //Remove the directory from the filename
+        if (currPath.length > 0 && !fileNameList.includes(currPath)) {
+          fileNameList.push(currPath);
+        }
+      }
+    }
+    console.warn(fileNameList);
+  });
+}
+
+//Query for Files
 async function requestFileStructure() {
   files.length = 0;
   const resp = await Promise.resolve(
@@ -60,24 +84,24 @@ async function requestFileStructure() {
   return resp.files.data;
 }
 
-const mapStateToProps = (state /*, ownProps*/) => {
-  const corState = state.visualizations.locEvolution.state;
 
+const mapStateToProps = (state /*, ownProps*/) => {
+  const locState = state.visualizations.locEvolution.state;
   var temp;
-  if (typeof corState.elements === 'undefined') {
+  if (typeof locState.elements === 'undefined') {
     temp = elementNames;
   } else {
-    temp = corState.elements
+    temp = locState.elements
   }
   return {
-    issues: corState.data.issues,
-    overlay: corState.config.overlay,
-    highlightedIssue: corState.config.highlightedIssue,
-    highlightedFolder: corState.config.highlightedFolder,
-    commitAttribute: corState.config.commitAttribute,
+    issues: locState.data.issues,
+    overlay: locState.config.overlay,
+    highlightedIssue: locState.config.highlightedIssue,
+    highlightedFolder: locState.config.highlightedFolder,
+    commitAttribute: locState.config.commitAttribute,
     elements: temp,
-    //files: state.visualizations.codeHotspots.state.data.data.files
-    files: files
+    files: files,
+    filteredFiles: locState.config.filteredFiles
   };
 };
 
@@ -85,6 +109,7 @@ const mapDispatchToProps = (dispatch /*, ownProps*/) => {
   return {
     onSetFile: url => dispatch(setActiveFile(url)),
     onChangeCommitAttribute: attr => dispatch(setCommitAttribute(attr)),
+    onSetFilteredFiles: files => dispatch(setFilteredFiles(files)),
     onChangeFolderName: folder => dispatch(setActiveFolder(folder))
   };
 };
@@ -93,23 +118,12 @@ const mapDispatchToProps = (dispatch /*, ownProps*/) => {
 
 const locEvolutionConfigComponent = props => {
   populateFiles();
-  //console.warn(files)
-  const options = [];
-  for (const i in files) {
-    options.push(
-      <option key={i}>
-        {files[i].key}
-      </option>
-    );
-  }
-
-  /*for (const i in elementNames) {
-    options.push(
-      <option key={i}>
-        {elementNames[i]}
-      </option>
-    );
+  /*if(props.filteredFiles.length == 0){
+    filterFiles(props.highlightedFolder);
+  } else {
+    fileNameList = props.filteredFiles;
   }*/
+
   return (
     <div className={styles.configContainer}>
       <form>
@@ -120,7 +134,7 @@ const locEvolutionConfigComponent = props => {
               <select
                 value={props.highlightedFolder}
                 onChange={e => props.onChangeFolderName(e.target.value)}
-                >
+              >
                 {optionsB}
               </select>
             </div>
@@ -129,20 +143,18 @@ const locEvolutionConfigComponent = props => {
 
         <div className="field">
           <div className="control">
-            <label className="label">Choose Elements to display:</label>
-
+            <label className="label">Choose Files to display:</label>
             {props.elements.map(value => (
               <span> {value} {" "}
                 <input
                   type="radio"
                   name="elementName"
                   value={value}
-                  checked="false"
+                  checked="true"
                   onChange={() => props.onChangeCommitAttribute('changes')}
                 />
               </span>
             ))}
-
           </div>
         </div>
       </form>

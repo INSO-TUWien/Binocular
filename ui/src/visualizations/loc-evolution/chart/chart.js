@@ -46,8 +46,6 @@ async function visualize(props) {
   var fileNameArr = new Array();
   var fileNameList = [];
 
-  //Here we will have to change to take the path + files from user selected input, this serves as a placeholder until that functionality is implemented
-  //let prefix = "ui/src/visualizations/code-ownership-river/chart/";
   let prefix = props.highlightedFolder;
 
   //Query for File Names
@@ -340,8 +338,7 @@ export default class locEvolution extends React.Component {
     this.onResize = zoomUtils.onResizeFactory(0.7, 0.7);
     this.onZoom = zoomUtils.onZoomFactory({ constrain: true, margin: 50 });
     console.warn(this.props.highlightedFolder);
-    //visualize("ui/src/visualizations/code-ownership-river/chart/");
-    //visualize(props);
+    visualize(props);
   }
 
   get getFiles() {
@@ -355,7 +352,7 @@ export default class locEvolution extends React.Component {
   }
 
   componentDidMount() {
-    //visualize(this.props);
+    visualize(this.props);
   }
 
   componentWillReceiveProps(nextProps) {
