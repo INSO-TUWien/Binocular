@@ -94,9 +94,6 @@ const mapStateToProps = (state /*, ownProps*/) => {
     temp = locState.elements
   }
   return {
-    issues: locState.data.issues,
-    overlay: locState.config.overlay,
-    highlightedIssue: locState.config.highlightedIssue,
     highlightedFolder: locState.config.highlightedFolder,
     commitAttribute: locState.config.commitAttribute,
     elements: temp,
@@ -107,7 +104,6 @@ const mapStateToProps = (state /*, ownProps*/) => {
 
 const mapDispatchToProps = (dispatch /*, ownProps*/) => {
   return {
-    onSetFile: url => dispatch(setActiveFile(url)),
     onChangeCommitAttribute: attr => dispatch(setCommitAttribute(attr)),
     onSetFilteredFiles: files => dispatch(setFilteredFiles(files)),
     onChangeFolderName: folder => dispatch(setActiveFolder(folder))

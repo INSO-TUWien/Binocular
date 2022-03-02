@@ -2,35 +2,20 @@
 
 import React from 'react';
 import * as d3 from 'd3';
-import { myprototyp } from './prototyp.js'
-import cx from 'classnames';
-import ScriptTag from 'react-script-tag';
 
+import { graphQl } from '../../../utils';
 
-import { collectPages, graphQl } from '../../../utils';
-import { fetchFactory, timestampedActionFactory } from '../../../sagas/utils.js';
-
-import styles from '../styles.scss';
 import _ from 'lodash';
-import Axis from './Axis.js';
-import GridLines from './GridLines.js';
-import StackedArea from './StackedArea.js';
-
-import Legend from '../../../components/Legend';
-import ZoomableChartContainer from '../../../components/svg/ZoomableChartContainer.js';
-import OffsetGroup from '../../../components/svg/OffsetGroup.js';
 import * as zoomUtils from '../../../utils/zoom.js';
-import fetchRelatedCommits from '../sagas/fetchRelatedCommits.js';
-import LocEvolutionConfig from '../config.js';
 
 async function visualize(props) {
 
   d3.select("#my_dataviz").selectAll("*").remove();
 
   // set the dimensions and margins of the graph
-  var margin = { top: 50, right: 30, bottom: 0, left: 0 },
-    width = 1200 - margin.left - margin.right,
-    height = 500 - margin.top - margin.bottom;
+  var margin = { top: 100, right: 100, bottom: 100, left: 100 },
+    width = 1600 - margin.left - margin.right,
+    height = 600 - margin.top - margin.bottom;
 
   // append the svg object to the body of the page
   var svg = d3.select("#my_dataviz")
@@ -146,11 +131,9 @@ async function visualize(props) {
   var maxDate = Math.max(...dateArr);
 
   // Add X axis
-  // Skala zu Timestamp machen hier
   var xScale = d3.scaleLinear()
     .domain([minDate, maxDate])
-    .nice()
-    .range([0, width - 100]);
+    .range([200, width]);
 
 
   svg.append("g")
@@ -166,12 +149,12 @@ async function visualize(props) {
     .attr("text-anchor", "end")
     .attr("x", width)
     .attr("y", height - 30)
-    .text("Time (year)");
+    .text("Timespan over which these files existed and commits were made to them");
 
   // Add Y axis
   var yScale = d3.scaleLinear()
     .domain([-20, 50])
-    .range([100, height - 50]);
+    .range([250, height - 100]); //change here to be more dynamic with different sizes
 
   // color palette
   var color = d3.scaleOrdinal()
@@ -281,18 +264,7 @@ async function visualize(props) {
   }
 
   var mouseclick = function (d, i) {
-    var mousex = d3.pointer(this);
-    mousex = mousex[0];
-    var invertedx = x.invert(mousex);
-    var year = Math.floor(invertedx)
-    var dmp = arr[(year - 2000)]
-    var result = Object.keys(dmp).map((key) => [String(key), dmp[key]]);
-    for (let index = 0; index < result.length; index++) {
-      if (result[index][0] === keys[i]) {
-        yVal = parseInt(result[index][1], 10)
-      }
-    }
-    Tooltip.text("Value of " + keys[i] + " in " + year + " is: " + yVal)
+    mousemove(d,i);
   }
 
   // Area generator
@@ -329,11 +301,6 @@ export default class locEvolution extends React.Component {
   constructor(props) {
     super(props);
 
-    const elements = this.extractCommitData(props);
-    this.elems = {};
-    this.state = {
-      elements
-    };
     this.updateDomain(props);
     this.onResize = zoomUtils.onResizeFactory(0.7, 0.7);
     this.onZoom = zoomUtils.onZoomFactory({ constrain: true, margin: 50 });
@@ -356,10 +323,6 @@ export default class locEvolution extends React.Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    const { fileURL, branch, path } = nextProps;
-    this.setState({ path: path });
-    this.setState({ branch: branch });
-    this.setState({ fileURL: fileURL });
   }
 
   render() {
@@ -368,46 +331,7 @@ export default class locEvolution extends React.Component {
       <div id="my_dataviz"></div>
     )
   }
-
-  activateLegend(legend) {
-    this.setState({ hoverHint: legend });
-  }
-
-  extractCommitData(props) {
-    const elements = ["File11", "File21", "File31"];
-    return elements;
-  }
 }
-
-const openIssuesLegend = {
-  name: 'Open issues',
-  style: {
-    fill: '#ff9eb1',
-    stroke: '#ff3860'
-  }
-};
-
-const closedIssuesLegend = {
-  name: 'Closed issues',
-  style: {
-    fill: '#73e79c'
-  }
-};
-
-const unsuccessfulBuildsLegend = {
-  name: 'Unsuccessful builds',
-  style: {
-    fill: '#ff9eb1',
-    stroke: '#ff3860'
-  }
-};
-
-const successfulBuildsLegend = {
-  name: 'Successful builds',
-  style: {
-    fill: '#73e79c'
-  }
-};
 
 
 async function getRelatedCommits(filename, perPage) {
