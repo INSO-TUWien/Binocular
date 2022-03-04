@@ -152,9 +152,26 @@ async function visualize(props) {
     .text("Timespan over which these files existed and commits were made to them");
 
   // Add Y axis
+  console.warn(dataArr)
+  var maxValue = 0;
+  for (let dp of dataArr) {
+    var tempValue = 0;
+    for (var property in dp) {
+      if (dp[property] instanceof Date) {
+
+      } else {
+        tempValue += dp[property];
+      }
+    }
+    if (tempValue > maxValue) {
+      maxValue = tempValue;
+    }
+  }
+  console.warn(maxValue)
   var yScale = d3.scaleLinear()
-    .domain([0, 1000])
-    .range([100, height - 300]); //change here to be more dynamic with different sizes
+    .domain([0, maxValue])
+    .range([75, height - 150])
+    .nice(); //change here to be more dynamic with different sizes
 
   // color palette
   var color = d3.scaleOrdinal()
@@ -168,7 +185,7 @@ async function visualize(props) {
     .enter()
     .append("circle")
     .attr("cx", 10)
-    .attr("cy", function (d, i) { return 100 + i * 25 }) // 100 is where the first dot appears. 25 is the distance between dots
+    .attr("cy", function (d, i) { return i * 25 }) // 100 is where the first dot appears. 25 is the distance between dots
     .attr("r", 7)
     .style("fill", function (d) { return color(d) })
 
@@ -178,7 +195,7 @@ async function visualize(props) {
     .enter()
     .append("text")
     .attr("x", 30)
-    .attr("y", function (d, i) { return 100 + i * 25 }) // 100 is where the first dot appears. 25 is the distance between dots
+    .attr("y", function (d, i) { return i * 25 }) // 100 is where the first dot appears. 25 is the distance between dots
     .style("fill", function (d) { return color(d) })
     .text(function (d) { return d })
     .attr("text-anchor", "left")
@@ -190,12 +207,13 @@ async function visualize(props) {
     .keys(keys);
 
   var stackedSeries = stackGen(dataArr)
+  console.warn(stackedSeries)
 
   // create a tooltip
   var Tooltip = svg
     .append("text")
     .attr("x", 0)
-    .attr("y", 0)
+    .attr("y", -225)
     .style("opacity", 0)
     .style("font-size", 17)
 
@@ -264,7 +282,7 @@ async function visualize(props) {
   }
 
   var mouseclick = function (d, i) {
-    mousemove(d,i);
+    mousemove(d, i);
   }
 
   // Area generator
