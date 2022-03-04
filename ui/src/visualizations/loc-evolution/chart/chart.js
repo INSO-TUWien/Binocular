@@ -15,16 +15,16 @@ async function visualize(props) {
   // set the dimensions and margins of the graph
   var margin = { top: 100, right: 100, bottom: 100, left: 100 },
     width = 1600 - margin.left - margin.right,
-    height = 600 - margin.top - margin.bottom;
+    height = 800;
 
   // append the svg object to the body of the page
   var svg = d3.select("#my_dataviz")
     .append("svg")
     .attr("width", width + margin.left + margin.right)
-    .attr("height", height + margin.top + margin.bottom)
+    .attr("height", height)
     .append("g")
     .attr("transform",
-      "translate(10,20)");
+      "translate(10,300)");
 
   const dataArr = new Array();
   const dateArr = new Array();
@@ -137,7 +137,7 @@ async function visualize(props) {
 
 
   svg.append("g")
-    .attr("transform", "translate(0,320)")
+    .attr("transform", "translate(0,350)")
     .call(d3.axisBottom(xScale).tickSize(-height * .7).tickFormat(d3.timeFormat("%Y-%m-%d")))
     .select(".domain").remove()
 
@@ -148,13 +148,13 @@ async function visualize(props) {
   svg.append("text")
     .attr("text-anchor", "end")
     .attr("x", width)
-    .attr("y", height - 30)
+    .attr("y", height - 400)
     .text("Timespan over which these files existed and commits were made to them");
 
   // Add Y axis
   var yScale = d3.scaleLinear()
-    .domain([-20, 50])
-    .range([250, height - 100]); //change here to be more dynamic with different sizes
+    .domain([0, 1000])
+    .range([100, height - 300]); //change here to be more dynamic with different sizes
 
   // color palette
   var color = d3.scaleOrdinal()
