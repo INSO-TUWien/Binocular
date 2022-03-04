@@ -151,8 +151,7 @@ async function visualize(props) {
     .attr("y", height - 400)
     .text("Timespan over which these files existed and commits were made to them");
 
-  // Add Y axis
-  console.warn(dataArr)
+  //Calculate the max height of the graph; needed for y-axis domain
   var maxValue = 0;
   for (let dp of dataArr) {
     var tempValue = 0;
@@ -167,7 +166,7 @@ async function visualize(props) {
       maxValue = tempValue;
     }
   }
-  console.warn(maxValue)
+  // Add Y axis
   var yScale = d3.scaleLinear()
     .domain([0, maxValue])
     .range([75, height - 150])
@@ -207,7 +206,6 @@ async function visualize(props) {
     .keys(keys);
 
   var stackedSeries = stackGen(dataArr)
-  console.warn(stackedSeries)
 
   // create a tooltip
   var Tooltip = svg
@@ -322,7 +320,6 @@ export default class locEvolution extends React.Component {
     this.updateDomain(props);
     this.onResize = zoomUtils.onResizeFactory(0.7, 0.7);
     this.onZoom = zoomUtils.onZoomFactory({ constrain: true, margin: 50 });
-    console.warn(this.props.highlightedFolder);
     visualize(props);
   }
 

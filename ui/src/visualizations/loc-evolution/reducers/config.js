@@ -11,9 +11,8 @@ export default handleActions(
 
 },
   {
-    highlightedFolder: "ui/src/visualizations/code-ownership-river/chart/",
-    commitAttribute: 'count',
-    filteredFiles: [],
-    viewport: [0, null]
+    highlightedFolder: "ui/src/visualizations/loc-evolution/chart/",
+    commitAttribute: '',
+    filteredFiles: []
   }
 );

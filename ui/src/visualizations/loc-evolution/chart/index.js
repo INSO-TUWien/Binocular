@@ -18,9 +18,9 @@ const mapDispatchToProps = (dispatch /*, ownProps*/) => {
     onCommitClick: function(c) {
       dispatch(openCommit(c));
     },
-    onViewportChanged: function(v) {
-      dispatch(setViewport(v));
-    }
+    onChangeFolderName: function(folder) {
+      dispatch(setActiveFolder(folder))
+    } 
   };
 };
 

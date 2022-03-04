@@ -14,10 +14,8 @@ export const setFilteredFiles = createAction('SET_FILTERED_FILES', fs => fs);
 
 export const requestRefresh = createAction('REQUEST_REFRESH');
 const refresh = createAction('REFRESH');
-export const setViewport = createAction('COR_SET_VIEWPORT');
 
 export default function*() {
   // fetch data once on entry
-  
   setActiveFolder
 }
