@@ -111,10 +111,7 @@ const FileEvolutionConfigComponent = props => {
             <label className={styles.label}>Sort by</label>
             <TabCombo
               value={props.commitBoxSort}
-              options={[
-                { label: 'Date', icon: 'file-alt', value: 'date' },
-                { label: 'Branch', icon: 'cloud-upload-alt', value: 'branch' }
-              ]}
+              options={[{ label: 'Date', icon: 'file-alt', value: 'date' }, { label: 'Branch', icon: 'cloud-upload-alt', value: 'branch' }]}
               onChange={value => props.onClickCommitBoxSort(value)}
             />
           </div>

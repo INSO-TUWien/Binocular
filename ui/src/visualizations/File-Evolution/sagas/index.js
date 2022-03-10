@@ -73,6 +73,8 @@ export const fetchFileEvolutionData = fetchFactory(
         const authorsColorPalette = getAuthorColorPalette(commiters);
         const branchesColorPalette = getBranchesColorPalette(branches);
         const commitFiles = addFilesToCommit(files, commits);
+        console.log(commitFiles);
+        console.log(files);
         return {
           files,
           commitFiles,

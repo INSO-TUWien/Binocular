@@ -20,10 +20,10 @@ export default handleActions(
     SET_SHOW_COMMIT_BRANCH: (state, action) => _.assign({}, state, { showCommitBranch: action.payload })
   },
   {
-    commitBoxWidth: 200,
+    commitBoxWidth: 400,
     commitBoxHeight: 200,
     commitBoxColor: 'author',
-    commitBoxSort: 'date',
+    commitBoxSort: 'branch',
     selectedAuthors: [],
     selectedBranches: [],
     showCommitDate: true,
