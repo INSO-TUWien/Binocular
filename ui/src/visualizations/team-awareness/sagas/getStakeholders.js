@@ -22,9 +22,9 @@ const getStakeholders = (page, perPage) => {
     query($page:Int, $perPage:Int){
         stakeholders(page:$page, perPage: $perPage) {
               data {
-            id
-            gitSignature
-          }
+                id
+                gitSignature
+              }
         }
       }`,
       page,

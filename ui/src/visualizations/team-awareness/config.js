@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { connect } from 'react-redux';
-import { setSelectActivity } from './sagas';
+import { setActivityScale } from './sagas';
 
 const mapStateToProps = (appState /*, ownProps*/) => {
   const awarenessState = appState.visualizations.teamAwareness.state.config;
@@ -14,7 +14,7 @@ const mapStateToProps = (appState /*, ownProps*/) => {
 };
 const mapDispatchToProps = dispatch => {
   return {
-    onSelectActivity: selectActivity => dispatch(setSelectActivity(selectActivity))
+    onSelectActivityScale: selectActivity => dispatch(setActivityScale(selectActivity))
   };
 };
 
@@ -29,7 +29,7 @@ class ConfigComponent extends React.Component {
         <div>
           <div>Activity:</div>
           <div>
-            <select value={this.props.config.selectedActivity} onChange={value => this.props.onSelectActivity(value)}>
+            <select value={this.props.config.selectedActivityScale} onChange={value => this.props.onSelectActivityScale(value)}>
               <option value="commits">Commits</option>
               <option value="activity">Additions & Deletions</option>
               <option value="additions">Additions</option>

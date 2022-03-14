@@ -6,10 +6,11 @@ import Chart from './chart.js';
 
 const mapStateToProps = (appState /*, chartState */) => {
   const vizState = getState(appState);
+  console.log(vizState);
   return {
     data: {
       stakeholders: vizState.data.data.stakeholders,
-      activity: vizState.data.data.activity
+      activityTimeline: vizState.data.data.activityTimeline
     }
   };
 };

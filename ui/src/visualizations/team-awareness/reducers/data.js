@@ -17,7 +17,9 @@ export default handleActions(
     }
   },
   {
-    data: {},
+    data: {
+      stakeholders: []
+    },
     lastFetched: null,
     isFetching: null
   }
