@@ -1,5 +1,6 @@
 import * as d3 from 'd3';
 import hunkChartGeneration from '../subCharts/hunkChartGeneration';
+import heatmapChartGeneration from '../subCharts/heatmapChartGeneration';
 
 export default class heatmapInteraction {
   static generateHeatmapInteractionLayer(data, lines, importantColumns, currThis, mode, firstLineNumber, displayProps) {
@@ -29,6 +30,8 @@ export default class heatmapInteraction {
         .on('mouseover', function() {
           if (displayProps.mainVisualizationMode === 1 && mode === 0) {
             hunkChartGeneration.interact(i);
+          } else if (displayProps.mainVisualizationMode === 0 && mode === 0) {
+            heatmapChartGeneration.interact(i);
           }
         });
     }

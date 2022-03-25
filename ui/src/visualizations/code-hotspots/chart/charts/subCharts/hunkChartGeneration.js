@@ -258,7 +258,7 @@ export default class hunkChartGeneration {
                   const x1 = (commitKey - (compareMode ? 1 : 0)) * barWidth;
                   const x2 =
                     (commitKey - (compareMode ? 1 : 0)) * barWidth + (parseInt(commitKey - 1) === parseInt(columns) ? width / 2 : barWidth);
-                  const y1 = oldLine * barHeight - barHeight / 2;
+                  const y1 = oldLine * barHeight - (end ? 0 : barHeight / 2);
                   const y2 = i * barHeight - barHeight / 2;
 
                   return (

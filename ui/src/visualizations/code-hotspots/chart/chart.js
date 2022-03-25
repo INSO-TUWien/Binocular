@@ -60,7 +60,8 @@ export default class CodeHotspots extends React.PureComponent {
           to: ''
         },
         heatMapStyle: 0,
-        mainVisualizationMode: 0
+        mainVisualizationMode: 0,
+        heatmapTooltips: false
       }
     };
 
@@ -256,6 +257,7 @@ export default class CodeHotspots extends React.PureComponent {
                   </div>}
               <div className={chartStyles.heatmapContainer}>
                 <svg id={'chartMain'} className="chartMain" />
+                <div id={'chartMainToolTip'} className="chartMainToolTip" />
               </div>
               <div className={chartStyles.rowInteractionContainer}>
                 <svg id={'rowInteraction'} className="rowInteraction" />

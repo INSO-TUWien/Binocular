@@ -2,6 +2,7 @@ import * as d3 from 'd3';
 import * as d3Collection from 'd3-collection';
 import ColorMixer from '../../helper/colorMixer';
 import Loading from '../../helper/loading';
+import styles from '../../../styles.scss';
 
 const HEATMAP_LOW_COLOR = '#ABEBC6';
 const HEATMAP_HIGH_COLOR = '#E6B0AA';
@@ -9,9 +10,35 @@ const HEATMAP_MAX_COLOR = '#d5796f';
 const EVEN_COLOR = '#FFFFFFFF';
 const ODD_COLOR = '#EEEEEE55';
 
+let commitData = [];
+let developerData = [];
+let issueData = [];
+
+let commitMaxValue = 0;
+let developerMaxValue = 0;
+let issueMaxValue = 0;
+
+let commitLegendSteps = [];
+let developerLegendSteps = [];
+let issueLegendSteps = [];
+
 export default class heatmapChartGeneration {
   static generateHeatmap(data, lines, importantColumns, currThis, mode, maxValue, legendSteps, firstLineNumber, displayProps) {
     d3.select('.chartMain > *').remove();
+    d3.select('.chartMainToolTip > *').remove();
+
+    switch (mode) {
+      case 0:
+        commitData = data;
+        break;
+      case 1:
+        developerData = data;
+        break;
+      case 2:
+        issueData = data;
+        break;
+    }
+
     currThis.combinedHeatmapData = data;
     const width = document.getElementById('barChartContainer').clientWidth,
       height = 24 * lines,
@@ -26,6 +53,24 @@ export default class heatmapChartGeneration {
       .append('g')
       .attr('transform', 'translate(' + margins.left + ',' + margins.top + ')')
       .attr('id', 'chartMain');
+
+    if (displayProps.heatmapTooltips) {
+      d3
+        .select('.chartMainToolTip')
+        .append('div')
+        .style('position', 'absolute')
+        .style('display', 'none')
+        .style('background-color', '#FFFFFFDD')
+        .style('box-shadow', '0px 0px 10px #555555')
+        .style('width', '100%')
+        .style('border-radius', '4px')
+        .style('padding', '1rem')
+        .style('z-index', '9')
+        .style('max-height', '70vh')
+        .style('overflow-y', 'scroll')
+        .style('backdrop-filter', 'blur(2px)')
+        .style('-webkit-backdrop-filter', 'blur(2px)');
+    }
     for (const rowKey of d3Collection.nest().key(d => d.row).entries(currThis.combinedHeatmapData).map(d => d.key)) {
       chart.append('g').attr('id', 'row' + rowKey);
     }
@@ -42,6 +87,21 @@ export default class heatmapChartGeneration {
       maxValue = displayProps.dataScaleHeatmap;
     } else {
       displayProps.dataScaleHeatmap = maxValue;
+    }
+
+    switch (mode) {
+      case 0:
+        commitMaxValue = maxValue;
+        commitLegendSteps = legendSteps;
+        break;
+      case 1:
+        developerMaxValue = maxValue;
+        developerLegendSteps = legendSteps;
+        break;
+      case 2:
+        issueMaxValue = maxValue;
+        issueLegendSteps = legendSteps;
+        break;
     }
 
     const width = document.getElementById('barChartContainer').clientWidth;
@@ -117,6 +177,142 @@ export default class heatmapChartGeneration {
           Loading.hideBackgroundRefresh();
         }
       });
+    }
+  }
+
+  static interact(line) {
+    if (d3.select('.chartMainToolTip > div').size() !== 0) {
+      const rowCommitData = commitData.filter(d => d.row === line);
+      const rowDeveloperData = developerData.filter(d => d.row === line);
+      const rowIssueData = issueData.filter(d => d.row === line);
+      const commitLegendData = [];
+
+      for (let i = 1; i <= commitLegendSteps; i++) {
+        commitLegendData.push({
+          interval: commitMaxValue / commitLegendSteps * i,
+          color: ColorMixer.mix(HEATMAP_LOW_COLOR, HEATMAP_HIGH_COLOR, 1.0 / commitLegendSteps * i)
+        });
+      }
+      const commitColorScale = d => {
+        for (let i = 0; i < commitLegendData.length; i++) {
+          if (d.value === 0) {
+            return ODD_COLOR;
+          }
+          if (d.value < commitLegendData[i].interval) {
+            return commitLegendData[i].color;
+          }
+        }
+        return HEATMAP_MAX_COLOR;
+      };
+
+      const developerLegendData = [];
+
+      for (let i = 1; i <= developerLegendSteps; i++) {
+        developerLegendData.push({
+          interval: developerMaxValue / developerLegendSteps * i,
+          color: ColorMixer.mix(HEATMAP_LOW_COLOR, HEATMAP_HIGH_COLOR, 1.0 / developerLegendSteps * i)
+        });
+      }
+      const developerColorScale = d => {
+        for (let i = 0; i < developerLegendData.length; i++) {
+          if (d.value === 0) {
+            return ODD_COLOR;
+          }
+          if (d.value < developerLegendData[i].interval) {
+            return developerLegendData[i].color;
+          }
+        }
+        return HEATMAP_MAX_COLOR;
+      };
+
+      const issueLegendData = [];
+
+      for (let i = 1; i <= issueLegendSteps; i++) {
+        issueLegendData.push({
+          interval: issueMaxValue / issueLegendSteps * i,
+          color: ColorMixer.mix(HEATMAP_LOW_COLOR, HEATMAP_HIGH_COLOR, 1.0 / issueLegendSteps * i)
+        });
+      }
+      const issueColorScale = d => {
+        for (let i = 0; i < issueLegendData.length; i++) {
+          if (d.value === 0) {
+            return ODD_COLOR;
+          }
+          if (d.value < issueLegendData[i].interval) {
+            return issueLegendData[i].color;
+          }
+        }
+        return HEATMAP_MAX_COLOR;
+      };
+
+      const toolTip = d3.select('.chartMainToolTip > div').style('display', 'block').style('top', '' + (line + 2) * 24 + 'px').html('');
+      toolTip.append('span').attr('class', styles.label).text('Line: ' + (line + 1));
+      toolTip.append('hr');
+      toolTip.append('span').attr('class', styles.label).text('Changes/Version:');
+      if (!rowCommitData.length) {
+        toolTip.append('span').text('Data Not Loaded! Open the Tab once to load data.');
+      } else {
+        toolTip
+          .append('svg')
+          .attr('width', '90%')
+          .attr('height', '24px')
+          .append('g')
+          .selectAll('rect')
+          .data(rowCommitData)
+          .enter()
+          .append('rect')
+          .attr('x', d => {
+            return '' + 100 / rowCommitData.length * d.column + '%';
+          })
+          .attr('y', '0')
+          .style('fill', commitColorScale)
+          .attr('width', '' + 100 / rowCommitData.length + '%')
+          .attr('height', '24px');
+      }
+      toolTip.append('hr');
+      toolTip.append('span').attr('class', styles.label).text('Changes/Developer:');
+      if (!rowDeveloperData.length) {
+        toolTip.append('span').text('Data Not Loaded! Open the Tab once to load data.');
+      } else {
+        toolTip
+          .append('svg')
+          .attr('width', '90%')
+          .attr('height', '24px')
+          .append('g')
+          .selectAll('rect')
+          .data(rowDeveloperData)
+          .enter()
+          .append('rect')
+          .attr('x', d => {
+            return '' + 100 / rowDeveloperData.length * d.column + '%';
+          })
+          .attr('y', '0')
+          .style('fill', developerColorScale)
+          .attr('width', '' + 100 / rowDeveloperData.length + '%')
+          .attr('height', '24px');
+      }
+      toolTip.append('hr');
+      toolTip.append('span').attr('class', styles.label).text('Changes/Issue:');
+      if (!rowIssueData.length) {
+        toolTip.append('span').text('Data Not Loaded! Open the Tab once to load data.');
+      } else {
+        toolTip
+          .append('svg')
+          .attr('width', '90%')
+          .attr('height', '24px')
+          .append('g')
+          .selectAll('rect')
+          .data(rowIssueData)
+          .enter()
+          .append('rect')
+          .attr('x', d => {
+            return '' + 100 / rowIssueData.length * d.column + '%';
+          })
+          .attr('y', '0')
+          .style('fill', issueColorScale)
+          .attr('width', '' + 100 / rowIssueData.length + '%')
+          .attr('height', '24px');
+      }
     }
   }
 }

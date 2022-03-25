@@ -218,6 +218,24 @@ export default class Settings extends React.PureComponent {
                 </div>
               </div>
               <hr />
+              <div className={styles.label}>Heatmap Tooltips:</div>
+              <div className="field">
+                <input
+                  id="heatmapTooltipsSwitch"
+                  type="checkbox"
+                  name="heatmapTooltipsSwitch"
+                  className={'switch is-rounded is-outlined is-info'}
+                  defaultChecked={false}
+                  onChange={e => {
+                    const currDisplayProps = this.state.displayProps;
+
+                    currDisplayProps.heatmapTooltips = e.target.checked;
+                    this.setState({ displayProps: currDisplayProps });
+                  }}
+                />
+                <label htmlFor="heatmapTooltipsSwitch" className={styles.switch} />
+              </div>
+              <hr />
             </div>
           </div>
         </div>
