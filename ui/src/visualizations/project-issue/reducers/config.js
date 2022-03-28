@@ -18,9 +18,9 @@ export default handleActions(
     showIssues: 'all', //Filter for issues, can be 'all', 'open' or 'closed'
     selectedIssues: [], //Issues checked in the CheckBoxLegend, Array of objects: [{id: 1234, gitSignature: 'Dev1 <Dev1@email.com>'}, ...]
     Issues: [], //All Issues that should be displayed in CheckBoxLegend, Same format as above
-    displayMetric: 'commits', //display metric for Changes-Chart, can be 'linesChanged' or 'commits'
-    showNormalizedChart: true, //Show or hide CI Chart
+    displayMetric: 'linesChanged', //display metric for Changes-Chart, can be 'linesChanged' or 'commits'
+    showNormalizedChart: false, //Show or hide CI Chart
     showStandardChart: true, //Show or hide issues chart
-    showMilestoneChart: true //Show or hide changes chart
+    showMilestoneChart: false //Show or hide changes chart
   }
 );

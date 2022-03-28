@@ -9,18 +9,24 @@ import _ from 'lodash';
 import ViolinPlot from '../../../components/ViolinPlot';
 import moment from 'moment';
 import cx from 'classnames';
+import chroma from 'chroma-js';
 
 export default class ProjectIssue extends React.Component {
   constructor(props) {
     super(props);
 
+    const { commitChartData, commitScale, commitPalette, selectedIssuesCommits } = this.extractCommitData(props);
     const { issueChartData, issueScale, selectedIssues, issueData } = this.extractIssueData(props);
 
     this.state = {
       issueChartData,
       issueScale,
+      issueData,
+      commitChartData,
+      commitScale,
+      commitPalette,
       selectedIssues,
-      issueData
+      selectedIssuesCommits
     };
   }
 
@@ -29,13 +35,18 @@ export default class ProjectIssue extends React.Component {
    * @param nextProps props that are passed
    */
   componentWillReceiveProps(nextProps) {
+    const { commitChartData, commitScale, commitPalette, selectedIssuesCommits } = this.extractCommitData(nextProps);
     const { issueChartData, issueScale, selectedIssues, issueData } = this.extractIssueData(nextProps);
 
     this.setState({
       issueChartData,
       issueScale,
+      issueData,
+      commitChartData,
+      commitScale,
+      commitPalette,
       selectedIssues,
-      issueData
+      selectedIssuesCommits
     });
   }
 
@@ -246,6 +257,147 @@ export default class ProjectIssue extends React.Component {
     });
 
     return { issueChartData, issueScale, selectedIssues, issueData };
+  }
+
+  extractCommitData(props) {
+    if (!props.commits || props.commits.length === 0) {
+      return {};
+    }
+
+    //---- STEP 1: AGGREGATE COMMITS GROUPED BY AUTHORS PER TIME INTERVAL ----
+    const data = [];
+    const granularity = ProjectIssue.getGranularity(props.chartResolution);
+    const curr = moment(props.firstSignificantTimestamp).startOf(granularity.unit).subtract(1, props.chartResolution);
+    const end = moment(props.lastSignificantTimestamp).endOf(granularity.unit).add(1, props.chartResolution);
+    const next = moment(curr).add(1, props.chartResolution);
+    const totalChangesPerAuthor = {};
+    // TODO: remove?
+    // eslint-disable-next-line no-unused-vars
+    let totalChanges = 0;
+    for (let i = 0; curr.isSameOrBefore(end); curr.add(1, props.chartResolution), next.add(1, props.chartResolution)) {
+      //Iterate through time buckets
+      const currTimestamp = curr.toDate().getTime();
+      const nextTimestamp = next.toDate().getTime();
+      const obj = { date: currTimestamp, statsByAuthor: {} }; //Save date of time bucket, create object
+      for (; i < props.commits.length && Date.parse(props.commits[i].date) < nextTimestamp; i++) {
+        //Iterate through commits that fall into this time bucket
+        const additions = props.commits[i].stats.additions;
+        const deletions = props.commits[i].stats.deletions;
+        const changes = additions + deletions;
+        const commitAuthor = props.commits[i].signature;
+        if (totalChangesPerAuthor[commitAuthor] === null) {
+          totalChangesPerAuthor[commitAuthor] = 0;
+        }
+        totalChangesPerAuthor[commitAuthor] += changes;
+        totalChanges += changes;
+        if (
+          commitAuthor in obj.statsByAuthor //If author is already in statsByAuthor, add to previous values
+        ) {
+          obj.statsByAuthor[commitAuthor] = {
+            count: obj.statsByAuthor[commitAuthor].count + 1,
+            additions: obj.statsByAuthor[commitAuthor].additions + additions,
+            deletions: obj.statsByAuthor[commitAuthor].deletions + deletions
+          };
+        } else {
+          //Else create new values
+          obj.statsByAuthor[commitAuthor] = { count: 1, additions: additions, deletions: deletions };
+        }
+      }
+      data.push(obj);
+    }
+
+    //---- STEP 2: CONSTRUCT CHART DATA FROM AGGREGATED COMMITS ----
+    const commitChartData = [];
+    const commitChartPalette = {};
+    const chartIsSplit = props.displayMetric === 'commits';
+    if (chartIsSplit) {
+      commitChartPalette['(Additions) others'] = props.palette['others'];
+      commitChartPalette['(Deletions) others'] = props.palette['others'];
+    } else {
+      commitChartPalette['others'] = props.palette['others'];
+    }
+    _.each(data, function(iss) {
+      //commit has structure {date, statsByAuthor: {}} (see next line)}
+      const obj = { date: iss.date };
+      if (chartIsSplit) {
+        obj['(Additions) others'] = 0;
+        obj['(Deletions) others'] = -0.001;
+      } else {
+        obj['others'] = 0;
+      }
+      _.each(props.issues, function(issue) {
+        //commitLegend to iterate over authorNames, commitLegend has structure [{name, style}, ...]
+        if (issue in iss.statsByAuthor && issue in props.palette) {
+          //If committer has data
+          if (chartIsSplit) {
+            //Insert number of changes with the author name as key,
+            //statsByAuthor has structure {{authorName: {count, additions, deletions, changes}}, ...}
+            obj['(Additions) ' + issue] = iss.statsByAuthor[issue].additions;
+            //-0.001 for stack layout to realize it belongs on the bottom
+            obj['(Deletions) ' + issue] = iss.statsByAuthor[issue].deletions * -1 - 0.001;
+            commitChartPalette['(Additions) ' + issue] = chroma(props.palette[issue]).hex();
+            commitChartPalette['(Deletions) ' + issue] = chroma(props.palette[issue]).darken(0.5).hex();
+          } else {
+            obj[issue] = iss.statsByAuthor[issue].count;
+          }
+        } else if (issue in iss.statsByAuthor && !(issue in props.palette)) {
+          if (chartIsSplit) {
+            obj['(Additions) others'] += iss.statsByAuthor[issue].additions;
+            obj['(Deletions) others'] += iss.statsByAuthor[issue].deletions * -1 - 0.001;
+          } else {
+            obj['others'] += iss.statsByAuthor[issue].additions + iss.statsByAuthor[issue].deletions;
+          }
+        } else if (issue in props.palette) {
+          if (chartIsSplit) {
+            obj['(Additions) ' + issue] = 0;
+            obj['(Deletions) ' + issue] = -0.001; //-0.001 for stack layout to realize it belongs on the bottom
+          } else {
+            obj[issue] = 0;
+          }
+        }
+      });
+      commitChartData.push(obj); //Add object to list of objects
+    });
+    //Output in commitChartData has format [{author1: 123, author2: 123, ...}, ...],
+    //e.g. series names are the authors with their corresponding values
+
+    //---- STEP 3: SCALING ----
+    const commitScale = [0, 0];
+    _.each(commitChartData, dataPoint => {
+      let positiveTotals = 0;
+      let negativeTotals = 0;
+      _.each(Object.keys(dataPoint).splice(1), key => {
+        if (key.includes('(Additions) ') && props.selectedIssues.indexOf(key.split(') ')[1]) > -1) {
+          positiveTotals += dataPoint[key];
+        } else if (key.includes('(Deletions) ') && props.selectedIssues.indexOf(key.split(') ')[1]) > -1) {
+          negativeTotals += dataPoint[key];
+        } else if (props.selectedIssues.indexOf(key) > -1) {
+          positiveTotals += dataPoint[key];
+        }
+      });
+      if (positiveTotals > commitScale[1]) {
+        commitScale[1] = positiveTotals;
+      }
+      if (negativeTotals < commitScale[0]) {
+        commitScale[0] = negativeTotals;
+      }
+    });
+
+    //---- STEP 4: FORMATTING FILTERS ----
+    const selectedIssues = [];
+    const keys = Object.keys(commitChartData[0]).splice(1);
+
+    _.each(keys, key => {
+      let concatKey = key;
+      if (key.includes('(Additions) ') || key.includes('(Deletions) ')) {
+        concatKey = key.split(') ')[1];
+      }
+      if (props.selectedIssues.indexOf(concatKey) > -1) {
+        selectedIssues.push(key);
+      }
+    });
+
+    return { commitChartData, commitScale, commitPalette: commitChartPalette, selectedIssues };
   }
 
   static getGranularity(resolution) {
