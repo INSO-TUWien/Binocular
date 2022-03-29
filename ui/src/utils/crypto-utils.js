@@ -1,6 +1,6 @@
 'use strict';
 
-import crypto from 'crypto';
+const crypto = require('crypto');
 
 const token = 'Binocular';
 

@@ -1,7 +1,8 @@
 'use strict';
 
-import React, { PropTypes } from 'react';
+import React from 'react';
 import * as d3 from 'd3';
+import PropTypes from "prop-types";
 
 /**
  * Provides an svg-element with all necessary handlers attached for zoomability.
