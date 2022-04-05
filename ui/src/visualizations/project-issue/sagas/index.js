@@ -7,6 +7,7 @@ import _ from 'lodash';
 
 import { fetchFactory, timestampedActionFactory, mapSaga } from '../../../sagas/utils.js';
 import getCommitData from './getCommitData.js';
+import getIssuesCommitData from './getIssueCommitData.js';
 import getIssueData from './getIssueData.js';
 import getBuildData from './getBuildData.js';
 import getBounds from './getBounds.js';
@@ -89,6 +90,7 @@ export const fetchProjectIssueData = fetchFactory(
 
     return yield Promise.join(
       getCommitData([firstCommitTimestamp, lastCommitTimestamp], [firstSignificantTimestamp, lastSignificantTimestamp]),
+      getIssuesCommitData([firstCommitTimestamp, lastCommitTimestamp], [firstSignificantTimestamp, lastSignificantTimestamp]),
       getIssueData([firstIssueTimestamp, lastIssueTimestamp], [firstSignificantTimestamp, lastSignificantTimestamp]),
       getBuildData()
     )

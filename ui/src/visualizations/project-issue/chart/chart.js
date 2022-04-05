@@ -284,6 +284,7 @@ export default class ProjectIssue extends React.Component {
         const additions = props.commits[i].stats.additions;
         const deletions = props.commits[i].stats.deletions;
         const changes = additions + deletions;
+        //TODO change to issue-id or issue-name
         const commitAuthor = props.commits[i].signature;
         if (totalChangesPerAuthor[commitAuthor] === null) {
           totalChangesPerAuthor[commitAuthor] = 0;
