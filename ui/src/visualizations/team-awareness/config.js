@@ -3,12 +3,21 @@
 import React from 'react';
 import { connect } from 'react-redux';
 import { setActivityScale } from './sagas';
+import StackedAreaChart from '../../components/StackedAreaChart';
+import * as d3 from 'd3';
+import { getState } from './util/util';
+import _ from 'lodash';
 
 const mapStateToProps = (appState /*, ownProps*/) => {
-  const awarenessState = appState.visualizations.teamAwareness.state.config;
+  const dataState = getState(appState).data;
+  console.log(dataState);
   return {
     config: {
-      selectedActivity: awarenessState.selectedActivity
+      selectedActivity: getState(appState).config.selectedActivity
+    },
+    data: {
+      activityTimeline: dataState.data.activityTimeline,
+      yDims: dataState.data.dataBoundaries
     }
   };
 };
@@ -24,8 +33,21 @@ class ConfigComponent extends React.Component {
   }
 
   render() {
+    const { activityTimeline, yDims } = this.props.data;
     return (
       <div>
+        <div>
+          <div>Timeline</div>
+          <StackedAreaChart
+            palette={{ activity: '#00bcd4' }}
+            paddings={{ top: 20, left: 25, bottom: 22, right: 30 }}
+            resolution={'weeks'}
+            xAxisCenter={true}
+            content={activityTimeline}
+            d3offset={d3.stackOffsetDiverging}
+            yDims={_.values(yDims)}
+          />
+        </div>
         <div>
           <div>Activity:</div>
           <div>

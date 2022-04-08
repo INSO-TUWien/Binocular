@@ -2,6 +2,7 @@ import React from 'react';
 import _ from 'lodash';
 import * as chartStyle from './BubbleChart.scss';
 import * as d3 from 'd3';
+import Legend from '../../../../components/Legend';
 
 export default class BubbleChart extends React.Component {
   constructor(props) {
@@ -10,20 +11,46 @@ export default class BubbleChart extends React.Component {
     this.state = {
       componentMounted: false,
       content: this.props.content,
-      data: {
-        data: []
-      },
+      colors: this.createColorSchema(_.map(this.props.content, 'id')),
       width: this.props.width || 0,
       height: this.props.height || 0
     };
-    window.addEventListener('resize', () => this.visualize());
+    window.addEventListener('resize', () => this.visualizeChart());
   }
 
   render() {
-    console.log('render bubble chart');
+    const legend = [
+      {
+        name: 'Authors',
+        subLegend: _.map(this.state.content, c => {
+          return {
+            name: c.signature,
+            style: {
+              fill: this.state.colors.get(c.id)
+            }
+          };
+        })
+      }
+    ];
+
+    /*
+              <ChartLegend
+            title="Authors"
+            x={15}
+            y={15}
+            colors={this.state.colors}
+            content={this.state.content}
+            ref={legend => (this.legendRef = legend)}
+          />
+             <Legend x={10} y={10} categories={categories} />
+     */
+
     return (
       <div className={this.styles.chartArea}>
-        <svg className={this.styles.chartDrawingArea} ref={svg => (this.svgRef = svg)} />
+        <svg className={this.styles.chartDrawingArea} ref={svg => (this.svgRef = svg)}>
+          <g className="chartBubbleArea" ref={area => (this.bubbleAreaRef = area)} />
+          <Legend x={10} y={10} categories={legend} />
+        </svg>
         <div className={this.styles.chartTooltip} ref={div => (this.tooltipRef = div)} />
       </div>
     );
@@ -40,31 +67,36 @@ export default class BubbleChart extends React.Component {
     console.log(prevState);
     console.log(this.state);
     if (this.state.componentMounted && this.state.content !== this.props.content) {
-      this.setState({ content: this.props.content }, this.visualize);
+      this.setState(
+        {
+          content: this.props.content,
+          colors: this.createColorSchema(_.map(this.props.content, 'id'))
+        },
+        this.visualizeChart
+      );
     } else {
-      this.visualize();
+      this.visualizeChart();
     }
   }
 
-  visualize() {
-    console.log(this.state);
-    this.drawChart(d3.select(this.svgRef));
-  }
+  visualizeChart() {
+    if (!this.state.componentMounted) {
+      return;
+    }
 
-  drawChart(svg) {
-    svg.selectAll('*').remove();
-    svg.attr('font-size', 10).attr('font-family', 'sans-serif').attr('text-anchor', 'middle');
+    const bubbleArea = d3.select(this.bubbleAreaRef);
+    bubbleArea.selectAll('a').remove();
 
     const { clientWidth, clientHeight } = this.svgRef;
-    const colors = this.createColorSchema(_.map(this.state.content, 'id'));
-
     const layout = d3.pack().size([clientWidth, clientHeight]);
     const root = d3.hierarchy({ children: this.state.content }).sum(d => d.activity);
     layout(root);
 
-    const leaf = svg.selectAll('a').data(root.leaves()).join('a').attr('transform', d => `translate(${d.x},${d.y})`);
+    const leaf = bubbleArea.selectAll('a').data(root.leaves()).join('a').attr('transform', d => `translate(${d.x},${d.y})`);
     leaf.append('title').text(d => `${d.data.signature}\nActivity: ${d.data.activity}`);
-    leaf.append('circle').attr('fill', d => colors.get(d.data.id)).attr('r', d => d.r);
+    leaf.append('circle').attr('fill', d => this.state.colors.get(d.data.id)).attr('r', d => {
+      return d.r;
+    });
   }
 
   createColorSchema(data) {

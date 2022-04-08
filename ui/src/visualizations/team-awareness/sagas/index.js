@@ -35,7 +35,7 @@ function* watchMessages() {
 /**
  *
  * @param commits{[{
- *   date: Date,
+ *   date: string,
  *   stats: {additions: number, deletions: number},
  *   stakeholder: {id: number}
  * }]} Commit data
@@ -46,14 +46,14 @@ function processData(commits) {
   /** @type {Map<number, any>} */
   const stakeholders = new Map();
 
-  /** @type [{date:Date, amount: number} ] */
-  const activity = [];
+  /** @type {Map<string, any>} */
+  const activities = new Map();
 
   const dataBoundaries = {
     min: Number.MAX_SAFE_INTEGER,
     max: Number.MIN_SAFE_INTEGER
   };
-  console.log(commits);
+
   commits.forEach(c => {
     if (!stakeholders.has(c.stakeholder.id)) {
       stakeholders.set(c.stakeholder.id, {
@@ -63,16 +63,26 @@ function processData(commits) {
         activity: 0
       });
     }
+    const dateString = c.date.substring(0, 10);
+    if (!activities.has(dateString)) {
+      activities.set(dateString, {
+        date: Date.parse(c.date),
+        activity: 0
+      });
+    }
+
     const calculatedActivity = calculateActivity(c);
     const stakeholder = stakeholders.get(c.stakeholder.id);
     stakeholder.activity += calculatedActivity;
-    activity.push({ date: c.date, amount: calculatedActivity });
-    updateBoundaries(dataBoundaries, stakeholder.activity);
+
+    const current = activities.get(dateString);
+    current.activity += calculatedActivity;
+    updateBoundaries(dataBoundaries, current.activity);
   });
 
   return {
     stakeholders: Array.from(stakeholders.values()),
-    activityTimeline: activity,
+    activityTimeline: Array.from(activities.values()),
     dataBoundaries
   };
 }
