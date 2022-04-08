@@ -50,7 +50,7 @@ export const fetchFileTreeEvolutionData = fetchFactory(
       }
       return {
         fileTreeHistory,
-        commits: resp
+        commits: resp.commits.data
       };
     });
   },

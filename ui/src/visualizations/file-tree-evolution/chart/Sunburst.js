@@ -14,22 +14,13 @@ export default class Sunburst extends React.Component {
     this.state = {};
   }
 
-  componentDidMount() {
-    // if (!!this.props.fileTreeHistory && this.props.fileTreeHistory.length > 0) {
-    //   this.createChart();
-    // }
-  }
-
   componentDidUpdate() {
     if (!!this.props.fileTreeHistory && this.props.fileTreeHistory.length > 0 && !this.initialized) {
       this.initialized = true
       this.createChart();
-      setInterval(() => !!this.props.fileTreeHistory[++this.index] ? this.update(this.props.fileTreeHistory[this.index], this.index) : undefined, this.settings.msBetweenIterations);
+    } else if (this.initialized) {
+      this.update(this.props.fileTreeHistory[this.props.selectedCommit], this.props.selectedCommit);
     }
-    // console.log(this.props)
-    // if(!!this.props.fileTreeHistory[++this.index]) {
-    //   this.update(this.props.fileTreeHistory[this.index], this.index)
-    // };
   }
 
   createChart() {

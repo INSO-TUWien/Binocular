@@ -6,7 +6,8 @@ import Chart from './chart.js';
 
 const mapStateToProps = (state) => {
   return {
-    fileTreeHistory: state.visualizations.fileTreeEvolution.state.data.data.fileTreeHistory || []
+    fileTreeHistory: state.visualizations.fileTreeEvolution.state.data.data.fileTreeHistory || [],
+    commits: state.visualizations.fileTreeEvolution.state.data.data.commits
   };
 };
 
