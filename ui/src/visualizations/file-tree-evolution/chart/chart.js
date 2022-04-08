@@ -12,9 +12,15 @@ export default class FileTreeEvolution extends React.Component {
     this.state = {};
   }
 
+  componentWillReceiveProps(nextProps) {
+    this.setState({
+      fileTreeHistory: nextProps.fileTreeHistory
+    });
+  }
+
   render() {
     return ( 
-      <Sunburst />
+      <Sunburst fileTreeHistory={this.props.fileTreeHistory} />
     );
   }
 }
