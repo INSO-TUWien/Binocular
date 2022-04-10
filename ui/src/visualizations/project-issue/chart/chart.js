@@ -52,9 +52,7 @@ export default class ProjectIssue extends React.Component {
 
   render() {
     let chartTitle = 'Issues';
-    console.log(this.state.issueData);
     let issueChart1, issueChart2, issueChart3;
-    console.log('issueChartData: ' + this.state.issueChartData);
 
     if (this.state.selectedIssues && this.state.issueData) {
       const issueDataLength = this.state.issueData.length;

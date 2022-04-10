@@ -93,7 +93,6 @@ export default class ViolinPlot extends ScalableBaseChartComponent {
 
     //Stack function for a ThemeRiver chart, using the keys provided
     //FIXME
-    console.log('orderedKeys: ' + orderedKeys);
     const stack = d3.stack().offset(this.props.d3offset).order(d3.stackOrderReverse).keys(orderedKeys);
 
     //Data formatted for d3

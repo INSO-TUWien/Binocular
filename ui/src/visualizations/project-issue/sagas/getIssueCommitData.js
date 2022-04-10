@@ -41,5 +41,5 @@ const getIssueCommitsPage = until => (page, perPage) => {
           }`,
       { page, perPage, until }
     )
-    .then(resp => resp.commits);
+    .then(resp => resp.issueCommits);
 };

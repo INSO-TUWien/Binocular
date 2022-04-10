@@ -79,6 +79,9 @@ export const fetchProjectIssueData = fetchFactory(
     const firstCommitTimestamp = Date.parse(firstCommit.date);
     const lastCommitTimestamp = Date.parse(lastCommit.date);
 
+    const firstIssueCommitTimestamp = Date.parse(firstCommit.date);
+    const lastIssueCommitTimestamp = Date.parse(lastCommit.date);
+
     const firstIssueTimestamp = firstIssue ? Date.parse(firstIssue.createdAt) : firstCommitTimestamp;
     const lastIssueTimestamp = lastIssue ? Date.parse(lastIssue.createdAt) : lastCommitTimestamp;
 
@@ -87,14 +90,14 @@ export const fetchProjectIssueData = fetchFactory(
 
     const firstSignificantTimestamp = Math.max(viewport[0], Math.min(firstCommitTimestamp, firstIssueTimestamp));
     const lastSignificantTimestamp = viewport[1] ? viewport[1].getTime() : Math.max(lastCommitTimestamp, lastIssueTimestamp);
-
+    console.log('AAAA');
     return yield Promise.join(
       getCommitData([firstCommitTimestamp, lastCommitTimestamp], [firstSignificantTimestamp, lastSignificantTimestamp]),
-      getIssuesCommitData([firstCommitTimestamp, lastCommitTimestamp], [firstSignificantTimestamp, lastSignificantTimestamp]),
+      //getIssuesCommitData([firstIssueCommitTimestamp, lastIssueCommitTimestamp], [firstSignificantTimestamp, lastSignificantTimestamp]),
       getIssueData([firstIssueTimestamp, lastIssueTimestamp], [firstSignificantTimestamp, lastSignificantTimestamp]),
       getBuildData()
     )
-      .spread((commits, issues, builds) => {
+      .spread((commits, issues, issueCommits, builds) => {
         const palette = getPalette(issues, 20, 20);
 
         return {
@@ -105,7 +108,8 @@ export const fetchProjectIssueData = fetchFactory(
           issues,
           builds,
           firstSignificantTimestamp,
-          lastSignificantTimestamp
+          lastSignificantTimestamp,
+          issueCommits
         };
       })
       .catch(function(e) {
