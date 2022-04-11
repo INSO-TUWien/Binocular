@@ -5,12 +5,13 @@ import { getState } from '../util/util.js';
 import Chart from './chart.js';
 
 const mapStateToProps = (appState /*, chartState */) => {
-  const vizState = getState(appState);
-  console.log(vizState);
+  const { data } = getState(appState);
+
+  console.log('chart', data);
   return {
     data: {
-      stakeholders: vizState.data.data.stakeholders,
-      activityTimeline: vizState.data.data.activityTimeline
+      stakeholders: data.data.stakeholders,
+      activityTimeline: data.data.activityTimeline
     }
   };
 };

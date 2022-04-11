@@ -9,8 +9,6 @@ export default class TeamAwareness extends React.PureComponent {
   }
 
   render() {
-    console.log(this.props);
-
     const { stakeholders } = this.props.data;
 
     return (

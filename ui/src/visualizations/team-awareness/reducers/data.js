@@ -12,12 +12,25 @@ export default handleActions(
       return _.assign({}, state, {
         data: action.payload,
         isFetching: false,
+        lastFetched: Date.now(),
         receivedAt: action.meta.receivedAt
+      });
+    },
+    PROCESS_TEAM_AWARENESS_DATA: (state, action) => {
+      console.log('PROCESS_TEAM_AWARENESS_DATA', state, action);
+      return _.assign({}, state, {
+        data: {
+          commits: state.data.commits,
+          stakeholders: action.payload.stakeholders,
+          activityTimeline: action.payload.activityTimeline,
+          dataBoundaries: action.payload.dataBoundaries
+        }
       });
     }
   },
   {
     data: {
+      commits: [],
       stakeholders: []
     },
     lastFetched: null,

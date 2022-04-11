@@ -64,8 +64,6 @@ export default class BubbleChart extends React.Component {
   }
   // eslint-disable-next-line no-unused-vars
   componentDidUpdate(prevProps, prevState, snapshot) {
-    console.log(prevState);
-    console.log(this.state);
     if (this.state.componentMounted && this.state.content !== this.props.content) {
       this.setState(
         {

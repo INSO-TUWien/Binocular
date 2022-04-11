@@ -2,28 +2,28 @@
 
 import React from 'react';
 import { connect } from 'react-redux';
-import { setActivityScale } from './sagas';
-import StackedAreaChart from '../../components/StackedAreaChart';
+import { setActivityDimensions, setActivityScale } from './sagas';
 import * as d3 from 'd3';
 import { getState } from './util/util';
 import _ from 'lodash';
+import ActivityTimeline from './components/Timeline/ActivityTimeline';
 
 const mapStateToProps = (appState /*, ownProps*/) => {
-  const dataState = getState(appState).data;
-  console.log(dataState);
+  const { config, data } = getState(appState);
   return {
     config: {
-      selectedActivity: getState(appState).config.selectedActivity
+      selectedActivity: config.selectedActivity
     },
     data: {
-      activityTimeline: dataState.data.activityTimeline,
-      yDims: dataState.data.dataBoundaries
+      activityTimeline: data.data.activityTimeline,
+      yDims: data.data.dataBoundaries
     }
   };
 };
 const mapDispatchToProps = dispatch => {
   return {
-    onSelectActivityScale: selectActivity => dispatch(setActivityScale(selectActivity))
+    onSelectActivityScale: selectActivity => dispatch(setActivityScale(selectActivity)),
+    onActivityDimensionsRestricted: restrictActivity => dispatch(setActivityDimensions(restrictActivity))
   };
 };
 
@@ -33,25 +33,27 @@ class ConfigComponent extends React.Component {
   }
 
   render() {
+    const { onActivityDimensionsRestricted, onSelectActivityScale } = this.props;
     const { activityTimeline, yDims } = this.props.data;
     return (
       <div>
         <div>
           <div>Timeline</div>
-          <StackedAreaChart
+          <ActivityTimeline
             palette={{ activity: '#00bcd4' }}
-            paddings={{ top: 20, left: 25, bottom: 22, right: 30 }}
+            paddings={{ top: 20, left: 25, bottom: 30, right: 30 }}
             resolution={'weeks'}
             xAxisCenter={true}
             content={activityTimeline}
             d3offset={d3.stackOffsetDiverging}
             yDims={_.values(yDims)}
+            onDimensionsRestricted={dims => onActivityDimensionsRestricted(dims)}
           />
         </div>
         <div>
           <div>Activity:</div>
           <div>
-            <select value={this.props.config.selectedActivityScale} onChange={value => this.props.onSelectActivityScale(value)}>
+            <select value={this.props.config.selectedActivityScale} onChange={value => onSelectActivityScale(value)}>
               <option value="commits">Commits</option>
               <option value="activity">Additions & Deletions</option>
               <option value="additions">Additions</option>
