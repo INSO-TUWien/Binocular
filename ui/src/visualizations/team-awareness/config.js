@@ -7,6 +7,7 @@ import * as d3 from 'd3';
 import { getState } from './util/util';
 import _ from 'lodash';
 import ActivityTimeline from './components/Timeline/ActivityTimeline';
+import styles from './config.scss';
 
 const mapStateToProps = (appState /*, ownProps*/) => {
   const { config, data } = getState(appState);
@@ -36,7 +37,18 @@ class ConfigComponent extends React.Component {
     const { onActivityDimensionsRestricted, onSelectActivityScale } = this.props;
     const { activityTimeline, yDims } = this.props.data;
     return (
-      <div>
+      <div className={styles.configContainer}>
+        <div>
+          <div>Activity:</div>
+          <div>
+            <select value={this.props.config.selectedActivityScale} onChange={value => onSelectActivityScale(value)}>
+              <option value="commits">Commits</option>
+              <option value="activity">Additions & Deletions</option>
+              <option value="additions">Additions</option>
+              <option value="deletions">Deletions</option>
+            </select>
+          </div>
+        </div>
         <div>
           <div>Timeline</div>
           <ActivityTimeline
@@ -49,17 +61,6 @@ class ConfigComponent extends React.Component {
             yDims={_.values(yDims)}
             onDimensionsRestricted={dims => onActivityDimensionsRestricted(dims)}
           />
-        </div>
-        <div>
-          <div>Activity:</div>
-          <div>
-            <select value={this.props.config.selectedActivityScale} onChange={value => onSelectActivityScale(value)}>
-              <option value="commits">Commits</option>
-              <option value="activity">Additions & Deletions</option>
-              <option value="additions">Additions</option>
-              <option value="deletions">Deletions</option>
-            </select>
-          </div>
         </div>
       </div>
     );
