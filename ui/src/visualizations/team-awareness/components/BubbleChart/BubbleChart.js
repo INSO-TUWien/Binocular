@@ -8,12 +8,14 @@ export default class BubbleChart extends React.Component {
   constructor(props) {
     super(props);
     this.styles = _.assign({}, chartStyle);
+    const { width, height } = this.props;
+
     this.state = {
       componentMounted: false,
       content: this.props.content,
       colors: this.createColorSchema(_.map(this.props.content, 'id')),
-      width: this.props.width || 0,
-      height: this.props.height || 0
+      width: width || 0,
+      height: height || 0
     };
     window.addEventListener('resize', () => this.visualizeChart());
   }
@@ -87,12 +89,14 @@ export default class BubbleChart extends React.Component {
       return;
     }
 
-    const bubbleArea = d3.select(this.bubbleAreaRef);
+    const { hierarchy, pack, select } = d3;
+
+    const bubbleArea = select(this.bubbleAreaRef);
     bubbleArea.selectAll('a').remove();
 
     const { clientWidth, clientHeight } = this.svgRef;
-    const layout = d3.pack().size([clientWidth, clientHeight]);
-    const root = d3.hierarchy({ children: this.state.content }).sum(d => d.activity);
+    const layout = pack().size([clientWidth, clientHeight]);
+    const root = hierarchy({ children: this.state.content }).sum(d => d.activity);
     layout(root);
 
     const leaf = bubbleArea.selectAll('a').data(root.leaves()).join('a').attr('transform', d => `translate(${d.x},${d.y})`);
