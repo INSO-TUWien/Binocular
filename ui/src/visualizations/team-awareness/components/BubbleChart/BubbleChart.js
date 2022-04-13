@@ -33,18 +33,6 @@ export default class BubbleChart extends React.Component {
       }
     ];
 
-    /*
-              <ChartLegend
-            title="Authors"
-            x={15}
-            y={15}
-            colors={this.state.colors}
-            content={this.state.content}
-            ref={legend => (this.legendRef = legend)}
-          />
-             <Legend x={10} y={10} categories={categories} />
-     */
-
     return (
       <div className={this.styles.chartArea}>
         <svg className={this.styles.chartDrawingArea} ref={svg => (this.svgRef = svg)}>
