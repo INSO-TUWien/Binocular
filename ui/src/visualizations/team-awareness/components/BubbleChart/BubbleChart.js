@@ -19,7 +19,22 @@ export default class BubbleChart extends React.Component {
   }
 
   render() {
-    const legend = [
+    const { activeLegend } = this.state;
+    const legend = activeLegend ? activeLegend : this.constructLegendsFromContent();
+
+    return (
+      <div className={this.styles.chartArea}>
+        <svg className={this.styles.chartDrawingArea} ref={svg => (this.svgRef = svg)}>
+          <g className="chartBubbleArea" ref={area => (this.bubbleAreaRef = area)} />
+          <Legend x={10} y={10} categories={legend} />
+        </svg>
+        <div className={this.styles.chartTooltip} ref={div => (this.tooltipRef = div)} />
+      </div>
+    );
+  }
+
+  constructLegendsFromContent() {
+    return [
       {
         name: 'Authors',
         subLegend: _.map(this.state.content, c => {
@@ -32,16 +47,18 @@ export default class BubbleChart extends React.Component {
         })
       }
     ];
+  }
 
-    return (
-      <div className={this.styles.chartArea}>
-        <svg className={this.styles.chartDrawingArea} ref={svg => (this.svgRef = svg)}>
-          <g className="chartBubbleArea" ref={area => (this.bubbleAreaRef = area)} />
-          <Legend x={10} y={10} categories={legend} />
-        </svg>
-        <div className={this.styles.chartTooltip} ref={div => (this.tooltipRef = div)} />
-      </div>
-    );
+  constructActiveLegend(circle) {
+    const stakeholder = circle.__data__.data;
+    const legend = [
+      {
+        name: stakeholder.signature + ' Activity: ' + stakeholder.activity,
+        style: { fill: this.state.colors.get(stakeholder.id) }
+      }
+    ];
+
+    this.setState({ activeLegend: legend });
   }
 
   componentDidMount() {
@@ -80,9 +97,9 @@ export default class BubbleChart extends React.Component {
 
     const leaf = bubbleArea.selectAll('a').data(root.leaves()).join('a').attr('transform', d => `translate(${d.x},${d.y})`);
     leaf.append('title').text(d => `${d.data.signature}\nActivity: ${d.data.activity}`);
-    leaf.append('circle').attr('fill', d => this.state.colors.get(d.data.id)).attr('r', d => {
-      return d.r;
-    });
+    leaf.append('circle').attr('fill', d => this.state.colors.get(d.data.id)).attr('r', d => d.r);
+    leaf.on('mouseenter', d => this.constructActiveLegend(d.target));
+    leaf.on('mouseleave', () => this.setState({ activeLegend: null }));
   }
 
   createColorSchema(data) {
