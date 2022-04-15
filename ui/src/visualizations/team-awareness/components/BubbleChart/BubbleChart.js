@@ -101,8 +101,13 @@ export default class BubbleChart extends React.Component {
     const root = hierarchy({ children: this.state.content }).sum(d => d.activity);
     layout(root);
 
-    const leaf = bubbleArea.selectAll('g').data(root.leaves()).join('g').attr('transform', d => `translate(${d.x},${d.y})`);
-    leaf.append('circle').attr('fill', d => this.state.colors.get(d.data.id)).attr('data', d => d.data.id).attr('r', d => d.r);
+    const leaves = root.leaves();
+    if (leaves.length === 0 || !leaves[0].r) {
+      return;
+    }
+
+    const leaf = bubbleArea.selectAll('g').data(leaves).join('g').attr('transform', d => `translate(${d.x},${d.y})`);
+    leaf.append('circle').attr('fill', d => this.state.colors.get(d.data.id)).attr('r', d => d.r);
     leaf.on('mouseenter', d => this.constructActiveLegend(d.target));
     leaf.on('mouseleave', () => this.setState({ activeLegend: null }));
   }
