@@ -27,8 +27,10 @@ export default class BubbleChart extends React.Component {
     return (
       <div className={this.styles.chartArea}>
         <svg className={this.styles.chartDrawingArea} ref={svg => (this.svgRef = svg)}>
-          <g className="chartBubbleArea" ref={area => (this.bubbleAreaRef = area)} />
-          <Legend x={10} y={10} categories={legend} />
+          <g>
+            <g id="chartBubbleArea" className="chartBubbleArea" ref={area => (this.bubbleAreaRef = area)} />
+            <Legend x={10} y={10} categories={legend} />
+          </g>
         </svg>
         <div className={this.styles.chartTooltip} ref={div => (this.tooltipRef = div)} />
       </div>
@@ -92,16 +94,16 @@ export default class BubbleChart extends React.Component {
     const { hierarchy, pack, select } = d3;
 
     const bubbleArea = select(this.bubbleAreaRef);
-    bubbleArea.selectAll('a').remove();
+    bubbleArea.selectAll('g').remove();
 
     const { clientWidth, clientHeight } = this.svgRef;
     const layout = pack().size([clientWidth, clientHeight]);
     const root = hierarchy({ children: this.state.content }).sum(d => d.activity);
     layout(root);
 
-    const leaf = bubbleArea.selectAll('a').data(root.leaves()).join('a').attr('transform', d => `translate(${d.x},${d.y})`);
-    leaf.append('title').text(d => `${d.data.signature}\nActivity: ${d.data.activity}`);
-    leaf.append('circle').attr('fill', d => this.state.colors.get(d.data.id)).attr('r', d => d.r);
+    console.log(root.leaves());
+    const leaf = bubbleArea.selectAll('g').data(root.leaves()).join('g').attr('transform', d => `translate(${d.x},${d.y})`);
+    leaf.append('circle').attr('fill', d => this.state.colors.get(d.data.id)).attr('data', d => d.data.id).attr('r', d => d.r);
     leaf.on('mouseenter', d => this.constructActiveLegend(d.target));
     leaf.on('mouseleave', () => this.setState({ activeLegend: null }));
   }
