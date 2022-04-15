@@ -91,22 +91,14 @@ function filterCommit(from, to, fn) {
 }
 
 function selectCalculationFunction(config) {
-  console.log(config);
   const { selectedActivityScale } = config;
   if (!selectedActivityScale) {
-    console.log('No activity scale selected');
     return () => 1;
   }
 
   switch (selectedActivityScale) {
     case 'activity':
-      return commit => {
-        if (commit.stakeholder.gitSignature.startsWith('Miriam')) {
-          console.log(commit.stats.additions + commit.stats.deletions);
-          console.log(commit);
-        }
-        return commit.stats.additions + commit.stats.deletions;
-      };
+      return commit => commit.stats.additions + commit.stats.deletions;
     case 'additions':
       return commit => commit.stats.additions;
     case 'deletions':
