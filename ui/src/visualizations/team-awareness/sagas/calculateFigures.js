@@ -21,11 +21,11 @@ function processData(appState) {
     max: Number.MIN_SAFE_INTEGER
   };
 
-  let activityCalculator = calculateActivity;
+  let activityCalculator = selectCalculationFunction(vizState.config);
   if (vizState.config.activityRestricted === true) {
     const from = Date.parse(vizState.config.activityDims[0]);
     const to = Date.parse(vizState.config.activityDims[1]);
-    activityCalculator = filterCommit(from, to, calculateActivity);
+    activityCalculator = filterCommit(from, to, activityCalculator);
   }
 
   vizState.data.data.commits.forEach(c => {
@@ -90,6 +90,29 @@ function filterCommit(from, to, fn) {
   };
 }
 
-function calculateActivity() {
-  return 1;
+function selectCalculationFunction(config) {
+  console.log(config);
+  const { selectedActivityScale } = config;
+  if (!selectedActivityScale) {
+    console.log('No activity scale selected');
+    return () => 1;
+  }
+
+  switch (selectedActivityScale) {
+    case 'activity':
+      return commit => {
+        if (commit.stakeholder.gitSignature.startsWith('Miriam')) {
+          console.log(commit.stats.additions + commit.stats.deletions);
+          console.log(commit);
+        }
+        return commit.stats.additions + commit.stats.deletions;
+      };
+    case 'additions':
+      return commit => commit.stats.additions;
+    case 'deletions':
+      return commit => commit.stats.deletions;
+    default:
+      // Also covers 'commits'
+      return () => 1;
+  }
 }

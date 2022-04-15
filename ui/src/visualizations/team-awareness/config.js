@@ -46,7 +46,7 @@ class ConfigComponent extends React.Component {
                 <select
                   className={styles.activitySelect}
                   value={config.selectedActivityScale}
-                  onChange={value => onSelectActivityScale(value)}>
+                  onChange={event => onSelectActivityScale(event.target.value)}>
                   <option value="commits">Commits</option>
                   <option value="activity">Additions & Deletions</option>
                   <option value="additions">Additions</option>

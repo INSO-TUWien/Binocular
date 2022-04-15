@@ -17,7 +17,6 @@ export default handleActions(
       });
     },
     PROCESS_TEAM_AWARENESS_DATA: (state, action) => {
-      console.log('PROCESS_TEAM_AWARENESS_DATA', state, action);
       return _.assign({}, state, {
         data: {
           commits: state.data.commits,

@@ -19,6 +19,7 @@ const refresh = createAction('REFRESH');
 
 export default function*() {
   yield fork(watchDataReceive);
+  yield fork(watchActivityScaleSet);
   yield fork(watchActivityDimensionsSet);
   yield fork(watchRefreshRequests);
   yield fork(watchMessages);
@@ -29,6 +30,10 @@ export default function*() {
 
 function* watchDataReceive() {
   yield takeEvery('RECEIVE_TEAM_AWARENESS_DATA', test);
+}
+
+function* watchActivityScaleSet() {
+  yield takeEvery('SET_TEAM_AWARENESS_ACTIVITY_SCALE', test);
 }
 
 function* watchActivityDimensionsSet() {
