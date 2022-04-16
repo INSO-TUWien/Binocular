@@ -21,9 +21,11 @@
     padding: 5px;
     display: flex;
     align-items: center;
+    height: 30%;
 
     .text{
-      writing-mode: vertical-lr;
+      writing-mode: vertical-rl;
+      text-align: center;
       transform: rotate(-180deg);
       margin-right: 10px;
     }

@@ -90,11 +90,10 @@ export const fetchProjectIssueData = fetchFactory(
 
     const firstSignificantTimestamp = Math.max(viewport[0], Math.min(firstCommitTimestamp, firstIssueTimestamp));
     const lastSignificantTimestamp = viewport[1] ? viewport[1].getTime() : Math.max(lastCommitTimestamp, lastIssueTimestamp);
-    console.log('AAAA');
     return yield Promise.join(
       getCommitData([firstCommitTimestamp, lastCommitTimestamp], [firstSignificantTimestamp, lastSignificantTimestamp]),
-      //getIssuesCommitData([firstIssueCommitTimestamp, lastIssueCommitTimestamp], [firstSignificantTimestamp, lastSignificantTimestamp]),
       getIssueData([firstIssueTimestamp, lastIssueTimestamp], [firstSignificantTimestamp, lastSignificantTimestamp]),
+      getIssuesCommitData([firstIssueCommitTimestamp, lastIssueCommitTimestamp], [firstSignificantTimestamp, lastSignificantTimestamp]),
       getBuildData()
     )
       .spread((commits, issues, issueCommits, builds) => {
