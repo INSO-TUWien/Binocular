@@ -28,14 +28,14 @@ export default class heatmapChartGeneration {
     d3.select('.chartMainToolTip > *').remove();
 
     switch (mode) {
-      case 0:
-        commitData = data;
-        break;
       case 1:
         developerData = data;
         break;
       case 2:
         issueData = data;
+        break;
+      default:
+        commitData = data;
         break;
     }
 
@@ -90,10 +90,6 @@ export default class heatmapChartGeneration {
     }
 
     switch (mode) {
-      case 0:
-        commitMaxValue = maxValue;
-        commitLegendSteps = legendSteps;
-        break;
       case 1:
         developerMaxValue = maxValue;
         developerLegendSteps = legendSteps;
@@ -101,6 +97,10 @@ export default class heatmapChartGeneration {
       case 2:
         issueMaxValue = maxValue;
         issueLegendSteps = legendSteps;
+        break;
+      default:
+        commitMaxValue = maxValue;
+        commitLegendSteps = legendSteps;
         break;
     }
 
@@ -186,7 +186,7 @@ export default class heatmapChartGeneration {
       const rowDeveloperData = developerData.filter(d => d.row === line);
       const rowIssueData = issueData.filter(d => d.row === line);
       const commitLegendData = [];
-
+      const width = document.getElementById('barChartContainer').clientWidth;
       for (let i = 1; i <= commitLegendSteps; i++) {
         commitLegendData.push({
           interval: commitMaxValue / commitLegendSteps * i,
@@ -252,66 +252,106 @@ export default class heatmapChartGeneration {
       if (!rowCommitData.length) {
         toolTip.append('span').text('Data Not Loaded! Open the Tab once to load data.');
       } else {
-        toolTip
+        const rowCommitDataTooltip = toolTip
           .append('svg')
-          .attr('width', '90%')
-          .attr('height', '24px')
+          .attr('width', width)
+          .attr('height', '48px')
           .append('g')
           .selectAll('rect')
           .data(rowCommitData)
           .enter()
+          .append('g');
+        rowCommitDataTooltip
           .append('rect')
-          .attr('x', d => {
-            return '' + 100 / rowCommitData.length * d.column + '%';
+          .attr('x', (d, i) => {
+            return '' + width / rowCommitData.length * i + '';
+          })
+          .attr('y', '24px')
+          .style('fill', commitColorScale)
+          .attr('width', '' + width / rowCommitData.length + '')
+          .attr('height', '24px');
+        rowCommitDataTooltip
+          .append('text')
+          .attr('x', (d, i) => {
+            return '' + width / rowCommitData.length * i + '';
           })
           .attr('y', '0')
-          .style('fill', commitColorScale)
-          .attr('width', '' + 100 / rowCommitData.length + '%')
-          .attr('height', '24px');
+          .attr('dy', '24px')
+          .style('fill', 'black')
+          .text(function(d) {
+            return d.column;
+          });
       }
       toolTip.append('hr');
       toolTip.append('span').attr('class', styles.label).text('Changes/Developer:');
       if (!rowDeveloperData.length) {
         toolTip.append('span').text('Data Not Loaded! Open the Tab once to load data.');
       } else {
-        toolTip
+        const rowDeveloperDataTooltip = toolTip
           .append('svg')
-          .attr('width', '90%')
-          .attr('height', '24px')
+          .attr('width', width)
+          .attr('height', '174px')
           .append('g')
           .selectAll('rect')
           .data(rowDeveloperData)
           .enter()
+          .append('g');
+        rowDeveloperDataTooltip
           .append('rect')
-          .attr('x', d => {
-            return '' + 100 / rowDeveloperData.length * d.column + '%';
+          .attr('x', (d, i) => {
+            return '' + width / rowDeveloperData.length * i + '';
           })
-          .attr('y', '0')
+          .attr('y', '150')
           .style('fill', developerColorScale)
-          .attr('width', '' + 100 / rowDeveloperData.length + '%')
+          .attr('width', '' + width / rowDeveloperData.length + '')
           .attr('height', '24px');
+        rowDeveloperDataTooltip
+          .append('text')
+          .attr('x', '0')
+          .attr('y', '0')
+          .attr('transform', (d, i) => {
+            return 'translate( ' + width / rowDeveloperData.length * i + ', ' + 126 + '),' + 'rotate(-45)';
+          })
+          .attr('dy', '24px')
+          .style('fill', 'black')
+          .text(function(d) {
+            return d.dev;
+          });
       }
       toolTip.append('hr');
       toolTip.append('span').attr('class', styles.label).text('Changes/Issue:');
       if (!rowIssueData.length) {
         toolTip.append('span').text('Data Not Loaded! Open the Tab once to load data.');
       } else {
-        toolTip
+        const rowIssueDataTooltip = toolTip
           .append('svg')
-          .attr('width', '90%')
-          .attr('height', '24px')
+          .attr('width', width)
+          .attr('height', '48px')
           .append('g')
           .selectAll('rect')
           .data(rowIssueData)
           .enter()
+          .append('g');
+        rowIssueDataTooltip
           .append('rect')
-          .attr('x', d => {
-            return '' + 100 / rowIssueData.length * d.column + '%';
+          .attr('x', (d, i) => {
+            return '' + width / rowIssueData.length * i + '';
+          })
+          .attr('y', '24')
+          .style('fill', issueColorScale)
+          .attr('width', '' + width / rowIssueData.length + '')
+          .attr('height', '24px');
+        rowIssueDataTooltip
+          .append('text')
+          .attr('x', (d, i) => {
+            return '' + width / rowIssueData.length * i + '';
           })
           .attr('y', '0')
-          .style('fill', issueColorScale)
-          .attr('width', '' + 100 / rowIssueData.length + '%')
-          .attr('height', '24px');
+          .attr('dy', '24px')
+          .style('fill', 'black')
+          .text(function(d) {
+            return d.iid;
+          });
       }
     }
   }

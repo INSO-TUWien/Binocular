@@ -30,7 +30,8 @@ export default class heatmapInteraction {
         .on('mouseover', function() {
           if (displayProps.mainVisualizationMode === 1 && mode === 0) {
             hunkChartGeneration.interact(i);
-          } else if (displayProps.mainVisualizationMode === 0 && mode === 0) {
+          } else if (displayProps.mainVisualizationMode === 0) {
+            console.log(i);
             heatmapChartGeneration.interact(i);
           }
         });

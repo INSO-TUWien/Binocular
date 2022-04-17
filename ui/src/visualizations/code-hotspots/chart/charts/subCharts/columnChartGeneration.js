@@ -166,7 +166,7 @@ export default class columnChartGeneration {
               tooltipp.append('div').style('font-weight', 'bold').html(currDev.split(' <')[0]);
               tooltipp.append('div').html(currDev.split(' <')[1]);
               tooltipp.append('hr');
-              tooltipp.append('div').html('Commits linked to this issue: ' + d.commits.length);
+              tooltipp.append('div').html('Commits linked to this developer: ' + d.commits.length);
               tooltipp.append('hr');
               const commitList = tooltipp.append('div');
               ListGeneration.generateCommitList(commitList, d.commits, currThis);
@@ -234,7 +234,7 @@ export default class columnChartGeneration {
                 tooltipp.append('div').html(d.description);
                 tooltipp.append('hr');
               }
-              tooltipp.append('div').html('Commits linked to this developer: ' + d.commits.length);
+              tooltipp.append('div').html('Commits linked to this issue: ' + d.commits.length);
               tooltipp.append('hr');
               const commitList = tooltipp.append('div');
               ListGeneration.generateCommitList(commitList, d.commits, currThis);
