@@ -16,6 +16,7 @@ const getCommits = (page, perPage) => {
         commits(page:$page, perPage:$perPage) {
           data {
             date
+            branch
             stakeholder {
               id
               gitSignature

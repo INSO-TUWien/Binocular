@@ -19,6 +19,7 @@ export default handleActions(
     PROCESS_TEAM_AWARENESS_DATA: (state, action) => {
       return _.assign({}, state, {
         data: {
+          branches: state.data.branches,
           commits: state.data.commits,
           stakeholders: action.payload.stakeholders,
           activityTimeline: action.payload.activityTimeline,
@@ -29,6 +30,7 @@ export default handleActions(
   },
   {
     data: {
+      branches: [],
       commits: [],
       stakeholders: []
     },

@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { connect } from 'react-redux';
-import { setActivityDimensions, setActivityScale } from './sagas';
+import { setActivityDimensions, setActivityScale, setBranch } from './sagas';
 import * as d3 from 'd3';
 import { getState } from './util/util';
 import _ from 'lodash';
@@ -13,9 +13,11 @@ const mapStateToProps = (appState /*, ownProps*/) => {
   const { config, data } = getState(appState);
   return {
     config: {
-      selectedActivity: config.selectedActivity
+      selectedActivityScale: config.selectedActivityScale,
+      selectedBranch: config.selectedBranch
     },
     data: {
+      branches: data.data.branches,
       activityTimeline: data.data.activityTimeline,
       yDims: data.data.dataBoundaries
     }
@@ -24,7 +26,8 @@ const mapStateToProps = (appState /*, ownProps*/) => {
 const mapDispatchToProps = dispatch => {
   return {
     onSelectActivityScale: selectActivity => dispatch(setActivityScale(selectActivity)),
-    onActivityDimensionsRestricted: restrictActivity => dispatch(setActivityDimensions(restrictActivity))
+    onActivityDimensionsRestricted: restrictActivity => dispatch(setActivityDimensions(restrictActivity)),
+    onSelectBranch: selectActivity => dispatch(setBranch(selectActivity))
   };
 };
 
@@ -34,8 +37,9 @@ class ConfigComponent extends React.Component {
   }
 
   render() {
-    const { onActivityDimensionsRestricted, onSelectActivityScale, config } = this.props;
-    const { activityTimeline, yDims } = this.props.data;
+    const { onActivityDimensionsRestricted, onSelectActivityScale, config, onSelectBranch } = this.props;
+    const { activityTimeline, yDims, branches } = this.props.data;
+    console.log(activityTimeline);
     return (
       <div className={styles.configContainer}>
         <form>
@@ -55,15 +59,31 @@ class ConfigComponent extends React.Component {
               </div>
             </div>
           </div>
+          <div className="field">
+            <label className="label">Branches</label>
+            <div className={'select ' + styles.branchesSelect}>
+              <select
+                className={styles.branchesSelect}
+                value={config.selectedBranch}
+                onChange={event => onSelectBranch(event.target.value)}>
+                <option value="all">All Branches</option>
+                {_.sortBy(branches, 'branch').map(branch =>
+                  <option key={'branch_' + branch.id} value={branch.branch}>
+                    {branch.branch}
+                  </option>
+                )}
+              </select>
+            </div>
+          </div>
         </form>
         <div>
           <label className="label">Timeline</label>
           <ActivityTimeline
             palette={{ activity: '#00bcd4' }}
-            paddings={{ top: 20, left: 25, bottom: 30, right: 30 }}
+            paddings={{ top: 5, left: 30, bottom: 30, right: 30 }}
             resolution={'weeks'}
             xAxisCenter={true}
-            content={activityTimeline}
+            content={activityTimeline && activityTimeline.length > 0 ? activityTimeline : [{ date: 0, activity: 0 }]}
             d3offset={d3.stackOffsetDiverging}
             yDims={_.values(yDims)}
             onDimensionsRestricted={dims => onActivityDimensionsRestricted(dims)}

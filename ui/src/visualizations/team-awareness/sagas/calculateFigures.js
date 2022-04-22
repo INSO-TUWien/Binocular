@@ -17,15 +17,20 @@ function processData(appState) {
   const activities = new Map();
 
   const dataBoundaries = {
-    min: Number.MAX_SAFE_INTEGER,
+    min: 0,
     max: Number.MIN_SAFE_INTEGER
   };
 
   let activityCalculator = selectCalculationFunction(vizState.config);
+  console.log(vizState.data.data);
   if (vizState.config.activityRestricted === true) {
     const from = Date.parse(vizState.config.activityDims[0]);
     const to = Date.parse(vizState.config.activityDims[1]);
-    activityCalculator = filterCommit(from, to, activityCalculator);
+    activityCalculator = filterCommitOnDate(from, to, activityCalculator);
+  }
+
+  if (vizState.config.selectedBranch && vizState.config.selectedBranch !== 'all') {
+    activityCalculator = filterCommitOnBranch(vizState.config.selectedBranch, activityCalculator);
   }
 
   vizState.data.data.commits.forEach(c => {
@@ -80,10 +85,24 @@ function updateBoundaries(boundaries, value) {
  * @param fn {function}
  * @return {function(*): number}
  */
-function filterCommit(from, to, fn) {
+function filterCommitOnDate(from, to, fn) {
   return commit => {
     const parsedDate = Date.parse(commit.date);
     if (from <= parsedDate && parsedDate <= to) {
+      return fn(commit);
+    }
+    return 0;
+  };
+}
+
+/**
+ * @param selectedBranch {string}
+ * @param fn {function}
+ * @return {function(*): number}
+ */
+function filterCommitOnBranch(selectedBranch, fn) {
+  return commit => {
+    if (commit.branch === selectedBranch) {
       return fn(commit);
     }
     return 0;
