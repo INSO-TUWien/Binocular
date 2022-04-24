@@ -12,8 +12,8 @@ import { traversePages, graphQl } from '../../../utils';
 export default function getIssueCommitData(issueCommitSpan, significantSpan) {
   const issueCommitList = [];
 
-  return traversePages(getIssueCommitsPage(significantSpan[1]), commit => {
-    issueCommitList.push(commit);
+  return traversePages(getIssueCommitsPage(significantSpan[1]), issueCommit => {
+    issueCommitList.push(issueCommit);
   }).then(function() {
     return issueCommitList;
   });
@@ -23,23 +23,21 @@ const getIssueCommitsPage = until => (page, perPage) => {
   return graphQl
     .query(
       `query($page: Int, $perPage: Int, $until: Timestamp) {
-             commits(page: $page, perPage: $perPage, until: $until) {
-               count
-               page
-               perPage
-               data {
-                 sha
-                 date
-                 messageHeader
-                 signature
-                 stats {
-                   additions
-                   deletions
-                 }
-               }
-             }
-          }`,
+          issues(page: $page, perPage: $perPage, until: $until) {
+            count
+            page
+            perPage
+            count
+            data {
+              title
+              description
+              createdAt
+              closedAt
+              state
+            }
+          }
+        }`,
       { page, perPage, until }
     )
-    .then(resp => resp.issueCommits);
+    .then(resp => resp.issues);
 };

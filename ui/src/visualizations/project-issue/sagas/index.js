@@ -7,7 +7,7 @@ import _ from 'lodash';
 
 import { fetchFactory, timestampedActionFactory, mapSaga } from '../../../sagas/utils.js';
 import getCommitData from './getCommitData.js';
-import getIssuesCommitData from './getIssueCommitData.js';
+import getIssueCommitData from './getIssueCommitData.js';
 import getIssueData from './getIssueData.js';
 import getBuildData from './getBuildData.js';
 import getBounds from './getBounds.js';
@@ -93,11 +93,20 @@ export const fetchProjectIssueData = fetchFactory(
     return yield Promise.join(
       getCommitData([firstCommitTimestamp, lastCommitTimestamp], [firstSignificantTimestamp, lastSignificantTimestamp]),
       getIssueData([firstIssueTimestamp, lastIssueTimestamp], [firstSignificantTimestamp, lastSignificantTimestamp]),
-      getIssuesCommitData([firstIssueCommitTimestamp, lastIssueCommitTimestamp], [firstSignificantTimestamp, lastSignificantTimestamp]),
-      getBuildData()
+      getBuildData(),
+      getIssueCommitData([firstIssueCommitTimestamp, lastIssueCommitTimestamp], [firstSignificantTimestamp, lastSignificantTimestamp])
     )
-      .spread((commits, issues, issueCommits, builds) => {
+      .spread((commits, issues, builds, issueCommits) => {
         const palette = getPalette(issues, 20, 20);
+
+        console.log('commits:');
+        console.log(commits);
+        console.log('issueCommits:');
+        console.log(issueCommits);
+        console.log('issues:');
+        console.log(issues);
+        console.log('builds:');
+        console.log(builds);
 
         return {
           otherCount: 0,
