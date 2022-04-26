@@ -8,28 +8,27 @@ export default class BubbleChart extends React.Component {
   constructor(props) {
     super(props);
     this.styles = _.assign({}, chartStyle);
-    const { width, height } = this.props;
 
     this.state = {
       componentMounted: false,
       content: this.props.content,
       colors: this.createColorSchema(_.map(this.props.content, 'id')),
-      width: width || 0,
-      height: height || 0
+      width: 0,
+      height: 0
     };
-    window.addEventListener('resize', () => this.visualizeChart());
+    window.addEventListener('resize', () => this.setState({ width: window.innerWidth, height: window.innerHeight }));
   }
 
   render() {
-    const { activeLegend } = this.state;
+    const { activeLegend, content } = this.state;
     const legend = activeLegend ? activeLegend : this.constructLegendsFromContent();
 
     return (
       <div className={this.styles.chartArea}>
         <svg className={this.styles.chartDrawingArea} ref={svg => (this.svgRef = svg)}>
           <g>
-            <g id="chartBubbleArea" className="chartBubbleArea" ref={area => (this.bubbleAreaRef = area)} />
-            <Legend x={10} y={10} categories={legend} />
+            {this.generateBubbles()}
+            {content && content.length > 0 && <Legend x={10} y={10} categories={legend} />}
           </g>
         </svg>
         <div className={this.styles.chartTooltip} ref={div => (this.tooltipRef = div)} />
@@ -53,8 +52,7 @@ export default class BubbleChart extends React.Component {
     ];
   }
 
-  constructActiveLegend(circle) {
-    const stakeholder = circle.__data__.data;
+  constructActiveLegend(stakeholder) {
     const legend = [
       {
         name: stakeholder.signature + ' Activity: ' + stakeholder.activity,
@@ -68,48 +66,46 @@ export default class BubbleChart extends React.Component {
   componentDidMount() {
     this.setState({ componentMounted: true });
   }
+
   componentWillUnmount() {
     this.setState({ componentMounted: false });
   }
   // eslint-disable-next-line no-unused-vars
   componentDidUpdate(prevProps, prevState, snapshot) {
     if (this.state.componentMounted && this.state.content !== this.props.content) {
-      this.setState(
-        {
-          content: this.props.content,
-          colors: this.createColorSchema(_.map(this.props.content, 'id'))
-        },
-        this.visualizeChart
-      );
-    } else {
-      this.visualizeChart();
+      this.setState({
+        content: this.props.content,
+        colors: this.createColorSchema(_.map(this.props.content, 'id'))
+      });
     }
   }
 
-  visualizeChart() {
-    if (!this.state.componentMounted) {
-      return;
+  generateBubbles() {
+    if (!this.svgRef) {
+      return [];
     }
 
-    const { hierarchy, pack, select } = d3;
-
-    const bubbleArea = select(this.bubbleAreaRef);
-    bubbleArea.selectAll('g').remove();
-
+    const { hierarchy, pack } = d3;
     const { clientWidth, clientHeight } = this.svgRef;
+
     const layout = pack().size([clientWidth, clientHeight]);
     const root = hierarchy({ children: this.state.content }).sum(d => d.activity);
     layout(root);
 
     const leaves = root.leaves();
     if (leaves.length === 0 || !leaves[0].r) {
-      return;
+      return [];
     }
 
-    const leaf = bubbleArea.selectAll('g').data(leaves).join('g').attr('transform', d => `translate(${d.x},${d.y})`);
-    leaf.append('circle').attr('fill', d => this.state.colors.get(d.data.id)).attr('r', d => d.r);
-    leaf.on('mouseenter', d => this.constructActiveLegend(d.target));
-    leaf.on('mouseleave', () => this.setState({ activeLegend: null }));
+    return _.map(leaves, (l, i) =>
+      <g
+        key={`circle_${i}`}
+        transform={`translate(${l.x},${l.y})`}
+        onMouseEnter={() => this.constructActiveLegend(l.data)}
+        onMouseOut={() => this.setState({ activeLegend: null })}>
+        <circle fill={this.state.colors.get(l.data.id)} r={l.r} />
+      </g>
+    );
   }
 
   createColorSchema(data) {
