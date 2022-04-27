@@ -15,6 +15,7 @@ const getCommits = (page, perPage) => {
     query($page:Int, $perPage:Int) {
         commits(page:$page, perPage:$perPage) {
           data {
+            sha
             date
             branch
             stakeholder {

@@ -5,9 +5,7 @@ import { handleActions } from 'redux-actions';
 
 export default handleActions(
   {
-    REQUEST_TEAM_AWARENESS_DATA: state => {
-      return _.assign({}, state, { isFetching: true });
-    },
+    REQUEST_TEAM_AWARENESS_DATA: state => _.assign({}, state, { isFetching: true }),
     RECEIVE_TEAM_AWARENESS_DATA: (state, action) => {
       return _.assign({}, state, {
         data: action.payload,
@@ -16,20 +14,13 @@ export default handleActions(
         receivedAt: action.meta.receivedAt
       });
     },
-    PROCESS_TEAM_AWARENESS_DATA: (state, action) => {
-      return _.assign({}, state, {
-        data: {
-          branches: state.data.branches,
-          commits: state.data.commits,
-          stakeholders: action.payload.stakeholders,
-          activityTimeline: action.payload.activityTimeline,
-          dataBoundaries: action.payload.dataBoundaries
-        }
-      });
-    }
+    PROCESS_TEAM_AWARENESS_DATA: (state, action) => _.assign({}, state, { data: _.assign({}, state.data, action.payload) }),
+    PROCESS_TEAM_AWARENESS_FILE_BROWSER: (state, action) => _.assign({}, state, { data: _.assign({}, state.data, action.payload) })
   },
   {
     data: {
+      files: [],
+      fileTree: [],
       branches: [],
       commits: [],
       stakeholders: []

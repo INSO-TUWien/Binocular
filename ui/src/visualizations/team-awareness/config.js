@@ -2,21 +2,25 @@
 
 import React from 'react';
 import { connect } from 'react-redux';
-import { setActivityDimensions, setActivityScale, setBranch } from './sagas';
+import { setActivityDimensions, setActivityScale, setBranch, setFileFilterMode, setFilteredFiles } from './sagas';
 import * as d3 from 'd3';
 import { getState } from './util/util';
 import _ from 'lodash';
 import ActivityTimeline from './components/Timeline/ActivityTimeline';
 import styles from './styles.scss';
+import FileSelection from './components/FileSelection/FileSelection';
 
 const mapStateToProps = (appState /*, ownProps*/) => {
   const { config, data } = getState(appState);
+
   return {
     config: {
       selectedActivityScale: config.selectedActivityScale,
       selectedBranch: config.selectedBranch
     },
     data: {
+      files: data.data.files,
+      fileTree: data.data.fileTree,
       branches: data.data.branches,
       activityTimeline: data.data.activityTimeline,
       yDims: data.data.dataBoundaries
@@ -24,10 +28,13 @@ const mapStateToProps = (appState /*, ownProps*/) => {
   };
 };
 const mapDispatchToProps = dispatch => {
+  // noinspection JSUnusedGlobalSymbols
   return {
-    onSelectActivityScale: selectActivity => dispatch(setActivityScale(selectActivity)),
-    onActivityDimensionsRestricted: restrictActivity => dispatch(setActivityDimensions(restrictActivity)),
-    onSelectBranch: selectActivity => dispatch(setBranch(selectActivity))
+    onSelectActivityScale: activity => dispatch(setActivityScale(activity)),
+    onActivityDimensionsRestricted: activity => dispatch(setActivityDimensions(activity)),
+    onSelectBranch: activity => dispatch(setBranch(activity)),
+    onSetFilteredFile: activity => dispatch(setFilteredFiles(activity)),
+    onSetFileFilterMode: activity => dispatch(setFileFilterMode(activity))
   };
 };
 
@@ -37,9 +44,18 @@ class ConfigComponent extends React.Component {
   }
 
   render() {
-    const { onActivityDimensionsRestricted, onSelectActivityScale, config, onSelectBranch } = this.props;
-    const { activityTimeline, yDims, branches } = this.props.data;
-    console.log(activityTimeline);
+    const {
+      onActivityDimensionsRestricted,
+      onSelectActivityScale,
+      config,
+      data,
+      onSelectBranch,
+      onSetFilteredFile,
+      onSetFileFilterMode
+    } = this.props;
+    const { activityTimeline, yDims, branches, fileTree } = data;
+    const { stackOffsetDiverging } = d3;
+
     return (
       <div className={styles.configContainer}>
         <form>
@@ -84,11 +100,12 @@ class ConfigComponent extends React.Component {
             resolution={'weeks'}
             xAxisCenter={true}
             content={activityTimeline && activityTimeline.length > 0 ? activityTimeline : [{ date: 0, activity: 0 }]}
-            d3offset={d3.stackOffsetDiverging}
+            d3offset={stackOffsetDiverging}
             yDims={_.values(yDims)}
             onDimensionsRestricted={dims => onActivityDimensionsRestricted(dims)}
           />
         </div>
+        <FileSelection onSetFileFilterMode={m => onSetFileFilterMode(m)} files={fileTree} onSetFilteredFile={f => onSetFilteredFile(f)} />
       </div>
     );
   }

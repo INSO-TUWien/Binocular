@@ -1,6 +1,9 @@
+'use strict';
+
 import { put, select } from 'redux-saga/effects';
 import { processTeamAwarenessData } from './index';
 import { getState } from '../util/util';
+import _ from 'lodash';
 
 export default function*() {
   const appState = yield select();
@@ -8,7 +11,7 @@ export default function*() {
 }
 
 function processData(appState) {
-  const vizState = getState(appState);
+  const { config, data } = getState(appState);
 
   /** @type {Map<number, any>} */
   const stakeholders = new Map();
@@ -21,19 +24,18 @@ function processData(appState) {
     max: Number.MIN_SAFE_INTEGER
   };
 
-  let activityCalculator = selectCalculationFunction(vizState.config);
-  console.log(vizState.data.data);
-  if (vizState.config.activityRestricted === true) {
-    const from = Date.parse(vizState.config.activityDims[0]);
-    const to = Date.parse(vizState.config.activityDims[1]);
+  let activityCalculator = filterCommitOnFiles(config.fileFilter, selectCalculationFunction(config));
+  if (config.activityRestricted === true) {
+    const from = Date.parse(config.activityDims[0]);
+    const to = Date.parse(config.activityDims[1]);
     activityCalculator = filterCommitOnDate(from, to, activityCalculator);
   }
 
-  if (vizState.config.selectedBranch && vizState.config.selectedBranch !== 'all') {
-    activityCalculator = filterCommitOnBranch(vizState.config.selectedBranch, activityCalculator);
+  if (config.selectedBranch && config.selectedBranch !== 'all') {
+    activityCalculator = filterCommitOnBranch(config.selectedBranch, activityCalculator);
   }
 
-  vizState.data.data.commits.forEach(c => {
+  data.data.commits.forEach(c => {
     const calculatedActivity = activityCalculator(c);
     if (calculatedActivity !== 0) {
       if (!stakeholders.has(c.stakeholder.id)) {
@@ -109,6 +111,29 @@ function filterCommitOnBranch(selectedBranch, fn) {
   };
 }
 
+/**
+ * @param filter
+ * @param fn {function}
+ * @return {function(*): number}
+ */
+function filterCommitOnFiles(filter, fn) {
+  const filteredCommits = _.reduce(
+    filter.files,
+    (acc, f) => {
+      _.map(f.commits.data, 'sha').forEach(s => acc.add(s));
+      return acc;
+    },
+    new Set()
+  );
+
+  let excludeFilesFn = sha => !filteredCommits.has(sha);
+  if (filter.mode === 'INCLUDE') {
+    excludeFilesFn = sha => filteredCommits.has(sha);
+  }
+
+  return commit => (excludeFilesFn(commit.sha) ? fn(commit) : 0);
+}
+
 function selectCalculationFunction(config) {
   const { selectedActivityScale } = config;
   if (!selectedActivityScale) {
@@ -117,7 +142,7 @@ function selectCalculationFunction(config) {
 
   switch (selectedActivityScale) {
     case 'activity':
-      return commit => commit.stats.additions + commit.stats.deletions;
+      return commit => commit.stats.additions - commit.stats.deletions;
     case 'additions':
       return commit => commit.stats.additions;
     case 'deletions':
