@@ -259,24 +259,26 @@ async function indexing(indexers, context, reporter, gateway, indexingThread) {
 
     // start indexer
     const activeIndexers = await Promise.all(
-      providers.filter(exist => exist).map(async indexer => {
-        if (!indexer) {
-          return;
-        }
+      providers
+        .filter((exist) => exist)
+        .map(async (indexer) => {
+          if (!indexer) {
+            return;
+          }
 
-        if ('setGateway' in indexer) {
-          indexer.setGateway(gateway);
-        }
+          if ('setGateway' in indexer) {
+            indexer.setGateway(gateway);
+          }
 
-        threadLog(indexingThread, `${indexer.constructor.name} fetching data...`);
-        await indexer.index();
-        threadLog(indexingThread, `${indexer.constructor.name} ${indexer.isStopping() ? 'stopped' : 'finished'}...`);
-        return indexer;
-      })
+          threadLog(indexingThread, `${indexer.constructor.name} fetching data...`);
+          await indexer.index();
+          threadLog(indexingThread, `${indexer.constructor.name} ${indexer.isStopping() ? 'stopped' : 'finished'}...`);
+          return indexer;
+        })
     );
 
     // make sure that the services has not been stopped
-    const activeProviders = activeIndexers.filter(provider => {
+    const activeProviders = activeIndexers.filter((provider) => {
       return !provider || !provider.isStopping();
     });
 
@@ -328,7 +330,7 @@ async function getIndexer(indexers, context, reporter, indexingThread) {
   }
 
   //wait until all indexers have been finished
-  return indexHandler.map(async index => await index());
+  return indexHandler.map(async (index) => await index());
 }
 
 /**
@@ -376,7 +378,7 @@ async function stop() {
 
   console.log('Let me finish up here, ... (Ctrl+C to force quit)');
 
-  const stopServers = services.filter(srv => srv && typeof srv.stop === 'function').map(srv => srv.stop());
+  const stopServers = services.filter((srv) => srv && typeof srv.stop === 'function').map((srv) => srv.stop());
 
   ctx.quit();
   config.stop();
@@ -409,12 +411,15 @@ function stopRepoListener() {
 async function stopIndexers(gateway) {
   gateway.stopIndexing();
   await Promise.all(
-    _(indexers).values().filter(indexer => indexer !== null).each(async indexPromise => {
-      const index = await indexPromise;
-      if (index) {
-        index.stop();
-      }
-    })
+    _(indexers)
+      .values()
+      .filter((indexer) => indexer !== null)
+      .each(async (indexPromise) => {
+        const index = await indexPromise;
+        if (index) {
+          index.stop();
+        }
+      })
   );
 }
 
@@ -426,10 +431,10 @@ async function stopIndexers(gateway) {
 function ensureDb(repo, context) {
   return context.db
     .ensureDatabase('pupil-' + repo.getName())
-    .catch(e => {
+    .catch((e) => {
       throw new DatabaseError(e.message);
     })
-    .then(function() {
+    .then(function () {
       if (argv.clean) {
         return context.db.truncate();
       }
@@ -460,7 +465,7 @@ function ensureDb(repo, context) {
 }
 
 function createManualIssueReferences(issueReferences) {
-  return Promise.map(_.keys(issueReferences), sha => {
+  return Promise.map(_.keys(issueReferences), (sha) => {
     const iid = issueReferences[sha];
 
     return Promise.join(Commit.findOneBySha(sha), Issue.findOneByIid(iid)).spread((commit, issue) => {
@@ -473,7 +478,7 @@ function createManualIssueReferences(issueReferences) {
         return;
       }
 
-      const existingMention = _.find(issue.mentions, mention => mention.commit === sha);
+      const existingMention = _.find(issue.mentions, (mention) => mention.commit === sha);
       if (!existingMention) {
         issue.mentions.push({
           createdAt: commit.date,
@@ -523,12 +528,12 @@ Promise.all(
       services.push(gateway);
 
       await gateway.configure(config.get('gateway'));
-      gateway.addServiceHandler('LanguageDetection', service => {
+      gateway.addServiceHandler('LanguageDetection', (service) => {
         service.comm = new LanguageDetectionService(`${service.client.address}:${service.client.port}`, grpc.credentials.createInsecure());
         reIndex(indexers, context, reporter, gateway, activeIndexingQueue, ++indexingProcess);
       });
 
       return gateway.start();
     }).bind(this, ctx, config, gatewayService)
-  ].map(entryPoint => serviceStarter(entryPoint))
+  ].map((entryPoint) => serviceStarter(entryPoint))
 );
