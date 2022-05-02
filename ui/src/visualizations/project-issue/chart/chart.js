@@ -7,7 +7,6 @@ import styles from '../styles.scss';
 import _ from 'lodash';
 
 import ViolinPlot from '../../../components/ViolinPlot';
-import ViolinPlot2 from '../../../components/ViolinPlot2';
 import moment from 'moment';
 import cx from 'classnames';
 import chroma from 'chroma-js';
@@ -67,7 +66,7 @@ export default class ProjectIssue extends React.Component {
                   {chartTitle}
                 </div>
                 <div className={styles.chart}>
-                  <ViolinPlot2
+                  <ViolinPlot
                     content={this.state.issueChartData}
                     palette={{ Opened: '#3461eb', Closed: '#8099e8' }}
                     paddings={{ top: 20, left: 60, bottom: 20, right: 30 }}
@@ -86,7 +85,7 @@ export default class ProjectIssue extends React.Component {
                   {chartTitle}
                 </div>
                 <div className={styles.chart}>
-                  <ViolinPlot2
+                  <ViolinPlot
                     content={this.state.issueChartData}
                     palette={{ Opened: '#3461eb', Closed: '#8099e8' }}
                     paddings={{ top: 20, left: 60, bottom: 20, right: 30 }}
@@ -105,7 +104,7 @@ export default class ProjectIssue extends React.Component {
                   {chartTitle}
                 </div>
                 <div className={styles.chart}>
-                  <ViolinPlot2
+                  <ViolinPlot
                     content={this.state.issueChartData}
                     palette={{ Opened: '#3461eb', Closed: '#8099e8' }}
                     paddings={{ top: 20, left: 60, bottom: 20, right: 30 }}
