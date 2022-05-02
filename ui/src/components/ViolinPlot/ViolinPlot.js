@@ -2,14 +2,13 @@
 
 import React from 'react';
 import * as d3 from 'd3';
-import * as baseStyles from './violinPlot.scss';
 import styles from './violinPlot.scss';
 import _ from 'lodash';
 import { formatDate } from '../../utils/date';
 import { hash } from '../../utils/crypto-utils';
 
 /**
- * Violin plot chart 2
+ * Violin plot chart
  * Takes the following props:
  *  - content (Format: [{date: timestamp(ms), seriesName1: number, seriesName2, number, ...}, ...],
  *             e.g. array of data points with date and series values)
@@ -32,7 +31,7 @@ export default class ViolinPlot extends React.Component {
   constructor(props) {
     super(props);
 
-    this.styles = Object.freeze(Object.assign({}, baseStyles, styles));
+    this.styles = Object.freeze(Object.assign({}, styles));
 
     this.state = {
       content: props.content, //[{name: "dev1", color: "#ffffff", checked: bool}, ...]
@@ -56,7 +55,6 @@ export default class ViolinPlot extends React.Component {
     return [d3.min(this.state.data.data, d => d.date), d3.max(this.state.data.data, d => d.date)];
   }
 
-  // eslint-disable-next-line no-unused-vars
   getYDims() {
     return this.props.yDims;
   }
