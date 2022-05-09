@@ -257,7 +257,7 @@ async function indexing(indexers, context, reporter, gateway, indexingThread) {
     context.ciUrlProvider = await UrlProvider.getCiUrlProvider(context.repo, reporter, context);
     const providers = await Promise.all(getIndexer(indexers, context, reporter, indexingThread));
 
-    for (const indexer of providers.filter((exist) => exist)) {
+    /*for (const indexer of providers.filter((exist) => exist)) {
       if (!indexer) {
         return;
       }
@@ -273,9 +273,9 @@ async function indexing(indexers, context, reporter, gateway, indexingThread) {
     // make sure that the services has not been stopped
     const activeProviders = providers.filter((provider) => {
       return !provider || !provider.isStopping();
-    });
+    });*/
     // start indexer
-    /*const activeIndexers = await Promise.all(
+    const activeIndexers = await Promise.all(
       providers
         .filter((exist) => exist)
         .map(async (indexer) => {
@@ -297,7 +297,7 @@ async function indexing(indexers, context, reporter, gateway, indexingThread) {
     // make sure that the services has not been stopped
     const activeProviders = activeIndexers.filter((provider) => {
       return !provider || !provider.isStopping();
-    });*/
+    });
 
     if (activeProviders.length < 1) {
       threadLog(indexingThread, 'All indexers stopped!');
