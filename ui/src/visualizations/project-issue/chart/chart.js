@@ -48,6 +48,8 @@ export default class ProjectIssue extends React.Component {
       selectedIssues,
       selectedIssuesCommits
     });
+    console.log('issueData: ' + this.state.issueData);
+    console.log('issueChartData: ' + this.state.issueChartData);
   }
 
   render() {

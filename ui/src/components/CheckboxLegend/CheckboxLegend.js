@@ -43,8 +43,17 @@ export default class CheckboxLegend extends React.Component {
   }
 
   selectData(props) {
-    if (props.palette && this.state.initialized === false) {
+    let numberSelected = -1;
+    if (this.props.numberSelected) {
+      numberSelected = this.props.numberSelected;
+    }
+    if (props.palette && this.state.initialized === false && numberSelected === -1) {
       const selected = Object.keys(props.palette);
+      this.setState({ initialized: true, selected: selected }, () => this.props.onClick(selected));
+    } else if (props.palette && this.state.initialized === false && numberSelected > 0) {
+      console.log(numberSelected);
+      console.log(Object.keys(props.palette).slice(0, numberSelected));
+      const selected = Object.keys(props.palette).slice(0, numberSelected);
       this.setState({ initialized: true, selected: selected }, () => this.props.onClick(selected));
     }
   }
@@ -96,6 +105,7 @@ export default class CheckboxLegend extends React.Component {
         if (text === 'others' && otherCommitters) {
           text = '' + otherCommitters + ' Others';
         }
+        console.log('selected: ' + this.state.selected);
         if (this.state.selected.indexOf(key) > -1 && (countSelected < numberSelected || numberSelected === -1)) {
           items.push(
             <CheckboxLegendLine
