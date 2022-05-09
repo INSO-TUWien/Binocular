@@ -99,15 +99,6 @@ export const fetchProjectIssueData = fetchFactory(
       .spread((commits, issues, builds, issueCommits) => {
         const palette = getPalette(issues, 20, 20);
 
-        console.log('commits:');
-        console.log(commits);
-        console.log('issueCommits:');
-        console.log(issueCommits);
-        console.log('issues:');
-        console.log(issues);
-        console.log('builds:');
-        console.log(builds);
-
         return {
           otherCount: 0,
           commits,

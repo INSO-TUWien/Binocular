@@ -120,9 +120,12 @@ const ProjectIssueConfigComponent = props => {
             palette={props.palette}
             onClick={props.onClickCheckboxLegend.bind(this)}
             title={'Issues:'}
-            explanation={'Number of issues'}
+            explanation={'Title of issue'}
             split={false}
             otherCommitters={otherIssues}
+            initialized={true}
+            checkboxSelectAll={false}
+            numberSelected={3}
           />
         </div>
       </form>

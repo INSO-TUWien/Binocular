@@ -20,14 +20,18 @@ const ICON_HEIGHT = 15;
  *  - split (Format: true/false)
  *            Split the colors into itself and a brighter version of itself (using chroma-js .brighten())
  *  - explanation:(string) set custom explanation
+ *  - checkboxSelectAll (Format: true/false): test
  */
 export default class CheckboxLegend extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
       initialized: false,
-      selected: [] //[name1, name2, ...]
+      selected: [], //[name1, name2, ...]
+      checkboxSelectAll: true,
+      numberSelected: -1
     };
+    console.log(this.props.numberSelected);
   }
 
   componentWillReceiveProps(nextProps) {
@@ -80,6 +84,11 @@ export default class CheckboxLegend extends React.Component {
 
   render() {
     const items = [];
+    let countSelected = 0;
+    let numberSelected = -1;
+    if (this.props.numberSelected) {
+      numberSelected = this.props.numberSelected;
+    }
     if (this.state.initialized || (this.state.selected && this.state.selected.length)) {
       const otherCommitters = this.props.otherCommitters;
       _.each(Object.keys(this.props.palette), key => {
@@ -87,7 +96,7 @@ export default class CheckboxLegend extends React.Component {
         if (text === 'others' && otherCommitters) {
           text = '' + otherCommitters + ' Others';
         }
-        if (this.state.selected.indexOf(key) > -1) {
+        if (this.state.selected.indexOf(key) > -1 && (countSelected < numberSelected || numberSelected === -1)) {
           items.push(
             <CheckboxLegendLine
               id={key}
@@ -99,6 +108,7 @@ export default class CheckboxLegend extends React.Component {
               split={this.props.split}
             />
           );
+          countSelected++;
         } else {
           items.push(
             <CheckboxLegendLine
@@ -148,19 +158,34 @@ export default class CheckboxLegend extends React.Component {
       }
     }
 
-    return (
-      <div>
-        <label className="label">
-          <input type="checkbox" checked={checked} onChange={this.selectAllAuthors.bind(this)} disabled={!this.props.palette} />
-          {this.props.title}
-        </label>
-        {explanation}
-        <div className={styles.legend}>
-          {items.length === 0 || items}
-          {items.length > 0 || loading}
+    if (this.props.checkboxSelectAll === false) {
+      return (
+        <div>
+          <label className="label">
+            {this.props.title}
+          </label>
+          {explanation}
+          <div className={styles.legend}>
+            {items.length === 0 || items}
+            {items.length > 0 || loading}
+          </div>
         </div>
-      </div>
-    );
+      );
+    } else {
+      return (
+        <div>
+          <label className="label">
+            <input type="checkbox" checked={checked} onChange={this.selectAllAuthors.bind(this)} disabled={!this.props.palette} />
+            {this.props.title}
+          </label>
+          {explanation}
+          <div className={styles.legend}>
+            {items.length === 0 || items}
+            {items.length > 0 || loading}
+          </div>
+        </div>
+      );
+    }
   }
 }
 

@@ -56,6 +56,7 @@ export default class ProjectIssue extends React.Component {
 
     if (this.state.selectedIssues && this.state.issueData) {
       const issueDataLength = this.state.issueData.length;
+      console.log('SELECTED ISSUES: ' + this.state.selectedIssues);
       if (issueDataLength) {
         for (let i = 0; i < this.state.selectedIssues.length && i <= 3; i++) {
           chartTitle = this.state.issueData[i].title;

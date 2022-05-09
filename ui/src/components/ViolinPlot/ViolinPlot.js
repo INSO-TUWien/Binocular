@@ -51,7 +51,6 @@ export default class ViolinPlot extends React.Component {
    * @returns {[]}
    */
   getXDims() {
-    console.log([d3.min(this.state.data.data, d => d.date), d3.max(this.state.data.data, d => d.date)]);
     return [d3.min(this.state.data.data, d => d.date), d3.max(this.state.data.data, d => d.date)];
   }
 
