@@ -51,7 +51,7 @@ export default class ViolinPlot extends React.Component {
    * @returns {[]}
    */
   getXDims() {
-    return [Date.UTC(2017, 10, 1, 0, 0, 0, 0), Date.now()];
+    return [Date.UTC(2013, 10, 1, 0, 0, 0, 0), Date.UTC(2024, 10, 1, 0, 0, 0, 0)];
   }
 
   getYDims() {
@@ -154,7 +154,7 @@ export default class ViolinPlot extends React.Component {
       nearestDataPoint = candidate2;
     }
     const key = d3.select(path).attr('id');
-    const text = key.split(' <', 1); //Remove git signature email
+    const text = key;
     let value = nearestDataPoint[key];
     const chartValues = this.findChartValues(this.state.data.stackedData, key, nearestDataPoint.date);
     const formattedDate = formatDate(new Date(nearestDataPoint.date), this.props.resolution);

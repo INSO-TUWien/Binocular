@@ -222,14 +222,14 @@ export default class ProjectIssue extends React.Component {
     _.each(data, function(issue) {
       issueChartData.push({
         date: issue.date,
-        Opened: issue.openCount,
-        Closed: issue.closedCount > 0 ? issue.closedCount * -1 : -0.001
-      }); //-0.001 for stack layout to realize it belongs on the bottom
+        Opened: 3,
+        Closed: -1
+      });
       if (issueScale[1] < issue.openCount) {
-        issueScale[1] = issue.openCount;
+        issueScale[1] = 3;
       }
       if (issueScale[0] > issue.closedCount * -1) {
-        issueScale[0] = issue.closedCount * -1;
+        issueScale[0] = -1;
       }
     });
 
