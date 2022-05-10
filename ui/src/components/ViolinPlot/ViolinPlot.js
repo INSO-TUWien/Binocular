@@ -51,11 +51,11 @@ export default class ViolinPlot extends React.Component {
    * @returns {[]}
    */
   getXDims() {
-    return [d3.min(this.state.data.data, d => d.date), d3.max(this.state.data.data, d => d.date)];
+    return [Date.UTC(2017, 10, 1, 0, 0, 0, 0), Date.now()];
   }
 
   getYDims() {
-    return this.props.yDims;
+    return [-5, 5];
   }
 
   /**

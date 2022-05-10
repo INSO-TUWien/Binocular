@@ -48,8 +48,6 @@ export default class ProjectIssue extends React.Component {
       selectedIssues,
       selectedIssuesCommits
     });
-    console.log('issueData: ' + this.state.issueData);
-    console.log('issueChartData: ' + this.state.issueChartData);
   }
 
   render() {
@@ -58,11 +56,10 @@ export default class ProjectIssue extends React.Component {
 
     if (this.state.selectedIssues && this.state.issueData) {
       const issueDataLength = this.state.issueData.length;
-      console.log('SELECTED ISSUES: ' + this.state.selectedIssues);
       if (issueDataLength) {
         for (let i = 0; i < this.state.selectedIssues.length && i <= 3; i++) {
           chartTitle = this.state.issueData[i].title;
-          if (i === 1) {
+          if (i === 0) {
             issueChart1 = (
               <div className={styles.chartLine}>
                 <div className={cx(styles.text, 'label')}>
@@ -81,7 +78,7 @@ export default class ProjectIssue extends React.Component {
                 </div>
               </div>
             );
-          } else if (i === 2) {
+          } else if (i === 1) {
             issueChart2 = (
               <div className={styles.chartLine}>
                 <div className={cx(styles.text, 'label')}>
@@ -100,7 +97,7 @@ export default class ProjectIssue extends React.Component {
                 </div>
               </div>
             );
-          } else if (i === 3) {
+          } else if (i === 2) {
             issueChart3 = (
               <div className={styles.chartLine}>
                 <div className={cx(styles.text, 'label')}>

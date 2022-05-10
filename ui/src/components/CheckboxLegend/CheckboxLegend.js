@@ -31,7 +31,6 @@ export default class CheckboxLegend extends React.Component {
       checkboxSelectAll: true,
       numberSelected: -1
     };
-    console.log(this.props.numberSelected);
   }
 
   componentWillReceiveProps(nextProps) {
@@ -51,8 +50,6 @@ export default class CheckboxLegend extends React.Component {
       const selected = Object.keys(props.palette);
       this.setState({ initialized: true, selected: selected }, () => this.props.onClick(selected));
     } else if (props.palette && this.state.initialized === false && numberSelected > 0) {
-      console.log(numberSelected);
-      console.log(Object.keys(props.palette).slice(0, numberSelected));
       const selected = Object.keys(props.palette).slice(0, numberSelected);
       this.setState({ initialized: true, selected: selected }, () => this.props.onClick(selected));
     }
@@ -64,14 +61,17 @@ export default class CheckboxLegend extends React.Component {
    */
   clickCallback(key) {
     const checked = this.state.selected.indexOf(key) !== -1;
+    const selected = this.state.selected;
+    let numberSelected = -1;
+    if (this.props.numberSelected) {
+      numberSelected = this.props.numberSelected;
+    }
     if (!checked) {
-      //Add to selected
-      const selected = this.state.selected;
-      selected.push(key);
-      this.setState({ selected: selected }, () => this.props.onClick(selected));
+      if (numberSelected === -1 || selected.length < numberSelected) {
+        selected.push(key);
+        this.setState({ selected: selected }, () => this.props.onClick(selected));
+      }
     } else {
-      //Remove from selected
-      const selected = this.state.selected;
       selected.splice(selected.indexOf(key), 1);
       this.setState({ selected: selected }, () => this.props.onClick(selected));
     }
@@ -105,7 +105,6 @@ export default class CheckboxLegend extends React.Component {
         if (text === 'others' && otherCommitters) {
           text = '' + otherCommitters + ' Others';
         }
-        console.log('selected: ' + this.state.selected);
         if (this.state.selected.indexOf(key) > -1 && (countSelected < numberSelected || numberSelected === -1)) {
           items.push(
             <CheckboxLegendLine
