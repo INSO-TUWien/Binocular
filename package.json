@@ -131,6 +131,7 @@
     "lokka-transport-http": "^1.6.1",
     "lorem-ipsum": "^2.0.4",
     "moment": "^2.29.1",
+    "myers-diff": "^2.0.1",
     "node-gitlab": "^1.6.1",
     "node-sass": "7.0.0",
     "nodegit": "^0.28.0-alpha.13",
