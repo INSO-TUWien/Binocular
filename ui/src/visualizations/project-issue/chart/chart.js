@@ -87,7 +87,7 @@ export default class ProjectIssue extends React.Component {
                 <div className={styles.chart}>
                   <ViolinPlot
                     content={this.state.issueChartData}
-                    palette={{ Opened: '#3461eb', Closed: '#8099e8' }}
+                    palette={{ Opened: '#35631BC8', Closed: '#5CC71EC8' }}
                     paddings={{ top: 20, left: 60, bottom: 20, right: 30 }}
                     xAxisCenter={true}
                     yDims={this.state.issueScale}
@@ -106,7 +106,7 @@ export default class ProjectIssue extends React.Component {
                 <div className={styles.chart}>
                   <ViolinPlot
                     content={this.state.issueChartData}
-                    palette={{ Opened: '#3461eb', Closed: '#8099e8' }}
+                    palette={{ Opened: '#753E2CFF', Closed: '#C56D2EFF' }}
                     paddings={{ top: 20, left: 60, bottom: 20, right: 30 }}
                     xAxisCenter={true}
                     yDims={this.state.issueScale}
