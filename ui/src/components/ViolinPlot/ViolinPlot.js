@@ -162,6 +162,7 @@ export default class ViolinPlot extends React.Component {
       value *= -1;
     }
 
+    console.log(event.layerX + ' ' + event.layerY);
     //Render tooltip
     tooltip
       .html(formattedDate + '<hr/>' + '<div style="background: ' + palette[key] + '">' + '</div>' + text + ': ' + Math.round(value))
@@ -254,7 +255,9 @@ export default class ViolinPlot extends React.Component {
     return (
       <div className={this.styles.chartDiv}>
         <svg className={this.styles.chartSvg} ref={svg => (this.svgRef = svg)} />
-        <div className={this.styles.tooltip} ref={div => (this.tooltipRef = div)} />
+        <div className={this.styles.tooltip} ref={div => (this.tooltipRef1 = div)} />
+        <div className={this.styles.tooltip} ref={div => (this.tooltipRef2 = div)} />
+        <div className={this.styles.tooltip} ref={div => (this.tooltipRef3 = div)} />
       </div>
     );
   }
@@ -322,6 +325,17 @@ export default class ViolinPlot extends React.Component {
     brush.on('end', event => this.updateZoom(event.selection, scales, axes, brush, brushArea, area));
     //Set callback to reset zoom on double-click
     svg.on('dblclick', () => this.resetZoom(scales, axes, brushArea, area));
+  }
+
+  createPoints(brushArea, date, text, tooltip, scales, node) {
+    //Render tooltip
+    tooltip
+      .html(text)
+      .style('position', 'absolute')
+      .style('left', 200 + 'px')
+      .style('top', 100 + (node.getBoundingClientRect() || { y: 0 }).y - 70 + 'px');
+
+    this.paintDataPoint(brushArea, scales.x(date), scales.y(0), scales.y(0), '#030303');
   }
 
   /**
@@ -396,9 +410,11 @@ export default class ViolinPlot extends React.Component {
   drawChart(svg, area, brush, yScale, scales, height, width, paddings) {
     const brushArea = svg.append('g');
 
-    const tooltip = d3.select(this.tooltipRef);
+    const tooltip1 = d3.select(this.tooltipRef1);
+    const tooltip2 = d3.select(this.tooltipRef2);
+    const tooltip3 = d3.select(this.tooltipRef3);
 
-    this.setBrushArea(brushArea.append('g'), brush, area, tooltip, svg, scales);
+    this.setBrushArea(brushArea.append('g'), brush, area, tooltip1, svg, scales);
 
     //Append visible x-axis on the bottom, with an offset, so it's actually visible
     const axes = Object.assign(
@@ -422,6 +438,12 @@ export default class ViolinPlot extends React.Component {
       .attr('height', height)
       .attr('x', paddings.left)
       .attr('y', 0);
+
+    const start_date = d3.min(this.state.data.data, d => d.date);
+    const end_date = d3.max(this.state.data.data, d => d.date);
+
+    this.createPoints(brushArea, start_date, 'START', tooltip2, scales, svg.node());
+    this.createPoints(brushArea, end_date, 'END', tooltip3, scales, svg.node());
 
     return { brushArea, axes };
   }
