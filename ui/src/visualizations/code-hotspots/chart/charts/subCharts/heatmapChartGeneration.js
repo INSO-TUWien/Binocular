@@ -26,6 +26,7 @@ export default class heatmapChartGeneration {
   static generateHeatmap(data, lines, importantColumns, currThis, mode, maxValue, legendSteps, firstLineNumber, displayProps) {
     d3.select('.chartMain > *').remove();
     d3.select('.chartMainToolTip > *').remove();
+    d3.select('.chartMainSubToolTip > *').remove();
 
     switch (mode) {
       case 1:
@@ -62,11 +63,26 @@ export default class heatmapChartGeneration {
         .style('display', 'none')
         .style('background-color', '#FFFFFFDD')
         .style('box-shadow', '0px 0px 10px #555555')
-        .style('width', '100%')
+        .style('width', '90%')
         .style('border-radius', '4px')
         .style('padding', '1rem')
         .style('z-index', '9')
         .style('max-height', '70vh')
+        .style('overflow-y', 'scroll')
+        .style('backdrop-filter', 'blur(2px)')
+        .style('-webkit-backdrop-filter', 'blur(2px)');
+      d3
+        .select('.chartMainSubToolTip')
+        .append('div')
+        .style('position', 'absolute')
+        .style('display', 'none')
+        .style('background-color', '#FFFFFFDD')
+        .style('box-shadow', '0px 0px 10px #555555')
+        .style('max-width', '80vh')
+        .style('border-radius', '4px')
+        .style('padding', '1rem')
+        .style('z-index', '9')
+        .style('max-height', '80vh')
         .style('overflow-y', 'scroll')
         .style('backdrop-filter', 'blur(2px)')
         .style('-webkit-backdrop-filter', 'blur(2px)');
@@ -180,179 +196,209 @@ export default class heatmapChartGeneration {
     }
   }
 
-  static interact(line) {
-    if (d3.select('.chartMainToolTip > div').size() !== 0) {
-      const rowCommitData = commitData.filter(d => d.row === line);
-      const rowDeveloperData = developerData.filter(d => d.row === line);
-      const rowIssueData = issueData.filter(d => d.row === line);
-      const commitLegendData = [];
-      const width = document.getElementById('barChartContainer').clientWidth;
-      for (let i = 1; i <= commitLegendSteps; i++) {
-        commitLegendData.push({
-          interval: commitMaxValue / commitLegendSteps * i,
-          color: ColorMixer.mix(HEATMAP_LOW_COLOR, HEATMAP_HIGH_COLOR, 1.0 / commitLegendSteps * i)
-        });
-      }
-      const commitColorScale = d => {
-        for (let i = 0; i < commitLegendData.length; i++) {
-          if (d.value === 0) {
-            return ODD_COLOR;
-          }
-          if (d.value < commitLegendData[i].interval) {
-            return commitLegendData[i].color;
-          }
-        }
-        return HEATMAP_MAX_COLOR;
-      };
-
-      const developerLegendData = [];
-
-      for (let i = 1; i <= developerLegendSteps; i++) {
-        developerLegendData.push({
-          interval: developerMaxValue / developerLegendSteps * i,
-          color: ColorMixer.mix(HEATMAP_LOW_COLOR, HEATMAP_HIGH_COLOR, 1.0 / developerLegendSteps * i)
-        });
-      }
-      const developerColorScale = d => {
-        for (let i = 0; i < developerLegendData.length; i++) {
-          if (d.value === 0) {
-            return ODD_COLOR;
-          }
-          if (d.value < developerLegendData[i].interval) {
-            return developerLegendData[i].color;
-          }
-        }
-        return HEATMAP_MAX_COLOR;
-      };
-
-      const issueLegendData = [];
-
-      for (let i = 1; i <= issueLegendSteps; i++) {
-        issueLegendData.push({
-          interval: issueMaxValue / issueLegendSteps * i,
-          color: ColorMixer.mix(HEATMAP_LOW_COLOR, HEATMAP_HIGH_COLOR, 1.0 / issueLegendSteps * i)
-        });
-      }
-      const issueColorScale = d => {
-        for (let i = 0; i < issueLegendData.length; i++) {
-          if (d.value === 0) {
-            return ODD_COLOR;
-          }
-          if (d.value < issueLegendData[i].interval) {
-            return issueLegendData[i].color;
-          }
-        }
-        return HEATMAP_MAX_COLOR;
-      };
-
-      const toolTip = d3.select('.chartMainToolTip > div').style('display', 'block').style('top', '' + (line + 2) * 24 + 'px').html('');
-      toolTip.append('span').attr('class', styles.label).text('Line: ' + (line + 1));
-      toolTip.append('hr');
-      toolTip.append('span').attr('class', styles.label).text('Changes/Version:');
-      if (!rowCommitData.length) {
-        toolTip.append('span').text('Data Not Loaded! Open the Tab once to load data.');
-      } else {
-        const rowCommitDataTooltip = toolTip
-          .append('svg')
-          .attr('width', width)
-          .attr('height', '48px')
-          .append('g')
-          .selectAll('rect')
-          .data(rowCommitData)
-          .enter()
-          .append('g');
-        rowCommitDataTooltip
-          .append('rect')
-          .attr('x', (d, i) => {
-            return '' + width / rowCommitData.length * i + '';
-          })
-          .attr('y', '24px')
-          .style('fill', commitColorScale)
-          .attr('width', '' + width / rowCommitData.length + '')
-          .attr('height', '24px');
-        rowCommitDataTooltip
-          .append('text')
-          .attr('x', (d, i) => {
-            return '' + width / rowCommitData.length * i + '';
-          })
-          .attr('y', '0')
-          .attr('dy', '24px')
-          .style('fill', 'black')
-          .text(function(d) {
-            return d.column;
+  static interact(line, currThis) {
+    if (!currThis.heatmapTooltipLocked) {
+      if (d3.select('.chartMainToolTip > div').size() !== 0) {
+        const rowCommitData = commitData.filter(d => d.row === line);
+        const rowDeveloperData = developerData.filter(d => d.row === line);
+        const rowIssueData = issueData.filter(d => d.row === line);
+        const commitLegendData = [];
+        const width = document.getElementById('barChartContainer').clientWidth * 0.9;
+        for (let i = 1; i <= commitLegendSteps; i++) {
+          commitLegendData.push({
+            interval: commitMaxValue / commitLegendSteps * i,
+            color: ColorMixer.mix(HEATMAP_LOW_COLOR, HEATMAP_HIGH_COLOR, 1.0 / commitLegendSteps * i)
           });
-      }
-      toolTip.append('hr');
-      toolTip.append('span').attr('class', styles.label).text('Changes/Developer:');
-      if (!rowDeveloperData.length) {
-        toolTip.append('span').text('Data Not Loaded! Open the Tab once to load data.');
-      } else {
-        const rowDeveloperDataTooltip = toolTip
-          .append('svg')
-          .attr('width', width)
-          .attr('height', '174px')
-          .append('g')
-          .selectAll('rect')
-          .data(rowDeveloperData)
-          .enter()
-          .append('g');
-        rowDeveloperDataTooltip
-          .append('rect')
-          .attr('x', (d, i) => {
-            return '' + width / rowDeveloperData.length * i + '';
-          })
-          .attr('y', '150')
-          .style('fill', developerColorScale)
-          .attr('width', '' + width / rowDeveloperData.length + '')
-          .attr('height', '24px');
-        rowDeveloperDataTooltip
-          .append('text')
-          .attr('x', '0')
-          .attr('y', '0')
-          .attr('transform', (d, i) => {
-            return 'translate( ' + width / rowDeveloperData.length * i + ', ' + 126 + '),' + 'rotate(-45)';
-          })
-          .attr('dy', '24px')
-          .style('fill', 'black')
-          .text(function(d) {
-            return d.dev;
+        }
+        const commitColorScale = d => {
+          for (let i = 0; i < commitLegendData.length; i++) {
+            if (d.value === 0) {
+              return ODD_COLOR;
+            }
+            if (d.value < commitLegendData[i].interval) {
+              return commitLegendData[i].color;
+            }
+          }
+          return HEATMAP_MAX_COLOR;
+        };
+
+        const developerLegendData = [];
+
+        for (let i = 1; i <= developerLegendSteps; i++) {
+          developerLegendData.push({
+            interval: developerMaxValue / developerLegendSteps * i,
+            color: ColorMixer.mix(HEATMAP_LOW_COLOR, HEATMAP_HIGH_COLOR, 1.0 / developerLegendSteps * i)
           });
-      }
-      toolTip.append('hr');
-      toolTip.append('span').attr('class', styles.label).text('Changes/Issue:');
-      if (!rowIssueData.length) {
-        toolTip.append('span').text('Data Not Loaded! Open the Tab once to load data.');
-      } else {
-        const rowIssueDataTooltip = toolTip
-          .append('svg')
-          .attr('width', width)
-          .attr('height', '48px')
-          .append('g')
-          .selectAll('rect')
-          .data(rowIssueData)
-          .enter()
-          .append('g');
-        rowIssueDataTooltip
-          .append('rect')
-          .attr('x', (d, i) => {
-            return '' + width / rowIssueData.length * i + '';
-          })
-          .attr('y', '24')
-          .style('fill', issueColorScale)
-          .attr('width', '' + width / rowIssueData.length + '')
-          .attr('height', '24px');
-        rowIssueDataTooltip
-          .append('text')
-          .attr('x', (d, i) => {
-            return '' + width / rowIssueData.length * i + '';
-          })
-          .attr('y', '0')
-          .attr('dy', '24px')
-          .style('fill', 'black')
-          .text(function(d) {
-            return d.iid;
+        }
+        const developerColorScale = d => {
+          for (let i = 0; i < developerLegendData.length; i++) {
+            if (d.value === 0) {
+              return ODD_COLOR;
+            }
+            if (d.value < developerLegendData[i].interval) {
+              return developerLegendData[i].color;
+            }
+          }
+          return HEATMAP_MAX_COLOR;
+        };
+
+        const issueLegendData = [];
+
+        for (let i = 1; i <= issueLegendSteps; i++) {
+          issueLegendData.push({
+            interval: issueMaxValue / issueLegendSteps * i,
+            color: ColorMixer.mix(HEATMAP_LOW_COLOR, HEATMAP_HIGH_COLOR, 1.0 / issueLegendSteps * i)
           });
+        }
+        const issueColorScale = d => {
+          for (let i = 0; i < issueLegendData.length; i++) {
+            if (d.value === 0) {
+              return ODD_COLOR;
+            }
+            if (d.value < issueLegendData[i].interval) {
+              return issueLegendData[i].color;
+            }
+          }
+          return HEATMAP_MAX_COLOR;
+        };
+
+        const toolTip = d3.select('.chartMainToolTip > div').style('display', 'block').style('top', '' + (line + 2) * 24 + 'px').html('');
+        toolTip.append('span').attr('class', styles.label).text('Line: ' + (line + 1));
+        toolTip.append('hr');
+        toolTip.append('span').attr('class', styles.label).text('Changes/Version:');
+        if (!rowCommitData.length) {
+          toolTip.append('span').text('Data Not Loaded! Open the Tab once to load data.');
+        } else {
+          const rowCommitDataTooltip = toolTip
+            .append('svg')
+            .attr('width', width)
+            .attr('height', '48px')
+            .append('g')
+            .selectAll('rect')
+            .data(rowCommitData)
+            .enter()
+            .append('g');
+          rowCommitDataTooltip
+            .append('rect')
+            .attr('x', (d, i) => {
+              return '' + width / rowCommitData.length * i + '';
+            })
+            .attr('y', '24px')
+            .style('fill', commitColorScale)
+            .attr('width', '' + width / rowCommitData.length + '')
+            .attr('height', '24px')
+            .on('mouseover', function(event, d) {
+              console.log(d);
+              const subToolTip = d3.select('.chartMainSubToolTip > div');
+              subToolTip.transition().duration(200).style('display', 'block');
+              subToolTip
+                .style('border', '3px solid transparent')
+                .style('left', (d.column + 1) * width / rowCommitData.length + 'px')
+                .style('top', '' + ((line + 2) * 24 + 200) + 'px');
+              subToolTip.selectAll('*').remove();
+              subToolTip.append('div').style('font-weight', 'bold').html('Version: ' + d.column);
+              subToolTip
+                .append('div')
+                .style('font-style', 'italic')
+                .style('color', '#AAAAAA')
+                .html(d.date.substring(0, d.date.length - 5).split('T').join(' '));
+              subToolTip.append('hr');
+              subToolTip.append('div').html(d.message);
+            })
+            .on('mouseout', function() {
+              const subToolTip = d3.select('.chartMainSubToolTip > div');
+              subToolTip.transition().duration(500).style('display', 'none');
+            });
+          rowCommitDataTooltip
+            .append('text')
+            .attr('x', (d, i) => {
+              return '' + width / rowCommitData.length * i + '';
+            })
+            .attr('y', '0')
+            .attr('dy', '24px')
+            .style('fill', 'black')
+            .text(function(d) {
+              return d.column;
+            });
+        }
+        toolTip.append('hr');
+        toolTip.append('span').attr('class', styles.label).text('Changes/Developer:');
+        if (!rowDeveloperData.length) {
+          toolTip.append('span').text('Data Not Loaded! Open the Tab once to load data.');
+        } else {
+          const rowDeveloperDataTooltip = toolTip
+            .append('svg')
+            .attr('width', width)
+            .attr('height', '174px')
+            .append('g')
+            .selectAll('rect')
+            .data(rowDeveloperData)
+            .enter()
+            .append('g');
+          rowDeveloperDataTooltip
+            .append('rect')
+            .attr('x', (d, i) => {
+              return '' + width / rowDeveloperData.length * i + '';
+            })
+            .attr('y', '150')
+            .style('fill', developerColorScale)
+            .attr('width', '' + width / rowDeveloperData.length + '')
+            .attr('height', '24px');
+          rowDeveloperDataTooltip
+            .append('text')
+            .attr('x', '0')
+            .attr('y', '0')
+            .attr('transform', (d, i) => {
+              return 'translate( ' + width / rowDeveloperData.length * i + ', ' + 126 + '),' + 'rotate(-45)';
+            })
+            .attr('dy', '24px')
+            .style('fill', 'black')
+            .text(function(d) {
+              return d.dev;
+            });
+        }
+        toolTip.append('hr');
+        toolTip.append('span').attr('class', styles.label).text('Changes/Issue:');
+        if (!rowIssueData.length) {
+          toolTip.append('span').text('Data Not Loaded! Open the Tab once to load data.');
+        } else {
+          const rowIssueDataTooltip = toolTip
+            .append('svg')
+            .attr('width', width)
+            .attr('height', '48px')
+            .append('g')
+            .selectAll('rect')
+            .data(rowIssueData)
+            .enter()
+            .append('g');
+          rowIssueDataTooltip
+            .append('rect')
+            .attr('x', (d, i) => {
+              return '' + width / rowIssueData.length * i + '';
+            })
+            .attr('y', '24')
+            .style('fill', issueColorScale)
+            .attr('width', '' + width / rowIssueData.length + '')
+            .attr('height', '24px');
+          rowIssueDataTooltip
+            .append('text')
+            .attr('x', (d, i) => {
+              return '' + width / rowIssueData.length * i + '';
+            })
+            .attr('y', '0')
+            .attr('dy', '24px')
+            .style('fill', 'black')
+            .text(function(d) {
+              return d.iid;
+            });
+        }
       }
     }
+  }
+
+  static fixToolTip(line, currThis) {
+    const toolTip = d3.select('.chartMainToolTip > div');
+    currThis.heatmapTooltipLocked = !currThis.heatmapTooltipLocked;
+    toolTip.style('border', currThis.heatmapTooltipLocked ? '3px solid #3498db' : '3px solid transparent');
   }
 }

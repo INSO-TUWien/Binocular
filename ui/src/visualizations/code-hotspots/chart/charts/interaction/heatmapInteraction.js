@@ -31,8 +31,12 @@ export default class heatmapInteraction {
           if (displayProps.mainVisualizationMode === 1 && mode === 0) {
             hunkChartGeneration.interact(i);
           } else if (displayProps.mainVisualizationMode === 0) {
-            console.log(i);
-            heatmapChartGeneration.interact(i);
+            heatmapChartGeneration.interact(i, currThis);
+          }
+        })
+        .on('click', function() {
+          if (displayProps.mainVisualizationMode === 0) {
+            heatmapChartGeneration.fixToolTip(i, currThis);
           }
         });
     }

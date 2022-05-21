@@ -98,7 +98,7 @@ export default class columnChartGeneration {
     const selection = barChart.append('g').attr('width', w).attr('height', h).attr('id', 'selection');
 
     //tooltip
-    const tooltipp = d3
+    const tooltip = d3
       .select('.barChart')
       .append('div')
       .attr('class', 'tooltipColumns')
@@ -144,9 +144,9 @@ export default class columnChartGeneration {
           .attr('height', h)
           .on('mouseover', function(event, d) {
             if (!currThis.tooltipLocked) {
-              tooltipp.transition().duration(200).style('display', 'block');
+              tooltip.transition().duration(200).style('display', 'block');
               const currDev = d.dev.split('>').join('');
-              tooltipp
+              tooltip
                 .style('border', '3px solid transparent')
                 .style(
                   'right',
@@ -155,33 +155,33 @@ export default class columnChartGeneration {
                     : 0 + 'px'
                 )
                 .style('top', h + 'px');
-              tooltipp.selectAll('*').remove();
-              const hint = tooltipp
+              tooltip.selectAll('*').remove();
+              const hint = tooltip
                 .append('div')
                 .style('color', '#AAAAAA')
                 .style('background-color', '#eeeeee')
                 .style('border-radius', '4px');
               hint.append('span').html('(i)').style('margin', '0 1rem').style('font-style', 'bold');
               hint.append('span').html('click to fix tooltip').style('font-style', 'italic');
-              tooltipp.append('div').style('font-weight', 'bold').html(currDev.split(' <')[0]);
-              tooltipp.append('div').html(currDev.split(' <')[1]);
-              tooltipp.append('hr');
-              tooltipp.append('div').html('Commits linked to this developer: ' + d.commits.length);
-              tooltipp.append('hr');
-              const commitList = tooltipp.append('div');
+              tooltip.append('div').style('font-weight', 'bold').html(currDev.split(' <')[0]);
+              tooltip.append('div').html(currDev.split(' <')[1]);
+              tooltip.append('hr');
+              tooltip.append('div').html('Commits linked to this developer: ' + d.commits.length);
+              tooltip.append('hr');
+              const commitList = tooltip.append('div');
               ListGeneration.generateCommitList(commitList, d.commits, currThis);
-              tooltipp.append('hr');
-              tooltipp.append('div').html('Changes: ' + d.value);
+              tooltip.append('hr');
+              tooltip.append('div').html('Changes: ' + d.value);
             }
           })
           .on('mouseout', function() {
             if (!currThis.tooltipLocked) {
-              tooltipp.transition().duration(500).style('display', 'none');
+              tooltip.transition().duration(500).style('display', 'none');
             }
           })
           .on('click', function() {
             currThis.tooltipLocked = !currThis.tooltipLocked;
-            tooltipp.style('border', currThis.tooltipLocked ? '3px solid #3498db' : '3px solid transparent');
+            tooltip.style('border', currThis.tooltipLocked ? '3px solid #3498db' : '3px solid transparent');
           });
         break;
       case 2:
@@ -209,8 +209,8 @@ export default class columnChartGeneration {
           .attr('height', h)
           .on('mouseover', function(event, d) {
             if (!currThis.tooltipLocked) {
-              tooltipp.transition().duration(200).style('display', 'block');
-              tooltipp
+              tooltip.transition().duration(200).style('display', 'block');
+              tooltip
                 .style('border', '3px solid transparent')
                 .style(
                   'right',
@@ -219,37 +219,37 @@ export default class columnChartGeneration {
                     : 0 + 'px'
                 )
                 .style('top', h + 'px');
-              tooltipp.selectAll('*').remove();
-              const hint = tooltipp
+              tooltip.selectAll('*').remove();
+              const hint = tooltip
                 .append('div')
                 .style('color', '#AAAAAA')
                 .style('background-color', '#eeeeee')
                 .style('border-radius', '4px');
               hint.append('span').html('(i)').style('margin', '0 1rem').style('font-style', 'bold');
               hint.append('span').html('click to fix tooltip').style('font-style', 'italic');
-              tooltipp.append('div').style('font-weight', 'bold').html('Issue: ' + d.iid);
-              tooltipp.append('div').html(d.title);
-              tooltipp.append('hr');
+              tooltip.append('div').style('font-weight', 'bold').html('Issue: ' + d.iid);
+              tooltip.append('div').html(d.title);
+              tooltip.append('hr');
               if (d.description !== '') {
-                tooltipp.append('div').html(d.description);
-                tooltipp.append('hr');
+                tooltip.append('div').html(d.description);
+                tooltip.append('hr');
               }
-              tooltipp.append('div').html('Commits linked to this issue: ' + d.commits.length);
-              tooltipp.append('hr');
-              const commitList = tooltipp.append('div');
+              tooltip.append('div').html('Commits linked to this issue: ' + d.commits.length);
+              tooltip.append('hr');
+              const commitList = tooltip.append('div');
               ListGeneration.generateCommitList(commitList, d.commits, currThis);
-              tooltipp.append('hr');
-              tooltipp.append('div').html('Changes: ' + d.value);
+              tooltip.append('hr');
+              tooltip.append('div').html('Changes: ' + d.value);
             }
           })
           .on('mouseout', function() {
             if (!currThis.tooltipLocked) {
-              tooltipp.transition().duration(500).style('display', 'none');
+              tooltip.transition().duration(500).style('display', 'none');
             }
           })
           .on('click', function() {
             currThis.tooltipLocked = !currThis.tooltipLocked;
-            tooltipp.style('border', currThis.tooltipLocked ? '3px solid #3498db' : '3px solid transparent');
+            tooltip.style('border', currThis.tooltipLocked ? '3px solid #3498db' : '3px solid transparent');
           });
         break;
       default:
@@ -303,8 +303,8 @@ export default class columnChartGeneration {
           .attr('height', h)
           .style('cursor', 'pointer')
           .on('mousemove', function(event, d) {
-            tooltipp.transition().duration(200).style('display', 'block');
-            tooltipp
+            tooltip.transition().duration(200).style('display', 'block');
+            tooltip
               .html(
                 "<div style='font-weight: bold'>Version: " +
                   d.column +
@@ -347,7 +347,7 @@ export default class columnChartGeneration {
               .style('top', h + 'px');
           })
           .on('mouseout', function() {
-            tooltipp.transition().duration(500).style('display', 'none');
+            tooltip.transition().duration(500).style('display', 'none');
           })
           .on('click', function(event, d) {
             if (event.shiftKey) {
@@ -439,7 +439,7 @@ export default class columnChartGeneration {
       .attr('id', 'chartBranchView');
 
     //tooltip
-    const tooltipp = d3.select('#tooltipColumns');
+    const tooltip = d3.select('#tooltipColumns');
 
     //commits
     const commits = d3.select('#chartBranchView').selectAll('rect').data(currThis.combinedColumnData);
@@ -478,8 +478,8 @@ export default class columnChartGeneration {
       .attr('rx', '100%')
       .attr('ry', '100%')
       .on('mousemove', function(event, d) {
-        tooltipp.transition().duration(200).style('display', 'block');
-        tooltipp
+        tooltip.transition().duration(200).style('display', 'block');
+        tooltip
           .html(
             "<div style='font-weight: bold'>Version: " +
               d.column +
@@ -522,7 +522,7 @@ export default class columnChartGeneration {
           .style('top', h + 100 + 'px');
       })
       .on('mouseout', function() {
-        tooltipp.transition().duration(500).style('display', 'none');
+        tooltip.transition().duration(500).style('display', 'none');
       })
       .on('click', function(event, d) {
         if (event.shiftKey) {
