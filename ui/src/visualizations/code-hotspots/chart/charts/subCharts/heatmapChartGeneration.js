@@ -262,6 +262,11 @@ export default class heatmapChartGeneration {
           return HEATMAP_MAX_COLOR;
         };
 
+        rowIssueData.map((d, i) => {
+          d.i = i;
+          return d;
+        });
+
         const toolTip = d3.select('.chartMainToolTip > div').style('display', 'block').style('top', '' + (line + 2) * 24 + 'px').html('');
         toolTip.append('span').attr('class', styles.label).text('Line: ' + (line + 1));
         toolTip.append('hr');
@@ -288,13 +293,12 @@ export default class heatmapChartGeneration {
             .attr('width', '' + width / rowCommitData.length + '')
             .attr('height', '24px')
             .on('mouseover', function(event, d) {
-              console.log(d);
               const subToolTip = d3.select('.chartMainSubToolTip > div');
               subToolTip.transition().duration(200).style('display', 'block');
               subToolTip
                 .style('border', '3px solid transparent')
                 .style('left', (d.column + 1) * width / rowCommitData.length + 'px')
-                .style('top', '' + ((line + 2) * 24 + 200) + 'px');
+                .style('top', '' + ((line + 2) * 24 + 170) + 'px');
               subToolTip.selectAll('*').remove();
               subToolTip.append('div').style('font-weight', 'bold').html('Version: ' + d.column);
               subToolTip
@@ -343,7 +347,24 @@ export default class heatmapChartGeneration {
             .attr('y', '150')
             .style('fill', developerColorScale)
             .attr('width', '' + width / rowDeveloperData.length + '')
-            .attr('height', '24px');
+            .attr('height', '24px')
+            .on('mouseover', function(event, d) {
+              const subToolTip = d3.select('.chartMainSubToolTip > div');
+              subToolTip.transition().duration(200).style('display', 'block');
+              subToolTip
+                .style('border', '3px solid transparent')
+                .style('left', (d.column + 1) * width / rowDeveloperData.length + 'px')
+                .style('top', '' + ((line + 2) * 24 + 430) + 'px');
+              subToolTip.selectAll('*').remove();
+              subToolTip.append('div').style('font-weight', 'bold').text(d.dev.split('<')[0]);
+              subToolTip.append('div').style('font-style', 'italic').style('color', '#AAAAAA').text('<' + d.dev.split('<')[1]);
+              subToolTip.append('hr');
+              subToolTip.append('div').text('Changes: ' + d.value);
+            })
+            .on('mouseout', function() {
+              const subToolTip = d3.select('.chartMainSubToolTip > div');
+              subToolTip.transition().duration(500).style('display', 'none');
+            });
           rowDeveloperDataTooltip
             .append('text')
             .attr('x', '0')
@@ -354,7 +375,7 @@ export default class heatmapChartGeneration {
             .attr('dy', '24px')
             .style('fill', 'black')
             .text(function(d) {
-              return d.dev;
+              return d.dev.split('<')[0];
             });
         }
         toolTip.append('hr');
@@ -379,7 +400,25 @@ export default class heatmapChartGeneration {
             .attr('y', '24')
             .style('fill', issueColorScale)
             .attr('width', '' + width / rowIssueData.length + '')
-            .attr('height', '24px');
+            .attr('height', '24px')
+            .on('mouseover', function(event, d) {
+              console.log(d);
+              const subToolTip = d3.select('.chartMainSubToolTip > div');
+              subToolTip.transition().duration(200).style('display', 'block');
+              subToolTip
+                .style('border', '3px solid transparent')
+                .style('left', (d.i + 1) * width / rowIssueData.length + 'px')
+                .style('top', '' + ((line + 2) * 24 + 570) + 'px');
+              subToolTip.selectAll('*').remove();
+              subToolTip.append('div').style('font-weight', 'bold').text('issue' + d.iid);
+              subToolTip.append('div').text(d.title);
+              subToolTip.append('hr');
+              subToolTip.append('div').text('Changes: ' + d.value);
+            })
+            .on('mouseout', function() {
+              const subToolTip = d3.select('.chartMainSubToolTip > div');
+              subToolTip.transition().duration(500).style('display', 'none');
+            });
           rowIssueDataTooltip
             .append('text')
             .attr('x', (d, i) => {
