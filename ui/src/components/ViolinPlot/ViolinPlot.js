@@ -162,7 +162,6 @@ export default class ViolinPlot extends React.Component {
       value *= -1;
     }
 
-    console.log(event.layerX + ' ' + event.layerY);
     //Render tooltip
     tooltip
       .html(formattedDate + '<hr/>' + '<div style="background: ' + palette[key] + '">' + '</div>' + text + ': ' + Math.round(value))
