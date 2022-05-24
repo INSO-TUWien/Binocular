@@ -147,18 +147,21 @@ export default class ProjectIssue extends React.Component {
         filteredIssues = props.issues;
         break;
       case 'open':
-        _.each(props.issues, issue => {
+        /*_.each(props.issues, issue => {
           if (issue.closedAt === null) {
             filteredIssues.push(issue);
           }
-        });
+        });*/
+        filteredIssues = props.issues;
         break;
       case 'closed':
-        _.each(props.issues, issue => {
+        /*_.each(props.issues, issue => {
           if (issue.closedAt) {
             filteredIssues.push(issue);
           }
         });
+         */
+        filteredIssues = props.issues;
         break;
       default:
     }
