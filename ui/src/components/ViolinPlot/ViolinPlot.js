@@ -257,6 +257,7 @@ export default class ViolinPlot extends React.Component {
         <div className={this.styles.tooltip} ref={div => (this.tooltipRef1 = div)} />
         <div className={this.styles.tooltip} ref={div => (this.tooltipRef2 = div)} />
         <div className={this.styles.tooltip} ref={div => (this.tooltipRef3 = div)} />
+        <div className={this.styles.tooltip} ref={div => (this.tooltipRef4 = div)} />
       </div>
     );
   }
@@ -326,7 +327,10 @@ export default class ViolinPlot extends React.Component {
     svg.on('dblclick', () => this.resetZoom(scales, axes, brushArea, area));
   }
 
-  createPoints(brushArea, date, text, tooltip, scales, node) {
+  createPoints(brushArea, date, text, tooltip, scales, node, color) {
+    if (!color) {
+      color = '#030303';
+    }
     //Render tooltip
     tooltip
       .html(text)
@@ -334,7 +338,7 @@ export default class ViolinPlot extends React.Component {
       .style('left', 200 + 'px')
       .style('top', 100 + (node.getBoundingClientRect() || { y: 0 }).y - 70 + 'px');
 
-    this.paintDataPoint(brushArea, scales.x(date), scales.y(0), scales.y(0), '#030303');
+    this.paintDataPoint(brushArea, scales.x(date), scales.y(0), scales.y(0), color);
   }
 
   /**
@@ -412,6 +416,7 @@ export default class ViolinPlot extends React.Component {
     const tooltip1 = d3.select(this.tooltipRef1);
     const tooltip2 = d3.select(this.tooltipRef2);
     const tooltip3 = d3.select(this.tooltipRef3);
+    const tooltip4 = d3.select(this.tooltipRef4);
 
     this.setBrushArea(brushArea.append('g'), brush, area, tooltip1, svg, scales);
 
@@ -443,6 +448,8 @@ export default class ViolinPlot extends React.Component {
 
     this.createPoints(brushArea, start_date, 'START', tooltip2, scales, svg.node());
     this.createPoints(brushArea, end_date, 'END', tooltip3, scales, svg.node());
+    this.createPoints(brushArea, 1525125600000, 'TEST', tooltip4, scales, svg.node(), '#ffe600');
+    this.createPoints(brushArea, 1585125600000, 'TEST', tooltip4, scales, svg.node(), '#ffe600');
 
     return { brushArea, axes };
   }
@@ -712,7 +719,8 @@ export default class ViolinPlot extends React.Component {
       .attr('x2', x)
       .attr('y1', y0)
       .attr('y2', y1)
-      .attr('clip-path', 'url(#clip)');
+      .attr('clip-path', 'url(#clip)')
+      .style('color', color);
 
     brushArea
       .append('circle')

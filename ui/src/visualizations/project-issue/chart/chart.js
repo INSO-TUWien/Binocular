@@ -211,11 +211,17 @@ export default class ProjectIssue extends React.Component {
     //---- STEP 3: CONSTRUCT CHART DATA FROM AGGREGATED ISSUES ----
     const issueChartData = [];
     const issueScale = [0, 0];
+    let i = 0;
     _.each(data, function(issue) {
+      i = i + 1;
+      if (i === 100) {
+        console.log('HUNDERT!!!!!');
+      }
       issueChartData.push({
         date: issue.date,
         Opened: issue.openCount > 0 ? issue.openCount : 0.1,
-        Closed: issue.closedCount > 0 ? issue.closedCount * -1 : -0.01
+        Closed: issue.closedCount > 0 ? issue.closedCount * -1 : -0.01,
+        Comment: i === 20 ? 'TEST' : 'NULL'
       });
       if (issueScale[1] < issue.openCount) {
         issueScale[1] = issue.openCount;
