@@ -36,10 +36,7 @@ const cssLoaders = [
   },
   {
     test: /\.s[ac]ss$/,
-    exclude: [
-      path.resolve(__dirname, 'node_modules'),
-      path.resolve(__dirname, 'ui/src/global.scss'),
-    ],
+    exclude: [path.resolve(__dirname, 'node_modules'), path.resolve(__dirname, 'ui/src/global.scss')],
     use: [{ loader: 'style-loader' }, cssModulesLoader, { loader: 'sass-loader' }],
   },
   {
@@ -65,7 +62,7 @@ module.exports = {
         test: /\.(ttf|eot|woff|svg)/,
         include: [path.resolve(__dirname, 'node_modules')],
         loader: 'file-loader',
-      }
+      },
     ],
   },
   plugins: [
@@ -83,10 +80,11 @@ module.exports = {
       zlib: 'browserify-zlib',
     },
     fallback: {
-      "url": require.resolve("url/"),
-      "util": require.resolve("util/"),
-      "assert": require.resolve("assert/"),
-      "crypto": require.resolve("crypto-browserify")
+      url: require.resolve('url/'),
+      util: require.resolve('util/'),
+      assert: require.resolve('assert/'),
+      crypto: require.resolve('crypto-browserify'),
+      buffer: require.resolve('buffer'),
     },
   },
 };
