@@ -64,6 +64,16 @@ export default class CodeHotspots extends React.PureComponent {
         heatmapTooltips: false
       }
     };
+    const lastDisplayProps = JSON.parse(localStorage.getItem('displayProps'));
+    if (lastDisplayProps !== null) {
+      this.state.displayProps = lastDisplayProps;
+      this.state.displayProps.dateRange = {
+        from: '',
+        to: ''
+      };
+    } else {
+      localStorage.setItem('displayProps', JSON.stringify(this.state.displayProps));
+    }
 
     this.combinedColumnData = {};
     this.combinedRowData = {};
@@ -121,6 +131,7 @@ export default class CodeHotspots extends React.PureComponent {
                 displayProps={this.state.displayProps}
                 displayPropsChanged={newDisplayProps => {
                   this.dataChanged = true;
+                  localStorage.setItem('displayProps', JSON.stringify(newDisplayProps));
                   this.setState({ displayProps: newDisplayProps });
                   this.forceUpdate();
                 }}

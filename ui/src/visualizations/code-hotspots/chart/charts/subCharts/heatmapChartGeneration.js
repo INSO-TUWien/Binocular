@@ -410,7 +410,7 @@ export default class heatmapChartGeneration {
                 .style('left', (d.i + 1) * width / rowIssueData.length + 'px')
                 .style('top', '' + ((line + 2) * 24 + 570) + 'px');
               subToolTip.selectAll('*').remove();
-              subToolTip.append('div').style('font-weight', 'bold').text('issue' + d.iid);
+              subToolTip.append('div').style('font-weight', 'bold').text('Issue: ' + d.iid);
               subToolTip.append('div').text(d.title);
               subToolTip.append('hr');
               subToolTip.append('div').text('Changes: ' + d.value);
