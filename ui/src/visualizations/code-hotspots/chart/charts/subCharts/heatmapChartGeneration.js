@@ -435,6 +435,12 @@ export default class heatmapChartGeneration {
     }
   }
 
+  static disInteract(currThis) {
+    if (!currThis.heatmapTooltipLocked) {
+      d3.select('.chartMainToolTip > div').style('display', 'none');
+    }
+  }
+
   static fixToolTip(line, currThis) {
     const toolTip = d3.select('.chartMainToolTip > div');
     currThis.heatmapTooltipLocked = !currThis.heatmapTooltipLocked;

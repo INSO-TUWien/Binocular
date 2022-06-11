@@ -13,6 +13,9 @@ const LINE_FLOW_COLOR_SELECTED = '#0000FFAA';
 
 let lastCommit = 0;
 
+let totalDataLength = 0;
+let processedDataLength = 0;
+
 export default class hunkChartGeneration {
   static generateHunkChart(data, lines, importantColumns, currThis, mode, maxValue, legendSteps, firstLineNumber, displayProps) {
     d3.select('.chartMain > *').remove();
@@ -83,6 +86,8 @@ export default class hunkChartGeneration {
   }
 
   static updateHunkChart(data, lines, importantColumns, currThis, mode, maxValue, legendSteps, firstLineNumber, displayProps) {
+    totalDataLength = data.data.length;
+    processedDataLength = 0;
     let columns = data.data.length;
     const width = document.getElementById('barChartContainer').clientWidth;
     let barWidth = width / columns;
@@ -90,7 +95,9 @@ export default class hunkChartGeneration {
     Loading.showBackgroundRefresh('HunkChart generation in progress!');
 
     const compareMode = columns < importantColumns.length;
-
+    if (compareMode) {
+      processedDataLength++;
+    }
     if (compareMode) {
       columns = columns - 2;
       barWidth = width / 2 / columns;
@@ -250,6 +257,9 @@ export default class hunkChartGeneration {
                   oldLine -= hunk.newLines - hunk.oldLines;
                 }
               }
+              if (commitKey === (compareMode ? 1 : 0)) {
+                end = true;
+              }
               d3
                 .select('#commit' + data.data[commitKey].commitID)
                 .append('path')
@@ -287,24 +297,46 @@ export default class hunkChartGeneration {
             }
           }
           lastCommit = data.data[commitKey].commitID;
+          processedDataLength++;
+          if (commitKey === data.data.length - 1) {
+            Loading.hideBackgroundRefresh();
+          }
         }.bind(this)
       );
     }
-    Loading.hideBackgroundRefresh();
   }
 
   static interact(line) {
-    d3.selectAll('.lineFlow').attr('stroke', LINE_FLOW_COLOR);
-    let currentLineFlow = d3.select('#commit' + lastCommit).select('.lineFlowLine' + line);
-    currentLineFlow.attr('stroke', LINE_FLOW_COLOR_SELECTED);
-    for (let i = 1; i <= lastCommit; i++) {
-      if (currentLineFlow.datum() === undefined || currentLineFlow.datum().end || currentLineFlow.datum().parentID === undefined) {
-        break;
-      }
-      line = currentLineFlow.datum().oldLineNumber;
-      const parentID = currentLineFlow.datum().parentID;
-      currentLineFlow = d3.select('#commit' + parentID).select('.lineFlowLine' + line);
+    if (totalDataLength === processedDataLength) {
+      //d3.selectAll('.lineFlow').attr('stroke', LINE_FLOW_COLOR);
+      let currentLineFlow = d3.select('#commit' + lastCommit).select('.lineFlowLine' + line);
       currentLineFlow.attr('stroke', LINE_FLOW_COLOR_SELECTED);
+      for (let i = 1; i <= lastCommit; i++) {
+        if (currentLineFlow.datum() === undefined || currentLineFlow.datum().end || currentLineFlow.datum().parentID === undefined) {
+          break;
+        }
+        line = currentLineFlow.datum().oldLineNumber;
+        const parentID = currentLineFlow.datum().parentID;
+        currentLineFlow = d3.select('#commit' + parentID).select('.lineFlowLine' + line);
+        currentLineFlow.attr('stroke', LINE_FLOW_COLOR_SELECTED);
+      }
+    }
+  }
+
+  static disInteract(line) {
+    if (totalDataLength === processedDataLength) {
+      //d3.selectAll('.lineFlow').attr('stroke', LINE_FLOW_COLOR);
+      let currentLineFlow = d3.select('#commit' + lastCommit).select('.lineFlowLine' + line);
+      currentLineFlow.attr('stroke', LINE_FLOW_COLOR);
+      for (let i = 1; i <= lastCommit; i++) {
+        if (currentLineFlow.datum() === undefined || currentLineFlow.datum().end || currentLineFlow.datum().parentID === undefined) {
+          break;
+        }
+        line = currentLineFlow.datum().oldLineNumber;
+        const parentID = currentLineFlow.datum().parentID;
+        currentLineFlow = d3.select('#commit' + parentID).select('.lineFlowLine' + line);
+        currentLineFlow.attr('stroke', LINE_FLOW_COLOR);
+      }
     }
   }
 }

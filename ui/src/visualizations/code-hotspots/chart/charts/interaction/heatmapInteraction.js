@@ -34,6 +34,13 @@ export default class heatmapInteraction {
             heatmapChartGeneration.interact(i, currThis);
           }
         })
+        .on('mouseout', function() {
+          if (displayProps.mainVisualizationMode === 1 && mode === 0) {
+            hunkChartGeneration.disInteract(i);
+          } else if (displayProps.mainVisualizationMode === 0) {
+            heatmapChartGeneration.disInteract(currThis);
+          }
+        })
         .on('click', function() {
           if (displayProps.mainVisualizationMode === 0) {
             heatmapChartGeneration.fixToolTip(i, currThis);
