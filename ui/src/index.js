@@ -20,7 +20,9 @@ const socketIo = createSocketIoMiddleware(socket, 'api/');
 const saga = createSagaMiddleware();
 
 const logger = createLogger({
-  collapsed: () => true
+  collapsed: () => true,
+  //suppresses logging output. Set to false for testing
+  predicate: () => false
 });
 
 //import all visualizations

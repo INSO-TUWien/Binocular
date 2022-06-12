@@ -1,0 +1,30 @@
+@import '~bulma';
+
+.chart {
+  outline: none;
+  flex: 1;
+}
+
+
+
+
+
+.configContainer {
+  width: 100%;
+
+  form {
+    width: 100%;
+
+    .selectContainer {
+      width: 100%;
+
+      >div {
+        width: 100%;
+
+        :global(.Select-arrow) {
+          display: none;
+        }
+      }
+    }
+  }
+}

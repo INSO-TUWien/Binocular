@@ -210,7 +210,7 @@
     "nyc": "^15.1.0",
     "postcss": "^8.4.5",
     "postcss-loader": "6.2.1",
-    "prettier": "2.6.2",
+    "prettier": "^2.5.1",
     "process": "^0.11.10",
     "react-error-overlay": "^6.0.10",
     "react-hot-loader": "^4.13.0",

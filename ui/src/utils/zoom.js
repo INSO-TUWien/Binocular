@@ -41,6 +41,28 @@ export function onResizeFactory(wPct, hPct) {
   };
 }
 
+//functional components (like code expertise visualization) do not have a setState function. return the result instead
+export function onResizeFactoryForFunctional(wPct, hPct) {
+  return function onResize(dimensions) {
+    const fullWidth = dimensions.width;
+    const fullHeight = dimensions.height;
+
+    const width = fullWidth * wPct;
+    const height = fullHeight * hPct;
+    const wMargin = (fullWidth - width) / 2;
+    const hMargin = (fullHeight - height) / 2;
+
+    return {
+      fullWidth,
+      fullHeight,
+      width,
+      height,
+      wMargin,
+      hMargin
+    }
+  };
+}
+
 export function onZoomFactory({ constrain = true, margin = 0 } = {}) {
   const updateZoom = updateZoomFactory();
 

@@ -18,7 +18,10 @@ export default handleActions(
     },
   },
   {
-    data: {},
+    data: {
+      devData: {},
+      issue: {}
+    },
     lastFetched: null,
     isFetching: null,
   }
