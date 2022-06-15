@@ -16,7 +16,7 @@
     "eslint:root": "eslint .",
     "eslint": "npm run eslint:root && npm run eslint:ui",
     "check": "npm run eslint",
-    "dev": "webpack serve --config webpack.dev.js & npm run dev-server --",
+    "dev": "npm run build && webpack serve --config webpack.dev.js & npm run dev-server --",
     "dev-concurrently": "concurrently --kill-others \"webpack serve --config webpack.dev.js\" \"npm run dev-server --\"",
     "dev-server": "nodemon --config .nodemonrc ./pupil.js --no-ui",
     "build": "webpack --config webpack.prod.js",
@@ -191,6 +191,7 @@
     "babel-jest": "^27.4.5",
     "babel-loader": "^8.2.3",
     "case-sensitive-paths-webpack-plugin": "2.4.0",
+    "concurrently": "^7.2.1",
     "css-loader": "6.5.1",
     "debug": "^4.3.3",
     "depcheck": "^1.4.2",
@@ -212,6 +213,7 @@
     "postcss-loader": "6.2.1",
     "prettier": "^2.5.1",
     "process": "^0.11.10",
+    "react-dev-utils": "^12.0.1",
     "react-error-overlay": "^6.0.10",
     "react-hot-loader": "^4.13.0",
     "resize-observer-polyfill": "^1.5.1",
@@ -220,10 +222,9 @@
     "sinon": "^12.0.1",
     "sinon-chai": "^3.7.0",
     "style-loader": "^3.3.1",
+    "svg-url-loader": "^7.1.1",
     "unzipper": "^0.10.11",
     "url-loader": "4.1.1",
-    "whalify": "0.0.9",
-    "concurrently": "^7.2.1",
-    "react-dev-utils": "^12.0.1"
+    "whalify": "0.0.9"
   }
 }

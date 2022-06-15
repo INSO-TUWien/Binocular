@@ -23,17 +23,18 @@ const logger = createLogger({
   collapsed: () => true
 });
 
-import dashboard from './visualizations/dashboard';
-import codeOwnershipRiver from './visualizations/code-ownership-river';
-import issueImpact from './visualizations/issue-impact';
-import hotspotDials from './visualizations/hotspot-dials';
-import codeHotspots from './visualizations/code-hotspots';
-import languageModuleRiver from './visualizations/language-module-river';
+import newDashboard from './visualizations/dashboard';
+import dashboard from './visualizations/legacy/dashboard';
+import codeOwnershipRiver from './visualizations/legacy/code-ownership-river';
+import issueImpact from './visualizations/legacy/issue-impact';
+import hotspotDials from './visualizations/legacy/hotspot-dials';
+import codeHotspots from './visualizations/legacy/code-hotspots';
+import languageModuleRiver from './visualizations/legacy/language-module-river';
 
-const visualizationModules = [dashboard, codeOwnershipRiver, issueImpact, hotspotDials, codeHotspots, languageModuleRiver];
+const visualizationModules = [newDashboard, dashboard, codeOwnershipRiver, issueImpact, hotspotDials, codeHotspots, languageModuleRiver];
 
 const visualizations = {};
-_.each(visualizationModules, viz => {
+_.each(visualizationModules, (viz) => {
   visualizations[viz.id] = viz;
 });
 

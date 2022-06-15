@@ -59,7 +59,18 @@ module.exports = {
       { test: /\.jsx?$/, exclude: /node_modules/, loader: 'babel-loader' },
       ...cssLoaders,
       {
-        test: /\.(ttf|eot|woff|svg)/,
+        test: /\.svg$/,
+        use: [
+          {
+            loader: 'svg-url-loader',
+            options: {
+              limit: 10000,
+            },
+          },
+        ],
+      },
+      {
+        test: /\.(ttf|eot|woff)/,
         include: [path.resolve(__dirname, 'node_modules')],
         loader: 'file-loader',
       },
