@@ -9,6 +9,7 @@ export default handleActions(
 
     SET_CURRENT_BRANCH: (state, action) => _.assign({}, state, { currentBranch: action.payload ? action.payload : null }),
     SET_ACTIVE_ISSUE: (state, action) => _.assign({}, state, { activeIssueId: action.payload ? action.payload : null }),
+    SET_ACTIVE_FILE: (state, action) => _.assign({}, state, { activeFile: action.payload ? action.payload : null }),
     SET_MODE: (state, action) => _.assign({}, state, { mode: action.payload ? action.payload : null }),
   },
   {
@@ -16,6 +17,7 @@ export default handleActions(
 
     currentBranch: 'develop',
     activeIssueId: 10,
+    activeFile: '.babelrc',
     mode: 'issues',
   }
 );

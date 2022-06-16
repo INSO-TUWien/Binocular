@@ -76,6 +76,14 @@ export function getAllCommits() {
               additions,
               deletions
             }
+            files{
+              data {
+                file{
+                  path
+                }
+                stats {additions,deletions}
+              }
+            }
           }
          }
        }`,

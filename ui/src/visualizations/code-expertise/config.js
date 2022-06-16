@@ -2,13 +2,12 @@
 
 import { useEffect, useState } from 'react'
 import Promise from 'bluebird';
-import SearchBox from '../../components/SearchBox';
 import TabCombo from '../../components/TabCombo.js';
 import { useDispatch, useSelector } from 'react-redux'
 import styles from "./styles.scss"
 import _ from 'lodash';
 import { graphQl } from '../../utils';
-import { setActiveIssue, setMode, setFiles, setCurrentBranch } from './sagas'
+import { setActiveIssue, setActiveFile, setMode, setCurrentBranch } from './sagas'
 
 export default () => {
 
@@ -26,11 +25,16 @@ export default () => {
     dispatch(setCurrentBranch(branch))
   }
 
+  const onSetFile = (file) => {
+    dispatch(setActiveFile(file))
+  }
+
   //global state from redux store
   const expertiseState = useSelector((state) => state.visualizations.codeExpertise.state)
   const currentMode = expertiseState.config.mode
   const currentBranch = expertiseState.config.currentBranch
   const activeIssueId = expertiseState.config.activeIssueId
+  const activeFile = expertiseState.config.activeFile
   
   //local state
   let [fileComponents, setFileComponents] = useState([])
@@ -57,7 +61,7 @@ export default () => {
     .then(files => {
       let temp = []
       for (const file of files) {
-        temp.push(<div key={file.path}><span>{file.path}</span></div>)
+        temp.push(<option key={file.path}>{file.path}</option>)
       }
       setFileComponents(temp)
     })
@@ -171,12 +175,17 @@ export default () => {
         {/* Only diplay file-picker when 'modules' is selected as mode */}
         {currentMode === 'modules' &&
           <div className="field">
-            <label className="label">Choose a Module to visualize:</label>
-            <div>
-              {fileComponents}
+          <div className="control">
+            <label className="label">Choose a File to visualize:</label>
+            <div className="select">
+              <select
+                value={activeFile}
+                onChange={e => onSetFile(e.target.value)}>
+                {fileComponents}
+              </select>
             </div>
-            
           </div>
+        </div>
         }
 
       </form>
