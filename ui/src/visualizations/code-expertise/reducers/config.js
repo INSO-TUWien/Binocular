@@ -7,11 +7,15 @@ export default handleActions(
   {
     //actions
 
-    SET_ACTIVE_ISSUE: (state, action) => _.assign({}, state, { activeIssueId: action.payload ? action.payload.iid : null })
+    SET_CURRENT_BRANCH: (state, action) => _.assign({}, state, { currentBranch: action.payload ? action.payload : null }),
+    SET_ACTIVE_ISSUE: (state, action) => _.assign({}, state, { activeIssueId: action.payload ? action.payload : null }),
+    SET_MODE: (state, action) => _.assign({}, state, { mode: action.payload ? action.payload : null }),
   },
   {
     //initial state
 
-    activeIssueId: 1
+    currentBranch: 'develop',
+    activeIssueId: 10,
+    mode: 'issues',
   }
 );

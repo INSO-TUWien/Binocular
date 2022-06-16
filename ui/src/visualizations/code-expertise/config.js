@@ -1,58 +1,183 @@
 "use strict";
 
+import { useEffect, useState } from 'react'
 import Promise from 'bluebird';
 import SearchBox from '../../components/SearchBox';
+import TabCombo from '../../components/TabCombo.js';
 import { useDispatch, useSelector } from 'react-redux'
 import styles from "./styles.scss"
 import _ from 'lodash';
 import { graphQl } from '../../utils';
-import { setActiveIssue } from './sagas'
+import { setActiveIssue, setMode, setFiles, setCurrentBranch } from './sagas'
 
 export default () => {
 
   const dispatch = useDispatch()
 
   const onSetIssue = (issueId) => {
-    console.log(issueId)
     dispatch(setActiveIssue(issueId))
+  }
+
+  const onSetMode = (mode) => {
+    dispatch(setMode(mode))
+  }
+
+  const onSetBranch = (branch) => {
+    dispatch(setCurrentBranch(branch))
   }
 
   //global state from redux store
   const expertiseState = useSelector((state) => state.visualizations.codeExpertise.state)
+  const currentMode = expertiseState.config.mode
+  const currentBranch = expertiseState.config.currentBranch
+  const activeIssueId = expertiseState.config.activeIssueId
+  
+  //local state
+  let [fileComponents, setFileComponents] = useState([])
+  let [branchOptions, setBranchOptions] = useState([])
+  let [issueOptions, setIssueOptions] = useState([])
+
+
+  //run once on initialization
+  useEffect(() => {
+    
+    //get all files for file-select
+    Promise.resolve(
+      graphQl.query(
+        `
+      query{
+       files(sort: "ASC"){
+          data{path,webUrl}
+        }
+      }
+      `,
+      {}
+      ))
+    .then(resp => resp.files.data)
+    .then(files => {
+      let temp = []
+      for (const file of files) {
+        temp.push(<div key={file.path}><span>{file.path}</span></div>)
+      }
+      setFileComponents(temp)
+    })
+
+
+    //get all branches for branch-select
+    Promise.resolve(
+      graphQl.query(
+        `
+      query{
+       branches(sort: "ASC"){
+          data{branch,active}
+        }
+      }
+      `,
+      {}
+      ))
+    .then(resp => resp.branches.data)
+    .then(branches => branches.sort((a,b) => a.branch.localeCompare(b.branch)))
+    .then(branches => {
+      const temp = []
+      for(const i in branches) {
+        temp.push(<option key={i}>{branches[i].branch}</option>)
+      }
+      setBranchOptions(temp)
+    })
+
+
+    //get all issues for issue-select
+    Promise.resolve(
+      graphQl.query(
+        `
+      query{
+       issues(sort: "ASC"){
+          data{iid, title}
+        }
+      }
+      `,
+      {}
+      ))
+    .then(resp => resp.issues.data)
+    .then(issues => {
+      const temp = []
+      for(const i of issues) {
+        temp.push(<option key={i.iid} value={i.iid}>{'#' + i.iid + ' ' + i.title}</option>)
+      }
+      setIssueOptions(temp)
+    })
+
+
+  }, []);
+
+
+
+  
+  
+
+
 
   return (
     <div className={styles.configContainer}>
       <form>
+
+        {/* select branch */}
         <div className="field">
-          <label className="label">Choose issue to visualize:</label>
-          <SearchBox
-            placeholder="Select issue..."
-            renderOption={i => `#${i.iid} ${i.title}`}
-            search={text => {
-              return Promise.resolve(
-                graphQl.query(
-                  `
-                  query($q: String) {
-                    issues(page: 1, perPage: 50, q: $q, sort: "DESC") {
-                      data { iid title createdAt closedAt }
-                    }
-                  }`,
-                  { q: text }
-                )
-              )
-                .then(resp => resp.issues.data)
-                .map(i => {
-                  i.createdAt = new Date(i.createdAt);
-                  i.closedAt = i.closedAt && new Date(i.closedAt);
-                  return i;
-                });
-            }}
-            value={expertiseState.data.data.issue}
-            onChange={issue => {
-              onSetIssue(issue)
-            }}
-          />
+          <div className="control">
+            <label className="label">Branch:</label>
+            <div className="select">
+              <select
+                value={currentBranch}
+                onChange={e => onSetBranch(e.target.value)}>
+                {branchOptions}
+              </select>
+            </div>
+          </div>
         </div>
+        
+        {/* select if commits related to issues or commits related to files should be visualized */}
+        <div className="field">
+          <div className="control">
+            <label className="label">Mode:</label>
+            <TabCombo
+              value={currentMode}
+              onChange={value => onSetMode(value)}
+              options={[
+                { label: 'Issues', icon: 'ticket-alt', value: 'issues' },
+                { label: 'Modules', icon: 'server', value: 'modules' }
+              ]}
+            />
+          </div>
+        </div>
+        
+        
+        {/* Only diplay issue searchbar when 'issues' is selected as mode */}
+        {currentMode === 'issues' &&
+          <div className="field">
+            <div className="control">
+              <label className="label">Choose issue to visualize:</label>
+              <div className="select">
+                <select
+                  value={activeIssueId}
+                  onChange={e => onSetIssue(e.target.value)}>
+                  {issueOptions}
+                </select>
+              </div>
+            </div>
+          </div>
+        }
+
+
+        {/* Only diplay file-picker when 'modules' is selected as mode */}
+        {currentMode === 'modules' &&
+          <div className="field">
+            <label className="label">Choose a Module to visualize:</label>
+            <div>
+              {fileComponents}
+            </div>
+            
+          </div>
+        }
 
       </form>
     </div>
