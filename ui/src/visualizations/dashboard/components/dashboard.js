@@ -10,12 +10,16 @@ import largeVisualizationIcon from '../assets/largeVisualizationIcon.svg';
 import wideVisualizationIcon from '../assets/wideVisualizationIcon.svg';
 import deleteIcon from '../assets/deleteIcon.svg';
 
+import VisualizationSelector from './visualizationSelector';
+import visualizationRegistry from '../visualizationRegistry';
+
 export default class Dashboard extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
       visualizations: [],
-      visualizationCount:0
+      visualizationCount: 0,
+      selectVisualization: false
     };
   }
 
@@ -37,14 +41,27 @@ export default class Dashboard extends React.Component {
         <div id={'dashboardContainer'} className={dashboardStyles.dashboard}>
           {this.state.visualizations}
         </div>
-        <div id={'addVisualization'} className={dashboardStyles.addVisualization} onClick={this.addVisualization.bind(this)}>
+        <button id={'addVisualization'} className={dashboardStyles.addVisualization} onClick={this.openVisualizationSelector.bind(this)}>
           +
-        </div>
+        </button>
+        {this.state.selectVisualization ? (
+          <VisualizationSelector
+            id={'visualizationSelector'}
+            close={() => {
+              this.setState({ selectVisualization: false });
+            }}
+            addVisualization={(key) => {
+              this.addVisualization(key);
+            }}
+            visualizations={visualizationRegistry}></VisualizationSelector>
+        ) : (
+          ''
+        )}
       </div>
     );
   }
 
-  addVisualization(e) {
+  addVisualization(key) {
     const currentVisualizations = this.state.visualizations;
     let visualizationCount = this.state.visualizationCount;
     visualizationCount++;
@@ -76,11 +93,16 @@ export default class Dashboard extends React.Component {
             <img className={dashboardStyles.visualizationSettingsItemIcon} src={deleteIcon}></img>Delete
           </div>
         </div>
-        <div className={dashboardStyles.inside}></div>
+        <div className={dashboardStyles.inside}>{React.createElement(visualizationRegistry[key].chart)}</div>
       </div>
     );
 
     this.setState({ visualizations: currentVisualizations, visualizationCount: visualizationCount });
+    //this.forceUpdate();
+  }
+
+  openVisualizationSelector(e) {
+    this.setState({ selectVisualization: true });
     this.forceUpdate();
   }
 
