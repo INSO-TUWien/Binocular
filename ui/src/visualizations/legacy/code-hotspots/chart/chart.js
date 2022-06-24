@@ -39,7 +39,7 @@ export default class CodeHotspots extends React.PureComponent {
       fileURL: '',
       path: '',
       sha: '',
-      mode: 0, //modes: 0...Changes/Version  1...Changes/Developer  2...Changes/Issue
+      mode: 0, //modes: 0...Empty/Version  1...Empty/Developer  2...Empty/Issue
       data: {},
       filteredData: { code: 'No File Selected', firstLineNumber: 1, searchTerm: '' },
       displayProps: {

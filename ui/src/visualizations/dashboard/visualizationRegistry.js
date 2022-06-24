@@ -1,9 +1,9 @@
 'use strict';
 
 import empty from '../VisualizationComponents/Empty';
-import empty2 from '../VisualizationComponents/Empty2';
+import additions_deletions from '../VisualizationComponents/Additions_Deletions';
 
 export default {
   empty,
-  empty2,
+  additions_deletions,
 };

@@ -171,7 +171,7 @@ export default class columnChartGeneration {
               const commitList = tooltipp.append('div');
               ListGeneration.generateCommitList(commitList, d.commits, currThis);
               tooltipp.append('hr');
-              tooltipp.append('div').html('Changes: ' + d.value);
+              tooltipp.append('div').html('Empty: ' + d.value);
             }
           })
           .on('mouseout', function() {
@@ -228,7 +228,7 @@ export default class columnChartGeneration {
               const commitList = tooltipp.append('div');
               ListGeneration.generateCommitList(commitList, d.commits, currThis);
               tooltipp.append('hr');
-              tooltipp.append('div').html('Changes: ' + d.value);
+              tooltipp.append('div').html('Empty: ' + d.value);
             }
           })
           .on('mouseout', function() {
@@ -286,7 +286,7 @@ export default class columnChartGeneration {
                   d.parents +
                   '</div>' +
                   '<hr>' +
-                  '<div>Changes: ' +
+                  '<div>Empty: ' +
                   d.value +
                   '</div>'
               )
@@ -452,7 +452,7 @@ export default class columnChartGeneration {
               d.parents +
               '</div>' +
               '<hr>' +
-              '<div>Changes: ' +
+              '<div>Empty: ' +
               d.value +
               '</div>'
           )

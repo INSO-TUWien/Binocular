@@ -3,7 +3,7 @@
 import chart from './chart/chart.js';
 
 export default {
-  id: 'empty2',
-  label: 'Empty-red',
+  id: 'additions_deletions',
+  label: 'Additions/Deletions',
   chart: chart,
 };

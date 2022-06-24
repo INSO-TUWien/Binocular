@@ -17,6 +17,7 @@
   -moz-user-select: none; /* Old versions of Firefox */
   -ms-user-select: none; /* Internet Explorer/Edge */
   user-select: none;
+  margin-top: 5rem;
 }
 
 .visualizationContainer {
@@ -113,11 +114,11 @@
   max-height: 0;
   padding: 0 0.5rem;
   overflow: hidden;
-  transition: all 1s ease-in-out;
+  transition: all 1s linear;
 }
 
 .visualizationSettingsExtended{
-  max-height: 100vh;
+  max-height: 20rem;
   padding: 0.5rem;
 }
 

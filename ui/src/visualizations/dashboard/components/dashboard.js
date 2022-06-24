@@ -51,7 +51,7 @@ export default class Dashboard extends React.Component {
               this.setState({ selectVisualization: false });
             }}
             addVisualization={(key) => {
-              this.addVisualization(key);
+              this.addVisualization(key, this.state.visualizationCount);
             }}
             visualizations={visualizationRegistry}></VisualizationSelector>
         ) : (
@@ -61,7 +61,7 @@ export default class Dashboard extends React.Component {
     );
   }
 
-  addVisualization(key) {
+  addVisualization(key, id) {
     const currentVisualizations = this.state.visualizations;
     let visualizationCount = this.state.visualizationCount;
     visualizationCount++;
@@ -71,7 +71,7 @@ export default class Dashboard extends React.Component {
         className={dashboardStyles.visualizationContainer}
         style={{ gridArea: 'span 2/span 2' }}>
         <div className={dashboardStyles.menuBar}>
-          <div className={dashboardStyles.visualizationName}>Visualization{visualizationCount}</div>
+          <div className={dashboardStyles.visualizationName}>{visualizationRegistry[key].label}</div>
           <div className={dashboardStyles.visualizationSettingsButton} onClick={this.switchVisualizationSettingsVisibility.bind(this)}>
             <img className={dashboardStyles.visualizationSettingsIcon} src={settingsIcon}></img>
           </div>
@@ -93,7 +93,7 @@ export default class Dashboard extends React.Component {
             <img className={dashboardStyles.visualizationSettingsItemIcon} src={deleteIcon}></img>Delete
           </div>
         </div>
-        <div className={dashboardStyles.inside}>{React.createElement(visualizationRegistry[key].chart)}</div>
+        <div className={dashboardStyles.inside}>{React.createElement(visualizationRegistry[key].chart, { id: id })}</div>
       </div>
     );
 
@@ -109,20 +109,28 @@ export default class Dashboard extends React.Component {
   changeWindowSizeSmall(e) {
     this.selectButton(e.target);
     e.target.parentNode.parentNode.style.gridArea = 'span 2/span 2';
+    const visualizationSettings = e.target.parentNode.parentNode.parentNode.querySelector('.' + dashboardStyles.visualizationSettings);
+    visualizationSettings.classList.remove(dashboardStyles.visualizationSettingsExtended);
   }
 
   changeWindowSizeLarge(e) {
     this.selectButton(e.target);
     e.target.parentNode.parentNode.style.gridArea = 'span 4/span 4';
+    const visualizationSettings = e.target.parentNode.parentNode.parentNode.querySelector('.' + dashboardStyles.visualizationSettings);
+    visualizationSettings.classList.remove(dashboardStyles.visualizationSettingsExtended);
   }
 
   changeWindowSizeWide(e) {
     this.selectButton(e.target);
     e.target.parentNode.parentNode.style.gridArea = 'span 2/span 4';
+    const visualizationSettings = e.target.parentNode.parentNode.parentNode.querySelector('.' + dashboardStyles.visualizationSettings);
+    visualizationSettings.classList.remove(dashboardStyles.visualizationSettingsExtended);
   }
 
   deleteVisualization(e) {
     this.setState({ visualizations: this.state.visualizations.filter((viz) => viz.props.id !== e.target.parentNode.parentNode.id) });
+    const visualizationSettings = e.target.parentNode.parentNode.parentNode.querySelector('.' + dashboardStyles.visualizationSettings);
+    visualizationSettings.classList.remove(dashboardStyles.visualizationSettingsExtended);
   }
 
   switchVisualizationSettingsVisibility(e) {
