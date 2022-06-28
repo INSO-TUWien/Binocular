@@ -1,8 +1,7 @@
 'use strict';
 
-import { createAction } from 'redux-actions';
-import { delay } from 'redux-saga';
-import { takeEvery, put } from 'redux-saga/effects';
+import {createAction} from 'redux-actions';
+import {delay, put, takeEvery} from 'redux-saga/effects';
 
 let nextId = 0;
 

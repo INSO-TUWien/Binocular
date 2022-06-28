@@ -12,7 +12,7 @@ import makeAppReducer from './reducers';
 
 import 'bulma';
 import 'react-tippy/dist/tippy.css';
-import '@fortawesome/fontawesome-free/css/all.css';
+import '@fortawesome/fontawesome-free/js/all.js';
 import './global.scss';
 
 const socket = io({ path: '/wsapi' });
