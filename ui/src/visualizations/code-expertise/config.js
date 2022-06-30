@@ -59,7 +59,9 @@ export default () => {
       ))
     .then(resp => resp.files.data)
     .then(files => {
-      let temp = []
+      const temp = []
+      //placeholder option
+      temp.push(<option key={-1} value={null}>Select a File</option>)
       for (const file of files) {
         temp.push(<option key={file.path}>{file.path}</option>)
       }
@@ -83,6 +85,8 @@ export default () => {
     .then(branches => branches.sort((a,b) => a.branch.localeCompare(b.branch)))
     .then(branches => {
       const temp = []
+      //placeholder option
+      temp.push(<option key={-1} value={null}>Select a Branch</option>)
       for(const i in branches) {
         temp.push(<option key={i}>{branches[i].branch}</option>)
       }
@@ -105,6 +109,8 @@ export default () => {
     .then(resp => resp.issues.data)
     .then(issues => {
       const temp = []
+      //placeholder option
+      temp.push(<option key={-1} value={null}>Select an Issue</option>)
       for(const i of issues) {
         temp.push(<option key={i.iid} value={i.iid}>{'#' + i.iid + ' ' + i.title}</option>)
       }
@@ -159,7 +165,7 @@ export default () => {
         {currentMode === 'issues' &&
           <div className="field">
             <div className="control">
-              <label className="label">Choose issue to visualize:</label>
+              <label className="label">Choose an Issue to visualize:</label>
               <div className="select">
                 <select
                   value={activeIssueId}

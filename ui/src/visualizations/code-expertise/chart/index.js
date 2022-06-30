@@ -11,19 +11,22 @@ import * as d3 from "d3"
 import styles from "../styles.scss"
 
 import Segment from "./Segment.js" 
+import FullScreenMessage from "./full-screen-message.js";
 
 const Chart = () => {
 
 
   //global state from redux store
   const data = useSelector((state) => state.visualizations.codeExpertise.state.data.data)
+  const config = useSelector((state) => state.visualizations.codeExpertise.state.config)
+  const isFetching = useSelector((state) => state.visualizations.codeExpertise.state.data.isFetching)
 
   //local state
   const [transform, setTransform] = useState(d3.zoomIdentity);
   const [dimensions, setDimensions] = useState(zoomUtils.initialDimensions())
   const [focussed, setFocussed] = useState(null)
 
-  //TODO dynamically set radius depending on dimentions
+  //TODO dynamically set radius depending on dimensions
   const radius = 250;
   const center = {
     x: dimensions.width / 2,
@@ -94,6 +97,39 @@ const Chart = () => {
   // }
 
 
+  if(config.currentBranch == null) {
+    return(
+      <FullScreenMessage message={'Please select a Branch!'}/>
+    )
+  }
+
+  if(config.mode == 'issues' && config.activeIssueId == null) {
+    return(
+      <FullScreenMessage message={'Please select an Issue to be visualized!'}/>
+    )
+  }
+
+  if(config.mode == 'modules' && config.activeFile == null) {
+    return(
+      <FullScreenMessage message={'Please select a File to be visualized!'}/>
+    )
+  }
+
+  if(isFetching) {
+    return(
+      <FullScreenMessage message={'Loading...'}/>
+    )
+  }
+
+  //if there are no commits to be shown
+  //(for example if a branch/issue combination is selected where no commits on the branch are tagged with the respective issueId)
+  if(segments.length == 0) {
+    return (
+      <FullScreenMessage message={'There are no commits for your current selection!'}/>
+    )
+  }
+
+  
 
   return (
     <ChartContainer onResize={evt => onResize(evt)}>

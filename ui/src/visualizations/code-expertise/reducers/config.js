@@ -15,9 +15,9 @@ export default handleActions(
   {
     //initial state
 
-    currentBranch: 'develop',
-    activeIssueId: 10,
-    activeFile: '.babelrc',
+    currentBranch: null,
+    activeIssueId: null,
+    activeFile: null,
     mode: 'issues',
   }
 );

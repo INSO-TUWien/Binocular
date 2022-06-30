@@ -5,10 +5,6 @@
   flex: 1;
 }
 
-
-
-
-
 .configContainer {
   width: 100%;
 
@@ -27,4 +23,11 @@
       }
     }
   }
+}
+
+.messageContainer{
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }

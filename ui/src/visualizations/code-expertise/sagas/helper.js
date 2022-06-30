@@ -21,16 +21,6 @@ const getCommitsForIssuePage = iid => (page, perPage) => {
             count
             data {
               sha
-              shortSha
-              message
-              messageHeader
-              signature
-              webUrl
-              date
-              stats {
-                additions
-                deletions
-              }
             }
           }
          }
@@ -92,13 +82,17 @@ export function getAllCommits() {
 }
 
 
-//recursively get all parent commits of latestCommit.
-//used to get all commits of a branch
-export function getCommitsForBranch(latestCommit, allCommits) {
+//recursively get all parent commits of the selected branch.
+export function getCommitsForBranch(branch, allCommits) {
+
+  //get most recent commit for current branch
+  const latestCommit = allCommits
+  .map(commit => Object.assign({}, commit, {branch: commit.branch.replace(/(?:\r\n|\r|\n)/g, '')})) //remove newlines
+  .filter(commit => commit.branch.endsWith(branch)) //get commits that are assigned to branch
+  .sort((a,b) => (new Date(b.date) - new Date(a.date)))[0] //get the most recent
 
   //array to accumulate commits
   //race conditions should be no problem since recursive calls will not be multi-threaded
-  //TODO
   let r = []
 
   function recursiveFun(currentCommit) {

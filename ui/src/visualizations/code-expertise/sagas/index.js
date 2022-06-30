@@ -86,71 +86,104 @@ export const fetchCodeExpertiseData = fetchFactory(
       'issue': null
     }
 
-    return yield Promise.join(
-      getAllCommits(branch),
-      getIssueData(issueId),
-      getCommitsForIssue(issueId)
-    ).spread((allCommits, issue, issueCommits) => {
+    if(branch == null) return result
 
-      console.log('all commits', allCommits)
+    if(mode == 'issues') {
+
+      if(issueId == null) return result
+
+      return yield Promise.join(
+        getAllCommits(),
+        getIssueData(issueId),
+        getCommitsForIssue(issueId)
+      ).spread((allCommits, issue, issueCommits) => {
+  
+        console.log('all commits', allCommits)
+
+        //########### current issue ###########
+        result['issue'] = issue
+  
+        //########### get all relevant commits ###########
+        
+        //contains all commits of the current branch
+        const branchCommits = getCommitsForBranch(branch, allCommits)
+  
+        //we now have all commits for the current branch and all commits for the issue
+        //intersect the two groups to get the result set
+        //we are interested in commits that are both on the current branch and related to the issue
+        let relevantCommits = branchCommits.filter(commit => issueCommits.map(c => c.sha).includes(commit.sha));
+
+        if(relevantCommits.length == 0) {
+          return result
+        }
+  
+        //########### extract data for each stakeholder ###########
+        
+        //first group all relevant commits by stakeholder
+        const commitsByStakeholders = _.groupBy(relevantCommits, (commit) => commit.signature)
+  
+        for (let stakeholder in commitsByStakeholders) {
+  
+          result['devData'][stakeholder] = {}
+
+  
+          //for each stakeholder, sum up relevant additions
+          result['devData'][stakeholder]['additions'] = _.reduce(commitsByStakeholders[stakeholder], (sum, commit) => {
+            //we are interested in all additions made in each commit
+            return sum + commit.stats.additions
+          }, 0)
+        }
+        
+        console.log("result", result)
+  
+        return result
+      })
 
 
-      //########### current issue ###########
-      result['issue'] = issue
 
+    } else if(mode == 'modules') {
 
-      //########### get all relevant commits ###########
-      //get most recent commit for current branch
-      const mostRecentCommitOnBranch = allCommits
-        .map(commit => Object.assign({}, commit, {branch: commit.branch.replace(/(?:\r\n|\r|\n)/g, '')})) //remove newlines
-        .filter(commit => commit.branch.endsWith(branch)) //get commits that are assigned to branch
-        .sort((a,b) => (new Date(b.date) - new Date(a.date)))[0] //get the most recent
-      
-      //contains all commits of the current branch
-      const branchCommits = getCommitsForBranch(mostRecentCommitOnBranch, allCommits)
+      if(activeFile == null) return result
 
-      //we now have all commits for the current branch and all commits for the issue/file
-      //intersect the two groups to get the result set
-      let relevantCommits
+      return yield Promise.join(
+        getAllCommits(),
+      ).spread((allCommits) => {
+  
+        console.log('all commits', allCommits)
 
-      if(mode == 'issues') {
-        //if we are in issues mode, we are interested in commits that are both on the current branch and related to the issue
-        relevantCommits = issueCommits.filter(c => branchCommits.map(c => c.sha).includes(c.sha));
-      } else if (mode == 'modules') {
-        //if we are in modules mode, we are interested in commits that are both on the current branch and related to the current file/module
-        relevantCommits = branchCommits.filter(c => {
+        //########### get all relevant commits ###########
+        
+        //contains all commits of the current branch
+        const branchCommits = getCommitsForBranch(branch, allCommits)
+  
+        //we now have all commits for the current branch and all commits for the file
+        //intersect the two groups to get the result set
+  
+        //we are interested in commits that are both on the current branch and related to the current file/module
+        let relevantCommits = branchCommits.filter(c => {
           //extract all filepaths of the commit
           const filePathsTouchedByCommit = c.files.data.map(fileObject => fileObject.file.path)
           //if the resulting array includes the active file, this commit is relevant
           return filePathsTouchedByCommit.includes(activeFile)
         })
-      } else {
-        console.log('error in fetchCodeExpertiseData: invalid mode: ' + mode)
-        //TODO handle error
-      }
-      
 
-      //console.log("relevant Commits:" + relevantCommits.length + ": ", relevantCommits)
+        if(relevantCommits.length == 0) {
+          return result
+        }
 
-
-      //########### extract data for each stakeholder ###########
-      
-      //first group all relevant commits by stakeholder
-      const commitsByStakeholders = _.groupBy(relevantCommits, (commit) => commit.signature)
-
-      for (let stakeholder in commitsByStakeholders) {
-
-        result['devData'][stakeholder] = {}
-
-        //for each stakeholder, sum up relevant additions
-        result['devData'][stakeholder]['additions'] = _.reduce(commitsByStakeholders[stakeholder], (sum, commit) => {
-          
-          if(mode == 'issues') {
-            //if mode is issues, we are interested in all additions made in each commit
-            return sum + commit.stats.additions
-
-          } else if (mode == 'modules') {
-            //if mode is modules, we are only interested in the additions made to the currently active file
+        //########### extract data for each stakeholder ###########
+        
+        //first group all relevant commits by stakeholder
+        const commitsByStakeholders = _.groupBy(relevantCommits, (commit) => commit.signature)
+  
+        for (let stakeholder in commitsByStakeholders) {
+  
+          result['devData'][stakeholder] = {}
+  
+          //for each stakeholder, sum up relevant additions
+          result['devData'][stakeholder]['additions'] = _.reduce(commitsByStakeholders[stakeholder], (sum, commit) => {
+            
+            //we are only interested in the additions made to the currently active file
             const relevantFile = commit.files.data.filter(f => f.file.path == activeFile)
             //if this file exists, return the respective additions
             if(relevantFile !== null && relevantFile !== undefined && relevantFile.length > 0) {
@@ -160,18 +193,22 @@ export const fetchCodeExpertiseData = fetchFactory(
               console.log('error in fetchCodeExpertiseData: relevantFile does not exist')
               return 0
             }
-          } else {
-            console.log('error in fetchCodeExpertiseData: invalid mode: ' + mode)
-            return 0
-          }
-          
-        }, 0)
-      }
-      
-      console.log("result", result)
+            
+          }, 0)
+        }
+        
+        console.log("result", result)
+  
+        return result
+      })
 
+
+
+    } else {
+      console.log('error in fetchCodeExpertiseData: invalid mode: ' + mode)
       return result
-    })
+      //TODO handle error
+    }
   },
   requestCodeExpertiseData,
   receiveCodeExpertiseData,
