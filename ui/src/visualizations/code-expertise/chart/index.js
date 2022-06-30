@@ -1,6 +1,6 @@
 "use strict";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useSelector } from 'react-redux'
 import _ from 'lodash'
 import GlobalZoomableSvg from '../../../components/svg/GlobalZoomableSvg.js';
@@ -24,7 +24,7 @@ const Chart = () => {
   //local state
   const [transform, setTransform] = useState(d3.zoomIdentity);
   const [dimensions, setDimensions] = useState(zoomUtils.initialDimensions())
-  const [focussed, setFocussed] = useState(null)
+  const [segments, setSegments] = useState([])
 
   //TODO dynamically set radius depending on dimensions
   const radius = 250;
@@ -38,56 +38,47 @@ const Chart = () => {
   const onResize = (evt) => {setDimensions(zoomUtils.onResizeFactoryForFunctional(0.7,0.7)(evt))}
   const onZoom = (evt) => {setTransform(evt.transform)}
 
+
+  //only (re-)create segments if data changes
+  useEffect(() => {
+    //total number of added lines by all stakeholders of the currently selected issue
+    const additionsTotal = _.reduce(data.devData, (sum, adds) => {
+      return sum + adds.additions
+    }, 0)
+
+
+    //TODO change this to local state.
+    //use useEffects hook -> always fire if hover changes -> map segments in a way that hovered segment gets hover flag
+    let segments = []
+    let totalPercent = 0
+
+    Object.entries(data.devData).map((item, index) => {
+      const name = item[0]
+      const devData = item[1]
+      const devAdditions = devData.additions
+
+      //at which point in a circle should the segment start
+      const startPercent = totalPercent
+      //adds the percentage of additions of the dev relative to all additions to the current percentage state
+      totalPercent += (devAdditions/additionsTotal)
+      //at which point in a circle should the segment end
+      const endPercent = totalPercent
+
+      segments.push(
+        <Segment
+        key={index}
+        rad={radius} 
+        startPercent={startPercent} 
+        endPercent={endPercent} 
+        devName={name}
+        devData={devData}/>
+      )
+    })
+
+    setSegments(segments)
   
-
-  //other helper functions
-  function onHoverOnSegment(segmentId) {
-    setFocussed(segmentId)
-  }
-
-  function clearHover() {
-    setFocussed(null)
-  }
-
-  function getDataForSegmentId(segmentId) {
-    if (segmentId === null) return null
-    return Object.entries(data.devData)[segmentId]
-  }
-
+  }, [data])
   
-
-
-  //total number of added lines by all stakeholders of the currently selected issue
-  const additionsTotal = _.reduce(data.devData, (sum, adds) => {
-    return sum + adds.additions
-  }, 0)
-
-
-  let segments = []
-  let totalPercent = 0
-
-  Object.entries(data.devData).map((item, index) => {
-    const name = item[0]
-    const devData = item[1]
-    const devAdditions = devData.additions
-
-    //at which point in a circle should the segment start
-    const startPercent = totalPercent
-    //adds the percentage of additions of the dev relative to all additions to the current percentage state
-    totalPercent += (devAdditions/additionsTotal)
-    //at which point in a circle should the segment end
-    const endPercent = totalPercent
-
-    segments.push(
-      <Segment
-      key={index}
-      radius={radius} 
-      startPercent={startPercent} 
-      endPercent={endPercent} 
-      devName={name}
-      onHover={() => onHoverOnSegment(index)}/>
-    )
-  })
 
   // let testText
   // if(focussed != null && getDataForSegmentId(focussed)) {
@@ -140,8 +131,7 @@ const Chart = () => {
         transform={transform}>
         <OffsetGroup dims={dimensions} transform={transform}>
         <g
-        transform={`translate(${center.x}, ${center.y})`}
-        onMouseLeave = { () => clearHover()}>
+        transform={`translate(${center.x}, ${center.y})`}>
           {segments}
           <circle cx="0" cy="0" r={radius/10} stroke="black" fill="white"/>
         </g>

@@ -1,6 +1,21 @@
 import * as d3 from "d3"
+import React, { useState } from "react";
 
-function Segment( { radius, startPercent, endPercent, devName, onHover } ) {
+function Segment( { rad, startPercent, endPercent, devName, devData } ) {
+
+    const [radius, setRadius] = useState(rad)
+    const [focus, setFocus] = useState(false)
+
+    const mouseEnter = () => {
+        setFocus(true)        
+        setRadius(rad*1.2)
+    }
+
+    const mouseLeave = () => {
+        setFocus(false)
+        setRadius(rad)
+    }
+
 
     // ######################## OUTER BORDER ########################
 
@@ -32,22 +47,34 @@ function Segment( { radius, startPercent, endPercent, devName, onHover } ) {
         .startAngle(arcStartAngle)
         .endAngle(arcEndAngle)
 
-
-
-    // ######################## DEV NAME OUTSIDE OF SEGMENT ########################
+    
+    // ######################## GENERAL TEXT SETTINGS ########################
 
     //decide which direction the path will be (from startAngle to endAngle or vice versa).
     //this affects  if the text is upside down or not
     //the text will eventually land on the angle halfway between startAngle and endAngle.
     //-> if this angle is < 180° (or PI), reverse text (because then we are at the lower half of the diagram)
-    const displayName = devName.split(" <")[0]
-    
     let reverseText = false
     const middleAngle = getAngle(startPercent + ((endPercent - startPercent) / 2))
     if(middleAngle < Math.PI) {
         reverseText = true
     }
 
+
+    // ######################## ADDITIONS TEXT ########################
+
+    const additionsTextArcRadius = additionsArcOuterRadius + additionsArcWeight
+    const additionsTextArc = d3.arc()
+    additionsTextArc
+        .innerRadius(additionsTextArcRadius)
+        .outerRadius(additionsTextArcRadius)
+        .startAngle(reverseText ? arcEndAngle : arcStartAngle)
+        .endAngle(reverseText ? arcStartAngle : arcEndAngle)
+
+
+    // ######################## DEV NAME OUTSIDE OF SEGMENT ########################
+
+    const displayName = devName.split(" <")[0]
     const nameArcRadius = radius * 1.1
     const nameArc = d3.arc()
     nameArc
@@ -60,7 +87,9 @@ function Segment( { radius, startPercent, endPercent, devName, onHover } ) {
 
     return (
         
-        <g onMouseEnter={onHover}>
+        <g
+        onMouseEnter={mouseEnter}
+        onMouseLeave={mouseLeave}>
             {/*outer border*/}  
             <path
             d={circleSegment.toString()}
@@ -73,6 +102,27 @@ function Segment( { radius, startPercent, endPercent, devName, onHover } ) {
             d={additionsArc().toString()}
             fill="green"
             />
+
+            {/*additions number outside green additions arc. Only display this when mouse hovers on segment*/}
+            {focus &&
+            <g>
+                <defs>
+                    <path
+                    id = {devName + "_additionsPath"}
+                    d={additionsTextArc().toString()}
+                    />
+                </defs>
+                <text>
+                    <textPath
+                    href={"#" + devName + "_additionsPath"}
+                    startOffset="25%"
+                    textAnchor="middle"
+                    alignmentBaseline="middle">
+                        {devData.additions}
+                    </textPath>
+                </text>
+            </g>
+            }
 
             {/*dev name outside of segment*/}
             <defs>
