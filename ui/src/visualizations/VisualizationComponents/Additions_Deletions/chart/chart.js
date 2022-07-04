@@ -32,6 +32,7 @@ export default class Dashboard extends React.Component {
   }
 
   generateChart() {
+    d3.select('#chart' + this.state.id + '>*').remove();
     const margin = { top: 10, right: 10, bottom: 10, left: 60 },
       width = document.getElementById('chartContainer' + this.state.id).clientWidth - margin.left - margin.right,
       height = document.getElementById('chartContainer' + this.state.id).clientHeight - margin.top - margin.bottom;

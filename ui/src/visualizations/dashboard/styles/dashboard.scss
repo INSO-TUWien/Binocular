@@ -104,6 +104,7 @@
 
 .visualizationSettings{
   position: absolute;
+  display: none;
   right: 2px;
   top: 2rem;
   width: 20rem;
@@ -111,15 +112,12 @@
   box-shadow: 0 0 10px #555A;
   border-radius: 0.5rem 0 0.5rem 0.5rem;
   z-index: +1;
-  max-height: 0;
   padding: 0 0.5rem;
   overflow: hidden;
-  transition: all 1s linear;
 }
 
 .visualizationSettingsExtended{
-  max-height: 20rem;
-  padding: 0.5rem;
+  display: block;
 }
 
 .visualizationSettingsItemIcon{
