@@ -2,6 +2,7 @@
 
 const webpack = require('webpack');
 const path = require('path');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 const cssModulesLoader = {
   loader: 'css-loader',
@@ -47,12 +48,10 @@ const cssLoaders = [
 ];
 
 module.exports = {
-  entry: ['./ui/src/index'],
+  entry: ['./ui/src'],
   output: {
-    path: path.resolve(__dirname, './ui/assets'),
-    pathinfo: true,
-    filename: 'bundle.js',
-    publicPath: 'assets/',
+    path: path.join(__dirname, '/dist'),
+    filename: 'index.bundle.js',
   },
   module: {
     rules: [
@@ -77,6 +76,7 @@ module.exports = {
     ],
   },
   plugins: [
+    new HtmlWebpackPlugin({ template: './ui/index.html' }),
     new webpack.ProvidePlugin({
       React: 'react',
       process: 'process/browser',
