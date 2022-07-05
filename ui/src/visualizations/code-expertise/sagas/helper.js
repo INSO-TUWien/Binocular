@@ -47,6 +47,36 @@ export function getIssueData(iid) {
     ).then(resp => resp.issue)
 }
 
+export function getAllBuildData() {
+  return graphQl
+    .query(
+      `query {
+        builds {
+          count
+          data {
+            sha
+            status
+          }
+        }
+      }`,
+      {}
+    ).then(resp => resp.builds.data)
+
+}
+
+export function addBuildData(relevantCommits, builds) {
+  return relevantCommits
+    .map(commit => {
+      let resultCommit = commit
+      resultCommit['build'] = null
+      const relevantBuilds = builds.filter(build => build.sha == commit.sha)
+      if (relevantBuilds.length > 0) {
+        resultCommit['build'] = relevantBuilds[0].status
+      }
+      return resultCommit
+    })
+}
+
 //TODO filter in query, not afterwards
 export function getAllCommits() {
   return graphQl

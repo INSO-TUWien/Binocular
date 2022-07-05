@@ -9,7 +9,7 @@ import TabCombo from '../../../components/TabCombo.js';
 import FilePicker from './filePicker/index.js';
 import styles from "../styles.scss"
 import { graphQl } from '../../../utils';
-import { setActiveIssue, /*setActiveFile,*/ setMode, setCurrentBranch } from '../sagas'
+import { setActiveIssue, setMode, setCurrentBranch } from '../sagas'
 
 export default () => {
 
@@ -27,19 +27,13 @@ export default () => {
     dispatch(setCurrentBranch(branch))
   }
 
-  // const onSetFile = (file) => {
-  //   dispatch(setActiveFile(file))
-  // }
-
   //global state from redux store
   const expertiseState = useSelector((state) => state.visualizations.codeExpertise.state)
   const currentMode = expertiseState.config.mode
   const currentBranch = expertiseState.config.currentBranch
   const activeIssueId = expertiseState.config.activeIssueId
-  //const activeFile = expertiseState.config.activeFile
   
   //local state
-  //let [fileComponents, setFileComponents] = useState([])
   let [branchOptions, setBranchOptions] = useState([])
   let [issueOptions, setIssueOptions] = useState([])
 
@@ -63,16 +57,7 @@ export default () => {
       ))
     .then(resp => resp.files.data)
     .then(files => {
-
       setFiles(files.map(file => file.path))
-
-      // const temp = []
-      // //placeholder option
-      // temp.push(<option key={-1} value={null}>Select a File</option>)
-      // for (const file of files) {
-      //   temp.push(<option key={file.path}>{file.path}</option>)
-      // }
-      // setFileComponents(temp)
     })
 
 
@@ -190,13 +175,6 @@ export default () => {
           <div className="field">
           <div className="control">
             <label className="label">Choose Files and Modules to visualize:</label>
-            {/* <div className="select">
-              <select
-                value={activeFile}
-                onChange={e => onSetFile(e.target.value)}>
-                {fileComponents}
-              </select>
-            </div> */}
 
             <FilePicker fileList={files}/>
 

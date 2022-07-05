@@ -4,6 +4,10 @@ import ModuleLine from "./ModuleLine";
 const FilePicker = ({ fileList }) => {
   const [fileMap, setFileMap] = useState({})
 
+  //every time the fileList changes, construct a map that has the same structure as the original directory
+  //example:
+  //files = [fortytwo.txt, foo/bar.txt, foo.baz.txt]
+  //generated map => {fortytwo.txt: {}, foo: {bar.txt: {}, baz.txt: {}}}
   useEffect(() => {
 
     const fileMap = {};

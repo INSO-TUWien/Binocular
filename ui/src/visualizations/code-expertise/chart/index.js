@@ -6,6 +6,7 @@ import _ from 'lodash'
 import GlobalZoomableSvg from '../../../components/svg/GlobalZoomableSvg.js';
 import OffsetGroup from '../../../components/svg/OffsetGroup.js';
 import ChartContainer from '../../../components/svg/ChartContainer.js';
+import { getChartColors } from '../../../utils';
 import * as zoomUtils from '../../../utils/zoom.js';
 import * as d3 from "d3"
 import styles from "../styles.scss"
@@ -14,6 +15,8 @@ import Segment from "./Segment.js"
 import FullScreenMessage from "./full-screen-message.js";
 
 const Chart = () => {
+
+  const chartSizeFactor = 0.85
 
 
   //global state from redux store
@@ -24,7 +27,7 @@ const Chart = () => {
   //local state
   const [transform, setTransform] = useState(d3.zoomIdentity);
   const [dimensions, setDimensions] = useState(zoomUtils.initialDimensions())
-  const [radius, setRadius] = useState((Math.min(dimensions.height, dimensions.width) / 2) * 0.8)
+  const [radius, setRadius] = useState((Math.min(dimensions.height, dimensions.width) / 2) * chartSizeFactor)
   const [segments, setSegments] = useState([])
   
   const center = {
@@ -40,7 +43,7 @@ const Chart = () => {
 
   //update radius when dimensions change.
   useEffect(() => {
-    setRadius((Math.min(dimensions.height, dimensions.width) / 2));
+    setRadius((Math.min(dimensions.height, dimensions.width) / 2) * chartSizeFactor);
   }, [dimensions])
   
 
@@ -50,6 +53,25 @@ const Chart = () => {
     const additionsTotal = _.reduce(data.devData, (sum, adds) => {
       return sum + adds.additions
     }, 0)
+
+    //get max number of either good or bad commits. Used in segments
+    let max = 0
+    Object.entries(data.devData).map(item => {
+      const commits = item[1].commits
+      const goodCommits = commits.filter(c => c.build == 'success').length
+      const badCommits = commits.filter(c => c.build != null && c.build != 'success').length
+
+      if(goodCommits > max) max = goodCommits
+      if(badCommits > max) max = badCommits
+    })
+
+    console.log('MAX COMMITS', max)
+
+    //get colors
+    const devColors = getChartColors('spectral', _.range(0, Object.entries(data.devData).length));
+
+    console.log(devColors)
+
 
     let segments = []
     let totalPercent = 0
@@ -73,7 +95,9 @@ const Chart = () => {
         startPercent={startPercent} 
         endPercent={endPercent} 
         devName={name}
-        devData={devData}/>
+        devData={devData}
+        maxCommits={max}
+        devColor={devColors[index]}/>
       )
     })
 

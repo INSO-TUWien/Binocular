@@ -9,7 +9,7 @@ import {
   mapSaga,
 } from "../../../sagas/utils.js";
 
-import { getAllCommits, getCommitsForBranch, getCommitsForIssue, getIssueData } from "./helper.js"
+import { getAllCommits, getCommitsForBranch, getCommitsForIssue, getIssueData, getAllBuildData, addBuildData } from "./helper.js"
 
 
 
@@ -81,8 +81,6 @@ export const fetchCodeExpertiseData = fetchFactory(
     const activeFiles = state.visualizations.codeExpertise.state.config.activeFiles
     const branch = state.visualizations.codeExpertise.state.config.currentBranch
 
-    console.log("saga active Files: ", activeFiles)
-
     let result = {
       'devData': {},
       'issue': null
@@ -97,10 +95,10 @@ export const fetchCodeExpertiseData = fetchFactory(
       return yield Promise.join(
         getAllCommits(),
         getIssueData(issueId),
-        getCommitsForIssue(issueId)
-      ).spread((allCommits, issue, issueCommits) => {
+        getCommitsForIssue(issueId),
+        getAllBuildData()
+      ).spread((allCommits, issue, issueCommits, builds) => {
   
-        console.log('all commits', allCommits)
 
         //########### current issue ###########
         result['issue'] = issue
@@ -118,6 +116,11 @@ export const fetchCodeExpertiseData = fetchFactory(
         if(relevantCommits.length == 0) {
           return result
         }
+
+        
+        //########### add build data to commits ###########
+        //TODO can this be done in the back end?
+        relevantCommits = addBuildData(relevantCommits, builds)
   
         //########### extract data for each stakeholder ###########
         
@@ -128,7 +131,9 @@ export const fetchCodeExpertiseData = fetchFactory(
   
           result['devData'][stakeholder] = {}
 
-  
+          //add commits to each stakeholder
+          result['devData'][stakeholder]['commits'] = commitsByStakeholders[stakeholder]
+
           //for each stakeholder, sum up relevant additions
           result['devData'][stakeholder]['additions'] = _.reduce(commitsByStakeholders[stakeholder], (sum, commit) => {
             //we are interested in all additions made in each commit
@@ -149,10 +154,9 @@ export const fetchCodeExpertiseData = fetchFactory(
 
       return yield Promise.join(
         getAllCommits(),
-      ).spread((allCommits) => {
+        getAllBuildData()
+      ).spread((allCommits, builds) => {
   
-        console.log('all commits', allCommits)
-
         //########### get all relevant commits ###########
         
         //contains all commits of the current branch
@@ -180,6 +184,11 @@ export const fetchCodeExpertiseData = fetchFactory(
           return result
         }
 
+        
+        //########### add build data to commits ###########
+        //TODO can this be done in the back end?
+        relevantCommits = addBuildData(relevantCommits, builds)
+
         //########### extract data for each stakeholder ###########
         
         //first group all relevant commits by stakeholder
@@ -188,6 +197,9 @@ export const fetchCodeExpertiseData = fetchFactory(
         for (let stakeholder in commitsByStakeholders) {
   
           result['devData'][stakeholder] = {}
+
+          //add commits to each stakeholder
+          result['devData'][stakeholder]['commits'] = commitsByStakeholders[stakeholder]
   
           //for each stakeholder, sum up relevant additions
           result['devData'][stakeholder]['additions'] = _.reduce(commitsByStakeholders[stakeholder], (sum, commit) => {

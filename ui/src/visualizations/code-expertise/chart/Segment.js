@@ -1,7 +1,8 @@
 import * as d3 from "d3"
+import chroma from 'chroma-js';
 import React, { useState, useEffect } from "react";
 
-function Segment( { rad, startPercent, endPercent, devName, devData } ) {
+function Segment( { rad, startPercent, endPercent, devName, devData, maxCommits, devColor } ) {
 
     const [radius, setRadius] = useState(rad)
     const [focus, setFocus] = useState(false)
@@ -20,6 +21,11 @@ function Segment( { rad, startPercent, endPercent, devName, devData } ) {
     useEffect(() => {
       setRadius(rad)
     }, [rad])
+
+    // ######################## COLORS ########################
+
+    const lightColor = chroma(devColor).brighten().hex()
+    const darkColor = devColor
     
 
     // ######################## OUTER BORDER ########################
@@ -38,6 +44,35 @@ function Segment( { rad, startPercent, endPercent, devName, devData } ) {
     const offset = Math.PI/2
     const arcStartAngle = getAngle(startPercent) + offset
     const arcEndAngle = getAngle(endPercent) + offset
+
+
+    // ######################## BUILD ARCS ########################
+
+    //goot commits are shown in an arc outside the circle segment, bad commits inside.
+    //this sets the bounds for this section of the chart
+    const buildWeight = radius * 0.3
+
+    const goodCommits = devData.commits.filter(c => c.build == 'success').length
+    const badCommits = devData.commits.filter(c => c.build != null && c.build != 'success').length
+
+    const goodCommitsRadius = radius + (buildWeight * (goodCommits / maxCommits))
+
+    const goodCommitsArc = d3.arc()
+    goodCommitsArc
+        .innerRadius(radius)
+        .outerRadius(goodCommitsRadius)
+        .startAngle(arcStartAngle)
+        .endAngle(arcEndAngle)
+    
+    
+    const badCommitsRadius = radius - (buildWeight * (badCommits / maxCommits))
+    const badCommitsArc = d3.arc()
+    badCommitsArc
+        .innerRadius(badCommitsRadius)
+        .outerRadius(radius)
+        .startAngle(arcStartAngle)
+        .endAngle(arcEndAngle)
+
 
 
     // ######################## GREEN ADDITIONS ARC ########################
@@ -65,6 +100,9 @@ function Segment( { rad, startPercent, endPercent, devName, devData } ) {
     if(middleAngle < Math.PI) {
         reverseText = true
     }
+
+    //at which radius should the dev name be placed
+    const devNameRadius = radius * 1.31
 
 
     // ######################## ADDITIONS TEXT ########################
@@ -96,15 +134,14 @@ function Segment( { rad, startPercent, endPercent, devName, devData } ) {
 
     //in case segment is small, get the coordinates for the point in between startP end endP, just outside the segment.
     //used as anchor point for the text
-    const nameCoord = getCoordinatesForPercent((radius * 1.1), middleAngle)
+    const nameCoord = getCoordinatesForPercent((devNameRadius), middleAngle)
 
     //in case segment is large enought for the text to be in an arc
     const displayName = devName.split(" <")[0]
-    const nameArcRadius = radius * 1.1
     const nameArc = d3.arc()
     nameArc
-        .innerRadius(nameArcRadius)
-        .outerRadius(nameArcRadius)
+        .innerRadius(devNameRadius)
+        .outerRadius(devNameRadius)
         .startAngle(reverseText ? arcEndAngle : arcStartAngle)
         .endAngle(reverseText ? arcStartAngle : arcEndAngle)
 
@@ -149,6 +186,18 @@ function Segment( { rad, startPercent, endPercent, devName, devData } ) {
             </g>
             }
 
+            {/*bad commits arc*/}
+            <path
+            d={badCommitsArc().toString()}
+            fill={darkColor}
+            />
+
+            {/*good commits arc*/}
+            <path
+            d={goodCommitsArc().toString()}
+            fill={lightColor}
+            />
+
             {/*dev name outside of segment*/}
             {!smallSegment &&
                 <g>
@@ -179,6 +228,13 @@ function Segment( { rad, startPercent, endPercent, devName, devData } ) {
                     {displayName}
                 </text>
             }
+
+            {/*outer border without fill, just for contours*/}  
+            <path
+            d={circleSegment.toString()}
+            stroke="black"
+            fill="none"
+            />
             
         </g>
 
