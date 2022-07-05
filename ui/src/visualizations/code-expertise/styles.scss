@@ -1,7 +1,6 @@
 @import '~bulma';
 
 .chart {
-  outline: none;
   flex: 1;
 }
 
@@ -30,4 +29,55 @@
   display: flex;
   justify-content: center;
   align-items: center;
+}
+
+
+// for the module picker
+.moduleLine {
+  border: solid;
+  display: flex;
+  flex-direction: row;
+  margin: 4px;
+
+  cursor: default;
+
+  background-color: #4882e0;
+  color: whitesmoke;
+  font-weight: bold;
+}
+
+.fileLine {
+  display: flex;
+  flex-direction: row;
+  margin: 4px;
+
+  cursor: default;
+
+  background-color: #F8F8F8;
+}
+
+.moduleName {
+  flex: 1;
+  padding-left: 10px;
+  cursor: pointer;
+
+  span {
+    float: left;
+  }
+}
+
+.fileName {
+  flex: 1;
+  padding-left: 10px;
+
+  span {
+    float: left;
+  }
+}
+
+.childContainer {
+  margin-left: 10px;
+  border-left: solid;
+  border-color: #bebebe;
+  padding-left: 10px;
 }

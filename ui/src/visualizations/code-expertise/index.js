@@ -1,7 +1,7 @@
 "use strict";
 
 import ChartComponent from "./chart";
-import ConfigComponent from "./config.js";
+import ConfigComponent from "./config";
 import HelpComponent from "./help.js";
 import saga from "./sagas";
 import reducer from "./reducers";

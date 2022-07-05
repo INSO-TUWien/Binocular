@@ -24,10 +24,9 @@ const Chart = () => {
   //local state
   const [transform, setTransform] = useState(d3.zoomIdentity);
   const [dimensions, setDimensions] = useState(zoomUtils.initialDimensions())
+  const [radius, setRadius] = useState((Math.min(dimensions.height, dimensions.width) / 2) * 0.8)
   const [segments, setSegments] = useState([])
-
-  //TODO dynamically set radius depending on dimensions
-  const radius = 250;
+  
   const center = {
     x: dimensions.width / 2,
     y: dimensions.height / 2
@@ -39,6 +38,12 @@ const Chart = () => {
   const onZoom = (evt) => {setTransform(evt.transform)}
 
 
+  //update radius when dimensions change.
+  useEffect(() => {
+    setRadius((Math.min(dimensions.height, dimensions.width) / 2));
+  }, [dimensions])
+  
+
   //only (re-)create segments if data changes
   useEffect(() => {
     //total number of added lines by all stakeholders of the currently selected issue
@@ -46,9 +51,6 @@ const Chart = () => {
       return sum + adds.additions
     }, 0)
 
-
-    //TODO change this to local state.
-    //use useEffects hook -> always fire if hover changes -> map segments in a way that hovered segment gets hover flag
     let segments = []
     let totalPercent = 0
 
@@ -77,7 +79,7 @@ const Chart = () => {
 
     setSegments(segments)
   
-  }, [data])
+  }, [data, radius])
   
 
   // let testText
@@ -100,7 +102,7 @@ const Chart = () => {
     )
   }
 
-  if(config.mode == 'modules' && config.activeFile == null) {
+  if(config.mode == 'modules' && (config.activeFiles == null || config.activeFiles.length == 0)) {
     return(
       <FullScreenMessage message={'Please select a File to be visualized!'}/>
     )
@@ -123,7 +125,7 @@ const Chart = () => {
   
 
   return (
-    <ChartContainer onResize={evt => onResize(evt)}>
+    <ChartContainer onResize={evt => onResize(evt)} className={styles.chart}>
       <GlobalZoomableSvg
         className={styles.chart}
         scaleExtent={[1, 10]}
@@ -133,7 +135,7 @@ const Chart = () => {
         <g
         transform={`translate(${center.x}, ${center.y})`}>
           {segments}
-          <circle cx="0" cy="0" r={radius/10} stroke="black" fill="white"/>
+          <circle cx="0" cy="0" r={radius/3} stroke="black" fill="white"/>
         </g>
         </OffsetGroup>
       </GlobalZoomableSvg>

@@ -24,7 +24,7 @@ const refresh = createAction("REFRESH")
 
 export const setCurrentBranch = createAction("SET_CURRENT_BRANCH", b => b)
 export const setActiveIssue = createAction("SET_ACTIVE_ISSUE", i => i)
-export const setActiveFile = createAction("SET_ACTIVE_FILE", f => f)
+export const setActiveFiles = createAction("SET_ACTIVE_FILES", f => f)
 export const setMode = createAction("SET_MODE", m => m)
 
 
@@ -36,7 +36,7 @@ export default function* () {
   yield fork(watchSetCurrentBranch)
   yield fork(watchSetMode)
   yield fork(watchSetActiveIssue)
-  yield fork(watchSetActiveFile)
+  yield fork(watchSetActiveFiles)
 
   //yield fork(...); for every additional watcher function
 }
@@ -61,8 +61,8 @@ function* watchSetMode() {
   yield takeEvery('SET_MODE', fetchCodeExpertiseData);
 }
 
-function* watchSetActiveFile() {
-  yield takeEvery('SET_ACTIVE_FILE', fetchCodeExpertiseData);
+function* watchSetActiveFiles() {
+  yield takeEvery('SET_ACTIVE_FILES', fetchCodeExpertiseData);
 }
 
 //every time the user chooses an issue in the config tab, update the displayed data
@@ -78,8 +78,10 @@ export const fetchCodeExpertiseData = fetchFactory(
     const state = yield select();
     const mode = state.visualizations.codeExpertise.state.config.mode
     const issueId = state.visualizations.codeExpertise.state.config.activeIssueId
-    const activeFile = state.visualizations.codeExpertise.state.config.activeFile
+    const activeFiles = state.visualizations.codeExpertise.state.config.activeFiles
     const branch = state.visualizations.codeExpertise.state.config.currentBranch
+
+    console.log("saga active Files: ", activeFiles)
 
     let result = {
       'devData': {},
@@ -143,7 +145,7 @@ export const fetchCodeExpertiseData = fetchFactory(
 
     } else if(mode == 'modules') {
 
-      if(activeFile == null) return result
+      if(activeFiles == null || activeFiles.length == 0) return result
 
       return yield Promise.join(
         getAllCommits(),
@@ -163,11 +165,18 @@ export const fetchCodeExpertiseData = fetchFactory(
         let relevantCommits = branchCommits.filter(c => {
           //extract all filepaths of the commit
           const filePathsTouchedByCommit = c.files.data.map(fileObject => fileObject.file.path)
-          //if the resulting array includes the active file, this commit is relevant
-          return filePathsTouchedByCommit.includes(activeFile)
+          //if the resulting array includes one of the active files, this commit is relevant
+          let relevantFlag = false
+          activeFiles.map(file => {
+            if(filePathsTouchedByCommit.includes(file)) {
+              relevantFlag = true
+            }
+          })
+          return relevantFlag
         })
 
         if(relevantCommits.length == 0) {
+          console.log('no relevant commits')
           return result
         }
 
@@ -183,15 +192,18 @@ export const fetchCodeExpertiseData = fetchFactory(
           //for each stakeholder, sum up relevant additions
           result['devData'][stakeholder]['additions'] = _.reduce(commitsByStakeholders[stakeholder], (sum, commit) => {
             
-            //we are only interested in the additions made to the currently active file
-            const relevantFile = commit.files.data.filter(f => f.file.path == activeFile)
-            //if this file exists, return the respective additions
-            if(relevantFile !== null && relevantFile !== undefined && relevantFile.length > 0) {
-              return relevantFile[0].stats.additions
+            //we are only interested in the additions made to the currently active files
+            const relevantFiles = commit.files.data.filter(f => activeFiles.includes(f.file.path))
+            //if at least one exists, return the respective additions
+            if(relevantFiles && relevantFiles.length > 0) {
+              const tempSum = _.reduce(relevantFiles, (sum, file) => {
+                return sum + file.stats.additions
+              }, 0)
+              return sum + tempSum
 
             } else {
               console.log('error in fetchCodeExpertiseData: relevantFile does not exist')
-              return 0
+              return sum + 0
             }
             
           }, 0)

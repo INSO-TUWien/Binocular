@@ -1,5 +1,5 @@
 import * as d3 from "d3"
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
 function Segment( { rad, startPercent, endPercent, devName, devData } ) {
 
@@ -16,6 +16,11 @@ function Segment( { rad, startPercent, endPercent, devName, devData } ) {
         setRadius(rad)
     }
 
+    //update radius state when rad prop changes
+    useEffect(() => {
+      setRadius(rad)
+    }, [rad])
+    
 
     // ######################## OUTER BORDER ########################
 
@@ -50,12 +55,13 @@ function Segment( { rad, startPercent, endPercent, devName, devData } ) {
     
     // ######################## GENERAL TEXT SETTINGS ########################
 
+    //the text will eventually land on the angle halfway between startAngle and endAngle.
+    const middleAngle = getAngle(startPercent + ((endPercent - startPercent) / 2))
+
     //decide which direction the path will be (from startAngle to endAngle or vice versa).
     //this affects  if the text is upside down or not
-    //the text will eventually land on the angle halfway between startAngle and endAngle.
-    //-> if this angle is < 180° (or PI), reverse text (because then we are at the lower half of the diagram)
+    //if middleAngle is < 180° (PI), reverse text (because then we are at the lower half of the diagram)
     let reverseText = false
-    const middleAngle = getAngle(startPercent + ((endPercent - startPercent) / 2))
     if(middleAngle < Math.PI) {
         reverseText = true
     }
@@ -74,6 +80,25 @@ function Segment( { rad, startPercent, endPercent, devName, devData } ) {
 
     // ######################## DEV NAME OUTSIDE OF SEGMENT ########################
 
+    //if the segment is small, the text probably wont fit in an arc at the outer border.
+    //in this case, write the text besides the segment
+    let smallSegment = false
+    if((arcEndAngle - arcStartAngle) < (Math.PI / 4)) {
+        smallSegment = true
+    }
+
+    //if text is at the right side of the diagram, the textanchor should be start, otherwise end
+    //(so that the text does not overlap with the diagram)
+    let textAnchorStart = false
+    if((middleAngle < (Math.PI/2)) || (middleAngle > (Math.PI*1.5))) {
+        textAnchorStart = true
+    }
+
+    //in case segment is small, get the coordinates for the point in between startP end endP, just outside the segment.
+    //used as anchor point for the text
+    const nameCoord = getCoordinatesForPercent((radius * 1.1), middleAngle)
+
+    //in case segment is large enought for the text to be in an arc
     const displayName = devName.split(" <")[0]
     const nameArcRadius = radius * 1.1
     const nameArc = d3.arc()
@@ -125,21 +150,35 @@ function Segment( { rad, startPercent, endPercent, devName, devData } ) {
             }
 
             {/*dev name outside of segment*/}
-            <defs>
-                <path
-                id = {devName + "_namePath"}
-                d={nameArc().toString()}
-                />
-            </defs>
-            <text>
-                <textPath
-                href={"#" + devName + "_namePath"}
-                startOffset="25%"
-                textAnchor="middle"
-                alignmentBaseline="middle">
+            {!smallSegment &&
+                <g>
+                    <defs>
+                        <path
+                        id = {devName + "_namePath"}
+                        d={nameArc().toString()}
+                        />
+                    </defs>
+                    <text>
+                        <textPath
+                        href={"#" + devName + "_namePath"}
+                        startOffset="25%"
+                        textAnchor="middle"
+                        alignmentBaseline="middle">
+                            {displayName}
+                        </textPath>
+                    </text>
+                </g>
+            }
+
+            {smallSegment &&
+                <text
+                x={nameCoord[0]}
+                y={nameCoord[1]}
+                textAnchor={textAnchorStart ? "start" : "end"}
+                alignment-baseline="middle">
                     {displayName}
-                </textPath>
-            </text>
+                </text>
+            }
             
         </g>
 
@@ -149,9 +188,10 @@ function Segment( { rad, startPercent, endPercent, devName, devData } ) {
 
 }
 
-function getCoordinatesForPercent(radius, percent) {
-    const x = radius * Math.cos(2 * Math.PI * percent)
-    const y = radius * Math.sin(2 * Math.PI * percent)
+//given a circle at (0,0) and specified radius, get the coordinates of a point on the outside line for the specified angle
+function getCoordinatesForPercent(radius, angle) {
+    const x = radius * Math.cos(angle)
+    const y = radius * Math.sin(angle)
     return [x,y]
 }
 
