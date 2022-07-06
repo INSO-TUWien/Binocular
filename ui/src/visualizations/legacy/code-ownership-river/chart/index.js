@@ -7,7 +7,6 @@ import { setViewport, openCommit } from '../sagas';
 
 const mapStateToProps = (state /*, ownProps*/) => {
   const corState = state.visualizations.codeOwnershipRiver.state;
-
   const issues = corState.config.overlay === 'issues' ? corState.data.data.issues : [];
   const builds = corState.config.overlay === 'builds' ? corState.data.data.builds : [];
 
@@ -19,18 +18,18 @@ const mapStateToProps = (state /*, ownProps*/) => {
     issues,
     builds,
     highlightedIssue: corState.config.highlightedIssue,
-    highlightedCommits: corState.config.highlightedCommits
+    highlightedCommits: corState.config.highlightedCommits,
   };
 };
 
 const mapDispatchToProps = (dispatch /*, ownProps*/) => {
   return {
-    onCommitClick: function(c) {
+    onCommitClick: function (c) {
       dispatch(openCommit(c));
     },
-    onViewportChanged: function(v) {
+    onViewportChanged: function (v) {
       dispatch(setViewport(v));
-    }
+    },
   };
 };
 

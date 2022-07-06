@@ -27,7 +27,7 @@ export const requestRefresh = createAction('REQUEST_REFRESH');
 const refresh = createAction('REFRESH');
 export const setViewport = createAction('COR_SET_VIEWPORT');
 
-export default function*() {
+export default function* () {
   // fetch data once on entry
   yield* fetchCodeOwnershipData();
 
@@ -52,7 +52,7 @@ function* watchMessages() {
 }
 
 export function* watchOpenCommit() {
-  yield takeEvery('OPEN_COMMIT', function(a) {
+  yield takeEvery('OPEN_COMMIT', function (a) {
     window.open(a.payload.webUrl);
   });
 }
@@ -70,13 +70,13 @@ function* watchRefresh() {
 }
 
 function* watchHighlightedIssue() {
-  yield takeEvery('SET_HIGHLIGHTED_ISSUE', function*(a) {
+  yield takeEvery('SET_HIGHLIGHTED_ISSUE', function* (a) {
     return yield fetchRelatedCommits(a.payload);
   });
 }
 
 export const fetchCodeOwnershipData = fetchFactory(
-  function*() {
+  function* () {
     const { firstCommit, lastCommit, committers, firstIssue, lastIssue } = yield getBounds();
     const firstCommitTimestamp = Date.parse(firstCommit.date);
     const lastCommitTimestamp = Date.parse(lastCommit.date);
@@ -123,7 +123,7 @@ export const fetchCodeOwnershipData = fetchFactory(
           builds
         };
       })
-      .catch(function(e) {
+      .catch(function (e) {
         console.error(e.stack);
         throw e;
       });

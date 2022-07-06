@@ -2,6 +2,9 @@
 
 .chartContainer{
   position: relative;
+  height: 100%;
+  overflow-y: scroll;
+  overflow-x: hidden;
 }
 
 .configContainer{

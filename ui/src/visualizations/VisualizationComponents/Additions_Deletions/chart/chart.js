@@ -73,7 +73,7 @@ export default class Dashboard extends React.Component {
     chart
       .append('path')
       .datum(this.state.commitData)
-      .attr('fill', 'none')
+      .attr('fill', '#BFFFBF')
       .attr('stroke', 'green')
       .attr('stroke-width', 1.5)
       .attr(
@@ -86,6 +86,7 @@ export default class Dashboard extends React.Component {
           .y(function (d) {
             return y(d.stats.additions);
           })
+          .curve(d3.curveBasis)
       );
 
     const y2 = d3
@@ -103,7 +104,7 @@ export default class Dashboard extends React.Component {
     chart
       .append('path')
       .datum(this.state.commitData)
-      .attr('fill', 'none')
+      .attr('fill', '#FFBDBD')
       .attr('stroke', 'red')
       .attr('stroke-width', 1.5)
       .attr(
@@ -116,6 +117,7 @@ export default class Dashboard extends React.Component {
           .y(function (d) {
             return y2(d.stats.deletions);
           })
+          .curve(d3.curveBasis)
       );
   }
 }

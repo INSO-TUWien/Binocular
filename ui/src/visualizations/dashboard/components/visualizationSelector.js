@@ -22,7 +22,6 @@ export default class VisualizationSelector extends React.PureComponent {
             <hr />
             {Object.keys(this.props.visualizations).map((viz) => {
               const visualization = this.props.visualizations[viz];
-              console.log(visualization);
               return (
                 <button
                   className={styles.visualizationSelectButton}

@@ -1,7 +1,9 @@
 'use strict';
 
+import React from 'react';
 import { connect } from 'react-redux';
 import styles from './styles.scss';
+import visualizationRegistry from './visualizationRegistry';
 
 const mapStateToProps = (state /*, ownProps*/) => {
   return {};
@@ -12,12 +14,25 @@ const mapDispatchToProps = (dispatch /*, ownProps*/) => {
 };
 
 const DashboardConfigComponent = (props) => {
-  let otherCommitters;
-  if (props.palette && 'others' in props.palette) {
-    otherCommitters = props.committers.length - (Object.keys(props.palette).length - 1);
+  const configComponents = [];
+  for (const visualization in visualizationRegistry) {
+    const configComponent = visualizationRegistry[visualization].ConfigComponent;
+    if (configComponent !== undefined) {
+      configComponents.push(configComponent);
+    }
   }
-
-  return <div className={styles.configContainer}></div>;
+  return (
+    <div className={styles.configContainer}>
+      {configComponents.map((component) => {
+        return (
+          <div>
+            {React.createElement(component)}
+            <hr />
+          </div>
+        );
+      })}
+    </div>
+  );
 };
 
 const DashboardConfig = connect(mapStateToProps, mapDispatchToProps)(DashboardConfigComponent);

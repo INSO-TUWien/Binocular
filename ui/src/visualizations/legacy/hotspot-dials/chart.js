@@ -65,11 +65,11 @@ export default class HotspotDials extends React.PureComponent {
     const CommitDial = this.props.splitCommits ? DoubleDial : Dial;
 
     return (
-      <ChartContainer onResize={evt => this.onResize(evt)}>
+      <ChartContainer onResize={(evt) => this.onResize(evt)}>
         <GlobalZoomableSvg
           className={styles.chart}
           scaleExtent={[1, 10]}
-          onZoom={evt => this.onZoom(evt)}
+          onZoom={(evt) => this.onZoom(evt)}
           transform={this.state.transform}
           unzoomed={<Legend x="10" y="10" categories={legend} />}>
           <OffsetGroup dims={dims} transform={this.state.transform}>

@@ -10,7 +10,6 @@ import styles from './styles.scss';
 
 const mapStateToProps = (state /*, ownProps*/) => {
   const hdState = state.visualizations.hotspotDials.state;
-
   return {
     category: hdState.config.category,
     splitCommits: hdState.config.splitCommits,
@@ -20,13 +19,13 @@ const mapStateToProps = (state /*, ownProps*/) => {
 
 const mapDispatchToProps = (dispatch /*, ownProps*/) => {
   return {
-    onSetCategory: cat => dispatch(setCategory(cat)),
-    onSetSplitCommits: b => dispatch(setSplitCommits(b)),
-    onSetIssueField: f => dispatch(setIssueField(f))
+    onSetCategory: (cat) => dispatch(setCategory(cat)),
+    onSetSplitCommits: (b) => dispatch(setSplitCommits(b)),
+    onSetIssueField: (f) => dispatch(setIssueField(f)),
   };
 };
 
-const HotspotDialsConfigComponent = props => {
+const HotspotDialsConfigComponent = (props) => {
   return (
     <div className={styles.configContainer}>
       <form>
@@ -34,7 +33,7 @@ const HotspotDialsConfigComponent = props => {
           <label className="label">Granularity:</label>
           <div className="control">
             <div className="select">
-              <select value={props.category} onChange={evt => props.onSetCategory(evt.target.value)}>
+              <select value={props.category} onChange={(evt) => props.onSetCategory(evt.target.value)}>
                 <option value="hour">By hour</option>
                 <option value="dayOfWeek">By day of week</option>
                 <option value="month">By month</option>
@@ -55,7 +54,7 @@ const HotspotDialsConfigComponent = props => {
                 type="checkbox"
                 id="split-commits"
                 checked={props.splitCommits}
-                onChange={e => props.onSetSplitCommits(e.target.checked)}
+                onChange={(e) => props.onSetSplitCommits(e.target.checked)}
               />
               Split commits into good and bad
               <sup className="fa fa-question-circle" aria-hidden="true" />
@@ -67,7 +66,7 @@ const HotspotDialsConfigComponent = props => {
             <label className="label">Show issues by:</label>
             <TabCombo
               value={props.issueField}
-              onChange={value => props.onSetIssueField(value)}
+              onChange={(value) => props.onSetIssueField(value)}
               options={[
                 { label: 'Creation date', icon: 'certificate', value: 'createdAt' },
                 { label: 'Closing date', icon: 'window-close', value: 'closedAt' }

@@ -3,6 +3,8 @@
 .chart {
   outline: none;
   flex: 1;
+  height: 100%;
+  width: 100%;
 }
 
 .circle {
@@ -34,7 +36,7 @@
 
   text {
     text-anchor: start;
-    font-size: 12;
+    font-size: 12px;
     cursor: hand;
     stroke: rgba( 50, 50, 50, 0.5 );
     fill: rgba( 50, 50, 50, 0.5 );

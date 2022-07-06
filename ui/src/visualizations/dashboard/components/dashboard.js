@@ -8,6 +8,7 @@ import settingsIcon from '../assets/settings.svg';
 import smallVisualizationIcon from '../assets/smallVisualizationIcon.svg';
 import largeVisualizationIcon from '../assets/largeVisualizationIcon.svg';
 import wideVisualizationIcon from '../assets/wideVisualizationIcon.svg';
+import highVisualizationIcon from '../assets/highVisualizationIcon.svg';
 import deleteIcon from '../assets/deleteIcon.svg';
 
 import VisualizationSelector from './visualizationSelector';
@@ -90,7 +91,14 @@ export default class Dashboard extends React.Component {
         id={'visualizationContainer' + visualization.id}
         className={dashboardStyles.visualizationContainer}
         style={{
-          gridArea: visualization.size === 'large' ? 'span 4/span 4' : visualization.size === 'wide' ? 'span 2/span 4' : 'span 2/span 2',
+          gridArea:
+            visualization.size === 'large'
+              ? 'span 4/span 4'
+              : visualization.size === 'wide'
+                ? 'span 2/span 4'
+                : visualization.size === 'high'
+                  ? 'span 4/span 2'
+                  : 'span 2/span 2',
         }}>
         <div className={dashboardStyles.menuBar}>
           <div className={dashboardStyles.visualizationName}>{visualizationRegistry[visualization.key].label}</div>
@@ -120,13 +128,21 @@ export default class Dashboard extends React.Component {
             onClick={this.changeWindowSizeWide.bind(this)}>
             <img className={dashboardStyles.visualizationSettingsItemIcon} src={wideVisualizationIcon}></img>Wide
           </div>
+          <div
+            className={
+              dashboardStyles.windowSizeButton + (visualization.size === 'high' ? ' ' + dashboardStyles.windowSizeButtonSelected : '')
+            }
+            onClick={this.changeWindowSizeHigh.bind(this)}>
+            <img className={dashboardStyles.visualizationSettingsItemIcon} src={highVisualizationIcon}></img>
+            High
+          </div>
           <hr />
           <div className={dashboardStyles.windowSizeButton} onClick={this.deleteVisualization.bind(this)}>
             <img className={dashboardStyles.visualizationSettingsItemIcon} src={deleteIcon}></img>Delete
           </div>
         </div>
         <div className={dashboardStyles.inside}>
-          {React.createElement(visualizationRegistry[visualization.key].chart, { id: visualization.id })}
+          {React.createElement(visualizationRegistry[visualization.key].ChartComponent, { id: visualization.id })}
         </div>
       </div>
     );
@@ -152,10 +168,16 @@ export default class Dashboard extends React.Component {
     this.forceUpdate();
   }
 
+  changeWindowSizeHigh(e) {
+    this.changeVisualizationSize(e, 'high');
+    this.forceUpdate();
+  }
+
   changeVisualizationSize(e, size) {
     this.selectButton(e.target);
     const visualizationContainer = e.target.parentNode.parentNode;
-    visualizationContainer.style.gridArea = size === 'large' ? 'span 4/span 4' : size === 'wide' ? 'span 2/span 4' : 'span 2/span 2';
+    visualizationContainer.style.gridArea =
+      size === 'large' ? 'span 4/span 4' : size === 'wide' ? 'span 2/span 4' : size === 'high' ? 'span 4/span 2' : 'span 2/span 2';
     const visualizationSettings = visualizationContainer.querySelector('.' + dashboardStyles.visualizationSettings);
     visualizationSettings.classList.remove(dashboardStyles.visualizationSettingsExtended);
     const id = visualizationContainer.id.substring('visualizationContainer'.length);
