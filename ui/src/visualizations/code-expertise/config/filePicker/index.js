@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import ModuleLine from "./ModuleLine";
+import styles from '../../styles.scss'
 
 const FilePicker = ({ fileList }) => {
   const [fileMap, setFileMap] = useState({})
@@ -47,7 +48,7 @@ const FilePicker = ({ fileList }) => {
   
 
   return (
-    <div>
+    <div className={styles.filepicker}>
       <ModuleLine moduleName={"root"} children={fileMap} initiallyExpanded={true}/>
     </div>
   );

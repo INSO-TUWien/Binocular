@@ -1,8 +1,166 @@
 @import '~bulma';
 
-.chart {
-  flex: 1;
+//overall container for the chart and the details sideboard
+.container {
+  width: 100%;
+  display: flex;
+  overflow: hidden;
+
+  .chartContainer {
+    flex: 1;
+    display: flex;
+
+    .chart {
+      flex: 1;
+    }
+  }
+
+  .messageContainer{
+    flex: 1;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  .details {
+    display: flex;
+    overflow: hidden;
+
+    .expandButton {
+      background-color: gray;
+      padding: 2px;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .content {
+      flex: 1;
+      padding: 15px;
+
+      display: flex;
+      flex-direction: column;
+      overflow: auto;
+
+      .field {
+        border-color: #bebebe;
+        margin-bottom: 20px;
+      }
+
+      .generalDetails {
+        display: flex;
+        flex-direction: column;
+        padding-right: 10px;
+
+
+        .generalDetailsContainer {
+          display: flex;
+        }
+
+        .generalDetailsLabel {
+          font-weight: 500;
+        }
+
+        .generalDetailsDots {
+          flex: 1;
+          margin-left: 5px;
+          margin-right: 5px;
+          margin-bottom: 5px;
+          border-bottom: dotted;
+          border-color: #606060;
+        }
+      }
+
+    }
+
+
+
+    .commitDetailsList {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .commitDetails {
+      width: 500px;
+    
+      padding: 5px;
+      margin: 2px;
+    
+      border: solid;
+      background-color: #f8f8f8;
+      border-color: #dbdbdb;
+      border-width: 1px;
+      border-radius: 5px;
+    
+      display: flex;
+      flex-direction: row;
+    
+      .date {
+        flex: 1.5;
+        min-width: fit-content;
+        padding: 2px;
+        
+        display: flex;
+        align-items: center;
+        text-align: center;
+    
+        border-width: 1px;
+    
+      }
+    
+      .stats {
+        flex: 2;
+        padding: 2px;
+        border-width: 1px;
+        
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 4px;
+    
+        .deletions {
+          color: red;
+        }
+    
+        .additions {
+          color: green;
+        }
+    
+      }
+    
+      .message {
+        flex: 4;
+        padding: 2px;
+        padding-left: 4px;
+        margin-bottom: 0px;
+
+        display: flex;
+        align-items: center;
+        min-width: 0;
+
+        span {
+          text-overflow: ellipsis;
+          white-space: nowrap;
+          overflow: hidden;
+        }
+    
+      }
+      
+    
+      .link {
+        flex: 1;
+        padding: 2px;
+        align-items: center;
+        justify-content: center;
+    
+      }
+    }
+  }
 }
+
+
 
 .configContainer {
   width: 100%;
@@ -10,74 +168,65 @@
   form {
     width: 100%;
 
-    .selectContainer {
+    #select {
       width: 100%;
+    }
 
-      >div {
-        width: 100%;
+    .filepicker {
 
-        :global(.Select-arrow) {
-          display: none;
+      .moduleLine {
+        border: solid;
+        display: flex;
+        flex-direction: row;
+        margin: 4px;
+      
+        cursor: default;
+      
+        background-color: #4882e0;
+        color: whitesmoke;
+        font-weight: bold;
+      }
+      
+      .fileLine {
+        display: flex;
+        flex-direction: row;
+        margin: 4px;
+      
+        cursor: default;
+      
+        background-color: #F8F8F8;
+      }
+      
+      .moduleName {
+        flex: 1;
+        padding-left: 10px;
+        cursor: pointer;
+      
+        span {
+          float: left;
         }
+      }
+      
+      .fileName {
+        flex: 1;
+        padding-left: 10px;
+      
+        span {
+          float: left;
+        }
+      }
+      
+      .childContainer {
+        margin-left: 10px;
+        border-left: solid;
+        border-color: #bebebe;
+        padding-left: 10px;
       }
     }
   }
 }
 
-.messageContainer{
-  height: 100vh;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
 
 
-// for the module picker
-.moduleLine {
-  border: solid;
-  display: flex;
-  flex-direction: row;
-  margin: 4px;
 
-  cursor: default;
 
-  background-color: #4882e0;
-  color: whitesmoke;
-  font-weight: bold;
-}
-
-.fileLine {
-  display: flex;
-  flex-direction: row;
-  margin: 4px;
-
-  cursor: default;
-
-  background-color: #F8F8F8;
-}
-
-.moduleName {
-  flex: 1;
-  padding-left: 10px;
-  cursor: pointer;
-
-  span {
-    float: left;
-  }
-}
-
-.fileName {
-  flex: 1;
-  padding-left: 10px;
-
-  span {
-    float: left;
-  }
-}
-
-.childContainer {
-  margin-left: 10px;
-  border-left: solid;
-  border-color: #bebebe;
-  padding-left: 10px;
-}

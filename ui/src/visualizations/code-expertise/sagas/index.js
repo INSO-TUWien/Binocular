@@ -26,6 +26,7 @@ export const setCurrentBranch = createAction("SET_CURRENT_BRANCH", b => b)
 export const setActiveIssue = createAction("SET_ACTIVE_ISSUE", i => i)
 export const setActiveFiles = createAction("SET_ACTIVE_FILES", f => f)
 export const setMode = createAction("SET_MODE", m => m)
+export const setDetails = createAction("SET_DETAILS", d => d)
 
 
 

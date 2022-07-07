@@ -1,31 +1,68 @@
 import * as d3 from "d3"
 import chroma from 'chroma-js';
 import React, { useState, useEffect } from "react";
+import { useDispatch, useSelector } from 'react-redux'
+import { setDetails } from '../sagas'
+
 
 function Segment( { rad, startPercent, endPercent, devName, devData, maxCommits, devColor } ) {
 
+    const dispatch = useDispatch()
+
+    const detailsDev = useSelector((state) => state.visualizations.codeExpertise.state.config.details)
+
     const [radius, setRadius] = useState(rad)
     const [focus, setFocus] = useState(false)
-
-    const mouseEnter = () => {
+    
+    const focusSegment = () => {
         setFocus(true)        
         setRadius(rad*1.2)
     }
 
-    const mouseLeave = () => {
+    const unfocusSegment = () => {
         setFocus(false)
         setRadius(rad)
     }
+    
+
+    //enlarge segment and show additional information in the chart if mouse hovers over segment
+    const mouseEnter = () => {
+        focusSegment()
+    }
+
+    //only decrease size if segment is not selected (has not been clicked on to show details in the side panel)
+    const mouseLeave = () => {
+        if(!(detailsDev === devName)) {
+            unfocusSegment()
+        }
+    }
+
+    const onClickSegment = () => {
+        dispatch(setDetails(devName))
+    }
+
+    useEffect(() => {
+        if(detailsDev === devName) {
+            focusSegment()
+        } else {
+            unfocusSegment()
+        }
+    }, [detailsDev, devName])
+
 
     //update radius state when rad prop changes
     useEffect(() => {
-      setRadius(rad)
+        if(detailsDev === devName) {
+            focusSegment()
+        } else {
+            unfocusSegment()
+        }
     }, [rad])
 
     // ######################## COLORS ########################
 
-    const lightColor = chroma(devColor).brighten().hex()
-    const darkColor = devColor
+    const lightColor = devColor
+    const darkColor = chroma(devColor).darken().hex()
     
 
     // ######################## OUTER BORDER ########################
@@ -72,7 +109,6 @@ function Segment( { rad, startPercent, endPercent, devName, devData, maxCommits,
         .outerRadius(radius)
         .startAngle(arcStartAngle)
         .endAngle(arcEndAngle)
-
 
 
     // ######################## GREEN ADDITIONS ARC ########################
@@ -148,10 +184,10 @@ function Segment( { rad, startPercent, endPercent, devName, devData, maxCommits,
     
 
     return (
-        
         <g
         onMouseEnter={mouseEnter}
-        onMouseLeave={mouseLeave}>
+        onMouseLeave={mouseLeave}
+        onClick={onClickSegment}>
             {/*outer border*/}  
             <path
             d={circleSegment.toString()}
@@ -237,11 +273,7 @@ function Segment( { rad, startPercent, endPercent, devName, devData, maxCommits,
             />
             
         </g>
-
-        
-        
     )
-
 }
 
 //given a circle at (0,0) and specified radius, get the coordinates of a point on the outside line for the specified angle
