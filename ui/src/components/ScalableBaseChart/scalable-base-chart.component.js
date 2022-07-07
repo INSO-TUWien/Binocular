@@ -430,7 +430,7 @@ export default class ScalableBaseChartComponent extends React.Component {
       .attr('stroke-width', this.getLayerStrokeWidth.bind(this))
       .attr('stroke', this.getLayerStrokeColor.bind(this))
       .attr('d', area)
-      .attr('clip-path', 'url(#clip)')
+      //.attr('clip-path', 'url(#clip)')
       .on('mouseenter', function (event, stream) {
         return _this.onMouseover.bind(_this, this, tooltip, brushArea)(event, stream);
       })
@@ -604,14 +604,8 @@ export default class ScalableBaseChartComponent extends React.Component {
    * @param color defines the color or the cycles
    */
   paintDataPoint(brushArea, x, y0, y1, color) {
-    brushArea
-      .append('line')
-      .attr('class', this.styles.indicatorLine)
-      .attr('x1', x)
-      .attr('x2', x)
-      .attr('y1', y0)
-      .attr('y2', y1)
-      .attr('clip-path', 'url(#clip)');
+    brushArea.append('line').attr('class', this.styles.indicatorLine).attr('x1', x).attr('x2', x).attr('y1', y0).attr('y2', y1);
+    //.attr('clip-path', 'url(#clip)');
 
     brushArea
       .append('circle')
@@ -619,7 +613,7 @@ export default class ScalableBaseChartComponent extends React.Component {
       .attr('cx', x)
       .attr('cy', y1)
       .attr('r', 5)
-      .attr('clip-path', 'url(#clip)')
+      //.attr('clip-path', 'url(#clip)')
       .style('fill', color);
 
     brushArea
@@ -628,7 +622,7 @@ export default class ScalableBaseChartComponent extends React.Component {
       .attr('cx', x)
       .attr('cy', y0)
       .attr('r', 5)
-      .attr('clip-path', 'url(#clip)')
+      //.attr('clip-path', 'url(#clip)')
       .style('fill', color);
   }
 }

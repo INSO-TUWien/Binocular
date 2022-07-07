@@ -20,7 +20,7 @@ const socketIo = createSocketIoMiddleware(socket, 'api/');
 const saga = createSagaMiddleware();
 
 const logger = createLogger({
-  collapsed: () => true
+  collapsed: () => true,
 });
 
 import newDashboard from './visualizations/dashboard';
@@ -48,8 +48,8 @@ const store = createStore(
     config: {
       isFetching: false,
       lastFetched: null,
-      isShown: false
-    }
+      isShown: false,
+    },
   },
   applyMiddleware(socketIo, saga, logger)
 );

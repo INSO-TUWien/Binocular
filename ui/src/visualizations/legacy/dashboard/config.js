@@ -8,7 +8,7 @@ import {
   setSelectedAuthors,
   setShowCIChart,
   setShowIssueChart,
-  setShowChangesChart
+  setShowChangesChart,
 } from './sagas';
 import TabCombo from '../../../components/TabCombo.js';
 import styles from './styles.scss';
@@ -28,23 +28,23 @@ const mapStateToProps = (state /*, ownProps*/) => {
     selectedAuthors: dashboardState.config.selectedAuthors,
     showCIChart: dashboardState.config.showCIChart,
     showIssueChart: dashboardState.config.showIssueChart,
-    showChangesChart: dashboardState.config.showChangesChart
+    showChangesChart: dashboardState.config.showChangesChart,
   };
 };
 
 const mapDispatchToProps = (dispatch /*, ownProps*/) => {
   return {
-    onClickResolution: resolution => dispatch(setResolution(resolution)),
-    onClickIssues: showIssues => dispatch(setShowIssues(showIssues)),
-    onClickMetric: metric => dispatch(setDisplayMetric(metric)),
-    onClickCheckboxLegend: selected => dispatch(setSelectedAuthors(selected)),
-    onClickShowCIChart: showCIChart => dispatch(setShowCIChart(showCIChart)),
-    onClickShowIssueChart: showIssueChart => dispatch(setShowIssueChart(showIssueChart)),
-    onClickShowChangesChart: showChangesChart => dispatch(setShowChangesChart(showChangesChart))
+    onClickResolution: (resolution) => dispatch(setResolution(resolution)),
+    onClickIssues: (showIssues) => dispatch(setShowIssues(showIssues)),
+    onClickMetric: (metric) => dispatch(setDisplayMetric(metric)),
+    onClickCheckboxLegend: (selected) => dispatch(setSelectedAuthors(selected)),
+    onClickShowCIChart: (showCIChart) => dispatch(setShowCIChart(showCIChart)),
+    onClickShowIssueChart: (showIssueChart) => dispatch(setShowIssueChart(showIssueChart)),
+    onClickShowChangesChart: (showChangesChart) => dispatch(setShowChangesChart(showChangesChart)),
   };
 };
 
-const DashboardConfigComponent = props => {
+const DashboardConfigComponent = (props) => {
   let otherCommitters;
   if (props.palette && 'others' in props.palette) {
     otherCommitters = props.committers.length - (Object.keys(props.palette).length - 1);
@@ -62,9 +62,9 @@ const DashboardConfigComponent = props => {
                 { label: 'Years', icon: 'calendar-plus', value: 'years' },
                 { label: 'Months', icon: 'calendar', value: 'months' },
                 { label: 'Weeks', icon: 'calendar-week', value: 'weeks' },
-                { label: 'Days', icon: 'calendar-day', value: 'days' }
+                { label: 'Days', icon: 'calendar-day', value: 'days' },
               ]}
-              onChange={value => props.onClickResolution(value)}
+              onChange={(value) => props.onClickResolution(value)}
             />
             <div>
               <label className={styles.checkboxLabel}>
@@ -116,9 +116,9 @@ const DashboardConfigComponent = props => {
               options={[
                 { label: 'All', icon: 'database', value: 'all' },
                 { label: 'Open', icon: 'folder-open', value: 'open' },
-                { label: 'Closed', icon: 'folder', value: 'closed' }
+                { label: 'Closed', icon: 'folder', value: 'closed' },
               ]}
-              onChange={value => props.onClickIssues(value)}
+              onChange={(value) => props.onClickIssues(value)}
             />
           </div>
         </div>
@@ -129,9 +129,9 @@ const DashboardConfigComponent = props => {
               value={props.metric}
               options={[
                 { label: '# lines changed', icon: 'file-alt', value: 'linesChanged' },
-                { label: '# commits', icon: 'cloud-upload-alt', value: 'commits' }
+                { label: '# commits', icon: 'cloud-upload-alt', value: 'commits' },
               ]}
-              onChange={value => props.onClickMetric(value)}
+              onChange={(value) => props.onClickMetric(value)}
             />
           </div>
           <CheckboxLegend

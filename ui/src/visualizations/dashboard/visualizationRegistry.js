@@ -6,6 +6,8 @@ import codeOwnershipRiver from '../legacy/code-ownership-river';
 import issueImpact from '../legacy/issue-impact';
 import hotspotDials from '../legacy/hotspot-dials';
 import dashboard from '../legacy/dashboard';
+import CIBuilds from '../VisualizationComponents/CIBuilds';
+import Issues from '../VisualizationComponents/Issues';
 
 export default {
   empty,
@@ -13,5 +15,7 @@ export default {
   dashboard,
   codeOwnershipRiver,
   issueImpact,
-  hotspotDials
+  hotspotDials,
+  CIBuilds,
+  Issues,
 };
