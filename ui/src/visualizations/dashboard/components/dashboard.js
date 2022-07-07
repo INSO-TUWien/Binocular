@@ -95,10 +95,10 @@ export default class Dashboard extends React.Component {
             visualization.size === 'large'
               ? 'span 4/span 4'
               : visualization.size === 'wide'
-                ? 'span 2/span 4'
-                : visualization.size === 'high'
-                  ? 'span 4/span 2'
-                  : 'span 2/span 2',
+              ? 'span 2/span 4'
+              : visualization.size === 'high'
+              ? 'span 4/span 2'
+              : 'span 2/span 2',
         }}>
         <div className={dashboardStyles.menuBar}>
           <div className={dashboardStyles.visualizationName}>{visualizationRegistry[visualization.key].label}</div>
@@ -142,7 +142,7 @@ export default class Dashboard extends React.Component {
           </div>
         </div>
         <div className={dashboardStyles.inside}>
-          {React.createElement(visualizationRegistry[visualization.key].ChartComponent, { id: visualization.id })}
+          {React.createElement(visualizationRegistry[visualization.key].ChartComponent, { id: visualization.id, size: visualization.size })}
         </div>
       </div>
     );
@@ -228,7 +228,7 @@ export default class Dashboard extends React.Component {
       e.dataTransfer.dropEffect = 'move';
 
       const target = e.target;
-      if (target && target !== dragEl && target.nodeName === 'DIV') {
+      if (target && target !== dragEl && target.nodeName === 'DIV' && target.classList.contains(dashboardStyles.visualizationContainer)) {
         if (target.classList.contains(dashboardStyles.inside)) {
           e.stopPropagation();
         } else {

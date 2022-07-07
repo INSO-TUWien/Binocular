@@ -14,20 +14,22 @@ const mapDispatchToProps = (dispatch /*, ownProps*/) => {
 };
 
 const DashboardConfigComponent = (props) => {
-  const configComponents = [];
+  const visulaizations = [];
   for (const visualization in visualizationRegistry) {
-    const configComponent = visualizationRegistry[visualization].ConfigComponent;
-    if (configComponent !== undefined) {
-      configComponents.push(configComponent);
+    const viz = visualizationRegistry[visualization];
+    if (viz.ConfigComponent !== undefined) {
+      visulaizations.push(viz);
     }
   }
   return (
     <div className={styles.configContainer}>
-      {configComponents.map((component) => {
+      {visulaizations.map((viz) => {
         return (
           <div>
-            {React.createElement(component)}
             <hr />
+            <h1>{viz.label}</h1>
+            <hr />
+            {React.createElement(viz.ConfigComponent)}
           </div>
         );
       })}

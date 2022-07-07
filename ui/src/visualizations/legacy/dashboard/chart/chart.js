@@ -27,7 +27,7 @@ export default class Dashboard extends React.Component {
       issueScale,
       ciScale,
       commitPalette,
-      selectedAuthors
+      selectedAuthors,
     };
   }
 
@@ -47,7 +47,7 @@ export default class Dashboard extends React.Component {
       issueScale,
       ciScale,
       commitPalette,
-      selectedAuthors
+      selectedAuthors,
     });
   }
 
@@ -157,14 +157,14 @@ export default class Dashboard extends React.Component {
         filteredIssues = props.issues;
         break;
       case 'open':
-        _.each(props.issues, issue => {
+        _.each(props.issues, (issue) => {
           if (issue.closedAt === null) {
             filteredIssues.push(issue);
           }
         });
         break;
       case 'closed':
-        _.each(props.issues, issue => {
+        _.each(props.issues, (issue) => {
           if (issue.closedAt) {
             filteredIssues.push(issue);
           }
@@ -218,11 +218,11 @@ export default class Dashboard extends React.Component {
     //---- STEP 3: CONSTRUCT CHART DATA FROM AGGREGATED ISSUES ----
     const issueChartData = [];
     const issueScale = [0, 0];
-    _.each(data, function(issue) {
+    _.each(data, function (issue) {
       issueChartData.push({
         date: issue.date,
         Opened: issue.openCount,
-        Closed: issue.closedCount > 0 ? issue.closedCount * -1 : -0.001
+        Closed: issue.closedCount > 0 ? issue.closedCount * -1 : -0.001,
       }); //-0.001 for stack layout to realize it belongs on the bottom
       if (issueScale[1] < issue.openCount) {
         issueScale[1] = issue.openCount;
@@ -265,7 +265,7 @@ export default class Dashboard extends React.Component {
     //--- STEP 2: CONSTRUCT CHART DATA FROM AGGREGATED BUILDS ----
     const ciChartData = [];
     const ciScale = [0, 0];
-    _.each(data, function(build) {
+    _.each(data, function (build) {
       ciChartData.push({ date: build.date, Succeeded: build.succeeded, Failed: build.failed > 0 ? build.failed * -1 : 0 });
       if (ciScale[1] < build.succeeded) {
         ciScale[1] = build.succeeded;
@@ -316,7 +316,7 @@ export default class Dashboard extends React.Component {
           obj.statsByAuthor[commitAuthor] = {
             count: obj.statsByAuthor[commitAuthor].count + 1,
             additions: obj.statsByAuthor[commitAuthor].additions + additions,
-            deletions: obj.statsByAuthor[commitAuthor].deletions + deletions
+            deletions: obj.statsByAuthor[commitAuthor].deletions + deletions,
           };
         } else {
           //Else create new values
@@ -336,7 +336,7 @@ export default class Dashboard extends React.Component {
     } else {
       commitChartPalette['others'] = props.palette['others'];
     }
-    _.each(data, function(commit) {
+    _.each(data, function (commit) {
       //commit has structure {date, statsByAuthor: {}} (see next line)}
       const obj = { date: commit.date };
       if (chartIsSplit) {
@@ -345,7 +345,7 @@ export default class Dashboard extends React.Component {
       } else {
         obj['others'] = 0;
       }
-      _.each(props.committers, function(committer) {
+      _.each(props.committers, function (committer) {
         //commitLegend to iterate over authorNames, commitLegend has structure [{name, style}, ...]
         if (committer in commit.statsByAuthor && committer in props.palette) {
           //If committer has data
@@ -383,10 +383,10 @@ export default class Dashboard extends React.Component {
 
     //---- STEP 3: SCALING ----
     const commitScale = [0, 0];
-    _.each(commitChartData, dataPoint => {
+    _.each(commitChartData, (dataPoint) => {
       let positiveTotals = 0;
       let negativeTotals = 0;
-      _.each(Object.keys(dataPoint).splice(1), key => {
+      _.each(Object.keys(dataPoint).splice(1), (key) => {
         if (key.includes('(Additions) ') && props.selectedAuthors.indexOf(key.split(') ')[1]) > -1) {
           positiveTotals += dataPoint[key];
         } else if (key.includes('(Deletions) ') && props.selectedAuthors.indexOf(key.split(') ')[1]) > -1) {
@@ -407,7 +407,7 @@ export default class Dashboard extends React.Component {
     const selectedAuthors = [];
     const keys = Object.keys(commitChartData[0]).splice(1);
 
-    _.each(keys, key => {
+    _.each(keys, (key) => {
       let concatKey = key;
       if (key.includes('(Additions) ') || key.includes('(Deletions) ')) {
         concatKey = key.split(') ')[1];
