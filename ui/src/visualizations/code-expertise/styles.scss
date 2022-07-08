@@ -59,10 +59,6 @@
           display: flex;
         }
 
-        .generalDetailsLabel {
-          font-weight: 500;
-        }
-
         .generalDetailsDots {
           flex: 1;
           margin-left: 5px;
@@ -76,29 +72,57 @@
     }
 
 
+    .monospaced {
+      font-family: $family-monospace;
+    }
+
+
+    .commitsDetailsListContainer {
+      margin-bottom: 15px;
+
+      label {
+        font-weight: 500;
+      }
+    }
 
     .commitDetailsList {
       display: flex;
       flex-direction: column;
+
+      padding-left: 10px;
+    }
+
+    .commitDetailsGood {
+      background-color: rgb(184, 240, 184);
+      border-color: darkgreen;
+    }
+
+    .commitDetailsBad {
+      background-color: rgb(240, 188, 184);
+      border-color: darkred;
+    }
+
+    .commitDetailsNeutral {
+      background-color: #f8f8f8;
+      border-color: #dbdbdb;
     }
 
     .commitDetails {
       width: 500px;
     
-      padding: 5px;
+      padding: 10px;
       margin: 2px;
     
       border: solid;
-      background-color: #f8f8f8;
-      border-color: #dbdbdb;
       border-width: 1px;
       border-radius: 5px;
+
+      cursor: pointer;
     
       display: flex;
       flex-direction: row;
     
-      .date {
-        flex: 1.5;
+      .ciIcon {
         min-width: fit-content;
         padding: 2px;
         
@@ -111,7 +135,7 @@
       }
     
       .stats {
-        flex: 2;
+        flex: 1;
         padding: 2px;
         border-width: 1px;
         
@@ -130,8 +154,8 @@
     
       }
     
-      .message {
-        flex: 4;
+      .commitMessage {
+        flex: 3;
         padding: 2px;
         padding-left: 4px;
         margin-bottom: 0px;
@@ -150,11 +174,51 @@
       
     
       .link {
-        flex: 1;
         padding: 2px;
         align-items: center;
         justify-content: center;
     
+      }
+    }
+
+
+
+
+    .commitDetailsExpanded {
+      width: 500px;
+    
+      padding: 10px;
+      margin: 2px;
+
+      gap: 8px;
+    
+      border: solid;
+      border-width: 1px;
+      border-radius: 5px;
+
+      cursor: pointer;
+    
+      display: flex;
+      flex-direction: column;
+    
+      .stats {    
+        .deletions {
+          color: red;
+        }
+        .additions {
+          color: green;
+        }
+      }
+
+      .dateAndLink {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+
+        p {
+          margin: 0px;
+        }
       }
     }
   }

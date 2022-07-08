@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useSelector, useDispatch } from 'react-redux'
+import _ from 'lodash'
 import styles from '../../styles.scss'
 import { setDetails } from '../../sagas'
 import CommitsDetailsList from "./CommitDetailsList";
@@ -111,7 +112,10 @@ const Details = () => {
                         <label className="label">Commits:</label>
 
                         <div>
-                            <CommitsDetailsList commits={devDetails.commits.sort((a,b) => (new Date(b.date)) - (new Date(a.date)))}/>
+                            {Object.entries(_.groupBy(
+                                devDetails.commits.sort((a,b) => (new Date(b.date)) - (new Date(a.date))),
+                                (commit) => commit.date.substring(0,10)))
+                            .map(item => <CommitsDetailsList date={item[0]} commits={item[1]}/>)}
                         </div>
                         
                     </div>
@@ -131,7 +135,7 @@ const GeneralDetailsData = ({ label, text }) => {
 
     return (
         <div className={styles.generalDetailsContainer}>
-            <span className={styles.generalDetailsLabel}>{label}:</span>
+            <span>{label}:</span>
             <div className={styles.generalDetailsDots}></div>
             <span>{text}</span>
         </div>
