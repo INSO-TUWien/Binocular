@@ -71,7 +71,8 @@ export default class Issues extends React.Component {
     }
 
     //---- STEP 1: FILTER ISSUES ----
-    /*let filteredIssues = [];
+    console.log(props);
+    let filteredIssues = [];
     switch (props.showIssues) {
       case 'all':
         filteredIssues = props.issues;
@@ -91,8 +92,7 @@ export default class Issues extends React.Component {
         });
         break;
       default:
-    }*/
-    let filteredIssues = props.issues;
+    }
 
     //---- STEP 2: AGGREGATE ISSUES PER TIME INTERVAL ----
     const data = [];

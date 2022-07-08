@@ -3,7 +3,6 @@
 import { connect } from 'react-redux';
 
 import Chart from './chart.js';
-import { setViewport } from '../sagas';
 
 const mapStateToProps = (state /*, ownProps*/) => {
   const dashState = state.visualizations.dashboard.state;
@@ -14,6 +13,7 @@ const mapStateToProps = (state /*, ownProps*/) => {
     firstSignificantTimestamp: dashState.data.data.firstSignificantTimestamp,
     lastSignificantTimestamp: dashState.data.data.lastSignificantTimestamp,
     chartResolution: dashState.config.chartResolution,
+    showIssues: dashState.config.showIssues,
   };
 };
 

@@ -6,13 +6,16 @@ import styles from './styles.scss';
 
 import LegendCompact from '../../../components/LegendCompact';
 import TabCombo from '../../../components/TabCombo';
+import { setShowIssues } from './sagas';
 
 const mapStateToProps = (state /*, ownProps*/) => {
-  return {};
+  const dashboardState = state.visualizations.dashboard.state;
+
+  return { showIssues: dashboardState.config.showIssues };
 };
 
 const mapDispatchToProps = (dispatch /*, ownProps*/) => {
-  return {};
+  return { onClickIssues: (showIssues) => dispatch(setShowIssues(showIssues)) };
 };
 
 const CIBuildsConfigComponent = (props) => {
