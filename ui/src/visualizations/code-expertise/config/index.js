@@ -9,7 +9,8 @@ import TabCombo from '../../../components/TabCombo.js';
 import FilePicker from './filePicker/index.js';
 import styles from "../styles.scss"
 import { graphQl } from '../../../utils';
-import { setActiveIssue, setMode, setCurrentBranch } from '../sagas'
+import { endpointUrl } from '../../../utils';
+import { setActiveIssue, setMode, setCurrentBranch, setActiveFiles } from '../sagas'
 
 export default () => {
 
@@ -27,6 +28,10 @@ export default () => {
     dispatch(setCurrentBranch(branch))
   }
 
+  const resetActiveFiles = () => {
+    dispatch(setActiveFiles([]))
+  }
+
   //global state from redux store
   const expertiseState = useSelector((state) => state.visualizations.codeExpertise.state)
   const currentMode = expertiseState.config.mode
@@ -42,24 +47,6 @@ export default () => {
 
   //run once on initialization
   useEffect(() => {
-    
-    //get all files for file-select
-    Promise.resolve(
-      graphQl.query(
-        `
-      query{
-       files(sort: "ASC"){
-          data{path,webUrl}
-        }
-      }
-      `,
-      {}
-      ))
-    .then(resp => resp.files.data)
-    .then(files => {
-      setFiles(files.map(file => file.path))
-    })
-
 
     //get all branches for branch-select
     Promise.resolve(
@@ -113,6 +100,33 @@ export default () => {
   }, []);
 
 
+
+  //update files every time the branch changes
+  //also reset selected files
+  useEffect(() => {
+    if(currentBranch) {
+
+      resetActiveFiles()
+      
+      //get all files for file-select
+      Promise.resolve(
+        fetch(endpointUrl('files'), {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            branch: currentBranch
+          })
+        }).then((resp) => resp.json()))
+      .then(resp => resp.files)
+      .then(files => {
+        console.log(files)
+        setFiles(files)
+      })
+    }
+  }, [currentBranch])
+  
 
   
   

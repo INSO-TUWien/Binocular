@@ -1,6 +1,24 @@
 'use strict';
 
 import { collectPages, graphQl } from '../../../utils';
+import { endpointUrl } from '../../../utils';
+
+//get the blame data for a specific commit and for specific files
+export function getBlame(sha, files) {
+
+  console.log(sha, files)
+
+  return fetch(endpointUrl('blame'), {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      sha: sha,
+      files: files
+    })
+  }).then((resp) => resp.json());
+}
 
 
 export function getCommitsForIssue(iid) {

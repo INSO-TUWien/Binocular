@@ -9,7 +9,7 @@ import {
   mapSaga,
 } from "../../../sagas/utils.js";
 
-import { getAllCommits, getCommitsForBranch, getCommitsForIssue, getIssueData, getAllBuildData, addBuildData } from "./helper.js"
+import { getAllCommits, getCommitsForBranch, getCommitsForIssue, getIssueData, getAllBuildData, addBuildData, getBlame } from "./helper.js"
 
 
 
@@ -122,6 +122,8 @@ export const fetchCodeExpertiseData = fetchFactory(
         //########### add build data to commits ###########
         //TODO can this be done in the back end?
         relevantCommits = addBuildData(relevantCommits, builds)
+
+        let issueFiles = new Set()
   
         //########### extract data for each stakeholder ###########
         
@@ -137,14 +139,42 @@ export const fetchCodeExpertiseData = fetchFactory(
 
           //for each stakeholder, sum up relevant additions
           result['devData'][stakeholder]['additions'] = _.reduce(commitsByStakeholders[stakeholder], (sum, commit) => {
+
+            //while we are at it, add all files of the commit to issueFiles for later
+            commit.files.data.map(file => {
+              issueFiles.add(file.file.path)
+            })
+
+
             //we are interested in all additions made in each commit
             return sum + commit.stats.additions
           }, 0)
         }
-        
-        console.log("result", result)
-  
-        return result
+
+        //########### add ownership data to commits ###########
+
+        //get latest commit of the branch
+        let latestRelevantCommit = relevantCommits.sort((a,b) => (new Date(b.date) - new Date(a.date)))[0]
+
+        return Promise.resolve(getBlame(latestRelevantCommit.sha, [...issueFiles])).then(res => {
+
+          Object.entries(res.blame).map(item => {
+            const devMail = item[0]
+            const linesOwned = item[1]
+
+            //add to dev object
+            for (let stakeholder in commitsByStakeholders) {
+              if(stakeholder.includes('<' + devMail + '>')) {
+                result['devData'][stakeholder]['linesOwned'] = linesOwned
+                break
+              }
+            }
+          })
+        }).then(_ => {
+            console.log("result", result)
+            return result
+          }
+        )
       })
 
 
@@ -186,6 +216,7 @@ export const fetchCodeExpertiseData = fetchFactory(
         }
 
         
+        
         //########### add build data to commits ###########
         //TODO can this be done in the back end?
         relevantCommits = addBuildData(relevantCommits, builds)
@@ -222,9 +253,34 @@ export const fetchCodeExpertiseData = fetchFactory(
           }, 0)
         }
         
-        console.log("result", result)
-  
-        return result
+
+
+        //########### add ownership data to commits ###########
+
+        //get latest commit of the branch
+        let latestRelevantCommit = relevantCommits.sort((a,b) => (new Date(b.date) - new Date(a.date)))[0]
+
+        return Promise.resolve(getBlame(latestRelevantCommit.sha, activeFiles)).then(res => {
+
+          Object.entries(res.blame).map(item => {
+            const devMail = item[0]
+            const linesOwned = item[1]
+
+            //add to dev object
+            for (let stakeholder in commitsByStakeholders) {
+              if(stakeholder.includes('<' + devMail + '>')) {
+                result['devData'][stakeholder]['linesOwned'] = linesOwned
+                break
+              }
+            }
+          })
+        }).then(_ => {
+            console.log("result", result)
+            return result
+          }
+        )
+
+        
       })
 
 

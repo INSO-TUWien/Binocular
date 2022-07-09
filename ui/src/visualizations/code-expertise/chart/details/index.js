@@ -90,8 +90,12 @@ const Details = () => {
                             text={selectedDev.substring((selectedDev.indexOf('<')+1), (selectedDev.length-1))}/>
 
                             <GeneralDetailsData
-                            label='Total Additions'
+                            label='Total Lines Added'
                             text={devDetails.additions}/>
+
+                            <GeneralDetailsData
+                            label='Total Lines Owned'
+                            text={`${devDetails.linesOwned} (${((devDetails.linesOwned / devDetails.additions)*100).toFixed(2)}% of added lines)`}/>
 
                             <GeneralDetailsData
                             label='Total Commits'

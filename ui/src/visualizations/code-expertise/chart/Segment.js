@@ -61,8 +61,10 @@ function Segment( { rad, startPercent, endPercent, devName, devData, maxCommits,
 
     // ######################## COLORS ########################
 
-    const lightColor = devColor
-    const darkColor = chroma(devColor).darken().hex()
+    const devColorLight = devColor
+    const devColorDark = chroma(devColor).darken().hex()
+    const goodCommitsColor = chroma('green').brighten().hex()
+    const badCommitsColor = chroma('red').brighten().hex()
     
 
     // ######################## OUTER BORDER ########################
@@ -92,8 +94,12 @@ function Segment( { rad, startPercent, endPercent, devName, devData, maxCommits,
     const goodCommits = devData.commits.filter(c => c.build == 'success').length
     const badCommits = devData.commits.filter(c => c.build != null && c.build != 'success').length
 
-    const goodCommitsRadius = radius + (buildWeight * (goodCommits / maxCommits))
-
+    let goodCommitsRadius = radius
+    //prevent /0
+    if(maxCommits > 0) {
+        goodCommitsRadius = radius + (buildWeight * (goodCommits / maxCommits))
+    }
+    
     const goodCommitsArc = d3.arc()
     goodCommitsArc
         .innerRadius(radius)
@@ -102,7 +108,12 @@ function Segment( { rad, startPercent, endPercent, devName, devData, maxCommits,
         .endAngle(arcEndAngle)
     
     
-    const badCommitsRadius = radius - (buildWeight * (badCommits / maxCommits))
+    let badCommitsRadius = radius
+    //prevent /0
+    if (maxCommits > 0) {
+        badCommitsRadius = radius - (buildWeight * (badCommits / maxCommits))
+    }
+    
     const badCommitsArc = d3.arc()
     badCommitsArc
         .innerRadius(badCommitsRadius)
@@ -111,7 +122,7 @@ function Segment( { rad, startPercent, endPercent, devName, devData, maxCommits,
         .endAngle(arcEndAngle)
 
 
-    // ######################## GREEN ADDITIONS ARC ########################
+    // ######################## RED ARC ########################
 
     const additionsArcWeight = radius / 20
     const additionsArcInnerRadius = radius * 0.6 - additionsArcWeight
@@ -122,6 +133,23 @@ function Segment( { rad, startPercent, endPercent, devName, devData, maxCommits,
         .outerRadius(additionsArcOuterRadius)
         .startAngle(arcStartAngle)
         .endAngle(arcEndAngle)
+
+
+    // ######################## GREEN OWNERSHIP ARC ########################
+
+    let ownershipEndAngle = arcStartAngle
+    if(devData.linesOwned) {
+        ownershipEndAngle += getAngle((endPercent - startPercent) * (devData.linesOwned / devData.additions))
+        if(ownershipEndAngle > arcEndAngle) {
+            ownershipEndAngle = arcEndAngle
+        }
+    }
+    const ownershipArc = d3.arc()
+    ownershipArc
+        .innerRadius(additionsArcInnerRadius)
+        .outerRadius(additionsArcOuterRadius)
+        .startAngle(arcStartAngle)
+        .endAngle(ownershipEndAngle)
 
     
     // ######################## GENERAL TEXT SETTINGS ########################
@@ -188,6 +216,19 @@ function Segment( { rad, startPercent, endPercent, devName, devData, maxCommits,
         onMouseEnter={mouseEnter}
         onMouseLeave={mouseLeave}
         onClick={onClickSegment}>
+
+            <defs>
+                <pattern id={`hatch_${devName.replace(/\s/g, '')}`} patternUnits='userSpaceOnUse' width='4' height='4'>
+                <path d='M-1,1 l2,-2
+                        M0,4 l4,-4
+                        M3,5 l2,-2' 
+                        style={{stroke: devColorDark, strokeWidth: 1}} />
+                </pattern>
+            </defs>
+            
+
+
+
             {/*outer border*/}  
             <path
             d={circleSegment.toString()}
@@ -195,24 +236,30 @@ function Segment( { rad, startPercent, endPercent, devName, devData, maxCommits,
             fill="white"
             />
 
-            {/*green additions arc*/}
+            {/*red arc*/}
             <path
             d={additionsArc().toString()}
-            fill="green"
+            fill={`url(#hatch_${devName.replace(/\s/g, '')})`}
             />
 
-            {/*additions number outside green additions arc. Only display this when mouse hovers on segment*/}
+            {/*ownership arc*/}
+            <path
+            d={ownershipArc().toString()}
+            fill={devColorDark}
+            />
+
+            {/*additions number outside additions/ownership arc. Only display this when mouse hovers on segment*/}
             {focus &&
             <g>
                 <defs>
                     <path
-                    id = {devName + "_additionsPath"}
+                    id = {devName.replace(/\s/g, '') + "_additionsPath"}
                     d={additionsTextArc().toString()}
                     />
                 </defs>
                 <text>
                     <textPath
-                    href={"#" + devName + "_additionsPath"}
+                    href={"#" + devName.replace(/\s/g, '') + "_additionsPath"}
                     startOffset="25%"
                     textAnchor="middle"
                     alignmentBaseline="middle">
@@ -225,13 +272,13 @@ function Segment( { rad, startPercent, endPercent, devName, devData, maxCommits,
             {/*bad commits arc*/}
             <path
             d={badCommitsArc().toString()}
-            fill={darkColor}
+            fill={badCommitsColor}
             />
 
             {/*good commits arc*/}
             <path
             d={goodCommitsArc().toString()}
-            fill={lightColor}
+            fill={goodCommitsColor}
             />
 
             {/*dev name outside of segment*/}
@@ -239,13 +286,13 @@ function Segment( { rad, startPercent, endPercent, devName, devData, maxCommits,
                 <g>
                     <defs>
                         <path
-                        id = {devName + "_namePath"}
+                        id = {devName.replace(/\s/g, '') + "_namePath"}
                         d={nameArc().toString()}
                         />
                     </defs>
                     <text>
                         <textPath
-                        href={"#" + devName + "_namePath"}
+                        href={"#" + devName.replace(/\s/g, '') + "_namePath"}
                         startOffset="25%"
                         textAnchor="middle"
                         alignmentBaseline="middle">

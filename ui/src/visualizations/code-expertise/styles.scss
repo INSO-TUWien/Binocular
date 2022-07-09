@@ -93,18 +93,29 @@
     }
 
     .commitDetailsGood {
-      background-color: rgb(184, 240, 184);
+      background-color: #4cb13a;
       border-color: darkgreen;
+      color: white;
+      border: solid;
+      border-width: 1px;
+      border-radius: 5px;
     }
 
     .commitDetailsBad {
-      background-color: rgb(240, 188, 184);
+      background-color: #ff5a36;
       border-color: darkred;
+      color: white;
+      border: solid;
+      border-width: 1px;
+      border-radius: 5px;
     }
 
     .commitDetailsNeutral {
       background-color: #f8f8f8;
       border-color: #dbdbdb;
+      border: solid;
+      border-width: 1px;
+      border-radius: 5px;
     }
 
     .commitDetails {
@@ -143,15 +154,6 @@
         align-items: center;
         justify-content: center;
         gap: 4px;
-    
-        .deletions {
-          color: red;
-        }
-    
-        .additions {
-          color: green;
-        }
-    
       }
     
       .commitMessage {
@@ -200,15 +202,6 @@
     
       display: flex;
       flex-direction: column;
-    
-      .stats {    
-        .deletions {
-          color: red;
-        }
-        .additions {
-          color: green;
-        }
-      }
 
       .dateAndLink {
         display: flex;

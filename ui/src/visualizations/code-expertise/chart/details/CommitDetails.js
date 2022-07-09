@@ -45,7 +45,7 @@ const CommitDetails = ({ commit }) => {
                     
 
                     <div className={styles.stats}>
-                        <span className={styles.deletions}>{commit.stats.deletions} deletions</span>, <span className={styles.additions}>{commit.stats.additions} additions</span>
+                        <span>{commit.stats.deletions} deletions</span>, <span>{commit.stats.additions} additions</span>
                     </div>
 
                     <div>
@@ -82,7 +82,7 @@ const CommitDetails = ({ commit }) => {
             </div>
 
             <div className={styles.stats}>
-                <span className={styles.deletions}>-{commit.stats.deletions}</span> | <span className={styles.additions}>+{commit.stats.additions}</span>
+                <span>-{commit.stats.deletions}</span> | <span>+{commit.stats.additions}</span>
                 
             </div>
 
