@@ -95,7 +95,11 @@ const Details = () => {
 
                             <GeneralDetailsData
                             label='Total Lines Owned'
-                            text={`${devDetails.linesOwned} (${((devDetails.linesOwned / devDetails.additions)*100).toFixed(2)}% of added lines)`}/>
+                            text={
+                                devDetails.linesOwned ?
+                                `${devDetails.linesOwned} (${((devDetails.linesOwned / devDetails.additions)*100).toFixed(2)}% of added lines)`
+                                : '0 (0% of added lines)'
+                            }/>
 
                             <GeneralDetailsData
                             label='Total Commits'

@@ -27,6 +27,7 @@ export const setActiveIssue = createAction("SET_ACTIVE_ISSUE", i => i)
 export const setActiveFiles = createAction("SET_ACTIVE_FILES", f => f)
 export const setMode = createAction("SET_MODE", m => m)
 export const setDetails = createAction("SET_DETAILS", d => d)
+export const setFilterMergeCommits = createAction("SET_FILTER_MERGE_COMMITS", f => f)
 
 
 
@@ -38,6 +39,7 @@ export default function* () {
   yield fork(watchSetMode)
   yield fork(watchSetActiveIssue)
   yield fork(watchSetActiveFiles)
+  yield fork(watchSetFilterMergeCommits)
 
   //yield fork(...); for every additional watcher function
 }
@@ -71,6 +73,10 @@ function* watchSetActiveIssue() {
   yield takeEvery('SET_ACTIVE_ISSUE', fetchCodeExpertiseData);
 }
 
+function* watchSetFilterMergeCommits() {
+  yield takeEvery('SET_FILTER_MERGE_COMMITS', fetchCodeExpertiseData);
+}
+
 //fetchFactory returns a function that calls the specified function*()
 // and dispatches the specified actions (requestCodeExpertiseData etc.) at appropriate points
 export const fetchCodeExpertiseData = fetchFactory(
@@ -81,6 +87,7 @@ export const fetchCodeExpertiseData = fetchFactory(
     const issueId = state.visualizations.codeExpertise.state.config.activeIssueId
     const activeFiles = state.visualizations.codeExpertise.state.config.activeFiles
     const branch = state.visualizations.codeExpertise.state.config.currentBranch
+    const filterMergeCommits = state.visualizations.codeExpertise.state.config.filterMergeCommits
 
     let result = {
       'devData': {},
@@ -112,7 +119,14 @@ export const fetchCodeExpertiseData = fetchFactory(
         //we now have all commits for the current branch and all commits for the issue
         //intersect the two groups to get the result set
         //we are interested in commits that are both on the current branch and related to the issue
-        let relevantCommits = branchCommits.filter(commit => issueCommits.map(c => c.sha).includes(commit.sha));
+        let relevantCommits = branchCommits.filter(commit => {
+
+          if(filterMergeCommits && commit.message.toLowerCase().includes('merge')) {
+            return false
+          }
+
+          return issueCommits.map(c => c.sha).includes(commit.sha)
+        });
 
         if(relevantCommits.length == 0) {
           return result
@@ -198,6 +212,13 @@ export const fetchCodeExpertiseData = fetchFactory(
   
         //we are interested in commits that are both on the current branch and related to the current file/module
         let relevantCommits = branchCommits.filter(c => {
+
+
+          if(filterMergeCommits && c.message.toLowerCase().includes('merge')) {
+            return false
+          }
+
+
           //extract all filepaths of the commit
           const filePathsTouchedByCommit = c.files.data.map(fileObject => fileObject.file.path)
           //if the resulting array includes one of the active files, this commit is relevant
@@ -261,6 +282,8 @@ export const fetchCodeExpertiseData = fetchFactory(
         let latestRelevantCommit = relevantCommits.sort((a,b) => (new Date(b.date) - new Date(a.date)))[0]
 
         return Promise.resolve(getBlame(latestRelevantCommit.sha, activeFiles)).then(res => {
+
+          console.log('frontend blame result: ', res)
 
           Object.entries(res.blame).map(item => {
             const devMail = item[0]

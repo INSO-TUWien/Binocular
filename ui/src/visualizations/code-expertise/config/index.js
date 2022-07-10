@@ -10,7 +10,7 @@ import FilePicker from './filePicker/index.js';
 import styles from "../styles.scss"
 import { graphQl } from '../../../utils';
 import { endpointUrl } from '../../../utils';
-import { setActiveIssue, setMode, setCurrentBranch, setActiveFiles } from '../sagas'
+import { setActiveIssue, setMode, setCurrentBranch, setActiveFiles, setFilterMergeCommits } from '../sagas'
 
 export default () => {
 
@@ -32,11 +32,16 @@ export default () => {
     dispatch(setActiveFiles([]))
   }
 
+  const onSetFilterMergeCommits = (isChecked) => {
+    dispatch(setFilterMergeCommits(isChecked))
+  }
+
   //global state from redux store
   const expertiseState = useSelector((state) => state.visualizations.codeExpertise.state)
   const currentMode = expertiseState.config.mode
   const currentBranch = expertiseState.config.currentBranch
   const activeIssueId = expertiseState.config.activeIssueId
+  const filterMergeCommits = expertiseState.config.filterMergeCommits
   
   //local state
   let [branchOptions, setBranchOptions] = useState([])
@@ -150,6 +155,23 @@ export default () => {
             </div>
           </div>
         </div>
+
+
+        {/* select if merge commits should be filtered */}
+        <div className="field">
+          <div className="control">
+            <label className="label">Merge Commits:</label>
+            <input
+              type="checkbox"
+              checked={filterMergeCommits}
+              onChange={(event) => onSetFilterMergeCommits(event.target.checked)}
+            />
+            <span>Filter Commits containing the Word 'merge'</span>
+          </div>
+        </div>
+
+
+        
         
         {/* select if commits related to issues or commits related to files should be visualized */}
         <div className="field">
