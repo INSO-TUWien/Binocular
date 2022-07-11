@@ -8,7 +8,6 @@ import _ from 'lodash';
 
 import StackedAreaChart from '../../../../components/StackedAreaChart';
 import moment from 'moment';
-import cx from 'classnames';
 import chroma from 'chroma-js';
 
 export default class Changes extends React.Component {
@@ -56,7 +55,6 @@ export default class Changes extends React.Component {
 
     const commitChart = (
       <div className={styles.chartLine}>
-        <div className={cx(styles.text, 'label')}>Changes</div>
         <div className={styles.chart}>
           <StackedAreaChart
             content={this.state.commitChartData}

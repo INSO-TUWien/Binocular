@@ -1,19 +1,45 @@
 'use strict';
 
-import { fetchFactory, timestampedActionFactory } from '../../../../sagas/utils';
+import { fetchFactory, mapSaga, timestampedActionFactory } from '../../../../sagas/utils';
 import getBounds from './getBounds';
 import Promise from 'bluebird';
 import getBuildData from './getBuildData';
-import { select } from 'redux-saga/effects';
+import { select, throttle, fork, takeEvery } from 'redux-saga/effects';
 import { createAction } from 'redux-actions';
 
 export const requestBuildData = createAction('REQUEST_BUILD_DATA');
 export const receiveBuildData = timestampedActionFactory('RECEIVE_BUILD_DATA');
 export const receiveBuildDataError = createAction('RECEIVE_DASHBOARD_BUILD_ERROR');
 
+export const requestRefresh = createAction('REQUEST_REFRESH');
+const refresh = createAction('REFRESH');
+
 export default function* () {
   // fetch data once on entry
   yield* fetchBuildsData();
+
+  yield fork(watchRefreshRequests);
+  yield fork(watchMessages);
+
+  // keep looking for viewport changes to re-fetch
+  yield fork(watchRefresh);
+  yield fork(watchToggleHelp);
+}
+
+function* watchRefreshRequests() {
+  yield throttle(2000, 'REQUEST_REFRESH', mapSaga(refresh));
+}
+
+function* watchMessages() {
+  yield takeEvery('message', mapSaga(requestRefresh));
+}
+
+function* watchToggleHelp() {
+  yield takeEvery('TOGGLE_HELP', mapSaga(refresh));
+}
+
+function* watchRefresh() {
+  yield takeEvery('REFRESH', fetchBuildsData);
 }
 
 /**
