@@ -121,7 +121,8 @@ export const fetchCodeExpertiseData = fetchFactory(
         //we are interested in commits that are both on the current branch and related to the issue
         let relevantCommits = branchCommits.filter(commit => {
 
-          if(filterMergeCommits && commit.message.toLowerCase().includes('merge')) {
+          //if a commits parent string contains a comma, it has more than one parent -> it is a merge commit
+          if(filterMergeCommits && commit.parents.includes(',')) {
             return false
           }
 
@@ -213,8 +214,8 @@ export const fetchCodeExpertiseData = fetchFactory(
         //we are interested in commits that are both on the current branch and related to the current file/module
         let relevantCommits = branchCommits.filter(c => {
 
-
-          if(filterMergeCommits && c.message.toLowerCase().includes('merge')) {
+          //if a commits parent string contains a comma, it has more than one parent -> it is a merge commit
+          if(filterMergeCommits && c.parents.includes(',')) {
             return false
           }
 
@@ -261,8 +262,8 @@ export const fetchCodeExpertiseData = fetchFactory(
             const relevantFiles = commit.files.data.filter(f => activeFiles.includes(f.file.path))
             //if at least one exists, return the respective additions
             if(relevantFiles && relevantFiles.length > 0) {
-              const tempSum = _.reduce(relevantFiles, (sum, file) => {
-                return sum + file.stats.additions
+              const tempSum = _.reduce(relevantFiles, (s, file) => {
+                return s + file.stats.additions
               }, 0)
               return sum + tempSum
 

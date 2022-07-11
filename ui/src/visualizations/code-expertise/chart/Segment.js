@@ -263,7 +263,7 @@ function Segment( { rad, startPercent, endPercent, devName, devData, maxCommits,
                     startOffset="25%"
                     textAnchor="middle"
                     alignmentBaseline="middle">
-                        {devData.additions}
+                        {devData.linesOwned}/{devData.additions}
                     </textPath>
                 </text>
             </g>

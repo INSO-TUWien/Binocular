@@ -67,12 +67,14 @@ export default () => {
       ))
     .then(resp => resp.branches.data)
     .then(branches => branches.sort((a,b) => a.branch.localeCompare(b.branch)))
+    .then(branches => branches.map(b => b.branch))
+    .then(branches => [...new Set(branches)])
     .then(branches => {
       const temp = []
       //placeholder option
       temp.push(<option key={-1} value={null}>Select a Branch</option>)
       for(const i in branches) {
-        temp.push(<option key={i}>{branches[i].branch}</option>)
+        temp.push(<option key={i}>{branches[i]}</option>)
       }
       setBranchOptions(temp)
     })
@@ -160,13 +162,13 @@ export default () => {
         {/* select if merge commits should be filtered */}
         <div className="field">
           <div className="control">
-            <label className="label">Merge Commits:</label>
+            <label className="label">Filter Commits:</label>
             <input
               type="checkbox"
               checked={filterMergeCommits}
               onChange={(event) => onSetFilterMergeCommits(event.target.checked)}
             />
-            <span>Filter Commits containing the Word 'merge'</span>
+            <span>Exclude merge commits</span>
           </div>
         </div>
 
@@ -206,8 +208,8 @@ export default () => {
         }
 
 
-        {/* Only diplay file-picker when 'modules' is selected as mode */}
-        {currentMode === 'modules' &&
+        {/* Only diplay file-picker when 'modules' is selected as mode and a branch is selected*/}
+        {currentMode === 'modules' && currentBranch &&
           <div className="field">
           <div className="control">
             <label className="label">Choose Files and Modules to visualize:</label>
