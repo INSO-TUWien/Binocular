@@ -57,30 +57,32 @@ function* watchRefresh() {
 
 
 function* watchSetCurrentBranch() {
-  yield takeEvery('SET_CURRENT_BRANCH', fetchCodeExpertiseData);
+  yield takeEvery('SET_CURRENT_BRANCH', mapSaga(requestRefresh));
 }
 
 function* watchSetMode() {
-  yield takeEvery('SET_MODE', fetchCodeExpertiseData);
+  yield takeEvery('SET_MODE', mapSaga(requestRefresh));
 }
 
 function* watchSetActiveFiles() {
-  yield takeEvery('SET_ACTIVE_FILES', fetchCodeExpertiseData);
+  yield takeEvery('SET_ACTIVE_FILES', mapSaga(requestRefresh));
 }
 
 //every time the user chooses an issue in the config tab, update the displayed data
 function* watchSetActiveIssue() {
-  yield takeEvery('SET_ACTIVE_ISSUE', fetchCodeExpertiseData);
+  yield takeEvery('SET_ACTIVE_ISSUE', mapSaga(requestRefresh));
 }
 
 function* watchSetFilterMergeCommits() {
-  yield takeEvery('SET_FILTER_MERGE_COMMITS', fetchCodeExpertiseData);
+  yield takeEvery('SET_FILTER_MERGE_COMMITS', mapSaga(requestRefresh));
 }
 
 //fetchFactory returns a function that calls the specified function*()
 // and dispatches the specified actions (requestCodeExpertiseData etc.) at appropriate points
 export const fetchCodeExpertiseData = fetchFactory(
   function* () {
+
+    console.log('#########################################')
 
     const state = yield select();
     const mode = state.visualizations.codeExpertise.state.config.mode
