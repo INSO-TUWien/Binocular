@@ -9,7 +9,7 @@ import TabCombo from '../../../components/TabCombo';
 import { setShowIssues } from './sagas';
 
 const mapStateToProps = (state /*, ownProps*/) => {
-  const dashboardState = state.visualizations.dashboard.state;
+  const dashboardState = state.visualizations.changes.state;
 
   return { showIssues: dashboardState.config.showIssues };
 };

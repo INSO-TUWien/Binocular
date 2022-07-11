@@ -8,6 +8,9 @@
 }
 
 .configContainer{
+  width: 100%;
+  overflow-x: hidden;
+
   .field + .field {
     border-top: 1px solid #dbdbdb;
   }

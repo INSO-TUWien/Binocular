@@ -71,7 +71,6 @@ export default class Issues extends React.Component {
     }
 
     //---- STEP 1: FILTER ISSUES ----
-    console.log(props);
     let filteredIssues = [];
     switch (props.showIssues) {
       case 'all':

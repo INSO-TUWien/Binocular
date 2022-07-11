@@ -30,8 +30,22 @@ import issueImpact from './visualizations/legacy/issue-impact';
 import hotspotDials from './visualizations/legacy/hotspot-dials';
 import codeHotspots from './visualizations/legacy/code-hotspots';
 import languageModuleRiver from './visualizations/legacy/language-module-river';
+import ciBuilds from './visualizations/VisualizationComponents/ciBuilds';
+import issues from './visualizations/VisualizationComponents/issues';
+import changes from './visualizations/VisualizationComponents/changes';
 
-const visualizationModules = [newDashboard, dashboard, codeOwnershipRiver, issueImpact, hotspotDials, codeHotspots, languageModuleRiver];
+const visualizationModules = [
+  newDashboard,
+  dashboard,
+  codeOwnershipRiver,
+  issueImpact,
+  hotspotDials,
+  codeHotspots,
+  languageModuleRiver,
+  ciBuilds,
+  issues,
+  changes,
+];
 
 const visualizations = {};
 _.each(visualizationModules, (viz) => {

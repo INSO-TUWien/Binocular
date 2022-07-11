@@ -8,7 +8,6 @@ import _ from 'lodash';
 
 import StackedAreaChart from '../../../../components/StackedAreaChart';
 import moment from 'moment';
-import cx from 'classnames';
 
 export default class CIBuilds extends React.Component {
   constructor(props) {

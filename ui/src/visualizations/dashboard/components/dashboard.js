@@ -38,11 +38,11 @@ export default class Dashboard extends React.Component {
   componentWillReceiveProps(nextProps) {}
 
   componentDidMount() {
-    this.sortable(document.getElementById('dashboardContainer'), function (item) {});
+    this.sortable(document.getElementById('dashboardContainer'), function (/*item*/) {});
   }
 
   componentDidUpdate(prevProps, prevState, snapshot) {
-    this.sortable(document.getElementById('dashboardContainer'), function (item) {});
+    this.sortable(document.getElementById('dashboardContainer'), function (/*item*/) {});
     localStorage.setItem('dashboardState', JSON.stringify(this.state));
   }
 
@@ -202,7 +202,11 @@ export default class Dashboard extends React.Component {
   }
 
   deleteVisualization(e) {
-    this.setState({ visualizations: this.state.visualizations.filter((viz) => viz.props.id !== e.target.parentNode.parentNode.id) });
+    this.setState({
+      visualizations: this.state.visualizations.filter(
+        (viz) => parseInt(viz.id) !== parseInt(e.target.parentNode.parentNode.id.substring('visualizationContainer'.length))
+      ),
+    });
     const visualizationSettings = e.target.parentNode.parentNode.parentNode.querySelector('.' + dashboardStyles.visualizationSettings);
     visualizationSettings.classList.remove(dashboardStyles.visualizationSettingsExtended);
   }

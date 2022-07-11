@@ -6,15 +6,15 @@ import styles from './styles.scss';
 
 import LegendCompact from '../../../components/LegendCompact';
 
-const mapStateToProps = (state /*, ownProps*/) => {
+const mapStateToProps = (/*state, ownProps*/) => {
   return {};
 };
 
-const mapDispatchToProps = (dispatch /*, ownProps*/) => {
+const mapDispatchToProps = (/*dispatch , ownProps*/) => {
   return {};
 };
 
-const CIBuildsConfigComponent = (props) => {
+const CIBuildsConfigComponent = (/*props*/) => {
   return (
     <div className={styles.configContainer}>
       <div className={styles.field}>

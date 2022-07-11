@@ -182,7 +182,6 @@ export default class ScalableBaseChartComponent extends React.Component {
     //Initialization
     const contentHash = hash(this.props.content || []);
     const orderHash = hash(this.props.order || []);
-
     const { hashes, hasChanges } = this.hasUpdate();
 
     //Get d3-friendly data
@@ -290,7 +289,7 @@ export default class ScalableBaseChartComponent extends React.Component {
    * @returns {*}
    */
   getColor(d) {
-    return this.state.palette[this.getBrushId(d)];
+    return this.props.palette[this.getBrushId(d)];
   }
 
   /**
