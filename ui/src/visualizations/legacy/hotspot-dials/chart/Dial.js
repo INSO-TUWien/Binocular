@@ -1,8 +1,8 @@
 import * as d3 from 'd3';
 import ClockScale from './ClockScale.js';
-import ClosingPathContext from '../../../utils/ClosingPathContext.js';
+import ClosingPathContext from '../../../../utils/ClosingPathContext.js';
 
-import styles from './styles.scss';
+import styles from '../styles.scss';
 
 const MAXIMUM_FILL_RATE = 0.9;
 
@@ -18,7 +18,7 @@ export default function Dial(props) {
   const dataPoints = [];
   const slices = [];
 
-  const points = props.categories.map(cat => {
+  const points = props.categories.map((cat) => {
     const coords = clock.getCoordsForShare((cat.category - 1) / props.categories.length, scale(cat.count));
 
     const textCoords = clock.getCoordsForShare((cat.category - 1) / props.categories.length, props.minimumFillRate * 1.25);
@@ -58,10 +58,11 @@ export default function Dial(props) {
     return (
       <g key={`tickMark-${cat.category}`}>
         <line x1={faceCoords.x} y1={faceCoords.y} x2={insetCoords.x} y2={insetCoords.y} />
-        {props.showLabels &&
+        {props.showLabels && (
           <text x={textCoords.x} y={textCoords.y}>
             {cat.label}
-          </text>}
+          </text>
+        )}
       </g>
     );
   });

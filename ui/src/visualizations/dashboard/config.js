@@ -4,26 +4,39 @@ import React from 'react';
 import { connect } from 'react-redux';
 import styles from './styles.scss';
 import visualizationRegistry from './visualizationRegistry';
+import { setResolution } from './sagas';
+import TabCombo from '../../components/TabCombo';
+import UniversalConfig from './components/universalConfig';
 
 const mapStateToProps = (state /*, ownProps*/) => {
-  return {};
+  const dashboardState = state.visualizations.newDashboard.state;
+  return {
+    resolution: dashboardState.config.chartResolution,
+  };
 };
 
 const mapDispatchToProps = (dispatch /*, ownProps*/) => {
-  return {};
+  return {
+    onClickResolution: (resolution) => dispatch(setResolution(resolution)),
+  };
 };
 
 const DashboardConfigComponent = (props) => {
-  const visulaizations = [];
+  const visualizations = [];
   for (const visualization in visualizationRegistry) {
     const viz = visualizationRegistry[visualization];
     if (viz.ConfigComponent !== undefined) {
-      visulaizations.push(viz);
+      if (viz.hideSettingsInDashboard === undefined) {
+        visualizations.push(viz);
+      } else if (!viz.hideSettingsInDashboard) {
+        visualizations.push(viz);
+      }
     }
   }
   return (
     <div className={styles.configContainer}>
-      {visulaizations.map((viz) => {
+      <UniversalConfig />
+      {visualizations.map((viz) => {
         return (
           <div>
             <hr />

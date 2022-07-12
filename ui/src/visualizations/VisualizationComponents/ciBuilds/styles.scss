@@ -1,5 +1,12 @@
 @import '../../../../../node_modules/bulma';
 
+.legend{
+  position: absolute;
+  top: 5px;
+  left: 5px;
+  background: #fffa;
+}
+
 .chartContainer{
   height: 100%;
   width: auto;

@@ -17,9 +17,10 @@ export const requestHotspotDialsData = createAction('REQUEST_HOTSPOT_DIALS_DATA'
 export const receiveHotspotDialsData = timestampedActionFactory('RECEIVE_HOTSPOT_DIALS_DATA');
 export const receiveHotspotDialsDataError = createAction('RECEIVE_HOTSPOT_DIALS_DATA_ERROR');
 
-export default function*() {
+export default function* () {
   yield fetchHotspotDialsData();
   yield fork(watchSetCategory);
+  yield fork(watchSetResolution);
   yield fork(watchRefreshRequests);
   yield fork(watchMessages);
   yield fork(watchRefresh);
@@ -31,6 +32,10 @@ const refresh = createAction('REFRESH');
 
 export function* watchSetCategory() {
   yield takeEvery('SET_CATEGORY', fetchHotspotDialsData);
+}
+
+export function* watchSetResolution() {
+  yield takeEvery('SET_RESOLUTION', fetchHotspotDialsData);
 }
 
 export function* watchSetIssueField() {
@@ -50,42 +55,73 @@ function* watchRefresh() {
 }
 
 export const fetchHotspotDialsData = fetchFactory(
-  function*() {
+  function* () {
     const state = yield select();
 
     const config = state.visualizations.hotspotDials.state.config;
+
+    const universalSettings = state.visualizations.newDashboard.state.config;
+    let universalSettingsCategory = 'hour';
+
+    switch (universalSettings.chartResolution) {
+      case 'years':
+        universalSettingsCategory = 'month';
+        break;
+      case 'months':
+        universalSettingsCategory = 'dayOfMonth';
+        break;
+      case 'weeks':
+        universalSettingsCategory = 'dayOfWeek';
+        break;
+      case 'days':
+        universalSettingsCategory = 'hour';
+        break;
+    }
 
     const categories = {
       hour: {
         offset: 0,
         count: 24,
-        postProcess: histogram => {
+        postProcess: (histogram) => {
           for (let i = 0; i < 12; i++) {
             histogram[i].count += histogram[i + 12].count;
           }
           histogram.splice(12, 12);
         },
-        label: cat => (cat === 0 ? '12' : cat.toString()),
-        detailedLabel: cat =>
-          cat === 0 ? '12:00 PM - 12:59 PM (and 0:00 AM - 0:59 AM)' : `${cat}:00 AM - ${cat}:59 AM (and ${cat}:00 PM - ${cat}:59 PM)`
+        label: (cat) => (cat === 0 ? '12' : cat.toString()),
+        detailedLabel: (cat) =>
+          cat === 0 ? '12:00 PM - 12:59 PM (and 0:00 AM - 0:59 AM)' : `${cat}:00 AM - ${cat}:59 AM (and ${cat}:00 PM - ${cat}:59 PM)`,
       },
       dayOfWeek: {
         offset: 0,
         count: 7,
-        postProcess: id => id,
-        label: cat => moment().set('day', cat).format('dddd'),
-        detailedLabel: cat => moment().set('day', cat).format('dddd')
+        postProcess: (id) => id,
+        label: (cat) => moment().set('day', cat).format('dddd'),
+        detailedLabel: (cat) => moment().set('day', cat).format('dddd'),
       },
       month: {
         offset: 1,
         count: 12,
-        postProcess: id => id,
-        label: cat => moment().set('month', cat - 1).format('MMMM'),
-        detailedLabel: cat => moment().set('month', cat - 1).format('MMMM')
-      }
+        postProcess: (id) => id,
+        label: (cat) =>
+          moment()
+            .set('month', cat - 1)
+            .format('MMMM'),
+        detailedLabel: (cat) =>
+          moment()
+            .set('month', cat - 1)
+            .format('MMMM'),
+      },
+      dayOfMonth: {
+        offset: 0,
+        count: 31,
+        postProcess: (id) => id,
+        label: (cat) => moment().set('day', cat).format('DD'),
+        detailedLabel: (cat) => moment().set('day', cat).format('DD'),
+      },
     };
 
-    const category = categories[config.category];
+    const category = categories[universalSettingsCategory];
 
     return yield Promise.resolve(
       graphQl.query(
@@ -107,12 +143,15 @@ export const fetchHotspotDialsData = fetchFactory(
              count
            }
          }`,
-        { granularity: config.category, dateField: config.issueField }
+        { granularity: universalSettingsCategory, dateField: config.issueField }
       )
     )
-      .then(resp => [resp.commitDateHistogram, resp.goodCommits, resp.badCommits, resp.issueDateHistogram])
-      .map(histogram => {
-        histogram = _(histogram).filter(c => c.category !== null).sortBy('category').value();
+      .then((resp) => [resp.commitDateHistogram, resp.goodCommits, resp.badCommits, resp.issueDateHistogram])
+      .map((histogram) => {
+        histogram = _(histogram)
+          .filter((c) => c.category !== null)
+          .sortBy('category')
+          .value();
 
         for (let i = 0; i < category.count; i++) {
           if (!histogram[i] || histogram[i].category !== i + category.offset) {
@@ -129,7 +168,7 @@ export const fetchHotspotDialsData = fetchFactory(
 
         return {
           maximum,
-          categories: histogram
+          categories: histogram,
         };
       })
       .spread((commits, goodCommits, badCommits, issues) => ({
@@ -141,10 +180,10 @@ export const fetchHotspotDialsData = fetchFactory(
             badCount: a.count,
             goodCount: b.count,
             label: a.label,
-            detailedLabel: a.detailedLabel
-          }))
+            detailedLabel: a.detailedLabel,
+          })),
         },
-        issues
+        issues,
       }));
   },
   requestHotspotDialsData,

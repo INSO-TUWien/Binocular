@@ -1,12 +1,11 @@
 'use strict';
 
 import { connect } from 'react-redux';
-
 import Chart from './chart.js';
 
 const mapStateToProps = (state /*, ownProps*/) => {
   const changesState = state.visualizations.changes.state;
-
+  const universalSettings = state.visualizations.newDashboard.state.config;
   return {
     palette: changesState.data.data.palette,
     otherCount: changesState.data.data.otherCount,
@@ -15,9 +14,9 @@ const mapStateToProps = (state /*, ownProps*/) => {
     commitAttribute: changesState.config.commitAttribute,
     firstSignificantTimestamp: changesState.data.data.firstSignificantTimestamp,
     lastSignificantTimestamp: changesState.data.data.lastSignificantTimestamp,
-    chartResolution: changesState.config.chartResolution,
     displayMetric: changesState.config.displayMetric,
     selectedAuthors: changesState.config.selectedAuthors,
+    chartResolution: universalSettings.chartResolution,
   };
 };
 

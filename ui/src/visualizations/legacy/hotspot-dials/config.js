@@ -13,7 +13,7 @@ const mapStateToProps = (state /*, ownProps*/) => {
   return {
     category: hdState.config.category,
     splitCommits: hdState.config.splitCommits,
-    issueField: hdState.config.issueField
+    issueField: hdState.config.issueField,
   };
 };
 
@@ -69,7 +69,7 @@ const HotspotDialsConfigComponent = (props) => {
               onChange={(value) => props.onSetIssueField(value)}
               options={[
                 { label: 'Creation date', icon: 'certificate', value: 'createdAt' },
-                { label: 'Closing date', icon: 'window-close', value: 'closedAt' }
+                { label: 'Closing date', icon: 'window-close', value: 'closedAt' },
               ]}
             />
           </div>

@@ -8,6 +8,7 @@ import _ from 'lodash';
 
 import StackedAreaChart from '../../../../components/StackedAreaChart';
 import moment from 'moment';
+import LegendCompact from '../../../../components/LegendCompact';
 
 export default class Issues extends React.Component {
   constructor(props) {
@@ -56,11 +57,16 @@ export default class Issues extends React.Component {
         </h1>
       </div>
     );
-
+    const legend = (
+      <div className={styles.legend}>
+        <LegendCompact text="Opened | Closed" color="#3461eb" color2="#8099e8" />
+      </div>
+    );
     return (
       <div className={styles.chartContainer}>
         {this.state.issueChartData === null && loadingHint}
         {issueChart}
+        {legend}
       </div>
     );
   }

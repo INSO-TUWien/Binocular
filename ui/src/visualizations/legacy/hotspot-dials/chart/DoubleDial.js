@@ -3,9 +3,9 @@ import * as d3 from 'd3';
 import cx from 'classnames';
 
 import ClockScale from './ClockScale.js';
-import ClosingPathContext from '../../../utils/ClosingPathContext.js';
+import ClosingPathContext from '../../../../utils/ClosingPathContext.js';
 
-import styles from './styles.scss';
+import styles from '../styles.scss';
 
 const MAXIMUM_FILL_RATE = 0.9;
 
@@ -75,7 +75,7 @@ export default function Dial(props) {
   });
 
   const axisTextShare = -1 / props.categories.length / 2 + 1 / props.categories.length / 30;
-  const axisTextAngle = 180 + clock.getAngleForShare(axisTextShare) / Math.PI * 180;
+  const axisTextAngle = 180 + (clock.getAngleForShare(axisTextShare) / Math.PI) * 180;
   const axisTextCoords = clock.getCoordsForShare(axisTextShare, midShare);
 
   return (

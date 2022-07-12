@@ -1,6 +1,6 @@
 'use strict';
 
-import { ClosingPathContext } from '../../../utils';
+import { ClosingPathContext } from '../../../../utils';
 
 const OFFSET = -Math.PI / 2;
 
@@ -22,7 +22,7 @@ export default class SemiCircleScale {
   getCoordsForAngle(angle, vshare = 1) {
     return {
       x: this.cx + this.r * vshare * Math.cos(angle),
-      y: this.cy + this.r * vshare * Math.sin(angle)
+      y: this.cy + this.r * vshare * Math.sin(angle),
     };
   }
 
@@ -70,11 +70,11 @@ export default class SemiCircleScale {
 
     return {
       transform: `translate(${coords.x}, ${-coords.y}) ` + `rotate(${SemiCircleScale.rad2deg(textAngle)})`,
-      textAnchor: anchor
+      textAnchor: anchor,
     };
   }
 
   static rad2deg(rad) {
-    return rad / Math.PI * 180;
+    return (rad / Math.PI) * 180;
   }
 }

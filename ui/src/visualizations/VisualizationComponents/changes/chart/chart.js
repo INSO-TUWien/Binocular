@@ -29,7 +29,6 @@ export default class Changes extends React.Component {
    */
   componentWillReceiveProps(nextProps) {
     const { commitChartData, commitScale, commitPalette, selectedAuthors } = this.extractCommitData(nextProps);
-    console.log(nextProps);
     this.setState({
       commitChartData,
       commitScale,

@@ -9,6 +9,7 @@ import reducer from './reducers';
 export default {
   id: 'ciBuilds',
   label: 'CI Builds',
+  hideSettingsInDashboard: true,
   saga,
   reducer,
   ChartComponent,

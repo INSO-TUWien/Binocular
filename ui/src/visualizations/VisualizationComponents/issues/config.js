@@ -23,7 +23,6 @@ const CIBuildsConfigComponent = (props) => {
     <div className={styles.configContainer}>
       <div className={styles.field}>
         <div className="control">
-          <LegendCompact text="Opened | Closed" color="#3461eb" color2="#8099e8" />
           <TabCombo
             value={props.showIssues}
             options={[
