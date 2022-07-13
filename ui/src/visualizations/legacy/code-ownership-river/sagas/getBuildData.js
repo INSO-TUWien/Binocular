@@ -13,12 +13,12 @@ export default function getBuildData(buildSpan, significantSpan, granularity, in
         success: 0,
         failed: 0,
         pending: 0,
-        canceled: 0
-      }
-    }
+        canceled: 0,
+      },
+    },
   ];
 
-  return traversePages(getBuildsPage, build => {
+  return traversePages(getBuildsPage(significantSpan[0], significantSpan[1]), (build) => {
     const createdAt = Date.parse(build.createdAt);
 
     while (createdAt >= next) {
@@ -26,10 +26,10 @@ export default function getBuildData(buildSpan, significantSpan, granularity, in
         date: new Date(next),
         stats: _.defaults(
           {
-            total: (build.stats.success || 0) + (build.stats.failed || 0) + (build.stats.pending || 0) + (build.stats.canceled || 0)
+            total: (build.stats.success || 0) + (build.stats.failed || 0) + (build.stats.pending || 0) + (build.stats.canceled || 0),
           },
           build.stats
-        )
+        ),
       };
 
       data.push(dataPoint);
@@ -38,12 +38,12 @@ export default function getBuildData(buildSpan, significantSpan, granularity, in
   }).then(() => data);
 }
 
-const getBuildsPage = (page, perPage) => {
+const getBuildsPage = (since, until) => (page, perPage) => {
   return graphQl
     .query(
       `
-    query($page: Int, $perPage: Int) {
-      builds(page: $page, perPage: $perPage) {
+    query($page: Int, $perPage: Int, $since: Timestamp, $until: Timestamp) {
+      builds(page: $page, perPage: $perPage, since: $since, until: $until) {
         count
         page
         perPage
@@ -60,7 +60,7 @@ const getBuildsPage = (page, perPage) => {
         }
       }
     }`,
-      { page, perPage }
+      { page, perPage, since, until }
     )
-    .then(resp => resp.builds);
+    .then((resp) => resp.builds);
 };

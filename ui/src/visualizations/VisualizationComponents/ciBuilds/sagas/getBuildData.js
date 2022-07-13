@@ -2,22 +2,22 @@
 
 import { traversePages, graphQl } from '../../../../utils';
 
-export default function getBuildData() {
+export default function getBuildData(commitSpan, significantSpan) {
   const buildList = [];
 
-  return traversePages(getBuildsPage, (build) => {
+  return traversePages(getBuildsPage(significantSpan[0], significantSpan[1]), (build) => {
     buildList.push(build);
   }).then(function () {
     return buildList;
   });
 }
 
-const getBuildsPage = (page, perPage) => {
+const getBuildsPage = (since, until) => (page, perPage) => {
   return graphQl
     .query(
       `
-    query($page: Int, $perPage: Int) {
-      builds(page: $page, perPage: $perPage) {
+    query($page: Int, $perPage: Int, $since: Timestamp, $until: Timestamp) {
+      builds(page: $page, perPage: $perPage, since: $since, until: $until) {
         count
         page
         perPage
@@ -34,7 +34,7 @@ const getBuildsPage = (page, perPage) => {
         }
       }
     }`,
-      { page, perPage }
+      { page, perPage, since, until }
     )
     .then((resp) => resp.builds);
 };

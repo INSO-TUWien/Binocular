@@ -2,14 +2,14 @@ import React from 'react';
 import settingsStyles from './settings.scss';
 import styles from '../../styles.scss';
 import { settings_black, settings_white } from '../../images/icons';
-import DateRangeFilter from '../dateRangeFilter/dateRangeFilter';
+import DateRangeFilter from '../../../../../components/DateRangeFilter/dateRangeFilter';
 require('bulma-switch');
 
 export default class Settings extends React.PureComponent {
   constructor(props) {
     super(props);
     this.state = {
-      displayProps: { dateRange: {} }
+      displayProps: { dateRange: {} },
     };
   }
 
@@ -23,7 +23,7 @@ export default class Settings extends React.PureComponent {
         <button
           id={'SettingsButton'}
           className={'button ' + styles.mg1 + ' ' + settingsStyles.settingsButton}
-          onClick={e => {
+          onClick={(e) => {
             const target = e.currentTarget;
             const panel = target.nextSibling;
             if (document.getElementById('SettingsButton').classList.contains(settingsStyles.selected)) {
@@ -63,7 +63,7 @@ export default class Settings extends React.PureComponent {
                   name="dataScaleSwitch"
                   className={'switch is-rounded is-outlined is-info'}
                   defaultChecked={true}
-                  onChange={e => {
+                  onChange={(e) => {
                     if (e.target.checked) {
                       document.getElementById('dataScaleContainer').classList.remove(settingsStyles.showElm);
                       document.getElementById('dataScaleContainer').classList.add(settingsStyles.hideElm);
@@ -91,7 +91,7 @@ export default class Settings extends React.PureComponent {
                   min="0"
                   className={'input'}
                   type="number"
-                  onChange={e => {
+                  onChange={(e) => {
                     const currDisplayProps = this.state.displayProps;
                     currDisplayProps.dataScaleHeatmap = parseInt(e.target.value);
                     this.setState({ displayProps: currDisplayProps });
@@ -103,7 +103,7 @@ export default class Settings extends React.PureComponent {
                   min="0"
                   className={'input'}
                   type="number"
-                  onChange={e => {
+                  onChange={(e) => {
                     const currDisplayProps = this.state.displayProps;
                     currDisplayProps.dataScaleColumns = parseInt(e.target.value);
                     this.setState({ displayProps: currDisplayProps });
@@ -115,7 +115,7 @@ export default class Settings extends React.PureComponent {
                   min="0"
                   className={'input'}
                   type="number"
-                  onChange={e => {
+                  onChange={(e) => {
                     const currDisplayProps = this.state.displayProps;
                     currDisplayProps.dataScaleRows = parseInt(e.target.value);
                     this.setState({ displayProps: currDisplayProps });
@@ -128,7 +128,7 @@ export default class Settings extends React.PureComponent {
                 <DateRangeFilter
                   from={this.state.displayProps.dateRange.from}
                   to={this.state.displayProps.dateRange.to}
-                  onDateChanged={data => {
+                  onDateChanged={(data) => {
                     const currDisplayProps = this.state.displayProps;
                     currDisplayProps.dateRange = data;
                     this.setState({ displayProps: currDisplayProps });

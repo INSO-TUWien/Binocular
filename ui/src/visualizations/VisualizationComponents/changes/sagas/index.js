@@ -14,7 +14,7 @@ export const setDisplayMetric = createAction('SET_DISPLAY_METRIC');
 
 export const requestChangesData = createAction('REQUEST_CHANGES_DATA');
 export const receiveChangesData = timestampedActionFactory('RECEIVE_CHANGES_DATA');
-export const receiveChangesDataError = createAction('RECEIVE_DASHBOARD_CHANGES_ERROR');
+export const receiveChangesDataError = createAction('RECEIVE_CHANGES_DATA_ERROR');
 
 export const requestRefresh = createAction('REQUEST_REFRESH');
 const refresh = createAction('REFRESH');
@@ -29,6 +29,13 @@ export default function* () {
   // keep looking for viewport changes to re-fetch
   yield fork(watchRefresh);
   yield fork(watchToggleHelp);
+
+  // keep looking for universal settings changes
+  yield fork(watchTimeSpan);
+}
+
+function* watchTimeSpan() {
+  yield takeEvery('SET_TIME_SPAN', fetchChangesData);
 }
 
 function* watchRefreshRequests() {
@@ -61,10 +68,11 @@ export const fetchChangesData = fetchFactory(
 
     const state = yield select();
     const viewport = state.visualizations.changes.state.config.viewport || [0, null];
-
-    const firstSignificantTimestamp = Math.max(viewport[0], Math.min(firstCommitTimestamp, firstIssueTimestamp));
-    const lastSignificantTimestamp = viewport[1] ? viewport[1].getTime() : Math.max(lastCommitTimestamp, lastIssueTimestamp);
-
+    let firstSignificantTimestamp = Math.max(viewport[0], Math.min(firstCommitTimestamp, firstIssueTimestamp));
+    let lastSignificantTimestamp = viewport[1] ? viewport[1].getTime() : Math.max(lastCommitTimestamp, lastIssueTimestamp);
+    const timeSpan = state.visualizations.newDashboard.state.config.chartTimeSpan;
+    firstSignificantTimestamp = timeSpan.from === undefined ? firstSignificantTimestamp : new Date(timeSpan.from).getTime();
+    lastSignificantTimestamp = timeSpan.to === undefined ? lastSignificantTimestamp : new Date(timeSpan.to).getTime();
     return yield Promise.join(
       getCommitData([firstCommitTimestamp, lastCommitTimestamp], [firstSignificantTimestamp, lastSignificantTimestamp])
     )
@@ -119,12 +127,12 @@ function getPalette(commits, maxNumberOfColors, numOfCommitters) {
 
   const returnPalette = {};
 
-  for (let i = 0; i < palette.length - 1; i++) {
+  for (let i = 0; i < Math.min(sortable.length, palette.length) - 1; i++) {
     returnPalette[sortable[i][0]] = palette[i];
   }
   if (sortable.length > maxNumberOfColors) {
     returnPalette['others'] = palette[maxNumberOfColors - 1];
-  } else if (sortable.length <= maxNumberOfColors) {
+  } else {
     returnPalette[sortable[sortable.length - 1][0]] = palette[palette.length - 1];
   }
 

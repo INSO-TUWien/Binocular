@@ -41,6 +41,13 @@ export default function* () {
   yield fork(watchRefresh);
   yield fork(watchHighlightedIssue);
   yield fork(watchToggleHelp);
+
+  // keep looking for universal settings changes
+  yield fork(watchTimeSpan);
+}
+
+function* watchTimeSpan() {
+  yield takeEvery('SET_TIME_SPAN', fetchCodeOwnershipData);
 }
 
 function* watchRefreshRequests() {
@@ -87,8 +94,11 @@ export const fetchCodeOwnershipData = fetchFactory(
     const state = yield select();
     const viewport = state.visualizations.codeOwnershipRiver.state.config.viewport || [0, null];
 
-    const firstSignificantTimestamp = Math.max(viewport[0], Math.min(firstCommitTimestamp, firstIssueTimestamp));
-    const lastSignificantTimestamp = viewport[1] ? viewport[1].getTime() : Math.max(lastCommitTimestamp, lastIssueTimestamp);
+    let firstSignificantTimestamp = Math.max(viewport[0], Math.min(firstCommitTimestamp, firstIssueTimestamp));
+    let lastSignificantTimestamp = viewport[1] ? viewport[1].getTime() : Math.max(lastCommitTimestamp, lastIssueTimestamp);
+    const timeSpan = state.visualizations.newDashboard.state.config.chartTimeSpan;
+    firstSignificantTimestamp = timeSpan.from === undefined ? firstSignificantTimestamp : new Date(timeSpan.from).getTime();
+    lastSignificantTimestamp = timeSpan.to === undefined ? lastSignificantTimestamp : new Date(timeSpan.to).getTime();
 
     const span = lastSignificantTimestamp - firstSignificantTimestamp;
     const granularity = getGranularity(span);
@@ -113,14 +123,13 @@ export const fetchCodeOwnershipData = fetchFactory(
       .spread((commits, issues, builds) => {
         const aggregatedAuthors = _.keys(_.last(commits).statsByAuthor);
         const palette = getChartColors('spectral', [...committers, 'other']);
-
         return {
           otherCount: committers.length - aggregatedAuthors.length,
           commits,
           committers,
           palette,
           issues,
-          builds
+          builds,
         };
       })
       .catch(function (e) {
@@ -140,7 +149,7 @@ function getGranularity(span) {
     { interval: moment.duration(1, 'month'), limit: moment.duration(50, 'months') },
     { interval: moment.duration(1, 'week'), limit: moment.duration(100, 'weeks') },
     { interval: moment.duration(1, 'day'), limit: moment.duration(100, 'day') },
-    { interval: moment.duration(1, 'hour'), limit: moment.duration(100, 'hour') }
+    { interval: moment.duration(1, 'hour'), limit: moment.duration(100, 'hour') },
   ];
 
   return _.reduce(granularities, (t, g) => {

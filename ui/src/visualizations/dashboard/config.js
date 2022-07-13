@@ -5,14 +5,11 @@ import { connect } from 'react-redux';
 import styles from './styles.scss';
 import visualizationRegistry from './visualizationRegistry';
 import { setResolution } from './sagas';
-import TabCombo from '../../components/TabCombo';
 import UniversalConfig from './components/universalConfig';
 
 const mapStateToProps = (state /*, ownProps*/) => {
   const dashboardState = state.visualizations.newDashboard.state;
-  return {
-    resolution: dashboardState.config.chartResolution,
-  };
+  return {};
 };
 
 const mapDispatchToProps = (dispatch /*, ownProps*/) => {

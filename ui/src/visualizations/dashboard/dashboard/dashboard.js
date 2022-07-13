@@ -11,13 +11,12 @@ import wideVisualizationIcon from '../assets/wideVisualizationIcon.svg';
 import highVisualizationIcon from '../assets/highVisualizationIcon.svg';
 import deleteIcon from '../assets/deleteIcon.svg';
 
-import VisualizationSelector from './visualizationSelector';
+import VisualizationSelector from '../components/visualizationSelector';
 import visualizationRegistry from '../visualizationRegistry';
 
 export default class Dashboard extends React.Component {
   constructor(props) {
     super(props);
-
     const dashboardSaveState = JSON.parse(localStorage.getItem('dashboardState'));
     if (dashboardSaveState === null) {
       this.state = {
@@ -35,7 +34,9 @@ export default class Dashboard extends React.Component {
    * Update computed commit data
    * @param nextProps props that are passed
    */
-  componentWillReceiveProps(nextProps) {}
+  componentWillReceiveProps(nextProps) {
+    console.log(nextProps);
+  }
 
   componentDidMount() {
     this.sortable(document.getElementById('dashboardContainer'), function (/*item*/) {});

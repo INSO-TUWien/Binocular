@@ -11,20 +11,20 @@ export default function getCommitData(commitSpan, significantSpan, granularity, 
     count: 0,
     additions: 0,
     deletions: 0,
-    changes: 0
+    changes: 0,
   };
 
   const data = [
     {
-      date: new Date(commitSpan[0]),
+      date: new Date(significantSpan[0]),
       totals: _.cloneDeep(totals),
-      statsByAuthor: {}
-    }
+      statsByAuthor: {},
+    },
   ];
 
   let next = moment(significantSpan[0]).startOf(granularity.unit).toDate().getTime();
 
-  return traversePages(getCommitsPage(significantSpan[1]), commit => {
+  return traversePages(getCommitsPage(significantSpan[1]), (commit) => {
     const dt = Date.parse(commit.date);
 
     let stats = statsByAuthor[commit.signature];
@@ -33,7 +33,7 @@ export default function getCommitData(commitSpan, significantSpan, granularity, 
         count: 0,
         additions: 0,
         deletions: 0,
-        changes: 0
+        changes: 0,
       };
     }
 
@@ -51,17 +51,17 @@ export default function getCommitData(commitSpan, significantSpan, granularity, 
       const dataPoint = {
         date: new Date(next),
         totals: _.cloneDeep(totals),
-        statsByAuthor: _.cloneDeep(statsByAuthor)
+        statsByAuthor: _.cloneDeep(statsByAuthor),
       };
 
       data.push(dataPoint);
       next += interval;
     }
-  }).then(function() {
+  }).then(function () {
     data.push({
-      date: new Date(commitSpan[1]),
+      date: new Date(significantSpan[1]),
       totals: _.cloneDeep(totals),
-      statsByAuthor: _.cloneDeep(statsByAuthor)
+      statsByAuthor: _.cloneDeep(statsByAuthor),
     });
 
     return group(data);
@@ -83,7 +83,7 @@ function group(data) {
       count: 0,
       additions: 0,
       deletions: 0,
-      changes: 0
+      changes: 0,
     };
     const groupedCommitters = [];
 
@@ -102,15 +102,15 @@ function group(data) {
 
     return {
       groupedStats,
-      groupedCommitters
+      groupedCommitters,
     };
   };
 
-  const { groupedCommitters } = applyGroupBy(lastDatum.statsByAuthor, stats => {
+  const { groupedCommitters } = applyGroupBy(lastDatum.statsByAuthor, (stats) => {
     return stats.count <= threshhold;
   });
 
-  _.each(data, datum => {
+  _.each(data, (datum) => {
     const { groupedStats } = applyGroupBy(datum.statsByAuthor, (stats, author) => _.includes(groupedCommitters, author));
 
     datum.statsByAuthor = groupedStats;
@@ -119,7 +119,7 @@ function group(data) {
   return data;
 }
 
-const getCommitsPage = until => (page, perPage) => {
+const getCommitsPage = (until) => (page, perPage) => {
   return graphQl
     .query(
       `query($page: Int, $perPage: Int, $until: Timestamp) {
@@ -141,5 +141,5 @@ const getCommitsPage = until => (page, perPage) => {
           }`,
       { page, perPage, until }
     )
-    .then(resp => resp.commits);
+    .then((resp) => resp.commits);
 };

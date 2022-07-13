@@ -7,8 +7,10 @@ export default class DateRangeFilter extends React.PureComponent {
   }
 
   componentWillReceiveProps(nextProps) {
-    document.getElementById('from').value = nextProps.from;
-    document.getElementById('to').value = nextProps.to;
+    if (nextProps.from !== undefined && nextProps.to !== undefined) {
+      document.getElementById('from').value = nextProps.from;
+      document.getElementById('to').value = nextProps.to;
+    }
   }
 
   render() {

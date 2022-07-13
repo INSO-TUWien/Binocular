@@ -1,6 +1,6 @@
 'use strict';
 
-import ChartComponent from './components/dashboard.js';
+import ChartComponent from './dashboard';
 import ConfigComponent from './config.js';
 import HelpComponent from './help.js';
 import saga from './sagas';

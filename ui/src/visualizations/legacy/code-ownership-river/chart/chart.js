@@ -21,7 +21,6 @@ const dateExtractor = (d) => d.date;
 export default class CodeOwnershipRiver extends React.Component {
   constructor(props) {
     super(props);
-
     this.elems = {};
 
     const { commitSeries, lastCommitDataPoint, commitLegend } = this.extractCommitData(props);
@@ -152,7 +151,6 @@ export default class CodeOwnershipRiver extends React.Component {
         />
       );
     });
-
     return (
       <ZoomableChartContainer
         scaleExtent={[1, Infinity]}
