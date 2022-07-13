@@ -89,7 +89,7 @@ function Segment( { rad, startPercent, endPercent, devName, devData, maxCommits,
 
     //goot commits are shown in an arc outside the circle segment, bad commits inside.
     //this sets the bounds for this section of the chart
-    const buildWeight = radius * 0.3
+    const buildWeight = radius * 0.25
 
     const goodCommits = devData.commits.filter(c => c.build == 'success').length
     const badCommits = devData.commits.filter(c => c.build != null && c.build != 'success').length

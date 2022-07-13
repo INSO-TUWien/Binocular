@@ -74,6 +74,7 @@ export function getAllBuildData() {
           data {
             sha
             status
+            webUrl
           }
         }
       }`,
@@ -90,12 +91,12 @@ export function addBuildData(relevantCommits, builds) {
       const relevantBuilds = builds.filter(build => build.sha == commit.sha)
       if (relevantBuilds.length > 0) {
         resultCommit['build'] = relevantBuilds[0].status
+        resultCommit['buildUrl'] = relevantBuilds[0].webUrl
       }
       return resultCommit
     })
 }
 
-//TODO filter in query, not afterwards
 export function getAllCommits() {
   return graphQl
     .query(
@@ -119,7 +120,8 @@ export function getAllCommits() {
                 file{
                   path
                 }
-                stats {additions,deletions}
+                stats {additions,deletions},
+                hunks {newLines}
               }
             }
           }

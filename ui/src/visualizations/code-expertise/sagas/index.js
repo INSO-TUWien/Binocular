@@ -82,8 +82,6 @@ function* watchSetFilterMergeCommits() {
 export const fetchCodeExpertiseData = fetchFactory(
   function* () {
 
-    console.log('#########################################')
-
     const state = yield select();
     const mode = state.visualizations.codeExpertise.state.config.mode
     const issueId = state.visualizations.codeExpertise.state.config.activeIssueId
@@ -264,8 +262,8 @@ export const fetchCodeExpertiseData = fetchFactory(
             const relevantFiles = commit.files.data.filter(f => activeFiles.includes(f.file.path))
             //if at least one exists, return the respective additions
             if(relevantFiles && relevantFiles.length > 0) {
-              const tempSum = _.reduce(relevantFiles, (s, file) => {
-                return s + file.stats.additions
+              const tempSum = _.reduce(relevantFiles, (fileSum, file) => {
+                return fileSum + _.reduce(file.hunks, (hunkSum, hunk) => { return hunkSum + hunk.newLines }, 0)
               }, 0)
               return sum + tempSum
 
@@ -282,9 +280,9 @@ export const fetchCodeExpertiseData = fetchFactory(
         //########### add ownership data to commits ###########
 
         //get latest commit of the branch
-        let latestRelevantCommit = relevantCommits.sort((a,b) => (new Date(b.date) - new Date(a.date)))[0]
+        let latestBranchCommit = branchCommits.sort((a,b) => (new Date(b.date) - new Date(a.date)))[0]
 
-        return Promise.resolve(getBlame(latestRelevantCommit.sha, activeFiles)).then(res => {
+        return Promise.resolve(getBlame(latestBranchCommit.sha, activeFiles)).then(res => {
 
           console.log('frontend blame result: ', res)
 
@@ -305,16 +303,11 @@ export const fetchCodeExpertiseData = fetchFactory(
             return result
           }
         )
-
-        
       })
-
-
 
     } else {
       console.log('error in fetchCodeExpertiseData: invalid mode: ' + mode)
       return result
-      //TODO handle error
     }
   },
   requestCodeExpertiseData,
