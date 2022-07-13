@@ -135,7 +135,6 @@ export const fetchCodeExpertiseData = fetchFactory(
 
         
         //########### add build data to commits ###########
-        //TODO can this be done in the back end?
         relevantCommits = addBuildData(relevantCommits, builds)
 
         let issueFiles = new Set()
@@ -240,7 +239,6 @@ export const fetchCodeExpertiseData = fetchFactory(
         
         
         //########### add build data to commits ###########
-        //TODO can this be done in the back end?
         relevantCommits = addBuildData(relevantCommits, builds)
 
         //########### extract data for each stakeholder ###########

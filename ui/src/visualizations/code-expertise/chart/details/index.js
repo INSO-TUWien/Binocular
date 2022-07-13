@@ -13,6 +13,15 @@ const Details = () => {
         dispatch(setDetails(dev))
     }
 
+    const openInNewTab = (url) => {
+        window.open(url, '_blank', 'noopener,noreferrer');
+    }
+
+    const formatDate = (d) => {
+        const date = new Date(d)
+        return `${date.toLocaleDateString()} at ${date.toLocaleTimeString()}`
+    }
+
     //local state
     const [isExpanded, setExpanded] = useState(false)
     const [devDetails, setDevDetails] = useState(null)
@@ -21,6 +30,7 @@ const Details = () => {
     //global state
     const allDevData = useSelector((state) => state.visualizations.codeExpertise.state.data.data.devData)
     const selectedDev = useSelector((state) => state.visualizations.codeExpertise.state.config.details)
+    const issueData = useSelector((state) => state.visualizations.codeExpertise.state.data.data.issue)
 
     useEffect(() => {
         setDevDetails(null)
@@ -79,6 +89,29 @@ const Details = () => {
                         </div>
                         </div>
                     </div>
+
+                    {issueData &&
+                    <div className={styles.field}>
+                        <label className="label">Issue: {issueData.title}</label>
+
+                        <div className={styles.generalDetails}>
+
+                            <GeneralDetailsData
+                            label='Opened:'
+                            text={formatDate(issueData.createdAt)}/>
+
+                            <GeneralDetailsData
+                            label='Closed:'
+                            text={issueData.closedAt ? formatDate(issueData.closedAt) : '/'}/>
+
+                            <button
+                            className={styles.button + ' ' + styles.issueButton}
+                            onClick={() => openInNewTab(issueData.webUrl)}>
+                                Issue Details
+                            </button>
+                        </div>
+                    </div>
+                    }
 
                     {selectedDev !== null && devDetails !== null &&
 

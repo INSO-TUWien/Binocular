@@ -20,7 +20,7 @@ export default handleActions(
   {
     data: {
       devData: {},
-      issue: {}
+      issue: null
     },
     lastFetched: null,
     isFetching: null,

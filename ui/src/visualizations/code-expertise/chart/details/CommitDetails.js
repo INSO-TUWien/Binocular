@@ -1,10 +1,23 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import styles from '../../styles.scss';
 
 
 const CommitDetails = ({ commit }) => {
 
     const [isExpanded, setExpanded] = useState(false)
+
+    const divOnClick = (e) => {
+        if(!(e.target instanceof HTMLButtonElement)) {
+            setExpanded(!isExpanded)
+        }
+    }
+
+    const openInNewTab = (url) => {
+        window.open(url, '_blank', 'noopener,noreferrer');
+    }
+
+    const ciUrl = commit.buildUrl
+    const commitUrl = commit.webUrl
 
     let ciIcon = null
     let ciText = null
@@ -27,7 +40,7 @@ const CommitDetails = ({ commit }) => {
     }
 
     const date = new Date(commit.date)
-    const dateString = `Committed on ${date.toLocaleDateString()} at ${date.toLocaleTimeString()}`
+    const dateString = `${date.toLocaleDateString()} at ${date.toLocaleTimeString()}`
 
     const shaShort = commit.sha.substring(0,7)
 
@@ -36,7 +49,7 @@ const CommitDetails = ({ commit }) => {
             <div key={commit.sha}>
                 <div
                 className={styles.commitDetailsExpanded + ' ' + colorClass}
-                onClick={() => setExpanded(!isExpanded)}>
+                onClick={(event) => divOnClick(event)}>
                     
                     <div>
                         <span>{ciIcon} </span>
@@ -61,7 +74,16 @@ const CommitDetails = ({ commit }) => {
                     
                     <div className={styles.dateAndLink}>
                         <p>{dateString}</p>
-                        <button className={styles.button + ' ' + styles.monospaced}>Details</button>
+                        <button
+                        className={styles.button}
+                        onClick={() => openInNewTab(ciUrl)}>
+                            CI-Details
+                        </button>
+                        <button
+                        className={styles.button}
+                        onClick={() => openInNewTab(commitUrl)}>
+                            Commit-Details
+                        </button>
                     </div>
                     
                 </div>
@@ -74,7 +96,7 @@ const CommitDetails = ({ commit }) => {
         <div key={commit.sha}>
         <div
         className={styles.commitDetails + ' ' + colorClass}
-        onClick={() => setExpanded(!isExpanded)}
+        onClick={(event) => divOnClick(event)}
         key={commit.sha}>
             
             <div className={styles.ciIcon}>
@@ -92,7 +114,11 @@ const CommitDetails = ({ commit }) => {
             
 
             <div className={styles.link}>
-                <button className={styles.button + ' ' + styles.monospaced}>{shaShort}</button>
+                <button
+                className={styles.button + ' ' + styles.monospaced}
+                onClick={() => openInNewTab(commitUrl)}>
+                    {shaShort}
+                </button>
             </div>
             
             
