@@ -18,11 +18,11 @@ export default function getIssueData(issueSpan, significantSpan, granularity, in
       date: new Date(issueSpan[0]),
       count: 0,
       openCount: 0,
-      closedCount: 0
-    }
+      closedCount: 0,
+    },
   ];
 
-  return traversePages(getIssuesPage(significantSpan[1]), issue => {
+  return traversePages(getIssuesPage(significantSpan[0], significantSpan[1]), (issue) => {
     const createdAt = Date.parse(issue.createdAt);
     const closedAt = issue.closedAt ? Date.parse(issue.closedAt) : null;
 
@@ -41,7 +41,7 @@ export default function getIssueData(issueSpan, significantSpan, granularity, in
         date: new Date(next),
         count,
         closedCount: closeCountTotal,
-        openCount: count - closeCountTotal
+        openCount: count - closeCountTotal,
       };
 
       data.push(dataPoint);
@@ -61,12 +61,12 @@ export default function getIssueData(issueSpan, significantSpan, granularity, in
   }).then(() => data);
 }
 
-const getIssuesPage = until => (page, perPage) => {
+const getIssuesPage = (since, until) => (page, perPage) => {
   return graphQl
     .query(
       `
-    query($page: Int, $perPage: Int, $until: Timestamp) {
-      issues(page: $page, perPage: $perPage, until: $until) {
+    query($page: Int, $perPage: Int, $since: Timestamp, $until: Timestamp) {
+      issues(page: $page, perPage: $perPage, since: $since, until: $until) {
         count
         page
         perPage
@@ -78,7 +78,7 @@ const getIssuesPage = until => (page, perPage) => {
         }
       }
     }`,
-      { page, perPage, until }
+      { page, perPage, since, until }
     )
-    .then(resp => resp.issues);
+    .then((resp) => resp.issues);
 };

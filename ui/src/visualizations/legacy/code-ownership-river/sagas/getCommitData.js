@@ -24,7 +24,7 @@ export default function getCommitData(commitSpan, significantSpan, granularity, 
 
   let next = moment(significantSpan[0]).startOf(granularity.unit).toDate().getTime();
 
-  return traversePages(getCommitsPage(significantSpan[1]), (commit) => {
+  return traversePages(getCommitsPage(significantSpan[0], significantSpan[1]), (commit) => {
     const dt = Date.parse(commit.date);
 
     let stats = statsByAuthor[commit.signature];
@@ -119,11 +119,11 @@ function group(data) {
   return data;
 }
 
-const getCommitsPage = (until) => (page, perPage) => {
+const getCommitsPage = (since, until) => (page, perPage) => {
   return graphQl
     .query(
-      `query($page: Int, $perPage: Int, $until: Timestamp) {
-             commits(page: $page, perPage: $perPage, until: $until) {
+      `query($page: Int, $perPage: Int, $since: Timestamp, $until: Timestamp) {
+             commits(page: $page, perPage: $perPage, since: $since, until: $until) {
                count
                page
                perPage
@@ -139,7 +139,7 @@ const getCommitsPage = (until) => (page, perPage) => {
                }
              }
           }`,
-      { page, perPage, until }
+      { page, perPage, since, until }
     )
     .then((resp) => resp.commits);
 };

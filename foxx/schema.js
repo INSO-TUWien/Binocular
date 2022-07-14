@@ -311,6 +311,8 @@ function makeDateHistogramEndpoint(collection, dateFieldName, { makeFilter, args
       granularity: {
         type: new gql.GraphQLNonNull(DateHistogramGranularity),
       },
+      since: { type: Timestamp },
+      until: { type: Timestamp },
     },
     args
   );
@@ -326,6 +328,9 @@ function makeDateHistogramEndpoint(collection, dateFieldName, { makeFilter, args
     args: extendedArgs,
     resolve(root, args) {
       let q = qb.for('item').in(collection);
+
+      q = queryHelpers.addDateFilter('item.' + (dateFieldName || args.dateField), 'gte', args.since, q);
+      q = queryHelpers.addDateFilter('item.' + (dateFieldName || args.dateField), 'lte', args.until, q);
 
       if (makeFilter) {
         q = q.filter(makeFilter(args));
