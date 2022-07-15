@@ -218,6 +218,7 @@ const queryType = new gql.GraphQLObjectType({
             SORT build.createdAt ASC
             ${limit}
             FILTER DATE_TIMESTAMP(build.createdAt) >= DATE_TIMESTAMP(${args.since})
+            FILTER DATE_TIMESTAMP(build.createdAt) <= DATE_TIMESTAMP(${args.until})
             LET countsByStatus = (
               FOR other IN ${builds}
                 FILTER other.finishedAt <= build.createdAt
