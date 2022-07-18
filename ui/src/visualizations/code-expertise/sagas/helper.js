@@ -4,11 +4,11 @@ import { collectPages, graphQl } from '../../../utils';
 import { endpointUrl } from '../../../utils';
 
 //get the blame data for a specific commit and for specific files
-export function getBlame(sha, files) {
+export function getBlameModules(sha, files) {
 
   console.log(sha, files)
 
-  return fetch(endpointUrl('blame'), {
+  return fetch(endpointUrl('blame/modules'), {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -16,6 +16,24 @@ export function getBlame(sha, files) {
     body: JSON.stringify({
       sha: sha,
       files: files
+    })
+  }).then((resp) => resp.json());
+}
+
+//get the blame data for a specific commit and for specific files
+export function getBlameIssues(sha, files, hashes) {
+
+  console.log(sha, files)
+
+  return fetch(endpointUrl('blame/issues'), {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      sha: sha,
+      files: files,
+      hashes: hashes
     })
   }).then((resp) => resp.json());
 }

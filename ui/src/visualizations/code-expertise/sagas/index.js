@@ -9,7 +9,7 @@ import {
   mapSaga,
 } from "../../../sagas/utils.js";
 
-import { getAllCommits, getCommitsForBranch, getCommitsForIssue, getIssueData, getAllBuildData, addBuildData, getBlame } from "./helper.js"
+import { getAllCommits, getCommitsForBranch, getCommitsForIssue, getIssueData, getAllBuildData, addBuildData, getBlameModules, getBlameIssues } from "./helper.js"
 
 
 
@@ -170,7 +170,10 @@ export const fetchCodeExpertiseData = fetchFactory(
         //get latest commit of the branch
         let latestRelevantCommit = relevantCommits.sort((a,b) => (new Date(b.date) - new Date(a.date)))[0]
 
-        return Promise.resolve(getBlame(latestRelevantCommit.sha, [...issueFiles])).then(res => {
+        //hashes of all commits related to the issue
+        const hashes = relevantCommits.map(commit => commit.sha)
+
+        return Promise.resolve(getBlameIssues(latestRelevantCommit.sha, [...issueFiles], hashes)).then(res => {
 
           Object.entries(res.blame).map(item => {
             const devMail = item[0]
@@ -280,7 +283,7 @@ export const fetchCodeExpertiseData = fetchFactory(
         //get latest commit of the branch
         let latestBranchCommit = branchCommits.sort((a,b) => (new Date(b.date) - new Date(a.date)))[0]
 
-        return Promise.resolve(getBlame(latestBranchCommit.sha, activeFiles)).then(res => {
+        return Promise.resolve(getBlameModules(latestBranchCommit.sha, activeFiles)).then(res => {
 
           console.log('frontend blame result: ', res)
 
