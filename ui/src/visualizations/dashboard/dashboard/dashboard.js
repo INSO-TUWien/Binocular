@@ -5,6 +5,8 @@ import styles from '../styles.scss';
 import dashboardStyles from '../styles/dashboard.scss';
 
 import settingsIcon from '../assets/settings.svg';
+import filterIcon from '../assets/filter.svg';
+import filterOffIcon from '../assets/filter_off.svg';
 import smallVisualizationIcon from '../assets/smallVisualizationIcon.svg';
 import largeVisualizationIcon from '../assets/largeVisualizationIcon.svg';
 import wideVisualizationIcon from '../assets/wideVisualizationIcon.svg';
@@ -82,7 +84,7 @@ export default class Dashboard extends React.Component {
     let visualizationCount = this.state.visualizationCount;
     visualizationCount++;
 
-    currentVisualizations.push({ key: key, id: id, size: 'small' });
+    currentVisualizations.push({ key: key, id: id, size: 'small', universalSettings: true });
     this.setState({ visualizations: currentVisualizations, visualizationCount: visualizationCount });
   }
 
@@ -105,6 +107,19 @@ export default class Dashboard extends React.Component {
           <div className={dashboardStyles.visualizationName}>{visualizationRegistry[visualization.key].label}</div>
           <div className={dashboardStyles.visualizationSettingsButton} onClick={this.switchVisualizationSettingsVisibility.bind(this)}>
             <img className={dashboardStyles.visualizationSettingsIcon} src={settingsIcon}></img>
+          </div>
+          <div
+            className={dashboardStyles.visualizationSettingsButton}
+            onClick={this.switchVisualizationUniversalFilterBehaviour.bind(this)}>
+            <img
+              title={'Enable/Disable influence of universal settings.'}
+              className={dashboardStyles.visualizationSettingsIcon}
+              src={visualization.universalSettings ? filterIcon : filterOffIcon}
+              style={
+                visualization.universalSettings
+                  ? {}
+                  : { filter: 'invert(20%) sepia(100%) saturate(1352%) hue-rotate(0deg) brightness(119%) contrast(119%)' }
+              }></img>
           </div>
         </div>
         <div className={dashboardStyles.visualizationSettings}>
@@ -143,7 +158,11 @@ export default class Dashboard extends React.Component {
           </div>
         </div>
         <div className={dashboardStyles.inside}>
-          {React.createElement(visualizationRegistry[visualization.key].ChartComponent, { id: visualization.id, size: visualization.size })}
+          {React.createElement(visualizationRegistry[visualization.key].ChartComponent, {
+            id: visualization.id,
+            size: visualization.size,
+            universalSettings: visualization.universalSettings,
+          })}
         </div>
       </div>
     );
@@ -287,5 +306,19 @@ export default class Dashboard extends React.Component {
     }
     this.state.visualizations = newVisualizationOrder;
     localStorage.setItem('dashboardState', JSON.stringify(this.state));
+  }
+
+  switchVisualizationUniversalFilterBehaviour(e) {
+    const visualizationContainer = e.target.parentNode.parentNode.parentNode;
+    const id = visualizationContainer.id.substring('visualizationContainer'.length);
+    const visualizations = this.state.visualizations.map((viz) => {
+      if (parseInt(viz.id) === parseInt(id)) {
+        viz.universalSettings = !viz.universalSettings;
+      }
+      return viz;
+    });
+    this.state.visualizations = visualizations;
+    localStorage.setItem('dashboardState', JSON.stringify(this.state));
+    this.forceUpdate();
   }
 }

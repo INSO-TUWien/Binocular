@@ -91,12 +91,21 @@ export default class Changes extends React.Component {
       return {};
     }
 
+    let firstTimestamp = props.firstCommitTimestamp;
+    let lastTimestamp = props.lastCommitTimestamp;
+    let commits = props.commits;
+    if (props.universalSettings) {
+      commits = props.filteredCommits;
+      firstTimestamp = props.firstSignificantTimestamp;
+      lastTimestamp = props.lastSignificantTimestamp;
+    }
+
     //---- STEP 1: AGGREGATE COMMITS GROUPED BY AUTHORS PER TIME INTERVAL ----
     const data = [];
     //let granularity = Dashboard.getGranularity(props.resolution);
     const granularity = this.getGranularity(props.chartResolution);
-    const curr = moment(props.firstSignificantTimestamp).startOf(granularity.unit).subtract(1, props.chartResolution);
-    const end = moment(props.lastSignificantTimestamp).endOf(granularity.unit).add(1, props.chartResolution);
+    const curr = moment(firstTimestamp).startOf(granularity.unit).subtract(1, props.chartResolution);
+    const end = moment(lastTimestamp).endOf(granularity.unit).add(1, props.chartResolution);
     const next = moment(curr).add(1, props.chartResolution);
     const totalChangesPerAuthor = {};
     for (let i = 0; curr.isSameOrBefore(end); curr.add(1, props.chartResolution), next.add(1, props.chartResolution)) {
@@ -104,12 +113,12 @@ export default class Changes extends React.Component {
       const currTimestamp = curr.toDate().getTime();
       const nextTimestamp = next.toDate().getTime();
       const obj = { date: currTimestamp, statsByAuthor: {} }; //Save date of time bucket, create object
-      for (; i < props.commits.length && Date.parse(props.commits[i].date) < nextTimestamp; i++) {
+      for (; i < commits.length && Date.parse(commits[i].date) < nextTimestamp; i++) {
         //Iterate through commits that fall into this time bucket
-        const additions = props.commits[i].stats.additions;
-        const deletions = props.commits[i].stats.deletions;
+        const additions = commits[i].stats.additions;
+        const deletions = commits[i].stats.deletions;
         const changes = additions + deletions;
-        const commitAuthor = props.commits[i].signature;
+        const commitAuthor = commits[i].signature;
         if (totalChangesPerAuthor[commitAuthor] === null) {
           totalChangesPerAuthor[commitAuthor] = 0;
         }

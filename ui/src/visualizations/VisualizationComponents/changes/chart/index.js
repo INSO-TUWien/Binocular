@@ -9,9 +9,12 @@ const mapStateToProps = (state /*, ownProps*/) => {
   return {
     palette: changesState.data.data.palette,
     otherCount: changesState.data.data.otherCount,
+    filteredCommits: changesState.data.data.filteredCommits,
     commits: changesState.data.data.commits,
     committers: changesState.data.data.committers,
     commitAttribute: changesState.config.commitAttribute,
+    firstCommitTimestamp: changesState.data.data.firstCommitTimestamp,
+    lastCommitTimestamp: changesState.data.data.lastCommitTimestamp,
     firstSignificantTimestamp: changesState.data.data.firstSignificantTimestamp,
     lastSignificantTimestamp: changesState.data.data.lastSignificantTimestamp,
     displayMetric: changesState.config.displayMetric,

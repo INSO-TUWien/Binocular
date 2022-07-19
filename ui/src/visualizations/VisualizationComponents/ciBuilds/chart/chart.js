@@ -77,23 +77,32 @@ export default class CIBuilds extends React.Component {
       return {};
     }
 
+    let firstTimestamp = props.firstCommitTimestamp;
+    let lastTimestamp = props.lastCommitTimestamp;
+    let builds = props.builds;
+    if (props.universalSettings) {
+      builds = props.filteredBuilds;
+      firstTimestamp = props.firstSignificantTimestamp;
+      lastTimestamp = props.lastSignificantTimestamp;
+    }
+
     //---- STEP 1: AGGREGATE BUILDS PER TIME INTERVAL ----
     const data = [];
     const granularity = this.getGranularity(props.chartResolution);
-    const curr = moment(props.firstSignificantTimestamp).startOf(granularity.unit).subtract(1, props.chartResolution);
-    const end = moment(props.lastSignificantTimestamp).endOf(granularity.unit).add(1, props.chartResolution);
+    const curr = moment(firstTimestamp).startOf(granularity.unit).subtract(1, props.chartResolution);
+    const end = moment(lastTimestamp).endOf(granularity.unit).add(1, props.chartResolution);
     const next = moment(curr).add(1, props.chartResolution);
     for (let i = 0; curr.isSameOrBefore(end); curr.add(1, props.chartResolution), next.add(1, props.chartResolution)) {
       //Iterate through time buckets
       const currTimestamp = curr.toDate().getTime();
       const nextTimestamp = next.toDate().getTime();
       const obj = { date: currTimestamp, succeeded: 0, failed: 0 }; //Save date of time bucket, create object
-      for (; i < props.builds.length && Date.parse(props.builds[i].createdAt) < nextTimestamp; i++) {
+      for (; i < builds.length && Date.parse(builds[i].createdAt) < nextTimestamp; i++) {
         //Iterate through commits that fall into this time bucket
-        const buildDate = Date.parse(props.builds[i].createdAt);
+        const buildDate = Date.parse(builds[i].createdAt);
         if (buildDate >= currTimestamp && buildDate < nextTimestamp) {
-          obj.succeeded += props.builds[i].stats.success || 0;
-          obj.failed += props.builds[i].stats.failed || -0.001; //-0.001 for stack layout to realize it belongs on the bottom
+          obj.succeeded += builds[i].stats.success || 0;
+          obj.failed += builds[i].stats.failed || -0.001; //-0.001 for stack layout to realize it belongs on the bottom
         }
       }
       data.push(obj);

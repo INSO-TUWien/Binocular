@@ -68,7 +68,6 @@ export const fetchHotspotDialsData = fetchFactory(
     const lastCommitTimestamp = Date.parse(lastCommit.date);
 
     const state = yield select();
-
     const config = state.visualizations.hotspotDials.state.config;
 
     const viewport = state.visualizations.hotspotDials.state.config.viewport || [0, null];
@@ -80,7 +79,6 @@ export const fetchHotspotDialsData = fetchFactory(
     const timeSpan = universalSettings.chartTimeSpan;
     firstSignificantTimestamp = timeSpan.from === undefined ? firstSignificantTimestamp : new Date(timeSpan.from).getTime();
     lastSignificantTimestamp = timeSpan.to === undefined ? lastSignificantTimestamp : new Date(timeSpan.to).getTime();
-
     let universalSettingsCategory = 'hour';
 
     switch (universalSettings.chartResolution) {
@@ -142,35 +140,20 @@ export const fetchHotspotDialsData = fetchFactory(
     };
 
     const category = categories[universalSettingsCategory];
-    return yield Promise.resolve(
-      graphQl.query(
-        `query($granularity: DateGranularity!, $dateField: String!, $since: Timestamp, $until: Timestamp) {
-           commitDateHistogram(granularity: $granularity, since: $since, until: $until) {
-             category
-             count
-           }
-           goodCommits: commitDateHistogram(granularity: $granularity, buildFilter: successful, since: $since, until: $until) {
-             category
-             count
-           }
-           badCommits: commitDateHistogram(granularity: $granularity, buildFilter: failed, since: $since, until: $until) {
-             category
-             count
-           }
-           issueDateHistogram(granularity: $granularity, dateField: $dateField, since: $since, until: $until) {
-             category
-             count
-           }
-         }`,
-        {
-          granularity: universalSettingsCategory,
-          dateField: config.issueField,
-          since: firstSignificantTimestamp,
-          until: lastSignificantTimestamp,
-        }
-      )
+    return yield Promise.join(
+      commitDateHistogramQuery(universalSettingsCategory, config.issueField, firstSignificantTimestamp, lastSignificantTimestamp),
+      commitDateHistogramQuery(universalSettingsCategory, config.issueField, firstCommitTimestamp, lastCommitTimestamp)
     )
-      .then((resp) => [resp.commitDateHistogram, resp.goodCommits, resp.badCommits, resp.issueDateHistogram])
+      .then((resp) => [
+        resp[0].commitDateHistogram,
+        resp[0].goodCommits,
+        resp[0].badCommits,
+        resp[0].issueDateHistogram,
+        resp[1].commitDateHistogram,
+        resp[1].goodCommits,
+        resp[1].badCommits,
+        resp[1].issueDateHistogram,
+      ])
       .map((histogram) => {
         histogram = _(histogram)
           .filter((c) => c.category !== null)
@@ -194,11 +177,16 @@ export const fetchHotspotDialsData = fetchFactory(
           categories: histogram,
         };
       })
-      .spread((commits, goodCommits, badCommits, issues) => {
+      .spread((filteredCommits, filteredGoodCommits, filteredBadCommits, filteredIssues, commits, goodCommits, badCommits, issues) => {
         commits.categories = commits.categories.filter((c) => c.label !== undefined);
         goodCommits.categories = goodCommits.categories.filter((gc) => gc.label !== undefined);
         badCommits.categories = badCommits.categories.filter((bc) => bc.label !== undefined);
         issues.categories = issues.categories.filter((i) => i.label !== undefined);
+        filteredCommits.categories = filteredCommits.categories.filter((c) => c.label !== undefined);
+        filteredGoodCommits.categories = filteredGoodCommits.categories.filter((gc) => gc.label !== undefined);
+        filteredBadCommits.categories = filteredBadCommits.categories.filter((bc) => bc.label !== undefined);
+        filteredIssues.categories = filteredIssues.categories.filter((i) => i.label !== undefined);
+
         return {
           commits: {
             maximum: badCommits.maximum + goodCommits.maximum,
@@ -211,7 +199,19 @@ export const fetchHotspotDialsData = fetchFactory(
               detailedLabel: a.detailedLabel,
             })),
           },
+          filteredCommits: {
+            maximum: filteredBadCommits.maximum + filteredGoodCommits.maximum,
+            categories: _.zipWith(filteredBadCommits.categories, filteredGoodCommits.categories, (a, b) => ({
+              category: a.category,
+              count: a.count + b.count,
+              badCount: a.count,
+              goodCount: b.count,
+              label: a.label,
+              detailedLabel: a.detailedLabel,
+            })),
+          },
           issues,
+          filteredIssues,
         };
       });
   },
@@ -219,3 +219,32 @@ export const fetchHotspotDialsData = fetchFactory(
   receiveHotspotDialsData,
   receiveHotspotDialsDataError
 );
+
+function commitDateHistogramQuery(granularity, dateField, since, until) {
+  return graphQl.query(
+    `query($granularity: DateGranularity!, $dateField: String!, $since: Timestamp, $until: Timestamp) {
+           commitDateHistogram(granularity: $granularity, since: $since, until: $until) {
+             category
+             count
+           }
+           goodCommits: commitDateHistogram(granularity: $granularity, buildFilter: successful, since: $since, until: $until) {
+             category
+             count
+           }
+           badCommits: commitDateHistogram(granularity: $granularity, buildFilter: failed, since: $since, until: $until) {
+             category
+             count
+           }
+           issueDateHistogram(granularity: $granularity, dateField: $dateField, since: $since, until: $until) {
+             category
+             count
+           }
+         }`,
+    {
+      granularity: granularity,
+      dateField: dateField,
+      since: since,
+      until: until,
+    }
+  );
+}

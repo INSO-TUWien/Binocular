@@ -72,12 +72,16 @@ export const fetchIssuesData = fetchFactory(
     firstSignificantTimestamp = timeSpan.from === undefined ? firstSignificantTimestamp : new Date(timeSpan.from).getTime();
     lastSignificantTimestamp = timeSpan.to === undefined ? lastSignificantTimestamp : new Date(timeSpan.to).getTime();
     return yield Promise.join(
-      getIssueData([firstIssueTimestamp, lastIssueTimestamp], [firstSignificantTimestamp, lastSignificantTimestamp])
+      getIssueData([firstIssueTimestamp, lastIssueTimestamp], [firstSignificantTimestamp, lastSignificantTimestamp]),
+      getIssueData([firstIssueTimestamp, lastIssueTimestamp], [firstIssueTimestamp, lastIssueTimestamp])
     )
-      .spread((issues) => {
+      .spread((filteredIssues, issues) => {
         return {
           otherCount: 0,
+          filteredIssues,
           issues,
+          firstCommitTimestamp,
+          lastCommitTimestamp,
           firstSignificantTimestamp,
           lastSignificantTimestamp,
         };

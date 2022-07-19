@@ -11,7 +11,10 @@ const mapStateToProps = (state /*, ownProps*/) => {
   return {
     palette: issuesState.data.data.palette,
     otherCount: issuesState.data.data.otherCount,
+    filteredIssues: issuesState.data.data.filteredIssues,
     issues: issuesState.data.data.issues,
+    firstCommitTimestamp: issuesState.data.data.firstCommitTimestamp,
+    lastCommitTimestamp: issuesState.data.data.lastCommitTimestamp,
     firstSignificantTimestamp: issuesState.data.data.firstSignificantTimestamp,
     lastSignificantTimestamp: issuesState.data.data.lastSignificantTimestamp,
     chartResolution: universalSettings.chartResolution,

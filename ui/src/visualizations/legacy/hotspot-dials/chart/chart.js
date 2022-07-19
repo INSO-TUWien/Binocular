@@ -62,6 +62,18 @@ export default class HotspotDials extends React.PureComponent {
     ];
 
     const CommitDial = this.props.splitCommits ? DoubleDial : Dial;
+    let commitsMaximum = this.props.commits.maximum;
+    let commitsCategories = this.props.commits.categories;
+    let issuesMaximum = this.props.issues.maximum;
+    let issuesCategories = this.props.issues.categories;
+    if (this.props.universalSettings !== undefined) {
+      if (this.props.universalSettings) {
+        commitsMaximum = this.props.filteredCommits.maximum;
+        commitsCategories = this.props.filteredCommits.categories;
+        issuesMaximum = this.props.filteredIssues.maximum;
+        issuesCategories = this.props.filteredIssues.categories;
+      }
+    }
 
     return (
       <ChartContainer onResize={(evt) => this.onResize(evt)}>
@@ -78,8 +90,8 @@ export default class HotspotDials extends React.PureComponent {
                 className={styles.commits}
                 radius={radius}
                 minimumFillRate={ISSUE_RATIO}
-                maximum={this.props.commits.maximum}
-                categories={this.props.commits.categories}
+                maximum={commitsMaximum}
+                categories={commitsCategories}
                 showLabels={true}
                 palette={commitPalette}
                 split={true}
@@ -89,8 +101,8 @@ export default class HotspotDials extends React.PureComponent {
                 className={styles.issues}
                 radius={radius * ISSUE_RATIO}
                 minimumFillRate={SPACER_RATIO}
-                maximum={this.props.issues.maximum}
-                categories={this.props.issues.categories}
+                maximum={issuesMaximum}
+                categories={issuesCategories}
                 palette={issuePalette}
                 background="grey"
               />

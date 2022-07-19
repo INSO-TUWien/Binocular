@@ -76,21 +76,29 @@ export default class Issues extends React.Component {
       return {};
     }
 
+    let firstTimestamp = props.firstCommitTimestamp;
+    let lastTimestamp = props.lastCommitTimestamp;
+    let issues = props.issues;
+    if (props.universalSettings) {
+      issues = props.filteredIssues;
+      firstTimestamp = props.firstSignificantTimestamp;
+      lastTimestamp = props.lastSignificantTimestamp;
+    }
     //---- STEP 1: FILTER ISSUES ----
     let filteredIssues = [];
     switch (props.showIssues) {
       case 'all':
-        filteredIssues = props.issues;
+        filteredIssues = issues;
         break;
       case 'open':
-        _.each(props.issues, (issue) => {
+        _.each(issues, (issue) => {
           if (issue.closedAt === null) {
             filteredIssues.push(issue);
           }
         });
         break;
       case 'closed':
-        _.each(props.issues, (issue) => {
+        _.each(issues, (issue) => {
           if (issue.closedAt) {
             filteredIssues.push(issue);
           }
@@ -102,11 +110,11 @@ export default class Issues extends React.Component {
     //---- STEP 2: AGGREGATE ISSUES PER TIME INTERVAL ----
     const data = [];
     const granularity = this.getGranularity(props.chartResolution);
-    const curr = moment(props.firstSignificantTimestamp).startOf(granularity.unit).subtract(1, props.chartResolution);
+    const curr = moment(firstTimestamp).startOf(granularity.unit).subtract(1, props.chartResolution);
     const next = moment(curr).add(1, props.chartResolution);
-    const end = moment(props.lastSignificantTimestamp).endOf(granularity.unit).add(1, props.chartResolution);
+    const end = moment(lastTimestamp).endOf(granularity.unit).add(1, props.chartResolution);
     const sortedCloseDates = [];
-    let createdDate = Date.parse(props.issues[0].createdAt);
+    let createdDate = Date.parse(issues[0].createdAt);
 
     for (let i = 0, j = 0; curr.isSameOrBefore(end); curr.add(1, props.chartResolution), next.add(1, props.chartResolution)) {
       //Iterate through time buckets

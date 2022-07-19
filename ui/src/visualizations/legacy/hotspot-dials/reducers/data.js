@@ -24,6 +24,14 @@ export default handleActions(
         categories: [],
         maximum: 0,
       },
+      filteredCommits: {
+        categories: [],
+        maximum: 0,
+      },
+      filteredIssues: {
+        categories: [],
+        maximum: 0,
+      },
     },
     lastFetched: null,
     isFetching: null,

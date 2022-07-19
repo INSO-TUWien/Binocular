@@ -9,7 +9,10 @@ const mapStateToProps = (state /*, ownProps*/) => {
   const universalSettings = state.visualizations.newDashboard.state.config;
 
   return {
+    filteredBuilds: buildsState.data.data.filteredBuilds,
     builds: buildsState.data.data.builds,
+    firstCommitTimestamp: buildsState.data.data.firstCommitTimestamp,
+    lastCommitTimestamp: buildsState.data.data.lastCommitTimestamp,
     firstSignificantTimestamp: buildsState.data.data.firstSignificantTimestamp,
     lastSignificantTimestamp: buildsState.data.data.lastSignificantTimestamp,
     chartResolution: universalSettings.chartResolution,

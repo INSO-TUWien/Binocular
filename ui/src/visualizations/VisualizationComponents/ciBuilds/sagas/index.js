@@ -70,12 +70,16 @@ export const fetchBuildsData = fetchFactory(
     firstSignificantTimestamp = timeSpan.from === undefined ? firstSignificantTimestamp : new Date(timeSpan.from).getTime();
     lastSignificantTimestamp = timeSpan.to === undefined ? lastSignificantTimestamp : new Date(timeSpan.to).getTime();
     return yield Promise.join(
-      getBuildData([firstCommitTimestamp, lastCommitTimestamp], [firstSignificantTimestamp, lastSignificantTimestamp])
+      getBuildData([firstCommitTimestamp, lastCommitTimestamp], [firstSignificantTimestamp, lastSignificantTimestamp]),
+      getBuildData([firstCommitTimestamp, lastCommitTimestamp], [firstCommitTimestamp, lastCommitTimestamp])
     )
-      .spread((builds) => {
+      .spread((filteredBuilds, builds) => {
         return {
           otherCount: 0,
+          filteredBuilds,
           builds,
+          firstCommitTimestamp,
+          lastCommitTimestamp,
           firstSignificantTimestamp,
           lastSignificantTimestamp,
         };

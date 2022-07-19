@@ -13,9 +13,17 @@ const mapStateToProps = (state) => {
       categories: hdState.data.data.commits.categories,
       maximum: hdState.data.data.commits.maximum,
     },
+    filteredCommits: {
+      categories: hdState.data.data.filteredCommits.categories,
+      maximum: hdState.data.data.filteredCommits.maximum,
+    },
     issues: {
       categories: hdState.data.data.issues.categories,
       maximum: hdState.data.data.issues.maximum,
+    },
+    filteredIssues: {
+      categories: hdState.data.data.filteredIssues.categories,
+      maximum: hdState.data.data.filteredIssues.maximum,
     },
     issueField: hdState.config.issueField,
     chartResolution: universalSettings.chartResolution,
