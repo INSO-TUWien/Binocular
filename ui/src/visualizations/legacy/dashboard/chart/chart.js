@@ -365,7 +365,7 @@ export default class Dashboard extends React.Component {
             obj['(Additions) others'] += commit.statsByAuthor[committer].additions;
             obj['(Deletions) others'] += commit.statsByAuthor[committer].deletions * -1 - 0.001;
           } else {
-            obj['others'] += commit.statsByAuthor[committer].additions + commit.statsByAuthor[committer].deletions;
+            obj['others'] += commit.statsByAuthor[committer].count;
           }
         } else if (committer in props.palette) {
           if (chartIsSplit) {

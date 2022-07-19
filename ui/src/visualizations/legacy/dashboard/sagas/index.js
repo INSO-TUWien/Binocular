@@ -28,7 +28,7 @@ export const requestRefresh = createAction('REQUEST_REFRESH');
 const refresh = createAction('REFRESH');
 export const setViewport = createAction('COR_SET_VIEWPORT');
 
-export default function*() {
+export default function* () {
   // fetch data once on entry
   yield* fetchDashboardData();
 
@@ -60,7 +60,7 @@ function* watchRefresh() {
  * Fetch data for dashboard, this still includes old functions that were copied over.
  */
 export const fetchDashboardData = fetchFactory(
-  function*() {
+  function* () {
     const { firstCommit, lastCommit, committers, firstIssue, lastIssue } = yield getBounds();
     const firstCommitTimestamp = Date.parse(firstCommit.date);
     const lastCommitTimestamp = Date.parse(lastCommit.date);
@@ -77,7 +77,7 @@ export const fetchDashboardData = fetchFactory(
     return yield Promise.join(
       getCommitData([firstCommitTimestamp, lastCommitTimestamp], [firstSignificantTimestamp, lastSignificantTimestamp]),
       getIssueData([firstIssueTimestamp, lastIssueTimestamp], [firstSignificantTimestamp, lastSignificantTimestamp]),
-      getBuildData()
+      getBuildData([firstCommitTimestamp, lastCommitTimestamp], [firstSignificantTimestamp, lastSignificantTimestamp])
     )
       .spread((commits, issues, builds) => {
         const palette = getPalette(commits, 15, committers.length);
@@ -90,10 +90,10 @@ export const fetchDashboardData = fetchFactory(
           issues,
           builds,
           firstSignificantTimestamp,
-          lastSignificantTimestamp
+          lastSignificantTimestamp,
         };
       })
-      .catch(function(e) {
+      .catch(function (e) {
         console.error(e.stack);
         throw e;
       });
@@ -112,7 +112,7 @@ function getPalette(commits, maxNumberOfColors, numOfCommitters) {
   const palette = chartColors('spectral', 15, numOfCommitters);
 
   const totals = {};
-  _.each(commits, commit => {
+  _.each(commits, (commit) => {
     const changes = commit.stats.additions + commit.stats.deletions;
     if (totals[commit.signature]) {
       totals[commit.signature] += changes;
@@ -122,7 +122,7 @@ function getPalette(commits, maxNumberOfColors, numOfCommitters) {
   });
 
   const sortable = [];
-  _.each(Object.keys(totals), key => {
+  _.each(Object.keys(totals), (key) => {
     sortable.push([key, totals[key]]);
   });
 

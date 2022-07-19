@@ -90,7 +90,6 @@ export default class Changes extends React.Component {
     if (!props.commits || props.commits.length === 0) {
       return {};
     }
-
     let firstTimestamp = props.firstCommitTimestamp;
     let lastTimestamp = props.lastCommitTimestamp;
     let commits = props.commits;
@@ -178,7 +177,7 @@ export default class Changes extends React.Component {
             obj['(Additions) others'] += commit.statsByAuthor[committer].additions;
             obj['(Deletions) others'] += commit.statsByAuthor[committer].deletions * -1 - 0.001;
           } else {
-            obj['others'] += commit.statsByAuthor[committer].additions + commit.statsByAuthor[committer].deletions;
+            obj['others'] += commit.statsByAuthor[committer].count;
           }
         } else if (committer in props.palette) {
           if (chartIsSplit) {
