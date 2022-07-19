@@ -75,6 +75,7 @@ const CommitDetails = ({ commit }) => {
                     <div className={styles.dateAndLink}>
                         <p>{dateString}</p>
                         <button
+                        disabled={!commit.build}
                         className={styles.button}
                         onClick={() => openInNewTab(ciUrl)}>
                             CI-Details

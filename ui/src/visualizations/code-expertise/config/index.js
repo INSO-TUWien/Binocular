@@ -72,7 +72,7 @@ export default () => {
     .then(branches => {
       const temp = []
       //placeholder option
-      temp.push(<option key={-1} value={null}>Select a Branch</option>)
+      temp.push(<option key={-1} value={''}>Select a Branch</option>)
       for(const i in branches) {
         temp.push(<option key={i}>{branches[i]}</option>)
       }
@@ -96,7 +96,7 @@ export default () => {
     .then(issues => {
       const temp = []
       //placeholder option
-      temp.push(<option key={-1} value={null}>Select an Issue</option>)
+      temp.push(<option key={-1} value={''}>Select an Issue</option>)
       for(const i of issues) {
         temp.push(<option key={i.iid} value={i.iid}>{'#' + i.iid + ' ' + i.title}</option>)
       }
