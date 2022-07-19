@@ -58,14 +58,23 @@ export default class CodeOwnershipRiver extends React.Component {
       return;
     }
 
-    const commitDateExtent = d3.extent(data.commits, (d) => d.date);
-    const commitCountExtent = [0, _.last(data.commits).totals.count];
+    let commits = data.commits;
+    let builds = data.builds;
+    let issues = data.issues;
+    if (data.universalSettings) {
+      commits = data.filteredCommits;
+      builds = data.filteredBuilds;
+      issues = data.filteredIssues;
+    }
 
-    const issueDateExtent = d3.extent(data.issues, (d) => d.createdAt);
-    const issueCountExtent = d3.extent(data.issues, (d) => d.count);
+    const commitDateExtent = d3.extent(commits, (d) => d.date);
+    const commitCountExtent = [0, _.last(commits).totals.count];
 
-    const buildDateExtent = d3.extent(data.builds, (b) => b.date);
-    const buildCountExtent = d3.extent(data.builds, (b) => b.stats.total);
+    const issueDateExtent = d3.extent(issues, (d) => d.createdAt);
+    const issueCountExtent = d3.extent(issues, (d) => d.count);
+
+    const buildDateExtent = d3.extent(builds, (b) => b.date);
+    const buildCountExtent = d3.extent(builds, (b) => b.stats.total);
 
     const min = (arr) => _.min(_.pull(arr, null));
     const max = (arr) => _.max(_.pull(arr, null));
@@ -97,6 +106,14 @@ export default class CodeOwnershipRiver extends React.Component {
     if (!this.props.commits) {
       return <svg />;
     }
+    let commits = this.props.commits;
+    let builds = this.props.builds;
+    let issues = this.props.issues;
+    if (this.props.universalSettings) {
+      commits = this.props.filteredCommits;
+      builds = this.props.filteredBuilds;
+      issues = this.props.filteredIssues;
+    }
 
     const legend = [
       {
@@ -105,14 +122,14 @@ export default class CodeOwnershipRiver extends React.Component {
       },
     ];
 
-    if (this.props.issues.length > 0) {
+    if (issues.length > 0) {
       legend.push({
         name: 'issues by state',
         subLegend: [openIssuesLegend, closedIssuesLegend],
       });
     }
 
-    if (this.props.builds.length > 0) {
+    if (builds.length > 0) {
       legend.push({
         name: 'Builds by state',
         subLegend: [successfulBuildsLegend, unsuccessfulBuildsLegend],
@@ -131,10 +148,10 @@ export default class CodeOwnershipRiver extends React.Component {
       // for each commit marker, we need to recalculate the correct
       // y-coordinate by checking where that commit would go in our
       // commit data points
-      const j = _.sortedIndexBy(this.props.commits, c, (other) => other.date.getTime());
+      const j = _.sortedIndexBy(commits, c, (other) => other.date.getTime());
 
-      const cBefore = this.props.commits[j - 1];
-      const cAfter = this.props.commits[j];
+      const cBefore = commits[j - 1];
+      const cAfter = commits[j];
       const span = cAfter.date.getTime() - cBefore.date.getTime();
       const dist = c.date.getTime() - cBefore.date.getTime();
       const pct = dist / span;
@@ -192,7 +209,7 @@ export default class CodeOwnershipRiver extends React.Component {
             </g>
             <g id="StackedArea1" clipPath="url(#chart)" className={cx(styles.commitCount)}>
               <StackedArea
-                data={this.props.commits}
+                data={commits}
                 series={this.state.commitSeries}
                 d3offset={d3.stackOffsetDiverging}
                 x={x}
@@ -219,7 +236,7 @@ export default class CodeOwnershipRiver extends React.Component {
             )}
             <g id="StackedArea2" clipPath="url(#chart)" mask="url(#issue-mask)" className={cx(styles.openIssuesCount)}>
               <StackedArea
-                data={this.props.issues}
+                data={issues}
                 x={x}
                 y={y}
                 series={[
@@ -244,7 +261,7 @@ export default class CodeOwnershipRiver extends React.Component {
             </g>
             <g id="StackedArea4" clipPath="url(#chart)" mask="url(#issue-mask)">
               <StackedArea
-                data={this.props.builds}
+                data={builds}
                 x={x}
                 y={y}
                 series={[
@@ -289,7 +306,12 @@ export default class CodeOwnershipRiver extends React.Component {
       return {};
     }
 
-    const lastCommitDataPoint = _.last(props.commits).statsByAuthor;
+    let commits = props.commits;
+    if (props.universalSettings) {
+      commits = props.filteredCommits;
+    }
+
+    const lastCommitDataPoint = _.last(commits).statsByAuthor;
     const commitLegend = [];
     const commitSeries = _.map(lastCommitDataPoint, (committerIndex, signature) => {
       const legend = {

@@ -118,17 +118,23 @@ export const fetchCodeOwnershipData = fetchFactory(
         [firstSignificantTimestamp, lastSignificantTimestamp],
         granularity,
         interval
-      )
+      ),
+      getCommitData([firstCommitTimestamp, lastCommitTimestamp], [firstCommitTimestamp, lastCommitTimestamp], granularity, interval),
+      getIssueData([firstIssueTimestamp, lastIssueTimestamp], [firstIssueTimestamp, lastIssueTimestamp], granularity, interval),
+      getBuildData([firstCommitTimestamp, lastCommitTimestamp], [firstCommitTimestamp, lastCommitTimestamp], granularity, interval)
     )
-      .spread((commits, issues, builds) => {
+      .spread((filteredCommits, filteredIssues, filteredBuilds, commits, issues, builds) => {
         const aggregatedAuthors = _.keys(_.last(commits).statsByAuthor);
         const palette = getChartColors('spectral', [...committers, 'other']);
         return {
           otherCount: committers.length - aggregatedAuthors.length,
+          filteredCommits,
           commits,
           committers,
           palette,
+          filteredIssues,
           issues,
+          filteredBuilds,
           builds,
         };
       })

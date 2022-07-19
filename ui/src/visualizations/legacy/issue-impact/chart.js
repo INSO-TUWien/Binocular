@@ -49,7 +49,7 @@ export default class IssueImpact extends React.PureComponent {
       hoveredHunk: null,
       hoveredFile: null,
       transform: d3.zoomIdentity,
-      dimensions: zoomUtils.initialDimensions()
+      dimensions: zoomUtils.initialDimensions(),
     };
 
     this.onResize = zoomUtils.onResizeFactory(0.7, 0.7);
@@ -65,7 +65,7 @@ export default class IssueImpact extends React.PureComponent {
       files,
       start,
       end,
-      builds
+      builds,
     });
   }
 
@@ -78,8 +78,8 @@ export default class IssueImpact extends React.PureComponent {
 
     let offsetShare = separatorShare;
 
-    return builds.data.map(build => {
-      const buildShare = build.duration / builds.totalDuration * MAXIMUM_OCCUPIED_SEMICIRCLE_SHARE;
+    return builds.data.map((build) => {
+      const buildShare = (build.duration / builds.totalDuration) * MAXIMUM_OCCUPIED_SEMICIRCLE_SHARE;
       const endShare = offsetShare + buildShare;
 
       const buildKey = build.id;
@@ -94,8 +94,8 @@ export default class IssueImpact extends React.PureComponent {
       const pie = semi.getPieForShares(offsetShare, endShare, lineStart, lineEnd);
 
       let jobOffsetShare = offsetShare;
-      const jobs = build.jobs.map(job => {
-        const jobShare = job.duration / build.duration * buildShare;
+      const jobs = build.jobs.map((job) => {
+        const jobShare = (job.duration / build.duration) * buildShare;
 
         const jobArc = semi.getArcForShares(jobOffsetShare, jobOffsetShare + jobShare);
         // const outerStart = outerJobSemi.getCoordsForShare(jobOffsetShare);
@@ -143,7 +143,7 @@ export default class IssueImpact extends React.PureComponent {
     let offsetShare = separatorShare;
 
     return files.data.map((file, i) => {
-      const fileShare = file.length / files.totalLength * MAXIMUM_OCCUPIED_SEMICIRCLE_SHARE;
+      const fileShare = (file.length / files.totalLength) * MAXIMUM_OCCUPIED_SEMICIRCLE_SHARE;
 
       if (fileShare === 0) {
         return <g key={i} />;
@@ -179,7 +179,7 @@ export default class IssueImpact extends React.PureComponent {
                 d={pie}
                 style={{
                   fill: isHighlighted ? dark : light,
-                  stroke: dark
+                  stroke: dark,
                 }}
                 onMouseEnter={() => this.setState({ hoveredHunk: hunkKey, hoveredFile: file.name })}
                 onMouseLeave={() => this.setState({ hoveredHunk: null, hoveredFile: null })}
@@ -198,9 +198,7 @@ export default class IssueImpact extends React.PureComponent {
 
       return (
         <g className={styles.fileAxis} key={i}>
-          <TransitionGroup component="g">
-            {hunkMarkers}
-          </TransitionGroup>
+          <TransitionGroup component="g">{hunkMarkers}</TransitionGroup>
           <path d={arcData} />
           <text
             transform={annotation.transform}
@@ -229,11 +227,13 @@ export default class IssueImpact extends React.PureComponent {
     const radius = Math.min(dims.width, dims.height) * CHART_FILL_RATIO;
     const issueAxisLength = radius * 0.95;
     const issueScale = d3.scaleTime().rangeRound([-issueAxisLength, issueAxisLength]).domain([this.state.start, this.state.end]);
-
     const fileAxis = this.renderFileAxis(issueScale, radius, this.state.files);
     const buildAxis = this.renderBuildAxis(issueScale, radius, this.state.builds);
-
-    const commitMarkers = _.map(this.props.issue.commits.data, commit => {
+    let issue = this.props.issue;
+    if (this.props.universalSettings) {
+      issue = this.props.filteredIssue;
+    }
+    const commitMarkers = _.map(issue.commits.data, (commit) => {
       return (
         <CommitMarker
           key={commit.sha}
@@ -246,8 +246,12 @@ export default class IssueImpact extends React.PureComponent {
     });
 
     return (
-      <ChartContainer onResize={evt => this.onResize(evt)}>
-        <GlobalZoomableSvg className={styles.chart} scaleExtent={[1, 10]} onZoom={evt => this.onZoom(evt)} transform={this.state.transform}>
+      <ChartContainer onResize={(evt) => this.onResize(evt)}>
+        <GlobalZoomableSvg
+          className={styles.chart}
+          scaleExtent={[1, 10]}
+          onZoom={(evt) => this.onZoom(evt)}
+          transform={this.state.transform}>
           <defs>
             <clipPath id="chart">
               <rect x="0" y="0" width={dims.width} height={dims.height} />
@@ -259,12 +263,8 @@ export default class IssueImpact extends React.PureComponent {
           <OffsetGroup dims={dims} transform={this.state.transform}>
             <circle className={styles.circle} r={radius} cx={dims.width / 2} cy={dims.height / 2} />
             <g transform={`translate(${dims.width / 2},${dims.height / 2})`}>
-              <g className="file-axis">
-                {fileAxis}
-              </g>
-              <g className="build-axis">
-                {buildAxis}
-              </g>
+              <g className="file-axis">{fileAxis}</g>
+              <g className="build-axis">{buildAxis}</g>
               <g className={styles.issueAxis}>
                 <Axis orient="bottom" ticks={8} scale={issueScale} />
                 <g className={styles.createMarker} transform={`translate(${issueScale(this.state.issue.createdAt)}, -5)`}>
@@ -290,31 +290,40 @@ function extractData(props) {
       colors: [],
       files: {
         totalLength: 0,
-        data: []
+        data: [],
       },
       builds: {
         totalDuration: 0,
-        data: []
-      }
+        data: [],
+      },
     };
   }
 
-  let start = new Date(props.issue.createdAt);
-  let end = props.issue.closedAt ? new Date(props.issue.closedAt) : new Date();
+  let issue = props.issue;
+  if (props.universalSettings) {
+    issue = props.filteredIssue;
+  }
+
+  let start = new Date(issue.createdAt);
+  let end = issue.closedAt ? new Date(issue.closedAt) : new Date();
 
   const filesById = {};
   const buildsById = {};
 
-  _.each(props.issue.commits.data, commit => {
-    if (!_.includes(props.filteredCommits, commit.sha)) {
-      return;
+  _.each(issue.commits.data, (commit) => {
+    if (props.filteredCommits.length !== 0) {
+      if (!_.includes(props.filteredCommits, commit.sha)) {
+        return;
+      }
     }
 
     start = Math.min(parseTime(commit.date).getTime(), start);
     end = Math.max(parseTime(commit.date), end);
-    _.each(commit.files.data, f => {
-      if (!_.includes(props.filteredFiles, f.file.path)) {
-        return;
+    _.each(commit.files.data, (f) => {
+      if (props.filteredFiles.length !== 0) {
+        if (!_.includes(props.filteredFiles, f.file.path)) {
+          return;
+        }
       }
 
       if (!filesById[f.id]) {
@@ -322,28 +331,28 @@ function extractData(props) {
           name: f.file.path,
           length: f.file.maxLength,
           webUrl: f.file.webUrl,
-          hunks: f.hunks.map(h =>
+          hunks: f.hunks.map((h) =>
             _.merge({}, h, {
               commit: {
                 sha: commit.sha,
                 date: parseTime(commit.date),
-                webUrl: commit.webUrl
-              }
+                webUrl: commit.webUrl,
+              },
             })
-          )
+          ),
         };
       }
     });
 
-    _.each(commit.builds, b => {
+    _.each(commit.builds, (b) => {
       if (!b.finishedAt) {
         return;
       }
 
       let totalJobDuration = 0;
       const jobs = _(b.jobs)
-        .filter(job => job.finishedAt)
-        .map(job => {
+        .filter((job) => job.finishedAt)
+        .map((job) => {
           const startedAt = parseTime(job.createdAt);
           const finishedAt = parseTime(job.finishedAt);
           const duration = finishedAt ? (finishedAt.getTime() - startedAt.getTime()) / 1000 : 0;
@@ -356,7 +365,7 @@ function extractData(props) {
             webUrl: job.webUrl,
             startedAt,
             finishedAt,
-            duration
+            duration,
           };
         })
         .value();
@@ -364,16 +373,19 @@ function extractData(props) {
       buildsById[b.id] = _.assign({}, b, {
         createdAt: parseTime(b.createdAt),
         finishedAt: parseTime(b.finishedAt),
-        jobs: _.map(jobs, job =>
+        jobs: _.map(jobs, (job) =>
           _.assign({}, job, {
-            duration: job.duration / totalJobDuration * b.duration
+            duration: (job.duration / totalJobDuration) * b.duration,
           })
-        )
+        ),
       });
     });
   });
 
-  const colors = getChartColors('spectral', props.issue.commits.data.map(c => c.sha));
+  const colors = getChartColors(
+    'spectral',
+    issue.commits.data.map((c) => c.sha)
+  );
 
   const files = _.values(filesById);
   const totalLength = _.sumBy(files, 'length');
@@ -384,18 +396,18 @@ function extractData(props) {
   return {
     issue: {
       createdAt: parseTime(props.issue.createdAt),
-      closedAt: parseTime(props.issue.closedAt)
+      closedAt: parseTime(props.issue.closedAt),
     },
     start: new Date(start),
     end: new Date(end),
     colors,
     files: {
       totalLength,
-      data: files
+      data: files,
     },
     builds: {
       totalDuration,
-      data: builds
-    }
+      data: builds,
+    },
   };
 }

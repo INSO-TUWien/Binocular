@@ -8,7 +8,7 @@ export default function getBuildData(buildSpan, significantSpan, granularity, in
   let next = moment(significantSpan[0]).startOf('day').toDate().getTime();
   const data = [
     {
-      date: new Date(buildSpan[0]),
+      date: new Date(significantSpan[0]),
       stats: {
         success: 0,
         failed: 0,
