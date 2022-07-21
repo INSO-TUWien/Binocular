@@ -13,10 +13,19 @@ export default handleActions(
       updateLocalStorage('chartTimeSpan', action.payload);
       return _.assign({}, state, { chartTimeSpan: action.payload });
     },
+    SET_SELECTED_AUTHORS_GLOBAL: (state, action) => {
+      updateLocalStorage('selectedAuthorsGlobal', action.payload);
+      return _.assign({}, state, { selectedAuthorsGlobal: action.payload });
+    },
+    SET_All_AUTHORS: (state, action) => {
+      return _.assign({}, state, { allAuthors: action.payload });
+    },
   },
   {
     chartResolution: getLocalStorage().chartResolution,
     chartTimeSpan: getLocalStorage().chartTimeSpan,
+    selectedAuthorsGlobal: getLocalStorage().selectedAuthorsGlobal,
+    allAuthors: [],
   }
 );
 
@@ -26,6 +35,7 @@ function updateLocalStorage(key, value) {
     currConfig = {
       chartResolution: 'months',
       chartTimeSpan: { from: undefined, to: undefined },
+      selectedAuthorsGlobal: [],
     };
   } else {
     currConfig = JSON.parse(localStorage.getItem('universalConfig'));
@@ -41,6 +51,7 @@ function getLocalStorage() {
     currConfig = {
       chartResolution: 'months',
       chartTimeSpan: { from: undefined, to: undefined },
+      selectedAuthorsGlobal: [],
     };
   } else {
     currConfig = JSON.parse(localStorage.getItem('universalConfig'));

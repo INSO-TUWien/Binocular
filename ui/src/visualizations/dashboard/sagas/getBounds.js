@@ -1,6 +1,6 @@
 'use strict';
 
-import { graphQl } from '../../../../utils';
+import { graphQl } from '../../../utils';
 
 /**
  * Get first and last commit, as well as first and last issue

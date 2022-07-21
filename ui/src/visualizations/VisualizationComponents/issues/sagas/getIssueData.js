@@ -26,6 +26,10 @@ const getIssuesPage = (since, until) => (page, perPage) => {
           title
           createdAt
           closedAt
+          author{
+            login
+            name
+          }
         }
       }
     }`,

@@ -157,7 +157,13 @@ export default class Dashboard extends React.Component {
             <img className={dashboardStyles.visualizationSettingsItemIcon} src={deleteIcon}></img>Delete
           </div>
         </div>
-        <div className={dashboardStyles.inside}>
+        <div
+          className={dashboardStyles.inside}
+          draggable={'true'}
+          onDragStart={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+          }}>
           {React.createElement(visualizationRegistry[visualization.key].ChartComponent, {
             id: visualization.id,
             size: visualization.size,
@@ -248,11 +254,16 @@ export default class Dashboard extends React.Component {
       return document.getElementById(item.id).getBoundingClientRect();
     });
     function _onDragOver(e) {
-      e.preventDefault();
-      e.dataTransfer.dropEffect = 'move';
-
       const target = e.target;
-      if (target && target !== dragEl && target.nodeName === 'DIV' && target.classList.contains(dashboardStyles.visualizationContainer)) {
+      if (
+        target &&
+        target !== dragEl &&
+        target.nodeName === 'DIV' &&
+        target.classList.contains(dashboardStyles.visualizationContainer) &&
+        !target.classList.contains(dashboardStyles.inside)
+      ) {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
         if (target.classList.contains(dashboardStyles.inside)) {
           e.stopPropagation();
         } else {
@@ -283,17 +294,18 @@ export default class Dashboard extends React.Component {
       'dragstart',
       function (e) {
         dragEl = e.target;
-        nextEl = dragEl.nextSibling;
+        if (!dragEl.classList.contains(dashboardStyles.inside)) {
+          nextEl = dragEl.nextSibling;
+          e.dataTransfer.effectAllowed = 'move';
+          e.dataTransfer.setData('Text', dragEl.textContent);
 
-        e.dataTransfer.effectAllowed = 'move';
-        e.dataTransfer.setData('Text', dragEl.textContent);
+          section.addEventListener('dragover', _onDragOver, false);
+          section.addEventListener('dragend', _onDragEnd.bind(this), false);
 
-        section.addEventListener('dragover', _onDragOver, false);
-        section.addEventListener('dragend', _onDragEnd.bind(this), false);
-
-        setTimeout(function () {
-          dragEl.classList.add(dashboardStyles.ghost);
-        }, 0);
+          setTimeout(function () {
+            dragEl.classList.add(dashboardStyles.ghost);
+          }, 0);
+        }
       }.bind(this)
     );
   }

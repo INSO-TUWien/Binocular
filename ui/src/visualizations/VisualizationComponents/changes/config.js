@@ -47,13 +47,13 @@ const ChangesConfigComponent = (props) => {
               onChange={(value) => props.onClickMetric(value)}
             />
           </div>
-          <CheckboxLegend
+          {/*<CheckboxLegend
             palette={props.palette}
             onClick={props.onClickCheckboxLegend.bind(this)}
             title="Authors:"
             split={props.metric === 'linesChanged'}
             otherCommitters={otherCommitters}
-          />
+          />*/}
         </div>
       </form>
     </div>

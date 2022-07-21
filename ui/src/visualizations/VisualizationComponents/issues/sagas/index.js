@@ -29,10 +29,20 @@ export default function* () {
 
   // keep looking for universal settings changes
   yield fork(watchTimeSpan);
+  yield fork(watchSelectedAuthorsGlobal);
+  yield fork(watchAllAuthors);
 }
 
 function* watchTimeSpan() {
   yield takeEvery('SET_TIME_SPAN', fetchIssuesData);
+}
+
+function* watchSelectedAuthorsGlobal() {
+  yield takeEvery('SET_SELECTED_AUTHORS_GLOBAL', fetchIssuesData);
+}
+
+function* watchAllAuthors() {
+  yield takeEvery('SET_ALL_AUTHORS', fetchIssuesData);
 }
 
 function* watchRefreshRequests() {

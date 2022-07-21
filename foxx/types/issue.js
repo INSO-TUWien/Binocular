@@ -83,6 +83,10 @@ module.exports = new gql.GraphQLObjectType({
             .toArray()[0];
         },
       },
+      author: {
+        type: require('./gitHubUser.js'),
+        description: 'The github author of this issue',
+      },
       commits: paginated({
         type: require('./commit.js'),
         description: 'All commits mentioning this issue',

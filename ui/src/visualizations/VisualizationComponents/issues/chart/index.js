@@ -18,6 +18,8 @@ const mapStateToProps = (state /*, ownProps*/) => {
     firstSignificantTimestamp: issuesState.data.data.firstSignificantTimestamp,
     lastSignificantTimestamp: issuesState.data.data.lastSignificantTimestamp,
     chartResolution: universalSettings.chartResolution,
+    selectedAuthors: universalSettings.selectedAuthorsGlobal,
+    allAuthors: universalSettings.allAuthors,
     showIssues: issuesState.config.showIssues,
   };
 };
