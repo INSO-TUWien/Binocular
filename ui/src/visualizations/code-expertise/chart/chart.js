@@ -54,17 +54,6 @@ const Chart = () => {
       return sum + adds.additions
     }, 0)
 
-    //get max number of either good or bad commits. Used in segments
-    let max = 0
-    Object.entries(data.devData).map(item => {
-      const commits = item[1].commits
-      const goodCommits = commits.filter(c => c.build == 'success').length
-      const badCommits = commits.filter(c => c.build != null && c.build != 'success').length
-
-      if(goodCommits > max) max = goodCommits
-      if(badCommits > max) max = badCommits
-    })
-
     //get colors
     const devColors = getChartColors('spectral', _.range(0, Object.entries(data.devData).length));
 
@@ -91,7 +80,6 @@ const Chart = () => {
         endPercent={endPercent} 
         devName={name}
         devData={devData}
-        maxCommits={max}
         devColor={devColors[index]}/>
       )
     })

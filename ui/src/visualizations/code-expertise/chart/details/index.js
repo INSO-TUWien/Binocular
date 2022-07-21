@@ -3,6 +3,7 @@ import { useSelector, useDispatch } from 'react-redux'
 import _ from 'lodash'
 import styles from '../../styles.scss'
 import { setDetails } from '../../sagas'
+import TabCombo from '../../../../components/TabCombo.js';
 import CommitsDetailsList from "./CommitDetailsList";
 
 const Details = () => {
@@ -26,6 +27,7 @@ const Details = () => {
     const [isExpanded, setExpanded] = useState(false)
     const [devDetails, setDevDetails] = useState(null)
     const [devOptions, setDevOptions] = useState([])
+    const [commitSort, setCommitSort] = useState('date')
 
     //global state
     const allDevData = useSelector((state) => state.visualizations.codeExpertise.state.data.data.devData)
@@ -41,7 +43,11 @@ const Details = () => {
         } else {
             Object.entries(allDevData).map(item => {
                 const name = item[0]
-                const devData = item[1]
+                let devData = item[1]
+
+                devData.commitsNum = devData.commits.length
+                devData.goodCommitsNum = devData.commits.filter(c => c.build == 'success').length
+                devData.badCommitsNum = devData.commits.filter(c => c.build != null && c.build != 'success').length
                 
                 if(name == selectedDev) {
                     setDevDetails(devData)
@@ -97,11 +103,11 @@ const Details = () => {
                         <div className={styles.generalDetails}>
 
                             <GeneralDetailsData
-                            label='Opened:'
+                            label='Opened'
                             text={formatDate(issueData.createdAt)}/>
 
                             <GeneralDetailsData
-                            label='Closed:'
+                            label='Closed'
                             text={issueData.closedAt ? formatDate(issueData.closedAt) : '/'}/>
 
                             <button
@@ -144,11 +150,11 @@ const Details = () => {
 
                                     <GeneralDetailsData
                                     label='Good Commits'
-                                    text={devDetails.commits.filter(c => c.build == 'success').length}/>
+                                    text={`${devDetails.goodCommitsNum} (${((devDetails.goodCommitsNum / devDetails.commitsNum)*100).toFixed(2)}% of commits)`}/>
 
                                     <GeneralDetailsData
                                     label='Bad Commits'
-                                    text={devDetails.commits.filter(c => c.build != null && c.build != 'success').length}/>
+                                    text={`${devDetails.badCommitsNum} (${((devDetails.badCommitsNum / devDetails.commitsNum)*100).toFixed(2)}% of commits)`}/>
                                 </div>
                             </div>
 
@@ -156,12 +162,28 @@ const Details = () => {
                             <div className={styles.field}>
                                 <label className="label">Commits:</label>
 
+                                <TabCombo
+                                    value={commitSort}
+                                    onChange={value => setCommitSort(value)}
+                                    options={[
+                                        { label: 'Date', icon: 'calendar', value: 'date' },
+                                        { label: 'Add.', icon: 'plus', value: 'additions' },
+                                        { label: 'Del.', icon: 'minus', value: 'deletions' },
+                                        { label: 'Good', icon: 'check', value: 'good' },
+                                        { label: 'Bad', icon: 'times', value: 'bad' }
+                                    ]}
+                                />
+
                                 <div>
+                                    <CommitsDetailsList commits={devDetails.commits} sort={commitSort}/>
+                                </div>
+
+                                {/* <div>
                                     {Object.entries(_.groupBy(
                                         devDetails.commits.sort((a,b) => (new Date(b.date)) - (new Date(a.date))),
                                         (commit) => commit.date.substring(0,10)))
                                     .map(item => <CommitsDetailsList date={item[0]} commits={item[1]}/>)}
-                                </div>
+                                </div> */}
                                 
                             </div>
 

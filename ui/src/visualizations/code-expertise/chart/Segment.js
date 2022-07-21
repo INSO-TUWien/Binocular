@@ -5,7 +5,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import { setDetails } from '../sagas'
 
 
-function Segment( { rad, startPercent, endPercent, devName, devData, maxCommits, devColor } ) {
+function Segment( { rad, startPercent, endPercent, devName, devData, devColor } ) {
 
     const dispatch = useDispatch()
 
@@ -61,7 +61,6 @@ function Segment( { rad, startPercent, endPercent, devName, devData, maxCommits,
 
     // ######################## COLORS ########################
 
-    const devColorLight = devColor
     const devColorDark = chroma(devColor).darken().hex()
     const goodCommitsColor = chroma('green').brighten().hex()
     const badCommitsColor = chroma('red').brighten().hex()
@@ -87,18 +86,17 @@ function Segment( { rad, startPercent, endPercent, devName, devData, maxCommits,
 
     // ######################## BUILD ARCS ########################
 
-    //goot commits are shown in an arc outside the circle segment, bad commits inside.
+    //good commits are shown in an arc outside the circle segment, bad commits inside.
+    //this displays the ratio of good/bad commits to the number of total commits
     //this sets the bounds for this section of the chart
-    const buildWeight = radius * 0.25
+    const buildWeight = radius * 0.35
 
+    const commitsNumber = devData.commits.length
     const goodCommits = devData.commits.filter(c => c.build == 'success').length
     const badCommits = devData.commits.filter(c => c.build != null && c.build != 'success').length
 
     let goodCommitsRadius = radius
-    //prevent /0
-    if(maxCommits > 0) {
-        goodCommitsRadius = radius + (buildWeight * (goodCommits / maxCommits))
-    }
+    goodCommitsRadius = radius + (buildWeight * (goodCommits/commitsNumber))
     
     const goodCommitsArc = d3.arc()
     goodCommitsArc
@@ -109,10 +107,7 @@ function Segment( { rad, startPercent, endPercent, devName, devData, maxCommits,
     
     
     let badCommitsRadius = radius
-    //prevent /0
-    if (maxCommits > 0) {
-        badCommitsRadius = radius - (buildWeight * (badCommits / maxCommits))
-    }
+    badCommitsRadius = radius - (buildWeight * (badCommits/commitsNumber))
     
     const badCommitsArc = d3.arc()
     badCommitsArc
@@ -166,7 +161,7 @@ function Segment( { rad, startPercent, endPercent, devName, devData, maxCommits,
     }
 
     //at which radius should the dev name be placed
-    const devNameRadius = radius * 1.31
+    const devNameRadius = goodCommitsRadius + (radius * 0.06)
 
 
     // ######################## ADDITIONS TEXT ########################

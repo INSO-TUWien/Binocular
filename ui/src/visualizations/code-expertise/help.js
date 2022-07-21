@@ -20,7 +20,7 @@ export default () =>
           <i className="fa fa-check" /> Owned Code
           <ul>
             <li>The middle section of each segment is split</li>
-            <li>The filled-in part represents the amount of code the developer currently owns for the selected configuration</li>
+            <li>The coloured part represents the amount of code the developer currently owns for the selected configuration</li>
             <li>The hashed part represents the amount of code the developer added to the project, but that was deleted or replaced later on</li>
             <li>The section therefore shows how much of the added code is still present in the project</li>
           </ul>
