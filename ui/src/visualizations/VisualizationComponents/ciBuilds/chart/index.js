@@ -16,6 +16,8 @@ const mapStateToProps = (state /*, ownProps*/) => {
     firstSignificantTimestamp: buildsState.data.data.firstSignificantTimestamp,
     lastSignificantTimestamp: buildsState.data.data.lastSignificantTimestamp,
     chartResolution: universalSettings.chartResolution,
+    selectedAuthors: universalSettings.selectedAuthorsGlobal,
+    allAuthors: universalSettings.allAuthors,
   };
 };
 

@@ -25,6 +25,7 @@ const getBuildsPage = (since, until) => (page, perPage) => {
         data {
           id
           createdAt
+          userFullName
           stats {
             success
             failed
