@@ -20,20 +20,35 @@ const socketIo = createSocketIoMiddleware(socket, 'api/');
 const saga = createSagaMiddleware();
 
 const logger = createLogger({
-  collapsed: () => true
+  collapsed: () => true,
 });
 
-import dashboard from './visualizations/dashboard';
-import codeOwnershipRiver from './visualizations/code-ownership-river';
-import issueImpact from './visualizations/issue-impact';
-import hotspotDials from './visualizations/hotspot-dials';
-import codeHotspots from './visualizations/code-hotspots';
-import languageModuleRiver from './visualizations/language-module-river';
+import newDashboard from './visualizations/dashboard';
+import dashboard from './visualizations/legacy/dashboard';
+import codeOwnershipRiver from './visualizations/legacy/code-ownership-river';
+import issueImpact from './visualizations/legacy/issue-impact';
+import hotspotDials from './visualizations/legacy/hotspot-dials';
+import codeHotspots from './visualizations/legacy/code-hotspots';
+import languageModuleRiver from './visualizations/legacy/language-module-river';
+import ciBuilds from './visualizations/VisualizationComponents/ciBuilds';
+import issues from './visualizations/VisualizationComponents/issues';
+import changes from './visualizations/VisualizationComponents/changes';
 
-const visualizationModules = [dashboard, codeOwnershipRiver, issueImpact, hotspotDials, codeHotspots, languageModuleRiver];
+const visualizationModules = [
+  newDashboard,
+  dashboard,
+  codeOwnershipRiver,
+  issueImpact,
+  hotspotDials,
+  codeHotspots,
+  languageModuleRiver,
+  ciBuilds,
+  issues,
+  changes,
+];
 
 const visualizations = {};
-_.each(visualizationModules, viz => {
+_.each(visualizationModules, (viz) => {
   visualizations[viz.id] = viz;
 });
 
@@ -47,8 +62,8 @@ const store = createStore(
     config: {
       isFetching: false,
       lastFetched: null,
-      isShown: false
-    }
+      isShown: false,
+    },
   },
   applyMiddleware(socketIo, saga, logger)
 );

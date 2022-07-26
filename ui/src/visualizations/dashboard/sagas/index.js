@@ -1,99 +1,52 @@
 'use strict';
 
-import Promise from 'bluebird';
+import visualizationRegistry from '../visualizationRegistry';
 import { createAction } from 'redux-actions';
-import { select, throttle, fork, takeEvery } from 'redux-saga/effects';
-import _ from 'lodash';
-
-import { fetchFactory, timestampedActionFactory, mapSaga } from '../../../sagas/utils.js';
-import getCommitData from './getCommitData.js';
-import getIssueData from './getIssueData.js';
-import getBuildData from './getBuildData.js';
-import getBounds from './getBounds.js';
+import { fetchFactory, timestampedActionFactory } from '../../../sagas/utils';
+import getBounds from './getBounds';
 import chroma from 'chroma-js';
+import _ from 'lodash';
+import Promise from 'bluebird';
+import getCommitData from './getCommitData';
 
 export const setResolution = createAction('SET_RESOLUTION');
-export const setShowIssues = createAction('SET_SHOW_ISSUES');
-export const setSelectedAuthors = createAction('SET_SELECTED_AUTHORS');
-export const setDisplayMetric = createAction('SET_DISPLAY_METRIC');
-export const setShowCIChart = createAction('SET_SHOW_CI_CHART');
-export const setShowIssueChart = createAction('SET_SHOW_ISSUE_CHART');
-export const setShowChangesChart = createAction('SET_SHOW_CHANGES_CHART');
+export const setTimeSpan = createAction('SET_TIME_SPAN');
+export const setSelectedAuthors = createAction('SET_SELECTED_AUTHORS_GLOBAL');
+export const setAllAuthors = createAction('SET_All_AUTHORS');
 
 export const requestDashboardData = createAction('REQUEST_DASHBOARD_DATA');
 export const receiveDashboardData = timestampedActionFactory('RECEIVE_DASHBOARD_DATA');
 export const receiveDashboardDataError = createAction('RECEIVE_DASHBOARD_DATA_ERROR');
 
-export const requestRefresh = createAction('REQUEST_REFRESH');
-const refresh = createAction('REFRESH');
-export const setViewport = createAction('COR_SET_VIEWPORT');
-
-export default function*() {
-  // fetch data once on entry
+export default function* () {
+  for (const visualization in visualizationRegistry) {
+    const viz = visualizationRegistry[visualization];
+    if (viz.saga !== undefined) {
+      yield* viz.saga();
+    }
+  }
   yield* fetchDashboardData();
-
-  yield fork(watchRefreshRequests);
-  yield fork(watchMessages);
-
-  // keep looking for viewport changes to re-fetch
-  yield fork(watchRefresh);
-  yield fork(watchToggleHelp);
 }
 
-function* watchRefreshRequests() {
-  yield throttle(2000, 'REQUEST_REFRESH', mapSaga(refresh));
-}
-
-function* watchMessages() {
-  yield takeEvery('message', mapSaga(requestRefresh));
-}
-
-function* watchToggleHelp() {
-  yield takeEvery('TOGGLE_HELP', mapSaga(refresh));
-}
-
-function* watchRefresh() {
-  yield takeEvery('REFRESH', fetchDashboardData);
-}
-
-/**
- * Fetch data for dashboard, this still includes old functions that were copied over.
- */
 export const fetchDashboardData = fetchFactory(
-  function*() {
+  function* () {
     const { firstCommit, lastCommit, committers, firstIssue, lastIssue } = yield getBounds();
     const firstCommitTimestamp = Date.parse(firstCommit.date);
     const lastCommitTimestamp = Date.parse(lastCommit.date);
-
-    const firstIssueTimestamp = firstIssue ? Date.parse(firstIssue.createdAt) : firstCommitTimestamp;
-    const lastIssueTimestamp = lastIssue ? Date.parse(lastIssue.createdAt) : lastCommitTimestamp;
-
-    const state = yield select();
-    const viewport = state.visualizations.dashboard.state.config.viewport || [0, null];
-
-    const firstSignificantTimestamp = Math.max(viewport[0], Math.min(firstCommitTimestamp, firstIssueTimestamp));
-    const lastSignificantTimestamp = viewport[1] ? viewport[1].getTime() : Math.max(lastCommitTimestamp, lastIssueTimestamp);
-
-    return yield Promise.join(
-      getCommitData([firstCommitTimestamp, lastCommitTimestamp], [firstSignificantTimestamp, lastSignificantTimestamp]),
-      getIssueData([firstIssueTimestamp, lastIssueTimestamp], [firstSignificantTimestamp, lastSignificantTimestamp]),
-      getBuildData()
-    )
-      .spread((commits, issues, builds) => {
+    return yield Promise.join(getCommitData([firstCommitTimestamp, lastCommitTimestamp], [firstCommitTimestamp, lastCommitTimestamp]))
+      .spread((commits) => {
         const palette = getPalette(commits, 15, committers.length);
 
         return {
-          otherCount: 0,
-          commits,
+          firstCommit,
+          lastCommit,
+          firstIssue,
+          lastIssue,
           committers,
           palette,
-          issues,
-          builds,
-          firstSignificantTimestamp,
-          lastSignificantTimestamp
         };
       })
-      .catch(function(e) {
+      .catch(function (e) {
         console.error(e.stack);
         throw e;
       });
@@ -109,10 +62,10 @@ function getPalette(commits, maxNumberOfColors, numOfCommitters) {
     return chroma.scale(band).mode('lch').colors(len);
   }
 
-  const palette = chartColors('spectral', 15, numOfCommitters);
+  const palette = chartColors('spectral', maxNumberOfColors, numOfCommitters);
 
   const totals = {};
-  _.each(commits, commit => {
+  _.each(commits, (commit) => {
     const changes = commit.stats.additions + commit.stats.deletions;
     if (totals[commit.signature]) {
       totals[commit.signature] += changes;
@@ -122,7 +75,7 @@ function getPalette(commits, maxNumberOfColors, numOfCommitters) {
   });
 
   const sortable = [];
-  _.each(Object.keys(totals), key => {
+  _.each(Object.keys(totals), (key) => {
     sortable.push([key, totals[key]]);
   });
 
@@ -132,12 +85,12 @@ function getPalette(commits, maxNumberOfColors, numOfCommitters) {
 
   const returnPalette = {};
 
-  for (let i = 0; i < palette.length - 1; i++) {
+  for (let i = 0; i < Math.min(sortable.length, palette.length) - 1; i++) {
     returnPalette[sortable[i][0]] = palette[i];
   }
   if (sortable.length > maxNumberOfColors) {
     returnPalette['others'] = palette[maxNumberOfColors - 1];
-  } else if (sortable.length <= maxNumberOfColors) {
+  } else {
     returnPalette[sortable[sortable.length - 1][0]] = palette[palette.length - 1];
   }
 

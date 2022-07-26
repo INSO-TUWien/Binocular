@@ -1,49 +1,36 @@
-@import '~bulma';
+@import '../../../../node_modules/bulma';
 
 .chartContainer{
+  position: relative;
   height: 100%;
-  width: auto;
-  flex-direction: column;
-  padding: 5px;
-  justify-content: center;
+  overflow-y: scroll;
+  overflow-x: hidden;
+}
 
-  .loadingHintContainer{
-    .loadingHint {
-      font-size: 40px;
-      text-align: center;
-    }
-  }
-
-  .chartLine{
-    background: #d8d8d8;
-    flex-grow: 1;
-    margin: 5px;
-    padding: 5px;
-    display: flex;
-    align-items: center;
-
-    .text{
-      writing-mode: vertical-lr;
-      transform: rotate(-180deg);
-      margin-right: 10px;
-    }
-
-    .chart{
-      width: 100%;
-      height: 100%;
-      background: #ffffff;
-      display: flex;
-    }
-  }
+.headline{
+  font-weight: bold;
+  font-size: 2em;
 }
 
 .configContainer{
+  width: 100%;
+  overflow-x: hidden;
+
   .field + .field {
     border-top: 1px solid #dbdbdb;
   }
 
   .checkboxLabel {
     cursor: pointer;
+  }
+
+  h1{
+    font-weight: bold;
+    font-size: 2em;
+  }
+
+  hr{
+    margin: 0.5em 0;
   }
 }
 
@@ -79,5 +66,9 @@
     width: 25px;
     text-align: center;
   }
+}
+
+.marginTop05{
+  margin-top: 0.5rem;
 }
 
