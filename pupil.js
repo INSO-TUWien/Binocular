@@ -23,7 +23,7 @@ const _ = require('lodash');
 const Promise = _.defaults(require('bluebird'), { config: () => {} });
 
 Promise.config({
-  longStackTraces: true
+  longStackTraces: true,
 });
 
 const Repository = require('./lib/core/provider/git.js');
@@ -60,7 +60,7 @@ const protoLoader = require('@grpc/proto-loader');
 const commPath = path.resolve(__dirname, 'services', 'grpc', 'comm');
 
 const LanguageDetectorPackageDefinition = protoLoader.loadSync(path.join(commPath, 'language.service.proto'), {
-  enums: String
+  enums: String,
 });
 
 const LanguageComm = grpc.loadPackageDefinition(LanguageDetectorPackageDefinition).binocular.comm;
@@ -83,7 +83,7 @@ const repoWatcher = {
   listener: null,
   working: false,
   headTimestamp: null,
-  headBranches: []
+  headBranches: [],
 };
 let indexingProcess = 0;
 
@@ -91,7 +91,7 @@ let activeIndexingQueue = Promise.resolve();
 const indexers = {
   vcs: null,
   its: null,
-  ci: null
+  ci: null,
 };
 
 const services = [];
@@ -133,7 +133,7 @@ async function startDatabase(context, gateway) {
     // immediately run all indexers
     return (activeIndexingQueue = Promise.all([
       repoUpdateHandler(repository, context, gateway),
-      reIndex(indexers, context, reporter, gateway, activeIndexingQueue, ++indexingProcess)
+      reIndex(indexers, context, reporter, gateway, activeIndexingQueue, ++indexingProcess),
     ]));
   }
 }
@@ -500,7 +500,7 @@ function createManualIssueReferences(issueReferences) {
         issue.mentions.push({
           createdAt: commit.date,
           commit: sha,
-          manual: true
+          manual: true,
         });
         return issue.save();
       }
@@ -551,6 +551,11 @@ Promise.all(
       });
 
       return gateway.start();
-    }).bind(this, ctx, config, gatewayService)
+    }).bind(this, ctx, config, gatewayService),
   ].map((entryPoint) => serviceStarter(entryPoint))
-);
+).then(() => {
+  // if no-server flag set stop immediately after indexing
+  if (!ctx.argv.server) {
+    stop();
+  }
+});
