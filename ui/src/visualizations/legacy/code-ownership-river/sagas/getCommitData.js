@@ -26,7 +26,6 @@ export default function getCommitData(commitSpan, significantSpan, granularity, 
 
   return traversePages(getCommitsPage(significantSpan[0], significantSpan[1]), (commit) => {
     const dt = Date.parse(commit.date);
-
     let stats = statsByAuthor[commit.signature];
     if (!stats) {
       stats = statsByAuthor[commit.signature] = {

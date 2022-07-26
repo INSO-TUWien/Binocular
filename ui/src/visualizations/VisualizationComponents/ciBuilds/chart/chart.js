@@ -84,9 +84,6 @@ export default class CIBuilds extends React.Component {
       builds = props.filteredBuilds;
       firstTimestamp = props.firstSignificantTimestamp;
       lastTimestamp = props.lastSignificantTimestamp;
-    }
-
-    if (props.universalSettings) {
       builds = builds.filter((build) => {
         let filter = false;
         if (props.selectedAuthors.filter((a) => a === 'others').length > 0) {

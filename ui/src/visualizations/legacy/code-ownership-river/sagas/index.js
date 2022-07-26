@@ -44,10 +44,14 @@ export default function* () {
 
   // keep looking for universal settings changes
   yield fork(watchTimeSpan);
+  yield fork(watchSelectedAuthorsGlobal);
 }
 
 function* watchTimeSpan() {
   yield takeEvery('SET_TIME_SPAN', fetchCodeOwnershipData);
+}
+function* watchSelectedAuthorsGlobal() {
+  yield takeEvery('SET_SELECTED_AUTHORS_GLOBAL', fetchCodeOwnershipData);
 }
 
 function* watchRefreshRequests() {

@@ -309,6 +309,49 @@ export default class CodeOwnershipRiver extends React.Component {
     let commits = props.commits;
     if (props.universalSettings) {
       commits = props.filteredCommits;
+
+      commits = commits.map((commit) => {
+        for (const author of Object.keys(commit.statsByAuthor)) {
+          let filter = false;
+          if (props.selectedAuthors.filter((a) => a === 'others').length > 0) {
+            filter = true;
+          }
+          for (const allAuthorsAuthor of Object.keys(props.allAuthors)) {
+            if (author === allAuthorsAuthor) {
+              if (props.selectedAuthors.filter((a) => a === allAuthorsAuthor).length > 0) {
+                filter = true;
+                break;
+              } else {
+                filter = false;
+                break;
+              }
+            }
+          }
+          if (!filter) {
+            delete commit.statsByAuthor[author];
+          }
+        }
+        return commit;
+      });
+
+      /*commits.statsByAuthor = commits.statsByAuthor.filter((commit) => {
+        let filter = false;
+        if (props.selectedAuthors.filter((a) => a === 'others').length > 0) {
+          filter = true;
+        }
+        for (const author of Object.keys(props.allAuthors)) {
+          if (commit.signature === author) {
+            if (props.selectedAuthors.filter((a) => a === author).length > 0) {
+              filter = true;
+              break;
+            } else {
+              filter = false;
+              break;
+            }
+          }
+        }
+        return filter;
+      });*/
     }
 
     const lastCommitDataPoint = _.last(commits).statsByAuthor;
