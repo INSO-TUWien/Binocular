@@ -51,7 +51,7 @@ module.exports = {
   entry: ['./ui/src'],
   output: {
     path: path.join(__dirname, '/dist'),
-    filename: 'index.bundle.js',
+    filename: 'bundle.js',
   },
   module: {
     rules: [
