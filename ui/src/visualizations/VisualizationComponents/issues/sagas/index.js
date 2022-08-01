@@ -1,11 +1,10 @@
 'use strict';
 
 import { fetchFactory, mapSaga, timestampedActionFactory } from '../../../../sagas/utils';
-import getBounds from './getBounds';
 import Promise from 'bluebird';
-import getIssueData from './getIssueData';
 import { select, throttle, fork, takeEvery } from 'redux-saga/effects';
 import { createAction } from 'redux-actions';
+import Database from '../../../../database/database';
 
 export const setShowIssues = createAction('SET_SHOW_ISSUES');
 
@@ -66,7 +65,7 @@ function* watchRefresh() {
  */
 export const fetchIssuesData = fetchFactory(
   function* () {
-    const { firstCommit, lastCommit, firstIssue, lastIssue } = yield getBounds();
+    const { firstCommit, lastCommit, firstIssue, lastIssue } = yield Database.getBounds();
     const firstCommitTimestamp = Date.parse(firstCommit.date);
     const lastCommitTimestamp = Date.parse(lastCommit.date);
 
@@ -82,8 +81,8 @@ export const fetchIssuesData = fetchFactory(
     firstSignificantTimestamp = timeSpan.from === undefined ? firstSignificantTimestamp : new Date(timeSpan.from).getTime();
     lastSignificantTimestamp = timeSpan.to === undefined ? lastSignificantTimestamp : new Date(timeSpan.to).getTime();
     return yield Promise.join(
-      getIssueData([firstIssueTimestamp, lastIssueTimestamp], [firstSignificantTimestamp, lastSignificantTimestamp]),
-      getIssueData([firstIssueTimestamp, lastIssueTimestamp], [firstIssueTimestamp, lastIssueTimestamp])
+      Database.getIssueData([firstIssueTimestamp, lastIssueTimestamp], [firstSignificantTimestamp, lastSignificantTimestamp]),
+      Database.getIssueData([firstIssueTimestamp, lastIssueTimestamp], [firstIssueTimestamp, lastIssueTimestamp])
     )
       .spread((filteredIssues, issues) => {
         return {

@@ -2,7 +2,9 @@
 
 import PouchDB from 'pouchdb-browser';
 import PouchDBFind from 'pouchdb-find';
+import PouchDBAdapterMemory from 'pouchdb-adapter-memory';
 PouchDB.plugin(PouchDBFind);
+PouchDB.plugin(PouchDBAdapterMemory);
 
 import branches from '../../arango_export/branches.json';
 import builds from '../../arango_export/builds.json';
@@ -39,8 +41,8 @@ const relations = {
 };
 
 // create database, index on _id and triple store
-const db = new PouchDB('Binocular_collections_' + Date.now());
-const tripleStore = new PouchDB('Binocular_triple_' + Date.now());
+const db = new PouchDB('Binocular_collections', { adapter: 'memory' });
+const tripleStore = new PouchDB('Binocular_triple', { adapter: 'memory' });
 
 db.createIndex({
   index: { fields: ['_id'] },
@@ -66,33 +68,34 @@ function importRelation(name) {
     delete item._to;
 
     item.relation = name;
-
     tripleStore.put(item);
   });
 }
 
 function importData() {
   // import collections iff DB does not already exist
-  db.info().then((res) => {
-    if (res.doc_count === 0) {
-      Object.keys(collections).forEach((name) => {
-        console.log(`Importing collection ${name}`);
+  /*db.info().then((res) => {
+    console.log(res);
+    if (res.doc_count === 0) {*/
+  Object.keys(collections).forEach((name) => {
+    console.log(`Importing collection ${name}`);
 
-        importCollection(name);
-      });
-    }
+    importCollection(name);
   });
+
+  /*  }
+  });*/
 
   // import relations iff triple store does not already exist
-  tripleStore.info().then((res) => {
-    if (res.doc_count === 0) {
-      Object.keys(relations).forEach((name) => {
-        console.log(`Importing relation ${name}`);
+  /*tripleStore.info().then((res) => {
+    if (res.doc_count === 0) {*/
+  Object.keys(relations).forEach((name) => {
+    console.log(`Importing relation ${name}`);
 
-        importRelation(name);
-      });
-    }
+    importRelation(name);
   });
+  //  }
+  //});
 }
 
 // find all of given collection (example _id field for e.g. issues looks like 'issues/{issue_id}')
@@ -109,7 +112,6 @@ export default class LocalDB {
 
   static getBounds() {
     return Promise.all([findAll('stakeholders'), findAll('commits'), findAll('issues')]).then((res) => {
-      console.log(res);
       const response = { committers: [] };
 
       // all committers
@@ -130,7 +132,7 @@ export default class LocalDB {
 
       response.firstIssue = res[2].docs[0];
       response.lastIssue = res[2].docs[res[2].docs.length - 1];
-
+      console.log(response);
       return response;
     });
   }
@@ -142,6 +144,39 @@ export default class LocalDB {
         return new Date(a.date) - new Date(b.date);
       });
 
+      return res.docs;
+    });
+  }
+
+  static getBuildData(commitSpan, significantSpan) {
+    // add stats object to each build
+    return findAll('builds').then((res) => {
+      const emptyStats = { success: 0, failed: 0, pending: 0, canceled: 0 };
+
+      return res.docs.map((build) => {
+        const stats = Object.assign({}, emptyStats);
+
+        if (build.status === 'success') {
+          stats.success = 1;
+        } else if (build.status === 'failed' || build.status === 'errored') {
+          stats.failed = 1;
+        }
+
+        build.stats = stats;
+
+        return build;
+      });
+    });
+  }
+
+  static getIssueData(issueSpan, significantSpan) {
+    // return all issues, filtering according to parameters can be added in the future
+    return findAll('issues').then((res) => {
+      res.docs = res.docs
+        .sort((a, b) => {
+          return new Date(a.createdAt) - new Date(b.createdAt);
+        })
+        .filter((i) => new Date(i.createdAt) >= new Date(significantSpan[0]) && new Date(i.createdAt) <= new Date(significantSpan[1]));
       return res.docs;
     });
   }

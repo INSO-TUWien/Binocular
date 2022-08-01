@@ -137,11 +137,11 @@ export default class Issues extends React.Component {
     const end = moment(lastTimestamp).endOf(granularity.unit).add(1, props.chartResolution);
     const sortedCloseDates = [];
     let createdDate = Date.parse(issues[0].createdAt);
-
     for (let i = 0, j = 0; curr.isSameOrBefore(end); curr.add(1, props.chartResolution), next.add(1, props.chartResolution)) {
       //Iterate through time buckets
       const currTimestamp = curr.toDate().getTime();
       const nextTimestamp = next.toDate().getTime();
+
       const obj = { date: currTimestamp, count: 0, openCount: 0, closedCount: 0 }; //Save date of time bucket, create object
 
       while (i < filteredIssues.length && createdDate < nextTimestamp && createdDate >= currTimestamp) {

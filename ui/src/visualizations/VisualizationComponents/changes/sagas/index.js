@@ -1,11 +1,9 @@
 'use strict';
 
 import { fetchFactory, mapSaga, timestampedActionFactory } from '../../../../sagas/utils';
-import getBounds from './getBounds';
 import Promise from 'bluebird';
 import { select, throttle, fork, takeEvery } from 'redux-saga/effects';
 import { createAction } from 'redux-actions';
-import getCommitData from './getCommitData';
 import chroma from 'chroma-js';
 import _ from 'lodash';
 import Database from '../../../../database/database';
@@ -65,7 +63,6 @@ function* watchRefresh() {
  */
 export const fetchChangesData = fetchFactory(
   function* () {
-    console.log(yield Database.getBounds());
     const { firstCommit, lastCommit, committers, firstIssue, lastIssue } = yield Database.getBounds();
     const firstCommitTimestamp = Date.parse(firstCommit.date);
     const lastCommitTimestamp = Date.parse(lastCommit.date);

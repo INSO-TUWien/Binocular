@@ -3,10 +3,10 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { Provider } from 'react-redux';
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import { MemoryRouter as Router } from 'react-router-dom';
 import App from '../components/App';
 
-export default class Root extends React.Component {
+export default class RootOffline extends React.Component {
   constructor(props) {
     super(props);
   }
@@ -18,15 +18,13 @@ export default class Root extends React.Component {
     return (
       <Provider store={this.props.store}>
         <Router>
-          <Routes>
-            <Route exact path="/" element={<App />} />
-          </Routes>
+          <App />
         </Router>
       </Provider>
     );
   }
 }
 
-Root.propTypes = {
+RootOffline.propTypes = {
   store: PropTypes.object.isRequired,
 };

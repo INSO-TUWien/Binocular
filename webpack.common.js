@@ -78,6 +78,9 @@ module.exports = {
   plugins: [
     new HtmlWebpackPlugin({ template: './ui/index.html' }),
     new webpack.ProvidePlugin({
+      Buffer: ['buffer', 'Buffer'],
+    }),
+    new webpack.ProvidePlugin({
       React: 'react',
       process: 'process/browser',
     }),

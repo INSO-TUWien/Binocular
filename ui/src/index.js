@@ -33,6 +33,7 @@ import languageModuleRiver from './visualizations/legacy/language-module-river';
 import ciBuilds from './visualizations/VisualizationComponents/ciBuilds';
 import issues from './visualizations/VisualizationComponents/issues';
 import changes from './visualizations/VisualizationComponents/changes';
+import RootOffline from './components/RootOffline';
 
 const visualizationModules = [
   newDashboard,
@@ -47,12 +48,11 @@ const visualizationModules = [
   changes,
 ];
 
-Database.initDB().then((connection) => {
+Database.checkBackendConnection().then((connection) => {
   const visualizations = {};
   _.each(visualizationModules, (viz) => {
     visualizations[viz.id] = viz;
   });
-
   if (connection) {
     const app = makeAppReducer(visualizationModules);
 
@@ -82,6 +82,7 @@ Database.initDB().then((connection) => {
       });
     }
   } else {
+    Database.initDB().then();
     const app = makeAppReducer(visualizationModules);
 
     const store = createStore(
@@ -100,7 +101,7 @@ Database.initDB().then((connection) => {
 
     saga.run(root);
 
-    render(<Root store={store} />, document.getElementById('root'));
+    render(<RootOffline store={store} />, document.getElementById('root'));
     if (module.hot) {
       module.hot.accept('./components/Root', () => {
         const NewRoot = require('./components/Root').default;

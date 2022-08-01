@@ -28,6 +28,22 @@ export default class Database {
     }
   }
 
+  static async getBuildData(commitSpan, significantSpan) {
+    if (await this.checkBackendConnection()) {
+      return ServerDB.getBuildData(commitSpan, significantSpan);
+    } else {
+      return LocalDB.getBuildData(commitSpan, significantSpan);
+    }
+  }
+
+  static async getIssueData(issueSpan, significantSpan) {
+    if (await this.checkBackendConnection()) {
+      return ServerDB.getIssueData(issueSpan, significantSpan);
+    } else {
+      return LocalDB.getIssueData(issueSpan, significantSpan);
+    }
+  }
+
   static async checkBackendConnection() {
     return new Promise((resolve) => {
       graphQl
