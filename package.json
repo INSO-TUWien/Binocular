@@ -21,7 +21,6 @@
     "dev-server": "nodemon --config .nodemonrc ./pupil.js --no-ui",
     "dev-frontend": "webpack serve --config webpack.dev.js",
     "build": "webpack --config webpack.prod.js",
-    "prepublish": "npm run build",
     "dockerize": "whalify generate-installer && ./node_modules/.bin/whalify build",
     "fix:root": "eslint --fix .",
     "fix:ui": "eslint --fix --ignore-path ui/.eslintignore -c ui/.eslintrc.yml ui",
