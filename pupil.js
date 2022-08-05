@@ -108,6 +108,7 @@ let databaseConnection = null;
  * @returns {Promise<*>}
  */
 async function startDatabase(context, gateway) {
+  console.log('Target Path: ' + ctx.targetPath);
   const repository = await Repository.fromPath(ctx.targetPath);
 
   context.repo = repository;
