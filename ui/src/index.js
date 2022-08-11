@@ -33,6 +33,7 @@ import languageModuleRiver from './visualizations/legacy/language-module-river';
 import ciBuilds from './visualizations/VisualizationComponents/ciBuilds';
 import issues from './visualizations/VisualizationComponents/issues';
 import changes from './visualizations/VisualizationComponents/changes';
+import coChangeGraph from './visualizations/VisualizationComponents/coChangeGraph';
 
 const visualizationModules = [
   newDashboard,
@@ -45,6 +46,7 @@ const visualizationModules = [
   ciBuilds,
   issues,
   changes,
+  coChangeGraph
 ];
 
 const visualizations = {};

@@ -1,0 +1,42 @@
+@import '~bulma';
+
+
+
+text {
+pointer-events: none;
+}
+
+.graphHolder {
+  line {
+    stroke: #000;
+  }
+  
+  circle {
+  fill: pink;
+  stroke: #000;
+  }
+}
+
+svg.chart {
+  flex: 1;
+  outline: none;
+  width: 100%;
+  cursor: grab;
+  cursor: -webkit-grab;
+
+  g.commitCount {
+    path {
+      stroke: none;
+      fill: lighten($blue, 20%);
+    }
+
+    path:first-child {
+      stroke: $blue;
+    }
+  }
+}
+
+svg.chart.panning {
+  cursor: grabbing;
+  cursor: -webkit-grabbing;
+}
