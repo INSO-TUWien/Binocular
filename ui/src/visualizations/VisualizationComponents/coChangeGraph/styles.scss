@@ -1,9 +1,11 @@
 @import '~bulma';
 
-
-
 text {
 pointer-events: none;
+}
+
+.greenNode {
+  fill: green;
 }
 
 .graphHolder {
@@ -12,8 +14,8 @@ pointer-events: none;
   }
   
   circle {
-  fill: pink;
-  stroke: #000;
+    fill: pink;
+    stroke: #000;
   }
 }
 

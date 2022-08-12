@@ -9,8 +9,11 @@ import ChartContainer from '../../../../components/svg/ChartContainer.js';
 import OffsetGroup from '../../../../components/svg/OffsetGroup.js';
 import styles from '../styles.scss';
 import * as zoomUtils from '../../../../utils/zoom.js';
+import * as exampleDataSet from './exampleDataset.js';
 
 const CHART_FILL_RATIO = 0.65;
+
+
 
 export default class CoChangeGraph extends React.Component {  
   constructor(props) {
@@ -27,42 +30,15 @@ export default class CoChangeGraph extends React.Component {
 
   componentDidMount() {
     const svg = d3.select("." + styles.graphHolder);
+    const dataset = exampleDataSet.dataset;
 
-    //create dummy data
-    const dataset =  {
-      nodes: [
-        {id: 1},
-        {id: 2},
-        {id: 3},
-        {id: 4},
-        {id: 5},
-        {id: 6}
-      ], 
-      links: [
-        {source: 1, target: 5},
-        {source: 4, target: 5},
-        {source: 3, target: 2},
-        {source: 5, target: 2},
-        {source: 1, target: 2},
-        {source: 3, target: 4}
-      ]
-    };
+    // Generate dataset link "source" and "target" from the dataset
+    exampleDataSet.generateLinkIndices(dataset);
+    exampleDataSet.generateDataset();
   
-    console.log("dataset is ...",dataset);
+    // Initialize definitions
+    const defs = svg.append("defs");
 
-    function ticked() {
-      node.attr("cx", d => d.x)
-          .attr("cy", d => d.y);
-
-      link.attr("x1", d => {return d.source.x})
-        .attr("y1", d => d.source.y)
-        .attr("x2", d => d.target.x)
-        .attr("y2", d => d.target.y);
-
-      text.attr("x", d => d.x - 5) //position of the lower left point of the text
-          .attr("y", d => d.y + 5); //position of the lower left point of the text
-    }
-  
     // Initialize the links
     const link = svg.append("g")
       .attr("class", "links")
@@ -77,13 +53,13 @@ export default class CoChangeGraph extends React.Component {
       .data(dataset.nodes)
       .enter().append("circle")
       .attr("r", 20)
-      .call(d3.drag()  //sets the event listener for the specified typenames and returns the drag behavior.
-        .on("start", dragstarted) //start - after a new pointer becomes active (on mousedown or touchstart).
-        .on("drag", dragged)      //drag - after an active pointer moves (on mousemove or touchmove).
-        .on("end", dragended)     //end - after an active pointer becomes inactive (on mouseup, touchend or touchcancel).
+      .call(d3.drag()
+        .on("start", dragstarted) 
+        .on("drag", dragged)      
+        .on("end", dragended)     
       );
 
-      // Text to nodes
+    // Text to nodes
     const text = svg.append("g")
       .attr("class", "text")
       .selectAll("text")
@@ -91,12 +67,26 @@ export default class CoChangeGraph extends React.Component {
       .enter().append("text")
       .text(d => d.id)
 
-    //Listen for tick events to render the nodes as they update in your Canvas or SVG.
+    // Initialize the simualtion
     const simulation = d3.forceSimulation(dataset.nodes)
-      .force('links', d3.forceLink().links(dataset.links).distance(200))
-      .force('charge', d3.forceManyBody().strength(-30))
+      .force('links', d3.forceLink().links(dataset.links).distance(500))
+      .force('repellent force', d3.forceManyBody().strength(-100))
       .on("tick", ticked); 
 
+    function ticked() {
+      node.attr("cx", d => d.x)
+          .attr("cy", d => d.y);
+
+      link.attr("x1", d => d.source.x)
+        .attr("y1", d => d.source.y)
+        .attr("x2", d => d.target.x)
+        .attr("y2", d => d.target.y);
+
+      text.attr("x", d => d.x - 5) //position of the lower left point of the text
+          .attr("y", d => d.y + 5); //position of the lower left point of the text
+    
+      link.each(function(d){refreshGradient(this, d)});
+    }
 
     //When the drag gesture starts, the targeted node is fixed to the pointer
     //The simulation is temporarily “heated” during interaction by setting the target alpha to a non-zero value.
@@ -118,11 +108,58 @@ export default class CoChangeGraph extends React.Component {
       if (!event.active) simulation.alphaTarget(0);
       d.fx = null;
       d.fy = null;
-      
-      console.log("dataset after dragged is ...",dataset);
     }
-  }
 
+    // node highlighting functionality
+    node.on('mouseover', function (event, d) {
+      
+      node.style('fill', "#B8B8B8")
+      d3.select(this).style('fill', '#ff0000')
+
+      // Highlight the connections
+      link.style('stroke-width', function (link_d) {return link_d.source.id === d.id || link_d.target.id === d.id ? 6 : 3;})
+    })
+    .on('mouseout', function (d) {
+      node.style('fill', "pink")
+      link.style('stroke-width', '3')
+    })
+
+    // link color functions
+    // create the baseline gradient for the links
+    function createGradient(line, d){
+      var self = d3.select(line);
+      var gradient_id = "line-gradient#" + d.source.id + "#" + d.target.id; 
+
+      defs.append("linearGradient")                
+          .attr("id", gradient_id)
+          .attr("gradientUnits", "userSpaceOnUse")
+          .attr("x1", d.source.x)
+          .attr("y1", d.source.y)
+          .attr("x2", d.target.x)
+          .attr("y2", d.target.y)    
+          .selectAll("stop")                      
+          .data([                             
+              {offset: "0%", color: d3.rgb(d.sourceColor * 255, ((1-d.sourceColor) * 255), 0)},       
+              {offset: "49%", color: d3.rgb(d.sourceColor * 255, ((1-d.sourceColor) * 255), 0)},
+              {offset: "50%", color: d3.rgb(d.targetColor * 255, ((1-d.targetColor) * 255), 0)}, 
+              {offset: "100%", color: d3.rgb(d.targetColor * 255, ((1-d.targetColor) * 255), 0)}
+          ])                  
+          .enter().append("stop")         
+          .attr("offset", function(d) { return d.offset; })   
+          .attr("stop-color", function(d) { return d.color; });   
+        
+      self.style("stroke", "url(#" + gradient_id + ")")
+    }
+  
+    function refreshGradient(line, d){
+      const gradientId = "line-gradient#" + d.source.id + "#" + d.target.id;
+      const gradient = document.getElementById(gradientId);
+      if(gradient != null){
+        gradient.remove();
+      }
+      createGradient(line, d);
+    }  
+  }
 
   render() {
     const dims = this.state.dimensions;
