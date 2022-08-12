@@ -44,6 +44,38 @@ export default class Database {
     }
   }
 
+  static async getCommitDataOwnershipRiver(commitSpan, significantSpan, granularity, interval) {
+    if (await this.checkBackendConnection()) {
+      return ServerDB.getCommitDataOwnershipRiver(commitSpan, significantSpan, granularity, interval);
+    } else {
+      return LocalDB.getCommitDataOwnershipRiver(commitSpan, significantSpan, granularity, interval);
+    }
+  }
+
+  static async getBuildDataOwnershipRiver(commitSpan, significantSpan, granularity, interval) {
+    if (await this.checkBackendConnection()) {
+      return ServerDB.getBuildDataOwnershipRiver(commitSpan, significantSpan, granularity, interval);
+    } else {
+      return LocalDB.getBuildDataOwnershipRiver(commitSpan, significantSpan, granularity, interval);
+    }
+  }
+
+  static async getIssueDataOwnershipRiver(issueSpan, significantSpan, granularity, interval) {
+    if (await this.checkBackendConnection()) {
+      return ServerDB.getIssueDataOwnershipRiver(issueSpan, significantSpan, granularity, interval);
+    } else {
+      return LocalDB.getIssueDataOwnershipRiver(issueSpan, significantSpan, granularity, interval);
+    }
+  }
+
+  static async getRelatedCommitDataOwnershipRiver(issue) {
+    if (await this.checkBackendConnection()) {
+      return ServerDB.getRelatedCommitDataOwnershipRiver(issue);
+    } else {
+      return LocalDB.getRelatedCommitDataOwnershipRiver(issue);
+    }
+  }
+
   static async checkBackendConnection() {
     return new Promise((resolve) => {
       graphQl

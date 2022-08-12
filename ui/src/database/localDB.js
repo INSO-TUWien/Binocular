@@ -24,6 +24,8 @@ import modulesFiles from '../../arango_export/modules-files.json';
 import modulesModules from '../../arango_export/modules-modules.json';
 import modules from '../../arango_export/modules.json';
 import stakeholders from '../../arango_export/stakeholders.json';
+import moment from 'moment';
+import _ from 'lodash';
 
 const collections = { branches, builds, commits, files, issues, languages, modules, stakeholders };
 
@@ -132,7 +134,6 @@ export default class LocalDB {
 
       response.firstIssue = res[2].docs[0];
       response.lastIssue = res[2].docs[res[2].docs.length - 1];
-      console.log(response);
       return response;
     });
   }
@@ -179,5 +180,229 @@ export default class LocalDB {
         .filter((i) => new Date(i.createdAt) >= new Date(significantSpan[0]) && new Date(i.createdAt) <= new Date(significantSpan[1]));
       return res.docs;
     });
+  }
+
+  static getCommitDataOwnershipRiver(commitSpan, significantSpan, granularity, interval) {
+    const statsByAuthor = {};
+
+    const totals = {
+      count: 0,
+      additions: 0,
+      deletions: 0,
+      changes: 0,
+    };
+
+    const data = [
+      {
+        date: new Date(significantSpan[0]),
+        totals: _.cloneDeep(totals),
+        statsByAuthor: {},
+      },
+    ];
+
+    let next = moment(significantSpan[0]).startOf(granularity.unit).toDate().getTime();
+    function group(data) {
+      const lastDatum = _.last(data);
+
+      if (_.keys(lastDatum.statsByAuthor).length < 50) {
+        return data;
+      }
+
+      const meanCommitCount = _.meanBy(_.values(lastDatum.statsByAuthor), 'count');
+      const threshhold = meanCommitCount;
+
+      const applyGroupBy = (stats, predicate) => {
+        const groupStats = {
+          count: 0,
+          additions: 0,
+          deletions: 0,
+          changes: 0,
+        };
+        const groupedCommitters = [];
+
+        const groupedStats = _.omitBy(stats, (stats, author) => {
+          if (predicate(stats, author)) {
+            groupStats.count += stats.count;
+            groupStats.additions += stats.additions;
+            groupStats.deletions += stats.deletions;
+            groupStats.changes += stats.changes;
+            groupedCommitters.push(author);
+            return true;
+          }
+        });
+
+        groupedStats.other = groupStats;
+
+        return {
+          groupedStats,
+          groupedCommitters,
+        };
+      };
+
+      const { groupedCommitters } = applyGroupBy(lastDatum.statsByAuthor, (stats) => {
+        return stats.count <= threshhold;
+      });
+
+      _.each(data, (datum) => {
+        const { groupedStats } = applyGroupBy(datum.statsByAuthor, (stats, author) => _.includes(groupedCommitters, author));
+
+        datum.statsByAuthor = groupedStats;
+      });
+
+      return data;
+    }
+
+    return findAll('commits').then((res) => {
+      const commits = res.docs.sort((a, b) => {
+        return new Date(a.date) - new Date(b.date);
+      });
+      commits.map((commit) => {
+        const dt = Date.parse(commit.date);
+        let stats = statsByAuthor[commit.signature];
+        if (!stats) {
+          stats = statsByAuthor[commit.signature] = {
+            count: 0,
+            additions: 0,
+            deletions: 0,
+            changes: 0,
+          };
+        }
+
+        totals.count++;
+        totals.additions += commit.stats.additions;
+        totals.deletions += commit.stats.deletions;
+        totals.changes += commit.stats.additions + commit.stats.deletions;
+
+        stats.count++;
+        stats.additions += commit.stats.additions;
+        stats.deletions += commit.stats.deletions;
+        stats.changes += commit.stats.additions + commit.stats.deletions;
+
+        while (dt >= next) {
+          const dataPoint = {
+            date: new Date(next),
+            totals: _.cloneDeep(totals),
+            statsByAuthor: _.cloneDeep(statsByAuthor),
+          };
+
+          data.push(dataPoint);
+          next += interval;
+        }
+      });
+      data.push({
+        date: new Date(significantSpan[1]),
+        totals: _.cloneDeep(totals),
+        statsByAuthor: _.cloneDeep(statsByAuthor),
+      });
+
+      return group(data);
+    });
+  }
+
+  static getBuildDataOwnershipRiver(commitSpan, significantSpan, granularity, interval) {
+    let next = moment(significantSpan[0]).startOf('day').toDate().getTime();
+    const data = [
+      {
+        date: new Date(significantSpan[0]),
+        stats: {
+          success: 0,
+          failed: 0,
+          pending: 0,
+          canceled: 0,
+        },
+      },
+    ];
+
+    return findAll('builds').then((res) => {
+      res.docs.map((build) => {
+        const createdAt = Date.parse(build.createdAt);
+
+        while (createdAt >= next) {
+          const dataPoint = {
+            date: new Date(next),
+            stats: _.defaults(
+              {
+                total: (build.stats.success || 0) + (build.stats.failed || 0) + (build.stats.pending || 0) + (build.stats.canceled || 0),
+              },
+              build.stats
+            ),
+          };
+
+          data.push(dataPoint);
+          next += interval;
+        }
+
+        return build;
+      });
+      return data;
+    });
+  }
+
+  static getIssueDataOwnershipRiver(issueSpan, significantSpan, granularity, interval) {
+    // holds close dates of still open issues, kept sorted at all times
+    const pendingCloses = [];
+
+    // issues closed so far
+    let closeCountTotal = 0,
+      count = 0;
+
+    let next = moment(significantSpan[0]).startOf('day').toDate().getTime();
+    const data = [
+      {
+        date: new Date(issueSpan[0]),
+        count: 0,
+        openCount: 0,
+        closedCount: 0,
+      },
+    ];
+    return findAll('issues').then((res) => {
+      res.docs = res.docs
+        .sort((a, b) => {
+          return new Date(a.createdAt) - new Date(b.createdAt);
+        })
+        .filter((i) => new Date(i.createdAt) >= new Date(significantSpan[0]) && new Date(i.createdAt) <= new Date(significantSpan[1]))
+        .map((issue) => {
+          const createdAt = Date.parse(issue.createdAt);
+          const closedAt = issue.closedAt ? Date.parse(issue.closedAt) : null;
+
+          count++;
+
+          // the number of closed issues at the issue's creation time, since
+          // the last time we increased closedCountTotal
+          const closedCount = _.sortedIndex(pendingCloses, createdAt);
+          closeCountTotal += closedCount;
+
+          // remove all issues that are closed by now from the "pending" list
+          pendingCloses.splice(0, closedCount);
+
+          while (createdAt >= next) {
+            const dataPoint = {
+              date: new Date(next),
+              count,
+              closedCount: closeCountTotal,
+              openCount: count - closeCountTotal,
+            };
+
+            data.push(dataPoint);
+            next += interval;
+          }
+
+          if (closedAt) {
+            // issue has a close date, be sure to track it in the "pending" list
+            const insertPos = _.sortedIndex(pendingCloses, closedAt);
+            pendingCloses.splice(insertPos, 0, closedAt);
+          } else {
+            // the issue has not yet been closed, indicate that by pushing
+            // null to the end of the pendingCloses list, which will always
+            // stay there
+            pendingCloses.push(null);
+          }
+        });
+      return data;
+    });
+  }
+
+  static getRelatedCommitDataOwnershipRiver(issue) {
+    return {};
   }
 }
