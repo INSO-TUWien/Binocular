@@ -43,7 +43,7 @@ function* watchSelectedAuthorsGlobal() {
 }
 
 function* watchRefreshRequests() {
-  yield throttle(10000, 'REQUEST_REFRESH', mapSaga(refresh));
+  yield throttle(5000, 'REQUEST_REFRESH', mapSaga(refresh));
 }
 
 function* watchMessages() {
