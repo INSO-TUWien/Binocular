@@ -19,11 +19,11 @@ import SearchBar from '../components/searchBar/searchBar';
 import searchAlgorithm from '../components/searchBar/searchAlgorithm';
 import chartStyles from './chart.scss';
 
-export default class CodeHotspots extends React.PureComponent {
+export default class Hotspots extends React.PureComponent {
   constructor(props) {
     super(props);
 
-    this.requestFileStructure().then(function(resp) {
+    this.requestFileStructure().then(function (resp) {
       const files = [];
       for (const i in resp) {
         files.push({ key: resp[i].path, webUrl: resp[i].webUrl });
@@ -196,6 +196,7 @@ export default class CodeHotspots extends React.PureComponent {
   }
 
   requestData() {
+    debugger;
     if (this.state.path !== '') {
       Loading.insert();
       Loading.setState(0, 'Requesting Source Code');

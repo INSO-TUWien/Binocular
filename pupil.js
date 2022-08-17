@@ -58,6 +58,9 @@ const GateWayService = require('./lib/gateway-service');
 const grpc = require('grpc');
 const protoLoader = require('@grpc/proto-loader');
 const commPath = path.resolve(__dirname, 'services', 'grpc', 'comm');
+const astJava = require('./lib/ast/astJava');
+const astJavascript = require('./lib/ast/astJavascript');
+
 
 const LanguageDetectorPackageDefinition = protoLoader.loadSync(path.join(commPath, 'language.service.proto'), {
   enums: String
@@ -70,6 +73,21 @@ const LanguageDetectionService = (LanguageComm || { LanguageDetectionService: ()
 app.get('/api/commits', require('./lib/endpoints/get-commits.js'));
 app.get('/api/config', require('./lib/endpoints/get-config.js'));
 app.get('/api/fileSourceCode', require('./lib/endpoints/get-fileSourceCode.js'));
+app.post('/api/ast', (req, res) => {
+  switch (req.body.type) {
+    case 'java': {
+      let data = astJava.ast_java(req.body.content);
+      res.send(data);
+    }
+      break;
+    case 'js': {
+      let data = astJavascript.ast_javascript(req.body.content);
+      res.send(data);
+    }
+      break;
+    default: break;
+  }
+});
 
 // proxy to the FOXX-service
 app.get('/graphQl', require('./lib/endpoints/graphQl.js'));
