@@ -446,6 +446,7 @@ async function stopIndexers(gateway) {
  * @param context get the current context
  */
 function ensureDb(repo, context) {
+  console.log(context);
   return context.db
     .ensureDatabase('pupil-' + repo.getName())
     .catch((e) => {
