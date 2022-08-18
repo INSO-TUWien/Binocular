@@ -1,21 +1,17 @@
 "use strict";
 
 import React from "react";
-import { UnControlled as CodeMirror } from "react-codemirror2";
 import styles from "../styles.scss";
 import "codemirror/lib/codemirror.css";
 require("codemirror/mode/javascript/javascript");
 import "../css/codeMirror.css";
-import vcsData from "./helper/vcsData";
-import chartUpdater from "./charts/chartUpdater";
 import BluebirdPromise from "bluebird";
 import { graphQl } from "../../../utils";
 import Loading from "./helper/loading";
 import BackgroundRefreshIndicator from "../components/backgroundRefreshIndicator/backgroundRefreshIndicator";
 import DateRangeFilter from "../components/dateRangeFilter/dateRangeFilter";
-import searchAlgorithm from "../components/searchBar/searchAlgorithm";
 import chartStyles from "./chart.scss";
-import ModeSwitcher from "./helper/modeSwitcher";
+import cx from "classnames";
 
 export default class DependencyChanges extends React.PureComponent {
   constructor(props) {
@@ -32,15 +28,24 @@ export default class DependencyChanges extends React.PureComponent {
     this.elems = {};
     this.state = {
       code: "No File Selected",
+      comparedCode: "No File Selected",
       type: "",
       branch: "main",
+      compareBranch: "main",
       checkedOutBranch: "main",
+      checkedOutCompareBranch: "main",
       fileURL: "",
       path: "",
       sha: "",
       mode: 0, //modes: 0...Changes/Version  1...Changes/Developer  2...Changes/Issue
       data: {},
       filteredData: {
+        code: "No File Selected",
+        firstLineNumber: 1,
+        searchTerm: "",
+      },
+      comparedData: {},
+      filteredComparedData: {
         code: "No File Selected",
         firstLineNumber: 1,
         searchTerm: "",
@@ -57,6 +62,8 @@ export default class DependencyChanges extends React.PureComponent {
         heatMapStyle: 0,
       },
       filteredDependencies: [],
+      filteredComparedDependencies: [],
+      resultDependencies: [],
     };
 
     this.combinedColumnData = {};
@@ -71,39 +78,33 @@ export default class DependencyChanges extends React.PureComponent {
           if (resp[i].active === "true") {
             activeBranch = resp[i].branch;
             props.onSetBranch(resp[i].branch);
+            props.onSetCompareBranch(resp[i].branch);
           }
         }
         props.onSetBranches(resp);
         this.setState({ checkedOutBranch: activeBranch });
+        this.setState({ checkedOutCompareBranch: activeBranch });
       }.bind(this)
     );
   }
 
   componentWillReceiveProps(nextProps) {
-    const { fileURL, branch, path } = nextProps;
-    this.setState({ path: path, branch: branch, fileURL: fileURL });
+    const { fileURL, branch, compareBranch, path } = nextProps;
+    this.setState({
+      path: path,
+      branch: branch,
+      compareBranch: compareBranch,
+      fileURL: fileURL,
+    });
   }
 
   componentDidMount() {}
 
   render() {
-    if (
-      this.prevMode !== this.state.mode ||
-      this.state.path !== this.prevPath
-    ) {
+    if (this.state.path !== this.prevPath) {
       this.requestData();
-    } else {
-      if (this.dataChanged) {
-        this.dataChanged = false;
-        Loading.remove();
-      } else {
-        if (!this.codeChanged) {
-          this.requestData();
-        } else {
-          this.codeChanged = false;
-        }
-      }
     }
+
     return (
       <div className={styles.w100}>
         <div className={"loadingContainer"} />
@@ -148,28 +149,17 @@ export default class DependencyChanges extends React.PureComponent {
 
           <div className={styles.w100 + " " + styles.pr + " tree-sitter"}>
             <div className={styles.dependencyChart}>
-              <span className={styles.dependencyTitle}>Dependencies: </span>
+              <span className={styles.dependencyTitle}>
+                Dependency Changes:{" "}
+              </span>
               <ul className={styles.dependencyList}>
-                {this.state.filteredDependencies.map((dep, index) => (
-                  <li key={index}>{dep}</li>
+                {this.state.resultDependencies.map((dep, index) => (
+                  <li key={index}>
+                    { dep.status === 1 ? <i className={cx("fa", "fa-plus")}></i> : dep.status === 2 ? <i className={cx("fa", "fa-minus")}></i> : <i className={cx("fa", "fa-equals")}></i>}
+                    {dep.name}
+                  </li>
                 ))}
               </ul>
-            </div>
-            <div className={chartStyles.codeView}>
-              <CodeMirror
-                id={"codeView"}
-                ref={"codeView"}
-                value={this.state.filteredData.code}
-                options={{
-                  mode: ModeSwitcher.modeFromExtension(
-                    this.state.path.split(".").pop()
-                  ),
-                  theme: "default",
-                  lineNumbers: true,
-                  readOnly: true,
-                  firstLineNumber: this.state.filteredData.firstLineNumber,
-                }}
-              />
             </div>
           </div>
         </div>
@@ -177,11 +167,88 @@ export default class DependencyChanges extends React.PureComponent {
     );
   }
 
+  evaluateDependencies() {
+    this.setState({
+      resultDependencies: [],
+    });
+    let result = [];
+    for (const i in this.state.filteredDependencies) {
+      var dep = this.state.filteredDependencies[i].name;
+      var foundDependencies = this.state.filteredComparedDependencies.filter(
+        (cd) => cd.name === dep
+      );
+      if (foundDependencies.length > 0) {
+        result.push({ name: dep, status: 0 });
+        this.setState({
+          filteredComparedDependencies:
+            this.state.filteredComparedDependencies.filter(
+              (cd) => cd.name !== dep
+            ),
+        });
+      } else {
+        result.push({ name: dep, status: 1 });
+      }
+    }
+
+    for (const j in this.state.filteredComparedDependencies) {
+      result.push({
+        name: this.state.filteredComparedDependencies[j].name,
+        status: 2,
+      });
+    }
+
+    this.setState({
+      resultDependencies: result,
+    });
+  }
+
+  requestComparedData() {
+    if (this.state.path !== "") {
+      const http = new XMLHttpRequest();
+      http.open(
+        "GET",
+        this.state.fileURL
+          .replace("github.com", "raw.githubusercontent.com")
+          .replace("/blob", "")
+          .replace(
+            this.state.checkedOutCompareBranch,
+            this.state.sha === "" ? this.state.compareBranch : this.state.sha
+          ),
+        true
+      );
+
+      let self = this;
+      http.onload = function () {
+        if (http.readyState === 4) {
+          const resp = http.responseText;
+          self.setState({
+            comparedCode: resp,
+          });
+          const type = self.state.fileURL.substring(
+            self.state.fileURL.lastIndexOf(".") + 1,
+            self.state.fileURL.length
+          );
+          self.getComparedDependencies(self.state.comparedCode, type);
+        }
+      };
+
+      http.onerror = function () {
+        Loading.setErrorText(xhr.statusText);
+        console.error(xhr.statusText);
+      };
+
+      http.send(null);
+    }
+  }
+
   requestData() {
     if (this.state.path !== "") {
+      debugger;
       Loading.insert();
       Loading.setState(0, "Requesting Source Code");
       const xhr = new XMLHttpRequest();
+
+      //get file from branch
       xhr.open(
         "GET",
         this.state.fileURL
@@ -196,105 +263,32 @@ export default class DependencyChanges extends React.PureComponent {
       xhr.onload = function () {
         if (xhr.readyState === 4) {
           //if (xhr.status === 200) {
-          if (
-            this.state.path === this.prevPath &&
-            this.state.sha !== this.prevSha
-          ) {
-            this.prevSha = this.state.sha;
-            this.codeChanged = true;
-            this.dataChanged = false;
-            Loading.remove();
-            const data = this.state.data;
-            data.code = xhr.responseText;
+          const path = this.state.path;
+          this.prevPath = this.state.path;
+          this.prevMode = this.state.mode;
+          this.prevSha = this.state.sha;
+          Loading.setState(33, "Requesting Version Data");
+          if (xhr.status === 200) {
             this.setState({
-              data: data,
-              filteredData:
-                this.state.mode === 2
-                  ? searchAlgorithm.performIssueSearch(
-                      data,
-                      this.state.filteredData.searchTerm
-                    )
-                  : this.state.mode === 1
-                  ? searchAlgorithm.performDeveloperSearch(
-                      data,
-                      this.state.filteredData.searchTerm
-                    )
-                  : this.state.mode === 0
-                  ? searchAlgorithm.performCommitSearch(
-                      data,
-                      this.state.filteredData.searchTerm
-                    )
-                  : data,
+              code: xhr.responseText,
             });
-          } else {
-            const path = this.state.path;
-            this.prevPath = this.state.path;
-            this.prevMode = this.state.mode;
-            this.prevSha = this.state.sha;
-            Loading.setState(33, "Requesting Version Data");
-            vcsData.getChangeData(path).then(
-              function (resp) {
-                Loading.setState(66, "Transforming Version Data");
-                setTimeout(
-                  function () {
-                    const lines = (
-                      xhr.status === 200 ? xhr.responseText : ""
-                    ).split(/\r\n|\r|\n/).length;
-                    const data = chartUpdater.transformChangesPerVersionData(
-                      resp,
-                      lines
-                    );
-
-                    //this.codeChanged = true;
-                    this.dataChanged = true;
-                    data.code =
-                      xhr.status === 200
-                        ? xhr.responseText
-                        : "No commit code in current selected Branch!";
-                    data.firstLineNumber = 1;
-                    data.searchTerm = "";
-
-                    const currDisplayProps = this.state.displayProps;
-                    currDisplayProps.dateRange.from =
-                      data.data[0].date.split(".")[0];
-                    currDisplayProps.dateRange.from =
-                      currDisplayProps.dateRange.from.substring(
-                        0,
-                        currDisplayProps.dateRange.from.length - 3
-                      );
-                    currDisplayProps.dateRange.to =
-                      data.data[data.data.length - 1].date.split(".")[0];
-                    currDisplayProps.dateRange.to =
-                      currDisplayProps.dateRange.to.substring(
-                        0,
-                        currDisplayProps.dateRange.to.length - 3
-                      );
-                    this.setState({
-                      code:
-                        xhr.status === 200
-                          ? xhr.responseText
-                          : "No commit code in current selected Branch!",
-                      data: data,
-                      filteredData: data,
-                      displayProps: currDisplayProps,
-                    });
-                  }.bind(this),
-                  0
-                );
-              }.bind(this)
-            );
-            const type = this.state.fileURL.substring(
-              this.state.fileURL.lastIndexOf(".") + 1,
-              this.state.fileURL.length
-            );
-            this.getDependencies(this.state.code, type);
           }
+          const type = this.state.fileURL.substring(
+            this.state.fileURL.lastIndexOf(".") + 1,
+            this.state.fileURL.length
+          );
+          this.getDependencies(this.state.code, type);
         }
       }.bind(this);
+
       xhr.onerror = function () {
         Loading.setErrorText(xhr.statusText);
         console.error(xhr.statusText);
       };
+      xhr.onloadend = function () {
+        this.requestComparedData();
+      }.bind(this);
+
       xhr.send(null);
     }
   }
@@ -340,9 +334,47 @@ export default class DependencyChanges extends React.PureComponent {
 
     http.onload = () => {
       if (http.readyState === XMLHttpRequest.DONE && http.status === 200) {
+        let deps = JSON.parse(http.responseText);
+        let toReturn = [];
+
+        //status 0 .. nothing changed, staus 1 .. dependency added, status 2 .. dependency removed
+        for (const i in deps) {
+          toReturn.push({ name: deps[i], status: 0 });
+        }
         this.setState({
-          filteredDependencies: JSON.parse(http.responseText),
+          filteredDependencies: toReturn,
         });
+      }
+      Loading.remove();
+    };
+
+    http.send(JSON.stringify(body));
+  }
+
+  getComparedDependencies(content, type) {
+    var body = {};
+    body.content = content;
+    body.type = type;
+    var http = new XMLHttpRequest();
+    http.open("POST", "/api/ast", true);
+
+    http.setRequestHeader("Content-type", "application/json");
+
+    http.onload = () => {
+      if (http.readyState === XMLHttpRequest.DONE && http.status === 200) {
+        let deps = JSON.parse(http.responseText);
+        let toReturn = [];
+
+        //status 0 .. nothing changed, staus 1 .. dependency added, status 2 .. dependency removed
+        for (const i in deps) {
+          toReturn.push({ name: deps[i], status: 0 });
+        }
+
+        this.setState({
+          filteredComparedDependencies: toReturn,
+        });
+
+        this.evaluateDependencies();
       }
       Loading.remove();
     };

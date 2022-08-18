@@ -2,7 +2,7 @@
 
 import { connect } from 'react-redux';
 
-import { setActiveFile, setActivePath, setActiveBranch } from '../sagas';
+import { setActiveFile, setActivePath, setActiveBranch, setActiveCompareBranch } from '../sagas';
 import styles from '../styles.scss';
 import FileBrowser from '../components/fileBrowser/fileBrowser';
 
@@ -13,6 +13,7 @@ const mapStateToProps = (state /*, ownProps*/) => {
     fileURL: State.data.data.fileURL,
     path: State.data.data.path,
     branch: State.data.data.branch,
+    compareBranch: State.data.data.compareBranch,
     files: State.data.data.files,
     branches: State.data.data.branches
   };
@@ -22,7 +23,8 @@ const mapDispatchToProps = (dispatch /*, ownProps*/) => {
   return {
     onSetFile: url => dispatch(setActiveFile(url)),
     onSetPath: path => dispatch(setActivePath(path)),
-    onSetBranch: branch => dispatch(setActiveBranch(branch))
+    onSetBranch: branch => dispatch(setActiveBranch(branch)),
+    onSetCompareBranch: compareBranch => dispatch(setActiveCompareBranch(compareBranch))
   };
 };
 
@@ -37,7 +39,7 @@ const DependencyChangesConfigComponent = props => {
   }
   return (
     <div className={styles.config}>
-      <div className={styles.label}> Branch:</div>
+      <div className={styles.label}>Current Branch:</div>
       <div id={'branchSelector'} className={'select ' + styles.branchSelect}>
         <select
           className={styles.branchSelect}
@@ -49,12 +51,13 @@ const DependencyChangesConfigComponent = props => {
         </select>
       </div>
       <hr />
+      <div className={styles.label}> Compare to:</div>
       <div id={'compareBranchSelector'} className={'select ' + styles.branchSelect}>
         <select
           className={styles.branchSelect}
-          value={props.branch}
+          value={props.compareBranch}
           onChange={e => {
-            props.onSetBranch(e.target.value);
+            props.onSetCompareBranch(e.target.value);
           }}>
           {options}
         </select>

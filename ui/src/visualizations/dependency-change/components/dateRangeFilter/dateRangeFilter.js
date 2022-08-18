@@ -20,7 +20,6 @@ export default class DateRangeFilter extends React.PureComponent {
           type="datetime-local"
           className={styles.dateTimePicker}
           onChange={() => {
-            debugger;
             const res = {};
             res.from = document.getElementById('from').value;
             res.to = document.getElementById('to').value;
@@ -33,7 +32,6 @@ export default class DateRangeFilter extends React.PureComponent {
           type="datetime-local"
           className={styles.dateTimePicker}
           onChange={() => {
-            debugger;
             const res = {};
             res.from = document.getElementById('from').value;
             res.to = document.getElementById('to').value;

@@ -34,11 +34,12 @@ export const fetchFileUrl = fetchFactory(
     const state = yield select();
     const fileURL = state.visualizations.dependencyChanges.state.config.fileURL;
     const branch = state.visualizations.dependencyChanges.state.config.branch;
+    const compareBranch = state.visualizations.dependencyChanges.state.config.compareBranch;
     const path = state.visualizations.dependencyChanges.state.config.path;
     const files = state.visualizations.dependencyChanges.state.config.files;
     const branches = state.visualizations.dependencyChanges.state.config.branches;
 
-    return { fileURL, branch, files, path, branches };
+    return { fileURL, branch, compareBranch, files, path, branches };
   },
   requestDependencyChangesData,
   receiveDependencyChangesData,

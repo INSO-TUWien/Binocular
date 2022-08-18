@@ -18,6 +18,7 @@ export default handleActions(
     data: {
       fileURL: '',
       branch: 'master',
+      compareBranch: 'master',
       files: [],
       branches: [],
       path: ''

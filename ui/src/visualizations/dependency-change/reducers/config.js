@@ -17,6 +17,10 @@ export default handleActions(
       _.assign({}, state, {
         branch: action.payload ? action.payload : null
       }),
+    SET_ACTIVE_COMPARE_BRANCH: (state, action) =>
+      _.assign({}, state, {
+        compareBranch: action.payload ? action.payload : null
+      }),
     SET_ACTIVE_FILES: (state, action) =>
       _.assign({}, state, {
         files: action.payload ? action.payload : null
@@ -29,6 +33,7 @@ export default handleActions(
   {
     fileURL: '',
     branch: 'master',
+    compareBranch: 'master',
     path: '',
     files: [],
     branches: []
