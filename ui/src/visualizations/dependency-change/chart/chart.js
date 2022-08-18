@@ -243,7 +243,6 @@ export default class DependencyChanges extends React.PureComponent {
 
   requestData() {
     if (this.state.path !== "") {
-      debugger;
       Loading.insert();
       Loading.setState(0, "Requesting Source Code");
       const xhr = new XMLHttpRequest();

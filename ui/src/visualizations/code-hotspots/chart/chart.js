@@ -196,7 +196,6 @@ export default class Hotspots extends React.PureComponent {
   }
 
   requestData() {
-    debugger;
     if (this.state.path !== '') {
       Loading.insert();
       Loading.setState(0, 'Requesting Source Code');

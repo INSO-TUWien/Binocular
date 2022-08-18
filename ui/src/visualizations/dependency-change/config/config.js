@@ -37,6 +37,8 @@ const DependencyChangesConfigComponent = props => {
       </option>
     );
   }
+
+  const filteredFiles = props.files.filter(f => f.key.endsWith('.js') || f.key.endsWith('.java') || f.key.endsWith('.py'));
   return (
     <div className={styles.config}>
       <div className={styles.label}>Current Branch:</div>
@@ -64,7 +66,7 @@ const DependencyChangesConfigComponent = props => {
       </div>
       <hr />
       <div id={'fileSelector'}>
-        <FileBrowser files={props.files} props={props} />
+        <FileBrowser files={filteredFiles} props={props} />
       </div>
     </div>
   );
