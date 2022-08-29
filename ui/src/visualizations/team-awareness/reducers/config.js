@@ -9,6 +9,7 @@ export default handleActions(
     SET_TEAM_AWARENESS_ACTIVITY_SCALE: (state, action) => _.assign({}, state, { selectedActivityScale: action.payload }),
     SET_TEAM_AWARENESS_ACTIVITY_DIMENSIONS: (state, action) => _.assign({}, state, action.payload),
     SET_TEAM_AWARENESS_BRANCH: (state, action) => _.assign({}, state, { selectedBranch: action.payload }),
+    SET_TEAM_AWARENESS_CONFLICT_BRANCH: (state, action) => _.assign({}, state, { selectedConflictBranch: action.payload }),
     SET_TEAM_AWARENESS_FILTERED_FILES: (state, action) => {
       const nextFilter = new Map();
       state.fileFilter.files.forEach(f => nextFilter.set(f.id, f));
@@ -34,6 +35,7 @@ export default handleActions(
       files: []
     },
     selectedBranch: 'all',
+    selectedConflictBranch: 'not_set',
     selectedActivityScale: 'commits',
     activityRestricted: false,
     activityDims: []

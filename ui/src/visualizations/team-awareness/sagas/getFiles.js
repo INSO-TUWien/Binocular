@@ -16,6 +16,7 @@ const getFiles = (page, perPage) => {
         files(page:$page, perPage:$perPage) {
           data {
             id
+            webUrl
             path
             commits {
               data {

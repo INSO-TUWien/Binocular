@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { connect } from 'react-redux';
-import { setActivityDimensions, setActivityScale, setBranch, setFileFilterMode, setFilteredFiles } from './sagas';
+import { setActivityDimensions, setActivityScale, setBranch, setConflictBranch, setFileFilterMode, setFilteredFiles } from './sagas';
 import * as d3 from 'd3';
 import { getState } from './util/util';
 import _ from 'lodash';
@@ -33,6 +33,7 @@ const mapDispatchToProps = dispatch => {
     onSelectActivityScale: activity => dispatch(setActivityScale(activity)),
     onActivityDimensionsRestricted: activity => dispatch(setActivityDimensions(activity)),
     onSelectBranch: activity => dispatch(setBranch(activity)),
+    onSelectConflictBranch: activity => dispatch(setConflictBranch(activity)),
     onSetFilteredFile: activity => dispatch(setFilteredFiles(activity)),
     onSetFileFilterMode: activity => dispatch(setFileFilterMode(activity))
   };
@@ -50,6 +51,7 @@ class ConfigComponent extends React.Component {
       config,
       data,
       onSelectBranch,
+      onSelectConflictBranch,
       onSetFilteredFile,
       onSetFileFilterMode
     } = this.props;
@@ -85,6 +87,22 @@ class ConfigComponent extends React.Component {
                 <option value="all">All Branches</option>
                 {_.sortBy(branches, 'branch').map(branch =>
                   <option key={'branch_' + branch.id} value={branch.branch}>
+                    {branch.branch}
+                  </option>
+                )}
+              </select>
+            </div>
+          </div>
+          <div className="field">
+            <label className="label">Conflict Branch</label>
+            <div className={'select ' + styles.branchesSelect}>
+              <select
+                className={styles.branchesSelect}
+                defaultValue="not_set"
+                onChange={event => onSelectConflictBranch(event.target.value)}>
+                <option value="not_set">Select a branch</option>
+                {_.sortBy(branches, 'branch').map(branch =>
+                  <option key={'conflict_branch_' + branch.id} value={branch.branch}>
                     {branch.branch}
                   </option>
                 )}
