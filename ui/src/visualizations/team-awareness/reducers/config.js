@@ -27,13 +27,15 @@ export default handleActions(
         fileFilter: _.assign({}, state.fileFilter, { files: Array.from(nextFilter.values()) })
       });
     },
-    SET_TEAM_AWARENESS_FILE_FILTER_MODE: (state, action) => _.assign({}, state, { fileFilter: { mode: action.payload, files: [] } })
+    SET_TEAM_AWARENESS_FILE_FILTER_MODE: (state, action) => _.assign({}, state, { fileFilter: { mode: action.payload, files: [] } }),
+    SET_TEAM_AWARENESS_CONFLICT_PARTNERS: (state, action) => Object.assign({}, state, { highlightedStakeholders: action.payload })
   },
   {
     fileFilter: {
       mode: 'EXCLUDE',
       files: []
     },
+    highlightedStakeholders: [],
     selectedBranch: 'all',
     selectedConflictBranch: 'not_set',
     selectedActivityScale: 'commits',

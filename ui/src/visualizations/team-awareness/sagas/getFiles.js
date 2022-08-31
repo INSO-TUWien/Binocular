@@ -20,6 +20,7 @@ const getFiles = (page, perPage) => {
             path
             commits {
               data {
+                parents
                 date
                 branch
                 sha

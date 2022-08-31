@@ -15,7 +15,10 @@ export default handleActions(
       });
     },
     PROCESS_TEAM_AWARENESS_DATA: (state, action) => _.assign({}, state, { data: _.assign({}, state.data, action.payload) }),
-    PROCESS_TEAM_AWARENESS_FILE_BROWSER: (state, action) => _.assign({}, state, { data: _.assign({}, state.data, action.payload) })
+    PROCESS_TEAM_AWARENESS_FILE_BROWSER: (state, action) => _.assign({}, state, { data: _.assign({}, state.data, action.payload) }),
+    START_TEAM_AWARENESS_CONFLICT_PROCESSING: state => Object.assign({}, state, { isConflictsProcessing: true }),
+    RECEIVE_TEAM_AWARENESS_CONFLICTS: (state, action) =>
+      Object.assign({}, state, { isConflictsProcessing: false, data: Object.assign(state.data, action.payload) })
   },
   {
     data: {
@@ -23,9 +26,11 @@ export default handleActions(
       fileTree: [],
       branches: [],
       commits: [],
+      conflicts: [],
       stakeholders: []
     },
     lastFetched: null,
-    isFetching: null
+    isFetching: null,
+    isConflictsProcessing: false
   }
 );

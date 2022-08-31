@@ -12,7 +12,6 @@ export default class BubbleChart extends React.Component {
     this.state = {
       componentMounted: false,
       content: this.props.content,
-      colors: this.createColorSchema(_.map(this.props.content, 'id')),
       width: 0,
       height: 0
     };
@@ -28,7 +27,7 @@ export default class BubbleChart extends React.Component {
         <svg className={this.styles.chartDrawingArea} ref={svg => (this.svgRef = svg)}>
           <g>
             {this.generateBubbles()}
-            {content && content.length > 0 && <Legend x={10} y={10} categories={legend} />}
+            {content && content.length > 0 && <Legend x={10} y={50} categories={legend} />}
           </g>
         </svg>
         <div className={this.styles.chartTooltip} ref={div => (this.tooltipRef = div)} />
@@ -44,7 +43,7 @@ export default class BubbleChart extends React.Component {
           return {
             name: c.signature,
             style: {
-              fill: this.state.colors.get(c.id)
+              fill: this.props.colors.get(c.id)
             }
           };
         })
@@ -56,7 +55,7 @@ export default class BubbleChart extends React.Component {
     const legend = [
       {
         name: stakeholder.signature + ' Activity: ' + stakeholder.activity,
-        style: { fill: this.state.colors.get(stakeholder.id) }
+        style: { fill: this.props.colors.get(stakeholder.id) }
       }
     ];
 
@@ -72,10 +71,10 @@ export default class BubbleChart extends React.Component {
   }
   // eslint-disable-next-line no-unused-vars
   componentDidUpdate(prevProps, prevState, snapshot) {
-    if (this.state.componentMounted && this.state.content !== this.props.content) {
+    const { componentMounted, content } = this.state;
+    if (componentMounted && content !== this.props.content) {
       this.setState({
-        content: this.props.content,
-        colors: this.createColorSchema(_.map(this.props.content, 'id'))
+        content: this.props.content
       });
     }
   }
@@ -97,35 +96,21 @@ export default class BubbleChart extends React.Component {
       return [];
     }
 
-    return _.map(leaves, (l, i) =>
-      <g
-        key={`circle_${i}`}
-        transform={`translate(${l.x},${l.y})`}
-        onMouseEnter={() => this.constructActiveLegend(l.data)}
-        onMouseOut={() => this.setState({ activeLegend: null })}>
-        <circle fill={this.state.colors.get(l.data.id)} r={l.r} />
-      </g>
-    );
+    return _.map(leaves, (l, i) => {
+      return (
+        <g
+          key={`circle_${i}`}
+          transform={`translate(${l.x},${l.y})`}
+          onMouseEnter={() => this.constructActiveLegend(l.data)}
+          onMouseOut={() => this.setState({ activeLegend: null })}>
+          <circle
+            fill={this.props.colors.get(l.data.id)}
+            stroke={this.props.highlightedStakeholders.includes(l.data.id) ? '#c0392b' : 'none'}
+            strokeWidth={5}
+            r={l.r}
+          />
+        </g>
+      );
+    });
   }
-
-  createColorSchema(data) {
-    return new Map(
-      data.map((v, i) => {
-        return [v, getColor((i + 1) / data.length)];
-      })
-    );
-  }
-}
-
-function getColor(t) {
-  t = Math.max(0, Math.min(1, t));
-  return (
-    'rgb(' +
-    Math.max(0, Math.min(255, Math.round(34.61 + t * (1172.33 - t * (10793.56 - t * (33300.12 - t * (38394.49 - t * 14825.05))))))) +
-    ', ' +
-    Math.max(0, Math.min(255, Math.round(23.31 + t * (557.33 + t * (1225.33 - t * (3574.96 - t * (1073.77 + t * 707.56))))))) +
-    ', ' +
-    Math.max(0, Math.min(255, Math.round(27.2 + t * (3211.1 - t * (15327.97 - t * (27814 - t * (22569.18 - t * 6838.66))))))) +
-    ')'
-  );
 }

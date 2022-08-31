@@ -8,7 +8,7 @@ import calculateGraphFigures from './calculateFigures';
 import getBranches from './getBranches';
 import getFiles from './getFiles';
 import { generateFileBrowser } from './fileTreeOperations';
-import { processConflictBranchSelection } from './conflicts';
+import { processConflictBranchSelection } from './conflictCalculations';
 
 export const setActivityScale = createAction('SET_TEAM_AWARENESS_ACTIVITY_SCALE');
 export const setActivityDimensions = createAction('SET_TEAM_AWARENESS_ACTIVITY_DIMENSIONS');
@@ -16,13 +16,16 @@ export const setBranch = createAction('SET_TEAM_AWARENESS_BRANCH');
 export const setConflictBranch = createAction('SET_TEAM_AWARENESS_CONFLICT_BRANCH');
 export const setFilteredFiles = createAction('SET_TEAM_AWARENESS_FILTERED_FILES');
 export const setFileFilterMode = createAction('SET_TEAM_AWARENESS_FILE_FILTER_MODE');
+export const setConflictPartners = createAction('SET_TEAM_AWARENESS_CONFLICT_PARTNERS');
 
 export const processTeamAwarenessData = timestampedActionFactory('PROCESS_TEAM_AWARENESS_DATA');
 export const processTeamAwarenessFileBrowser = timestampedActionFactory('PROCESS_TEAM_AWARENESS_FILE_BROWSER');
-export const processTeamAwarenessConflicts = timestampedActionFactory('PROCESS_TEAM_AWARENESS_CONFLICTS');
 export const requestTeamAwarenessData = createAction('REQUEST_TEAM_AWARENESS_DATA');
 export const receiveTeamAwarenessData = timestampedActionFactory('RECEIVE_TEAM_AWARENESS_DATA');
 export const receiveTeamAwarenessDataError = timestampedActionFactory('RECEIVE_TEAM_AWARENESS_DATA_ERROR');
+
+export const startTeamAwarenessConflictProcessing = createAction('START_TEAM_AWARENESS_CONFLICT_PROCESSING');
+export const receiveTeamAwarenessConflicts = timestampedActionFactory('RECEIVE_TEAM_AWARENESS_CONFLICTS');
 
 export const requestRefresh = createAction('REQUEST_REFRESH');
 const refresh = createAction('REFRESH');
@@ -51,6 +54,7 @@ const invokeAllDataGenerators = action => {
 
 function* watchConflictBranch() {
   yield takeEvery('SET_TEAM_AWARENESS_CONFLICT_BRANCH', processConflictBranchSelection);
+  yield takeEvery('SET_TEAM_AWARENESS_BRANCH', processConflictBranchSelection);
 }
 
 function* watchRefreshRequests() {

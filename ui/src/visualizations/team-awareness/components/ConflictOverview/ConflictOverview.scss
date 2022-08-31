@@ -1,0 +1,44 @@
+.conflictOverview {
+  top: 10px;
+  left: 6px;
+  position: absolute;
+}
+
+.conflictOverviewIcon {
+  height: 25px;
+  width: 25px;
+}
+
+.conflictOverviewHeader {
+  display: flex;
+  color: black;
+}
+
+.conflictOverviewContent {
+  max-height: 750px;
+  padding-left: 20px;
+  width: 500px;
+  background: white;
+  overflow: scroll;
+}
+
+.conflictOverviewItem {
+  color: black;
+  cursor: pointer;
+}
+
+.conflictOverviewItemColors {
+  width: 15px;
+  height: 15px;
+}
+
+.conflictOverviewItemText {
+  padding-left: 5px;
+}
+
+.conflictOverviewNoSelection {
+  color: black;
+  top: 10px;
+  left: 10px;
+  position: absolute;
+}
