@@ -10,14 +10,15 @@ import OffsetGroup from '../../../../components/svg/OffsetGroup.js';
 import styles from '../styles.scss';
 import * as zoomUtils from '../../../../utils/zoom.js';
 import * as exampleDataSet from './exampleDataset.js';
+import computeDependencies from './computeUtils.js';
 
 const CHART_FILL_RATIO = 0.65;
-
-
 
 export default class CoChangeGraph extends React.Component {  
   constructor(props) {
     super(props);
+
+    console.log(props);
 
     this.state = {
       transform: d3.zoomIdentity,
@@ -26,6 +27,15 @@ export default class CoChangeGraph extends React.Component {
 
     this.onResize = zoomUtils.onResizeFactory(0.7, 0.7);
     this.onZoom = zoomUtils.onZoomFactory({ constrain: false });
+  }
+
+  /**
+  * Update computed commit data
+  * @param nextProps props that are passed
+  */
+  componentWillReceiveProps(nextProps) {
+    console.log(nextProps);
+    computeDependencies(nextProps);
   }
 
   componentDidMount() {

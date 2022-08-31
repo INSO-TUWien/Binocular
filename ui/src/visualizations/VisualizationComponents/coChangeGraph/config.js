@@ -14,10 +14,11 @@ import { graphQl, emojify } from '../../../utils';
 import { createAction } from 'redux-actions';
 
 const mapStateToProps = (state /*, ownProps*/) => {
-  const coChangeState = state.visualizations.CoChangeGraph.state;
+  const coChangeState = state.visualizations.coChangeGraph.state;
 
   return {
     navigationMode: coChangeState.config.navigationMode,
+    commitsFiles: coChangeState.data.data.commitsFiles
   };
 };
 
