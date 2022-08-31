@@ -15,12 +15,6 @@ export default class ConflictOverview extends React.Component {
     };
   }
 
-  calculateConflictAmount() {
-    let amount = 0;
-    this.props.conflicts.forEach(c => (amount += c.data.length));
-    return amount;
-  }
-
   reduceConflictsToStakeholders() {
     const conflictedFiles = this.props.conflicts ? this.props.conflicts : [];
     const conflicts = new Map();
