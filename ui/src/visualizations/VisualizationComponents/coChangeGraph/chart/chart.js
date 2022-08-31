@@ -2,11 +2,9 @@
 
 import React from 'react';
 import * as d3 from 'd3';
-import cx from 'classnames';
 
 import GlobalZoomableSvg from '../../../../components/svg/GlobalZoomableSvg.js';
 import ChartContainer from '../../../../components/svg/ChartContainer.js';
-import OffsetGroup from '../../../../components/svg/OffsetGroup.js';
 import styles from '../styles.scss';
 import * as zoomUtils from '../../../../utils/zoom.js';
 import * as exampleDataSet from './exampleDataset.js';
@@ -34,17 +32,25 @@ export default class CoChangeGraph extends React.Component {
   * @param nextProps props that are passed
   */
   componentWillReceiveProps(nextProps) {
-    console.log(nextProps);
-    computeDependencies(nextProps);
+    const dataset = computeDependencies(nextProps);
+
+    console.log(dataset);
+    if(dataset != undefined) {
+      this.drawgraph(dataset);
+    }
   }
 
   componentDidMount() {
+
+  }
+
+  drawgraph(dataset) {
     const svg = d3.select("." + styles.graphHolder);
-    const dataset = exampleDataSet.dataset;
+    //const dataset = exampleDataSet.dataset;
 
     // Generate dataset link "source" and "target" from the dataset
-    exampleDataSet.generateLinkIndices(dataset);
-    exampleDataSet.generateDataset();
+    //exampleDataSet.generateLinkIndices(dataset);
+    //exampleDataSet.generateDataset();
   
     // Initialize definitions
     const defs = svg.append("defs");
@@ -95,7 +101,7 @@ export default class CoChangeGraph extends React.Component {
       text.attr("x", d => d.x - 5) //position of the lower left point of the text
           .attr("y", d => d.y + 5); //position of the lower left point of the text
     
-      link.each(function(d){refreshGradient(this, d)});
+      //link.each(function(d){refreshGradient(this, d)});
     }
 
     //When the drag gesture starts, the targeted node is fixed to the pointer

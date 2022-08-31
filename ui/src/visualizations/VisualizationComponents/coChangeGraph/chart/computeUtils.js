@@ -33,6 +33,7 @@ export default function computeDependencies(props){
     }
 
     let dependencies = [];
+    fileSet = Array.from(fileSet); //convert to Array for ease of use
 
     // compute the dependencies
     for (const srcFile of fileSet) {
@@ -45,11 +46,15 @@ export default function computeDependencies(props){
             const srcCoChange = sharedCommitCnt[srcFile][dstFile] / commitCntPerFile[srcFile]   //cochange percentage from source POV
             const dstCoChange = sharedCommitCnt[srcFile][dstFile] / commitCntPerFile[dstFile]    //cochange percentage from destination POV 
 
+            // get indices used in graph
+            const srcIndex = fileSet.findIndex(_ => _ === srcFile);
+            const dstIndex = fileSet.findIndex(_ => _ === dstFile);
+
             const link = {
-                src: srcFile,
-                dst: dstFile,
-                srcDependency: srcCoChange,
-                dstDependency: dstCoChange
+                source: srcIndex,    // needed for d3 to create the graph
+                target: dstIndex,
+                sourceColor: srcCoChange,
+                targetColor: dstCoChange
             }
             
             const key = srcFile + ":" + dstFile;
@@ -69,8 +74,18 @@ export default function computeDependencies(props){
         dependencyArray.push(dependencies[key]);
     });
 
-    console.log(dependencyArray);
-    console.log(fileSet);
+    // convert fileSet to objects for d3
+    let files = [];
+    for (const file of fileSet) {
+        files.push({id: file});
+    }
+
+    const dataset = {
+        nodes: files,
+        links: dependencyArray
+    }
+
+    return dataset;
 }
 
 
