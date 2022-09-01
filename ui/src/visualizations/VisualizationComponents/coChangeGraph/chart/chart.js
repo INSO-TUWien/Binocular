@@ -7,9 +7,7 @@ import GlobalZoomableSvg from '../../../../components/svg/GlobalZoomableSvg.js';
 import ChartContainer from '../../../../components/svg/ChartContainer.js';
 import styles from '../styles.scss';
 import * as zoomUtils from '../../../../utils/zoom.js';
-import * as exampleDataSet from './exampleDataset.js';
-import computeDependencies from './computeUtils.js';
-import ClosingPathContext from '../../../../utils/ClosingPathContext.js';
+import {computeFileDependencies, computeModuleDependencies} from './computeUtils.js';
 
 const CHART_FILL_RATIO = 0.65;
 
@@ -33,16 +31,12 @@ export default class CoChangeGraph extends React.Component {
   * @param nextProps props that are passed
   */
   componentWillReceiveProps(nextProps) {
-    const dataset = computeDependencies(nextProps);
+    const dataset = computeFileDependencies(nextProps);
+    const module_dataset = computeModuleDependencies(nextProps);
 
-    console.log(dataset);
     if(dataset != undefined) {
       this.drawgraph(dataset);
     }
-  }
-
-  componentDidMount() {
-
   }
 
   drawgraph(dataset) {
@@ -81,7 +75,7 @@ export default class CoChangeGraph extends React.Component {
 
     // Initialize the simualtion
     const simulation = d3.forceSimulation(dataset.nodes)
-      .force('links', d3.forceLink().links(dataset.links).distance(500))
+      .force('links', d3.forceLink().links(dataset.links).distance(750))
       .force('repellent force', d3.forceManyBody().strength(-100))
       .on("tick", ticked); 
 

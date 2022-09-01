@@ -9,6 +9,7 @@ import getCommitFiles from './getCommitFiles';
 
 import { fetchFactory, timestampedActionFactory, mapSaga } from '../../../../sagas/utils.js';
 import { graphQl } from '../../../../utils';
+import getCommitsModules from './getCommitsModules';
 
 export const setNavigationMode = createAction('SET_NAVIGATION_MODE');
 
@@ -34,8 +35,9 @@ export const testFunction =
   
 export const fetchChangesData = fetchFactory(
   function* () {
+    const {commitsModules} = yield getCommitsModules();
     const {commitsFiles} = yield getCommitFiles();
-    return {commitsFiles};
+    return {commitsFiles, commitsModules};
   },
   requestData,
   receiveData,

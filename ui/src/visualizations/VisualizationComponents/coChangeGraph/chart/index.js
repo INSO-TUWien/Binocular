@@ -10,7 +10,8 @@ const mapStateToProps = (state /*, ownProps*/) => {
 
   return {
     navigationMode: coChangeState.config.navigationMode,
-    commitsFiles: coChangeState.data.data.commitsFiles
+    commitsFiles: coChangeState.data.data.commitsFiles,
+    commitsModules: coChangeState.data.data.commitsModules
   };
 };
 
