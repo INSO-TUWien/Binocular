@@ -9,6 +9,7 @@ import styles from '../styles.scss';
 import * as zoomUtils from '../../../../utils/zoom.js';
 import * as exampleDataSet from './exampleDataset.js';
 import computeDependencies from './computeUtils.js';
+import ClosingPathContext from '../../../../utils/ClosingPathContext.js';
 
 const CHART_FILL_RATIO = 0.65;
 
@@ -46,11 +47,6 @@ export default class CoChangeGraph extends React.Component {
 
   drawgraph(dataset) {
     const svg = d3.select("." + styles.graphHolder);
-    //const dataset = exampleDataSet.dataset;
-
-    // Generate dataset link "source" and "target" from the dataset
-    //exampleDataSet.generateLinkIndices(dataset);
-    //exampleDataSet.generateDataset();
   
     // Initialize definitions
     const defs = svg.append("defs");
@@ -89,6 +85,9 @@ export default class CoChangeGraph extends React.Component {
       .force('repellent force', d3.forceManyBody().strength(-100))
       .on("tick", ticked); 
 
+    let counter = 0;
+
+    // advance simulation
     function ticked() {
       node.attr("cx", d => d.x)
           .attr("cy", d => d.y);
@@ -101,7 +100,13 @@ export default class CoChangeGraph extends React.Component {
       text.attr("x", d => d.x - 5) //position of the lower left point of the text
           .attr("y", d => d.y + 5); //position of the lower left point of the text
     
-      //link.each(function(d){refreshGradient(this, d)});
+      if(counter >= 10){
+        link.each(function(d){refreshGradient(this, d)});
+        counter = 0;
+      } else {
+        counter++;
+      }
+
     }
 
     //When the drag gesture starts, the targeted node is fixed to the pointer
@@ -144,10 +149,12 @@ export default class CoChangeGraph extends React.Component {
     // create the baseline gradient for the links
     function createGradient(line, d){
       var self = d3.select(line);
-      var gradient_id = "line-gradient#" + d.source.id + "#" + d.target.id; 
+      var gradientId = "line-gradient_" + d.source.id + "_" + d.target.id; 
+      gradientId = gradientId.replace(/\./g, '');
+      gradientId = gradientId.replace(/\//g, '');
 
       defs.append("linearGradient")                
-          .attr("id", gradient_id)
+          .attr("id", gradientId)
           .attr("gradientUnits", "userSpaceOnUse")
           .attr("x1", d.source.x)
           .attr("y1", d.source.y)
@@ -162,18 +169,26 @@ export default class CoChangeGraph extends React.Component {
           ])                  
           .enter().append("stop")         
           .attr("offset", function(d) { return d.offset; })   
-          .attr("stop-color", function(d) { return d.color; });   
-        
-      self.style("stroke", "url(#" + gradient_id + ")")
+          .attr("stop-color", function(d) { return d.color; }); 
+                  
+      self.style("stroke", "url(#" + gradientId + ")")
     }
   
     function refreshGradient(line, d){
-      const gradientId = "line-gradient#" + d.source.id + "#" + d.target.id;
-      const gradient = document.getElementById(gradientId);
-      if(gradient != null){
-        gradient.remove();
+      let gradientId = "line-gradient_" + d.source.id + "_" + d.target.id;
+      gradientId = gradientId.replace(/\./g, '');
+      gradientId = gradientId.replace(/\//g, '');
+
+      let gradient = d3.select("#" + gradientId);
+
+      if(!gradient.empty()){
+        gradient.attr("x1", d.source.x);
+        gradient.attr("y1", d.source.y);
+        gradient.attr("x2", d.target.x);
+        gradient.attr("y2", d.target.y);
+      } else {
+        createGradient(line, d);
       }
-      createGradient(line, d);
     }  
   }
 
