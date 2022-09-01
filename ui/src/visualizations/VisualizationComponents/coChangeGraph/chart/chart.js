@@ -153,9 +153,7 @@ export default class CoChangeGraph extends React.Component {
     // create the baseline gradient for the links
     function createGradient(line, d){
       var self = d3.select(line);
-      var gradientId = "line-gradient_" + d.source.id + "_" + d.target.id; 
-      gradientId = gradientId.replace(/\./g, '');
-      gradientId = gradientId.replace(/\//g, '');
+      var gradientId = "gradient_" + d.uuid;
 
       defs.append("linearGradient")                
           .attr("id", gradientId)
@@ -179,10 +177,7 @@ export default class CoChangeGraph extends React.Component {
     }
   
     function refreshGradient(line, d){
-      let gradientId = "line-gradient_" + d.source.id + "_" + d.target.id;
-      gradientId = gradientId.replace(/\./g, '');
-      gradientId = gradientId.replace(/\//g, '');
-
+      let gradientId = "gradient_" + d.uuid;
       let gradient = d3.select("#" + gradientId);
 
       if(!gradient.empty()){

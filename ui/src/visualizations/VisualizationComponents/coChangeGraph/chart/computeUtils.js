@@ -114,6 +114,7 @@ function validateSharedCommitCnt(sharedCommitCnt, srcFile, dstFile) {
 
 function computeDependencyDataset(entitySet, sharedCommitCnt, commitCntPerEntity){
     let dependencies = [];
+    let dependencyCnt = 0;
     entitySet = Array.from(entitySet); //convert to Array for ease of use
 
     // compute the dependencies
@@ -138,7 +139,8 @@ function computeDependencyDataset(entitySet, sharedCommitCnt, commitCntPerEntity
                     source: srcIndex,    // needed for d3 to create the graph
                     target: dstIndex,
                     sourceColor: srcCoChange,
-                    targetColor: dstCoChange
+                    targetColor: dstCoChange,
+                    uuid: dependencyCnt
                 }
                 
                 const key = srcEntity + ":" + dstEntity;
@@ -147,6 +149,7 @@ function computeDependencyDataset(entitySet, sharedCommitCnt, commitCntPerEntity
                 // check both directions to avoid duplicates
                 if (dependencies[key] === undefined && dependencies[reverseKey] === undefined) {
                     dependencies[key] = link;
+                    dependencyCnt++;
                 }
             }
         });
