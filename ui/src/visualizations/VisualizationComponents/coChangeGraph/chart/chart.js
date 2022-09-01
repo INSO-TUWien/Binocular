@@ -69,7 +69,7 @@ export default class CoChangeGraph extends React.Component {
         .on("start", dragstarted) 
         .on("drag", dragged)      
         .on("end", dragended)     
-      );
+    );
 
     // Text to nodes
     const text = svg.append("g")
@@ -132,17 +132,27 @@ export default class CoChangeGraph extends React.Component {
     }
 
     // node highlighting functionality
-    node.on('mouseover', function (event, d) {
-      
-      node.style('fill', "#B8B8B8")
-      d3.select(this).style('fill', '#ff0000')
-
+    node.on('mouseover', function (event, d) {     
       // Highlight the connections
-      link.style('stroke-width', function (link_d) {return link_d.source.id === d.id || link_d.target.id === d.id ? 6 : 3;})
+      link.style('stroke-width', function (link_d) {return link_d.source.id === d.id || link_d.target.id === d.id ? 5 : 0.1;})
+      const links = link.filter(_ => _.source.id === d.id || _.target.id === d.id);
+      links.raise();
+
+      let targetNodes = [];
+      links.each(_ => {targetNodes.push(_.target.id); targetNodes.push(_.source.id)});
+
+      text.style("fill", function (link_d) {return targetNodes.includes(link_d.id) ? 'black' : 'transparent'})
+      node.style('stroke-width', function (node_d) {return targetNodes.includes(node_d.id) ? 1 : 0.1})
+      node.style('fill', function (node_d) {return targetNodes.includes(node_d.id) ? "orange" : "transparent"})
+
+      d3.select(this).style('fill', 'red');
     })
     .on('mouseout', function (d) {
-      node.style('fill', "pink")
-      link.style('stroke-width', '3')
+      node.style('fill', "pink");
+      node.style('stroke-width', 1);
+      link.style('stroke-width', '1');
+      text.style("fill", 'black');
+      text.style('font-size', '16');
     })
 
     // link color functions
