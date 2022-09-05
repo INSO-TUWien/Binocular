@@ -32,7 +32,7 @@ export function computeFileDependencies(props){
         }
     }
 
-    fileSet = filterEntities("ui/src/visualizations/VisualizationComponents", fileSet);
+    fileSet = filterEntities("ui/src/visualizations", fileSet);
     const dataset = computeDependencyDataset(fileSet, sharedCommitCnt, commitCntPerFile);
     return dataset;
 }
@@ -186,7 +186,8 @@ function computeDependencyDataset(entitySet, sharedCommitCnt, commitCntPerEntity
 
 export function assignModuleIndicesToFiles(nodes, allModules){
     const fileSet = nodes;
-    let moduleLinks = new Array();
+    let fileToModuleLinks = new Array();
+    let usedModules = new Array();
 
     for (const file of fileSet) {
         for (const module of allModules) {
@@ -199,6 +200,7 @@ export function assignModuleIndicesToFiles(nodes, allModules){
 
                 if(moduleIndex === -1){
                     nodes.push({id: module.path, name: module.path});
+                    usedModules.push(module);      
                     moduleIndex = nodes.length - 1;
                 } else {
                     moduleIndex = moduleIndex;
@@ -211,8 +213,38 @@ export function assignModuleIndicesToFiles(nodes, allModules){
 
                 file.name = file.id.replace(module.path.substring(2) + "/", "");
 
-                moduleLinks.push(link);
+                fileToModuleLinks.push(link);
                 break;
+            }
+        }
+    }
+
+    const moduleToModuleLinks = createSubModuleLinks(usedModules, nodes);
+
+    return {fileToModuleLinks, moduleToModuleLinks};
+}
+
+
+/*
+* Function to create links between submodules and modules
+*/
+
+export function createSubModuleLinks(usedModules, nodes){
+    let moduleLinks = new Array();
+
+    for (const module of usedModules) {
+        const subModules = module.subModules.data;
+        const moduleIndex = nodes.findIndex(_ => _.id === module.path);
+
+        for (const subModule of subModules) {
+            const subModuleIndex = nodes.findIndex(_ => _.id === subModule.path);
+
+            if(subModuleIndex != -1) {
+                const link = {
+                    source: moduleIndex,
+                    target: subModuleIndex,
+                }
+                moduleLinks.push(link);
             }
         }
     }

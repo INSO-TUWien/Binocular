@@ -33,10 +33,10 @@ export default class CoChangeGraph extends React.Component {
   */
   componentWillReceiveProps(nextProps) {
     const dataset = computeFileDependencies(nextProps);
-    const moduleLinks = assignModuleIndicesToFiles(dataset.nodes, nextProps.modulesFiles);
+    const {fileToModuleLinks, moduleToModuleLinks} = assignModuleIndicesToFiles(dataset.nodes, nextProps.moduleData);
 
-    dataset.moduleLinks = moduleLinks;
-    console.log(dataset);
+    dataset.fileToModuleLinks = fileToModuleLinks;
+    dataset.moduleToModuleLinks = moduleToModuleLinks;
 
     const module_dataset = computeModuleDependencies(nextProps);
 
@@ -56,13 +56,6 @@ export default class CoChangeGraph extends React.Component {
       .attr("class", "links")
       .selectAll("line")
       .data(dataset.links)
-      .enter().append("line");
-
-    // Initialize the links
-    const moduleLinks = svg.append("g")
-      .attr("class", "moduleLinks")
-      .selectAll("line")
-      .data(dataset.moduleLinks)
       .enter().append("line");
   
     // Initialize the nodes
@@ -89,10 +82,12 @@ export default class CoChangeGraph extends React.Component {
     // Initialize the simualtion
     const simulation = d3.forceSimulation(dataset.nodes)
       .force('links', d3.forceLink().links(dataset.links).strength(0))
-      .force('moduleLinks', d3.forceLink().links(dataset.moduleLinks).strength(0.15))
-      .force('repellent force', d3.forceManyBody().strength(-100))
-      .force('x', d3.forceX().strength(0.005))
-      .force('y', d3.forceY().strength(0.005))
+      .force('fileToModuleLinks', d3.forceLink().links(dataset.fileToModuleLinks).distance(60))
+      .force('moduleToModuleLinks', d3.forceLink().links(dataset.moduleToModuleLinks).strength(0.15))
+      .force('repellent force near', d3.forceManyBody().strength(-500).distanceMin(0).distanceMax(200))
+      .force('repellent force far', d3.forceManyBody().strength(-200).distanceMin(200).distanceMax(500))
+      //.force('x', d3.forceX().strength(0.0010))
+      //.force('y', d3.forceY().strength(0.0010))
       .on("tick", ticked); 
 
     let counter = 0;
