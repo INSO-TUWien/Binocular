@@ -7,7 +7,7 @@ import GlobalZoomableSvg from '../../../../components/svg/GlobalZoomableSvg.js';
 import ChartContainer from '../../../../components/svg/ChartContainer.js';
 import styles from '../styles.scss';
 import * as zoomUtils from '../../../../utils/zoom.js';
-import {computeFileDependencies, computeModuleDependencies} from './computeUtils.js';
+import {computeFileDependencies, computeModuleDependencies, assignModuleIndicesToFiles} from './computeUtils.js';
 
 const CHART_FILL_RATIO = 0.65;
 
@@ -15,6 +15,7 @@ export default class CoChangeGraph extends React.Component {
   constructor(props) {
     super(props);
 
+    console.log("Props:");
     console.log(props);
 
     this.state = {
@@ -32,6 +33,11 @@ export default class CoChangeGraph extends React.Component {
   */
   componentWillReceiveProps(nextProps) {
     const dataset = computeFileDependencies(nextProps);
+    const moduleLinks = assignModuleIndicesToFiles(dataset.nodes, nextProps.modulesFiles);
+
+    dataset.moduleLinks = moduleLinks;
+    console.log(dataset);
+
     const module_dataset = computeModuleDependencies(nextProps);
 
     if(dataset != undefined) {
@@ -50,6 +56,13 @@ export default class CoChangeGraph extends React.Component {
       .attr("class", "links")
       .selectAll("line")
       .data(dataset.links)
+      .enter().append("line");
+
+    // Initialize the links
+    const moduleLinks = svg.append("g")
+      .attr("class", "moduleLinks")
+      .selectAll("line")
+      .data(dataset.moduleLinks)
       .enter().append("line");
   
     // Initialize the nodes
@@ -71,12 +84,15 @@ export default class CoChangeGraph extends React.Component {
       .selectAll("text")
       .data(dataset.nodes)
       .enter().append("text")
-      .text(d => d.id)
+      .text(d => d.name)
 
     // Initialize the simualtion
     const simulation = d3.forceSimulation(dataset.nodes)
-      .force('links', d3.forceLink().links(dataset.links).distance(750))
+      .force('links', d3.forceLink().links(dataset.links).strength(0))
+      .force('moduleLinks', d3.forceLink().links(dataset.moduleLinks).strength(0.15))
       .force('repellent force', d3.forceManyBody().strength(-100))
+      .force('x', d3.forceX().strength(0.005))
+      .force('y', d3.forceY().strength(0.005))
       .on("tick", ticked); 
 
     let counter = 0;

@@ -32,8 +32,7 @@ export function computeFileDependencies(props){
         }
     }
 
-    console.log(fileSet);
-    fileSet = filterEntities("ui/src/visualizations/VisualizationComponents/issues", fileSet);
+    fileSet = filterEntities("ui/src/visualizations/VisualizationComponents", fileSet);
     const dataset = computeDependencyDataset(fileSet, sharedCommitCnt, commitCntPerFile);
     return dataset;
 }
@@ -148,8 +147,11 @@ function computeDependencyDataset(entitySet, sharedCommitCnt, commitCntPerEntity
     
                 // check both directions to avoid duplicates
                 if (dependencies[key] === undefined && dependencies[reverseKey] === undefined) {
-                    dependencies[key] = link;
-                    dependencyCnt++;
+                    // do not draw links with zero dependency
+                    if(srcCoChange != 0 || dstCoChange != 0){   
+                        dependencies[key] = link;
+                        dependencyCnt++;
+                    }
                 }
             }
         });
@@ -174,4 +176,46 @@ function computeDependencyDataset(entitySet, sharedCommitCnt, commitCntPerEntity
     }
 
     return dataset;
+}
+
+
+
+/*
+* Generate list of all modules and create module indices for the files
+*/
+
+export function assignModuleIndicesToFiles(nodes, allModules){
+    const fileSet = nodes;
+    let moduleLinks = new Array();
+
+    for (const file of fileSet) {
+        for (const module of allModules) {
+            const filesInModule = module.files.data;
+            const found = filesInModule.findIndex(_ => _.path === file.id);
+
+            // file is part of module
+            if(found != -1) {
+                let moduleIndex = nodes.findIndex(_ => _.id === module.path);
+
+                if(moduleIndex === -1){
+                    nodes.push({id: module.path, name: module.path});
+                    moduleIndex = nodes.length - 1;
+                } else {
+                    moduleIndex = moduleIndex;
+                }
+
+                const link = {
+                    source: fileSet.findIndex(_ => _.id === file.id),
+                    target: moduleIndex,
+                }
+
+                file.name = file.id.replace(module.path.substring(2) + "/", "");
+
+                moduleLinks.push(link);
+                break;
+            }
+        }
+    }
+
+    return moduleLinks;
 }
