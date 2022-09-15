@@ -82,15 +82,14 @@ export default class Issues extends React.Component {
 
     const issueChartData = [];
     const issueScale = [0, 0];
-
+    if (props.universalSettings) {
+      issues = props.filteredIssues;
+      firstTimestamp = props.firstSignificantTimestamp;
+      lastTimestamp = props.lastSignificantTimestamp;
+    }
     console.log('ISSUES:');
     console.log(issues);
     if (issues.length > 0) {
-      if (props.universalSettings) {
-        issues = props.filteredIssues;
-        firstTimestamp = props.firstSignificantTimestamp;
-        lastTimestamp = props.lastSignificantTimestamp;
-      }
       //---- STEP 1: FILTER ISSUES ----
       let filteredIssues = [];
       switch (props.showIssues) {
