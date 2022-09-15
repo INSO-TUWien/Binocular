@@ -35,18 +35,23 @@ export default class Issues extends React.Component {
   }
 
   render() {
+    console.log(this.state.issueChartData);
     const issueChart = (
       <div className={styles.chartLine}>
         <div className={styles.chart}>
-          <StackedAreaChart
-            content={this.state.issueChartData}
-            palette={{ Opened: '#3461eb', Closed: '#8099e8' }}
-            paddings={{ top: 20, left: 60, bottom: 20, right: 30 }}
-            xAxisCenter={true}
-            yDims={this.state.issueScale}
-            d3offset={d3.stackOffsetDiverging}
-            resolution={this.props.chartResolution}
-          />
+          {this.state.issueChartData !== undefined && this.state.issueChartData.length > 0 ? (
+            <StackedAreaChart
+              content={this.state.issueChartData}
+              palette={{ Opened: '#3461eb', Closed: '#8099e8' }}
+              paddings={{ top: 20, left: 60, bottom: 20, right: 30 }}
+              xAxisCenter={true}
+              yDims={this.state.issueScale}
+              d3offset={d3.stackOffsetDiverging}
+              resolution={this.props.chartResolution}
+            />
+          ) : (
+            <div>No Data Available</div>
+          )}
         </div>
       </div>
     );
