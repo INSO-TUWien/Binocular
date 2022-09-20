@@ -141,6 +141,7 @@ export default class CodeOwnershipRiver extends React.Component {
 
     const dims = this.state.dimensions;
     const today = x(new Date());
+    const last = commits[commits.length - 1].date;
     this.scales.x.rangeRound([0, dims.width]);
     this.scales.y.rangeRound([dims.height, 0]);
 
@@ -168,6 +169,7 @@ export default class CodeOwnershipRiver extends React.Component {
         />
       );
     });
+
     return (
       <ZoomableChartContainer
         scaleExtent={[1, Infinity]}
@@ -216,7 +218,7 @@ export default class CodeOwnershipRiver extends React.Component {
                 y={y}
                 extractX={dateExtractor}
                 sum={_.sum}
-                fillToRight={today}
+                fillToRight={last}
               />
               {commitMarkers}
             </g>
@@ -256,7 +258,7 @@ export default class CodeOwnershipRiver extends React.Component {
                 ]}
                 extractX={dateExtractor}
                 sum={_.sum}
-                fillToRight={today}
+                fillToRight={last}
               />
             </g>
             <g id="StackedArea4" clipPath="url(#chart)" mask="url(#issue-mask)">
@@ -281,7 +283,7 @@ export default class CodeOwnershipRiver extends React.Component {
                 ]}
                 extractX={dateExtractor}
                 sum={_.sum}
-                fillToRight={today}
+                fillToRight={last}
               />
             </g>
             <g className={styles.today} clipPath="url(#x-only)">

@@ -35,7 +35,6 @@ export default class Issues extends React.Component {
   }
 
   render() {
-    console.log(this.state.issueChartData);
     const issueChart = (
       <div className={styles.chartLine}>
         <div className={styles.chart}>
@@ -92,8 +91,7 @@ export default class Issues extends React.Component {
       firstTimestamp = props.firstSignificantTimestamp;
       lastTimestamp = props.lastSignificantTimestamp;
     }
-    console.log('ISSUES:');
-    console.log(issues);
+
     if (issues.length > 0) {
       //---- STEP 1: FILTER ISSUES ----
       let filteredIssues = [];

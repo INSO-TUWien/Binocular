@@ -201,6 +201,7 @@ export default class LocalDB {
     ];
 
     let next = moment(significantSpan[0]).startOf(granularity.unit).toDate().getTime();
+    let last = new Date(significantSpan[1]).getTime();
     function group(data) {
       const lastDatum = _.last(data);
 
@@ -278,7 +279,7 @@ export default class LocalDB {
         stats.deletions += commit.stats.deletions;
         stats.changes += commit.stats.additions + commit.stats.deletions;
 
-        while (dt >= next) {
+        while (dt >= next && dt <= last) {
           const dataPoint = {
             date: new Date(next),
             totals: _.cloneDeep(totals),
@@ -294,6 +295,7 @@ export default class LocalDB {
         totals: _.cloneDeep(totals),
         statsByAuthor: _.cloneDeep(statsByAuthor),
       });
+      console.log(significantSpan[1].toString());
 
       return group(data);
     });
