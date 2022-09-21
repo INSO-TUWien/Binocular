@@ -201,7 +201,8 @@ export default class LocalDB {
     ];
 
     let next = moment(significantSpan[0]).startOf(granularity.unit).toDate().getTime();
-    let last = new Date(significantSpan[1]).getTime();
+    const first = new Date(significantSpan[0]).getTime();
+    const last = new Date(significantSpan[1]).getTime();
     function group(data) {
       const lastDatum = _.last(data);
 
@@ -254,9 +255,11 @@ export default class LocalDB {
     }
 
     return findAll('commits').then((res) => {
-      const commits = res.docs.sort((a, b) => {
-        return new Date(a.date) - new Date(b.date);
-      });
+      const commits = res.docs
+        .filter((c) => new Date(c.date) >= first && new Date(c.date) <= last)
+        .sort((a, b) => {
+          return new Date(a.date) - new Date(b.date);
+        });
       commits.map((commit) => {
         const dt = Date.parse(commit.date);
         let stats = statsByAuthor[commit.signature];
@@ -279,7 +282,7 @@ export default class LocalDB {
         stats.deletions += commit.stats.deletions;
         stats.changes += commit.stats.additions + commit.stats.deletions;
 
-        while (dt >= next && dt <= last) {
+        while (dt >= next) {
           const dataPoint = {
             date: new Date(next),
             totals: _.cloneDeep(totals),
