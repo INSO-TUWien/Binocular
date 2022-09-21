@@ -117,18 +117,17 @@ async function startDatabase(context, gateway) {
   if (databaseConnection === null) {
     // configure everything in the context
     require('./lib/core/db/setup-db.js');
-    try {
-      databaseConnection = await ensureDb(repository, context);
-    } catch (error) {
-      stopRepoListener();
-
-      if (error && error.name === DatabaseError.name) {
-        databaseConnection = null;
-        console.error(`A ${error.name} occurred and returns the following message: ${error.message}!`);
-        console.log('wait 1 minute until retry!');
-        setTimeout(startDatabase.bind(context, gateway), 60000);
+    while (databaseConnection === null) {
+      try {
+        databaseConnection = await ensureDb(repository, context);
+      } catch (error) {
+        if (error && error.name === DatabaseError.name) {
+          databaseConnection = null;
+          console.error(`A ${error.name} occurred and returns the following message: ${error.message}!`);
+          console.log('wait 5 seconds until retry!');
+          await new Promise((resolve) => setTimeout(resolve, 5000));
+        }
       }
-      throw error;
     }
 
     // immediately run all indexers
@@ -442,78 +441,44 @@ async function stopIndexers(gateway) {
 }
 
 /**
- * checks if database is online. If not wait x seconds and check again.
- *
- * @param waitTime time to wait between checks in seconds
- */
-async function checkIfDBOnlineOrWait(waitTime) {
-  let serverOnline = false;
-  while (!serverOnline) {
-    serverOnline = await new Promise((resolve, reject) => {
-      http
-        .request({ host: config.get('arango').host, port: config.get('arango').port }, () => {
-          resolve(true);
-        })
-        .on('error', (e) => {
-          resolve(false);
-        })
-        .end();
-    });
-
-    if (!serverOnline) {
-      console.warn(
-        'Database not online. Please start an arangoDB server on the configured host (' +
-          config.get('arango').host +
-          ') and port (' +
-          config.get('arango').port +
-          ')'
-      );
-      await new Promise((resolve) => setTimeout(resolve, waitTime * 1000));
-    }
-  }
-}
-
-/**
  * Ensures that the db is set up correctly and the GraphQL-Service is installed
  * @param repo contains the repository
  * @param context get the current context
  */
 function ensureDb(repo, context) {
-  return checkIfDBOnlineOrWait(2).then(() => {
-    return context.db
-      .ensureDatabase('pupil-' + repo.getName())
-      .catch((e) => {
-        throw new DatabaseError(e.message);
-      })
-      .then(function () {
-        if (argv.clean) {
-          return context.db.truncate();
-        }
-      })
-      .then(() => {
-        return Promise.join(
-          context.db.ensureService(path.join(__dirname, 'foxx'), '/pupil-ql'),
-          Commit.ensureCollection(),
-          Language.ensureCollection(),
-          File.ensureCollection(),
-          Hunk.ensureCollection(),
-          Stakeholder.ensureCollection(),
-          Issue.ensureCollection(),
-          Build.ensureCollection(),
-          Branch.ensureCollection(),
-          Module.ensureCollection(),
-          LanguageFileConnection.ensureCollection(),
-          CommitStakeholderConnection.ensureCollection(),
-          IssueStakeholderConnection.ensureCollection(),
-          IssueCommitConnection.ensureCollection(),
-          CommitCommitConnection.ensureCollection(),
-          CommitLanguageConnection.ensureCollection(),
-          CommitModuleConnection.ensureCollection(),
-          ModuleModuleConnection.ensureCollection(),
-          ModuleFileConnection.ensureCollection()
-        );
-      });
-  });
+  return context.db
+    .ensureDatabase('pupil-' + repo.getName())
+    .catch((e) => {
+      throw new DatabaseError(e.message);
+    })
+    .then(function () {
+      if (argv.clean) {
+        return context.db.truncate();
+      }
+    })
+    .then(() => {
+      return Promise.join(
+        context.db.ensureService(path.join(__dirname, 'foxx'), '/pupil-ql'),
+        Commit.ensureCollection(),
+        Language.ensureCollection(),
+        File.ensureCollection(),
+        Hunk.ensureCollection(),
+        Stakeholder.ensureCollection(),
+        Issue.ensureCollection(),
+        Build.ensureCollection(),
+        Branch.ensureCollection(),
+        Module.ensureCollection(),
+        LanguageFileConnection.ensureCollection(),
+        CommitStakeholderConnection.ensureCollection(),
+        IssueStakeholderConnection.ensureCollection(),
+        IssueCommitConnection.ensureCollection(),
+        CommitCommitConnection.ensureCollection(),
+        CommitLanguageConnection.ensureCollection(),
+        CommitModuleConnection.ensureCollection(),
+        ModuleModuleConnection.ensureCollection(),
+        ModuleFileConnection.ensureCollection()
+      );
+    });
 }
 
 function createManualIssueReferences(issueReferences) {
