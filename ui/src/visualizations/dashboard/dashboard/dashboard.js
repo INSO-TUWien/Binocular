@@ -16,6 +16,16 @@ import deleteIcon from '../assets/deleteIcon.svg';
 import VisualizationSelector from '../components/visualizationSelector';
 import visualizationRegistry from '../visualizationRegistry';
 
+const DEFAULT_DASHBOARD = {
+  visualizations: [
+    { key: 'changes', id: 8, size: 'large', universalSettings: true },
+    { key: 'issues', id: 9, size: 'small', universalSettings: true },
+    { key: 'ciBuilds', id: 10, size: 'small', universalSettings: true },
+  ],
+  visualizationCount: 11,
+  selectVisualization: false,
+};
+
 export default class Dashboard extends React.Component {
   constructor(props) {
     super(props);
@@ -52,6 +62,20 @@ export default class Dashboard extends React.Component {
   render() {
     return (
       <div className={styles.chartContainer}>
+        <div className={dashboardStyles.dashboardMenu}>
+          <button
+            id={'addVisualization'}
+            className={dashboardStyles.dashboardMenuButton + ' ' + dashboardStyles.addVisualization}
+            onClick={this.openVisualizationSelector.bind(this)}>
+            +
+          </button>
+          <button
+            className={dashboardStyles.dashboardMenuButton + ' ' + dashboardStyles.dashboardMenuButtonInverted}
+            onClick={this.loadDefaultDashboard.bind(this)}>
+            Load Default Dashboard
+          </button>
+        </div>
+
         <div id={'dashboardContainer'} className={dashboardStyles.dashboard}>
           {this.state.visualizations.map(
             function (viz) {
@@ -59,9 +83,7 @@ export default class Dashboard extends React.Component {
             }.bind(this)
           )}
         </div>
-        <button id={'addVisualization'} className={dashboardStyles.addVisualization} onClick={this.openVisualizationSelector.bind(this)}>
-          +
-        </button>
+
         {this.state.selectVisualization ? (
           <VisualizationSelector
             id={'visualizationSelector'}
@@ -331,6 +353,16 @@ export default class Dashboard extends React.Component {
     });
     this.state.visualizations = visualizations;
     localStorage.setItem('dashboardState', JSON.stringify(this.state));
+    this.forceUpdate();
+  }
+
+  loadDefaultDashboard(e) {
+    this.state.visualizations = [];
+    this.state.visualizations.push({ key: 'changes', id: 0, size: 'large', universalSettings: true });
+    this.state.visualizations.push({ key: 'issues', id: 1, size: 'small', universalSettings: true });
+    this.state.visualizations.push({ key: 'ciBuilds', id: 2, size: 'small', universalSettings: true });
+    this.state.selectVisualization = false;
+    this.state.visualizationCount = 3;
     this.forceUpdate();
   }
 }

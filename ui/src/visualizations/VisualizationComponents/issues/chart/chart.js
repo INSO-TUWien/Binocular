@@ -49,7 +49,7 @@ export default class Issues extends React.Component {
               resolution={this.props.chartResolution}
             />
           ) : (
-            <div>No Data Available</div>
+            <div className={styles.errorMessage}>No data during this time period!</div>
           )}
         </div>
       </div>
