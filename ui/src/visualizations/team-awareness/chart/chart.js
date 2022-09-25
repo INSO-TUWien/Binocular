@@ -11,6 +11,7 @@ export default class TeamAwareness extends React.PureComponent {
 
     this.state = {
       componentMounted: false,
+      showModal: true,
       colors: this.createColorSchema(_.map(this.props.data.stakeholders, 'id'))
     };
   }

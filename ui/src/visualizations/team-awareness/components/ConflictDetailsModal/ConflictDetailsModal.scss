@@ -1,0 +1,31 @@
+.darkBG {
+  background-color: rgba(0, 0, 0, 0.2);
+  width: 100vw;
+  height: 100vh;
+  z-index: 0;
+  position: absolute;
+}
+
+
+.modal {
+  background-color: white;
+  width: 500px;
+  height: 500px;
+  z-index: 10;
+  position: absolute;
+  margin-left: auto;
+
+  border-radius: 5px;
+  box-shadow: 0 5px 20px 0 rgba(0, 0, 0, 0.04);
+}
+
+
+.modalHeader {
+  font-size: 2rem;
+  display: flex;
+  align-items: center;
+  flex-direction: row;
+  justify-content: center;
+}
+.modalBody {}
+.modalFooter {}
