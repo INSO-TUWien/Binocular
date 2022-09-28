@@ -37,4 +37,8 @@ export default class ServerDB {
   static getRelatedCommitDataOwnershipRiver(issue) {
     return Commits.getRelatedCommitDataOwnershipRiver(issue);
   }
+
+  static getCommitDateHistogram(granularity, dateField, since, until) {
+    return Commits.getCommitDateHistogram(granularity, dateField, since, until);
+  }
 }

@@ -146,4 +146,8 @@ export default class LocalDB {
   static getRelatedCommitDataOwnershipRiver(issue) {
     return Commits.getRelatedCommitDataOwnershipRiver(db, issue);
   }
+
+  static getCommitDateHistogram(granularity, dateField, since, until) {
+    return Commits.getCommitDateHistogram(db, granularity, dateField, since, until);
+  }
 }

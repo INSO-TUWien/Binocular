@@ -76,6 +76,14 @@ export default class Database {
     }
   }
 
+  static async getCommitDateHistogram(granularity, dateField, since, until) {
+    if (await this.checkBackendConnection()) {
+      return ServerDB.getCommitDateHistogram(granularity, dateField, since, until);
+    } else {
+      return LocalDB.getCommitDateHistogram(granularity, dateField, since, until);
+    }
+  }
+
   static async checkBackendConnection() {
     return new Promise((resolve) => {
       graphQl
