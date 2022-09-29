@@ -18,10 +18,15 @@ function findAll(database, collection) {
 export default class Commits {
   static getCommitData(db, commitSpan, significantSpan) {
     // return all commits, filtering according to parameters can be added in the future
+    const first = new Date(significantSpan[0]).getTime();
+    const last = new Date(significantSpan[1]).getTime();
+
     return findAll(db, 'commits').then((res) => {
-      res.docs = res.docs.sort((a, b) => {
-        return new Date(a.date) - new Date(b.date);
-      });
+      res.docs = res.docs
+        .filter((c) => new Date(c.date) >= first && new Date(c.date) <= last)
+        .sort((a, b) => {
+          return new Date(a.date) - new Date(b.date);
+        });
 
       return res.docs;
     });
