@@ -159,34 +159,44 @@ export default class Commits {
   }
 
   static getCommitDateHistogram(db, granularity, dateField, since, until) {
-    function addCommitsToCollection(collection, commits, granularity) {
+    function mapCommitToHistogram(histogram, commit, granularity) {
+      const commitDate = new Date(commit.date);
+      return histogram.map((commit) => {
+        switch (granularity) {
+          case 'month':
+            if (commit.category === commitDate.getMonth() + 1) {
+              commit.count++;
+            }
+            break;
+          case 'dayOfMonth':
+            if (commit.category === commitDate.getDate()) {
+              commit.count++;
+            }
+            break;
+          case 'dayOfWeek':
+            if (commit.category === commitDate.getDay()) {
+              commit.count++;
+            }
+            break;
+          case 'hour':
+            if (commit.category === (12 + commitDate.getHours() - 2) % 12) {
+              commit.count++;
+            }
+            break;
+        }
+        return commit;
+      });
+    }
+
+    function addCommitsToCollection(histogram, goodCommitsHistogram, badCommitsHistogram, commits, builds, granularity) {
       for (const commit of commits) {
-        const commitDate = new Date(commit.date);
-        collection = collection.map((commit) => {
-          switch (granularity) {
-            case 'month':
-              if (commit.category === commitDate.getMonth() + 1) {
-                commit.count++;
-              }
-              break;
-            case 'dayOfMonth':
-              if (commit.category === commitDate.getDate()) {
-                commit.count++;
-              }
-              break;
-            case 'dayOfWeek':
-              if (commit.category === commitDate.getDay()) {
-                commit.count++;
-              }
-              break;
-            case 'hour':
-              if (commit.category === (12 + commitDate.getHours() - 2) % 12) {
-                commit.count++;
-              }
-              break;
-          }
-          return commit;
-        });
+        const commitBuild = builds.find((b) => b.sha === commit.sha);
+        histogram = mapCommitToHistogram(histogram, commit, granularity);
+        if (commitBuild !== undefined && commitBuild.status === 'success') {
+          goodCommitsHistogram = mapCommitToHistogram(goodCommitsHistogram, commit, granularity);
+        } else {
+          badCommitsHistogram = mapCommitToHistogram(badCommitsHistogram, commit, granularity);
+        }
       }
     }
 
@@ -223,78 +233,80 @@ export default class Commits {
 
     return findAll(db, 'commits').then((resCommits) => {
       return findAll(db, 'issues').then((resIssues) => {
-        const commitDateHistogram = [];
-        const goodCommits = [];
-        const badCommits = [];
-        const issueDateHistogram = [];
-        const commits = resCommits.docs
-          .filter((c) => new Date(c.date) >= since && new Date(c.date) <= until)
-          .sort((a, b) => {
-            return new Date(a.date) - new Date(b.date);
-          });
-        const issues = resIssues.docs
-          .filter((i) => new Date(i.createdAt) >= since && new Date(i.createdAt) <= until)
-          .sort((a, b) => {
+        return findAll(db, 'builds').then((resBuilds) => {
+          const commitDateHistogram = [];
+          const goodCommits = [];
+          const badCommits = [];
+          const issueDateHistogram = [];
+          const commits = resCommits.docs
+            .filter((c) => new Date(c.date) >= since && new Date(c.date) <= until)
+            .sort((a, b) => {
+              return new Date(a.date) - new Date(b.date);
+            });
+          const issues = resIssues.docs
+            .filter((i) => new Date(i.createdAt) >= since && new Date(i.createdAt) <= until)
+            .sort((a, b) => {
+              return new Date(a.createdAt) - new Date(b.createdAt);
+            });
+          const builds = resBuilds.docs.sort((a, b) => {
             return new Date(a.createdAt) - new Date(b.createdAt);
           });
-        //console.log(commits);
-        //console.log(dateField); //createdAt || closedAt
-        switch (granularity) {
-          case 'month':
-            for (let i = 1; i <= 12; i++) {
-              commitDateHistogram.push({ count: 0, category: i });
-              goodCommits.push({ count: 0, category: i });
-              badCommits.push({ count: 0, category: i });
-              issueDateHistogram.push({ count: 0, category: i });
-            }
-            addCommitsToCollection(commitDateHistogram, commits, 'month');
-            addCommitsToCollection(goodCommits, commits, 'month');
-            addIssuesToCollection(issueDateHistogram, issues, 'month');
-            break;
-          case 'dayOfMonth':
-            for (let i = 1; i <= 31; i++) {
-              commitDateHistogram.push({ count: 0, category: i });
-              goodCommits.push({ count: 0, category: i });
-              badCommits.push({ count: 0, category: i });
-              issueDateHistogram.push({ count: 0, category: i });
-            }
-            addCommitsToCollection(commitDateHistogram, commits, 'dayOfMonth');
-            addCommitsToCollection(goodCommits, commits, 'dayOfMonth');
-            addIssuesToCollection(issueDateHistogram, issues, 'dayOfMonth');
-            break;
-          case 'dayOfWeek':
-            for (let i = 0; i < 7; i++) {
-              commitDateHistogram.push({ count: 0, category: i });
-              goodCommits.push({ count: 0, category: i });
-              badCommits.push({ count: 0, category: i });
-              issueDateHistogram.push({ count: 0, category: i });
-            }
-            addCommitsToCollection(commitDateHistogram, commits, 'dayOfWeek');
-            addCommitsToCollection(goodCommits, commits, 'dayOfWeek');
-            addIssuesToCollection(issueDateHistogram, issues, 'dayOfWeek');
-            break;
-          case 'hour':
-            for (let i = 0; i < 12; i++) {
-              commitDateHistogram.push({ count: 0, category: i });
-              goodCommits.push({ count: 0, category: i });
-              badCommits.push({ count: 0, category: i });
-              issueDateHistogram.push({ count: 0, category: i });
-            }
-            addCommitsToCollection(commitDateHistogram, commits, 'hour');
-            addCommitsToCollection(goodCommits, commits, 'hour');
-            addIssuesToCollection(issueDateHistogram, issues, 'hour');
-            break;
-          default:
-            break;
-        }
-        //console.log('Histogram');
-        //console.log(commitDateHistogram);
-        return {
-          commitDateHistogram: commitDateHistogram,
-          goodCommits: goodCommits,
-          badCommits: badCommits,
-          issueDateHistogram: issueDateHistogram,
-        };
+
+          //console.log(commits);
+          //console.log(dateField); //createdAt || closedAt
+          switch (granularity) {
+            case 'month':
+              for (let i = 1; i <= 12; i++) {
+                commitDateHistogram.push({ count: 0, category: i });
+                goodCommits.push({ count: 0, category: i });
+                badCommits.push({ count: 0, category: i });
+                issueDateHistogram.push({ count: 0, category: i });
+              }
+              addCommitsToCollection(commitDateHistogram, goodCommits, badCommits, commits, builds, 'month');
+              addIssuesToCollection(issueDateHistogram, issues, 'month');
+              break;
+            case 'dayOfMonth':
+              for (let i = 1; i <= 31; i++) {
+                commitDateHistogram.push({ count: 0, category: i });
+                goodCommits.push({ count: 0, category: i });
+                badCommits.push({ count: 0, category: i });
+                issueDateHistogram.push({ count: 0, category: i });
+              }
+              addCommitsToCollection(commitDateHistogram, goodCommits, badCommits, commits, builds, 'dayOfMonth');
+              addIssuesToCollection(issueDateHistogram, issues, 'dayOfMonth');
+              break;
+            case 'dayOfWeek':
+              for (let i = 0; i < 7; i++) {
+                commitDateHistogram.push({ count: 0, category: i });
+                goodCommits.push({ count: 0, category: i });
+                badCommits.push({ count: 0, category: i });
+                issueDateHistogram.push({ count: 0, category: i });
+              }
+              addCommitsToCollection(commitDateHistogram, goodCommits, badCommits, commits, builds, 'dayOfWeek');
+              addIssuesToCollection(issueDateHistogram, issues, 'dayOfWeek');
+              break;
+            case 'hour':
+              for (let i = 0; i < 12; i++) {
+                commitDateHistogram.push({ count: 0, category: i });
+                goodCommits.push({ count: 0, category: i });
+                badCommits.push({ count: 0, category: i });
+                issueDateHistogram.push({ count: 0, category: i });
+              }
+              addCommitsToCollection(commitDateHistogram, goodCommits, badCommits, commits, builds, 'hour');
+              addIssuesToCollection(issueDateHistogram, issues, 'hour');
+              break;
+            default:
+              break;
+          }
+          //console.log('Histogram');
+          //console.log(commitDateHistogram);
+          return {
+            commitDateHistogram: commitDateHistogram,
+            goodCommits: goodCommits,
+            badCommits: badCommits,
+            issueDateHistogram: issueDateHistogram,
+          };
+        });
       });
     });
   }
