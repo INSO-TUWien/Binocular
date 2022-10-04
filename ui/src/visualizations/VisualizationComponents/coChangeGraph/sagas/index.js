@@ -1,18 +1,18 @@
 'use strict';
 
 import { createAction } from 'redux-actions';
-import { select, takeEvery, fork, throttle } from 'redux-saga/effects';
+import { takeEvery, fork } from 'redux-saga/effects';
 import _ from 'lodash';
-import moment from 'moment';
-import Promise from 'bluebird';
 import getCommitFiles from './getCommitFiles';
 
 import { fetchFactory, timestampedActionFactory, mapSaga } from '../../../../sagas/utils.js';
-import { graphQl } from '../../../../utils';
 import getCommitsModules from './getCommitsModules';
 import getModuleData from './getModuleData';
+import getBounds from './getBounds';
 
 export const setNavigationMode = createAction('SET_NAVIGATION_MODE');
+export const setTimeSpan = createAction('SET_TIME_SPAN');
+export const applyTimeSpan = createAction('APPLY_TIME_SPAN')
 
 export const requestData = createAction('REQUEST_DATA');
 export const receiveData = timestampedActionFactory('RECEIVE_DATA');
@@ -26,6 +26,7 @@ export default function*() {
 
 export function* watchNavigationChange() {
   yield takeEvery('SET_NAVIGATION_MODE', testFunction);
+  yield takeEvery('APPLY_TIME_SPAN', () => {console.log("applied!")});
 }
 
 export const testFunction = 
@@ -36,11 +37,16 @@ export const testFunction =
   
 export const fetchChangesData = fetchFactory(
   function* () {
-    const {commitsModules} = yield getCommitsModules();
-    const {commitsFiles} = yield getCommitFiles();
-    const {moduleData} = yield getModuleData();
+    const {firstCommit, lastCommit} = yield getBounds();
+    const firstCommitTimestamp = Date.parse(firstCommit.date);
+    const lastCommitTimestamp = Date.parse(lastCommit.date);
 
-    return {commitsFiles, commitsModules, moduleData};
+    const {commitsModules} = yield getCommitsModules();
+    const {commitsFiles} = yield getCommitFiles(firstCommitTimestamp, lastCommitTimestamp);
+    const {moduleData} = yield getModuleData();
+    
+
+    return {commitsFiles, commitsModules, moduleData, firstCommit, lastCommit};
   },
   requestData,
   receiveData,

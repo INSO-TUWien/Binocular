@@ -9,5 +9,6 @@ export default handleActions(
   },
   {
     navigationMode: 'pan',
+    chartTimeSpan: {from: undefined, to: undefined}
   }
 );
