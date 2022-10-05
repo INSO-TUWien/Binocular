@@ -5,10 +5,9 @@ import _ from 'lodash';
 
 export default handleActions(
   {
-    SET_NAVIGATION_MODE: (state, action) => _.assign({}, state, { navigationMode: action.payload }),
+    SET_TIME_SPAN: (state, action) => _.assign({}, state, { chartTimeSpan: action.payload })
   },
   {
-    navigationMode: 'pan',
-    chartTimeSpan: {from: undefined, to: undefined}
+    chartTimeSpan: {from: undefined, to: undefined},
   }
 );

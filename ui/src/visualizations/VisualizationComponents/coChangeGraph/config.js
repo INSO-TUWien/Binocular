@@ -4,7 +4,7 @@ import _ from 'lodash';
 import { connect } from 'react-redux';
 
 import styles from './styles.scss';
-import { setNavigationMode, setTimeSpan, applyTimeSpan } from './sagas';
+import { setTimeSpan, applyTimeSpan, setFilterContent } from './sagas';
 import DateRangeFilter from '../../../components/DateRangeFilter/dateRangeFilter';
 
 
@@ -37,9 +37,9 @@ const mapStateToProps = (state /*, ownProps*/) => {
 
 const mapDispatchToProps = (dispatch /*, ownProps*/) => {
   return {
-    onNavigationModeChange: (navigationMode) => dispatch(setNavigationMode(navigationMode)),
     onChangeTimeSpan: (timeSpan) => dispatch(setTimeSpan(timeSpan)),
-    onTimeSpanApply: () => dispatch(applyTimeSpan())
+    onTimeSpanApply: () => dispatch(applyTimeSpan()),
+    onFilterChange: (filterContent) => dispatch(setFilterContent(filterContent))
   };
 };
 
@@ -47,42 +47,20 @@ const CoChangeConfigComponent = props => {
   return (
     <div className={styles.configContainer}>
       <form>
-      <div className="field">
-          <div className="control">
-            <label className="label">Navigation Mode:</label>
-            <label className="radio">
-              <input
-                name="navigationMode"
-                type="radio"
-                checked={props.navigationMode === 'pan'}
-                onChange={() => props.onNavigationModeChange('pan')}
-              />
-              Pan
-            </label>
-            <label className="radio">
-              <input
-                name="navigationMode"
-                type="radio"
-                checked={props.navigationMode === 'highlight'}
-                onChange={() => props.onNavigationModeChange('highlight')}
-              />
-              Highlight
-            </label>
-          </div>
           <label className="label">Time span:</label>
           <div>
             <DateRangeFilter
               from={props.firstDisplayDate}
               to={props.lastDisplayDate}
               onDateChanged={(data) => {
-                console.log(data);
                 props.onChangeTimeSpan(data);
               }}
           />
         </div>
-        <button onClick={() => {props.onTimeSpanApply()}}>Apply</button>
-        </div>
+        <label className="label">Path filter</label>
+        <input type="text" onChange={() => {props.onFilterChange()}}></input>
       </form>
+      <button onClick={() => {props.onTimeSpanApply()}}>Apply</button>
     </div>
   );
 };

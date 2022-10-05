@@ -10,6 +10,7 @@ import * as zoomUtils from '../../../../utils/zoom.js';
 import {computeFileDependencies, computeModuleDependencies, assignModuleIndicesToFiles} from './computeUtils.js';
 
 const CHART_FILL_RATIO = 0.65;
+let dataset = undefined;
 
 export default class CoChangeGraph extends React.Component {  
   constructor(props) {
@@ -32,20 +33,27 @@ export default class CoChangeGraph extends React.Component {
   * @param nextProps props that are passed
   */
   componentWillReceiveProps(nextProps) {
-    const dataset = computeFileDependencies(nextProps);
-    const {fileToModuleLinks, moduleToModuleLinks} = assignModuleIndicesToFiles(dataset.nodes, nextProps.moduleData);
+    const newDataset = computeFileDependencies(nextProps);
+    const {fileToModuleLinks, moduleToModuleLinks} = assignModuleIndicesToFiles(newDataset.nodes, nextProps.moduleData);
 
-    dataset.fileToModuleLinks = fileToModuleLinks;
-    dataset.moduleToModuleLinks = moduleToModuleLinks;
+    newDataset.fileToModuleLinks = fileToModuleLinks;
+    newDataset.moduleToModuleLinks = moduleToModuleLinks;
 
-    const module_dataset = computeModuleDependencies(nextProps);
+    //const module_dataset = computeModuleDependencies(nextProps);
+    dataset = newDataset;
 
     if(dataset != undefined) {
-      this.drawgraph(dataset);
+      this.removeGraph();
+      this.drawGraph();
     }
   }
 
-  drawgraph(dataset) {
+  removeGraph(){
+    const svg = d3.select("." + styles.graphHolder).selectChildren();
+    svg.remove();
+  }
+
+  drawGraph() {
     const svg = d3.select("." + styles.graphHolder);
   
     // Initialize definitions
