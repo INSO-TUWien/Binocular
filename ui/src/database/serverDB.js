@@ -41,4 +41,12 @@ export default class ServerDB {
   static getCommitDateHistogram(granularity, dateField, since, until) {
     return Commits.getCommitDateHistogram(granularity, dateField, since, until);
   }
+
+  static issueImpactQuery(iid, since, until) {
+    return Issues.issueImpactQuery(iid, since, until);
+  }
+
+  static searchIssues(text) {
+    return Issues.searchIssues(text);
+  }
 }

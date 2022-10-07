@@ -15,6 +15,36 @@ function findAll(database, collection) {
   });
 }
 
+function findIssue(database, iid) {
+  return database.find({
+    selector: { _id: { $regex: new RegExp('^issues/.*') }, iid: { $eq: iid } },
+  });
+}
+
+function findCommit(database, sha) {
+  return database.find({
+    selector: { _id: { $regex: new RegExp('^commits/.*') }, sha: { $eq: sha } },
+  });
+}
+
+function findBuild(database, sha) {
+  return database.find({
+    selector: { _id: { $regex: new RegExp('^builds/.*') }, sha: { $eq: sha } },
+  });
+}
+
+function findFileConnections(relations, sha) {
+  return relations.find({
+    selector: { _id: { $regex: new RegExp('^commits-files/.*') }, to: { $eq: 'commits/' + sha } },
+  });
+}
+
+function findFile(database, file) {
+  return database.find({
+    selector: { _id: { $eq: file } },
+  });
+}
+
 export default class Issues {
   static getIssueData(db, issueSpan, significantSpan) {
     // return all issues, filtering according to parameters can be added in the future
@@ -89,6 +119,49 @@ export default class Issues {
           }
         });
       return data;
+    });
+  }
+
+  static issueImpactQuery(db, relations, iid, since, until) {
+    return findIssue(db, iid).then(async (resIssue) => {
+      const issue = resIssue.docs[0];
+      issue.commits = { data: [] };
+      for (const mentionedCommit of issue.mentions) {
+        if (
+          mentionedCommit.commit !== null &&
+          new Date(mentionedCommit.createdAt) >= new Date(since) &&
+          new Date(mentionedCommit.createdAt) <= new Date(until)
+        ) {
+          const commit = (await findCommit(db, mentionedCommit.commit)).docs[0];
+          const builds = (await findBuild(db, commit.sha)).docs;
+          commit.files = { data: [] };
+          const fileConnections = (await findFileConnections(relations, commit.sha)).docs;
+          if (builds.length > 0) {
+            commit.build = builds[0];
+          }
+
+          for (const fileRelation of fileConnections) {
+            fileRelation.file = (await findFile(db, fileRelation.from)).docs[0];
+            fileRelation.file.id = fileRelation.file._id;
+            commit.files.data.push(fileRelation);
+          }
+
+          issue.commits.data.push(commit);
+        }
+      }
+      return { issue: issue };
+    });
+  }
+
+  static searchIssues(db, text) {
+    // return all issues, filtering according to parameters can be added in the future
+    return findAll(db, 'issues').then((res) => {
+      res.docs = res.docs
+        .filter((i) => i.title.includes(text))
+        .sort((a, b) => {
+          return new Date(b.createdAt) - new Date(a.createdAt);
+        });
+      return res.docs;
     });
   }
 }

@@ -103,13 +103,6 @@ function importData() {
   //});
 }
 
-// find all of given collection (example _id field for e.g. issues looks like 'issues/{issue_id}')
-function findAll(collection) {
-  return db.find({
-    selector: { _id: { $regex: new RegExp(`^${collection}\/.*`) } },
-  });
-}
-
 export default class LocalDB {
   static initDB() {
     importData();
@@ -149,5 +142,13 @@ export default class LocalDB {
 
   static getCommitDateHistogram(granularity, dateField, since, until) {
     return Commits.getCommitDateHistogram(db, granularity, dateField, since, until);
+  }
+
+  static issueImpactQuery(iid, since, until) {
+    return Issues.issueImpactQuery(db, tripleStore, iid, since, until);
+  }
+
+  static searchIssues(text) {
+    return Issues.searchIssues(db, text);
   }
 }

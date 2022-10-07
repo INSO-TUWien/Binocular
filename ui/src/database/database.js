@@ -84,6 +84,22 @@ export default class Database {
     }
   }
 
+  static async issueImpactQuery(iid, since, until) {
+    if (await this.checkBackendConnection()) {
+      return ServerDB.issueImpactQuery(iid, since, until);
+    } else {
+      return LocalDB.issueImpactQuery(iid, since, until);
+    }
+  }
+
+  static async searchIssues(text) {
+    if (await this.checkBackendConnection()) {
+      return ServerDB.searchIssues(text);
+    } else {
+      return LocalDB.searchIssues(text);
+    }
+  }
+
   static async checkBackendConnection() {
     return new Promise((resolve) => {
       graphQl

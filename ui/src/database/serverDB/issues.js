@@ -119,4 +119,91 @@ export default class Issues {
       }
     }).then(() => data);
   }
+
+  static issueImpactQuery(iid, since, until) {
+    return graphQl.query(
+      `query($iid: Int!, $since: Timestamp, $until: Timestamp) {
+           issue(iid: $iid) {
+             iid
+             title
+             createdAt
+             closedAt,
+             webUrl
+             commits (since: $since, until: $until) {
+               data {
+                 sha
+                 shortSha
+                 messageHeader
+                 date
+                 webUrl
+                 files {
+                   data {
+                     lineCount
+                     hunks {
+                       newStart
+                       newLines
+                       oldStart
+                       oldLines
+                       webUrl
+                     }
+                     stats {
+                      additions
+                      deletions
+                     }
+                     file {
+                       id
+                       path
+                       webUrl
+                       maxLength
+                     }
+                   }
+                 }
+                 builds {
+                   id
+                   createdAt
+                   finishedAt
+                   duration
+                   status
+                   webUrl
+                   jobs {
+                     id
+                     name
+                     stage
+                     status
+                     createdAt
+                     finishedAt
+                     webUrl
+                   }
+                 }
+               }
+             }
+           }
+         }`,
+      { iid: iid, since: since, until: until }
+    );
+  }
+
+  static searchIssues(text) {
+    const issueList = [];
+
+    const getIssuesPageSearch = (text) => (text) => {
+      return graphQl
+        .query(
+          `
+                  query($q: String) {
+                    issues(page: 1, perPage: 50, q: $q, sort: "DESC") {
+                      data { iid title createdAt closedAt }
+                    }
+                  }`,
+          { q: text }
+        )
+        .then((resp) => resp.issues);
+    };
+
+    return traversePages(getIssuesPageSearch(text), (issue) => {
+      issueList.push(issue);
+    }).then(function () {
+      return issueList;
+    });
+  }
 }

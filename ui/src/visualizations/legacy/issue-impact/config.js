@@ -11,6 +11,7 @@ import FilterBox from '../../../components/FilterBox';
 import styles from './styles.scss';
 
 import { graphQl, emojify } from '../../../utils';
+import Database from '../../../database/database';
 
 const mapStateToProps = (state /*, ownProps*/) => {
   const iiState = state.visualizations.issueImpact.state;
@@ -41,23 +42,11 @@ const IssueImpactConfigComponent = (props) => {
             placeholder="Select issue..."
             renderOption={(i) => `#${i.iid} ${i.title}`}
             search={(text) => {
-              return Promise.resolve(
-                graphQl.query(
-                  `
-                  query($q: String) {
-                    issues(page: 1, perPage: 50, q: $q, sort: "DESC") {
-                      data { iid title createdAt closedAt }
-                    }
-                  }`,
-                  { q: text }
-                )
-              )
-                .then((resp) => resp.issues.data)
-                .map((i) => {
-                  i.createdAt = new Date(i.createdAt);
-                  i.closedAt = i.closedAt && new Date(i.closedAt);
-                  return i;
-                });
+              return Promise.resolve(Database.searchIssues(text)).map((i) => {
+                i.createdAt = new Date(i.createdAt);
+                i.closedAt = i.closedAt && new Date(i.closedAt);
+                return i;
+              });
             }}
             value={props.issue}
             onChange={(issue) => {
