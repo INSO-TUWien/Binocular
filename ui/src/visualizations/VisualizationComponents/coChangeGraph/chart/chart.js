@@ -16,9 +16,6 @@ export default class CoChangeGraph extends React.Component {
   constructor(props) {
     super(props);
 
-    console.log("Props:");
-    console.log(props);
-
     this.state = {
       transform: d3.zoomIdentity,
       dimensions: zoomUtils.initialDimensions(),
@@ -33,6 +30,9 @@ export default class CoChangeGraph extends React.Component {
   * @param nextProps props that are passed
   */
   componentWillReceiveProps(nextProps) {
+    console.log("Props:");
+    console.log(nextProps);
+
     const newDataset = computeFileDependencies(nextProps);
     const {fileToModuleLinks, moduleToModuleLinks} = assignModuleIndicesToFiles(newDataset.nodes, nextProps.moduleData);
 
@@ -72,12 +72,7 @@ export default class CoChangeGraph extends React.Component {
       .selectAll("circle")
       .data(dataset.nodes)
       .enter().append("circle")
-      .attr("r", 20)
-      .call(d3.drag()
-        .on("start", dragstarted) 
-        .on("drag", dragged)      
-        .on("end", dragended)     
-    );
+      .attr("r", 20);
 
     // Text to nodes
     const text = svg.append("g")
@@ -120,28 +115,6 @@ export default class CoChangeGraph extends React.Component {
         counter++;
       }
 
-    }
-
-    //When the drag gesture starts, the targeted node is fixed to the pointer
-    //The simulation is temporarily “heated” during interaction by setting the target alpha to a non-zero value.
-    function dragstarted(event, d) {
-      if (!event.active) simulation.alphaTarget(0.3);
-      console.log("dragged!")
-      d.fy = d.y; //fx - the node’s fixed x-position. Original is null.
-      d.fx = d.x; //fy - the node’s fixed y-position. Original is null.
-    }
-
-    //When the drag gesture starts, the targeted node is fixed to the pointer
-    function dragged(event, d) {
-      d.fx = event.x;
-      d.fy = event.y;
-    }
-
-    //the targeted node is released when the gesture ends
-    function dragended(event, d) {
-      if (!event.active) simulation.alphaTarget(0);
-      d.fx = null;
-      d.fy = null;
     }
 
     // node highlighting functionality

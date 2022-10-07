@@ -28,18 +28,20 @@ const mapStateToProps = (state /*, ownProps*/) => {
   }
 
   return {
-    navigationMode: coChangeState.config.navigationMode,
     commitsFiles: coChangeState.data.data.commitsFiles,
     firstDisplayDate: firstDisplayDate,
-    lastDisplayDate: lastDisplayDate
+    lastDisplayDate: lastDisplayDate,
+    pathFilter: coChangeState.config.pathFilter
   };
 };
+
+let filter = undefined;
 
 const mapDispatchToProps = (dispatch /*, ownProps*/) => {
   return {
     onChangeTimeSpan: (timeSpan) => dispatch(setTimeSpan(timeSpan)),
-    onTimeSpanApply: () => dispatch(applyTimeSpan()),
-    onFilterChange: (filterContent) => dispatch(setFilterContent(filterContent))
+    onTimeSpanApply: () => dispatch(applyTimeSpan(filter)),
+    onFilterChange: (filterContent) => {filter = filterContent}
   };
 };
 
@@ -58,9 +60,9 @@ const CoChangeConfigComponent = props => {
           />
         </div>
         <label className="label">Path filter</label>
-        <input type="text" onChange={() => {props.onFilterChange()}}></input>
+        <input type="text" onChange={(e) => {props.onFilterChange(e.target.value)}}></input>
       </form>
-      <button onClick={() => {props.onTimeSpanApply()}}>Apply</button>
+      <button onClick={() => {props.onTimeSpanApply(filter)}}>Apply</button>
     </div>
   );
 };

@@ -9,10 +9,10 @@ const mapStateToProps = (state /*, ownProps*/) => {
   //const universalSettings = state.visualizations.newDashboard.state.config;
 
   return {
-    navigationMode: coChangeState.config.navigationMode,
     commitsFiles: coChangeState.data.data.commitsFiles,
     commitsModules: coChangeState.data.data.commitsModules,
-    moduleData: coChangeState.data.data.moduleData
+    moduleData: coChangeState.data.data.moduleData,
+    pathFilter: coChangeState.data.data.pathFilter
   };
 };
 

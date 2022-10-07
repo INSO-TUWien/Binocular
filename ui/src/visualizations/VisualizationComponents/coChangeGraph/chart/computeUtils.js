@@ -32,7 +32,12 @@ export function computeFileDependencies(props){
         }
     }
 
-    fileSet = filterEntities("ui/src/visualizations", fileSet);
+    if(props.pathFilter != undefined && props.pathFilter != ""){
+        fileSet = filterEntities(props.pathFilter, fileSet);
+    } else {
+        fileSet = filterEntities("ui/src/visualizations", fileSet);
+    }
+    
     const dataset = computeDependencyDataset(fileSet, sharedCommitCnt, commitCntPerFile);
     return dataset;
 }
