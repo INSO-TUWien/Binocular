@@ -187,6 +187,7 @@ function computeDependencyDataset(entitySet, sharedCommitCnt, commitCntPerEntity
 
 /*
 * Generate list of all modules and create module indices for the files
+* Also adds nodes for the used modules to the provided nodes list
 */
 
 export function assignModuleIndicesToFiles(nodes, allModules){
@@ -204,11 +205,9 @@ export function assignModuleIndicesToFiles(nodes, allModules){
                 let moduleIndex = nodes.findIndex(_ => _.id === module.path);
 
                 if(moduleIndex === -1){
-                    nodes.push({id: module.path, name: module.path});
+                    nodes.push({id: module.path, name: module.path, type: "m"});
                     usedModules.push(module);      
                     moduleIndex = nodes.length - 1;
-                } else {
-                    moduleIndex = moduleIndex;
                 }
 
                 const link = {

@@ -34,6 +34,7 @@ export default class CoChangeGraph extends React.Component {
     console.log(nextProps);
 
     const newDataset = computeFileDependencies(nextProps);
+    console.log(newDataset)
     const {fileToModuleLinks, moduleToModuleLinks} = assignModuleIndicesToFiles(newDataset.nodes, nextProps.moduleData);
 
     newDataset.fileToModuleLinks = fileToModuleLinks;
@@ -72,7 +73,8 @@ export default class CoChangeGraph extends React.Component {
       .selectAll("circle")
       .data(dataset.nodes)
       .enter().append("circle")
-      .attr("r", 20);
+      .attr("r", 20)
+      .style("fill", (d) => {return d.type == "m" ? "yellow" : "pink"});
 
     // Text to nodes
     const text = svg.append("g")
@@ -134,7 +136,7 @@ export default class CoChangeGraph extends React.Component {
       d3.select(this).style('fill', 'red');
     })
     .on('mouseout', function (d) {
-      node.style('fill', "pink");
+      node.style('fill', function (node_d) {return node_d.type == "m" ? "yellow" : "pink"})
       node.style('stroke-width', 1);
       link.style('stroke-width', '1');
       text.style("fill", 'black');
