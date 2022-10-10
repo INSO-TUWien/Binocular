@@ -11,7 +11,19 @@ PouchDB.plugin(PouchDBAdapterMemory);
 // find all of given collection (example _id field for e.g. issues looks like 'issues/{issue_id}')
 function findAll(database, collection) {
   return database.find({
-    selector: { _id: { $regex: new RegExp(`^${collection}\/.*`) } },
+    selector: { _id: { $regex: new RegExp(`^${collection}/.*`) } },
+  });
+}
+
+function findIssue(database, iid) {
+  return database.find({
+    selector: { _id: { $regex: new RegExp('^issues/.*') }, iid: { $eq: iid } },
+  });
+}
+
+function findCommit(database, sha) {
+  return database.find({
+    selector: { _id: { $regex: new RegExp('^commits/.*') }, sha: { $eq: sha } },
   });
 }
 
@@ -155,7 +167,22 @@ export default class Commits {
   }
 
   static getRelatedCommitDataOwnershipRiver(db, issue) {
-    return {};
+    if (issue !== null) {
+      return findIssue(db, issue.iid).then(async (resIssue) => {
+        const foundIssue = resIssue.docs[0];
+        foundIssue.commits = { count: 0, data: [] };
+        for (const mention of foundIssue.mentions) {
+          if (mention.commit !== null) {
+            const commit = (await findCommit(db, mention.commit)).docs[0];
+            foundIssue.commits.count++;
+            foundIssue.commits.data.push(commit);
+          }
+        }
+        return foundIssue;
+      });
+    } else {
+      return {};
+    }
   }
 
   static getCommitDateHistogram(db, granularity, dateField, since, until) {

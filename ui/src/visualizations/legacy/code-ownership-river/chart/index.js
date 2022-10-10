@@ -12,7 +12,6 @@ const mapStateToProps = (state /*, ownProps*/) => {
   const filteredBuilds = corState.config.overlay === 'builds' ? corState.data.data.filteredBuilds : [];
   const issues = corState.config.overlay === 'issues' ? corState.data.data.issues : [];
   const builds = corState.config.overlay === 'builds' ? corState.data.data.builds : [];
-
   return {
     palette: corState.data.data.palette,
     otherCount: corState.data.data.otherCount,

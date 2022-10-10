@@ -102,6 +102,10 @@ export default class Database {
 
   static async checkBackendConnection() {
     return new Promise((resolve) => {
+      if (location.protocol === 'file:') {
+        resolve(false);
+        return;
+      }
       graphQl
         .query(
           `{
