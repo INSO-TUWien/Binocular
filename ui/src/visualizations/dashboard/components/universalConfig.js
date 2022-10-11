@@ -59,7 +59,7 @@ const UniversalConfigComponent = (props) => {
     otherCommitters = props.committers.length - (Object.keys(props.palette).length - 1);
   }
   if (props.palette !== undefined) {
-    props.onSetPalette(props.palette);
+    setAllAuthors(props.palette);
   }
   return (
     <div>
@@ -81,7 +81,6 @@ const UniversalConfigComponent = (props) => {
           from={props.firstDisplayDate}
           to={props.lastDisplayDate}
           onDateChanged={(data) => {
-            console.log(data);
             props.onChangeTimeSpan(data);
           }}
         />

@@ -114,6 +114,7 @@ export default class Dashboard extends React.Component {
     return (
       <div
         id={'visualizationContainer' + visualization.id}
+        key={visualization.id}
         className={dashboardStyles.visualizationContainer}
         style={{
           gridArea:

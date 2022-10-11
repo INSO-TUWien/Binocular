@@ -186,7 +186,7 @@ export default class Issues {
   static searchIssues(text) {
     const issueList = [];
 
-    const getIssuesPageSearch = (text) => (text) => {
+    const getIssuesPageSearch = (text) => (page, perPage) => {
       return graphQl
         .query(
           `

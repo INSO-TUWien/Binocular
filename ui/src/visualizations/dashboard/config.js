@@ -35,7 +35,7 @@ const DashboardConfigComponent = (props) => {
       <UniversalConfig />
       {visualizations.map((viz) => {
         return (
-          <div>
+          <div key={viz.id}>
             <hr />
             <h1>{viz.label}</h1>
             <hr />
