@@ -12,7 +12,8 @@ const mapStateToProps = (state /*, ownProps*/) => {
     commitsFiles: coChangeState.data.data.commitsFiles,
     commitsModules: coChangeState.data.data.commitsModules,
     moduleData: coChangeState.data.data.moduleData,
-    pathFilter: coChangeState.data.data.pathFilter
+    pathFilter: coChangeState.data.data.pathFilter,
+    lowerBounds: coChangeState.data.data.lowerBounds
   };
 };
 

@@ -38,12 +38,12 @@ export function computeFileDependencies(props){
         fileSet = filterEntities("ui/src/visualizations", fileSet);
     }
     
-    const dataset = computeDependencyDataset(fileSet, sharedCommitCnt, commitCntPerFile);
+    let dataset = computeDependencyDataset(fileSet, sharedCommitCnt, commitCntPerFile);
+    console.log(dataset.links)
+    dataset = filterDependencyDataset(dataset, props.lowerBounds);
+    console.log(dataset.links)
     return dataset;
 }
-
-
-
 
 // Same as computeFileDependencies for now, but for modules
 export function computeModuleDependencies(props){
@@ -82,7 +82,7 @@ export function computeModuleDependencies(props){
     }
 
     moduleSet = filterEntities("./ui/src/visualizations/legacy/code-hotspots", moduleSet);
-    const dataset = computeDependencyDataset(moduleSet, sharedCommitCnt, commitCntPerModule);
+    let dataset = computeDependencyDataset(moduleSet, sharedCommitCnt, commitCntPerModule);
     return dataset;
 }
 
@@ -182,6 +182,27 @@ function computeDependencyDataset(entitySet, sharedCommitCnt, commitCntPerEntity
 
     return dataset;
 }
+
+
+/*
+* Removes links which have a dependency below the threshold
+*
+*/
+
+function filterDependencyDataset(dataset, threshold){
+    const links = dataset.links;
+    const filteredLinks = [];
+
+    links.forEach(link => {
+        if(link.sourceColor >= threshold || link.targetColor >= threshold){
+            filteredLinks.push(link);
+        }
+    });
+
+    dataset.links = filteredLinks;
+    return dataset;
+}
+
 
 
 

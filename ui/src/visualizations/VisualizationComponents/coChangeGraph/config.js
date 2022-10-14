@@ -31,17 +31,18 @@ const mapStateToProps = (state /*, ownProps*/) => {
     commitsFiles: coChangeState.data.data.commitsFiles,
     firstDisplayDate: firstDisplayDate,
     lastDisplayDate: lastDisplayDate,
-    pathFilter: coChangeState.config.pathFilter
   };
 };
 
-let filter = undefined;
+let filter = "ui/src/visualizations/";
+let lowerBounds = 0.0;
 
 const mapDispatchToProps = (dispatch /*, ownProps*/) => {
   return {
     onChangeTimeSpan: (timeSpan) => dispatch(setTimeSpan(timeSpan)),
-    onTimeSpanApply: () => dispatch(applyTimeSpan(filter)),
-    onFilterChange: (filterContent) => {filter = filterContent}
+    onTimeSpanApply: () => dispatch(applyTimeSpan({filter: filter, lowerBounds: lowerBounds})),
+    onFilterChange: (filterContent) => {filter = filterContent},
+    onBoundraryChange: (boundrary) => {lowerBounds = boundrary}
   };
 };
 
@@ -60,9 +61,17 @@ const CoChangeConfigComponent = props => {
           />
         </div>
         <label className="label">Path filter</label>
-        <input type="text" onChange={(e) => {props.onFilterChange(e.target.value)}}></input>
+        <input  type="text" 
+                defaultValue="ui/src/visualizations/"
+                onChange={(e) => {props.onFilterChange(e.target.value)}}></input>
+        <label className="label">Lower Boundrary for Co-Changes</label>
+        <input  type="number" 
+                defaultValue="0.1"
+                step="0.05"
+                onChange={(e) => {props.onBoundraryChange(e.target.value)}}
+                ></input>
       </form>
-      <button onClick={() => {props.onTimeSpanApply(filter)}}>Apply</button>
+      <button onClick={() => {props.onTimeSpanApply()}}>Apply</button>
     </div>
   );
 };

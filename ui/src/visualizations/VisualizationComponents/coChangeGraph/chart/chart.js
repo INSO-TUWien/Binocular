@@ -36,7 +36,9 @@ export default class CoChangeGraph extends React.Component {
     const newDataset = computeFileDependencies(nextProps);
     console.log(newDataset)
     const {fileToModuleLinks, moduleToModuleLinks} = assignModuleIndicesToFiles(newDataset.nodes, nextProps.moduleData);
+    
 
+    // (invisible) links solely used to generate force layout
     newDataset.fileToModuleLinks = fileToModuleLinks;
     newDataset.moduleToModuleLinks = moduleToModuleLinks;
 
