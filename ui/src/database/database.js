@@ -100,6 +100,38 @@ export default class Database {
     }
   }
 
+  static async requestFileStructure() {
+    if (await this.checkBackendConnection()) {
+      return ServerDB.requestFileStructure();
+    } else {
+      return LocalDB.requestFileStructure();
+    }
+  }
+
+  static async getAllBranches() {
+    if (await this.checkBackendConnection()) {
+      return ServerDB.getAllBranches();
+    } else {
+      return LocalDB.getAllBranches();
+    }
+  }
+
+  static async getCodeHotspotsChangeData(file) {
+    if (await this.checkBackendConnection()) {
+      return ServerDB.getCodeHotspotsChangeData(file);
+    } else {
+      return LocalDB.getCodeHotspotsChangeData(file);
+    }
+  }
+
+  static async getCodeHotspotsIssueData(file) {
+    if (await this.checkBackendConnection()) {
+      return ServerDB.getCodeHotspotsIssueData(file);
+    } else {
+      return LocalDB.getCodeHotspotsIssueData(file);
+    }
+  }
+
   static async checkBackendConnection() {
     return new Promise((resolve) => {
       if (location.protocol === 'file:') {

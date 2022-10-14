@@ -4,6 +4,8 @@ import Bounds from './serverDB/bounds';
 import Commits from './serverDB/commits';
 import Builds from './serverDB/builds';
 import Issues from './serverDB/issues';
+import Files from './serverDB/files';
+import Branches from './serverDB/branches';
 
 export default class ServerDB {
   static getBounds() {
@@ -48,5 +50,21 @@ export default class ServerDB {
 
   static searchIssues(text) {
     return Issues.searchIssues(text);
+  }
+
+  static requestFileStructure() {
+    return Files.requestFileStructure();
+  }
+
+  static getAllBranches() {
+    return Branches.getAllBranches();
+  }
+
+  static getCodeHotspotsChangeData(file) {
+    return Commits.getCodeHotspotsChangeData(file);
+  }
+
+  static getCodeHotspotsIssueData(file) {
+    return Issues.getCodeHotspotsIssueData(file);
   }
 }

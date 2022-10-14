@@ -84,6 +84,7 @@ export default class Commits {
         )
         .then((resp) => resp.commits);
     };
+
     function group(data) {
       const lastDatum = _.last(data);
 
@@ -134,6 +135,7 @@ export default class Commits {
 
       return data;
     }
+
     return traversePages(getCommitsPage(significantSpan[0], significantSpan[1]), (commit) => {
       const dt = Date.parse(commit.date);
       let stats = statsByAuthor[commit.signature];
@@ -237,6 +239,46 @@ export default class Commits {
         since: since,
         until: until,
       }
+    );
+  }
+
+  static getCodeHotspotsChangeData(file) {
+    return graphQl.query(
+      `
+        query($file: String!) {
+          file(path: $file){
+              path
+              maxLength
+              commits{
+                  data{
+                      message
+                      sha
+                      signature
+                      branch
+                      parents
+                      date
+                      stats{
+                          additions
+                          deletions
+                      }
+                      file(path: $file){
+                          file{
+                              path
+                          }
+                          lineCount
+                          hunks{
+                              newStart
+                              newLines
+                              oldStart
+                              oldLines
+                          }
+                      }
+                  }
+              }
+          }
+      }
+      `,
+      { file: file }
     );
   }
 }

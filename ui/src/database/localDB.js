@@ -10,6 +10,8 @@ import Bounds from './localDB/bounds';
 import Commits from './localDB/commits';
 import Builds from './localDB/builds';
 import Issues from './localDB/issues';
+import Files from './localDB/files';
+import Branches from './localDB/branches';
 
 import branches from '../../arango_export/branches.json';
 import builds from '../../arango_export/builds.json';
@@ -150,5 +152,21 @@ export default class LocalDB {
 
   static searchIssues(text) {
     return Issues.searchIssues(db, text);
+  }
+
+  static requestFileStructure() {
+    return Files.requestFileStructure(db);
+  }
+
+  static getAllBranches() {
+    return Branches.getAllBranches(db);
+  }
+
+  static getCodeHotspotsChangeData(file) {
+    return Commits.getCodeHotspotsChangeData(db, tripleStore, file);
+  }
+
+  static getCodeHotspotsIssueData(file) {
+    return Issues.getCodeHotspotsIssueData(db, tripleStore, file);
   }
 }

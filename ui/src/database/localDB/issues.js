@@ -11,7 +11,7 @@ PouchDB.plugin(PouchDBAdapterMemory);
 // find all of given collection (example _id field for e.g. issues looks like 'issues/{issue_id}')
 function findAll(database, collection) {
   return database.find({
-    selector: { _id: { $regex: new RegExp(`^${collection}\/.*`) } },
+    selector: { _id: { $regex: new RegExp(`^${collection}/.*`) } },
   });
 }
 
@@ -33,15 +33,21 @@ function findBuild(database, sha) {
   });
 }
 
+function findFile(database, file) {
+  return database.find({
+    selector: { _id: { $regex: new RegExp('^files/.*') }, path: { $eq: file } },
+  });
+}
+
 function findFileConnections(relations, sha) {
   return relations.find({
     selector: { _id: { $regex: new RegExp('^commits-files/.*') }, to: { $eq: 'commits/' + sha } },
   });
 }
 
-function findFile(database, file) {
-  return database.find({
-    selector: { _id: { $eq: file } },
+function findSpecificFileConnections(relations, commitID, fileId) {
+  return relations.find({
+    selector: { _id: { $regex: new RegExp('^commits-files/.*') }, to: { $eq: commitID }, from: { $eq: fileId } },
   });
 }
 
@@ -162,6 +168,47 @@ export default class Issues {
           return new Date(b.createdAt) - new Date(a.createdAt);
         });
       return res.docs;
+    });
+  }
+
+  static getCodeHotspotsIssueData(db, relations, file) {
+    return findAll(db, 'issues').then(async (res) => {
+      const issues = [];
+
+      for (const issue of res.docs) {
+        issue.commits = { data: [] };
+        if (issue.mentions !== undefined) {
+          for (const commitMention of issue.mentions) {
+            if (commitMention.commit !== null) {
+              const resCommit = await findCommit(db, commitMention.commit);
+              if (resCommit.docs.length > 0) {
+                const commit = resCommit.docs[0];
+                const resFile = await findFile(db, file);
+                if (resFile.docs.length > 0) {
+                  const file = resFile.docs[0];
+                  const commitFileConnection = await findSpecificFileConnections(relations, commit._id, file._id);
+                  if (commitFileConnection.docs.length > 0) {
+                    commit.file = {
+                      file: { path: file.path },
+                      lineCount: commitFileConnection.docs[0].lineCount,
+                      hunks: commitFileConnection.docs[0].hunks,
+                    };
+                  } else {
+                    commit.file = {
+                      file: { path: file.path },
+                      lineCount: 0,
+                      hunks: [],
+                    };
+                  }
+                  issue.commits.data.push(commit);
+                }
+              }
+            }
+          }
+        }
+        issues.push(issue);
+      }
+      return { issues: { data: issues } };
     });
   }
 }

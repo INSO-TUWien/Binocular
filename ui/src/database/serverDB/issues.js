@@ -206,4 +206,47 @@ export default class Issues {
       return issueList;
     });
   }
+
+  static getCodeHotspotsIssueData(file) {
+    return graphQl.query(
+      `
+        query($file: String!) {
+          issues{
+            data{
+              title
+              description
+              iid
+              commits{
+                data{
+                  message
+                  sha
+                  signature
+                  branch
+                  date
+                  parents
+                  stats{
+                    additions
+                    deletions
+                  }
+                  file(path: $file){
+                    file{
+                      path
+                    }
+                    lineCount
+                    hunks{
+                      newStart
+                      newLines
+                      oldStart
+                      oldLines
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      `,
+      { file: file }
+    );
+  }
 }

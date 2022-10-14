@@ -27,6 +27,24 @@ function findCommit(database, sha) {
   });
 }
 
+function findID(database, id) {
+  return database.find({
+    selector: { _id: id },
+  });
+}
+
+function findFile(database, file) {
+  return database.find({
+    selector: { _id: { $regex: new RegExp('^files/.*') }, path: { $eq: file } },
+  });
+}
+
+function findFileCommitConnections(relations, fileId) {
+  return relations.find({
+    selector: { _id: { $regex: new RegExp('^commits-files/.*') }, from: { $eq: fileId } },
+  });
+}
+
 export default class Commits {
   static getCommitData(db, commitSpan, significantSpan) {
     // return all commits, filtering according to parameters can be added in the future
@@ -335,6 +353,26 @@ export default class Commits {
           };
         });
       });
+    });
+  }
+
+  static getCodeHotspotsChangeData(db, relations, file) {
+    return findFile(db, file).then(async (resFile) => {
+      const file = resFile.docs[0];
+      const fileCommitConnections = (await findFileCommitConnections(relations, file._id)).docs;
+      const commits = [];
+      for (const fileCommitConnection of fileCommitConnections) {
+        const resCommit = await findID(db, fileCommitConnection.to);
+        if (resCommit.docs.length > 0) {
+          const commit = resCommit.docs[0];
+          commit.file = { file: {} };
+          commit.file.file.path = file.path;
+          commit.file.lineCount = fileCommitConnection.lineCount;
+          commit.file.hunks = fileCommitConnection.hunks;
+          commits.push(commit);
+        }
+      }
+      return { file: { commits: { data: commits } } };
     });
   }
 }
