@@ -10,7 +10,10 @@ import * as zoomUtils from '../../../../utils/zoom.js';
 import {computeFileDependencies, computeModuleDependencies, assignModuleIndicesToFiles} from './computeUtils.js';
 
 const CHART_FILL_RATIO = 0.65;
+
+// graph parameters
 let dataset = undefined;
+let simulation = undefined;
 
 export default class CoChangeGraph extends React.Component {  
   constructor(props) {
@@ -46,6 +49,10 @@ export default class CoChangeGraph extends React.Component {
     dataset = newDataset;
 
     if(dataset != undefined) {
+      if(simulation != undefined){
+        simulation.stop();
+      }
+
       this.removeGraph();
       this.drawGraph();
     }
@@ -87,7 +94,7 @@ export default class CoChangeGraph extends React.Component {
       .text(d => d.name)
 
     // Initialize the simualtion
-    const simulation = d3.forceSimulation(dataset.nodes)
+    simulation = d3.forceSimulation(dataset.nodes)
       .force('links', d3.forceLink().links(dataset.links).strength(0))
       .force('fileToModuleLinks', d3.forceLink().links(dataset.fileToModuleLinks).distance(60))
       .force('moduleToModuleLinks', d3.forceLink().links(dataset.moduleToModuleLinks).strength(0.15))

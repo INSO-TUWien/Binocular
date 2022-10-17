@@ -4,8 +4,9 @@ import _ from 'lodash';
 import { connect } from 'react-redux';
 
 import styles from './styles.scss';
-import { setTimeSpan, applyTimeSpan, setFilterContent } from './sagas';
+import { setTimeSpan, applyTimeSpan, setEntitySelection } from './sagas';
 import DateRangeFilter from '../../../components/DateRangeFilter/dateRangeFilter';
+import { props } from 'bluebird';
 
 
 const mapStateToProps = (state /*, ownProps*/) => {
@@ -27,10 +28,13 @@ const mapStateToProps = (state /*, ownProps*/) => {
     lastDisplayDate = coChangeState.config.chartTimeSpan.to;
   }
 
+  console.log(coChangeState)
+
   return {
     commitsFiles: coChangeState.data.data.commitsFiles,
     firstDisplayDate: firstDisplayDate,
     lastDisplayDate: lastDisplayDate,
+    entitySelection: coChangeState.config.entitySelection,
   };
 };
 
@@ -40,16 +44,39 @@ let lowerBounds = 0.0;
 const mapDispatchToProps = (dispatch /*, ownProps*/) => {
   return {
     onChangeTimeSpan: (timeSpan) => dispatch(setTimeSpan(timeSpan)),
-    onTimeSpanApply: () => dispatch(applyTimeSpan({filter: filter, lowerBounds: lowerBounds})),
+    onTimeSpanApply: () => dispatch(applyTimeSpan({filter: filter, lowerBounds: lowerBounds, entitySelection: props.entitySelection})),
     onFilterChange: (filterContent) => {filter = filterContent},
-    onBoundraryChange: (boundrary) => {lowerBounds = boundrary}
+    onBoundraryChange: (boundrary) => {lowerBounds = boundrary},
+    onEntitySelectionChange: (entityType) => dispatch(setEntitySelection(entityType))
   };
 };
 
 const CoChangeConfigComponent = props => {
+  console.log(props)
   return (
     <div className={styles.configContainer}>
       <form>
+        <div className="control">
+            <label className="label">Show graph for:</label>
+            <label className="radio">
+              <input
+                name="entitySelection"
+                type="radio"
+                checked={props.entitySelection === 'files'}
+                onChange={() => props.onEntitySelectionChange('files')}
+              />
+              Files
+            </label>
+            <label className="radio">
+              <input
+                name="entitySelection"
+                type="radio"
+                checked={props.entitySelection === 'modules'}
+                onChange={() => props.onEntitySelectionChange('modules')}
+              />
+              Modules
+            </label>
+        </div>
           <label className="label">Time span:</label>
           <div>
             <DateRangeFilter
