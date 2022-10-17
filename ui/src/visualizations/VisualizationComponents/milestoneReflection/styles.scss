@@ -1,0 +1,123 @@
+@import '~bulma';
+
+.chart {
+  outline: none;
+  flex: 1;
+}
+
+.clockFace {
+  circle {
+    fill: none;
+    stroke: black;
+  }
+
+  .ticks {
+    line {
+      stroke-width: 1;
+      stroke: $grey;
+      fill: none;
+    }
+
+    text {
+      text-anchor: middle;
+      alignment-baseline: middle;
+    }
+  }
+
+  line.tick {
+    stroke-width: 1;
+    stroke: $grey;
+  }
+
+  .counts {
+    text {
+      font-size: 12px;
+      text-anchor: middle;
+      alignment-baseline: middle;
+    }
+  }
+
+  .innerDial {
+    fill: white;
+  }
+
+  .segment {
+    stroke: black;
+  }
+
+  .curve {
+    fill: none;
+    stroke-width: 2;
+    stroke: $grey-darker;
+  }
+}
+
+.issues {
+  > circle.outer {
+    stroke: none;
+  }
+
+  > circle.spacer {
+    fill: darken($grey-lighter, 15%);
+  }
+}
+
+.commits {
+  > circle.outer {
+    stroke: none;
+  }
+
+  > circle {
+    fill: $white;
+  }
+
+  .spacer {
+    fill: darken($grey-lighter, 15%);
+  }
+}
+
+
+circle.midRadius {
+  stroke: black;
+  stroke-width: 2;
+  fill: none;
+}
+
+text.axisDescription {
+  font-size: 13px;
+}
+
+text.axisDescription.upper {
+  text-anchor: end;
+  fill: darken($green, 5%);
+}
+
+text.axisDescription.lower {
+  text-anchor: start;
+  fill: $red;
+}
+
+.help {
+  width: 100%;
+  overflow-y: scroll;
+  font-size: 1.5em;
+
+  h2 {
+    font-size: 1.2em;
+    font-weight: bold;
+  }
+
+  h3 {
+    font-size: 1.1em;
+    font-weight: bold;
+  }
+
+  ul {
+    list-style-type: circle;
+    margin-left: 1.5em;
+  }
+
+  p {
+    margin-bottom: 1em;
+  }
+}

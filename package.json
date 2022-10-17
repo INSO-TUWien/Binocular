@@ -191,7 +191,7 @@
     "babel-jest": "^27.4.5",
     "babel-loader": "^8.2.3",
     "case-sensitive-paths-webpack-plugin": "2.4.0",
-    "concurrently": "^7.2.1",
+    "concurrently": "^7.4.0",
     "css-loader": "6.5.1",
     "debug": "^4.3.3",
     "depcheck": "^1.4.2",
