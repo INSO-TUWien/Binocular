@@ -39,6 +39,12 @@ function findFile(database, file) {
   });
 }
 
+function findID(database, id) {
+  return database.find({
+    selector: { _id: id },
+  });
+}
+
 function findFileConnections(relations, sha) {
   return relations.find({
     selector: { _id: { $regex: new RegExp('^commits-files/.*') }, to: { $eq: 'commits/' + sha } },
@@ -147,7 +153,7 @@ export default class Issues {
           }
 
           for (const fileRelation of fileConnections) {
-            fileRelation.file = (await findFile(db, fileRelation.from)).docs[0];
+            fileRelation.file = (await findID(db, fileRelation.from)).docs[0];
             fileRelation.file.id = fileRelation.file._id;
             commit.files.data.push(fileRelation);
           }
