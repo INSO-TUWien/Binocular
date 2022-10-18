@@ -3,19 +3,9 @@
 import React from 'react';
 import * as d3 from 'd3';
 import _ from 'lodash';
-import {
-  timeline,
-  testData,
-  rectAndCircleTestData,
-  labelTestData,
-  iconTestData,
-  labelColorTestData,
-  testDataWithColor,
-  testDataWithColorPerTime,
-  testDataRelative,
-  width,
-} from './timeline';
+
 import moment from 'moment/moment';
+import Timeline from '../../../../components/Timeline/Timeline';
 
 export default class MilestoneReflection extends React.PureComponent {
   constructor(props) {
@@ -182,19 +172,16 @@ export default class MilestoneReflection extends React.PureComponent {
 
   render() {
     return (
-      <div>
-        <h3>A stacked timeline with hover, click, and scroll events</h3>
-        <div>current config selected:
+      <div style={{ display: 'block' }}>
+        <h3>DEVELOPMENT-INFO: TODO - A stacked timeline with hover, click, and scroll events</h3>
+        <div>
+          current config selected:
           <p>config.issueInfo: {this.props.config.issueInfo}</p>
-          <p>config.milestone: {this.props.config.milestone? this.props.config.milestone.title : 'not selected'}</p>
+          <p>config.milestone: {this.props.config.milestone ? this.props.config.milestone.title : 'not selected'}</p>
         </div>
-
-        <div id="timeline3"></div>
-        <div id="hoverRes">
-          <div className="coloredDiv"></div>
-          <div id="name"></div>
-          <div id="scrolled_date"></div>
-        </div>
+        <br/>
+        <br/>
+        <Timeline/>
       </div>
     );
   }
