@@ -173,15 +173,26 @@ export default class MilestoneReflection extends React.PureComponent {
   render() {
     return (
       <div style={{ display: 'block' }}>
-        <h3>DEVELOPMENT-INFO: TODO - A stacked timeline with hover, click, and scroll events</h3>
-        <div>
-          current config selected:
-          <p>config.issueInfo: {this.props.config.issueInfo}</p>
-          <p>config.milestone: {this.props.config.milestone ? this.props.config.milestone.title : 'not selected'}</p>
+        <div style={{ background: '#ffe8e8', position: 'absolute', width: '100%' }}>
+          <h2>DEVELOPMENT-INFO: </h2>
+          <div style={{ 'font-size': '0.8rem' }}>
+            <p> TODO - A stacked timeline with hover, click, and scroll events</p>
+            current config selected:
+            <p>config.issueInfo: {this.props.config.issueInfo}</p>
+            <p>config.milestone: {this.props.config.milestone ? this.props.config.milestone.title : 'not selected'}</p>
+          </div>
+          <br />
+          <br />
         </div>
-        <br/>
-        <br/>
-        <Timeline/>
+
+        <div style={{ 'height': '100%', 'width': '100%', 'align-items': 'center', 'display': 'flex', 'justify-content': 'center' }}>
+          {this.props.config.milestone === null && <div> Please select Milestone!</div>}
+          {this.props.config.milestone !== null && (
+            <svg id="timeline" width={750}>
+              <Timeline />
+            </svg>
+          )}
+        </div>
       </div>
     );
   }

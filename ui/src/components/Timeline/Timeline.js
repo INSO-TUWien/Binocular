@@ -24,16 +24,11 @@ export default class Timeline extends React.Component {
   componentDidMount() {
     var xScale = d3.scaleTime().range([30, 750 - 30]);
     const axis = d3.axisBottom(xScale);
-    d3.select('#timeline').append('svg').attr('width', 750).call(axis);
+    d3.select(this.g).attr('width', 750).call(axis);
+    // d3.select('#timeline')
   }
 
   render() {
-    return (
-      <div
-        id="timeline"
-        className="timeline"
-        style={{ 'height': '100%', 'width': '100%', 'align-items': 'center', 'display': 'flex' }}
-      />
-    );
+    return <g className="timeline" ref={(g) => (this.g = g)} />;
   }
 }
