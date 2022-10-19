@@ -35,11 +35,13 @@ export const fetchChangesData = fetchFactory(
     let firstCommitTimestamp = Date.parse(firstCommit.date);
     let lastCommitTimestamp = Date.parse(lastCommit.date);
 
-    // TODO: apply new timespan
     const state = yield select();
     const timeSpan = state.visualizations.coChangeGraph.state.config.chartTimeSpan;
+
+    // filtering options
     const pathFilter = event.payload.filter;
     const lowerBounds = event.payload.lowerBounds;
+    const entitySelection = event.payload.entitySelection;
 
     firstCommitTimestamp = timeSpan.from === undefined ? firstCommitTimestamp : new Date(timeSpan.from).getTime();
     lastCommitTimestamp = timeSpan.to === undefined ? lastCommitTimestamp : new Date(timeSpan.to).getTime();
@@ -52,7 +54,7 @@ export const fetchChangesData = fetchFactory(
     const {moduleData} = yield getModuleData();
     
 
-    return {commitsFiles, commitsModules, moduleData, firstCommit, lastCommit, pathFilter, lowerBounds};
+    return {commitsFiles, commitsModules, moduleData, firstCommit, lastCommit, pathFilter, lowerBounds, entitySelection};
   },
   requestData,
   receiveData,

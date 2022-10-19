@@ -7,13 +7,13 @@ import GlobalZoomableSvg from '../../../../components/svg/GlobalZoomableSvg.js';
 import ChartContainer from '../../../../components/svg/ChartContainer.js';
 import styles from '../styles.scss';
 import * as zoomUtils from '../../../../utils/zoom.js';
-import {computeFileDependencies, computeModuleDependencies, assignModuleIndicesToFiles} from './computeUtils.js';
+import {computeFileDependencies, computeModuleDependencies, assignModuleIndicesToFiles, createSubModuleLinks} from './computeUtils.js';
 
 const CHART_FILL_RATIO = 0.65;
 
 // graph parameters
-let dataset = undefined;
-let simulation = undefined;
+let _dataset = undefined;
+let _simulation = undefined;
 
 export default class CoChangeGraph extends React.Component {  
   constructor(props) {
@@ -33,11 +33,10 @@ export default class CoChangeGraph extends React.Component {
   * @param nextProps props that are passed
   */
   componentWillReceiveProps(nextProps) {
-    console.log("Props:");
-    console.log(nextProps);
+    //console.log("Props:");
+    //console.log(nextProps);
 
     const newDataset = computeFileDependencies(nextProps);
-    console.log(newDataset)
     const {fileToModuleLinks, moduleToModuleLinks} = assignModuleIndicesToFiles(newDataset.nodes, nextProps.moduleData);
     
 
@@ -45,12 +44,19 @@ export default class CoChangeGraph extends React.Component {
     newDataset.fileToModuleLinks = fileToModuleLinks;
     newDataset.moduleToModuleLinks = moduleToModuleLinks;
 
-    //const module_dataset = computeModuleDependencies(nextProps);
-    dataset = newDataset;
+    const module_dataset = computeModuleDependencies(nextProps);
+    module_dataset.fileToModuleLinks = [];
+    module_dataset.moduleToModuleLinks = createSubModuleLinks(nextProps.moduleData, module_dataset.nodes);
 
-    if(dataset != undefined) {
-      if(simulation != undefined){
-        simulation.stop();
+    if (nextProps.entitySelection === "files"){
+      _dataset = newDataset;
+    } else {
+      _dataset = module_dataset;
+    }
+
+    if(_dataset != undefined) {
+      if(_simulation != undefined){
+        _simulation.stop();
       }
 
       this.removeGraph();
@@ -73,14 +79,14 @@ export default class CoChangeGraph extends React.Component {
     const link = svg.append("g")
       .attr("class", "links")
       .selectAll("line")
-      .data(dataset.links)
+      .data(_dataset.links)
       .enter().append("line");
   
     // Initialize the nodes
     const node = svg.append("g")
       .attr("class", "nodes")
       .selectAll("circle")
-      .data(dataset.nodes)
+      .data(_dataset.nodes)
       .enter().append("circle")
       .attr("r", 20)
       .style("fill", (d) => {return d.type == "m" ? "yellow" : "pink"});
@@ -89,15 +95,15 @@ export default class CoChangeGraph extends React.Component {
     const text = svg.append("g")
       .attr("class", "text")
       .selectAll("text")
-      .data(dataset.nodes)
+      .data(_dataset.nodes)
       .enter().append("text")
       .text(d => d.name)
 
     // Initialize the simualtion
-    simulation = d3.forceSimulation(dataset.nodes)
-      .force('links', d3.forceLink().links(dataset.links).strength(0))
-      .force('fileToModuleLinks', d3.forceLink().links(dataset.fileToModuleLinks).distance(60))
-      .force('moduleToModuleLinks', d3.forceLink().links(dataset.moduleToModuleLinks).strength(0.15))
+    _simulation = d3.forceSimulation(_dataset.nodes)
+      .force('links', d3.forceLink().links(_dataset.links).strength(0))
+      .force('fileToModuleLinks', d3.forceLink().links(_dataset.fileToModuleLinks).distance(60))
+      .force('moduleToModuleLinks', d3.forceLink().links(_dataset.moduleToModuleLinks).strength(0.15))
       .force('repellent force near', d3.forceManyBody().strength(-500).distanceMin(0).distanceMax(200))
       .force('repellent force far', d3.forceManyBody().strength(-200).distanceMin(200).distanceMax(500))
       //.force('x', d3.forceX().strength(0.0010))

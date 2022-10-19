@@ -1,3 +1,5 @@
+import { file } from "jszip";
+
 export function computeFileDependencies(props){
     if(props.commitsFiles === undefined){
         console.error("Error: commitsFiles is undefined!");
@@ -37,17 +39,14 @@ export function computeFileDependencies(props){
     } else {
         fileSet = filterEntities("ui/src/visualizations", fileSet);
     }
-    
+
     let dataset = computeDependencyDataset(fileSet, sharedCommitCnt, commitCntPerFile);
-    console.log(dataset.links)
     dataset = filterDependencyDataset(dataset, props.lowerBounds);
-    console.log(dataset.links)
     return dataset;
 }
 
 // Same as computeFileDependencies for now, but for modules
 export function computeModuleDependencies(props){
-    console.log(props);
     if(props.commitsModules === undefined){
         console.error("Error: commitsModules is undefined!");
         return null;
@@ -81,8 +80,14 @@ export function computeModuleDependencies(props){
         }
     }
 
-    moduleSet = filterEntities("./ui/src/visualizations/legacy/code-hotspots", moduleSet);
+    moduleSet = filterEntities(props.pathFilter, moduleSet);
     let dataset = computeDependencyDataset(moduleSet, sharedCommitCnt, commitCntPerModule);
+
+    dataset.nodes.forEach(node => {
+        node.name = node.id;
+        node.type = "m"
+    })
+
     return dataset;
 }
 
@@ -209,6 +214,7 @@ function filterDependencyDataset(dataset, threshold){
 /*
 * Generate list of all modules and create module indices for the files
 * Also adds nodes for the used modules to the provided nodes list
+* Additionally adds "name" attribute to files which is without the leading path
 */
 
 export function assignModuleIndicesToFiles(nodes, allModules){
@@ -244,7 +250,7 @@ export function assignModuleIndicesToFiles(nodes, allModules){
         }
     }
 
-    const moduleToModuleLinks = createSubModuleLinks(usedModules, nodes);
+    const moduleToModuleLinks = internalCreateSubModuleLinks(usedModules, nodes);
 
     return {fileToModuleLinks, moduleToModuleLinks};
 }
@@ -254,7 +260,26 @@ export function assignModuleIndicesToFiles(nodes, allModules){
 * Function to create links between submodules and modules
 */
 
-export function createSubModuleLinks(usedModules, nodes){
+export function createSubModuleLinks(moduleData, nodes){
+    const modules = moduleData;
+    console.log("modules");
+    console.log(modules);
+
+    let usedModules = new Array();
+
+    moduleData.forEach(module => {
+        const isInUse = nodes.findIndex(_ => _.id === module.path)
+        if (isInUse != -1) {
+            usedModules.push(module);
+        }
+    });
+
+    return internalCreateSubModuleLinks(usedModules, nodes);
+}
+
+
+
+function internalCreateSubModuleLinks(usedModules, nodes){
     let moduleLinks = new Array();
 
     for (const module of usedModules) {

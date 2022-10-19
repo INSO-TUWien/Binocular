@@ -40,19 +40,19 @@ const mapStateToProps = (state /*, ownProps*/) => {
 
 let filter = "ui/src/visualizations/";
 let lowerBounds = 0.0;
+let entitySelection = "files";
 
 const mapDispatchToProps = (dispatch /*, ownProps*/) => {
   return {
     onChangeTimeSpan: (timeSpan) => dispatch(setTimeSpan(timeSpan)),
-    onTimeSpanApply: () => dispatch(applyTimeSpan({filter: filter, lowerBounds: lowerBounds, entitySelection: props.entitySelection})),
+    onTimeSpanApply: () => dispatch(applyTimeSpan({filter: filter, lowerBounds: lowerBounds, entitySelection: entitySelection})),
     onFilterChange: (filterContent) => {filter = filterContent},
     onBoundraryChange: (boundrary) => {lowerBounds = boundrary},
-    onEntitySelectionChange: (entityType) => dispatch(setEntitySelection(entityType))
+    onEntitySelectionChange: (entityType) => {entitySelection = entityType; dispatch(setEntitySelection(entityType))}
   };
 };
 
 const CoChangeConfigComponent = props => {
-  console.log(props)
   return (
     <div className={styles.configContainer}>
       <form>
@@ -62,7 +62,7 @@ const CoChangeConfigComponent = props => {
               <input
                 name="entitySelection"
                 type="radio"
-                checked={props.entitySelection === 'files'}
+                checked={entitySelection === 'files'}
                 onChange={() => props.onEntitySelectionChange('files')}
               />
               Files
@@ -71,7 +71,7 @@ const CoChangeConfigComponent = props => {
               <input
                 name="entitySelection"
                 type="radio"
-                checked={props.entitySelection === 'modules'}
+                checked={entitySelection === 'modules'}
                 onChange={() => props.onEntitySelectionChange('modules')}
               />
               Modules
