@@ -173,16 +173,26 @@ export default class CoChangeGraph extends React.Component {
           .attr("y2", d.target.y)    
           .selectAll("stop")                      
           .data([                             
-              {offset: "0%", color: d3.rgb(d.sourceColor * 255, ((1-d.sourceColor) * 255), 0)},       
-              {offset: "49%", color: d3.rgb(d.sourceColor * 255, ((1-d.sourceColor) * 255), 0)},
-              {offset: "50%", color: d3.rgb(d.targetColor * 255, ((1-d.targetColor) * 255), 0)}, 
-              {offset: "100%", color: d3.rgb(d.targetColor * 255, ((1-d.targetColor) * 255), 0)}
+              {offset: "0%", color: createColorGradient(d.sourceColor)},       
+              {offset: "49%", color: createColorGradient(d.sourceColor)},
+              {offset: "50%", color: createColorGradient(d.targetColor)}, 
+              {offset: "100%", color: createColorGradient(d.targetColor)}
           ])                  
           .enter().append("stop")         
           .attr("offset", function(d) { return d.offset; })   
           .attr("stop-color", function(d) { return d.color; }); 
                   
       self.style("stroke", "url(#" + gradientId + ")")
+    }
+
+    // create color for gradient strength must be a value between 0 and 1
+    // the gradient goes from red to yellow to green
+    function createColorGradient(strength) {
+      if(strength >= 0.5) {
+        return d3.rgb(255, (1 - strength) * 2 * 255, 0)
+      } else {
+        return d3.rgb(strength * 2 * 255, 255, 0)
+      }
     }
   
     function refreshGradient(line, d){
