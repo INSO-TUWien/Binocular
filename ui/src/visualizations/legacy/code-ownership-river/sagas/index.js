@@ -96,6 +96,10 @@ export const fetchCodeOwnershipData = fetchFactory(
 
     let firstSignificantTimestamp = Math.max(viewport[0], Math.min(firstCommitTimestamp, firstIssueTimestamp));
     let lastSignificantTimestamp = viewport[1] ? viewport[1].getTime() : Math.max(lastCommitTimestamp, lastIssueTimestamp);
+
+    const firstSignificantIssueTimestamp = Math.max(firstSignificantTimestamp, firstIssueTimestamp);
+    const lastSignificantIssueTimestamp = Math.min(lastSignificantTimestamp, lastIssueTimestamp);
+
     const timeSpan = state.visualizations.newDashboard.state.config.chartTimeSpan;
     firstSignificantTimestamp = timeSpan.from === undefined ? firstSignificantTimestamp : new Date(timeSpan.from).getTime();
     lastSignificantTimestamp = timeSpan.to === undefined ? lastSignificantTimestamp : new Date(timeSpan.to).getTime();
@@ -114,7 +118,7 @@ export const fetchCodeOwnershipData = fetchFactory(
       ),
       Database.getIssueDataOwnershipRiver(
         [firstIssueTimestamp, lastIssueTimestamp],
-        [firstSignificantTimestamp, lastSignificantTimestamp],
+        [firstSignificantIssueTimestamp, lastSignificantIssueTimestamp],
         granularity,
         interval
       ),
