@@ -102,36 +102,39 @@ export default class CoChangeGraph extends React.Component {
     // Initialize the simualtion
     _simulation = d3.forceSimulation(_dataset.nodes)
       .force('links', d3.forceLink().links(_dataset.links).strength(0))
-      .force('fileToModuleLinks', d3.forceLink().links(_dataset.fileToModuleLinks).distance(60))
+      .force('fileToModuleLinks', d3.forceLink().links(_dataset.fileToModuleLinks).distance(80))
       .force('moduleToModuleLinks', d3.forceLink().links(_dataset.moduleToModuleLinks).strength(0.15))
-      .force('repellent force near', d3.forceManyBody().strength(-500).distanceMin(0).distanceMax(200))
-      .force('repellent force far', d3.forceManyBody().strength(-200).distanceMin(200).distanceMax(500))
+      .force('repellent force near', d3.forceManyBody().strength(-1000).distanceMin(0).distanceMax(400))
+      .force('repellent force far', d3.forceManyBody().strength(-200).distanceMin(400).distanceMax(1000))
       //.force('x', d3.forceX().strength(0.0010))
       //.force('y', d3.forceY().strength(0.0010))
       .on("tick", ticked); 
 
-    let counter = 0;
+    let debouncer;
+    let time = Date.now();
 
     // advance simulation
     function ticked() {
-      node.attr("cx", d => d.x)
-          .attr("cy", d => d.y);
+      clearTimeout(debouncer);
 
-      link.attr("x1", d => d.source.x)
-        .attr("y1", d => d.source.y)
-        .attr("x2", d => d.target.x)
-        .attr("y2", d => d.target.y);
+      // only update the view once the simulation didn't have a new step in 1 second
+      debouncer = setTimeout(_ => {
+        node.attr("cx", d => d.x)
+        .attr("cy", d => d.y);
 
-      text.attr("x", d => d.x - 5) //position of the lower left point of the text
-          .attr("y", d => d.y + 5); //position of the lower left point of the text
-    
-      if(counter >= 10){
+        link.attr("x1", d => d.source.x)
+          .attr("y1", d => d.source.y)
+          .attr("x2", d => d.target.x)
+          .attr("y2", d => d.target.y);
+
+        text.attr("x", d => d.x - 5) //position of the lower left point of the text
+            .attr("y", d => d.y + 5); //position of the lower left point of the text
+
         link.each(function(d){refreshGradient(this, d)});
-        counter = 0;
-      } else {
-        counter++;
-      }
+        let timeToRender = Date.now() - time;
+        console.log("rendered in: " + timeToRender);
 
+      }, 1000)
     }
 
     // node highlighting functionality
@@ -151,8 +154,6 @@ export default class CoChangeGraph extends React.Component {
         }
       });
       
-
-
       text.style("fill", function (link_d) {
         return targetNodes.has(link_d.id) || targetModuls.has(link_d.id) ? 'black' : 'transparent'
       })
