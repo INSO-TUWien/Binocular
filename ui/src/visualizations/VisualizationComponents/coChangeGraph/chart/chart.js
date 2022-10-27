@@ -141,12 +141,25 @@ export default class CoChangeGraph extends React.Component {
       const links = link.filter(_ => _.source.id === d.id || _.target.id === d.id);
       links.raise();
 
-      let targetNodes = [];
-      links.each(_ => {targetNodes.push(_.target.id); targetNodes.push(_.source.id)});
+      let targetNodes = new Set();
+      links.each(_ => {targetNodes.add(_.target.id); targetNodes.add(_.source.id)});
 
-      text.style("fill", function (link_d) {return targetNodes.includes(link_d.id) ? 'black' : 'transparent'})
-      node.style('stroke-width', function (node_d) {return targetNodes.includes(node_d.id) ? 1 : 0.1})
-      node.style('fill', function (node_d) {return targetNodes.includes(node_d.id) ? "orange" : "transparent"})
+      let targetModuls = new Set();
+      _dataset.fileToModuleLinks.forEach(element => {
+        if (targetNodes.has(element.source.id)) {
+          targetModuls.add(element.target.id)
+        }
+      });
+      
+
+
+      text.style("fill", function (link_d) {
+        return targetNodes.has(link_d.id) || targetModuls.has(link_d.id) ? 'black' : 'transparent'
+      })
+      node.style('stroke-width', function (node_d) {return targetNodes.has(node_d.id) ? 1 : 0.1})
+      node.style('fill', function (node_d) {
+        return targetNodes.has(node_d.id) ? "orange" : targetModuls.has(node_d.id) ? "yellow" : "transparent"
+      })
 
       d3.select(this).style('fill', 'red');
     })

@@ -37,7 +37,7 @@ export function computeFileDependencies(props){
     if(props.pathFilter != undefined && props.pathFilter != ""){
         fileSet = filterEntities(props.pathFilter, fileSet);
     } else {
-        fileSet = filterEntities("ui/src/visualizations", fileSet);
+        fileSet = filterEntities("", fileSet);
     }
 
     let dataset = computeDependencyDataset(fileSet, sharedCommitCnt, commitCntPerFile);
@@ -88,6 +88,7 @@ export function computeModuleDependencies(props){
         node.type = "m"
     })
 
+    dataset = filterDependencyDataset(dataset, props.lowerBounds);
     return dataset;
 }
 
