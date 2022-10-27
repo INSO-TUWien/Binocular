@@ -137,8 +137,12 @@ export default class CoChangeGraph extends React.Component {
       }, 1000)
     }
 
+
+    let fixedHighlighting = false;
     // node highlighting functionality
-    node.on('mouseover', function (event, d) {     
+    node.on('mouseover', function (event, d) {   
+      if(fixedHighlighting) return;
+        
       // Highlight the connections
       link.style('stroke-width', function (link_d) {return link_d.source.id === d.id || link_d.target.id === d.id ? 5 : 0.1;})
       const links = link.filter(_ => _.source.id === d.id || _.target.id === d.id);
@@ -165,12 +169,17 @@ export default class CoChangeGraph extends React.Component {
       d3.select(this).style('fill', 'red');
     })
     .on('mouseout', function (d) {
+      if(fixedHighlighting) return;
+
       node.style('fill', function (node_d) {return node_d.type == "m" ? "yellow" : "pink"})
       node.style('stroke-width', 1);
       link.style('stroke-width', '1');
       text.style("fill", 'black');
       text.style('font-size', '16');
     })
+    .on('click', function(d){
+      fixedHighlighting = fixedHighlighting ? false : true;
+    });
 
     // link color functions
     // create the baseline gradient for the links
