@@ -20,17 +20,7 @@ export default function* () {
   // fetch data once on entry
   yield* fetchIssuesData();
 
-  yield fork(watchRefreshRequests);
-  yield fork(watchMessages);
 
-  // keep looking for viewport changes to re-fetch
-  yield fork(watchRefresh);
-  yield fork(watchToggleHelp);
-
-  // keep looking for universal settings changes
-  yield fork(watchTimeSpan);
-  yield fork(watchSelectedAuthorsGlobal);
-  yield fork(watchAllAuthors);
 }
 
 function* watchTimeSpan() {

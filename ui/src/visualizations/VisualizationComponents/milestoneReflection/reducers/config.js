@@ -17,7 +17,6 @@ export default handleActions(
   {
     issueInfo: 'loc',
     milestone: null,
-    issues: ['-1-', '-2-'],
   }
 );
 
