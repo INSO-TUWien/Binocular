@@ -7,13 +7,14 @@ import GlobalZoomableSvg from '../../../../components/svg/GlobalZoomableSvg.js';
 import ChartContainer from '../../../../components/svg/ChartContainer.js';
 import styles from '../styles.scss';
 import * as zoomUtils from '../../../../utils/zoom.js';
-import {computeFileDependencies, computeModuleDependencies, assignModuleIndicesToFiles, createSubModuleLinks} from './computeUtils.js';
+import {computeFileDependencies, computeModuleDependencies, assignModuleIndicesToFiles, createSubModuleLinks, removeIntraModuleLinks} from './computeUtils.js';
 
 const CHART_FILL_RATIO = 0.65;
 
 // graph parameters
 let _dataset = undefined;
 let _simulation = undefined;
+let _showIntraModuleDeps = true;
 
 export default class CoChangeGraph extends React.Component {  
   constructor(props) {
@@ -36,9 +37,17 @@ export default class CoChangeGraph extends React.Component {
     //console.log("Props:");
     //console.log(nextProps);
 
+    if(_showIntraModuleDeps != nextProps.showIntraModuleDeps){
+      _showIntraModuleDeps = nextProps.showIntraModuleDeps;
+      return;
+    }
+
     const newDataset = computeFileDependencies(nextProps);
     const {fileToModuleLinks, moduleToModuleLinks} = assignModuleIndicesToFiles(newDataset.nodes, nextProps.moduleData);
-    
+
+    if(!_showIntraModuleDeps){
+      newDataset.links = removeIntraModuleLinks(newDataset);
+    }
 
     // (invisible) links solely used to generate force layout
     newDataset.fileToModuleLinks = fileToModuleLinks;
@@ -76,7 +85,7 @@ export default class CoChangeGraph extends React.Component {
     const defs = svg.append("defs");
 
     // Initialize the links
-    const link = svg.append("g")
+    const links = svg.append("g")
       .attr("class", "links")
       .selectAll("line")
       .data(_dataset.links)
@@ -122,7 +131,7 @@ export default class CoChangeGraph extends React.Component {
         node.attr("cx", d => d.x)
         .attr("cy", d => d.y);
 
-        link.attr("x1", d => d.source.x)
+        links.attr("x1", d => d.source.x)
           .attr("y1", d => d.source.y)
           .attr("x2", d => d.target.x)
           .attr("y2", d => d.target.y);
@@ -130,7 +139,7 @@ export default class CoChangeGraph extends React.Component {
         text.attr("x", d => d.x - 5) //position of the lower left point of the text
             .attr("y", d => d.y + 5); //position of the lower left point of the text
 
-        link.each(function(d){refreshGradient(this, d)});
+        links.each(function(d){refreshGradient(this, d)});
         let timeToRender = Date.now() - time;
         console.log("rendered in: " + timeToRender);
 
@@ -144,12 +153,12 @@ export default class CoChangeGraph extends React.Component {
       if(fixedHighlighting) return;
         
       // Highlight the connections
-      link.style('stroke-width', function (link_d) {return link_d.source.id === d.id || link_d.target.id === d.id ? 5 : 0.1;})
-      const links = link.filter(_ => _.source.id === d.id || _.target.id === d.id);
-      links.raise();
+      links.style('stroke-width', function (link_d) {return link_d.source.id === d.id || link_d.target.id === d.id ? 5 : 0.1;})
+      const _links = links.filter(_ => _.source.id === d.id || _.target.id === d.id);
+      _links.raise();
 
       let targetNodes = new Set();
-      links.each(_ => {targetNodes.add(_.target.id); targetNodes.add(_.source.id)});
+      _links.each(_ => {targetNodes.add(_.target.id); targetNodes.add(_.source.id)});
 
       let targetModuls = new Set();
       _dataset.fileToModuleLinks.forEach(element => {
@@ -173,7 +182,7 @@ export default class CoChangeGraph extends React.Component {
 
       node.style('fill', function (node_d) {return node_d.type == "m" ? "yellow" : "pink"})
       node.style('stroke-width', 1);
-      link.style('stroke-width', '1');
+      links.style('stroke-width', '1');
       text.style("fill", 'black');
       text.style('font-size', '16');
     })

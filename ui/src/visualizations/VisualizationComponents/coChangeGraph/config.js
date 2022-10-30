@@ -4,9 +4,8 @@ import _ from 'lodash';
 import { connect } from 'react-redux';
 
 import styles from './styles.scss';
-import { setTimeSpan, applyTimeSpan, setEntitySelection } from './sagas';
+import { setTimeSpan, applyTimeSpan, setEntitySelection, setShowIntraModuleDeps } from './sagas';
 import DateRangeFilter from '../../../components/DateRangeFilter/dateRangeFilter';
-import { props } from 'bluebird';
 
 
 const mapStateToProps = (state /*, ownProps*/) => {
@@ -35,11 +34,12 @@ const mapStateToProps = (state /*, ownProps*/) => {
     firstDisplayDate: firstDisplayDate,
     lastDisplayDate: lastDisplayDate,
     entitySelection: coChangeState.config.entitySelection,
+    showIntraModuleDeps: coChangeState.config.showIntraModuleDeps,
   };
 };
 
 let filter = "ui/src/visualizations/";
-let lowerBounds = 0.0;
+let lowerBounds = 0.1;
 let entitySelection = "files";
 
 const mapDispatchToProps = (dispatch /*, ownProps*/) => {
@@ -48,14 +48,14 @@ const mapDispatchToProps = (dispatch /*, ownProps*/) => {
     onTimeSpanApply: () => dispatch(applyTimeSpan({filter: filter, lowerBounds: lowerBounds, entitySelection: entitySelection})),
     onFilterChange: (filterContent) => {filter = filterContent},
     onBoundraryChange: (boundrary) => {lowerBounds = boundrary},
-    onEntitySelectionChange: (entityType) => {entitySelection = entityType; dispatch(setEntitySelection(entityType))}
+    onEntitySelectionChange: (entityType) => {entitySelection = entityType; dispatch(setEntitySelection(entityType))},
+    onSetShowIntraModuleDeps: (b) => dispatch(setShowIntraModuleDeps(b))
   };
 };
 
 const CoChangeConfigComponent = props => {
   return (
     <div className={styles.configContainer}>
-      <form>
         <div className="control">
             <label className="label">Show graph for:</label>
             <label className="radio">
@@ -93,11 +93,20 @@ const CoChangeConfigComponent = props => {
                 onChange={(e) => {props.onFilterChange(e.target.value)}}></input>
         <label className="label">Lower Boundrary for Co-Changes</label>
         <input  type="number" 
-                defaultValue="0.1"
+                defaultValue={lowerBounds}
                 step="0.05"
                 onChange={(e) => {props.onBoundraryChange(e.target.value)}}
-                ></input>
-      </form>
+        ></input>
+        <label className="checkbox">
+              <input
+                type="checkbox"
+                id="filterIntraModule"
+                checked={props.showIntraModuleDeps}
+                onChange={(e) => props.onSetShowIntraModuleDeps(e.target.checked)}
+              />
+              Show intra-module dependencies
+        </label>
+        <br/><br/>
       <button onClick={() => {props.onTimeSpanApply()}}>Apply</button>
     </div>
   );

@@ -1,4 +1,5 @@
 import { file } from "jszip";
+import { forEach } from "lodash";
 
 export function computeFileDependencies(props){
     if(props.commitsFiles === undefined){
@@ -198,13 +199,17 @@ function computeDependencyDataset(entitySet, sharedCommitCnt, commitCntPerEntity
 function filterDependencyDataset(dataset, threshold){
     const links = dataset.links;
     const filteredLinks = [];
+    let removedDependencies = 0;
 
     links.forEach(link => {
         if(link.sourceColor >= threshold || link.targetColor >= threshold){
             filteredLinks.push(link);
+        } else {
+            removedDependencies++;
         }
     });
 
+    console.log(removedDependencies + " dependencies were below the threshold of " + threshold);
     dataset.links = filteredLinks;
     return dataset;
 }
@@ -262,10 +267,6 @@ export function assignModuleIndicesToFiles(nodes, allModules){
 */
 
 export function createSubModuleLinks(moduleData, nodes){
-    const modules = moduleData;
-    console.log("modules");
-    console.log(modules);
-
     let usedModules = new Array();
 
     moduleData.forEach(module => {
@@ -301,4 +302,27 @@ function internalCreateSubModuleLinks(usedModules, nodes){
     }
 
     return moduleLinks;
+}
+
+// returns set of links with intra-module links removed
+export function removeIntraModuleLinks(dataset){
+    let filteredLinks = [];
+    let removedLinks = 0;
+
+    for(const link of dataset.links) {
+        const node1 = dataset.nodes[link.source];
+        const node2 = dataset.nodes[link.target];
+
+        const module1 = node1.id.replace(node1.name);
+        const module2 = node2.id.replace(node2.name);
+
+        if(module1 === module2){
+            removedLinks++;
+            continue;
+        }
+        filteredLinks.push(link);
+    }
+
+    console.log("Removed " + removedLinks + " intra-module dependencies")
+    return filteredLinks;
 }

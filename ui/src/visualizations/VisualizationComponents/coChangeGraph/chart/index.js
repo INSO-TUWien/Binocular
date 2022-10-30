@@ -14,7 +14,8 @@ const mapStateToProps = (state /*, ownProps*/) => {
     moduleData: coChangeState.data.data.moduleData,
     pathFilter: coChangeState.data.data.pathFilter,
     lowerBounds: coChangeState.data.data.lowerBounds,
-    entitySelection: coChangeState.data.data.entitySelection
+    entitySelection: coChangeState.data.data.entitySelection,
+    showIntraModuleDeps: coChangeState.config.showIntraModuleDeps,
   };
 };
 
