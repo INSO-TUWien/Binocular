@@ -86,3 +86,14 @@
   }
 }
 
+.errorMessage:before {
+  content: "";
+  display: inline-block;
+  height: 100%;
+  vertical-align: middle;
+}
+
+.errorMessage{
+  width: 100%;
+  text-align: center;
+}

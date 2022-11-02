@@ -46,28 +46,6 @@
   background-color: #fff;
 }
 
-.addVisualization{
-  position: absolute;
-  top: 1rem;
-  left: 1rem;
-  background-color: #3273dc;
-  width: 3rem;
-  height: 3rem;
-  border-radius: 100%;
-  box-shadow: 0 0 10px #555A;
-  line-height: 2.8rem;
-  font-size: 2rem;
-  color: white;
-  font-weight: bold;
-  text-align: center;
-  cursor: pointer;
-  border:none;
-}
-
-.addVisualization:hover{
-  background: #4882e0;
-}
-
 .extendHorizontalButton{
   display: inline-block;
   float: right;
@@ -139,4 +117,48 @@
   float: right;
   border-radius: 0.2rem;
   cursor: pointer;
+}
+
+.dashboardMenu{
+  position: absolute;
+  width: 100%;
+  padding-top: 1rem;
+}
+
+.dashboardMenuButton{
+  display: inline-block;
+  background-color: #3273dc;
+  height: 3rem;
+  border-radius: 1.5rem;
+  box-shadow: 0 0 10px #555A;
+  line-height: 2.8rem;
+  font-size: 1.5rem;
+  color: white;
+  text-align: center;
+  cursor: pointer;
+  border:none;
+  padding: 0 1.5rem;
+  transition: all 0.2s ease-in-out;
+  margin: 0 0.5rem;
+}
+
+.dashboardMenuButton:hover{
+  background: #4882e0;
+}
+
+.addVisualization{
+  width: 3rem;
+  line-height: 2.8rem;
+  font-weight: bold;
+  padding: 0;
+}
+
+.dashboardMenuButtonInverted{
+  background-color:transparent;
+  color: #3273dc;
+  box-shadow: none;
+}
+
+.dashboardMenuButtonInverted:hover{
+  background: #cccccc33;
 }

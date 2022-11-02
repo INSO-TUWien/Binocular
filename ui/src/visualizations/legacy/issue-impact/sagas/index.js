@@ -5,8 +5,8 @@ import { select, takeEvery, fork } from 'redux-saga/effects';
 
 import { fetchFactory, timestampedActionFactory } from '../../../../sagas/utils.js';
 import { graphQl } from '../../../../utils';
-import getBounds from './getBounds';
 import Promise from 'bluebird';
+import Database from '../../../../database/database';
 
 export const setActiveIssue = createAction('SET_ACTIVE_ISSUE', (i) => i);
 export const setFilteredCommits = createAction('SET_FILTERED_COMMITS', (cs) => cs);
@@ -64,7 +64,7 @@ export const fetchIssueImpactData = fetchFactory(
   function* () {
     const state = yield select();
     const activeIssueId = state.visualizations.issueImpact.state.config.activeIssueId;
-    const { firstCommit, lastCommit, committers, firstIssue, lastIssue } = yield getBounds();
+    const { firstCommit, lastCommit, committers, firstIssue, lastIssue } = yield Database.getBounds();
     const firstCommitTimestamp = Date.parse(firstCommit.date);
     const lastCommitTimestamp = Date.parse(lastCommit.date);
     const viewport = state.visualizations.issueImpact.state.config.viewport || [0, null];
@@ -82,8 +82,8 @@ export const fetchIssueImpactData = fetchFactory(
     }
 
     return yield Promise.join(
-      issueImpactQuery(activeIssueId, firstSignificantTimestamp, lastSignificantTimestamp),
-      issueImpactQuery(activeIssueId, firstIssueTimestamp, lastIssueTimestamp)
+      Database.issueImpactQuery(activeIssueId, firstSignificantTimestamp, lastSignificantTimestamp),
+      Database.issueImpactQuery(activeIssueId, firstIssueTimestamp, lastIssueTimestamp)
     ).then((resp) => {
       return [resp[0], resp[1]];
     });
@@ -92,66 +92,3 @@ export const fetchIssueImpactData = fetchFactory(
   receiveIssueImpactData,
   receiveIssueImpactDataError
 );
-
-function issueImpactQuery(iid, since, until) {
-  return graphQl.query(
-    `query($iid: Int!, $since: Timestamp, $until: Timestamp) {
-           issue(iid: $iid) {
-             iid
-             title
-             createdAt
-             closedAt,
-             webUrl
-             commits (since: $since, until: $until) {
-               data {
-                 sha
-                 shortSha
-                 messageHeader
-                 date
-                 webUrl
-                 files {
-                   data {
-                     lineCount
-                     hunks {
-                       newStart
-                       newLines
-                       oldStart
-                       oldLines
-                       webUrl
-                     }
-                     stats {
-                      additions
-                      deletions
-                     }
-                     file {
-                       id
-                       path
-                       webUrl
-                       maxLength
-                     }
-                   }
-                 }
-                 builds {
-                   id
-                   createdAt
-                   finishedAt
-                   duration
-                   status
-                   webUrl
-                   jobs {
-                     id
-                     name
-                     stage
-                     status
-                     createdAt
-                     finishedAt
-                     webUrl
-                   }
-                 }
-               }
-             }
-           }
-         }`,
-    { iid: iid, since: since, until: until }
-  );
-}

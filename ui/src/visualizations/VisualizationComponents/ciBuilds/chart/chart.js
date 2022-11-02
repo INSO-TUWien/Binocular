@@ -37,15 +37,19 @@ export default class CIBuilds extends React.Component {
     const ciChart = (
       <div className={styles.chartLine}>
         <div className={styles.chart}>
-          <StackedAreaChart
-            content={this.state.ciChartData}
-            palette={{ Succeeded: '#26ca3b', Failed: '#e23b41' }}
-            paddings={{ top: 20, left: 60, bottom: 20, right: 30 }}
-            xAxisCenter={true}
-            yDims={this.state.ciScale}
-            d3offset={d3.stackOffsetDiverging}
-            resolution={this.props.chartResolution}
-          />
+          {this.state.ciChartData !== undefined && this.state.ciChartData.length > 0 ? (
+            <StackedAreaChart
+              content={this.state.ciChartData}
+              palette={{ Succeeded: '#26ca3b', Failed: '#e23b41' }}
+              paddings={{ top: 20, left: 60, bottom: 20, right: 30 }}
+              xAxisCenter={true}
+              yDims={this.state.ciScale}
+              d3offset={d3.stackOffsetDiverging}
+              resolution={this.props.chartResolution}
+            />
+          ) : (
+            <div className={styles.errorMessage}>No data during this time period!</div>
+          )}
         </div>
       </div>
     );

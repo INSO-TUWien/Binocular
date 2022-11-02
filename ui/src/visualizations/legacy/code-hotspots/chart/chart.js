@@ -18,12 +18,13 @@ import VisualizationSelector from '../components/VisulaizationSelector/visualiza
 import SearchBar from '../components/searchBar/searchBar';
 import searchAlgorithm from '../components/searchBar/searchAlgorithm';
 import chartStyles from './chart.scss';
+import Database from '../../../../database/database';
 
 export default class CodeHotspots extends React.PureComponent {
   constructor(props) {
     super(props);
 
-    this.requestFileStructure().then(function(resp) {
+    this.requestFileStructure().then(function (resp) {
       const files = [];
       for (const i in resp) {
         files.push({ key: resp[i].path, webUrl: resp[i].webUrl });
@@ -49,10 +50,10 @@ export default class CodeHotspots extends React.PureComponent {
         customDataScale: false,
         dateRange: {
           from: '',
-          to: ''
+          to: '',
         },
-        heatMapStyle: 0
-      }
+        heatMapStyle: 0,
+      },
     };
 
     this.combinedColumnData = {};
@@ -61,7 +62,7 @@ export default class CodeHotspots extends React.PureComponent {
     this.dataChanged = false;
     this.codeChanged = false;
     this.getAllBranches().then(
-      function(resp) {
+      function (resp) {
         let activeBranch = 'main';
         for (const i in resp) {
           if (resp[i].active === 'true') {
@@ -106,7 +107,7 @@ export default class CodeHotspots extends React.PureComponent {
             <span style={{ float: 'left' }}>
               <Settings
                 displayProps={this.state.displayProps}
-                displayPropsChanged={newDisplayProps => {
+                displayPropsChanged={(newDisplayProps) => {
                   this.dataChanged = true;
                   this.setState({ displayProps: newDisplayProps });
                   this.forceUpdate();
@@ -115,8 +116,9 @@ export default class CodeHotspots extends React.PureComponent {
             </span>
             <span className={styles.verticalSeparator} />
             <span style={{ float: 'left' }}>
-              {' '}<VisualizationSelector
-                changeMode={mode => {
+              {' '}
+              <VisualizationSelector
+                changeMode={(mode) => {
                   this.setState({ mode: mode });
                 }}
               />
@@ -132,22 +134,22 @@ export default class CodeHotspots extends React.PureComponent {
                     ? '-n [term] search developer name; ' + '-e [term] search developer email' + '-l [term] search line or multible lines'
                     : this.state.mode === 2
                       ? '-t [term] search title; ' +
-                        '-d [term] search description; ' +
-                        '-i [term] search iid' +
-                        '-l [term] search line or multible lines'
+                      '-d [term] search description; ' +
+                      '-i [term] search iid' +
+                      '-l [term] search line or multible lines'
                       : '-m [term] search commit message; ' +
-                        '-s [term] search commit sha; ' +
-                        '-d [term] search developer; ' +
-                        '-b [term] search branch; ' +
-                        '-l [term] search line or multible lines'
+                      '-s [term] search commit sha; ' +
+                      '-d [term] search developer; ' +
+                      '-b [term] search branch; ' +
+                      '-l [term] search line or multible lines'
                 }
-                onSearchChanged={function(data) {
+                onSearchChanged={function (data) {
                   this.dataChanged = true;
                   this.setState({ filteredData: data });
                 }.bind(this)}
               />
             </span>
-            {this.state.sha !== '' &&
+            {this.state.sha !== '' && (
               <span>
                 <span className={styles.verticalSeparator} />
                 <button
@@ -157,18 +159,21 @@ export default class CodeHotspots extends React.PureComponent {
                   }}>
                   Back to current Version
                 </button>
-              </span>}
+              </span>
+            )}
           </div>
 
           <div className={styles.w100 + ' ' + styles.pr}>
             <div id={'barChartContainer'} className={chartStyles.barChartContainer}>
               <div className={'barChart'} />
             </div>
-            {this.state.mode === 0
-              ? <div className={chartStyles.branchView}>
-                  <div className={'branchView'} />
-                </div>
-              : ''}
+            {this.state.mode === 0 ? (
+              <div className={chartStyles.branchView}>
+                <div className={'branchView'} />
+              </div>
+            ) : (
+              ''
+            )}
             <div className={chartStyles.codeView}>
               <CodeMirror
                 id={'codeView'}
@@ -179,7 +184,7 @@ export default class CodeHotspots extends React.PureComponent {
                   theme: 'default',
                   lineNumbers: true,
                   readOnly: true,
-                  firstLineNumber: this.state.filteredData.firstLineNumber
+                  firstLineNumber: this.state.filteredData.firstLineNumber,
                 }}
               />
               <div className={chartStyles.heatmapContainer}>
@@ -208,7 +213,7 @@ export default class CodeHotspots extends React.PureComponent {
           .replace(this.state.checkedOutBranch, this.state.sha === '' ? this.state.branch : this.state.sha),
         true
       );
-      xhr.onload = function() {
+      xhr.onload = function () {
         if (xhr.readyState === 4) {
           //if (xhr.status === 200) {
           if (this.state.path === this.prevPath && this.state.sha !== this.prevSha) {
@@ -225,7 +230,9 @@ export default class CodeHotspots extends React.PureComponent {
                   ? searchAlgorithm.performIssueSearch(data, this.state.filteredData.searchTerm)
                   : this.state.mode === 1
                     ? searchAlgorithm.performDeveloperSearch(data, this.state.filteredData.searchTerm)
-                    : this.state.mode === 0 ? searchAlgorithm.performCommitSearch(data, this.state.filteredData.searchTerm) : data
+                    : this.state.mode === 0
+                      ? searchAlgorithm.performCommitSearch(data, this.state.filteredData.searchTerm)
+                      : data,
             });
           } else {
             const path = this.state.path;
@@ -238,10 +245,10 @@ export default class CodeHotspots extends React.PureComponent {
               case 1:
                 Loading.setState(33, 'Requesting Developer Data');
                 vcsData.getChangeData(path).then(
-                  function(resp) {
+                  function (resp) {
                     Loading.setState(66, 'Transforming Developer Data');
                     setTimeout(
-                      function() {
+                      function () {
                         const lines = (xhr.status === 200 ? xhr.responseText : '').split(/\r\n|\r|\n/).length;
                         const data = chartUpdater.transformChangesPerDeveloperData(resp, lines);
                         //this.codeChanged = true;
@@ -253,7 +260,7 @@ export default class CodeHotspots extends React.PureComponent {
                         this.setState({
                           code: xhr.status === 200 ? xhr.responseText : 'No commit code in current selected Branch!',
                           data: data,
-                          filteredData: data
+                          filteredData: data,
                         });
                       }.bind(this),
                       0
@@ -264,10 +271,10 @@ export default class CodeHotspots extends React.PureComponent {
               case 2:
                 Loading.setState(33, 'Requesting Issue Data');
                 vcsData.getIssueData(path).then(
-                  function(resp) {
+                  function (resp) {
                     Loading.setState(66, 'Transforming Issue Data');
                     setTimeout(
-                      function() {
+                      function () {
                         const lines = (xhr.status === 200 ? xhr.responseText : '').split(/\r\n|\r|\n/).length;
                         const data = chartUpdater.transformChangesPerIssueData(resp, lines);
                         //this.codeChanged = true;
@@ -278,7 +285,7 @@ export default class CodeHotspots extends React.PureComponent {
                         this.setState({
                           code: xhr.status === 200 ? xhr.responseText : 'No commit code in current selected Branch!',
                           data: data,
-                          filteredData: data
+                          filteredData: data,
                         });
                       }.bind(this),
                       0
@@ -289,10 +296,10 @@ export default class CodeHotspots extends React.PureComponent {
               default:
                 Loading.setState(33, 'Requesting Version Data');
                 vcsData.getChangeData(path).then(
-                  function(resp) {
+                  function (resp) {
                     Loading.setState(66, 'Transforming Version Data');
                     setTimeout(
-                      function() {
+                      function () {
                         const lines = (xhr.status === 200 ? xhr.responseText : '').split(/\r\n|\r|\n/).length;
                         const data = chartUpdater.transformChangesPerVersionData(resp, lines);
 
@@ -317,7 +324,7 @@ export default class CodeHotspots extends React.PureComponent {
                           code: xhr.status === 200 ? xhr.responseText : 'No commit code in current selected Branch!',
                           data: data,
                           filteredData: data,
-                          displayProps: currDisplayProps
+                          displayProps: currDisplayProps,
                         });
                       }.bind(this),
                       0
@@ -329,7 +336,7 @@ export default class CodeHotspots extends React.PureComponent {
           }
         }
       }.bind(this);
-      xhr.onerror = function() {
+      xhr.onerror = function () {
         Loading.setErrorText(xhr.statusText);
         console.error(xhr.statusText);
       };
@@ -340,7 +347,7 @@ export default class CodeHotspots extends React.PureComponent {
   generateCharts() {
     Loading.setState(100, 'Generating Charts');
     setTimeout(
-      function() {
+      function () {
         chartUpdater.generateCharts(this, this.state.mode, this.state.filteredData, this.state.displayProps);
         Loading.remove();
       }.bind(this),
@@ -349,32 +356,10 @@ export default class CodeHotspots extends React.PureComponent {
   }
 
   requestFileStructure() {
-    return BluebirdPromise.resolve(
-      graphQl.query(
-        `
-      query{
-       files(sort: "ASC"){
-          data{path,webUrl}
-        }
-      }
-      `,
-        {}
-      )
-    ).then(resp => resp.files.data);
+    return BluebirdPromise.resolve(Database.requestFileStructure()).then((resp) => resp.files.data);
   }
 
   getAllBranches() {
-    return BluebirdPromise.resolve(
-      graphQl.query(
-        `
-      query{
-       branches(sort: "ASC"){
-          data{branch,active}
-        }
-      }
-      `,
-        {}
-      )
-    ).then(resp => resp.branches.data);
+    return BluebirdPromise.resolve(Database.getAllBranches()).then((resp) => resp.branches.data);
   }
 }

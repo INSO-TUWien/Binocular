@@ -1,13 +1,12 @@
 'use strict';
 
 import { fetchFactory, mapSaga, timestampedActionFactory } from '../../../../sagas/utils';
-import getBounds from './getBounds';
 import Promise from 'bluebird';
 import { select, throttle, fork, takeEvery } from 'redux-saga/effects';
 import { createAction } from 'redux-actions';
-import getCommitData from './getCommitData';
 import chroma from 'chroma-js';
 import _ from 'lodash';
+import Database from '../../../../database/database';
 
 export const setSelectedAuthors = createAction('SET_SELECTED_AUTHORS');
 export const setDisplayMetric = createAction('SET_DISPLAY_METRIC');
@@ -44,7 +43,7 @@ function* watchSelectedAuthorsGlobal() {
 }
 
 function* watchRefreshRequests() {
-  yield throttle(2000, 'REQUEST_REFRESH', mapSaga(refresh));
+  yield throttle(5000, 'REQUEST_REFRESH', mapSaga(refresh));
 }
 
 function* watchMessages() {
@@ -64,7 +63,7 @@ function* watchRefresh() {
  */
 export const fetchChangesData = fetchFactory(
   function* () {
-    const { firstCommit, lastCommit, committers, firstIssue, lastIssue } = yield getBounds();
+    const { firstCommit, lastCommit, committers, firstIssue, lastIssue } = yield Database.getBounds();
     const firstCommitTimestamp = Date.parse(firstCommit.date);
     const lastCommitTimestamp = Date.parse(lastCommit.date);
 
@@ -79,8 +78,8 @@ export const fetchChangesData = fetchFactory(
     firstSignificantTimestamp = timeSpan.from === undefined ? firstSignificantTimestamp : new Date(timeSpan.from).getTime();
     lastSignificantTimestamp = timeSpan.to === undefined ? lastSignificantTimestamp : new Date(timeSpan.to).getTime();
     return yield Promise.join(
-      getCommitData([firstCommitTimestamp, lastCommitTimestamp], [firstSignificantTimestamp, lastSignificantTimestamp]),
-      getCommitData([firstCommitTimestamp, lastCommitTimestamp], [firstCommitTimestamp, lastCommitTimestamp])
+      Database.getCommitData([firstCommitTimestamp, lastCommitTimestamp], [firstSignificantTimestamp, lastSignificantTimestamp]),
+      Database.getCommitData([firstCommitTimestamp, lastCommitTimestamp], [firstCommitTimestamp, lastCommitTimestamp])
     )
       .spread((filteredCommits, commits) => {
         const palette = getPalette(commits, 15, committers.length);

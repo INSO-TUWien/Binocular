@@ -10,12 +10,12 @@ import issues from '../VisualizationComponents/issues';
 import changes from '../VisualizationComponents/changes';
 
 export default {
-  empty,
-  additions_deletions,
+  changes,
+  issues,
+  ciBuilds,
   codeOwnershipRiver,
   issueImpact,
   hotspotDials,
-  ciBuilds,
-  issues,
-  changes,
+  additions_deletions,
+  empty,
 };

@@ -36,7 +36,7 @@ export default function Dial(props) {
   });
 
   const curvePath = new ClosingPathContext();
-  curvePath.smoothCurve(points, { smoothness: 0.5, close: true });
+  curvePath.smoothCurve(points, { smoothness: 0.4, close: true });
 
   const tickMarks = props.categories.map((cat, i) => {
     const textShare = i / props.categories.length;

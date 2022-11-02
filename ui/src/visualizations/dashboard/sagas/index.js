@@ -3,11 +3,10 @@
 import visualizationRegistry from '../visualizationRegistry';
 import { createAction } from 'redux-actions';
 import { fetchFactory, timestampedActionFactory } from '../../../sagas/utils';
-import getBounds from './getBounds';
 import chroma from 'chroma-js';
 import _ from 'lodash';
 import Promise from 'bluebird';
-import getCommitData from './getCommitData';
+import Database from '../../../database/database.js';
 
 export const setResolution = createAction('SET_RESOLUTION');
 export const setTimeSpan = createAction('SET_TIME_SPAN');
@@ -30,13 +29,15 @@ export default function* () {
 
 export const fetchDashboardData = fetchFactory(
   function* () {
-    const { firstCommit, lastCommit, committers, firstIssue, lastIssue } = yield getBounds();
+    const { firstCommit, lastCommit, committers, firstIssue, lastIssue } = yield Database.getBounds();
     const firstCommitTimestamp = Date.parse(firstCommit.date);
     const lastCommitTimestamp = Date.parse(lastCommit.date);
-    return yield Promise.join(getCommitData([firstCommitTimestamp, lastCommitTimestamp], [firstCommitTimestamp, lastCommitTimestamp]))
+
+    return yield Promise.join(
+      Database.getCommitData([firstCommitTimestamp, lastCommitTimestamp], [firstCommitTimestamp, lastCommitTimestamp])
+    )
       .spread((commits) => {
         const palette = getPalette(commits, 15, committers.length);
-
         return {
           firstCommit,
           lastCommit,

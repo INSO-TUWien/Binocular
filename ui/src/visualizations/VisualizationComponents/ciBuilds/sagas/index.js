@@ -1,11 +1,10 @@
 'use strict';
 
 import { fetchFactory, mapSaga, timestampedActionFactory } from '../../../../sagas/utils';
-import getBounds from './getBounds';
 import Promise from 'bluebird';
-import getBuildData from './getBuildData';
 import { select, throttle, fork, takeEvery } from 'redux-saga/effects';
 import { createAction } from 'redux-actions';
+import Database from '../../../../database/database';
 
 export const requestBuildData = createAction('REQUEST_BUILD_DATA');
 export const receiveBuildData = timestampedActionFactory('RECEIVE_BUILD_DATA');
@@ -39,7 +38,7 @@ function* watchSelectedAuthorsGlobal() {
 }
 
 function* watchRefreshRequests() {
-  yield throttle(2000, 'REQUEST_REFRESH', mapSaga(refresh));
+  yield throttle(5000, 'REQUEST_REFRESH', mapSaga(refresh));
 }
 
 function* watchMessages() {
@@ -59,7 +58,7 @@ function* watchRefresh() {
  */
 export const fetchBuildsData = fetchFactory(
   function* () {
-    const { firstCommit, lastCommit, firstIssue, lastIssue } = yield getBounds();
+    const { firstCommit, lastCommit, firstIssue, lastIssue } = yield Database.getBounds();
     const firstCommitTimestamp = Date.parse(firstCommit.date);
     const lastCommitTimestamp = Date.parse(lastCommit.date);
 
@@ -75,8 +74,8 @@ export const fetchBuildsData = fetchFactory(
     firstSignificantTimestamp = timeSpan.from === undefined ? firstSignificantTimestamp : new Date(timeSpan.from).getTime();
     lastSignificantTimestamp = timeSpan.to === undefined ? lastSignificantTimestamp : new Date(timeSpan.to).getTime();
     return yield Promise.join(
-      getBuildData([firstCommitTimestamp, lastCommitTimestamp], [firstSignificantTimestamp, lastSignificantTimestamp]),
-      getBuildData([firstCommitTimestamp, lastCommitTimestamp], [firstCommitTimestamp, lastCommitTimestamp])
+      Database.getBuildData([firstCommitTimestamp, lastCommitTimestamp], [firstSignificantTimestamp, lastSignificantTimestamp]),
+      Database.getBuildData([firstCommitTimestamp, lastCommitTimestamp], [firstCommitTimestamp, lastCommitTimestamp])
     )
       .spread((filteredBuilds, builds) => {
         return {

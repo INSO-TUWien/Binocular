@@ -8,7 +8,7 @@ import Promise from 'bluebird';
 
 import { fetchFactory, timestampedActionFactory, mapSaga } from '../../../../sagas/utils.js';
 import { graphQl } from '../../../../utils';
-import getBounds from '../../dashboard/sagas/getBounds';
+import Database from '../../../../database/database';
 
 export const setCategory = createAction('SET_CATEGORY');
 export const setSplitCommits = createAction('SET_SPLIT_COMMITS');
@@ -50,7 +50,7 @@ export function* watchSetIssueField() {
 }
 
 function* watchRefreshRequests() {
-  yield throttle(2000, 'REQUEST_REFRESH', mapSaga(refresh));
+  yield throttle(5000, 'REQUEST_REFRESH', mapSaga(refresh));
 }
 
 function* watchMessages() {
@@ -63,7 +63,7 @@ function* watchRefresh() {
 
 export const fetchHotspotDialsData = fetchFactory(
   function* () {
-    const { firstCommit, lastCommit, committers, firstIssue, lastIssue } = yield getBounds();
+    const { firstCommit, lastCommit, committers, firstIssue, lastIssue } = yield Database.getBounds();
     const firstCommitTimestamp = Date.parse(firstCommit.date);
     const lastCommitTimestamp = Date.parse(lastCommit.date);
 
@@ -141,8 +141,8 @@ export const fetchHotspotDialsData = fetchFactory(
 
     const category = categories[universalSettingsCategory];
     return yield Promise.join(
-      commitDateHistogramQuery(universalSettingsCategory, config.issueField, firstSignificantTimestamp, lastSignificantTimestamp),
-      commitDateHistogramQuery(universalSettingsCategory, config.issueField, firstCommitTimestamp, lastCommitTimestamp)
+      Database.getCommitDateHistogram(universalSettingsCategory, config.issueField, firstSignificantTimestamp, lastSignificantTimestamp),
+      Database.getCommitDateHistogram(universalSettingsCategory, config.issueField, firstCommitTimestamp, lastCommitTimestamp)
     )
       .then((resp) => [
         resp[0].commitDateHistogram,
@@ -219,32 +219,3 @@ export const fetchHotspotDialsData = fetchFactory(
   receiveHotspotDialsData,
   receiveHotspotDialsDataError
 );
-
-function commitDateHistogramQuery(granularity, dateField, since, until) {
-  return graphQl.query(
-    `query($granularity: DateGranularity!, $dateField: String!, $since: Timestamp, $until: Timestamp) {
-           commitDateHistogram(granularity: $granularity, since: $since, until: $until) {
-             category
-             count
-           }
-           goodCommits: commitDateHistogram(granularity: $granularity, buildFilter: successful, since: $since, until: $until) {
-             category
-             count
-           }
-           badCommits: commitDateHistogram(granularity: $granularity, buildFilter: failed, since: $since, until: $until) {
-             category
-             count
-           }
-           issueDateHistogram(granularity: $granularity, dateField: $dateField, since: $since, until: $until) {
-             category
-             count
-           }
-         }`,
-    {
-      granularity: granularity,
-      dateField: dateField,
-      since: since,
-      until: until,
-    }
-  );
-}

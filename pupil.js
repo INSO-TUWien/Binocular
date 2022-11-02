@@ -23,7 +23,7 @@ const _ = require('lodash');
 const Promise = _.defaults(require('bluebird'), { config: () => {} });
 
 Promise.config({
-  longStackTraces: true
+  longStackTraces: true,
 });
 
 const Repository = require('./lib/core/provider/git.js');
@@ -57,10 +57,11 @@ const DatabaseError = require('./lib/errors/DatabaseError');
 const GateWayService = require('./lib/gateway-service');
 const grpc = require('grpc');
 const protoLoader = require('@grpc/proto-loader');
+const http = require('http');
 const commPath = path.resolve(__dirname, 'services', 'grpc', 'comm');
 
 const LanguageDetectorPackageDefinition = protoLoader.loadSync(path.join(commPath, 'language.service.proto'), {
-  enums: String
+  enums: String,
 });
 
 const LanguageComm = grpc.loadPackageDefinition(LanguageDetectorPackageDefinition).binocular.comm;
@@ -83,7 +84,7 @@ const repoWatcher = {
   listener: null,
   working: false,
   headTimestamp: null,
-  headBranches: []
+  headBranches: [],
 };
 let indexingProcess = 0;
 
@@ -91,7 +92,7 @@ let activeIndexingQueue = Promise.resolve();
 const indexers = {
   vcs: null,
   its: null,
-  ci: null
+  ci: null,
 };
 
 const services = [];
@@ -116,24 +117,23 @@ async function startDatabase(context, gateway) {
   if (databaseConnection === null) {
     // configure everything in the context
     require('./lib/core/db/setup-db.js');
-    try {
-      databaseConnection = await ensureDb(repository, context);
-    } catch (error) {
-      stopRepoListener();
-
-      if (error && error.name === DatabaseError.name) {
-        databaseConnection = null;
-        console.error(`A ${error.name} occurred and returns the following message: ${error.message}!`);
-        console.log('wait 1 minute until retry!');
-        setTimeout(startDatabase.bind(context, gateway), 60000);
+    while (databaseConnection === null) {
+      try {
+        databaseConnection = await ensureDb(repository, context);
+      } catch (error) {
+        if (error && error.name === DatabaseError.name) {
+          databaseConnection = null;
+          console.error(`A ${error.name} occurred and returns the following message: ${error.message}!`);
+          console.log('wait 5 seconds until retry!');
+          await new Promise((resolve) => setTimeout(resolve, 5000));
+        }
       }
-      throw error;
     }
 
     // immediately run all indexers
     return (activeIndexingQueue = Promise.all([
       repoUpdateHandler(repository, context, gateway),
-      reIndex(indexers, context, reporter, gateway, activeIndexingQueue, ++indexingProcess)
+      reIndex(indexers, context, reporter, gateway, activeIndexingQueue, ++indexingProcess),
     ]));
   }
 }
@@ -500,7 +500,7 @@ function createManualIssueReferences(issueReferences) {
         issue.mentions.push({
           createdAt: commit.date,
           commit: sha,
-          manual: true
+          manual: true,
         });
         return issue.save();
       }
@@ -551,6 +551,11 @@ Promise.all(
       });
 
       return gateway.start();
-    }).bind(this, ctx, config, gatewayService)
+    }).bind(this, ctx, config, gatewayService),
   ].map((entryPoint) => serviceStarter(entryPoint))
-);
+).then(() => {
+  // if no-server flag set stop immediately after indexing
+  if (!ctx.argv.server) {
+    stop();
+  }
+});
