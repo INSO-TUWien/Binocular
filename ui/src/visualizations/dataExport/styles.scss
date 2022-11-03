@@ -1,0 +1,74 @@
+@import '../../../../node_modules/bulma';
+
+.chartContainer{
+  position: relative;
+  height: 100%;
+  overflow-y: scroll;
+  overflow-x: hidden;
+}
+
+.headline{
+  font-weight: bold;
+  font-size: 2em;
+}
+
+.configContainer{
+  width: 100%;
+  overflow-x: hidden;
+
+  .field + .field {
+    border-top: 1px solid #dbdbdb;
+  }
+
+  .checkboxLabel {
+    cursor: pointer;
+  }
+
+  h1{
+    font-weight: bold;
+    font-size: 2em;
+  }
+
+  hr{
+    margin: 0.5em 0;
+  }
+}
+
+.form {
+  margin-bottom: 0;
+}
+
+.help {
+  width: 100%;
+  overflow-y: auto;
+  font-size: 1.5em;
+
+  h2 {
+    font-size: 1.2em;
+    font-weight: bold;
+  }
+
+  h3 {
+    font-size: 1.1em;
+    font-weight: bold;
+  }
+
+  ul {
+    list-style-type: circle;
+    margin-left: 1.5em;
+  }
+
+  p {
+    margin-bottom: 1em;
+  }
+
+  i {
+    width: 25px;
+    text-align: center;
+  }
+}
+
+.marginTop05{
+  margin-top: 0.5rem;
+}
+

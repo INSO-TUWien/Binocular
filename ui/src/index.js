@@ -24,6 +24,7 @@ const logger = createLogger({
 });
 
 import newDashboard from './visualizations/dashboard';
+import dataExport from './visualizations/dataExport';
 import dashboard from './visualizations/legacy/dashboard';
 import codeOwnershipRiver from './visualizations/legacy/code-ownership-river';
 import issueImpact from './visualizations/legacy/issue-impact';
@@ -46,6 +47,7 @@ const visualizationModules = [
   ciBuilds,
   issues,
   changes,
+  dataExport,
 ];
 
 Database.checkBackendConnection().then((connection) => {
