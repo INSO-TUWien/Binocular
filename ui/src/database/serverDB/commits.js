@@ -18,9 +18,14 @@ export default class Commits {
                perPage
                data {
                  sha
-                 date
+                 shortSha
+                 message
                  messageHeader
                  signature
+                 branch
+                 parents
+                 date
+                 webUrl
                  stats {
                    additions
                    deletions

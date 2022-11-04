@@ -5,6 +5,7 @@ import styles from '../styles.scss';
 import dataExportStyles from '../styles/dataExport.scss';
 import GetData from './helper/getData';
 import Promise from 'bluebird';
+import viewIcon from '../assets/viewIcon.svg';
 
 export default class DataExport extends React.Component {
   constructor(props) {
@@ -18,6 +19,7 @@ export default class DataExport extends React.Component {
       languages: [],
       modules: [],
       stakeholders: [],
+      previewTable: [],
     };
   }
 
@@ -30,6 +32,7 @@ export default class DataExport extends React.Component {
   }
 
   render() {
+    const previewTableHeader = this.state.previewTable.length > 0 ? Object.keys(this.state.previewTable[1]) : [];
     return (
       <div className={styles.chartContainer}>
         <div className={styles.mg1}>
@@ -37,14 +40,109 @@ export default class DataExport extends React.Component {
             Load Data
           </button>
           <h1>Loaded Data</h1>
-          <div>Commits: {this.state.commits.length}</div>
-          <div>Issues: {this.state.issues.length}</div>
-          <div>Builds: {this.state.builds.length}</div>
-          <div>Files: {this.state.files.length}</div>
-          <div>Branches: {this.state.branches.length}</div>
-          <div>Languages: {this.state.languages.length}</div>
-          <div>Modules: {this.state.modules.length}</div>
-          <div>Stakeholders: {this.state.stakeholders.length}</div>
+          <div>
+            Commits: {this.state.commits.length}
+            <img
+              className={dataExportStyles.viewIcon}
+              src={viewIcon}
+              onClick={() => {
+                this.setState({ previewTable: this.state.commits });
+              }}></img>
+          </div>
+          <div>
+            Issues: {this.state.issues.length}
+            <img
+              className={dataExportStyles.viewIcon}
+              src={viewIcon}
+              onClick={() => {
+                this.setState({ previewTable: this.state.issues });
+              }}></img>
+          </div>
+          <div>
+            Builds: {this.state.builds.length}
+            <img
+              className={dataExportStyles.viewIcon}
+              src={viewIcon}
+              onClick={() => {
+                this.setState({ previewTable: this.state.builds });
+              }}></img>
+          </div>
+          <div>
+            Files: {this.state.files.length}
+            <img
+              className={dataExportStyles.viewIcon}
+              src={viewIcon}
+              onClick={() => {
+                this.setState({ previewTable: this.state.files });
+              }}></img>
+          </div>
+          <div>
+            Branches: {this.state.branches.length}
+            <img
+              className={dataExportStyles.viewIcon}
+              src={viewIcon}
+              onClick={() => {
+                this.setState({ previewTable: this.state.branches });
+              }}></img>
+          </div>
+          <div>
+            Languages: {this.state.languages.length}
+            <img
+              className={dataExportStyles.viewIcon}
+              src={viewIcon}
+              onClick={() => {
+                this.setState({ previewTable: this.state.languages });
+              }}></img>
+          </div>
+          <div>
+            Modules: {this.state.modules.length}
+            <img
+              className={dataExportStyles.viewIcon}
+              src={viewIcon}
+              onClick={() => {
+                this.setState({ previewTable: this.state.modules });
+              }}></img>
+          </div>
+          <div>
+            Stakeholders: {this.state.stakeholders.length}
+            <img
+              className={dataExportStyles.viewIcon}
+              src={viewIcon}
+              onClick={() => {
+                this.setState({ previewTable: this.state.stakeholders });
+              }}></img>
+          </div>
+          <hr />
+          <div>
+            {this.state.previewTable.length !== 0 ? (
+              <table className={dataExportStyles.previewTable}>
+                <thead className={dataExportStyles.previewTableHeader}>
+                  <tr>
+                    {previewTableHeader.map((key, i) => {
+                      return (
+                        <th className={i % 2 === 0 ? dataExportStyles.previewTableHeaderEven : dataExportStyles.previewTableHeaderOdd}>
+                          {key}
+                        </th>
+                      );
+                    })}
+                  </tr>
+                </thead>
+                <tbody>
+                  {this.state.previewTable.map((row, i) => {
+                    return (
+                      <tr>
+                        {previewTableHeader.map((key, j) => {
+                          return <th className={dataExportStyles.previewTableCell}>{JSON.stringify(row[key])}</th>;
+                        })}
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            ) : (
+              ''
+            )}
+          </div>
         </div>
       </div>
     );

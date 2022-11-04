@@ -8,3 +8,30 @@
   border-bottom-color:  #3273dc;
   /*background-color: lightgray;*/
 }
+
+.viewIcon{
+  display: inline-block;
+  height: 2rem;
+  position: relative;
+  top: 0.5rem;
+  margin-left: 1rem;
+}
+
+.previewTable{
+}
+.previewTableCell{
+  border: 1px solid lightgrey;
+}
+
+.previewTableHeader{
+}
+
+.previewTableHeaderEven{
+  border: 1px solid lightgrey;
+  background: #eeeeee;
+}
+
+.previewTableHeaderOdd{
+  border: 1px solid lightgrey;
+  background: #cccccc;
+}
