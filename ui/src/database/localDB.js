@@ -12,6 +12,9 @@ import Builds from './localDB/builds';
 import Issues from './localDB/issues';
 import Files from './localDB/files';
 import Branches from './localDB/branches';
+import Languages from './localDB/languages';
+import Modules from './localDB/modules';
+import Stakeholders from './localDB/stakeholders';
 
 import branches from '../../arango_export/branches.json';
 import builds from '../../arango_export/builds.json';
@@ -160,6 +163,18 @@ export default class LocalDB {
 
   static getAllBranches() {
     return Branches.getAllBranches(db);
+  }
+
+  static getAllLanguages() {
+    return Languages.getAllLanguages(db);
+  }
+
+  static getAllModules() {
+    return Modules.getAllModules(db);
+  }
+
+  static getAllStakeholders() {
+    return Stakeholders.getAllStakeholders(db);
   }
 
   static getCodeHotspotsChangeData(file) {

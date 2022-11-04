@@ -6,6 +6,9 @@ import Builds from './serverDB/builds';
 import Issues from './serverDB/issues';
 import Files from './serverDB/files';
 import Branches from './serverDB/branches';
+import Languages from './serverDB/languages';
+import Modules from './serverDB/modules';
+import Stakeholders from './serverDB/stakeholders';
 
 export default class ServerDB {
   static getBounds() {
@@ -58,6 +61,18 @@ export default class ServerDB {
 
   static getAllBranches() {
     return Branches.getAllBranches();
+  }
+
+  static getAllLanguages() {
+    return Languages.getAllLanguages();
+  }
+
+  static getAllModules() {
+    return Modules.getAllModules();
+  }
+
+  static getAllStakeholders() {
+    return Stakeholders.getAllStakeholders();
   }
 
   static getCodeHotspotsChangeData(file) {

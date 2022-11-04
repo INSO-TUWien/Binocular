@@ -20,6 +20,10 @@ export default class Database {
     }
   }
 
+  /**
+   * COMMITS
+   */
+
   static async getCommitData(commitSpan, significantSpan) {
     if (await this.checkBackendConnection()) {
       return ServerDB.getCommitData(commitSpan, significantSpan);
@@ -28,43 +32,11 @@ export default class Database {
     }
   }
 
-  static async getBuildData(commitSpan, significantSpan) {
-    if (await this.checkBackendConnection()) {
-      return ServerDB.getBuildData(commitSpan, significantSpan);
-    } else {
-      return LocalDB.getBuildData(commitSpan, significantSpan);
-    }
-  }
-
-  static async getIssueData(issueSpan, significantSpan) {
-    if (await this.checkBackendConnection()) {
-      return ServerDB.getIssueData(issueSpan, significantSpan);
-    } else {
-      return LocalDB.getIssueData(issueSpan, significantSpan);
-    }
-  }
-
   static async getCommitDataOwnershipRiver(commitSpan, significantSpan, granularity, interval) {
     if (await this.checkBackendConnection()) {
       return ServerDB.getCommitDataOwnershipRiver(commitSpan, significantSpan, granularity, interval);
     } else {
       return LocalDB.getCommitDataOwnershipRiver(commitSpan, significantSpan, granularity, interval);
-    }
-  }
-
-  static async getBuildDataOwnershipRiver(commitSpan, significantSpan, granularity, interval) {
-    if (await this.checkBackendConnection()) {
-      return ServerDB.getBuildDataOwnershipRiver(commitSpan, significantSpan, granularity, interval);
-    } else {
-      return LocalDB.getBuildDataOwnershipRiver(commitSpan, significantSpan, granularity, interval);
-    }
-  }
-
-  static async getIssueDataOwnershipRiver(issueSpan, significantSpan, granularity, interval) {
-    if (await this.checkBackendConnection()) {
-      return ServerDB.getIssueDataOwnershipRiver(issueSpan, significantSpan, granularity, interval);
-    } else {
-      return LocalDB.getIssueDataOwnershipRiver(issueSpan, significantSpan, granularity, interval);
     }
   }
 
@@ -84,6 +56,52 @@ export default class Database {
     }
   }
 
+  static async getCodeHotspotsChangeData(file) {
+    if (await this.checkBackendConnection()) {
+      return ServerDB.getCodeHotspotsChangeData(file);
+    } else {
+      return LocalDB.getCodeHotspotsChangeData(file);
+    }
+  }
+
+  /**
+   * BUILDS
+   */
+  static async getBuildData(commitSpan, significantSpan) {
+    if (await this.checkBackendConnection()) {
+      return ServerDB.getBuildData(commitSpan, significantSpan);
+    } else {
+      return LocalDB.getBuildData(commitSpan, significantSpan);
+    }
+  }
+
+  static async getBuildDataOwnershipRiver(commitSpan, significantSpan, granularity, interval) {
+    if (await this.checkBackendConnection()) {
+      return ServerDB.getBuildDataOwnershipRiver(commitSpan, significantSpan, granularity, interval);
+    } else {
+      return LocalDB.getBuildDataOwnershipRiver(commitSpan, significantSpan, granularity, interval);
+    }
+  }
+
+  /**
+   * ISSUES
+   */
+  static async getIssueData(issueSpan, significantSpan) {
+    if (await this.checkBackendConnection()) {
+      return ServerDB.getIssueData(issueSpan, significantSpan);
+    } else {
+      return LocalDB.getIssueData(issueSpan, significantSpan);
+    }
+  }
+
+  static async getIssueDataOwnershipRiver(issueSpan, significantSpan, granularity, interval) {
+    if (await this.checkBackendConnection()) {
+      return ServerDB.getIssueDataOwnershipRiver(issueSpan, significantSpan, granularity, interval);
+    } else {
+      return LocalDB.getIssueDataOwnershipRiver(issueSpan, significantSpan, granularity, interval);
+    }
+  }
+
   static async issueImpactQuery(iid, since, until) {
     if (await this.checkBackendConnection()) {
       return ServerDB.issueImpactQuery(iid, since, until);
@@ -100,6 +118,17 @@ export default class Database {
     }
   }
 
+  static async getCodeHotspotsIssueData(file) {
+    if (await this.checkBackendConnection()) {
+      return ServerDB.getCodeHotspotsIssueData(file);
+    } else {
+      return LocalDB.getCodeHotspotsIssueData(file);
+    }
+  }
+
+  /**
+   * FILES
+   */
   static async requestFileStructure() {
     if (await this.checkBackendConnection()) {
       return ServerDB.requestFileStructure();
@@ -108,6 +137,9 @@ export default class Database {
     }
   }
 
+  /**
+   * BRANCHES
+   */
   static async getAllBranches() {
     if (await this.checkBackendConnection()) {
       return ServerDB.getAllBranches();
@@ -116,19 +148,36 @@ export default class Database {
     }
   }
 
-  static async getCodeHotspotsChangeData(file) {
+  /**
+   * LANGUAGES
+   */
+  static async getAllLanguages() {
     if (await this.checkBackendConnection()) {
-      return ServerDB.getCodeHotspotsChangeData(file);
+      return ServerDB.getAllLanguages();
     } else {
-      return LocalDB.getCodeHotspotsChangeData(file);
+      return LocalDB.getAllLanguages();
     }
   }
 
-  static async getCodeHotspotsIssueData(file) {
+  /**
+   * MODULES
+   */
+  static async getAllModules() {
     if (await this.checkBackendConnection()) {
-      return ServerDB.getCodeHotspotsIssueData(file);
+      return ServerDB.getAllModules();
     } else {
-      return LocalDB.getCodeHotspotsIssueData(file);
+      return LocalDB.getAllModules();
+    }
+  }
+
+  /**
+   * STAKEHOLDER
+   */
+  static async getAllStakeholders() {
+    if (await this.checkBackendConnection()) {
+      return ServerDB.getAllStakeholders();
+    } else {
+      return LocalDB.getAllStakeholders();
     }
   }
 

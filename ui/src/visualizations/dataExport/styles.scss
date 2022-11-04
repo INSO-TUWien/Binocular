@@ -5,6 +5,11 @@
   height: 100%;
   overflow-y: scroll;
   overflow-x: hidden;
+
+  h1{
+    font-weight: bold;
+    font-size: 2em;
+  }
 }
 
 .headline{
@@ -70,5 +75,9 @@
 
 .marginTop05{
   margin-top: 0.5rem;
+}
+
+.mg1{
+  margin: 1rem;
 }
 
