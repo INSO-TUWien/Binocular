@@ -8,6 +8,7 @@ import ChartContainer from '../../../../components/svg/ChartContainer.js';
 import styles from '../styles.scss';
 import * as zoomUtils from '../../../../utils/zoom.js';
 import {computeFileDependencies, computeModuleDependencies, assignModuleIndicesToFiles, createSubModuleLinks, removeIntraModuleLinks} from './computeUtils.js';
+import {getFirstAndLastCommitDates} from './timeUtils';
 
 const CHART_FILL_RATIO = 0.65;
 
@@ -15,6 +16,9 @@ const CHART_FILL_RATIO = 0.65;
 let _dataset = undefined;
 let _simulation = undefined;
 let _showIntraModuleDeps = true;
+let _nodeToHighlight = "";
+
+let _nodes = undefined;
 
 export default class CoChangeGraph extends React.Component {  
   constructor(props) {
@@ -37,15 +41,17 @@ export default class CoChangeGraph extends React.Component {
     //console.log("Props:");
     //console.log(nextProps);
 
-    if(_showIntraModuleDeps != nextProps.showIntraModuleDeps){
+    if(_showIntraModuleDeps != nextProps.showIntraModuleDeps || _nodeToHighlight != nextProps.nodeToHighlight){
       _showIntraModuleDeps = nextProps.showIntraModuleDeps;
+      _nodeToHighlight = nextProps.nodeToHighlight;
+      this.highlightNode(_nodeToHighlight);
       return;
     }
 
     const newDataset = computeFileDependencies(nextProps);
     const {fileToModuleLinks, moduleToModuleLinks} = assignModuleIndicesToFiles(newDataset.nodes, nextProps.moduleData);
 
-    if(!_showIntraModuleDeps){
+    if(_showIntraModuleDeps === false){
       newDataset.links = removeIntraModuleLinks(newDataset);
     }
 
@@ -73,6 +79,18 @@ export default class CoChangeGraph extends React.Component {
     }
   }
 
+  highlightNode(filter) {
+    if(_simulation == undefined) return;
+
+    _nodes.style('fill', function (node_d) {
+      if(filter != "" && node_d.id.includes(filter)) {
+        return node_d.type == "m" ? "orange" : "aqua";
+      }
+
+      return node_d.type == "m" ? "yellow" : "pink"
+    })
+  }
+
   removeGraph(){
     const svg = d3.select("." + styles.graphHolder).selectChildren();
     svg.remove();
@@ -92,7 +110,7 @@ export default class CoChangeGraph extends React.Component {
       .enter().append("line");
   
     // Initialize the nodes
-    const node = svg.append("g")
+    _nodes = svg.append("g")
       .attr("class", "nodes")
       .selectAll("circle")
       .data(_dataset.nodes)
@@ -128,7 +146,7 @@ export default class CoChangeGraph extends React.Component {
 
       // only update the view once the simulation didn't have a new step in 1 second
       debouncer = setTimeout(_ => {
-        node.attr("cx", d => d.x)
+        _nodes.attr("cx", d => d.x)
         .attr("cy", d => d.y);
 
         links.attr("x1", d => d.source.x)
@@ -149,7 +167,7 @@ export default class CoChangeGraph extends React.Component {
 
     let fixedHighlighting = false;
     // node highlighting functionality
-    node.on('mouseover', function (event, d) {   
+    _nodes.on('mouseover', function (event, d) {   
       if(fixedHighlighting) return;
         
       // Highlight the connections
@@ -170,8 +188,8 @@ export default class CoChangeGraph extends React.Component {
       text.style("fill", function (link_d) {
         return targetNodes.has(link_d.id) || targetModuls.has(link_d.id) ? 'black' : 'transparent'
       })
-      node.style('stroke-width', function (node_d) {return targetNodes.has(node_d.id) ? 1 : 0.1})
-      node.style('fill', function (node_d) {
+      _nodes.style('stroke-width', function (node_d) {return targetNodes.has(node_d.id) ? 1 : 0.1})
+      _nodes.style('fill', function (node_d) {
         return targetNodes.has(node_d.id) ? "orange" : targetModuls.has(node_d.id) ? "yellow" : "transparent"
       })
 
@@ -180,8 +198,8 @@ export default class CoChangeGraph extends React.Component {
     .on('mouseout', function (d) {
       if(fixedHighlighting) return;
 
-      node.style('fill', function (node_d) {return node_d.type == "m" ? "yellow" : "pink"})
-      node.style('stroke-width', 1);
+      _nodes.style('fill', function (node_d) {return node_d.type == "m" ? "yellow" : "pink"})
+      _nodes.style('stroke-width', 1);
       links.style('stroke-width', '1');
       text.style("fill", 'black');
       text.style('font-size', '16');

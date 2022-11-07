@@ -1,6 +1,3 @@
-import { file } from "jszip";
-import { forEach } from "lodash";
-
 export function computeFileDependencies(props){
     if(props.commitsFiles === undefined){
         console.error("Error: commitsFiles is undefined!");

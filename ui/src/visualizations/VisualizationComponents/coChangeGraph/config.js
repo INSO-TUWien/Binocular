@@ -4,7 +4,7 @@ import _ from 'lodash';
 import { connect } from 'react-redux';
 
 import styles from './styles.scss';
-import { setTimeSpan, applyTimeSpan, setEntitySelection, setShowIntraModuleDeps } from './sagas';
+import { setTimeSpan, applyTimeSpan, setEntitySelection, setShowIntraModuleDeps, setNodeHighlighting } from './sagas';
 import DateRangeFilter from '../../../components/DateRangeFilter/dateRangeFilter';
 
 
@@ -49,7 +49,8 @@ const mapDispatchToProps = (dispatch /*, ownProps*/) => {
     onFilterChange: (filterContent) => {filter = filterContent},
     onBoundraryChange: (boundrary) => {lowerBounds = boundrary},
     onEntitySelectionChange: (entityType) => {entitySelection = entityType; dispatch(setEntitySelection(entityType))},
-    onSetShowIntraModuleDeps: (b) => dispatch(setShowIntraModuleDeps(b))
+    onSetShowIntraModuleDeps: (b) => dispatch(setShowIntraModuleDeps(b)),
+    onNodeHighlightingChange: (nodeToHighlight) => {dispatch(setNodeHighlighting(nodeToHighlight))}
   };
 };
 
@@ -108,6 +109,11 @@ const CoChangeConfigComponent = props => {
         </label>
         <br/><br/>
       <button onClick={() => {props.onTimeSpanApply()}}>Apply</button>
+      <br/><br/>
+      <label className="label">Highlight nodes:</label>
+        <input  type="text" 
+                defaultValue=""
+                onChange={(e) => {props.onNodeHighlightingChange(e.target.value)}}></input>
     </div>
   );
 };

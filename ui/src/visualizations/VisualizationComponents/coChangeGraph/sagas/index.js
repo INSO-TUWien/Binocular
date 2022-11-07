@@ -15,6 +15,7 @@ export const setEntitySelection = createAction('SET_ENTITY_SELECTION')
 export const setFilterContent = createAction('SET_PATH_FILTER');
 export const applyTimeSpan = createAction('APPLY_TIME_SPAN')
 export const setShowIntraModuleDeps = createAction('SET_SHOW_INTRA_MODULE_DEPS')
+export const setNodeHighlighting = createAction('SET_NODE_HIGHLIGHTING')
 
 export const requestData = createAction('REQUEST_DATA');
 export const receiveData = timestampedActionFactory('RECEIVE_DATA');
@@ -53,7 +54,6 @@ export const fetchChangesData = fetchFactory(
     const {commitsFiles} = yield getCommitFiles(firstCommitTimestamp, lastCommitTimestamp);
     const {moduleData} = yield getModuleData();
     
-
     return {commitsFiles, commitsModules, moduleData, firstCommit, lastCommit, pathFilter, lowerBounds, entitySelection};
   },
   requestData,
