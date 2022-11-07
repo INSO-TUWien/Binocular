@@ -6,6 +6,7 @@ import dataExportStyles from '../styles/dataExport.scss';
 import GetData from './helper/getData';
 import Promise from 'bluebird';
 import viewIcon from '../assets/viewIcon.svg';
+import downloadIcon from '../assets/downloadIcon.svg';
 
 export default class DataExport extends React.Component {
   constructor(props) {
@@ -20,6 +21,7 @@ export default class DataExport extends React.Component {
       modules: [],
       stakeholders: [],
       previewTable: [],
+      exportType: 'json',
     };
   }
 
@@ -39,81 +41,144 @@ export default class DataExport extends React.Component {
           <button className={'button ' + dataExportStyles.button} onClick={this.loadData.bind(this)}>
             Load Data
           </button>
+          <h1>Export Type</h1>
+          <button
+            className={'button ' + dataExportStyles.button + (this.state.exportType === 'json' ? ' ' + dataExportStyles.selected : '')}
+            onClick={() => {
+              this.setState({ exportType: 'json' });
+            }}>
+            JSON
+          </button>
+          <button
+            className={'button ' + dataExportStyles.button + (this.state.exportType === 'csv' ? ' ' + dataExportStyles.selected : '')}
+            onClick={() => {
+              this.setState({ exportType: 'csv' });
+            }}>
+            CSV
+          </button>
           <h1>Loaded Data</h1>
           <div>
             Commits: {this.state.commits.length}
             <img
-              className={dataExportStyles.viewIcon}
+              className={dataExportStyles.icon}
               src={viewIcon}
               onClick={() => {
                 this.setState({ previewTable: this.state.commits });
+              }}></img>
+            <img
+              className={dataExportStyles.icon}
+              src={downloadIcon}
+              onClick={() => {
+                this.download('commits', this.state.commits);
               }}></img>
           </div>
           <div>
             Issues: {this.state.issues.length}
             <img
-              className={dataExportStyles.viewIcon}
+              className={dataExportStyles.icon}
               src={viewIcon}
               onClick={() => {
                 this.setState({ previewTable: this.state.issues });
+              }}></img>
+            <img
+              className={dataExportStyles.icon}
+              src={downloadIcon}
+              onClick={() => {
+                this.download('issues', this.state.issues);
               }}></img>
           </div>
           <div>
             Builds: {this.state.builds.length}
             <img
-              className={dataExportStyles.viewIcon}
+              className={dataExportStyles.icon}
               src={viewIcon}
               onClick={() => {
                 this.setState({ previewTable: this.state.builds });
+              }}></img>
+            <img
+              className={dataExportStyles.icon}
+              src={downloadIcon}
+              onClick={() => {
+                this.download('builds', this.state.builds);
               }}></img>
           </div>
           <div>
             Files: {this.state.files.length}
             <img
-              className={dataExportStyles.viewIcon}
+              className={dataExportStyles.icon}
               src={viewIcon}
               onClick={() => {
                 this.setState({ previewTable: this.state.files });
+              }}></img>
+            <img
+              className={dataExportStyles.icon}
+              src={downloadIcon}
+              onClick={() => {
+                this.download('files', this.state.files);
               }}></img>
           </div>
           <div>
             Branches: {this.state.branches.length}
             <img
-              className={dataExportStyles.viewIcon}
+              className={dataExportStyles.icon}
               src={viewIcon}
               onClick={() => {
                 this.setState({ previewTable: this.state.branches });
+              }}></img>
+            <img
+              className={dataExportStyles.icon}
+              src={downloadIcon}
+              onClick={() => {
+                this.download('branches', this.state.branches);
               }}></img>
           </div>
           <div>
             Languages: {this.state.languages.length}
             <img
-              className={dataExportStyles.viewIcon}
+              className={dataExportStyles.icon}
               src={viewIcon}
               onClick={() => {
                 this.setState({ previewTable: this.state.languages });
+              }}></img>
+            <img
+              className={dataExportStyles.icon}
+              src={downloadIcon}
+              onClick={() => {
+                this.download('languages', this.state.languages);
               }}></img>
           </div>
           <div>
             Modules: {this.state.modules.length}
             <img
-              className={dataExportStyles.viewIcon}
+              className={dataExportStyles.icon}
               src={viewIcon}
               onClick={() => {
                 this.setState({ previewTable: this.state.modules });
+              }}></img>
+            <img
+              className={dataExportStyles.icon}
+              src={downloadIcon}
+              onClick={() => {
+                this.download('modules', this.state.modules);
               }}></img>
           </div>
           <div>
             Stakeholders: {this.state.stakeholders.length}
             <img
-              className={dataExportStyles.viewIcon}
+              className={dataExportStyles.icon}
               src={viewIcon}
               onClick={() => {
                 this.setState({ previewTable: this.state.stakeholders });
               }}></img>
+            <img
+              className={dataExportStyles.icon}
+              src={downloadIcon}
+              onClick={() => {
+                this.download('stakeholders', this.state.stakeholders);
+              }}></img>
           </div>
           <hr />
-          <div>
+          <div className={dataExportStyles.previewTableContainer}>
             {this.state.previewTable.length !== 0 ? (
               <table className={dataExportStyles.previewTable}>
                 <thead className={dataExportStyles.previewTableHeader}>
@@ -146,6 +211,36 @@ export default class DataExport extends React.Component {
         </div>
       </div>
     );
+  }
+
+  download(filename, jsonObject) {
+    let dataStr = '';
+    const downloadAnchorNode = document.createElement('a');
+    switch (this.state.exportType) {
+      case 'csv':
+        dataStr = 'data:text/csv;charset=utf-8,' + encodeURIComponent(this.convertToCSV(jsonObject));
+        downloadAnchorNode.setAttribute('download', filename + '.csv');
+        break;
+      default:
+        dataStr = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(jsonObject));
+        downloadAnchorNode.setAttribute('download', filename + '.json');
+        break;
+    }
+    downloadAnchorNode.setAttribute('href', dataStr);
+    document.body.appendChild(downloadAnchorNode); // required for firefox
+    downloadAnchorNode.click();
+    downloadAnchorNode.remove();
+  }
+
+  convertToCSV(jsonObject) {
+    const items = jsonObject;
+    const replacer = (key, value) => (value === null ? '' : value);
+    const header = Object.keys(items[0]);
+    const csv = [
+      header.join(','),
+      ...items.map((row) => header.map((fieldName) => JSON.stringify(row[fieldName], replacer)).join(',')),
+    ].join('\r\n');
+    return csv;
   }
 
   loadData() {

@@ -9,7 +9,12 @@
   /*background-color: lightgray;*/
 }
 
-.viewIcon{
+.selected{
+  background:  #3273dc;
+  color: white !important;
+}
+
+.icon{
   display: inline-block;
   height: 2rem;
   position: relative;
@@ -17,8 +22,15 @@
   margin-left: 1rem;
 }
 
+.previewTableContainer{
+  width: 50vw;
+  height: 50vh;
+  overflow: scroll;
+}
+
 .previewTable{
 }
+
 .previewTableCell{
   border: 1px solid lightgrey;
 }
