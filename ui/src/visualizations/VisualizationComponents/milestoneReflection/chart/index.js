@@ -3,29 +3,99 @@
 import { connect } from 'react-redux';
 
 import MilestoneReflection from './chart';
+import {setMilestone} from "../sagas";
 
 let oldState = null;
 
-export const mockData = [
+/**
+*
+* changes in enrichIssuesWithMilestoneData():
+ * issue_inProgress & issue_done will be converted to milliseconds
+ * its.assignedTo will be set
+ */
+export const mockIssueData = [
+  // first Issue / person (with 4 persons)
   {
-    label: 'person a',
-    times: [
-      { starting_time: 1355752800000, ending_time: 1355759900000 },
-      { starting_time: 1355767900000, ending_time: 1355774400000 },
-    ],
+    vcs: {loc: 15}, ci: {totalBuild: 4, successful: 1},
+    its: {timeStamps: {issue_inProgress: '2022-10-01T08:00:00', issue_done: '2022-10-04T08:00:00'}, minutesSpent: 60*9*3},
+  }, {
+    vcs: {loc: 230}, ci: {totalBuild: 1, successful: 1},
+    its: {timeStamps: {issue_inProgress: '2022-10-01T08:00:00', issue_done: '2022-10-03T08:00:00'}, minutesSpent: 60*7*2},
+  }, {
+    vcs: {loc: 15}, ci: {totalBuild: 1, successful: 1},
+    its: {timeStamps: {issue_inProgress: '2022-10-13T08:00:00', issue_done: '2022-10-14T08:00:00'}, minutesSpent: 230},
+  }, {
+    vcs: {loc: 15}, ci: {totalBuild: 1, successful: 1},
+    its: {timeStamps: {issue_inProgress: '2022-10-13T08:00:00', issue_done: '2022-10-14T08:00:00'}, minutesSpent: 230},
   },
-  { label: 'person b', times: [{ starting_time: 1355759910000, ending_time: 1355761900000 }] },
-  { label: 'person c', times: [{ starting_time: 1355761910000, ending_time: 1355763910000 }] },
+
+  // second Issue / person (with 4 persons)
+  {
+    vcs: {loc: 15}, ci: {totalBuild: 4, successful: 1},
+    its: {timeStamps: {issue_inProgress: '2022-10-13T08:00:00', issue_done: '2022-10-14T08:00:00'}, minutesSpent: 230},
+  }, {
+    vcs: {loc: 15}, ci: {totalBuild: 4, successful: 1},
+    its: {timeStamps: {issue_inProgress: '2022-10-13T08:00:00', issue_done: '2022-10-14T08:00:00'}, minutesSpent: 230},
+  }, {
+    vcs: {loc: 15}, ci: {totalBuild: 4, successful: 1},
+    its: {timeStamps: {issue_inProgress: '2022-10-13T08:00:00', issue_done: '2022-10-14T08:00:00'}, minutesSpent: 230},
+  }, {
+    vcs: {loc: 15}, ci: {totalBuild: 4, successful: 1},
+    its: {timeStamps: {issue_inProgress: '2022-10-13T08:00:00', issue_done: '2022-10-14T08:00:00'}, minutesSpent: 230},
+  },
+
+  // third Issue / person (with 4 persons)
+  {
+    vcs: {loc: 15}, ci: {totalBuild: 4, successful: 1},
+    its: {timeStamps: {issue_inProgress: '2022-10-13T08:00:00', issue_done: '2022-10-14T08:00:00'}, minutesSpent: 230},
+  }, {
+    vcs: {loc: 15}, ci: {totalBuild: 4, successful: 1},
+    its: {timeStamps: {issue_inProgress: '2022-10-13T08:00:00', issue_done: '2022-10-14T08:00:00'}, minutesSpent: 230},
+  }, {
+    vcs: {loc: 15}, ci: {totalBuild: 4, successful: 1},
+    its: {timeStamps: {issue_inProgress: '2022-10-13T08:00:00', issue_done: '2022-10-14T08:00:00'}, minutesSpent: 230},
+  }, {
+    vcs: {loc: 15}, ci: {totalBuild: 4, successful: 1},
+    its: {timeStamps: {issue_inProgress: '2022-10-13T08:00:00', issue_done: '2022-10-14T08:00:00'}, minutesSpent: 230},
+  },
+
+  // fourth Issue / person (with 4 persons)
+  {
+    vcs: {loc: 15}, ci: {totalBuild: 4, successful: 1},
+    its: {timeStamps: {issue_inProgress: '2022-10-13T08:00:00', issue_done: '2022-10-14T08:00:00'}, minutesSpent: 230},
+  }, {
+    vcs: {loc: 15}, ci: {totalBuild: 4, successful: 1},
+    its: {timeStamps: {issue_inProgress: '2022-10-13T08:00:00', issue_done: '2022-10-14T08:00:00'}, minutesSpent: 230},
+  }, {
+    vcs: {loc: 15}, ci: {totalBuild: 4, successful: 1},
+    its: {timeStamps: {issue_inProgress: '2022-10-13T08:00:00', issue_done: '2022-10-14T08:00:00'}, minutesSpent: 230},
+  }, {
+    vcs: {loc: 15}, ci: {totalBuild: 4, successful: 1},
+    its: {timeStamps: {issue_inProgress: '2022-10-13T08:00:00', issue_done: '2022-10-14T08:00:00'}, minutesSpent: 230},
+  },
+
+  // fifth Issue / person (with 4 persons)
+
+  {
+    vcs: {loc: 15}, ci: {totalBuild: 4, successful: 1},
+    its: {timeStamps: {issue_inProgress: '2022-10-05T08:00:00', issue_done: '2022-10-07T08:00:00'}, minutesSpent: 230},
+  }, {
+    vcs: {loc: 15}, ci: {totalBuild: 4, successful: 1},
+    its: {timeStamps: {issue_inProgress: '2022-10-13T08:00:00', issue_done: '2022-10-14T08:00:00'}, minutesSpent: 230},
+  }, {
+    vcs: {loc: 15}, ci: {totalBuild: 4, successful: 1},
+    its: {timeStamps: {issue_inProgress: '2022-10-13T08:00:00', issue_done: '2022-10-14T08:00:00'}, minutesSpent: 230},
+  }, {
+    vcs: {loc: 15}, ci: {totalBuild: 4, successful: 1},
+    its: {timeStamps: {issue_inProgress: '2022-10-06T08:00:00', issue_done: '2022-10-07T08:00:00'}, minutesSpent: 230},
+  },
 ];
 
-export const mockIssueData = [
-  {times: {issue_started: 1355752800000},},
-];
 
 export const mockMilestone = [
-  { iid: 1, title: 'Milestone 1', rangeBegin: 0, rangeEnd: 12 },
-  { iid: 2, title: 'Milestone 2', rangeBegin: 13, rangeEnd: 35 },
-  { iid: 3, title: 'Milestone 3', rangeBegin: 36, rangeEnd: 50 },
+  { iid: 1, title: 'Milestone 1', rangeBegin: 0, rangeEnd: 11 },
+  { iid: 2, title: 'Milestone 2', rangeBegin: 12, rangeEnd: 31 },
+  { iid: 3, title: 'Milestone 3', rangeBegin: 32, rangeEnd: 55 },
 ];
 
 const mockPersons = ['Alice Abbing', 'Bob Bodemann', 'Caesar Clown', 'Max Mustermann',]; // 'Durin IV.', 'Agend Smith'];
@@ -33,12 +103,10 @@ const mockPersons = ['Alice Abbing', 'Bob Bodemann', 'Caesar Clown', 'Max Muster
 const mapStateToProps = (state) => {
   const dashboardState = state.visualizations.milestoneReflection.state;
 
-  const milestoneIssues = [];
+  let milestoneIssues = [];
 
   if (JSON.stringify(oldState?.data?.issues) != JSON.stringify(dashboardState.data.issues) && dashboardState.data.issues.length > 0) {
-    dashboardState.data.issues = enrichIssuesWithMilestoneData(dashboardState.data.issues);
-
-    debugger;
+    milestoneIssues = enrichIssuesWithMilestoneData(dashboardState.data.issues);
   }
 
   oldState = {
@@ -59,7 +127,7 @@ const mapStateToProps = (state) => {
 };
 
 const enrichIssuesWithMilestoneData = (issues) => {
-
+  let mockIndex = 510;
   let newMockArr = [];
   mockMilestone.forEach((originalMilestone, index) => {
 
@@ -71,14 +139,16 @@ const enrichIssuesWithMilestoneData = (issues) => {
     const currMilestone = {
       iid: originalMilestone.iid,
       title: originalMilestone.title,
-      beginDate: issues[originalMilestone.rangeBegin].createdAt,
+      beginDate: null,
       endDate: null,
       issuesPerPerson: [],
       personsMap: new Map(),
     }
 
     newMockArr.push(currMilestone);
+    originalMilestone.local_arr_id = newMockArr.length -1;
 
+    //debugger;
     // enriching current issue and overwrite existing name
     for (let i = originalMilestone.rangeBegin; i < originalMilestone.rangeEnd; i++) {
       let currIssue = issues[i];
@@ -91,21 +161,38 @@ const enrichIssuesWithMilestoneData = (issues) => {
         currMilestone.issuesPerPerson.push({name: newName, issueList: []})
       }
 
-      currIssue.assignedTo = mockPersons[i % mockPersons.length];
+      currIssue = {...currIssue, ...mockIssueData[(i - originalMilestone.rangeBegin) % mockIssueData.length]}
+      currIssue.issueName = "Issue" + mockIndex++;
 
-      console.log(currIssue);
+      // transform mock timestamp to millsec
+      currIssue.its.timeStamps.issue_inProgress = (new Date(currIssue.its.timeStamps.issue_inProgress)).getTime();
+      currIssue.its.timeStamps.issue_done = (new Date(currIssue.its.timeStamps.issue_done)).getTime();
+
+      if (currMilestone.beginDate == null || currMilestone.beginDate > currIssue.its.timeStamps.issue_inProgress) {
+        currMilestone.beginDate = currIssue.its.timeStamps.issue_inProgress;
+      }
+      if (currMilestone.endDate == null || currMilestone.endDate < currIssue.its.timeStamps.issue_done) {
+        currMilestone.endDate = currIssue.its.timeStamps.issue_done;
+      }
+      // mockIssueData
+      // author{ additionalName: '' }
+      // new Date('2022-10-13T08:00:00').getTime()
+      currIssue.assignedTo = mockPersons[(i - originalMilestone.rangeBegin) % mockPersons.length];
+
       currMilestone.issuesPerPerson[currentPersonIndex].issueList.push(currIssue);
-      debugger;
-      return {};
     }
-
   })
 
   return newMockArr;
 }
 
 
-const mapDispatchToProps = (/*dispatch , ownProps*/) => {
+const mapDispatchToProps = (dispatch /*, ownProps*/) => {
+  // todo: ui/src/index.js change default view to dashboard
+  // for development:
+  if(this?.dashboardState?.config?.milestone == null) {
+    dispatch(setMilestone(mockMilestone[0]));
+  }
   return {};
 };
 

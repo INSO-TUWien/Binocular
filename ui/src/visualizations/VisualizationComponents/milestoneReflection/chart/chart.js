@@ -1,8 +1,7 @@
 'use strict';
 
 import React from 'react';
-import Timeline from '../../../../components/Timeline/Timeline';
-import { mockData } from './index';
+import Timeline from "../Timeline/Timeline";
 
 export default class MilestoneReflection extends React.PureComponent {
   constructor(props) {
@@ -27,7 +26,9 @@ export default class MilestoneReflection extends React.PureComponent {
 
         <div style={{ height: '100%', width: '100%', alignItems: 'center', display: 'flex', justifyContent: 'center' }}>
           {this.props.config?.milestone === null && <div> Please select Milestone!</div>}
-          {this.props.config?.milestone !== null && <Timeline data={{ mockData }} />}
+          {this.props.config?.milestone !== null && this.props.data?.milestoneIssues?.length <= 0  && "No issues are available for this Milestone!"}
+          {this.props.config?.milestone !== null && this.props.data?.milestoneIssues?.length > 0
+            && <Timeline data={{milestone: this.props.data.milestoneIssues[this.props.config.milestone.local_arr_id], showInfo: this.props.config.issueInfo}}/>}
         </div>
       </div>
     );

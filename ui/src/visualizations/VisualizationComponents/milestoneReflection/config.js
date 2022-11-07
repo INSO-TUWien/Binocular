@@ -9,7 +9,7 @@ import { connect } from 'react-redux';
 import styles from './styles.scss';
 import SearchBox from '../../../components/SearchBox';
 import { setIssueInfo, setMilestone } from './sagas';
-import { mockMilestone } from "./chart/index";
+import { mockMilestone } from './chart/index';
 
 const mapStateToProps = (state /*, ownProps*/) => {
   const dashboardState = state.visualizations.milestoneReflection.state;
@@ -22,9 +22,8 @@ const mapStateToProps = (state /*, ownProps*/) => {
 };
 
 const mapDispatchToProps = (dispatch /*, ownProps*/) => {
-  dispatch(setMilestone({ iid: 1, title: 'Milestone 1', rangeBegin: 0, rangeEnd: 4 }));
   return {
-    onIssueInfoChange: (issueInfo) => dispatch(setIssueInfo(issueInfo), get),
+    onIssueInfoChange: (issueInfo) => dispatch(setIssueInfo(issueInfo)),
     onMilestoneChange: (milestone) => dispatch(setMilestone(milestone)),
   };
 };
