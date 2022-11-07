@@ -4,6 +4,7 @@ import * as d3 from 'd3';
 import _ from 'lodash';
 import React from 'react';
 
+const MAX_SAFE_INTEGER = 9007199254740991;
 export default class Timeline extends React.Component {
   state = {
     colorCycle: [
@@ -60,20 +61,20 @@ export default class Timeline extends React.Component {
     this.state.showInfo = this.props.data.showInfo;
 
     if (this.props?.data?.milestone == null){
-      this.appendAxis(d3.select(this.svgTimeline));
+      this.appendAxis(d3.select(this.gTimeline));
     } else {
-      this.appendIssues(d3.select(this.svgTimeline));
+      // get future boundaries of svg
+      this.calcIssueDrawProperties();
+
+      this.appendIssues();
     }
   }
 
-  appendAxis(parent, svgTimeline) {
+  appendAxis(parent) {
     // calculate the axis
     let margin = this.state.defaultValues.margin;
     // + 1 for milestone row
     let yPosition = (margin.top + (this.state.issuesStats.height + this.state.issuesStats.margin) * (this.state.issuesStats.rowCount + 1));
-
-    // set svg height = axis position + axis height
-    svgTimeline.node().style.height = yPosition + (this.state.issuesStats.height + this.state.issuesStats.margin);
 
     let xScale = d3.scaleTime()
       .domain([this.state.issuesStats.startTime, this.state.issuesStats.endTime])
@@ -91,10 +92,21 @@ export default class Timeline extends React.Component {
       .call(xAxis);
   }
 
-  calcIssueDrawProperties(g) {
+  calcIssueDrawProperties() {
     let minTime = this.state.issuesStats.startTime;
     let maxTime = this.state.issuesStats.endTime;
     let rowCount = 1;
+
+    let localToolInfos = {
+      vcs: {
+        loc: {min: MAX_SAFE_INTEGER, max: -1}
+      }, its: {
+        time: {min: MAX_SAFE_INTEGER, max: -1}
+      }, ci: {
+        builds: {minSuccessRate: 1.0, maxSuccessRate: 0.0}
+      }
+    };
+    let buildRate;
 
     // check how many rows ar needed and how max start and endtime of the issues is
     if (this.state.issuesStats.startTime === 0 || this.state.issuesStats.endTime === 0) {
@@ -107,11 +119,20 @@ export default class Timeline extends React.Component {
           person.issueList.forEach(function (issue, i) {
 
             if (issue.its.timeStamps.issue_inProgress < minTime || (minTime === 0)) {
-              minTime = issue.its.timeStamps.issue_inProgress ;
-            }
+              minTime = issue.its.timeStamps.issue_inProgress ;}
             if (issue.its.timeStamps.issue_done > maxTime) {
-              maxTime = issue.its.timeStamps.issue_done;
-            }
+              maxTime = issue.its.timeStamps.issue_done;}
+
+            // calc metrik data
+            if (localToolInfos.vcs.loc.min > issue.vcs.loc) {localToolInfos.vcs.loc.min = issue.vcs.loc;}
+            if (localToolInfos.vcs.loc.max < issue.vcs.loc) {localToolInfos.vcs.loc.max = issue.vcs.loc;}
+            if (localToolInfos.its.time.min > issue.its.minutesSpent) {localToolInfos.its.time.min = issue.its.minutesSpent;}
+            if (localToolInfos.its.time.max < issue.its.minutesSpent) {localToolInfos.its.time.max = issue.its.minutesSpent;}
+
+            buildRate = (issue.ci.successful / issue.ci.totalBuild);
+            if (localToolInfos.ci.builds.minSuccessRate > buildRate) {localToolInfos.ci.builds.minSuccessRate = buildRate;}
+            if (localToolInfos.ci.builds.maxSuccessRate < buildRate) {localToolInfos.ci.builds.maxSuccessRate = buildRate;}
+
           });
         })
       }
@@ -119,6 +140,8 @@ export default class Timeline extends React.Component {
       this.state.issuesStats.rowCount = milestone.issuesPerPerson.length;
       this.state.issuesStats.startTime = minTime;
       this.state.issuesStats.endTime = maxTime;
+
+      this.state.issuesStats.issueToolInfo = localToolInfos;
 
       let timeDiff = maxTime - minTime;
       let widthWithoutMargin = this.state.defaultValues.width - this.state.defaultValues.margin.left - this.state.defaultValues.margin.right;
@@ -205,15 +228,48 @@ export default class Timeline extends React.Component {
           debugger;
         }
 
+        const yellow =  "#ffe147";
+        const blue = "#2ca6ff";
+        const grey = "#a1a1a1";
+
+        let interpolate1 = d3.interpolateRgb(yellow, grey)
+        let interpolate2 = d3.interpolateRgb(grey, blue)
+
         // colored background box
         gTimeline
           .append("rect")
-          .datum({issue: singleIssue})
+          .datum({issue: singleIssue, state: this.state, interpolate1, interpolate2})
           .attr("x", xPosition)
           .attr("y", yPosition)
           .attr("width", issueWidth)
           .attr("height", this.state.issuesStats.height)
-          .style("fill", (data) => { return this.state.colorCycle[index]})
+          .style("fill", (data, index, d3) => {
+            let value, min, max, interpolation;
+
+            switch (data.state.showInfo) {
+              case "loc":
+                value = data.issue.vcs.loc;
+                min =  data.state.issuesStats.issueToolInfo.vcs.loc.min;
+                max =  data.state.issuesStats.issueToolInfo.vcs.loc.max;
+                break;
+              case "time":
+                value = data.issue.its.minutesSpent;
+                min =  data.state.issuesStats.issueToolInfo.its.time.min;
+                max =  data.state.issuesStats.issueToolInfo.its.time.max;
+                break;
+              case "builds":
+                value = data.issue.ci.successful / data.issue.ci.totalBuild;
+                min =  data.state.issuesStats.issueToolInfo.ci.builds.min;
+                max =  data.state.issuesStats.issueToolInfo.ci.builds.max;
+                break;
+            }
+            interpolation = (value-min)/(max-min);
+            if (interpolation <= 0.5) {
+              return interpolate1(interpolation);
+            } else {
+              return interpolate2(interpolation);
+            }
+          })
           .attr("class",  "timelineSeries_" + index)
           .attr("id", 'timelineItem_' + index + "_" + issueIndex)
         ;
@@ -237,7 +293,6 @@ export default class Timeline extends React.Component {
           .style("fill", "transparent")
           .on("click", (event, data) => {data.onClick(data.issue);})
         ;
-
       })
     })
   }
@@ -255,9 +310,6 @@ export default class Timeline extends React.Component {
 
     gTimeline.datum({milestone, state: this.state});
 
-    // get future boundaries of svg
-    this.calcIssueDrawProperties(gTimeline);
-
     if (milestone != null) {
       this.drawMilestoneRow(gTimeline, milestone);
 
@@ -265,17 +317,27 @@ export default class Timeline extends React.Component {
     };
 
     // draw axis
-    this.appendAxis(gTimeline, svgTimeline);
+    this.appendAxis(gTimeline);
+
+    let height = (this.state.defaultValues.margin.top + this.state.defaultValues.margin.bottom
+      + (this.state.issuesStats.height + this.state.issuesStats.margin) * (this.state.issuesStats.rowCount + 2));
+    // set svg height = axis position + axis height
+    svgTimeline.node().style.height = height;
   }
 
 
   render() {
-    if (this.state.componentDidMount
-      && (JSON.stringify(this.props.data.milestone) != JSON.stringify(this.state.inputFieldJson)
-        || this.state.showInfo != this.props.data.milestone)
-    ) {
-      this.drawTimeline();
+    if (this.state.componentDidMount) {
+      if  (JSON.stringify(this.props.data.milestone) != JSON.stringify(this.state.inputFieldJson)) {
+        this.drawTimeline();
+      }
+
+      if (this.state.showInfo != this.props.data.showInfo) {
+        this.state.showInfo = this.props.data.showInfo;
+        this.appendIssues();
+      }
     }
+
 
     return (
       <svg id="timeline" style={{ width: "100%" }} ref={(svg) => (this.svgTimeline = svg)}>
