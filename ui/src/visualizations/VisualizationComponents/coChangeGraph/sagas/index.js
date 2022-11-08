@@ -16,6 +16,7 @@ export const setFilterContent = createAction('SET_PATH_FILTER');
 export const applyTimeSpan = createAction('APPLY_TIME_SPAN')
 export const setShowIntraModuleDeps = createAction('SET_SHOW_INTRA_MODULE_DEPS')
 export const setNodeHighlighting = createAction('SET_NODE_HIGHLIGHTING')
+export const setActivateNodeHighlighting = createAction('SET_ACTIVATE_NODE_HIGHLIGHTING')
 
 export const requestData = createAction('REQUEST_DATA');
 export const receiveData = timestampedActionFactory('RECEIVE_DATA');

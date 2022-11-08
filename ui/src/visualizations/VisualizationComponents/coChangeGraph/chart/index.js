@@ -17,6 +17,7 @@ const mapStateToProps = (state /*, ownProps*/) => {
     entitySelection: coChangeState.data.data.entitySelection,
     showIntraModuleDeps: coChangeState.config.showIntraModuleDeps,
     nodeToHighlight: coChangeState.config.nodeToHighlight,
+    activateNodeHighlighting: coChangeState.config.activateNodeHighlighting
   };
 };
 

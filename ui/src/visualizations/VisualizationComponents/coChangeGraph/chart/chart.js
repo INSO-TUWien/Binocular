@@ -8,7 +8,7 @@ import ChartContainer from '../../../../components/svg/ChartContainer.js';
 import styles from '../styles.scss';
 import * as zoomUtils from '../../../../utils/zoom.js';
 import {computeFileDependencies, computeModuleDependencies, assignModuleIndicesToFiles, createSubModuleLinks, removeIntraModuleLinks} from './computeUtils.js';
-import {getFirstAndLastCommitDates} from './timeUtils';
+//import {highlightNodeAndLinks} from './chartUtils';
 
 const CHART_FILL_RATIO = 0.65;
 
@@ -17,8 +17,12 @@ let _dataset = undefined;
 let _simulation = undefined;
 let _showIntraModuleDeps = true;
 let _nodeToHighlight = "";
+let _activateNodeHighlighting = false;
+let _fixedHighlighting = false;
 
 let _nodes = undefined;
+let _links = undefined;
+let _text = undefined;
 
 export default class CoChangeGraph extends React.Component {  
   constructor(props) {
@@ -41,10 +45,19 @@ export default class CoChangeGraph extends React.Component {
     //console.log("Props:");
     //console.log(nextProps);
 
-    if(_showIntraModuleDeps != nextProps.showIntraModuleDeps || _nodeToHighlight != nextProps.nodeToHighlight){
+    if(_showIntraModuleDeps != nextProps.showIntraModuleDeps 
+      || _nodeToHighlight != nextProps.nodeToHighlight
+      || _activateNodeHighlighting != nextProps.activateNodeHighlighting){
+
       _showIntraModuleDeps = nextProps.showIntraModuleDeps;
       _nodeToHighlight = nextProps.nodeToHighlight;
-      this.highlightNode(_nodeToHighlight);
+      _activateNodeHighlighting = nextProps.activateNodeHighlighting;
+
+      if(_activateNodeHighlighting){
+        this.highlightNodes(_nodeToHighlight);
+      } else {
+        this.disableHighlighting(_fixedHighlighting);
+      }
       return;
     }
 
@@ -79,8 +92,11 @@ export default class CoChangeGraph extends React.Component {
     }
   }
 
-  highlightNode(filter) {
+  highlightNodes(filter) {
     if(_simulation == undefined) return;
+    
+    _fixedHighlighting = false;
+    this.disableHighlighting(_fixedHighlighting);
 
     _nodes.style('fill', function (node_d) {
       if(filter != "" && node_d.id.includes(filter)) {
@@ -103,7 +119,7 @@ export default class CoChangeGraph extends React.Component {
     const defs = svg.append("defs");
 
     // Initialize the links
-    const links = svg.append("g")
+    _links = svg.append("g")
       .attr("class", "links")
       .selectAll("line")
       .data(_dataset.links)
@@ -119,7 +135,7 @@ export default class CoChangeGraph extends React.Component {
       .style("fill", (d) => {return d.type == "m" ? "yellow" : "pink"});
 
     // Text to nodes
-    const text = svg.append("g")
+    _text = svg.append("g")
       .attr("class", "text")
       .selectAll("text")
       .data(_dataset.nodes)
@@ -149,63 +165,56 @@ export default class CoChangeGraph extends React.Component {
         _nodes.attr("cx", d => d.x)
         .attr("cy", d => d.y);
 
-        links.attr("x1", d => d.source.x)
+        _links.attr("x1", d => d.source.x)
           .attr("y1", d => d.source.y)
           .attr("x2", d => d.target.x)
           .attr("y2", d => d.target.y);
 
-        text.attr("x", d => d.x - 5) //position of the lower left point of the text
+        _text.attr("x", d => d.x - 5) //position of the lower left point of the text
             .attr("y", d => d.y + 5); //position of the lower left point of the text
 
-        links.each(function(d){refreshGradient(this, d)});
+        _links.each(function(d){refreshGradient(this, d)});
         let timeToRender = Date.now() - time;
         console.log("rendered in: " + timeToRender);
 
       }, 1000)
     }
 
-
-    let fixedHighlighting = false;
     // node highlighting functionality
-    _nodes.on('mouseover', function (event, d) {   
-      if(fixedHighlighting) return;
-        
-      // Highlight the connections
-      links.style('stroke-width', function (link_d) {return link_d.source.id === d.id || link_d.target.id === d.id ? 5 : 0.1;})
-      const _links = links.filter(_ => _.source.id === d.id || _.target.id === d.id);
-      _links.raise();
+    _nodes.on('mouseover', 
+      function(event, d) {   
+        if(_fixedHighlighting || _activateNodeHighlighting) return;
 
-      let targetNodes = new Set();
-      _links.each(_ => {targetNodes.add(_.target.id); targetNodes.add(_.source.id)});
-
-      let targetModuls = new Set();
-      _dataset.fileToModuleLinks.forEach(element => {
-        if (targetNodes.has(element.source.id)) {
-          targetModuls.add(element.target.id)
-        }
-      });
+        // Highlight the connections
+        _links.style('stroke-width', function (link_d) {return link_d.source.id === d.id || link_d.target.id === d.id ? 5 : 0.1;})
+        const filteredLinks = _links.filter(_ => _.source.id === d.id || _.target.id === d.id);
+        filteredLinks.raise();
       
-      text.style("fill", function (link_d) {
-        return targetNodes.has(link_d.id) || targetModuls.has(link_d.id) ? 'black' : 'transparent'
-      })
-      _nodes.style('stroke-width', function (node_d) {return targetNodes.has(node_d.id) ? 1 : 0.1})
-      _nodes.style('fill', function (node_d) {
-        return targetNodes.has(node_d.id) ? "orange" : targetModuls.has(node_d.id) ? "yellow" : "transparent"
-      })
+        let targetNodes = new Set();
+        filteredLinks.each(_ => {targetNodes.add(_.target.id); targetNodes.add(_.source.id)});
+      
+        let targetModuls = new Set();
+        _dataset.fileToModuleLinks.forEach(element => {
+          if (targetNodes.has(element.source.id)) {
+            targetModuls.add(element.target.id)
+          }
+        });
 
-      d3.select(this).style('fill', 'red');
+        _text.style("fill", function (link_d) {
+          return targetNodes.has(link_d.id) || targetModuls.has(link_d.id) ? 'black' : 'transparent'
+        })
+        _nodes.style('stroke-width', function (node_d) {return targetNodes.has(node_d.id) ? 1 : 0.1})
+        _nodes.style('fill', function (node_d) {
+          return targetNodes.has(node_d.id) ? "orange" : targetModuls.has(node_d.id) ? "yellow" : "transparent"
+        })
+      
+        d3.select(this).style('fill', 'red');
     })
-    .on('mouseout', function (d) {
-      if(fixedHighlighting) return;
-
-      _nodes.style('fill', function (node_d) {return node_d.type == "m" ? "yellow" : "pink"})
-      _nodes.style('stroke-width', 1);
-      links.style('stroke-width', '1');
-      text.style("fill", 'black');
-      text.style('font-size', '16');
+    .on('mouseout', (d) => {
+      if(!_activateNodeHighlighting) this.disableHighlighting(_fixedHighlighting);
     })
     .on('click', function(d){
-      fixedHighlighting = fixedHighlighting ? false : true;
+      if(!_activateNodeHighlighting) _fixedHighlighting = _fixedHighlighting ? false : true;
     });
 
     // link color functions
@@ -258,6 +267,16 @@ export default class CoChangeGraph extends React.Component {
         createGradient(line, d);
       }
     }  
+  }
+
+  disableHighlighting(fixedHighlighting) {
+    if(fixedHighlighting) return;
+
+    _nodes.style('fill', function (node_d) {return node_d.type == "m" ? "yellow" : "pink"})
+    _nodes.style('stroke-width', 1);
+    _links.style('stroke-width', '1');
+    _text.style("fill", 'black');
+    _text.style('font-size', '16');
   }
 
   render() {

@@ -4,7 +4,7 @@ import _ from 'lodash';
 import { connect } from 'react-redux';
 
 import styles from './styles.scss';
-import { setTimeSpan, applyTimeSpan, setEntitySelection, setShowIntraModuleDeps, setNodeHighlighting } from './sagas';
+import { setTimeSpan, applyTimeSpan, setEntitySelection, setShowIntraModuleDeps, setNodeHighlighting, setActivateNodeHighlighting } from './sagas';
 import DateRangeFilter from '../../../components/DateRangeFilter/dateRangeFilter';
 
 
@@ -35,6 +35,7 @@ const mapStateToProps = (state /*, ownProps*/) => {
     lastDisplayDate: lastDisplayDate,
     entitySelection: coChangeState.config.entitySelection,
     showIntraModuleDeps: coChangeState.config.showIntraModuleDeps,
+    activateNodeHighlighting: coChangeState.config.activateNodeHighlighting,
   };
 };
 
@@ -50,7 +51,8 @@ const mapDispatchToProps = (dispatch /*, ownProps*/) => {
     onBoundraryChange: (boundrary) => {lowerBounds = boundrary},
     onEntitySelectionChange: (entityType) => {entitySelection = entityType; dispatch(setEntitySelection(entityType))},
     onSetShowIntraModuleDeps: (b) => dispatch(setShowIntraModuleDeps(b)),
-    onNodeHighlightingChange: (nodeToHighlight) => {dispatch(setNodeHighlighting(nodeToHighlight))}
+    onNodeHighlightingChange: (nodeToHighlight) => {dispatch(setNodeHighlighting(nodeToHighlight))},
+    onSetActivateNodeHighlighting: (b) => dispatch(setActivateNodeHighlighting(b)),
   };
 };
 
@@ -58,7 +60,7 @@ const CoChangeConfigComponent = props => {
   return (
     <div className={styles.configContainer}>
         <div className="control">
-            <label className="label">Show graph for:</label>
+            <label className="label">Show Graph for:</label>
             <label className="radio">
               <input
                 name="entitySelection"
@@ -78,7 +80,7 @@ const CoChangeConfigComponent = props => {
               Modules
             </label>
         </div>
-          <label className="label">Time span:</label>
+          <label className="label">Time Span:</label>
           <div>
             <DateRangeFilter
               from={props.firstDisplayDate}
@@ -98,6 +100,7 @@ const CoChangeConfigComponent = props => {
                 step="0.05"
                 onChange={(e) => {props.onBoundraryChange(e.target.value)}}
         ></input>
+        <br/>
         <label className="checkbox">
               <input
                 type="checkbox"
@@ -105,15 +108,24 @@ const CoChangeConfigComponent = props => {
                 checked={props.showIntraModuleDeps}
                 onChange={(e) => props.onSetShowIntraModuleDeps(e.target.checked)}
               />
-              Show intra-module dependencies
+              Show Intra-Module Dependencies
         </label>
         <br/><br/>
       <button onClick={() => {props.onTimeSpanApply()}}>Apply</button>
       <br/><br/>
-      <label className="label">Highlight nodes:</label>
+      <label className="label">Highlight Nodes:</label>
         <input  type="text" 
                 defaultValue=""
                 onChange={(e) => {props.onNodeHighlightingChange(e.target.value)}}></input>
+        <label className="checkbox">
+          <input
+            type="checkbox"
+            id="show node highlighting"
+            checked={props.activateNodeHighlighting}
+            onChange={(e) => props.onSetActivateNodeHighlighting(e.target.checked)}
+          />
+          Activate Highlighting
+        </label>
     </div>
   );
 };
