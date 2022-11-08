@@ -10,12 +10,14 @@ export default handleActions(
     SET_SHOW_INTRA_MODULE_DEPS: (state, action) => _.assign({}, state, { showIntraModuleDeps: action.payload }),
     SET_NODE_HIGHLIGHTING: (state, action) => _.assign({}, state, { nodeToHighlight: action.payload }),
     SET_ACTIVATE_NODE_HIGHLIGHTING: (state, action) => _.assign({}, state, { activateNodeHighlighting: action.payload }),
+    SET_MIN_SHARED_COMMITS: (state, action) => _.assign({}, state, { minSharedCommits: action.payload }),
   },
   {
     chartTimeSpan: {from: undefined, to: undefined},
     entitySelection: "files",
     showIntraModuleDeps: true,
     nodeToHighlight: "",
-    activateNodeHighlighting: false
+    activateNodeHighlighting: false,
+    minSharedCommits: 1,
   }
 );

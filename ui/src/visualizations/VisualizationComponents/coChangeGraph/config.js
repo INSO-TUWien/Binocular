@@ -4,7 +4,7 @@ import _ from 'lodash';
 import { connect } from 'react-redux';
 
 import styles from './styles.scss';
-import { setTimeSpan, applyTimeSpan, setEntitySelection, setShowIntraModuleDeps, setNodeHighlighting, setActivateNodeHighlighting } from './sagas';
+import { setTimeSpan, applyTimeSpan, setEntitySelection, setShowIntraModuleDeps, setNodeHighlighting, setActivateNodeHighlighting, setMinSharedCommits } from './sagas';
 import DateRangeFilter from '../../../components/DateRangeFilter/dateRangeFilter';
 
 
@@ -27,8 +27,6 @@ const mapStateToProps = (state /*, ownProps*/) => {
     lastDisplayDate = coChangeState.config.chartTimeSpan.to;
   }
 
-  console.log(coChangeState)
-
   return {
     commitsFiles: coChangeState.data.data.commitsFiles,
     firstDisplayDate: firstDisplayDate,
@@ -36,6 +34,7 @@ const mapStateToProps = (state /*, ownProps*/) => {
     entitySelection: coChangeState.config.entitySelection,
     showIntraModuleDeps: coChangeState.config.showIntraModuleDeps,
     activateNodeHighlighting: coChangeState.config.activateNodeHighlighting,
+    minSharedCommits: coChangeState.config.minSharedCommits
   };
 };
 
@@ -53,6 +52,7 @@ const mapDispatchToProps = (dispatch /*, ownProps*/) => {
     onSetShowIntraModuleDeps: (b) => dispatch(setShowIntraModuleDeps(b)),
     onNodeHighlightingChange: (nodeToHighlight) => {dispatch(setNodeHighlighting(nodeToHighlight))},
     onSetActivateNodeHighlighting: (b) => dispatch(setActivateNodeHighlighting(b)),
+    onMinSharedCommitsChange: (minSharedCommits) => dispatch(setMinSharedCommits(minSharedCommits)),
   };
 };
 
@@ -94,12 +94,6 @@ const CoChangeConfigComponent = props => {
         <input  type="text" 
                 defaultValue="ui/src/visualizations/"
                 onChange={(e) => {props.onFilterChange(e.target.value)}}></input>
-        <label className="label">Lower Boundrary for Co-Changes</label>
-        <input  type="number" 
-                defaultValue={lowerBounds}
-                step="0.05"
-                onChange={(e) => {props.onBoundraryChange(e.target.value)}}
-        ></input>
         <br/>
         <label className="checkbox">
               <input
@@ -110,7 +104,22 @@ const CoChangeConfigComponent = props => {
               />
               Show Intra-Module Dependencies
         </label>
-        <br/><br/>
+        <label className="label">Lower Boundrary for Co-Changes</label>
+        <input  type="number" 
+                defaultValue={lowerBounds}
+                step="0.05"
+                min="0"
+                max="1"
+                onChange={(e) => {props.onBoundraryChange(e.target.value)}}
+        ></input>
+        <label className="label">Minimum Amount of Shared Commits</label>
+        <input  type="number" 
+                defaultValue={props.minSharedCommits}
+                step="1"
+                min="1"
+                onChange={(e) => {props.onMinSharedCommitsChange(e.target.value)}}
+        ></input>
+        <br/>
       <button onClick={() => {props.onTimeSpanApply()}}>Apply</button>
       <br/><br/>
       <label className="label">Highlight Nodes:</label>

@@ -5,7 +5,7 @@ import { takeEvery, fork, select } from 'redux-saga/effects';
 import _ from 'lodash';
 import getCommitFiles from './getCommitFiles';
 
-import { fetchFactory, timestampedActionFactory, mapSaga } from '../../../../sagas/utils.js';
+import { fetchFactory, timestampedActionFactory } from '../../../../sagas/utils.js';
 import getCommitsModules from './getCommitsModules';
 import getModuleData from './getModuleData';
 import getBounds from './getBounds';
@@ -17,6 +17,7 @@ export const applyTimeSpan = createAction('APPLY_TIME_SPAN')
 export const setShowIntraModuleDeps = createAction('SET_SHOW_INTRA_MODULE_DEPS')
 export const setNodeHighlighting = createAction('SET_NODE_HIGHLIGHTING')
 export const setActivateNodeHighlighting = createAction('SET_ACTIVATE_NODE_HIGHLIGHTING')
+export const setMinSharedCommits = createAction('SET_MIN_SHARED_COMMITS')
 
 export const requestData = createAction('REQUEST_DATA');
 export const receiveData = timestampedActionFactory('RECEIVE_DATA');

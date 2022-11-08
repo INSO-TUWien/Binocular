@@ -38,7 +38,7 @@ export function computeFileDependencies(props){
         fileSet = filterEntities("", fileSet);
     }
 
-    let dataset = computeDependencyDataset(fileSet, sharedCommitCnt, commitCntPerFile);
+    let dataset = computeDependencyDataset(fileSet, sharedCommitCnt, commitCntPerFile, props.minSharedCommits);
     dataset = filterDependencyDataset(dataset, props.lowerBounds);
     return dataset;
 }
@@ -79,7 +79,7 @@ export function computeModuleDependencies(props){
     }
 
     moduleSet = filterEntities(props.pathFilter, moduleSet);
-    let dataset = computeDependencyDataset(moduleSet, sharedCommitCnt, commitCntPerModule);
+    let dataset = computeDependencyDataset(moduleSet, sharedCommitCnt, commitCntPerModule, props.minSharedCommits);
 
     dataset.nodes.forEach(node => {
         node.name = node.id;
@@ -120,10 +120,11 @@ function validateSharedCommitCnt(sharedCommitCnt, srcFile, dstFile) {
 * Produces: {dataset}, containing all entities as nodes, and the dependencies as edges
 */
 
-function computeDependencyDataset(entitySet, sharedCommitCnt, commitCntPerEntity){
+function computeDependencyDataset(entitySet, sharedCommitCnt, commitCntPerEntity, minSharedCommitCount){
     let dependencies = [];
     let dependencyCnt = 0;
     entitySet = Array.from(entitySet); //convert to Array for ease of use
+    let notDrawn = 0;
 
     // compute the dependencies
     for (const srcEntity of entitySet) {
@@ -156,15 +157,19 @@ function computeDependencyDataset(entitySet, sharedCommitCnt, commitCntPerEntity
     
                 // check both directions to avoid duplicates
                 if (dependencies[key] === undefined && dependencies[reverseKey] === undefined) {
-                    // do not draw links with zero dependency
-                    if(srcCoChange != 0 || dstCoChange != 0){   
+                    // do not draw if shared commit count is below threshold
+                    if(sharedCommitCnt[srcEntity][dstEntity] >= minSharedCommitCount){
                         dependencies[key] = link;
                         dependencyCnt++;
+                    } else {
+                        notDrawn++;
                     }
                 }
             }
         });
     }
+
+    console.log("Edges removed because of they are below commit threshold: " + notDrawn);
 
     let dependencyArray = [];
 

@@ -8,7 +8,6 @@ import ChartContainer from '../../../../components/svg/ChartContainer.js';
 import styles from '../styles.scss';
 import * as zoomUtils from '../../../../utils/zoom.js';
 import {computeFileDependencies, computeModuleDependencies, assignModuleIndicesToFiles, createSubModuleLinks, removeIntraModuleLinks} from './computeUtils.js';
-//import {highlightNodeAndLinks} from './chartUtils';
 
 const CHART_FILL_RATIO = 0.65;
 
@@ -19,6 +18,7 @@ let _showIntraModuleDeps = true;
 let _nodeToHighlight = "";
 let _activateNodeHighlighting = false;
 let _fixedHighlighting = false;
+let _minSharedCommits = 1;
 
 let _nodes = undefined;
 let _links = undefined;
@@ -45,20 +45,9 @@ export default class CoChangeGraph extends React.Component {
     //console.log("Props:");
     //console.log(nextProps);
 
-    if(_showIntraModuleDeps != nextProps.showIntraModuleDeps 
-      || _nodeToHighlight != nextProps.nodeToHighlight
-      || _activateNodeHighlighting != nextProps.activateNodeHighlighting){
-
-      _showIntraModuleDeps = nextProps.showIntraModuleDeps;
-      _nodeToHighlight = nextProps.nodeToHighlight;
-      _activateNodeHighlighting = nextProps.activateNodeHighlighting;
-
-      if(_activateNodeHighlighting){
-        this.highlightNodes(_nodeToHighlight);
-      } else {
-        this.disableHighlighting(_fixedHighlighting);
-      }
-      return;
+    const configChanged = this.updateConfigProperties(nextProps);
+    if(configChanged === true){
+      return; // only update config
     }
 
     const newDataset = computeFileDependencies(nextProps);
@@ -90,21 +79,6 @@ export default class CoChangeGraph extends React.Component {
       this.removeGraph();
       this.drawGraph();
     }
-  }
-
-  highlightNodes(filter) {
-    if(_simulation == undefined) return;
-    
-    _fixedHighlighting = false;
-    this.disableHighlighting(_fixedHighlighting);
-
-    _nodes.style('fill', function (node_d) {
-      if(filter != "" && node_d.id.includes(filter)) {
-        return node_d.type == "m" ? "orange" : "aqua";
-      }
-
-      return node_d.type == "m" ? "yellow" : "pink"
-    })
   }
 
   removeGraph(){
@@ -149,8 +123,6 @@ export default class CoChangeGraph extends React.Component {
       .force('moduleToModuleLinks', d3.forceLink().links(_dataset.moduleToModuleLinks).strength(0.15))
       .force('repellent force near', d3.forceManyBody().strength(-1000).distanceMin(0).distanceMax(400))
       .force('repellent force far', d3.forceManyBody().strength(-200).distanceMin(400).distanceMax(1000))
-      //.force('x', d3.forceX().strength(0.0010))
-      //.force('y', d3.forceY().strength(0.0010))
       .on("tick", ticked); 
 
     let debouncer;
@@ -270,7 +242,7 @@ export default class CoChangeGraph extends React.Component {
   }
 
   disableHighlighting(fixedHighlighting) {
-    if(fixedHighlighting) return;
+    if(fixedHighlighting || _simulation === undefined) return;
 
     _nodes.style('fill', function (node_d) {return node_d.type == "m" ? "yellow" : "pink"})
     _nodes.style('stroke-width', 1);
@@ -301,4 +273,44 @@ export default class CoChangeGraph extends React.Component {
       </ChartContainer>
     );
   }
+
+  // returns true if config properties were changed
+  updateConfigProperties(nextProps){
+    if(_showIntraModuleDeps != nextProps.showIntraModuleDeps 
+      || _nodeToHighlight != nextProps.nodeToHighlight
+      || _activateNodeHighlighting != nextProps.activateNodeHighlighting
+      || _minSharedCommits != nextProps.minSharedCommits) {
+
+      _showIntraModuleDeps = nextProps.showIntraModuleDeps;
+      _nodeToHighlight = nextProps.nodeToHighlight;
+      _activateNodeHighlighting = nextProps.activateNodeHighlighting;
+      _minSharedCommits = nextProps.minSharedCommits;
+
+      if(_activateNodeHighlighting){
+        this.highlightNodes(_nodeToHighlight);
+      } else {
+        this.disableHighlighting(_fixedHighlighting);
+      }
+
+      return true;
+    } 
+
+    return false;
+  }
+
+  highlightNodes(filter) {
+    if(_simulation == undefined) return;
+    
+    _fixedHighlighting = false;
+    this.disableHighlighting(_fixedHighlighting);
+
+    _nodes.style('fill', function (node_d) {
+      if(filter != "" && node_d.id.includes(filter)) {
+        return node_d.type == "m" ? "orange" : "aqua";
+      }
+
+      return node_d.type == "m" ? "yellow" : "pink"
+    })
+  }
+
 }
