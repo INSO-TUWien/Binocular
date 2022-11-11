@@ -15,57 +15,61 @@ export default class columnChartGeneration {
       case 1:
         combinedColumnData = d3Collection
           .nest()
-          .key(d => d.column)
-          .rollup(function(v) {
+          .key((d) => d.column)
+          .rollup(function (v) {
             return {
               column: v[0].column,
-              value: d3.sum(v, g => g.value),
+              value: d3.sum(v, (g) => g.value),
               message: v[0].message,
               sha: v[0].sha,
               dev: v[0].dev,
-              commits: v[0].commits
+              commits: v[0].commits,
             };
           })
           .entries(data)
-          .map(d => d.value);
+          .map((d) => d.value);
         break;
       case 2:
         combinedColumnData = d3Collection
           .nest()
-          .key(d => d.column)
-          .rollup(function(v) {
+          .key((d) => d.column)
+          .rollup(function (v) {
             return {
               column: v[0].column,
-              value: d3.sum(v, g => g.value),
+              value: d3.sum(v, (g) => g.value),
               title: v[0].title,
               description: v[0].description,
               iid: v[0].iid,
-              commits: d3Collection.nest().key(c => c.sha).entries(v[0].commits).map(c => c.values[0])
+              commits: d3Collection
+                .nest()
+                .key((c) => c.sha)
+                .entries(v[0].commits)
+                .map((c) => c.values[0]),
             };
           })
           .entries(data)
-          .map(d => d.value)
-          .filter(d => d.value !== 0);
+          .map((d) => d.value)
+          .filter((d) => d.value !== 0);
         break;
       default:
         combinedColumnData = d3Collection
           .nest()
-          .key(d => d.column)
-          .rollup(function(v) {
+          .key((d) => d.column)
+          .rollup(function (v) {
             return {
               column: v[0].column,
-              value: d3.sum(v, g => g.value),
+              value: d3.sum(v, (g) => g.value),
               message: v[0].message,
               date: v[0].date,
               sha: v[0].sha,
               branch: v[0].branch,
               parents: v[0].parents,
               history: v[0].history,
-              signature: v[0].signature
+              signature: v[0].signature,
             };
           })
           .entries(data)
-          .map(d => d.value);
+          .map((d) => d.value);
         break;
     }
     return combinedColumnData;
@@ -127,7 +131,7 @@ export default class columnChartGeneration {
           .append('rect')
           .attr('fill', '#EEEEEE88')
           .attr('class', 'sBar')
-          .attr('x', (d, i) => i * w / currThis.combinedColumnData.length)
+          .attr('x', (d, i) => (i * w) / currThis.combinedColumnData.length)
           .attr('y', 0)
           .attr('width', w / currThis.combinedColumnData.length)
           .attr('height', h);
@@ -138,11 +142,11 @@ export default class columnChartGeneration {
           .append('rect')
           .attr('fill', '#00000000')
           .attr('class', 'sBar')
-          .attr('x', (d, i) => i * w / currThis.combinedColumnData.length)
+          .attr('x', (d, i) => (i * w) / currThis.combinedColumnData.length)
           .attr('y', 0)
           .attr('width', w / currThis.combinedColumnData.length)
           .attr('height', h)
-          .on('mouseover', function(event, d) {
+          .on('mouseover', function (event, d) {
             if (!currThis.tooltipLocked) {
               tooltip.transition().duration(200).style('display', 'block');
               const currDev = d.dev.split('>').join('');
@@ -150,8 +154,8 @@ export default class columnChartGeneration {
                 .style('border', '3px solid transparent')
                 .style(
                   'right',
-                  w - d.i * w / currThis.combinedColumnData.length - 300 > 0
-                    ? w - d.i * w / currThis.combinedColumnData.length - 300
+                  w - (d.i * w) / currThis.combinedColumnData.length - 300 > 0
+                    ? w - (d.i * w) / currThis.combinedColumnData.length - 300
                     : 0 + 'px'
                 )
                 .style('top', h + 'px');
@@ -174,12 +178,12 @@ export default class columnChartGeneration {
               tooltip.append('div').html('Changes: ' + d.value);
             }
           })
-          .on('mouseout', function() {
+          .on('mouseout', function () {
             if (!currThis.tooltipLocked) {
               tooltip.transition().duration(500).style('display', 'none');
             }
           })
-          .on('click', function() {
+          .on('click', function () {
             currThis.tooltipLocked = !currThis.tooltipLocked;
             tooltip.style('border', currThis.tooltipLocked ? '3px solid #3498db' : '3px solid transparent');
           });
@@ -192,7 +196,7 @@ export default class columnChartGeneration {
           .append('rect')
           .attr('fill', '#EEEEEE88')
           .attr('class', 'sBar')
-          .attr('x', (d, i) => i * w / currThis.combinedColumnData.length)
+          .attr('x', (d, i) => (i * w) / currThis.combinedColumnData.length)
           .attr('y', 0)
           .attr('width', w / currThis.combinedColumnData.length)
           .attr('height', h);
@@ -203,19 +207,19 @@ export default class columnChartGeneration {
           .append('rect')
           .attr('fill', '#00000000')
           .attr('class', 'sBar')
-          .attr('x', (d, i) => i * w / currThis.combinedColumnData.length)
+          .attr('x', (d, i) => (i * w) / currThis.combinedColumnData.length)
           .attr('y', 0)
           .attr('width', w / currThis.combinedColumnData.length)
           .attr('height', h)
-          .on('mouseover', function(event, d) {
+          .on('mouseover', function (event, d) {
             if (!currThis.tooltipLocked) {
               tooltip.transition().duration(200).style('display', 'block');
               tooltip
                 .style('border', '3px solid transparent')
                 .style(
                   'right',
-                  w - d.i * w / currThis.combinedColumnData.length - 300 > 0
-                    ? w - d.i * w / currThis.combinedColumnData.length - 300
+                  w - (d.i * w) / currThis.combinedColumnData.length - 300 > 0
+                    ? w - (d.i * w) / currThis.combinedColumnData.length - 300
                     : 0 + 'px'
                 )
                 .style('top', h + 'px');
@@ -227,7 +231,10 @@ export default class columnChartGeneration {
                 .style('border-radius', '4px');
               hint.append('span').html('(i)').style('margin', '0 1rem').style('font-style', 'bold');
               hint.append('span').html('click to fix tooltip').style('font-style', 'italic');
-              tooltip.append('div').style('font-weight', 'bold').html('Issue: ' + d.iid);
+              tooltip
+                .append('div')
+                .style('font-weight', 'bold')
+                .html('Issue: ' + d.iid);
               tooltip.append('div').html(d.title);
               tooltip.append('hr');
               if (d.description !== '') {
@@ -242,12 +249,12 @@ export default class columnChartGeneration {
               tooltip.append('div').html('Changes: ' + d.value);
             }
           })
-          .on('mouseout', function() {
+          .on('mouseout', function () {
             if (!currThis.tooltipLocked) {
               tooltip.transition().duration(500).style('display', 'none');
             }
           })
-          .on('click', function() {
+          .on('click', function () {
             currThis.tooltipLocked = !currThis.tooltipLocked;
             tooltip.style('border', currThis.tooltipLocked ? '3px solid #3498db' : '3px solid transparent');
           });
@@ -259,15 +266,15 @@ export default class columnChartGeneration {
           .data(currThis.combinedColumnData)
           .enter()
           .append('rect')
-          .attr(
-            'fill',
-            d =>
-              d.sha.localeCompare(currThis.state.selectedCommit.sha) === 0
-                ? '#3273dc22'
-                : d.sha.localeCompare(currThis.state.selectedCompareCommit.sha) === 0 ? '#4cd96422' : '#EEEEEE88'
+          .attr('fill', (d) =>
+            d.sha.localeCompare(currThis.state.selectedCommit.sha) === 0
+              ? '#3273dc22'
+              : d.sha.localeCompare(currThis.state.selectedCompareCommit.sha) === 0
+                ? '#4cd96422'
+                : '#EEEEEE88'
           )
           .attr('class', 'sBar')
-          .attr('x', (d, i) => i * w / currThis.combinedColumnData.length)
+          .attr('x', (d, i) => (i * w) / currThis.combinedColumnData.length)
           .attr('y', 0)
           .attr('width', w / currThis.combinedColumnData.length)
           .attr('height', h);
@@ -278,16 +285,16 @@ export default class columnChartGeneration {
           .append('rect')
           .attr('fill', '#00000000')
           .attr('class', 'sBar')
-          .attr('x', (d, i) => i * w / currThis.combinedColumnData.length + 2)
+          .attr('x', (d, i) => (i * w) / currThis.combinedColumnData.length + 2)
           .attr('y', h + 2)
           .attr('width', w / currThis.combinedColumnData.length - 4)
           .attr('height', 4)
-          .attr(
-            'fill',
-            d =>
-              d.sha.localeCompare(currThis.state.selectedCommit.sha) === 0
-                ? '#3273dc'
-                : d.sha.localeCompare(currThis.state.selectedCompareCommit.sha) === 0 ? '#4cd964' : '#00000000'
+          .attr('fill', (d) =>
+            d.sha.localeCompare(currThis.state.selectedCommit.sha) === 0
+              ? '#3273dc'
+              : d.sha.localeCompare(currThis.state.selectedCompareCommit.sha) === 0
+                ? '#4cd964'
+                : '#00000000'
           );
 
         groupInfo
@@ -297,12 +304,12 @@ export default class columnChartGeneration {
           .append('rect')
           .attr('fill', '#00000000')
           .attr('class', 'sBar')
-          .attr('x', (d, i) => i * w / currThis.combinedColumnData.length)
+          .attr('x', (d, i) => (i * w) / currThis.combinedColumnData.length)
           .attr('y', 0)
           .attr('width', w / currThis.combinedColumnData.length)
           .attr('height', h)
           .style('cursor', 'pointer')
-          .on('mousemove', function(event, d) {
+          .on('mousemove', function (event, d) {
             tooltip.transition().duration(200).style('display', 'block');
             tooltip
               .html(
@@ -310,7 +317,10 @@ export default class columnChartGeneration {
                   d.column +
                   '</div>' +
                   "<div style='font-style: italic;color: #AAAAAA;'>" +
-                  d.date.substring(0, d.date.length - 5).split('T').join(' ') +
+                  d.date
+                    .substring(0, d.date.length - 5)
+                    .split('T')
+                    .join(' ') +
                   '</div>' +
                   '<hr>' +
                   "<div style='word-wrap: break-word'>" +
@@ -340,16 +350,16 @@ export default class columnChartGeneration {
               )
               .style(
                 'right',
-                w - (d.i - 2) * w / currThis.combinedColumnData.length - 300 > 0
-                  ? w - (d.i - 2) * w / currThis.combinedColumnData.length - 300
+                w - ((d.i - 2) * w) / currThis.combinedColumnData.length - 300 > 0
+                  ? w - ((d.i - 2) * w) / currThis.combinedColumnData.length - 300
                   : 0 + 'px'
               )
               .style('top', h + 'px');
           })
-          .on('mouseout', function() {
+          .on('mouseout', function () {
             tooltip.transition().duration(500).style('display', 'none');
           })
-          .on('click', function(event, d) {
+          .on('click', function (event, d) {
             if (event.shiftKey) {
               currThis.setState({ selectedCompareCommit: { commitID: d.column - 1, sha: d.sha } });
             } else {
@@ -357,14 +367,14 @@ export default class columnChartGeneration {
             }
           });
         setTimeout(
-          function() {
+          function () {
             this.generateBranchView(data, columns, currThis);
           }.bind(this)
         );
         break;
     }
     setTimeout(
-      function() {
+      function () {
         this.updateColumnChart(data, columns, currThis, mode, legendSteps, displayProps);
       }.bind(this)
     );
@@ -374,7 +384,7 @@ export default class columnChartGeneration {
     const w = document.getElementById('codeViewContainer').clientWidth - 80;
     const h = 100;
 
-    let maxValue = d3.max(currThis.combinedColumnData, d => d.value);
+    let maxValue = d3.max(currThis.combinedColumnData, (d) => d.value);
     if (displayProps.customDataScale) {
       maxValue = displayProps.dataScaleColumns;
     } else {
@@ -385,11 +395,11 @@ export default class columnChartGeneration {
 
     for (let i = 1; i <= legendSteps; i++) {
       legendData.push({
-        interval: maxValue / legendSteps * i,
-        color: ColorMixer.mix(HEATMAP_LOW_COLOR, HEATMAP_HIGH_COLOR, 1.0 / legendSteps * i)
+        interval: (maxValue / legendSteps) * i,
+        color: ColorMixer.mix(HEATMAP_LOW_COLOR, HEATMAP_HIGH_COLOR, (1.0 / legendSteps) * i),
       });
     }
-    const colorScale = d => {
+    const colorScale = (d) => {
       for (let i = 0; i < legendData.length; i++) {
         if (d.value < legendData[i].interval) {
           return legendData[i].color;
@@ -404,13 +414,13 @@ export default class columnChartGeneration {
       .append('rect')
       .attr('fill', colorScale)
       .attr('class', 'sBar')
-      .attr('x', (d, i) => i * w / currThis.combinedColumnData.length)
-      .attr('y', d => {
-        return h - h / maxValue * d.value;
+      .attr('x', (d, i) => (i * w) / currThis.combinedColumnData.length)
+      .attr('y', (d) => {
+        return h - (h / maxValue) * d.value;
       })
       .attr('width', w / currThis.combinedColumnData.length)
-      .attr('height', d => {
-        return h / maxValue * d.value;
+      .attr('height', (d) => {
+        return (h / maxValue) * d.value;
       });
     bars.exit().remove();
   }
@@ -426,10 +436,12 @@ export default class columnChartGeneration {
 
     const versionSize = Math.min(w / currThis.combinedColumnData.length, 20) - 4;
 
-    const branches = d3Collection.nest().key(d => d.branch.trim()).entries(currThis.combinedColumnData);
+    const branches = d3Collection
+      .nest()
+      .key((d) => d.branch.trim())
+      .entries(currThis.combinedColumnData);
 
-    d3
-      .select('.branchView')
+    d3.select('.branchView')
       .append('svg')
       .attr('width', '100%')
       .attr('height', h)
@@ -461,23 +473,28 @@ export default class columnChartGeneration {
     commits
       .enter()
       .append('rect')
-      .attr('fill', d => ColorMixer.rainbow(branches.length, branches.findIndex(v => v.key.trim() === d.branch.trim())))
+      .attr('fill', (d) =>
+        ColorMixer.rainbow(
+          branches.length,
+          branches.findIndex((v) => v.key.trim() === d.branch.trim())
+        )
+      )
       .attr('class', 'sBar')
-      .attr('x', (d, i) => i * w / currThis.combinedColumnData.length + w / (currThis.combinedColumnData.length * 2) - versionSize / 2)
+      .attr('x', (d, i) => (i * w) / currThis.combinedColumnData.length + w / (currThis.combinedColumnData.length * 2) - versionSize / 2)
       .attr('y', h / 2 - versionSize / 2)
       .attr('width', versionSize)
       .attr('height', versionSize)
-      .attr(
-        'stroke',
-        d =>
-          d.sha.localeCompare(currThis.state.selectedCommit.sha) === 0
-            ? '#3273dc'
-            : d.sha.localeCompare(currThis.state.selectedCompareCommit.sha) === 0 ? '#4cd964' : '#00000000'
+      .attr('stroke', (d) =>
+        d.sha.localeCompare(currThis.state.selectedCommit.sha) === 0
+          ? '#3273dc'
+          : d.sha.localeCompare(currThis.state.selectedCompareCommit.sha) === 0
+            ? '#4cd964'
+            : '#00000000'
       )
       .style('stroke-width', '2px')
       .attr('rx', '100%')
       .attr('ry', '100%')
-      .on('mousemove', function(event, d) {
+      .on('mousemove', function (event, d) {
         tooltip.transition().duration(200).style('display', 'block');
         tooltip
           .html(
@@ -485,7 +502,10 @@ export default class columnChartGeneration {
               d.column +
               '</div>' +
               "<div style='font-style: italic;color: #AAAAAA;'>" +
-              d.date.substring(0, d.date.length - 5).split('T').join(' ') +
+              d.date
+                .substring(0, d.date.length - 5)
+                .split('T')
+                .join(' ') +
               '</div>' +
               '<hr>' +
               "<div style='word-wrap: break-word'>" +
@@ -515,16 +535,16 @@ export default class columnChartGeneration {
           )
           .style(
             'right',
-            w - (d.i - 2) * w / currThis.combinedColumnData.length - 300 > 0
-              ? w - (d.i - 2) * w / currThis.combinedColumnData.length - 300
+            w - ((d.i - 2) * w) / currThis.combinedColumnData.length - 300 > 0
+              ? w - ((d.i - 2) * w) / currThis.combinedColumnData.length - 300
               : 0 + 'px'
           )
           .style('top', h + 100 + 'px');
       })
-      .on('mouseout', function() {
+      .on('mouseout', function () {
         tooltip.transition().duration(500).style('display', 'none');
       })
-      .on('click', function(event, d) {
+      .on('click', function (event, d) {
         if (event.shiftKey) {
           currThis.setState({ selectedCompareCommit: { commitID: d.column, sha: d.sha } });
         } else {
@@ -539,10 +559,10 @@ export default class columnChartGeneration {
 
     if (i === 0) {
       for (const parentSha of branch.values[i].parents.split(',')) {
-        let parent = currThis.combinedColumnData.find(d => d.sha === parentSha);
+        let parent = currThis.combinedColumnData.find((d) => d.sha === parentSha);
         if (parent === undefined) {
           for (const historyParentSha of branch.values[i].history.split(',')) {
-            parent = currThis.combinedColumnData.find(d => d.sha === historyParentSha);
+            parent = currThis.combinedColumnData.find((d) => d.sha === historyParentSha);
             if (parent !== undefined && parent.sha !== branch.values[i].sha) {
               break;
             }
@@ -550,33 +570,39 @@ export default class columnChartGeneration {
         }
         if (parent !== undefined) {
           offset++;
-          let currOffset = (offset % 2 === 0 ? -1 : 1) * Math.floor(offset / 2) + offset % 2;
+          let currOffset = (offset % 2 === 0 ? -1 : 1) * Math.floor(offset / 2) + (offset % 2);
           currOffset = Math.min(Math.max(currOffset * branchOutHeight, -h / 2 + 5), h / 2 - 5);
           if (parseInt(parent.column) + 1 < c1) {
             branchLines
               .append('line')
               .style(
                 'stroke',
-                ColorMixer.rainbow(branches.length, branches.findIndex(v => v.key.trim() === branch.values[i].branch.trim()))
+                ColorMixer.rainbow(
+                  branches.length,
+                  branches.findIndex((v) => v.key.trim() === branch.values[i].branch.trim())
+                )
               )
               .style('stroke-width', 5)
               .style('stroke-linecap', 'round')
               .attr('y1', h / 2)
               .attr(
                 'x1',
-                w / (currThis.combinedColumnData.length * 2) + (parent.column - firstCommitCount) * w / currThis.combinedColumnData.length
+                w / (currThis.combinedColumnData.length * 2) + ((parent.column - firstCommitCount) * w) / currThis.combinedColumnData.length
               )
               .attr('y2', h / 2 + currOffset)
               .attr(
                 'x2',
                 w / (currThis.combinedColumnData.length * 2) +
-                  (parent.column - firstCommitCount + 0.5) * w / currThis.combinedColumnData.length
+                  ((parent.column - firstCommitCount + 0.5) * w) / currThis.combinedColumnData.length
               );
             branchLines
               .append('line')
               .style(
                 'stroke',
-                ColorMixer.rainbow(branches.length, branches.findIndex(v => v.key.trim() === branch.values[i].branch.trim()))
+                ColorMixer.rainbow(
+                  branches.length,
+                  branches.findIndex((v) => v.key.trim() === branch.values[i].branch.trim())
+                )
               )
               .style('stroke-width', 5)
               .style('stroke-linecap', 'round')
@@ -584,60 +610,78 @@ export default class columnChartGeneration {
               .attr(
                 'x1',
                 w / (currThis.combinedColumnData.length * 2) +
-                  (parent.column - firstCommitCount + 0.5) * w / currThis.combinedColumnData.length
+                  ((parent.column - firstCommitCount + 0.5) * w) / currThis.combinedColumnData.length
               )
               .attr('y2', h / 2 + currOffset)
-              .attr('x2', w / (currThis.combinedColumnData.length * 2) + (c1 - 0.5) * w / currThis.combinedColumnData.length);
+              .attr('x2', w / (currThis.combinedColumnData.length * 2) + ((c1 - 0.5) * w) / currThis.combinedColumnData.length);
             branchLines
               .append('line')
               .style(
                 'stroke',
-                ColorMixer.rainbow(branches.length, branches.findIndex(v => v.key.trim() === branch.values[i].branch.trim()))
+                ColorMixer.rainbow(
+                  branches.length,
+                  branches.findIndex((v) => v.key.trim() === branch.values[i].branch.trim())
+                )
               )
               .style('stroke-width', 5)
               .style('stroke-linecap', 'round')
               .attr('y1', h / 2 + currOffset)
-              .attr('x1', w / (currThis.combinedColumnData.length * 2) + (c1 - 0.5) * w / currThis.combinedColumnData.length)
+              .attr('x1', w / (currThis.combinedColumnData.length * 2) + ((c1 - 0.5) * w) / currThis.combinedColumnData.length)
               .attr('y2', h / 2)
-              .attr('x2', w / (currThis.combinedColumnData.length * 2) + c1 * w / currThis.combinedColumnData.length);
+              .attr('x2', w / (currThis.combinedColumnData.length * 2) + (c1 * w) / currThis.combinedColumnData.length);
           } else {
             branchLines
               .append('line')
               .style(
                 'stroke',
-                ColorMixer.rainbow(branches.length, branches.findIndex(v => v.key.trim() === branch.values[i].branch.trim()))
+                ColorMixer.rainbow(
+                  branches.length,
+                  branches.findIndex((v) => v.key.trim() === branch.values[i].branch.trim())
+                )
               )
               .style('stroke-width', 5)
               .style('stroke-linecap', 'round')
               .attr('y1', h / 2)
               .attr(
                 'x1',
-                w / (currThis.combinedColumnData.length * 2) + (parent.column - firstCommitCount) * w / currThis.combinedColumnData.length
+                w / (currThis.combinedColumnData.length * 2) + ((parent.column - firstCommitCount) * w) / currThis.combinedColumnData.length
               )
               .attr('y2', h / 2)
-              .attr('x2', w / (currThis.combinedColumnData.length * 2) + c1 * w / currThis.combinedColumnData.length);
+              .attr('x2', w / (currThis.combinedColumnData.length * 2) + (c1 * w) / currThis.combinedColumnData.length);
           }
         } else {
           branchLines
             .append('line')
-            .style('stroke', ColorMixer.rainbow(branches.length, branches.findIndex(v => v.key.trim() === branch.values[i].branch.trim())))
+            .style(
+              'stroke',
+              ColorMixer.rainbow(
+                branches.length,
+                branches.findIndex((v) => v.key.trim() === branch.values[i].branch.trim())
+              )
+            )
             .style('stroke-width', 5)
             .style('stroke-linecap', 'round')
             .attr('y1', 10)
-            .attr('x1', w / (currThis.combinedColumnData.length * 2) + (c1 - 0.5) * w / currThis.combinedColumnData.length)
+            .attr('x1', w / (currThis.combinedColumnData.length * 2) + ((c1 - 0.5) * w) / currThis.combinedColumnData.length)
             .attr('y2', h / 2)
-            .attr('x2', w / (currThis.combinedColumnData.length * 2) + c1 * w / currThis.combinedColumnData.length);
+            .attr('x2', w / (currThis.combinedColumnData.length * 2) + (c1 * w) / currThis.combinedColumnData.length);
 
           branchLines
             .append('line')
-            .style('stroke', ColorMixer.rainbow(branches.length, branches.findIndex(v => v.key.trim() === branch.values[i].branch.trim())))
+            .style(
+              'stroke',
+              ColorMixer.rainbow(
+                branches.length,
+                branches.findIndex((v) => v.key.trim() === branch.values[i].branch.trim())
+              )
+            )
             .style('stroke-width', 5)
             .style('stroke-linecap', 'round')
             .style('stroke-dasharray', '1, 10')
             .attr('y1', 10)
-            .attr('x1', w / (currThis.combinedColumnData.length * 2) + (c1 - 1.5) * w / currThis.combinedColumnData.length)
+            .attr('x1', w / (currThis.combinedColumnData.length * 2) + ((c1 - 1.5) * w) / currThis.combinedColumnData.length)
             .attr('y2', 10)
-            .attr('x2', w / (currThis.combinedColumnData.length * 2) + (c1 - 0.5) * w / currThis.combinedColumnData.length);
+            .attr('x2', w / (currThis.combinedColumnData.length * 2) + ((c1 - 0.5) * w) / currThis.combinedColumnData.length);
         }
       }
     }
@@ -645,47 +689,71 @@ export default class columnChartGeneration {
       if (c1 + 1 === c2) {
         branchLines
           .append('line')
-          .style('stroke', ColorMixer.rainbow(branches.length, branches.findIndex(v => v.key.trim() === branch.values[i].branch.trim())))
+          .style(
+            'stroke',
+            ColorMixer.rainbow(
+              branches.length,
+              branches.findIndex((v) => v.key.trim() === branch.values[i].branch.trim())
+            )
+          )
           .style('stroke-width', 5)
           .style('stroke-linecap', 'round')
           .attr('y1', h / 2)
-          .attr('x1', w / (currThis.combinedColumnData.length * 2) + c1 * w / currThis.combinedColumnData.length)
+          .attr('x1', w / (currThis.combinedColumnData.length * 2) + (c1 * w) / currThis.combinedColumnData.length)
           .attr('y2', h / 2)
-          .attr('x2', w / (currThis.combinedColumnData.length * 2) + c2 * w / currThis.combinedColumnData.length);
+          .attr('x2', w / (currThis.combinedColumnData.length * 2) + (c2 * w) / currThis.combinedColumnData.length);
       } else {
         offset++;
-        let currOffset = (offset % 2 === 0 ? -1 : 1) * Math.floor(offset / 2) + offset % 2;
+        let currOffset = (offset % 2 === 0 ? -1 : 1) * Math.floor(offset / 2) + (offset % 2);
 
         currOffset = Math.min(Math.max(currOffset * branchOutHeight, -h / 2 + 5), h / 2 - 5);
         branchLines
           .append('line')
-          .style('stroke', ColorMixer.rainbow(branches.length, branches.findIndex(v => v.key.trim() === branch.values[i].branch.trim())))
+          .style(
+            'stroke',
+            ColorMixer.rainbow(
+              branches.length,
+              branches.findIndex((v) => v.key.trim() === branch.values[i].branch.trim())
+            )
+          )
           .style('stroke-width', 5)
           .style('stroke-linecap', 'round')
           .attr('y1', h / 2)
-          .attr('x1', w / (currThis.combinedColumnData.length * 2) + c1 * w / currThis.combinedColumnData.length)
+          .attr('x1', w / (currThis.combinedColumnData.length * 2) + (c1 * w) / currThis.combinedColumnData.length)
           .attr('y2', h / 2 + currOffset)
-          .attr('x2', w / (currThis.combinedColumnData.length * 2) + (c1 + 0.5) * w / currThis.combinedColumnData.length);
+          .attr('x2', w / (currThis.combinedColumnData.length * 2) + ((c1 + 0.5) * w) / currThis.combinedColumnData.length);
 
         branchLines
           .append('line')
-          .style('stroke', ColorMixer.rainbow(branches.length, branches.findIndex(v => v.key.trim() === branch.values[i].branch.trim())))
+          .style(
+            'stroke',
+            ColorMixer.rainbow(
+              branches.length,
+              branches.findIndex((v) => v.key.trim() === branch.values[i].branch.trim())
+            )
+          )
           .style('stroke-width', 5)
           .style('stroke-linecap', 'round')
           .attr('y1', h / 2 + currOffset)
-          .attr('x1', w / (currThis.combinedColumnData.length * 2) + (c1 + 0.5) * w / currThis.combinedColumnData.length)
+          .attr('x1', w / (currThis.combinedColumnData.length * 2) + ((c1 + 0.5) * w) / currThis.combinedColumnData.length)
           .attr('y2', h / 2 + currOffset)
-          .attr('x2', w / (currThis.combinedColumnData.length * 2) + (c2 - 0.5) * w / currThis.combinedColumnData.length);
+          .attr('x2', w / (currThis.combinedColumnData.length * 2) + ((c2 - 0.5) * w) / currThis.combinedColumnData.length);
 
         branchLines
           .append('line')
-          .style('stroke', ColorMixer.rainbow(branches.length, branches.findIndex(v => v.key.trim() === branch.values[i].branch.trim())))
+          .style(
+            'stroke',
+            ColorMixer.rainbow(
+              branches.length,
+              branches.findIndex((v) => v.key.trim() === branch.values[i].branch.trim())
+            )
+          )
           .style('stroke-width', 5)
           .style('stroke-linecap', 'round')
           .attr('y1', h / 2 + currOffset)
-          .attr('x1', w / (currThis.combinedColumnData.length * 2) + (c2 - 0.5) * w / currThis.combinedColumnData.length)
+          .attr('x1', w / (currThis.combinedColumnData.length * 2) + ((c2 - 0.5) * w) / currThis.combinedColumnData.length)
           .attr('y2', h / 2)
-          .attr('x2', w / (currThis.combinedColumnData.length * 2) + c2 * w / currThis.combinedColumnData.length);
+          .attr('x2', w / (currThis.combinedColumnData.length * 2) + (c2 * w) / currThis.combinedColumnData.length);
       }
     }
     return offset;

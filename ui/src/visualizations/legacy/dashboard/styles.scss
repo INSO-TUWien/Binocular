@@ -1,36 +1,50 @@
-@import '../../../../node_modules/bulma';
+@import '../../../../../node_modules/bulma';
 
 .chartContainer{
-  position: relative;
   height: 100%;
-  overflow-y: scroll;
-  overflow-x: hidden;
-}
+  width: auto;
+  flex-direction: column;
+  padding: 5px;
+  justify-content: center;
 
-.headline{
-  font-weight: bold;
-  font-size: 2em;
+  .loadingHintContainer{
+    .loadingHint {
+      font-size: 40px;
+      text-align: center;
+    }
+  }
+
+  .chartLine{
+    background: #d8d8d8;
+    flex-grow: 1;
+    margin: 5px;
+    padding: 5px;
+    display: flex;
+    align-items: center;
+    height: 32%;
+
+    .text{
+      writing-mode: vertical-lr;
+      transform: rotate(-180deg);
+      margin-right: 10px;
+    }
+
+    .chart{
+      width: 100%;
+      height: 100%;
+      background: #ffffff;
+      display: flex;
+    }
+  }
 }
 
 .configContainer{
-  width: 100%;
-  overflow-x: hidden;
-
   .field + .field {
     border-top: 1px solid #dbdbdb;
   }
 
   .checkboxLabel {
     cursor: pointer;
-  }
-
-  h1{
-    font-weight: bold;
-    font-size: 2em;
-  }
-
-  hr{
-    margin: 0.5em 0;
   }
 }
 
@@ -67,8 +81,3 @@
     text-align: center;
   }
 }
-
-.marginTop05{
-  margin-top: 0.5rem;
-}
-

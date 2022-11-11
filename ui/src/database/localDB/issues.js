@@ -179,6 +179,7 @@ export default class Issues {
 
   static getCodeHotspotsIssueData(db, relations, file) {
     return findAll(db, 'issues').then(async (res) => {
+      console.log(res);
       const issues = [];
 
       for (const issue of res.docs) {

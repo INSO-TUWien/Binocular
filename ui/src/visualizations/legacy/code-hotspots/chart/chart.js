@@ -42,11 +42,11 @@ export default class CodeHotspots extends React.PureComponent {
       path: '',
       selectedCommit: {
         commitID: 0,
-        sha: ''
+        sha: '',
       },
       selectedCompareCommit: {
         commitID: 0,
-        sha: ''
+        sha: '',
       },
       mode: 0, //modes: 0...Changes/Version  1...Changes/Developer  2...Changes/Issue
       data: {},
@@ -62,15 +62,15 @@ export default class CodeHotspots extends React.PureComponent {
         },
         heatMapStyle: 0,
         mainVisualizationMode: 0,
-        heatmapTooltips: false
-      }
+        heatmapTooltips: false,
+      },
     };
     const lastDisplayProps = JSON.parse(localStorage.getItem('displayProps'));
     if (lastDisplayProps !== null) {
       this.state.displayProps = lastDisplayProps;
       this.state.displayProps.dateRange = {
         from: '',
-        to: ''
+        to: '',
       };
     } else {
       localStorage.setItem('displayProps', JSON.stringify(this.state.displayProps));
@@ -157,11 +157,11 @@ export default class CodeHotspots extends React.PureComponent {
                   this.state.mode === 1
                     ? '-n [term] search developer name; ' + '-e [term] search developer email' + '-l [term] search line or multible lines'
                     : this.state.mode === 2
-                      ? '-t [term] search title; ' +
+                    ? '-t [term] search title; ' +
                       '-d [term] search description; ' +
                       '-i [term] search iid' +
                       '-l [term] search line or multible lines'
-                      : '-m [term] search commit message; ' +
+                    : '-m [term] search commit message; ' +
                       '-s [term] search commit sha; ' +
                       '-d [term] search developer; ' +
                       '-b [term] search branch; ' +
@@ -182,14 +182,14 @@ export default class CodeHotspots extends React.PureComponent {
                     this.setState({
                       selectedCommit: {
                         commitID: 0,
-                        sha: ''
-                      }
+                        sha: '',
+                      },
                     });
                     this.setState({
                       selectedCompareCommit: {
                         commitID: 0,
-                        sha: ''
-                      }
+                        sha: '',
+                      },
                     });
                   }}>
                   Back to current Version
@@ -202,29 +202,33 @@ export default class CodeHotspots extends React.PureComponent {
             <div id={'barChartContainer'} className={chartStyles.barChartContainer}>
               <div className={'barChart'} />
             </div>
-            {this.state.mode === 0
-              ? <div className={chartStyles.branchView}>
-                  <div className={'branchView'} />
-                </div>
-              : ''}
-            {this.state.selectedCompareCommit.sha === ''
-              ? ''
-              : <div className={chartStyles.codeViewIndicators}>
-                  <div
-                    className={
-                      this.state.selectedCommit.commitID <= this.state.selectedCompareCommit.commitID
-                        ? chartStyles.codeViewPrimaryIndicator
-                        : chartStyles.codeViewSecondaryIndicator
-                    }
-                  />
-                  <div
-                    className={
-                      this.state.selectedCommit.commitID > this.state.selectedCompareCommit.commitID
-                        ? chartStyles.codeViewPrimaryIndicator
-                        : chartStyles.codeViewSecondaryIndicator
-                    }
-                  />
-                </div>}
+            {this.state.mode === 0 ? (
+              <div className={chartStyles.branchView}>
+                <div className={'branchView'} />
+              </div>
+            ) : (
+              ''
+            )}
+            {this.state.selectedCompareCommit.sha === '' ? (
+              ''
+            ) : (
+              <div className={chartStyles.codeViewIndicators}>
+                <div
+                  className={
+                    this.state.selectedCommit.commitID <= this.state.selectedCompareCommit.commitID
+                      ? chartStyles.codeViewPrimaryIndicator
+                      : chartStyles.codeViewSecondaryIndicator
+                  }
+                />
+                <div
+                  className={
+                    this.state.selectedCommit.commitID > this.state.selectedCompareCommit.commitID
+                      ? chartStyles.codeViewPrimaryIndicator
+                      : chartStyles.codeViewSecondaryIndicator
+                  }
+                />
+              </div>
+            )}
             <div className={chartStyles.codeView} id={'codeViewContainer'}>
               <div
                 className={
@@ -245,30 +249,32 @@ export default class CodeHotspots extends React.PureComponent {
                     theme: 'default',
                     lineNumbers: true,
                     readOnly: true,
-                    firstLineNumber: this.state.filteredData.firstLineNumber
+                    firstLineNumber: this.state.filteredData.firstLineNumber,
                   }}
                 />
               </div>
-              {this.state.selectedCompareCommit.sha === ''
-                ? ''
-                : <div className={chartStyles.codeViewWidthHalf + ' ' + chartStyles.codeViewSecondary}>
-                    <CodeMirror
-                      id={'codeViewSecondary'}
-                      ref={'codeViewSecondary'}
-                      value={
-                        this.state.selectedCommit.commitID > this.state.selectedCompareCommit.commitID
-                          ? this.state.filteredData.code
-                          : this.state.filteredData.secondaryCode
-                      }
-                      options={{
-                        mode: ModeSwitcher.modeFromExtension(this.state.path.split('.').pop()),
-                        theme: 'default',
-                        lineNumbers: true,
-                        readOnly: true,
-                        firstLineNumber: this.state.filteredData.firstLineNumber
-                      }}
-                    />
-                  </div>}
+              {this.state.selectedCompareCommit.sha === '' ? (
+                ''
+              ) : (
+                <div className={chartStyles.codeViewWidthHalf + ' ' + chartStyles.codeViewSecondary}>
+                  <CodeMirror
+                    id={'codeViewSecondary'}
+                    ref={'codeViewSecondary'}
+                    value={
+                      this.state.selectedCommit.commitID > this.state.selectedCompareCommit.commitID
+                        ? this.state.filteredData.code
+                        : this.state.filteredData.secondaryCode
+                    }
+                    options={{
+                      mode: ModeSwitcher.modeFromExtension(this.state.path.split('.').pop()),
+                      theme: 'default',
+                      lineNumbers: true,
+                      readOnly: true,
+                      firstLineNumber: this.state.filteredData.firstLineNumber,
+                    }}
+                  />
+                </div>
+              )}
               <div className={chartStyles.heatmapContainer}>
                 <svg id={'chartMain'} className="chartMain" />
                 <div id={'chartMainToolTip'} className="chartMainToolTip" />
@@ -300,7 +306,7 @@ export default class CodeHotspots extends React.PureComponent {
           .replace(this.state.checkedOutBranch, this.state.selectedCommit.sha === '' ? this.state.branch : this.state.selectedCommit.sha),
         true
       );
-      sourceCodeRequest.onload = function() {
+      sourceCodeRequest.onload = function () {
         if (sourceCodeRequest.readyState === 4) {
           //if (xhr.status === 200) {
 
@@ -328,7 +334,7 @@ export default class CodeHotspots extends React.PureComponent {
                 true
               );
               const currThis = this;
-              secondarySourceCodeRequest.onload = function() {
+              secondarySourceCodeRequest.onload = function () {
                 data.secondaryCode = secondarySourceCodeRequest.responseText;
                 currThis.setState({
                   data: data,
@@ -336,10 +342,10 @@ export default class CodeHotspots extends React.PureComponent {
                     currThis.state.mode === 2
                       ? searchAlgorithm.performIssueSearch(data, currThis.state.filteredData.searchTerm)
                       : currThis.state.mode === 1
-                        ? searchAlgorithm.performDeveloperSearch(data, currThis.state.filteredData.searchTerm)
-                        : currThis.state.mode === 0
-                          ? searchAlgorithm.performCommitSearch(data, currThis.state.filteredData.searchTerm)
-                          : data
+                      ? searchAlgorithm.performDeveloperSearch(data, currThis.state.filteredData.searchTerm)
+                      : currThis.state.mode === 0
+                      ? searchAlgorithm.performCommitSearch(data, currThis.state.filteredData.searchTerm)
+                      : data,
                 });
               };
               secondarySourceCodeRequest.send(null);
@@ -350,8 +356,10 @@ export default class CodeHotspots extends React.PureComponent {
                   this.state.mode === 2
                     ? searchAlgorithm.performIssueSearch(data, this.state.filteredData.searchTerm)
                     : this.state.mode === 1
-                      ? searchAlgorithm.performDeveloperSearch(data, this.state.filteredData.searchTerm)
-                      : this.state.mode === 0 ? searchAlgorithm.performCommitSearch(data, this.state.filteredData.searchTerm) : data
+                    ? searchAlgorithm.performDeveloperSearch(data, this.state.filteredData.searchTerm)
+                    : this.state.mode === 0
+                    ? searchAlgorithm.performCommitSearch(data, this.state.filteredData.searchTerm)
+                    : data,
               });
             }
           } else {
@@ -369,7 +377,7 @@ export default class CodeHotspots extends React.PureComponent {
                   function (resp) {
                     Loading.setState(66, 'Transforming Developer Data');
                     setTimeout(
-                      function() {
+                      function () {
                         const lines = (sourceCodeRequest.status === 200 ? sourceCodeRequest.responseText : '').split(/\r\n|\r|\n/).length;
                         const data = chartUpdater.transformChangesPerDeveloperData(resp, lines);
                         //this.codeChanged = true;
@@ -400,7 +408,7 @@ export default class CodeHotspots extends React.PureComponent {
                   function (resp) {
                     Loading.setState(66, 'Transforming Issue Data');
                     setTimeout(
-                      function() {
+                      function () {
                         const lines = (sourceCodeRequest.status === 200 ? sourceCodeRequest.responseText : '').split(/\r\n|\r|\n/).length;
                         const data = chartUpdater.transformChangesPerIssueData(resp, lines);
                         //this.codeChanged = true;
@@ -430,7 +438,7 @@ export default class CodeHotspots extends React.PureComponent {
                   function (resp) {
                     Loading.setState(66, 'Transforming Version Data');
                     setTimeout(
-                      function() {
+                      function () {
                         const lines = (sourceCodeRequest.status === 200 ? sourceCodeRequest.responseText : '').split(/\r\n|\r|\n/).length;
                         const data = chartUpdater.transformChangesPerVersionData(resp, lines);
                         //this.codeChanged = true;
@@ -462,7 +470,7 @@ export default class CodeHotspots extends React.PureComponent {
           }
         }
       }.bind(this);
-      sourceCodeRequest.onerror = function() {
+      sourceCodeRequest.onerror = function () {
         Loading.setErrorText(sourceCodeRequest.statusText);
         console.error(sourceCodeRequest.statusText);
       };

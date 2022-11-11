@@ -12,7 +12,7 @@ export default class SearchAlgorithm {
         case '-file':
           if (i < searchTermChunks.length - 1) {
             i++;
-            filteredDataSet = filteredDataSet.filter(d =>
+            filteredDataSet = filteredDataSet.filter((d) =>
               d.key.split('/')[d.key.split('/').length - 1].split('.')[0].toLowerCase().includes(searchTermChunks[i])
             );
           }
@@ -21,13 +21,13 @@ export default class SearchAlgorithm {
         case '-type':
           if (i < searchTermChunks.length - 1) {
             i++;
-            filteredDataSet = filteredDataSet.filter(d =>
+            filteredDataSet = filteredDataSet.filter((d) =>
               d.key.split('.')[d.key.split('.').length - 1].toLowerCase().includes(searchTermChunks[i])
             );
           }
           break;
         default:
-          filteredDataSet = filteredDataSet.filter(d => d.key.toLowerCase().includes(searchTermChunks[i]));
+          filteredDataSet = filteredDataSet.filter((d) => d.key.toLowerCase().includes(searchTermChunks[i]));
           break;
       }
     }
@@ -47,28 +47,28 @@ export default class SearchAlgorithm {
         case '-message':
           if (i < searchTermChunks.length - 1) {
             i++;
-            filteredDataSet = filteredDataSet.filter(d => d.message.toLowerCase().includes(searchTermChunks[i]));
+            filteredDataSet = filteredDataSet.filter((d) => d.message.toLowerCase().includes(searchTermChunks[i]));
           }
           break;
         case '-s':
         case '-sha':
           if (i < searchTermChunks.length - 1) {
             i++;
-            filteredDataSet = filteredDataSet.filter(d => d.sha.toLowerCase().includes(searchTermChunks[i]));
+            filteredDataSet = filteredDataSet.filter((d) => d.sha.toLowerCase().includes(searchTermChunks[i]));
           }
           break;
         case '-d':
         case '-developer':
           if (i < searchTermChunks.length - 1) {
             i++;
-            filteredDataSet = filteredDataSet.filter(d => d.signature.toLowerCase().includes(searchTermChunks[i]));
+            filteredDataSet = filteredDataSet.filter((d) => d.signature.toLowerCase().includes(searchTermChunks[i]));
           }
           break;
         case '-b':
         case '-branch':
           if (i < searchTermChunks.length - 1) {
             i++;
-            filteredDataSet = filteredDataSet.filter(d => d.branch.toLowerCase().includes(searchTermChunks[i]));
+            filteredDataSet = filteredDataSet.filter((d) => d.branch.toLowerCase().includes(searchTermChunks[i]));
           }
           break;
         case '-l':
@@ -81,17 +81,29 @@ export default class SearchAlgorithm {
               if (searchTermChunk.startsWith('-')) {
                 const endNr = parseInt(searchTermChunk.substring(1));
                 if (!isNaN(endNr)) {
-                  code = code.split(/\r\n|\r|\n/).filter((e, i) => i < endNr).join('\n');
-                  secondaryCode = secondaryCode.split(/\r\n|\r|\n/).filter((e, i) => i < endNr).join('\n');
-                  filteredDataSet = filteredDataSet.filter(d => d.row < endNr);
+                  code = code
+                    .split(/\r\n|\r|\n/)
+                    .filter((e, i) => i < endNr)
+                    .join('\n');
+                  secondaryCode = secondaryCode
+                    .split(/\r\n|\r|\n/)
+                    .filter((e, i) => i < endNr)
+                    .join('\n');
+                  filteredDataSet = filteredDataSet.filter((d) => d.row < endNr);
                 }
               } else if (searchTermChunk.endsWith('-')) {
                 const startNr = parseInt(searchTermChunk.substring(0, searchTermChunk.length - 1));
                 if (!isNaN(startNr)) {
                   firstLineNumber = startNr;
-                  code = code.split(/\r\n|\r|\n/).filter((e, i) => i >= startNr - 1).join('\n');
-                  secondaryCode = secondaryCode.split(/\r\n|\r|\n/).filter((e, i) => i >= startNr - 1).join('\n');
-                  filteredDataSet = filteredDataSet.filter(d => d.row >= startNr - 1);
+                  code = code
+                    .split(/\r\n|\r|\n/)
+                    .filter((e, i) => i >= startNr - 1)
+                    .join('\n');
+                  secondaryCode = secondaryCode
+                    .split(/\r\n|\r|\n/)
+                    .filter((e, i) => i >= startNr - 1)
+                    .join('\n');
+                  filteredDataSet = filteredDataSet.filter((d) => d.row >= startNr - 1);
                 }
               } else {
                 const rowSearchTermChunks = searchTermChunk.split('-');
@@ -99,9 +111,15 @@ export default class SearchAlgorithm {
                 const endNr = parseInt(rowSearchTermChunks[1]);
                 if (!isNaN(startNr) && !isNaN(endNr)) {
                   firstLineNumber = startNr;
-                  code = code.split(/\r\n|\r|\n/).filter((e, i) => i >= startNr - 1 && i < endNr).join('\n');
-                  secondaryCode = secondaryCode.split(/\r\n|\r|\n/).filter((e, i) => i >= startNr - 1 && i < endNr).join('\n');
-                  filteredDataSet = filteredDataSet.filter(d => d.row >= startNr - 1 && d.row < endNr);
+                  code = code
+                    .split(/\r\n|\r|\n/)
+                    .filter((e, i) => i >= startNr - 1 && i < endNr)
+                    .join('\n');
+                  secondaryCode = secondaryCode
+                    .split(/\r\n|\r|\n/)
+                    .filter((e, i) => i >= startNr - 1 && i < endNr)
+                    .join('\n');
+                  filteredDataSet = filteredDataSet.filter((d) => d.row >= startNr - 1 && d.row < endNr);
                 }
               }
             } else {
@@ -110,7 +128,7 @@ export default class SearchAlgorithm {
                 firstLineNumber = lineNr;
                 code = code.split(/\r\n|\r|\n/).find((e, i) => i === lineNr - 1);
                 secondaryCode = secondaryCode.split(/\r\n|\r|\n/).find((e, i) => i === lineNr - 1);
-                filteredDataSet = filteredDataSet.filter(d => d.row === lineNr - 1);
+                filteredDataSet = filteredDataSet.filter((d) => d.row === lineNr - 1);
               }
             }
           }
@@ -118,7 +136,7 @@ export default class SearchAlgorithm {
           break;
         default:
           filteredDataSet = filteredDataSet.filter(
-            d =>
+            (d) =>
               d.message.toLowerCase().includes(searchTermChunks[i]) ||
               d.branch.toLowerCase().includes(searchTermChunks[i]) ||
               d.sha.toLowerCase().includes(searchTermChunks[i]) ||
@@ -139,7 +157,7 @@ export default class SearchAlgorithm {
       firstLineNumber: firstLineNumber,
       legendSteps: dataSet.legendSteps,
       searchTerm: searchTerm,
-      rawData: dataSet.rawData
+      rawData: dataSet.rawData,
     };
   }
 
@@ -155,18 +173,18 @@ export default class SearchAlgorithm {
         case '-name':
           if (i < searchTermChunks.length - 1) {
             i++;
-            filteredDataSet = filteredDataSet.filter(d => d.dev.split(' <')[0].toLowerCase().includes(searchTermChunks[i]));
+            filteredDataSet = filteredDataSet.filter((d) => d.dev.split(' <')[0].toLowerCase().includes(searchTermChunks[i]));
           }
           break;
         case '-e':
         case '-email':
           if (i < searchTermChunks.length - 1) {
             i++;
-            filteredDataSet = filteredDataSet.filter(d => d.dev.split(' <')[1].toLowerCase().includes(searchTermChunks[i]));
+            filteredDataSet = filteredDataSet.filter((d) => d.dev.split(' <')[1].toLowerCase().includes(searchTermChunks[i]));
           }
           break;
         default:
-          filteredDataSet = filteredDataSet.filter(d => d.dev.toLowerCase().includes(searchTermChunks[i]));
+          filteredDataSet = filteredDataSet.filter((d) => d.dev.toLowerCase().includes(searchTermChunks[i]));
           break;
         case '-l':
         case '-line':
@@ -178,17 +196,29 @@ export default class SearchAlgorithm {
               if (searchTermChunk.startsWith('-')) {
                 const endNr = parseInt(searchTermChunk.substring(1));
                 if (!isNaN(endNr)) {
-                  code = code.split(/\r\n|\r|\n/).filter((e, i) => i < endNr).join('\n');
-                  secondaryCode = secondaryCode.split(/\r\n|\r|\n/).filter((e, i) => i < endNr).join('\n');
-                  filteredDataSet = filteredDataSet.filter(d => d.row < endNr);
+                  code = code
+                    .split(/\r\n|\r|\n/)
+                    .filter((e, i) => i < endNr)
+                    .join('\n');
+                  secondaryCode = secondaryCode
+                    .split(/\r\n|\r|\n/)
+                    .filter((e, i) => i < endNr)
+                    .join('\n');
+                  filteredDataSet = filteredDataSet.filter((d) => d.row < endNr);
                 }
               } else if (searchTermChunk.endsWith('-')) {
                 const startNr = parseInt(searchTermChunk.substring(0, searchTermChunk.length - 1));
                 if (!isNaN(startNr)) {
                   firstLineNumber = startNr;
-                  code = code.split(/\r\n|\r|\n/).filter((e, i) => i >= startNr - 1).join('\n');
-                  secondaryCode = secondaryCode.split(/\r\n|\r|\n/).filter((e, i) => i >= startNr - 1).join('\n');
-                  filteredDataSet = filteredDataSet.filter(d => d.row >= startNr - 1);
+                  code = code
+                    .split(/\r\n|\r|\n/)
+                    .filter((e, i) => i >= startNr - 1)
+                    .join('\n');
+                  secondaryCode = secondaryCode
+                    .split(/\r\n|\r|\n/)
+                    .filter((e, i) => i >= startNr - 1)
+                    .join('\n');
+                  filteredDataSet = filteredDataSet.filter((d) => d.row >= startNr - 1);
                 }
               } else {
                 const rowSearchTermChunks = searchTermChunk.split('-');
@@ -196,9 +226,15 @@ export default class SearchAlgorithm {
                 const endNr = parseInt(rowSearchTermChunks[1]);
                 if (!isNaN(startNr) && !isNaN(endNr)) {
                   firstLineNumber = startNr;
-                  code = code.split(/\r\n|\r|\n/).filter((e, i) => i >= startNr - 1 && i < endNr).join('\n');
-                  secondaryCode = secondaryCode.split(/\r\n|\r|\n/).filter((e, i) => i >= startNr - 1 && i < endNr).join('\n');
-                  filteredDataSet = filteredDataSet.filter(d => d.row >= startNr - 1 && d.row < endNr);
+                  code = code
+                    .split(/\r\n|\r|\n/)
+                    .filter((e, i) => i >= startNr - 1 && i < endNr)
+                    .join('\n');
+                  secondaryCode = secondaryCode
+                    .split(/\r\n|\r|\n/)
+                    .filter((e, i) => i >= startNr - 1 && i < endNr)
+                    .join('\n');
+                  filteredDataSet = filteredDataSet.filter((d) => d.row >= startNr - 1 && d.row < endNr);
                 }
               }
             } else {
@@ -207,7 +243,7 @@ export default class SearchAlgorithm {
                 firstLineNumber = lineNr;
                 code = code.split(/\r\n|\r|\n/).find((e, i) => i === lineNr - 1);
                 secondaryCode = secondaryCode.split(/\r\n|\r|\n/).find((e, i) => i === lineNr - 1);
-                filteredDataSet = filteredDataSet.filter(d => d.row === lineNr - 1);
+                filteredDataSet = filteredDataSet.filter((d) => d.row === lineNr - 1);
               }
             }
           }
@@ -227,7 +263,7 @@ export default class SearchAlgorithm {
       firstLineNumber: firstLineNumber,
       legendSteps: dataSet.legendSteps,
       searchTerm: searchTerm,
-      rawData: dataSet.rawData
+      rawData: dataSet.rawData,
     };
   }
 
@@ -242,26 +278,26 @@ export default class SearchAlgorithm {
         case '-title':
           if (i < searchTermChunks.length - 1) {
             i++;
-            filteredDataSet = filteredDataSet.filter(d => d.title.toLowerCase().includes(searchTermChunks[i]));
+            filteredDataSet = filteredDataSet.filter((d) => d.title.toLowerCase().includes(searchTermChunks[i]));
           }
           break;
         case '-d':
         case '-description':
           if (i < searchTermChunks.length - 1) {
             i++;
-            filteredDataSet = filteredDataSet.filter(d => ('' + d.description).toLowerCase().includes(searchTermChunks[i]));
+            filteredDataSet = filteredDataSet.filter((d) => ('' + d.description).toLowerCase().includes(searchTermChunks[i]));
           }
           break;
         case '-i':
         case '-iid':
           if (i < searchTermChunks.length - 1) {
             i++;
-            filteredDataSet = filteredDataSet.filter(d => d.iid.toLowerCase().includes(searchTermChunks[i]));
+            filteredDataSet = filteredDataSet.filter((d) => d.iid.toLowerCase().includes(searchTermChunks[i]));
           }
           break;
         default:
           filteredDataSet = filteredDataSet.filter(
-            d =>
+            (d) =>
               d.title.toLowerCase().includes(searchTermChunks[i]) ||
               ('' + d.description).toLowerCase().includes(searchTermChunks[i]) ||
               d.iid.toLowerCase().includes(searchTermChunks[i])
@@ -277,15 +313,21 @@ export default class SearchAlgorithm {
               if (searchTermChunk.startsWith('-')) {
                 const endNr = parseInt(searchTermChunk.substring(1));
                 if (!isNaN(endNr)) {
-                  code = code.split(/\r\n|\r|\n/).filter((e, i) => i < endNr).join('\n');
-                  filteredDataSet = filteredDataSet.filter(d => d.row < endNr);
+                  code = code
+                    .split(/\r\n|\r|\n/)
+                    .filter((e, i) => i < endNr)
+                    .join('\n');
+                  filteredDataSet = filteredDataSet.filter((d) => d.row < endNr);
                 }
               } else if (searchTermChunk.endsWith('-')) {
                 const startNr = parseInt(searchTermChunk.substring(0, searchTermChunk.length - 1));
                 if (!isNaN(startNr)) {
                   firstLineNumber = startNr;
-                  code = code.split(/\r\n|\r|\n/).filter((e, i) => i >= startNr - 1).join('\n');
-                  filteredDataSet = filteredDataSet.filter(d => d.row >= startNr - 1);
+                  code = code
+                    .split(/\r\n|\r|\n/)
+                    .filter((e, i) => i >= startNr - 1)
+                    .join('\n');
+                  filteredDataSet = filteredDataSet.filter((d) => d.row >= startNr - 1);
                 }
               } else {
                 const rowSearchTermChunks = searchTermChunk.split('-');
@@ -293,8 +335,11 @@ export default class SearchAlgorithm {
                 const endNr = parseInt(rowSearchTermChunks[1]);
                 if (!isNaN(startNr) && !isNaN(endNr)) {
                   firstLineNumber = startNr;
-                  code = code.split(/\r\n|\r|\n/).filter((e, i) => i >= startNr - 1 && i < endNr).join('\n');
-                  filteredDataSet = filteredDataSet.filter(d => d.row >= startNr - 1 && d.row < endNr);
+                  code = code
+                    .split(/\r\n|\r|\n/)
+                    .filter((e, i) => i >= startNr - 1 && i < endNr)
+                    .join('\n');
+                  filteredDataSet = filteredDataSet.filter((d) => d.row >= startNr - 1 && d.row < endNr);
                 }
               }
             } else {
@@ -302,7 +347,7 @@ export default class SearchAlgorithm {
               if (!isNaN(lineNr)) {
                 firstLineNumber = lineNr;
                 code = code.split(/\r\n|\r|\n/).find((e, i) => i === lineNr - 1);
-                filteredDataSet = filteredDataSet.filter(d => d.row === lineNr - 1);
+                filteredDataSet = filteredDataSet.filter((d) => d.row === lineNr - 1);
               }
             }
           }
@@ -321,7 +366,7 @@ export default class SearchAlgorithm {
       firstLineNumber: firstLineNumber,
       legendSteps: dataSet.legendSteps,
       searchTerm: searchTerm,
-      rawData: dataSet.rawData
+      rawData: dataSet.rawData,
     };
   }
 }

@@ -42,7 +42,7 @@ export default class hunkChartGeneration {
         d.commitID = i;
         return d;
       })
-      .filter(d => {
+      .filter((d) => {
         return (
           new Date(d.date.split('.')[0]) >= new Date(displayProps.dateRange.from) &&
           new Date(d.date.split('.')[0]) <= new Date(displayProps.dateRange.to)
@@ -51,7 +51,7 @@ export default class hunkChartGeneration {
 
     //filter if 2 commits are selected
     if (currThis.state.selectedCompareCommit.sha !== '') {
-      filteredData = filteredData.filter(d => {
+      filteredData = filteredData.filter((d) => {
         let earlierVersion, laterVersion;
         if (currThis.state.selectedCommit.commitID <= currThis.state.selectedCompareCommit.commitID) {
           earlierVersion = currThis.state.selectedCommit.commitID;
@@ -69,7 +69,7 @@ export default class hunkChartGeneration {
       chart.append('g').attr('id', 'commit' + filteredData[commitKey].commitID);
     }
     setTimeout(
-      function() {
+      function () {
         this.updateHunkChart(
           { data: filteredData },
           lines,
@@ -103,17 +103,16 @@ export default class hunkChartGeneration {
       barWidth = width / 2 / columns;
     }
 
-    d3
-      .select('#commitBackground')
+    d3.select('#commitBackground')
       .selectAll('rect')
       .data(Array.from(Array(lines).keys()))
       .enter()
       .append('rect')
       .attr('x', 0)
-      .attr('y', d => {
+      .attr('y', (d) => {
         return d * barHeight;
       })
-      .style('fill', d => {
+      .style('fill', (d) => {
         return d % 2 === 1 ? '#FFFFFF' : '#FAFAFA';
       })
       .attr('width', width)
@@ -121,11 +120,10 @@ export default class hunkChartGeneration {
 
     for (let commitKey = compareMode ? 1 : 0; commitKey < data.data.length; commitKey++) {
       setTimeout(
-        function() {
+        function () {
           d3.select('#commit' + data.data[commitKey].commitID + ' > *').remove();
 
-          d3
-            .select('#commitBackground')
+          d3.select('#commitBackground')
             .append('line')
             .style('stroke', '#00000033')
             .attr(
@@ -139,13 +137,12 @@ export default class hunkChartGeneration {
             )
             .attr('y2', barHeight * lines);
 
-          d3
-            .select('#commit' + data.data[commitKey].commitID)
+          d3.select('#commit' + data.data[commitKey].commitID)
             .selectAll('rect')
             .data(data.data[commitKey].file.hunks)
             .enter()
             .append('path')
-            .attr('d', d => {
+            .attr('d', (d) => {
               const lineOffset = d.newLines < d.oldLines ? 0 : d.newLines > d.oldLines ? 0 : -1;
 
               const x1 = (commitKey - (compareMode ? 1 : 0)) * barWidth;
@@ -191,19 +188,21 @@ export default class hunkChartGeneration {
                 'Z'
               );
             })
-            .attr('fill', d => {
+            .attr('fill', (d) => {
               return d.newLines < d.oldLines ? HUNK_DELETION_COLOR : d.newLines > d.oldLines ? HUNK_ADDITION_COLOR : HUNK_CHANGE_COLOR;
             })
-            .attr('stroke', d => {
+            .attr('stroke', (d) => {
               return d.newLines < d.oldLines
                 ? HUNK_DELETION_COLOR_STROKE
-                : d.newLines > d.oldLines ? HUNK_ADDITION_COLOR_STROKE : HUNK_CHANGE_COLOR_STROKE;
+                : d.newLines > d.oldLines
+                  ? HUNK_ADDITION_COLOR_STROKE
+                  : HUNK_CHANGE_COLOR_STROKE;
             });
 
           for (let i = 0; i < lines; i++) {
             let parent = undefined;
             for (const historyParentSha of data.data[commitKey].history.split(',')) {
-              parent = data.data.find(d => d.sha === historyParentSha);
+              parent = data.data.find((d) => d.sha === historyParentSha);
               if (parent !== undefined && parent.sha !== data.data[commitKey].sha) {
                 break;
               }
@@ -212,8 +211,7 @@ export default class hunkChartGeneration {
               parent = { commitID: 0 };
             }
             if (data.data[commitKey].file.hunks.length === 0) {
-              d3
-                .select('#commit' + data.data[commitKey].commitID)
+              d3.select('#commit' + data.data[commitKey].commitID)
                 .append('path')
                 .attr('class', 'lineFlow lineFlowLine' + i)
                 .attr('d', () => {
@@ -249,7 +247,7 @@ export default class hunkChartGeneration {
             } else {
               let oldLine = i;
               let end = false;
-              for (const hunk of data.data[commitKey].file.hunks.filter(h => h.newStart - 1 <= i)) {
+              for (const hunk of data.data[commitKey].file.hunks.filter((h) => h.newStart - 1 <= i)) {
                 if (i >= hunk.newStart - 1 && i <= hunk.newStart + hunk.newLines - 2) {
                   oldLine = hunk.oldStart - 1;
                   end = true;
@@ -260,8 +258,7 @@ export default class hunkChartGeneration {
               if (commitKey === (compareMode ? 1 : 0)) {
                 end = true;
               }
-              d3
-                .select('#commit' + data.data[commitKey].commitID)
+              d3.select('#commit' + data.data[commitKey].commitID)
                 .append('path')
                 .attr('class', 'lineFlow lineFlowLine' + i)
                 .attr('d', () => {

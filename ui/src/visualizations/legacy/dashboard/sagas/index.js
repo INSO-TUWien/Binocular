@@ -109,7 +109,7 @@ function getPalette(commits, maxNumberOfColors, numOfCommitters) {
     return chroma.scale(band).mode('lch').colors(len);
   }
 
-  const palette = chartColors('spectral', maxNumberOfColors, numOfCommitters);
+  const palette = chartColors('spectral', 15, numOfCommitters);
 
   const totals = {};
   _.each(commits, (commit) => {
@@ -132,12 +132,12 @@ function getPalette(commits, maxNumberOfColors, numOfCommitters) {
 
   const returnPalette = {};
 
-  for (let i = 0; i < Math.min(sortable.length, palette.length) - 1; i++) {
+  for (let i = 0; i < palette.length - 1; i++) {
     returnPalette[sortable[i][0]] = palette[i];
   }
   if (sortable.length > maxNumberOfColors) {
     returnPalette['others'] = palette[maxNumberOfColors - 1];
-  } else {
+  } else if (sortable.length <= maxNumberOfColors) {
     returnPalette[sortable[sortable.length - 1][0]] = palette[palette.length - 1];
   }
 
