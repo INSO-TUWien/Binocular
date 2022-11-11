@@ -7,7 +7,6 @@ import { setViewport } from '../sagas';
 
 const mapStateToProps = (state /*, ownProps*/) => {
   const dashState = state.visualizations.dashboard.state;
-
   return {
     palette: dashState.data.data.palette,
     otherCount: dashState.data.data.otherCount,
@@ -24,20 +23,20 @@ const mapStateToProps = (state /*, ownProps*/) => {
     selectedAuthors: dashState.config.selectedAuthors,
     showCIChart: dashState.config.showCIChart,
     showIssueChart: dashState.config.showIssueChart,
-    showChangesChart: dashState.config.showChangesChart
+    showChangesChart: dashState.config.showChangesChart,
   };
 };
 
 const mapDispatchToProps = (dispatch /*, ownProps*/) => {
   return {
-    onCommitClick: function(c) {
+    onCommitClick: function (c) {
       //TODO: set correct function current behavior unknown
       // eslint-disable-next-line no-undef
       dispatch(openCommit(c));
     },
-    onViewportChanged: function(v) {
+    onViewportChanged: function (v) {
       dispatch(setViewport(v));
-    }
+    },
   };
 };
 

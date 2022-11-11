@@ -4,7 +4,7 @@ import cx from 'classnames';
 
 import styles from './styles.scss';
 
-export default () =>
+export default () => (
   <div className={cx('box', styles.help)}>
     <h1 className="title">Dashboard Help</h1>
     <h2>Interaction</h2>
@@ -48,4 +48,5 @@ export default () =>
         on top. "Others" is an exception, they are always at the bottom.
       </li>
     </ul>
-  </div>;
+  </div>
+);

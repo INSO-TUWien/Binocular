@@ -11,6 +11,7 @@ import FilterBox from '../../../components/FilterBox';
 import styles from './styles.scss';
 
 import { graphQl, emojify } from '../../../utils';
+import Database from '../../../database/database';
 
 const mapStateToProps = (state /*, ownProps*/) => {
   const iiState = state.visualizations.issueImpact.state;
@@ -19,19 +20,19 @@ const mapStateToProps = (state /*, ownProps*/) => {
     issue: iiState.data.data.issue,
     filteredCommits: iiState.config.filteredCommits,
     files: iiState.config.files,
-    filteredFiles: iiState.config.filteredFiles
+    filteredFiles: iiState.config.filteredFiles,
   };
 };
 
 const mapDispatchToProps = (dispatch /*, ownProps*/) => {
   return {
-    onSetIssue: issue => dispatch(setActiveIssue(issue)),
-    onSetFilteredCommits: commits => dispatch(setFilteredCommits(commits)),
-    onSetFilteredFiles: files => dispatch(setFilteredFiles(files))
+    onSetIssue: (issue) => dispatch(setActiveIssue(issue)),
+    onSetFilteredCommits: (commits) => dispatch(setFilteredCommits(commits)),
+    onSetFilteredFiles: (files) => dispatch(setFilteredFiles(files)),
   };
 };
 
-const IssueImpactConfigComponent = props => {
+const IssueImpactConfigComponent = (props) => {
   return (
     <div className={styles.configContainer}>
       <form>
@@ -39,70 +40,65 @@ const IssueImpactConfigComponent = props => {
           <label className="label">Choose issue to visualize:</label>
           <SearchBox
             placeholder="Select issue..."
-            renderOption={i => `#${i.iid} ${i.title}`}
-            search={text => {
-              return Promise.resolve(
-                graphQl.query(
-                  `
-                  query($q: String) {
-                    issues(page: 1, perPage: 50, q: $q, sort: "DESC") {
-                      data { iid title createdAt closedAt }
-                    }
-                  }`,
-                  { q: text }
-                )
-              )
-                .then(resp => resp.issues.data)
-                .map(i => {
-                  i.createdAt = new Date(i.createdAt);
-                  i.closedAt = i.closedAt && new Date(i.closedAt);
-                  return i;
-                });
+            renderOption={(i) => `#${i.iid} ${i.title}`}
+            search={(text) => {
+              return Promise.resolve(Database.searchIssues(text)).map((i) => {
+                i.createdAt = new Date(i.createdAt);
+                i.closedAt = i.closedAt && new Date(i.closedAt);
+                return i;
+              });
             }}
             value={props.issue}
-            onChange={issue => props.onSetIssue(issue)}
+            onChange={(issue) => {
+              if (issue !== null) {
+                props.onSetIssue(issue);
+              }
+            }}
           />
-          {props.issue &&
+          {props.issue && (
             <a href={props.issue.webUrl} target="_blank">
               View #{props.issue.iid} on ITS
-            </a>}
+            </a>
+          )}
         </div>
 
-        {props.issue &&
+        {props.issue && (
           <div className="field">
             <label className="label">
               Filter {props.issue.commits.length} {inflect('commit', props.issue.commits.length)}
             </label>
             <FilterBox
               options={_(props.issue.commits.data)
-                .uniqBy(c => c.sha)
-                .map(c => ({
+                .uniqBy((c) => c.sha)
+                .map((c) => ({
                   label: `${c.shortSha} ${emojify(c.messageHeader)}`,
-                  value: c.sha
+                  value: c.sha,
                 }))
                 .value()}
               checkedOptions={props.filteredCommits}
               onChange={props.onSetFilteredCommits}
             />
-          </div>}
+          </div>
+        )}
 
-        {props.issue &&
+        {props.issue && (
           <div className="field">
             <label className="label">
               Filter {props.files.length} {inflect('file', props.files.length)}
             </label>
             <FilterBox
               options={_(props.files)
-                .map(f => ({
+                .map((f) => ({
                   label: f,
-                  value: f
+                  value: f,
                 }))
                 .sortBy('label')
                 .value()}
               checkedOptions={props.filteredFiles}
               onChange={props.onSetFilteredFiles}
             />
-          </div>}
+          </div>
+        )}
       </form>
     </div>
   );

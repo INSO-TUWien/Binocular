@@ -20,18 +20,18 @@ export default class StackedArea extends React.PureComponent {
       return {
         line: d3
           .line()
-          .x(d => this.props.x(this.props.extractX(d)))
-          .y(d => {
-            const values = _.take(series, i + 1).map(s => s.extractY(d));
+          .x((d) => this.props.x(this.props.extractX(d)))
+          .y((d) => {
+            const values = _.take(series, i + 1).map((s) => s.extractY(d));
             return this.props.y(this.props.sum(values));
           })
           .context(path),
         path,
-        series: s
+        series: s,
       };
     });
 
-    _.each(areas, area => {
+    _.each(areas, (area) => {
       area.line(this.props.data);
       if (this.props.fillToRight) {
         area.path.fillToRight(this.props.fillToRight);
@@ -62,10 +62,6 @@ export default class StackedArea extends React.PureComponent {
       );
     }
 
-    return (
-      <g>
-        {paths}
-      </g>
-    );
+    return <g>{paths}</g>;
   }
 }

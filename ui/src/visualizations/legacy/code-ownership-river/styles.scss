@@ -1,4 +1,4 @@
-@import 'node_modules/bulma';
+@import '../../../../../node_modules/bulma';
 
 svg.chart {
   flex: 1;
@@ -6,6 +6,7 @@ svg.chart {
   width: 100%;
   cursor: grab;
   cursor: -webkit-grab;
+  height: 100%;
 
   g.commitCount {
     path {
@@ -105,4 +106,9 @@ svg.chart.panning {
   p {
     margin-bottom: 1em;
   }
+}
+
+.chart{
+  height: 100%;
+  width: 100%;
 }

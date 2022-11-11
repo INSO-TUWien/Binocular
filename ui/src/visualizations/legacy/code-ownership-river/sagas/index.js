@@ -8,11 +8,7 @@ import moment from 'moment';
 
 import { fetchFactory, timestampedActionFactory, mapSaga } from '../../../../sagas/utils.js';
 import { getChartColors } from '../../../../utils';
-import getCommitData from './getCommitData.js';
-import getIssueData from './getIssueData.js';
-import getBuildData from './getBuildData.js';
-import fetchRelatedCommits from './fetchRelatedCommits.js';
-import getBounds from './getBounds.js';
+import Database from '../../../../database/database';
 
 export const setOverlay = createAction('SET_OVERLAY');
 export const setHighlightedIssue = createAction('SET_HIGHLIGHTED_ISSUE');
@@ -27,7 +23,7 @@ export const requestRefresh = createAction('REQUEST_REFRESH');
 const refresh = createAction('REFRESH');
 export const setViewport = createAction('COR_SET_VIEWPORT');
 
-export default function*() {
+export default function* () {
   // fetch data once on entry
   yield* fetchCodeOwnershipData();
 
@@ -37,14 +33,25 @@ export default function*() {
   yield fork(watchOpenCommit);
 
   // keep looking for viewport changes to re-fetch
-  yield fork(watchViewport);
+  //yield fork(watchViewport);
   yield fork(watchRefresh);
   yield fork(watchHighlightedIssue);
   yield fork(watchToggleHelp);
+
+  // keep looking for universal settings changes
+  yield fork(watchTimeSpan);
+  yield fork(watchSelectedAuthorsGlobal);
+}
+
+function* watchTimeSpan() {
+  yield takeEvery('SET_TIME_SPAN', fetchCodeOwnershipData);
+}
+function* watchSelectedAuthorsGlobal() {
+  yield takeEvery('SET_SELECTED_AUTHORS_GLOBAL', fetchCodeOwnershipData);
 }
 
 function* watchRefreshRequests() {
-  yield throttle(2000, 'REQUEST_REFRESH', mapSaga(refresh));
+  yield throttle(5000, 'REQUEST_REFRESH', mapSaga(refresh));
 }
 
 function* watchMessages() {
@@ -52,7 +59,7 @@ function* watchMessages() {
 }
 
 export function* watchOpenCommit() {
-  yield takeEvery('OPEN_COMMIT', function(a) {
+  yield takeEvery('OPEN_COMMIT', function (a) {
     window.open(a.payload.webUrl);
   });
 }
@@ -70,14 +77,14 @@ function* watchRefresh() {
 }
 
 function* watchHighlightedIssue() {
-  yield takeEvery('SET_HIGHLIGHTED_ISSUE', function*(a) {
-    return yield fetchRelatedCommits(a.payload);
+  yield takeEvery('SET_HIGHLIGHTED_ISSUE', function* (a) {
+    return yield Database.getRelatedCommitDataOwnershipRiver(a.payload);
   });
 }
 
 export const fetchCodeOwnershipData = fetchFactory(
-  function*() {
-    const { firstCommit, lastCommit, committers, firstIssue, lastIssue } = yield getBounds();
+  function* () {
+    const { firstCommit, lastCommit, committers, firstIssue, lastIssue } = yield Database.getBounds();
     const firstCommitTimestamp = Date.parse(firstCommit.date);
     const lastCommitTimestamp = Date.parse(lastCommit.date);
 
@@ -87,8 +94,15 @@ export const fetchCodeOwnershipData = fetchFactory(
     const state = yield select();
     const viewport = state.visualizations.codeOwnershipRiver.state.config.viewport || [0, null];
 
-    const firstSignificantTimestamp = Math.max(viewport[0], Math.min(firstCommitTimestamp, firstIssueTimestamp));
-    const lastSignificantTimestamp = viewport[1] ? viewport[1].getTime() : Math.max(lastCommitTimestamp, lastIssueTimestamp);
+    let firstSignificantTimestamp = Math.max(viewport[0], Math.min(firstCommitTimestamp, firstIssueTimestamp));
+    let lastSignificantTimestamp = viewport[1] ? viewport[1].getTime() : Math.max(lastCommitTimestamp, lastIssueTimestamp);
+
+    const firstSignificantIssueTimestamp = Math.max(firstSignificantTimestamp, firstIssueTimestamp);
+    const lastSignificantIssueTimestamp = Math.min(lastSignificantTimestamp, lastIssueTimestamp);
+
+    const timeSpan = state.visualizations.newDashboard.state.config.chartTimeSpan;
+    firstSignificantTimestamp = timeSpan.from === undefined ? firstSignificantTimestamp : new Date(timeSpan.from).getTime();
+    lastSignificantTimestamp = timeSpan.to === undefined ? lastSignificantTimestamp : new Date(timeSpan.to).getTime();
 
     const span = lastSignificantTimestamp - firstSignificantTimestamp;
     const granularity = getGranularity(span);
@@ -96,34 +110,54 @@ export const fetchCodeOwnershipData = fetchFactory(
     const interval = granularity.interval.asMilliseconds();
 
     return yield Promise.join(
-      getCommitData(
+      Database.getCommitDataOwnershipRiver(
         [firstCommitTimestamp, lastCommitTimestamp],
         [firstSignificantTimestamp, lastSignificantTimestamp],
         granularity,
         interval
       ),
-      getIssueData([firstIssueTimestamp, lastIssueTimestamp], [firstSignificantTimestamp, lastSignificantTimestamp], granularity, interval),
-      getBuildData(
+      Database.getIssueDataOwnershipRiver(
+        [firstIssueTimestamp, lastIssueTimestamp],
+        [firstSignificantIssueTimestamp, lastSignificantIssueTimestamp],
+        granularity,
+        interval
+      ),
+      Database.getBuildData(
         [firstCommitTimestamp, lastCommitTimestamp],
         [firstSignificantTimestamp, lastSignificantTimestamp],
         granularity,
         interval
-      )
+      ),
+      Database.getCommitDataOwnershipRiver(
+        [firstCommitTimestamp, lastCommitTimestamp],
+        [firstCommitTimestamp, lastCommitTimestamp],
+        granularity,
+        interval
+      ),
+      Database.getIssueDataOwnershipRiver(
+        [firstIssueTimestamp, lastIssueTimestamp],
+        [firstIssueTimestamp, lastIssueTimestamp],
+        granularity,
+        interval
+      ),
+      Database.getBuildData([firstCommitTimestamp, lastCommitTimestamp], [firstCommitTimestamp, lastCommitTimestamp], granularity, interval)
     )
-      .spread((commits, issues, builds) => {
+      .spread((filteredCommits, filteredIssues, filteredBuilds, commits, issues, builds) => {
         const aggregatedAuthors = _.keys(_.last(commits).statsByAuthor);
         const palette = getChartColors('spectral', [...committers, 'other']);
-
         return {
           otherCount: committers.length - aggregatedAuthors.length,
+          filteredCommits,
           commits,
           committers,
           palette,
+          filteredIssues,
           issues,
-          builds
+          filteredBuilds,
+          builds,
         };
       })
-      .catch(function(e) {
+      .catch(function (e) {
         console.error(e.stack);
         throw e;
       });
@@ -140,7 +174,7 @@ function getGranularity(span) {
     { interval: moment.duration(1, 'month'), limit: moment.duration(50, 'months') },
     { interval: moment.duration(1, 'week'), limit: moment.duration(100, 'weeks') },
     { interval: moment.duration(1, 'day'), limit: moment.duration(100, 'day') },
-    { interval: moment.duration(1, 'hour'), limit: moment.duration(100, 'hour') }
+    { interval: moment.duration(1, 'hour'), limit: moment.duration(100, 'hour') },
   ];
 
   return _.reduce(granularities, (t, g) => {

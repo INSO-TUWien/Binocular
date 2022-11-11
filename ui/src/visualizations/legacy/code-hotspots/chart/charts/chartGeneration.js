@@ -1,66 +1,34 @@
 import heatmapChartGeneration from './subCharts/heatmapChartGeneration';
 import rowChartGeneration from './subCharts/rowChartGeneration';
 import columnChartGeneration from './subCharts/columnChartGeneration';
-import hunkChartGeneration from './subCharts/hunkChartGeneration';
-import heatmapInteraction from './interaction/heatmapInteraction';
 
 export default class chartGeneration {
-  static generateMainChart(data, rawData, lines, importantColumns, currThis, mode, maxValue, legendSteps, firstLineNumber, displayProps) {
-    if (displayProps.mainVisualizationMode === 1 && mode === 0) {
-      hunkChartGeneration.generateHunkChart(
-        rawData,
-        lines,
-        importantColumns,
-        currThis,
-        mode,
-        maxValue,
-        legendSteps,
-        firstLineNumber,
-        displayProps
-      );
-    } else {
-      heatmapChartGeneration.generateHeatmap(
-        data,
-        lines,
-        importantColumns,
-        currThis,
-        mode,
-        maxValue,
-        legendSteps,
-        firstLineNumber,
-        displayProps
-      );
-    }
-    heatmapInteraction.generateHeatmapInteractionLayer(data, lines, importantColumns, currThis, mode, firstLineNumber, displayProps);
+  static generateHeatmap(data, lines, importantColumns, currThis, mode, maxValue, legendSteps, firstLineNumber, displayProps) {
+    heatmapChartGeneration.generateHeatmap(
+      data,
+      lines,
+      importantColumns,
+      currThis,
+      mode,
+      maxValue,
+      legendSteps,
+      firstLineNumber,
+      displayProps
+    );
   }
 
-  static updateMainChart(data, rawData, lines, importantColumns, currThis, mode, maxValue, legendSteps, firstLineNumber, displayProps) {
-    if (displayProps.mainVisualizationMode === 1 && mode === 0) {
-      hunkChartGeneration.generateHunkChart(
-        rawData,
-        lines,
-        importantColumns,
-        currThis,
-        mode,
-        maxValue,
-        legendSteps,
-        firstLineNumber,
-        displayProps
-      );
-    } else {
-      heatmapChartGeneration.updateHeatmap(
-        data,
-        lines,
-        importantColumns,
-        currThis,
-        mode,
-        maxValue,
-        legendSteps,
-        firstLineNumber,
-        displayProps
-      );
-    }
-    heatmapInteraction.generateHeatmapInteractionLayer(data, lines, importantColumns, currThis, mode, firstLineNumber, displayProps);
+  static updateHeatmap(data, lines, importantColumns, currThis, mode, maxValue, legendSteps, firstLineNumber, displayProps) {
+    heatmapChartGeneration.updateHeatmap(
+      data,
+      lines,
+      importantColumns,
+      currThis,
+      mode,
+      maxValue,
+      legendSteps,
+      firstLineNumber,
+      displayProps
+    );
   }
 
   static generateRowSummary(data, lines, currThis, mode, legendSteps, firstLineNumber, displayProps) {

@@ -5,27 +5,35 @@ import _ from 'lodash';
 
 export default handleActions(
   {
-    REQUEST_HOTSPOT_DIALS_DATA: state => _.assign({}, state, { isFetching: true }),
+    REQUEST_HOTSPOT_DIALS_DATA: (state) => _.assign({}, state, { isFetching: true }),
     RECEIVE_HOTSPOT_DIALS_DATA: (state, action) => {
       return _.assign({}, state, {
         data: action.payload,
         isFetching: false,
-        receivedAt: action.meta.receivedAt
+        receivedAt: action.meta.receivedAt,
       });
-    }
+    },
   },
   {
     data: {
       commits: {
         categories: [],
-        maximum: 0
+        maximum: 0,
       },
       issues: {
         categories: [],
-        maximum: 0
-      }
+        maximum: 0,
+      },
+      filteredCommits: {
+        categories: [],
+        maximum: 0,
+      },
+      filteredIssues: {
+        categories: [],
+        maximum: 0,
+      },
     },
     lastFetched: null,
-    isFetching: null
+    isFetching: null,
   }
 );

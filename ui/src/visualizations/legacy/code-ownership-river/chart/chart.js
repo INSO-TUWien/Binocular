@@ -16,12 +16,11 @@ import ZoomableChartContainer from '../../../../components/svg/ZoomableChartCont
 import OffsetGroup from '../../../../components/svg/OffsetGroup.js';
 import * as zoomUtils from '../../../../utils/zoom.js';
 
-const dateExtractor = d => d.date;
+const dateExtractor = (d) => d.date;
 
 export default class CodeOwnershipRiver extends React.Component {
   constructor(props) {
     super(props);
-
     this.elems = {};
 
     const { commitSeries, lastCommitDataPoint, commitLegend } = this.extractCommitData(props);
@@ -32,7 +31,7 @@ export default class CodeOwnershipRiver extends React.Component {
       lastCommitDataPoint,
       commitLegend,
       commitSeries,
-      dimensions: zoomUtils.initialDimensions()
+      dimensions: zoomUtils.initialDimensions(),
     };
 
     const x = d3.scaleTime().rangeRound([0, 0]);
@@ -42,11 +41,11 @@ export default class CodeOwnershipRiver extends React.Component {
       x,
       y,
       scaledX: x,
-      scaledY: y
+      scaledY: y,
     };
 
     this.commitExtractors = {
-      x: d => d.date
+      x: (d) => d.date,
     };
 
     this.updateDomain(props);
@@ -59,26 +58,35 @@ export default class CodeOwnershipRiver extends React.Component {
       return;
     }
 
-    const commitDateExtent = d3.extent(data.commits, d => d.date);
-    const commitCountExtent = [0, _.last(data.commits).totals.count];
+    let commits = data.commits;
+    let builds = data.builds;
+    let issues = data.issues;
+    if (data.universalSettings) {
+      commits = data.filteredCommits;
+      builds = data.filteredBuilds;
+      issues = data.filteredIssues;
+    }
 
-    const issueDateExtent = d3.extent(data.issues, d => d.createdAt);
-    const issueCountExtent = d3.extent(data.issues, d => d.count);
+    const commitDateExtent = d3.extent(commits, (d) => d.date);
+    const commitCountExtent = [0, _.last(commits).totals.count];
 
-    const buildDateExtent = d3.extent(data.builds, b => b.date);
-    const buildCountExtent = d3.extent(data.builds, b => b.stats.total);
+    const issueDateExtent = d3.extent(issues, (d) => d.createdAt);
+    const issueCountExtent = d3.extent(issues, (d) => d.count);
 
-    const min = arr => _.min(_.pull(arr, null));
-    const max = arr => _.max(_.pull(arr, null));
+    const buildDateExtent = d3.extent(builds, (b) => b.date);
+    const buildCountExtent = d3.extent(builds, (b) => b.stats.total);
+
+    const min = (arr) => _.min(_.pull(arr, null));
+    const max = (arr) => _.max(_.pull(arr, null));
 
     this.scales.x.domain([
       min([commitDateExtent[0], issueDateExtent[0], buildDateExtent[0]]),
-      max([commitDateExtent[1], issueDateExtent[1], buildDateExtent[1]])
+      max([commitDateExtent[1], issueDateExtent[1], buildDateExtent[1]]),
     ]);
 
     this.scales.y.domain([
       min([this.scales.y.domain()[0], commitCountExtent[0], issueCountExtent[0], buildCountExtent[0]]),
-      max([this.scales.y.domain()[1], commitCountExtent[1], issueCountExtent[1], buildCountExtent[1]])
+      max([this.scales.y.domain()[1], commitCountExtent[1], issueCountExtent[1], buildCountExtent[1]]),
     ]);
   }
 
@@ -88,7 +96,7 @@ export default class CodeOwnershipRiver extends React.Component {
       {
         lastCommitDataPoint,
         commitSeries,
-        commitLegend
+        commitLegend,
       },
       () => this.updateDomain(nextProps)
     );
@@ -98,25 +106,33 @@ export default class CodeOwnershipRiver extends React.Component {
     if (!this.props.commits) {
       return <svg />;
     }
+    let commits = this.props.commits;
+    let builds = this.props.builds;
+    let issues = this.props.issues;
+    if (this.props.universalSettings) {
+      commits = this.props.filteredCommits;
+      builds = this.props.filteredBuilds;
+      issues = this.props.filteredIssues;
+    }
 
     const legend = [
       {
         name: 'Commits by author',
-        subLegend: this.state.commitLegend
-      }
+        subLegend: this.state.commitLegend,
+      },
     ];
 
-    if (this.props.issues.length > 0) {
+    if (issues.length > 0) {
       legend.push({
-        name: 'Issues by state',
-        subLegend: [openIssuesLegend, closedIssuesLegend]
+        name: 'issues by state',
+        subLegend: [openIssuesLegend, closedIssuesLegend],
       });
     }
 
-    if (this.props.builds.length > 0) {
+    if (builds.length > 0) {
       legend.push({
         name: 'Builds by state',
-        subLegend: [successfulBuildsLegend, unsuccessfulBuildsLegend]
+        subLegend: [successfulBuildsLegend, unsuccessfulBuildsLegend],
       });
     }
 
@@ -125,6 +141,7 @@ export default class CodeOwnershipRiver extends React.Component {
 
     const dims = this.state.dimensions;
     const today = x(new Date());
+    const last = commits[commits.length - 1].date;
     this.scales.x.rangeRound([0, dims.width]);
     this.scales.y.rangeRound([dims.height, 0]);
 
@@ -132,10 +149,10 @@ export default class CodeOwnershipRiver extends React.Component {
       // for each commit marker, we need to recalculate the correct
       // y-coordinate by checking where that commit would go in our
       // commit data points
-      const j = _.sortedIndexBy(this.props.commits, c, other => other.date.getTime());
+      const j = _.sortedIndexBy(commits, c, (other) => other.date.getTime());
 
-      const cBefore = this.props.commits[j - 1];
-      const cAfter = this.props.commits[j];
+      const cBefore = commits[j - 1];
+      const cAfter = commits[j];
       const span = cAfter.date.getTime() - cBefore.date.getTime();
       const dist = c.date.getTime() - cBefore.date.getTime();
       const pct = dist / span;
@@ -156,15 +173,16 @@ export default class CodeOwnershipRiver extends React.Component {
     return (
       <ZoomableChartContainer
         scaleExtent={[1, Infinity]}
-        onZoom={evt => {
+        onZoom={(evt) => {
           this.onZoom(evt);
           this.props.onViewportChanged(this.scales.scaledX.domain());
         }}
-        onResize={dims => this.onResize(dims)}
-        onStart={e =>
+        onResize={(dims) => this.onResize(dims)}
+        onStart={(e) =>
           this.setState({
-            isPanning: e.sourceEvent === null || e.sourceEvent.type !== 'wheel'
-          })}
+            isPanning: e.sourceEvent === null || e.sourceEvent.type !== 'wheel',
+          })
+        }
         onEnd={() => this.setState({ isPanning: false })}
         className={cx(styles.chart, { [styles.panning]: this.state.isPanning })}>
         <g>
@@ -193,18 +211,18 @@ export default class CodeOwnershipRiver extends React.Component {
             </g>
             <g id="StackedArea1" clipPath="url(#chart)" className={cx(styles.commitCount)}>
               <StackedArea
-                data={this.props.commits}
+                data={commits}
                 series={this.state.commitSeries}
                 d3offset={d3.stackOffsetDiverging}
                 x={x}
                 y={y}
                 extractX={dateExtractor}
                 sum={_.sum}
-                fillToRight={today}
+                fillToRight={last}
               />
               {commitMarkers}
             </g>
-            {this.props.highlightedIssue &&
+            {this.props.highlightedIssue && (
               <defs>
                 <mask id="issue-mask">
                   <rect x={0} y={0} width={dims.width} height={dims.height} style={{ stroke: 'none', fill: '#ffffff', opacity: 0.5 }} />
@@ -216,55 +234,56 @@ export default class CodeOwnershipRiver extends React.Component {
                     style={{ stroke: 'none', fill: '#ffffff' }}
                   />
                 </mask>
-              </defs>}
+              </defs>
+            )}
             <g id="StackedArea2" clipPath="url(#chart)" mask="url(#issue-mask)" className={cx(styles.openIssuesCount)}>
               <StackedArea
-                data={this.props.issues}
+                data={issues}
                 x={x}
                 y={y}
                 series={[
                   {
-                    extractY: i => i.closedCount,
+                    extractY: (i) => i.closedCount,
                     style: closedIssuesLegend.style,
                     className: styles.closedIssuesCount,
                     onMouseEnter: () => this.activateLegend(closedIssuesLegend),
-                    onMouseLeave: () => this.activateLegend(null)
+                    onMouseLeave: () => this.activateLegend(null),
                   },
                   {
-                    extractY: i => i.openCount,
+                    extractY: (i) => i.openCount,
                     style: openIssuesLegend.style,
                     onMouseEnter: () => this.activateLegend(openIssuesLegend),
-                    onMouseLeave: () => this.activateLegend(null)
-                  }
+                    onMouseLeave: () => this.activateLegend(null),
+                  },
                 ]}
                 extractX={dateExtractor}
                 sum={_.sum}
-                fillToRight={today}
+                fillToRight={last}
               />
             </g>
             <g id="StackedArea4" clipPath="url(#chart)" mask="url(#issue-mask)">
               <StackedArea
-                data={this.props.builds}
+                data={builds}
                 x={x}
                 y={y}
                 series={[
                   {
-                    extractY: b => b.stats.success,
+                    extractY: (b) => b.stats.success,
                     style: successfulBuildsLegend.style,
                     className: '',
                     onMouseEnter: () => this.activateLegend(successfulBuildsLegend),
-                    onMouseLeave: () => this.activateLegend(null)
+                    onMouseLeave: () => this.activateLegend(null),
                   },
                   {
-                    extractY: b => b.stats.failed,
+                    extractY: (b) => b.stats.failed,
                     style: unsuccessfulBuildsLegend.style,
                     onMouseEnter: () => this.activateLegend(unsuccessfulBuildsLegend),
-                    onMouseLeave: () => this.activateLegend(null)
-                  }
+                    onMouseLeave: () => this.activateLegend(null),
+                  },
                 ]}
                 extractX={dateExtractor}
                 sum={_.sum}
-                fillToRight={today}
+                fillToRight={last}
               />
             </g>
             <g className={styles.today} clipPath="url(#x-only)">
@@ -289,35 +308,83 @@ export default class CodeOwnershipRiver extends React.Component {
       return {};
     }
 
-    const lastCommitDataPoint = _.last(props.commits).statsByAuthor;
+    let commits = props.commits;
+    if (props.universalSettings) {
+      commits = props.filteredCommits;
+
+      commits = commits.map((commit) => {
+        for (const author of Object.keys(commit.statsByAuthor)) {
+          let filter = false;
+          if (props.selectedAuthors.filter((a) => a === 'others').length > 0) {
+            filter = true;
+          }
+          for (const allAuthorsAuthor of Object.keys(props.allAuthors)) {
+            if (author === allAuthorsAuthor) {
+              if (props.selectedAuthors.filter((a) => a === allAuthorsAuthor).length > 0) {
+                filter = true;
+                break;
+              } else {
+                filter = false;
+                break;
+              }
+            }
+          }
+          if (!filter) {
+            delete commit.statsByAuthor[author];
+          }
+        }
+        return commit;
+      });
+
+      /*commits.statsByAuthor = commits.statsByAuthor.filter((commit) => {
+        let filter = false;
+        if (props.selectedAuthors.filter((a) => a === 'others').length > 0) {
+          filter = true;
+        }
+        for (const author of Object.keys(props.allAuthors)) {
+          if (commit.signature === author) {
+            if (props.selectedAuthors.filter((a) => a === author).length > 0) {
+              filter = true;
+              break;
+            } else {
+              filter = false;
+              break;
+            }
+          }
+        }
+        return filter;
+      });*/
+    }
+
+    const lastCommitDataPoint = _.last(commits).statsByAuthor;
     const commitLegend = [];
     const commitSeries = _.map(lastCommitDataPoint, (committerIndex, signature) => {
       const legend = {
         name:
-          (props.commitAttribute === 'count' ? 'Commits by ' : 'Changes by ') +
+          (props.commitAttribute === 'count' ? 'Commits by ' : 'Empty by ') +
           (signature === 'other' ? props.otherCount + ' Others' : signature),
         style: {
-          fill: props.palette[signature]
-        }
+          fill: props.palette[signature],
+        },
       };
 
       commitLegend.push(legend);
 
       return {
         style: {
-          fill: props.palette[signature]
+          fill: props.palette[signature],
         },
-        extractY: d => {
+        extractY: (d) => {
           const stats = d.statsByAuthor[signature];
 
           if (props.commitAttribute === 'count') {
             return stats ? stats.count : 0;
           } else {
-            return stats ? stats.changes / d.totals.changes * d.totals.count : 0;
+            return stats ? (stats.changes / d.totals.changes) * d.totals.count : 0;
           }
         },
         onMouseEnter: () => this.activateLegend(legend),
-        onMouseLeave: () => this.activateLegend(null)
+        onMouseLeave: () => this.activateLegend(null),
       };
     });
 
@@ -329,28 +396,28 @@ const openIssuesLegend = {
   name: 'Open issues',
   style: {
     fill: '#ff9eb1',
-    stroke: '#ff3860'
-  }
+    stroke: '#ff3860',
+  },
 };
 
 const closedIssuesLegend = {
   name: 'Closed issues',
   style: {
-    fill: '#73e79c'
-  }
+    fill: '#73e79c',
+  },
 };
 
 const unsuccessfulBuildsLegend = {
   name: 'Unsuccessful builds',
   style: {
     fill: '#ff9eb1',
-    stroke: '#ff3860'
-  }
+    stroke: '#ff3860',
+  },
 };
 
 const successfulBuildsLegend = {
   name: 'Successful builds',
   style: {
-    fill: '#73e79c'
-  }
+    fill: '#73e79c',
+  },
 };

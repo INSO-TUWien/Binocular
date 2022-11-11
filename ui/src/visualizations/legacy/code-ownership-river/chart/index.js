@@ -7,30 +7,36 @@ import { setViewport, openCommit } from '../sagas';
 
 const mapStateToProps = (state /*, ownProps*/) => {
   const corState = state.visualizations.codeOwnershipRiver.state;
-
+  const universalSettings = state.visualizations.newDashboard.state.config;
+  const filteredIssues = corState.config.overlay === 'issues' ? corState.data.data.filteredIssues : [];
+  const filteredBuilds = corState.config.overlay === 'builds' ? corState.data.data.filteredBuilds : [];
   const issues = corState.config.overlay === 'issues' ? corState.data.data.issues : [];
   const builds = corState.config.overlay === 'builds' ? corState.data.data.builds : [];
-
   return {
     palette: corState.data.data.palette,
     otherCount: corState.data.data.otherCount,
+    filteredCommits: corState.data.data.filteredCommits,
     commits: corState.data.data.commits,
     commitAttribute: corState.config.commitAttribute,
+    filteredIssues,
     issues,
+    filteredBuilds,
     builds,
     highlightedIssue: corState.config.highlightedIssue,
-    highlightedCommits: corState.config.highlightedCommits
+    highlightedCommits: corState.config.highlightedCommits,
+    selectedAuthors: universalSettings.selectedAuthorsGlobal,
+    allAuthors: universalSettings.allAuthors,
   };
 };
 
 const mapDispatchToProps = (dispatch /*, ownProps*/) => {
   return {
-    onCommitClick: function(c) {
+    onCommitClick: function (c) {
       dispatch(openCommit(c));
     },
-    onViewportChanged: function(v) {
+    onViewportChanged: function (v) {
       dispatch(setViewport(v));
-    }
+    },
   };
 };
 

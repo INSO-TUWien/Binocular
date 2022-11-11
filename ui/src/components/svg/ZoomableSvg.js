@@ -1,7 +1,8 @@
 'use strict';
 
-import React, { PropTypes } from 'react';
+import React from 'react';
 import * as d3 from 'd3';
+import PropTypes from 'prop-types';
 
 /**
  * Provides an svg-element with all necessary handlers attached for zoomability.
@@ -30,8 +31,8 @@ export default class ZoomableSvg extends React.Component {
         tabIndex={this.props.tabIndex || 1}
         className={this.props.className}
         // remember ref for attaching d3 zoom behaviour later
-        ref={svg => (this.ref = svg)}
-        onKeyDown={e => this.onKeyDown(e)}>
+        ref={(svg) => (this.ref = svg)}
+        onKeyDown={(e) => this.onKeyDown(e)}>
         {this.props.children}
       </svg>
     );
@@ -46,7 +47,7 @@ export default class ZoomableSvg extends React.Component {
       this.zoom = this.zoom.scaleExtent(this.props.scaleExtent);
     }
 
-    this.zoom = this.zoom.on('zoom', event => {
+    this.zoom = this.zoom.on('zoom', (event) => {
       if (this.props.onZoom) {
         this.props.onZoom(event);
       }
@@ -55,11 +56,11 @@ export default class ZoomableSvg extends React.Component {
     });
 
     if (this.props.onStart) {
-      this.zoom = this.zoom.on('start', event => this.props.onStart(event));
+      this.zoom = this.zoom.on('start', (event) => this.props.onStart(event));
     }
 
     if (this.props.onEnd) {
-      this.zoom = this.zoom.on('end', event => this.props.onEnd(event));
+      this.zoom = this.zoom.on('end', (event) => this.props.onEnd(event));
     }
 
     svg.call(this.zoom);

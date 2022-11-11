@@ -176,7 +176,7 @@ export default class rowChartGeneration {
                 "<div style='font-weight: bold'>Row: " +
                   (parseInt(d.row) + 1) +
                   '</div>' +
-                  '<div>Changes: ' +
+                  '<div>Empty: ' +
                   d.value +
                   '</div>' +
                   '<hr>' +
@@ -209,7 +209,7 @@ export default class rowChartGeneration {
                 "<div style='font-weight: bold'>Row: " +
                   (parseInt(d.row) + 1) +
                   '</div>' +
-                  '<div>Changes: ' +
+                  '<div>Empty: ' +
                   d.value +
                   '</div>' +
                   (d.issues.length > 0 ? '<hr>' + ListGeneration.generateIssueList(d.issues) : '')
@@ -237,7 +237,7 @@ export default class rowChartGeneration {
           .on('mouseover', function(event, d) {
             tooltipp.transition().duration(200).style('display', 'block');
             tooltipp
-              .html("<div style='font-weight: bold'>Row: " + (parseInt(d.row) + 1) + '</div>' + '<div>Changes: ' + d.value + '</div>')
+              .html("<div style='font-weight: bold'>Row: " + (parseInt(d.row) + 1) + '</div>' + '<div>Empty: ' + d.value + '</div>')
               .style('right', 30 + 'px')
               .style('top', (d.row - firstLineNumber + 1) * barHeight + 'px');
           })
