@@ -59,7 +59,7 @@ const app = makeAppReducer(visualizationModules);
 const store = createStore(
   app,
   {
-    activeVisualization: _.keys(visualizations)[0],
+    activeVisualization: _.keys(visualizations)[10],
     visualizations,
     config: {
       isFetching: false,

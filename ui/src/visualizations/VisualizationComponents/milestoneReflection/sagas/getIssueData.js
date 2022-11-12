@@ -23,6 +23,8 @@ const getIssuesPage = (since, until) => (page, perPage) => {
         perPage
         count
         data {
+          id
+          iid
           title
           createdAt
           closedAt

@@ -35,5 +35,7 @@ const getIssuesPage = (since, until) => (page, perPage) => {
     }`,
       { page, perPage, since, until }
     )
-    .then((resp) => resp.issues);
+    .then((resp) => {
+     return  resp.issues
+    } );
 };
