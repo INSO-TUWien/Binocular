@@ -11,7 +11,7 @@ export default class MilestoneReflection extends React.PureComponent {
   render() {
     return (
       <div style={{ display: 'block' }}>
-        <div style={{ background: '#ffe8e8', position: 'absolute', width: '100%' }}>
+        <div style={{ display:'none', background: '#ffe8e8', position: 'absolute', width: '100%' }}>
           <h2>DEVELOPMENT-INFO: </h2>
           <div style={{ fontSize: '0.8rem' }}>
             <p> TODO - A stacked timeline with hover, click, and scroll events</p>

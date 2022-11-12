@@ -34,13 +34,13 @@ export default class Timeline extends React.Component {
     },
     tickFormat: {
       format: d3.timeFormat("%d.%m"),
-      tickTime:  14, // d3.timeHour.every(24) == every 12h, // utcHour
+      tickTime:  d3.timeHour.every(24), // d3.timeHour.every(24) == every 12h, // utcHour
       tickInterval: 1,
       tickSize: 6
     },
     defaultValues: {
       margin: { left: 150, right: 30, top: 0, bottom: 0 },
-      width: 750,
+      width: 1400,
     },
     inputFieldJson: "",
     showInfo: null,
@@ -108,42 +108,48 @@ export default class Timeline extends React.Component {
     };
     let buildRate;
 
-    // check how many rows ar needed and how max start and endtime of the issues is
-    if (this.state.issuesStats.startTime === 0 || this.state.issuesStats.endTime === 0) {
-      const milestone = this.props.data.milestone;
+    // calculate the min/max properties of vcs/its/ci attributes
+    // additionally the actual max/min time of the issue is calculated, which is currently not used at all
+    const milestone = this.props.data.milestone;
 
-      if (milestone != null) {
-        milestone.issuesPerPerson.forEach((person, index) => {
+    if (milestone != null) {
+      milestone.issuesPerPerson.forEach((person, index) => {
 
-          // figure out beginning and ending times if they are unspecified
-          person.issueList.forEach(function (issue, i) {
+        // figure out beginning and ending times if they are unspecified
+        person.issueList.forEach(function (issue, i) {
 
-            if (issue.its.timeStamps.issue_inProgress < minTime || (minTime === 0)) {
-              minTime = issue.its.timeStamps.issue_inProgress ;}
-            if (issue.its.timeStamps.issue_done > maxTime) {
-              maxTime = issue.its.timeStamps.issue_done;}
+          if (issue.its.timeStamps.issue_inProgress < minTime || (minTime === 0)) {
+            minTime = issue.its.timeStamps.issue_inProgress ;}
+          if (issue.its.timeStamps.issue_done > maxTime) {
+            maxTime = issue.its.timeStamps.issue_done;}
 
-            // calc metrik data
-            if (localToolInfos.vcs.loc.min > issue.vcs.loc) {localToolInfos.vcs.loc.min = issue.vcs.loc;}
-            if (localToolInfos.vcs.loc.max < issue.vcs.loc) {localToolInfos.vcs.loc.max = issue.vcs.loc;}
-            if (localToolInfos.its.time.min > issue.its.minutesSpent) {localToolInfos.its.time.min = issue.its.minutesSpent;}
-            if (localToolInfos.its.time.max < issue.its.minutesSpent) {localToolInfos.its.time.max = issue.its.minutesSpent;}
+          // calc metrik data
+          if (localToolInfos.vcs.loc.min > issue.vcs.loc) {localToolInfos.vcs.loc.min = issue.vcs.loc;}
+          if (localToolInfos.vcs.loc.max < issue.vcs.loc) {localToolInfos.vcs.loc.max = issue.vcs.loc;}
+          if (localToolInfos.its.time.min > issue.its.minutesSpent) {localToolInfos.its.time.min = issue.its.minutesSpent;}
+          if (localToolInfos.its.time.max < issue.its.minutesSpent) {localToolInfos.its.time.max = issue.its.minutesSpent;}
 
+          if (issue.ci.totalBuild == 0) {
+            buildRate = 0;
+          } else {
             buildRate = (issue.ci.successful / issue.ci.totalBuild);
-            if (localToolInfos.ci.builds.minSuccessRate > buildRate) {localToolInfos.ci.builds.minSuccessRate = buildRate;}
-            if (localToolInfos.ci.builds.maxSuccessRate < buildRate) {localToolInfos.ci.builds.maxSuccessRate = buildRate;}
+          }
+          if (localToolInfos.ci.builds.minSuccessRate > buildRate) {localToolInfos.ci.builds.minSuccessRate = buildRate;}
+          if (localToolInfos.ci.builds.maxSuccessRate < buildRate) {localToolInfos.ci.builds.maxSuccessRate = buildRate;}
 
-          });
-        })
-      }
+        });
+      })
 
       this.state.issuesStats.rowCount = milestone.issuesPerPerson.length;
-      this.state.issuesStats.startTime = minTime;
-      this.state.issuesStats.endTime = maxTime;
+
+      this.state.issuesStats.startTime = this.props.data.milestone.beginDate;
+      this.state.issuesStats.endTime = this.props.data.milestone.endDate;
+      // this.state.issuesStats.startTime = minTime;
+      // this.state.issuesStats.endTime = maxTime;
 
       this.state.issuesStats.issueToolInfo = localToolInfos;
 
-      let timeDiff = maxTime - minTime;
+      let timeDiff = this.state.issuesStats.endTime - this.state.issuesStats.startTime;
       let widthWithoutMargin = this.state.defaultValues.width - this.state.defaultValues.margin.left - this.state.defaultValues.margin.right;
 
       this.state.issuesStats.scaleFactor = (1/timeDiff) * widthWithoutMargin;
@@ -162,6 +168,8 @@ export default class Timeline extends React.Component {
       .attr("y", yPosition)
       .attr("width", issueWidth)
       .attr("height", this.state.issuesStats.height)
+      .attr('stroke', 'black')
+      .attr('stroke-width', '0.5')
       .style("fill", "#29e40a")
       .attr("class",  "timelineSeries_milestone")
       .attr("id", 'timelineItem_' + (milestone.title).replace(" ", "-"))
@@ -186,13 +194,45 @@ export default class Timeline extends React.Component {
   }
 
   onIssueClick(issue) {
-    debugger;
     let issueText = "Issue: \t" + issue.issueName + "\n" +
                       "Assigned to: \t" + issue.assignedTo + "\n" +
                       "VCS Data: " + JSON.stringify(issue.vcs) + "\n" +
                       "ITS Data: " + JSON.stringify(issue.its) + "\n" +
                       "CI/CD Data: " + JSON.stringify(issue.ci) + "\n";
     alert(issueText)
+  }
+
+  colorInterpolation(data) {
+    let value, min, max, interpolation;
+
+    switch (data.state.showInfo) {
+      case "loc":
+        value = data.issue.vcs.loc;
+        min =  data.state.issuesStats.issueToolInfo.vcs.loc.min;
+        max =  data.state.issuesStats.issueToolInfo.vcs.loc.max;
+        break;
+      case "time":
+        value = data.issue.its.minutesSpent;
+        min =  data.state.issuesStats.issueToolInfo.its.time.min;
+        max =  data.state.issuesStats.issueToolInfo.its.time.max;
+        break;
+      case "ciBuild":
+        if (data.issue.ci.totalBuild == 0) {
+          return data.interpolate1(0);
+        }
+        value = data.issue.ci.successful / data.issue.ci.totalBuild;
+        min =  data.state.issuesStats.issueToolInfo.ci.builds.minSuccessRate;
+        max =  data.state.issuesStats.issueToolInfo.ci.builds.maxSuccessRate;
+        break;
+      default:
+        return "pink";
+    }
+    interpolation = (value-min)/(max-min);
+    if (interpolation <= 0.5) {
+      return data.interpolate1(interpolation*2);
+    } else {
+      return data.interpolate2((interpolation-0.5)*2);
+    }
   }
 
   drawIssueRows(gLabel, gTimeline, milestone) {
@@ -216,8 +256,32 @@ export default class Timeline extends React.Component {
         .text(name)
         .on("click", (event, data) => {data.onClick(data.person);});
 
+
       // draw issues of a person
       issueArr.forEach((singleIssue, issueIndex) => {
+        // check if at least a part of the issue is within the time range of the milestone
+        if (!(singleIssue.its.timeStamps.issue_inProgress <= this.state.issuesStats.endTime
+            && singleIssue.its.timeStamps.issue_inProgress >= this.state.issuesStats.startTime)
+          && !(singleIssue.its.timeStamps.issue_done <= this.state.issuesStats.endTime
+            && singleIssue.its.timeStamps.issue_done >= this.state.issuesStats.startTime)) {
+          return;
+        }
+
+        // preparation for handling issues that are only partly within the milestone time range
+        let startBeforeMS = false;
+        let finishAfterMS = false;
+        if (!(singleIssue.its.timeStamps.issue_inProgress <= this.state.issuesStats.endTime
+            && singleIssue.its.timeStamps.issue_inProgress >= this.state.issuesStats.startTime))
+        {
+          startBeforeMS = true;
+        }
+        if (!(singleIssue.its.timeStamps.issue_done <= this.state.issuesStats.endTime
+          && singleIssue.its.timeStamps.issue_done >= this.state.issuesStats.startTime))
+        {
+          finishAfterMS = true;
+        }
+
+
         const xPosition = this.state.defaultValues.margin.left
           + (singleIssue.its.timeStamps.issue_inProgress - this.state.issuesStats.startTime) * this.state.issuesStats.scaleFactor;
         const yPosition = this.state.defaultValues.margin.top
@@ -243,33 +307,9 @@ export default class Timeline extends React.Component {
           .attr("y", yPosition)
           .attr("width", issueWidth)
           .attr("height", this.state.issuesStats.height)
-          .style("fill", (data, index, d3) => {
-            let value, min, max, interpolation;
-
-            switch (data.state.showInfo) {
-              case "loc":
-                value = data.issue.vcs.loc;
-                min =  data.state.issuesStats.issueToolInfo.vcs.loc.min;
-                max =  data.state.issuesStats.issueToolInfo.vcs.loc.max;
-                break;
-              case "time":
-                value = data.issue.its.minutesSpent;
-                min =  data.state.issuesStats.issueToolInfo.its.time.min;
-                max =  data.state.issuesStats.issueToolInfo.its.time.max;
-                break;
-              case "builds":
-                value = data.issue.ci.successful / data.issue.ci.totalBuild;
-                min =  data.state.issuesStats.issueToolInfo.ci.builds.min;
-                max =  data.state.issuesStats.issueToolInfo.ci.builds.max;
-                break;
-            }
-            interpolation = (value-min)/(max-min);
-            if (interpolation <= 0.5) {
-              return interpolate1(interpolation);
-            } else {
-              return interpolate2(interpolation);
-            }
-          })
+          .attr('stroke', 'black')
+          .attr('stroke-width', '0.2')
+          .style("fill", this.colorInterpolation)
           .attr("class",  "timelineSeries_" + index)
           .attr("id", 'timelineItem_' + index + "_" + issueIndex)
         ;
@@ -277,7 +317,7 @@ export default class Timeline extends React.Component {
         // issue label
         gTimeline
           .append("text").datum({data: singleIssue, state: this.state})
-          .attr("x", xPosition + issueWidth/2 - singleIssue.issueName.length*3)
+          .attr("x", xPosition + issueWidth / 2 - singleIssue.issueName.length * 3)
           .attr("y", yPosition + this.state.issuesStats.height * 0.75)
           .text(singleIssue.issueName)
         ;
@@ -291,8 +331,11 @@ export default class Timeline extends React.Component {
           .attr("width", issueWidth)
           .attr("height", this.state.issuesStats.height)
           .style("fill", "transparent")
-          .on("click", (event, data) => {data.onClick(data.issue);})
+          .on("click", (event, data) => {
+            data.onClick(data.issue);
+          })
         ;
+
       })
     })
   }
@@ -328,7 +371,7 @@ export default class Timeline extends React.Component {
 
   render() {
     if (this.state.componentDidMount) {
-      if  (JSON.stringify(this.props.data.milestone) != JSON.stringify(this.state.inputFieldJson)) {
+      if  (JSON.stringify(this.props.data.milestone) != this.state.inputFieldJson) {
         this.drawTimeline();
       }
 
@@ -337,7 +380,6 @@ export default class Timeline extends React.Component {
         this.appendIssues();
       }
     }
-
 
     return (
       <svg id="timeline" style={{ width: "100%" }} ref={(svg) => (this.svgTimeline = svg)}>
