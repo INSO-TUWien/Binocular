@@ -49,7 +49,7 @@ export default class CodeHotspots extends React.PureComponent {
         sha: '',
       },
       mode: 0, //modes: 0...Changes/Version  1...Changes/Developer  2...Changes/Issue
-      data: {},
+      data: { code: 'No File Selected', secondaryCode: 'No File Selected' },
       filteredData: { code: 'No File Selected', secondaryCode: 'No File Selected', firstLineNumber: 1, searchTerm: '' },
       displayProps: {
         dataScaleHeatmap: 0,
@@ -385,6 +385,7 @@ export default class CodeHotspots extends React.PureComponent {
                         // eslint-disable-next-line max-len
                         data.code =
                           sourceCodeRequest.status === 200 ? sourceCodeRequest.responseText : 'No commit code in current selected Branch!';
+                        data.secondaryCode = data.code;
                         data.firstLineNumber = 1;
                         data.searchTerm = '';
                         data.rawData = resp;
@@ -415,6 +416,7 @@ export default class CodeHotspots extends React.PureComponent {
                         this.dataChanged = true;
                         data.code =
                           sourceCodeRequest.status === 200 ? sourceCodeRequest.responseText : 'No commit code in current selected Branch!';
+                        data.secondaryCode = data.code;
                         data.firstLineNumber = 1;
                         data.searchTerm = '';
                         data.rawData = resp;
@@ -445,6 +447,7 @@ export default class CodeHotspots extends React.PureComponent {
                         this.dataChanged = true;
                         data.code =
                           sourceCodeRequest.status === 200 ? sourceCodeRequest.responseText : 'No commit code in current selected Branch!';
+                        data.secondaryCode = data.code;
                         data.firstLineNumber = 1;
                         data.searchTerm = '';
                         data.rawData = resp;
