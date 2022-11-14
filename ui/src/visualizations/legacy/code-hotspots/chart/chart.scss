@@ -1,5 +1,5 @@
 .codeView{
-  height: calc(calc(100vh - 150px) - 6.4rem);
+  height: calc(calc(100vh - 160px) - 6.4rem);
   overflow-y: scroll;
   overflow-x: hidden;
   position: relative;
@@ -7,10 +7,59 @@
   width: 100%;
 }
 
+.codeViewWidthHalf{
+  position: absolute;
+  height: 100%;
+  width: 50%;
+}
+
+.codeViewWidthFull{
+  position: absolute;
+  height: 100%;
+  width: 100%;
+}
+
+.codeViewIndicators{
+  width: 100%;
+  height: 1rem;
+}
+
+.codeViewPrimaryIndicator{
+  //position: absolute;
+  display: inline-block;
+  background-color: #3273dc;
+  width: 50%;
+  height: 1rem;
+}
+
+.codeViewSecondaryIndicator{
+  display: inline-block;
+  //position: absolute;
+  //left: 50%;
+  background-color: #4cd964;
+  width: 50%;
+  height: 1rem;
+}
+.codeViewPrimary{
+}
+
+.codeViewSecondary{
+  left: 50%;
+}
+
 .heatmapContainer{
   width: 100%;
   margin: 0 0 0 40px;
 }
+
+.rowInteractionContainer{
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  margin: 0 0 0 40px;
+}
+
 .rowSummaryContainer{
   margin: 0;
   position: absolute;

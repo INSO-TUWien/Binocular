@@ -9,15 +9,11 @@ export default class Dashboard extends React.Component {
     this.state = {
       visualizations: [],
       visualizationCount: 0,
-      selectVisualization: false
+      selectVisualization: false,
     };
   }
 
-
   render() {
-    return (
-      <div className={styles.chartContainer}>
-      </div>
-    );
+    return <div className={styles.chartContainer}></div>;
   }
 }
