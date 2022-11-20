@@ -11,8 +11,12 @@
 
 
 .modal {
+  display: flex;
+  flex-direction: column;
+  justify-content: stretch;
+
   background-color: white;
-  width: 500px;
+  width: 700px;
   height: 500px;
   z-index: 10;
   position: absolute;
@@ -20,34 +24,66 @@
 
   border-radius: 5px;
   box-shadow: 0 5px 20px 0 rgba(0, 0, 0, 0.04);
+
+  .header {
+    margin-top: 15px;
+    font-size: 2rem;
+    display: flex;
+    align-items: center;
+    flex-direction: row;
+    justify-content: center;
+  }
+  .footer {
+    display: flex;
+    justify-content: end;
+    margin: 10px 15px 15px 0;
+
+    button {
+      cursor: pointer;
+      border-radius: 3px;
+      background-color: #3273dc;
+      padding: 8px 16px;
+      font-size: 16px;
+      font-weight: 400;
+      line-height: 24px;
+      border: none;
+      color: white;
+    }
+  }
 }
 
+.modalBody {}
 
-.modalHeader {
-  font-size: 2rem;
+.item{
+  margin-left: 15px;
+}
+.header {
   display: flex;
   align-items: center;
   flex-direction: row;
-  justify-content: center;
 }
-.modalBody {}
-.modalFooter {}
-
-.modalFileContainer {
-  overflow: scroll;
-  max-height: 300px;
+.fileBody {
+  margin-left: 35px;
 }
-.modalFileItem{
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-}
-.modalFileItemPath{
-  margin-left: 30px;
+.headerText{
+  margin-left: 15px;
   text-overflow: ellipsis;
   overflow: hidden;
   white-space: nowrap;
 }
-.modalFileItemIcon{
-  margin-right: 30px;
+.headerIcon{
+  width: 20px;
+  height: 20px;
+}
+.branch {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+.branchIcon {
+  width: 15px;
+  height: 15px;
+}
+.branchText {
+  margin-left: 10px;
 }

@@ -1,14 +1,11 @@
 import React from 'react';
 import * as styles from './ConflictDetailsModal.scss';
+import FileOverview from './FileOverview/FileOverview';
 
 export default class ConflictDetailsModal extends React.Component {
   constructor(props) {
     super(props);
     this.styles = Object.assign({}, styles);
-  }
-
-  getUniqueFiles(selectedConflict) {
-    return [...new Set(selectedConflict.conflicts.map(c => c.file))];
   }
 
   render() {
@@ -22,27 +19,19 @@ export default class ConflictDetailsModal extends React.Component {
       }
     };
 
-    console.log(selectedConflict);
+    const content = <FileOverview selectedConflict={selectedConflict} />;
+
     return (
       <div className={this.styles.darkBG} onClick={e => closeModal(e)}>
         <div className={this.styles.modal}>
-          <div className={this.styles.modalHeader}>
+          <div className={this.styles.header}>
             <b>Conflict Details</b>
           </div>
-          <div className={this.styles.modalBody}>Here comes the content</div>
-          <div className={this.styles.modalFileContainer}>
-            {this.getUniqueFiles(selectedConflict).map((c, i) =>
-              <div className={this.styles.modalFileItem} key={`conflicted_file_${i}`}>
-                <div className={this.styles.modalFileItemPath}>
-                  {c.path}
-                </div>
-                {c.path.endsWith('.js') && <div className={this.styles.modalFileItemIcon}>+</div>}
-              </div>
-            )}
-          </div>
-
-          <div className={this.styles.modalFooter}>
-            <button onClick={() => close()}>Close</button>
+          {content}
+          <div className={this.styles.footer}>
+            <button title="Close Details Modal" onClick={() => close()}>
+              Close
+            </button>
           </div>
         </div>
       </div>

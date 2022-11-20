@@ -1,0 +1,66 @@
+.item{
+  margin-left: 15px;
+}
+.separator {
+  height: 1px;
+  background-color: #343232;
+  margin-left: 15px;
+  margin-right: 15px;
+}
+.header {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+
+  .headerIcon{
+    width: 20px;
+    height: 20px;
+  }
+  .headerText{
+    margin-left: 15px;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+  }
+}
+.fileBody {
+  margin-left: 35px;
+}
+
+.branch {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+
+  .branchIcon {
+    width: 22px;
+  }
+
+  .branchTextContainer {
+    align-items: center;
+    justify-content: space-between;
+    margin-left: 7px;
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+
+    .branchText {
+      max-width: 570px;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+
+    .branchInfoIcon {
+      padding: 0;
+      cursor: pointer;
+      background-color: transparent;
+      border: none;
+      width: 20px;
+      height: 20px;
+      margin-right: 20px;
+    }
+  }
+}
+
+
