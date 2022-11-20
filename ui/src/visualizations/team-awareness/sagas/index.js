@@ -30,6 +30,9 @@ export const receiveTeamAwarenessConflicts = timestampedActionFactory('RECEIVE_T
 export const requestRefresh = createAction('REQUEST_REFRESH');
 const refresh = createAction('REFRESH');
 
+export const showConflictDetails = createAction('SHOW_TEAM_AWARENESS_CONFLICT_DETAILS');
+export const hideConflictDetails = createAction('HIDE_TEAM_AWARENESS_CONFLICT_DETAILS');
+
 export default function*() {
   yield fork(invokeAllDataGenerators('RECEIVE_TEAM_AWARENESS_DATA'));
   yield fork(invokeAllDataGenerators('SET_TEAM_AWARENESS_ACTIVITY_SCALE'));

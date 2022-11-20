@@ -9,14 +9,14 @@ export default class ConflictOverviewItem extends React.Component {
   }
 
   render() {
-    const { conflict: { conflictStakeholder, otherStakeholder }, colors, highlightPartners } = this.props;
+    const { conflict: { conflictStakeholder, otherStakeholder }, colors, highlightPartners, displayConflictDetails } = this.props;
 
     const participantA = conflictStakeholder.gitSignature.substring(0, conflictStakeholder.gitSignature.indexOf('<') - 1);
     const participantB = otherStakeholder.gitSignature.substring(0, otherStakeholder.gitSignature.indexOf('<') - 1);
     const ids = [conflictStakeholder.id, otherStakeholder.id];
 
     return (
-      <div className={this.styles.conflictOverviewItem}>
+      <div className={this.styles.conflictOverviewItem} onClick={() => displayConflictDetails(this.props.conflict)}>
         <svg className={this.styles.conflictOverviewItemColors}>
           <rect width={7.5} height={15} fill={colors.get(conflictStakeholder.id)} />
           <rect x={7.5} width={7.5} height={15} fill={colors.get(otherStakeholder.id)} />

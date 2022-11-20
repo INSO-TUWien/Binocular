@@ -3,7 +3,7 @@
 import { connect } from 'react-redux';
 import { getState } from '../util/util.js';
 import Chart from './chart.js';
-import { setConflictPartners } from '../sagas';
+import { showConflictDetails, setConflictPartners, hideConflictDetails } from '../sagas';
 
 const mapStateToProps = (appState /*, chartState */) => {
   const { data, config } = getState(appState);
@@ -14,6 +14,8 @@ const mapStateToProps = (appState /*, chartState */) => {
     hasConflictBranchSelected: config.selectedConflictBranch !== 'not_set',
     selectedStakeholders: config.selectedStakeholders,
     isConflictsProcessing: data.isConflictsProcessing,
+    showConflictDetails: config.showConflictDetails,
+    selectedConflict: config.selectedConflict,
     data: {
       conflicts: data.data.conflicts,
       stakeholders: data.data.stakeholders,
@@ -23,7 +25,9 @@ const mapStateToProps = (appState /*, chartState */) => {
 };
 
 const mapDispatchToProps = dispatch => ({
-  highlightPartners: partners => dispatch(setConflictPartners(partners))
+  highlightPartners: partners => dispatch(setConflictPartners(partners)),
+  displayConflictDetails: conflict => dispatch(showConflictDetails(conflict)),
+  hideConflictDetails: () => dispatch(hideConflictDetails())
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(Chart);

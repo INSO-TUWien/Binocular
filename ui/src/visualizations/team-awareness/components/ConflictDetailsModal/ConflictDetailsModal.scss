@@ -1,9 +1,12 @@
 .darkBG {
-  background-color: rgba(0, 0, 0, 0.2);
-  width: 100vw;
-  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.6);
+  width: 100%;
+  height: 100%;
   z-index: 0;
   position: absolute;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 
@@ -29,3 +32,22 @@
 }
 .modalBody {}
 .modalFooter {}
+
+.modalFileContainer {
+  overflow: scroll;
+  max-height: 300px;
+}
+.modalFileItem{
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
+.modalFileItemPath{
+  margin-left: 30px;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+}
+.modalFileItemIcon{
+  margin-right: 30px;
+}

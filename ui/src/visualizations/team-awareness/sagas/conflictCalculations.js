@@ -37,7 +37,8 @@ const analyseConflictsFromAppState = async appState => {
             change,
             selectedContributor.stakeholder,
             config.selectedConflictBranch,
-            aggregatedChanges.values()
+            aggregatedChanges.values(),
+            file
           );
 
           if (detectedConflicts.length > 0) {
@@ -104,7 +105,7 @@ const aggregateChanges = (data, config) => {
   return hunksByBranch;
 };
 
-const checkForConflicts = (sourceChange, conflictStakeholder, conflictBranch, otherEdits) => {
+const checkForConflicts = (sourceChange, conflictStakeholder, conflictBranch, otherEdits, file) => {
   const conflicts = new Map();
 
   for (const otherEdit of otherEdits) {
@@ -122,9 +123,10 @@ const checkForConflicts = (sourceChange, conflictStakeholder, conflictBranch, ot
               conflicts.set(otherEdit.branch, { branch: otherEdit.branch, conflicts: [] });
             }
             conflicts.get(otherEdit.branch).conflicts.push({
-              conflictStakeholder: conflictStakeholder,
-              otherStakeholder: otherContributor.stakeholder,
-              change: otherChange
+              conflictStakeholder: Object.assign({}, conflictStakeholder, { branch: conflictBranch }),
+              otherStakeholder: Object.assign({}, otherContributor.stakeholder, { branch: otherEdit.branch }),
+              change: otherChange,
+              file: { path: file.path, url: file.webUrl }
             });
             break;
           }

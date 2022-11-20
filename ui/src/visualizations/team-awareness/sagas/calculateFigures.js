@@ -136,9 +136,7 @@ function filterCommitOnFiles(filter, fn) {
 
 function selectCalculationFunction(config) {
   const { selectedActivityScale } = config;
-  if (!selectedActivityScale) {
-    return () => 1;
-  }
+  if (!selectedActivityScale) return () => 1;
 
   switch (selectedActivityScale) {
     case 'activity':

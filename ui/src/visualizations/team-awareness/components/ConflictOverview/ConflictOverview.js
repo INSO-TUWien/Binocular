@@ -23,8 +23,16 @@ export default class ConflictOverview extends React.Component {
       for (const branch of conflictedFile.data) {
         for (const conflict of branch.conflicts) {
           const participants = `${conflict.conflictStakeholder.id}${conflict.otherStakeholder.id}`;
-          if (!conflicts.has(participants) && conflict.conflictStakeholder.id !== conflict.otherStakeholder.id) {
-            conflicts.set(participants, { conflictStakeholder: conflict.conflictStakeholder, otherStakeholder: conflict.otherStakeholder });
+          if (conflict.conflictStakeholder.id === conflict.otherStakeholder.id) continue;
+          if (!conflicts.has(participants)) {
+            conflicts.set(participants, {
+              conflictStakeholder: conflict.conflictStakeholder,
+              otherStakeholder: conflict.otherStakeholder,
+              conflicts: [conflict],
+              file: conflictedFile
+            });
+          } else {
+            conflicts.get(participants).conflicts.push(conflict);
           }
         }
       }
@@ -107,6 +115,7 @@ export default class ConflictOverview extends React.Component {
           <div className={this.styles.conflictOverviewContent} onMouseOver={handleContentMouseOver} onMouseOut={handleContentClose}>
             {conflicts.map((conflict, i) =>
               <ConflictOverviewItem
+                displayConflictDetails={this.props.displayConflictDetails}
                 highlightPartners={this.props.highlightPartners}
                 colors={this.props.colors}
                 conflict={conflict}

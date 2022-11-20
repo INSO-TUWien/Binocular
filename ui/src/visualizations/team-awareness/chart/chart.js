@@ -4,6 +4,7 @@ import React from 'react';
 import BubbleChart from '../components/BubbleChart/BubbleChart';
 import ConflictOverview from '../components/ConflictOverview/ConflictOverview';
 import _ from 'lodash';
+import ConflictDetailsModal from '../components/ConflictDetailsModal/ConflictDetailsModal';
 
 export default class TeamAwareness extends React.PureComponent {
   constructor(props) {
@@ -51,7 +52,11 @@ export default class TeamAwareness extends React.PureComponent {
       isConflictsProcessing,
       hasConflictBranchSelected,
       highlightPartners,
-      highlightedStakeholders
+      highlightedStakeholders,
+      displayConflictDetails,
+      selectedConflict,
+      showConflictDetails,
+      hideConflictDetails
     } = this.props;
     const { colors } = this.state;
 
@@ -63,8 +68,10 @@ export default class TeamAwareness extends React.PureComponent {
           loading={isConflictsProcessing}
           colors={colors}
           highlightPartners={highlightPartners}
+          displayConflictDetails={displayConflictDetails}
         />
         <BubbleChart content={stakeholders} colors={colors} highlightedStakeholders={highlightedStakeholders} />
+        <ConflictDetailsModal show={showConflictDetails} close={hideConflictDetails} selectedConflict={selectedConflict} />
       </div>
     );
   }

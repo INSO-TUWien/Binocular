@@ -28,13 +28,20 @@ export default handleActions(
       });
     },
     SET_TEAM_AWARENESS_FILE_FILTER_MODE: (state, action) => _.assign({}, state, { fileFilter: { mode: action.payload, files: [] } }),
-    SET_TEAM_AWARENESS_CONFLICT_PARTNERS: (state, action) => Object.assign({}, state, { highlightedStakeholders: action.payload })
+    SET_TEAM_AWARENESS_CONFLICT_PARTNERS: (state, action) => Object.assign({}, state, { highlightedStakeholders: action.payload }),
+    SHOW_TEAM_AWARENESS_CONFLICT_DETAILS: (state, action) => {
+      console.log(action.payload);
+      return Object.assign({}, state, { showConflictDetails: true, selectedConflict: action.payload });
+    },
+    HIDE_TEAM_AWARENESS_CONFLICT_DETAILS: state => Object.assign({}, state, { showConflictDetails: false, selectedConflict: null })
   },
   {
     fileFilter: {
       mode: 'EXCLUDE',
       files: []
     },
+    showConflictDetails: false,
+    selectedConflict: null,
     highlightedStakeholders: [],
     selectedBranch: 'all',
     selectedConflictBranch: 'not_set',
