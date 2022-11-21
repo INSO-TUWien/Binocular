@@ -184,4 +184,22 @@ export default class LocalDB {
   static getCodeHotspotsIssueData(file) {
     return Issues.getCodeHotspotsIssueData(db, tripleStore, file);
   }
+
+  static getDatabase() {
+    const database = collections;
+
+    //relations need to be mapped so that they have the same names as with the server based variant
+    database.commits_commits = relations['commits-commits'];
+    database.commits_files = relations['commits-files'];
+    database.commits_languages = relations['commits-languages'];
+    database.commits_modules = relations['commits-modules'];
+    database.commits_stakeholders = relations['commits-stakeholders'];
+    database.issues_commits = relations['issues-commits'];
+    database.issues_stakeholders = relations['issues-stakeholders'];
+    database.languages_files = relations['languages-files'];
+    database.modules_files = relations['modules-files'];
+    database.modules_modules = relations['modules-modules'];
+
+    return database;
+  }
 }

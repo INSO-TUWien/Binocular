@@ -82,4 +82,14 @@ export default class ServerDB {
   static getCodeHotspotsIssueData(file) {
     return Issues.getCodeHotspotsIssueData(file);
   }
+
+  static getDatabase() {
+    const xhr = new XMLHttpRequest();
+    xhr.open('GET', window.location.protocol + '//' + window.location.hostname + ':48763/api/db-export', false);
+    xhr.send();
+    if (xhr.readyState === 4 && xhr.status === 200) {
+      return JSON.parse(xhr.responseText);
+    }
+    return {};
+  }
 }

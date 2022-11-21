@@ -181,6 +181,17 @@ export default class Database {
     }
   }
 
+  /**
+   * DATABASE
+   */
+  static async getDatabase() {
+    if (await this.checkBackendConnection()) {
+      return ServerDB.getDatabase();
+    } else {
+      return LocalDB.getDatabase();
+    }
+  }
+
   static async checkBackendConnection() {
     return new Promise((resolve) => {
       if (location.protocol === 'file:') {

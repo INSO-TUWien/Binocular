@@ -12,14 +12,19 @@ export default class DataExport extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      commits: [],
-      issues: [],
-      builds: [],
-      files: [],
-      branches: [],
-      languages: [],
-      modules: [],
-      stakeholders: [],
+      collections: { branches: [], builds: [], commits: [], files: [], issues: [], languages: [], modules: [], stakeholders: [] },
+      relations: {
+        commits_commits: [],
+        commits_files: [],
+        commits_languages: [],
+        commits_modules: [],
+        commits_stakeholders: [],
+        issues_commits: [],
+        issues_stakeholders: [],
+        languages_files: [],
+        modules_files: [],
+        modules_modules: [],
+      },
       previewTable: [],
       exportType: 'json',
     };
@@ -57,126 +62,48 @@ export default class DataExport extends React.Component {
             CSV
           </button>
           <h1>Loaded Data</h1>
-          <div>
-            Commits: {this.state.commits.length}
-            <img
-              className={dataExportStyles.icon}
-              src={viewIcon}
-              onClick={() => {
-                this.setState({ previewTable: this.state.commits });
-              }}></img>
-            <img
-              className={dataExportStyles.icon}
-              src={downloadIcon}
-              onClick={() => {
-                this.download('commits', this.state.commits);
-              }}></img>
-          </div>
-          <div>
-            Issues: {this.state.issues.length}
-            <img
-              className={dataExportStyles.icon}
-              src={viewIcon}
-              onClick={() => {
-                this.setState({ previewTable: this.state.issues });
-              }}></img>
-            <img
-              className={dataExportStyles.icon}
-              src={downloadIcon}
-              onClick={() => {
-                this.download('issues', this.state.issues);
-              }}></img>
-          </div>
-          <div>
-            Builds: {this.state.builds.length}
-            <img
-              className={dataExportStyles.icon}
-              src={viewIcon}
-              onClick={() => {
-                this.setState({ previewTable: this.state.builds });
-              }}></img>
-            <img
-              className={dataExportStyles.icon}
-              src={downloadIcon}
-              onClick={() => {
-                this.download('builds', this.state.builds);
-              }}></img>
-          </div>
-          <div>
-            Files: {this.state.files.length}
-            <img
-              className={dataExportStyles.icon}
-              src={viewIcon}
-              onClick={() => {
-                this.setState({ previewTable: this.state.files });
-              }}></img>
-            <img
-              className={dataExportStyles.icon}
-              src={downloadIcon}
-              onClick={() => {
-                this.download('files', this.state.files);
-              }}></img>
-          </div>
-          <div>
-            Branches: {this.state.branches.length}
-            <img
-              className={dataExportStyles.icon}
-              src={viewIcon}
-              onClick={() => {
-                this.setState({ previewTable: this.state.branches });
-              }}></img>
-            <img
-              className={dataExportStyles.icon}
-              src={downloadIcon}
-              onClick={() => {
-                this.download('branches', this.state.branches);
-              }}></img>
-          </div>
-          <div>
-            Languages: {this.state.languages.length}
-            <img
-              className={dataExportStyles.icon}
-              src={viewIcon}
-              onClick={() => {
-                this.setState({ previewTable: this.state.languages });
-              }}></img>
-            <img
-              className={dataExportStyles.icon}
-              src={downloadIcon}
-              onClick={() => {
-                this.download('languages', this.state.languages);
-              }}></img>
-          </div>
-          <div>
-            Modules: {this.state.modules.length}
-            <img
-              className={dataExportStyles.icon}
-              src={viewIcon}
-              onClick={() => {
-                this.setState({ previewTable: this.state.modules });
-              }}></img>
-            <img
-              className={dataExportStyles.icon}
-              src={downloadIcon}
-              onClick={() => {
-                this.download('modules', this.state.modules);
-              }}></img>
-          </div>
-          <div>
-            Stakeholders: {this.state.stakeholders.length}
-            <img
-              className={dataExportStyles.icon}
-              src={viewIcon}
-              onClick={() => {
-                this.setState({ previewTable: this.state.stakeholders });
-              }}></img>
-            <img
-              className={dataExportStyles.icon}
-              src={downloadIcon}
-              onClick={() => {
-                this.download('stakeholders', this.state.stakeholders);
-              }}></img>
-          </div>
+          <h2>Collections</h2>
+          {Object.keys(this.state.collections).map((c) => {
+            return (
+              <div>
+                {c}: {this.state.collections[c].length}
+                <img
+                  className={dataExportStyles.icon}
+                  src={viewIcon}
+                  onClick={() => {
+                    this.setState({ previewTable: this.state.collections[c] });
+                  }}></img>
+                <img
+                  className={dataExportStyles.icon}
+                  src={downloadIcon}
+                  onClick={() => {
+                    this.download(c, this.state.collections[c]);
+                  }}></img>
+              </div>
+            );
+          })}
+
+          <h2>Relations</h2>
+          {Object.keys(this.state.relations).map((r) => {
+            return (
+              <div>
+                {r.replace('_', '-')}: {this.state.relations[r].length}
+                <img
+                  className={dataExportStyles.icon}
+                  src={viewIcon}
+                  onClick={() => {
+                    this.setState({ previewTable: this.state.relations[r] });
+                  }}></img>
+                <img
+                  className={dataExportStyles.icon}
+                  src={downloadIcon}
+                  onClick={() => {
+                    this.download(r.replace('_', '-'), this.state.relations[r]);
+                  }}></img>
+              </div>
+            );
+          })}
+
           <hr />
           <div className={dataExportStyles.previewTableContainer}>
             {this.state.previewTable.length !== 0 ? (
@@ -244,40 +171,34 @@ export default class DataExport extends React.Component {
   }
 
   loadData() {
-    GetData.getBounds().then((bounds) => {
-      const significantSpan = [
-        Math.min(new Date(bounds.firstCommit.date), new Date(bounds.firstIssue.createdAt)),
-        Math.max(new Date(bounds.lastCommit.date), new Date(bounds.lastIssue.createdAt)),
-      ];
-      Promise.join(
-        GetData.getCommitData(significantSpan),
-        GetData.getIssueData(significantSpan),
-        GetData.getBuildData(significantSpan),
-        GetData.getFileData(),
-        GetData.getBranchData(),
-        GetData.getLanguageData(),
-        GetData.getModuleData(),
-        GetData.getStakeholderData()
-      ).then((resp) => {
-        const commits = resp[0];
-        const issues = resp[1];
-        const builds = resp[2];
-        const files = resp[3];
-        const branches = resp[4];
-        const languages = resp[5];
-        const modules = resp[6];
-        const stakeholders = resp[7];
+    Promise.resolve(GetData.getDatabase()).then((resp) => {
+      const database = resp;
 
-        this.setState({
-          commits: commits,
-          issues: issues,
-          builds: builds,
-          files: files,
-          branches: branches,
-          languages: languages,
-          modules: modules,
-          stakeholders: stakeholders,
-        });
+      const collections = this.state.collections;
+      const relations = this.state.relations;
+
+      collections.branches = database.branches;
+      collections.builds = database.builds;
+      collections.commits = database.commits;
+      collections.files = database.files;
+      collections.issues = database.issues;
+      collections.languages = database.languages;
+      collections.modules = database.modules;
+      collections.stakeholders = database.stakeholders;
+
+      relations.commits_commits = database.commits_commits;
+      relations.commits_files = database.commits_files;
+      relations.commits_languages = database.commits_languages;
+      relations.commits_stakeholders = database.commits_stakeholders;
+      relations.issues_commits = database.issues_commits;
+      relations.issues_stakeholders = database.issues_stakeholders;
+      relations.languages_files = database.languages_files;
+      relations.modules_files = database.modules_files;
+      relations.modules_modules = database.modules_modules;
+
+      this.setState({
+        collections: collections,
+        relations: relations,
       });
     });
   }
