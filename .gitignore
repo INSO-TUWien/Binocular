@@ -12,4 +12,4 @@ coverage/
 out
 pkg
 .grandle
-/ui/arango_export
+/ui/db_export

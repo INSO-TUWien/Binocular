@@ -7,6 +7,8 @@ import GetData from './helper/getData';
 import Promise from 'bluebird';
 import viewIcon from '../assets/viewIcon.svg';
 import downloadIcon from '../assets/downloadIcon.svg';
+import JSZip from 'jszip';
+import FileSaver from 'file-saver';
 
 export default class DataExport extends React.Component {
   constructor(props) {
@@ -43,67 +45,89 @@ export default class DataExport extends React.Component {
     return (
       <div className={styles.chartContainer}>
         <div className={styles.mg1}>
-          <button className={'button ' + dataExportStyles.button} onClick={this.loadData.bind(this)}>
-            Load Data
-          </button>
-          <h1>Export Type</h1>
-          <button
-            className={'button ' + dataExportStyles.button + (this.state.exportType === 'json' ? ' ' + dataExportStyles.selected : '')}
-            onClick={() => {
-              this.setState({ exportType: 'json' });
-            }}>
-            JSON
-          </button>
-          <button
-            className={'button ' + dataExportStyles.button + (this.state.exportType === 'csv' ? ' ' + dataExportStyles.selected : '')}
-            onClick={() => {
-              this.setState({ exportType: 'csv' });
-            }}>
-            CSV
-          </button>
-          <h1>Loaded Data</h1>
-          <h2>Collections</h2>
-          {Object.keys(this.state.collections).map((c) => {
-            return (
-              <div>
-                {c}: {this.state.collections[c].length}
-                <img
-                  className={dataExportStyles.icon}
-                  src={viewIcon}
-                  onClick={() => {
-                    this.setState({ previewTable: this.state.collections[c] });
-                  }}></img>
-                <img
-                  className={dataExportStyles.icon}
-                  src={downloadIcon}
-                  onClick={() => {
-                    this.download(c, this.state.collections[c]);
-                  }}></img>
-              </div>
-            );
-          })}
+          <h1>1. Load Data</h1>
+          <div className={dataExportStyles.sectionArrowContainer}>
+            <div className={dataExportStyles.sectionArrowStem}></div>
+            <div className={dataExportStyles.sectionArrowHead}></div>
+          </div>
+          <div className={dataExportStyles.section}>
+            <button className={'button ' + dataExportStyles.button} onClick={this.loadData.bind(this)}>
+              Load Data
+            </button>
+          </div>
+          <h1>2. Choose Export Type</h1>
+          <div className={dataExportStyles.sectionArrowContainer}>
+            <div className={dataExportStyles.sectionArrowStem}></div>
+            <div className={dataExportStyles.sectionArrowHead}></div>
+          </div>
+          <div className={dataExportStyles.section}>
+            <button
+              className={'button ' + dataExportStyles.button + (this.state.exportType === 'json' ? ' ' + dataExportStyles.selected : '')}
+              onClick={() => {
+                this.setState({ exportType: 'json' });
+              }}>
+              JSON
+            </button>
+            <button
+              className={'button ' + dataExportStyles.button + (this.state.exportType === 'csv' ? ' ' + dataExportStyles.selected : '')}
+              onClick={() => {
+                this.setState({ exportType: 'csv' });
+              }}>
+              CSV
+            </button>
+          </div>
+          <h1>3. View and Download Data</h1>
+          <div className={dataExportStyles.sectionArrowContainer}>
+            <div className={dataExportStyles.sectionArrowStem}></div>
+            <div className={dataExportStyles.sectionArrowHead}></div>
+          </div>
+          <div className={dataExportStyles.section}>
+            <h2>Collections</h2>
+            {Object.keys(this.state.collections).map((c) => {
+              return (
+                <div>
+                  {c}: {this.state.collections[c].length}
+                  <img
+                    className={dataExportStyles.icon}
+                    src={viewIcon}
+                    onClick={() => {
+                      this.setState({ previewTable: this.state.collections[c] });
+                    }}></img>
+                  <img
+                    className={dataExportStyles.icon}
+                    src={downloadIcon}
+                    onClick={() => {
+                      this.download(c, this.state.collections[c]);
+                    }}></img>
+                </div>
+              );
+            })}
 
-          <h2>Relations</h2>
-          {Object.keys(this.state.relations).map((r) => {
-            return (
-              <div>
-                {r.replace('_', '-')}: {this.state.relations[r].length}
-                <img
-                  className={dataExportStyles.icon}
-                  src={viewIcon}
-                  onClick={() => {
-                    this.setState({ previewTable: this.state.relations[r] });
-                  }}></img>
-                <img
-                  className={dataExportStyles.icon}
-                  src={downloadIcon}
-                  onClick={() => {
-                    this.download(r.replace('_', '-'), this.state.relations[r]);
-                  }}></img>
-              </div>
-            );
-          })}
-
+            <h2>Relations</h2>
+            {Object.keys(this.state.relations).map((r) => {
+              return (
+                <div>
+                  {r.replace('_', '-')}: {this.state.relations[r].length}
+                  <img
+                    className={dataExportStyles.icon}
+                    src={viewIcon}
+                    onClick={() => {
+                      this.setState({ previewTable: this.state.relations[r] });
+                    }}></img>
+                  <img
+                    className={dataExportStyles.icon}
+                    src={downloadIcon}
+                    onClick={() => {
+                      this.download(r.replace('_', '-'), this.state.relations[r]);
+                    }}></img>
+                </div>
+              );
+            })}
+          </div>
+          <hr />
+          <button className={'button ' + dataExportStyles.button} onClick={this.createExportZipAndDownload.bind(this)}>
+            Export Complete Database
+          </button>
           <hr />
           <div className={dataExportStyles.previewTableContainer}>
             {this.state.previewTable.length !== 0 ? (
@@ -141,22 +165,17 @@ export default class DataExport extends React.Component {
   }
 
   download(filename, jsonObject) {
-    let dataStr = '';
-    const downloadAnchorNode = document.createElement('a');
+    let blob = '';
     switch (this.state.exportType) {
       case 'csv':
-        dataStr = 'data:text/csv;charset=utf-8,' + encodeURIComponent(this.convertToCSV(jsonObject));
-        downloadAnchorNode.setAttribute('download', filename + '.csv');
+        blob = new Blob([this.convertToCSV(jsonObject)], { type: 'data:text/csv;charset=utf-8' });
+        FileSaver.saveAs(blob, filename + '.csv');
         break;
       default:
-        dataStr = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(jsonObject));
-        downloadAnchorNode.setAttribute('download', filename + '.json');
+        blob = new Blob([JSON.stringify(jsonObject)], { type: 'data:text/json;charset=utf-8' });
+        FileSaver.saveAs(blob, filename + '.json');
         break;
     }
-    downloadAnchorNode.setAttribute('href', dataStr);
-    document.body.appendChild(downloadAnchorNode); // required for firefox
-    downloadAnchorNode.click();
-    downloadAnchorNode.remove();
   }
 
   convertToCSV(jsonObject) {
@@ -200,6 +219,36 @@ export default class DataExport extends React.Component {
         collections: collections,
         relations: relations,
       });
+    });
+  }
+
+  createExportZipAndDownload() {
+    const zip = new JSZip();
+    switch (this.state.exportType) {
+      case 'csv':
+        for (const c of Object.keys(this.state.collections)) {
+          if (this.state.collections[c].length > 0) {
+            zip.file(c.replace('_', '-') + '.csv', this.convertToCSV(this.state.collections[c]));
+          }
+        }
+        for (const r of Object.keys(this.state.relations)) {
+          if (this.state.relations[r].length > 0) {
+            zip.file(r.replace('_', '-') + '.csv', this.convertToCSV(this.state.relations[r]));
+          }
+        }
+        break;
+      default:
+        for (const c of Object.keys(this.state.collections)) {
+          zip.file(c.replace('_', '-') + '.json', JSON.stringify(this.state.collections[c]));
+        }
+        for (const r of Object.keys(this.state.relations)) {
+          zip.file(r.replace('_', '-') + '.json', JSON.stringify(this.state.relations[r]));
+        }
+        break;
+    }
+
+    zip.generateAsync({ type: 'blob' }).then(function (content) {
+      FileSaver.saveAs(content, 'db_export.zip');
     });
   }
 }

@@ -1,7 +1,7 @@
 .button{
   background-color: white;
   height: 3rem;
-  width: 12rem;
+  padding: 0 4rem;
 }
 
 .button:hover{
@@ -46,4 +46,34 @@
 .previewTableHeaderOdd{
   border: 1px solid lightgrey;
   background: #cccccc;
+}
+
+.sectionArrowContainer{
+  display: inline;
+  float:left;
+  height: 3rem;
+  position: relative;
+}
+.sectionArrowStem{
+  position: absolute;
+  left: calc(2rem - 1px);
+  width: 2px;
+  height: 100%;
+  background: #cccccc;
+}
+
+.sectionArrowHead{
+  position: absolute;
+  bottom:0;
+  left: 1rem;
+  width: 1rem;
+  height: 1rem;
+  border-bottom: 3px solid #cccccc;
+  border-right: 3px solid #cccccc;
+  transform: rotate(45deg);
+  transform-origin: bottom right;
+}
+
+.section{
+  margin-left: 4rem;
 }
