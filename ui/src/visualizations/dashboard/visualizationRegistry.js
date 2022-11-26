@@ -8,6 +8,7 @@ import hotspotDials from '../legacy/hotspot-dials';
 import ciBuilds from '../VisualizationComponents/ciBuilds';
 import issues from '../VisualizationComponents/issues';
 import changes from '../VisualizationComponents/changes';
+import fileTreeComparison from '../legacy/file-tree-comparison';
 
 export default {
   changes,
@@ -18,4 +19,5 @@ export default {
   hotspotDials,
   additions_deletions,
   empty,
+  fileTreeComparison,
 };

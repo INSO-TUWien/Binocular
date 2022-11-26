@@ -33,6 +33,7 @@ import ciBuilds from './visualizations/VisualizationComponents/ciBuilds';
 import issues from './visualizations/VisualizationComponents/issues';
 import changes from './visualizations/VisualizationComponents/changes';
 import RootOffline from './components/RootOffline';
+import fileTreeComparison from './visualizations/legacy/file-tree-comparison';
 
 const visualizationModules = [
   newDashboard,
@@ -45,6 +46,7 @@ const visualizationModules = [
   ciBuilds,
   issues,
   changes,
+  fileTreeComparison,
 ];
 
 Database.checkBackendConnection().then((connection) => {
