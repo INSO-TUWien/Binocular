@@ -19,16 +19,23 @@ export default class FileOverview extends React.Component {
       files.get(c.file.path).push(c);
     });
 
-    console.log(files);
     return files;
   }
 
   render() {
-    const { selectedConflict } = this.props;
+    const { selectedConflict, displayConflictDetails, startFileConflictDetails } = this.props;
 
     const fileEntries = [];
     for (const [filePath, conflicts] of this.getUniqueFiles(selectedConflict)) {
-      fileEntries.push(<ConflictFile filePath={filePath} key={`conflicted_file_${filePath}`} conflicts={conflicts} />);
+      fileEntries.push(
+        <ConflictFile
+          startFileConflictDetails={startFileConflictDetails}
+          displayConflictDetails={displayConflictDetails}
+          filePath={filePath}
+          key={`conflicted_file_${filePath}`}
+          conflicts={conflicts}
+        />
+      );
     }
 
     return (

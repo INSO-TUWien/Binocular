@@ -9,11 +9,15 @@ export default class ConflictFile extends React.Component {
   }
 
   render() {
-    const { filePath, conflicts } = this.props;
-    console.log(conflicts);
+    const { filePath, conflicts, displayConflictDetails, startFileConflictDetails } = this.props;
 
     const fileIcon = filePath.endsWith('.js') ? TEXT_DOCUMENT_ICON : EMPTY_DOCUMENT_ICON;
     const showInfoIcon = filePath.endsWith('.js');
+
+    const showFileDetails = conflict => {
+      startFileConflictDetails(conflict);
+      displayConflictDetails(Object.assign({ overviewType: 'fileDetails' }, conflict));
+    };
 
     return (
       <div>
@@ -32,7 +36,7 @@ export default class ConflictFile extends React.Component {
             </small>
             <div>
               {conflicts.map(c =>
-                <div className={this.styles.branch}>
+                <div key={`file_branch_${c.otherStakeholder.branch}`} className={this.styles.branch}>
                   <div className={this.styles.branchIcon}>
                     {GIT_BRANCH_ICON}
                   </div>
@@ -41,7 +45,7 @@ export default class ConflictFile extends React.Component {
                       {c.otherStakeholder.branch}
                     </div>
                     {showInfoIcon &&
-                      <button className={this.styles.branchInfoIcon} title="View conflicts">
+                      <button className={this.styles.branchInfoIcon} onClick={() => showFileDetails(c)} title="View conflicts">
                         {MAGNIFY_DOCUMENT_ICON}
                       </button>}
                   </div>

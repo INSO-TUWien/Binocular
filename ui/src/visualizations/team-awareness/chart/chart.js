@@ -48,14 +48,16 @@ export default class TeamAwareness extends React.PureComponent {
 
   render() {
     const {
-      data: { stakeholders, conflicts },
+      data: { stakeholders, conflicts, fileDetails },
       isConflictsProcessing,
+      isFileDetailsProcessing,
       hasConflictBranchSelected,
       highlightPartners,
       highlightedStakeholders,
       displayConflictDetails,
       selectedConflict,
       showConflictDetails,
+      startFileConflictDetails,
       hideConflictDetails
     } = this.props;
     const { colors } = this.state;
@@ -71,7 +73,15 @@ export default class TeamAwareness extends React.PureComponent {
           displayConflictDetails={displayConflictDetails}
         />
         <BubbleChart content={stakeholders} colors={colors} highlightedStakeholders={highlightedStakeholders} />
-        <ConflictDetailsModal show={showConflictDetails} close={hideConflictDetails} selectedConflict={selectedConflict} />
+        <ConflictDetailsModal
+          fileDetails={fileDetails}
+          isFileDetailsProcessing={isFileDetailsProcessing}
+          show={showConflictDetails}
+          startFileConflictDetails={startFileConflictDetails}
+          displayConflictDetails={displayConflictDetails}
+          close={hideConflictDetails}
+          selectedConflict={selectedConflict}
+        />
       </div>
     );
   }

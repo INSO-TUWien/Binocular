@@ -9,6 +9,7 @@ import getBranches from './getBranches';
 import getFiles from './getFiles';
 import { generateFileBrowser } from './fileTreeOperations';
 import { processConflictBranchSelection } from './conflictCalculations';
+import { processFileConflictDetails } from './conflictDetailsOperation';
 
 export const setActivityScale = createAction('SET_TEAM_AWARENESS_ACTIVITY_SCALE');
 export const setActivityDimensions = createAction('SET_TEAM_AWARENESS_ACTIVITY_DIMENSIONS');
@@ -27,6 +28,9 @@ export const receiveTeamAwarenessDataError = timestampedActionFactory('RECEIVE_T
 export const startTeamAwarenessConflictProcessing = createAction('START_TEAM_AWARENESS_CONFLICT_PROCESSING');
 export const receiveTeamAwarenessConflicts = timestampedActionFactory('RECEIVE_TEAM_AWARENESS_CONFLICTS');
 
+export const startTeamAwarenessFileConflictDetailsProcessing = createAction('START_TEAM_AWARENESS_FILE_CONFLICT_DETAILS_PROCESSING');
+export const receiveTeamAwarenessFileConflictDetails = createAction('RECEIVE_TEAM_AWARENESS_FILE_CONFLICT_DETAILS');
+
 export const requestRefresh = createAction('REQUEST_REFRESH');
 const refresh = createAction('REFRESH');
 
@@ -44,6 +48,7 @@ export default function*() {
   yield fork(watchMessages);
   yield fork(watchRefresh);
   yield fork(watchConflictBranch);
+  yield fork(watchFileConflictDetails);
 
   yield* fetchAwarenessData();
 }
@@ -54,6 +59,10 @@ const invokeAllDataGenerators = action => {
     yield takeEvery(action, generateFileBrowser);
   };
 };
+
+function* watchFileConflictDetails() {
+  yield takeEvery('START_TEAM_AWARENESS_FILE_CONFLICT_DETAILS_PROCESSING', processFileConflictDetails);
+}
 
 function* watchConflictBranch() {
   yield takeEvery('SET_TEAM_AWARENESS_CONFLICT_BRANCH', processConflictBranchSelection);

@@ -1,6 +1,7 @@
 import React from 'react';
 import * as styles from './ConflictDetailsModal.scss';
 import FileOverview from './FileOverview/FileOverview';
+import FileDetails from './FileDetails/FileDetails';
 
 export default class ConflictDetailsModal extends React.Component {
   constructor(props) {
@@ -9,17 +10,37 @@ export default class ConflictDetailsModal extends React.Component {
   }
 
   render() {
-    const { show, close, selectedConflict } = this.props;
-    if (show === false) return null;
+    const {
+      show,
+      close,
+      selectedConflict,
+      displayConflictDetails,
+      startFileConflictDetails,
+      isFileDetailsProcessing,
+      fileDetails
+    } = this.props;
 
+    if (show === false) return null;
+    const { overviewType } = selectedConflict;
     const closeModal = e => {
-      console.log(e.target);
+      if (!Array.isArray(e.target.className)) return;
       if (e.target.className.indexOf('darkBG') >= 0) {
         close();
       }
     };
 
-    const content = <FileOverview selectedConflict={selectedConflict} />;
+    let content = <h1>Unknown content selected</h1>;
+    if (overviewType === 'files') {
+      content = (
+        <FileOverview
+          displayConflictDetails={displayConflictDetails}
+          startFileConflictDetails={startFileConflictDetails}
+          selectedConflict={selectedConflict}
+        />
+      );
+    } else if (overviewType === 'fileDetails') {
+      content = <FileDetails fileDetails={fileDetails} isFileDetailsProcessing={isFileDetailsProcessing} />;
+    }
 
     return (
       <div className={this.styles.darkBG} onClick={e => closeModal(e)}>
