@@ -1,13 +1,14 @@
 'use strict';
 
-import { fetchFactory, mapSaga, timestampedActionFactory } from '../../../../sagas/utils';
+import { fetchFactory, timestampedActionFactory } from '../../../../sagas/utils';
 import { createAction } from 'redux-actions';
 import Database from '../../../../database/database';
-import { graphQl } from '../../../../utils';
 
 export const requestCommitsAndFileTree = createAction('REQUEST_COMMITS_AND_FILE_TREE');
 export const receiveCommitsAndFileTree = timestampedActionFactory('RECEIVE_COMMITS_AND_FILE_TREE');
 export const receiveCommitsAndFileTreeError = createAction('RECEIVE_COMMITS_AND_FILE_TREE_ERROR');
+export const setCommit1 = createAction('SET_COMMIT_1', (f) => f);
+export const setCommit2 = createAction('SET_COMMIT_2', (f) => f);
 
 export default function* () {
   // fetch data once on entry
@@ -22,58 +23,13 @@ export const fetchFileTreeEvolutionData = fetchFactory(
     const lastCommitTimestamp = Date.parse(lastCommit.date);
 
     const commits = yield Database.getCommitData([firstCommitTimestamp, lastCommitTimestamp], [firstCommitTimestamp, lastCommitTimestamp]); //COMMITS
-
     const fileTree = yield Database.requestFileStructure();
-    const hierarchicalFileTree = makeHierarchyFileTree(fileTree); //FILETREE
-
-
-
+    const hierarchicalFileTree = makeHierarchyFileTree(fileTree); //file-tree
     //console.log(yield Database.searchCommits('Bug')); //search commits
 
-    return { commits, hierarchicalFileTree };
-
-    return yield graphQl //TODO replace with my query, get changes by certain commit
-      .query(
-        `{  
-        commits(sort: "ASC") {
-          data {
-            date
-            message
-            files {
-              data {
-                stats {
-                  additions
-                  deletions
-                }
-                file {
-                  path,
-                }
-                lineCount
-              }
-            }
-          }
-        }
-      }`
-      )
-      .then((resp) => {
-        const commitsWithFileTree = [];
-
-        for (const commit of resp.commits.data) {
-          //const fileTree = makeHierarchyFileTreee(commit);
-          //const commitWithFileTree = [commit, fileTree];
-          //commitsWithFileTree.push(commitWithFileTree);
-          //fileTree = applyCommit(fileTree, commit);
-          //fileTreeHistory.push(fileTree);
-        }
-        return {
-          commitsWithFileTree,
-
-          //fileTreeHistory,
-          //commits: resp.commits.data
-        };
-      });
+    return { commits: commits, tree: hierarchicalFileTree };
   },
-  requestCommitsAndFileTree, //LOGGER
+  requestCommitsAndFileTree,
   receiveCommitsAndFileTree,
   receiveCommitsAndFileTreeError
 );
@@ -88,7 +44,6 @@ function makeHierarchyFileTree(fileTree) {
         r[name] = { result: [] };
         r.result.push({ name, children: r[name].result });
       }
-
       return r[name];
     }, level);
   });

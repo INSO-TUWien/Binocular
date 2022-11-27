@@ -5,8 +5,8 @@ import _ from 'lodash';
 
 export default handleActions(
   {
-    REQUEST_CHANGES_DATA: (state) => _.assign({}, state, { isFetching: true }),
-    RECEIVE_CHANGES_DATA: (state, action) => {
+    REQUEST_COMMITS_AND_FILE_TREE: (state) => _.assign({}, state, { isFetching: true }),
+    RECEIVE_COMMITS_AND_FILE_TREE: (state, action) => {
       return _.assign({}, state, {
         data: action.payload,
         isFetching: false,
@@ -15,7 +15,14 @@ export default handleActions(
     },
   },
   {
-    data: {},
+    data: [
+      {
+        commits: [],
+        tree: [],
+        commit1: [],
+        commit2: [],
+      },
+    ],
     lastFetched: null,
     isFetching: null,
   }
