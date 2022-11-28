@@ -82,30 +82,30 @@ function importRelation(name) {
   });
 }
 
+function loadData() {
+  loadInContext('db_export/commits.json').then((x) => {
+    console.log(x);
+  });
+}
+
+function loadInContext(filename) {
+  return require('./' + filename);
+}
+
 function importData() {
-  // import collections iff DB does not already exist
-  /*db.info().then((res) => {
-    console.log(res);
-    if (res.doc_count === 0) {*/
+  loadData();
+
   Object.keys(collections).forEach((name) => {
     console.log(`Importing collection ${name}`);
 
     importCollection(name);
   });
 
-  /*  }
-  });*/
-
-  // import relations iff triple store does not already exist
-  /*tripleStore.info().then((res) => {
-    if (res.doc_count === 0) {*/
   Object.keys(relations).forEach((name) => {
     console.log(`Importing relation ${name}`);
 
     importRelation(name);
   });
-  //  }
-  //});
 }
 
 export default class LocalDB {
