@@ -82,19 +82,7 @@ function importRelation(name) {
   });
 }
 
-function loadData() {
-  loadInContext('db_export/commits.json').then((x) => {
-    console.log(x);
-  });
-}
-
-function loadInContext(filename) {
-  return require('./' + filename);
-}
-
 function importData() {
-  loadData();
-
   Object.keys(collections).forEach((name) => {
     console.log(`Importing collection ${name}`);
 
