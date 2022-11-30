@@ -15,33 +15,8 @@ export default class ConflictOverview extends React.Component {
     };
   }
 
-  reduceConflictsToStakeholders() {
-    const conflictedFiles = this.props.conflicts ? this.props.conflicts : [];
-    const conflicts = new Map();
-
-    for (const conflictedFile of conflictedFiles) {
-      for (const branch of conflictedFile.data) {
-        for (const conflict of branch.conflicts) {
-          const participants = `${conflict.conflictStakeholder.id}${conflict.otherStakeholder.id}`;
-          if (conflict.conflictStakeholder.id === conflict.otherStakeholder.id) continue;
-          if (!conflicts.has(participants)) {
-            conflicts.set(participants, {
-              conflictStakeholder: conflict.conflictStakeholder,
-              otherStakeholder: conflict.otherStakeholder,
-              conflicts: [conflict],
-              file: conflictedFile
-            });
-          } else {
-            conflicts.get(participants).conflicts.push(conflict);
-          }
-        }
-      }
-    }
-    return Array.from(conflicts.values());
-  }
-
   render() {
-    const conflicts = this.reduceConflictsToStakeholders();
+    const { conflicts } = this.props;
     const participantsTag = conflicts.length > 1 ? 'participants' : 'participant';
 
     const handleContentMouseOver = () => {
@@ -72,7 +47,6 @@ export default class ConflictOverview extends React.Component {
         </div>
       );
     }
-
     if (conflicts.length === 0) {
       return (
         <div className={[this.styles.conflictOverview, this.styles.conflictOverviewHeader].join(' ')}>

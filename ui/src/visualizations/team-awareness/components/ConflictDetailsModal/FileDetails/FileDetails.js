@@ -9,10 +9,9 @@ export default class FileDetails extends React.Component {
   }
 
   render() {
-    const { isFileDetailsProcessing, fileDetails: { selectedConflict } } = this.props;
-    const { conflictStakeholder, otherStakeholder } = selectedConflict;
-
-    console.log(this.props);
+    const { isFileDetailsProcessing, fileDetails: { selectedConflict, repositoryUrl } } = this.props;
+    const { conflictBranch, selectedBranch, selectedFile } = selectedConflict;
+    console.log(selectedConflict);
 
     if (isFileDetailsProcessing) {
       return (
@@ -27,7 +26,14 @@ export default class FileDetails extends React.Component {
     return (
       <div>
         <div>
-          Conflict between branches <a>{conflictStakeholder.branch}</a> and <a>{otherStakeholder.branch}</a>
+          {'Conflict between branches '}
+          <a href={`${repositoryUrl}${conflictBranch}/${selectedFile}`}>
+            {conflictBranch}
+          </a>
+          {'and '}
+          <a href={`${repositoryUrl}${selectedBranch}/${selectedFile}`}>
+            {selectedBranch}
+          </a>
         </div>
       </div>
     );

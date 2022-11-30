@@ -17,10 +17,10 @@ const analyseConflictsFromAppState = async appState => {
     return { conflicts: null };
   }
 
-  const eligibleFiles = extractEligibleFiles(data.data.files, config);
-  const conflicts = new Map();
+  const changedFiles = extractChangedFiles(data.data.files, config);
+  const stakeholders = new Map();
 
-  for (const file of eligibleFiles) {
+  for (const file of changedFiles) {
     const aggregatedChanges = aggregateChanges(await getFileHunks(file.path), config);
 
     if (!aggregatedChanges.has(config.selectedConflictBranch)) {
@@ -28,41 +28,48 @@ const analyseConflictsFromAppState = async appState => {
       return { conflicts: [] };
     }
 
-    for (const selectedContributor of aggregatedChanges.get(config.selectedConflictBranch).contributors) {
-      let selectedContributorConflicted = false;
+    for (const branch of aggregatedChanges.keys()) {
+      if (branch === config.selectedConflictBranch) continue;
+      const conflictingContributor = aggregatedChanges.get(config.selectedConflictBranch).contributors;
+      const conflictingStakeholders = checkBranchConflicts(conflictingContributor, aggregatedChanges.get(branch).contributors);
+      if (conflictingStakeholders.length === 0) continue;
 
-      for (const possibleConflict of selectedContributor.hunks) {
-        for (const change of possibleConflict) {
-          const detectedConflicts = checkForConflicts(
-            change,
-            selectedContributor.stakeholder,
-            config.selectedConflictBranch,
-            aggregatedChanges.values(),
-            file
-          );
+      for (const s of conflictingStakeholders) {
+        const { conflictStakeholder, otherStakeholder } = s;
 
-          if (detectedConflicts.length > 0) {
-            if (!conflicts.has(file.path)) {
-              conflicts.set(file.path, { file: file.path, data: [] });
-            }
-            conflicts.get(file.path).data.push(...detectedConflicts);
-            selectedContributorConflicted = true;
-            break;
-          }
+        const combined = `${conflictStakeholder.stakeholder.id}${otherStakeholder.stakeholder.id}`;
+        if (!stakeholders.has(combined)) {
+          stakeholders.set(combined, {
+            conflictStakeholder: conflictStakeholder.stakeholder,
+            otherStakeholder: otherStakeholder.stakeholder,
+            conflictBranch: config.selectedConflictBranch,
+            files: new Map()
+          });
         }
-        if (selectedContributorConflicted === true) break;
+
+        if (!stakeholders.get(combined).files.has(file.path)) {
+          stakeholders.get(combined).files.set(file.path, { file: { path: file.path, url: file.webUrl }, branches: [] });
+        }
+        stakeholders.get(combined).files.get(file.path).branches.push(branch);
       }
     }
   }
-  return { conflicts: Array.from(conflicts.values()) };
+
+  return {
+    conflicts: Array.from(stakeholders.values())
+  };
 };
 
-const extractEligibleFiles = (files, config) => {
+const extractChangedFiles = (files, config) => {
+  const skipFilesRegex = new RegExp(/^.*(package-lock.json|yarn.lock)$/);
+
   const eligibleFiles = new Map();
   files.forEach(f => {
-    for (const c of f.commits.data) {
-      if (c.branch.startsWith(config.selectedConflictBranch) && !eligibleFiles.has(f.path)) {
-        eligibleFiles.set(f.path, f);
+    if (skipFilesRegex.test(f.path) === false) {
+      for (const c of f.commits.data) {
+        if (c.branch.startsWith(config.selectedConflictBranch) && !eligibleFiles.has(f.path)) {
+          eligibleFiles.set(f.path, f);
+        }
       }
     }
   });
@@ -105,37 +112,45 @@ const aggregateChanges = (data, config) => {
   return hunksByBranch;
 };
 
-const checkForConflicts = (sourceChange, conflictStakeholder, conflictBranch, otherEdits, file) => {
-  const conflicts = new Map();
-
-  for (const otherEdit of otherEdits) {
-    if (otherEdit.branch === conflictBranch) continue;
-
-    for (const otherContributor of otherEdit.contributors) {
-      let contributorConflicted = false;
-
-      for (const otherHunk of otherContributor.hunks) {
-        for (const otherChange of otherHunk) {
-          if (sourceChange.oldStart >= otherChange.newStart) {
-            contributorConflicted = true;
-
-            if (!conflicts.has(otherEdit.branch)) {
-              conflicts.set(otherEdit.branch, { branch: otherEdit.branch, conflicts: [] });
-            }
-            conflicts.get(otherEdit.branch).conflicts.push({
-              conflictStakeholder: Object.assign({}, conflictStakeholder, { branch: conflictBranch }),
-              otherStakeholder: Object.assign({}, otherContributor.stakeholder, { branch: otherEdit.branch }),
-              change: otherChange,
-              file: { path: file.path, url: file.webUrl }
-            });
-            break;
-          }
-        }
-        if (contributorConflicted === true) break;
+const checkBranchConflicts = (conflictBranchContributors, otherContributors) => {
+  const detectedBranchConflicts = [];
+  for (const conflictContributor of conflictBranchContributors) {
+    for (const otherContributor of otherContributors) {
+      if (checkContributorConflict(conflictContributor, otherContributor)) {
+        detectedBranchConflicts.push({ conflictStakeholder: conflictContributor, otherStakeholder: otherContributor });
       }
     }
   }
-  return Array.from(conflicts.values());
+  return detectedBranchConflicts;
+};
+
+const checkContributorConflict = (conflictContributor, otherContributor) => {
+  for (const conflictHunk of conflictContributor.hunks) {
+    for (const otherHunk of otherContributor.hunks) {
+      if (checkHunkConflict(conflictHunk, otherHunk)) {
+        return true;
+      }
+    }
+  }
+  return false;
+};
+
+const checkHunkConflict = (conflictHunk, otherHunk) => {
+  for (const conflictChanges of conflictHunk) {
+    for (const otherChanges of otherHunk) {
+      if (conflictChanges.newStart >= otherChanges.oldStart && conflictChanges.newStart <= otherChanges.oldStart + otherChanges.oldLines) {
+        return true;
+      }
+
+      if (
+        otherChanges.newStart >= conflictChanges.oldStart &&
+        otherChanges.newStart <= conflictChanges.oldStart + conflictChanges.oldLines
+      ) {
+        return true;
+      }
+    }
+  }
+  return false;
 };
 
 export { processConflictBranchSelection };

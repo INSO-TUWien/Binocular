@@ -9,15 +9,16 @@ export default class ConflictFile extends React.Component {
   }
 
   render() {
-    const { filePath, conflicts, displayConflictDetails, startFileConflictDetails } = this.props;
-
+    const { filePath, conflict, displayConflictDetails, startFileConflictDetails } = this.props;
     const fileIcon = filePath.endsWith('.js') ? TEXT_DOCUMENT_ICON : EMPTY_DOCUMENT_ICON;
     const showInfoIcon = filePath.endsWith('.js');
 
-    const showFileDetails = conflict => {
-      startFileConflictDetails(conflict);
-      displayConflictDetails(Object.assign({ overviewType: 'fileDetails' }, conflict));
+    const showFileDetails = branch => {
+      startFileConflictDetails(Object.assign(conflict, { selectedBranch: branch }));
+      displayConflictDetails(Object.assign(conflict, { overviewType: 'fileDetails', selectedBranch: branch }));
     };
+
+    const { branches } = conflict.files.get(conflict.selectedFile);
 
     return (
       <div>
@@ -32,20 +33,20 @@ export default class ConflictFile extends React.Component {
           </div>
           <div className={this.styles.fileBody}>
             <small>
-              Conflicts on {conflicts.length} branch{conflicts.length === 1 ? '' : 'es'}
+              Conflicts on {branches.length} branch{branches.length === 1 ? '' : 'es'}
             </small>
             <div>
-              {conflicts.map(c =>
-                <div key={`file_branch_${c.otherStakeholder.branch}`} className={this.styles.branch}>
+              {branches.map(branch =>
+                <div key={`file_branch_${branch}`} className={this.styles.branch}>
                   <div className={this.styles.branchIcon}>
                     {GIT_BRANCH_ICON}
                   </div>
                   <div className={this.styles.branchTextContainer}>
                     <div className={this.styles.branchText}>
-                      {c.otherStakeholder.branch}
+                      {branch}
                     </div>
                     {showInfoIcon &&
-                      <button className={this.styles.branchInfoIcon} onClick={() => showFileDetails(c)} title="View conflicts">
+                      <button className={this.styles.branchInfoIcon} onClick={() => showFileDetails(branch)} title="View conflicts">
                         {MAGNIFY_DOCUMENT_ICON}
                       </button>}
                   </div>
