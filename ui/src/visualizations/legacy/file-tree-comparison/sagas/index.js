@@ -9,6 +9,8 @@ export const receiveCommitsAndFileTree = timestampedActionFactory('RECEIVE_COMMI
 export const receiveCommitsAndFileTreeError = createAction('RECEIVE_COMMITS_AND_FILE_TREE_ERROR');
 export const setCommit1 = createAction('SET_COMMIT_1', (f) => f);
 export const setCommit2 = createAction('SET_COMMIT_2', (f) => f);
+export const setTree1 = createAction('SET_TREE_1', (f) => f);
+export const setTree2 = createAction('SET_TREE_2', (f) => f);
 
 export default function* () {
   // fetch data once on entry
@@ -22,31 +24,24 @@ export const fetchFileTreeEvolutionData = fetchFactory(
     const firstCommitTimestamp = Date.parse(firstCommit.date);
     const lastCommitTimestamp = Date.parse(lastCommit.date);
 
-    const commits = yield Database.getCommitData([firstCommitTimestamp, lastCommitTimestamp], [firstCommitTimestamp, lastCommitTimestamp]); //COMMITS
-    const fileTree = yield Database.requestFileStructure();
-    const hierarchicalFileTree = makeHierarchyFileTree(fileTree); //file-tree
+    const commits = yield Database.getCommitsWithFileTree([firstCommitTimestamp, lastCommitTimestamp], [firstCommitTimestamp, lastCommitTimestamp]); //COMMITS
+    //const fileTree = yield Database.requestFileStructure();
     //console.log(yield Database.searchCommits('Bug')); //search commits
 
-    return { commits: commits, tree: hierarchicalFileTree };
+    //let fileTreeInTimeSpan = buildTimespanSpecificFileTree(null, commits[100].sha, commits);
+    //console.log(fileTreeInTimeSpan);
+    //const h = makeHierarchyFileTree(fileTreeInTimeSpan);
+    //console.log(h);
+
+    return { commits: commits, tree: null };
   },
   requestCommitsAndFileTree,
   receiveCommitsAndFileTree,
   receiveCommitsAndFileTreeError
 );
 
-function makeHierarchyFileTree(fileTree) {
-  const result = [];
-  const level = { result };
 
-  fileTree.files.data.forEach((entry) => {
-    entry.path.split('/').reduce((r, name) => {
-      if (!r[name]) {
-        r[name] = { result: [] };
-        r.result.push({ name, children: r[name].result });
-      }
-      return r[name];
-    }, level);
-  });
 
-  return result;
-}
+
+
+

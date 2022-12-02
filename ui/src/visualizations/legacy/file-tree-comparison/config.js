@@ -9,12 +9,16 @@ const mapStateToProps = (state /*, ownProps*/) => {
     commits: fileTreeState.commits,
     commit1: null,
     commit2: null,
+    tree1: null,
+    tree2: null,
   };
 };
 
 const mapDispatchToProps = (dispatch) => {
   return {
-    onSetCommit1: (commit) => dispatch(setCommit1(commit)),
+    onSetCommit1: (commit) => {
+      dispatch(setCommit1(commit));
+    },
     onSetCommit2: (commit) => dispatch(setCommit2(commit)),
   };
 };
