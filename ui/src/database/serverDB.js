@@ -20,6 +20,10 @@ export default class ServerDB {
     return Builds.getBuildData(commitSpan, significantSpan);
   }
 
+  static getCommitsWithFileTree(commitSpan, significantSpan) {
+    return Commits.getCommitsWithFileTree(commitSpan, significantSpan);
+  }
+
   static getIssueData(issueSpan, significantSpan) {
     return Issues.getIssueData(issueSpan, significantSpan);
   }

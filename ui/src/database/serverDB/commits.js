@@ -32,13 +32,84 @@ export default class Commits {
         )
         .then((resp) => resp.commits);
     };
-
     return traversePages(getCommitsPage(significantSpan[0], significantSpan[1]), (commit) => {
       commitList.push(commit);
     }).then(function () {
       return commitList;
     });
   }
+
+  static getCommitsWithFileTree(commitSpan, significantSpan) {
+    const commitList = [];
+    const commitsWithFileTree = (since, until) => (page, perPage) => {
+      return graphQl
+        .query(
+          `query($page: Int, $perPage: Int, $since: Timestamp, $until: Timestamp) {
+             commits(page: $page, perPage: $perPage, since: $since, until: $until) {
+               count
+               page
+               perPage
+               data {
+                 sha
+                 date
+                 messageHeader
+                 signature
+                 stats {
+                   additions
+                   deletions
+                 }
+                 files {
+              data {
+                stats {
+                  additions
+                  deletions
+                }
+                file {
+                  path,
+                }
+                lineCount
+              }
+            }
+               }
+             }
+          }`,
+          { page, perPage, since, until }
+        )
+        .then((resp) => resp.commits);
+    };
+
+    return traversePages(commitsWithFileTree(significantSpan[0], significantSpan[1]), (commit) => {
+      commitList.push(commit);
+    }).then(function () {
+      return commitList;
+    });
+  }
+  static searchCommits(text) { //TODO richtige Query schreiben
+    /*
+    const commitList = [];
+
+    const getCommitPageSearch = (text) => (page, perPage) => {
+      return graphQl
+        .query(
+          `
+                  query($q: String) {
+                    commits(page: 1, perPage: 50, q: $q, sort: "DESC") {
+                      data { iid title createdAt closedAt }
+                    }
+                  }`,
+          { q: text }
+        )
+        .then((resp) => resp.data);
+    };
+
+    return traversePages(getCommitPageSearch(text), (commit) => {
+      commitList.push(commit);
+    }).then(function () {
+      return commitList;
+    });*/
+  }
+
+
 
   static getCommitDataOwnershipRiver(commitSpan, significantSpan, granularity, interval) {
     const statsByAuthor = {};

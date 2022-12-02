@@ -20,6 +20,14 @@ export default class Database {
     }
   }
 
+  static async getCommitsWithFileTree(commitSpan, significantSpan) {
+    if (await this.checkBackendConnection()) {
+      return ServerDB.getCommitsWithFileTree(commitSpan, significantSpan);
+    } else {
+      //return LocalDB.getCommitWithFileTree(commitSpan, significantSpan);
+    }
+  }
+
   static async getCommitData(commitSpan, significantSpan) {
     if (await this.checkBackendConnection()) {
       return ServerDB.getCommitData(commitSpan, significantSpan);
