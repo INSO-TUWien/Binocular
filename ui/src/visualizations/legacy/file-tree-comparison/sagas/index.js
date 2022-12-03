@@ -4,13 +4,11 @@ import { fetchFactory, timestampedActionFactory } from '../../../../sagas/utils'
 import { createAction } from 'redux-actions';
 import Database from '../../../../database/database';
 
-export const requestCommitsAndFileTree = createAction('REQUEST_COMMITS_AND_FILE_TREE');
-export const receiveCommitsAndFileTree = timestampedActionFactory('RECEIVE_COMMITS_AND_FILE_TREE');
-export const receiveCommitsAndFileTreeError = createAction('RECEIVE_COMMITS_AND_FILE_TREE_ERROR');
+export const requestCommitsAndFileTree = createAction('REQUEST_COMMITS');
+export const receiveCommitsAndFileTree = timestampedActionFactory('RECEIVE_COMMITS');
+export const receiveCommitsAndFileTreeError = createAction('RECEIVE_COMMITS');
 export const setCommit1 = createAction('SET_COMMIT_1', (f) => f);
 export const setCommit2 = createAction('SET_COMMIT_2', (f) => f);
-export const setTree1 = createAction('SET_TREE_1', (f) => f);
-export const setTree2 = createAction('SET_TREE_2', (f) => f);
 
 export default function* () {
   // fetch data once on entry

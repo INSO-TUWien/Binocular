@@ -1,7 +1,7 @@
 'use strict';
 
 import { connect } from 'react-redux';
-import { setCommit1, setCommit2 } from './sagas/index.js';
+import { setCommit1, setCommit2, setTree1, setTree2 } from './sagas/index.js';
 
 const mapStateToProps = (state /*, ownProps*/) => {
   const fileTreeState = state.visualizations.fileTreeComparison.state.data.data;
@@ -16,10 +16,8 @@ const mapStateToProps = (state /*, ownProps*/) => {
 
 const mapDispatchToProps = (dispatch) => {
   return {
-    onSetCommit1: (commit) => {
-      dispatch(setCommit1(commit));
-    },
-    onSetCommit2: (commit) => dispatch(setCommit2(commit)),
+    onSetCommit1: (commit) => dispatch(setCommit1(commit)),
+    onSetCommit2: (commit) => dispatch(setCommit2(commit))
   };
 };
 
@@ -35,21 +33,22 @@ const ChangesConfigComponent = (props) => {
       <select
         value={props.commit1}
         onChange={(e) => {
-          props.onSetCommit1(props.commits[e.target.options.selectedIndex]);
+          props.onSetCommit1(props.commits[commits.length - e.target.options.selectedIndex - 1]);
         }}>
         {commits}
       </select>
-       <select
-         value={props.commit2}
-         onChange={(e) => {
-           props.onSetCommit2(props.commits[e.target.options.selectedIndex]);
-         }}>
-         {commits}
-       </select>
-     </div>
-   )
+      <select
+        value={props.commit2}
+        onChange={(e) => {
+          props.onSetCommit2(props.commits[commits.length - e.target.options.selectedIndex - 1]);
+        }}>
+        {commits}
+      </select>
+    </div>
+  );
 };
 
 const FileTreeConfig = connect(mapStateToProps, mapDispatchToProps)(ChangesConfigComponent);
 
 export default FileTreeConfig;
+
