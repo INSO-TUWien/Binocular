@@ -2,7 +2,6 @@
 
 import { connect } from 'react-redux';
 import Chart from './chart.js';
-import { setCommit1, setCommit2 } from '../sagas';
 
 const mapStateToProps = (state /*, ownProps*/) => {
   const corState = state.visualizations.fileTreeComparison.state;
@@ -17,8 +16,6 @@ const mapStateToProps = (state /*, ownProps*/) => {
 
 const mapDispatchToProps = (dispatch) => {
   return {
-    onSetCommit1: (commit) => dispatch(setCommit1(commit)),
-    onSetCommit2: (commit) => dispatch(setCommit2(commit)),
   };
 };
 
