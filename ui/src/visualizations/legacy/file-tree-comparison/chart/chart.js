@@ -1,9 +1,7 @@
 'use strict';
 
 import React from 'react';
-import * as d3 from 'd3';
-
-import styles from '../styles.scss';
+import Tree from '../components/tree.js';
 
 export default class Changes extends React.Component {
   constructor(props) {
@@ -16,35 +14,22 @@ export default class Changes extends React.Component {
       commit2: {
         messageHeader: '',
       },
-      tree1: null,
-      tree2: null,
+      tree1: [],
+      tree2: [],
     };
   }
 
   render() {
     return (
-      <table className={styles.tableGeneral}>
-        <thead>
-          <tr className={styles.headerCommits}>
-            <td>{this.state.commit1.messageHeader}</td>
-            <td className={styles.tdLine}>{this.state.commit2.messageHeader}</td>
-          </tr>
-        </thead>
-        <tbody>
-          <tr className={styles.tableContent}>
-            <td className={styles.tdLine}>Test 2</td>
-            <td className={styles.tdLine}>Test3</td>
-          </tr>
-        </tbody>
-      </table>
+      <Tree files={this.state.tree1} />
     );
   }
 
   componentWillReceiveProps(nextProps) {
     if (nextProps.commit1 !== [] && nextProps.commit2 !== []) {
-      let tree1 = getTreeCommitspan(null, nextProps.commit1.sha, nextProps.commits);
+      let tree1 = getTreeCommitspan(nextProps.commit1.sha, nextProps.commits);
       tree1 = makeHierarchyFileTree(tree1);
-      let tree2 = getTreeCommitspan(nextProps.commit1.sha, nextProps.commit2.sha, nextProps.commits);
+      let tree2 = getTreeCommitspan(nextProps.commit2.sha, nextProps.commits);
       tree2 = makeHierarchyFileTree(tree2);
       this.setState({
         commits: nextProps.commits,
@@ -57,35 +42,22 @@ export default class Changes extends React.Component {
   }
 }
 
-function getTreeCommitspan(fromSha, toSha, commits) {
-  if (toSha === undefined || fromSha === undefined || commits === undefined) {
+function getTreeCommitspan(toSha, commits) {
+  if (toSha === undefined || commits === undefined) {
     return null;
   }
   const fileTree = [];
-  if (fromSha === null) {
-    commits.forEach((c) => {
-      if (c.sha === toSha) {
-        return fileTree;
-      }
-      c.files.data.forEach((f) => {
+  console.log(commits);
+  console.log(toSha);
+
+  for (let i = 0; i < commits.length; i++) {
+    if (commits[i].sha !== toSha) {
+      commits[i].files.data.forEach((f) => {
         fileTree.push(f.file.path);
       });
-    });
-  } else {
-    let mark = 0;
-    commits.forEach((c) => {
-      if (c.sha === fromSha) {
-        mark = 1;
-      }
-      if (c.sha === toSha) {
-        return fileTree;
-      }
-      if (mark === 1) {
-        c.files.data.forEach((f) => {
-          fileTree.push(f.file.path);
-        });
-      }
-    });
+    } else {
+      return fileTree;
+    }
   }
   return fileTree;
 }
