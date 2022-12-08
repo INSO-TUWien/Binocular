@@ -1,3 +1,11 @@
 .nested {
   margin-left: 30px;
 }
+
+.addition {
+  background-color: #4cd964;
+}
+
+.deletion {
+  background-color: crimson;
+}

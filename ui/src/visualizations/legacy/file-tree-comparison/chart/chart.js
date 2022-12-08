@@ -71,15 +71,28 @@ export default class Changes extends React.Component {
     if (commit1 !== null) {
       let tree1 = getTreeCommitspan(commit1.sha, this.state.commits);
       tree1 = makeHierarchyFileTree(tree1);
-      this.setState({ commit1: commit1, tree1: tree1 });
+      this.setState(function (state) {
+        if (state.tree2.length !== 0) {
+          this.compareTrees(commit1, state.commit2);
+        }
+        return {
+          commit1: commit1,
+          tree1: tree1,
+        };
+      });
     }
     if (commit2 !== null) {
       let tree2 = getTreeCommitspan(commit2.sha, this.state.commits);
       tree2 = makeHierarchyFileTree(tree2);
-      this.setState({ commit2: commit2, tree2: tree2 });
-    }
-    if (this.state.commit1.messageHeader !== 'Select a first commit' && this.state.commit2.messageHeader !== 'Select a first commit') {
-      //this.compareTrees
+      this.setState(function (state) {
+        if (state.tree1.length !== 0) {
+          this.compareTrees(state.commit1, commit2);
+        }
+        return {
+          commit2: commit2,
+          tree2: tree2,
+        };
+      });
     }
   }
 
@@ -105,7 +118,6 @@ export default class Changes extends React.Component {
       }
     }
     newCommits = newCommits.slice().reverse(); //reverse Array
-    console.log(newCommits);
     return newCommits;
   }
 
@@ -115,14 +127,24 @@ export default class Changes extends React.Component {
       this.setState({ commits: nextProps.commits, commitsToChoose1: commits, commitsToChoose2: commits });
     }
   }
-}
+  compareTrees(c1, c2) {
+    const tree1 = getTreeCommitspan(c1.sha, this.state.commits);
+    const tree2 = getTreeCommitspan(c2.sha, this.state.commits);
+    let tree1H = makeHierarchyFileTree(tree2);
+    let tree2H = makeHierarchyFileTree(tree2);
 
-function compareTrees(tree1, tree2) {
-  tree2.forEach((e) => {
-    if (tree1.contains(e)) {
-      console.log('True');
-    }
-  });
+    tree1.forEach((n) => {
+      if (!tree2.includes(n)) {
+        console.log(n);
+        this.setState({ tree1: markChild(tree1H, n, 'Deletion') });
+      }
+    });
+    tree2.forEach((n) => {
+      if (!tree1.includes(n)) {
+        this.setState({ tree2: markChild(tree2H, n, 'Addition') });
+      }
+    });
+  }
 }
 
 function getTreeCommitspan(toSha, commits) {
@@ -134,7 +156,11 @@ function getTreeCommitspan(toSha, commits) {
   for (let i = 0; i < commits.length; i++) {
     if (commits[i].sha !== toSha) {
       commits[i].files.data.forEach((f) => {
-        fileTree.push(f.file.path);
+        if (f.stats.additions > f.stats.deletions) {
+          fileTree.push(f.file.path);
+        } else if (f.stats.additions === 0 && f.stats.deletions > 0) {
+          fileTree.splice(fileTree.indexOf(f.file.path), 1);
+        }
       });
     } else {
       return fileTree;
@@ -142,7 +168,24 @@ function getTreeCommitspan(toSha, commits) {
   }
   return fileTree;
 }
-
+function markChild(tree, path, mode) {
+  if (path.includes('/')) {
+    tree.forEach((n) => {
+      if (n.name === path.split('/')[0]) {
+        n.mark = mode;
+        markChild(n.children, path.substring(path.indexOf('/') + 1, path.length), mode);
+      }
+    });
+  } else {
+    tree.map((n) => {
+      if (n.name === path) {
+        n.mark = mode;
+        return tree;
+      }
+    });
+  }
+  return tree;
+}
 function makeHierarchyFileTree(fileTree) {
   if (fileTree === null || fileTree === undefined) {
     return null;
