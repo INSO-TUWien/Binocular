@@ -41,6 +41,8 @@ const mapStateToProps = (state /*, ownProps*/) => {
     committers: dashboardState.data.data.committers,
     palette: dashboardState.data.data.palette,
     selectedAuthors: selectedAuthors,
+    firstSignificantTimestamp: dashboardState.data.data.firstSignificantTimestamp,
+    lastSignificantTimestamp: dashboardState.data.data.lastSignificantTimestamp,
   };
 };
 
@@ -59,8 +61,28 @@ const UniversalConfigComponent = (props) => {
     otherCommitters = props.committers.length - (Object.keys(props.palette).length - 1);
   }
   if (props.palette !== undefined) {
-    setAllAuthors(props.palette);
+    props.onSetPalette(props.palette);
   }
+
+  function timestampToDateTimeString(timestamp) {
+    const date = new Date(timestamp);
+
+    return (
+      '' +
+      date.getFullYear() +
+      '-' +
+      String(date.getMonth() + 1).padStart(2, '0') +
+      '-' +
+      String(date.getDate()).padStart(2, '0') +
+      'T' +
+      String(date.getHours()).padStart(2, '0') +
+      ':' +
+      String(date.getMinutes()).padStart(2, '0') +
+      ':' +
+      String(date.getSeconds()).padStart(2, '0')
+    );
+  }
+
   return (
     <div>
       <h1 className={styles.headline}>Universal Settings</h1>
@@ -89,7 +111,10 @@ const UniversalConfigComponent = (props) => {
         <button
           className="button"
           onClick={(e) => {
-            const defaultTimeSpan = { from: props.firstCommit.date.split('.')[0], to: props.lastCommit.date.split('.')[0] };
+            const defaultTimeSpan = {
+              from: timestampToDateTimeString(props.firstSignificantTimestamp),
+              to: timestampToDateTimeString(props.lastSignificantTimestamp),
+            };
             props.onChangeTimeSpan(defaultTimeSpan);
           }}>
           Reset

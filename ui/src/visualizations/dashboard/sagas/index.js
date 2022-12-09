@@ -33,8 +33,14 @@ export const fetchDashboardData = fetchFactory(
     const firstCommitTimestamp = Date.parse(firstCommit.date);
     const lastCommitTimestamp = Date.parse(lastCommit.date);
 
+    const firstIssueTimestamp = firstIssue ? Date.parse(firstIssue.createdAt) : firstCommitTimestamp;
+    const lastIssueTimestamp = lastIssue ? Date.parse(lastIssue.createdAt) : lastCommitTimestamp;
+
+    const firstSignificantTimestamp = Math.min(firstCommitTimestamp, firstIssueTimestamp);
+    const lastSignificantTimestamp = Math.max(lastCommitTimestamp, lastIssueTimestamp);
+
     return yield Promise.join(
-      Database.getCommitData([firstCommitTimestamp, lastCommitTimestamp], [firstCommitTimestamp, lastCommitTimestamp])
+      Database.getCommitData([firstCommitTimestamp, lastCommitTimestamp], [firstSignificantTimestamp, lastSignificantTimestamp])
     )
       .spread((commits) => {
         const palette = getPalette(commits, 15, committers.length);
@@ -45,6 +51,8 @@ export const fetchDashboardData = fetchFactory(
           lastIssue,
           committers,
           palette,
+          firstSignificantTimestamp,
+          lastSignificantTimestamp,
         };
       })
       .catch(function (e) {

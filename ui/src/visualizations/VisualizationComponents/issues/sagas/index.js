@@ -89,8 +89,8 @@ export const fetchIssuesData = fetchFactory(
           otherCount: 0,
           filteredIssues,
           issues,
-          firstCommitTimestamp,
-          lastCommitTimestamp,
+          firstIssueTimestamp,
+          lastIssueTimestamp,
           firstSignificantTimestamp,
           lastSignificantTimestamp,
         };
