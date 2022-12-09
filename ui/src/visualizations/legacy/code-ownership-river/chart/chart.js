@@ -335,25 +335,6 @@ export default class CodeOwnershipRiver extends React.Component {
         }
         return commit;
       });
-
-      /*commits.statsByAuthor = commits.statsByAuthor.filter((commit) => {
-        let filter = false;
-        if (props.selectedAuthors.filter((a) => a === 'others').length > 0) {
-          filter = true;
-        }
-        for (const author of Object.keys(props.allAuthors)) {
-          if (commit.signature === author) {
-            if (props.selectedAuthors.filter((a) => a === author).length > 0) {
-              filter = true;
-              break;
-            } else {
-              filter = false;
-              break;
-            }
-          }
-        }
-        return filter;
-      });*/
     }
 
     const lastCommitDataPoint = _.last(commits).statsByAuthor;
@@ -361,7 +342,7 @@ export default class CodeOwnershipRiver extends React.Component {
     const commitSeries = _.map(lastCommitDataPoint, (committerIndex, signature) => {
       const legend = {
         name:
-          (props.commitAttribute === 'count' ? 'Commits by ' : 'Empty by ') +
+          (props.commitAttribute === 'count' ? 'Commits by ' : 'Changes by ') +
           (signature === 'other' ? props.otherCount + ' Others' : signature),
         style: {
           fill: props.palette[signature],

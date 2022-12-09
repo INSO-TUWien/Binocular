@@ -13,7 +13,7 @@ const mapStateToProps = (state /*, ownProps*/) => {
   const issues = corState.config.overlay === 'issues' ? corState.data.data.issues : [];
   const builds = corState.config.overlay === 'builds' ? corState.data.data.builds : [];
   return {
-    palette: corState.data.data.palette,
+    palette: universalSettings.allAuthors,
     otherCount: corState.data.data.otherCount,
     filteredCommits: corState.data.data.filteredCommits,
     commits: corState.data.data.commits,
