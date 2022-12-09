@@ -4,7 +4,7 @@ import { traversePages, graphQl } from '../../../utils';
 
 /**
  * Get issue commit data from the database.
- * @param commitSpan Array of two time values (ms), first commit and last commit.
+ * @param issueCommitSpan Array of two time values (ms), first commit and last commit.
  * @param significantSpan Array of two time values (ms), first significant and last significant commit
  * (only these will actually be returned, used for zooming, the rest of the time will be empty data).
  * @returns {*} (see below)
@@ -12,14 +12,14 @@ import { traversePages, graphQl } from '../../../utils';
 export default function getIssueCommitData(issueCommitSpan, significantSpan) {
   const issueCommitList = [];
 
-  return traversePages(getIssueCommitsPage(significantSpan[1]), issueCommit => {
+  return traversePages(getIssueCommitsPage(significantSpan[1]), (issueCommit) => {
     issueCommitList.push(issueCommit);
   }).then(function() {
     return issueCommitList;
   });
 }
 
-const getIssueCommitsPage = until => (page, perPage) => {
+const getIssueCommitsPage = (until) => (page, perPage) => {
   return graphQl
     .query(
       `query($page: Int, $perPage: Int, $until: Timestamp) {
@@ -39,5 +39,5 @@ const getIssueCommitsPage = until => (page, perPage) => {
         }`,
       { page, perPage, until }
     )
-    .then(resp => resp.issues);
+    .then((resp) => resp.issues);
 };

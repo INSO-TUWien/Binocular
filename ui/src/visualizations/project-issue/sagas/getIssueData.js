@@ -12,14 +12,14 @@ import { traversePages, graphQl } from '../../../utils';
 export default function getIssueData(issueSpan, significantSpan) {
   const issueList = [];
 
-  return traversePages(getIssuesPage(significantSpan[1]), issue => {
+  return traversePages(getIssuesPage(significantSpan[1]), (issue) => {
     issueList.push(issue);
   }).then(function() {
     return issueList;
   });
 }
 
-const getIssuesPage = until => (page, perPage) => {
+const getIssuesPage = (until) => (page, perPage) => {
   return graphQl
     .query(
       `
@@ -39,5 +39,5 @@ const getIssuesPage = until => (page, perPage) => {
     }`,
       { page, perPage, until }
     )
-    .then(resp => resp.issues);
+    .then((resp) => resp.issues);
 };

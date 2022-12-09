@@ -28,23 +28,23 @@ const mapStateToProps = (state /*, ownProps*/) => {
     selectedIssues: projectIssueState.config.selectedIssues,
     showNormalizedChart: projectIssueState.config.showNormalizedChart,
     showStandardChart: projectIssueState.config.showStandardChart,
-    showMilestoneChart: projectIssueState.config.showMilestoneChart
+    showMilestoneChart: projectIssueState.config.showMilestoneChart,
   };
 };
 
 const mapDispatchToProps = (dispatch /*, ownProps*/) => {
   return {
-    onClickResolution: resolution => dispatch(setResolution(resolution)),
-    onClickIssues: showIssues => dispatch(setShowIssues(showIssues)),
-    onClickMetric: metric => dispatch(setDisplayMetric(metric)),
-    onClickCheckboxLegend: selected => dispatch(setSelectedIssues(selected)),
-    onClickShowNormalizedChart: showNormalizedChart => dispatch(setShowNormalizedChart(showNormalizedChart)),
-    onClickShowStandardChart: showStandardChart => dispatch(setShowStandardChart(showStandardChart)),
-    onClickShowMilestoneChart: showMilestoneChart => dispatch(setShowMilestoneChart(showMilestoneChart))
+    onClickResolution: (resolution) => dispatch(setResolution(resolution)),
+    onClickIssues: (showIssues) => dispatch(setShowIssues(showIssues)),
+    onClickMetric: (metric) => dispatch(setDisplayMetric(metric)),
+    onClickCheckboxLegend: (selected) => dispatch(setSelectedIssues(selected)),
+    onClickShowNormalizedChart: (showNormalizedChart) => dispatch(setShowNormalizedChart(showNormalizedChart)),
+    onClickShowStandardChart: (showStandardChart) => dispatch(setShowStandardChart(showStandardChart)),
+    onClickShowMilestoneChart: (showMilestoneChart) => dispatch(setShowMilestoneChart(showMilestoneChart))
   };
 };
 
-const ProjectIssueConfigComponent = props => {
+const ProjectIssueConfigComponent = (props) => {
   let otherIssues;
   if (props.palette && 'others' in props.palette) {
     otherIssues = props.issues.length - (Object.keys(props.palette).length - 1);
@@ -63,7 +63,7 @@ const ProjectIssueConfigComponent = props => {
                 { label: 'Months', icon: 'calendar', value: 'months' },
                 { label: 'Weeks', icon: 'calendar-week', value: 'weeks' }
               ]}
-              onChange={value => props.onClickResolution(value)}
+              onChange={(value) => props.onClickResolution(value)}
             />
             <div>
               <label className={styles.checkboxLabel}>
@@ -111,7 +111,7 @@ const ProjectIssueConfigComponent = props => {
                 { label: 'Open', icon: 'folder-open', value: 'open' },
                 { label: 'Closed', icon: 'folder', value: 'closed' }
               ]}
-              onChange={value => props.onClickIssues(value)}
+              onChange={(value) => props.onClickIssues(value)}
             />
           </div>
         </div>

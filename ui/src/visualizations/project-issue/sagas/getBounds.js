@@ -37,7 +37,7 @@ export default function getBounds() {
          }
        }`
     )
-    .then(resp => ({
+    .then((resp) => ({
       firstCommit: resp.firstCommit.data[0],
       lastCommit: resp.lastCommit.data[0],
       firstIssue: resp.firstIssue.data[0],

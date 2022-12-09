@@ -130,7 +130,7 @@ function getPalette(issues, maxNumberOfColors, numOfIssues) {
   const palette = chartColors('spectral', maxNumberOfColors, numOfIssues);
 
   const totals = {};
-  _.each(issues, issue => {
+  _.each(issues, (issue) => {
     const changes = 1;
     if (totals[issue.signature]) {
       totals[issue.title] += changes;
@@ -140,7 +140,7 @@ function getPalette(issues, maxNumberOfColors, numOfIssues) {
   });
 
   const sortable = [];
-  _.each(Object.keys(totals), key => {
+  _.each(Object.keys(totals), (key) => {
     sortable.push([key, totals[key]]);
   });
 

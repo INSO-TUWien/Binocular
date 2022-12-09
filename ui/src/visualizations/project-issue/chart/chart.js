@@ -51,9 +51,7 @@ export default class ProjectIssue extends React.Component {
           if (i === 0) {
             issueChart1 = (
               <div className={styles.chartLine}>
-                <div className={cx(styles.text, 'label')}>
-                  {chartTitle}
-                </div>
+                <div className={cx(styles.text, 'label')}>{chartTitle}</div>
                 <div className={styles.chart}>
                   <ViolinPlot
                     content={this.state.issueChartData}
@@ -70,9 +68,7 @@ export default class ProjectIssue extends React.Component {
           } else if (i === 1) {
             issueChart2 = (
               <div className={styles.chartLine}>
-                <div className={cx(styles.text, 'label')}>
-                  {chartTitle}
-                </div>
+                <div className={cx(styles.text, 'label')}>{chartTitle}</div>
                 <div className={styles.chart}>
                   <ViolinPlot
                     content={this.state.issueChartData}
@@ -89,9 +85,7 @@ export default class ProjectIssue extends React.Component {
           } else if (i === 2) {
             issueChart3 = (
               <div className={styles.chartLine}>
-                <div className={cx(styles.text, 'label')}>
-                  {chartTitle}
-                </div>
+                <div className={cx(styles.text, 'label')}>{chartTitle}</div>
                 <div className={styles.chart}>
                   <ViolinPlot
                     content={this.state.issueChartData}
@@ -147,6 +141,7 @@ export default class ProjectIssue extends React.Component {
         filteredIssues = props.issues;
         break;
       case 'open':
+
         /*_.each(props.issues, issue => {
           if (issue.closedAt === null) {
             filteredIssues.push(issue);
@@ -155,6 +150,7 @@ export default class ProjectIssue extends React.Component {
         filteredIssues = props.issues;
         break;
       case 'closed':
+
         /*_.each(props.issues, issue => {
           if (issue.closedAt) {
             filteredIssues.push(issue);
@@ -212,10 +208,10 @@ export default class ProjectIssue extends React.Component {
     const issueChartData = [];
     const issueScale = [0, 0];
     let i = 0;
-    _.each(data, function(issue) {
+    _.each(data, function (issue) {
       i = i + 1;
       if (i === 100) {
-        console.log('HUNDERT!!!!!');
+        console.log('HUNDRED!');
       }
       issueChartData.push({
         date: issue.date,
@@ -234,7 +230,7 @@ export default class ProjectIssue extends React.Component {
     //---- STEP 4: FORMATTING FILTERS AND CONSTRUCT NEW ISSUE DATA----
     const selectedIssues = [];
     const keys = props.selectedIssues;
-    _.each(keys, key => {
+    _.each(keys, (key) => {
       if (props.selectedIssues.indexOf(key) > -1) {
         selectedIssues.push(key);
       }
@@ -242,7 +238,7 @@ export default class ProjectIssue extends React.Component {
 
     //---- STEP 5: CONSTRUCT NEW ISSUE DATA ----
     const issueData = [];
-    _.each(filteredIssues, function(issue) {
+    _.each(filteredIssues, function (issue) {
       if (props.selectedIssues.indexOf(issue.title) > -1) {
         issueData.push({
           title: issue.title,

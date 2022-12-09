@@ -5,7 +5,7 @@ import _ from 'lodash';
 
 export default handleActions(
   {
-    REQUEST_PROJECT_ISSUE_DATA: state => _.assign({}, state, { isFetching: true }),
+    REQUEST_PROJECT_ISSUE_DATA: (state) => _.assign({}, state, { isFetching: true }),
     RECEIVE_PROJECT_ISSUE_DATA: (state, action) => {
       return _.assign({}, state, {
         data: action.payload,
