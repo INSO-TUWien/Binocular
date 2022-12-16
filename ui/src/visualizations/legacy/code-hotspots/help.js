@@ -155,12 +155,53 @@ export default () =>
       <p>In the settings, it is possible to parameterize the visualization.</p>
       <h3>Parameterization parameter</h3>
       <ul>
-        <li>Automatic or custom scale of the different charts</li>
-        <li>Heatmap scale</li>
-        <li>Column summary scale</li>
-        <li>Row summary scale</li>
-        <li>Date Range (Display only data from a specific period.)</li>
-        <li>Heatmap Style (Change the style of the main visualization.)</li>
+        <li>
+          <span>Automatic or custom scale of the different charts </span>
+          <span className={styles.lightText}>
+            (Select if you prefer automatic or custom scaling for all the different parts of the visualization.)
+          </span>
+        </li>
+        <li>
+          <span>Heatmap scale </span>
+          <span className={styles.lightText}>
+            (Only visible if you select custom data scale. Change the scale of the main heatmap visualization.)
+          </span>
+        </li>
+        <li>
+          <span>Column summary scale </span>
+          <span className={styles.lightText}>
+            (Only visible if you select custom data scale. Change the scale of the column chart on top of the main heatmap visualization.)
+          </span>
+        </li>
+        <li>
+          <span>Row summary scale </span>
+          <span className={styles.lightText}>
+            (Only visible if you select custom data scale. Change the scale of the row summary chart right of the main heatmap
+            visualization.)
+          </span>
+        </li>
+        <li>
+          <span>Date Range </span>
+          <span className={styles.lightText}>(Display only data from a specific period.)</span>
+        </li>
+        <li>
+          <span>Main Visualization Mode </span>
+          <span className={styles.lightText}>
+            (Switch the main visualization between the default heatmap style visualization or a hunk visualization that shows you the pure
+            change data.)
+          </span>
+        </li>
+        <li>
+          <span>Heatmap Style </span>
+          <span className={styles.lightText}>(Change the style of the main visualization to you preferred style.)</span>
+        </li>
+        <li>
+          <span>Heatmap Tooltips </span>
+          <span className={styles.lightText}>
+            (Display tooltips for each code line to give you more insights to a specific line. All data is only available if you open each
+            visualization once.)
+          </span>
+        </li>
       </ul>
     </div>
     <div

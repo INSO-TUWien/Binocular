@@ -12,7 +12,7 @@ export default class ZoomableSvg extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      transform: d3.zoomIdentity
+      transform: d3.zoomIdentity,
     };
   }
 
@@ -89,5 +89,5 @@ ZoomableSvg.propTypes = {
   scaleExtent: PropTypes.arrayOf(PropTypes.number),
   onStart: PropTypes.func,
   onZoom: PropTypes.func,
-  onEnd: PropTypes.func
+  onEnd: PropTypes.func,
 };

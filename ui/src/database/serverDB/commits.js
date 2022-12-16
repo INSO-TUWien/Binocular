@@ -260,6 +260,7 @@ export default class Commits {
                       sha
                       signature
                       branch
+                      history
                       parents
                       date
                       stats{

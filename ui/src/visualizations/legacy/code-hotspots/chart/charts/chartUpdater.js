@@ -9,7 +9,6 @@ export default class chartUpdater {
     const legendSteps = 20;
 
     let maxValue = 0;
-
     const data = rawData.data
       .map((commit, i) => {
         const columnData = new Array(lines).fill({ value: 0 }, 0, lines).map((row, j) => {
@@ -22,12 +21,13 @@ export default class chartUpdater {
             date: commit.date,
             branch: commit.branch,
             parents: commit.parents,
-            signature: commit.signature
+            history: commit.history,
+            signature: commit.signature,
           };
         });
         if (commit.file !== undefined) {
-          commit.file.hunks.forEach(hunk => {
-            columnData.filter(column => {
+          commit.file.hunks.forEach((hunk) => {
+            columnData.filter((column) => {
               if (
                 (column.row >= hunk.newStart - 1 && column.row < hunk.newStart + hunk.newLines - 1) ||
                 (column.row >= hunk.oldStart - 1 && column.row < hunk.oldStart + hunk.oldLines - 1)
@@ -53,23 +53,26 @@ export default class chartUpdater {
     let maxValue = 0;
 
     const versionData = this.transformChangesPerVersionData(rawData, lines).data;
-    const groupedDevData = d3Collection.nest().key(k => k.signature).entries(versionData);
+    const groupedDevData = d3Collection
+      .nest()
+      .key((k) => k.signature)
+      .entries(versionData);
 
-    const devs = groupedDevData.map(entry => entry.key);
+    const devs = groupedDevData.map((entry) => entry.key);
     const data = groupedDevData
       .map((entry, i) => {
         return d3Collection
           .nest()
-          .key(k => k.row)
-          .rollup(d => {
-            const value = d3.sum(d, v => v.value);
+          .key((k) => k.row)
+          .rollup((d) => {
+            const value = d3.sum(d, (v) => v.value);
             if (value > maxValue) {
               maxValue = value;
             }
             return { column: i, row: d[0].row, value: value, dev: d[0].signature, commits: d };
           })
           .entries(entry.values)
-          .map(d => d.value);
+          .map((d) => d.value);
       })
       .flat();
     return { data: data, lines: lines, devs: devs, maxValue: maxValue, legendSteps: legendSteps };
@@ -81,7 +84,7 @@ export default class chartUpdater {
     const issues = [];
 
     const data = rawData.data
-      .filter(issue => issue.commits.data.length > 0)
+      .filter((issue) => issue.commits.data.length > 0)
       .map((issue, i) => {
         issues.push(issue.title);
         const columnData = new Array(lines).fill({ value: 0 }, 0, lines).map((row, j) => {
@@ -92,13 +95,13 @@ export default class chartUpdater {
             title: issue.title,
             description: issue.description,
             iid: issue.iid,
-            commits: []
+            commits: [],
           };
         });
-        issue.commits.data.forEach(commit => {
+        issue.commits.data.forEach((commit) => {
           if (commit.file !== null) {
-            commit.file.hunks.forEach(hunk => {
-              columnData.filter(column => {
+            commit.file.hunks.forEach((hunk) => {
+              columnData.filter((column) => {
                 if (
                   (column.row >= hunk.newStart - 1 && column.row < hunk.newStart + hunk.newLines - 1) ||
                   (column.row >= hunk.oldStart - 1 && column.row < hunk.oldStart + hunk.oldLines - 1)
@@ -114,7 +117,7 @@ export default class chartUpdater {
                   date: commit.date,
                   branch: commit.branch,
                   parents: commit.parents,
-                  signature: commit.signature
+                  signature: commit.signature,
                 });
                 return column;
               });
@@ -129,15 +132,18 @@ export default class chartUpdater {
 
   static generateCharts(currThis, mode, data, displayProps) {
     let filteredData = data.data;
+
     if (mode === 0) {
       filteredData = data.data.filter(
-        d => new Date(d.date) >= new Date(displayProps.dateRange.from) && new Date(d.date) <= new Date(displayProps.dateRange.to)
+        (d) =>
+          new Date(d.date.split('.')[0]) >= new Date(displayProps.dateRange.from) &&
+          new Date(d.date.split('.')[0]) <= new Date(displayProps.dateRange.to)
       );
     }
 
     const combinedColumnData = chartGeneration.updateColumnData(filteredData, currThis, mode);
     currThis.combinedColumnData = combinedColumnData;
-    const importantColumns = combinedColumnData.map(d => d.column);
+    const importantColumns = combinedColumnData.map((d) => d.column);
     chartGeneration.generateColumnChart(
       currThis.combinedColumnData,
       mode === 1 ? data.devs.length : mode === 2 ? data.issues.length : data.commits,
@@ -146,10 +152,59 @@ export default class chartUpdater {
       data.legendSteps,
       displayProps
     );
-    filteredData = filteredData.filter(d => importantColumns.includes(d.column));
+    filteredData = filteredData.filter((d) => importantColumns.includes(d.column));
     chartGeneration.generateRowSummary(filteredData, data.lines, currThis, mode, data.legendSteps, data.firstLineNumber, displayProps);
-    chartGeneration.generateHeatmap(
+    chartGeneration.generateMainChart(
       filteredData,
+      data.rawData,
+      data.lines,
+      importantColumns,
+      currThis,
+      mode,
+      data.maxValue,
+      data.legendSteps,
+      data.firstLineNumber,
+      displayProps
+    );
+  }
+
+  static updateColumnChart(currThis, mode, data, displayProps) {
+    let filteredData = data.data;
+    if (mode === 0) {
+      filteredData = data.data.filter(
+        (d) =>
+          new Date(d.date.split('.')[0]) >= new Date(displayProps.dateRange.from) &&
+          new Date(d.date.split('.')[0]) <= new Date(displayProps.dateRange.to)
+      );
+    }
+
+    currThis.combinedColumnData = chartGeneration.updateColumnData(filteredData, currThis, mode);
+    chartGeneration.generateColumnChart(
+      currThis.combinedColumnData,
+      mode === 1 ? data.devs.length : mode === 2 ? data.issues.length : data.commits,
+      currThis,
+      mode,
+      data.legendSteps,
+      displayProps
+    );
+  }
+
+  static updateMainChart(currThis, mode, data, displayProps) {
+    let filteredData = data.data;
+    if (mode === 0) {
+      filteredData = data.data.filter(
+        (d) =>
+          new Date(d.date.split('.')[0]) >= new Date(displayProps.dateRange.from) &&
+          new Date(d.date.split('.')[0]) <= new Date(displayProps.dateRange.to)
+      );
+    }
+    const combinedColumnData = chartGeneration.updateColumnData(filteredData, currThis, mode);
+    const importantColumns = combinedColumnData.map((d) => d.column);
+
+    filteredData = filteredData.filter((d) => importantColumns.includes(d.column));
+    chartGeneration.updateMainChart(
+      filteredData,
+      data.rawData,
       data.lines,
       importantColumns,
       currThis,

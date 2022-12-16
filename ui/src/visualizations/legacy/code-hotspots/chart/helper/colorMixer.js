@@ -57,7 +57,8 @@ export default class ColorMixer {
       '#' +
       ('00' + (~~(r * 255)).toString(16)).slice(-2) +
       ('00' + (~~(g * 255)).toString(16)).slice(-2) +
-      ('00' + (~~(b * 255)).toString(16)).slice(-2)
+      ('00' + (~~(b * 255)).toString(16)).slice(-2) +
+      'AA'
     );
   }
 }

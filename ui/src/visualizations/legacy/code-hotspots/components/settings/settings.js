@@ -62,22 +62,24 @@ export default class Settings extends React.PureComponent {
                   type="checkbox"
                   name="dataScaleSwitch"
                   className={'switch is-rounded is-outlined is-info'}
-                  defaultChecked={true}
-                  onChange={(e) => {
-                    if (e.target.checked) {
+                  checked={!this.state.displayProps.customDataScale}
+                  onClick={e => {
+                    const currDisplayProps = this.state.displayProps;
+                    if (currDisplayProps.customDataScale) {
                       document.getElementById('dataScaleContainer').classList.remove(settingsStyles.showElm);
                       document.getElementById('dataScaleContainer').classList.add(settingsStyles.hideElm);
                     } else {
                       document.getElementById('dataScaleContainer').classList.add(settingsStyles.showElm);
                       document.getElementById('dataScaleContainer').classList.remove(settingsStyles.hideElm);
                     }
-                    const currDisplayProps = this.state.displayProps;
                     document.getElementById('dataScaleHeatmap').value = currDisplayProps.dataScaleHeatmap;
                     document.getElementById('dataScaleColumns').value = currDisplayProps.dataScaleColumns;
                     document.getElementById('dataScaleRows').value = currDisplayProps.dataScaleRows;
 
-                    currDisplayProps.customDataScale = !e.target.checked;
+                    currDisplayProps.customDataScale = !currDisplayProps.customDataScale;
+                    e.target.checked = currDisplayProps.customDataScale;
                     this.setState({ displayProps: currDisplayProps });
+                    this.forceUpdate();
                   }}
                 />
                 <label htmlFor="dataScaleSwitch" className={styles.switch}>
@@ -136,12 +138,53 @@ export default class Settings extends React.PureComponent {
                 />
               </div>
               <hr />
+              <div className={styles.label}>Main Visualization Mode:</div>
+              <div className="field">
+                <div className="buttons has-addons">
+                  <button
+                    id={'mainVisualizationModeHeatmap'}
+                    className={
+                      'button' + (this.state.displayProps.mainVisualizationMode === 0 ? ' ' + settingsStyles.buttonRowSelected : '')
+                    }
+                    onClick={() => {
+                      document.getElementById('mainVisualizationModeHeatmap').classList.add(settingsStyles.buttonRowSelected);
+                      document.getElementById('mainVisualizationModeHunks').classList.remove(settingsStyles.buttonRowSelected);
+                      const currDisplayProps = this.state.displayProps;
+                      currDisplayProps.mainVisualizationMode = 0;
+                      document.getElementById('heatmapStyleClassic').disabled = false;
+                      document.getElementById('heatmapStyleCompact').disabled = false;
+                      document.getElementById('heatmapStyleModerate').disabled = false;
+                      this.setState({ displayProps: currDisplayProps });
+                    }}>
+                    Heatmap
+                  </button>
+                  <button
+                    id={'mainVisualizationModeHunks'}
+                    className={
+                      'button' + (this.state.displayProps.mainVisualizationMode === 1 ? ' ' + settingsStyles.buttonRowSelected : '')
+                    }
+                    onClick={() => {
+                      document.getElementById('mainVisualizationModeHeatmap').classList.remove(settingsStyles.buttonRowSelected);
+                      document.getElementById('mainVisualizationModeHunks').classList.add(settingsStyles.buttonRowSelected);
+                      const currDisplayProps = this.state.displayProps;
+                      currDisplayProps.mainVisualizationMode = 1;
+                      document.getElementById('heatmapStyleClassic').disabled = true;
+                      document.getElementById('heatmapStyleCompact').disabled = true;
+                      document.getElementById('heatmapStyleModerate').disabled = true;
+                      this.setState({ displayProps: currDisplayProps });
+                    }}>
+                    Hunks
+                  </button>
+                </div>
+                <span>Hunk view only available in Changes/Version mode!</span>
+              </div>
+              <hr />
               <div className={styles.label}>Heatmap Style:</div>
               <div className="field">
                 <div className="buttons has-addons">
                   <button
                     id={'heatmapStyleClassic'}
-                    className={'button ' + settingsStyles.buttonRowSelected}
+                    className={'button' + (this.state.displayProps.heatMapStyle === 0 ? ' ' + settingsStyles.buttonRowSelected : '')}
                     onClick={() => {
                       document.getElementById('heatmapStyleClassic').classList.add(settingsStyles.buttonRowSelected);
                       document.getElementById('heatmapStyleCompact').classList.remove(settingsStyles.buttonRowSelected);
@@ -154,7 +197,7 @@ export default class Settings extends React.PureComponent {
                   </button>
                   <button
                     id={'heatmapStyleModerate'}
-                    className={'button'}
+                    className={'button' + (this.state.displayProps.heatMapStyle === 2 ? ' ' + settingsStyles.buttonRowSelected : '')}
                     onClick={() => {
                       document.getElementById('heatmapStyleClassic').classList.remove(settingsStyles.buttonRowSelected);
                       document.getElementById('heatmapStyleCompact').classList.remove(settingsStyles.buttonRowSelected);
@@ -167,7 +210,7 @@ export default class Settings extends React.PureComponent {
                   </button>
                   <button
                     id={'heatmapStyleCompact'}
-                    className={'button'}
+                    className={'button' + (this.state.displayProps.heatMapStyle === 1 ? ' ' + settingsStyles.buttonRowSelected : '')}
                     onClick={() => {
                       document.getElementById('heatmapStyleClassic').classList.remove(settingsStyles.buttonRowSelected);
                       document.getElementById('heatmapStyleCompact').classList.add(settingsStyles.buttonRowSelected);
@@ -179,8 +222,28 @@ export default class Settings extends React.PureComponent {
                     Compact
                   </button>
                 </div>
-                <hr />
               </div>
+              <hr />
+              <div className={styles.label}>Heatmap Tooltips:</div>
+              <div className="field">
+                <input
+                  id="heatmapTooltipsSwitch"
+                  type="checkbox"
+                  name="heatmapTooltipsSwitch"
+                  className={'switch is-rounded is-outlined is-info'}
+                  checked={this.state.displayProps.heatmapTooltips}
+                  onClick={e => {
+                    const currDisplayProps = this.state.displayProps;
+
+                    currDisplayProps.heatmapTooltips = !currDisplayProps.heatmapTooltips;
+                    e.target.checked = currDisplayProps.heatmapTooltips;
+                    this.setState({ displayProps: currDisplayProps });
+                    this.forceUpdate();
+                  }}
+                />
+                <label htmlFor="heatmapTooltipsSwitch" className={styles.switch} />
+              </div>
+              <hr />
             </div>
           </div>
         </div>
