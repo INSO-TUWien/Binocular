@@ -6,6 +6,9 @@ import Builds from './serverDB/builds';
 import Issues from './serverDB/issues';
 import Files from './serverDB/files';
 import Branches from './serverDB/branches';
+import Languages from './serverDB/languages';
+import Modules from './serverDB/modules';
+import Stakeholders from './serverDB/stakeholders';
 
 export default class ServerDB {
   static getBounds() {
@@ -60,11 +63,33 @@ export default class ServerDB {
     return Branches.getAllBranches();
   }
 
+  static getAllLanguages() {
+    return Languages.getAllLanguages();
+  }
+
+  static getAllModules() {
+    return Modules.getAllModules();
+  }
+
+  static getAllStakeholders() {
+    return Stakeholders.getAllStakeholders();
+  }
+
   static getCodeHotspotsChangeData(file) {
     return Commits.getCodeHotspotsChangeData(file);
   }
 
   static getCodeHotspotsIssueData(file) {
     return Issues.getCodeHotspotsIssueData(file);
+  }
+
+  static getDatabase() {
+    const xhr = new XMLHttpRequest();
+    xhr.open('GET', window.location.protocol + '//' + window.location.hostname + ':48763/api/db-export', false);
+    xhr.send();
+    if (xhr.readyState === 4 && xhr.status === 200) {
+      return JSON.parse(xhr.responseText);
+    }
+    return {};
   }
 }

@@ -58,6 +58,7 @@ const GateWayService = require('./lib/gateway-service');
 const grpc = require('grpc');
 const protoLoader = require('@grpc/proto-loader');
 const http = require('http');
+const projectStructureHelper = require('./lib/projectStructureHelper');
 const commPath = path.resolve(__dirname, 'services', 'grpc', 'comm');
 
 const LanguageDetectorPackageDefinition = protoLoader.loadSync(path.join(commPath, 'language.service.proto'), {
@@ -71,6 +72,7 @@ const LanguageDetectionService = (LanguageComm || { LanguageDetectionService: ()
 app.get('/api/commits', require('./lib/endpoints/get-commits.js'));
 app.get('/api/config', require('./lib/endpoints/get-config.js'));
 app.get('/api/fileSourceCode', require('./lib/endpoints/get-fileSourceCode.js'));
+app.get('/api/db-export', require('./lib/endpoints/get-db-export.js'));
 
 // proxy to the FOXX-service
 app.get('/graphQl', require('./lib/endpoints/graphQl.js'));
@@ -80,6 +82,7 @@ app.post('/graphQl', require('./lib/endpoints/graphQl.js'));
 app.post('/api/config', require('./lib/endpoints/update-config.js'));
 
 const port = config.get().port;
+
 const repoWatcher = {
   listener: null,
   working: false,
@@ -315,6 +318,7 @@ async function indexing(indexers, context, reporter, gateway, indexingThread) {
     }
   }
   threadLog(indexingThread, 'Indexing finished');
+  projectStructureHelper.checkProjectStructureAndFix();
 }
 
 /**

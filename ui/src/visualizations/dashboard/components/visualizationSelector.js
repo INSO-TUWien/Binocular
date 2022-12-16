@@ -24,6 +24,7 @@ export default class VisualizationSelector extends React.PureComponent {
               const visualization = this.props.visualizations[viz];
               return (
                 <button
+                  key={visualization.id}
                   className={styles.visualizationSelectButton}
                   onClick={(e) => {
                     this.props.addVisualization(viz);

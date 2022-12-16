@@ -7,7 +7,7 @@ import moment from 'moment/moment';
 export default class Commits {
   static getCommitData(commitSpan, significantSpan) {
     const commitList = [];
-
+    console.log(commitSpan);
     const getCommitsPage = (since, until) => (page, perPage) => {
       return graphQl
         .query(
@@ -18,9 +18,14 @@ export default class Commits {
                perPage
                data {
                  sha
-                 date
+                 shortSha
+                 message
                  messageHeader
                  signature
+                 branch
+                 parents
+                 date
+                 webUrl
                  stats {
                    additions
                    deletions
