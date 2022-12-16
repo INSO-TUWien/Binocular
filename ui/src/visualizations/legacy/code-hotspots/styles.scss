@@ -68,6 +68,10 @@
   position: relative;
 }
 
+.pa{
+  position: absolute;
+}
+
 .inline{
   display: inline;
 }
@@ -116,4 +120,8 @@
 
 .branchSelect>select{
   border-color: #cccccc;
+}
+
+.lightText{
+  color: #AAA;
 }

@@ -46,6 +46,10 @@ module.exports = new gql.GraphQLObjectType({
         type: gql.GraphQLString,
         description: 'Parents of the commit'
       },
+      history: {
+        type: gql.GraphQLString,
+        description: 'sha History of the commit'
+      },
       date: {
         type: Timestamp,
         description: 'The date of the commit'
