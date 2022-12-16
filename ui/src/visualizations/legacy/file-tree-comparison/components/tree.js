@@ -10,7 +10,6 @@ export default class Tree extends React.PureComponent {
   }
 
   componentWillReceiveProps(nextProps, nextContext) {
-    console.log(nextProps.files);
     this.setState({
       tree: nextProps.files,
     });
@@ -34,7 +33,7 @@ class TreeNode extends React.PureComponent {
         this.props.node.map(x => {
           if (x.children.length === 0) {
             if (x.mark !== undefined) {
-              if(x.mark === 'Addition'){
+            if (x.mark === 'Addition') {
                 return <li className={styles.addition} key={x.name.toString()}>{x.name}</li>;
               }
               if(x.mark === 'Deletion'){
