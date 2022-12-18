@@ -1,6 +1,5 @@
 import React from 'react';
 import styles from './tree.css';
-import Button from 'react-bootstrap/Button';
 
 export default class Tree extends React.PureComponent {
   constructor(props) {

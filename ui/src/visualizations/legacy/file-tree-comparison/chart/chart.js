@@ -1,7 +1,8 @@
 'use strict';
-
 import React from 'react';
 import Tree from '../components/tree.js';
+import Select from 'react-select';
+import styles from './chart.css';
 
 export default class Changes extends React.Component {
   constructor(props) {
@@ -10,14 +11,16 @@ export default class Changes extends React.Component {
       commitsToChoose1: [],
       commitsToChoose2: [],
       commits: this.props.commits,
-      commit1: {
-        messageHeader: 'Select a first commit',
-      },
-      commit2: {
-        messageHeader: 'Select a second commit',
-      },
       tree1: [],
       tree2: [],
+      commit1: {
+        signature: '',
+        date: '',
+      },
+      commit2: {
+        signature: '',
+        date: '',
+      },
     };
   }
 
@@ -26,34 +29,30 @@ export default class Changes extends React.Component {
       <table>
         <thead>
           <th>
-            <select
-              value={this.state.commit1.messageHeader}
+            <div className={styles.flex}>
+            <Select
+              className={styles.select}
+              placeholder={'Select first commit'}
+              options={this.state.commitsToChoose1}
               onChange={(e) => {
-                const commit = this.state.commits.find((c) => {
-                  return e.target.options[e.target.options.selectedIndex].getAttribute('sha') === c.sha;
-                });
-                this.calculateValues(commit, null);
-                this.setState({ commitsToChoose2: this.buildingSelect(this.state.commits, commit.date) });
-              }}>
-              {this.state.commitsToChoose1}
-            </select>
+                this.calculateValues(e.value, null);
+                this.setState({ commitsToChoose2: this.buildingSelect(this.state.commits, e.value.date) });
+              }}></Select> <div hidden={this.state.commit1.date === ''}>{this.state.commit1.signature.split('<')[0] + ', ' + this.state.commit1.date.substring(0, 10)}</div></div>
           </th>
           <th>
-            <select
-              value={this.state.commit2.messageHeader}
+            <div className={styles.flex}>
+            <Select
+              className={styles.select}
+              placeholder={'Select second commit'}
+              options={this.state.commitsToChoose2}
               onChange={(e) => {
-                const commit = this.state.commits.find((c) => {
-                  return e.target.options[e.target.options.selectedIndex].getAttribute('sha') === c.sha;
-                });
-                this.calculateValues(null, commit);
-              }}>
-              {this.state.commitsToChoose2}
-            </select>
+                this.calculateValues(null, e.value);
+              }}></Select><div hidden={this.state.commit2.date === ''}>{this.state.commit2.signature.split('<')[0] + ', ' + this.state.commit2.date.substring(0, 10)}</div></div>
           </th>
         </thead>
         <tbody>
           <td>
-            <div>
+            <div className={styles.padding}>
               <Tree files={this.state.tree1} />
             </div>
           </td>
@@ -101,20 +100,12 @@ export default class Changes extends React.Component {
     let newCommits = [];
     if (filter === null) {
       for (const i in commits) {
-        newCommits.push(
-          <option key={i} sha={commits[i].sha}>
-            {commits[i].messageHeader}
-          </option>
-        );
+        newCommits.push({ label: commits[i].messageHeader, value: commits[i] });
       }
     } else {
       for (const i in commits) {
         if (commits[i].date > filter) {
-          newCommits.push(
-            <option key={i} sha={commits[i].sha}>
-              {commits[i].messageHeader}
-            </option>
-          );
+          newCommits.push({ label: commits[i].messageHeader, value: commits[i] });
         }
       }
     }
@@ -176,7 +167,6 @@ function getEdits(fromSha, toSha, commits) {
   });
   return edited;
 }
-
 function getTreeCommitspan(toSha, commits) {
   console.log('getTreeCommitSpan');
   if (toSha === undefined || commits === undefined) {

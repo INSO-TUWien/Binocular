@@ -1,0 +1,34 @@
+th {
+  height: 100px;
+}
+table {
+  width:95%;
+  align-self: center;
+  table-layout:fixed;
+  border-collapse: collapse;
+  border-style: hidden;
+}
+table td, table th {
+  border: 1px solid black;
+}
+.select {
+  flex-basis: 60%;
+  flex-grow: 0;
+  flex-shrink: 0;
+  font-weight: normal;
+}
+
+.padding {
+  padding: 10px;
+}
+
+.flex {
+  padding: 10px;
+  display: flex;
+  width: 90%;
+  height: 100%;
+  align-items: center;
+  justify-content: space-between;
+}
+
+
