@@ -134,10 +134,10 @@ export default class Changes extends React.Component {
     const tree2 = getTreeCommitspan(c2.sha, this.state.commits);
     let tree1H = makeHierarchyFileTree(tree1);
     let tree2H = makeHierarchyFileTree(tree2);
+    const edited = getEdits(c1.sha, c2.sha, this.state.commits);
 
     tree1.forEach((path) => {
       if (!tree2.includes(path)) {
-        console.log('Tree1 Deletion of ' + path);
         markChild(tree1H, path, 'Deletion');
       }
     });
@@ -147,8 +147,34 @@ export default class Changes extends React.Component {
         markChild(tree2H, path, 'Addition');
       }
     });
+    edited.forEach((path) => {
+      markChild(tree2H, path, 'Edit');
+    });
     this.setState({ tree2: tree2H });
   }
+}
+
+function getEdits(fromSha, toSha, commits) {
+  console.log('getEdits');
+  const edited = [];
+
+  const commitRadius = commits.slice(
+    commits.findIndex((e) => e.sha === fromSha),
+    commits.findIndex((e) => e.sha === toSha)
+  );
+
+  commitRadius.forEach((commit) => {
+    commit.files.data.forEach((file) => {
+      if (
+        (file.stats.additions > 0 || file.stats.deletions > 0) &&
+        file.lineCount !== file.stats.additions &&
+        file.lineCount !== file.stats.deletions
+      ) {
+        edited.push(file.file.path);
+      }
+    });
+  });
+  return edited;
 }
 
 function getTreeCommitspan(toSha, commits) {
@@ -157,35 +183,21 @@ function getTreeCommitspan(toSha, commits) {
     return null;
   }
   const fileTree = [];
+  const commitRadius = commits.slice(0, commits.findIndex((e) => e.sha === toSha) + 1);
 
-  for (let i = 0; i < commits.length; i++) {
-    if (commits[i].sha !== toSha) {
-      commits[i].files.data.forEach((f) => {
-        if (f.stats.additions === f.lineCount) {
-          if (!fileTree.includes(f.file.path)) {
-            fileTree.push(f.file.path);
-          }
+  commitRadius.forEach((commit) => {
+    commit.files.data.forEach((f) => {
+      if (f.stats.additions === f.lineCount) {
+        if (!fileTree.includes(f.file.path)) {
+          fileTree.push(f.file.path);
         }
-        if (f.stats.deletions > 0 && f.stats.additions === 0) {
-          fileTree.splice(fileTree.indexOf(f.file.path), 1);
-        }
-      });
-    } else {
-      console.log(commits[i]);
-      commits[i].files.data.forEach((f) => {
-        if (f.stats.additions === f.lineCount) {
-          if (!fileTree.includes(f.file.path)) {
-            fileTree.push(f.file.path);
-          }
-        }
-        if (f.stats.deletions > 0 && f.stats.additions === 0) {
-          fileTree.splice(fileTree.indexOf(f.file.path), 1);
-        }
-      });
-      console.log(fileTree);
-      return fileTree;
-    }
-  }
+      }
+      if (f.stats.deletions === f.lineCount) {
+        fileTree.splice(fileTree.indexOf(f.file.path), 1);
+      }
+    });
+  });
+
   return fileTree;
 }
 function markChild(tree, path, mode) {

@@ -1,5 +1,6 @@
 import React from 'react';
 import styles from './tree.css';
+import Button from 'react-bootstrap/Button';
 
 export default class Tree extends React.PureComponent {
   constructor(props) {
@@ -39,47 +40,48 @@ class TreeNode extends React.PureComponent {
               if(x.mark === 'Deletion'){
                 return <li className={styles.deletion} key={x.name.toString()}>{x.name}</li>;
               }
+              if(x.mark === 'Edit'){
+                return <li className={styles.edit} key={x.name.toString()}>{x.name}</li>;
+              }
             } else {
             return <li key={x.name.toString()}>{x.name}</li>;
           }
 
           } else {
-            if(x.mark === 'Addition'){
+            if (x.mark === 'Addition' || x.mark === 'Deletion' || x.mark === 'Edit') {
               return (
                 <div key={x.name.toString()}>
-                  <button className={styles.addition} onClick={event => {
+                  <Button onClick={event => {
                     const target = event.currentTarget;
                     const panel = target.nextSibling;
-                    if(panel.hidden){
-                      panel.hidden = false;
-                    } else {
-                      panel.hidden = true;
-                    }
+                    panel.hidden = !panel.hidden;
                   }
-                  }>{x.name}</button>
-                  <ul hidden={h} className={styles.nested}>
+                  }>{x.name}</Button>
+                  <ul hidden={false} className={styles.nested}>
                     <TreeNode node={x.children}/>
                   </ul>
                 </div>
               );
             }
-            return (
+            else {
+              return (
               <div key={x.name.toString()}>
-                <button onClick={event => {
+                <Button onClick={event => {
                   const target = event.currentTarget;
                   const panel = target.nextSibling;
-                  if(panel.hidden){
+                  if (panel.hidden) {
                     panel.hidden = false;
                   } else {
                     panel.hidden = true;
                   }
                 }
-                }>{x.name}</button>
-                  <ul hidden={h} className={styles.nested}>
-                    <TreeNode node={x.children}/>
-                  </ul>
+                }>{x.name}</Button>
+                <ul hidden={h} className={styles.nested}>
+                  <TreeNode node={x.children}/>
+                </ul>
               </div>
             );
+          }
           }
       })
       );

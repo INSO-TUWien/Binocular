@@ -3,9 +3,13 @@
 }
 
 .addition {
-  background-color: #28cd41;
+  color: #28cd41;
 }
 
 .deletion {
-  background-color: #ff453a;
+  color: #ff453a;
+}
+
+.edit {
+  color: #bd981d;
 }
