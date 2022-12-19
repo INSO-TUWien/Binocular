@@ -21,6 +21,7 @@ export default class Changes extends React.Component {
         signature: '',
         date: '',
       },
+      changed: [],
     };
   }
 
@@ -37,7 +38,7 @@ export default class Changes extends React.Component {
               onChange={(e) => {
                 this.calculateValues(e.value, null);
                 this.setState({ commitsToChoose2: this.buildingSelect(this.state.commits, e.value.date) });
-              }}></Select> <div hidden={this.state.commit1.date === ''}>{this.state.commit1.signature.split('<')[0] + ', ' + this.state.commit1.date.substring(0, 10)}</div></div>
+              }}></Select> <div hidden={this.state.commit1.date === ''}>{this.state.commit1.signature.split('<')[0].trim() + ', ' + this.state.commit1.date.substring(0, 10)}</div></div>
           </th>
           <th>
             <div className={styles.flex}>
@@ -47,17 +48,17 @@ export default class Changes extends React.Component {
               options={this.state.commitsToChoose2}
               onChange={(e) => {
                 this.calculateValues(null, e.value);
-              }}></Select><div hidden={this.state.commit2.date === ''}>{this.state.commit2.signature.split('<')[0] + ', ' + this.state.commit2.date.substring(0, 10)}</div></div>
+              }}></Select><div hidden={this.state.commit2.date === ''}>{this.state.commit2.signature.split('<')[0].trim() + ', ' + this.state.commit2.date.substring(0, 10)}</div></div>
           </th>
         </thead>
         <tbody>
           <td>
-            <div className={styles.padding}>
+            <div className={styles.padding} hidden={this.state.tree1.length === 0}>
               <Tree files={this.state.tree1} />
             </div>
           </td>
           <td>
-            <div>
+            <div className={styles.padding} hidden={this.state.tree2.length === 0}>
               <Tree files={this.state.tree2} />
             </div>
           </td>
@@ -126,25 +127,28 @@ export default class Changes extends React.Component {
     let tree1H = makeHierarchyFileTree(tree1);
     let tree2H = makeHierarchyFileTree(tree2);
     const edited = getEdits(c1.sha, c2.sha, this.state.commits);
+    const additions = [];
+    const deletions = [];
 
     tree1.forEach((path) => {
       if (!tree2.includes(path)) {
         markChild(tree1H, path, 'Deletion');
+        deletions.push(path);
       }
     });
-    this.setState({ tree1: tree1H });
     tree2.forEach((path) => {
       if (!tree1.includes(path)) {
         markChild(tree2H, path, 'Addition');
+        additions.push(path);
       }
     });
     edited.forEach((path) => {
       markChild(tree2H, path, 'Edit');
     });
-    this.setState({ tree2: tree2H });
+    const changed = { add: additions, edit: edited, delete: deletions };
+    this.setState({ tree1: tree1H, tree2: tree2H, changed: changed });
   }
 }
-
 function getEdits(fromSha, toSha, commits) {
   console.log('getEdits');
   const edited = [];

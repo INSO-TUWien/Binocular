@@ -1,15 +1,46 @@
 .nested {
-  margin-left: 30px;
+  margin-left: 5%;
+  width: 90%;
+  padding: 5px;
+  margin-top: 5px;
+  background-color: white;
+}
+
+.tree{
+  background-color: lightgrey;
+}
+
+li:not(:last-child) {
+  margin-bottom: 5px;
+  margin-left: 5px;
+}
+li:last-child {
+  margin-left: 5px;
+}
+.space {
+  margin: 5px;
 }
 
 .addition {
-  color: #28cd41;
+ background-color: #28cd41;
+  border-radius: 5px;
 }
 
 .deletion {
-  color: #ff453a;
+  background-color: #ff453a;
+  border-radius: 5px;
 }
 
 .edit {
-  color: #bd981d;
+  background-color: #bd981d;
+  border-radius: 5px;
 }
+
+ul {
+  border: 1px solid black;
+  border-top-left-radius: 10px;
+  border-bottom-left-radius: 10px;
+  overflow-y: auto;
+  max-height: 50em;
+}
+

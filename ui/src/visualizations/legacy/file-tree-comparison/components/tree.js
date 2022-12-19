@@ -17,7 +17,7 @@ export default class Tree extends React.PureComponent {
 
   render() {
     return (
-      <ul>
+      <ul className={styles.tree}>
         <TreeNode node={this.state.tree} props={this.props}></TreeNode>
       </ul>
     );
@@ -49,13 +49,13 @@ class TreeNode extends React.PureComponent {
           } else {
             if (x.mark === 'Addition' || x.mark === 'Deletion' || x.mark === 'Edit') {
               return (
-                <div key={x.name.toString()}>
-                  <Button onClick={event => {
+                <div key={x.name.toString()} className={styles.space}>
+                  <button onClick={event => {
                     const target = event.currentTarget;
                     const panel = target.nextSibling;
                     panel.hidden = !panel.hidden;
                   }
-                  }>{x.name}</Button>
+                  }>{x.name}</button>
                   <ul hidden={false} className={styles.nested}>
                     <TreeNode node={x.children}/>
                   </ul>
@@ -64,8 +64,8 @@ class TreeNode extends React.PureComponent {
             }
             else {
               return (
-              <div key={x.name.toString()}>
-                <Button onClick={event => {
+              <div key={x.name.toString()} className={styles.space}>
+                <button onClick={event => {
                   const target = event.currentTarget;
                   const panel = target.nextSibling;
                   if (panel.hidden) {
@@ -74,7 +74,7 @@ class TreeNode extends React.PureComponent {
                     panel.hidden = true;
                   }
                 }
-                }>{x.name}</Button>
+                }>{x.name}</button>
                 <ul hidden={h} className={styles.nested}>
                   <TreeNode node={x.children}/>
                 </ul>
