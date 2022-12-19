@@ -39,9 +39,9 @@ function findFile(database, file) {
   });
 }
 
-function findFileCommitConnections(relations, fileId) {
+function findFileCommitConnections(relations) {
   return relations.find({
-    selector: { _id: { $regex: new RegExp('^commits-files/.*') }, from: { $eq: fileId } },
+    selector: { _id: { $regex: new RegExp('^commits-files/.*') } },
   });
 }
 
@@ -359,7 +359,8 @@ export default class Commits {
   static getCodeHotspotsChangeData(db, relations, file) {
     return findFile(db, file).then(async (resFile) => {
       const file = resFile.docs[0];
-      const fileCommitConnections = (await findFileCommitConnections(relations, file._id)).docs;
+
+      const fileCommitConnections = (await findFileCommitConnections(relations)).docs.filter((fCC) => fCC.from === file._id);
       const commits = [];
       for (const fileCommitConnection of fileCommitConnections) {
         const resCommit = await findID(db, fileCommitConnection.to);

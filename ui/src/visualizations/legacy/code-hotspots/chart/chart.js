@@ -19,6 +19,7 @@ import SearchBar from '../components/searchBar/searchBar';
 import searchAlgorithm from '../components/searchBar/searchAlgorithm';
 import chartStyles from './chart.scss';
 import Database from '../../../../database/database';
+import SourceCodeRequest from './helper/sourceCodeRequest';
 
 export default class CodeHotspots extends React.PureComponent {
   constructor(props) {
@@ -64,8 +65,16 @@ export default class CodeHotspots extends React.PureComponent {
         mainVisualizationMode: 0,
         heatmapTooltips: false,
       },
+      gitlabSettings: { server: 'Gitlab Server', projectId: 'Project ID', apiKey: 'API Key' },
     };
     const lastDisplayProps = JSON.parse(localStorage.getItem('displayProps'));
+    const lastGitlabSettings = JSON.parse(localStorage.getItem('gitlabSettings'));
+    if (lastGitlabSettings !== null) {
+      this.state.gitlabSettings = lastGitlabSettings;
+    } else {
+      localStorage.setItem('gitlabSettings', JSON.stringify(this.state.gitlabSettings));
+    }
+
     if (lastDisplayProps !== null) {
       this.state.displayProps = lastDisplayProps;
       this.state.displayProps.dateRange = {
@@ -130,10 +139,12 @@ export default class CodeHotspots extends React.PureComponent {
             <span style={{ float: 'left' }}>
               <Settings
                 displayProps={this.state.displayProps}
-                displayPropsChanged={(newDisplayProps) => {
+                gitlabSettings={this.state.gitlabSettings}
+                saveSettings={(newDisplayProps, newGitlabSettings) => {
                   this.dataChanged = true;
                   localStorage.setItem('displayProps', JSON.stringify(newDisplayProps));
-                  this.setState({ displayProps: newDisplayProps });
+                  localStorage.setItem('gitlabSettings', JSON.stringify(newGitlabSettings));
+                  this.setState({ displayProps: newDisplayProps, gitlabSettings: newGitlabSettings });
                   this.forceUpdate();
                 }}
               />
@@ -297,187 +308,158 @@ export default class CodeHotspots extends React.PureComponent {
     if (this.state.path !== '') {
       Loading.insert();
       Loading.setState(0, 'Requesting Source Code');
-      const sourceCodeRequest = new XMLHttpRequest();
-      sourceCodeRequest.open(
-        'GET',
-        this.state.fileURL
-          .replace('github.com', 'raw.githubusercontent.com')
-          .replace('/blob', '')
-          .replace(this.state.checkedOutBranch, this.state.selectedCommit.sha === '' ? this.state.branch : this.state.selectedCommit.sha),
-        true
-      );
-      sourceCodeRequest.onload = function () {
-        if (sourceCodeRequest.readyState === 4) {
-          //if (xhr.status === 200) {
+      SourceCodeRequest.getSourceCode(
+        this.state.fileURL,
+        this.state.path,
+        this.state.checkedOutBranch,
+        this.state.branch,
+        this.state.selectedCommit.sha,
+        this.state.gitlabSettings.projectId,
+        this.state.gitlabSettings.apiKey,
+        this.state.gitlabSettings.server
+      ).then((sourceCode) => {
+        if (
+          this.state.path === this.prevPath &&
+          (this.state.selectedCommit.sha !== this.prevSha || this.state.selectedCompareCommit.sha !== this.prevCompareSha)
+        ) {
+          this.prevSha = this.state.selectedCommit.sha;
+          this.prevCompareSha = this.state.selectedCompareCommit.sha;
+          this.codeChanged = true;
+          this.dataChanged = false;
+          Loading.remove();
+          const data = this.state.data;
+          data.code = sourceCode;
+          data.secondaryCode = sourceCode;
+          const currFilteredData =
+            this.state.mode === 2
+              ? searchAlgorithm.performIssueSearch(data, this.state.filteredData.searchTerm)
+              : this.state.mode === 1
+              ? searchAlgorithm.performDeveloperSearch(data, this.state.filteredData.searchTerm)
+              : this.state.mode === 0
+              ? searchAlgorithm.performCommitSearch(data, this.state.filteredData.searchTerm)
+              : data;
+          if (this.state.selectedCompareCommit.sha !== '') {
+            Loading.setState(50, 'Requesting Comparison Source Code');
 
-          if (
-            this.state.path === this.prevPath &&
-            (this.state.selectedCommit.sha !== this.prevSha || this.state.selectedCompareCommit.sha !== this.prevCompareSha)
-          ) {
-            this.prevSha = this.state.selectedCommit.sha;
-            this.prevCompareSha = this.state.selectedCompareCommit.sha;
-            this.codeChanged = true;
-            this.dataChanged = false;
-            Loading.remove();
-            const data = this.state.data;
-            data.code = sourceCodeRequest.responseText;
-            data.secondaryCode = sourceCodeRequest.responseText;
-            if (this.state.selectedCompareCommit.sha !== '') {
-              Loading.setState(50, 'Requesting Comparison Source Code');
-              const secondarySourceCodeRequest = new XMLHttpRequest();
-              secondarySourceCodeRequest.open(
-                'GET',
-                this.state.fileURL
-                  .replace('github.com', 'raw.githubusercontent.com')
-                  .replace('/blob', '')
-                  .replace(this.state.checkedOutBranch, this.state.selectedCompareCommit.sha),
-                true
-              );
-              const currThis = this;
-              secondarySourceCodeRequest.onload = function () {
-                data.secondaryCode = secondarySourceCodeRequest.responseText;
-                currThis.setState({
-                  data: data,
-                  filteredData:
-                    currThis.state.mode === 2
-                      ? searchAlgorithm.performIssueSearch(data, currThis.state.filteredData.searchTerm)
-                      : currThis.state.mode === 1
-                      ? searchAlgorithm.performDeveloperSearch(data, currThis.state.filteredData.searchTerm)
-                      : currThis.state.mode === 0
-                      ? searchAlgorithm.performCommitSearch(data, currThis.state.filteredData.searchTerm)
-                      : data,
-                });
-              };
-              secondarySourceCodeRequest.send(null);
-            } else {
+            SourceCodeRequest.getSourceCode(
+              this.state.fileURL,
+              this.state.checkedOutBranch,
+              this.state.branch,
+              this.state.selectedCompareCommit.sha,
+              '',
+              ''
+            ).then((secondarySourceCode) => {
+              data.secondaryCode = secondarySourceCode;
+
               this.setState({
                 data: data,
-                filteredData:
-                  this.state.mode === 2
-                    ? searchAlgorithm.performIssueSearch(data, this.state.filteredData.searchTerm)
-                    : this.state.mode === 1
-                    ? searchAlgorithm.performDeveloperSearch(data, this.state.filteredData.searchTerm)
-                    : this.state.mode === 0
-                    ? searchAlgorithm.performCommitSearch(data, this.state.filteredData.searchTerm)
-                    : data,
+                filteredData: currFilteredData,
               });
-            }
+            });
           } else {
-            const path = this.state.path;
-            const mode = this.state.mode;
-            this.prevPath = this.state.path;
-            this.prevMode = this.state.mode;
-            this.prevSha = this.state.selectedCommit.sha;
-            this.prevCompareSha = this.state.selectedCompareCommit.sha;
+            this.setState({
+              data: data,
+              filteredData: currFilteredData,
+            });
+          }
+        } else {
+          const path = this.state.path;
+          const mode = this.state.mode;
+          this.prevPath = this.state.path;
+          this.prevMode = this.state.mode;
+          this.prevSha = this.state.selectedCommit.sha;
+          this.prevCompareSha = this.state.selectedCompareCommit.sha;
 
-            switch (mode) {
-              case 1:
-                Loading.setState(33, 'Requesting Developer Data');
-                vcsData.getChangeData(path).then(
-                  function (resp) {
-                    Loading.setState(66, 'Transforming Developer Data');
-                    setTimeout(
-                      function () {
-                        const lines = (sourceCodeRequest.status === 200 ? sourceCodeRequest.responseText : '').split(/\r\n|\r|\n/).length;
-                        const data = chartUpdater.transformChangesPerDeveloperData(resp, lines);
-                        //this.codeChanged = true;
-                        this.dataChanged = true;
-                        // eslint-disable-next-line max-len
-                        data.code =
-                          sourceCodeRequest.status === 200 ? sourceCodeRequest.responseText : 'No commit code in current selected Branch!';
-                        data.secondaryCode = data.code;
-                        data.firstLineNumber = 1;
-                        data.searchTerm = '';
-                        data.rawData = resp;
-                        this.setState({
-                          code:
-                            sourceCodeRequest.status === 200
-                              ? sourceCodeRequest.responseText
-                              : 'No commit code in current selected Branch!',
-                          data: data,
-                          filteredData: data,
-                        });
-                      }.bind(this),
-                      0
-                    );
-                  }.bind(this)
-                );
-                break;
-              case 2:
-                Loading.setState(33, 'Requesting Issue Data');
-                vcsData.getIssueData(path).then(
-                  function (resp) {
-                    Loading.setState(66, 'Transforming Issue Data');
-                    setTimeout(
-                      function () {
-                        const lines = (sourceCodeRequest.status === 200 ? sourceCodeRequest.responseText : '').split(/\r\n|\r|\n/).length;
-                        const data = chartUpdater.transformChangesPerIssueData(resp, lines);
-                        //this.codeChanged = true;
-                        this.dataChanged = true;
-                        data.code =
-                          sourceCodeRequest.status === 200 ? sourceCodeRequest.responseText : 'No commit code in current selected Branch!';
-                        data.secondaryCode = data.code;
-                        data.firstLineNumber = 1;
-                        data.searchTerm = '';
-                        data.rawData = resp;
-                        this.setState({
-                          code:
-                            sourceCodeRequest.status === 200
-                              ? sourceCodeRequest.responseText
-                              : 'No commit code in current selected Branch!',
-                          data: data,
-                          filteredData: data,
-                        });
-                      }.bind(this),
-                      0
-                    );
-                  }.bind(this)
-                );
-                break;
-              default:
-                Loading.setState(33, 'Requesting Version Data');
-                vcsData.getChangeData(path).then(
-                  function (resp) {
-                    Loading.setState(66, 'Transforming Version Data');
-                    setTimeout(
-                      function () {
-                        const lines = (sourceCodeRequest.status === 200 ? sourceCodeRequest.responseText : '').split(/\r\n|\r|\n/).length;
-                        const data = chartUpdater.transformChangesPerVersionData(resp, lines);
-                        //this.codeChanged = true;
-                        this.dataChanged = true;
-                        data.code =
-                          sourceCodeRequest.status === 200 ? sourceCodeRequest.responseText : 'No commit code in current selected Branch!';
-                        data.secondaryCode = data.code;
-                        data.firstLineNumber = 1;
-                        data.searchTerm = '';
-                        data.rawData = resp;
-                        const currDisplayProps = this.state.displayProps;
-                        currDisplayProps.dateRange.from = data.data[0].date.split('.')[0];
-                        currDisplayProps.dateRange.to = data.data[data.data.length - 1].date.split('.')[0];
-                        this.setState({
-                          code:
-                            sourceCodeRequest.status === 200
-                              ? sourceCodeRequest.responseText
-                              : 'No commit code in current selected Branch!',
-                          data: data,
-                          filteredData: data,
-                          displayProps: currDisplayProps,
-                        });
-                      }.bind(this),
-                      0
-                    );
-                  }.bind(this)
-                );
-                break;
-            }
+          switch (mode) {
+            case 1:
+              Loading.setState(33, 'Requesting Developer Data');
+              vcsData.getChangeData(path).then(
+                function (resp) {
+                  Loading.setState(66, 'Transforming Developer Data');
+                  setTimeout(
+                    function () {
+                      const lines = sourceCode.split(/\r\n|\r|\n/).length;
+                      const data = chartUpdater.transformChangesPerDeveloperData(resp, lines);
+                      //this.codeChanged = true;
+                      this.dataChanged = true;
+                      // eslint-disable-next-line max-len
+                      data.code = sourceCode;
+                      data.secondaryCode = data.code;
+                      data.firstLineNumber = 1;
+                      data.searchTerm = '';
+                      data.rawData = resp;
+                      this.setState({
+                        code: sourceCode,
+                        data: data,
+                        filteredData: data,
+                      });
+                    }.bind(this),
+                    0
+                  );
+                }.bind(this)
+              );
+              break;
+            case 2:
+              Loading.setState(33, 'Requesting Issue Data');
+              vcsData.getIssueData(path).then(
+                function (resp) {
+                  Loading.setState(66, 'Transforming Issue Data');
+                  setTimeout(
+                    function () {
+                      const lines = sourceCode.split(/\r\n|\r|\n/).length;
+                      const data = chartUpdater.transformChangesPerIssueData(resp, lines);
+                      //this.codeChanged = true;
+                      this.dataChanged = true;
+                      data.code = sourceCode;
+                      data.secondaryCode = data.code;
+                      data.firstLineNumber = 1;
+                      data.searchTerm = '';
+                      data.rawData = resp;
+                      this.setState({
+                        code: sourceCode,
+                        data: data,
+                        filteredData: data,
+                      });
+                    }.bind(this),
+                    0
+                  );
+                }.bind(this)
+              );
+              break;
+            default:
+              Loading.setState(33, 'Requesting Version Data');
+              vcsData.getChangeData(path).then(
+                function (resp) {
+                  Loading.setState(66, 'Transforming Version Data');
+                  setTimeout(
+                    function () {
+                      const lines = sourceCode.split(/\r\n|\r|\n/).length;
+                      const data = chartUpdater.transformChangesPerVersionData(resp, lines);
+                      //this.codeChanged = true;
+                      this.dataChanged = true;
+                      data.code = sourceCode;
+                      data.secondaryCode = data.code;
+                      data.firstLineNumber = 1;
+                      data.searchTerm = '';
+                      data.rawData = resp;
+                      const currDisplayProps = this.state.displayProps;
+                      currDisplayProps.dateRange.from = data.data[0].date.split('.')[0];
+                      currDisplayProps.dateRange.to = data.data[data.data.length - 1].date.split('.')[0];
+                      this.setState({
+                        code: sourceCode,
+                        data: data,
+                        filteredData: data,
+                        displayProps: currDisplayProps,
+                      });
+                    }.bind(this),
+                    0
+                  );
+                }.bind(this)
+              );
+              break;
           }
         }
-      }.bind(this);
-      sourceCodeRequest.onerror = function () {
-        Loading.setErrorText(sourceCodeRequest.statusText);
-        console.error(sourceCodeRequest.statusText);
-      };
-      sourceCodeRequest.send(null);
+      });
     }
   }
 

@@ -14,7 +14,8 @@ const modeDB = {
   java: 'clike',
   py: 'python',
   r: 'r',
-  xml: 'xml'
+  xml: 'xml',
+  yml: 'yaml',
 };
 
 export default class ModeSwitcher {
