@@ -270,8 +270,8 @@ export default class columnChartGeneration {
             d.sha.localeCompare(currThis.state.selectedCommit.sha) === 0
               ? '#3273dc22'
               : d.sha.localeCompare(currThis.state.selectedCompareCommit.sha) === 0
-                ? '#4cd96422'
-                : '#EEEEEE88'
+              ? '#4cd96422'
+              : '#EEEEEE88'
           )
           .attr('class', 'sBar')
           .attr('x', (d, i) => (i * w) / currThis.combinedColumnData.length)
@@ -293,8 +293,8 @@ export default class columnChartGeneration {
             d.sha.localeCompare(currThis.state.selectedCommit.sha) === 0
               ? '#3273dc'
               : d.sha.localeCompare(currThis.state.selectedCompareCommit.sha) === 0
-                ? '#4cd964'
-                : '#00000000'
+              ? '#4cd964'
+              : '#00000000'
           );
 
         groupInfo
@@ -457,6 +457,7 @@ export default class columnChartGeneration {
     const commits = d3.select('#chartBranchView').selectAll('rect').data(currThis.combinedColumnData);
     const branchLines = d3.select('#chartBranchView');
     let offset = 0;
+    console.log(branches);
     const firstCommitCount = parseInt(branches[0].values[0].column);
     for (const branch of branches) {
       if (branch.values.length === 1) {
@@ -488,8 +489,8 @@ export default class columnChartGeneration {
         d.sha.localeCompare(currThis.state.selectedCommit.sha) === 0
           ? '#3273dc'
           : d.sha.localeCompare(currThis.state.selectedCompareCommit.sha) === 0
-            ? '#4cd964'
-            : '#00000000'
+          ? '#4cd964'
+          : '#00000000'
       )
       .style('stroke-width', '2px')
       .attr('rx', '100%')
