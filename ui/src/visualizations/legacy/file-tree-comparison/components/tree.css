@@ -4,18 +4,29 @@
   padding: 5px;
   margin-top: 5px;
   background-color: white;
+  border-radius: 10px;
 }
 
 .tree{
   background-color: lightgrey;
+  border: 1px solid black;
+  border-top-left-radius: 10px;
+  border-bottom-left-radius: 10px;
+  overflow-y: auto;
+  max-height: 50em;
 }
 
 li:not(:last-child) {
   margin-bottom: 5px;
   margin-left: 5px;
+  width: fit-content;
+  padding: 2px;
 }
 li:last-child {
+  margin-bottom: 5px;
   margin-left: 5px;
+  width: fit-content;
+  padding: 2px;
 }
 .space {
   margin: 5px;
@@ -35,12 +46,19 @@ li:last-child {
   background-color: #bd981d;
   border-radius: 5px;
 }
-
-ul {
-  border: 1px solid black;
-  border-top-left-radius: 10px;
-  border-bottom-left-radius: 10px;
-  overflow-y: auto;
-  max-height: 50em;
+button {
+  background-color: white;
+  border: 1px solid #555555;
+  color: #555555;
+  padding: 5px 10px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  border-radius: 10px;
+  transition-duration: 0.2s;
+}
+button:hover {
+  background-color: #555555;
+  color: white;
 }
 

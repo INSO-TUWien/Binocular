@@ -1,7 +1,6 @@
 .legend {
   padding: 0;
-  position: absolute;
-  bottom: 0;
+  align-self: flex-end;
   list-style: none;
   border: 1px black;
   overflow: hidden;
