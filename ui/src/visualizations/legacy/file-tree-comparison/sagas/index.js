@@ -9,6 +9,9 @@ export const receiveCommitsAndFileTree = timestampedActionFactory('RECEIVE_COMMI
 export const receiveCommitsAndFileTreeError = createAction('RECEIVE_COMMITS');
 export const setCommit1 = createAction('SET_COMMIT_1', (f) => f);
 export const setCommit2 = createAction('SET_COMMIT_2', (f) => f);
+export const setTree1 = createAction('SET_TREE_1', (f) => f);
+export const setTree2 = createAction('SET_TREE_2', (f) => f);
+export const setChanged = createAction('SET_CHANGED', (f) => f);
 
 export default function* () {
   // fetch data once on entry
@@ -22,16 +25,12 @@ export const fetchFileTreeEvolutionData = fetchFactory(
     const firstCommitTimestamp = Date.parse(firstCommit.date);
     const lastCommitTimestamp = Date.parse(lastCommit.date);
 
-    const commits = yield Database.getCommitsWithFileTree([firstCommitTimestamp, lastCommitTimestamp], [firstCommitTimestamp, lastCommitTimestamp]); //COMMITS
-    //const fileTree = yield Database.requestFileStructure();
-    //console.log(yield Database.searchCommits('Bug')); //search commits
+    const commits = yield Database.getCommitsWithFileTree(
+      [firstCommitTimestamp, lastCommitTimestamp],
+      [firstCommitTimestamp, lastCommitTimestamp]
+    ); //COMMITS
 
-    //let fileTreeInTimeSpan = buildTimespanSpecificFileTree(null, commits[100].sha, commits);
-    //console.log(fileTreeInTimeSpan);
-    //const h = makeHierarchyFileTree(fileTreeInTimeSpan);
-    //console.log(h);
-
-    return { commits: commits, tree: null };
+    return { commits: commits };
   },
   requestCommitsAndFileTree,
   receiveCommitsAndFileTree,

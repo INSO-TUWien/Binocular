@@ -147,6 +147,7 @@ export default class Changes extends React.Component {
     });
     const changed = { add: additions, edit: edited, delete: deletions };
     this.setState({ tree1: tree1H, tree2: tree2H, changed: changed });
+    this.props.onSetChanged(changed);
   }
 }
 function getEdits(fromSha, toSha, commits) {
@@ -178,10 +179,9 @@ function getTreeCommitspan(toSha, commits) {
   }
   const fileTree = [];
   const commitRadius = commits.slice(0, commits.findIndex((e) => e.sha === toSha) + 1);
-
   commitRadius.forEach((commit) => {
     commit.files.data.forEach((f) => {
-      if (f.stats.additions === f.lineCount) {
+      if (f.stats.additions > f.stats.deletions) {
         if (!fileTree.includes(f.file.path)) {
           fileTree.push(f.file.path);
         }

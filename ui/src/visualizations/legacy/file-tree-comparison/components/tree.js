@@ -10,6 +10,7 @@ export default class Tree extends React.PureComponent {
   }
 
   componentWillReceiveProps(nextProps, nextContext) {
+    console.log(nextProps);
     this.setState({
       tree: nextProps.files,
     });
@@ -50,7 +51,7 @@ class TreeNode extends React.PureComponent {
             if (x.mark === 'Addition' || x.mark === 'Deletion' || x.mark === 'Edit') {
               return (
                 <div key={x.name.toString()} className={styles.space}>
-                  <button onClick={event => {
+                  <button  onClick={event => {
                     const target = event.currentTarget;
                     const panel = target.nextSibling;
                     panel.hidden = !panel.hidden;

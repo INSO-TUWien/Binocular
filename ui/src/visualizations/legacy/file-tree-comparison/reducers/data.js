@@ -18,6 +18,11 @@ export default handleActions(
     data: [
       {
         commits: [],
+        changed: {
+          add: [],
+          delete: [],
+          edit: [],
+        },
       },
     ],
     lastFetched: null,

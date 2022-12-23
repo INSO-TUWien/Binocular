@@ -17,13 +17,11 @@
 }
 
 li:not(:last-child) {
-  margin-bottom: 5px;
   margin-left: 5px;
   width: fit-content;
   padding: 2px;
 }
 li:last-child {
-  margin-bottom: 5px;
   margin-left: 5px;
   width: fit-content;
   padding: 2px;
