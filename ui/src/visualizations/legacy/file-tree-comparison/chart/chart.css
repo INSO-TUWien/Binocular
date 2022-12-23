@@ -22,6 +22,10 @@ table td, table th {
   padding: 10px;
 }
 
+.name {
+  margin-left: 10px;
+}
+
 .flex {
   padding: 10px;
   display: flex;

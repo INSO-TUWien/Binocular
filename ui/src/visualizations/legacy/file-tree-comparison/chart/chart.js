@@ -38,7 +38,7 @@ export default class Changes extends React.Component {
               onChange={(e) => {
                 this.calculateValues(e.value, null);
                 this.setState({ commitsToChoose2: this.buildingSelect(this.state.commits, e.value.date) });
-              }}></Select> <div hidden={this.state.commit1.date === ''}>{this.state.commit1.signature.split('<')[0].trim() + ', ' + this.state.commit1.date.substring(0, 10)}</div></div>
+              }}></Select> <div className={styles.name} hidden={this.state.commit1.date === ''}>{this.state.commit1.signature.split('<')[0].trim() + ', ' + this.state.commit1.date.substring(0, 10)}</div></div>
           </th>
           <th>
             <div className={styles.flex}>
@@ -48,7 +48,7 @@ export default class Changes extends React.Component {
               options={this.state.commitsToChoose2}
               onChange={(e) => {
                 this.calculateValues(null, e.value);
-              }}></Select><div hidden={this.state.commit2.date === ''}>{this.state.commit2.signature.split('<')[0].trim() + ', ' + this.state.commit2.date.substring(0, 10)}</div></div>
+              }}></Select><div className={styles.name} hidden={this.state.commit2.date === ''}>{this.state.commit2.signature.split('<')[0].trim() + ', ' + this.state.commit2.date.substring(0, 10)}</div></div>
           </th>
         </thead>
         <tbody>
@@ -136,14 +136,14 @@ export default class Changes extends React.Component {
         deletions.push(path);
       }
     });
+    edited.forEach((path) => {
+      markChild(tree2H, path, 'Edit');
+    });
     tree2.forEach((path) => {
       if (!tree1.includes(path)) {
         markChild(tree2H, path, 'Addition');
         additions.push(path);
       }
-    });
-    edited.forEach((path) => {
-      markChild(tree2H, path, 'Edit');
     });
     const changed = { add: additions, edit: edited, delete: deletions };
     this.setState({ tree1: tree1H, tree2: tree2H, changed: changed });
