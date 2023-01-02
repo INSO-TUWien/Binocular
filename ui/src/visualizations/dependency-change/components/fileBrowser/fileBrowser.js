@@ -6,7 +6,6 @@ import SearchBar from '../searchBar/searchBar';
 export default class FileBrowser extends React.PureComponent {
   constructor(props) {
     super(props);
-    debugger;
     this.state = {
       filteredData: this.props.files
     };

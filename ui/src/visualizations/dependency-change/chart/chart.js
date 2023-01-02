@@ -12,6 +12,8 @@ import BackgroundRefreshIndicator from "../components/backgroundRefreshIndicator
 import DateRangeFilter from "../components/dateRangeFilter/dateRangeFilter";
 import chartStyles from "./chart.scss";
 import cx from "classnames";
+import TimeLineComponent from "../components/timeLine/timeLine";
+
 
 export default class DependencyChanges extends React.PureComponent {
   constructor(props) {
@@ -25,8 +27,12 @@ export default class DependencyChanges extends React.PureComponent {
       props.onSetFiles(files);
     });
 
+
+
     this.elems = {};
     this.state = {
+      dates: ['2022-11-12', '2022-11-13', '2022-11-14', '2022-11-15'],
+      date: '2022-11-13',
       code: "No File Selected",
       comparedCode: "No File Selected",
       type: "",
@@ -36,6 +42,7 @@ export default class DependencyChanges extends React.PureComponent {
       checkedOutCompareBranch: "main",
       fileURL: "",
       path: "",
+      showTimeLine: false,
       sha: "",
       mode: 0, //modes: 0...Changes/Version  1...Changes/Developer  2...Changes/Issue
       data: {},
@@ -64,6 +71,8 @@ export default class DependencyChanges extends React.PureComponent {
       filteredDependencies: [],
       filteredComparedDependencies: [],
       resultDependencies: [],
+      packageJsons: {},
+      commits: []
     };
 
     this.combinedColumnData = {};
@@ -86,6 +95,8 @@ export default class DependencyChanges extends React.PureComponent {
         this.setState({ checkedOutCompareBranch: activeBranch });
       }.bind(this)
     );
+
+    this.getCommitsPackageJsons();
   }
 
   componentWillReceiveProps(nextProps) {
@@ -154,17 +165,33 @@ export default class DependencyChanges extends React.PureComponent {
               </span>
               <ul className={styles.dependencyList}>
                 {this.state.resultDependencies.map((dep, index) => (
-                  <li key={index}>
+                  <li onClick={() => { this.getCommitsPackageJsons(dep.name)}}  key={index}>
                     { dep.status === 1 ? <i className={cx("fa", "fa-plus")}></i> : dep.status === 2 ? <i className={cx("fa", "fa-minus")}></i> : <i className={cx("fa", "fa-equals")}></i>}
                     {dep.name}
                   </li>
                 ))}
               </ul>
+              { this.state.showTimeLine ? <TimeLineComponent data={ this.state.commits }/> : null }
             </div>
           </div>
         </div>
       </div>
     );
+  }
+
+  convertTimeToDate(timestamp){
+    debugger;
+    const timestampParsed = parseInt(timestamp);
+    const date = new Date(timestampParsed);
+    return date.toLocaleDateString('de-DE', {day:'numeric', month: 'numeric', year: 'numeric'});
+  }
+
+  showVersion(depName){
+    let arr = [];
+    for( const [key, value] of Object.entries(this.state.packageJsons)){
+        arr.push(value.dependencies[depName]);
+    }
+    return arr;
   }
 
   evaluateDependencies() {
@@ -321,6 +348,36 @@ export default class DependencyChanges extends React.PureComponent {
       )
     ).then((resp) => resp.branches.data);
   }
+
+
+  getCommitsPackageJsons(name){
+    this.setState({
+      showTimeLine: false
+    });
+    
+    var http = new XMLHttpRequest();
+
+    http.addEventListener('load', () => {
+      const data = JSON.parse(http.responseText);
+
+      const onlyRelevant = [];
+      for(const commit of data){
+        if(onlyRelevant.filter(c => c.version == commit.version).length == 0){
+            onlyRelevant.push(commit);
+        }
+      }
+      this.setState({
+        commits: onlyRelevant,
+        showTimeLine: true
+      });
+      console.log('wait until all data fetched');
+      console.log(onlyRelevant);
+    });
+    
+    http.open("GET", "/api/commitsPackage?dep=" + name);
+    http.send();
+  }
+
 
   getDependencies(content, type) {
     var body = {};
