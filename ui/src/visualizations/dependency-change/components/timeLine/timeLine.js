@@ -2,6 +2,7 @@ import React from 'react';
 import styles from './timeLine.scss';
 import * as d3 from 'd3';
 
+
 export default class TimeLineComponent extends React.PureComponent {
   constructor(props) {
     super(props);
@@ -23,17 +24,17 @@ export default class TimeLineComponent extends React.PureComponent {
 
         const xScale = d3
             .scaleTime()
-            .domain([new Date(2015,0,1), new Date(2023,0,1)])
+            .domain([new Date(2015,0,1), new Date()])
             .range([0,500]);
       
 
-        const yScale = d3.scaleLinear().range([50,0]);
+        const yScale = d3.scaleLinear().range([100,0]);
 
         const xAxis = d3.axisBottom(xScale);
 
-        svg.append("g").attr("transform", "translate(0,50)").call(xAxis);
+        svg.append("g").attr("transform", "translate(0,100)").call(xAxis);
 
-        const circles = svg
+        svg
         .selectAll("circle")
         .data(data)
         .enter()
@@ -41,26 +42,35 @@ export default class TimeLineComponent extends React.PureComponent {
         .attr("r", 5)
         .attr("cx", d => xScale(d.date))
         .attr("cy", d => yScale(d.value))
-        .attr("fill", "green")
+        .attr("fill", "blue")
         .attr("title", d => d.label)
         .append("text")
         .text(d => d.label)
         .attr("x", d => xScale(d.date))
         .attr("y", d => yScale(d.value) - 10)
         .attr("dx", 0)
-        .attr("dy", 0) // adjust this value to move the label above the circle
+        .attr("dy", -50) // adjust this value to move the label above the circle
         .style("font-size", "12px")
         .style("fill", "black")
+        .style("writing-mode", "vertical-rl")
+        .style("glyph-orientation-vertical", 0)
+        .style("font-weight", "bold")
         .style("text-anchor", "start");
      
+        const circles = document.querySelectorAll(".timeLine circle");
+        circles.forEach(elem => {
+          const textSelection = elem.querySelector("text");
+          elem.parentNode.insertBefore(textSelection, elem.nextSibling);
+        })
 
     }
 
   render() {
     return (
-        <svg style={{width: '100%', marginLeft: '15px'}} className="timeline" ref={g => (this.g = g)}>
-                <g className="x-axis" />
-        </svg> 
+        <div>
+          <svg style={{width: '100%', marginLeft: '15px', marginTop: '50px'}} className="timeline" ref={g => (this.g = g)}></svg>
+          <label style={{ paddingLeft: '15px', fontWeight: '300'}}>{ this.props.dep }</label>
+        </div>
     );
   }
 }

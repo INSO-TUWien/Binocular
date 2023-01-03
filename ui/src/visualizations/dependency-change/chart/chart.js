@@ -72,7 +72,8 @@ export default class DependencyChanges extends React.PureComponent {
       filteredComparedDependencies: [],
       resultDependencies: [],
       packageJsons: {},
-      commits: []
+      commits: [],
+      selectedDep: undefined
     };
 
     this.combinedColumnData = {};
@@ -80,7 +81,7 @@ export default class DependencyChanges extends React.PureComponent {
     this.combinedHeatmapData = {};
     this.dataChanged = false;
     this.codeChanged = false;
-    this.getAllBranches().then(
+    this.getAllBranches().then(   
       function (resp) {
         let activeBranch = "main";
         for (const i in resp) {
@@ -171,7 +172,7 @@ export default class DependencyChanges extends React.PureComponent {
                   </li>
                 ))}
               </ul>
-              { this.state.showTimeLine ? <TimeLineComponent data={ this.state.commits }/> : null }
+              { this.state.showTimeLine && this.state.commits.length > 0 ? <TimeLineComponent dep={ this.state.selectedDep } data={ this.state.commits }/> : null }
             </div>
           </div>
         </div>
@@ -351,10 +352,13 @@ export default class DependencyChanges extends React.PureComponent {
 
 
   getCommitsPackageJsons(name){
+    Loading.insert();
+    Loading.setState(80, "Search for dependency version changes");
     this.setState({
-      showTimeLine: false
+      showTimeLine: false,
+      selectedDep: name
     });
-    
+
     var http = new XMLHttpRequest();
 
     http.addEventListener('load', () => {
@@ -370,6 +374,7 @@ export default class DependencyChanges extends React.PureComponent {
         commits: onlyRelevant,
         showTimeLine: true
       });
+      Loading.remove();
       console.log('wait until all data fetched');
       console.log(onlyRelevant);
     });
