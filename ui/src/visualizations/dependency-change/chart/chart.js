@@ -29,7 +29,6 @@ export default class DependencyChanges extends React.PureComponent {
 
     this.elems = {};
     this.state = {
-      dates: ['2022-11-12', '2022-11-13', '2022-11-14', '2022-11-15'],
       date: '2022-11-13',
       code: "No File Selected",
       comparedCode: "No File Selected",
@@ -124,9 +123,9 @@ export default class DependencyChanges extends React.PureComponent {
               </span>
               <ul className={styles.dependencyList}>
                 {this.state.resultDependencies.map((dep, index) => (
-                  <li onClick={() => { this.getCommitsPackageJsons(dep.name)}}  key={index}>
+                  <li style={{fontWeight: this.state.selectedDep == dep.name ? 600 : 300}}  key={index}>
                     { dep.status === 1 ? <i className={cx("fa", "fa-plus")}></i> : dep.status === 2 ? <i className={cx("fa", "fa-minus")}></i> : <i className={cx("fa", "fa-equals")}></i>}
-                    {dep.name}
+                    <span onClick={() => { this.getCommitsPackageJsons(dep.name)}} className={styles.pointer}>{dep.name}</span>
                   </li>
                 ))}
               </ul>
@@ -139,7 +138,11 @@ export default class DependencyChanges extends React.PureComponent {
                 </div>
               ) : null }
             </div>
-          </div>) : null }
+          </div>) : (
+            <div className={styles.filler}>
+            <p>Please select a file to visualize from the sidebar.</p>
+          </div>
+          ) }
         </div>
       </div>
     );
@@ -235,6 +238,7 @@ export default class DependencyChanges extends React.PureComponent {
 
   requestData() {
     if (this.state.path !== "") {
+      debugger;
       Loading.insert();
       Loading.setState(0, "Requesting Source Code");
       const xhr = new XMLHttpRequest();

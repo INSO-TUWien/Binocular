@@ -2,7 +2,6 @@ import React from 'react';
 import styles from './timeLine.scss';
 import * as d3 from 'd3';
 import cx from 'classnames';
-import { func } from 'prop-types';
 
 
 export default class TimeLineComponent extends React.PureComponent {
@@ -43,6 +42,7 @@ export default class TimeLineComponent extends React.PureComponent {
         .data(data)
         .enter()
         .append("circle")
+        .style("cursor", "pointer")
         .attr("r", 5)
         .attr("cx", d => xScale(d.date))
         .attr("cy", d => yScale(d.value))
