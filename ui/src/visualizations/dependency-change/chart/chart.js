@@ -9,8 +9,6 @@ import BluebirdPromise from "bluebird";
 import { graphQl } from "../../../utils";
 import Loading from "./helper/loading";
 import BackgroundRefreshIndicator from "../components/backgroundRefreshIndicator/backgroundRefreshIndicator";
-import DateRangeFilter from "../components/dateRangeFilter/dateRangeFilter";
-import chartStyles from "./chart.scss";
 import cx from "classnames";
 import TimeLineComponent from "../components/timeLine/timeLine";
 
@@ -96,8 +94,6 @@ export default class DependencyChanges extends React.PureComponent {
         this.setState({ checkedOutCompareBranch: activeBranch });
       }.bind(this)
     );
-
-    this.getCommitsPackageJsons();
   }
 
   componentWillReceiveProps(nextProps) {
@@ -121,45 +117,7 @@ export default class DependencyChanges extends React.PureComponent {
       <div className={styles.w100}>
         <div className={"loadingContainer"} />
         <BackgroundRefreshIndicator />
-        <div className={styles.w100}>
-          <div className={chartStyles.menubar}>
-            <span
-              className={chartStyles.dependencyChangesFilter}
-              style={{ float: "left" }}
-            >
-              {" "}
-              <DateRangeFilter
-                from={this.state.displayProps.dateRange.from}
-                to={this.state.displayProps.dateRange.to}
-                onDateChanged={(data) => {
-                  const currDisplayProps = this.state.displayProps;
-                  currDisplayProps.dateRange = data;
-                  this.setState({ displayProps: currDisplayProps });
-                }}
-              />
-            </span>
-            <span className={styles.verticalSeparator} />
-            <span
-              id={"mainSearch"}
-              className={styles.mg1}
-              style={{ width: "20rem", float: "left" }}
-            ></span>
-            {this.state.sha !== "" && (
-              <span>
-                <span className={styles.verticalSeparator} />
-                <button
-                  className={"button " + styles.mg1 + " " + styles.button}
-                  onClick={() => {
-                    this.setState({ sha: "" });
-                  }}
-                >
-                  Back to current Version
-                </button>
-              </span>
-            )}
-          </div>
-
-          <div className={styles.w100 + " " + styles.pr + " tree-sitter"}>
+        <div className={styles.w100}>{ this.state.resultDependencies?.length > 0 ? (<div className={styles.w100 + " " + styles.pr + " tree-sitter"}>
             <div className={styles.dependencyChart}>
               <span className={styles.dependencyTitle}>
                 Dependency Changes:{" "}
@@ -172,16 +130,22 @@ export default class DependencyChanges extends React.PureComponent {
                   </li>
                 ))}
               </ul>
-              { this.state.showTimeLine && this.state.commits.length > 0 ? <TimeLineComponent dep={ this.state.selectedDep } data={ this.state.commits }/> : null }
+              { this.state.showTimeLine && this.state.commits.length > 0 ? (
+                <div className={styles.chartLine}>
+                  <div className={cx(styles.text, 'label')}>{ this.state.selectedDep }</div>
+                  <div className={styles.chart}>
+                    <TimeLineComponent dep={ this.state.selectedDep } data={ this.state.commits }/>
+                  </div>
+                </div>
+              ) : null }
             </div>
-          </div>
+          </div>) : null }
         </div>
       </div>
     );
   }
 
   convertTimeToDate(timestamp){
-    debugger;
     const timestampParsed = parseInt(timestamp);
     const date = new Date(timestampParsed);
     return date.toLocaleDateString('de-DE', {day:'numeric', month: 'numeric', year: 'numeric'});

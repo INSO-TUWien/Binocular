@@ -1,6 +1,7 @@
 import React from 'react';
 import styles from './timeLine.scss';
 import * as d3 from 'd3';
+import cx from 'classnames'
 
 
 export default class TimeLineComponent extends React.PureComponent {
@@ -25,7 +26,7 @@ export default class TimeLineComponent extends React.PureComponent {
         const xScale = d3
             .scaleTime()
             .domain([new Date(2015,0,1), new Date()])
-            .range([0,500]);
+            .range([0,925]);
       
 
         const yScale = d3.scaleLinear().range([100,0]);
@@ -67,9 +68,8 @@ export default class TimeLineComponent extends React.PureComponent {
 
   render() {
     return (
-        <div>
-          <svg style={{width: '100%', marginLeft: '15px', marginTop: '50px'}} className="timeline" ref={g => (this.g = g)}></svg>
-          <label style={{ paddingLeft: '15px', fontWeight: '300'}}>{ this.props.dep }</label>
+        <div className={cx(styles.chartDiv, 'timeLine')}>
+          <svg className={styles.chartSvg} ref={g => (this.g = g)}></svg>
         </div>
     );
   }

@@ -1,4 +1,15 @@
-
-.timeline{
+.chartSvg {
+    width:100%;
+    margin-left: 40px;
+    margin-top: 50px;
+}
+  
+.chartDiv {
+    display: flex;
     width: 100%;
+}
+
+.chartLabel {
+    padding-left: 15px;
+    font-weight: 300;
 }

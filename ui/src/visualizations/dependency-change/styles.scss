@@ -121,6 +121,7 @@
 .dependencyChart{
     width: 100%;
     height: 300px;
+    margin-top: 15px;
 }
 
 .dependencyTitle{
@@ -134,4 +135,26 @@
 .dependencyList{
     padding-left: 12px;
     margin-top: 12px;
+}
+
+.chartLine{
+    background: #d8d8d8;
+    flex-grow: 1;
+    margin: 30px 5px 5px 5px;
+    padding: 5px;
+    display: flex;
+    align-items: center;
+
+    .text{
+      writing-mode: vertical-lr;
+      transform: rotate(-180deg);
+      margin-right: 10px;
+    }
+
+    .chart{
+      width: 100%;
+      height: 100%;
+      background: #ffffff;
+      display: flex;
+    }
 }
