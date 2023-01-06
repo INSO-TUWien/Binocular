@@ -2,6 +2,7 @@
 
 import { connect } from 'react-redux';
 import style from './config.css';
+import { setFilter } from './sagas';
 const mapStateToProps = (state /*, ownProps*/) => {
   const fileTreeState = state.visualizations.fileTreeComparison.state;
   return {
@@ -9,11 +10,29 @@ const mapStateToProps = (state /*, ownProps*/) => {
   };
 };
 
-const mapDispatchToProps = (dispatch) => {};
+const mapDispatchToProps = (dispatch, ownProps) => {
+  return Object.assign({
+      onSetFilter: (c) => dispatch(setFilter(c)),
+    },
+    ownProps
+  );
+};
 
 const ChangesConfigComponent = (props) => {
   return (
     <div className={style.info}>
+      <div className={style.search}>
+        <input
+          placeholder="Highlight issue..."
+          onChange={(e) => {
+            if (e.target.value === null) {
+              props.onSetFilter('');
+            } else {
+              props.onSetFilter(e.target.value);
+            }
+          }}
+        />
+      </div>
       <div className={style.files}>
         <div hidden={props.changed.add.length === 0}>
           <div>
@@ -53,11 +72,17 @@ const ChangesConfigComponent = (props) => {
         </div>
       </div>
       <div className={style.legend}>
-      <hr />
-      <div className={style.add}></div><div className={style.flexGrow}> Additions</div><hr/>
-      <div className={style.delete}></div><div className={style.flexGrow}> Deletions</div><hr/>
-      <div className={style.edit}></div><div className={style.flexGrow}> Modifications</div><hr/>
-    </div>
+        <hr />
+        <div className={style.add}></div>
+        <div className={style.flexGrow}> Additions</div>
+        <hr />
+        <div className={style.delete}></div>
+        <div className={style.flexGrow}> Deletions</div>
+        <hr />
+        <div className={style.edit}></div>
+        <div className={style.flexGrow}> Modifications</div>
+        <hr />
+      </div>
     </div>
   );
 };

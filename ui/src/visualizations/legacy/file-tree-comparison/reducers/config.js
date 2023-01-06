@@ -25,6 +25,10 @@ export default handleActions(
       _.assign({}, state, {
         changed: action.payload ? action.payload : null,
       }),
+    SET_FILTER: (state, action) =>
+      _.assign({}, state, {
+        filter: action.payload ? action.payload : null,
+      }),
   },
   {
     commit1: [],
@@ -36,5 +40,6 @@ export default handleActions(
       delete: [],
       edit: [],
     },
+    filter: '',
   }
 );

@@ -7,10 +7,25 @@
   align-content: center;
   display: flex;
   flex-flow: wrap;
+  margin-bottom: auto;
+}
+.search {
+  padding-top: 1em;
+}
+.files{
+  font-size: smaller;
+  overflow-y: auto;
+  max-height: 30em;
+  overflow-x: auto;
 }
 .info {
-  align-self: flex-end;
   max-width: 400px;
+  height: 40em;
+  display: flex;
+  flex-direction: row;
+  flex-flow: wrap;
+  justify-content: space-between;
+  align-content: space-between;
 }
 hr {
   flex-basis: 100%;
@@ -38,12 +53,7 @@ hr {
   width: 25px;
   margin-right: 10px;
 }
-.files{
-  font-size: smaller;
-  overflow-y: auto;
-  max-height: 25em;
-  overflow-x: auto;
-}
+
 .listStyle {
   list-style-type: disc;
   margin-left: 15px;
@@ -53,3 +63,4 @@ hr {
   word-wrap: break-word;
   width: auto !important;
 }
+

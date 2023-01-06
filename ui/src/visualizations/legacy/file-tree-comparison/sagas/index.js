@@ -12,6 +12,7 @@ export const setCommit2 = createAction('SET_COMMIT_2', (f) => f);
 export const setTree1 = createAction('SET_TREE_1', (f) => f);
 export const setTree2 = createAction('SET_TREE_2', (f) => f);
 export const setChanged = createAction('SET_CHANGED', (f) => f);
+export const setFilter = createAction('SET_FILTER', (f) => f);
 
 export default function* () {
   // fetch data once on entry

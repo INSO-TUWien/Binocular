@@ -117,8 +117,21 @@ export default class Changes extends React.Component {
   componentWillReceiveProps(nextProps) {
     if (nextProps.commits.length !== 0) {
       const commits = this.buildingSelect(nextProps.commits, null);
-      this.setState({ commits: nextProps.commits, commitsToChoose1: commits, commitsToChoose2: commits });
+      this.setState({ commits: nextProps.commits, commitsToChoose1: commits, commitsToChoose2: commits, filter: nextProps.filter });
+      if (this.state.tree2.length !== 0 && this.state.tree1.length !== 0) {
+        this.filterTrees(nextProps.filter);
+      }
     }
+  }
+
+  filterTrees(f) {
+    if (f === '' || f === null) {
+      return;
+    }
+    let t1 = this.state.tree1;
+    let t2 = this.state.tree2;
+
+    console.log(t1);
   }
   compareTrees(c1, c2) {
     console.log('compareTrees');
@@ -210,6 +223,11 @@ function markChild(tree, path, mode) {
       }
     });
   }
+  return tree;
+}
+
+function filterTree(tree, filter) {
+
   return tree;
 }
 function makeHierarchyFileTree(fileTree) {
