@@ -42,11 +42,19 @@ export default class ConflictDetailsModal extends React.Component {
       content = <FileDetails fileDetails={fileDetails} isFileDetailsProcessing={isFileDetailsProcessing} />;
     }
 
+    function navigateToFiles() {
+      displayConflictDetails(Object.assign(selectedConflict, { overviewType: 'files' }));
+    }
+
     return (
       <div className={this.styles.darkBG} onClick={e => closeModal(e)}>
         <div className={this.styles.modal}>
           <div className={this.styles.header}>
+            {overviewType === 'fileDetails' &&
+              <i className={this.styles.backIcon + ' fas fa-caret-left'} title="Go back to file list" onClick={() => navigateToFiles()} />}
+            {overviewType === 'files' && <i />}
             <b>Conflict Details</b>
+            <i className={this.styles.closeIcon + ' fas fa-times'} onClick={() => close()} title="Close Details Modal" />
           </div>
           {content}
           <div className={this.styles.footer}>

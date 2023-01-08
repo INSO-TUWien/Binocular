@@ -18,7 +18,6 @@ export default class ConflictOverview extends React.Component {
   render() {
     const { conflicts } = this.props;
     const participantsTag = conflicts.length > 1 ? 'participants' : 'participant';
-
     const handleContentMouseOver = () => {
       clearTimeout(this.state.contentCloseTimeout);
       this.setState({ showContent: true });

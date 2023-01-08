@@ -8,21 +8,40 @@ export default class FileDetails extends React.Component {
     this.styles = Object.assign({}, styles);
   }
 
+  renderError(error) {
+    return (
+      <div>
+        <span>Could not load conflict details. Reason: </span>
+        <span>
+          {error}
+        </span>
+      </div>
+    );
+  }
+
+  renderLoadingIndicator() {
+    return (
+      <div className={this.styles.loadingWrapper}>
+        <div className={this.styles.loadingIcon}>
+          {LOADING_ICON}
+        </div>
+        <div>Loading file conflict details</div>
+      </div>
+    );
+  }
+
   render() {
-    const { isFileDetailsProcessing, fileDetails: { selectedConflict, repositoryUrl } } = this.props;
+    const { isFileDetailsProcessing, fileDetails: { selectedConflict, repositoryUrl, fetchError } } = this.props;
     const { conflictBranch, selectedBranch, selectedFile } = selectedConflict;
-    console.log(selectedConflict);
+    console.log(selectedConflict, this.props.fileDetails);
 
     if (isFileDetailsProcessing) {
-      return (
-        <div className={this.styles.loadingWrapper}>
-          <div className={this.styles.loadingIcon}>
-            {LOADING_ICON}
-          </div>
-          <div>Loading file conflict details</div>
-        </div>
-      );
+      return this.renderLoadingIndicator();
     }
+    if (fetchError) {
+      return this.renderError(fetchError);
+    }
+
     return (
       <div>
         <div>

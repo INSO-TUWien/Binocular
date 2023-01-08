@@ -25,14 +25,6 @@
   border-radius: 5px;
   box-shadow: 0 5px 20px 0 rgba(0, 0, 0, 0.04);
 
-  .header {
-    margin-top: 15px;
-    font-size: 2rem;
-    display: flex;
-    align-items: center;
-    flex-direction: row;
-    justify-content: center;
-  }
   .footer {
     display: flex;
     justify-content: end;
@@ -51,16 +43,27 @@
     }
   }
 }
+.header {
+  margin-top: 15px;
+  font-size: 2rem;
+  display: flex;
+  align-items: center;
+  flex-direction: row;
+  justify-content: space-between;
+}
 
+.backIcon {
+  margin-left: 17px;
+  cursor: pointer;
+}
+.closeIcon {
+  margin-right: 17px;
+  cursor: pointer;
+}
 .modalBody {}
 
 .item{
   margin-left: 15px;
-}
-.header {
-  display: flex;
-  align-items: center;
-  flex-direction: row;
 }
 .fileBody {
   margin-left: 35px;
