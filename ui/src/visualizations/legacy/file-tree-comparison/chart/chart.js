@@ -118,27 +118,54 @@ export default class Changes extends React.Component {
     if (nextProps.commits.length !== 0) {
       const commits = this.buildingSelect(nextProps.commits, null);
       this.setState({ commits: nextProps.commits, commitsToChoose1: commits, commitsToChoose2: commits, filter: nextProps.filter });
-      if (this.state.tree2.length !== 0 && this.state.tree1.length !== 0) {
+      if (this.state.commit1.sha !== undefined && this.state.commit2.sha !== undefined) {
         this.filterTrees(nextProps.filter);
       }
     }
   }
 
   filterTrees(f) {
-    if (f === '' || f === null) {
-      return;
+    console.log('filter: ' + f);
+    if (f === null) {
+      f = '';
     }
-    let t1 = this.state.tree1;
-    let t2 = this.state.tree2;
+    const tree1 = getTreeCommitspan(this.state.commit1.sha, this.state.commits);
+    const tree2 = getTreeCommitspan(this.state.commit2.sha, this.state.commits);
+    const t1 = [];
+    const t2 = [];
+    tree1.forEach((path) => {
+      if (path.includes(f)) {
+        t1.push(path);
+      }
+    });
+    tree2.forEach((path) => {
+      if (path.includes(f)) {
+        t2.push(path);
+      }
+    });
+    const tree1H = makeHierarchyFileTree(t1);
+    const tree2H = makeHierarchyFileTree(t2);
+    const additions = this.state.changed.add;
+    const edits = this.state.changed.edit;
+    const deletions = this.state.changed.delete;
+    additions.forEach((p) => {
+      markChild(tree2H, p, 'Addition');
+    });
+    edits.forEach((p) => {
+      markChild(tree2H, p, 'Edit');
+    });
+    deletions.forEach((p) => {
+      markChild(tree1H, p, 'Deletion');
+    });
 
-    console.log(t1);
+    this.setState({ tree1: tree1H, tree2: tree2H });
   }
   compareTrees(c1, c2) {
     console.log('compareTrees');
     const tree1 = getTreeCommitspan(c1.sha, this.state.commits);
     const tree2 = getTreeCommitspan(c2.sha, this.state.commits);
-    let tree1H = makeHierarchyFileTree(tree1);
-    let tree2H = makeHierarchyFileTree(tree2);
+    const tree1H = makeHierarchyFileTree(tree1);
+    const tree2H = makeHierarchyFileTree(tree2);
     const edited = getEdits(c1.sha, c2.sha, this.state.commits);
     const additions = [];
     const deletions = [];
@@ -225,12 +252,8 @@ function markChild(tree, path, mode) {
   }
   return tree;
 }
-
-function filterTree(tree, filter) {
-
-  return tree;
-}
 function makeHierarchyFileTree(fileTree) {
+  console.log('makeHierarchyFileTree');
   if (fileTree === null || fileTree === undefined) {
     return null;
   }

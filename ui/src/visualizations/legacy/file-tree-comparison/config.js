@@ -23,6 +23,7 @@ const ChangesConfigComponent = (props) => {
     <div className={style.info}>
       <div className={style.search}>
         <input
+          hidden={props.changed.add.length === 0 && props.changed.edit.length === 0 && props.changed.delete.length === 0}
           placeholder="Highlight issue..."
           onChange={(e) => {
             if (e.target.value === null) {
