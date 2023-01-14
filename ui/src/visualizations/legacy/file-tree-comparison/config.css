@@ -1,13 +1,11 @@
 .legend {
   padding: 0;
-  align-self: flex-end;
   list-style: none;
   border: 1px black;
   overflow: hidden;
   align-content: center;
   display: flex;
   flex-flow: wrap;
-  margin-bottom: auto;
 }
 .search {
   padding-top: 1em;
@@ -17,15 +15,14 @@
   overflow-y: auto;
   max-height: 30em;
   overflow-x: auto;
+  width: 30em;
 }
 .info {
   max-width: 400px;
   height: 40em;
   display: flex;
-  flex-direction: row;
-  flex-flow: wrap;
+  flex-direction: column;
   justify-content: space-between;
-  align-content: space-between;
 }
 hr {
   flex-basis: 100%;
