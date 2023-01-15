@@ -9,10 +9,9 @@ export const receiveCommitsAndFileTree = timestampedActionFactory('RECEIVE_COMMI
 export const receiveCommitsAndFileTreeError = createAction('RECEIVE_COMMITS');
 export const setCommit1 = createAction('SET_COMMIT_1', (f) => f);
 export const setCommit2 = createAction('SET_COMMIT_2', (f) => f);
-export const setTree1 = createAction('SET_TREE_1', (f) => f);
-export const setTree2 = createAction('SET_TREE_2', (f) => f);
 export const setChanged = createAction('SET_CHANGED', (f) => f);
 export const setFilter = createAction('SET_FILTER', (f) => f);
+export const setDisplayOnlyChanged = createAction('DISPLAY_ONLY_CHANGED', (f) => f);
 
 export default function* () {
   // fetch data once on entry
@@ -37,9 +36,3 @@ export const fetchFileTreeEvolutionData = fetchFactory(
   receiveCommitsAndFileTree,
   receiveCommitsAndFileTreeError
 );
-
-
-
-
-
-

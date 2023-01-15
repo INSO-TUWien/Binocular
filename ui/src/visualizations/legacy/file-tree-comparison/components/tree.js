@@ -6,6 +6,7 @@ export default class Tree extends React.PureComponent {
     super(props);
     this.state = {
       tree: [],
+      mode: null,
     };
   }
 
@@ -13,13 +14,14 @@ export default class Tree extends React.PureComponent {
     console.log(nextProps);
     this.setState({
       tree: nextProps.files,
+      mode: nextProps.mode,
     });
   }
 
   render() {
     return (
       <ul className={styles.tree}>
-        <TreeNode node={this.state.tree} props={this.props}></TreeNode>
+        <TreeNode node={this.state.tree} mode={this.state.mode} props={this.props}></TreeNode>
       </ul>
     );
   }
@@ -44,7 +46,7 @@ class TreeNode extends React.PureComponent {
                 return <li className={styles.edit} key={x.name.toString()}>{x.name}</li>;
               }
             } else {
-            return <li key={x.name.toString()}>{x.name}</li>;
+            return <li hidden={this.props.mode} key={x.name.toString()}>{x.name}</li>;
           }
 
           } else {
@@ -58,14 +60,14 @@ class TreeNode extends React.PureComponent {
                   }
                   }>{x.name}</button>
                   <ul hidden={false} className={styles.nested}>
-                    <TreeNode node={x.children}/>
+                    <TreeNode node={x.children} mode={this.props.mode} />
                   </ul>
                 </div>
               );
             }
             else {
               return (
-              <div key={x.name.toString()} className={styles.space}>
+              <div hidden={this.props.mode} key={x.name.toString()} className={styles.space}>
                 <button onClick={event => {
                   const target = event.currentTarget;
                   const panel = target.nextSibling;
@@ -77,7 +79,7 @@ class TreeNode extends React.PureComponent {
                 }
                 }>{x.name}</button>
                 <ul hidden={h} className={styles.nested}>
-                  <TreeNode node={x.children}/>
+                  <TreeNode node={x.children} mode={this.props.mode} />
                 </ul>
               </div>
             );

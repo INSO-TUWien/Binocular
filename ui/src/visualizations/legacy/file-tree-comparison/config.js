@@ -2,7 +2,7 @@
 
 import { connect } from 'react-redux';
 import style from './config.css';
-import { setFilter } from './sagas';
+import { setFilter, setDisplayOnlyChanged } from './sagas';
 const mapStateToProps = (state /*, ownProps*/) => {
   const fileTreeState = state.visualizations.fileTreeComparison.state;
   return {
@@ -13,6 +13,7 @@ const mapStateToProps = (state /*, ownProps*/) => {
 const mapDispatchToProps = (dispatch, ownProps) => {
   return Object.assign({
       onSetFilter: (c) => dispatch(setFilter(c)),
+      onSetDisplayOnlyChanged: (c) => dispatch(setDisplayOnlyChanged(c)),
     },
     ownProps
   );
@@ -21,9 +22,9 @@ const mapDispatchToProps = (dispatch, ownProps) => {
 const ChangesConfigComponent = (props) => {
   return (
     <div className={style.info}>
-      <div className={style.search}>
+      <div className={style.search} hidden={props.changed.add.length === 0 && props.changed.edit.length === 0 && props.changed.delete.length === 0}>
         <input
-          hidden={props.changed.add.length === 0 && props.changed.edit.length === 0 && props.changed.delete.length === 0}
+          className={style.bottomMargin}
           placeholder="Highlight issue..."
           onChange={(e) => {
             if (e.target.value === null) {
@@ -33,7 +34,17 @@ const ChangesConfigComponent = (props) => {
             }
           }}
         />
+        <p></p>
+        Only show changed files:
+        <span className={style.tab}></span>
+        <input
+          type={'checkbox'}
+          onChange={(e) => {
+            props.onSetDisplayOnlyChanged(e.target.checked);
+          }}
+        />
       </div>
+
       <div className={style.files}>
         <div hidden={props.changed.add.length === 0}>
           <div>

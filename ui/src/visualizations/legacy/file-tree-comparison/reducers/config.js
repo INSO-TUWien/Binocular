@@ -29,6 +29,10 @@ export default handleActions(
       _.assign({}, state, {
         filter: action.payload ? action.payload : null,
       }),
+    DISPLAY_ONLY_CHANGED: (state, action) =>
+      _.assign({}, state, {
+        displayOnlyChanged: action.payload ? action.payload : false,
+      }),
   },
   {
     commit1: [],
@@ -41,5 +45,6 @@ export default handleActions(
       edit: [],
     },
     filter: '',
+    displayOnlyChanged: null,
   }
 );

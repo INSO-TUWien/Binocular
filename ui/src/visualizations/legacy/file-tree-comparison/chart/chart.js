@@ -22,6 +22,7 @@ export default class Changes extends React.Component {
         date: '',
       },
       changed: [],
+      displayOnlyChanged: null,
     };
   }
 
@@ -54,12 +55,12 @@ export default class Changes extends React.Component {
         <tbody>
           <td>
             <div className={styles.padding} hidden={this.state.tree1.length === 0}>
-              <Tree files={this.state.tree1} />
+              <Tree files={this.state.tree1} mode={this.state.displayOnlyChanged} />
             </div>
           </td>
           <td>
             <div className={styles.padding} hidden={this.state.tree2.length === 0}>
-              <Tree files={this.state.tree2} />
+              <Tree files={this.state.tree2} mode={this.state.displayOnlyChanged} />
             </div>
           </td>
         </tbody>
@@ -117,7 +118,13 @@ export default class Changes extends React.Component {
   componentWillReceiveProps(nextProps) {
     if (nextProps.commits.length !== 0) {
       const commits = this.buildingSelect(nextProps.commits, null);
-      this.setState({ commits: nextProps.commits, commitsToChoose1: commits, commitsToChoose2: commits, filter: nextProps.filter });
+      this.setState({
+        commits: nextProps.commits,
+        commitsToChoose1: commits,
+        commitsToChoose2: commits,
+        filter: nextProps.filter,
+        displayOnlyChanged: nextProps.displayOnlyChanged,
+      });
       if (this.state.commit1.sha !== undefined && this.state.commit2.sha !== undefined) {
         this.filterTrees(nextProps.filter);
       }

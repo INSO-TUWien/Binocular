@@ -10,12 +10,19 @@
 .search {
   padding-top: 1em;
 }
+.tab {
+  display: inline-block;
+  margin-left: 20px;
+}
 .files{
   font-size: smaller;
   overflow-y: auto;
   max-height: 30em;
   overflow-x: auto;
   width: 30em;
+}
+.bottomMargin {
+  margin-bottom: 1em;
 }
 .info {
   max-width: 400px;
