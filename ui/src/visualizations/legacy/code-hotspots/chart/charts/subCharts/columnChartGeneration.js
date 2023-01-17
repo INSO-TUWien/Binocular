@@ -435,7 +435,6 @@ export default class columnChartGeneration {
     }
 
     const versionSize = Math.min(w / currThis.combinedColumnData.length, 20) - 4;
-
     const branches = d3Collection
       .nest()
       .key((d) => d.branch.trim())
@@ -457,7 +456,6 @@ export default class columnChartGeneration {
     const commits = d3.select('#chartBranchView').selectAll('rect').data(currThis.combinedColumnData);
     const branchLines = d3.select('#chartBranchView');
     let offset = 0;
-    console.log(branches);
     const firstCommitCount = parseInt(branches[0].values[0].column);
     for (const branch of branches) {
       if (branch.values.length === 1) {

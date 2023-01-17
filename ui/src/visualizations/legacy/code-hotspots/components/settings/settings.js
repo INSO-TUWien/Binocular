@@ -17,7 +17,9 @@ export default class Settings extends React.PureComponent {
   componentWillReceiveProps(nextProps) {
     document.getElementById('gitlabSettingsServer').value = nextProps.gitlabSettings.server;
     document.getElementById('gitlabSettingsProjectID').value = nextProps.gitlabSettings.projectId;
-    document.getElementById('gitlabSettingsApiKey').value = nextProps.gitlabSettings.apiKey;
+    document.getElementById('gitlabSettingsApiKey').value = nextProps.gitlabSettings.configAvailable
+      ? '*********'
+      : nextProps.gitlabSettings.apiKey;
 
     this.setState({ displayProps: nextProps.displayProps, gitlabSettings: nextProps.gitlabSettings });
   }
@@ -256,6 +258,7 @@ export default class Settings extends React.PureComponent {
                 id={'gitlabSettingsServer'}
                 type="text"
                 placeholder={'Gitlab Server'}
+                disabled={this.state.gitlabSettings.configAvailable}
                 defaultValue={this.state.gitlabSettings.server}
                 onChange={(e) => {
                   const gitlabSettings = this.state.gitlabSettings;
@@ -269,6 +272,7 @@ export default class Settings extends React.PureComponent {
                 id={'gitlabSettingsProjectID'}
                 type="text"
                 placeholder={'Project ID'}
+                disabled={this.state.gitlabSettings.configAvailable}
                 defaultValue={this.state.gitlabSettings.projectId}
                 onChange={(e) => {
                   const gitlabSettings = this.state.gitlabSettings;
@@ -282,7 +286,8 @@ export default class Settings extends React.PureComponent {
                 id={'gitlabSettingsApiKey'}
                 type="text"
                 placeholder={'API Key'}
-                defaultValue={this.state.gitlabSettings.apiKey}
+                disabled={this.state.gitlabSettings.configAvailable}
+                defaultValue={this.state.gitlabSettings.configAvailable ? '*********' : this.state.gitlabSettings.apiKey}
                 onChange={(e) => {
                   const gitlabSettings = this.state.gitlabSettings;
                   gitlabSettings.apiKey = e.target.value;

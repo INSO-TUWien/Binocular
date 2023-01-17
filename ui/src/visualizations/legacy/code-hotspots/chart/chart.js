@@ -20,6 +20,8 @@ import searchAlgorithm from '../components/searchBar/searchAlgorithm';
 import chartStyles from './chart.scss';
 import Database from '../../../../database/database';
 import SourceCodeRequest from './helper/sourceCodeRequest';
+import GitLabConfig from '../../../../../config/gitlab.json';
+import _ from 'lodash';
 
 export default class CodeHotspots extends React.PureComponent {
   constructor(props) {
@@ -65,15 +67,24 @@ export default class CodeHotspots extends React.PureComponent {
         mainVisualizationMode: 0,
         heatmapTooltips: false,
       },
-      gitlabSettings: { server: 'Gitlab Server', projectId: 'Project ID', apiKey: 'API Key' },
+      gitlabSettings: { server: 'Gitlab Server', projectId: 'Project ID', apiKey: 'API Key', configAvailable: false },
     };
-    const lastDisplayProps = JSON.parse(localStorage.getItem('displayProps'));
-    const lastGitlabSettings = JSON.parse(localStorage.getItem('gitlabSettings'));
-    if (lastGitlabSettings !== null) {
-      this.state.gitlabSettings = lastGitlabSettings;
+    if (_.isEmpty(GitLabConfig)) {
+      const lastGitlabSettings = JSON.parse(localStorage.getItem('gitlabSettings'));
+      if (lastGitlabSettings !== null) {
+        this.state.gitlabSettings = lastGitlabSettings;
+      } else {
+        localStorage.setItem('gitlabSettings', JSON.stringify(this.state.gitlabSettings));
+      }
     } else {
-      localStorage.setItem('gitlabSettings', JSON.stringify(this.state.gitlabSettings));
+      this.state.gitlabSettings.server = GitLabConfig.server;
+      this.state.gitlabSettings.projectId = GitLabConfig.projectId;
+      this.state.gitlabSettings.apiKey = GitLabConfig.apiKey;
+      this.state.gitlabSettings.configAvailable = true;
     }
+
+    console.log(this.state.gitlabSettings);
+    const lastDisplayProps = JSON.parse(localStorage.getItem('displayProps'));
 
     if (lastDisplayProps !== null) {
       this.state.displayProps = lastDisplayProps;
@@ -443,8 +454,10 @@ export default class CodeHotspots extends React.PureComponent {
                       data.searchTerm = '';
                       data.rawData = resp;
                       const currDisplayProps = this.state.displayProps;
-                      currDisplayProps.dateRange.from = data.data[0].date.split('.')[0];
-                      currDisplayProps.dateRange.to = data.data[data.data.length - 1].date.split('.')[0];
+                      if (data.data.length !== 0) {
+                        currDisplayProps.dateRange.from = data.data[0].date.split('.')[0];
+                        currDisplayProps.dateRange.to = data.data[data.data.length - 1].date.split('.')[0];
+                      }
                       this.setState({
                         code: sourceCode,
                         data: data,

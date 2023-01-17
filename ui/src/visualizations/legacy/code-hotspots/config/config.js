@@ -14,26 +14,22 @@ const mapStateToProps = (state /*, ownProps*/) => {
     path: State.data.data.path,
     branch: State.data.data.branch,
     files: State.data.data.files,
-    branches: State.data.data.branches
+    branches: State.data.data.branches,
   };
 };
 
 const mapDispatchToProps = (dispatch /*, ownProps*/) => {
   return {
-    onSetFile: url => dispatch(setActiveFile(url)),
-    onSetPath: path => dispatch(setActivePath(path)),
-    onSetBranch: branch => dispatch(setActiveBranch(branch))
+    onSetFile: (url) => dispatch(setActiveFile(url)),
+    onSetPath: (path) => dispatch(setActivePath(path)),
+    onSetBranch: (branch) => dispatch(setActiveBranch(branch)),
   };
 };
 
-const CodeHotspotsConfigComponent = props => {
+const CodeHotspotsConfigComponent = (props) => {
   const options = [];
   for (const i in props.branches) {
-    options.push(
-      <option key={i}>
-        {props.branches[i].branch}
-      </option>
-    );
+    options.push(<option key={i}>{props.branches[i].branch}</option>);
   }
   return (
     <div className={styles.config}>
@@ -42,7 +38,7 @@ const CodeHotspotsConfigComponent = props => {
         <select
           className={styles.branchSelect}
           value={props.branch}
-          onChange={e => {
+          onChange={(e) => {
             props.onSetBranch(e.target.value);
           }}>
           {options}

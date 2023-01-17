@@ -14,7 +14,7 @@ export default class SourceCodeRequest {
             'api/v4/projects/' +
             gitlabProjectID +
             '/repository/files/' +
-            encodeURI(path) +
+            path.replaceAll('/', '%2F') +
             '/raw?ref=' +
             (sha === '' ? branch : sha)
         );
