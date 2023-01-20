@@ -306,9 +306,10 @@ async function indexing(indexers, context, reporter, gateway, indexingThread) {
       threadLog(indexingThread, 'All indexers stopped!');
       return;
     }
-
-    Commit.deduceStakeholders();
-    Issue.deduceStakeholders();
+    Promise.all([Commit.deduceStakeholders(), Issue.deduceStakeholders()]).then(() => {
+      threadLog(indexingThread, 'Indexing finished');
+      projectStructureHelper.checkProjectStructureAndFix();
+    });
     createManualIssueReferences(config.get('issueReferences'));
   } catch (error) {
     if (error && 'name' in error && error.name === 'Gitlab401Error') {
@@ -317,8 +318,6 @@ async function indexing(indexers, context, reporter, gateway, indexingThread) {
       throw error;
     }
   }
-  threadLog(indexingThread, 'Indexing finished');
-  projectStructureHelper.checkProjectStructureAndFix();
 }
 
 /**
