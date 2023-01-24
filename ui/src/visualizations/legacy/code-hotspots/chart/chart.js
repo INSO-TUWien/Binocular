@@ -69,18 +69,24 @@ export default class CodeHotspots extends React.PureComponent {
       },
       gitlabSettings: { server: 'Gitlab Server', projectId: 'Project ID', apiKey: 'API Key', configAvailable: false },
     };
-    if (_.isEmpty(GitLabConfig)) {
-      const lastGitlabSettings = JSON.parse(localStorage.getItem('gitlabSettings'));
+    if (!_.isEmpty(GitLabConfig)) {
+      this.state.gitlabSettings.server = GitLabConfig.server;
+      this.state.gitlabSettings.projectId = GitLabConfig.projectId;
+      this.state.gitlabSettings.configAvailable = true;
+    }
+    const lastGitlabSettings = JSON.parse(localStorage.getItem('gitlabSettings'));
+    if (!this.state.gitlabSettings.configAvailable) {
       if (lastGitlabSettings !== null) {
         this.state.gitlabSettings = lastGitlabSettings;
       } else {
         localStorage.setItem('gitlabSettings', JSON.stringify(this.state.gitlabSettings));
       }
     } else {
-      this.state.gitlabSettings.server = GitLabConfig.server;
-      this.state.gitlabSettings.projectId = GitLabConfig.projectId;
-      this.state.gitlabSettings.apiKey = GitLabConfig.apiKey;
-      this.state.gitlabSettings.configAvailable = true;
+      if (lastGitlabSettings !== null) {
+        this.state.gitlabSettings.apiKey = lastGitlabSettings.apiKey;
+      } else {
+        localStorage.setItem('gitlabSettings', JSON.stringify(this.state.gitlabSettings));
+      }
     }
 
     console.log(this.state.gitlabSettings);
