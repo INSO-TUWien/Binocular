@@ -5,15 +5,12 @@ const commonConfig = require('./webpack.common');
 
 module.exports = merge(commonConfig, {
   mode: 'development',
-  devtool: 'inline-source-map',
-  entry: [
-    require.resolve('react-dev-utils/webpackHotDevClient'),
-    require.resolve('react-error-overlay'),
-  ],
+  devtool: 'cheap-module-source-map',
+  entry: [require.resolve('react-dev-utils/webpackHotDevClient'), require.resolve('react-error-overlay')],
   devServer: {
     static: {
       directory: 'ui',
-      watch: true
+      watch: true,
     },
     hot: true,
     historyApiFallback: true,

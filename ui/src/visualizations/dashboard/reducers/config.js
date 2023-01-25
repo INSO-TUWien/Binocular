@@ -5,22 +5,56 @@ import _ from 'lodash';
 
 export default handleActions(
   {
-    SET_RESOLUTION: (state, action) => _.assign({}, state, { chartResolution: action.payload }),
-    SET_SHOW_ISSUES: (state, action) => _.assign({}, state, { showIssues: action.payload }),
-    SET_SELECTED_AUTHORS: (state, action) => _.assign({}, state, { selectedAuthors: [...action.payload] }),
-    SET_DISPLAY_METRIC: (state, action) => _.assign({}, state, { displayMetric: action.payload }),
-    SET_SHOW_CI_CHART: (state, action) => _.assign({}, state, { showCIChart: action.payload }),
-    SET_SHOW_ISSUE_CHART: (state, action) => _.assign({}, state, { showIssueChart: action.payload }),
-    SET_SHOW_CHANGES_CHART: (state, action) => _.assign({}, state, { showChangesChart: action.payload })
+    SET_RESOLUTION: (state, action) => {
+      updateLocalStorage('chartResolution', action.payload);
+      return _.assign({}, state, { chartResolution: action.payload });
+    },
+    SET_TIME_SPAN: (state, action) => {
+      updateLocalStorage('chartTimeSpan', action.payload);
+      return _.assign({}, state, { chartTimeSpan: action.payload });
+    },
+    SET_SELECTED_AUTHORS_GLOBAL: (state, action) => {
+      updateLocalStorage('selectedAuthorsGlobal', action.payload);
+      return _.assign({}, state, { selectedAuthorsGlobal: action.payload });
+    },
+    SET_All_AUTHORS: (state, action) => {
+      return _.assign({}, state, { allAuthors: action.payload });
+    },
   },
   {
-    chartResolution: 'months', //chart bucket size, can be 'years', 'months', 'weeks' or 'days'
-    showIssues: 'all', //Filter for issues, can be 'all', 'open' or 'closed'
-    selectedAuthors: [], //Authors checked in the CheckBoxLegend, Array of objects: [{id: 1234, gitSignature: 'Dev1 <Dev1@email.com>'}, ...]
-    availableAuthors: [], //All authors that should be displayed in CheckBoxLegend, Same format as above
-    displayMetric: 'linesChanged', //display metric for Changes-Chart, can be 'linesChanged' or 'commits'
-    showCIChart: true, //Show or hide CI Chart
-    showIssueChart: true, //Show or hide issues chart
-    showChangesChart: true //Show or hide changes chart
+    chartResolution: getLocalStorage().chartResolution,
+    chartTimeSpan: getLocalStorage().chartTimeSpan,
+    selectedAuthorsGlobal: getLocalStorage().selectedAuthorsGlobal,
+    allAuthors: [],
   }
 );
+
+function updateLocalStorage(key, value) {
+  let currConfig = {};
+  if (localStorage.getItem('universalConfig') === null) {
+    currConfig = {
+      chartResolution: 'months',
+      chartTimeSpan: { from: undefined, to: undefined },
+      selectedAuthorsGlobal: [],
+    };
+  } else {
+    currConfig = JSON.parse(localStorage.getItem('universalConfig'));
+  }
+  currConfig[key] = value;
+
+  localStorage.setItem('universalConfig', JSON.stringify(currConfig));
+}
+
+function getLocalStorage() {
+  let currConfig = {};
+  if (localStorage.getItem('universalConfig') === null) {
+    currConfig = {
+      chartResolution: 'months',
+      chartTimeSpan: { from: undefined, to: undefined },
+      selectedAuthorsGlobal: [],
+    };
+  } else {
+    currConfig = JSON.parse(localStorage.getItem('universalConfig'));
+  }
+  return currConfig;
+}

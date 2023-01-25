@@ -65,16 +65,16 @@ export default class ClosingPathContext {
    * Draw a smooth curve that goes through each of the given
    * points. Points should be an array of objects holding x and y
    * properties.
-   * 
+   *
    * The curve is drawn by concatenating a series of bezier curves
    * whose anchor points are interpolated to provide a smooth
    * transition from curve to curve.
-   * 
+   *
    * The smoothness value describes the distance of the anchor points
    * from the respective curve point with respect to the distance to
    * the next point on the curve. Values larger than 1 can lead to
    * loops.
-  **/
+   **/
   smoothCurve(points, { smoothness = 0.5, close = false } = {}) {
     // make sure we start at the first point
     this.moveTo(points[0].x, points[0].y);
@@ -92,6 +92,7 @@ export default class ClosingPathContext {
       // current point to draw the bezier curve to
       const cur = points[i];
 
+      const a = Math.atan2(cur.y, cur.x) - Math.PI;
       // point from which to draw the bezier curve (use the last point
       // of the curve for the first point in case of drawing a closed
       // loop)
@@ -106,31 +107,24 @@ export default class ClosingPathContext {
       const dPrev = { x: prev.x - cur.x, y: prev.y - cur.y };
       const dNext = { x: next.x - cur.x, y: next.y - cur.y };
 
-      // angles of beeline from current to previous and current to next
-      const aPrev = Math.atan2(dPrev.y, dPrev.x);
-      const aNext = Math.atan2(dNext.y, dNext.x);
-
       // length of line segments to prev and next
       const prevDist = Math.hypot(dPrev.x, dPrev.y);
       const nextDist = Math.hypot(dNext.x, dNext.y);
 
       // midpoint-angle on cur between aPrev and aNext
-      const aAvg = (aPrev + aNext) / 2;
 
       const unitMidPoint = {
-        x: Math.cos(aAvg),
-        y: Math.sin(aAvg)
+        x: Math.cos(a),
+        y: Math.sin(a),
       };
 
       // take care to always take the smaller angle, or else our curve
       // might loop around its points
-      const unitNormal =
-        aNext - aPrev < Math.PI / 2 ? { x: -unitMidPoint.y, y: unitMidPoint.x } : { x: unitMidPoint.y, y: -unitMidPoint.x };
-
+      const unitNormal = a < Math.PI / 2 ? { x: -unitMidPoint.y, y: unitMidPoint.x } : { x: unitMidPoint.y, y: -unitMidPoint.x };
       // determine the entry anchor for the current point
       const entryAnchor = {
         x: cur.x + unitNormal.x * (prevDist * smoothness),
-        y: cur.y + unitNormal.y * (prevDist * smoothness)
+        y: cur.y + unitNormal.y * (prevDist * smoothness),
       };
 
       // take care to remember the first entry anchor if we want to
@@ -145,7 +139,7 @@ export default class ClosingPathContext {
 
       exitAnchor = {
         x: cur.x - unitNormal.x * (nextDist * smoothness),
-        y: cur.y - unitNormal.y * (nextDist * smoothness)
+        y: cur.y - unitNormal.y * (nextDist * smoothness),
       };
     }
 

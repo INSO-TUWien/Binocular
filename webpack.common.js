@@ -2,6 +2,7 @@
 
 const webpack = require('webpack');
 const path = require('path');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 const cssModulesLoader = {
   loader: 'css-loader',
@@ -36,10 +37,7 @@ const cssLoaders = [
   },
   {
     test: /\.s[ac]ss$/,
-    exclude: [
-      path.resolve(__dirname, 'node_modules'),
-      path.resolve(__dirname, 'ui/src/global.scss'),
-    ],
+    exclude: [path.resolve(__dirname, 'node_modules'), path.resolve(__dirname, 'ui/src/global.scss')],
     use: [{ loader: 'style-loader' }, cssModulesLoader, { loader: 'sass-loader' }],
   },
   {
@@ -50,25 +48,38 @@ const cssLoaders = [
 ];
 
 module.exports = {
-  entry: ['./ui/src/index'],
+  entry: ['./ui/src'],
   output: {
-    path: path.resolve(__dirname, './ui/assets'),
-    pathinfo: true,
+    path: path.join(__dirname, '/dist'),
     filename: 'bundle.js',
-    publicPath: 'assets/',
   },
   module: {
     rules: [
       { test: /\.jsx?$/, exclude: /node_modules/, loader: 'babel-loader' },
       ...cssLoaders,
       {
-        test: /\.(ttf|eot|woff|svg)/,
+        test: /\.svg$/,
+        use: [
+          {
+            loader: 'svg-url-loader',
+            options: {
+              limit: 10000,
+            },
+          },
+        ],
+      },
+      {
+        test: /\.(ttf|eot|woff)/,
         include: [path.resolve(__dirname, 'node_modules')],
         loader: 'file-loader',
-      }
+      },
     ],
   },
   plugins: [
+    new HtmlWebpackPlugin({ template: './ui/index.html' }),
+    new webpack.ProvidePlugin({
+      Buffer: ['buffer', 'Buffer'],
+    }),
     new webpack.ProvidePlugin({
       React: 'react',
       process: 'process/browser',
@@ -83,10 +94,11 @@ module.exports = {
       zlib: 'browserify-zlib',
     },
     fallback: {
-      "url": require.resolve("url/"),
-      "util": require.resolve("util/"),
-      "assert": require.resolve("assert/"),
-      "crypto": require.resolve("crypto-browserify")
+      url: require.resolve('url/'),
+      util: require.resolve('util/'),
+      assert: require.resolve('assert/'),
+      crypto: require.resolve('crypto-browserify'),
+      buffer: require.resolve('buffer'),
     },
   },
 };
