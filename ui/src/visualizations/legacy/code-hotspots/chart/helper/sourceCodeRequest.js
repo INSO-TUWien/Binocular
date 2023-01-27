@@ -24,6 +24,8 @@ export default class SourceCodeRequest {
           if (sourceCodeRequest.readyState === 4) {
             if (sourceCodeRequest.status === 200) {
               resolve(sourceCodeRequest.responseText);
+            } else if (sourceCodeRequest.status === 401) {
+              resolve('Authentication Error. API Key missing or entered wrong!');
             } else {
               resolve('No commit code in current selected Branch!');
             }

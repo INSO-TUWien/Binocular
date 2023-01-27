@@ -14,7 +14,7 @@ import Loading from './helper/loading';
 import ModeSwitcher from './helper/modeSwitcher';
 import Settings from '../components/settings/settings';
 import BackgroundRefreshIndicator from '../components/backgroundRefreshIndicator/backgroundRefreshIndicator';
-import VisualizationSelector from '../components/VisulaizationSelector/visualizationSelector';
+import VisualizationSelector from '../components/visualizationSelector/visualizationSelector';
 import SearchBar from '../components/searchBar/searchBar';
 import searchAlgorithm from '../components/searchBar/searchAlgorithm';
 import chartStyles from './chart.scss';
@@ -22,6 +22,7 @@ import Database from '../../../../database/database';
 import SourceCodeRequest from './helper/sourceCodeRequest';
 import GitLabConfig from '../../../../../config/gitlab.json';
 import _ from 'lodash';
+import ApiKeyEntry from '../components/apiKeyEntry/apiKeyEntry';
 
 export default class CodeHotspots extends React.PureComponent {
   constructor(props) {
@@ -67,7 +68,13 @@ export default class CodeHotspots extends React.PureComponent {
         mainVisualizationMode: 0,
         heatmapTooltips: false,
       },
-      gitlabSettings: { server: 'Gitlab Server', projectId: 'Project ID', apiKey: 'API Key', configAvailable: false },
+      gitlabSettings: {
+        server: 'Gitlab Server',
+        projectId: 'Project ID',
+        apiKey: '',
+        configAvailable: false,
+        apiKeyEntryNecessary: false,
+      },
     };
     if (!_.isEmpty(GitLabConfig)) {
       this.state.gitlabSettings.server = GitLabConfig.server;
@@ -83,13 +90,17 @@ export default class CodeHotspots extends React.PureComponent {
       }
     } else {
       if (lastGitlabSettings !== null) {
-        this.state.gitlabSettings.apiKey = lastGitlabSettings.apiKey;
+        if (lastGitlabSettings.apiKey === '') {
+          this.state.gitlabSettings.apiKeyEntryNecessary = true;
+        } else {
+          this.state.gitlabSettings.apiKey = lastGitlabSettings.apiKey;
+        }
       } else {
+        this.state.gitlabSettings.apiKeyEntryNecessary = true;
         localStorage.setItem('gitlabSettings', JSON.stringify(this.state.gitlabSettings));
       }
     }
 
-    console.log(this.state.gitlabSettings);
     const lastDisplayProps = JSON.parse(localStorage.getItem('displayProps'));
 
     if (lastDisplayProps !== null) {
@@ -150,6 +161,21 @@ export default class CodeHotspots extends React.PureComponent {
     return (
       <div className={styles.w100}>
         <div className={'loadingContainer'} />
+        {this.state.gitlabSettings.apiKeyEntryNecessary ? (
+          <ApiKeyEntry
+            setApiKey={(apiKey) => {
+              console.log(apiKey);
+              const newGitlabSettings = this.state.gitlabSettings;
+              newGitlabSettings.apiKey = apiKey;
+              newGitlabSettings.apiKeyEntryNecessary = false;
+              localStorage.setItem('gitlabSettings', JSON.stringify(newGitlabSettings));
+              this.setState({ gitlabSettings: newGitlabSettings });
+              this.forceUpdate();
+            }}
+          />
+        ) : (
+          ''
+        )}
         <BackgroundRefreshIndicator />
         <div className={styles.w100}>
           <div className={chartStyles.menubar}>
