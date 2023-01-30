@@ -166,8 +166,8 @@ export default class ViolinPlot extends React.Component {
     tooltip
       .html(formattedDate + '<hr/>' + '<div style="background: ' + palette[key] + '">' + '</div>' + text + ': ' + Math.round(value))
       .style('position', 'absolute')
-      .style('left', event.layerX - 20 + 'px')
-      .style('top', event.layerY + (node.getBoundingClientRect() || { y: 0 }).y - 70 + 'px');
+      .style('left', event.layerX - 30 + 'px')
+      .style('top', event.layerY + (node.getBoundingClientRect() || { y: 0 }).y - 100 + 'px');
 
     this.paintDataPoint(brushArea, scales.x(nearestDataPoint.date), scales.y(chartValues.y1), scales.y(chartValues.y2), palette[key]);
   }
