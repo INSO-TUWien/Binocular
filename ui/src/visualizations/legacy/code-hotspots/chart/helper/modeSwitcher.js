@@ -1,5 +1,6 @@
 const modeDB = {
   js: 'javascript',
+  ts: 'javascript',
   json: 'javascript',
   jsx: 'jsx',
   html: 'htmlmixed',
@@ -11,9 +12,8 @@ const modeDB = {
   c: 'clike',
   cpp: 'clike',
   cs: 'clike',
-  java: 'clike',
+  java: 'text/x-java',
   py: 'python',
-  r: 'r',
   xml: 'xml',
   yml: 'yaml',
 };

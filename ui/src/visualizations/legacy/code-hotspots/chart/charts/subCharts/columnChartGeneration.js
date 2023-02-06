@@ -350,8 +350,8 @@ export default class columnChartGeneration {
               )
               .style(
                 'right',
-                w - ((d.i - 2) * w) / currThis.combinedColumnData.length - 300 > 0
-                  ? w - ((d.i - 2) * w) / currThis.combinedColumnData.length - 300
+                w - (d.i * w) / currThis.combinedColumnData.length - 300 > 0
+                  ? w - (d.i * w) / currThis.combinedColumnData.length - 300
                   : 0 + 'px'
               )
               .style('top', h + 'px');
@@ -433,8 +433,8 @@ export default class columnChartGeneration {
     for (let i = 0; i < currThis.combinedColumnData.length; i++) {
       currThis.combinedColumnData[i].i = i;
     }
-
     const versionSize = Math.min(w / currThis.combinedColumnData.length, 20) - 4;
+
     const branches = d3Collection
       .nest()
       .key((d) => d.branch.trim())
@@ -456,15 +456,15 @@ export default class columnChartGeneration {
     const commits = d3.select('#chartBranchView').selectAll('rect').data(currThis.combinedColumnData);
     const branchLines = d3.select('#chartBranchView');
     let offset = 0;
-    const firstCommitCount = parseInt(branches[0].values[0].column);
+    const firstCommitCount = parseInt(branches[0].values[0].i);
     for (const branch of branches) {
       if (branch.values.length === 1) {
-        const c1 = parseInt(branch.values[0].column) - firstCommitCount;
+        const c1 = parseInt(branch.values[0].i) - firstCommitCount;
         offset = this.drawBranchConnections(0, branch, currThis, c1, branchLines, branches, h, w, firstCommitCount, null, offset);
       } else {
         for (let i = 0; i < branch.values.length - 1; i++) {
-          const c1 = parseInt(branch.values[i].column) - firstCommitCount;
-          const c2 = parseInt(branch.values[i + 1].column) - firstCommitCount;
+          const c1 = parseInt(branch.values[i].i) - firstCommitCount;
+          const c2 = parseInt(branch.values[i + 1].i) - firstCommitCount;
           offset = this.drawBranchConnections(i, branch, currThis, c1, branchLines, branches, h, w, firstCommitCount, c2, offset);
         }
       }
@@ -534,8 +534,8 @@ export default class columnChartGeneration {
           )
           .style(
             'right',
-            w - ((d.i - 2) * w) / currThis.combinedColumnData.length - 300 > 0
-              ? w - ((d.i - 2) * w) / currThis.combinedColumnData.length - 300
+            w - (d.i * w) / currThis.combinedColumnData.length - 300 > 0
+              ? w - (d.i * w) / currThis.combinedColumnData.length - 300
               : 0 + 'px'
           )
           .style('top', h + 100 + 'px');
@@ -555,10 +555,12 @@ export default class columnChartGeneration {
 
   static drawBranchConnections(i, branch, currThis, c1, branchLines, branches, h, w, firstCommitCount, c2, offset) {
     const branchOutHeight = 5;
-
+    //check if commit is first commit of a branch
     if (i === 0) {
       for (const parentSha of branch.values[i].parents.split(',')) {
+        //find parent commit
         let parent = currThis.combinedColumnData.find((d) => d.sha === parentSha);
+        //if parent commit is not found look trhough the history to find commit to cpnnect
         if (parent === undefined) {
           for (const historyParentSha of branch.values[i].history.split(',')) {
             parent = currThis.combinedColumnData.find((d) => d.sha === historyParentSha);
@@ -567,11 +569,15 @@ export default class columnChartGeneration {
             }
           }
         }
+
+        //draw line when commit co connect is found
         if (parent !== undefined) {
           offset++;
           let currOffset = (offset % 2 === 0 ? -1 : 1) * Math.floor(offset / 2) + (offset % 2);
           currOffset = Math.min(Math.max(currOffset * branchOutHeight, -h / 2 + 5), h / 2 - 5);
+          //check if parent is in front of current commit
           if (parseInt(parent.column) + 1 < c1) {
+            //diagonal away from prev commit
             branchLines
               .append('line')
               .style(
@@ -592,8 +598,10 @@ export default class columnChartGeneration {
               .attr(
                 'x2',
                 w / (currThis.combinedColumnData.length * 2) +
-                  ((parent.column - firstCommitCount + 0.5) * w) / currThis.combinedColumnData.length
+                  ((parent.column - firstCommitCount + 0.25) * w) / currThis.combinedColumnData.length
               );
+
+            //straight between the diaogonales
             branchLines
               .append('line')
               .style(
@@ -609,10 +617,12 @@ export default class columnChartGeneration {
               .attr(
                 'x1',
                 w / (currThis.combinedColumnData.length * 2) +
-                  ((parent.column - firstCommitCount + 0.5) * w) / currThis.combinedColumnData.length
+                  ((parent.column - firstCommitCount + 0.25) * w) / currThis.combinedColumnData.length
               )
               .attr('y2', h / 2 + currOffset)
-              .attr('x2', w / (currThis.combinedColumnData.length * 2) + ((c1 - 0.5) * w) / currThis.combinedColumnData.length);
+              .attr('x2', w / (currThis.combinedColumnData.length * 2) + ((c1 - 0.25) * w) / currThis.combinedColumnData.length);
+
+            //diagonal to the current commit
             branchLines
               .append('line')
               .style(
@@ -625,7 +635,7 @@ export default class columnChartGeneration {
               .style('stroke-width', 5)
               .style('stroke-linecap', 'round')
               .attr('y1', h / 2 + currOffset)
-              .attr('x1', w / (currThis.combinedColumnData.length * 2) + ((c1 - 0.5) * w) / currThis.combinedColumnData.length)
+              .attr('x1', w / (currThis.combinedColumnData.length * 2) + ((c1 - 0.25) * w) / currThis.combinedColumnData.length)
               .attr('y2', h / 2)
               .attr('x2', w / (currThis.combinedColumnData.length * 2) + (c1 * w) / currThis.combinedColumnData.length);
           } else {
@@ -648,39 +658,6 @@ export default class columnChartGeneration {
               .attr('y2', h / 2)
               .attr('x2', w / (currThis.combinedColumnData.length * 2) + (c1 * w) / currThis.combinedColumnData.length);
           }
-        } else {
-          branchLines
-            .append('line')
-            .style(
-              'stroke',
-              ColorMixer.rainbow(
-                branches.length,
-                branches.findIndex((v) => v.key.trim() === branch.values[i].branch.trim())
-              )
-            )
-            .style('stroke-width', 5)
-            .style('stroke-linecap', 'round')
-            .attr('y1', 10)
-            .attr('x1', w / (currThis.combinedColumnData.length * 2) + ((c1 - 0.5) * w) / currThis.combinedColumnData.length)
-            .attr('y2', h / 2)
-            .attr('x2', w / (currThis.combinedColumnData.length * 2) + (c1 * w) / currThis.combinedColumnData.length);
-
-          branchLines
-            .append('line')
-            .style(
-              'stroke',
-              ColorMixer.rainbow(
-                branches.length,
-                branches.findIndex((v) => v.key.trim() === branch.values[i].branch.trim())
-              )
-            )
-            .style('stroke-width', 5)
-            .style('stroke-linecap', 'round')
-            .style('stroke-dasharray', '1, 10')
-            .attr('y1', 10)
-            .attr('x1', w / (currThis.combinedColumnData.length * 2) + ((c1 - 1.5) * w) / currThis.combinedColumnData.length)
-            .attr('y2', 10)
-            .attr('x2', w / (currThis.combinedColumnData.length * 2) + ((c1 - 0.5) * w) / currThis.combinedColumnData.length);
         }
       }
     }

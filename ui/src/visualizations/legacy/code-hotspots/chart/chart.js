@@ -3,8 +3,15 @@
 import React from 'react';
 import { UnControlled as CodeMirror } from 'react-codemirror2';
 import styles from '../styles.scss';
+
 import 'codemirror/lib/codemirror.css';
 require('codemirror/mode/javascript/javascript');
+require('codemirror/mode/clike/clike');
+require('codemirror/mode/htmlmixed/htmlmixed');
+require('codemirror/mode/yaml/yaml');
+require('codemirror/mode/php/php');
+require('codemirror/mode/python/python');
+
 import '../css/codeMirror.css';
 import vcsData from './helper/vcsData';
 import chartUpdater from './charts/chartUpdater';
@@ -122,13 +129,14 @@ export default class CodeHotspots extends React.PureComponent {
       function (resp) {
         let activeBranch = 'main';
         for (const i in resp) {
-          if (resp[i].active === 'true') {
+          if (resp[i].active === true || resp[i].active === 'true') {
             activeBranch = resp[i].branch;
             props.onSetBranch(resp[i].branch);
           }
         }
         props.onSetBranches(resp);
         this.setState({ checkedOutBranch: activeBranch });
+        this.forceUpdate();
       }.bind(this)
     );
   }
@@ -141,6 +149,7 @@ export default class CodeHotspots extends React.PureComponent {
   componentDidMount() {}
 
   render() {
+    //console.log(this.state.checkedOutBranch);
     if (this.prevMode !== this.state.mode || this.state.path !== this.prevPath) {
       this.requestData();
     } else {

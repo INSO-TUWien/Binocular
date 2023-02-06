@@ -20,7 +20,6 @@ export default class SourceCodeRequest {
         );
         sourceCodeRequest.setRequestHeader('PRIVATE-TOKEN', apiKey);
         sourceCodeRequest.onload = function () {
-          console.log(sourceCodeRequest);
           if (sourceCodeRequest.readyState === 4) {
             if (sourceCodeRequest.status === 200) {
               resolve(sourceCodeRequest.responseText);
