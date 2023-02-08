@@ -35,7 +35,7 @@ const analyseConflictsFromAppState = async appState => {
       if (conflictingStakeholders.length === 0) continue;
 
       for (const s of conflictingStakeholders) {
-        const { conflictStakeholder, otherStakeholder, hunks, changes } = s;
+        const { conflictStakeholder, otherStakeholder, changes } = s;
 
         const combined = `${conflictStakeholder.stakeholder.id}${otherStakeholder.stakeholder.id}`;
         if (!stakeholders.has(combined)) {

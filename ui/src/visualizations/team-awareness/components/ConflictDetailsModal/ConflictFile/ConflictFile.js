@@ -13,12 +13,14 @@ export default class ConflictFile extends React.Component {
     const fileIcon = filePath.endsWith('.js') ? TEXT_DOCUMENT_ICON : EMPTY_DOCUMENT_ICON;
     const showInfoIcon = filePath.endsWith('.js');
 
+    console.log(filePath, conflict);
+
     const showFileDetails = branch => {
-      startFileConflictDetails(Object.assign(conflict, { selectedBranch: branch }));
-      displayConflictDetails(Object.assign(conflict, { overviewType: 'fileDetails', selectedBranch: branch }));
+      startFileConflictDetails(Object.assign(conflict, { selectedBranch: branch, selectedFile: filePath }));
+      displayConflictDetails(Object.assign(conflict, { overviewType: 'fileDetails', selectedBranch: branch, selectedFile: filePath }));
     };
 
-    const { branches } = conflict.files.get(conflict.selectedFile);
+    const { branches } = conflict.files.get(filePath);
 
     return (
       <div>

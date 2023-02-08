@@ -4,6 +4,22 @@
   position: absolute;
 }
 
+.indicator {
+  margin: 0 4px;
+  font-size: 1.1rem;
+  align-self: center;
+}
+.loadingIndicator {
+  animation: rotation 2s infinite linear;
+}
+@keyframes rotation {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(359deg);
+  }
+}
 .conflictOverviewIcon {
   height: 25px;
   width: 25px;

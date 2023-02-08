@@ -1,8 +1,57 @@
-.loadingIcon {
-  height: 15px;
-  width: 15px;
+.centerContent {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
 }
-.loadingWrapper {
+.content {
+  overflow: scroll;
+  height: 100%;
+  padding: 0 17px;
+}
+
+.changeItem {
+  margin-left: 10px;
+}
+.textConsolas {
+  font-family: Consolas, 'Liberation Mono', Menlo, Courier, monospace;
+}
+
+.separator {
+  height: 1px;
+  background-color: lightgray;
+}
+
+.userIcon {
+  align-self: center;
+  margin-right: 5px;
+  padding-left: 3px;
+}
+.paddingLeft {
+  padding-left: 10px;
+}
+.flexRow {
   display: flex;
   flex-direction: row;
+}
+
+.branchIcon {
+  width: 22px;
+}
+.loadingIndicator {
+  font-size: 2rem;
+  animation: rotation 2s infinite linear;
+}
+.errorIndicator {
+  font-size: 2rem;
+  color: indianred;
+}
+@keyframes rotation {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(359deg);
+  }
 }

@@ -1,5 +1,3 @@
-import React from 'react';
-
 const GIT_BRANCH_ICON = (
   <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
     <path
@@ -49,10 +47,4 @@ const MAGNIFY_DOCUMENT_ICON = (
   </svg>
 );
 
-const LOADING_ICON = (
-  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-  </svg>
-);
-
-export { TEXT_DOCUMENT_ICON, EMPTY_DOCUMENT_ICON, GIT_BRANCH_ICON, MAGNIFY_DOCUMENT_ICON, LOADING_ICON };
+export { TEXT_DOCUMENT_ICON, EMPTY_DOCUMENT_ICON, GIT_BRANCH_ICON, MAGNIFY_DOCUMENT_ICON };
