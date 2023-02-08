@@ -1,21 +1,21 @@
 import React from 'react';
 import _ from 'lodash';
-import * as chartStyle from './BubbleChart.scss';
+import styles from './BubbleChart.scss';
 import * as d3 from 'd3';
 import Legend from '../../../../components/Legend';
 
 export default class BubbleChart extends React.Component {
   constructor(props) {
     super(props);
-    this.styles = _.assign({}, chartStyle);
 
     this.state = {
       componentMounted: false,
       content: this.props.content,
       width: 0,
-      height: 0
+      height: 0,
     };
     window.addEventListener('resize', () => this.setState({ width: window.innerWidth, height: window.innerHeight }));
+    console.log(this.state);
   }
 
   render() {
@@ -23,14 +23,14 @@ export default class BubbleChart extends React.Component {
     const legend = activeLegend ? activeLegend : this.constructLegendsFromContent();
 
     return (
-      <div className={this.styles.chartArea}>
-        <svg className={this.styles.chartDrawingArea} ref={svg => (this.svgRef = svg)}>
+      <div className={styles.chartArea}>
+        <svg className={styles.chartDrawingArea} ref={(svg) => (this.svgRef = svg)}>
           <g>
             {this.generateBubbles()}
             {content && content.length > 0 && <Legend x={10} y={50} categories={legend} />}
           </g>
         </svg>
-        <div className={this.styles.chartTooltip} ref={div => (this.tooltipRef = div)} />
+        <div className={styles.chartTooltip} ref={(div) => (this.tooltipRef = div)} />
       </div>
     );
   }
@@ -39,15 +39,15 @@ export default class BubbleChart extends React.Component {
     return [
       {
         name: 'Authors',
-        subLegend: _.map(this.state.content, c => {
+        subLegend: _.map(this.state.content, (c) => {
           return {
             name: c.signature,
             style: {
-              fill: this.props.colors.get(c.id)
-            }
+              fill: this.props.colors.get(c.id),
+            },
           };
-        })
-      }
+        }),
+      },
     ];
   }
 
@@ -55,8 +55,8 @@ export default class BubbleChart extends React.Component {
     const legend = [
       {
         name: stakeholder.signature + ' Activity: ' + stakeholder.activity,
-        style: { fill: this.props.colors.get(stakeholder.id) }
-      }
+        style: { fill: this.props.colors.get(stakeholder.id) },
+      },
     ];
 
     this.setState({ activeLegend: legend });
@@ -74,7 +74,7 @@ export default class BubbleChart extends React.Component {
     const { componentMounted, content } = this.state;
     if (componentMounted && content !== this.props.content) {
       this.setState({
-        content: this.props.content
+        content: this.props.content,
       });
     }
   }
@@ -88,7 +88,7 @@ export default class BubbleChart extends React.Component {
     const { clientWidth, clientHeight } = this.svgRef;
 
     const layout = pack().size([clientWidth, clientHeight]);
-    const root = hierarchy({ children: this.state.content }).sum(d => d.activity);
+    const root = hierarchy({ children: this.state.content }).sum((d) => d.activity);
     layout(root);
 
     const leaves = root.leaves();

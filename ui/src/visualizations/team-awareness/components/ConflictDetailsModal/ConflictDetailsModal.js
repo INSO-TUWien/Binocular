@@ -1,31 +1,26 @@
 import React from 'react';
-import * as styles from './ConflictDetailsModal.scss';
+import styles from './ConflictDetailsModal.scss';
 import FileOverview from './FileOverview/FileOverview';
 import FileDetails from './FileDetails/FileDetails';
 
 export default class ConflictDetailsModal extends React.Component {
   constructor(props) {
     super(props);
-    this.styles = Object.assign({}, styles);
   }
 
   render() {
-    const {
-      show,
-      close,
-      selectedConflict,
-      displayConflictDetails,
-      startFileConflictDetails,
-      isFileDetailsProcessing,
-      fileDetails
-    } = this.props;
+    const { show, close, selectedConflict, displayConflictDetails, startFileConflictDetails, isFileDetailsProcessing, fileDetails } =
+      this.props;
 
     if (show === false) return null;
     const { overviewType } = selectedConflict;
-    const closeModal = e => {
-      if (!Array.isArray(e.target.className)) return;
-      if (e.target.className.indexOf('darkBG') >= 0) {
-        close();
+    const closeModal = (e) => {
+      console.log('close', e);
+      if (e.target.className && typeof e.target.className === 'string') {
+        console.log(e.target.className);
+        if (e.target.className.indexOf('darkBG') >= 0) {
+          close();
+        }
       }
     };
 
@@ -47,17 +42,25 @@ export default class ConflictDetailsModal extends React.Component {
     }
 
     return (
-      <div className={this.styles.darkBG} onClick={e => closeModal(e)}>
-        <div className={this.styles.modal}>
-          <div className={this.styles.header}>
-            {overviewType === 'fileDetails' &&
-              <i className={this.styles.backIcon + ' fas fa-caret-left'} title="Go back to file list" onClick={() => navigateToFiles()} />}
+      <div className={styles.darkBG} onClick={(e) => closeModal(e)}>
+        <div className={styles.modal}>
+          <div className={styles.header}>
+            {overviewType === 'fileDetails' && (
+              <button
+                className={[styles.iconButton, styles.leftButton].join(' ')}
+                title="Go back to file list"
+                onClick={() => navigateToFiles()}>
+                <i className={'fas fa-caret-left ' + styles.fill} />
+              </button>
+            )}
             {overviewType === 'files' && <i />}
             <b>Conflict Details</b>
-            <i className={this.styles.closeIcon + ' fas fa-times'} onClick={() => close()} title="Close Details Modal" />
+            <button className={[styles.iconButton, styles.rightButton].join(' ')} onClick={() => close()} title="Close Details Modal">
+              <i className={'fas fa-times ' + styles.fill} />
+            </button>
           </div>
           {content}
-          <div className={this.styles.footer}>
+          <div className={styles.footer}>
             <button title="Close Details Modal" onClick={() => close()}>
               Close
             </button>

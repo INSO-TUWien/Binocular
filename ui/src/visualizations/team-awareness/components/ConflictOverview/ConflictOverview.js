@@ -1,24 +1,24 @@
 /* eslint-disable max-len */
 import React from 'react';
-import _ from 'lodash';
-import * as style from './ConflictOverview.scss';
+import styles from './ConflictOverview.scss';
 import ConflictOverviewItem from './ConflictOverviewItem';
 
 export default class ConflictOverview extends React.Component {
   constructor(props) {
     super(props);
-    this.styles = _.assign({}, style);
 
     this.state = {
       showContent: false,
-      contentCloseTimeout: -1
+      contentCloseTimeout: -1,
     };
   }
 
   renderLoadingIndicator() {
     return (
-      <div className={[this.styles.conflictOverview, this.styles.conflictOverviewHeader].join(' ')}>
-        <i className={[this.styles.indicator, this.styles.loadingIndicator, 'fa fa-spinner'].join(' ')} />
+      <div className={[styles.conflictOverview, styles.conflictOverviewHeader].join(' ')}>
+        <p>
+          <i className={[styles.indicator, styles.loadingIndicator, 'fa fa-spinner'].join(' ')} />
+        </p>
         <span>Processing conflicts...</span>
       </div>
     );
@@ -26,13 +26,8 @@ export default class ConflictOverview extends React.Component {
 
   renderNoConflictIndicator() {
     return (
-      <div className={[this.styles.conflictOverview, this.styles.conflictOverviewHeader].join(' ')}>
-        <svg
-          className={this.styles.conflictOverviewIcon}
-          fill="none"
-          stroke="#27ae60"
-          viewBox="0 0 24 24"
-          xmlns="http://www.w3.org/2000/svg">
+      <div className={[styles.conflictOverview, styles.conflictOverviewHeader].join(' ')}>
+        <svg className={styles.conflictOverviewIcon} fill="none" stroke="#27ae60" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
           <path
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -54,10 +49,10 @@ export default class ConflictOverview extends React.Component {
 
     return (
       <div
-        className={this.styles.conflictOverviewHeader}
+        className={styles.conflictOverviewHeader}
         onMouseOver={() => this.setState({ showContent: true })}
         onMouseOut={handleContentClose}>
-        <svg className={this.styles.conflictOverviewIcon} fill="#E67E22" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+        <svg className={styles.conflictOverviewIcon} fill="#E67E22" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
           <path
             fillRule="evenodd"
             d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
@@ -73,6 +68,7 @@ export default class ConflictOverview extends React.Component {
 
   render() {
     const { conflicts } = this.props;
+    console.log(conflicts);
 
     const handleContentClose = () => {
       this.setState({ contentCloseTimeout: setTimeout(() => this.setState({ showContent: false }), 250) });
@@ -83,7 +79,7 @@ export default class ConflictOverview extends React.Component {
     };
 
     if (!this.props.branchSelected) {
-      return <div className={this.styles.conflictOverviewNoSelection}>No conflict branch selected</div>;
+      return <div className={styles.conflictOverviewNoSelection}>No conflict branch selected</div>;
     }
 
     if (this.props.loading) {
@@ -94,11 +90,11 @@ export default class ConflictOverview extends React.Component {
     }
 
     return (
-      <div className={this.styles.conflictOverview}>
+      <div className={styles.conflictOverview}>
         {this.renderConflictIndicator()}
-        {this.state.showContent &&
-          <div className={this.styles.conflictOverviewContent} onMouseOver={handleContentMouseOver} onMouseOut={handleContentClose}>
-            {conflicts.map((conflict, i) =>
+        {this.state.showContent && (
+          <div className={styles.conflictOverviewContent} onMouseOver={handleContentMouseOver} onMouseOut={handleContentClose}>
+            {conflicts.map((conflict, i) => (
               <ConflictOverviewItem
                 displayConflictDetails={this.props.displayConflictDetails}
                 highlightPartners={this.props.highlightPartners}
@@ -106,8 +102,9 @@ export default class ConflictOverview extends React.Component {
                 conflict={conflict}
                 key={i}
               />
-            )}
-          </div>}
+            ))}
+          </div>
+        )}
       </div>
     );
   }

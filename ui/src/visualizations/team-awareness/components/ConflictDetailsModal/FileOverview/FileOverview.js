@@ -1,11 +1,10 @@
 import React from 'react';
-import * as styles from './FileOverview.scss';
+import styles from './FileOverview.scss';
 import ConflictFile from '../ConflictFile/ConflictFile';
 
 export default class FileOverview extends React.Component {
   constructor(props) {
     super(props);
-    this.styles = Object.assign({}, styles);
   }
 
   render() {
@@ -24,10 +23,6 @@ export default class FileOverview extends React.Component {
       );
     }
 
-    return (
-      <div className={this.styles.content}>
-        {fileEntries}
-      </div>
-    );
+    return <div className={styles.content}>{fileEntries}</div>;
   }
 }
