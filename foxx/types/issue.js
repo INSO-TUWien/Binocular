@@ -7,6 +7,7 @@ const aql = arangodb.aql;
 const issuesToStakeholders = db._collection('issues-stakeholders');
 const paginated = require('./paginated.js');
 const Timestamp = require('./Timestamp.js');
+const Sort = require('./Sort');
 
 module.exports = new gql.GraphQLObjectType({
   name: 'Issue',
@@ -15,55 +16,55 @@ module.exports = new gql.GraphQLObjectType({
     return {
       id: {
         type: new gql.GraphQLNonNull(gql.GraphQLString),
-        resolve: e => e._key
+        resolve: (e) => e._key,
       },
       iid: {
         type: gql.GraphQLString,
-        description: 'The issue number within its project'
+        description: 'The issue number within its project',
       },
       title: {
         type: gql.GraphQLString,
-        description: 'The issue title'
+        description: 'The issue title',
       },
       description: {
         type: gql.GraphQLString,
-        description: 'The issue description'
+        description: 'The issue description',
       },
       state: {
         type: gql.GraphQLString,
-        description: 'The issue state'
+        description: 'The issue state',
       },
       upvotes: {
         type: gql.GraphQLInt,
-        description: 'Number of upvotes on this issue'
+        description: 'Number of upvotes on this issue',
       },
       downvotes: {
         type: gql.GraphQLInt,
-        description: 'Number of downvotes on this issue'
+        description: 'Number of downvotes on this issue',
       },
       dueDate: {
         type: gql.GraphQLString,
-        description: 'The due date of this issue'
+        description: 'The due date of this issue',
       },
       confidential: {
         type: gql.GraphQLBoolean,
-        description: 'Wether or not this issue is confidential'
+        description: 'Wether or not this issue is confidential',
       },
       weight: {
         type: gql.GraphQLInt,
-        description: 'Weight of the issue'
+        description: 'Weight of the issue',
       },
       webUrl: {
         type: gql.GraphQLString,
-        description: 'Web URL of the issue'
+        description: 'Web URL of the issue',
       },
       createdAt: {
         type: Timestamp,
-        description: 'Creation date of the issue'
+        description: 'Creation date of the issue',
       },
       closedAt: {
         type: Timestamp,
-        description: 'Close date of the issue'
+        description: 'Close date of the issue',
       },
       creator: {
         type: require('./stakeholder.js'),
@@ -80,7 +81,11 @@ module.exports = new gql.GraphQLObjectType({
               `
             )
             .toArray()[0];
-        }
+        },
+      },
+      author: {
+        type: require('./gitHubUser.js'),
+        description: 'The github author of this issue',
       },
       commits: paginated({
         type: require('./commit.js'),
@@ -93,15 +98,15 @@ module.exports = new gql.GraphQLObjectType({
               )
               FILTER commit != NULL
               ${limit}
-              RETURN commit`
+              RETURN commit`,
       }),
       mentions: {
         type: new gql.GraphQLList(gql.GraphQLString),
         description: 'The shas of all commits mentioning this issue',
         resolve(issue) {
-          return (issue.mentions || []).map(m => m.commit);
-        }
-      }
+          return (issue.mentions || []).map((m) => m.commit);
+        },
+      },
     };
-  }
+  },
 });

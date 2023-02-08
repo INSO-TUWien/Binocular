@@ -3,5 +3,6 @@
   "transform": {
     ".*": "<rootDir>/../../node_modules/babel-jest"
   },
-  "moduleFileExtensions": ["js", "jsx", "json"]
+  "moduleFileExtensions": ["js", "jsx","json"],
+  "transformIgnorePatterns": ["node_modules/(?!d3|d3-array|internmap|delaunator|robust-predicates)"]
 }
