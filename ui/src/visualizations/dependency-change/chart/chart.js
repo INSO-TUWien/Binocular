@@ -236,12 +236,63 @@ export default class DependencyChanges extends React.PureComponent {
     }
   }
 
+  changeFileUrl(path){
+    if(path.startsWith('..')){
+      let currentPathComponents = this.state.fileURL.split('/');
+      let pathComponents = path.split('/');
+      let shiftForward = pathComponents.filter(path => path == '..').length;
+      let moveBack = pathComponents.filter(path => path == '..').length + 1;
+  
+      for(let i = 0; i < moveBack; i++){
+        currentPathComponents.pop();
+      }
+  
+      for(let i = 0; i < shiftForward; i++){
+        pathComponents.shift();
+      }
+  
+      let newPathComponents = currentPathComponents.concat(pathComponents);
+      let newPath = newPathComponents.join('/');
+      if(newPathComponents[newPathComponents.length -1].indexOf('.') == -1){
+        newPath += "/index.js";
+      }
+      console.log(newPath);
+      this.setState({
+        fileURL: newPath,
+        filteredComparedDependencies: [],
+        filteredDependencies: [],
+        resultDependencies: []
+      });
+      this.requestData();
+    } else if(path.startsWith('.')){
+      let currentPathComponents = this.state.fileURL.split('/');
+      let pathComponents = path.split('/');
+      currentPathComponents.pop();
+      pathComponents.shift();
+      
+  
+      let newPathComponents = currentPathComponents.concat(pathComponents);
+      let newPath = newPathComponents.join('/');
+      if(newPathComponents[newPathComponents.length -1].indexOf('.') == -1){
+        newPath += "/index.js";
+      }
+      console.log(newPath);
+      this.setState({
+        fileURL: newPath,
+        filteredComparedDependencies: [],
+        filteredDependencies: [],
+        resultDependencies: []
+      });
+      this.requestData();
+    }
+  }
+
   requestData() {
     if (this.state.path !== "") {
-      debugger;
       Loading.insert();
       Loading.setState(0, "Requesting Source Code");
       const xhr = new XMLHttpRequest();
+      console.log(`Before get request `,this.state.fileURL);
 
       //get file from branch
       xhr.open(
@@ -258,6 +309,7 @@ export default class DependencyChanges extends React.PureComponent {
       xhr.onload = function () {
         if (xhr.readyState === 4) {
           //if (xhr.status === 200) {
+          console.log(`After get request `,this.state.fileURL);  
           const path = this.state.path;
           this.prevPath = this.state.path;
           this.prevMode = this.state.mode;
@@ -320,35 +372,38 @@ export default class DependencyChanges extends React.PureComponent {
 
 
   getCommitsPackageJsons(name){
-    Loading.insert();
-    Loading.setState(80, "Search for dependency version changes");
-    this.setState({
-      showTimeLine: false,
-      selectedDep: name
-    });
-
-    var http = new XMLHttpRequest();
-
-    http.addEventListener('load', () => {
-      const data = JSON.parse(http.responseText);
-
-      const onlyRelevant = [];
-      for(const commit of data){
-        if(onlyRelevant.filter(c => c.version == commit.version).length == 0){
-            onlyRelevant.push(commit);
-        }
-      }
+    if(!name.startsWith('.')){
+      this.changeFileUrl(name);
+      Loading.insert();
+      Loading.setState(80, "Search for dependency version changes");
       this.setState({
-        commits: onlyRelevant,
-        showTimeLine: true
+        showTimeLine: false,
+        selectedDep: name
       });
-      Loading.remove();
-      console.log('wait until all data fetched');
-      console.log(onlyRelevant);
-    });
-    
-    http.open("GET", "/api/commitsPackage?dep=" + name);
-    http.send();
+
+      var http = new XMLHttpRequest();
+
+      http.addEventListener('load', () => {
+        const data = JSON.parse(http.responseText);
+
+        const onlyRelevant = [];
+        for(const commit of data){
+          if(onlyRelevant.filter(c => c.version == commit.version).length == 0){
+              onlyRelevant.push(commit);
+          }
+        }
+        this.setState({
+          commits: onlyRelevant,
+          showTimeLine: true
+        });
+        Loading.remove();
+        console.log('wait until all data fetched');
+        console.log(onlyRelevant);
+      });
+      
+      http.open("GET", "/api/commitsPackage?dep=" + name);
+      http.send();
+    }
   }
 
 

@@ -22,11 +22,12 @@ export default class TimeLineComponent extends React.PureComponent {
         }
         
         const svg = d3.select(this.g);
+        var width = d3.select(".timeLine").node().getBoundingClientRect().width - 80;
 
         const xScale = d3
             .scaleTime()
             .domain([new Date(2015,0,1), new Date()])
-            .range([0,925]);
+            .range([0,width]);
       
 
         const yScale = d3.scaleLinear().range([100,0]);
@@ -36,6 +37,8 @@ export default class TimeLineComponent extends React.PureComponent {
         svg.append("g").attr("transform", "translate(0,100)").call(xAxis);
 
         const tooltip = d3.select('.tooltip');
+
+        
 
         svg
         .selectAll("circle")
