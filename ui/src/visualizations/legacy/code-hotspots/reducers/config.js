@@ -7,30 +7,30 @@ export default handleActions(
   {
     SET_ACTIVE_FILE: (state, action) =>
       _.assign({}, state, {
-        fileURL: action.payload ? action.payload : null
+        fileURL: action.payload ? action.payload : null,
       }),
     SET_ACTIVE_PATH: (state, action) =>
       _.assign({}, state, {
-        path: action.payload ? action.payload : null
+        path: action.payload ? action.payload : null,
       }),
     SET_ACTIVE_BRANCH: (state, action) =>
       _.assign({}, state, {
-        branch: action.payload ? action.payload : null
+        branch: action.payload ? action.payload : null,
       }),
     SET_ACTIVE_FILES: (state, action) =>
       _.assign({}, state, {
-        files: action.payload ? action.payload : null
+        files: action.payload ? action.payload : null,
       }),
     SET_ACTIVE_BRANCHES: (state, action) =>
       _.assign({}, state, {
-        branches: action.payload ? action.payload : null
-      })
+        branches: action.payload ? action.payload : null,
+      }),
   },
   {
     fileURL: '',
-    branch: 'master',
+    branch: 'main',
     path: '',
     files: [],
-    branches: []
+    branches: [],
   }
 );

@@ -10,11 +10,16 @@ export default class Settings extends React.PureComponent {
     super(props);
     this.state = {
       displayProps: { dateRange: {} },
+      gitlabSettings: { server: 'Gitlab Server', projectId: 'Project ID', apiKey: 'API Key' },
     };
   }
 
   componentWillReceiveProps(nextProps) {
-    this.setState({ displayProps: nextProps.displayProps });
+    document.getElementById('gitlabSettingsServer').value = nextProps.gitlabSettings.server;
+    document.getElementById('gitlabSettingsProjectID').value = nextProps.gitlabSettings.projectId;
+    document.getElementById('gitlabSettingsApiKey').value = nextProps.gitlabSettings.apiKey;
+
+    this.setState({ displayProps: nextProps.displayProps, gitlabSettings: nextProps.gitlabSettings });
   }
 
   render() {
@@ -47,7 +52,7 @@ export default class Settings extends React.PureComponent {
                 className={'button ' + settingsStyles.saveButton}
                 onClick={() => {
                   console.log('Parameters saved!');
-                  this.props.displayPropsChanged(this.state.displayProps);
+                  this.props.saveSettings(this.state.displayProps, this.state.gitlabSettings);
                 }}>
                 Save
               </button>
@@ -63,7 +68,7 @@ export default class Settings extends React.PureComponent {
                   name="dataScaleSwitch"
                   className={'switch is-rounded is-outlined is-info'}
                   checked={!this.state.displayProps.customDataScale}
-                  onClick={e => {
+                  onClick={(e) => {
                     const currDisplayProps = this.state.displayProps;
                     if (currDisplayProps.customDataScale) {
                       document.getElementById('dataScaleContainer').classList.remove(settingsStyles.showElm);
@@ -232,7 +237,7 @@ export default class Settings extends React.PureComponent {
                   name="heatmapTooltipsSwitch"
                   className={'switch is-rounded is-outlined is-info'}
                   checked={this.state.displayProps.heatmapTooltips}
-                  onClick={e => {
+                  onClick={(e) => {
                     const currDisplayProps = this.state.displayProps;
 
                     currDisplayProps.heatmapTooltips = !currDisplayProps.heatmapTooltips;
@@ -244,6 +249,48 @@ export default class Settings extends React.PureComponent {
                 <label htmlFor="heatmapTooltipsSwitch" className={styles.switch} />
               </div>
               <hr />
+              <div className={styles.label}>Gitlab Settings:</div>
+              <span>Gitlab Server:</span>
+              <input
+                className="input"
+                id={'gitlabSettingsServer'}
+                type="text"
+                placeholder={'Gitlab Server'}
+                disabled={this.state.gitlabSettings.configAvailable}
+                defaultValue={this.state.gitlabSettings.server}
+                onChange={(e) => {
+                  const gitlabSettings = this.state.gitlabSettings;
+                  gitlabSettings.server = e.target.value;
+                  this.setState({ gitlabSettings: gitlabSettings });
+                }}
+              />
+              <span>Project ID:</span>
+              <input
+                className="input"
+                id={'gitlabSettingsProjectID'}
+                type="text"
+                placeholder={'Project ID'}
+                disabled={this.state.gitlabSettings.configAvailable}
+                defaultValue={this.state.gitlabSettings.projectId}
+                onChange={(e) => {
+                  const gitlabSettings = this.state.gitlabSettings;
+                  gitlabSettings.projectId = e.target.value;
+                  this.setState({ gitlabSettings: gitlabSettings });
+                }}
+              />
+              <span>API Key:</span>
+              <input
+                className="input"
+                id={'gitlabSettingsApiKey'}
+                type="text"
+                placeholder={'API Key'}
+                defaultValue={this.state.gitlabSettings.apiKey}
+                onChange={(e) => {
+                  const gitlabSettings = this.state.gitlabSettings;
+                  gitlabSettings.apiKey = e.target.value;
+                  this.setState({ gitlabSettings: gitlabSettings });
+                }}
+              />
             </div>
           </div>
         </div>

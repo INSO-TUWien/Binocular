@@ -3,8 +3,15 @@
 import React from 'react';
 import { UnControlled as CodeMirror } from 'react-codemirror2';
 import styles from '../styles.scss';
+
 import 'codemirror/lib/codemirror.css';
 require('codemirror/mode/javascript/javascript');
+require('codemirror/mode/clike/clike');
+require('codemirror/mode/htmlmixed/htmlmixed');
+require('codemirror/mode/yaml/yaml');
+require('codemirror/mode/php/php');
+require('codemirror/mode/python/python');
+
 import '../css/codeMirror.css';
 import vcsData from './helper/vcsData';
 import chartUpdater from './charts/chartUpdater';
@@ -14,11 +21,15 @@ import Loading from './helper/loading';
 import ModeSwitcher from './helper/modeSwitcher';
 import Settings from '../components/settings/settings';
 import BackgroundRefreshIndicator from '../components/backgroundRefreshIndicator/backgroundRefreshIndicator';
-import VisualizationSelector from '../components/VisulaizationSelector/visualizationSelector';
+import VisualizationSelector from '../components/visualizationSelector/visualizationSelector';
 import SearchBar from '../components/searchBar/searchBar';
 import searchAlgorithm from '../components/searchBar/searchAlgorithm';
 import chartStyles from './chart.scss';
 import Database from '../../../../database/database';
+import SourceCodeRequest from './helper/sourceCodeRequest';
+import GitLabConfig from '../../../../../config/gitlab.json';
+import _ from 'lodash';
+import ApiKeyEntry from '../components/apiKeyEntry/apiKeyEntry';
 
 export default class CodeHotspots extends React.PureComponent {
   constructor(props) {
@@ -64,8 +75,41 @@ export default class CodeHotspots extends React.PureComponent {
         mainVisualizationMode: 0,
         heatmapTooltips: false,
       },
+      gitlabSettings: {
+        server: 'Gitlab Server',
+        projectId: 'Project ID',
+        apiKey: '',
+        configAvailable: false,
+        apiKeyEntryNecessary: false,
+      },
     };
+    if (!_.isEmpty(GitLabConfig)) {
+      this.state.gitlabSettings.server = GitLabConfig.server;
+      this.state.gitlabSettings.projectId = GitLabConfig.projectId;
+      this.state.gitlabSettings.configAvailable = true;
+    }
+    const lastGitlabSettings = JSON.parse(localStorage.getItem('gitlabSettings'));
+    if (!this.state.gitlabSettings.configAvailable) {
+      if (lastGitlabSettings !== null) {
+        this.state.gitlabSettings = lastGitlabSettings;
+      } else {
+        localStorage.setItem('gitlabSettings', JSON.stringify(this.state.gitlabSettings));
+      }
+    } else {
+      if (lastGitlabSettings !== null) {
+        if (lastGitlabSettings.apiKey === '') {
+          this.state.gitlabSettings.apiKeyEntryNecessary = true;
+        } else {
+          this.state.gitlabSettings.apiKey = lastGitlabSettings.apiKey;
+        }
+      } else {
+        this.state.gitlabSettings.apiKeyEntryNecessary = true;
+        localStorage.setItem('gitlabSettings', JSON.stringify(this.state.gitlabSettings));
+      }
+    }
+
     const lastDisplayProps = JSON.parse(localStorage.getItem('displayProps'));
+
     if (lastDisplayProps !== null) {
       this.state.displayProps = lastDisplayProps;
       this.state.displayProps.dateRange = {
@@ -85,13 +129,14 @@ export default class CodeHotspots extends React.PureComponent {
       function (resp) {
         let activeBranch = 'main';
         for (const i in resp) {
-          if (resp[i].active === 'true') {
+          if (resp[i].active === true || resp[i].active === 'true') {
             activeBranch = resp[i].branch;
             props.onSetBranch(resp[i].branch);
           }
         }
         props.onSetBranches(resp);
         this.setState({ checkedOutBranch: activeBranch });
+        this.forceUpdate();
       }.bind(this)
     );
   }
@@ -104,6 +149,7 @@ export default class CodeHotspots extends React.PureComponent {
   componentDidMount() {}
 
   render() {
+    //console.log(this.state.checkedOutBranch);
     if (this.prevMode !== this.state.mode || this.state.path !== this.prevPath) {
       this.requestData();
     } else {
@@ -124,16 +170,33 @@ export default class CodeHotspots extends React.PureComponent {
     return (
       <div className={styles.w100}>
         <div className={'loadingContainer'} />
+        {this.state.gitlabSettings.apiKeyEntryNecessary ? (
+          <ApiKeyEntry
+            setApiKey={(apiKey) => {
+              console.log(apiKey);
+              const newGitlabSettings = this.state.gitlabSettings;
+              newGitlabSettings.apiKey = apiKey;
+              newGitlabSettings.apiKeyEntryNecessary = false;
+              localStorage.setItem('gitlabSettings', JSON.stringify(newGitlabSettings));
+              this.setState({ gitlabSettings: newGitlabSettings });
+              this.forceUpdate();
+            }}
+          />
+        ) : (
+          ''
+        )}
         <BackgroundRefreshIndicator />
         <div className={styles.w100}>
           <div className={chartStyles.menubar}>
             <span style={{ float: 'left' }}>
               <Settings
                 displayProps={this.state.displayProps}
-                displayPropsChanged={(newDisplayProps) => {
+                gitlabSettings={this.state.gitlabSettings}
+                saveSettings={(newDisplayProps, newGitlabSettings) => {
                   this.dataChanged = true;
                   localStorage.setItem('displayProps', JSON.stringify(newDisplayProps));
-                  this.setState({ displayProps: newDisplayProps });
+                  localStorage.setItem('gitlabSettings', JSON.stringify(newGitlabSettings));
+                  this.setState({ displayProps: newDisplayProps, gitlabSettings: newGitlabSettings });
                   this.forceUpdate();
                 }}
               />
@@ -297,187 +360,160 @@ export default class CodeHotspots extends React.PureComponent {
     if (this.state.path !== '') {
       Loading.insert();
       Loading.setState(0, 'Requesting Source Code');
-      const sourceCodeRequest = new XMLHttpRequest();
-      sourceCodeRequest.open(
-        'GET',
-        this.state.fileURL
-          .replace('github.com', 'raw.githubusercontent.com')
-          .replace('/blob', '')
-          .replace(this.state.checkedOutBranch, this.state.selectedCommit.sha === '' ? this.state.branch : this.state.selectedCommit.sha),
-        true
-      );
-      sourceCodeRequest.onload = function () {
-        if (sourceCodeRequest.readyState === 4) {
-          //if (xhr.status === 200) {
+      SourceCodeRequest.getSourceCode(
+        this.state.fileURL,
+        this.state.path,
+        this.state.checkedOutBranch,
+        this.state.branch,
+        this.state.selectedCommit.sha,
+        this.state.gitlabSettings.projectId,
+        this.state.gitlabSettings.apiKey,
+        this.state.gitlabSettings.server
+      ).then((sourceCode) => {
+        if (
+          this.state.path === this.prevPath &&
+          (this.state.selectedCommit.sha !== this.prevSha || this.state.selectedCompareCommit.sha !== this.prevCompareSha)
+        ) {
+          this.prevSha = this.state.selectedCommit.sha;
+          this.prevCompareSha = this.state.selectedCompareCommit.sha;
+          this.codeChanged = true;
+          this.dataChanged = false;
+          Loading.remove();
+          const data = this.state.data;
+          data.code = sourceCode;
+          data.secondaryCode = sourceCode;
+          const currFilteredData =
+            this.state.mode === 2
+              ? searchAlgorithm.performIssueSearch(data, this.state.filteredData.searchTerm)
+              : this.state.mode === 1
+              ? searchAlgorithm.performDeveloperSearch(data, this.state.filteredData.searchTerm)
+              : this.state.mode === 0
+              ? searchAlgorithm.performCommitSearch(data, this.state.filteredData.searchTerm)
+              : data;
+          if (this.state.selectedCompareCommit.sha !== '') {
+            Loading.setState(50, 'Requesting Comparison Source Code');
 
-          if (
-            this.state.path === this.prevPath &&
-            (this.state.selectedCommit.sha !== this.prevSha || this.state.selectedCompareCommit.sha !== this.prevCompareSha)
-          ) {
-            this.prevSha = this.state.selectedCommit.sha;
-            this.prevCompareSha = this.state.selectedCompareCommit.sha;
-            this.codeChanged = true;
-            this.dataChanged = false;
-            Loading.remove();
-            const data = this.state.data;
-            data.code = sourceCodeRequest.responseText;
-            data.secondaryCode = sourceCodeRequest.responseText;
-            if (this.state.selectedCompareCommit.sha !== '') {
-              Loading.setState(50, 'Requesting Comparison Source Code');
-              const secondarySourceCodeRequest = new XMLHttpRequest();
-              secondarySourceCodeRequest.open(
-                'GET',
-                this.state.fileURL
-                  .replace('github.com', 'raw.githubusercontent.com')
-                  .replace('/blob', '')
-                  .replace(this.state.checkedOutBranch, this.state.selectedCompareCommit.sha),
-                true
-              );
-              const currThis = this;
-              secondarySourceCodeRequest.onload = function () {
-                data.secondaryCode = secondarySourceCodeRequest.responseText;
-                currThis.setState({
-                  data: data,
-                  filteredData:
-                    currThis.state.mode === 2
-                      ? searchAlgorithm.performIssueSearch(data, currThis.state.filteredData.searchTerm)
-                      : currThis.state.mode === 1
-                      ? searchAlgorithm.performDeveloperSearch(data, currThis.state.filteredData.searchTerm)
-                      : currThis.state.mode === 0
-                      ? searchAlgorithm.performCommitSearch(data, currThis.state.filteredData.searchTerm)
-                      : data,
-                });
-              };
-              secondarySourceCodeRequest.send(null);
-            } else {
+            SourceCodeRequest.getSourceCode(
+              this.state.fileURL,
+              this.state.checkedOutBranch,
+              this.state.branch,
+              this.state.selectedCompareCommit.sha,
+              '',
+              ''
+            ).then((secondarySourceCode) => {
+              data.secondaryCode = secondarySourceCode;
+
               this.setState({
                 data: data,
-                filteredData:
-                  this.state.mode === 2
-                    ? searchAlgorithm.performIssueSearch(data, this.state.filteredData.searchTerm)
-                    : this.state.mode === 1
-                    ? searchAlgorithm.performDeveloperSearch(data, this.state.filteredData.searchTerm)
-                    : this.state.mode === 0
-                    ? searchAlgorithm.performCommitSearch(data, this.state.filteredData.searchTerm)
-                    : data,
+                filteredData: currFilteredData,
               });
-            }
+            });
           } else {
-            const path = this.state.path;
-            const mode = this.state.mode;
-            this.prevPath = this.state.path;
-            this.prevMode = this.state.mode;
-            this.prevSha = this.state.selectedCommit.sha;
-            this.prevCompareSha = this.state.selectedCompareCommit.sha;
+            this.setState({
+              data: data,
+              filteredData: currFilteredData,
+            });
+          }
+        } else {
+          const path = this.state.path;
+          const mode = this.state.mode;
+          this.prevPath = this.state.path;
+          this.prevMode = this.state.mode;
+          this.prevSha = this.state.selectedCommit.sha;
+          this.prevCompareSha = this.state.selectedCompareCommit.sha;
 
-            switch (mode) {
-              case 1:
-                Loading.setState(33, 'Requesting Developer Data');
-                vcsData.getChangeData(path).then(
-                  function (resp) {
-                    Loading.setState(66, 'Transforming Developer Data');
-                    setTimeout(
-                      function () {
-                        const lines = (sourceCodeRequest.status === 200 ? sourceCodeRequest.responseText : '').split(/\r\n|\r|\n/).length;
-                        const data = chartUpdater.transformChangesPerDeveloperData(resp, lines);
-                        //this.codeChanged = true;
-                        this.dataChanged = true;
-                        // eslint-disable-next-line max-len
-                        data.code =
-                          sourceCodeRequest.status === 200 ? sourceCodeRequest.responseText : 'No commit code in current selected Branch!';
-                        data.secondaryCode = data.code;
-                        data.firstLineNumber = 1;
-                        data.searchTerm = '';
-                        data.rawData = resp;
-                        this.setState({
-                          code:
-                            sourceCodeRequest.status === 200
-                              ? sourceCodeRequest.responseText
-                              : 'No commit code in current selected Branch!',
-                          data: data,
-                          filteredData: data,
-                        });
-                      }.bind(this),
-                      0
-                    );
-                  }.bind(this)
-                );
-                break;
-              case 2:
-                Loading.setState(33, 'Requesting Issue Data');
-                vcsData.getIssueData(path).then(
-                  function (resp) {
-                    Loading.setState(66, 'Transforming Issue Data');
-                    setTimeout(
-                      function () {
-                        const lines = (sourceCodeRequest.status === 200 ? sourceCodeRequest.responseText : '').split(/\r\n|\r|\n/).length;
-                        const data = chartUpdater.transformChangesPerIssueData(resp, lines);
-                        //this.codeChanged = true;
-                        this.dataChanged = true;
-                        data.code =
-                          sourceCodeRequest.status === 200 ? sourceCodeRequest.responseText : 'No commit code in current selected Branch!';
-                        data.secondaryCode = data.code;
-                        data.firstLineNumber = 1;
-                        data.searchTerm = '';
-                        data.rawData = resp;
-                        this.setState({
-                          code:
-                            sourceCodeRequest.status === 200
-                              ? sourceCodeRequest.responseText
-                              : 'No commit code in current selected Branch!',
-                          data: data,
-                          filteredData: data,
-                        });
-                      }.bind(this),
-                      0
-                    );
-                  }.bind(this)
-                );
-                break;
-              default:
-                Loading.setState(33, 'Requesting Version Data');
-                vcsData.getChangeData(path).then(
-                  function (resp) {
-                    Loading.setState(66, 'Transforming Version Data');
-                    setTimeout(
-                      function () {
-                        const lines = (sourceCodeRequest.status === 200 ? sourceCodeRequest.responseText : '').split(/\r\n|\r|\n/).length;
-                        const data = chartUpdater.transformChangesPerVersionData(resp, lines);
-                        //this.codeChanged = true;
-                        this.dataChanged = true;
-                        data.code =
-                          sourceCodeRequest.status === 200 ? sourceCodeRequest.responseText : 'No commit code in current selected Branch!';
-                        data.secondaryCode = data.code;
-                        data.firstLineNumber = 1;
-                        data.searchTerm = '';
-                        data.rawData = resp;
-                        const currDisplayProps = this.state.displayProps;
+          switch (mode) {
+            case 1:
+              Loading.setState(33, 'Requesting Developer Data');
+              vcsData.getChangeData(path).then(
+                function (resp) {
+                  Loading.setState(66, 'Transforming Developer Data');
+                  setTimeout(
+                    function () {
+                      const lines = sourceCode.split(/\r\n|\r|\n/).length;
+                      const data = chartUpdater.transformChangesPerDeveloperData(resp, lines);
+                      //this.codeChanged = true;
+                      this.dataChanged = true;
+                      // eslint-disable-next-line max-len
+                      data.code = sourceCode;
+                      data.secondaryCode = data.code;
+                      data.firstLineNumber = 1;
+                      data.searchTerm = '';
+                      data.rawData = resp;
+                      this.setState({
+                        code: sourceCode,
+                        data: data,
+                        filteredData: data,
+                      });
+                    }.bind(this),
+                    0
+                  );
+                }.bind(this)
+              );
+              break;
+            case 2:
+              Loading.setState(33, 'Requesting Issue Data');
+              vcsData.getIssueData(path).then(
+                function (resp) {
+                  Loading.setState(66, 'Transforming Issue Data');
+                  setTimeout(
+                    function () {
+                      const lines = sourceCode.split(/\r\n|\r|\n/).length;
+                      const data = chartUpdater.transformChangesPerIssueData(resp, lines);
+                      //this.codeChanged = true;
+                      this.dataChanged = true;
+                      data.code = sourceCode;
+                      data.secondaryCode = data.code;
+                      data.firstLineNumber = 1;
+                      data.searchTerm = '';
+                      data.rawData = resp;
+                      this.setState({
+                        code: sourceCode,
+                        data: data,
+                        filteredData: data,
+                      });
+                    }.bind(this),
+                    0
+                  );
+                }.bind(this)
+              );
+              break;
+            default:
+              Loading.setState(33, 'Requesting Version Data');
+              vcsData.getChangeData(path).then(
+                function (resp) {
+                  Loading.setState(66, 'Transforming Version Data');
+                  setTimeout(
+                    function () {
+                      const lines = sourceCode.split(/\r\n|\r|\n/).length;
+                      const data = chartUpdater.transformChangesPerVersionData(resp, lines);
+                      //this.codeChanged = true;
+                      this.dataChanged = true;
+                      data.code = sourceCode;
+                      data.secondaryCode = data.code;
+                      data.firstLineNumber = 1;
+                      data.searchTerm = '';
+                      data.rawData = resp;
+                      const currDisplayProps = this.state.displayProps;
+                      if (data.data.length !== 0) {
                         currDisplayProps.dateRange.from = data.data[0].date.split('.')[0];
                         currDisplayProps.dateRange.to = data.data[data.data.length - 1].date.split('.')[0];
-                        this.setState({
-                          code:
-                            sourceCodeRequest.status === 200
-                              ? sourceCodeRequest.responseText
-                              : 'No commit code in current selected Branch!',
-                          data: data,
-                          filteredData: data,
-                          displayProps: currDisplayProps,
-                        });
-                      }.bind(this),
-                      0
-                    );
-                  }.bind(this)
-                );
-                break;
-            }
+                      }
+                      this.setState({
+                        code: sourceCode,
+                        data: data,
+                        filteredData: data,
+                        displayProps: currDisplayProps,
+                      });
+                    }.bind(this),
+                    0
+                  );
+                }.bind(this)
+              );
+              break;
           }
         }
-      }.bind(this);
-      sourceCodeRequest.onerror = function () {
-        Loading.setErrorText(sourceCodeRequest.statusText);
-        console.error(sourceCodeRequest.statusText);
-      };
-      sourceCodeRequest.send(null);
+      });
     }
   }
 
