@@ -1,8 +1,8 @@
 'use strict';
 
 import React from 'react';
-import visualizationRegistry from '../visualizationRegistry';
-import styles from '../styles/visualizationSelector.css';
+import visualizationRegistry from '../../visualizationRegistry';
+import styles from './visualizationSelector.css';
 
 export default class VisualizationSelector extends React.PureComponent {
   constructor(props) {
