@@ -149,6 +149,7 @@ class UniversalConfigComponent extends React.PureComponent {
             selected={this.props.selectedAuthors}
           />
         </div>
+        <div className={styles.marginTop05}></div>
         <button
           className={'button'}
           onClick={() => {

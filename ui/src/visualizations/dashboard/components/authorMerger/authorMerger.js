@@ -10,6 +10,7 @@ export default class AuthorMerger extends React.PureComponent {
       palette: props.palette,
       allCommitters: props.committers,
       committers: this.generateCommittersList(props.committers, props.palette),
+      other: [],
     };
   }
 
@@ -22,11 +23,10 @@ export default class AuthorMerger extends React.PureComponent {
         color: palette[committer],
       });
     }
-    console.log(committersList);
     return committersList;
   }
 
-  addCommitterToOther(primary, secondary) {
+  addCommitterToCommitter(primary, secondary) {
     if (primary !== secondary) {
       let committerList = this.state.committers;
       const committerToAdd = committerList.filter((c) => c.mainCommitter === secondary)[0];
@@ -45,6 +45,33 @@ export default class AuthorMerger extends React.PureComponent {
     }
   }
 
+  addCommitterToOther(committer) {
+    const other = this.state.other;
+    let committerList = this.state.committers;
+    const committerToAdd = committerList.filter((c) => c.mainCommitter === committer)[0];
+    committerList = committerList.filter((c) => c.mainCommitter !== committer);
+    for (const cToAdd of committerToAdd.committers) {
+      other.push(cToAdd);
+    }
+    this.setState({ committers: committerList, other: other });
+  }
+
+  removeCommitterFromOther(committer) {
+    let other = this.state.other;
+    const committerList = this.state.committers;
+    console.log(other);
+    console.log(committer);
+    const committerToRemove = other.filter((c) => c.signature === committer)[0];
+    console.log(committerToRemove);
+    committerList.push({
+      mainCommitter: committerToRemove.signature,
+      committers: [{ signature: committerToRemove.signature, color: this.state.palette[committer] }],
+      color: this.state.palette[committer],
+    });
+    other = other.filter((c) => c.signature !== committerToRemove.signature);
+    this.setState({ committers: committerList, other: other });
+  }
+
   render() {
     return (
       <div className={styles.authorMerger}>
@@ -58,42 +85,76 @@ export default class AuthorMerger extends React.PureComponent {
             <button
               className={'button'}
               onClick={() => {
-                this.setState({ committers: this.generateCommittersList(this.state.allCommitters, this.state.palette) });
+                this.setState({ committers: this.generateCommittersList(this.state.allCommitters, this.state.palette), others: [] });
               }}>
               Reset
             </button>
             <hr />
             {this.state.committers.map((committer) => {
               return (
-                <div
-                  id={committer.mainCommitter}
-                  className={styles.committerDragDropContainer}
-                  style={{ background: committer.color }}
-                  onDrop={(e) => {
-                    e.target.classList.remove(styles.authorMergerContainerDragOver);
-                    this.addCommitterToOther(e.target.id, e.dataTransfer.getData('Text'));
-                  }}
-                  onDragOver={(e) => {
-                    e.target.classList.add(styles.authorMergerContainerDragOver);
-                    e.preventDefault();
-                  }}
-                  onDragLeave={(e) => {
-                    e.target.classList.remove(styles.authorMergerContainerDragOver);
-                  }}
-                  onDragStart={(e) => {
-                    e.dataTransfer.setData('Text', e.target.id);
-                  }}>
-                  {committer.committers.map((individualCommitter) => {
-                    return (
-                      <div className={styles.individualCommitter}>
-                        <span className={styles.individualCommitterColor} style={{ background: individualCommitter.color }}></span>
-                        <span className={styles.individualCommitterText}>{individualCommitter.signature}</span>
-                      </div>
-                    );
-                  })}
+                <div className={styles.committerRow}>
+                  <div
+                    id={committer.mainCommitter}
+                    className={styles.committerContainer + ' ' + styles.dragAndDrop}
+                    style={{ background: committer.color }}
+                    onDrop={(e) => {
+                      e.target.classList.remove(styles.authorMergerContainerDragOver);
+                      this.addCommitterToCommitter(e.target.id, e.dataTransfer.getData('Text'));
+                    }}
+                    onDragOver={(e) => {
+                      e.target.classList.add(styles.authorMergerContainerDragOver);
+                      e.preventDefault();
+                    }}
+                    onDragLeave={(e) => {
+                      e.target.classList.remove(styles.authorMergerContainerDragOver);
+                    }}
+                    onDragStart={(e) => {
+                      e.dataTransfer.setData('Text', e.target.id);
+                    }}>
+                    {committer.committers.map((individualCommitter) => {
+                      return (
+                        <div className={styles.individualCommitter}>
+                          <span className={styles.individualCommitterColor} style={{ background: individualCommitter.color }}></span>
+                          <span className={styles.individualCommitterText}>{individualCommitter.signature}</span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                  <button
+                    className={'button ' + styles.addToOtherButton}
+                    style={{ borderColor: this.state.palette['other'] }}
+                    onClick={(e) => {
+                      this.addCommitterToOther(committer.mainCommitter);
+                    }}>
+                    Add to Other
+                  </button>
                 </div>
               );
             })}
+            <hr />
+            <h2>Other:</h2>
+            <div className={styles.committerRow}>
+              <div
+                id={'other'}
+                className={styles.committerContainer + ' ' + styles.otherContainer}
+                style={{ background: this.state.palette['other'] }}>
+                {this.state.other.map((individualCommitter) => {
+                  return (
+                    <div className={styles.individualCommitter}>
+                      <span className={styles.individualCommitterColor} style={{ background: individualCommitter.color }}></span>
+                      <span className={styles.individualCommitterText}>{individualCommitter.signature}</span>
+                      <button
+                        className={'button ' + styles.removeButton}
+                        onClick={(e) => {
+                          this.removeCommitterFromOther(individualCommitter.signature);
+                        }}>
+                        Remove
+                      </button>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
           </div>
         </div>
       </div>
