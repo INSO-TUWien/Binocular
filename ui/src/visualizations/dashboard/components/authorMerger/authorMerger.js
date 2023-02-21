@@ -9,8 +9,8 @@ export default class AuthorMerger extends React.PureComponent {
     this.state = {
       palette: props.palette,
       allCommitters: props.committers,
-      committers: this.generateCommittersList(props.committers, props.palette),
-      other: [],
+      committers: props.mergedAuthorList,
+      other: props.other,
     };
   }
 
@@ -85,14 +85,14 @@ export default class AuthorMerger extends React.PureComponent {
             <button
               className={'button'}
               onClick={() => {
-                this.setState({ committers: this.generateCommittersList(this.state.allCommitters, this.state.palette), others: [] });
+                this.setState({ committers: this.generateCommittersList(this.state.allCommitters, this.state.palette), other: [] });
               }}>
               Reset
             </button>
             <hr />
             {this.state.committers.map((committer) => {
               return (
-                <div className={styles.committerRow}>
+                <div key={'authorMerger' + committer.mainCommitter} className={styles.committerRow}>
                   <div
                     id={committer.mainCommitter}
                     className={styles.committerContainer + ' ' + styles.dragAndDrop}
@@ -113,7 +113,7 @@ export default class AuthorMerger extends React.PureComponent {
                     }}>
                     {committer.committers.map((individualCommitter) => {
                       return (
-                        <div className={styles.individualCommitter}>
+                        <div key={'authorMergerIndividual' + individualCommitter.signature} className={styles.individualCommitter}>
                           <span className={styles.individualCommitterColor} style={{ background: individualCommitter.color }}></span>
                           <span className={styles.individualCommitterText}>{individualCommitter.signature}</span>
                         </div>
@@ -140,7 +140,7 @@ export default class AuthorMerger extends React.PureComponent {
                 style={{ background: this.state.palette['other'] }}>
                 {this.state.other.map((individualCommitter) => {
                   return (
-                    <div className={styles.individualCommitter}>
+                    <div key={'authorMergerIndividual' + individualCommitter.signature} className={styles.individualCommitter}>
                       <span className={styles.individualCommitterColor} style={{ background: individualCommitter.color }}></span>
                       <span className={styles.individualCommitterText}>{individualCommitter.signature}</span>
                       <button
@@ -155,6 +155,21 @@ export default class AuthorMerger extends React.PureComponent {
                 })}
               </div>
             </div>
+            <hr />
+            <button
+              className={'button'}
+              onClick={() => {
+                this.props.close();
+              }}>
+              Close
+            </button>
+            <button
+              className={'button ' + styles.applyButton}
+              onClick={() => {
+                this.props.apply(this.state.committers, this.state.other);
+              }}>
+              Apply
+            </button>
           </div>
         </div>
       </div>

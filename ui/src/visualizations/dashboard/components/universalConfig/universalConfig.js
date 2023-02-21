@@ -3,10 +3,10 @@
 import React from 'react';
 import { connect } from 'react-redux';
 import styles from '../../styles.scss';
-import { setResolution, setTimeSpan, setSelectedAuthors, setAllAuthors } from '../../sagas';
+import { setResolution, setTimeSpan, setSelectedAuthors, setAllAuthors, setMergedAuthorList, setOtherAuthorList } from '../../sagas';
 import DateRangeFilter from '../../../../components/DateRangeFilter/dateRangeFilter';
-import CheckboxLegend from '../../../../components/CheckboxLegend';
 import AuthorMerger from '../authorMerger/authorMerger';
+import AuthorList from '../authorList/authorList';
 
 const mapStateToProps = (state /*, ownProps*/) => {
   const dashboardState = state.visualizations.newDashboard.state;
@@ -14,6 +14,8 @@ const mapStateToProps = (state /*, ownProps*/) => {
   let firstDisplayDate = '';
   let lastDisplayDate = '';
   let selectedAuthors = [];
+  let mergedAuthors = [];
+  let otherAuthors = [];
 
   if (dashboardState.config.chartTimeSpan.from === undefined) {
     firstDisplayDate =
@@ -30,6 +32,12 @@ const mapStateToProps = (state /*, ownProps*/) => {
   if (dashboardState.config.selectedAuthorsGlobal !== undefined) {
     selectedAuthors = dashboardState.config.selectedAuthorsGlobal;
   }
+  if (dashboardState.config.mergedAuthors !== undefined) {
+    mergedAuthors = dashboardState.config.mergedAuthors;
+  }
+  if (dashboardState.config.otherAuthors !== undefined) {
+    otherAuthors = dashboardState.config.otherAuthors;
+  }
   return {
     chartResolution: dashboardState.config.chartResolution,
     firstDisplayDate: firstDisplayDate,
@@ -39,6 +47,8 @@ const mapStateToProps = (state /*, ownProps*/) => {
     committers: dashboardState.data.data.committers,
     palette: dashboardState.data.data.palette,
     selectedAuthors: selectedAuthors,
+    mergedAuthors: mergedAuthors,
+    otherAuthors: otherAuthors,
     firstSignificantTimestamp: dashboardState.data.data.firstSignificantTimestamp,
     lastSignificantTimestamp: dashboardState.data.data.lastSignificantTimestamp,
   };
@@ -48,7 +58,9 @@ const mapDispatchToProps = (dispatch /*, ownProps*/) => {
   return {
     onClickResolution: (resolution) => dispatch(setResolution(resolution)),
     onChangeTimeSpan: (timeSpan) => dispatch(setTimeSpan(timeSpan)),
-    onClickCheckboxLegend: (selected) => dispatch(setSelectedAuthors(selected)),
+    onAuthorSelectionChanged: (selected) => dispatch(setSelectedAuthors(selected)),
+    onMergedAuthorListChanged: (selected) => dispatch(setMergedAuthorList(selected)),
+    onOtherAuthorListChanged: (selected) => dispatch(setOtherAuthorList(selected)),
     onSetPalette: (allAuthors) => dispatch(setAllAuthors(allAuthors)),
   };
 };
@@ -58,7 +70,34 @@ class UniversalConfigComponent extends React.PureComponent {
     super(props);
     this.state = {
       showAuthorMerge: false,
+      mergedAuthorList: this.props.mergedAuthors,
+      otherAuthors: this.props.otherAuthors,
     };
+  }
+
+  componentWillReceiveProps(nextProps, nextContext) {
+    if (
+      nextProps.committers !== [] &&
+      nextProps.palette !== [] &&
+      this.state.mergedAuthorList.length === 0 &&
+      this.state.otherAuthors.length === 0
+    ) {
+      const mergedAuthorList = this.generateCommittersList(nextProps.committers, nextProps.palette);
+      this.props.onMergedAuthorListChanged(mergedAuthorList);
+      this.setState({ mergedAuthorList: mergedAuthorList });
+    }
+  }
+
+  generateCommittersList(committers, palette) {
+    const committersList = [];
+    for (const committer of committers) {
+      committersList.push({
+        mainCommitter: committer,
+        committers: [{ signature: committer, color: palette[committer] }],
+        color: palette[committer],
+      });
+    }
+    return committersList;
   }
 
   render() {
@@ -70,7 +109,6 @@ class UniversalConfigComponent extends React.PureComponent {
     if (this.props.palette !== undefined) {
       this.props.onSetPalette(this.props.palette);
     }
-
     function timestampToDateTimeString(timestamp) {
       const date = new Date(timestamp);
 
@@ -96,8 +134,15 @@ class UniversalConfigComponent extends React.PureComponent {
           <AuthorMerger
             committers={this.props.committers}
             palette={this.props.palette}
+            mergedAuthorList={this.state.mergedAuthorList}
+            other={this.state.otherAuthors}
             close={() => {
               this.setState({ showAuthorMerge: false });
+            }}
+            apply={(mergedAuthorList, otherAuthors) => {
+              this.props.onMergedAuthorListChanged(mergedAuthorList);
+              this.props.onOtherAuthorListChanged(otherAuthors);
+              this.setState({ showAuthorMerge: false, mergedAuthorList: mergedAuthorList, otherAuthors: otherAuthors });
             }}
           />
         ) : (
@@ -140,14 +185,14 @@ class UniversalConfigComponent extends React.PureComponent {
         </div>
         <label className="label">Authors</label>
         <div>
-          <CheckboxLegend
+          <AuthorList
             palette={this.props.palette}
-            onClick={this.props.onClickCheckboxLegend.bind(this)}
-            title="All"
-            split={this.props.metric === 'linesChanged'}
-            otherCommitters={otherCommitters}
-            selected={this.props.selectedAuthors}
-          />
+            authorList={this.state.mergedAuthorList}
+            otherAuthors={this.state.otherAuthors}
+            selectedAuthors={this.props.selectedAuthors}
+            selectionChanged={(newSelection) => {
+              this.props.onAuthorSelectionChanged(newSelection);
+            }}></AuthorList>
         </div>
         <div className={styles.marginTop05}></div>
         <button
