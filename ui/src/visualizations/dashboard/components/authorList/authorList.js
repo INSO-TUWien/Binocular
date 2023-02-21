@@ -30,8 +30,8 @@ export default class AuthorList extends React.PureComponent {
                 checkedAuthors.push(author.mainCommitter);
               }
             });
-            if (!checkedAuthors.includes('other')) {
-              checkedAuthors.push('other');
+            if (!checkedAuthors.includes('others')) {
+              checkedAuthors.push('others');
             }
             this.setState({ checkedAuthors: checkedAuthors });
             this.props.selectionChanged(checkedAuthors);
@@ -92,13 +92,13 @@ export default class AuthorList extends React.PureComponent {
                   <td>
                     <input
                       type={'checkbox'}
-                      checked={this.state.checkedAuthors.includes('other')}
+                      checked={this.state.checkedAuthors.includes('others')}
                       onChange={(event) => {
                         let checkedAuthors = this.state.checkedAuthors;
                         if (event.target.checked) {
-                          checkedAuthors.push('other');
+                          checkedAuthors.push('others');
                         } else {
-                          checkedAuthors = checkedAuthors.filter((a) => a !== 'other');
+                          checkedAuthors = checkedAuthors.filter((a) => a !== 'others');
                         }
                         this.setState({ checkedAuthors: checkedAuthors });
                         this.props.selectionChanged(checkedAuthors);
