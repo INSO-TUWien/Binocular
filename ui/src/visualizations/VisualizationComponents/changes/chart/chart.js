@@ -210,11 +210,13 @@ export default class Changes extends React.Component {
                 }
               }
             } else {
-              if (chartIsSplit) {
-                obj['(Additions) ' + committer] = 0;
-                obj['(Deletions) ' + committer] = -0.001; //-0.001 for stack layout to realize it belongs on the bottom
-              } else {
-                obj[committer] = 0;
+              for (const mergedAuthor of props.mergedAuthors.filter((a) => a.mainCommitter === committer)) {
+                if (chartIsSplit) {
+                  obj['(Additions) ' + committer] = 0;
+                  obj['(Deletions) ' + committer] = -0.001; //-0.001 for stack layout to realize it belongs on the bottom
+                } else {
+                  obj[committer] = 0;
+                }
               }
             }
           }
@@ -287,7 +289,8 @@ export default class Changes extends React.Component {
         }
       });
     }
-
+    console.log(commitChartData);
+    console.log(commitChartPalette);
     return { commitChartData, commitScale, commitPalette: commitChartPalette, selectedAuthors };
   }
 
