@@ -309,18 +309,63 @@ export default class CodeOwnershipRiver extends React.Component {
     }
 
     let commits = props.commits;
+
     if (props.universalSettings) {
       commits = props.filteredCommits;
+
+      //merge author stats
+      commits.map((c) => {
+        const newStatsByAuthor = {};
+        for (const mergedAuthor of props.mergedAuthors) {
+          for (const committer of mergedAuthor.committers) {
+            if (committer.signature in c.statsByAuthor) {
+              if (!(mergedAuthor.mainCommitter in newStatsByAuthor)) {
+                newStatsByAuthor[mergedAuthor.mainCommitter] = c.statsByAuthor[committer.signature];
+              } else {
+                const stats = newStatsByAuthor[mergedAuthor.mainCommitter];
+                const additionalStats = c.statsByAuthor[committer.signature];
+                stats.count += additionalStats.count;
+                stats.additions += additionalStats.additions;
+                stats.deletions += additionalStats.deletions;
+                stats.changes += additionalStats.changes;
+
+                newStatsByAuthor[mergedAuthor.mainCommitter] = stats;
+              }
+            }
+          }
+        }
+
+        for (const otherAuthor of props.otherAuthors) {
+          if (otherAuthor.signature in c.statsByAuthor) {
+            if (!('others' in newStatsByAuthor)) {
+              newStatsByAuthor['others'] = c.statsByAuthor[otherAuthor.signature];
+            } else {
+              const stats = newStatsByAuthor['others'];
+              const additionalStats = c.statsByAuthor[otherAuthor.signature];
+              stats.count += additionalStats.count;
+              stats.additions += additionalStats.additions;
+              stats.deletions += additionalStats.deletions;
+              stats.changes += additionalStats.changes;
+
+              newStatsByAuthor['others'] = stats;
+            }
+          }
+        }
+
+        c.statsByAuthor = newStatsByAuthor;
+        return c;
+      });
 
       commits = commits.map((commit) => {
         for (const author of Object.keys(commit.statsByAuthor)) {
           let filter = false;
-          if (props.selectedAuthors.filter((a) => a === 'others').length > 0) {
-            filter = true;
+          if (!props.selectedAuthors.includes('others')) {
+            delete commit.statsByAuthor['others'];
           }
-          for (const allAuthorsAuthor of Object.keys(props.allAuthors)) {
-            if (author === allAuthorsAuthor) {
-              if (props.selectedAuthors.filter((a) => a === allAuthorsAuthor).length > 0) {
+
+          for (const mergedAuthor of props.mergedAuthors) {
+            if (author === mergedAuthor.mainCommitter) {
+              if (props.selectedAuthors.filter((a) => a === mergedAuthor.mainCommitter).length > 0) {
                 filter = true;
                 break;
               } else {
@@ -329,7 +374,7 @@ export default class CodeOwnershipRiver extends React.Component {
               }
             }
           }
-          if (!filter) {
+          if (!filter && author !== 'others') {
             delete commit.statsByAuthor[author];
           }
         }
@@ -338,14 +383,15 @@ export default class CodeOwnershipRiver extends React.Component {
     }
 
     const lastCommitDataPoint = _.last(commits).statsByAuthor;
+
     const commitLegend = [];
     const commitSeries = _.map(lastCommitDataPoint, (committerIndex, signature) => {
       const legend = {
         name:
           (props.commitAttribute === 'count' ? 'Commits by ' : 'Changes by ') +
-          (signature === 'other' ? props.otherCount + ' Others' : signature),
+          (signature === 'others' ? props.otherAuthors.length + ' Others' : signature),
         style: {
-          fill: props.palette[signature],
+          fill: props.palette[signature === 'others' ? 'other' : signature],
         },
       };
 
@@ -353,7 +399,7 @@ export default class CodeOwnershipRiver extends React.Component {
 
       return {
         style: {
-          fill: props.palette[signature],
+          fill: props.palette[signature === 'others' ? 'other' : signature],
         },
         extractY: (d) => {
           const stats = d.statsByAuthor[signature];

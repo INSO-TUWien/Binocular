@@ -289,8 +289,7 @@ export default class Changes extends React.Component {
         }
       });
     }
-    console.log(commitChartData);
-    console.log(commitChartPalette);
+
     return { commitChartData, commitScale, commitPalette: commitChartPalette, selectedAuthors };
   }
 

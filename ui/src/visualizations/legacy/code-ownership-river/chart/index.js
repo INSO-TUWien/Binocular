@@ -25,6 +25,8 @@ const mapStateToProps = (state /*, ownProps*/) => {
     highlightedIssue: corState.config.highlightedIssue,
     highlightedCommits: corState.config.highlightedCommits,
     selectedAuthors: universalSettings.selectedAuthorsGlobal,
+    mergedAuthors: universalSettings.mergedAuthors,
+    otherAuthors: universalSettings.otherAuthors,
     allAuthors: universalSettings.allAuthors,
   };
 };
