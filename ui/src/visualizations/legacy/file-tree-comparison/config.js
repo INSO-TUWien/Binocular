@@ -25,7 +25,7 @@ const ChangesConfigComponent = (props) => {
       <div className={style.search} hidden={props.changed.add.length === 0 && props.changed.edit.length === 0 && props.changed.delete.length === 0}>
         <input
           className={style.bottomMargin}
-          placeholder="Highlight issue..."
+          placeholder="Search for folder/file/extension..."
           onChange={(e) => {
             if (e.target.value === null) {
               props.onSetFilter('');

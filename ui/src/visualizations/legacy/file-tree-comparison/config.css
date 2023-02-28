@@ -23,6 +23,7 @@
 }
 .bottomMargin {
   margin-bottom: 1em;
+  width: 25em;
 }
 .info {
   max-width: 400px;
