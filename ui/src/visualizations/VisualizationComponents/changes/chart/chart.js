@@ -222,7 +222,7 @@ export default class Changes extends React.Component {
           }
         );
         //Add other if selected
-        if (props.selectedAuthors.includes('other')) {
+        if (props.selectedAuthors.includes('others')) {
           props.otherAuthors.forEach((c) => {
             if (chartIsSplit) {
               if (c.signature in commit.statsByAuthor) {

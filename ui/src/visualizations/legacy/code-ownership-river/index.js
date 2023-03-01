@@ -13,5 +13,5 @@ export default {
   reducer,
   ChartComponent,
   ConfigComponent,
-  HelpComponent
+  HelpComponent,
 };
