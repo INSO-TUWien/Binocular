@@ -30,7 +30,7 @@ export default class SearchBox extends React.Component {
   }
 
   componentDidUpdate(nextProps) {
-    if (nextProps.value) {
+    if (nextProps.value !== this.props.value) {
       const idx = _.findIndex(this.state.options, (o) => o === nextProps.value);
       this.setState({ selectedIndex: idx });
     }
