@@ -47,7 +47,7 @@
   min-height: 3rem;
   margin: 0.1rem 0.5rem ;
   background: lightgray;
-  border-radius: 0.5rem;
+  border-radius: 4px;
   padding: 0.5rem;
   border: 1px solid lightgray;
 }
@@ -68,7 +68,7 @@
 .individualCommitter{
   display: inline-block;
   position: relative;
-  border-radius: 0.3rem;
+  border-radius: 4px;
   background: white;
   padding: 0.1rem;
   border: 1px solid darkgray;
@@ -84,7 +84,7 @@
   display: inline-block;
   width: 1rem;
   height: 1.8rem;
-  border-radius: 0.2rem;
+  border-radius: 2px;
   border: 1px solid white;
 }
 

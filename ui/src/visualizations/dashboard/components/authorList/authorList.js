@@ -39,49 +39,52 @@ export default class AuthorList extends React.PureComponent {
           }}>
           Check All
         </button>
-        <table>
-          <tbody>
-            {this.props.authorList.map((author) => {
-              return (
-                <tr key={author.mainCommitter} className={'checkbox ' + styles.authorRow} style={{ background: author.color }}>
-                  <td>
-                    <input
-                      type={'checkbox'}
-                      checked={this.state.checkedAuthors.includes(author.mainCommitter)}
-                      onChange={(event) => {
-                        let checkedAuthors = this.state.checkedAuthors;
-                        if (event.target.checked) {
-                          checkedAuthors.push(author.mainCommitter);
-                        } else {
-                          checkedAuthors = checkedAuthors.filter((a) => a !== author.mainCommitter);
-                        }
-                        this.setState({ checkedAuthors: checkedAuthors });
-                        this.props.selectionChanged(checkedAuthors);
-                        this.forceUpdate();
-                      }}
-                    />
-                  </td>
-                  <td>
-                    {author.committers.map((committer) => {
-                      return (
-                        <div key={'individual' + committer.signature}>
-                          <table className={styles.individualCommitter}>
-                            <tbody>
-                              <tr>
-                                <td className={styles.individualCommitterColor} style={{ background: committer.color }}></td>
-                                <td className={styles.individualCommitterText}>{committer.signature}</td>
-                              </tr>
-                            </tbody>
-                          </table>
-                        </div>
-                      );
-                    })}
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
+        <hr />
+        <div className={styles.authorListScrollContainer}>
+          <table>
+            <tbody>
+              {this.props.authorList.map((author) => {
+                return (
+                  <tr key={author.mainCommitter} className={'checkbox ' + styles.authorRow} style={{ background: author.color }}>
+                    <td>
+                      <input
+                        type={'checkbox'}
+                        checked={this.state.checkedAuthors.includes(author.mainCommitter)}
+                        onChange={(event) => {
+                          let checkedAuthors = this.state.checkedAuthors;
+                          if (event.target.checked) {
+                            checkedAuthors.push(author.mainCommitter);
+                          } else {
+                            checkedAuthors = checkedAuthors.filter((a) => a !== author.mainCommitter);
+                          }
+                          this.setState({ checkedAuthors: checkedAuthors });
+                          this.props.selectionChanged(checkedAuthors);
+                          this.forceUpdate();
+                        }}
+                      />
+                    </td>
+                    <td>
+                      {author.committers.map((committer) => {
+                        return (
+                          <div key={'individual' + committer.signature}>
+                            <table className={styles.individualCommitter}>
+                              <tbody>
+                                <tr>
+                                  <td className={styles.individualCommitterColor} style={{ background: committer.color }}></td>
+                                  <td className={styles.individualCommitterText}>{committer.signature}</td>
+                                </tr>
+                              </tbody>
+                            </table>
+                          </div>
+                        );
+                      })}
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
         {this.props.otherAuthors.length > 0 ? (
           <div>
             <hr />
