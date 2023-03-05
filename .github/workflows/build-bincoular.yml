@@ -5,7 +5,7 @@ on:
     branches:
       - feature/67 # TODO: set trigger according to project needs
 
-env: # set env if needed
+#env: set env if needed
 
 jobs:
 
