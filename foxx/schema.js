@@ -34,7 +34,7 @@ const queryType = new gql.GraphQLObjectType({
         args: {
           since: { type: Timestamp },
           until: { type: Timestamp },
-          sort: { type: Sort }
+          sort: { type: Sort },
         },
         query: (root, args, limit) => {
           let q = qb.for('commit').in('commits').sort('commit.date', args.sort);
@@ -45,29 +45,29 @@ const queryType = new gql.GraphQLObjectType({
           q = q.limit(limit.offset, limit.count).return('commit');
 
           return q;
-        }
+        },
       }),
       commit: {
         type: require('./types/commit.js'),
         args: {
           sha: {
             description: 'sha of the commit',
-            type: new gql.GraphQLNonNull(gql.GraphQLString)
-          }
+            type: new gql.GraphQLNonNull(gql.GraphQLString),
+          },
         },
         resolve(root, args) {
           return commits.document(args.sha);
-        }
+        },
       },
       latestCommit: {
         type: require('./types/commit.js'),
         args: {
           since: { type: Timestamp },
-          until: { type: Timestamp }
+          until: { type: Timestamp },
         },
         resolve(root, args) {
           return commits.document(args.sha);
-        }
+        },
       },
       commitDateHistogram: makeDateHistogramEndpoint(commits, 'date', {
         args: {
@@ -76,27 +76,27 @@ const queryType = new gql.GraphQLObjectType({
               name: 'BuildFilter',
               values: {
                 successful: {
-                  value: 'successful'
+                  value: 'successful',
                 },
                 failed: {
-                  value: 'failed'
+                  value: 'failed',
                 },
                 all: {
-                  value: 'all'
-                }
-              }
+                  value: 'all',
+                },
+              },
             }),
-            description: 'Include/exclude commits that have successful builds'
-          }
+            description: 'Include/exclude commits that have successful builds',
+          },
         },
-        makeFilter: args => {
+        makeFilter: (args) => {
           if (!args.buildFilter || args.buildFilter === 'all') {
             return true;
           }
 
           const comparatorMap = {
             successful: 'gt',
-            failed: 'eq'
+            failed: 'eq',
           };
 
           return qb[comparatorMap[args.buildFilter]](
@@ -109,12 +109,12 @@ const queryType = new gql.GraphQLObjectType({
             ),
             0
           );
-        }
+        },
       }),
       files: paginated({
         type: require('./types/file.js'),
         args: {
-          sort: { type: Sort }
+          sort: { type: Sort },
         },
         query: (root, args, limit) => {
           let q = qb.for('file').in('files').sort('file.path', args.sort);
@@ -122,19 +122,19 @@ const queryType = new gql.GraphQLObjectType({
           q = q.limit(limit.offset, limit.count).return('file');
 
           return q;
-        }
+        },
       }),
       file: {
         type: require('./types/file.js'),
         args: {
           path: {
             description: 'Path of the file',
-            type: new gql.GraphQLNonNull(gql.GraphQLString)
-          }
+            type: new gql.GraphQLNonNull(gql.GraphQLString),
+          },
         },
         resolve(root, args) {
           return files.firstExample({ path: args.path });
-        }
+        },
       },
       languages: paginated({
         type: require('./types/language'),
@@ -143,19 +143,19 @@ const queryType = new gql.GraphQLObjectType({
             IN
             ${languages}
             ${limit}
-              RETURN language`
+              RETURN language`,
       }),
       language: {
         type: require('./types/language'),
         args: {
           name: {
             description: 'name of language',
-            type: new gql.GraphQLNonNull(gql.GraphQLString)
-          }
+            type: new gql.GraphQLNonNull(gql.GraphQLString),
+          },
         },
         resolve(root, args) {
           return languages.firstExample({ name: args.name });
-        }
+        },
       },
       modules: paginated({
         type: require('./types/module'),
@@ -164,19 +164,19 @@ const queryType = new gql.GraphQLObjectType({
             IN
             ${modules}
             ${limit}
-              RETURN module`
+              RETURN module`,
       }),
       module: {
         type: require('./types/module'),
         args: {
           path: {
             description: 'path of module',
-            type: new gql.GraphQLNonNull(gql.GraphQLString)
-          }
+            type: new gql.GraphQLNonNull(gql.GraphQLString),
+          },
         },
         resolve(root, args) {
           return modules.firstExample({ path: args.path });
-        }
+        },
       },
       stakeholders: paginated({
         type: require('./types/stakeholder.js'),
@@ -185,7 +185,7 @@ const queryType = new gql.GraphQLObjectType({
             IN
             ${stakeholders}
             ${limit}
-              RETURN stakeholder`
+              RETURN stakeholder`,
       }),
       committers: {
         type: new gql.GraphQLList(gql.GraphQLString),
@@ -198,7 +198,7 @@ const queryType = new gql.GraphQLObjectType({
                 RETURN DISTINCT commit.signature`
             )
             .toArray();
-        }
+        },
       },
       baseBuilds: paginated({
         type: require('./types/build.js'),
@@ -207,22 +207,26 @@ const queryType = new gql.GraphQLObjectType({
           FOR build IN ${builds}
             SORT build.createdAt ASC
             ${limit}
-            RETURN build`
+            RETURN build`,
       }),
       builds: paginated({
         type: require('./types/build.js'),
-        args: {},
-        query: (root, args, limit) => aql`
+        args: { since: { type: Timestamp }, until: { type: Timestamp } },
+        query: (root, args, limit) => {
+          return aql`
           FOR build IN ${builds}
             SORT build.createdAt ASC
             ${limit}
+            FILTER DATE_TIMESTAMP(build.createdAt) >= DATE_TIMESTAMP(${args.since})
+            FILTER DATE_TIMESTAMP(build.createdAt) <= DATE_TIMESTAMP(${args.until})
             LET countsByStatus = (
               FOR other IN ${builds}
                 FILTER other.finishedAt <= build.createdAt
                 COLLECT status = other.status WITH COUNT INTO statusCount
                 RETURN { [status]: statusCount }
             )
-            RETURN MERGE(build, { stats: MERGE(countsByStatus) })`
+            RETURN MERGE(build, { stats: MERGE(countsByStatus) })`;
+        },
       }),
       issues: paginated({
         type: require('./types/issue.js'),
@@ -230,7 +234,7 @@ const queryType = new gql.GraphQLObjectType({
           q: { type: gql.GraphQLString },
           since: { type: Timestamp },
           until: { type: Timestamp },
-          sort: { type: Sort }
+          sort: { type: Sort },
         },
         query: (root, args, limit) => {
           let exactQuery = [];
@@ -258,15 +262,15 @@ const queryType = new gql.GraphQLObjectType({
           q = q.limit(limit.offset, limit.count).return('issue');
 
           return q;
-        }
+        },
       }),
       issue: {
         type: require('./types/issue.js'),
         args: {
           iid: {
             description: 'Project-Internal issue number',
-            type: new gql.GraphQLNonNull(gql.GraphQLInt)
-          }
+            type: new gql.GraphQLNonNull(gql.GraphQLInt),
+          },
         },
         resolve(root, args) {
           return db
@@ -278,12 +282,12 @@ const queryType = new gql.GraphQLObjectType({
                     RETURN issue`
             )
             .toArray()[0];
-        }
+        },
       },
       branches: paginated({
         type: require('./types/branch.js'),
         args: {
-          sort: { type: Sort }
+          sort: { type: Sort },
         },
         query: (root, args, limit) => {
           let q = qb.for('branch').in('branches').sort('branch.id', args.sort);
@@ -291,30 +295,32 @@ const queryType = new gql.GraphQLObjectType({
           q = q.limit(limit.offset, limit.count).return('branch');
 
           return q;
-        }
+        },
       }),
-      issueDateHistogram: makeDateHistogramEndpoint(issues)
+      issueDateHistogram: makeDateHistogramEndpoint(issues),
     };
-  }
+  },
 });
 
 module.exports = new gql.GraphQLSchema({
-  query: queryType
+  query: queryType,
 });
 
 function makeDateHistogramEndpoint(collection, dateFieldName, { makeFilter, args } = {}) {
   const extendedArgs = Object.assign(
     {
       granularity: {
-        type: new gql.GraphQLNonNull(DateHistogramGranularity)
-      }
+        type: new gql.GraphQLNonNull(DateHistogramGranularity),
+      },
+      since: { type: Timestamp },
+      until: { type: Timestamp },
     },
     args
   );
 
   if (!dateFieldName) {
     extendedArgs.dateField = {
-      type: new gql.GraphQLNonNull(gql.GraphQLString)
+      type: new gql.GraphQLNonNull(gql.GraphQLString),
     };
   }
 
@@ -323,6 +329,9 @@ function makeDateHistogramEndpoint(collection, dateFieldName, { makeFilter, args
     args: extendedArgs,
     resolve(root, args) {
       let q = qb.for('item').in(collection);
+
+      q = queryHelpers.addDateFilter('item.' + (dateFieldName || args.dateField), 'gte', args.since, q);
+      q = queryHelpers.addDateFilter('item.' + (dateFieldName || args.dateField), 'lte', args.until, q);
 
       if (makeFilter) {
         q = q.filter(makeFilter(args));
@@ -333,11 +342,11 @@ function makeDateHistogramEndpoint(collection, dateFieldName, { makeFilter, args
         .withCountInto('length')
         .return({
           category: 'category',
-          count: 'length'
+          count: 'length',
         })
         .toAQL();
 
       return db._query(q).toArray();
-    }
+    },
   };
 }

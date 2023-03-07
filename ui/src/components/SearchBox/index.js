@@ -19,27 +19,27 @@ export default class SearchBox extends React.Component {
       options: [],
       selectedIndex: null,
       dirty: false,
-      searchText: ''
+      searchText: '',
     };
   }
 
-  componentWillMount() {
+  componentDidMount() {
     if (!this.props.value) {
       this.search('');
     }
   }
 
-  componentWillReceiveProps(nextProps) {
-    if (nextProps.value) {
-      const idx = _.findIndex(this.state.options, o => o === nextProps.value);
+  componentDidUpdate(nextProps) {
+    if (nextProps.value !== this.props.value) {
+      const idx = _.findIndex(this.state.options, (o) => o === nextProps.value);
       this.setState({ selectedIndex: idx });
     }
   }
 
   render() {
-    const suggestions = this.state.options.map((o, i) =>
+    const suggestions = this.state.options.map((o, i) => (
       <div
-        ref={div => {
+        ref={(div) => {
           if (i === this.state.selectedIndex) {
             this.selectedDiv = div;
           }
@@ -49,13 +49,13 @@ export default class SearchBox extends React.Component {
         onClick={this.select.bind(this, o)}>
         {this.props.renderOption(o)}
       </div>
-    );
+    ));
 
     return (
       <div
         className={cx('control has-icons-right', {
           [styles.isOpen]: this.state.isOpen,
-          [styles.hasValue]: !!this.props.value
+          [styles.hasValue]: !!this.props.value,
         })}>
         <input
           className={cx('input')}
@@ -64,8 +64,8 @@ export default class SearchBox extends React.Component {
           value={this.props.value && !this.state.dirty ? this.props.renderOption(this.props.value) : this.state.searchText}
           onFocus={() => this.setState({ isOpen: true })}
           onBlur={() => this.cancel()}
-          onChange={e => this.search(e.target.value)}
-          onKeyDown={e => this.onKeyDown(e)}
+          onChange={(e) => this.search(e.target.value)}
+          onKeyDown={(e) => this.onKeyDown(e)}
         />
         <span className={cx('icon', 'is-small is-right', styles.icon)} onClick={() => this.clear()}>
           <i
@@ -73,14 +73,11 @@ export default class SearchBox extends React.Component {
               'fa-times': !!this.props.value,
               'fa-search': !this.props.value,
               'fa-circle-o-notch': this.state.isSearching,
-              'fa-spin': this.state.isSearching
+              'fa-spin': this.state.isSearching,
             })}
           />
         </span>
-        {this.state.isOpen &&
-          <div className={cx(styles.suggestions)}>
-            {suggestions}
-          </div>}
+        {this.state.isOpen && <div className={cx(styles.suggestions)}>{suggestions}</div>}
       </div>
     );
   }
@@ -92,13 +89,13 @@ export default class SearchBox extends React.Component {
 
     this.setState({
       searchText: '',
-      dirty: false
+      dirty: false,
     });
   }
 
   search(text) {
     clearTimeout(this.cancelTimer);
-    const activeSearch = Promise.try(() => this.props.search(text)).then(options => {
+    const activeSearch = Promise.try(() => this.props.search(text)).then((options) => {
       // make sure not to signal end when there is a more recent
       // search active
       if (this.state.activeSearch === activeSearch) {
@@ -106,7 +103,7 @@ export default class SearchBox extends React.Component {
           isSearching: false,
           activeSearch: null,
           options,
-          selectedIndex: this.state.selectedIndex === null ? 0 : Math.min(this.state.selectedIndex, options.length - 1)
+          selectedIndex: this.state.selectedIndex === null ? 0 : Math.min(this.state.selectedIndex, options.length - 1),
         });
       }
     });
@@ -116,7 +113,7 @@ export default class SearchBox extends React.Component {
         searchText: text,
         isSearching: true,
         dirty: true,
-        activeSearch
+        activeSearch,
       },
       () => null
     );
@@ -175,5 +172,5 @@ SearchBox.propTypes = {
   renderOption: PropTypes.func.isRequired,
   onChange: PropTypes.func,
   placeholder: PropTypes.string,
-  search: PropTypes.func.isRequired
+  search: PropTypes.func.isRequired,
 };
