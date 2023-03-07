@@ -27,11 +27,14 @@ jobs:
     - name: Install dependencies
       run: npm ci --legacy-peer-deps
 
-    #- name: Run eslint
-     # run: npm run eslint
+    # - name: Run eslint
+    #   run: npm run eslint
 
-    #- name: Build
-     # run: npm run build
+    # - name: Build
+    #   run: npm run build
 
-    - name: Run tests
-      run: npm run test
+    # - name: Run tests
+    #   run: npm run test
+
+    - name: Collect coverage
+      run: npm run coverage
