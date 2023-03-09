@@ -45,8 +45,11 @@ jobs:
     # - name: Run eslint
     #   run: npm run eslint
 
+    - name: Run ls
+      run: ls -a
+
     - name: Run pupil
-      run: node pupil.js --no-open --no-server .
+      run: node pupil.js --no-open --no-server /home/runner/work/Binocular/Binocular
 
     - name: Build
       run: npm run build
