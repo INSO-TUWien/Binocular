@@ -26,6 +26,13 @@ jobs:
     - name: Checkout Repository
       uses: actions/checkout@v3
 
+    - name: Set .pupilrc variables
+      uses: microsoft/variable-substitution@v1   
+      with:
+        files: .pupilrc
+      env:
+        github.auth.token: ${{ secrets.GITHUB_TOKEN }}
+
     - name: Set node version
       uses: actions/setup-node@v3
       with:
