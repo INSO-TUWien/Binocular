@@ -12,6 +12,12 @@ jobs:
   build:
 
     runs-on: ubuntu-latest
+    services:
+
+      arangodb:
+        image: arangodb:3.7
+        ports:  
+          - 8529:8529
 
     steps:
 
@@ -30,11 +36,11 @@ jobs:
     # - name: Run eslint
     #   run: npm run eslint
 
-    # - name: Build
-    #   run: npm run build
+    - name: Build
+      run: npm run build
 
     # - name: Run tests
     #   run: npm run test
 
-    - name: Collect coverage
-      run: npm run coverage
+    # - name: Collect coverage
+    #   run: npm run coverage
