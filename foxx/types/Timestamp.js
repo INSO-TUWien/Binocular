@@ -5,9 +5,9 @@ const gql = require('graphql-sync');
 module.exports = new gql.GraphQLScalarType({
   name: 'Timestamp',
   description: 'An ISO8601-compliant timestamp',
-  serialize: value => value,
-  parseValue: value => value,
-  parseLiteral: ast => {
+  serialize: (value) => value,
+  parseValue: (value) => value,
+  parseLiteral: (ast) => {
     if (ast.kind === gql.Kind.INT) {
       return new Date(parseInt(ast.value, 10));
     } else if (ast.kind === gql.Kind.STRING) {
@@ -21,5 +21,5 @@ module.exports = new gql.GraphQLScalarType({
     } else {
       throw new gql.GraphQLError('Query error: Can only parse int or string but got a: ' + ast.kind, [ast]);
     }
-  }
+  },
 });

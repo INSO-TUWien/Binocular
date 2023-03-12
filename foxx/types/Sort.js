@@ -5,9 +5,9 @@ const gql = require('graphql-sync');
 module.exports = new gql.GraphQLScalarType({
   name: 'Sort',
   description: 'Sorting direction. Either ASC (ascending) or DESC (descending)',
-  serialize: value => value,
-  parseValue: value => value,
-  parseLiteral: ast => {
+  serialize: (value) => value,
+  parseValue: (value) => value,
+  parseLiteral: (ast) => {
     if (ast.kind !== gql.Kind.STRING) {
       throw new gql.GraphQLError('Query error: Must pass string for sort', [ast]);
     }
@@ -19,5 +19,5 @@ module.exports = new gql.GraphQLScalarType({
     }
 
     return val;
-  }
+  },
 });
