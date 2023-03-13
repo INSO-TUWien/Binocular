@@ -27,7 +27,12 @@ export default class StreamKey {
   }
 
   equal(item) {
-    return this === item || !Object.keys(this).filter(key => typeof this[key] === 'function').find(key => this[key] !== item[key]);
+    return (
+      this === item ||
+      !Object.keys(this)
+        .filter((key) => typeof this[key] === 'function')
+        .find((key) => this[key] !== item[key])
+    );
   }
   eqPrimKey(item) {
     return this === item || (this.name === item.name && this.attribute === item.attribute);

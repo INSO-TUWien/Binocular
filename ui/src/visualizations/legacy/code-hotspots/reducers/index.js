@@ -6,5 +6,5 @@ import { combineReducers } from 'redux';
 
 export default combineReducers({
   config,
-  data
+  data,
 });

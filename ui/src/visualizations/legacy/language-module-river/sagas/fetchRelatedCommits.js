@@ -10,7 +10,7 @@ export const receiveRelatedCommits = timestampedActionFactory('SET_LANGUAGE_MODU
 export const receiveRelatedCommitsError = createAction('SET_LANGUAGE_MODULE_RIVER_RECEIVE_RELATED_COMMITS_ERROR');
 
 export default fetchFactory(
-  function*(issue) {
+  function* (issue) {
     return yield getRelatedCommitData(issue);
   },
   requestRelatedCommits,
@@ -23,10 +23,10 @@ function getRelatedCommitData(issue) {
     return [];
   }
 
-  return collectPages(getRelatedCommitsPage(issue)).map(commit => commit);
+  return collectPages(getRelatedCommitsPage(issue)).map((commit) => commit);
 }
 
-const getRelatedCommitsPage = issue => (page, perPage) => {
+const getRelatedCommitsPage = (issue) => (page, perPage) => {
   return graphQl
     .query(
       `query($page: Int, $perPage: Int, $iid: Int!){
@@ -42,5 +42,5 @@ const getRelatedCommitsPage = issue => (page, perPage) => {
        }`,
       { page, perPage, iid: issue.iid }
     )
-    .then(resp => resp.issue.commits);
+    .then((resp) => resp.issue.commits);
 };

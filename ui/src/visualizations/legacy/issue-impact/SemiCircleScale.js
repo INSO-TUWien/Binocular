@@ -7,7 +7,7 @@ import { ClosingPathContext } from '../../../utils';
 export default class SemiCircleScale {
   constructor(cx, cy, radius, options) {
     options = _.defaults({}, options, {
-      offset: 0
+      offset: 0,
     });
 
     this.cx = cx;
@@ -27,7 +27,7 @@ export default class SemiCircleScale {
   getCoordsForAngle(angle) {
     return {
       x: this.cx + this.r * Math.cos(angle),
-      y: this.cy + this.r * Math.sin(angle)
+      y: this.cy + this.r * Math.sin(angle),
     };
   }
 
@@ -75,7 +75,7 @@ export default class SemiCircleScale {
 
     return {
       transform: `translate(${coords.x}, ${-coords.y}) ` + `rotate(${SemiCircleScale.rad2deg(textAngle)})`,
-      textAnchor: anchor
+      textAnchor: anchor,
     };
   }
 
@@ -84,6 +84,6 @@ export default class SemiCircleScale {
   }
 
   static rad2deg(rad) {
-    return rad / Math.PI * 180;
+    return (rad / Math.PI) * 180;
   }
 }

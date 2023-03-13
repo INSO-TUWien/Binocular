@@ -21,7 +21,7 @@ export default class Axis extends React.Component {
       left: 'axisLeft',
       right: 'axisRight',
       top: 'axisTop',
-      bottom: 'axisBottom'
+      bottom: 'axisBottom',
     };
 
     const axisMethodName = methodNames[this.props.orient];
@@ -50,7 +50,7 @@ export default class Axis extends React.Component {
 
     return (
       <g>
-        <g className="axis" ref={g => (this.g = g)} transform={translate} />
+        <g className="axis" ref={(g) => (this.g = g)} transform={translate} />
       </g>
     );
   }

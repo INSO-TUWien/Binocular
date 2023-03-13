@@ -13,23 +13,21 @@ export default class searchBar extends React.PureComponent {
     return (
       <div className={styles.searchBoxHint}>
         <div className={styles.searchBox}>
-          <span className={styles.placeholder}>
-            {placeholder}
-          </span>
+          <span className={styles.placeholder}>{placeholder}</span>
         </div>
         <input
           className={styles.searchBoxInput}
-          onFocus={e => {
+          onFocus={(e) => {
             if (e.target.parentElement.children[0].innerHTML.includes('placeholder')) {
               e.target.parentElement.children[0].innerHTML = '';
             }
           }}
-          onBlur={e => {
+          onBlur={(e) => {
             if (e.target.parentElement.children[0].innerHTML === '') {
               e.target.parentElement.children[0].innerHTML = '<span class="' + styles.placeholder + '">' + placeholder + '</span>';
             }
           }}
-          onChange={e => {
+          onChange={(e) => {
             if (e.target.value === ' ') {
               e.target.value = '';
             }

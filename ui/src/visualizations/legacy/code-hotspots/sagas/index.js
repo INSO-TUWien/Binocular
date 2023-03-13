@@ -5,17 +5,17 @@ import { select, takeEvery, fork } from 'redux-saga/effects';
 
 import { fetchFactory, timestampedActionFactory } from '../../../../sagas/utils.js';
 
-export const setActiveFile = createAction('SET_ACTIVE_FILE', f => f);
-export const setActivePath = createAction('SET_ACTIVE_PATH', p => p);
-export const setActiveBranch = createAction('SET_ACTIVE_BRANCH', b => b);
-export const setActiveFiles = createAction('SET_ACTIVE_FILES', f => f);
-export const setActiveBranches = createAction('SET_ACTIVE_BRANCHES', b => b);
+export const setActiveFile = createAction('SET_ACTIVE_FILE', (f) => f);
+export const setActivePath = createAction('SET_ACTIVE_PATH', (p) => p);
+export const setActiveBranch = createAction('SET_ACTIVE_BRANCH', (b) => b);
+export const setActiveFiles = createAction('SET_ACTIVE_FILES', (f) => f);
+export const setActiveBranches = createAction('SET_ACTIVE_BRANCHES', (b) => b);
 
 export const requestCodeHotspotsData = createAction('REQUEST_CODE_HOTSPOTS_DATA');
 export const receiveCodeHotspotsData = timestampedActionFactory('RECEIVE_CODE_HOTSPOTS_DATA');
 export const receiveCodeHotspotsDataError = createAction('RECEIVE_CODE_HOTSPOTS_DATA_ERROR');
 
-export default function*() {
+export default function* () {
   yield fork(watchSetActiveFile);
 }
 
@@ -28,7 +28,7 @@ export function* watchSetActiveFile() {
 }
 
 export const fetchFileUrl = fetchFactory(
-  function*() {
+  function* () {
     const state = yield select();
     const fileURL = state.visualizations.codeHotspots.state.config.fileURL;
     const branch = state.visualizations.codeHotspots.state.config.branch;

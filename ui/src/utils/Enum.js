@@ -18,9 +18,9 @@ export function createEnum(plainEnum) {
         return item;
       }, {});
 
-      data.valueOf = value => {
+      data.valueOf = (value) => {
         const foundKey = Object.keys(data).find(
-          key =>
+          (key) =>
             value &&
             (data[key] === value ||
               data[key].name.toUpperCase().replace(/\s+/g, '') === `${value}`.replace(/\s+/g, '').toUpperCase() ||
@@ -30,15 +30,19 @@ export function createEnum(plainEnum) {
       };
 
       Object.defineProperty(data, 'getAvailable', {
-        get: function() {
-          return Object.keys(data).filter(key => data[key].value).map(key => data[key].name);
-        }
+        get: function () {
+          return Object.keys(data)
+            .filter((key) => data[key].value)
+            .map((key) => data[key].name);
+        },
       });
 
       Object.defineProperty(data, 'values', {
-        get: function() {
-          return Object.keys(data).filter(key => data[key].value).map(key => data[key]);
-        }
+        get: function () {
+          return Object.keys(data)
+            .filter((key) => data[key].value)
+            .map((key) => data[key]);
+        },
       });
 
       return data;

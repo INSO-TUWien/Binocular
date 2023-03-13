@@ -27,7 +27,7 @@ export default class LanguageModuleRiver extends React.Component {
       commitPalette: {},
       selectedAuthors: props.selectedAuthors,
       selectedLanguages: props.selectedLanguages,
-      selectedModules: props.selectedModules
+      selectedModules: props.selectedModules,
     };
   }
 
@@ -38,14 +38,14 @@ export default class LanguageModuleRiver extends React.Component {
   componentWillReceiveProps(nextProps) {
     const { riverData } = this.extractRiverData(nextProps);
 
-    this.setState(prev =>
+    this.setState((prev) =>
       Object.assign(prev, {
         commitChartData: riverData,
         issueChartData: [],
         commitPalette: {},
         selectedAuthors: nextProps.selectedAuthors,
         selectedLanguages: nextProps.selectedLanguages,
-        selectedModules: nextProps.selectedModules
+        selectedModules: nextProps.selectedModules,
       })
     );
   }
@@ -56,9 +56,9 @@ export default class LanguageModuleRiver extends React.Component {
     let commitOrder;
     if (attributes && this.props.chartAttribute && attributes.authors && attributes[this.props.chartAttribute]) {
       commitOrder = _.flatMap(
-        attributes.authors.order.map(author =>
+        attributes.authors.order.map((author) =>
           attributes[this.props.chartAttribute].order.map(
-            attribute => new StreamKey({ name: author.name, attribute: attribute.name, changes: author.changes + attribute.changes })
+            (attribute) => new StreamKey({ name: author.name, attribute: attribute.name, changes: author.changes + attribute.changes })
           )
         )
       ).sort((order1, order2) => order2.data.changes - order1.data.changes);
@@ -68,7 +68,7 @@ export default class LanguageModuleRiver extends React.Component {
     const issuePalette = {
       [IssueStat.Open.name]: chroma('skyblue').hex(),
       [IssueStat.InProgress.name]: '#ffe12e',
-      [IssueStat.Close.name]: '#63c56c'
+      [IssueStat.Close.name]: '#63c56c',
     };
 
     const issueStream = this.props.highlightedIssue
@@ -85,9 +85,7 @@ export default class LanguageModuleRiver extends React.Component {
 
     const commitChart = (
       <div className={styles.chartLine}>
-        <div className={cx(styles.text, 'label')}>
-          {attribute} River
-        </div>
+        <div className={cx(styles.text, 'label')}>{attribute} River</div>
         <div className={styles.chart}>
           <DataRiverChartComponent
             sidebarOpen={this.props.sidebarOpen}
@@ -131,7 +129,7 @@ export default class LanguageModuleRiver extends React.Component {
    */
   createStreamColorPalette(attributes) {
     const authorPalette = (this.state.selectedAuthors || []).reduce((authors, authorName) => {
-      const author = attributes && attributes.authors ? attributes.authors.colors.find(color => color.key === authorName) : undefined;
+      const author = attributes && attributes.authors ? attributes.authors.colors.find((color) => color.key === authorName) : undefined;
       if (author) {
         authors[`(Additions) ${author.key}`] = author.color;
         authors[`(Deletions) ${author.key}`] = chroma(author.color).darken(1).css();
@@ -142,12 +140,14 @@ export default class LanguageModuleRiver extends React.Component {
     const selectedAttribute =
       this.props.chartAttribute === 'languages'
         ? this.props.selectedLanguages
-        : this.props.chartAttribute === 'modules' ? this.props.selectedModules : undefined;
+        : this.props.chartAttribute === 'modules'
+        ? this.props.selectedModules
+        : undefined;
 
     const attributePalette = (selectedAttribute || []).reduce((attributePalette, attributeName) => {
       const attribute =
         attributes && attributes[this.props.chartAttribute]
-          ? attributes[this.props.chartAttribute].colors.find(color => color.key === attributeName)
+          ? attributes[this.props.chartAttribute].colors.find((color) => color.key === attributeName)
           : undefined;
       if (attribute) {
         attributePalette[`${attribute.key}`] = attribute.color;
@@ -168,11 +168,11 @@ export default class LanguageModuleRiver extends React.Component {
       return [];
     }
 
-    const getOthers = key =>
+    const getOthers = (key) =>
       props.attributes && props.attributes[key] && props.attributes[key].others ? props.attributes[key].others : [];
     const attr = {
       authors: getOthers('authors'),
-      [props.chartAttribute]: getOthers(props.chartAttribute)
+      [props.chartAttribute]: getOthers(props.chartAttribute),
     };
 
     const attributeStreams = {
@@ -180,18 +180,26 @@ export default class LanguageModuleRiver extends React.Component {
         props.chartAttribute === 'languages'
           ? this.extractCommitAttribute(
               props.commits,
-              commit => commit.languages,
-              commit => commit.language.name,
+              (commit) => commit.languages,
+              (commit) => commit.language.name,
               attr.authors,
               attr.languages
             )
           : props.chartAttribute === 'modules'
-            ? this.extractCommitAttribute(props.commits, commit => commit.modules, commit => commit.module.path, attr.authors, attr.modules)
-            : undefined,
+          ? this.extractCommitAttribute(
+              props.commits,
+              (commit) => commit.modules,
+              (commit) => commit.module.path,
+              attr.authors,
+              attr.modules
+            )
+          : undefined,
       selectedAttributes:
         props.chartAttribute === 'languages'
           ? props.selectedLanguages
-          : props.chartAttribute === 'modules' ? props.selectedModules : undefined
+          : props.chartAttribute === 'modules'
+          ? props.selectedModules
+          : undefined,
     };
 
     if (!attributeStreams.commits || !attributeStreams.selectedAttributes) {
@@ -199,12 +207,12 @@ export default class LanguageModuleRiver extends React.Component {
     }
 
     const commits = attributeStreams.commits.filter(
-      stream =>
+      (stream) =>
         stream &&
         stream.length &&
         stream[0] &&
-        props.selectedAuthors.find(author => author === stream[0].signature) &&
-        attributeStreams.selectedAttributes.find(attribute => attribute === stream[0].attribute)
+        props.selectedAuthors.find((author) => author === stream[0].signature) &&
+        attributeStreams.selectedAttributes.find((attribute) => attribute === stream[0].attribute)
     );
 
     const granularity = getGranularityDuration(props.chartResolution);
@@ -222,13 +230,13 @@ export default class LanguageModuleRiver extends React.Component {
    * @returns [RiverData] get a list of all aggregated commits
    */
   createAggregatedRiverData(commits, props, granularity) {
-    const jobs = _.flatMap(props.builds, build => build.jobs.map(job => Object.assign(job, { sha: build.sha })));
+    const jobs = _.flatMap(props.builds, (build) => build.jobs.map((job) => Object.assign(job, { sha: build.sha })));
     const groupedBuilds = _.groupBy(jobs, 'sha');
 
     // aggregate all commits referring to a given commit stream and the corresponding timespan aggregation
     // and flat the data streams to one stream
     return _.flatMap(
-      commits.map(commitStream => {
+      commits.map((commitStream) => {
         const aggregatedCommits = [];
 
         if (!commitStream || !commitStream.length) {
@@ -248,7 +256,7 @@ export default class LanguageModuleRiver extends React.Component {
             shas: [],
             attribute: commitStream[0].attribute,
             additions: 0,
-            deletions: 0
+            deletions: 0,
           };
 
           // aggregate commit stream stats
@@ -283,7 +291,7 @@ export default class LanguageModuleRiver extends React.Component {
         if (!groupedBuilds[sha]) {
           return builds;
         }
-        return builds.concat(groupedBuilds[sha].map(build => build.status));
+        return builds.concat(groupedBuilds[sha].map((build) => build.status));
       }, [])
     );
 
@@ -304,19 +312,19 @@ export default class LanguageModuleRiver extends React.Component {
    * @returns {unknown[]}
    */
   extractCommitAttribute(commits, commitFn, attributeFn, others = [], othersAttribute = []) {
-    const attributes = _.flatMap(commits, commit =>
-      commitFn(commit).data.map(data => {
+    const attributes = _.flatMap(commits, (commit) =>
+      commitFn(commit).data.map((data) => {
         const attribute = attributeFn(data);
         return Object.assign(
           {
             sha: commit.sha,
             date: commit.date,
             messageHeader: commit.messageHeader,
-            signature: others.find(name => name === commit.signature) ? 'others' : commit.signature
+            signature: others.find((name) => name === commit.signature) ? 'others' : commit.signature,
           },
           data,
           {
-            attribute: othersAttribute.find(name => name === attribute) ? 'others' : attribute
+            attribute: othersAttribute.find((name) => name === attribute) ? 'others' : attribute,
           }
         );
       })
@@ -324,9 +332,9 @@ export default class LanguageModuleRiver extends React.Component {
 
     const grouped = _.groupBy(attributes, 'signature');
     return _.flatMap(
-      Object.keys(grouped).map(key => {
+      Object.keys(grouped).map((key) => {
         const organized = _.groupBy(grouped[key], 'attribute');
-        return Object.keys(organized).map(organizedKey => organized[organizedKey]);
+        return Object.keys(organized).map((organizedKey) => organized[organizedKey]);
       })
     );
   }
