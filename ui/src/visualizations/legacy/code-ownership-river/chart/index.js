@@ -12,6 +12,7 @@ const mapStateToProps = (state /*, ownProps*/) => {
   const filteredBuilds = corState.config.overlay === 'builds' ? corState.data.data.filteredBuilds : [];
   const issues = corState.config.overlay === 'issues' ? corState.data.data.issues : [];
   const builds = corState.config.overlay === 'builds' ? corState.data.data.builds : [];
+
   return {
     palette: universalSettings.allAuthors,
     otherCount: corState.data.data.otherCount,
@@ -25,6 +26,8 @@ const mapStateToProps = (state /*, ownProps*/) => {
     highlightedIssue: corState.config.highlightedIssue,
     highlightedCommits: corState.config.highlightedCommits,
     selectedAuthors: universalSettings.selectedAuthorsGlobal,
+    mergedAuthors: universalSettings.mergedAuthors,
+    otherAuthors: universalSettings.otherAuthors,
     allAuthors: universalSettings.allAuthors,
   };
 };

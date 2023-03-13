@@ -87,31 +87,17 @@ export default class CheckboxLegend extends React.Component {
         if (text === 'others' && otherCommitters) {
           text = '' + otherCommitters + ' Others';
         }
-        if (this.state.selected.indexOf(key) > -1) {
-          items.push(
-            <CheckboxLegendLine
-              id={key}
-              key={key}
-              text={text}
-              color={this.props.palette[key]}
-              checked={true}
-              onClick={this.clickCallback.bind(this)}
-              split={this.props.split}
-            />
-          );
-        } else {
-          items.push(
-            <CheckboxLegendLine
-              id={key}
-              key={key}
-              text={text}
-              color={this.props.palette[key]}
-              checked={false}
-              onClick={this.clickCallback.bind(this)}
-              split={this.props.split}
-            />
-          );
-        }
+        items.push(
+          <CheckboxLegendLine
+            id={key}
+            key={key}
+            text={text}
+            color={this.props.palette[key]}
+            checked={this.state.selected.indexOf(key) > -1}
+            onClick={this.clickCallback.bind(this)}
+            split={this.props.split}
+          />
+        );
       });
     }
 

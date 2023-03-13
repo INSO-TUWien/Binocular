@@ -33,7 +33,7 @@ export default function* () {
   yield fork(watchOpenCommit);
 
   // keep looking for viewport changes to re-fetch
-  //yield fork(watchViewport);
+  yield fork(watchViewport);
   yield fork(watchRefresh);
   yield fork(watchHighlightedIssue);
   yield fork(watchToggleHelp);
@@ -143,10 +143,8 @@ export const fetchCodeOwnershipData = fetchFactory(
       Database.getBuildData([firstCommitTimestamp, lastCommitTimestamp], [firstCommitTimestamp, lastCommitTimestamp], granularity, interval)
     )
       .spread((filteredCommits, filteredIssues, filteredBuilds, commits, issues, builds) => {
-        const aggregatedAuthors = _.keys(_.last(commits).statsByAuthor);
         const palette = getChartColors('spectral', [...committers, 'other']);
         return {
-          otherCount: committers.length - aggregatedAuthors.length,
           filteredCommits,
           commits,
           committers,
