@@ -46,6 +46,8 @@ function updateLocalStorage(key, value) {
       chartResolution: 'months',
       chartTimeSpan: { from: undefined, to: undefined },
       selectedAuthorsGlobal: [],
+      mergedAuthors: [],
+      otherAuthors: [],
     };
   } else {
     currConfig = JSON.parse(localStorage.getItem('universalConfig'));
