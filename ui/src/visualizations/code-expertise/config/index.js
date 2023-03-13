@@ -11,6 +11,7 @@ import styles from "../styles.scss"
 import { graphQl } from '../../../utils';
 import { endpointUrl } from '../../../utils';
 import { setActiveIssue, setMode, setCurrentBranch, setActiveFiles, setFilterMergeCommits } from '../sagas'
+import { getBranches } from '../sagas/helper.js';
 
 export default () => {
 
@@ -54,18 +55,7 @@ export default () => {
   useEffect(() => {
 
     //get all branches for branch-select
-    Promise.resolve(
-      graphQl.query(
-        `
-      query{
-       branches(sort: "ASC"){
-          data{branch,active}
-        }
-      }
-      `,
-      {}
-      ))
-    .then(resp => resp.branches.data)
+    getBranches()
     .then(branches => branches.sort((a,b) => a.branch.localeCompare(b.branch)))
     .then(branches => branches.map(b => b.branch))
     .then(branches => [...new Set(branches)])
@@ -128,7 +118,6 @@ export default () => {
         }).then((resp) => resp.json()))
       .then(resp => resp.files)
       .then(files => {
-        console.log(files)
         setFiles(files)
       })
     }

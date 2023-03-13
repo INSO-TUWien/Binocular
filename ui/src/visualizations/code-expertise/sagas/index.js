@@ -9,7 +9,7 @@ import {
   mapSaga,
 } from "../../../sagas/utils.js";
 
-import { getAllCommits, getCommitsForBranch, getCommitsForIssue, getIssueData, getAllBuildData, addBuildData, getBlameModules, getBlameIssues } from "./helper.js"
+import { getAllCommits, getCommitsForBranch, getCommitsForIssue, getIssueData, getAllBuildData, addBuildData, getBlameModules, getBlameIssues, getBranches } from "./helper.js"
 
 
 
@@ -104,17 +104,21 @@ export const fetchCodeExpertiseData = fetchFactory(
         getAllCommits(),
         getIssueData(issueId),
         getCommitsForIssue(issueId),
-        getAllBuildData()
-      ).spread((allCommits, issue, issueCommits, builds) => {
+        getAllBuildData(),
+        getBranches()
+      ).spread((allCommits, issue, issueCommits, builds, branches) => {
   
 
         //########### current issue ###########
         result['issue'] = issue
   
         //########### get all relevant commits ###########
+
+        //get full branch object for currently selected branch
+        const currentBranchObject = branches.filter(b => b.branch === branch)[0]
         
         //contains all commits of the current branch
-        const branchCommits = getCommitsForBranch(branch, allCommits)
+        const branchCommits = getCommitsForBranch(currentBranchObject, allCommits)
   
         //we now have all commits for the current branch and all commits for the issue
         //intersect the two groups to get the result set
@@ -188,7 +192,6 @@ export const fetchCodeExpertiseData = fetchFactory(
             }
           })
         }).then(_ => {
-            console.log("result", result)
             return result
           }
         )
@@ -202,13 +205,17 @@ export const fetchCodeExpertiseData = fetchFactory(
 
       return yield Promise.join(
         getAllCommits(),
-        getAllBuildData()
-      ).spread((allCommits, builds) => {
+        getAllBuildData(),
+        getBranches()
+      ).spread((allCommits, builds, branches) => {
   
         //########### get all relevant commits ###########
+
+        //get full branch object for current branch
+        const currentBranchObject = branches.filter(b => b.branch === branch)[0]
         
         //contains all commits of the current branch
-        const branchCommits = getCommitsForBranch(branch, allCommits)
+        const branchCommits = getCommitsForBranch(currentBranchObject, allCommits)
   
         //we now have all commits for the current branch and all commits for the file
         //intersect the two groups to get the result set
@@ -285,8 +292,6 @@ export const fetchCodeExpertiseData = fetchFactory(
 
         return Promise.resolve(getBlameModules(latestBranchCommit.sha, activeFiles)).then(res => {
 
-          console.log('frontend blame result: ', res)
-
           Object.entries(res.blame).map(item => {
             const devMail = item[0]
             const linesOwned = item[1]
@@ -300,7 +305,6 @@ export const fetchCodeExpertiseData = fetchFactory(
             }
           })
         }).then(_ => {
-            console.log("result", result)
             return result
           }
         )

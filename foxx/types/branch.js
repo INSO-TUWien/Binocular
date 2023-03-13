@@ -18,6 +18,10 @@ module.exports = new gql.GraphQLObjectType({
       active: {
         type: gql.GraphQLString,
         description: 'True if this is the current active branch on your system.'
+      },
+      latestCommit: {
+        type: gql.GraphQLString,
+        description: 'latest commit on this branch'
       }
     };
   }
