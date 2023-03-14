@@ -1,4 +1,4 @@
 {
- "github": { "auth": { "token": ""}},
- "arango": { "host": "localhost", "port": "8529", "user": "root", "password":"openSesame"}
+ "github": { "auth": { "token": "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"}},
+ "arango": { "host": "172.17.0.3", "port": "8529", "user": "root", "password":"openSesame"}
 }
