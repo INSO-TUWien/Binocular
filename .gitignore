@@ -13,3 +13,4 @@ out
 pkg
 .grandle
 /ui/db_export
+/.devcontainer

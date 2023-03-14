@@ -13,15 +13,15 @@ export default handleActions(
 
     COR_RECEIVE_RELATED_COMMITS: (state, action) => {
       return _.assign({}, state, {
-        highlightedCommits: action.payload
+        highlightedCommits: action.payload,
       });
-    }
+    },
   },
   {
     overlay: 'issues',
     highlightedIssue: null,
     highlightedCommits: [],
     commitAttribute: 'count',
-    viewport: [0, null]
+    viewport: [0, null],
   }
 );

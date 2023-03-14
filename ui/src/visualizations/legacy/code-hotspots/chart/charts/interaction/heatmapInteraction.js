@@ -27,21 +27,21 @@ export default class heatmapInteraction {
         .style('fill', 'transparent')
         .attr('width', width)
         .attr('height', 24)
-        .on('mouseover', function() {
+        .on('mouseover', function () {
           if (displayProps.mainVisualizationMode === 1 && mode === 0) {
             hunkChartGeneration.interact(i);
           } else if (displayProps.mainVisualizationMode === 0) {
             heatmapChartGeneration.interact(i, currThis);
           }
         })
-        .on('mouseout', function() {
+        .on('mouseout', function () {
           if (displayProps.mainVisualizationMode === 1 && mode === 0) {
             hunkChartGeneration.disInteract(i);
           } else if (displayProps.mainVisualizationMode === 0) {
             heatmapChartGeneration.disInteract(currThis);
           }
         })
-        .on('click', function() {
+        .on('click', function () {
           if (displayProps.mainVisualizationMode === 0) {
             heatmapChartGeneration.fixToolTip(i, currThis);
           }

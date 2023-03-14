@@ -7,13 +7,13 @@ import HelpButton from './HelpButton.js';
 
 const mapStateToProps = (state /*, ownProps*/) => {
   return {
-    shown: state.showHelp
+    shown: state.showHelp,
   };
 };
 
 const mapDispatchToProps = (dispatch /*, ownProps*/) => {
   return {
-    onClick: () => dispatch(toggleHelp())
+    onClick: () => dispatch(toggleHelp()),
   };
 };
 

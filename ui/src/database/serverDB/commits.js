@@ -7,7 +7,6 @@ import moment from 'moment/moment';
 export default class Commits {
   static getCommitData(commitSpan, significantSpan) {
     const commitList = [];
-    console.log(commitSpan);
     const getCommitsPage = (since, until) => (page, perPage) => {
       return graphQl
         .query(
@@ -92,7 +91,6 @@ export default class Commits {
 
     function group(data) {
       const lastDatum = _.last(data);
-
       if (_.keys(lastDatum.statsByAuthor).length < 50) {
         return data;
       }
@@ -121,7 +119,6 @@ export default class Commits {
         });
 
         groupedStats.other = groupStats;
-
         return {
           groupedStats,
           groupedCommitters,

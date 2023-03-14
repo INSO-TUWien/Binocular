@@ -23,7 +23,7 @@ const mapStateToProps = (state /*, ownProps*/) => {
     selectedLanguages: languageModuleRiverState.config.selectedLanguages,
     selectedModules: languageModuleRiverState.config.selectedModules,
     highlightedIssue: languageModuleRiverState.config.highlightedIssue,
-    highlightedCommits: languageModuleRiverState.config.highlightedCommits
+    highlightedCommits: languageModuleRiverState.config.highlightedCommits,
   };
 };
 

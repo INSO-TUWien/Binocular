@@ -5,20 +5,20 @@ import _ from 'lodash';
 
 export default handleActions(
   {
-    REQUEST_LANGUAGE_MODULE_RIVER_DATA: state => _.assign({}, state, { isFetching: true }),
+    REQUEST_LANGUAGE_MODULE_RIVER_DATA: (state) => _.assign({}, state, { isFetching: true }),
     RECEIVE_LANGUAGE_MODULE_RIVER_DATA: (state, action) => {
       const ret = _.assign({}, state, {
         data: action.payload,
         isFetching: false,
-        receivedAt: action.meta.receivedAt
+        receivedAt: action.meta.receivedAt,
       });
 
       return ret;
-    }
+    },
   },
   {
     data: {},
     lastFetched: null,
-    isFetching: null
+    isFetching: null,
   }
 );

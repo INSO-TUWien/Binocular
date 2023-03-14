@@ -2,7 +2,7 @@ import styles from './icon.css';
 import cx from 'classnames';
 import PropTypes from 'prop-types';
 
-const Icon = props => {
+const Icon = (props) => {
   const icon = `fa-${props.name}`;
 
   return (
@@ -13,7 +13,7 @@ const Icon = props => {
 };
 
 Icon.propTypes = {
-  name: PropTypes.string.isRequired
+  name: PropTypes.string.isRequired,
 };
 
 export default Icon;

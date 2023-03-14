@@ -17,9 +17,9 @@ export default class Legend extends React.Component {
     this.state = {
       dims: {
         height: 0,
-        width: 0
+        width: 0,
       },
-      expand: null
+      expand: null,
     };
   }
 
@@ -33,16 +33,17 @@ export default class Legend extends React.Component {
           transform={`translate(0,${(ICON_HEIGHT + ICON_VERTICAL_MARGIN) * i})`}
           onMouseEnter={() => this.setState({ expand: i })}
           onMouseLeave={() => this.setState({ expand: null })}>
-          {(this.state.expand === null || this.state.expand === i) &&
+          {(this.state.expand === null || this.state.expand === i) && (
             <g>
-              <LegendIcon width={ICON_WIDTH} height={ICON_HEIGHT} styles={cat.style ? [cat.style] : cat.subLegend.map(l => l.style)} />
+              <LegendIcon width={ICON_WIDTH} height={ICON_HEIGHT} styles={cat.style ? [cat.style] : cat.subLegend.map((l) => l.style)} />
               <text x={ICON_WIDTH + ICON_HORIZONTAL_MARGIN} y={ICON_HEIGHT / 2 + 1}>
                 {cat.name}
               </text>
-              {cat.subLegend &&
-                this.state.expand === i &&
-                <Legend x={ICON_WIDTH + ICON_HORIZONTAL_MARGIN} y={ICON_HEIGHT + ICON_VERTICAL_MARGIN} categories={cat.subLegend} />}
-            </g>}
+              {cat.subLegend && this.state.expand === i && (
+                <Legend x={ICON_WIDTH + ICON_HORIZONTAL_MARGIN} y={ICON_HEIGHT + ICON_VERTICAL_MARGIN} categories={cat.subLegend} />
+              )}
+            </g>
+          )}
         </g>
       );
     });
@@ -52,27 +53,20 @@ export default class Legend extends React.Component {
     return (
       <g transform={transform} className={styles.legend}>
         <rect width={this.state.dims.width} height={this.state.dims.height} className={styles.background} />
-        <Measure bounds onResize={dims => this.setState({ dims: dims.bounds })}>
-          {({ measureRef }) =>
-            <g ref={measureRef}>
-              {items}
-            </g>}
+        <Measure bounds onResize={(dims) => this.setState({ dims: dims.bounds })}>
+          {({ measureRef }) => <g ref={measureRef}>{items}</g>}
         </Measure>
       </g>
     );
   }
 }
 
-const LegendIcon = props => {
+const LegendIcon = (props) => {
   const tileLength = props.width / props.styles.length;
 
-  const rects = _.map(props.styles, (style, i) =>
+  const rects = _.map(props.styles, (style, i) => (
     <rect key={i} x={i * tileLength} width={tileLength} height={props.height} style={style} />
-  );
+  ));
 
-  return (
-    <g>
-      {rects}
-    </g>
-  );
+  return <g>{rects}</g>;
 };

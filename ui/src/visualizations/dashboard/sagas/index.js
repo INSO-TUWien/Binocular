@@ -13,7 +13,8 @@ export const setResolution = createAction('SET_RESOLUTION');
 export const setTimeSpan = createAction('SET_TIME_SPAN');
 export const setSelectedAuthors = createAction('SET_SELECTED_AUTHORS_GLOBAL');
 export const setAllAuthors = createAction('SET_All_AUTHORS');
-
+export const setMergedAuthorList = createAction('SET_MERGED_AUTHOR_LIST');
+export const setOtherAuthorList = createAction('SET_OTHER_AUTHOR_LIST');
 export const requestDashboardData = createAction('REQUEST_DASHBOARD_DATA');
 export const receiveDashboardData = timestampedActionFactory('RECEIVE_DASHBOARD_DATA');
 export const receiveDashboardDataError = createAction('RECEIVE_DASHBOARD_DATA_ERROR');
@@ -44,7 +45,6 @@ export const fetchDashboardData = fetchFactory(
       Database.getCommitData([firstCommitTimestamp, lastCommitTimestamp], [firstSignificantTimestamp, lastSignificantTimestamp])
     )
       .spread((commits) => {
-        console.log(committers);
         const palette = getChartColors('spectral', [...committers, 'other']);
         return {
           firstCommit,

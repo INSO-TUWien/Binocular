@@ -32,6 +32,8 @@ export default function* () {
   // keep looking for universal settings changes
   yield fork(watchTimeSpan);
   yield fork(watchSelectedAuthorsGlobal);
+  yield fork(watchMergedAuthors);
+  yield fork(watchOtherAuthors);
 }
 
 function* watchTimeSpan() {
@@ -40,6 +42,14 @@ function* watchTimeSpan() {
 
 function* watchSelectedAuthorsGlobal() {
   yield takeEvery('SET_SELECTED_AUTHORS_GLOBAL', fetchChangesData);
+}
+
+function* watchOtherAuthors() {
+  yield takeEvery('SET_OTHER_AUTHORS', fetchChangesData);
+}
+
+function* watchMergedAuthors() {
+  yield takeEvery('SET_MERGED_AUTHORS', fetchChangesData);
 }
 
 function* watchRefreshRequests() {

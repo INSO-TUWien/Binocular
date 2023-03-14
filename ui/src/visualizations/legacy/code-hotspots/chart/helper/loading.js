@@ -10,8 +10,7 @@ export default class Loading {
       .append('div')
       .attr('id', 'loading')
       .html('<div class=' + styles.loaderContainer + '><div class=' + styles.loader + '></div></div>');*/
-    d3
-      .select('body')
+    d3.select('body')
       .append('div')
       .attr('id', 'loading')
       .html(
@@ -45,8 +44,7 @@ export default class Loading {
 
   static setErrorText(text) {
     d3.select('#loading').remove();
-    d3
-      .select('.loadingContainer')
+    d3.select('.loadingContainer')
       .append('div')
       .attr('id', 'loading')
       .html(

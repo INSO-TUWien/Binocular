@@ -5,9 +5,9 @@ import { traversePages, graphQl } from '../../../../utils';
 export default function getLanguageData() {
   const languages = [];
 
-  return traversePages(getLanguagePage, language => {
+  return traversePages(getLanguagePage, (language) => {
     languages.push(language);
-  }).then(function() {
+  }).then(function () {
     return languages;
   });
 }
@@ -31,5 +31,5 @@ const getLanguagePage = (page, perPage) => {
     }`,
       { page, perPage }
     )
-    .then(resp => resp.languages);
+    .then((resp) => resp.languages);
 };

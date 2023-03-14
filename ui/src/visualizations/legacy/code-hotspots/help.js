@@ -25,7 +25,7 @@ function unhighlightElementByID() {
   document.getElementById('highlighter').remove();
 }
 
-export default () =>
+export default () => (
   <div id={'help'} className={cx('box', styles.help)}>
     <h1 className="title"> Code Hotspots Help </h1>
     <p>The Code Hotspots visualization shows different line-based metrics in combination with the sourcecode or a file.</p>
@@ -266,4 +266,5 @@ export default () =>
       </ul>
     </div>
     <p />
-  </div>;
+  </div>
+);

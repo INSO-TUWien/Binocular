@@ -8,7 +8,7 @@ export default class CommitMarker extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      showText: false
+      showText: false,
     };
   }
 
@@ -22,10 +22,11 @@ export default class CommitMarker extends React.Component {
           onMouseOver={() => this.setState({ showText: true })}
           onMouseOut={() => this.setState({ showText: false })}
         />
-        {this.state.showText &&
+        {this.state.showText && (
           <text x="15" y="5">
             {this.props.commit.sha.substring(0, 7)} {emojify(this.props.commit.messageHeader)}
-          </text>}
+          </text>
+        )}
       </g>
     );
   }

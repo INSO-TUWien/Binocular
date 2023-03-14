@@ -7,7 +7,7 @@ const customErrorReporter = ({ error }) => {
 };
 
 customErrorReporter.propTypes = {
-  error: PropTypes.instanceOf(Error).isRequired
+  error: PropTypes.instanceOf(Error).isRequired,
 };
 
 export default customErrorReporter;

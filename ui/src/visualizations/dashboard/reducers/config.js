@@ -20,12 +20,22 @@ export default handleActions(
     SET_All_AUTHORS: (state, action) => {
       return _.assign({}, state, { allAuthors: action.payload });
     },
+    SET_MERGED_AUTHOR_LIST: (state, action) => {
+      updateLocalStorage('mergedAuthors', action.payload);
+      return _.assign({}, state, { mergedAuthors: action.payload });
+    },
+    SET_OTHER_AUTHOR_LIST: (state, action) => {
+      updateLocalStorage('otherAuthors', action.payload);
+      return _.assign({}, state, { otherAuthors: action.payload });
+    },
   },
   {
     chartResolution: getLocalStorage().chartResolution,
     chartTimeSpan: getLocalStorage().chartTimeSpan,
     selectedAuthorsGlobal: getLocalStorage().selectedAuthorsGlobal,
     allAuthors: [],
+    mergedAuthors: getLocalStorage().mergedAuthors,
+    otherAuthors: getLocalStorage().otherAuthors,
   }
 );
 
@@ -36,6 +46,8 @@ function updateLocalStorage(key, value) {
       chartResolution: 'months',
       chartTimeSpan: { from: undefined, to: undefined },
       selectedAuthorsGlobal: [],
+      mergedAuthors: [],
+      otherAuthors: [],
     };
   } else {
     currConfig = JSON.parse(localStorage.getItem('universalConfig'));
@@ -52,6 +64,8 @@ function getLocalStorage() {
       chartResolution: 'months',
       chartTimeSpan: { from: undefined, to: undefined },
       selectedAuthorsGlobal: [],
+      mergedAuthors: [],
+      otherAuthors: [],
     };
   } else {
     currConfig = JSON.parse(localStorage.getItem('universalConfig'));

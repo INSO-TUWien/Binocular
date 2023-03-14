@@ -4,7 +4,7 @@ import cx from 'classnames';
 
 import styles from './styles.scss';
 
-export default () =>
+export default () => (
   <div className={cx('box', styles.help)}>
     <h1 className="title">Issue Impact Help</h1>
     <p>
@@ -34,4 +34,5 @@ export default () =>
     <p>Use the search-box to choose an issue to visualize. When an issue is selected, more options become available.</p>
     <h3>Filters</h3>
     Use the provided filter boxes to exclude certain files or commits from the visualization in order to de-clutter the chart.
-  </div>;
+  </div>
+);

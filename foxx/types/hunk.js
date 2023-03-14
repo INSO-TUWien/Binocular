@@ -9,22 +9,22 @@ module.exports = new gql.GraphQLObjectType({
     return {
       newStart: {
         type: gql.GraphQLInt,
-        description: 'The starting line number of the hunk'
+        description: 'The starting line number of the hunk',
       },
       newLines: {
-        type: gql.GraphQLInt
+        type: gql.GraphQLInt,
       },
       oldStart: {
         type: gql.GraphQLInt,
-        description: 'The starting line number of the hunk'
+        description: 'The starting line number of the hunk',
       },
       oldLines: {
-        type: gql.GraphQLInt
+        type: gql.GraphQLInt,
       },
       webUrl: {
         type: gql.GraphQLString,
-        description: 'Url (if available) to this hunk in the ITS'
-      }
+        description: 'Url (if available) to this hunk in the ITS',
+      },
     };
-  }
+  },
 });

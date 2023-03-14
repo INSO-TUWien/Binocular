@@ -12,14 +12,14 @@ import { createEnum } from '../../../../utils/Enum';
 export default function getCommitData(significantSpan = []) {
   const commitList = [];
 
-  return traversePages(getCommitsPage(significantSpan[1]), commit => {
+  return traversePages(getCommitsPage(significantSpan[1]), (commit) => {
     commitList.push(commit);
-  }).then(function() {
+  }).then(function () {
     return commitList;
   });
 }
 
-const getCommitsPage = until => (page, perPage) => {
+const getCommitsPage = (until) => (page, perPage) => {
   return graphQl
     .query(
       `query($page: Int, $perPage: Int, $until: Timestamp) {
@@ -54,7 +54,7 @@ const getCommitsPage = until => (page, perPage) => {
       }`,
       { page, perPage, until }
     )
-    .then(resp => resp.commits);
+    .then((resp) => resp.commits);
 };
 
 export const Attribute = createEnum(['Modules', 'Languages']);

@@ -6,13 +6,13 @@ import { removeNotification } from '../../sagas/notifications.js';
 
 const mapStateToProps = (state = [] /*, ownProps*/) => {
   return {
-    notifications: state.notifications
+    notifications: state.notifications,
   };
 };
 
 const mapDispatchToProps = (dispatch /*, ownProps*/) => {
   return {
-    onCloseNotification: id => dispatch(removeNotification(id))
+    onCloseNotification: (id) => dispatch(removeNotification(id)),
   };
 };
 
