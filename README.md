@@ -24,7 +24,7 @@ should clone this repository and then link it:
 ``` shell
 $ git clone https://github.com/INSO-TUWien/Binocular.git
 $ cd Binocular
-Binocular npm link    # <- this will make the `Binocular` executable available in your $PATH
+/Binocular $ npm link    # <- this will make the `Binocular` executable available in your $PATH
 ```
 
 ### Configuration
@@ -76,9 +76,8 @@ A sample configuration file looks like this:
   "github": {
     "auth": {
       "type": "basic",
-      "username": "YOUR_GITLAB_USER",
-      "password": "YOUR_GITLAB_PASSWORD",
-      "token": "YOUR_GITLAB_OAUTH_TOKEN"
+      "username": "YOUR_GITHUB_USER",
+      "token": "YOUR_GITHUB_OAUTH_TOKEN"
     }
   },
   "arango": {
@@ -98,8 +97,8 @@ A sample configuration file looks like this:
 You may override configuration options for specific projects by
 placing another `.binocularrc` file in the project's root directory.
 
-You can also add a config to the `gitlab.json` file in `./ui/config`. This file sets
-the GitLab API settings for the CodeHotspots visualization for
+You may also modify a config to the `gitlab.json` file in `./ui/config`. This file sets
+the GitLab API settings for the CodeHotspots-visualization for
 offline execution. This is only necessary if you want to automatically
 set those options within for example an GitLab pipeline.
 
@@ -129,7 +128,7 @@ Dictionary by running the command:
 ``` shell
 npm run dev
 ```
-or if you run Windows (does not support chaining of command) you
+If you run Windows (does not support chaining of commands) you
 should use the command:
 ``` shell
 npm run dev-concurrently
@@ -138,20 +137,20 @@ This will start both the node backend and webpack frontend server
 for the Binocular dictionary and mine it. If you run Binocular for the
 first time it will show webpack errors for missing JSON files. This
 happens because to build the frontend it needs an export of the db to
-build correctly so that it can also be run without the backend. This
+build so that it can  fall back to run without the backend. This
 is necessary when binocular gets executed within a GitLab
-pipeline/GitHub action. This isn't a problem at all because when
-you execute Binocular the first time and the indexer are finished it
+pipeline/GitHub action. Those errors aren't a problem because when
+you execute Binocular for the first time and the indexer are finished it
 will create the db export by itself and place it into the correct
 folder. After the exported JSON files of the db are available it is
 possible to build an offline executable version of Binocular by
-executing th command
+executing the command
 ``` shell
 npm run build
 ```
 This will create a html and js file in the dist folder that can be
-opened without the backend running. It is of course also possible
-to place the exported JSON files of a different mining job. (not
+opened without the backend running. It is also possible
+to place the exported JSON files of a different mining job under `./ui/db_export/` and build the frontend. (not
 all features will be available in the offline build)
 
 ## Contributing
