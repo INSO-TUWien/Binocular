@@ -178,21 +178,12 @@ const Details = () => {
                                     <CommitsDetailsList commits={devDetails.commits} sort={commitSort}/>
                                 </div>
 
-                                {/* <div>
-                                    {Object.entries(_.groupBy(
-                                        devDetails.commits.sort((a,b) => (new Date(b.date)) - (new Date(a.date))),
-                                        (commit) => commit.date.substring(0,10)))
-                                    .map(item => <CommitsDetailsList date={item[0]} commits={item[1]}/>)}
-                                </div> */}
-                                
                             </div>
 
                         </div>
                     }
                 </div>
                 }
-
-            
 
         </div>
     )

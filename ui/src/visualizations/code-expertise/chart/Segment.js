@@ -302,7 +302,7 @@ function Segment( { rad, startPercent, endPercent, devName, devData, devColor } 
                 x={nameCoord[0]}
                 y={nameCoord[1]}
                 textAnchor={textAnchorStart ? "start" : "end"}
-                alignment-baseline="middle">
+                alignmentBaseline="middle">
                     {displayName}
                 </text>
             }

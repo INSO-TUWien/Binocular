@@ -66,9 +66,9 @@ const ModuleLine = ({ moduleName, children, initiallyExpanded = false }) => {
     for (const key in children) {
       const value = children[key];
       if (typeof value === "string") {
-        childNodes.push(<ModuleLine moduleName={value} children={{}} />);
+        childNodes.push(<ModuleLine moduleName={value} children={{}} key={key} />);
       } else {
-        childNodes.push(<ModuleLine moduleName={key} children={value} />);
+        childNodes.push(<ModuleLine moduleName={key} children={value} key={key} />);
       }
     }
 

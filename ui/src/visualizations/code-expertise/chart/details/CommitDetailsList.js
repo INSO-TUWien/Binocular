@@ -10,15 +10,15 @@ const CommitsDetailsList = ({ commits, sort }) => {
         Object.entries(_.groupBy(
             commits.sort((a,b) => (new Date(b.date)) - (new Date(a.date))),
             (commit) => commit.date.substring(0,10)))
-        .map(item => {
+        .map((item, index) => {
             const date = item[0]
             const commits = item[1]
             const dateString = (new Date(date)).toLocaleDateString()
             result.push(
-                <div className={styles.commitsDetailsListContainer}>
+                <div className={styles.commitsDetailsListContainer} key={index}>
                     <label>{dateString}</label>
                     <div className={styles.commitDetailsList}>
-                        {commits.map(c => <CommitDetails commit={c}></CommitDetails>)}
+                        {commits.map((c, index) => <CommitDetails commit={c} key={index}></CommitDetails>)}
                     </div>
                 </div>
             )
@@ -36,9 +36,9 @@ const CommitsDetailsList = ({ commits, sort }) => {
         else if (sort === 'bad') commitsToDisplay = commits.sort((a,b) => (b.build != null && b.build != 'success') - (a.build != null && a.build != 'success'))
        
 
-        commitsToDisplay = commitsToDisplay.map(c => {
+        commitsToDisplay = commitsToDisplay.map((c, index) => {
             return (
-                <div className={styles.commitDetailsList}>
+                <div className={styles.commitDetailsList} key={index}>
                     <CommitDetails commit={c}></CommitDetails>
                 </div>
             )
