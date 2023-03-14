@@ -18,7 +18,7 @@ export function formatDate(date, resolution) {
     'September',
     'October',
     'November',
-    'December'
+    'December',
   ];
   switch (resolution) {
     case 'years':

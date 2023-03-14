@@ -4,19 +4,19 @@ import cx from 'classnames';
 
 import styles from './progress-bar.scss';
 
-const ProgressBar = props => {
+const ProgressBar = (props) => {
   const commits = props.progress.commits;
   const issues = props.progress.issues;
   const builds = props.progress.builds;
   const languages = props.progress.languages;
-  const pieData = [commits, issues, builds, languages].filter(d => d.total !== 0);
+  const pieData = [commits, issues, builds, languages].filter((d) => d.total !== 0);
   const shareCount = pieData.length;
 
   const ringRadius = 100 / (2 * Math.PI);
 
   let dashOffset = 0;
-  const segments = pieData.map(function(d, i) {
-    const share = d.processed / d.total * 100 / shareCount;
+  const segments = pieData.map(function (d, i) {
+    const share = ((d.processed / d.total) * 100) / shareCount;
     const rest = 100 - share;
 
     const segment = (
@@ -43,11 +43,9 @@ const ProgressBar = props => {
     <div className={styles.hoverTarget}>
       <svg width="100%" height="100%" viewBox="0 0 42 42" className={styles.donut}>
         <circle className={styles.ring} cx="21" cy="21" r={ringRadius} />
-        <g>
-          {segments}
-        </g>
+        <g>{segments}</g>
 
-        {props.showWorkIndicator &&
+        {props.showWorkIndicator && (
           <g className={styles.workIndicator}>
             <circle cx="21" cy="21" r="14">
               <animateTransform
@@ -60,9 +58,10 @@ const ProgressBar = props => {
                 repeatCount="indefinite"
               />
             </circle>
-          </g>}
+          </g>
+        )}
         <text className={styles.text} x="21" y="21">
-          {Math.round(processed / total * 100)}%
+          {Math.round((processed / total) * 100)}%
         </text>
         <g transform="translate(21 17)">
           <text className={cx(styles.text, styles.details)} x="0" y="0">

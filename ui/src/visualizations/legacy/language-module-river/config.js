@@ -9,7 +9,7 @@ import {
   setSelectedModules,
   setSelectedLanguages,
   setChartAttribute,
-  setHighlightedIssue
+  setHighlightedIssue,
 } from './sagas';
 import TabCombo from '../../../components/TabCombo.js';
 import styles from './styles.scss';
@@ -19,7 +19,7 @@ import SearchBox from '../../../components/SearchBox';
 import Promise from 'bluebird';
 import { graphQl } from '../../../utils';
 
-const mapStateToProps = state => {
+const mapStateToProps = (state) => {
   const languageModuleRiverState = state.visualizations.languageModuleRiver.state;
 
   return {
@@ -32,30 +32,30 @@ const mapStateToProps = state => {
     selectedAuthors: languageModuleRiverState.config.selectedAuthors,
     selectedLanguages: languageModuleRiverState.config.selectedLanguages,
     selectedModules: languageModuleRiverState.config.selectedModules,
-    highlightedIssue: languageModuleRiverState.config.highlightedIssue
+    highlightedIssue: languageModuleRiverState.config.highlightedIssue,
   };
 };
 
 const mapDispatchToProps = (dispatch, ownProps) => {
   return Object.assign(
     {
-      onClickResolution: resolution => dispatch(setResolution(resolution)),
-      onSetHighlightedIssue: issue => dispatch(setHighlightedIssue(issue)),
-      onClickAttribute: resolution => dispatch(setChartAttribute(resolution)),
-      onClickAuthors: selected => dispatch(setSelectedAuthors(selected)),
-      onClickLanguages: selected => dispatch(setSelectedLanguages(selected)),
-      onClickModules: selected => dispatch(setSelectedModules(selected))
+      onClickResolution: (resolution) => dispatch(setResolution(resolution)),
+      onSetHighlightedIssue: (issue) => dispatch(setHighlightedIssue(issue)),
+      onClickAttribute: (resolution) => dispatch(setChartAttribute(resolution)),
+      onClickAuthors: (selected) => dispatch(setSelectedAuthors(selected)),
+      onClickLanguages: (selected) => dispatch(setSelectedLanguages(selected)),
+      onClickModules: (selected) => dispatch(setSelectedModules(selected)),
     },
     ownProps
   );
 };
 
-const LangModRiverConfigComponent = props => {
-  const attributeKeys = Object.keys(props.attributes || {}).filter(key => key !== 'offset');
+const LangModRiverConfigComponent = (props) => {
+  const attributeKeys = Object.keys(props.attributes || {}).filter((key) => key !== 'offset');
   const palette = attributeKeys.reduce(
     (attributes, key) =>
       Object.assign(attributes, {
-        [key]: props.attributes[key].colors.reduce((colors, attribute) => Object.assign(colors, { [attribute.key]: attribute.color }), {})
+        [key]: props.attributes[key].colors.reduce((colors, attribute) => Object.assign(colors, { [attribute.key]: attribute.color }), {}),
       }),
     {}
   );
@@ -63,7 +63,7 @@ const LangModRiverConfigComponent = props => {
   const overflow = attributeKeys.reduce(
     (attributes, key) =>
       Object.assign(attributes, {
-        [key]: props.attributes[key].overflow || 0
+        [key]: props.attributes[key].overflow || 0,
       }),
     {}
   );
@@ -80,17 +80,17 @@ const LangModRiverConfigComponent = props => {
                 { label: 'Years', icon: 'calendar-plus', value: 'years' },
                 { label: 'Months', icon: 'calendar', value: 'months' },
                 { label: 'Weeks', icon: 'calendar-week', value: 'weeks' },
-                { label: 'Days', icon: 'calendar-day', value: 'days' }
+                { label: 'Days', icon: 'calendar-day', value: 'days' },
               ]}
-              onChange={value => props.onClickResolution(value)}
+              onChange={(value) => props.onClickResolution(value)}
             />
           </div>
         </div>
         <div className="field">
           <SearchBox
             placeholder="Highlight issue..."
-            renderOption={i => `#${i.iid} ${i.title}`}
-            search={text => {
+            renderOption={(i) => `#${i.iid} ${i.title}`}
+            search={(text) => {
               return Promise.resolve(
                 graphQl.query(
                   `
@@ -102,15 +102,15 @@ const LangModRiverConfigComponent = props => {
                   { q: text }
                 )
               )
-                .then(resp => resp.issues.data)
-                .map(i => {
+                .then((resp) => resp.issues.data)
+                .map((i) => {
                   i.createdAt = new Date(i.createdAt);
                   i.closedAt = i.closedAt && new Date(i.closedAt);
                   return i;
                 });
             }}
             value={props.highlightedIssue}
-            onChange={issue => props.onSetHighlightedIssue(issue)}
+            onChange={(issue) => props.onSetHighlightedIssue(issue)}
           />
         </div>
         <div className={styles.field}>
@@ -119,9 +119,9 @@ const LangModRiverConfigComponent = props => {
             value={props.riverAttribute}
             options={[
               { label: 'Languages', icon: 'file-code', value: 'languages' },
-              { label: 'Modules', icon: 'folder-open', value: 'modules' }
+              { label: 'Modules', icon: 'folder-open', value: 'modules' },
             ]}
-            onChange={value => props.onClickAttribute(value)}
+            onChange={(value) => props.onClickAttribute(value)}
           />
         </div>
         <div className={styles.field}>
@@ -134,29 +134,29 @@ const LangModRiverConfigComponent = props => {
             otherCommitters={overflow.authors}
           />
         </div>
-        {props.riverAttribute === 'languages'
-          ? <div className={styles.field}>
-              <CheckboxLegend
-                palette={palette.languages}
-                onClick={props.onClickLanguages.bind(this)}
-                title={`Available Languages: [${(props.languages || []).length}]`}
-                explanation={'Number of lines per Language'}
-                split={false}
-                otherCommitters={overflow.languages}
-              />
-            </div>
-          : props.riverAttribute === 'modules'
-            ? <div className={styles.field}>
-                <CheckboxLegend
-                  palette={palette.modules}
-                  onClick={props.onClickModules.bind(this)}
-                  title={`Available Modules: [${(props.modules || []).length}]`}
-                  explanation={'Number of lines per Module'}
-                  split={false}
-                  otherCommitters={overflow.modules}
-                />
-              </div>
-            : null}
+        {props.riverAttribute === 'languages' ? (
+          <div className={styles.field}>
+            <CheckboxLegend
+              palette={palette.languages}
+              onClick={props.onClickLanguages.bind(this)}
+              title={`Available Languages: [${(props.languages || []).length}]`}
+              explanation={'Number of lines per Language'}
+              split={false}
+              otherCommitters={overflow.languages}
+            />
+          </div>
+        ) : props.riverAttribute === 'modules' ? (
+          <div className={styles.field}>
+            <CheckboxLegend
+              palette={palette.modules}
+              onClick={props.onClickModules.bind(this)}
+              title={`Available Modules: [${(props.modules || []).length}]`}
+              explanation={'Number of lines per Module'}
+              split={false}
+              otherCommitters={overflow.modules}
+            />
+          </div>
+        ) : null}
       </form>
     </div>
   );

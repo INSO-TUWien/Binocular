@@ -14,7 +14,7 @@ export default class LanguageData {
   init(name, alias, color, containsPopular) {
     this.data = Object.freeze({
       name,
-      color
+      color,
     });
     this.__alias = [];
     this.__containsPopular = containsPopular;

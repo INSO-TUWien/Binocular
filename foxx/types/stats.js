@@ -9,12 +9,12 @@ module.exports = new gql.GraphQLObjectType({
     return {
       additions: {
         type: gql.GraphQLInt,
-        description: 'count of added LoCs'
+        description: 'count of added LoCs',
       },
       deletions: {
         type: gql.GraphQLInt,
-        description: 'count of removed LoCs'
-      }
+        description: 'count of removed LoCs',
+      },
     };
-  }
+  },
 });

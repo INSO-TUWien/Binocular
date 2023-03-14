@@ -23,7 +23,7 @@ export default class GridLines extends React.Component {
       left: 'axisLeft',
       right: 'axisRight',
       top: 'axisTop',
-      bottom: 'axisBottom'
+      bottom: 'axisBottom',
     };
 
     const axisMethodName = methodNames[this.props.orient];
@@ -53,6 +53,6 @@ export default class GridLines extends React.Component {
     const y = this.props.y || 0;
     const translate = `translate(${x}, ${y})`;
 
-    return <g className={styles.grid} ref={g => (this.g = g)} transform={translate} />;
+    return <g className={styles.grid} ref={(g) => (this.g = g)} transform={translate} />;
   }
 }

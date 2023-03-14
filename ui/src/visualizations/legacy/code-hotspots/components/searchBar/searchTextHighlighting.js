@@ -6,23 +6,23 @@ export default class SearchTextHighlighting {
       {
         modifier: '-f',
         color: '#4cd964',
-        secondary_color: '#def8e2'
+        secondary_color: '#def8e2',
       },
       {
         modifier: '-file',
         color: '#4cd964',
-        secondary_color: '#def8e2'
+        secondary_color: '#def8e2',
       },
       {
         modifier: '-t',
         color: '#ffcc00',
-        secondary_color: '#fff7d8'
+        secondary_color: '#fff7d8',
       },
       {
         modifier: '-type',
         color: '#ffcc00',
-        secondary_color: '#fff7d8'
-      }
+        secondary_color: '#fff7d8',
+      },
     ];
     return this.performTextHighlighting(searchTerm, highlightSet);
   }
@@ -32,58 +32,58 @@ export default class SearchTextHighlighting {
       {
         modifier: '-m',
         color: '#4cd964',
-        secondary_color: '#def8e2'
+        secondary_color: '#def8e2',
       },
       {
         modifier: '-message',
         color: '#4cd964',
-        secondary_color: '#def8e2'
+        secondary_color: '#def8e2',
       },
       {
         modifier: '-s',
         color: '#ffcc00',
-        secondary_color: '#fff7d8'
+        secondary_color: '#fff7d8',
       },
       {
         modifier: '-sha',
         color: '#ffcc00',
-        secondary_color: '#fff7d8'
+        secondary_color: '#fff7d8',
       },
       {
         modifier: '-d',
         color: '#ff9500',
-        secondary_color: '#fff7eb'
+        secondary_color: '#fff7eb',
       },
       {
         modifier: '-developer',
         color: '#ff9500',
-        secondary_color: '#fff7eb'
+        secondary_color: '#fff7eb',
       },
       {
         modifier: '-b',
         color: '#5856d6',
-        secondary_color: '#e4e4f8'
+        secondary_color: '#e4e4f8',
       },
       {
         modifier: '-branch',
         color: '#5856d6',
-        secondary_color: '#e4e4f8'
+        secondary_color: '#e4e4f8',
       },
       {
         modifier: '-l',
         color: '#007aff',
-        secondary_color: '#ebf5ff'
+        secondary_color: '#ebf5ff',
       },
       {
         modifier: '-line',
         color: '#007aff',
-        secondary_color: '#ebf5ff'
+        secondary_color: '#ebf5ff',
       },
       {
         modifier: '-lines',
         color: '#007aff',
-        secondary_color: '#ebf5ff'
-      }
+        secondary_color: '#ebf5ff',
+      },
     ];
     return this.performTextHighlighting(searchTerm, highlightSet);
   }
@@ -93,38 +93,38 @@ export default class SearchTextHighlighting {
       {
         modifier: '-n',
         color: '#4cd964',
-        secondary_color: '#def8e2'
+        secondary_color: '#def8e2',
       },
       {
         modifier: '-name',
         color: '#4cd964',
-        secondary_color: '#def8e2'
+        secondary_color: '#def8e2',
       },
       {
         modifier: '-e',
         color: '#ffcc00',
-        secondary_color: '#fff7d8'
+        secondary_color: '#fff7d8',
       },
       {
         modifier: '-email',
         color: '#ffcc00',
-        secondary_color: '#fff7d8'
+        secondary_color: '#fff7d8',
       },
       {
         modifier: '-l',
         color: '#007aff',
-        secondary_color: '#ebf5ff'
+        secondary_color: '#ebf5ff',
       },
       {
         modifier: '-line',
         color: '#007aff',
-        secondary_color: '#ebf5ff'
+        secondary_color: '#ebf5ff',
       },
       {
         modifier: '-lines',
         color: '#007aff',
-        secondary_color: '#ebf5ff'
-      }
+        secondary_color: '#ebf5ff',
+      },
     ];
     return this.performTextHighlighting(searchTerm, highlightSet);
   }
@@ -134,48 +134,48 @@ export default class SearchTextHighlighting {
       {
         modifier: '-t',
         color: '#4cd964',
-        secondary_color: '#def8e2'
+        secondary_color: '#def8e2',
       },
       {
         modifier: '-title',
         color: '#4cd964',
-        secondary_color: '#def8e2'
+        secondary_color: '#def8e2',
       },
       {
         modifier: '-d',
         color: '#ffcc00',
-        secondary_color: '#fff7d8'
+        secondary_color: '#fff7d8',
       },
       {
         modifier: '-description',
         color: '#ffcc00',
-        secondary_color: '#fff7d8'
+        secondary_color: '#fff7d8',
       },
       {
         modifier: '-i',
         color: '#ff9500',
-        secondary_color: '#fff7eb'
+        secondary_color: '#fff7eb',
       },
       {
         modifier: '-iid',
         color: '#ff9500',
-        secondary_color: '#fff7eb'
+        secondary_color: '#fff7eb',
       },
       {
         modifier: '-l',
         color: '#007aff',
-        secondary_color: '#ebf5ff'
+        secondary_color: '#ebf5ff',
       },
       {
         modifier: '-line',
         color: '#007aff',
-        secondary_color: '#ebf5ff'
+        secondary_color: '#ebf5ff',
       },
       {
         modifier: '-lines',
         color: '#007aff',
-        secondary_color: '#ebf5ff'
-      }
+        secondary_color: '#ebf5ff',
+      },
     ];
     return this.performTextHighlighting(searchTerm, highlightSet);
   }

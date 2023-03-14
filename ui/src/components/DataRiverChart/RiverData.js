@@ -26,7 +26,7 @@ export class RiverData {
       additions,
       deletions,
       buildStat: BuildStat.valueOf(buildStat),
-      buildWeight
+      buildWeight,
     });
     this.buildSuccessRate = buildSuccessRate;
     this._trend = 0;

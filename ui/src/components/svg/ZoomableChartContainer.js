@@ -4,7 +4,7 @@ import ChartContainer from './ChartContainer.js';
 import ZoomableSvg from './ZoomableSvg.js';
 import { callSafe } from '../../utils';
 
-const ZoomableChartContainer = function(props) {
+const ZoomableChartContainer = function (props) {
   return (
     <ChartContainer onResize={props.onResize}>
       <ZoomableSvg

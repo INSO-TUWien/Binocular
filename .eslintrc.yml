@@ -6,7 +6,7 @@ extends:
   - prettier
   - lambdas
 parserOptions:
-  ecmaVersion: 8
+  ecmaVersion: 2020
   sourceType: 'module'
 rules:
   prettier/prettier:

@@ -8,10 +8,10 @@ import Notifications from '../notifications';
 import React from 'react';
 import { connect } from 'react-redux';
 
-const mapStateToProps = state => {
+const mapStateToProps = (state) => {
   return {
     visualization: state.visualizations[state.activeVisualization],
-    showHelp: state.showHelp
+    showHelp: state.showHelp,
   };
 };
 
@@ -23,7 +23,7 @@ class App extends React.PureComponent {
 
     this.state = {
       helpPos: 0,
-      collapsed: false
+      collapsed: false,
     };
   }
 
@@ -35,15 +35,17 @@ class App extends React.PureComponent {
 
     return (
       <div className={styles.app}>
-        <Sidebar collapsed={collapsed} onToggle={() => this.setState(prevState => ({ collapsed: !prevState.collapsed }))} />
+        <Sidebar collapsed={collapsed} onToggle={() => this.setState((prevState) => ({ collapsed: !prevState.collapsed }))} />
         <div className={styles.mainPane}>
           <ProgressBar />
           <ChartComponent sidebarOpen={!collapsed} />
-          {showHelp
-            ? <Help onResize={e => this.setState({ helpPos: e.bounds.height })}>
-                <HelpComponent sidebarOpen={!collapsed} />
-              </Help>
-            : ''}
+          {showHelp ? (
+            <Help onResize={(e) => this.setState({ helpPos: e.bounds.height })}>
+              <HelpComponent sidebarOpen={!collapsed} />
+            </Help>
+          ) : (
+            ''
+          )}
         </div>
         <Notifications />
         <HelpButton y={showHelp ? helpPos : 0} icon={showHelp ? 'times' : 'question'} />

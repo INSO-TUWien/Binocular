@@ -13,7 +13,7 @@ export default class Link extends React.Component {
         href="#"
         className={cx({ 'is-active ': this.props.isActive }, styles.link)}
         key={this.props.key}
-        onClick={e => {
+        onClick={(e) => {
           e.preventDefault();
           this.props.onClick();
         }}>
@@ -26,5 +26,5 @@ export default class Link extends React.Component {
 Link.propTypes = {
   isActive: PropTypes.bool.isRequired,
   children: PropTypes.node.isRequired,
-  onClick: PropTypes.func.isRequired
+  onClick: PropTypes.func.isRequired,
 };

@@ -28,7 +28,7 @@ export const receiveLanguageModuleRiverDataError = createAction('RECEIVE_LANGUAG
 export const requestRefresh = createAction('REQUEST_REFRESH');
 const refresh = createAction('REFRESH');
 
-export default function*() {
+export default function* () {
   // fetch data once on entry
   yield* fetchLanguageModuleRiverData();
 
@@ -58,7 +58,7 @@ function* watchRefresh() {
 }
 
 function* watchHighlightedIssue() {
-  yield takeEvery('SET_LANGUAGE_MODULE_RIVER_HIGHLIGHTED_ISSUE', function*(a) {
+  yield takeEvery('SET_LANGUAGE_MODULE_RIVER_HIGHLIGHTED_ISSUE', function* (a) {
     return yield fetchRelatedCommits(a.payload);
   });
 }
@@ -67,7 +67,7 @@ function* watchHighlightedIssue() {
  * Fetch data for languageModuleRiver, this still includes old functions that were copied over from dashboard.
  */
 export const fetchLanguageModuleRiverData = fetchFactory(
-  function*() {
+  function* () {
     const { firstCommit, lastCommit, committers, firstIssue, lastIssue } = yield getBounds();
     const firstCommitTimestamp = Date.parse(firstCommit.date);
     const lastCommitTimestamp = Date.parse(lastCommit.date);
@@ -95,10 +95,10 @@ export const fetchLanguageModuleRiverData = fetchFactory(
           languages,
           modules,
           firstSignificantTimestamp,
-          lastSignificantTimestamp
+          lastSignificantTimestamp,
         };
       })
-      .catch(function(e) {
+      .catch(function (e) {
         console.error(e.stack);
         throw e;
       });
@@ -132,9 +132,9 @@ function organizeAttributes(commits, maxNumberOfColors, maxAuthors = 15, maxLang
     (attributes, attribute) =>
       Object.assign(attributes, {
         [attribute]: Object.keys(totals[attribute])
-          .map(key => [key, totals[attribute][key]])
+          .map((key) => [key, totals[attribute][key]])
           .sort((a, b) => b[1] - a[1])
-          .map(item => ({ name: item[0], changes: item[1] }))
+          .map((item) => ({ name: item[0], changes: item[1] })),
       }),
     {}
   );
@@ -150,19 +150,19 @@ function organizeAttributes(commits, maxNumberOfColors, maxAuthors = 15, maxLang
       attributes[attribute] = {
         colors: colors.slice(attributes.offset, offset).map((color, i, colorPalette) => ({
           key: hasOverflow && i >= colorPalette.length - 1 ? 'others' : orderedList[attribute][i].name,
-          color
+          color,
         })),
         // store all ordered values of a given attribute
         order: hasOverflow ? orderedList[attribute].slice(0, elementCount - 1) : orderedList[attribute],
         overflow,
         // contains all others
-        others: others.map(data => data.name)
+        others: others.map((data) => data.name),
       };
       // if overflow exists sum all overflowing values together
       if (hasOverflow) {
         attributes[attribute].order[elementCount - 1] = {
           name: 'others',
-          changes: others.reduce((sum, element) => sum + element.changes, 0)
+          changes: others.reduce((sum, element) => sum + element.changes, 0),
         };
       }
       attributes.offset = offset;
@@ -181,22 +181,27 @@ function calculateTotals(commits) {
   const totals = { authors: {}, languages: {}, modules: {} };
 
   const attributes = (attribute, key, changes, source) =>
-    source.forEach(commit => {
+    source.forEach((commit) => {
       attribute[key(commit)] = (attribute[key(commit)] || 0) + changes(commit).stats.additions + changes(commit).stats.deletions;
     });
 
-  attributes(totals.authors, commit => commit.signature, commit => commit, commits);
+  attributes(
+    totals.authors,
+    (commit) => commit.signature,
+    (commit) => commit,
+    commits
+  );
   attributes(
     totals.languages,
-    commit => commit.language.name,
-    commit => commit,
+    (commit) => commit.language.name,
+    (commit) => commit,
     commits.reduce((changes, commit) => [...changes, ...commit.languages.data], [])
   );
 
   attributes(
     totals.modules,
-    commit => commit.module.path,
-    commit => commit,
+    (commit) => commit.module.path,
+    (commit) => commit,
     commits.reduce((changes, commit) => [...changes, ...commit.modules.data], [])
   );
   return totals;

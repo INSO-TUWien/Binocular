@@ -9,7 +9,7 @@ const graphQl = new Lokka({ transport: new Transport('/graphQl') });
 export { graphQl };
 
 export function traversePages(getPage, fn, pageNumber = 1, perPage = 1000) {
-  return Promise.resolve(getPage(pageNumber, perPage)).then(page => {
+  return Promise.resolve(getPage(pageNumber, perPage)).then((page) => {
     if (!page) {
       return;
     }
@@ -23,5 +23,5 @@ export function traversePages(getPage, fn, pageNumber = 1, perPage = 1000) {
 
 export function collectPages(getPage, fn, pageNumber = 1, perPage = 1000) {
   const items = [];
-  return traversePages(getPage, item => items.push(item), pageNumber, perPage).thenReturn(items);
+  return traversePages(getPage, (item) => items.push(item), pageNumber, perPage).thenReturn(items);
 }

@@ -5,10 +5,11 @@ import { traversePages, graphQl } from '../../../../utils';
 export default function getModuleData() {
   const modules = [];
 
-  return traversePages(getModulesPage, module => {
-    module.subModules = module.subModules && module.subModules.data ? (module.subModules.data || []).map(subModule => subModule.path) : [];
+  return traversePages(getModulesPage, (module) => {
+    module.subModules =
+      module.subModules && module.subModules.data ? (module.subModules.data || []).map((subModule) => subModule.path) : [];
     modules.push(module);
-  }).then(function() {
+  }).then(function () {
     return modules;
   });
 }
@@ -28,5 +29,5 @@ const getModulesPage = (page, perPage) => {
       }`,
       { page, perPage }
     )
-    .then(resp => resp.modules);
+    .then((resp) => resp.modules);
 };
