@@ -9,7 +9,7 @@ PouchDB.plugin(PouchDBAdapterMemory);
 // find all of given collection (example _id field for e.g. issues looks like 'issues/{issue_id}')
 function findAll(database, collection) {
   return database.find({
-    selector: { _id: { $regex: new RegExp(`^${collection}\/.*`) } },
+    selector: { _id: { $regex: new RegExp(`^${collection}/.*`) } },
   });
 }
 

@@ -8,7 +8,7 @@ import Monospaced from '../monospaced';
 import FormControl from '../FormControl.js';
 import Labeled from '../Labeled.js';
 
-const ConfigDialog = props => {
+const ConfigDialog = (props) => {
   return (
     <form className={cx('modal', { 'is-active': props.active })} onSubmit={props.handleSubmit}>
       <div className="modal-background" onClick={props.onCancel} />
@@ -43,7 +43,7 @@ const ConfigDialog = props => {
             </ul>
           </div>
 
-          {props.activeTab === 'its' &&
+          {props.activeTab === 'its' && (
             <div>
               <Labeled className="field" label="Type:">
                 <div className="control">
@@ -68,14 +68,16 @@ const ConfigDialog = props => {
                   </a>
                 </p>
               </Field>
-            </div>}
-          {props.activeTab === 'arango' &&
+            </div>
+          )}
+          {props.activeTab === 'arango' && (
             <div>
               <Field component={FormControl} name="arangoHost" type="text" label="Host:" placeholder="localhost" />
               <Field component={FormControl} name="arangoPort" type="text" label="Port:" placeholder="8529" />
               <Field component={FormControl} name="arangoUser" type="text" label="Username:" placeholder="root" />
               <Field component={FormControl} name="arangoPassword" type="password" label="Password:" placeholder="*********" />
-            </div>}
+            </div>
+          )}
         </section>
         <footer className="modal-card-foot">
           <button type="submit" className="button is-primary">

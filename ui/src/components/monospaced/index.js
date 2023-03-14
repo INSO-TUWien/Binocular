@@ -5,10 +5,6 @@ import styles from './monospaced.scss';
 
 export default class Monospaced extends React.Component {
   render() {
-    return (
-      <span className={styles.monospaced}>
-        {this.props.children}
-      </span>
-    );
+    return <span className={styles.monospaced}>{this.props.children}</span>;
   }
 }

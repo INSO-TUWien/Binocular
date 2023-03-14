@@ -7,7 +7,7 @@ import PanelLink from './PanelLink.js';
 import cx from 'classnames';
 
 export default ({ visualizations, activeVisualization, onToggle, collapsed }) => {
-  const links = _.map(visualizations, vis => <PanelLink key={vis.id} visualization={vis} />);
+  const links = _.map(visualizations, (vis) => <PanelLink key={vis.id} visualization={vis} />);
 
   const ConfigComponent = visualizations[activeVisualization].ConfigComponent;
 
@@ -32,12 +32,8 @@ export default ({ visualizations, activeVisualization, onToggle, collapsed }) =>
           }}
         />
       </p>
-      <p className={cx('panel-tabs', styles['panel-tabs'])}>
-        {links}
-      </p>
-      <div className={cx('panel-block', styles.configuration)}>
-        {activeVisualization in visualizations && <ConfigComponent />}
-      </div>
+      <p className={cx('panel-tabs', styles['panel-tabs'])}>{links}</p>
+      <div className={cx('panel-block', styles.configuration)}>{activeVisualization in visualizations && <ConfigComponent />}</div>
     </nav>
   );
 };

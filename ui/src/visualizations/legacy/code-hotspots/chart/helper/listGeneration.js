@@ -88,7 +88,12 @@ export default class ListGeneration {
         .style('background-color', 'white');
       info
         .append('div')
-        .html(commit.date.substring(0, commit.date.length - 5).split('T').join(' '))
+        .html(
+          commit.date
+            .substring(0, commit.date.length - 5)
+            .split('T')
+            .join(' ')
+        )
         .style('font-style', 'italic')
         .style('color', '#AAAAAA');
       info.append('div').html(commit.message);

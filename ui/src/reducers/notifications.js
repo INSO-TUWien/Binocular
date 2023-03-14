@@ -18,7 +18,7 @@ export default handleActions(
       return [...notifications, action.payload];
     },
 
-    REMOVE_NOTIFICATION: (notifications, action) => _.filter(notifications, n => n.id !== action.payload)
+    REMOVE_NOTIFICATION: (notifications, action) => _.filter(notifications, (n) => n.id !== action.payload),
   },
   []
 );

@@ -52,9 +52,9 @@ export default class DataRiverChartComponent extends ScalableBaseChartComponent 
     //Area generator for the chart
     return d3
       .area()
-      .x(d => scales.x(d.data.date))
-      .y0(d => this.getPoint(scales, d).y0)
-      .y1(d => this.getPoint(scales, d).y1)
+      .x((d) => scales.x(d.data.date))
+      .y0((d) => this.getPoint(scales, d).y0)
+      .y1((d) => this.getPoint(scales, d).y1)
       .curve(d3.curveMonotoneX);
   }
 
@@ -79,10 +79,10 @@ export default class DataRiverChartComponent extends ScalableBaseChartComponent 
       new Set(
         this.state.data.stackedData && this.state.data.stackedIssues
           ? [...this.state.data.stackedIssues, ...this.state.data.stackedData].reduce(
-              (stack, stream) => [...stack, ...stream.filter(exist => exist).map(data => data.data.date)],
+              (stack, stream) => [...stack, ...stream.filter((exist) => exist).map((data) => data.data.date)],
               []
             )
-          : this.state.data.data.map(data => data.date)
+          : this.state.data.data.map((data) => data.date)
       )
     );
     dates.push(new Date());
@@ -97,8 +97,8 @@ export default class DataRiverChartComponent extends ScalableBaseChartComponent 
   getYDims() {
     return (
       this.state.yDims || [
-        d3.max(this.state.data.data, data => data.deletions) || 0,
-        d3.max(this.state.data.data, data => data.additions) || 0
+        d3.max(this.state.data.data, (data) => data.deletions) || 0,
+        d3.max(this.state.data.data, (data) => data.additions) || 0,
       ]
     );
   }
@@ -170,7 +170,7 @@ export default class DataRiverChartComponent extends ScalableBaseChartComponent 
 
     const scale = {
       height: d3.scaleLinear().domain([0.0, 100.0]).range(yRange),
-      width: d3.scaleLinear().domain([100.0, 0.0]).range(xRange)
+      width: d3.scaleLinear().domain([100.0, 0.0]).range(xRange),
     };
 
     return Object.assign({}, scales, scale, {
@@ -179,11 +179,17 @@ export default class DataRiverChartComponent extends ScalableBaseChartComponent 
         .domain(IssueStat.getAvailable)
         .range(
           IssueStat.getAvailable.map((_, i, values) =>
-            scale.height(i === 0 ? 100.0 : i === values.length - 1 ? 0.0 : 100.0 / (values.length - 1.0) * i)
+            scale.height(i === 0 ? 100.0 : i === values.length - 1 ? 0.0 : (100.0 / (values.length - 1.0)) * i)
           )
         ),
-      y: d3.scaleLinear().domain([-1.0, 1.0]).range([scale.height(20), scale.height(80)]),
-      diff: d3.scaleLinear().domain(scales.y.domain()).range([scale.height(70) - scale.height(100), 0]),
+      y: d3
+        .scaleLinear()
+        .domain([-1.0, 1.0])
+        .range([scale.height(20), scale.height(80)]),
+      diff: d3
+        .scaleLinear()
+        .domain(scales.y.domain())
+        .range([scale.height(70) - scale.height(100), 0]),
 
       // define design pattern values
       pattern: d3
@@ -191,8 +197,8 @@ export default class DataRiverChartComponent extends ScalableBaseChartComponent 
         .domain([0, d3.max(scales.y.domain())])
         .range([
           Math.max(Math.min(scale.height(0) - scale.height(1), scale.width(0) - scale.width(1)), 1),
-          Math.max(Math.min(scale.height(0) - scale.height(2), scale.width(0) - scale.width(2)), 5)
-        ])
+          Math.max(Math.min(scale.height(0) - scale.height(2), scale.width(0) - scale.width(2)), 5),
+        ]),
     });
   }
 
@@ -206,10 +212,13 @@ export default class DataRiverChartComponent extends ScalableBaseChartComponent 
    * @returns {*}
    */
   createYAxis(brushArea, scales, width, height, paddings) {
-    const yAxis = brushArea.append('g').attr('class', this.styles.axis).attr('transform', 'translate(' + paddings.left + ',0)');
+    const yAxis = brushArea
+      .append('g')
+      .attr('class', this.styles.axis)
+      .attr('transform', 'translate(' + paddings.left + ',0)');
 
     if (!this.props.hideVertical) {
-      yAxis.call(d3.axisLeft(scales.y).tickFormat(d => `${formatPercentage(d)}`));
+      yAxis.call(d3.axisLeft(scales.y).tickFormat((d) => `${formatPercentage(d)}`));
 
       // text label for the y axis
       yAxis
@@ -254,7 +263,7 @@ export default class DataRiverChartComponent extends ScalableBaseChartComponent 
 
     return {
       hashes: Object.assign(update.hashes, { issueHash }),
-      hasChanges: update.hasChanges || this.state.data.issueHash !== issueHash
+      hasChanges: update.hasChanges || this.state.data.issueHash !== issueHash,
     };
   }
 
@@ -270,16 +279,16 @@ export default class DataRiverChartComponent extends ScalableBaseChartComponent 
       return { stackedData: [], data };
     }
 
-    if (data.find(record => !(record instanceof RiverData))) {
+    if (data.find((record) => !(record instanceof RiverData))) {
       throw new InvalidArgumentException('The provided data are not of the type RiverData!');
     }
 
     const streamingData = this.processStreamData(data, order);
 
     // set yDims associated with the presented data
-    this.setState(prev =>
+    this.setState((prev) =>
       Object.assign({}, prev, {
-        yDims: [-d3.max(data, d => d.deletions) || 1, d3.max(data, d => d.additions) || 1]
+        yDims: [-d3.max(data, (d) => d.deletions) || 1, d3.max(data, (d) => d.additions) || 1],
       })
     );
 
@@ -294,14 +303,14 @@ export default class DataRiverChartComponent extends ScalableBaseChartComponent 
    */
   processStreamData(data, order) {
     data = data
-      .filter(record => record && record instanceof RiverData)
-      .map(record => new RiverData(record))
+      .filter((record) => record && record instanceof RiverData)
+      .map((record) => new RiverData(record))
       .sort((record1, record2) => (record1.date < record2.date ? -1 : record1.date > record2.date ? 1 : 0));
 
     const reorganizedData = this.preprocessData(data);
-    const streamData = _.flatMap(reorganizedData.grouped.map(record => record.sort()));
+    const streamData = _.flatMap(reorganizedData.grouped.map((record) => record.sort()));
 
-    const keys = this.props.keys ? this.props.keys : streamData.filter(stream => stream.length).map(stream => new StreamKey(stream[0]));
+    const keys = this.props.keys ? this.props.keys : streamData.filter((stream) => stream.length).map((stream) => new StreamKey(stream[0]));
 
     //Data formatted for d3
     const stackedData = this.createStackedData(streamData, keys);
@@ -330,7 +339,7 @@ export default class DataRiverChartComponent extends ScalableBaseChartComponent 
     if (!name || !colorPalette) {
       return name;
     }
-    const key = Object.keys(colorPalette).find(colorKey => name.toUpperCase() === colorKey.toUpperCase()) || null;
+    const key = Object.keys(colorPalette).find((colorKey) => name.toUpperCase() === colorKey.toUpperCase()) || null;
     const color = key ? colorPalette[key] : undefined;
     return color ? chroma(color).alpha(0.85).hex('rgba') : color;
   }
@@ -341,9 +350,9 @@ export default class DataRiverChartComponent extends ScalableBaseChartComponent 
    * @param skipChildren
    */
   setRiverStreamColors(stackedData, skipChildren) {
-    stackedData.forEach(stack => {
+    stackedData.forEach((stack) => {
       const nameColorKey = Object.keys(this.props.authorPalette || {}).find(
-        colorKey =>
+        (colorKey) =>
           colorKey.toLowerCase().includes(stack.key.name.toLowerCase()) &&
           colorKey.toLowerCase().includes(stack.key.direction.toLowerCase())
       );
@@ -353,11 +362,11 @@ export default class DataRiverChartComponent extends ScalableBaseChartComponent 
           this.props.attributePalette && stack.key.attribute in this.props.attributePalette
             ? chroma(this.props.attributePalette[stack.key.attribute]).alpha(0.85).hex('rgba')
             : undefined,
-        name: this.findColor(this.props.authorPalette, nameColorKey)
+        name: this.findColor(this.props.authorPalette, nameColorKey),
       };
 
       if (!skipChildren) {
-        stack.forEach(node => (node.color = color));
+        stack.forEach((node) => (node.color = color));
       }
 
       stack.color = color;
@@ -369,12 +378,12 @@ export default class DataRiverChartComponent extends ScalableBaseChartComponent 
    * @param issueStreams
    */
   setIssueStreamColors(issueStreams) {
-    const colors = IssueStat.getAvailable.map(key => this.findColor(this.props.issuePalette, key));
-    issueStreams.forEach(stack => {
+    const colors = IssueStat.getAvailable.map((key) => this.findColor(this.props.issuePalette, key));
+    issueStreams.forEach((stack) => {
       stack.color = new (IssueColor.bind.apply(IssueColor, [
         undefined,
         this.findColor(this.props.issuePalette, stack.ticketId),
-        ...colors
+        ...colors,
       ]))();
     });
   }
@@ -389,19 +398,20 @@ export default class DataRiverChartComponent extends ScalableBaseChartComponent 
   createStackedData(dataStreams, keys) {
     return dataStreams
       .filter(
-        stream => !keys || (keys.length && !!keys.find(key => key && key.name === stream[0].name && key.attribute === stream[0].attribute))
+        (stream) =>
+          !keys || (keys.length && !!keys.find((key) => key && key.name === stream[0].name && key.attribute === stream[0].attribute))
       )
       .reduce((stack, dataStream, index) => {
         const stream = {
-          additions: this.createStack(dataStream, index * 2, record => [0, record.additions + (!record.shas.length ? 0.001 : 0)]),
-          deletions: this.createStack(dataStream, index * 2 + 1, record => [-record.deletions - (!record.shas.length ? 0.001 : 0), 0])
+          additions: this.createStack(dataStream, index * 2, (record) => [0, record.additions + (!record.shas.length ? 0.001 : 0)]),
+          deletions: this.createStack(dataStream, index * 2 + 1, (record) => [-record.deletions - (!record.shas.length ? 0.001 : 0), 0]),
         };
 
-        Object.keys(stream).forEach(key => {
+        Object.keys(stream).forEach((key) => {
           if (stream[key] && stream[key].length) {
             stream[key].key.direction = key;
             stream[key].key[0] = stream[key].index;
-            stream[key].forEach(dataPoint => (dataPoint.key.direction = key));
+            stream[key].forEach((dataPoint) => (dataPoint.key.direction = key));
             stack.push(stream[key]);
           }
         });
@@ -415,7 +425,7 @@ export default class DataRiverChartComponent extends ScalableBaseChartComponent 
    * @returns {*}
    */
   preprocessData(data) {
-    const maxDiff = d3.max(data, d => d.additions + d.deletions);
+    const maxDiff = d3.max(data, (d) => d.additions + d.deletions);
 
     return this.createOrganizeDataStreams(data, this.calculateDateDiff(data).dateTicks, maxDiff);
   }
@@ -429,20 +439,20 @@ export default class DataRiverChartComponent extends ScalableBaseChartComponent 
     //calculate minimum x difference
     const dateDiff =
       data
-        .map(record => record.date)
-        .filter(date => date && !Number.isNaN(date.getTime()) && !isNaN(date.getTime()))
-        .map(date => date.getTime())
+        .map((record) => record.date)
+        .filter((date) => date && !Number.isNaN(date.getTime()) && !isNaN(date.getTime()))
+        .map((date) => date.getTime())
         .map((date, i, dates) => date - dates[i - 1])
-        .filter(diff => !Number.isNaN(diff) && !isNaN(diff) && diff > 0)
+        .filter((diff) => !Number.isNaN(diff) && !isNaN(diff) && diff > 0)
         .sort()[0] || 1;
 
     return {
       dateDiff,
       dateTicks: [
         new Date(data[0].date.getTime() - dateDiff),
-        ...data.map(record => record.date),
-        new Date(data[data.length - 1].date.getTime() + dateDiff)
-      ]
+        ...data.map((record) => record.date),
+        new Date(data[data.length - 1].date.getTime() + dateDiff),
+      ],
     };
   }
 
@@ -459,7 +469,7 @@ export default class DataRiverChartComponent extends ScalableBaseChartComponent 
 
       // init all existing date nodes
       if (!container.length) {
-        dateTicks.forEach(date => (container.getValue(date.getTime()).value = new RiverData(date, record.attribute, record.name)));
+        dateTicks.forEach((date) => (container.getValue(date.getTime()).value = new RiverData(date, record.attribute, record.name)));
       }
 
       this.calculateBuildRates(container, record, maxDiff);
@@ -468,7 +478,7 @@ export default class DataRiverChartComponent extends ScalableBaseChartComponent 
       container.getValue(record.date.getTime()).value = record;
 
       // set build rate for all future items until a new existing datapoint
-      dateTicks.forEach(date => {
+      dateTicks.forEach((date) => {
         if (date.getTime() > record.date.getTime()) container.getValue(date.getTime()).value.buildSuccessRate = record.buildSuccessRate;
       });
       return current;
@@ -489,10 +499,10 @@ export default class DataRiverChartComponent extends ScalableBaseChartComponent 
     record.buildSuccessRate =
       (previous ? previous.buildSuccessRate : 0.0) +
       (record.buildStat === BuildStat.Success
-        ? record.buildWeight * record.totalDiff / maxDiff
+        ? (record.buildWeight * record.totalDiff) / maxDiff
         : record.buildStat === BuildStat.Failed || record.buildStat === BuildStat.Errored
-          ? -record.buildWeight * record.totalDiff / maxDiff
-          : 0.0);
+        ? (-record.buildWeight * record.totalDiff) / maxDiff
+        : 0.0);
 
     // define range of success rate
     record.buildSuccessRate =
@@ -524,12 +534,17 @@ export default class DataRiverChartComponent extends ScalableBaseChartComponent 
     dataStream.index = index;
     dataStream.key = dataStream[0].key;
 
-    const size = stream => Math.max(d3.max(stream, d => d.data.additions), d3.max(stream, d => d.data.deletions), 1);
+    const size = (stream) =>
+      Math.max(
+        d3.max(stream, (d) => d.data.additions),
+        d3.max(stream, (d) => d.data.deletions),
+        1
+      );
     dataStream.pattern = {
       size,
       position: (scale, stream) => scale(size(stream)) / 2,
       radius: (scale, stream) => scale(size(stream)) / 2 + 0.5,
-      offset: (scale, stream) => scale(size(stream)) * 0.75
+      offset: (scale, stream) => scale(size(stream)) * 0.75,
     };
     return dataStream;
   }
@@ -543,32 +558,32 @@ export default class DataRiverChartComponent extends ScalableBaseChartComponent 
       return [];
     }
 
-    const issueStreams = this.props.issueStreams.map(stream => new IssueStream(stream));
+    const issueStreams = this.props.issueStreams.map((stream) => new IssueStream(stream));
 
-    issueStreams.forEach(stream => {
+    issueStreams.forEach((stream) => {
       const issueStream = stackedData.reduce(
         (stack, data) => [
           ...stack,
           ...data.filter(
-            record =>
+            (record) =>
               record &&
               record.data &&
               record.data.shas &&
               record.data.shas.length > 0 &&
-              !!record.data.shas.find(sha => !!stream.find(issue => sha === issue.sha))
-          )
+              !!record.data.shas.find((sha) => !!stream.find((issue) => sha === issue.sha))
+          ),
         ],
         []
       );
 
-      stream.forEach(ticketPoint => {
-        ticketPoint.values = issueStream.filter(dataPoint => !!dataPoint.data.shas.find(sha => sha === ticketPoint.sha));
-        ticketPoint.points = Array.from(new Set(ticketPoint.values.map(record => record.data)));
+      stream.forEach((ticketPoint) => {
+        ticketPoint.values = issueStream.filter((dataPoint) => !!dataPoint.data.shas.find((sha) => sha === ticketPoint.sha));
+        ticketPoint.points = Array.from(new Set(ticketPoint.values.map((record) => record.data)));
       });
 
       stream.__values.sort(
         (point1, point2) =>
-          d3.min(point1.points, point => point.data.date.getTime()) - d3.min(point2.points, point => point.data.date.getTime())
+          d3.min(point1.points, (point) => point.data.date.getTime()) - d3.min(point2.points, (point) => point.data.date.getTime())
       );
     });
 
@@ -582,11 +597,11 @@ export default class DataRiverChartComponent extends ScalableBaseChartComponent 
    */
   processIssueStreams(issueStreams) {
     return issueStreams.reduce((streams, stream) => {
-      const maxStreamCount = d3.max(stream.values, ticketDataPoint => ticketDataPoint.points.length);
+      const maxStreamCount = d3.max(stream.values, (ticketDataPoint) => ticketDataPoint.points.length);
       const data = [];
       for (let i = 0; i < maxStreamCount * 2; i++) {
-        const issueStream = [stream.start, ...stream.map(dataPoint => dataPoint.values[i % dataPoint.values.length])].filter(
-          exist => exist
+        const issueStream = [stream.start, ...stream.map((dataPoint) => dataPoint.values[i % dataPoint.values.length])].filter(
+          (exist) => exist
         );
         if (stream.isClosed) {
           issueStream.push(stream.end);
@@ -634,15 +649,15 @@ export default class DataRiverChartComponent extends ScalableBaseChartComponent 
       issueDataPoints.length > 1 ? (scales.x(issueDataPoints[1].data.date) - scales.x(issueDataPoints[0].data.date)) * 0.01 : 0,
       5
     );
-    const size = d => Math.max(d.data.additions || 0, d.data.deletions || 1, 1);
+    const size = (d) => Math.max(d.data.additions || 0, d.data.deletions || 1, 1);
     issueDataPoints.forEach(
-      d => (d.radius = Math.min(Math.max((scales.diff(0) - scales.diff(size(d))) / 100 * radius, 5), scales.height(50)))
+      (d) => (d.radius = Math.min(Math.max(((scales.diff(0) - scales.diff(size(d))) / 100) * radius, 5), scales.height(50)))
     );
     issueDataPoints.sort((a, b) => b.radius - a.radius);
 
     const _this = this;
 
-    const getColor = d => d.stream.color[d instanceof IssueData ? d.status.name : d.issue ? d.issue.status.name : undefined];
+    const getColor = (d) => d.stream.color[d instanceof IssueData ? d.status.name : d.issue ? d.issue.status.name : undefined];
 
     brushArea
       .append('g')
@@ -650,24 +665,23 @@ export default class DataRiverChartComponent extends ScalableBaseChartComponent 
       .data(issueDataPoints)
       .enter()
       .append('a')
-      .attr('href', d => (d.issue ? d.issue.webUrl : d.webUrl))
+      .attr('href', (d) => (d.issue ? d.issue.webUrl : d.webUrl))
       .attr('target', '_blank')
       .attr('rel', 'noopener noreferrer')
       .append('circle')
       .classed('issue-nodes', true)
-      .attr('fill', d => {
+      .attr('fill', (d) => {
         const color = d.stream.color.ticket || getColor(d);
         return color ? chroma(color).alpha(0.6).css() : color;
       })
-      .attr('cx', d => scales.x(d.data.date))
-      .attr(
-        'cy',
-        d => (d instanceof IssueData ? (this.props.useIssueAxis ? scales.issue(d.status.name) : scales.y(0)) : scales.y(d.buildSuccessRate))
+      .attr('cx', (d) => scales.x(d.data.date))
+      .attr('cy', (d) =>
+        d instanceof IssueData ? (this.props.useIssueAxis ? scales.issue(d.status.name) : scales.y(0)) : scales.y(d.buildSuccessRate)
       )
-      .attr('r', d => d.radius)
-      .attr('stroke-width', d => (!(d instanceof IssueData) && !d.issue ? 0 : 3))
+      .attr('r', (d) => d.radius)
+      .attr('stroke-width', (d) => (!(d instanceof IssueData) && !d.issue ? 0 : 3))
       .attr('stroke', getColor)
-      .on('mouseenter', function(event, dataPoint) {
+      .on('mouseenter', function (event, dataPoint) {
         tooltip.attr('additional', dataPoint.stream.ticketId);
         tooltip.attr('color', `${dataPoint.stream.color.ticket || getColor(dataPoint)}`);
 
@@ -698,7 +712,7 @@ export default class DataRiverChartComponent extends ScalableBaseChartComponent 
           dataPoint.stream.color.ticket || getColor(dataPoint)
         );
       })
-      .on('mouseout', function(event, stream) {
+      .on('mouseout', function (event, stream) {
         d3.select(this).classed(_this.styles['issue-nodes--active'], false);
         return _this.onMouseLeave.bind(_this, this, tooltip, brushArea)(event, stream);
       });
@@ -718,14 +732,14 @@ export default class DataRiverChartComponent extends ScalableBaseChartComponent 
           const dataPoints = stream.values.reduce(
             (data, item) => [
               ...data,
-              ...item.points.map(d => {
+              ...item.points.map((d) => {
                 d.issue = item;
                 return d;
-              })
+              }),
             ],
             []
           );
-          dataPoints.forEach(item => {
+          dataPoints.forEach((item) => {
             item.stream = stream;
           });
           const start = stream.start;
@@ -753,42 +767,55 @@ export default class DataRiverChartComponent extends ScalableBaseChartComponent 
 
     const pattern = defs
       .selectAll('pattern')
-      .data(this.state.data.stackedData.filter(data => data && !data.stream && !(data.stream instanceof IssueData)))
+      .data(this.state.data.stackedData.filter((data) => data && !data.stream && !(data.stream instanceof IssueData)))
       .enter()
       .append('pattern')
-      .attr('width', stream => scales.pattern(stream.pattern.size(stream)))
-      .attr('height', stream => scales.pattern(stream.pattern.size(stream)))
-      .attr('id', stream => `color-${stream.key.toId()}`)
+      .attr('width', (stream) => scales.pattern(stream.pattern.size(stream)))
+      .attr('height', (stream) => scales.pattern(stream.pattern.size(stream)))
+      .attr('id', (stream) => `color-${stream.key.toId()}`)
       .attr('patternUnits', 'userSpaceOnUse')
-      .attr('x', stream => stream.pattern.offset(scales.pattern, stream))
-      .attr('y', stream => stream.pattern.offset(scales.pattern, stream))
-      .attr('patternTransform', (d, i) => `rotate(${(i * 360 / this.state.data.stackedData.length + 1 * i) % 360} 50 50)`);
+      .attr('x', (stream) => stream.pattern.offset(scales.pattern, stream))
+      .attr('y', (stream) => stream.pattern.offset(scales.pattern, stream))
+      .attr('patternTransform', (d, i) => `rotate(${((i * 360) / this.state.data.stackedData.length + 1 * i) % 360} 50 50)`);
 
-    pattern.append('rect').attr('fill', d => d.color.attribute).attr('width', '100%').attr('height', '100%');
+    pattern
+      .append('rect')
+      .attr('fill', (d) => d.color.attribute)
+      .attr('width', '100%')
+      .attr('height', '100%');
 
     pattern
       .append('circle')
-      .attr('fill', d => d.color.name)
-      .attr('cx', stream => stream.pattern.position(scales.pattern, stream))
-      .attr('cy', stream => stream.pattern.position(scales.pattern, stream))
-      .attr('r', stream => stream.pattern.radius(scales.pattern, stream));
+      .attr('fill', (d) => d.color.name)
+      .attr('cx', (stream) => stream.pattern.position(scales.pattern, stream))
+      .attr('cy', (stream) => stream.pattern.position(scales.pattern, stream))
+      .attr('r', (stream) => stream.pattern.radius(scales.pattern, stream));
 
     pathStreams.attr('opacity', 0.9);
 
     const gradients = defs
       .selectAll('linearGradient')
-      .data(Array.from(new Set(this.state.data.stackedData.filter(data => data && data.stream && data.stream instanceof IssueStream))))
+      .data(Array.from(new Set(this.state.data.stackedData.filter((data) => data && data.stream && data.stream instanceof IssueStream))))
       .enter()
       .append('linearGradient')
-      .attr('id', stream => `color-${stream.key.toId()}`);
+      .attr('id', (stream) => `color-${stream.key.toId()}`);
 
-    gradients.append('stop').attr('offset', '0%').attr('stop-color', stream => stream.color[IssueStat.Open.name]);
-    gradients.append('stop').attr('offset', '20%').attr('stop-color', stream => stream.color[IssueStat.InProgress.name]);
-    gradients.append('stop').attr('offset', '80%').attr('stop-color', stream => stream.color[IssueStat.InProgress.name]);
+    gradients
+      .append('stop')
+      .attr('offset', '0%')
+      .attr('stop-color', (stream) => stream.color[IssueStat.Open.name]);
+    gradients
+      .append('stop')
+      .attr('offset', '20%')
+      .attr('stop-color', (stream) => stream.color[IssueStat.InProgress.name]);
+    gradients
+      .append('stop')
+      .attr('offset', '80%')
+      .attr('stop-color', (stream) => stream.color[IssueStat.InProgress.name]);
     gradients
       .append('stop')
       .attr('offset', '100%')
-      .attr('stop-color', stream => (stream.stream.isClosed ? stream.color[IssueStat.Close.name] : undefined));
+      .attr('stop-color', (stream) => (stream.stream.isClosed ? stream.color[IssueStat.Close.name] : undefined));
   }
 
   /**
@@ -804,8 +831,11 @@ export default class DataRiverChartComponent extends ScalableBaseChartComponent 
    * @param stream
    */
   createdTooltipNode(path, bisectDate, mouseoverDate, tooltip, event, node, brushArea, scales, stream) {
-    const realDataStream = stream.filter(record => record && record.data && record.data.shas && record.data.shas.length > 0);
-    const nearestDateIndex = bisectDate(realDataStream.map(record => record.data), mouseoverDate);
+    const realDataStream = stream.filter((record) => record && record.data && record.data.shas && record.data.shas.length > 0);
+    const nearestDateIndex = bisectDate(
+      realDataStream.map((record) => record.data),
+      mouseoverDate
+    );
     const candidate1 = realDataStream[nearestDateIndex] || realDataStream[realDataStream.length - 1];
     const candidate2 = realDataStream[nearestDateIndex - 1] || realDataStream[0];
 
@@ -825,9 +855,11 @@ export default class DataRiverChartComponent extends ScalableBaseChartComponent 
   }
 
   raiseFilteredStreams(key, streamCb) {
-    this.state.data.stackedData.forEach(dataStream => {
+    this.state.data.stackedData.forEach((dataStream) => {
       if (dataStream.key.eqPrimKey(key)) {
-        d3.select(`#${this.getBrushId(dataStream)}`).raise().attr('opacity', 1);
+        d3.select(`#${this.getBrushId(dataStream)}`)
+          .raise()
+          .attr('opacity', 1);
         if (typeof streamCb === 'function') {
           streamCb(dataStream, key);
         }
@@ -864,7 +896,10 @@ export default class DataRiverChartComponent extends ScalableBaseChartComponent 
     tooltip.attr('data', null);
     brushArea.select('.' + this.styles.indicatorLine).remove();
     brushArea.selectAll('.' + this.styles.indicatorCircle).remove();
-    brushArea.selectAll('.layer').attr('opacity', 0.9).sort((streamA, streamB) => streamA.index - streamB.index);
+    brushArea
+      .selectAll('.layer')
+      .attr('opacity', 0.9)
+      .sort((streamA, streamB) => streamA.index - streamB.index);
   }
 
   /**
@@ -889,8 +924,8 @@ export default class DataRiverChartComponent extends ScalableBaseChartComponent 
   render() {
     return (
       <div className={this.styles.chartDiv}>
-        <svg className={this.styles.chartSvg} ref={svg => (this.svgRef = svg)} />
-        <RiverTooltip ref={div => (this.tooltipRef = div)} attribute={this.props.attribute} resolution={this.props.resolution} />
+        <svg className={this.styles.chartSvg} ref={(svg) => (this.svgRef = svg)} />
+        <RiverTooltip ref={(div) => (this.tooltipRef = div)} attribute={this.props.attribute} resolution={this.props.resolution} />
       </div>
     );
   }

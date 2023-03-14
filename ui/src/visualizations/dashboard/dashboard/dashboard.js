@@ -13,7 +13,7 @@ import wideVisualizationIcon from '../assets/wideVisualizationIcon.svg';
 import highVisualizationIcon from '../assets/highVisualizationIcon.svg';
 import deleteIcon from '../assets/deleteIcon.svg';
 
-import VisualizationSelector from '../components/visualizationSelector';
+import VisualizationSelector from '../components/visualizationSelector/visualizationSelector';
 import visualizationRegistry from '../visualizationRegistry';
 
 const DEFAULT_DASHBOARD = {

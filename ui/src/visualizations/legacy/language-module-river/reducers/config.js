@@ -12,7 +12,7 @@ export default handleActions(
     SET_LANGUAGE_MODULE_RIVER_HIGHLIGHTED_ISSUE: (state, action) =>
       _.assign({}, state, { highlightedIssue: action.payload, highlightedCommits: [] }),
     SET_LANGUAGE_MODULE_RIVER_SELECTED_MODULES: (state, action) => _.assign({}, state, { selectedModules: [...action.payload] }),
-    SET_LANGUAGE_MODULE_RIVER_RECEIVE_RELATED_COMMITS: (state, action) => _.assign({}, state, { highlightedCommits: action.payload })
+    SET_LANGUAGE_MODULE_RIVER_RECEIVE_RELATED_COMMITS: (state, action) => _.assign({}, state, { highlightedCommits: action.payload }),
   },
   {
     chartResolution: 'months', //chart bucket size, can be 'years', 'months', 'weeks' or 'days'
@@ -21,6 +21,6 @@ export default handleActions(
     selectedLanguages: [], //languages checked in the CheckBoxLegend, Array of objects
     selectedModules: [], //Modules checked in the CheckBoxLegend, Array of objects
     highlightedIssue: null,
-    highlightedCommits: []
+    highlightedCommits: [],
   }
 );

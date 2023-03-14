@@ -23,7 +23,7 @@ export default class CodeOwnershipRiver extends React.Component {
     super(props);
     this.elems = {};
 
-    const { commitSeries, lastCommitDataPoint, commitLegend } = this.extractCommitData(props);
+    const { commitSeries, lastCommitDataPoint, commitLegend, commits } = this.extractCommitData(props);
 
     this.state = {
       dirty: true,
@@ -31,6 +31,7 @@ export default class CodeOwnershipRiver extends React.Component {
       lastCommitDataPoint,
       commitLegend,
       commitSeries,
+      commits,
       dimensions: zoomUtils.initialDimensions(),
     };
 
@@ -53,16 +54,14 @@ export default class CodeOwnershipRiver extends React.Component {
     this.onZoom = zoomUtils.onZoomFactory({ constrain: true, margin: 50 });
   }
 
-  updateDomain(data) {
-    if (!data.commits) {
+  updateDomain(data, commits) {
+    if (commits === undefined) {
       return;
     }
 
-    let commits = data.commits;
     let builds = data.builds;
     let issues = data.issues;
     if (data.universalSettings) {
-      commits = data.filteredCommits;
       builds = data.filteredBuilds;
       issues = data.filteredIssues;
     }
@@ -91,30 +90,30 @@ export default class CodeOwnershipRiver extends React.Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    const { commitSeries, lastCommitDataPoint, commitLegend } = this.extractCommitData(nextProps);
+    const { commitSeries, lastCommitDataPoint, commitLegend, commits } = this.extractCommitData(nextProps);
     this.setState(
       {
         lastCommitDataPoint,
         commitSeries,
         commitLegend,
+        commits,
       },
-      () => this.updateDomain(nextProps)
+      () => this.updateDomain(nextProps, commits)
     );
   }
 
   render() {
-    if (!this.props.commits) {
+    if (!this.state.commits) {
       return <svg />;
     }
-    let commits = this.props.commits;
+
+    const commits = this.state.commits;
     let builds = this.props.builds;
     let issues = this.props.issues;
     if (this.props.universalSettings) {
-      commits = this.props.filteredCommits;
       builds = this.props.filteredBuilds;
       issues = this.props.filteredIssues;
     }
-
     const legend = [
       {
         name: 'Commits by author',
@@ -169,7 +168,6 @@ export default class CodeOwnershipRiver extends React.Component {
         />
       );
     });
-
     return (
       <ZoomableChartContainer
         scaleExtent={[1, Infinity]}
@@ -307,45 +305,78 @@ export default class CodeOwnershipRiver extends React.Component {
     if (!props.commits || props.commits.length === 0) {
       return {};
     }
+    const commits = [];
 
-    let commits = props.commits;
     if (props.universalSettings) {
-      commits = props.filteredCommits;
+      props.filteredCommits.forEach((c) => {
+        const newCommit = _.cloneDeep(c);
+        const newStatsByAuthor = {};
 
-      commits = commits.map((commit) => {
-        for (const author of Object.keys(commit.statsByAuthor)) {
-          let filter = false;
-          if (props.selectedAuthors.filter((a) => a === 'others').length > 0) {
-            filter = true;
-          }
-          for (const allAuthorsAuthor of Object.keys(props.allAuthors)) {
-            if (author === allAuthorsAuthor) {
-              if (props.selectedAuthors.filter((a) => a === allAuthorsAuthor).length > 0) {
-                filter = true;
-                break;
-              } else {
-                filter = false;
-                break;
+        //loop through merged Authors and add them and their committer
+        for (const mergedAuthor of props.mergedAuthors) {
+          if (props.selectedAuthors.includes(mergedAuthor.mainCommitter)) {
+            newStatsByAuthor[mergedAuthor.mainCommitter] = {
+              count: 0,
+              additions: 0,
+              deletions: 0,
+              changes: 0,
+            };
+            for (const committer of mergedAuthor.committers) {
+              if (committer.signature in c.statsByAuthor) {
+                const stats = newStatsByAuthor[mergedAuthor.mainCommitter];
+                const additionalStats = c.statsByAuthor[committer.signature];
+                stats.count += additionalStats.count;
+                stats.additions += additionalStats.additions;
+                stats.deletions += additionalStats.deletions;
+                stats.changes += additionalStats.changes;
+
+                newStatsByAuthor[mergedAuthor.mainCommitter] = stats;
               }
             }
           }
-          if (!filter) {
-            delete commit.statsByAuthor[author];
+        }
+
+        //loop through other Authors and add them to others
+        if (props.selectedAuthors.includes('others')) {
+          newStatsByAuthor['others'] = {
+            count: 0,
+            additions: 0,
+            deletions: 0,
+            changes: 0,
+          };
+          for (const otherAuthor of props.otherAuthors) {
+            if (otherAuthor.signature in c.statsByAuthor) {
+              const stats = newStatsByAuthor['others'];
+              const additionalStats = c.statsByAuthor[otherAuthor.signature];
+              stats.count += additionalStats.count;
+              stats.additions += additionalStats.additions;
+              stats.deletions += additionalStats.deletions;
+              stats.changes += additionalStats.changes;
+
+              newStatsByAuthor['others'] = stats;
+            }
           }
         }
-        return commit;
+
+        newCommit.statsByAuthor = newStatsByAuthor;
+        commits.push(newCommit);
+      });
+    } else {
+      props.commits.forEach((c) => {
+        commits.push(c);
       });
     }
 
     const lastCommitDataPoint = _.last(commits).statsByAuthor;
+
     const commitLegend = [];
     const commitSeries = _.map(lastCommitDataPoint, (committerIndex, signature) => {
       const legend = {
         name:
           (props.commitAttribute === 'count' ? 'Commits by ' : 'Changes by ') +
-          (signature === 'other' ? props.otherCount + ' Others' : signature),
+          (signature === 'others' ? props.otherAuthors.length + ' Others' : signature),
         style: {
-          fill: props.palette[signature],
+          fill: props.palette[signature === 'others' ? 'other' : signature],
         },
       };
 
@@ -353,7 +384,7 @@ export default class CodeOwnershipRiver extends React.Component {
 
       return {
         style: {
-          fill: props.palette[signature],
+          fill: props.palette[signature === 'others' ? 'other' : signature],
         },
         extractY: (d) => {
           const stats = d.statsByAuthor[signature];
@@ -369,7 +400,7 @@ export default class CodeOwnershipRiver extends React.Component {
       };
     });
 
-    return { commitSeries, commitLegend };
+    return { commitSeries, lastCommitDataPoint, commitLegend, commits };
   }
 }
 

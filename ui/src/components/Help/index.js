@@ -10,7 +10,7 @@ import styles from './styles.scss';
 
 const mapStateToProps = (state /*, ownProps*/) => {
   return {
-    shown: state.showHelp
+    shown: state.showHelp,
   };
 };
 
@@ -18,13 +18,14 @@ const mapDispatchToProps = (/*dispatch, ownProps*/) => {
   return {};
 };
 
-const HelpComponent = props => {
+const HelpComponent = (props) => {
   return (
     <Measure bounds onResize={callSafe(props.onResize)}>
-      {({ measureRef }) =>
+      {({ measureRef }) => (
         <div className={cx(styles.help, { [styles.shown]: props.shown })} ref={measureRef}>
           {props.children}
-        </div>}
+        </div>
+      )}
     </Measure>
   );
 };

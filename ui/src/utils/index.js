@@ -58,13 +58,13 @@ export function shortenPath(path, maxLength, { replacer = '\u2026' } = {}) {
 
 export function callSafe(fn) {
   if (fn) {
-    return e => fn(e);
+    return (e) => fn(e);
   }
 }
 
 const brokenEmojis = {
   ':white-check-mark:': ':white_check_mark:',
-  ':construction-worker:': ':construction_worker_man:'
+  ':construction-worker:': ':construction_worker_man:',
 };
 
 export function emojify(str) {

@@ -4,7 +4,7 @@ const gql = require('graphql-sync');
 
 const bucketTypes = {};
 
-module.exports = function(categoryType) {
+module.exports = function (categoryType) {
   let Bucket = bucketTypes[categoryType.name];
 
   if (!Bucket) {
@@ -15,14 +15,14 @@ module.exports = function(categoryType) {
         return {
           category: {
             type: categoryType,
-            description: 'Category for this bucket'
+            description: 'Category for this bucket',
           },
           count: {
             type: gql.GraphQLInt,
-            description: 'Number of elements in this bucket'
-          }
+            description: 'Number of elements in this bucket',
+          },
         };
-      }
+      },
     });
   }
 

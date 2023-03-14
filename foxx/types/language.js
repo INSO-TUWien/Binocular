@@ -14,24 +14,24 @@ module.exports = new gql.GraphQLObjectType({
     return {
       id: {
         type: new gql.GraphQLNonNull(gql.GraphQLString),
-        resolve: e => e._key,
-        description: 'The GitHub linguist id of the particular language'
+        resolve: (e) => e._key,
+        description: 'The GitHub linguist id of the particular language',
       },
       name: {
         type: new gql.GraphQLNonNull(gql.GraphQLString),
-        description: 'The name of the particular language'
+        description: 'The name of the particular language',
       },
       aliases: {
         type: new gql.GraphQLList(gql.GraphQLString),
-        description: 'All aliases of the particular language'
+        description: 'All aliases of the particular language',
       },
       popular: {
         type: gql.GraphQLBoolean,
-        description: 'Whether or not this language is popular'
+        description: 'Whether or not this language is popular',
       },
       color: {
         type: gql.GraphQLString,
-        description: 'Holds the hex code of the color of the particular language that is used in the GitHub ui'
+        description: 'Holds the hex code of the color of the particular language that is used in the GitHub ui',
       },
       commits: paginated({
         type: require('./commit.js'),
@@ -41,8 +41,8 @@ module.exports = new gql.GraphQLObjectType({
           IN
           OUTBOUND ${language} ${commitsToLanguages}
             ${limit}
-            RETURN commit`
-      })
+            RETURN commit`,
+      }),
     };
-  }
+  },
 });

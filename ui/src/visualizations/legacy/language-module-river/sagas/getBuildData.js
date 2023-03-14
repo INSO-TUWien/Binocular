@@ -5,9 +5,9 @@ import { traversePages, graphQl } from '../../../../utils';
 export default function getBuildData() {
   const buildList = [];
 
-  return traversePages(getBuildsPage, build => {
+  return traversePages(getBuildsPage, (build) => {
     buildList.push(build);
-  }).then(function() {
+  }).then(function () {
     return buildList;
   });
 }
@@ -29,5 +29,5 @@ const getBuildsPage = (page, perPage) => {
     }`,
       { page, perPage }
     )
-    .then(resp => resp.baseBuilds);
+    .then((resp) => resp.baseBuilds);
 };

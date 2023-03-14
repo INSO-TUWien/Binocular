@@ -1,6 +1,6 @@
 'use strict';
 
-const Pie = props => {
+const Pie = (props) => {
   return (
     <div className="pie">
       Start: {props.start}

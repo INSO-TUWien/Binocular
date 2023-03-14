@@ -19,6 +19,8 @@ const mapStateToProps = (state /*, ownProps*/) => {
     lastSignificantTimestamp: changesState.data.data.lastSignificantTimestamp,
     displayMetric: changesState.config.displayMetric,
     selectedAuthors: universalSettings.selectedAuthorsGlobal,
+    otherAuthors: universalSettings.otherAuthors,
+    mergedAuthors: universalSettings.mergedAuthors,
     chartResolution: universalSettings.chartResolution,
   };
 };

@@ -16,11 +16,11 @@ const Module = new gql.GraphQLObjectType({
     return {
       id: {
         type: new gql.GraphQLNonNull(gql.GraphQLString),
-        resolve: e => e._key
+        resolve: (e) => e._key,
       },
       path: {
         type: gql.GraphQLString,
-        description: 'The path of the module, relative to the repository root'
+        description: 'The path of the module, relative to the repository root',
       },
       files: paginated({
         type: require('./file'),
@@ -30,7 +30,7 @@ const Module = new gql.GraphQLObjectType({
           IN
           INBOUND ${module} ${ModulesToFiles}
             ${limit}
-            RETURN file`
+            RETURN file`,
       }),
       commits: paginated({
         type: require('./moduleInCommit.js'),
@@ -44,7 +44,7 @@ const Module = new gql.GraphQLObjectType({
               commit,
               webUrl: edge.webUrl,
               stats: edge.stats
-            }`
+            }`,
       }),
       subModules: paginated({
         type: require('./module'),
@@ -54,10 +54,10 @@ const Module = new gql.GraphQLObjectType({
           IN
           INBOUND ${module} ${ModulesToModules}
             ${limit}
-            RETURN module`
-      })
+            RETURN module`,
+      }),
     };
-  }
+  },
 });
 
 module.exports = Module;
