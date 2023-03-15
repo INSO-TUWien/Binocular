@@ -18,11 +18,3 @@
 :global html{
   overflow: hidden;
 }
-
-:global .cm-editor{
-  background-color: transparent !important;
-}
-
-:global .cm-activeLine{
-  background-color: transparent !important;
-}

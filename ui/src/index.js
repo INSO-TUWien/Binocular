@@ -1,4 +1,4 @@
-import { createRoot } from 'react-dom/client';
+import { render } from 'react-dom';
 import { createStore, applyMiddleware } from 'redux';
 import { createLogger } from 'redux-logger';
 import io from 'socket.io-client';
@@ -54,10 +54,6 @@ Database.checkBackendConnection().then((connection) => {
   _.each(visualizationModules, (viz) => {
     visualizations[viz.id] = viz;
   });
-
-  const container = document.getElementById('root');
-  const rootContainer = createRoot(container);
-
   if (connection) {
     const app = makeAppReducer(visualizationModules);
 
@@ -79,11 +75,11 @@ Database.checkBackendConnection().then((connection) => {
 
     saga.run(root);
 
-    rootContainer.render(<Root store={store} />);
+    render(<Root store={store} />, document.getElementById('root'));
     if (module.hot) {
       module.hot.accept('./components/Root', () => {
         const NewRoot = require('./components/Root').default;
-        rootContainer.render(<NewRoot store={store} />);
+        render(<NewRoot store={store} />, document.getElementById('root'));
       });
     }
   } else {
@@ -106,11 +102,11 @@ Database.checkBackendConnection().then((connection) => {
 
     saga.run(root);
 
-    rootContainer.render(<RootOffline store={store} />);
+    render(<RootOffline store={store} />, document.getElementById('root'));
     if (module.hot) {
       module.hot.accept('./components/Root', () => {
         const NewRoot = require('./components/Root').default;
-        rootContainer.render(<NewRoot store={store} />);
+        render(<NewRoot store={store} />, document.getElementById('root'));
       });
     }
   }

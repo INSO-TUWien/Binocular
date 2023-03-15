@@ -2,15 +2,13 @@ import * as d3 from 'd3';
 import hunkChartGeneration from '../subCharts/hunkChartGeneration';
 import heatmapChartGeneration from '../subCharts/heatmapChartGeneration';
 
-const lineHeight = 22.4;
-
 export default class heatmapInteraction {
   static generateHeatmapInteractionLayer(data, lines, importantColumns, currThis, mode, firstLineNumber, displayProps) {
     d3.select('.rowInteraction > *').remove();
     currThis.combinedHeatmapData = data;
     const width = document.getElementById('barChartContainer').clientWidth,
-      height = lineHeight * lines,
-      margins = { top: lineHeight, right: 0, bottom: 0, left: 0 };
+      height = 24 * lines,
+      margins = { top: 24, right: 0, bottom: 0, left: 0 };
     //Setting chart width and adjusting for margins
     const interactionLayer = d3
       .select('.rowInteraction')
@@ -25,10 +23,10 @@ export default class heatmapInteraction {
       interactionLayer
         .append('rect')
         .attr('x', 0)
-        .attr('y', (i - firstLineNumber) * lineHeight)
+        .attr('y', (i - firstLineNumber) * 24)
         .style('fill', 'transparent')
         .attr('width', width)
-        .attr('height', lineHeight)
+        .attr('height', 24)
         .on('mouseover', function () {
           if (displayProps.mainVisualizationMode === 1 && mode === 0) {
             hunkChartGeneration.interact(i);
