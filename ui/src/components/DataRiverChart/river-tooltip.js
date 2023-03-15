@@ -2,7 +2,7 @@ import styles from './data-river-chart.component.scss';
 import { BuildStat } from './RiverData';
 
 import React from 'react';
-import MouseTooltip from 'react-sticky-mouse-tooltip';
+import MouseTooltip from 'guyllkegen-react-sticky-mouse-tooltip';
 import { formatInteger, formatNumber } from '../../utils/format';
 import cx from 'classnames';
 import { formatDate } from '../../utils/date';
