@@ -45,6 +45,9 @@ jobs:
     - name: Run eslint
       run: npm run eslint
 
+    - name: test origin url
+      run: git remote get-url origin
+
     - name: Run pupil
       run: node pupil.js --no-open --no-server .
 
