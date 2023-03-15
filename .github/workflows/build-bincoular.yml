@@ -53,6 +53,12 @@ jobs:
     - name: Build
       run: npm run build
 
+    - name: Publish artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: binocular_ui
+        path: dist/
+
     # - name: Run tests
     #   run: npm run test
 
