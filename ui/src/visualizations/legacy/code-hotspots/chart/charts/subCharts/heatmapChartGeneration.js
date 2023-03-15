@@ -22,6 +22,8 @@ let commitLegendSteps = [];
 let developerLegendSteps = [];
 let issueLegendSteps = [];
 
+const lineHeight = 22.4;
+
 export default class heatmapChartGeneration {
   static generateHeatmap(data, lines, importantColumns, currThis, mode, maxValue, legendSteps, firstLineNumber, displayProps) {
     d3.select('.chartMain > *').remove();
@@ -42,8 +44,8 @@ export default class heatmapChartGeneration {
 
     currThis.combinedHeatmapData = data;
     const width = document.getElementById('barChartContainer').clientWidth,
-      height = 24 * lines,
-      margins = { top: 24, right: 0, bottom: 0, left: 0 };
+      height = lineHeight * lines,
+      margins = { top: lineHeight, right: 0, bottom: 0, left: 0 };
     //Setting chart width and adjusting for margins
     const chart = d3
       .select('.chartMain')
@@ -124,7 +126,7 @@ export default class heatmapChartGeneration {
 
     const width = document.getElementById('barChartContainer').clientWidth;
     const barWidth = width / columns,
-      barHeight = 24;
+      barHeight = lineHeight;
     const legendData = [];
 
     for (let i = 1; i <= legendSteps; i++) {
@@ -279,7 +281,7 @@ export default class heatmapChartGeneration {
         const toolTip = d3
           .select('.chartMainToolTip > div')
           .style('display', 'block')
-          .style('top', '' + (line + 2) * 24 + 'px')
+          .style('top', '' + (line + 2) * lineHeight + 'px')
           .html('');
         toolTip
           .append('span')
@@ -304,17 +306,17 @@ export default class heatmapChartGeneration {
             .attr('x', (d, i) => {
               return '' + (width / rowCommitData.length) * i + '';
             })
-            .attr('y', '24px')
+            .attr('y', lineHeight + 'px')
             .style('fill', commitColorScale)
             .attr('width', '' + width / rowCommitData.length + '')
-            .attr('height', '24px')
+            .attr('height', lineHeight + 'px')
             .on('mouseover', function (event, d) {
               const subToolTip = d3.select('.chartMainSubToolTip > div');
               subToolTip.transition().duration(200).style('display', 'block');
               subToolTip
                 .style('border', '3px solid transparent')
                 .style('left', ((d.column + 1) * width) / rowCommitData.length + 'px')
-                .style('top', '' + ((line + 2) * 24 + 170) + 'px');
+                .style('top', '' + ((line + 2) * lineHeight + 170) + 'px');
               subToolTip.selectAll('*').remove();
               subToolTip
                 .append('div')
@@ -343,7 +345,7 @@ export default class heatmapChartGeneration {
               return '' + (width / rowCommitData.length) * i + '';
             })
             .attr('y', '0')
-            .attr('dy', '24px')
+            .attr('dy', lineHeight + 'px')
             .style('fill', 'black')
             .text(function (d) {
               return d.column;
@@ -371,14 +373,14 @@ export default class heatmapChartGeneration {
             .attr('y', '150')
             .style('fill', developerColorScale)
             .attr('width', '' + width / rowDeveloperData.length + '')
-            .attr('height', '24px')
+            .attr('height', lineHeight + 'px')
             .on('mouseover', function (event, d) {
               const subToolTip = d3.select('.chartMainSubToolTip > div');
               subToolTip.transition().duration(200).style('display', 'block');
               subToolTip
                 .style('border', '3px solid transparent')
                 .style('left', ((d.column + 1) * width) / rowDeveloperData.length + 'px')
-                .style('top', '' + ((line + 2) * 24 + 430) + 'px');
+                .style('top', '' + ((line + 2) * lineHeight + 430) + 'px');
               subToolTip.selectAll('*').remove();
               subToolTip.append('div').style('font-weight', 'bold').text(d.dev.split('<')[0]);
               subToolTip
@@ -400,7 +402,7 @@ export default class heatmapChartGeneration {
             .attr('transform', (d, i) => {
               return 'translate( ' + (width / rowDeveloperData.length) * i + ', ' + 126 + '),' + 'rotate(-45)';
             })
-            .attr('dy', '24px')
+            .attr('dy', lineHeight + 'px')
             .style('fill', 'black')
             .text(function (d) {
               return d.dev.split('<')[0];
@@ -425,10 +427,10 @@ export default class heatmapChartGeneration {
             .attr('x', (d, i) => {
               return '' + (width / rowIssueData.length) * i + '';
             })
-            .attr('y', '24')
+            .attr('y', lineHeight + 'px')
             .style('fill', issueColorScale)
             .attr('width', '' + width / rowIssueData.length + '')
-            .attr('height', '24px')
+            .attr('height', lineHeight + 'px')
             .on('mouseover', function (event, d) {
               console.log(d);
               const subToolTip = d3.select('.chartMainSubToolTip > div');
@@ -436,7 +438,7 @@ export default class heatmapChartGeneration {
               subToolTip
                 .style('border', '3px solid transparent')
                 .style('left', ((d.i + 1) * width) / rowIssueData.length + 'px')
-                .style('top', '' + ((line + 2) * 24 + 570) + 'px');
+                .style('top', '' + ((line + 2) * lineHeight + 570) + 'px');
               subToolTip.selectAll('*').remove();
               subToolTip
                 .append('div')
@@ -456,7 +458,7 @@ export default class heatmapChartGeneration {
               return '' + (width / rowIssueData.length) * i + '';
             })
             .attr('y', '0')
-            .attr('dy', '24px')
+            .attr('dy', lineHeight + 'px')
             .style('fill', 'black')
             .text(function (d) {
               return d.iid;
