@@ -3,21 +3,11 @@
 import React from 'react';
 import CodeMirror from '@uiw/react-codemirror';
 import styles from '../styles.scss';
-import { EditorState, Compartment } from '@codemirror/state';
-
-import 'codemirror/lib/codemirror.css';
-require('codemirror/mode/javascript/javascript');
-require('codemirror/mode/clike/clike');
-require('codemirror/mode/htmlmixed/htmlmixed');
-require('codemirror/mode/yaml/yaml');
-require('codemirror/mode/php/php');
-require('codemirror/mode/python/python');
 
 import '../css/codeMirror.css';
 import vcsData from './helper/vcsData';
 import chartUpdater from './charts/chartUpdater';
 import BluebirdPromise from 'bluebird';
-import { graphQl } from '../../../../utils';
 import Loading from './helper/loading';
 import ModeSwitcher from './helper/modeSwitcher';
 import Settings from '../components/settings/settings';
