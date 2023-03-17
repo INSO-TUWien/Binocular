@@ -1,9 +1,8 @@
 'use strict';
 
 import React from 'react';
-import CodeMirror from '@uiw/react-codemirror';
+import { UnControlled as CodeMirror } from 'react-codemirror2';
 import styles from '../styles.scss';
-import { EditorState, Compartment } from '@codemirror/state';
 
 import 'codemirror/lib/codemirror.css';
 require('codemirror/mode/javascript/javascript');
@@ -308,9 +307,6 @@ export default class CodeHotspots extends React.PureComponent {
                       ? this.state.filteredData.code
                       : this.state.filteredData.secondaryCode
                   }
-                  basicSetup={{
-                    highlightActiveLineGutter: false,
-                  }}
                   options={{
                     mode: ModeSwitcher.modeFromExtension(this.state.path.split('.').pop()),
                     theme: 'default',
@@ -332,9 +328,6 @@ export default class CodeHotspots extends React.PureComponent {
                         ? this.state.filteredData.code
                         : this.state.filteredData.secondaryCode
                     }
-                    basicSetup={{
-                      highlightActiveLineGutter: false,
-                    }}
                     options={{
                       mode: ModeSwitcher.modeFromExtension(this.state.path.split('.').pop()),
                       theme: 'default',

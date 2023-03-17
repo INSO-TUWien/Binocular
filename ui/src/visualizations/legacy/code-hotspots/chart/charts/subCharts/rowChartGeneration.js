@@ -7,8 +7,6 @@ const HEATMAP_LOW_COLOR = '#ABEBC6';
 const HEATMAP_HIGH_COLOR = '#E6B0AA';
 const HEATMAP_MAX_COLOR = '#d5796f';
 
-const lineHeight = 22.4;
-
 export default class rowChartGeneration {
   static generateRowSummary(data, lines, currThis, mode, legendSteps, firstLineNumber, displayProps) {
     d3.select('#chartRow').remove();
@@ -86,7 +84,7 @@ export default class rowChartGeneration {
     }
 
     const width = 28,
-      height = lineHeight * lines,
+      height = 24 * lines,
       margins = { top: 28, right: 0, bottom: 0, left: 2 };
 
     //Setting chart width and adjusting for margins
@@ -142,7 +140,7 @@ export default class rowChartGeneration {
     }
 
     const barWidth = 28,
-      barHeight = lineHeight;
+      barHeight = 24;
     const colorScale = (d) => {
       for (let i = 0; i < legendData.length; i++) {
         if (d.value < legendData[i].interval) {
