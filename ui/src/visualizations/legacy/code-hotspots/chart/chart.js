@@ -311,9 +311,6 @@ export default class CodeHotspots extends React.PureComponent {
                     loadLanguage(lang),
                     compartment.of(lineNumbers({ formatNumber: this.getFormatNumber(this.state.filteredData.firstLineNumber) })),
                   ]}
-                  options={{
-                    firstLineNumber: this.state.filteredData.firstLineNumber,
-                  }}
                 />
               </div>
               {this.state.selectedCompareCommit.sha === '' ? (
@@ -336,9 +333,6 @@ export default class CodeHotspots extends React.PureComponent {
                       loadLanguage(lang),
                       compartment.of(lineNumbers({ formatNumber: this.getFormatNumber(this.state.filteredData.firstLineNumber) })),
                     ]}
-                    options={{
-                      firstLineNumber: this.state.filteredData.firstLineNumber,
-                    }}
                   />
                 </div>
               )}
