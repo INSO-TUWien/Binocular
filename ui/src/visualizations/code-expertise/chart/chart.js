@@ -85,16 +85,8 @@ const Chart = () => {
     })
 
     setSegments(segments)
-  
-  }, [data, radius])
-  
 
-  // let testText
-  // if(focussed != null && getDataForSegmentId(focussed)) {
-  //   testText = <div>Currently focussed: {getDataForSegmentId(focussed)[0]}</div>
-  // } else {
-  //   testText = <div>No Segment focussed</div>
-  // }
+  }, [data, radius])
 
 
   if(config.currentBranch == null) {

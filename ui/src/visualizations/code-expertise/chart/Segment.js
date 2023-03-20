@@ -10,15 +10,16 @@ function Segment( { rad, startPercent, endPercent, devName, devData, devColor } 
     const dispatch = useDispatch()
 
     //global state
-    const detailsDev = useSelector((state) => state.visualizations.codeExpertise.state.config.details)
+    const globalDetailsDevState = useSelector((state) => state.visualizations.codeExpertise.state.config.details)
 
     //local state
+    const [isDevSelected, setIsDevSelected] = useState(globalDetailsDevState === devName)
     const [radius, setRadius] = useState(rad)
     const [focus, setFocus] = useState(false)
-    const [readyToRender, setReadyToRender] = useState(false)
+    const [readyToAnimate, setReadyToAnimate] = useState(false)
 
 
-    // ######################## COLOURS ########################
+    // ######################## COLORS ########################
 
     const devColorDark = chroma(devColor).darken().hex()
     const goodCommitsColor = chroma('green').brighten().hex()
@@ -46,13 +47,16 @@ function Segment( { rad, startPercent, endPercent, devName, devData, devColor } 
     const [ownershipArc, setOwnershipArc] = useState(d3.arc().innerRadius(0).outerRadius(0).startAngle(0).endAngle(0))
     const [additionsTextArc, setAdditionsTextArc] = useState(d3.arc().innerRadius(0).outerRadius(0).startAngle(0).endAngle(0))
     const [devNameArc, setDevNameArc] = useState(d3.arc().innerRadius(0).outerRadius(0).startAngle(0).endAngle(0))
-    const [isDevSelected, setIsDevSelected] = useState(false)
+    const [animationFlag, setAnimationFlag] = useState(false)
 
 
     // ######################## SETTINGS GENERAL ########################
 
     //duration in ms for the animation when the size changes
     const animationDuration = 100
+
+    //controls how much the segment enlarges when hovered / focused
+    const growthFactor = 1.2
 
     //for some reason, arc() starts at another point that path().arc(),
     // so we have to offset the startAngle and endAngle by PI/2
@@ -92,10 +96,38 @@ function Segment( { rad, startPercent, endPercent, devName, devData, devColor } 
     }
 
 
-    // ######################## FUNCTIONS AND EFFECTS ########################
+    // ######################## FUNCTIONS ########################
+
+    //enlarge segment and show additional information in the chart if mouse hovers over segment
+    const mouseEnter = () => {
+        if(!focus) {
+            setFocus(true)
+        }
+    }
+
+    //only decrease size if segment is not selected (has not been clicked on to show details in the side panel)
+    const mouseLeave = () => {
+        if(!isDevSelected) {
+            setFocus(false)
+        }
+    }
+
+    //if there is a click on the segment, dispatch an action that causes the detqails panel to open
+    //this will also change the global state which dev is currently selected
+    const onClickSegment = () => {
+        dispatch(setDetails(devName))
+    }
 
     //smoothly animate the d3 components when their size changes
     const animate = (ref, newAttribute) => {
+        //dont animate right at the start. Looks weird.
+        if(!readyToAnimate) {
+            d3.select(ref.current)
+                .attr('d', newAttribute.toString());
+            return
+        }
+
+        //smoothly animate the transition when segment grows or shrinks
         d3.select(ref.current)
             .transition()
             .duration(animationDuration)
@@ -103,130 +135,82 @@ function Segment( { rad, startPercent, endPercent, devName, devData, devColor } 
     }
 
     //Is called when the size of the segment changes.
-    //Recalculates the d3 components and calls animate()
-    const setD3Components = () => {
+    //Recalculates the d3 components and change the animation flag, causing a rerender
+    const setD3Components = (animateSmoothly) => {
         setOuterBorderPath()
         setCommitPath()
         setAdditionsPath()
         setDevNamePath()
 
-        //only animate the movement if d3 components have already been calculated with radius != 0
-        // otherwise, the components would not render properly at the beginning
-        if(readyToRender) {
-            animate(segmentRef, circleSegment)
-            animate(contourRef, circleSegment)
-            animate(goodCommitsArcRef, goodCommitsArc)
-            animate(badCommitsArcRef, badCommitsArc)
-            animate(additionsArcRef, additionsArc)
-            animate(ownershipArcRef, ownershipArc)
-            animate(additionsTextArcRef, additionsTextArc)
-            animate(devNameArcRef, devNameArc)
-        }
+        if(!animateSmoothly) {
+            setReadyToAnimate(false)
+        } 
+        setAnimationFlag(!animationFlag)
     }
 
-    //enlarges the segment and sets focus to true so additional information is shown
-    const focusSegment = () => {
-        console.log("#### " + devName + " CALLED FOCUS")
-        setFocus(true)
-        setRadius(rad*1.2)
-        setD3Components()
-    }
 
-    //resets segment to its normal size and removes additional information
-    const unfocusSegment = () => {
-        console.log("**** " + devName + " CALLED UNFOCUS")
-        setFocus(false)
-        setRadius(rad)
-        setD3Components()
-        
-        if(radius !== 0 && !readyToRender) {
-            setReadyToRender(true)
-        }
-    }
+    // ######################## EFFECTS ########################
 
-    // useEffect(() => {
-    //     if(focus) {
-    //         setRadius(rad*1.2)
-    //     } else {
-    //         setRadius(rad)
-    //     }
-    // }, [focus])
-
-    // useEffect(() => {
-    //   setD3Components()
-    // }, [radius])
-    
-    
-    //enlarge segment and show additional information in the chart if mouse hovers over segment
-    const mouseEnter = () => {
-        if(!focus) {
-            focusSegment()
-        }
-        
-    }
-
-    //only decrease size if segment is not selected (has not been clicked on to show details in the side panel)
-    const mouseLeave = () => {
-        if(!isDevSelected && focus) {
-            unfocusSegment()
-        }
-    }
-
-    //if there is a click on the segment, dispatch an action that causes the detqails panel to open
-    const onClickSegment = () => {
-        focusSegment()
-        dispatch(setDetails(devName))
-    }
-
-    //re-calculate the d3 components.
-    //it is done everytime detailsDev/devName changes because then the segment might be focussed.
-    //it is done everytime rad changes because we want to render it correctly at the beginning.
-    // Since rad (a prop) is 0 at the beginning, we must re-set the d3 components when it changes.
+    //is called when the animation flag changes.
+    //this means that the d3 components have changed and need to be animated to display their new state.
     useEffect(() => {
-        if(focus && isDevSelected) {
-            console.log("RAD OR ISDEVSELECTED CHANGED. FOCUSSING " + devName)
-            focusSegment()
+        animate(segmentRef, circleSegment)
+        animate(contourRef, circleSegment)
+        animate(goodCommitsArcRef, goodCommitsArc)
+        animate(badCommitsArcRef, badCommitsArc)
+        animate(additionsArcRef, additionsArc)
+        animate(ownershipArcRef, ownershipArc)
+        animate(additionsTextArcRef, additionsTextArc)
+        animate(devNameArcRef, devNameArc)
+
+        //allow animations after first time of displaying the chart
+        if(radius !== 0 && !readyToAnimate) {
+            setReadyToAnimate(true)
+        }
+    }, [animationFlag])
+
+    //when focus changes, change size of segment
+    useEffect(() => {
+        if(focus) {
+            setRadius(rad * growthFactor)
         } else {
-            console.log("RAD OR ISDEVSELECTED CHANGED. UUUUUUNNNNNNNFOCUSSING " + devName)
-            unfocusSegment()
+            setRadius(rad)
+        }
+    }, [focus])
+
+    //when radius changes, update d3 components with a smooth animation
+    useEffect(() => {
+        setD3Components(true)
+    }, [radius])
+
+    //when dev data changes (for example when other files were selected), update components but without a smooth animation
+    useEffect(() => {
+        setD3Components(false)
+    }, [devData, startPercent, endPercent])
+
+    //update local state when global state changes
+    useEffect(() => {
+        setIsDevSelected(globalDetailsDevState === devName)
+    }, [globalDetailsDevState])
+    
+    //Since rad (a prop) is 0 at the beginning, radius and focus are set correctly everytime rad changes because we want to render it correctly at the beginning.
+    //Also run this everytime isDevSelected changes.
+    useEffect(() => {
+        if(isDevSelected) {
+            setFocus(true)
+            setRadius(rad * growthFactor)
+        } else {
+            setFocus(false)
+            setRadius(rad)
         }
     }, [rad, isDevSelected])
 
-    //this effect is important for the beginning, when this component is created
-    //it ensures that the d3 components are rendered when radius changes at the beginning
-    useEffect(() => {
-        //ensures that this effect is only used at the beginning
-        if(radius !== 0 && readyToRender) {
-            return
-        } else {
-            console.log("RADIUS OR READYTORENDER CHANGED. UNFOCUSSING " + devName)
-            unfocusSegment()
-        }
-    }, [radius, readyToRender])
-
-
-    useEffect(() => {
-      if(devName === detailsDev) {
-        console.log("+++ SETTING " + devName + " TO SELECTED")
-        setIsDevSelected(true)
-      } else if (isDevSelected) {
-        console.log("--- SETTING " + devName + " TO UNSELECTED")
-        setIsDevSelected(false)
-      }
-    }, [devName, detailsDev])
-
     
-
-    
-
-
-
     // ######################## OUTER BORDER ########################
 
     //path for the outer boarder of the segment
     //const circleSegment = d3.path()
     const setOuterBorderPath = () => {
-
         const newCircleSegment = d3.path()
         newCircleSegment.moveTo(0,0)
         newCircleSegment.arc(0, 0, radius, getAngle(startPercent), getAngle(endPercent))
@@ -247,7 +231,6 @@ function Segment( { rad, startPercent, endPercent, devName, devData, devColor } 
     const badCommits = devData.commits.filter(c => c.build != null && c.build != 'success').length
 
     const setCommitPath = () => {
-
         const goodCommitsRadius = radius + (buildWeight * (goodCommits/commitsNumber))
         const badCommitsRadius = radius - (buildWeight * (badCommits/commitsNumber))
         
@@ -269,11 +252,9 @@ function Segment( { rad, startPercent, endPercent, devName, devData, devColor } 
     }
 
 
-
     // ######################## ADDITIONS AND OWNERSHIP ARCS ########################
     
     const setAdditionsPath = () => {
-
         const additionsArcWeight = radius / 20
         const additionsArcInnerRadius = radius * 0.6 - additionsArcWeight
         const additionsArcOuterRadius = radius * 0.6 + additionsArcWeight
@@ -284,7 +265,6 @@ function Segment( { rad, startPercent, endPercent, devName, devData, devColor } 
             .outerRadius(additionsArcOuterRadius)
             .startAngle(arcStartAngle)
             .endAngle(arcEndAngle))
-
 
         let ownershipEndAngle = arcStartAngle
         if(devData.linesOwned) {
@@ -302,7 +282,7 @@ function Segment( { rad, startPercent, endPercent, devName, devData, devColor } 
             .endAngle(ownershipEndAngle)
         )
 
-        const additionsTextArcRadius = additionsArcOuterRadius + 4 * additionsArcWeight
+        const additionsTextArcRadius = additionsArcOuterRadius + additionsArcWeight
 
         setAdditionsTextArc(
             d3.arc()
@@ -314,7 +294,6 @@ function Segment( { rad, startPercent, endPercent, devName, devData, devColor } 
     }
 
 
-
     // ######################## DEV NAME OUTSIDE OF SEGMENT ########################
 
     //TODO: for some reason this does not work when devNameCoordinates is a local state and is changed inside the setDevNamePath function.
@@ -324,7 +303,6 @@ function Segment( { rad, startPercent, endPercent, devName, devData, devColor } 
     const devNameCoordinates = getCoordinatesForPercent((coordinatesRadius), middleAngle)
 
     const setDevNamePath = () => {
-
         //at which radius should the dev name be placed
         const goodCommitsRadius = radius + (buildWeight * (goodCommits/commitsNumber))
         const devNameRadius = goodCommitsRadius + (radius * 0.06)
@@ -338,14 +316,11 @@ function Segment( { rad, startPercent, endPercent, devName, devData, devColor } 
         )
     }
 
-    
-
 
     // ######################## RENDER ########################
 
     return (
         <g>
-            {console.log("~~~~~~~~~~~~~~~~~~~~ RENDERING " + devName + " with radius " + radius + " ~~~~~~~~~~~~~~~~~~~~")}
             {/*dev name outside of segment*/}
             {!smallSegment &&
                 <g>
@@ -353,7 +328,6 @@ function Segment( { rad, startPercent, endPercent, devName, devData, devColor } 
                         <path
                         ref={devNameArcRef}
                         id = {devName.replace(/\s/g, '') + "_namePath"}
-                        d={devNameArc.toString()}
                         />
                     </defs>
                     <text>
@@ -394,13 +368,9 @@ function Segment( { rad, startPercent, endPercent, devName, devData, devColor } 
                     </pattern>
                 </defs>
                 
-
-
-
                 {/*outer border*/}  
                 <path
                 ref={segmentRef}
-                d={circleSegment.toString()}
                 stroke="black"
                 fill="white"
                 />
@@ -408,14 +378,12 @@ function Segment( { rad, startPercent, endPercent, devName, devData, devColor } 
                 {/*additions arc*/}
                 <path
                 ref={additionsArcRef}
-                d={additionsArc.toString()}
                 fill={`url(#hatch_${devName.replace(/\s/g, '')})`}
                 />
 
                 {/*ownership arc*/}
                 <path
                 ref={ownershipArcRef}
-                d={ownershipArc.toString()}
                 fill={devColorDark}
                 />
 
@@ -426,7 +394,6 @@ function Segment( { rad, startPercent, endPercent, devName, devData, devColor } 
                         <path
                         ref={additionsTextArcRef}
                         id = {devName.replace(/\s/g, '') + "_additionsPath"}
-                        d={additionsTextArc.toString()}
                         />
                     </defs>
                     <text>
@@ -444,21 +411,18 @@ function Segment( { rad, startPercent, endPercent, devName, devData, devColor } 
                 {/*bad commits arc*/}
                 <path
                 ref={badCommitsArcRef}
-                d={badCommitsArc.toString()}
                 fill={badCommitsColor}
                 />
 
                 {/*good commits arc*/}
                 <path
                 ref={goodCommitsArcRef}
-                d={goodCommitsArc.toString()}
                 fill={goodCommitsColor}
                 />
 
                 {/*outer border without fill, just for contours*/}  
                 <path
                 ref={contourRef}
-                d={circleSegment.toString()}
                 stroke="black"
                 fill="none"
                 />
@@ -467,8 +431,6 @@ function Segment( { rad, startPercent, endPercent, devName, devData, devColor } 
         </g>
     )
 }
-
-
 
 
 // ######################## HELPER FUNCTIONS ########################
