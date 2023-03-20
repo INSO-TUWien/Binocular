@@ -305,6 +305,7 @@ export default class CodeHotspots extends React.PureComponent {
                   }
                   basicSetup={{
                     highlightActiveLineGutter: false,
+                    foldGutter: false,
                   }}
                   readOnly={true}
                   extensions={[
@@ -327,6 +328,7 @@ export default class CodeHotspots extends React.PureComponent {
                     }
                     basicSetup={{
                       highlightActiveLineGutter: false,
+                      foldGutter: false,
                     }}
                     readOnly={true}
                     extensions={[
