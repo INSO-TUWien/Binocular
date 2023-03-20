@@ -73,6 +73,12 @@ module.exports = {
         include: [path.resolve(__dirname, 'node_modules')],
         loader: 'file-loader',
       },
+      {
+        test: /\.m?js/,
+        resolve: {
+          fullySpecified: false,
+        },
+      },
     ],
   },
   plugins: [
@@ -82,6 +88,8 @@ module.exports = {
     }),
     new webpack.ProvidePlugin({
       React: 'react',
+    }),
+    new webpack.ProvidePlugin({
       process: 'process/browser',
     }),
     new webpack.LoaderOptionsPlugin({ debug: true }),

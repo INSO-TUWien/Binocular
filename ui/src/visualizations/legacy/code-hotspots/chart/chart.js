@@ -2,6 +2,9 @@
 
 import React from 'react';
 import CodeMirror from '@uiw/react-codemirror';
+import { loadLanguage } from '@uiw/codemirror-extensions-langs';
+import { lineNumbers } from '@codemirror/view';
+import { Compartment } from '@codemirror/state';
 import styles from '../styles.scss';
 
 import '../css/codeMirror.css';
@@ -157,6 +160,8 @@ export default class CodeHotspots extends React.PureComponent {
         }
       }
     }
+    const lang = ModeSwitcher.modeFromExtension(this.state.path.split('.').pop());
+    const compartment = new Compartment();
 
     return (
       <div className={styles.w100}>
@@ -301,11 +306,12 @@ export default class CodeHotspots extends React.PureComponent {
                   basicSetup={{
                     highlightActiveLineGutter: false,
                   }}
+                  readOnly={true}
+                  extensions={[
+                    loadLanguage(lang),
+                    compartment.of(lineNumbers({ formatNumber: this.getFormatNumber(this.state.filteredData.firstLineNumber) })),
+                  ]}
                   options={{
-                    mode: ModeSwitcher.modeFromExtension(this.state.path.split('.').pop()),
-                    theme: 'default',
-                    lineNumbers: true,
-                    readOnly: true,
                     firstLineNumber: this.state.filteredData.firstLineNumber,
                   }}
                 />
@@ -325,11 +331,12 @@ export default class CodeHotspots extends React.PureComponent {
                     basicSetup={{
                       highlightActiveLineGutter: false,
                     }}
+                    readOnly={true}
+                    extensions={[
+                      loadLanguage(lang),
+                      compartment.of(lineNumbers({ formatNumber: this.getFormatNumber(this.state.filteredData.firstLineNumber) })),
+                    ]}
                     options={{
-                      mode: ModeSwitcher.modeFromExtension(this.state.path.split('.').pop()),
-                      theme: 'default',
-                      lineNumbers: true,
-                      readOnly: true,
                       firstLineNumber: this.state.filteredData.firstLineNumber,
                     }}
                   />
@@ -531,5 +538,9 @@ export default class CodeHotspots extends React.PureComponent {
 
   getAllBranches() {
     return BluebirdPromise.resolve(Database.getAllBranches()).then((resp) => resp.branches.data);
+  }
+
+  getFormatNumber(lineNumberOffset) {
+    return (n, s) => (lineNumberOffset + n - 1).toString();
   }
 }
