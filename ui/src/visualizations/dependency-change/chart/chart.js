@@ -70,7 +70,8 @@ export default class DependencyChanges extends React.PureComponent {
       resultDependencies: [],
       packageJsons: {},
       commits: [],
-      selectedDep: undefined
+      selectedDep: undefined,
+      firstCommit: undefined
     };
 
     this.combinedColumnData = {};
@@ -133,7 +134,7 @@ export default class DependencyChanges extends React.PureComponent {
                 <div className={styles.chartLine}>
                   <div className={cx(styles.text, 'label')}>{ this.state.selectedDep }</div>
                   <div className={styles.chart}>
-                    <TimeLineComponent dep={ this.state.selectedDep } data={ this.state.commits }/>
+                    <TimeLineComponent start={this.state.firstCommit} dep={ this.state.selectedDep } data={ this.state.commits }/>
                   </div>
                 </div>
               ) : null }
@@ -324,6 +325,7 @@ export default class DependencyChanges extends React.PureComponent {
             this.state.fileURL.lastIndexOf(".") + 1,
             this.state.fileURL.length
           );
+          this.getFirstCommit();
           this.getDependencies(this.state.code, type);
         }
       }.bind(this);
@@ -338,6 +340,21 @@ export default class DependencyChanges extends React.PureComponent {
 
       xhr.send(null);
     }
+  }
+
+  getFirstCommit() {
+      var http = new XMLHttpRequest();
+
+      http.addEventListener('load', () => {
+        const data = JSON.parse(http.responseText);
+        this.setState({
+          firstCommit: data
+        });
+        console.log(data);
+      });
+      
+      http.open("GET", "/api/firstCommit");
+      http.send();
   }
 
   requestFileStructure() {

@@ -17,6 +17,10 @@ export default class TimeLineComponent extends React.PureComponent {
         
         let data = [];
 
+        let startDate = new Date(this.props.start.date);
+        startDate.setFullYear(startDate.getFullYear() - 1);
+
+
         for(const commit of this.props.data){
             data.push({date: new Date(commit.date), value: 0, label: commit.version, committer: commit.committer});
         }
@@ -26,7 +30,7 @@ export default class TimeLineComponent extends React.PureComponent {
 
         const xScale = d3
             .scaleTime()
-            .domain([new Date(2015,0,1), new Date()])
+            .domain([startDate, new Date()])
             .range([0,width]);
       
 
@@ -93,6 +97,7 @@ export default class TimeLineComponent extends React.PureComponent {
         
      
         const circles = document.querySelectorAll(".timeLine circle");
+        circles.item(0).style.fill = 'green';
         circles.forEach(elem => {
           const textSelection = elem.querySelector("text");
           elem.parentNode.insertBefore(textSelection, elem.nextSibling);

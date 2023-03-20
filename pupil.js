@@ -71,6 +71,8 @@ app.get('/api/commits', require('./lib/endpoints/get-commits.js'));
 app.get('/api/config', require('./lib/endpoints/get-config.js'));
 app.get('/api/fileSourceCode', require('./lib/endpoints/get-fileSourceCode.js'));
 app.get('/api/commitsPackage', require('./lib/endpoints/get-commits-package-json.js'));
+app.get('/api/firstCommit', require('./lib/endpoints/get-first-commit.js'));
+
 app.post('/api/ast', require('./lib/endpoints/get-dependencies.js'));
 
 
