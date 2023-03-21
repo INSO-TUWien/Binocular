@@ -36,6 +36,8 @@ function Segment( { rad, startPercent, endPercent, devName, devData, devColor } 
     const ownershipArcRef = useRef(null)
     const additionsTextArcRef = useRef(null)
     const devNameArcRef = useRef(null)
+    const devNameTextRef = useRef(null)
+    const additionsTextRef = useRef(null)
 
 
     // ######################## D3 PATHS ########################
@@ -47,6 +49,7 @@ function Segment( { rad, startPercent, endPercent, devName, devData, devColor } 
     const [ownershipArc, setOwnershipArc] = useState(d3.arc().innerRadius(0).outerRadius(0).startAngle(0).endAngle(0))
     const [additionsTextArc, setAdditionsTextArc] = useState(d3.arc().innerRadius(0).outerRadius(0).startAngle(0).endAngle(0))
     const [devNameArc, setDevNameArc] = useState(d3.arc().innerRadius(0).outerRadius(0).startAngle(0).endAngle(0))
+    const [devNameCoordinates, setDevNameCoordiantes] = useState([0,0])
     const [animationFlag, setAnimationFlag] = useState(false)
 
 
@@ -118,20 +121,23 @@ function Segment( { rad, startPercent, endPercent, devName, devData, devColor } 
         dispatch(setDetails(devName))
     }
 
-    //smoothly animate the d3 components when their size changes
-    const animate = (ref, newAttribute) => {
+    //smoothly animate the d3 components
+    //attributeNames and newAttributes should both be arrays
+    const animate = (ref, attributeNames, newAttributes) => {
         //dont animate right at the start. Looks weird.
-        if(!readyToAnimate) {
-            d3.select(ref.current)
-                .attr('d', newAttribute.toString());
-            return
+        let selection = d3.select(ref.current)
+
+        //anly animate a smooth transition if the flag is set
+        if(readyToAnimate) {
+            selection = selection.transition().duration(animationDuration)
         }
 
-        //smoothly animate the transition when segment grows or shrinks
-        d3.select(ref.current)
-            .transition()
-            .duration(animationDuration)
-            .attr('d', newAttribute.toString());
+        const length = Math.min(attributeNames.length, newAttributes.length)
+        for (let i = 0; i < length; i++) {
+            const name = attributeNames[i]
+            const value = newAttributes[i]   
+            selection = selection.attr(name, value);
+        }
     }
 
     //Is called when the size of the segment changes.
@@ -154,14 +160,18 @@ function Segment( { rad, startPercent, endPercent, devName, devData, devColor } 
     //is called when the animation flag changes.
     //this means that the d3 components have changed and need to be animated to display their new state.
     useEffect(() => {
-        animate(segmentRef, circleSegment)
-        animate(contourRef, circleSegment)
-        animate(goodCommitsArcRef, goodCommitsArc)
-        animate(badCommitsArcRef, badCommitsArc)
-        animate(additionsArcRef, additionsArc)
-        animate(ownershipArcRef, ownershipArc)
-        animate(additionsTextArcRef, additionsTextArc)
-        animate(devNameArcRef, devNameArc)
+        animate(segmentRef, ['d'], [circleSegment.toString()])
+        animate(contourRef, ['d'], [circleSegment])
+        animate(goodCommitsArcRef, ['d'], [goodCommitsArc])
+        animate(badCommitsArcRef, ['d'], [badCommitsArc])
+        animate(additionsArcRef, ['d'], [additionsArc])
+        animate(ownershipArcRef, ['d'], [ownershipArc])
+        animate(additionsTextArcRef, ['d'], [additionsTextArc])
+        animate(devNameArcRef, ['d'], [devNameArc])
+        animate(devNameTextRef, ['x', 'y'], devNameCoordinates)
+        
+        //text fades in when segment is focused
+        animate(additionsTextRef, ['opacity'], focus ? [1] : [0])
 
         //allow animations after first time of displaying the chart
         if(radius !== 0 && !readyToAnimate) {
@@ -296,14 +306,17 @@ function Segment( { rad, startPercent, endPercent, devName, devData, devColor } 
 
     // ######################## DEV NAME OUTSIDE OF SEGMENT ########################
 
-    //TODO: for some reason this does not work when devNameCoordinates is a local state and is changed inside the setDevNamePath function.
-    //in case segment is small, get the coordinates for the point in between startP end endP, just outside the segment.
-    //used as anchor point for the text
-    const coordinatesRadius = radius + (buildWeight * (goodCommits/commitsNumber)) + (radius * 0.06)
-    const devNameCoordinates = getCoordinatesForPercent((coordinatesRadius), middleAngle)
+    
 
     const setDevNamePath = () => {
-        //at which radius should the dev name be placed
+
+
+        //in case segment is small, get the coordinates for the point in between startP end endP, just outside the segment.
+        //used as anchor point for the text
+        const coordinatesRadius = radius + (buildWeight * (goodCommits/commitsNumber)) + (radius * 0.06)
+        setDevNameCoordiantes(getCoordinatesForPercent((coordinatesRadius), middleAngle))
+
+        //otherwise, show text in an arc outside of the segment
         const goodCommitsRadius = radius + (buildWeight * (goodCommits/commitsNumber))
         const devNameRadius = goodCommitsRadius + (radius * 0.06)
 
@@ -344,8 +357,7 @@ function Segment( { rad, startPercent, endPercent, devName, devData, devColor } 
 
             {smallSegment &&
                 <text
-                x={devNameCoordinates[0]}
-                y={devNameCoordinates[1]}
+                ref={devNameTextRef}
                 textAnchor={textAnchorStart ? "start" : "end"}
                 alignmentBaseline="middle">
                     {displayName}
@@ -388,7 +400,6 @@ function Segment( { rad, startPercent, endPercent, devName, devData, devColor } 
                 />
 
                 {/*additions number outside additions/ownership arc. Only display this when mouse hovers on segment*/}
-                {focus &&
                 <g>
                     <defs>
                         <path
@@ -396,7 +407,8 @@ function Segment( { rad, startPercent, endPercent, devName, devData, devColor } 
                         id = {devName.replace(/\s/g, '') + "_additionsPath"}
                         />
                     </defs>
-                    <text>
+                    <text
+                        ref={additionsTextRef}>
                         <textPath
                         href={"#" + devName.replace(/\s/g, '') + "_additionsPath"}
                         startOffset="25%"
@@ -406,7 +418,6 @@ function Segment( { rad, startPercent, endPercent, devName, devData, devColor } 
                         </textPath>
                     </text>
                 </g>
-                }
 
                 {/*bad commits arc*/}
                 <path
