@@ -39,6 +39,7 @@ const ProgressBar = (props) => {
   const total = pieData.reduce((t, d) => t + d.total, 0);
   const processed = pieData.reduce((t, d) => t + d.processed, 0);
 
+  if (props.offlineMode) return null;
   return (
     <div className={styles.hoverTarget}>
       <svg width="100%" height="100%" viewBox="0 0 42 42" className={styles.donut}>

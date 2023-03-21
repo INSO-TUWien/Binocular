@@ -68,6 +68,7 @@ Database.checkBackendConnection().then((connection) => {
           isFetching: false,
           lastFetched: null,
           isShown: false,
+          offlineMode: false,
         },
       },
       applyMiddleware(socketIo, saga, logger)
@@ -95,6 +96,7 @@ Database.checkBackendConnection().then((connection) => {
           isFetching: false,
           lastFetched: null,
           isShown: false,
+          offlineMode: true,
         },
       },
       applyMiddleware(saga, logger)
