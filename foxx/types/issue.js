@@ -101,8 +101,8 @@ module.exports = new gql.GraphQLObjectType({
                 RETURN DOCUMENT(CONCAT("commits/", mention.commit))
               )
               FILTER commit != NULL
-              FILTER DATE_TIMESTAMP(commit.date) >= DATE_TIMESTAMP(${args.since})
-              FILTER DATE_TIMESTAMP(commit.date) <= DATE_TIMESTAMP(${args.until})
+              FILTER ${args.since} == NULL || DATE_TIMESTAMP(commit.date) >= DATE_TIMESTAMP(${args.since})
+              FILTER ${args.until} == NULL || DATE_TIMESTAMP(commit.date) <= DATE_TIMESTAMP(${args.until})
               ${limit}
               RETURN commit`,
       }),
