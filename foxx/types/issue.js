@@ -90,6 +90,10 @@ module.exports = new gql.GraphQLObjectType({
       commits: paginated({
         type: require('./commit.js'),
         description: 'All commits mentioning this issue',
+        args: {
+          since: { type: Timestamp },
+          until: { type: Timestamp },
+        },
         query: (issue, args, limit) => aql`
           FOR commit IN (
               FOR mention IN ${issue.mentions || []}
@@ -97,6 +101,8 @@ module.exports = new gql.GraphQLObjectType({
                 RETURN DOCUMENT(CONCAT("commits/", mention.commit))
               )
               FILTER commit != NULL
+              FILTER DATE_TIMESTAMP(commit.date) >= DATE_TIMESTAMP(${args.since})
+              FILTER DATE_TIMESTAMP(commit.date) <= DATE_TIMESTAMP(${args.until})
               ${limit}
               RETURN commit`,
       }),
