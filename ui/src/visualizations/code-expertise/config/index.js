@@ -10,7 +10,7 @@ import FilePicker from './filePicker/index.js';
 import styles from "../styles.scss"
 import { graphQl } from '../../../utils';
 import { endpointUrl } from '../../../utils';
-import { setActiveIssue, setMode, setCurrentBranch, setActiveFiles, setFilterMergeCommits } from '../sagas'
+import { setActiveIssue, setMode, setCurrentBranch, setActiveFiles, setFilterMergeCommits, setOnlyDisplayOwnership } from '../sagas'
 import { getBranches } from '../sagas/helper.js';
 
 export default () => {
@@ -37,12 +37,17 @@ export default () => {
     dispatch(setFilterMergeCommits(isChecked))
   }
 
+  const onSetOnlyDisplayOwnership = (isChecked) => {
+    dispatch(setOnlyDisplayOwnership(isChecked))
+  }
+
   //global state from redux store
   const expertiseState = useSelector((state) => state.visualizations.codeExpertise.state)
   const currentMode = expertiseState.config.mode
   const currentBranch = expertiseState.config.currentBranch
   const activeIssueId = expertiseState.config.activeIssueId
   const filterMergeCommits = expertiseState.config.filterMergeCommits
+  const onlyDisplayOwnership = expertiseState.config.onlyDisplayOwnership
   
   //local state
   let [branchOptions, setBranchOptions] = useState([])
@@ -158,6 +163,18 @@ export default () => {
               onChange={(event) => onSetFilterMergeCommits(event.target.checked)}
             />
             <span>Exclude merge commits</span>
+          </div>
+        </div>
+
+        <div className="field">
+          <div className="control">
+            <label className="label">Display Settings:</label>
+            <input
+              type="checkbox"
+              checked={onlyDisplayOwnership}
+              onChange={(event) => onSetOnlyDisplayOwnership(event.target.checked)}
+            />
+            <span>Only display Code Ownership</span>
           </div>
         </div>
 

@@ -54,6 +54,14 @@ const Chart = () => {
       return sum + adds.additions
     }, 0)
 
+    const linesOwnedTotal = _.reduce(data.devData, (sum, data) => {
+      if (data.linesOwned) {
+        return sum + data.linesOwned
+      } else {
+        return sum
+      }
+    }, 0)
+
     //get colors
     const devColors = getChartColors('spectral', _.range(0, Object.entries(data.devData).length));
 
@@ -64,11 +72,22 @@ const Chart = () => {
       const name = item[0]
       const devData = item[1]
       const devAdditions = devData.additions
+      const devLinesOwned = devData.linesOwned
 
       //at which point in a circle should the segment start
       const startPercent = totalPercent
-      //adds the percentage of additions of the dev relative to all additions to the current percentage state
-      totalPercent += (devAdditions/additionsTotal)
+
+      //adds the percentage of additions/ownership of the dev relative to all additions to the current percentage state
+      if (config.onlyDisplayOwnership) {
+        //dont display a segment for a dev who does not own lines
+        if (!devLinesOwned) {
+          return
+        }
+        totalPercent += (devLinesOwned/linesOwnedTotal)
+      } else {
+        totalPercent += (devAdditions/additionsTotal)
+      }
+      
       //at which point in a circle should the segment end
       const endPercent = totalPercent
 
@@ -86,7 +105,7 @@ const Chart = () => {
 
     setSegments(segments)
 
-  }, [data, radius])
+  }, [data, radius, config.onlyDisplayOwnership])
 
 
   if(config.currentBranch == null) {

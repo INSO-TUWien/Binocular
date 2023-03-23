@@ -11,6 +11,7 @@ function Segment( { rad, startPercent, endPercent, devName, devData, devColor } 
 
     //global state
     const globalDetailsDevState = useSelector((state) => state.visualizations.codeExpertise.state.config.details)
+    const onlyDisplayOwnership = useSelector((state) => state.visualizations.codeExpertise.state.config.onlyDisplayOwnership)
 
     //local state
     const [isDevSelected, setIsDevSelected] = useState(globalDetailsDevState === devName)
@@ -99,6 +100,14 @@ function Segment( { rad, startPercent, endPercent, devName, devData, devColor } 
     }
 
 
+    //additions/ownership arc text
+    let additionsText = "" + (devData.linesOwned !== undefined ? devData.linesOwned : "0")
+    if(!onlyDisplayOwnership) {
+        additionsText = additionsText + "/" + (devData.additions !== undefined ? devData.additions : "0")
+    }
+
+
+
     // ######################## FUNCTIONS ########################
 
     //enlarge segment and show additional information in the chart if mouse hovers over segment
@@ -124,7 +133,6 @@ function Segment( { rad, startPercent, endPercent, devName, devData, devColor } 
     //smoothly animate the d3 components
     //attributeNames and newAttributes should both be arrays
     const animate = (ref, attributeNames, newAttributes) => {
-        //dont animate right at the start. Looks weird.
         let selection = d3.select(ref.current)
 
         //anly animate a smooth transition if the flag is set
@@ -191,12 +199,12 @@ function Segment( { rad, startPercent, endPercent, devName, devData, devColor } 
     //when radius changes, update d3 components with a smooth animation
     useEffect(() => {
         setD3Components(true)
-    }, [radius])
+    }, [radius, startPercent, endPercent])
 
     //when dev data changes (for example when other files were selected), update components but without a smooth animation
     useEffect(() => {
         setD3Components(false)
-    }, [devData, startPercent, endPercent])
+    }, [devData])
 
     //update local state when global state changes
     useEffect(() => {
@@ -235,7 +243,7 @@ function Segment( { rad, startPercent, endPercent, devName, devData, devColor } 
     //good commits are shown in an arc outside the circle segment, bad commits inside.
     //this displays the ratio of good/bad commits to the number of total commits
     //this sets the bounds for this section of the chart
-    const buildWeight = radius * 0.35
+    const buildWeight = radius * 0.2
     const commitsNumber = devData.commits.length
     const goodCommits = devData.commits.filter(c => c.build == 'success').length
     const badCommits = devData.commits.filter(c => c.build != null && c.build != 'success').length
@@ -265,9 +273,9 @@ function Segment( { rad, startPercent, endPercent, devName, devData, devColor } 
     // ######################## ADDITIONS AND OWNERSHIP ARCS ########################
     
     const setAdditionsPath = () => {
-        const additionsArcWeight = radius / 20
-        const additionsArcInnerRadius = radius * 0.6 - additionsArcWeight
-        const additionsArcOuterRadius = radius * 0.6 + additionsArcWeight
+        const additionsArcWeight = radius / 12
+        const additionsArcInnerRadius = radius * 0.7 - additionsArcWeight
+        const additionsArcOuterRadius = radius * 0.7 + additionsArcWeight
 
         setAdditionsArc(
             d3.arc()
@@ -276,13 +284,20 @@ function Segment( { rad, startPercent, endPercent, devName, devData, devColor } 
             .startAngle(arcStartAngle)
             .endAngle(arcEndAngle))
 
-        let ownershipEndAngle = arcStartAngle
-        if(devData.linesOwned) {
-            ownershipEndAngle += getAngle((endPercent - startPercent) * (devData.linesOwned / devData.additions))
-            if(ownershipEndAngle > arcEndAngle) {
-                ownershipEndAngle = arcEndAngle
+        let ownershipEndAngle
+        
+        if(onlyDisplayOwnership) {
+            ownershipEndAngle = arcEndAngle
+        } else {
+            ownershipEndAngle = arcStartAngle
+            if(devData.linesOwned) {
+                ownershipEndAngle += getAngle((endPercent - startPercent) * (devData.linesOwned / devData.additions))
+                if(ownershipEndAngle > arcEndAngle) {
+                    ownershipEndAngle = arcEndAngle
+                }
             }
         }
+        
         
         setOwnershipArc(
             d3.arc()
@@ -292,7 +307,7 @@ function Segment( { rad, startPercent, endPercent, devName, devData, devColor } 
             .endAngle(ownershipEndAngle)
         )
 
-        const additionsTextArcRadius = additionsArcOuterRadius + additionsArcWeight
+        const additionsTextArcRadius = additionsArcInnerRadius + additionsArcWeight
 
         setAdditionsTextArc(
             d3.arc()
@@ -413,8 +428,12 @@ function Segment( { rad, startPercent, endPercent, devName, devData, devColor } 
                         href={"#" + devName.replace(/\s/g, '') + "_additionsPath"}
                         startOffset="25%"
                         textAnchor="middle"
-                        alignmentBaseline="middle">
-                            {devData.linesOwned ? devData.linesOwned : '0'}/{devData.additions ? devData.additions : '0'}
+                        alignmentBaseline="middle"
+                        stroke={devColorDark}
+                        fill="white"
+                        strokeWidth={3}
+                        paintOrder="stroke">
+                            {additionsText}
                         </textPath>
                     </text>
                 </g>
