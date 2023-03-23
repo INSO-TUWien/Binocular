@@ -91,20 +91,29 @@ module.exports = new gql.GraphQLObjectType({
         type: require('./commit.js'),
         description: 'All commits mentioning this issue',
         args: {
-          since: { type: Timestamp },
-          until: { type: Timestamp },
+          since: { type: Timestamp, required: false },
+          until: { type: Timestamp, required: false },
         },
-        query: (issue, args, limit) => aql`
-          FOR commit IN (
+        query: (issue, args, limit) => {
+          let query = aql`
+            FOR commit IN (
               FOR mention IN ${issue.mentions || []}
                 FILTER mention.commit != NULL
                 RETURN DOCUMENT(CONCAT("commits/", mention.commit))
-              )
-              FILTER commit != NULL
-              FILTER ${args.since} == NULL || DATE_TIMESTAMP(commit.date) >= DATE_TIMESTAMP(${args.since})
-              FILTER ${args.until} == NULL || DATE_TIMESTAMP(commit.date) <= DATE_TIMESTAMP(${args.until})
-              ${limit}
-              RETURN commit`,
+            )
+            FILTER commit != NULL`;
+
+          if (args.since !== undefined) {
+            query = aql`${query} FILTER DATE_TIMESTAMP(commit.date) >= DATE_TIMESTAMP(${args.since})`;
+          }
+
+          if (args.until !== undefined) {
+            query = aql`${query} FILTER DATE_TIMESTAMP(commit.date) <= DATE_TIMESTAMP(${args.until})`;
+          }
+
+          query = aql`${query} ${limit} RETURN commit`;
+          return query;
+        },
       }),
       mentions: {
         type: new gql.GraphQLList(gql.GraphQLString),
