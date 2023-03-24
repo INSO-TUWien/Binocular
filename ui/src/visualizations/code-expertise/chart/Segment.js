@@ -5,7 +5,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import { setDetails } from '../sagas'
 
 
-function Segment( { rad, startPercent, endPercent, devName, devData, devColor } ) {
+function Segment( { rad, startPercent, endPercent, devName, devData, devColor, maxCommitsPerDev } ) {
 
     const dispatch = useDispatch()
 
@@ -23,8 +23,9 @@ function Segment( { rad, startPercent, endPercent, devName, devData, devColor } 
     // ######################## COLORS ########################
 
     const devColorDark = chroma(devColor).darken().hex()
-    const goodCommitsColor = chroma('green').brighten().hex()
-    const badCommitsColor = chroma('red').brighten().hex()
+    const devColorLight = chroma(devColor).brighten().hex()
+    const goodCommitsColor = chroma('green').brighten().brighten().hex()
+    const badCommitsColor = chroma('red').brighten().brighten().hex()
 
 
     // ######################## D3 REFERENCES ########################
@@ -39,6 +40,7 @@ function Segment( { rad, startPercent, endPercent, devName, devData, devColor } 
     const devNameArcRef = useRef(null)
     const devNameTextRef = useRef(null)
     const additionsTextRef = useRef(null)
+    const commitsRef = useRef(null)
 
 
     // ######################## D3 PATHS ########################
@@ -50,6 +52,7 @@ function Segment( { rad, startPercent, endPercent, devName, devData, devColor } 
     const [ownershipArc, setOwnershipArc] = useState(d3.arc().innerRadius(0).outerRadius(0).startAngle(0).endAngle(0))
     const [additionsTextArc, setAdditionsTextArc] = useState(d3.arc().innerRadius(0).outerRadius(0).startAngle(0).endAngle(0))
     const [devNameArc, setDevNameArc] = useState(d3.arc().innerRadius(0).outerRadius(0).startAngle(0).endAngle(0))
+    const [commitsPath, setCommitsPath] = useState(d3.path())
     const [devNameCoordinates, setDevNameCoordiantes] = useState([0,0])
     const [animationFlag, setAnimationFlag] = useState(false)
 
@@ -153,6 +156,7 @@ function Segment( { rad, startPercent, endPercent, devName, devData, devColor } 
     const setD3Components = (animateSmoothly) => {
         setOuterBorderPath()
         setCommitPath()
+        setInnerCommitsSegment()
         setAdditionsPath()
         setDevNamePath()
 
@@ -172,6 +176,7 @@ function Segment( { rad, startPercent, endPercent, devName, devData, devColor } 
         animate(contourRef, ['d'], [circleSegment])
         animate(goodCommitsArcRef, ['d'], [goodCommitsArc])
         animate(badCommitsArcRef, ['d'], [badCommitsArc])
+        animate(commitsRef, ['d'], [commitsPath])
         animate(additionsArcRef, ['d'], [additionsArc])
         animate(ownershipArcRef, ['d'], [ownershipArc])
         animate(additionsTextArcRef, ['d'], [additionsTextArc])
@@ -199,7 +204,7 @@ function Segment( { rad, startPercent, endPercent, devName, devData, devColor } 
     //when radius changes, update d3 components with a smooth animation
     useEffect(() => {
         setD3Components(true)
-    }, [radius, startPercent, endPercent])
+    }, [radius, startPercent, endPercent, maxCommitsPerDev])
 
     //when dev data changes (for example when other files were selected), update components but without a smooth animation
     useEffect(() => {
@@ -319,6 +324,19 @@ function Segment( { rad, startPercent, endPercent, devName, devData, devColor } 
     }
 
 
+    // ######################## COMMITS ########################
+
+    const setInnerCommitsSegment = () => {
+        const newRadius = radius/3 + radius * 0.2 * (devData.commits.length / maxCommitsPerDev)
+
+        const newCommitsPath = d3.path()
+        newCommitsPath.moveTo(0,0)
+        newCommitsPath.arc(0, 0, newRadius, getAngle(startPercent), getAngle(endPercent))
+        newCommitsPath.closePath()
+
+        setCommitsPath(newCommitsPath)
+    }
+
     // ######################## DEV NAME OUTSIDE OF SEGMENT ########################
 
     
@@ -414,7 +432,7 @@ function Segment( { rad, startPercent, endPercent, devName, devData, devColor } 
                 fill={devColorDark}
                 />
 
-                {/*additions number outside additions/ownership arc. Only display this when mouse hovers on segment*/}
+                {/*additions number in additions/ownership arc. Only display this when mouse hovers on segment*/}
                 <g>
                     <defs>
                         <path
@@ -448,6 +466,13 @@ function Segment( { rad, startPercent, endPercent, devName, devData, devColor } 
                 <path
                 ref={goodCommitsArcRef}
                 fill={goodCommitsColor}
+                />
+
+                {/*inner commits path*/}  
+                <path
+                id={devName + "_commitsPath"}
+                ref={commitsRef}
+                fill={devColor}
                 />
 
                 {/*outer border without fill, just for contours*/}  

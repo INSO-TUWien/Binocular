@@ -62,6 +62,17 @@ const Chart = () => {
       }
     }, 0)
 
+    //get the maximum number of commits over all currently relevant devs
+    let maxCommitsPerDev = 0;
+    Object.entries(data.devData).map((item, index) => {
+      const data = item[1]
+      const commits = data.commits.length
+      if(commits > maxCommitsPerDev) {
+        maxCommitsPerDev = commits
+      }
+    })
+
+
     //get colors
     const devColors = getChartColors('spectral', _.range(0, Object.entries(data.devData).length));
 
@@ -99,7 +110,8 @@ const Chart = () => {
         endPercent={endPercent} 
         devName={name}
         devData={devData}
-        devColor={devColors[index]}/>
+        devColor={devColors[index]}
+        maxCommitsPerDev={maxCommitsPerDev}/>
       )
     })
 

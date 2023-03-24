@@ -24,7 +24,7 @@ export default handleActions(
     activeFiles: [],
     mode: 'issues',
     details: null,
-    filterMergeCommits: false,
+    filterMergeCommits: true,
     onlyDisplayOwnership: false,
   }
 );
