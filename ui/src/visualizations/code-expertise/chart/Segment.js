@@ -468,11 +468,20 @@ function Segment( { rad, startPercent, endPercent, devName, devData, devColor, m
                 fill={goodCommitsColor}
                 />
 
-                {/*inner commits path*/}  
+                {/*inner commits path with dot-pattern*/}
+                <defs>
+                    <pattern id={`dots_${devName.replace(/\s/g, '')}`} width="100" height="100" patternUnits="userSpaceOnUse" patternTransform="scale(0.07)">
+                        <circle id={`circle_${devName.replace(/\s/g, '')}`} data-color="outline" fill="none" stroke={devColor} stroke-width="67.36" r=".5"></circle>
+                        <use href={`#circle_${devName.replace(/\s/g, '')}`} y="100"></use>
+                        <use href={`#circle_${devName.replace(/\s/g, '')}`} x="100"></use>
+                        <use href={`#circle_${devName.replace(/\s/g, '')}`} x="100" y="100"></use>
+                        <use href={`#circle_${devName.replace(/\s/g, '')}`} x="50" y="50"></use>
+                    </pattern>
+                </defs>
                 <path
                 id={devName + "_commitsPath"}
                 ref={commitsRef}
-                fill={devColor}
+                fill={`url(#dots_${devName.replace(/\s/g, '')})`}
                 />
 
                 {/*outer border without fill, just for contours*/}  
