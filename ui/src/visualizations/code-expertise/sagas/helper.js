@@ -132,6 +132,7 @@ export function getAllCommits() {
           data {
             sha,
             branch,
+            history,
             message,
             signature,
             webUrl,
@@ -163,38 +164,6 @@ export function getCommitsForBranch(branch, allCommits) {
 
   let latestCommitSha = branch.latestCommit;
   const latestCommit = allCommits.filter(commit => commit.sha == latestCommitSha)[0]
-
-  //array to accumulate commits
-  //race conditions should be no problem since recursive calls will not be multi-threaded
-  let r = []
-
-  function recursiveFun(currentCommit) {
-
-    //if this commit is already in r, then c's parents are also already present. return in this case
-    if(r.filter(c => c.sha == currentCommit.sha).length > 0) {
-      return
-    }
-
-    //if commit is not present, add it
-    r = r.concat([currentCommit])
-      
-    //if commit has no parents, this 'branch' of the tree is done. return
-    if(!currentCommit.parents) {
-      return
-    }
-
-    let parentsSha = currentCommit.parents.split(",")
-    for(const sha of parentsSha) {
-      let pCommit = allCommits.filter(c => c.sha == sha)
-      if(pCommit.length > 0) {
-        recursiveFun(pCommit[0])
-      }
-    }
-    return
-  }
-  
-  //start the recursive function with the latest commit of the desired branch
-  recursiveFun(latestCommit)
-
-  return r
+  const history = latestCommit.history.split(',')
+  return allCommits.filter(c => _.includes(history, c.sha))
 }

@@ -19,11 +19,11 @@ const ModuleLine = ({ moduleName, children, initiallyExpanded = false }) => {
 
     if(check) {
       //add path to global state
-      dispatch(setActiveFiles(globalActiveFiles.concat(files)))
+      dispatch(setActiveFiles(unique(globalActiveFiles.concat(files))))
 
     } else if (!check) {
       //remove file from global list of checked Files
-      dispatch(setActiveFiles(globalActiveFiles.filter(fileName => !files.includes(fileName))))
+      dispatch(setActiveFiles(unique(globalActiveFiles.filter(fileName => !files.includes(fileName)))))
     }
   }
   
@@ -145,5 +145,9 @@ const ModuleLine = ({ moduleName, children, initiallyExpanded = false }) => {
     </div>
   );
 };
+
+const unique = (array) => {
+  return [...new Set(array)]
+}
 
 export default ModuleLine;
