@@ -13,7 +13,7 @@ function threadWarn(thread) {
 }
 
 /**
- * Main entry point of the pupil application
+ * Main entry point of the binocular application
  */
 
 const ctx = require('./lib/context.js');
@@ -115,7 +115,7 @@ async function startDatabase(context, gateway) {
   const repository = await Repository.fromPath(ctx.targetPath);
 
   context.repo = repository;
-  config.setSource(repository.pathFromRoot('.pupilrc'));
+  config.setSource(repository.pathFromRoot('.binocularrc'));
 
   if (databaseConnection === null) {
     // configure everything in the context
@@ -450,7 +450,7 @@ async function stopIndexers(gateway) {
  */
 function ensureDb(repo, context) {
   return context.db
-    .ensureDatabase('pupil-' + repo.getName())
+    .ensureDatabase('binocular-' + repo.getName())
     .catch((e) => {
       throw new DatabaseError(e.message);
     })
@@ -461,7 +461,7 @@ function ensureDb(repo, context) {
     })
     .then(() => {
       return Promise.join(
-        context.db.ensureService(path.join(__dirname, 'foxx'), '/pupil-ql'),
+        context.db.ensureService(path.join(__dirname, 'foxx'), '/binocular-ql'),
         Commit.ensureCollection(),
         Language.ensureCollection(),
         File.ensureCollection(),
