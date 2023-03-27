@@ -81,7 +81,7 @@ A sample configuration file looks like this:
     }
   },
   "arango": {
-    "host": "10.0.0.127",
+    "host": "127.0.0.1",
     "port": 8529,
     "user": "YOUR_ARANGODB_USER",
     "password": "YOUR_ARANGODB_PASSWORD"
