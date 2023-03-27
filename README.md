@@ -13,7 +13,7 @@ via a web-interface.
 
 ## Dependencies
 
-* node.js 16
+* node.js 18
 * ArangoDB (tested with 3.8.2)
 
 ## Installation
@@ -81,7 +81,7 @@ A sample configuration file looks like this:
     }
   },
   "arango": {
-    "host": "localhost",
+    "host": "127.0.0.1",
     "port": 8529,
     "user": "YOUR_ARANGODB_USER",
     "password": "YOUR_ARANGODB_PASSWORD"
