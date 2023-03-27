@@ -9,6 +9,7 @@ import moment from 'moment';
 import { fetchFactory, timestampedActionFactory, mapSaga } from '../../../../sagas/utils.js';
 import { getChartColors } from '../../../../utils';
 import Database from '../../../../database/database';
+import fetchRelatedCommits from './fetchRelatedCommits.js';
 
 export const setOverlay = createAction('SET_OVERLAY');
 export const setHighlightedIssue = createAction('SET_HIGHLIGHTED_ISSUE');
@@ -78,7 +79,7 @@ function* watchRefresh() {
 
 function* watchHighlightedIssue() {
   yield takeEvery('SET_HIGHLIGHTED_ISSUE', function* (a) {
-    return yield Database.getRelatedCommitDataOwnershipRiver(a.payload);
+    return yield fetchRelatedCommits(a.payload);
   });
 }
 

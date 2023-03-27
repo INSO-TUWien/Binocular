@@ -13,6 +13,7 @@ const mapStateToProps = (state /*, ownProps*/) => {
   return {
     progress: state.progress,
     showWorkIndicator: dashState.data.isFetching || corState.data.isFetching || hotState.data.isFetching || impactState.data.isFetching,
+    offlineMode: state.config.offlineMode,
   };
 };
 
