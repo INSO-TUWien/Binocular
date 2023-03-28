@@ -4,7 +4,7 @@ import { createAction } from 'redux-actions';
 import { call, put } from 'redux-saga/effects';
 
 export function fetchFactory(fn, requestActionCreator, receiveActionCreator, errorActionCreator) {
-  return function*(...args) {
+  return function* (...args) {
     yield put(requestActionCreator());
     let result = null;
     try {
@@ -22,11 +22,15 @@ export function fetchFactory(fn, requestActionCreator, receiveActionCreator, err
 }
 
 export function timestampedActionFactory(action) {
-  return createAction(action, id => id, () => ({ receivedAt: new Date() }));
+  return createAction(
+    action,
+    (id) => id,
+    () => ({ receivedAt: new Date() })
+  );
 }
 
 export function mapSaga(actionCreator) {
-  return function*() {
+  return function* () {
     yield put(actionCreator());
   };
 }

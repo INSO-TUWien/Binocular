@@ -7,7 +7,7 @@ export default class FileBrowser extends React.PureComponent {
   constructor(props) {
     super(props);
     this.state = {
-      filteredData: this.props.files
+      filteredData: this.props.files,
     };
   }
 
@@ -27,7 +27,7 @@ export default class FileBrowser extends React.PureComponent {
     if (pathParts.length === 0) {
       convertedData.push({ name: currElm, type: 'file', url: Url, path: Path });
     } else {
-      let elem = convertedData.find(d => d.name === currElm);
+      let elem = convertedData.find((d) => d.name === currElm);
       if (elem === undefined) {
         elem = { name: currElm, type: 'folder', content: [] };
         this.genPathObjectString(elem.content, pathParts, Url, Path);
@@ -58,7 +58,7 @@ export default class FileBrowser extends React.PureComponent {
             data={this.props.files}
             placeholder={'Search for files!'}
             hint={'-f [term] search file; -t [term] search file type'}
-            onSearchChanged={function(data) {
+            onSearchChanged={function (data) {
               this.setState({ filteredData: data });
             }.bind(this)}
           />
@@ -95,7 +95,7 @@ class FileStruct extends React.PureComponent {
               <div key={data.name}>
                 <button
                   className={styles.button + ' ' + (i % 2 === 0 ? styles.ACEven : styles.ACOdd)}
-                  onClick={e => {
+                  onClick={(e) => {
                     const target = e.currentTarget;
                     const panel = target.nextSibling;
                     if (panel.style.display === 'block') {

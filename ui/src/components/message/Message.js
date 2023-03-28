@@ -10,13 +10,8 @@ export default class Message extends React.Component {
 
     return (
       <article className={cx('message', { [`is-${this.props.style}`]: hasClass })}>
-        {this.props.header &&
-          <div className="message-header">
-            {this.props.header}
-          </div>}
-        <div className="message-body">
-          {this.props.children}
-        </div>
+        {this.props.header && <div className="message-header">{this.props.header}</div>}
+        <div className="message-body">{this.props.children}</div>
       </article>
     );
   }

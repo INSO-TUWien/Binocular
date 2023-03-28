@@ -5,7 +5,7 @@ import { connect } from 'react-redux';
 import styles from './styles.scss';
 import visualizationRegistry from './visualizationRegistry';
 import { setResolution } from './sagas';
-import UniversalConfig from './components/universalConfig';
+import UniversalConfig from './components/universalConfig/universalConfig';
 
 const mapStateToProps = (state /*, ownProps*/) => {
   const dashboardState = state.visualizations.newDashboard.state;

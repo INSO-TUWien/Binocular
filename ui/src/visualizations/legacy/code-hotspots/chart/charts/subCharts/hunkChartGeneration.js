@@ -195,8 +195,8 @@ export default class hunkChartGeneration {
               return d.newLines < d.oldLines
                 ? HUNK_DELETION_COLOR_STROKE
                 : d.newLines > d.oldLines
-                  ? HUNK_ADDITION_COLOR_STROKE
-                  : HUNK_CHANGE_COLOR_STROKE;
+                ? HUNK_ADDITION_COLOR_STROKE
+                : HUNK_CHANGE_COLOR_STROKE;
             });
 
           for (let i = 0; i < lines; i++) {

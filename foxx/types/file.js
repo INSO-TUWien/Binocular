@@ -15,19 +15,19 @@ module.exports = new gql.GraphQLObjectType({
     return {
       id: {
         type: new gql.GraphQLNonNull(gql.GraphQLString),
-        resolve: e => e._key
+        resolve: (e) => e._key,
       },
       path: {
         type: gql.GraphQLString,
-        description: 'The path of the file, relative to the repository root'
+        description: 'The path of the file, relative to the repository root',
       },
       maxLength: {
         type: gql.GraphQLInt,
-        description: 'The maximum number of lines this file ever had over the course of the whole project'
+        description: 'The maximum number of lines this file ever had over the course of the whole project',
       },
       webUrl: {
         type: gql.GraphQLString,
-        description: 'The URL (if available) to the master-version of this file on the ITS'
+        description: 'The URL (if available) to the master-version of this file on the ITS',
       },
       language: {
         type: require('./language'),
@@ -37,7 +37,7 @@ module.exports = new gql.GraphQLObjectType({
           IN
           INBOUND ${file} ${LanguagesToFiles}
             ${limit}
-            RETURN language`
+            RETURN language`,
       },
       commits: paginated({
         type: require('./commit.js'),
@@ -48,8 +48,8 @@ module.exports = new gql.GraphQLObjectType({
           OUTBOUND ${file} ${commitsToFiles}
             ${limit}
             SORT commit.date ASC
-            RETURN commit`
-      })
+            RETURN commit`,
+      }),
     };
-  }
+  },
 });

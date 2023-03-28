@@ -64,7 +64,7 @@ export default class Dashboard extends React.Component {
         0,
         d3.max(this.state.commitData, function (d) {
           return Math.max(d.stats.deletions, d.stats.additions);
-        })
+        }),
       ])
       .range([height / 2, 0]);
     chart.append('g').call(d3.axisLeft(y));
@@ -95,7 +95,7 @@ export default class Dashboard extends React.Component {
         0,
         d3.max(this.state.commitData, function (d) {
           return Math.max(d.stats.deletions, d.stats.additions);
-        })
+        }),
       ])
       .range([height / 2, height]);
     chart.append('g').call(d3.axisLeft(y2));

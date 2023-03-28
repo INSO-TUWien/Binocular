@@ -1,7 +1,7 @@
 /node_modules
 /dist
-.pupil
-.pupilrc
+.binocular
+.binocularrc
 db/
 *.log
 coverage/
@@ -13,3 +13,4 @@ out
 pkg
 .grandle
 /ui/db_export
+/.devcontainer

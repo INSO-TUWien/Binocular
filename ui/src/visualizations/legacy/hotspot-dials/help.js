@@ -4,7 +4,7 @@ import cx from 'classnames';
 
 import styles from './styles.scss';
 
-export default () =>
+export default () => (
   <div className={cx('box', styles.help)}>
     <h1 className="title">Hotspot Dials Help</h1>
     <p>The Hotspot Dials visualization shows an overview of the work that's been done since the project started.</p>
@@ -22,4 +22,5 @@ export default () =>
     <p>The inner dial shows the number of issues per time bucket.</p>
     <h2>Sidebar</h2>
     <p>Use the granularity setting to adjust the size of the time-buckets to hours, weekdays or months.</p>
-  </div>;
+  </div>
+);

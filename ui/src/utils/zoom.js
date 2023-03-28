@@ -7,7 +7,7 @@ export function initialDimensions() {
     width: 0,
     height: 0,
     wMargin: 0,
-    hMargin: 0
+    hMargin: 0,
   };
 }
 
@@ -35,8 +35,8 @@ export function onResizeFactory(wPct, hPct) {
         width,
         height,
         wMargin,
-        hMargin
-      }
+        hMargin,
+      },
     });
   };
 }
@@ -68,7 +68,7 @@ export function onZoomFactory({ constrain = true, margin = 0 } = {}) {
 
   if (constrain) {
     const constrainZoom = constrainZoomFactory(margin);
-    return function(evt) {
+    return function (evt) {
       constrainZoom.call(this, evt.transform);
       updateZoom.call(this, evt);
     };
@@ -93,8 +93,8 @@ export function updateZoomFactory() {
 export function constrainZoomFactory(margin = 0) {
   return function constrainZoom(t) {
     const dims = this.state.dimensions;
-    const [xMin, xMax] = this.scales.x.domain().map(d => this.scales.x(d));
-    const [yMin, yMax] = this.scales.y.domain().map(d => this.scales.y(d));
+    const [xMin, xMax] = this.scales.x.domain().map((d) => this.scales.x(d));
+    const [yMin, yMax] = this.scales.y.domain().map((d) => this.scales.y(d));
 
     if (t.invertX(xMin) < -margin) {
       t.x = -(xMin - margin) * t.k;

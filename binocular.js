@@ -13,7 +13,7 @@ function threadWarn(thread) {
 }
 
 /**
- * Main entry point of the pupil application
+ * Main entry point of the binocular application
  */
 
 const ctx = require('./lib/context.js');
@@ -55,7 +55,7 @@ const LanguageFileConnection = require('./lib/models/LanguageFileConnection');
 const ConfigurationError = require('./lib/errors/ConfigurationError');
 const DatabaseError = require('./lib/errors/DatabaseError');
 const GateWayService = require('./lib/gateway-service');
-const grpc = require('grpc');
+const grpc = require('@grpc/grpc-js');
 const protoLoader = require('@grpc/proto-loader');
 const http = require('http');
 const projectStructureHelper = require('./lib/projectStructureHelper');
@@ -124,7 +124,7 @@ async function startDatabase(context, gateway) {
   const repository = await Repository.fromPath(ctx.targetPath);
 
   context.repo = repository;
-  config.setSource(repository.pathFromRoot('.pupilrc'));
+  config.setSource(repository.pathFromRoot('.binocularrc'));
 
   if (databaseConnection === null) {
     // configure everything in the context
@@ -459,7 +459,7 @@ async function stopIndexers(gateway) {
  */
 function ensureDb(repo, context) {
   return context.db
-    .ensureDatabase('pupil-' + repo.getName())
+    .ensureDatabase('binocular-' + repo.getName())
     .catch((e) => {
       throw new DatabaseError(e.message);
     })
@@ -470,7 +470,7 @@ function ensureDb(repo, context) {
     })
     .then(() => {
       return Promise.join(
-        context.db.ensureService(path.join(__dirname, 'foxx'), '/pupil-ql'),
+        context.db.ensureService(path.join(__dirname, 'foxx'), '/binocular-ql'),
         Commit.ensureCollection(),
         Language.ensureCollection(),
         File.ensureCollection(),

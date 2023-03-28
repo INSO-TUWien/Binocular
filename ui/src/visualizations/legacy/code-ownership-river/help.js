@@ -4,7 +4,7 @@ import cx from 'classnames';
 
 import styles from './styles.scss';
 
-export default () =>
+export default () => (
   <div className={cx('box', styles.help)}>
     <h1 className="title">Code Ownership River Help</h1>
     <p>
@@ -51,4 +51,5 @@ export default () =>
         <i className="fa fa-server" /> Builds overlay: Shows the amount of successful and unsuccessful builds on top of the commits.
       </li>
     </ul>
-  </div>;
+  </div>
+);

@@ -5,14 +5,14 @@ import _ from 'lodash';
 
 export default handleActions(
   {
-    REQUEST_CODE_HOTSPOTS_DATA: state => _.assign({}, state, { isFetching: true }),
+    REQUEST_CODE_HOTSPOTS_DATA: (state) => _.assign({}, state, { isFetching: true }),
     RECEIVE_CODE_HOTSPOTS_DATA: (state, action) => {
       return _.assign({}, state, {
         data: action.payload,
         isFetching: false,
-        receivedAt: action.meta.receivedAt
+        receivedAt: action.meta.receivedAt,
       });
-    }
+    },
   },
   {
     data: {
@@ -20,9 +20,9 @@ export default handleActions(
       branch: 'master',
       files: [],
       branches: [],
-      path: ''
+      path: '',
     },
     lastFetched: null,
-    isFetching: null
+    isFetching: null,
   }
 );

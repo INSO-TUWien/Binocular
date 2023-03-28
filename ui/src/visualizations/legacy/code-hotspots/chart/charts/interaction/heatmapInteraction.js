@@ -2,13 +2,15 @@ import * as d3 from 'd3';
 import hunkChartGeneration from '../subCharts/hunkChartGeneration';
 import heatmapChartGeneration from '../subCharts/heatmapChartGeneration';
 
+const lineHeight = 22.4;
+
 export default class heatmapInteraction {
   static generateHeatmapInteractionLayer(data, lines, importantColumns, currThis, mode, firstLineNumber, displayProps) {
     d3.select('.rowInteraction > *').remove();
     currThis.combinedHeatmapData = data;
     const width = document.getElementById('barChartContainer').clientWidth,
-      height = 24 * lines,
-      margins = { top: 24, right: 0, bottom: 0, left: 0 };
+      height = lineHeight * lines,
+      margins = { top: lineHeight, right: 0, bottom: 0, left: 0 };
     //Setting chart width and adjusting for margins
     const interactionLayer = d3
       .select('.rowInteraction')
@@ -23,25 +25,25 @@ export default class heatmapInteraction {
       interactionLayer
         .append('rect')
         .attr('x', 0)
-        .attr('y', (i - firstLineNumber) * 24)
+        .attr('y', (i - firstLineNumber) * lineHeight)
         .style('fill', 'transparent')
         .attr('width', width)
-        .attr('height', 24)
-        .on('mouseover', function() {
+        .attr('height', lineHeight)
+        .on('mouseover', function () {
           if (displayProps.mainVisualizationMode === 1 && mode === 0) {
             hunkChartGeneration.interact(i);
           } else if (displayProps.mainVisualizationMode === 0) {
             heatmapChartGeneration.interact(i, currThis);
           }
         })
-        .on('mouseout', function() {
+        .on('mouseout', function () {
           if (displayProps.mainVisualizationMode === 1 && mode === 0) {
             hunkChartGeneration.disInteract(i);
           } else if (displayProps.mainVisualizationMode === 0) {
             heatmapChartGeneration.disInteract(currThis);
           }
         })
-        .on('click', function() {
+        .on('click', function () {
           if (displayProps.mainVisualizationMode === 0) {
             heatmapChartGeneration.fixToolTip(i, currThis);
           }
