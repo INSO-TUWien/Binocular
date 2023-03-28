@@ -31,9 +31,12 @@ jobs:
     - name: Set .pupilrc variables
       uses: microsoft/variable-substitution@v1   
       with:
-        files: .binocularrc
+        files: .binocularrc_ci
       env:
         github.auth.token: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Rename binocularrc
+      run: mv .binocularrc_ci .binocularrc 
 
     - name: Set node version
       uses: actions/setup-node@v3
