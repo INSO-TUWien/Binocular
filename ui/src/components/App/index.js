@@ -2,7 +2,6 @@ import styles from './app.css';
 import Sidebar from '../Sidebar';
 import HelpButton from '../Help/HelpButton';
 import Help from '../Help';
-import ConfigDialog from '../ConfigDialog';
 import ProgressBar from '../ProgressBar';
 import Notifications from '../notifications';
 import React from 'react';
@@ -49,7 +48,6 @@ class App extends React.PureComponent {
         </div>
         <Notifications />
         <HelpButton y={showHelp ? helpPos : 0} icon={showHelp ? 'times' : 'question'} />
-        <ConfigDialog sidebarOpen={!collapsed} />
       </div>
     );
   }

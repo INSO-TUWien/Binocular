@@ -1,4 +1,4 @@
-import { render } from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { createStore, applyMiddleware } from 'redux';
 import { createLogger } from 'redux-logger';
 import io from 'socket.io-client';
@@ -54,6 +54,10 @@ Database.checkBackendConnection().then((connection) => {
   _.each(visualizationModules, (viz) => {
     visualizations[viz.id] = viz;
   });
+
+  const container = document.getElementById('root');
+  const rootContainer = createRoot(container);
+
   if (connection) {
     const app = makeAppReducer(visualizationModules);
 
@@ -68,6 +72,7 @@ Database.checkBackendConnection().then((connection) => {
           isFetching: false,
           lastFetched: null,
           isShown: false,
+          offlineMode: false,
         },
       },
       applyMiddleware(socketIo, saga, logger)
@@ -75,11 +80,11 @@ Database.checkBackendConnection().then((connection) => {
 
     saga.run(root);
 
-    render(<Root store={store} />, document.getElementById('root'));
+    rootContainer.render(<Root store={store} />);
     if (module.hot) {
       module.hot.accept('./components/Root', () => {
         const NewRoot = require('./components/Root').default;
-        render(<NewRoot store={store} />, document.getElementById('root'));
+        rootContainer.render(<NewRoot store={store} />);
       });
     }
   } else {
@@ -95,6 +100,7 @@ Database.checkBackendConnection().then((connection) => {
           isFetching: false,
           lastFetched: null,
           isShown: false,
+          offlineMode: true,
         },
       },
       applyMiddleware(saga, logger)
@@ -102,11 +108,11 @@ Database.checkBackendConnection().then((connection) => {
 
     saga.run(root);
 
-    render(<RootOffline store={store} />, document.getElementById('root'));
+    rootContainer.render(<RootOffline store={store} />);
     if (module.hot) {
       module.hot.accept('./components/Root', () => {
         const NewRoot = require('./components/Root').default;
-        render(<NewRoot store={store} />, document.getElementById('root'));
+        rootContainer.render(<NewRoot store={store} />);
       });
     }
   }

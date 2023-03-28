@@ -1,6 +1,7 @@
 /node_modules
 /dist
-.pupil
+.binocular
+.binocularrc
 db/
 *.log
 coverage/

@@ -1,18 +1,18 @@
 const modeDB = {
-  js: 'javascript',
-  ts: 'javascript',
-  json: 'javascript',
+  js: 'jsx',
+  ts: 'jsx',
+  json: 'jsx',
   jsx: 'jsx',
-  html: 'htmlmixed',
-  htm: 'htmlmixed',
-  xhtml: 'htmlmixed',
+  html: 'html',
+  htm: 'html',
+  xhtml: 'html',
   php: 'php',
-  css: 'htmlmixed',
-  scss: 'htmlmixed',
-  c: 'clike',
-  cpp: 'clike',
-  cs: 'clike',
-  java: 'text/x-java',
+  css: 'css',
+  scss: 'css',
+  c: 'cpp',
+  cpp: 'cpp',
+  cs: 'cpp',
+  java: 'java',
   py: 'python',
   xml: 'xml',
   yml: 'yaml',
@@ -20,6 +20,6 @@ const modeDB = {
 
 export default class ModeSwitcher {
   static modeFromExtension(ext) {
-    return modeDB[ext] !== undefined ? modeDB[ext] : '';
+    return modeDB[ext] !== undefined ? modeDB[ext] : 'jsx';
   }
 }
