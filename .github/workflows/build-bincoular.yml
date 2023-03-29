@@ -3,7 +3,7 @@ name: Build Binocular
 on: 
   push:
     branches:
-      - feature/67_deptest # TODO: set trigger according to project needs
+      - feature/67 # TODO: set trigger according to project needs
 
 #env: set env if needed
 
