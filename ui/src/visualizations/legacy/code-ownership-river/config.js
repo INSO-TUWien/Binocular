@@ -1,13 +1,10 @@
 'use strict';
 
-import Promise from 'bluebird';
 import { connect } from 'react-redux';
 import { setOverlay, setHighlightedIssue, setCommitAttribute } from './sagas';
 import SearchBox from '../../../components/SearchBox';
 import TabCombo from '../../../components/TabCombo.js';
 import styles from './styles.scss';
-
-import { graphQl } from '../../../utils';
 import Database from '../../../database/database';
 
 const mapStateToProps = (state /*, ownProps*/) => {
@@ -78,10 +75,12 @@ const CodeOwnershipRiverConfigComponent = (props) => {
               placeholder="Highlight issue..."
               renderOption={(i) => `#${i.iid} ${i.title}`}
               search={(text) => {
-                return Promise.resolve(Database.searchIssues(text)).map((i) => {
-                  i.createdAt = new Date(i.createdAt);
-                  i.closedAt = i.closedAt && new Date(i.closedAt);
-                  return i;
+                return Promise.resolve(Database.searchIssues(text)).then((issues) => {
+                  return issues.map((i) => {
+                    i.createdAt = new Date(i.createdAt);
+                    i.closedAt = i.closedAt && new Date(i.closedAt);
+                    return i;
+                  });
                 });
               }}
               value={props.highlightedIssue}

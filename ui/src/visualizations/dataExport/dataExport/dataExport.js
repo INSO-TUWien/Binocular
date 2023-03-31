@@ -4,7 +4,6 @@ import React from 'react';
 import styles from '../styles.scss';
 import dataExportStyles from '../styles/dataExport.scss';
 import GetData from './helper/getData';
-import Promise from 'bluebird';
 import viewIcon from '../assets/viewIcon.svg';
 import downloadIcon from '../assets/downloadIcon.svg';
 import JSZip from 'jszip';

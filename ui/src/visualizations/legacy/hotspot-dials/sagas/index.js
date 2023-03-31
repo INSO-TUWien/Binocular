@@ -4,10 +4,8 @@ import { createAction } from 'redux-actions';
 import { select, takeEvery, fork, throttle } from 'redux-saga/effects';
 import _ from 'lodash';
 import moment from 'moment';
-import Promise from 'bluebird';
 
 import { fetchFactory, timestampedActionFactory, mapSaga } from '../../../../sagas/utils.js';
-import { graphQl } from '../../../../utils';
 import Database from '../../../../database/database';
 
 export const setCategory = createAction('SET_CATEGORY');
@@ -140,10 +138,10 @@ export const fetchHotspotDialsData = fetchFactory(
     };
 
     const category = categories[universalSettingsCategory];
-    return yield Promise.join(
+    return yield Promise.all([
       Database.getCommitDateHistogram(universalSettingsCategory, config.issueField, firstSignificantTimestamp, lastSignificantTimestamp),
-      Database.getCommitDateHistogram(universalSettingsCategory, config.issueField, firstCommitTimestamp, lastCommitTimestamp)
-    )
+      Database.getCommitDateHistogram(universalSettingsCategory, config.issueField, firstCommitTimestamp, lastCommitTimestamp),
+    ])
       .then((resp) => [
         resp[0].commitDateHistogram,
         resp[0].goodCommits,
@@ -154,30 +152,41 @@ export const fetchHotspotDialsData = fetchFactory(
         resp[1].badCommits,
         resp[1].issueDateHistogram,
       ])
-      .map((histogram) => {
-        histogram = _(histogram)
-          .filter((c) => c.category !== null)
-          .sortBy('category')
-          .value();
+      .then((resp) => {
+        return resp.map((histogram) => {
+          histogram = _(histogram)
+            .filter((c) => c.category !== null)
+            .sortBy('category')
+            .value();
 
-        for (let i = 0; i < category.count; i++) {
-          if (!histogram[i] || histogram[i].category !== i + category.offset) {
-            histogram.splice(i, 0, { category: i + category.offset, count: 0 });
+          for (let i = 0; i < category.count; i++) {
+            if (!histogram[i] || histogram[i].category !== i + category.offset) {
+              histogram.splice(i, 0, { category: i + category.offset, count: 0 });
+            }
+
+            histogram[i].label = category.label(histogram[i].category);
+            histogram[i].detailedLabel = category.detailedLabel(histogram[i].category);
           }
 
-          histogram[i].label = category.label(histogram[i].category);
-          histogram[i].detailedLabel = category.detailedLabel(histogram[i].category);
-        }
+          category.postProcess(histogram);
 
-        category.postProcess(histogram);
-
-        const maximum = _.maxBy(histogram, 'count').count;
-        return {
-          maximum,
-          categories: histogram,
-        };
+          const maximum = _.maxBy(histogram, 'count').count;
+          return {
+            maximum,
+            categories: histogram,
+          };
+        });
       })
-      .spread((filteredCommits, filteredGoodCommits, filteredBadCommits, filteredIssues, commits, goodCommits, badCommits, issues) => {
+      .then((results) => {
+        const filteredCommits = results[0];
+        const filteredGoodCommits = results[1];
+        const filteredBadCommits = results[2];
+        const filteredIssues = results[3];
+        const commits = results[4];
+        const goodCommits = results[5];
+        const badCommits = results[6];
+        const issues = results[7];
+
         commits.categories = commits.categories.filter((c) => c.label !== undefined);
         goodCommits.categories = goodCommits.categories.filter((gc) => gc.label !== undefined);
         badCommits.categories = badCommits.categories.filter((bc) => bc.label !== undefined);

@@ -1,8 +1,7 @@
 'use strict';
 
 const _ = require('lodash');
-const Promise = require('bluebird');
-const temp = Promise.promisifyAll(require('temp'));
+const temp = require('temp');
 const fs = require('fs-extra-promise');
 const Random = require('random-js');
 const path = require('path');

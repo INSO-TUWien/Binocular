@@ -1,6 +1,5 @@
 'use strict';
 
-import Promise from 'bluebird';
 import { createAction } from 'redux-actions';
 import { select, throttle, fork, takeEvery } from 'redux-saga/effects';
 import _ from 'lodash';
@@ -74,12 +73,16 @@ export const fetchDashboardData = fetchFactory(
     const firstSignificantTimestamp = Math.max(viewport[0], Math.min(firstCommitTimestamp, firstIssueTimestamp));
     const lastSignificantTimestamp = viewport[1] ? viewport[1].getTime() : Math.max(lastCommitTimestamp, lastIssueTimestamp);
 
-    return yield Promise.join(
+    return yield Promise.all([
       getCommitData([firstCommitTimestamp, lastCommitTimestamp], [firstSignificantTimestamp, lastSignificantTimestamp]),
       getIssueData([firstIssueTimestamp, lastIssueTimestamp], [firstSignificantTimestamp, lastSignificantTimestamp]),
-      getBuildData([firstCommitTimestamp, lastCommitTimestamp], [firstSignificantTimestamp, lastSignificantTimestamp])
-    )
-      .spread((commits, issues, builds) => {
+      getBuildData([firstCommitTimestamp, lastCommitTimestamp], [firstSignificantTimestamp, lastSignificantTimestamp]),
+    ])
+      .then((results) => {
+        const commits = results[0];
+        const issues = results[1];
+        const builds = results[2];
+
         const palette = getPalette(commits, 15, committers.length);
 
         return {

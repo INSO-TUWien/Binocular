@@ -1,6 +1,5 @@
 'use strict';
 
-const Promise = require('bluebird');
 const chai = require('chai');
 
 const fake = require('./fake.js');

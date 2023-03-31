@@ -20,11 +20,6 @@ const ctx = require('./lib/context.js');
 
 const open = require('open');
 const _ = require('lodash');
-const Promise = _.defaults(require('bluebird'), { config: () => {} });
-
-Promise.config({
-  longStackTraces: true,
-});
 
 const Repository = require('./lib/core/provider/git.js');
 const { app, argv, httpServer, io } = require('./lib/context.js');

@@ -16,7 +16,6 @@ import styles from './styles.scss';
 
 import CheckboxLegend from '../../../components/CheckboxLegend';
 import SearchBox from '../../../components/SearchBox';
-import Promise from 'bluebird';
 import { graphQl } from '../../../utils';
 
 const mapStateToProps = (state) => {

@@ -1,6 +1,5 @@
 'use strict';
 
-import Promise from 'bluebird';
 import React from 'react';
 import _ from 'lodash';
 import PropTypes from 'prop-types';
@@ -95,7 +94,7 @@ export default class SearchBox extends React.Component {
 
   search(text) {
     clearTimeout(this.cancelTimer);
-    const activeSearch = Promise.try(() => this.props.search(text)).then((options) => {
+    const activeSearch = this.props.search(text).then((options) => {
       // make sure not to signal end when there is a more recent
       // search active
       if (this.state.activeSearch === activeSearch) {

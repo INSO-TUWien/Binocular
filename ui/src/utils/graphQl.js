@@ -1,7 +1,6 @@
 'use strict';
 
 import _ from 'lodash';
-import Promise from 'bluebird';
 import { Lokka } from 'lokka';
 import { Transport } from 'lokka-transport-http';
 const graphQl = new Lokka({ transport: new Transport('/graphQl') });

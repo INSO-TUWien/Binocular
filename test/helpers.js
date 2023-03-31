@@ -1,7 +1,5 @@
 'use strict';
 
-const Promise = require('bluebird');
-
 const helpers = {
   stage: function (repo, filePath) {
     return Promise.resolve(repo.refreshIndex())
