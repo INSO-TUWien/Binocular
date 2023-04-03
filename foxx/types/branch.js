@@ -22,7 +22,7 @@ module.exports = new gql.GraphQLObjectType({
       latestCommit: {
         type: gql.GraphQLString,
         description: 'latest commit on this branch'
-      }
+      },
     };
   },
 });

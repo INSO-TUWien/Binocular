@@ -32,6 +32,12 @@ export default () =>
             <li>The size of the red arc inside the circle segment represents the amount of bad commits, which are commits that did not pass the CI-Pipeline successfully</li>
           </ul>
         </li>
+        <li>
+          <i class="fa fa-code-commit"></i> Number of Commits
+          <ul>
+            <li>The inner dotted part of a segment depicts the number of commits relative to the other stakeholders for the current selection</li>
+          </ul>
+        </li>
       </ul>
     </p>
 
@@ -77,7 +83,7 @@ export default () =>
           </ul>
         </li>
         <li>
-          Optionally exclude merge-commits
+          Optionally exclude merge-commits or ignore added code that is not owned.
         </li>
       </ol>
     </p>
