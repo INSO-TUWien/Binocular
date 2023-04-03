@@ -1,16 +1,15 @@
-import React, { useState, useEffect } from "react";
-import ModuleLine from "./ModuleLine";
-import styles from '../../styles.scss'
+import React, { useState, useEffect } from 'react';
+import ModuleLine from './ModuleLine';
+import styles from '../../styles.scss';
 
 const FilePicker = ({ fileList }) => {
-  const [fileMap, setFileMap] = useState({})
+  const [fileMap, setFileMap] = useState({});
 
   //every time the fileList changes, construct a map that has the same structure as the original directory
   //example:
   //files = [fortytwo.txt, foo/bar.txt, foo.baz.txt]
   //generated map => {fortytwo.txt: {}, foo: {bar.txt: {}, baz.txt: {}}}
   useEffect(() => {
-
     const fileMap = {};
 
     const set = (pathSplitArray, fileMap) => {
@@ -20,8 +19,8 @@ const FilePicker = ({ fileList }) => {
       for (const pathItemIndex in pathSplitArray) {
         const pathItem = pathSplitArray[pathItemIndex];
 
-        if (pathItemIndex == pathSplitArray.length - 1) {
-          map[pathItem] = pathSplitArray.join("/");
+        if (parseInt(pathItemIndex) === pathSplitArray.length - 1) {
+          map[pathItem] = pathSplitArray.join('/');
           break;
         }
 
@@ -35,21 +34,17 @@ const FilePicker = ({ fileList }) => {
     };
 
     fileList
-      .map((path) => path.split("/"))
+      .map((path) => path.split('/'))
       .forEach((pathSplitArray) => {
         set(pathSplitArray, fileMap);
       });
 
-    setFileMap(fileMap)
-
-  }, [fileList])
-  
-
-  
+    setFileMap(fileMap);
+  }, [fileList]);
 
   return (
     <div className={styles.filepicker}>
-      <ModuleLine moduleName={"root"} children={fileMap} initiallyExpanded={true}/>
+      <ModuleLine moduleName={'root'} children={fileMap} initiallyExpanded={true} />
     </div>
   );
 };

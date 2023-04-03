@@ -1,6 +1,6 @@
-"use strict";
+'use strict';
 
-import styles from "../styles.scss";
+import styles from '../styles.scss';
 
 const FullScreenMessage = ({ message }) => {
   return (

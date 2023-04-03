@@ -1,12 +1,11 @@
-"use strict";
+'use strict';
 
-import { handleActions } from "redux-actions";
-import _ from "lodash";
+import { handleActions } from 'redux-actions';
+import _ from 'lodash';
 
 export default handleActions(
   {
-    REQUEST_CODE_EXPERTISE_DATA: (state) =>
-      _.assign({}, state, { isFetching: true }),
+    REQUEST_CODE_EXPERTISE_DATA: (state) => _.assign({}, state, { isFetching: true }),
     RECEIVE_CODE_EXPERTISE_DATA: (state, action) => {
       const ret = _.assign({}, state, {
         data: action.payload,
@@ -20,7 +19,7 @@ export default handleActions(
   {
     data: {
       devData: {},
-      issue: null
+      issue: null,
     },
     lastFetched: null,
     isFetching: null,

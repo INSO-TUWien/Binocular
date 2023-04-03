@@ -58,8 +58,8 @@ export function onResizeFactoryForFunctional(wPct, hPct) {
       width,
       height,
       wMargin,
-      hMargin
-    }
+      hMargin,
+    };
   };
 }
 
