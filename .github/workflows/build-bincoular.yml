@@ -1,9 +1,9 @@
 name: Build Binocular
 
 on: 
-  pull_request:
+  push:
     branches:
-      - develop
+      - feature/67
 
 #env: set env if needed
 
