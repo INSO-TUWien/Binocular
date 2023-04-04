@@ -75,7 +75,7 @@
     "@uiw/codemirror-extensions-langs": "^4.19.9",
     "@uiw/react-codemirror": "^4.19.9",
     "adm-zip": "^0.5.10",
-    "arangojs": "^7.8.0",
+    "arangojs": "^8.1.0",
     "archiver": "^5.3.1",
     "assert": "^2.0.0",
     "autoprefixer": "^10.4.14",
