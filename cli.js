@@ -18,7 +18,7 @@ cli.showHelpAfterError();
 
 // Maybe figure out how to securely load the version file from package.json
 cli
-  .version(package_json.version)
+  .version(package_json.version, '-v, --version')
   .description(
     'Binocular is a tool for visualizing data from various software-engineering tools.' +
       ' It works as a command-line tool run from a git-repository.' +
@@ -28,7 +28,9 @@ cli
       'Binocular then hosts interactive visualizations about the gathered data via a web-interface.'
   )
   .option('-e, --export-db <repo>', 'Index the repository <repo> and export the ArangoDB database')
-  .option('-o, --build-offline <repo>', 'Prepares the artifacts needed for an offline visualization of the Repository <repo>')
+  .option('-o, --build-offline <repo>', 'Prepares the artifacts needed for an offline visualization of the repository <repo>')
+  .option('-rf,--run-frontend', 'Starts the dev frontend application')
+  .option('-rb, --run-backend <repo>', 'Starts the dev backend application for repository <repo>')
   .parse(process.argv);
 
 console.log(chalk.green(figlet.textSync('Binocular')));
@@ -41,8 +43,18 @@ if (options.exportDb) {
 }
 
 if (options.buildOffline) {
-  console.log(chalk.cyan(`Indexing repository ${options.buildOffline} in offline mode and exporting the database...`));
+  console.log(chalk.cyan(`Indexing repository ${options.buildOffline} and building frontend for an offline run...`));
   execute(`node binocular.js --no-open --no-server ${options.buildOffline}`, 'npm run build');
+}
+
+if (options.runFrontend) {
+  console.log(chalk.cyan('Starting the frontend application...'));
+  execute('webpack serve --config webpack.dev.js');
+}
+
+if (options.runBackend) {
+  console.log(chalk.cyan('Starting the backend application...'));
+  execute(`npm run dev-server ${options.runBackend}`);
 }
 
 // Executes statements sequentially
