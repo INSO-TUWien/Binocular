@@ -84,7 +84,7 @@ export default class DataExport extends React.Component {
             <h2>Collections</h2>
             {Object.keys(this.state.collections).map((c) => {
               return (
-                <div>
+                <div key={c}>
                   {c}: {this.state.collections[c].length}
                   <img
                     className={dataExportStyles.icon}
@@ -105,7 +105,7 @@ export default class DataExport extends React.Component {
             <h2>Relations</h2>
             {Object.keys(this.state.relations).map((r) => {
               return (
-                <div>
+                <div key={r}>
                   {r.replace('_', '-')}: {this.state.relations[r].length}
                   <img
                     className={dataExportStyles.icon}
@@ -135,7 +135,9 @@ export default class DataExport extends React.Component {
                   <tr>
                     {previewTableHeader.map((key, i) => {
                       return (
-                        <th className={i % 2 === 0 ? dataExportStyles.previewTableHeaderEven : dataExportStyles.previewTableHeaderOdd}>
+                        <th
+                          key={'previewTableHeaderCol' + i}
+                          className={i % 2 === 0 ? dataExportStyles.previewTableHeaderEven : dataExportStyles.previewTableHeaderOdd}>
                           {key}
                         </th>
                       );
@@ -145,9 +147,13 @@ export default class DataExport extends React.Component {
                 <tbody>
                   {this.state.previewTable.map((row, i) => {
                     return (
-                      <tr>
+                      <tr key={'previewTableRow' + i}>
                         {previewTableHeader.map((key, j) => {
-                          return <th className={dataExportStyles.previewTableCell}>{JSON.stringify(row[key])}</th>;
+                          return (
+                            <th key={'previewTableRow' + i + 'Col' + j} className={dataExportStyles.previewTableCell}>
+                              {JSON.stringify(row[key])}
+                            </th>
+                          );
                         })}
                       </tr>
                     );

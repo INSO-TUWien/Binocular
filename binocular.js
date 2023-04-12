@@ -21,6 +21,12 @@ const ctx = require('./lib/context.js');
 const open = require('open');
 const _ = require('lodash');
 
+const Promise = _.defaults(require('bluebird'), { config: () => {} });
+
+Promise.config({
+  longStackTraces: true,
+});
+
 const Repository = require('./lib/core/provider/git.js');
 const { app, argv, httpServer, io } = require('./lib/context.js');
 const config = require('./lib/config.js');
@@ -455,7 +461,7 @@ function ensureDb(repo, context) {
       }
     })
     .then(() => {
-      return Promise.join(
+      return Promise.all([
         context.db.ensureService(path.join(__dirname, 'foxx'), '/binocular-ql'),
         Commit.ensureCollection(),
         Language.ensureCollection(),
@@ -474,8 +480,8 @@ function ensureDb(repo, context) {
         CommitLanguageConnection.ensureCollection(),
         CommitModuleConnection.ensureCollection(),
         ModuleModuleConnection.ensureCollection(),
-        ModuleFileConnection.ensureCollection()
-      );
+        ModuleFileConnection.ensureCollection(),
+      ]);
     });
 }
 
