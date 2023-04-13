@@ -27,10 +27,11 @@ cli
       '\n' +
       'Binocular then hosts interactive visualizations about the gathered data via a web-interface.'
   )
-  .option('-e, --export-db <repo>', 'Index the repository <repo> and export the ArangoDB database')
-  .option('-o, --build-offline <repo>', 'Prepares the artifacts needed for an offline visualization of the repository <repo>')
-  .option('-rf,--run-frontend', 'Starts the dev frontend application')
-  .option('-rb, --run-backend <repo>', 'Starts the dev backend application for repository <repo>')
+  .option('-e, --export-db <repo>', 'index the repository <repo> and export the ArangoDB database')
+  .option('-o, --build-offline <repo>', 'prepares the artifacts needed for an offline visualization of the repository <repo>')
+  .option('-rf,--run-frontend', 'starts the dev frontend application')
+  .option('-rb, --run-backend <repo>', 'starts the dev backend application for repository <repo>')
+  .option('-rc, --run-concurrently <repo>', 'starts the dev backend and frontend application for repository <repo>')
   .parse(process.argv);
 
 console.log(chalk.green(figlet.textSync('Binocular')));
@@ -55,6 +56,11 @@ if (options.runFrontend) {
 if (options.runBackend) {
   console.log(chalk.cyan('Starting the backend application...'));
   execute(`npm run dev-server ${options.runBackend}`);
+}
+
+if (options.runConcurrently) {
+  console.log(chalk.cyan('Starting the frontend and backend application concurrently...'));
+  execute(`npm run dev-concurrently -- --repo=${options.runConcurrently}`);
 }
 
 // Executes statements sequentially
