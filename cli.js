@@ -5,6 +5,7 @@ const { spawn } = require('child_process');
 const figlet = require('figlet');
 const chalk = require('chalk');
 const package_json = require('./package.json');
+const open = require('open');
 
 const cli = new Command();
 
@@ -32,6 +33,7 @@ cli
   .option('-rf,--run-frontend', 'starts the dev frontend application')
   .option('-rb, --run-backend <repo>', 'starts the dev backend application for repository <repo>')
   .option('-rc, --run-concurrently <repo>', 'starts the dev backend and frontend application for repository <repo>')
+  .option('--setup-db', 'helps set up the database needed for the backend application to run')
   .parse(process.argv);
 
 console.log(chalk.green(figlet.textSync('Binocular')));
@@ -61,6 +63,11 @@ if (options.runBackend) {
 if (options.runConcurrently) {
   console.log(chalk.cyan('Starting the frontend and backend application concurrently...'));
   execute(`npm run dev-concurrently -- --repo=${options.runConcurrently}`);
+}
+
+if (options.setupDb) {
+  console.log(chalk.cyan('Opening the ArangoDB download site...'));
+  open('https://www.arangodb.com/download-major/');
 }
 
 // Executes statements sequentially
