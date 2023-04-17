@@ -2,7 +2,8 @@
 
 const _ = require('lodash');
 const temp = require('temp');
-const fs = require('fs-extra-promise');
+const fs = require('fs').promises;
+const fse = require('fs-extra');
 const Random = require('random-js');
 const path = require('path');
 const faker = require('faker');
@@ -48,7 +49,7 @@ const fake = {
         }
 
         this.repoPath = dirPath;
-        return fs.emptyDirAsync(dirPath);
+        return fse.emptyDir(dirPath);
       })
       .then(function () {
         return isomorphicGit.init({ fs, dir: this.repoPath || '.' });
@@ -81,8 +82,8 @@ const fake = {
 
     const fullPath = path.join(dirPath, filePath);
 
-    return fs.ensureFileAsync(fullPath).then(function () {
-      return fs.writeFileAsync(fullPath, contents);
+    return fse.ensureFile(fullPath).then(function () {
+      return fs.writeFile(fullPath, contents);
     });
   },
 
