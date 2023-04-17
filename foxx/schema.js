@@ -213,12 +213,43 @@ const queryType = new gql.GraphQLObjectType({
         type: require('./types/build.js'),
         args: { since: { type: Timestamp }, until: { type: Timestamp } },
         query: (root, args, limit) => {
-          return aql`
+          // let q = qb.for('build').in('builds').sort('build.createdAt', 'ASC');
+
+          // q = queryHelpers.addDateFilter('build.createdAt', 'gte', args.since, q);
+          // q = queryHelpers.addDateFilter('build.createdAt', 'lte', args.until, q);
+
+          // let countsByStatus = qb.for('other').in('builds');
+          // countsByStatus = countsByStatus.filter(qb.lte('other.finishedAt', 'build.createdAt'));
+          // countsByStatus = countsByStatus
+          //   .collect('status', 'other.status')
+          //   .withCountInto('statusCount')
+          //   .return({ ['status']: 'statusCount' });
+
+          // q = q.limit(limit.offset, limit.count).return('build');
+
+          // //TODO: RETURN MERGE(build, { stats: MERGE(countsByStatus) })`;
+
+          // return q;
+
+          if (args.since && args.until) {
+            return aql`
           FOR build IN ${builds}
             SORT build.createdAt ASC
             ${limit}
             FILTER DATE_TIMESTAMP(build.createdAt) >= DATE_TIMESTAMP(${args.since})
             FILTER DATE_TIMESTAMP(build.createdAt) <= DATE_TIMESTAMP(${args.until})
+            LET countsByStatus = (
+              FOR other IN ${builds}
+                FILTER other.finishedAt <= build.createdAt
+                COLLECT status = other.status WITH COUNT INTO statusCount
+                RETURN { [status]: statusCount }
+            )
+            RETURN MERGE(build, { stats: MERGE(countsByStatus) })`;
+          }
+          return aql`
+          FOR build IN ${builds}
+            SORT build.createdAt ASC
+            ${limit}
             LET countsByStatus = (
               FOR other IN ${builds}
                 FILTER other.finishedAt <= build.createdAt
