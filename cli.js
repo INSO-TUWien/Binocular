@@ -1,13 +1,13 @@
 'use strict';
 
-const { Command } = require('commander');
+const { Command, Option } = require('commander');
 const { spawn } = require('child_process');
 const figlet = require('figlet');
 const chalk = require('chalk');
 const package_json = require('./package.json');
 const open = require('open');
 const setupConfig = require('./cli/setupConfig');
-const fs = require('fs-extra')
+const fs = require('fs-extra');
 
 const cli = new Command();
 
@@ -30,13 +30,33 @@ cli
       '\n' +
       'Binocular then hosts interactive visualizations about the gathered data via a web-interface.'
   )
-  .option('-e, --export-db <repo>', 'index the repository <repo> and export the ArangoDB database')
-  .option('-o, --build-offline <repo>', 'prepares the artifacts needed for an offline visualization of the repository <repo>')
-  .option('-rf,--run-frontend', 'starts the dev frontend application')
-  .option('-rb, --run-backend <repo>', 'starts the dev backend application for repository <repo>')
-  .option('-rc, --run-concurrently <repo>', 'starts the dev backend and frontend application for repository <repo>')
-  .option('--setup-db', 'helps set up the database needed for the backend application to run')
-  .option('--setup-config', 'starts an interactive step-by-step wizard that configures the application')
+  .addOption(
+    new Option(
+      '-e, --export-db [repo]',
+      'index the repository [repo] and export the ArangoDB database. Default is current repository.'
+    ).preset('.')
+  )
+  .addOption(
+    new Option(
+      '-o, --build-offline [repo]',
+      'prepares the artifacts needed for an offline visualization of the repository [repo]. Default is current repository.'
+    ).preset('.')
+  )
+  .addOption(new Option('-rf,--run-frontend', 'starts the dev frontend application'))
+  .addOption(
+    new Option(
+      '-rb, --run-backend [repo]',
+      'starts the dev backend application for repository [repo]. Default is current repository.'
+    ).preset('.')
+  )
+  .addOption(
+    new Option(
+      '-rc, --run-concurrently [repo]',
+      'starts the dev backend and frontend application for repository [repo]. Default is current repository.'
+    ).preset('.')
+  )
+  .addOption(new Option('--setup-db', 'helps set up the database needed for the backend application to run'))
+  .addOption(new Option('--setup-config', 'starts an interactive step-by-step wizard that configures the application'))
   .parse(process.argv);
 
 console.log(chalk.green(figlet.textSync('Binocular')));
