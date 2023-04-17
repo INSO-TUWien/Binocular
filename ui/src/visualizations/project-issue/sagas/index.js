@@ -71,7 +71,7 @@ function openByWebUrl(action) {
 }
 
 /**
- * Fetch data for ProjectIssue, this still includes old functions that were copied over.
+ * Fetch data for ProjectIssue Visualisation
  */
 export const fetchProjectIssueData = fetchFactory(
   function*() {

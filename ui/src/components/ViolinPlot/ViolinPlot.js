@@ -448,8 +448,8 @@ export default class ViolinPlot extends React.Component {
 
     this.createPoints(brushArea, start_date, 'START', tooltip2, scales, svg.node());
     this.createPoints(brushArea, end_date, 'END', tooltip3, scales, svg.node());
-    this.createPoints(brushArea, 1525125600000, 'TEST', tooltip4, scales, svg.node(), '#ffe600');
-    this.createPoints(brushArea, 1585125600000, 'TEST', tooltip4, scales, svg.node(), '#ffe600');
+    this.createPoints(brushArea, 1525125600000, 'ONE', tooltip4, scales, svg.node(), '#ffe600');
+    this.createPoints(brushArea, 1585125600000, 'TWO', tooltip4, scales, svg.node(), '#ffe600');
 
     return { brushArea, axes };
   }
