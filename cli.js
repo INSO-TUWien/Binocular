@@ -7,6 +7,7 @@ const chalk = require('chalk');
 const package_json = require('./package.json');
 const open = require('open');
 const setupConfig = require('./cli/setupConfig');
+const fs = require('fs-extra')
 
 const cli = new Command();
 
@@ -44,6 +45,7 @@ const options = cli.opts();
 
 if (options.exportDb) {
   console.log(chalk.cyan(`Indexing repository ${options.exportDb} in offline mode and exporting the database...`));
+  fs.rmSync('./ui/db_export', { recursive: true, force: true });
   execute(`node binocular.js --no-open --no-server ${options.exportDb}`);
 }
 
