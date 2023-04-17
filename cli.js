@@ -42,6 +42,7 @@ cli
       'prepares the artifacts needed for an offline visualization of the repository [repo]. Default is current repository.'
     ).preset('.')
   )
+  .addOption(new Option('--build-offline-no-export', 'builds the frontend application.'))
   .addOption(new Option('-rf,--run-frontend', 'starts the dev frontend application'))
   .addOption(
     new Option(
@@ -72,6 +73,11 @@ if (options.exportDb) {
 if (options.buildOffline) {
   console.log(chalk.cyan(`Indexing repository ${options.buildOffline} and building frontend for an offline run...`));
   execute(`node binocular.js --no-open --no-server ${options.buildOffline}`, 'npm run build');
+}
+
+if (options.buildOfflineNoExport) {
+  console.log(chalk.cyan('Building frontend...'));
+  execute('npm run build');
 }
 
 if (options.runFrontend) {
