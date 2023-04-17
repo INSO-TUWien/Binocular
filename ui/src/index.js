@@ -30,6 +30,7 @@ import issueImpact from './visualizations/legacy/issue-impact';
 import hotspotDials from './visualizations/legacy/hotspot-dials';
 import codeHotspots from './visualizations/legacy/code-hotspots';
 import languageModuleRiver from './visualizations/legacy/language-module-river';
+import codeExpertise from './visualizations/code-expertise';
 import ciBuilds from './visualizations/VisualizationComponents/ciBuilds';
 import issues from './visualizations/VisualizationComponents/issues';
 import changes from './visualizations/VisualizationComponents/changes';
@@ -47,6 +48,7 @@ const visualizationModules = [
   issues,
   changes,
   dataExport,
+  codeExpertise,
 ];
 
 Database.checkBackendConnection().then((connection) => {
