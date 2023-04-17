@@ -6,6 +6,7 @@ const figlet = require('figlet');
 const chalk = require('chalk');
 const package_json = require('./package.json');
 const open = require('open');
+const setupConfig = require('./cli/setupConfig');
 
 const cli = new Command();
 
@@ -34,6 +35,7 @@ cli
   .option('-rb, --run-backend <repo>', 'starts the dev backend application for repository <repo>')
   .option('-rc, --run-concurrently <repo>', 'starts the dev backend and frontend application for repository <repo>')
   .option('--setup-db', 'helps set up the database needed for the backend application to run')
+  .option('--setup-config', 'starts an interactive step-by-step wizard that configures the application')
   .parse(process.argv);
 
 console.log(chalk.green(figlet.textSync('Binocular')));
@@ -68,6 +70,11 @@ if (options.runConcurrently) {
 if (options.setupDb) {
   console.log(chalk.cyan('Opening the ArangoDB download site...'));
   open('https://www.arangodb.com/download-major/');
+}
+
+if (options.setupConfig) {
+  console.log(chalk.cyan('Starting the setup-config wizard...'));
+  setupConfig.promptUserAndSaveConfig();
 }
 
 // Executes statements sequentially
