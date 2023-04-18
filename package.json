@@ -61,7 +61,7 @@
     "url": "https://github.com/INSO-TUWien/Binocular.git"
   },
   "bin": {
-    "binocular": "binocular.js"
+    "binocular": "cli.js"
   },
   "dependencies": {
     "@apollo/client": "^3.7.10",
