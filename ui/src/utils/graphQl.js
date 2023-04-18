@@ -3,6 +3,7 @@
 import _ from 'lodash';
 import { Lokka } from 'lokka';
 import { Transport } from 'lokka-transport-http';
+import Promise from 'bluebird';
 const graphQl = new Lokka({ transport: new Transport('/graphQl') });
 
 export { graphQl };
