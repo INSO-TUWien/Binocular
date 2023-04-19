@@ -9,6 +9,7 @@ const package_json = require('./package.json');
 const open = require('open');
 const setupConfig = require('./cli/setupConfig');
 const fs = require('fs-extra');
+const path = require('path');
 
 const cli = new Command();
 
@@ -67,13 +68,13 @@ const options = cli.opts();
 
 if (options.exportDb) {
   console.log(chalk.cyan(`Indexing repository ${options.exportDb} in offline mode and exporting the database...`));
-  fs.rmSync('./ui/db_export', { recursive: true, force: true });
-  execute(`node binocular.js --no-open --no-server ${options.exportDb}`);
+  fs.rmSync(`${__dirname}/ui/db_export`, { recursive: true, force: true });
+  execute(`node binocular.js --no-open --no-server ${path.resolve(options.exportDb)}`);
 }
 
 if (options.buildOffline) {
   console.log(chalk.cyan(`Indexing repository ${options.buildOffline} and building frontend for an offline run...`));
-  execute(`node binocular.js --no-open --no-server ${options.buildOffline}`, 'npm run build');
+  execute(`node binocular.js --no-open --no-server ${path.resolve(options.buildOffline)}`, 'npm run build');
 }
 
 if (options.buildOfflineNoExport) {
@@ -88,12 +89,12 @@ if (options.runFrontend) {
 
 if (options.runBackend) {
   console.log(chalk.cyan('Starting the backend application...'));
-  execute(`npm run dev-server ${options.runBackend}`);
+  execute(`npm run dev-server ${path.resolve(options.runBackend)}`);
 }
 
 if (options.runConcurrently) {
   console.log(chalk.cyan('Starting the frontend and backend application concurrently...'));
-  execute(`npm run dev-concurrently -- --repo=${options.runConcurrently}`);
+  execute(`npm run dev-concurrently -- --repo=${path.resolve(options.runConcurrently)}`);
 }
 
 if (options.setupDb) {
@@ -108,6 +109,10 @@ if (options.setupConfig) {
 
 // Executes statements sequentially
 function execute(...statements) {
+  // we are executing everything from the module folder -> paths to the repository folders need to be absolute e.G. using path.resolve
+  // perhaps a less complicated alternative is possible
+  statements.unshift(`cd ${__dirname}`);
+
   const chainedStatement = chainStatements(...statements);
   spawn(chainedStatement, { stdio: 'inherit', shell: true });
 
