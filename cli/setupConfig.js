@@ -7,12 +7,12 @@ function promptUserAndSaveConfig() {
       {
         type: 'input',
         name: 'gitlabUrl',
-        message: 'Enter GitLab URL:',
+        message: 'Enter GitLab URL [optional]:',
       },
       {
         type: 'input',
         name: 'gitlabToken',
-        message: 'Enter GitLab API Token:',
+        message: 'Enter GitLab API Token [optional]:',
       },
       {
         type: 'input',
@@ -53,6 +53,20 @@ function promptUserAndSaveConfig() {
         name: 'arangoPassword',
         message: 'Enter Arango Password:',
       },
+      {
+        type: 'list',
+        name: 'its',
+        message: 'Select ITS (Issue Tracking System):',
+        choices: ['github', 'gitlab', 'none'],
+        default: 'none',
+      },
+      {
+        type: 'list',
+        name: 'ci',
+        message: 'Select CI (Continuous Integration) system:',
+        choices: ['travis', 'gitlab', 'none'],
+        default: 'none',
+      },
     ])
     .then((answers) => {
       const data = {
@@ -75,6 +89,14 @@ function promptUserAndSaveConfig() {
           password: answers.arangoPassword,
         },
       };
+
+      if (answers.its !== 'none' || answers.ci !== 'none') {
+        data.indexers = {
+          its: answers.its === 'none' ? '' : answers.its,
+          ci: answers.ci === 'none' ? '' : answers.ci,
+        };
+      }
+
       fs.writeJson('.binocularrc', data, (err) => {
         if (err) {
           console.error(err);
