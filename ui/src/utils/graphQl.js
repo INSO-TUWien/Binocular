@@ -3,7 +3,7 @@
 import _ from 'lodash';
 import { Lokka } from 'lokka';
 import { Transport } from 'lokka-transport-http';
-import Promise from 'bluebird';
+
 const graphQl = new Lokka({ transport: new Transport('/graphQl') });
 
 export { graphQl };
@@ -21,7 +21,8 @@ export function traversePages(getPage, fn, pageNumber = 1, perPage = 1000) {
   });
 }
 
-export function collectPages(getPage, fn, pageNumber = 1, perPage = 1000) {
+export async function collectPages(getPage, fn, pageNumber = 1, perPage = 1000) {
   const items = [];
-  return traversePages(getPage, (item) => items.push(item), pageNumber, perPage).thenReturn(items);
+  await traversePages(getPage, (item) => items.push(item), pageNumber, perPage);
+  return items;
 }
