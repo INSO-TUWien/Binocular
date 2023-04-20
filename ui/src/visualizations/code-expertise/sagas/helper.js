@@ -34,9 +34,11 @@ export function getBlameIssues(sha, files, hashes) {
 }
 
 export function getCommitsForIssue(iid) {
-  return collectPages(getCommitsForIssuePage(iid)).map((commit) => {
-    commit.date = new Date(commit.date);
-    return commit;
+  return collectPages(getCommitsForIssuePage(iid)).then((commits) => {
+    return commits.map((commit) => {
+      commit.date = new Date(commit.date);
+      return commit;
+    });
   });
 }
 
@@ -56,7 +58,9 @@ const getCommitsForIssuePage = (iid) => (page, perPage) => {
        }`,
       { page, perPage, iid }
     )
-    .then((resp) => resp.issue.commits);
+    .then((resp) => {
+      return resp.issue.commits;
+    });
 };
 
 export function getIssueData(iid) {

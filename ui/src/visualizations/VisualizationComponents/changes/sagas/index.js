@@ -1,7 +1,6 @@
 'use strict';
 
 import { fetchFactory, mapSaga, timestampedActionFactory } from '../../../../sagas/utils';
-import Promise from 'bluebird';
 import { select, throttle, fork, takeEvery } from 'redux-saga/effects';
 import { createAction } from 'redux-actions';
 import chroma from 'chroma-js';
@@ -87,11 +86,14 @@ export const fetchChangesData = fetchFactory(
     const timeSpan = state.visualizations.newDashboard.state.config.chartTimeSpan;
     firstSignificantTimestamp = timeSpan.from === undefined ? firstSignificantTimestamp : new Date(timeSpan.from).getTime();
     lastSignificantTimestamp = timeSpan.to === undefined ? lastSignificantTimestamp : new Date(timeSpan.to).getTime();
-    return yield Promise.join(
+    return yield Promise.all([
       Database.getCommitData([firstCommitTimestamp, lastCommitTimestamp], [firstSignificantTimestamp, lastSignificantTimestamp]),
-      Database.getCommitData([firstCommitTimestamp, lastCommitTimestamp], [firstCommitTimestamp, lastCommitTimestamp])
-    )
-      .spread((filteredCommits, commits) => {
+      Database.getCommitData([firstCommitTimestamp, lastCommitTimestamp], [firstCommitTimestamp, lastCommitTimestamp]),
+    ])
+      .then((result) => {
+        const filteredCommits = result[0];
+        const commits = result[1];
+
         const palette = getPalette(commits, 15, committers.length);
 
         return {

@@ -1,6 +1,5 @@
 'use strict';
 
-import Promise from 'bluebird';
 import { createAction } from 'redux-actions';
 import { throttle, fork, takeEvery } from 'redux-saga/effects';
 
@@ -78,13 +77,18 @@ export const fetchLanguageModuleRiverData = fetchFactory(
     const firstSignificantTimestamp = Math.min(firstCommitTimestamp, firstIssueTimestamp);
     const lastSignificantTimestamp = Math.max(lastCommitTimestamp, lastIssueTimestamp);
 
-    return yield Promise.join(
+    return yield Promise.all([
       getCommitData([firstSignificantTimestamp, lastSignificantTimestamp]),
       getBuildData(),
       getLanguageData(),
-      getModuleData()
-    )
-      .spread((commits, builds, languages, modules) => {
+      getModuleData(),
+    ])
+      .then((results) => {
+        const commits = results[0];
+        const builds = results[1];
+        const languages = results[2];
+        const modules = results[3];
+
         const attributes = organizeAttributes(commits, 100);
 
         return {
