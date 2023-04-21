@@ -94,7 +94,7 @@ if (options.runBackend) {
 
 if (options.runConcurrently) {
   console.log(chalk.cyan('Starting the frontend and backend application concurrently...'));
-  execute(`npm run dev-concurrently -- --repo=${path.resolve(options.runConcurrently)}`);
+  execute(`npm run dev-concurrently -- ${path.resolve(options.runConcurrently)}`);
 }
 
 if (options.setupDb) {
