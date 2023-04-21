@@ -16,7 +16,6 @@ import styles from './styles.scss';
 
 import CheckboxLegend from '../../../components/CheckboxLegend';
 import SearchBox from '../../../components/SearchBox';
-import Promise from 'bluebird';
 import { graphQl } from '../../../utils';
 
 const mapStateToProps = (state) => {
@@ -103,10 +102,12 @@ const LangModRiverConfigComponent = (props) => {
                 )
               )
                 .then((resp) => resp.issues.data)
-                .map((i) => {
-                  i.createdAt = new Date(i.createdAt);
-                  i.closedAt = i.closedAt && new Date(i.closedAt);
-                  return i;
+                .then((issues) => {
+                  return issues.map((i) => {
+                    i.createdAt = new Date(i.createdAt);
+                    i.closedAt = i.closedAt && new Date(i.closedAt);
+                    return i;
+                  });
                 });
             }}
             value={props.highlightedIssue}

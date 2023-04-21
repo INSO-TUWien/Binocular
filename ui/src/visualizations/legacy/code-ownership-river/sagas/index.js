@@ -1,6 +1,5 @@
 'use strict';
 
-import Promise from 'bluebird';
 import { createAction } from 'redux-actions';
 import { select, throttle, fork, takeEvery } from 'redux-saga/effects';
 import _ from 'lodash';
@@ -110,7 +109,7 @@ export const fetchCodeOwnershipData = fetchFactory(
 
     const interval = granularity.interval.asMilliseconds();
 
-    return yield Promise.join(
+    return yield Promise.all([
       Database.getCommitDataOwnershipRiver(
         [firstCommitTimestamp, lastCommitTimestamp],
         [firstSignificantTimestamp, lastSignificantTimestamp],
@@ -141,9 +140,21 @@ export const fetchCodeOwnershipData = fetchFactory(
         granularity,
         interval
       ),
-      Database.getBuildData([firstCommitTimestamp, lastCommitTimestamp], [firstCommitTimestamp, lastCommitTimestamp], granularity, interval)
-    )
-      .spread((filteredCommits, filteredIssues, filteredBuilds, commits, issues, builds) => {
+      Database.getBuildData(
+        [firstCommitTimestamp, lastCommitTimestamp],
+        [firstCommitTimestamp, lastCommitTimestamp],
+        granularity,
+        interval
+      ),
+    ])
+      .then((results) => {
+        const filteredCommits = results[0];
+        const filteredIssues = results[1];
+        const filteredBuilds = results[2];
+        const commits = results[3];
+        const issues = results[4];
+        const builds = results[5];
+
         const palette = getChartColors('spectral', [...committers, 'other']);
         return {
           filteredCommits,

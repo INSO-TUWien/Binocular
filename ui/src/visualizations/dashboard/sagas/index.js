@@ -3,9 +3,6 @@
 import visualizationRegistry from '../visualizationRegistry';
 import { createAction } from 'redux-actions';
 import { fetchFactory, timestampedActionFactory } from '../../../sagas/utils';
-import chroma from 'chroma-js';
-import _ from 'lodash';
-import Promise from 'bluebird';
 import Database from '../../../database/database.js';
 import { getChartColors } from '../../../utils';
 
@@ -41,10 +38,11 @@ export const fetchDashboardData = fetchFactory(
     const firstSignificantTimestamp = Math.min(firstCommitTimestamp, firstIssueTimestamp);
     const lastSignificantTimestamp = Math.max(lastCommitTimestamp, lastIssueTimestamp);
 
-    return yield Promise.join(
-      Database.getCommitData([firstCommitTimestamp, lastCommitTimestamp], [firstSignificantTimestamp, lastSignificantTimestamp])
-    )
-      .spread((commits) => {
+    return yield Promise.all([
+      Database.getCommitData([firstCommitTimestamp, lastCommitTimestamp], [firstSignificantTimestamp, lastSignificantTimestamp]),
+    ])
+      .then((results) => {
+        const commits = results[0];
         const palette = getChartColors('spectral', [...committers, 'other']);
         return {
           firstCommit,

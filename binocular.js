@@ -20,11 +20,6 @@ const ctx = require('./lib/context.js');
 
 const open = require('open');
 const _ = require('lodash');
-const Promise = _.defaults(require('bluebird'), { config: () => {} });
-
-Promise.config({
-  longStackTraces: true,
-});
 
 const Repository = require('./lib/core/provider/git.js');
 const { app, argv, httpServer, io } = require('./lib/context.js');
@@ -267,7 +262,8 @@ async function indexing(indexers, context, reporter, gateway, indexingThread) {
   try {
     context.vcsUrlProvider = await UrlProvider.getVcsUrlProvider(context.repo, reporter, context);
     context.ciUrlProvider = await UrlProvider.getCiUrlProvider(context.repo, reporter, context);
-    const providers = await Promise.all(getIndexer(indexers, context, reporter, indexingThread));
+    const indexer = await getIndexer(indexers, context, reporter, indexingThread);
+    const providers = await Promise.all(indexer);
 
     /*for (const indexer of providers.filter((exist) => exist)) {
       if (!indexer) {
@@ -469,7 +465,7 @@ function ensureDb(repo, context) {
       }
     })
     .then(() => {
-      return Promise.join(
+      return Promise.all([
         context.db.ensureService(path.join(__dirname, 'foxx'), '/binocular-ql'),
         Commit.ensureCollection(),
         Language.ensureCollection(),
@@ -488,36 +484,38 @@ function ensureDb(repo, context) {
         CommitLanguageConnection.ensureCollection(),
         CommitModuleConnection.ensureCollection(),
         ModuleModuleConnection.ensureCollection(),
-        ModuleFileConnection.ensureCollection()
-      );
+        ModuleFileConnection.ensureCollection(),
+      ]);
     });
 }
 
 function createManualIssueReferences(issueReferences) {
-  return Promise.map(_.keys(issueReferences), (sha) => {
-    const iid = issueReferences[sha];
+  return Promise.all(
+    _.keys(issueReferences).map((sha) => {
+      const iid = issueReferences[sha];
 
-    return Promise.join(Commit.findOneBySha(sha), Issue.findOneByIid(iid)).spread((commit, issue) => {
-      if (!commit) {
-        console.warn(`Ignored issue #${iid} referencing non-existing commit ${sha}`);
-        return;
-      }
-      if (!issue) {
-        console.warn(`Ignored issue #${iid} referencing commit ${sha} because the issue does not exist`);
-        return;
-      }
+      return Promise.join(Commit.findOneBySha(sha), Issue.findOneByIid(iid)).spread((commit, issue) => {
+        if (!commit) {
+          console.warn(`Ignored issue #${iid} referencing non-existing commit ${sha}`);
+          return;
+        }
+        if (!issue) {
+          console.warn(`Ignored issue #${iid} referencing commit ${sha} because the issue does not exist`);
+          return;
+        }
 
-      const existingMention = _.find(issue.mentions, (mention) => mention.commit === sha);
-      if (!existingMention) {
-        issue.mentions.push({
-          createdAt: commit.date,
-          commit: sha,
-          manual: true,
-        });
-        return issue.save();
-      }
-    });
-  });
+        const existingMention = _.find(issue.mentions, (mention) => mention.commit === sha);
+        if (!existingMention) {
+          issue.mentions.push({
+            createdAt: commit.date,
+            commit: sha,
+            manual: true,
+          });
+          return issue.save();
+        }
+      });
+    })
+  );
 }
 
 /**

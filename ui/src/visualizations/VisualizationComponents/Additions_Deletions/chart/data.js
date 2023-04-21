@@ -1,7 +1,6 @@
 'use strict';
 
 import { traversePages, graphQl } from '../../../../utils';
-import BluebirdPromise from 'bluebird';
 import chroma from 'chroma-js';
 import _ from 'lodash';
 
@@ -56,7 +55,7 @@ export default class Data {
    * @returns {*} (see below)
    */
   static getBounds() {
-    return BluebirdPromise.resolve(
+    return Promise.resolve(
       graphQl
         .query(
           `{

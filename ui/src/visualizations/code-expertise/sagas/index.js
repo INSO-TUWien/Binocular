@@ -1,7 +1,6 @@
 import { createAction } from 'redux-actions';
 import { select, throttle, fork, takeEvery } from 'redux-saga/effects';
 import _ from 'lodash';
-import Promise from 'bluebird';
 
 import { fetchFactory, timestampedActionFactory, mapSaga } from '../../../sagas/utils.js';
 
@@ -99,13 +98,18 @@ export const fetchCodeExpertiseData = fetchFactory(
     if (mode === 'issues') {
       if (issueId === null) return result;
 
-      return yield Promise.join(
+      return yield Promise.all([
         getAllCommits(),
         getIssueData(issueId),
         getCommitsForIssue(issueId),
         getAllBuildData(),
-        getBranches()
-      ).spread((allCommits, issue, issueCommits, builds, branches) => {
+        getBranches(),
+      ]).then((results) => {
+        const allCommits = results[0];
+        const issue = results[1];
+        const issueCommits = results[2];
+        const builds = results[3];
+        const branches = results[4];
         //########### current issue ###########
         result['issue'] = issue;
 

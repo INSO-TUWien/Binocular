@@ -1,6 +1,5 @@
 'use strict';
 
-import Promise from 'bluebird';
 import _ from 'lodash';
 import { connect } from 'react-redux';
 import { inflect } from 'inflection';
@@ -42,10 +41,12 @@ const IssueImpactConfigComponent = (props) => {
             placeholder="Select issue..."
             renderOption={(i) => `#${i.iid} ${i.title}`}
             search={(text) => {
-              return Promise.resolve(Database.searchIssues(text)).map((i) => {
-                i.createdAt = new Date(i.createdAt);
-                i.closedAt = i.closedAt && new Date(i.closedAt);
-                return i;
+              return Promise.resolve(Database.searchIssues(text)).then((issues) => {
+                return issues.map((i) => {
+                  i.createdAt = new Date(i.createdAt);
+                  i.closedAt = i.closedAt && new Date(i.closedAt);
+                  return i;
+                });
               });
             }}
             value={props.issue}

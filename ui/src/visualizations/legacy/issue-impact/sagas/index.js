@@ -4,8 +4,6 @@ import { createAction } from 'redux-actions';
 import { select, takeEvery, fork } from 'redux-saga/effects';
 
 import { fetchFactory, timestampedActionFactory } from '../../../../sagas/utils.js';
-import { graphQl } from '../../../../utils';
-import Promise from 'bluebird';
 import Database from '../../../../database/database';
 
 export const setActiveIssue = createAction('SET_ACTIVE_ISSUE', (i) => i);
@@ -81,10 +79,10 @@ export const fetchIssueImpactData = fetchFactory(
       return { issue: null };
     }
 
-    return yield Promise.join(
+    return yield Promise.all([
       Database.issueImpactQuery(activeIssueId, firstSignificantTimestamp, lastSignificantTimestamp),
-      Database.issueImpactQuery(activeIssueId, firstIssueTimestamp, lastIssueTimestamp)
-    ).then((resp) => {
+      Database.issueImpactQuery(activeIssueId, firstIssueTimestamp, lastIssueTimestamp),
+    ]).then((resp) => {
       return [resp[0], resp[1]];
     });
   },

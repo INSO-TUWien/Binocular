@@ -1,7 +1,6 @@
 'use strict';
 
 import { fetchFactory, mapSaga, timestampedActionFactory } from '../../../../sagas/utils';
-import Promise from 'bluebird';
 import { select, throttle, fork, takeEvery } from 'redux-saga/effects';
 import { createAction } from 'redux-actions';
 import Database from '../../../../database/database';
@@ -73,11 +72,14 @@ export const fetchBuildsData = fetchFactory(
     const timeSpan = state.visualizations.newDashboard.state.config.chartTimeSpan;
     firstSignificantTimestamp = timeSpan.from === undefined ? firstSignificantTimestamp : new Date(timeSpan.from).getTime();
     lastSignificantTimestamp = timeSpan.to === undefined ? lastSignificantTimestamp : new Date(timeSpan.to).getTime();
-    return yield Promise.join(
+    return yield Promise.all([
       Database.getBuildData([firstCommitTimestamp, lastCommitTimestamp], [firstSignificantTimestamp, lastSignificantTimestamp]),
-      Database.getBuildData([firstCommitTimestamp, lastCommitTimestamp], [firstCommitTimestamp, lastCommitTimestamp])
-    )
-      .spread((filteredBuilds, builds) => {
+      Database.getBuildData([firstCommitTimestamp, lastCommitTimestamp], [firstCommitTimestamp, lastCommitTimestamp]),
+    ])
+      .then((results) => {
+        const filteredBuilds = results[0];
+        const builds = results[1];
+
         return {
           otherCount: 0,
           filteredBuilds,
