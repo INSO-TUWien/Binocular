@@ -113,22 +113,24 @@ export default () => {
     if (currentBranch) {
       resetActiveFiles();
 
-      //get all files for file-select
-      Promise.resolve(
-        fetch(endpointUrl('files'), {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            branch: currentBranch,
-          }),
-        }).then((resp) => resp.json())
-      )
-        .then((resp) => resp.files)
-        .then((files) => {
-          setFiles(files);
-        });
+      //TODO move to saga helper file
+      Promise.resolve(graphQl.query(
+        `
+        query{
+          branch(branchName: "${currentBranch}"){
+            files{
+              data{
+                file{
+                  path
+                }
+              }
+            }
+          }
+        }
+        `,{}
+      )).then((result) => {
+        setFiles(result.branch.files.data.map(entry => entry.file.path).sort())
+      });
     }
   }, [currentBranch]);
 
