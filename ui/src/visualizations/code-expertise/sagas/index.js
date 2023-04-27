@@ -87,6 +87,10 @@ export const fetchCodeExpertiseData = fetchFactory(
     const activeFiles = state.visualizations.codeExpertise.state.config.activeFiles;
     const branch = state.visualizations.codeExpertise.state.config.currentBranch;
     const filterMergeCommits = state.visualizations.codeExpertise.state.config.filterMergeCommits;
+    const offlineMode = state.config.offlineMode;
+
+
+    console.log("OFFLINE MODE: ", offlineMode)
 
     const result = {
       devData: {},
@@ -153,6 +157,9 @@ export const fetchCodeExpertiseData = fetchFactory(
           //add commits to each stakeholder
           result['devData'][stakeholder]['commits'] = commitsByStakeholders[stakeholder];
 
+          //initialize linesOwned with 0. If program runs in online mode, this will be updated later
+          result['devData'][stakeholder]['linesOwned'] = 0;
+
           //for each stakeholder, sum up relevant additions
           result['devData'][stakeholder]['additions'] = _.reduce(
             commitsByStakeholders[stakeholder],
@@ -170,6 +177,11 @@ export const fetchCodeExpertiseData = fetchFactory(
         }
 
         //########### add ownership data to commits ###########
+
+        //if the program runs in offline mode, don't add ownership data since this requires a back end connection
+        if(offlineMode)  {
+          return result;
+        }
 
         //get latest commit of the branch
         const latestRelevantCommit = relevantCommits.sort((a, b) => new Date(b.date) - new Date(a.date))[0];
@@ -251,6 +263,9 @@ export const fetchCodeExpertiseData = fetchFactory(
           //add commits to each stakeholder
           result['devData'][stakeholder]['commits'] = commitsByStakeholders[stakeholder];
 
+          //initialize linesOwned with 0. If program runs in online mode, this will be updated later
+          result['devData'][stakeholder]['linesOwned'] = 0;
+
           //for each stakeholder, sum up relevant additions
           result['devData'][stakeholder]['additions'] = _.reduce(
             commitsByStakeholders[stakeholder],
@@ -286,6 +301,11 @@ export const fetchCodeExpertiseData = fetchFactory(
         }
 
         //########### add ownership data to commits ###########
+
+        //if the program runs in offline mode, don't add ownership data since this requires a back end connection
+        if(offlineMode)  {
+          return result;
+        }
 
         //get latest commit of the branch
         const latestBranchCommit = branchCommits.sort((a, b) => new Date(b.date) - new Date(a.date))[0];

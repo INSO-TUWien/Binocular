@@ -33,6 +33,20 @@ export function getBlameIssues(sha, files, hashes) {
   }).then((resp) => resp.json());
 }
 
+export function getIssues() {
+  return Promise.resolve(
+    graphQl.query(
+    `
+    query{
+     issues(sort: "ASC"){
+        data{iid, title}
+      }
+    }
+    `, {}
+    )
+  ).then((resp) => resp.issues.data)
+}
+
 export function getCommitsForIssue(iid) {
   return collectPages(getCommitsForIssuePage(iid)).then((commits) => {
     return commits.map((commit) => {
@@ -109,6 +123,24 @@ export function getBranches() {
       {}
     )
     .then((resp) => resp.branches.data);
+}
+
+export function getFilesForBranch(branchName) {
+  return Promise.resolve(graphQl.query(
+    `
+    query{
+      branch(branchName: "${branchName}"){
+        files{
+          data{
+            file{
+              path
+            }
+          }
+        }
+      }
+    }
+    `,{}
+  )).then((result) => result.branch.files.data.map(entry => entry.file.path).sort())
 }
 
 export function addBuildData(relevantCommits, builds) {
