@@ -123,7 +123,6 @@ export default class CIBuilds extends React.Component {
         //Iterate through commits that fall into this time bucket
         const buildDate = Date.parse(builds[i].createdAt);
         if (buildDate >= currTimestamp && buildDate < nextTimestamp) {
-          console.log(builds[i]);
           obj.succeeded += builds[i].stats.success || 0;
           obj.canceled += builds[i].stats.canceled || -0.001;
           obj.failed += builds[i].stats.failed || -0.001; //-0.001 for stack layout to realize it belongs on the bottom
