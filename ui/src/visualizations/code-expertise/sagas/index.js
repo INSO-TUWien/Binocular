@@ -199,9 +199,11 @@ export const fetchCodeExpertiseData = fetchFactory(
     } else if (mode === 'modules') {
       if (activeFiles === null || activeFiles.length === 0) return result;
 
-      return yield Promise.join(getAllCommits(), getAllBuildData(), getBranches()).spread((allCommits, builds, branches) => {
+      return yield Promise.all([getAllCommits(), getAllBuildData(), getBranches()]).then((results) => {
+        const allCommits = results[0];
+        const builds = results[1];
+        const branches = results[2];
         //########### get all relevant commits ###########
-
         //get full branch object for current branch
         const currentBranchObject = branches.filter((b) => b.branch === branch)[0];
 

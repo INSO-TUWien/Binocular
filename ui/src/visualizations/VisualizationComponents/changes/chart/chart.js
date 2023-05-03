@@ -203,8 +203,6 @@ export default class Changes extends React.Component {
                       } else {
                         obj[committer] = commit.statsByAuthor[c.signature].count;
                       }
-
-                      obj[committer] += commit.statsByAuthor[c.signature].count;
                     }
                   });
                 }
