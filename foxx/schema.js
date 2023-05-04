@@ -230,7 +230,6 @@ const queryType = new gql.GraphQLObjectType({
           // //TODO: RETURN MERGE(build, { stats: MERGE(countsByStatus) })`;
 
           // return q;
-
           if (args.since && args.until) {
             return aql`
           FOR build IN ${builds}
@@ -239,10 +238,8 @@ const queryType = new gql.GraphQLObjectType({
             FILTER DATE_TIMESTAMP(build.createdAt) >= DATE_TIMESTAMP(${args.since})
             FILTER DATE_TIMESTAMP(build.createdAt) <= DATE_TIMESTAMP(${args.until})
             LET countsByStatus = (
-              FOR other IN ${builds}
-                FILTER other.finishedAt <= build.createdAt
-                COLLECT status = other.status WITH COUNT INTO statusCount
-                RETURN { [status]: statusCount }
+              COLLECT status = build.status WITH COUNT INTO statusCount
+              RETURN { [status]: statusCount }
             )
             RETURN MERGE(build, { stats: MERGE(countsByStatus) })`;
           }
@@ -251,10 +248,8 @@ const queryType = new gql.GraphQLObjectType({
             SORT build.createdAt ASC
             ${limit}
             LET countsByStatus = (
-              FOR other IN ${builds}
-                FILTER other.finishedAt <= build.createdAt
-                COLLECT status = other.status WITH COUNT INTO statusCount
-                RETURN { [status]: statusCount }
+              COLLECT status = build.status WITH COUNT INTO statusCount
+              RETURN { [status]: statusCount }
             )
             RETURN MERGE(build, { stats: MERGE(countsByStatus) })`;
         },

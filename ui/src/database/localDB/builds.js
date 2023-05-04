@@ -19,7 +19,7 @@ export default class Builds {
   static getBuildData(db, commitSpan, significantSpan) {
     // add stats object to each build
     return findAll(db, 'builds').then((res) => {
-      const emptyStats = { success: 0, failed: 0, pending: 0, canceled: 0 };
+      const emptyStats = { success: 0, failed: 0, pending: 0, cancelled: 0 };
 
       return res.docs.map((build) => {
         const stats = Object.assign({}, emptyStats);
@@ -28,10 +28,11 @@ export default class Builds {
           stats.success = 1;
         } else if (build.status === 'failed' || build.status === 'errored') {
           stats.failed = 1;
+        } else if (build.status === 'cancelled') {
+          stats.cancelled = 1;
         }
 
         build.stats = stats;
-
         return build;
       });
     });
@@ -46,7 +47,7 @@ export default class Builds {
           success: 0,
           failed: 0,
           pending: 0,
-          canceled: 0,
+          cancelled: 0,
         },
       },
     ];
@@ -60,7 +61,7 @@ export default class Builds {
             date: new Date(next),
             stats: _.defaults(
               {
-                total: (build.stats.success || 0) + (build.stats.failed || 0) + (build.stats.pending || 0) + (build.stats.canceled || 0),
+                total: (build.stats.success || 0) + (build.stats.failed || 0) + (build.stats.pending || 0) + (build.stats.cancelled || 0),
               },
               build.stats
             ),
