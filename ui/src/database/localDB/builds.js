@@ -28,6 +28,8 @@ export default class Builds {
           stats.success = 1;
         } else if (build.status === 'failed' || build.status === 'errored') {
           stats.failed = 1;
+        } else if (build.status === 'cancelled') {
+          stats.cancelled = 1;
         }
 
         build.stats = stats;
