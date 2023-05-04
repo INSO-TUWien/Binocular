@@ -26,7 +26,7 @@ export default class Builds {
                   success
                   failed
                   pending
-                  canceled
+                  cancelled
                 }
               }
             }
@@ -52,7 +52,7 @@ export default class Builds {
           success: 0,
           failed: 0,
           pending: 0,
-          canceled: 0,
+          cancelled: 0,
         },
       },
     ];
@@ -74,7 +74,7 @@ export default class Builds {
             success
             failed
             pending
-            canceled
+            cancelled
           }
         }
       }
@@ -92,7 +92,7 @@ export default class Builds {
           date: new Date(next),
           stats: _.defaults(
             {
-              total: (build.stats.success || 0) + (build.stats.failed || 0) + (build.stats.pending || 0) + (build.stats.canceled || 0),
+              total: (build.stats.success || 0) + (build.stats.failed || 0) + (build.stats.pending || 0) + (build.stats.cancelled || 0),
             },
             build.stats
           ),

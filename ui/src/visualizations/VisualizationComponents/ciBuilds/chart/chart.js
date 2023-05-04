@@ -40,7 +40,7 @@ export default class CIBuilds extends React.Component {
           {this.state.ciChartData !== undefined && this.state.ciChartData.length > 0 ? (
             <StackedAreaChart
               content={this.state.ciChartData}
-              palette={{ Succeeded: '#26ca3b', Canceled: '#aaaaaa', Failed: '#e23b41' }}
+              palette={{ Succeeded: '#26ca3b', Cancelled: '#aaaaaa', Failed: '#e23b41' }}
               paddings={{ top: 20, left: 60, bottom: 20, right: 30 }}
               xAxisCenter={true}
               yDims={this.state.ciScale}
@@ -63,7 +63,7 @@ export default class CIBuilds extends React.Component {
 
     const legend = (
       <div className={styles.legend}>
-        <LegendCompact text="Succeeded | Failed | Canceled" color="#26ca3b" color2="#e23b41" color3="#aaaaaa" />
+        <LegendCompact text="Succeeded | Failed | Cancelled" color="#26ca3b" color2="#e23b41" color3="#aaaaaa" />
       </div>
     );
 
@@ -118,13 +118,13 @@ export default class CIBuilds extends React.Component {
       //Iterate through time buckets
       const currTimestamp = curr.toDate().getTime();
       const nextTimestamp = next.toDate().getTime();
-      const obj = { date: currTimestamp, succeeded: 0, canceled: 0, failed: 0 }; //Save date of time bucket, create object
+      const obj = { date: currTimestamp, succeeded: 0, cancelled: 0, failed: 0 }; //Save date of time bucket, create object
       for (; i < builds.length && Date.parse(builds[i].createdAt) < nextTimestamp; i++) {
         //Iterate through commits that fall into this time bucket
         const buildDate = Date.parse(builds[i].createdAt);
         if (buildDate >= currTimestamp && buildDate < nextTimestamp) {
           obj.succeeded += builds[i].stats.success || 0;
-          obj.canceled += builds[i].stats.canceled || -0.001;
+          obj.cancelled += builds[i].stats.cancelled || -0.001;
           obj.failed += builds[i].stats.failed || -0.001; //-0.001 for stack layout to realize it belongs on the bottom
         }
       }
@@ -138,14 +138,14 @@ export default class CIBuilds extends React.Component {
       ciChartData.push({
         date: build.date,
         Succeeded: build.succeeded,
-        Canceled: build.canceled > 0 ? build.canceled * -1 : 0,
+        Cancelled: build.cancelled > 0 ? build.cancelled * -1 : 0,
         Failed: build.failed > 0 ? build.failed * -1 : 0,
       });
       if (ciScale[1] < build.succeeded) {
         ciScale[1] = build.succeeded;
       }
-      if (ciScale[0] > (build.failed + build.canceled) * -1) {
-        ciScale[0] = (build.failed + build.canceled) * -1;
+      if (ciScale[0] > (build.failed + build.cancelled) * -1) {
+        ciScale[0] = (build.failed + build.cancelled) * -1;
       }
     });
 
