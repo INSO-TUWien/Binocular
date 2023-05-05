@@ -14,6 +14,7 @@ import {
   getBlameModules,
   getBlameIssues,
   getBranches,
+  getFilesForCommits,
 } from './helper.js';
 
 //define actions
@@ -134,7 +135,7 @@ export const fetchCodeExpertiseData = fetchFactory(
             return false;
           }
 
-          return issueCommits.map((c) => c.sha).includes(commit.sha);
+          return issueCommits.includes(commit.sha);
         });
 
         if (relevantCommits.length === 0) {
@@ -143,8 +144,6 @@ export const fetchCodeExpertiseData = fetchFactory(
 
         //########### add build data to commits ###########
         relevantCommits = addBuildData(relevantCommits, builds);
-
-        const issueFiles = new Set();
 
         //########### extract data for each stakeholder ###########
 
@@ -163,12 +162,7 @@ export const fetchCodeExpertiseData = fetchFactory(
           //for each stakeholder, sum up relevant additions
           result['devData'][stakeholder]['additions'] = _.reduce(
             commitsByStakeholders[stakeholder],
-            (sum, commit) => {
-              //while we are at it, add all files of the commit to issueFiles for later
-              commit.files.data.map((file) => {
-                issueFiles.add(file.file.path);
-              });
-
+            (sum, commit) => {              
               //we are interested in all additions made in each commit
               return sum + commit.stats.additions;
             },
@@ -183,13 +177,14 @@ export const fetchCodeExpertiseData = fetchFactory(
           return result;
         }
 
-        //get latest commit of the branch
+        //get latest relevant commit of the branch
         const latestRelevantCommit = relevantCommits.sort((a, b) => new Date(b.date) - new Date(a.date))[0];
 
         //hashes of all commits related to the issue
         const hashes = relevantCommits.map((commit) => commit.sha);
 
-        return Promise.resolve(getBlameIssues(latestRelevantCommit.sha, [...issueFiles], hashes))
+        return Promise.resolve(getFilesForCommits(hashes))
+          .then((files) => getBlameIssues(latestRelevantCommit.sha, [...new Set(files.map((file) => file.file.path))], hashes))
           .then((res) => {
             Object.entries(res.blame).map((item) => {
               const devMail = item[0];
@@ -231,6 +226,8 @@ export const fetchCodeExpertiseData = fetchFactory(
           if (filterMergeCommits && c.parents.includes(',')) {
             return false;
           }
+
+          //TODO files are not stored in commits anymore! fetch separately
 
           //extract all filepaths of the commit
           const filePathsTouchedByCommit = c.files.data.map((fileObject) => fileObject.file.path);

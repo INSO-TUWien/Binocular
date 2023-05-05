@@ -117,6 +117,14 @@ export default class LocalDB {
     return Issues.getIssueData(db, issueSpan, significantSpan);
   }
 
+  static getCommitsForIssue(iid) {
+    return Issues.getCommitsForIssue(db, iid);
+  }
+
+  static getCommitDataWithFiles() {
+    return Commits.getCommitDataWithFiles(db, tripleStore);
+  }
+
   static getCommitDataOwnershipRiver(commitSpan, significantSpan, granularity, interval) {
     return Commits.getCommitDataOwnershipRiver(db, commitSpan, significantSpan, granularity, interval);
   }
@@ -147,6 +155,11 @@ export default class LocalDB {
 
   static requestFileStructure() {
     return Files.requestFileStructure(db);
+  }
+
+  static getFilenamesForBranch(branchName) {
+    //TODO
+    return [];
   }
 
   static getAllBranches() {

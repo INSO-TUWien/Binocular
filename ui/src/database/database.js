@@ -32,6 +32,14 @@ export default class Database {
     }
   }
 
+  static async getCommitDataWithFiles() {
+    if (await this.checkBackendConnection()) {
+      return ServerDB.getCommitDataWithFiles();
+    } else {
+      return LocalDB.getCommitDataWithFiles();
+    }
+  }
+
   static async getCommitDataOwnershipRiver(commitSpan, significantSpan, granularity, interval) {
     if (await this.checkBackendConnection()) {
       return ServerDB.getCommitDataOwnershipRiver(commitSpan, significantSpan, granularity, interval);
@@ -94,6 +102,14 @@ export default class Database {
     }
   }
 
+  static async getCommitsForIssue(iid) {
+    if (await this.checkBackendConnection()) {
+      return ServerDB.getCommitsForIssue(iid);
+    } else {
+      return LocalDB.getCommitsForIssue(iid);
+    }
+  }
+
   static async getIssueDataOwnershipRiver(issueSpan, significantSpan, granularity, interval) {
     if (await this.checkBackendConnection()) {
       return ServerDB.getIssueDataOwnershipRiver(issueSpan, significantSpan, granularity, interval);
@@ -134,6 +150,23 @@ export default class Database {
       return ServerDB.requestFileStructure();
     } else {
       return LocalDB.requestFileStructure();
+    }
+  }
+
+  static async getFilenamesForBranch(branchName) {
+    if (await this.checkBackendConnection()) {
+      return ServerDB.getFilenamesForBranch(branchName);
+    } else {
+      return LocalDB.getFilenamesForBranch(branchName);
+    }
+  }
+
+  static async getFilesForCommits(hashes) {
+    if (await this.checkBackendConnection()) {
+      return ServerDB.getFilesForCommits(hashes);
+    } else {
+      //TODO
+      return []
     }
   }
 

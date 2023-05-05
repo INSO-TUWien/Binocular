@@ -19,9 +19,11 @@ export default class Issues {
               perPage
               count
               data {
+                iid
                 title
                 createdAt
                 closedAt
+                webUrl
                 author{
                   login
                   name
@@ -39,6 +41,25 @@ export default class Issues {
     }).then(function () {
       return issueList;
     });
+  }
+
+  static getCommitsForIssue(iid) {
+    return graphQl
+        .query(
+          `query{
+             issue (iid: ${iid}){
+              
+              commits {
+                count
+                data {
+                  sha
+                }
+              }
+             }
+           }`,
+          { iid }
+        )
+        .then((resp) => resp.issue.commits.data.map(c => c.sha));
   }
 
   static getIssueDataOwnershipRiver(issueSpan, significantSpan, granularity, interval) {

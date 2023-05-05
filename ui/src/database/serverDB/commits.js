@@ -18,6 +18,7 @@ export default class Commits {
                data {
                  sha
                  shortSha
+                 history
                  message
                  messageHeader
                  signature
@@ -42,6 +43,42 @@ export default class Commits {
     }).then(function () {
       return commitList;
     });
+  }
+
+  static getCommitDataWithFiles() {
+    return graphQl
+    .query(
+      `query {
+         commits {
+          count,
+          data {
+            sha,
+            branch,
+            history,
+            message,
+            signature,
+            webUrl,
+            date,
+            parents,
+            stats {
+              additions,
+              deletions
+            }
+            files{
+              data {
+                file{
+                  path
+                }
+                stats {additions,deletions},
+                hunks {newLines}
+              }
+            }
+          }
+         }
+       }`,
+      {}
+    )
+    .then((resp) => resp.commits.data);
   }
 
   static getCommitDataOwnershipRiver(commitSpan, significantSpan, granularity, interval) {

@@ -70,6 +70,29 @@ export default class Issues {
     });
   }
 
+  static getCommitsForIssue(db, issueId) {
+    let iid;
+    if(typeof issueId == 'string') {
+      iid = parseInt(issueId);
+    } else {
+      iid = issueId;
+    }
+
+    return findIssue(db, iid).then(async (resIssue) => {
+      const issue = resIssue.docs[0];
+      let result = []
+      for (const mentionedCommit of issue.mentions) {
+        if(mentionedCommit.commit !== null) {
+          result.push(mentionedCommit.commit);
+        }
+      }
+      return result;
+    });
+  }
+
+
+
+
   static getIssueDataOwnershipRiver(db, issueSpan, significantSpan, granularity, interval) {
     // holds close dates of still open issues, kept sorted at all times
     const pendingCloses = [];

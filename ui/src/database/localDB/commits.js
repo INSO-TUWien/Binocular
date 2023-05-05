@@ -62,6 +62,41 @@ export default class Commits {
     });
   }
 
+  //TODO this is way too slow to fetch all commits
+  static getCommitDataWithFiles(db, relations) {
+
+    return findAll(db, 'commits').then(async (res) => {
+
+      const commits = res.docs;
+
+      const result = [];
+
+      for(let commit of commits) {
+        commit.files = {};
+
+        const fileCommitConnections = (await findFileCommitConnections(relations)).docs;
+        const relevantConnections = fileCommitConnections.filter((fCC) => fCC.to === commit._id);
+
+        //concurrently
+        commit.files.data = await Promise.all(relevantConnections.map(async (connection) => {
+          let resultFile = await (findID(db, connection.from));
+          resultFile = resultFile.docs;
+          if(resultFile.length > 0) {
+            const file = resultFile[0];
+            const res = { file: {} };
+            res.file.path = file.path;
+            res.stats = connection.stats;
+            res.hunks = connection.hunks;
+            return res
+          }
+        }))
+        result.push(commit);
+      }
+
+      return result;
+    });
+  }
+
   static getCommitDataOwnershipRiver(db, commitSpan, significantSpan, granularity, interval) {
     const statsByAuthor = {};
 
