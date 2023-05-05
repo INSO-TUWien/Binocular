@@ -2,6 +2,8 @@
 
 import { handleActions } from 'redux-actions';
 import _ from 'lodash';
+import { getContext } from './../../../utils/context';
+const ctx = getContext();
 
 export default handleActions(
   {
@@ -41,7 +43,7 @@ export default handleActions(
 
 function updateLocalStorage(key, value) {
   let currConfig = {};
-  if (localStorage.getItem('universalConfig') === null) {
+  if (localStorage.getItem(ctx.repo.name + '-universalConfig') === null) {
     currConfig = {
       chartResolution: 'months',
       chartTimeSpan: { from: undefined, to: undefined },
@@ -50,16 +52,16 @@ function updateLocalStorage(key, value) {
       otherAuthors: [],
     };
   } else {
-    currConfig = JSON.parse(localStorage.getItem('universalConfig'));
+    currConfig = JSON.parse(localStorage.getItem(ctx.repo.name + '-universalConfig'));
   }
   currConfig[key] = value;
 
-  localStorage.setItem('universalConfig', JSON.stringify(currConfig));
+  localStorage.setItem(ctx.repo.name + '-universalConfig', JSON.stringify(currConfig));
 }
 
 function getLocalStorage() {
   let currConfig = {};
-  if (localStorage.getItem('universalConfig') === null) {
+  if (localStorage.getItem(ctx.repo.name + '-universalConfig') === null) {
     currConfig = {
       chartResolution: 'months',
       chartTimeSpan: { from: undefined, to: undefined },
@@ -68,7 +70,7 @@ function getLocalStorage() {
       otherAuthors: [],
     };
   } else {
-    currConfig = JSON.parse(localStorage.getItem('universalConfig'));
+    currConfig = JSON.parse(localStorage.getItem(ctx.repo.name + '-universalConfig'));
   }
   return currConfig;
 }

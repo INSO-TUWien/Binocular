@@ -16,6 +16,7 @@ import Languages from './localDB/languages';
 import Modules from './localDB/modules';
 import Stakeholders from './localDB/stakeholders';
 
+/// #if ENV === 'production'
 import branches from '../../db_export/branches.json';
 import builds from '../../db_export/builds.json';
 import commitsCommits from '../../db_export/commits-commits.json';
@@ -49,6 +50,7 @@ const relations = {
   'modules-files': modulesFiles,
   'modules-modules': modulesModules,
 };
+/// #endif
 
 // create database, index on _id and triple store
 const db = new PouchDB('Binocular_collections', { adapter: 'memory' });

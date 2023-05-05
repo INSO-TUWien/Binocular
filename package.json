@@ -114,6 +114,7 @@
     "graphql-tag": "^2.12.6",
     "guyllkegen-react-sticky-mouse-tooltip": "1.1.0",
     "https-browserify": "^1.0.0",
+    "ifdef-loader": "^2.3.2",
     "inflection": "^2.0.1",
     "isomorphic-fetch": "^3.0.0",
     "isomorphic-git": "^1.22.0",
