@@ -17,6 +17,7 @@ import Modules from './localDB/modules';
 import Stakeholders from './localDB/stakeholders';
 
 import branches from '../../db_export/branches.json';
+import branchesFiles from '../../db_export/branches-files.json';
 import builds from '../../db_export/builds.json';
 import commitsCommits from '../../db_export/commits-commits.json';
 import commitsFiles from '../../db_export/commits-files.json';
@@ -48,6 +49,7 @@ const relations = {
   'languages-files': languagesFiles,
   'modules-files': modulesFiles,
   'modules-modules': modulesModules,
+  'branches-files': branchesFiles,
 };
 
 // create database, index on _id and triple store
@@ -158,8 +160,7 @@ export default class LocalDB {
   }
 
   static getFilenamesForBranch(branchName) {
-    //TODO
-    return [];
+    return Files.getFilenamesForBranch(db, tripleStore, branchName);
   }
 
   static getAllBranches() {
@@ -200,6 +201,7 @@ export default class LocalDB {
     database.languages_files = relations['languages-files'];
     database.modules_files = relations['modules-files'];
     database.modules_modules = relations['modules-modules'];
+    database.branches_files = relations['branches-files'];
 
     return database;
   }

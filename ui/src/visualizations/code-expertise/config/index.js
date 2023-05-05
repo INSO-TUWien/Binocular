@@ -8,7 +8,7 @@ import TabCombo from '../../../components/TabCombo.js';
 import FilePicker from './filePicker/index.js';
 import styles from '../styles.scss';
 import { setActiveIssue, setMode, setCurrentBranch, setActiveFiles, setFilterMergeCommits, setOnlyDisplayOwnership } from '../sagas';
-import { getBranches, getFilesForBranch, getIssues } from '../sagas/helper.js';
+import { getBranches, getFilenamesForBranch, getIssues } from '../sagas/helper.js';
 
 export default () => {
 
@@ -101,7 +101,7 @@ export default () => {
   useEffect(() => {
     if (currentBranch) {
       resetActiveFiles();
-      getFilesForBranch(currentBranch).then((files) => setFiles(files));
+      getFilenamesForBranch(currentBranch).then((files) => setFiles(files));
     }
   }, [currentBranch]);
 

@@ -58,7 +58,7 @@ export function getBranches() {
   return Database.getAllBranches().then((resp) => resp.branches.data);
 }
 
-export function getFilesForBranch(branchName) {
+export function getFilenamesForBranch(branchName) {
   return Database.getFilenamesForBranch(branchName);
 }
 
