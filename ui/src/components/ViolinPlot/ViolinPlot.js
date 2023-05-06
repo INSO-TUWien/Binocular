@@ -68,13 +68,13 @@ export default class ViolinPlot extends React.Component {
     //FIXME
     return d3
       .area()
-      .x(function(d) {
+      .x(function (d) {
         return scales.x(d.data.date);
       })
-      .y0(function(d) {
+      .y0(function (d) {
         return scales.y(d[0]);
       })
-      .y1(function(d) {
+      .y1(function (d) {
         return scales.y(d[1]);
       })
       .curve(d3.curveMonotoneX);
@@ -91,7 +91,7 @@ export default class ViolinPlot extends React.Component {
 
     let orderedKeys = [];
     if (order) {
-      _.each(order, orderElem => {
+      _.each(order, (orderElem) => {
         if (keys.includes('(Additions) ' + orderElem) && keys.includes('(Deletions) ' + orderElem)) {
           orderedKeys.push('(Additions) ' + orderElem);
           orderedKeys.push('(Deletions) ' + orderElem);
@@ -166,8 +166,8 @@ export default class ViolinPlot extends React.Component {
     tooltip
       .html(formattedDate + '<hr/>' + '<div style="background: ' + palette[key] + '">' + '</div>' + text + ': ' + Math.round(value))
       .style('position', 'absolute')
-      .style('left', event.layerX - 30 + 'px')
-      .style('top', event.layerY + (node.getBoundingClientRect() || { y: 0 }).y - 100 + 'px');
+      .style('left', event.layerX - 20 + 'px')
+      .style('top', event.layerY - 55 + 'px');
 
     this.paintDataPoint(brushArea, scales.x(nearestDataPoint.date), scales.y(chartValues.y1), scales.y(chartValues.y2), palette[key]);
   }
@@ -218,9 +218,9 @@ export default class ViolinPlot extends React.Component {
    */
   findChartValues(data, key, timeValue) {
     let foundValues = [];
-    _.each(data, series => {
+    _.each(data, (series) => {
       if (series.key === key) {
-        _.each(series, dataPoint => {
+        _.each(series, (dataPoint) => {
           if (dataPoint.data.date === timeValue) {
             foundValues = dataPoint;
             return false;
@@ -253,11 +253,11 @@ export default class ViolinPlot extends React.Component {
   render() {
     return (
       <div className={this.styles.chartDiv}>
-        <svg className={this.styles.chartSvg} ref={svg => (this.svgRef = svg)} />
-        <div className={this.styles.tooltip} ref={div => (this.tooltipRef1 = div)} />
-        <div className={this.styles.tooltip} ref={div => (this.tooltipRef2 = div)} />
-        <div className={this.styles.tooltip} ref={div => (this.tooltipRef3 = div)} />
-        <div className={this.styles.tooltip} ref={div => (this.tooltipRef4 = div)} />
+        <svg className={this.styles.chartSvg} ref={(svg) => (this.svgRef = svg)} />
+        <div className={this.styles.tooltip} ref={(div) => (this.tooltipRef1 = div)} />
+        <div className={this.styles.tooltip} ref={(div) => (this.tooltipRef2 = div)} />
+        <div className={this.styles.tooltip} ref={(div) => (this.tooltipRef3 = div)} />
+        <div className={this.styles.tooltip} ref={(div) => (this.tooltipRef4 = div)} />
       </div>
     );
   }
@@ -313,7 +313,10 @@ export default class ViolinPlot extends React.Component {
     const area = this.createAreaFunction(scales);
 
     //Brush generator for brush-zoom functionality, with referenced callback-function
-    const brush = d3.brushX().extent([[paddings.left, 0], [width - paddings.right, height]]);
+    const brush = d3.brushX().extent([
+      [paddings.left, 0],
+      [width - paddings.right, height]
+    ]);
 
     //Remove old data
     svg.selectAll('*').remove();
@@ -322,7 +325,7 @@ export default class ViolinPlot extends React.Component {
     const { brushArea, axes } = this.drawChart(svg, area, brush, yScale, scales, height, width, paddings);
 
     //Set callback for brush-zoom functionality
-    brush.on('end', event => this.updateZoom(event.selection, scales, axes, brush, brushArea, area));
+    brush.on('end', (event) => this.updateZoom(event.selection, scales, axes, brush, brushArea, area));
     //Set callback to reset zoom on double-click
     svg.on('dblclick', () => this.resetZoom(scales, axes, brushArea, area));
   }
@@ -443,8 +446,8 @@ export default class ViolinPlot extends React.Component {
       .attr('x', paddings.left)
       .attr('y', 0);
 
-    const start_date = d3.min(this.state.data.data, d => d.date);
-    const end_date = d3.max(this.state.data.data, d => d.date);
+    const start_date = d3.min(this.state.data.data, (d) => d.date);
+    const end_date = d3.max(this.state.data.data, (d) => d.date);
 
     this.createPoints(brushArea, start_date, 'START', tooltip2, scales, svg.node());
     this.createPoints(brushArea, end_date, 'END', tooltip3, scales, svg.node());
@@ -488,10 +491,13 @@ export default class ViolinPlot extends React.Component {
    * @returns {*}
    */
   createYAxis(brushArea, scales, width, height, paddings) {
-    const yAxis = brushArea.append('g').attr('class', this.styles.axis).attr('transform', 'translate(' + paddings.left + ',0)');
+    const yAxis = brushArea
+      .append('g')
+      .attr('class', this.styles.axis)
+      .attr('transform', 'translate(' + paddings.left + ',0)');
 
     if (!this.props.hideVertical) {
-      yAxis.call(d3.axisLeft(scales.y).tickFormat(d => (this.props.displayNegative ? d : Math.abs(d))));
+      yAxis.call(d3.axisLeft(scales.y).tickFormat((d) => (this.props.displayNegative ? d : Math.abs(d))));
     }
     return yAxis;
   }
@@ -519,7 +525,7 @@ export default class ViolinPlot extends React.Component {
   setBrushArea(brushArea, brush, area, tooltip, svg, scales) {
     brushArea.append('g').attr('class', 'brush').call(brush);
 
-    const bisectDate = d3.bisector(d => d.date).left;
+    const bisectDate = d3.bisector((d) => d.date).left;
     const _this = this;
 
     //Append data to svg using the area generator and palette
@@ -529,7 +535,7 @@ export default class ViolinPlot extends React.Component {
       .data(this.state.data.stackedData)
       .enter()
       .append('path')
-      .attr('class', data => `layers ${_this.getBrushClass(data)}`)
+      .attr('class', (data) => `layers ${_this.getBrushClass(data)}`)
       .classed(this.styles.layer, !!this.styles.layer)
       .classed('layer', true)
       .attr('id', _this.getBrushId)
@@ -539,13 +545,13 @@ export default class ViolinPlot extends React.Component {
       .attr('stroke', this.getLayerStrokeColor.bind(this))
       .attr('d', area)
       .attr('clip-path', 'url(#clip)')
-      .on('mouseenter', function(event, stream) {
+      .on('mouseenter', function (event, stream) {
         return _this.onMouseover.bind(_this, this, tooltip, brushArea)(event, stream);
       })
-      .on('mouseout', function(event, stream) {
+      .on('mouseout', function (event, stream) {
         return _this.onMouseLeave.bind(_this, this, tooltip, brushArea)(event, stream);
       })
-      .on('mousemove', function(event, stream) {
+      .on('mousemove', function (event, stream) {
         //Calculate values and text for tooltip
         const node = svg.node();
         const pointer = d3.pointer(event, node);
@@ -607,7 +613,7 @@ export default class ViolinPlot extends React.Component {
    * @returns scroll event
    */
   createScrollEvent(svg, scales, axes, brushArea, area) {
-    return event => {
+    return (event) => {
       const direction = event.deltaY > 0 ? 'down' : 'up';
       let zoomedDims = [...this.getYDims()];
       let top = zoomedDims[1],
