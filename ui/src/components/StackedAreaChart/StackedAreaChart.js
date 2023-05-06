@@ -36,7 +36,7 @@ export default class StackedAreaChart extends ScalableBaseChartComponent {
    * @returns {[]}
    */
   getXDims() {
-    return [d3.min(this.state.data.data, d => d.date), d3.max(this.state.data.data, d => d.date)];
+    return [d3.min(this.state.data.data, (d) => d.date), d3.max(this.state.data.data, (d) => d.date)];
   }
 
   // eslint-disable-next-line no-unused-vars
@@ -53,13 +53,13 @@ export default class StackedAreaChart extends ScalableBaseChartComponent {
     //Area generator for the chart
     return d3
       .area()
-      .x(function(d) {
+      .x(function (d) {
         return scales.x(d.data.date);
       })
-      .y0(function(d) {
+      .y0(function (d) {
         return scales.y(d[0]);
       })
-      .y1(function(d) {
+      .y1(function (d) {
         return scales.y(d[1]);
       })
       .curve(d3.curveMonotoneX);
@@ -77,7 +77,7 @@ export default class StackedAreaChart extends ScalableBaseChartComponent {
 
     let orderedKeys = [];
     if (order) {
-      _.each(order, orderElem => {
+      _.each(order, (orderElem) => {
         if (keys.includes('(Additions) ' + orderElem) && keys.includes('(Deletions) ' + orderElem)) {
           orderedKeys.push('(Additions) ' + orderElem);
           orderedKeys.push('(Deletions) ' + orderElem);
@@ -152,7 +152,7 @@ export default class StackedAreaChart extends ScalableBaseChartComponent {
       .html(formattedDate + '<hr/>' + '<div style="background: ' + palette[key] + '">' + '</div>' + text + ': ' + Math.round(value))
       .style('position', 'absolute')
       .style('left', event.layerX - 20 + 'px')
-      .style('top', event.layerY + (node.getBoundingClientRect() || { y: 0 }).y - 70 + 'px');
+      .style('top', event.layerY - 70 + 'px');
 
     this.paintDataPoint(brushArea, scales.x(nearestDataPoint.date), scales.y(chartValues.y1), scales.y(chartValues.y2), palette[key]);
   }
@@ -203,9 +203,9 @@ export default class StackedAreaChart extends ScalableBaseChartComponent {
    */
   findChartValues(data, key, timeValue) {
     let foundValues = [];
-    _.each(data, series => {
+    _.each(data, (series) => {
       if (series.key === key) {
-        _.each(series, dataPoint => {
+        _.each(series, (dataPoint) => {
           if (dataPoint.data.date === timeValue) {
             foundValues = dataPoint;
             return false;
