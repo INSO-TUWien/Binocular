@@ -16,14 +16,14 @@ export default class IssueStream {
   init(ticketId, webUrl) {
     this.data = Object.freeze({
       ticketId,
-      webUrl
+      webUrl,
     });
     this.__values = [];
   }
 
   copyCtor(data) {
     this.data = Object.freeze(Object.assign({}, data.data));
-    this.__values = data.__values.map(issue => new IssueData(issue));
+    this.__values = data.__values.map((issue) => new IssueData(issue));
     this.__start = data.start;
     delete this.__start.__values;
     this.__end = data.end;
@@ -41,7 +41,7 @@ export default class IssueStream {
   }
 
   pushCommits(commits) {
-    commits.forEach(commit => this.__values.push(new IssueData(commit.sha, IssueStat.InProgress, commit.webUrl)));
+    commits.forEach((commit) => this.__values.push(new IssueData(commit.sha, IssueStat.InProgress, commit.webUrl)));
     return this;
   }
 
@@ -118,7 +118,7 @@ export class IssueData {
       sha,
       status,
       webUrl,
-      date
+      date,
     });
     this.values = [];
   }
@@ -151,9 +151,9 @@ export class IssueColor {
 
     const create = (name, key) =>
       Object.defineProperty(this, name, {
-        get: function() {
+        get: function () {
           return this.data[key];
-        }
+        },
       });
 
     create('ticket', 0);

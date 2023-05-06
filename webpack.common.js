@@ -2,6 +2,7 @@
 
 const webpack = require('webpack');
 const path = require('path');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 const cssModulesLoader = {
   loader: 'css-loader',
@@ -47,27 +48,48 @@ const cssLoaders = [
 ];
 
 module.exports = {
-  entry: ['./ui/src/index'],
+  entry: ['./ui/src'],
   output: {
-    path: path.resolve(__dirname, './ui/assets'),
-    pathinfo: true,
+    path: path.join(__dirname, '/dist'),
     filename: 'bundle.js',
-    publicPath: 'assets/',
   },
   module: {
     rules: [
       { test: /\.jsx?$/, exclude: /node_modules/, loader: 'babel-loader' },
       ...cssLoaders,
       {
-        test: /\.(ttf|eot|woff|svg)/,
+        test: /\.svg$/,
+        use: [
+          {
+            loader: 'svg-url-loader',
+            options: {
+              limit: 10000,
+            },
+          },
+        ],
+      },
+      {
+        test: /\.(ttf|eot|woff)/,
         include: [path.resolve(__dirname, 'node_modules')],
         loader: 'file-loader',
+      },
+      {
+        test: /\.m?js/,
+        resolve: {
+          fullySpecified: false,
+        },
       },
     ],
   },
   plugins: [
+    new HtmlWebpackPlugin({ template: './ui/index.html' }),
+    new webpack.ProvidePlugin({
+      Buffer: ['buffer', 'Buffer'],
+    }),
     new webpack.ProvidePlugin({
       React: 'react',
+    }),
+    new webpack.ProvidePlugin({
       process: 'process/browser',
     }),
     new webpack.LoaderOptionsPlugin({ debug: true }),

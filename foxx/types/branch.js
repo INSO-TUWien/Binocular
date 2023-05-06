@@ -9,16 +9,20 @@ module.exports = new gql.GraphQLObjectType({
     return {
       id: {
         type: new gql.GraphQLNonNull(gql.GraphQLString),
-        resolve: e => e._key
+        resolve: (e) => e._key,
       },
       branch: {
         type: gql.GraphQLString,
-        description: 'The name of the branch'
+        description: 'The name of the branch',
       },
       active: {
         type: gql.GraphQLString,
-        description: 'True if this is the current active branch on your system.'
-      }
+        description: 'True if this is the current active branch on your system.',
+      },
+      latestCommit: {
+        type: gql.GraphQLString,
+        description: 'latest commit on this branch',
+      },
     };
-  }
+  },
 });

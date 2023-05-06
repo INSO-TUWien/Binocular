@@ -3,10 +3,11 @@
 import { createAction } from 'redux-actions';
 import { select, takeEvery, fork, cancel } from 'redux-saga/effects';
 
-import { fetchConfig, watchConfig } from './config.js';
+import { fetchConfig, fetchConfigOffline, watchConfig } from './config.js';
 import { watchNotifications } from './notifications.js';
+import Database from '../database/database';
 
-export const switchVisualization = createAction('SWITCH_VISUALIZATION', vis => vis);
+export const switchVisualization = createAction('SWITCH_VISUALIZATION', (vis) => vis);
 export const toggleHelp = createAction('TOGGLE_HELP');
 
 let currentComponentSaga = null;
@@ -21,7 +22,13 @@ function* switchComponentSaga(visualizationName) {
 }
 
 export function* root() {
-  yield* fetchConfig();
+  Database.checkBackendConnection().then(function* (resp) {
+    if (resp) {
+      yield* fetchConfig();
+    } else {
+      yield* fetchConfigOffline();
+    }
+  });
 
   const { activeVisualization } = yield select();
   yield* switchComponentSaga(activeVisualization);
@@ -31,7 +38,7 @@ export function* root() {
 }
 
 function* watchVisualization() {
-  yield takeEvery('SWITCH_VISUALIZATION', function*() {
+  yield takeEvery('SWITCH_VISUALIZATION', function* () {
     const { activeVisualization } = yield select();
     yield switchComponentSaga(activeVisualization);
   });

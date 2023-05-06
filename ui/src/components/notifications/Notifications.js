@@ -10,7 +10,7 @@ import styles from './notifications.scss';
 
 export default class Notifications extends React.Component {
   render() {
-    const notifications = _.map(this.props.notifications, n => {
+    const notifications = _.map(this.props.notifications, (n) => {
       return (
         <CSSTransition classNames={styles} timeout={500} key={n.id}>
           <Notification type={n.type} onClose={() => this.props.onCloseNotification(n.id)}>
@@ -22,9 +22,7 @@ export default class Notifications extends React.Component {
 
     return (
       <div className={styles.notifications}>
-        <TransitionGroup>
-          {notifications}
-        </TransitionGroup>
+        <TransitionGroup>{notifications}</TransitionGroup>
       </div>
     );
   }

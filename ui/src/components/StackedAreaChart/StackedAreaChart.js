@@ -107,7 +107,7 @@ export default class StackedAreaChart extends ScalableBaseChartComponent {
   resetZoom(scales, axes, brushArea, area) {
     scales.x.domain([
       this.state.data.stackedData[0][0].data.date,
-      this.state.data.stackedData[0][this.state.data.stackedData[0].length - 1].data.date
+      this.state.data.stackedData[0][this.state.data.stackedData[0].length - 1].data.date,
     ]);
     axes.x.call(d3.axisBottom(scales.x));
     brushArea.selectAll('.layer').attr('d', area);
@@ -152,7 +152,7 @@ export default class StackedAreaChart extends ScalableBaseChartComponent {
       .html(formattedDate + '<hr/>' + '<div style="background: ' + palette[key] + '">' + '</div>' + text + ': ' + Math.round(value))
       .style('position', 'absolute')
       .style('left', event.layerX - 20 + 'px')
-      .style('top', event.layerY - 55 + 'px');
+      .style('top', event.layerY - 70 + 'px');
 
     this.paintDataPoint(brushArea, scales.x(nearestDataPoint.date), scales.y(chartValues.y1), scales.y(chartValues.y2), palette[key]);
   }

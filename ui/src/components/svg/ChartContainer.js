@@ -10,11 +10,12 @@ export default class ChartContainer extends React.PureComponent {
 
   render() {
     return (
-      <Measure bounds onResize={dims => this.props.onResize(dims.bounds)}>
-        {({ measureRef }) =>
+      <Measure bounds onResize={(dims) => this.props.onResize(dims.bounds)}>
+        {({ measureRef }) => (
           <div ref={measureRef} className={this.props.className}>
             {this.props.children}
-          </div>}
+          </div>
+        )}
       </Measure>
     );
   }

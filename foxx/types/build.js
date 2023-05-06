@@ -15,12 +15,12 @@ const BuildStatus = new gql.GraphQLEnumType({
     success: {},
     pending: {},
     running: {},
-    canceled: {},
+    cancelled: {},
     skipped: {},
     created: {},
     started: {},
-    queued: {}
-  }
+    queued: {},
+  },
 });
 
 const Job = new gql.GraphQLObjectType({
@@ -29,34 +29,34 @@ const Job = new gql.GraphQLObjectType({
   fields() {
     return {
       id: {
-        type: new gql.GraphQLNonNull(gql.GraphQLInt)
+        type: new gql.GraphQLNonNull(gql.GraphQLInt),
       },
       name: {
         type: gql.GraphQLString,
-        description: 'Job name'
+        description: 'Job name',
       },
       status: {
         type: BuildStatus,
-        description: 'Status of the build'
+        description: 'Status of the build',
       },
       stage: {
         type: gql.GraphQLString,
-        description: 'Build stage'
+        description: 'Build stage',
       },
       webUrl: {
         type: gql.GraphQLString,
-        description: 'Web-url of this job'
+        description: 'Web-url of this job',
       },
       createdAt: {
         type: Timestamp,
-        description: 'Creation date of the build'
+        description: 'Creation date of the build',
       },
       finishedAt: {
         type: Timestamp,
-        description: 'When the build finished'
-      }
+        description: 'When the build finished',
+      },
     };
-  }
+  },
 });
 
 module.exports = new gql.GraphQLObjectType({
@@ -66,79 +66,87 @@ module.exports = new gql.GraphQLObjectType({
     return {
       id: {
         type: new gql.GraphQLNonNull(gql.GraphQLString),
-        resolve: e => e._key
+        resolve: (e) => e._key,
       },
       sha: {
         type: gql.GraphQLString,
-        description: 'Sha of the commit that triggered the build'
+        description: 'Sha of the commit that triggered the build',
       },
       beforeSha: {
-        type: gql.GraphQLString
+        type: gql.GraphQLString,
       },
       ref: {
-        type: gql.GraphQLString
+        type: gql.GraphQLString,
       },
       status: {
         type: BuildStatus,
-        description: 'Status of the build'
+        description: 'Status of the build',
+      },
+      user: {
+        type: gql.GraphQLString,
+        description: 'user login name',
+      },
+      userFullName: {
+        type: gql.GraphQLString,
+        description: 'user full name',
       },
       webUrl: {
         type: gql.GraphQLString,
-        description: 'Web-url of this build'
+        description: 'Web-url of this build',
       },
       createdAt: {
         type: Timestamp,
-        description: 'Creation date of the build'
+        description: 'Creation date of the build',
       },
       updatedAt: {
         type: Timestamp,
-        description: 'Time of last update to the build'
+        description: 'Time of last update to the build',
       },
       startedAt: {
         type: Timestamp,
-        description: 'When the build was started'
+        description: 'When the build was started',
       },
       finishedAt: {
         type: Timestamp,
-        description: 'When the build finished'
+        description: 'When the build finished',
       },
       committedAt: {
         type: Timestamp,
-        description: 'When the triggering commit happened'
+        description: 'When the triggering commit happened',
       },
       duration: {
         type: gql.GraphQLInt,
-        description: 'Run duration in seconds'
+        description: 'Run duration in seconds',
       },
       coverage: {
         type: gql.GraphQLString,
-        description: 'Coverage information'
+        description: 'Coverage information',
       },
       stats: {
         type: new gql.GraphQLObjectType({
           name: 'BuildStats',
           fields: {
             success: {
-              type: gql.GraphQLInt
+              type: gql.GraphQLInt,
             },
             failed: {
-              type: gql.GraphQLInt
+              type: gql.GraphQLInt,
             },
             running: {
-              type: gql.GraphQLInt
+              type: gql.GraphQLInt,
             },
             pending: {
-              type: gql.GraphQLInt
+              type: gql.GraphQLInt,
             },
-            canceled: {
-              type: gql.GraphQLInt
-            }
-          }
-        })
+            cancelled: {
+              type: gql.GraphQLInt,
+            },
+          },
+        }),
       },
       jobs: {
         type: new gql.GraphQLList(Job),
-        description: 'Jobs in this build'
+        description: 'Jobs in this build',
       },
       commit: {
         type: require('./commit.js'),
@@ -152,8 +160,8 @@ module.exports = new gql.GraphQLObjectType({
               RETURN commit`
             )
             .toArray()[0];
-        }
-      }
+        },
+      },
     };
-  }
+  },
 });

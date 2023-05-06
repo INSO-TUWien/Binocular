@@ -100,7 +100,7 @@ export default class CheckboxLegend extends React.Component {
     }
     if (this.state.initialized || (this.state.selected && this.state.selected.length)) {
       const otherCommitters = this.props.otherCommitters;
-      _.each(Object.keys(this.props.palette), key => {
+      _.each(Object.keys(this.props.palette), (key) => {
         let text = key;
         if (text === 'others' && otherCommitters) {
           text = '' + otherCommitters + ' Others';
