@@ -9,20 +9,20 @@ module.exports = new gql.GraphQLObjectType({
     return {
       id: {
         type: new gql.GraphQLNonNull(gql.GraphQLString),
-        resolve: e => e._key
+        resolve: (e) => e._key,
       },
       language: {
         type: require('./language.js'),
-        description: 'The language that touches the commit'
+        description: 'The language that touches the commit',
       },
       commit: {
         type: require('./commit'),
-        description: 'contains the commit that touches the corresponding language'
+        description: 'contains the commit that touches the corresponding language',
       },
       stats: {
         type: require('./stats'),
-        description: 'The changing stats of the commit'
-      }
+        description: 'The changing stats of the commit',
+      },
     };
-  }
+  },
 });

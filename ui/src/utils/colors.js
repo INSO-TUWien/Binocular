@@ -24,7 +24,7 @@ function calculateHue(colorNum, colors) {
  */
 function calculateSaturation(colorNum, colors) {
   if (colors < 1) colors = 1; // defaults to one color - avoid divide by zero
-  return (colorNum * 2 / colors * 100 % 50 + 50.0) / 100.0;
+  return (((((colorNum * 2) / colors) * 100) % 50) + 50.0) / 100.0;
 }
 
 /**
@@ -36,7 +36,7 @@ function calculateSaturation(colorNum, colors) {
  */
 function calculateLightness(colorNum, colors) {
   if (colors < 1) colors = 1; // defaults to one color - avoid divide by zero
-  return 0.4 + colorNum / colors * 100.0 % 40 / 100.0;
+  return 0.4 + (((colorNum / colors) * 100.0) % 40) / 100.0;
 }
 
 export default function generateColorPattern(colorCount) {

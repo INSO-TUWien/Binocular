@@ -1,8 +1,7 @@
 'use strict';
 
 import { createAction } from 'redux-actions';
-import { delay } from 'redux-saga';
-import { takeEvery, put } from 'redux-saga/effects';
+import { delay, put, takeEvery } from 'redux-saga/effects';
 
 let nextId = 0;
 
@@ -11,11 +10,11 @@ export const addNotification = createAction('ADD_NOTIFICATION', (message, type =
   id: nextId++,
   type,
   message,
-  duration
+  duration,
 }));
 
 export function* watchNotifications() {
-  yield takeEvery('ADD_NOTIFICATION', function*(action) {
+  yield takeEvery('ADD_NOTIFICATION', function* (action) {
     yield delay(action.payload.duration || 2000);
     yield put(removeNotification(action.payload.id));
   });

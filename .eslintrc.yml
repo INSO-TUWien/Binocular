@@ -6,7 +6,7 @@ extends:
   - prettier
   - lambdas
 parserOptions:
-  ecmaVersion: 8
+  ecmaVersion: 2020
   sourceType: 'module'
 rules:
   prettier/prettier:
@@ -16,7 +16,7 @@ rules:
   no-console: off
   indent: ['error', 2, { "SwitchCase": 1 }]
   max-len: ["error", { "code": 140 }]
-  comma-dangle: ["error", "never"]
+  comma-dangle: ["error", "only-multiline"]
   operator-linebreak: ['error', 'after', { "overrides": { "?": "before", ":": "before"} }]
   linebreak-style: ["error", "unix"]
   quotes:

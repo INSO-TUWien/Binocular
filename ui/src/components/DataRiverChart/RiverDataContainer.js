@@ -19,7 +19,7 @@ export class RiverDataContainer {
     this.data = {
       key,
       values: [],
-      leaf: undefined
+      leaf: undefined,
     };
   }
 
@@ -40,11 +40,11 @@ export class RiverDataContainer {
   }
 
   find(key) {
-    return (this.data.values || []).find(item => item.name === key);
+    return (this.data.values || []).find((item) => item.name === key);
   }
 
   indexOf(key) {
-    return (this.data.values || []).map(item => item.name).indexOf(key);
+    return (this.data.values || []).map((item) => item.name).indexOf(key);
   }
 
   getValue(key) {
@@ -73,7 +73,7 @@ export class RiverDataContainer {
     if (!this.values) {
       return this.value;
     }
-    return this.values.map(container => container.grouped);
+    return this.values.map((container) => container.grouped);
   }
 
   forEach(cb) {

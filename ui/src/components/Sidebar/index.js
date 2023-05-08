@@ -6,7 +6,7 @@ import Sidebar from './Sidebar.js';
 const mapStateToProps = (state /*, ownProps*/) => {
   return {
     visualizations: state.visualizations,
-    activeVisualization: state.activeVisualization
+    activeVisualization: state.activeVisualization,
   };
 };
 

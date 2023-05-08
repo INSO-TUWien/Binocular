@@ -12,7 +12,7 @@ export default class FilterBox extends React.Component {
     super(props);
 
     this.state = {
-      filterText: ''
+      filterText: '',
     };
     _.merge(this.state, this.extractOptions(props));
   }
@@ -22,15 +22,18 @@ export default class FilterBox extends React.Component {
   }
 
   getCheckedOptions() {
-    return _(this.state.options).filter(o => o.checked).map('value').value();
+    return _(this.state.options)
+      .filter((o) => o.checked)
+      .map('value')
+      .value();
   }
 
   render() {
     const filteredOptions = fuzzy
       .filter(this.state.filterText, this.state.options, {
-        extract: o => o.label
+        extract: (o) => o.label,
       })
-      .map(o => o.original);
+      .map((o) => o.original);
 
     const options = filteredOptions.map((o, i) => {
       return (
@@ -44,7 +47,7 @@ export default class FilterBox extends React.Component {
                 const payload = this.getCheckedOptions();
 
                 if (o.checked) {
-                  _.remove(payload, e => e === o.value);
+                  _.remove(payload, (e) => e === o.value);
                 } else {
                   payload.push(o.value);
                 }
@@ -66,30 +69,28 @@ export default class FilterBox extends React.Component {
             type="text"
             placeholder={this.props.placeholder || 'Filter...'}
             value={this.state.filterText}
-            onChange={e => this.setState({ filterText: e.target.value })}
+            onChange={(e) => this.setState({ filterText: e.target.value })}
           />
           <span className={cx('icon', 'is-small is-right')}>
             <i className={cx('fa', 'fa-search')} />
           </span>
         </div>
-        <ul>
-          {options}
-        </ul>
+        <ul>{options}</ul>
       </div>
     );
   }
 
   extractOptions(props) {
-    const options = _.map(props.options, o => {
+    const options = _.map(props.options, (o) => {
       return {
         label: o.label,
         value: o.value,
-        checked: _.includes(props.checkedOptions, o.value)
+        checked: _.includes(props.checkedOptions, o.value),
       };
     });
 
     return {
-      options
+      options,
     };
   }
 }

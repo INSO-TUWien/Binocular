@@ -7,13 +7,13 @@ import { showConfig } from '../../sagas/config.js';
 
 const mapStateToProps = (state /*, ownProps*/) => {
   return {
-    spinning: state.config.isFetching
+    spinning: state.config.isFetching,
   };
 };
 
 const mapDispatchToProps = (dispatch /*, ownProps*/) => {
   return {
-    onClick: () => dispatch(showConfig())
+    onClick: () => dispatch(showConfig()),
   };
 };
 

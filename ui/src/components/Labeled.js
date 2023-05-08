@@ -1,12 +1,10 @@
 'use strict';
 
-const Labeled = props =>
+const Labeled = (props) => (
   <div className={props.className}>
-    {!!props.label &&
-      <label className="label">
-        {props.label}
-      </label>}
+    {!!props.label && <label className="label">{props.label}</label>}
     {props.children}
-  </div>;
+  </div>
+);
 
 export default Labeled;

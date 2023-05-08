@@ -1,0 +1,18 @@
+{
+  "github": {
+    "auth": {
+      "type": "client",
+      "token": "tnGQ3BuRV+xFVDtpn3vnq/cW8yKsIHrSLFf/i7KyQYg"
+    }
+  },
+  "arango": {
+    "host": "localhost",
+    "port": 8529,
+    "user": "root",
+    "password": "binocular"
+  },
+  "indexers": {
+    "its": "github",
+    "ci": "travis"
+  }
+}

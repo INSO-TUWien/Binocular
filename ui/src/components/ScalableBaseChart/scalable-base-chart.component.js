@@ -40,7 +40,7 @@ export default class ScalableBaseChartComponent extends React.Component {
       zoomedDims: [0, 0],
       zoomedVertical: false,
       verticalZoomDims: [0, 0],
-      data: { data: [], stackedData: [] }
+      data: { data: [], stackedData: [] },
     };
     window.addEventListener('resize', () => this.updateElement());
   }
@@ -164,8 +164,8 @@ export default class ScalableBaseChartComponent extends React.Component {
   render() {
     return (
       <div className={this.styles.chartDiv}>
-        <svg className={this.styles.chartSvg} ref={svg => (this.svgRef = svg)} />
-        <div className={this.styles.tooltip} ref={div => (this.tooltipRef = div)} />
+        <svg className={this.styles.chartSvg} ref={(svg) => (this.svgRef = svg)} />
+        <div className={this.styles.tooltip} ref={(div) => (this.tooltipRef = div)} />
       </div>
     );
   }
@@ -182,14 +182,13 @@ export default class ScalableBaseChartComponent extends React.Component {
     //Initialization
     const contentHash = hash(this.props.content || []);
     const orderHash = hash(this.props.order || []);
-
     const { hashes, hasChanges } = this.hasUpdate();
 
     //Get d3-friendly data
     if (this.state.data.hash !== contentHash || this.state.data.orderHash !== orderHash || hasChanges) {
       this.setState(
         {
-          data: Object.assign({ hash: contentHash, orderHash }, hashes, this.calculateChartData(this.props.content, this.props.order))
+          data: Object.assign({ hash: contentHash, orderHash }, hashes, this.calculateChartData(this.props.content, this.props.order)),
         },
         this.visualizeData
       );
@@ -216,12 +215,15 @@ export default class ScalableBaseChartComponent extends React.Component {
     //Get and set all required scales, which translate data values into pixel values
     const scales = this.createScales(this.getXDims(), [paddings.left, width - paddings.right], this.getYDims(), [
       height - paddings.bottom,
-      paddings.top
+      paddings.top,
     ]);
     const area = this.createAreaFunction(scales);
 
     //Brush generator for brush-zoom functionality, with referenced callback-function
-    const brush = d3.brushX().extent([[paddings.left, 0], [width - paddings.right, height]]);
+    const brush = d3.brushX().extent([
+      [paddings.left, 0],
+      [width - paddings.right, height],
+    ]);
 
     //Remove old data
     svg.selectAll('*').remove();
@@ -230,7 +232,7 @@ export default class ScalableBaseChartComponent extends React.Component {
     const { brushArea, axes } = this.drawChart(svg, area, brush, yScale, scales, height, width, paddings);
 
     //Set callback for brush-zoom functionality
-    brush.on('end', event => this.updateZoom(event.selection, scales, axes, brush, brushArea, area));
+    brush.on('end', (event) => this.updateZoom(event.selection, scales, axes, brush, brushArea, area));
     //Set callback to reset zoom on double-click
     svg.on('dblclick', () => this.resetZoom(scales, axes, brushArea, area));
   }
@@ -287,7 +289,7 @@ export default class ScalableBaseChartComponent extends React.Component {
    * @returns {*}
    */
   getColor(d) {
-    return this.state.palette[this.getBrushId(d)];
+    return this.props.palette[this.getBrushId(d)];
   }
 
   /**
@@ -315,7 +317,7 @@ export default class ScalableBaseChartComponent extends React.Component {
     const axes = Object.assign(
       {
         x: this.createXAxis(brushArea, scales, width, height, paddings),
-        y: this.createYAxis(brushArea, scales, width, height, paddings)
+        y: this.createYAxis(brushArea, scales, width, height, paddings),
       },
       this.additionalAxes(brushArea, scales, width, height, paddings)
     );
@@ -325,6 +327,9 @@ export default class ScalableBaseChartComponent extends React.Component {
 
     // required to support event handling
     svg
+      .attr('width', '100%')
+      .attr('height', '100%')
+      .attr('viewBox', '0 0 ' + width + ' ' + height)
       .append('defs')
       .append('svg:clipPath')
       .attr('id', 'clip')
@@ -371,10 +376,13 @@ export default class ScalableBaseChartComponent extends React.Component {
    * @returns {*}
    */
   createYAxis(brushArea, scales, width, height, paddings) {
-    const yAxis = brushArea.append('g').attr('class', this.styles.axis).attr('transform', 'translate(' + paddings.left + ',0)');
+    const yAxis = brushArea
+      .append('g')
+      .attr('class', this.styles.axis)
+      .attr('transform', 'translate(' + paddings.left + ',0)');
 
     if (!this.props.hideVertical) {
-      yAxis.call(d3.axisLeft(scales.y).tickFormat(d => (this.props.displayNegative ? d : Math.abs(d))));
+      yAxis.call(d3.axisLeft(scales.y).tickFormat((d) => (this.props.displayNegative ? d : Math.abs(d))));
     }
     return yAxis;
   }
@@ -402,7 +410,7 @@ export default class ScalableBaseChartComponent extends React.Component {
   setBrushArea(brushArea, brush, area, tooltip, svg, scales) {
     brushArea.append('g').attr('class', 'brush').call(brush);
 
-    const bisectDate = d3.bisector(d => d.date).left;
+    const bisectDate = d3.bisector((d) => d.date).left;
     const _this = this;
 
     //Append data to svg using the area generator and palette
@@ -412,7 +420,7 @@ export default class ScalableBaseChartComponent extends React.Component {
       .data(this.state.data.stackedData)
       .enter()
       .append('path')
-      .attr('class', data => `layers ${_this.getBrushClass(data)}`)
+      .attr('class', (data) => `layers ${_this.getBrushClass(data)}`)
       .classed(this.styles.layer, !!this.styles.layer)
       .classed('layer', true)
       .attr('id', _this.getBrushId)
@@ -421,14 +429,14 @@ export default class ScalableBaseChartComponent extends React.Component {
       .attr('stroke-width', this.getLayerStrokeWidth.bind(this))
       .attr('stroke', this.getLayerStrokeColor.bind(this))
       .attr('d', area)
-      .attr('clip-path', 'url(#clip)')
-      .on('mouseenter', function(event, stream) {
+      //.attr('clip-path', 'url(#clip)')
+      .on('mouseenter', function (event, stream) {
         return _this.onMouseover.bind(_this, this, tooltip, brushArea)(event, stream);
       })
-      .on('mouseout', function(event, stream) {
+      .on('mouseout', function (event, stream) {
         return _this.onMouseLeave.bind(_this, this, tooltip, brushArea)(event, stream);
       })
-      .on('mousemove', function(event, stream) {
+      .on('mousemove', function (event, stream) {
         //Calculate values and text for tooltip
         const node = svg.node();
         const pointer = d3.pointer(event, node);
@@ -490,7 +498,10 @@ export default class ScalableBaseChartComponent extends React.Component {
    * @returns scroll event
    */
   createScrollEvent(svg, scales, axes, brushArea, area) {
-    return event => {
+    return (event) => {
+      // prevent page scrolling
+      event.preventDefault();
+
       const direction = event.deltaY > 0 ? 'down' : 'up';
       let zoomedDims = [...this.getYDims()];
       let top = zoomedDims[1],
@@ -595,14 +606,8 @@ export default class ScalableBaseChartComponent extends React.Component {
    * @param color defines the color or the cycles
    */
   paintDataPoint(brushArea, x, y0, y1, color) {
-    brushArea
-      .append('line')
-      .attr('class', this.styles.indicatorLine)
-      .attr('x1', x)
-      .attr('x2', x)
-      .attr('y1', y0)
-      .attr('y2', y1)
-      .attr('clip-path', 'url(#clip)');
+    brushArea.append('line').attr('class', this.styles.indicatorLine).attr('x1', x).attr('x2', x).attr('y1', y0).attr('y2', y1);
+    //.attr('clip-path', 'url(#clip)');
 
     brushArea
       .append('circle')
@@ -610,7 +615,7 @@ export default class ScalableBaseChartComponent extends React.Component {
       .attr('cx', x)
       .attr('cy', y1)
       .attr('r', 5)
-      .attr('clip-path', 'url(#clip)')
+      //.attr('clip-path', 'url(#clip)')
       .style('fill', color);
 
     brushArea
@@ -619,7 +624,7 @@ export default class ScalableBaseChartComponent extends React.Component {
       .attr('cx', x)
       .attr('cy', y0)
       .attr('r', 5)
-      .attr('clip-path', 'url(#clip)')
+      //.attr('clip-path', 'url(#clip)')
       .style('fill', color);
   }
 }

@@ -26,7 +26,7 @@ export default class CheckboxLegend extends React.Component {
     super(props);
     this.state = {
       initialized: false,
-      selected: [] //[name1, name2, ...]
+      selected: [], //[name1, name2, ...]
     };
   }
 
@@ -40,7 +40,7 @@ export default class CheckboxLegend extends React.Component {
 
   selectData(props) {
     if (props.palette && this.state.initialized === false) {
-      const selected = Object.keys(props.palette);
+      const selected = props.selected === undefined ? Object.keys(props.palette) : props.selected;
       this.setState({ initialized: true, selected: selected }, () => this.props.onClick(selected));
     }
   }
@@ -82,36 +82,22 @@ export default class CheckboxLegend extends React.Component {
     const items = [];
     if (this.state.initialized || (this.state.selected && this.state.selected.length)) {
       const otherCommitters = this.props.otherCommitters;
-      _.each(Object.keys(this.props.palette), key => {
+      _.each(Object.keys(this.props.palette), (key) => {
         let text = key;
         if (text === 'others' && otherCommitters) {
           text = '' + otherCommitters + ' Others';
         }
-        if (this.state.selected.indexOf(key) > -1) {
-          items.push(
-            <CheckboxLegendLine
-              id={key}
-              key={key}
-              text={text}
-              color={this.props.palette[key]}
-              checked={true}
-              onClick={this.clickCallback.bind(this)}
-              split={this.props.split}
-            />
-          );
-        } else {
-          items.push(
-            <CheckboxLegendLine
-              id={key}
-              key={key}
-              text={text}
-              color={this.props.palette[key]}
-              checked={false}
-              onClick={this.clickCallback.bind(this)}
-              split={this.props.split}
-            />
-          );
-        }
+        items.push(
+          <CheckboxLegendLine
+            id={key}
+            key={key}
+            text={text}
+            color={this.props.palette[key]}
+            checked={this.state.selected.indexOf(key) > -1}
+            onClick={this.clickCallback.bind(this)}
+            split={this.props.split}
+          />
+        );
       });
     }
 
