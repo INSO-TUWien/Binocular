@@ -85,9 +85,20 @@ export default class Sunburst extends React.Component {
       .ease(t => t)
       .duration(iteration === 0 ? 0 : this.settings.msBetweenIterations)
       .attrTween("d", arcTweenFunction(this.settings.radius, this.settings.padding))
+      .attr("id", (d, i) => "fileArc_" + i)
       .attr("fill", d => this.getColor(d, iteration))
       .attr("fill-opacity", d => d.depth === 0 ? 0 : 1)
-      
+
+    this.svg.selectAll(".fileText")
+      .data(root.descendants())
+      .enter()
+      .append("text")
+      .attr("class", "fileText")
+      .attr("x", 5)   //Move the text from the start angle of the arc
+      .attr("dy", 18) //Move the text down
+      .append("textPath")
+      .attr("xlink:href", function(d, i) { return "#fileArc_" + i; })
+      .text(d => d.x1 - d.x0 > 0.5 ? d.data.name : '')
   }
   
   getColor(d, iteration) {
