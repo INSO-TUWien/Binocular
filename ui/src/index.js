@@ -45,7 +45,7 @@ const visualizationModules = [
   hotspotDials,
   codeHotspots,
   languageModuleRiver,
-  fileTreeEvolution
+  fileTreeEvolution,
   ciBuilds,
   issues,
   changes,
