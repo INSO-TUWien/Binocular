@@ -33,7 +33,7 @@ const getBuildsPage = (page, perPage) => {
             success
             failed
             pending
-            canceled
+            cancelled
           }
         }
       }
