@@ -25,6 +25,7 @@ export const fetchFileTreeEvolutionData = fetchFactory(
           data {
             date
             message
+            signature
             files {
               data {
                 stats {
@@ -43,9 +44,14 @@ export const fetchFileTreeEvolutionData = fetchFactory(
     )
     .then(resp => {
       const fileTreeHistory = [];
+      const contributors = new Map();
       let fileTree = {};
-      for (const commit of resp.commits.data) {
-        fileTree = applyCommit(fileTree, commit);
+      for (let i = 0; i < resp.commits.data.length; i++) {
+        const commit = resp.commits.data[i];
+        if (!contributors.has(commit.signature)) {
+          contributors.set(commit.signature, contributors.size + 1);
+        }
+        fileTree = applyCommit(fileTree, commit, i, contributors.get(commit.signature));
         fileTreeHistory.push(fileTree);
       }
       return {
@@ -59,18 +65,20 @@ export const fetchFileTreeEvolutionData = fetchFactory(
   receiveFileTreeEvolutionDataError
 );
 
-function applyCommit(fileTree, commit) {
+function applyCommit(fileTree, commit, commitIndex, contributor) {
   fileTree = structuredClone(fileTree)
   for (const file of commit.files.data) {
     const path = file.file.path.split('/');
-    modifyFile(fileTree, path, file);
+    modifyFile(fileTree, path, file, commitIndex, contributor);
   }
   return fileTree;
 }
 
-function modifyFile(fileTree, path, file) {
+function modifyFile(fileTree, path, file, commitIndex, contributor) {
   if (path.length === 0) {
     fileTree.size = file.lineCount;
+    fileTree.contributor = contributor;
+    fileTree.changeIteration = commitIndex
   } else {
     if (!fileTree.children) {
       fileTree.children = {};
@@ -80,6 +88,6 @@ function modifyFile(fileTree, path, file) {
         name: path[0]
       };
     }
-    modifyFile(fileTree.children[path[0]], path.slice(1), file);
+    modifyFile(fileTree.children[path[0]], path.slice(1), file, commitIndex, contributor);
   }
 }
