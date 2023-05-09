@@ -131,7 +131,7 @@ export default class Sunburst extends React.Component {
     return (
       <div>
         <svg ref={svg => this.chartRef = svg}></svg>
-        <div class="fileName">{this.state.selectedFile}</div>
+        <div className="fileName">{this.state.selectedFile}</div>
       </div>
     );
   }

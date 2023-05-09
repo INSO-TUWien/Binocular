@@ -78,8 +78,6 @@ function applyCommit(fileTree, commit, commitIndex, contributor) {
 function modifyFile(fileTree, path, file, commitIndex, contributor, prevPath = '', parentPaths = []) {
   if (path.length === 0) {
     fileTree.size = file.lineCount;
-    fileTree.contributor = contributor;
-    fileTree.changeIteration = commitIndex;
   } else {
     const fullPath = !prevPath ? path[0] : prevPath + '/' + path[0]
     if (!fileTree.children) {
@@ -91,12 +89,18 @@ function modifyFile(fileTree, path, file, commitIndex, contributor, prevPath = '
         name: path[0],
         creationIteration: commitIndex,
         fullPath: fullPath,
-        parentPaths: parentPaths
+        parentPaths: parentPaths,
+        contributor: contributor,
+        changeIteration: commitIndex,
       });
       fileTree.childIndexMap[path[0]] = fileTree.children.length - 1;
     }
+    const currentNode = fileTree.children[fileTree.childIndexMap[path[0]]];
+    // Add those two lines to highlight changes on directory level already, instead of file level only.
+    // currentNode.contributor = contributor;
+    // currentNode.changeIteration = commitIndex;
     modifyFile(
-      fileTree.children[fileTree.childIndexMap[path[0]]], 
+      currentNode, 
       path.slice(1), 
       file, 
       commitIndex, 
