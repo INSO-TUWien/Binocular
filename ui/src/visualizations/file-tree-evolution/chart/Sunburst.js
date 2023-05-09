@@ -28,12 +28,13 @@ export default class Sunburst extends React.Component {
     this.settings.radius = 400;
     this.settings.margin = 1;
     this.settings.padding = 1;
-    this.settings.contributorColors = {
-      1: 'red',
-      2: 'green',
-      3: 'blue',
-      4: 'yellow',
-      5: 'purple'
+
+    this.settings.contributorColors = {};
+    if (!!this.props.contributors) {
+      const contributorCount = this.props.contributors.size;
+      for (let i = 0; i < contributorCount; i++) {
+        this.settings.contributorColors[i] = `hsl(${i*360/contributorCount},100%,50%)`;
+      }
     }
     this.settings.contributionVisibilityDuration = 4;
     this.settings.msBetweenIterations = 500;

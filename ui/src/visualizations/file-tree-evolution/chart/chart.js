@@ -18,6 +18,7 @@ export default class FileTreeEvolution extends React.Component {
     this.setState({
       fileTreeHistory: nextProps.fileTreeHistory,
       commits: nextProps.commits,
+      contributors: nextProps.contributors
     });
   }
 
@@ -35,7 +36,10 @@ export default class FileTreeEvolution extends React.Component {
             commits={this.props.commits || []}
             selectedCommit={this.state.selectedCommit || 0}
             onSelectedCommitChange={commit => this.changeSelectedCommit(commit)} />
-          <Sunburst fileTreeHistory={this.props.fileTreeHistory} selectedCommit={this.state.selectedCommit} />
+          <Sunburst 
+            fileTreeHistory={this.props.fileTreeHistory} 
+            selectedCommit={this.state.selectedCommit}
+            contributors={this.props.contributors} />
         </div>
       </div>
     );
