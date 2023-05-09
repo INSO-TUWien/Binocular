@@ -19,7 +19,7 @@ export default class Sunburst extends React.Component {
       this.initialized = true
       this.createChart();
     } else if (this.initialized) {
-      this.update(this.props.fileTreeHistory[this.props.selectedCommit], this.props.selectedCommit);
+      this.update(this.props.fileTreeHistory[this.props.selectedCommit], Number.parseInt(this.props.selectedCommit));
     }
   }
 
@@ -73,8 +73,13 @@ export default class Sunburst extends React.Component {
 
     root.children.forEach((child, i) => child.index = i);
 
+    if (this.prevIteration == null || iteration !== this.prevIteration + 1) {
+      this.svg.selectAll(".fileArc").remove();
+    }
+    this.prevIteration = iteration;
+
     let cell = this.svg
-      .selectAll("path")
+      .selectAll(".fileArc")
       .data(root.descendants())
         
     cell = cell.enter()
@@ -89,11 +94,16 @@ export default class Sunburst extends React.Component {
       .attr("fill", d => this.getColor(d, iteration))
       .attr("fill-opacity", d => d.depth === 0 ? 0 : 1)
 
-    this.svg.selectAll(".fileText")
+    this.svg.selectAll(".fileText").remove();
+
+    let text = this.svg
+      .selectAll(".fileText")
       .data(root.descendants())
-      .enter()
+    
+    text = text.enter()
       .append("text")
       .attr("class", "fileText")
+      .merge(text)
       .attr("x", 5)   //Move the text from the start angle of the arc
       .attr("dy", 18) //Move the text down
       .append("textPath")

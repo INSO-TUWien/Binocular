@@ -78,14 +78,15 @@ function modifyFile(fileTree, path, file, commitIndex, contributor) {
   if (path.length === 0) {
     fileTree.size = file.lineCount;
     fileTree.contributor = contributor;
-    fileTree.changeIteration = commitIndex
+    fileTree.changeIteration = commitIndex;
   } else {
     if (!fileTree.children) {
       fileTree.children = {};
     }
     if (!fileTree.children[path[0]]) {
       fileTree.children[path[0]] = {
-        name: path[0]
+        name: path[0],
+        creationIteration: commitIndex
       };
     }
     modifyFile(fileTree.children[path[0]], path.slice(1), file, commitIndex, contributor);
