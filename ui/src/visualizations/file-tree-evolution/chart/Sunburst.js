@@ -6,8 +6,6 @@ import * as d3 from "d3";
 
 import { } from 'react'
 
-import { generateData } from "./data-generator";
-
 export default class Sunburst extends React.Component {
   constructor(props) {
     super(props);
@@ -15,15 +13,19 @@ export default class Sunburst extends React.Component {
   }
 
   componentDidUpdate() {
-    if (!!this.props.fileTreeHistory && this.props.fileTreeHistory.length > 0 && !this.initialized) {
-      this.initialized = true
-      this.createChart();
-    } else if (this.initialized) {
-      this.update(this.props.fileTreeHistory[this.props.selectedCommit], Number.parseInt(this.props.selectedCommit));
+    if (!this.performingInternalChange) {
+      if (!!this.props.fileTreeHistory && this.props.fileTreeHistory.length > 0 && !this.initialized) {
+        this.initialized = true
+        this.createChart();
+      } else if (this.initialized) {
+        this.update(this.props.fileTreeHistory[this.props.selectedCommit], Number.parseInt(this.props.selectedCommit));
+      }
     }
+    this.performingInternalChange = false;
   }
 
   createChart() {
+    this.prevAngleMap = new Map();
     this.settings = {};
     this.settings.radius = 400;
     this.settings.margin = 1;
@@ -36,7 +38,7 @@ export default class Sunburst extends React.Component {
         this.settings.contributorColors[i] = `hsl(${i*360/contributorCount},100%,50%)`;
       }
     }
-    this.settings.contributionVisibilityDuration = 4;
+    this.settings.contributionVisibilityDuration = 10;
     this.settings.msBetweenIterations = 500;
     this.settings.variant = 'sunburst'; // 'sunburst' | 'sunrise' | 'sundown'
 
@@ -59,7 +61,6 @@ export default class Sunburst extends React.Component {
 
     this.settings.color = d3.scaleSequential(d3.interpolate('#bbb', '#ccc'))
 
-    // this.props.fileTreeHistory = generateData();
     this.index = 0;
 
     this.update(this.props.fileTreeHistory[0], 0);
@@ -75,7 +76,6 @@ export default class Sunburst extends React.Component {
 
     if (this.prevIteration == null || iteration !== this.prevIteration + 1) {
       this.svg.selectAll(".fileArc").remove();
-      this.prevAngleMap = new Map();
     }
     this.prevIteration = iteration;
 
@@ -87,6 +87,12 @@ export default class Sunburst extends React.Component {
       .append("path")
       .attr("class", "fileArc")
       .merge(cell)
+      .on("mouseover", (e, d) => {
+        this.performingInternalChange = true;
+        this.setState({
+          selectedFile: d.data?.fullPath
+        });
+      })
       .transition()
       .ease(t => t)
       .duration(iteration === 0 ? 0 : this.settings.msBetweenIterations)
@@ -95,21 +101,21 @@ export default class Sunburst extends React.Component {
       .attr("fill", d => this.getColor(d, iteration))
       .attr("fill-opacity", d => d.depth === 0 ? 0 : 1)
 
-    this.svg.selectAll(".fileText").remove();
+    // this.svg.selectAll(".fileText").remove();
 
-    let text = this.svg
-      .selectAll(".fileText")
-      .data(root.descendants())
+    // let text = this.svg
+    //   .selectAll(".fileText")
+    //   .data(root.descendants())
     
-    text = text.enter()
-      .append("text")
-      .attr("class", "fileText")
-      .merge(text)
-      .attr("x", 5)   //Move the text from the start angle of the arc
-      .attr("dy", 18) //Move the text down
-      .append("textPath")
-      .attr("xlink:href", function(d, i) { return "#fileArc_" + i; })
-      .text(d => d.x1 - d.x0 > 0.5 ? d.data.name : '')
+    // text = text.enter()
+    //   .append("text")
+    //   .attr("class", "fileText")
+    //   .merge(text)
+    //   .attr("x", 5)   //Move the text from the start angle of the arc
+    //   .attr("dy", 18) //Move the text down
+    //   .append("textPath")
+    //   .attr("xlink:href", function(d, i) { return "#fileArc_" + i; })
+    //   .text(d => d.x1 - d.x0 > 0.5 ? d.data.name : '')
   }
   
   getColor(d, iteration) {
@@ -123,7 +129,10 @@ export default class Sunburst extends React.Component {
 
   render() {
     return (
-      <svg ref={svg => this.chartRef = svg}></svg>
+      <div>
+        <svg ref={svg => this.chartRef = svg}></svg>
+        <div class="fileName">{this.state.selectedFile}</div>
+      </div>
     );
   }
 }
@@ -171,5 +180,5 @@ function arcTweenFunction(radius, padding, prevAngleMap) {
 }
 
 function getChildren(data) {
-  return data.children;
+  return data?.children ?? [];
 }
