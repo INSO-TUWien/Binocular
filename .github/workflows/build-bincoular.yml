@@ -33,7 +33,7 @@ jobs:
         fetch-depth: 0
         path: test
 
-    - name: Set .pupilrc variables
+    - name: Set .binocularrc variables
       uses: microsoft/variable-substitution@v1   
       with:
         files: .binocularrc_ci
