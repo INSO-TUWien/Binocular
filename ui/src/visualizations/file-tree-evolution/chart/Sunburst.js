@@ -67,7 +67,6 @@ export default class Sunburst extends React.Component {
   update(data, iteration) {
     const root = d3.hierarchy(data, d => getChildren(d));
     root.sum(d => Math.max(0, d.size))
-    // root.sort((a, b) => d3.descending(a.value, b.value))
 
     d3.partition().size([this.settings.fullAngle, this.settings.radius])(root);
 
@@ -75,13 +74,14 @@ export default class Sunburst extends React.Component {
 
     if (this.prevIteration == null || iteration !== this.prevIteration + 1) {
       this.svg.selectAll(".fileArc").remove();
+      this.prevAngleMap = new Map();
     }
     this.prevIteration = iteration;
 
     let cell = this.svg
       .selectAll(".fileArc")
       .data(root.descendants())
-        
+    
     cell = cell.enter()
       .append("path")
       .attr("class", "fileArc")
@@ -89,7 +89,7 @@ export default class Sunburst extends React.Component {
       .transition()
       .ease(t => t)
       .duration(iteration === 0 ? 0 : this.settings.msBetweenIterations)
-      .attrTween("d", arcTweenFunction(this.settings.radius, this.settings.padding))
+      .attrTween("d", arcTweenFunction(this.settings.radius, this.settings.padding, this.prevAngleMap))
       .attr("id", (d, i) => "fileArc_" + i)
       .attr("fill", d => this.getColor(d, iteration))
       .attr("fill-opacity", d => d.depth === 0 ? 0 : 1)
@@ -128,7 +128,7 @@ export default class Sunburst extends React.Component {
 }
 
 
-function arcTweenFunction(radius, padding) {
+function arcTweenFunction(radius, padding, prevAngleMap) {
   return function(d) {
     const arc = d3.arc()
       .startAngle(d => d.x0)
@@ -138,14 +138,28 @@ function arcTweenFunction(radius, padding) {
       .innerRadius(d => d.y0)
       .outerRadius(d => d.y1 - padding)
 
-    if (!this._current) {
-      this._current = d;
+    let prev = prevAngleMap.get(d.data.fullPath);
+    // If this file/folder has no previous angles, it's newly added to the chart.
+    // In this case we need to use its parent's end angle as both start and end angle.
+    // By doing so we let the new slice appear from the "end" of its parent. 
+    if (!prev && !!d.data.parentPaths) {
+      for (const parentPath of d.data.parentPaths) {
+        const parentAngles = prevAngleMap.get(parentPath);
+        if (!!parentAngles) {
+          prev = { x0: parentAngles.x1, x1: parentAngles.x1 };
+          break;
+        }
+      }
+    }
+    // If it has no parents with existing angles, we let it appear from the "end" of the circle.
+    if (!prev) {
+      prev = { x0: 2 * Math.PI, x1: 2 * Math.PI };
     }
 
-    var interpolateStartAngle = d3.interpolate(this._current.x0, d.x0);
-    var interpolateEndAngle = d3.interpolate(this._current.x1, d.x1);
+    var interpolateStartAngle = d3.interpolate(prev.x0, d.x0);
+    var interpolateEndAngle = d3.interpolate(prev.x1, d.x1);
     
-    this._current = d;
+    prevAngleMap.set(d.data.fullPath, { x0: d.x0, x1: d.x1 });
 
     return function(t) {
       d.x0 = interpolateStartAngle(t);
@@ -156,5 +170,5 @@ function arcTweenFunction(radius, padding) {
 }
 
 function getChildren(data) {
-  return !data || !data.children ? undefined : Object.getOwnPropertyNames(data.children).map(prop => data.children[prop]);
+  return data.children;
 }

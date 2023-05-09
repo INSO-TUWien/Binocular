@@ -74,21 +74,34 @@ function applyCommit(fileTree, commit, commitIndex, contributor) {
   return fileTree;
 }
 
-function modifyFile(fileTree, path, file, commitIndex, contributor) {
+function modifyFile(fileTree, path, file, commitIndex, contributor, prevPath = '', parentPaths = []) {
   if (path.length === 0) {
     fileTree.size = file.lineCount;
     fileTree.contributor = contributor;
     fileTree.changeIteration = commitIndex;
   } else {
+    const fullPath = !prevPath ? path[0] : prevPath + '/' + path[0]
     if (!fileTree.children) {
-      fileTree.children = {};
+      fileTree.children = [];
+      fileTree.childIndexMap = {};
     }
-    if (!fileTree.children[path[0]]) {
-      fileTree.children[path[0]] = {
+    if (fileTree.childIndexMap[path[0]] == null) {
+      fileTree.children.push({
         name: path[0],
-        creationIteration: commitIndex
-      };
+        creationIteration: commitIndex,
+        fullPath: fullPath,
+        parentPaths: parentPaths
+      });
+      fileTree.childIndexMap[path[0]] = fileTree.children.length - 1;
     }
-    modifyFile(fileTree.children[path[0]], path.slice(1), file, commitIndex, contributor);
+    modifyFile(
+      fileTree.children[fileTree.childIndexMap[path[0]]], 
+      path.slice(1), 
+      file, 
+      commitIndex, 
+      contributor,
+      fullPath,
+      [fullPath, ...parentPaths]
+    );
   }
 }
