@@ -38,11 +38,8 @@ export default class Changes extends React.Component {
   }
 
   render() {
-    let commitOffset, commitPalette, commitCenterAxis, commitOrder;
-    if (this.props.palette) {
-      commitOrder = Object.keys(this.props.palette);
-    }
-    commitPalette = this.state.commitPalette;
+    let commitOffset, commitCenterAxis, commitOrder;
+
     if (this.props.displayMetric === 'linesChanged') {
       commitOffset = d3.stackOffsetDiverging;
       commitCenterAxis = true;
@@ -50,13 +47,14 @@ export default class Changes extends React.Component {
       commitOffset = d3.stackOffsetNone;
       commitCenterAxis = false;
     }
+
     const commitChart = (
       <div className={styles.chartLine}>
         <div className={styles.chart}>
           {this.state.commitChartData !== undefined && this.state.commitChartData.length > 0 ? (
             <StackedAreaChart
               content={this.state.commitChartData}
-              palette={commitPalette}
+              palette={this.state.commitPalette}
               paddings={{ top: 20, left: 60, bottom: 20, right: 30 }}
               xAxisCenter={commitCenterAxis}
               yDims={this.state.commitScale}
@@ -64,7 +62,7 @@ export default class Changes extends React.Component {
               keys={this.state.selectedAuthors}
               resolution={this.props.chartResolution}
               displayNegative={true}
-              order={commitOrder}
+              order={Object.keys(this.state.commitPalette)}
             />
           ) : (
             <div className={styles.errorMessage}>No data during this time period!</div>
@@ -162,12 +160,15 @@ export default class Changes extends React.Component {
           for (const mergedAuthor of props.mergedAuthors) {
             commitChartPalette['(Additions) ' + mergedAuthor.mainCommitter] = chroma(mergedAuthor.color).hex();
             commitChartPalette['(Deletions) ' + mergedAuthor.mainCommitter] = chroma(mergedAuthor.color).darken(0.5).hex();
+            obj['(Additions) ' + mergedAuthor.mainCommitter] = 0;
+            obj['(Deletions) ' + mergedAuthor.mainCommitter] = -0.001; //-0.001 for stack layout to realize it belongs on the bottom
           }
           obj['(Additions) others'] = 0;
           obj['(Deletions) others'] = -0.001;
         } else {
           for (const mergedAuthor of props.mergedAuthors) {
             commitChartPalette[mergedAuthor.mainCommitter] = chroma(mergedAuthor.color).hex();
+            obj[mergedAuthor.mainCommitter] = 0;
           }
           obj['others'] = 0;
         }
@@ -175,45 +176,32 @@ export default class Changes extends React.Component {
           props.selectedAuthors.filter((sA) => sA !== 'other'),
           function (committer) {
             //commitLegend to iterate over authorNames, commitLegend has structure [{name, style}, ...]
-            if (committer in commit.statsByAuthor) {
+            for (const mergedAuthor of props.mergedAuthors.filter((a) => a.mainCommitter === committer)) {
               //If committer has data
               //Add additions and Deletions of merged Committers
-              for (const mergedAuthor of props.mergedAuthors.filter((a) => a.mainCommitter === committer)) {
+              for (const c of mergedAuthor.committers) {
                 if (chartIsSplit) {
-                  mergedAuthor.committers.forEach((c) => {
-                    if (c.signature in commit.statsByAuthor) {
-                      //Insert number of changes with the author name as key,
-                      //statsByAuthor has structure {{authorName: {count, additions, deletions, changes}}, ...}
-                      if ('(Additions) ' + committer in obj && '(Deletions) ' + committer in obj) {
-                        obj['(Additions) ' + committer] += commit.statsByAuthor[c.signature].additions;
-                        //-0.001 for stack layout to realize it belongs on the bottom
-                        obj['(Deletions) ' + committer] += commit.statsByAuthor[c.signature].deletions * -1 - 0.001;
-                      } else {
-                        obj['(Additions) ' + committer] = commit.statsByAuthor[c.signature].additions;
-                        //-0.001 for stack layout to realize it belongs on the bottom
-                        obj['(Deletions) ' + committer] = commit.statsByAuthor[c.signature].deletions * -1 - 0.001;
-                      }
+                  if (c.signature in commit.statsByAuthor) {
+                    //Insert number of changes with the author name as key,
+                    //statsByAuthor has structure {{authorName: {count, additions, deletions, changes}}, ...}
+                    if ('(Additions) ' + mergedAuthor.mainCommitter in obj && '(Deletions) ' + mergedAuthor.mainCommitter in obj) {
+                      obj['(Additions) ' + mergedAuthor.mainCommitter] += commit.statsByAuthor[c.signature].additions;
+                      //-0.001 for stack layout to realize it belongs on the bottom
+                      obj['(Deletions) ' + mergedAuthor.mainCommitter] += commit.statsByAuthor[c.signature].deletions * -1 - 0.001;
+                    } else {
+                      obj['(Additions) ' + mergedAuthor.mainCommitter] = commit.statsByAuthor[c.signature].additions;
+                      //-0.001 for stack layout to realize it belongs on the bottom
+                      obj['(Deletions) ' + mergedAuthor.mainCommitter] = commit.statsByAuthor[c.signature].deletions * -1 - 0.001;
                     }
-                  });
+                  }
                 } else {
-                  mergedAuthor.committers.forEach((c) => {
-                    if (c.signature in commit.statsByAuthor) {
-                      if (committer in obj) {
-                        obj[committer] += commit.statsByAuthor[c.signature].count;
-                      } else {
-                        obj[committer] = commit.statsByAuthor[c.signature].count;
-                      }
+                  if (c.signature in commit.statsByAuthor) {
+                    if (mergedAuthor.mainCommitter in obj) {
+                      obj[mergedAuthor.mainCommitter] += commit.statsByAuthor[c.signature].count;
+                    } else {
+                      obj[mergedAuthor.mainCommitter] = commit.statsByAuthor[c.signature].count;
                     }
-                  });
-                }
-              }
-            } else {
-              for (const mergedAuthor of props.mergedAuthors.filter((a) => a.mainCommitter === committer)) {
-                if (chartIsSplit) {
-                  obj['(Additions) ' + committer] = 0;
-                  obj['(Deletions) ' + committer] = -0.001; //-0.001 for stack layout to realize it belongs on the bottom
-                } else {
-                  obj[committer] = 0;
+                  }
                 }
               }
             }
