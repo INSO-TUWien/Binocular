@@ -3,10 +3,23 @@
 const { merge } = require('webpack-merge');
 const commonConfig = require('./webpack.common');
 
+const opts = {
+  ENV: 'development',
+};
+
 module.exports = merge(commonConfig, {
   mode: 'development',
   devtool: 'cheap-module-source-map',
   entry: [require.resolve('react-dev-utils/webpackHotDevClient'), require.resolve('react-error-overlay')],
+  module: {
+    rules: [
+      {
+        test: /\.jsx?$/,
+        exclude: /node_modules/,
+        use: [{ loader: 'ifdef-loader', options: opts }],
+      },
+    ],
+  },
   devServer: {
     static: {
       directory: 'ui',
