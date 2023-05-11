@@ -8,6 +8,7 @@ import {
   getAllCommits,
   getCommitsForBranch,
   getCommitsForIssue,
+  getCommitsForFiles,
   getIssueData,
   getAllBuildData,
   addBuildData,
@@ -90,9 +91,6 @@ export const fetchCodeExpertiseData = fetchFactory(
     const filterMergeCommits = state.visualizations.codeExpertise.state.config.filterMergeCommits;
     const offlineMode = state.config.offlineMode;
 
-
-    console.log("OFFLINE MODE: ", offlineMode)
-
     const result = {
       devData: {},
       issue: null,
@@ -134,7 +132,6 @@ export const fetchCodeExpertiseData = fetchFactory(
           if (filterMergeCommits && commit.parents.includes(',')) {
             return false;
           }
-
           return issueCommits.includes(commit.sha);
         });
 
@@ -206,10 +203,17 @@ export const fetchCodeExpertiseData = fetchFactory(
     } else if (mode === 'modules') {
       if (activeFiles === null || activeFiles.length === 0) return result;
 
-      return yield Promise.all([getAllCommits(), getAllBuildData(), getBranches()]).then((results) => {
+      return yield Promise.all([
+        getAllCommits(),
+        getAllBuildData(),
+        getBranches(),
+        getCommitsForFiles(activeFiles)
+      ]).then((results) => {
         const allCommits = results[0];
         const builds = results[1];
         const branches = results[2];
+        const commitsForFiles = results[3];
+
         //########### get all relevant commits ###########
         //get full branch object for current branch
         const currentBranchObject = branches.filter((b) => b.branch === branch)[0];
@@ -226,19 +230,7 @@ export const fetchCodeExpertiseData = fetchFactory(
           if (filterMergeCommits && c.parents.includes(',')) {
             return false;
           }
-
-          //TODO files are not stored in commits anymore! fetch separately
-
-          //extract all filepaths of the commit
-          const filePathsTouchedByCommit = c.files.data.map((fileObject) => fileObject.file.path);
-          //if the resulting array includes one of the active files, this commit is relevant
-          let relevantFlag = false;
-          activeFiles.map((file) => {
-            if (filePathsTouchedByCommit.includes(file)) {
-              relevantFlag = true;
-            }
-          });
-          return relevantFlag;
+          return commitsForFiles.includes(c.sha);
         });
 
         if (relevantCommits.length === 0) {
@@ -271,23 +263,7 @@ export const fetchCodeExpertiseData = fetchFactory(
               const relevantFiles = commit.files.data.filter((f) => activeFiles.includes(f.file.path));
               //if at least one exists, return the respective additions
               if (relevantFiles && relevantFiles.length > 0) {
-                const tempSum = _.reduce(
-                  relevantFiles,
-                  (fileSum, file) => {
-                    return (
-                      fileSum +
-                      _.reduce(
-                        file.hunks,
-                        (hunkSum, hunk) => {
-                          return hunkSum + hunk.newLines;
-                        },
-                        0
-                      )
-                    );
-                  },
-                  0
-                );
-                return sum + tempSum;
+                return sum +  _.reduce(relevantFiles, (fileSum, file) => fileSum + file.stats.additions, 0);
               } else {
                 console.log('error in fetchCodeExpertiseData: relevantFile does not exist');
                 return sum + 0;

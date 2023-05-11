@@ -41,13 +41,13 @@ export default class Files {
   static getFilenamesForBranch(db, relations, branchName) {
     return findBranch(db, branchName).then(async (resBranch) => {
       const branch = resBranch.docs[0];
-
+      const files = (await findAll(db, 'files')).docs;
       const branchFileConnections = (await findBranchFileConnections(relations)).docs.filter((connection) => connection.to === branch._id);
       const filenames = [];
       for (const connection of branchFileConnections) {
-        const resFile = await findID(db, connection.from);
-        if (resFile.docs.length > 0) {
-          const file = resFile.docs[0];
+        const resFiles = files.filter(f => f._id === connection.from);
+        if (resFiles.length > 0) {
+          const file = resFiles[0];
           filenames.push(file.path);
         }
       }

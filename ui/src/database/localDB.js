@@ -123,6 +123,10 @@ export default class LocalDB {
     return Issues.getCommitsForIssue(db, iid);
   }
 
+  static getCommitsForFiles(filenames) {
+    return Commits.getCommitsForFiles(db, tripleStore, filenames);
+  }
+
   static getCommitDataWithFiles() {
     return Commits.getCommitDataWithFiles(db, tripleStore);
   }

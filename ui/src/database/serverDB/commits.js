@@ -81,6 +81,42 @@ export default class Commits {
     .then((resp) => resp.commits.data);
   }
 
+  static getCommitsForFiles(filenames) {
+
+    return graphQl
+    .query(
+      `query {
+         commits {
+          count,
+          data {
+            sha,
+            files{
+              data {
+                file{
+                  path
+                }
+              }
+            }
+          }
+         }
+       }`,
+      {}
+    )
+    .then((resp) => resp.commits.data).then((commits) => {
+      const result = [];
+      for(const commit of commits) {
+        for(const cFile of commit.files.data) {
+          if(filenames.includes(cFile.file.path)) {
+            result.push(commit.sha)
+            break;
+          }
+        }
+      }
+      return result;
+    });
+
+  }
+
   static getCommitDataOwnershipRiver(commitSpan, significantSpan, granularity, interval) {
     const statsByAuthor = {};
 

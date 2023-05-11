@@ -81,6 +81,9 @@ export default class Issues {
     return findIssue(db, iid).then(async (resIssue) => {
       const issue = resIssue.docs[0];
       let result = []
+      if(issue.mentions === null || issue.mentions === undefined) {
+        return result;
+      }
       for (const mentionedCommit of issue.mentions) {
         if(mentionedCommit.commit !== null) {
           result.push(mentionedCommit.commit);

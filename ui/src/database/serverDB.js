@@ -55,6 +55,10 @@ export default class ServerDB {
     return Issues.getCommitsForIssue(iid);
   }
 
+  static getCommitsForFiles(filenames) {
+    return Commits.getCommitsForFiles(filenames)
+  }
+
   static issueImpactQuery(iid, since, until) {
     return Issues.issueImpactQuery(iid, since, until);
   }

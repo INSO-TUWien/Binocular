@@ -45,6 +45,10 @@ export function getCommitsForIssue(iid) {
   return Database.getCommitsForIssue(iid);
 };
 
+export function getCommitsForFiles(filenames) {
+  return Database.getCommitsForFiles(filenames);
+}
+
 export function getIssueData(iid) {
   //TODO use separate function that only queries for specific issue
   return getIssues().then((resp) => resp.filter(i => i.iid === parseInt(iid))[0]);
@@ -80,6 +84,7 @@ export function addBuildData(relevantCommits, builds) {
 }
 
 export function getAllCommits() {
+  return Database.getCommitDataWithFiles();
   return Database.getCommitData([], [minDate, maxDate]);
 }
 
