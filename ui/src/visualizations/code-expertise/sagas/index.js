@@ -98,10 +98,14 @@ export const fetchCodeExpertiseData = fetchFactory(
 
     if (branch === null) return result;
 
+    //########### get data from database (depending on mode) ###########
+
+    let dataPromise;
+
     if (mode === 'issues') {
       if (issueId === null) return result;
-
-      return yield Promise.all([
+      
+      dataPromise = Promise.all([
         getAllCommits(),
         getIssueData(issueId),
         getCommitsForIssue(issueId),
@@ -113,152 +117,75 @@ export const fetchCodeExpertiseData = fetchFactory(
         const issueCommits = results[2];
         const builds = results[3];
         const branches = results[4];
-        //########### current issue ###########
+        //set current issue
         result['issue'] = issue;
-
-        //########### get all relevant commits ###########
-
-        //get full branch object for currently selected branch
-        const currentBranchObject = branches.filter((b) => b.branch === branch)[0];
-
-        //contains all commits of the current branch
-        const branchCommits = getCommitsForBranch(currentBranchObject, allCommits);
-
-        //we now have all commits for the current branch and all commits for the issue
-        //intersect the two groups to get the result set
-        //we are interested in commits that are both on the current branch and related to the issue
-        let relevantCommits = branchCommits.filter((commit) => {
-          //if a commits parent string contains a comma, it has more than one parent -> it is a merge commit
-          if (filterMergeCommits && commit.parents.includes(',')) {
-            return false;
-          }
-          return issueCommits.includes(commit.sha);
-        });
-
-        if (relevantCommits.length === 0) {
-          return result;
-        }
-
-        //########### add build data to commits ###########
-        relevantCommits = addBuildData(relevantCommits, builds);
-
-        //########### extract data for each stakeholder ###########
-
-        //first group all relevant commits by stakeholder
-        const commitsByStakeholders = _.groupBy(relevantCommits, (commit) => commit.signature);
-
-        for (const stakeholder in commitsByStakeholders) {
-          result['devData'][stakeholder] = {};
-
-          //add commits to each stakeholder
-          result['devData'][stakeholder]['commits'] = commitsByStakeholders[stakeholder];
-
-          //initialize linesOwned with 0. If program runs in online mode, this will be updated later
-          result['devData'][stakeholder]['linesOwned'] = 0;
-
-          //for each stakeholder, sum up relevant additions
-          result['devData'][stakeholder]['additions'] = _.reduce(
-            commitsByStakeholders[stakeholder],
-            (sum, commit) => {              
-              //we are interested in all additions made in each commit
-              return sum + commit.stats.additions;
-            },
-            0
-          );
-        }
-
-        //########### add ownership data to commits ###########
-
-        //if the program runs in offline mode, don't add ownership data since this requires a back end connection
-        if(offlineMode)  {
-          return result;
-        }
-
-        //get latest relevant commit of the branch
-        const latestRelevantCommit = relevantCommits.sort((a, b) => new Date(b.date) - new Date(a.date))[0];
-
-        //hashes of all commits related to the issue
-        const hashes = relevantCommits.map((commit) => commit.sha);
-
-        return Promise.resolve(getFilesForCommits(hashes))
-          .then((files) => getBlameIssues(latestRelevantCommit.sha, [...new Set(files.map((file) => file.file.path))], hashes))
-          .then((res) => {
-            Object.entries(res.blame).map((item) => {
-              const devMail = item[0];
-              const linesOwned = item[1];
-
-              //add to dev object
-              for (const stakeholder in commitsByStakeholders) {
-                if (stakeholder.includes('<' + devMail + '>')) {
-                  result['devData'][stakeholder]['linesOwned'] = linesOwned;
-                  break;
-                }
-              }
-            });
-          })
-          .then((_) => {
-            return result;
-          });
+        return [allCommits, issueCommits, builds, branches]
       });
+
     } else if (mode === 'modules') {
       if (activeFiles === null || activeFiles.length === 0) return result;
-
-      return yield Promise.all([
+      
+      dataPromise = Promise.all([
         getAllCommits(),
+        getCommitsForFiles(activeFiles),
         getAllBuildData(),
         getBranches(),
-        getCommitsForFiles(activeFiles)
-      ]).then((results) => {
-        const allCommits = results[0];
-        const builds = results[1];
-        const branches = results[2];
-        const commitsForFiles = results[3];
+      ]);
 
-        //########### get all relevant commits ###########
-        //get full branch object for current branch
-        const currentBranchObject = branches.filter((b) => b.branch === branch)[0];
+    } else {
+      console.log('error in fetchCodeExpertiseData: invalid mode: ' + mode);
+      return result;
+    }
 
-        //contains all commits of the current branch
-        const branchCommits = getCommitsForBranch(currentBranchObject, allCommits);
+    return yield dataPromise.then(([allCommits, relevantCommitsHashes, builds, branches]) => {
 
-        //we now have all commits for the current branch and all commits for the file
-        //intersect the two groups to get the result set
+      //########### get all relevant commits ###########
+      //get full branch object for currently selected branch
+      const currentBranchObject = branches.filter((b) => b.branch === branch)[0];
 
-        //we are interested in commits that are both on the current branch and related to the current file/module
-        let relevantCommits = branchCommits.filter((c) => {
-          //if a commits parent string contains a comma, it has more than one parent -> it is a merge commit
-          if (filterMergeCommits && c.parents.includes(',')) {
-            return false;
-          }
-          return commitsForFiles.includes(c.sha);
-        });
+      //contains all commits of the current branch
+      const branchCommits = getCommitsForBranch(currentBranchObject, allCommits);
 
-        if (relevantCommits.length === 0) {
-          console.log('no relevant commits');
-          return result;
+      //we now have all commits for the current branch and all commits for the issue
+      //intersect the two groups to get the result set
+      //we are interested in commits that are both on the current branch and related to the issue
+      let relevantCommits = branchCommits.filter((commit) => {
+        //if a commits parent string contains a comma, it has more than one parent -> it is a merge commit
+        if (filterMergeCommits && commit.parents.includes(',')) {
+          return false;
         }
+        return relevantCommitsHashes.includes(commit.sha);
+      });
 
-        //########### add build data to commits ###########
-        relevantCommits = addBuildData(relevantCommits, builds);
+      if (relevantCommits.length === 0) {
+        return result;
+      }
 
-        //########### extract data for each stakeholder ###########
+      //########### add build data to commits ###########
+      relevantCommits = addBuildData(relevantCommits, builds);
 
-        //first group all relevant commits by stakeholder
-        const commitsByStakeholders = _.groupBy(relevantCommits, (commit) => commit.signature);
+      //########### extract data for each stakeholder ###########
 
-        for (const stakeholder in commitsByStakeholders) {
-          result['devData'][stakeholder] = {};
+      //first group all relevant commits by stakeholder
+      const commitsByStakeholders = _.groupBy(relevantCommits, (commit) => commit.signature);
 
-          //add commits to each stakeholder
-          result['devData'][stakeholder]['commits'] = commitsByStakeholders[stakeholder];
+      for (const stakeholder in commitsByStakeholders) {
+        result['devData'][stakeholder] = {};
 
-          //initialize linesOwned with 0. If program runs in online mode, this will be updated later
-          result['devData'][stakeholder]['linesOwned'] = 0;
+        //add commits to each stakeholder
+        result['devData'][stakeholder]['commits'] = commitsByStakeholders[stakeholder];
 
-          //for each stakeholder, sum up relevant additions
-          result['devData'][stakeholder]['additions'] = _.reduce(
-            commitsByStakeholders[stakeholder],
-            (sum, commit) => {
+        //initialize linesOwned with 0. If program runs in online mode, this will be updated later
+        result['devData'][stakeholder]['linesOwned'] = 0;
+
+        //for each stakeholder, sum up relevant additions
+        result['devData'][stakeholder]['additions'] = _.reduce(
+          commitsByStakeholders[stakeholder],
+          (sum, commit) => {        
+            if(mode === 'issues') {
+              //we are interested in all additions made in each commit
+              return sum + commit.stats.additions;
+            } else {
               //we are only interested in the additions made to the currently active files
               const relevantFiles = commit.files.data.filter((f) => activeFiles.includes(f.file.path));
               //if at least one exists, return the respective additions
@@ -268,44 +195,53 @@ export const fetchCodeExpertiseData = fetchFactory(
                 console.log('error in fetchCodeExpertiseData: relevantFile does not exist');
                 return sum + 0;
               }
-            },
-            0
-          );
-        }
+            }
+          },
+          0
+        );
+      }
 
-        //########### add ownership data to commits ###########
+      //########### add ownership data to commits ###########
 
-        //if the program runs in offline mode, don't add ownership data since this requires a back end connection
-        if(offlineMode)  {
-          return result;
-        }
+      //if the program runs in offline mode, don't add ownership data since this requires a back end connection
+      if(offlineMode)  {
+        return result;
+      }
 
+      let ownershipDataPromise;
+
+      if (mode === 'issues') {
+        //get latest relevant commit of the branch
+        const latestRelevantCommit = relevantCommits.sort((a, b) => new Date(b.date) - new Date(a.date))[0];
+        //hashes of all relevant commits
+        const hashes = relevantCommits.map((commit) => commit.sha);
+        ownershipDataPromise = Promise.resolve(getFilesForCommits(hashes))
+        .then((files) => getBlameIssues(latestRelevantCommit.sha, [...new Set(files.map((file) => file.file.path))], hashes))
+      } else {
         //get latest commit of the branch
         const latestBranchCommit = branchCommits.sort((a, b) => new Date(b.date) - new Date(a.date))[0];
+        ownershipDataPromise = Promise.resolve(getBlameModules(latestBranchCommit.sha, activeFiles))
+      }
 
-        return Promise.resolve(getBlameModules(latestBranchCommit.sha, activeFiles))
-          .then((res) => {
-            Object.entries(res.blame).map((item) => {
-              const devMail = item[0];
-              const linesOwned = item[1];
+      return ownershipDataPromise.then((res) => {
+        Object.entries(res.blame).map((item) => {
+          const devMail = item[0];
+          const linesOwned = item[1];
 
-              //add to dev object
-              for (const stakeholder in commitsByStakeholders) {
-                if (stakeholder.includes('<' + devMail + '>')) {
-                  result['devData'][stakeholder]['linesOwned'] = linesOwned;
-                  break;
-                }
-              }
-            });
-          })
-          .then((_) => {
-            return result;
-          });
+          //add to dev object
+          for (const stakeholder in commitsByStakeholders) {
+            if (stakeholder.includes('<' + devMail + '>')) {
+              result['devData'][stakeholder]['linesOwned'] = linesOwned;
+              break;
+            }
+          }
+        });
+      })
+      .then((_) => {
+        return result;
       });
-    } else {
-      console.log('error in fetchCodeExpertiseData: invalid mode: ' + mode);
-      return result;
-    }
+
+    });
   },
   requestCodeExpertiseData,
   receiveCodeExpertiseData,
