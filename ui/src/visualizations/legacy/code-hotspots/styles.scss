@@ -12,32 +12,6 @@
   overflow: hidden;
 }
 
-.help {
-  width: 100%;
-  overflow-y: scroll;
-  font-size: 1.5em;
-  height: 100%;
-
-  h2 {
-    font-size: 1.2em;
-    font-weight: bold;
-  }
-
-  h3 {
-    font-size: 1.1em;
-    font-weight: bold;
-  }
-
-  ul {
-    list-style-type: circle;
-    margin-left: 1.5em;
-  }
-
-  p {
-    margin-bottom: 1em;
-  }
-}
-
 .filler {
   justify-content: center;
   align-items: center;

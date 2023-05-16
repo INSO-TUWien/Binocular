@@ -1,0 +1,32 @@
+.help {
+  width: 100%;
+  overflow-y: auto;
+  font-size: 1.5em;
+
+  h2 {
+    font-size: 1.2em;
+    font-weight: bold;
+  }
+
+  h3 {
+    font-size: 1em;
+    font-weight: bold;
+  }
+
+  ul {
+    list-style-type: circle;
+    margin-left: 1.5em;
+  }
+
+  p {
+    padding-bottom: 1em;
+    margin-left: 0.5rem;
+    padding-left: 0.5rem;
+    border-left: 1px solid lightgray;
+  }
+
+  i {
+    width: 25px;
+    text-align: center;
+  }
+}
