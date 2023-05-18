@@ -45,8 +45,8 @@ export default class Issues {
 
   static getCommitsForIssue(iid) {
     return graphQl
-        .query(
-          `query{
+      .query(
+        `query{
              issue (iid: ${iid}){
               commits {
                 count
@@ -69,9 +69,9 @@ export default class Issues {
               }
              }
            }`,
-          { iid }
-        )
-        .then((resp) => resp.issue.commits.data);
+        { iid }
+      )
+      .then((resp) => resp.issue.commits.data);
   }
 
   static getIssueDataOwnershipRiver(issueSpan, significantSpan, granularity, interval) {

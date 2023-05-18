@@ -100,15 +100,14 @@ function Segment({ rad, startPercent, endPercent, devName, devData, devColor, ma
   let additionsText = '';
 
   //only display added lines if program runs in offline mode
-  if(offlineMode) {
-    additionsText += (devData.additions !== undefined ? devData.additions : '0');
+  if (offlineMode) {
+    additionsText += devData.additions !== undefined ? devData.additions : '0';
   } else {
-    additionsText += (devData.linesOwned !== undefined ? devData.linesOwned : '0');
+    additionsText += devData.linesOwned !== undefined ? devData.linesOwned : '0';
     if (!onlyDisplayOwnership) {
       additionsText += '/' + (devData.additions !== undefined ? devData.additions : '0');
     }
   }
-  
 
   // ######################## FUNCTIONS ########################
 

@@ -104,7 +104,7 @@ export const fetchCodeExpertiseData = fetchFactory(
 
     if (mode === 'issues') {
       if (issueId === null) return result;
-      
+
       dataPromise = Promise.all([
         getAllCommits(),
         getIssueData(issueId),
@@ -119,26 +119,18 @@ export const fetchCodeExpertiseData = fetchFactory(
         const branches = results[4];
         //set current issue
         result['issue'] = issue;
-        return [allCommits, issueCommitHashes, builds, branches]
+        return [allCommits, issueCommitHashes, builds, branches];
       });
-
     } else if (mode === 'modules') {
       if (activeFiles === null || activeFiles.length === 0) return result;
-      
-      dataPromise = Promise.all([
-        getAllCommits(),
-        getCommitHashesForFiles(activeFiles),
-        getAllBuildData(),
-        getBranches(),
-      ]);
 
+      dataPromise = Promise.all([getAllCommits(), getCommitHashesForFiles(activeFiles), getAllBuildData(), getBranches()]);
     } else {
       console.log('error in fetchCodeExpertiseData: invalid mode: ' + mode);
       return result;
     }
 
     return yield dataPromise.then(([allCommits, relevantCommitsHashes, builds, branches]) => {
-
       //########### get all relevant commits ###########
       //get full branch object for currently selected branch
       const currentBranchObject = branches.filter((b) => b.branch === branch)[0];
@@ -181,8 +173,8 @@ export const fetchCodeExpertiseData = fetchFactory(
         //for each stakeholder, sum up relevant additions
         result['devData'][stakeholder]['additions'] = _.reduce(
           commitsByStakeholders[stakeholder],
-          (sum, commit) => {        
-            if(mode === 'issues') {
+          (sum, commit) => {
+            if (mode === 'issues') {
               //we are interested in all additions made in each commit
               return sum + commit.stats.additions;
             } else {
@@ -190,7 +182,7 @@ export const fetchCodeExpertiseData = fetchFactory(
               const relevantFiles = commit.files.data.filter((f) => activeFiles.includes(f.file.path));
               //if at least one exists, return the respective additions
               if (relevantFiles && relevantFiles.length > 0) {
-                return sum +  _.reduce(relevantFiles, (fileSum, file) => fileSum + file.stats.additions, 0);
+                return sum + _.reduce(relevantFiles, (fileSum, file) => fileSum + file.stats.additions, 0);
               } else {
                 console.log('error in fetchCodeExpertiseData: relevantFile does not exist');
                 return sum + 0;
@@ -204,7 +196,7 @@ export const fetchCodeExpertiseData = fetchFactory(
       //########### add ownership data to commits ###########
 
       //if the program runs in offline mode, don't add ownership data since this requires a back end connection
-      if(offlineMode)  {
+      if (offlineMode) {
         return result;
       }
 
@@ -215,32 +207,37 @@ export const fetchCodeExpertiseData = fetchFactory(
         const latestRelevantCommit = relevantCommits.sort((a, b) => new Date(b.date) - new Date(a.date))[0];
         //hashes of all relevant commits
         const hashes = relevantCommits.map((commit) => commit.sha);
-        ownershipDataPromise = Promise.resolve(getFilesForCommits(hashes))
-        .then((files) => getBlameIssues(latestRelevantCommit.sha, files.map((file) => file.file.path), hashes))
+        ownershipDataPromise = Promise.resolve(getFilesForCommits(hashes)).then((files) =>
+          getBlameIssues(
+            latestRelevantCommit.sha,
+            files.map((file) => file.file.path),
+            hashes
+          )
+        );
       } else {
         //get latest commit of the branch
         const latestBranchCommit = branchCommits.sort((a, b) => new Date(b.date) - new Date(a.date))[0];
-        ownershipDataPromise = Promise.resolve(getBlameModules(latestBranchCommit.sha, activeFiles))
+        ownershipDataPromise = Promise.resolve(getBlameModules(latestBranchCommit.sha, activeFiles));
       }
 
-      return ownershipDataPromise.then((res) => {
-        Object.entries(res.blame).map((item) => {
-          const devMail = item[0];
-          const linesOwned = item[1];
+      return ownershipDataPromise
+        .then((res) => {
+          Object.entries(res.blame).map((item) => {
+            const devMail = item[0];
+            const linesOwned = item[1];
 
-          //add to dev object
-          for (const stakeholder in commitsByStakeholders) {
-            if (stakeholder.includes('<' + devMail + '>')) {
-              result['devData'][stakeholder]['linesOwned'] = linesOwned;
-              break;
+            //add to dev object
+            for (const stakeholder in commitsByStakeholders) {
+              if (stakeholder.includes('<' + devMail + '>')) {
+                result['devData'][stakeholder]['linesOwned'] = linesOwned;
+                break;
+              }
             }
-          }
+          });
+        })
+        .then((_) => {
+          return result;
         });
-      })
-      .then((_) => {
-        return result;
-      });
-
     });
   },
   requestCodeExpertiseData,

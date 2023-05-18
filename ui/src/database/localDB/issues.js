@@ -72,7 +72,7 @@ export default class Issues {
 
   static getCommitsForIssue(db, issueId) {
     let iid;
-    if(typeof issueId == 'string') {
+    if (typeof issueId === 'string') {
       iid = parseInt(issueId);
     } else {
       iid = issueId;
@@ -81,15 +81,15 @@ export default class Issues {
     return findIssue(db, iid).then(async (resIssue) => {
       const issue = resIssue.docs[0];
       const allCommits = (await findAll(db, 'commits')).docs;
-      let result = []
-      if(issue.mentions === null || issue.mentions === undefined) {
+      const result = [];
+      if (issue.mentions === null || issue.mentions === undefined) {
         return result;
       }
       for (const mentionedCommit of issue.mentions) {
-        if(mentionedCommit.commit !== null) {
-          const commitSha = mentionedCommit.commit
-          const commitObject = allCommits.filter(c => c.sha === commitSha)[0];
-          if(commitObject) {
+        if (mentionedCommit.commit !== null) {
+          const commitSha = mentionedCommit.commit;
+          const commitObject = allCommits.filter((c) => c.sha === commitSha)[0];
+          if (commitObject) {
             result.push(commitObject);
           }
         }
@@ -97,9 +97,6 @@ export default class Issues {
       return result;
     });
   }
-
-
-
 
   static getIssueDataOwnershipRiver(db, issueSpan, significantSpan, granularity, interval) {
     // holds close dates of still open issues, kept sorted at all times

@@ -56,7 +56,7 @@ export default class ServerDB {
   }
 
   static getCommitsForFiles(filenames) {
-    return Commits.getCommitsForFiles(filenames)
+    return Commits.getCommitsForFiles(filenames);
   }
 
   static issueImpactQuery(iid, since, until) {
@@ -76,7 +76,7 @@ export default class ServerDB {
   }
 
   static getFilesForCommits(hashes) {
-    return Files.getFilesForCommits(hashes)
+    return Files.getFilesForCommits(hashes);
   }
 
   static getAllBranches() {

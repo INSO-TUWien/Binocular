@@ -42,7 +42,7 @@ const Details = () => {
     } else {
       Object.entries(allDevData).map((item) => {
         const name = item[0];
-        let devData = item[1];
+        const devData = item[1];
 
         devData.commitsNum = devData.commits.length;
         devData.goodCommitsNum = devData.commits.filter((c) => c.build === 'success').length;
@@ -125,16 +125,18 @@ const Details = () => {
 
                   <GeneralDetailsData label="Total Lines Added" text={devDetails.additions} />
 
-                  {!offlineMode &&
-                  <GeneralDetailsData
-                    label="Total Lines Owned"
-                    text={
-                      devDetails.linesOwned
-                        ? `${devDetails.linesOwned} (${((devDetails.linesOwned / devDetails.additions) * 100).toFixed(2)}% of added lines)`
-                        : '0 (0% of added lines)'
-                    }
-                  />
-                  }
+                  {!offlineMode && (
+                    <GeneralDetailsData
+                      label="Total Lines Owned"
+                      text={
+                        devDetails.linesOwned
+                          ? `${devDetails.linesOwned} (${((devDetails.linesOwned / devDetails.additions) * 100).toFixed(
+                              2
+                            )}% of added lines)`
+                          : '0 (0% of added lines)'
+                      }
+                    />
+                  )}
 
                   <GeneralDetailsData label="Total Commits" text={devDetails.commits.length} />
 

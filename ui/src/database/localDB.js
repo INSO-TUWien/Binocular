@@ -164,7 +164,7 @@ export default class LocalDB {
   }
 
   static getFilesForCommits(hashes) {
-    return Files.getFilesForCommits(db, tripleStore, hashes)
+    return Files.getFilesForCommits(db, tripleStore, hashes);
   }
 
   static getFilenamesForBranch(branchName) {

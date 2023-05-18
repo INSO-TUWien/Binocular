@@ -16,9 +16,11 @@ function findAll(database, collection) {
 }
 
 function bulkGet(database, ids) {
-  const idsObjects = ids.map((id) => { return {id: id} })
+  const idsObjects = ids.map((id) => {
+    return { id: id };
+  });
   return database.bulkGet({
-    docs: idsObjects
+    docs: idsObjects,
   });
 }
 
@@ -70,12 +72,10 @@ export default class Commits {
   }
 
   static getCommitDataWithFiles(db, relations, commitSpan, significantSpan) {
-
     const first = new Date(significantSpan[0]).getTime();
     const last = new Date(significantSpan[1]).getTime();
 
     return findAll(db, 'commits').then(async (res) => {
-
       const commits = res.docs
         .filter((c) => new Date(c.date) >= first && new Date(c.date) <= last)
         .sort((a, b) => {
@@ -85,21 +85,21 @@ export default class Commits {
       const allFiles = (await findAll(db, 'files')).docs;
       const result = [];
 
-      for(let commit of commits) {
+      for (const commit of commits) {
         commit.files = {};
 
         const relevantConnections = fileCommitConnections.filter((fCC) => fCC.to === commit._id);
 
         //concurrently
         commit.files.data = relevantConnections.map((connection) => {
-          const resultFile = allFiles.filter((file) => file._id === connection.from)
-          if(resultFile.length > 0) {
+          const resultFile = allFiles.filter((file) => file._id === connection.from);
+          if (resultFile.length > 0) {
             const file = resultFile[0];
             const res = { file: {} };
             res.file.path = file.path;
             res.stats = connection.stats;
             res.hunks = connection.hunks;
-            return res
+            return res;
           }
         });
         result.push(commit);
@@ -110,21 +110,19 @@ export default class Commits {
   }
 
   static getCommitsForFiles(db, relations, filenames) {
-
     return findAll(db, 'files').then(async (res) => {
-
       let files = res.docs;
       files = files.filter((f) => filenames.includes(f.path));
 
-      const resultCommitHashes = []
+      const resultCommitHashes = [];
 
       const fileCommitConnections = (await findFileCommitConnections(relations)).docs;
 
-      for(let file of files) {
+      for (const file of files) {
         const relevantConnections = fileCommitConnections.filter((fCC) => fCC.from === file._id);
-        for(const connection of relevantConnections) {
-          if(resultCommitHashes.includes(connection.to)) {
-            continue; 
+        for (const connection of relevantConnections) {
+          if (resultCommitHashes.includes(connection.to)) {
+            continue;
           }
           resultCommitHashes.push(connection.to);
         }
@@ -132,10 +130,9 @@ export default class Commits {
 
       //get whole commit objects from hashes
       let resultCommits = await bulkGet(db, resultCommitHashes);
-      resultCommits = resultCommits.results.map(res => res.docs[0].ok)
+      resultCommits = resultCommits.results.map((res) => res.docs[0].ok);
       return resultCommits;
     });
-
   }
 
   static getCommitDataOwnershipRiver(db, commitSpan, significantSpan, granularity, interval) {

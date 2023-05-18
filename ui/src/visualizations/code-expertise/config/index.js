@@ -11,7 +11,6 @@ import { setActiveIssue, setMode, setCurrentBranch, setActiveFiles, setFilterMer
 import { getBranches, getFilenamesForBranch, getIssues } from '../sagas/helper.js';
 
 export default () => {
-
   //global state from redux store
   const expertiseState = useSelector((state) => state.visualizations.codeExpertise.state);
   const currentMode = expertiseState.config.mode;
@@ -49,11 +48,9 @@ export default () => {
   };
 
   const onSetOnlyDisplayOwnership = (isChecked) => {
-    if(offlineMode) return;
+    if (offlineMode) return;
     dispatch(setOnlyDisplayOwnership(isChecked));
   };
-
-  
 
   //run once on initialization
   useEffect(() => {
@@ -78,22 +75,22 @@ export default () => {
 
     //get all issues for issue-select
     getIssues().then((issues) => {
-        const temp = [];
-        //placeholder option
+      const temp = [];
+      //placeholder option
+      temp.push(
+        <option key={-1} value={''}>
+          Select an Issue
+        </option>
+      );
+      for (const i of issues) {
         temp.push(
-          <option key={-1} value={''}>
-            Select an Issue
+          <option key={i.iid} value={i.iid}>
+            {'#' + i.iid + ' ' + i.title}
           </option>
         );
-        for (const i of issues) {
-          temp.push(
-            <option key={i.iid} value={i.iid}>
-              {'#' + i.iid + ' ' + i.title}
-            </option>
-          );
-        }
-        setIssueOptions(temp);
-      });
+      }
+      setIssueOptions(temp);
+    });
   }, []);
 
   //update files every time the branch changes
@@ -129,15 +126,15 @@ export default () => {
           </div>
         </div>
 
-        {!offlineMode &&
-        <div className="field">
-          <div className="control">
-            <label className="label">Display Settings:</label>
-            <input type="checkbox" checked={onlyDisplayOwnership} onChange={(event) => onSetOnlyDisplayOwnership(event.target.checked)} />
-            <span>Only display Code Ownership</span>
+        {!offlineMode && (
+          <div className="field">
+            <div className="control">
+              <label className="label">Display Settings:</label>
+              <input type="checkbox" checked={onlyDisplayOwnership} onChange={(event) => onSetOnlyDisplayOwnership(event.target.checked)} />
+              <span>Only display Code Ownership</span>
+            </div>
           </div>
-        </div>
-        }
+        )}
 
         {/* select if commits related to issues or commits related to files should be visualized */}
         <div className="field">

@@ -46,7 +46,6 @@ export default class Commits {
   }
 
   static getCommitDataWithFiles(commitSpan, significantSpan) {
-
     const commitList = [];
     const getCommitsPage = (since, until) => (page, perPage) => {
       return graphQl
@@ -92,12 +91,9 @@ export default class Commits {
       return commitList;
     });
 
-
-
-
     return graphQl
-    .query(
-      `query {
+      .query(
+        `query {
          commits {
           count,
           data {
@@ -125,16 +121,15 @@ export default class Commits {
           }
          }
        }`,
-      {}
-    )
-    .then((resp) => resp.commits.data);
+        {}
+      )
+      .then((resp) => resp.commits.data);
   }
 
   static getCommitsForFiles(filenames) {
-
     return graphQl
-    .query(
-      `query {
+      .query(
+        `query {
          commits {
           count,
           data {
@@ -160,22 +155,22 @@ export default class Commits {
           }
          }
        }`,
-      {}
-    )
-    .then((resp) => resp.commits.data).then((commits) => {
-      const result = [];
-      for(const commit of commits) {
-        for(const cFile of commit.files.data) {
-          if(filenames.includes(cFile.file.path)) {
-            //this function should only return the commit data. We do not need the files entry anymore
-            result.push(_.omit(commit, 'files'));
-            break;
+        {}
+      )
+      .then((resp) => resp.commits.data)
+      .then((commits) => {
+        const result = [];
+        for (const commit of commits) {
+          for (const cFile of commit.files.data) {
+            if (filenames.includes(cFile.file.path)) {
+              //this function should only return the commit data. We do not need the files entry anymore
+              result.push(_.omit(commit, 'files'));
+              break;
+            }
           }
         }
-      }
-      return result;
-    });
-
+        return result;
+      });
   }
 
   static getCommitDataOwnershipRiver(commitSpan, significantSpan, granularity, interval) {

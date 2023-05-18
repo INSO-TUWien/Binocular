@@ -38,20 +38,20 @@ export function getBlameIssues(sha, files, hashes) {
 }
 
 export function getIssues() {
-  return Database.getIssueData([],[minDate,maxDate]);
+  return Database.getIssueData([], [minDate, maxDate]);
 }
 
 export function getCommitHashesForIssue(iid) {
-  return Database.getCommitsForIssue(iid).then(commits => commits.map(c => c.sha));
-};
+  return Database.getCommitsForIssue(iid).then((commits) => commits.map((c) => c.sha));
+}
 
 export function getCommitHashesForFiles(filenames) {
-  return Database.getCommitsForFiles(filenames).then(commits => commits.map(c => c.sha));
+  return Database.getCommitsForFiles(filenames).then((commits) => commits.map((c) => c.sha));
 }
 
 export function getIssueData(iid) {
   //TODO use separate function that only queries for specific issue
-  return getIssues().then((resp) => resp.filter(i => i.iid === parseInt(iid))[0]);
+  return getIssues().then((resp) => resp.filter((i) => i.iid === parseInt(iid))[0]);
 }
 
 export function getAllBuildData() {
@@ -67,7 +67,7 @@ export function getFilenamesForBranch(branchName) {
 }
 
 export function getFilesForCommits(hashes) {
-  return Database.getFilesForCommits(hashes)
+  return Database.getFilesForCommits(hashes);
 }
 
 export function addBuildData(relevantCommits, builds) {

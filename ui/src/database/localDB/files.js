@@ -51,7 +51,7 @@ export default class Files {
       const branchFileConnections = (await findBranchFileConnections(relations)).docs.filter((connection) => connection.to === branch._id);
       const filenames = [];
       for (const connection of branchFileConnections) {
-        const resFiles = files.filter(f => f._id === connection.from);
+        const resFiles = files.filter((f) => f._id === connection.from);
         if (resFiles.length > 0) {
           const file = resFiles[0];
           filenames.push(file.path);
@@ -62,7 +62,6 @@ export default class Files {
   }
 
   static getFilesForCommits(db, relations, hashes) {
-
     return findAll(db, 'commits').then(async (res) => {
       let commits = res.docs;
 
@@ -70,22 +69,21 @@ export default class Files {
       const allFiles = (await findAll(db, 'files')).docs;
       const fileCommitConnections = (await findFileCommitConnections(relations)).docs;
 
-      let result = []
-    
-      for(let commit of commits) {
+      const result = [];
+
+      for (const commit of commits) {
         const relevantConnections = fileCommitConnections.filter((fCC) => fCC.to === commit._id);
-        for(const connection of relevantConnections) {
-          if(result.filter(f => f._id === connection.from).length !== 0) {
+        for (const connection of relevantConnections) {
+          if (result.filter((f) => f._id === connection.from).length !== 0) {
             continue;
           }
-          result.push(allFiles.filter(f => f._id === connection.from)[0]);
+          result.push(allFiles.filter((f) => f._id === connection.from)[0]);
         }
       }
 
-      return result.map(f => {
-        return {file: {path: f.path}}
+      return result.map((f) => {
+        return { file: { path: f.path } };
       });
     });
-
   }
 }
