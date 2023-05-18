@@ -2,7 +2,7 @@
 
 import cx from 'classnames';
 
-import styles from './styles.scss';
+import styles from '../../../styles/styles.scss';
 
 export default () => (
   <div className={cx('box', styles.help)}>

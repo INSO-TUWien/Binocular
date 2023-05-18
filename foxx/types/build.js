@@ -15,7 +15,7 @@ const BuildStatus = new gql.GraphQLEnumType({
     success: {},
     pending: {},
     running: {},
-    canceled: {},
+    cancelled: {},
     skipped: {},
     created: {},
     started: {},
@@ -138,7 +138,7 @@ module.exports = new gql.GraphQLObjectType({
             pending: {
               type: gql.GraphQLInt,
             },
-            canceled: {
+            cancelled: {
               type: gql.GraphQLInt,
             },
           },

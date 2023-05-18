@@ -134,6 +134,8 @@ async function startDatabase(context, gateway) {
       }
     }
 
+    //writeConfigToFrontend
+    projectStructureHelper.writeContextToFrontend(ctx, config);
     // immediately run all indexers
     return (activeIndexingQueue = Promise.all([
       repoUpdateHandler(repository, context, gateway),
@@ -551,7 +553,6 @@ Promise.all(
     // start gateway
     (async (context, config, gateway) => {
       services.push(gateway);
-
       await gateway.configure(config.get('gateway'));
       gateway.addServiceHandler('LanguageDetection', (service) => {
         service.comm = new LanguageDetectionService(`${service.client.address}:${service.client.port}`, grpc.credentials.createInsecure());
