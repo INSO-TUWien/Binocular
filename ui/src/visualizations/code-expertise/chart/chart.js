@@ -6,10 +6,14 @@ import _ from 'lodash';
 import GlobalZoomableSvg from '../../../components/svg/GlobalZoomableSvg.js';
 import OffsetGroup from '../../../components/svg/OffsetGroup.js';
 import ChartContainer from '../../../components/svg/ChartContainer.js';
+import LegendCompact from '../../../components/LegendCompact/LegendCompact.js';
 import { getChartColors } from '../../../utils';
 import * as zoomUtils from '../../../utils/zoom.js';
 import * as d3 from 'd3';
 import styles from '../styles.scss';
+import chroma from 'chroma-js';
+import DotsPattern from '../../../components/svg/patterns/dots.js';
+import HatchPattern from '../../../components/svg/patterns/hatch.js';
 
 import Segment from './Segment.js';
 import FullScreenMessage from './full-screen-message.js';
@@ -32,6 +36,13 @@ const Chart = () => {
     x: dimensions.width / 2,
     y: dimensions.height / 2,
   };
+
+  //for legend
+  const legendGoodCommitsColor = chroma('green').brighten().brighten().hex();
+  const legendBadCommitsColor = chroma('red').brighten().brighten().hex();
+  const legendColor = getChartColors('spectral', _.range(0, 4))[0];
+  const legendDotsId = "legend_dots"
+  const legendHatchId = "legend_hatch"
 
   //functions to handle zooming and resizing of the chart
   const onResize = (evt) => {
@@ -148,6 +159,24 @@ const Chart = () => {
   }
 
   return (
+    <>
+    
+    <div className={styles.legend}>
+      <g>
+        <svg width={0} height={0}>
+        <defs>
+          {DotsPattern(legendColor, legendDotsId)}
+          {HatchPattern(legendColor, legendHatchId)}
+        </defs>
+        </svg>
+        
+        <LegendCompact text="Good Commits rel. to all Commits of Dev" color={legendGoodCommitsColor} />
+        <LegendCompact text="Bad Commits rel. to all Commits of Dev" color={legendBadCommitsColor} />
+        <LegendCompact text="# of Commits rel. to others" color={`url(#${legendDotsId})`} />
+        <LegendCompact text="Added lines of code" color={`url(#${legendHatchId})`} color2={legendColor} />
+        <LegendCompact text="Added lines of code (still in the Project)" color={legendColor} />
+      </g>
+    </div>
     <ChartContainer onResize={(evt) => onResize(evt)} className={styles.chartContainer}>
       <GlobalZoomableSvg className={styles.chart} scaleExtent={[1, 10]} onZoom={(evt) => onZoom(evt)} transform={transform}>
         <OffsetGroup dims={dimensions} transform={transform}>
@@ -158,6 +187,7 @@ const Chart = () => {
         </OffsetGroup>
       </GlobalZoomableSvg>
     </ChartContainer>
+    </>
   );
 };
 

@@ -3,6 +3,8 @@ import chroma from 'chroma-js';
 import React, { useState, useEffect, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { setDetails } from '../sagas';
+import DotsPattern from '../../../components/svg/patterns/dots';
+import HatchPattern from '../../../components/svg/patterns/hatch';
 
 function Segment({ rad, startPercent, endPercent, devName, devData, devColor, maxCommitsPerDev }) {
   const dispatch = useDispatch();
@@ -65,6 +67,9 @@ function Segment({ rad, startPercent, endPercent, devName, devData, devColor, ma
   const offset = Math.PI / 2;
   const arcStartAngle = getAngle(startPercent) + offset;
   const arcEndAngle = getAngle(endPercent) + offset;
+
+  //is used for various ids in the JSX
+  const devNameId = devName.replace(/\s/g, '');
 
   // ######################## TEXT SETTINGS ########################
 
@@ -347,11 +352,11 @@ function Segment({ rad, startPercent, endPercent, devName, devData, devColor, ma
       {!smallSegment && (
         <g>
           <defs>
-            <path ref={devNameArcRef} id={devName.replace(/\s/g, '') + '_namePath'} />
+            <path ref={devNameArcRef} id={devNameId + '_namePath'} />
           </defs>
           <text>
             <textPath
-              href={'#' + devName.replace(/\s/g, '') + '_namePath'}
+              href={'#' + devNameId + '_namePath'}
               startOffset="25%"
               textAnchor="middle"
               alignmentBaseline="middle">
@@ -371,21 +376,14 @@ function Segment({ rad, startPercent, endPercent, devName, devData, devColor, ma
       <g onMouseEnter={mouseEnter} onMouseLeave={mouseLeave} onClick={onClickSegment}>
         {/*hatch pattern for the middle arc*/}
         <defs>
-          <pattern id={`hatch_${devName.replace(/\s/g, '')}`} patternUnits="userSpaceOnUse" width="4" height="4">
-            <path
-              d="M-1,1 l2,-2
-                            M0,4 l4,-4
-                            M3,5 l2,-2"
-              style={{ stroke: devColorDark, strokeWidth: 1 }}
-            />
-          </pattern>
+          {HatchPattern(devColorDark, `hatch_${devNameId}`)}
         </defs>
 
         {/*outer border*/}
         <path ref={segmentRef} stroke="black" fill="white" />
 
         {/*additions arc*/}
-        <path ref={additionsArcRef} fill={offlineMode ? devColorDark : `url(#hatch_${devName.replace(/\s/g, '')})`} />
+        <path ref={additionsArcRef} fill={offlineMode ? devColorDark : `url(#hatch_${devNameId})`} />
 
         {/*ownership arc*/}
         {!offlineMode && <path ref={ownershipArcRef} fill={devColorDark} />}
@@ -393,11 +391,11 @@ function Segment({ rad, startPercent, endPercent, devName, devData, devColor, ma
         {/*additions number in additions/ownership arc. Only display this when mouse hovers on segment*/}
         <g>
           <defs>
-            <path ref={additionsTextArcRef} id={devName.replace(/\s/g, '') + '_additionsPath'} />
+            <path ref={additionsTextArcRef} id={devNameId + '_additionsPath'} />
           </defs>
           <text ref={additionsTextRef}>
             <textPath
-              href={'#' + devName.replace(/\s/g, '') + '_additionsPath'}
+              href={'#' + devNameId + '_additionsPath'}
               startOffset="25%"
               textAnchor="middle"
               alignmentBaseline="middle"
@@ -418,26 +416,9 @@ function Segment({ rad, startPercent, endPercent, devName, devData, devColor, ma
 
         {/*inner commits path with dot-pattern*/}
         <defs>
-          <pattern
-            id={`dots_${devName.replace(/\s/g, '')}`}
-            width="100"
-            height="100"
-            patternUnits="userSpaceOnUse"
-            patternTransform="scale(0.07)">
-            <circle
-              id={`circle_${devName.replace(/\s/g, '')}`}
-              data-color="outline"
-              fill="none"
-              stroke={devColor}
-              strokeWidth="67.36"
-              r=".5"></circle>
-            <use href={`#circle_${devName.replace(/\s/g, '')}`} y="100"></use>
-            <use href={`#circle_${devName.replace(/\s/g, '')}`} x="100"></use>
-            <use href={`#circle_${devName.replace(/\s/g, '')}`} x="100" y="100"></use>
-            <use href={`#circle_${devName.replace(/\s/g, '')}`} x="50" y="50"></use>
-          </pattern>
+          {DotsPattern(devColor, `dots_${devNameId}`)}
         </defs>
-        <path id={devName + '_commitsPath'} ref={commitsRef} fill={`url(#dots_${devName.replace(/\s/g, '')})`} />
+        <path id={devName + '_commitsPath'} ref={commitsRef} fill={`url(#dots_${devNameId})`} />
 
         {/*outer border without fill, just for contours*/}
         <path ref={contourRef} stroke="black" fill="none" />
