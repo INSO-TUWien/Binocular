@@ -47,8 +47,6 @@ export default class Files {
                 file{
                   path
                 }
-                stats {additions,deletions},
-                hunks {newLines}
               }
             }
           }
@@ -59,11 +57,18 @@ export default class Files {
     .then((resp) => resp.commits.data)
     .then((commits) => commits.filter((c) => hashes.includes(c.sha)))
     .then((commits) => {
-      const result = [];
+      const resultFiles = [];
       for(const commit of commits) {
         for (const file of commit.files.data) {
-          result.push(file)
+          resultFiles.push(file)
         }        
+      }
+      //we only want one entry per file.
+      // the [...new Set()] method does not work on objects.
+      let result = [];
+      let filePaths = [...new Set(resultFiles.map(r => r.file.path))]
+      for (const path of filePaths) {
+        result.push(resultFiles.filter(f => f.file.path === path)[0])
       }
       return result;
     });

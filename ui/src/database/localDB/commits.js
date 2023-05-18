@@ -69,11 +69,18 @@ export default class Commits {
     });
   }
 
-  static getCommitDataWithFiles(db, relations) {
+  static getCommitDataWithFiles(db, relations, commitSpan, significantSpan) {
+
+    const first = new Date(significantSpan[0]).getTime();
+    const last = new Date(significantSpan[1]).getTime();
 
     return findAll(db, 'commits').then(async (res) => {
 
-      const commits = res.docs;
+      const commits = res.docs
+        .filter((c) => new Date(c.date) >= first && new Date(c.date) <= last)
+        .sort((a, b) => {
+          return new Date(a.date) - new Date(b.date);
+        });
       const fileCommitConnections = (await findFileCommitConnections(relations)).docs;
       const allFiles = (await findAll(db, 'files')).docs;
       const result = [];
@@ -85,9 +92,7 @@ export default class Commits {
 
         //concurrently
         commit.files.data = relevantConnections.map((connection) => {
-          //let resultFile = await (findID(db, connection.from));
           const resultFile = allFiles.filter((file) => file._id === connection.from)
-          //resultFile = resultFile.docs;
           if(resultFile.length > 0) {
             const file = resultFile[0];
             const res = { file: {} };
@@ -111,23 +116,24 @@ export default class Commits {
       let files = res.docs;
       files = files.filter((f) => filenames.includes(f.path));
 
-      const resultCommits = []
+      const resultCommitHashes = []
 
       const fileCommitConnections = (await findFileCommitConnections(relations)).docs;
 
       for(let file of files) {
         const relevantConnections = fileCommitConnections.filter((fCC) => fCC.from === file._id);
         for(const connection of relevantConnections) {
-          if(resultCommits.includes(connection.to)) {
+          if(resultCommitHashes.includes(connection.to)) {
             continue; 
           }
-          resultCommits.push(connection.to);
+          resultCommitHashes.push(connection.to);
         }
       }
 
-      let r = await bulkGet(db, resultCommits);
-      r = r.results.map(res => res.docs[0].ok.sha)
-      return r;
+      //get whole commit objects from hashes
+      let resultCommits = await bulkGet(db, resultCommitHashes);
+      resultCommits = resultCommits.results.map(res => res.docs[0].ok)
+      return resultCommits;
     });
 
   }

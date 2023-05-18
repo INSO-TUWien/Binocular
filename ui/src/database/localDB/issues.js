@@ -80,13 +80,18 @@ export default class Issues {
 
     return findIssue(db, iid).then(async (resIssue) => {
       const issue = resIssue.docs[0];
+      const allCommits = (await findAll(db, 'commits')).docs;
       let result = []
       if(issue.mentions === null || issue.mentions === undefined) {
         return result;
       }
       for (const mentionedCommit of issue.mentions) {
         if(mentionedCommit.commit !== null) {
-          result.push(mentionedCommit.commit);
+          const commitSha = mentionedCommit.commit
+          const commitObject = allCommits.filter(c => c.sha === commitSha)[0];
+          if(commitObject) {
+            result.push(commitObject);
+          }
         }
       }
       return result;

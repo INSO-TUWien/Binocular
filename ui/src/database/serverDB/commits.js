@@ -45,7 +45,56 @@ export default class Commits {
     });
   }
 
-  static getCommitDataWithFiles() {
+  static getCommitDataWithFiles(commitSpan, significantSpan) {
+
+    const commitList = [];
+    const getCommitsPage = (since, until) => (page, perPage) => {
+      return graphQl
+        .query(
+          `query($page: Int, $perPage: Int, $since: Timestamp, $until: Timestamp) {
+            commits(page: $page, perPage: $perPage, since: $since, until: $until) {
+             count,
+             page,
+             perPage,
+             data {
+               sha,
+               branch,
+               history,
+               message,
+               signature,
+               webUrl,
+               date,
+               parents,
+               stats {
+                 additions,
+                 deletions
+               }
+               files{
+                 data {
+                   file{
+                     path
+                   }
+                   stats {additions,deletions},
+                   hunks {newLines}
+                 }
+               }
+             }
+            }
+          }`,
+          { page, perPage, since, until }
+        )
+        .then((resp) => resp.commits);
+    };
+
+    return traversePages(getCommitsPage(significantSpan[0], significantSpan[1]), (commit) => {
+      commitList.push(commit);
+    }).then(function () {
+      return commitList;
+    });
+
+
+
+
     return graphQl
     .query(
       `query {
@@ -90,6 +139,17 @@ export default class Commits {
           count,
           data {
             sha,
+            branch,
+            history,
+            message,
+            signature,
+            webUrl,
+            date,
+            parents,
+            stats {
+              additions,
+              deletions
+            }
             files{
               data {
                 file{
@@ -107,7 +167,8 @@ export default class Commits {
       for(const commit of commits) {
         for(const cFile of commit.files.data) {
           if(filenames.includes(cFile.file.path)) {
-            result.push(commit.sha)
+            //this function should only return the commit data. We do not need the files entry anymore
+            result.push(_.omit(commit, 'files'));
             break;
           }
         }

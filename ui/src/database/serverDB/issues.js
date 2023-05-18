@@ -48,18 +48,30 @@ export default class Issues {
         .query(
           `query{
              issue (iid: ${iid}){
-              
               commits {
                 count
                 data {
                   sha
+                  shortSha
+                  history
+                  message
+                  messageHeader
+                  signature
+                  branch
+                  parents
+                  date
+                  webUrl
+                  stats {
+                    additions
+                    deletions
+                  }
                 }
               }
              }
            }`,
           { iid }
         )
-        .then((resp) => resp.issue.commits.data.map(c => c.sha));
+        .then((resp) => resp.issue.commits.data);
   }
 
   static getIssueDataOwnershipRiver(issueSpan, significantSpan, granularity, interval) {

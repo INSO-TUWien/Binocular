@@ -127,8 +127,8 @@ export default class LocalDB {
     return Commits.getCommitsForFiles(db, tripleStore, filenames);
   }
 
-  static getCommitDataWithFiles() {
-    return Commits.getCommitDataWithFiles(db, tripleStore);
+  static getCommitDataWithFiles(commitSpan, significantSpan) {
+    return Commits.getCommitDataWithFiles(db, tripleStore, commitSpan, significantSpan);
   }
 
   static getCommitDataOwnershipRiver(commitSpan, significantSpan, granularity, interval) {
@@ -161,6 +161,10 @@ export default class LocalDB {
 
   static requestFileStructure() {
     return Files.requestFileStructure(db);
+  }
+
+  static getFilesForCommits(hashes) {
+    return Files.getFilesForCommits(db, tripleStore, hashes)
   }
 
   static getFilenamesForBranch(branchName) {

@@ -27,8 +27,8 @@ export default class ServerDB {
     return Issues.getIssueData(issueSpan, significantSpan);
   }
 
-  static getCommitDataWithFiles() {
-    return Commits.getCommitDataWithFiles();
+  static getCommitDataWithFiles(commitSpan, significantSpan) {
+    return Commits.getCommitDataWithFiles(commitSpan, significantSpan);
   }
 
   static getCommitDataOwnershipRiver(commitSpan, significantSpan, granularity, interval) {

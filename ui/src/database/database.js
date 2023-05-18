@@ -32,17 +32,16 @@ export default class Database {
     }
   }
 
-  static async getCommitDataWithFiles() {
+  static async getCommitDataWithFiles(commitSpan, significantSpan) {
     if (await this.checkBackendConnection()) {
-      return ServerDB.getCommitDataWithFiles();
+      return ServerDB.getCommitDataWithFiles(commitSpan, significantSpan);
     } else {
-      return LocalDB.getCommitDataWithFiles();
+      return LocalDB.getCommitDataWithFiles(commitSpan, significantSpan);
     }
   }
 
   static async getCommitsForFiles(filenames) {
     if (await this.checkBackendConnection()) {
-      //TODO
       return ServerDB.getCommitsForFiles(filenames);
     } else {
       return LocalDB.getCommitsForFiles(filenames);
@@ -174,8 +173,7 @@ export default class Database {
     if (await this.checkBackendConnection()) {
       return ServerDB.getFilesForCommits(hashes);
     } else {
-      //TODO
-      return []
+      return LocalDB.getFilesForCommits(hashes);
     }
   }
 

@@ -7,8 +7,8 @@ import { fetchFactory, timestampedActionFactory, mapSaga } from '../../../sagas/
 import {
   getAllCommits,
   getCommitsForBranch,
-  getCommitsForIssue,
-  getCommitsForFiles,
+  getCommitHashesForIssue,
+  getCommitHashesForFiles,
   getIssueData,
   getAllBuildData,
   addBuildData,
@@ -108,18 +108,18 @@ export const fetchCodeExpertiseData = fetchFactory(
       dataPromise = Promise.all([
         getAllCommits(),
         getIssueData(issueId),
-        getCommitsForIssue(issueId),
+        getCommitHashesForIssue(issueId),
         getAllBuildData(),
         getBranches(),
       ]).then((results) => {
         const allCommits = results[0];
         const issue = results[1];
-        const issueCommits = results[2];
+        const issueCommitHashes = results[2];
         const builds = results[3];
         const branches = results[4];
         //set current issue
         result['issue'] = issue;
-        return [allCommits, issueCommits, builds, branches]
+        return [allCommits, issueCommitHashes, builds, branches]
       });
 
     } else if (mode === 'modules') {
@@ -127,7 +127,7 @@ export const fetchCodeExpertiseData = fetchFactory(
       
       dataPromise = Promise.all([
         getAllCommits(),
-        getCommitsForFiles(activeFiles),
+        getCommitHashesForFiles(activeFiles),
         getAllBuildData(),
         getBranches(),
       ]);
@@ -216,7 +216,7 @@ export const fetchCodeExpertiseData = fetchFactory(
         //hashes of all relevant commits
         const hashes = relevantCommits.map((commit) => commit.sha);
         ownershipDataPromise = Promise.resolve(getFilesForCommits(hashes))
-        .then((files) => getBlameIssues(latestRelevantCommit.sha, [...new Set(files.map((file) => file.file.path))], hashes))
+        .then((files) => getBlameIssues(latestRelevantCommit.sha, files.map((file) => file.file.path), hashes))
       } else {
         //get latest commit of the branch
         const latestBranchCommit = branchCommits.sort((a, b) => new Date(b.date) - new Date(a.date))[0];

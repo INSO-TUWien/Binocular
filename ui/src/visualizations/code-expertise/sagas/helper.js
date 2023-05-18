@@ -41,12 +41,12 @@ export function getIssues() {
   return Database.getIssueData([],[minDate,maxDate]);
 }
 
-export function getCommitsForIssue(iid) {
-  return Database.getCommitsForIssue(iid);
+export function getCommitHashesForIssue(iid) {
+  return Database.getCommitsForIssue(iid).then(commits => commits.map(c => c.sha));
 };
 
-export function getCommitsForFiles(filenames) {
-  return Database.getCommitsForFiles(filenames);
+export function getCommitHashesForFiles(filenames) {
+  return Database.getCommitsForFiles(filenames).then(commits => commits.map(c => c.sha));
 }
 
 export function getIssueData(iid) {
@@ -84,7 +84,7 @@ export function addBuildData(relevantCommits, builds) {
 }
 
 export function getAllCommits() {
-  return Database.getCommitDataWithFiles();
+  return Database.getCommitDataWithFiles([minDate, maxDate], [minDate, maxDate]);
   return Database.getCommitData([], [minDate, maxDate]);
 }
 
