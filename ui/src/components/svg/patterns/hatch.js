@@ -1,4 +1,4 @@
-"use-strict";
+'use-strict';
 
 const HatchPattern = (color, id) => (
   <pattern id={id} patternUnits="userSpaceOnUse" width="4" height="4">

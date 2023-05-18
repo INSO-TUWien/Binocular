@@ -355,11 +355,7 @@ function Segment({ rad, startPercent, endPercent, devName, devData, devColor, ma
             <path ref={devNameArcRef} id={devNameId + '_namePath'} />
           </defs>
           <text>
-            <textPath
-              href={'#' + devNameId + '_namePath'}
-              startOffset="25%"
-              textAnchor="middle"
-              alignmentBaseline="middle">
+            <textPath href={'#' + devNameId + '_namePath'} startOffset="25%" textAnchor="middle" alignmentBaseline="middle">
               {displayName}
             </textPath>
           </text>
@@ -375,9 +371,7 @@ function Segment({ rad, startPercent, endPercent, devName, devData, devColor, ma
       {/*actual segment*/}
       <g onMouseEnter={mouseEnter} onMouseLeave={mouseLeave} onClick={onClickSegment}>
         {/*hatch pattern for the middle arc*/}
-        <defs>
-          {HatchPattern(devColorDark, `hatch_${devNameId}`)}
-        </defs>
+        <defs>{HatchPattern(devColorDark, `hatch_${devNameId}`)}</defs>
 
         {/*outer border*/}
         <path ref={segmentRef} stroke="black" fill="white" />
@@ -415,9 +409,7 @@ function Segment({ rad, startPercent, endPercent, devName, devData, devColor, ma
         <path ref={goodCommitsArcRef} fill={goodCommitsColor} />
 
         {/*inner commits path with dot-pattern*/}
-        <defs>
-          {DotsPattern(devColor, `dots_${devNameId}`)}
-        </defs>
+        <defs>{DotsPattern(devColor, `dots_${devNameId}`)}</defs>
         <path id={devName + '_commitsPath'} ref={commitsRef} fill={`url(#dots_${devNameId})`} />
 
         {/*outer border without fill, just for contours*/}
