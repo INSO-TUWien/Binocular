@@ -22,6 +22,7 @@ const modules = db._collection('modules');
 const issues = db._collection('issues');
 const builds = db._collection('builds');
 const languages = db._collection('languages');
+const branches = db._collection('branches');
 
 const ISSUE_NUMBER_REGEX = /^#?(\d+).*$/;
 
@@ -323,6 +324,26 @@ const queryType = new gql.GraphQLObjectType({
           return q;
         },
       }),
+      branch: {
+        type: require('./types/branch.js'),
+        args: {
+          branchName: {
+            description: 'name of the branch',
+            type: new gql.GraphQLNonNull(gql.GraphQLString),
+          },
+        },
+        resolve(root, args) {
+          return db
+            ._query(
+              aql`FOR branch
+                  IN
+                  ${branches}
+                  FILTER branch.branch == ${args.branchName}
+                    RETURN branch`
+            )
+            .toArray()[0];
+        },
+      },
       issueDateHistogram: makeDateHistogramEndpoint(issues),
     };
   },

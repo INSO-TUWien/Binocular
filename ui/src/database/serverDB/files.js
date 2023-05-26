@@ -15,4 +15,64 @@ export default class Files {
       {}
     );
   }
+
+  static getFilenamesForBranch(branchName) {
+    return graphQl
+      .query(
+        `
+      query{
+        branch(branchName: "${branchName}"){
+          files{
+            data{
+              file{
+                path
+              }
+            }
+          }
+        }
+      }
+      `,
+        {}
+      )
+      .then((result) => result.branch.files.data.map((entry) => entry.file.path).sort());
+  }
+
+  static getFilesForCommits(hashes) {
+    return graphQl
+      .query(
+        `query {
+         commits {
+          data {
+            sha
+            files{
+              data {
+                file{
+                  path
+                }
+              }
+            }
+          }
+         }
+       }`,
+        {}
+      )
+      .then((resp) => resp.commits.data)
+      .then((commits) => commits.filter((c) => hashes.includes(c.sha)))
+      .then((commits) => {
+        const resultFiles = [];
+        for (const commit of commits) {
+          for (const file of commit.files.data) {
+            resultFiles.push(file);
+          }
+        }
+        //we only want one entry per file.
+        // the [...new Set()] method does not work on objects.
+        const result = [];
+        const filePaths = [...new Set(resultFiles.map((r) => r.file.path))];
+        for (const path of filePaths) {
+          result.push(resultFiles.filter((f) => f.file.path === path)[0]);
+        }
+        return result;
+      });
+  }
 }

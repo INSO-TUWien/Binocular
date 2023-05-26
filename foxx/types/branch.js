@@ -1,6 +1,11 @@
 'use strict';
 
 const gql = require('graphql-sync');
+const paginated = require('./paginated.js');
+const arangodb = require('@arangodb');
+const db = arangodb.db;
+const aql = arangodb.aql;
+const branchesToFiles = db._collection('branches-files');
 
 module.exports = new gql.GraphQLObjectType({
   name: 'Branch',
@@ -23,6 +28,17 @@ module.exports = new gql.GraphQLObjectType({
         type: gql.GraphQLString,
         description: 'latest commit on this branch',
       },
+      files: paginated({
+        type: require('./fileInBranch.js'),
+        description: 'The files touched by this commit',
+        query: (commit, args, limit) => aql`
+          FOR file, edge
+            IN INBOUND ${commit} ${branchesToFiles}
+            ${limit}
+            RETURN {
+              file,
+            }`,
+      }),
     };
   },
 });

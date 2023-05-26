@@ -98,4 +98,4 @@ export class RiverData {
 /**
  * represents a build state enum
  */
-export const BuildStat = createEnum(['None', 'Skipped', 'Canceled', 'Failed', 'Errored', 'Success']);
+export const BuildStat = createEnum(['None', 'Skipped', 'Cancelled', 'Failed', 'Errored', 'Success']);

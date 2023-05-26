@@ -18,6 +18,7 @@ export default class Commits {
                data {
                  sha
                  shortSha
+                 history
                  message
                  messageHeader
                  signature
@@ -42,6 +43,134 @@ export default class Commits {
     }).then(function () {
       return commitList;
     });
+  }
+
+  static getCommitDataWithFiles(commitSpan, significantSpan) {
+    const commitList = [];
+    const getCommitsPage = (since, until) => (page, perPage) => {
+      return graphQl
+        .query(
+          `query($page: Int, $perPage: Int, $since: Timestamp, $until: Timestamp) {
+            commits(page: $page, perPage: $perPage, since: $since, until: $until) {
+             count,
+             page,
+             perPage,
+             data {
+               sha,
+               branch,
+               history,
+               message,
+               signature,
+               webUrl,
+               date,
+               parents,
+               stats {
+                 additions,
+                 deletions
+               }
+               files{
+                 data {
+                   file{
+                     path
+                   }
+                   stats {additions,deletions},
+                   hunks {newLines}
+                 }
+               }
+             }
+            }
+          }`,
+          { page, perPage, since, until }
+        )
+        .then((resp) => resp.commits);
+    };
+
+    return traversePages(getCommitsPage(significantSpan[0], significantSpan[1]), (commit) => {
+      commitList.push(commit);
+    }).then(function () {
+      return commitList;
+    });
+
+    return graphQl
+      .query(
+        `query {
+         commits {
+          count,
+          data {
+            sha,
+            branch,
+            history,
+            message,
+            signature,
+            webUrl,
+            date,
+            parents,
+            stats {
+              additions,
+              deletions
+            }
+            files{
+              data {
+                file{
+                  path
+                }
+                stats {additions,deletions},
+                hunks {newLines}
+              }
+            }
+          }
+         }
+       }`,
+        {}
+      )
+      .then((resp) => resp.commits.data);
+  }
+
+  static getCommitsForFiles(filenames) {
+    return graphQl
+      .query(
+        `query {
+         commits {
+          count,
+          data {
+            sha,
+            branch,
+            history,
+            message,
+            signature,
+            webUrl,
+            date,
+            parents,
+            stats {
+              additions,
+              deletions
+            }
+            files{
+              data {
+                file{
+                  path
+                }
+              }
+            }
+          }
+         }
+       }`,
+        {}
+      )
+      .then((resp) => resp.commits.data)
+      .then((commits) => {
+        const result = [];
+        for (const commit of commits) {
+          for (const cFile of commit.files.data) {
+            if (filenames.includes(cFile.file.path)) {
+              //this function should only return the commit data. We do not need the files entry anymore
+              result.push(_.omit(commit, 'files'));
+              break;
+            }
+          }
+        }
+        return result;
+      });
   }
 
   static getCommitDataOwnershipRiver(commitSpan, significantSpan, granularity, interval) {

@@ -27,6 +27,10 @@ export default class ServerDB {
     return Issues.getIssueData(issueSpan, significantSpan);
   }
 
+  static getCommitDataWithFiles(commitSpan, significantSpan) {
+    return Commits.getCommitDataWithFiles(commitSpan, significantSpan);
+  }
+
   static getCommitDataOwnershipRiver(commitSpan, significantSpan, granularity, interval) {
     return Commits.getCommitDataOwnershipRiver(commitSpan, significantSpan, granularity, interval);
   }
@@ -47,6 +51,14 @@ export default class ServerDB {
     return Commits.getCommitDateHistogram(granularity, dateField, since, until);
   }
 
+  static getCommitsForIssue(iid) {
+    return Issues.getCommitsForIssue(iid);
+  }
+
+  static getCommitsForFiles(filenames) {
+    return Commits.getCommitsForFiles(filenames);
+  }
+
   static issueImpactQuery(iid, since, until) {
     return Issues.issueImpactQuery(iid, since, until);
   }
@@ -57,6 +69,14 @@ export default class ServerDB {
 
   static requestFileStructure() {
     return Files.requestFileStructure();
+  }
+
+  static getFilenamesForBranch(branchName) {
+    return Files.getFilenamesForBranch(branchName);
+  }
+
+  static getFilesForCommits(hashes) {
+    return Files.getFilesForCommits(hashes);
   }
 
   static getAllBranches() {

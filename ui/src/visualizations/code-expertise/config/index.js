@@ -7,12 +7,24 @@ import _ from 'lodash';
 import TabCombo from '../../../components/TabCombo.js';
 import FilePicker from './filePicker/index.js';
 import styles from '../styles.scss';
-import { graphQl } from '../../../utils';
-import { endpointUrl } from '../../../utils';
 import { setActiveIssue, setMode, setCurrentBranch, setActiveFiles, setFilterMergeCommits, setOnlyDisplayOwnership } from '../sagas';
-import { getBranches } from '../sagas/helper.js';
+import { getBranches, getFilenamesForBranch, getIssues } from '../sagas/helper.js';
 
 export default () => {
+  //global state from redux store
+  const expertiseState = useSelector((state) => state.visualizations.codeExpertise.state);
+  const currentMode = expertiseState.config.mode;
+  const currentBranch = expertiseState.config.currentBranch;
+  const activeIssueId = expertiseState.config.activeIssueId;
+  const filterMergeCommits = expertiseState.config.filterMergeCommits;
+  const onlyDisplayOwnership = expertiseState.config.onlyDisplayOwnership;
+  const offlineMode = useSelector((state) => state.config.offlineMode);
+
+  //local state
+  const [branchOptions, setBranchOptions] = useState([]);
+  const [issueOptions, setIssueOptions] = useState([]);
+  const [files, setFiles] = useState([]);
+
   const dispatch = useDispatch();
 
   const onSetIssue = (issueId) => {
@@ -36,22 +48,9 @@ export default () => {
   };
 
   const onSetOnlyDisplayOwnership = (isChecked) => {
+    if (offlineMode) return;
     dispatch(setOnlyDisplayOwnership(isChecked));
   };
-
-  //global state from redux store
-  const expertiseState = useSelector((state) => state.visualizations.codeExpertise.state);
-  const currentMode = expertiseState.config.mode;
-  const currentBranch = expertiseState.config.currentBranch;
-  const activeIssueId = expertiseState.config.activeIssueId;
-  const filterMergeCommits = expertiseState.config.filterMergeCommits;
-  const onlyDisplayOwnership = expertiseState.config.onlyDisplayOwnership;
-
-  //local state
-  const [branchOptions, setBranchOptions] = useState([]);
-  const [issueOptions, setIssueOptions] = useState([]);
-
-  const [files, setFiles] = useState([]);
 
   //run once on initialization
   useEffect(() => {
@@ -75,36 +74,23 @@ export default () => {
       });
 
     //get all issues for issue-select
-    Promise.resolve(
-      graphQl.query(
-        `
-      query{
-       issues(sort: "ASC"){
-          data{iid, title}
-        }
-      }
-      `,
-        {}
-      )
-    )
-      .then((resp) => resp.issues.data)
-      .then((issues) => {
-        const temp = [];
-        //placeholder option
+    getIssues().then((issues) => {
+      const temp = [];
+      //placeholder option
+      temp.push(
+        <option key={-1} value={''}>
+          Select an Issue
+        </option>
+      );
+      for (const i of issues) {
         temp.push(
-          <option key={-1} value={''}>
-            Select an Issue
+          <option key={i.iid} value={i.iid}>
+            {'#' + i.iid + ' ' + i.title}
           </option>
         );
-        for (const i of issues) {
-          temp.push(
-            <option key={i.iid} value={i.iid}>
-              {'#' + i.iid + ' ' + i.title}
-            </option>
-          );
-        }
-        setIssueOptions(temp);
-      });
+      }
+      setIssueOptions(temp);
+    });
   }, []);
 
   //update files every time the branch changes
@@ -112,23 +98,7 @@ export default () => {
   useEffect(() => {
     if (currentBranch) {
       resetActiveFiles();
-
-      //get all files for file-select
-      Promise.resolve(
-        fetch(endpointUrl('files'), {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            branch: currentBranch,
-          }),
-        }).then((resp) => resp.json())
-      )
-        .then((resp) => resp.files)
-        .then((files) => {
-          setFiles(files);
-        });
+      getFilenamesForBranch(currentBranch).then((files) => setFiles(files));
     }
   }, [currentBranch]);
 
@@ -156,13 +126,15 @@ export default () => {
           </div>
         </div>
 
-        <div className="field">
-          <div className="control">
-            <label className="label">Display Settings:</label>
-            <input type="checkbox" checked={onlyDisplayOwnership} onChange={(event) => onSetOnlyDisplayOwnership(event.target.checked)} />
-            <span>Only display Code Ownership</span>
+        {!offlineMode && (
+          <div className="field">
+            <div className="control">
+              <label className="label">Display Settings:</label>
+              <input type="checkbox" checked={onlyDisplayOwnership} onChange={(event) => onSetOnlyDisplayOwnership(event.target.checked)} />
+              <span>Only display Code Ownership</span>
+            </div>
           </div>
-        </div>
+        )}
 
         {/* select if commits related to issues or commits related to files should be visualized */}
         <div className="field">

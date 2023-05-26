@@ -20,6 +20,9 @@ export default class Builds {
               count
               data {
                 id
+                sha
+                status
+                webUrl
                 createdAt
                 userFullName
                 stats {

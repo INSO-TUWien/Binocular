@@ -18,6 +18,7 @@ import Stakeholders from './localDB/stakeholders';
 
 /// #if ENV === 'production'
 import branches from '../../db_export/branches.json';
+import branchesFiles from '../../db_export/branches-files.json';
 import builds from '../../db_export/builds.json';
 import commitsCommits from '../../db_export/commits-commits.json';
 import commitsFiles from '../../db_export/commits-files.json';
@@ -49,6 +50,7 @@ const relations = {
   'languages-files': languagesFiles,
   'modules-files': modulesFiles,
   'modules-modules': modulesModules,
+  'branches-files': branchesFiles,
 };
 /// #endif
 
@@ -119,6 +121,18 @@ export default class LocalDB {
     return Issues.getIssueData(db, issueSpan, significantSpan);
   }
 
+  static getCommitsForIssue(iid) {
+    return Issues.getCommitsForIssue(db, iid);
+  }
+
+  static getCommitsForFiles(filenames) {
+    return Commits.getCommitsForFiles(db, tripleStore, filenames);
+  }
+
+  static getCommitDataWithFiles(commitSpan, significantSpan) {
+    return Commits.getCommitDataWithFiles(db, tripleStore, commitSpan, significantSpan);
+  }
+
   static getCommitDataOwnershipRiver(commitSpan, significantSpan, granularity, interval) {
     return Commits.getCommitDataOwnershipRiver(db, commitSpan, significantSpan, granularity, interval);
   }
@@ -149,6 +163,14 @@ export default class LocalDB {
 
   static requestFileStructure() {
     return Files.requestFileStructure(db);
+  }
+
+  static getFilesForCommits(hashes) {
+    return Files.getFilesForCommits(db, tripleStore, hashes);
+  }
+
+  static getFilenamesForBranch(branchName) {
+    return Files.getFilenamesForBranch(db, tripleStore, branchName);
   }
 
   static getAllBranches() {
@@ -189,6 +211,7 @@ export default class LocalDB {
     database.languages_files = relations['languages-files'];
     database.modules_files = relations['modules-files'];
     database.modules_modules = relations['modules-modules'];
+    database.branches_files = relations['branches-files'];
 
     return database;
   }

@@ -47,6 +47,7 @@ const CommitModuleConnection = require('./lib/models/CommitModuleConnection');
 const ModuleModuleConnection = require('./lib/models/ModuleModuleConnection');
 const ModuleFileConnection = require('./lib/models/ModuleFileConnection');
 const LanguageFileConnection = require('./lib/models/LanguageFileConnection');
+const BranchFileConnection = require('./lib/models/BranchFileConnection');
 const ConfigurationError = require('./lib/errors/ConfigurationError');
 const DatabaseError = require('./lib/errors/DatabaseError');
 const GateWayService = require('./lib/gateway-service');
@@ -80,10 +81,6 @@ app.post('/api/config', require('./lib/endpoints/update-config.js'));
 // used for the code expertise visualization
 app.post('/api/blame/modules', require('./lib/endpoints/get-blame-modules.js'));
 app.post('/api/blame/issues', require('./lib/endpoints/get-blame-issues.js'));
-
-// endpoint to get all files of the project at the time of a certain commit
-// used for the code expertise visualization
-app.post('/api/files', require('./lib/endpoints/get-filenames.js'));
 
 const port = config.get().port;
 
@@ -487,6 +484,7 @@ function ensureDb(repo, context) {
         CommitModuleConnection.ensureCollection(),
         ModuleModuleConnection.ensureCollection(),
         ModuleFileConnection.ensureCollection(),
+        BranchFileConnection.ensureCollection(),
       ]);
     });
 }

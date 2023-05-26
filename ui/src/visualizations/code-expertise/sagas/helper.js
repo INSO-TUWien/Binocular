@@ -2,7 +2,11 @@
 
 import { collectPages, graphQl } from '../../../utils';
 import { endpointUrl } from '../../../utils';
+import Database from '../../../database/database';
 import _ from 'lodash';
+
+const minDate = new Date(0);
+const maxDate = new Date();
 
 //get the blame data for a specific commit and for specific files
 export function getBlameModules(sha, files) {
@@ -33,82 +37,37 @@ export function getBlameIssues(sha, files, hashes) {
   }).then((resp) => resp.json());
 }
 
-export function getCommitsForIssue(iid) {
-  return collectPages(getCommitsForIssuePage(iid)).then((commits) => {
-    return commits.map((commit) => {
-      commit.date = new Date(commit.date);
-      return commit;
-    });
-  });
+export function getIssues() {
+  return Database.getIssueData([], [minDate, maxDate]);
 }
 
-const getCommitsForIssuePage = (iid) => (page, perPage) => {
-  return graphQl
-    .query(
-      `query($page: Int, $perPage: Int, $iid: Int!){
-         issue (iid: $iid){
-          
-          commits (page: $page, perPage: $perPage) {
-            count
-            data {
-              sha
-            }
-          }
-         }
-       }`,
-      { page, perPage, iid }
-    )
-    .then((resp) => {
-      return resp.issue.commits;
-    });
-};
+export function getCommitHashesForIssue(iid) {
+  return Database.getCommitsForIssue(iid).then((commits) => commits.map((c) => c.sha));
+}
+
+export function getCommitHashesForFiles(filenames) {
+  return Database.getCommitsForFiles(filenames).then((commits) => commits.map((c) => c.sha));
+}
 
 export function getIssueData(iid) {
-  return graphQl
-    .query(
-      `query($iid: Int!){
-         issue (iid: $iid){
-          iid,
-          title,
-          createdAt,
-          closedAt,
-          webUrl
-         }
-       }`,
-      { iid }
-    )
-    .then((resp) => resp.issue);
+  //TODO use separate function that only queries for specific issue
+  return getIssues().then((resp) => resp.filter((i) => i.iid === parseInt(iid))[0]);
 }
 
 export function getAllBuildData() {
-  return graphQl
-    .query(
-      `query {
-        builds {
-          count
-          data {
-            sha
-            status
-            webUrl
-          }
-        }
-      }`,
-      {}
-    )
-    .then((resp) => resp.builds.data);
+  return Database.getBuildData([], [minDate, maxDate]);
 }
 
 export function getBranches() {
-  return graphQl
-    .query(
-      `query{
-      branches(sort: "ASC"){
-        data{branch,active,latestCommit}
-      }
-    }`,
-      {}
-    )
-    .then((resp) => resp.branches.data);
+  return Database.getAllBranches().then((resp) => resp.branches.data);
+}
+
+export function getFilenamesForBranch(branchName) {
+  return Database.getFilenamesForBranch(branchName);
+}
+
+export function getFilesForCommits(hashes) {
+  return Database.getFilesForCommits(hashes);
 }
 
 export function addBuildData(relevantCommits, builds) {
@@ -125,39 +84,8 @@ export function addBuildData(relevantCommits, builds) {
 }
 
 export function getAllCommits() {
-  return graphQl
-    .query(
-      `query {
-         commits {
-          count,
-          data {
-            sha,
-            branch,
-            history,
-            message,
-            signature,
-            webUrl,
-            date,
-            parents,
-            stats {
-              additions,
-              deletions
-            }
-            files{
-              data {
-                file{
-                  path
-                }
-                stats {additions,deletions},
-                hunks {newLines}
-              }
-            }
-          }
-         }
-       }`,
-      {}
-    )
-    .then((resp) => resp.commits.data);
+  return Database.getCommitDataWithFiles([minDate, maxDate], [minDate, maxDate]);
+  return Database.getCommitData([], [minDate, maxDate]);
 }
 
 //recursively get all parent commits of the selected branch.
