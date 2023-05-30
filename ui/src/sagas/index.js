@@ -4,6 +4,7 @@ import { createAction } from 'redux-actions';
 import { select, takeEvery, fork, cancel } from 'redux-saga/effects';
 
 import { fetchConfig, fetchConfigOffline, watchConfig } from './config.js';
+import { fetchUniversalSettingsData } from './universalSettings';
 import { watchNotifications } from './notifications.js';
 import Database from '../database/database';
 
@@ -36,7 +37,7 @@ export function* root() {
       yield* fetchConfigOffline();
     }
   });
-
+  yield* fetchUniversalSettingsData();
   const { activeVisualization } = yield select();
   yield* switchComponentSaga(activeVisualization);
   yield fork(watchConfig);

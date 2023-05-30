@@ -4,7 +4,7 @@ import React from 'react';
 import { connect } from 'react-redux';
 import styles from './styles.scss';
 import visualizationRegistry from './visualizationRegistry';
-import UniversalConfig from '../../components/UniversalConfig/universalSettings';
+import UniversalConfig from '../../components/UniversalSettings/universalSettings';
 
 const mapStateToProps = (state /*, ownProps*/) => {
   const dashboardState = state.visualizations.newDashboard.state;

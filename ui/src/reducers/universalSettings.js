@@ -37,8 +37,20 @@ export default handleActions(
       updateLocalStorage('otherAuthors', action.payload);
       return _.assign({}, state, { otherAuthors: action.payload });
     },
+    REQUEST_UNIVERSAL_SETTINGS_DATA: (state) =>
+      _.assign({}, state, { universalSettingsData: { data: {}, lastFetched: null, isFetching: true } }),
+    RECEIVE_UNIVERSAL_SETTINGS_DATA: (state, action) => {
+      return _.assign({}, state, {
+        universalSettingsData: {
+          data: action.payload,
+          isFetching: false,
+          receivedAt: action.meta.receivedAt,
+        },
+      });
+    },
   },
   {
+    universalSettingsData: { data: {}, lastFetched: null, isFetching: null },
     chartResolution: getLocalStorage().chartResolution,
     chartTimeSpan: getLocalStorage().chartTimeSpan,
     selectedAuthorsGlobal: getLocalStorage().selectedAuthorsGlobal,
@@ -50,11 +62,11 @@ export default handleActions(
 
 function updateLocalStorage(key, value) {
   let currConfig = {};
-  if (localStorage.getItem(ctx.repo.name + '-UniversalConfig') === null) {
+  if (localStorage.getItem(ctx.repo.name + '-UniversalSettings') === null) {
     currConfig = defaultConfig;
   } else {
     try {
-      currConfig = JSON.parse(localStorage.getItem(ctx.repo.name + '-UniversalConfig'));
+      currConfig = JSON.parse(localStorage.getItem(ctx.repo.name + '-UniversalSettings'));
     } catch (e) {
       currConfig = defaultConfig;
     }
@@ -66,17 +78,17 @@ function updateLocalStorage(key, value) {
     currConfig.initialized = true;
   }
 
-  localStorage.setItem(ctx.repo.name + '-UniversalConfig', JSON.stringify(currConfig));
+  localStorage.setItem(ctx.repo.name + '-UniversalSettings', JSON.stringify(currConfig));
   return currConfig;
 }
 
 function getLocalStorage() {
   let currConfig = {};
-  if (localStorage.getItem(ctx.repo.name + '-UniversalConfig') === null) {
+  if (localStorage.getItem(ctx.repo.name + '-UniversalSettings') === null) {
     currConfig = defaultConfig;
   } else {
     try {
-      currConfig = JSON.parse(localStorage.getItem(ctx.repo.name + '-UniversalConfig'));
+      currConfig = JSON.parse(localStorage.getItem(ctx.repo.name + '-UniversalSettings'));
       if (currConfig.initialized === undefined || currConfig.initialized === false) {
         selectAllAuthors(currConfig);
         currConfig.initialized = true;

@@ -10,7 +10,6 @@ import AuthorList from './authorList/authorList';
 
 const mapStateToProps = (state /*, ownProps*/) => {
   const universalSettings = state.universalSettings;
-  const dashboardState = state.visualizations.newDashboard.state;
 
   let firstDisplayDate = '';
   let lastDisplayDate = '';
@@ -20,13 +19,17 @@ const mapStateToProps = (state /*, ownProps*/) => {
 
   if (universalSettings.chartTimeSpan.from === undefined) {
     firstDisplayDate =
-      dashboardState.data.data.firstCommit !== undefined ? dashboardState.data.data.firstCommit.date.split('.')[0] : undefined;
+      universalSettings.universalSettingsData.data.firstCommit !== undefined
+        ? universalSettings.universalSettingsData.data.firstCommit.date.split('.')[0]
+        : undefined;
   } else {
     firstDisplayDate = universalSettings.chartTimeSpan.from;
   }
   if (universalSettings.chartTimeSpan.to === undefined) {
     lastDisplayDate =
-      dashboardState.data.data.lastCommit !== undefined ? dashboardState.data.data.lastCommit.date.split('.')[0] : undefined;
+      universalSettings.universalSettingsData.data.lastCommit !== undefined
+        ? universalSettings.universalSettingsData.data.lastCommit.date.split('.')[0]
+        : undefined;
   } else {
     lastDisplayDate = universalSettings.chartTimeSpan.to;
   }
@@ -43,15 +46,15 @@ const mapStateToProps = (state /*, ownProps*/) => {
     chartResolution: universalSettings.chartResolution,
     firstDisplayDate: firstDisplayDate,
     lastDisplayDate: lastDisplayDate,
-    firstCommit: dashboardState.data.data.firstCommit,
-    lastCommit: dashboardState.data.data.lastCommit,
-    committers: dashboardState.data.data.committers,
-    palette: dashboardState.data.data.palette,
+    firstCommit: universalSettings.universalSettingsData.data.firstCommit,
+    lastCommit: universalSettings.universalSettingsData.data.lastCommit,
+    committers: universalSettings.universalSettingsData.data.committers,
+    palette: universalSettings.universalSettingsData.data.palette,
     selectedAuthors: selectedAuthors,
     mergedAuthors: mergedAuthors,
     otherAuthors: otherAuthors,
-    firstSignificantTimestamp: dashboardState.data.data.firstSignificantTimestamp,
-    lastSignificantTimestamp: dashboardState.data.data.lastSignificantTimestamp,
+    firstSignificantTimestamp: universalSettings.universalSettingsData.data.firstSignificantTimestamp,
+    lastSignificantTimestamp: universalSettings.universalSettingsData.data.lastSignificantTimestamp,
   };
 };
 
