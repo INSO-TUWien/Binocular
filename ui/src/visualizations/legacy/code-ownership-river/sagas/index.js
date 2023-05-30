@@ -100,7 +100,7 @@ export const fetchCodeOwnershipData = fetchFactory(
     const firstSignificantIssueTimestamp = Math.max(firstSignificantTimestamp, firstIssueTimestamp);
     const lastSignificantIssueTimestamp = Math.min(lastSignificantTimestamp, lastIssueTimestamp);
 
-    const timeSpan = state.visualizations.newDashboard.state.config.chartTimeSpan;
+    const timeSpan = state.universalSettings.chartTimeSpan;
     firstSignificantTimestamp = timeSpan.from === undefined ? firstSignificantTimestamp : new Date(timeSpan.from).getTime();
     lastSignificantTimestamp = timeSpan.to === undefined ? lastSignificantTimestamp : new Date(timeSpan.to).getTime();
 

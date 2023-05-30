@@ -1,0 +1,37 @@
+@import '../../../../node_modules/bulma';
+
+
+.headline{
+  font-weight: bold;
+  font-size: 2em;
+}
+
+.configContainer{
+  width: 100%;
+  overflow-x: hidden;
+
+  .field + .field {
+    border-top: 1px solid #dbdbdb;
+  }
+
+  .checkboxLabel {
+    cursor: pointer;
+  }
+
+  h1{
+    font-weight: bold;
+    font-size: 2em;
+  }
+
+  hr{
+    margin: 0.5em 0;
+  }
+}
+
+.form {
+  margin-bottom: 0;
+}
+
+.marginTop05{
+  margin-top: 0.5rem;
+}

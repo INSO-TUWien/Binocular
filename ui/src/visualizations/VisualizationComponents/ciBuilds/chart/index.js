@@ -6,7 +6,7 @@ import Chart from './chart.js';
 
 const mapStateToProps = (state /*, ownProps*/) => {
   const buildsState = state.visualizations.ciBuilds.state;
-  const universalSettings = state.visualizations.newDashboard.state.config;
+  const universalSettings = state.universalSettings;
 
   return {
     filteredBuilds: buildsState.data.data.filteredBuilds,

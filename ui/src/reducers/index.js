@@ -7,6 +7,7 @@ import config from './config.js';
 import notifications from './notifications.js';
 import progress from './progress.js';
 import activeConfigTab from './activeConfigTab.js';
+import universalSettings from './universalSettings';
 
 export default (visualizations) => {
   const visualizationReducers = {};
@@ -31,5 +32,6 @@ export default (visualizations) => {
     progress,
     activeConfigTab,
     showHelp: handleAction('TOGGLE_HELP', (state) => !state, false),
+    universalSettings,
   });
 };

@@ -4,8 +4,7 @@ import React from 'react';
 import { connect } from 'react-redux';
 import styles from './styles.scss';
 import visualizationRegistry from './visualizationRegistry';
-import { setResolution } from './sagas';
-import UniversalConfig from './components/universalConfig/universalConfig';
+import UniversalConfig from '../../components/UniversalConfig/universalSettings';
 
 const mapStateToProps = (state /*, ownProps*/) => {
   const dashboardState = state.visualizations.newDashboard.state;
@@ -13,9 +12,7 @@ const mapStateToProps = (state /*, ownProps*/) => {
 };
 
 const mapDispatchToProps = (dispatch /*, ownProps*/) => {
-  return {
-    onClickResolution: (resolution) => dispatch(setResolution(resolution)),
-  };
+  return {};
 };
 
 const DashboardConfigComponent = (props) => {

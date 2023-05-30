@@ -2,13 +2,14 @@
 
 import React from 'react';
 import { connect } from 'react-redux';
-import styles from '../../styles.scss';
+import styles from './styles.scss';
 import { setResolution, setTimeSpan, setSelectedAuthors, setAllAuthors, setMergedAuthorList, setOtherAuthorList } from '../../sagas';
-import DateRangeFilter from '../../../../components/DateRangeFilter/dateRangeFilter';
-import AuthorMerger from '../authorMerger/authorMerger';
-import AuthorList from '../authorList/authorList';
+import DateRangeFilter from '../DateRangeFilter/dateRangeFilter';
+import AuthorMerger from './authorMerger/authorMerger';
+import AuthorList from './authorList/authorList';
 
 const mapStateToProps = (state /*, ownProps*/) => {
+  const universalSettings = state.universalSettings;
   const dashboardState = state.visualizations.newDashboard.state;
 
   let firstDisplayDate = '';
@@ -17,29 +18,29 @@ const mapStateToProps = (state /*, ownProps*/) => {
   let mergedAuthors = [];
   let otherAuthors = [];
 
-  if (dashboardState.config.chartTimeSpan.from === undefined) {
+  if (universalSettings.chartTimeSpan.from === undefined) {
     firstDisplayDate =
       dashboardState.data.data.firstCommit !== undefined ? dashboardState.data.data.firstCommit.date.split('.')[0] : undefined;
   } else {
-    firstDisplayDate = dashboardState.config.chartTimeSpan.from;
+    firstDisplayDate = universalSettings.chartTimeSpan.from;
   }
-  if (dashboardState.config.chartTimeSpan.to === undefined) {
+  if (universalSettings.chartTimeSpan.to === undefined) {
     lastDisplayDate =
       dashboardState.data.data.lastCommit !== undefined ? dashboardState.data.data.lastCommit.date.split('.')[0] : undefined;
   } else {
-    lastDisplayDate = dashboardState.config.chartTimeSpan.to;
+    lastDisplayDate = universalSettings.chartTimeSpan.to;
   }
-  if (dashboardState.config.selectedAuthorsGlobal !== undefined) {
-    selectedAuthors = dashboardState.config.selectedAuthorsGlobal;
+  if (universalSettings.selectedAuthorsGlobal !== undefined) {
+    selectedAuthors = universalSettings.selectedAuthorsGlobal;
   }
-  if (dashboardState.config.mergedAuthors !== undefined) {
-    mergedAuthors = dashboardState.config.mergedAuthors;
+  if (universalSettings.mergedAuthors !== undefined) {
+    mergedAuthors = universalSettings.mergedAuthors;
   }
-  if (dashboardState.config.otherAuthors !== undefined) {
-    otherAuthors = dashboardState.config.otherAuthors;
+  if (universalSettings.otherAuthors !== undefined) {
+    otherAuthors = universalSettings.otherAuthors;
   }
   return {
-    chartResolution: dashboardState.config.chartResolution,
+    chartResolution: universalSettings.chartResolution,
     firstDisplayDate: firstDisplayDate,
     lastDisplayDate: lastDisplayDate,
     firstCommit: dashboardState.data.data.firstCommit,

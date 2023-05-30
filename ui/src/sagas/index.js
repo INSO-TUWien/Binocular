@@ -10,6 +10,13 @@ import Database from '../database/database';
 export const switchVisualization = createAction('SWITCH_VISUALIZATION', (vis) => vis);
 export const toggleHelp = createAction('TOGGLE_HELP');
 
+export const setTimeSpan = createAction('SET_TIME_SPAN');
+export const setSelectedAuthors = createAction('SET_SELECTED_AUTHORS_GLOBAL');
+export const setAllAuthors = createAction('SET_All_AUTHORS');
+export const setMergedAuthorList = createAction('SET_MERGED_AUTHOR_LIST');
+export const setOtherAuthorList = createAction('SET_OTHER_AUTHOR_LIST');
+export const setResolution = createAction('SET_RESOLUTION');
+
 let currentComponentSaga = null;
 
 function* switchComponentSaga(visualizationName) {

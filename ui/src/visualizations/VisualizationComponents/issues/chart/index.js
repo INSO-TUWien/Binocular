@@ -6,7 +6,7 @@ import Chart from './chart.js';
 
 const mapStateToProps = (state /*, ownProps*/) => {
   const issuesState = state.visualizations.issues.state;
-  const universalSettings = state.visualizations.newDashboard.state.config;
+  const universalSettings = state.universalSettings;
   return {
     palette: issuesState.data.data.palette,
     otherCount: issuesState.data.data.otherCount,
