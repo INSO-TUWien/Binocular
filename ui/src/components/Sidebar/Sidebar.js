@@ -7,6 +7,7 @@ import cx from 'classnames';
 import React from 'react';
 import LinkList from './LinkList';
 import _ from 'lodash';
+import UniversalSettings from '../UniversalSettings/universalSettings';
 
 export default class Sidebar extends React.Component {
   constructor(props) {
@@ -23,6 +24,8 @@ export default class Sidebar extends React.Component {
   render() {
     const { visualizations, activeVisualization, onToggle, collapsed } = this.props;
     const ConfigComponent = visualizations[activeVisualization].ConfigComponent;
+
+    console.log(visualizations[activeVisualization]);
     return (
       <div className={styles.sidebar}>
         <nav className={cx('panel')}>
@@ -110,6 +113,13 @@ export default class Sidebar extends React.Component {
             onClick={(e) => {
               this.setState({ visualizationSelectorActive: false, search: '' });
             }}></div>
+          {visualizations[activeVisualization].usesUniversalSettings ? (
+            <div className={cx('panel-block', styles.configuration)}>
+              <UniversalSettings />
+            </div>
+          ) : (
+            ''
+          )}
           <div className={cx('panel-block', styles.configuration)}>{activeVisualization in visualizations && <ConfigComponent />}</div>
         </nav>
       </div>

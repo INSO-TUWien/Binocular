@@ -67,7 +67,6 @@ Database.checkBackendConnection().then((connection) => {
 
   const container = document.getElementById('root');
   const rootContainer = createRoot(container);
-
   if (connection) {
     const app = makeAppReducer(visualizationModules);
 

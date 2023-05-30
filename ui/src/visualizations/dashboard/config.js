@@ -29,7 +29,6 @@ const DashboardConfigComponent = (props) => {
   }
   return (
     <div className={styles.configContainer}>
-      <UniversalConfig />
       {visualizations.map((viz) => {
         return (
           <div key={viz.id}>

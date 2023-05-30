@@ -21,6 +21,8 @@ export default (visualizations) => {
       saga: () => vis.saga,
       reducer: () => vis.reducer,
       state: vis.reducer,
+      usesUniversalSettings: () => (vis.usesUniversalSettings !== undefined ? vis.usesUniversalSettings : false),
+      //ternary operator (?) needed for compatibility for older visualizations that don't use Universal settings
     });
   });
 
