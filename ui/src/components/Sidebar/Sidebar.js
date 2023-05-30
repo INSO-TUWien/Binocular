@@ -20,9 +20,6 @@ export default class Sidebar extends React.Component {
     this.visualizationSelectorVisualizationsContainer = React.createRef();
   }
 
-  renderVisualizationSelectorList(visualizations, activeVisualization) {
-    return;
-  }
   render() {
     const { visualizations, activeVisualization, onToggle, collapsed } = this.props;
     const ConfigComponent = visualizations[activeVisualization].ConfigComponent;
@@ -62,10 +59,9 @@ export default class Sidebar extends React.Component {
                     }}
                     onKeyDown={(e) => {
                       let selectedViz = this.state.selectedViz;
-                      console.log(e.key);
                       if (e.key === 'Enter') {
                         const firstViz = _.filter(
-                          _.filter(visualizations, (vis) => this.state.search !== '' || vis.id !== activeVisualization),
+                          visualizations,
                           (vis) =>
                             this.state.search === '' ||
                             vis.id.toLowerCase().includes(this.state.search.toLowerCase()) ||
@@ -81,7 +77,8 @@ export default class Sidebar extends React.Component {
                         this.setState({ selectedViz: selectedViz });
                       } else if (e.key === 'ArrowDown') {
                         const vizCount = _.filter(
-                          _.filter(visualizations, (vis) => this.state.search !== '' || vis.id !== activeVisualization),
+                          visualizations,
+
                           (vis) =>
                             this.state.search === '' ||
                             vis.id.toLowerCase().includes(this.state.search.toLowerCase()) ||
