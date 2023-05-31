@@ -24,20 +24,24 @@ export default class AuthorList extends React.PureComponent {
         <button
           className={'button'}
           onClick={() => {
-            const checkedAuthors = this.state.checkedAuthors;
-            this.props.authorList.forEach((author) => {
-              if (!checkedAuthors.includes(author.mainCommitter)) {
-                checkedAuthors.push(author.mainCommitter);
+            let checkedAuthors = this.state.checkedAuthors;
+            if (this.props.authorList.length + this.props.otherAuthors.length > this.props.selectedAuthors.length - 1) {
+              this.props.authorList.forEach((author) => {
+                if (!checkedAuthors.includes(author.mainCommitter)) {
+                  checkedAuthors.push(author.mainCommitter);
+                }
+              });
+              if (!checkedAuthors.includes('others')) {
+                checkedAuthors.push('others');
               }
-            });
-            if (!checkedAuthors.includes('others')) {
-              checkedAuthors.push('others');
+            } else {
+              checkedAuthors = [];
             }
             this.setState({ checkedAuthors: checkedAuthors });
             this.props.selectionChanged(checkedAuthors);
             this.forceUpdate();
           }}>
-          Check All
+          {this.props.authorList.length > this.props.selectedAuthors.length - 1 ? 'Check All' : 'Uncheck All'}
         </button>
         <div className={styles.authorListScrollContainer}>
           <table>
