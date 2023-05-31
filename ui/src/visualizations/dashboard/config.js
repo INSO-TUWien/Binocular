@@ -41,10 +41,9 @@ class DashboardConfigComponent extends React.PureComponent {
           .map((vis) => {
             return (
               <div key={vis.id}>
-                <hr />
                 <h2>{vis.label}</h2>
-                <hr />
-                {React.createElement(vis.ConfigComponent)}
+                <div className={styles.configComponentContainer}> {React.createElement(vis.ConfigComponent)}</div>
+                <div className={styles.separator}></div>
               </div>
             );
           })}
