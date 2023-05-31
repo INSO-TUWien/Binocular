@@ -107,11 +107,15 @@ export default class Sidebar extends React.Component {
               </div>
             </div>
           </div>
-          <div
-            className={this.state.visualizationSelectorActive ? styles.visualizationSelectorOutsideDetector : ''}
-            onClick={(e) => {
-              this.setState({ visualizationSelectorActive: false, search: '' });
-            }}></div>
+          {this.state.visualizationSelectorActive ? (
+            <div
+              className={styles.visualizationSelectorOutsideDetector}
+              onClick={(e) => {
+                this.setState({ visualizationSelectorActive: false, search: '' });
+              }}></div>
+          ) : (
+            ''
+          )}
 
           {visualizations[activeVisualization].usesUniversalSettings ? (
             <div>

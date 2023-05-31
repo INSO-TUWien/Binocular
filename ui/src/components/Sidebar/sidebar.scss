@@ -127,7 +127,9 @@
   position: fixed;
   width: 100vw;
   height: 100vh;
-  background: #FFF5;
+  background: #fff8;
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
 }
 
 .visualizationSelectorVisualizationsContainer{
