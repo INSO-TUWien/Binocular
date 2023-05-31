@@ -30,18 +30,6 @@ const HotspotDialsConfigComponent = (props) => {
     <div className={styles.configContainer}>
       <form>
         <div className="field">
-          <label className="label">Granularity:</label>
-          <div className="control">
-            <div className="select">
-              <select value={props.category} onChange={(evt) => props.onSetCategory(evt.target.value)}>
-                <option value="hour">By hour</option>
-                <option value="dayOfWeek">By day of week</option>
-                <option value="month">By month</option>
-              </select>
-            </div>
-          </div>
-        </div>
-        <div className="field">
           <label className="label">Display:</label>
           <Tooltip
             position="bottom"

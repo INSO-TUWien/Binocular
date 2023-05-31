@@ -6,6 +6,8 @@ import { fetchFactory, timestampedActionFactory } from '../../../sagas/utils';
 import Database from '../../../database/database.js';
 import { getChartColors } from '../../../utils';
 
+export const setActiveVisualizations = createAction('SET_ACTIVE_VISUALIZATIONS');
+
 export default function* () {
   for (const visualization in visualizationRegistry) {
     const viz = visualizationRegistry[visualization];

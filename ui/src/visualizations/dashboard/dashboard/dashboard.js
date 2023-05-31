@@ -15,6 +15,7 @@ import deleteIcon from '../assets/deleteIcon.svg';
 
 import VisualizationSelector from '../components/visualizationSelector/visualizationSelector';
 import visualizationRegistry from '../visualizationRegistry';
+import { setActiveVisualizations } from '../sagas';
 
 const DEFAULT_DASHBOARD = {
   visualizations: [
@@ -40,6 +41,7 @@ export default class Dashboard extends React.Component {
     } else {
       this.state = dashboardSaveState;
     }
+    props.setActiveVisualizations(this.state.visualizations.map((viz) => viz.key));
   }
 
   /**
@@ -107,7 +109,33 @@ export default class Dashboard extends React.Component {
     visualizationCount++;
 
     currentVisualizations.push({ key: key, id: id, size: 'small', universalSettings: true });
+
+    this.props.setActiveVisualizations(currentVisualizations.map((viz) => viz.key));
+
     this.setState({ visualizations: currentVisualizations, visualizationCount: visualizationCount });
+  }
+
+  deleteVisualization(e) {
+    const currentVisualizations = this.state.visualizations.filter(
+      (viz) => parseInt(viz.id) !== parseInt(e.target.parentNode.parentNode.id.substring('visualizationContainer'.length))
+    );
+    this.props.setActiveVisualizations(currentVisualizations.map((viz) => viz.key));
+    this.setState({
+      visualizations: currentVisualizations,
+    });
+    const visualizationSettings = e.target.parentNode.parentNode.parentNode.querySelector('.' + dashboardStyles.visualizationSettings);
+    visualizationSettings.classList.remove(dashboardStyles.visualizationSettingsExtended);
+  }
+
+  loadDefaultDashboard(e) {
+    this.state.visualizations = [];
+    this.state.visualizations.push({ key: 'changes', id: 0, size: 'large', universalSettings: true });
+    this.state.visualizations.push({ key: 'issues', id: 1, size: 'small', universalSettings: true });
+    this.state.visualizations.push({ key: 'ciBuilds', id: 2, size: 'small', universalSettings: true });
+    this.state.selectVisualization = false;
+    this.state.visualizationCount = 3;
+    this.props.setActiveVisualizations(this.state.visualizations.map((viz) => viz.key));
+    this.forceUpdate();
   }
 
   renderVisualizationWithWindow(visualization) {
@@ -250,16 +278,6 @@ export default class Dashboard extends React.Component {
     target.classList.add(dashboardStyles.windowSizeButtonSelected);
   }
 
-  deleteVisualization(e) {
-    this.setState({
-      visualizations: this.state.visualizations.filter(
-        (viz) => parseInt(viz.id) !== parseInt(e.target.parentNode.parentNode.id.substring('visualizationContainer'.length))
-      ),
-    });
-    const visualizationSettings = e.target.parentNode.parentNode.parentNode.querySelector('.' + dashboardStyles.visualizationSettings);
-    visualizationSettings.classList.remove(dashboardStyles.visualizationSettingsExtended);
-  }
-
   switchVisualizationSettingsVisibility(e) {
     const visualizationSettings = e.target.parentNode.parentNode.parentNode.querySelector('.' + dashboardStyles.visualizationSettings);
     if (visualizationSettings.classList.contains(dashboardStyles.visualizationSettingsExtended)) {
@@ -354,16 +372,6 @@ export default class Dashboard extends React.Component {
     });
     this.state.visualizations = visualizations;
     localStorage.setItem('dashboardState', JSON.stringify(this.state));
-    this.forceUpdate();
-  }
-
-  loadDefaultDashboard(e) {
-    this.state.visualizations = [];
-    this.state.visualizations.push({ key: 'changes', id: 0, size: 'large', universalSettings: true });
-    this.state.visualizations.push({ key: 'issues', id: 1, size: 'small', universalSettings: true });
-    this.state.visualizations.push({ key: 'ciBuilds', id: 2, size: 'small', universalSettings: true });
-    this.state.selectVisualization = false;
-    this.state.visualizationCount = 3;
     this.forceUpdate();
   }
 }

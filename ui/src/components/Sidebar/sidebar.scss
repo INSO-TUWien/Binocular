@@ -1,9 +1,17 @@
 .sidebar {
-  flex: 0 0 30rem;
+  flex: 0 0 32rem;
   height: 100%;
   display: flex;
   flex-direction: column;
   overflow-y: auto;
+  border-right: 1px solid lightgray;
+  box-shadow: 0 0 10px #CCCA;
+}
+
+.sidebar h1{
+  font-weight: bold;
+  font-size: 2.5em;
+  text-decoration: underline 0.2rem #3273dc;
 }
 
 .sidebar .panel-heading {
@@ -21,6 +29,7 @@
 .sidebar .configuration {
   flex-grow: 1;
   align-items: flex-start;
+  border:none !important;
 }
 
 .sidebar:not(:last-child) {
@@ -50,7 +59,7 @@
   margin: 0.5rem;
   border: 1px solid #3273dc;
   border-radius: 0.5rem;
-  box-shadow: 0 0 5px #555A;
+  box-shadow: 0 0 10px #555A;
   overflow: hidden;
   width: calc(100% - 1rem);
   background: white;

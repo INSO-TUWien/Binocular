@@ -4,45 +4,53 @@ import React from 'react';
 import { connect } from 'react-redux';
 import styles from './styles.scss';
 import visualizationRegistry from './visualizationRegistry';
-import UniversalConfig from '../../components/UniversalSettings/universalSettings';
 
 const mapStateToProps = (state /*, ownProps*/) => {
   const dashboardState = state.visualizations.newDashboard.state;
-  return {};
+  return {
+    visualizations: dashboardState.config.visualizations,
+  };
 };
 
 const mapDispatchToProps = (dispatch /*, ownProps*/) => {
   return {};
 };
 
-const DashboardConfigComponent = (props) => {
-  const visualizations = [];
-  for (const visualization in visualizationRegistry) {
-    const viz = visualizationRegistry[visualization];
-    if (viz.ConfigComponent !== undefined) {
-      if (viz.hideSettingsInDashboard === undefined) {
-        visualizations.push(viz);
-      } else if (!viz.hideSettingsInDashboard) {
-        visualizations.push(viz);
+class DashboardConfigComponent extends React.PureComponent {
+  constructor(props) {
+    super(props);
+  }
+
+  render() {
+    const visualizations = [];
+
+    for (const visualization in visualizationRegistry) {
+      const vis = visualizationRegistry[visualization];
+      if (vis.ConfigComponent !== undefined) {
+        if (vis.hideSettingsInDashboard === undefined) {
+          visualizations.push(vis);
+        } else if (!vis.hideSettingsInDashboard) {
+          visualizations.push(vis);
+        }
       }
     }
+    return (
+      <div className={styles.configContainer}>
+        {visualizations
+          .filter((vis) => this.props.visualizations.includes(vis.id))
+          .map((vis) => {
+            return (
+              <div key={vis.id}>
+                <hr />
+                <h2>{vis.label}</h2>
+                <hr />
+                {React.createElement(vis.ConfigComponent)}
+              </div>
+            );
+          })}
+      </div>
+    );
   }
-  return (
-    <div className={styles.configContainer}>
-      {visualizations.map((viz) => {
-        return (
-          <div key={viz.id}>
-            <hr />
-            <h1>{viz.label}</h1>
-            <hr />
-            {React.createElement(viz.ConfigComponent)}
-          </div>
-        );
-      })}
-    </div>
-  );
-};
+}
 
-const DashboardConfig = connect(mapStateToProps, mapDispatchToProps)(DashboardConfigComponent);
-
-export default DashboardConfig;
+export default connect(mapStateToProps, mapDispatchToProps)(DashboardConfigComponent);

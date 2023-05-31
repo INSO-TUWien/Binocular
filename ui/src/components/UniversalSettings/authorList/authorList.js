@@ -8,7 +8,7 @@ export default class AuthorList extends React.PureComponent {
   constructor(props) {
     super(props);
     this.state = {
-      checkedAuthors: [],
+      checkedAuthors: props.selectedAuthors,
     };
   }
 
@@ -39,7 +39,6 @@ export default class AuthorList extends React.PureComponent {
           }}>
           Check All
         </button>
-        <hr />
         <div className={styles.authorListScrollContainer}>
           <table>
             <tbody>

@@ -1,7 +1,7 @@
 'use strict';
 
 import _ from 'lodash';
-import styles from './sidebar.css';
+import styles from './sidebar.scss';
 import PanelLink from './PanelLink.js';
 import menu from './assets/menu.svg';
 import close from './assets/close.svg';

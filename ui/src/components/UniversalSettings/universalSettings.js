@@ -133,7 +133,7 @@ class UniversalConfigComponent extends React.PureComponent {
     }
 
     return (
-      <div>
+      <div className={styles.universalSettings}>
         {this.state.showAuthorMerge === true ? (
           <AuthorMerger
             committers={this.props.committers}
@@ -152,7 +152,6 @@ class UniversalConfigComponent extends React.PureComponent {
         ) : (
           ''
         )}
-        <h1 className={styles.headline}>Universal Settings</h1>
         <label className="label">Granularity</label>
         <div className="control">
           <div className="select">

@@ -1,6 +1,6 @@
 'use strict';
 
-import styles from './sidebar.css';
+import styles from './sidebar.scss';
 import menu from './assets/menu.svg';
 
 import cx from 'classnames';
@@ -27,7 +27,7 @@ export default class Sidebar extends React.Component {
 
     return (
       <div className={styles.sidebar}>
-        <nav className={cx('panel')}>
+        <nav>
           <div className={styles.visualizationSelectorContainer}>
             <div
               className={cx(
@@ -112,13 +112,24 @@ export default class Sidebar extends React.Component {
             onClick={(e) => {
               this.setState({ visualizationSelectorActive: false, search: '' });
             }}></div>
+
           {visualizations[activeVisualization].usesUniversalSettings ? (
-            <div className={cx('panel-block', styles.configuration)}>
-              <UniversalSettings />
+            <div>
+              {' '}
+              <div className={cx('panel-block', styles.configuration)}>
+                <h1>Universal Settings:</h1>
+              </div>
+              <div className={cx('panel-block', styles.configuration)}>
+                <UniversalSettings />
+              </div>
+              <div className={cx('panel-block', styles.configuration)}>
+                <h1>Visualization Specific Settings:</h1>
+              </div>
             </div>
           ) : (
             ''
           )}
+
           <div className={cx('panel-block', styles.configuration)}>{activeVisualization in visualizations && <ConfigComponent />}</div>
         </nav>
       </div>
