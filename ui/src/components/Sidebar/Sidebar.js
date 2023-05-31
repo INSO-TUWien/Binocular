@@ -25,7 +25,6 @@ export default class Sidebar extends React.Component {
     const { visualizations, activeVisualization, onToggle, collapsed } = this.props;
     const ConfigComponent = visualizations[activeVisualization].ConfigComponent;
 
-    console.log(visualizations[activeVisualization]);
     return (
       <div className={styles.sidebar}>
         <nav className={cx('panel')}>
