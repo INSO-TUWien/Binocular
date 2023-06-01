@@ -23,7 +23,7 @@ const DEFAULT_DASHBOARD = {
     { key: 'issues', id: 9, size: 'small', universalSettings: true },
     { key: 'ciBuilds', id: 10, size: 'small', universalSettings: true },
   ],
-  visualizationCount: 11,
+  visualizationCount: 3,
   selectVisualization: false,
 };
 
@@ -32,11 +32,7 @@ export default class Dashboard extends React.Component {
     super(props);
     const dashboardSaveState = JSON.parse(localStorage.getItem('dashboardState'));
     if (dashboardSaveState === null) {
-      this.state = {
-        visualizations: [],
-        visualizationCount: 0,
-        selectVisualization: false,
-      };
+      this.state = DEFAULT_DASHBOARD;
       localStorage.setItem('dashboardState', JSON.stringify(this.state));
     } else {
       this.state = dashboardSaveState;
