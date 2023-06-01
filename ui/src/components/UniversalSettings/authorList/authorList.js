@@ -19,6 +19,8 @@ export default class AuthorList extends React.PureComponent {
   }
 
   render() {
+    console.log(this.props);
+
     return this.props.authorList.length > 0 && this.props.palette !== undefined ? (
       <div className={styles.authorList}>
         <button

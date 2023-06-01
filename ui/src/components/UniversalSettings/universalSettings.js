@@ -139,14 +139,20 @@ class UniversalConfigComponent extends React.PureComponent {
             committers={this.props.committers}
             palette={this.props.palette}
             mergedAuthorList={this.state.mergedAuthorList}
+            selectedAuthors={this.props.selectedAuthors}
             other={this.state.otherAuthors}
             close={() => {
               this.setState({ showAuthorMerge: false });
             }}
-            apply={(mergedAuthorList, otherAuthors) => {
+            apply={(mergedAuthorList, otherAuthors, selectedAuthors) => {
               this.props.onMergedAuthorListChanged(mergedAuthorList);
               this.props.onOtherAuthorListChanged(otherAuthors);
-              this.setState({ showAuthorMerge: false, mergedAuthorList: mergedAuthorList, otherAuthors: otherAuthors });
+              this.props.onAuthorSelectionChanged(selectedAuthors);
+              this.setState({
+                showAuthorMerge: false,
+                mergedAuthorList: mergedAuthorList,
+                otherAuthors: otherAuthors,
+              });
             }}
           />
         ) : (

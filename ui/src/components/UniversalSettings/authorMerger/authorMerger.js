@@ -10,6 +10,7 @@ export default class AuthorMerger extends React.PureComponent {
       palette: props.palette,
       allCommitters: props.committers,
       committers: props.mergedAuthorList,
+      selectedAuthors: props.selectedAuthors,
       other: props.other,
     };
   }
@@ -41,7 +42,11 @@ export default class AuthorMerger extends React.PureComponent {
           }
           return c;
         });
-      this.setState({ committers: committerList });
+      let selectedAuthors = this.state.selectedAuthors;
+      if (selectedAuthors.includes(secondary)) {
+        selectedAuthors = selectedAuthors.filter((sA) => sA !== secondary);
+      }
+      this.setState({ committers: committerList, selectedAuthors: selectedAuthors });
     }
   }
 
@@ -53,16 +58,17 @@ export default class AuthorMerger extends React.PureComponent {
     for (const cToAdd of committerToAdd.committers) {
       other.push(cToAdd);
     }
-    this.setState({ committers: committerList, other: other });
+    let selectedAuthors = this.state.selectedAuthors;
+    if (selectedAuthors.includes(committer)) {
+      selectedAuthors = selectedAuthors.filter((sA) => sA !== committer);
+    }
+    this.setState({ committers: committerList, other: other, selectedAuthors: selectedAuthors });
   }
 
   removeCommitterFromOther(committer) {
     let other = this.state.other;
     const committerList = this.state.committers;
-    console.log(other);
-    console.log(committer);
     const committerToRemove = other.filter((c) => c.signature === committer)[0];
-    console.log(committerToRemove);
     committerList.push({
       mainCommitter: committerToRemove.signature,
       committers: [{ signature: committerToRemove.signature, color: this.state.palette[committer] }],
@@ -166,7 +172,7 @@ export default class AuthorMerger extends React.PureComponent {
             <button
               className={'button ' + styles.applyButton}
               onClick={() => {
-                this.props.apply(this.state.committers, this.state.other);
+                this.props.apply(this.state.committers, this.state.other, this.state.selectedAuthors);
               }}>
               Apply
             </button>
