@@ -27,115 +27,121 @@ export default class Sidebar extends React.Component {
 
     return (
       <div className={styles.sidebar}>
-        <nav>
-          <div className={styles.visualizationSelectorContainer}>
-            <div
-              className={cx(
-                styles.visualizationSelector,
-                this.state.visualizationSelectorActive ? styles.visualizationSelectorExtended : ''
-              )}>
+        <div className={styles.sidebarInnerContainer}>
+          <nav>
+            <div className={styles.visualizationSelectorContainer}>
               <div
-                className={styles.visualizationSelectorCurrentVisualization}
+                className={cx(
+                  styles.visualizationSelector,
+                  this.state.visualizationSelectorActive ? styles.visualizationSelectorExtended : ''
+                )}>
+                <div
+                  className={styles.visualizationSelectorCurrentVisualization}
+                  onClick={(e) => {
+                    let visualizationSelectorActive = this.state.visualizationSelectorActive;
+                    visualizationSelectorActive = !visualizationSelectorActive;
+                    this.setState({ visualizationSelectorActive: visualizationSelectorActive, search: '' });
+                  }}>
+                  <span className={styles.visualizationSelectorIcon}>
+                    <img src={menu} />
+                  </span>
+                  {!this.state.visualizationSelectorActive ? (
+                    <span className={styles.visualizationSelectorText}>{visualizations[activeVisualization].label}</span>
+                  ) : (
+                    <input
+                      className={styles.visualizationSelectorSearch}
+                      autoFocus={true}
+                      placeholder={'Search'}
+                      value={this.state.search}
+                      type={'text'}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                      }}
+                      onChange={(e) => {
+                        this.setState({ search: e.target.value, selectedViz: 0 });
+                      }}
+                      onKeyDown={(e) => {
+                        let selectedViz = this.state.selectedViz;
+                        if (e.key === 'Enter') {
+                          const firstViz = _.filter(
+                            visualizations,
+                            (vis) =>
+                              this.state.search === '' ||
+                              vis.id.toLowerCase().includes(this.state.search.toLowerCase()) ||
+                              vis.label.toLowerCase().includes(this.state.search.toLowerCase())
+                          )[selectedViz];
+                          if (firstViz !== undefined) {
+                            this.props.switchVisualization(firstViz.id);
+                          }
+                        } else if (e.key === 'ArrowUp') {
+                          if (selectedViz > 0) {
+                            selectedViz--;
+                          }
+                          this.setState({ selectedViz: selectedViz });
+                        } else if (e.key === 'ArrowDown') {
+                          const vizCount = _.filter(
+                            visualizations,
+
+                            (vis) =>
+                              this.state.search === '' ||
+                              vis.id.toLowerCase().includes(this.state.search.toLowerCase()) ||
+                              vis.label.toLowerCase().includes(this.state.search.toLowerCase())
+                          ).length;
+                          if (selectedViz < vizCount - 1) {
+                            selectedViz++;
+                          }
+                          this.setState({ selectedViz: selectedViz });
+                        } else if (e.key === 'Escape') {
+                          this.setState({ visualizationSelectorActive: false, search: '' });
+                        }
+                      }}></input>
+                  )}
+                </div>
+                <div
+                  ref={this.visualizationSelectorVisualizationsContainer}
+                  className={styles.visualizationSelectorVisualizationsContainer}>
+                  <LinkList
+                    visualizations={visualizations}
+                    activeVisualization={activeVisualization}
+                    search={this.state.search}
+                    visualizationSelectorActive={this.state.visualizationSelectorActive}
+                    selectedViz={this.state.selectedViz}
+                  />
+                </div>
+              </div>
+            </div>
+          </nav>
+          <div className={styles.configSection}>
+            {this.state.visualizationSelectorActive ? (
+              <div
+                className={styles.visualizationSelectorOutsideDetector}
                 onClick={(e) => {
-                  let visualizationSelectorActive = this.state.visualizationSelectorActive;
-                  visualizationSelectorActive = !visualizationSelectorActive;
-                  this.setState({ visualizationSelectorActive: visualizationSelectorActive, search: '' });
-                }}>
-                <span className={styles.visualizationSelectorIcon}>
-                  <img src={menu} />
-                </span>
-                {!this.state.visualizationSelectorActive ? (
-                  <span className={styles.visualizationSelectorText}>{visualizations[activeVisualization].label}</span>
-                ) : (
-                  <input
-                    className={styles.visualizationSelectorSearch}
-                    autoFocus={true}
-                    placeholder={'Search'}
-                    value={this.state.search}
-                    type={'text'}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                    }}
-                    onChange={(e) => {
-                      this.setState({ search: e.target.value, selectedViz: 0 });
-                    }}
-                    onKeyDown={(e) => {
-                      let selectedViz = this.state.selectedViz;
-                      if (e.key === 'Enter') {
-                        const firstViz = _.filter(
-                          visualizations,
-                          (vis) =>
-                            this.state.search === '' ||
-                            vis.id.toLowerCase().includes(this.state.search.toLowerCase()) ||
-                            vis.label.toLowerCase().includes(this.state.search.toLowerCase())
-                        )[selectedViz];
-                        if (firstViz !== undefined) {
-                          this.props.switchVisualization(firstViz.id);
-                        }
-                      } else if (e.key === 'ArrowUp') {
-                        if (selectedViz > 0) {
-                          selectedViz--;
-                        }
-                        this.setState({ selectedViz: selectedViz });
-                      } else if (e.key === 'ArrowDown') {
-                        const vizCount = _.filter(
-                          visualizations,
+                  this.setState({ visualizationSelectorActive: false, search: '' });
+                }}></div>
+            ) : (
+              ''
+            )}
 
-                          (vis) =>
-                            this.state.search === '' ||
-                            vis.id.toLowerCase().includes(this.state.search.toLowerCase()) ||
-                            vis.label.toLowerCase().includes(this.state.search.toLowerCase())
-                        ).length;
-                        if (selectedViz < vizCount - 1) {
-                          selectedViz++;
-                        }
-                        this.setState({ selectedViz: selectedViz });
-                      } else if (e.key === 'Escape') {
-                        this.setState({ visualizationSelectorActive: false, search: '' });
-                      }
-                    }}></input>
-                )}
+            {visualizations[activeVisualization].usesUniversalSettings ? (
+              <div>
+                {' '}
+                <div className={cx('panel-block', styles.configuration)}>
+                  <h1>Universal Settings:</h1>
+                </div>
+                <div className={cx('panel-block', styles.configuration)}>
+                  <UniversalSettings />
+                </div>
+                <div className={cx('panel-block', styles.configuration)}>
+                  <h1>Visualization Specific Settings:</h1>
+                </div>
               </div>
-              <div ref={this.visualizationSelectorVisualizationsContainer} className={styles.visualizationSelectorVisualizationsContainer}>
-                <LinkList
-                  visualizations={visualizations}
-                  activeVisualization={activeVisualization}
-                  search={this.state.search}
-                  visualizationSelectorActive={this.state.visualizationSelectorActive}
-                  selectedViz={this.state.selectedViz}
-                />
-              </div>
-            </div>
+            ) : (
+              ''
+            )}
+
+            <div className={cx('panel-block', styles.configuration)}>{activeVisualization in visualizations && <ConfigComponent />}</div>
           </div>
-          {this.state.visualizationSelectorActive ? (
-            <div
-              className={styles.visualizationSelectorOutsideDetector}
-              onClick={(e) => {
-                this.setState({ visualizationSelectorActive: false, search: '' });
-              }}></div>
-          ) : (
-            ''
-          )}
-
-          {visualizations[activeVisualization].usesUniversalSettings ? (
-            <div>
-              {' '}
-              <div className={cx('panel-block', styles.configuration)}>
-                <h1>Universal Settings:</h1>
-              </div>
-              <div className={cx('panel-block', styles.configuration)}>
-                <UniversalSettings />
-              </div>
-              <div className={cx('panel-block', styles.configuration)}>
-                <h1>Visualization Specific Settings:</h1>
-              </div>
-            </div>
-          ) : (
-            ''
-          )}
-
-          <div className={cx('panel-block', styles.configuration)}>{activeVisualization in visualizations && <ConfigComponent />}</div>
-        </nav>
+        </div>
       </div>
     );
   }

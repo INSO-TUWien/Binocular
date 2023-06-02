@@ -44,8 +44,22 @@
   flex: 1 1 50%;
 }
 
-.visualizationSelectorContainer{
+.sidebarInnerContainer{
   position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.configSection{
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  padding-top: 4rem;
+  overflow-y: scroll;
+}
+
+.visualizationSelectorContainer{
+  position: absolute;
   width: 100%;
   min-height: 4rem;
 }

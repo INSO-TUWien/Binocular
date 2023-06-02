@@ -14,8 +14,8 @@
   user-select: none;
   -webkit-user-select: none;
   -moz-user-select: none;
-  width: 90%;
-  border-radius: 4px;;
+  width: calc(100% - 25px);
+  border-radius: 5px;;
   margin-bottom: 0.1rem;
   padding: 0.5rem;
   border:1px solid lightgray;
