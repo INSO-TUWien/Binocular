@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 'use strict';
+
 // init timestamp for output
 const Moment = require('moment');
 require('log-timestamp')(() => '[' + Moment().format('DD-MM-YYYY, HH:mm:ss') + ']');
