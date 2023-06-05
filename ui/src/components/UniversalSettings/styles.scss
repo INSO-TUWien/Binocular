@@ -1,10 +1,7 @@
 @import '../../../../node_modules/bulma';
 
-.chartContainer{
-  position: relative;
-  height: 100%;
-  overflow-y: scroll;
-  overflow-x: hidden;
+.universalSettings{
+  width: 100%;
 }
 
 .headline{
@@ -24,9 +21,9 @@
     cursor: pointer;
   }
 
-  h2{
+  h1{
     font-weight: bold;
-    font-size: 1.5em;
+    font-size: 2em;
   }
 
   hr{
@@ -40,14 +37,4 @@
 
 .marginTop05{
   margin-top: 0.5rem;
-}
-
-.separator{
-  margin-bottom: 2rem;
-}
-
-.configComponentContainer{
-  margin-left: 0.5rem;
-  border-left: 1px solid lightgray;
-  padding-left: 0.5rem;
 }

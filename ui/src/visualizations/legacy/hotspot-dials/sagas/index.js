@@ -72,7 +72,7 @@ export const fetchHotspotDialsData = fetchFactory(
 
     let firstSignificantTimestamp = Math.max(viewport[0], firstCommitTimestamp);
     let lastSignificantTimestamp = viewport[1] ? viewport[1].getTime() : lastCommitTimestamp;
-    const universalSettings = state.visualizations.newDashboard.state.config;
+    const universalSettings = state.universalSettings;
 
     const timeSpan = universalSettings.chartTimeSpan;
     firstSignificantTimestamp = timeSpan.from === undefined ? firstSignificantTimestamp : new Date(timeSpan.from).getTime();

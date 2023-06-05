@@ -14,13 +14,14 @@ export default class DateRangeFilter extends React.PureComponent {
   }
 
   render() {
-    const { onDateChanged } = this.props;
+    const { onDateChanged, from, to } = this.props;
     return (
       <div>
         <input
           id={'from'}
           type="datetime-local"
           className={styles.dateTimePicker}
+          value={from}
           onChange={() => {
             const res = {};
             res.from = document.getElementById('from').value;
@@ -31,6 +32,7 @@ export default class DateRangeFilter extends React.PureComponent {
         <span style={{ margin: '0 1rem' }}>-</span>
         <input
           id={'to'}
+          value={to}
           type="datetime-local"
           className={styles.dateTimePicker}
           onChange={() => {

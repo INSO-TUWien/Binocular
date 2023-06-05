@@ -7,7 +7,7 @@ import { setViewport, openCommit } from '../sagas';
 
 const mapStateToProps = (state /*, ownProps*/) => {
   const corState = state.visualizations.codeOwnershipRiver.state;
-  const universalSettings = state.visualizations.newDashboard.state.config;
+  const universalSettings = state.universalSettings;
   const filteredIssues = corState.config.overlay === 'issues' ? corState.data.data.filteredIssues : [];
   const filteredBuilds = corState.config.overlay === 'builds' ? corState.data.data.filteredBuilds : [];
   const issues = corState.config.overlay === 'issues' ? corState.data.data.issues : [];

@@ -57,18 +57,26 @@ Database.checkBackendConnection().then((connection) => {
     visualizations[viz.id] = viz;
   });
 
+  let activeVisualization = _.keys(visualizations)[0];
+
+  const previousActiveVisualization = localStorage.getItem('previousActiveVisualization');
+
+  if (previousActiveVisualization !== null) {
+    activeVisualization = previousActiveVisualization;
+  }
+
   const container = document.getElementById('root');
   const rootContainer = createRoot(container);
-
   if (connection) {
     const app = makeAppReducer(visualizationModules);
 
     const socket = io({ path: '/wsapi' });
     const socketIo = createSocketIoMiddleware(socket, 'api/');
+
     const store = createStore(
       app,
       {
-        activeVisualization: _.keys(visualizations)[0],
+        activeVisualization: activeVisualization,
         visualizations,
         config: {
           isFetching: false,

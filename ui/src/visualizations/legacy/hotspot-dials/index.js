@@ -14,4 +14,5 @@ export default {
   HelpComponent,
   saga,
   reducer,
+  usesUniversalSettings: true,
 };

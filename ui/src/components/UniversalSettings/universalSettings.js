@@ -2,14 +2,14 @@
 
 import React from 'react';
 import { connect } from 'react-redux';
-import styles from '../../styles.scss';
+import styles from './styles.scss';
 import { setResolution, setTimeSpan, setSelectedAuthors, setAllAuthors, setMergedAuthorList, setOtherAuthorList } from '../../sagas';
-import DateRangeFilter from '../../../../components/DateRangeFilter/dateRangeFilter';
-import AuthorMerger from '../authorMerger/authorMerger';
-import AuthorList from '../authorList/authorList';
+import DateRangeFilter from '../DateRangeFilter/dateRangeFilter';
+import AuthorMerger from './authorMerger/authorMerger';
+import AuthorList from './authorList/authorList';
 
 const mapStateToProps = (state /*, ownProps*/) => {
-  const dashboardState = state.visualizations.newDashboard.state;
+  const universalSettings = state.universalSettings;
 
   let firstDisplayDate = '';
   let lastDisplayDate = '';
@@ -17,40 +17,44 @@ const mapStateToProps = (state /*, ownProps*/) => {
   let mergedAuthors = [];
   let otherAuthors = [];
 
-  if (dashboardState.config.chartTimeSpan.from === undefined) {
+  if (universalSettings.chartTimeSpan.from === undefined) {
     firstDisplayDate =
-      dashboardState.data.data.firstCommit !== undefined ? dashboardState.data.data.firstCommit.date.split('.')[0] : undefined;
+      universalSettings.universalSettingsData.data.firstCommit !== undefined
+        ? universalSettings.universalSettingsData.data.firstCommit.date.split('.')[0]
+        : undefined;
   } else {
-    firstDisplayDate = dashboardState.config.chartTimeSpan.from;
+    firstDisplayDate = universalSettings.chartTimeSpan.from;
   }
-  if (dashboardState.config.chartTimeSpan.to === undefined) {
+  if (universalSettings.chartTimeSpan.to === undefined) {
     lastDisplayDate =
-      dashboardState.data.data.lastCommit !== undefined ? dashboardState.data.data.lastCommit.date.split('.')[0] : undefined;
+      universalSettings.universalSettingsData.data.lastCommit !== undefined
+        ? universalSettings.universalSettingsData.data.lastCommit.date.split('.')[0]
+        : undefined;
   } else {
-    lastDisplayDate = dashboardState.config.chartTimeSpan.to;
+    lastDisplayDate = universalSettings.chartTimeSpan.to;
   }
-  if (dashboardState.config.selectedAuthorsGlobal !== undefined) {
-    selectedAuthors = dashboardState.config.selectedAuthorsGlobal;
+  if (universalSettings.selectedAuthorsGlobal !== undefined) {
+    selectedAuthors = universalSettings.selectedAuthorsGlobal;
   }
-  if (dashboardState.config.mergedAuthors !== undefined) {
-    mergedAuthors = dashboardState.config.mergedAuthors;
+  if (universalSettings.mergedAuthors !== undefined) {
+    mergedAuthors = universalSettings.mergedAuthors;
   }
-  if (dashboardState.config.otherAuthors !== undefined) {
-    otherAuthors = dashboardState.config.otherAuthors;
+  if (universalSettings.otherAuthors !== undefined) {
+    otherAuthors = universalSettings.otherAuthors;
   }
   return {
-    chartResolution: dashboardState.config.chartResolution,
+    chartResolution: universalSettings.chartResolution,
     firstDisplayDate: firstDisplayDate,
     lastDisplayDate: lastDisplayDate,
-    firstCommit: dashboardState.data.data.firstCommit,
-    lastCommit: dashboardState.data.data.lastCommit,
-    committers: dashboardState.data.data.committers,
-    palette: dashboardState.data.data.palette,
+    firstCommit: universalSettings.universalSettingsData.data.firstCommit,
+    lastCommit: universalSettings.universalSettingsData.data.lastCommit,
+    committers: universalSettings.universalSettingsData.data.committers,
+    palette: universalSettings.universalSettingsData.data.palette,
     selectedAuthors: selectedAuthors,
     mergedAuthors: mergedAuthors,
     otherAuthors: otherAuthors,
-    firstSignificantTimestamp: dashboardState.data.data.firstSignificantTimestamp,
-    lastSignificantTimestamp: dashboardState.data.data.lastSignificantTimestamp,
+    firstSignificantTimestamp: universalSettings.universalSettingsData.data.firstSignificantTimestamp,
+    lastSignificantTimestamp: universalSettings.universalSettingsData.data.lastSignificantTimestamp,
   };
 };
 
@@ -129,26 +133,31 @@ class UniversalConfigComponent extends React.PureComponent {
     }
 
     return (
-      <div>
+      <div className={styles.universalSettings}>
         {this.state.showAuthorMerge === true ? (
           <AuthorMerger
             committers={this.props.committers}
             palette={this.props.palette}
             mergedAuthorList={this.state.mergedAuthorList}
+            selectedAuthors={this.props.selectedAuthors}
             other={this.state.otherAuthors}
             close={() => {
               this.setState({ showAuthorMerge: false });
             }}
-            apply={(mergedAuthorList, otherAuthors) => {
+            apply={(mergedAuthorList, otherAuthors, selectedAuthors) => {
               this.props.onMergedAuthorListChanged(mergedAuthorList);
               this.props.onOtherAuthorListChanged(otherAuthors);
-              this.setState({ showAuthorMerge: false, mergedAuthorList: mergedAuthorList, otherAuthors: otherAuthors });
+              this.props.onAuthorSelectionChanged(selectedAuthors);
+              this.setState({
+                showAuthorMerge: false,
+                mergedAuthorList: mergedAuthorList,
+                otherAuthors: otherAuthors,
+              });
             }}
           />
         ) : (
           ''
         )}
-        <h1 className={styles.headline}>Universal Settings</h1>
         <label className="label">Granularity</label>
         <div className="control">
           <div className="select">
