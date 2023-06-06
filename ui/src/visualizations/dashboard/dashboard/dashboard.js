@@ -143,13 +143,19 @@ export default class Dashboard extends React.Component {
         style={{
           gridArea:
             visualization.size === 'large'
-              ? 'span 4/span 4'
+              ? 'span 2/span 2'
               : visualization.size === 'wide'
-              ? 'span 2/span 4'
+              ? 'span 1/span 2'
               : visualization.size === 'high'
-              ? 'span 4/span 2'
-              : 'span 2/span 2',
+              ? 'span 2/span 1'
+              : 'span 1/span 1',
         }}>
+        <div id={'dropZone'} className={dashboardStyles.dropZone} style={{ display: 'none' }}>
+          <span>{visualizationRegistry[visualization.key].label}</span>
+          <div>
+            <span>Drop Here to Insert Before!</span>
+          </div>
+        </div>
         <div className={dashboardStyles.menuBar}>
           <div className={dashboardStyles.visualizationName}>{visualizationRegistry[visualization.key].label}</div>
           <div className={dashboardStyles.visualizationSettingsButton} onClick={this.switchVisualizationSettingsVisibility.bind(this)}>
@@ -175,21 +181,24 @@ export default class Dashboard extends React.Component {
               dashboardStyles.windowSizeButton + (visualization.size === 'small' ? ' ' + dashboardStyles.windowSizeButtonSelected : '')
             }
             onClick={this.changeWindowSizeSmall.bind(this)}>
-            <img className={dashboardStyles.visualizationSettingsItemIcon} src={smallVisualizationIcon}></img>Small
+            <img className={dashboardStyles.visualizationSettingsItemIcon} src={smallVisualizationIcon}></img>
+            Small (1x1)
           </div>
           <div
             className={
               dashboardStyles.windowSizeButton + (visualization.size === 'large' ? ' ' + dashboardStyles.windowSizeButtonSelected : '')
             }
             onClick={this.changeWindowSizeLarge.bind(this)}>
-            <img className={dashboardStyles.visualizationSettingsItemIcon} src={largeVisualizationIcon}></img>Large
+            <img className={dashboardStyles.visualizationSettingsItemIcon} src={largeVisualizationIcon}></img>
+            Large (2x2)
           </div>
           <div
             className={
               dashboardStyles.windowSizeButton + (visualization.size === 'wide' ? ' ' + dashboardStyles.windowSizeButtonSelected : '')
             }
             onClick={this.changeWindowSizeWide.bind(this)}>
-            <img className={dashboardStyles.visualizationSettingsItemIcon} src={wideVisualizationIcon}></img>Wide
+            <img className={dashboardStyles.visualizationSettingsItemIcon} src={wideVisualizationIcon}></img>
+            Wide (1x2)
           </div>
           <div
             className={
@@ -197,7 +206,7 @@ export default class Dashboard extends React.Component {
             }
             onClick={this.changeWindowSizeHigh.bind(this)}>
             <img className={dashboardStyles.visualizationSettingsItemIcon} src={highVisualizationIcon}></img>
-            High
+            High (2x1)
           </div>
           <hr />
           <div className={dashboardStyles.windowSizeButton} onClick={this.deleteVisualization.bind(this)}>
@@ -291,52 +300,35 @@ export default class Dashboard extends React.Component {
       return document.getElementById(item.id).getBoundingClientRect();
     });
     function _onDragOver(e) {
-      const target = e.target;
-      if (
-        target &&
-        target !== dragEl &&
-        target.nodeName === 'DIV' &&
-        target.classList.contains(dashboardStyles.visualizationContainer) &&
-        !target.classList.contains(dashboardStyles.inside)
-      ) {
+      const target = e.target.parentNode.parentNode;
+      if (target && target !== dragEl && target.nodeName === 'DIV' && target.classList.contains(dashboardStyles.visualizationContainer)) {
         e.preventDefault();
         e.dataTransfer.dropEffect = 'move';
-        if (target.classList.contains(dashboardStyles.inside)) {
-          e.stopPropagation();
-        } else {
-          const targetPos = target.getBoundingClientRect();
-          const next =
-            (e.clientY - targetPos.top) / (targetPos.bottom - targetPos.top) > 0.5 ||
-            (e.clientX - targetPos.left) / (targetPos.right - targetPos.left) > 0.5;
-          section.insertBefore(dragEl, (next && target.nextSibling) || target);
-        }
+
+        section.insertBefore(dragEl, target);
       }
     }
 
     function _onDragEnd(evt) {
       evt.preventDefault();
-      newPos = [...section.children].map((child) => {
-        const pos = document.getElementById(child.id).getBoundingClientRect();
-        return pos;
-      });
+      this.removeDropZones([...section.children]);
       dragEl.classList.remove(dashboardStyles.ghost);
-      section.removeEventListener('dragover', _onDragOver, false);
-      section.removeEventListener('dragend', _onDragEnd, false);
-
-      nextEl !== dragEl.nextSibling ? onUpdate(dragEl) : false;
+      section.removeEventListener('dragover', _onDragOver.bind(this), false);
+      section.removeEventListener('dragend', _onDragEnd.bind(this), false);
       this.reorderVisualizations();
     }
 
     section.addEventListener(
       'dragstart',
       function (e) {
+        this.showDropZones([...section.children], e.target.id);
         dragEl = e.target;
         if (!dragEl.classList.contains(dashboardStyles.inside)) {
           nextEl = dragEl.nextSibling;
           e.dataTransfer.effectAllowed = 'move';
           e.dataTransfer.setData('Text', dragEl.textContent);
 
-          section.addEventListener('dragover', _onDragOver, false);
+          section.addEventListener('dragover', _onDragOver.bind(this), false);
           section.addEventListener('dragend', _onDragEnd.bind(this), false);
 
           setTimeout(function () {
@@ -369,5 +361,19 @@ export default class Dashboard extends React.Component {
     this.state.visualizations = visualizations;
     localStorage.setItem('dashboardState', JSON.stringify(this.state));
     this.forceUpdate();
+  }
+
+  showDropZones(visualizations, currentTargetID) {
+    visualizations.forEach((item) => {
+      if (item.id !== currentTargetID) {
+        item.childNodes.item('dropZone').style.display = 'inline-block';
+      }
+    });
+  }
+
+  removeDropZones(visualizations) {
+    visualizations.forEach((item) => {
+      item.childNodes.item('dropZone').style.display = 'none';
+    });
   }
 }
