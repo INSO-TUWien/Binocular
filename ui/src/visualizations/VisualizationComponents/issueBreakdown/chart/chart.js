@@ -40,7 +40,7 @@ export default class Issues extends React.Component {
           {this.state.issueChartData !== undefined && this.state.issueChartData.length > 0 ? (
             <StackedAreaChart
               content={this.state.issueChartData}
-              palette={{ Opened: '#3461eb', Closed: '#8099e8' }}
+              palette={{ Opened: '#3461eb' }}
               paddings={{ top: 20, left: 60, bottom: 20, right: 30 }}
               xAxisCenter={true}
               yDims={this.state.issueScale}
@@ -62,7 +62,7 @@ export default class Issues extends React.Component {
     );
     const legend = (
       <div className={styles.legend}>
-        <LegendCompact text="Opened | Closed" color="#3461eb" color2="#8099e8" />
+        <LegendCompact text="Open Issues" color="#3461eb" />
       </div>
     );
     return (
@@ -93,27 +93,8 @@ export default class Issues extends React.Component {
 
     if (issues.length > 0) {
       //---- STEP 1: FILTER ISSUES ----
-      let filteredIssues = [];
-      switch (props.showIssues) {
-        case 'all':
-          filteredIssues = issues;
-          break;
-        case 'open':
-          _.each(issues, (issue) => {
-            if (issue.closedAt === null) {
-              filteredIssues.push(issue);
-            }
-          });
-          break;
-        case 'closed':
-          _.each(issues, (issue) => {
-            if (issue.closedAt) {
-              filteredIssues.push(issue);
-            }
-          });
-          break;
-        default:
-      }
+      let filteredIssues = issues;
+
       if (props.universalSettings) {
         filteredIssues = filteredIssues.filter((issue) => {
           let filter = false;
@@ -143,55 +124,41 @@ export default class Issues extends React.Component {
       const next = moment(curr).add(1, props.chartResolution);
       const end = moment(lastTimestamp).endOf(granularity.unit).add(1, props.chartResolution);
       const sortedCloseDates = [];
-      let createdDate = Date.parse(issues[0].createdAt);
+      const createdDate = Date.parse(issues[0].createdAt);
 
-      for (let i = 0, j = 0; curr.isSameOrBefore(end); curr.add(1, props.chartResolution), next.add(1, props.chartResolution)) {
+      for (; curr.isSameOrBefore(end); curr.add(1, props.chartResolution), next.add(1, props.chartResolution)) {
         //Iterate through time buckets
         const currTimestamp = curr.toDate().getTime();
         const nextTimestamp = next.toDate().getTime();
 
-        const obj = { date: currTimestamp, count: 0, openCount: 0, closedCount: 0 }; //Save date of time bucket, create object
-        while (i < filteredIssues.length && createdDate < nextTimestamp && createdDate >= currTimestamp) {
-          //Iterate through issues that fall into this time bucket (open date)
-          if (createdDate > currTimestamp && createdDate < nextTimestamp) {
-            obj.count++;
-            obj.openCount++;
-          }
-          if (filteredIssues[i].closedAt) {
-            //If issues are closed, save close date in sorted list
-            const closedDate = Date.parse(filteredIssues[i].closedAt);
-            const insertPos = _.sortedIndex(sortedCloseDates, closedDate);
-            sortedCloseDates.splice(insertPos, 0, closedDate);
-          }
-          if (++i < filteredIssues.length) {
-            createdDate = Date.parse(filteredIssues[i].createdAt);
-          }
-        }
-        for (; j < sortedCloseDates.length && sortedCloseDates[j] < nextTimestamp && sortedCloseDates[j] >= currTimestamp; j++) {
-          //Iterate through issues that fall into this time bucket (closed date)
-          if (sortedCloseDates[j] > currTimestamp && sortedCloseDates[j] < nextTimestamp) {
-            sortedCloseDates.splice(j, 1);
-            obj.count++;
-            obj.closedCount++;
-          }
-        }
-        data.push(obj);
+        const openedIssues = filteredIssues.filter(
+          (issue) => Date.parse(issue.createdAt) >= currTimestamp && Date.parse(issue.createdAt) < nextTimestamp
+        );
+
+        const closedIssues = filteredIssues.filter(
+          (issue) => Date.parse(issue.closedAt) >= currTimestamp && Date.parse(issue.closedAt) < nextTimestamp
+        );
+
+        data.push({
+          date: currTimestamp,
+          count: openedIssues.length + closedIssues.length,
+          openCount: openedIssues.length - closedIssues.length,
+        });
       }
 
       //---- STEP 3: CONSTRUCT CHART DATA FROM AGGREGATED ISSUES ----
+
+      let aggregatedOpenCount = 0;
+
       _.each(data, function (issue) {
+        aggregatedOpenCount += issue.openCount;
         issueChartData.push({
           date: issue.date,
-          Opened: issue.openCount,
-          Closed: issue.closedCount > 0 ? issue.closedCount * -1 : -0.001,
-        }); //-0.001 for stack layout to realize it belongs on the bottom
-        if (issueScale[1] < issue.openCount) {
-          issueScale[1] = issue.openCount;
-        }
-        if (issueScale[0] > issue.closedCount * -1) {
-          issueScale[0] = issue.closedCount * -1;
-        }
+          Opened: aggregatedOpenCount,
+          Cosed: 0,
+        });
       });
+      issueScale[1] = aggregatedOpenCount;
     }
     return { issueChartData, issueScale };
   }
