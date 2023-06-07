@@ -6,6 +6,15 @@
   overflow-y: auto;
   border-right: 1px solid lightgray;
   box-shadow: 0 0 10px #CCCA;
+  background: white;
+}
+
+@media (pointer:none), (pointer:coarse) {
+  .sidebar{
+    position: fixed;
+    z-index: 999999;
+    width: 90%;
+  }
 }
 
 .sidebar h1{
@@ -48,6 +57,74 @@
   position: relative;
   width: 100%;
   height: 100%;
+}
+
+.showSidebar{
+  position: fixed;
+  background: #3273dc;
+  width: 5rem;
+  height: 4rem;
+  border-radius: 0 2rem 2rem 0;
+  box-shadow: 0 0 10px #CCCA;
+  z-index: 99999;
+  top: calc(50vh - 2rem);
+  transition: margin-left 0.5s ease-in-out;
+  margin-left: -3rem;
+}
+.showSidebar>img{
+  position: absolute;
+  right: 0.5rem;
+  top: 0.5rem;
+  height: 3rem;
+  width: 3rem;
+}
+
+.showSidebar:hover{
+  background: #4882e0;
+  margin-left: 0;
+}
+
+.headline{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-weight: bold;
+  font-size: 3rem;
+  padding: 0 0.5rem;
+  border-bottom: 1px solid lightgray;
+}
+
+.headline:hover{
+  background: whitesmoke;
+}
+
+.headline:hover>.headlineText::after{
+  background: linear-gradient(90deg,#0000, whitesmoke);
+}
+
+.headlineText{
+  width: 80%;
+  white-space: nowrap;
+}
+.headlineText>div{
+  display: inline-block;
+  width: 100%;
+  overflow: hidden;
+}
+.headlineText::after {
+  content: '';
+  background: linear-gradient(90deg,#0000, #ffff);
+  display: inline-block;
+  width: 10rem;
+  height: 100%;
+  margin-left: -10rem;
+}
+
+.headlineHint{
+  margin-bottom: -1rem;
+  font-size: 1rem;
+  font-weight: normal;
+  text-decoration: underline 2px;
 }
 
 .configSection{
