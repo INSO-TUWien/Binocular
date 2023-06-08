@@ -28,6 +28,10 @@ module.exports = new gql.GraphQLObjectType({
         type: gql.GraphQLString,
         description: 'latest commit on this branch',
       },
+      tracksFileRenames: {
+        type: gql.GraphQLString,
+        description: 'True if renames of files connected to this branch are tracked.',
+      },
       files: paginated({
         type: require('./fileInBranch.js'),
         description: 'The files touched by this commit',
