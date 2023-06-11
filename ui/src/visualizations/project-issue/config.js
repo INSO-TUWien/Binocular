@@ -50,6 +50,8 @@ const ProjectIssueConfigComponent = (props) => {
     otherIssues = props.issues.length - (Object.keys(props.palette).length - 1);
   }
 
+  console.log(props.palette);
+
   return (
     <div className={styles.configContainer}>
       <form className={styles.form}>

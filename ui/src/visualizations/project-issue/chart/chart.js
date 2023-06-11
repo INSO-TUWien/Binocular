@@ -45,60 +45,63 @@ export default class ProjectIssue extends React.Component {
 
     if (this.state.selectedIssues && this.state.issueData) {
       const issueDataLength = this.state.issueData.length;
-      if (issueDataLength) {
+      if (!issueDataLength) {
+      } else {
         for (let i = 0; i < this.state.selectedIssues.length && i <= 3; i++) {
-          chartTitle = this.state.issueData[i].title;
-          if (i === 0) {
-            issueChart1 = (
-              <div className={styles.chartLine}>
-                <div className={cx(styles.text, 'label')}>{chartTitle}</div>
-                <div className={styles.chart}>
-                  <ViolinPlot
-                    content={this.state.issueChartData}
-                    palette={{ Opened: '#3461eb', Closed: '#8099e8' }}
-                    paddings={{ top: 20, left: 60, bottom: 20, right: 30 }}
-                    xAxisCenter={true}
-                    yDims={this.state.issueScale}
-                    d3offset={d3.stackOffsetDiverging}
-                    resolution={this.props.chartResolution}
-                  />
+          if (this.state.issueData[i].title) {
+            chartTitle = this.state.issueData[i].title;
+            if (i === 0) {
+              issueChart1 = (
+                <div className={styles.chartLine}>
+                  <div className={cx(styles.text, 'label')}>{chartTitle}</div>
+                  <div className={styles.chart}>
+                    <ViolinPlot
+                      content={this.state.issueChartData}
+                      palette={{Opened: '#3461eb', Closed: '#8099e8'}}
+                      paddings={{top: 20, left: 60, bottom: 20, right: 30}}
+                      xAxisCenter={true}
+                      yDims={this.state.issueScale}
+                      d3offset={d3.stackOffsetDiverging}
+                      resolution={this.props.chartResolution}
+                    />
+                  </div>
                 </div>
-              </div>
-            );
-          } else if (i === 1) {
-            issueChart2 = (
-              <div className={styles.chartLine}>
-                <div className={cx(styles.text, 'label')}>{chartTitle}</div>
-                <div className={styles.chart}>
-                  <ViolinPlot
-                    content={this.state.issueChartData}
-                    palette={{ Opened: '#35631BC8', Closed: '#5CC71EC8' }}
-                    paddings={{ top: 20, left: 60, bottom: 20, right: 30 }}
-                    xAxisCenter={true}
-                    yDims={this.state.issueScale}
-                    d3offset={d3.stackOffsetDiverging}
-                    resolution={this.props.chartResolution}
-                  />
+              );
+            } else if (i === 1) {
+              issueChart2 = (
+                <div className={styles.chartLine}>
+                  <div className={cx(styles.text, 'label')}>{chartTitle}</div>
+                  <div className={styles.chart}>
+                    <ViolinPlot
+                      content={this.state.issueChartData}
+                      palette={{Opened: '#35631BC8', Closed: '#5CC71EC8'}}
+                      paddings={{top: 20, left: 60, bottom: 20, right: 30}}
+                      xAxisCenter={true}
+                      yDims={this.state.issueScale}
+                      d3offset={d3.stackOffsetDiverging}
+                      resolution={this.props.chartResolution}
+                    />
+                  </div>
                 </div>
-              </div>
-            );
-          } else if (i === 2) {
-            issueChart3 = (
-              <div className={styles.chartLine}>
-                <div className={cx(styles.text, 'label')}>{chartTitle}</div>
-                <div className={styles.chart}>
-                  <ViolinPlot
-                    content={this.state.issueChartData}
-                    palette={{ Opened: '#753E2CFF', Closed: '#C56D2EFF' }}
-                    paddings={{ top: 20, left: 60, bottom: 20, right: 30 }}
-                    xAxisCenter={true}
-                    yDims={this.state.issueScale}
-                    d3offset={d3.stackOffsetDiverging}
-                    resolution={this.props.chartResolution}
-                  />
+              );
+            } else if (i === 2) {
+              issueChart3 = (
+                <div className={styles.chartLine}>
+                  <div className={cx(styles.text, 'label')}>{chartTitle}</div>
+                  <div className={styles.chart}>
+                    <ViolinPlot
+                      content={this.state.issueChartData}
+                      palette={{Opened: '#753E2CFF', Closed: '#C56D2EFF'}}
+                      paddings={{top: 20, left: 60, bottom: 20, right: 30}}
+                      xAxisCenter={true}
+                      yDims={this.state.issueScale}
+                      d3offset={d3.stackOffsetDiverging}
+                      resolution={this.props.chartResolution}
+                    />
+                  </div>
                 </div>
-              </div>
-            );
+              );
+            }
           }
         }
       }
@@ -239,12 +242,14 @@ export default class ProjectIssue extends React.Component {
     //---- STEP 5: CONSTRUCT NEW ISSUE DATA ----
     const issueData = [];
     _.each(filteredIssues, function (issue) {
-      if (props.selectedIssues.indexOf(issue.title) > -1) {
-        issueData.push({
-          title: issue.title,
-          createdAt: issue.createdAt,
-          closedAt: issue.closedAt
-        });
+      if (issue.title) {
+        if (props.selectedIssues.indexOf(issue.title) > -1) {
+          issueData.push({
+            title: issue.title,
+            createdAt: issue.createdAt,
+            closedAt: issue.closedAt
+          });
+        }
       }
     });
 
