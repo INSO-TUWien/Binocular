@@ -158,7 +158,9 @@ export default class Issues extends React.Component {
           Cosed: 0,
         });
       });
-      issueScale[1] = aggregatedOpenCount;
+      if (aggregatedOpenCount > issueScale[1]) {
+        issueScale[1] = aggregatedOpenCount;
+      }
     }
     return { issueChartData, issueScale };
   }
