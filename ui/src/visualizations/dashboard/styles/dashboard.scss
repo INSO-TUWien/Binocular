@@ -6,10 +6,10 @@
   -moz-user-select: none;
   user-select: none;
   display: grid;
-  grid-gap: 15px;
-  grid-template-columns: repeat(4, 1fr);
-  grid-auto-rows: 15vh;
-  grid-auto-flow: row dense;
+  grid-gap: 1rem;
+  grid-template-columns: repeat(2, 1fr);
+  grid-auto-rows:30rem;
+  grid-auto-flow: row;
   width: 100%;
   -webkit-touch-callout: none; /* iOS Safari */
   -webkit-user-select: none; /* Safari */
@@ -27,8 +27,8 @@
   font-size: 20px;
   background-color: white;
   box-shadow: 0 0 5px #555A;
-  border: 1px solid #3273dc;
   border-radius: 0.2rem;
+  overflow: hidden;
 }
 
 .inside {
@@ -41,8 +41,8 @@
 }
 
 .ghost {
-  border: 5px dashed #3273dc;
-  border-radius: 0.2rem;
+  border: 3px dashed #3273dc;
+  border-radius: 0.3rem;
   background-color: #fff;
 }
 
@@ -71,6 +71,10 @@
 }
 
 .menuBar{
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
   height: 2rem;
   border-bottom: 1px solid lightgray;
 }
@@ -162,4 +166,38 @@
 
 .dashboardMenuButtonInverted:hover{
   background: #cccccc33;
+}
+
+.dropZone{
+  position: absolute;
+  z-index: +3;
+  width: 100%;
+  height: 100%;
+  background: #EEE5;
+  backdrop-filter: blur(25px);
+  -webkit-backdrop-filter: blur(25px);
+}
+
+.dropZone>span {
+  font-size: 2rem;
+  font-weight: bold;
+  color: #222A;
+  text-shadow: 0 0 10px #CCCA;
+  padding:1rem;
+  text-decoration: underline;
+}
+
+.dropZone>div{
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.dropZone>div>span{
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #555A;
+  text-shadow: 0 0 10px #CCCA;
 }
