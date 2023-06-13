@@ -157,11 +157,12 @@ export default class Issues extends React.Component {
           Opened: aggregatedOpenCount,
           Cosed: 0,
         });
+        if (aggregatedOpenCount > issueScale[1]) {
+          issueScale[1] = aggregatedOpenCount;
+        }
       });
-      if (aggregatedOpenCount > issueScale[1]) {
-        issueScale[1] = aggregatedOpenCount;
-      }
     }
+    console.log(issueScale);
     return { issueChartData, issueScale };
   }
 
