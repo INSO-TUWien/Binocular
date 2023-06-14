@@ -33,6 +33,7 @@ import languageModuleRiver from './visualizations/legacy/language-module-river';
 import codeExpertise from './visualizations/code-expertise';
 import ciBuilds from './visualizations/VisualizationComponents/ciBuilds';
 import issues from './visualizations/VisualizationComponents/issues';
+import issueBreakdown from './visualizations/VisualizationComponents/issueBreakdown';
 import changes from './visualizations/VisualizationComponents/changes';
 import RootOffline from './components/RootOffline';
 
@@ -46,6 +47,7 @@ const visualizationModules = [
   languageModuleRiver,
   ciBuilds,
   issues,
+  issueBreakdown,
   changes,
   dataExport,
   codeExpertise,

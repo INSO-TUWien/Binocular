@@ -7,6 +7,7 @@ import issueImpact from '../legacy/issue-impact';
 import hotspotDials from '../legacy/hotspot-dials';
 import ciBuilds from '../VisualizationComponents/ciBuilds';
 import issues from '../VisualizationComponents/issues';
+import issueBreakdown from '../VisualizationComponents/issueBreakdown';
 import changes from '../VisualizationComponents/changes';
 
 export default {
@@ -15,6 +16,7 @@ export default {
   ciBuilds,
   codeOwnershipRiver,
   issueImpact,
+  issueBreakdown,
   hotspotDials,
   additions_deletions,
   empty,
