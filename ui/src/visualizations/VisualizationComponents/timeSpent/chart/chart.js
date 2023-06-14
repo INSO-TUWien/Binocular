@@ -10,13 +10,13 @@ import StackedAreaChart from '../../../../components/StackedAreaChart';
 import moment from 'moment';
 import LegendCompact from '../../../../components/LegendCompact';
 
-export default class IssueBreakdown extends React.Component {
+export default class TimeSpentChart extends React.Component {
   constructor(props) {
     super(props);
-    const { issueChartData, issueScale } = this.extractIssueData(props);
+    const { timeChartData, timeScale } = this.extractTimeData(props);
     this.state = {
-      issueChartData,
-      issueScale,
+      timeChartData,
+      timeScale,
     };
   }
 
@@ -25,25 +25,25 @@ export default class IssueBreakdown extends React.Component {
    * @param nextProps props that are passed
    */
   componentWillReceiveProps(nextProps) {
-    const { issueChartData, issueScale } = this.extractIssueData(nextProps);
+    const { timeChartData, timeScale } = this.extractTimeData(nextProps);
 
     this.setState({
-      issueChartData,
-      issueScale,
+      timeChartData,
+      timeScale,
     });
   }
 
   render() {
-    const issueBreakdownChart = (
+    const timeChart = (
       <div className={styles.chartLine}>
         <div className={styles.chart}>
-          {this.state.issueChartData !== undefined && this.state.issueChartData.length > 0 ? (
+          {this.state.timeChartData !== undefined && this.state.timeChartData.length > 0 ? (
             <StackedAreaChart
-              content={this.state.issueChartData}
+              content={this.state.timeChartData}
               palette={{ Opened: '#3461eb' }}
               paddings={{ top: 20, left: 60, bottom: 20, right: 30 }}
               xAxisCenter={true}
-              yDims={this.state.issueScale}
+              yDims={this.state.timeScale}
               d3offset={d3.stackOffsetDiverging}
               resolution={this.props.chartResolution}
             />
@@ -62,19 +62,19 @@ export default class IssueBreakdown extends React.Component {
     );
     const legend = (
       <div className={styles.legend}>
-        <LegendCompact text="Open Issues" color="#3461eb" />
+        <LegendCompact text="Time Spent" color="#3461eb" />
       </div>
     );
     return (
       <div className={styles.chartContainer}>
-        {this.state.issueChartData === null && loadingHint}
-        {issueBreakdownChart}
+        {this.state.timeChartData === null && loadingHint}
+        {timeChart}
         {legend}
       </div>
     );
   }
 
-  extractIssueData(props) {
+  extractTimeData(props) {
     if (!props.issues || props.issues.length === 0) {
       return {};
     }
@@ -117,7 +117,7 @@ export default class IssueBreakdown extends React.Component {
         });
       }
 
-      //---- STEP 2: AGGREGATE ISSUES PER TIME INTERVAL ----
+      //---- STEP 2: AGGREGATE TIME PER TIME INTERVAL ----
       const data = [];
       const granularity = this.getGranularity(props.chartResolution);
       const curr = moment(firstTimestamp).startOf(granularity.unit).subtract(1, props.chartResolution);
@@ -126,39 +126,31 @@ export default class IssueBreakdown extends React.Component {
       const sortedCloseDates = [];
       const createdDate = Date.parse(issues[0].createdAt);
 
+      console.log(filteredIssues);
+
       for (; curr.isSameOrBefore(end); curr.add(1, props.chartResolution), next.add(1, props.chartResolution)) {
         //Iterate through time buckets
         const currTimestamp = curr.toDate().getTime();
         const nextTimestamp = next.toDate().getTime();
 
-        const openedIssues = filteredIssues.filter(
-          (issue) => Date.parse(issue.createdAt) >= currTimestamp && Date.parse(issue.createdAt) < nextTimestamp
-        );
-
-        const closedIssues = filteredIssues.filter(
-          (issue) => Date.parse(issue.closedAt) >= currTimestamp && Date.parse(issue.closedAt) < nextTimestamp
-        );
-
         data.push({
           date: currTimestamp,
-          count: openedIssues.length + closedIssues.length,
-          openCount: openedIssues.length - closedIssues.length,
+          amount: 0,
         });
       }
 
-      //---- STEP 3: CONSTRUCT CHART DATA FROM AGGREGATED ISSUES ----
+      //---- STEP 3: CONSTRUCT CHART DATA FROM AGGREGATED Time ----
 
       let aggregatedOpenCount = 0;
 
-      _.each(data, function (issue) {
-        aggregatedOpenCount += issue.openCount;
+      _.each(data, function (timeSpent) {
         issueChartData.push({
-          date: issue.date,
-          Opened: aggregatedOpenCount,
+          date: timeSpent.date,
+          Opened: timeSpent.amount,
           Cosed: 0,
         });
-        if (aggregatedOpenCount > issueScale[1]) {
-          issueScale[1] = aggregatedOpenCount;
+        if (timeSpent.amount > issueScale[1]) {
+          issueScale[1] = timeSpent.amount;
         }
       });
     }

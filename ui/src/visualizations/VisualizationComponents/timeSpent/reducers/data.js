@@ -5,8 +5,8 @@ import _ from 'lodash';
 
 export default handleActions(
   {
-    REQUEST_ISSUEBREAKDOWN_DATA: (state) => _.assign({}, state, { isFetching: true }),
-    RECEIVE_ISSUEBREAKDOWN_DATA: (state, action) => {
+    REQUEST_TIMESPENT_DATA: (state) => _.assign({}, state, { isFetching: true }),
+    RECEIVE_TIMESPENT_DATA: (state, action) => {
       return _.assign({}, state, {
         data: action.payload,
         isFetching: false,
