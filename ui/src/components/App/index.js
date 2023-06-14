@@ -19,7 +19,7 @@ const mapDispatchToProps = () => ({});
 class App extends React.PureComponent {
   constructor(props) {
     super(props);
-    const collapsedLS = JSON.parse(localStorage.getItem('SidebarCollapsed')).state;
+    const collapsedLS = JSON.parse(localStorage.getItem('SidebarCollapsed'));
     if (collapsedLS === null) {
       this.state = {
         helpPos: 0,
@@ -28,7 +28,7 @@ class App extends React.PureComponent {
     } else {
       this.state = {
         helpPos: 0,
-        collapsed: collapsedLS,
+        collapsed: collapsedLS.state,
       };
     }
   }
