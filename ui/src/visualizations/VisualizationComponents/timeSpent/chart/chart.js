@@ -4,19 +4,17 @@ import React from 'react';
 import * as d3 from 'd3';
 
 import styles from '../styles.scss';
-import _ from 'lodash';
 
 import StackedAreaChart from '../../../../components/StackedAreaChart';
 import moment from 'moment';
 import LegendCompact from '../../../../components/LegendCompact';
-
 export default class TimeSpentChart extends React.Component {
   constructor(props) {
     super(props);
-    const { timeChartData, timeScale } = this.extractTimeData(props);
+    const { timeSpentChartData, timeSpentScale } = this.extractTimeData(props);
     this.state = {
-      timeChartData,
-      timeScale,
+      timeSpentChartData,
+      timeSpentScale,
     };
   }
 
@@ -25,25 +23,26 @@ export default class TimeSpentChart extends React.Component {
    * @param nextProps props that are passed
    */
   componentWillReceiveProps(nextProps) {
-    const { timeChartData, timeScale } = this.extractTimeData(nextProps);
+    const { timeSpentChartData, timeSpentScale } = this.extractTimeData(nextProps);
 
     this.setState({
-      timeChartData,
-      timeScale,
+      timeSpentChartData,
+      timeSpentScale,
     });
   }
 
   render() {
+    const palette = this.generatePalette(this.props.allAuthors);
     const timeChart = (
       <div className={styles.chartLine}>
         <div className={styles.chart}>
-          {this.state.timeChartData !== undefined && this.state.timeChartData.length > 0 ? (
+          {this.state.timeSpentChartData !== undefined && this.state.timeSpentChartData.length > 0 ? (
             <StackedAreaChart
-              content={this.state.timeChartData}
-              palette={{ Opened: '#3461eb' }}
+              content={this.state.timeSpentChartData}
+              palette={palette}
               paddings={{ top: 20, left: 60, bottom: 20, right: 30 }}
               xAxisCenter={true}
-              yDims={this.state.timeScale}
+              yDims={this.state.timeSpentScale}
               d3offset={d3.stackOffsetDiverging}
               resolution={this.props.chartResolution}
             />
@@ -60,16 +59,10 @@ export default class TimeSpentChart extends React.Component {
         </h1>
       </div>
     );
-    const legend = (
-      <div className={styles.legend}>
-        <LegendCompact text="Time Spent" color="#3461eb" />
-      </div>
-    );
     return (
       <div className={styles.chartContainer}>
-        {this.state.timeChartData === null && loadingHint}
+        {this.state.timeSpentChartData === null && loadingHint}
         {timeChart}
-        {legend}
       </div>
     );
   }
@@ -83,8 +76,8 @@ export default class TimeSpentChart extends React.Component {
     let lastTimestamp = props.lastIssueTimestamp;
     let issues = props.issues;
 
-    const issueChartData = [];
-    const issueScale = [0, 0];
+    const timeSpentChartData = [];
+    const timeSpentScale = [0, 0];
     if (props.universalSettings) {
       issues = props.filteredIssues;
       firstTimestamp = props.firstSignificantTimestamp;
@@ -94,7 +87,7 @@ export default class TimeSpentChart extends React.Component {
     if (issues.length > 0) {
       //---- STEP 1: FILTER ISSUES ----
       let filteredIssues = issues;
-
+      const selectedAuthorNames = props.selectedAuthors.map((sA) => sA.split('<')[0].slice(0, -1));
       if (props.universalSettings) {
         filteredIssues = filteredIssues.filter((issue) => {
           let filter = false;
@@ -118,43 +111,55 @@ export default class TimeSpentChart extends React.Component {
       }
 
       //---- STEP 2: AGGREGATE TIME PER TIME INTERVAL ----
-      const data = [];
       const granularity = this.getGranularity(props.chartResolution);
       const curr = moment(firstTimestamp).startOf(granularity.unit).subtract(1, props.chartResolution);
       const next = moment(curr).add(1, props.chartResolution);
       const end = moment(lastTimestamp).endOf(granularity.unit).add(1, props.chartResolution);
-      const sortedCloseDates = [];
-      const createdDate = Date.parse(issues[0].createdAt);
+      const data = [];
 
-      console.log(filteredIssues);
+      const timeTrakingData = [];
 
+      filteredIssues.forEach((issue) => {
+        issue.notes.forEach((note) => {
+          const timeNote = /^added ([1-9a-z ]+) of time spent$/.exec(note.body);
+          if (timeNote) {
+            timeTrakingData.push({
+              authorName: note.author.name,
+              timeSpent: this.convertTime(timeNote[1]) / 3600,
+              createdAt: note.created_at,
+            });
+          }
+        });
+      });
       for (; curr.isSameOrBefore(end); curr.add(1, props.chartResolution), next.add(1, props.chartResolution)) {
         //Iterate through time buckets
         const currTimestamp = curr.toDate().getTime();
         const nextTimestamp = next.toDate().getTime();
+        const relevantNotes = timeTrakingData.filter(
+          (entry) => Date.parse(entry.createdAt) >= currTimestamp && Date.parse(entry.createdAt) < nextTimestamp
+        );
 
-        data.push({
-          date: currTimestamp,
-          amount: 0,
+        const dataEntry = { data: { date: currTimestamp }, aggregatedTime: 0 };
+        relevantNotes.forEach((note) => {
+          dataEntry.data[note.authorName] = note.timeSpent;
+          dataEntry.aggregatedTime += note.timeSpent;
         });
+        selectedAuthorNames.forEach((sA) => {
+          if (dataEntry.data[sA] === undefined) {
+            dataEntry.data[sA] = 0;
+          }
+        });
+        data.push(dataEntry);
       }
-
       //---- STEP 3: CONSTRUCT CHART DATA FROM AGGREGATED Time ----
-
-      let aggregatedOpenCount = 0;
-
-      _.each(data, function (timeSpent) {
-        issueChartData.push({
-          date: timeSpent.date,
-          Opened: timeSpent.amount,
-          Cosed: 0,
-        });
-        if (timeSpent.amount > issueScale[1]) {
-          issueScale[1] = timeSpent.amount;
+      data.forEach((dataEntry) => {
+        timeSpentChartData.push(dataEntry.data);
+        if (dataEntry.aggregatedTime > timeSpentScale[1]) {
+          timeSpentScale[1] = dataEntry.aggregatedTime;
         }
       });
     }
-    return { issueChartData, issueScale };
+    return { timeSpentChartData, timeSpentScale };
   }
 
   getGranularity(resolution) {
@@ -170,5 +175,31 @@ export default class TimeSpentChart extends React.Component {
       default:
         return { interval: 0, unit: '' };
     }
+  }
+
+  convertTime(timeString) {
+    const timeParts = timeString.split(' ');
+    let time = 0;
+    timeParts.forEach((part) => {
+      if (part.endsWith('h')) {
+        time += parseInt(part.substring(0, part.length - 1)) * 60 * 60;
+      }
+      if (part.endsWith('m')) {
+        time += parseInt(part.substring(0, part.length - 1)) * 60;
+      }
+      if (part.endsWith('2')) {
+        time += parseInt(part.substring(0, part.length - 1));
+      }
+    });
+    return time;
+  }
+
+  generatePalette(allAuthors) {
+    const palette = {};
+    Object.keys(allAuthors).forEach((author) => {
+      const authorName = author.split('<')[0].slice(0, -1);
+      palette[authorName] = allAuthors[author];
+    });
+    return palette;
   }
 }

@@ -8,7 +8,6 @@ const mapStateToProps = (state /*, ownProps*/) => {
   const timeSpentState = state.visualizations.timeSpent.state;
   const universalSettings = state.universalSettings;
   return {
-    palette: timeSpentState.data.data.palette,
     otherCount: timeSpentState.data.data.otherCount,
     filteredIssues: timeSpentState.data.data.filteredIssues,
     issues: timeSpentState.data.data.issues,

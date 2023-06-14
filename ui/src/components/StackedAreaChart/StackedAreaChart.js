@@ -149,7 +149,17 @@ export default class StackedAreaChart extends ScalableBaseChartComponent {
 
     //Render tooltip
     tooltip
-      .html(formattedDate + '<hr/>' + '<div style="background: ' + palette[key] + '">' + '</div>' + text + ': ' + Math.round(value))
+      .html(
+        formattedDate +
+          '<hr/>' +
+          '<div style="background: ' +
+          palette[key] +
+          '">' +
+          '</div>' +
+          text +
+          ': ' +
+          Math.round((value + Number.EPSILON) * 100) / 100
+      )
       .style('position', 'absolute')
       .style('left', event.layerX - 20 + 'px')
       .style('top', event.layerY - 70 + 'px');

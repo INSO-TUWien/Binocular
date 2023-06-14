@@ -162,6 +162,7 @@ export default class IssueBreakdown extends React.Component {
         }
       });
     }
+
     return { issueChartData, issueScale };
   }
 
