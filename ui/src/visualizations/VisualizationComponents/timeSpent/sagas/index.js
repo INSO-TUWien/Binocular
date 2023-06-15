@@ -4,6 +4,9 @@ import { fetchFactory, mapSaga, timestampedActionFactory } from '../../../../sag
 import { select, throttle, fork, takeEvery } from 'redux-saga/effects';
 import { createAction } from 'redux-actions';
 import Database from '../../../../database/database';
+
+export const setAggregateTime = createAction('SET_AGGREGATE_TIME');
+
 export const requestTimeSpentData = createAction('REQUEST_TIMESPENT_DATA');
 export const receiveTimeSpentData = timestampedActionFactory('RECEIVE_TIMESPENT_DATA');
 export const receiveTimeSpentDataError = createAction('RECEIVE_TIMESPENT_DATA_ERROR');
@@ -18,6 +21,9 @@ export default function* () {
   yield fork(watchRefreshRequests);
   yield fork(watchMessages);
 
+  // keep looking for config changes
+  yield fork(watchAggregatedTimeSwitch);
+
   // keep looking for viewport changes to re-fetch
   yield fork(watchRefresh);
   yield fork(watchToggleHelp);
@@ -28,6 +34,9 @@ export default function* () {
   yield fork(watchAllAuthors);
 }
 
+function* watchAggregatedTimeSwitch() {
+  yield takeEvery('SET_AGGREGATE_TIME', fetchTimeSpentData);
+}
 function* watchTimeSpan() {
   yield takeEvery('SET_TIME_SPAN', fetchTimeSpentData);
 }

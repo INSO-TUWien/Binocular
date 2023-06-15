@@ -412,7 +412,6 @@ export default class ScalableBaseChartComponent extends React.Component {
 
     const bisectDate = d3.bisector((d) => d.date).left;
     const _this = this;
-    console.log(this.state.data.stackedData);
     //Append data to svg using the area generator and palette
     const pathStreams = brushArea
       .append('g')

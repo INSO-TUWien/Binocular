@@ -18,7 +18,8 @@ const mapStateToProps = (state /*, ownProps*/) => {
     chartResolution: universalSettings.chartResolution,
     selectedAuthors: universalSettings.selectedAuthorsGlobal,
     allAuthors: universalSettings.allAuthors,
-    showIssues: timeSpentState.config.showIssues,
+    mergedAuthors: universalSettings.mergedAuthors,
+    aggregateTime: timeSpentState.config.aggregateTime,
   };
 };
 

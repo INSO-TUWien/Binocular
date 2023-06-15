@@ -3,23 +3,37 @@
 import { connect } from 'react-redux';
 
 import styles from './styles.scss';
-
-import LegendCompact from '../../../components/LegendCompact';
-import TabCombo from '../../../components/TabCombo';
-import { setShowIssues } from './sagas';
+import React from 'react';
+import { setAggregateTime } from './sagas';
 
 const mapStateToProps = (state /*, ownProps*/) => {
-  const dashboardState = state.visualizations.timeSpent.state;
+  const timeSpentState = state.visualizations.timeSpent.state;
 
-  return {};
+  return { aggregatedTime: timeSpentState.config.aggregatedTime };
 };
 
 const mapDispatchToProps = (dispatch /*, ownProps*/) => {
-  return {};
+  return { onSetAggregateTime: (value) => dispatch(setAggregateTime(value)) };
 };
 
 const TimeSpentConfigComponent = (props) => {
-  return <div className={styles.configContainer}></div>;
+  return (
+    <div className={styles.configContainer}>
+      <div className="field">
+        <input
+          id="aggregateTimeSwitch"
+          type="checkbox"
+          name="aggregateTimeSwitch"
+          className={'switch is-rounded is-outlined is-info'}
+          defaultChecked={props.aggregateTime}
+          onChange={(e) => props.onSetAggregateTime(e.target.checked)}
+        />
+        <label htmlFor="aggregateTimeSwitch" className={styles.switch}>
+          Aggregate Time Spent
+        </label>
+      </div>
+    </div>
+  );
 };
 
 const TimeSpentConfig = connect(mapStateToProps, mapDispatchToProps)(TimeSpentConfigComponent);

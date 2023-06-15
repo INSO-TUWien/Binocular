@@ -7,14 +7,16 @@ import styles from '../styles.scss';
 
 import StackedAreaChart from '../../../../components/StackedAreaChart';
 import moment from 'moment';
-import LegendCompact from '../../../../components/LegendCompact';
+
 export default class TimeSpentChart extends React.Component {
   constructor(props) {
     super(props);
-    const { timeSpentChartData, timeSpentScale } = this.extractTimeData(props);
+    const { timeSpentChartData, timeSpentScale, aggregatedDataPerAuthor, aggregatedTimeSpent } = this.extractTimeData(props);
     this.state = {
       timeSpentChartData,
       timeSpentScale,
+      aggregatedDataPerAuthor,
+      aggregatedTimeSpent,
     };
   }
 
@@ -23,11 +25,13 @@ export default class TimeSpentChart extends React.Component {
    * @param nextProps props that are passed
    */
   componentWillReceiveProps(nextProps) {
-    const { timeSpentChartData, timeSpentScale } = this.extractTimeData(nextProps);
+    const { timeSpentChartData, timeSpentScale, aggregatedDataPerAuthor, aggregatedTimeSpent } = this.extractTimeData(nextProps);
 
     this.setState({
       timeSpentChartData,
       timeSpentScale,
+      aggregatedDataPerAuthor,
+      aggregatedTimeSpent,
     });
   }
 
@@ -59,10 +63,38 @@ export default class TimeSpentChart extends React.Component {
         </h1>
       </div>
     );
+
+    const currentAbsoluteTimeDistribution = (
+      <div className={styles.secondaryChart}>
+        <div>Absolute Time Distribution:</div>
+        <div className={styles.stackedBarChart}>
+          {this.state.aggregatedDataPerAuthor !== undefined &&
+            Object.keys(this.state.aggregatedDataPerAuthor).map((author) => {
+              const precentContribution = (100.0 / this.state.aggregatedTimeSpent) * this.state.aggregatedDataPerAuthor[author];
+              return (
+                <div
+                  className={styles.stackedBarChartBlock}
+                  style={{
+                    width: '' + precentContribution + '%',
+                    background: palette[author],
+                  }}>
+                  <div style={{ display: 'block', textDecoration: 'underline', fontWeight: 'bold' }}>{author}:</div>
+                  <div style={{ display: 'inline-block' }}>{Math.round((precentContribution + Number.EPSILON) * 10) / 10}%</div>
+                  <div style={{ display: 'inline-block' }}>
+                    {Math.round((this.state.aggregatedDataPerAuthor[author] + Number.EPSILON) * 100) / 100}h
+                  </div>
+                </div>
+              );
+            })}
+        </div>
+      </div>
+    );
+
     return (
       <div className={styles.chartContainer}>
-        {this.state.timeSpentChartData === null && loadingHint}
-        {timeChart}
+        {this.state.timeSpentChartData === undefined && loadingHint}
+        {this.state.timeSpentChartData !== undefined && timeChart}
+        {this.state.timeSpentChartData !== undefined && currentAbsoluteTimeDistribution}
       </div>
     );
   }
@@ -83,7 +115,8 @@ export default class TimeSpentChart extends React.Component {
       firstTimestamp = props.firstSignificantTimestamp;
       lastTimestamp = props.lastSignificantTimestamp;
     }
-
+    const aggregatedDataPerAuthor = {};
+    let aggregatedTimeSpent = 0;
     if (issues.length > 0) {
       //---- STEP 1: FILTER ISSUES ----
       let filteredIssues = issues;
@@ -118,7 +151,9 @@ export default class TimeSpentChart extends React.Component {
       const data = [];
 
       const timeTrakingData = [];
-
+      selectedAuthorNames.forEach((sA) => {
+        aggregatedDataPerAuthor[sA] = 0;
+      });
       filteredIssues.forEach((issue) => {
         issue.notes.forEach((note) => {
           const timeNote = /^added ([1-9a-z ]+) of time spent$/.exec(note.body);
@@ -139,27 +174,57 @@ export default class TimeSpentChart extends React.Component {
           (entry) => Date.parse(entry.createdAt) >= currTimestamp && Date.parse(entry.createdAt) < nextTimestamp
         );
 
-        const dataEntry = { data: { date: currTimestamp }, aggregatedTime: 0 };
-        relevantNotes.forEach((note) => {
-          dataEntry.data[note.authorName] = note.timeSpent;
-          dataEntry.aggregatedTime += note.timeSpent;
+        const dataEntry = {
+          data: { date: currTimestamp },
+          dataAggregated: { date: currTimestamp },
+          aggregatedTime: 0,
+          aggregatedTimeAllAuthors: 0,
+        };
+
+        props.mergedAuthors.forEach((author) => {
+          const authorName = author.mainCommitter.split('<')[0].slice(0, -1);
+          author.committers.forEach((committer) => {
+            const committerName = committer.signature.split('<')[0].slice(0, -1);
+            relevantNotes
+              .filter((note) => note.authorName === committerName)
+              .forEach((note) => {
+                aggregatedDataPerAuthor[authorName] += note.timeSpent;
+                dataEntry.data[authorName] = note.timeSpent;
+                dataEntry.dataAggregated[authorName] = aggregatedDataPerAuthor[authorName];
+                dataEntry.aggregatedTime += note.timeSpent;
+              });
+          });
         });
+
         selectedAuthorNames.forEach((sA) => {
           if (dataEntry.data[sA] === undefined) {
             dataEntry.data[sA] = 0;
+            dataEntry.dataAggregated[sA] = aggregatedDataPerAuthor[sA];
           }
+          dataEntry.aggregatedTimeAllAuthors += aggregatedDataPerAuthor[sA];
         });
+
         data.push(dataEntry);
       }
       //---- STEP 3: CONSTRUCT CHART DATA FROM AGGREGATED Time ----
       data.forEach((dataEntry) => {
-        timeSpentChartData.push(dataEntry.data);
-        if (dataEntry.aggregatedTime > timeSpentScale[1]) {
-          timeSpentScale[1] = dataEntry.aggregatedTime;
+        if (props.aggregateTime) {
+          timeSpentChartData.push(dataEntry.dataAggregated);
+          if (dataEntry.aggregatedTimeAllAuthors > timeSpentScale[1]) {
+            timeSpentScale[1] = dataEntry.aggregatedTimeAllAuthors;
+          }
+        } else {
+          timeSpentChartData.push(dataEntry.data);
+          if (dataEntry.aggregatedTime > timeSpentScale[1]) {
+            timeSpentScale[1] = dataEntry.aggregatedTime;
+          }
+        }
+        if (dataEntry.aggregatedTimeAllAuthors > aggregatedTimeSpent) {
+          aggregatedTimeSpent = dataEntry.aggregatedTimeAllAuthors;
         }
       });
     }
-    return { timeSpentChartData, timeSpentScale };
+    return { timeSpentChartData, timeSpentScale, aggregatedDataPerAuthor, aggregatedTimeSpent };
   }
 
   getGranularity(resolution) {
@@ -198,7 +263,9 @@ export default class TimeSpentChart extends React.Component {
     const palette = {};
     Object.keys(allAuthors).forEach((author) => {
       const authorName = author.split('<')[0].slice(0, -1);
-      palette[authorName] = allAuthors[author];
+      if (palette[authorName] === undefined) {
+        palette[authorName] = allAuthors[author];
+      }
     });
     return palette;
   }

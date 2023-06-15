@@ -25,7 +25,7 @@
     flex-grow: 1;
     display: flex;
     align-items: center;
-    height: 100%;
+    height: 80%;
 
     .text{
       writing-mode: vertical-lr;
@@ -96,4 +96,38 @@
 .errorMessage{
   width: 100%;
   text-align: center;
+}
+
+.switch:after{
+  background-color: #3273dc!important;
+}
+
+.secondaryChart{
+  width: 95%;
+  margin: auto;
+  height: 20%;
+}
+
+.stackedBarChart{
+  display: flex;
+  width: 100%;
+  height: 60%;
+}
+
+.stackedBarChartBlock{
+  display: inline-block;
+  height: 100%;
+  border-radius: 0.2rem;
+  margin: 2px;
+  box-shadow: 0 0 5px #5555;
+}
+
+.stackedBarChartBlock>div{
+  background: white;
+  width: fit-content;
+  margin: 2px;
+  padding: 2px;
+  font-size: 50%;
+  line-height: 100%;
+  border-radius: 0.2rem;
 }
