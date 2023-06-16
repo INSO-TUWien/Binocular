@@ -162,16 +162,18 @@ export default class TimeSpentChart extends React.Component {
         aggregatedDataPerAuthor[sA] = 0;
       });
       filteredIssues.forEach((issue) => {
-        issue.notes.forEach((note) => {
-          const timeNote = /^added ([1-9a-z ]+) of time spent$/.exec(note.body);
-          if (timeNote) {
-            timeTrakingData.push({
-              authorName: note.author.name,
-              timeSpent: this.convertTime(timeNote[1]) / 3600,
-              createdAt: note.created_at,
-            });
-          }
-        });
+        if (issue.notes !== undefined) {
+          issue.notes.forEach((note) => {
+            const timeNote = /^added ([1-9a-z ]+) of time spent$/.exec(note.body);
+            if (timeNote) {
+              timeTrakingData.push({
+                authorName: note.author.name,
+                timeSpent: this.convertTime(timeNote[1]) / 3600,
+                createdAt: note.created_at,
+              });
+            }
+          });
+        }
       });
       for (; curr.isSameOrBefore(end); curr.add(1, props.chartResolution), next.add(1, props.chartResolution)) {
         //Iterate through time buckets

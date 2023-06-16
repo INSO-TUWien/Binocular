@@ -8,7 +8,7 @@ import reducer from './reducers';
 
 export default {
   id: 'timeSpent',
-  label: 'Time Spent',
+  label: 'Time Spent (GitLab Only)',
   saga,
   reducer,
   ChartComponent,
