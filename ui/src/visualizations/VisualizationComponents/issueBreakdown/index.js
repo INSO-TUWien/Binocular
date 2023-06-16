@@ -8,7 +8,7 @@ import reducer from './reducers';
 
 export default {
   id: 'issueBreakdown',
-  label: 'Issue Brakdown',
+  label: 'Issue Breakdown',
   saga,
   reducer,
   ChartComponent,

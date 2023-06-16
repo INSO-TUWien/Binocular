@@ -7,6 +7,7 @@ import styles from '../styles.scss';
 
 import StackedAreaChart from '../../../../components/StackedAreaChart';
 import moment from 'moment';
+import _ from 'lodash';
 
 export default class TimeSpentChart extends React.Component {
   constructor(props) {
@@ -70,21 +71,26 @@ export default class TimeSpentChart extends React.Component {
         <div className={styles.stackedBarChart}>
           {this.state.aggregatedDataPerAuthor !== undefined &&
             Object.keys(this.state.aggregatedDataPerAuthor).map((author) => {
-              const precentContribution = (100.0 / this.state.aggregatedTimeSpent) * this.state.aggregatedDataPerAuthor[author];
-              return (
-                <div
-                  className={styles.stackedBarChartBlock}
-                  style={{
-                    width: '' + precentContribution + '%',
-                    background: palette[author],
-                  }}>
-                  <div style={{ display: 'block', textDecoration: 'underline', fontWeight: 'bold' }}>{author}:</div>
-                  <div style={{ display: 'inline-block' }}>{Math.round((precentContribution + Number.EPSILON) * 10) / 10}%</div>
-                  <div style={{ display: 'inline-block' }}>
-                    {Math.round((this.state.aggregatedDataPerAuthor[author] + Number.EPSILON) * 100) / 100}h
+              const percentContribution = (100.0 / this.state.aggregatedTimeSpent) * this.state.aggregatedDataPerAuthor[author];
+              if (percentContribution > 0) {
+                return (
+                  <div
+                    key={author}
+                    className={styles.stackedBarChartBlock}
+                    style={{
+                      width: '' + percentContribution + '%',
+                      background: palette[author],
+                    }}>
+                    <div style={{ display: 'block', textDecoration: 'underline', fontWeight: 'bold' }}>{author}:</div>
+                    <div style={{ display: 'inline-block' }}>{Math.round((percentContribution + Number.EPSILON) * 10) / 10}%</div>
+                    <div style={{ display: 'inline-block' }}>
+                      {Math.round((this.state.aggregatedDataPerAuthor[author] + Number.EPSILON) * 100) / 100}h
+                    </div>
                   </div>
-                </div>
-              );
+                );
+              } else {
+                return '';
+              }
             })}
         </div>
       </div>
@@ -107,7 +113,6 @@ export default class TimeSpentChart extends React.Component {
     let firstTimestamp = props.firstIssueTimestamp;
     let lastTimestamp = props.lastIssueTimestamp;
     let issues = props.issues;
-
     const timeSpentChartData = [];
     const timeSpentScale = [0, 0];
     if (props.universalSettings) {
@@ -120,7 +125,7 @@ export default class TimeSpentChart extends React.Component {
     if (issues.length > 0) {
       //---- STEP 1: FILTER ISSUES ----
       let filteredIssues = issues;
-      const selectedAuthorNames = props.selectedAuthors.map((sA) => sA.split('<')[0].slice(0, -1));
+      const selectedAuthorNames = _.uniq(props.selectedAuthors.map((sA) => sA.split('<')[0].slice(0, -1)));
       if (props.universalSettings) {
         filteredIssues = filteredIssues.filter((issue) => {
           let filter = false;
@@ -142,12 +147,14 @@ export default class TimeSpentChart extends React.Component {
           return filter;
         });
       }
-
       //---- STEP 2: AGGREGATE TIME PER TIME INTERVAL ----
       const granularity = this.getGranularity(props.chartResolution);
       const curr = moment(firstTimestamp).startOf(granularity.unit).subtract(1, props.chartResolution);
       const next = moment(curr).add(1, props.chartResolution);
-      const end = moment(lastTimestamp).endOf(granularity.unit).add(1, props.chartResolution);
+
+      const end = moment(lastTimestamp)
+        .endOf(granularity.unit)
+        .add(props.chartResolution === 'days' ? 7 : 1, props.chartResolution);
       const data = [];
 
       const timeTrakingData = [];
