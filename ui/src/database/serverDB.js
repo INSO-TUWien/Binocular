@@ -56,7 +56,11 @@ export default class ServerDB {
   }
 
   static getCommitsForFiles(filenames) {
-    return Commits.getCommitsForFiles(filenames);
+    return Commits.getCommitsForFiles(filenames, true);
+  }
+
+  static getCommitsWithFilesForFiles(filenames) {
+    return Commits.getCommitsForFiles(filenames, false);
   }
 
   static issueImpactQuery(iid, since, until) {
@@ -73,6 +77,10 @@ export default class ServerDB {
 
   static getFilenamesForBranch(branchName) {
     return Files.getFilenamesForBranch(branchName);
+  }
+
+  static getPreviousFilenamesForFilesOnBranch(branchName) {
+    return Files.getPreviousFilenamesForFilesOnBranch(branchName);
   }
 
   static getFilesForCommits(hashes) {

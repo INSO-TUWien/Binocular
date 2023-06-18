@@ -1,6 +1,5 @@
 'use strict';
 
-import { collectPages, graphQl } from '../../../utils';
 import { endpointUrl } from '../../../utils';
 import Database from '../../../database/database';
 import _ from 'lodash';
@@ -45,8 +44,78 @@ export function getCommitHashesForIssue(iid) {
   return Database.getCommitsForIssue(iid).then((commits) => commits.map((c) => c.sha));
 }
 
-export function getCommitHashesForFiles(filenames) {
-  return Database.getCommitsForFiles(filenames).then((commits) => commits.map((c) => c.sha));
+export async function getPreviousFilenames(filenames, branch) {
+  //if this branch tracks file renames, we first have to find out how the relevant files were named in the past
+  let filePathsWithPreviousNames = []
+  let previousFilenameObjects = []
+  if(branch.tracksFileRenames) {
+    filePathsWithPreviousNames = await Database.getPreviousFilenamesForFilesOnBranch(branch.branch);
+    //we only care about files that were renamed
+    filePathsWithPreviousNames = filePathsWithPreviousNames.filter((pfn) => pfn.previousFileNames.length !== 0);
+    //we only care about the previous names of selected files
+    filePathsWithPreviousNames = filePathsWithPreviousNames.filter((pfn) => filenames.includes(pfn.path));
+    //add these named to the filenames array
+    for(const pfn of filePathsWithPreviousNames) {
+      for (const oldFile of pfn.previousFileNames) {
+        previousFilenameObjects.push(oldFile)
+      }
+    }
+  }  
+  return previousFilenameObjects;
+}
+
+export async function getCommitHashesForFiles(filenames, branch) {
+  //console.log("starting getCommitHashesForFiles")
+
+  let previousFilenameObjects = await getPreviousFilenames(filenames, branch)
+
+  //fetch commits for selected files
+  let commits = await Database.getCommitsForFiles(filenames)
+
+  //fetch commits for old filenames
+  let previousFilenamesPaths = [...new Set(previousFilenameObjects.map((fno) => fno.oldFilePath))]
+  let prevFilesCommits = await Database.getCommitsWithFilesForFiles(previousFilenamesPaths)
+  console.log(prevFilesCommits)
+
+  //for each of the previous filenames
+  for (const prevPath of previousFilenamesPaths) {
+    //console.log("starting map for " + prevPath)
+    //extract the commits that touch this particular file
+    let commitsForOldFilename = prevFilesCommits.filter(c => c.files.data.map(f => f.file.path).includes(prevPath))
+    console.log(commitsForOldFilename)
+  
+    //now remove the commits that touch the previous filenames but not within the time period where this file was named this way
+    // this can for example happen when a file was renamed and later on, a new file with the same name is created again
+    // we are not interested in the commits touching this "new" file
+    commitsForOldFilename = commitsForOldFilename.filter(c => {
+      const commitDate = new Date(c.date);
+      //there could be more files with this name in other time intervals
+      const prevFileObjects = previousFilenameObjects.filter((pfno) => pfno.oldFilePath === prevPath)
+      for(const prevFileObj of prevFileObjects) {
+        //if hasThisNameUntil is null, this means that this is the current name of the file.
+        // since this commit is then in the 'commits' array anyways, we can ignore it here
+        if(prevFileObj.hasThisNameUntil === null) return false
+
+        const fileWasNamedFrom = new Date(prevFileObj.hasThisNameFrom)
+        const fileWasNamedUntil = new Date(prevFileObj.hasThisNameUntil)
+        //if this commit touches a previous version of this file in the right timeframe, we keep this commit
+        if(fileWasNamedFrom <= commitDate && commitDate < fileWasNamedUntil) {
+          return true;
+        }
+      }
+      return false;
+    })
+    commits = _.concat(commits, commitsForOldFilename)
+    //console.log("finishing map for " + prevPath)
+
+  }
+
+  //TODO overall: dates and previous names have to be checked in saga when doing the reductions
+  
+  //console.log("finished getCommitHashesForFiles")
+
+  //get sha hashes
+  return _.uniq(commits.map((c) => c.sha))
 }
 
 export function getIssueData(iid) {

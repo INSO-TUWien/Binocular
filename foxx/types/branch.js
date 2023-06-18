@@ -34,10 +34,10 @@ module.exports = new gql.GraphQLObjectType({
       },
       files: paginated({
         type: require('./fileInBranch.js'),
-        description: 'The files touched by this commit',
-        query: (commit, args, limit) => aql`
+        description: 'The files existing in this branch',
+        query: (branch, args, limit) => aql`
           FOR file, edge
-            IN INBOUND ${commit} ${branchesToFiles}
+            IN INBOUND ${branch} ${branchesToFiles}
             ${limit}
             RETURN {
               file,

@@ -90,43 +90,9 @@ export default class Commits {
     }).then(function () {
       return commitList;
     });
-
-    return graphQl
-      .query(
-        `query {
-         commits {
-          count,
-          data {
-            sha,
-            branch,
-            history,
-            message,
-            signature,
-            webUrl,
-            date,
-            parents,
-            stats {
-              additions,
-              deletions
-            }
-            files{
-              data {
-                file{
-                  path
-                }
-                stats {additions,deletions},
-                hunks {newLines}
-              }
-            }
-          }
-         }
-       }`,
-        {}
-      )
-      .then((resp) => resp.commits.data);
   }
 
-  static getCommitsForFiles(filenames) {
+  static getCommitsForFiles(filenames, omitFiles) {
     return graphQl
       .query(
         `query {
@@ -164,7 +130,11 @@ export default class Commits {
           for (const cFile of commit.files.data) {
             if (filenames.includes(cFile.file.path)) {
               //this function should only return the commit data. We do not need the files entry anymore
-              result.push(_.omit(commit, 'files'));
+              if(omitFiles) {
+                result.push(_.omit(commit, 'files'));
+              } else {
+                result.push(commit);
+              }
               break;
             }
           }

@@ -16,6 +16,7 @@ import {
   getBlameIssues,
   getBranches,
   getFilesForCommits,
+  getPreviousFilenames,
 } from './helper.js';
 
 //define actions
@@ -87,7 +88,8 @@ export const fetchCodeExpertiseData = fetchFactory(
     const mode = state.visualizations.codeExpertise.state.config.mode;
     const issueId = state.visualizations.codeExpertise.state.config.activeIssueId;
     const activeFiles = state.visualizations.codeExpertise.state.config.activeFiles;
-    const branch = state.visualizations.codeExpertise.state.config.currentBranch;
+    //the currentBranch object could be null, therefore ?. is used
+    const currentBranch = state.visualizations.codeExpertise.state.config.currentBranch;
     const filterMergeCommits = state.visualizations.codeExpertise.state.config.filterMergeCommits;
     const offlineMode = state.config.offlineMode;
 
@@ -96,7 +98,7 @@ export const fetchCodeExpertiseData = fetchFactory(
       issue: null,
     };
 
-    if (branch === null) return result;
+    if (currentBranch == null) return result;
 
     //########### get data from database (depending on mode) ###########
 
@@ -124,19 +126,17 @@ export const fetchCodeExpertiseData = fetchFactory(
     } else if (mode === 'modules') {
       if (activeFiles === null || activeFiles.length === 0) return result;
 
-      dataPromise = Promise.all([getAllCommits(), getCommitHashesForFiles(activeFiles), getAllBuildData(), getBranches()]);
+      dataPromise = Promise.all([getAllCommits(), getCommitHashesForFiles(activeFiles, currentBranch), getAllBuildData(), getBranches()]);
     } else {
       console.log('error in fetchCodeExpertiseData: invalid mode: ' + mode);
       return result;
     }
 
-    return yield dataPromise.then(([allCommits, relevantCommitsHashes, builds, branches]) => {
+    return yield dataPromise.then(async ([allCommits, relevantCommitsHashes, builds, branches]) => {
       //########### get all relevant commits ###########
-      //get full branch object for currently selected branch
-      const currentBranchObject = branches.filter((b) => b.branch === branch)[0];
 
       //contains all commits of the current branch
-      const branchCommits = getCommitsForBranch(currentBranchObject, allCommits);
+      const branchCommits = getCommitsForBranch(currentBranch, allCommits);
 
       //we now have all commits for the current branch and all commits for the issue
       //intersect the two groups to get the result set
@@ -158,6 +158,9 @@ export const fetchCodeExpertiseData = fetchFactory(
 
       //########### extract data for each stakeholder ###########
 
+      //get previous names of active files together with the dates where the files were named like that
+      const prevFilenames = await getPreviousFilenames(activeFiles, currentBranch);
+
       //first group all relevant commits by stakeholder
       const commitsByStakeholders = _.groupBy(relevantCommits, (commit) => commit.signature);
 
@@ -178,15 +181,42 @@ export const fetchCodeExpertiseData = fetchFactory(
               //we are interested in all additions made in each commit
               return sum + commit.stats.additions;
             } else {
-              //we are only interested in the additions made to the currently active files
-              const relevantFiles = commit.files.data.filter((f) => activeFiles.includes(f.file.path));
+              let tempsum = 0
+              //we are interested in the additions made to the currently active files
+              const relevantActiveFiles = commit.files.data.filter((f) => activeFiles.includes(f.file.path));
               //if at least one exists, return the respective additions
-              if (relevantFiles && relevantFiles.length > 0) {
-                return sum + _.reduce(relevantFiles, (fileSum, file) => fileSum + file.stats.additions, 0);
+              if (relevantActiveFiles && relevantActiveFiles.length > 0) {
+                tempsum += _.reduce(relevantActiveFiles, (fileSum, file) => fileSum + file.stats.additions, 0);
               } else {
                 console.log('error in fetchCodeExpertiseData: relevantFile does not exist');
-                return sum + 0;
               }
+
+              //also, we want to check if this commit touches previous versions of the active files
+              //for each file this commit touches
+              commit.files.data.map((f) => {
+                const filePath = f.file.path
+                const commitDate = new Date(commit.date)
+
+                //get all objects for previous file names that have the same name as the file we are currently looking at
+                //this means that maybe this commit touches a file that was renamed later on
+                const prevFileObjects = prevFilenames.filter((pfno) => pfno.oldFilePath === filePath)
+                //for each of these file objects (there could be multiple since the file may have been renamed multiple times)
+                for(const prevFileObj of prevFileObjects) {
+                  //if hasThisNameUntil is null, this means that this is the current name of the file.
+                  // since we are at this point only interested in previous files, we ignore this file
+                  if(prevFileObj.hasThisNameUntil === null) continue
+
+                  const fileWasNamedFrom = new Date(prevFileObj.hasThisNameFrom)
+                  const fileWasNamedUntil = new Date(prevFileObj.hasThisNameUntil)
+                  //if this commit touches a previous version of this file in the right timeframe, we add the additions of this file to the temporary sum
+                  if(fileWasNamedFrom <= commitDate && commitDate < fileWasNamedUntil) {
+                    tempsum += f.stats.additions;
+                  }
+                }
+                return false;
+              })
+
+              return sum + tempsum;
             }
           },
           0

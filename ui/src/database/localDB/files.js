@@ -86,4 +86,18 @@ export default class Files {
       });
     });
   }
+
+  static getPreviousFilenamesForFilesOnBranch(db, relations, branchName) {
+    //TODO
+    //form:
+    //[
+    //  {
+    //     path: "path/to/current/file",
+    //     previousFileNames: [
+    //       {oldFilePath: "path", hasThisNameFrom: "timestamp", hasThisNameUntil: "timestamp"}
+    //     ]
+    //   }
+    //]
+    return []
+  }
 }

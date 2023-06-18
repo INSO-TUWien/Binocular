@@ -37,6 +37,36 @@ export default class Files {
       .then((result) => result.branch.files.data.map((entry) => entry.file.path).sort());
   }
 
+  static getPreviousFilenamesForFilesOnBranch(branchName) {
+    return graphQl
+      .query(
+        `
+      query{
+        branch(branchName: "${branchName}") {
+          files {
+            data {
+              file {
+                path
+                oldFileNames(branch: "${branchName}") {
+                  data {
+                    oldFilePath
+                    hasThisNameFrom
+                    hasThisNameUntil
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+      `,
+        {}
+      )
+      .then((result) => result.branch.files.data.map((entry) => {
+        return {path: entry.file.path, previousFileNames: entry.file.oldFileNames.data}
+      }));
+  }
+
   static getFilesForCommits(hashes) {
     return graphQl
       .query(

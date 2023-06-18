@@ -126,7 +126,11 @@ export default class LocalDB {
   }
 
   static getCommitsForFiles(filenames) {
-    return Commits.getCommitsForFiles(db, tripleStore, filenames);
+    return Commits.getCommitsForFiles(db, tripleStore, filenames, true);
+  }
+
+  static getCommitsWithFilesForFiles(filenames) {
+    return Commits.getCommitsForFiles(db, tripleStore, filenames, false);
   }
 
   static getCommitDataWithFiles(commitSpan, significantSpan) {
@@ -171,6 +175,11 @@ export default class LocalDB {
 
   static getFilenamesForBranch(branchName) {
     return Files.getFilenamesForBranch(db, tripleStore, branchName);
+  }
+
+  static getPreviousFilenamesForFilesOnBranch(branchName) {
+    //TODO
+    return Files.getPreviousFilenamesForFilesOnBranch(db, tripleStore, branchName);
   }
 
   static getAllBranches() {
