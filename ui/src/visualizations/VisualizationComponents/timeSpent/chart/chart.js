@@ -162,6 +162,7 @@ export default class TimeSpentChart extends React.Component {
         aggregatedDataPerAuthor[sA] = 0;
       });
       filteredIssues.forEach((issue) => {
+        console.log(issue)
         if (issue.notes !== undefined) {
           issue.notes.forEach((note) => {
             const timeNote = /^added ([1-9a-z ]+) of time spent$/.exec(note.body);
