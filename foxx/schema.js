@@ -352,10 +352,10 @@ const queryType = new gql.GraphQLObjectType({
           sort: { type: Sort },
         },
         query: (root, args, limit) => {
-          let q = qb.for('mergeRequest').in('mergeRequests').sort('mergeRequest.created_at', args.sort);
+          let q = qb.for('mergeRequest').in('mergeRequests').sort('mergeRequest.createdAt', args.sort);
 
-          q = queryHelpers.addDateFilter('mergeRequest.created_at', 'gte', args.since, q);
-          q = queryHelpers.addDateFilter('mergeRequest.created_at', 'lte', args.until, q);
+          q = queryHelpers.addDateFilter('mergeRequest.createdAt', 'gte', args.since, q);
+          q = queryHelpers.addDateFilter('mergeRequest.createdAt', 'lte', args.until, q);
 
           q = q.limit(limit.offset, limit.count).return('mergeRequest');
 

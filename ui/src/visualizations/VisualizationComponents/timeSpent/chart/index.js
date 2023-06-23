@@ -20,6 +20,8 @@ const mapStateToProps = (state /*, ownProps*/) => {
     allAuthors: universalSettings.allAuthors,
     mergedAuthors: universalSettings.mergedAuthors,
     aggregateTime: timeSpentState.config.aggregateTime,
+    filteredMergeRequests: timeSpentState.data.data.filteredMergeRequests,
+    mergeRequests: timeSpentState.data.data.mergeRequests,
   };
 };
 

@@ -88,11 +88,14 @@ export const fetchTimeSpentData = fetchFactory(
     return yield Promise.all([
       Database.getIssueData([firstIssueTimestamp, lastIssueTimestamp], [firstSignificantTimestamp, lastSignificantTimestamp]),
       Database.getIssueData([firstIssueTimestamp, lastIssueTimestamp], [firstIssueTimestamp, lastIssueTimestamp]),
+      Database.getMergeRequestData([firstIssueTimestamp, lastIssueTimestamp], [firstSignificantTimestamp, lastSignificantTimestamp]),
+      Database.getMergeRequestData([firstIssueTimestamp, lastIssueTimestamp], [firstIssueTimestamp, lastIssueTimestamp]),
     ])
       .then((result) => {
         const filteredIssues = result[0];
         const issues = result[1];
-
+        const filteredMergeRequests = result[2];
+        const mergeRequests = result[3];
         return {
           otherCount: 0,
           filteredIssues,
@@ -101,6 +104,8 @@ export const fetchTimeSpentData = fetchFactory(
           lastIssueTimestamp,
           firstSignificantTimestamp,
           lastSignificantTimestamp,
+          filteredMergeRequests,
+          mergeRequests,
         };
       })
       .catch(function (e) {

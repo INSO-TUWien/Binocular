@@ -83,9 +83,7 @@ export default class TimeSpentChart extends React.Component {
                     }}>
                     <div style={{ display: 'block', textDecoration: 'underline', fontWeight: 'bold' }}>{author}:</div>
                     <div style={{ display: 'inline-block' }}>{Math.round((percentContribution + Number.EPSILON) * 10) / 10}%</div>
-                    <div style={{ display: 'inline-block' }}>
-                      {Math.round((this.state.aggregatedDataPerAuthor[author] + Number.EPSILON) * 100) / 100}h
-                    </div>
+                    <div style={{ display: 'inline-block' }}>{this.convertToTimeString(this.state.aggregatedDataPerAuthor[author])}</div>
                   </div>
                 );
               } else {
@@ -112,11 +110,13 @@ export default class TimeSpentChart extends React.Component {
 
     let firstTimestamp = props.firstIssueTimestamp;
     let lastTimestamp = props.lastIssueTimestamp;
-    let issues = props.issues;
+    const issues = props.issues;
+    const mergeRequests = props.mergeRequests;
     const timeSpentChartData = [];
     const timeSpentScale = [0, 0];
     if (props.universalSettings) {
-      issues = props.filteredIssues;
+      //issues = props.filteredIssues;
+      //mergeRequests = props.filteredMergeRequests;
       firstTimestamp = props.firstSignificantTimestamp;
       lastTimestamp = props.lastSignificantTimestamp;
     }
@@ -124,58 +124,83 @@ export default class TimeSpentChart extends React.Component {
     let aggregatedTimeSpent = 0;
     if (issues.length > 0) {
       //---- STEP 1: FILTER ISSUES ----
-      let filteredIssues = issues;
+      const filteredIssues = issues;
+      const filteredMergeRequests = mergeRequests;
       const selectedAuthorNames = _.uniq(props.selectedAuthors.map((sA) => sA.split('<')[0].slice(0, -1)));
-      if (props.universalSettings) {
-        filteredIssues = filteredIssues.filter((issue) => {
-          let filter = false;
-          if (props.selectedAuthors.filter((a) => a === 'others').length > 0) {
-            filter = true;
-          }
-          for (const author of Object.keys(props.allAuthors)) {
-            const authorName = author.split('<')[0].slice(0, -1);
-            if (issue.author.name === authorName) {
-              if (props.selectedAuthors.filter((a) => a === author).length > 0) {
-                filter = true;
-                break;
-              } else {
-                filter = false;
-                break;
-              }
-            }
-          }
-          return filter;
-        });
-      }
+
       //---- STEP 2: AGGREGATE TIME PER TIME INTERVAL ----
       const granularity = this.getGranularity(props.chartResolution);
       const curr = moment(firstTimestamp).startOf(granularity.unit).subtract(1, props.chartResolution);
       const next = moment(curr).add(1, props.chartResolution);
 
-      const end = moment(lastTimestamp)
-        .endOf(granularity.unit)
-        .add(props.chartResolution === 'days' ? 7 : 1, props.chartResolution);
+      const end = moment(lastTimestamp).endOf(granularity.unit).add(1, props.chartResolution);
       const data = [];
 
       const timeTrakingData = [];
       selectedAuthorNames.forEach((sA) => {
         aggregatedDataPerAuthor[sA] = 0;
       });
+
       filteredIssues.forEach((issue) => {
-        console.log(issue.notes);
         if (issue.notes !== undefined && issue.notes !== null) {
           issue.notes.forEach((note) => {
-            const timeNote = /^added ([1-9a-z ]+) of time spent$/.exec(note.body);
-            if (timeNote) {
+            const timeAddedNote = /^added ([0-9a-z ]+) of time spent.*?$/.exec(note.body);
+            const timeSubtractedNote = /^subtracted ([0-9a-z ]+) of time spent.*?$/.exec(note.body);
+            const timeDeletedNote = /^deleted ([0-9a-z ]+) of spent time.*?$/.exec(note.body);
+
+            if (timeAddedNote) {
               timeTrakingData.push({
                 authorName: note.author.name,
-                timeSpent: this.convertTime(timeNote[1]) / 3600,
+                timeSpent: this.convertTime(timeAddedNote[1]) / 3600,
+                createdAt: note.created_at,
+              });
+            } else if (timeSubtractedNote) {
+              timeTrakingData.push({
+                authorName: note.author.name,
+                timeSpent: -this.convertTime(timeSubtractedNote[1]) / 3600,
+                createdAt: note.created_at,
+              });
+            } else if (timeDeletedNote) {
+              timeTrakingData.push({
+                authorName: note.author.name,
+                timeSpent: -this.convertTime(timeDeletedNote[1]) / 3600,
                 createdAt: note.created_at,
               });
             }
           });
         }
       });
+
+      filteredMergeRequests.forEach((mergeRequest) => {
+        if (mergeRequest.notes !== undefined && mergeRequest.notes !== null) {
+          mergeRequest.notes.forEach((note) => {
+            const timeAddedNote = /^added ([0-9a-z ]+) of time spent.*?$/.exec(note.body);
+            const timeSubtractedNote = /^subtracted ([0-9a-z ]+) of time spent.*?$/.exec(note.body);
+            const timeDeletedNote = /^deleted ([0-9a-z ]+) of spent time.*?$/.exec(note.body);
+
+            if (timeAddedNote) {
+              timeTrakingData.push({
+                authorName: note.author.name,
+                timeSpent: this.convertTime(timeAddedNote[1]) / 3600,
+                createdAt: note.created_at,
+              });
+            } else if (timeSubtractedNote) {
+              timeTrakingData.push({
+                authorName: note.author.name,
+                timeSpent: -this.convertTime(timeSubtractedNote[1]) / 3600,
+                createdAt: note.created_at,
+              });
+            } else if (timeDeletedNote) {
+              timeTrakingData.push({
+                authorName: note.author.name,
+                timeSpent: -this.convertTime(timeDeletedNote[1]) / 3600,
+                createdAt: note.created_at,
+              });
+            }
+          });
+        }
+      });
+
       for (; curr.isSameOrBefore(end); curr.add(1, props.chartResolution), next.add(1, props.chartResolution)) {
         //Iterate through time buckets
         const currTimestamp = curr.toDate().getTime();
@@ -187,7 +212,8 @@ export default class TimeSpentChart extends React.Component {
         const dataEntry = {
           data: { date: currTimestamp },
           dataAggregated: { date: currTimestamp },
-          aggregatedTime: 0,
+          aggregatedTimeMax: 0,
+          aggregatedTimeMin: 0,
           aggregatedTimeAllAuthors: 0,
         };
 
@@ -205,7 +231,6 @@ export default class TimeSpentChart extends React.Component {
                   aggregatedDataPerAuthor[authorName] += note.timeSpent;
                   dataEntry.data[authorName] = note.timeSpent;
                   dataEntry.dataAggregated[authorName] = aggregatedDataPerAuthor[authorName];
-                  dataEntry.aggregatedTime += note.timeSpent;
                 });
             }
           });
@@ -216,11 +241,17 @@ export default class TimeSpentChart extends React.Component {
             dataEntry.data[sA] = 0;
             dataEntry.dataAggregated[sA] = aggregatedDataPerAuthor[sA];
           }
+          if (dataEntry.data[sA] >= 0) {
+            dataEntry.aggregatedTimeMax += dataEntry.data[sA];
+          } else {
+            dataEntry.aggregatedTimeMin += dataEntry.data[sA];
+          }
+
           dataEntry.aggregatedTimeAllAuthors += aggregatedDataPerAuthor[sA];
         });
-
         data.push(dataEntry);
       }
+
       //---- STEP 3: CONSTRUCT CHART DATA FROM AGGREGATED Time ----
       data.forEach((dataEntry) => {
         if (props.aggregateTime) {
@@ -230,8 +261,11 @@ export default class TimeSpentChart extends React.Component {
           }
         } else {
           timeSpentChartData.push(dataEntry.data);
-          if (dataEntry.aggregatedTime > timeSpentScale[1]) {
-            timeSpentScale[1] = dataEntry.aggregatedTime;
+          if (dataEntry.aggregatedTimeMax > timeSpentScale[1]) {
+            timeSpentScale[1] = dataEntry.aggregatedTimeMax;
+          }
+          if (dataEntry.aggregatedTimeMin < timeSpentScale[0]) {
+            timeSpentScale[0] = dataEntry.aggregatedTimeMin;
           }
         }
         if (dataEntry.aggregatedTimeAllAuthors > aggregatedTimeSpent) {
@@ -283,5 +317,9 @@ export default class TimeSpentChart extends React.Component {
       }
     });
     return palette;
+  }
+
+  convertToTimeString(hours) {
+    return parseInt(hours) + 'h ' + Math.round(((60 * (hours % 1) + Number.EPSILON) * 100) / 100) + 'min';
   }
 }

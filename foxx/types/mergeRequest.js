@@ -10,23 +10,27 @@ module.exports = new gql.GraphQLObjectType({
     return {
       author: {
         type: require('./gitHubUser.js'),
-        description: 'The github author of this issue',
+        description: 'The github/gitlab author of this mergeRequest',
       },
       id: {
         type: gql.GraphQLString,
-        description: 'id of the note',
+        description: 'id of the mergeRequest',
       },
-      status: {
+      state: {
         type: gql.GraphQLString,
-        description: 'status of the note',
+        description: 'state of the mergeRequest',
       },
-      time_stats: {
-        type: gql.GraphQLString,
-        description: 'time_stats of the note',
+      timeStats: {
+        type: require('./timeStats.js'),
+        description: 'time_stats of the mergeRequest',
       },
-      created_at: {
+      createdAt: {
         type: Timestamp,
-        description: 'Creation date of the issue',
+        description: 'Creation date of the mergeRequest',
+      },
+      notes: {
+        type: new gql.GraphQLList(require('./gitlabNote.js')),
+        description: 'Notes attached to the Merge Request',
       },
     };
   },
