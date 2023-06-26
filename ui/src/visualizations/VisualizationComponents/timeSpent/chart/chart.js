@@ -236,11 +236,11 @@ export default class TimeSpentChart extends React.Component {
           const authorName = author.mainCommitter.split('<')[0].slice(0, -1);
           author.committers.forEach((committer) => {
             const committerName = committer.signature.split('<')[0].slice(0, -1);
-            if (!committersDone.includes(committerName)) {
+            if (!committersDone.includes(authorName)) {
               relevantNotes
                 .filter((note) => note.authorName.includes(committerName))
                 .forEach((note) => {
-                  committersDone.push(note.authorName);
+                  committersDone.push(authorName);
                   aggregatedDataPerAuthor[authorName] += note.timeSpent;
                   dataEntry.data[authorName] = note.timeSpent;
                   dataEntry.dataAggregated[authorName] = aggregatedDataPerAuthor[authorName];
