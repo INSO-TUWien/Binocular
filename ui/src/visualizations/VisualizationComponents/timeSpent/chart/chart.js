@@ -147,6 +147,7 @@ export default class TimeSpentChart extends React.Component {
             const timeAddedNote = /^added ([0-9a-z ]+) of time spent.*?$/.exec(note.body);
             const timeSubtractedNote = /^subtracted ([0-9a-z ]+) of time spent.*?$/.exec(note.body);
             const timeDeletedNote = /^deleted ([0-9a-z ]+) of spent time.*?$/.exec(note.body);
+            const timeSubtractedDeletedNote = /^deleted -([0-9a-z ]+) of spent time.*?$/.exec(note.body);
 
             if (timeAddedNote) {
               timeTrakingData.push({
@@ -164,6 +165,12 @@ export default class TimeSpentChart extends React.Component {
               timeTrakingData.push({
                 authorName: note.author.name,
                 timeSpent: -this.convertTime(timeDeletedNote[1]) / 3600,
+                createdAt: note.created_at,
+              });
+            } else if (timeSubtractedDeletedNote) {
+              timeTrakingData.push({
+                authorName: note.author.name,
+                timeSpent: this.convertTime(timeSubtractedDeletedNote[1]) / 3600,
                 createdAt: note.created_at,
               });
             }
@@ -177,6 +184,7 @@ export default class TimeSpentChart extends React.Component {
             const timeAddedNote = /^added ([0-9a-z ]+) of time spent.*?$/.exec(note.body);
             const timeSubtractedNote = /^subtracted ([0-9a-z ]+) of time spent.*?$/.exec(note.body);
             const timeDeletedNote = /^deleted ([0-9a-z ]+) of spent time.*?$/.exec(note.body);
+            const timeSubtractedDeletedNote = /^deleted -([0-9a-z ]+) of spent time.*?$/.exec(note.body);
 
             if (timeAddedNote) {
               timeTrakingData.push({
@@ -196,11 +204,16 @@ export default class TimeSpentChart extends React.Component {
                 timeSpent: -this.convertTime(timeDeletedNote[1]) / 3600,
                 createdAt: note.created_at,
               });
+            } else if (timeSubtractedDeletedNote) {
+              timeTrakingData.push({
+                authorName: note.author.name,
+                timeSpent: this.convertTime(timeSubtractedDeletedNote[1]) / 3600,
+                createdAt: note.created_at,
+              });
             }
           });
         }
       });
-
       for (; curr.isSameOrBefore(end); curr.add(1, props.chartResolution), next.add(1, props.chartResolution)) {
         //Iterate through time buckets
         const currTimestamp = curr.toDate().getTime();
@@ -224,10 +237,10 @@ export default class TimeSpentChart extends React.Component {
           author.committers.forEach((committer) => {
             const committerName = committer.signature.split('<')[0].slice(0, -1);
             if (!committersDone.includes(committerName)) {
-              committersDone.push(committerName);
               relevantNotes
-                .filter((note) => note.authorName === committerName)
+                .filter((note) => note.authorName.includes(committerName))
                 .forEach((note) => {
+                  committersDone.push(note.authorName);
                   aggregatedDataPerAuthor[authorName] += note.timeSpent;
                   dataEntry.data[authorName] = note.timeSpent;
                   dataEntry.dataAggregated[authorName] = aggregatedDataPerAuthor[authorName];
