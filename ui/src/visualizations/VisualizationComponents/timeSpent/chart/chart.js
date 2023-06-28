@@ -142,77 +142,87 @@ export default class TimeSpentChart extends React.Component {
       });
 
       filteredIssues.forEach((issue) => {
+        let issueTimeTrakingData = [];
         if (issue.notes !== undefined && issue.notes !== null) {
-          issue.notes.forEach((note) => {
+          issue.notes.reverse().forEach((note) => {
             const timeAddedNote = /^added ([0-9a-z ]+) of time spent.*?$/.exec(note.body);
             const timeSubtractedNote = /^subtracted ([0-9a-z ]+) of time spent.*?$/.exec(note.body);
             const timeDeletedNote = /^deleted ([0-9a-z ]+) of spent time.*?$/.exec(note.body);
             const timeSubtractedDeletedNote = /^deleted -([0-9a-z ]+) of spent time.*?$/.exec(note.body);
+            const removedTimeSpentNote = /^removed time spent.*?$/.exec(note.body);
 
             if (timeAddedNote) {
-              timeTrakingData.push({
+              issueTimeTrakingData.push({
                 authorName: note.author.name,
                 timeSpent: this.convertTime(timeAddedNote[1]) / 3600,
                 createdAt: note.created_at,
               });
             } else if (timeSubtractedNote) {
-              timeTrakingData.push({
+              issueTimeTrakingData.push({
                 authorName: note.author.name,
                 timeSpent: -this.convertTime(timeSubtractedNote[1]) / 3600,
                 createdAt: note.created_at,
               });
             } else if (timeDeletedNote) {
-              timeTrakingData.push({
+              issueTimeTrakingData.push({
                 authorName: note.author.name,
                 timeSpent: -this.convertTime(timeDeletedNote[1]) / 3600,
                 createdAt: note.created_at,
               });
             } else if (timeSubtractedDeletedNote) {
-              timeTrakingData.push({
+              issueTimeTrakingData.push({
                 authorName: note.author.name,
                 timeSpent: this.convertTime(timeSubtractedDeletedNote[1]) / 3600,
                 createdAt: note.created_at,
               });
+            } else if (removedTimeSpentNote) {
+              issueTimeTrakingData = [];
             }
           });
         }
+        timeTrakingData.push(...issueTimeTrakingData);
       });
 
       filteredMergeRequests.forEach((mergeRequest) => {
+        let mergeRequestTimeTrakingData = [];
         if (mergeRequest.notes !== undefined && mergeRequest.notes !== null) {
           mergeRequest.notes.forEach((note) => {
             const timeAddedNote = /^added ([0-9a-z ]+) of time spent.*?$/.exec(note.body);
             const timeSubtractedNote = /^subtracted ([0-9a-z ]+) of time spent.*?$/.exec(note.body);
             const timeDeletedNote = /^deleted ([0-9a-z ]+) of spent time.*?$/.exec(note.body);
             const timeSubtractedDeletedNote = /^deleted -([0-9a-z ]+) of spent time.*?$/.exec(note.body);
+            const removedTimeSpentNote = /^removed time spent.*?$/.exec(note.body);
 
             if (timeAddedNote) {
-              timeTrakingData.push({
+              mergeRequestTimeTrakingData.push({
                 authorName: note.author.name,
                 timeSpent: this.convertTime(timeAddedNote[1]) / 3600,
                 createdAt: note.created_at,
               });
             } else if (timeSubtractedNote) {
-              timeTrakingData.push({
+              mergeRequestTimeTrakingData.push({
                 authorName: note.author.name,
                 timeSpent: -this.convertTime(timeSubtractedNote[1]) / 3600,
                 createdAt: note.created_at,
               });
             } else if (timeDeletedNote) {
-              timeTrakingData.push({
+              mergeRequestTimeTrakingData.push({
                 authorName: note.author.name,
                 timeSpent: -this.convertTime(timeDeletedNote[1]) / 3600,
                 createdAt: note.created_at,
               });
             } else if (timeSubtractedDeletedNote) {
-              timeTrakingData.push({
+              mergeRequestTimeTrakingData.push({
                 authorName: note.author.name,
                 timeSpent: this.convertTime(timeSubtractedDeletedNote[1]) / 3600,
                 createdAt: note.created_at,
               });
+            } else if (removedTimeSpentNote) {
+              mergeRequestTimeTrakingData = [];
             }
           });
         }
+        timeTrakingData.push(...mergeRequestTimeTrakingData);
       });
       for (; curr.isSameOrBefore(end); curr.add(1, props.chartResolution), next.add(1, props.chartResolution)) {
         //Iterate through time buckets
