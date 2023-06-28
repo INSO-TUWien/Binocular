@@ -39,6 +39,7 @@ const Build = require('./lib/models/Build.js');
 const Branch = require('./lib/models/Branch.js');
 const Module = require('./lib/models/Module');
 const Stakeholder = require('./lib/models/Stakeholder.js');
+const MergeRequest = require('./lib/models/MergeRequest.js');
 const CommitStakeholderConnection = require('./lib/models/CommitStakeholderConnection.js');
 const IssueStakeholderConnection = require('./lib/models/IssueStakeholderConnection.js');
 const IssueCommitConnection = require('./lib/models/IssueCommitConnection.js');
@@ -103,7 +104,16 @@ const indexers = {
 const services = [];
 
 const gatewayService = new GateWayService();
-const reporter = new ProgressReporter(io, ['commits', 'issues', 'builds', 'files', 'languages', 'filesLanguage', 'modules']);
+const reporter = new ProgressReporter(io, [
+  'commits',
+  'issues',
+  'builds',
+  'files',
+  'languages',
+  'filesLanguage',
+  'modules',
+  'mergeRequests',
+]);
 let databaseConnection = null;
 
 /**
@@ -476,6 +486,7 @@ function ensureDb(repo, context) {
         Build.ensureCollection(),
         Branch.ensureCollection(),
         Module.ensureCollection(),
+        MergeRequest.ensureCollection(),
         LanguageFileConnection.ensureCollection(),
         CommitStakeholderConnection.ensureCollection(),
         IssueStakeholderConnection.ensureCollection(),

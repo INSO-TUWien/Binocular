@@ -5,21 +5,24 @@ import { select, throttle, fork, takeEvery } from 'redux-saga/effects';
 import { createAction } from 'redux-actions';
 import Database from '../../../../database/database';
 
-export const setShowIssues = createAction('SET_SHOW_ISSUEBREAKDOWN');
+export const setAggregateTime = createAction('SET_AGGREGATE_TIME');
 
-export const requestIssueBreakdownData = createAction('REQUEST_ISSUEBREAKDOWN_DATA');
-export const receiveIssueBreakdownData = timestampedActionFactory('RECEIVE_ISSUEBREAKDOWN_DATA');
-export const receiveIssueBreakdownDataError = createAction('RECEIVE_ISSUEBREAKDOWN_DATA_ERROR');
+export const requestTimeSpentData = createAction('REQUEST_TIMESPENT_DATA');
+export const receiveTimeSpentData = timestampedActionFactory('RECEIVE_TIMESPENT_DATA');
+export const receiveTimeSpentDataError = createAction('RECEIVE_TIMESPENT_DATA_ERROR');
 
 export const requestRefresh = createAction('REQUEST_REFRESH');
 const refresh = createAction('REFRESH');
 
 export default function* () {
   // fetch data once on entry
-  yield* fetchIssueBreakdownData();
+  yield* fetchTimeSpentData();
 
   yield fork(watchRefreshRequests);
   yield fork(watchMessages);
+
+  // keep looking for config changes
+  yield fork(watchAggregatedTimeSwitch);
 
   // keep looking for viewport changes to re-fetch
   yield fork(watchRefresh);
@@ -31,16 +34,19 @@ export default function* () {
   yield fork(watchAllAuthors);
 }
 
+function* watchAggregatedTimeSwitch() {
+  yield takeEvery('SET_AGGREGATE_TIME', fetchTimeSpentData);
+}
 function* watchTimeSpan() {
-  yield takeEvery('SET_TIME_SPAN', fetchIssueBreakdownData);
+  yield takeEvery('SET_TIME_SPAN', fetchTimeSpentData);
 }
 
 function* watchSelectedAuthorsGlobal() {
-  yield takeEvery('SET_SELECTED_AUTHORS_GLOBAL', fetchIssueBreakdownData);
+  yield takeEvery('SET_SELECTED_AUTHORS_GLOBAL', fetchTimeSpentData);
 }
 
 function* watchAllAuthors() {
-  yield takeEvery('SET_ALL_AUTHORS', fetchIssueBreakdownData);
+  yield takeEvery('SET_ALL_AUTHORS', fetchTimeSpentData);
 }
 
 function* watchRefreshRequests() {
@@ -56,13 +62,13 @@ function* watchToggleHelp() {
 }
 
 function* watchRefresh() {
-  yield takeEvery('REFRESH', fetchIssueBreakdownData);
+  yield takeEvery('REFRESH', fetchTimeSpentData);
 }
 
 /**
  * Fetch data for dashboard, this still includes old functions that were copied over.
  */
-export const fetchIssueBreakdownData = fetchFactory(
+export const fetchTimeSpentData = fetchFactory(
   function* () {
     const { firstCommit, lastCommit, firstIssue, lastIssue } = yield Database.getBounds();
     const firstCommitTimestamp = Date.parse(firstCommit.date);
@@ -72,7 +78,7 @@ export const fetchIssueBreakdownData = fetchFactory(
     const lastIssueTimestamp = lastIssue ? Date.parse(lastIssue.createdAt) : lastCommitTimestamp;
 
     const state = yield select();
-    const viewport = state.visualizations.issues.state.config.viewport || [0, null];
+    const viewport = state.visualizations.timeSpent.state.config.viewport || [0, null];
 
     let firstSignificantTimestamp = Math.max(viewport[0], Math.min(firstCommitTimestamp, firstIssueTimestamp));
     let lastSignificantTimestamp = viewport[1] ? viewport[1].getTime() : Math.max(lastCommitTimestamp, lastIssueTimestamp);
@@ -82,11 +88,14 @@ export const fetchIssueBreakdownData = fetchFactory(
     return yield Promise.all([
       Database.getIssueData([firstIssueTimestamp, lastIssueTimestamp], [firstSignificantTimestamp, lastSignificantTimestamp]),
       Database.getIssueData([firstIssueTimestamp, lastIssueTimestamp], [firstIssueTimestamp, lastIssueTimestamp]),
+      Database.getMergeRequestData([firstIssueTimestamp, lastIssueTimestamp], [firstSignificantTimestamp, lastSignificantTimestamp]),
+      Database.getMergeRequestData([firstIssueTimestamp, lastIssueTimestamp], [firstIssueTimestamp, lastIssueTimestamp]),
     ])
       .then((result) => {
         const filteredIssues = result[0];
         const issues = result[1];
-
+        const filteredMergeRequests = result[2];
+        const mergeRequests = result[3];
         return {
           otherCount: 0,
           filteredIssues,
@@ -95,6 +104,8 @@ export const fetchIssueBreakdownData = fetchFactory(
           lastIssueTimestamp,
           firstSignificantTimestamp,
           lastSignificantTimestamp,
+          filteredMergeRequests,
+          mergeRequests,
         };
       })
       .catch(function (e) {
@@ -102,7 +113,7 @@ export const fetchIssueBreakdownData = fetchFactory(
         throw e;
       });
   },
-  requestIssueBreakdownData,
-  receiveIssueBreakdownData,
-  receiveIssueBreakdownDataError
+  requestTimeSpentData,
+  receiveTimeSpentData,
+  receiveTimeSpentDataError
 );

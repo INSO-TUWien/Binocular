@@ -4,6 +4,7 @@ import Bounds from './serverDB/bounds';
 import Commits from './serverDB/commits';
 import Builds from './serverDB/builds';
 import Issues from './serverDB/issues';
+import MergeRequests from './serverDB/mergeRequests';
 import Files from './serverDB/files';
 import Branches from './serverDB/branches';
 import Languages from './serverDB/languages';
@@ -25,6 +26,14 @@ export default class ServerDB {
 
   static getIssueData(issueSpan, significantSpan) {
     return Issues.getIssueData(issueSpan, significantSpan);
+  }
+
+  static getCommitsForIssue(iid) {
+    return Issues.getCommitsForIssue(iid);
+  }
+
+  static getMergeRequestData(mergeRequestSpan, significantSpan) {
+    return MergeRequests.getMergeRequestData(mergeRequestSpan, significantSpan);
   }
 
   static getCommitDataWithFiles(commitSpan, significantSpan) {
@@ -49,10 +58,6 @@ export default class ServerDB {
 
   static getCommitDateHistogram(granularity, dateField, since, until) {
     return Commits.getCommitDateHistogram(granularity, dateField, since, until);
-  }
-
-  static getCommitsForIssue(iid) {
-    return Issues.getCommitsForIssue(iid);
   }
 
   static getCommitsForFiles(filenames) {

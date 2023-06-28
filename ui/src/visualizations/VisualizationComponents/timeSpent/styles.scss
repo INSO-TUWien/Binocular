@@ -1,0 +1,133 @@
+@import '../../../../../node_modules/bulma';
+
+.legend{
+  position: absolute;
+  top: 5px;
+  left: 5px;
+  background: #fffa;
+}
+
+.chartContainer{
+  height: 100%;
+  width: auto;
+  flex-direction: column;
+  padding: 5px;
+  justify-content: center;
+
+  .loadingHintContainer{
+    .loadingHint {
+      font-size: 40px;
+      text-align: center;
+    }
+  }
+
+  .chartLine{
+    flex-grow: 1;
+    display: flex;
+    align-items: center;
+    height: 80%;
+
+    .text{
+      writing-mode: vertical-lr;
+      transform: rotate(-180deg);
+      margin-right: 10px;
+    }
+
+    .chart{
+      width: 100%;
+      height: 100%;
+      background: #ffffff;
+      display: flex;
+    }
+  }
+}
+
+.configContainer{
+  .field + .field {
+    border-top: 1px solid #dbdbdb;
+  }
+
+  .checkboxLabel {
+    cursor: pointer;
+  }
+}
+
+.form {
+  margin-bottom: 0;
+}
+
+.help {
+  width: 100%;
+  overflow-y: auto;
+  font-size: 1.5em;
+
+  h2 {
+    font-size: 1.2em;
+    font-weight: bold;
+  }
+
+  h3 {
+    font-size: 1.1em;
+    font-weight: bold;
+  }
+
+  ul {
+    list-style-type: circle;
+    margin-left: 1.5em;
+  }
+
+  p {
+    margin-bottom: 1em;
+  }
+
+  i {
+    width: 25px;
+    text-align: center;
+  }
+}
+
+.errorMessage:before {
+  content: "";
+  display: inline-block;
+  height: 100%;
+  vertical-align: middle;
+}
+
+.errorMessage{
+  width: 100%;
+  text-align: center;
+}
+
+.switch:after{
+  background-color: #3273dc!important;
+}
+
+.secondaryChart{
+  width: 95%;
+  margin: auto;
+  height: 20%;
+}
+
+.stackedBarChart{
+  display: flex;
+  width: 100%;
+  height: 60%;
+}
+
+.stackedBarChartBlock{
+  display: inline-block;
+  height: 100%;
+  border-radius: 0.2rem;
+  margin: 2px;
+  box-shadow: 0 0 5px #5555;
+}
+
+.stackedBarChartBlock>div{
+  background: white;
+  width: fit-content;
+  margin: 2px;
+  padding: 2px;
+  font-size: 50%;
+  line-height: 100%;
+  border-radius: 0.2rem;
+}

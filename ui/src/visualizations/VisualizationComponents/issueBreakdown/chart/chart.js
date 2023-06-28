@@ -10,7 +10,7 @@ import StackedAreaChart from '../../../../components/StackedAreaChart';
 import moment from 'moment';
 import LegendCompact from '../../../../components/LegendCompact';
 
-export default class Issues extends React.Component {
+export default class IssueBreakdown extends React.Component {
   constructor(props) {
     super(props);
     const { issueChartData, issueScale } = this.extractIssueData(props);
@@ -34,7 +34,7 @@ export default class Issues extends React.Component {
   }
 
   render() {
-    const issueChart = (
+    const issueBreakdownChart = (
       <div className={styles.chartLine}>
         <div className={styles.chart}>
           {this.state.issueChartData !== undefined && this.state.issueChartData.length > 0 ? (
@@ -68,7 +68,7 @@ export default class Issues extends React.Component {
     return (
       <div className={styles.chartContainer}>
         {this.state.issueChartData === null && loadingHint}
-        {issueChart}
+        {issueBreakdownChart}
         {legend}
       </div>
     );
@@ -162,7 +162,7 @@ export default class Issues extends React.Component {
         }
       });
     }
-    console.log(issueScale);
+
     return { issueChartData, issueScale };
   }
 

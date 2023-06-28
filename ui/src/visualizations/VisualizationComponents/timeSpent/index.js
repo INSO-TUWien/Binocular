@@ -7,8 +7,8 @@ import saga from './sagas';
 import reducer from './reducers';
 
 export default {
-  id: 'issueBreakdown',
-  label: 'Issue Breakdown',
+  id: 'timeSpent',
+  label: 'Time Spent (GitLab Only)',
   saga,
   reducer,
   ChartComponent,
