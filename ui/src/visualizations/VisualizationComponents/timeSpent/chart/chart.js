@@ -144,7 +144,7 @@ export default class TimeSpentChart extends React.Component {
       filteredIssues.forEach((issue) => {
         let issueTimeTrackingData = [];
         if (issue.notes !== undefined && issue.notes !== null) {
-          issue.notes.reverse().forEach((note) => {
+          [...issue.notes].reverse().forEach((note) => {
             const timeAddedNote = /^added ([0-9a-z ]+) of time spent.*?$/.exec(note.body);
             const timeSubtractedNote = /^subtracted ([0-9a-z ]+) of time spent.*?$/.exec(note.body);
             const timeDeletedNote = /^deleted ([0-9a-z ]+) of spent time.*?$/.exec(note.body);
@@ -186,7 +186,7 @@ export default class TimeSpentChart extends React.Component {
       filteredMergeRequests.forEach((mergeRequest) => {
         let mergeRequestTimeTrackingData = [];
         if (mergeRequest.notes !== undefined && mergeRequest.notes !== null) {
-          mergeRequest.notes.forEach((note) => {
+          [...mergeRequest.notes].reverse().forEach((note) => {
             const timeAddedNote = /^added ([0-9a-z ]+) of time spent.*?$/.exec(note.body);
             const timeSubtractedNote = /^subtracted ([0-9a-z ]+) of time spent.*?$/.exec(note.body);
             const timeDeletedNote = /^deleted ([0-9a-z ]+) of spent time.*?$/.exec(note.body);
