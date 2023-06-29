@@ -14,7 +14,6 @@ import {
   addBuildData,
   getBlameModules,
   getBlameIssues,
-  getBranches,
   getFilesForCommits,
   getPreviousFilenames,
 } from './helper.js';
@@ -112,27 +111,32 @@ export const fetchCodeExpertiseData = fetchFactory(
         getIssueData(issueId),
         getCommitHashesForIssue(issueId),
         getAllBuildData(),
-        getBranches(),
+        getPreviousFilenames(activeFiles, currentBranch)
       ]).then((results) => {
         const allCommits = results[0];
         const issue = results[1];
         const issueCommitHashes = results[2];
         const builds = results[3];
-        const branches = results[4];
+        const prevFilenames = results[4]
         //set current issue
         result['issue'] = issue;
-        return [allCommits, issueCommitHashes, builds, branches];
+        return [allCommits, issueCommitHashes, builds, prevFilenames];
       });
     } else if (mode === 'modules') {
       if (activeFiles === null || activeFiles.length === 0) return result;
 
-      dataPromise = Promise.all([getAllCommits(), getCommitHashesForFiles(activeFiles, currentBranch), getAllBuildData(), getBranches()]);
+      dataPromise = Promise.all([
+        getAllCommits(),
+        getCommitHashesForFiles(activeFiles, currentBranch),
+        getAllBuildData(),
+        getPreviousFilenames(activeFiles, currentBranch)
+      ]);
     } else {
       console.log('error in fetchCodeExpertiseData: invalid mode: ' + mode);
       return result;
     }
 
-    return yield dataPromise.then(async ([allCommits, relevantCommitsHashes, builds, branches]) => {
+    return yield dataPromise.then(([allCommits, relevantCommitsHashes, builds, prevFilenames]) => {
       //########### get all relevant commits ###########
 
       //contains all commits of the current branch
@@ -157,9 +161,6 @@ export const fetchCodeExpertiseData = fetchFactory(
       relevantCommits = addBuildData(relevantCommits, builds);
 
       //########### extract data for each stakeholder ###########
-
-      //get previous names of active files together with the dates where the files were named like that
-      const prevFilenames = await getPreviousFilenames(activeFiles, currentBranch);
 
       //first group all relevant commits by stakeholder
       const commitsByStakeholders = _.groupBy(relevantCommits, (commit) => commit.signature);
@@ -213,7 +214,6 @@ export const fetchCodeExpertiseData = fetchFactory(
                     tempsum += f.stats.additions;
                   }
                 }
-                return false;
               })
 
               return sum + tempsum;

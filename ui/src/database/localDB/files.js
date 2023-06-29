@@ -31,6 +31,13 @@ function findBranchFileConnections(relations) {
   });
 }
 
+// a connection between a branch-file edge and a file
+function findBranchFileFileConnections(relations) {
+  return relations.find({
+    selector: { _id: { $regex: new RegExp('^branches-files-files/.*') } },
+  });
+}
+
 function findFileCommitConnections(relations) {
   return relations.find({
     selector: { _id: { $regex: new RegExp('^commits-files/.*') } },
@@ -88,16 +95,55 @@ export default class Files {
   }
 
   static getPreviousFilenamesForFilesOnBranch(db, relations, branchName) {
-    //TODO
-    //form:
-    //[
-    //  {
-    //     path: "path/to/current/file",
-    //     previousFileNames: [
-    //       {oldFilePath: "path", hasThisNameFrom: "timestamp", hasThisNameUntil: "timestamp"}
-    //     ]
-    //   }
-    //]
-    return []
+    return findBranch(db, branchName).then(async (resBranch) => {
+      let result = [];
+      const branch = resBranch.docs[0];
+      //find all branch-file-file connections. These are connections between a branch-file edge and a file.
+      // They tell us which files on a branch had another name in the past (since renaming a file effectively creates a new file)
+      const branchFileFileConnections = (await findBranchFileFileConnections(relations)).docs;
+      //find all files and extract the ones that are on this branch
+      const files = (await findAll(db, 'files')).docs;
+      // find connections from this branch to files
+      const branchFileConnections = (await findBranchFileConnections(relations)).docs.filter((connection) => connection.to === branch._id);
+      
+      // for each connection, extract the file object and find all connections to other files (previous names)
+      for (const branchFileConnection of branchFileConnections) {
+        const resFiles = files.filter((f) => f._id === branchFileConnection.from);
+        if (resFiles.length > 0) {
+          const currentFile = resFiles[0];
+          //get connections to other files
+          const connectionsToOtherFiles = branchFileFileConnections.filter((bffCon) => {
+            return bffCon.from === branchFileConnection._id
+          });
+
+          //if there are no connections, go to the next bf connection
+          if(connectionsToOtherFiles.length == 0) {
+            continue;
+          }
+          //this object says the the file with this path has had these previous filenames
+          let resultObject = {
+            path: currentFile.path,
+            previousFileNames: [],
+          }
+
+          for (const branchFileFileConnection of connectionsToOtherFiles) {
+            // get referenced file
+            const resFiles = files.filter((f) => f._id === branchFileFileConnection.to);
+            if (resFiles.length > 0) {
+              const referencedFile = resFiles[0];
+              resultObject.previousFileNames.push(
+                {
+                  oldFilePath: referencedFile.path,
+                  hasThisNameFrom: branchFileFileConnection.hasThisNameFrom,
+                  hasThisNameUntil: branchFileFileConnection.hasThisNameUntil,
+                }
+              )
+            }
+          }
+          result.push(resultObject)
+        }
+      }
+      return result;
+    });
   }
 }

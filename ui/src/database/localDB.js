@@ -19,6 +19,7 @@ import Stakeholders from './localDB/stakeholders';
 /// #if ENV === 'production'
 import branches from '../../db_export/branches.json';
 import branchesFiles from '../../db_export/branches-files.json';
+import branchesFilesFiles from '../../db_export/branches-files-files.json';
 import builds from '../../db_export/builds.json';
 import commitsCommits from '../../db_export/commits-commits.json';
 import commitsFiles from '../../db_export/commits-files.json';
@@ -51,6 +52,7 @@ const relations = {
   'modules-files': modulesFiles,
   'modules-modules': modulesModules,
   'branches-files': branchesFiles,
+  'branches-files-files': branchesFilesFiles,
 };
 /// #endif
 
@@ -178,7 +180,6 @@ export default class LocalDB {
   }
 
   static getPreviousFilenamesForFilesOnBranch(branchName) {
-    //TODO
     return Files.getPreviousFilenamesForFilesOnBranch(db, tripleStore, branchName);
   }
 
@@ -221,6 +222,7 @@ export default class LocalDB {
     database.modules_files = relations['modules-files'];
     database.modules_modules = relations['modules-modules'];
     database.branches_files = relations['branches-files'];
+    database.branches_files_files = relations['branches-files-files'];
 
     return database;
   }

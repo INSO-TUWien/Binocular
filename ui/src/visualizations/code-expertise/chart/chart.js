@@ -25,6 +25,7 @@ const Chart = () => {
   const data = useSelector((state) => state.visualizations.codeExpertise.state.data.data);
   const config = useSelector((state) => state.visualizations.codeExpertise.state.config);
   const isFetching = useSelector((state) => state.visualizations.codeExpertise.state.data.isFetching);
+  const offlineMode = useSelector((state) => state.config.offlineMode);
 
   //local state
   const [transform, setTransform] = useState(d3.zoomIdentity);
@@ -172,8 +173,17 @@ const Chart = () => {
           <LegendCompact text="Good Commits rel. to all Commits of Dev" color={legendGoodCommitsColor} />
           <LegendCompact text="Bad Commits rel. to all Commits of Dev" color={legendBadCommitsColor} />
           <LegendCompact text="# of Commits rel. to others" color={`url(#${legendDotsId})`} />
-          <LegendCompact text="Added lines of code" color={`url(#${legendHatchId})`} color2={legendColor} />
-          <LegendCompact text="Added lines of code (still in the Project)" color={legendColor} />
+          {offlineMode &&
+            <LegendCompact text="Added lines of code" color={legendColor} />
+          }
+          {!offlineMode &&
+            <>
+              <LegendCompact text="Added lines of code" color={`url(#${legendHatchId})`} color2={legendColor} />
+              <LegendCompact text="Added lines of code (still in the Project)" color={legendColor} />
+            </>
+          }
+
+          
         </g>
       </div>
       <ChartContainer onResize={(evt) => onResize(evt)} className={styles.chartContainer}>

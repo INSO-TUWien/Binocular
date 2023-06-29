@@ -60,13 +60,11 @@ export async function getPreviousFilenames(filenames, branch) {
         previousFilenameObjects.push(oldFile)
       }
     }
-  }  
+  }
   return previousFilenameObjects;
 }
 
 export async function getCommitHashesForFiles(filenames, branch) {
-  //console.log("starting getCommitHashesForFiles")
-
   let previousFilenameObjects = await getPreviousFilenames(filenames, branch)
 
   //fetch commits for selected files
@@ -74,15 +72,17 @@ export async function getCommitHashesForFiles(filenames, branch) {
 
   //fetch commits for old filenames
   let previousFilenamesPaths = [...new Set(previousFilenameObjects.map((fno) => fno.oldFilePath))]
-  let prevFilesCommits = await Database.getCommitsWithFilesForFiles(previousFilenamesPaths)
-  console.log(prevFilesCommits)
+
+  //TODO this does not return in offline mode
+  let prevFilesCommits = [];
+  if(previousFilenamesPaths.length > 0) {
+    prevFilesCommits = await Database.getCommitsWithFilesForFiles(previousFilenamesPaths)
+  }
 
   //for each of the previous filenames
   for (const prevPath of previousFilenamesPaths) {
-    //console.log("starting map for " + prevPath)
     //extract the commits that touch this particular file
     let commitsForOldFilename = prevFilesCommits.filter(c => c.files.data.map(f => f.file.path).includes(prevPath))
-    console.log(commitsForOldFilename)
   
     //now remove the commits that touch the previous filenames but not within the time period where this file was named this way
     // this can for example happen when a file was renamed and later on, a new file with the same name is created again
@@ -106,14 +106,7 @@ export async function getCommitHashesForFiles(filenames, branch) {
       return false;
     })
     commits = _.concat(commits, commitsForOldFilename)
-    //console.log("finishing map for " + prevPath)
-
   }
-
-  //TODO overall: dates and previous names have to be checked in saga when doing the reductions
-  
-  //console.log("finished getCommitHashesForFiles")
-
   //get sha hashes
   return _.uniq(commits.map((c) => c.sha))
 }
@@ -154,7 +147,6 @@ export function addBuildData(relevantCommits, builds) {
 
 export function getAllCommits() {
   return Database.getCommitDataWithFiles([minDate, maxDate], [minDate, maxDate]);
-  return Database.getCommitData([], [minDate, maxDate]);
 }
 
 //recursively get all parent commits of the selected branch.

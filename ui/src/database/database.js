@@ -52,7 +52,6 @@ export default class Database {
     if (await this.checkBackendConnection()) {
       return ServerDB.getCommitsWithFilesForFiles(filenames);
     } else {
-      //TODO
       return LocalDB.getCommitsWithFilesForFiles(filenames);
     }
   }
@@ -182,7 +181,6 @@ export default class Database {
     if (await this.checkBackendConnection()) {
       return ServerDB.getPreviousFilenamesForFilesOnBranch(branchName);
     } else {
-      //TODO
       return LocalDB.getPreviousFilenamesForFilesOnBranch(branchName);
     }
   }

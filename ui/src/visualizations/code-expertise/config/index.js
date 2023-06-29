@@ -124,7 +124,7 @@ export default () => {
         </div>
 
         {/* Display a warning if the current branch cannot track file renames */}
-        {currentBranch && (currentBranch.tracksFileRenames !== 'true') &&
+        {currentBranch && (currentBranch.tracksFileRenames !== 'true') && (currentBranch.tracksFileRenames !== true) &&
           <>
             <p><b>Attention:</b> This branch does <b>not</b> track file renames!</p>
             <p>If you want to track file renames for this branch, add it to the 'fileRenameBranches' array in '.binocularrc'</p>

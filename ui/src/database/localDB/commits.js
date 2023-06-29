@@ -110,6 +110,9 @@ export default class Commits {
   }
 
   static getCommitsForFiles(db, relations, filenames, omitFiles) {
+    if (filenames.length === 0) {
+      return []
+    }
     return findAll(db, 'files').then(async (res) => {
       let files = res.docs;
       files = files.filter((f) => filenames.includes(f.path));
@@ -130,7 +133,10 @@ export default class Commits {
           //if we also want file objects in our commit objects,
           // we have to push the file object to an intermediary array to add to the commits later
           if(!omitFiles) {
-            let fileArray = filesForCommits[connection.to] || [];
+            let fileArray = [];
+            if (filesForCommits[connection.to] != null) {
+              fileArray = filesForCommits[connection.to]
+            }
             fileArray.push({file:{path:file.path}})
             filesForCommits[connection.to] = fileArray;
           }
@@ -149,9 +155,11 @@ export default class Commits {
 
       //if we also want file objects in our commit objects, add them now
       if(!omitFiles) {
-        for(const commit of resultCommits) {
-          commit.files = {data: filesForCommits[commit._id]}
-        }
+        resultCommits = resultCommits.map((commit) => {
+          let c = commit;
+          c.files = {data: filesForCommits[commit._id]}
+          return c
+        })
       }
       return resultCommits;
     });
