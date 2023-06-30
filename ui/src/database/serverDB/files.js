@@ -62,9 +62,11 @@ export default class Files {
       `,
         {}
       )
-      .then((result) => result.branch.files.data.map((entry) => {
-        return {path: entry.file.path, previousFileNames: entry.file.oldFileNames.data}
-      }));
+      .then((result) =>
+        result.branch.files.data.map((entry) => {
+          return { path: entry.file.path, previousFileNames: entry.file.oldFileNames.data };
+        })
+      );
   }
 
   static getFilesForCommits(hashes) {

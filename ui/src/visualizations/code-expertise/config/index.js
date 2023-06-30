@@ -15,14 +15,14 @@ export default () => {
   const expertiseState = useSelector((state) => state.visualizations.codeExpertise.state);
   const currentMode = expertiseState.config.mode;
   const currentBranch = expertiseState.config.currentBranch;
-  const currentBranchName = currentBranch?.branch
+  const currentBranchName = currentBranch && currentBranch.branch;
   const activeIssueId = expertiseState.config.activeIssueId;
   const filterMergeCommits = expertiseState.config.filterMergeCommits;
   const onlyDisplayOwnership = expertiseState.config.onlyDisplayOwnership;
   const offlineMode = useSelector((state) => state.config.offlineMode);
 
   //local state
-  const [allBranches, setAllBranches] = useState([])
+  const [allBranches, setAllBranches] = useState([]);
   const [branchOptions, setBranchOptions] = useState([]);
   const [issueOptions, setIssueOptions] = useState([]);
   const [files, setFiles] = useState([]);
@@ -38,7 +38,7 @@ export default () => {
   };
 
   const onSetBranch = (branchName) => {
-    const branchObject = allBranches.filter(b => b.branch === branchName)[0];
+    const branchObject = allBranches.filter((b) => b.branch === branchName)[0];
     dispatch(setCurrentBranch(branchObject));
   };
 
@@ -74,7 +74,11 @@ export default () => {
           </option>
         );
         for (const i in branches) {
-          temp.push(<option key={i} value={branches[i]}>{branches[i]}</option>);
+          temp.push(
+            <option key={i} value={branches[i]}>
+              {branches[i]}
+            </option>
+          );
         }
         setBranchOptions(temp);
       });
@@ -124,13 +128,14 @@ export default () => {
         </div>
 
         {/* Display a warning if the current branch cannot track file renames */}
-        {currentBranch && (currentBranch.tracksFileRenames !== 'true') && (currentBranch.tracksFileRenames !== true) &&
+        {currentBranch && currentBranch.tracksFileRenames !== 'true' && currentBranch.tracksFileRenames !== true && (
           <>
-            <p><b>Attention:</b> This branch does <b>not</b> track file renames!</p>
+            <p>
+              <b>Attention:</b> This branch does <b>not</b> track file renames!
+            </p>
             <p>If you want to track file renames for this branch, add it to the 'fileRenameBranches' array in '.binocularrc'</p>
           </>
-        }
-        
+        )}
 
         {/* select if merge commits should be filtered */}
         <div className="field">

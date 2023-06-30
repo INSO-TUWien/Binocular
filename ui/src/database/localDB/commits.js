@@ -111,7 +111,7 @@ export default class Commits {
 
   static getCommitsForFiles(db, relations, filenames, omitFiles) {
     if (filenames.length === 0) {
-      return []
+      return [];
     }
     return findAll(db, 'files').then(async (res) => {
       let files = res.docs;
@@ -121,7 +121,7 @@ export default class Commits {
       const resultCommitHashes = [];
 
       //stores file objects for commit hashes. Add this to the commit objects later
-      let filesForCommits = {}
+      const filesForCommits = {};
 
       //edges in the db between files and commits
       const fileCommitConnections = (await findFileCommitConnections(relations)).docs;
@@ -132,15 +132,15 @@ export default class Commits {
         for (const connection of relevantConnections) {
           //if we also want file objects in our commit objects,
           // we have to push the file object to an intermediary array to add to the commits later
-          if(!omitFiles) {
+          if (!omitFiles) {
             let fileArray = [];
-            if (filesForCommits[connection.to] != null) {
-              fileArray = filesForCommits[connection.to]
+            if (filesForCommits[connection.to] !== null && filesForCommits[connection.to] !== undefined) {
+              fileArray = filesForCommits[connection.to];
             }
-            fileArray.push({file:{path:file.path}})
+            fileArray.push({ file: { path: file.path } });
             filesForCommits[connection.to] = fileArray;
           }
-          
+
           //if this commit was not already connected to another file, push it to the array
           if (resultCommitHashes.includes(connection.to)) {
             continue;
@@ -154,12 +154,12 @@ export default class Commits {
       resultCommits = resultCommits.results.map((res) => res.docs[0].ok);
 
       //if we also want file objects in our commit objects, add them now
-      if(!omitFiles) {
+      if (!omitFiles) {
         resultCommits = resultCommits.map((commit) => {
-          let c = commit;
-          c.files = {data: filesForCommits[commit._id]}
-          return c
-        })
+          const c = commit;
+          c.files = { data: filesForCommits[commit._id] };
+          return c;
+        });
       }
       return resultCommits;
     });

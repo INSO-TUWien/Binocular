@@ -160,7 +160,7 @@ const Chart = () => {
   }
 
   return (
-    <>
+    <ChartContainer onResize={(evt) => onResize(evt)} className={styles.chartContainer}>
       <div className={styles.legend}>
         <g>
           <svg width={0} height={0}>
@@ -173,30 +173,24 @@ const Chart = () => {
           <LegendCompact text="Good Commits rel. to all Commits of Dev" color={legendGoodCommitsColor} />
           <LegendCompact text="Bad Commits rel. to all Commits of Dev" color={legendBadCommitsColor} />
           <LegendCompact text="# of Commits rel. to others" color={`url(#${legendDotsId})`} />
-          {offlineMode &&
-            <LegendCompact text="Added lines of code" color={legendColor} />
-          }
-          {!offlineMode &&
+          {offlineMode && <LegendCompact text="Added lines of code" color={legendColor} />}
+          {!offlineMode && (
             <>
               <LegendCompact text="Added lines of code" color={`url(#${legendHatchId})`} color2={legendColor} />
               <LegendCompact text="Added lines of code (still in the Project)" color={legendColor} />
             </>
-          }
-
-          
+          )}
         </g>
       </div>
-      <ChartContainer onResize={(evt) => onResize(evt)} className={styles.chartContainer}>
-        <GlobalZoomableSvg className={styles.chart} scaleExtent={[1, 10]} onZoom={(evt) => onZoom(evt)} transform={transform}>
-          <OffsetGroup dims={dimensions} transform={transform}>
-            <g transform={`translate(${center.x}, ${center.y})`}>
-              {segments}
-              <circle cx="0" cy="0" r={radius / 3} stroke="black" fill="white" />
-            </g>
-          </OffsetGroup>
-        </GlobalZoomableSvg>
-      </ChartContainer>
-    </>
+      <GlobalZoomableSvg className={styles.chart} scaleExtent={[1, 10]} onZoom={(evt) => onZoom(evt)} transform={transform}>
+        <OffsetGroup dims={dimensions} transform={transform}>
+          <g transform={`translate(${center.x}, ${center.y})`}>
+            {segments}
+            <circle cx="0" cy="0" r={radius / 3} stroke="black" fill="white" />
+          </g>
+        </OffsetGroup>
+      </GlobalZoomableSvg>
+    </ChartContainer>
   );
 };
 

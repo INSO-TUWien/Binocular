@@ -97,7 +97,7 @@ export const fetchCodeExpertiseData = fetchFactory(
       issue: null,
     };
 
-    if (currentBranch == null) return result;
+    if (currentBranch === null || currentBranch === undefined) return result;
 
     //########### get data from database (depending on mode) ###########
 
@@ -111,13 +111,13 @@ export const fetchCodeExpertiseData = fetchFactory(
         getIssueData(issueId),
         getCommitHashesForIssue(issueId),
         getAllBuildData(),
-        getPreviousFilenames(activeFiles, currentBranch)
+        getPreviousFilenames(activeFiles, currentBranch),
       ]).then((results) => {
         const allCommits = results[0];
         const issue = results[1];
         const issueCommitHashes = results[2];
         const builds = results[3];
-        const prevFilenames = results[4]
+        const prevFilenames = results[4];
         //set current issue
         result['issue'] = issue;
         return [allCommits, issueCommitHashes, builds, prevFilenames];
@@ -129,7 +129,7 @@ export const fetchCodeExpertiseData = fetchFactory(
         getAllCommits(),
         getCommitHashesForFiles(activeFiles, currentBranch),
         getAllBuildData(),
-        getPreviousFilenames(activeFiles, currentBranch)
+        getPreviousFilenames(activeFiles, currentBranch),
       ]);
     } else {
       console.log('error in fetchCodeExpertiseData: invalid mode: ' + mode);
@@ -182,39 +182,39 @@ export const fetchCodeExpertiseData = fetchFactory(
               //we are interested in all additions made in each commit
               return sum + commit.stats.additions;
             } else {
-              let tempsum = 0
+              let tempsum = 0;
               //we are interested in the additions made to the currently active files
+              //TODO what if the commit touches an old file that has the same name as a current file?
               const relevantActiveFiles = commit.files.data.filter((f) => activeFiles.includes(f.file.path));
               //if at least one exists, return the respective additions
               if (relevantActiveFiles && relevantActiveFiles.length > 0) {
                 tempsum += _.reduce(relevantActiveFiles, (fileSum, file) => fileSum + file.stats.additions, 0);
-              } else {
-                console.log('error in fetchCodeExpertiseData: relevantFile does not exist');
               }
 
               //also, we want to check if this commit touches previous versions of the active files
               //for each file this commit touches
               commit.files.data.map((f) => {
-                const filePath = f.file.path
-                const commitDate = new Date(commit.date)
+                const filePath = f.file.path;
+                const commitDate = new Date(commit.date);
 
                 //get all objects for previous file names that have the same name as the file we are currently looking at
                 //this means that maybe this commit touches a file that was renamed later on
-                const prevFileObjects = prevFilenames.filter((pfno) => pfno.oldFilePath === filePath)
+                const prevFileObjects = prevFilenames.filter((pfno) => pfno.oldFilePath === filePath);
                 //for each of these file objects (there could be multiple since the file may have been renamed multiple times)
-                for(const prevFileObj of prevFileObjects) {
+                for (const prevFileObj of prevFileObjects) {
                   //if hasThisNameUntil is null, this means that this is the current name of the file.
                   // since we are at this point only interested in previous files, we ignore this file
-                  if(prevFileObj.hasThisNameUntil === null) continue
+                  if (prevFileObj.hasThisNameUntil === null) continue;
 
-                  const fileWasNamedFrom = new Date(prevFileObj.hasThisNameFrom)
-                  const fileWasNamedUntil = new Date(prevFileObj.hasThisNameUntil)
-                  //if this commit touches a previous version of this file in the right timeframe, we add the additions of this file to the temporary sum
-                  if(fileWasNamedFrom <= commitDate && commitDate < fileWasNamedUntil) {
+                  const fileWasNamedFrom = new Date(prevFileObj.hasThisNameFrom);
+                  const fileWasNamedUntil = new Date(prevFileObj.hasThisNameUntil);
+                  //if this commit touches a previous version of this file in the right timeframe,
+                  // we add the additions of this file to the temporary sum
+                  if (fileWasNamedFrom <= commitDate && commitDate < fileWasNamedUntil) {
                     tempsum += f.stats.additions;
                   }
                 }
-              })
+              });
 
               return sum + tempsum;
             }

@@ -130,7 +130,7 @@ export default class Commits {
           for (const cFile of commit.files.data) {
             if (filenames.includes(cFile.file.path)) {
               //this function should only return the commit data. We do not need the files entry anymore
-              if(omitFiles) {
+              if (omitFiles) {
                 result.push(_.omit(commit, 'files'));
               } else {
                 result.push(commit);
