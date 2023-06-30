@@ -13,7 +13,17 @@ export default class DataExport extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      collections: { branches: [], builds: [], commits: [], files: [], issues: [], languages: [], modules: [], stakeholders: [] },
+      collections: {
+        branches: [],
+        builds: [],
+        commits: [],
+        files: [],
+        issues: [],
+        languages: [],
+        modules: [],
+        stakeholders: [],
+        mergeRequests: [],
+      },
       relations: {
         commits_commits: [],
         commits_files: [],
@@ -209,6 +219,7 @@ export default class DataExport extends React.Component {
       collections.languages = database.languages;
       collections.modules = database.modules;
       collections.stakeholders = database.stakeholders;
+      collections.mergeRequests = database.mergeRequests;
 
       relations.commits_commits = database.commits_commits;
       relations.commits_files = database.commits_files;

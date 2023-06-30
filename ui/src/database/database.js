@@ -159,6 +159,17 @@ export default class Database {
   }
 
   /**
+   * MERGE REQUESTS (GITLAB ONLY)
+   */
+  static async getMergeRequestData(mergeRequestSpan, significantSpan) {
+    if (await this.checkBackendConnection()) {
+      return ServerDB.getMergeRequestData(mergeRequestSpan, significantSpan);
+    } else {
+      return LocalDB.getMergeRequestData(mergeRequestSpan, significantSpan);
+    }
+  }
+
+  /**
    * FILES
    */
   static async requestFileStructure() {

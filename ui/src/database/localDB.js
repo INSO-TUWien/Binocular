@@ -10,6 +10,7 @@ import Bounds from './localDB/bounds';
 import Commits from './localDB/commits';
 import Builds from './localDB/builds';
 import Issues from './localDB/issues';
+import MergeRequests from './localDB/mergeRequests';
 import Files from './localDB/files';
 import Branches from './localDB/branches';
 import Languages from './localDB/languages';
@@ -37,8 +38,9 @@ import modulesFiles from '../../db_export/modules-files.json';
 import modulesModules from '../../db_export/modules-modules.json';
 import modules from '../../db_export/modules.json';
 import stakeholders from '../../db_export/stakeholders.json';
+import mergeRequests from '../../db_export/mergeRequests.json';
 
-const collections = { branches, builds, commits, files, issues, languages, modules, stakeholders };
+const collections = { branches, builds, commits, files, issues, languages, modules, stakeholders, mergeRequests };
 
 const relations = {
   'commits-commits': commitsCommits,
@@ -125,6 +127,10 @@ export default class LocalDB {
 
   static getCommitsForIssue(iid) {
     return Issues.getCommitsForIssue(db, iid);
+  }
+
+  static getMergeRequestData(mergeRequestSpan, significantSpan) {
+    return MergeRequests.getMergeRequestData(db, mergeRequestSpan, significantSpan);
   }
 
   static getCommitsForFiles(filenames) {

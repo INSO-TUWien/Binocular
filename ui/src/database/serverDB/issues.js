@@ -28,6 +28,14 @@ export default class Issues {
                   login
                   name
                 }
+                notes{
+                  body
+                  created_at
+                  author{
+                    login
+                    name
+                  }
+                }
               }
             }
           }`,

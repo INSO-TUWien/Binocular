@@ -33,7 +33,9 @@ import languageModuleRiver from './visualizations/legacy/language-module-river';
 import codeExpertise from './visualizations/code-expertise';
 import ciBuilds from './visualizations/VisualizationComponents/ciBuilds';
 import issues from './visualizations/VisualizationComponents/issues';
+import issueBreakdown from './visualizations/VisualizationComponents/issueBreakdown';
 import changes from './visualizations/VisualizationComponents/changes';
+import timeSpent from './visualizations/VisualizationComponents/timeSpent';
 import RootOffline from './components/RootOffline';
 
 const visualizationModules = [
@@ -46,9 +48,11 @@ const visualizationModules = [
   languageModuleRiver,
   ciBuilds,
   issues,
+  issueBreakdown,
   changes,
-  dataExport,
   codeExpertise,
+  timeSpent,
+  dataExport,
 ];
 
 Database.checkBackendConnection().then((connection) => {

@@ -18,7 +18,7 @@ const mapDispatchToProps = (dispatch /*, ownProps*/) => {
   return { onClickIssues: (showIssues) => dispatch(setShowIssues(showIssues)) };
 };
 
-const CIBuildsConfigComponent = (props) => {
+const IssuesConfigComponent = (props) => {
   return (
     <div className={styles.configContainer}>
       <div className={styles.field}>
@@ -38,6 +38,6 @@ const CIBuildsConfigComponent = (props) => {
   );
 };
 
-const CIBuildsConfig = connect(mapStateToProps, mapDispatchToProps)(CIBuildsConfigComponent);
+const IssuesConfig = connect(mapStateToProps, mapDispatchToProps)(IssuesConfigComponent);
 
-export default CIBuildsConfig;
+export default IssuesConfig;

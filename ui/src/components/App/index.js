@@ -19,11 +19,18 @@ const mapDispatchToProps = () => ({});
 class App extends React.PureComponent {
   constructor(props) {
     super(props);
-
-    this.state = {
-      helpPos: 0,
-      collapsed: false,
-    };
+    const collapsedLS = JSON.parse(localStorage.getItem('SidebarCollapsed'));
+    if (collapsedLS === null) {
+      this.state = {
+        helpPos: 0,
+        collapsed: false,
+      };
+    } else {
+      this.state = {
+        helpPos: 0,
+        collapsed: collapsedLS.state,
+      };
+    }
   }
 
   render() {
@@ -34,7 +41,14 @@ class App extends React.PureComponent {
 
     return (
       <div className={styles.app}>
-        <Sidebar collapsed={collapsed} onToggle={() => this.setState((prevState) => ({ collapsed: !prevState.collapsed }))} />
+        <Sidebar
+          collapsed={collapsed}
+          onToggle={() => {
+            const collapsed = !this.state.collapsed;
+            localStorage.setItem('SidebarCollapsed', JSON.stringify({ state: collapsed }));
+            this.setState({ collapsed: collapsed });
+          }}
+        />
         <div className={styles.mainPane}>
           <ProgressBar />
           <ChartComponent sidebarOpen={!collapsed} />

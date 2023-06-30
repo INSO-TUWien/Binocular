@@ -122,6 +122,10 @@ module.exports = new gql.GraphQLObjectType({
           return (issue.mentions || []).map((m) => m.commit);
         },
       },
+      notes: {
+        type: new gql.GraphQLList(require('./gitlabNote.js')),
+        description: 'Notes attached to the issue',
+      },
     };
   },
 });

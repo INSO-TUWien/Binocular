@@ -344,6 +344,24 @@ const queryType = new gql.GraphQLObjectType({
             .toArray()[0];
         },
       },
+      mergeRequests: paginated({
+        type: require('./types/mergeRequest.js'),
+        args: {
+          since: { type: Timestamp },
+          until: { type: Timestamp },
+          sort: { type: Sort },
+        },
+        query: (root, args, limit) => {
+          let q = qb.for('mergeRequest').in('mergeRequests').sort('mergeRequest.createdAt', args.sort);
+
+          q = queryHelpers.addDateFilter('mergeRequest.createdAt', 'gte', args.since, q);
+          q = queryHelpers.addDateFilter('mergeRequest.createdAt', 'lte', args.until, q);
+
+          q = q.limit(limit.offset, limit.count).return('mergeRequest');
+
+          return q;
+        },
+      }),
       issueDateHistogram: makeDateHistogramEndpoint(issues),
     };
   },
