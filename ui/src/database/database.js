@@ -48,6 +48,14 @@ export default class Database {
     }
   }
 
+  static async getCommitsWithFilesForFiles(filenames) {
+    if (await this.checkBackendConnection()) {
+      return ServerDB.getCommitsWithFilesForFiles(filenames);
+    } else {
+      return LocalDB.getCommitsWithFilesForFiles(filenames);
+    }
+  }
+
   static async getCommitDataOwnershipRiver(commitSpan, significantSpan, granularity, interval) {
     if (await this.checkBackendConnection()) {
       return ServerDB.getCommitDataOwnershipRiver(commitSpan, significantSpan, granularity, interval);
@@ -177,6 +185,14 @@ export default class Database {
       return ServerDB.getFilenamesForBranch(branchName);
     } else {
       return LocalDB.getFilenamesForBranch(branchName);
+    }
+  }
+
+  static async getPreviousFilenamesForFilesOnBranch(branchName) {
+    if (await this.checkBackendConnection()) {
+      return ServerDB.getPreviousFilenamesForFilesOnBranch(branchName);
+    } else {
+      return LocalDB.getPreviousFilenamesForFilesOnBranch(branchName);
     }
   }
 

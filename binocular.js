@@ -50,12 +50,12 @@ const ModuleModuleConnection = require('./lib/models/ModuleModuleConnection');
 const ModuleFileConnection = require('./lib/models/ModuleFileConnection');
 const LanguageFileConnection = require('./lib/models/LanguageFileConnection');
 const BranchFileConnection = require('./lib/models/BranchFileConnection');
+const BranchFileFileConnection = require('./lib/models/BranchFileFileConnection.js');
 const ConfigurationError = require('./lib/errors/ConfigurationError');
 const DatabaseError = require('./lib/errors/DatabaseError');
 const GateWayService = require('./lib/gateway-service');
 const grpc = require('@grpc/grpc-js');
 const protoLoader = require('@grpc/proto-loader');
-const http = require('http');
 const projectStructureHelper = require('./lib/projectStructureHelper');
 const commPath = path.resolve(__dirname, 'services', 'grpc', 'comm');
 
@@ -497,6 +497,7 @@ function ensureDb(repo, context) {
         ModuleModuleConnection.ensureCollection(),
         ModuleFileConnection.ensureCollection(),
         BranchFileConnection.ensureCollection(),
+        BranchFileFileConnection.ensureCollection(),
       ]);
     });
 }

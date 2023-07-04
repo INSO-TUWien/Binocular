@@ -29,7 +29,8 @@ const Job = new gql.GraphQLObjectType({
   fields() {
     return {
       id: {
-        type: new gql.GraphQLNonNull(gql.GraphQLInt),
+        //TODO: GraphQLInt only supports 32bit values. Float can handle 52 bits. Is there a cleaner way to fix this?
+        type: new gql.GraphQLNonNull(gql.GraphQLFloat),
       },
       name: {
         type: gql.GraphQLString,
