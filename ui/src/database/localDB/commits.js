@@ -109,18 +109,39 @@ export default class Commits {
     });
   }
 
-  static getCommitsForFiles(db, relations, filenames) {
+  static getCommitsForFiles(db, relations, filenames, omitFiles) {
+    if (filenames.length === 0) {
+      return [];
+    }
     return findAll(db, 'files').then(async (res) => {
       let files = res.docs;
       files = files.filter((f) => filenames.includes(f.path));
 
+      //this stores the ahshes of the commits associated to the given filenames
       const resultCommitHashes = [];
 
+      //stores file objects for commit hashes. Add this to the commit objects later
+      const filesForCommits = {};
+
+      //edges in the db between files and commits
       const fileCommitConnections = (await findFileCommitConnections(relations)).docs;
 
       for (const file of files) {
+        //get the connections from the current file to commits
         const relevantConnections = fileCommitConnections.filter((fCC) => fCC.from === file._id);
         for (const connection of relevantConnections) {
+          //if we also want file objects in our commit objects,
+          // we have to push the file object to an intermediary array to add to the commits later
+          if (!omitFiles) {
+            let fileArray = [];
+            if (filesForCommits[connection.to] !== null && filesForCommits[connection.to] !== undefined) {
+              fileArray = filesForCommits[connection.to];
+            }
+            fileArray.push({ file: { path: file.path } });
+            filesForCommits[connection.to] = fileArray;
+          }
+
+          //if this commit was not already connected to another file, push it to the array
           if (resultCommitHashes.includes(connection.to)) {
             continue;
           }
@@ -131,6 +152,15 @@ export default class Commits {
       //get whole commit objects from hashes
       let resultCommits = await bulkGet(db, resultCommitHashes);
       resultCommits = resultCommits.results.map((res) => res.docs[0].ok);
+
+      //if we also want file objects in our commit objects, add them now
+      if (!omitFiles) {
+        resultCommits = resultCommits.map((commit) => {
+          const c = commit;
+          c.files = { data: filesForCommits[commit._id] };
+          return c;
+        });
+      }
       return resultCommits;
     });
   }

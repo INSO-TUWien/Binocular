@@ -15,12 +15,14 @@ export default () => {
   const expertiseState = useSelector((state) => state.visualizations.codeExpertise.state);
   const currentMode = expertiseState.config.mode;
   const currentBranch = expertiseState.config.currentBranch;
+  const currentBranchName = currentBranch && currentBranch.branch;
   const activeIssueId = expertiseState.config.activeIssueId;
   const filterMergeCommits = expertiseState.config.filterMergeCommits;
   const onlyDisplayOwnership = expertiseState.config.onlyDisplayOwnership;
   const offlineMode = useSelector((state) => state.config.offlineMode);
 
   //local state
+  const [allBranches, setAllBranches] = useState([]);
   const [branchOptions, setBranchOptions] = useState([]);
   const [issueOptions, setIssueOptions] = useState([]);
   const [files, setFiles] = useState([]);
@@ -35,8 +37,9 @@ export default () => {
     dispatch(setMode(mode));
   };
 
-  const onSetBranch = (branch) => {
-    dispatch(setCurrentBranch(branch));
+  const onSetBranch = (branchName) => {
+    const branchObject = allBranches.filter((b) => b.branch === branchName)[0];
+    dispatch(setCurrentBranch(branchObject));
   };
 
   const resetActiveFiles = () => {
@@ -57,7 +60,10 @@ export default () => {
     //get all branches for branch-select
     getBranches()
       .then((branches) => branches.sort((a, b) => a.branch.localeCompare(b.branch)))
-      .then((branches) => branches.map((b) => b.branch))
+      .then((branches) => {
+        setAllBranches(branches);
+        return branches.map((b) => b.branch);
+      })
       .then((branches) => [...new Set(branches)])
       .then((branches) => {
         const temp = [];
@@ -68,7 +74,11 @@ export default () => {
           </option>
         );
         for (const i in branches) {
-          temp.push(<option key={i}>{branches[i]}</option>);
+          temp.push(
+            <option key={i} value={branches[i]}>
+              {branches[i]}
+            </option>
+          );
         }
         setBranchOptions(temp);
       });
@@ -98,7 +108,7 @@ export default () => {
   useEffect(() => {
     if (currentBranch) {
       resetActiveFiles();
-      getFilenamesForBranch(currentBranch).then((files) => setFiles(files));
+      getFilenamesForBranch(currentBranch.branch).then((files) => setFiles(files));
     }
   }, [currentBranch]);
 
@@ -110,12 +120,22 @@ export default () => {
           <div className="control">
             <label className="label">Branch:</label>
             <div className="select">
-              <select value={currentBranch} onChange={(e) => onSetBranch(e.target.value)}>
+              <select value={currentBranchName} onChange={(e) => onSetBranch(e.target.value)}>
                 {branchOptions}
               </select>
             </div>
           </div>
         </div>
+
+        {/* Display a warning if the current branch cannot track file renames */}
+        {currentBranch && currentBranch.tracksFileRenames !== 'true' && currentBranch.tracksFileRenames !== true && (
+          <>
+            <p>
+              <b>Attention:</b> This branch does <b>not</b> track file renames!
+            </p>
+            <p>If you want to track file renames for this branch, add it to the 'fileRenameBranches' array in '.binocularrc'</p>
+          </>
+        )}
 
         {/* select if merge commits should be filtered */}
         <div className="field">
