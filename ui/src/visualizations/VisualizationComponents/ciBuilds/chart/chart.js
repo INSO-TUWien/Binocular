@@ -124,8 +124,8 @@ export default class CIBuilds extends React.Component {
         const buildDate = Date.parse(builds[i].createdAt);
         if (buildDate >= currTimestamp && buildDate < nextTimestamp) {
           obj.succeeded += builds[i].stats.success || 0;
-          obj.cancelled += builds[i].stats.cancelled || -0.001;
-          obj.failed += builds[i].stats.failed || -0.001; //-0.001 for stack layout to realize it belongs on the bottom
+          obj.cancelled += builds[i].stats.cancelled || 0;
+          obj.failed += builds[i].stats.failed || 0; //-0.001 for stack layout to realize it belongs on the bottom
         }
       }
       data.push(obj);
@@ -138,8 +138,8 @@ export default class CIBuilds extends React.Component {
       ciChartData.push({
         date: build.date,
         Succeeded: build.succeeded,
-        Cancelled: build.cancelled > 0 ? build.cancelled * -1 : 0,
         Failed: build.failed > 0 ? build.failed * -1 : 0,
+        Cancelled: build.cancelled > 0 ? build.cancelled * -1 : 0,
       });
       if (ciScale[1] < build.succeeded) {
         ciScale[1] = build.succeeded;
