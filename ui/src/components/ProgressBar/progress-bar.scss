@@ -18,7 +18,7 @@
 .hoverTarget:hover{
   border-radius: 0.5rem;
   width: 20rem;
-  height: 10rem;
+  height: 15rem;
 }
 
 .progressBoxInner{
@@ -26,7 +26,7 @@
   right: 0;
   top: 0;
   width: 20rem;
-  height: 10rem;
+  height: 15rem;
 }
 
 .headline{
@@ -39,7 +39,7 @@
 
 .statusBar{
   position: absolute;
-  height: 3rem;
+  height: 6rem;
   width: 20rem;
   top: 0;
   right: 0;
@@ -69,8 +69,9 @@
 .progressInfo{
   position: absolute;
   overflow-y: scroll;
-  height: 7rem;
-  top:3rem;
+  height: 10rem;
+  top:5rem;
   width: 20rem;
   padding: 0 1rem ;
+  border:1px solid lightgray;
 }

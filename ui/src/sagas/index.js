@@ -7,6 +7,7 @@ import { fetchConfig, fetchConfigOffline, watchConfig } from './config.js';
 import { fetchUniversalSettingsData } from './universalSettings';
 import { watchNotifications } from './notifications.js';
 import Database from '../database/database';
+import { mapSaga } from './utils';
 
 export const switchVisualization = createAction('SWITCH_VISUALIZATION', (vis) => vis);
 export const toggleHelp = createAction('TOGGLE_HELP');
@@ -17,6 +18,8 @@ export const setAllAuthors = createAction('SET_All_AUTHORS');
 export const setMergedAuthorList = createAction('SET_MERGED_AUTHOR_LIST');
 export const setOtherAuthorList = createAction('SET_OTHER_AUTHOR_LIST');
 export const setResolution = createAction('SET_RESOLUTION');
+
+export const requestRefresh = createAction('REQUEST_REFRESH');
 
 let currentComponentSaga = null;
 
@@ -41,8 +44,13 @@ export function* root() {
   const { activeVisualization } = yield select();
   yield* switchComponentSaga(activeVisualization);
   yield fork(watchConfig);
+  yield fork(watchProgress);
   yield fork(watchVisualization);
   yield fork(watchNotifications);
+}
+
+function* watchProgress() {
+  yield takeEvery('PROGRESS', mapSaga(requestRefresh));
 }
 
 function* watchVisualization() {

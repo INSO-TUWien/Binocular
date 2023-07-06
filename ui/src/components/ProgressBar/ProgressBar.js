@@ -50,66 +50,86 @@ export default class ProgressBar extends React.PureComponent {
         onMouseLeave={() => this.setState({ hover: false })}>
         <div className={styles.progressBoxInner}>
           <h1 className={styles.headline}>Indexing Progress:</h1>
-          <svg className={styles.statusBar} viewBox="0 0 855 150">
-            <path
-              id={'pathCommits'}
-              className={styles.path}
-              d="M 25 125 L 855 125 A 1 1 0 0 0 855 25 A 1 1 0 0 0 855 125 A 1 1 0 0 0 855 25"
-              stroke={colors[0]}
-              strokeWidth={'15'}
-              fill={'transparent'}
-              strokeDasharray={
-                Math.max(
-                  ((pathWidth * (this.state.hover ? widthExtended : widthCompressed)) / 3 / pieData[0].total) * pieData[0].processed -
-                    separatorWidth,
-                  0
-                ) + ' 10000'
-              }
-              strokeDashoffset={'-' + pathWidth * (this.state.hover ? offsetExtended : offsetCompressed)}
-              strokeLinecap={'round'}
-            />
-            <path
-              id={'pathIssues'}
-              className={styles.path}
-              d="M 25 125 L 855 125 A 1 1 0 0 0 855 25 A 1 1 0 0 0 855 125 A 1 1 0 0 0 855 25"
-              stroke={colors[1]}
-              strokeWidth={'15'}
-              fill={'transparent'}
-              strokeDasharray={
-                Math.max(
-                  ((pathWidth * (this.state.hover ? widthExtended : widthCompressed)) / 3 / pieData[1].total) * pieData[1].processed -
-                    separatorWidth,
-                  0
-                ) + ' 10000'
-              }
-              strokeDashoffset={
-                '-' +
-                pathWidth *
-                  ((this.state.hover ? offsetExtended : offsetCompressed) + (this.state.hover ? widthExtended : widthCompressed) / 3)
-              }
-              strokeLinecap={'round'}
-            />
-            <path
-              id={'pathBuilds'}
-              className={styles.path}
-              d="M 25 125 L 855 125 A 1 1 0 0 0 855 25 A 1 1 0 0 0 855 125 A 1 1 0 0 0 855 25"
-              stroke={colors[2]}
-              strokeWidth={'15'}
-              fill={'transparent'}
-              strokeDasharray={
-                Math.max(
-                  ((pathWidth * (this.state.hover ? widthExtended : widthCompressed)) / 3 / pieData[2].total) * pieData[2].processed -
-                    separatorWidth,
-                  0
-                ) + ' 10000'
-              }
-              strokeDashoffset={
-                '-' +
-                pathWidth *
-                  ((this.state.hover ? offsetExtended : offsetCompressed) + ((this.state.hover ? widthExtended : widthCompressed) / 3) * 2)
-              }
-              strokeLinecap={'round'}
-            />
+          <svg className={styles.statusBar} viewBox="0 0 855 300">
+            <g>
+              <path
+                id={'pathCommits'}
+                className={styles.path}
+                d={'M 25 125 L 855 125 A 1 1 0 0 0 855 25 A 1 1 0 0 0 855 125 A 1 1 0 0 0 855 25'}
+                stroke={colors[0]}
+                strokeWidth={'15'}
+                fill={'transparent'}
+                strokeDasharray={
+                  Math.max(
+                    ((pathWidth * (this.state.hover ? widthExtended : widthCompressed)) / 3 / pieData[0].total) * pieData[0].processed -
+                      separatorWidth,
+                    0
+                  ) + ' 10000'
+                }
+                strokeDashoffset={'-' + pathWidth * (this.state.hover ? offsetExtended : offsetCompressed)}
+                strokeLinecap={'round'}
+              />
+              <path d={'M 35 125 L 35 200'} stroke={colors[0]} strokeWidth={'5'} />
+              <text x={50} y={200} fontSize={50} fill={colors[0]}>
+                Commits
+              </text>
+            </g>
+            <g>
+              {' '}
+              <path
+                id={'pathIssues'}
+                className={styles.path}
+                d={'M 25 125 L 855 125 A 1 1 0 0 0 855 25 A 1 1 0 0 0 855 125 A 1 1 0 0 0 855 25'}
+                stroke={colors[1]}
+                strokeWidth={'15'}
+                fill={'transparent'}
+                strokeDasharray={
+                  Math.max(
+                    ((pathWidth * (this.state.hover ? widthExtended : widthCompressed)) / 3 / pieData[1].total) * pieData[1].processed -
+                      separatorWidth,
+                    0
+                  ) + ' 10000'
+                }
+                strokeDashoffset={
+                  '-' +
+                  pathWidth *
+                    ((this.state.hover ? offsetExtended : offsetCompressed) + (this.state.hover ? widthExtended : widthCompressed) / 3)
+                }
+                strokeLinecap={'round'}
+              />
+              <path d={'M 295 125 L 295 200'} stroke={colors[1]} strokeWidth={'5'} />
+              <text x={310} y={200} fontSize={50} fill={colors[1]}>
+                Issues
+              </text>
+            </g>
+            <g>
+              <path
+                id={'pathBuilds'}
+                className={styles.path}
+                d={'M 25 125 L 855 125 A 1 1 0 0 0 855 25 A 1 1 0 0 0 855 125 A 1 1 0 0 0 855 25'}
+                stroke={colors[2]}
+                strokeWidth={'15'}
+                fill={'transparent'}
+                strokeDasharray={
+                  Math.max(
+                    ((pathWidth * (this.state.hover ? widthExtended : widthCompressed)) / 3 / pieData[2].total) * pieData[2].processed -
+                      separatorWidth,
+                    0
+                  ) + ' 10000'
+                }
+                strokeDashoffset={
+                  '-' +
+                  pathWidth *
+                    ((this.state.hover ? offsetExtended : offsetCompressed) +
+                      ((this.state.hover ? widthExtended : widthCompressed) / 3) * 2)
+                }
+                strokeLinecap={'round'}
+              />
+              <path d={'M 555 125 L 555 200'} stroke={colors[2]} strokeWidth={'5'} />
+              <text x={570} y={200} fontSize={50} fill={colors[2]}>
+                Builds
+              </text>
+            </g>
           </svg>
           {this.props.showWorkIndicator ? (
             <svg className={styles.loadingAnimation} viewBox="0 0 150 150">
@@ -133,20 +153,15 @@ export default class ProgressBar extends React.PureComponent {
             <div>
               Builds: {pieData[2].processed}/{pieData[2].total} ({Math.round((100 / pieData[2].total) * pieData[2].processed)}%)
             </div>
+            <hr style={{ margin: '0.5rem 0' }} />
+            <div>Files: {this.state.files.total}</div>
+            <div>Modules: {this.state.modules.total}</div>
             <div>
               Languages: {pieData[3].processed}/{pieData[3].total} ({Math.round((100 / pieData[3].total) * pieData[3].processed)}%)
             </div>
             <div>
-              Files: {this.state.files.processed}/{this.state.files.total} (
-              {Math.round((100 / this.state.files.total) * this.state.files.processed)}%)
-            </div>
-            <div>
               Merge Requests: {this.state.mergeRequests.processed}/{this.state.mergeRequests.total} (
               {Math.round((100 / this.state.mergeRequests.total) * this.state.mergeRequests.processed)}%)
-            </div>{' '}
-            <div>
-              Modules: {this.state.modules.processed}/{this.state.modules.total} (
-              {Math.round((100 / this.state.modules.total) * this.state.modules.processed)}%)
             </div>
           </div>
         </div>
