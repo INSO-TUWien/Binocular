@@ -11,6 +11,7 @@ const defaultConfig = {
   mergedAuthors: [],
   otherAuthors: [],
   initialized: false,
+  excludeMergeRequests: false,
 };
 export default handleActions(
   {
@@ -37,6 +38,10 @@ export default handleActions(
       updateLocalStorage('otherAuthors', action.payload);
       return _.assign({}, state, { otherAuthors: action.payload });
     },
+    SET_EXCLUDE_MERGE_COMMITS: (state, action) => {
+      updateLocalStorage('excludeMergeCommits', action.payload);
+      return _.assign({}, state, { excludeMergeCommits: action.payload });
+    },
     REQUEST_UNIVERSAL_SETTINGS_DATA: (state) =>
       _.assign({}, state, { universalSettingsData: { data: {}, lastFetched: null, isFetching: true } }),
     RECEIVE_UNIVERSAL_SETTINGS_DATA: (state, action) => {
@@ -57,6 +62,7 @@ export default handleActions(
     allAuthors: [],
     mergedAuthors: getLocalStorage().mergedAuthors,
     otherAuthors: getLocalStorage().otherAuthors,
+    excludeMergeCommits: getLocalStorage().excludeMergeCommits,
   }
 );
 

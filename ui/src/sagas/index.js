@@ -21,6 +21,8 @@ export const setResolution = createAction('SET_RESOLUTION');
 
 export const requestRefresh = createAction('REQUEST_REFRESH');
 
+export const setExcludeMergeCommits = createAction('SET_EXCLUDE_MERGE_COMMITS');
+
 let currentComponentSaga = null;
 
 function* switchComponentSaga(visualizationName) {

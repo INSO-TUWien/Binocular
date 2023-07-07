@@ -33,6 +33,7 @@ export default function* () {
   yield fork(watchSelectedAuthorsGlobal);
   yield fork(watchMergedAuthors);
   yield fork(watchOtherAuthors);
+  yield fork(watchExcludeMergeCommits);
 }
 
 function* watchTimeSpan() {
@@ -45,6 +46,10 @@ function* watchSelectedAuthorsGlobal() {
 
 function* watchOtherAuthors() {
   yield takeEvery('SET_OTHER_AUTHORS', fetchChangesData);
+}
+
+function* watchExcludeMergeCommits() {
+  yield takeEvery('SET_EXCLUDE_MERGE_COMMITS', fetchChangesData);
 }
 
 function* watchMergedAuthors() {

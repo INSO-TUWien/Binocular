@@ -97,6 +97,9 @@ export default class Changes extends React.Component {
       commits = props.filteredCommits;
       firstTimestamp = props.firstSignificantTimestamp;
       lastTimestamp = props.lastSignificantTimestamp;
+      if (props.excludeMergeCommits) {
+        commits = commits.filter((c) => !c.message.includes('Merge'));
+      }
     }
 
     const data = [];
