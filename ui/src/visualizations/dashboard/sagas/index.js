@@ -2,14 +2,13 @@
 
 import visualizationRegistry from '../visualizationRegistry';
 import { createAction } from 'redux-actions';
-import { fetchFactory, timestampedActionFactory } from '../../../sagas/utils';
-import Database from '../../../database/database.js';
-import { getChartColors } from '../../../utils';
+import { select } from 'redux-saga/effects';
 
 export const setActiveVisualizations = createAction('SET_ACTIVE_VISUALIZATIONS');
 
 export default function* () {
-  for (const visualization in visualizationRegistry) {
+  const state = yield select();
+  for (const visualization of state.visualizations.newDashboard.state.config.visualizations) {
     const viz = visualizationRegistry[visualization];
     if (viz.saga !== undefined) {
       yield* viz.saga();

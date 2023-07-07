@@ -100,6 +100,7 @@ export default class AuthorMerger extends React.PureComponent {
               return (
                 <div key={'authorMerger' + committer.mainCommitter} className={styles.committerRow}>
                   <div
+                    draggable={'true'}
                     id={committer.mainCommitter}
                     className={styles.committerContainer + ' ' + styles.dragAndDrop}
                     style={{ background: committer.color }}

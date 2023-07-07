@@ -12,7 +12,15 @@ const mapStateToProps = (state /*, ownProps*/) => {
 
   return {
     progress: state.progress,
-    showWorkIndicator: dashState.data.isFetching || corState.data.isFetching || hotState.data.isFetching || impactState.data.isFetching,
+    showWorkIndicator:
+      state.progress.commits.processed < state.progress.commits.total ||
+      state.progress.issues.processed < state.progress.issues.total ||
+      state.progress.builds.processed < state.progress.builds.total ||
+      state.progress.languages.processed < state.progress.languages.total ||
+      dashState.data.isFetching ||
+      corState.data.isFetching ||
+      hotState.data.isFetching ||
+      impactState.data.isFetching,
     offlineMode: state.config.offlineMode,
   };
 };
