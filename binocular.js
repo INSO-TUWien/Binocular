@@ -51,6 +51,7 @@ const ModuleFileConnection = require('./lib/models/ModuleFileConnection');
 const LanguageFileConnection = require('./lib/models/LanguageFileConnection');
 const BranchFileConnection = require('./lib/models/BranchFileConnection');
 const BranchFileFileConnection = require('./lib/models/BranchFileFileConnection.js');
+const CommitFileStakeholderConnection = require('./lib/models/CommitFileStakeholderConnection.js');
 const ConfigurationError = require('./lib/errors/ConfigurationError');
 const DatabaseError = require('./lib/errors/DatabaseError');
 const GateWayService = require('./lib/gateway-service');
@@ -498,6 +499,7 @@ function ensureDb(repo, context) {
         ModuleFileConnection.ensureCollection(),
         BranchFileConnection.ensureCollection(),
         BranchFileFileConnection.ensureCollection(),
+        CommitFileStakeholderConnection.ensureCollection(),
       ]);
     });
 }
