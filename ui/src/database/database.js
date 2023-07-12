@@ -69,8 +69,7 @@ export default class Database {
     if (await this.checkBackendConnection()) {
       return ServerDB.getOwnershipDataForFiles(files);
     } else {
-      //TODO
-      //return LocalDB.getOwnershipDataForFiles(files);
+      return LocalDB.getOwnershipDataForFiles(files);
     }
   }
 

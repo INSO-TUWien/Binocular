@@ -92,7 +92,6 @@ export const fetchCodeExpertiseData = fetchFactory(
     //the currentBranch object could be null, therefore ?. is used
     const currentBranch = state.visualizations.codeExpertise.state.config.currentBranch;
     const filterMergeCommits = state.visualizations.codeExpertise.state.config.filterMergeCommits;
-    const offlineMode = state.config.offlineMode;
 
     const result = {
       devData: {},
@@ -226,11 +225,6 @@ export const fetchCodeExpertiseData = fetchFactory(
       }
 
       //########### add ownership data to commits ###########
-
-      //if the program runs in offline mode, don't add ownership data since this requires a back end connection
-      if (offlineMode) {
-        return result;
-      }
 
       if (mode === 'issues') {
         console.log("TODO");

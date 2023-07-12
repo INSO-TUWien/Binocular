@@ -12,7 +12,6 @@ function Segment({ rad, startPercent, endPercent, devName, devData, devColor, ma
   //global state
   const globalDetailsDevState = useSelector((state) => state.visualizations.codeExpertise.state.config.details);
   const onlyDisplayOwnership = useSelector((state) => state.visualizations.codeExpertise.state.config.onlyDisplayOwnership);
-  const offlineMode = useSelector((state) => state.config.offlineMode);
 
   //local state
   const [isDevSelected, setIsDevSelected] = useState(globalDetailsDevState === devName);
@@ -104,15 +103,10 @@ function Segment({ rad, startPercent, endPercent, devName, devData, devColor, ma
   //additions/ownership arc text
   let additionsText = '';
 
-  //only display added lines if program runs in offline mode
-  if (offlineMode) {
-    additionsText += devData.additions !== undefined ? devData.additions : '0';
-  } else {
-    additionsText += devData.linesOwned !== undefined ? devData.linesOwned : '0';
+  additionsText += devData.linesOwned !== undefined ? devData.linesOwned : '0';
     if (!onlyDisplayOwnership) {
       additionsText += '/' + (devData.additions !== undefined ? devData.additions : '0');
     }
-  }
 
   // ######################## FUNCTIONS ########################
 
@@ -377,10 +371,10 @@ function Segment({ rad, startPercent, endPercent, devName, devData, devColor, ma
         <path ref={segmentRef} stroke="black" fill="white" />
 
         {/*additions arc*/}
-        <path ref={additionsArcRef} fill={offlineMode ? devColorDark : `url(#hatch_${devNameId})`} />
+        <path ref={additionsArcRef} fill={`url(#hatch_${devNameId})`} />
 
         {/*ownership arc*/}
-        {!offlineMode && <path ref={ownershipArcRef} fill={devColorDark} />}
+        <path ref={ownershipArcRef} fill={devColorDark} />
 
         {/*additions number in additions/ownership arc. Only display this when mouse hovers on segment*/}
         <g>

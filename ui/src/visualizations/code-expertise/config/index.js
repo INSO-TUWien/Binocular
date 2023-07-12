@@ -19,7 +19,6 @@ export default () => {
   const activeIssueId = expertiseState.config.activeIssueId;
   const filterMergeCommits = expertiseState.config.filterMergeCommits;
   const onlyDisplayOwnership = expertiseState.config.onlyDisplayOwnership;
-  const offlineMode = useSelector((state) => state.config.offlineMode);
 
   //local state
   const [allBranches, setAllBranches] = useState([]);
@@ -51,7 +50,6 @@ export default () => {
   };
 
   const onSetOnlyDisplayOwnership = (isChecked) => {
-    if (offlineMode) return;
     dispatch(setOnlyDisplayOwnership(isChecked));
   };
 
@@ -146,15 +144,13 @@ export default () => {
           </div>
         </div>
 
-        {!offlineMode && (
-          <div className="field">
-            <div className="control">
-              <label className="label">Display Settings:</label>
-              <input type="checkbox" checked={onlyDisplayOwnership} onChange={(event) => onSetOnlyDisplayOwnership(event.target.checked)} />
-              <span>Only display Code Ownership</span>
-            </div>
+        <div className="field">
+          <div className="control">
+            <label className="label">Display Settings:</label>
+            <input type="checkbox" checked={onlyDisplayOwnership} onChange={(event) => onSetOnlyDisplayOwnership(event.target.checked)} />
+            <span>Only display Code Ownership</span>
           </div>
-        )}
+        </div>
 
         {/* select if commits related to issues or commits related to files should be visualized */}
         <div className="field">
