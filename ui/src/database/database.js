@@ -56,6 +56,24 @@ export default class Database {
     }
   }
 
+  static async getOwnershipDataForCommit(sha) {
+    if (await this.checkBackendConnection()) {
+      return ServerDB.getOwnershipDataForCommit(sha);
+    } else {
+      //TODO
+      //return LocalDB.getOwnershipDataForCommit(sha);
+    }
+  }
+
+  static async getOwnershipDataForFiles(files) {
+    if (await this.checkBackendConnection()) {
+      return ServerDB.getOwnershipDataForFiles(files);
+    } else {
+      //TODO
+      //return LocalDB.getOwnershipDataForFiles(files);
+    }
+  }
+
   static async getCommitDataOwnershipRiver(commitSpan, significantSpan, granularity, interval) {
     if (await this.checkBackendConnection()) {
       return ServerDB.getCommitDataOwnershipRiver(commitSpan, significantSpan, granularity, interval);

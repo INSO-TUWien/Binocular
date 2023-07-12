@@ -40,6 +40,14 @@ export default class ServerDB {
     return Commits.getCommitDataWithFiles(commitSpan, significantSpan);
   }
 
+  static getOwnershipDataForCommit(sha) {
+    return Commits.getOwnershipDataForCommit(sha);
+  }
+
+  static getOwnershipDataForFiles(files) {
+    return Files.getOwnershipDataForFiles(files);
+  }
+
   static getCommitDataOwnershipRiver(commitSpan, significantSpan, granularity, interval) {
     return Commits.getCommitDataOwnershipRiver(commitSpan, significantSpan, granularity, interval);
   }

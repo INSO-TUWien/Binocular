@@ -16,6 +16,8 @@ import {
   getBlameIssues,
   getFilesForCommits,
   getPreviousFilenames,
+  getBlameModulesNEW,
+  getBlameModulesNEWforFiles,
 } from './helper.js';
 
 //define actions
@@ -230,44 +232,44 @@ export const fetchCodeExpertiseData = fetchFactory(
         return result;
       }
 
-      let ownershipDataPromise;
-
       if (mode === 'issues') {
-        //get latest relevant commit of the branch
-        const latestRelevantCommit = relevantCommits.sort((a, b) => new Date(b.date) - new Date(a.date))[0];
-        //hashes of all relevant commits
-        const hashes = relevantCommits.map((commit) => commit.sha);
-        ownershipDataPromise = Promise.resolve(getFilesForCommits(hashes)).then((files) =>
-          getBlameIssues(
-            latestRelevantCommit.sha,
-            files.map((file) => file.file.path),
-            hashes
-          )
-        );
+        console.log("TODO");
+        return result;
       } else {
-        //get latest commit of the branch
         const latestBranchCommit = branchCommits.sort((a, b) => new Date(b.date) - new Date(a.date))[0];
-        ownershipDataPromise = Promise.resolve(getBlameModules(latestBranchCommit.sha, activeFiles));
-      }
-
-      return ownershipDataPromise
-        .then((res) => {
-          Object.entries(res.blame).map((item) => {
-            const devMail = item[0];
-            const linesOwned = item[1];
-
-            //add to dev object
-            for (const stakeholder in commitsByStakeholders) {
-              if (stakeholder.includes('<' + devMail + '>')) {
-                result['devData'][stakeholder]['linesOwned'] = linesOwned;
-                break;
-              }
-            }
-          });
-        })
-        .then((_) => {
+        return getBlameModules(latestBranchCommit, activeFiles).then((res) => {
+          for (const [name, val] of Object.entries(res)) {
+            result['devData'][name]['linesOwned'] = val;
+          }
           return result;
         });
+      }
+      
+
+      // let ownershipDataPromise;
+
+      // if (mode === 'issues') {
+      //   //get latest relevant commit of the branch
+      //   const latestRelevantCommit = relevantCommits.sort((a, b) => new Date(b.date) - new Date(a.date))[0];
+      //   //hashes of all relevant commits
+      //   const hashes = relevantCommits.map((commit) => commit.sha);
+      //   ownershipDataPromise = Promise.resolve(getFilesForCommits(hashes)).then((files) =>
+      //     getBlameIssues(
+      //       latestRelevantCommit.sha,
+      //       files.map((file) => file.file.path),
+      //       hashes
+      //     )
+      //   );
+      // } else {
+      //   //get latest commit of the branch
+      //   const latestBranchCommit = branchCommits.sort((a, b) => new Date(b.date) - new Date(a.date))[0];
+      //   ownershipDataPromise = Promise.resolve(getBlameModules(latestBranchCommit.sha, activeFiles));
+      // }
+
+      // return ownershipDataPromise
+      //   .then((res) => {
+      //     ...
+      //   });
     });
   },
   requestCodeExpertiseData,

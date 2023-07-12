@@ -74,7 +74,7 @@ module.exports = new gql.GraphQLObjectType({
                           hasThisNameUntil: conn.hasThisNameUntil
                       }`,
       }),
-      ownership: paginated({
+      ownershipForCommit: paginated({
         type: require('./stakeholderInFile.js'),
         args: {
           commit: {
@@ -94,6 +94,23 @@ module.exports = new gql.GraphQLObjectType({
                         stakeholder: stakeholder.gitSignature,
                         ownedLines: conn.ownedLines,
                     }`,
+      }),
+
+      ownership: paginated({
+        type: require('./ownershipInFile.js'),
+        query: (file, args, limit) => aql`
+        FOR commit, edge
+        IN OUTBOUND ${file} ${commitsToFiles}
+        let c = (commit)
+        let o = (
+          FOR stakeholder, conn
+              IN OUTBOUND edge ${commitsToFilesToStakeholders}
+                  RETURN {
+                      stakeholder: stakeholder.gitSignature,
+                      ownedLines: conn.ownedLines,
+                  }
+        )
+        RETURN {commit: c, ownership: o}`,
       }),
     };
   },
