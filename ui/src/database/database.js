@@ -60,8 +60,7 @@ export default class Database {
     if (await this.checkBackendConnection()) {
       return ServerDB.getOwnershipDataForCommit(sha);
     } else {
-      //TODO
-      //return LocalDB.getOwnershipDataForCommit(sha);
+      return LocalDB.getOwnershipDataForCommit(sha);
     }
   }
 

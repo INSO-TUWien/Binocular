@@ -16,8 +16,6 @@ import {
   getBlameIssues,
   getFilesForCommits,
   getPreviousFilenames,
-  getBlameModulesNEW,
-  getBlameModulesNEWforFiles,
 } from './helper.js';
 
 //define actions

@@ -54,6 +54,12 @@ function findFileCommitConnections(relations) {
   });
 }
 
+function findFileCommitStakeholderConnections(relations) {
+  return relations.find({
+    selector: { _id: { $regex: new RegExp('^commits-files-stakeholders/.*') } },
+  });
+}
+
 export default class Commits {
   static getCommitData(db, commitSpan, significantSpan) {
     // return all commits, filtering according to parameters can be added in the future
@@ -162,6 +168,40 @@ export default class Commits {
         });
       }
       return resultCommits;
+    });
+  }
+
+  static getOwnershipDataForCommit(db, relations, sha) {
+
+    return findCommit(db, sha).then(async (res) => {
+      const commit = res.docs[0];
+
+      const files = (await findAll(db, 'files')).docs;
+      const stakeholders = (await findAll(db, 'stakeholders')).docs;
+      const fileCommitConnections = (await findFileCommitConnections(relations)).docs;
+      const fileCommitStakeholderConnections = (await findFileCommitStakeholderConnections(relations)).docs;
+
+      let result = []
+
+      //find commits-files connection of this commit
+      const relevantConnections = fileCommitConnections.filter((fCC) => fCC.to === commit._id);
+      for (const conn of relevantConnections) {
+        const relevantFile = files.filter((f) => f._id === conn.from)[0];
+
+        let fileResult = { path: relevantFile.path, ownership: [], };
+        
+        let relevantOwnershipConnections = fileCommitStakeholderConnections.filter((fcsc) => fcsc.from === conn._id);
+
+        //for each of the ownership connections, add the signature of the stakeholder and the owned lines to fileResult.ownership
+        for (const ownershipConn of relevantOwnershipConnections) {
+          const stakeholder = stakeholders.filter((s) => s._id === ownershipConn.to)[0].gitSignature;
+          fileResult.ownership.push({ stakeholder: stakeholder, ownedLines: ownershipConn.ownedLines });
+        }
+        //add to the result object of the current file
+        result.push(fileResult);
+      }
+
+      return result;
     });
   }
 
