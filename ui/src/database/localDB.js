@@ -145,8 +145,8 @@ export default class LocalDB {
     return Commits.getCommitDataWithFiles(db, tripleStore, commitSpan, significantSpan);
   }
 
-  static getCommitDataOwnershipRiver(commitSpan, significantSpan, granularity, interval) {
-    return Commits.getCommitDataOwnershipRiver(db, commitSpan, significantSpan, granularity, interval);
+  static getCommitDataOwnershipRiver(commitSpan, significantSpan, granularity, interval, excludeMergeCommits) {
+    return Commits.getCommitDataOwnershipRiver(db, commitSpan, significantSpan, granularity, interval, excludeMergeCommits);
   }
 
   static getBuildDataOwnershipRiver(commitSpan, significantSpan, granularity, interval) {

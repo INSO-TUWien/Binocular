@@ -143,7 +143,7 @@ export default class Commits {
       });
   }
 
-  static getCommitDataOwnershipRiver(commitSpan, significantSpan, granularity, interval) {
+  static getCommitDataOwnershipRiver(commitSpan, significantSpan, granularity, interval, excludeMergeCommits) {
     const statsByAuthor = {};
 
     const totals = {
@@ -175,6 +175,7 @@ export default class Commits {
                  sha
                  date
                  messageHeader
+                 message
                  signature
                  stats {
                    additions
@@ -238,6 +239,10 @@ export default class Commits {
     }
 
     return traversePages(getCommitsPage(significantSpan[0], significantSpan[1]), (commit) => {
+      if (excludeMergeCommits && commit.message.includes('Merge')) {
+        return;
+      }
+
       const dt = Date.parse(commit.date);
       let stats = statsByAuthor[commit.signature];
       if (!stats) {

@@ -17,7 +17,7 @@ export default function* () {
   yield* fetchBuildsData();
 
   yield fork(watchRefreshRequests);
-  yield fork(watchMessages);
+  yield fork(watchProgress);
 
   // keep looking for viewport changes to re-fetch
   yield fork(watchRefresh);
@@ -40,8 +40,8 @@ function* watchRefreshRequests() {
   yield throttle(5000, 'REQUEST_REFRESH', mapSaga(refresh));
 }
 
-function* watchMessages() {
-  yield takeEvery('message', mapSaga(requestRefresh));
+function* watchProgress() {
+  yield takeEvery('PROGRESS', mapSaga(requestRefresh));
 }
 
 function* watchToggleHelp() {
