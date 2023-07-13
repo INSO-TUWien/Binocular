@@ -88,21 +88,6 @@ export async function getBlameModulesAlternative(commit, files) {
   return result;
 }
 
-//get the blame data for a specific commit and for specific files
-export function getBlameIssues(sha, files, hashes) {
-  return fetch(endpointUrl('blame/issues'), {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      sha: sha,
-      files: files,
-      hashes: hashes,
-    }),
-  }).then((resp) => resp.json());
-}
-
 export function getIssues() {
   return Database.getIssueData([], [minDate, maxDate]);
 }

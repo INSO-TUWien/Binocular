@@ -25,6 +25,7 @@ const Chart = () => {
   const data = useSelector((state) => state.visualizations.codeExpertise.state.data.data);
   const config = useSelector((state) => state.visualizations.codeExpertise.state.config);
   const isFetching = useSelector((state) => state.visualizations.codeExpertise.state.data.isFetching);
+  const mode = useSelector((state) => state.visualizations.codeExpertise.state.config.mode);
 
   //local state
   const [transform, setTransform] = useState(d3.zoomIdentity);
@@ -172,8 +173,13 @@ const Chart = () => {
           <LegendCompact text="Good Commits rel. to all Commits of Dev" color={legendGoodCommitsColor} />
           <LegendCompact text="Bad Commits rel. to all Commits of Dev" color={legendBadCommitsColor} />
           <LegendCompact text="# of Commits rel. to others" color={`url(#${legendDotsId})`} />
-          <LegendCompact text="Added lines of code" color={`url(#${legendHatchId})`} color2={legendColor} />
-          <LegendCompact text="Added lines of code (still in the Project)" color={legendColor} />
+          {(mode === 'issues') && <LegendCompact text="Added lines of code" color={`url(#${legendHatchId})`} />}
+          {!(mode === 'issues') && (
+            <>
+              <LegendCompact text="Added lines of code" color={`url(#${legendHatchId})`} color2={legendColor} />
+              <LegendCompact text="Added lines of code (still in the Project)" color={legendColor} />
+            </>
+          )}
         </g>
       </div>
       <GlobalZoomableSvg className={styles.chart} scaleExtent={[1, 10]} onZoom={(evt) => onZoom(evt)} transform={transform}>

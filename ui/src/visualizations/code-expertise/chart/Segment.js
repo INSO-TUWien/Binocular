@@ -12,6 +12,7 @@ function Segment({ rad, startPercent, endPercent, devName, devData, devColor, ma
   //global state
   const globalDetailsDevState = useSelector((state) => state.visualizations.codeExpertise.state.config.details);
   const onlyDisplayOwnership = useSelector((state) => state.visualizations.codeExpertise.state.config.onlyDisplayOwnership);
+  const mode = useSelector((state) => state.visualizations.codeExpertise.state.config.mode);
 
   //local state
   const [isDevSelected, setIsDevSelected] = useState(globalDetailsDevState === devName);
@@ -103,10 +104,14 @@ function Segment({ rad, startPercent, endPercent, devName, devData, devColor, ma
   //additions/ownership arc text
   let additionsText = '';
 
-  additionsText += devData.linesOwned !== undefined ? devData.linesOwned : '0';
+  if (mode === 'issues') {
+    additionsText += devData.additions !== undefined ? devData.additions : '0';
+  } else {
+    additionsText += devData.linesOwned !== undefined ? devData.linesOwned : '0';
     if (!onlyDisplayOwnership) {
       additionsText += '/' + (devData.additions !== undefined ? devData.additions : '0');
     }
+  }
 
   // ######################## FUNCTIONS ########################
 
@@ -374,7 +379,7 @@ function Segment({ rad, startPercent, endPercent, devName, devData, devColor, ma
         <path ref={additionsArcRef} fill={`url(#hatch_${devNameId})`} />
 
         {/*ownership arc*/}
-        <path ref={ownershipArcRef} fill={devColorDark} />
+        {mode !== 'issues' && <path ref={ownershipArcRef} fill={devColorDark} />}
 
         {/*additions number in additions/ownership arc. Only display this when mouse hovers on segment*/}
         <g>

@@ -32,6 +32,8 @@ const Details = () => {
   const allDevData = useSelector((state) => state.visualizations.codeExpertise.state.data.data.devData);
   const selectedDev = useSelector((state) => state.visualizations.codeExpertise.state.config.details);
   const issueData = useSelector((state) => state.visualizations.codeExpertise.state.data.data.issue);
+  const mode = useSelector((state) => state.visualizations.codeExpertise.state.config.mode);
+
 
   useEffect(() => {
     setDevDetails(null);
@@ -124,16 +126,18 @@ const Details = () => {
 
                   <GeneralDetailsData label="Total Lines Added" text={devDetails.additions} />
 
-                  <GeneralDetailsData
-                    label="Total Lines Owned"
-                    text={
-                      devDetails.linesOwned
-                        ? `${devDetails.linesOwned} (${((devDetails.linesOwned / devDetails.additions) * 100).toFixed(
-                            2
-                          )}% of added lines)`
-                        : '0 (0% of added lines)'
-                    }
-                  />
+                  {mode !== 'issues' && (
+                    <GeneralDetailsData
+                      label="Total Lines Owned"
+                      text={
+                        devDetails.linesOwned
+                          ? `${devDetails.linesOwned} (${((devDetails.linesOwned / devDetails.additions) * 100).toFixed(
+                              2
+                            )}% of added lines)`
+                          : '0 (0% of added lines)'
+                      }
+                    />
+                  )}
 
                   <GeneralDetailsData label="Total Commits" text={devDetails.commits.length} />
 

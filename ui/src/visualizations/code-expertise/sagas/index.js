@@ -224,44 +224,18 @@ export const fetchCodeExpertiseData = fetchFactory(
 
       //########### add ownership data to commits ###########
 
+      // dont add ownership when in issues mode
       if (mode === 'issues') {
-        console.log("TODO");
         return result;
-      } else {
-        const latestBranchCommit = branchCommits.sort((a, b) => new Date(b.date) - new Date(a.date))[0];
-        return getBlameModules(latestBranchCommit, activeFiles).then((res) => {
-          for (const [name, val] of Object.entries(res)) {
-            result['devData'][name]['linesOwned'] = val;
-          }
-          return result;
-        });
       }
-      
 
-      // let ownershipDataPromise;
-
-      // if (mode === 'issues') {
-      //   //get latest relevant commit of the branch
-      //   const latestRelevantCommit = relevantCommits.sort((a, b) => new Date(b.date) - new Date(a.date))[0];
-      //   //hashes of all relevant commits
-      //   const hashes = relevantCommits.map((commit) => commit.sha);
-      //   ownershipDataPromise = Promise.resolve(getFilesForCommits(hashes)).then((files) =>
-      //     getBlameIssues(
-      //       latestRelevantCommit.sha,
-      //       files.map((file) => file.file.path),
-      //       hashes
-      //     )
-      //   );
-      // } else {
-      //   //get latest commit of the branch
-      //   const latestBranchCommit = branchCommits.sort((a, b) => new Date(b.date) - new Date(a.date))[0];
-      //   ownershipDataPromise = Promise.resolve(getBlameModules(latestBranchCommit.sha, activeFiles));
-      // }
-
-      // return ownershipDataPromise
-      //   .then((res) => {
-      //     ...
-      //   });
+      const latestBranchCommit = branchCommits.sort((a, b) => new Date(b.date) - new Date(a.date))[0];
+      return getBlameModules(latestBranchCommit, activeFiles).then((res) => {
+        for (const [name, val] of Object.entries(res)) {
+          result['devData'][name]['linesOwned'] = val;
+        }
+        return result;
+      });
     });
   },
   requestCodeExpertiseData,
