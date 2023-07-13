@@ -1,11 +1,28 @@
 'use strict';
 
-import { endpointUrl } from '../../../utils';
 import Database from '../../../database/database';
 import _ from 'lodash';
 
 const minDate = new Date(0);
 const maxDate = new Date();
+
+export async function modulesModeData(activeFiles, currentBranch) {
+  const allCommits = await getAllCommits();
+  const previousFilenames = await getPreviousFilenames(activeFiles, currentBranch);
+  const relevantCommitHashes = getCommitHashesForFiles(allCommits, activeFiles, previousFilenames);
+  const buildData = await getAllBuildData();
+  return [allCommits, relevantCommitHashes, buildData, previousFilenames];
+}
+
+export async function issuesModeData(activeFiles, currentBranch, issueId) {
+  const allCommits = await getAllCommits();
+  const previousFilenames = await getPreviousFilenames(activeFiles, currentBranch);
+  const issueData = await getIssueData(issueId);
+  const relevantCommitHashes = await getCommitHashesForIssue(issueId);
+  const buildData = await getAllBuildData();
+
+  return [allCommits, issueData, relevantCommitHashes, buildData, previousFilenames];
+}
 
 export async function getBlameModules(commit, files) {
 
@@ -116,18 +133,29 @@ export async function getPreviousFilenames(filenames, branch) {
   return previousFilenameObjects;
 }
 
-export async function getCommitHashesForFiles(filenames, branch) {
-  const previousFilenameObjects = await getPreviousFilenames(filenames, branch);
+export function getCommitHashesForFiles(allCommits, filenames, previousFilenameObjects) {
 
   //fetch commits for selected files
-  let commits = await Database.getCommitsForFiles(filenames);
+  let commits = allCommits.filter((c) => {
+    for (const file of c.files.data) {
+      if (filenames.includes(file.file.path)) {
+        return true;
+      }
+    }
+  });
 
   //fetch commits for old filenames
   const previousFilenamesPaths = [...new Set(previousFilenameObjects.map((fno) => fno.oldFilePath))];
 
   let prevFilesCommits = [];
   if (previousFilenamesPaths.length > 0) {
-    prevFilesCommits = await Database.getCommitsWithFilesForFiles(previousFilenamesPaths);
+    prevFilesCommits = allCommits.filter((c) => {
+      for (const file of c.files.data) {
+        if (previousFilenamesPaths.includes(file.file.path)) {
+          return true;
+        }
+      }
+    });
   }
 
   //for each of the previous filenames
@@ -159,7 +187,8 @@ export async function getCommitHashesForFiles(filenames, branch) {
     commits = _.concat(commits, commitsForOldFilename);
   }
   //get sha hashes
-  return _.uniq(commits.map((c) => c.sha));
+  const result = _.uniq(commits.map((c) => c.sha));
+  return result;
 }
 
 export function getIssueData(iid) {

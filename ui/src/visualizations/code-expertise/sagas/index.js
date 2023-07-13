@@ -5,17 +5,11 @@ import _ from 'lodash';
 import { fetchFactory, timestampedActionFactory, mapSaga } from '../../../sagas/utils.js';
 
 import {
-  getAllCommits,
   getCommitsForBranch,
-  getCommitHashesForIssue,
-  getCommitHashesForFiles,
-  getIssueData,
-  getAllBuildData,
   addBuildData,
   getBlameModules,
-  getBlameIssues,
-  getFilesForCommits,
-  getPreviousFilenames,
+  modulesModeData,
+  issuesModeData,
 } from './helper.js';
 
 //define actions
@@ -105,31 +99,15 @@ export const fetchCodeExpertiseData = fetchFactory(
     if (mode === 'issues') {
       if (issueId === null) return result;
 
-      dataPromise = Promise.all([
-        getAllCommits(),
-        getIssueData(issueId),
-        getCommitHashesForIssue(issueId),
-        getAllBuildData(),
-        getPreviousFilenames(activeFiles, currentBranch),
-      ]).then((results) => {
-        const allCommits = results[0];
-        const issue = results[1];
-        const issueCommitHashes = results[2];
-        const builds = results[3];
-        const prevFilenames = results[4];
+      dataPromise = issuesModeData(activeFiles, currentBranch, issueId)
+      .then(([allCommits, issueData, relevantCommitHashes, buildData, previousFilenames]) => {
         //set current issue
-        result['issue'] = issue;
-        return [allCommits, issueCommitHashes, builds, prevFilenames];
+        result['issue'] = issueData;
+        return [allCommits, relevantCommitHashes, buildData, previousFilenames];
       });
     } else if (mode === 'modules') {
       if (activeFiles === null || activeFiles.length === 0) return result;
-
-      dataPromise = Promise.all([
-        getAllCommits(),
-        getCommitHashesForFiles(activeFiles, currentBranch),
-        getAllBuildData(),
-        getPreviousFilenames(activeFiles, currentBranch),
-      ]);
+      dataPromise = modulesModeData(activeFiles, currentBranch);
     } else {
       console.log('error in fetchCodeExpertiseData: invalid mode: ' + mode);
       return result;
@@ -224,7 +202,7 @@ export const fetchCodeExpertiseData = fetchFactory(
 
       //########### add ownership data to commits ###########
 
-      // dont add ownership when in issues mode
+      // don't add ownership when in issues mode
       if (mode === 'issues') {
         return result;
       }
