@@ -40,8 +40,8 @@ export default class ServerDB {
     return Commits.getCommitDataWithFiles(commitSpan, significantSpan);
   }
 
-  static getCommitDataOwnershipRiver(commitSpan, significantSpan, granularity, interval) {
-    return Commits.getCommitDataOwnershipRiver(commitSpan, significantSpan, granularity, interval);
+  static getCommitDataOwnershipRiver(commitSpan, significantSpan, granularity, interval, excludeMergeCommits) {
+    return Commits.getCommitDataOwnershipRiver(commitSpan, significantSpan, granularity, interval, excludeMergeCommits);
   }
 
   static getBuildDataOwnershipRiver(commitSpan, significantSpan, granularity, interval) {

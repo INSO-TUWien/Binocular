@@ -3,7 +3,15 @@
 import React from 'react';
 import { connect } from 'react-redux';
 import styles from './styles.scss';
-import { setResolution, setTimeSpan, setSelectedAuthors, setAllAuthors, setMergedAuthorList, setOtherAuthorList } from '../../sagas';
+import {
+  setResolution,
+  setTimeSpan,
+  setSelectedAuthors,
+  setAllAuthors,
+  setMergedAuthorList,
+  setOtherAuthorList,
+  setExcludeMergeCommits,
+} from '../../sagas';
 import DateRangeFilter from '../DateRangeFilter/dateRangeFilter';
 import AuthorMerger from './authorMerger/authorMerger';
 import AuthorList from './authorList/authorList';
@@ -55,6 +63,7 @@ const mapStateToProps = (state /*, ownProps*/) => {
     otherAuthors: otherAuthors,
     firstSignificantTimestamp: universalSettings.universalSettingsData.data.firstSignificantTimestamp,
     lastSignificantTimestamp: universalSettings.universalSettingsData.data.lastSignificantTimestamp,
+    excludeMergeCommits: universalSettings.excludeMergeCommits,
   };
 };
 
@@ -66,6 +75,7 @@ const mapDispatchToProps = (dispatch /*, ownProps*/) => {
     onMergedAuthorListChanged: (selected) => dispatch(setMergedAuthorList(selected)),
     onOtherAuthorListChanged: (selected) => dispatch(setOtherAuthorList(selected)),
     onSetPalette: (allAuthors) => dispatch(setAllAuthors(allAuthors)),
+    onSetExcludeMergeCommits: (checked) => dispatch(setExcludeMergeCommits(checked)),
   };
 };
 
@@ -158,7 +168,7 @@ class UniversalConfigComponent extends React.PureComponent {
         ) : (
           ''
         )}
-        <label className="label">Granularity</label>
+        <h2>Granularity</h2>
         <div className="control">
           <div className="select">
             <select value={this.props.chartResolution} onChange={(e) => this.props.onClickResolution(e.target.value)}>
@@ -169,7 +179,7 @@ class UniversalConfigComponent extends React.PureComponent {
             </select>
           </div>
         </div>
-        <label className="label">Date Range</label>
+        <h2>Date Range</h2>
         <div>
           <DateRangeFilter
             from={this.props.firstDisplayDate}
@@ -192,7 +202,7 @@ class UniversalConfigComponent extends React.PureComponent {
             Reset
           </button>
         </div>
-        <label className="label">Authors</label>
+        <h2>Authors</h2>
         <div>
           <AuthorList
             palette={this.props.palette}
@@ -211,6 +221,20 @@ class UniversalConfigComponent extends React.PureComponent {
           }}>
           Merge duplicate Authors
         </button>
+        <h2>Commits</h2>
+        <div className="field">
+          <input
+            id="aggregateTimeSwitch"
+            type="checkbox"
+            name="aggregateTimeSwitch"
+            className={'switch is-rounded is-outlined is-info'}
+            defaultChecked={this.props.excludeMergeCommits}
+            onChange={(e) => this.props.onSetExcludeMergeCommits(e.target.checked)}
+          />
+          <label htmlFor="aggregateTimeSwitch" className={styles.switch}>
+            Exclude Merge Commits
+          </label>
+        </div>
       </div>
     );
   }

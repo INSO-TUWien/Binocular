@@ -165,7 +165,7 @@ export default class Commits {
     });
   }
 
-  static getCommitDataOwnershipRiver(db, commitSpan, significantSpan, granularity, interval) {
+  static getCommitDataOwnershipRiver(db, commitSpan, significantSpan, granularity, interval, excludeMergeCommits) {
     const statsByAuthor = {};
 
     const totals = {
@@ -238,11 +238,14 @@ export default class Commits {
     }
 
     return findAll(db, 'commits').then((res) => {
-      const commits = res.docs
+      let commits = res.docs
         .filter((c) => new Date(c.date) >= first && new Date(c.date) <= last)
         .sort((a, b) => {
           return new Date(a.date) - new Date(b.date);
         });
+      if (excludeMergeCommits) {
+        commits = commits.filter((c) => !c.message.includes('Merge'));
+      }
       commits.map((commit) => {
         const dt = Date.parse(commit.date);
         let stats = statsByAuthor[commit.signature];

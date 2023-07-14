@@ -21,7 +21,7 @@ export default function* () {
   yield fork(watchSetCategory);
   yield fork(watchSetResolution);
   yield fork(watchRefreshRequests);
-  yield fork(watchMessages);
+  yield fork(watchProgress);
   yield fork(watchRefresh);
   yield fork(watchSetIssueField);
 
@@ -51,8 +51,8 @@ function* watchRefreshRequests() {
   yield throttle(5000, 'REQUEST_REFRESH', mapSaga(refresh));
 }
 
-function* watchMessages() {
-  yield takeEvery('message', mapSaga(requestRefresh));
+function* watchProgress() {
+  yield takeEvery('PROGRESS', mapSaga(requestRefresh));
 }
 
 function* watchRefresh() {
