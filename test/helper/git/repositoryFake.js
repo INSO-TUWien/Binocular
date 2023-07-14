@@ -7,7 +7,6 @@ const fse = require('fs-extra');
 const Random = require('random-js');
 const path = require('path');
 const faker = require('faker');
-const isomorphicGit = require('isomorphic-git');
 const fakerHelpers = require('faker/lib/helpers.js')(faker);
 const firstNames = require('faker/lib/locales/en/name/first_name.js');
 const lastNames = require('faker/lib/locales/en/name/last_name.js');
@@ -15,7 +14,7 @@ const emailProviders = require('faker/lib/locales/en/internet/free_email.js');
 const lorem = require('lorem-ipsum').loremIpsum;
 
 const helpers = require('./helpers.js');
-const Repository = require('../lib/core/provider/git.js');
+const Repository = require('../../../lib/core/provider/git.js');
 
 const neutralVerbs = ['removed'];
 const positiveVerbs = ['improved', 'added', 'refactored', 'adjusted', 'tweaked', ...neutralVerbs];
@@ -30,7 +29,7 @@ const mt = Random.MersenneTwister19937.seed(4); // chosen by fair dice roll, gua
 
 const random = new Random.Random(mt);
 
-const fake = {
+const repositoryFake = {
   integer: function (...args) {
     return random.integer(...args);
   },
@@ -41,9 +40,9 @@ const fake = {
 
   repository: function (name) {
     return temp
-      .mkdirAsync(null)
-      .bind({})
-      .then(function (dirPath) {
+      .mkdir(null)
+
+      .then((dirPath) => {
         if (name) {
           dirPath = path.join(dirPath, name);
         }
@@ -51,11 +50,8 @@ const fake = {
         this.repoPath = dirPath;
         return fse.emptyDir(dirPath);
       })
-      .then(function () {
-        return isomorphicGit.init({ fs, dir: this.repoPath || '.' });
-      })
-      .then(function (repo) {
-        return Repository.fromRepo(repo);
+      .then(() => {
+        return Repository.fromPath(this.repoPath);
       });
   },
 
@@ -64,7 +60,7 @@ const fake = {
   },
 
   email: function () {
-    return fake.emailFor(fake.name());
+    return repositoryFake.emailFor(repositoryFake.name());
   },
 
   emailFor: function (name) {
@@ -72,7 +68,7 @@ const fake = {
   },
 
   signature: function () {
-    return fake.signatureFor(fake.name());
+    return repositoryFake.signatureFor(repositoryFake.name());
   },
 
   file: function (dirPath, filePath, contents) {
@@ -82,13 +78,11 @@ const fake = {
 
     const fullPath = path.join(dirPath, filePath);
 
-    return fse.ensureFile(fullPath).then(function () {
-      return fs.writeFile(fullPath, contents);
-    });
+    return fs.writeFile(fullPath, contents);
   },
 
   stageFile: function (repo, filePath, contents) {
-    return fake.file(repo.path, filePath, contents).then(function () {
+    return repositoryFake.file(repo.path, filePath, contents).then(function () {
       return helpers.stage(repo, filePath);
     });
   },
@@ -99,7 +93,7 @@ const fake = {
       email = null;
     }
 
-    //return nodegit.Signature.create(name, email || fake.emailFor(name), (date || new Date()).getTime(), 0);
+    //return nodegit.Signature.create(name, email || repositoryFake.emailFor(name), (date || new Date()).getTime(), 0);
     //no equivalent in isomorphic git to nodegit
     return {};
   },
@@ -118,7 +112,7 @@ const fake = {
 
   message: function () {
     let verbs, nouns;
-    if (fake.boolean(0.7)) {
+    if (repositoryFake.boolean(0.7)) {
       [verbs, nouns] = [positiveVerbs, positiveNouns];
     } else {
       [verbs, nouns] = [negativeVerbs, negativeNouns];
@@ -136,8 +130,8 @@ const fake = {
   },
 };
 
-module.exports = fake;
+module.exports = repositoryFake;
 
 function pickOne(array) {
-  return array[fake.integer(0, array.length - 1)];
+  return array[repositoryFake.integer(0, array.length - 1)];
 }
