@@ -1,10 +1,14 @@
 module.exports = {
-  rootDir: 'test/frontend',
+  roots: ['<rootDir>'],
   transform: {
-    '.*': '<rootDir>/../../node_modules/babel-jest',
+    '^.+\\.js$': 'babel-jest',
   },
+  testMatch: ['<rootDir>/test/frontend/**'],
+  modulePaths: ['<rootDir>'],
+  testEnvironment: 'jsdom',
+  transformIgnorePatterns: ['node_modules/(?!d3|d3-array|internmap|delaunator|robust-predicates)'],
+  moduleDirectories: ['node_modules'],
   moduleFileExtensions: ['js', 'jsx', 'json'],
   collectCoverage: true,
-  coverageDirectory: '<rootDir>/../../coverage/ui',
-  transformIgnorePatterns: ['node_modules/(?!d3|d3-array|internmap|delaunator|robust-predicates)'],
+  coverageDirectory: '<rootDir>/coverage/ui',
 };
