@@ -8,7 +8,7 @@
     "test-server": "mocha --reporter spec test/backend",
     "test-ui": "jest --config jest.config.js",
     "coverage": "npm run coverage-server && npm run coverage-ui && npm run collect-coverage",
-    "coverage-server": "nyc ./node_modules/.bin/_mocha",
+    "coverage-server": "nyc ./node_modules/.bin/_mocha test/backend",
     "coverage-ui": "jest --config jest-coverage.config.js",
     "collect-coverage": "./scripts/collect-coverage.js",
     "depcheck": "depcheck",
