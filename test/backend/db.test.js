@@ -63,8 +63,8 @@ describe('db', function () {
     });
   });
 
-  describe('#turncat', function () {
-    it('turncat Data', async function () {
+  describe('#turncate', function () {
+    it('turncate Data', async function () {
       await db.ensureDatabase('test');
       await db.truncate();
       await TestModel.ensureCollection();
