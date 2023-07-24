@@ -52,6 +52,7 @@ const LanguageFileConnection = require('./lib/models/LanguageFileConnection');
 const BranchFileConnection = require('./lib/models/BranchFileConnection');
 const BranchFileFileConnection = require('./lib/models/BranchFileFileConnection.js');
 const CommitFileStakeholderConnection = require('./lib/models/CommitFileStakeholderConnection.js');
+const CommitFileConnection = require('./lib/models/CommitFileConnection.js');
 const ConfigurationError = require('./lib/errors/ConfigurationError');
 const DatabaseError = require('./lib/errors/DatabaseError');
 const GateWayService = require('./lib/gateway-service');
@@ -483,6 +484,7 @@ function ensureDb(repo, context) {
         Branch.ensureCollection(),
         Module.ensureCollection(),
         MergeRequest.ensureCollection(),
+        CommitFileConnection.ensureCollection(),
         LanguageFileConnection.ensureCollection(),
         CommitStakeholderConnection.ensureCollection(),
         IssueStakeholderConnection.ensureCollection(),
