@@ -4,7 +4,7 @@ import styles from '../styles.scss';
 
 export default () => {
   return (
-    <div className={styles.container}>
+    <div className={styles.chartDetailsContainer}>
       <Chart />
       <Details />
     </div>
