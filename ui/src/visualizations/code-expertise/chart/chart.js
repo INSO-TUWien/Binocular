@@ -104,7 +104,7 @@ const Chart = () => {
       const devLinesOwned = devData.linesOwned;
 
       //we dont care about stakeholders that for example only have deletions for selected files
-      if(devAdditions === 0) return;
+      if (devAdditions === 0) return;
 
       //at which point in a circle should the segment start
       const startPercent = totalPercent;
@@ -176,7 +176,7 @@ const Chart = () => {
           <LegendCompact text="Good Commits rel. to all Commits of Dev" color={legendGoodCommitsColor} />
           <LegendCompact text="Bad Commits rel. to all Commits of Dev" color={legendBadCommitsColor} />
           <LegendCompact text="# of Commits rel. to others" color={`url(#${legendDotsId})`} />
-          {(mode === 'issues') && <LegendCompact text="Added lines of code" color={`url(#${legendHatchId})`} />}
+          {mode === 'issues' && <LegendCompact text="Added lines of code" color={`url(#${legendHatchId})`} />}
           {!(mode === 'issues') && (
             <>
               <LegendCompact text="Added lines of code" color={`url(#${legendHatchId})`} color2={legendColor} />

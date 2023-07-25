@@ -34,7 +34,6 @@ const Details = () => {
   const issueData = useSelector((state) => state.visualizations.codeExpertise.state.data.data.issue);
   const mode = useSelector((state) => state.visualizations.codeExpertise.state.config.mode);
 
-
   useEffect(() => {
     setDevDetails(null);
 

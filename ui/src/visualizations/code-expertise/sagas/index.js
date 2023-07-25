@@ -4,13 +4,7 @@ import _ from 'lodash';
 
 import { fetchFactory, timestampedActionFactory, mapSaga } from '../../../sagas/utils.js';
 
-import {
-  getCommitsForBranch,
-  addBuildData,
-  getBlameModules,
-  modulesModeData,
-  issuesModeData,
-} from './helper.js';
+import { getCommitsForBranch, addBuildData, getBlameModules, modulesModeData, issuesModeData } from './helper.js';
 
 //define actions
 export const requestCodeExpertiseData = createAction('REQUEST_CODE_EXPERTISE_DATA');
@@ -99,12 +93,13 @@ export const fetchCodeExpertiseData = fetchFactory(
     if (mode === 'issues') {
       if (issueId === null) return result;
 
-      dataPromise = issuesModeData(activeFiles, currentBranch, issueId)
-      .then(([allCommits, issueData, relevantCommitHashes, buildData, previousFilenames]) => {
-        //set current issue
-        result['issue'] = issueData;
-        return [allCommits, relevantCommitHashes, buildData, previousFilenames];
-      });
+      dataPromise = issuesModeData(activeFiles, currentBranch, issueId).then(
+        ([allCommits, issueData, relevantCommitHashes, buildData, previousFilenames]) => {
+          //set current issue
+          result['issue'] = issueData;
+          return [allCommits, relevantCommitHashes, buildData, previousFilenames];
+        }
+      );
     } else if (mode === 'modules') {
       if (activeFiles === null || activeFiles.length === 0) return result;
       dataPromise = modulesModeData(activeFiles, currentBranch);

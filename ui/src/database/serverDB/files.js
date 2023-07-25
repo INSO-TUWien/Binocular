@@ -109,7 +109,7 @@ export default class Files {
   }
 
   static getOwnershipDataForFiles(files) {
-    files = files.map((f) => `\"${f}\"`);
+    files = files.map((f) => `"${f}"`);
     return graphQl
       .query(
         `query {
@@ -133,11 +133,13 @@ export default class Files {
        }`,
         {}
       )
-      .then((resp) => resp.files.data.map((d) => {
-        return {
-          path: d.path,
-          ownership: d.ownership.data,
-        }
-      }))
+      .then((resp) =>
+        resp.files.data.map((d) => {
+          return {
+            path: d.path,
+            ownership: d.ownership.data,
+          };
+        })
+      );
   }
 }

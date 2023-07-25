@@ -172,7 +172,6 @@ export default class Commits {
   }
 
   static getOwnershipDataForCommit(db, relations, sha) {
-
     return findCommit(db, sha).then(async (res) => {
       const commit = res.docs[0];
 
@@ -181,15 +180,15 @@ export default class Commits {
       const fileCommitConnections = (await findFileCommitConnections(relations)).docs;
       const fileCommitStakeholderConnections = (await findFileCommitStakeholderConnections(relations)).docs;
 
-      let result = []
+      let result = [];
 
       //find commits-files connection of this commit
       const relevantConnections = fileCommitConnections.filter((fCC) => fCC.to === commit._id);
       for (const conn of relevantConnections) {
         const relevantFile = files.filter((f) => f._id === conn.from)[0];
 
-        let fileResult = { path: relevantFile.path, ownership: [], };
-        
+        let fileResult = { path: relevantFile.path, ownership: [] };
+
         let relevantOwnershipConnections = fileCommitStakeholderConnections.filter((fcsc) => fcsc.from === conn._id);
 
         //for each of the ownership connections, add the signature of the stakeholder and the owned lines to fileResult.ownership
