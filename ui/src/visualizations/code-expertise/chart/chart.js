@@ -103,6 +103,9 @@ const Chart = () => {
       const devAdditions = devData.additions;
       const devLinesOwned = devData.linesOwned;
 
+      //we dont care about stakeholders that for example only have deletions for selected files
+      if(devAdditions === 0) return;
+
       //at which point in a circle should the segment start
       const startPercent = totalPercent;
 
