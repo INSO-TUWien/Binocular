@@ -151,6 +151,11 @@ export default class TimeSpentChart extends React.Component {
             const timeSubtractedDeletedNote = /^deleted -([0-9a-z ]+) of spent time.*?$/.exec(note.body);
             const removedTimeSpentNote = /^removed time spent.*?$/.exec(note.body);
 
+            if (note.author.name === 'Marija Pantelic') {
+              console.log(issue);
+              console.log(note.body);
+            }
+
             if (timeAddedNote) {
               issueTimeTrackingData.push({
                 authorName: note.author.name,

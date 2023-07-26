@@ -56,11 +56,11 @@ export default class Database {
     }
   }
 
-  static async getCommitDataOwnershipRiver(commitSpan, significantSpan, granularity, interval) {
+  static async getCommitDataOwnershipRiver(commitSpan, significantSpan, granularity, interval, excludeMergeCommits) {
     if (await this.checkBackendConnection()) {
-      return ServerDB.getCommitDataOwnershipRiver(commitSpan, significantSpan, granularity, interval);
+      return ServerDB.getCommitDataOwnershipRiver(commitSpan, significantSpan, granularity, interval, excludeMergeCommits);
     } else {
-      return LocalDB.getCommitDataOwnershipRiver(commitSpan, significantSpan, granularity, interval);
+      return LocalDB.getCommitDataOwnershipRiver(commitSpan, significantSpan, granularity, interval, excludeMergeCommits);
     }
   }
 

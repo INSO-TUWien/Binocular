@@ -28,7 +28,7 @@ export default function* () {
   yield* fetchCodeOwnershipData();
 
   yield fork(watchRefreshRequests);
-  yield fork(watchMessages);
+  yield fork(watchProgress);
 
   yield fork(watchOpenCommit);
 
@@ -41,6 +41,7 @@ export default function* () {
   // keep looking for universal settings changes
   yield fork(watchTimeSpan);
   yield fork(watchSelectedAuthorsGlobal);
+  yield fork(watchExcludeMergeCommits);
 }
 
 function* watchTimeSpan() {
@@ -54,8 +55,12 @@ function* watchRefreshRequests() {
   yield throttle(5000, 'REQUEST_REFRESH', mapSaga(refresh));
 }
 
-function* watchMessages() {
-  yield takeEvery('message', mapSaga(requestRefresh));
+function* watchProgress() {
+  yield takeEvery('PROGRESS', mapSaga(requestRefresh));
+}
+
+function* watchExcludeMergeCommits() {
+  yield takeEvery('SET_EXCLUDE_MERGE_COMMITS', fetchCodeOwnershipData);
 }
 
 export function* watchOpenCommit() {
@@ -114,7 +119,8 @@ export const fetchCodeOwnershipData = fetchFactory(
         [firstCommitTimestamp, lastCommitTimestamp],
         [firstSignificantTimestamp, lastSignificantTimestamp],
         granularity,
-        interval
+        interval,
+        state.universalSettings.excludeMergeCommits
       ),
       Database.getIssueDataOwnershipRiver(
         [firstIssueTimestamp, lastIssueTimestamp],
@@ -132,7 +138,8 @@ export const fetchCodeOwnershipData = fetchFactory(
         [firstCommitTimestamp, lastCommitTimestamp],
         [firstCommitTimestamp, lastCommitTimestamp],
         granularity,
-        interval
+        interval,
+        state.universalSettings.excludeMergeCommits
       ),
       Database.getIssueDataOwnershipRiver(
         [firstIssueTimestamp, lastIssueTimestamp],
