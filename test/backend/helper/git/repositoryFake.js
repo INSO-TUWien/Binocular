@@ -80,6 +80,15 @@ const repositoryFake = {
 
     return fs.writeFile(fullPath, contents);
   },
+  dir: function (dirPath, dir) {
+    if (dirPath instanceof Repository) {
+      dirPath = dirPath.getRoot();
+    }
+
+    const fullPath = path.join(dirPath, dir);
+
+    return fs.mkdir(fullPath);
+  },
 
   stageFile: function (repo, filePath, contents) {
     return repositoryFake.file(repo.path, filePath, contents).then(function () {

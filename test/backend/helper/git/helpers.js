@@ -23,6 +23,14 @@ const helpers = {
 
     return repo.createCommit(files, committer, message);
   },
+
+  branch: function (repo, branchName) {
+    return repo.createBranch(branchName);
+  },
+
+  checkout: function (repo, branchName) {
+    return repo.checkout(branchName);
+  },
 };
 
 module.exports = helpers;
