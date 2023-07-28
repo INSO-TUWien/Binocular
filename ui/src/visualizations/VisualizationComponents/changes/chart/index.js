@@ -22,6 +22,7 @@ const mapStateToProps = (state /*, ownProps*/) => {
     otherAuthors: universalSettings.otherAuthors,
     mergedAuthors: universalSettings.mergedAuthors,
     chartResolution: universalSettings.chartResolution,
+    excludeMergeCommits: universalSettings.excludeMergeCommits,
   };
 };
 

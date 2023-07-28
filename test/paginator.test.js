@@ -169,7 +169,9 @@ function createArrayBasedPaginator(arraySize) {
 
   const getPage = (page, perPage) => {
     const start = (page - 1) * perPage;
-    return data.slice(start, start + perPage);
+    return new Promise(function (resolve) {
+      resolve(data.slice(start, start + perPage));
+    });
   };
 
   const getItems = (page) => page;
