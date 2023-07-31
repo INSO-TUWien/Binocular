@@ -143,6 +143,40 @@ export default class Commits {
       });
   }
 
+  static getOwnershipDataForCommit(sha) {
+    return graphQl
+      .query(
+        `
+      query {
+        commit(sha:"${sha}") {
+          files{
+            data {
+              file{
+                path,
+                ownershipForCommit(commit:"${sha}") {
+                  data{
+                    stakeholder,
+                    ownedLines
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+      `
+      )
+      .then((res) => res.commit.files.data)
+      .then((files) =>
+        files.map((f) => {
+          return {
+            path: f.file.path,
+            ownership: f.file.ownershipForCommit.data,
+          };
+        })
+      );
+  }
+
   static getCommitDataOwnershipRiver(commitSpan, significantSpan, granularity, interval, excludeMergeCommits) {
     const statsByAuthor = {};
 

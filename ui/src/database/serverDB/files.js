@@ -107,4 +107,39 @@ export default class Files {
         return result;
       });
   }
+
+  static getOwnershipDataForFiles(files) {
+    files = files.map((f) => `"${f}"`);
+    return graphQl
+      .query(
+        `query {
+          files(paths: [${files}]) {
+            data {
+              path
+              ownership {
+                data {
+                  commit {
+                    sha
+                    date
+                  }
+                  ownership {
+                    stakeholder
+                    ownedLines
+                  }
+                }
+              }
+            }
+          }
+       }`,
+        {}
+      )
+      .then((resp) =>
+        resp.files.data.map((d) => {
+          return {
+            path: d.path,
+            ownership: d.ownership.data,
+          };
+        })
+      );
+  }
 }

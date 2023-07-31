@@ -24,6 +24,7 @@ import branchesFilesFiles from '../../db_export/branches-files-files.json';
 import builds from '../../db_export/builds.json';
 import commitsCommits from '../../db_export/commits-commits.json';
 import commitsFiles from '../../db_export/commits-files.json';
+import commitsFilesStakeholders from '../../db_export/commits-files-stakeholders.json';
 import commitsLanguages from '../../db_export/commits-languages.json';
 import commitsModules from '../../db_export/commits-modules.json';
 import commitsStakeholders from '../../db_export/commits-stakeholders.json';
@@ -45,6 +46,7 @@ const collections = { branches, builds, commits, files, issues, languages, modul
 const relations = {
   'commits-commits': commitsCommits,
   'commits-files': commitsFiles,
+  'commits-files-stakeholders': commitsFilesStakeholders,
   'commits-languages': commitsLanguages,
   'commits-modules': commitsModules,
   'commits-stakeholders': commitsStakeholders,
@@ -145,6 +147,14 @@ export default class LocalDB {
     return Commits.getCommitDataWithFiles(db, tripleStore, commitSpan, significantSpan);
   }
 
+  static getOwnershipDataForCommit(sha) {
+    return Commits.getOwnershipDataForCommit(db, tripleStore, sha);
+  }
+
+  static getOwnershipDataForFiles(files) {
+    return Files.getOwnershipDataForFiles(db, tripleStore, files);
+  }
+
   static getCommitDataOwnershipRiver(commitSpan, significantSpan, granularity, interval, excludeMergeCommits) {
     return Commits.getCommitDataOwnershipRiver(db, commitSpan, significantSpan, granularity, interval, excludeMergeCommits);
   }
@@ -219,6 +229,7 @@ export default class LocalDB {
     //relations need to be mapped so that they have the same names as with the server based variant
     database.commits_commits = relations['commits-commits'];
     database.commits_files = relations['commits-files'];
+    database.commits_files_stakeholders = relations['commits-files-stakeholders'];
     database.commits_languages = relations['commits-languages'];
     database.commits_modules = relations['commits-modules'];
     database.commits_stakeholders = relations['commits-stakeholders'];

@@ -4,19 +4,7 @@ import _ from 'lodash';
 
 import { fetchFactory, timestampedActionFactory, mapSaga } from '../../../sagas/utils.js';
 
-import {
-  getAllCommits,
-  getCommitsForBranch,
-  getCommitHashesForIssue,
-  getCommitHashesForFiles,
-  getIssueData,
-  getAllBuildData,
-  addBuildData,
-  getBlameModules,
-  getBlameIssues,
-  getFilesForCommits,
-  getPreviousFilenames,
-} from './helper.js';
+import { getCommitsForBranch, addBuildData, getBlameModules, modulesModeData, issuesModeData } from './helper.js';
 
 //define actions
 export const requestCodeExpertiseData = createAction('REQUEST_CODE_EXPERTISE_DATA');
@@ -90,7 +78,6 @@ export const fetchCodeExpertiseData = fetchFactory(
     //the currentBranch object could be null, therefore ?. is used
     const currentBranch = state.visualizations.codeExpertise.state.config.currentBranch;
     const filterMergeCommits = state.visualizations.codeExpertise.state.config.filterMergeCommits;
-    const offlineMode = state.config.offlineMode;
 
     const result = {
       devData: {},
@@ -106,31 +93,16 @@ export const fetchCodeExpertiseData = fetchFactory(
     if (mode === 'issues') {
       if (issueId === null) return result;
 
-      dataPromise = Promise.all([
-        getAllCommits(),
-        getIssueData(issueId),
-        getCommitHashesForIssue(issueId),
-        getAllBuildData(),
-        getPreviousFilenames(activeFiles, currentBranch),
-      ]).then((results) => {
-        const allCommits = results[0];
-        const issue = results[1];
-        const issueCommitHashes = results[2];
-        const builds = results[3];
-        const prevFilenames = results[4];
-        //set current issue
-        result['issue'] = issue;
-        return [allCommits, issueCommitHashes, builds, prevFilenames];
-      });
+      dataPromise = issuesModeData(activeFiles, currentBranch, issueId).then(
+        ([allCommits, issueData, relevantCommitHashes, buildData, previousFilenames]) => {
+          //set current issue
+          result['issue'] = issueData;
+          return [allCommits, relevantCommitHashes, buildData, previousFilenames];
+        }
+      );
     } else if (mode === 'modules') {
       if (activeFiles === null || activeFiles.length === 0) return result;
-
-      dataPromise = Promise.all([
-        getAllCommits(),
-        getCommitHashesForFiles(activeFiles, currentBranch),
-        getAllBuildData(),
-        getPreviousFilenames(activeFiles, currentBranch),
-      ]);
+      dataPromise = modulesModeData(activeFiles, currentBranch);
     } else {
       console.log('error in fetchCodeExpertiseData: invalid mode: ' + mode);
       return result;
@@ -225,49 +197,18 @@ export const fetchCodeExpertiseData = fetchFactory(
 
       //########### add ownership data to commits ###########
 
-      //if the program runs in offline mode, don't add ownership data since this requires a back end connection
-      if (offlineMode) {
+      // don't add ownership when in issues mode
+      if (mode === 'issues') {
         return result;
       }
 
-      let ownershipDataPromise;
-
-      if (mode === 'issues') {
-        //get latest relevant commit of the branch
-        const latestRelevantCommit = relevantCommits.sort((a, b) => new Date(b.date) - new Date(a.date))[0];
-        //hashes of all relevant commits
-        const hashes = relevantCommits.map((commit) => commit.sha);
-        ownershipDataPromise = Promise.resolve(getFilesForCommits(hashes)).then((files) =>
-          getBlameIssues(
-            latestRelevantCommit.sha,
-            files.map((file) => file.file.path),
-            hashes
-          )
-        );
-      } else {
-        //get latest commit of the branch
-        const latestBranchCommit = branchCommits.sort((a, b) => new Date(b.date) - new Date(a.date))[0];
-        ownershipDataPromise = Promise.resolve(getBlameModules(latestBranchCommit.sha, activeFiles));
-      }
-
-      return ownershipDataPromise
-        .then((res) => {
-          Object.entries(res.blame).map((item) => {
-            const devMail = item[0];
-            const linesOwned = item[1];
-
-            //add to dev object
-            for (const stakeholder in commitsByStakeholders) {
-              if (stakeholder.includes('<' + devMail + '>')) {
-                result['devData'][stakeholder]['linesOwned'] = linesOwned;
-                break;
-              }
-            }
-          });
-        })
-        .then((_) => {
-          return result;
-        });
+      const latestBranchCommit = branchCommits.sort((a, b) => new Date(b.date) - new Date(a.date))[0];
+      return getBlameModules(latestBranchCommit, activeFiles).then((res) => {
+        for (const [name, val] of Object.entries(res)) {
+          result['devData'][name]['linesOwned'] = val;
+        }
+        return result;
+      });
     });
   },
   requestCodeExpertiseData,

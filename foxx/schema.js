@@ -116,13 +116,26 @@ const queryType = new gql.GraphQLObjectType({
         type: require('./types/file.js'),
         args: {
           sort: { type: Sort },
+          paths: { type: new gql.GraphQLList(gql.GraphQLString) },
         },
         query: (root, args, limit) => {
-          let q = qb.for('file').in('files').sort('file.path', args.sort);
-
-          q = q.limit(limit.offset, limit.count).return('file');
-
-          return q;
+          //if the paths argument exists, only return files where the path is contained in paths
+          if (args.paths) {
+            return aql`
+            FOR file in ${files}
+              FILTER POSITION(${args.paths}, file.path)
+              SORT file.path ${args.sort}
+              ${limit}
+              RETURN file
+            `;
+          } else {
+            return aql`
+            FOR file in ${files}
+              SORT file.path ${args.sort}
+              ${limit}
+              RETURN file
+            `;
+          }
         },
       }),
       file: {

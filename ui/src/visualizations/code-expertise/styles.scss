@@ -9,7 +9,7 @@
 }
 
 //overall container for the chart and the details sideboard
-.container {
+.chartDetailsContainer {
   width: 100%;
   display: flex;
   overflow: hidden;
@@ -25,7 +25,6 @@
 
   .messageContainer{
     flex: 1;
-    height: 100vh;
     display: flex;
     justify-content: center;
     align-items: center;
