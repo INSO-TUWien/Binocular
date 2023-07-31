@@ -5,6 +5,7 @@ const arangodb = require('@arangodb');
 const db = arangodb.db;
 const aql = arangodb.aql;
 const commitsToFiles = db._collection('commits-files');
+const commitsToFilesToStakeholders = db._collection('commits-files-stakeholders');
 const builds = db._collection('builds');
 const commitsToStakeholders = db._collection('commits-stakeholders');
 const commitsToLanguages = db._collection('commits-languages');
@@ -68,12 +69,21 @@ module.exports = new gql.GraphQLObjectType({
         query: (commit, args, limit) => aql`
           FOR file, edge
             IN INBOUND ${commit} ${commitsToFiles}
+            let o = (
+              FOR stakeholder, conn
+                IN OUTBOUND edge ${commitsToFilesToStakeholders}
+                    RETURN {
+                      stakeholder: stakeholder.gitSignature,
+                      ownedLines: conn.ownedLines,
+                    }
+            )
             ${limit}
             RETURN {
-              file,
+              file: file,
               lineCount: edge.lineCount,
               stats: edge.stats,
-              hunks: edge.hunks
+              hunks: edge.hunks,
+              ownership: o,
             }`,
       }),
       file: {

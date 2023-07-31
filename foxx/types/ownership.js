@@ -1,18 +1,17 @@
 'use strict';
 
 const gql = require('graphql-sync');
-const Timestamp = require('./Timestamp.js');
 
 module.exports = new gql.GraphQLObjectType({
-  name: 'OwnershipInFile',
+  name: 'Ownership',
   description: 'how many lines of a file does a stakeholder own at the time of a commit',
   fields() {
     return {
-      commit: {
-        type: require('./commit.js'),
+      stakeholder: {
+        type: new gql.GraphQLNonNull(gql.GraphQLString),
       },
-      ownership: {
-        type: new gql.GraphQLList(require('./stakeholderInFile.js')),
+      ownedLines: {
+        type: new gql.GraphQLNonNull(gql.GraphQLInt),
       },
     };
   },

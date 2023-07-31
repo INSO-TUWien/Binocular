@@ -43,15 +43,25 @@ module.exports = new gql.GraphQLObjectType({
             RETURN language`,
       },
       commits: paginated({
-        type: require('./commit.js'),
+        type: require('./commitInFile.js'),
         description: 'The commits touching this file',
         query: (file, args, limit) => aql`
-          FOR commit
-          IN
-          OUTBOUND ${file} ${commitsToFiles}
+          FOR commit, edge
+            IN OUTBOUND ${file} ${commitsToFiles}
+            let o = (
+              FOR stakeholder, conn
+                  IN OUTBOUND edge ${commitsToFilesToStakeholders}
+                      RETURN {
+                          stakeholder: stakeholder.gitSignature,
+                          ownedLines: conn.ownedLines,
+                      }
+            )
             ${limit}
             SORT commit.date ASC
-            RETURN commit`,
+            RETURN {
+              commit: commit,
+              ownership: o,
+            }`,
       }),
       oldFileNames: paginated({
         type: require('./fileInFiles.js'),
@@ -73,44 +83,6 @@ module.exports = new gql.GraphQLObjectType({
                           hasThisNameFrom: conn.hasThisNameFrom,
                           hasThisNameUntil: conn.hasThisNameUntil
                       }`,
-      }),
-      ownershipForCommit: paginated({
-        type: require('./stakeholderInFile.js'),
-        args: {
-          commit: {
-            description: 'commit this file is touched by. Display ownership of file at the time of the specified commit.',
-            type: new gql.GraphQLNonNull(gql.GraphQLString),
-          },
-        },
-        query: (file, args, limit) => aql`
-        FOR commit IN commits
-        FILTER commit.sha == ${args.commit}
-        FOR touchedFile, edge
-            IN INBOUND commit ${commitsToFiles}
-            FILTER touchedFile == ${file}
-            FOR stakeholder, conn
-                IN OUTBOUND edge ${commitsToFilesToStakeholders}
-                    RETURN {
-                        stakeholder: stakeholder.gitSignature,
-                        ownedLines: conn.ownedLines,
-                    }`,
-      }),
-
-      ownership: paginated({
-        type: require('./ownershipInFile.js'),
-        query: (file, args, limit) => aql`
-        FOR commit, edge
-        IN OUTBOUND ${file} ${commitsToFiles}
-        let c = (commit)
-        let o = (
-          FOR stakeholder, conn
-              IN OUTBOUND edge ${commitsToFilesToStakeholders}
-                  RETURN {
-                      stakeholder: stakeholder.gitSignature,
-                      ownedLines: conn.ownedLines,
-                  }
-        )
-        RETURN {commit: c, ownership: o}`,
       }),
     };
   },
