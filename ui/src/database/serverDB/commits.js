@@ -92,6 +92,8 @@ export default class Commits {
     });
   }
 
+  //TODO: first query files and search for commit connections
+  //TODO move this to ./files.js
   static getCommitsForFiles(filenames, omitFiles) {
     return graphQl
       .query(
@@ -143,19 +145,57 @@ export default class Commits {
       });
   }
 
+
   static getOwnershipDataForCommit(sha) {
+    
     return graphQl
       .query(
         `
-      query {
-        commit(sha:"${sha}") {
-          files{
+        query {
+          commit(sha: "${sha}") {
+            files {
+              data {
+                file {
+                  path
+                }
+                ownership {
+                  stakeholder
+                  ownedLines
+                }
+              }
+            }
+          }
+        }
+      `
+      )
+      .then((res) => res.commit.files.data)
+      .then((ownershipData) =>
+        ownershipData.map((o) => {
+          return {
+            path: o.file.path,
+            ownership: o.ownership,
+          };
+        })
+      );
+  }
+
+
+  static getOwnershipDataForCommits() {
+    return graphQl
+      .query(
+        `
+        query {
+          commits {
             data {
-              file{
-                path,
-                ownershipForCommit(commit:"${sha}") {
-                  data{
-                    stakeholder,
+              sha
+              date
+              files {
+                data {
+                  file {
+                    path
+                  }
+                  ownership {
+                    stakeholder
                     ownedLines
                   }
                 }
@@ -163,15 +203,20 @@ export default class Commits {
             }
           }
         }
-      }
       `
       )
-      .then((res) => res.commit.files.data)
-      .then((files) =>
-        files.map((f) => {
+      .then((res) => res.commits.data)
+      .then((commits) =>
+        commits.map((c) => {
           return {
-            path: f.file.path,
-            ownership: f.file.ownershipForCommit.data,
+            sha: c.sha,
+            date: c.date,
+            ownership: c.files.data.map((fileData) => {
+              return {
+                path: fileData.file.path,
+                ownership: fileData.ownership,
+              }
+            }),
           };
         })
       );
@@ -391,6 +436,7 @@ export default class Commits {
               maxLength
               commits{
                   data{
+                    commit{
                       message
                       sha
                       signature
@@ -414,12 +460,16 @@ export default class Commits {
                               oldLines
                           }
                       }
+                    }
                   }
               }
           }
       }
       `,
       { file: file }
-    );
+    ).then((result) => {
+      result.file.commits.data = result.file.commits.data.map((d) => d.commit);
+      return result;
+    });
   }
 }

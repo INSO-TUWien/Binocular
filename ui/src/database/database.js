@@ -64,6 +64,15 @@ export default class Database {
     }
   }
 
+  static async getOwnershipDataForCommits() {
+    if (await this.checkBackendConnection()) {
+      return ServerDB.getOwnershipDataForCommits();
+    } else {
+      //TODO
+      //return LocalDB.getOwnershipDataForCommits();
+    }
+  }
+
   static async getOwnershipDataForFiles(files) {
     if (await this.checkBackendConnection()) {
       return ServerDB.getOwnershipDataForFiles(files);
