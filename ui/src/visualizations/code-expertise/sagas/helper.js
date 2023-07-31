@@ -65,44 +65,44 @@ export async function getBlameModules(commit, files) {
 //this steps through all commits (from most recent one backwards)
 // and collects ownership data until it has the most recent data for every file.
 //is *way* slower than getBlameModules, but may be of use for different usecases.
-export async function getBlameModulesAlternative(commit, files) {
-  //this contains the timeline of all commits from the initial commit until the most recent one
-  let commitsLeft = commit.history.split(',').reverse();
-  //filesLeft contains all files we want to get the ownership data from.
-  let filesLeft = files;
-  let result = {};
+// export async function getBlameModulesAlternative(commit, files) {
+//   //this contains the timeline of all commits from the initial commit until the most recent one
+//   let commitsLeft = commit.history.split(',').reverse();
+//   //filesLeft contains all files we want to get the ownership data from.
+//   let filesLeft = files;
+//   let result = {};
 
-  while (filesLeft.length !== 0 && commitsLeft.length !== 0) {
-    //remove the first (latest) commit from the commitsLeft array
-    const currentSha = commitsLeft.pop();
-    let ownershipData = await Database.getOwnershipDataForCommit(currentSha);
+//   while (filesLeft.length !== 0 && commitsLeft.length !== 0) {
+//     //remove the first (latest) commit from the commitsLeft array
+//     const currentSha = commitsLeft.pop();
+//     let ownershipData = await Database.getOwnershipDataForCommit(currentSha);
 
-    //we are only interested in ownership data related to filesLeft
-    ownershipData = ownershipData.filter((o) => filesLeft.includes(o.path));
+//     //we are only interested in ownership data related to filesLeft
+//     ownershipData = ownershipData.filter((o) => filesLeft.includes(o.path));
 
-    //if this commit touches files we are interested in, extract the ownership data
-    if (ownershipData.length !== 0) {
-      //for each relevant file
-      for (const fileOwnershipElement of ownershipData) {
-        //for each ownership element of the current file
-        for (const ownershipElement of fileOwnershipElement.ownership) {
-          if (!result[ownershipElement.stakeholder]) {
-            result[ownershipElement.stakeholder] = ownershipElement.ownedLines;
-          } else {
-            result[ownershipElement.stakeholder] += ownershipElement.ownedLines;
-          }
-        }
-      }
-      //we now have the most recent ownership data of this file. This means we dont have to extract ownership data for this file anymore
-      filesLeft = _.without(filesLeft, ...ownershipData.map((o) => o.path));
-    }
-  }
+//     //if this commit touches files we are interested in, extract the ownership data
+//     if (ownershipData.length !== 0) {
+//       //for each relevant file
+//       for (const fileOwnershipElement of ownershipData) {
+//         //for each ownership element of the current file
+//         for (const ownershipElement of fileOwnershipElement.ownership) {
+//           if (!result[ownershipElement.stakeholder]) {
+//             result[ownershipElement.stakeholder] = ownershipElement.ownedLines;
+//           } else {
+//             result[ownershipElement.stakeholder] += ownershipElement.ownedLines;
+//           }
+//         }
+//       }
+//       //we now have the most recent ownership data of this file. This means we dont have to extract ownership data for this file anymore
+//       filesLeft = _.without(filesLeft, ...ownershipData.map((o) => o.path));
+//     }
+//   }
 
-  if (filesLeft.length !== 0) {
-    console.log('Error in Code Expertise Visualization: no ownership data found for the following file(s):', filesLeft);
-  }
-  return result;
-}
+//   if (filesLeft.length !== 0) {
+//     console.log('Error in Code Expertise Visualization: no ownership data found for the following file(s):', filesLeft);
+//   }
+//   return result;
+// }
 
 export function getIssues() {
   return Database.getIssueData([], [minDate, maxDate]);

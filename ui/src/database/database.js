@@ -32,6 +32,15 @@ export default class Database {
     }
   }
 
+  static async getCommitDataForSha(sha) {
+    if (await this.checkBackendConnection()) {
+      return ServerDB.getCommitDataForSha(sha);
+    } else {
+      //TODO
+      //return LocalDB.getCommitDataForSha(sha);
+    }
+  }
+
   static async getCommitDataWithFiles(commitSpan, significantSpan) {
     if (await this.checkBackendConnection()) {
       return ServerDB.getCommitDataWithFiles(commitSpan, significantSpan);

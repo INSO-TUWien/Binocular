@@ -83,6 +83,7 @@ module.exports = new gql.GraphQLObjectType({
               lineCount: edge.lineCount,
               stats: edge.stats,
               hunks: edge.hunks,
+              action: edge.action,
               ownership: o,
             }`,
       }),

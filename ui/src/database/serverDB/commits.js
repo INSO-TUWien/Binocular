@@ -45,6 +45,28 @@ export default class Commits {
     });
   }
 
+  static getCommitDataForSha(sha) {
+    return graphQl
+      .query(
+        `query {
+          commit(sha: "${sha}") {
+            sha
+            branch
+            history
+            message
+            signature
+            webUrl
+            date
+            parents
+            stats {
+              additions
+              deletions
+            }
+          }
+        }`
+      )
+  }
+
   static getCommitDataWithFiles(commitSpan, significantSpan) {
     const commitList = [];
     const getCommitsPage = (since, until) => (page, perPage) => {
@@ -194,6 +216,7 @@ export default class Commits {
                   file {
                     path
                   }
+                  action
                   ownership {
                     stakeholder
                     ownedLines
@@ -211,9 +234,10 @@ export default class Commits {
           return {
             sha: c.sha,
             date: c.date,
-            ownership: c.files.data.map((fileData) => {
+            files: c.files.data.map((fileData) => {
               return {
                 path: fileData.file.path,
+                action: fileData.action,
                 ownership: fileData.ownership,
               }
             }),

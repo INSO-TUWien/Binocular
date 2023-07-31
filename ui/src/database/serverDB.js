@@ -20,6 +20,10 @@ export default class ServerDB {
     return Commits.getCommitData(commitSpan, significantSpan);
   }
 
+  static getCommitDataForSha(sha) {
+    return Commits.getCommitDataForSha(sha);
+  }
+
   static getBuildData(commitSpan, significantSpan) {
     return Builds.getBuildData(commitSpan, significantSpan);
   }
