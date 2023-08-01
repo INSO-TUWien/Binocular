@@ -5,7 +5,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import _ from 'lodash';
 
 import TabCombo from '../../../components/TabCombo.js';
-import FilePicker from './filePicker/index.js';
+import Filepicker from '../../../components/Filepicker/index.js';
 import styles from '../styles.scss';
 import { setActiveIssue, setMode, setCurrentBranch, setActiveFiles, setFilterMergeCommits, setOnlyDisplayOwnership } from '../sagas';
 import { getBranches, getFilenamesForBranch, getIssues } from '../sagas/helper.js';
@@ -15,6 +15,7 @@ export default () => {
   const expertiseState = useSelector((state) => state.visualizations.codeExpertise.state);
   const currentMode = expertiseState.config.mode;
   const currentBranch = expertiseState.config.currentBranch;
+  const activeFiles = expertiseState.config.activeFiles;
   const currentBranchName = currentBranch && currentBranch.branch;
   const activeIssueId = expertiseState.config.activeIssueId;
   const filterMergeCommits = expertiseState.config.filterMergeCommits;
@@ -191,7 +192,7 @@ export default () => {
             <div className="control">
               <label className="label">Choose Files and Modules to visualize:</label>
 
-              <FilePicker fileList={files} />
+              <Filepicker fileList={files} globalActiveFiles={activeFiles} setActiveFiles={(files) => dispatch(setActiveFiles(files))} />
             </div>
           </div>
         )}
