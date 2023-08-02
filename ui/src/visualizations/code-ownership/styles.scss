@@ -12,3 +12,18 @@
 
   }
 }
+
+.chartContainer{
+  height: 100%;
+  width: 100%;
+  flex-direction: column;
+  padding: 5px;
+  justify-content: center;
+
+  .chart{
+    width: 100%;
+    height: 100%;
+    background: #ffffff;
+    display: flex;
+  }
+}

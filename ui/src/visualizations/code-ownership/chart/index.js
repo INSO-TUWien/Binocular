@@ -2,12 +2,14 @@
 
 import { useSelector } from "react-redux";
 import StackedAreaChart from "../../../components/StackedAreaChart";
+import styles from '../styles.scss';
 import * as d3 from "d3";
 import { useState, useEffect } from "react";
 
 export default () => {
   
   //local state used for the chart
+  const [ownershipData, setOwnershipData] = useState([]);
   const [keys, setKeys] = useState([]);
   const [scale, setScale] = useState([]);
   const [chartData, setChartData] = useState([]);
@@ -16,7 +18,9 @@ export default () => {
   //global state
   const ownershipState = useSelector((state) => state.visualizations.codeOwnership.state);
   const isLoading = ownershipState.data.isFetching;
-  const ownershipData = ownershipState.data.data.ownershipData;
+  //const ownershipData = ownershipState.data.data.ownershipData;
+  const relevantOwnershipData = ownershipState.data.data.rawData;
+  const previousFilenames = ownershipState.data.data.previousFilenames;
   const displayMode = ownershipState.config.mode;
   const currentBranch = ownershipState.config.currentBranch;
   const activeFiles = ownershipState.config.activeFiles;
@@ -36,7 +40,82 @@ export default () => {
     setScale([]);
   }
 
-  //everytime the settings change (new data comes in, different files selected, mode changed etc.) recompute the chart data
+  //when a new branch is selected, new data is fetched. When the data is ready, prepare it for further processing.
+  useEffect(() => {
+    if (
+      relevantOwnershipData === undefined ||
+      relevantOwnershipData === null ||
+      activeFiles === undefined ||
+      activeFiles === null
+    ) {
+      return;
+    }
+
+    let resultOwnershipData = []
+
+    //stores the current ownership distribution for each file
+    const fileCache = {};
+
+    //step through the commits sequentially, starting with the oldest one
+    for (const commit of relevantOwnershipData) {
+      const commitResult = { sha: commit.sha, date: commit.date, ownership: {} };
+
+      //update fileCache for each file this commit touches
+      for (const file of commit.files) {
+        //if the file was deleted in this commit, delete it from the filecache
+        if (file.action === 'deleted') {
+          delete fileCache[file.path];
+        } else {
+          //if the file was either added or modified, we add it to the filecache (if it is relevant)
+          //the file is relevant if it is either one of the currently active files
+          // or if it is a previous version of an active file.
+          let relevant = activeFiles.includes(file.path);
+
+          if (!relevant) {
+            //look at the previous filenames of all active files
+            for (const [fileName, previousNames] of Object.entries(previousFilenames)) {
+              if(!activeFiles.includes(fileName)) continue;
+              if (relevant) break;
+              //for all previous filenames of the file we are currently looking at
+              for (const name of previousNames) {
+                //if this old filename is the one the current commit touches
+                // (same path and committed at a time where the file had that path),
+                // this file is relevant
+                if (
+                  name.oldFilePath === file.path &&
+                  new Date(name.hasThisNameFrom) <= new Date(commit.date) &&
+                  new Date(commit.date) <= new Date(name.hasThisNameUntil)
+                ) {
+                  relevant = true;
+                  break;
+                }
+              }
+            }
+          }
+
+          if (relevant) {
+            fileCache[file.path] = file.ownership;
+          }
+        }
+      }
+
+      //now filecache stores the current ownership for each file that exists at the time of the current commit
+      for (const [filePath, fileOwnershipData] of Object.entries(fileCache)) {
+        for (const ownershipOfStakeholder of fileOwnershipData) {
+          if (commitResult.ownership[ownershipOfStakeholder.stakeholder]) {
+            commitResult.ownership[ownershipOfStakeholder.stakeholder] += ownershipOfStakeholder.ownedLines;
+          } else {
+            commitResult.ownership[ownershipOfStakeholder.stakeholder] = ownershipOfStakeholder.ownedLines;
+          }
+        }
+      }
+      resultOwnershipData.push(commitResult);
+    }
+    setOwnershipData(resultOwnershipData)
+  }, [relevantOwnershipData, previousFilenames, activeFiles])
+  
+
+  //everytime the settings change (different files selected, mode changed etc.) recompute the chart data
   useEffect(() => {
     //if the global state has not loaded yet, return
     if (
@@ -171,8 +250,10 @@ export default () => {
 
 
   return(
-    <>
-    {chartComponent}
-    </> 
+    <div className={styles.chartContainer}>
+      <div className={styles.chart}>
+        {chartComponent}
+      </div>
+    </div> 
   )
 };
