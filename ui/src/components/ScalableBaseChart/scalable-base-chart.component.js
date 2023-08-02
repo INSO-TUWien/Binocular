@@ -40,6 +40,7 @@ export default class ScalableBaseChartComponent extends React.Component {
       zoomedDims: [0, 0],
       zoomedVertical: false,
       verticalZoomDims: [0, 0],
+      d3offset: props.d3offset,
       data: { data: [], stackedData: [] },
     };
     window.addEventListener('resize', () => this.updateElement());
@@ -172,7 +173,7 @@ export default class ScalableBaseChartComponent extends React.Component {
 
   hasUpdate() {
     const keysHash = hash(this.props.keys || []);
-    return { hashes: { keysHash }, hasChanges: this.state.data.keysHash !== keysHash };
+    return { hashes: { keysHash }, hasChanges: (this.state.data.keysHash !== keysHash) || this.state.d3offset !== this.props.d3offset };
   }
 
   /**
@@ -189,6 +190,7 @@ export default class ScalableBaseChartComponent extends React.Component {
       this.setState(
         {
           data: Object.assign({ hash: contentHash, orderHash }, hashes, this.calculateChartData(this.props.content, this.props.order)),
+          d3offset: this.props.d3offset
         },
         this.visualizeData
       );

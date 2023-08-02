@@ -138,8 +138,6 @@ export const fetchCodeOwnershipData = fetchFactory(
           }
           result.ownershipData.push(commitResult);
         }
-
-        console.log(result);
         return result;
       })
       .catch((e) => {
