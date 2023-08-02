@@ -23,6 +23,8 @@ export default () => {
 
   const universalSettings = useSelector((state) => state.universalSettings);
   const selectedAuthors = universalSettings.selectedAuthorsGlobal;
+  const otherAuthors = universalSettings.otherAuthors;
+  const mergedAuthors = universalSettings.mergedAuthors;
   const tooltipGranularity = universalSettings.chartResolution;
   const authorColors = universalSettings.universalSettingsData.data.palette;
   const dateFrom = universalSettings.chartTimeSpan.from;
@@ -67,9 +69,9 @@ export default () => {
         }
       }
     });
-    setKeys(tempKeys);
+    tempKeys.push('other')
 
-    
+    setKeys(tempKeys);
 
     setChartData(
       filteredOwnershipData.map((d) => {
@@ -82,9 +84,23 @@ export default () => {
           result[name] = 0;
         }
 
+        //also for special stakeholder "other"
+        result['other'] = 0;
+
         //set the ownership of everyone to the real value
         for (const [authorName, ownership] of Object.entries(d.ownership)) {
-          result[authorName] = ownership;
+          //if the author is in the "other" category, add the ownership to the "other" author
+          if (otherAuthors.map((oa) => oa.signature).includes(authorName)) {
+            result['other'] += ownership;
+          }
+
+          //check if the author is part of a merges author from the universal settings
+          for (const mergedAuthor of mergedAuthors) {
+            if (mergedAuthor.committers.map((c) => c.signature).includes(authorName)) {
+              result[mergedAuthor.mainCommitter] += ownership;
+              break;
+            }
+          }
         }
         return result;
       })
@@ -126,6 +142,7 @@ export default () => {
           d3offset={displayMode === 'relative' ? d3.stackOffsetExpand : d3.stackOffsetNone}
           resolution={tooltipGranularity}
           keys={keys}
+          order={keys.reverse()}
         />
       )
 
