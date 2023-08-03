@@ -28,7 +28,7 @@ export default () => {
   const selectedAuthors = universalSettings.selectedAuthorsGlobal;
   const otherAuthors = universalSettings.otherAuthors;
   const mergedAuthors = universalSettings.mergedAuthors;
-  const tooltipGranularity = universalSettings.chartResolution;
+  const dataGranularity = universalSettings.chartResolution;
   const authorColors = universalSettings.universalSettingsData.data.palette;
   const dateFrom = universalSettings.chartTimeSpan.from;
   const dateUntil = universalSettings.chartTimeSpan.to;
@@ -136,53 +136,6 @@ export default () => {
       return minDate <= date && date <= maxDate;
     });
 
-    //get all stakeholders
-    let tempKeys = [];
-    filteredOwnershipData.map((d) => {
-      for (const [authorName] of Object.entries(d.ownership)) {
-        //only display authors that are selected in the universal settings
-        if (!tempKeys.includes(authorName) && selectedAuthors.includes(authorName)) {
-          tempKeys.push(authorName);
-        }
-      }
-    });
-    tempKeys.push('other')
-
-    setKeys(tempKeys);
-
-    setChartData(
-      filteredOwnershipData.map((d) => {
-        let result = {};
-        //set the date as timestamp (in ms)
-        result.date = new Date(d.date).getTime();
-
-        //set the ownership to 0 for all stakeholders
-        for (const name of tempKeys) {
-          result[name] = 0;
-        }
-
-        //also for special stakeholder "other"
-        result['other'] = 0;
-
-        //set the ownership of everyone to the real value
-        for (const [authorName, ownership] of Object.entries(d.ownership)) {
-          //if the author is in the "other" category, add the ownership to the "other" author
-          if (otherAuthors.map((oa) => oa.signature).includes(authorName)) {
-            result['other'] += ownership;
-          }
-
-          //check if the author is part of a merges author from the universal settings
-          for (const mergedAuthor of mergedAuthors) {
-            if (mergedAuthor.committers.map((c) => c.signature).includes(authorName)) {
-              result[mergedAuthor.mainCommitter] += ownership;
-              break;
-            }
-          }
-        }
-        return result;
-      })
-    );
-
     //compute scale
     // in relative mode, the scale is always min=0, max=1.
     // in absolute mode, the max value has to be computed
@@ -201,6 +154,93 @@ export default () => {
       }
       setScale([0, max * 1.1]);
     }
+
+    //get all stakeholders
+    let tempKeys = [];
+    filteredOwnershipData.map((d) => {
+      for (const [authorName] of Object.entries(d.ownership)) {
+        //only display authors that are selected in the universal settings
+        if (!tempKeys.includes(authorName) && selectedAuthors.includes(authorName)) {
+          tempKeys.push(authorName);
+        }
+      }
+    });
+    tempKeys.push('other')
+
+    setKeys(tempKeys);
+    
+    let result = filteredOwnershipData.map((d) => {
+      let result = {};
+      //set the date as timestamp (in ms)
+      result.date = new Date(d.date).getTime();
+
+      //set the ownership to 0 for all stakeholders
+      for (const name of tempKeys) {
+        result[name] = 0;
+      }
+
+      //also for special stakeholder "other"
+      result['other'] = 0;
+
+      //set the ownership of everyone to the real value
+      for (const [authorName, ownership] of Object.entries(d.ownership)) {
+        //if the author is in the "other" category, add the ownership to the "other" author
+        if (otherAuthors.map((oa) => oa.signature).includes(authorName)) {
+          result['other'] += ownership;
+        }
+
+        //check if the author is part of a merges author from the universal settings
+        for (const mergedAuthor of mergedAuthors) {
+          if (mergedAuthor.committers.map((c) => c.signature).includes(authorName)) {
+            result[mergedAuthor.mainCommitter] += ownership;
+            break;
+          }
+        }
+      }
+      return result;
+    });
+
+
+    if (dataGranularity === 'days') {
+      setChartData(result);
+    } else {      
+      let groupedResult;
+
+      if (dataGranularity === 'years') {
+        groupedResult = _.groupBy(result, (dataPoint) => '' + (new Date(dataPoint.date)).getFullYear());
+
+      } else if (dataGranularity === 'months') {
+        groupedResult = _.groupBy(result, (dataPoint) => '' + (new Date(dataPoint.date)).getMonth() + '-' + (new Date(dataPoint.date)).getFullYear());
+
+      } else if (dataGranularity === 'weeks') {
+        groupedResult = _.groupBy(result, (dataPoint) => {
+          let d = new Date(dataPoint.date);
+          let onejan = new Date(d.getFullYear(), 0, 1);
+          let week = Math.ceil((((d.getTime() - onejan.getTime()) / 86400000) + onejan.getDay() + 1) / 7);
+          return '' + week + '-' + d.getFullYear();
+        });
+      } else {
+        //invalid granularity
+        console.log('Error in Code Ownership: granularity "' + dataGranularity + '" not valid');
+        setChartData(result);
+        return;
+      }
+
+      let coarseResult = [];
+
+      const firstDataPoint = result.sort((a, b) => a.date - b.date)[0];
+      if (firstDataPoint) {
+        coarseResult.push(firstDataPoint)
+      }
+
+      for (const [, points] of Object.entries(groupedResult)) {
+        let dataPoints = points.sort((a, b) => a.date - b.date);
+        //only consider last element
+        coarseResult.push(dataPoints.slice(-1)[0]);
+      }
+
+      setChartData(coarseResult)
+    }
   }, [ownershipData, displayMode, universalSettings]);
 
 
@@ -217,7 +257,7 @@ export default () => {
           paddings={{ top: 20, left: 70, bottom: 40, right: 30 }}
           yDims={scale}
           d3offset={displayMode === 'relative' ? d3.stackOffsetExpand : d3.stackOffsetNone}
-          resolution={tooltipGranularity}
+          resolution={dataGranularity}
           keys={keys}
           order={keys.reverse()}
         />
