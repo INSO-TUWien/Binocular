@@ -6,7 +6,7 @@ class GitLabMock {
 
   getProject() {
     return new Promise((resolve) => {
-      resolve({ id: 1 });
+      resolve({ id: 1, path_with_namespace: 'Test/Test-Project' });
     });
   }
 
@@ -37,8 +37,8 @@ class GitLabMock {
         return new Promise((resolve) => {
           resolve([
             { id: 0, created_at: '1970-01-01T07:00:00.000Z', body: 'closed' },
-            { id: 0, created_at: '1970-01-01T07:00:00.000Z', body: 'mentioned in commit 1234567890' },
-            { id: 0, created_at: '1970-01-01T07:00:00.000Z', body: 'some text' },
+            { id: 1, created_at: '1970-01-01T07:00:00.000Z', body: 'mentioned in commit 1234567890' },
+            { id: 2, created_at: '1970-01-01T07:00:00.000Z', body: 'some text' },
           ]);
         });
       },
@@ -53,15 +53,30 @@ class GitLabMock {
   }
 
   getPipelines() {
-    return [];
+    return new Paginator(
+      () => {
+        return new Promise((resolve) => {
+          resolve([{ id: '0' }, { id: '1' }, { id: '2' }]);
+        });
+      },
+      (resp) => {
+        return resp;
+      },
+      () => {
+        this.count = 3;
+        return this.count;
+      }
+    );
   }
 
   getPipeline() {
-    return {};
+    return new Promise((resolve) => {
+      resolve({ id: '1' });
+    });
   }
 
   getPipelineJobs() {
-    return [];
+    return [{ id: '0' }, { id: '1' }, { id: '2' }];
   }
 
   getMergeRequests() {

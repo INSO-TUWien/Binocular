@@ -6,6 +6,11 @@ class GitLabBaseIndexerMock {
     this.repo = repo;
     this.stopping = false;
     this.reporter = reporter;
+
+    this.urlProvider = {
+      getJobUrl: (id) => 'https://gitlab.com/Test/Test-Project/jobs/' + id,
+      getPipelineUrl: (id) => 'https://gitlab.com/Test/Test-Project/pipelines/' + id,
+    };
   }
 
   configure(config) {

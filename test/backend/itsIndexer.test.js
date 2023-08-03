@@ -80,7 +80,7 @@ describe('its', function () {
   });
 
   describe('#indexGitHub', function () {
-    it('should index all GitLab issues and create all necessary db collections and connections', async function () {
+    it('should index all GitHub issues and create all necessary db collections and connections', async function () {
       const repo = await fake.repository();
       ctx.targetPath = repo.path;
 
