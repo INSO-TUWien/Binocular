@@ -15,7 +15,7 @@ export async function getBranches() {
 }
 
 export async function getCommitDataForSha(sha) {
-  return Database.getCommitDataForSha(sha).then((resp) => resp.commit);
+  return Database.getCommitDataForSha(sha);
 }
 
 export async function getFilenamesForBranch(branchName) {

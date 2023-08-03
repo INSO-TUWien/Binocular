@@ -18,7 +18,6 @@ export default () => {
   //global state
   const ownershipState = useSelector((state) => state.visualizations.codeOwnership.state);
   const isLoading = ownershipState.data.isFetching;
-  //const ownershipData = ownershipState.data.data.ownershipData;
   const relevantOwnershipData = ownershipState.data.data.rawData;
   const previousFilenames = ownershipState.data.data.previousFilenames;
   const displayMode = ownershipState.config.mode;
@@ -100,7 +99,7 @@ export default () => {
       }
 
       //now filecache stores the current ownership for each file that exists at the time of the current commit
-      for (const [filePath, fileOwnershipData] of Object.entries(fileCache)) {
+      for (const [, fileOwnershipData] of Object.entries(fileCache)) {
         for (const ownershipOfStakeholder of fileOwnershipData) {
           if (commitResult.ownership[ownershipOfStakeholder.stakeholder]) {
             commitResult.ownership[ownershipOfStakeholder.stakeholder] += ownershipOfStakeholder.ownedLines;
@@ -132,11 +131,10 @@ export default () => {
     //filter ownership data for commits that are in the right timespan
     const filteredOwnershipData = ownershipData.filter((o) => {
       const date = new Date(o.date)
-      const minDate = new Date(dateFrom);
-      const maxDate = new Date(dateUntil);
+      const minDate = dateFrom ? new Date(dateFrom) : new Date(0);
+      const maxDate = dateUntil ? new Date(dateUntil) : new Date();
       return minDate <= date && date <= maxDate;
     });
-
 
     //get all stakeholders
     let tempKeys = [];

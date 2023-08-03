@@ -36,8 +36,7 @@ export default class Database {
     if (await this.checkBackendConnection()) {
       return ServerDB.getCommitDataForSha(sha);
     } else {
-      //TODO
-      //return LocalDB.getCommitDataForSha(sha);
+      return LocalDB.getCommitDataForSha(sha);
     }
   }
 
@@ -77,8 +76,7 @@ export default class Database {
     if (await this.checkBackendConnection()) {
       return ServerDB.getOwnershipDataForCommits();
     } else {
-      //TODO
-      //return LocalDB.getOwnershipDataForCommits();
+      return LocalDB.getOwnershipDataForCommits();
     }
   }
 

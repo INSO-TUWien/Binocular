@@ -64,7 +64,7 @@ export default class Commits {
             }
           }
         }`
-      )
+      ).then((resp) => resp.commit);
   }
 
   static getCommitDataWithFiles(commitSpan, significantSpan) {
