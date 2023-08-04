@@ -165,8 +165,11 @@ export default () => {
         }
       }
     });
-    tempKeys.push('other')
 
+    if (selectedAuthors.includes('others')) {
+      tempKeys.push('other');
+    }
+    
     setKeys(tempKeys);
     
     let result = filteredOwnershipData.map((d) => {
@@ -270,20 +273,34 @@ export default () => {
   
   }, [chartData, scale, keys, authorColors])
 
+
+  const FullScreenMessage = ({ message }) => {
+    return (
+      <div className={styles.chartContainer}>
+        <div className={styles.chart}>
+          <div className={styles.messageContainer}>
+            <h1>{message}</h1>
+          </div>
+        </div>
+      </div> 
+      
+    );
+  };
+
   if(isLoading) {
-    return <div>Loading...</div>;
+    return <FullScreenMessage message={'Loading...'} />;
   }
 
   if (currentBranch === undefined || currentBranch === null) {
-    return <div>Select a branch</div>;
+    return <FullScreenMessage message={'Select a branch'} />;
   }
 
   if (activeFiles && activeFiles.length === 0) {
-    return <div>Select Files/Modules to be visualized</div>;
+    return <FullScreenMessage message={'Select Files/Modules to be visualized'} />;    
   }
 
   if (chartData === undefined || chartData === null || chartData.length === 0) {
-    return <div>Loading...</div>;
+    return <FullScreenMessage message={'Loading...'} />;
   }
 
 
