@@ -104,4 +104,16 @@ describe('ci', function () {
       expect(dbBuildsCollectionData[0].userFullName).to.equal('Tester Test 1');
     });
   });
+
+  describe('#configureGitHubIncorrectly', function () {
+    it('should configure GitHubCIIndexer incorrectly and throw error', async function () {
+      const gitHubCIIndexer = new GitHubCIIndexer();
+      try {
+        await gitHubCIIndexer.configure();
+      } catch (e) {
+        expect(e.name).to.equal('ConfigurationError');
+        expect(e.message).to.equal('GitHub/Octokit cannot be configured!');
+      }
+    });
+  });
 });
