@@ -2,6 +2,7 @@ Binocular
 =====
 
 [![Build Binocular](https://github.com/INSO-TUWien/Binocular/actions/workflows/build-binocular.yml/badge.svg?branch=develop)](https://github.com/INSO-TUWien/Binocular/actions/workflows/build-binocular.yml)
+[![Test ESLint](https://github.com/INSO-TUWien/Binocular/actions/workflows/eslint.yml/badge.svg?branch=develop)](https://github.com/INSO-TUWien/Binocular/actions/workflows/eslint.yml)
 
 Binocular is a tool for visualizing data from various software-engineering
 tools. It works as a command-line tool run from a git-repository. When
