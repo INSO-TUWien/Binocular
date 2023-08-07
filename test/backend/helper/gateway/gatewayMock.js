@@ -1,6 +1,6 @@
 'use strict';
 
-const ServiceProviderMock = require('./serviceProviderMock')
+const ServiceProviderMock = require('./serviceProviderMock');
 
 class GatewayMock {
   constructor() {
