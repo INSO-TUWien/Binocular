@@ -2,8 +2,8 @@
 
 const chai = require('chai');
 
-const fake = require('./fake.js');
-const helpers = require('./helpers.js');
+const fake = require('./helper/git/repositoryFake.js');
+const helpers = require('./helper/git/helpers.js');
 
 const expect = chai.expect;
 
@@ -16,7 +16,7 @@ describe('git', function () {
       return fake
         .repository()
         .then(function (repo) {
-          return repo.getAllCommits();
+          return repo.listAllCommits();
         })
         .then(function (commits) {
           expect(commits).to.have.length(0);
@@ -26,28 +26,28 @@ describe('git', function () {
     it('should get the commits of a repository', function () {
       return fake
         .repository()
-        .then(function (repo) {
+        .then((repo) => {
           this.repo = repo;
 
-          return Promise.join(
+          return Promise.all([
             fake.file(repo, 'README.md', fake.lorem(5).paragraphs()),
             fake.file(repo, 'some-file.txt', fake.lorem(3).paragraphs()),
-            fake.file(repo, 'another-file.txt', fake.lorem(10).paragraphs())
-          );
+            fake.file(repo, 'another-file.txt', fake.lorem(10).paragraphs()),
+          ]);
         })
-        .then(function () {
-          return helpers.commit(this.repo.repo, ['README.md'], alice, 'Initial');
+        .then(() => {
+          return helpers.commit(this.repo, ['README.md'], alice, 'Initial');
         })
-        .then(function () {
-          return helpers.commit(this.repo.repo, ['some-file.txt'], bob);
+        .then(() => {
+          return helpers.commit(this.repo, ['some-file.txt'], bob);
         })
-        .then(function () {
-          return helpers.commit(this.repo.repo, ['another-file.txt'], alice);
+        .then(() => {
+          return helpers.commit(this.repo, ['another-file.txt'], alice);
         })
-        .then(function () {
-          return this.repo.getAllCommits();
+        .then(() => {
+          return this.repo.listAllCommits();
         })
-        .then(function (commits) {
+        .then((commits) => {
           expect(commits).to.have.length(3);
         });
     });

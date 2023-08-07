@@ -17,12 +17,19 @@ const helpers = {
   },
 
   commit: function (repo, files, committer, message) {
-    const fake = require('./fake.js');
-    const sig = fake.signatureFor(committer.name, committer.email);
+    const fake = require('./repositoryFake.js');
 
     message = message || fake.message();
 
-    return repo.createCommitOnHead(files, sig, sig, message);
+    return repo.createCommit(files, committer, message);
+  },
+
+  branch: function (repo, branchName) {
+    return repo.createBranch(branchName);
+  },
+
+  checkout: function (repo, branchName) {
+    return repo.checkout(branchName);
   },
 };
 
