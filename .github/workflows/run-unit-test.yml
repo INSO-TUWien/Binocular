@@ -1,10 +1,9 @@
 name: Run Unit-Tests
 
-on: push
-#on:
-#  pull_request:
-#    branches:
-#      - develop
+on:
+  pull_request:
+    branches:
+      - develop
 
 #env: set env if needed
 
