@@ -1,4 +1,4 @@
-name: Build Binocular
+name: Run Unit-Tests
 
 on: push
 #on:
@@ -10,7 +10,7 @@ on: push
 
 jobs:
 
-  build:
+  run-tests:
 
     runs-on: ubuntu-latest
     services:
