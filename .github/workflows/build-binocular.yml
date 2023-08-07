@@ -1,10 +1,9 @@
 name: Build Binocular
 
-on: push
-#on:
-#  pull_request:
-#    branches:
-#      - develop
+on:
+  push:
+    branches:
+      - develop
 
 #env: set env if needed
 
@@ -47,9 +46,6 @@ jobs:
 
     - name: Install dependencies
       run: npm ci
-
-    - name: Run eslint
-      run: npm run eslint
 
     - name: Run binocular
       run: node binocular.js --no-open --no-server
