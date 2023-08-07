@@ -19,7 +19,7 @@ export default () => {
   const activeIssueId = expertiseState.config.activeIssueId;
   const filterMergeCommits = expertiseState.config.filterMergeCommits;
   const onlyDisplayOwnership = expertiseState.config.onlyDisplayOwnership;
-  const offlineMode = useSelector((state) => state.config.offlineMode);
+  const mode = useSelector((state) => state.visualizations.codeExpertise.state.config.mode);
 
   //local state
   const [allBranches, setAllBranches] = useState([]);
@@ -51,7 +51,7 @@ export default () => {
   };
 
   const onSetOnlyDisplayOwnership = (isChecked) => {
-    if (offlineMode) return;
+    if (mode === 'issues') return;
     dispatch(setOnlyDisplayOwnership(isChecked));
   };
 
@@ -146,7 +146,7 @@ export default () => {
           </div>
         </div>
 
-        {!offlineMode && (
+        {mode !== 'issues' && (
           <div className="field">
             <div className="control">
               <label className="label">Display Settings:</label>

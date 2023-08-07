@@ -51,6 +51,8 @@ const ModuleFileConnection = require('./lib/models/ModuleFileConnection');
 const LanguageFileConnection = require('./lib/models/LanguageFileConnection');
 const BranchFileConnection = require('./lib/models/BranchFileConnection');
 const BranchFileFileConnection = require('./lib/models/BranchFileFileConnection.js');
+const CommitFileStakeholderConnection = require('./lib/models/CommitFileStakeholderConnection.js');
+const CommitFileConnection = require('./lib/models/CommitFileConnection.js');
 const ConfigurationError = require('./lib/errors/ConfigurationError');
 const DatabaseError = require('./lib/errors/DatabaseError');
 const GateWayService = require('./lib/gateway-service');
@@ -78,11 +80,6 @@ app.post('/graphQl', require('./lib/endpoints/graphQl.js'));
 
 // configuration endpoint (not really used atm)
 app.post('/api/config', require('./lib/endpoints/update-config.js'));
-
-// endpoint to get the number of lines each stakeholder owns for a specific commit and a specific set of files
-// used for the code expertise visualization
-app.post('/api/blame/modules', require('./lib/endpoints/get-blame-modules.js'));
-app.post('/api/blame/issues', require('./lib/endpoints/get-blame-issues.js'));
 
 const port = config.get().port;
 
@@ -487,6 +484,7 @@ function ensureDb(repo, context) {
         Branch.ensureCollection(),
         Module.ensureCollection(),
         MergeRequest.ensureCollection(),
+        CommitFileConnection.ensureCollection(),
         LanguageFileConnection.ensureCollection(),
         CommitStakeholderConnection.ensureCollection(),
         IssueStakeholderConnection.ensureCollection(),
@@ -498,6 +496,7 @@ function ensureDb(repo, context) {
         ModuleFileConnection.ensureCollection(),
         BranchFileConnection.ensureCollection(),
         BranchFileFileConnection.ensureCollection(),
+        CommitFileStakeholderConnection.ensureCollection(),
       ]);
     });
 }
