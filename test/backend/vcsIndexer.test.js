@@ -19,6 +19,7 @@ const ModuleFileConnection = require('../../lib/models/ModuleFileConnection');
 const CommitModuleConnection = require('../../lib/models/CommitModuleConnection');
 const BranchFileConnection = require('../../lib/models/BranchFileConnection');
 const ModuleModuleConnection = require('../../lib/models/ModuleModuleConnection');
+const CommitFileStakeholderConnection = require('../../lib/models/CommitFileStakeholderConnection');
 
 const config = require('../../lib/config.js').get();
 const ctx = require('../../lib/context');
@@ -69,6 +70,7 @@ describe('vcs', function () {
       await CommitModuleConnection.ensureCollection();
       await BranchFileConnection.ensureCollection();
       await ModuleModuleConnection.ensureCollection();
+      await CommitFileStakeholderConnection.ensureCollection();
 
       await fake.file(repo, 'test.js', testFile);
       await fake.dir(repo, 'testDir');
