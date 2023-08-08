@@ -15,6 +15,7 @@ import {
 import DateRangeFilter from '../DateRangeFilter/dateRangeFilter';
 import AuthorMerger from './authorMerger/authorMerger';
 import AuthorList from './authorList/authorList';
+import SprintManager from './sprintManager/sprintManager';
 
 const mapStateToProps = (state /*, ownProps*/) => {
   const universalSettings = state.universalSettings;
@@ -84,6 +85,7 @@ class UniversalConfigComponent extends React.PureComponent {
     super(props);
     this.state = {
       showAuthorMerge: false,
+      showSprintManager: false,
       mergedAuthorList: this.props.mergedAuthors,
       otherAuthors: this.props.otherAuthors,
     };
@@ -168,6 +170,15 @@ class UniversalConfigComponent extends React.PureComponent {
         ) : (
           ''
         )}
+        {this.state.showSprintManager === true ? (
+          <SprintManager
+            close={() => {
+              this.setState({ showSprintManager: false });
+            }}
+          />
+        ) : (
+          ''
+        )}
         <h2>Granularity</h2>
         <div className="control">
           <div className="select">
@@ -235,6 +246,14 @@ class UniversalConfigComponent extends React.PureComponent {
             Exclude Merge Commits
           </label>
         </div>
+        <h2>Sprints</h2>
+        <button
+          className={'button'}
+          onClick={() => {
+            this.setState({ showSprintManager: true });
+          }}>
+          Manage Sprints
+        </button>
       </div>
     );
   }

@@ -1,0 +1,36 @@
+.sprintManager{
+  position:fixed;
+  top:0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 99999;
+}
+
+.backgroundBlur{
+  width: 100%;
+  height: 100%;
+  background: #fff8;
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.sprintManagerContainer{
+  background: white;
+  width: 95vw;
+  max-width: 80vh;
+  min-height: 3rem;
+  box-shadow: 0 0 10px #5558;
+  border-radius: 1rem;
+  padding: 0.5rem;
+  max-height: 80vh;
+  overflow: hidden;
+}
+
+.authorMergerContainer>h1{
+  font-size: 2rem;
+  font-weight: bold;
+}
