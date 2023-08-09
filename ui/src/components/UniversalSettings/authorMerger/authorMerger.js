@@ -123,7 +123,9 @@ export default class AuthorMerger extends React.PureComponent {
                         return (
                           <div key={'authorMergerIndividual' + individualCommitter.signature} className={styles.individualCommitter}>
                             <span className={styles.individualCommitterColor} style={{ background: individualCommitter.color }}></span>
-                            <span className={styles.individualCommitterText}>{individualCommitter.signature}</span>
+                            <span className={styles.individualCommitterText} title={individualCommitter.signature}>
+                              {individualCommitter.signature}
+                            </span>
                           </div>
                         );
                       })}
@@ -150,7 +152,9 @@ export default class AuthorMerger extends React.PureComponent {
                     return (
                       <div key={'authorMergerIndividual' + individualCommitter.signature} className={styles.individualCommitter}>
                         <span className={styles.individualCommitterColor} style={{ background: individualCommitter.color }}></span>
-                        <span className={styles.individualCommitterText}>{individualCommitter.signature}</span>
+                        <span className={styles.individualCommitterText} title={individualCommitter.signature}>
+                          {individualCommitter.signature}
+                        </span>
                         <button
                           className={'button ' + styles.removeButton}
                           onClick={(e) => {
@@ -172,7 +176,7 @@ export default class AuthorMerger extends React.PureComponent {
                 Close
               </button>
               <button
-                className={'button ' + styles.applyButton}
+                className={'button ' + styles.accentButton}
                 onClick={() => {
                   this.props.apply(this.state.committers, this.state.other, this.state.selectedAuthors);
                 }}>

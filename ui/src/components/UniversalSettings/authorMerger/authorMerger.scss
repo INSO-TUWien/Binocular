@@ -80,6 +80,8 @@
   pointer-events: none;
   margin-right: 0.5rem;
   height: 2rem;
+  max-width: 80%;
+  overflow: hidden;
 }
 
 .individualCommitterColor{
@@ -97,6 +99,7 @@
   display: inline-block;
   height: 2rem;
   margin-left: 1.5rem;
+  width: max-content;
 }
 
 .addToOtherButton{
@@ -124,13 +127,13 @@
   background: darkred;
 }
 
-.applyButton{
+.accentButton{
   background: #3273dc;
   color: white;
   margin-left: 1rem;
 }
 
-.applyButton:hover{
+.accentButton:hover{
   background: #2262ca;
   color: whitesmoke;
 }

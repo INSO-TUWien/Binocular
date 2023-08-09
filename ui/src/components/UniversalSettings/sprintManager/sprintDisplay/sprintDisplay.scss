@@ -1,0 +1,101 @@
+:root {
+  --sprintContainerWidth: 15rem;
+}
+
+.sprints{
+  width: 100%;
+  overflow-y: hidden;
+  overflow-x: scroll;
+  height: 10rem;
+}
+
+.sprintsScroll{
+  width: max-content;
+  height: 100%;
+}
+
+.sprintContainer{
+  display: inline-block;
+  margin: 0 0.1rem;
+  height: 8rem;
+  width: var(--sprintContainerWidth);
+  position: relative;
+}
+
+.sprintContainerName{
+  position: absolute;
+  top: 2rem;
+  background: #3273dc;
+  color: white;
+  padding: 1rem;
+  width: var(--sprintContainerWidth);
+  border-radius: 0 0.5rem 0 0.5rem;
+  height: 4rem;
+}
+
+.sprintContainerFrom{
+  position: absolute;
+  top: 0;
+  left: 0;
+  color: gray;
+  padding: 0 1rem;
+  background: #caf4d1;
+  border-radius: 0 0.5rem 0.5rem 0;
+}
+
+.sprintContainerFrom:before{
+  position: absolute;
+  content: '';
+  top:0;
+  left: 0;
+  height: 2rem;
+  width: 1px;
+  background: #4cd964;
+}
+
+.sprintContainerFrom:after{
+  position: absolute;
+  content: '';
+  top:0;
+  left: 0;
+  height: 0;
+  width: 0;
+  border-top: .75rem solid transparent;
+  border-bottom: .75rem  solid transparent;
+
+  border-left: .75rem  solid #4cd964;
+}
+
+.sprintContainerTo{
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  color: gray;
+  padding: 0 1rem;
+  text-align: right;
+  background: #f1d2d2;
+  border-radius: 0.5rem 0 0 0.5rem;
+}
+
+.sprintContainerTo:before{
+  position: absolute;
+  content: '';
+  bottom:0;
+  right: 0;
+  height: 2rem;
+  width: 1px;
+  background: indianred;
+}
+
+.sprintContainerTo:after{
+  position: absolute;
+  content: '';
+  bottom:0;
+  right: 0;
+  height: 0;
+  width: 0;
+  border-top: .75rem solid transparent;
+  border-bottom: .75rem  solid transparent;
+
+  border-right: .75rem  solid indianred;
+}
