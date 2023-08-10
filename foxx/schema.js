@@ -375,6 +375,24 @@ const queryType = new gql.GraphQLObjectType({
           return q;
         },
       }),
+      milestones: paginated({
+        type: require('./types/milestone.js'),
+        args: {
+          since: { type: Timestamp },
+          until: { type: Timestamp },
+          sort: { type: Sort },
+        },
+        query: (root, args, limit) => {
+          let q = qb.for('milestone').in('milestones').sort('milestone.startDate', args.sort);
+
+          q = queryHelpers.addDateFilter('mergeRequest.startDate', 'gte', args.since, q);
+          q = queryHelpers.addDateFilter('mergeRequest.startDate', 'lte', args.until, q);
+
+          q = q.limit(limit.offset, limit.count).return('milestone');
+
+          return q;
+        },
+      }),
       issueDateHistogram: makeDateHistogramEndpoint(issues),
     };
   },
