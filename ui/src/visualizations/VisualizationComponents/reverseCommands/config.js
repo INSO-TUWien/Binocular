@@ -4,7 +4,7 @@ import { connect } from 'react-redux';
 import { setDisplayMetric, setSelectedAuthors } from './sagas';
 import TabCombo from '../../../components/TabCombo.js';
 import styles from './styles.scss';
-import { setActiveBranch } from '../../legacy/code-hotspots/sagas';
+import { setActiveBranches, setActiveBranch } from './sagas';
 
 const mapStateToProps = (state /*, ownProps*/) => {
   const dashboardState = state.visualizations.reverseCommands.state;
@@ -23,17 +23,15 @@ const mapDispatchToProps = (dispatch /*, ownProps*/) => {
   return {
     onClickMetric: (metric) => dispatch(setDisplayMetric(metric)),
     onClickCheckboxLegend: (selected) => dispatch(setSelectedAuthors(selected)),
+    onSetBranches: (branches) => dispatch(setActiveBranches(branches)),
+    onSetBranch: (branch) => dispatch(setActiveBranch(branch)),
   };
 };
 
 const ReverseCommandsConfigComponent = (props) => {
-  let otherCommitters;
-  if (props.palette && 'others' in props.palette) {
-    otherCommitters = props.committers.length - (Object.keys(props.palette).length - 1);
-  }
-
   const options = [];
   for (const i in props.branches) {
+    console.log('branch', props.branches[i].branch);
     options.push(<option key={i}>{props.branches[i].branch}</option>);
   }
   return (

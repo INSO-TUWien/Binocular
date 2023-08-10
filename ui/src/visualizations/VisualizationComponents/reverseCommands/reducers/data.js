@@ -15,7 +15,10 @@ export default handleActions(
     },
   },
   {
-    data: {},
+    data: {
+      branch: 'master',
+      branches: [],
+    },
     lastFetched: null,
     isFetching: null,
   }

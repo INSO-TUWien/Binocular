@@ -2,6 +2,7 @@
 
 import { connect } from 'react-redux';
 import Chart from './chart.js';
+import { setActiveBranch, setActiveBranches, setActiveFile, setActiveFiles, setActivePath } from '../../../legacy/code-hotspots/sagas';
 
 const mapStateToProps = (state /*, ownProps*/) => {
   const reverseCommands = state.visualizations.reverseCommands.state;
@@ -22,11 +23,13 @@ const mapStateToProps = (state /*, ownProps*/) => {
     otherAuthors: universalSettings.otherAuthors,
     mergedAuthors: universalSettings.mergedAuthors,
     chartResolution: universalSettings.chartResolution,
+    branches: reverseCommands.data.data.branches,
   };
 };
 
-const mapDispatchToProps = (/*dispatch , ownProps*/) => {
-  return {};
-};
+const mapDispatchToProps = (dispatch) => ({
+  onSetBranch: (branch) => dispatch(setActiveBranch(branch)),
+  onSetBranches: (branches) => dispatch(setActiveBranches(branches)),
+});
 
 export default connect(mapStateToProps, mapDispatchToProps)(Chart);

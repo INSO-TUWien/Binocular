@@ -29,6 +29,7 @@ const mapDispatchToProps = (dispatch /*, ownProps*/) => {
 const CodeHotspotsConfigComponent = (props) => {
   const options = [];
   for (const i in props.branches) {
+    console.log('branch', props.branches[i].branch);
     options.push(<option key={i}>{props.branches[i].branch}</option>);
   }
   return (

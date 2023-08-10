@@ -9,6 +9,7 @@ import _ from 'lodash';
 import StackedAreaChart from '../../../../components/StackedAreaChart';
 import moment from 'moment';
 import chroma from 'chroma-js';
+import Database from '../../../../database/database';
 
 export default class ReverseCommands extends React.Component {
   constructor(props) {
@@ -20,7 +21,23 @@ export default class ReverseCommands extends React.Component {
       commitScale, //Maximum change in commit changes graph, used for y-axis scaling
       commitPalette,
       selectedAuthors,
+      branch: 'main',
     };
+
+    this.getAllBranches().then(
+      function (resp) {
+        let activeBranch = 'main';
+        for (const i in resp) {
+          if (resp[i].active === true || resp[i].active === 'true') {
+            activeBranch = resp[i].branch;
+            props.onSetBranch(resp[i].branch);
+          }
+        }
+        props.onSetBranches(resp);
+        this.setState({ checkedOutBranch: activeBranch });
+        this.forceUpdate();
+      }.bind(this)
+    );
   }
 
   /**
@@ -292,5 +309,9 @@ export default class ReverseCommands extends React.Component {
       default:
         return { interval: 0, unit: '' };
     }
+  }
+
+  getAllBranches() {
+    return Promise.resolve(Database.getAllBranches()).then((resp) => resp.branches.data);
   }
 }

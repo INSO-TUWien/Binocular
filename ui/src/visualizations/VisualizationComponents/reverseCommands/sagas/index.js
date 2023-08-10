@@ -13,6 +13,9 @@ export const requestReverseCommandsData = createAction('REQUEST_REVERSE_COMMANDS
 export const receiveReverseCommandsData = timestampedActionFactory('RECEIVE_REVERSE_COMMANDS_DATA');
 export const receiveReverseCommandsDataError = createAction('RECEIVE_CHANGES_DATA_ERROR');
 
+export const setActiveBranch = createAction('SET_ACTIVE_BRANCH', (b) => b);
+export const setActiveBranches = createAction('SET_ACTIVE_BRANCHES', (b) => b);
+
 export const requestRefresh = createAction('REQUEST_REFRESH');
 const refresh = createAction('REFRESH');
 
@@ -32,6 +35,10 @@ export default function* () {
   yield fork(watchSelectedAuthorsGlobal);
   yield fork(watchMergedAuthors);
   yield fork(watchOtherAuthors);
+
+  //branch settings
+  yield fork(watchSetActiveBranch);
+  yield fork(watchSetActiveBranches);
 }
 
 function* watchTimeSpan() {
@@ -66,6 +73,14 @@ function* watchRefresh() {
   yield takeEvery('REFRESH', fetchReverseCommandsData);
 }
 
+function* watchSetActiveBranch() {
+  yield takeEvery('SET_ACTIVE_BRANCH', mapSaga(requestRefresh));
+}
+
+function* watchSetActiveBranches() {
+  yield takeEvery('SET_ACTIVE_BRANCHES', mapSaga(requestRefresh));
+}
+
 /**
  * Fetch data for dashboard, this still includes old functions that were copied over.
  */
@@ -79,6 +94,8 @@ export const fetchReverseCommandsData = fetchFactory(
     const lastIssueTimestamp = lastIssue ? Date.parse(lastIssue.createdAt) : lastCommitTimestamp;
 
     const state = yield select();
+    const branch = state.visualizations.reverseCommands.state.config.branch;
+    const branches = state.visualizations.reverseCommands.state.config.branches;
     const viewport = state.visualizations.reverseCommands.state.config.viewport || [0, null];
     let firstSignificantTimestamp = Math.max(viewport[0], Math.min(firstCommitTimestamp, firstIssueTimestamp));
     let lastSignificantTimestamp = viewport[1] ? viewport[1].getTime() : Math.max(lastCommitTimestamp, lastIssueTimestamp);
@@ -105,6 +122,8 @@ export const fetchReverseCommandsData = fetchFactory(
           lastCommitTimestamp,
           firstSignificantTimestamp,
           lastSignificantTimestamp,
+          branch,
+          branches,
         };
       })
       .catch(function (e) {
