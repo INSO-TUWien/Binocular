@@ -7,6 +7,10 @@
   overflow-y: hidden;
   overflow-x: scroll;
   height: 10rem;
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
 }
 
 .sprintsScroll{
@@ -22,15 +26,49 @@
   position: relative;
 }
 
-.sprintContainerName{
+.sprintContainerInner{
   position: absolute;
   top: 2rem;
   background: #3273dc;
   color: white;
-  padding: 1rem;
   width: var(--sprintContainerWidth);
   border-radius: 0 0.5rem 0 0.5rem;
   height: 4rem;
+  overflow-x: hidden;
+}
+
+.sprintContainerInnerText{
+  display: flex;
+  align-items: center;
+  height: 4rem;
+  float: left;
+  margin-left: 1rem;
+}
+
+.sprintContainerInnerDeleteButton{
+  height: 4rem;
+  float: right;
+  color: white;
+  background: #ff3b30;
+  border: none;
+  border-left: 1px solid white;
+  border-radius: 0;
+}
+.sprintContainerInnerDeleteButton:hover{
+  background: #e30c00;
+}
+
+.sprintContainerInnerTextInput{
+  background: transparent;
+  color: white;
+  border: none;
+  border-bottom: 1px solid white;
+}
+
+.sprintContainerInnerTextInput:focus{
+  background: #fff2;
+  outline: none;
+  border-bottom: 2px solid white;
 }
 
 .sprintContainerFrom{

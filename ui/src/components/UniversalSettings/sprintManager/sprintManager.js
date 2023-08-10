@@ -6,6 +6,8 @@ import DateRangeFilter from '../../DateRangeFilter/dateRangeFilter';
 import _ from 'lodash';
 import SprintDisplay from './sprintDisplay/sprintDisplay';
 import moment from 'moment';
+import Database from '../../../database/database';
+import MilestoneList from './milestoneList/milestoneList';
 
 export default class SprintManager extends React.PureComponent {
   constructor(props) {
@@ -22,9 +24,12 @@ export default class SprintManager extends React.PureComponent {
         sprintLength: 1,
         startDateTime: undefined,
       },
+      milestones: [],
     };
-
     this.state.newSprintToAdd.name = 'Sprint' + (this.state.sprints.length + 1);
+    Database.getMilestoneData().then((milestones) => {
+      this.setState({ milestones: milestones });
+    });
   }
 
   recursivelyAddSprints() {
@@ -35,6 +40,7 @@ export default class SprintManager extends React.PureComponent {
     for (let i = 0; i < recursiveSprints.amount; i++) {
       sprints.push({
         name: 'Sprint' + (sprints.length + 1),
+        id: sprints.length,
         from: from.format(),
         to: to.format(),
       });
@@ -52,6 +58,45 @@ export default class SprintManager extends React.PureComponent {
     });
   }
 
+  addAllMilestones(milestones) {
+    for (const milestone of milestones) {
+      this.state.sprints.push({
+        name: milestone.title,
+        id: this.state.sprints.length,
+        iid: milestone.iid,
+        from: moment(milestone.startDate).format(),
+        to: moment(milestone.dueDate).format(),
+      });
+    }
+    this.forceUpdate();
+  }
+
+  addMilestone(milestone) {
+    this.state.sprints.push({
+      name: milestone.title,
+      id: this.state.sprints.length,
+      iid: milestone.iid,
+      from: moment(milestone.startDate).format(),
+      to: moment(milestone.dueDate).format(),
+    });
+    this.forceUpdate();
+  }
+
+  deleteSprint(sprintID) {
+    this.setState({
+      sprints: this.state.sprints.filter((s) => s.id !== sprintID),
+    });
+  }
+
+  renameSprint(sprintID, name) {
+    this.state.sprints = this.state.sprints.map((s) => {
+      if (s.id === sprintID) {
+        s.name = name;
+      }
+      return s;
+    });
+  }
+
   render() {
     return (
       <div className={styles.sprintManager}>
@@ -65,7 +110,11 @@ export default class SprintManager extends React.PureComponent {
               <h1>Sprint Manager</h1>
               <div className={styles.sprintManagerPanel}>
                 <h2>Sprints</h2>
-                <SprintDisplay sprints={this.state.sprints} />
+                <SprintDisplay
+                  sprints={this.state.sprints}
+                  deleteSprint={(sprintID) => this.deleteSprint(sprintID)}
+                  renameSprint={(sprintID, name) => this.renameSprint(sprintID, name)}
+                />
               </div>
               <div className={styles.sprintManagerPanel}>
                 <h2>Add Sprint</h2>
@@ -88,6 +137,7 @@ export default class SprintManager extends React.PureComponent {
                   <DateRangeFilter
                     from={this.state.newSprintToAdd.from}
                     to={this.state.newSprintToAdd.to}
+                    type={'date'}
                     onDateChanged={(date) => {
                       const newSprintToAdd = this.state.newSprintToAdd;
                       if (date.from !== undefined) {
@@ -126,7 +176,12 @@ export default class SprintManager extends React.PureComponent {
                       sprints.push(newSprintToAdd);
                       this.setState({
                         sprints: sprints,
-                        newSprintToAdd: { name: 'Sprint' + (sprints.length + 1), from: newSprintToAdd.from, to: newSprintToAdd.to },
+                        newSprintToAdd: {
+                          name: 'Sprint' + (sprints.length + 1),
+                          id: sprints.length,
+                          from: newSprintToAdd.from,
+                          to: newSprintToAdd.to,
+                        },
                       });
                     }}>
                     Add
@@ -173,7 +228,7 @@ export default class SprintManager extends React.PureComponent {
                   <div>StartDate:</div>
                   <input
                     id={'from'}
-                    type="datetime-local"
+                    type={'date'}
                     className={styles.dateTimePicker}
                     value={this.state.from}
                     onChange={(e) => {
@@ -220,7 +275,18 @@ export default class SprintManager extends React.PureComponent {
                 </div>
               </div>
               <div className={styles.sprintManagerPanel}>
-                <h2>Suggested Sprints from Milestones</h2>
+                <h2>Import Sprints from Milestones</h2>
+                <MilestoneList
+                  milestones={this.state.milestones.filter((m) => this.state.sprints.filter((s) => s.iid === m.iid).length === 0)}
+                  addMilestone={(milestone) => this.addMilestone(milestone)}
+                />
+                <button
+                  className={'button ' + styles.accentButton}
+                  onClick={() => {
+                    this.addAllMilestones(this.state.milestones);
+                  }}>
+                  Add All
+                </button>
               </div>
               <button
                 className={'button'}

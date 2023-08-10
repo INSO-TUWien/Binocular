@@ -186,6 +186,17 @@ export default class Database {
   }
 
   /**
+   * MILESTONES
+   */
+  static async getMilestoneData() {
+    if (await this.checkBackendConnection()) {
+      return ServerDB.getMilestoneData();
+    } else {
+      return LocalDB.getMilestoneData();
+    }
+  }
+
+  /**
    * FILES
    */
   static async requestFileStructure() {

@@ -5,6 +5,7 @@ import Commits from './serverDB/commits';
 import Builds from './serverDB/builds';
 import Issues from './serverDB/issues';
 import MergeRequests from './serverDB/mergeRequests';
+import Milestones from './serverDB/milestones';
 import Files from './serverDB/files';
 import Branches from './serverDB/branches';
 import Languages from './serverDB/languages';
@@ -34,6 +35,10 @@ export default class ServerDB {
 
   static getMergeRequestData(mergeRequestSpan, significantSpan) {
     return MergeRequests.getMergeRequestData(mergeRequestSpan, significantSpan);
+  }
+
+  static getMilestoneData() {
+    return Milestones.getMilestoneData();
   }
 
   static getCommitDataWithFiles(commitSpan, significantSpan) {
