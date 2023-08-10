@@ -35,6 +35,7 @@ import ciBuilds from './visualizations/VisualizationComponents/ciBuilds';
 import issues from './visualizations/VisualizationComponents/issues';
 import issueBreakdown from './visualizations/VisualizationComponents/issueBreakdown';
 import changes from './visualizations/VisualizationComponents/changes';
+import reverseCommands from './visualizations/VisualizationComponents/reverseCommands';
 import timeSpent from './visualizations/VisualizationComponents/timeSpent';
 import RootOffline from './components/RootOffline';
 
@@ -50,6 +51,7 @@ const visualizationModules = [
   issues,
   issueBreakdown,
   changes,
+  reverseCommands,
   codeExpertise,
   timeSpent,
   dataExport,
