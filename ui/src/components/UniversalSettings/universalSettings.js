@@ -11,6 +11,7 @@ import {
   setMergedAuthorList,
   setOtherAuthorList,
   setExcludeMergeCommits,
+  setSprints,
 } from '../../sagas';
 import DateRangeFilter from '../DateRangeFilter/dateRangeFilter';
 import AuthorMerger from './authorMerger/authorMerger';
@@ -25,6 +26,7 @@ const mapStateToProps = (state /*, ownProps*/) => {
   let selectedAuthors = [];
   let mergedAuthors = [];
   let otherAuthors = [];
+  let sprints = [];
 
   if (universalSettings.chartTimeSpan.from === undefined) {
     firstDisplayDate =
@@ -51,6 +53,10 @@ const mapStateToProps = (state /*, ownProps*/) => {
   if (universalSettings.otherAuthors !== undefined) {
     otherAuthors = universalSettings.otherAuthors;
   }
+  if (universalSettings.sprints !== undefined) {
+    sprints = universalSettings.sprints;
+  }
+
   return {
     chartResolution: universalSettings.chartResolution,
     firstDisplayDate: firstDisplayDate,
@@ -65,6 +71,7 @@ const mapStateToProps = (state /*, ownProps*/) => {
     firstSignificantTimestamp: universalSettings.universalSettingsData.data.firstSignificantTimestamp,
     lastSignificantTimestamp: universalSettings.universalSettingsData.data.lastSignificantTimestamp,
     excludeMergeCommits: universalSettings.excludeMergeCommits,
+    sprints: sprints,
   };
 };
 
@@ -77,6 +84,7 @@ const mapDispatchToProps = (dispatch /*, ownProps*/) => {
     onOtherAuthorListChanged: (selected) => dispatch(setOtherAuthorList(selected)),
     onSetPalette: (allAuthors) => dispatch(setAllAuthors(allAuthors)),
     onSetExcludeMergeCommits: (checked) => dispatch(setExcludeMergeCommits(checked)),
+    onSetSprints: (sprints) => dispatch(setSprints(sprints)),
   };
 };
 
@@ -88,6 +96,7 @@ class UniversalConfigComponent extends React.PureComponent {
       showSprintManager: false,
       mergedAuthorList: this.props.mergedAuthors,
       otherAuthors: this.props.otherAuthors,
+      sprints: this.props.sprints,
     };
   }
 
@@ -102,6 +111,7 @@ class UniversalConfigComponent extends React.PureComponent {
       this.props.onMergedAuthorListChanged(mergedAuthorList);
       this.setState({ mergedAuthorList: mergedAuthorList });
     }
+    this.setState({ sprints: nextProps.sprints });
   }
 
   generateCommittersList(committers, palette) {
@@ -122,7 +132,7 @@ class UniversalConfigComponent extends React.PureComponent {
     if (this.props.palette && 'others' in this.props.palette) {
       otherCommitters = this.props.committers.length - (Object.keys(this.props.palette).length - 1);
     }
-    if (this.props.palette !== undefined) {
+    if (this.props.palette !== undefined && this.props.palette.length < 1) {
       this.props.onSetPalette(this.props.palette);
     }
     function timestampToDateTimeString(timestamp) {
@@ -172,8 +182,12 @@ class UniversalConfigComponent extends React.PureComponent {
         )}
         {this.state.showSprintManager === true ? (
           <SprintManager
+            sprints={this.state.sprints}
             close={() => {
               this.setState({ showSprintManager: false });
+            }}
+            setSprints={(sprints) => {
+              this.props.onSetSprints(sprints);
             }}
           />
         ) : (

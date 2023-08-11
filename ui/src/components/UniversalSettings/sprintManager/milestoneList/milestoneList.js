@@ -19,7 +19,7 @@ export default class MilestoneList extends React.PureComponent {
         <div className={styles.milestonesScroll}>
           {this.props.milestones.map((milestone) => {
             return (
-              <div className={styles.milestone}>
+              <div className={styles.milestone} key={'m_' + milestone.iid}>
                 <div className={styles.milestoneText}>
                   <div>{milestone.title}</div>
                   <div>Start Date: {moment(milestone.startDate).format('ll')}</div>

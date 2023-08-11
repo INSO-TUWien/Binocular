@@ -20,7 +20,7 @@ export default class SprintDisplay extends React.PureComponent {
         .sort((a, b) => new moment(a.from).format('YYYYMMDD') - new moment(b.from).format('YYYYMMDD'))
         .map((sprint) => {
           return (
-            <div className={styles.sprintContainer} key={'sprint_' + sprint.name}>
+            <div className={styles.sprintContainer} key={'sprint_' + sprint.id}>
               <div className={styles.sprintContainerFrom}>{moment(sprint.from).format('ll')}</div>
               <div className={styles.sprintContainerInner}>
                 <div className={styles.sprintContainerInnerText}>
@@ -28,8 +28,14 @@ export default class SprintDisplay extends React.PureComponent {
                     type={'text'}
                     className={styles.sprintContainerInnerTextInput}
                     defaultValue={sprint.name}
-                    onChange={(e) => this.props.renameSprint(sprint.id, e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        e.target.blur();
+                        this.props.renameSprint(sprint.id, e.target.value);
+                      }
+                    }}
                   />
+                  <div>(Press &#8629; to save Name)</div>
                 </div>
                 <button className={styles.sprintContainerInnerDeleteButton} onClick={() => this.props.deleteSprint(sprint.id)}>
                   Delete

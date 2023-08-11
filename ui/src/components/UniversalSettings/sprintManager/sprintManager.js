@@ -13,7 +13,7 @@ export default class SprintManager extends React.PureComponent {
   constructor(props) {
     super(props);
     this.state = {
-      sprints: [],
+      sprints: this.props.sprints,
       newSprintToAdd: {
         name: '',
         from: undefined,
@@ -30,6 +30,14 @@ export default class SprintManager extends React.PureComponent {
     Database.getMilestoneData().then((milestones) => {
       this.setState({ milestones: milestones });
     });
+  }
+
+  componentWillReceiveProps(nextProps, nextContext) {
+    this.setState({ sprints: nextProps.sprints });
+  }
+
+  componentDidUpdate(prevProps, prevState, snapshot) {
+    this.props.setSprints(this.state.sprints);
   }
 
   recursivelyAddSprints() {
@@ -72,28 +80,29 @@ export default class SprintManager extends React.PureComponent {
   }
 
   addMilestone(milestone) {
-    this.state.sprints.push({
-      name: milestone.title,
-      id: this.state.sprints.length,
-      iid: milestone.iid,
-      from: moment(milestone.startDate).format(),
-      to: moment(milestone.dueDate).format(),
+    this.setState({
+      state: this.state.sprints.push({
+        name: milestone.title,
+        id: this.state.sprints.length,
+        iid: milestone.iid,
+        from: moment(milestone.startDate).format(),
+        to: moment(milestone.dueDate).format(),
+      }),
     });
-    this.forceUpdate();
   }
 
   deleteSprint(sprintID) {
-    this.setState({
-      sprints: this.state.sprints.filter((s) => s.id !== sprintID),
-    });
+    this.setState({ sprints: this.state.sprints.filter((s) => s.id !== sprintID) });
   }
 
   renameSprint(sprintID, name) {
-    this.state.sprints = this.state.sprints.map((s) => {
-      if (s.id === sprintID) {
-        s.name = name;
-      }
-      return s;
+    this.setState({
+      sprints: this.state.sprints.map((s) => {
+        if (s.id === sprintID) {
+          s.name = name;
+        }
+        return s;
+      }),
     });
   }
 
@@ -173,12 +182,13 @@ export default class SprintManager extends React.PureComponent {
                         return;
                       }
                       const sprints = this.state.sprints;
+                      newSprintToAdd.id = sprints.length;
+
                       sprints.push(newSprintToAdd);
                       this.setState({
                         sprints: sprints,
                         newSprintToAdd: {
                           name: 'Sprint' + (sprints.length + 1),
-                          id: sprints.length,
                           from: newSprintToAdd.from,
                           to: newSprintToAdd.to,
                         },
@@ -283,7 +293,9 @@ export default class SprintManager extends React.PureComponent {
                 <button
                   className={'button ' + styles.accentButton}
                   onClick={() => {
-                    this.addAllMilestones(this.state.milestones);
+                    this.addAllMilestones(
+                      this.state.milestones.filter((m) => this.state.sprints.filter((s) => s.iid === m.iid).length === 0)
+                    );
                   }}>
                   Add All
                 </button>

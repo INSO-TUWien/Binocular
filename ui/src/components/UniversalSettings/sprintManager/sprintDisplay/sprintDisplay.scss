@@ -39,10 +39,15 @@
 
 .sprintContainerInnerText{
   display: flex;
-  align-items: center;
+  align-items: start;
+  flex-direction: column;
+  justify-content: center;
   height: 4rem;
   float: left;
   margin-left: 1rem;
+}
+.sprintContainerInnerText>div{
+  font-size: 0.6rem;
 }
 
 .sprintContainerInnerDeleteButton{
