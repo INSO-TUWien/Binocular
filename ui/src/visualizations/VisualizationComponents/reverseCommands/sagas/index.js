@@ -97,6 +97,7 @@ export const fetchReverseCommandsData = fetchFactory(
     const branch = state.visualizations.reverseCommands.state.config.branch;
     const branches = state.visualizations.reverseCommands.state.config.branches;
     const viewport = state.visualizations.reverseCommands.state.config.viewport || [0, null];
+
     let firstSignificantTimestamp = Math.max(viewport[0], Math.min(firstCommitTimestamp, firstIssueTimestamp));
     let lastSignificantTimestamp = viewport[1] ? viewport[1].getTime() : Math.max(lastCommitTimestamp, lastIssueTimestamp);
     const timeSpan = state.universalSettings.chartTimeSpan;
@@ -107,8 +108,8 @@ export const fetchReverseCommandsData = fetchFactory(
       Database.getCommitData([firstCommitTimestamp, lastCommitTimestamp], [firstCommitTimestamp, lastCommitTimestamp]),
     ])
       .then((result) => {
-        const filteredCommits = result[0];
         const commits = result[1];
+        const filteredCommits = filterCommits(commits,'feature/20');
 
         const palette = getPalette(commits, 15, committers.length);
 
@@ -175,4 +176,10 @@ function getPalette(commits, maxNumberOfColors, numOfCommitters) {
   }
 
   return returnPalette;
+}
+
+function filterCommits(commits, branchName) {
+  const filteredCommits = commits.filter((commit) => commit.branch === branchName);
+  console.log('how much did i filter: ', filteredCommits.length);
+  return filteredCommits;
 }

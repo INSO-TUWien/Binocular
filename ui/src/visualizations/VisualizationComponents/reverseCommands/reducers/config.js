@@ -23,5 +23,7 @@ export default handleActions(
     displayMetric: 'linesChanged', //display metric for Empty-Chart, can be 'linesChanged' or 'commits'
     branches: [],
     branch: 'main',
+    commits: [],
+    filteredCommits: [],
   }
 );

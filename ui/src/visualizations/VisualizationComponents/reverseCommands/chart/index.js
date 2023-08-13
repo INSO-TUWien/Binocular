@@ -1,7 +1,7 @@
 'use strict';
 
 import { connect } from 'react-redux';
-import Chart from './chart.js';
+import Chart from './chart_temp.js';
 import { setActiveBranch, setActiveBranches, setActiveFile, setActiveFiles, setActivePath } from '../../../legacy/code-hotspots/sagas';
 
 const mapStateToProps = (state /*, ownProps*/) => {

@@ -18,6 +18,8 @@ export default handleActions(
     data: {
       branch: 'master',
       branches: [],
+      commits: [],
+      filteredCommits: [],
     },
     lastFetched: null,
     isFetching: null,
