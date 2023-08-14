@@ -47,10 +47,20 @@ export default () => {
       .then((branches) => branches.sort((a, b) => a.branch.localeCompare(b.branch)))
       .then((branches) => {
         setAllBranches(branches);
+        //select the currently active branch
+        if(!currentBranch) {
+          let activeBranch = branches.filter((b) => b.active === 'true')[0];
+          if(!activeBranch) {
+            activeBranch = branches[0];
+          }
+          dispatch(setCurrentBranch(activeBranch));
+        }
+        //return just the names of the branches
         return branches.map((b) => b.branch);
       })
       .then((branches) => [...new Set(branches)])
       .then((branches) => {
+        //build the selection box
         const temp = [];
         //placeholder option
         temp.push(
