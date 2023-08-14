@@ -79,7 +79,7 @@ export default class Commits {
 
   static getCommitDataForSha(db, sha) {
     return findAll(db, 'commits').then((res) => {
-      const result = res.docs.filter((c) => c.sha === sha)[0]
+      const result = res.docs.filter((c) => c.sha === sha)[0];
       return result;
     });
   }
@@ -211,9 +211,9 @@ export default class Commits {
     });
   }
 
-  static getOwnershipDataForCommit(db, relations) {
+  static getOwnershipDataForCommits(db, relations) {
     return findAll(db, 'commits').then(async (res) => {
-      const commits = res.docs
+      const commits = res.docs;
 
       const files = (await findAll(db, 'files')).docs;
       const stakeholders = (await findAll(db, 'stakeholders')).docs;
@@ -222,15 +222,15 @@ export default class Commits {
 
       //find commits-files connections for each commit
       return commits.map((commit) => {
-        let commitResult = {sha: commit.sha, date: commit.date, files: []}
+        let commitResult = { sha: commit.sha, date: commit.date, files: [] };
         const relevantConnections = fileCommitConnections.filter((fCC) => fCC.to === commit._id);
         for (const conn of relevantConnections) {
           const relevantFile = files.filter((f) => f._id === conn.from)[0];
-  
+
           let fileResult = { path: relevantFile.path, action: conn.action, ownership: [] };
-  
+
           let relevantOwnershipConnections = fileCommitStakeholderConnections.filter((fcsc) => fcsc.from === conn._id);
-  
+
           //for each of the ownership connections, add the signature of the stakeholder and the owned lines to fileResult.ownership
           for (const ownershipConn of relevantOwnershipConnections) {
             const stakeholder = stakeholders.filter((s) => s._id === ownershipConn.to)[0].gitSignature;

@@ -44,12 +44,9 @@ export const fetchCodeOwnershipData = fetchFactory(
     const state = yield select();
     const currentBranch = state.visualizations.codeOwnership.state.config.currentBranch;
 
-    const result = { rawData: [], previousFilenames:{} };
+    const result = { rawData: [], previousFilenames: {} };
 
-    if (
-      currentBranch === null ||
-      currentBranch === undefined
-    ) {
+    if (currentBranch === null || currentBranch === undefined) {
       return result;
     }
 

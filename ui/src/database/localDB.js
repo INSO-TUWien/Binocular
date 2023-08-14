@@ -156,7 +156,7 @@ export default class LocalDB {
   }
 
   static getOwnershipDataForCommits() {
-    return Commits.getOwnershipDataForCommit(db, tripleStore);
+    return Commits.getOwnershipDataForCommits(db, tripleStore);
   }
 
   static getOwnershipDataForFiles(files) {

@@ -1,13 +1,13 @@
-"use-strict";
+'use-strict';
 
-import { useSelector } from "react-redux";
-import StackedAreaChart from "../../../components/StackedAreaChart";
+import { useSelector } from 'react-redux';
+import StackedAreaChart from '../../../components/StackedAreaChart';
 import styles from '../styles.scss';
-import * as d3 from "d3";
-import { useState, useEffect } from "react";
+import * as d3 from 'd3';
+import { useState, useEffect } from 'react';
+import _ from 'lodash';
 
 export default () => {
-  
   //local state used for the chart
   const [ownershipData, setOwnershipData] = useState([]);
   const [keys, setKeys] = useState([]);
@@ -37,20 +37,15 @@ export default () => {
     setKeys([]);
     setChartData([]);
     setScale([]);
-  }
+  };
 
   //when a new branch is selected, new data is fetched. When the data is ready, prepare it for further processing.
   useEffect(() => {
-    if (
-      relevantOwnershipData === undefined ||
-      relevantOwnershipData === null ||
-      activeFiles === undefined ||
-      activeFiles === null
-    ) {
+    if (relevantOwnershipData === undefined || relevantOwnershipData === null || activeFiles === undefined || activeFiles === null) {
       return;
     }
 
-    let resultOwnershipData = []
+    let resultOwnershipData = [];
 
     //stores the current ownership distribution for each file
     const fileCache = {};
@@ -73,7 +68,7 @@ export default () => {
           if (!relevant) {
             //look at the previous filenames of all active files
             for (const [fileName, previousNames] of Object.entries(previousFilenames)) {
-              if(!activeFiles.includes(fileName)) continue;
+              if (!activeFiles.includes(fileName)) continue;
               if (relevant) break;
               //for all previous filenames of the file we are currently looking at
               for (const name of previousNames) {
@@ -110,27 +105,23 @@ export default () => {
       }
       resultOwnershipData.push(commitResult);
     }
-    setOwnershipData(resultOwnershipData)
-  }, [relevantOwnershipData, previousFilenames, activeFiles])
-  
+    setOwnershipData(resultOwnershipData);
+  }, [relevantOwnershipData, previousFilenames, activeFiles]);
 
   //everytime the settings change (different files selected, mode changed etc.) recompute the chart data
   useEffect(() => {
     //if the global state has not loaded yet, return
-    if (
-      ownershipData === undefined ||
-      ownershipData === null
-    ) {
+    if (ownershipData === undefined || ownershipData === null) {
       return;
     }
 
     if (ownershipData.length === 0) {
-        resetData();
+      resetData();
     }
 
     //filter ownership data for commits that are in the right timespan
     const filteredOwnershipData = ownershipData.filter((o) => {
-      const date = new Date(o.date)
+      const date = new Date(o.date);
       const minDate = dateFrom ? new Date(dateFrom) : new Date(0);
       const maxDate = dateUntil ? new Date(dateUntil) : new Date();
       return minDate <= date && date <= maxDate;
@@ -140,7 +131,7 @@ export default () => {
     // in relative mode, the scale is always min=0, max=1.
     // in absolute mode, the max value has to be computed
     if (displayMode === 'relative') {
-      setScale([0,1]);
+      setScale([0, 1]);
     } else {
       let max = 0;
       for (const commit of filteredOwnershipData) {
@@ -169,9 +160,9 @@ export default () => {
     if (selectedAuthors.includes('others')) {
       tempKeys.push('other');
     }
-    
+
     setKeys(tempKeys);
-    
+
     let result = filteredOwnershipData.map((d) => {
       let result = {};
       //set the date as timestamp (in ms)
@@ -203,23 +194,23 @@ export default () => {
       return result;
     });
 
-
     if (dataGranularity === 'days') {
       setChartData(result);
-    } else {      
+    } else {
       let groupedResult;
 
       if (dataGranularity === 'years') {
-        groupedResult = _.groupBy(result, (dataPoint) => '' + (new Date(dataPoint.date)).getFullYear());
-
+        groupedResult = _.groupBy(result, (dataPoint) => '' + new Date(dataPoint.date).getFullYear());
       } else if (dataGranularity === 'months') {
-        groupedResult = _.groupBy(result, (dataPoint) => '' + (new Date(dataPoint.date)).getMonth() + '-' + (new Date(dataPoint.date)).getFullYear());
-
+        groupedResult = _.groupBy(
+          result,
+          (dataPoint) => '' + new Date(dataPoint.date).getMonth() + '-' + new Date(dataPoint.date).getFullYear()
+        );
       } else if (dataGranularity === 'weeks') {
         groupedResult = _.groupBy(result, (dataPoint) => {
           let d = new Date(dataPoint.date);
           let onejan = new Date(d.getFullYear(), 0, 1);
-          let week = Math.ceil((((d.getTime() - onejan.getTime()) / 86400000) + onejan.getDay() + 1) / 7);
+          let week = Math.ceil(((d.getTime() - onejan.getTime()) / 86400000 + onejan.getDay() + 1) / 7);
           return '' + week + '-' + d.getFullYear();
         });
       } else {
@@ -229,11 +220,11 @@ export default () => {
         return;
       }
 
-      let coarseResult = [];
+      const coarseResult = [];
 
       const firstDataPoint = result.sort((a, b) => a.date - b.date)[0];
       if (firstDataPoint) {
-        coarseResult.push(firstDataPoint)
+        coarseResult.push(firstDataPoint);
       }
 
       for (const [, points] of Object.entries(groupedResult)) {
@@ -242,17 +233,13 @@ export default () => {
         coarseResult.push(dataPoints.slice(-1)[0]);
       }
 
-      setChartData(coarseResult)
+      setChartData(coarseResult);
     }
   }, [ownershipData, displayMode, universalSettings]);
 
-
-
   //check if the data needed for the chart has all been set
   useEffect(() => {
-      
-    if(chartData && chartData.length !== 0 && scale && scale.length !== 0 && keys && keys.length !== 0) {
-
+    if (chartData && chartData.length !== 0 && scale && scale.length !== 0 && keys && keys.length !== 0) {
       setChartComponent(
         <StackedAreaChart
           content={chartData}
@@ -264,15 +251,11 @@ export default () => {
           keys={keys}
           order={keys.reverse()}
         />
-      )
-
-      
+      );
     } else {
-      setChartComponent(null)
+      setChartComponent(null);
     }
-  
-  }, [chartData, scale, keys, authorColors])
-
+  }, [chartData, scale, keys, authorColors]);
 
   const FullScreenMessage = ({ message }) => {
     return (
@@ -282,12 +265,11 @@ export default () => {
             <h1>{message}</h1>
           </div>
         </div>
-      </div> 
-      
+      </div>
     );
   };
 
-  if(isLoading) {
+  if (isLoading) {
     return <FullScreenMessage message={'Loading...'} />;
   }
 
@@ -296,19 +278,16 @@ export default () => {
   }
 
   if (activeFiles && activeFiles.length === 0) {
-    return <FullScreenMessage message={'Select Files/Modules to be visualized'} />;    
+    return <FullScreenMessage message={'Select Files/Modules to be visualized'} />;
   }
 
   if (chartData === undefined || chartData === null || chartData.length === 0) {
     return <FullScreenMessage message={'Loading...'} />;
   }
 
-
-  return(
+  return (
     <div className={styles.chartContainer}>
-      <div className={styles.chart}>
-        {chartComponent}
-      </div>
-    </div> 
-  )
+      <div className={styles.chart}>{chartComponent}</div>
+    </div>
+  );
 };

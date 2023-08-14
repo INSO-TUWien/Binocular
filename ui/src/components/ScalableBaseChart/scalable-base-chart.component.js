@@ -173,7 +173,7 @@ export default class ScalableBaseChartComponent extends React.Component {
 
   hasUpdate() {
     const keysHash = hash(this.props.keys || []);
-    return { hashes: { keysHash }, hasChanges: (this.state.data.keysHash !== keysHash) || this.state.d3offset !== this.props.d3offset };
+    return { hashes: { keysHash }, hasChanges: this.state.data.keysHash !== keysHash || this.state.d3offset !== this.props.d3offset };
   }
 
   /**
@@ -190,7 +190,7 @@ export default class ScalableBaseChartComponent extends React.Component {
       this.setState(
         {
           data: Object.assign({ hash: contentHash, orderHash }, hashes, this.calculateChartData(this.props.content, this.props.order)),
-          d3offset: this.props.d3offset
+          d3offset: this.props.d3offset,
         },
         this.visualizeData
       );

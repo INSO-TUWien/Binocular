@@ -64,7 +64,8 @@ export default class Commits {
             }
           }
         }`
-      ).then((resp) => resp.commit);
+      )
+      .then((resp) => resp.commit);
   }
 
   static getCommitDataWithFiles(commitSpan, significantSpan) {
@@ -167,9 +168,7 @@ export default class Commits {
       });
   }
 
-
   static getOwnershipDataForCommit(sha) {
-    
     return graphQl
       .query(
         `
@@ -200,7 +199,6 @@ export default class Commits {
         })
       );
   }
-
 
   static getOwnershipDataForCommits() {
     return graphQl
@@ -239,7 +237,7 @@ export default class Commits {
                 path: fileData.file.path,
                 action: fileData.action,
                 ownership: fileData.ownership,
-              }
+              };
             }),
           };
         })
@@ -452,8 +450,9 @@ export default class Commits {
   }
 
   static getCodeHotspotsChangeData(file) {
-    return graphQl.query(
-      `
+    return graphQl
+      .query(
+        `
         query($file: String!) {
           file(path: $file){
               path
@@ -490,10 +489,11 @@ export default class Commits {
           }
       }
       `,
-      { file: file }
-    ).then((result) => {
-      result.file.commits.data = result.file.commits.data.map((d) => d.commit);
-      return result;
-    });
+        { file: file }
+      )
+      .then((result) => {
+        result.file.commits.data = result.file.commits.data.map((d) => d.commit);
+        return result;
+      });
   }
 }

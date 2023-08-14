@@ -48,9 +48,9 @@ export default () => {
       .then((branches) => {
         setAllBranches(branches);
         //select the currently active branch
-        if(!currentBranch) {
+        if (!currentBranch) {
           let activeBranch = branches.filter((b) => b.active === 'true')[0];
-          if(!activeBranch) {
+          if (!activeBranch) {
             activeBranch = branches[0];
           }
           dispatch(setCurrentBranch(activeBranch));
