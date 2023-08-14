@@ -7,7 +7,7 @@ const sinonChai = require('sinon-chai');
 
 chai.use(sinonChai);
 
-const Paginator = require('../lib/paginator.js');
+const Paginator = require('../../lib/paginator.js');
 
 const expect = chai.expect;
 
