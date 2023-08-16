@@ -119,6 +119,10 @@ export default class LocalDB {
     return Commits.getCommitData(db, commitSpan, significantSpan);
   }
 
+  static getCommitDataForSha(sha) {
+    return Commits.getCommitDataForSha(db, sha);
+  }
+
   static getBuildData(commitSpan, significantSpan) {
     return Builds.getBuildData(db, commitSpan, significantSpan);
   }
@@ -149,6 +153,10 @@ export default class LocalDB {
 
   static getOwnershipDataForCommit(sha) {
     return Commits.getOwnershipDataForCommit(db, tripleStore, sha);
+  }
+
+  static getOwnershipDataForCommits() {
+    return Commits.getOwnershipDataForCommits(db, tripleStore);
   }
 
   static getOwnershipDataForFiles(files) {

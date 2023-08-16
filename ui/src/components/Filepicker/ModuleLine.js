@@ -1,10 +1,7 @@
-import React, { useState, useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import _ from 'lodash';
-import { setActiveFiles } from '../../sagas';
-import styles from '../../styles.scss';
+import { useState, useEffect } from 'react';
+import styles from './styles.scss';
 
-const ModuleLine = ({ moduleName, children, initiallyExpanded = false }) => {
+const ModuleLine = ({ moduleName, children, initiallyExpanded = false, globalActiveFiles, setActiveFiles }) => {
   const [isExpanded, setExpanded] = useState(initiallyExpanded);
   const [isChecked, setChecked] = useState(false);
   const [childNodes, setChildNodes] = useState([]);
@@ -12,16 +9,14 @@ const ModuleLine = ({ moduleName, children, initiallyExpanded = false }) => {
 
   //if this component has no children, it means that it is a file, otherwise it is a module
   const isModule = !(Object.keys(children).length === 0);
-  const globalActiveFiles = useSelector((state) => state.visualizations.codeExpertise.state.config.activeFiles);
-  const dispatch = useDispatch();
 
   const dispatchCheckFiles = (files, check) => {
     if (check) {
       //add path to global state
-      dispatch(setActiveFiles(unique(globalActiveFiles.concat(files))));
+      setActiveFiles(unique(globalActiveFiles.concat(files)));
     } else if (!check) {
       //remove file from global list of checked Files
-      dispatch(setActiveFiles(unique(globalActiveFiles.filter((fileName) => !files.includes(fileName)))));
+      setActiveFiles(unique(globalActiveFiles.filter((fileName) => !files.includes(fileName))));
     }
   };
 
@@ -52,16 +47,20 @@ const ModuleLine = ({ moduleName, children, initiallyExpanded = false }) => {
     return childPaths;
   };
 
-  //generate child nodes. Should only be called once since children should not change
+  // generate child nodes
   useEffect(() => {
     const childNodes = [];
 
     for (const key in children) {
       const value = children[key];
       if (typeof value === 'string') {
-        childNodes.push(<ModuleLine moduleName={value} children={{}} key={key} />);
+        childNodes.push(
+          <ModuleLine moduleName={value} children={{}} key={key} globalActiveFiles={globalActiveFiles} setActiveFiles={setActiveFiles} />
+        );
       } else {
-        childNodes.push(<ModuleLine moduleName={key} children={value} key={key} />);
+        childNodes.push(
+          <ModuleLine moduleName={key} children={value} key={key} globalActiveFiles={globalActiveFiles} setActiveFiles={setActiveFiles} />
+        );
       }
     }
 
@@ -69,7 +68,7 @@ const ModuleLine = ({ moduleName, children, initiallyExpanded = false }) => {
 
     //get all paths of all children. Used to bulk-check / uncheck them
     setAllChildPaths(getAllPaths(children));
-  }, [children]);
+  }, [children, globalActiveFiles]);
 
   useEffect(() => {
     if (!isModule) {

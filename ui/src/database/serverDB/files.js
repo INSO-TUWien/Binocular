@@ -69,6 +69,8 @@ export default class Files {
       );
   }
 
+  //TODO move this to ./commits.js
+  //TODO: filter directly in the query
   static getFilesForCommits(hashes) {
     return graphQl
       .query(
@@ -116,7 +118,7 @@ export default class Files {
           files(paths: [${files}]) {
             data {
               path
-              ownership {
+              commits {
                 data {
                   commit {
                     sha
@@ -137,7 +139,7 @@ export default class Files {
         resp.files.data.map((d) => {
           return {
             path: d.path,
-            ownership: d.ownership.data,
+            ownership: d.commits.data,
           };
         })
       );
