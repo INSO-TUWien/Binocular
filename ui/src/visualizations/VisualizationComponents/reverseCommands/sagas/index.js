@@ -95,6 +95,7 @@ export const fetchReverseCommandsData = fetchFactory(
 
     const state = yield select();
     const branch = state.visualizations.reverseCommands.state.config.branch;
+    console.log('saga-branch: ', branch);
     const branches = state.visualizations.reverseCommands.state.config.branches;
     const viewport = state.visualizations.reverseCommands.state.config.viewport || [0, null];
 
@@ -109,7 +110,8 @@ export const fetchReverseCommandsData = fetchFactory(
     ])
       .then((result) => {
         const commits = result[1];
-        const filteredCommits = filterCommits(commits,'feature/20');
+        //const filteredCommits = filterCommits(commits,branch);
+        const filteredCommits = commits;
 
         const palette = getPalette(commits, 15, committers.length);
 
