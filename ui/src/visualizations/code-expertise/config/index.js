@@ -118,7 +118,7 @@ export default () => {
     if (currentBranch) {
       resetActiveFiles();
       getFilenamesForBranch(currentBranch.branch).then((files) => {
-        setFiles(files)
+        setFiles(files);
         //preselect all files
         dispatch(setActiveFiles(files));
       });
