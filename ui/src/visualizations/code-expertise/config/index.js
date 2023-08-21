@@ -103,7 +103,7 @@ export default () => {
     });
   }, []);
 
-  //update files every time the branch changes
+  //update files every time the branch sprints
   //also reset selected files
   useEffect(() => {
     if (currentBranch) {

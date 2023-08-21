@@ -25,7 +25,7 @@ export default function* () {
   yield fork(watchRefresh);
   yield fork(watchSetIssueField);
 
-  // keep looking for universal settings changes
+  // keep looking for universal settings sprints
   yield fork(watchTimeSpan);
 }
 

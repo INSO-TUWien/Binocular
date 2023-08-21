@@ -26,7 +26,7 @@ export default function* () {
   yield fork(watchOpenJob);
   yield fork(watchOpenFile);
 
-  // keep looking for universal settings changes
+  // keep looking for universal settings sprints
   yield fork(watchTimeSpan);
 }
 

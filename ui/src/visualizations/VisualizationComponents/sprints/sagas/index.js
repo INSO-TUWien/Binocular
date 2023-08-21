@@ -3,23 +3,23 @@
 import { fetchFactory, mapSaga, timestampedActionFactory } from '../../../../sagas/utils';
 import { select, throttle, fork, takeEvery } from 'redux-saga/effects';
 import { createAction } from 'redux-actions';
+import chroma from 'chroma-js';
+import _ from 'lodash';
 import Database from '../../../../database/database';
 
-export const setShowIssues = createAction('SET_SHOW_ISSUEBREAKDOWN');
-
-export const requestIssueBreakdownData = createAction('REQUEST_ISSUEBREAKDOWN_DATA');
-export const receiveIssueBreakdownData = timestampedActionFactory('RECEIVE_ISSUEBREAKDOWN_DATA');
-export const receiveIssueBreakdownDataError = createAction('RECEIVE_ISSUEBREAKDOWN_DATA_ERROR');
+export const requestSprintsData = createAction('REQUEST_SPRINTS_DATA');
+export const receiveSprintsData = timestampedActionFactory('RECEIVE_SPRINTS_DATA');
+export const receiveSprintsDataError = createAction('RECEIVE_SPRINTSDATA_ERROR');
 
 export const requestRefresh = createAction('REQUEST_REFRESH');
 const refresh = createAction('REFRESH');
 
 export default function* () {
   // fetch data once on entry
-  yield* fetchIssueBreakdownData();
+  yield* fetchSprintsData();
 
   yield fork(watchRefreshRequests);
-  yield fork(watchProgress);
+  yield fork(watchMessages);
 
   // keep looking for viewport sprints to re-fetch
   yield fork(watchRefresh);
@@ -28,27 +28,36 @@ export default function* () {
   // keep looking for universal settings sprints
   yield fork(watchTimeSpan);
   yield fork(watchSelectedAuthorsGlobal);
-  yield fork(watchAllAuthors);
+  yield fork(watchMergedAuthors);
+  yield fork(watchOtherAuthors);
 }
 
 function* watchTimeSpan() {
-  yield takeEvery('SET_TIME_SPAN', fetchIssueBreakdownData);
+  yield takeEvery('SET_TIME_SPAN', fetchSprintsData);
 }
 
 function* watchSelectedAuthorsGlobal() {
-  yield takeEvery('SET_SELECTED_AUTHORS_GLOBAL', fetchIssueBreakdownData);
+  yield takeEvery('SET_SELECTED_AUTHORS_GLOBAL', fetchSprintsData);
 }
 
-function* watchAllAuthors() {
-  yield takeEvery('SET_ALL_AUTHORS', fetchIssueBreakdownData);
+function* watchOtherAuthors() {
+  yield takeEvery('SET_OTHER_AUTHORS', fetchSprintsData);
+}
+
+function* watchExcludeMergeCommits() {
+  yield takeEvery('SET_EXCLUDE_MERGE_COMMITS', fetchSprintsData);
+}
+
+function* watchMergedAuthors() {
+  yield takeEvery('SET_MERGED_AUTHORS', fetchSprintsData);
 }
 
 function* watchRefreshRequests() {
   yield throttle(5000, 'REQUEST_REFRESH', mapSaga(refresh));
 }
 
-function* watchProgress() {
-  yield takeEvery('PROGRESS', mapSaga(requestRefresh));
+function* watchMessages() {
+  yield takeEvery('message', mapSaga(fetchSprintsData));
 }
 
 function* watchToggleHelp() {
@@ -56,15 +65,15 @@ function* watchToggleHelp() {
 }
 
 function* watchRefresh() {
-  yield takeEvery('REFRESH', fetchIssueBreakdownData);
+  yield takeEvery('REFRESH', fetchSprintsData);
 }
 
 /**
  * Fetch data for dashboard, this still includes old functions that were copied over.
  */
-export const fetchIssueBreakdownData = fetchFactory(
+export const fetchSprintsData = fetchFactory(
   function* () {
-    const { firstCommit, lastCommit, firstIssue, lastIssue } = yield Database.getBounds();
+    const { firstCommit, lastCommit, committers, firstIssue, lastIssue } = yield Database.getBounds();
     const firstCommitTimestamp = Date.parse(firstCommit.date);
     const lastCommitTimestamp = Date.parse(lastCommit.date);
 
@@ -72,8 +81,7 @@ export const fetchIssueBreakdownData = fetchFactory(
     const lastIssueTimestamp = lastIssue ? Date.parse(lastIssue.createdAt) : lastCommitTimestamp;
 
     const state = yield select();
-    const viewport = state.visualizations.issues.state.config.viewport || [0, null];
-
+    const viewport = state.visualizations.changes.state.config.viewport || [0, null];
     let firstSignificantTimestamp = Math.max(viewport[0], Math.min(firstCommitTimestamp, firstIssueTimestamp));
     let lastSignificantTimestamp = viewport[1] ? viewport[1].getTime() : Math.max(lastCommitTimestamp, lastIssueTimestamp);
     const timeSpan = state.universalSettings.chartTimeSpan;
@@ -81,12 +89,11 @@ export const fetchIssueBreakdownData = fetchFactory(
     lastSignificantTimestamp = timeSpan.to === undefined ? lastSignificantTimestamp : new Date(timeSpan.to).getTime();
     return yield Promise.all([
       Database.getIssueData([firstIssueTimestamp, lastIssueTimestamp], [firstSignificantTimestamp, lastSignificantTimestamp]),
-      Database.getIssueData([firstIssueTimestamp, lastIssueTimestamp], [firstIssueTimestamp, lastIssueTimestamp]),
+      Database.getIssueData([firstIssueTimestamp, lastIssueTimestamp], [firstCommitTimestamp, lastCommitTimestamp]),
     ])
       .then((result) => {
         const filteredIssues = result[0];
         const issues = result[1];
-
         return {
           otherCount: 0,
           filteredIssues,
@@ -102,7 +109,7 @@ export const fetchIssueBreakdownData = fetchFactory(
         throw e;
       });
   },
-  requestIssueBreakdownData,
-  receiveIssueBreakdownData,
-  receiveIssueBreakdownDataError
+  requestSprintsData,
+  receiveSprintsData,
+  receiveSprintsDataError
 );

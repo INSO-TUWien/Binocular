@@ -56,7 +56,7 @@ function Segment({ rad, startPercent, endPercent, devName, devData, devColor, ma
 
   // ######################## SETTINGS GENERAL ########################
 
-  //duration in ms for the animation when the size changes
+  //duration in ms for the animation when the size sprints
   const animationDuration = 100;
 
   //controls how much the segment enlarges when hovered / focused
@@ -153,7 +153,7 @@ function Segment({ rad, startPercent, endPercent, devName, devData, devColor, ma
     }
   };
 
-  //Is called when the size of the segment changes.
+  //Is called when the size of the segment sprints.
   //Recalculates the d3 components and change the animation flag, causing a rerender
   const setD3Components = (animateSmoothly) => {
     setOuterBorderPath();
@@ -170,7 +170,7 @@ function Segment({ rad, startPercent, endPercent, devName, devData, devColor, ma
 
   // ######################## EFFECTS ########################
 
-  //is called when the animation flag changes.
+  //is called when the animation flag sprints.
   //this means that the d3 components have changed and need to be animated to display their new state.
   useEffect(() => {
     animate(segmentRef, ['d'], [circleSegment.toString()]);
@@ -193,7 +193,7 @@ function Segment({ rad, startPercent, endPercent, devName, devData, devColor, ma
     }
   }, [animationFlag]);
 
-  //when focus changes, change size of segment
+  //when focus sprints, change size of segment
   useEffect(() => {
     if (focus) {
       setRadius(rad * growthFactor);
@@ -202,24 +202,24 @@ function Segment({ rad, startPercent, endPercent, devName, devData, devColor, ma
     }
   }, [focus]);
 
-  //when radius changes, update d3 components with a smooth animation
+  //when radius sprints, update d3 components with a smooth animation
   useEffect(() => {
     setD3Components(true);
   }, [radius, startPercent, endPercent, maxCommitsPerDev]);
 
-  //when dev data changes (for example when other files were selected), update components but without a smooth animation
+  //when dev data sprints (for example when other files were selected), update components but without a smooth animation
   useEffect(() => {
     setD3Components(false);
   }, [devData]);
 
-  //update local state when global state changes
+  //update local state when global state sprints
   useEffect(() => {
     setIsDevSelected(globalDetailsDevState === devName);
   }, [globalDetailsDevState]);
 
-  //Since rad (a prop) is 0 at the beginning, radius and focus are set correctly everytime rad changes
+  //Since rad (a prop) is 0 at the beginning, radius and focus are set correctly everytime rad sprints
   // because we want to render it correctly at the beginning.
-  //Also run this everytime isDevSelected changes.
+  //Also run this everytime isDevSelected sprints.
   useEffect(() => {
     if (isDevSelected) {
       setFocus(true);

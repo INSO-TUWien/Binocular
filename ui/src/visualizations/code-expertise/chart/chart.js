@@ -58,7 +58,7 @@ const Chart = () => {
     setRadius((Math.min(dimensions.height, dimensions.width) / 2) * chartSizeFactor);
   }, [dimensions]);
 
-  //only (re-)create segments if data changes
+  //only (re-)create segments if data sprints
   useEffect(() => {
     //total number of added lines by all stakeholders of the currently selected issue
     const additionsTotal = _.reduce(

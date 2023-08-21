@@ -21,6 +21,6 @@ export default handleActions(
     displayMetric: 'linesChanged', //display metric for Empty-Chart, can be 'linesChanged' or 'commits'
     showCIChart: true, //Show or hide CI Chart
     showIssueChart: true, //Show or hide issues chart
-    showChangesChart: true, //Show or hide changes chart
+    showChangesChart: true, //Show or hide sprints chart
   }
 );

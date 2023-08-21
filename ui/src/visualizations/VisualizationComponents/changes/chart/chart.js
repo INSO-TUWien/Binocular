@@ -16,8 +16,8 @@ export default class Changes extends React.Component {
 
     const { commitChartData, commitScale, commitPalette, selectedAuthors } = this.extractCommitData(props);
     this.state = {
-      commitChartData, //Data for commit changes
-      commitScale, //Maximum change in commit changes graph, used for y-axis scaling
+      commitChartData, //Data for commit sprints
+      commitScale, //Maximum change in commit sprints graph, used for y-axis scaling
       commitPalette,
       selectedAuthors,
     };
@@ -185,8 +185,8 @@ export default class Changes extends React.Component {
               for (const c of mergedAuthor.committers) {
                 if (chartIsSplit) {
                   if (c.signature in commit.statsByAuthor) {
-                    //Insert number of changes with the author name as key,
-                    //statsByAuthor has structure {{authorName: {count, additions, deletions, changes}}, ...}
+                    //Insert number of sprints with the author name as key,
+                    //statsByAuthor has structure {{authorName: {count, additions, deletions, sprints}}, ...}
                     if ('(Additions) ' + mergedAuthor.mainCommitter in obj && '(Deletions) ' + mergedAuthor.mainCommitter in obj) {
                       obj['(Additions) ' + mergedAuthor.mainCommitter] += commit.statsByAuthor[c.signature].additions;
                       //-0.001 for stack layout to realize it belongs on the bottom
@@ -215,14 +215,14 @@ export default class Changes extends React.Component {
           props.otherAuthors.forEach((c) => {
             if (chartIsSplit) {
               if (c.signature in commit.statsByAuthor) {
-                //Insert number of changes with the author name as key,
+                //Insert number of sprints with the author name as key,
                 if ('(Additions) others' in obj && '(Deletions) others' in obj) {
-                  //statsByAuthor has structure {{authorName: {count, additions, deletions, changes}}, ...}
+                  //statsByAuthor has structure {{authorName: {count, additions, deletions, sprints}}, ...}
                   obj['(Additions) others'] += commit.statsByAuthor[c.signature].additions;
                   //-0.001 for stack layout to realize it belongs on the bottom
                   obj['(Deletions) others'] += commit.statsByAuthor[c.signature].deletions * -1 - 0.001;
                 } else {
-                  //statsByAuthor has structure {{authorName: {count, additions, deletions, changes}}, ...}
+                  //statsByAuthor has structure {{authorName: {count, additions, deletions, sprints}}, ...}
                   obj['(Additions) others'] = commit.statsByAuthor[c.signature].additions;
                   //-0.001 for stack layout to realize it belongs on the bottom
                   obj['(Deletions) others'] = commit.statsByAuthor[c.signature].deletions * -1 - 0.001;

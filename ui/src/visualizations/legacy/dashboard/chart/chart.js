@@ -20,10 +20,10 @@ export default class Dashboard extends React.Component {
     const { ciChartData, ciScale } = this.extractCIData(props);
 
     this.state = {
-      commitChartData, //Data for commit changes
+      commitChartData, //Data for commit sprints
       issueChartData,
       ciChartData,
-      commitScale, //Maximum change in commit changes graph, used for y-axis scaling
+      commitScale, //Maximum change in commit sprints graph, used for y-axis scaling
       issueScale,
       ciScale,
       commitPalette,
@@ -350,8 +350,8 @@ export default class Dashboard extends React.Component {
         if (committer in commit.statsByAuthor && committer in props.palette) {
           //If committer has data
           if (chartIsSplit) {
-            //Insert number of changes with the author name as key,
-            //statsByAuthor has structure {{authorName: {count, additions, deletions, changes}}, ...}
+            //Insert number of sprints with the author name as key,
+            //statsByAuthor has structure {{authorName: {count, additions, deletions, sprints}}, ...}
             obj['(Additions) ' + committer] = commit.statsByAuthor[committer].additions;
             //-0.001 for stack layout to realize it belongs on the bottom
             obj['(Deletions) ' + committer] = commit.statsByAuthor[committer].deletions * -1 - 0.001;

@@ -4,7 +4,7 @@ const gql = require('graphql-sync');
 
 module.exports = new gql.GraphQLObjectType({
   name: 'Stats',
-  description: 'holds stats of changes',
+  description: 'holds stats of sprints',
   fields() {
     return {
       additions: {

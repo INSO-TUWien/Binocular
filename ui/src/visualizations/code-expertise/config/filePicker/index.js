@@ -5,7 +5,7 @@ import styles from '../../styles.scss';
 const FilePicker = ({ fileList }) => {
   const [fileMap, setFileMap] = useState({});
 
-  //every time the fileList changes, construct a map that has the same structure as the original directory
+  //every time the fileList sprints, construct a map that has the same structure as the original directory
   //example:
   //files = [fortytwo.txt, foo/bar.txt, foo.baz.txt]
   //generated map => {fortytwo.txt: {}, foo: {bar.txt: {}, baz.txt: {}}}

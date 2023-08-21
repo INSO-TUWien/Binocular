@@ -22,7 +22,7 @@ export default class LanguageModuleRiver extends React.Component {
     const { riverData } = this.extractRiverData(props);
 
     this.state = {
-      commitChartData: riverData, //Data for commit changes
+      commitChartData: riverData, //Data for commit sprints
       issueChartData: [],
       commitPalette: {},
       selectedAuthors: props.selectedAuthors,

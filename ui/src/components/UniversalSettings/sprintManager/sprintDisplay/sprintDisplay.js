@@ -40,7 +40,7 @@ export default (props) => {
           );
         });
     } else {
-      return 'No sprints defined!';
+      return 'No changes defined!';
     }
   };
   return (

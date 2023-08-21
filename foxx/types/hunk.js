@@ -4,7 +4,7 @@ const gql = require('graphql-sync');
 
 module.exports = new gql.GraphQLObjectType({
   name: 'Hunk',
-  description: 'A hunk of changes',
+  description: 'A hunk of sprints',
   fields() {
     return {
       newStart: {
