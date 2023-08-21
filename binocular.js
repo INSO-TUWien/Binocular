@@ -177,7 +177,7 @@ async function repoUpdateHandler(repository, context, gateway) {
   repoWatcher.headBranches = await getFetchedBranches(headPath);
 
   repoWatcher.headTimestamp = fs.statSync(headPath).mtime.valueOf();
-  // create watchdog of the head file to detect sprints
+  // create watchdog of the head file to detect changes
   repoWatcher.listener = fs.watch(headPath, async (event, file) => {
     if (file && !repoWatcher.working) {
       repoWatcher.working = true;
@@ -231,7 +231,7 @@ async function getFetchedBranches(file) {
   );
 }
 
-// be sure to re-index when the configuration sprints
+// be sure to re-index when the configuration changes
 config.on('updated', async () => {
   return await startDatabase(ctx, gatewayService);
 });

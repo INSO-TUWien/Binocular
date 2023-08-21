@@ -21,14 +21,14 @@ export default function* () {
   yield fork(watchRefreshRequests);
   yield fork(watchProgress);
 
-  // keep looking for config sprints
+  // keep looking for config changes
   yield fork(watchAggregatedTimeSwitch);
 
-  // keep looking for viewport sprints to re-fetch
+  // keep looking for viewport changes to re-fetch
   yield fork(watchRefresh);
   yield fork(watchToggleHelp);
 
-  // keep looking for universal settings sprints
+  // keep looking for universal settings changes
   yield fork(watchTimeSpan);
   yield fork(watchSelectedAuthorsGlobal);
   yield fork(watchAllAuthors);

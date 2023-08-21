@@ -34,7 +34,7 @@ export default function* () {
   yield fork(watchRefreshRequests);
   yield fork(watchMessages);
 
-  // keep looking for viewport sprints to re-fetch
+  // keep looking for viewport changes to re-fetch
   yield fork(watchRefresh);
   yield fork(watchToggleHelp);
   yield fork(watchHighlightedIssue);
@@ -131,7 +131,7 @@ function organizeAttributes(commits, maxNumberOfColors, maxAuthors = 15, maxLang
 
   const totals = calculateTotals(commits);
 
-  // reorganize all attributes referring to their total sprints
+  // reorganize all attributes referring to their total changes
   const orderedList = Object.keys(totals).reduce(
     (attributes, attribute) =>
       Object.assign(attributes, {
