@@ -5,18 +5,12 @@ import styles from './sprintDisplay.scss';
 import moment from 'moment';
 import 'moment/locale/de';
 
-export default class SprintDisplay extends React.PureComponent {
-  constructor(props) {
-    super(props);
-    moment.locale('de');
-  }
-  componentWillReceiveProps(nextProps, nextContext) {
-    this.forceUpdate();
-  }
+export default (props) => {
+  moment.locale('de');
 
-  renderSprintList() {
-    if (this.props.sprints.length !== 0) {
-      return this.props.sprints
+  const renderSprintList = () => {
+    if (props.sprints.length !== 0) {
+      return props.sprints
         .sort((a, b) => new moment(a.from).format('YYYYMMDD') - new moment(b.from).format('YYYYMMDD'))
         .map((sprint) => {
           return (
@@ -31,13 +25,13 @@ export default class SprintDisplay extends React.PureComponent {
                     onKeyDown={(e) => {
                       if (e.key === 'Enter') {
                         e.target.blur();
-                        this.props.renameSprint(sprint.id, e.target.value);
+                        props.renameSprint(sprint.id, e.target.value);
                       }
                     }}
                   />
                   <div>(Press &#8629; to save Name)</div>
                 </div>
-                <button className={styles.sprintContainerInnerDeleteButton} onClick={() => this.props.deleteSprint(sprint.id)}>
+                <button className={styles.sprintContainerInnerDeleteButton} onClick={() => props.deleteSprint(sprint.id)}>
                   Delete
                 </button>
               </div>
@@ -48,13 +42,10 @@ export default class SprintDisplay extends React.PureComponent {
     } else {
       return 'No sprints defined!';
     }
-  }
-
-  render() {
-    return (
-      <div className={styles.sprints}>
-        <div className={styles.sprintsScroll}>{this.renderSprintList()}</div>
-      </div>
-    );
-  }
-}
+  };
+  return (
+    <div className={styles.sprints}>
+      <div className={styles.sprintsScroll}>{renderSprintList()}</div>
+    </div>
+  );
+};
