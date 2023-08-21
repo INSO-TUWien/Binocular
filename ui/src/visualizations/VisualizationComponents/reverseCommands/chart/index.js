@@ -1,7 +1,7 @@
 'use strict';
 
 import { connect } from 'react-redux';
-import Chart from './chart_temp.js';
+import Chart from './chart_temp_konva.js';
 import { setActiveBranch, setActiveBranches, setActiveFile, setActiveFiles, setActivePath } from '../../../legacy/code-hotspots/sagas';
 
 const mapStateToProps = (state /*, ownProps*/) => {
@@ -24,6 +24,11 @@ const mapStateToProps = (state /*, ownProps*/) => {
     mergedAuthors: universalSettings.mergedAuthors,
     chartResolution: universalSettings.chartResolution,
     branches: reverseCommands.data.data.branches,
+    shapes: [],
+    graph_konva: [],
+    isDrawingLine: false,
+    startLinePoint: { x: 0, y: 0 },
+    endLinePoint: { x: 0, y: 0 },
   };
 };
 

@@ -21,7 +21,7 @@ const refresh = createAction('REFRESH');
 
 export default function* () {
   // fetch data once on entry
-  yield* fetchReverseCommandsData();
+  /*yield* fetchReverseCommandsData();
 
   yield fork(watchRefreshRequests);
   yield fork(watchMessages);
@@ -38,7 +38,7 @@ export default function* () {
 
   //branch settings
   yield fork(watchSetActiveBranch);
-  yield fork(watchSetActiveBranches);
+  yield fork(watchSetActiveBranches);*/
 }
 
 function* watchTimeSpan() {

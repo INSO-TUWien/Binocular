@@ -5,7 +5,6 @@ import React from 'react';
 import styles from '../styles.scss';
 import { generateTestGraph } from './helper.js';
 
-
 export default class ReverseCommands extends React.Component {
   constructor(props) {
     super(props);
@@ -179,11 +178,13 @@ export default class ReverseCommands extends React.Component {
     this.setState({
       graph: {
         nodes: [...nodes, { id: newNodeId, label: newNodeId, layout: {}, physics: false, fixed: false}],
-        edges: [...edges],
+        edges: [...edges, { from: 8, to: 15, physics: false}],
       },
     });
 
     console.log('before state setting: ', this.state.options);
+    console.log('coordinate check: ', this.state.graph);
+    console.log('get Position: ', getPosition(2));
 
     this.setState({
       options: options,

@@ -120,3 +120,14 @@
   font-weight: bold;
   font-size: larger;
 }
+
+.node rect {
+  stroke: #999;
+  fill: #fff;
+  stroke-width: 1.5px;
+}
+
+.edgePath path {
+  stroke: #333;
+  stroke-width: 1.5px;
+}
