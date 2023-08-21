@@ -63,6 +63,14 @@ export default () => {
       .then((branches) => branches.sort((a, b) => a.branch.localeCompare(b.branch)))
       .then((branches) => {
         setAllBranches(branches);
+        //select the currently active branch
+        if (!currentBranch) {
+          let activeBranch = branches.filter((b) => b.active === 'true')[0];
+          if (!activeBranch) {
+            activeBranch = branches[0];
+          }
+          dispatch(setCurrentBranch(activeBranch));
+        }
         return branches.map((b) => b.branch);
       })
       .then((branches) => [...new Set(branches)])
@@ -109,7 +117,11 @@ export default () => {
   useEffect(() => {
     if (currentBranch) {
       resetActiveFiles();
-      getFilenamesForBranch(currentBranch.branch).then((files) => setFiles(files));
+      getFilenamesForBranch(currentBranch.branch).then((files) => {
+        setFiles(files);
+        //preselect all files
+        dispatch(setActiveFiles(files));
+      });
     }
   }, [currentBranch]);
 
