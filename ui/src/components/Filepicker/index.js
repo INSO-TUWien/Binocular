@@ -21,10 +21,23 @@ import _ from 'lodash';
  *                       This function is called everytime a file is checked and will get an array of *all* currently checked files.
  *                       Example: If `globalActiveFiles` is in the global state managed by redux,
  *                       `setActiveFiles` should look something like `(files) => dispatch(setGlobalFiles(files))`
- * @param showSelectButtons if set to false, the `Select All` and `Deselect All` buttons are hidden.
+ * @param showSelectButtons (optional, default true) If set to false, the `Select All` and `Deselect All` buttons are hidden.
+ * @param fileOwnership (optional) if set, colors in the filepicker will represent ownership of files and modules.
+ *                      For every file, an object with authors as keys and owned lines as values is expected.
+ *                      Example: {fortytwo.txt: {dev1: 50, dev2: 50}, foo/bar.txt: {dev1: 50}, foo/baz.txt: {dev3: 50}}
+ * @param authorColors (optional, required if fileOwnership is set) object containing the colors for each author.
+ *                     Example: {dev1: 'blue', dev2: 'green', dev3: 'red'}
  */
-const Filepicker = ({ fileList, globalActiveFiles = [], setActiveFiles, showSelectButtons = true }) => {
+const Filepicker = ({
+  fileList,
+  globalActiveFiles = [],
+  setActiveFiles,
+  showSelectButtons = true,
+  fileOwnership = null,
+  authorColors = null,
+}) => {
   const [fileMap, setFileMap] = useState({});
+  const [readyToRender, setReadyToRender] = useState(false);
 
   const resetActiveFiles = () => {
     if (globalActiveFiles.length !== 0) {
@@ -41,9 +54,18 @@ const Filepicker = ({ fileList, globalActiveFiles = [], setActiveFiles, showSele
   //every time the fileList changes, construct a map that has the same structure as the original directory
   //example:
   //files = [fortytwo.txt, foo/bar.txt, foo/baz.txt]
-  //generated map => {fortytwo.txt: {}, foo: {bar.txt: {}, baz.txt: {}}}
+  //generated map:
+  //{
+  //  fortytwo.txt: { path: 'fortytwo.txt', ownership: {...}},
+  //  foo: {
+  //    bar.txt: { path: 'foo/bar.txt', ownership: {...} },
+  //    baz.txt: { path: 'foo/baz.txt', ownership: {...} },
+  //  }
+  //}
   useEffect(() => {
-    const fileMap = {};
+    if (!fileList || fileList.length === 0) return;
+
+    const fileMap = { children: {}, ownership: null };
 
     const set = (pathSplitArray, fileMap) => {
       //start at the top layer
@@ -53,27 +75,57 @@ const Filepicker = ({ fileList, globalActiveFiles = [], setActiveFiles, showSele
         const pathItem = pathSplitArray[pathItemIndex];
 
         if (parseInt(pathItemIndex) === pathSplitArray.length - 1) {
-          map[pathItem] = pathSplitArray.join('/');
+          const fullPath = pathSplitArray.join('/');
+          map[pathItem] = { path: fullPath, ownership: fileOwnership ? fileOwnership[fullPath] : {} };
           break;
         }
 
         //if this path is not already in the map, create an empty object as value
         if (!map[pathItem]) {
-          map[pathItem] = {};
+          map[pathItem] = { children: {}, ownership: {} };
         }
         //follow the path
-        map = map[pathItem];
+        map = map[pathItem].children;
       }
     };
 
     fileList
       .map((path) => path.split('/'))
       .forEach((pathSplitArray) => {
-        set(pathSplitArray, fileMap);
+        set(pathSplitArray, fileMap.children);
       });
 
+    //if ownership data is available
+    if (fileOwnership && !_.isEqual(fileOwnership, {})) {
+      //calculate ownership for directories
+      const dirOwnership = (obj) => {
+        //if this is a directory
+        if (obj.children) {
+          let res = {};
+          for (const [, child] of Object.entries(obj.children)) {
+            const childModuleOwnership = dirOwnership(child);
+            for (const { signature, ownedLines } of childModuleOwnership) {
+              if (res[signature]) {
+                res[signature] += ownedLines;
+              } else {
+                res[signature] = ownedLines;
+              }
+            }
+          }
+          obj.ownership = Object.entries(res).map(([sig, lines]) => {
+            return { signature: sig, ownedLines: lines };
+          });
+        }
+        return obj.ownership;
+      };
+      dirOwnership(fileMap);
+    }
+
     setFileMap(fileMap);
-  }, [fileList]);
+    setReadyToRender(true);
+  }, [fileList, fileOwnership]);
+
+  if (!readyToRender) return;
 
   return (
     <div className={styles.filepicker}>
@@ -99,7 +151,9 @@ const Filepicker = ({ fileList, globalActiveFiles = [], setActiveFiles, showSele
       )}
       <ModuleLine
         moduleName={'root'}
-        children={fileMap}
+        children={fileMap.children}
+        ownership={fileMap.ownership}
+        authorColors={authorColors}
         initiallyExpanded={true}
         globalActiveFiles={globalActiveFiles}
         setActiveFiles={setActiveFiles}
