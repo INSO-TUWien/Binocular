@@ -15,7 +15,7 @@ export default handleActions(
     },
   },
   {
-    data: {},
+    data: { issues: [] },
     lastFetched: null,
     isFetching: null,
   }

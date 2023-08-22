@@ -9,7 +9,7 @@ import Database from '../../../../database/database';
 
 export const requestSprintsData = createAction('REQUEST_SPRINTS_DATA');
 export const receiveSprintsData = timestampedActionFactory('RECEIVE_SPRINTS_DATA');
-export const receiveSprintsDataError = createAction('RECEIVE_SPRINTSDATA_ERROR');
+export const receiveSprintsDataError = createAction('RECEIVE_SPRINTS_DATA_ERROR');
 
 export const requestRefresh = createAction('REQUEST_REFRESH');
 const refresh = createAction('REFRESH');
@@ -30,6 +30,7 @@ export default function* () {
   yield fork(watchSelectedAuthorsGlobal);
   yield fork(watchMergedAuthors);
   yield fork(watchOtherAuthors);
+  yield fork(watchSprints);
 }
 
 function* watchTimeSpan() {
@@ -44,12 +45,12 @@ function* watchOtherAuthors() {
   yield takeEvery('SET_OTHER_AUTHORS', fetchSprintsData);
 }
 
-function* watchExcludeMergeCommits() {
-  yield takeEvery('SET_EXCLUDE_MERGE_COMMITS', fetchSprintsData);
-}
-
 function* watchMergedAuthors() {
   yield takeEvery('SET_MERGED_AUTHORS', fetchSprintsData);
+}
+
+function* watchSprints() {
+  yield takeEvery('SET_SPRINTS', fetchSprintsData);
 }
 
 function* watchRefreshRequests() {
@@ -87,16 +88,11 @@ export const fetchSprintsData = fetchFactory(
     const timeSpan = state.universalSettings.chartTimeSpan;
     firstSignificantTimestamp = timeSpan.from === undefined ? firstSignificantTimestamp : new Date(timeSpan.from).getTime();
     lastSignificantTimestamp = timeSpan.to === undefined ? lastSignificantTimestamp : new Date(timeSpan.to).getTime();
-    return yield Promise.all([
-      Database.getIssueData([firstIssueTimestamp, lastIssueTimestamp], [firstSignificantTimestamp, lastSignificantTimestamp]),
-      Database.getIssueData([firstIssueTimestamp, lastIssueTimestamp], [firstCommitTimestamp, lastCommitTimestamp]),
-    ])
+    return yield Promise.all([Database.getIssueData([firstIssueTimestamp, lastIssueTimestamp], [firstIssueTimestamp, lastIssueTimestamp])])
       .then((result) => {
-        const filteredIssues = result[0];
-        const issues = result[1];
+        const issues = result[0];
         return {
           otherCount: 0,
-          filteredIssues,
           issues,
           firstIssueTimestamp,
           lastIssueTimestamp,

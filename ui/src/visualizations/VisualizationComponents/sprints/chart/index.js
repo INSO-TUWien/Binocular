@@ -7,8 +7,7 @@ const mapStateToProps = (state /*, ownProps*/) => {
   const sprintsState = state.visualizations.sprints.state;
   const universalSettings = state.universalSettings;
   return {
-    filteredIssues: sprintsState.data.data.filteredCommits,
-    issues: sprintsState.data.data.commits,
+    issues: sprintsState.data.data.issues,
     firstCommitTimestamp: sprintsState.data.data.firstCommitTimestamp,
     lastCommitTimestamp: sprintsState.data.data.lastCommitTimestamp,
     firstSignificantTimestamp: sprintsState.data.data.firstSignificantTimestamp,
