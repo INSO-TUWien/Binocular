@@ -11,17 +11,19 @@ export default class ReverseCommands extends React.Component {
     super(props);
 
     this.state = {
-      graph_konva: generateKonvaGraph(),
+      graph_konva: this.generateDAG(1000,300),
       isDrawingLine: false,
       startLinePoint: { x: 0, y: 0 },
       endLinePoint: { x: 0, y: 0 },
+      graph: null,
+      selectedBranches: [],
     };
 
     this.stageRef = React.createRef();
   }
 
   async componentDidMount() {
-    this.generateDAG(0,0);
+    this.generateDAG(1000,300);
     /*const graph = generateSimpleGraph();
     const simulation = layoutGraph(graph);
     try {
@@ -138,17 +140,20 @@ export default class ReverseCommands extends React.Component {
 
   generateDAG( width, height) {
     // values i want to know
-    console.log('filteredCommits#',this.props.filteredCommits.length);
-    const branches = ['develop','feature/20','feature/9'];
-    const numBranches = branches.length;
+    const steps_x = 25;
+    const steps_y = 50;
 
+    const buffer_y = 300;
+    const buffer_x = 100;
+    const nodes = [];
+    const edges = [];
 
     // Use reduce() to organize commits by branch
     const organizedCommits = this.props.filteredCommits.reduce((result, commit) => {
       const branch = commit.branch;
 
       if (!result[branch]) {
-          result[branch] = [];
+        result[branch] = [];
       }
 
       result[branch].push(commit);
@@ -156,7 +161,64 @@ export default class ReverseCommands extends React.Component {
       return result;
     }, {});
 
-    console.log('organized ', organizedCommits);
+    console.log('dag infos');
+    console.log(organizedCommits);
 
+    const branchNames = Object.keys(organizedCommits);
+    const numBranches = branchNames.length;
+    console.log('numbranch',numBranches);
+
+    const heights = branchNames.map((branch, index) => ({
+      name: branch,
+      height: (height / numBranches) * index + buffer_y,
+    }));
+
+    console.log('widths:',heights);
+    ////////////////////////////////// - Parents
+    const crossBranchParents = [];
+    this.props.filteredCommits.forEach((commit) => {
+      if (commit.parents !== null) {
+        commit.parents.split(',').forEach((parent) => {
+          const parentCommit = this.props.filteredCommits.find(c => c.sha === parent);
+
+          if (parentCommit && parentCommit.branch === commit.branch) {
+            edges.push({ from: parent, to: commit.sha });
+          } else if (parentCommit) {
+            crossBranchParents.push({ from: parent, to: commit.sha });
+          }
+        });
+      }
+    });
+    console.log('edges: ', edges);
+    console.log('crossParent: ', crossBranchParents);
+    ////////////////////////////////// - Node Creation
+    const nodesData = [];
+
+    branchNames.forEach((branch, branchIndex) => {
+      const branchCommits = organizedCommits[branch];
+      const branchHeights = heights.find( (pair) => pair.name === branch)?.height;
+
+      branchCommits.forEach((commit, commitIndex) => {
+        const parentCommit = crossBranchParents.find(c => c.to === commit.sha);
+        console.log('found cross parent', parentCommit);
+
+        const parentNode = nodesData.find(node => node.id === parentCommit?.from);
+        const parentX = parentNode ? parentNode.x : 0;
+
+        const node = {
+          id: commit.sha,
+          label: `Commit ${ commit.sha}`,
+          x: parentCommit ? parentX + steps_x : steps_x * commitIndex + buffer_x,
+          y: branchHeights, // You can adjust the y-coordinate as needed
+        };
+        nodesData.push(node);
+      });
+    });
+
+    console.log('nodes:', nodesData);
+    const graph = { nodes: nodesData, edges: [...edges,...crossBranchParents]};
+    console.log('graph:', graph);
+
+    return graph;
   }
 }
