@@ -21,6 +21,7 @@ export default class ReverseCommands extends React.Component {
   }
 
   async componentDidMount() {
+    this.generateDAG(0,0);
     /*const graph = generateSimpleGraph();
     const simulation = layoutGraph(graph);
     try {
@@ -134,4 +135,28 @@ export default class ReverseCommands extends React.Component {
       hoveredCircleIndex: null,
     });
   };
+
+  generateDAG( width, height) {
+    // values i want to know
+    console.log('filteredCommits#',this.props.filteredCommits.length);
+    const branches = ['develop','feature/20','feature/9'];
+    const numBranches = branches.length;
+
+
+    // Use reduce() to organize commits by branch
+    const organizedCommits = this.props.filteredCommits.reduce((result, commit) => {
+      const branch = commit.branch;
+
+      if (!result[branch]) {
+          result[branch] = [];
+      }
+
+      result[branch].push(commit);
+
+      return result;
+    }, {});
+
+    console.log('organized ', organizedCommits);
+
+  }
 }

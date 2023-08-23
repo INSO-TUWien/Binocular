@@ -1,7 +1,7 @@
 'use strict';
 
 import { connect } from 'react-redux';
-import { setDisplayMetric, setSelectedAuthors } from './sagas';
+import { setDisplayMetric, setSelectedAuthors, setSelectedBranches } from './sagas';
 import TabCombo from '../../../components/TabCombo.js';
 import styles from './styles.scss';
 import { setActiveBranches, setActiveBranch } from './sagas';
@@ -12,10 +12,10 @@ const mapStateToProps = (state /*, ownProps*/) => {
   return {
     committers: dashboardState.data.data.committers,
     resolution: dashboardState.config.chartResolution,
-    palette: dashboardState.data.data.palette,
     metric: dashboardState.config.displayMetric,
     selectedAuthors: dashboardState.config.selectedAuthors,
     branches: dashboardState.data.data.branches,
+    selectedBranches: dashboardState.config.selectedBranches,
   };
 };
 
@@ -25,13 +25,14 @@ const mapDispatchToProps = (dispatch /*, ownProps*/) => {
     onClickCheckboxLegend: (selected) => dispatch(setSelectedAuthors(selected)),
     onSetBranches: (branches) => dispatch(setActiveBranches(branches)),
     onSetBranch: (branch) => dispatch(setActiveBranch(branch)),
+    onSetSelectedBranches: (branches) => dispatch(setSelectedBranches(branches)),
   };
 };
 
 const ReverseCommandsConfigComponent = (props) => {
   const options = [];
   for (const i in props.branches) {
-    console.log('branch', props.branches[i].branch);
+    //console.log('branch', props.branches[i].branch);
     options.push(<option key={i}>{props.branches[i].branch}</option>);
   }
   return (
@@ -41,9 +42,14 @@ const ReverseCommandsConfigComponent = (props) => {
         <div id={'branchSelector'} className={'select ' + styles.branchSelect}>
           <select
             className={styles.branchSelect}
+            multiple
             value={props.branch}
             onChange={(e) => {
               props.onSetBranch(e.target.value);
+              console.log('value change', e.target.selectedOptions);
+              const selectedOptions = Array.from(e.target.selectedOptions, (option) => option.value);
+              console.log('selected opts:', selectedOptions);
+              props.onSetSelectedBranches(selectedOptions);
             }}>
             {options}
           </select>
@@ -51,17 +57,7 @@ const ReverseCommandsConfigComponent = (props) => {
       </div>
       <form className={styles.form}>
         <div className={styles.field}>
-          <label className="label">Reverse Commands</label>
-          <div style={{ marginBottom: '0.5em' }}>
-            <TabCombo
-              value={props.metric}
-              options={[
-                { label: '# lines changed', icon: 'file-alt', value: 'linesChanged' },
-                { label: '# commits', icon: 'cloud-upload-alt', value: 'commits' },
-              ]}
-              onChange={(value) => props.onClickMetric(value)}
-            />
-          </div>
+          <label className="label"></label>
         </div>
       </form>
     </div>

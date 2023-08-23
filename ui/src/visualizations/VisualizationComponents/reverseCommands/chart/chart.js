@@ -15,13 +15,13 @@ export default class ReverseCommands extends React.Component {
   constructor(props) {
     super(props);
 
-    const { commitChartData, commitScale, commitPalette, selectedAuthors } = this.extractCommitData(props);
+    const { commitChartData, commitScale, selectedAuthors } = this.extractCommitData(props);
     this.state = {
       commitChartData, //Data for commit changes
       commitScale, //Maximum change in commit changes graph, used for y-axis scaling
-      commitPalette,
       selectedAuthors,
       branch: 'main',
+      selectedBranches: [],
     };
 
     this.getAllBranches().then(

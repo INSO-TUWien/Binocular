@@ -51,6 +51,7 @@ export function generateKonvaGraph() {
       { id: 7, label: 'Commit 5', x: 125, y: 300 },
       { id: 8, label: 'Commit 6', x: 150, y: 300 },
       { id: 9, label: 'Commit 7', x: 175, y: 300 },
+      { id: 9, label: 'Commit 7', x: 175, y: 300 },
     ],
     edges: [
       { from: 0, to: 1 },

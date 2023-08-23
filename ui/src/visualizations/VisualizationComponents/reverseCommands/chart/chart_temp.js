@@ -26,6 +26,8 @@ export default class ReverseCommands extends React.Component {
 
     this.state = {
       branch: 'main',
+      selectedBranches: [],
+      branches: [],
       clickedNode: null,
       clickedCommitInfo: null,
       popupVisible: false,
@@ -36,12 +38,14 @@ export default class ReverseCommands extends React.Component {
   }
 
   render() {
-    //if (this.props.filteredCommits.length > 0 ) {
-    if (true) {
+    console.log('selected in comp', this.props);
+    console.log('selected in comp', this.props.selectedBranches);
+    if (this.props.filteredCommits.length > 0 ) {
+    //if (true) {
         const nodes = [];
         const edges = [];
 
-        /*this.props.filteredCommits.forEach((commit) => {
+        this.props.filteredCommits.forEach((commit) => {
           nodes.push({ id: commit.sha, label: ' ' });
           if (commit.parents !== null) {
             commit.parents.split(',').forEach((parent) =>
@@ -51,8 +55,8 @@ export default class ReverseCommands extends React.Component {
         });
 
         const graph = { nodes: nodes, edges: edges };
-        const graph = this.generateTestGraph();
-        this.state.graph = graph;*/
+        //const graph = this.generateTestGraph();
+        this.state.graph = graph;
 
         const events = {
           select: function(event) {
@@ -62,7 +66,7 @@ export default class ReverseCommands extends React.Component {
             if (event.nodes.length === 1) {
               console.log(event);
               const clickedNodeId = event.nodes[0];
-              this.handleNodeClick2(clickedNodeId, nodes, edges); // Update the state
+              this.handleNodeClick1(clickedNodeId, nodes, edges); // Update the state
             }
           }
         };
@@ -78,7 +82,7 @@ export default class ReverseCommands extends React.Component {
                   //  if you want access to vis.js network api you can set the state in a parent component using this property
                 }}
               />
-              { this.state.popupVisible && this.state.clickedNode  (
+              { this.state.popupVisible && this.state.clickedNode && (
                 this.getCommitInfos()
               )}
             </div>
@@ -98,12 +102,12 @@ export default class ReverseCommands extends React.Component {
   handleNodeClick1 = (nodeId, nodes, edges) => {
     // Update the state to the clicked node ID
     this.setState({ clickedNode: nodeId });
-    /*this.setState({    popupVisible: false});tes
+    this.setState({    popupVisible: false});
     this.setCommitInfos(nodeId);
-    this.setState({    popupVisible: true});*/
+    this.setState({    popupVisible: true});
 
     // Adding Head Node:
-    console.log('before pushing: ', this.state.graph.nodes.length);
+    /*console.log('before pushing: ', this.state.graph.nodes.length);
     const newNode = { id: 'head', label: 'head' };
     const newEdge = { from: nodeId, to: 'head' };
     var nodesCopy = this.state.graph.nodes.slice(); // this will create a copy with the same items
@@ -115,7 +119,7 @@ export default class ReverseCommands extends React.Component {
     console.log('after state setting: ', this.state.graph);
     console.log('before state setting: ', this.state.testProp);
     this.setState({    testProp: true});
-    console.log('before state setting: ', this.state.testProp);
+    console.log('before state setting: ', this.state.testProp);*/
 
   };
 

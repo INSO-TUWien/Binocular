@@ -20,6 +20,7 @@ export default handleActions(
       branches: [],
       commits: [],
       filteredCommits: [],
+      selectedBranches: [],
     },
     lastFetched: null,
     isFetching: null,

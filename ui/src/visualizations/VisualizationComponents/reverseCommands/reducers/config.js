@@ -15,6 +15,10 @@ export default handleActions(
       _.assign({}, state, {
         branch: action.payload ? action.payload : null,
       }),
+    SET_SELECTED_BRANCHES: (state, action) =>
+      _.assign({}, state, {
+        selectedBranches: action.payload ? action.payload : null,
+      }),
   },
   {
     chartResolution: 'months', //chart bucket size, can be 'years', 'months', 'weeks' or 'days'
@@ -22,6 +26,7 @@ export default handleActions(
     availableAuthors: [], //All authors that should be displayed in CheckBoxLegend, Same format as above
     displayMetric: 'linesChanged', //display metric for Empty-Chart, can be 'linesChanged' or 'commits'
     branches: [],
+    selectedBranches: [],
     branch: 'main',
     commits: [],
     filteredCommits: [],

@@ -1,14 +1,14 @@
 'use strict';
 
 import { connect } from 'react-redux';
-import Chart from './chart_temp_konva.js';
+import Chart from './chart_temp.js';
 import { setActiveBranch, setActiveBranches, setActiveFile, setActiveFiles, setActivePath } from '../../../legacy/code-hotspots/sagas';
+import { setSelectedBranches } from '../sagas';
 
 const mapStateToProps = (state /*, ownProps*/) => {
   const reverseCommands = state.visualizations.reverseCommands.state;
   const universalSettings = state.universalSettings;
   return {
-    palette: reverseCommands.data.data.palette,
     otherCount: reverseCommands.data.data.otherCount,
     filteredCommits: reverseCommands.data.data.filteredCommits,
     commits: reverseCommands.data.data.commits,
@@ -24,6 +24,7 @@ const mapStateToProps = (state /*, ownProps*/) => {
     mergedAuthors: universalSettings.mergedAuthors,
     chartResolution: universalSettings.chartResolution,
     branches: reverseCommands.data.data.branches,
+    selectedBranches: reverseCommands.data.data.selectedBranches,
     shapes: [],
     graph_konva: [],
     isDrawingLine: false,
@@ -35,6 +36,7 @@ const mapStateToProps = (state /*, ownProps*/) => {
 const mapDispatchToProps = (dispatch) => ({
   onSetBranch: (branch) => dispatch(setActiveBranch(branch)),
   onSetBranches: (branches) => dispatch(setActiveBranches(branches)),
+  onSetSelectedBranches: (selectedBranches) => dispatch(setSelectedBranches(selectedBranches)),
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(Chart);

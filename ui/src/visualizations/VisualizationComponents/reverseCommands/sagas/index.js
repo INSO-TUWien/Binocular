@@ -15,13 +15,13 @@ export const receiveReverseCommandsDataError = createAction('RECEIVE_CHANGES_DAT
 
 export const setActiveBranch = createAction('SET_ACTIVE_BRANCH', (b) => b);
 export const setActiveBranches = createAction('SET_ACTIVE_BRANCHES', (b) => b);
-
+export const setSelectedBranches = createAction('SET_SELECTED_BRANCHES', (b) => b);
 export const requestRefresh = createAction('REQUEST_REFRESH');
 const refresh = createAction('REFRESH');
 
 export default function* () {
   // fetch data once on entry
-  /*yield* fetchReverseCommandsData();
+  yield* fetchReverseCommandsData();
 
   yield fork(watchRefreshRequests);
   yield fork(watchMessages);
@@ -38,7 +38,8 @@ export default function* () {
 
   //branch settings
   yield fork(watchSetActiveBranch);
-  yield fork(watchSetActiveBranches);*/
+  yield fork(watchSetActiveBranches);
+  yield fork(watchSetSelectedBranches);
 }
 
 function* watchTimeSpan() {
@@ -81,6 +82,10 @@ function* watchSetActiveBranches() {
   yield takeEvery('SET_ACTIVE_BRANCHES', mapSaga(requestRefresh));
 }
 
+function* watchSetSelectedBranches() {
+  yield takeEvery('SET_SELECTED_BRANCHES', mapSaga(requestRefresh));
+}
+
 /**
  * Fetch data for dashboard, this still includes old functions that were copied over.
  */
@@ -94,8 +99,10 @@ export const fetchReverseCommandsData = fetchFactory(
     const lastIssueTimestamp = lastIssue ? Date.parse(lastIssue.createdAt) : lastCommitTimestamp;
 
     const state = yield select();
-    const branch = state.visualizations.reverseCommands.state.config.branch;
+    const branch = state.visualizations.reverseCommands.state.config.branches;
+    const selectedBranches = state.visualizations.reverseCommands.state.config.selectedBranches;
     console.log('saga-branch: ', branch);
+    console.log('selected-branches in saga: ', selectedBranches);
     const branches = state.visualizations.reverseCommands.state.config.branches;
     const viewport = state.visualizations.reverseCommands.state.config.viewport || [0, null];
 
@@ -110,23 +117,25 @@ export const fetchReverseCommandsData = fetchFactory(
     ])
       .then((result) => {
         const commits = result[1];
-        //const filteredCommits = filterCommits(commits,branch);
-        const filteredCommits = commits;
-
-        const palette = getPalette(commits, 15, committers.length);
-
+        let filteredCommits;
+        if (selectedBranches.length !== 0) {
+          filteredCommits = filterCommits(commits, selectedBranches);
+          console.log('commits-length: ', filteredCommits.length);
+        } else {
+          filteredCommits = commits;
+        }
         return {
           otherCount: 0,
           filteredCommits,
           commits,
           committers,
-          palette,
           firstCommitTimestamp,
           lastCommitTimestamp,
           firstSignificantTimestamp,
           lastSignificantTimestamp,
           branch,
           branches,
+          selectedBranches,
         };
       })
       .catch(function (e) {
@@ -139,49 +148,8 @@ export const fetchReverseCommandsData = fetchFactory(
   receiveReverseCommandsDataError
 );
 
-function getPalette(commits, maxNumberOfColors, numOfCommitters) {
-  function chartColors(band, maxLength, length) {
-    const len = length > maxLength ? maxLength : length;
-    return chroma.scale(band).mode('lch').colors(len);
-  }
-
-  const palette = chartColors('spectral', maxNumberOfColors, numOfCommitters);
-
-  const totals = {};
-  _.each(commits, (commit) => {
-    const changes = commit.stats.additions + commit.stats.deletions;
-    if (totals[commit.signature]) {
-      totals[commit.signature] += changes;
-    } else {
-      totals[commit.signature] = changes;
-    }
-  });
-
-  const sortable = [];
-  _.each(Object.keys(totals), (key) => {
-    sortable.push([key, totals[key]]);
-  });
-
-  sortable.sort((a, b) => {
-    return b[1] - a[1];
-  });
-
-  const returnPalette = {};
-
-  for (let i = 0; i < Math.min(sortable.length, palette.length) - 1; i++) {
-    returnPalette[sortable[i][0]] = palette[i];
-  }
-  if (sortable.length > maxNumberOfColors) {
-    returnPalette['others'] = palette[maxNumberOfColors - 1];
-  } else {
-    returnPalette[sortable[sortable.length - 1][0]] = palette[palette.length - 1];
-  }
-
-  return returnPalette;
-}
-
-function filterCommits(commits, branchName) {
-  const filteredCommits = commits.filter((commit) => commit.branch === branchName);
+function filterCommits(commits, branchNames) {
+  const filteredCommits = commits.filter((commit) => branchNames.includes(commit.branch));
   console.log('how much did i filter: ', filteredCommits.length);
   return filteredCommits;
 }
