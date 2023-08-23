@@ -151,6 +151,10 @@ export default class LocalDB {
     return Commits.getCommitDataWithFiles(db, tripleStore, commitSpan, significantSpan);
   }
 
+  static getCommitDataWithFilesAndOwnership(commitSpan, significantSpan) {
+    return Commits.getCommitDataWithFilesAndOwnership(db, tripleStore, commitSpan, significantSpan);
+  }
+
   static getOwnershipDataForCommit(sha) {
     return Commits.getOwnershipDataForCommit(db, tripleStore, sha);
   }

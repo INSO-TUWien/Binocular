@@ -17,10 +17,7 @@ export default handleActions(
     },
   },
   {
-    data: {
-      devData: {},
-      issue: null,
-    },
+    data: null,
     lastFetched: null,
     isFetching: null,
   }

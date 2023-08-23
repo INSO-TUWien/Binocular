@@ -48,6 +48,14 @@ export default class Database {
     }
   }
 
+  static async getCommitDataWithFilesAndOwnership(commitSpan, significantSpan) {
+    if (await this.checkBackendConnection()) {
+      return ServerDB.getCommitDataWithFilesAndOwnership(commitSpan, significantSpan);
+    } else {
+      return LocalDB.getCommitDataWithFilesAndOwnership(commitSpan, significantSpan);
+    }
+  }
+
   static async getCommitsForFiles(filenames) {
     if (await this.checkBackendConnection()) {
       return ServerDB.getCommitsForFiles(filenames);

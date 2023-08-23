@@ -122,6 +122,56 @@ export default class Commits {
     });
   }
 
+  static getCommitDataWithFilesAndOwnership(db, relations, commitSpan, significantSpan) {
+    const first = new Date(significantSpan[0]).getTime();
+    const last = new Date(significantSpan[1]).getTime();
+
+    return findAll(db, 'commits').then(async (res) => {
+      const commits = res.docs
+        .filter((c) => new Date(c.date) >= first && new Date(c.date) <= last)
+        .sort((a, b) => {
+          return new Date(a.date) - new Date(b.date);
+        });
+      const allFiles = (await findAll(db, 'files')).docs;
+      const fileCommitConnections = (await findFileCommitConnections(relations)).docs;
+      const fileCommitStakeholderConnections = (await findFileCommitStakeholderConnections(relations)).docs;
+      const stakeholders = (await findAll(db, 'stakeholders')).docs;
+      const result = [];
+
+      for (const commit of commits) {
+        commit.files = {};
+
+        const relevantConnections = fileCommitConnections.filter((fCC) => fCC.to === commit._id);
+
+        //concurrently
+        commit.files.data = relevantConnections.map((connection) => {
+          const resultFile = allFiles.filter((file) => file._id === connection.from);
+          if (resultFile.length > 0) {
+            const file = resultFile[0];
+            const res = { file: {} };
+            res.file.path = file.path;
+            res.stats = connection.stats;
+            res.hunks = connection.hunks;
+            res.ownership = [];
+
+            //find connections to stakeholders for ownership data
+            let relevantOwnershipConnections = fileCommitStakeholderConnections.filter((fcsc) => fcsc.from === connection._id);
+            //for each of the ownership connections, add the signature of the stakeholder and the owned lines to fileResult.ownership
+            for (const ownershipConn of relevantOwnershipConnections) {
+              const stakeholder = stakeholders.filter((s) => s._id === ownershipConn.to)[0].gitSignature;
+              res.ownership.push({ stakeholder: stakeholder, ownedLines: ownershipConn.ownedLines });
+            }
+
+            return res;
+          }
+        });
+        result.push(commit);
+      }
+
+      return result;
+    });
+  }
+
   static getCommitsForFiles(db, relations, filenames, omitFiles) {
     if (filenames.length === 0) {
       return [];

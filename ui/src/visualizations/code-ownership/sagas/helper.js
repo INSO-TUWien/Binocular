@@ -4,9 +4,7 @@ import Database from '../../../database/database';
 import _ from 'lodash';
 
 export async function getOwnershipForCommits(history) {
-  console.time('fetchOwnershipData');
   const ownershipData = await Database.getOwnershipDataForCommits();
-  console.timeEnd('fetchOwnershipData');
   return ownershipData.filter((d) => history.includes(d.sha));
 }
 
