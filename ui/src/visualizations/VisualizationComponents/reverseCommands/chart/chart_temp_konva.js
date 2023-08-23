@@ -23,7 +23,7 @@ export default class ReverseCommands extends React.Component {
   }
 
   async componentDidMount() {
-    this.generateDAG(1000,300);
+    this.setState({graph_konva: this.generateDAG(1000,300)});
     /*const graph = generateSimpleGraph();
     const simulation = layoutGraph(graph);
     try {
@@ -37,7 +37,15 @@ export default class ReverseCommands extends React.Component {
     }*/
   }
 
+  componentDidUpdate(prevProps) {
+    if (this.props.filteredCommits !== prevProps.filteredCommits) {
+      this.setState({ graph_konva: this.generateDAG(1000, 300) });
+    }
+  }
+
   render() {
+    console.log('branches in comp konva', this.props.filteredCommits);
+
     return (
       <div className={styles.chartContainer}>
         <Stage ref={this.stageRef} width={window.innerWidth} height={window.innerHeight} onMouseUp={this.handleStageMouseUp}
