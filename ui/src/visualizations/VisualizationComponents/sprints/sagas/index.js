@@ -7,6 +7,8 @@ import chroma from 'chroma-js';
 import _ from 'lodash';
 import Database from '../../../../database/database';
 
+export const setColorIssuesMergeRequestsMostTimeSpent = createAction('SET_COLOR_ISSUES_MERGE_REQUESTS_MOST_TIME_SPENT');
+
 export const requestSprintsData = createAction('REQUEST_SPRINTS_DATA');
 export const receiveSprintsData = timestampedActionFactory('RECEIVE_SPRINTS_DATA');
 export const receiveSprintsDataError = createAction('RECEIVE_SPRINTS_DATA_ERROR');
@@ -88,12 +90,17 @@ export const fetchSprintsData = fetchFactory(
     const timeSpan = state.universalSettings.chartTimeSpan;
     firstSignificantTimestamp = timeSpan.from === undefined ? firstSignificantTimestamp : new Date(timeSpan.from).getTime();
     lastSignificantTimestamp = timeSpan.to === undefined ? lastSignificantTimestamp : new Date(timeSpan.to).getTime();
-    return yield Promise.all([Database.getIssueData([firstIssueTimestamp, lastIssueTimestamp], [firstIssueTimestamp, lastIssueTimestamp])])
+    return yield Promise.all([
+      Database.getIssueData([firstIssueTimestamp, lastIssueTimestamp], [firstSignificantTimestamp, lastSignificantTimestamp]),
+      Database.getMergeRequestData([firstIssueTimestamp, lastIssueTimestamp], [firstSignificantTimestamp, lastSignificantTimestamp]),
+    ])
       .then((result) => {
         const issues = result[0];
+        const mergeRequests = result[1];
         return {
           otherCount: 0,
           issues,
+          mergeRequests,
           firstIssueTimestamp,
           lastIssueTimestamp,
           firstSignificantTimestamp,

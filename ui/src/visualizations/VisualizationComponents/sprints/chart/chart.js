@@ -8,7 +8,13 @@ import SprintChart from './sprintChart';
 export default (props) => {
   return (
     <div className={styles.chartContainer} onClick={(event) => event.stopPropagation()}>
-      <SprintChart sprints={props.sprints} issues={props.issues} mergedAuthors={props.mergedAuthors} />
+      <SprintChart
+        sprints={props.sprints}
+        issues={props.issues}
+        mergeRequests={props.mergeRequests}
+        mergedAuthors={props.mergedAuthors}
+        colorIssuesMergeRequestsMostTimeSpent={props.colorIssuesMergeRequestsMostTimeSpent}
+      />
     </div>
   );
 };
