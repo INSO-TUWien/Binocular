@@ -1,6 +1,6 @@
 'use strict';
 
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import ReactDOMServer from 'react-dom/server';
 
 import styles from '../styles.scss';
@@ -12,11 +12,22 @@ import { object } from 'prop-types';
 export default (props) => {
   const svgChartRef = useRef(null);
 
+  const [selectedSprint, setSelectedSprint] = useState(null);
+
   const renderChart = () => {
-    const { width, height } = svgChartRef.current.getBoundingClientRect();
+    let { width, height } = svgChartRef.current.getBoundingClientRect();
     const margin = 20;
+    const mrRowHeight = 60;
+    height = height - mrRowHeight;
     d3.select(svgChartRef.current).selectAll('*').remove();
-    const svg = d3.select(svgChartRef.current).append('svg').attr('width', '100%').attr('height', '100%');
+    const svg = d3
+      .select(svgChartRef.current)
+      .append('svg')
+      .attr('width', '100%')
+      .attr('height', '100%')
+      .attr('viewBox', [0, 0, width, height])
+      .style('cursor', 'crosshair');
+
     if (props.sprints.length > 0) {
       let firstDate = moment(props.sprints[0].from);
       let lastDate = moment(props.sprints[0].to);
@@ -30,22 +41,33 @@ export default (props) => {
           lastDate = moment(s.to);
         }
       });
-      props.issues.forEach((s) => {
-        if (moment(s.createdAt) < firstDate) {
-          firstDate = moment(s.createdAt);
+      let issuesData = props.issues.map((i) => {
+        if (i.closedAt === null) {
+          i.closedAt = moment();
         }
-        if (moment(s.closedAt) > lastDate) {
-          lastDate = moment(s.closedAt);
-        }
+        return i;
       });
-
-      //calculate amount of most paralell issues
       const events = [];
-      props.issues.forEach((i) => {
+      //loop through issues to find the first and last date and create an event list for later calculations
+      issuesData.forEach((i) => {
+        if (moment(i.createdAt) < firstDate) {
+          firstDate = moment(i.createdAt);
+        }
+        if (moment(i.closedAt) > lastDate) {
+          lastDate = moment(i.closedAt);
+        }
         events.push({ dateTime: i.createdAt, type: 'opened' });
         events.push({ dateTime: i.closedAt, type: 'closed' });
       });
 
+      const scale = d3.scaleUtc().range([margin, width - margin]);
+      if (selectedSprint === null) {
+        scale.domain([firstDate, lastDate]);
+      } else {
+        scale.domain([moment(selectedSprint.from), moment(selectedSprint.to)]);
+      }
+
+      //calculate the number of most parallel issues
       events.sort((a, b) => moment(a.dateTime) - moment(b.dateTime));
       let openEvents = 0;
       let maxOpenEvents = 0;
@@ -65,7 +87,7 @@ export default (props) => {
       });
 
       //calculate Time Traking Data
-      const issuesData = props.issues.map((i) => {
+      issuesData = issuesData.map((i) => {
         const extractedTimeTrackingData = extractTimeTrackingDataFromNotes(i.notes);
         const { aggregatedTimeTrackingData, totalTime } = aggregateTimeTrackingData(extractedTimeTrackingData);
         let authorWithMostSpentTime = '';
@@ -101,11 +123,6 @@ export default (props) => {
 
       //create chart
 
-      const scale = d3
-        .scaleUtc()
-        .domain([firstDate, lastDate])
-        .range([margin, width - margin]);
-
       const tooltip = d3
         .select(svgChartRef.current)
         .append('div')
@@ -113,13 +130,15 @@ export default (props) => {
         .style('visibility', 'hidden')
         .attr('class', styles.tooltip);
 
+      let issueTracks = {};
+
       const issues = svg.append('g').selectAll('g').data(issuesData).enter().append('g');
       issues
         .append('rect')
         .attr('x', (d) => scale(moment(d.createdAt)))
-        .attr('y', (d) => 30 + (((d.iid * (height - 110)) / maxOpenEvents) % (height - 110)))
-        .attr('width', (d) => Math.max(scale(moment(d.closedAt)) - scale(moment(d.createdAt)) - 4, 1))
-        .attr('height', (height - 110) / maxOpenEvents)
+        .attr('y', (d) => calculateIssuePosition(d, issueTracks, height, maxOpenEvents, 1, 0))
+        .attr('width', (d) => Math.max(scale(moment(d.closedAt)) - scale(moment(d.createdAt)) - 4, (height - 110) / maxOpenEvents - 2))
+        .attr('height', (height - 110) / maxOpenEvents - 2)
         .attr('fill', (d) =>
           props.colorIssuesMergeRequestsMostTimeSpent
             ? getColorForAuthorName(d.authorWithMostSpentTime, props.mergedAuthors)
@@ -128,12 +147,13 @@ export default (props) => {
         .attr('stroke-width', '2')
         .attr('rx', '.2rem')
         .attr('stroke', '#fff')
+        .style('cursor', 'pointer')
         .on('mouseover', function () {
           tooltip.style('visibility', 'visible');
+          d3.select(this).attr('stroke', '#aaa');
         })
         .on('mousemove', function (e, d) {
-          tooltip.style('top', e.pageY + 10 + 'px').style('left', e.pageX + 10 + 'px');
-
+          tooltip.style('top', e.pageY + 10 + 'px').style('left', Math.min(e.pageX + 10, width) + 'px');
           tooltip.html(
             ReactDOMServer.renderToStaticMarkup(
               <div>
@@ -142,13 +162,14 @@ export default (props) => {
                   <span className={styles.tooltipTitle}>{d.title}</span>
                   <span>(Click to open)</span>
                 </div>
-                <div>Created: {d.createdAt}</div>
-                <div>Closed: {d.closedAt} </div>
-                <div>Author: {d.author.name} </div>
+                <div>Created: {moment(d.createdAt).format('lll', 'de')}</div>
+                <div>Closed: {d.state === 'closed' ? moment(d.closedAt).format('lll', 'de') : 'open'}</div>
+                <div>Creator: {d.author.name} </div>
                 <div className={styles.timeSpentBar}>
-                  {Object.keys(d.aggregatedTimeTrackingData).map((authorName) => {
+                  {Object.keys(d.aggregatedTimeTrackingData).map((authorName, i) => {
                     return (
                       <div
+                        key={'timeSpentBlock' + i}
                         className={styles.timeSpentBlock}
                         style={{
                           width: (100 / d.totalTime) * d.aggregatedTimeTrackingData[authorName] + '%',
@@ -166,16 +187,41 @@ export default (props) => {
         })
         .on('mouseout', function () {
           tooltip.style('visibility', 'hidden');
+          d3.select(this).attr('stroke', '#fff');
         })
         .on('click', function (e, d) {
           window.open(d.webUrl, '_blank');
         });
 
+      issues
+        .append('text')
+        .attr('x', (d) => scale(moment(d.createdAt)))
+        .attr('width', (d) => Math.max(scale(moment(d.closedAt)) - scale(moment(d.createdAt)) - 4, 1))
+        .attr('pointer-events', 'none');
+
+      svg
+        .append('rect')
+        .attr('x', scale(firstDate))
+        .attr('y', height - 20)
+        .attr('width', scale(lastDate))
+        .attr('height', mrRowHeight)
+        .attr('fill', '#eee');
       const mergeRequests = svg.append('g').selectAll('g').data(mergeRequestData).enter().append('g');
+
+      let lastMrDate = moment(0);
+      let mergeRequestsOnDay = 0;
       mergeRequests
         .append('rect')
         .attr('x', (d) => scale(moment(d.createdAt)))
-        .attr('y', (d) => 30 + (((d.iid * (height - 110)) / maxOpenEvents) % (height - 110)) - 2)
+        .attr('y', (d) => {
+          if (moment(d.createdAt) > lastMrDate.set('hour', 23).set('minute', 59)) {
+            lastMrDate = moment(d.createdAt);
+            mergeRequestsOnDay = 0;
+          } else {
+            mergeRequestsOnDay++;
+          }
+          return height - 15 + mergeRequestsOnDay * ((height - 110) / maxOpenEvents + 4);
+        })
         .attr('width', (height - 110) / maxOpenEvents + 4)
         .attr('height', (height - 110) / maxOpenEvents + 4)
         .attr('fill', (d) =>
@@ -186,11 +232,13 @@ export default (props) => {
         .attr('stroke-width', '2')
         .attr('rx', ((height - 110) / maxOpenEvents + 4) / 2)
         .attr('stroke', '#000')
+        .style('cursor', 'pointer')
         .on('mouseover', function () {
           tooltip.style('visibility', 'visible');
+          d3.select(this).attr('stroke', '#555');
         })
         .on('mousemove', function (e, d) {
-          tooltip.style('top', e.pageY + 10 + 'px').style('left', e.pageX + 10 + 'px');
+          tooltip.style('top', e.pageY + 10 + 'px').style('left', Math.min(e.pageX + 10, width) + 'px');
 
           tooltip.html(
             ReactDOMServer.renderToStaticMarkup(
@@ -203,12 +251,13 @@ export default (props) => {
                 <div>
                   {d.sourceBranch}&#8594;{d.targetBranch}
                 </div>
-                <div>Created: {d.createdAt}</div>
-                <div>Author: {d.author.name} </div>
+                <div>Created: {moment(d.createdAt).format('lll', 'de')}</div>
+                <div>Creator: {d.author.name} </div>
                 <div className={styles.timeSpentBar}>
-                  {Object.keys(d.aggregatedTimeTrackingData).map((authorName) => {
+                  {Object.keys(d.aggregatedTimeTrackingData).map((authorName, i) => {
                     return (
                       <div
+                        key={'timeSpentBlock' + i}
                         className={styles.timeSpentBlock}
                         style={{
                           width: (100 / d.totalTime) * d.aggregatedTimeTrackingData[authorName] + '%',
@@ -226,16 +275,11 @@ export default (props) => {
         })
         .on('mouseout', function () {
           tooltip.style('visibility', 'hidden');
+          d3.select(this).attr('stroke', '#000');
         })
         .on('click', function (e, d) {
           window.open(d.webUrl, '_blank');
         });
-
-      issues
-        .append('text')
-        .attr('x', (d) => scale(moment(d.createdAt)))
-        .attr('width', (d) => Math.max(scale(moment(d.closedAt)) - scale(moment(d.createdAt)) - 4, 1))
-        .attr('pointer-events', 'none');
 
       const sprints = svg.append('g').selectAll('rect').data(props.sprints).enter().append('g');
       sprints
@@ -247,7 +291,21 @@ export default (props) => {
         .attr('fill', '#3273dc')
         .attr('stroke-width', '2')
         .attr('rx', '.2rem')
-        .attr('stroke', '#fff');
+        .attr('stroke', '#fff')
+        .style('cursor', 'pointer')
+        .on('mouseover', function () {
+          d3.select(this).attr('fill', '#1c51a5');
+        })
+        .on('mouseout', function () {
+          d3.select(this).attr('fill', '#3273dc');
+        })
+        .on('click', function (e, d) {
+          if (selectedSprint === null) {
+            setSelectedSprint(d);
+          } else {
+            setSelectedSprint(null);
+          }
+        });
       sprints
         .append('text')
         .text((d) => d.name + ' (' + moment(d.from).format('DD.MM.YYYY') + '-' + moment(d.to).format('DD.MM.YYYY') + ')')
@@ -266,7 +324,7 @@ export default (props) => {
           (d) =>
             scale(moment(d.from)) +
             ' ' +
-            (height - 20) +
+            (height + mrRowHeight) +
             ' ' +
             scale(moment(d.from)) +
             ' 0 ' +
@@ -287,7 +345,7 @@ export default (props) => {
             scale(moment(d.to)) -
             2 +
             ' ' +
-            (height - 20) +
+            (height + mrRowHeight) +
             ' ' +
             (scale(moment(d.to)) - 2) +
             ' 0 ' +
@@ -301,41 +359,54 @@ export default (props) => {
         .attr('stroke', '#cd5c5c');
 
       const handleZoom = (e) => {
+        issueTracks = {};
         issues
           .selectAll('rect')
-          .attr('y', (d) => (30 + (((d.iid * (height - 110)) / maxOpenEvents) % (height - 110))) * e.transform.k + e.transform.y)
-          .attr('height', ((height - 110) / maxOpenEvents) * e.transform.k);
-
+          .attr('y', (d) => calculateIssuePosition(d, issueTracks, height, maxOpenEvents, e.transform.k, e.transform.y))
+          .attr('height', ((height - 110) / maxOpenEvents - 2) * e.transform.k);
+        issueTracks = {};
         issues
           .selectAll('text')
-          .attr('y', (d) => (30 + (((d.iid * (height - 110)) / maxOpenEvents) % (height - 110))) * e.transform.k + e.transform.y + 20)
-          .attr('height', ((height - 110) / maxOpenEvents) * e.transform.k)
+          .attr('y', (d) => calculateIssuePosition(d, issueTracks, height, maxOpenEvents, e.transform.k, e.transform.y + 20))
+          .attr('height', ((height - 110) / maxOpenEvents - 2) * e.transform.k)
           .text((d) => {
-            if (e.transform.k > 3) {
+            if (e.transform.k > 4) {
               return '#' + d.iid;
             }
             return '';
           });
-
-        mergeRequests
-          .selectAll('rect')
-          .attr('y', (d) => (30 + (((d.iid * (height - 110)) / maxOpenEvents) % (height - 110)) - 2) * e.transform.k + e.transform.y)
-          .attr('height', ((height - 110) / maxOpenEvents + 4) * e.transform.k);
       };
 
-      const zoom = d3.zoom().on('zoom', handleZoom);
+      const zoom = d3
+        .zoom()
+        .on('zoom', handleZoom)
+        .on('start', function (e) {
+          if (e.sourceEvent.type === 'wheel') {
+            if (e.sourceEvent.deltaY < 0) {
+              d3.select(this).style('cursor', 'zoom-in');
+            } else {
+              d3.select(this).style('cursor', 'zoom-out');
+            }
+          } else {
+            d3.select(this).style('cursor', 'ns-resize');
+          }
+        })
+        .on('end', function (e) {
+          d3.select(this).style('cursor', 'crosshair');
+        });
       svg.call(zoom);
 
       svg
         .append('g')
         .attr('transform', 'translate(0,' + (height - margin) + ')')
+        .attr('pointer-events', 'none')
         .call(d3.axisBottom().scale(scale));
     }
   };
 
   React.useEffect(() => {
     renderChart();
-  }, [props.sprints, props.issues, props.mergeRequests, props.colorIssuesMergeRequestsMostTimeSpent, props.mergedAuthors]);
+  }, [props.sprints, props.issues, props.mergeRequests, props.colorIssuesMergeRequestsMostTimeSpent, props.mergedAuthors, selectedSprint]);
   return (
     <div className={styles.chartContainer}>
       <div className={styles.chartSvg} ref={svgChartRef} />
@@ -345,11 +416,24 @@ export default (props) => {
 
 function getColorForAuthorName(authorName, mergedAuthors) {
   if (authorName === '') {
-    return 'white';
+    return 'lightgray';
   }
   const author = mergedAuthors.filter((mA) => mA.mainCommitter.includes(authorName));
   if (author.length > 0) {
     return author[0].color;
   }
-  return 'transparent';
+  return 'lightgray';
+}
+
+function calculateIssuePosition(issue, issueTracks, height, maxOpenEvents, zoom, offset) {
+  for (let i = 0; i < maxOpenEvents; i++) {
+    if (issueTracks[i] === undefined) {
+      issueTracks[i] = issue.closedAt;
+      return (30 + (i * (height - 110)) / maxOpenEvents) * zoom + offset;
+    } else if (moment(issue.createdAt) > moment(issueTracks[i])) {
+      issueTracks[i] = issue.closedAt;
+      return (30 + (i * (height - 110)) / maxOpenEvents) * zoom + offset;
+    }
+  }
+  return 30 * zoom + offset;
 }

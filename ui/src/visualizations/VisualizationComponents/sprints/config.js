@@ -7,6 +7,7 @@ import React from 'react';
 
 const mapStateToProps = (state /*, ownProps*/) => {
   const sprintsState = state.visualizations.sprints.state;
+  return {};
 };
 
 const mapDispatchToProps = (dispatch /*, ownProps*/) => {
@@ -27,7 +28,7 @@ const SprintsConfigComponent = (props) => {
           onChange={(e) => props.onSetColorIssuesMergeRequestsMostTimeSpent(e.target.checked)}
         />
         <label htmlFor="issueMergeRequestsColoringSwitch" className={styles.switch}>
-          Creator/Most Spent Time
+          Creator/Most Spent Time (Gitlab Only)
         </label>
       </div>
     </div>
