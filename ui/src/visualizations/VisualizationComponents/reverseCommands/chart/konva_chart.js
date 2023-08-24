@@ -88,7 +88,7 @@ export default class ReverseCommands extends React.Component {
               <Text
                 key={branch.name}
                 id={branch.name}
-                x={0}
+                x={-50}
                 y={branch.height}
                 text={branch.name}
                 onClick={() => this.handleTextClick(branch)}
@@ -188,7 +188,7 @@ export default class ReverseCommands extends React.Component {
 
   handleMouseMove = (e) => {
     const stage = this.stageRef.current;
-    const mousePos = stage.getPointerPosition();
+    const mousePos = stage.getRelativePointerPosition();
 
     this.setState({
       endLinePoint: { x: mousePos.x, y: mousePos.y },
@@ -238,22 +238,19 @@ export default class ReverseCommands extends React.Component {
       return result;
     }, {});
 
-    console.log('dag infos');
-    console.log(organizedCommits);
 
     const branchNames = Object.keys(organizedCommits);
     const numBranches = branchNames.length;
-    console.log('numbranch',numBranches);
+    console.log('Number of Branches',numBranches);
 
     const heights = branchNames.map((branch, index) => ({
       name: branch,
       height: (height / numBranches) * index + buffer_y,
     }));
 
-    console.log('widths:',heights);
     ////////////////////////////////// - Color Generation
     const colors = this.generateRandomRGBColors(numBranches);
-    console.log('colors', colors);
+
     ////////////////////////////////// - Parents
     const crossBranchParents = [];
     this.props.filteredCommits.forEach((commit) => {
@@ -269,29 +266,8 @@ export default class ReverseCommands extends React.Component {
         });
       }
     });
-    console.log('edges: ', edges);
-    console.log('crossParent: ', crossBranchParents);
-    ////////////////////////////////// - Check If node is parent of multiple commits in the same branch:
-    const edgesCountMap = edges.reduce((countMap, edge) => {
-      if (!countMap[edge.from]) {
-        countMap[edge.from] = 1;
-      } else {
-        countMap[edge.from]++;
-      }
-      return countMap;
-    }, {});
-
-    const filteredEdges = edges.filter(edge => edgesCountMap[edge.from] > 1);
-
-    console.log('filteredEdges:', filteredEdges);
-    const fromValuesList = filteredEdges.map(edge => edge.from);
-
-    console.log('fromValuesList:', fromValuesList);
-
-    const uniqueFromValues = [...new Set(fromValuesList)];
-
-    console.log('uniqueFromValues:', uniqueFromValues);
-
+    console.log('sameBranchRelationships: ', edges);
+    console.log('crossBranchRelationships: : ', crossBranchParents);
     ////////////////////////////////// - Node Creation
     const nodesData = [];
 
@@ -303,7 +279,6 @@ export default class ReverseCommands extends React.Component {
       let branch_offset = 0;
       branchCommits.forEach((commit, commitIndex) => {
         const parentCommit = crossBranchParents.find(c => c.to === commit.sha);
-        console.log('found cross parent', parentCommit);
 
         const parentNode = nodesData.find(node => node.id === parentCommit?.from);
         const parentX = parentNode ? parentNode.x : 0;
@@ -324,7 +299,6 @@ export default class ReverseCommands extends React.Component {
       });
     });
 
-    console.log('nodes:', nodesData);
     const graph = { nodes: nodesData, edges: [...edges,...crossBranchParents], branches: heights};
     console.log('graph:', graph);
 
