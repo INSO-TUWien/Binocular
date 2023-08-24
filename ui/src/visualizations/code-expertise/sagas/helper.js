@@ -35,8 +35,8 @@ export function getBlameModules(commit, files, allCommits) {
     //remove the first (latest) commit from the commitsLeft array
     const currentSha = commitsLeft.pop();
     let ownershipData = allCommits.filter((c) => c.sha === currentSha)[0];
-    if(!ownershipData) {
-      console.log("Error in code expertise getBlameModules: commit not found");
+    if (!ownershipData) {
+      console.log('Error in code expertise getBlameModules: commit not found');
     }
     ownershipData = ownershipData.files.data.map((o) => {
       return {
@@ -208,16 +208,18 @@ export function getCommitsForBranch(branch, allCommits) {
 }
 
 export function commitsToOwnership(commits) {
-  return commits.map((c) => {
-    return {
-      sha: c.sha,
-      date: c.date,
-      files: c.files.data.map((f) => {
-        return {
-          path: f.file.path,
-          ownership: f.ownership,
-        }
-      }),
-    }
-  }).sort((a, b) => new Date(a.date) - new Date(b.date));
+  return commits
+    .map((c) => {
+      return {
+        sha: c.sha,
+        date: c.date,
+        files: c.files.data.map((f) => {
+          return {
+            path: f.file.path,
+            ownership: f.ownership,
+          };
+        }),
+      };
+    })
+    .sort((a, b) => new Date(a.date) - new Date(b.date));
 }

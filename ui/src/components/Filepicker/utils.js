@@ -19,9 +19,8 @@ export function extractFileOwnership(ownershipData) {
 //considers the merged authors from the universal settings and merges the ownership data used for the filepicker accordingly
 //returns null if any of the parameters is null or undefined
 export function ownershipDataForMergedAuthors(mergedAuthors, otherAuthors, authorColors, ownershipForFiles, files) {
-  
   if (!mergedAuthors || !otherAuthors || !authorColors || !ownershipForFiles || !files) return null;
-  
+
   let result = {};
 
   for (const [filename, ownership] of Object.entries(ownershipForFiles)) {
@@ -37,10 +36,10 @@ export function ownershipDataForMergedAuthors(mergedAuthors, otherAuthors, autho
 
       //first check if this author is in the 'other' category
       if (otherAuthors.map((a) => a.signature).includes(sig)) {
-        if (!mergedOwnership["other"]) {
-          mergedOwnership["other"] = lines;
+        if (!mergedOwnership['other']) {
+          mergedOwnership['other'] = lines;
         } else {
-          mergedOwnership["other"] += lines;
+          mergedOwnership['other'] += lines;
         }
       } else {
         //else check who is the main committer / if this is an alias

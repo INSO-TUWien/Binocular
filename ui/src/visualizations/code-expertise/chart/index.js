@@ -5,7 +5,13 @@ import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import FullScreenMessage from './full-screen-message.js';
 import _ from 'lodash';
-import { addBuildData, extractRelevantPreviousFilenames, getBlameModules, getCommitHashesForFiles, getCommitsForBranch } from '../sagas/helper';
+import {
+  addBuildData,
+  extractRelevantPreviousFilenames,
+  getBlameModules,
+  getCommitHashesForFiles,
+  getCommitsForBranch,
+} from '../sagas/helper';
 import { requestRefresh } from '../sagas';
 
 export default () => {
@@ -30,13 +36,12 @@ export default () => {
 
   //process raw data from global store
   useEffect(() => {
-
     const result = {
       devData: {},
       issue: null,
     };
 
-    if(rawData === null || rawData === undefined) {
+    if (rawData === null || rawData === undefined) {
       setData(result);
       return;
     }
@@ -46,8 +51,8 @@ export default () => {
       return;
     }
 
-    if (!(rawData.branchCommits)) {
-      dispatch(requestRefresh())
+    if (!rawData.branchCommits) {
+      dispatch(requestRefresh());
       return;
     }
 
@@ -56,10 +61,10 @@ export default () => {
     const issueData = rawData.issue;
     const allPrevFilenames = rawData.prevFilenames;
     const prevFilenames = extractRelevantPreviousFilenames(activeFiles, allPrevFilenames);
-    
+
     let relevantCommitHashes;
-    
-    if(mode === 'modules') {
+
+    if (mode === 'modules') {
       relevantCommitHashes = getCommitHashesForFiles(branchCommits, activeFiles, prevFilenames);
     } else {
       relevantCommitHashes = issueData.issueCommits;
@@ -158,14 +163,12 @@ export default () => {
     }
 
     const latestBranchCommit = branchCommits.sort((a, b) => new Date(b.date) - new Date(a.date))[0];
-    const blameRes = getBlameModules(latestBranchCommit, activeFiles, branchCommits)
+    const blameRes = getBlameModules(latestBranchCommit, activeFiles, branchCommits);
     for (const [name, val] of Object.entries(blameRes)) {
       result['devData'][name]['linesOwned'] = val;
     }
     setData(result);
-
-  }, [rawData, activeFiles])
-  
+  }, [rawData, activeFiles]);
 
   //calculate the data for relevant (selected) developers
   useEffect(() => {

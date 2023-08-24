@@ -3,12 +3,7 @@ import { select, throttle, fork, takeEvery } from 'redux-saga/effects';
 import _ from 'lodash';
 
 import { fetchFactory, timestampedActionFactory, mapSaga } from '../../../sagas/utils.js';
-import {
-  getCommitDataForSha,
-  getOwnershipForCommits,
-  getFilenamesForBranch,
-  getPreviousFilenames,
-} from './helper.js';
+import { getCommitDataForSha, getOwnershipForCommits, getFilenamesForBranch, getPreviousFilenames } from './helper.js';
 import { extractFileOwnership } from '../../../components/Filepicker/utils.js';
 
 //define actions

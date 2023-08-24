@@ -22,8 +22,7 @@ export default () => {
   const filterMergeCommits = expertiseState.config.filterMergeCommits;
   const onlyDisplayOwnership = expertiseState.config.onlyDisplayOwnership;
   const mode = expertiseState.config.mode;
-  const ownershipForFiles = expertiseState.data.data?.ownershipForFiles;
-
+  const ownershipForFiles = expertiseState.data.data ? expertiseState.data.data.ownershipForFiles : null;
 
   //global state of universal settings
   const universalSettings = useSelector((state) => state.universalSettings);
@@ -225,7 +224,8 @@ export default () => {
                 globalActiveFiles={activeFiles}
                 setActiveFiles={(files) => dispatch(setActiveFiles(files))}
                 fileOwnership={fileOwnership}
-                authorColors={authorColors} />
+                authorColors={authorColors}
+              />
             </div>
           </div>
         )}

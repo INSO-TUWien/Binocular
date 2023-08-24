@@ -30,7 +30,7 @@ const Details = ({ devData }) => {
 
   //global state
   const globalData = useSelector((state) => state.visualizations.codeExpertise.state.data.data);
-  const issueData = globalData?.issue?.issueData;
+  const issueData = globalData ? (globalData.issue ? globalData.issue.issueData : null) : null;
   const selectedDev = useSelector((state) => state.visualizations.codeExpertise.state.config.details);
   const mode = useSelector((state) => state.visualizations.codeExpertise.state.config.mode);
 

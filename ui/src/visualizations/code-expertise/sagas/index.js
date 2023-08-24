@@ -83,7 +83,6 @@ export const fetchCodeExpertiseData = fetchFactory(
 
       return yield issuesModeData(currentBranch, issueId).then(
         ([allCommits, issueData, relevantCommitHashes, buildData, prevFilenames]) => {
-
           const branchCommits = getCommitsForBranch(currentBranch, allCommits);
 
           return {
@@ -95,14 +94,12 @@ export const fetchCodeExpertiseData = fetchFactory(
               issueCommits: relevantCommitHashes,
             },
             ownershipForFiles: extractFileOwnership(commitsToOwnership(allCommits)),
-          }
+          };
         }
       );
-
     } else if (mode === 'modules') {
       if (activeFiles === null || activeFiles.length === 0) return result;
       return yield modulesModeData(currentBranch).then(([allCommits, builds, prevFilenames]) => {
-
         const branchCommits = getCommitsForBranch(currentBranch, allCommits);
 
         return {
@@ -111,9 +108,8 @@ export const fetchCodeExpertiseData = fetchFactory(
           prevFilenames: prevFilenames,
           issue: null,
           ownershipForFiles: extractFileOwnership(commitsToOwnership(allCommits)),
-        }
+        };
       });
-
     } else {
       console.log('error in fetchCodeExpertiseData: invalid mode: ' + mode);
       return result;
