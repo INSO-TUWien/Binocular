@@ -41,20 +41,3 @@ export async function getPreviousFilenames(filenames, branch) {
   }
   return previousFilenameObjects;
 }
-
-//returns an object with filepaths as keys and the most recent ownership data for each file as values
-export function extractFileOwnership(ownershipData) {
-  //(copy and) reverse array so we have the most recent commits first
-  const commits = ownershipData.toReversed();
-  const result = {};
-  for (const commit of commits) {
-    for (const file of commit.files) {
-      //since we start with the most recent commit, we are only interested in the first occurence of each file
-      //and because this is used for the filepicker, we are also not concerned about file renames
-      if (!result[file.path]) {
-        result[file.path] = file.ownership;
-      }
-    }
-  }
-  return result;
-}

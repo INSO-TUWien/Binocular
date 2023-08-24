@@ -4,7 +4,8 @@ import _ from 'lodash';
 
 import { fetchFactory, timestampedActionFactory, mapSaga } from '../../../sagas/utils.js';
 
-import { modulesModeData, issuesModeData } from './helper.js';
+import { modulesModeData, issuesModeData, commitsToOwnership, getCommitsForBranch } from './helper.js';
+import { extractFileOwnership } from '../../../components/Filepicker/utils.js';
 
 //define actions
 export const requestCodeExpertiseData = createAction('REQUEST_CODE_EXPERTISE_DATA');
@@ -68,10 +69,11 @@ export const fetchCodeExpertiseData = fetchFactory(
     const currentBranch = state.visualizations.codeExpertise.state.config.currentBranch;
 
     const result = {
-      allCommits: null,
+      branchCommits: null,
       builds: null,
       prevFilenames: null,
       issue: null,
+      ownershipForFiles: null,
     };
 
     if (currentBranch === null || currentBranch === undefined) return result;
@@ -81,27 +83,34 @@ export const fetchCodeExpertiseData = fetchFactory(
 
       return yield issuesModeData(currentBranch, issueId).then(
         ([allCommits, issueData, relevantCommitHashes, buildData, prevFilenames]) => {
+
+          const branchCommits = getCommitsForBranch(currentBranch, allCommits);
+
           return {
-            allCommits: allCommits,
+            branchCommits: branchCommits,
             builds: buildData,
             prevFilenames: prevFilenames,
             issue: {
               issueData: issueData,
               issueCommits: relevantCommitHashes,
             },
+            ownershipForFiles: extractFileOwnership(commitsToOwnership(allCommits)),
           }
         }
       );
 
     } else if (mode === 'modules') {
       if (activeFiles === null || activeFiles.length === 0) return result;
-      //TODO use other function to get all commits (with ownership data)
       return yield modulesModeData(currentBranch).then(([allCommits, builds, prevFilenames]) => {
+
+        const branchCommits = getCommitsForBranch(currentBranch, allCommits);
+
         return {
-          allCommits: allCommits,
+          branchCommits: branchCommits,
           builds: builds,
           prevFilenames: prevFilenames,
           issue: null,
+          ownershipForFiles: extractFileOwnership(commitsToOwnership(allCommits)),
         }
       });
 

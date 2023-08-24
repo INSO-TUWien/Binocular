@@ -8,6 +8,7 @@ import Filepicker from '../../../components/Filepicker/index.js';
 import styles from '../styles.scss';
 import { setMode, setCurrentBranch, setActiveFiles } from '../sagas';
 import { getBranches, getFilenamesForBranch } from '../sagas/helper.js';
+import { ownershipDataForMergedAuthors } from '../../../components/Filepicker/utils.js';
 
 export default () => {
   //global state from redux store
@@ -20,7 +21,6 @@ export default () => {
 
   //global state of universal settings
   const universalSettings = useSelector((state) => state.universalSettings);
-  const selectedAuthors = universalSettings.selectedAuthorsGlobal;
   const otherAuthors = universalSettings.otherAuthors;
   const mergedAuthors = universalSettings.mergedAuthors;
   const authorColors = universalSettings.universalSettingsData.data.palette;
@@ -103,57 +103,7 @@ export default () => {
   //the filepicker should indicate the ownership of the files
   //it needs to consider the colors and merged authors from the universal settings
   useEffect(() => {
-    if (!mergedAuthors || !otherAuthors || !authorColors || !ownershipForFiles || !files) return;
-
-    let result = {};
-
-    for (const [filename, ownership] of Object.entries(ownershipForFiles)) {
-      //we are only interested in ownership data of files that actually exist on this branch at the moment
-      if (!files.includes(filename)) continue;
-
-      let mergedOwnership = {};
-
-      //for every stakeholder that ownes lines of this file
-      for (const stakeholder of ownership) {
-        const sig = stakeholder.stakeholder;
-        const lines = stakeholder.ownedLines;
-
-        //first check if this author is in the 'other' category
-        if (otherAuthors.map((a) => a.signature).includes(sig)) {
-          if (!mergedOwnership['other']) {
-            mergedOwnership['other'] = lines;
-          } else {
-            mergedOwnership['other'] += lines;
-          }
-        } else {
-          //else check who is the main committer / if this is an alias
-          for (const committer of mergedAuthors) {
-            let breakOut = false;
-            const mainSignature = committer.mainCommitter;
-            for (const alias of committer.committers) {
-              //if the stakeholder is an alias of this main committer
-              if (alias.signature === sig) {
-                if (!mergedOwnership[mainSignature]) {
-                  mergedOwnership[mainSignature] = lines;
-                } else {
-                  mergedOwnership[mainSignature] += lines;
-                }
-                //we found the right committer, so we can stop searching
-                breakOut = true;
-                break;
-              }
-            }
-            if (breakOut) break;
-          }
-        }
-      }
-      //bring it to the same form as the original ownership data
-      result[filename] = Object.entries(mergedOwnership).map(([sig, lines]) => {
-        return { signature: sig, ownedLines: lines };
-      });
-    }
-
-    setFileOwnership(result);
+    setFileOwnership(ownershipDataForMergedAuthors(mergedAuthors, otherAuthors, authorColors, ownershipForFiles, files));
   }, [mergedAuthors, otherAuthors, authorColors, ownershipForFiles, files]);
 
   return (

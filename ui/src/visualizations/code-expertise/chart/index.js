@@ -19,7 +19,6 @@ export default () => {
   const isFetching = useSelector((state) => state.visualizations.codeExpertise.state.data.isFetching);
   const mode = useSelector((state) => state.visualizations.codeExpertise.state.config.mode);
   const activeFiles = useSelector((state) => state.visualizations.codeExpertise.state.config.activeFiles);
-  const currentBranch = useSelector((state) => state.visualizations.codeExpertise.state.config.currentBranch);
   const filterMergeCommits = useSelector((state) => state.visualizations.codeExpertise.state.config.filterMergeCommits);
 
   //processed data
@@ -47,12 +46,12 @@ export default () => {
       return;
     }
 
-    if (!(rawData.allCommits)) {
+    if (!(rawData.branchCommits)) {
       dispatch(requestRefresh())
       return;
     }
 
-    const allCommits = rawData.allCommits;
+    const branchCommits = rawData.branchCommits;
     const builds = rawData.builds;
     const issueData = rawData.issue;
     const allPrevFilenames = rawData.prevFilenames;
@@ -61,15 +60,12 @@ export default () => {
     let relevantCommitHashes;
     
     if(mode === 'modules') {
-      relevantCommitHashes = getCommitHashesForFiles(allCommits, activeFiles, prevFilenames);
+      relevantCommitHashes = getCommitHashesForFiles(branchCommits, activeFiles, prevFilenames);
     } else {
       relevantCommitHashes = issueData.issueCommits;
     }
 
     //########### get all relevant commits ###########
-
-    //contains all commits of the current branch
-    const branchCommits = getCommitsForBranch(currentBranch, allCommits);
 
     //we now have all commits for the current branch and all commits for the issue
     //intersect the two groups to get the result set
@@ -162,7 +158,7 @@ export default () => {
     }
 
     const latestBranchCommit = branchCommits.sort((a, b) => new Date(b.date) - new Date(a.date))[0];
-    const blameRes = getBlameModules(latestBranchCommit, activeFiles, allCommits)
+    const blameRes = getBlameModules(latestBranchCommit, activeFiles, branchCommits)
     for (const [name, val] of Object.entries(blameRes)) {
       result['devData'][name]['linesOwned'] = val;
     }
