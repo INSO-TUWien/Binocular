@@ -1,10 +1,10 @@
 'use strict';
 
 import React from 'react';
-import { Stage, Layer, Circle, Arrow, Line } from 'react-konva';
+import { Stage, Layer, Circle, Arrow, Line, Text } from 'react-konva';
 import { generateKonvaGraph, generateSimpleGraph } from './helper.js';
-import { layoutGraph } from './d3_graph_simulation.js';
 import styles from '../styles.scss';
+import Modal from 'react-modal';
 
 export default class ReverseCommands extends React.Component {
   constructor(props) {
@@ -15,8 +15,11 @@ export default class ReverseCommands extends React.Component {
       isDrawingLine: false,
       startLinePoint: { x: 0, y: 0 },
       endLinePoint: { x: 0, y: 0 },
-      graph: null,
       selectedBranches: [],
+      scale: 1,
+      isModalOpen: false,
+      checkedOutBranch: null,
+      selectedBranch: null,
     };
 
     this.stageRef = React.createRef();
@@ -24,17 +27,6 @@ export default class ReverseCommands extends React.Component {
 
   async componentDidMount() {
     this.setState({graph_konva: this.generateDAG(1000,300)});
-    /*const graph = generateSimpleGraph();
-    const simulation = layoutGraph(graph);
-    try {
-      const graph = generateSimpleGraph();
-      const sim_graph = await layoutGraph(graph);
-      this.setState({ graph_konva: sim_graph });
-      console.log('im done', graph);
-    } catch (error) {
-      console.log('something bad happened!');
-      console.log(error);
-    }*/
   }
 
   componentDidUpdate(prevProps) {
@@ -47,7 +39,15 @@ export default class ReverseCommands extends React.Component {
   const redValue = 255;
     return (
       <div className={styles.chartContainer}>
-        <Stage ref={this.stageRef} width={window.innerWidth} height={window.innerHeight} onMouseUp={this.handleStageMouseUp}
+        <Stage
+          ref={this.stageRef}
+          width={window.innerWidth}
+          height={window.innerHeight}
+          onMouseUp={this.handleStageMouseUp}
+          onWheel={this.handleWheel}
+          scaleX={this.state.scale}
+          scaleY={this.state.scale}
+          draggable
         >
           <Layer>
             {this.state.graph_konva.edges.map((edge) => {
@@ -84,6 +84,17 @@ export default class ReverseCommands extends React.Component {
               />
             ))}
 
+            {this.state.graph_konva.branches.map((branch) => (
+              <Text
+                key={branch.name}
+                id={branch.name}
+                x={0}
+                y={branch.height}
+                text={branch.name}
+                onClick={() => this.handleTextClick(branch)}
+              />
+            ))}
+
             {this.state.isDrawingLine && (
               <Arrow
                 points={[
@@ -96,11 +107,62 @@ export default class ReverseCommands extends React.Component {
                 strokeWidth={2}
               />
             )}
+
           </Layer>
         </Stage>
+        <Modal
+          isOpen={this.state.isModalOpen}
+          onRequestClose={this.closeModal}
+          contentLabel="Checkout Modal"
+          style={this.customModalStyles} //
+        >
+          {this.state.selectedBranch ? (
+            <div>
+              <h2>Checkout Branch: {this.state.selectedBranch.name}</h2>
+              <button onClick={this.handleCheckout}>Checkout</button>
+            </div>
+          ) : (
+            <div>
+              <p>No branch selected.</p>
+            </div>
+          )}
+          <button onClick={this.closeModal}>Cancel</button>
+        </Modal>
       </div>
     );
   }
+
+  customModalStyles = {
+    content: {
+      width: '50%',  // Adjust the width as needed
+      height: '50%', // Let the height adjust based on content
+      margin: 'auto',
+    },
+  };
+
+  handleTextClick = (branch) => {
+    this.setState({
+      selectedBranch: branch,
+      isModalOpen: true,
+    });
+  };
+
+  handleCheckout = () => {
+    // Implement your branch checkout logic here
+    // This function will be called when the "Checkout" button in the modal is clicked
+    console.log(`Checking out the branch: ${this.state.selectedBranch.name}`);
+    this.setState({
+      selectedBranch: null,
+      isModalOpen: false,
+    });
+  };
+
+  closeModal = () => {
+    this.setState({
+      selectedBranch: null,
+      isModalOpen: false,
+    });
+  };
 
   handleCircleClick(node) {
     console.log(`Circle with ID ${node.id} was clicked.`);
@@ -116,6 +178,13 @@ export default class ReverseCommands extends React.Component {
       console.log('wanna merge?');
     }
   }
+
+  handleWheel = (e) => {
+    e.evt.preventDefault();
+    const scaleBy = 1.2;
+    const newScale = e.evt.deltaY > 0 ? this.state.scale / scaleBy : this.state.scale * scaleBy;
+    this.setState({ scale: newScale} );
+  };
 
   handleMouseMove = (e) => {
     const stage = this.stageRef.current;
@@ -240,7 +309,7 @@ export default class ReverseCommands extends React.Component {
         const parentX = parentNode ? parentNode.x : 0;
 
         if(parentNode !== undefined){
-          branch_offset = parentX - buffer_x;
+          branch_offset = parentX - buffer_x + steps_x;
         }
 
         const node = {
@@ -249,13 +318,14 @@ export default class ReverseCommands extends React.Component {
           x: parentCommit ? parentX + steps_x : steps_x * commitIndex + branch_offset + buffer_x,
           y: branchHeights, // You can adjust the y-coordinate as needed
           color: color,
+          message: commit.message
         };
         nodesData.push(node);
       });
     });
 
     console.log('nodes:', nodesData);
-    const graph = { nodes: nodesData, edges: [...edges,...crossBranchParents]};
+    const graph = { nodes: nodesData, edges: [...edges,...crossBranchParents], branches: heights};
     console.log('graph:', graph);
 
     return graph;

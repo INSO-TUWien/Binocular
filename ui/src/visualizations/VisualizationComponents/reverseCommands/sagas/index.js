@@ -118,9 +118,10 @@ export const fetchReverseCommandsData = fetchFactory(
       .then((result) => {
         const commits = result[1];
         let filteredCommits;
+
+        // initially load whole repo, then filter once branches are selected
         if (selectedBranches.length !== 0) {
           filteredCommits = filterCommits(commits, selectedBranches);
-          console.log('commits-length: ', filteredCommits.length);
         } else {
           filteredCommits = commits;
         }

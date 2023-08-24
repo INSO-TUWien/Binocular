@@ -1,8 +1,8 @@
 'use strict';
 
 import { connect } from 'react-redux';
-import Chart from './chart_temp_konva.js';
-import { setActiveBranch, setActiveBranches, setActiveFile, setActiveFiles, setActivePath } from '../../../legacy/code-hotspots/sagas';
+import Chart from './konva_chart.js';
+import { setActiveBranch, setActiveBranches } from '../../../legacy/code-hotspots/sagas';
 import { setSelectedBranches } from '../sagas';
 
 const mapStateToProps = (state /*, ownProps*/) => {
