@@ -44,30 +44,12 @@ export default class ReverseCommands extends React.Component {
   }
 
   render() {
-    console.log('branches in comp konva', this.props.filteredCommits);
-
+  const redValue = 255;
     return (
       <div className={styles.chartContainer}>
         <Stage ref={this.stageRef} width={window.innerWidth} height={window.innerHeight} onMouseUp={this.handleStageMouseUp}
         >
           <Layer>
-            {this.state.graph_konva.nodes.map((node) => (
-              <Circle
-                key={node.index}
-                id={node.index}
-                x={node.x}
-                y={node.y}
-                radius={10}
-                fill="red"
-                onClick={() => this.handleCircleClick(node)} // Add this line
-                onMouseEnter={() => this.handleCircleMouseEnter(node.id)} // Add hover event handler
-                onMouseLeave={this.handleCircleMouseLeave} // Add mouse leave event handler
-                stroke={
-                  this.state.hoveredCircleIndex === node.id ? 'yellow' : null
-                } // Conditionally add stroke color for hover effect
-                strokeWidth={1}
-              />
-            ))}
             {this.state.graph_konva.edges.map((edge) => {
               const fromNode = this.state.graph_konva.nodes.find((node) => node.id === edge.from);
               const toNode = this.state.graph_konva.nodes.find((node) => node.id === edge.to);
@@ -84,6 +66,24 @@ export default class ReverseCommands extends React.Component {
 
               return null; // Handle the case where nodes for the edge are not found
             })}
+            {this.state.graph_konva.nodes.map((node) => (
+              <Circle
+                key={node.index}
+                id={node.index}
+                x={node.x}
+                y={node.y}
+                radius={10}
+                fill={node.color}
+                onClick={() => this.handleCircleClick(node)} // Add this line
+                onMouseEnter={() => this.handleCircleMouseEnter(node.id)} // Add hover event handler
+                onMouseLeave={this.handleCircleMouseLeave} // Add mouse leave event handler
+                stroke={
+                  this.state.hoveredCircleIndex === node.id ? 'yellow' : null
+                } // Conditionally add stroke color for hover effect
+                strokeWidth={1}
+              />
+            ))}
+
             {this.state.isDrawingLine && (
               <Arrow
                 points={[
@@ -182,6 +182,9 @@ export default class ReverseCommands extends React.Component {
     }));
 
     console.log('widths:',heights);
+    ////////////////////////////////// - Color Generation
+    const colors = this.generateRandomRGBColors(numBranches);
+    console.log('colors', colors);
     ////////////////////////////////// - Parents
     const crossBranchParents = [];
     this.props.filteredCommits.forEach((commit) => {
@@ -199,13 +202,36 @@ export default class ReverseCommands extends React.Component {
     });
     console.log('edges: ', edges);
     console.log('crossParent: ', crossBranchParents);
+    ////////////////////////////////// - Check If node is parent of multiple commits in the same branch:
+    const edgesCountMap = edges.reduce((countMap, edge) => {
+      if (!countMap[edge.from]) {
+        countMap[edge.from] = 1;
+      } else {
+        countMap[edge.from]++;
+      }
+      return countMap;
+    }, {});
+
+    const filteredEdges = edges.filter(edge => edgesCountMap[edge.from] > 1);
+
+    console.log('filteredEdges:', filteredEdges);
+    const fromValuesList = filteredEdges.map(edge => edge.from);
+
+    console.log('fromValuesList:', fromValuesList);
+
+    const uniqueFromValues = [...new Set(fromValuesList)];
+
+    console.log('uniqueFromValues:', uniqueFromValues);
+
     ////////////////////////////////// - Node Creation
     const nodesData = [];
 
     branchNames.forEach((branch, branchIndex) => {
       const branchCommits = organizedCommits[branch];
       const branchHeights = heights.find( (pair) => pair.name === branch)?.height;
+      const color = colors[branchIndex];
 
+      let branch_offset = 0;
       branchCommits.forEach((commit, commitIndex) => {
         const parentCommit = crossBranchParents.find(c => c.to === commit.sha);
         console.log('found cross parent', parentCommit);
@@ -213,11 +239,16 @@ export default class ReverseCommands extends React.Component {
         const parentNode = nodesData.find(node => node.id === parentCommit?.from);
         const parentX = parentNode ? parentNode.x : 0;
 
+        if(parentNode !== undefined){
+          branch_offset = parentX - buffer_x;
+        }
+
         const node = {
           id: commit.sha,
           label: `Commit ${ commit.sha}`,
-          x: parentCommit ? parentX + steps_x : steps_x * commitIndex + buffer_x,
+          x: parentCommit ? parentX + steps_x : steps_x * commitIndex + branch_offset + buffer_x,
           y: branchHeights, // You can adjust the y-coordinate as needed
+          color: color,
         };
         nodesData.push(node);
       });
@@ -228,5 +259,19 @@ export default class ReverseCommands extends React.Component {
     console.log('graph:', graph);
 
     return graph;
+  }
+
+  generateRandomRGBColors(numBranches) {
+    const colors = [];
+
+    for (let i = 0; i < numBranches; i++) {
+      const red = Math.floor(Math.random() * 256);
+      const green = Math.floor(Math.random() * 256);
+      const blue = Math.floor(Math.random() * 256);
+
+      colors.push(`rgb(${red}, ${green}, ${blue})`);
+    }
+
+    return colors;
   }
 }
