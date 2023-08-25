@@ -7,13 +7,13 @@ import saga from './sagas';
 import reducer from './reducers';
 
 export default {
-  id: 'codeExpertise',
-  label: 'Code Expertise',
+  id: 'codeOwnership',
+  label: 'Code Ownership',
   saga,
   reducer,
   ChartComponent,
   ConfigComponent,
   HelpComponent,
   usesUniversalSettings: true,
-  universalSettingsConfig: { hideGranularitySettings: true, hideDateSettings: true, hideCommitSettings: true },
+  universalSettingsConfig: { hideCommitSettings: true },
 };

@@ -159,7 +159,7 @@ export default class Sidebar extends React.Component {
                     <h1>Universal Settings:</h1>
                   </div>
                   <div className={cx('panel-block', styles.configuration)}>
-                    <UniversalSettings />
+                    <UniversalSettings universalSettingsConfig={visualizations[activeVisualization].universalSettingsConfig} />
                   </div>
                   <div className={cx('panel-block', styles.configuration)}>
                     <h1>Visualization Specific Settings:</h1>

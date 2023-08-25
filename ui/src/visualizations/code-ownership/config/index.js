@@ -2,37 +2,28 @@
 
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import _ from 'lodash';
 
 import TabCombo from '../../../components/TabCombo.js';
 import Filepicker from '../../../components/Filepicker/index.js';
 import styles from '../styles.scss';
-import { setActiveIssue, setMode, setCurrentBranch, setActiveFiles, setFilterMergeCommits, setOnlyDisplayOwnership } from '../sagas';
-import { getBranches, getFilenamesForBranch, getIssues } from '../sagas/helper.js';
+import { setMode, setCurrentBranch, setActiveFiles } from '../sagas';
+import { getBranches, getFilenamesForBranch } from '../sagas/helper.js';
 
 export default () => {
   //global state from redux store
-  const expertiseState = useSelector((state) => state.visualizations.codeExpertise.state);
-  const currentMode = expertiseState.config.mode;
-  const currentBranch = expertiseState.config.currentBranch;
-  const activeFiles = expertiseState.config.activeFiles;
-  const currentBranchName = currentBranch && currentBranch.branch;
-  const activeIssueId = expertiseState.config.activeIssueId;
-  const filterMergeCommits = expertiseState.config.filterMergeCommits;
-  const onlyDisplayOwnership = expertiseState.config.onlyDisplayOwnership;
-  const mode = useSelector((state) => state.visualizations.codeExpertise.state.config.mode);
+  const ownershipState = useSelector((state) => state.visualizations.codeOwnership.state);
+
+  const currentMode = ownershipState.config.mode;
+  const currentBranch = ownershipState.config.currentBranch;
+  const currentBranchName = (currentBranch && currentBranch.branch) || undefined;
+  const currentActiveFiles = ownershipState.config.activeFiles;
 
   //local state
   const [allBranches, setAllBranches] = useState([]);
   const [branchOptions, setBranchOptions] = useState([]);
-  const [issueOptions, setIssueOptions] = useState([]);
   const [files, setFiles] = useState([]);
 
   const dispatch = useDispatch();
-
-  const onSetIssue = (issueId) => {
-    dispatch(setActiveIssue(issueId));
-  };
 
   const onSetMode = (mode) => {
     dispatch(setMode(mode));
@@ -44,16 +35,9 @@ export default () => {
   };
 
   const resetActiveFiles = () => {
-    dispatch(setActiveFiles([]));
-  };
-
-  const onSetFilterMergeCommits = (isChecked) => {
-    dispatch(setFilterMergeCommits(isChecked));
-  };
-
-  const onSetOnlyDisplayOwnership = (isChecked) => {
-    if (mode === 'issues') return;
-    dispatch(setOnlyDisplayOwnership(isChecked));
+    if (currentActiveFiles.length !== 0) {
+      dispatch(setActiveFiles([]));
+    }
   };
 
   //run once on initialization
@@ -71,10 +55,12 @@ export default () => {
           }
           dispatch(setCurrentBranch(activeBranch));
         }
+        //return just the names of the branches
         return branches.map((b) => b.branch);
       })
       .then((branches) => [...new Set(branches)])
       .then((branches) => {
+        //build the selection box
         const temp = [];
         //placeholder option
         temp.push(
@@ -91,25 +77,6 @@ export default () => {
         }
         setBranchOptions(temp);
       });
-
-    //get all issues for issue-select
-    getIssues().then((issues) => {
-      const temp = [];
-      //placeholder option
-      temp.push(
-        <option key={-1} value={''}>
-          Select an Issue
-        </option>
-      );
-      for (const i of issues) {
-        temp.push(
-          <option key={i.iid} value={i.iid}>
-            {'#' + i.iid + ' ' + i.title}
-          </option>
-        );
-      }
-      setIssueOptions(temp);
-    });
   }, []);
 
   //update files every time the branch changes
@@ -150,26 +117,7 @@ export default () => {
           </>
         )}
 
-        {/* select if merge commits should be filtered */}
-        <div className="field">
-          <div className="control">
-            <label className="label">Filter Commits:</label>
-            <input type="checkbox" checked={filterMergeCommits} onChange={(event) => onSetFilterMergeCommits(event.target.checked)} />
-            <span>Exclude merge commits</span>
-          </div>
-        </div>
-
-        {mode !== 'issues' && (
-          <div className="field">
-            <div className="control">
-              <label className="label">Display Settings:</label>
-              <input type="checkbox" checked={onlyDisplayOwnership} onChange={(event) => onSetOnlyDisplayOwnership(event.target.checked)} />
-              <span>Only display Code Ownership</span>
-            </div>
-          </div>
-        )}
-
-        {/* select if commits related to issues or commits related to files should be visualized */}
+        {/* if the chart should display the absolute ownership (stacked chart) or the relative percentage of ownership of each dev */}
         <div className="field">
           <div className="control">
             <label className="label">Mode:</label>
@@ -177,34 +125,22 @@ export default () => {
               value={currentMode}
               onChange={(value) => onSetMode(value)}
               options={[
-                { label: 'Issues', icon: 'ticket-alt', value: 'issues' },
-                { label: 'Modules', icon: 'server', value: 'modules' },
+                { label: 'Absolute', icon: 'bars', value: 'absolute' },
+                { label: 'Relative', icon: 'percent', value: 'relative' },
               ]}
             />
           </div>
         </div>
 
-        {/* Only diplay issue searchbar when 'issues' is selected as mode */}
-        {currentMode === 'issues' && (
-          <div className="field">
-            <div className="control">
-              <label className="label">Choose an Issue to visualize:</label>
-              <div className="select">
-                <select value={activeIssueId} onChange={(e) => onSetIssue(e.target.value)}>
-                  {issueOptions}
-                </select>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Only diplay file-picker when 'modules' is selected as mode and a branch is selected*/}
-        {currentMode === 'modules' && currentBranch && (
+        {currentBranch && (
           <div className="field">
             <div className="control">
               <label className="label">Choose Files and Modules to visualize:</label>
-
-              <Filepicker fileList={files} globalActiveFiles={activeFiles} setActiveFiles={(files) => dispatch(setActiveFiles(files))} />
+              <Filepicker
+                fileList={files}
+                globalActiveFiles={currentActiveFiles}
+                setActiveFiles={(files) => dispatch(setActiveFiles(files))}
+              />
             </div>
           </div>
         )}

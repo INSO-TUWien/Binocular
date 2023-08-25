@@ -39,6 +39,9 @@ module.exports = new gql.GraphQLObjectType({
         type: FileAction,
         description: 'How the file is affected (added, deleted, modified)',
       },
+      ownership: {
+        type: new gql.GraphQLList(require('./ownership.js')),
+      },
     };
   },
 });
