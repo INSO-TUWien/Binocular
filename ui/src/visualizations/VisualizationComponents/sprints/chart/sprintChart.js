@@ -222,17 +222,17 @@ export default (props) => {
         } else {
           mergeRequestsOnDay++;
         }
-        return height - 15 + mergeRequestsOnDay * ((height - 110) / maxOpenEvents + 4);
+        return height - 15 + mergeRequestsOnDay * 10;
       })
-      .attr('width', (height - 110) / maxOpenEvents + 4)
-      .attr('height', (height - 110) / maxOpenEvents + 4)
+      .attr('width', 10)
+      .attr('height', 10)
       .attr('fill', (d) =>
         props.colorIssuesMergeRequestsMostTimeSpent
           ? getColorForAuthorName(d.authorWithMostSpentTime, props.mergedAuthors)
           : getColorForAuthorName(d.author.name, props.mergedAuthors)
       )
       .attr('stroke-width', '2')
-      .attr('rx', ((height - 110) / maxOpenEvents + 4) / 2)
+      .attr('rx', 10)
       .attr('stroke', '#000')
       .style('cursor', 'pointer')
       .on('mouseover', function () {
