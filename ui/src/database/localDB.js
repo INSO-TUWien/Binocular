@@ -41,8 +41,9 @@ import modulesModules from '../../db_export/modules-modules.json';
 import modules from '../../db_export/modules.json';
 import stakeholders from '../../db_export/stakeholders.json';
 import mergeRequests from '../../db_export/mergeRequests.json';
+import milestones from '../../db_export/milestones.json';
 
-const collections = { branches, builds, commits, files, issues, languages, modules, stakeholders, mergeRequests };
+const collections = { branches, builds, commits, files, issues, languages, modules, stakeholders, mergeRequests, milestones };
 
 const relations = {
   'commits-commits': commitsCommits,
