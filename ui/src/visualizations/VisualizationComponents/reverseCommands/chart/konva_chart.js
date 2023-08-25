@@ -1,10 +1,12 @@
 'use strict';
 
 import React from 'react';
-import { Stage, Layer, Circle, Arrow, Line, Text } from 'react-konva';
+import { Stage, Layer, Circle, Arrow, Line, Text, Wedge } from 'react-konva';
 import { generateKonvaGraph, generateSimpleGraph } from './helper.js';
 import styles from '../styles.scss';
 import Modal from 'react-modal';
+import * as eventHandlers from  './eventHandlers';
+import copyToClipboard from '../../../dashboard/assets/copyToClipboardIcon.svg';
 
 export default class ReverseCommands extends React.Component {
   constructor(props) {
@@ -20,6 +22,7 @@ export default class ReverseCommands extends React.Component {
       isModalOpen: false,
       checkedOutBranch: null,
       selectedBranch: null,
+      checkoutPointer: null,
     };
 
     this.stageRef = React.createRef();
@@ -36,20 +39,38 @@ export default class ReverseCommands extends React.Component {
   }
 
   render() {
-  const redValue = 255;
-    return (
+
+    const controlPoint= { x: (this.state.startLinePoint.x + this.state.endLinePoint.x) / 2, y: ((this.state.startLinePoint.y + this.state.endLinePoint.y) / 2 ) + -40}; // Adjust the y value to control the curvature
+
+      return (
       <div className={styles.chartContainer}>
         <Stage
           ref={this.stageRef}
           width={window.innerWidth}
           height={window.innerHeight}
-          onMouseUp={this.handleStageMouseUp}
-          onWheel={this.handleWheel}
+          onMouseUp={() => eventHandlers.handleStageMouseUp(this)}
+          onWheel={(e) => eventHandlers.handleWheel(e, this)}
+          onMouseMove={() => eventHandlers.handleMouseMove(this)}
           scaleX={this.state.scale}
           scaleY={this.state.scale}
           draggable
         >
           <Layer>
+            {this.state.isDrawingLine && (
+              <Arrow
+                points={[
+                  this.state.startLinePoint.x,
+                  this.state.startLinePoint.y,
+                  controlPoint.x,
+                  controlPoint.y,
+                  this.state.endLinePoint.x,
+                  this.state.endLinePoint.y,
+                ]}
+                stroke="black"
+                strokeWidth={2}
+                tension={0.5}
+              />
+            )}
             {this.state.graph_konva.edges.map((edge) => {
               const fromNode = this.state.graph_konva.nodes.find((node) => node.id === edge.from);
               const toNode = this.state.graph_konva.nodes.find((node) => node.id === edge.to);
@@ -74,13 +95,15 @@ export default class ReverseCommands extends React.Component {
                 y={node.y}
                 radius={10}
                 fill={node.color}
-                onClick={() => this.handleCircleClick(node)} // Add this line
-                onMouseEnter={() => this.handleCircleMouseEnter(node.id)} // Add hover event handler
-                onMouseLeave={this.handleCircleMouseLeave} // Add mouse leave event handler
+                onClick={() => eventHandlers.handleCircleClick(node, this)} // Add this line
+                onMouseEnter={() => eventHandlers.handleCircleMouseEnter(node.id, this)} // Add hover event handler
+                onMouseLeave={() => eventHandlers.handleCircleMouseLeave(this)} // Add mouse leave event handler
                 stroke={
                   this.state.hoveredCircleIndex === node.id ? 'yellow' : null
                 } // Conditionally add stroke color for hover effect
                 strokeWidth={1}
+                hitStrokeWidth={10}
+
               />
             ))}
 
@@ -91,44 +114,64 @@ export default class ReverseCommands extends React.Component {
                 x={-50}
                 y={branch.height}
                 text={branch.name}
-                onClick={() => this.handleTextClick(branch)}
+                onClick={() => eventHandlers.handleTextClick(branch, this)}
               />
             ))}
-
-            {this.state.isDrawingLine && (
-              <Arrow
-                points={[
-                  this.state.startLinePoint.x,
-                  this.state.startLinePoint.y,
-                  this.state.endLinePoint.x,
-                  this.state.endLinePoint.y,
-                ]}
-                stroke="black"
-                strokeWidth={2}
+            {this.state.checkoutPointer && (
+              <Wedge
+                x={this.state.checkoutPointer.x} // x-coordinate of the center of the wedge
+                y={this.state.checkoutPointer.y} // y-coordinate of the center of the wedge
+                radius={20} // radius of the wedge
+                angle={90} // angle in degrees (quarter circle)
+                rotation={135} // rotation to make the starting point at the right
+                fill="lightgreen" // fill color of the wedge
+                stroke="black" // stroke color of the wedge
+                strokeWidth={1} // stroke width
               />
-            )}
-
+            )
+            }
           </Layer>
         </Stage>
         <Modal
           isOpen={this.state.isModalOpen}
-          onRequestClose={this.closeModal}
+          onRequestClose={() => eventHandlers.closeModal(this)}
           contentLabel="Checkout Modal"
           style={this.customModalStyles} //
         >
           {this.state.selectedBranch ? (
             <div>
-              <h2>Checkout Branch: {this.state.selectedBranch.name}</h2>
-              <button onClick={this.handleCheckout}>Checkout</button>
+              <h2>Branch Name: {this.state.selectedBranch.name}</h2>
+              <br/>
+              To Checkout this Branch:
+              <br/>
+              <div id="switchCMD" className={styles.terminal}>$git switch {this.state.selectedBranch.name}</div>
+              <button onClick={() => this.copyToClipboard(`git switch ${this.state.selectedBranch.name}`)}> <img src={copyToClipboard} alt="CopyToClipboard" className={styles.svgIcon}/></button>
+              <br/><br/>
+
+              <button onClick={() => eventHandlers.handleCheckout(this)}>switch</button>
             </div>
           ) : (
             <div>
               <p>No branch selected.</p>
             </div>
           )}
-          <button onClick={this.closeModal}>Cancel</button>
+          <button onClick={() => eventHandlers.closeModal(this)}>Cancel</button>
         </Modal>
       </div>
+    );
+  }
+
+  copyToClipboard(text) {
+    // Copy the text inside the text field
+    navigator.clipboard.writeText(text).then(
+      () => {
+        /* clipboard successfully set */
+        alert("Copied the text: " + text);
+      },
+      () => {
+        /* clipboard write failed */
+        alert("Error occurred when trying to copy to clipboard");
+      },
     );
   }
 
@@ -138,81 +181,6 @@ export default class ReverseCommands extends React.Component {
       height: '50%', // Let the height adjust based on content
       margin: 'auto',
     },
-  };
-
-  handleTextClick = (branch) => {
-    this.setState({
-      selectedBranch: branch,
-      isModalOpen: true,
-    });
-  };
-
-  handleCheckout = () => {
-    // Implement your branch checkout logic here
-    // This function will be called when the "Checkout" button in the modal is clicked
-    console.log(`Checking out the branch: ${this.state.selectedBranch.name}`);
-    this.setState({
-      selectedBranch: null,
-      isModalOpen: false,
-    });
-  };
-
-  closeModal = () => {
-    this.setState({
-      selectedBranch: null,
-      isModalOpen: false,
-    });
-  };
-
-  handleCircleClick(node) {
-    console.log(`Circle with ID ${node.id} was clicked.`);
-
-    if(!this.state.isDrawingLine) {
-      this.setState({
-        isDrawingLine: true,
-        startLinePoint: { x: node.x, y: node.y },
-      });
-
-      this.stageRef.current.addEventListener('mousemove', this.handleMouseMove);
-    } else {
-      console.log('wanna merge?');
-    }
-  }
-
-  handleWheel = (e) => {
-    e.evt.preventDefault();
-    const scaleBy = 1.2;
-    const newScale = e.evt.deltaY > 0 ? this.state.scale / scaleBy : this.state.scale * scaleBy;
-    this.setState({ scale: newScale} );
-  };
-
-  handleMouseMove = (e) => {
-    const stage = this.stageRef.current;
-    const mousePos = stage.getRelativePointerPosition();
-
-    this.setState({
-      endLinePoint: { x: mousePos.x, y: mousePos.y },
-    });
-  };
-
-  handleStageMouseUp = () => {
-    this.setState({
-      isDrawingLine: false,
-    });
-
-    this.stageRef.current.removeEventListener('mousemove', this.handleMouseMove);
-  };
-
-  handleCircleMouseEnter = (circleIndex) => {
-    this.setState({
-      hoveredCircleIndex: circleIndex,
-    });
-  };
-
-  handleCircleMouseLeave = () => {
-    this.setState({
-      hoveredCircleIndex: null,
-    });
   };
 
   generateDAG( width, height) {

@@ -131,3 +131,45 @@
   stroke: #333;
   stroke-width: 1.5px;
 }
+
+.terminal {
+  background-color: black;
+  color: green;
+  font-family: monospace;
+  padding: 10px;
+  border-radius: 5px;
+  display: inline-block;
+}
+
+.svgIcon {
+  /* Place the icon on the text baseline. */
+  position: relative;
+  top: .125em;
+
+  /* Prevent the icon from shrinking inside a flex container. */
+  flex-shrink: 0;
+
+  /* Scale the icon to match the font-size of the parent element. */
+  height: 1em;
+  width: 1em;
+
+  /* Let the icon take whatever color the parent has. */
+  fill: currentColor;
+
+  /*
+   * If the icon is used on a link, which has a color transition,
+   * we can also use a transition on the fill value.
+  */
+  transition: fill .3s;
+}
+
+svg {
+  display: block;
+}
+
+.close-x {
+  stroke: green;
+  fill: transparent;
+  stroke-linecap: round;
+  stroke-width: 5;
+}
