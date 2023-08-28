@@ -64,8 +64,6 @@ const ModuleLine = ({
   // generate child nodes
   useEffect(() => {
     const childNodes = [];
-
-    //TODO change this
     for (const key in children) {
       const value = children[key];
       if (value.path) {
@@ -99,7 +97,7 @@ const ModuleLine = ({
 
     //get all paths of all children. Used to bulk-check / uncheck them
     setAllChildPaths(getAllPaths(children));
-  }, [children, globalActiveFiles]);
+  }, [children, globalActiveFiles, ownership]);
 
   useEffect(() => {
     if (!isModule) {

@@ -1,6 +1,7 @@
 'use-strict';
 
 import { useState, useEffect } from 'react';
+import { Tooltip } from 'react-tippy';
 import ModuleLine from './ModuleLine';
 import styles from './styles.scss';
 import _ from 'lodash';
@@ -38,6 +39,7 @@ const Filepicker = ({
 }) => {
   const [fileMap, setFileMap] = useState({});
   const [readyToRender, setReadyToRender] = useState(false);
+  const [useOwnershipData, setUseOwnershipData] = useState(false);
 
   const resetActiveFiles = () => {
     if (globalActiveFiles.length !== 0) {
@@ -50,6 +52,14 @@ const Filepicker = ({
       setActiveFiles(fileList);
     }
   };
+
+  useEffect(() => {
+    if (fileOwnership) {
+      setUseOwnershipData(true);
+    } else {
+      setUseOwnershipData(false);
+    }
+  }, [fileOwnership]);
 
   //every time the fileList changes, construct a map that has the same structure as the original directory
   //example:
@@ -76,7 +86,7 @@ const Filepicker = ({
 
         if (parseInt(pathItemIndex) === pathSplitArray.length - 1) {
           const fullPath = pathSplitArray.join('/');
-          map[pathItem] = { path: fullPath, ownership: fileOwnership ? fileOwnership[fullPath] : {} };
+          map[pathItem] = { path: fullPath, ownership: fileOwnership && useOwnershipData ? fileOwnership[fullPath] : {} };
           break;
         }
 
@@ -96,7 +106,7 @@ const Filepicker = ({
       });
 
     //if ownership data is available
-    if (fileOwnership && !_.isEqual(fileOwnership, {})) {
+    if (fileOwnership && !_.isEqual(fileOwnership, {}) && useOwnershipData) {
       //calculate ownership for directories
       const dirOwnership = (obj) => {
         //if this is a directory
@@ -123,36 +133,66 @@ const Filepicker = ({
 
     setFileMap(fileMap);
     setReadyToRender(true);
-  }, [fileList, fileOwnership]);
+  }, [fileList, fileOwnership, useOwnershipData]);
 
   if (!readyToRender) return;
 
   return (
     <div className={styles.filepicker}>
-      {showSelectButtons && (
-        <>
-          <button
-            className={styles.button + ' mr-2'}
-            onClick={(e) => {
-              e.preventDefault();
-              selectAllFiles();
-            }}>
-            Select All
-          </button>
-          <button
-            className={styles.button}
-            onClick={(e) => {
-              e.preventDefault();
-              resetActiveFiles();
-            }}>
-            Deselect All
-          </button>
-        </>
-      )}
+      <div className={styles.buttonBar}>
+        <div>
+          {showSelectButtons && (
+            <>
+              <button
+                className={styles.button + ' mr-2'}
+                onClick={(e) => {
+                  e.preventDefault();
+                  selectAllFiles();
+                }}>
+                Select All
+              </button>
+              <button
+                className={styles.button}
+                onClick={(e) => {
+                  e.preventDefault();
+                  resetActiveFiles();
+                }}>
+                Deselect All
+              </button>
+            </>
+          )}
+        </div>
+
+        <div>
+          {fileOwnership && (
+            <div>
+              <Tooltip
+                position="bottom"
+                arrow={true}
+                arrowSize="big"
+                theme="transparent"
+                title="The colors represent the current ownership distribution of a module/file">
+                <input
+                  id="ownershipSwitch"
+                  type="checkbox"
+                  name="ownershipSwitch"
+                  className={'switch is-rounded is-outlined is-info'}
+                  defaultChecked={true}
+                  onChange={(e) => setUseOwnershipData(e.target.checked)}
+                />
+                <label htmlFor="ownershipSwitch" className={styles.switch}>
+                  Show Ownership
+                </label>
+              </Tooltip>
+            </div>
+          )}
+        </div>
+      </div>
+
       <ModuleLine
         moduleName={'root'}
         children={fileMap.children}
-        ownership={fileMap.ownership}
+        ownership={useOwnershipData ? fileMap.ownership : null}
         authorColors={authorColors}
         initiallyExpanded={true}
         globalActiveFiles={globalActiveFiles}
