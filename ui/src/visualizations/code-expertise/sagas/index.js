@@ -4,7 +4,8 @@ import _ from 'lodash';
 
 import { fetchFactory, timestampedActionFactory, mapSaga } from '../../../sagas/utils.js';
 
-import { getCommitsForBranch, addBuildData, getBlameModules, modulesModeData, issuesModeData } from './helper.js';
+import { modulesModeData, issuesModeData, commitsToOwnership, getCommitsForBranch } from './helper.js';
+import { extractFileOwnership } from '../../../components/Filepicker/utils.js';
 
 //define actions
 export const requestCodeExpertiseData = createAction('REQUEST_CODE_EXPERTISE_DATA');
@@ -28,8 +29,6 @@ export default function* () {
   yield fork(watchSetCurrentBranch);
   yield fork(watchSetMode);
   yield fork(watchSetActiveIssue);
-  yield fork(watchSetActiveFiles);
-  yield fork(watchSetFilterMergeCommits);
 
   //yield fork(...); for every additional watcher function
 }
@@ -54,17 +53,9 @@ function* watchSetMode() {
   yield takeEvery('SET_MODE', mapSaga(requestRefresh));
 }
 
-function* watchSetActiveFiles() {
-  yield takeEvery('SET_ACTIVE_FILES', mapSaga(requestRefresh));
-}
-
 //every time the user chooses an issue in the config tab, update the displayed data
 function* watchSetActiveIssue() {
   yield takeEvery('SET_ACTIVE_ISSUE', mapSaga(requestRefresh));
-}
-
-function* watchSetFilterMergeCommits() {
-  yield takeEvery('SET_FILTER_MERGE_COMMITS', mapSaga(requestRefresh));
 }
 
 //fetchFactory returns a function that calls the specified function*()
@@ -75,141 +66,54 @@ export const fetchCodeExpertiseData = fetchFactory(
     const mode = state.visualizations.codeExpertise.state.config.mode;
     const issueId = state.visualizations.codeExpertise.state.config.activeIssueId;
     const activeFiles = state.visualizations.codeExpertise.state.config.activeFiles;
-    //the currentBranch object could be null, therefore ?. is used
     const currentBranch = state.visualizations.codeExpertise.state.config.currentBranch;
-    const filterMergeCommits = state.visualizations.codeExpertise.state.config.filterMergeCommits;
 
     const result = {
-      devData: {},
+      branchCommits: null,
+      builds: null,
+      prevFilenames: null,
       issue: null,
+      ownershipForFiles: null,
     };
 
     if (currentBranch === null || currentBranch === undefined) return result;
 
-    //########### get data from database (depending on mode) ###########
-
-    let dataPromise;
-
     if (mode === 'issues') {
       if (issueId === null) return result;
 
-      dataPromise = issuesModeData(activeFiles, currentBranch, issueId).then(
-        ([allCommits, issueData, relevantCommitHashes, buildData, previousFilenames]) => {
-          //set current issue
-          result['issue'] = issueData;
-          return [allCommits, relevantCommitHashes, buildData, previousFilenames];
+      return yield issuesModeData(currentBranch, issueId).then(
+        ([allCommits, issueData, relevantCommitHashes, buildData, prevFilenames]) => {
+          const branchCommits = getCommitsForBranch(currentBranch, allCommits);
+
+          return {
+            branchCommits: branchCommits,
+            builds: buildData,
+            prevFilenames: prevFilenames,
+            issue: {
+              issueData: issueData,
+              issueCommits: relevantCommitHashes,
+            },
+            ownershipForFiles: extractFileOwnership(commitsToOwnership(allCommits)),
+          };
         }
       );
     } else if (mode === 'modules') {
       if (activeFiles === null || activeFiles.length === 0) return result;
-      dataPromise = modulesModeData(activeFiles, currentBranch);
+      return yield modulesModeData(currentBranch).then(([allCommits, builds, prevFilenames]) => {
+        const branchCommits = getCommitsForBranch(currentBranch, allCommits);
+
+        return {
+          branchCommits: branchCommits,
+          builds: builds,
+          prevFilenames: prevFilenames,
+          issue: null,
+          ownershipForFiles: extractFileOwnership(commitsToOwnership(allCommits)),
+        };
+      });
     } else {
       console.log('error in fetchCodeExpertiseData: invalid mode: ' + mode);
       return result;
     }
-
-    return yield dataPromise.then(([allCommits, relevantCommitsHashes, builds, prevFilenames]) => {
-      //########### get all relevant commits ###########
-
-      //contains all commits of the current branch
-      const branchCommits = getCommitsForBranch(currentBranch, allCommits);
-
-      //we now have all commits for the current branch and all commits for the issue
-      //intersect the two groups to get the result set
-      //we are interested in commits that are both on the current branch and related to the issue
-      let relevantCommits = branchCommits.filter((commit) => {
-        //if a commits parent string contains a comma, it has more than one parent -> it is a merge commit
-        if (filterMergeCommits && commit.parents.includes(',')) {
-          return false;
-        }
-        return relevantCommitsHashes.includes(commit.sha);
-      });
-
-      if (relevantCommits.length === 0) {
-        return result;
-      }
-
-      //########### add build data to commits ###########
-      relevantCommits = addBuildData(relevantCommits, builds);
-
-      //########### extract data for each stakeholder ###########
-
-      //first group all relevant commits by stakeholder
-      const commitsByStakeholders = _.groupBy(relevantCommits, (commit) => commit.signature);
-
-      for (const stakeholder in commitsByStakeholders) {
-        result['devData'][stakeholder] = {};
-
-        //add commits to each stakeholder
-        result['devData'][stakeholder]['commits'] = commitsByStakeholders[stakeholder];
-
-        //initialize linesOwned with 0. If program runs in online mode, this will be updated later
-        result['devData'][stakeholder]['linesOwned'] = 0;
-
-        //for each stakeholder, sum up relevant additions
-        result['devData'][stakeholder]['additions'] = _.reduce(
-          commitsByStakeholders[stakeholder],
-          (sum, commit) => {
-            if (mode === 'issues') {
-              //we are interested in all additions made in each commit
-              return sum + commit.stats.additions;
-            } else {
-              let tempsum = 0;
-              //we are interested in the additions made to the currently active files
-              //TODO what if the commit touches an old file that has the same name as a current file?
-              const relevantActiveFiles = commit.files.data.filter((f) => activeFiles.includes(f.file.path));
-              //if at least one exists, return the respective additions
-              if (relevantActiveFiles && relevantActiveFiles.length > 0) {
-                tempsum += _.reduce(relevantActiveFiles, (fileSum, file) => fileSum + file.stats.additions, 0);
-              }
-
-              //also, we want to check if this commit touches previous versions of the active files
-              //for each file this commit touches
-              commit.files.data.map((f) => {
-                const filePath = f.file.path;
-                const commitDate = new Date(commit.date);
-
-                //get all objects for previous file names that have the same name as the file we are currently looking at
-                //this means that maybe this commit touches a file that was renamed later on
-                const prevFileObjects = prevFilenames.filter((pfno) => pfno.oldFilePath === filePath);
-                //for each of these file objects (there could be multiple since the file may have been renamed multiple times)
-                for (const prevFileObj of prevFileObjects) {
-                  //if hasThisNameUntil is null, this means that this is the current name of the file.
-                  // since we are at this point only interested in previous files, we ignore this file
-                  if (prevFileObj.hasThisNameUntil === null) continue;
-
-                  const fileWasNamedFrom = new Date(prevFileObj.hasThisNameFrom);
-                  const fileWasNamedUntil = new Date(prevFileObj.hasThisNameUntil);
-                  //if this commit touches a previous version of this file in the right timeframe,
-                  // we add the additions of this file to the temporary sum
-                  if (fileWasNamedFrom <= commitDate && commitDate < fileWasNamedUntil) {
-                    tempsum += f.stats.additions;
-                  }
-                }
-              });
-
-              return sum + tempsum;
-            }
-          },
-          0
-        );
-      }
-
-      //########### add ownership data to commits ###########
-
-      // don't add ownership when in issues mode
-      if (mode === 'issues') {
-        return result;
-      }
-
-      const latestBranchCommit = branchCommits.sort((a, b) => new Date(b.date) - new Date(a.date))[0];
-      return getBlameModules(latestBranchCommit, activeFiles).then((res) => {
-        for (const [name, val] of Object.entries(res)) {
-          result['devData'][name]['linesOwned'] = val;
-        }
-        return result;
-      });
-    });
   },
   requestCodeExpertiseData,
   receiveCodeExpertiseData,

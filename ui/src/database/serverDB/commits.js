@@ -115,6 +115,57 @@ export default class Commits {
     });
   }
 
+  static getCommitDataWithFilesAndOwnership(commitSpan, significantSpan) {
+    const commitList = [];
+    const getCommitsPage = (since, until) => (page, perPage) => {
+      return graphQl
+        .query(
+          `query($page: Int, $perPage: Int, $since: Timestamp, $until: Timestamp) {
+            commits(page: $page, perPage: $perPage, since: $since, until: $until) {
+             count,
+             page,
+             perPage,
+             data {
+               sha,
+               branch,
+               history,
+               message,
+               signature,
+               webUrl,
+               date,
+               parents,
+               stats {
+                 additions,
+                 deletions
+               }
+               files{
+                 data {
+                   file{
+                     path
+                   }
+                   ownership {
+                    stakeholder
+                    ownedLines
+                  }
+                   stats {additions,deletions},
+                   hunks {newLines}
+                 }
+               }
+             }
+            }
+          }`,
+          { page, perPage, since, until }
+        )
+        .then((resp) => resp.commits);
+    };
+
+    return traversePages(getCommitsPage(significantSpan[0], significantSpan[1]), (commit) => {
+      commitList.push(commit);
+    }).then(function () {
+      return commitList;
+    });
+  }
+
   //TODO: first query files and search for commit connections
   //TODO move this to ./files.js
   static getCommitsForFiles(filenames, omitFiles) {

@@ -4,6 +4,7 @@ import _ from 'lodash';
 
 import { fetchFactory, timestampedActionFactory, mapSaga } from '../../../sagas/utils.js';
 import { getCommitDataForSha, getOwnershipForCommits, getFilenamesForBranch, getPreviousFilenames } from './helper.js';
+import { extractFileOwnership } from '../../../components/Filepicker/utils.js';
 
 //define actions
 export const requestCodeOwnershipData = createAction('REQUEST_CODE_OWNERSHIP_DATA');
@@ -73,7 +74,7 @@ export const fetchCodeOwnershipData = fetchFactory(
 
         result.rawData = relevantOwnershipData;
         result.previousFilenames = previousFilenames;
-
+        result.ownershipForFiles = extractFileOwnership(relevantOwnershipData);
         return result;
       })
       .catch((e) => {

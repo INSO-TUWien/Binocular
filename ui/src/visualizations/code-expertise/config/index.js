@@ -9,6 +9,7 @@ import Filepicker from '../../../components/Filepicker/index.js';
 import styles from '../styles.scss';
 import { setActiveIssue, setMode, setCurrentBranch, setActiveFiles, setFilterMergeCommits, setOnlyDisplayOwnership } from '../sagas';
 import { getBranches, getFilenamesForBranch, getIssues } from '../sagas/helper.js';
+import { ownershipDataForMergedAuthors } from '../../../components/Filepicker/utils.js';
 
 export default () => {
   //global state from redux store
@@ -20,13 +21,21 @@ export default () => {
   const activeIssueId = expertiseState.config.activeIssueId;
   const filterMergeCommits = expertiseState.config.filterMergeCommits;
   const onlyDisplayOwnership = expertiseState.config.onlyDisplayOwnership;
-  const mode = useSelector((state) => state.visualizations.codeExpertise.state.config.mode);
+  const mode = expertiseState.config.mode;
+  const ownershipForFiles = expertiseState.data.data ? expertiseState.data.data.ownershipForFiles : null;
+
+  //global state of universal settings
+  const universalSettings = useSelector((state) => state.universalSettings);
+  const otherAuthors = universalSettings.otherAuthors;
+  const mergedAuthors = universalSettings.mergedAuthors;
+  const authorColors = universalSettings.universalSettingsData.data.palette;
 
   //local state
   const [allBranches, setAllBranches] = useState([]);
   const [branchOptions, setBranchOptions] = useState([]);
   const [issueOptions, setIssueOptions] = useState([]);
   const [files, setFiles] = useState([]);
+  const [fileOwnership, setFileOwnership] = useState(null);
 
   const dispatch = useDispatch();
 
@@ -125,6 +134,12 @@ export default () => {
     }
   }, [currentBranch]);
 
+  //the filepicker should indicate the ownership of the files
+  //it needs to consider the colors and merged authors from the universal settings
+  useEffect(() => {
+    setFileOwnership(ownershipDataForMergedAuthors(mergedAuthors, otherAuthors, authorColors, ownershipForFiles, files));
+  }, [mergedAuthors, otherAuthors, authorColors, ownershipForFiles, files]);
+
   return (
     <div className={styles.configContainer}>
       <form>
@@ -204,7 +219,13 @@ export default () => {
             <div className="control">
               <label className="label">Choose Files and Modules to visualize:</label>
 
-              <Filepicker fileList={files} globalActiveFiles={activeFiles} setActiveFiles={(files) => dispatch(setActiveFiles(files))} />
+              <Filepicker
+                fileList={files}
+                globalActiveFiles={activeFiles}
+                setActiveFiles={(files) => dispatch(setActiveFiles(files))}
+                fileOwnership={fileOwnership}
+                authorColors={authorColors}
+              />
             </div>
           </div>
         )}

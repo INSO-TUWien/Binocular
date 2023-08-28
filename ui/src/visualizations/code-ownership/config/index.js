@@ -8,20 +8,28 @@ import Filepicker from '../../../components/Filepicker/index.js';
 import styles from '../styles.scss';
 import { setMode, setCurrentBranch, setActiveFiles } from '../sagas';
 import { getBranches, getFilenamesForBranch } from '../sagas/helper.js';
+import { ownershipDataForMergedAuthors } from '../../../components/Filepicker/utils.js';
 
 export default () => {
   //global state from redux store
   const ownershipState = useSelector((state) => state.visualizations.codeOwnership.state);
-
   const currentMode = ownershipState.config.mode;
   const currentBranch = ownershipState.config.currentBranch;
   const currentBranchName = (currentBranch && currentBranch.branch) || undefined;
   const currentActiveFiles = ownershipState.config.activeFiles;
+  const ownershipForFiles = ownershipState.data.data.ownershipForFiles;
+
+  //global state of universal settings
+  const universalSettings = useSelector((state) => state.universalSettings);
+  const otherAuthors = universalSettings.otherAuthors;
+  const mergedAuthors = universalSettings.mergedAuthors;
+  const authorColors = universalSettings.universalSettingsData.data.palette;
 
   //local state
   const [allBranches, setAllBranches] = useState([]);
   const [branchOptions, setBranchOptions] = useState([]);
   const [files, setFiles] = useState([]);
+  const [fileOwnership, setFileOwnership] = useState(null);
 
   const dispatch = useDispatch();
 
@@ -92,6 +100,12 @@ export default () => {
     }
   }, [currentBranch]);
 
+  //the filepicker should indicate the ownership of the files
+  //it needs to consider the colors and merged authors from the universal settings
+  useEffect(() => {
+    setFileOwnership(ownershipDataForMergedAuthors(mergedAuthors, otherAuthors, authorColors, ownershipForFiles, files));
+  }, [mergedAuthors, otherAuthors, authorColors, ownershipForFiles, files]);
+
   return (
     <div className={styles.configContainer}>
       <form>
@@ -140,6 +154,8 @@ export default () => {
                 fileList={files}
                 globalActiveFiles={currentActiveFiles}
                 setActiveFiles={(files) => dispatch(setActiveFiles(files))}
+                fileOwnership={fileOwnership}
+                authorColors={authorColors}
               />
             </div>
           </div>
