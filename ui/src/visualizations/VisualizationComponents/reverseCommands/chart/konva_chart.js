@@ -140,22 +140,25 @@ export default class ReverseCommands extends React.Component {
         >
           {this.state.selectedBranch ? (
             <div>
-              <h2>Branch Name: {this.state.selectedBranch.name}</h2>
-              <br/>
+              <b>Branch Name: {this.state.selectedBranch.name}</b>
+              <br/> <br/>
+              #Commits: {this.state.graph_konva.organizedCommits[this.state.selectedBranch.name].length} <br/>
+              Originated from: {this.originatesFrom(this.state.selectedBranch.name, this.state.graph_konva.organizedCommits, this.state.graph_konva.crossBranchParents)}
+              <br/> <br/>
               To Checkout this Branch:
               <br/>
-              <div id="switchCMD" className={styles.terminal}>$git switch {this.state.selectedBranch.name}</div>
+              <div id="switchCMD" className={styles.terminal}>$ git switch {this.state.selectedBranch.name}</div>
               <button onClick={() => this.copyToClipboard(`git switch ${this.state.selectedBranch.name}`)}> <img src={copyToClipboard} alt="CopyToClipboard" className={styles.svgIcon}/></button>
               <br/><br/>
 
-              <button onClick={() => eventHandlers.handleCheckout(this)}>switch</button>
+              <button className={styles.switchButton} onClick={() => eventHandlers.handleCheckout(this)}>switch</button>
             </div>
           ) : (
             <div>
               <p>No branch selected.</p>
             </div>
           )}
-          <button onClick={() => eventHandlers.closeModal(this)}>Cancel</button>
+          <button className={styles.cancelButton} onClick={() => eventHandlers.closeModal(this)}>Cancel</button>
         </Modal>
       </div>
     );
@@ -177,8 +180,8 @@ export default class ReverseCommands extends React.Component {
 
   customModalStyles = {
     content: {
-      width: '50%',  // Adjust the width as needed
-      height: '50%', // Let the height adjust based on content
+      width: '25%',  // Adjust the width as needed
+      height: '35%', // Let the height adjust based on content
       margin: 'auto',
     },
   };
@@ -267,10 +270,32 @@ export default class ReverseCommands extends React.Component {
       });
     });
 
-    const graph = { nodes: nodesData, edges: [...edges,...crossBranchParents], branches: heights};
+    const graph = { nodes: nodesData, edges: [...edges,...crossBranchParents], branches: heights, organizedCommits: organizedCommits, crossBranchParents: crossBranchParents};
     console.log('graph:', graph);
 
     return graph;
+  }
+
+  originatesFrom = (branchName, organizedCommits, crossBranchParents) => {
+    const firstCommit = organizedCommits[branchName][0];
+    console.log(firstCommit);
+    console.log(crossBranchParents);
+    const erg = crossBranchParents.filter((r) => r.to === firstCommit.sha );
+    if( erg.length === 0) {
+      return "This is the initial branch."
+    } else {
+      const searchFor = erg[0].from;
+
+      for (const branch in organizedCommits) {
+        const value = organizedCommits[branch];
+
+        for (const c of value) {
+          if (c.sha === searchFor) {
+            return branch; // Return the branch directly from here
+          }
+        }
+      }
+    }
   }
 
   generateRandomRGBColors(numBranches) {
