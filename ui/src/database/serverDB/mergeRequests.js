@@ -30,7 +30,16 @@ export default class MergeRequests {
                   total_time_spent
                 }
                 author{
+                  login
                   name
+                }
+                assignees{
+                  login
+                  name 
+                }
+                assignee{
+                  login
+                  name 
                 }
                 createdAt
                 notes{

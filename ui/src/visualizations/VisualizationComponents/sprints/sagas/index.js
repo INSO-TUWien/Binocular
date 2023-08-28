@@ -7,7 +7,7 @@ import chroma from 'chroma-js';
 import _ from 'lodash';
 import Database from '../../../../database/database';
 
-export const setColorIssuesMergeRequestsMostTimeSpent = createAction('SET_COLOR_ISSUES_MERGE_REQUESTS_MOST_TIME_SPENT');
+export const setColorIssuesMergeRequests = createAction('SET_COLOR_ISSUES_MERGE_REQUESTS');
 
 export const requestSprintsData = createAction('REQUEST_SPRINTS_DATA');
 export const receiveSprintsData = timestampedActionFactory('RECEIVE_SPRINTS_DATA');

@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import _ from 'lodash';
 
-import TabCombo from '../../../components/TabCombo.js';
+import TabCombo from '../../../components/TabCombo/tabCombo.js';
 import FilePicker from './filePicker/index.js';
 import styles from '../styles.scss';
 import { setActiveIssue, setMode, setCurrentBranch, setActiveFiles, setFilterMergeCommits, setOnlyDisplayOwnership } from '../sagas';

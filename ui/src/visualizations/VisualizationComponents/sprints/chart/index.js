@@ -13,7 +13,7 @@ const mapStateToProps = (state /*, ownProps*/) => {
     lastCommitTimestamp: sprintsState.data.data.lastCommitTimestamp,
     firstSignificantTimestamp: sprintsState.data.data.firstSignificantTimestamp,
     lastSignificantTimestamp: sprintsState.data.data.lastSignificantTimestamp,
-    colorIssuesMergeRequestsMostTimeSpent: sprintsState.config.colorIssuesMergeRequestsMostTimeSpent,
+    colorIssuesMergeRequests: sprintsState.config.colorIssuesMergeRequests,
     selectedAuthors: universalSettings.selectedAuthorsGlobal,
     otherAuthors: universalSettings.otherAuthors,
     mergedAuthors: universalSettings.mergedAuthors,

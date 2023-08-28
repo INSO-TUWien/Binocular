@@ -8,6 +8,9 @@ import * as d3 from 'd3';
 import moment from 'moment';
 import { aggregateTimeTrackingData, convertToTimeString, extractTimeTrackingDataFromNotes } from '../../../../utils/timeTracking';
 import { object } from 'prop-types';
+import Database from '../../../../database/database';
+
+import InlineLoadingIndicator from '../../../../components/InlineLoadingIndicator/inlineLoadingIndicator';
 
 export default (props) => {
   const svgChartRef = useRef(null);
@@ -141,21 +144,23 @@ export default (props) => {
       .attr('y', (d) => calculateIssuePosition(d, issueTracks, height, maxOpenEvents, 1, 0))
       .attr('width', (d) => Math.max(scale(moment(d.closedAt)) - scale(moment(d.createdAt)) - 4, (height - 110) / maxOpenEvents - 2))
       .attr('height', (height - 110) / maxOpenEvents - 2)
-      .attr('fill', (d) =>
-        props.colorIssuesMergeRequestsMostTimeSpent
-          ? getColorForAuthorName(d.authorWithMostSpentTime, props.mergedAuthors)
-          : getColorForAuthorName(d.author.name, props.mergedAuthors)
-      )
+      .attr('fill', (d) => {
+        switch (props.colorIssuesMergeRequests) {
+          case 2:
+            return getColorForAuthorName(d.authorWithMostSpentTime, props.mergedAuthors);
+          case 1:
+            return getColorForAuthorName(d.assignee === null ? '' : d.assignee.name, props.mergedAuthors);
+          default:
+            return getColorForAuthorName(d.author.name, props.mergedAuthors);
+        }
+      })
       .attr('stroke-width', '2')
       .attr('rx', '.2rem')
       .attr('stroke', '#fff')
       .style('cursor', 'pointer')
-      .on('mouseover', function () {
+      .on('mouseover', function (e, d) {
         tooltip.style('visibility', 'visible');
         d3.select(this).attr('stroke', '#aaa');
-      })
-      .on('mousemove', function (e, d) {
-        tooltip.style('top', e.pageY + 10 + 'px').style('left', Math.min(e.pageX + 10, width) + 'px');
         tooltip.html(
           ReactDOMServer.renderToStaticMarkup(
             <div>
@@ -167,6 +172,15 @@ export default (props) => {
               <div>Created: {moment(d.createdAt).format('lll', 'de')}</div>
               <div>Closed: {d.state === 'closed' ? moment(d.closedAt).format('lll', 'de') : 'open'}</div>
               <div>Creator: {d.author.name} </div>
+              <hr />
+              <div>Assignees ({d.assignees.length}):</div>
+              <div>
+                {d.assignees.map((a) => {
+                  return <div key={'assignee-' + a.name}>- {a.name}</div>;
+                })}
+              </div>
+              <hr />
+              <div>Time Tracking:</div>
               <div className={styles.timeSpentBar}>
                 {Object.keys(d.aggregatedTimeTrackingData).map((authorName, i) => {
                   return (
@@ -183,9 +197,36 @@ export default (props) => {
                   );
                 })}
               </div>
+              <hr />
+              <div id={'tooltipCommitCount'}>
+                <span>Linked Commits: </span>
+                <InlineLoadingIndicator />
+              </div>
+              <div id={'tooltipCommitAdditions'}>
+                <span>Additions: </span>
+                <InlineLoadingIndicator />
+              </div>
+              <div id={'tooltipCommitDeletions'}>
+                <span>Deletions: </span>
+                <InlineLoadingIndicator />
+              </div>
             </div>
           )
         );
+        Database.getCommitsForIssue(d.iid).then((commits) => {
+          document.getElementById('tooltipCommitCount').innerText = 'Linked Commits: ' + commits.length;
+          let additions = 0;
+          let deletions = 0;
+          commits.forEach((c) => {
+            additions += c.stats.additions;
+            deletions += c.stats.deletions;
+          });
+          document.getElementById('tooltipCommitAdditions').innerText = 'Additions: ' + additions;
+          document.getElementById('tooltipCommitDeletions').innerText = 'Deletions: ' + deletions;
+        });
+      })
+      .on('mousemove', function (e, d) {
+        tooltip.style('top', e.pageY + 10 + 'px').style('left', Math.min(e.pageX + 10, width) + 'px');
       })
       .on('mouseout', function () {
         tooltip.style('visibility', 'hidden');
@@ -226,22 +267,23 @@ export default (props) => {
       })
       .attr('width', 10)
       .attr('height', 10)
-      .attr('fill', (d) =>
-        props.colorIssuesMergeRequestsMostTimeSpent
-          ? getColorForAuthorName(d.authorWithMostSpentTime, props.mergedAuthors)
-          : getColorForAuthorName(d.author.name, props.mergedAuthors)
-      )
+      .attr('fill', (d) => {
+        switch (props.colorIssuesMergeRequests) {
+          case 2:
+            return getColorForAuthorName(d.authorWithMostSpentTime, props.mergedAuthors);
+          case 1:
+            return getColorForAuthorName(d.assignee === null ? '' : d.assignee.name, props.mergedAuthors);
+          default:
+            return getColorForAuthorName(d.author.name, props.mergedAuthors);
+        }
+      })
       .attr('stroke-width', '2')
       .attr('rx', 10)
       .attr('stroke', '#000')
       .style('cursor', 'pointer')
-      .on('mouseover', function () {
+      .on('mouseover', function (e, d) {
         tooltip.style('visibility', 'visible');
         d3.select(this).attr('stroke', '#555');
-      })
-      .on('mousemove', function (e, d) {
-        tooltip.style('top', e.pageY + 10 + 'px').style('left', Math.min(e.pageX + 10, width) + 'px');
-
         tooltip.html(
           ReactDOMServer.renderToStaticMarkup(
             <div>
@@ -274,6 +316,9 @@ export default (props) => {
             </div>
           )
         );
+      })
+      .on('mousemove', function (e, d) {
+        tooltip.style('top', e.pageY + 10 + 'px').style('left', Math.min(e.pageX + 10, width) + 'px');
       })
       .on('mouseout', function () {
         tooltip.style('visibility', 'hidden');
@@ -424,7 +469,7 @@ export default (props) => {
 
   React.useEffect(() => {
     renderChart();
-  }, [props.sprints, props.issues, props.mergeRequests, props.colorIssuesMergeRequestsMostTimeSpent, props.mergedAuthors, selectedSprint]);
+  }, [props.sprints, props.issues, props.mergeRequests, props.colorIssuesMergeRequests, props.mergedAuthors, selectedSprint]);
   return (
     <div className={styles.chartContainer}>
       <div className={styles.chartSvg} ref={svgChartRef} />

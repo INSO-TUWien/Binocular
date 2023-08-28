@@ -1,0 +1,26 @@
+.container{
+  display: inline-block;
+  height: 1rem;
+  width: 1rem;
+}
+
+.loading{
+  height: 100%;
+  width: 100%;
+  border: 2px solid #333;
+  border-radius: 50%;
+  animation: 0.5s linear loading;
+  border-bottom: 2px solid transparent;
+  border-top: 2px solid transparent;
+  animation-iteration-count: infinite;
+  rotation: 0deg;
+}
+
+@keyframes loading {
+  from{
+    transform: rotateX(0);
+  }
+  to{
+    transform: rotate(360deg);
+  }
+}

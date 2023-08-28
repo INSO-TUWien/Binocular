@@ -1,36 +1,33 @@
 'use strict';
 
 import { connect } from 'react-redux';
-import { setColorIssuesMergeRequestsMostTimeSpent } from './sagas';
+import { setColorIssuesMergeRequests } from './sagas';
 import styles from './styles.scss';
 import React from 'react';
+import TabCombo from '../../../components/TabCombo/tabCombo';
 
 const mapStateToProps = (state /*, ownProps*/) => {
   const sprintsState = state.visualizations.sprints.state;
-  return {};
+  return { colorIssuesMergeRequests: sprintsState.config.colorIssuesMergeRequests };
 };
 
 const mapDispatchToProps = (dispatch /*, ownProps*/) => {
-  return { onSetColorIssuesMergeRequestsMostTimeSpent: (value) => dispatch(setColorIssuesMergeRequestsMostTimeSpent(value)) };
+  return { onSetColorIssuesMergeRequests: (value) => dispatch(setColorIssuesMergeRequests(value)) };
 };
 
 const SprintsConfigComponent = (props) => {
   return (
     <div className={styles.configContainer}>
       <h2>Color Sprints and Merge Requests</h2>
-      <div className="field">
-        <input
-          id="issueMergeRequestsColoringSwitch"
-          type="checkbox"
-          name="issueMergeRequestsColoringSwitch"
-          className={'switch is-rounded is-outlined is-info'}
-          defaultChecked={props.colorIssuesMergeRequestsMostTimeSpent}
-          onChange={(e) => props.onSetColorIssuesMergeRequestsMostTimeSpent(e.target.checked)}
-        />
-        <label htmlFor="issueMergeRequestsColoringSwitch" className={styles.switch}>
-          Creator/Most Spent Time (Gitlab Only)
-        </label>
-      </div>
+      <TabCombo
+        value={props.colorIssuesMergeRequests}
+        options={[
+          { label: 'Creator', value: 0 },
+          { label: 'Assignee', value: 1 },
+          { label: 'Most Spent Time', value: 2, hint: 'Gitlab Only' },
+        ]}
+        onChange={(newSelected) => props.onSetColorIssuesMergeRequests(newSelected)}
+      />
     </div>
   );
 };

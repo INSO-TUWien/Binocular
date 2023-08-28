@@ -87,6 +87,11 @@ module.exports = new gql.GraphQLObjectType({
         type: require('./gitHubUser.js'),
         description: 'The github author of this issue',
       },
+      assignee: {
+        type: require('./gitHubUser.js'),
+        description: 'The assignee of this issue',
+      },
+      assignees: { type: new gql.GraphQLList(require('./gitHubUser.js')), description: 'All the assignees of this issue' },
       commits: paginated({
         type: require('./commit.js'),
         description: 'All commits mentioning this issue',

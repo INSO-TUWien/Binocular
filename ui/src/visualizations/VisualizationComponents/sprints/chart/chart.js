@@ -13,7 +13,7 @@ export default (props) => {
         issues={props.issues}
         mergeRequests={props.mergeRequests}
         mergedAuthors={props.mergedAuthors}
-        colorIssuesMergeRequestsMostTimeSpent={props.colorIssuesMergeRequestsMostTimeSpent}
+        colorIssuesMergeRequests={props.colorIssuesMergeRequests}
       />
     </div>
   );

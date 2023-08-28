@@ -29,6 +29,14 @@ export default class Issues {
                   login
                   name
                 }
+                assignees{
+                  login
+                  name 
+                }
+                assignee{
+                  login
+                  name 
+                }
                 notes{
                   body
                   created_at

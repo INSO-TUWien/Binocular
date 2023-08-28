@@ -11,7 +11,7 @@ import {
   setChartAttribute,
   setHighlightedIssue,
 } from './sagas';
-import TabCombo from '../../../components/TabCombo.js';
+import TabCombo from '../../../components/TabCombo/tabCombo.js';
 import styles from './styles.scss';
 
 import CheckboxLegend from '../../../components/CheckboxLegend';
@@ -69,96 +69,94 @@ const LangModRiverConfigComponent = (props) => {
 
   return (
     <div className={styles.configContainer}>
-      <form className={styles.form}>
-        <div className={styles.field}>
-          <div className="control">
-            <label className="label">General Chart Settings</label>
-            <TabCombo
-              value={props.resolution}
-              options={[
-                { label: 'Years', icon: 'calendar-plus', value: 'years' },
-                { label: 'Months', icon: 'calendar', value: 'months' },
-                { label: 'Weeks', icon: 'calendar-week', value: 'weeks' },
-                { label: 'Days', icon: 'calendar-day', value: 'days' },
-              ]}
-              onChange={(value) => props.onClickResolution(value)}
-            />
-          </div>
+      <div className={styles.field}>
+        <div className="control">
+          <label className="label">General Chart Settings</label>
+          <TabCombo
+            value={props.resolution}
+            options={[
+              { label: 'Years', icon: 'calendar-plus', value: 'years' },
+              { label: 'Months', icon: 'calendar', value: 'months' },
+              { label: 'Weeks', icon: 'calendar-week', value: 'weeks' },
+              { label: 'Days', icon: 'calendar-day', value: 'days' },
+            ]}
+            onChange={(value) => props.onClickResolution(value)}
+          />
         </div>
-        <div className="field">
-          <SearchBox
-            placeholder="Highlight issue..."
-            renderOption={(i) => `#${i.iid} ${i.title}`}
-            search={(text) => {
-              return Promise.resolve(
-                graphQl.query(
-                  `
+      </div>
+      <div className="field">
+        <SearchBox
+          placeholder="Highlight issue..."
+          renderOption={(i) => `#${i.iid} ${i.title}`}
+          search={(text) => {
+            return Promise.resolve(
+              graphQl.query(
+                `
                   query($q: String) {
                     issues(q: $q, sort: "DESC") {
                       data { iid title createdAt closedAt webUrl }
                     }
                   }`,
-                  { q: text }
-                )
+                { q: text }
               )
-                .then((resp) => resp.issues.data)
-                .then((issues) => {
-                  return issues.map((i) => {
-                    i.createdAt = new Date(i.createdAt);
-                    i.closedAt = i.closedAt && new Date(i.closedAt);
-                    return i;
-                  });
+            )
+              .then((resp) => resp.issues.data)
+              .then((issues) => {
+                return issues.map((i) => {
+                  i.createdAt = new Date(i.createdAt);
+                  i.closedAt = i.closedAt && new Date(i.closedAt);
+                  return i;
                 });
-            }}
-            value={props.highlightedIssue}
-            onChange={(issue) => props.onSetHighlightedIssue(issue)}
-          />
-        </div>
+              });
+          }}
+          value={props.highlightedIssue}
+          onChange={(issue) => props.onSetHighlightedIssue(issue)}
+        />
+      </div>
+      <div className={styles.field}>
+        <label className="label">River Attribute Settings</label>
+        <TabCombo
+          value={props.riverAttribute}
+          options={[
+            { label: 'Languages', icon: 'file-code', value: 'languages' },
+            { label: 'Modules', icon: 'folder-open', value: 'modules' },
+          ]}
+          onChange={(value) => props.onClickAttribute(value)}
+        />
+      </div>
+      <div className={styles.field}>
+        <label className="label">Changes</label>
+        <CheckboxLegend
+          palette={palette.authors}
+          onClick={props.onClickAuthors.bind(this)}
+          title={`Authors: [${(props.committers || []).length}]`}
+          split={true}
+          otherCommitters={overflow.authors}
+        />
+      </div>
+      {props.riverAttribute === 'languages' ? (
         <div className={styles.field}>
-          <label className="label">River Attribute Settings</label>
-          <TabCombo
-            value={props.riverAttribute}
-            options={[
-              { label: 'Languages', icon: 'file-code', value: 'languages' },
-              { label: 'Modules', icon: 'folder-open', value: 'modules' },
-            ]}
-            onChange={(value) => props.onClickAttribute(value)}
-          />
-        </div>
-        <div className={styles.field}>
-          <label className="label">Changes</label>
           <CheckboxLegend
-            palette={palette.authors}
-            onClick={props.onClickAuthors.bind(this)}
-            title={`Authors: [${(props.committers || []).length}]`}
-            split={true}
-            otherCommitters={overflow.authors}
+            palette={palette.languages}
+            onClick={props.onClickLanguages.bind(this)}
+            title={`Available Languages: [${(props.languages || []).length}]`}
+            explanation={'Number of lines per Language'}
+            split={false}
+            otherCommitters={overflow.languages}
           />
         </div>
-        {props.riverAttribute === 'languages' ? (
-          <div className={styles.field}>
-            <CheckboxLegend
-              palette={palette.languages}
-              onClick={props.onClickLanguages.bind(this)}
-              title={`Available Languages: [${(props.languages || []).length}]`}
-              explanation={'Number of lines per Language'}
-              split={false}
-              otherCommitters={overflow.languages}
-            />
-          </div>
-        ) : props.riverAttribute === 'modules' ? (
-          <div className={styles.field}>
-            <CheckboxLegend
-              palette={palette.modules}
-              onClick={props.onClickModules.bind(this)}
-              title={`Available Modules: [${(props.modules || []).length}]`}
-              explanation={'Number of lines per Module'}
-              split={false}
-              otherCommitters={overflow.modules}
-            />
-          </div>
-        ) : null}
-      </form>
+      ) : props.riverAttribute === 'modules' ? (
+        <div className={styles.field}>
+          <CheckboxLegend
+            palette={palette.modules}
+            onClick={props.onClickModules.bind(this)}
+            title={`Available Modules: [${(props.modules || []).length}]`}
+            explanation={'Number of lines per Module'}
+            split={false}
+            otherCommitters={overflow.modules}
+          />
+        </div>
+      ) : null}
     </div>
   );
 };
