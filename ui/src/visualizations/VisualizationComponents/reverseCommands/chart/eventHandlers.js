@@ -8,7 +8,12 @@ export const handleTextClick = (branch, component) => {
 export const handleCheckout = (component) => {
   console.log(`Checking out the branch: ${component.state.selectedBranch.name}`);
   component.setState({
-    checkoutPointer: { label: 'Checked Out', x: -75, y: component.state.selectedBranch.height },
+    checkoutPointer: {
+      label: 'Checked Out',
+      x: -75,
+      y: component.state.selectedBranch.height,
+      branchName: component.state.selectedBranch.name,
+    },
     isModalOpen: false,
   });
 };
@@ -17,6 +22,8 @@ export const closeModal = (component) => {
   component.setState({
     selectedBranch: null,
     isModalOpen: false,
+    isBranchAwayModalOpen: false,
+    isModalOpenMerge: false,
   });
 };
 
@@ -24,12 +31,18 @@ export const handleCircleClick = (node, component) => {
   console.log(`Circle with ID ${node.id} was clicked.`);
 
   if (!component.state.isDrawingLine) {
+    console.log('initiate drawing!');
     component.setState({
       isDrawingLine: true,
       startLinePoint: { x: node.x, y: node.y },
+      originNode: node,
     });
   } else {
-    console.log('wanna merge?');
+    console.log('initiate merge!');
+    component.setState({
+      targetNode: node,
+      isModalOpenMerge: true,
+    });
   }
 };
 
@@ -64,5 +77,31 @@ export const handleCircleMouseEnter = (circleIndex, component) => {
 export const handleCircleMouseLeave = (component) => {
   component.setState({
     hoveredCircleIndex: null,
+  });
+};
+
+export const handleMouseClick = (e, component) => {
+  console.log('eeeeee', e.target.className);
+
+  if (component.state.isDrawingLine) {
+    if (e.target.className === 'Arrow') {
+      component.setState({
+        isBranchAwayModalOpen: true,
+      });
+    }
+    component.setState({
+      isDrawingLine: false,
+    });
+  }
+};
+
+export const handleInputChange = (event, component) => {
+  component.setState({ branchName: event.target.value }); // Update the state with the input value
+};
+
+export const createNewBranch = (component) => {
+  console.log(`Creating the new branch: ${component.state.branchName}`);
+  component.setState({
+    isBranchAwayModalOpen: false,
   });
 };

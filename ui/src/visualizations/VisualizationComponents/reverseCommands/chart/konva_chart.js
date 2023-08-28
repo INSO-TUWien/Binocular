@@ -13,7 +13,7 @@ export default class ReverseCommands extends React.Component {
     super(props);
 
     this.state = {
-      graph_konva: this.generateDAG(1000,300),
+      graph_konva: this.generateDAG(1000, 300),
       isDrawingLine: false,
       startLinePoint: { x: 0, y: 0 },
       endLinePoint: { x: 0, y: 0 },
@@ -23,13 +23,18 @@ export default class ReverseCommands extends React.Component {
       checkedOutBranch: null,
       selectedBranch: null,
       checkoutPointer: null,
+      isBranchAwayModalOpen: false,
+      originNode: null,
+      branchName: "",
+      isModalOpenMerge: false,
+      targetNode: null,
     };
 
     this.stageRef = React.createRef();
   }
 
   async componentDidMount() {
-    this.setState({graph_konva: this.generateDAG(1000,300)});
+    this.setState({ graph_konva: this.generateDAG(1000, 300) });
   }
 
   componentDidUpdate(prevProps) {
@@ -40,9 +45,12 @@ export default class ReverseCommands extends React.Component {
 
   render() {
 
-    const controlPoint= { x: (this.state.startLinePoint.x + this.state.endLinePoint.x) / 2, y: ((this.state.startLinePoint.y + this.state.endLinePoint.y) / 2 ) + -40}; // Adjust the y value to control the curvature
+    const controlPoint = {
+      x: (this.state.startLinePoint.x + this.state.endLinePoint.x) / 2,
+      y: ((this.state.startLinePoint.y + this.state.endLinePoint.y) / 2) + -40
+    }; // Adjust the y value to control the curvature
 
-      return (
+    return (
       <div className={styles.chartContainer}>
         <Stage
           ref={this.stageRef}
@@ -51,6 +59,7 @@ export default class ReverseCommands extends React.Component {
           onMouseUp={() => eventHandlers.handleStageMouseUp(this)}
           onWheel={(e) => eventHandlers.handleWheel(e, this)}
           onMouseMove={() => eventHandlers.handleMouseMove(this)}
+          onClick={(e) => eventHandlers.handleMouseClick(e, this)}
           scaleX={this.state.scale}
           scaleY={this.state.scale}
           draggable
@@ -133,25 +142,74 @@ export default class ReverseCommands extends React.Component {
           </Layer>
         </Stage>
         <Modal
+          isOpen={this.state.isModalOpenMerge}
+          onRequestClose={() => eventHandlers.closeModal(this)}
+          contentLabel="Merge Modal"
+          style={this.customBranchAwayInfoModalStyles} //
+        >
+          {this.state.originNode && this.state.targetNode && (
+            <div>
+              <b>Would you like to perform a merge?</b>
+              <br/> <br/>
+              {this.checkForMerge(this.state.targetNode,this.state.originNode)}
+              <button className={styles.switchButton} onClick={() => eventHandlers.createNewBranch(this)}>Merge</button>
+            </div>
+          )}
+          <button className={styles.cancelButton} onClick={() => eventHandlers.closeModal(this)}>Cancel</button>
+
+        </Modal>
+        <Modal
+          isOpen={this.state.isBranchAwayModalOpen}
+          onRequestClose={() => eventHandlers.closeModal(this)}
+          contentLabel="Branch Away Modal"
+          style={this.customBranchAwayInfoModalStyles} //
+        >
+          {this.state.originNode && (
+            <div>
+              <b>Would you like to create a new Branch from this Commit?</b>
+              <br />
+              Origin Node: {this.state.originNode.id}
+              <br /> <br />
+              <label> What should be the new branches name? </label>
+              <br />
+              <input className={styles.inputBox} id="branchNameInput" onChange={(e) => eventHandlers.handleInputChange(e, this)} type="text"
+                     placeholder="e.i.: feature/XX" />
+              <br /> <br />
+              <div id="switchCMD" className={styles.terminal}>$ git branch {this.state.branchName} {this.state.originNode.id} </div>
+              <button onClick={() => this.copyToClipboard(`git branch ${this.state.branchName} ${this.state.originNode.id}`)}><img
+                src={copyToClipboard} alt="CopyToClipboard" className={styles.svgIcon} /></button>
+              <br /><br />
+
+              <button className={styles.switchButton} onClick={() => eventHandlers.createNewBranch(this)}>Create new Branch</button>
+            </div>
+          )}
+          <button className={styles.cancelButton} onClick={() => eventHandlers.closeModal(this)}>Cancel</button>
+
+        </Modal>
+        <Modal
           isOpen={this.state.isModalOpen}
           onRequestClose={() => eventHandlers.closeModal(this)}
           contentLabel="Checkout Modal"
-          style={this.customModalStyles} //
+          style={this.customBranchInfoModalStyles} //
         >
           {this.state.selectedBranch ? (
             <div>
               <b>Branch Name: {this.state.selectedBranch.name}</b>
-              <br/> <br/>
-              #Commits: {this.state.graph_konva.organizedCommits[this.state.selectedBranch.name].length} <br/>
-              Originated from: {this.originatesFrom(this.state.selectedBranch.name, this.state.graph_konva.organizedCommits, this.state.graph_konva.crossBranchParents)}
-              <br/> <br/>
+              <br /> <br />
+              #Commits: {this.state.graph_konva.organizedCommits[this.state.selectedBranch.name].length} <br />
+              Originated
+              from: {this.originatesFrom(this.state.selectedBranch.name, this.state.graph_konva.organizedCommits, this.state.graph_konva.crossBranchParents)}
+              <br /> <br />
               To Checkout this Branch:
-              <br/>
+              <br />
               <div id="switchCMD" className={styles.terminal}>$ git switch {this.state.selectedBranch.name}</div>
-              <button onClick={() => this.copyToClipboard(`git switch ${this.state.selectedBranch.name}`)}> <img src={copyToClipboard} alt="CopyToClipboard" className={styles.svgIcon}/></button>
-              <br/><br/>
+              <button onClick={() => this.copyToClipboard(`git switch ${this.state.selectedBranch.name}`)}><img src={copyToClipboard}
+                                                                                                                alt="CopyToClipboard"
+                                                                                                                className={styles.svgIcon} />
+              </button>
+              <br /><br />
 
-              <button className={styles.switchButton} onClick={() => eventHandlers.handleCheckout(this)}>switch</button>
+              <button className={styles.switchButton} onClick={() => eventHandlers.handleCheckout(this)}>Switch</button>
             </div>
           ) : (
             <div>
@@ -178,15 +236,23 @@ export default class ReverseCommands extends React.Component {
     );
   }
 
-  customModalStyles = {
+  customBranchInfoModalStyles = {
     content: {
-      width: '25%',  // Adjust the width as needed
+      width: '35%',  // Adjust the width as needed
       height: '35%', // Let the height adjust based on content
       margin: 'auto',
     },
   };
 
-  generateDAG( width, height) {
+  customBranchAwayInfoModalStyles = {
+    content: {
+      width: '50%',  // Adjust the width as needed
+      height: '35%', // Let the height adjust based on content
+      margin: 'auto',
+    },
+  };
+
+  generateDAG(width, height) {
     // values i want to know
     const steps_x = 25;
     const steps_y = 50;
@@ -212,7 +278,7 @@ export default class ReverseCommands extends React.Component {
 
     const branchNames = Object.keys(organizedCommits);
     const numBranches = branchNames.length;
-    console.log('Number of Branches',numBranches);
+    console.log('Number of Branches', numBranches);
 
     const heights = branchNames.map((branch, index) => ({
       name: branch,
@@ -244,7 +310,7 @@ export default class ReverseCommands extends React.Component {
 
     branchNames.forEach((branch, branchIndex) => {
       const branchCommits = organizedCommits[branch];
-      const branchHeights = heights.find( (pair) => pair.name === branch)?.height;
+      const branchHeights = heights.find((pair) => pair.name === branch)?.height;
       const color = colors[branchIndex];
 
       let branch_offset = 0;
@@ -254,23 +320,30 @@ export default class ReverseCommands extends React.Component {
         const parentNode = nodesData.find(node => node.id === parentCommit?.from);
         const parentX = parentNode ? parentNode.x : 0;
 
-        if(parentNode !== undefined){
+        if (parentNode !== undefined) {
           branch_offset = parentX - buffer_x + steps_x;
         }
 
         const node = {
           id: commit.sha,
-          label: `Commit ${ commit.sha}`,
+          label: `Commit ${commit.sha}`,
           x: parentCommit ? parentX + steps_x : steps_x * commitIndex + branch_offset + buffer_x,
           y: branchHeights, // You can adjust the y-coordinate as needed
           color: color,
-          message: commit.message
+          message: commit.message,
+          branch: commit.branch,
         };
         nodesData.push(node);
       });
     });
 
-    const graph = { nodes: nodesData, edges: [...edges,...crossBranchParents], branches: heights, organizedCommits: organizedCommits, crossBranchParents: crossBranchParents};
+    const graph = {
+      nodes: nodesData,
+      edges: [...edges, ...crossBranchParents],
+      branches: heights,
+      organizedCommits: organizedCommits,
+      crossBranchParents: crossBranchParents
+    };
     console.log('graph:', graph);
 
     return graph;
@@ -280,8 +353,8 @@ export default class ReverseCommands extends React.Component {
     const firstCommit = organizedCommits[branchName][0];
     console.log(firstCommit);
     console.log(crossBranchParents);
-    const erg = crossBranchParents.filter((r) => r.to === firstCommit.sha );
-    if( erg.length === 0) {
+    const erg = crossBranchParents.filter((r) => r.to === firstCommit.sha);
+    if (erg.length === 0) {
       return "This is the initial branch."
     } else {
       const searchFor = erg[0].from;
@@ -296,6 +369,57 @@ export default class ReverseCommands extends React.Component {
         }
       }
     }
+  }
+
+  checkForMerge = (targetCommit, originCommit) => {
+    //Check if TargetBranch is Origin Branch
+    const targetBranch = targetCommit.branch;
+    console.log('target Branch', targetBranch);
+
+    const sourceBranch = originCommit.branch;
+    console.log('source Branch', sourceBranch);
+
+    const originBranch = this.originatesFrom(sourceBranch, this.state.graph_konva.organizedCommits, this.state.graph_konva.crossBranchParents);
+    console.log('origin Branch', originBranch)
+
+    if (originBranch === targetBranch) {
+      console.log('Merge to origin is possible!');
+      // Check for type of merge , 3 way or fast forward
+      const commitsInOrigin = this.state.graph_konva.organizedCommits[originBranch];
+      const firstCommitInSource =  this.state.graph_konva.organizedCommits[sourceBranch][0];
+      const originCommitInOrigin = this.state.graph_konva.crossBranchParents.filter((x) => x.to === firstCommitInSource.sha)[0].from;
+      const indexOfOriginCommitInOrigin =  this.state.graph_konva.organizedCommits[targetBranch].findIndex((x) => x.sha === originCommitInOrigin);
+
+      const commitsSinceBranch = ( commitsInOrigin.length - 1) - indexOfOriginCommitInOrigin
+      let result;
+      if (commitsSinceBranch === 0) {
+        // Fast forward
+        result = (<div>
+          If so you can perform a <b>fast-forward</b> merge because there haven't been any commits
+          in <b>{targetBranch}</b> since <b>{sourceBranch}</b> was created.
+        </div>);
+      } else {
+        // Three-way
+        result = (<div>
+          If so you can perform a <b>three-way</b> merge but keep in mind that there could potentially be merge conflicts because
+          there have been <b>{commitsSinceBranch}</b> Commits in <b>{targetBranch}</b> since <b>{sourceBranch}</b> was created.
+        </div>);
+      }
+      return <div>
+        {result}
+        <br/>
+        {(this.state.checkoutPointer?.branchName !== targetBranch) && (
+          <div>
+            You additionally have to checkout the target branch before merging!
+            <br/>
+          * <div id="switchCMD" className={styles.terminal}>$ git checkout {targetBranch}</div>
+            <br/><br/>
+          </div>
+          )}
+          * <div id="switchCMD" className={styles.terminal}>$ git merge {sourceBranch}</div>
+      </div>;
+    }
+    return "whatever";
   }
 
   generateRandomRGBColors(numBranches) {
