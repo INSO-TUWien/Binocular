@@ -8,11 +8,36 @@ import moment from 'moment/moment';
 PouchDB.plugin(PouchDBFind);
 PouchDB.plugin(PouchDBAdapterMemory);
 
+//add stakeholder to commit
+async function preprocessCommit(commit, database, commitStakeholderRelations) {
+  const relevantRelation = commitStakeholderRelations.filter((r) => r.to === commit._id)[0];
+  if (!relevantRelation) {
+    console.log('Error in localDB: commit: no stakeholder found for commit ' + commit.sha);
+    return commit;
+  }
+
+  const author = (await findID(database, relevantRelation.from)).docs[0];
+  if (!author) {
+    console.log('Error in localDB: commit: no stakeholder found with ID ' + relevantRelation.from);
+    return commit;
+  }
+
+  return _.assign(commit, { signature: author.gitSignature });
+}
+
 // find all of given collection (example _id field for e.g. issues looks like 'issues/{issue_id}')
 function findAll(database, collection) {
   return database.find({
     selector: { _id: { $regex: new RegExp(`^${collection}/.*`) } },
   });
+}
+async function findAllCommits(database, relations) {
+  let commits = await database.find({
+    selector: { _id: { $regex: new RegExp('^commits/.*') } },
+  });
+  const relevantRelations = (await findCommitStakeholderConnections(relations)).docs;
+  commits.docs = await Promise.all(commits.docs.map((c) => preprocessCommit(c, database, relevantRelations)));
+  return commits;
 }
 
 function bulkGet(database, ids) {
@@ -30,10 +55,15 @@ function findIssue(database, iid) {
   });
 }
 
-function findCommit(database, sha) {
-  return database.find({
+async function findCommit(database, relations, sha) {
+  let commit = await database.find({
     selector: { _id: { $regex: new RegExp('^commits/.*') }, sha: { $eq: sha } },
   });
+  if (commit.docs && commit.docs[0]) {
+    const commitStakeholderConnections = (await findCommitStakeholderConnections(relations)).docs;
+    commit.docs[0] = await preprocessCommit(commit.docs[0], database, commitStakeholderConnections);
+  }
+  return commit;
 }
 
 function findID(database, id) {
@@ -54,6 +84,12 @@ function findFileCommitConnections(relations) {
   });
 }
 
+function findCommitStakeholderConnections(relations) {
+  return relations.find({
+    selector: { _id: { $regex: new RegExp('^commits-stakeholders/.*') } },
+  });
+}
+
 function findFileCommitStakeholderConnections(relations) {
   return relations.find({
     selector: { _id: { $regex: new RegExp('^commits-files-stakeholders/.*') } },
@@ -61,12 +97,12 @@ function findFileCommitStakeholderConnections(relations) {
 }
 
 export default class Commits {
-  static getCommitData(db, commitSpan, significantSpan) {
+  static getCommitData(db, relations, commitSpan, significantSpan) {
     // return all commits, filtering according to parameters can be added in the future
     const first = new Date(significantSpan[0]).getTime();
     const last = new Date(significantSpan[1]).getTime();
 
-    return findAll(db, 'commits').then((res) => {
+    return findAllCommits(db, relations).then((res) => {
       res.docs = res.docs
         .filter((c) => new Date(c.date) >= first && new Date(c.date) <= last)
         .sort((a, b) => {
@@ -77,8 +113,9 @@ export default class Commits {
     });
   }
 
-  static getCommitDataForSha(db, sha) {
-    return findAll(db, 'commits').then((res) => {
+  static getCommitDataForSha(db, relations, sha) {
+    //TODO use findCommit here
+    return findAllCommits(db, relations).then((res) => {
       const result = res.docs.filter((c) => c.sha === sha)[0];
       return result;
     });
@@ -88,7 +125,7 @@ export default class Commits {
     const first = new Date(significantSpan[0]).getTime();
     const last = new Date(significantSpan[1]).getTime();
 
-    return findAll(db, 'commits').then(async (res) => {
+    return findAllCommits(db, relations).then(async (res) => {
       const commits = res.docs
         .filter((c) => new Date(c.date) >= first && new Date(c.date) <= last)
         .sort((a, b) => {
@@ -126,7 +163,7 @@ export default class Commits {
     const first = new Date(significantSpan[0]).getTime();
     const last = new Date(significantSpan[1]).getTime();
 
-    return findAll(db, 'commits').then(async (res) => {
+    return findAllCommits(db, relations).then(async (res) => {
       const commits = res.docs
         .filter((c) => new Date(c.date) >= first && new Date(c.date) <= last)
         .sort((a, b) => {
@@ -229,7 +266,7 @@ export default class Commits {
   }
 
   static getOwnershipDataForCommit(db, relations, sha) {
-    return findCommit(db, sha).then(async (res) => {
+    return findCommit(db, relations, sha).then(async (res) => {
       const commit = res.docs[0];
 
       const files = (await findAll(db, 'files')).docs;
@@ -262,7 +299,7 @@ export default class Commits {
   }
 
   static getOwnershipDataForCommits(db, relations) {
-    return findAll(db, 'commits').then(async (res) => {
+    return findAllCommits(db, relations).then(async (res) => {
       const commits = res.docs;
 
       const files = (await findAll(db, 'files')).docs;
@@ -294,7 +331,7 @@ export default class Commits {
     });
   }
 
-  static getCommitDataOwnershipRiver(db, commitSpan, significantSpan, granularity, interval, excludeMergeCommits) {
+  static getCommitDataOwnershipRiver(db, relations, commitSpan, significantSpan, granularity, interval, excludeMergeCommits) {
     const statsByAuthor = {};
 
     const totals = {
@@ -366,7 +403,7 @@ export default class Commits {
       return data;
     }
 
-    return findAll(db, 'commits').then((res) => {
+    return findAllCommits(db, relations).then((res) => {
       let commits = res.docs
         .filter((c) => new Date(c.date) >= first && new Date(c.date) <= last)
         .sort((a, b) => {
@@ -419,14 +456,14 @@ export default class Commits {
     });
   }
 
-  static getRelatedCommitDataOwnershipRiver(db, issue) {
+  static getRelatedCommitDataOwnershipRiver(db, relations, issue) {
     if (issue !== null) {
       return findIssue(db, issue.iid).then(async (resIssue) => {
         const foundIssue = resIssue.docs[0];
         foundIssue.commits = { count: 0, data: [] };
         for (const mention of foundIssue.mentions) {
           if (mention.commit !== null) {
-            const commit = (await findCommit(db, mention.commit)).docs[0];
+            const commit = (await findCommit(db, relations, mention.commit)).docs[0];
             foundIssue.commits.count++;
             foundIssue.commits.data.push(commit);
           }
@@ -438,7 +475,7 @@ export default class Commits {
     }
   }
 
-  static getCommitDateHistogram(db, granularity, dateField, since, until) {
+  static getCommitDateHistogram(db, relations, granularity, dateField, since, until) {
     function mapCommitToHistogram(histogram, commit, granularity) {
       const commitDate = new Date(commit.date);
       return histogram.map((commit) => {
@@ -511,7 +548,7 @@ export default class Commits {
       }
     }
 
-    return findAll(db, 'commits').then((resCommits) => {
+    return findAllCommits(db, relations).then((resCommits) => {
       return findAll(db, 'issues').then((resIssues) => {
         return findAll(db, 'builds').then((resBuilds) => {
           const commitDateHistogram = [];

@@ -318,7 +318,7 @@ async function indexing(indexers, context, reporter, gateway, indexingThread) {
       threadLog(indexingThread, 'All indexers stopped!');
       return;
     }
-    Promise.all([Commit.deduceStakeholders(), Issue.deduceStakeholders()]).then(() => {
+    Issue.deduceStakeholders().then(() => {
       threadLog(indexingThread, 'Indexing finished');
       projectStructureHelper.checkProjectStructureAndFix();
     });

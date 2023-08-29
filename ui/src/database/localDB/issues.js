@@ -8,11 +8,37 @@ import _ from 'lodash';
 PouchDB.plugin(PouchDBFind);
 PouchDB.plugin(PouchDBAdapterMemory);
 
+//add stakeholder to commit
+async function preprocessCommit(commit, database, commitStakeholderRelations) {
+  const relevantRelation = commitStakeholderRelations.filter((r) => r.to === commit._id)[0];
+  if (!relevantRelation) {
+    console.log('Error in localDB: commit: no stakeholder found for commit ' + commit.sha);
+    return commit;
+  }
+
+  const author = (await findID(database, relevantRelation.from)).docs[0];
+  if (!author) {
+    console.log('Error in localDB: commit: no stakeholder found with ID ' + relevantRelation.from);
+    return commit;
+  }
+
+  return _.assign(commit, { signature: author.gitSignature });
+}
+
 // find all of given collection (example _id field for e.g. issues looks like 'issues/{issue_id}')
 function findAll(database, collection) {
   return database.find({
     selector: { _id: { $regex: new RegExp(`^${collection}/.*`) } },
   });
+}
+
+async function findAllCommits(database, relations) {
+  let commits = await database.find({
+    selector: { _id: { $regex: new RegExp('^commits/.*') } },
+  });
+  const relevantRelations = (await findCommitStakeholderConnections(relations)).docs;
+  commits.docs = await Promise.all(commits.docs.map((c) => preprocessCommit(c, database, relevantRelations)));
+  return commits;
 }
 
 function findIssue(database, iid) {
@@ -21,10 +47,15 @@ function findIssue(database, iid) {
   });
 }
 
-function findCommit(database, sha) {
-  return database.find({
+async function findCommit(database, relations, sha) {
+  let commit = await database.find({
     selector: { _id: { $regex: new RegExp('^commits/.*') }, sha: { $eq: sha } },
   });
+  if (commit.docs && commit.docs[0]) {
+    const commitStakeholderConnections = (await findCommitStakeholderConnections(relations)).docs;
+    commit.docs[0] = await preprocessCommit(commit.docs[0], database, commitStakeholderConnections);
+  }
+  return commit;
 }
 
 function findBuild(database, sha) {
@@ -57,8 +88,14 @@ function findSpecificFileConnections(relations, commitID, fileId) {
   });
 }
 
+function findCommitStakeholderConnections(relations) {
+  return relations.find({
+    selector: { _id: { $regex: new RegExp('^commits-stakeholders/.*') } },
+  });
+}
+
 export default class Issues {
-  static getIssueData(db, issueSpan, significantSpan) {
+  static getIssueData(db, relations, issueSpan, significantSpan) {
     // return all issues, filtering according to parameters can be added in the future
     return findAll(db, 'issues').then((res) => {
       res.docs = res.docs
@@ -70,7 +107,7 @@ export default class Issues {
     });
   }
 
-  static getCommitsForIssue(db, issueId) {
+  static getCommitsForIssue(db, relations, issueId) {
     let iid;
     if (typeof issueId === 'string') {
       iid = parseInt(issueId);
@@ -80,7 +117,7 @@ export default class Issues {
 
     return findIssue(db, iid).then(async (resIssue) => {
       const issue = resIssue.docs[0];
-      const allCommits = (await findAll(db, 'commits')).docs;
+      const allCommits = (await findAllCommits(db, relations)).docs;
       const result = [];
       if (issue.mentions === null || issue.mentions === undefined) {
         return result;
@@ -172,7 +209,7 @@ export default class Issues {
           new Date(mentionedCommit.createdAt) >= new Date(since) &&
           new Date(mentionedCommit.createdAt) <= new Date(until)
         ) {
-          const commit = (await findCommit(db, mentionedCommit.commit)).docs[0];
+          const commit = (await findCommit(db, relations, mentionedCommit.commit)).docs[0];
           const builds = (await findBuild(db, commit.sha)).docs;
           commit.files = { data: [] };
           const fileConnections = (await findFileConnections(relations, commit.sha)).docs;
@@ -214,7 +251,7 @@ export default class Issues {
         if (issue.mentions !== undefined) {
           for (const commitMention of issue.mentions) {
             if (commitMention.commit !== null) {
-              const resCommit = await findCommit(db, commitMention.commit);
+              const resCommit = await findCommit(db, relations, commitMention.commit);
               if (resCommit.docs.length > 0) {
                 const commit = resCommit.docs[0];
                 const resFile = await findFile(db, file);

@@ -116,11 +116,11 @@ export default class LocalDB {
   }
 
   static getCommitData(commitSpan, significantSpan) {
-    return Commits.getCommitData(db, commitSpan, significantSpan);
+    return Commits.getCommitData(db, tripleStore, commitSpan, significantSpan);
   }
 
   static getCommitDataForSha(sha) {
-    return Commits.getCommitDataForSha(db, sha);
+    return Commits.getCommitDataForSha(db, tripleStore, sha);
   }
 
   static getBuildData(commitSpan, significantSpan) {
@@ -128,11 +128,11 @@ export default class LocalDB {
   }
 
   static getIssueData(issueSpan, significantSpan) {
-    return Issues.getIssueData(db, issueSpan, significantSpan);
+    return Issues.getIssueData(db, tripleStore, issueSpan, significantSpan);
   }
 
   static getCommitsForIssue(iid) {
-    return Issues.getCommitsForIssue(db, iid);
+    return Issues.getCommitsForIssue(db, tripleStore, iid);
   }
 
   static getMergeRequestData(mergeRequestSpan, significantSpan) {
@@ -168,7 +168,7 @@ export default class LocalDB {
   }
 
   static getCommitDataOwnershipRiver(commitSpan, significantSpan, granularity, interval, excludeMergeCommits) {
-    return Commits.getCommitDataOwnershipRiver(db, commitSpan, significantSpan, granularity, interval, excludeMergeCommits);
+    return Commits.getCommitDataOwnershipRiver(db, tripleStore, commitSpan, significantSpan, granularity, interval, excludeMergeCommits);
   }
 
   static getBuildDataOwnershipRiver(commitSpan, significantSpan, granularity, interval) {
@@ -180,11 +180,11 @@ export default class LocalDB {
   }
 
   static getRelatedCommitDataOwnershipRiver(issue) {
-    return Commits.getRelatedCommitDataOwnershipRiver(db, issue);
+    return Commits.getRelatedCommitDataOwnershipRiver(db, tripleStore, issue);
   }
 
   static getCommitDateHistogram(granularity, dateField, since, until) {
-    return Commits.getCommitDateHistogram(db, granularity, dateField, since, until);
+    return Commits.getCommitDateHistogram(db, tripleStore, granularity, dateField, since, until);
   }
 
   static issueImpactQuery(iid, since, until) {

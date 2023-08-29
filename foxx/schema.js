@@ -201,6 +201,7 @@ const queryType = new gql.GraphQLObjectType({
             ${limit}
               RETURN stakeholder`,
       }),
+      //TODO use stakeholders collection here
       committers: {
         type: new gql.GraphQLList(gql.GraphQLString),
         resolve: () => {

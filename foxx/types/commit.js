@@ -38,6 +38,17 @@ module.exports = new gql.GraphQLObjectType({
       signature: {
         type: gql.GraphQLString,
         description: "The commit author's signature",
+        resolve(commit) {
+          return db
+            ._query(
+              aql`
+              FOR stakeholder, edge
+              IN INBOUND ${commit} ${commitsToStakeholders}
+              return stakeholder.gitSignature
+          `
+            )
+            .toArray()[0];
+        },
       },
       branch: {
         type: gql.GraphQLString,
