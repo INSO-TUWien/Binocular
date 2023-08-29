@@ -24,6 +24,7 @@ export const closeModal = (component) => {
     isModalOpen: false,
     isBranchAwayModalOpen: false,
     isModalOpenMerge: false,
+    isModalOpenSquash: false,
   });
 };
 
@@ -38,6 +39,7 @@ export const handleCircleClick = (node, component) => {
       originNode: node,
     });
   } else {
+    //TODO: differentiate between merge and squash
     console.log('initiate merge!');
     component.setState({
       targetNode: node,
@@ -71,6 +73,7 @@ export const handleStageMouseUp = (component) => {
 export const handleCircleMouseEnter = (circleIndex, component) => {
   component.setState({
     hoveredCircleIndex: circleIndex,
+    commitSummaryModal: true,
   });
 };
 

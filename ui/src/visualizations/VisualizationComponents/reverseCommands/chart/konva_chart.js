@@ -1,7 +1,7 @@
 'use strict';
 
 import React from 'react';
-import { Stage, Layer, Circle, Arrow, Line, Text, Wedge } from 'react-konva';
+import { Stage, Layer, Circle, Arrow, Line, Text, Wedge, Rect } from 'react-konva';
 import { generateKonvaGraph, generateSimpleGraph } from './helper.js';
 import styles from '../styles.scss';
 import Modal from 'react-modal';
@@ -28,6 +28,9 @@ export default class ReverseCommands extends React.Component {
       branchName: "",
       isModalOpenMerge: false,
       targetNode: null,
+      isModalOpenSquash: false,
+      commitSummaryModal: false,
+      hoveredCircleIndex: false,
     };
 
     this.stageRef = React.createRef();
@@ -105,16 +108,72 @@ export default class ReverseCommands extends React.Component {
                 radius={10}
                 fill={node.color}
                 onClick={() => eventHandlers.handleCircleClick(node, this)} // Add this line
-                onMouseEnter={() => eventHandlers.handleCircleMouseEnter(node.id, this)} // Add hover event handler
+                onMouseEnter={() => eventHandlers.handleCircleMouseEnter(node, this)} // Add hover event handler
                 onMouseLeave={() => eventHandlers.handleCircleMouseLeave(this)} // Add mouse leave event handler
                 stroke={
-                  this.state.hoveredCircleIndex === node.id ? 'yellow' : null
+                  this.state.hoveredCircleIndex?.id === node.id ? 'yellow' : null
                 } // Conditionally add stroke color for hover effect
                 strokeWidth={1}
                 hitStrokeWidth={10}
 
               />
             ))}
+            {(this.state.hoveredCircleIndex ) && (
+              <React.Fragment>
+                <Rect
+                  x={this.state.hoveredCircleIndex.x}
+                  y={this.state.hoveredCircleIndex.y + 20}
+                  width={450}
+                  height={100}
+                  fill="white"
+                  stroke="black"
+                  strokeWidth={1}
+                  cornerRadius={5}
+                  opacity={0.5}
+                />
+                <Text
+                  x={this.state.hoveredCircleIndex.x + 10} // Adjust the positioning as needed
+                  y={this.state.hoveredCircleIndex.y + 25} // Adjust the positioning as needed
+                  text="Summary:"
+                  fontSize={14}
+                  fontStyle="bold"
+                  fontFamily="Arial"
+                  fill="black"
+                />
+                <Text
+                  x={this.state.hoveredCircleIndex.x + 10} // Adjust the positioning as needed
+                  y={this.state.hoveredCircleIndex.y + 45} // Adjust the positioning as needed
+                  text={`Date: ${this.state.hoveredCircleIndex.date}`}
+                  fontSize={14}
+                  fontFamily="Arial"
+                  fill="black"
+                />
+                <Text
+                  x={this.state.hoveredCircleIndex.x + 10} // Adjust the positioning as needed
+                  y={this.state.hoveredCircleIndex.y + 60} // Adjust the positioning as needed
+                  text={`Branch: ${this.state.hoveredCircleIndex.branch}`}
+                  fontSize={14}
+                  fontFamily="Arial"
+                  fill="black"
+                />
+                <Text
+                  x={this.state.hoveredCircleIndex.x + 10} // Adjust the positioning as needed
+                  y={this.state.hoveredCircleIndex.y + 75} // Adjust the positioning as needed
+                  text={`Author: ${this.state.hoveredCircleIndex.signature}`}
+                  fontSize={14}
+                  fontFamily="Arial"
+                  fill="black"
+                />
+                <Text
+                  x={this.state.hoveredCircleIndex.x + 10} // Adjust the positioning as needed
+                  y={this.state.hoveredCircleIndex.y + 90} // Adjust the positioning as needed
+                  text={`Message: ${this.state.hoveredCircleIndex.message}`}
+                  fontSize={14}
+                  fontFamily="Arial"
+                  fill="black"
+                />
+              </React.Fragment>
+            )}
 
             {this.state.graph_konva.branches.map((branch) => (
               <Text
@@ -339,6 +398,8 @@ export default class ReverseCommands extends React.Component {
           y: branchHeights, // You can adjust the y-coordinate as needed
           color: color,
           message: commit.message,
+          signature: commit.signature,
+          date: commit.date,
           branch: commit.branch,
         };
         nodesData.push(node);
@@ -448,6 +509,10 @@ export default class ReverseCommands extends React.Component {
           * <div id="switchCMD" className={styles.terminal}>$ git rebase {originBranch}</div>
         </div>)}
       </div>;
+    }
+
+    if (targetBranch === sourceBranch) {
+      return (<div> Same branch </div>);
     }
     return "Type of request merge is not implemented yet";
   }
