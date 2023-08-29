@@ -145,7 +145,7 @@ export default class ReverseCommands extends React.Component {
           isOpen={this.state.isModalOpenMerge}
           onRequestClose={() => eventHandlers.closeModal(this)}
           contentLabel="Merge Modal"
-          style={this.customBranchAwayInfoModalStyles} //
+          style={this.customMergeModalStyles} //
         >
           {this.state.originNode && this.state.targetNode && (
             <div>
@@ -248,6 +248,14 @@ export default class ReverseCommands extends React.Component {
     content: {
       width: '50%',  // Adjust the width as needed
       height: '35%', // Let the height adjust based on content
+      margin: 'auto',
+    },
+  };
+
+  customMergeModalStyles = {
+    content: {
+      width: '50%',  // Adjust the width as needed
+      height: '70%', // Let the height adjust based on content
       margin: 'auto',
     },
   };
@@ -391,22 +399,30 @@ export default class ReverseCommands extends React.Component {
       const indexOfOriginCommitInOrigin =  this.state.graph_konva.organizedCommits[targetBranch].findIndex((x) => x.sha === originCommitInOrigin);
 
       const commitsSinceBranch = ( commitsInOrigin.length - 1) - indexOfOriginCommitInOrigin
-      let result;
+      let merge_content;
+      let rebase_content = null;
       if (commitsSinceBranch === 0) {
         // Fast forward
-        result = (<div>
+        merge_content = (<div>
           If so you can perform a <b>fast-forward</b> merge because there haven't been any commits
           in <b>{targetBranch}</b> since <b>{sourceBranch}</b> was created.
         </div>);
       } else {
-        // Three-way
-        result = (<div>
+        // Three-way or rebase
+        merge_content = (<div>
           If so you can perform a <b>three-way</b> merge but keep in mind that there could potentially be merge conflicts because
           there have been <b>{commitsSinceBranch}</b> Commits in <b>{targetBranch}</b> since <b>{sourceBranch}</b> was created.
         </div>);
+
+        rebase_content = (<div>
+          Another way to apply the changes from <b>{sourceBranch}</b> to <b>{targetBranch}</b> is a <b>rebase</b>. A rebase applies the
+          changes into a linear timeline in <b>{targetBranch}</b>. To achieve this run the following command and resolve potential conflicts
+          in the IDE of your choice.
+          <br/>
+        </div>);
       }
       return <div>
-        {result}
+        {merge_content}
         <br/>
         {(this.state.checkoutPointer?.branchName !== targetBranch) && (
           <div>
@@ -417,9 +433,23 @@ export default class ReverseCommands extends React.Component {
           </div>
           )}
           * <div id="switchCMD" className={styles.terminal}>$ git merge {sourceBranch}</div>
+        {(rebase_content !== null) && (<div>
+          <br/>
+          {rebase_content}
+          <br/>
+          {(this.state.checkoutPointer?.branchName !== sourceBranch) && (
+            <div>
+              You additionally have to checkout the branch containing the changes before rebasing!
+              <br/>
+              * <div id="switchCMD" className={styles.terminal}>$ git checkout {sourceBranch}</div>
+              <br/><br/>
+            </div>
+          )}
+          * <div id="switchCMD" className={styles.terminal}>$ git rebase {originBranch}</div>
+        </div>)}
       </div>;
     }
-    return "whatever";
+    return "Type of request merge is not implemented yet";
   }
 
   generateRandomRGBColors(numBranches) {
