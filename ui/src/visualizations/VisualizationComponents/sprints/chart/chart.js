@@ -14,6 +14,7 @@ export default (props) => {
         mergeRequests={props.mergeRequests}
         mergedAuthors={props.mergedAuthors}
         colorIssuesMergeRequests={props.colorIssuesMergeRequests}
+        size={props.size}
       />
     </div>
   );

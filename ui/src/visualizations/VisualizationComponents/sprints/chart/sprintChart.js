@@ -295,6 +295,7 @@ export default (props) => {
               <div>
                 {d.sourceBranch}&#8594;{d.targetBranch}
               </div>
+              <div>State: {d.state}</div>
               <div>Created: {moment(d.createdAt).format('lll', 'de')}</div>
               <div>Creator: {d.author.name} </div>
               <div className={styles.timeSpentBar}>
@@ -469,7 +470,7 @@ export default (props) => {
 
   React.useEffect(() => {
     renderChart();
-  }, [props.sprints, props.issues, props.mergeRequests, props.colorIssuesMergeRequests, props.mergedAuthors, selectedSprint]);
+  }, [props.sprints, props.issues, props.mergeRequests, props.colorIssuesMergeRequests, props.mergedAuthors, selectedSprint, props.size]);
   return (
     <div className={styles.chartContainer}>
       <div className={styles.chartSvg} ref={svgChartRef} />
