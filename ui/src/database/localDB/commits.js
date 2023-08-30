@@ -456,24 +456,6 @@ export default class Commits {
     });
   }
 
-  static getRelatedCommitDataOwnershipRiver(db, relations, issue) {
-    if (issue !== null) {
-      return findIssue(db, issue.iid).then(async (resIssue) => {
-        const foundIssue = resIssue.docs[0];
-        foundIssue.commits = { count: 0, data: [] };
-        for (const mention of foundIssue.mentions) {
-          if (mention.commit !== null) {
-            const commit = (await findCommit(db, relations, mention.commit)).docs[0];
-            foundIssue.commits.count++;
-            foundIssue.commits.data.push(commit);
-          }
-        }
-        return foundIssue;
-      });
-    } else {
-      return {};
-    }
-  }
 
   static getCommitDateHistogram(db, relations, granularity, dateField, since, until) {
     function mapCommitToHistogram(histogram, commit, granularity) {
@@ -631,13 +613,13 @@ export default class Commits {
   static getCodeHotspotsChangeData(db, relations, file) {
     return findFile(db, file).then(async (resFile) => {
       const file = resFile.docs[0];
+      const allCommits = (await findAllCommits(db, relations)).docs;
 
       const fileCommitConnections = (await findFileCommitConnections(relations)).docs.filter((fCC) => fCC.from === file._id);
       const commits = [];
       for (const fileCommitConnection of fileCommitConnections) {
-        const resCommit = await findID(db, fileCommitConnection.to);
-        if (resCommit.docs.length > 0) {
-          const commit = resCommit.docs[0];
+        const commit = allCommits.filter((c) => c._id === fileCommitConnection.to)[0];
+        if (commit) {
           commit.file = { file: {} };
           commit.file.file.path = file.path;
           commit.file.lineCount = fileCommitConnection.lineCount;

@@ -180,7 +180,7 @@ export default class LocalDB {
   }
 
   static getRelatedCommitDataOwnershipRiver(issue) {
-    return Commits.getRelatedCommitDataOwnershipRiver(db, tripleStore, issue);
+    return Issues.getRelatedCommitDataOwnershipRiver(db, tripleStore, issue);
   }
 
   static getCommitDateHistogram(granularity, dateField, since, until) {

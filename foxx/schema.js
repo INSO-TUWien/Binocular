@@ -208,9 +208,9 @@ const queryType = new gql.GraphQLObjectType({
           return db
             ._query(
               aql`
-              FOR commit IN ${commits}
-                SORT commit.signature ASC
-                RETURN DISTINCT commit.signature`
+              FOR stakeholder IN ${stakeholders}
+                SORT stakeholder.gitSignature ASC
+                RETURN DISTINCT stakeholder.gitSignature`
             )
             .toArray();
         },

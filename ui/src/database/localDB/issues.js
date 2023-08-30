@@ -82,6 +82,12 @@ function findFileConnections(relations, sha) {
   });
 }
 
+function findCommitFileConnections(relations) {
+  return relations.find({
+    selector: { _id: { $regex: new RegExp('^commits-files/.*') } },
+  });
+}
+
 function findSpecificFileConnections(relations, commitID, fileId) {
   return relations.find({
     selector: { _id: { $regex: new RegExp('^commits-files/.*') }, to: { $eq: commitID }, from: { $eq: fileId } },
@@ -91,6 +97,12 @@ function findSpecificFileConnections(relations, commitID, fileId) {
 function findCommitStakeholderConnections(relations) {
   return relations.find({
     selector: { _id: { $regex: new RegExp('^commits-stakeholders/.*') } },
+  });
+}
+
+function findIssueCommitConnections(relations) {
+  return relations.find({
+    selector: { _id: { $regex: new RegExp('^issues-commits/.*') } },
   });
 }
 
@@ -119,16 +131,11 @@ export default class Issues {
       const issue = resIssue.docs[0];
       const allCommits = (await findAllCommits(db, relations)).docs;
       const result = [];
-      if (issue.mentions === null || issue.mentions === undefined) {
-        return result;
-      }
-      for (const mentionedCommit of issue.mentions) {
-        if (mentionedCommit.commit !== null) {
-          const commitSha = mentionedCommit.commit;
-          const commitObject = allCommits.filter((c) => c.sha === commitSha)[0];
-          if (commitObject) {
-            result.push(commitObject);
-          }
+      const issueCommitConnections = (await findIssueCommitConnections(relations)).docs.filter((r) => r.to === issue._id);
+      for (const conn of issueCommitConnections) {
+        const commitObject = allCommits.filter((c) => c._id === conn.from)[0];
+        if (commitObject) {
+          result.push(commitObject);
         }
       }
       return result;
@@ -199,17 +206,39 @@ export default class Issues {
     });
   }
 
+  static getRelatedCommitDataOwnershipRiver(db, relations, issue) {
+    if (issue !== null) {
+      return findIssue(db, issue.iid).then(async (resIssue) => {
+        const foundIssue = resIssue.docs[0];
+        const allCommits = (await findAllCommits(db, relations)).docs;
+        foundIssue.commits = { count: 0, data: [] };
+        const issueCommitConnections = (await findIssueCommitConnections(relations)).docs.filter((r) => r.to === foundIssue._id);
+        for (const conn of issueCommitConnections) {
+          const commitObject = allCommits.filter((c) => c._id === conn.from)[0];
+          if (commitObject) {
+            foundIssue.commits.count++;
+            foundIssue.commits.data.push(commitObject);
+          }
+        }
+        return foundIssue;
+      });
+    } else {
+      return {};
+    }
+  }
+
   static issueImpactQuery(db, relations, iid, since, until) {
     return findIssue(db, iid).then(async (resIssue) => {
       const issue = resIssue.docs[0];
+      const allCommits = (await findAllCommits(db, relations)).docs;
       issue.commits = { data: [] };
-      for (const mentionedCommit of issue.mentions) {
-        if (
-          mentionedCommit.commit !== null &&
-          new Date(mentionedCommit.createdAt) >= new Date(since) &&
-          new Date(mentionedCommit.createdAt) <= new Date(until)
-        ) {
-          const commit = (await findCommit(db, relations, mentionedCommit.commit)).docs[0];
+
+      const issueCommitConnections = (await findIssueCommitConnections(relations)).docs.filter((r) => r.to === issue._id);
+      for (const conn of issueCommitConnections) {
+        const commit = allCommits.filter((c) => c._id === conn.from)[0];
+        if (commit &&
+            new Date(commit.date) >= new Date(since) &&
+            new Date(commit.date) <= new Date(until)) {
           const builds = (await findBuild(db, commit.sha)).docs;
           commit.files = { data: [] };
           const fileConnections = (await findFileConnections(relations, commit.sha)).docs;
@@ -245,40 +274,46 @@ export default class Issues {
   static getCodeHotspotsIssueData(db, relations, file) {
     return findAll(db, 'issues').then(async (res) => {
       const issues = [];
+      const allCommits = (await findAllCommits(db, relations)).docs;
+      const allCommitFileConnections = (await findCommitFileConnections(relations)).docs;
+      const allIssueCommitConnections = (await findIssueCommitConnections(relations)).docs
+
+      let fileObj = null;
+      const resFile = await findFile(db, file);
+      if (resFile.docs.length > 0) {
+        fileObj = resFile.docs[0];
+      }
 
       for (const issue of res.docs) {
         issue.commits = { data: [] };
-        if (issue.mentions !== undefined) {
-          for (const commitMention of issue.mentions) {
-            if (commitMention.commit !== null) {
-              const resCommit = await findCommit(db, relations, commitMention.commit);
-              if (resCommit.docs.length > 0) {
-                const commit = resCommit.docs[0];
-                const resFile = await findFile(db, file);
-                if (resFile.docs.length > 0) {
-                  const file = resFile.docs[0];
-                  const commitFileConnection = await findSpecificFileConnections(relations, commit._id, file._id);
-                  if (commitFileConnection.docs.length > 0) {
-                    commit.file = {
-                      file: { path: file.path },
-                      lineCount: commitFileConnection.docs[0].lineCount,
-                      hunks: commitFileConnection.docs[0].hunks,
-                    };
-                  } else {
-                    commit.file = {
-                      file: { path: file.path },
-                      lineCount: 0,
-                      hunks: [],
-                    };
-                  }
-                  issue.commits.data.push(commit);
-                }
+
+
+        const issueCommitConnections = allIssueCommitConnections.filter((r) => r.to === issue._id);
+        for (const conn of issueCommitConnections) {
+          const commit = allCommits.filter((c) => c._id === conn.from)[0];
+          if (commit) {
+            if (fileObj) {
+              const commitFileConnection = allCommitFileConnections.filter((cf) => cf.to === commit._id && cf.from === fileObj._id);
+              if (commitFileConnection.length > 0) {
+                commit.file = {
+                  file: { path: fileObj.path },
+                  lineCount: commitFileConnection[0].lineCount,
+                  hunks: commitFileConnection[0].hunks,
+                };
+              } else {
+                commit.file = {
+                  file: { path: fileObj.path },
+                  lineCount: 0,
+                  hunks: [],
+                };
               }
+              issue.commits.data.push(commit);
             }
           }
         }
         issues.push(issue);
       }
+
       return { issues: { data: issues } };
     });
   }
