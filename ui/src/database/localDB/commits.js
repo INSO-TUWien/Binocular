@@ -456,7 +456,6 @@ export default class Commits {
     });
   }
 
-
   static getCommitDateHistogram(db, relations, granularity, dateField, since, until) {
     function mapCommitToHistogram(histogram, commit, granularity) {
       const commitDate = new Date(commit.date);
@@ -616,7 +615,7 @@ export default class Commits {
       const allCommits = (await findAllCommits(db, relations)).docs;
 
       const fileCommitConnections = (await findFileCommitConnections(relations)).docs.filter((fCC) => fCC.from === file._id);
-      const commits = [];
+      let commits = [];
       for (const fileCommitConnection of fileCommitConnections) {
         const commit = allCommits.filter((c) => c._id === fileCommitConnection.to)[0];
         if (commit) {
@@ -627,6 +626,7 @@ export default class Commits {
           commits.push(commit);
         }
       }
+      commits = commits.sort((a, b) => new Date(a.date) - new Date(b.date));
       return { file: { commits: { data: commits } } };
     });
   }

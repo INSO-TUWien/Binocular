@@ -236,9 +236,7 @@ export default class Issues {
       const issueCommitConnections = (await findIssueCommitConnections(relations)).docs.filter((r) => r.to === issue._id);
       for (const conn of issueCommitConnections) {
         const commit = allCommits.filter((c) => c._id === conn.from)[0];
-        if (commit &&
-            new Date(commit.date) >= new Date(since) &&
-            new Date(commit.date) <= new Date(until)) {
+        if (commit && new Date(commit.date) >= new Date(since) && new Date(commit.date) <= new Date(until)) {
           const builds = (await findBuild(db, commit.sha)).docs;
           commit.files = { data: [] };
           const fileConnections = (await findFileConnections(relations, commit.sha)).docs;
@@ -276,7 +274,7 @@ export default class Issues {
       const issues = [];
       const allCommits = (await findAllCommits(db, relations)).docs;
       const allCommitFileConnections = (await findCommitFileConnections(relations)).docs;
-      const allIssueCommitConnections = (await findIssueCommitConnections(relations)).docs
+      const allIssueCommitConnections = (await findIssueCommitConnections(relations)).docs;
 
       let fileObj = null;
       const resFile = await findFile(db, file);
@@ -286,7 +284,6 @@ export default class Issues {
 
       for (const issue of res.docs) {
         issue.commits = { data: [] };
-
 
         const issueCommitConnections = allIssueCommitConnections.filter((r) => r.to === issue._id);
         for (const conn of issueCommitConnections) {
