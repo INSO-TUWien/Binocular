@@ -20,7 +20,6 @@ export default class Builds {
               count
               data {
                 id
-                sha
                 status
                 webUrl
                 createdAt
@@ -30,6 +29,9 @@ export default class Builds {
                   failed
                   pending
                   cancelled
+                }
+                commit {
+                  sha
                 }
               }
             }

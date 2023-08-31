@@ -24,6 +24,7 @@ import branchesFilesFiles from '../../db_export/branches-files-files.json';
 import builds from '../../db_export/builds.json';
 import commitsCommits from '../../db_export/commits-commits.json';
 import commitsFiles from '../../db_export/commits-files.json';
+import commitsBuilds from '../../db_export/commits-builds.json';
 import commitsFilesStakeholders from '../../db_export/commits-files-stakeholders.json';
 import commitsLanguages from '../../db_export/commits-languages.json';
 import commitsModules from '../../db_export/commits-modules.json';
@@ -47,6 +48,7 @@ const relations = {
   'commits-commits': commitsCommits,
   'commits-files': commitsFiles,
   'commits-files-stakeholders': commitsFilesStakeholders,
+  'commits-builds': commitsBuilds,
   'commits-languages': commitsLanguages,
   'commits-modules': commitsModules,
   'commits-stakeholders': commitsStakeholders,
@@ -124,7 +126,7 @@ export default class LocalDB {
   }
 
   static getBuildData(commitSpan, significantSpan) {
-    return Builds.getBuildData(db, commitSpan, significantSpan);
+    return Builds.getBuildData(db, tripleStore, commitSpan, significantSpan);
   }
 
   static getIssueData(issueSpan, significantSpan) {
@@ -242,6 +244,7 @@ export default class LocalDB {
     database.commits_commits = relations['commits-commits'];
     database.commits_files = relations['commits-files'];
     database.commits_files_stakeholders = relations['commits-files-stakeholders'];
+    database.commits_builds = relations['commits-builds'];
     database.commits_languages = relations['commits-languages'];
     database.commits_modules = relations['commits-modules'];
     database.commits_stakeholders = relations['commits-stakeholders'];

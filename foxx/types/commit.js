@@ -6,10 +6,10 @@ const db = arangodb.db;
 const aql = arangodb.aql;
 const commitsToFiles = db._collection('commits-files');
 const commitsToFilesToStakeholders = db._collection('commits-files-stakeholders');
-const builds = db._collection('builds');
 const commitsToStakeholders = db._collection('commits-stakeholders');
 const commitsToLanguages = db._collection('commits-languages');
 const CommitsToModules = db._collection('commits-modules');
+const commitsToBuilds = db._collection('commits-builds');
 const paginated = require('./paginated.js');
 const Timestamp = require('./Timestamp.js');
 
@@ -147,10 +147,9 @@ module.exports = new gql.GraphQLObjectType({
           return db
             ._query(
               aql`
-              FOR build
-              IN ${builds}
-              FILTER build.sha == ${commit.sha}
-                RETURN build`
+              FOR build, edge
+              IN INBOUND ${commit} ${commitsToBuilds}
+              RETURN build`
             )
             .toArray();
         },

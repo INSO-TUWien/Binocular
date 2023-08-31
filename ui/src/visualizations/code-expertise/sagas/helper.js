@@ -186,7 +186,7 @@ export function addBuildData(relevantCommits, builds) {
   return relevantCommits.map((commit) => {
     const resultCommit = commit;
     resultCommit['build'] = null;
-    const relevantBuilds = builds.filter((build) => build.sha === commit.sha);
+    const relevantBuilds = builds.filter((build) => build.commit && build.commit.sha === commit.sha);
     if (relevantBuilds.length > 0) {
       resultCommit['build'] = relevantBuilds[0].status;
       resultCommit['buildUrl'] = relevantBuilds[0].webUrl;

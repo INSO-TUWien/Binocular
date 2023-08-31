@@ -53,6 +53,7 @@ const BranchFileConnection = require('./lib/models/BranchFileConnection');
 const BranchFileFileConnection = require('./lib/models/BranchFileFileConnection.js');
 const CommitFileStakeholderConnection = require('./lib/models/CommitFileStakeholderConnection.js');
 const CommitFileConnection = require('./lib/models/CommitFileConnection.js');
+const CommitBuildConnection = require('./lib/models/CommitBuildConnection.js');
 const ConfigurationError = require('./lib/errors/ConfigurationError');
 const DatabaseError = require('./lib/errors/DatabaseError');
 const GateWayService = require('./lib/gateway-service');
@@ -330,6 +331,7 @@ async function indexing(indexers, context, reporter, gateway, indexingThread) {
     // This is why we connect them here and then delete the temporary references in the collections themselves
     // (like the `mentions` field in issues).
     await connectIssuesAndCommits();
+    await connectCommitsAndBuilds();
 
     threadLog(indexingThread, 'Indexing finished');
   } catch (error) {
@@ -494,6 +496,7 @@ function ensureDb(repo, context) {
         Module.ensureCollection(),
         MergeRequest.ensureCollection(),
         CommitFileConnection.ensureCollection(),
+        CommitBuildConnection.ensureCollection(),
         LanguageFileConnection.ensureCollection(),
         CommitStakeholderConnection.ensureCollection(),
         IssueStakeholderConnection.ensureCollection(),
@@ -608,4 +611,19 @@ async function connectIssuesAndCommits() {
   }
   //remove the temporary `mentions` attribute since we have the connections now
   await Issue.deleteMentionsAttribute();
+}
+
+async function connectCommitsAndBuilds() {
+  const builds = await Build.findAll();
+  const commits = await Commit.findAll();
+
+  for (const build of builds) {
+    if (!build.sha) continue;
+    const commit = commits.filter((c) => c.sha === build.sha);
+    if (commit && commit[0]) {
+      commit[0].connect(build);
+    }
+  }
+
+  await Build.deleteShaRefAttributes();
 }

@@ -15,10 +15,19 @@ function findAll(database, collection) {
   });
 }
 
+function findCommitBuildConnections(relations) {
+  return relations.find({
+    selector: { _id: { $regex: new RegExp('^commits-builds/.*') } },
+  });
+}
+
 export default class Builds {
-  static getBuildData(db, commitSpan, significantSpan) {
+  static getBuildData(db, relations, commitSpan, significantSpan) {
     // add stats object to each build
-    return findAll(db, 'builds').then((res) => {
+    return findAll(db, 'builds').then(async (res) => {
+      const allCommits = (await findAll(db, 'commits')).docs;
+      const commitBuildConnections = (await findCommitBuildConnections(relations)).docs;
+
       const emptyStats = { success: 0, failed: 0, pending: 0, cancelled: 0 };
 
       return res.docs.map((build) => {
@@ -31,8 +40,17 @@ export default class Builds {
         } else if (build.status === 'cancelled') {
           stats.cancelled = 1;
         }
-
         build.stats = stats;
+        build.commit = { sha: null };
+
+        const relevantConnection = commitBuildConnections.filter((cb) => cb.from === build._id);
+        if (relevantConnection.length !== 0) {
+          const relevantCommit = allCommits.filter((c) => c._id === relevantConnection[0].to);
+          if (relevantCommit.length !== 0) {
+            build.commit.sha = relevantCommit[0].sha;
+          }
+        }
+
         return build;
       });
     });
