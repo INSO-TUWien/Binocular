@@ -3,7 +3,7 @@ name: Docker Image CI
 on:
   pull_request:
    branches:
-      - main
+      - feature/149
       
 env:
   REGISTRY: docker.io
