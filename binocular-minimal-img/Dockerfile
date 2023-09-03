@@ -9,4 +9,3 @@ COPY run.sh run.sh
 ENTRYPOINT [ "/run.sh"]
 CMD ["https://github.com/INSO-TUWien/Binocular.git"]
 
-LABEL org.opencontainers.image.source=https://github.com/INSO-TUWien/Binocular

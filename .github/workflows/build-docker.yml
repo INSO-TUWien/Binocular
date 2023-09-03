@@ -30,11 +30,11 @@ jobs:
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
 
-    - name: Extract metadata (tags, labels) for Docker
-      id: meta
-      uses: docker/metadata-action@v4
-      with:
-        images: ${{ env.REGISTRY }}/${{ env.REPO }}
+    # - name: Extract metadata (tags, labels) for Docker
+    #   id: meta
+    #   uses: docker/metadata-action@v4
+    #   with:
+    #     images: ${{ env.REGISTRY }}/${{ env.REPO }}
 
     - name: Set up Builder Buildx
       id: buildx
@@ -53,8 +53,7 @@ jobs:
         context: ./binocular-minimal-img
         push: true
         builder: ${{ steps.buildx.outputs.name }}
-        tags: ${{ steps.meta.outputs.tags }}:latest-minimal
-        labels: ${{ steps.meta.outputs.labels }}
+        tags: ${{ env.REGISTRY }}/${{ env.REPO }}:latest-minimal
         cache-from: type=local,src=/tmp/.buildx-cache
         cache-to: type=local,dest=/tmp/.buildx-cache
 
@@ -77,11 +76,11 @@ jobs:
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
 
-    - name: Extract metadata (tags, labels) for Docker
-      id: meta
-      uses: docker/metadata-action@v4
-      with:
-        images: ${{ env.REGISTRY }}/${{ env.REPO }}
+    # - name: Extract metadata (tags, labels) for Docker
+    #   id: meta
+    #   uses: docker/metadata-action@v4
+    #   with:
+    #     images: ${{ env.REGISTRY }}/${{ env.REPO }}
 
     - name: Set up Builder Buildx
       id: buildx
@@ -100,7 +99,6 @@ jobs:
         context: ./binocular-img
         push: true
         builder: ${{ steps.buildx.outputs.name }}
-        tags: ${{ steps.meta.outputs.tags }}:latest
-        labels: ${{ steps.meta.outputs.labels }}
+        tags: ${{ env.REGISTRY }}/${{ env.REPO }}:latest
         cache-from: type=local,src=/tmp/.buildx-cache
         cache-to: type=local,dest=/tmp/.buildx-cache
