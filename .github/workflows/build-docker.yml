@@ -6,9 +6,9 @@ on:
       - feature/149
       
 env:
-  REGISTRY: docker.io
+  REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
-  USER_NAME: schoeberlt
+  #USER_NAME: schoeberlt
 
 jobs:
 
@@ -23,8 +23,8 @@ jobs:
       uses: docker/login-action@v2
       with:
         registry: ${{ env.REGISTRY }}
-        username: ${{ env.USER_NAME }}
-        password: ${{ secrets.DOCKER_PAT }}
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
 
     # - name: Extract metadata (tags, labels) for Docker
     #   id: meta
@@ -65,8 +65,8 @@ jobs:
       uses: docker/login-action@v2
       with:
         registry: ${{ env.REGISTRY }}
-        username: ${{ env.USER_NAME }}
-        password: ${{ secrets.DOCKER_PAT }}
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
 
     # - name: Extract metadata (tags, labels) for Docker
     #   id: meta
