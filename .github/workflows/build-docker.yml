@@ -53,7 +53,7 @@ jobs:
         context: ./binocular-minimal-img
         push: true
         builder: ${{ steps.buildx.outputs.name }}
-        tags: ${REPO}:latest-minimal
+        tags: ${{ env.REPO }}:latest-minimal
         cache-from: type=local,src=/tmp/.buildx-cache
         cache-to: type=local,dest=/tmp/.buildx-cache
 
@@ -99,6 +99,6 @@ jobs:
         context: ./binocular-img
         push: true
         builder: ${{ steps.buildx.outputs.name }}
-        tags: ${ REPO }:latest
+        tags: ${{ env.REPO }}:latest
         cache-from: type=local,src=/tmp/.buildx-cache
         cache-to: type=local,dest=/tmp/.buildx-cache
