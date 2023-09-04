@@ -5,96 +5,9 @@ import PouchDBFind from 'pouchdb-find';
 import PouchDBAdapterMemory from 'pouchdb-adapter-memory';
 import _ from 'lodash';
 import moment from 'moment/moment';
+import { bulkGet, findAll, findAllCommits, findCommit, findID, findFile, findFileCommitConnections, findFileCommitStakeholderConnections } from './utils';
 PouchDB.plugin(PouchDBFind);
 PouchDB.plugin(PouchDBAdapterMemory);
-
-//add stakeholder to commit
-async function preprocessCommit(commit, database, commitStakeholderRelations) {
-  const relevantRelation = commitStakeholderRelations.filter((r) => r.to === commit._id)[0];
-  if (!relevantRelation) {
-    console.log('Error in localDB: commit: no stakeholder found for commit ' + commit.sha);
-    return commit;
-  }
-
-  const author = (await findID(database, relevantRelation.from)).docs[0];
-  if (!author) {
-    console.log('Error in localDB: commit: no stakeholder found with ID ' + relevantRelation.from);
-    return commit;
-  }
-
-  return _.assign(commit, { signature: author.gitSignature });
-}
-
-// find all of given collection (example _id field for e.g. issues looks like 'issues/{issue_id}')
-function findAll(database, collection) {
-  return database.find({
-    selector: { _id: { $regex: new RegExp(`^${collection}/.*`) } },
-  });
-}
-async function findAllCommits(database, relations) {
-  let commits = await database.find({
-    selector: { _id: { $regex: new RegExp('^commits/.*') } },
-  });
-  const relevantRelations = (await findCommitStakeholderConnections(relations)).docs;
-  commits.docs = await Promise.all(commits.docs.map((c) => preprocessCommit(c, database, relevantRelations)));
-  return commits;
-}
-
-function bulkGet(database, ids) {
-  const idsObjects = ids.map((id) => {
-    return { id: id };
-  });
-  return database.bulkGet({
-    docs: idsObjects,
-  });
-}
-
-function findIssue(database, iid) {
-  return database.find({
-    selector: { _id: { $regex: new RegExp('^issues/.*') }, iid: { $eq: iid } },
-  });
-}
-
-async function findCommit(database, relations, sha) {
-  let commit = await database.find({
-    selector: { _id: { $regex: new RegExp('^commits/.*') }, sha: { $eq: sha } },
-  });
-  if (commit.docs && commit.docs[0]) {
-    const commitStakeholderConnections = (await findCommitStakeholderConnections(relations)).docs;
-    commit.docs[0] = await preprocessCommit(commit.docs[0], database, commitStakeholderConnections);
-  }
-  return commit;
-}
-
-function findID(database, id) {
-  return database.find({
-    selector: { _id: id },
-  });
-}
-
-function findFile(database, file) {
-  return database.find({
-    selector: { _id: { $regex: new RegExp('^files/.*') }, path: { $eq: file } },
-  });
-}
-
-function findFileCommitConnections(relations) {
-  return relations.find({
-    selector: { _id: { $regex: new RegExp('^commits-files/.*') } },
-  });
-}
-
-function findCommitStakeholderConnections(relations) {
-  return relations.find({
-    selector: { _id: { $regex: new RegExp('^commits-stakeholders/.*') } },
-  });
-}
-
-function findFileCommitStakeholderConnections(relations) {
-  return relations.find({
-    selector: { _id: { $regex: new RegExp('^commits-files-stakeholders/.*') } },
-  });
-}
 
 export default class Commits {
   static getCommitData(db, relations, commitSpan, significantSpan) {
