@@ -69,6 +69,22 @@ class GitLabMock {
     );
   }
 
+  getMileStones() {
+    return new Paginator(
+      () => {
+        return new Promise((resolve) => {
+          resolve([]);
+        });
+      },
+      (resp) => {
+        return resp;
+      },
+      () => {
+        return 0;
+      }
+    );
+  }
+
   getPipeline() {
     return new Promise((resolve) => {
       resolve({ id: '1' });
