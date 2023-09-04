@@ -163,7 +163,7 @@ export default ({ universalSettingsConfig }) => {
       ) : (
         ''
       )}
-      {this.state.showSprintManager === true ? (
+      {showSprintManager === true ? (
         <SprintManager
           sprints={sprints}
           close={() => {
