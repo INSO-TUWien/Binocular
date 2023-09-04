@@ -21,6 +21,10 @@ export default class ServerDB {
     return Commits.getCommitData(commitSpan, significantSpan);
   }
 
+  static getCommitDataForSha(sha) {
+    return Commits.getCommitDataForSha(sha);
+  }
+
   static getBuildData(commitSpan, significantSpan) {
     return Builds.getBuildData(commitSpan, significantSpan);
   }
@@ -45,8 +49,16 @@ export default class ServerDB {
     return Commits.getCommitDataWithFiles(commitSpan, significantSpan);
   }
 
+  static getCommitDataWithFilesAndOwnership(commitSpan, significantSpan) {
+    return Commits.getCommitDataWithFilesAndOwnership(commitSpan, significantSpan);
+  }
+
   static getOwnershipDataForCommit(sha) {
     return Commits.getOwnershipDataForCommit(sha);
+  }
+
+  static getOwnershipDataForCommits() {
+    return Commits.getOwnershipDataForCommits();
   }
 
   static getOwnershipDataForFiles(files) {

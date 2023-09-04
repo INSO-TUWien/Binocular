@@ -1,7 +1,7 @@
 'use strict';
 
-import React from 'react';
-import { connect } from 'react-redux';
+import React, { useState, useEffect } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
 import styles from './styles.scss';
 import {
   setResolution,
@@ -18,103 +18,98 @@ import AuthorMerger from './authorMerger/authorMerger';
 import AuthorList from './authorList/authorList';
 import SprintManager from './sprintManager/sprintManager';
 
-const mapStateToProps = (state /*, ownProps*/) => {
-  const universalSettings = state.universalSettings;
+export default ({ universalSettingsConfig }) => {
+  //config
+  const hideDateSettings = universalSettingsConfig.hideDateSettings === true;
+  const hideGranularitySettings = universalSettingsConfig.hideGranularitySettings === true;
+  const hideCommitSettings = universalSettingsConfig.hideCommitSettings === true;
+  const hideSprintSettings = universalSettingsConfig.hideSprintSettings === true;
 
-  let firstDisplayDate = '';
-  let lastDisplayDate = '';
-  let selectedAuthors = [];
-  let mergedAuthors = [];
-  let otherAuthors = [];
+  //global state
+  const universalSettings = useSelector((state) => state.universalSettings);
+  const chartResolution = universalSettings.chartResolution;
+  const firstCommit = universalSettings.universalSettingsData.data.firstCommit;
+  const lastCommit = universalSettings.universalSettingsData.data.lastCommit;
+  const committers = universalSettings.universalSettingsData.data.committers;
+  const palette = universalSettings.universalSettingsData.data.palette;
+  const firstSignificantTimestamp = universalSettings.universalSettingsData.data.firstSignificantTimestamp;
+  const lastSignificantTimestamp = universalSettings.universalSettingsData.data.lastSignificantTimestamp;
+  const excludeMergeCommits = universalSettings.excludeMergeCommits;
+  const mergedAuthorListGlobal = universalSettings.mergedAuthors;
+  const otherAuthorListGlobal = universalSettings.otherAuthors;
+
+  let firstDisplayDate;
+  let lastDisplayDate;
+  let selectedAuthors;
+  let otherAuthorsGlobal;
   let sprints = [];
 
   if (universalSettings.chartTimeSpan.from === undefined) {
-    firstDisplayDate =
-      universalSettings.universalSettingsData.data.firstCommit !== undefined
-        ? universalSettings.universalSettingsData.data.firstCommit.date.split('.')[0]
-        : undefined;
+    firstDisplayDate = firstCommit !== undefined ? firstCommit.date.split('.')[0] : undefined;
   } else {
     firstDisplayDate = universalSettings.chartTimeSpan.from;
   }
+
   if (universalSettings.chartTimeSpan.to === undefined) {
-    lastDisplayDate =
-      universalSettings.universalSettingsData.data.lastCommit !== undefined
-        ? universalSettings.universalSettingsData.data.lastCommit.date.split('.')[0]
-        : undefined;
+    lastDisplayDate = lastCommit !== undefined ? lastCommit.date.split('.')[0] : undefined;
   } else {
     lastDisplayDate = universalSettings.chartTimeSpan.to;
   }
+
   if (universalSettings.selectedAuthorsGlobal !== undefined) {
     selectedAuthors = universalSettings.selectedAuthorsGlobal;
   }
-  if (universalSettings.mergedAuthors !== undefined) {
-    mergedAuthors = universalSettings.mergedAuthors;
-  }
+
   if (universalSettings.otherAuthors !== undefined) {
-    otherAuthors = universalSettings.otherAuthors;
+    otherAuthorsGlobal = universalSettings.otherAuthors;
   }
   if (universalSettings.sprints !== undefined) {
     sprints = universalSettings.sprints;
   }
 
-  return {
-    chartResolution: universalSettings.chartResolution,
-    firstDisplayDate: firstDisplayDate,
-    lastDisplayDate: lastDisplayDate,
-    firstCommit: universalSettings.universalSettingsData.data.firstCommit,
-    lastCommit: universalSettings.universalSettingsData.data.lastCommit,
-    committers: universalSettings.universalSettingsData.data.committers,
-    palette: universalSettings.universalSettingsData.data.palette,
-    selectedAuthors: selectedAuthors,
-    mergedAuthors: mergedAuthors,
-    otherAuthors: otherAuthors,
-    firstSignificantTimestamp: universalSettings.universalSettingsData.data.firstSignificantTimestamp,
-    lastSignificantTimestamp: universalSettings.universalSettingsData.data.lastSignificantTimestamp,
-    excludeMergeCommits: universalSettings.excludeMergeCommits,
-    sprints: sprints,
-  };
-};
+  const dispatch = useDispatch();
+  const onClickResolution = (resolution) => dispatch(setResolution(resolution));
+  const onChangeTimeSpan = (timeSpan) => dispatch(setTimeSpan(timeSpan));
+  const onAuthorSelectionChanged = (selected) => dispatch(setSelectedAuthors(selected));
+  const onMergedAuthorListChanged = (selected) => dispatch(setMergedAuthorList(selected));
+  const onOtherAuthorListChanged = (selected) => dispatch(setOtherAuthorList(selected));
+  const onSetPalette = (allAuthors) => dispatch(setAllAuthors(allAuthors));
+  const onSetExcludeMergeCommits = (checked) => dispatch(setExcludeMergeCommits(checked));
+  const onSetSprints = (sprints) => dispatch(setSprints(sprints));
 
-const mapDispatchToProps = (dispatch /*, ownProps*/) => {
-  return {
-    onClickResolution: (resolution) => dispatch(setResolution(resolution)),
-    onChangeTimeSpan: (timeSpan) => dispatch(setTimeSpan(timeSpan)),
-    onAuthorSelectionChanged: (selected) => dispatch(setSelectedAuthors(selected)),
-    onMergedAuthorListChanged: (selected) => dispatch(setMergedAuthorList(selected)),
-    onOtherAuthorListChanged: (selected) => dispatch(setOtherAuthorList(selected)),
-    onSetPalette: (allAuthors) => dispatch(setAllAuthors(allAuthors)),
-    onSetExcludeMergeCommits: (checked) => dispatch(setExcludeMergeCommits(checked)),
-    onSetSprints: (sprints) => dispatch(setSprints(sprints)),
-  };
-};
+  //local state
+  const [showAuthorMerge, setShowAuthorMerge] = useState(false);
+  const [mergedAuthorList, setMergedAuthorListLocal] = useState([]);
+  const [otherAuthors, setOtherAuthors] = useState([]);
+  const [showSprintManager, setShowSprintManager] = useState(false);
 
-class UniversalConfigComponent extends React.PureComponent {
-  constructor(props) {
-    super(props);
-    this.state = {
-      showAuthorMerge: false,
-      showSprintManager: false,
-      mergedAuthorList: this.props.mergedAuthors,
-      otherAuthors: this.props.otherAuthors,
-      sprints: this.props.sprints,
-    };
-  }
+  //set local state when global state changes
+  useEffect(() => {
+    setOtherAuthors(otherAuthorsGlobal);
+  }, [otherAuthorsGlobal]);
 
-  componentWillReceiveProps(nextProps, nextContext) {
-    if (
-      nextProps.committers !== [] &&
-      nextProps.palette !== [] &&
-      this.state.mergedAuthorList.length === 0 &&
-      this.state.otherAuthors.length === 0
-    ) {
-      const mergedAuthorList = this.generateCommittersList(nextProps.committers, nextProps.palette);
-      this.props.onMergedAuthorListChanged(mergedAuthorList);
-      this.setState({ mergedAuthorList: mergedAuthorList });
+  useEffect(() => {
+    if (palette !== undefined) {
+      onSetPalette(palette);
     }
-    this.setState({ sprints: nextProps.sprints });
-  }
+  }, [palette]);
 
-  generateCommittersList(committers, palette) {
+  //if the merged authors in the universal settings are not initialized yet
+  // (either from local storage or because the app already started), do that now.
+  //else just take the values from the global universal settings state
+  useEffect(() => {
+    if (committers && (mergedAuthorListGlobal === undefined || mergedAuthorListGlobal.length === 0)) {
+      const mergedAuthorList = generateCommittersList(committers, palette);
+      onMergedAuthorListChanged(mergedAuthorList);
+      setMergedAuthorListLocal(mergedAuthorList);
+      setOtherAuthors([]);
+    } else {
+      setMergedAuthorListLocal(mergedAuthorListGlobal);
+      setOtherAuthorList(otherAuthorListGlobal);
+    }
+  }, [mergedAuthorListGlobal, otherAuthorListGlobal, committers]);
+
+  const generateCommittersList = (committers, palette) => {
     const committersList = [];
     for (const committer of committers) {
       committersList.push({
@@ -124,153 +119,154 @@ class UniversalConfigComponent extends React.PureComponent {
       });
     }
     return committersList;
-  }
+  };
 
-  render() {
-    let otherCommitters;
-
-    if (this.props.palette && 'others' in this.props.palette) {
-      otherCommitters = this.props.committers.length - (Object.keys(this.props.palette).length - 1);
-    }
-    if (this.props.palette !== undefined && this.props.palette.length < 1) {
-      this.props.onSetPalette(this.props.palette);
-    }
-    function timestampToDateTimeString(timestamp) {
-      const date = new Date(timestamp);
-
-      return (
-        '' +
-        date.getFullYear() +
-        '-' +
-        String(date.getMonth() + 1).padStart(2, '0') +
-        '-' +
-        String(date.getDate()).padStart(2, '0') +
-        'T' +
-        String(date.getHours()).padStart(2, '0') +
-        ':' +
-        String(date.getMinutes()).padStart(2, '0') +
-        ':' +
-        String(date.getSeconds()).padStart(2, '0')
-      );
-    }
-
+  const timestampToDateTimeString = (timestamp) => {
+    const date = new Date(timestamp);
     return (
-      <div className={styles.universalSettings}>
-        {this.state.showAuthorMerge === true ? (
-          <AuthorMerger
-            committers={this.props.committers}
-            palette={this.props.palette}
-            mergedAuthorList={this.state.mergedAuthorList}
-            selectedAuthors={this.props.selectedAuthors}
-            other={this.state.otherAuthors}
-            close={() => {
-              this.setState({ showAuthorMerge: false });
-            }}
-            apply={(mergedAuthorList, otherAuthors, selectedAuthors) => {
-              this.props.onMergedAuthorListChanged(mergedAuthorList);
-              this.props.onOtherAuthorListChanged(otherAuthors);
-              this.props.onAuthorSelectionChanged(selectedAuthors);
-              this.setState({
-                showAuthorMerge: false,
-                mergedAuthorList: mergedAuthorList,
-                otherAuthors: otherAuthors,
-              });
-            }}
-          />
-        ) : (
-          ''
-        )}
-        {this.state.showSprintManager === true ? (
-          <SprintManager
-            sprints={this.state.sprints}
-            close={() => {
-              this.setState({ showSprintManager: false });
-            }}
-            setSprints={(sprints) => {
-              this.props.onSetSprints(sprints);
-            }}
-          />
-        ) : (
-          ''
-        )}
-        <h2>Granularity</h2>
-        <div className="control">
-          <div className="select">
-            <select value={this.props.chartResolution} onChange={(e) => this.props.onClickResolution(e.target.value)}>
-              <option value="years">Year</option>
-              <option value="months">Month</option>
-              <option value="weeks">Week</option>
-              <option value="days">Day</option>
-            </select>
-          </div>
-        </div>
-        <h2>Date Range</h2>
-        <div>
-          <DateRangeFilter
-            from={this.props.firstDisplayDate}
-            to={this.props.lastDisplayDate}
-            onDateChanged={(data) => {
-              this.props.onChangeTimeSpan(data);
-            }}
-          />
-        </div>
-        <div className={styles.marginTop05}>
-          <button
-            className="button"
-            onClick={(e) => {
-              const defaultTimeSpan = {
-                from: timestampToDateTimeString(this.props.firstSignificantTimestamp),
-                to: timestampToDateTimeString(this.props.lastSignificantTimestamp),
-              };
-              this.props.onChangeTimeSpan(defaultTimeSpan);
-            }}>
-            Reset
-          </button>
-        </div>
-        <h2>Authors</h2>
-        <div>
-          <AuthorList
-            palette={this.props.palette}
-            authorList={this.state.mergedAuthorList}
-            otherAuthors={this.state.otherAuthors}
-            selectedAuthors={this.props.selectedAuthors}
-            selectionChanged={(newSelection) => {
-              this.props.onAuthorSelectionChanged(newSelection);
-            }}></AuthorList>
-        </div>
-        <div className={styles.marginTop05}></div>
-        <button
-          className={'button'}
-          onClick={() => {
-            this.setState({ showAuthorMerge: true });
-          }}>
-          Merge duplicate Authors
-        </button>
-        <h2>Commits</h2>
-        <div className="field">
-          <input
-            id="aggregateTimeSwitch"
-            type="checkbox"
-            name="aggregateTimeSwitch"
-            className={'switch is-rounded is-outlined is-info'}
-            defaultChecked={this.props.excludeMergeCommits}
-            onChange={(e) => this.props.onSetExcludeMergeCommits(e.target.checked)}
-          />
-          <label htmlFor="aggregateTimeSwitch" className={styles.switch}>
-            Exclude Merge Commits
-          </label>
-        </div>
-        <h2>Sprints</h2>
-        <button
-          className={'button'}
-          onClick={() => {
-            this.setState({ showSprintManager: true });
-          }}>
-          Manage Sprints
-        </button>
-      </div>
+      '' +
+      date.getFullYear() +
+      '-' +
+      String(date.getMonth() + 1).padStart(2, '0') +
+      '-' +
+      String(date.getDate()).padStart(2, '0') +
+      'T' +
+      String(date.getHours()).padStart(2, '0') +
+      ':' +
+      String(date.getMinutes()).padStart(2, '0') +
+      ':' +
+      String(date.getSeconds()).padStart(2, '0')
     );
-  }
-}
+  };
 
-export default connect(mapStateToProps, mapDispatchToProps)(UniversalConfigComponent);
+  return (
+    <div className={styles.universalSettings}>
+      {showAuthorMerge === true ? (
+        <AuthorMerger
+          committers={committers}
+          palette={palette}
+          mergedAuthorList={mergedAuthorList}
+          selectedAuthors={selectedAuthors}
+          other={otherAuthors}
+          close={() => {
+            setShowAuthorMerge(false);
+          }}
+          apply={(mergedAuthorList, otherAuthors, selectedAuthors) => {
+            onMergedAuthorListChanged(mergedAuthorList);
+            onOtherAuthorListChanged(otherAuthors);
+            onAuthorSelectionChanged(selectedAuthors);
+            setShowAuthorMerge(false);
+            setMergedAuthorListLocal(mergedAuthorList);
+            setOtherAuthors(otherAuthors);
+          }}
+        />
+      ) : (
+        ''
+      )}
+      {this.state.showSprintManager === true ? (
+        <SprintManager
+          sprints={sprints}
+          close={() => {
+            setShowSprintManager(false);
+          }}
+          setSprints={(sprints) => {
+            onSetSprints(sprints);
+          }}
+        />
+      ) : (
+        ''
+      )}
+      {!hideGranularitySettings && (
+        <>
+          <h2>Granularity</h2>
+          <div className="control">
+            <div className="select">
+              <select value={chartResolution} onChange={(e) => onClickResolution(e.target.value)}>
+                <option value="years">Year</option>
+                <option value="months">Month</option>
+                <option value="weeks">Week</option>
+                <option value="days">Day</option>
+              </select>
+            </div>
+          </div>
+        </>
+      )}
+      {!hideDateSettings && (
+        <>
+          <h2>Date Range</h2>
+          <div>
+            <DateRangeFilter
+              from={firstDisplayDate}
+              to={lastDisplayDate}
+              onDateChanged={(data) => {
+                onChangeTimeSpan(data);
+              }}
+            />
+          </div>
+          <div className={styles.marginTop05}>
+            <button
+              className="button"
+              onClick={(e) => {
+                const defaultTimeSpan = {
+                  from: timestampToDateTimeString(firstSignificantTimestamp),
+                  to: timestampToDateTimeString(lastSignificantTimestamp),
+                };
+                onChangeTimeSpan(defaultTimeSpan);
+              }}>
+              Reset
+            </button>
+          </div>
+        </>
+      )}
+      <h2>Authors</h2>
+      <div>
+        <AuthorList
+          palette={palette}
+          authorList={mergedAuthorList}
+          otherAuthors={otherAuthors}
+          selectedAuthors={selectedAuthors}
+          selectionChanged={(newSelection) => {
+            onAuthorSelectionChanged(newSelection);
+          }}></AuthorList>
+      </div>
+      <div className={styles.marginTop05}></div>
+      <button
+        className={'button'}
+        onClick={() => {
+          setShowAuthorMerge(true);
+        }}>
+        Merge duplicate Authors
+      </button>
+      {!hideCommitSettings && (
+        <>
+          <h2>Commits</h2>
+          <div className="field">
+            <input
+              id="aggregateTimeSwitch"
+              type="checkbox"
+              name="aggregateTimeSwitch"
+              className={'switch is-rounded is-outlined is-info'}
+              defaultChecked={excludeMergeCommits}
+              onChange={(e) => onSetExcludeMergeCommits(e.target.checked)}
+            />
+            <label htmlFor="aggregateTimeSwitch" className={styles.switch}>
+              Exclude Merge Commits
+            </label>
+          </div>
+        </>
+      )}
+      {!hideSprintSettings && (
+        <>
+          <h2>Sprints</h2>
+          <button
+            className={'button'}
+            onClick={() => {
+              setShowSprintManager(true);
+            }}>
+            Manage Sprints
+          </button>
+        </>
+      )}
+    </div>
+  );
+};

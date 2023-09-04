@@ -32,11 +32,27 @@ export default class Database {
     }
   }
 
+  static async getCommitDataForSha(sha) {
+    if (await this.checkBackendConnection()) {
+      return ServerDB.getCommitDataForSha(sha);
+    } else {
+      return LocalDB.getCommitDataForSha(sha);
+    }
+  }
+
   static async getCommitDataWithFiles(commitSpan, significantSpan) {
     if (await this.checkBackendConnection()) {
       return ServerDB.getCommitDataWithFiles(commitSpan, significantSpan);
     } else {
       return LocalDB.getCommitDataWithFiles(commitSpan, significantSpan);
+    }
+  }
+
+  static async getCommitDataWithFilesAndOwnership(commitSpan, significantSpan) {
+    if (await this.checkBackendConnection()) {
+      return ServerDB.getCommitDataWithFilesAndOwnership(commitSpan, significantSpan);
+    } else {
+      return LocalDB.getCommitDataWithFilesAndOwnership(commitSpan, significantSpan);
     }
   }
 
@@ -61,6 +77,14 @@ export default class Database {
       return ServerDB.getOwnershipDataForCommit(sha);
     } else {
       return LocalDB.getOwnershipDataForCommit(sha);
+    }
+  }
+
+  static async getOwnershipDataForCommits() {
+    if (await this.checkBackendConnection()) {
+      return ServerDB.getOwnershipDataForCommits();
+    } else {
+      return LocalDB.getOwnershipDataForCommits();
     }
   }
 

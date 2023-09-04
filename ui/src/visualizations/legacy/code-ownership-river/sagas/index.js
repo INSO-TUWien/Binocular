@@ -15,9 +15,9 @@ export const setHighlightedIssue = createAction('SET_HIGHLIGHTED_ISSUE');
 export const setCommitAttribute = createAction('SET_COMMIT_ATTRIBUTE');
 export const openCommit = createAction('OPEN_COMMIT');
 
-export const requestCodeOwnershipData = createAction('REQUEST_CODE_OWNERSHIP_DATA');
-export const receiveCodeOwnershipData = timestampedActionFactory('RECEIVE_CODE_OWNERSHIP_DATA');
-export const receiveCodeOwnershipDataError = createAction('RECEIVE_CODE_OWNERSHIP_DATA_ERROR');
+export const requestCodeOwnershipData = createAction('REQUEST_CODE_OWNERSHIP_RIVER_DATA');
+export const receiveCodeOwnershipData = timestampedActionFactory('RECEIVE_CODE_OWNERSHIP_RIVER_DATA');
+export const receiveCodeOwnershipDataError = createAction('RECEIVE_CODE_OWNERSHIP_RIVER_DATA_ERROR');
 
 export const requestRefresh = createAction('REQUEST_REFRESH');
 const refresh = createAction('REFRESH');

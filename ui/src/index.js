@@ -37,6 +37,7 @@ import issueBreakdown from './visualizations/VisualizationComponents/issueBreakd
 import changes from './visualizations/VisualizationComponents/changes';
 import sprints from './visualizations/VisualizationComponents/sprints';
 import timeSpent from './visualizations/VisualizationComponents/timeSpent';
+import codeOwnership from './visualizations/code-ownership';
 import RootOffline from './components/RootOffline';
 
 const visualizationModules = [
@@ -54,6 +55,7 @@ const visualizationModules = [
   sprints,
   codeExpertise,
   timeSpent,
+  codeOwnership,
   dataExport,
 ];
 

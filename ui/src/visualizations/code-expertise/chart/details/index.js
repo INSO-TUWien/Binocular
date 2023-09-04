@@ -6,7 +6,7 @@ import { setDetails } from '../../sagas';
 import TabCombo from '../../../../components/TabCombo/tabCombo.js';
 import CommitsDetailsList from './CommitDetailsList';
 
-const Details = () => {
+const Details = ({ devData }) => {
   const dispatch = useDispatch();
 
   const onSelectDev = (dev) => {
@@ -29,18 +29,22 @@ const Details = () => {
   const [commitSort, setCommitSort] = useState('date');
 
   //global state
-  const allDevData = useSelector((state) => state.visualizations.codeExpertise.state.data.data.devData);
+  const globalData = useSelector((state) => state.visualizations.codeExpertise.state.data.data);
+  const issueData = globalData ? (globalData.issue ? globalData.issue.issueData : null) : null;
   const selectedDev = useSelector((state) => state.visualizations.codeExpertise.state.config.details);
-  const issueData = useSelector((state) => state.visualizations.codeExpertise.state.data.data.issue);
   const mode = useSelector((state) => state.visualizations.codeExpertise.state.config.mode);
 
   useEffect(() => {
+    if (!devData) {
+      return;
+    }
+
     setDevDetails(null);
 
     if (selectedDev === null) {
       setExpanded(false);
     } else {
-      Object.entries(allDevData).map((item) => {
+      Object.entries(devData).map((item) => {
         const name = item[0];
         const devData = item[1];
 
@@ -54,9 +58,12 @@ const Details = () => {
         }
       });
     }
-  }, [selectedDev, allDevData]);
+  }, [selectedDev]);
 
   useEffect(() => {
+    if (!devData) {
+      return;
+    }
     const devOptions = [];
     //placeholder option
     devOptions.push(
@@ -65,7 +72,7 @@ const Details = () => {
       </option>
     );
 
-    Object.entries(allDevData).map((item, index) => {
+    Object.entries(devData).map((item, index) => {
       const name = item[0];
       const displayName = name.split('<')[0];
       devOptions.push(
@@ -76,7 +83,7 @@ const Details = () => {
     });
 
     setDevOptions(devOptions);
-  }, [allDevData]);
+  }, [devData]);
 
   return (
     <div className={styles.details}>
@@ -121,7 +128,10 @@ const Details = () => {
                 <label className="label">General Info:</label>
 
                 <div className={styles.generalDetails}>
-                  <GeneralDetailsData label="E-Mail" text={selectedDev.substring(selectedDev.indexOf('<') + 1, selectedDev.length - 1)} />
+                  <GeneralDetailsData
+                    label="E-Mail"
+                    text={selectedDev === 'other' ? '/' : selectedDev.substring(selectedDev.indexOf('<') + 1, selectedDev.length - 1)}
+                  />
 
                   <GeneralDetailsData label="Total Lines Added" text={devDetails.additions} />
 
