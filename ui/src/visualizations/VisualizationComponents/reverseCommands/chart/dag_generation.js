@@ -45,10 +45,9 @@ function organizeEdges(commits) {
       });
     }
   });
-  return { edges: edges, crossBranchRelationships: crossBranchParents};
+  return { edges: edges, crossBranchRelationships: crossBranchParents };
 }
 
 function getNumOfParentsInSameBranch(commit) {
   const organizedEdges = organizeEdges().edges;
-
 }
