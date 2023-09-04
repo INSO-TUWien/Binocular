@@ -214,15 +214,21 @@ export default (props) => {
           )
         );
         Database.getCommitsForIssue(d.iid).then((commits) => {
-          document.getElementById('tooltipCommitCount').innerText = 'Linked Commits: ' + commits.length;
+          if (document.getElementById('tooltipCommitCount') !== null) {
+            document.getElementById('tooltipCommitCount').innerText = 'Linked Commits: ' + commits.length;
+          }
           let additions = 0;
           let deletions = 0;
           commits.forEach((c) => {
             additions += c.stats.additions;
             deletions += c.stats.deletions;
           });
-          document.getElementById('tooltipCommitAdditions').innerText = 'Additions: ' + additions;
-          document.getElementById('tooltipCommitDeletions').innerText = 'Deletions: ' + deletions;
+          if (document.getElementById('tooltipCommitAdditions') !== null) {
+            document.getElementById('tooltipCommitAdditions').innerText = 'Additions: ' + additions;
+          }
+          if (document.getElementById('tooltipCommitDeletions') !== null) {
+            document.getElementById('tooltipCommitDeletions').innerText = 'Deletions: ' + deletions;
+          }
         });
       })
       .on('mousemove', function (e, d) {
