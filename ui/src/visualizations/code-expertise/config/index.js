@@ -5,27 +5,37 @@ import { useDispatch, useSelector } from 'react-redux';
 import _ from 'lodash';
 
 import TabCombo from '../../../components/TabCombo.js';
-import FilePicker from './filePicker/index.js';
+import Filepicker from '../../../components/Filepicker/index.js';
 import styles from '../styles.scss';
 import { setActiveIssue, setMode, setCurrentBranch, setActiveFiles, setFilterMergeCommits, setOnlyDisplayOwnership } from '../sagas';
 import { getBranches, getFilenamesForBranch, getIssues } from '../sagas/helper.js';
+import { ownershipDataForMergedAuthors } from '../../../components/Filepicker/utils.js';
 
 export default () => {
   //global state from redux store
   const expertiseState = useSelector((state) => state.visualizations.codeExpertise.state);
   const currentMode = expertiseState.config.mode;
   const currentBranch = expertiseState.config.currentBranch;
+  const activeFiles = expertiseState.config.activeFiles;
   const currentBranchName = currentBranch && currentBranch.branch;
   const activeIssueId = expertiseState.config.activeIssueId;
   const filterMergeCommits = expertiseState.config.filterMergeCommits;
   const onlyDisplayOwnership = expertiseState.config.onlyDisplayOwnership;
-  const offlineMode = useSelector((state) => state.config.offlineMode);
+  const mode = expertiseState.config.mode;
+  const ownershipForFiles = expertiseState.data.data ? expertiseState.data.data.ownershipForFiles : null;
+
+  //global state of universal settings
+  const universalSettings = useSelector((state) => state.universalSettings);
+  const otherAuthors = universalSettings.otherAuthors;
+  const mergedAuthors = universalSettings.mergedAuthors;
+  const authorColors = universalSettings.universalSettingsData.data.palette;
 
   //local state
   const [allBranches, setAllBranches] = useState([]);
   const [branchOptions, setBranchOptions] = useState([]);
   const [issueOptions, setIssueOptions] = useState([]);
   const [files, setFiles] = useState([]);
+  const [fileOwnership, setFileOwnership] = useState(null);
 
   const dispatch = useDispatch();
 
@@ -51,7 +61,7 @@ export default () => {
   };
 
   const onSetOnlyDisplayOwnership = (isChecked) => {
-    if (offlineMode) return;
+    if (mode === 'issues') return;
     dispatch(setOnlyDisplayOwnership(isChecked));
   };
 
@@ -62,6 +72,14 @@ export default () => {
       .then((branches) => branches.sort((a, b) => a.branch.localeCompare(b.branch)))
       .then((branches) => {
         setAllBranches(branches);
+        //select the currently active branch
+        if (!currentBranch) {
+          let activeBranch = branches.filter((b) => b.active === 'true')[0];
+          if (!activeBranch) {
+            activeBranch = branches[0];
+          }
+          dispatch(setCurrentBranch(activeBranch));
+        }
         return branches.map((b) => b.branch);
       })
       .then((branches) => [...new Set(branches)])
@@ -108,9 +126,19 @@ export default () => {
   useEffect(() => {
     if (currentBranch) {
       resetActiveFiles();
-      getFilenamesForBranch(currentBranch.branch).then((files) => setFiles(files));
+      getFilenamesForBranch(currentBranch.branch).then((files) => {
+        setFiles(files);
+        //preselect all files
+        dispatch(setActiveFiles(files));
+      });
     }
   }, [currentBranch]);
+
+  //the filepicker should indicate the ownership of the files
+  //it needs to consider the colors and merged authors from the universal settings
+  useEffect(() => {
+    setFileOwnership(ownershipDataForMergedAuthors(mergedAuthors, otherAuthors, authorColors, ownershipForFiles, files));
+  }, [mergedAuthors, otherAuthors, authorColors, ownershipForFiles, files]);
 
   return (
     <div className={styles.configContainer}>
@@ -146,7 +174,7 @@ export default () => {
           </div>
         </div>
 
-        {!offlineMode && (
+        {mode !== 'issues' && (
           <div className="field">
             <div className="control">
               <label className="label">Display Settings:</label>
@@ -191,7 +219,13 @@ export default () => {
             <div className="control">
               <label className="label">Choose Files and Modules to visualize:</label>
 
-              <FilePicker fileList={files} />
+              <Filepicker
+                fileList={files}
+                globalActiveFiles={activeFiles}
+                setActiveFiles={(files) => dispatch(setActiveFiles(files))}
+                fileOwnership={fileOwnership}
+                authorColors={authorColors}
+              />
             </div>
           </div>
         )}

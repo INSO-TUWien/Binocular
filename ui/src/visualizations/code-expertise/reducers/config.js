@@ -23,7 +23,7 @@ export default handleActions(
     currentBranch: null,
     activeIssueId: null,
     activeFiles: [],
-    mode: 'issues',
+    mode: 'modules',
     details: null,
     filterMergeCommits: true,
     onlyDisplayOwnership: false,

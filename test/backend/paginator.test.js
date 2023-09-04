@@ -7,7 +7,7 @@ const sinonChai = require('sinon-chai');
 
 chai.use(sinonChai);
 
-const Paginator = require('../lib/paginator.js');
+const Paginator = require('../../lib/paginator.js');
 
 const expect = chai.expect;
 
@@ -169,7 +169,9 @@ function createArrayBasedPaginator(arraySize) {
 
   const getPage = (page, perPage) => {
     const start = (page - 1) * perPage;
-    return data.slice(start, start + perPage);
+    return new Promise(function (resolve) {
+      resolve(data.slice(start, start + perPage));
+    });
   };
 
   const getItems = (page) => page;

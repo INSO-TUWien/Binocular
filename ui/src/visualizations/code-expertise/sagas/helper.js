@@ -1,39 +1,75 @@
 'use strict';
 
-import { endpointUrl } from '../../../utils';
 import Database from '../../../database/database';
 import _ from 'lodash';
 
 const minDate = new Date(0);
 const maxDate = new Date();
 
-//get the blame data for a specific commit and for specific files
-export function getBlameModules(sha, files) {
-  return fetch(endpointUrl('blame/modules'), {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      sha: sha,
-      files: files,
-    }),
-  }).then((resp) => resp.json());
+export async function modulesModeData(currentBranch) {
+  const allCommits = await getAllCommits();
+  const previousFilenames = await getPreviousFilenames(currentBranch);
+  const buildData = await getAllBuildData();
+  return [allCommits, buildData, previousFilenames];
 }
 
-//get the blame data for a specific commit and for specific files
-export function getBlameIssues(sha, files, hashes) {
-  return fetch(endpointUrl('blame/issues'), {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      sha: sha,
-      files: files,
-      hashes: hashes,
-    }),
-  }).then((resp) => resp.json());
+export async function issuesModeData(currentBranch, issueId) {
+  const allCommits = await getAllCommits();
+  const previousFilenames = await getPreviousFilenames(currentBranch);
+  const issueData = await getIssueData(issueId);
+  const relevantCommitHashes = await getCommitHashesForIssue(issueId);
+  const buildData = await getAllBuildData();
+  return [allCommits, issueData, relevantCommitHashes, buildData, previousFilenames];
+}
+
+//this steps through all commits (from most recent one backwards)
+// and collects ownership data until it has the most recent data for every file.
+export function getBlameModules(commit, files, allCommits) {
+  //this contains the timeline of all commits from the initial commit until the most recent one
+  let commitsLeft = commit.history.split(',').reverse();
+  //filesLeft contains all files we want to get the ownership data from.
+  let filesLeft = files;
+  let result = {};
+
+  while (filesLeft.length !== 0 && commitsLeft.length !== 0) {
+    //remove the first (latest) commit from the commitsLeft array
+    const currentSha = commitsLeft.pop();
+    let ownershipData = allCommits.filter((c) => c.sha === currentSha)[0];
+    if (!ownershipData) {
+      console.log('Error in code expertise getBlameModules: commit not found');
+    }
+    ownershipData = ownershipData.files.data.map((o) => {
+      return {
+        path: o.file.path,
+        ownership: o.ownership,
+      };
+    });
+
+    //we are only interested in ownership data related to filesLeft
+    ownershipData = ownershipData.filter((o) => filesLeft.includes(o.path));
+
+    //if this commit touches files we are interested in, extract the ownership data
+    if (ownershipData.length !== 0) {
+      //for each relevant file
+      for (const fileOwnershipElement of ownershipData) {
+        //for each ownership element of the current file
+        for (const ownershipElement of fileOwnershipElement.ownership) {
+          if (!result[ownershipElement.stakeholder]) {
+            result[ownershipElement.stakeholder] = ownershipElement.ownedLines;
+          } else {
+            result[ownershipElement.stakeholder] += ownershipElement.ownedLines;
+          }
+        }
+      }
+      //we now have the most recent ownership data of this file. This means we dont have to extract ownership data for this file anymore
+      filesLeft = _.without(filesLeft, ...ownershipData.map((o) => o.path));
+    }
+  }
+
+  if (filesLeft.length !== 0) {
+    console.log('Error in Code Expertise Visualization: no ownership data found for the following file(s):', filesLeft);
+  }
+  return result;
 }
 
 export function getIssues() {
@@ -44,39 +80,52 @@ export function getCommitHashesForIssue(iid) {
   return Database.getCommitsForIssue(iid).then((commits) => commits.map((c) => c.sha));
 }
 
-export async function getPreviousFilenames(filenames, branch) {
+export async function getPreviousFilenames(branch) {
+  if (branch.tracksFileRenames) {
+    return await Database.getPreviousFilenamesForFilesOnBranch(branch.branch);
+  }
+  return [];
+}
+
+export function extractRelevantPreviousFilenames(filenames, allPreviousFilenames) {
   //if this branch tracks file renames, we first have to find out how the relevant files were named in the past
   let filePathsWithPreviousNames = [];
   const previousFilenameObjects = [];
-  if (branch.tracksFileRenames) {
-    filePathsWithPreviousNames = await Database.getPreviousFilenamesForFilesOnBranch(branch.branch);
-    //we only care about files that were renamed
-    filePathsWithPreviousNames = filePathsWithPreviousNames.filter((pfn) => pfn.previousFileNames.length !== 0);
-    //we only care about the previous names of selected files
-    filePathsWithPreviousNames = filePathsWithPreviousNames.filter((pfn) => filenames.includes(pfn.path));
-    //add these named to the filenames array
-    for (const pfn of filePathsWithPreviousNames) {
-      for (const oldFile of pfn.previousFileNames) {
-        previousFilenameObjects.push(oldFile);
-      }
+  //we only care about files that were renamed
+  filePathsWithPreviousNames = allPreviousFilenames.filter((pfn) => pfn.previousFileNames.length !== 0);
+  //we only care about the previous names of selected files
+  filePathsWithPreviousNames = filePathsWithPreviousNames.filter((pfn) => filenames.includes(pfn.path));
+  //add these named to the filenames array
+  for (const pfn of filePathsWithPreviousNames) {
+    for (const oldFile of pfn.previousFileNames) {
+      previousFilenameObjects.push(oldFile);
     }
   }
   return previousFilenameObjects;
 }
 
-export async function getCommitHashesForFiles(filenames, branch) {
-  const previousFilenameObjects = await getPreviousFilenames(filenames, branch);
-
+export function getCommitHashesForFiles(allCommits, filenames, previousFilenameObjects) {
   //fetch commits for selected files
-  let commits = await Database.getCommitsForFiles(filenames);
+  let commits = allCommits.filter((c) => {
+    for (const file of c.files.data) {
+      if (filenames.includes(file.file.path)) {
+        return true;
+      }
+    }
+  });
 
   //fetch commits for old filenames
   const previousFilenamesPaths = [...new Set(previousFilenameObjects.map((fno) => fno.oldFilePath))];
 
-  //TODO this does not return in offline mode
   let prevFilesCommits = [];
   if (previousFilenamesPaths.length > 0) {
-    prevFilesCommits = await Database.getCommitsWithFilesForFiles(previousFilenamesPaths);
+    prevFilesCommits = allCommits.filter((c) => {
+      for (const file of c.files.data) {
+        if (previousFilenamesPaths.includes(file.file.path)) {
+          return true;
+        }
+      }
+    });
   }
 
   //for each of the previous filenames
@@ -108,12 +157,13 @@ export async function getCommitHashesForFiles(filenames, branch) {
     commits = _.concat(commits, commitsForOldFilename);
   }
   //get sha hashes
-  return _.uniq(commits.map((c) => c.sha));
+  const result = _.uniq(commits.map((c) => c.sha));
+  return result;
 }
 
 export function getIssueData(iid) {
   //TODO use separate function that only queries for specific issue
-  return getIssues().then((resp) => resp.filter((i) => i.iid === parseInt(iid))[0]);
+  return getIssues().then((resp) => resp.filter((i) => parseInt(i.iid) === parseInt(iid))[0]);
 }
 
 export function getAllBuildData() {
@@ -146,7 +196,7 @@ export function addBuildData(relevantCommits, builds) {
 }
 
 export function getAllCommits() {
-  return Database.getCommitDataWithFiles([minDate, maxDate], [minDate, maxDate]);
+  return Database.getCommitDataWithFilesAndOwnership([minDate, maxDate], [minDate, maxDate]);
 }
 
 //recursively get all parent commits of the selected branch.
@@ -155,4 +205,21 @@ export function getCommitsForBranch(branch, allCommits) {
   const latestCommit = allCommits.filter((commit) => commit.sha === latestCommitSha)[0];
   const history = latestCommit.history.split(',');
   return allCommits.filter((c) => _.includes(history, c.sha));
+}
+
+export function commitsToOwnership(commits) {
+  return commits
+    .map((c) => {
+      return {
+        sha: c.sha,
+        date: c.date,
+        files: c.files.data.map((f) => {
+          return {
+            path: f.file.path,
+            ownership: f.ownership,
+          };
+        }),
+      };
+    })
+    .sort((a, b) => new Date(a.date) - new Date(b.date));
 }

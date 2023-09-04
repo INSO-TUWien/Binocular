@@ -20,6 +20,10 @@ export default class ServerDB {
     return Commits.getCommitData(commitSpan, significantSpan);
   }
 
+  static getCommitDataForSha(sha) {
+    return Commits.getCommitDataForSha(sha);
+  }
+
   static getBuildData(commitSpan, significantSpan) {
     return Builds.getBuildData(commitSpan, significantSpan);
   }
@@ -40,8 +44,24 @@ export default class ServerDB {
     return Commits.getCommitDataWithFiles(commitSpan, significantSpan);
   }
 
-  static getCommitDataOwnershipRiver(commitSpan, significantSpan, granularity, interval) {
-    return Commits.getCommitDataOwnershipRiver(commitSpan, significantSpan, granularity, interval);
+  static getCommitDataWithFilesAndOwnership(commitSpan, significantSpan) {
+    return Commits.getCommitDataWithFilesAndOwnership(commitSpan, significantSpan);
+  }
+
+  static getOwnershipDataForCommit(sha) {
+    return Commits.getOwnershipDataForCommit(sha);
+  }
+
+  static getOwnershipDataForCommits() {
+    return Commits.getOwnershipDataForCommits();
+  }
+
+  static getOwnershipDataForFiles(files) {
+    return Files.getOwnershipDataForFiles(files);
+  }
+
+  static getCommitDataOwnershipRiver(commitSpan, significantSpan, granularity, interval, excludeMergeCommits) {
+    return Commits.getCommitDataOwnershipRiver(commitSpan, significantSpan, granularity, interval, excludeMergeCommits);
   }
 
   static getBuildDataOwnershipRiver(commitSpan, significantSpan, granularity, interval) {

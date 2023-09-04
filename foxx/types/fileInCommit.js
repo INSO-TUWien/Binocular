@@ -2,6 +2,15 @@
 
 const gql = require('graphql-sync');
 
+const FileAction = new gql.GraphQLEnumType({
+  name: 'FileAction',
+  values: {
+    added: {},
+    deleted: {},
+    modified: {},
+  },
+});
+
 module.exports = new gql.GraphQLObjectType({
   name: 'FileInCommit',
   description: 'A file touched by a single commit',
@@ -25,6 +34,13 @@ module.exports = new gql.GraphQLObjectType({
       hunks: {
         type: new gql.GraphQLList(require('./hunk.js')),
         description: 'The hunks that affect this file',
+      },
+      action: {
+        type: FileAction,
+        description: 'How the file is affected (added, deleted, modified)',
+      },
+      ownership: {
+        type: new gql.GraphQLList(require('./ownership.js')),
       },
     };
   },

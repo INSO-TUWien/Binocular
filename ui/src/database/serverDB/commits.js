@@ -45,6 +45,29 @@ export default class Commits {
     });
   }
 
+  static getCommitDataForSha(sha) {
+    return graphQl
+      .query(
+        `query {
+          commit(sha: "${sha}") {
+            sha
+            branch
+            history
+            message
+            signature
+            webUrl
+            date
+            parents
+            stats {
+              additions
+              deletions
+            }
+          }
+        }`
+      )
+      .then((resp) => resp.commit);
+  }
+
   static getCommitDataWithFiles(commitSpan, significantSpan) {
     const commitList = [];
     const getCommitsPage = (since, until) => (page, perPage) => {
@@ -92,6 +115,59 @@ export default class Commits {
     });
   }
 
+  static getCommitDataWithFilesAndOwnership(commitSpan, significantSpan) {
+    const commitList = [];
+    const getCommitsPage = (since, until) => (page, perPage) => {
+      return graphQl
+        .query(
+          `query($page: Int, $perPage: Int, $since: Timestamp, $until: Timestamp) {
+            commits(page: $page, perPage: $perPage, since: $since, until: $until) {
+             count,
+             page,
+             perPage,
+             data {
+               sha,
+               branch,
+               history,
+               message,
+               signature,
+               webUrl,
+               date,
+               parents,
+               stats {
+                 additions,
+                 deletions
+               }
+               files{
+                 data {
+                   file{
+                     path
+                   }
+                   ownership {
+                    stakeholder
+                    ownedLines
+                  }
+                   stats {additions,deletions},
+                   hunks {newLines}
+                 }
+               }
+             }
+            }
+          }`,
+          { page, perPage, since, until }
+        )
+        .then((resp) => resp.commits);
+    };
+
+    return traversePages(getCommitsPage(significantSpan[0], significantSpan[1]), (commit) => {
+      commitList.push(commit);
+    }).then(function () {
+      return commitList;
+    });
+  }
+
+  //TODO: first query files and search for commit connections
+  //TODO move this to ./files.js
   static getCommitsForFiles(filenames, omitFiles) {
     return graphQl
       .query(
@@ -143,7 +219,83 @@ export default class Commits {
       });
   }
 
-  static getCommitDataOwnershipRiver(commitSpan, significantSpan, granularity, interval) {
+  static getOwnershipDataForCommit(sha) {
+    return graphQl
+      .query(
+        `
+        query {
+          commit(sha: "${sha}") {
+            files {
+              data {
+                file {
+                  path
+                }
+                ownership {
+                  stakeholder
+                  ownedLines
+                }
+              }
+            }
+          }
+        }
+      `
+      )
+      .then((res) => res.commit.files.data)
+      .then((ownershipData) =>
+        ownershipData.map((o) => {
+          return {
+            path: o.file.path,
+            ownership: o.ownership,
+          };
+        })
+      );
+  }
+
+  static getOwnershipDataForCommits() {
+    return graphQl
+      .query(
+        `
+        query {
+          commits {
+            data {
+              sha
+              date
+              files {
+                data {
+                  file {
+                    path
+                  }
+                  action
+                  ownership {
+                    stakeholder
+                    ownedLines
+                  }
+                }
+              }
+            }
+          }
+        }
+      `
+      )
+      .then((res) => res.commits.data)
+      .then((commits) =>
+        commits.map((c) => {
+          return {
+            sha: c.sha,
+            date: c.date,
+            files: c.files.data.map((fileData) => {
+              return {
+                path: fileData.file.path,
+                action: fileData.action,
+                ownership: fileData.ownership,
+              };
+            }),
+          };
+        })
+      );
+  }
+
+  static getCommitDataOwnershipRiver(commitSpan, significantSpan, granularity, interval, excludeMergeCommits) {
     const statsByAuthor = {};
 
     const totals = {
@@ -175,6 +327,7 @@ export default class Commits {
                  sha
                  date
                  messageHeader
+                 message
                  signature
                  stats {
                    additions
@@ -238,6 +391,10 @@ export default class Commits {
     }
 
     return traversePages(getCommitsPage(significantSpan[0], significantSpan[1]), (commit) => {
+      if (excludeMergeCommits && commit.message.includes('Merge')) {
+        return;
+      }
+
       const dt = Date.parse(commit.date);
       let stats = statsByAuthor[commit.signature];
       if (!stats) {
@@ -344,14 +501,16 @@ export default class Commits {
   }
 
   static getCodeHotspotsChangeData(file) {
-    return graphQl.query(
-      `
+    return graphQl
+      .query(
+        `
         query($file: String!) {
           file(path: $file){
               path
               maxLength
               commits{
                   data{
+                    commit{
                       message
                       sha
                       signature
@@ -375,12 +534,17 @@ export default class Commits {
                               oldLines
                           }
                       }
+                    }
                   }
               }
           }
       }
       `,
-      { file: file }
-    );
+        { file: file }
+      )
+      .then((result) => {
+        result.file.commits.data = result.file.commits.data.map((d) => d.commit);
+        return result;
+      });
   }
 }

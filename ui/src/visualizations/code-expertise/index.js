@@ -14,4 +14,6 @@ export default {
   ChartComponent,
   ConfigComponent,
   HelpComponent,
+  usesUniversalSettings: true,
+  universalSettingsConfig: { hideGranularitySettings: true, hideDateSettings: true, hideCommitSettings: true },
 };

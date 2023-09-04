@@ -69,6 +69,8 @@ export default class Files {
       );
   }
 
+  //TODO move this to ./commits.js
+  //TODO: filter directly in the query
   static getFilesForCommits(hashes) {
     return graphQl
       .query(
@@ -106,5 +108,40 @@ export default class Files {
         }
         return result;
       });
+  }
+
+  static getOwnershipDataForFiles(files) {
+    files = files.map((f) => `"${f}"`);
+    return graphQl
+      .query(
+        `query {
+          files(paths: [${files}]) {
+            data {
+              path
+              commits {
+                data {
+                  commit {
+                    sha
+                    date
+                  }
+                  ownership {
+                    stakeholder
+                    ownedLines
+                  }
+                }
+              }
+            }
+          }
+       }`,
+        {}
+      )
+      .then((resp) =>
+        resp.files.data.map((d) => {
+          return {
+            path: d.path,
+            ownership: d.commits.data,
+          };
+        })
+      );
   }
 }

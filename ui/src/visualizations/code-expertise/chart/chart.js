@@ -18,14 +18,15 @@ import HatchPattern from '../../../components/svg/patterns/hatch.js';
 import Segment from './Segment.js';
 import FullScreenMessage from './full-screen-message.js';
 
-const Chart = () => {
+const Chart = ({ devData }) => {
   const chartSizeFactor = 0.85;
 
   //global state from redux store
-  const data = useSelector((state) => state.visualizations.codeExpertise.state.data.data);
   const config = useSelector((state) => state.visualizations.codeExpertise.state.config);
-  const isFetching = useSelector((state) => state.visualizations.codeExpertise.state.data.isFetching);
-  const offlineMode = useSelector((state) => state.config.offlineMode);
+  const mode = useSelector((state) => state.visualizations.codeExpertise.state.config.mode);
+
+  const universalSettings = useSelector((state) => state.universalSettings);
+  const authorColors = universalSettings.universalSettingsData.data.palette;
 
   //local state
   const [transform, setTransform] = useState(d3.zoomIdentity);
@@ -62,7 +63,7 @@ const Chart = () => {
   useEffect(() => {
     //total number of added lines by all stakeholders of the currently selected issue
     const additionsTotal = _.reduce(
-      data.devData,
+      devData,
       (sum, adds) => {
         return sum + adds.additions;
       },
@@ -70,7 +71,7 @@ const Chart = () => {
     );
 
     const linesOwnedTotal = _.reduce(
-      data.devData,
+      devData,
       (sum, data) => {
         if (data.linesOwned) {
           return sum + data.linesOwned;
@@ -83,7 +84,7 @@ const Chart = () => {
 
     //get the maximum number of commits over all currently relevant devs
     let maxCommitsPerDev = 0;
-    Object.entries(data.devData).map((item, index) => {
+    Object.entries(devData).map((item, index) => {
       const data = item[1];
       const commits = data.commits.length;
       if (commits > maxCommitsPerDev) {
@@ -91,17 +92,17 @@ const Chart = () => {
       }
     });
 
-    //get colors
-    const devColors = getChartColors('spectral', _.range(0, Object.entries(data.devData).length));
-
     const segments = [];
     let totalPercent = 0;
 
-    Object.entries(data.devData).map((item, index) => {
+    Object.entries(devData).map((item, index) => {
       const name = item[0];
       const devData = item[1];
       const devAdditions = devData.additions;
       const devLinesOwned = devData.linesOwned;
+
+      //we dont care about stakeholders that for example only have deletions for selected files
+      if (devAdditions === 0) return;
 
       //at which point in a circle should the segment start
       const startPercent = totalPercent;
@@ -128,30 +129,14 @@ const Chart = () => {
           endPercent={endPercent}
           devName={name}
           devData={devData}
-          devColor={devColors[index]}
+          devColor={authorColors[name]}
           maxCommitsPerDev={maxCommitsPerDev}
         />
       );
     });
 
     setSegments(segments);
-  }, [data, radius, config.onlyDisplayOwnership]);
-
-  if (config.currentBranch === null) {
-    return <FullScreenMessage message={'Please select a Branch!'} />;
-  }
-
-  if (config.mode === 'issues' && config.activeIssueId === null) {
-    return <FullScreenMessage message={'Please select an Issue to be visualized!'} />;
-  }
-
-  if (config.mode === 'modules' && (config.activeFiles === null || config.activeFiles.length === 0)) {
-    return <FullScreenMessage message={'Please select a File to be visualized!'} />;
-  }
-
-  if (isFetching) {
-    return <FullScreenMessage message={'Loading...'} />;
-  }
+  }, [devData, radius, config.onlyDisplayOwnership, universalSettings]);
 
   //if there are no commits to be shown
   //(for example if a branch/issue combination is selected where no commits on the branch are tagged with the respective issueId)
@@ -173,8 +158,8 @@ const Chart = () => {
           <LegendCompact text="Good Commits rel. to all Commits of Dev" color={legendGoodCommitsColor} />
           <LegendCompact text="Bad Commits rel. to all Commits of Dev" color={legendBadCommitsColor} />
           <LegendCompact text="# of Commits rel. to others" color={`url(#${legendDotsId})`} />
-          {offlineMode && <LegendCompact text="Added lines of code" color={legendColor} />}
-          {!offlineMode && (
+          {mode === 'issues' && <LegendCompact text="Added lines of code" color={`url(#${legendHatchId})`} />}
+          {!(mode === 'issues') && (
             <>
               <LegendCompact text="Added lines of code" color={`url(#${legendHatchId})`} color2={legendColor} />
               <LegendCompact text="Added lines of code (still in the Project)" color={legendColor} />
