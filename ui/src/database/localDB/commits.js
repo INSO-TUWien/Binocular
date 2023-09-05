@@ -5,7 +5,7 @@ import PouchDBFind from 'pouchdb-find';
 import PouchDBAdapterMemory from 'pouchdb-adapter-memory';
 import _ from 'lodash';
 import moment from 'moment/moment';
-import { bulkGet, findAll, findAllCommits, findCommit, findID, findFile, findFileCommitConnections, findFileCommitStakeholderConnections } from './utils';
+import { bulkGet, findAll, findAllCommits, findCommit, findID, findFile, findFileCommitConnections, findFileCommitStakeholderConnections, findCommitBuildConnections } from './utils';
 PouchDB.plugin(PouchDBFind);
 PouchDB.plugin(PouchDBAdapterMemory);
 
@@ -369,7 +369,11 @@ export default class Commits {
     });
   }
 
-  static getCommitDateHistogram(db, relations, granularity, dateField, since, until) {
+  static async getCommitDateHistogram(db, relations, granularity, dateField, since, until) {
+
+    //all commits-builds relations
+    const commitBuildConnections = (await findCommitBuildConnections(relations)).docs;
+
     function mapCommitToHistogram(histogram, commit, granularity) {
       const commitDate = new Date(commit.date);
       return histogram.map((commit) => {
@@ -401,9 +405,19 @@ export default class Commits {
 
     function addCommitsToCollection(histogram, goodCommitsHistogram, badCommitsHistogram, commits, builds, granularity) {
       for (const commit of commits) {
-        const commitBuild = builds.find((b) => b.sha === commit.sha);
+        let success = false;
+        const relevantConnections = commitBuildConnections.filter((cb) => cb.to === commit._id);
+
+        for (const conn of relevantConnections) {
+          const commitBuild = builds.find((b) => b._id === conn.from);
+          if (commitBuild !== undefined && commitBuild.status === 'success') {
+            success = true;
+            break;
+          }
+        }
+        
         histogram = mapCommitToHistogram(histogram, commit, granularity);
-        if (commitBuild !== undefined && commitBuild.status === 'success') {
+        if (success) {
           goodCommitsHistogram = mapCommitToHistogram(goodCommitsHistogram, commit, granularity);
         } else {
           badCommitsHistogram = mapCommitToHistogram(badCommitsHistogram, commit, granularity);
