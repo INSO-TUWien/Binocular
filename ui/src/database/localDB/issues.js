@@ -5,7 +5,17 @@ import PouchDBFind from 'pouchdb-find';
 import PouchDBAdapterMemory from 'pouchdb-adapter-memory';
 import moment from 'moment/moment';
 import _ from 'lodash';
-import { findAll, findAllCommits, findIssue, findBuild, findFile, findID, findFileConnections, findCommitFileConnections, findIssueCommitConnections } from './utils';
+import {
+  findAll,
+  findAllCommits,
+  findIssue,
+  findBuild,
+  findFile,
+  findID,
+  findFileConnections,
+  findCommitFileConnections,
+  findIssueCommitConnections,
+} from './utils';
 PouchDB.plugin(PouchDBFind);
 PouchDB.plugin(PouchDBAdapterMemory);
 

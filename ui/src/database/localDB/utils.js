@@ -1,10 +1,12 @@
-"use strict";
+'use strict';
 
-import PouchDB from "pouchdb-browser";
-import PouchDBFind from "pouchdb-find";
-import PouchDBAdapterMemory from "pouchdb-adapter-memory";
+import PouchDB from 'pouchdb-browser';
+import PouchDBFind from 'pouchdb-find';
+import PouchDBAdapterMemory from 'pouchdb-adapter-memory';
+import { addHistoryToAllCommits } from '../utils';
 PouchDB.plugin(PouchDBFind);
 PouchDB.plugin(PouchDBAdapterMemory);
+const _ = require('lodash');
 
 // ###################### GENERAL SEARCH FUNCTIONS ######################
 
@@ -34,55 +36,49 @@ export function bulkGet(database, ids) {
 
 export async function findAllCommits(database, relations) {
   let commits = await database.find({
-    selector: { _id: { $regex: new RegExp("^commits/.*") } },
+    selector: { _id: { $regex: new RegExp('^commits/.*') } },
   });
-  const relevantRelations = (await findCommitStakeholderConnections(relations))
-    .docs;
+  const commitStakeholderConnections = (await findCommitStakeholderConnections(relations)).docs;
+  const commitCommitConnections = (await findCommitCommitConnections(relations)).docs;
+
   commits.docs = await Promise.all(
-    commits.docs.map((c) => preprocessCommit(c, database, relevantRelations))
+    commits.docs.map((c) => preprocessCommit(c, database, commitStakeholderConnections, commitCommitConnections))
   );
+  addHistoryToAllCommits(commits.docs);
+
   return commits;
 }
 
 export async function findCommit(database, relations, sha) {
   let commit = await database.find({
-    selector: { _id: { $regex: new RegExp("^commits/.*") }, sha: { $eq: sha } },
+    selector: { _id: { $regex: new RegExp('^commits/.*') }, sha: { $eq: sha } },
   });
+
   if (commit.docs && commit.docs[0]) {
-    const commitStakeholderConnections = (
-      await findCommitStakeholderConnections(relations)
-    ).docs;
-    commit.docs[0] = await preprocessCommit(
-      commit.docs[0],
-      database,
-      commitStakeholderConnections
-    );
+    const commitStakeholderConnections = (await findCommitStakeholderConnections(relations)).docs;
+    const commitCommitConnections = (await findCommitCommitConnections(relations)).docs;
+    commit.docs[0] = await preprocessCommit(commit.docs[0], database, commitStakeholderConnections, commitCommitConnections);
   }
   return commit;
 }
 
-//add stakeholder to commit
-export async function preprocessCommit(
-  commit,
-  database,
-  commitStakeholderRelations
-) {
-  const relevantRelation = commitStakeholderRelations.filter(
-    (r) => r.to === commit._id
-  )[0];
-  if (!relevantRelation) {
-    console.log(
-      "Error in localDB: commit: no stakeholder found for commit " + commit.sha
-    );
+//add stakeholder, parents to commit
+async function preprocessCommit(commit, database, commitStakeholder, commitCommit) {
+  //add parents
+  const parents = commitCommit.filter((r) => r.to === commit._id).map((r) => r.from.split('/')[1]);
+  commit.parents = parents;
+
+  //add stakeholder
+  const commitStakeholderRelation = commitStakeholder.filter((r) => r.to === commit._id)[0];
+
+  if (!commitStakeholderRelation) {
+    console.log('Error in localDB: commit: no stakeholder found for commit ' + commit.sha);
     return commit;
   }
 
-  const author = (await findID(database, relevantRelation.from)).docs[0];
+  const author = (await findID(database, commitStakeholderRelation.from)).docs[0];
   if (!author) {
-    console.log(
-      "Error in localDB: commit: no stakeholder found with ID " +
-        relevantRelation.from
-    );
+    console.log('Error in localDB: commit: no stakeholder found with ID ' + commitStakeholderRelation.from);
     return commit;
   }
 
@@ -91,13 +87,13 @@ export async function preprocessCommit(
 
 export function findIssue(database, iid) {
   return database.find({
-    selector: { _id: { $regex: new RegExp("^issues/.*") }, iid: { $eq: iid } },
+    selector: { _id: { $regex: new RegExp('^issues/.*') }, iid: { $eq: iid } },
   });
 }
 
 export function findFile(database, file) {
   return database.find({
-    selector: { _id: { $regex: new RegExp("^files/.*") }, path: { $eq: file } },
+    selector: { _id: { $regex: new RegExp('^files/.*') }, path: { $eq: file } },
   });
 }
 
@@ -105,26 +101,32 @@ export function findFile(database, file) {
 
 export function findFileCommitConnections(relations) {
   return relations.find({
-    selector: { _id: { $regex: new RegExp("^commits-files/.*") } },
+    selector: { _id: { $regex: new RegExp('^commits-files/.*') } },
   });
 }
 
 export function findCommitStakeholderConnections(relations) {
   return relations.find({
-    selector: { _id: { $regex: new RegExp("^commits-stakeholders/.*") } },
+    selector: { _id: { $regex: new RegExp('^commits-stakeholders/.*') } },
+  });
+}
+
+export function findCommitCommitConnections(relations) {
+  return relations.find({
+    selector: { _id: { $regex: new RegExp('^commits-commits/.*') } },
   });
 }
 
 export function findFileCommitStakeholderConnections(relations) {
   return relations.find({
-    selector: { _id: { $regex: new RegExp("^commits-files-stakeholders/.*") } },
+    selector: { _id: { $regex: new RegExp('^commits-files-stakeholders/.*') } },
   });
 }
 
 export function findBranch(database, branch) {
   return database.find({
     selector: {
-      _id: { $regex: new RegExp("^branches/.*") },
+      _id: { $regex: new RegExp('^branches/.*') },
       branch: { $eq: branch },
     },
   });
@@ -132,54 +134,54 @@ export function findBranch(database, branch) {
 
 export function findBranchFileConnections(relations) {
   return relations.find({
-    selector: { _id: { $regex: new RegExp("^branches-files/.*") } },
+    selector: { _id: { $regex: new RegExp('^branches-files/.*') } },
   });
 }
 
 // a connection between a branch-file edge and a file
 export function findBranchFileFileConnections(relations) {
   return relations.find({
-    selector: { _id: { $regex: new RegExp("^branches-files-files/.*") } },
+    selector: { _id: { $regex: new RegExp('^branches-files-files/.*') } },
   });
 }
 
 export function findBuild(database, sha) {
   return database.find({
-    selector: { _id: { $regex: new RegExp("^builds/.*") }, sha: { $eq: sha } },
+    selector: { _id: { $regex: new RegExp('^builds/.*') }, sha: { $eq: sha } },
   });
 }
 
 export function findFileConnections(relations, sha) {
   return relations.find({
     selector: {
-      _id: { $regex: new RegExp("^commits-files/.*") },
-      to: { $eq: "commits/" + sha },
+      _id: { $regex: new RegExp('^commits-files/.*') },
+      to: { $eq: 'commits/' + sha },
     },
   });
 }
 
 export function findCommitFileConnections(relations) {
   return relations.find({
-    selector: { _id: { $regex: new RegExp("^commits-files/.*") } },
+    selector: { _id: { $regex: new RegExp('^commits-files/.*') } },
   });
 }
 
 export function findIssueCommitConnections(relations) {
   return relations.find({
-    selector: { _id: { $regex: new RegExp("^issues-commits/.*") } },
+    selector: { _id: { $regex: new RegExp('^issues-commits/.*') } },
   });
 }
 
 export function findCommitBuildConnections(relations) {
   return relations.find({
-    selector: { _id: { $regex: new RegExp("^commits-builds/.*") } },
+    selector: { _id: { $regex: new RegExp('^commits-builds/.*') } },
   });
 }
 
 export function findSpecificFileConnections(relations, commitID, fileId) {
   return relations.find({
     selector: {
-      _id: { $regex: new RegExp("^commits-files/.*") },
+      _id: { $regex: new RegExp('^commits-files/.*') },
       to: { $eq: commitID },
       from: { $eq: fileId },
     },

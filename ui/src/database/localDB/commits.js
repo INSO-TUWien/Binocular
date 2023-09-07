@@ -5,7 +5,15 @@ import PouchDBFind from 'pouchdb-find';
 import PouchDBAdapterMemory from 'pouchdb-adapter-memory';
 import _ from 'lodash';
 import moment from 'moment/moment';
-import { bulkGet, findAll, findAllCommits, findCommit, findID, findFile, findFileCommitConnections, findFileCommitStakeholderConnections, findCommitBuildConnections } from './utils';
+import {
+  findAll,
+  findAllCommits,
+  findCommit,
+  findFile,
+  findFileCommitConnections,
+  findFileCommitStakeholderConnections,
+  findCommitBuildConnections,
+} from './utils';
 PouchDB.plugin(PouchDBFind);
 PouchDB.plugin(PouchDBAdapterMemory);
 
@@ -27,7 +35,7 @@ export default class Commits {
   }
 
   static getCommitDataForSha(db, relations, sha) {
-    //TODO use findCommit here
+    //dont use findCommit here since we need to fetch all commits anyway in order to add history data
     return findAllCommits(db, relations).then((res) => {
       const result = res.docs.filter((c) => c.sha === sha)[0];
       return result;
@@ -163,8 +171,7 @@ export default class Commits {
       }
 
       //get whole commit objects from hashes
-      let resultCommits = await bulkGet(db, resultCommitHashes);
-      resultCommits = resultCommits.results.map((res) => res.docs[0].ok);
+      let resultCommits = (await findAllCommits(db, relations)).docs.filter((c) => resultCommitHashes.includes(c.sha));
 
       //if we also want file objects in our commit objects, add them now
       if (!omitFiles) {
@@ -370,7 +377,6 @@ export default class Commits {
   }
 
   static async getCommitDateHistogram(db, relations, granularity, dateField, since, until) {
-
     //all commits-builds relations
     const commitBuildConnections = (await findCommitBuildConnections(relations)).docs;
 
@@ -415,7 +421,7 @@ export default class Commits {
             break;
           }
         }
-        
+
         histogram = mapCommitToHistogram(histogram, commit, granularity);
         if (success) {
           goodCommitsHistogram = mapCommitToHistogram(goodCommitsHistogram, commit, granularity);

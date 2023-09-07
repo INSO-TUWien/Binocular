@@ -557,7 +557,7 @@ export default class columnChartGeneration {
     const branchOutHeight = 5;
     //check if commit is first commit of a branch
     if (i === 0) {
-      for (const parentSha of branch.values[i].parents.split(',')) {
+      for (const parentSha of branch.values[i].parents) {
         //find parent commit
         let parent = currThis.combinedColumnData.find((d) => d.sha === parentSha);
         //if parent commit is not found look trhough the history to find commit to cpnnect

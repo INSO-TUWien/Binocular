@@ -3,7 +3,14 @@
 import PouchDB from 'pouchdb-browser';
 import PouchDBFind from 'pouchdb-find';
 import PouchDBAdapterMemory from 'pouchdb-adapter-memory';
-import { findAll, findBranch, findBranchFileConnections, findBranchFileFileConnections, findFileCommitConnections, findFileCommitStakeholderConnections } from './utils';
+import {
+  findAll,
+  findBranch,
+  findBranchFileConnections,
+  findBranchFileFileConnections,
+  findFileCommitConnections,
+  findFileCommitStakeholderConnections,
+} from './utils';
 PouchDB.plugin(PouchDBFind);
 PouchDB.plugin(PouchDBAdapterMemory);
 

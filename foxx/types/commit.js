@@ -4,6 +4,7 @@ const gql = require('graphql-sync');
 const arangodb = require('@arangodb');
 const db = arangodb.db;
 const aql = arangodb.aql;
+const commitsToCommits = db._collection('commits-commits');
 const commitsToFiles = db._collection('commits-files');
 const commitsToFilesToStakeholders = db._collection('commits-files-stakeholders');
 const commitsToStakeholders = db._collection('commits-stakeholders');
@@ -55,8 +56,18 @@ module.exports = new gql.GraphQLObjectType({
         description: 'The commit branch',
       },
       parents: {
-        type: gql.GraphQLString,
+        type: new gql.GraphQLList(gql.GraphQLString),
         description: 'Parents of the commit',
+        resolve(commit) {
+          return db
+            ._query(
+              aql`
+            FOR c, edge
+            IN inbound ${commit} ${commitsToCommits}
+            RETURN c.sha`
+            )
+            .toArray();
+        },
       },
       history: {
         type: gql.GraphQLString,

@@ -3,6 +3,7 @@
 import { collectPages, graphQl, traversePages } from '../../utils';
 import _ from 'lodash';
 import moment from 'moment/moment';
+import { addHistoryToAllCommits } from '../utils';
 
 export default class Commits {
   static getCommitData(commitSpan, significantSpan) {
@@ -18,7 +19,6 @@ export default class Commits {
                data {
                  sha
                  shortSha
-                 history
                  message
                  messageHeader
                  signature
@@ -41,31 +41,17 @@ export default class Commits {
     return traversePages(getCommitsPage(significantSpan[0], significantSpan[1]), (commit) => {
       commitList.push(commit);
     }).then(function () {
-      return commitList;
+      const allCommits = commitList.sort((a, b) => new Date(b.date) - new Date(a.date));
+      addHistoryToAllCommits(allCommits);
+      return allCommits;
     });
   }
 
+  //easier to fetch all commits first because all commits are needed for the history attribute
   static getCommitDataForSha(sha) {
-    return graphQl
-      .query(
-        `query {
-          commit(sha: "${sha}") {
-            sha
-            branch
-            history
-            message
-            signature
-            webUrl
-            date
-            parents
-            stats {
-              additions
-              deletions
-            }
-          }
-        }`
-      )
-      .then((resp) => resp.commit);
+    return this.getCommitData([new Date(0), new Date()], [new Date(0), new Date()]).then(
+      (commits) => commits.filter((c) => c.sha === sha)[0]
+    );
   }
 
   static getCommitDataWithFiles(commitSpan, significantSpan) {
@@ -81,7 +67,6 @@ export default class Commits {
              data {
                sha,
                branch,
-               history,
                message,
                signature,
                webUrl,
@@ -111,7 +96,9 @@ export default class Commits {
     return traversePages(getCommitsPage(significantSpan[0], significantSpan[1]), (commit) => {
       commitList.push(commit);
     }).then(function () {
-      return commitList;
+      const allCommits = commitList.sort((a, b) => new Date(b.date) - new Date(a.date));
+      addHistoryToAllCommits(allCommits);
+      return allCommits;
     });
   }
 
@@ -128,7 +115,6 @@ export default class Commits {
              data {
                sha,
                branch,
-               history,
                message,
                signature,
                webUrl,
@@ -162,12 +148,12 @@ export default class Commits {
     return traversePages(getCommitsPage(significantSpan[0], significantSpan[1]), (commit) => {
       commitList.push(commit);
     }).then(function () {
-      return commitList;
+      const allCommits = commitList.sort((a, b) => new Date(b.date) - new Date(a.date));
+      addHistoryToAllCommits(allCommits);
+      return allCommits;
     });
   }
 
-  //TODO: first query files and search for commit connections
-  //TODO move this to ./files.js
   static getCommitsForFiles(filenames, omitFiles) {
     return graphQl
       .query(
@@ -177,7 +163,6 @@ export default class Commits {
           data {
             sha,
             branch,
-            history,
             message,
             signature,
             webUrl,
@@ -201,8 +186,10 @@ export default class Commits {
       )
       .then((resp) => resp.commits.data)
       .then((commits) => {
+        const allCommits = commits.sort((a, b) => new Date(b.date) - new Date(a.date));
+        addHistoryToAllCommits(allCommits);
         const result = [];
-        for (const commit of commits) {
+        for (const commit of allCommits) {
           for (const cFile of commit.files.data) {
             if (filenames.includes(cFile.file.path)) {
               //this function should only return the commit data. We do not need the files entry anymore
@@ -515,7 +502,6 @@ export default class Commits {
                       sha
                       signature
                       branch
-                      history
                       parents
                       date
                       stats{
@@ -543,8 +529,33 @@ export default class Commits {
         { file: file }
       )
       .then((result) => {
-        result.file.commits.data = result.file.commits.data.map((d) => d.commit);
-        return result;
+        //get all commits, calculate history, append history to all originally fetched commits
+        return graphQl
+          .query(
+            `
+          query {
+            commits {
+              data {
+                sha
+                date
+                parents
+              }
+            }
+        }
+        `
+          )
+          .then((commits) => {
+            const allCommits = commits.commits.data;
+            addHistoryToAllCommits(allCommits);
+
+            result.file.commits.data = result.file.commits.data.map((d) => {
+              let c = d.commit;
+              let his = allCommits.filter((com) => com.sha === c.sha)[0].history;
+              c.history = his;
+              return c;
+            });
+            return result;
+          });
       });
   }
 }
