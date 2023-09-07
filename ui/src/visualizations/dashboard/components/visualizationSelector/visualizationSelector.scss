@@ -1,4 +1,5 @@
 .visualizationSelector{
+  z-index: 99999;
   position:fixed;
   top:0;
   left: 0;
@@ -19,7 +20,7 @@
 
 .visualizationContainer{
   background: white;
-  min-width: 25rem;
+  max-width: 80vh;
   min-height: 3rem;
   box-shadow: 0 0 10px #5558;
   border-radius: 1rem;
@@ -32,10 +33,8 @@
 }
 
 .visualizationSelectButton{
+
   width: 100%;
-  width: -moz-available;          /* WebKit-based browsers will ignore this. */
-  width: -webkit-fill-available;  /* Mozilla-based browsers will ignore this. */
-  width: fill-available;
   border: 1px solid darkgray;
   background: white;
   color: black;

@@ -9,6 +9,8 @@ import StackedAreaChart from '../../../../components/StackedAreaChart';
 import moment from 'moment';
 import _ from 'lodash';
 
+import { convertToTimeString, extractTimeTrackingDataFromNotes } from '../../../../utils/timeTracking';
+
 export default class TimeSpentChart extends React.Component {
   constructor(props) {
     super(props);
@@ -37,7 +39,7 @@ export default class TimeSpentChart extends React.Component {
   }
 
   render() {
-    const palette = this.generatePalette(this.props.allAuthors);
+    const palette = this.generatePalette(this.props.mergedAuthors);
     const timeChart = (
       <div className={styles.chartLine}>
         <div className={styles.chart}>
@@ -83,7 +85,7 @@ export default class TimeSpentChart extends React.Component {
                     }}>
                     <div style={{ display: 'block', textDecoration: 'underline', fontWeight: 'bold' }}>{author}:</div>
                     <div style={{ display: 'inline-block' }}>{Math.round((percentContribution + Number.EPSILON) * 10) / 10}%</div>
-                    <div style={{ display: 'inline-block' }}>{this.convertToTimeString(this.state.aggregatedDataPerAuthor[author])}</div>
+                    <div style={{ display: 'inline-block' }}>{convertToTimeString(this.state.aggregatedDataPerAuthor[author])}</div>
                   </div>
                 );
               } else {
@@ -142,92 +144,11 @@ export default class TimeSpentChart extends React.Component {
       });
 
       filteredIssues.forEach((issue) => {
-        let issueTimeTrackingData = [];
-        if (issue.notes !== undefined && issue.notes !== null) {
-          [...issue.notes].reverse().forEach((note) => {
-            const timeAddedNote = /^added ([0-9a-z ]+) of time spent.*?$/.exec(note.body);
-            const timeSubtractedNote = /^subtracted ([0-9a-z ]+) of time spent.*?$/.exec(note.body);
-            const timeDeletedNote = /^deleted ([0-9a-z ]+) of spent time.*?$/.exec(note.body);
-            const timeSubtractedDeletedNote = /^deleted -([0-9a-z ]+) of spent time.*?$/.exec(note.body);
-            const removedTimeSpentNote = /^removed time spent.*?$/.exec(note.body);
-
-            if (note.author.name === 'Marija Pantelic') {
-              console.log(issue);
-              console.log(note.body);
-            }
-
-            if (timeAddedNote) {
-              issueTimeTrackingData.push({
-                authorName: note.author.name,
-                timeSpent: this.convertTime(timeAddedNote[1]) / 3600,
-                createdAt: note.created_at,
-              });
-            } else if (timeSubtractedNote) {
-              issueTimeTrackingData.push({
-                authorName: note.author.name,
-                timeSpent: -this.convertTime(timeSubtractedNote[1]) / 3600,
-                createdAt: note.created_at,
-              });
-            } else if (timeDeletedNote) {
-              issueTimeTrackingData.push({
-                authorName: note.author.name,
-                timeSpent: -this.convertTime(timeDeletedNote[1]) / 3600,
-                createdAt: note.created_at,
-              });
-            } else if (timeSubtractedDeletedNote) {
-              issueTimeTrackingData.push({
-                authorName: note.author.name,
-                timeSpent: this.convertTime(timeSubtractedDeletedNote[1]) / 3600,
-                createdAt: note.created_at,
-              });
-            } else if (removedTimeSpentNote) {
-              issueTimeTrackingData = [];
-            }
-          });
-        }
-        timeTrackingData.push(...issueTimeTrackingData);
+        timeTrackingData.push(...extractTimeTrackingDataFromNotes(issue.notes));
       });
 
       filteredMergeRequests.forEach((mergeRequest) => {
-        let mergeRequestTimeTrackingData = [];
-        if (mergeRequest.notes !== undefined && mergeRequest.notes !== null) {
-          [...mergeRequest.notes].reverse().forEach((note) => {
-            const timeAddedNote = /^added ([0-9a-z ]+) of time spent.*?$/.exec(note.body);
-            const timeSubtractedNote = /^subtracted ([0-9a-z ]+) of time spent.*?$/.exec(note.body);
-            const timeDeletedNote = /^deleted ([0-9a-z ]+) of spent time.*?$/.exec(note.body);
-            const timeSubtractedDeletedNote = /^deleted -([0-9a-z ]+) of spent time.*?$/.exec(note.body);
-            const removedTimeSpentNote = /^removed time spent.*?$/.exec(note.body);
-
-            if (timeAddedNote) {
-              mergeRequestTimeTrackingData.push({
-                authorName: note.author.name,
-                timeSpent: this.convertTime(timeAddedNote[1]) / 3600,
-                createdAt: note.created_at,
-              });
-            } else if (timeSubtractedNote) {
-              mergeRequestTimeTrackingData.push({
-                authorName: note.author.name,
-                timeSpent: -this.convertTime(timeSubtractedNote[1]) / 3600,
-                createdAt: note.created_at,
-              });
-            } else if (timeDeletedNote) {
-              mergeRequestTimeTrackingData.push({
-                authorName: note.author.name,
-                timeSpent: -this.convertTime(timeDeletedNote[1]) / 3600,
-                createdAt: note.created_at,
-              });
-            } else if (timeSubtractedDeletedNote) {
-              mergeRequestTimeTrackingData.push({
-                authorName: note.author.name,
-                timeSpent: this.convertTime(timeSubtractedDeletedNote[1]) / 3600,
-                createdAt: note.created_at,
-              });
-            } else if (removedTimeSpentNote) {
-              mergeRequestTimeTrackingData = [];
-            }
-          });
-        }
-        timeTrackingData.push(...mergeRequestTimeTrackingData);
+        timeTrackingData.push(...extractTimeTrackingDataFromNotes(mergeRequest.notes));
       });
       for (; curr.isSameOrBefore(end); curr.add(1, props.chartResolution), next.add(1, props.chartResolution)) {
         //Iterate through time buckets
@@ -319,35 +240,14 @@ export default class TimeSpentChart extends React.Component {
     }
   }
 
-  convertTime(timeString) {
-    const timeParts = timeString.split(' ');
-    let time = 0;
-    timeParts.forEach((part) => {
-      if (part.endsWith('h')) {
-        time += parseInt(part.substring(0, part.length - 1)) * 60 * 60;
-      }
-      if (part.endsWith('m')) {
-        time += parseInt(part.substring(0, part.length - 1)) * 60;
-      }
-      if (part.endsWith('2')) {
-        time += parseInt(part.substring(0, part.length - 1));
-      }
-    });
-    return time;
-  }
-
-  generatePalette(allAuthors) {
+  generatePalette(mergedAuthors) {
     const palette = {};
-    Object.keys(allAuthors).forEach((author) => {
-      const authorName = author.split('<')[0].slice(0, -1);
+    mergedAuthors.forEach((author) => {
+      const authorName = author.mainCommitter.split('<')[0].slice(0, -1);
       if (palette[authorName] === undefined) {
-        palette[authorName] = allAuthors[author];
+        palette[authorName] = author.color;
       }
     });
     return palette;
-  }
-
-  convertToTimeString(hours) {
-    return parseInt(hours) + 'h ' + Math.round(((60 * (hours % 1) + Number.EPSILON) * 100) / 100) + 'min';
   }
 }

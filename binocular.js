@@ -40,6 +40,7 @@ const Branch = require('./lib/models/Branch.js');
 const Module = require('./lib/models/Module');
 const Stakeholder = require('./lib/models/Stakeholder.js');
 const MergeRequest = require('./lib/models/MergeRequest.js');
+const Milestone = require('./lib/models/Milestone.js');
 const CommitStakeholderConnection = require('./lib/models/CommitStakeholderConnection.js');
 const IssueStakeholderConnection = require('./lib/models/IssueStakeholderConnection.js');
 const IssueCommitConnection = require('./lib/models/IssueCommitConnection.js');
@@ -110,6 +111,7 @@ const reporter = new ProgressReporter(io, [
   'filesLanguage',
   'modules',
   'mergeRequests',
+  'milestones',
 ]);
 let databaseConnection = null;
 
@@ -484,6 +486,7 @@ function ensureDb(repo, context) {
         Branch.ensureCollection(),
         Module.ensureCollection(),
         MergeRequest.ensureCollection(),
+        Milestone.ensureCollection(),
         CommitFileConnection.ensureCollection(),
         LanguageFileConnection.ensureCollection(),
         CommitStakeholderConnection.ensureCollection(),

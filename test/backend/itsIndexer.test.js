@@ -18,7 +18,7 @@ const GitLabITSIndexer = proxyquire('../../lib/indexers/its/GitLabITSIndexer', {
   '../../indexers/BaseGitLabIndexer.js': GitLabBaseIndexerMock,
 });
 
-const GitHubITSIndexer = require('../../lib/indexers/its/GitHubIndexer');
+const GitHubITSIndexer = require('../../lib/indexers/its/GitHubITSIndexer');
 
 const Issue = require('../../lib/models/Issue');
 const MergeRequest = require('../../lib/models/MergeRequest');

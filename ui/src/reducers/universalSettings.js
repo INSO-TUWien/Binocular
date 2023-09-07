@@ -10,6 +10,7 @@ const defaultConfig = {
   selectedAuthorsGlobal: [],
   mergedAuthors: [],
   otherAuthors: [],
+  sprints: [],
   initialized: false,
   excludeMergeRequests: false,
 };
@@ -42,6 +43,10 @@ export default handleActions(
       updateLocalStorage('excludeMergeCommits', action.payload);
       return _.assign({}, state, { excludeMergeCommits: action.payload });
     },
+    SET_SPRINTS: (state, action) => {
+      updateLocalStorage('sprints', action.payload);
+      return _.assign({}, state, { sprints: action.payload });
+    },
     REQUEST_UNIVERSAL_SETTINGS_DATA: (state) =>
       _.assign({}, state, { universalSettingsData: { data: {}, lastFetched: null, isFetching: true } }),
     RECEIVE_UNIVERSAL_SETTINGS_DATA: (state, action) => {
@@ -63,6 +68,7 @@ export default handleActions(
     mergedAuthors: getLocalStorage().mergedAuthors,
     otherAuthors: getLocalStorage().otherAuthors,
     excludeMergeCommits: getLocalStorage().excludeMergeCommits,
+    sprints: getLocalStorage().sprints,
   }
 );
 

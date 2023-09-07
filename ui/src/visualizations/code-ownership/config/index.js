@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
-import TabCombo from '../../../components/TabCombo.js';
+import TabCombo from '../../../components/TabCombo/tabCombo';
 import Filepicker from '../../../components/Filepicker/index.js';
 import styles from '../styles.scss';
 import { setMode, setCurrentBranch, setActiveFiles } from '../sagas';

@@ -19,13 +19,27 @@ export default class MergeRequests {
               count
               data {
                 id
+                iid
+                title
                 state
+                webUrl
+                sourceBranch
+                targetBranch
                 timeStats{
                   time_estimate
                   total_time_spent
                 }
                 author{
+                  login
                   name
+                }
+                assignees{
+                  login
+                  name 
+                }
+                assignee{
+                  login
+                  name 
                 }
                 createdAt
                 notes{

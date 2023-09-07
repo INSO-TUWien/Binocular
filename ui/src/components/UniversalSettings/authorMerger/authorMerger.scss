@@ -4,7 +4,7 @@
   left: 0;
   width: 100%;
   height: 100%;
-  z-index: 999;
+  z-index: 99999;
 }
 
 .backgroundBlur{
@@ -20,12 +20,17 @@
 
 .authorMergerContainer{
   background: white;
-  width: 50vw;
-  min-height: 3rem;
+  width: 95vw;
+  max-width: 80vh;
   box-shadow: 0 0 10px #5558;
   border-radius: 1rem;
   padding: 0.5rem;
-  max-height: 80vh;
+  height: 80vh;
+  overflow: hidden;
+}
+
+.authorMergerScroll{
+  height: 100%;
   overflow-y: scroll;
 }
 
@@ -75,6 +80,8 @@
   pointer-events: none;
   margin-right: 0.5rem;
   height: 2rem;
+  max-width: 80%;
+  overflow: hidden;
 }
 
 .individualCommitterColor{
@@ -92,6 +99,7 @@
   display: inline-block;
   height: 2rem;
   margin-left: 1.5rem;
+  width: max-content;
 }
 
 .addToOtherButton{
@@ -119,13 +127,13 @@
   background: darkred;
 }
 
-.applyButton{
+.accentButton{
   background: #3273dc;
   color: white;
   margin-left: 1rem;
 }
 
-.applyButton:hover{
+.accentButton:hover{
   background: #2262ca;
   color: whitesmoke;
 }

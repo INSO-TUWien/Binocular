@@ -3,7 +3,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import _ from 'lodash';
 import styles from '../../styles.scss';
 import { setDetails } from '../../sagas';
-import TabCombo from '../../../../components/TabCombo.js';
+import TabCombo from '../../../../components/TabCombo/tabCombo.js';
 import CommitsDetailsList from './CommitDetailsList';
 
 const Details = ({ devData }) => {

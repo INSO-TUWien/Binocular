@@ -2,7 +2,7 @@
 
 import { connect } from 'react-redux';
 import { Tooltip } from 'react-tippy';
-import TabCombo from '../../../components/TabCombo.js';
+import TabCombo from '../../../components/TabCombo/tabCombo.js';
 
 import { setCategory, setSplitCommits, setIssueField } from './sagas';
 
@@ -28,41 +28,39 @@ const mapDispatchToProps = (dispatch /*, ownProps*/) => {
 const HotspotDialsConfigComponent = (props) => {
   return (
     <div className={styles.configContainer}>
-      <form>
-        <div className="field">
-          <label className="label">Display:</label>
-          <Tooltip
-            position="bottom"
-            arrow={true}
-            arrowSize="big"
-            theme="transparent"
-            title="A commit is considered good if there exists at least one successful build in the CI-system">
-            <label className="checkbox" htmlFor="split-commits">
-              <input
-                type="checkbox"
-                id="split-commits"
-                checked={props.splitCommits}
-                onChange={(e) => props.onSetSplitCommits(e.target.checked)}
-              />
-              Split commits into good and bad
-              <sup className="fa fa-question-circle" aria-hidden="true" />
-            </label>
-          </Tooltip>
-        </div>
-        <div className="field">
-          <div className="control">
-            <label className="label">Show issues by:</label>
-            <TabCombo
-              value={props.issueField}
-              onChange={(value) => props.onSetIssueField(value)}
-              options={[
-                { label: 'Creation date', icon: 'certificate', value: 'createdAt' },
-                { label: 'Closing date', icon: 'window-close', value: 'closedAt' },
-              ]}
+      <div className="field">
+        <label className="label">Display:</label>
+        <Tooltip
+          position="bottom"
+          arrow={true}
+          arrowSize="big"
+          theme="transparent"
+          title="A commit is considered good if there exists at least one successful build in the CI-system">
+          <label className="checkbox" htmlFor="split-commits">
+            <input
+              type="checkbox"
+              id="split-commits"
+              checked={props.splitCommits}
+              onChange={(e) => props.onSetSplitCommits(e.target.checked)}
             />
-          </div>
+            Split commits into good and bad
+            <sup className="fa fa-question-circle" aria-hidden="true" />
+          </label>
+        </Tooltip>
+      </div>
+      <div className="field">
+        <div className="control">
+          <label className="label">Show issues by:</label>
+          <TabCombo
+            value={props.issueField}
+            onChange={(value) => props.onSetIssueField(value)}
+            options={[
+              { label: 'Creation date', icon: 'certificate', value: 'createdAt' },
+              { label: 'Closing date', icon: 'window-close', value: 'closedAt' },
+            ]}
+          />
         </div>
-      </form>
+      </div>
     </div>
   );
 };

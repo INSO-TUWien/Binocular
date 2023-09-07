@@ -11,16 +11,19 @@ import {
   setMergedAuthorList,
   setOtherAuthorList,
   setExcludeMergeCommits,
+  setSprints,
 } from '../../sagas';
 import DateRangeFilter from '../DateRangeFilter/dateRangeFilter';
 import AuthorMerger from './authorMerger/authorMerger';
 import AuthorList from './authorList/authorList';
+import SprintManager from './sprintManager/sprintManager';
 
 export default ({ universalSettingsConfig }) => {
   //config
   const hideDateSettings = universalSettingsConfig.hideDateSettings === true;
   const hideGranularitySettings = universalSettingsConfig.hideGranularitySettings === true;
   const hideCommitSettings = universalSettingsConfig.hideCommitSettings === true;
+  const hideSprintSettings = universalSettingsConfig.hideSprintSettings === true;
 
   //global state
   const universalSettings = useSelector((state) => state.universalSettings);
@@ -39,6 +42,7 @@ export default ({ universalSettingsConfig }) => {
   let lastDisplayDate;
   let selectedAuthors;
   let otherAuthorsGlobal;
+  let sprints = [];
 
   if (universalSettings.chartTimeSpan.from === undefined) {
     firstDisplayDate = firstCommit !== undefined ? firstCommit.date.split('.')[0] : undefined;
@@ -59,6 +63,9 @@ export default ({ universalSettingsConfig }) => {
   if (universalSettings.otherAuthors !== undefined) {
     otherAuthorsGlobal = universalSettings.otherAuthors;
   }
+  if (universalSettings.sprints !== undefined) {
+    sprints = universalSettings.sprints;
+  }
 
   const dispatch = useDispatch();
   const onClickResolution = (resolution) => dispatch(setResolution(resolution));
@@ -68,11 +75,13 @@ export default ({ universalSettingsConfig }) => {
   const onOtherAuthorListChanged = (selected) => dispatch(setOtherAuthorList(selected));
   const onSetPalette = (allAuthors) => dispatch(setAllAuthors(allAuthors));
   const onSetExcludeMergeCommits = (checked) => dispatch(setExcludeMergeCommits(checked));
+  const onSetSprints = (sprints) => dispatch(setSprints(sprints));
 
   //local state
   const [showAuthorMerge, setShowAuthorMerge] = useState(false);
   const [mergedAuthorList, setMergedAuthorListLocal] = useState([]);
   const [otherAuthors, setOtherAuthors] = useState([]);
+  const [showSprintManager, setShowSprintManager] = useState(false);
 
   //set local state when global state changes
   useEffect(() => {
@@ -149,6 +158,19 @@ export default ({ universalSettingsConfig }) => {
             setShowAuthorMerge(false);
             setMergedAuthorListLocal(mergedAuthorList);
             setOtherAuthors(otherAuthors);
+          }}
+        />
+      ) : (
+        ''
+      )}
+      {showSprintManager === true ? (
+        <SprintManager
+          sprints={sprints}
+          close={() => {
+            setShowSprintManager(false);
+          }}
+          setSprints={(sprints) => {
+            onSetSprints(sprints);
           }}
         />
       ) : (
@@ -231,6 +253,18 @@ export default ({ universalSettingsConfig }) => {
               Exclude Merge Commits
             </label>
           </div>
+        </>
+      )}
+      {!hideSprintSettings && (
+        <>
+          <h2>Sprints</h2>
+          <button
+            className={'button'}
+            onClick={() => {
+              setShowSprintManager(true);
+            }}>
+            Manage Sprints
+          </button>
         </>
       )}
     </div>
