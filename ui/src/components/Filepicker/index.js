@@ -86,7 +86,10 @@ const Filepicker = ({
 
         if (parseInt(pathItemIndex) === pathSplitArray.length - 1) {
           const fullPath = pathSplitArray.join('/');
-          map[pathItem] = { path: fullPath, ownership: fileOwnership && useOwnershipData ? fileOwnership[fullPath] : {} };
+          map[pathItem] = {
+            path: fullPath,
+            ownership: fileOwnership && useOwnershipData && fileOwnership[fullPath] ? fileOwnership[fullPath] : [],
+          };
           break;
         }
 
@@ -181,7 +184,7 @@ const Filepicker = ({
                   onChange={(e) => setUseOwnershipData(e.target.checked)}
                 />
                 <label htmlFor="ownershipSwitch" className={styles.switch}>
-                  Show Ownership
+                  Show Ownership (?)
                 </label>
               </Tooltip>
             </div>
