@@ -24,9 +24,18 @@ export default class Issues {
                 createdAt
                 closedAt
                 webUrl
+                state
                 author{
                   login
                   name
+                }
+                assignees{
+                  login
+                  name 
+                }
+                assignee{
+                  login
+                  name 
                 }
                 notes{
                   body

@@ -9,6 +9,7 @@ import ciBuilds from '../VisualizationComponents/ciBuilds';
 import issues from '../VisualizationComponents/issues';
 import issueBreakdown from '../VisualizationComponents/issueBreakdown';
 import changes from '../VisualizationComponents/changes';
+import sprints from '../VisualizationComponents/sprints';
 import timeSpent from '../VisualizationComponents/timeSpent';
 
 export default {
@@ -21,5 +22,6 @@ export default {
   hotspotDials,
   additions_deletions,
   timeSpent,
+  sprints,
   empty,
 };

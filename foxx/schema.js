@@ -355,6 +355,18 @@ const queryType = new gql.GraphQLObjectType({
           return q;
         },
       }),
+      milestones: paginated({
+        type: require('./types/milestone.js'),
+        args: {
+          sort: { type: Sort },
+        },
+        query: (root, args, limit) => {
+          let q = qb.for('milestone').in('milestones').sort('milestone.startDate', args.sort);
+          q = q.limit(limit.offset, limit.count).return('milestone');
+
+          return q;
+        },
+      }),
       issueDateHistogram: makeDateHistogramEndpoint(issues),
     };
   },

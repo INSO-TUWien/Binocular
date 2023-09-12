@@ -53,7 +53,7 @@ lib/indexers
 │   ├── ...                 # (Additional CI-indexers could be added here)
 │   └── index.js
 ├── its                     # ITS-specific indexers
-│   ├── GitHubIndexer.js    # Indexer for GitHub
+│   ├── GitHubITSIndexer.js    # Indexer for GitHub
 │   ├── GitLabITSIndexer.js # Indexer for GitLab
 │   ├── ...                 # (Additional ITS-indexers could be added here)
 │   └── index.js

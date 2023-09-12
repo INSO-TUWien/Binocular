@@ -12,9 +12,34 @@ module.exports = new gql.GraphQLObjectType({
         type: require('./gitHubUser.js'),
         description: 'The github/gitlab author of this mergeRequest',
       },
+      assignee: {
+        type: require('./gitHubUser.js'),
+        description: 'The assignee of this mergeRequest',
+      },
+      assignees: { type: new gql.GraphQLList(require('./gitHubUser.js')), description: 'All the assignees of this mergeRequest' },
       id: {
         type: gql.GraphQLString,
         description: 'id of the mergeRequest',
+      },
+      iid: {
+        type: gql.GraphQLString,
+        description: 'iid of the mergeRequest',
+      },
+      title: {
+        type: gql.GraphQLString,
+        description: 'title of the mergeRequest',
+      },
+      webUrl: {
+        type: gql.GraphQLString,
+        description: 'webUrl of the mergeRequest',
+      },
+      sourceBranch: {
+        type: gql.GraphQLString,
+        description: 'sourceBranch of the mergeRequest',
+      },
+      targetBranch: {
+        type: gql.GraphQLString,
+        description: 'targetBranch of the mergeRequest',
       },
       state: {
         type: gql.GraphQLString,

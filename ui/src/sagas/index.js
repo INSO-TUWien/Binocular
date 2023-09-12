@@ -23,6 +23,8 @@ export const requestRefresh = createAction('REQUEST_REFRESH');
 
 export const setExcludeMergeCommits = createAction('SET_EXCLUDE_MERGE_COMMITS');
 
+export const setSprints = createAction('SET_SPRINTS');
+
 let currentComponentSaga = null;
 
 function* switchComponentSaga(visualizationName) {
