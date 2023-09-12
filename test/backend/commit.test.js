@@ -12,10 +12,12 @@ const File = require('../../lib/models/File');
 const Language = require('../../lib/models/Language');
 const Hunk = require('../../lib/models/Hunk');
 const LanguageFileConnection = require('../../lib/models/LanguageFileConnection');
+const CommitStakeholderConnection = require('../../lib/models/CommitStakeholderConnection.js');
 
 const config = require('../../lib/config.js').get();
 const ctx = require('../../lib/context');
 const GitHubUrlProvider = require('../../lib/url-providers/GitHubUrlProvider');
+const Stakeholder = require('../../lib/models/Stakeholder.js');
 
 const expect = chai.expect;
 
@@ -45,6 +47,8 @@ describe('commit', function () {
       await Hunk.ensureCollection();
       await Language.ensureCollection();
       await LanguageFileConnection.ensureCollection();
+      await CommitStakeholderConnection.ensureCollection();
+      await Stakeholder.ensureCollection();
 
       await fake.file(repo, 'test.js', testFile);
       await helpers.commit(repo, ['test.js'], bob, 'Commit1');

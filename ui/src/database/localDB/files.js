@@ -3,52 +3,16 @@
 import PouchDB from 'pouchdb-browser';
 import PouchDBFind from 'pouchdb-find';
 import PouchDBAdapterMemory from 'pouchdb-adapter-memory';
+import {
+  findAll,
+  findBranch,
+  findBranchFileConnections,
+  findBranchFileFileConnections,
+  findFileCommitConnections,
+  findFileCommitStakeholderConnections,
+} from './utils';
 PouchDB.plugin(PouchDBFind);
 PouchDB.plugin(PouchDBAdapterMemory);
-
-// find all of given collection (example _id field for e.g. issues looks like 'issues/{issue_id}')
-function findAll(database, collection) {
-  return database.find({
-    selector: { _id: { $regex: new RegExp(`^${collection}/.*`) } },
-  });
-}
-
-function findBranch(database, branch) {
-  return database.find({
-    selector: { _id: { $regex: new RegExp('^branches/.*') }, branch: { $eq: branch } },
-  });
-}
-
-function findID(database, id) {
-  return database.find({
-    selector: { _id: id },
-  });
-}
-
-function findBranchFileConnections(relations) {
-  return relations.find({
-    selector: { _id: { $regex: new RegExp('^branches-files/.*') } },
-  });
-}
-
-// a connection between a branch-file edge and a file
-function findBranchFileFileConnections(relations) {
-  return relations.find({
-    selector: { _id: { $regex: new RegExp('^branches-files-files/.*') } },
-  });
-}
-
-function findFileCommitConnections(relations) {
-  return relations.find({
-    selector: { _id: { $regex: new RegExp('^commits-files/.*') } },
-  });
-}
-
-function findFileCommitStakeholderConnections(relations) {
-  return relations.find({
-    selector: { _id: { $regex: new RegExp('^commits-files-stakeholders/.*') } },
-  });
-}
 
 export default class Files {
   static requestFileStructure(db) {

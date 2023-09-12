@@ -35,7 +35,8 @@ export default (props) => {
               left: (100 / props.options.length) * i + '%',
               color: item.value === selection ? 'white' : 'black',
             }}
-            onClick={() => {
+            onClick={(e) => {
+              e.preventDefault();
               setSelection(item.value);
               props.onChange(item.value);
             }}>

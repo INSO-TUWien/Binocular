@@ -77,7 +77,7 @@ export default () => {
     //we are interested in commits that are both on the current branch and related to the issue
     let relevantCommits = branchCommits.filter((commit) => {
       //if a commits parent string contains a comma, it has more than one parent -> it is a merge commit
-      if (filterMergeCommits && commit.parents.includes(',')) {
+      if (filterMergeCommits && commit.parents.length > 1) {
         return false;
       }
       return relevantCommitHashes.includes(commit.sha);

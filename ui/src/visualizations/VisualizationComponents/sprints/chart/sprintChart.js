@@ -35,7 +35,7 @@ export default (props) => {
     let lastDate = moment(0);
 
     //Calculate earliest and latest date
-    if (props.sprints.length > 0) {
+    if (props.sprints && props.sprints.length > 0) {
       props.sprints.forEach((s) => {
         if (moment(s.from) < firstDate) {
           firstDate = moment(s.from);
@@ -334,7 +334,7 @@ export default (props) => {
       .on('click', function (e, d) {
         window.open(d.webUrl, '_blank');
       });
-    if (props.sprints.length > 0) {
+    if (props.sprints && props.sprints.length > 0) {
       const sprints = svg.append('g').selectAll('rect').data(props.sprints).enter().append('g');
       sprints
         .append('rect')

@@ -70,7 +70,6 @@ export default class Issues {
                 data {
                   sha
                   shortSha
-                  history
                   message
                   messageHeader
                   signature

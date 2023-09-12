@@ -5,68 +5,25 @@ import PouchDBFind from 'pouchdb-find';
 import PouchDBAdapterMemory from 'pouchdb-adapter-memory';
 import _ from 'lodash';
 import moment from 'moment/moment';
+import {
+  findAll,
+  findAllCommits,
+  findCommit,
+  findFile,
+  findFileCommitConnections,
+  findFileCommitStakeholderConnections,
+  findCommitBuildConnections,
+} from './utils';
 PouchDB.plugin(PouchDBFind);
 PouchDB.plugin(PouchDBAdapterMemory);
 
-// find all of given collection (example _id field for e.g. issues looks like 'issues/{issue_id}')
-function findAll(database, collection) {
-  return database.find({
-    selector: { _id: { $regex: new RegExp(`^${collection}/.*`) } },
-  });
-}
-
-function bulkGet(database, ids) {
-  const idsObjects = ids.map((id) => {
-    return { id: id };
-  });
-  return database.bulkGet({
-    docs: idsObjects,
-  });
-}
-
-function findIssue(database, iid) {
-  return database.find({
-    selector: { _id: { $regex: new RegExp('^issues/.*') }, iid: { $eq: iid } },
-  });
-}
-
-function findCommit(database, sha) {
-  return database.find({
-    selector: { _id: { $regex: new RegExp('^commits/.*') }, sha: { $eq: sha } },
-  });
-}
-
-function findID(database, id) {
-  return database.find({
-    selector: { _id: id },
-  });
-}
-
-function findFile(database, file) {
-  return database.find({
-    selector: { _id: { $regex: new RegExp('^files/.*') }, path: { $eq: file } },
-  });
-}
-
-function findFileCommitConnections(relations) {
-  return relations.find({
-    selector: { _id: { $regex: new RegExp('^commits-files/.*') } },
-  });
-}
-
-function findFileCommitStakeholderConnections(relations) {
-  return relations.find({
-    selector: { _id: { $regex: new RegExp('^commits-files-stakeholders/.*') } },
-  });
-}
-
 export default class Commits {
-  static getCommitData(db, commitSpan, significantSpan) {
+  static getCommitData(db, relations, commitSpan, significantSpan) {
     // return all commits, filtering according to parameters can be added in the future
     const first = new Date(significantSpan[0]).getTime();
     const last = new Date(significantSpan[1]).getTime();
 
-    return findAll(db, 'commits').then((res) => {
+    return findAllCommits(db, relations).then((res) => {
       res.docs = res.docs
         .filter((c) => new Date(c.date) >= first && new Date(c.date) <= last)
         .sort((a, b) => {
@@ -77,8 +34,9 @@ export default class Commits {
     });
   }
 
-  static getCommitDataForSha(db, sha) {
-    return findAll(db, 'commits').then((res) => {
+  static getCommitDataForSha(db, relations, sha) {
+    //dont use findCommit here since we need to fetch all commits anyway in order to add history data
+    return findAllCommits(db, relations).then((res) => {
       const result = res.docs.filter((c) => c.sha === sha)[0];
       return result;
     });
@@ -88,7 +46,7 @@ export default class Commits {
     const first = new Date(significantSpan[0]).getTime();
     const last = new Date(significantSpan[1]).getTime();
 
-    return findAll(db, 'commits').then(async (res) => {
+    return findAllCommits(db, relations).then(async (res) => {
       const commits = res.docs
         .filter((c) => new Date(c.date) >= first && new Date(c.date) <= last)
         .sort((a, b) => {
@@ -126,7 +84,7 @@ export default class Commits {
     const first = new Date(significantSpan[0]).getTime();
     const last = new Date(significantSpan[1]).getTime();
 
-    return findAll(db, 'commits').then(async (res) => {
+    return findAllCommits(db, relations).then(async (res) => {
       const commits = res.docs
         .filter((c) => new Date(c.date) >= first && new Date(c.date) <= last)
         .sort((a, b) => {
@@ -213,8 +171,7 @@ export default class Commits {
       }
 
       //get whole commit objects from hashes
-      let resultCommits = await bulkGet(db, resultCommitHashes);
-      resultCommits = resultCommits.results.map((res) => res.docs[0].ok);
+      let resultCommits = (await findAllCommits(db, relations)).docs.filter((c) => resultCommitHashes.includes(c.sha));
 
       //if we also want file objects in our commit objects, add them now
       if (!omitFiles) {
@@ -229,7 +186,7 @@ export default class Commits {
   }
 
   static getOwnershipDataForCommit(db, relations, sha) {
-    return findCommit(db, sha).then(async (res) => {
+    return findCommit(db, relations, sha).then(async (res) => {
       const commit = res.docs[0];
 
       const files = (await findAll(db, 'files')).docs;
@@ -262,7 +219,7 @@ export default class Commits {
   }
 
   static getOwnershipDataForCommits(db, relations) {
-    return findAll(db, 'commits').then(async (res) => {
+    return findAllCommits(db, relations).then(async (res) => {
       const commits = res.docs;
 
       const files = (await findAll(db, 'files')).docs;
@@ -294,7 +251,7 @@ export default class Commits {
     });
   }
 
-  static getCommitDataOwnershipRiver(db, commitSpan, significantSpan, granularity, interval, excludeMergeCommits) {
+  static getCommitDataOwnershipRiver(db, relations, commitSpan, significantSpan, granularity, interval, excludeMergeCommits) {
     const statsByAuthor = {};
 
     const totals = {
@@ -366,7 +323,7 @@ export default class Commits {
       return data;
     }
 
-    return findAll(db, 'commits').then((res) => {
+    return findAllCommits(db, relations).then((res) => {
       let commits = res.docs
         .filter((c) => new Date(c.date) >= first && new Date(c.date) <= last)
         .sort((a, b) => {
@@ -419,26 +376,10 @@ export default class Commits {
     });
   }
 
-  static getRelatedCommitDataOwnershipRiver(db, issue) {
-    if (issue !== null) {
-      return findIssue(db, issue.iid).then(async (resIssue) => {
-        const foundIssue = resIssue.docs[0];
-        foundIssue.commits = { count: 0, data: [] };
-        for (const mention of foundIssue.mentions) {
-          if (mention.commit !== null) {
-            const commit = (await findCommit(db, mention.commit)).docs[0];
-            foundIssue.commits.count++;
-            foundIssue.commits.data.push(commit);
-          }
-        }
-        return foundIssue;
-      });
-    } else {
-      return {};
-    }
-  }
+  static async getCommitDateHistogram(db, relations, granularity, dateField, since, until) {
+    //all commits-builds relations
+    const commitBuildConnections = (await findCommitBuildConnections(relations)).docs;
 
-  static getCommitDateHistogram(db, granularity, dateField, since, until) {
     function mapCommitToHistogram(histogram, commit, granularity) {
       const commitDate = new Date(commit.date);
       return histogram.map((commit) => {
@@ -470,9 +411,19 @@ export default class Commits {
 
     function addCommitsToCollection(histogram, goodCommitsHistogram, badCommitsHistogram, commits, builds, granularity) {
       for (const commit of commits) {
-        const commitBuild = builds.find((b) => b.sha === commit.sha);
+        let success = false;
+        const relevantConnections = commitBuildConnections.filter((cb) => cb.to === commit._id);
+
+        for (const conn of relevantConnections) {
+          const commitBuild = builds.find((b) => b._id === conn.from);
+          if (commitBuild !== undefined && commitBuild.status === 'success') {
+            success = true;
+            break;
+          }
+        }
+
         histogram = mapCommitToHistogram(histogram, commit, granularity);
-        if (commitBuild !== undefined && commitBuild.status === 'success') {
+        if (success) {
           goodCommitsHistogram = mapCommitToHistogram(goodCommitsHistogram, commit, granularity);
         } else {
           badCommitsHistogram = mapCommitToHistogram(badCommitsHistogram, commit, granularity);
@@ -511,7 +462,7 @@ export default class Commits {
       }
     }
 
-    return findAll(db, 'commits').then((resCommits) => {
+    return findAllCommits(db, relations).then((resCommits) => {
       return findAll(db, 'issues').then((resIssues) => {
         return findAll(db, 'builds').then((resBuilds) => {
           const commitDateHistogram = [];
@@ -594,13 +545,13 @@ export default class Commits {
   static getCodeHotspotsChangeData(db, relations, file) {
     return findFile(db, file).then(async (resFile) => {
       const file = resFile.docs[0];
+      const allCommits = (await findAllCommits(db, relations)).docs;
 
       const fileCommitConnections = (await findFileCommitConnections(relations)).docs.filter((fCC) => fCC.from === file._id);
-      const commits = [];
+      let commits = [];
       for (const fileCommitConnection of fileCommitConnections) {
-        const resCommit = await findID(db, fileCommitConnection.to);
-        if (resCommit.docs.length > 0) {
-          const commit = resCommit.docs[0];
+        const commit = allCommits.filter((c) => c._id === fileCommitConnection.to)[0];
+        if (commit) {
           commit.file = { file: {} };
           commit.file.file.path = file.path;
           commit.file.lineCount = fileCommitConnection.lineCount;
@@ -608,6 +559,7 @@ export default class Commits {
           commits.push(commit);
         }
       }
+      commits = commits.sort((a, b) => new Date(a.date) - new Date(b.date));
       return { file: { commits: { data: commits } } };
     });
   }

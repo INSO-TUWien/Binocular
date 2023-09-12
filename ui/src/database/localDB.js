@@ -25,6 +25,7 @@ import branchesFilesFiles from '../../db_export/branches-files-files.json';
 import builds from '../../db_export/builds.json';
 import commitsCommits from '../../db_export/commits-commits.json';
 import commitsFiles from '../../db_export/commits-files.json';
+import commitsBuilds from '../../db_export/commits-builds.json';
 import commitsFilesStakeholders from '../../db_export/commits-files-stakeholders.json';
 import commitsLanguages from '../../db_export/commits-languages.json';
 import commitsModules from '../../db_export/commits-modules.json';
@@ -49,6 +50,7 @@ const relations = {
   'commits-commits': commitsCommits,
   'commits-files': commitsFiles,
   'commits-files-stakeholders': commitsFilesStakeholders,
+  'commits-builds': commitsBuilds,
   'commits-languages': commitsLanguages,
   'commits-modules': commitsModules,
   'commits-stakeholders': commitsStakeholders,
@@ -118,23 +120,23 @@ export default class LocalDB {
   }
 
   static getCommitData(commitSpan, significantSpan) {
-    return Commits.getCommitData(db, commitSpan, significantSpan);
+    return Commits.getCommitData(db, tripleStore, commitSpan, significantSpan);
   }
 
   static getCommitDataForSha(sha) {
-    return Commits.getCommitDataForSha(db, sha);
+    return Commits.getCommitDataForSha(db, tripleStore, sha);
   }
 
   static getBuildData(commitSpan, significantSpan) {
-    return Builds.getBuildData(db, commitSpan, significantSpan);
+    return Builds.getBuildData(db, tripleStore, commitSpan, significantSpan);
   }
 
   static getIssueData(issueSpan, significantSpan) {
-    return Issues.getIssueData(db, issueSpan, significantSpan);
+    return Issues.getIssueData(db, tripleStore, issueSpan, significantSpan);
   }
 
   static getCommitsForIssue(iid) {
-    return Issues.getCommitsForIssue(db, iid);
+    return Issues.getCommitsForIssue(db, tripleStore, iid);
   }
 
   static getMergeRequestData(mergeRequestSpan, significantSpan) {
@@ -174,7 +176,7 @@ export default class LocalDB {
   }
 
   static getCommitDataOwnershipRiver(commitSpan, significantSpan, granularity, interval, excludeMergeCommits) {
-    return Commits.getCommitDataOwnershipRiver(db, commitSpan, significantSpan, granularity, interval, excludeMergeCommits);
+    return Commits.getCommitDataOwnershipRiver(db, tripleStore, commitSpan, significantSpan, granularity, interval, excludeMergeCommits);
   }
 
   static getBuildDataOwnershipRiver(commitSpan, significantSpan, granularity, interval) {
@@ -186,11 +188,11 @@ export default class LocalDB {
   }
 
   static getRelatedCommitDataOwnershipRiver(issue) {
-    return Commits.getRelatedCommitDataOwnershipRiver(db, issue);
+    return Issues.getRelatedCommitDataOwnershipRiver(db, tripleStore, issue);
   }
 
   static getCommitDateHistogram(granularity, dateField, since, until) {
-    return Commits.getCommitDateHistogram(db, granularity, dateField, since, until);
+    return Commits.getCommitDateHistogram(db, tripleStore, granularity, dateField, since, until);
   }
 
   static issueImpactQuery(iid, since, until) {
@@ -248,6 +250,7 @@ export default class LocalDB {
     database.commits_commits = relations['commits-commits'];
     database.commits_files = relations['commits-files'];
     database.commits_files_stakeholders = relations['commits-files-stakeholders'];
+    database.commits_builds = relations['commits-builds'];
     database.commits_languages = relations['commits-languages'];
     database.commits_modules = relations['commits-modules'];
     database.commits_stakeholders = relations['commits-stakeholders'];

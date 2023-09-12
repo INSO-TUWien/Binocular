@@ -54,6 +54,7 @@ const BranchFileConnection = require('./lib/models/BranchFileConnection');
 const BranchFileFileConnection = require('./lib/models/BranchFileFileConnection.js');
 const CommitFileStakeholderConnection = require('./lib/models/CommitFileStakeholderConnection.js');
 const CommitFileConnection = require('./lib/models/CommitFileConnection.js');
+const CommitBuildConnection = require('./lib/models/CommitBuildConnection.js');
 const ConfigurationError = require('./lib/errors/ConfigurationError');
 const DatabaseError = require('./lib/errors/DatabaseError');
 const GateWayService = require('./lib/gateway-service');
@@ -320,11 +321,21 @@ async function indexing(indexers, context, reporter, gateway, indexingThread) {
       threadLog(indexingThread, 'All indexers stopped!');
       return;
     }
-    Promise.all([Commit.deduceStakeholders(), Issue.deduceStakeholders()]).then(() => {
-      threadLog(indexingThread, 'Indexing finished');
-      projectStructureHelper.checkProjectStructureAndFix();
-    });
+
+    await Issue.deduceStakeholders();
     createManualIssueReferences(config.get('issueReferences'));
+    projectStructureHelper.checkProjectStructureAndFix();
+
+    //now that the indexers have finished, we have VCS, ITS and CI data and can connect them.
+    // for that purpose, references between e.g. issues and commits have been stored in the collections.
+    // exmaple: issue has a `mentions` field that contains hashes of commits that mention the issue.
+    // since all indexers run simultaniously, we cant connect the collections right away.
+    // This is why we connect them here and then delete the temporary references in the collections themselves
+    // (like the `mentions` field in issues).
+    await connectIssuesAndCommits();
+    await connectCommitsAndBuilds();
+
+    threadLog(indexingThread, 'Indexing finished');
   } catch (error) {
     if (error && 'name' in error && error.name === 'Gitlab401Error') {
       threadWarn(indexingThread, 'Unable to access GitLab API. Please configure a valid private access token in the UI.');
@@ -488,6 +499,7 @@ function ensureDb(repo, context) {
         MergeRequest.ensureCollection(),
         Milestone.ensureCollection(),
         CommitFileConnection.ensureCollection(),
+        CommitBuildConnection.ensureCollection(),
         LanguageFileConnection.ensureCollection(),
         CommitStakeholderConnection.ensureCollection(),
         IssueStakeholderConnection.ensureCollection(),
@@ -583,3 +595,38 @@ Promise.all(
     stop();
   }
 });
+
+async function connectIssuesAndCommits() {
+  const issues = await Issue.findAll();
+  const commits = await Commit.findAll();
+
+  //at this point, most issues have a mentions attribute which stores the sha hashes of the commits that mention the issue.
+  //connect these commits to the issue:
+  for (const issue of issues) {
+    //some issues are not mentioned by any commits
+    if (!issue.mentions) continue;
+    for (const mention of issue.mentions) {
+      const commit = commits.filter((c) => c.sha === mention.commit);
+      if (commit && commit[0]) {
+        issue.connect(commit[0], { closes: mention.closes });
+      }
+    }
+  }
+  //remove the temporary `mentions` attribute since we have the connections now
+  await Issue.deleteMentionsAttribute();
+}
+
+async function connectCommitsAndBuilds() {
+  const builds = await Build.findAll();
+  const commits = await Commit.findAll();
+
+  for (const build of builds) {
+    if (!build.sha) continue;
+    const commit = commits.filter((c) => c.sha === build.sha);
+    if (commit && commit[0]) {
+      commit[0].connect(build);
+    }
+  }
+
+  await Build.deleteShaRefAttributes();
+}

@@ -21,6 +21,7 @@ const stakeholders = db._collection('stakeholders');
 const modules = db._collection('modules');
 const issues = db._collection('issues');
 const builds = db._collection('builds');
+const commitsBuilds = db._collection('commits-builds');
 const languages = db._collection('languages');
 const branches = db._collection('branches');
 
@@ -92,24 +93,19 @@ const queryType = new gql.GraphQLObjectType({
         },
         makeFilter: (args) => {
           if (!args.buildFilter || args.buildFilter === 'all') {
-            return true;
+            return aql`FILTER TRUE`;
           }
 
           const comparatorMap = {
-            successful: 'gt',
-            failed: 'eq',
+            successful: '>',
+            failed: '==',
           };
 
-          return qb[comparatorMap[args.buildFilter]](
-            qb.LENGTH(
-              qb
-                .for('build')
-                .in('builds')
-                .filter(qb.and(qb.eq('build.sha', 'item.sha'), qb.eq('build.status', qb.str('success'))))
-                .return(1)
-            ),
-            0
-          );
+          const comp = aql.literal(comparatorMap[args.buildFilter]);
+
+          return aql`FILTER (
+            LENGTH((FOR build, edge IN INBOUND item ${commitsBuilds} FILTER (build.status == "success") RETURN 1)) ${comp} 0
+          )`;
         },
       }),
       files: paginated({
@@ -201,15 +197,16 @@ const queryType = new gql.GraphQLObjectType({
             ${limit}
               RETURN stakeholder`,
       }),
+      //TODO use stakeholders collection here
       committers: {
         type: new gql.GraphQLList(gql.GraphQLString),
         resolve: () => {
           return db
             ._query(
               aql`
-              FOR commit IN ${commits}
-                SORT commit.signature ASC
-                RETURN DISTINCT commit.signature`
+              FOR stakeholder IN ${stakeholders}
+                SORT stakeholder.gitSignature ASC
+                RETURN DISTINCT stakeholder.gitSignature`
             )
             .toArray();
         },
@@ -227,23 +224,6 @@ const queryType = new gql.GraphQLObjectType({
         type: require('./types/build.js'),
         args: { since: { type: Timestamp }, until: { type: Timestamp } },
         query: (root, args, limit) => {
-          // let q = qb.for('build').in('builds').sort('build.createdAt', 'ASC');
-
-          // q = queryHelpers.addDateFilter('build.createdAt', 'gte', args.since, q);
-          // q = queryHelpers.addDateFilter('build.createdAt', 'lte', args.until, q);
-
-          // let countsByStatus = qb.for('other').in('builds');
-          // countsByStatus = countsByStatus.filter(qb.lte('other.finishedAt', 'build.createdAt'));
-          // countsByStatus = countsByStatus
-          //   .collect('status', 'other.status')
-          //   .withCountInto('statusCount')
-          //   .return({ ['status']: 'statusCount' });
-
-          // q = q.limit(limit.offset, limit.count).return('build');
-
-          // //TODO: RETURN MERGE(build, { stats: MERGE(countsByStatus) })`;
-
-          // return q;
           if (args.since && args.until) {
             return aql`
           FOR build IN ${builds}
@@ -418,25 +398,20 @@ function makeDateHistogramEndpoint(collection, dateFieldName, { makeFilter, args
     type: require('./types/histogram.js')(gql.GraphQLInt),
     args: extendedArgs,
     resolve(root, args) {
-      let q = qb.for('item').in(collection);
+      //collect parts of the query in an array to join them in the end
+      const queryStr = [aql`FOR item IN ${collection}`];
 
-      q = queryHelpers.addDateFilter('item.' + (dateFieldName || args.dateField), 'gte', args.since, q);
-      q = queryHelpers.addDateFilter('item.' + (dateFieldName || args.dateField), 'lte', args.until, q);
+      queryStr.push(queryHelpers.addDateFilterAQL('item.' + (dateFieldName || args.dateField), '>=', args.since));
+      queryStr.push(queryHelpers.addDateFilterAQL('item.' + (dateFieldName || args.dateField), '<=', args.until));
 
       if (makeFilter) {
-        q = q.filter(makeFilter(args));
+        queryStr.push(makeFilter(args));
       }
 
-      q = q
-        .collect('category', args.granularity(`item.${dateFieldName || args.dateField}`))
-        .withCountInto('length')
-        .return({
-          category: 'category',
-          count: 'length',
-        })
-        .toAQL();
+      const granularity = aql.literal(args.granularity(`item.${dateFieldName || args.dateField}`));
+      queryStr.push(aql`COLLECT category = ${granularity} WITH COUNT INTO length RETURN {category: category, count: length}`);
 
-      return db._query(q).toArray();
+      return db._query(aql.join(queryStr)).toArray();
     },
   };
 }
