@@ -1,13 +1,13 @@
 'use strict';
 
 import React from 'react';
-import { Stage, Layer, Circle, Arrow, Line, Text, Wedge, Rect } from 'react-konva';
+import { Stage, Layer, Circle, Arrow, Line, Text, Wedge } from 'react-konva';
 import styles from '../styles.scss';
 import * as eventHandlers from  './eventHandlers';
 import BranchAwayModal from '../modals/BranchAway';
 import CheckoutModal from '../modals/SwitchBranch';
 import MergeModal from '../modals/MergeOrRebaseBranch';
-
+import CommitSummary from '../konvaComponents/commitSummary';
 
 export default class ReverseCommands extends React.Component {
   constructor(props) {
@@ -119,61 +119,12 @@ export default class ReverseCommands extends React.Component {
 
               />
             ))}
-            {(this.state.hoveredCircleIndex ) && (
-              <React.Fragment>
-                <Rect
-                  x={this.state.hoveredCircleIndex.x}
-                  y={this.state.hoveredCircleIndex.y + 20}
-                  width={450}
-                  height={100}
-                  fill="white"
-                  stroke="black"
-                  strokeWidth={1}
-                  cornerRadius={5}
-                  opacity={0.5}
-                />
-                <Text
-                  x={this.state.hoveredCircleIndex.x + 10} // Adjust the positioning as needed
-                  y={this.state.hoveredCircleIndex.y + 25} // Adjust the positioning as needed
-                  text="Summary:"
-                  fontSize={14}
-                  fontStyle="bold"
-                  fontFamily="Arial"
-                  fill="black"
-                />
-                <Text
-                  x={this.state.hoveredCircleIndex.x + 10} // Adjust the positioning as needed
-                  y={this.state.hoveredCircleIndex.y + 45} // Adjust the positioning as needed
-                  text={`Date: ${this.state.hoveredCircleIndex.date}`}
-                  fontSize={14}
-                  fontFamily="Arial"
-                  fill="black"
-                />
-                <Text
-                  x={this.state.hoveredCircleIndex.x + 10} // Adjust the positioning as needed
-                  y={this.state.hoveredCircleIndex.y + 60} // Adjust the positioning as needed
-                  text={`Branch: ${this.state.hoveredCircleIndex.branch}`}
-                  fontSize={14}
-                  fontFamily="Arial"
-                  fill="black"
-                />
-                <Text
-                  x={this.state.hoveredCircleIndex.x + 10} // Adjust the positioning as needed
-                  y={this.state.hoveredCircleIndex.y + 75} // Adjust the positioning as needed
-                  text={`Author: ${this.state.hoveredCircleIndex.signature}`}
-                  fontSize={14}
-                  fontFamily="Arial"
-                  fill="black"
-                />
-                <Text
-                  x={this.state.hoveredCircleIndex.x + 10} // Adjust the positioning as needed
-                  y={this.state.hoveredCircleIndex.y + 90} // Adjust the positioning as needed
-                  text={`Message: ${this.state.hoveredCircleIndex.message}`}
-                  fontSize={14}
-                  fontFamily="Arial"
-                  fill="black"
-                />
-              </React.Fragment>
+            {this.state.hoveredCircleIndex && (
+              <CommitSummary
+                x={this.state.hoveredCircleIndex.x}
+                y={this.state.hoveredCircleIndex.y}
+                hoveredCircleIndex={this.state.hoveredCircleIndex}
+              />
             )}
 
             {this.state.graph_konva.branches.map((branch) => (
