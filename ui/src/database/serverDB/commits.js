@@ -8,11 +8,15 @@ import { addHistoryToAllCommits } from '../utils';
 export default class Commits {
   static getCommitData(commitSpan, significantSpan) {
     const commitList = [];
-    const getCommitsPage = (since, until) => (page, perPage) => {
+    const significantSince = significantSpan[0];
+    const significantUntil = significantSpan[1];
+    //important: we do not use significantSince in the query directly
+    // because we need a full commit history to add the `history` attribute to all commits.
+    const getCommitsPage = (until) => (page, perPage) => {
       return graphQl
         .query(
-          `query($page: Int, $perPage: Int, $since: Timestamp, $until: Timestamp) {
-             commits(page: $page, perPage: $perPage, since: $since, until: $until) {
+          `query($page: Int, $perPage: Int, $until: Timestamp) {
+             commits(page: $page, perPage: $perPage, until: $until) {
                count
                page
                perPage
@@ -33,17 +37,18 @@ export default class Commits {
                }
              }
           }`,
-          { page, perPage, since, until }
+          { page, perPage, until }
         )
         .then((resp) => resp.commits);
     };
 
-    return traversePages(getCommitsPage(significantSpan[0], significantSpan[1]), (commit) => {
+    return traversePages(getCommitsPage(significantUntil), (commit) => {
       commitList.push(commit);
     }).then(function () {
       const allCommits = commitList.sort((a, b) => new Date(b.date) - new Date(a.date));
       addHistoryToAllCommits(allCommits);
-      return allCommits;
+      //we can now remove commits that happened before significantSince, because now the history has been calculated
+      return allCommits.filter((c) => new Date(c.date) >= new Date(significantSince));
     });
   }
 
@@ -56,11 +61,13 @@ export default class Commits {
 
   static getCommitDataWithFiles(commitSpan, significantSpan) {
     const commitList = [];
-    const getCommitsPage = (since, until) => (page, perPage) => {
+    const significantSince = significantSpan[0];
+    const significantUntil = significantSpan[1];
+    const getCommitsPage = (until) => (page, perPage) => {
       return graphQl
         .query(
-          `query($page: Int, $perPage: Int, $since: Timestamp, $until: Timestamp) {
-            commits(page: $page, perPage: $perPage, since: $since, until: $until) {
+          `query($page: Int, $perPage: Int, $until: Timestamp) {
+            commits(page: $page, perPage: $perPage, until: $until) {
              count,
              page,
              perPage,
@@ -88,27 +95,29 @@ export default class Commits {
              }
             }
           }`,
-          { page, perPage, since, until }
+          { page, perPage, until }
         )
         .then((resp) => resp.commits);
     };
 
-    return traversePages(getCommitsPage(significantSpan[0], significantSpan[1]), (commit) => {
+    return traversePages(getCommitsPage(significantUntil), (commit) => {
       commitList.push(commit);
     }).then(function () {
       const allCommits = commitList.sort((a, b) => new Date(b.date) - new Date(a.date));
       addHistoryToAllCommits(allCommits);
-      return allCommits;
+      return allCommits.filter((c) => new Date(c.date) >= new Date(significantSince));
     });
   }
 
   static getCommitDataWithFilesAndOwnership(commitSpan, significantSpan) {
     const commitList = [];
-    const getCommitsPage = (since, until) => (page, perPage) => {
+    const significantSince = significantSpan[0];
+    const significantUntil = significantSpan[1];
+    const getCommitsPage = (until) => (page, perPage) => {
       return graphQl
         .query(
-          `query($page: Int, $perPage: Int, $since: Timestamp, $until: Timestamp) {
-            commits(page: $page, perPage: $perPage, since: $since, until: $until) {
+          `query($page: Int, $perPage: Int, $until: Timestamp) {
+            commits(page: $page, perPage: $perPage, until: $until) {
              count,
              page,
              perPage,
@@ -140,17 +149,17 @@ export default class Commits {
              }
             }
           }`,
-          { page, perPage, since, until }
+          { page, perPage, until }
         )
         .then((resp) => resp.commits);
     };
 
-    return traversePages(getCommitsPage(significantSpan[0], significantSpan[1]), (commit) => {
+    return traversePages(getCommitsPage(significantUntil), (commit) => {
       commitList.push(commit);
     }).then(function () {
       const allCommits = commitList.sort((a, b) => new Date(b.date) - new Date(a.date));
       addHistoryToAllCommits(allCommits);
-      return allCommits;
+      return allCommits.filter((c) => new Date(c.date) >= new Date(significantSince));
     });
   }
 
