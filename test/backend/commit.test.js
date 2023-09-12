@@ -17,6 +17,7 @@ const CommitStakeholderConnection = require('../../lib/models/CommitStakeholderC
 const config = require('../../lib/config.js').get();
 const ctx = require('../../lib/context');
 const GitHubUrlProvider = require('../../lib/url-providers/GitHubUrlProvider');
+const Stakeholder = require('../../lib/models/Stakeholder.js');
 
 const expect = chai.expect;
 
@@ -47,6 +48,7 @@ describe('commit', function () {
       await Language.ensureCollection();
       await LanguageFileConnection.ensureCollection();
       await CommitStakeholderConnection.ensureCollection();
+      await Stakeholder.ensureCollection();
 
       await fake.file(repo, 'test.js', testFile);
       await helpers.commit(repo, ['test.js'], bob, 'Commit1');
