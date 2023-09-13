@@ -1,7 +1,7 @@
 'use strict';
 
 import { connect } from 'react-redux';
-import Chart from './konva_chart.js';
+import Chart from './chart.js';
 import { setActiveBranch, setActiveBranches } from '../../../legacy/code-hotspots/sagas';
 import { setSelectedBranches } from '../sagas';
 

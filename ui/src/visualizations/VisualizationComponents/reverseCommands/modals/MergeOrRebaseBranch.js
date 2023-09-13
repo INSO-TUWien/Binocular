@@ -28,17 +28,12 @@ export default class MergeModal extends React.Component {
   checkForMerge = (targetCommit, originCommit, state) => {
     //Check if TargetBranch is Origin Branch
     const targetBranch = targetCommit.branch;
-    console.log('target Branch', targetBranch);
-
     const sourceBranch = originCommit.branch;
-    console.log('source Branch', sourceBranch);
-
     const originBranch = this.originatesFrom(sourceBranch, state.graph_konva.organizedCommits, state.graph_konva.crossBranchParents);
-    console.log('origin Branch', originBranch)
 
     if (originBranch === targetBranch) {
-      console.log('Merge to origin is possible!');
-      // Check for type of merge , 3 way or fast forward
+
+      // Check for type of merge , 3 way or fast-forward
       const commitsInOrigin = state.graph_konva.organizedCommits[originBranch];
       const firstCommitInSource =  state.graph_konva.organizedCommits[sourceBranch][0];
       const originCommitInOrigin = state.graph_konva.crossBranchParents.filter((x) => x.to === firstCommitInSource.sha)[0].from;

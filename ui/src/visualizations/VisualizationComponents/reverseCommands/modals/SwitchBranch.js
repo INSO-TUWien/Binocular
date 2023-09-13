@@ -1,3 +1,5 @@
+'use strict';
+
 import React from 'react';
 import Modal from 'react-modal';
 import styles from '../styles.scss';
@@ -5,10 +7,8 @@ import * as eventHandlers from '../chart/eventHandlers';
 import copyToClipboard from '../../../dashboard/assets/copyToClipboardIcon.svg';
 
 export default class CheckoutModal extends React.Component {
-  originatesFrom = (branchName, organizedCommits, crossBranchParents) => {
+  originatesFrom(branchName, organizedCommits, crossBranchParents) {
     const firstCommit = organizedCommits[branchName][0];
-    console.log(firstCommit);
-    console.log(crossBranchParents);
     const erg = crossBranchParents.filter((r) => r.to === firstCommit.sha);
     if (erg.length === 0) {
       return "This is the initial branch."
