@@ -43,7 +43,6 @@ export const addHistoryToAllCommits = (allCommits) => {
     }
     history = _.uniq(history).sort((a, b) => positions[b] - positions[a]);
     historycache[commit.sha] = history;
-
     commit.history = history.join();
 
     //find all children of commit
