@@ -165,7 +165,9 @@ export default () => {
     const latestBranchCommit = branchCommits.sort((a, b) => new Date(b.date) - new Date(a.date))[0];
     const blameRes = getBlameModules(latestBranchCommit, activeFiles, branchCommits);
     for (const [name, val] of Object.entries(blameRes)) {
-      result['devData'][name]['linesOwned'] = val;
+      if (result['devData'][name]) {
+        result['devData'][name]['linesOwned'] = val;
+      }
     }
     setData(result);
   }, [rawData, activeFiles]);
