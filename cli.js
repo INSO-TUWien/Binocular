@@ -28,10 +28,25 @@ cli
     'Binocular is a tool for visualizing data from various software-engineering tools.' +
       ' It works as a command-line tool run from a git-repository.' +
       ' When run, Binocular will gather data from the repository ' +
-      'and the GitLab REST-API and persist it to a configured ArangoDB instance.\n' +
+      'and the GitHub or GitLab API and persist it to a configured ArangoDB instance.\n' +
       '\n' +
       'Binocular then hosts interactive visualizations about the gathered data via a web-interface.'
   )
+  .addOption(new Option('-sdb, --setup-db', 'helps set up the database needed for the backend application to run'))
+  .addOption(new Option('-sc, --setup-config', 'starts an interactive step-by-step wizard that configures the application'))
+  .addOption(
+    new Option(
+      '-rc, --run-concurrently [repo]',
+      'starts the dev backend and frontend application for repository [repo]. Default is current repository.'
+    ).preset('.')
+  )
+  .addOption(
+    new Option(
+      '-rb, --run-backend [repo]',
+      'starts the dev backend application for repository [repo]. Default is current repository.'
+    ).preset('.')
+  )
+  .addOption(new Option('-rf,--run-frontend', 'starts the dev frontend application'))
   .addOption(
     new Option(
       '-e, --export-db [repo]',
@@ -45,21 +60,7 @@ cli
     ).preset('.')
   )
   .addOption(new Option('--build-offline-no-export', 'builds the frontend application.'))
-  .addOption(new Option('-rf,--run-frontend', 'starts the dev frontend application'))
-  .addOption(
-    new Option(
-      '-rb, --run-backend [repo]',
-      'starts the dev backend application for repository [repo]. Default is current repository.'
-    ).preset('.')
-  )
-  .addOption(
-    new Option(
-      '-rc, --run-concurrently [repo]',
-      'starts the dev backend and frontend application for repository [repo]. Default is current repository.'
-    ).preset('.')
-  )
-  .addOption(new Option('--setup-db', 'helps set up the database needed for the backend application to run'))
-  .addOption(new Option('--setup-config', 'starts an interactive step-by-step wizard that configures the application'))
+
   .parse(process.argv);
 
 console.log(chalk.green(figlet.textSync('Binocular')));
@@ -84,7 +85,7 @@ if (options.buildOfflineNoExport) {
 
 if (options.runFrontend) {
   console.log(chalk.cyan('Starting the frontend application...'));
-  execute('webpack serve --config webpack.dev.js');
+  execute('npm run dev-frontend');
 }
 
 if (options.runBackend) {
@@ -98,6 +99,13 @@ if (options.runConcurrently) {
 }
 
 if (options.setupDb) {
+  console.log(
+    'To use binocular you need a version of ' +
+      chalk.underline('ArangoDB') +
+      ' running (Tested with ArangoDB 3.11). It is recommended to use the ' +
+      chalk.underline('Docker Image') +
+      ' provided by ArangoDB.\n'
+  );
   console.log(chalk.cyan('Opening the ArangoDB download site...'));
   open('https://www.arangodb.com/download-major/');
 }

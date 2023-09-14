@@ -7,32 +7,40 @@ function promptUserAndSaveConfig() {
       {
         type: 'input',
         name: 'gitlabUrl',
-        message: 'Enter GitLab URL [optional]:',
+        message: 'Enter GitLab URL [only necessary for GitLab Repositories]:',
+      },
+      {
+        type: 'input',
+        name: 'gitlabProject',
+        message:
+          'Enter GitLab Group and Project Name (Example Format: [Group Name]/[SubgroupName]/[ProjectName])' +
+          '[only necessary for GitLab Repositories]:',
       },
       {
         type: 'input',
         name: 'gitlabToken',
-        message: 'Enter GitLab API Token [optional]:',
+        message: 'Enter GitLab API Token [only necessary for GitLab Repositories]:',
       },
       {
         type: 'input',
         name: 'githubUsername',
-        message: 'Enter GitHub Username:',
+        message: 'Enter GitHub Username [only necessary for GitHub Repositories]:',
       },
       {
         type: 'password',
         name: 'githubPassword',
-        message: 'Enter GitHub Password:',
+        message: 'Enter GitHub Password [only necessary for GitHub Repositories]:',
       },
       {
         type: 'input',
         name: 'githubToken',
-        message: 'Enter GitHub API Token:',
+        message: 'Enter GitHub API Token [only necessary for GitHub Repositories]:',
       },
       {
         type: 'input',
         name: 'arangoHost',
         message: 'Enter Arango Host:',
+        default: '127.0.0.1',
       },
       {
         type: 'input',
@@ -42,11 +50,13 @@ function promptUserAndSaveConfig() {
           const number = parseInt(input);
           return Number.isInteger(number) && number > 0 && number < 65536;
         },
+        default: 8529,
       },
       {
         type: 'input',
         name: 'arangoUser',
         message: 'Enter Arango User:',
+        default: 'root',
       },
       {
         type: 'password',
@@ -63,7 +73,7 @@ function promptUserAndSaveConfig() {
       {
         type: 'list',
         name: 'ci',
-        message: 'Select CI (Continuous Integration) system:',
+        message: 'Select CI System (Continuous Integration):',
         choices: ['github', 'gitlab', 'none'],
         default: 'none',
       },
@@ -72,6 +82,7 @@ function promptUserAndSaveConfig() {
       const data = {
         gitlab: {
           url: answers.gitlabUrl,
+          project: answers.gitlabProject,
           token: answers.gitlabToken,
         },
         github: {
