@@ -38,6 +38,7 @@ import changes from './visualizations/VisualizationComponents/changes';
 import sprints from './visualizations/VisualizationComponents/sprints';
 import timeSpent from './visualizations/VisualizationComponents/timeSpent';
 import codeOwnership from './visualizations/code-ownership';
+import distributionDials from './visualizations/distribution-dials';
 import RootOffline from './components/RootOffline';
 
 const visualizationModules = [
@@ -45,6 +46,7 @@ const visualizationModules = [
   dashboard,
   codeOwnershipRiver,
   issueImpact,
+  distributionDials,
   hotspotDials,
   codeHotspots,
   languageModuleRiver,
