@@ -64,7 +64,7 @@ function promptUserAndSaveConfig() {
         type: 'list',
         name: 'ci',
         message: 'Select CI (Continuous Integration) system:',
-        choices: ['travis', 'gitlab', 'none'],
+        choices: ['github', 'gitlab', 'none'],
         default: 'none',
       },
     ])
