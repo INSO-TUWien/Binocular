@@ -14,16 +14,23 @@ export const addHistoryToAllCommits = (allCommits) => {
     positions[commitsShas[i]] = i;
   }
 
-  const genesis = commits[0];
-  historycache[genesis.sha] = [genesis.sha];
+  //for all commits that do not have parents, add them to the cache
+  //necessary for gitlab projects that can have multiple initial commits
+  const initialCommits = allCommits.filter((c) => c.parents.length === 0);
 
+  let children = [];
   let frontier = [];
 
-  //find all children of genesis
-  const children = allCommits.filter((child) => child.parents.includes(genesis.sha));
+  for (const genesis of initialCommits) {
+    historycache[genesis.sha] = [genesis.sha];
+    //find all children of genesis
+    children = children.concat(allCommits.filter((child) => child.parents.includes(genesis.sha)));
+  }
+
   for (const child of children) {
     frontier.push(child);
   }
+  frontier = _.uniqBy(frontier, (c) => c.sha);
 
   const helper = (commit) => {
     let history = [commit.sha];
