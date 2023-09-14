@@ -2,8 +2,8 @@ name: Docker Image CI
 
 on:
   push:
-   branches:
-      - feature/149
+    branches:
+      - develop
       
 env:
   REGISTRY: ghcr.io
