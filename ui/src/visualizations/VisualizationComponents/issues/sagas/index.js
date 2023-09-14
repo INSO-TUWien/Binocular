@@ -1,7 +1,6 @@
 'use strict';
 
 import { fetchFactory, mapSaga, timestampedActionFactory } from '../../../../sagas/utils';
-import Promise from 'bluebird';
 import { select, throttle, fork, takeEvery } from 'redux-saga/effects';
 import { createAction } from 'redux-actions';
 import Database from '../../../../database/database';
@@ -20,7 +19,7 @@ export default function* () {
   yield* fetchIssuesData();
 
   yield fork(watchRefreshRequests);
-  yield fork(watchMessages);
+  yield fork(watchProgress);
 
   // keep looking for viewport changes to re-fetch
   yield fork(watchRefresh);
@@ -48,8 +47,8 @@ function* watchRefreshRequests() {
   yield throttle(5000, 'REQUEST_REFRESH', mapSaga(refresh));
 }
 
-function* watchMessages() {
-  yield takeEvery('message', mapSaga(requestRefresh));
+function* watchProgress() {
+  yield takeEvery('PROGRESS', mapSaga(requestRefresh));
 }
 
 function* watchToggleHelp() {
@@ -77,14 +76,17 @@ export const fetchIssuesData = fetchFactory(
 
     let firstSignificantTimestamp = Math.max(viewport[0], Math.min(firstCommitTimestamp, firstIssueTimestamp));
     let lastSignificantTimestamp = viewport[1] ? viewport[1].getTime() : Math.max(lastCommitTimestamp, lastIssueTimestamp);
-    const timeSpan = state.visualizations.newDashboard.state.config.chartTimeSpan;
+    const timeSpan = state.universalSettings.chartTimeSpan;
     firstSignificantTimestamp = timeSpan.from === undefined ? firstSignificantTimestamp : new Date(timeSpan.from).getTime();
     lastSignificantTimestamp = timeSpan.to === undefined ? lastSignificantTimestamp : new Date(timeSpan.to).getTime();
-    return yield Promise.join(
+    return yield Promise.all([
       Database.getIssueData([firstIssueTimestamp, lastIssueTimestamp], [firstSignificantTimestamp, lastSignificantTimestamp]),
-      Database.getIssueData([firstIssueTimestamp, lastIssueTimestamp], [firstIssueTimestamp, lastIssueTimestamp])
-    )
-      .spread((filteredIssues, issues) => {
+      Database.getIssueData([firstIssueTimestamp, lastIssueTimestamp], [firstIssueTimestamp, lastIssueTimestamp]),
+    ])
+      .then((result) => {
+        const filteredIssues = result[0];
+        const issues = result[1];
+
         return {
           otherCount: 0,
           filteredIssues,

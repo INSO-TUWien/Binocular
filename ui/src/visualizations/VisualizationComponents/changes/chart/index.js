@@ -5,7 +5,7 @@ import Chart from './chart.js';
 
 const mapStateToProps = (state /*, ownProps*/) => {
   const changesState = state.visualizations.changes.state;
-  const universalSettings = state.visualizations.newDashboard.state.config;
+  const universalSettings = state.universalSettings;
   return {
     palette: changesState.data.data.palette,
     otherCount: changesState.data.data.otherCount,
@@ -22,6 +22,7 @@ const mapStateToProps = (state /*, ownProps*/) => {
     otherAuthors: universalSettings.otherAuthors,
     mergedAuthors: universalSettings.mergedAuthors,
     chartResolution: universalSettings.chartResolution,
+    excludeMergeCommits: universalSettings.excludeMergeCommits,
   };
 };
 

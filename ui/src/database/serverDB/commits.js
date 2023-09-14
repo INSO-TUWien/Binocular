@@ -3,15 +3,20 @@
 import { collectPages, graphQl, traversePages } from '../../utils';
 import _ from 'lodash';
 import moment from 'moment/moment';
+import { addHistoryToAllCommits } from '../utils';
 
 export default class Commits {
   static getCommitData(commitSpan, significantSpan) {
     const commitList = [];
-    const getCommitsPage = (since, until) => (page, perPage) => {
+    const significantSince = significantSpan[0];
+    const significantUntil = significantSpan[1];
+    //important: we do not use significantSince in the query directly
+    // because we need a full commit history to add the `history` attribute to all commits.
+    const getCommitsPage = (until) => (page, perPage) => {
       return graphQl
         .query(
-          `query($page: Int, $perPage: Int, $since: Timestamp, $until: Timestamp) {
-             commits(page: $page, perPage: $perPage, since: $since, until: $until) {
+          `query($page: Int, $perPage: Int, $until: Timestamp) {
+             commits(page: $page, perPage: $perPage, until: $until) {
                count
                page
                perPage
@@ -32,19 +37,261 @@ export default class Commits {
                }
              }
           }`,
-          { page, perPage, since, until }
+          { page, perPage, until }
         )
         .then((resp) => resp.commits);
     };
 
-    return traversePages(getCommitsPage(significantSpan[0], significantSpan[1]), (commit) => {
+    return traversePages(getCommitsPage(significantUntil), (commit) => {
       commitList.push(commit);
     }).then(function () {
-      return commitList;
+      const allCommits = commitList.sort((a, b) => new Date(b.date) - new Date(a.date));
+      addHistoryToAllCommits(allCommits);
+      //we can now remove commits that happened before significantSince, because now the history has been calculated
+      return allCommits.filter((c) => new Date(c.date) >= new Date(significantSince));
     });
   }
 
-  static getCommitDataOwnershipRiver(commitSpan, significantSpan, granularity, interval) {
+  //easier to fetch all commits first because all commits are needed for the history attribute
+  static getCommitDataForSha(sha) {
+    return this.getCommitData([new Date(0), new Date()], [new Date(0), new Date()]).then(
+      (commits) => commits.filter((c) => c.sha === sha)[0]
+    );
+  }
+
+  static getCommitDataWithFiles(commitSpan, significantSpan) {
+    const commitList = [];
+    const significantSince = significantSpan[0];
+    const significantUntil = significantSpan[1];
+    const getCommitsPage = (until) => (page, perPage) => {
+      return graphQl
+        .query(
+          `query($page: Int, $perPage: Int, $until: Timestamp) {
+            commits(page: $page, perPage: $perPage, until: $until) {
+             count,
+             page,
+             perPage,
+             data {
+               sha,
+               branch,
+               message,
+               signature,
+               webUrl,
+               date,
+               parents,
+               stats {
+                 additions,
+                 deletions
+               }
+               files{
+                 data {
+                   file{
+                     path
+                   }
+                   stats {additions,deletions},
+                   hunks {newLines}
+                 }
+               }
+             }
+            }
+          }`,
+          { page, perPage, until }
+        )
+        .then((resp) => resp.commits);
+    };
+
+    return traversePages(getCommitsPage(significantUntil), (commit) => {
+      commitList.push(commit);
+    }).then(function () {
+      const allCommits = commitList.sort((a, b) => new Date(b.date) - new Date(a.date));
+      addHistoryToAllCommits(allCommits);
+      return allCommits.filter((c) => new Date(c.date) >= new Date(significantSince));
+    });
+  }
+
+  static getCommitDataWithFilesAndOwnership(commitSpan, significantSpan) {
+    const commitList = [];
+    const significantSince = significantSpan[0];
+    const significantUntil = significantSpan[1];
+    const getCommitsPage = (until) => (page, perPage) => {
+      return graphQl
+        .query(
+          `query($page: Int, $perPage: Int, $until: Timestamp) {
+            commits(page: $page, perPage: $perPage, until: $until) {
+             count,
+             page,
+             perPage,
+             data {
+               sha,
+               branch,
+               message,
+               signature,
+               webUrl,
+               date,
+               parents,
+               stats {
+                 additions,
+                 deletions
+               }
+               files{
+                 data {
+                   file{
+                     path
+                   }
+                   ownership {
+                    stakeholder
+                    ownedLines
+                  }
+                   stats {additions,deletions},
+                   hunks {newLines}
+                 }
+               }
+             }
+            }
+          }`,
+          { page, perPage, until }
+        )
+        .then((resp) => resp.commits);
+    };
+
+    return traversePages(getCommitsPage(significantUntil), (commit) => {
+      commitList.push(commit);
+    }).then(function () {
+      const allCommits = commitList.sort((a, b) => new Date(b.date) - new Date(a.date));
+      addHistoryToAllCommits(allCommits);
+      return allCommits.filter((c) => new Date(c.date) >= new Date(significantSince));
+    });
+  }
+
+  static getCommitsForFiles(filenames, omitFiles) {
+    return graphQl
+      .query(
+        `query {
+         commits {
+          count,
+          data {
+            sha,
+            branch,
+            message,
+            signature,
+            webUrl,
+            date,
+            parents,
+            stats {
+              additions,
+              deletions
+            }
+            files{
+              data {
+                file{
+                  path
+                }
+              }
+            }
+          }
+         }
+       }`,
+        {}
+      )
+      .then((resp) => resp.commits.data)
+      .then((commits) => {
+        const allCommits = commits.sort((a, b) => new Date(b.date) - new Date(a.date));
+        addHistoryToAllCommits(allCommits);
+        const result = [];
+        for (const commit of allCommits) {
+          for (const cFile of commit.files.data) {
+            if (filenames.includes(cFile.file.path)) {
+              //this function should only return the commit data. We do not need the files entry anymore
+              if (omitFiles) {
+                result.push(_.omit(commit, 'files'));
+              } else {
+                result.push(commit);
+              }
+              break;
+            }
+          }
+        }
+        return result;
+      });
+  }
+
+  static getOwnershipDataForCommit(sha) {
+    return graphQl
+      .query(
+        `
+        query {
+          commit(sha: "${sha}") {
+            files {
+              data {
+                file {
+                  path
+                }
+                ownership {
+                  stakeholder
+                  ownedLines
+                }
+              }
+            }
+          }
+        }
+      `
+      )
+      .then((res) => res.commit.files.data)
+      .then((ownershipData) =>
+        ownershipData.map((o) => {
+          return {
+            path: o.file.path,
+            ownership: o.ownership,
+          };
+        })
+      );
+  }
+
+  static getOwnershipDataForCommits() {
+    return graphQl
+      .query(
+        `
+        query {
+          commits {
+            data {
+              sha
+              date
+              files {
+                data {
+                  file {
+                    path
+                  }
+                  action
+                  ownership {
+                    stakeholder
+                    ownedLines
+                  }
+                }
+              }
+            }
+          }
+        }
+      `
+      )
+      .then((res) => res.commits.data)
+      .then((commits) =>
+        commits.map((c) => {
+          return {
+            sha: c.sha,
+            date: c.date,
+            files: c.files.data.map((fileData) => {
+              return {
+                path: fileData.file.path,
+                action: fileData.action,
+                ownership: fileData.ownership,
+              };
+            }),
+          };
+        })
+      );
+  }
+
+  static getCommitDataOwnershipRiver(commitSpan, significantSpan, granularity, interval, excludeMergeCommits) {
     const statsByAuthor = {};
 
     const totals = {
@@ -76,6 +323,7 @@ export default class Commits {
                  sha
                  date
                  messageHeader
+                 message
                  signature
                  stats {
                    additions
@@ -139,6 +387,10 @@ export default class Commits {
     }
 
     return traversePages(getCommitsPage(significantSpan[0], significantSpan[1]), (commit) => {
+      if (excludeMergeCommits && commit.message.includes('Merge')) {
+        return;
+      }
+
       const dt = Date.parse(commit.date);
       let stats = statsByAuthor[commit.signature];
       if (!stats) {
@@ -245,19 +497,20 @@ export default class Commits {
   }
 
   static getCodeHotspotsChangeData(file) {
-    return graphQl.query(
-      `
+    return graphQl
+      .query(
+        `
         query($file: String!) {
           file(path: $file){
               path
               maxLength
               commits{
                   data{
+                    commit{
                       message
                       sha
                       signature
                       branch
-                      history
                       parents
                       date
                       stats{
@@ -276,12 +529,42 @@ export default class Commits {
                               oldLines
                           }
                       }
+                    }
                   }
               }
           }
       }
       `,
-      { file: file }
-    );
+        { file: file }
+      )
+      .then((result) => {
+        //get all commits, calculate history, append history to all originally fetched commits
+        return graphQl
+          .query(
+            `
+          query {
+            commits {
+              data {
+                sha
+                date
+                parents
+              }
+            }
+        }
+        `
+          )
+          .then((commits) => {
+            const allCommits = commits.commits.data;
+            addHistoryToAllCommits(allCommits);
+
+            result.file.commits.data = result.file.commits.data.map((d) => {
+              let c = d.commit;
+              let his = allCommits.filter((com) => com.sha === c.sha)[0].history;
+              c.history = his;
+              return c;
+            });
+            return result;
+          });
+      });
   }
 }

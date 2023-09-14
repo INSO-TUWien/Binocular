@@ -1,0 +1,43 @@
+.milestones{
+  height: 8rem;
+  width: 100%;
+  overflow-y: scroll;
+}
+
+.milestonesScroll{
+  width: max-content;
+  height: 100%;
+}
+
+.milestone{
+  display: inline-block;
+  height: 6rem;
+  border: 2px solid #3273dc;
+  margin: 0 0.1rem;
+  overflow: hidden;
+  border-radius: 0.2rem;
+}
+.milestoneText{
+  display: flex;
+  flex-direction: column;
+  float: left;
+  align-items: start;
+  justify-content: center;
+  padding-left: 1rem;
+  padding-right: 2rem;
+  height: 6rem;
+}
+
+.milestoneAddButton{
+  float: right;
+  height: 6rem;
+  border: none;
+  border-radius: 0;
+  background: #3273dc;
+  color: white;
+}
+
+.milestoneAddButton:hover{
+  background: #2262ca!important;
+  color: whitesmoke!important;
+}

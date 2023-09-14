@@ -2,7 +2,7 @@
 
 import React from 'react';
 import visualizationRegistry from '../../visualizationRegistry';
-import styles from './visualizationSelector.css';
+import styles from './visualizationSelector.scss';
 
 export default class VisualizationSelector extends React.PureComponent {
   constructor(props) {

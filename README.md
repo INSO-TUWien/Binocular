@@ -1,7 +1,8 @@
 Binocular
 =====
 
-[![Build Status](https://travis-ci.org/INSO-TUWien/Binocular.svg?branch=development)](https://travis-ci.org/INSO-TUWien/Binocular)
+[![Build Binocular](https://github.com/INSO-TUWien/Binocular/actions/workflows/build-binocular.yml/badge.svg?branch=develop)](https://github.com/INSO-TUWien/Binocular/actions/workflows/build-binocular.yml)
+[![Test ESLint](https://github.com/INSO-TUWien/Binocular/actions/workflows/eslint.yml/badge.svg?branch=develop)](https://github.com/INSO-TUWien/Binocular/actions/workflows/eslint.yml)
 
 Binocular is a tool for visualizing data from various software-engineering
 tools. It works as a command-line tool run from a git-repository. When
@@ -63,7 +64,7 @@ json.
               Should only be used if the repository could not detect the indexers automatically.
   - `its`: Holds the name of the issue tracking system indexer,for instance, gitlab or github
   - `ci`: Since the CI indexer importer is searching for the corresponding file in the repository, it can be necessary to specify the
-          correct indexer like, for example, travis.
+          correct indexer like, for example, gitlab, github or travis.
          
 A sample configuration file looks like this:
 
@@ -88,7 +89,7 @@ A sample configuration file looks like this:
   },
   "indexers": {
     "its": "github",
-    "ci": "travis" 
+    "ci": "github" 
   }
 }
 ```

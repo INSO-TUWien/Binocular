@@ -5,7 +5,7 @@ import Chart from './chart.js';
 
 const mapStateToProps = (state) => {
   const hdState = state.visualizations.hotspotDials.state;
-  const universalSettings = state.visualizations.newDashboard.state.config;
+  const universalSettings = state.universalSettings;
 
   return {
     splitCommits: hdState.config.splitCommits,

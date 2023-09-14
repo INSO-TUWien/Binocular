@@ -4,11 +4,13 @@ const gql = require('graphql-sync');
 const arangodb = require('@arangodb');
 const db = arangodb.db;
 const aql = arangodb.aql;
+const commitsToCommits = db._collection('commits-commits');
 const commitsToFiles = db._collection('commits-files');
-const builds = db._collection('builds');
+const commitsToFilesToStakeholders = db._collection('commits-files-stakeholders');
 const commitsToStakeholders = db._collection('commits-stakeholders');
 const commitsToLanguages = db._collection('commits-languages');
 const CommitsToModules = db._collection('commits-modules');
+const commitsToBuilds = db._collection('commits-builds');
 const paginated = require('./paginated.js');
 const Timestamp = require('./Timestamp.js');
 
@@ -37,14 +39,35 @@ module.exports = new gql.GraphQLObjectType({
       signature: {
         type: gql.GraphQLString,
         description: "The commit author's signature",
+        resolve(commit) {
+          return db
+            ._query(
+              aql`
+              FOR stakeholder, edge
+              IN INBOUND ${commit} ${commitsToStakeholders}
+              return stakeholder.gitSignature
+          `
+            )
+            .toArray()[0];
+        },
       },
       branch: {
         type: gql.GraphQLString,
         description: 'The commit branch',
       },
       parents: {
-        type: gql.GraphQLString,
+        type: new gql.GraphQLList(gql.GraphQLString),
         description: 'Parents of the commit',
+        resolve(commit) {
+          return db
+            ._query(
+              aql`
+            FOR c, edge
+            IN inbound ${commit} ${commitsToCommits}
+            RETURN c.sha`
+            )
+            .toArray();
+        },
       },
       history: {
         type: gql.GraphQLString,
@@ -68,12 +91,22 @@ module.exports = new gql.GraphQLObjectType({
         query: (commit, args, limit) => aql`
           FOR file, edge
             IN INBOUND ${commit} ${commitsToFiles}
+            let o = (
+              FOR stakeholder, conn
+                IN OUTBOUND edge ${commitsToFilesToStakeholders}
+                    RETURN {
+                      stakeholder: stakeholder.gitSignature,
+                      ownedLines: conn.ownedLines,
+                    }
+            )
             ${limit}
             RETURN {
-              file,
+              file: file,
               lineCount: edge.lineCount,
               stats: edge.stats,
-              hunks: edge.hunks
+              hunks: edge.hunks,
+              action: edge.action,
+              ownership: o,
             }`,
       }),
       file: {
@@ -125,10 +158,9 @@ module.exports = new gql.GraphQLObjectType({
           return db
             ._query(
               aql`
-              FOR build
-              IN ${builds}
-              FILTER build.sha == ${commit.sha}
-                RETURN build`
+              FOR build, edge
+              IN INBOUND ${commit} ${commitsToBuilds}
+              RETURN build`
             )
             .toArray();
         },

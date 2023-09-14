@@ -6,6 +6,7 @@ const db = arangodb.db;
 const aql = arangodb.aql;
 const Timestamp = require('./Timestamp.js');
 const commits = db._collection('commits');
+const commitsToBuilds = db._collection('commits-builds');
 
 const BuildStatus = new gql.GraphQLEnumType({
   name: 'BuildStatus',
@@ -15,7 +16,7 @@ const BuildStatus = new gql.GraphQLEnumType({
     success: {},
     pending: {},
     running: {},
-    canceled: {},
+    cancelled: {},
     skipped: {},
     created: {},
     started: {},
@@ -29,7 +30,8 @@ const Job = new gql.GraphQLObjectType({
   fields() {
     return {
       id: {
-        type: new gql.GraphQLNonNull(gql.GraphQLInt),
+        //TODO: GraphQLInt only supports 32bit values. Float can handle 52 bits. Is there a cleaner way to fix this?
+        type: new gql.GraphQLNonNull(gql.GraphQLFloat),
       },
       name: {
         type: gql.GraphQLString,
@@ -68,14 +70,8 @@ module.exports = new gql.GraphQLObjectType({
         type: new gql.GraphQLNonNull(gql.GraphQLString),
         resolve: (e) => e._key,
       },
-      sha: {
-        type: gql.GraphQLString,
-        description: 'Sha of the commit that triggered the build',
-      },
+      //TODO is this necessary?
       beforeSha: {
-        type: gql.GraphQLString,
-      },
-      ref: {
         type: gql.GraphQLString,
       },
       status: {
@@ -138,7 +134,7 @@ module.exports = new gql.GraphQLObjectType({
             pending: {
               type: gql.GraphQLInt,
             },
-            canceled: {
+            cancelled: {
               type: gql.GraphQLInt,
             },
           },
@@ -155,8 +151,8 @@ module.exports = new gql.GraphQLObjectType({
           return db
             ._query(
               aql`
-            FOR commit IN ${commits}
-              FILTER commit.sha == ${build.sha}
+              FOR commit, edge
+              IN OUTBOUND ${build} ${commitsToBuilds}
               RETURN commit`
             )
             .toArray()[0];

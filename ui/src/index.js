@@ -30,9 +30,14 @@ import issueImpact from './visualizations/legacy/issue-impact';
 import hotspotDials from './visualizations/legacy/hotspot-dials';
 import codeHotspots from './visualizations/legacy/code-hotspots';
 import languageModuleRiver from './visualizations/legacy/language-module-river';
+import codeExpertise from './visualizations/code-expertise';
 import ciBuilds from './visualizations/VisualizationComponents/ciBuilds';
 import issues from './visualizations/VisualizationComponents/issues';
+import issueBreakdown from './visualizations/VisualizationComponents/issueBreakdown';
 import changes from './visualizations/VisualizationComponents/changes';
+import sprints from './visualizations/VisualizationComponents/sprints';
+import timeSpent from './visualizations/VisualizationComponents/timeSpent';
+import codeOwnership from './visualizations/code-ownership';
 import RootOffline from './components/RootOffline';
 
 const visualizationModules = [
@@ -45,7 +50,12 @@ const visualizationModules = [
   languageModuleRiver,
   ciBuilds,
   issues,
+  issueBreakdown,
   changes,
+  sprints,
+  codeExpertise,
+  timeSpent,
+  codeOwnership,
   dataExport,
 ];
 
@@ -55,18 +65,26 @@ Database.checkBackendConnection().then((connection) => {
     visualizations[viz.id] = viz;
   });
 
+  let activeVisualization = _.keys(visualizations)[0];
+
+  const previousActiveVisualization = localStorage.getItem('previousActiveVisualization');
+
+  if (previousActiveVisualization !== null) {
+    activeVisualization = previousActiveVisualization;
+  }
+
   const container = document.getElementById('root');
   const rootContainer = createRoot(container);
-
   if (connection) {
     const app = makeAppReducer(visualizationModules);
 
     const socket = io({ path: '/wsapi' });
     const socketIo = createSocketIoMiddleware(socket, 'api/');
+
     const store = createStore(
       app,
       {
-        activeVisualization: _.keys(visualizations)[0],
+        activeVisualization: activeVisualization,
         visualizations,
         config: {
           isFetching: false,

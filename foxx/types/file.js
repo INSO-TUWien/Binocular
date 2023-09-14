@@ -5,6 +5,9 @@ const arangodb = require('@arangodb');
 const db = arangodb.db;
 const aql = arangodb.aql;
 const commitsToFiles = db._collection('commits-files');
+const branchesToFiles = db._collection('branches-files');
+const branchesToFilesToFiles = db._collection('branches-files-files');
+const commitsToFilesToStakeholders = db._collection('commits-files-stakeholders');
 const LanguagesToFiles = db._collection('languages-files');
 const paginated = require('./paginated.js');
 
@@ -40,15 +43,46 @@ module.exports = new gql.GraphQLObjectType({
             RETURN language`,
       },
       commits: paginated({
-        type: require('./commit.js'),
+        type: require('./commitInFile.js'),
         description: 'The commits touching this file',
         query: (file, args, limit) => aql`
-          FOR commit
-          IN
-          OUTBOUND ${file} ${commitsToFiles}
+          FOR commit, edge
+            IN OUTBOUND ${file} ${commitsToFiles}
+            let o = (
+              FOR stakeholder, conn
+                  IN OUTBOUND edge ${commitsToFilesToStakeholders}
+                      RETURN {
+                          stakeholder: stakeholder.gitSignature,
+                          ownedLines: conn.ownedLines,
+                      }
+            )
             ${limit}
             SORT commit.date ASC
-            RETURN commit`,
+            RETURN {
+              commit: commit,
+              ownership: o,
+            }`,
+      }),
+      oldFileNames: paginated({
+        type: require('./fileInFiles.js'),
+        args: {
+          branch: {
+            description: 'branch of this file',
+            type: new gql.GraphQLNonNull(gql.GraphQLString),
+          },
+        },
+        query: (file, args, limit) => aql`
+          FOR branch IN branches
+          FILTER branch.branch == ${args.branch}
+          FOR file, edge
+              IN OUTBOUND ${file} ${branchesToFiles}
+              FOR oldFile, conn
+                  IN OUTBOUND edge ${branchesToFilesToFiles}
+                      RETURN {
+                          oldFilePath:oldFile.path,
+                          hasThisNameFrom: conn.hasThisNameFrom,
+                          hasThisNameUntil: conn.hasThisNameUntil
+                      }`,
       }),
     };
   },

@@ -230,7 +230,7 @@ export default class LanguageModuleRiver extends React.Component {
    * @returns [RiverData] get a list of all aggregated commits
    */
   createAggregatedRiverData(commits, props, granularity) {
-    const jobs = _.flatMap(props.builds, (build) => build.jobs.map((job) => Object.assign(job, { sha: build.sha })));
+    const jobs = _.flatMap(props.builds, (build) => build.jobs.map((job) => Object.assign(job, { sha: build.commit.sha })));
     const groupedBuilds = _.groupBy(jobs, 'sha');
 
     // aggregate all commits referring to a given commit stream and the corresponding timespan aggregation

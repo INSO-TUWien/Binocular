@@ -4,8 +4,6 @@ import { createAction } from 'redux-actions';
 import { select, takeEvery, fork } from 'redux-saga/effects';
 
 import { fetchFactory, timestampedActionFactory } from '../../../../sagas/utils.js';
-import { graphQl } from '../../../../utils';
-import Promise from 'bluebird';
 import Database from '../../../../database/database';
 
 export const setActiveIssue = createAction('SET_ACTIVE_ISSUE', (i) => i);
@@ -73,7 +71,7 @@ export const fetchIssueImpactData = fetchFactory(
     const lastIssueTimestamp = lastIssue ? Date.parse(lastIssue.createdAt) : lastCommitTimestamp;
     let firstSignificantTimestamp = Math.max(viewport[0], Math.min(firstCommitTimestamp, firstIssueTimestamp));
     let lastSignificantTimestamp = viewport[1] ? viewport[1].getTime() : Math.max(lastCommitTimestamp, lastIssueTimestamp);
-    const timeSpan = state.visualizations.newDashboard.state.config.chartTimeSpan;
+    const timeSpan = state.universalSettings.chartTimeSpan;
     firstSignificantTimestamp = timeSpan.from === undefined ? firstSignificantTimestamp : new Date(timeSpan.from).getTime();
     lastSignificantTimestamp = timeSpan.to === undefined ? lastSignificantTimestamp : new Date(timeSpan.to).getTime();
 
@@ -81,10 +79,10 @@ export const fetchIssueImpactData = fetchFactory(
       return { issue: null };
     }
 
-    return yield Promise.join(
+    return yield Promise.all([
       Database.issueImpactQuery(activeIssueId, firstSignificantTimestamp, lastSignificantTimestamp),
-      Database.issueImpactQuery(activeIssueId, firstIssueTimestamp, lastIssueTimestamp)
-    ).then((resp) => {
+      Database.issueImpactQuery(activeIssueId, firstIssueTimestamp, lastIssueTimestamp),
+    ]).then((resp) => {
       return [resp[0], resp[1]];
     });
   },

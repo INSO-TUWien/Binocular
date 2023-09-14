@@ -1,7 +1,6 @@
 'use strict';
 
 import { fetchFactory, mapSaga, timestampedActionFactory } from '../../../../sagas/utils';
-import Promise from 'bluebird';
 import { select, throttle, fork, takeEvery } from 'redux-saga/effects';
 import { createAction } from 'redux-actions';
 import Database from '../../../../database/database';
@@ -18,7 +17,7 @@ export default function* () {
   yield* fetchBuildsData();
 
   yield fork(watchRefreshRequests);
-  yield fork(watchMessages);
+  yield fork(watchProgress);
 
   // keep looking for viewport changes to re-fetch
   yield fork(watchRefresh);
@@ -41,8 +40,8 @@ function* watchRefreshRequests() {
   yield throttle(5000, 'REQUEST_REFRESH', mapSaga(refresh));
 }
 
-function* watchMessages() {
-  yield takeEvery('message', mapSaga(requestRefresh));
+function* watchProgress() {
+  yield takeEvery('PROGRESS', mapSaga(requestRefresh));
 }
 
 function* watchToggleHelp() {
@@ -70,14 +69,16 @@ export const fetchBuildsData = fetchFactory(
 
     let firstSignificantTimestamp = Math.max(viewport[0], Math.min(firstCommitTimestamp, firstIssueTimestamp));
     let lastSignificantTimestamp = viewport[1] ? viewport[1].getTime() : Math.max(lastCommitTimestamp, lastIssueTimestamp);
-    const timeSpan = state.visualizations.newDashboard.state.config.chartTimeSpan;
+    const timeSpan = state.universalSettings.chartTimeSpan;
     firstSignificantTimestamp = timeSpan.from === undefined ? firstSignificantTimestamp : new Date(timeSpan.from).getTime();
     lastSignificantTimestamp = timeSpan.to === undefined ? lastSignificantTimestamp : new Date(timeSpan.to).getTime();
-    return yield Promise.join(
+    return yield Promise.all([
       Database.getBuildData([firstCommitTimestamp, lastCommitTimestamp], [firstSignificantTimestamp, lastSignificantTimestamp]),
-      Database.getBuildData([firstCommitTimestamp, lastCommitTimestamp], [firstCommitTimestamp, lastCommitTimestamp])
-    )
-      .spread((filteredBuilds, builds) => {
+      Database.getBuildData([firstCommitTimestamp, lastCommitTimestamp], [firstCommitTimestamp, lastCommitTimestamp]),
+    ])
+      .then((results) => {
+        const filteredBuilds = results[0];
+        const builds = results[1];
         return {
           otherCount: 0,
           filteredBuilds,

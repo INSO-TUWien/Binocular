@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 'use strict';
+
 // init timestamp for output
 const Moment = require('moment');
 require('log-timestamp')(() => '[' + Moment().format('DD-MM-YYYY, HH:mm:ss') + ']');
@@ -20,11 +21,6 @@ const ctx = require('./lib/context.js');
 
 const open = require('open');
 const _ = require('lodash');
-const Promise = _.defaults(require('bluebird'), { config: () => {} });
-
-Promise.config({
-  longStackTraces: true,
-});
 
 const Repository = require('./lib/core/provider/git.js');
 const { app, argv, httpServer, io } = require('./lib/context.js');
@@ -43,6 +39,8 @@ const Build = require('./lib/models/Build.js');
 const Branch = require('./lib/models/Branch.js');
 const Module = require('./lib/models/Module');
 const Stakeholder = require('./lib/models/Stakeholder.js');
+const MergeRequest = require('./lib/models/MergeRequest.js');
+const Milestone = require('./lib/models/Milestone.js');
 const CommitStakeholderConnection = require('./lib/models/CommitStakeholderConnection.js');
 const IssueStakeholderConnection = require('./lib/models/IssueStakeholderConnection.js');
 const IssueCommitConnection = require('./lib/models/IssueCommitConnection.js');
@@ -52,12 +50,16 @@ const CommitModuleConnection = require('./lib/models/CommitModuleConnection');
 const ModuleModuleConnection = require('./lib/models/ModuleModuleConnection');
 const ModuleFileConnection = require('./lib/models/ModuleFileConnection');
 const LanguageFileConnection = require('./lib/models/LanguageFileConnection');
+const BranchFileConnection = require('./lib/models/BranchFileConnection');
+const BranchFileFileConnection = require('./lib/models/BranchFileFileConnection.js');
+const CommitFileStakeholderConnection = require('./lib/models/CommitFileStakeholderConnection.js');
+const CommitFileConnection = require('./lib/models/CommitFileConnection.js');
+const CommitBuildConnection = require('./lib/models/CommitBuildConnection.js');
 const ConfigurationError = require('./lib/errors/ConfigurationError');
 const DatabaseError = require('./lib/errors/DatabaseError');
 const GateWayService = require('./lib/gateway-service');
 const grpc = require('@grpc/grpc-js');
 const protoLoader = require('@grpc/proto-loader');
-const http = require('http');
 const projectStructureHelper = require('./lib/projectStructureHelper');
 const commPath = path.resolve(__dirname, 'services', 'grpc', 'comm');
 
@@ -101,7 +103,17 @@ const indexers = {
 const services = [];
 
 const gatewayService = new GateWayService();
-const reporter = new ProgressReporter(io, ['commits', 'issues', 'builds', 'files', 'languages', 'filesLanguage', 'modules']);
+const reporter = new ProgressReporter(io, [
+  'commits',
+  'issues',
+  'builds',
+  'files',
+  'languages',
+  'filesLanguage',
+  'modules',
+  'mergeRequests',
+  'milestones',
+]);
 let databaseConnection = null;
 
 /**
@@ -133,6 +145,8 @@ async function startDatabase(context, gateway) {
       }
     }
 
+    //writeConfigToFrontend
+    projectStructureHelper.writeContextToFrontend(ctx, config);
     // immediately run all indexers
     return (activeIndexingQueue = Promise.all([
       repoUpdateHandler(repository, context, gateway),
@@ -258,7 +272,8 @@ async function indexing(indexers, context, reporter, gateway, indexingThread) {
   try {
     context.vcsUrlProvider = await UrlProvider.getVcsUrlProvider(context.repo, reporter, context);
     context.ciUrlProvider = await UrlProvider.getCiUrlProvider(context.repo, reporter, context);
-    const providers = await Promise.all(getIndexer(indexers, context, reporter, indexingThread));
+    const indexer = await getIndexer(indexers, context, reporter, indexingThread);
+    const providers = await Promise.all(indexer);
 
     /*for (const indexer of providers.filter((exist) => exist)) {
       if (!indexer) {
@@ -306,11 +321,21 @@ async function indexing(indexers, context, reporter, gateway, indexingThread) {
       threadLog(indexingThread, 'All indexers stopped!');
       return;
     }
-    Promise.all([Commit.deduceStakeholders(), Issue.deduceStakeholders()]).then(() => {
-      threadLog(indexingThread, 'Indexing finished');
-      projectStructureHelper.checkProjectStructureAndFix();
-    });
+
+    await Issue.deduceStakeholders();
     createManualIssueReferences(config.get('issueReferences'));
+    projectStructureHelper.checkProjectStructureAndFix();
+
+    //now that the indexers have finished, we have VCS, ITS and CI data and can connect them.
+    // for that purpose, references between e.g. issues and commits have been stored in the collections.
+    // exmaple: issue has a `mentions` field that contains hashes of commits that mention the issue.
+    // since all indexers run simultaniously, we cant connect the collections right away.
+    // This is why we connect them here and then delete the temporary references in the collections themselves
+    // (like the `mentions` field in issues).
+    await connectIssuesAndCommits();
+    await connectCommitsAndBuilds();
+
+    threadLog(indexingThread, 'Indexing finished');
   } catch (error) {
     if (error && 'name' in error && error.name === 'Gitlab401Error') {
       threadWarn(indexingThread, 'Unable to access GitLab API. Please configure a valid private access token in the UI.');
@@ -460,7 +485,7 @@ function ensureDb(repo, context) {
       }
     })
     .then(() => {
-      return Promise.join(
+      return Promise.all([
         context.db.ensureService(path.join(__dirname, 'foxx'), '/binocular-ql'),
         Commit.ensureCollection(),
         Language.ensureCollection(),
@@ -471,6 +496,10 @@ function ensureDb(repo, context) {
         Build.ensureCollection(),
         Branch.ensureCollection(),
         Module.ensureCollection(),
+        MergeRequest.ensureCollection(),
+        Milestone.ensureCollection(),
+        CommitFileConnection.ensureCollection(),
+        CommitBuildConnection.ensureCollection(),
         LanguageFileConnection.ensureCollection(),
         CommitStakeholderConnection.ensureCollection(),
         IssueStakeholderConnection.ensureCollection(),
@@ -479,36 +508,41 @@ function ensureDb(repo, context) {
         CommitLanguageConnection.ensureCollection(),
         CommitModuleConnection.ensureCollection(),
         ModuleModuleConnection.ensureCollection(),
-        ModuleFileConnection.ensureCollection()
-      );
+        ModuleFileConnection.ensureCollection(),
+        BranchFileConnection.ensureCollection(),
+        BranchFileFileConnection.ensureCollection(),
+        CommitFileStakeholderConnection.ensureCollection(),
+      ]);
     });
 }
 
 function createManualIssueReferences(issueReferences) {
-  return Promise.map(_.keys(issueReferences), (sha) => {
-    const iid = issueReferences[sha];
+  return Promise.all(
+    _.keys(issueReferences).map((sha) => {
+      const iid = issueReferences[sha];
 
-    return Promise.join(Commit.findOneBySha(sha), Issue.findOneByIid(iid)).spread((commit, issue) => {
-      if (!commit) {
-        console.warn(`Ignored issue #${iid} referencing non-existing commit ${sha}`);
-        return;
-      }
-      if (!issue) {
-        console.warn(`Ignored issue #${iid} referencing commit ${sha} because the issue does not exist`);
-        return;
-      }
+      return Promise.join(Commit.findOneBySha(sha), Issue.findOneByIid(iid)).spread((commit, issue) => {
+        if (!commit) {
+          console.warn(`Ignored issue #${iid} referencing non-existing commit ${sha}`);
+          return;
+        }
+        if (!issue) {
+          console.warn(`Ignored issue #${iid} referencing commit ${sha} because the issue does not exist`);
+          return;
+        }
 
-      const existingMention = _.find(issue.mentions, (mention) => mention.commit === sha);
-      if (!existingMention) {
-        issue.mentions.push({
-          createdAt: commit.date,
-          commit: sha,
-          manual: true,
-        });
-        return issue.save();
-      }
-    });
-  });
+        const existingMention = _.find(issue.mentions, (mention) => mention.commit === sha);
+        if (!existingMention) {
+          issue.mentions.push({
+            createdAt: commit.date,
+            commit: sha,
+            manual: true,
+          });
+          return issue.save();
+        }
+      });
+    })
+  );
 }
 
 /**
@@ -546,7 +580,6 @@ Promise.all(
     // start gateway
     (async (context, config, gateway) => {
       services.push(gateway);
-
       await gateway.configure(config.get('gateway'));
       gateway.addServiceHandler('LanguageDetection', (service) => {
         service.comm = new LanguageDetectionService(`${service.client.address}:${service.client.port}`, grpc.credentials.createInsecure());
@@ -562,3 +595,38 @@ Promise.all(
     stop();
   }
 });
+
+async function connectIssuesAndCommits() {
+  const issues = await Issue.findAll();
+  const commits = await Commit.findAll();
+
+  //at this point, most issues have a mentions attribute which stores the sha hashes of the commits that mention the issue.
+  //connect these commits to the issue:
+  for (const issue of issues) {
+    //some issues are not mentioned by any commits
+    if (!issue.mentions) continue;
+    for (const mention of issue.mentions) {
+      const commit = commits.filter((c) => c.sha === mention.commit);
+      if (commit && commit[0]) {
+        issue.connect(commit[0], { closes: mention.closes });
+      }
+    }
+  }
+  //remove the temporary `mentions` attribute since we have the connections now
+  await Issue.deleteMentionsAttribute();
+}
+
+async function connectCommitsAndBuilds() {
+  const builds = await Build.findAll();
+  const commits = await Commit.findAll();
+
+  for (const build of builds) {
+    if (!build.sha) continue;
+    const commit = commits.filter((c) => c.sha === build.sha);
+    if (commit && commit[0]) {
+      commit[0].connect(build);
+    }
+  }
+
+  await Build.deleteShaRefAttributes();
+}

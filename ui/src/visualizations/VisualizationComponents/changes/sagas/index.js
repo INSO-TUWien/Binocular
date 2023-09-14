@@ -1,7 +1,6 @@
 'use strict';
 
 import { fetchFactory, mapSaga, timestampedActionFactory } from '../../../../sagas/utils';
-import Promise from 'bluebird';
 import { select, throttle, fork, takeEvery } from 'redux-saga/effects';
 import { createAction } from 'redux-actions';
 import chroma from 'chroma-js';
@@ -34,6 +33,7 @@ export default function* () {
   yield fork(watchSelectedAuthorsGlobal);
   yield fork(watchMergedAuthors);
   yield fork(watchOtherAuthors);
+  yield fork(watchExcludeMergeCommits);
 }
 
 function* watchTimeSpan() {
@@ -46,6 +46,10 @@ function* watchSelectedAuthorsGlobal() {
 
 function* watchOtherAuthors() {
   yield takeEvery('SET_OTHER_AUTHORS', fetchChangesData);
+}
+
+function* watchExcludeMergeCommits() {
+  yield takeEvery('SET_EXCLUDE_MERGE_COMMITS', fetchChangesData);
 }
 
 function* watchMergedAuthors() {
@@ -84,14 +88,17 @@ export const fetchChangesData = fetchFactory(
     const viewport = state.visualizations.changes.state.config.viewport || [0, null];
     let firstSignificantTimestamp = Math.max(viewport[0], Math.min(firstCommitTimestamp, firstIssueTimestamp));
     let lastSignificantTimestamp = viewport[1] ? viewport[1].getTime() : Math.max(lastCommitTimestamp, lastIssueTimestamp);
-    const timeSpan = state.visualizations.newDashboard.state.config.chartTimeSpan;
+    const timeSpan = state.universalSettings.chartTimeSpan;
     firstSignificantTimestamp = timeSpan.from === undefined ? firstSignificantTimestamp : new Date(timeSpan.from).getTime();
     lastSignificantTimestamp = timeSpan.to === undefined ? lastSignificantTimestamp : new Date(timeSpan.to).getTime();
-    return yield Promise.join(
+    return yield Promise.all([
       Database.getCommitData([firstCommitTimestamp, lastCommitTimestamp], [firstSignificantTimestamp, lastSignificantTimestamp]),
-      Database.getCommitData([firstCommitTimestamp, lastCommitTimestamp], [firstCommitTimestamp, lastCommitTimestamp])
-    )
-      .spread((filteredCommits, commits) => {
+      Database.getCommitData([firstCommitTimestamp, lastCommitTimestamp], [firstCommitTimestamp, lastCommitTimestamp]),
+    ])
+      .then((result) => {
+        const filteredCommits = result[0];
+        const commits = result[1];
+
         const palette = getPalette(commits, 15, committers.length);
 
         return {

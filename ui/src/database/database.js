@@ -32,11 +32,75 @@ export default class Database {
     }
   }
 
-  static async getCommitDataOwnershipRiver(commitSpan, significantSpan, granularity, interval) {
+  static async getCommitDataForSha(sha) {
     if (await this.checkBackendConnection()) {
-      return ServerDB.getCommitDataOwnershipRiver(commitSpan, significantSpan, granularity, interval);
+      return ServerDB.getCommitDataForSha(sha);
     } else {
-      return LocalDB.getCommitDataOwnershipRiver(commitSpan, significantSpan, granularity, interval);
+      return LocalDB.getCommitDataForSha(sha);
+    }
+  }
+
+  static async getCommitDataWithFiles(commitSpan, significantSpan) {
+    if (await this.checkBackendConnection()) {
+      return ServerDB.getCommitDataWithFiles(commitSpan, significantSpan);
+    } else {
+      return LocalDB.getCommitDataWithFiles(commitSpan, significantSpan);
+    }
+  }
+
+  static async getCommitDataWithFilesAndOwnership(commitSpan, significantSpan) {
+    if (await this.checkBackendConnection()) {
+      return ServerDB.getCommitDataWithFilesAndOwnership(commitSpan, significantSpan);
+    } else {
+      return LocalDB.getCommitDataWithFilesAndOwnership(commitSpan, significantSpan);
+    }
+  }
+
+  static async getCommitsForFiles(filenames) {
+    if (await this.checkBackendConnection()) {
+      return ServerDB.getCommitsForFiles(filenames);
+    } else {
+      return LocalDB.getCommitsForFiles(filenames);
+    }
+  }
+
+  static async getCommitsWithFilesForFiles(filenames) {
+    if (await this.checkBackendConnection()) {
+      return ServerDB.getCommitsWithFilesForFiles(filenames);
+    } else {
+      return LocalDB.getCommitsWithFilesForFiles(filenames);
+    }
+  }
+
+  static async getOwnershipDataForCommit(sha) {
+    if (await this.checkBackendConnection()) {
+      return ServerDB.getOwnershipDataForCommit(sha);
+    } else {
+      return LocalDB.getOwnershipDataForCommit(sha);
+    }
+  }
+
+  static async getOwnershipDataForCommits() {
+    if (await this.checkBackendConnection()) {
+      return ServerDB.getOwnershipDataForCommits();
+    } else {
+      return LocalDB.getOwnershipDataForCommits();
+    }
+  }
+
+  static async getOwnershipDataForFiles(files) {
+    if (await this.checkBackendConnection()) {
+      return ServerDB.getOwnershipDataForFiles(files);
+    } else {
+      return LocalDB.getOwnershipDataForFiles(files);
+    }
+  }
+
+  static async getCommitDataOwnershipRiver(commitSpan, significantSpan, granularity, interval, excludeMergeCommits) {
+    if (await this.checkBackendConnection()) {
+      return ServerDB.getCommitDataOwnershipRiver(commitSpan, significantSpan, granularity, interval, excludeMergeCommits);
+    } else {
+      return LocalDB.getCommitDataOwnershipRiver(commitSpan, significantSpan, granularity, interval, excludeMergeCommits);
     }
   }
 
@@ -94,6 +158,14 @@ export default class Database {
     }
   }
 
+  static async getCommitsForIssue(iid) {
+    if (await this.checkBackendConnection()) {
+      return ServerDB.getCommitsForIssue(iid);
+    } else {
+      return LocalDB.getCommitsForIssue(iid);
+    }
+  }
+
   static async getIssueDataOwnershipRiver(issueSpan, significantSpan, granularity, interval) {
     if (await this.checkBackendConnection()) {
       return ServerDB.getIssueDataOwnershipRiver(issueSpan, significantSpan, granularity, interval);
@@ -127,6 +199,28 @@ export default class Database {
   }
 
   /**
+   * MERGE REQUESTS (GITLAB ONLY)
+   */
+  static async getMergeRequestData(mergeRequestSpan, significantSpan) {
+    if (await this.checkBackendConnection()) {
+      return ServerDB.getMergeRequestData(mergeRequestSpan, significantSpan);
+    } else {
+      return LocalDB.getMergeRequestData(mergeRequestSpan, significantSpan);
+    }
+  }
+
+  /**
+   * MILESTONES
+   */
+  static async getMilestoneData() {
+    if (await this.checkBackendConnection()) {
+      return ServerDB.getMilestoneData();
+    } else {
+      return LocalDB.getMilestoneData();
+    }
+  }
+
+  /**
    * FILES
    */
   static async requestFileStructure() {
@@ -134,6 +228,30 @@ export default class Database {
       return ServerDB.requestFileStructure();
     } else {
       return LocalDB.requestFileStructure();
+    }
+  }
+
+  static async getFilenamesForBranch(branchName) {
+    if (await this.checkBackendConnection()) {
+      return ServerDB.getFilenamesForBranch(branchName);
+    } else {
+      return LocalDB.getFilenamesForBranch(branchName);
+    }
+  }
+
+  static async getPreviousFilenamesForFilesOnBranch(branchName) {
+    if (await this.checkBackendConnection()) {
+      return ServerDB.getPreviousFilenamesForFilesOnBranch(branchName);
+    } else {
+      return LocalDB.getPreviousFilenamesForFilesOnBranch(branchName);
+    }
+  }
+
+  static async getFilesForCommits(hashes) {
+    if (await this.checkBackendConnection()) {
+      return ServerDB.getFilesForCommits(hashes);
+    } else {
+      return LocalDB.getFilesForCommits(hashes);
     }
   }
 

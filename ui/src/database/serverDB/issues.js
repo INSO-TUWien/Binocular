@@ -19,12 +19,31 @@ export default class Issues {
               perPage
               count
               data {
+                iid
                 title
                 createdAt
                 closedAt
+                webUrl
+                state
                 author{
                   login
                   name
+                }
+                assignees{
+                  login
+                  name 
+                }
+                assignee{
+                  login
+                  name 
+                }
+                notes{
+                  body
+                  created_at
+                  author{
+                    login
+                    name
+                  }
                 }
               }
             }
@@ -39,6 +58,36 @@ export default class Issues {
     }).then(function () {
       return issueList;
     });
+  }
+
+  static getCommitsForIssue(iid) {
+    return graphQl
+      .query(
+        `query{
+             issue (iid: ${iid}){
+              commits {
+                count
+                data {
+                  sha
+                  shortSha
+                  message
+                  messageHeader
+                  signature
+                  branch
+                  parents
+                  date
+                  webUrl
+                  stats {
+                    additions
+                    deletions
+                  }
+                }
+              }
+             }
+           }`,
+        { iid }
+      )
+      .then((resp) => resp.issue.commits.data);
   }
 
   static getIssueDataOwnershipRiver(issueSpan, significantSpan, granularity, interval) {

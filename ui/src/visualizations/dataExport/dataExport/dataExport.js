@@ -4,7 +4,6 @@ import React from 'react';
 import styles from '../styles.scss';
 import dataExportStyles from '../styles/dataExport.scss';
 import GetData from './helper/getData';
-import Promise from 'bluebird';
 import viewIcon from '../assets/viewIcon.svg';
 import downloadIcon from '../assets/downloadIcon.svg';
 import JSZip from 'jszip';
@@ -14,7 +13,17 @@ export default class DataExport extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      collections: { branches: [], builds: [], commits: [], files: [], issues: [], languages: [], modules: [], stakeholders: [] },
+      collections: {
+        branches: [],
+        builds: [],
+        commits: [],
+        files: [],
+        issues: [],
+        languages: [],
+        modules: [],
+        stakeholders: [],
+        mergeRequests: [],
+      },
       relations: {
         commits_commits: [],
         commits_files: [],
@@ -85,7 +94,7 @@ export default class DataExport extends React.Component {
             <h2>Collections</h2>
             {Object.keys(this.state.collections).map((c) => {
               return (
-                <div>
+                <div key={c}>
                   {c}: {this.state.collections[c].length}
                   <img
                     className={dataExportStyles.icon}
@@ -106,7 +115,7 @@ export default class DataExport extends React.Component {
             <h2>Relations</h2>
             {Object.keys(this.state.relations).map((r) => {
               return (
-                <div>
+                <div key={r}>
                   {r.replace('_', '-')}: {this.state.relations[r].length}
                   <img
                     className={dataExportStyles.icon}
@@ -136,7 +145,9 @@ export default class DataExport extends React.Component {
                   <tr>
                     {previewTableHeader.map((key, i) => {
                       return (
-                        <th className={i % 2 === 0 ? dataExportStyles.previewTableHeaderEven : dataExportStyles.previewTableHeaderOdd}>
+                        <th
+                          key={'previewTableHeaderCol' + i}
+                          className={i % 2 === 0 ? dataExportStyles.previewTableHeaderEven : dataExportStyles.previewTableHeaderOdd}>
                           {key}
                         </th>
                       );
@@ -146,9 +157,13 @@ export default class DataExport extends React.Component {
                 <tbody>
                   {this.state.previewTable.map((row, i) => {
                     return (
-                      <tr>
+                      <tr key={'previewTableRow' + i}>
                         {previewTableHeader.map((key, j) => {
-                          return <th className={dataExportStyles.previewTableCell}>{JSON.stringify(row[key])}</th>;
+                          return (
+                            <th key={'previewTableRow' + i + 'Col' + j} className={dataExportStyles.previewTableCell}>
+                              {JSON.stringify(row[key])}
+                            </th>
+                          );
                         })}
                       </tr>
                     );
@@ -204,6 +219,7 @@ export default class DataExport extends React.Component {
       collections.languages = database.languages;
       collections.modules = database.modules;
       collections.stakeholders = database.stakeholders;
+      collections.mergeRequests = database.mergeRequests;
 
       relations.commits_commits = database.commits_commits;
       relations.commits_files = database.commits_files;

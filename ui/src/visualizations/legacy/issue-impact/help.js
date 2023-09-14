@@ -2,7 +2,7 @@
 
 import cx from 'classnames';
 
-import styles from './styles.scss';
+import styles from '../../../styles/styles.scss';
 
 export default () => (
   <div className={cx('box', styles.help)}>
@@ -32,7 +32,9 @@ export default () => (
     </p>
     <h2>Sidebar</h2>
     <p>Use the search-box to choose an issue to visualize. When an issue is selected, more options become available.</p>
-    <h3>Filters</h3>
-    Use the provided filter boxes to exclude certain files or commits from the visualization in order to de-clutter the chart.
+    <p>
+      <h3>Filters</h3>
+      <p>Use the provided filter boxes to exclude certain files or commits from the visualization in order to de-clutter the chart.</p>
+    </p>
   </div>
 );

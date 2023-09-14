@@ -5,20 +5,20 @@ import { connect } from 'react-redux';
 import styles from './styles.scss';
 
 import LegendCompact from '../../../components/LegendCompact';
-import TabCombo from '../../../components/TabCombo';
+import TabCombo from '../../../components/TabCombo/tabCombo';
 import { setShowIssues } from './sagas';
 
 const mapStateToProps = (state /*, ownProps*/) => {
-  const dashboardState = state.visualizations.changes.state;
+  const issuesState = state.visualizations.issues.state;
 
-  return { showIssues: dashboardState.config.showIssues };
+  return { showIssues: issuesState.config.showIssues };
 };
 
 const mapDispatchToProps = (dispatch /*, ownProps*/) => {
   return { onClickIssues: (showIssues) => dispatch(setShowIssues(showIssues)) };
 };
 
-const CIBuildsConfigComponent = (props) => {
+const IssuesConfigComponent = (props) => {
   return (
     <div className={styles.configContainer}>
       <div className={styles.field}>
@@ -38,6 +38,6 @@ const CIBuildsConfigComponent = (props) => {
   );
 };
 
-const CIBuildsConfig = connect(mapStateToProps, mapDispatchToProps)(CIBuildsConfigComponent);
+const IssuesConfig = connect(mapStateToProps, mapDispatchToProps)(IssuesConfigComponent);
 
-export default CIBuildsConfig;
+export default IssuesConfig;

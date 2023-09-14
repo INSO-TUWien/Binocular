@@ -8,7 +8,7 @@ export default class Branches {
       `
       query{
        branches(sort: "ASC"){
-          data{branch,active}
+          data{branch,active,tracksFileRenames,latestCommit}
         }
       }
       `,

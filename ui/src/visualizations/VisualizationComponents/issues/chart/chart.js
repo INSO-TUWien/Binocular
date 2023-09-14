@@ -143,39 +143,27 @@ export default class Issues extends React.Component {
       const next = moment(curr).add(1, props.chartResolution);
       const end = moment(lastTimestamp).endOf(granularity.unit).add(1, props.chartResolution);
       const sortedCloseDates = [];
-      let createdDate = Date.parse(issues[0].createdAt);
+      const createdDate = Date.parse(issues[0].createdAt);
 
       for (let i = 0, j = 0; curr.isSameOrBefore(end); curr.add(1, props.chartResolution), next.add(1, props.chartResolution)) {
         //Iterate through time buckets
         const currTimestamp = curr.toDate().getTime();
         const nextTimestamp = next.toDate().getTime();
 
-        const obj = { date: currTimestamp, count: 0, openCount: 0, closedCount: 0 }; //Save date of time bucket, create object
-        while (i < filteredIssues.length && createdDate < nextTimestamp && createdDate >= currTimestamp) {
-          //Iterate through issues that fall into this time bucket (open date)
-          if (createdDate > currTimestamp && createdDate < nextTimestamp) {
-            obj.count++;
-            obj.openCount++;
-          }
-          if (filteredIssues[i].closedAt) {
-            //If issues are closed, save close date in sorted list
-            const closedDate = Date.parse(filteredIssues[i].closedAt);
-            const insertPos = _.sortedIndex(sortedCloseDates, closedDate);
-            sortedCloseDates.splice(insertPos, 0, closedDate);
-          }
-          if (++i < filteredIssues.length) {
-            createdDate = Date.parse(filteredIssues[i].createdAt);
-          }
-        }
-        for (; j < sortedCloseDates.length && sortedCloseDates[j] < nextTimestamp && sortedCloseDates[j] >= currTimestamp; j++) {
-          //Iterate through issues that fall into this time bucket (closed date)
-          if (sortedCloseDates[j] > currTimestamp && sortedCloseDates[j] < nextTimestamp) {
-            sortedCloseDates.splice(j, 1);
-            obj.count++;
-            obj.closedCount++;
-          }
-        }
-        data.push(obj);
+        const openedIssues = filteredIssues.filter(
+          (issue) => Date.parse(issue.createdAt) >= currTimestamp && Date.parse(issue.createdAt) < nextTimestamp
+        );
+
+        const closedIssues = filteredIssues.filter(
+          (issue) => Date.parse(issue.closedAt) >= currTimestamp && Date.parse(issue.closedAt) < nextTimestamp
+        );
+
+        data.push({
+          date: currTimestamp,
+          count: openedIssues.length + closedIssues.length,
+          openCount: openedIssues.length,
+          closedCount: closedIssues.length,
+        });
       }
 
       //---- STEP 3: CONSTRUCT CHART DATA FROM AGGREGATED ISSUES ----

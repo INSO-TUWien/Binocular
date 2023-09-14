@@ -4,6 +4,8 @@ import Bounds from './serverDB/bounds';
 import Commits from './serverDB/commits';
 import Builds from './serverDB/builds';
 import Issues from './serverDB/issues';
+import MergeRequests from './serverDB/mergeRequests';
+import Milestones from './serverDB/milestones';
 import Files from './serverDB/files';
 import Branches from './serverDB/branches';
 import Languages from './serverDB/languages';
@@ -19,6 +21,10 @@ export default class ServerDB {
     return Commits.getCommitData(commitSpan, significantSpan);
   }
 
+  static getCommitDataForSha(sha) {
+    return Commits.getCommitDataForSha(sha);
+  }
+
   static getBuildData(commitSpan, significantSpan) {
     return Builds.getBuildData(commitSpan, significantSpan);
   }
@@ -27,8 +33,40 @@ export default class ServerDB {
     return Issues.getIssueData(issueSpan, significantSpan);
   }
 
-  static getCommitDataOwnershipRiver(commitSpan, significantSpan, granularity, interval) {
-    return Commits.getCommitDataOwnershipRiver(commitSpan, significantSpan, granularity, interval);
+  static getCommitsForIssue(iid) {
+    return Issues.getCommitsForIssue(iid);
+  }
+
+  static getMergeRequestData(mergeRequestSpan, significantSpan) {
+    return MergeRequests.getMergeRequestData(mergeRequestSpan, significantSpan);
+  }
+
+  static getMilestoneData() {
+    return Milestones.getMilestoneData();
+  }
+
+  static getCommitDataWithFiles(commitSpan, significantSpan) {
+    return Commits.getCommitDataWithFiles(commitSpan, significantSpan);
+  }
+
+  static getCommitDataWithFilesAndOwnership(commitSpan, significantSpan) {
+    return Commits.getCommitDataWithFilesAndOwnership(commitSpan, significantSpan);
+  }
+
+  static getOwnershipDataForCommit(sha) {
+    return Commits.getOwnershipDataForCommit(sha);
+  }
+
+  static getOwnershipDataForCommits() {
+    return Commits.getOwnershipDataForCommits();
+  }
+
+  static getOwnershipDataForFiles(files) {
+    return Files.getOwnershipDataForFiles(files);
+  }
+
+  static getCommitDataOwnershipRiver(commitSpan, significantSpan, granularity, interval, excludeMergeCommits) {
+    return Commits.getCommitDataOwnershipRiver(commitSpan, significantSpan, granularity, interval, excludeMergeCommits);
   }
 
   static getBuildDataOwnershipRiver(commitSpan, significantSpan, granularity, interval) {
@@ -47,6 +85,14 @@ export default class ServerDB {
     return Commits.getCommitDateHistogram(granularity, dateField, since, until);
   }
 
+  static getCommitsForFiles(filenames) {
+    return Commits.getCommitsForFiles(filenames, true);
+  }
+
+  static getCommitsWithFilesForFiles(filenames) {
+    return Commits.getCommitsForFiles(filenames, false);
+  }
+
   static issueImpactQuery(iid, since, until) {
     return Issues.issueImpactQuery(iid, since, until);
   }
@@ -57,6 +103,18 @@ export default class ServerDB {
 
   static requestFileStructure() {
     return Files.requestFileStructure();
+  }
+
+  static getFilenamesForBranch(branchName) {
+    return Files.getFilenamesForBranch(branchName);
+  }
+
+  static getPreviousFilenamesForFilesOnBranch(branchName) {
+    return Files.getPreviousFilenamesForFilesOnBranch(branchName);
+  }
+
+  static getFilesForCommits(hashes) {
+    return Files.getFilesForCommits(hashes);
   }
 
   static getAllBranches() {

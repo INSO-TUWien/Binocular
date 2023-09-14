@@ -1,6 +1,5 @@
 'use strict';
 
-import Promise from 'bluebird';
 import { createAction } from 'redux-actions';
 import { select, throttle, fork, takeEvery } from 'redux-saga/effects';
 import _ from 'lodash';
@@ -16,9 +15,9 @@ export const setHighlightedIssue = createAction('SET_HIGHLIGHTED_ISSUE');
 export const setCommitAttribute = createAction('SET_COMMIT_ATTRIBUTE');
 export const openCommit = createAction('OPEN_COMMIT');
 
-export const requestCodeOwnershipData = createAction('REQUEST_CODE_OWNERSHIP_DATA');
-export const receiveCodeOwnershipData = timestampedActionFactory('RECEIVE_CODE_OWNERSHIP_DATA');
-export const receiveCodeOwnershipDataError = createAction('RECEIVE_CODE_OWNERSHIP_DATA_ERROR');
+export const requestCodeOwnershipData = createAction('REQUEST_CODE_OWNERSHIP_RIVER_DATA');
+export const receiveCodeOwnershipData = timestampedActionFactory('RECEIVE_CODE_OWNERSHIP_RIVER_DATA');
+export const receiveCodeOwnershipDataError = createAction('RECEIVE_CODE_OWNERSHIP_RIVER_DATA_ERROR');
 
 export const requestRefresh = createAction('REQUEST_REFRESH');
 const refresh = createAction('REFRESH');
@@ -29,7 +28,7 @@ export default function* () {
   yield* fetchCodeOwnershipData();
 
   yield fork(watchRefreshRequests);
-  yield fork(watchMessages);
+  yield fork(watchProgress);
 
   yield fork(watchOpenCommit);
 
@@ -42,6 +41,7 @@ export default function* () {
   // keep looking for universal settings changes
   yield fork(watchTimeSpan);
   yield fork(watchSelectedAuthorsGlobal);
+  yield fork(watchExcludeMergeCommits);
 }
 
 function* watchTimeSpan() {
@@ -55,8 +55,12 @@ function* watchRefreshRequests() {
   yield throttle(5000, 'REQUEST_REFRESH', mapSaga(refresh));
 }
 
-function* watchMessages() {
-  yield takeEvery('message', mapSaga(requestRefresh));
+function* watchProgress() {
+  yield takeEvery('PROGRESS', mapSaga(requestRefresh));
+}
+
+function* watchExcludeMergeCommits() {
+  yield takeEvery('SET_EXCLUDE_MERGE_COMMITS', fetchCodeOwnershipData);
 }
 
 export function* watchOpenCommit() {
@@ -101,7 +105,7 @@ export const fetchCodeOwnershipData = fetchFactory(
     const firstSignificantIssueTimestamp = Math.max(firstSignificantTimestamp, firstIssueTimestamp);
     const lastSignificantIssueTimestamp = Math.min(lastSignificantTimestamp, lastIssueTimestamp);
 
-    const timeSpan = state.visualizations.newDashboard.state.config.chartTimeSpan;
+    const timeSpan = state.universalSettings.chartTimeSpan;
     firstSignificantTimestamp = timeSpan.from === undefined ? firstSignificantTimestamp : new Date(timeSpan.from).getTime();
     lastSignificantTimestamp = timeSpan.to === undefined ? lastSignificantTimestamp : new Date(timeSpan.to).getTime();
 
@@ -110,12 +114,13 @@ export const fetchCodeOwnershipData = fetchFactory(
 
     const interval = granularity.interval.asMilliseconds();
 
-    return yield Promise.join(
+    return yield Promise.all([
       Database.getCommitDataOwnershipRiver(
         [firstCommitTimestamp, lastCommitTimestamp],
         [firstSignificantTimestamp, lastSignificantTimestamp],
         granularity,
-        interval
+        interval,
+        state.universalSettings.excludeMergeCommits
       ),
       Database.getIssueDataOwnershipRiver(
         [firstIssueTimestamp, lastIssueTimestamp],
@@ -133,7 +138,8 @@ export const fetchCodeOwnershipData = fetchFactory(
         [firstCommitTimestamp, lastCommitTimestamp],
         [firstCommitTimestamp, lastCommitTimestamp],
         granularity,
-        interval
+        interval,
+        state.universalSettings.excludeMergeCommits
       ),
       Database.getIssueDataOwnershipRiver(
         [firstIssueTimestamp, lastIssueTimestamp],
@@ -141,9 +147,21 @@ export const fetchCodeOwnershipData = fetchFactory(
         granularity,
         interval
       ),
-      Database.getBuildData([firstCommitTimestamp, lastCommitTimestamp], [firstCommitTimestamp, lastCommitTimestamp], granularity, interval)
-    )
-      .spread((filteredCommits, filteredIssues, filteredBuilds, commits, issues, builds) => {
+      Database.getBuildData(
+        [firstCommitTimestamp, lastCommitTimestamp],
+        [firstCommitTimestamp, lastCommitTimestamp],
+        granularity,
+        interval
+      ),
+    ])
+      .then((results) => {
+        const filteredCommits = results[0];
+        const filteredIssues = results[1];
+        const filteredBuilds = results[2];
+        const commits = results[3];
+        const issues = results[4];
+        const builds = results[5];
+
         const palette = getChartColors('spectral', [...committers, 'other']);
         return {
           filteredCommits,

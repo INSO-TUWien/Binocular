@@ -5,9 +5,9 @@ const arangodb = require('@arangodb');
 const db = arangodb.db;
 const aql = arangodb.aql;
 const issuesToStakeholders = db._collection('issues-stakeholders');
+const issuesToCommits = db._collection('issues-commits');
 const paginated = require('./paginated.js');
 const Timestamp = require('./Timestamp.js');
-const Sort = require('./Sort');
 
 module.exports = new gql.GraphQLObjectType({
   name: 'Issue',
@@ -87,6 +87,11 @@ module.exports = new gql.GraphQLObjectType({
         type: require('./gitHubUser.js'),
         description: 'The github author of this issue',
       },
+      assignee: {
+        type: require('./gitHubUser.js'),
+        description: 'The assignee of this issue',
+      },
+      assignees: { type: new gql.GraphQLList(require('./gitHubUser.js')), description: 'All the assignees of this issue' },
       commits: paginated({
         type: require('./commit.js'),
         description: 'All commits mentioning this issue',
@@ -96,12 +101,8 @@ module.exports = new gql.GraphQLObjectType({
         },
         query: (issue, args, limit) => {
           let query = aql`
-            FOR commit IN (
-              FOR mention IN ${issue.mentions || []}
-                FILTER mention.commit != NULL
-                RETURN DOCUMENT(CONCAT("commits/", mention.commit))
-            )
-            FILTER commit != NULL`;
+            FOR commit, edge IN
+            INBOUND ${issue} ${issuesToCommits}`;
 
           if (args.since !== undefined) {
             query = aql`${query} FILTER DATE_TIMESTAMP(commit.date) >= DATE_TIMESTAMP(${args.since})`;
@@ -115,12 +116,9 @@ module.exports = new gql.GraphQLObjectType({
           return query;
         },
       }),
-      mentions: {
-        type: new gql.GraphQLList(gql.GraphQLString),
-        description: 'The shas of all commits mentioning this issue',
-        resolve(issue) {
-          return (issue.mentions || []).map((m) => m.commit);
-        },
+      notes: {
+        type: new gql.GraphQLList(require('./gitlabNote.js')),
+        description: 'Notes attached to the issue',
       },
     };
   },

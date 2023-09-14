@@ -1,0 +1,66 @@
+name: Build Binocular
+
+on:
+  push:
+    branches:
+      - develop
+
+#env: set env if needed
+
+jobs:
+
+  build:
+
+    runs-on: ubuntu-latest
+    services:
+
+      arangodb:
+        image: arangodb:3.11
+        ports:  
+          - 8529:8529
+        env: 
+          ARANGO_ROOT_PASSWORD: openSesame
+
+    steps:
+
+    - name: Checkout Repository
+      uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+
+    - name: Set .pupilrc variables
+      uses: microsoft/variable-substitution@v1   
+      with:
+        files: .binocularrc_ci
+      env:
+        github.auth.token: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Rename binocularrc
+      run: mv .binocularrc_ci .binocularrc 
+
+    - name: Set node version
+      uses: actions/setup-node@v3
+      with:
+        node-version: 18
+        cache: npm
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Run binocular
+      run: node binocular.js --no-open --no-server
+
+    - name: Build
+      run: npm run build
+
+    - name: Publish artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: binocular_ui
+        path: dist/
+
+    # - name: Run tests
+    #   run: npm run test
+
+    # - name: Collect coverage
+    #   run: npm run coverage

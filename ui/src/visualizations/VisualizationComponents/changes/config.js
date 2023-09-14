@@ -2,10 +2,8 @@
 
 import { connect } from 'react-redux';
 import { setDisplayMetric, setSelectedAuthors } from './sagas';
-import TabCombo from '../../../components/TabCombo.js';
+import TabCombo from '../../../components/TabCombo/tabCombo';
 import styles from './styles.scss';
-
-import CheckboxLegend from '../../../components/CheckboxLegend';
 
 const mapStateToProps = (state /*, ownProps*/) => {
   const dashboardState = state.visualizations.changes.state;
@@ -34,28 +32,19 @@ const ChangesConfigComponent = (props) => {
 
   return (
     <div className={styles.configContainer}>
-      <form className={styles.form}>
-        <div className={styles.field}>
-          <label className="label">Changes</label>
-          <div style={{ marginBottom: '0.5em' }}>
-            <TabCombo
-              value={props.metric}
-              options={[
-                { label: '# lines changed', icon: 'file-alt', value: 'linesChanged' },
-                { label: '# commits', icon: 'cloud-upload-alt', value: 'commits' },
-              ]}
-              onChange={(value) => props.onClickMetric(value)}
-            />
-          </div>
-          {/*<CheckboxLegend
-            palette={props.palette}
-            onClick={props.onClickCheckboxLegend.bind(this)}
-            title="Authors:"
-            split={props.metric === 'linesChanged'}
-            otherCommitters={otherCommitters}
-          />*/}
+      <div className={styles.field}>
+        <label className="label">Changes</label>
+        <div style={{ marginBottom: '0.5em' }}>
+          <TabCombo
+            value={props.metric}
+            options={[
+              { label: '# lines changed', icon: 'file-alt', value: 'linesChanged' },
+              { label: '# commits', icon: 'cloud-upload-alt', value: 'commits' },
+            ]}
+            onChange={(value) => props.onClickMetric(value)}
+          />
         </div>
-      </form>
+      </div>
     </div>
   );
 };

@@ -10,7 +10,6 @@ import styles from '../styles.scss';
 import '../css/codeMirror.css';
 import vcsData from './helper/vcsData';
 import chartUpdater from './charts/chartUpdater';
-import BluebirdPromise from 'bluebird';
 import Loading from './helper/loading';
 import ModeSwitcher from './helper/modeSwitcher';
 import Settings from '../components/settings/settings';
@@ -529,11 +528,11 @@ export default class CodeHotspots extends React.PureComponent {
   }
 
   requestFileStructure() {
-    return BluebirdPromise.resolve(Database.requestFileStructure()).then((resp) => resp.files.data);
+    return Promise.resolve(Database.requestFileStructure()).then((resp) => resp.files.data);
   }
 
   getAllBranches() {
-    return BluebirdPromise.resolve(Database.getAllBranches()).then((resp) => resp.branches.data);
+    return Promise.resolve(Database.getAllBranches()).then((resp) => resp.branches.data);
   }
 
   getFormatNumber(lineNumberOffset) {

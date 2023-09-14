@@ -2,22 +2,29 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-
+import styles from './sidebar.scss';
 import cx from 'classnames';
-import styles from './sidebar.css';
+import returnIcon from './assets/return.svg';
 
 export default class Link extends React.Component {
   render() {
     return (
       <a
         href="#"
-        className={cx({ 'is-active ': this.props.isActive }, styles.link)}
+        className={cx(styles.link, this.props.odd ? styles.oddLink : '')}
         key={this.props.key}
         onClick={(e) => {
           e.preventDefault();
           this.props.onClick();
         }}>
-        {this.props.children}
+        <span style={{ display: 'inline-block' }}>{this.props.children}</span>
+        {this.props.pressReturnToSelect ? (
+          <span className={styles.pressReturnToSelect}>
+            <img src={returnIcon} />
+          </span>
+        ) : (
+          ''
+        )}
       </a>
     );
   }

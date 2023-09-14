@@ -20,7 +20,9 @@ const getBuildsPage = (page, perPage) => {
         page
         perPage
         data {
-          sha
+          commit{
+            sha
+          }
           jobs {
             status
           }

@@ -19,7 +19,7 @@ const CIBuildsConfigComponent = (/*props*/) => {
     <div className={styles.configContainer}>
       <div className={styles.field}>
         <div className="control">
-          <LegendCompact text="Succeeded | Failed" color="#26ca3b" color2="#e23b41" />
+          <LegendCompact text={'Succeeded | Failed | Cancelled'} color={'#26ca3b'} color2={'#e23b41'} color3={'#aaaaaa'} />
         </div>
       </div>
     </div>

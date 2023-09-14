@@ -5,21 +5,18 @@ import PouchDBFind from 'pouchdb-find';
 import PouchDBAdapterMemory from 'pouchdb-adapter-memory';
 import moment from 'moment/moment';
 import _ from 'lodash';
+import { findAll, findCommitBuildConnections } from './utils';
 PouchDB.plugin(PouchDBFind);
 PouchDB.plugin(PouchDBAdapterMemory);
 
-// find all of given collection (example _id field for e.g. issues looks like 'issues/{issue_id}')
-function findAll(database, collection) {
-  return database.find({
-    selector: { _id: { $regex: new RegExp(`^${collection}/.*`) } },
-  });
-}
-
 export default class Builds {
-  static getBuildData(db, commitSpan, significantSpan) {
+  static getBuildData(db, relations, commitSpan, significantSpan) {
     // add stats object to each build
-    return findAll(db, 'builds').then((res) => {
-      const emptyStats = { success: 0, failed: 0, pending: 0, canceled: 0 };
+    return findAll(db, 'builds').then(async (res) => {
+      const allCommits = (await findAll(db, 'commits')).docs;
+      const commitBuildConnections = (await findCommitBuildConnections(relations)).docs;
+
+      const emptyStats = { success: 0, failed: 0, pending: 0, cancelled: 0 };
 
       return res.docs.map((build) => {
         const stats = Object.assign({}, emptyStats);
@@ -28,9 +25,19 @@ export default class Builds {
           stats.success = 1;
         } else if (build.status === 'failed' || build.status === 'errored') {
           stats.failed = 1;
+        } else if (build.status === 'cancelled') {
+          stats.cancelled = 1;
         }
-
         build.stats = stats;
+        build.commit = { sha: null };
+
+        const relevantConnection = commitBuildConnections.filter((cb) => cb.from === build._id);
+        if (relevantConnection.length !== 0) {
+          const relevantCommit = allCommits.filter((c) => c._id === relevantConnection[0].to);
+          if (relevantCommit.length !== 0) {
+            build.commit.sha = relevantCommit[0].sha;
+          }
+        }
 
         return build;
       });
@@ -46,7 +53,7 @@ export default class Builds {
           success: 0,
           failed: 0,
           pending: 0,
-          canceled: 0,
+          cancelled: 0,
         },
       },
     ];
@@ -60,7 +67,7 @@ export default class Builds {
             date: new Date(next),
             stats: _.defaults(
               {
-                total: (build.stats.success || 0) + (build.stats.failed || 0) + (build.stats.pending || 0) + (build.stats.canceled || 0),
+                total: (build.stats.success || 0) + (build.stats.failed || 0) + (build.stats.pending || 0) + (build.stats.cancelled || 0),
               },
               build.stats
             ),
