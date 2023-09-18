@@ -15,7 +15,8 @@ const cli = new Command();
 
 // Show help when no arguments passed
 if (process.argv.length < 3) {
-  cli.help();
+  console.log(chalk.cyan('Starting the frontend and backend application concurrently...'));
+  execute(`npm run dev-concurrently ${path.resolve('.')}`);
 }
 
 // Add unknown option handler
