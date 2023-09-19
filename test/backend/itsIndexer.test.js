@@ -90,7 +90,7 @@ describe('its', function () {
       repo.getLatestCommitForBranchRemote = repo.getLatestCommitForBranch;
       repo.getFilePathsForBranchRemote = repo.getFilePathsForBranch;
       repo.getOriginUrl = async function () {
-        return 'git@github.com:Test/Test-Project.git';
+        return 'git@github.com/Test/Test-Project.git';
       };
 
       //setup DB
