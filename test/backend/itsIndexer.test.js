@@ -12,12 +12,13 @@ const config = require('../../lib/config.js').get();
 const ctx = require('../../lib/context');
 
 const GitLabBaseIndexerMock = require('./helper/gitlab/gitLabBaseIndexerMock');
-const OctokitMock = require('./helper/github/octokitMock');
 
+const OctokitMock = require('./helper/github/octokitMock');
 const GitLabITSIndexer = proxyquire('../../lib/indexers/its/GitLabITSIndexer', {
   '../../indexers/BaseGitLabIndexer.js': GitLabBaseIndexerMock,
 });
 
+const GitHubMock = require('./helper/github/gitHubMock');
 const GitHubITSIndexer = require('../../lib/indexers/its/GitHubITSIndexer');
 
 const Issue = require('../../lib/models/Issue');
@@ -102,6 +103,7 @@ describe('its', function () {
 
       const gitHubITSIndexer = new GitHubITSIndexer(repo, reporter);
       gitHubITSIndexer.github = new OctokitMock();
+      gitHubITSIndexer.controller = new GitHubMock();
       await gitHubITSIndexer.index();
 
       const dbIssuesCollectionData = await (await db.query('FOR i IN @@collection RETURN i', { '@collection': 'issues' })).all();
@@ -109,20 +111,20 @@ describe('its', function () {
       expect(dbIssuesCollectionData.length).to.equal(2);
 
       expect(dbIssuesCollectionData[0].mentions.length).to.equal(2);
-      expect(dbIssuesCollectionData[0].author.name).to.equal('Tester Test 1');
-      expect(dbIssuesCollectionData[0].assignee.name).to.equal('Tester Test 2');
+      expect(dbIssuesCollectionData[0].author.login).to.equal('tester1');
+      expect(dbIssuesCollectionData[0].assignee.login).to.equal('tester2');
       expect(dbIssuesCollectionData[0].assignees.length).to.equal(1);
-      expect(dbIssuesCollectionData[1].assignees[0].name).to.equal('Tester Test 1');
+      expect(dbIssuesCollectionData[1].assignees[0].login).to.equal('tester1');
       expect(dbIssuesCollectionData[0].mentions[0].closes).to.equal(false);
       expect(dbIssuesCollectionData[0].mentions[0].commit).to.equal('1234567890');
       expect(dbIssuesCollectionData[0].mentions[1].closes).to.equal(true);
 
       expect(dbIssuesCollectionData[1].mentions.length).to.equal(2);
-      expect(dbIssuesCollectionData[1].author.name).to.equal('Tester Test 2');
-      expect(dbIssuesCollectionData[1].assignee.name).to.equal('Tester Test 1');
+      expect(dbIssuesCollectionData[1].author.login).to.equal('tester2');
+      expect(dbIssuesCollectionData[1].assignee.login).to.equal('tester1');
       expect(dbIssuesCollectionData[1].assignees.length).to.equal(2);
-      expect(dbIssuesCollectionData[1].assignees[0].name).to.equal('Tester Test 1');
-      expect(dbIssuesCollectionData[1].assignees[1].name).to.equal('Tester Test 2');
+      expect(dbIssuesCollectionData[1].assignees[0].login).to.equal('tester1');
+      expect(dbIssuesCollectionData[1].assignees[1].login).to.equal('tester2');
       expect(dbIssuesCollectionData[1].mentions[0].closes).to.equal(false);
       expect(dbIssuesCollectionData[1].mentions[0].commit).to.equal('1234567890');
       expect(dbIssuesCollectionData[1].mentions[1].closes).to.equal(true);

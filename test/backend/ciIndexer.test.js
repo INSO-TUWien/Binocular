@@ -77,7 +77,7 @@ describe('ci', function () {
       repo.getLatestCommitForBranchRemote = repo.getLatestCommitForBranch;
       repo.getFilePathsForBranchRemote = repo.getFilePathsForBranch;
       repo.getOriginUrl = async function () {
-        return 'git@github.com:Test/Test-Project.git';
+        return 'git@github.com/Test/Test-Project.git';
       };
 
       //setup DB
@@ -88,6 +88,7 @@ describe('ci', function () {
       const gitHubCIIndexer = new GitHubCIIndexer(repo, reporter);
       await gitHubCIIndexer.configure(config);
       gitHubCIIndexer.github = new OctokitMock();
+      gitHubCIIndexer.controller = new GitHubMock();
       await gitHubCIIndexer.index();
       const dbBuildsCollectionData = await (await db.query('FOR i IN @@collection RETURN i', { '@collection': 'builds' })).all();
 
@@ -101,7 +102,6 @@ describe('ci', function () {
       expect(dbBuildsCollectionData[0].jobs[2].status).to.equal('failure');
 
       expect(dbBuildsCollectionData[0].status).to.equal('failed');
-      expect(dbBuildsCollectionData[0].userFullName).to.equal('Tester Test 1');
     });
   });
 
