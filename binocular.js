@@ -3,6 +3,9 @@
 
 // init timestamp for output
 const Moment = require('moment');
+
+const startTime = Moment.now();
+console.log('Start Time: ' + Moment(startTime).format());
 require('log-timestamp')(() => '[' + Moment().format('DD-MM-YYYY, HH:mm:ss') + ']');
 
 function threadLog(thread) {
@@ -334,7 +337,10 @@ async function indexing(indexers, context, reporter, gateway, indexingThread) {
     // (like the `mentions` field in issues).
     await connectIssuesAndCommits();
     await connectCommitsAndBuilds();
-
+    const endTime = Moment.now();
+    console.log('End Time: ' + Moment(endTime).format());
+    const executionTime = Moment(endTime).diff(startTime, 'seconds');
+    console.log('Execution Time: ' + parseInt(executionTime / 60) + ':' + (executionTime % 60));
     threadLog(indexingThread, 'Indexing finished');
   } catch (error) {
     if (error && 'name' in error && error.name === 'Gitlab401Error') {
