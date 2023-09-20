@@ -7,6 +7,8 @@ class GitHubMock {
     this.pipelineId = 0;
   }
 
+  loadAssignableUsers() {}
+
   getPipelines() {
     return new Paginator(
       () => {
@@ -49,6 +51,10 @@ class GitHubMock {
       { id: '1', conclusion: 'success', created_at: '1970-01-01T07:00:00.000Z', completed_at: '1970-01-01T07:00:00.000Z' },
       { id: '2', conclusion: 'failure', created_at: '1970-01-01T07:00:00.000Z', completed_at: '1970-01-01T07:00:00.000Z' },
     ];
+  }
+
+  getUser() {
+    return 'Tester';
   }
 }
 
