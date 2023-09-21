@@ -20,7 +20,8 @@ jobs:
         ports:  
           - 8529:8529
         env: 
-          ARANGO_ROOT_PASSWORD: openSesame
+          # ARANGO_ROOT_PASSWORD: openSesame
+          ARANGO_NO_AUTH: 1
 
     steps:
     - name: Download ArangoClient
@@ -43,15 +44,14 @@ jobs:
       run: |
         pwd
         ls -l
-        ./arangodb3-client/bin/arangoimp \
           # --log.file "./arangoimp.log" \
           # --log.level "trace" \
-          --collection=cities \
+        ./arangodb3-client/bin/arangoimport \
+          --collection="cities" \
           --create-collection=true \
           --server.endpoint "tcp://arangodb:8529" \
           --server.username "root" \
-          --server.password "openSesame" \
-          --server.database "binocular-Binocular" \
+          --server.database "GeoLiteCity" \
           --overwrite true \
           --progress true \
           --create-database true \
