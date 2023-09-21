@@ -37,7 +37,7 @@ jobs:
       run: ls -l ./arangodb3-client/bin
 
     - name: Download demo data
-      run: wget https://github.com/arangodb/example-datasets/blob/master/Cities/GeoLiteCity.csv
+      run: wget https://raw.githubusercontent.com/arangodb/example-datasets/master/Bezirke/bezirke.csv
     
     - name: Fill arangodb service db
       # working-directory: ./arangodb3-client/bin
@@ -46,7 +46,7 @@ jobs:
         ls -l
         ./arangodb3-client/bin/arangoimport \
           --log.level "trace" \
-          --collection "cities" \
+          --collection "bezirke" \
           --create-collection true \
           --server.endpoint "tcp://localhost:8529" \
           --server.username "root" \
@@ -55,5 +55,5 @@ jobs:
           --overwrite true \
           --progress true \
           --create-database true \
-          --file GeoLiteCity.csv \
+          --file bezirke.csv \
           --type=csv
