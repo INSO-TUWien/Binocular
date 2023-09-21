@@ -44,23 +44,16 @@ jobs:
         pwd
         ls -l
         ./arangodb3-client/bin/arangoimp \
-          --log.file "./arangoimp.log" \
-          --log.level "trace" \
-          --file GeoLiteCity.csv \
+          # --log.file "./arangoimp.log" \
+          # --log.level "trace" \
           --collection=cities \
           --create-collection=true \
+          --server.endpoint "tcp://arangodb:8529" \
           --server.username "root" \
           --server.password "openSesame" \
           --server.database "binocular-Binocular" \
           --overwrite true \
           --progress true \
           --create-database true \
+          --file GeoLiteCity.csv \
           --type=csv
-    - name: Show logs
-      run: cat ./arangoimp.log
-
-    - name: Publish logs
-      uses: actions/upload-artifact@v3
-      with:
-        name: arangoimp.log
-        path: ./arangoimp.log
