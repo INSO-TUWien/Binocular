@@ -48,7 +48,7 @@ jobs:
           --log.level "trace" \
           --collection "bezirke" \
           --create-collection true \
-          --server.endpoint "tcp://localhost:8529" \
+          --server.endpoint "http+tcp://arangodb:8529" \
           --server.username "root" \
           --server.password "" \
           --server.database "GeoLiteCity" \
