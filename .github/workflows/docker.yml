@@ -40,4 +40,7 @@ jobs:
     
     - name: Fill arangodb service db
       working-directory: ./arangodb3-client/bin
-      run: arangoimp --file GeoLiteCity.csv --collection=cities --create-collection=true --type=csv
+      run: |
+        pwd
+        ls -l
+        arangoimp --file GeoLiteCity.csv --collection=cities --create-collection=true --type=csv
