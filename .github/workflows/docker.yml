@@ -21,8 +21,8 @@ jobs:
         ports:  
           - 8529:8529
         env: 
-          # ARANGO_ROOT_PASSWORD: openSesame
-          ARANGO_NO_AUTH: "0"
+          ARANGO_ROOT_PASSWORD: "openSesame"
+          # ARANGO_NO_AUTH: "0"
 
     steps:
     - name: Download ArangoClient
@@ -40,12 +40,15 @@ jobs:
     - name: Download demo data
       run: wget https://raw.githubusercontent.com/arangodb/example-datasets/master/Bezirke/bezirke.csv
     
+    - name: docker
+      run: docker --version
+
     - name: Show databases
       run: echo "db._databases();" | ./arangodb3-client/bin/arangosh \
             --server.endpoint "http+tcp://localhost:8529" \
             --server.authentication false \
             --server.username "root" \
-            --server.password ""
+            --server.password "openSesame"
             
     - name: Fill arangodb service db
       # working-directory: ./arangodb3-client/bin
