@@ -48,7 +48,10 @@ jobs:
       run: docker ps
       
     - name: docker logs
-      run: docker logs arangodb
+      run: |
+        docker logs arangodb
+        wait 5
+        docker logs arangodb
 
     # - name: wait
     #   uses: nev7n/wait_for_response@v1
