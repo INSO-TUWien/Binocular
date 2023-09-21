@@ -39,6 +39,12 @@ jobs:
     - name: Download demo data
       run: wget https://raw.githubusercontent.com/arangodb/example-datasets/master/Bezirke/bezirke.csv
     
+    - name: Show databases
+      run: echo "db._databases();" | ./arangodb3-client/bin/arangosh \
+            --server.endpoint "http+tcp://arangodb:8529" \
+            --server.username "root" \
+            --server.password ""
+            
     - name: Fill arangodb service db
       # working-directory: ./arangodb3-client/bin
       run: |
