@@ -67,7 +67,7 @@ jobs:
     - name: Show databases
       run: |
           echo "db._databases();" | ./arangodb3-client/bin/arangosh \
-            --log.level all=warning --log.level queries=trace --log.level startup=trace \
+            --log.level "trace" \
             --server.ask-jwt-secret false \
             --server.endpoint "http+tcp://127.0.0.1:8529"
             # --server.username "root" \
