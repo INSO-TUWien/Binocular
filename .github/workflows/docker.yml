@@ -22,7 +22,7 @@ jobs:
           - 8529:8529
         env: 
           # ARANGO_ROOT_PASSWORD: openSesame
-          ARANGO_NO_AUTH: "1"
+          ARANGO_NO_AUTH: "0"
 
     steps:
     - name: Download ArangoClient
