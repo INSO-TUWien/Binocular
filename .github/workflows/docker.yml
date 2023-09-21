@@ -47,6 +47,12 @@ jobs:
     - name: docker ps
       run: docker ps
       
+    - name: docker logs
+      run: |
+        docker logs arangodb
+        sleep 5
+        docker logs arangodb
+
     # - name: wait
     #   uses: nev7n/wait_for_response@v1
     #   with:
@@ -62,8 +68,8 @@ jobs:
       run: |
           ./arangodb3-client/bin/arangoinspect \
             --log.level all=warning --log.level queries=trace --log.level startup=trace \
-            --server.ask-jwt-secret false 
-            # --server.endpoint "http+tcp://127.0.0.1:8529"
+            --server.ask-jwt-secret false \
+            --server.endpoint "http+tcp://127.0.0.1:8529"
             # --server.username "root" \
             # --server.password ""
             
