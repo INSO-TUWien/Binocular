@@ -86,7 +86,7 @@ jobs:
       
     - name: docker commit
       # run: docker commit arangodb ${{ env.IMAGE_BASE_NAME }}
-      run: echo ${{ IMAGE_BASE_NAME }}_${{ github.sha }}
+      run: echo ${IMAGE_BASE_NAME}_${GITHUB_RUN_ID}
       
     - name: docker images
       run: docker images
