@@ -3,7 +3,7 @@ name: Build Binocular
 on:
   push:
     branches:
-      - develop
+      - feature/159
 
 env:
   IMAGE_BASE_NAME: ghcr.io/inso-tuwien/binocular-arangodb_3.11.3
