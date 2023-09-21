@@ -24,6 +24,17 @@ jobs:
         env: 
           # ARANGO_ROOT_PASSWORD: "openSesame"
           ARANGO_NO_AUTH: "1"
+        # Set health checks to wait until postgres has started
+        options: >-
+          --health-cmd arangoinspect \
+            --log.level all=warning --log.level queries=trace --log.level startup=trace \
+            --server.ask-jwt-secret false \
+            --server.endpoint "http+tcp://localhost:8529" \
+            --server.username "root" \
+            --server.password ""
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
 
     steps:
     - name: Download ArangoClient
