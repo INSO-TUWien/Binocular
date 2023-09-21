@@ -16,7 +16,7 @@ jobs:
     services:
 
       arangodb:
-        image: arangodb:3.11
+        image: ghcr.io/inso-tuwien/binocular-database:develop-aa6ee159
         ports:  
           - 8529:8529
         env: 
