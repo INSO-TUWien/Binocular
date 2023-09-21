@@ -18,7 +18,7 @@ jobs:
 
       arangodb:
         # image: ghcr.io/inso-tuwien/binocular-database:develop-aa6ee159
-        image: arangodb:3.11
+        image: ${ARANGO_IMAGE}
         options: --name "arangodb_filled"
         ports:  
           - 8529:8529
