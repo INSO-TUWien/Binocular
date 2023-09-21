@@ -73,22 +73,22 @@ jobs:
             # --server.username "root" \
             # --server.password ""
             
-    # - name: Fill arangodb service db
-    #   # working-directory: ./arangodb3-client/bin
-    #   run: |
-    #     pwd
-    #     ls -l
-    #     ./arangodb3-client/bin/arangoimport \
-    #       --log.level "trace" \
-    #       --collection "bezirke" \
-    #       --create-collection true \
-    #       --server.endpoint "http+tcp://arangodb:8529" \
-    #       --server.username "root" \
-    #       --server.password "" \
-    #       --server.database "GeoLiteCity" \
-    #       --overwrite true \
-    #       --progress true \
-    #       --create-database true \
-    #       --file bezirke.csv \
-    #       --type=csv
+    - name: Fill arangodb service db
+      # working-directory: ./arangodb3-client/bin
+      run: |
+        pwd
+        ls -l
+        ./arangodb3-client/bin/arangoimport \
+          --log.level "trace" \
+          --collection "bezirke" \
+          --create-collection true \
+          --server.endpoint "http+tcp://127.0.0.1:8529" \
+          --server.username "root" \
+          --server.password "" \
+          --server.database "GeoLiteCity" \
+          --overwrite true \
+          --progress true \
+          --create-database true \
+          --file bezirke.csv \
+          --type=csv
     
