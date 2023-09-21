@@ -34,3 +34,10 @@ jobs:
     
     - name: List contents
       run: ls -l ./arangodb3-client/bin
+
+    - name: Download demo data
+      run: wget https://github.com/arangodb/example-datasets/blob/master/Cities/GeoLiteCity.csv
+    
+    - name: Fill arangodb service db
+      working-directory: ./arangodb3-client/bin
+      run: arangoimp --file GeoLiteCity.csv --collection=cities --create-collection=true --type=csv
