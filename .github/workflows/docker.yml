@@ -46,11 +46,11 @@ jobs:
     - name: wait
       uses: nev7n/wait_for_response@v1
       with:
-        url: 'http://127.0.0.1:5829/_api/version'
+        url: 'http://127.0.0.1:8529/_api/version'
         responseCode: 200
         timeout: 2000
         interval: 1500
-      # curl http://127.0.0.1:5829/_api/version
+      # curl http://127.0.0.1:8529/_api/version
     # - name: sleep
     #   run: sleep 30
 
