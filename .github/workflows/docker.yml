@@ -26,8 +26,11 @@ jobs:
     - name: Download ArangoClient
       run: wget -nv https://download.arangodb.com/arangodb311/Community/Linux/arangodb3-client-linux-3.11.1_x86_64.tar.gz -O arangodb3-client.tar.gz
 
+    - name: Create client folder
+      run: mkdir -p ./arangodb3-client
+
     - name: Extract ArangoClient
-      run: 
-        mkdir -p ./arangodb3-client
-        tar -xf arangodb3-client.tar.gz -C ./arangodb3-client --strip-components=1
-        ls -l ./arangodb3-client/bin
+      run: tar -xf arangodb3-client.tar.gz -C ./arangodb3-client --strip-components=1
+    
+    - name: List contents
+      run: ls -l ./arangodb3-client/bin
