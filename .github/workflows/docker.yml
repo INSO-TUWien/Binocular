@@ -39,8 +39,19 @@ jobs:
       run: wget https://github.com/arangodb/example-datasets/blob/master/Cities/GeoLiteCity.csv
     
     - name: Fill arangodb service db
-      working-directory: ./arangodb3-client/bin
+      # working-directory: ./arangodb3-client/bin
       run: |
         pwd
         ls -l
-        ./arangoimp --file GeoLiteCity.csv --collection=cities --create-collection=true --type=csv
+        ./arangodb3-client/bin/arangoimp \
+          --log.level "trace" \
+          --file GeoLiteCity.csv \
+          --collection=cities \
+          --create-collection=true \
+          --server.username "root" \
+          --server.password "openSesame" \
+          --server.database "binocular-Binocular" \
+          --overwrite true \
+          --progress true \
+          --create-database true \
+          --type=csv
