@@ -18,7 +18,7 @@ jobs:
       arangodb:
         # image: ghcr.io/inso-tuwien/binocular-database:develop-aa6ee159
         image: arangodb:3.11
-        options: --health-cmd "curl -s http://localhost:8529/_api/version"
+        # options: --health-cmd "curl -s http://localhost:8529/_api/version"
         ports:  
           - 8529:8529
         env: 
@@ -44,6 +44,9 @@ jobs:
     - name: docker
       run: docker --version
 
+    - name: docker ps
+      run: docker ps
+
     # - name: wait
     #   uses: nev7n/wait_for_response@v1
     #   with:
@@ -60,7 +63,7 @@ jobs:
           ./arangodb3-client/bin/arangoinspect \
             --log.level all=warning --log.level queries=trace --log.level startup=trace \
             --server.ask-jwt-secret false \
-            --server.endpoint "tcp://arangodb:8529" \
+            --server.endpoint "http+tcp://arangodb:8529" \
             --server.username "root" \
             --server.password ""
             
