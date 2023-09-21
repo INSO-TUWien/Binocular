@@ -7,9 +7,8 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  ARANGO_VERSION: 3.11.3
   IMAGE_BASE_NAME: ghcr.io/inso-tuwien/binocular-arangodb_3.11.3
-  ARANGO_IMAGE: ghcr.io/inso-tuwien/binocular-database:arangodb_3.11.3-no_volumes
+  # ARANGO_IMAGE: ghcr.io/inso-tuwien/binocular-database:arangodb_3.11.3-no_volumes
 
 jobs:
   build:
@@ -17,8 +16,8 @@ jobs:
     services:
 
       arangodb:
-        # image: ghcr.io/inso-tuwien/binocular-database:develop-aa6ee159
-        image: ${{env.ARANGO_IMAGE}}
+        image: ghcr.io/inso-tuwien/binocular-database:develop-aa6ee159
+        # image: ${{env.ARANGO_IMAGE}}
         options: --name "arangodb_filled"
         ports:  
           - 8529:8529
