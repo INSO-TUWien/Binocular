@@ -43,6 +43,9 @@ jobs:
     - name: docker
       run: docker --version
 
+    - name: sleep
+      run: sleep 30
+
     - name: Show databases
       run: |
           echo "db._databases();" | ./arangodb3-client/bin/arangosh \
