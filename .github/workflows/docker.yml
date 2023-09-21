@@ -46,7 +46,7 @@ jobs:
     - name: Show databases
       run: |
           echo "db._databases();" | ./arangodb3-client/bin/arangosh \
-            --server.endpoint "http+tcp://arangodb:8529" \
+            --server.endpoint "tcp://arangodb:8529" \
             --server.username "root" \
             --server.password ""
             
