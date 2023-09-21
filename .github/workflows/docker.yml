@@ -68,10 +68,10 @@ jobs:
       run: |
           ./arangodb3-client/bin/arangoinspect \
             --log.level all=warning --log.level queries=trace --log.level startup=trace \
-            --server.ask-jwt-secret false \
-            --server.endpoint "http+tcp://arangodb:8529" \
-            --server.username "root" \
-            --server.password ""
+            --server.ask-jwt-secret false
+            # --server.endpoint "http+tcp://arangodb:8529" \
+            # --server.username "root" \
+            # --server.password ""
             
     # - name: Fill arangodb service db
     #   # working-directory: ./arangodb3-client/bin
