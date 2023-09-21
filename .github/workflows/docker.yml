@@ -19,7 +19,7 @@ jobs:
       arangodb:
         # image: ghcr.io/inso-tuwien/binocular-database:develop-aa6ee159
         image: arangodb:3.11
-        options: --name "arangodb"
+        options: --name "arangodb_filled"
         ports:  
           - 8529:8529
         env: 
@@ -50,9 +50,9 @@ jobs:
       
     - name: docker logs
       run: |
-        docker logs arangodb
+        docker logs arangodb_filled
         sleep 10
-        docker logs arangodb
+        docker logs arangodb_filled
             
     - name: Fill arangodb service db
       run: |
@@ -86,7 +86,7 @@ jobs:
     - name: docker commit
       run: |
         echo ${IMAGE_BASE_NAME}_${GITHUB_RUN_ID}
-        docker commit arangodb ${IMAGE_BASE_NAME}:${GITHUB_RUN_ID}
+        docker commit arangodb_filled ${IMAGE_BASE_NAME}:${GITHUB_RUN_ID}
       
     - name: docker images
       run: docker images
