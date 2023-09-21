@@ -51,6 +51,7 @@ jobs:
           --create-collection=true \
           --server.endpoint "tcp://arangodb:8529" \
           --server.username "root" \
+          --server.password "" \
           --server.database "GeoLiteCity" \
           --overwrite true \
           --progress true \
