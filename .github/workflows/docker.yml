@@ -37,14 +37,22 @@ jobs:
     - name: List contents
       run: ls -l ./arangodb3-client/bin
 
-    - name: Download demo data
-      run: wget https://raw.githubusercontent.com/arangodb/example-datasets/master/Bezirke/bezirke.csv
+    # - name: Download demo data
+    #   run: wget https://raw.githubusercontent.com/arangodb/example-datasets/master/Bezirke/bezirke.csv
     
     - name: docker
       run: docker --version
 
-    - name: sleep
-      run: sleep 30
+    - name: wait
+      uses: nev7n/wait_for_response@v1
+      with:
+        url: 'http://127.0.0.1:5829/_api/version'
+        responseCode: 200
+        timeout: 2000
+        interval: 1500
+      # curl http://127.0.0.1:5829/_api/version
+    # - name: sleep
+    #   run: sleep 30
 
     - name: Show databases
       run: |
@@ -53,21 +61,22 @@ jobs:
             --server.username "root" \
             --server.password ""
             
-    - name: Fill arangodb service db
-      # working-directory: ./arangodb3-client/bin
-      run: |
-        pwd
-        ls -l
-        ./arangodb3-client/bin/arangoimport \
-          --log.level "trace" \
-          --collection "bezirke" \
-          --create-collection true \
-          --server.endpoint "http+tcp://arangodb:8529" \
-          --server.username "root" \
-          --server.password "" \
-          --server.database "GeoLiteCity" \
-          --overwrite true \
-          --progress true \
-          --create-database true \
-          --file bezirke.csv \
-          --type=csv
+    # - name: Fill arangodb service db
+    #   # working-directory: ./arangodb3-client/bin
+    #   run: |
+    #     pwd
+    #     ls -l
+    #     ./arangodb3-client/bin/arangoimport \
+    #       --log.level "trace" \
+    #       --collection "bezirke" \
+    #       --create-collection true \
+    #       --server.endpoint "http+tcp://arangodb:8529" \
+    #       --server.username "root" \
+    #       --server.password "" \
+    #       --server.database "GeoLiteCity" \
+    #       --overwrite true \
+    #       --progress true \
+    #       --create-database true \
+    #       --file bezirke.csv \
+    #       --type=csv
+    
