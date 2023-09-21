@@ -7,7 +7,8 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository }}
+  ARANGO_VERSION: 3.11.3
+  IMAGE_BASE_NAME: ghcr.io/inso-tuwien/binocular-database:arangodb_{{env.ARANGO_VERSION}}
   ARANGO_IMAGE: ghcr.io/inso-tuwien/binocular-database:arangodb_3.11.3-no_volumes
 
 jobs:
@@ -53,17 +54,6 @@ jobs:
         sleep 5
         docker logs arangodb
 
-    # - name: wait
-    #   uses: nev7n/wait_for_response@v1
-    #   with:
-    #     url: 'http://127.0.0.1:8529/_api/version'
-    #     responseCode: 200
-    #     timeout: 2000
-    #     interval: 1500
-    #   # curl http://127.0.0.1:8529/_api/version
-    # # - name: sleep
-    # #   run: sleep 30
-
     - name: Show databases
       run: |
           echo "db._databases();" | ./arangodb3-client/bin/arangosh \
@@ -74,7 +64,6 @@ jobs:
             # --server.password ""
             
     - name: Fill arangodb service db
-      # working-directory: ./arangodb3-client/bin
       run: |
         pwd
         ls -l
@@ -92,3 +81,12 @@ jobs:
           --file bezirke.csv \
           --type=csv
     
+    - name: docker images
+      run: docker images
+      
+    - name: docker commit
+      # run: docker commit arangodb ${{ env.IMAGE_BASE_NAME }}
+      run: echo ${{ env.IMAGE_BASE_NAME }}_${{ github.sha }}
+      
+    - name: docker images
+      run: docker images
