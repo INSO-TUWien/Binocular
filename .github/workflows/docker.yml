@@ -50,7 +50,7 @@ jobs:
     - name: docker logs
       run: |
         docker logs arangodb
-        wait 5
+        sleep 5
         docker logs arangodb
 
     # - name: wait
