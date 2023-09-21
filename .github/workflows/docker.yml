@@ -38,8 +38,8 @@ jobs:
     - name: List contents
       run: ls -l ./arangodb3-client/bin
 
-    # - name: Download demo data
-    #   run: wget https://raw.githubusercontent.com/arangodb/example-datasets/master/Bezirke/bezirke.csv
+    - name: Download demo data
+      run: wget https://raw.githubusercontent.com/arangodb/example-datasets/master/Bezirke/bezirke.csv
     
     - name: docker
       run: docker --version
