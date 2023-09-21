@@ -85,8 +85,9 @@ jobs:
       run: docker ps
       
     - name: docker commit
-      # run: docker commit arangodb ${{ env.IMAGE_BASE_NAME }}
-      run: echo ${IMAGE_BASE_NAME}_${GITHUB_RUN_ID}
+      run: |
+        echo ${IMAGE_BASE_NAME}_${GITHUB_RUN_ID}
+        docker commit arangodb ${IMAGE_BASE_NAME}_${GITHUB_RUN_ID}
       
     - name: docker images
       run: docker images
