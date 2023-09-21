@@ -1,0 +1,33 @@
+name: Build Database
+
+on:
+  push:
+    branches:
+      - "feature/159"
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+  ARANGO_IMAGE: ghcr.io/inso-tuwien/binocular-database:arangodb_3.11.3-no_volumes
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    services:
+
+      arangodb:
+        image: arangodb:3.11
+        ports:  
+          - 8529:8529
+        env: 
+          ARANGO_ROOT_PASSWORD: openSesame
+
+    steps:
+    - name: Download ArangoClient
+      run: wget -nv https://download.arangodb.com/arangodb311/Community/Linux/arangodb3-client-linux-3.11.1_x86_64.tar.gz -O arangodb3-client.tar.gz
+
+    - name: Extract ArangoClient
+      run: 
+        mkdir -p ./arangodb3-client
+        tar -xf arangodb3-client.tar.gz -C ./arangodb3-client --strip-components=1
+        ls -l ./arangodb3-client/bin
