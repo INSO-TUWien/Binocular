@@ -6,6 +6,7 @@ on:
       - feature/159
 
 env:
+  REGISTRY: ghcr.io
   IMAGE_BASE_NAME: ghcr.io/inso-tuwien/binocular-arangodb_3.11.3
 
 jobs:
