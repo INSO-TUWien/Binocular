@@ -44,9 +44,8 @@ jobs:
       run: |
         pwd
         ls -l
-          # --log.file "./arangoimp.log" \
-          # --log.level "trace" \
         ./arangodb3-client/bin/arangoimport \
+          --log.level "trace" \
           --collection "cities" \
           --create-collection true \
           --server.endpoint "tcp://localhost:8529" \
