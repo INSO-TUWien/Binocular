@@ -51,17 +51,8 @@ jobs:
     - name: docker logs
       run: |
         docker logs arangodb
-        sleep 5
+        sleep 10
         docker logs arangodb
-
-    - name: Show databases
-      run: |
-          echo "db._databases();" | ./arangodb3-client/bin/arangosh \
-            --log.level "trace" \
-            --server.ask-jwt-secret false \
-            --server.endpoint "http+tcp://127.0.0.1:8529"
-            # --server.username "root" \
-            # --server.password ""
             
     - name: Fill arangodb service db
       run: |
@@ -80,6 +71,12 @@ jobs:
           --create-database true \
           --file bezirke.csv \
           --type=csv
+
+    - name: Show databases
+      run: |
+          echo "db._databases();" | ./arangodb3-client/bin/arangosh \
+            --log.level "trace" \
+            --server.endpoint "http+tcp://127.0.0.1:8529"
     
     - name: docker ps
       run: docker ps
@@ -101,6 +98,6 @@ jobs:
 
     - name: Push image
       run: |
-        docker push ${IMAGE_BASE_NAME}_${GITHUB_RUN_ID}
-        docker tag ${IMAGE_BASE_NAME}_${GITHUB_RUN_ID} ${IMAGE_BASE_NAME}:latest
+        docker push ${IMAGE_BASE_NAME}:${GITHUB_RUN_ID}
+        docker tag ${IMAGE_BASE_NAME}:${GITHUB_RUN_ID} ${IMAGE_BASE_NAME}:latest
         docker push ${IMAGE_BASE_NAME}:latest
