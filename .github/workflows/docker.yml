@@ -81,12 +81,12 @@ jobs:
           --file bezirke.csv \
           --type=csv
     
-    - name: docker images
-      run: docker images
+    - name: docker ps
+      run: docker ps
       
     - name: docker commit
       # run: docker commit arangodb ${{ env.IMAGE_BASE_NAME }}
-      run: echo ${{ env.IMAGE_BASE_NAME }}_${{ github.sha }}
+      run: echo ${{ IMAGE_BASE_NAME }}_${{ github.sha }}
       
     - name: docker images
       run: docker images
