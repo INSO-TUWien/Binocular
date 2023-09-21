@@ -76,7 +76,9 @@ jobs:
       run: |
           echo "db._databases();" | ./arangodb3-client/bin/arangosh \
             --log.level "trace" \
-            --server.endpoint "http+tcp://127.0.0.1:8529"
+            --server.endpoint "http+tcp://127.0.0.1:8529" \
+            --server.username "root" \
+            --server.password ""
     
     - name: docker ps
       run: docker ps
