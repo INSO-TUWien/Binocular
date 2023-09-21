@@ -57,6 +57,7 @@ jobs:
     - name: Show databases
       run: |
           ./arangodb3-client/bin/arangoinspect \
+            --log.level all=warning --log.level queries=trace --log.level startup=trace \
             --server.ask-jwt-secret false \
             --server.endpoint "tcp://arangodb:8529" \
             --server.username "root" \
