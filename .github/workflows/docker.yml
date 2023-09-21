@@ -44,7 +44,8 @@ jobs:
       run: docker --version
 
     - name: Show databases
-      run: echo "db._databases();" | ./arangodb3-client/bin/arangosh \
+      run: |
+          echo "db._databases();" | ./arangodb3-client/bin/arangosh \
             --server.endpoint "http+tcp://localhost:8529" \
             --server.authentication false \
             --server.username "root" \
