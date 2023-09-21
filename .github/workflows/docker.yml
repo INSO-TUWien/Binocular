@@ -62,8 +62,8 @@ jobs:
       run: |
           ./arangodb3-client/bin/arangoinspect \
             --log.level all=warning --log.level queries=trace --log.level startup=trace \
-            --server.ask-jwt-secret false \
-            --server.endpoint "http+tcp://127.0.0.1:8529"
+            --server.ask-jwt-secret false 
+            # --server.endpoint "http+tcp://127.0.0.1:8529"
             # --server.username "root" \
             # --server.password ""
             
