@@ -16,7 +16,8 @@ jobs:
     services:
 
       arangodb:
-        image: ghcr.io/inso-tuwien/binocular-database:develop-aa6ee159
+        # image: ghcr.io/inso-tuwien/binocular-database:develop-aa6ee159
+        image: arangodb:3.11
         ports:  
           - 8529:8529
         env: 
@@ -41,7 +42,7 @@ jobs:
     
     - name: Show databases
       run: echo "db._databases();" | ./arangodb3-client/bin/arangosh \
-            --server.endpoint "http+tcp://arangodb:8529" \
+            --server.endpoint "http+tcp://localhost:8529" \
             --server.authentication false \
             --server.username "root" \
             --server.password ""
