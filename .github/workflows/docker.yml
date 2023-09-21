@@ -47,9 +47,9 @@ jobs:
           # --log.file "./arangoimp.log" \
           # --log.level "trace" \
         ./arangodb3-client/bin/arangoimport \
-          --collection="cities" \
-          --create-collection=true \
-          --server.endpoint "tcp://arangodb:8529" \
+          --collection "cities" \
+          --create-collection true \
+          --server.endpoint "tcp://localhost:8529" \
           --server.username "root" \
           --server.password "" \
           --server.database "GeoLiteCity" \
