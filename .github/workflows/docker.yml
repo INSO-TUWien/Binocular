@@ -43,4 +43,4 @@ jobs:
       run: |
         pwd
         ls -l
-        arangoimp --file GeoLiteCity.csv --collection=cities --create-collection=true --type=csv
+        ./arangoimp --file GeoLiteCity.csv --collection=cities --create-collection=true --type=csv
