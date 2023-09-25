@@ -3,7 +3,7 @@ name: Build Binocular
 on:
   push:
     branches:
-      - develop
+      - "feature/165"
 
 env:
   REGISTRY: ghcr.io
