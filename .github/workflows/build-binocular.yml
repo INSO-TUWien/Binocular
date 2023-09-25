@@ -56,12 +56,12 @@ jobs:
     - name: Cache dependencies
       uses: actions/cache@v2
       with:
-        path: ~/.npm
-        key: npm-${{ hashFiles('package-lock.json') }}
-        restore-keys: npm-
+        path: ./node_modules
+        key: modules-${{ hashFiles('package-lock.json') }}
 
     - name: Install dependencies
-      run: npm ci
+      if: steps.cache.outputs.cache-hit != 'true'
+      run: npm ci --ignore-scripts
 
     - name: Run binocular
       run: DEBUG=idx*,importer*,git*,db* node binocular.js --no-open --no-server
