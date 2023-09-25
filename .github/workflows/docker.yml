@@ -33,6 +33,7 @@ jobs:
         SHORT_SHA=$(echo ${{ github.sha }} | cut -c1-8)
         echo "SHORT_SHA=${SHORT_SHA}" >> $GITHUB_ENV
         echo "SHORT_SHA" ${SHORT_SHA}
+        echo "SHORT_SHA" ${{env.SHORT_SHA}}
         #
         echo "BINOCULAR_DATABASE_IMAGE_NAME=binocular-database" >> $GITHUB_ENV
         echo "BINOCULAR_DATABASE_IMAGE_NAME" ${BINOCULAR_DATABASE_IMAGE_NAME}
