@@ -30,15 +30,15 @@ jobs:
     - name: Set docker image env var
       run: |
         echo "DOCKER_IMAGE=${ARTIFACTORY_URL}/${IMAGE_NAME}:${GITHUB_REF##*/}.${{github.run_number}}" >> $GITHUB_ENV
+        # SHORT_SHA source: https://stackoverflow.com/questions/59810838/how-to-get-the-short-sha-for-the-github-workflow
+        echo "SHORT_SHA=$(echo ${{ github.sha }} | cut -c1-7)" >> $GITHUB_ENV
 
     - name: Testing docker tags
       run: |
-        echo "binocular-database:arangodb_${ARANGO_VERSION}-${GITHUB_REF_NAME}-${GITHUB_SHA}"
+        echo "binocular-database:arangodb${ARANGO_VERSION}-${GITHUB_REF_NAME}-${GITHUB_SHA}"
         echo "GITHUB_REF_NAME" ${GITHUB_REF_NAME}
-        echo "GITHUB_REF" ${GITHUB_REF}
-        echo "GITHUB_HEAD_REF" ${GITHUB_HEAD_REF}
         echo "env.DOCKER_IMAGE" ${{ env.DOCKER_IMAGE }}
-        echo "DOCKER_IMAGE" ${DOCKER_IMAGE}
+        echo "SHORT_SHA" ${SHORT_SHA}
 
     #   run: wget -nv https://download.arangodb.com/arangodb311/Community/Linux/arangodb3-client-linux-3.11.1_x86_64.tar.gz -O arangodb3-client.tar.gz
 
