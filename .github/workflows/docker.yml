@@ -13,10 +13,10 @@ env:
 jobs:
   build:
     runs-on: ubuntu-latest
+    
     services:
-
       arangodb:
-        image: ghcr.io/inso-tuwien/binocular-database:arangodb_${ARANGO_VERSION}-no_volumes
+        image: ghcr.io/inso-tuwien/binocular-database:arangodb_3.11.3-no_volumes
         # image: ${{env.ARANGO_IMAGE}}
         options: --name "arangodb_filled"
         ports:  
@@ -24,8 +24,13 @@ jobs:
         env: 
           # ARANGO_ROOT_PASSWORD: "openSesame"
           ARANGO_NO_AUTH: "1"
-
+    
     steps:
+
+    - name: Set docker image env var
+      run: |
+        echo "DOCKER_IMAGE=${ARTIFACTORY_URL}/${IMAGE_NAME}:${GITHUB_REF##*/}.${{github.run_number}}" >> $GITHUB_ENV
+
     - name: Testing docker tags
       run: |
         echo "binocular-database:arangodb_${ARANGO_VERSION}-${GITHUB_REF_NAME}-${GITHUB_SHA}"
