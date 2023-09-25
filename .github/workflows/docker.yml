@@ -19,7 +19,7 @@ jobs:
         image: ghcr.io/inso-tuwien/binocular-database:arangodb_3.11.3-no_volumes
         # image: ${{env.ARANGO_IMAGE}}
         options: --name "arangodb_filled"
-        ports:  
+        ports:
           - 8529:8529
         env: 
           # ARANGO_ROOT_PASSWORD: "openSesame"
@@ -37,6 +37,8 @@ jobs:
         echo "GITHUB_REF_NAME" ${GITHUB_REF_NAME}
         echo "GITHUB_REF" ${GITHUB_REF}
         echo "GITHUB_HEAD_REF" ${GITHUB_HEAD_REF}
+        echo "env.DOCKER_IMAGE" ${{ env.DOCKER_IMAGE }}
+        echo "DOCKER_IMAGE" ${DOCKER_IMAGE}
 
     #   run: wget -nv https://download.arangodb.com/arangodb311/Community/Linux/arangodb3-client-linux-3.11.1_x86_64.tar.gz -O arangodb3-client.tar.gz
 
