@@ -62,8 +62,8 @@ jobs:
     - name: Install dependencies
       run: npm ci
 
-    # - name: Run binocular
-    #   run: DEBUG=idx*,importer*,git*,db* node binocular.js --no-open --no-server
+    - name: Run binocular
+      run: DEBUG=idx*,importer*,git*,db* node binocular.js --no-open --no-server
 
     - name: Build
       run: npm run build
