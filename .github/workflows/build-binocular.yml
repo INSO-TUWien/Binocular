@@ -149,6 +149,9 @@ jobs:
       - name: docker images
         run: docker images
 
+      - name: Setup Pages
+        uses: actions/configure-pages@v3
+
       - name: Download Artifact from previous job
         uses: actions/download-artifact@v3
         with:
