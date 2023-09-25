@@ -50,6 +50,7 @@ jobs:
       with:
         node-version: 18
         cache: npm
+        cache-dependency-path: ./package-lock.json
 
     # Source: https://www.voorhoede.nl/en/blog/super-fast-npm-install-on-github-actions/
     - name: Cache dependencies
