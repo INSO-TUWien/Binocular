@@ -31,14 +31,14 @@ jobs:
       run: |
         # SHORT_SHA source: https://stackoverflow.com/questions/59810838/how-to-get-the-short-sha-for-the-github-workflow
         SHORT_SHA=$(echo ${{ github.sha }} | cut -c1-8)
-        echo ${SHORT_SHA} >> $GITHUB_ENV
+        echo "SHORT_SHA=${SHORT_SHA}" >> $GITHUB_ENV
         echo "SHORT_SHA" ${SHORT_SHA}
         #
         echo "BINOCULAR_DATABASE_IMAGE_NAME=binocular-database" >> $GITHUB_ENV
         echo "BINOCULAR_DATABASE_IMAGE_NAME" ${BINOCULAR_DATABASE_IMAGE_NAME}
         #
         echo "BINOCULAR_DATABASE_IMAGE_TAG=arangodb${ARANGO_VERSION}-${GITHUB_REF_NAME}-${SHORT_SHA}" >> $GITHUB_ENV
-        echo "BINOCULAR_DATABASE_IMAGE_TAG" ${BINOCULAR_DATABASE_IMAGE_TAG}
+        echo "BINOCULAR_DATABASE_IMAGE_TAG" ${{env.BINOCULAR_DATABASE_IMAGE_TAG}}
 
     - name: Testing docker tags
       run: |
