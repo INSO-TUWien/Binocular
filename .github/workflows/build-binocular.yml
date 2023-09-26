@@ -107,30 +107,30 @@ jobs:
         echo ${BINOCULAR_DATABASE_IMAGE_NAME}:${GITHUB_RUN_ID}
         echo ${BINOCULAR_DATABASE_IMAGE_NAME}:latest
       
-    # - name: docker commit
-    #   run: |
-    #     echo ${BINOCULAR_DATABASE_IMAGE_NAME}:${BINOCULAR_DATABASE_IMAGE_TAG}
-    #     docker commit arangodb_svc ${BINOCULAR_DATABASE_IMAGE_NAME}:${BINOCULAR_DATABASE_IMAGE_TAG}
+    - name: docker commit
+      run: |
+        echo ${BINOCULAR_DATABASE_IMAGE_NAME}:${BINOCULAR_DATABASE_IMAGE_TAG}
+        docker commit arangodb_svc ${BINOCULAR_DATABASE_IMAGE_NAME}:${BINOCULAR_DATABASE_IMAGE_TAG}
       
-    # - name: docker images
-    #   run: docker images
+    - name: docker images
+      run: docker images
 
-    # - name: Log in to the Container registry
-    #   uses: docker/login-action@v2
-    #   with:
-    #     registry: ${{ env.REGISTRY }}
-    #     username: ${{ github.actor }}
-    #     password: ${{ secrets.GITHUB_TOKEN }}
+    - name: Log in to the Container registry
+      uses: docker/login-action@v2
+      with:
+        registry: ${{ env.REGISTRY }}
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
 
-    # - name: Push image
-    #   run: |
-    #     docker push ${BINOCULAR_DATABASE_IMAGE_NAME}:${BINOCULAR_DATABASE_IMAGE_TAG}
-    #     #
-    #     docker tag ${BINOCULAR_DATABASE_IMAGE_NAME}:${BINOCULAR_DATABASE_IMAGE_TAG} ${BINOCULAR_DATABASE_IMAGE_NAME}:${GITHUB_RUN_ID}
-    #     docker push ${BINOCULAR_DATABASE_IMAGE_NAME}:${GITHUB_RUN_ID}
-    #     #
-    #     docker tag ${BINOCULAR_DATABASE_IMAGE_NAME}:${BINOCULAR_DATABASE_IMAGE_TAG} ${BINOCULAR_DATABASE_IMAGE_NAME}:latest
-    #     docker push ${BINOCULAR_DATABASE_IMAGE_NAME}:latest
+    - name: Push image
+      run: |
+        docker push ${BINOCULAR_DATABASE_IMAGE_NAME}:${BINOCULAR_DATABASE_IMAGE_TAG}
+        #
+        docker tag ${BINOCULAR_DATABASE_IMAGE_NAME}:${BINOCULAR_DATABASE_IMAGE_TAG} ${BINOCULAR_DATABASE_IMAGE_NAME}:${GITHUB_RUN_ID}
+        docker push ${BINOCULAR_DATABASE_IMAGE_NAME}:${GITHUB_RUN_ID}
+        #
+        docker tag ${BINOCULAR_DATABASE_IMAGE_NAME}:${BINOCULAR_DATABASE_IMAGE_TAG} ${BINOCULAR_DATABASE_IMAGE_NAME}:latest
+        docker push ${BINOCULAR_DATABASE_IMAGE_NAME}:latest
 
     # - name: Run tests
     #   run: npm run test
