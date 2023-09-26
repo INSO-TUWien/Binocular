@@ -1,9 +1,17 @@
 name: Build Binocular
 
 on:
-  push:
-    branches:
-      - develop
+  # push:
+  #   branches:
+  #     - "develop"
+  workflow_dispatch:
+    inputs:
+      databaseImage: 
+        description: "Base image to build database from"
+        default: "ghcr.io/inso-tuwien/binocular-database"
+      databaseTag:
+        description: "Base tag to build database from"
+        default: "latest"
 
 env:
   REGISTRY: ghcr.io
@@ -21,7 +29,7 @@ jobs:
       arangodb:
         # image: arangodb:3.11
         # image: ghcr.io/inso-tuwien/binocular-database:arangodb_3.11.3-no_volumes
-        image: ghcr.io/inso-tuwien/binocular-database:latest
+        image: ${{ github.event.inputs.databaseImage || 'ghcr.io/inso-tuwien/binocular-database' }}:${{ github.event.inputs.databaseTag || 'latest' }}"
         options: --name "arangodb_svc"
         ports:  
           - 8529:8529
@@ -50,17 +58,18 @@ jobs:
       with:
         node-version: 18
         cache: npm
+        cache-dependency-path: ./package-lock.json
 
     # Source: https://www.voorhoede.nl/en/blog/super-fast-npm-install-on-github-actions/
     - name: Cache dependencies
       uses: actions/cache@v2
       with:
-        path: ~/.npm
-        key: npm-${{ hashFiles('package-lock.json') }}
-        restore-keys: npm-
+        path: ./node_modules
+        key: modules-${{ hashFiles('package-lock.json') }}
 
     - name: Install dependencies
-      run: npm ci
+      if: steps.cache.outputs.cache-hit != 'true'
+      run: npm ci --ignore-scripts
 
     - name: Run binocular
       run: DEBUG=idx*,importer*,git*,db* node binocular.js --no-open --no-server
@@ -128,3 +137,44 @@ jobs:
 
     # - name: Collect coverage
     #   run: npm run coverage
+  deploy:
+    runs-on: ubuntu-latest
+
+    # Add a dependency to the build job
+    needs: build
+
+    # Grant GITHUB_TOKEN the permissions required to make a Pages deployment
+    permissions:
+      pages: write      # to deploy to Pages
+      id-token: write   # to verify the deployment originates from an appropriate source
+
+    # Deploy to the github-pages environment
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: Setup Pages
+        uses: actions/configure-pages@v3
+
+      - name: Download Artifact from previous job
+        uses: actions/download-artifact@v3
+        with:
+          name: binocular_ui
+          path: dist/
+
+      - name: Display structure of downloaded files
+        run: |
+          echo "url:" ${{ env.url }}
+          echo "page_url:" ${{ steps.deployment.outputs.page_url }}
+          ls -l dist/
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v2
+        with:
+          # Upload entire repository
+          path: 'dist/'
+      
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v2
