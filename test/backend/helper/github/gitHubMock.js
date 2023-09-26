@@ -1,7 +1,5 @@
 'use strict';
 
-const Paginator = require('../../../../lib/paginator');
-
 class GitHubMock {
   constructor() {
     this.pipelineId = 0;
