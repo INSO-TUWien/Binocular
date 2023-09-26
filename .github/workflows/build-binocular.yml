@@ -3,7 +3,7 @@ name: Build Binocular
 on:
   push:
     branches:
-      - "feature/165"
+      - "feature/166"
   workflow_dispatch:
     inputs:
       databaseTag:
