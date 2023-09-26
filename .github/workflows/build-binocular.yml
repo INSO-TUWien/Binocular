@@ -4,6 +4,11 @@ on:
   push:
     branches:
       - "feature/165"
+  workflow_dispatch:
+    inputs:
+      databaseTag:
+        description: "Base image to build database from"
+        default: "latest"
 
 env:
   REGISTRY: ghcr.io
@@ -21,7 +26,7 @@ jobs:
       arangodb:
         # image: arangodb:3.11
         # image: ghcr.io/inso-tuwien/binocular-database:arangodb_3.11.3-no_volumes
-        image: ghcr.io/inso-tuwien/binocular-database:latest
+        image: ghcr.io/inso-tuwien/binocular-database:${{ github.event.inputs.databaseTag }}"
         options: --name "arangodb_svc"
         ports:  
           - 8529:8529
