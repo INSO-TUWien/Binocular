@@ -51,7 +51,7 @@ export default class DataExport extends React.Component {
   }
 
   render() {
-    const previewTableHeader = this.state.previewTable.length > 0 ? Object.keys(this.state.previewTable[1]) : [];
+    const previewTableHeader = this.state.previewTable.length > 0 ? Object.keys(this.state.previewTable[0]) : [];
     return (
       <div className={styles.chartContainer}>
         <div className={styles.mg1}>
