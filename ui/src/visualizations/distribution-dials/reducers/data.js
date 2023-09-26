@@ -5,8 +5,8 @@ import _ from 'lodash';
 
 export default handleActions(
   {
-    REQUEST_DISTRIBUTION_DIALS_DATA: (state) => _.assign({}, state, { isFetching: true }),
-    RECEIVE_DISTRIBUTION_DIALS_DATA: (state, action) => {
+    DD_REQUEST_DISTRIBUTION_DIALS_DATA: (state) => _.assign({}, state, { isFetching: true }),
+    DD_RECEIVE_DISTRIBUTION_DIALS_DATA: (state, action) => {
       const ret = _.assign({}, state, {
         data: action.payload,
         isFetching: false,

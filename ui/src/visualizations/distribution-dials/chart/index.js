@@ -79,7 +79,7 @@ export default () => {
         // otherwise: if there is a failed build, it is considered failed
         // otherwise: this commit is considered neutral
         let status = null;
-        const relevantBuilds = rawData.builds.filter((b) => b.commit.sha === c.sha);
+        const relevantBuilds = rawData.builds.filter((b) => b.commit && b.commit.sha === c.sha);
         if (relevantBuilds.length !== 0) {
           const success = relevantBuilds.filter((b) => b.status === 'success');
           const failed = relevantBuilds.filter((b) => b.status === 'failed');

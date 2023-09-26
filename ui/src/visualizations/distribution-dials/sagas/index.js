@@ -1,15 +1,19 @@
 import { createAction } from 'redux-actions';
-import { select, throttle, fork, takeEvery } from 'redux-saga/effects';
+import { throttle, fork, takeEvery } from 'redux-saga/effects';
 import _ from 'lodash';
 
 import { fetchFactory, timestampedActionFactory, mapSaga } from '../../../sagas/utils.js';
 import { getBuilds, getCommits, getIssues } from './helper.js';
 
-export const requestDistributionDialsData = createAction('REQUEST_DISTRIBUTION_DIALS_DATA');
-export const receiveDistributionDialsData = timestampedActionFactory('RECEIVE_DISTRIBUTION_DIALS_DATA');
-export const receiveDistributionDialsDataError = createAction('RECEIVE_DISTRIBUTION_DIALS_DATA_ERROR');
-export const requestRefresh = createAction('REQUEST_REFRESH');
-const refresh = createAction('REFRESH');
+export const requestDistributionDialsData = createAction('DD_REQUEST_DISTRIBUTION_DIALS_DATA');
+export const receiveDistributionDialsData = timestampedActionFactory('DD_RECEIVE_DISTRIBUTION_DIALS_DATA');
+export const receiveDistributionDialsDataError = createAction('DD_RECEIVE_DISTRIBUTION_DIALS_DATA_ERROR');
+export const requestRefresh = createAction('DD_REQUEST_REFRESH');
+const refresh = createAction('DD_REFRESH');
+
+export const setSplitCommits = createAction('DD_SET_SPLIT_COMMITS', (s) => s);
+export const setSplitChanges = createAction('DD_SET_SPLIT_CHANGES', (s) => s);
+export const setSplitIssues = createAction('DD_SET_SPLIT_ISSUES', (s) => s);
 
 export default function* () {
   yield fetchDistributionDialsData();
@@ -42,8 +46,6 @@ export const fetchDistributionDialsData = fetchFactory(
         result.rawData.commits = commits;
         result.rawData.issues = issues;
         result.rawData.builds = builds;
-
-        console.log(result);
 
         console.timeEnd('fetch Distribution Dials Data');
 
