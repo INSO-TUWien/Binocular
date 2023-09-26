@@ -74,11 +74,12 @@ export const fetchBuildsData = fetchFactory(
     lastSignificantTimestamp = timeSpan.to === undefined ? lastSignificantTimestamp : new Date(timeSpan.to).getTime();
     return yield Promise.all([
       Database.getBuildData([firstCommitTimestamp, lastCommitTimestamp], [firstSignificantTimestamp, lastSignificantTimestamp]),
-      Database.getBuildData([firstCommitTimestamp, lastCommitTimestamp], [firstCommitTimestamp, lastCommitTimestamp]),
+      Database.getBuildData([firstCommitTimestamp, lastCommitTimestamp], [0, Date.now()]),
     ])
       .then((results) => {
         const filteredBuilds = results[0];
         const builds = results[1];
+        console.log(results);
         return {
           otherCount: 0,
           filteredBuilds,

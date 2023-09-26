@@ -1,7 +1,5 @@
 'use strict';
 
-const Paginator = require('../../../../lib/paginator');
-
 class GitHubMock {
   constructor() {
     this.pipelineId = 0;
@@ -10,20 +8,13 @@ class GitHubMock {
   loadAssignableUsers() {}
 
   getPipelines() {
-    return new Paginator(
-      () => {
-        return new Promise((resolve) => {
-          resolve([{ id: '0' }, { id: '1' }, { id: '2' }]);
-        });
-      },
-      (resp) => {
-        return resp;
-      },
-      () => {
-        this.count = 3;
-        return this.count;
-      }
-    );
+    return new Promise((resolve) => {
+      resolve([
+        { id: '0', head_commit: { sha: '' } },
+        { id: '1', head_commit: { sha: '' } },
+        { id: '2', head_commit: { sha: '' } },
+      ]);
+    });
   }
 
   getPipeline() {

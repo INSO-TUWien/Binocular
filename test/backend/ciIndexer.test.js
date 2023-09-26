@@ -57,7 +57,7 @@ describe('ci', function () {
       await gitLabCIIndexer.index();
       const dbBuildsCollectionData = await (await db.query('FOR i IN @@collection RETURN i', { '@collection': 'builds' })).all();
 
-      expect(dbBuildsCollectionData.length).to.equal(1);
+      expect(dbBuildsCollectionData.length).to.equal(3);
       expect(dbBuildsCollectionData[0].jobs.length).to.equal(3);
       for (const i in dbBuildsCollectionData[0].jobs) {
         expect(dbBuildsCollectionData[0].jobs[i].webUrl).to.equal('https://gitlab.com/Test/Test-Project/jobs/' + i);

@@ -53,20 +53,48 @@ class GitLabMock {
   }
 
   getPipelines() {
-    return new Paginator(
-      () => {
-        return new Promise((resolve) => {
-          resolve([{ id: '0' }, { id: '1' }, { id: '2' }]);
-        });
-      },
-      (resp) => {
-        return resp;
-      },
-      () => {
-        this.count = 3;
-        return this.count;
-      }
-    );
+    return new Promise((resolve) => {
+      resolve([
+        {
+          id: '0',
+          status: 'SUCCESS',
+          user: { name: 'Tester1' },
+
+          jobs: {
+            edges: [
+              { node: { id: '0', stage: { name: '' } } },
+              { node: { id: '1', stage: { name: '' } } },
+              { node: { id: '2', stage: { name: '' } } },
+            ],
+          },
+        },
+        {
+          id: '1',
+          status: 'SUCCESS',
+          user: { name: 'Tester1' },
+          jobs: {
+            edges: [
+              { node: { id: '0', stage: { name: '' } } },
+              { node: { id: '1', stage: { name: '' } } },
+              { node: { id: '2', stage: { name: '' } } },
+            ],
+          },
+        },
+        {
+          id: '2',
+          status: 'SUCCESS',
+          user: { name: 'Tester1' },
+
+          jobs: {
+            edges: [
+              { node: { id: '0', stage: { name: '' } } },
+              { node: { id: '1', stage: { name: '' } } },
+              { node: { id: '2', stage: { name: '' } } },
+            ],
+          },
+        },
+      ]);
+    });
   }
 
   getMileStones() {
@@ -85,14 +113,8 @@ class GitLabMock {
     );
   }
 
-  getPipeline() {
-    return new Promise((resolve) => {
-      resolve({ id: '1' });
-    });
-  }
-
   getPipelineJobs() {
-    return [{ id: '0' }, { id: '1' }, { id: '2' }];
+    return 'gitlab';
   }
 
   getMergeRequests() {
