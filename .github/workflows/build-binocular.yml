@@ -1,9 +1,9 @@
-name: Build Binocular 2
+name: Build Binocular
 
 on:
-  # push:
-  #   branches:
-  #     - "feature/166"
+  push:
+    branches:
+      - "feature/166"
   workflow_dispatch:
     inputs:
       databaseTag:
