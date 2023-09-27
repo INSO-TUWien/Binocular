@@ -10,7 +10,7 @@ import * as zoomUtils from '../../../utils/zoom.js';
 import * as d3 from 'd3';
 import styles from '../styles.scss';
 import StackedDial from './stackedDial.js';
-import { getAngleAdjusted, getCoordinatesForAngle, getOuterCoordinatesForBucket } from './utils.js';
+import { getAngle, getAngleAdjusted, getCoordinatesForAngle, getOuterCoordinatesForBucket } from './utils.js';
 import BezierDial from './bezierDial.js';
 import chroma from 'chroma-js';
 import LegendCompact from '../../../components/LegendCompact/LegendCompact.js';
@@ -157,14 +157,53 @@ export default ({ data }) => {
   //update Lables when data changes
   useEffect(() => {
     const labels = [];
+
+    //check if labels are long or short
+    const longLabels = Math.max(...data.map((d) => d.label.length)) > 3;
+
     for (let i = 0; i < data.length; i++) {
       const label = data[i].label;
-      const coords = getOuterCoordinatesForBucket(i, data.length, chartRadius);
-      labels.push(
-        <text x={coords[0]} y={coords[1]} key={'label_' + label} textAnchor="middle">
-          {label}
-        </text>
-      );
+
+      //If the label is long (like weekdays), display the label in an arc outside the segment
+      // so it does not interfere with the visualization
+      if(longLabels) {
+        //arc for the text
+        let arcStartAngle = getAngle((i) / data.length);
+        let arcEndAngle = getAngle((0.99999 + i) / data.length);
+        let arcMiddleAngle = arcStartAngle + ((arcEndAngle - arcStartAngle) / 2)
+
+        //if the text is on the bottom half of the diagram
+        const textReversed = (arcMiddleAngle > Math.PI/2) && (arcMiddleAngle < 1.5*Math.PI);
+        const labelArc = d3
+          .arc()
+          .innerRadius(uiRadius)
+          .outerRadius(uiRadius)
+          .startAngle(textReversed ? arcEndAngle : arcStartAngle)
+          .endAngle(textReversed ? arcStartAngle : arcEndAngle)
+
+        labels.push(
+          <g key={'label_' + label}>
+            <defs>
+              <path d={labelArc().toString()} id={`${label}_arc`} />
+            </defs>
+            <text>
+              <textPath href={`#${label}_arc`} startOffset={'25%'} textAnchor="middle" alignmentBaseline="middle">
+                {label}
+              </textPath>
+            </text>
+          </g>
+          
+        );
+
+      } else {
+        //else this is a short label. which can be displayed normally
+        const coords = getOuterCoordinatesForBucket(i, data.length, chartRadius);
+        labels.push(
+          <text x={coords[0]} y={coords[1]} key={'label_' + label} textAnchor="middle" alignmentBaseline="middle">
+            {label}
+          </text>
+        );
+      }
     }
 
     setLabels(labels);
