@@ -1,10 +1,10 @@
 import * as d3 from 'd3';
 const _ = require('lodash');
 import React, { useState, useEffect } from 'react';
-import { getAngle, getAngleAdjusted } from './utils';
+import { getAngle } from './utils';
 
 function StackedDial({ innerRad, outerRad, data, colors }) {
-  const sizeFactor = 0.95;
+  const gutter = 3;
 
   const [outerRadius, setOuterRadius] = useState(0);
   const [innerRadius, setInnerRadius] = useState(0);
@@ -16,9 +16,11 @@ function StackedDial({ innerRad, outerRad, data, colors }) {
   const [middleColor, setMiddleColor] = useState('');
 
   useEffect(() => {
-    setOuterRadius(outerRad * sizeFactor);
-    setInnerRadius(innerRad * (2 - sizeFactor));
-    setMiddleRadius(innerRad + (outerRad * sizeFactor - innerRad) / 2);
+    const newOuter = outerRad - gutter;
+    const newInner = innerRad + gutter;
+    setOuterRadius(newOuter);
+    setInnerRadius(newInner);
+    setMiddleRadius(newInner + ((newOuter - newInner) / 2));
   }, [outerRad, innerRad]);
 
   if (!data || data.length === 0) return;
@@ -37,24 +39,24 @@ function StackedDial({ innerRad, outerRad, data, colors }) {
     let outerStartingRadius = middleRadius;
     let innerStartingRadius = middleRadius;
 
-    //TODO scaling does not work perfectly yet. See granularity: Month, split changes
-    let maxValue = 0;
-    let ratioOfMaxVal = 0;
-
+    //handle scaling:
+    //get the maximum segment size (from middle radius to outer/inner radius)
+    //the goal is that the max bucket reaches this line and everything else scales accordingly
+    let maxSegmentSize = 0;
     for (const bucket of _.unzip(data)) {
-      for (const cat of bucket) {
-        if (cat > maxValue) {
-          maxValue = cat;
-          ratioOfMaxVal = cat / bucket.reduce((p, c) => p + c, 0);
+      //if there is an inner segment, extract it
+      const innerSegments = bucket.slice(0,Math.floor(categoryNum/2));
+      //get the inner parts (the ones that are between the middle line and the inner line)
+      const middleSegment = categoryNum % 2 === 1 ? bucket[Math.floor(categoryNum/2)] : 0;
+      //get the categories that are between the middle line and the outer line
+      //if there is a middle segment, leave that one out
+      const outerSegments = bucket.slice(Math.floor(categoryNum/2) + (categoryNum % 2 === 1));
 
-          console.log(
-            cat,
-            bucket,
-            bucket.reduce((p, c) => p + c, 0),
-            _.unzip(data)
-          );
-        }
-      }
+      //since the middle segment (if there is one) is directly on the middle line, half of it is in each half of the diagram
+      const innerSegmentSize = innerSegments.reduce((p,c) => p+c, 0) + middleSegment / 2;
+      const outerSegmentSize = outerSegments.reduce((p,c) => p+c, 0) + middleSegment / 2;
+
+      maxSegmentSize = Math.max(maxSegmentSize, innerSegmentSize, outerSegmentSize);
     }
 
     //this means we have an uneven number of categories.
@@ -80,7 +82,7 @@ function StackedDial({ innerRad, outerRad, data, colors }) {
 
       if (categoryNum % 2 === 1) {
         const middleSegment = middleData[i];
-        const middleSegmentSize = (middleSegment / maxValue) * ((outerRadius - innerRadius) * ratioOfMaxVal);
+        const middleSegmentSize = (middleSegment / maxSegmentSize) * (outerRadius - middleRadius);
         const middleSegmentOuterRadius = middleRadius + middleSegmentSize / 2;
         const middleSegmentInnerRadius = middleRadius - middleSegmentSize / 2;
 
@@ -108,7 +110,7 @@ function StackedDial({ innerRad, outerRad, data, colors }) {
         const categoryId = outerDataCategories[j];
         const d = outerData[j];
         const innerR = currentRad;
-        const outerR = currentRad + (d / maxValue) * ((outerRadius - innerRadius) * ratioOfMaxVal);
+        const outerR = currentRad + (d / maxSegmentSize) * (outerRadius - middleRadius);
 
         const arc = d3.arc().innerRadius(innerR).outerRadius(outerR).startAngle(startAngle).endAngle(endAngle);
 
@@ -125,7 +127,7 @@ function StackedDial({ innerRad, outerRad, data, colors }) {
       for (let j = 0; j < innerData.length; j++) {
         const categoryId = innerDataCategories[j];
         const d = innerData[j];
-        const innerR = currentRad - (d / maxValue) * ((outerRadius - innerRadius) * ratioOfMaxVal);
+        const innerR = currentRad - (d / maxSegmentSize) * (outerRadius - middleRadius);
         const outerR = currentRad;
 
         const arc = d3.arc().innerRadius(innerR).outerRadius(outerR).startAngle(startAngle).endAngle(endAngle);
@@ -144,7 +146,8 @@ function StackedDial({ innerRad, outerRad, data, colors }) {
 
   return (
     <>
-      <circle cx="0" cy="0" r={outerRad} stroke="DarkGray" fill="white" />
+      <circle cx="0" cy="0" r={outerRad} stroke="none" strokeDasharray={'3,3'} fill="white" />
+
       {middlePaths.map((m, index) => (
         <path stroke="none" fill={middleColor} d={m().toString()} key={`middle-${index}`}></path>
       ))}

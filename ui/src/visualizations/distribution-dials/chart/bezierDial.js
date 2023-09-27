@@ -4,15 +4,18 @@ import { getCoordinatesForBucket } from './utils';
 import chroma from 'chroma-js';
 
 function BezierDial({ innerRad, outerRad, data, color }) {
-  const sizeFactor = 0.95;
+  const gutter = 3;
 
   const [area, setArea] = useState(null);
+  const [indicatorCircles, setIndicatorCircles] = useState([]);
   const [outerRadius, setOuterRadius] = useState(0);
   const [innerRadius, setInnerRadius] = useState(0);
 
   useEffect(() => {
-    setOuterRadius(outerRad * sizeFactor);
-    setInnerRadius(innerRad);
+    const newOuter = outerRad - gutter;
+    const newInner = innerRad + gutter;
+    setOuterRadius(newOuter);
+    setInnerRadius(newInner);
   }, [outerRad, innerRad]);
 
   if (!data || data.length === 0) return;
@@ -20,24 +23,29 @@ function BezierDial({ innerRad, outerRad, data, color }) {
   useEffect(() => {
     if (!outerRadius || !innerRadius) return;
 
+    const circles = [];
+
     const maxValue = Math.max(...data);
     const bucketsNum = data.length;
 
     const path = d3.path();
-    path.moveTo(...getCoordinatesForBucket(0, bucketsNum, data[0], maxValue, innerRadius, outerRadius));
 
-    for (let i = 1; i < data.length; i++) {
-      path.lineTo(...getCoordinatesForBucket(i, bucketsNum, data[i], maxValue, innerRadius, outerRadius));
+    for (let i = 0; i < data.length; i++) {
+      const coordinates = getCoordinatesForBucket(i, bucketsNum, data[i], maxValue, innerRadius, outerRadius);
+      i === 0 ? path.moveTo(...coordinates) : path.lineTo(...coordinates)
+      circles.push(<circle cx={coordinates[0]} cy={coordinates[1]} r={3} stroke="DarkGray" fill="none" />)
     }
     path.closePath();
 
     setArea(<path stroke="DarkGray" fill={color} d={path.toString()} />);
+    setIndicatorCircles(circles);
   }, [data, outerRadius, innerRadius]);
 
   return (
     <>
       <circle cx="0" cy="0" r={outerRad} stroke="none" fill="white" />
       {area}
+      {indicatorCircles}
     </>
   );
 }

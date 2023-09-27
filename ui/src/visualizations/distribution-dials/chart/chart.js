@@ -18,7 +18,7 @@ import LegendCompact from '../../../components/LegendCompact/LegendCompact.js';
 export default ({ data }) => {
   const chartSizeFactor = 0.9;
   const uiSizeFactor = 0.95;
-  const innerCircleRadiusFactor = 0.15;
+  const innerCircleRadiusFactor = 0.2;
 
   const issuesColor = chroma.rgb(65, 109, 181).hex();
   const commitsColor = chroma.rgb(158, 1, 66).hex();
@@ -98,6 +98,7 @@ export default ({ data }) => {
           });
           dials.push(<BezierDial innerRad={innerRad} outerRad={outerRad} data={issuesNumber} color={issuesColor} key={'issues'} />);
         }
+
       } else if (part === 'changes') {
         if (isChangesSplit) {
           //if this dial is split, we have the number of additions on the outside
@@ -120,6 +121,7 @@ export default ({ data }) => {
           );
           dials.push(<BezierDial innerRad={innerRad} outerRad={outerRad} data={changes} color={changesColor} key={'changes'} />);
         }
+
       } else if (part === 'commits') {
         if (isCommitsSplit) {
           //if this dial is split, we split the commits in good, bad and neutral based on the CI runs
@@ -136,7 +138,7 @@ export default ({ data }) => {
               innerRad={innerRad}
               outerRad={outerRad}
               data={commitsSplit}
-              colors={['red', 'gray', 'green']}
+              colors={['red', 'DarkGray', 'green']}
               key={'commits_split'}
             />
           );
@@ -199,7 +201,7 @@ export default ({ data }) => {
           <g transform={`translate(${center.x}, ${center.y})`}>
             {chartParts}
             {dialLines}
-            <circle cx="0" cy="0" r={chartRadius * innerCircleRadiusFactor} stroke="black" fill="white" />
+            <circle cx="0" cy="0" r={chartRadius * innerCircleRadiusFactor} stroke="DarkGray" fill="white" />
             {labels}
           </g>
         </OffsetGroup>
