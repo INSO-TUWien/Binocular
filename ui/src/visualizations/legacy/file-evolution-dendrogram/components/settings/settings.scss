@@ -1,0 +1,71 @@
+.icon{
+  vertical-align: bottom;
+  display: inline-block;
+}
+.panel{
+  display: none;
+  position: relative;
+}
+
+.settingsPanel {
+  position: absolute;
+  background-color: white;
+  z-index: 998;
+  padding: 1rem;
+  border-radius: 4px;
+  box-shadow: 0 0 10px #555555;
+  min-width: 50rem;
+  left: -4rem;
+  top: 4.5rem;
+}
+
+.scrollArea{
+  overflow-y: scroll;
+  max-height: 50rem;
+}
+
+.shAnimation{
+  overflow: hidden;
+  transition: max-height ease-in-out 0.5s;
+}
+
+.showElm{
+  height: auto;
+  max-height: 50rem;
+}
+
+.hideElm{
+  max-height: 0;
+}
+
+.saveButton{
+  background-color: #4882e0;
+  color: whitesmoke;
+  font-weight: bold;
+  float: right;
+}
+
+.saveButton:hover{
+  background-color: #2262ca;
+  color: whitesmoke;
+}
+
+.settingsButton{
+  width: 3rem;
+  height: 3rem;
+  border-radius: 50%;
+  transition: 0.2s ease-in-out;
+}
+
+.selected{
+  background-color: #3273dc !important;
+  color: whitesmoke !important;
+  transform: rotate(90deg);
+}
+
+.buttonRowSelected{
+  background-color: #3273dc;
+  color: whitesmoke!important;
+}
+
+

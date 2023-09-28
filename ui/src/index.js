@@ -34,6 +34,7 @@ import ciBuilds from './visualizations/VisualizationComponents/ciBuilds';
 import issues from './visualizations/VisualizationComponents/issues';
 import changes from './visualizations/VisualizationComponents/changes';
 import RootOffline from './components/RootOffline';
+import fileEvolutionDendrogram from './visualizations/legacy/file-evolution-dendrogram';
 
 const visualizationModules = [
   newDashboard,
@@ -47,6 +48,7 @@ const visualizationModules = [
   issues,
   changes,
   dataExport,
+  fileEvolutionDendrogram,
 ];
 
 Database.checkBackendConnection().then((connection) => {
