@@ -28,7 +28,9 @@ export default ({ data }) => {
   const distributionDialsState = useSelector((state) => state.visualizations.distributionDials.state);
 
   //TODO get this from config state
-  const parts = ['issues', 'changes', 'commits'];
+  const layers = distributionDialsState.config.layers;
+  const selectedLayers = distributionDialsState.config.layersSelected;
+  const splitLayers = distributionDialsState.config.layersSplit;
   const isCommitsSplit = distributionDialsState.config.splitCommits;
   const isChangesSplit = distributionDialsState.config.splitChanges;
   const isIssuesSplit = distributionDialsState.config.splitIssues;
@@ -64,16 +66,18 @@ export default ({ data }) => {
   //update parts of the chart when data changes
   useEffect(() => {
     const dials = [];
-    const numOfDials = parts.length;
+    const numOfDials = selectedLayers.length;
+    const sortedSelectedLayers = layers.filter((l) => selectedLayers.includes(l));
 
-    for (let i = 0; i < parts.length; i++) {
-      const part = parts[i];
+    for (let i = 0; i < sortedSelectedLayers.length; i++) {
+      const part = sortedSelectedLayers[i];
+
       const innerCircleRadius = chartRadius * innerCircleRadiusFactor;
       const innerRad = innerCircleRadius + ((chartRadius - innerCircleRadius) / numOfDials) * i;
       const outerRad = innerCircleRadius + ((chartRadius - innerCircleRadius) / numOfDials) * (i + 1);
 
       if (part === 'issues') {
-        if (isIssuesSplit) {
+        if (splitLayers.includes(part)) {
           //if this dial is split, we have the number of created issues on the outside
           // and the number of closed issues on the inside
           const issuesCreated = data.map((bucket) => bucket.issuesCreated.length);
@@ -98,9 +102,8 @@ export default ({ data }) => {
           });
           dials.push(<BezierDial innerRad={innerRad} outerRad={outerRad} data={issuesNumber} color={issuesColor} key={'issues'} />);
         }
-
       } else if (part === 'changes') {
-        if (isChangesSplit) {
+        if (splitLayers.includes(part)) {
           //if this dial is split, we have the number of additions on the outside
           // and the number of deletions an the inside
           const additions = data.map((bucket) => bucket.commits.reduce((prev, curr) => prev + curr.stats.additions, 0));
@@ -121,9 +124,8 @@ export default ({ data }) => {
           );
           dials.push(<BezierDial innerRad={innerRad} outerRad={outerRad} data={changes} color={changesColor} key={'changes'} />);
         }
-
       } else if (part === 'commits') {
-        if (isCommitsSplit) {
+        if (splitLayers.includes(part)) {
           //if this dial is split, we split the commits in good, bad and neutral based on the CI runs
           const commitsSplit = _.unzip(
             data.map((bucket) => {
@@ -152,7 +154,7 @@ export default ({ data }) => {
 
     //reverse so the smallest dial is rendered last (on top of the larger dials)
     setChartParts(dials.reverse());
-  }, [chartRadius, data, isChangesSplit, isIssuesSplit, isCommitsSplit]);
+  }, [chartRadius, data, layers, splitLayers, selectedLayers]);
 
   //update Lables when data changes
   useEffect(() => {
@@ -166,20 +168,20 @@ export default ({ data }) => {
 
       //If the label is long (like weekdays), display the label in an arc outside the segment
       // so it does not interfere with the visualization
-      if(longLabels) {
+      if (longLabels) {
         //arc for the text
-        let arcStartAngle = getAngle((i) / data.length);
+        let arcStartAngle = getAngle(i / data.length);
         let arcEndAngle = getAngle((0.99999 + i) / data.length);
-        let arcMiddleAngle = arcStartAngle + ((arcEndAngle - arcStartAngle) / 2)
+        let arcMiddleAngle = arcStartAngle + (arcEndAngle - arcStartAngle) / 2;
 
         //if the text is on the bottom half of the diagram
-        const textReversed = (arcMiddleAngle > Math.PI/2) && (arcMiddleAngle < 1.5*Math.PI);
+        const textReversed = arcMiddleAngle > Math.PI / 2 && arcMiddleAngle < 1.5 * Math.PI;
         const labelArc = d3
           .arc()
           .innerRadius(uiRadius)
           .outerRadius(uiRadius)
           .startAngle(textReversed ? arcEndAngle : arcStartAngle)
-          .endAngle(textReversed ? arcStartAngle : arcEndAngle)
+          .endAngle(textReversed ? arcStartAngle : arcEndAngle);
 
         labels.push(
           <g key={'label_' + label}>
@@ -192,9 +194,7 @@ export default ({ data }) => {
               </textPath>
             </text>
           </g>
-          
         );
-
       } else {
         //else this is a short label. which can be displayed normally
         const coords = getOuterCoordinatesForBucket(i, data.length, chartRadius);

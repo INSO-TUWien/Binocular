@@ -1,72 +1,54 @@
 'use-strict';
 
 import { useDispatch, useSelector } from 'react-redux';
-import { setSplitChanges, setSplitCommits, setSplitIssues } from '../sagas';
+import { setLayers, setSelectLayers, setSplitLayers } from '../sagas';
 import styles from '../styles.scss';
+import DragAndDropList from '../../../components/DragAndDropList/dragAndDropList';
 
 export default () => {
   const distributionDialsState = useSelector((state) => state.visualizations.distributionDials.state);
-  const splitCommits = distributionDialsState.config.splitCommits;
-  const splitChanges = distributionDialsState.config.splitChanges;
-  const splitIssues = distributionDialsState.config.splitIssues;
+  const layers = distributionDialsState.config.layers;
+  const layersSelected = distributionDialsState.config.layersSelected;
+  const layersSplit = distributionDialsState.config.layersSplit;
 
   const dispatch = useDispatch();
 
-  const onSplitCommits = (val) => {
-    dispatch(setSplitCommits(val));
+  const onPositionChange = (list) => {
+    dispatch(setLayers(list));
   };
 
-  const onSplitChanges = (val) => {
-    dispatch(setSplitChanges(val));
+  const onCheck = (element) => {
+    if (layersSelected.includes(element)) {
+      dispatch(setSelectLayers(layersSelected.filter((e) => e !== element)));
+    } else {
+      dispatch(setSelectLayers(layersSelected.concat([element])));
+    }
   };
 
-  const onSplitIssues = (val) => {
-    dispatch(setSplitIssues(val));
+  const onSwitch = (element) => {
+    if (layersSplit.includes(element)) {
+      dispatch(setSplitLayers(layersSplit.filter((e) => e !== element)));
+    } else {
+      dispatch(setSplitLayers(layersSplit.concat([element])));
+    }
   };
 
   return (
-    <>
+    <div className={styles.configContainer}>
+      <p>
+        <b>Drag to change order:</b>
+      </p>
       <div className="field">
-        <input
-          id="splitCommitsSwitch"
-          type="checkbox"
-          name="splitCommitsSwitch"
-          className={'switch is-rounded is-outlined is-info'}
-          defaultChecked={splitCommits}
-          onChange={(e) => onSplitCommits(e.target.checked)}
+        <DragAndDropList
+          elements={layers}
+          onPositionChange={onPositionChange}
+          onCheck={onCheck}
+          checkedElements={layersSelected}
+          onSwitch={onSwitch}
+          switchedElements={layersSplit}
+          switchLabel="Split"
         />
-        <label htmlFor="splitCommitsSwitch" className={styles.switch}>
-          Split Commits
-        </label>
       </div>
-
-      <div className="field">
-        <input
-          id="splitChangesSwitch"
-          type="checkbox"
-          name="splitChangesSwitch"
-          className={'switch is-rounded is-outlined is-info'}
-          defaultChecked={splitChanges}
-          onChange={(e) => onSplitChanges(e.target.checked)}
-        />
-        <label htmlFor="splitChangesSwitch" className={styles.switch}>
-          Split Changes
-        </label>
-      </div>
-
-      <div className="field">
-        <input
-          id="splitIssuesSwitch"
-          type="checkbox"
-          name="splitIssuesSwitch"
-          className={'switch is-rounded is-outlined is-info'}
-          defaultChecked={splitIssues}
-          onChange={(e) => onSplitIssues(e.target.checked)}
-        />
-        <label htmlFor="splitIssuesSwitch" className={styles.switch}>
-          Split Issues
-        </label>
-      </div>
-    </>
+    </div>
   );
 };

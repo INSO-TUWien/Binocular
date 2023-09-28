@@ -11,9 +11,9 @@ export const receiveDistributionDialsDataError = createAction('DD_RECEIVE_DISTRI
 export const requestRefresh = createAction('DD_REQUEST_REFRESH');
 const refresh = createAction('DD_REFRESH');
 
-export const setSplitCommits = createAction('DD_SET_SPLIT_COMMITS', (s) => s);
-export const setSplitChanges = createAction('DD_SET_SPLIT_CHANGES', (s) => s);
-export const setSplitIssues = createAction('DD_SET_SPLIT_ISSUES', (s) => s);
+export const setLayers = createAction('DD_SET_LAYERS', (s) => s);
+export const setSplitLayers = createAction('DD_SET_SPLIT_LAYERS', (s) => s);
+export const setSelectLayers = createAction('DD_SET_SELECT_LAYERS', (s) => s);
 
 export default function* () {
   yield fetchDistributionDialsData();

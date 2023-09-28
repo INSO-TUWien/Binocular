@@ -20,7 +20,7 @@ function StackedDial({ innerRad, outerRad, data, colors }) {
     const newInner = innerRad + gutter;
     setOuterRadius(newOuter);
     setInnerRadius(newInner);
-    setMiddleRadius(newInner + ((newOuter - newInner) / 2));
+    setMiddleRadius(newInner + (newOuter - newInner) / 2);
   }, [outerRad, innerRad]);
 
   if (!data || data.length === 0) return;
@@ -45,16 +45,16 @@ function StackedDial({ innerRad, outerRad, data, colors }) {
     let maxSegmentSize = 0;
     for (const bucket of _.unzip(data)) {
       //if there is an inner segment, extract it
-      const innerSegments = bucket.slice(0,Math.floor(categoryNum/2));
+      const innerSegments = bucket.slice(0, Math.floor(categoryNum / 2));
       //get the inner parts (the ones that are between the middle line and the inner line)
-      const middleSegment = categoryNum % 2 === 1 ? bucket[Math.floor(categoryNum/2)] : 0;
+      const middleSegment = categoryNum % 2 === 1 ? bucket[Math.floor(categoryNum / 2)] : 0;
       //get the categories that are between the middle line and the outer line
       //if there is a middle segment, leave that one out
-      const outerSegments = bucket.slice(Math.floor(categoryNum/2) + (categoryNum % 2 === 1));
+      const outerSegments = bucket.slice(Math.floor(categoryNum / 2) + (categoryNum % 2 === 1));
 
       //since the middle segment (if there is one) is directly on the middle line, half of it is in each half of the diagram
-      const innerSegmentSize = innerSegments.reduce((p,c) => p+c, 0) + middleSegment / 2;
-      const outerSegmentSize = outerSegments.reduce((p,c) => p+c, 0) + middleSegment / 2;
+      const innerSegmentSize = innerSegments.reduce((p, c) => p + c, 0) + middleSegment / 2;
+      const outerSegmentSize = outerSegments.reduce((p, c) => p + c, 0) + middleSegment / 2;
 
       maxSegmentSize = Math.max(maxSegmentSize, innerSegmentSize, outerSegmentSize);
     }

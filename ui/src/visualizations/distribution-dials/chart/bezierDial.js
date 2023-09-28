@@ -32,8 +32,8 @@ function BezierDial({ innerRad, outerRad, data, color }) {
 
     for (let i = 0; i < data.length; i++) {
       const coordinates = getCoordinatesForBucket(i, bucketsNum, data[i], maxValue, innerRadius, outerRadius);
-      i === 0 ? path.moveTo(...coordinates) : path.lineTo(...coordinates)
-      circles.push(<circle cx={coordinates[0]} cy={coordinates[1]} r={3} stroke="DarkGray" fill="none" />)
+      i === 0 ? path.moveTo(...coordinates) : path.lineTo(...coordinates);
+      circles.push(<circle cx={coordinates[0]} cy={coordinates[1]} r={3} stroke="DarkGray" fill="none" />);
     }
     path.closePath();
 
