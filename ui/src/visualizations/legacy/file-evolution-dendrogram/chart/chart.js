@@ -2,48 +2,12 @@
 
 import React from 'react';
 import * as d3 from 'd3';
-import CodeMirror from '@uiw/react-codemirror';
-import { loadLanguage } from '@uiw/codemirror-extensions-langs';
-import { lineNumbers } from '@codemirror/view';
-import { Compartment } from '@codemirror/state';
-import styles from '../styles.scss';
 
 import '../css/codeMirror.css';
-import vcsData from './helper/vcsData';
-import chartUpdater from './charts/chartUpdater';
-import BluebirdPromise from 'bluebird';
-import Loading from './helper/loading';
-import ModeSwitcher from './helper/modeSwitcher';
-import Settings from '../components/settings/settings';
-import BackgroundRefreshIndicator from '../components/backgroundRefreshIndicator/backgroundRefreshIndicator';
-import VisualizationSelector from '../components/visualizationSelector/visualizationSelector';
-import SearchBar from '../components/searchBar/searchBar';
-import searchAlgorithm from '../components/searchBar/searchAlgorithm';
-import chartStyles from './chart.scss';
-import Database from '../../../../database/database';
-import SourceCodeRequest from './helper/sourceCodeRequest';
-import GitLabConfig from '../../../../../config/gitlab.json';
-import _ from 'lodash';
-import ApiKeyEntry from '../components/apiKeyEntry/apiKeyEntry';
-import { files } from 'jszip';
 
 export default class FileEvolutionDendrogram extends React.PureComponent {
   constructor(props) {
     super(props);
-    console.log("props");
-    console.log(props);
-
-    /*
-    this.requestFileStructure().then(function (resp) {
-      const files = [];
-      for (const i in resp) {
-        files.push({ key: resp[i].path, webUrl: resp[i].webUrl });
-      }
-      props.onSetFiles(files);
-    });
-    console.log("props");
-    console.log(props);
-    */
 
     this.elems = {};
     this.state = {
@@ -51,21 +15,18 @@ export default class FileEvolutionDendrogram extends React.PureComponent {
       checkedOutBranch: 'main',
       path: '',
       fileURL: '',
-      files: [],
+      files: props.files,
     };
   }
 
   componentWillReceiveProps(nextProps) {
-    console.log("willreceive");
     const { fileURL, branch, path, files } = nextProps;
-    console.log(nextProps);
     this.setState({ path: path, branch: branch, fileURL: fileURL, files: files });
   }
 
   componentDidMount() {}
 
   render() {
-    /*
      // Specify the chart’s dimensions.
   const width = 928;
   const height = width;
@@ -74,7 +35,6 @@ export default class FileEvolutionDendrogram extends React.PureComponent {
   const radius = Math.min(width, height) / 2 - 30;
 
   const convertedData = this.convertData(this.state.files);
-  console.log(convertedData);
 
   // Create a radial tree layout. The layout’s first dimension (x)
   // is the angle, while the second (y) is the radius.
@@ -83,17 +43,17 @@ export default class FileEvolutionDendrogram extends React.PureComponent {
       .separation((a, b) => (a.parent == b.parent ? 1 : 2) / a.depth);
 
   // Sort the tree and apply the layout.
-  const root = tree(d3.hierarchy(this.state.files));
+  const root = tree(d3.hierarchy(convertedData), d => getChildren(d));
 
   // Creates the SVG container.
-  const svg = d3.create("svg")
-      .attr("width", width)
+  this.svg = d3.select(this.chartRef)
+  .attr("width", width)
       .attr("height", height)
       .attr("viewBox", [-cx, -cy, width, height])
       .attr("style", "width: 100%; height: auto; font: 10px sans-serif;");
 
   // Append links.
-  svg.append("g")
+  this.svg.append("g")
       .attr("fill", "none")
       .attr("stroke", "#555")
       .attr("stroke-opacity", 0.4)
@@ -106,16 +66,16 @@ export default class FileEvolutionDendrogram extends React.PureComponent {
           .radius(d => d.y));
 
   // Append nodes.
-  svg.append("g")
+  this.svg.append("g")
     .selectAll()
     .data(root.descendants())
     .join("circle")
       .attr("transform", d => `rotate(${d.x * 180 / Math.PI - 90}) translate(${d.y},0)`)
-      .attr("fill", d => d.children ? "#555" : "#999")
+      .attr("fill", d => d.data ? "#555" : "#999")
       .attr("r", 2.5);
 
   // Append labels.
-  svg.append("g")
+  this.svg.append("g")
       .attr("stroke-linejoin", "round")
       .attr("stroke-width", 3)
     .selectAll()
@@ -123,32 +83,32 @@ export default class FileEvolutionDendrogram extends React.PureComponent {
     .join("text")
       .attr("transform", d => `rotate(${d.x * 180 / Math.PI - 90}) translate(${d.y},0) rotate(${d.x >= Math.PI ? 180 : 0})`)
       .attr("dy", "0.31em")
-      .attr("x", d => d.x < Math.PI === !d.children ? 6 : -6)
-      .attr("text-anchor", d => d.x < Math.PI === !d.children ? "start" : "end")
+      .attr("x", d => d.x < Math.PI === !d.data ? 6 : -6)
+      .attr("text-anchor", d => d.x < Math.PI === !d.data ? "start" : "end")
       .attr("paint-order", "stroke")
       .attr("stroke", "white")
       .attr("fill", "currentColor")
       .text(d => d.data.name);
 
-  return svg.node();
-  */
+  return (
+    <div>
+      <svg ref={svg => this.chartRef = svg}></svg>
+    </div>
+  );
   }
 
-  /*
-  requestFileStructure() {
-    return BluebirdPromise.resolve(Database.requestFileStructure()).then((resp) => resp.files.data);
-  }
-  */
-
+  // needs subfiles to be named children, it does not work wth content
   getChildren(data) {
     return data?.children ?? [];
   }
 
+  // taken from code hotspots, changed by giving base folder a name
+  // needs subfiles to be named children, it does not work wth content
   convertData(data) {
-    const convertedData = { content: [] };
+    const convertedData = { name: "root", children: [] };
     for (const file of data) {
       const pathParts = file.key.split('/');
-      this.genPathObjectString(convertedData.content, pathParts, file.webUrl, file.key);
+      this.genPathObjectString(convertedData.children, pathParts, file.webUrl, file.key);
     }
 
     return convertedData;
@@ -162,11 +122,11 @@ export default class FileEvolutionDendrogram extends React.PureComponent {
     } else {
       let elem = convertedData.find((d) => d.name === currElm);
       if (elem === undefined) {
-        elem = { name: currElm, type: 'folder', content: [] };
-        this.genPathObjectString(elem.content, pathParts, Url, Path);
+        elem = { name: currElm, type: 'folder', children: [] };
+        this.genPathObjectString(elem.children, pathParts, Url, Path);
         convertedData.push(elem);
       } else {
-        this.genPathObjectString(elem.content, pathParts, Url, Path);
+        this.genPathObjectString(elem.children, pathParts, Url, Path);
       }
     }
   }

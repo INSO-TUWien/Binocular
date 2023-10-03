@@ -6,16 +6,10 @@ import SearchBar from '../searchBar/searchBar';
 export default class FileBrowser extends React.PureComponent {
   constructor(props) {
     super(props);
-    console.log("filebrowserprops");
-    console.log(props);
     this.state = {
       filteredData: props.files,
     };
-    console.log(this.state.filteredData);
-    console.log(props.files);
     setTimeout(() => {
-      console.log(this.state.filteredData.length);
-      console.log(this.state.filteredData);
     }, 1000);
   }
 
@@ -25,7 +19,6 @@ export default class FileBrowser extends React.PureComponent {
       const pathParts = file.key.split('/');
       this.genPathObjectString(convertedData.content, pathParts, file.webUrl, file.key);
     }
-
     return convertedData;
   }
 
@@ -48,18 +41,13 @@ export default class FileBrowser extends React.PureComponent {
 
   componentWillReceiveProps(nextProps) {
     if (this.state.filteredData.length === 0) {
-      console.log("configcompwillreceive");
-      console.log(nextProps);
       this.setState({ filteredData: nextProps.files });
     }
   }
 
   render() {
     const fileCount = this.props.files.length;
-    console.log("test filebrowser");
-    console.log(this.state.filteredData);
     const convertedData = this.convertData(this.state.filteredData);
-    console.log(convertedData);
     const filteredFileCount = this.state.filteredData.length;
 
     return (

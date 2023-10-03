@@ -5,7 +5,6 @@ import { select, takeEvery, fork } from 'redux-saga/effects';
 
 import { fetchFactory, timestampedActionFactory } from '../../../../sagas/utils.js';
 import Database from '../../../../database/database';
-import BluebirdPromise from 'bluebird';
 
 
 export const setActiveFile = createAction('SET_ACTIVE_FILE', (f) => f);
@@ -35,21 +34,16 @@ export function* watchSetActiveFile() {
 export const fetchFileUrl = fetchFactory(
   function* () {
     const state = yield select();
-    const fileURL = state.visualizations.fileEvolutionDendrogram.state.config.fileURL;
-    const branch = state.visualizations.fileEvolutionDendrogram.state.config.branch;
-    const path = state.visualizations.fileEvolutionDendrogram.state.config.path;
     const files = [];
-    BluebirdPromise.resolve(Database.requestFileStructure()).then((resp) => resp.files.data).then(function (resp) {
+    yield Promise.resolve(Database.requestFileStructure())
+    .then((resp) => resp.files.data)
+    .then(function (resp) {
       for (const i in resp) {
         files.push({ key: resp[i].path, webUrl: resp[i].webUrl });
       }
     });
-    const branches = state.visualizations.fileEvolutionDendrogram.state.config.branches;
-    console.log("saga");
-    console.log(state);
-    console.log(files);
 
-    return { fileURL, branch, files, path, branches };
+    return { files };
   },
   requestFileEvolutionDendrogramData,
   receiveFileEvolutionDendrogramData,

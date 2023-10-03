@@ -8,9 +8,6 @@ import FileBrowser from '../components/fileBrowser/fileBrowser';
 
 const mapStateToProps = (state /*, ownProps*/) => {
   const State = state.visualizations.fileEvolutionDendrogram.state;
-  console.log("configmapstatetoprops");
-  console.log(State);
-  console.log(State.data.data.files);
 
   return {
     fileURL: State.data.data.fileURL,
@@ -30,8 +27,6 @@ const mapDispatchToProps = (dispatch /*, ownProps*/) => {
 };
 
 const FileEvolutionDendrogramConfigComponent = (props) => {
-  console.log("test config");
-  console.log(props);
   const options = [];
   for (const i in props.branches) {
     options.push(<option key={i}>{props.branches[i].branch}</option>);
