@@ -2,8 +2,12 @@
 
 import React from 'react';
 import * as d3 from 'd3';
+import cx from 'classnames';
 
 import '../css/codeMirror.css';
+import styles from '../styles.scss';
+import ZoomableChartContainer from '../../../../components/svg/ZoomableChartContainer';
+import * as zoomUtils from '../../../../utils/zoom.js';
 
 export default class FileEvolutionDendrogram extends React.PureComponent {
   constructor(props) {
@@ -11,12 +15,30 @@ export default class FileEvolutionDendrogram extends React.PureComponent {
 
     this.elems = {};
     this.state = {
-      branch: 'main',
-      checkedOutBranch: 'main',
-      path: '',
-      fileURL: '',
       files: props.files,
+      isPanning: false,
     };
+
+    const dimensions = zoomUtils.initialDimensions();
+    const zoom_x = d3.scaleTime().rangeRound([0, 0]);
+    const zoom_y = d3.scaleLinear().rangeRound([0, 0]);
+
+    this.scales = {
+      x: zoom_x,
+      y: zoom_y,
+      scaledX: zoom_x,
+      scaledY: zoom_y,
+    };
+
+    console.log("this.scales");
+    console.log(this.scales);
+    this.scales.x.domain([0, 928]);
+    this.scales.y.domain([0, 928]);
+    console.log("this.scales.domain");
+    console.log(this.scales);
+
+    this.onResize = zoomUtils.onResizeFactory(0.7, 0.7);
+    this.onZoom = zoomUtils.onZoomFactory({ constrain: true, margin: 50 });
   }
 
   componentWillReceiveProps(nextProps) {
@@ -25,13 +47,15 @@ export default class FileEvolutionDendrogram extends React.PureComponent {
   }
 
   componentDidMount() {}
+  
 
   render() {
      // Specify the chart’s dimensions.
   const width = 928;
   const height = width;
-  const cx = width * 0.5; // adjust as needed to fit
-  const cy = height * 0.59; // adjust as needed to fit
+  // named center_x, since it clashes with the cx function from classnames
+  const center_x = width * 0.5; // adjust as needed to fit
+  const center_y = height * 0.59; // adjust as needed to fit
   const radius = Math.min(width, height) / 2 - 30;
 
   const convertedData = this.convertData(this.state.files);
@@ -49,7 +73,7 @@ export default class FileEvolutionDendrogram extends React.PureComponent {
   this.svg = d3.select(this.chartRef)
   .attr("width", width)
       .attr("height", height)
-      .attr("viewBox", [-cx, -cy, width, height])
+      .attr("viewBox", [-center_x, -center_y, width, height])
       .attr("style", "width: 100%; height: auto; font: 10px sans-serif;");
 
   // Append links.
@@ -91,9 +115,24 @@ export default class FileEvolutionDendrogram extends React.PureComponent {
       .text(d => d.data.name);
 
   return (
-    <div>
-      <svg ref={svg => this.chartRef = svg}></svg>
-    </div>
+    <ZoomableChartContainer
+    scaleExtent={[1, Infinity]}
+    onZoom={(evt) => {
+      this.onZoom(evt);
+      this.props.onViewportChanged(this.scales.scaledX.domain());
+    }}
+    onResize={(dimensions) => this.onResize(dimensions)}
+    onStart={(e) =>
+      this.setState({
+        isPanning: e.sourceEvent === null || e.sourceEvent.type !== 'wheel',
+      })
+    }
+    onEnd={() => this.setState({ isPanning: false })}
+    className={cx(styles.chart, { [styles.panning]: this.state.isPanning })}>
+
+    <svg ref={svg => this.chartRef = svg}></svg>
+
+    </ZoomableChartContainer>
   );
   }
 

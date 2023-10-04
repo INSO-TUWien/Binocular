@@ -1,9 +1,9 @@
 'use strict';
 
 import { createAction } from 'redux-actions';
-import { select, takeEvery, fork } from 'redux-saga/effects';
+import { select, throttle, fork, takeEvery } from 'redux-saga/effects';
 
-import { fetchFactory, timestampedActionFactory } from '../../../../sagas/utils.js';
+import { fetchFactory, timestampedActionFactory, mapSaga } from '../../../../sagas/utils.js';
 import Database from '../../../../database/database';
 
 
@@ -17,10 +17,21 @@ export const requestFileEvolutionDendrogramData = createAction('REQUEST_FILE_EVO
 export const receiveFileEvolutionDendrogramData = timestampedActionFactory('RECEIVE_FILE_EVOLUTION_DENDROGRAM_DATA');
 export const receiveFileEvolutionDendrogramDataError = createAction('RECEIVE_FILE_EVOLUTION_DENDROGRAM_DATA_ERROR');
 
+// for zoom
+export const requestRefresh = createAction('REQUEST_REFRESH');
+const refresh = createAction('REFRESH');
+
+// for zoom
+export const setViewport = createAction('COR_SET_VIEWPORT');
+
 export default function* () {      
   // fetch data once on entry
   yield* fetchFileUrl();                                                                       
   yield fork(watchSetActiveFile);
+  // for zoom
+  yield fork(watchViewport);
+  yield fork(watchRefresh);
+  yield fork(watchRefreshRequests);
 }
 
 export function* watchSetActiveFile() {
@@ -31,9 +42,24 @@ export function* watchSetActiveFile() {
   yield takeEvery('SET_ACTIVE_BRANCHES', fetchFileUrl);
 }
 
+// for zoom
+function* watchViewport() {
+  yield takeEvery('COR_SET_VIEWPORT', mapSaga(requestRefresh));
+}
+
+function* watchRefreshRequests() {
+  yield throttle(5000, 'REQUEST_REFRESH', mapSaga(refresh));
+}
+
+function* watchRefresh() {
+  yield takeEvery('REFRESH', fetchFileUrl);
+}
+
 export const fetchFileUrl = fetchFactory(
   function* () {
     const state = yield select();
+    // for zoom
+    const viewport = state.visualizations.fileEvolutionDendrogram.state.config.viewport || [0, null];
     const files = [];
     yield Promise.resolve(Database.requestFileStructure())
     .then((resp) => resp.files.data)
