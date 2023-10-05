@@ -26,8 +26,9 @@ export default handleActions(
         branches: action.payload ? action.payload : null,
       }),
 
+
       // for zoom
-      COR_SET_VIEWPORT: (state, action) => _.assign({}, state, { viewport: action.payload }),
+      //COR_SET_VIEWPORT: (state, action) => _.assign({}, state, { viewport: action.payload }),
   },
   {
     fileURL: '',
@@ -36,6 +37,6 @@ export default handleActions(
     files: [],
     branches: [],
     // for zoom
-    viewport: [0, null],
+    //viewport: [0, null],
   }
 );

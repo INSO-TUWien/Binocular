@@ -16,10 +16,12 @@ const mapStateToProps = (state) => {
 
 const mapDispatchToProps = (dispatch) => {
   return {
+    /*
     // for zoom
     onViewportChanged: function (v) {
       dispatch(setViewport(v));
     },
+    */
   };
 };
 
