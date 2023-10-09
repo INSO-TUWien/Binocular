@@ -1,9 +1,9 @@
 name: Build Binocular
 
 on:
-  push:
-     branches:
-       - "feature/169"
+  # push:
+  #   branches:
+  #     - "develop"
   workflow_dispatch:
     inputs:
       databaseImage: 
@@ -11,7 +11,7 @@ on:
         default: "ghcr.io/inso-tuwien/binocular-database"
       databaseTag:
         description: "Base tag to build database from"
-        default: "arangodb_3.11.3-no_volumes"
+        default: "latest"
 
 env:
   REGISTRY: ghcr.io
