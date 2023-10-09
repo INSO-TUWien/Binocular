@@ -62,7 +62,7 @@ describe('ci', function () {
       for (const i in dbBuildsCollectionData[0].jobs) {
         expect(dbBuildsCollectionData[0].jobs[i].webUrl).to.equal('https://gitlab.com/Test/Test-Project/jobs/' + i);
       }
-      expect(dbBuildsCollectionData[0].webUrl).to.equal('https://gitlab.com/Test/Test-Project/pipelines/1');
+      expect(dbBuildsCollectionData[0].webUrl).to.equal('https://gitlab.com/Test/Test-Project/pipelines/' + dbBuildsCollectionData[0]._key);
     });
   });
 
