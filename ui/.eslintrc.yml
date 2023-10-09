@@ -5,6 +5,8 @@ extends:
   - eslint:recommended
   - prettier
   - lambdas
+  - plugin:@typescript-eslint/eslint-recommended
+  - plugin:@typescript-eslint/recommended
 parserOptions:
   ecmaVersion: 8
   sourceType: module

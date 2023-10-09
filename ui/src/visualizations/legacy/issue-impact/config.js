@@ -9,7 +9,6 @@ import SearchBox from '../../../components/SearchBox';
 import FilterBox from '../../../components/FilterBox';
 import styles from './styles.scss';
 
-import { graphQl, emojify } from '../../../utils';
 import Database from '../../../database/database';
 
 const mapStateToProps = (state /*, ownProps*/) => {
@@ -72,7 +71,7 @@ const IssueImpactConfigComponent = (props) => {
               options={_(props.issue.commits.data)
                 .uniqBy((c) => c.sha)
                 .map((c) => ({
-                  label: `${c.shortSha} ${emojify(c.messageHeader)}`,
+                  label: `${c.shortSha} ${c.messageHeader}`,
                   value: c.sha,
                 }))
                 .value()}

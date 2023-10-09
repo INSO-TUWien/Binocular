@@ -1,6 +1,6 @@
 'use strict';
 
-import { emojify, endpointUrl, getChartColors, shortenPath } from '../../ui/src/utils';
+import { endpointUrl, getChartColors, shortenPath } from '../../ui/src/utils';
 
 describe('endpointUrl', function () {
   it('should generate an endpointUrl with a provided suffix', function () {
@@ -25,12 +25,5 @@ describe('shortenPath', function () {
   it('should shorten the provided path to the max length provided py replacing a part in the middel with ...', function () {
     const shortenedPath = shortenPath('http://localhost/api/test', 10);
     expect(shortenedPath).toBe('ht…pi/test');
-  });
-});
-
-describe('emojify', function () {
-  it('should emojify the provided stiring and replace broken emojis', function () {
-    const shortenedPath = emojify(':bug::rocket::new_moon_with_face:|:white-check-mark::construction-worker:');
-    expect(shortenedPath).toBe('🐛🚀🌚|✅👷');
   });
 });

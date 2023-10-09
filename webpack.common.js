@@ -56,6 +56,11 @@ module.exports = {
   module: {
     rules: [
       { test: /\.jsx?$/, exclude: /node_modules/, loader: 'babel-loader' },
+      {
+        test: /\.tsx?$/,
+        use: 'ts-loader',
+        exclude: /node_modules/,
+      },
       ...cssLoaders,
       {
         test: /\.svg$/,
@@ -95,6 +100,7 @@ module.exports = {
     new webpack.LoaderOptionsPlugin({ debug: true }),
   ],
   resolve: {
+    extensions: ['.tsx', '.ts', '.js'],
     alias: {
       http: 'stream-http',
       https: 'https-browserify',
