@@ -1,9 +1,9 @@
 name: Build Binocular
 
 on:
-  # push:
-  #   branches:
-  #     - "develop"
+  push:
+     branches:
+       - "feature/169"
   workflow_dispatch:
     inputs:
       databaseImage: 
