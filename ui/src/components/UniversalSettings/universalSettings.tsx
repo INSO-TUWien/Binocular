@@ -1,6 +1,6 @@
 'use strict';
 
-import React, { useState, useEffect } from 'react';
+import * as React from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import styles from './styles.scss';
 import {
@@ -17,16 +17,25 @@ import DateRangeFilter from '../DateRangeFilter/dateRangeFilter';
 import AuthorMerger from './authorMerger/authorMerger';
 import AuthorList from './authorList/authorList';
 import SprintManager from './sprintManager/sprintManager';
+import { IAuthor, ICommitter, IPalette } from '../../types/authorTypes';
+import { IUniversalSettings, IUniversalSettingsConfig } from '../../types/unversalSettingsTypes';
+import { IDateRange, IGlobalState } from '../../types/globalTypes';
+import { ISprint } from '../../types/sprintTypes';
 
-export default ({ universalSettingsConfig }) => {
+interface IProps {
+  universalSettingsConfig: IUniversalSettingsConfig;
+}
+
+export default (props: IProps) => {
   //config
-  const hideDateSettings = universalSettingsConfig.hideDateSettings === true;
-  const hideGranularitySettings = universalSettingsConfig.hideGranularitySettings === true;
-  const hideCommitSettings = universalSettingsConfig.hideCommitSettings === true;
-  const hideSprintSettings = universalSettingsConfig.hideSprintSettings === true;
+  const hideDateSettings = props.universalSettingsConfig.hideDateSettings === true;
+  const hideGranularitySettings = props.universalSettingsConfig.hideGranularitySettings === true;
+  const hideCommitSettings = props.universalSettingsConfig.hideCommitSettings === true;
+  const hideSprintSettings = props.universalSettingsConfig.hideSprintSettings === true;
 
   //global state
-  const universalSettings = useSelector((state) => state.universalSettings);
+
+  const universalSettings: IUniversalSettings = useSelector((state: IGlobalState) => state.universalSettings);
   const chartResolution = universalSettings.chartResolution;
   const firstCommit = universalSettings.universalSettingsData.data.firstCommit;
   const lastCommit = universalSettings.universalSettingsData.data.lastCommit;
@@ -38,11 +47,11 @@ export default ({ universalSettingsConfig }) => {
   const mergedAuthorListGlobal = universalSettings.mergedAuthors;
   const otherAuthorListGlobal = universalSettings.otherAuthors;
 
-  let firstDisplayDate;
-  let lastDisplayDate;
-  let selectedAuthors;
-  let otherAuthorsGlobal;
-  let sprints = [];
+  let firstDisplayDate: string;
+  let lastDisplayDate: string;
+  let selectedAuthors: string[];
+  let otherAuthorsGlobal: ICommitter[];
+  let sprints: ISprint[] = [];
 
   if (universalSettings.chartTimeSpan.from === undefined) {
     firstDisplayDate = firstCommit !== undefined ? firstCommit.date.split('.')[0] : undefined;
@@ -68,27 +77,27 @@ export default ({ universalSettingsConfig }) => {
   }
 
   const dispatch = useDispatch();
-  const onClickResolution = (resolution) => dispatch(setResolution(resolution));
-  const onChangeTimeSpan = (timeSpan) => dispatch(setTimeSpan(timeSpan));
-  const onAuthorSelectionChanged = (selected) => dispatch(setSelectedAuthors(selected));
-  const onMergedAuthorListChanged = (selected) => dispatch(setMergedAuthorList(selected));
-  const onOtherAuthorListChanged = (selected) => dispatch(setOtherAuthorList(selected));
-  const onSetPalette = (allAuthors) => dispatch(setAllAuthors(allAuthors));
-  const onSetExcludeMergeCommits = (checked) => dispatch(setExcludeMergeCommits(checked));
-  const onSetSprints = (sprints) => dispatch(setSprints(sprints));
+  const onClickResolution = (resolution: string) => dispatch(setResolution(resolution));
+  const onChangeTimeSpan = (timeSpan: IDateRange) => dispatch(setTimeSpan(timeSpan));
+  const onAuthorSelectionChanged = (selectedAuthors: string[]) => dispatch(setSelectedAuthors(selectedAuthors));
+  const onMergedAuthorListChanged = (mergedAuthorList: IAuthor[]) => dispatch(setMergedAuthorList(mergedAuthorList));
+  const onOtherAuthorListChanged = (otherAuthorList: ICommitter[]) => dispatch(setOtherAuthorList(otherAuthorList));
+  const onSetPalette = (allAuthors: IPalette) => dispatch(setAllAuthors(allAuthors));
+  const onSetExcludeMergeCommits = (checked: boolean) => dispatch(setExcludeMergeCommits(checked));
+  const onSetSprints = (sprints: ISprint[]) => dispatch(setSprints(sprints));
 
   //local state
-  const [showAuthorMerge, setShowAuthorMerge] = useState(false);
-  const [mergedAuthorList, setMergedAuthorListLocal] = useState([]);
-  const [otherAuthors, setOtherAuthors] = useState([]);
-  const [showSprintManager, setShowSprintManager] = useState(false);
+  const [showAuthorMerge, setShowAuthorMerge] = React.useState(false);
+  const [mergedAuthorList, setMergedAuthorListLocal] = React.useState([]);
+  const [otherAuthors, setOtherAuthors] = React.useState([]);
+  const [showSprintManager, setShowSprintManager] = React.useState(false);
 
   //set local state when global state changes
-  useEffect(() => {
+  React.useEffect(() => {
     setOtherAuthors(otherAuthorsGlobal);
   }, [otherAuthorsGlobal]);
 
-  useEffect(() => {
+  React.useEffect(() => {
     if (palette !== undefined) {
       onSetPalette(palette);
     }
@@ -97,9 +106,9 @@ export default ({ universalSettingsConfig }) => {
   //if the merged authors in the universal settings are not initialized yet
   // (either from local storage or because the app already started), do that now.
   //else just take the values from the global universal settings state
-  useEffect(() => {
+  React.useEffect(() => {
     if (committers && (mergedAuthorListGlobal === undefined || mergedAuthorListGlobal.length === 0)) {
-      const mergedAuthorList = generateCommittersList(committers, palette);
+      const mergedAuthorList = generateCommitterList(committers, palette);
       onMergedAuthorListChanged(mergedAuthorList);
       setMergedAuthorListLocal(mergedAuthorList);
       setOtherAuthors([]);
@@ -109,19 +118,19 @@ export default ({ universalSettingsConfig }) => {
     }
   }, [mergedAuthorListGlobal, otherAuthorListGlobal, committers]);
 
-  const generateCommittersList = (committers, palette) => {
-    const committersList = [];
+  const generateCommitterList = (committers: string[], palette: IPalette): IAuthor[] => {
+    const committerList: IAuthor[] = [];
     for (const committer of committers) {
-      committersList.push({
+      committerList.push({
         mainCommitter: committer,
         committers: [{ signature: committer, color: palette[committer] }],
         color: palette[committer],
       });
     }
-    return committersList;
+    return committerList;
   };
 
-  const timestampToDateTimeString = (timestamp) => {
+  const timestampToDateTimeString = (timestamp: number): string => {
     const date = new Date(timestamp);
     return (
       '' +
@@ -198,7 +207,7 @@ export default ({ universalSettingsConfig }) => {
             <DateRangeFilter
               from={firstDisplayDate}
               to={lastDisplayDate}
-              onDateChanged={(data) => {
+              onDateChanged={(data: IDateRange) => {
                 onChangeTimeSpan(data);
               }}
             />
@@ -206,7 +215,7 @@ export default ({ universalSettingsConfig }) => {
           <div className={styles.marginTop05}>
             <button
               className="button"
-              onClick={(e) => {
+              onClick={() => {
                 const defaultTimeSpan = {
                   from: timestampToDateTimeString(firstSignificantTimestamp),
                   to: timestampToDateTimeString(lastSignificantTimestamp),

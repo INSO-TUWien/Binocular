@@ -1,15 +1,22 @@
 'use strict';
 
-import React from 'react';
+import * as React from 'react';
 import styles from './milestoneList.scss';
-import moment from 'moment';
+import * as moment from 'moment';
 import 'moment/locale/de';
-export default (props) => {
+import { IMilestone } from '../../../../types/milestoneTypes';
+
+interface IProps {
+  milestones: IMilestone[];
+  addMilestone: (milestone: IMilestone) => void;
+}
+
+export default (props: IProps) => {
   moment.locale('de');
   return (
     <div className={styles.milestones}>
       <div className={styles.milestonesScroll}>
-        {props.milestones.map((milestone) => {
+        {props.milestones.map((milestone: IMilestone) => {
           return (
             <div className={styles.milestone} key={'m_' + milestone.iid}>
               <div className={styles.milestoneText}>

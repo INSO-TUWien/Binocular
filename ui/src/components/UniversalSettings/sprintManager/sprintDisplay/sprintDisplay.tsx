@@ -1,18 +1,27 @@
 'use strict';
 
-import React from 'react';
+import * as React from 'react';
 import styles from './sprintDisplay.scss';
-import moment from 'moment';
+import * as moment from 'moment';
 import 'moment/locale/de';
+import { ISprint } from '../../../../types/sprintTypes';
 
-export default (props) => {
+interface IProps {
+  sprints: ISprint[];
+  deleteSprint: (id: number) => void;
+  renameSprint: (id: number, newName: string) => void;
+}
+
+export default (props: IProps) => {
   moment.locale('de');
 
   const renderSprintList = () => {
     if (props.sprints.length !== 0) {
       return props.sprints
-        .sort((a, b) => new moment(a.from).format('YYYYMMDD') - new moment(b.from).format('YYYYMMDD'))
-        .map((sprint) => {
+        .sort((a: ISprint, b: ISprint): number => {
+          return new (moment as any)(a.from).format('YYYYMMDD') - new (moment as any)(b.from).format('YYYYMMDD');
+        })
+        .map((sprint: ISprint) => {
           return (
             <div className={styles.sprintContainer} key={'sprint_' + sprint.id}>
               <div className={styles.sprintContainerFrom}>{moment(sprint.from).format('ll')}</div>
@@ -22,7 +31,7 @@ export default (props) => {
                     type={'text'}
                     className={styles.sprintContainerInnerTextInput}
                     defaultValue={sprint.name}
-                    onKeyDown={(e) => {
+                    onKeyDown={(e: any) => {
                       if (e.key === 'Enter') {
                         e.target.blur();
                         props.renameSprint(sprint.id, e.target.value);

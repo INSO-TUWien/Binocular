@@ -1,52 +1,62 @@
 'use strict';
 
-import React, { useState, useEffect } from 'react';
+import * as React from 'react';
 import styles from './sprintManager.scss';
 import DateRangeFilter from '../../DateRangeFilter/dateRangeFilter';
 import SprintDisplay from './sprintDisplay/sprintDisplay';
-import moment from 'moment';
+import * as moment from 'moment';
 import Database from '../../../database/database';
 import MilestoneList from './milestoneList/milestoneList';
+import { ISprint } from '../../../types/sprintTypes';
+import { IMilestone } from '../../../types/milestoneTypes';
+import { IDateRange } from '../../../types/globalTypes';
 
-export default (props) => {
-  let [sprints, setSprints] = useState(props.sprints);
+interface IProps {
+  sprints: ISprint[];
+  close: () => void;
+  setSprints: (sprints: ISprint[]) => void;
+}
 
-  const [newSprintToAdd, setNewSprintToAdd] = useState({
+export default (props: IProps) => {
+  const [sprints, setSprints] = React.useState(props.sprints);
+
+  const [newSprintToAdd, setNewSprintToAdd] = React.useState({
     name: 'Sprint' + (sprints.length + 1),
     from: undefined,
     to: undefined,
   });
-  const [recursiveSprints, setRecursiveSprints] = useState({
+  const [recursiveSprints, setRecursiveSprints] = React.useState({
     amount: 1,
     sprintLength: 1,
     startDateTime: undefined,
   });
-  const [milestones, setMilestones] = useState([]);
+  const [milestones, setMilestones] = React.useState<IMilestone[]>([]);
   let tmpID = 0;
-  sprints.forEach((s) => {
+  sprints.forEach((s: ISprint) => {
     if (s.id > tmpID) {
       tmpID = s.id;
     }
   });
 
-  let [currID, setCurrID] = useState(tmpID);
+  const [currID, setCurrID] = React.useState(tmpID);
 
   Database.getMilestoneData().then((milestones) => {
     setMilestones(milestones);
   });
 
-  useEffect(() => {
+  React.useEffect(() => {
     setSprints(props.sprints);
   }, [props.sprints]);
 
   const recursivelyAddSprints = () => {
     let from = moment(recursiveSprints.startDateTime);
     let to = moment(from).add(recursiveSprints.sprintLength, 'd');
+    let id = currID;
     for (let i = 0; i < recursiveSprints.amount; i++) {
-      currID++;
+      id++;
       sprints.push({
         name: 'Sprint' + (sprints.length + 1),
-        id: currID,
+        id: id,
         from: from.format(),
         to: to.format(),
       });
@@ -58,50 +68,51 @@ export default (props) => {
       sprintLength: 1,
       startDateTime: undefined,
     });
-    setCurrID(currID);
+    setCurrID(id);
     setSprints(sprints);
     props.setSprints(sprints);
   };
-  const addAllMilestones = (milestones) => {
+  const addAllMilestones = (milestones: IMilestone[]) => {
+    let id = currID;
     for (const milestone of milestones) {
-      currID++;
+      id++;
       sprints.push({
         name: milestone.title,
-        id: currID,
+        id: id,
         iid: milestone.iid,
         from: moment(milestone.startDate).format(),
         to: moment(milestone.dueDate).format(),
       });
     }
-    setCurrID(currID);
+    setCurrID(id);
     props.setSprints(sprints);
   };
 
-  const addMilestone = (milestone) => {
-    currID++;
+  const addMilestone = (milestone: IMilestone) => {
+    const id = currID + 1;
     sprints.push({
       name: milestone.title,
-      id: currID,
+      id: id,
       iid: milestone.iid,
       from: moment(milestone.startDate).format(),
       to: moment(milestone.dueDate).format(),
     });
-    setCurrID(currID);
+    setCurrID(id);
     setSprints(sprints);
     props.setSprints(sprints);
   };
 
-  const deleteSprint = (sprintID) => {
-    sprints = sprints.filter((s) => s.id !== sprintID);
-    setSprints(sprints);
-    props.setSprints(sprints);
+  const deleteSprint = (sprintID: number) => {
+    const newSprints = sprints.filter((s: ISprint) => s.id !== sprintID);
+    setSprints(newSprints);
+    props.setSprints(newSprints);
   };
 
-  const renameSprint = (sprintID, name) => {
+  const renameSprint = (sprintID: number, newName: string) => {
     setSprints(
-      sprints.map((s) => {
+      sprints.map((s: ISprint) => {
         if (s.id === sprintID) {
-          s.name = name;
+          s.name = newName;
         }
         return s;
       })
@@ -147,7 +158,7 @@ export default (props) => {
                   from={newSprintToAdd.from}
                   to={newSprintToAdd.to}
                   type={'date'}
-                  onDateChanged={(date) => {
+                  onDateChanged={(date: IDateRange) => {
                     if (date.from !== undefined) {
                       newSprintToAdd.from = date.from;
                     }
@@ -179,10 +190,9 @@ export default (props) => {
                     if (falseInput) {
                       return;
                     }
-                    currID++;
-                    newSprintToAdd.id = currID;
-                    sprints.push(newSprintToAdd);
-                    setCurrID(currID);
+                    const id = currID + 1;
+                    sprints.push({ id: id, name: newSprintToAdd.name, from: newSprintToAdd.from, to: newSprintToAdd.to });
+                    setCurrID(id);
                     setSprints(sprints);
                     setNewSprintToAdd({
                       name: 'Sprint' + (sprints.length + 1),
@@ -205,7 +215,7 @@ export default (props) => {
                   value={recursiveSprints.amount}
                   type={'number'}
                   onChange={(e) => {
-                    recursiveSprints.amount = e.target.value;
+                    recursiveSprints.amount = parseInt(e.target.value);
                   }}></input>
               </div>
               <div className={styles.mb05 + ' ' + styles.p05} id={'recursivelyAddSprintsSprintLengthInput'}>
@@ -216,7 +226,7 @@ export default (props) => {
                   value={recursiveSprints.sprintLength}
                   type={'number'}
                   onChange={(e) => {
-                    recursiveSprints.sprintLength = e.target.value;
+                    recursiveSprints.sprintLength = parseInt(e.target.value);
                   }}></input>
               </div>
               <div className={styles.mb05 + ' ' + styles.p05} id={'recursivelyAddSprintsStartDateInput'}>
@@ -242,13 +252,13 @@ export default (props) => {
                       document.getElementById('recursivelyAddSprintsStartDateInput').classList.add(styles.wrongInput);
                       falseInput = true;
                     }
-                    if (recursiveSprints.amount === '') {
+                    if (isNaN(recursiveSprints.amount)) {
                       document.getElementById('recursivelyAddSprintsSprintAmountInput').classList.remove(styles.wrongInput);
                       document.getElementById('recursivelyAddSprintsSprintAmountInput').offsetWidth;
                       document.getElementById('recursivelyAddSprintsSprintAmountInput').classList.add(styles.wrongInput);
                       falseInput = true;
                     }
-                    if (recursiveSprints.sprintLength === '') {
+                    if (isNaN(recursiveSprints.sprintLength)) {
                       document.getElementById('recursivelyAddSprintsSprintLengthInput').classList.remove(styles.wrongInput);
                       document.getElementById('recursivelyAddSprintsSprintLengthInput').offsetWidth;
                       document.getElementById('recursivelyAddSprintsSprintLengthInput').classList.add(styles.wrongInput);
@@ -266,13 +276,13 @@ export default (props) => {
             <div className={styles.sprintManagerPanel}>
               <h2>Import Sprints from Milestones</h2>
               <MilestoneList
-                milestones={milestones.filter((m) => sprints.filter((s) => s.iid === m.iid).length === 0)}
+                milestones={milestones.filter((m) => sprints.filter((s: ISprint) => s.iid === m.iid).length === 0)}
                 addMilestone={(milestone) => addMilestone(milestone)}
               />
               <button
                 className={'button ' + styles.accentButton}
                 onClick={() => {
-                  addAllMilestones(milestones.filter((m) => sprints.filter((s) => s.iid === m.iid).length === 0));
+                  addAllMilestones(milestones.filter((m) => sprints.filter((s: ISprint) => s.iid === m.iid).length === 0));
                 }}>
                 Add All
               </button>
