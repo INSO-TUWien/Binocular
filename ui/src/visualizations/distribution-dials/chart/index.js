@@ -35,7 +35,7 @@ export default () => {
     //if the 'others' cetegory is also selected, add it to the array
     if (selectedAuthors.includes('others')) {
       selectedMergedAuthors.push({
-        mainCommitter: 'others',
+        mainCommitter: 'other',
         committers: otherAuthors,
         color: authorColors['other'],
       });

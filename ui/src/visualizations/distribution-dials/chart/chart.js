@@ -1,6 +1,6 @@
 'use strict';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useSelector } from 'react-redux';
 import _ from 'lodash';
 import GlobalZoomableSvg from '../../../components/svg/GlobalZoomableSvg.js';
@@ -10,30 +10,34 @@ import * as zoomUtils from '../../../utils/zoom.js';
 import * as d3 from 'd3';
 import styles from '../styles.scss';
 import StackedDial from './stackedDial.js';
-import { getAngle, getAngleAdjusted, getCoordinatesForAngle, getOuterCoordinatesForBucket } from './utils.js';
+import {
+  getAngle,
+  getAngleAdjusted,
+  getCoordinatesForAngle,
+  getOuterCoordinatesForBucket,
+  splitCommitsByAuthor,
+  splitIssuesByAuthor,
+} from './utils.js';
 import BezierDial from './bezierDial.js';
 import chroma from 'chroma-js';
 import LegendCompact from '../../../components/LegendCompact/LegendCompact.js';
+import CenterCircle from './centerCircle.js';
 
 export default ({ data }) => {
   const chartSizeFactor = 0.9;
   const uiSizeFactor = 0.95;
-  const innerCircleRadiusFactor = 0.2;
+  const innerCircleRadiusFactor = 0.33;
 
-  const issuesColor = chroma.rgb(65, 109, 181).hex();
-  const commitsColor = chroma.rgb(158, 1, 66).hex();
-  const changesColor = chroma.rgb(128, 205, 164).hex();
+  const issuesColor = '#118ab2';
+  const commitsColor = '#06d6a0';
+  const changesColor = '#ffd166';
 
   //global state
   const distributionDialsState = useSelector((state) => state.visualizations.distributionDials.state);
 
-  //TODO get this from config state
   const layers = distributionDialsState.config.layers;
   const selectedLayers = distributionDialsState.config.layersSelected;
   const splitLayers = distributionDialsState.config.layersSplit;
-  const isCommitsSplit = distributionDialsState.config.splitCommits;
-  const isChangesSplit = distributionDialsState.config.splitChanges;
-  const isIssuesSplit = distributionDialsState.config.splitIssues;
 
   //local state
   const [transform, setTransform] = useState(d3.zoomIdentity);
@@ -43,6 +47,10 @@ export default ({ data }) => {
   const [chartParts, setChartParts] = useState([]);
   const [dialLines, setDialLines] = useState([]);
   const [labels, setLabels] = useState([]);
+
+  const [centerCircleLabel, setCenterCircleLabel] = useState('');
+  const [centerCircleData, setCenterCircleData] = useState([]);
+  const [isCenterCircleDataVisible, setIsCenterCircleDataVisible] = useState(false);
 
   const center = {
     x: dimensions.width / 2,
@@ -55,6 +63,16 @@ export default ({ data }) => {
   };
   const onZoom = (evt) => {
     setTransform(evt.transform);
+  };
+
+  const onHoverData = (label, data) => {
+    if (!label) {
+      setIsCenterCircleDataVisible(false);
+    } else {
+      setCenterCircleLabel(label);
+      setCenterCircleData(data);
+      setIsCenterCircleDataVisible(true);
+    }
   };
 
   //update radius when dimensions change.
@@ -76,6 +94,9 @@ export default ({ data }) => {
       const innerRad = innerCircleRadius + ((chartRadius - innerCircleRadius) / numOfDials) * i;
       const outerRad = innerCircleRadius + ((chartRadius - innerCircleRadius) / numOfDials) * (i + 1);
 
+      const commitsByBucketAndAuthor = data.map((bucket) => splitCommitsByAuthor(bucket.commits));
+      const issuesByBucketAndAuthor = data.map((bucket) => splitIssuesByAuthor(bucket.issuesCreated, bucket.issuesClosed));
+
       if (part === 'issues') {
         if (splitLayers.includes(part)) {
           //if this dial is split, we have the number of created issues on the outside
@@ -92,15 +113,27 @@ export default ({ data }) => {
             />
           );
         } else {
-          //otherwise, we just have the total number of issues that were either created or closed in the specified timeframe
-          const issuesNumber = data.map((bucket) => {
-            let allIssues = bucket.issuesCreated.concat(bucket.issuesClosed);
-            //remove duplicates
-            allIssues = _.uniqBy(allIssues, (i) => i.iid);
-            //we are interested in the number of issues in each bucket
-            return allIssues.length;
-          });
-          dials.push(<BezierDial innerRad={innerRad} outerRad={outerRad} data={issuesNumber} color={issuesColor} key={'issues'} />);
+          //otherwise, we just have the total number of issues that were either created or closed in the specified timeframe by each author
+          const issuesNumberByAuthors = issuesByBucketAndAuthor.map((bucket) =>
+            bucket.map((author) => {
+              return {
+                name: author.name,
+                data: author.issues,
+              };
+            })
+          );
+
+          dials.push(
+            <BezierDial
+              label={part}
+              innerRad={innerRad}
+              outerRad={outerRad}
+              data={issuesNumberByAuthors}
+              color={issuesColor}
+              key={'issues'}
+              onHoverData={onHoverData}
+            />
+          );
         }
       } else if (part === 'changes') {
         if (splitLayers.includes(part)) {
@@ -118,11 +151,27 @@ export default ({ data }) => {
             />
           );
         } else {
-          //if the dial is not split, we count the number of changes (additions + deletions) for each bucket
-          const changes = data.map((bucket) =>
-            bucket.commits.reduce((prev, curr) => prev + curr.stats.additions + curr.stats.deletions, 0)
+          //if the dial is not split, we count the number of changes (additions + deletions) for each author for each bucket
+          const changesByAuthors = commitsByBucketAndAuthor.map((bucket) =>
+            bucket.map((author) => {
+              return {
+                name: author.name,
+                data: author.additions + author.deletions,
+              };
+            })
           );
-          dials.push(<BezierDial innerRad={innerRad} outerRad={outerRad} data={changes} color={changesColor} key={'changes'} />);
+
+          dials.push(
+            <BezierDial
+              label={part}
+              innerRad={innerRad}
+              outerRad={outerRad}
+              data={changesByAuthors}
+              color={changesColor}
+              key={'changes'}
+              onHoverData={onHoverData}
+            />
+          );
         }
       } else if (part === 'commits') {
         if (splitLayers.includes(part)) {
@@ -145,9 +194,27 @@ export default ({ data }) => {
             />
           );
         } else {
-          //just the total number of commits in each bucket
-          const commitsNumber = data.map((bucket) => bucket.commits.length);
-          dials.push(<BezierDial innerRad={innerRad} outerRad={outerRad} data={commitsNumber} color={commitsColor} key={'commits'} />);
+          //just the total number of commits for each author in each bucket
+          const commitsNumberByAuthors = commitsByBucketAndAuthor.map((bucket) =>
+            bucket.map((author) => {
+              return {
+                name: author.name,
+                data: author.commits,
+              };
+            })
+          );
+
+          dials.push(
+            <BezierDial
+              label={part}
+              innerRad={innerRad}
+              outerRad={outerRad}
+              data={commitsNumberByAuthors}
+              color={commitsColor}
+              key={'commits'}
+              onHoverData={onHoverData}
+            />
+          );
         }
       }
     }
@@ -240,7 +307,12 @@ export default ({ data }) => {
           <g transform={`translate(${center.x}, ${center.y})`}>
             {chartParts}
             {dialLines}
-            <circle cx="0" cy="0" r={chartRadius * innerCircleRadiusFactor} stroke="DarkGray" fill="white" />
+            <CenterCircle
+              radius={chartRadius * innerCircleRadiusFactor}
+              label={centerCircleLabel}
+              data={centerCircleData}
+              isDataVisible={isCenterCircleDataVisible}
+            />
             {labels}
           </g>
         </OffsetGroup>
