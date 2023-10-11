@@ -75,6 +75,8 @@
     "@octokit/graphql": "^7.0.1",
     "@octokit/plugin-paginate-graphql": "^4.0.0",
     "@octokit/rest": "^19.0.7",
+    "@types/chroma-js": "^2.4.1",
+    "@types/d3": "^7.4.1",
     "@types/lodash": "^4.14.199",
     "@types/redux-actions": "^2.6.3",
     "@uiw/codemirror-extensions-langs": "^4.19.9",

@@ -1,9 +1,10 @@
 'use strict';
 
 import { connect } from 'react-redux';
-import Chart from './chart.js';
+import Chart from './chart';
+import { IGlobalState } from '../../../../types/globalTypes';
 
-const mapStateToProps = (state /*, ownProps*/) => {
+const mapStateToProps = (state: IGlobalState) => {
   const changesState = state.visualizations.changes.state;
   const universalSettings = state.universalSettings;
   return {
@@ -12,7 +13,6 @@ const mapStateToProps = (state /*, ownProps*/) => {
     filteredCommits: changesState.data.data.filteredCommits,
     commits: changesState.data.data.commits,
     committers: changesState.data.data.committers,
-    commitAttribute: changesState.config.commitAttribute,
     firstCommitTimestamp: changesState.data.data.firstCommitTimestamp,
     lastCommitTimestamp: changesState.data.data.lastCommitTimestamp,
     firstSignificantTimestamp: changesState.data.data.firstSignificantTimestamp,
@@ -26,7 +26,7 @@ const mapStateToProps = (state /*, ownProps*/) => {
   };
 };
 
-const mapDispatchToProps = (/*dispatch , ownProps*/) => {
+const mapDispatchToProps = () => {
   return {};
 };
 

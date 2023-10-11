@@ -1,10 +1,11 @@
 'use strict';
 
-import React from 'react';
+import * as React from 'react';
 import * as d3 from 'd3';
 import * as baseStyles from './scalable-base-chart.component.scss';
 import { NoImplementationException } from '../../utils/exception/NoImplementationException';
 import { hash } from '../../utils/crypto-utils';
+import { IPalette } from '../../types/authorTypes';
 
 /**
  * ScalableBaseChartComponent
@@ -26,8 +27,40 @@ import { hash } from '../../utils/crypto-utils';
  *  - displayNegative (optional) (Format: true/false) Display negative numbers on y-scale.
  *  - order (optional) (Format: [string, string, ...]) Strings containing the keys in desired order (largest to smallest).
  */
-export default class ScalableBaseChartComponent extends React.Component {
-  constructor(props, styles) {
+
+interface IProps {
+  content: any[];
+  d3offset: any;
+  displayNegative: boolean;
+  keys: string[];
+  order: string[];
+  paddings: { top: number; left: number; bottom: number; right: number };
+  palette: IPalette;
+  resolution: string;
+  xAxisCenter: boolean;
+  yDims: number[];
+  yScale?: number[];
+  disableVerticalZoom?: boolean;
+  hideVertical?: boolean;
+}
+
+interface IState {
+  content: any;
+  palette: any;
+  componentMounted: boolean;
+  zoomed: boolean;
+  zoomedDims: number[];
+  zoomedVertical: boolean;
+  verticalZoomDims: number[];
+  d3offset: any;
+  data: any;
+}
+
+export default class ScalableBaseChart extends React.Component<IProps, IState> {
+  protected styles: any;
+  private svgRef: SVGSVGElement;
+  private tooltipRef: HTMLDivElement;
+  constructor(props: any, styles: any) {
     super(props);
 
     this.styles = Object.freeze(Object.assign({}, baseStyles, styles));
@@ -56,7 +89,7 @@ export default class ScalableBaseChartComponent extends React.Component {
    * @returns {*}
    */
   // eslint-disable-next-line no-unused-vars
-  createAreaFunction(scales) {
+  createAreaFunction(scales: any) {
     throw new NoImplementationException('Base class is abstract and requires implementation!');
   }
 
@@ -66,7 +99,7 @@ export default class ScalableBaseChartComponent extends React.Component {
   }
 
   // eslint-disable-next-line no-unused-vars
-  getYDims() {
+  getYDims(): any {
     throw new NoImplementationException('Base class is abstract and requires implementation!');
   }
 
@@ -78,7 +111,7 @@ export default class ScalableBaseChartComponent extends React.Component {
    * @param area
    */
   // eslint-disable-next-line no-unused-vars
-  resetZoom(scales, axes, brushArea, area) {
+  resetZoom(scales: any, axes: any, brushArea: any, area: any) {
     throw new NoImplementationException('Base class is abstract and requires implementation!');
   }
 
@@ -89,7 +122,7 @@ export default class ScalableBaseChartComponent extends React.Component {
    * @returns Stacked chart data for d3 functions and preprocessed data { stackedData, data }
    */
   // eslint-disable-next-line no-unused-vars
-  calculateChartData(data, order) {
+  calculateChartData(data: any, order: any) {
     throw new NoImplementationException('Base class is abstract and requires implementation!');
   }
 
@@ -105,25 +138,12 @@ export default class ScalableBaseChartComponent extends React.Component {
    * @param scales
    */
   // eslint-disable-next-line no-unused-vars
-  createdTooltipNode(path, bisectDate, mouseoverDate, tooltip, event, node, brushArea, scales) {
+  createdTooltipNode(path: any, bisectDate: any, mouseoverDate: any, tooltip: any, event: any, node: any, brushArea: any, scales: any) {
     throw new NoImplementationException('Base class is abstract and requires implementation!');
   }
 
   // eslint-disable-next-line no-unused-vars
-  getBrushId(data) {
-    throw new NoImplementationException('Base class is abstract and requires implementation!');
-  }
-
-  /**
-   *
-   * @param path
-   * @param tooltip
-   * @param brushArea
-   * @param event
-   * @param stream
-   */
-  // eslint-disable-next-line no-unused-vars
-  onMouseover(path, tooltip, brushArea, event, stream) {
+  getBrushId(data: any): any {
     throw new NoImplementationException('Base class is abstract and requires implementation!');
   }
 
@@ -136,7 +156,20 @@ export default class ScalableBaseChartComponent extends React.Component {
    * @param stream
    */
   // eslint-disable-next-line no-unused-vars
-  onMouseLeave(path, tooltip, brushArea, event, stream) {
+  onMouseover(path: any, tooltip: any, brushArea: any, event: any, stream: any) {
+    throw new NoImplementationException('Base class is abstract and requires implementation!');
+  }
+
+  /**
+   *
+   * @param path
+   * @param tooltip
+   * @param brushArea
+   * @param event
+   * @param stream
+   */
+  // eslint-disable-next-line no-unused-vars
+  onMouseLeave(path: any, tooltip: any, brushArea: any, event: any, stream: any) {
     throw new NoImplementationException('Base class is abstract and requires implementation!');
   }
 
@@ -204,7 +237,6 @@ export default class ScalableBaseChartComponent extends React.Component {
    */
   visualizeData() {
     const { stackedData, data } = this.state.data;
-
     // cannot proceed without data
     if (!data || !stackedData) {
       return;
@@ -245,7 +277,7 @@ export default class ScalableBaseChartComponent extends React.Component {
    * @returns {width, height, {paddings: {top: *, left: *, bottom: *, right: *}, width: *, height: *}}
    *          Values self-explanatory. All values in pixels.
    */
-  getDimsAndPaddings(svg) {
+  getDimsAndPaddings(svg: any) {
     const paddings = this.props.paddings || { left: 0, right: 0, top: 0, bottom: 0 };
     const node = !svg || typeof svg.node !== 'function' ? { getBoundingClientRec: () => ({}) } : svg.node();
     const clientRect = node ? node.getBoundingClientRect() : {};
@@ -268,7 +300,7 @@ export default class ScalableBaseChartComponent extends React.Component {
    *               e.g. width-paddingBottom and yTop should be e.g. paddingTop)
    * @returns {{x: *, y: *}} d3 x and y scales. x scale as time scale, y scale as linear scale.
    */
-  createScales(xDims, xRange, yDims, yRange) {
+  createScales(xDims: any, xRange: any, yDims: any, yRange: any) {
     const x = d3.scaleTime().domain(xDims).range(xRange);
 
     if (this.state.zoomed === true) {
@@ -290,7 +322,7 @@ export default class ScalableBaseChartComponent extends React.Component {
    * @param d
    * @returns {*}
    */
-  getColor(d) {
+  getColor(d: any) {
     return this.props.palette[this.getBrushId(d)];
   }
 
@@ -308,7 +340,7 @@ export default class ScalableBaseChartComponent extends React.Component {
    * @returns {{brushArea: *, xAxis: *}} brushArea: Area that has all the contents appended to it,
    *               xAxis: d3 x-Axis for later transitioning (for zooming)
    */
-  drawChart(svg, area, brush, yScale, scales, height, width, paddings) {
+  drawChart(svg: any, area: any, brush: any, yScale: any, scales: any, height: any, width: any, paddings: any) {
     const brushArea = svg.append('g');
 
     const tooltip = d3.select(this.tooltipRef);
@@ -353,7 +385,7 @@ export default class ScalableBaseChartComponent extends React.Component {
    * @param paddings
    * @returns {*}
    */
-  createXAxis(brushArea, scales, width, height, paddings) {
+  createXAxis(brushArea: any, scales: any, width: any, height: any, paddings: any) {
     if (this.props.xAxisCenter) {
       return brushArea
         .append('g')
@@ -377,13 +409,15 @@ export default class ScalableBaseChartComponent extends React.Component {
    * @param paddings
    * @returns {*}
    */
-  createYAxis(brushArea, scales, width, height, paddings) {
+  createYAxis(brushArea: any, scales: any, width: any, height: any, paddings: any) {
     const yAxis = brushArea
       .append('g')
       .attr('class', this.styles.axis)
       .attr('transform', 'translate(' + paddings.left + ',0)');
 
     if (!this.props.hideVertical) {
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
       yAxis.call(d3.axisLeft(scales.y).tickFormat((d) => (this.props.displayNegative ? d : Math.abs(d))));
     }
     return yAxis;
@@ -398,7 +432,9 @@ export default class ScalableBaseChartComponent extends React.Component {
    * @param paddings
    */
   // eslint-disable-next-line no-unused-vars
-  additionalAxes(brushArea, scales, width, height, paddings) {}
+  additionalAxes(brushArea: any, scales: any, width: any, height: any, paddings: any) {
+    return;
+  }
 
   /**
    *
@@ -409,11 +445,10 @@ export default class ScalableBaseChartComponent extends React.Component {
    * @param svg
    * @param scales
    */
-  setBrushArea(brushArea, brush, area, tooltip, svg, scales) {
+  setBrushArea(brushArea: any, brush: any, area: any, tooltip: any, svg: any, scales: any) {
     brushArea.append('g').attr('class', 'brush').call(brush);
 
-    const bisectDate = d3.bisector((d) => d.date).left;
-    const _this = this;
+    const bisectDate = d3.bisector((d: any) => d.date).left;
     //Append data to svg using the area generator and palette
     const pathStreams = brushArea
       .append('g')
@@ -421,36 +456,36 @@ export default class ScalableBaseChartComponent extends React.Component {
       .data(this.state.data.stackedData)
       .enter()
       .append('path')
-      .attr('class', (data) => `layers ${_this.getBrushClass(data)}`)
+      .attr('class', () => `layers ${this.getBrushClass()}`)
       .classed(this.styles.layer, !!this.styles.layer)
       .classed('layer', true)
-      .attr('id', _this.getBrushId)
+      .attr('id', this.getBrushId)
       //Color palette with the form {author1: color1, ...}
       .style('fill', this.getColor.bind(this))
       .attr('stroke-width', this.getLayerStrokeWidth.bind(this))
       .attr('stroke', this.getLayerStrokeColor.bind(this))
       .attr('d', area)
       //.attr('clip-path', 'url(#clip)')
-      .on('mouseenter', function (event, stream) {
-        return _this.onMouseover.bind(_this, this, tooltip, brushArea)(event, stream);
+      .on('mouseenter', (event: any, stream: any) => {
+        return this.onMouseover(this, tooltip, brushArea, event, stream);
       })
-      .on('mouseout', function (event, stream) {
-        return _this.onMouseLeave.bind(_this, this, tooltip, brushArea)(event, stream);
+      .on('mouseout', (event: any, stream: any) => {
+        return this.onMouseLeave(this, tooltip, brushArea, event, stream);
       })
-      .on('mousemove', function (event, stream) {
+      .on('mousemove', (event: any, stream: any) => {
         //Calculate values and text for tooltip
         const node = svg.node();
         const pointer = d3.pointer(event, node);
         const mouseoverDate = pointer ? scales.x.invert(pointer[0]) : undefined;
 
-        brushArea.select('.' + _this.styles.indicatorLine).remove();
-        brushArea.selectAll('.' + _this.styles.indicatorCircle).remove();
+        brushArea.select('.' + this.styles.indicatorLine).remove();
+        brushArea.selectAll('.' + this.styles.indicatorCircle).remove();
 
         if (!mouseoverDate) {
           return;
         }
 
-        _this.createdTooltipNode(this, bisectDate, mouseoverDate, tooltip, event, node, brushArea, scales, stream);
+        this.createdTooltipNode(event.target, bisectDate, mouseoverDate, tooltip, event, node, brushArea, scales);
       });
 
     this.additionalPathDefs(brushArea, pathStreams, scales);
@@ -462,7 +497,7 @@ export default class ScalableBaseChartComponent extends React.Component {
    * @returns {number}
    */
   // eslint-disable-next-line no-unused-vars
-  getLayerStrokeWidth(data) {
+  getLayerStrokeWidth(data: any) {
     return 0;
   }
 
@@ -472,7 +507,7 @@ export default class ScalableBaseChartComponent extends React.Component {
    * @returns {undefined}
    */
   // eslint-disable-next-line no-unused-vars
-  getLayerStrokeColor(data) {
+  getLayerStrokeColor(data: any): any {
     return undefined;
   }
 
@@ -487,7 +522,9 @@ export default class ScalableBaseChartComponent extends React.Component {
    * @param scales
    */
   // eslint-disable-next-line no-unused-vars
-  additionalPathDefs(brushArea, pathStreams, scales) {}
+  additionalPathDefs(brushArea: any, pathStreams: any, scales: any) {
+    return;
+  }
 
   /**
    *
@@ -498,8 +535,8 @@ export default class ScalableBaseChartComponent extends React.Component {
    * @param area
    * @returns scroll event
    */
-  createScrollEvent(svg, scales, axes, brushArea, area) {
-    return (event) => {
+  createScrollEvent(svg: any, scales: any, axes: any, brushArea: any, area: any) {
+    return (event: any) => {
       // prevent page scrolling
       event.preventDefault();
 
@@ -549,7 +586,7 @@ export default class ScalableBaseChartComponent extends React.Component {
    * @param area Area that the paths are drawn on
    * @param areaGenerator Area generator for those paths
    */
-  updateVerticalZoom(dims, scales, axes, area, areaGenerator) {
+  updateVerticalZoom(dims: any, scales: any, axes: any, area: any, areaGenerator: any) {
     scales.y.domain(dims);
 
     axes.y.call(d3.axisLeft(scales.y));
@@ -564,8 +601,8 @@ export default class ScalableBaseChartComponent extends React.Component {
    * @param area Area that the paths are drawn on
    * @param areaGenerator Area generator for those paths
    */
-  resetVerticalZoom(scales, axes, area, areaGenerator) {
-    scales.y.domain(this.getYDims(this.state.data.data));
+  resetVerticalZoom(scales: any, axes: any, area: any, areaGenerator: any) {
+    scales.y.domain(this.getYDims());
 
     axes.y.call(d3.axisLeft(scales.y));
     area.selectAll('.layer').attr('d', areaGenerator);
@@ -582,7 +619,7 @@ export default class ScalableBaseChartComponent extends React.Component {
    * @param brushArea Area that the path, x/y-Axis and brush-functionality live on (see drawChart)
    * @param area d3 Area generator (for area graphs)
    */
-  updateZoom(extent, scales, axes, brush, brushArea, area) {
+  updateZoom(extent: any, scales: any, axes: any, brush: any, brushArea: any, area: any) {
     let zoomedDims;
     if (extent) {
       zoomedDims = [scales.x.invert(extent[0]), scales.x.invert(extent[1])];
@@ -606,7 +643,7 @@ export default class ScalableBaseChartComponent extends React.Component {
    * @param y1 contains upper y referring to the y axis
    * @param color defines the color or the cycles
    */
-  paintDataPoint(brushArea, x, y0, y1, color) {
+  paintDataPoint(brushArea: any, x: any, y0: any, y1: any, color: any) {
     brushArea.append('line').attr('class', this.styles.indicatorLine).attr('x1', x).attr('x2', x).attr('y1', y0).attr('y2', y1);
     //.attr('clip-path', 'url(#clip)');
 

@@ -7,7 +7,7 @@ import { fetchConfig, fetchConfigOffline, watchConfig } from './config.js';
 import { fetchUniversalSettingsData } from './universalSettings';
 import { watchNotifications } from './notifications.js';
 import Database from '../database/database';
-import { mapSaga } from './utils';
+import { mapSaga } from './utils.ts';
 
 export const switchVisualization = createAction('SWITCH_VISUALIZATION', (vis) => vis);
 export const toggleHelp = createAction('TOGGLE_HELP');

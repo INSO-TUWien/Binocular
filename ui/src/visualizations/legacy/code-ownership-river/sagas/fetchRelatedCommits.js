@@ -2,7 +2,7 @@
 
 import { createAction } from 'redux-actions';
 import Database from '../../../../database/database';
-import { fetchFactory, timestampedActionFactory } from '../../../../sagas/utils.js';
+import { fetchFactory, timestampedActionFactory } from '../../../../sagas/utils.ts';
 
 export const requestRelatedCommits = createAction('COR_REQUEST_RELATED_COMMITS');
 export const receiveRelatedCommits = timestampedActionFactory('COR_RECEIVE_RELATED_COMMITS');

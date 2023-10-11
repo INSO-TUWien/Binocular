@@ -1,18 +1,28 @@
 'use strict';
 
-import _ from 'lodash';
-import cx from 'classnames';
-import { callSafe } from '../../utils';
-import React, { useState } from 'react';
+import * as React from 'react';
 import styles from './tabCombo.scss';
 
-export default (props) => {
-  const [selection, setSelection] = useState(props.value);
-  const currSelectedIndex = props.options.findIndex((i) => i.value === selection);
+interface IProps {
+  options: IOption[];
+  value: string;
+  onChange: (value: string) => void;
+}
+
+interface IOption {
+  label: string;
+  value: string;
+  icon?: string;
+  hint?: string;
+}
+
+export default (props: IProps) => {
+  const [selection, setSelection] = React.useState(props.value);
+  const currSelectedIndex = props.options.findIndex((i: IOption) => i.value === selection);
   let borderRadiusSelection = '.2rem';
   if (currSelectedIndex === 0) {
     borderRadiusSelection = '.4rem .2rem .2rem .4rem';
-  } else if (borderRadiusSelection === props.options.length - 1) {
+  } else if (currSelectedIndex === props.options.length - 1) {
     borderRadiusSelection = '.2rem .4rem .4rem .2rem';
   }
 
@@ -25,7 +35,7 @@ export default (props) => {
           left: (100 / props.options.length) * currSelectedIndex + '%',
           borderRadius: borderRadiusSelection,
         }}></div>
-      {props.options.map((item, i) => {
+      {props.options.map((item: IOption, i: number) => {
         return (
           <button
             key={'multiSwitchItem-' + item.label}

@@ -1,9 +1,9 @@
 export interface IBounds {
-  firstCommit: IBoundsCommit;
-  lastCommit: IBoundsCommit;
-  committers: string[];
-  firstIssue: IBoundsIssue;
-  lastIssue: IBoundsIssue;
+  firstCommit?: IBoundsCommit;
+  lastCommit?: IBoundsCommit;
+  committers?: string[];
+  firstIssue?: IBoundsIssue;
+  lastIssue?: IBoundsIssue;
 }
 
 export interface IBoundsCommit {

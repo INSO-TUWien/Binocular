@@ -79,7 +79,6 @@ export const fetchBuildsData = fetchFactory(
       .then((results) => {
         const filteredBuilds = results[0];
         const builds = results[1];
-        console.log(results);
         return {
           otherCount: 0,
           filteredBuilds,

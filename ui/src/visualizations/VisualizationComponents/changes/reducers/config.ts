@@ -1,12 +1,12 @@
 'use strict';
 
-import { handleActions } from 'redux-actions';
-import _ from 'lodash';
+import { Action, handleActions } from 'redux-actions';
+import * as _ from 'lodash';
 
 export default handleActions(
   {
-    SET_SELECTED_AUTHORS: (state, action) => _.assign({}, state, { selectedAuthors: [...action.payload] }),
-    SET_DISPLAY_METRIC: (state, action) => _.assign({}, state, { displayMetric: action.payload }),
+    SET_SELECTED_AUTHORS: (state, action: Action<any>) => _.assign({}, state, { selectedAuthors: [...action.payload] }),
+    SET_DISPLAY_METRIC: (state, action: Action<any>) => _.assign({}, state, { displayMetric: action.payload }),
   },
   {
     chartResolution: 'months', //chart bucket size, can be 'years', 'months', 'weeks' or 'days'

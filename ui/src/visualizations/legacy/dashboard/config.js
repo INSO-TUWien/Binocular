@@ -10,7 +10,7 @@ import {
   setShowIssueChart,
   setShowChangesChart,
 } from './sagas';
-import TabCombo from '../../../components/TabCombo/tabCombo.js';
+import TabCombo from '../../../components/TabCombo';
 import styles from './styles.scss';
 
 import LegendCompact from '../../../components/LegendCompact';

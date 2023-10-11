@@ -3,10 +3,10 @@
 import { createAction } from 'redux-actions';
 import { call, put } from 'redux-saga/effects';
 
-export function fetchFactory(fn, requestActionCreator, receiveActionCreator, errorActionCreator) {
-  return function* (...args) {
+export function fetchFactory(fn: any, requestActionCreator: any, receiveActionCreator: any, errorActionCreator: any): any {
+  return function* (...args: any[]) {
     yield put(requestActionCreator());
-    let result = null;
+    let result: { [key: string]: any } = null;
     try {
       result = yield call(fn, ...args);
       yield put(receiveActionCreator(result));
@@ -21,7 +21,7 @@ export function fetchFactory(fn, requestActionCreator, receiveActionCreator, err
   };
 }
 
-export function timestampedActionFactory(action) {
+export function timestampedActionFactory(action: any) {
   return createAction(
     action,
     (id) => id,
@@ -29,7 +29,7 @@ export function timestampedActionFactory(action) {
   );
 }
 
-export function mapSaga(actionCreator) {
+export function mapSaga(actionCreator: any) {
   return function* () {
     yield put(actionCreator());
   };

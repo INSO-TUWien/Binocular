@@ -4,8 +4,7 @@ import { connect } from 'react-redux';
 
 import styles from './styles.scss';
 
-import LegendCompact from '../../../components/LegendCompact';
-import TabCombo from '../../../components/TabCombo/tabCombo';
+import TabCombo from '../../../components/TabCombo';
 import { setShowIssues } from './sagas';
 
 const mapStateToProps = (state /*, ownProps*/) => {

@@ -5,7 +5,7 @@ import moment from 'moment';
 const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
 //Formats the date for the tooltip
-export function formatDate(date, resolution) {
+export function formatDate(date: Date, resolution: string) {
   const monthNames = [
     'January',
     'February',
@@ -39,7 +39,7 @@ export function formatDate(date, resolution) {
  * @param resolution
  * @returns {{unit: string, interval: moment.Duration}|{unit: string, interval: number}}
  */
-export function getGranularityDuration(resolution) {
+export function getGranularityDuration(resolution: string) {
   switch (resolution) {
     case 'years':
       return { interval: moment.duration(1, 'year'), unit: 'year' };

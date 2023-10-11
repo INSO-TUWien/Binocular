@@ -3,7 +3,7 @@
 import { createAction } from 'redux-actions';
 
 import { collectPages, graphQl } from '../../../../utils';
-import { fetchFactory, timestampedActionFactory } from '../../../../sagas/utils.js';
+import { fetchFactory, timestampedActionFactory } from '../../../../sagas/utils.ts';
 
 export const requestRelatedCommits = createAction('SET_LANGUAGE_MODULE_RIVER_REQUEST_RELATED_COMMITS');
 export const receiveRelatedCommits = timestampedActionFactory('SET_LANGUAGE_MODULE_RIVER_RECEIVE_RELATED_COMMITS');

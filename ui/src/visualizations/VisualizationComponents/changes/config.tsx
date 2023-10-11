@@ -2,10 +2,13 @@
 
 import { connect } from 'react-redux';
 import { setDisplayMetric, setSelectedAuthors } from './sagas';
-import TabCombo from '../../../components/TabCombo/tabCombo';
+import TabCombo from '../../../components/TabCombo';
 import styles from './styles.scss';
+import { IGlobalState } from '../../../types/globalTypes';
+import * as React from 'react';
+import { IPalette } from '../../../types/authorTypes';
 
-const mapStateToProps = (state /*, ownProps*/) => {
+const mapStateToProps = (state: IGlobalState) => {
   const dashboardState = state.visualizations.changes.state;
 
   return {
@@ -17,19 +20,24 @@ const mapStateToProps = (state /*, ownProps*/) => {
   };
 };
 
-const mapDispatchToProps = (dispatch /*, ownProps*/) => {
+const mapDispatchToProps = (dispatch: any) => {
   return {
-    onClickMetric: (metric) => dispatch(setDisplayMetric(metric)),
-    onClickCheckboxLegend: (selected) => dispatch(setSelectedAuthors(selected)),
+    onClickMetric: (metric: string) => dispatch(setDisplayMetric(metric)),
+    onClickCheckboxLegend: (selected: boolean) => dispatch(setSelectedAuthors(selected)),
   };
 };
 
-const ChangesConfigComponent = (props) => {
-  let otherCommitters;
-  if (props.palette && 'others' in props.palette) {
-    otherCommitters = props.committers.length - (Object.keys(props.palette).length - 1);
-  }
+interface IProps {
+  committers: string[];
+  metric: string;
+  palette: IPalette;
+  resolution: string;
+  selectedAuthors: string[];
+  onClickCheckboxLegend: (selected: boolean) => void;
+  onClickMetric: (metric: string) => void;
+}
 
+const ChangesConfigComponent = (props: IProps) => {
   return (
     <div className={styles.configContainer}>
       <div className={styles.field}>
@@ -41,7 +49,7 @@ const ChangesConfigComponent = (props) => {
               { label: '# lines changed', icon: 'file-alt', value: 'linesChanged' },
               { label: '# commits', icon: 'cloud-upload-alt', value: 'commits' },
             ]}
-            onChange={(value) => props.onClickMetric(value)}
+            onChange={(value: string) => props.onClickMetric(value)}
           />
         </div>
       </div>
