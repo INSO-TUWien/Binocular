@@ -126,7 +126,9 @@ function execute(...statements) {
   spawn(chainedStatement, { stdio: 'inherit', shell: true });
 
   // SIGINT gets sent to the entire process group, so no need to send it again to the child process
-  process.on('SIGINT', () => {});
+  process.on('SIGINT', () => {
+    console.log('Event sent: SIGINT');
+  });
 
   function chainStatements(...statements) {
     return statements.reduce((acc, statement) => {

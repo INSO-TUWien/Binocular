@@ -71,7 +71,13 @@ const LanguageDetectorPackageDefinition = protoLoader.loadSync(path.join(commPat
 });
 
 const LanguageComm = grpc.loadPackageDefinition(LanguageDetectorPackageDefinition).binocular.comm;
-const LanguageDetectionService = (LanguageComm || { LanguageDetectionService: () => {} }).LanguageDetectionService;
+const LanguageDetectionService = (
+  LanguageComm || {
+    LanguageDetectionService: () => {
+      console.log('No Language Detection Service!');
+    },
+  }
+).LanguageDetectionService;
 
 // set up the endpoints
 app.get('/api/commits', require('./lib/endpoints/get-commits.js'));

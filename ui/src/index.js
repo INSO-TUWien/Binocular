@@ -101,7 +101,7 @@ Database.checkBackendConnection().then((connection) => {
     rootContainer.render(<Root store={store} />);
     if (module.hot) {
       module.hot.accept('./components/Root', () => {
-        const NewRoot = require('./components/Root').default;
+        const NewRoot = Root.default;
         rootContainer.render(<NewRoot store={store} />);
       });
     }
@@ -129,7 +129,7 @@ Database.checkBackendConnection().then((connection) => {
     rootContainer.render(<RootOffline store={store} />);
     if (module.hot) {
       module.hot.accept('./components/Root', () => {
-        const NewRoot = require('./components/Root').default;
+        const NewRoot = Root.default;
         rootContainer.render(<NewRoot store={store} />);
       });
     }

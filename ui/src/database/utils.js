@@ -1,6 +1,6 @@
 'use strict';
 
-const _ = require('lodash');
+import _ from 'lodash';
 
 export const addHistoryToAllCommits = (allCommits) => {
   //stores the histories of all commits

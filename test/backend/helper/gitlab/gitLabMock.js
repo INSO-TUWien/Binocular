@@ -2,8 +2,6 @@
 const Paginator = require('../../../../lib/paginator');
 
 class GitLabMock {
-  constructor() {}
-
   getProject() {
     return new Promise((resolve) => {
       resolve({ id: 1, path_with_namespace: 'Test/Test-Project' });
