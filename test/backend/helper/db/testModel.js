@@ -1,5 +1,5 @@
 'use strict';
-const Model = require('../../../../lib/models/Model.js');
+const Model = require('../../../../lib/models/Model.js').default;
 const _ = require('lodash');
 
 const TestModel = Model.define('Test', {

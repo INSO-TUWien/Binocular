@@ -6,10 +6,10 @@ const proxyquire = require('proxyquire');
 const fake = require('./helper/git/repositoryFake.js');
 const ReporterMock = require('./helper/reporter/reporterMock');
 
-const Db = require('../../lib/core/db/db');
+const Db = require('../../lib/core/db/db').default;
 
 const config = require('../../lib/config.js').get();
-const ctx = require('../../lib/context');
+const ctx = require('../../lib/context').default;
 
 const GitLabBaseIndexerMock = require('./helper/gitlab/gitLabBaseIndexerMock');
 
@@ -19,12 +19,12 @@ const GitLabITSIndexer = proxyquire('../../lib/indexers/its/GitLabITSIndexer', {
 });
 
 const GitHubMock = require('./helper/github/gitHubMock');
-const GitHubITSIndexer = require('../../lib/indexers/its/GitHubITSIndexer');
+const GitHubITSIndexer = require('../../lib/indexers/its/GitHubITSIndexer').default;
 
-const Issue = require('../../lib/models/Issue');
-const MergeRequest = require('../../lib/models/MergeRequest');
-const Stakeholder = require('../../lib/models/Stakeholder');
-const IssueStakeholderConnection = require('../../lib/models/IssueStakeholderConnection');
+const Issue = require('../../lib/models/Issue').default;
+const MergeRequest = require('../../lib/models/MergeRequest').default;
+const Stakeholder = require('../../lib/models/Stakeholder').default;
+const IssueStakeholderConnection = require('../../lib/models/IssueStakeholderConnection').default;
 
 const expect = chai.expect;
 

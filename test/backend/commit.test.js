@@ -6,18 +6,18 @@ const fake = require('./helper/git/repositoryFake.js');
 const helpers = require('./helper/git/helpers.js');
 const GatewayMock = require('./helper/gateway/gatewayMock');
 
-const Db = require('../../lib/core/db/db');
-const Commit = require('../../lib/models/Commit');
-const File = require('../../lib/models/File');
-const Language = require('../../lib/models/Language');
-const Hunk = require('../../lib/models/Hunk');
-const LanguageFileConnection = require('../../lib/models/LanguageFileConnection');
-const CommitStakeholderConnection = require('../../lib/models/CommitStakeholderConnection.js');
+const Db = require('../../lib/core/db/db').default;
+const Commit = require('../../lib/models/Commit').default;
+const File = require('../../lib/models/File').default;
+const Language = require('../../lib/models/Language').default;
+const Hunk = require('../../lib/models/Hunk').default;
+const LanguageFileConnection = require('../../lib/models/LanguageFileConnection').default;
+const CommitStakeholderConnection = require('../../lib/models/CommitStakeholderConnection.js').default;
 
 const config = require('../../lib/config.js').get();
-const ctx = require('../../lib/context');
-const GitHubUrlProvider = require('../../lib/url-providers/GitHubUrlProvider');
-const Stakeholder = require('../../lib/models/Stakeholder.js');
+const ctx = require('../../lib/context').default;
+const GitHubUrlProvider = require('../../lib/url-providers/GitHubUrlProvider').default;
+const Stakeholder = require('../../lib/models/Stakeholder.js').default;
 
 const expect = chai.expect;
 

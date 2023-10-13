@@ -1,8 +1,16 @@
 'use strict';
 
-const webpack = require('webpack');
-const path = require('path');
-const HtmlWebpackPlugin = require('html-webpack-plugin');
+import webpack from 'webpack';
+import HtmlWebpackPlugin from 'html-webpack-plugin';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+import { createRequire } from 'node:module';
+
+const require = createRequire(import.meta.url);
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const cssModulesLoader = {
   loader: 'css-loader',
@@ -47,72 +55,70 @@ const cssLoaders = [
   },
 ];
 
-module.exports = {
-  entry: ['./ui/src'],
-  output: {
-    path: path.join(__dirname, '/dist'),
-    filename: 'bundle.js',
-  },
-  module: {
-    rules: [
-      { test: /\.jsx?$/, exclude: /node_modules/, loader: 'babel-loader' },
-      {
-        test: /\.tsx?$/,
-        use: 'ts-loader',
-        exclude: /node_modules/,
-      },
-      ...cssLoaders,
-      {
-        test: /\.svg$/,
-        use: [
-          {
-            loader: 'svg-url-loader',
-            options: {
-              limit: 10000,
-            },
+export const entry = ['./ui/src'];
+export const output = {
+  path: path.join(__dirname, '/dist'),
+  filename: 'bundle.js',
+};
+export const module = {
+  rules: [
+    { test: /\.jsx?$/, exclude: /node_modules/, loader: 'babel-loader' },
+    {
+      test: /\.tsx?$/,
+      use: 'ts-loader',
+      exclude: /node_modules/,
+    },
+    ...cssLoaders,
+    {
+      test: /\.svg$/,
+      use: [
+        {
+          loader: 'svg-url-loader',
+          options: {
+            limit: 10000,
           },
-        ],
-      },
-      {
-        test: /\.(ttf|eot|woff)/,
-        include: [path.resolve(__dirname, 'node_modules')],
-        loader: 'file-loader',
-      },
-      {
-        test: /\.m?js/,
-        resolve: {
-          fullySpecified: false,
         },
+      ],
+    },
+    {
+      test: /\.(ttf|eot|woff)/,
+      include: [path.resolve(__dirname, 'node_modules')],
+      loader: 'file-loader',
+    },
+    {
+      test: /\.m?js/,
+      resolve: {
+        fullySpecified: false,
       },
-    ],
-  },
-  plugins: [
-    new HtmlWebpackPlugin({ template: './ui/index.html' }),
-    new webpack.ProvidePlugin({
-      Buffer: ['buffer', 'Buffer'],
-    }),
-    new webpack.ProvidePlugin({
-      React: 'react',
-    }),
-    new webpack.ProvidePlugin({
-      process: 'process/browser',
-    }),
-    new webpack.LoaderOptionsPlugin({ debug: true }),
+    },
   ],
-  resolve: {
-    extensions: ['.tsx', '.ts', '.js'],
-    alias: {
-      http: 'stream-http',
-      https: 'https-browserify',
-      stream: 'stream-browserify',
-      zlib: 'browserify-zlib',
-    },
-    fallback: {
-      url: require.resolve('url/'),
-      util: require.resolve('util/'),
-      assert: require.resolve('assert/'),
-      crypto: require.resolve('crypto-browserify'),
-      buffer: require.resolve('buffer'),
-    },
+};
+export const plugins = [
+  new HtmlWebpackPlugin({ template: './ui/index.html' }),
+  new webpack.ProvidePlugin({
+    Buffer: ['buffer', 'Buffer'],
+  }),
+  new webpack.ProvidePlugin({
+    React: 'react',
+  }),
+  new webpack.ProvidePlugin({
+    process: 'process/browser',
+  }),
+  new webpack.LoaderOptionsPlugin({ debug: true }),
+];
+export const resolve = {
+  extensions: ['.tsx', '.ts', '.js'],
+  alias: {
+    http: 'stream-http',
+    https: 'https-browserify',
+    stream: 'stream-browserify',
+    zlib: 'browserify-zlib',
+  },
+  fallback: {
+    url: require.resolve('url/'),
+    util: require.resolve('util/'),
+    assert: require.resolve('assert/'),
+    crypto: require.resolve('crypto-browserify'),
+    buffer: require.resolve('buffer'),
   },
 };

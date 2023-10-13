@@ -1,5 +1,5 @@
 'use strict';
-const Paginator = require('../../../../lib/paginator');
+const Paginator = require('../../../../lib/paginator').default;
 
 class GitLabMock {
   getProject() {

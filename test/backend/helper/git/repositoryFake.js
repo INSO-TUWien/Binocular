@@ -14,7 +14,7 @@ const emailProviders = require('faker/lib/locales/en/internet/free_email.js');
 const lorem = require('lorem-ipsum').loremIpsum;
 
 const helpers = require('./helpers.js');
-const Repository = require('../../../../lib/core/provider/git.js');
+const Repository = require('../../../../lib/core/provider/git.js').default;
 
 const neutralVerbs = ['removed'];
 const positiveVerbs = ['improved', 'added', 'refactored', 'adjusted', 'tweaked', ...neutralVerbs];

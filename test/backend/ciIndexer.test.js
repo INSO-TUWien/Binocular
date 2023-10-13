@@ -6,10 +6,10 @@ const proxyquire = require('proxyquire');
 const fake = require('./helper/git/repositoryFake.js');
 const ReporterMock = require('./helper/reporter/reporterMock');
 
-const Db = require('../../lib/core/db/db');
+const Db = require('../../lib/core/db/db').default;
 
 const config = require('../../lib/config.js').get();
-const ctx = require('../../lib/context');
+const ctx = require('../../lib/context').default;
 
 const GitLabBaseIndexerMock = require('./helper/gitlab/gitLabBaseIndexerMock');
 const GitLabCIIndexer = proxyquire('../../lib/indexers/ci/GitLabCIIndexer', {
@@ -21,7 +21,7 @@ const GitHubCIIndexer = proxyquire('../../lib/indexers/ci/GitHubCIIndexer', {
   '../../core/provider/github': GitHubMock,
 });
 
-const Build = require('../../lib/models/Build');
+const Build = require('../../lib/models/Build').default;
 const OctokitMock = require('./helper/github/octokitMock');
 
 const expect = chai.expect;

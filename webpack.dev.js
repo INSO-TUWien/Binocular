@@ -1,13 +1,16 @@
 'use strict';
 
-const { merge } = require('webpack-merge');
-const commonConfig = require('./webpack.common');
+import { merge } from 'webpack-merge';
+import * as commonConfig from './webpack.common.js';
+import { createRequire } from 'node:module';
+
+const require = createRequire(import.meta.url);
 
 const opts = {
   ENV: 'development',
 };
 
-module.exports = merge(commonConfig, {
+export default merge(commonConfig, {
   mode: 'development',
   devtool: 'cheap-module-source-map',
   entry: [require.resolve('react-dev-utils/webpackHotDevClient'), require.resolve('react-error-overlay')],

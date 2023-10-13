@@ -7,25 +7,25 @@ const helpers = require('./helper/git/helpers.js');
 const GatewayMock = require('./helper/gateway/gatewayMock');
 const ReporterMock = require('./helper/reporter/reporterMock');
 
-const Db = require('../../lib/core/db/db');
-const Commit = require('../../lib/models/Commit');
-const Hunk = require('../../lib/models/Hunk');
-const File = require('../../lib/models/File');
-const Language = require('../../lib/models/Language');
-const LanguageFileConnection = require('../../lib/models/LanguageFileConnection');
-const Branch = require('../../lib/models/Branch');
-const Module = require('../../lib/models/Module');
-const ModuleFileConnection = require('../../lib/models/ModuleFileConnection');
-const CommitModuleConnection = require('../../lib/models/CommitModuleConnection');
-const BranchFileConnection = require('../../lib/models/BranchFileConnection');
-const ModuleModuleConnection = require('../../lib/models/ModuleModuleConnection');
-const CommitFileStakeholderConnection = require('../../lib/models/CommitFileStakeholderConnection');
+const Db = require('../../lib/core/db/db').default;
+const Commit = require('../../lib/models/Commit').default;
+const Hunk = require('../../lib/models/Hunk').default;
+const File = require('../../lib/models/File').default;
+const Language = require('../../lib/models/Language').default;
+const LanguageFileConnection = require('../../lib/models/LanguageFileConnection').default;
+const Branch = require('../../lib/models/Branch').default;
+const Module = require('../../lib/models/Module').default;
+const ModuleFileConnection = require('../../lib/models/ModuleFileConnection').default;
+const CommitModuleConnection = require('../../lib/models/CommitModuleConnection').default;
+const BranchFileConnection = require('../../lib/models/BranchFileConnection').default;
+const ModuleModuleConnection = require('../../lib/models/ModuleModuleConnection').default;
+const CommitFileStakeholderConnection = require('../../lib/models/CommitFileStakeholderConnection').default;
 
 const config = require('../../lib/config.js').get();
-const ctx = require('../../lib/context');
-const GitHubUrlProvider = require('../../lib/url-providers/GitHubUrlProvider');
+const ctx = require('../../lib/context').default;
+const GitHubUrlProvider = require('../../lib/url-providers/GitHubUrlProvider').default;
 
-const VcsIndexer = require('../../lib/indexers/vcs');
+const VcsIndexer = require('../../lib/indexers/vcs').default;
 
 const expect = chai.expect;
 

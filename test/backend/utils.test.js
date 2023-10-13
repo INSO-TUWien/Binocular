@@ -5,7 +5,7 @@ const expect = chai.expect;
 
 const config = require('../../lib/config.js').get();
 
-const Db = require('../../lib/core/db/db');
+const Db = require('../../lib/core/db/db').default;
 const TestModel = require('./helper/db/testModel');
 
 const utils = require('../../lib/utils');
