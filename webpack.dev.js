@@ -39,6 +39,7 @@ export default merge(commonConfig, {
       '/graphQl': {
         target: 'http://localhost:48763/',
         secure: false,
+        changeOrigin: true,
       },
       '/wsapi': {
         target: 'ws://localhost:48763',
