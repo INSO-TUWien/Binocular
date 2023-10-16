@@ -394,15 +394,14 @@ async function getIndexer(indexers, context, reporter, indexingThread) {
   // stores all indexer to call them async
   const indexHandler = [];
   indexHandler.push(
-    async () =>
-      (indexers.vcs = await GetIndexer.makeVCSIndexer(context.repo, context.vcsUrlProvider, reporter, context.argv.parsed.argv.clean))
+    async () => (indexers.vcs = await GetIndexer.makeVCSIndexer(context.repo, context.vcsUrlProvider, reporter, context.argv.clean))
   );
 
-  if (context.argv.parsed.argv.its) {
+  if (context.argv.its) {
     indexHandler.push(optionalIndexerHandler.bind(this, indexingThread, 'its', context.repo, reporter, context, GetIndexer.makeITSIndexer));
   }
 
-  if (context.argv.parsed.argv.ci) {
+  if (context.argv.ci) {
     indexHandler.push(optionalIndexerHandler.bind(this, indexingThread, 'ci', context.repo, reporter, context, GetIndexer.makeCIIndexer));
   }
 
