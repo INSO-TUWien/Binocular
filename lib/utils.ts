@@ -4,7 +4,7 @@ import _ from 'lodash';
 import archiver from 'archiver';
 import stream from 'stream';
 
-export function createZipStream(directory) {
+export function createZipStream(directory: any) {
   const zip = archiver('zip');
 
   const pass = new stream.PassThrough();
@@ -16,9 +16,9 @@ export function createZipStream(directory) {
   return pass;
 }
 
-export function renamer(mappings) {
-  return function (obj) {
-    const ret = {};
+export function renamer(mappings: any) {
+  return function (obj: any) {
+    const ret: any = {};
     _.each(mappings, function (to, from) {
       if (from in obj) {
         ret[to] = obj[from];
@@ -29,8 +29,8 @@ export function renamer(mappings) {
   };
 }
 
-export async function getDbExport(db) {
-  const exportJson = {};
+export async function getDbExport(db: any) {
+  const exportJson: any = {};
   const collections = await db.collections();
   for (const collection of collections) {
     const name = collection._name;
@@ -40,17 +40,17 @@ export async function getDbExport(db) {
   return exportJson;
 }
 
-export function parseBlameOutput(output) {
+export function parseBlameOutput(output: any) {
   //this function parses git blame output with the -p flag (porcelain).
   //it extracts how many lines of code each stakeholder owns.
   //How it works:
   //  - git blame porcelain output outputs the commit sha followed by one or multiple lines of code (each prepended by a \t).
   //  - This means that these lines were added/modified by that commit.
   //  - when a commit appears the first time, additional data (like author) are provided
-  const ownershipData = {};
+  const ownershipData: any = {};
 
   //stores who the author for each commit is
-  const commitAuthors = {};
+  const commitAuthors: any = {};
 
   //stores which commit we are currently looking at
   let currentSha = '';
@@ -61,9 +61,9 @@ export function parseBlameOutput(output) {
   //get lines of output
   const lines = output.split('\n');
 
-  const hunks = {};
+  const hunks: any = {};
 
-  let currHunk = {};
+  let currHunk: any = {};
 
   let currLineNumber = 0;
 
@@ -127,6 +127,6 @@ export function parseBlameOutput(output) {
   return { ownershipData: ownershipData, hunks: hunks };
 }
 
-export function fixUTF8(text) {
+export function fixUTF8(text: string) {
   return text.normalize('NFC');
 }

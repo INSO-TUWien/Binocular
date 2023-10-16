@@ -32,7 +32,6 @@ import * as GetIndexer from './lib/indexers/index.js';
 import * as UrlProvider from './lib/url-providers/index.js';
 import ProgressReporter from './lib/progress-reporter.js';
 import path from 'path';
-import { fileURLToPath } from 'url';
 import fs from 'fs';
 import Commit from './lib/models/Commit.js';
 import File from './lib/models/File.js';
@@ -62,8 +61,8 @@ import CommitBuildConnection from './lib/models/CommitBuildConnection.js';
 import ConfigurationError from './lib/errors/ConfigurationError.js';
 import DatabaseError from './lib/errors/DatabaseError.js';
 import GateWayService from './lib/gateway-service.js';
-import grpc from '@grpc/grpc-js';
-import protoLoader from '@grpc/proto-loader';
+import * as grpc from '@grpc/grpc-js';
+import * as protoLoader from '@grpc/proto-loader';
 import * as projectStructureHelper from './lib/projectStructureHelper.js';
 
 import * as getCommitsEndpoint from './lib/endpoints/get-commits.js';
@@ -79,10 +78,6 @@ import * as graphQlEndpoint from './lib/endpoints/graphQl.js';
 import * as updateConfigEndpoint from './lib/endpoints/update-config.js';
 
 import * as setupDb from './lib/core/db/setup-db.js';
-
-const __filename = fileURLToPath(import.meta.url);
-
-const __dirname = path.dirname(__filename);
 
 const commPath = path.resolve(__dirname, 'services', 'grpc', 'comm');
 
