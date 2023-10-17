@@ -3,17 +3,17 @@
 import * as React from 'react';
 import styles from './authorList.scss';
 import loadingAnimation from './loadingAnimaiton.scss';
-import { IAuthor, ICommitter, IPalette } from '../../../types/authorTypes';
+import { Author, Committer, Palette } from '../../../types/authorTypes';
 
-interface IProps {
-  palette: IPalette;
-  authorList: IAuthor[];
-  otherAuthors: ICommitter[];
+interface Props {
+  palette: Palette;
+  authorList: Author[];
+  otherAuthors: Committer[];
   selectedAuthors: string[];
   selectionChanged: (checkedAuthors: string[]) => void;
 }
 
-export default (props: IProps) => {
+export default (props: Props) => {
   const [checkedAuthors, setCheckedAuthors] = React.useState(props.selectedAuthors);
   React.useEffect(() => {
     if (props.selectedAuthors.length > 0) {
@@ -45,7 +45,7 @@ export default (props: IProps) => {
       <div className={styles.authorListScrollContainer}>
         <table>
           <tbody>
-            {props.authorList.map((author: { mainCommitter: string; color: string; committers: ICommitter[] }) => {
+            {props.authorList.map((author: { mainCommitter: string; color: string; committers: Committer[] }) => {
               return (
                 <tr key={author.mainCommitter} className={'checkbox ' + styles.authorRow} style={{ background: author.color }}>
                   <td>

@@ -1,14 +1,14 @@
-export interface ICommitter {
+export interface Committer {
   signature: string;
   color: string;
 }
 
-export interface IPalette {
+export interface Palette {
   [signature: string]: string;
 }
 
-export interface IAuthor {
+export interface Author {
   mainCommitter: string;
-  committers: ICommitter[];
+  committers: Committer[];
   color: string;
 }

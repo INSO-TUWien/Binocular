@@ -1,15 +1,15 @@
 import * as React from 'react';
 import styles from './dateRangeFilter.scss';
-import { IDateRange } from '../../types/globalTypes';
+import { DateRange } from '../../types/globalTypes';
 
-interface IProps {
+interface Props {
   from: string;
   to: string;
   type?: string;
-  onDateChanged: (newDateRange: IDateRange) => void;
+  onDateChanged: (newDateRange: DateRange) => void;
 }
 
-export default (props: IProps) => {
+export default (props: Props) => {
   const [from, setFrom] = React.useState(props.from);
   const [to, setTo] = React.useState(props.to);
 

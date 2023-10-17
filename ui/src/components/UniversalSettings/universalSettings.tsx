@@ -17,16 +17,16 @@ import DateRangeFilter from '../DateRangeFilter/dateRangeFilter';
 import AuthorMerger from './authorMerger/authorMerger';
 import AuthorList from './authorList/authorList';
 import SprintManager from './sprintManager/sprintManager';
-import { IAuthor, ICommitter, IPalette } from '../../types/authorTypes';
-import { IUniversalSettings, IUniversalSettingsConfig } from '../../types/unversalSettingsTypes';
-import { IDateRange, IGlobalState } from '../../types/globalTypes';
-import { ISprint } from '../../types/sprintTypes';
+import { Author, Committer, Palette } from '../../types/authorTypes';
+import { UniversalSettings, UniversalSettingsConfig } from '../../types/unversalSettingsTypes';
+import { DateRange, GlobalState } from '../../types/globalTypes';
+import { Sprint } from '../../types/sprintTypes';
 
-interface IProps {
-  universalSettingsConfig: IUniversalSettingsConfig;
+interface Props {
+  universalSettingsConfig: UniversalSettingsConfig;
 }
 
-export default (props: IProps) => {
+export default (props: Props) => {
   //config
   const hideDateSettings = props.universalSettingsConfig.hideDateSettings === true;
   const hideGranularitySettings = props.universalSettingsConfig.hideGranularitySettings === true;
@@ -35,7 +35,7 @@ export default (props: IProps) => {
 
   //global state
 
-  const universalSettings: IUniversalSettings = useSelector((state: IGlobalState) => state.universalSettings);
+  const universalSettings: UniversalSettings = useSelector((state: GlobalState) => state.universalSettings);
   const chartResolution = universalSettings.chartResolution;
   const firstCommit = universalSettings.universalSettingsData.data.firstCommit;
   const lastCommit = universalSettings.universalSettingsData.data.lastCommit;
@@ -50,8 +50,8 @@ export default (props: IProps) => {
   let firstDisplayDate: string;
   let lastDisplayDate: string;
   let selectedAuthors: string[];
-  let otherAuthorsGlobal: ICommitter[];
-  let sprints: ISprint[] = [];
+  let otherAuthorsGlobal: Committer[];
+  let sprints: Sprint[] = [];
 
   if (universalSettings.chartTimeSpan.from === undefined) {
     firstDisplayDate = firstCommit !== undefined ? firstCommit.date.split('.')[0] : undefined;
@@ -78,13 +78,13 @@ export default (props: IProps) => {
 
   const dispatch = useDispatch();
   const onClickResolution = (resolution: string) => dispatch(setResolution(resolution));
-  const onChangeTimeSpan = (timeSpan: IDateRange) => dispatch(setTimeSpan(timeSpan));
+  const onChangeTimeSpan = (timeSpan: DateRange) => dispatch(setTimeSpan(timeSpan));
   const onAuthorSelectionChanged = (selectedAuthors: string[]) => dispatch(setSelectedAuthors(selectedAuthors));
-  const onMergedAuthorListChanged = (mergedAuthorList: IAuthor[]) => dispatch(setMergedAuthorList(mergedAuthorList));
-  const onOtherAuthorListChanged = (otherAuthorList: ICommitter[]) => dispatch(setOtherAuthorList(otherAuthorList));
-  const onSetPalette = (allAuthors: IPalette) => dispatch(setAllAuthors(allAuthors));
+  const onMergedAuthorListChanged = (mergedAuthorList: Author[]) => dispatch(setMergedAuthorList(mergedAuthorList));
+  const onOtherAuthorListChanged = (otherAuthorList: Committer[]) => dispatch(setOtherAuthorList(otherAuthorList));
+  const onSetPalette = (allAuthors: Palette) => dispatch(setAllAuthors(allAuthors));
   const onSetExcludeMergeCommits = (checked: boolean) => dispatch(setExcludeMergeCommits(checked));
-  const onSetSprints = (sprints: ISprint[]) => dispatch(setSprints(sprints));
+  const onSetSprints = (sprints: Sprint[]) => dispatch(setSprints(sprints));
 
   //local state
   const [showAuthorMerge, setShowAuthorMerge] = React.useState(false);
@@ -118,8 +118,8 @@ export default (props: IProps) => {
     }
   }, [mergedAuthorListGlobal, otherAuthorListGlobal, committers]);
 
-  const generateCommitterList = (committers: string[], palette: IPalette): IAuthor[] => {
-    const committerList: IAuthor[] = [];
+  const generateCommitterList = (committers: string[], palette: Palette): Author[] => {
+    const committerList: Author[] = [];
     for (const committer of committers) {
       committerList.push({
         mainCommitter: committer,
@@ -207,7 +207,7 @@ export default (props: IProps) => {
             <DateRangeFilter
               from={firstDisplayDate}
               to={lastDisplayDate}
-              onDateChanged={(data: IDateRange) => {
+              onDateChanged={(data: DateRange) => {
                 onChangeTimeSpan(data);
               }}
             />

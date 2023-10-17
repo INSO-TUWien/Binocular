@@ -1,4 +1,4 @@
-export interface ICommit {
+export interface Commit {
   sha: string;
   shortSha: string;
   messageHeader: string;
@@ -8,10 +8,10 @@ export interface ICommit {
   date: string;
   parents: string[];
   webUrl: string;
-  stats: IStats;
+  stats: Stats;
 }
 
-interface IStats {
+interface Stats {
   additions: number;
   deletions: number;
 }

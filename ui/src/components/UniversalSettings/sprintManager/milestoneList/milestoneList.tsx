@@ -4,19 +4,19 @@ import * as React from 'react';
 import styles from './milestoneList.scss';
 import * as moment from 'moment';
 import 'moment/locale/de';
-import { IMilestone } from '../../../../types/milestoneTypes';
+import { Milestone } from '../../../../types/milestoneTypes';
 
-interface IProps {
-  milestones: IMilestone[];
-  addMilestone: (milestone: IMilestone) => void;
+interface Props {
+  milestones: Milestone[];
+  addMilestone: (milestone: Milestone) => void;
 }
 
-export default (props: IProps) => {
+export default (props: Props) => {
   moment.locale('de');
   return (
     <div className={styles.milestones}>
       <div className={styles.milestonesScroll}>
-        {props.milestones.map((milestone: IMilestone) => {
+        {props.milestones.map((milestone: Milestone) => {
           return (
             <div className={styles.milestone} key={'m_' + milestone.iid}>
               <div className={styles.milestoneText}>

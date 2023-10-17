@@ -1,4 +1,4 @@
-export interface IMilestone {
+export interface Milestone {
   id: string;
   iid: string;
   title: string;

@@ -1,17 +1,17 @@
-import { IUniversalSettings } from './unversalSettingsTypes';
+import { UniversalSettings } from './unversalSettingsTypes';
 
-export interface IGlobalState {
+export interface GlobalState {
   activeConfigTab: string;
   activeVisualization: string;
   config: any;
   notifications: any;
   progress: any;
   showHelp: boolean;
-  universalSettings: IUniversalSettings;
+  universalSettings: UniversalSettings;
   visualizations: any;
 }
 
-export interface IDateRange {
+export interface DateRange {
   from?: string;
   to?: string;
 }

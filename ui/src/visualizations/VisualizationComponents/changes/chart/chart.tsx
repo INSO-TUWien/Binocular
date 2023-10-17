@@ -9,14 +9,14 @@ import * as _ from 'lodash';
 import StackedAreaChart from '../../../../components/StackedAreaChart';
 import * as moment from 'moment';
 import * as chroma from 'chroma-js';
-import { IAuthor, ICommitter, IPalette } from '../../../../types/authorTypes';
-import { ICommit } from '../../../../types/commitTypes';
+import { Author, Committer, Palette } from '../../../../types/authorTypes';
+import { Commit } from '../../../../types/commitTypes';
 
-interface IProps {
+interface Props {
   id: number;
   chartResolution: moment.unitOfTime.DurationConstructor;
-  commits: ICommit[];
-  filteredCommits: ICommit[];
+  commits: Commit[];
+  filteredCommits: Commit[];
   committers: string[];
   displayMetric: string;
   excludeMergeCommits: boolean;
@@ -24,21 +24,21 @@ interface IProps {
   lastCommitTimestamp: number;
   firstSignificantTimestamp: number;
   lastSignificantTimestamp: number;
-  mergedAuthors: IAuthor[];
-  otherAuthors: ICommitter[];
+  mergedAuthors: Author[];
+  otherAuthors: Committer[];
   otherCount: number;
-  palette: IPalette;
+  palette: Palette;
   selectedAuthors: string[];
   size: string;
   universalSettings: boolean;
 }
 
-interface ICommitChartData {
+interface CommitChartData {
   date: number;
   [signature: string]: number;
 }
 
-export default (props: IProps) => {
+export default (props: Props) => {
   const extractedCommitData = extractCommitData(props);
   const [commitChartData, setCommitChartData] = React.useState(extractedCommitData.commitChartData);
   const [commitScale, setCommitScale] = React.useState(extractedCommitData.commitScale);
@@ -101,7 +101,7 @@ export default (props: IProps) => {
   );
 };
 
-const extractCommitData = (props: IProps) => {
+const extractCommitData = (props: Props) => {
   if (!props.commits || props.commits.length === 0) {
     return {};
   }
@@ -113,15 +113,15 @@ const extractCommitData = (props: IProps) => {
     firstTimestamp = props.firstSignificantTimestamp;
     lastTimestamp = props.lastSignificantTimestamp;
     if (props.excludeMergeCommits) {
-      commits = commits.filter((c: ICommit) => !c.message.includes('Merge'));
+      commits = commits.filter((c: Commit) => !c.message.includes('Merge'));
     }
   }
 
   const data = [];
   const selectedAuthors: string[] = [];
-  const commitChartData: ICommitChartData[] = [];
+  const commitChartData: CommitChartData[] = [];
   const commitScale: number[] = [0, 0];
-  const commitChartPalette: IPalette = {};
+  const commitChartPalette: Palette = {};
 
   if (commits.length > 0) {
     //---- STEP 1: AGGREGATE COMMITS GROUPED BY AUTHORS PER TIME INTERVAL ----
@@ -179,7 +179,7 @@ const extractCommitData = (props: IProps) => {
     }
     _.each(data, function (commit) {
       //commit has structure {date, statsByAuthor: {}} (see next line)}
-      const obj: ICommitChartData = { date: commit.date };
+      const obj: CommitChartData = { date: commit.date };
 
       if (chartIsSplit) {
         for (const mergedAuthor of props.mergedAuthors) {
@@ -201,7 +201,7 @@ const extractCommitData = (props: IProps) => {
         props.selectedAuthors.filter((sA: string) => sA !== 'other'),
         function (committer) {
           //commitLegend to iterate over authorNames, commitLegend has structure [{name, style}, ...]
-          for (const mergedAuthor of props.mergedAuthors.filter((a: IAuthor) => a.mainCommitter === committer)) {
+          for (const mergedAuthor of props.mergedAuthors.filter((a: Author) => a.mainCommitter === committer)) {
             //If committer has data
             //Add additions and Deletions of merged Committers
             for (const c of mergedAuthor.committers) {
@@ -234,7 +234,7 @@ const extractCommitData = (props: IProps) => {
       );
       //Add other if selected
       if (props.selectedAuthors.includes('others')) {
-        props.otherAuthors.forEach((c: ICommitter) => {
+        props.otherAuthors.forEach((c: Committer) => {
           if (chartIsSplit) {
             if (c.signature in commit.statsByAuthor) {
               //Insert number of changes with the author name as key,

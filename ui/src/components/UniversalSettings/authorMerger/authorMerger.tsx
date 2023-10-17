@@ -2,19 +2,19 @@
 
 import * as React from 'react';
 import styles from './authorMerger.scss';
-import { IAuthor, ICommitter, IPalette } from '../../../types/authorTypes';
+import { Author, Committer, Palette } from '../../../types/authorTypes';
 
-interface IProps {
-  apply: (mergedAuthorList: IAuthor[], otherAuthors: ICommitter[], selectedAuthors: string[]) => void;
+interface Props {
+  apply: (mergedAuthorList: Author[], otherAuthors: Committer[], selectedAuthors: string[]) => void;
   close: () => void;
   committers: string[];
-  mergedAuthorList: IAuthor[];
-  other: ICommitter[];
-  palette: IPalette;
+  mergedAuthorList: Author[];
+  other: Committer[];
+  palette: Palette;
   selectedAuthors: string[];
 }
 
-export default (props: IProps) => {
+export default (props: Props) => {
   const [committers, setCommitters] = React.useState(props.mergedAuthorList);
   const [selectedAuthors, setSelectedAuthors] = React.useState(props.selectedAuthors);
   const [other, setOther] = React.useState(props.other);
@@ -58,8 +58,8 @@ export default (props: IProps) => {
   const addCommitterToOther = (committer: string) => {
     const newOther = [...other];
     let newCommitters = committers;
-    const committerToAdd = newCommitters.filter((c: IAuthor) => c.mainCommitter === committer)[0];
-    newCommitters = newCommitters.filter((c: IAuthor) => c.mainCommitter !== committer);
+    const committerToAdd = newCommitters.filter((c: Author) => c.mainCommitter === committer)[0];
+    newCommitters = newCommitters.filter((c: Author) => c.mainCommitter !== committer);
     for (const cToAdd of committerToAdd.committers) {
       newOther.push(cToAdd);
     }
@@ -75,13 +75,13 @@ export default (props: IProps) => {
   const removeCommitterFromOther = (committer: string) => {
     let newOther = [...other];
     const newCommitters = [...committers];
-    const committerToRemove = other.filter((c: ICommitter) => c.signature === committer)[0];
+    const committerToRemove = other.filter((c: Committer) => c.signature === committer)[0];
     newCommitters.push({
       mainCommitter: committerToRemove.signature,
       committers: [{ signature: committerToRemove.signature, color: props.palette[committer] }],
       color: props.palette[committer],
     });
-    newOther = newOther.filter((c: ICommitter) => c.signature !== committerToRemove.signature);
+    newOther = newOther.filter((c: Committer) => c.signature !== committerToRemove.signature);
     setCommitters(newCommitters);
     setOther(newOther);
   };
@@ -105,7 +105,7 @@ export default (props: IProps) => {
               Reset
             </button>
             <hr />
-            {committers.map((committer: IAuthor) => {
+            {committers.map((committer: Author) => {
               return (
                 <div key={'authorMerger' + committer.mainCommitter} className={styles.committerRow}>
                   <div
@@ -127,7 +127,7 @@ export default (props: IProps) => {
                     onDragStart={(e: any) => {
                       e.dataTransfer.setData('Text', e.target.id);
                     }}>
-                    {committer.committers.map((individualCommitter: ICommitter) => {
+                    {committer.committers.map((individualCommitter: Committer) => {
                       return (
                         <div key={'authorMergerIndividual' + individualCommitter.signature} className={styles.individualCommitter}>
                           <span className={styles.individualCommitterColor} style={{ background: individualCommitter.color }}></span>
@@ -154,7 +154,7 @@ export default (props: IProps) => {
                 id={'other'}
                 className={styles.committerContainer + ' ' + styles.otherContainer}
                 style={{ background: props.palette['other'] }}>
-                {other.map((individualCommitter: ICommitter) => {
+                {other.map((individualCommitter: Committer) => {
                   return (
                     <div key={'authorMergerIndividual' + individualCommitter.signature} className={styles.individualCommitter}>
                       <span className={styles.individualCommitterColor} style={{ background: individualCommitter.color }}></span>

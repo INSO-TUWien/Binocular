@@ -7,17 +7,17 @@ import SprintDisplay from './sprintDisplay/sprintDisplay';
 import * as moment from 'moment';
 import Database from '../../../database/database';
 import MilestoneList from './milestoneList/milestoneList';
-import { ISprint } from '../../../types/sprintTypes';
-import { IMilestone } from '../../../types/milestoneTypes';
-import { IDateRange } from '../../../types/globalTypes';
+import { Sprint } from '../../../types/sprintTypes';
+import { Milestone } from '../../../types/milestoneTypes';
+import { DateRange } from '../../../types/globalTypes';
 
-interface IProps {
-  sprints: ISprint[];
+interface Props {
+  sprints: Sprint[];
   close: () => void;
-  setSprints: (sprints: ISprint[]) => void;
+  setSprints: (sprints: Sprint[]) => void;
 }
 
-export default (props: IProps) => {
+export default (props: Props) => {
   const [sprints, setSprints] = React.useState(props.sprints);
 
   const [newSprintToAdd, setNewSprintToAdd] = React.useState({
@@ -30,9 +30,9 @@ export default (props: IProps) => {
     sprintLength: 1,
     startDateTime: undefined,
   });
-  const [milestones, setMilestones] = React.useState<IMilestone[]>([]);
+  const [milestones, setMilestones] = React.useState<Milestone[]>([]);
   let tmpID = 0;
-  sprints.forEach((s: ISprint) => {
+  sprints.forEach((s: Sprint) => {
     if (s.id > tmpID) {
       tmpID = s.id;
     }
@@ -72,7 +72,7 @@ export default (props: IProps) => {
     setSprints(sprints);
     props.setSprints(sprints);
   };
-  const addAllMilestones = (milestones: IMilestone[]) => {
+  const addAllMilestones = (milestones: Milestone[]) => {
     let id = currID;
     for (const milestone of milestones) {
       id++;
@@ -88,7 +88,7 @@ export default (props: IProps) => {
     props.setSprints(sprints);
   };
 
-  const addMilestone = (milestone: IMilestone) => {
+  const addMilestone = (milestone: Milestone) => {
     const id = currID + 1;
     sprints.push({
       name: milestone.title,
@@ -103,14 +103,14 @@ export default (props: IProps) => {
   };
 
   const deleteSprint = (sprintID: number) => {
-    const newSprints = sprints.filter((s: ISprint) => s.id !== sprintID);
+    const newSprints = sprints.filter((s: Sprint) => s.id !== sprintID);
     setSprints(newSprints);
     props.setSprints(newSprints);
   };
 
   const renameSprint = (sprintID: number, newName: string) => {
     setSprints(
-      sprints.map((s: ISprint) => {
+      sprints.map((s: Sprint) => {
         if (s.id === sprintID) {
           s.name = newName;
         }
@@ -158,7 +158,7 @@ export default (props: IProps) => {
                   from={newSprintToAdd.from}
                   to={newSprintToAdd.to}
                   type={'date'}
-                  onDateChanged={(date: IDateRange) => {
+                  onDateChanged={(date: DateRange) => {
                     if (date.from !== undefined) {
                       newSprintToAdd.from = date.from;
                     }
@@ -276,13 +276,13 @@ export default (props: IProps) => {
             <div className={styles.sprintManagerPanel}>
               <h2>Import Sprints from Milestones</h2>
               <MilestoneList
-                milestones={milestones.filter((m) => sprints.filter((s: ISprint) => s.iid === m.iid).length === 0)}
+                milestones={milestones.filter((m) => sprints.filter((s: Sprint) => s.iid === m.iid).length === 0)}
                 addMilestone={(milestone) => addMilestone(milestone)}
               />
               <button
                 className={'button ' + styles.accentButton}
                 onClick={() => {
-                  addAllMilestones(milestones.filter((m) => sprints.filter((s: ISprint) => s.iid === m.iid).length === 0));
+                  addAllMilestones(milestones.filter((m) => sprints.filter((s: Sprint) => s.iid === m.iid).length === 0));
                 }}>
                 Add All
               </button>

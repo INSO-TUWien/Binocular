@@ -6,10 +6,10 @@ import { createAction } from 'redux-actions';
 import * as chroma from 'chroma-js';
 import * as _ from 'lodash';
 import Database from '../../../../database/database';
-import { IGlobalState } from '../../../../types/globalTypes';
-import { ICommit } from '../../../../types/commitTypes';
-import { IPalette } from '../../../../types/authorTypes';
-import { IBounds } from '../../../../types/boundsTypes';
+import { GlobalState } from '../../../../types/globalTypes';
+import { Commit } from '../../../../types/commitTypes';
+import { Palette } from '../../../../types/authorTypes';
+import { Bounds } from '../../../../types/boundsTypes';
 
 export const setSelectedAuthors = createAction('SET_SELECTED_AUTHORS');
 export const setDisplayMetric = createAction('SET_DISPLAY_METRIC');
@@ -21,12 +21,12 @@ export const receiveChangesDataError = createAction('RECEIVE_CHANGES_DATA_ERROR'
 export const requestRefresh = createAction('REQUEST_REFRESH');
 const refresh = createAction('REFRESH');
 
-interface IChangesData {
+interface ChangesData {
   otherCount: number;
-  filteredCommits: ICommit[];
-  commits: ICommit[];
+  filteredCommits: Commit[];
+  commits: Commit[];
   committers: string[];
-  palette: IPalette;
+  palette: Palette;
   firstCommitTimestamp: number;
   lastCommitTimestamp: number;
   firstSignificantTimestamp: number;
@@ -93,21 +93,21 @@ function* watchRefresh() {
  */
 export const fetchChangesData = fetchFactory(
   function* () {
-    const bounds: IBounds = yield Database.getBounds();
+    const bounds: Bounds = yield Database.getBounds();
     const firstCommitTimestamp = Date.parse(bounds.firstCommit.date);
     const lastCommitTimestamp = Date.parse(bounds.lastCommit.date);
 
     const firstIssueTimestamp = bounds.firstIssue ? Date.parse(bounds.firstIssue.createdAt) : firstCommitTimestamp;
     const lastIssueTimestamp = bounds.lastIssue ? Date.parse(bounds.lastIssue.createdAt) : lastCommitTimestamp;
 
-    const state: IGlobalState = yield select();
+    const state: GlobalState = yield select();
     const viewport = state.visualizations.changes.state.config.viewport || [0, null];
     let firstSignificantTimestamp = Math.max(viewport[0], Math.min(firstCommitTimestamp, firstIssueTimestamp));
     let lastSignificantTimestamp = viewport[1] ? viewport[1].getTime() : Math.max(lastCommitTimestamp, lastIssueTimestamp);
     const timeSpan = state.universalSettings.chartTimeSpan;
     firstSignificantTimestamp = timeSpan.from === undefined ? firstSignificantTimestamp : new Date(timeSpan.from).getTime();
     lastSignificantTimestamp = timeSpan.to === undefined ? lastSignificantTimestamp : new Date(timeSpan.to).getTime();
-    const changesData: IChangesData = yield Promise.all([
+    const changesData: ChangesData = yield Promise.all([
       Database.getCommitData([firstCommitTimestamp, lastCommitTimestamp], [firstSignificantTimestamp, lastSignificantTimestamp]),
       Database.getCommitData([firstCommitTimestamp, lastCommitTimestamp], [firstCommitTimestamp, lastCommitTimestamp]),
     ])
@@ -140,7 +140,7 @@ export const fetchChangesData = fetchFactory(
   receiveChangesDataError
 );
 
-function getPalette(commits: ICommit[], maxNumberOfColors: number, numOfCommitters: number) {
+function getPalette(commits: Commit[], maxNumberOfColors: number, numOfCommitters: number) {
   function chartColors(band: string, maxLength: number, length: number): string[] {
     const len = length > maxLength ? maxLength : length;
     return chroma.scale(band).mode('lch').colors(len);
@@ -167,7 +167,7 @@ function getPalette(commits: ICommit[], maxNumberOfColors: number, numOfCommitte
     return b[1] - a[1];
   });
 
-  const returnPalette: IPalette = {};
+  const returnPalette: Palette = {};
 
   for (let i = 0; i < Math.min(sortable.length, palette.length) - 1; i++) {
     returnPalette[sortable[i][0]] = palette[i];

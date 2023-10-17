@@ -2,9 +2,9 @@
 
 import { connect } from 'react-redux';
 import Chart from './chart';
-import { IGlobalState } from '../../../../types/globalTypes';
+import { GlobalState } from '../../../../types/globalTypes';
 
-const mapStateToProps = (state: IGlobalState) => {
+const mapStateToProps = (state: GlobalState) => {
   const changesState = state.visualizations.changes.state;
   const universalSettings = state.universalSettings;
   return {

@@ -1,4 +1,4 @@
-export interface ISprint {
+export interface Sprint {
   id: number;
   iid?: string;
   name: string;

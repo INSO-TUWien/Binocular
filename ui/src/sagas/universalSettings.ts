@@ -2,7 +2,7 @@ import { fetchFactory, timestampedActionFactory } from './utils';
 import Database from '../database/database';
 import { getChartColors } from '../utils';
 import { createAction } from 'redux-actions';
-import { IPalette } from '../types/authorTypes';
+import { Palette } from '../types/authorTypes';
 export const requestUniversalSettingsData = createAction('REQUEST_UNIVERSAL_SETTINGS_DATA');
 export const receiveUniversalSettingsData = timestampedActionFactory('RECEIVE_UNIVERSAL_SETTINGS_DATA');
 export const receiveUniversalSettingsDataError = createAction('RECEIVE_UNIVERSAL_SETTINGS_DATA_ERROR');
@@ -18,7 +18,7 @@ export const fetchUniversalSettingsData = fetchFactory(
     const firstSignificantTimestamp: number = Math.min(firstCommitTimestamp, firstIssueTimestamp);
     const lastSignificantTimestamp: number = Math.max(lastCommitTimestamp, lastIssueTimestamp);
 
-    const palette = getChartColors('spectral', [...committers, 'other']) as IPalette;
+    const palette = getChartColors('spectral', [...committers, 'other']) as Palette;
     return {
       firstCommit,
       lastCommit,

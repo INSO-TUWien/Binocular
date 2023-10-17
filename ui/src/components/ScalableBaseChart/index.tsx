@@ -5,7 +5,7 @@ import * as d3 from 'd3';
 import * as baseStyles from './scalable-base-chart.component.scss';
 import { NoImplementationException } from '../../utils/exception/NoImplementationException';
 import { hash } from '../../utils/crypto-utils';
-import { IPalette } from '../../types/authorTypes';
+import { Palette } from '../../types/authorTypes';
 
 /**
  * ScalableBaseChartComponent
@@ -28,14 +28,14 @@ import { IPalette } from '../../types/authorTypes';
  *  - order (optional) (Format: [string, string, ...]) Strings containing the keys in desired order (largest to smallest).
  */
 
-interface IProps {
+interface Props {
   content: any[];
   d3offset: any;
   displayNegative: boolean;
   keys: string[];
   order: string[];
   paddings: { top: number; left: number; bottom: number; right: number };
-  palette: IPalette;
+  palette: Palette;
   resolution: string;
   xAxisCenter: boolean;
   yDims: number[];
@@ -44,7 +44,7 @@ interface IProps {
   hideVertical?: boolean;
 }
 
-interface IState {
+interface State {
   content: any;
   palette: any;
   componentMounted: boolean;
@@ -56,7 +56,7 @@ interface IState {
   data: any;
 }
 
-export default class ScalableBaseChart extends React.Component<IProps, IState> {
+export default class ScalableBaseChart extends React.Component<Props, State> {
   protected styles: any;
   private svgRef: SVGSVGElement;
   private tooltipRef: HTMLDivElement;

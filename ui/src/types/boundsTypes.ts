@@ -1,12 +1,12 @@
-export interface IBounds {
-  firstCommit?: IBoundsCommit;
-  lastCommit?: IBoundsCommit;
+export interface Bounds {
+  firstCommit?: BoundsCommit;
+  lastCommit?: BoundsCommit;
   committers?: string[];
-  firstIssue?: IBoundsIssue;
-  lastIssue?: IBoundsIssue;
+  firstIssue?: BoundsIssue;
+  lastIssue?: BoundsIssue;
 }
 
-export interface IBoundsCommit {
+export interface BoundsCommit {
   date: string;
   stats: {
     additions: number;
@@ -14,7 +14,7 @@ export interface IBoundsCommit {
   };
 }
 
-export interface IBoundsIssue {
+export interface BoundsIssue {
   createdAt: string;
   closedAt: string;
 }

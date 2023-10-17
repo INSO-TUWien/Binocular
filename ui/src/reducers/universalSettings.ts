@@ -3,11 +3,11 @@
 import { handleActions, Action } from 'redux-actions';
 import * as _ from 'lodash';
 import { getContext } from '../utils/context';
-import { IUniversalSettings } from '../types/unversalSettingsTypes';
-import { IAuthor } from '../types/authorTypes';
+import { UniversalSettings } from '../types/unversalSettingsTypes';
+import { Author } from '../types/authorTypes';
 
 const ctx = getContext();
-const defaultConfig: IUniversalSettings = {
+const defaultConfig: UniversalSettings = {
   chartResolution: 'months',
   chartTimeSpan: { from: undefined, to: undefined },
   selectedAuthorsGlobal: [],
@@ -35,7 +35,7 @@ export default handleActions(
       return _.assign({}, state, { allAuthors: action.payload });
     },
     SET_MERGED_AUTHOR_LIST: (state, action: Action<any>) => {
-      const config: IUniversalSettings = updateLocalStorage('mergedAuthors', action.payload);
+      const config: UniversalSettings = updateLocalStorage('mergedAuthors', action.payload);
       return _.assign({}, state, { mergedAuthors: action.payload, selectedAuthorsGlobal: config.selectedAuthorsGlobal });
     },
     SET_OTHER_AUTHOR_LIST: (state, action: Action<any>) => {
@@ -75,8 +75,8 @@ export default handleActions(
   }
 );
 
-function updateLocalStorage(key: string, value: any): IUniversalSettings {
-  let currConfig: IUniversalSettings = undefined;
+function updateLocalStorage(key: string, value: any): UniversalSettings {
+  let currConfig: UniversalSettings = undefined;
   if (localStorage.getItem(ctx.repo.name + '-UniversalSettings') === null) {
     currConfig = defaultConfig;
   } else {
@@ -87,7 +87,7 @@ function updateLocalStorage(key: string, value: any): IUniversalSettings {
     }
   }
 
-  (currConfig[key as keyof IUniversalSettings] as any) = value;
+  (currConfig[key as keyof UniversalSettings] as any) = value;
   if (currConfig.mergedAuthors.length > 0 && (currConfig.initialized === undefined || currConfig.initialized === false)) {
     selectAllAuthors(currConfig);
     currConfig.initialized = true;
@@ -97,8 +97,8 @@ function updateLocalStorage(key: string, value: any): IUniversalSettings {
   return currConfig;
 }
 
-function getLocalStorage(): IUniversalSettings {
-  let currConfig: IUniversalSettings = undefined;
+function getLocalStorage(): UniversalSettings {
+  let currConfig: UniversalSettings = undefined;
   if (localStorage.getItem(ctx.repo.name + '-UniversalSettings') === null) {
     currConfig = defaultConfig;
   } else {
@@ -116,6 +116,6 @@ function getLocalStorage(): IUniversalSettings {
   return currConfig;
 }
 
-function selectAllAuthors(config: IUniversalSettings) {
-  config.selectedAuthorsGlobal = config.mergedAuthors.map((mergedAuthor: IAuthor) => mergedAuthor.mainCommitter);
+function selectAllAuthors(config: UniversalSettings) {
+  config.selectedAuthorsGlobal = config.mergedAuthors.map((mergedAuthor: Author) => mergedAuthor.mainCommitter);
 }

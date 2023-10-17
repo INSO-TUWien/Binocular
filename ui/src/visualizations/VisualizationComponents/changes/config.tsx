@@ -4,11 +4,11 @@ import { connect } from 'react-redux';
 import { setDisplayMetric, setSelectedAuthors } from './sagas';
 import TabCombo from '../../../components/TabCombo';
 import styles from './styles.scss';
-import { IGlobalState } from '../../../types/globalTypes';
+import { GlobalState } from '../../../types/globalTypes';
 import * as React from 'react';
-import { IPalette } from '../../../types/authorTypes';
+import { Palette } from '../../../types/authorTypes';
 
-const mapStateToProps = (state: IGlobalState) => {
+const mapStateToProps = (state: GlobalState) => {
   const dashboardState = state.visualizations.changes.state;
 
   return {
@@ -27,17 +27,17 @@ const mapDispatchToProps = (dispatch: any) => {
   };
 };
 
-interface IProps {
+interface Props {
   committers: string[];
   metric: string;
-  palette: IPalette;
+  palette: Palette;
   resolution: string;
   selectedAuthors: string[];
   onClickCheckboxLegend: (selected: boolean) => void;
   onClickMetric: (metric: string) => void;
 }
 
-const ChangesConfigComponent = (props: IProps) => {
+const ChangesConfigComponent = (props: Props) => {
   return (
     <div className={styles.configContainer}>
       <div className={styles.field}>

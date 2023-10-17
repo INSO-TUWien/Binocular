@@ -1,35 +1,35 @@
-import { IAuthor, ICommitter, IPalette } from './authorTypes';
-import { IDateRange } from './globalTypes';
-import { ISprint } from './sprintTypes';
-import { IBoundsCommit, IBoundsIssue } from './boundsTypes';
+import { Author, Committer, Palette } from './authorTypes';
+import { DateRange } from './globalTypes';
+import { Sprint } from './sprintTypes';
+import { BoundsCommit, BoundsIssue } from './boundsTypes';
 
-export interface IUniversalSettingsConfig {
+export interface UniversalSettingsConfig {
   hideDateSettings?: boolean;
   hideGranularitySettings?: boolean;
   hideCommitSettings?: boolean;
   hideSprintSettings?: boolean;
 }
 
-export interface IUniversalSettings {
-  allAuthors?: IPalette;
+export interface UniversalSettings {
+  allAuthors?: Palette;
   chartResolution: string;
-  chartTimeSpan: IDateRange;
+  chartTimeSpan: DateRange;
   excludeMergeCommits: boolean;
-  mergedAuthors: IAuthor[];
-  otherAuthors: ICommitter[];
+  mergedAuthors: Author[];
+  otherAuthors: Committer[];
   selectedAuthorsGlobal: string[];
-  sprints: ISprint[];
-  universalSettingsData?: { data: IUniversalSettingsData; isFetching: boolean; receivedAt: any };
+  sprints: Sprint[];
+  universalSettingsData?: { data: UniversalSettingsData; isFetching: boolean; receivedAt: any };
   initialized?: boolean;
 }
 
-export interface IUniversalSettingsData {
+export interface UniversalSettingsData {
   committers: string[];
-  firstCommit: IBoundsCommit;
-  lastCommit: IBoundsCommit;
-  firstIssue: IBoundsIssue;
-  lastIssue: IBoundsIssue;
+  firstCommit: BoundsCommit;
+  lastCommit: BoundsCommit;
+  firstIssue: BoundsIssue;
+  lastIssue: BoundsIssue;
   firstSignificantTimestamp: number;
   lastSignificantTimestamp: number;
-  palette: IPalette;
+  palette: Palette;
 }

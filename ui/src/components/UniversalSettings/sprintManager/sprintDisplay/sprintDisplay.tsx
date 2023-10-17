@@ -4,24 +4,24 @@ import * as React from 'react';
 import styles from './sprintDisplay.scss';
 import * as moment from 'moment';
 import 'moment/locale/de';
-import { ISprint } from '../../../../types/sprintTypes';
+import { Sprint } from '../../../../types/sprintTypes';
 
-interface IProps {
-  sprints: ISprint[];
+interface Props {
+  sprints: Sprint[];
   deleteSprint: (id: number) => void;
   renameSprint: (id: number, newName: string) => void;
 }
 
-export default (props: IProps) => {
+export default (props: Props) => {
   moment.locale('de');
 
   const renderSprintList = () => {
     if (props.sprints.length !== 0) {
       return props.sprints
-        .sort((a: ISprint, b: ISprint): number => {
+        .sort((a: Sprint, b: Sprint): number => {
           return new (moment as any)(a.from).format('YYYYMMDD') - new (moment as any)(b.from).format('YYYYMMDD');
         })
-        .map((sprint: ISprint) => {
+        .map((sprint: Sprint) => {
           return (
             <div className={styles.sprintContainer} key={'sprint_' + sprint.id}>
               <div className={styles.sprintContainerFrom}>{moment(sprint.from).format('ll')}</div>

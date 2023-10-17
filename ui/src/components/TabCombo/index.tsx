@@ -3,22 +3,22 @@
 import * as React from 'react';
 import styles from './tabCombo.scss';
 
-interface IProps {
-  options: IOption[];
+interface Props {
+  options: Option[];
   value: string;
   onChange: (value: string) => void;
 }
 
-interface IOption {
+interface Option {
   label: string;
   value: string;
   icon?: string;
   hint?: string;
 }
 
-export default (props: IProps) => {
+export default (props: Props) => {
   const [selection, setSelection] = React.useState(props.value);
-  const currSelectedIndex = props.options.findIndex((i: IOption) => i.value === selection);
+  const currSelectedIndex = props.options.findIndex((i: Option) => i.value === selection);
   let borderRadiusSelection = '.2rem';
   if (currSelectedIndex === 0) {
     borderRadiusSelection = '.4rem .2rem .2rem .4rem';
@@ -35,7 +35,7 @@ export default (props: IProps) => {
           left: (100 / props.options.length) * currSelectedIndex + '%',
           borderRadius: borderRadiusSelection,
         }}></div>
-      {props.options.map((item: IOption, i: number) => {
+      {props.options.map((item: Option, i: number) => {
         return (
           <button
             key={'multiSwitchItem-' + item.label}
