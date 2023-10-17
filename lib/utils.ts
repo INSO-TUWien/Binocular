@@ -3,8 +3,9 @@
 import _ from 'lodash';
 import archiver from 'archiver';
 import stream from 'stream';
+import Db from './core/db/db';
 
-export function createZipStream(directory: any) {
+export function createZipStream(directory: string) {
   const zip = archiver('zip');
 
   const pass = new stream.PassThrough();
@@ -16,20 +17,7 @@ export function createZipStream(directory: any) {
   return pass;
 }
 
-export function renamer(mappings: any) {
-  return function (obj: any) {
-    const ret: any = {};
-    _.each(mappings, function (to, from) {
-      if (from in obj) {
-        ret[to] = obj[from];
-      }
-    });
-
-    return ret;
-  };
-}
-
-export async function getDbExport(db: any) {
+export async function getDbExport(db: Db) {
   const exportJson: any = {};
   const collections = await db.collections();
   for (const collection of collections) {
@@ -40,7 +28,7 @@ export async function getDbExport(db: any) {
   return exportJson;
 }
 
-export function parseBlameOutput(output: any) {
+export function parseBlameOutput(output: string) {
   //this function parses git blame output with the -p flag (porcelain).
   //it extracts how many lines of code each stakeholder owns.
   //How it works:

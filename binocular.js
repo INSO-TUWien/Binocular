@@ -79,6 +79,10 @@ import * as updateConfigEndpoint from './lib/endpoints/update-config.js';
 
 import * as setupDb from './lib/core/db/setup-db.js';
 
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 const commPath = path.resolve(__dirname, 'services', 'grpc', 'comm');
 
 const LanguageDetectorPackageDefinition = protoLoader.loadSync(path.join(commPath, 'language.service.proto'), {
