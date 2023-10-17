@@ -27,10 +27,10 @@ import open from 'open';
 import _ from 'lodash';
 
 import git from './lib/core/provider/git.js';
-import config from './lib/config.js';
+import config from './lib/config';
 import * as GetIndexer from './lib/indexers/index.js';
 import * as UrlProvider from './lib/url-providers/index.js';
-import ProgressReporter from './lib/progress-reporter.js';
+import ProgressReporter from './lib/progress-reporter';
 import path from 'path';
 import fs from 'fs';
 import Commit from './lib/models/Commit.js';
@@ -63,7 +63,7 @@ import DatabaseError from './lib/errors/DatabaseError.js';
 import GateWayService from './lib/gateway-service.js';
 import * as grpc from '@grpc/grpc-js';
 import * as protoLoader from '@grpc/proto-loader';
-import * as projectStructureHelper from './lib/projectStructureHelper.js';
+import * as projectStructureHelper from './lib/projectStructureHelper';
 
 import * as getCommitsEndpoint from './lib/endpoints/get-commits.js';
 

@@ -5,7 +5,12 @@ import debug from 'debug';
 
 const log = debug('paginator');
 
-function Paginator(getPage, getItems, getCount, options) {
+function Paginator(
+  getPage: (page: number, perPage: number) => Promise<any>,
+  getItems: (resp: any) => any,
+  getCount: (resp: any) => number,
+  options: any
+) {
   options = _.defaults({}, options, { defaultPageSize: 100 });
   this.handlers = {
     count: [],
@@ -20,17 +25,17 @@ function Paginator(getPage, getItems, getCount, options) {
   this.defaultPageSize = options.defaultPageSize;
 }
 
-Paginator.prototype.addEventListener = Paginator.prototype.on = function (name, fn) {
+Paginator.prototype.addEventListener = Paginator.prototype.on = function (name: string, fn: any) {
   this.handlers[name].push(fn);
   return this;
 };
 
-Paginator.prototype.removeEventListener = Paginator.prototype.off = function (name, fn) {
+Paginator.prototype.removeEventListener = Paginator.prototype.off = function (name: string, fn: any) {
   _.pull(this.handlers[name], fn);
   return this;
 };
 
-Paginator.prototype.once = function (name, fn) {
+Paginator.prototype.once = function (name: string, fn: any) {
   const self = this;
   const handler = function () {
     self.off(name, handler);
@@ -40,16 +45,16 @@ Paginator.prototype.once = function (name, fn) {
   return this.on(name, handler);
 };
 
-Paginator.prototype.emit = function (name /*, rest... */) {
+Paginator.prototype.emit = function (name: string /*, rest... */) {
   const handlers = this.handlers[name];
 
-  return Promise.all(handlers.map((handler) => handler(...Array.prototype.slice.call(arguments, 1))));
+  return Promise.all(handlers.map((handler: any) => handler(...Array.prototype.slice.call(arguments, 1))));
 };
 
 Paginator.prototype.execute = function (perPage = this.defaultPageSize) {
-  const countHolder = { count: null };
+  const countHolder: any = { count: null };
 
-  this.once('page', (firstPage) => {
+  this.once('page', (firstPage: any) => {
     try {
       return Promise.resolve(this.getCount(firstPage)).then((count) => {
         countHolder.count = count;
@@ -64,15 +69,15 @@ Paginator.prototype.execute = function (perPage = this.defaultPageSize) {
   return this.$depaginate(perPage, countHolder);
 };
 
-Paginator.prototype.$depaginate = function (perPage, countHolder, page = 1, processed = 0) {
+Paginator.prototype.$depaginate = function (perPage: number, countHolder: { count: number }, page = 1, processed = 0) {
   log(`Getting page ${page}`);
   return this.getPage(page, perPage)
-    .then((pageData) => {
+    .then((pageData: any) => {
       this.emit('page', pageData, page);
       return pageData;
     })
-    .then((page) => this.getItems(page))
-    .then((items) => {
+    .then((page: any) => this.getItems(page))
+    .then((items: any[]) => {
       log(`Got ${items.length} items from page ${page}`);
 
       if (items.length === 0) {
@@ -80,7 +85,7 @@ Paginator.prototype.$depaginate = function (perPage, countHolder, page = 1, proc
         return false;
       }
 
-      return items.map((item) => {
+      return items.map((item: any) => {
         log(`Processing page[${processed}]`);
         processed++;
         if (processed <= countHolder.count) {
@@ -90,7 +95,7 @@ Paginator.prototype.$depaginate = function (perPage, countHolder, page = 1, proc
         }
       });
     })
-    .then((stop) => {
+    .then((stop: boolean) => {
       log(`Finished page #${page}, total items processed: ${processed}/${countHolder.count}`);
       if (stop !== false && processed < countHolder.count) {
         return this.$depaginate(perPage, countHolder, page + 1, processed);
@@ -99,14 +104,14 @@ Paginator.prototype.$depaginate = function (perPage, countHolder, page = 1, proc
     });
 };
 
-Paginator.prototype.pageSize = function (pageSize) {
+Paginator.prototype.pageSize = function (pageSize: number) {
   this.defaultPageSize = pageSize;
   return this;
 };
 
-Paginator.prototype.collect = function (fn) {
-  const items = [];
-  const collector = (item) => items.push(item);
+Paginator.prototype.collect = function (fn: any) {
+  const items: any[] = [];
+  const collector = (item: any) => items.push(item);
 
   this.on('item', collector);
 
@@ -116,28 +121,28 @@ Paginator.prototype.collect = function (fn) {
   });
 };
 
-Paginator.prototype.then = function (fn) {
+Paginator.prototype.then = function (fn: any) {
   return this.execute().then(fn);
 };
 
-Paginator.prototype.map = function (fn) {
-  return this.collect((items) => items).map(fn);
+Paginator.prototype.map = function (fn: any) {
+  return this.collect((items: any) => items).map(fn);
 };
 
-Paginator.prototype.each = function (fn) {
+Paginator.prototype.each = function (fn: any) {
   this.on('item', fn);
 
   return new Promise((resolve) =>
-    this.execute().then((resp) => {
+    this.execute().then((resp: any) => {
       this.off('item', fn);
       resolve(resp);
     })
   );
 };
 
-Paginator.prototype.reduce = function (fn, initial) {
+Paginator.prototype.reduce = function (fn: any, initial: any) {
   let sum = initial;
-  return this.each((item) => {
+  return this.each((item: any) => {
     return Promise.resolve(() => {
       return fn(sum, item);
     }).then((newSum) => {

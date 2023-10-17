@@ -3,6 +3,7 @@
 import _ from 'lodash';
 import * as inflection from 'inflection';
 import debug from 'debug';
+import { Server, Socket } from 'socket.io';
 
 const log = debug('progress-reporter');
 
@@ -11,7 +12,7 @@ const log = debug('progress-reporter');
  * Keeps an array of commits that is currently being processed at all times, sorted by commit date.
  * Before starting, the total number of commits must be set by calling `setCommitCount`.
  */
-function ProgressReporter(io, categories) {
+function ProgressReporter(io: Server, categories: string[]) {
   this.dirty = true;
   this.categories = {};
 
@@ -23,7 +24,7 @@ function ProgressReporter(io, categories) {
       total: 0,
     };
 
-    this[`set${Category}Count`] = function (n) {
+    this[`set${Category}Count`] = function (n: number) {
       log(`Set ${Category}Count: %d`, n);
       this.categories[categories].total = n;
       this.categories[categories].processed = 0;
@@ -39,7 +40,7 @@ function ProgressReporter(io, categories) {
 
   this.sockets = [];
 
-  io.on('connection', (socket) => {
+  io.on('connection', (socket: Socket) => {
     log('Client connected');
     this.sockets.push(socket);
 

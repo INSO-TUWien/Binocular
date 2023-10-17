@@ -2,11 +2,12 @@
 
 import ctx from './context.js';
 import fs from 'fs';
-import * as utils from './utils.ts';
+import * as utils from './utils';
 import Moment from 'moment';
 import log_timestamp from 'log-timestamp';
-import { fileURLToPath } from 'url';
+import Context from './context.js';
 import path from 'path';
+import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -31,9 +32,9 @@ export function createAndFillDbExportFolder() {
   });
 }
 
-export function writeContextToFrontend(context) {
-  async function getData(context) {
-    const data = {};
+export function writeContextToFrontend(context: typeof Context) {
+  async function getData(context: typeof Context) {
+    const data: any = {};
     data.repo = { name: await context.repo.getName() };
     return data;
   }
