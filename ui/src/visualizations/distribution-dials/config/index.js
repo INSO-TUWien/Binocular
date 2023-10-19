@@ -1,7 +1,7 @@
 'use-strict';
 
 import { useDispatch, useSelector } from 'react-redux';
-import { setLayers, setSelectLayers, setSplitLayers } from '../sagas';
+import { setFilterCommitsChanges, setFilterCommitsChangesCutoff, setLayers, setSelectLayers, setSplitLayers } from '../sagas';
 import styles from '../styles.scss';
 import DragAndDropList from '../../../components/DragAndDropList/dragAndDropList';
 
@@ -10,6 +10,8 @@ export default () => {
   const layers = distributionDialsState.config.layers;
   const layersSelected = distributionDialsState.config.layersSelected;
   const layersSplit = distributionDialsState.config.layersSplit;
+  const filterCommitsChanges = distributionDialsState.config.filterCommitsChanges;
+  const filterCommitsChangesCutoff = distributionDialsState.config.filterCommitsChangesCutoff;
 
   const dispatch = useDispatch();
 
@@ -33,12 +35,22 @@ export default () => {
     }
   };
 
+  const onFilterCommits = (checked) => {
+    dispatch(setFilterCommitsChanges(checked));
+  };
+
+  const onSetChangesCutoff = (value) => {
+    if (value && value > 0) {
+      dispatch(setFilterCommitsChangesCutoff(value));
+    }
+  };
+
   return (
     <div className={styles.configContainer}>
-      <p>
-        <b>Drag to change order:</b>
-      </p>
       <div className="field">
+        <p>
+          <b>Drag to change order:</b>
+        </p>
         <DragAndDropList
           elements={layers}
           onPositionChange={onPositionChange}
@@ -47,6 +59,33 @@ export default () => {
           onSwitch={onSwitch}
           switchedElements={layersSplit}
           switchLabel="Split"
+        />
+      </div>
+
+      <div className="field">
+        <input
+          id="filterCommitsSwitch"
+          type="checkbox"
+          name="filterCommitsSwitch"
+          className={'switch is-rounded is-outlined is-info'}
+          defaultChecked={filterCommitsChanges}
+          onChange={(e) => onFilterCommits(e.target.checked)}
+        />
+        <label htmlFor="filterCommitsSwitch" className={styles.switch}>
+          Exclude Commits with a set number of changed lines
+        </label>
+      </div>
+
+      <div className="field">
+        <label htmlFor="filterCommitsCutoffInput">Set changes cutoff for filtering commits:</label>
+        <input
+          id="filterCommitsCutoffInput"
+          type="number"
+          name="filterCommitsCutoffInput"
+          className="input"
+          defaultValue={filterCommitsChangesCutoff}
+          disabled={!filterCommitsChanges}
+          onChange={(e) => onSetChangesCutoff(e.target.value)}
         />
       </div>
     </div>

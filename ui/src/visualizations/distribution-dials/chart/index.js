@@ -14,6 +14,8 @@ export default () => {
   const distributionDialsState = useSelector((state) => state.visualizations.distributionDials.state);
   const rawData = distributionDialsState.data.data.rawData;
   const isFetching = distributionDialsState.data.isFetching;
+  const filterCommitsChanges = distributionDialsState.config.filterCommitsChanges;
+  const filterCommitsChangesCutoff = distributionDialsState.config.filterCommitsChangesCutoff;
 
   const universalSettings = useSelector((state) => state.universalSettings);
   const selectedAuthors = universalSettings.selectedAuthorsGlobal;
@@ -58,9 +60,15 @@ export default () => {
     });
 
     //exclude merge commits if option is set in universal settings
+    console.log(rawData.commits);
     let filteredCommits = rawData.commits;
     if (excludeMergeCommits) {
       filteredCommits = filteredCommits.filter((c) => c.parents && c.parents.length < 2);
+    }
+    //exclude commits with a certain number of changes if option is set in config component
+    if (filterCommitsChanges) {
+      console.log('here', filterCommitsChangesCutoff);
+      filteredCommits = filteredCommits.filter((c) => c.stats.additions + c.stats.deletions < filterCommitsChangesCutoff);
     }
     // we dont need commits from authors that are noit checked or which are not in the specified timespan
     filteredCommits = filteredCommits
@@ -144,7 +152,7 @@ export default () => {
     }
 
     setChartData(buckets);
-  }, [rawData, universalSettings]);
+  }, [rawData, universalSettings, filterCommitsChanges, filterCommitsChangesCutoff]);
 
   if (isFetching || chartData === null) {
     return (
