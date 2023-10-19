@@ -3,7 +3,7 @@ const _ = require('lodash');
 import React, { useState, useEffect } from 'react';
 import { getAngle } from './utils';
 
-function StackedDial({ innerRad, outerRad, data, colors }) {
+function StackedDial({ label, innerRad, outerRad, data, colors, onHoverData }) {
   const gutter = 3;
 
   const [outerRadius, setOuterRadius] = useState(0);
@@ -15,6 +15,8 @@ function StackedDial({ innerRad, outerRad, data, colors }) {
   const [middlePaths, setMiddlePaths] = useState([]);
   const [middleColor, setMiddleColor] = useState('');
 
+  const [onHoverPaths, setHoverPaths] = useState([]);
+
   useEffect(() => {
     const newOuter = outerRad - gutter;
     const newInner = innerRad + gutter;
@@ -25,14 +27,20 @@ function StackedDial({ innerRad, outerRad, data, colors }) {
 
   if (!data || data.length === 0) return;
 
-  const bucketNum = data[0].length;
-  const categoryNum = data.length;
-  const innerOuterCategoryNum = categoryNum - (categoryNum % 2);
+  const showTooltip = (data) => {
+    onHoverData(label, data, colors);
+  };
+
+  const hideTooltip = () => {
+    onHoverData();
+  };
+
+  const bucketNum = data.length;
+  const categoryNum = data[0][0] ? (data[0][0].data ? data[0][0].data.length : 0) : 0;
 
   useEffect(() => {
-    const innerOuterData = _.cloneDeep(data);
-    let middleData = [];
     const middlePaths = [];
+    const hoverPaths = [];
 
     //this stores all paths. Each category has its own array so colors can be used later on
     const resultPaths = {};
@@ -43,19 +51,23 @@ function StackedDial({ innerRad, outerRad, data, colors }) {
     //get the maximum segment size (from middle radius to outer/inner radius)
     //the goal is that the max bucket reaches this line and everything else scales accordingly
     let maxSegmentSize = 0;
-    for (const bucket of _.unzip(data)) {
-      //if there is an inner segment, extract it
-      const innerSegments = bucket.slice(0, Math.floor(categoryNum / 2));
-      //get the inner parts (the ones that are between the middle line and the inner line)
-      const middleSegment = categoryNum % 2 === 1 ? bucket[Math.floor(categoryNum / 2)] : 0;
+    for (const bucket of data) {
+      //get all datapoints for the inner categories. So if there are 5 categories, get the first 2. If there are 4, also get the first 2.
+      //for each author object in the bucket, we get the datapoints for the inner categories,
+      // which gives us for example an array like this: [[1,2],[3,4],...]
+      //we flatten this ([1,2,3,4,...]) and sum everything up up. this is the total "size" of all inner categories
+      const innerSegments = _.sum(_.flatten(bucket.map((author) => author.data.slice(0, Math.floor(categoryNum / 2)))));
+      //get the middle category if there is one (if the number of categories in uneven)
+      const middleSegment = categoryNum % 2 === 1 ? _.sum(bucket.map((author) => author.data[Math.floor(categoryNum / 2)])) : 0;
       //get the categories that are between the middle line and the outer line
       //if there is a middle segment, leave that one out
-      const outerSegments = bucket.slice(Math.floor(categoryNum / 2) + (categoryNum % 2 === 1));
+      const outerSegments = _.sum(
+        _.flatten(bucket.map((author) => author.data.slice(Math.floor(categoryNum / 2) + (categoryNum % 2 === 1))))
+      );
 
       //since the middle segment (if there is one) is directly on the middle line, half of it is in each half of the diagram
-      const innerSegmentSize = innerSegments.reduce((p, c) => p + c, 0) + middleSegment / 2;
-      const outerSegmentSize = outerSegments.reduce((p, c) => p + c, 0) + middleSegment / 2;
-
+      const innerSegmentSize = innerSegments + middleSegment / 2;
+      const outerSegmentSize = outerSegments + middleSegment / 2;
       maxSegmentSize = Math.max(maxSegmentSize, innerSegmentSize, outerSegmentSize);
     }
 
@@ -64,24 +76,24 @@ function StackedDial({ innerRad, outerRad, data, colors }) {
     //Half of the remaining categories will be outside the middle category, half inside
     if (categoryNum % 2 === 1) {
       //get middle category
-      //example: data.length is 5, then 2 is the middle index
-      const middleIndex = Math.floor(data.length / 2);
-      middleData = data[middleIndex];
+      //example: categoryNum is 5, then 2 is the middle index
+      const middleIndex = Math.floor(categoryNum / 2);
       setMiddleColor(colors[middleIndex]);
-      //remove the middle data from the array for the inner and outer categories
-      innerOuterData.splice(middleIndex, 1);
       setInnerOuterColors(colors.filter((c, i) => i !== middleIndex));
     }
 
     //now stack up the categories outside/inside the middle line (or middle category if there is one)
     let currentPercent = 0.0;
     for (let i = 0; i < bucketNum; i++) {
+      const bucket = data[i];
+
       const startAngle = getAngle(currentPercent);
       currentPercent = (i + 1.0) / bucketNum;
       const endAngle = getAngle(currentPercent);
 
+      //if there is a middle category
       if (categoryNum % 2 === 1) {
-        const middleSegment = middleData[i];
+        const middleSegment = _.sum(bucket.map((author) => author.data[Math.floor(categoryNum / 2)]));
         const middleSegmentSize = (middleSegment / maxSegmentSize) * (outerRadius - middleRadius);
         const middleSegmentOuterRadius = middleRadius + middleSegmentSize / 2;
         const middleSegmentInnerRadius = middleRadius - middleSegmentSize / 2;
@@ -95,22 +107,25 @@ function StackedDial({ innerRad, outerRad, data, colors }) {
         innerStartingRadius = middleSegmentInnerRadius;
       }
 
-      //array containing each category's value for this bucket
-      const dataInBucket = innerOuterData.map((d) => d[i]);
       //half of it will be displayed inside the middle line
-      const innerData = dataInBucket.slice(0, innerOuterCategoryNum / 2).toReversed();
-      const innerDataCategories = _.range(0, innerOuterCategoryNum / 2).toReversed();
+      //note: we use toReversed() here because we will be drawing the segments from the one closest to the middle line inwards
+      const innerDataUnaggregated = bucket.map((author) => author.data.slice(0, Math.floor(categoryNum / 2)));
+      const innerData =
+        innerDataUnaggregated.length > 0 ? innerDataUnaggregated.reduce((prev, curr) => prev.map((p, i) => p + curr[i])).toReversed() : [];
+      const innerDataCategories = _.range(0, Math.floor(categoryNum / 2)).toReversed();
       //the other half outside the middle line
-      const outerData = dataInBucket.slice(innerOuterCategoryNum / 2, innerOuterCategoryNum);
-      const outerDataCategories = _.range(innerOuterCategoryNum / 2, innerOuterCategoryNum);
+      const outerDataUnaggregated = bucket.map((author) => author.data.slice(Math.floor(categoryNum / 2) + (categoryNum % 2 === 1)));
+      const outerData =
+        outerDataUnaggregated.length > 0 ? outerDataUnaggregated.reduce((prev, curr) => prev.map((p, i) => p + curr[i])) : [];
+      const outerDataCategories = _.range(Math.floor(categoryNum / 2), categoryNum);
 
       //stack up the outer data points
-      let currentRad = outerStartingRadius;
+      let currentOuterRad = outerStartingRadius;
       for (let j = 0; j < outerData.length; j++) {
         const categoryId = outerDataCategories[j];
         const d = outerData[j];
-        const innerR = currentRad;
-        const outerR = currentRad + (d / maxSegmentSize) * (outerRadius - middleRadius);
+        const innerR = currentOuterRad;
+        const outerR = currentOuterRad + (d / maxSegmentSize) * (outerRadius - middleRadius);
 
         const arc = d3.arc().innerRadius(innerR).outerRadius(outerR).startAngle(startAngle).endAngle(endAngle);
 
@@ -118,17 +133,17 @@ function StackedDial({ innerRad, outerRad, data, colors }) {
           resultPaths[categoryId] = [];
         }
         resultPaths[categoryId].push(arc);
-        currentRad = outerR;
+        currentOuterRad = outerR;
       }
 
       //stack up the inner data points
       //from the middle line inwards
-      currentRad = innerStartingRadius;
+      let currentInnerRad = innerStartingRadius;
       for (let j = 0; j < innerData.length; j++) {
         const categoryId = innerDataCategories[j];
         const d = innerData[j];
-        const innerR = currentRad - (d / maxSegmentSize) * (outerRadius - middleRadius);
-        const outerR = currentRad;
+        const innerR = currentInnerRad - (d / maxSegmentSize) * (outerRadius - middleRadius);
+        const outerR = currentInnerRad;
 
         const arc = d3.arc().innerRadius(innerR).outerRadius(outerR).startAngle(startAngle).endAngle(endAngle);
 
@@ -136,12 +151,26 @@ function StackedDial({ innerRad, outerRad, data, colors }) {
           resultPaths[categoryId] = [];
         }
         resultPaths[categoryId].push(arc);
-        currentRad = innerR;
+        currentInnerRad = innerR;
       }
+
+      const hoverP = d3.arc().innerRadius(innerRadius).outerRadius(outerRadius).startAngle(startAngle).endAngle(endAngle);
+      hoverPaths.push(
+        <path
+          stroke="none"
+          fill="white"
+          fillOpacity={0}
+          onMouseEnter={() => showTooltip(bucket)}
+          onMouseLeave={() => hideTooltip()}
+          d={hoverP().toString()}
+          key={`${i}-hover`}
+        />
+      );
     }
 
     setPaths(resultPaths);
     setMiddlePaths(middlePaths);
+    setHoverPaths(hoverPaths);
   }, [data, innerRadius, outerRadius, middleRadius]);
 
   return (
@@ -158,6 +187,7 @@ function StackedDial({ innerRad, outerRad, data, colors }) {
           });
         })
       )}
+      {onHoverPaths}
     </>
   );
 }

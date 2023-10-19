@@ -1,13 +1,14 @@
 import * as d3 from 'd3';
 import React, { useState, useEffect } from 'react';
 
-import { getCoordinatesForBucket } from './utils';
+import { getAngle, getCoordinatesForBucket } from './utils';
 
 function BezierDial({ label, innerRad, outerRad, data, color, onHoverData }) {
   const gutter = 3;
 
   const [area, setArea] = useState(null);
   const [indicatorCircles, setIndicatorCircles] = useState([]);
+  const [onHoverPaths, setHoverPaths] = useState([]);
   const [outerRadius, setOuterRadius] = useState(0);
   const [innerRadius, setInnerRadius] = useState(0);
 
@@ -21,7 +22,7 @@ function BezierDial({ label, innerRad, outerRad, data, color, onHoverData }) {
   if (!data || data.length === 0) return;
 
   const showTooltip = (data) => {
-    onHoverData(label, data);
+    onHoverData(label, data, [color]);
   };
 
   const hideTooltip = () => {
@@ -32,6 +33,7 @@ function BezierDial({ label, innerRad, outerRad, data, color, onHoverData }) {
     if (!outerRadius || !innerRadius) return;
 
     const circles = [];
+    const hoverPaths = [];
 
     const aggregatedNumbersForBuckets = data.map((bucket) => bucket.reduce((prev, curr) => prev + curr.data, 0));
 
@@ -47,20 +49,27 @@ function BezierDial({ label, innerRad, outerRad, data, color, onHoverData }) {
       const coordinates = getCoordinatesForBucket(i, bucketsNum, aggregatedNumber, maxValue, innerRadius, outerRadius);
       i === 0 ? path.moveTo(...coordinates) : path.lineTo(...coordinates);
 
-      //circles that indicate where the mouse should hover for the tooltip to appear
+      //circles that indicate the data point
       circles.push(<circle cx={coordinates[0]} cy={coordinates[1]} r={3} stroke="DarkGray" fill="none" />);
 
-      //larger, invisible circle that actually triggers the tooltip when hovered over
-      circles.push(
-        <circle
-          cx={coordinates[0]}
-          cy={coordinates[1]}
-          r={10}
+      //paths that trigger the onHover function
+      //space between hover-fields
+      const hoverGutter = 0.01;
+      const hoverP = d3
+        .arc()
+        .innerRadius(innerRadius)
+        .outerRadius(outerRadius)
+        .startAngle(getAngle(i / bucketsNum) + hoverGutter)
+        .endAngle(getAngle(((i + 0.999999) % bucketsNum) / bucketsNum) - hoverGutter);
+      hoverPaths.push(
+        <path
           stroke="none"
           fill="white"
           fillOpacity={0}
           onMouseEnter={() => showTooltip(bucketData)}
           onMouseLeave={() => hideTooltip()}
+          d={hoverP().toString()}
+          key={`${label}_${i}-hover`}
         />
       );
     }
@@ -68,6 +77,7 @@ function BezierDial({ label, innerRad, outerRad, data, color, onHoverData }) {
 
     setArea(<path stroke="DarkGray" fill={color} d={path.toString()} />);
     setIndicatorCircles(circles);
+    setHoverPaths(hoverPaths);
   }, [data, outerRadius, innerRadius]);
 
   return (
@@ -75,6 +85,7 @@ function BezierDial({ label, innerRad, outerRad, data, color, onHoverData }) {
       <circle cx="0" cy="0" r={outerRad} stroke="none" fill="white" />
       {area}
       {indicatorCircles}
+      {onHoverPaths}
     </>
   );
 }

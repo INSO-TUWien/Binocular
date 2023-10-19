@@ -19,7 +19,6 @@ import {
   splitIssuesByAuthor,
 } from './utils.js';
 import BezierDial from './bezierDial.js';
-import chroma from 'chroma-js';
 import LegendCompact from '../../../components/LegendCompact/LegendCompact.js';
 import CenterCircle from './centerCircle.js';
 
@@ -50,6 +49,7 @@ export default ({ data }) => {
 
   const [centerCircleLabel, setCenterCircleLabel] = useState('');
   const [centerCircleData, setCenterCircleData] = useState([]);
+  const [centerCircleColorScheme, setCenterCircleColorScheme] = useState([]);
   const [isCenterCircleDataVisible, setIsCenterCircleDataVisible] = useState(false);
 
   const center = {
@@ -65,14 +65,16 @@ export default ({ data }) => {
     setTransform(evt.transform);
   };
 
-  const onHoverData = (label, data) => {
+  const onHoverData = (label, data, colors) => {
     if (!label) {
       setIsCenterCircleDataVisible(false);
     } else {
-      setCenterCircleLabel(label);
-      setCenterCircleData(data);
       setIsCenterCircleDataVisible(true);
     }
+
+    setCenterCircleLabel(label);
+    setCenterCircleData(data);
+    setCenterCircleColorScheme(colors);
   };
 
   //update radius when dimensions change.
@@ -101,15 +103,24 @@ export default ({ data }) => {
         if (splitLayers.includes(part)) {
           //if this dial is split, we have the number of created issues on the outside
           // and the number of closed issues on the inside
-          const issuesCreated = data.map((bucket) => bucket.issuesCreated.length);
-          const issuesClosed = data.map((bucket) => bucket.issuesClosed.length);
+          const issuesOpenedAndClosedByAuthor = issuesByBucketAndAuthor.map((bucket) =>
+            bucket.map((author) => {
+              return {
+                name: author.name,
+                data: [author.issuesClosed, author.issuesCreated],
+              };
+            })
+          );
+
           dials.push(
             <StackedDial
+              label={part}
               innerRad={innerRad}
               outerRad={outerRad}
-              data={[issuesClosed, issuesCreated]}
+              data={issuesOpenedAndClosedByAuthor}
               colors={['DarkBlue', 'DarkTurquoise']}
               key={'issues_split'}
+              onHoverData={onHoverData}
             />
           );
         } else {
@@ -139,15 +150,23 @@ export default ({ data }) => {
         if (splitLayers.includes(part)) {
           //if this dial is split, we have the number of additions on the outside
           // and the number of deletions an the inside
-          const additions = data.map((bucket) => bucket.commits.reduce((prev, curr) => prev + curr.stats.additions, 0));
-          const deletions = data.map((bucket) => bucket.commits.reduce((prev, curr) => prev + curr.stats.deletions, 0));
+          const changesByAuthors = commitsByBucketAndAuthor.map((bucket) =>
+            bucket.map((author) => {
+              return {
+                name: author.name,
+                data: [author.deletions, author.additions],
+              };
+            })
+          );
           dials.push(
             <StackedDial
+              label={part}
               innerRad={innerRad}
               outerRad={outerRad}
-              data={[deletions, additions]}
+              data={changesByAuthors}
               colors={['red', 'green']}
               key={'changes_split'}
+              onHoverData={onHoverData}
             />
           );
         } else {
@@ -176,21 +195,25 @@ export default ({ data }) => {
       } else if (part === 'commits') {
         if (splitLayers.includes(part)) {
           //if this dial is split, we split the commits in good, bad and neutral based on the CI runs
-          const commitsSplit = _.unzip(
-            data.map((bucket) => {
-              const goodCommits = bucket.commits.filter((c) => c.buildStatus === 'success').length;
-              const badCommits = bucket.commits.filter((c) => c.buildStatus === 'failed').length;
-              const neutralCommits = bucket.commits.length - goodCommits - badCommits;
-              return [badCommits, neutralCommits, goodCommits];
+          const commitsNumberByAuthors = commitsByBucketAndAuthor.map((bucket) =>
+            bucket.map((author) => {
+              const neutralCommits = author.commits - author.badCommits - author.goodCommits;
+              return {
+                name: author.name,
+                data: [author.badCommits, neutralCommits, author.goodCommits],
+              };
             })
           );
+
           dials.push(
             <StackedDial
+              label={part}
               innerRad={innerRad}
               outerRad={outerRad}
-              data={commitsSplit}
+              data={commitsNumberByAuthors}
               colors={['red', 'DarkGray', 'green']}
               key={'commits_split'}
+              onHoverData={onHoverData}
             />
           );
         } else {
@@ -237,9 +260,9 @@ export default ({ data }) => {
       // so it does not interfere with the visualization
       if (longLabels) {
         //arc for the text
-        let arcStartAngle = getAngle(i / data.length);
-        let arcEndAngle = getAngle((0.99999 + i) / data.length);
-        let arcMiddleAngle = arcStartAngle + (arcEndAngle - arcStartAngle) / 2;
+        const arcStartAngle = getAngle(i / data.length);
+        const arcEndAngle = getAngle((0.99999 + i) / data.length);
+        const arcMiddleAngle = arcStartAngle + (arcEndAngle - arcStartAngle) / 2;
 
         //if the text is on the bottom half of the diagram
         const textReversed = arcMiddleAngle > Math.PI / 2 && arcMiddleAngle < 1.5 * Math.PI;
@@ -311,6 +334,7 @@ export default ({ data }) => {
               radius={chartRadius * innerCircleRadiusFactor}
               label={centerCircleLabel}
               data={centerCircleData}
+              colors={centerCircleColorScheme}
               isDataVisible={isCenterCircleDataVisible}
             />
             {labels}
