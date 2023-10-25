@@ -1,7 +1,7 @@
 import * as d3 from 'd3';
 import React, { useState, useEffect } from 'react';
 
-import { getAngle, getCoordinatesForBucket } from './utils';
+import { getAngle, getCoordinatesForBucket, smoothCurve } from './utils';
 
 function BezierDial({ label, innerRad, outerRad, data, color, onHoverData }) {
   const gutter = 3;
@@ -40,14 +40,14 @@ function BezierDial({ label, innerRad, outerRad, data, color, onHoverData }) {
     const maxValue = Math.max(...aggregatedNumbersForBuckets);
     const bucketsNum = data.length;
 
-    const path = d3.path();
+    const points = [];
 
     for (let i = 0; i < bucketsNum; i++) {
       const bucketData = data[i];
       const aggregatedNumber = aggregatedNumbersForBuckets[i];
 
       const coordinates = getCoordinatesForBucket(i, bucketsNum, aggregatedNumber, maxValue, innerRadius, outerRadius);
-      i === 0 ? path.moveTo(...coordinates) : path.lineTo(...coordinates);
+      points.push({ x: coordinates[0], y: coordinates[1] });
 
       //circles that indicate the data point
       circles.push(<circle cx={coordinates[0]} cy={coordinates[1]} r={3} stroke="DarkGray" fill="none" />);
@@ -73,9 +73,8 @@ function BezierDial({ label, innerRad, outerRad, data, color, onHoverData }) {
         />
       );
     }
-    path.closePath();
 
-    setArea(<path stroke="DarkGray" fill={color} d={path.toString()} />);
+    setArea(<path stroke="DarkGray" fill={color} d={smoothCurve(points)} />);
     setIndicatorCircles(circles);
     setHoverPaths(hoverPaths);
   }, [data, outerRadius, innerRadius]);

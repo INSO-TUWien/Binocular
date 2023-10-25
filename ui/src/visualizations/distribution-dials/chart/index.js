@@ -60,14 +60,12 @@ export default () => {
     });
 
     //exclude merge commits if option is set in universal settings
-    console.log(rawData.commits);
     let filteredCommits = rawData.commits;
     if (excludeMergeCommits) {
       filteredCommits = filteredCommits.filter((c) => c.parents && c.parents.length < 2);
     }
     //exclude commits with a certain number of changes if option is set in config component
     if (filterCommitsChanges) {
-      console.log('here', filterCommitsChangesCutoff);
       filteredCommits = filteredCommits.filter((c) => c.stats.additions + c.stats.deletions < filterCommitsChangesCutoff);
     }
     // we dont need commits from authors that are noit checked or which are not in the specified timespan

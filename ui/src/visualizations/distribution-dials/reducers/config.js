@@ -17,7 +17,7 @@ export default handleActions(
 
   {
     //initial state
-    layers: ['issues', 'changes', 'commits'],
+    layers: ['commits', 'changes', 'issues'],
     layersSplit: [],
     layersSelected: ['issues', 'changes', 'commits'],
     filterCommitsChanges: false,

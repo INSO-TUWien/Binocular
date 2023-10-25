@@ -93,7 +93,7 @@ function CenterCircle({ radius, label, data, colors, isDataVisible }) {
         <CenteredText
           text="..."
           x={upperLeftCorner.x + (upperRightCorner.x - upperLeftCorner.x) / 2}
-          y={upperLeftCorner.y + maxLines * linespacing}
+          y={upperLeftCorner.y + (maxLines + 1) * linespacing}
         />
       );
     }

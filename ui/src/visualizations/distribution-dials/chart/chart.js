@@ -21,6 +21,7 @@ import {
 import BezierDial from './bezierDial.js';
 import LegendCompact from '../../../components/LegendCompact/LegendCompact.js';
 import CenterCircle from './centerCircle.js';
+import chroma from 'chroma-js';
 
 export default ({ data }) => {
   const chartSizeFactor = 0.9;
@@ -28,8 +29,11 @@ export default ({ data }) => {
   const innerCircleRadiusFactor = 0.33;
 
   const issuesColor = '#118ab2';
+  const issuesColorsSplit = [chroma(issuesColor).darken().hex(), chroma(issuesColor).brighten().hex()];
   const commitsColor = '#06d6a0';
+  const commitsColorsSplit = ['red', 'DarkGray', 'green'];
   const changesColor = '#ffd166';
+  const changesColorsSplit = [chroma(changesColor).darken().hex(), changesColor];
 
   //global state
   const distributionDialsState = useSelector((state) => state.visualizations.distributionDials.state);
@@ -46,6 +50,7 @@ export default ({ data }) => {
   const [chartParts, setChartParts] = useState([]);
   const [dialLines, setDialLines] = useState([]);
   const [labels, setLabels] = useState([]);
+  const [legend, setLegend] = useState([]);
 
   const [centerCircleLabel, setCenterCircleLabel] = useState('');
   const [centerCircleData, setCenterCircleData] = useState([]);
@@ -87,7 +92,7 @@ export default ({ data }) => {
   useEffect(() => {
     const dials = [];
     const numOfDials = selectedLayers.length;
-    const sortedSelectedLayers = layers.filter((l) => selectedLayers.includes(l));
+    const sortedSelectedLayers = layers.toReversed().filter((l) => selectedLayers.includes(l));
 
     for (let i = 0; i < sortedSelectedLayers.length; i++) {
       const part = sortedSelectedLayers[i];
@@ -118,7 +123,7 @@ export default ({ data }) => {
               innerRad={innerRad}
               outerRad={outerRad}
               data={issuesOpenedAndClosedByAuthor}
-              colors={['DarkBlue', 'DarkTurquoise']}
+              colors={issuesColorsSplit}
               key={'issues_split'}
               onHoverData={onHoverData}
             />
@@ -164,7 +169,7 @@ export default ({ data }) => {
               innerRad={innerRad}
               outerRad={outerRad}
               data={changesByAuthors}
-              colors={['red', 'green']}
+              colors={changesColorsSplit}
               key={'changes_split'}
               onHoverData={onHoverData}
             />
@@ -211,7 +216,7 @@ export default ({ data }) => {
               innerRad={innerRad}
               outerRad={outerRad}
               data={commitsNumberByAuthors}
-              colors={['red', 'DarkGray', 'green']}
+              colors={commitsColorsSplit}
               key={'commits_split'}
               onHoverData={onHoverData}
             />
@@ -316,14 +321,45 @@ export default ({ data }) => {
     setDialLines(paths);
   }, [uiRadius, data]);
 
+  useEffect(() => {
+    setLegend(
+      layers
+        .filter((l) => selectedLayers.includes(l))
+        .map((l) => {
+          if (l === 'issues') {
+            if (splitLayers.includes(l)) {
+              return <LegendCompact text="issues opened/closed" color={issuesColorsSplit[1]} color2={issuesColorsSplit[0]} />;
+            } else {
+              return <LegendCompact text="issues" color={issuesColor} />;
+            }
+          } else if (l === 'changes') {
+            if (splitLayers.includes(l)) {
+              return <LegendCompact text="additions/deletions" color={changesColorsSplit[1]} color2={changesColorsSplit[0]} />;
+            } else {
+              return <LegendCompact text="changes" color={changesColor} />;
+            }
+          } else if (l === 'commits') {
+            if (splitLayers.includes(l)) {
+              return (
+                <LegendCompact
+                  text="good/neutral/bad commits"
+                  color={commitsColorsSplit[2]}
+                  color2={commitsColorsSplit[1]}
+                  color3={commitsColorsSplit[0]}
+                />
+              );
+            } else {
+              return <LegendCompact text="commits" color={commitsColor} />;
+            }
+          }
+        })
+    );
+  }, [layers, selectedLayers, splitLayers]);
+
   return (
     <ChartContainer onResize={(evt) => onResize(evt)} className={styles.chartContainer}>
       <div className={styles.legend}>
-        <g>
-          <LegendCompact text="commits" color={commitsColor} />
-          <LegendCompact text="changes" color={changesColor} />
-          <LegendCompact text="issues" color={issuesColor} />
-        </g>
+        <g>{legend}</g>
       </div>
       <GlobalZoomableSvg className={styles.chart} scaleExtent={[1, 10]} onZoom={(evt) => onZoom(evt)} transform={transform}>
         <OffsetGroup dims={dimensions} transform={transform}>

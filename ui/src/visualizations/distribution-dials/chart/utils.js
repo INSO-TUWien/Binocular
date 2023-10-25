@@ -1,4 +1,5 @@
 import _ from 'lodash';
+import * as d3 from 'd3';
 
 //given a circle at (0,0) and specified radius, get the coordinates of a point on the outside line for the specified angle
 export function getCoordinatesForAngle(r, angle) {
@@ -111,4 +112,19 @@ export const splitIssuesByAuthor = (issuesCreated, issuesClosed) => {
       issuesClosed: value.issuesClosed,
     };
   });
+};
+
+export const smoothCurve = d3
+  .line()
+  .x((d) => d.x)
+  .y((d) => d.y)
+  .curve(d3.curveCardinalClosed);
+
+export const getNumberOfCategories = (data) => {
+  for (const d of data) {
+    if (d.length !== 0) {
+      return d[0].data.length;
+    }
+  }
+  return 0;
 };

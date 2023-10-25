@@ -1,7 +1,7 @@
 import * as d3 from 'd3';
 const _ = require('lodash');
 import React, { useState, useEffect } from 'react';
-import { getAngle } from './utils';
+import { getAngle, getNumberOfCategories } from './utils';
 
 function StackedDial({ label, innerRad, outerRad, data, colors, onHoverData }) {
   const gutter = 3;
@@ -36,7 +36,7 @@ function StackedDial({ label, innerRad, outerRad, data, colors, onHoverData }) {
   };
 
   const bucketNum = data.length;
-  const categoryNum = data[0][0] ? (data[0][0].data ? data[0][0].data.length : 0) : 0;
+  const categoryNum = getNumberOfCategories(data);
 
   useEffect(() => {
     const middlePaths = [];
