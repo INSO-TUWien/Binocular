@@ -6,4 +6,4 @@ class ServiceProviderMock {
   }
 }
 
-module.exports = ServiceProviderMock;
+export default ServiceProviderMock;

@@ -51,4 +51,4 @@ class GitHubMock {
   }
 }
 
-module.exports = GitHubMock;
+export default GitHubMock;

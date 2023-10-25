@@ -1,13 +1,13 @@
 'use strict';
 
-const _ = require('lodash');
-const chai = require('chai');
-const sinon = require('sinon');
-const sinonChai = require('sinon-chai');
+import _ from 'lodash';
+import chai from 'chai';
+import sinon from 'sinon';
+import sinonChai from 'sinon-chai';
 
 chai.use(sinonChai);
 
-const Paginator = require('../../lib/paginator.js').default;
+import Paginator from '../../lib/paginator';
 
 const expect = chai.expect;
 

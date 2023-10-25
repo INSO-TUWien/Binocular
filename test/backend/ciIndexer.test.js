@@ -1,32 +1,23 @@
 'use strict';
 
-const chai = require('chai');
-const proxyquire = require('proxyquire');
+import { expect } from 'chai';
+import ReporterMock from './helper/reporter/reporterMock.js';
 
-const fake = require('./helper/git/repositoryFake.js');
-const ReporterMock = require('./helper/reporter/reporterMock');
+import Db from '../../lib/core/db/db.js';
+import conf from '../../lib/config.js';
 
-const Db = require('../../lib/core/db/db').default;
+import ctx from '../../lib/context.js';
+import GitLabCIIndexer from '../../lib/indexers/ci/GitLabCIIndexer.js';
+import GitHubMock from './helper/github/gitHubMock.js';
+import GitHubCIIndexer from '../../lib/indexers/ci/GitHubCIIndexer.js';
 
-const config = require('../../lib/config.js').get();
-const ctx = require('../../lib/context').default;
-
-const GitLabBaseIndexerMock = require('./helper/gitlab/gitLabBaseIndexerMock');
-const GitLabCIIndexer = proxyquire('../../lib/indexers/ci/GitLabCIIndexer', {
-  '../../indexers/BaseGitLabIndexer.js': GitLabBaseIndexerMock,
-});
-
-const GitHubMock = require('./helper/github/gitHubMock');
-const GitHubCIIndexer = proxyquire('../../lib/indexers/ci/GitHubCIIndexer', {
-  '../../core/provider/github': GitHubMock,
-});
-
-const Build = require('../../lib/models/Build').default;
-const OctokitMock = require('./helper/github/octokitMock');
-
-const expect = chai.expect;
+import Build from '../../lib/models/Build.js';
+import OctokitMock from './helper/github/octokitMock.js';
+import repositoryFake from './helper/git/repositoryFake.js';
+import GitLabBaseIndexerMock from './helper/gitlab/gitLabBaseIndexerMock.js';
 
 describe('ci', function () {
+  const config = conf.get();
   const db = new Db(config.arango);
   const reporter = new ReporterMock(['build']);
 
@@ -34,7 +25,7 @@ describe('ci', function () {
 
   describe('#indexGitLab', function () {
     it('should index all GitLab pipelines and create all necessary db collections and connections', async function () {
-      const repo = await fake.repository();
+      const repo = await repositoryFake.repository();
       ctx.targetPath = repo.path;
 
       //Remap Remote functions to local ones because remote repository doesn't exist anymore.
@@ -68,7 +59,7 @@ describe('ci', function () {
 
   describe('#indexGitHub', function () {
     it('should index all GitHub workflows and create all necessary db collections and connections', async function () {
-      const repo = await fake.repository();
+      const repo = await repositoryFake.repository();
       ctx.targetPath = repo.path;
 
       //Remap Remote functions to local ones because remote repository doesn't exist anymore.

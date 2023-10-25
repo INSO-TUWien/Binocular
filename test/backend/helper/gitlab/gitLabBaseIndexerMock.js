@@ -1,6 +1,7 @@
 'use strict';
 
-const GitLabMock = require('./gitLabMock');
+import GitLabMock from './gitLabMock.js';
+
 class GitLabBaseIndexerMock {
   constructor(repo, reporter) {
     this.repo = repo;
@@ -32,4 +33,4 @@ class GitLabBaseIndexerMock {
   }
 }
 
-module.exports = GitLabBaseIndexerMock;
+export default GitLabBaseIndexerMock;

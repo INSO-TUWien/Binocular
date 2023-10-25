@@ -1,25 +1,24 @@
 'use strict';
 
-const chai = require('chai');
+import { expect } from 'chai';
 
-const fake = require('./helper/git/repositoryFake.js');
-const helpers = require('./helper/git/helpers.js');
-const GatewayMock = require('./helper/gateway/gatewayMock');
+import fake from './helper/git/repositoryFake.js';
+import helpers from './helper/git/helpers.js';
+import GatewayMock from './helper/gateway/gatewayMock';
 
-const Db = require('../../lib/core/db/db').default;
-const Commit = require('../../lib/models/Commit').default;
-const File = require('../../lib/models/File').default;
-const Language = require('../../lib/models/Language').default;
-const Hunk = require('../../lib/models/Hunk').default;
-const LanguageFileConnection = require('../../lib/models/LanguageFileConnection').default;
-const CommitStakeholderConnection = require('../../lib/models/CommitStakeholderConnection.js').default;
+import Db from '../../lib/core/db/db';
+import Commit from '../../lib/models/Commit';
+import File from '../../lib/models/File';
+import Language from '../../lib/models/Language';
+import Hunk from '../../lib/models/Hunk';
+import LanguageFileConnection from '../../lib/models/LanguageFileConnection';
+import CommitStakeholderConnection from '../../lib/models/CommitStakeholderConnection.js';
+import conf from '../../lib/config.js';
 
-const config = require('../../lib/config.js').get();
-const ctx = require('../../lib/context').default;
-const GitHubUrlProvider = require('../../lib/url-providers/GitHubUrlProvider').default;
-const Stakeholder = require('../../lib/models/Stakeholder.js').default;
-
-const expect = chai.expect;
+import ctx from '../../lib/context';
+import GitHubUrlProvider from '../../lib/url-providers/GitHubUrlProvider';
+import Stakeholder from '../../lib/models/Stakeholder.js';
+const config = conf.get();
 
 describe('commit', function () {
   const db = new Db(config.arango);

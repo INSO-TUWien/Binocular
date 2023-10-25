@@ -1,11 +1,9 @@
 'use strict';
 
-const chai = require('chai');
+import {expect} from 'chai';
 
-const fake = require('./helper/git/repositoryFake.js');
-const helpers = require('./helper/git/helpers.js');
-
-const expect = chai.expect;
+import fake from './helper/git/repositoryFake.js';
+import helpers from './helper/git/helpers.js';
 
 describe('git', function () {
   const alice = { name: 'Alice Alisson', email: 'alice@gmail.com' };

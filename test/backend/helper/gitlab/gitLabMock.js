@@ -1,5 +1,5 @@
 'use strict';
-const Paginator = require('../../../../lib/paginator').default;
+import Paginator from '../../../../lib/paginator.ts';
 
 class GitLabMock {
   getProject() {
@@ -166,4 +166,4 @@ class GitLabMock {
   }
 }
 
-module.exports = GitLabMock;
+export default GitLabMock;
