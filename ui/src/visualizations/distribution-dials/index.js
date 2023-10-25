@@ -15,4 +15,5 @@ export default {
   ConfigComponent,
   HelpComponent,
   usesUniversalSettings: true,
+  universalSettingsConfig: { hideSprintSettings: true },
 };

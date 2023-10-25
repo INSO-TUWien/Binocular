@@ -41,6 +41,7 @@ export default ({ data }) => {
   const layers = distributionDialsState.config.layers;
   const selectedLayers = distributionDialsState.config.layersSelected;
   const splitLayers = distributionDialsState.config.layersSplit;
+  const colorSegments = distributionDialsState.config.colorSegments;
 
   //local state
   const [transform, setTransform] = useState(d3.zoomIdentity);
@@ -139,6 +140,7 @@ export default ({ data }) => {
             })
           );
 
+          //there are no author colors for ITS data, so colorSegmentsForAuthors is hardcoded to false
           dials.push(
             <BezierDial
               label={part}
@@ -148,6 +150,7 @@ export default ({ data }) => {
               color={issuesColor}
               key={'issues'}
               onHoverData={onHoverData}
+              colorSegmentsForAuthors={false}
             />
           );
         }
@@ -194,6 +197,7 @@ export default ({ data }) => {
               color={changesColor}
               key={'changes'}
               onHoverData={onHoverData}
+              colorSegmentsForAuthors={colorSegments}
             />
           );
         }
@@ -241,6 +245,7 @@ export default ({ data }) => {
               color={commitsColor}
               key={'commits'}
               onHoverData={onHoverData}
+              colorSegmentsForAuthors={colorSegments}
             />
           );
         }
@@ -249,7 +254,7 @@ export default ({ data }) => {
 
     //reverse so the smallest dial is rendered last (on top of the larger dials)
     setChartParts(dials.reverse());
-  }, [chartRadius, data, layers, splitLayers, selectedLayers]);
+  }, [chartRadius, data, layers, splitLayers, selectedLayers, colorSegments]);
 
   //update Lables when data changes
   useEffect(() => {

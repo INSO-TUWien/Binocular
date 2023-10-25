@@ -16,6 +16,7 @@ export const setSplitLayers = createAction('DD_SET_SPLIT_LAYERS', (s) => s);
 export const setSelectLayers = createAction('DD_SET_SELECT_LAYERS', (s) => s);
 export const setFilterCommitsChanges = createAction('DD_SET_FILTER_COMMITS_CHANGES', (s) => s);
 export const setFilterCommitsChangesCutoff = createAction('DD_SET_FILTER_COMMITS_CHANGES_CUTOFF', (s) => s);
+export const setColorSegments = createAction('DD_SET_COLOR_SEGMENTS', (s) => s);
 
 export default function* () {
   yield fetchDistributionDialsData();

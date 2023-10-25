@@ -1,7 +1,14 @@
 'use-strict';
 
 import { useDispatch, useSelector } from 'react-redux';
-import { setFilterCommitsChanges, setFilterCommitsChangesCutoff, setLayers, setSelectLayers, setSplitLayers } from '../sagas';
+import {
+  setColorSegments,
+  setFilterCommitsChanges,
+  setFilterCommitsChangesCutoff,
+  setLayers,
+  setSelectLayers,
+  setSplitLayers,
+} from '../sagas';
 import styles from '../styles.scss';
 import DragAndDropList from '../../../components/DragAndDropList/dragAndDropList';
 
@@ -12,6 +19,7 @@ export default () => {
   const layersSplit = distributionDialsState.config.layersSplit;
   const filterCommitsChanges = distributionDialsState.config.filterCommitsChanges;
   const filterCommitsChangesCutoff = distributionDialsState.config.filterCommitsChangesCutoff;
+  const colorSegments = distributionDialsState.config.colorSegments;
 
   const dispatch = useDispatch();
 
@@ -45,9 +53,13 @@ export default () => {
     }
   };
 
+  const onSetColorSegments = (value) => {
+    dispatch(setColorSegments(value));
+  };
+
   return (
     <div className={styles.configContainer}>
-      <div className="field">
+      <div className={styles.field}>
         <p>
           <b>Drag to change order:</b>
         </p>
@@ -62,7 +74,10 @@ export default () => {
         />
       </div>
 
-      <div className="field">
+      <div className={styles.field}>
+        <p>
+          <b>Filters:</b>
+        </p>
         <input
           id="filterCommitsSwitch"
           type="checkbox"
@@ -74,19 +89,35 @@ export default () => {
         <label htmlFor="filterCommitsSwitch" className={styles.switch}>
           Exclude Commits with a set number of changed lines
         </label>
+        <div>
+          <label htmlFor="filterCommitsCutoffInput">Set changes cutoff for filtering commits:</label>
+          <input
+            id="filterCommitsCutoffInput"
+            type="number"
+            name="filterCommitsCutoffInput"
+            className="input"
+            defaultValue={filterCommitsChangesCutoff}
+            disabled={!filterCommitsChanges}
+            onChange={(e) => onSetChangesCutoff(e.target.value)}
+          />
+        </div>
       </div>
 
-      <div className="field">
-        <label htmlFor="filterCommitsCutoffInput">Set changes cutoff for filtering commits:</label>
+      <div className={styles.field}>
+        <p>
+          <b>Colors:</b>
+        </p>
         <input
-          id="filterCommitsCutoffInput"
-          type="number"
-          name="filterCommitsCutoffInput"
-          className="input"
-          defaultValue={filterCommitsChangesCutoff}
-          disabled={!filterCommitsChanges}
-          onChange={(e) => onSetChangesCutoff(e.target.value)}
+          id="colorSegmentsSwitch"
+          type="checkbox"
+          name="colorSegmentsSwitch"
+          className={'switch is-rounded is-outlined is-info'}
+          defaultChecked={colorSegments}
+          onChange={(e) => onSetColorSegments(e.target.checked)}
         />
+        <label htmlFor="colorSegmentsSwitch" className={styles.switch}>
+          Color segments in colors of authors with the most contributions
+        </label>
       </div>
     </div>
   );

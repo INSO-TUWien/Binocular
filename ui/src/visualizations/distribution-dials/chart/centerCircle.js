@@ -93,7 +93,7 @@ function CenterCircle({ radius, label, data, colors, isDataVisible }) {
         <CenteredText
           text="..."
           x={upperLeftCorner.x + (upperRightCorner.x - upperLeftCorner.x) / 2}
-          y={upperLeftCorner.y + (maxLines + 1) * linespacing}
+          y={upperLeftCorner.y + (maxLines + 1.5) * linespacing}
         />
       );
     }
@@ -147,6 +147,7 @@ function DevLine({ devName, data, maxData, x, y, maxLength, authorColor, categor
           rx={2}
           ry={2}
           id={`${devName}_rect_${i}`}
+          key={`${devName}_rect_${i}`}
         />
       );
 
@@ -158,7 +159,15 @@ function DevLine({ devName, data, maxData, x, y, maxLength, authorColor, categor
     <>
       {rects}
       <text>
-        <tspan x={x + 8} y={y} stroke={'white'} fill={'black'} strokeWidth={3} paintOrder="stroke" id={`${devName}_text`}>
+        <tspan
+          x={x + 8}
+          y={y}
+          stroke={'white'}
+          fill={'black'}
+          strokeWidth={3}
+          paintOrder="stroke"
+          id={`${devName}_text`}
+          key={`${devName}_text`}>
           {`${devName.split('<')[0].trim()}`}
         </tspan>
       </text>

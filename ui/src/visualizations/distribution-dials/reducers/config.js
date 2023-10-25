@@ -13,6 +13,7 @@ export default handleActions(
       _.assign({}, state, { filterCommitsChanges: action.payload ? action.payload : false }),
     DD_SET_FILTER_COMMITS_CHANGES_CUTOFF: (state, action) =>
       _.assign({}, state, { filterCommitsChangesCutoff: action.payload ? action.payload : 1000 }),
+    DD_SET_COLOR_SEGMENTS: (state, action) => _.assign({}, state, { colorSegments: action.payload ? action.payload : false }),
   },
 
   {
@@ -20,7 +21,8 @@ export default handleActions(
     layers: ['commits', 'changes', 'issues'],
     layersSplit: [],
     layersSelected: ['issues', 'changes', 'commits'],
-    filterCommitsChanges: false,
+    filterCommitsChanges: true,
     filterCommitsChangesCutoff: 1000,
+    colorSegments: false,
   }
 );
