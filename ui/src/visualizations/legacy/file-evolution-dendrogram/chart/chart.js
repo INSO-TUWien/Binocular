@@ -17,6 +17,7 @@ export default class FileEvolutionDendrogram extends React.PureComponent {
     this.elems = {};
     this.state = {
       files: props.files,
+      convertedFiles: this.convertData(props.files),
       //isPanning: false,
       dimensions: zoomUtils.initialDimensions(),
       transform: d3.zoomIdentity,
@@ -43,80 +44,29 @@ export default class FileEvolutionDendrogram extends React.PureComponent {
 
     this.onResize = zoomUtils.onResizeFactory(0.7, 0.7);
     this.onZoom = zoomUtils.onZoomFactory({ constrain: false });
+    this.createChart();
   }
 
   componentWillReceiveProps(nextProps) {
-    const { fileURL, branch, path, files } = nextProps;
-    this.setState({ path: path, branch: branch, fileURL: fileURL, files: files });
+    const { files } = nextProps;
+    const convertedFiles = this.convertData(files);
+
+    // setState is async - call createChart on callback
+    // createChart is used seperately from render(), since render is called on zoom
+    this.setState({
+      files: files,
+      convertedFiles: convertedFiles,
+    }, () => {
+      this.createChart();
+    });
+
+    //this.createChart();
   }
 
   componentDidMount() { }
 
 
   render() {
-    // Specify the chart’s dimensions.
-    const width = 928;
-    const height = width;
-    // named center_x, since it clashes with the cx function from classnames
-    const center_x = width * 0.5; // adjust as needed to fit
-    const center_y = height * 0.59; // adjust as needed to fit
-    const radius = Math.min(width, height) / 2 - 30;
-
-    const convertedData = this.convertData(this.state.files);
-
-    // Create a radial tree layout. The layout’s first dimension (x)
-    // is the angle, while the second (y) is the radius.
-    const tree = d3.tree()
-      .size([2 * Math.PI, radius])
-      .separation((a, b) => (a.parent == b.parent ? 1 : 2) / a.depth);
-
-    // Sort the tree and apply the layout.
-    const root = tree(d3.hierarchy(convertedData), d => getChildren(d));
-
-    // Creates the SVG container.
-    this.svg = d3.select(this.chartRef)
-      .attr("width", width)
-      .attr("height", height)
-      .attr("viewBox", [-center_x, -center_y, width, height])
-      .attr("style", "width: 100%; height: auto; font: 10px sans-serif;");
-
-    // Append links.
-    this.svg.append("g")
-      .attr("fill", "none")
-      .attr("stroke", "#555")
-      .attr("stroke-opacity", 0.4)
-      .attr("stroke-width", 1.5)
-      .selectAll()
-      .data(root.links())
-      .join("path")
-      .attr("d", d3.linkRadial()
-        .angle(d => d.x)
-        .radius(d => d.y));
-
-    // Append nodes.
-    this.svg.append("g")
-      .selectAll()
-      .data(root.descendants())
-      .join("circle")
-      .attr("transform", d => `rotate(${d.x * 180 / Math.PI - 90}) translate(${d.y},0)`)
-      .attr("fill", d => d.data ? "#555" : "#999")
-      .attr("r", 2.5);
-
-    // Append labels.
-    this.svg.append("g")
-      .attr("stroke-linejoin", "round")
-      .attr("stroke-width", 3)
-      .selectAll()
-      .data(root.descendants())
-      .join("text")
-      .attr("transform", d => `rotate(${d.x * 180 / Math.PI - 90}) translate(${d.y},0) rotate(${d.x >= Math.PI ? 180 : 0})`)
-      .attr("dy", "0.31em")
-      .attr("x", d => d.x < Math.PI === !d.data ? 6 : -6)
-      .attr("text-anchor", d => d.x < Math.PI === !d.data ? "start" : "end")
-      .attr("paint-order", "stroke")
-      .attr("stroke", "white")
-      .attr("fill", "currentColor")
-      .text(d => d.data.name);
 
     return (
       <ChartContainer onResize={(evt) => this.onResize(evt)}>
@@ -125,14 +75,184 @@ export default class FileEvolutionDendrogram extends React.PureComponent {
           scaleExtent={[1, 10]}
           onZoom={(evt) => this.onZoom(evt)}
           transform={this.state.transform}
-          // unzoomed={<Legend x="10" y="10" categories={legend} />}
-          >
+          //unzoomed={<Legend x="10" y="10" categories={legend} />}
+        >
 
-          <g ref={svg => this.chartRef = svg}></g>
+          <g ref={g => this.chartRef = g}></g>
 
         </GlobalZoomableSvg>
       </ChartContainer>
     );
+  }
+
+  // render is called while zooming, so this has to be separated from render
+  // is called als callback from props changing
+  createChart() {
+    this.chartSettings = {};
+    // Specify the chart’s dimensions.
+    this.chartSettings.width = 2000;
+    this.chartSettings.height = this.chartSettings.width;
+    this.chartSettings.center_x = this.chartSettings.width * 0.5;
+    this.chartSettings.center_y = this.chartSettings.height * 0.59;
+    this.chartSettings.radius = Math.min(this.chartSettings.width, this.chartSettings.height) / 2 - 30;
+
+    // create a radial tree layout
+    this.chartSettings.tree = d3.tree()
+      .size([2 * Math.PI, this.chartSettings.radius])
+      .separation((a, b) => (a.parent == b.parent ? 1 : 2) / a.depth*2);
+
+    // selects the container for the chart
+    this.g = d3.select(this.chartRef)
+      .attr("width", this.chartSettings.width)
+      .attr("height", this.chartSettings.height)
+      .attr("viewBox", [-this.chartSettings.center_x, -this.chartSettings.center_y, this.chartSettings.width, this.chartSettings.height])
+      .attr("style", "width: 100%; height: auto; font: 10px sans-serif;");
+
+      // prevent creating a new group on each createChart call
+      this.linkgroup = this.g.select(".linkgroup");
+      if(this.linkgroup.empty()) {
+        this.linkgroup = this.g.append("g")
+        .classed("linkgroup", true)
+        .attr("fill", "none")
+        .attr("stroke", "#555")
+        .attr("stroke-opacity", 0.4)
+        .attr("stroke-width", 1.5);
+      }
+
+      // prevent creating a new group on each createChart call
+      this.nodegroup = this.g.select(".nodegroup");
+      if(this.nodegroup.empty()) {
+        this.nodegroup = this.g.append("g")
+        .classed("nodegroup", true)
+        .attr("stroke-linejoin", "round")
+        .attr("stroke-width", 1.5);
+      }
+
+
+      // initial update, draws the chart for the first time
+      this.update(false);
+  }
+
+  update(animate = true) {
+    // get class context into this function
+    const _this = this;
+    console.log("convertedFiles");
+    console.log(this.state.convertedFiles);
+    // sort the tree and apply the layout
+    let root = this.chartSettings.tree(d3.hierarchy(this.state.convertedFiles), d => getChildren(d));
+    console.log("root");
+    console.log(root);
+
+    let links_data = root.links();
+    let links = this.linkgroup
+      .selectAll("path")
+      // keyfunction binds data only to links which should remain
+      .data(links_data, d => d.source.data.path + d.target.data.path);
+
+    // remove the links not needed anymore after update
+    links.exit().remove();
+
+    console.log("links.exit");
+    console.log(links.exit());
+
+    console.log("links.enter");
+    console.log(links.enter());
+    links.enter()
+      .append("path")
+      .attr("d", d3.linkRadial()
+        .angle(d => d.x)
+        .radius(10));
+
+    let t = d3.transition()
+      .duration(animate ? 600 : 0)
+      .ease(d3.easeLinear);
+
+    this.linkgroup.selectAll("path")
+      .transition(t)
+      .attr("d", d3.linkRadial()
+        .angle(d => d.x)
+        .radius(d => d.y));
+
+
+    let nodes_data = root.descendants();
+    console.log("nodes_data");
+    console.log(nodes_data);
+    console.log(root.descendants());
+    
+    console.log("test");
+    console.log(this.nodegroup.selectAll("g"));
+
+    let nodes = this.nodegroup
+      .selectAll("g")
+      .data(nodes_data, function (d) {
+        return d.data.path;
+      });
+    
+    console.log("nodes");
+    console.log(nodes);
+
+    // remove dom elements without data attached after updating
+    nodes.exit().remove();
+    console.log("nodes exit removd");
+    console.log(nodes);
+
+    // nodes that have to be drawn
+    let newnodes = nodes
+      .enter().append("g");
+
+    console.log("newnodes");
+    console.log(newnodes);
+
+    let allnodes = animate ? this.nodegroup.selectAll("g").transition(t) : this.nodegroup.selectAll("g");
+    allnodes.attr("transform", d => `
+         rotate(${d.x * 180 / Math.PI - 90})
+         translate(${d.y},0)`);
+    
+    newnodes.append("circle")
+    .attr("r", d => d.children ? 6 : 3)
+      .on('mouseover', function (d) {
+        if (d.children) {
+          d3.select(this).style("cursor", "pointer")
+        }
+      })
+      .on("click", function (event, d) {
+        // switch out children, to not draw them in the next update
+        let altChildren = d.data.altChildren || [];
+        let children = d.data.children;
+        d.data.children = altChildren;
+        d.data.altChildren = children;
+        _this.update(true);
+      })
+
+    /*
+    this.nodegroup.selectAll("g circle")
+      .attr("fill", "#999")
+      .attr("r", d => d.children ? 7 : 5)
+      .on('mouseover', function (d) {
+        if (d.children) {
+          d3.select(this).style("cursor", "pointer")
+        }
+      })
+      */
+
+      // instead of just adding text to newnodes, redraw all the text
+      // resets the text orienation -> would be destroyed when collapsing nodes
+      this.nodegroup.selectAll("text").remove();
+      this.nodegroup.selectAll("g").append("text")
+      .text(d => d.data.name)
+      .attr("x", 10)
+      .attr("dy", ".31em");
+
+      this.nodegroup.selectAll("text")
+      .attr("text-anchor", d => d.x < Math.PI === !d.children ? "start" : "end")
+      .attr("transform", d => d.x >= Math.PI ? "rotate(180)" : null)
+      .attr("x", d => d.x < Math.PI === !d.children ? 10 : -10)
+      /*
+    .filter(d => d.children)
+    .clone(true).lower()
+      .attr("stroke", "white")
+      .attr("stroke-width", 1.5);
+      */
   }
 
   // needs subfiles to be named children, it does not work wth content
@@ -141,18 +261,21 @@ export default class FileEvolutionDendrogram extends React.PureComponent {
   }
 
   // taken from code hotspots, changed by giving base folder a name
-  // needs subfiles to be named children, it does not work wth content
+  // needs subfiles to be named children, it does not work with content
   convertData(data) {
     const convertedData = { name: "root", children: [] };
     for (const file of data) {
       const pathParts = file.key.split('/');
-      this.genPathObjectString(convertedData.children, pathParts, file.webUrl, file.key);
+      this.genPathObjectString(convertedData.children, pathParts, file.webUrl, file.key, "");
     }
 
     return convertedData;
   }
 
-  genPathObjectString(convertedData, pathParts, Url, Path) {
+  // traversedPath is needed to give all folders a unique path
+  // only path is not enough, since there is no way to differentiate between 
+  // two folders of the same name in a path, e.g. -> a/b/a/c/...
+  genPathObjectString(convertedData, pathParts, Url, Path, traversedPath ) {
     const currElm = pathParts.shift();
 
     if (pathParts.length === 0) {
@@ -160,12 +283,20 @@ export default class FileEvolutionDendrogram extends React.PureComponent {
     } else {
       let elem = convertedData.find((d) => d.name === currElm);
       if (elem === undefined) {
-        elem = { name: currElm, type: 'folder', children: [] };
-        this.genPathObjectString(elem.children, pathParts, Url, Path);
+        elem = { name: currElm, type: 'folder', path: this.updateTraversedPath(traversedPath, currElm),  children: [] };
+        this.genPathObjectString(elem.children, pathParts, Url, Path, this.updateTraversedPath(traversedPath, currElm));
         convertedData.push(elem);
       } else {
-        this.genPathObjectString(elem.children, pathParts, Url, Path);
+        this.genPathObjectString(elem.children, pathParts, Url, Path, this.updateTraversedPath(traversedPath, currElm));
       }
+    }
+  }
+
+  updateTraversedPath(traversedPath, currElm) {
+    if (traversedPath.length === 0) {
+      return currElm;
+    } else {
+      return traversedPath + "/" + currElm;
     }
   }
 
