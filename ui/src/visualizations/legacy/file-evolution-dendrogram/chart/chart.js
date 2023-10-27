@@ -34,12 +34,8 @@ export default class FileEvolutionDendrogram extends React.PureComponent {
       scaledY: zoom_y,
     };
 
-    console.log("this.scales");
-    console.log(this.scales);
     this.scales.x.domain([0, 928]);
     this.scales.y.domain([0, 928]);
-    console.log("this.scales.domain");
-    console.log(this.scales);
     */
 
     this.onResize = zoomUtils.onResizeFactory(0.7, 0.7);
@@ -130,18 +126,14 @@ export default class FileEvolutionDendrogram extends React.PureComponent {
 
 
       // initial update, draws the chart for the first time
-      this.update(false);
+      this.update(false, true);
   }
 
-  update(animate = true) {
+  update(animate = true, collapseOuter = false) {
     // get class context into this function
     const _this = this;
-    console.log("convertedFiles");
-    console.log(this.state.convertedFiles);
     // sort the tree and apply the layout
     let root = this.chartSettings.tree(d3.hierarchy(this.state.convertedFiles), d => getChildren(d));
-    console.log("root");
-    console.log(root);
 
     let links_data = root.links();
     let links = this.linkgroup
@@ -152,11 +144,6 @@ export default class FileEvolutionDendrogram extends React.PureComponent {
     // remove the links not needed anymore after update
     links.exit().remove();
 
-    console.log("links.exit");
-    console.log(links.exit());
-
-    console.log("links.enter");
-    console.log(links.enter());
     links.enter()
       .append("path")
       .attr("d", d3.linkRadial()
@@ -175,33 +162,19 @@ export default class FileEvolutionDendrogram extends React.PureComponent {
 
 
     let nodes_data = root.descendants();
-    console.log("nodes_data");
-    console.log(nodes_data);
-    console.log(root.descendants());
-    
-    console.log("test");
-    console.log(this.nodegroup.selectAll("g"));
 
     let nodes = this.nodegroup
       .selectAll("g")
       .data(nodes_data, function (d) {
         return d.data.path;
       });
-    
-    console.log("nodes");
-    console.log(nodes);
 
     // remove dom elements without data attached after updating
     nodes.exit().remove();
-    console.log("nodes exit removd");
-    console.log(nodes);
 
     // nodes that have to be drawn
     let newnodes = nodes
       .enter().append("g");
-
-    console.log("newnodes");
-    console.log(newnodes);
 
     let allnodes = animate ? this.nodegroup.selectAll("g").transition(t) : this.nodegroup.selectAll("g");
     allnodes.attr("transform", d => `
@@ -215,25 +188,15 @@ export default class FileEvolutionDendrogram extends React.PureComponent {
           d3.select(this).style("cursor", "pointer")
         }
       })
+      .filter(d => d.children)
       .on("click", function (event, d) {
         // switch out children, to not draw them in the next update
         let altChildren = d.data.altChildren || [];
         let children = d.data.children;
         d.data.children = altChildren;
         d.data.altChildren = children;
-        _this.update(true);
+        _this.update(true, false);
       })
-
-    /*
-    this.nodegroup.selectAll("g circle")
-      .attr("fill", "#999")
-      .attr("r", d => d.children ? 7 : 5)
-      .on('mouseover', function (d) {
-        if (d.children) {
-          d3.select(this).style("cursor", "pointer")
-        }
-      })
-      */
 
       // instead of just adding text to newnodes, redraw all the text
       // resets the text orienation -> would be destroyed when collapsing nodes
