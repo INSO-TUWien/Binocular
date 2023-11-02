@@ -7,13 +7,13 @@ import Link from './Link.js';
 const mapStateToProps = (state, ownProps) => {
   return {
     isActive: ownProps.visualization.id === state.activeVisualization,
-    children: ownProps.visualization.label
+    children: ownProps.visualization.label,
   };
 };
 
 const mapDispatchToProps = (dispatch, ownProps) => {
   return {
-    onClick: () => dispatch(switchVisualization(ownProps.visualization.id))
+    onClick: () => dispatch(switchVisualization(ownProps.visualization.id)),
   };
 };
 

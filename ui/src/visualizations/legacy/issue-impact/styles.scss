@@ -1,0 +1,124 @@
+@import '../../../../../node_modules/bulma';
+
+.chart {
+  outline: none;
+  flex: 1;
+  height: 100%;
+  width: 100%;
+}
+
+.circle {
+  fill: none;
+  stroke: $grey-lighter;
+}
+
+.issueAxis {
+  path {
+    stroke: black;
+    stroke-width: 2;
+  }
+
+  .createMarker {
+    stroke: $red;
+    fill: $red;
+  }
+
+  .closeMarker {
+    path {
+      stroke: $green;
+      fill: $green;
+    }
+  }
+}
+
+.fileAxis {
+  stroke: black;
+
+  text {
+    text-anchor: start;
+    font-size: 12px;
+    cursor: hand;
+    stroke: rgba( 50, 50, 50, 0.5 );
+    fill: rgba( 50, 50, 50, 0.5 );
+  }
+
+  text.isHighlighted {
+    stroke: black;
+    fill: black;
+  }
+
+  path {
+    fill: none;
+    stroke-width: 2;
+    stroke: black;
+  }
+
+  path.changeIndicator {
+    fill: $grey;
+    stroke-width: 0.5;
+    cursor: hand;
+  }
+}
+
+.buildAxis {
+  path.arc {
+    stroke: black;
+    stroke-width: 2;
+    fill: none;
+  }
+
+  path.arc.success {
+    stroke: $green;
+  }
+
+  path.arc.failed {
+    stroke: $red;
+  }
+
+  path.indicatorLine {
+    stroke: $grey;
+    fill: none;
+    stroke-width: 0.5;
+  }
+
+  .job {
+    fill: none;
+    stroke: $background !important;
+    stroke-width: 1 !important;
+    cursor: hand;
+  }
+
+  .job.failed {
+    fill: $red;
+  }
+
+  .job.success {
+    fill: $green;
+  }
+}
+
+.configContainer {
+  width: 100%;
+
+  form {
+    width: 100%;
+
+    .selectContainer {
+      width: 100%;
+
+      >div {
+        width: 100%;
+
+        :global(.Select-arrow) {
+          display: none;
+        }
+      }
+    }
+  }
+}
+
+.filler {
+  justify-content: center;
+  align-items: center;
+  color: $grey;
+}

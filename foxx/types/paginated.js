@@ -7,12 +7,12 @@ const db = arangodb.db;
 const PAGINATION_ARGS = {
   page: {
     description: 'Page number to get',
-    type: gql.GraphQLInt
+    type: gql.GraphQLInt,
   },
   perPage: {
     description: 'Amount of items per page',
-    type: gql.GraphQLInt
-  }
+    type: gql.GraphQLInt,
+  },
 };
 
 const paginatedTypes = {};
@@ -32,9 +32,9 @@ module.exports = function paginated(innerSchema) {
         data: getData(innerSchema, root, args, limitClause(args)),
         count: getCount(innerSchema, root, args),
         page: args.page || 1,
-        perPage: args.perPage
+        perPage: args.perPage,
       };
-    }
+    },
   };
 };
 
@@ -61,7 +61,7 @@ function getCount(innerSchema, root, args) {
     } else {
       query = {
         query: `RETURN LENGTH(${innerQuery.query})`,
-        bindVars: innerQuery.bindVars
+        bindVars: innerQuery.bindVars,
       };
     }
 
@@ -75,7 +75,7 @@ function limitClause(args) {
   }
 
   const offset = ((args.page || 1) - 1) * args.perPage;
-  let ret = `LIMIT ${offset}, ${args.perPage}`;
+  const ret = `LIMIT ${offset}, ${args.perPage}`;
 
   console.log('setting up limit', ret, offset, args);
 
@@ -90,21 +90,21 @@ function createPaginatedType(type) {
       return {
         data: {
           type: new gql.GraphQLList(type),
-          description: 'Paginated data'
+          description: 'Paginated data',
         },
         count: {
           type: gql.GraphQLInt,
-          description: 'Total amount of items'
+          description: 'Total amount of items',
         },
         page: {
           type: gql.GraphQLInt,
-          description: 'Current page'
+          description: 'Current page',
         },
         perPage: {
           type: gql.GraphQLInt,
-          description: 'Number of items per page'
-        }
+          description: 'Number of items per page',
+        },
       };
-    }
+    },
   });
 }

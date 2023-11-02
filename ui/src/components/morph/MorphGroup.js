@@ -11,16 +11,12 @@ export default class Message extends React.Component {
 
   componentWillReceiveProps(nextProps) {
     console.log('next children:', nextProps.children);
-    _.each(nextProps.children, child => {
+    _.each(nextProps.children, (child) => {
       console.log(child.props);
     });
   }
 
   render() {
-    return (
-      <g>
-        {this.props.children}
-      </g>
-    );
+    return <g>{this.props.children}</g>;
   }
 }

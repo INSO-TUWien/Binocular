@@ -20,7 +20,7 @@ export default class SearchBox extends React.Component {
       options: [],
       suggestions: [],
       selectedIndex: null,
-      isOpen: false
+      isOpen: false,
     };
 
     _.merge(this.state, this.buildSuggestions(this.state.searchText, this.state.options));
@@ -41,7 +41,7 @@ export default class SearchBox extends React.Component {
     let { selectedIndex } = this.state;
 
     const suggestions = fuzzy.filter(searchText, options || [], {
-      extract: this.props.renderOption.bind(this)
+      extract: this.props.renderOption.bind(this),
     });
 
     if (selectedIndex !== null) {
@@ -53,9 +53,9 @@ export default class SearchBox extends React.Component {
 
   render() {
     this.selectedDiv = null;
-    const suggestions = this.state.suggestions.map((r, i) =>
+    const suggestions = this.state.suggestions.map((r, i) => (
       <div
-        ref={div => {
+        ref={(div) => {
           if (i === this.state.selectedIndex) {
             this.selectedDiv = div;
           }
@@ -65,38 +65,33 @@ export default class SearchBox extends React.Component {
         onClick={() => this.select(r.original)}>
         {this.props.renderOption(r.original)}
       </div>
-    );
+    ));
 
     return (
       <div
         className={cx('control has-icons-right', {
           [styles.isOpen]: this.state.isOpen,
-          [styles.hasValue]: !!this.state.value
+          [styles.hasValue]: !!this.state.value,
         })}>
         <input
           className={cx('input')}
           type="text"
           placeholder={this.props.placeholder}
-          value={
-            this.state.value ? this.props.renderOption(this.state.value) : this.state.searchText
-          }
+          value={this.state.value ? this.props.renderOption(this.state.value) : this.state.searchText}
           onFocus={() => this.setState({ isOpen: true })}
           onBlur={() => this.cancel()}
-          onChange={e => this.search(e.target.value)}
-          onKeyDown={e => this.onKeyDown(e)}
+          onChange={(e) => this.search(e.target.value)}
+          onKeyDown={(e) => this.onKeyDown(e)}
         />
         <span className={cx('icon', 'is-small is-right', styles.icon)} onClick={() => this.clear()}>
           <i
             className={cx('fa', {
               'fa-times': !!this.state.value,
-              'fa-search': !this.state.value
+              'fa-search': !this.state.value,
             })}
           />
         </span>
-        {this.state.isOpen &&
-          <div className={cx(styles.suggestions)}>
-            {suggestions}
-          </div>}
+        {this.state.isOpen && <div className={cx(styles.suggestions)}>{suggestions}</div>}
       </div>
     );
   }
@@ -133,14 +128,11 @@ export default class SearchBox extends React.Component {
 
   select(option) {
     clearTimeout(this.cancelTimer);
-    this.setState(
-      { searchText: this.props.renderOption(option), isOpen: false, value: option },
-      () => {
-        if (this.props.onChange) {
-          this.props.onChange(option);
-        }
+    this.setState({ searchText: this.props.renderOption(option), isOpen: false, value: option }, () => {
+      if (this.props.onChange) {
+        this.props.onChange(option);
       }
-    );
+    });
   }
 
   cancel() {
@@ -170,5 +162,5 @@ SearchBox.propTypes = {
   onChange: PropTypes.func,
   options: PropTypes.arrayOf(PropTypes.object),
   placeholder: PropTypes.string,
-  search: PropTypes.func
+  search: PropTypes.func,
 };

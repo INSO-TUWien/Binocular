@@ -2,8 +2,8 @@ import styles from './icon.css';
 import cx from 'classnames';
 import PropTypes from 'prop-types';
 
-const Icon = props => {
-  let icon = `fa-${props.name}`;
+const Icon = (props) => {
+  const icon = `fa-${props.name}`;
 
   return (
     <span className={styles.icon}>
@@ -13,7 +13,7 @@ const Icon = props => {
 };
 
 Icon.propTypes = {
-  name: PropTypes.string.isRequired
+  name: PropTypes.string.isRequired,
 };
 
 export default Icon;

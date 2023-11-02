@@ -1,0 +1,89 @@
+@import '../../../../../node_modules/bulma';
+
+svg.chart {
+  flex: 1;
+  outline: none;
+  width: 100%;
+  cursor: grab;
+  cursor: -webkit-grab;
+  height: 100%;
+
+  g.commitCount {
+    path {
+      stroke: none;
+      fill: lighten($blue, 20%);
+    }
+
+    path:first-child {
+      stroke: $blue;
+    }
+
+  }
+
+  g.highlightedIssue {
+    line {
+      stroke: $grey;
+    }
+  }
+
+  line.highlightedCommit {
+    stroke-dasharray: 5,5;
+    stroke: $grey;
+  }
+
+  g.today {
+    text {
+      text-anchor: end;
+    }
+    line {
+      stroke: red;
+      stroke-dasharray: 5;
+      stroke-width: 2;
+    }
+  }
+
+  .lineMarker {
+    stroke: $grey;
+    fill: $grey;
+    stroke-width: 1.5;
+  }
+
+  .highlightedIssueLine {
+    stroke-width: 4;
+  }
+}
+
+svg.chart.panning {
+  cursor: grabbing;
+  cursor: -webkit-grabbing;
+}
+
+.grid line {
+  stroke: $grey-lighter;
+}
+
+
+.configContainer {
+  width: 100%;
+
+  form {
+    width: 100%;
+
+    .selectContainer {
+      width: 100%;
+
+      >div {
+        width: 100%;
+
+        :global(.Select-arrow) {
+          display: none;
+        }
+      }
+    }
+  }
+}
+
+.chart{
+  height: 100%;
+  width: 100%;
+}

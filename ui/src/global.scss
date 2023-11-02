@@ -1,3 +1,30 @@
 .hidden {
   display: none;
 }
+
+/* width */
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+  background: white;
+}
+
+::-webkit-scrollbar-track:hover {
+  background: #EEE;
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+  background: lightgray;
+  border-radius: 5px;
+  border: 2px solid white;
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+  background: darkgrey;
+  border: 2px solid darkgrey;
+}
