@@ -1,6 +1,8 @@
 name: Build Binocular
 
 on:
+  schedule:
+    - cron: '30 4 * * 0' # At 04:30 on Sunday, https://crontab.guru/#30_4_*_*_0
   # push:
   #   branches:
   #     - "develop"
