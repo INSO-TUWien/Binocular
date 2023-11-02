@@ -27,6 +27,7 @@ export default class DataExport extends React.Component {
       relations: {
         commits_commits: [],
         commits_files: [],
+        commits_files_stakeholders: [],
         commits_languages: [],
         commits_modules: [],
         commits_stakeholders: [],
@@ -50,7 +51,7 @@ export default class DataExport extends React.Component {
   }
 
   render() {
-    const previewTableHeader = this.state.previewTable.length > 0 ? Object.keys(this.state.previewTable[1]) : [];
+    const previewTableHeader = this.state.previewTable.length > 0 ? Object.keys(this.state.previewTable[0]) : [];
     return (
       <div className={styles.chartContainer}>
         <div className={styles.mg1}>
@@ -95,7 +96,8 @@ export default class DataExport extends React.Component {
             {Object.keys(this.state.collections).map((c) => {
               return (
                 <div key={c}>
-                  {c}: {this.state.collections[c].length}
+                  {c}: {this.state.collections[c].length}{' '}
+                  {this.state.collections[c].length > 10000 ? '(Too many Entries! Preview may crash Binocular.)' : ''}
                   <img
                     className={dataExportStyles.icon}
                     src={viewIcon}
@@ -116,7 +118,8 @@ export default class DataExport extends React.Component {
             {Object.keys(this.state.relations).map((r) => {
               return (
                 <div key={r}>
-                  {r.replace('_', '-')}: {this.state.relations[r].length}
+                  {r.replaceAll('_', '-')}: {this.state.relations[r].length}{' '}
+                  {this.state.relations[r].length > 10000 ? '(Too many Entries! Preview may crash Binocular.)' : ''}
                   <img
                     className={dataExportStyles.icon}
                     src={viewIcon}
@@ -127,7 +130,7 @@ export default class DataExport extends React.Component {
                     className={dataExportStyles.icon}
                     src={downloadIcon}
                     onClick={() => {
-                      this.download(r.replace('_', '-'), this.state.relations[r]);
+                      this.download(r.replaceAll('_', '-'), this.state.relations[r]);
                     }}></img>
                 </div>
               );
@@ -223,6 +226,7 @@ export default class DataExport extends React.Component {
 
       relations.commits_commits = database.commits_commits;
       relations.commits_files = database.commits_files;
+      relations.commits_files_stakeholders = database.commits_files_stakeholders;
       relations.commits_languages = database.commits_languages;
       relations.commits_stakeholders = database.commits_stakeholders;
       relations.issues_commits = database.issues_commits;
@@ -244,21 +248,21 @@ export default class DataExport extends React.Component {
       case 'csv':
         for (const c of Object.keys(this.state.collections)) {
           if (this.state.collections[c].length > 0) {
-            zip.file(c.replace('_', '-') + '.csv', this.convertToCSV(this.state.collections[c]));
+            zip.file(c.replaceAll('_', '-') + '.csv', this.convertToCSV(this.state.collections[c]));
           }
         }
         for (const r of Object.keys(this.state.relations)) {
           if (this.state.relations[r].length > 0) {
-            zip.file(r.replace('_', '-') + '.csv', this.convertToCSV(this.state.relations[r]));
+            zip.file(r.replaceAll('_', '-') + '.csv', this.convertToCSV(this.state.relations[r]));
           }
         }
         break;
       default:
         for (const c of Object.keys(this.state.collections)) {
-          zip.file(c.replace('_', '-') + '.json', JSON.stringify(this.state.collections[c]));
+          zip.file(c.replaceAll('_', '-') + '.json', JSON.stringify(this.state.collections[c]));
         }
         for (const r of Object.keys(this.state.relations)) {
-          zip.file(r.replace('_', '-') + '.json', JSON.stringify(this.state.relations[r]));
+          zip.file(r.replaceAll('_', '-') + '.json', JSON.stringify(this.state.relations[r]));
         }
         break;
     }
