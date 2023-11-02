@@ -25,7 +25,6 @@ const logger = createLogger({
 import newDashboard from './visualizations/dashboard';
 import dataExport from './visualizations/dataExport';
 import dashboard from './visualizations/legacy/dashboard';
-import codeOwnershipRiver from './visualizations/legacy/code-ownership-river';
 import issueImpact from './visualizations/legacy/issue-impact';
 import hotspotDials from './visualizations/legacy/hotspot-dials';
 import codeHotspots from './visualizations/legacy/code-hotspots';
@@ -44,7 +43,7 @@ import RootOffline from './components/RootOffline';
 const visualizationModules = [
   newDashboard,
   dashboard,
-  codeOwnershipRiver,
+  codeOwnership,
   issueImpact,
   distributionDials,
   hotspotDials,
@@ -57,7 +56,6 @@ const visualizationModules = [
   sprints,
   codeExpertise,
   timeSpent,
-  codeOwnership,
   dataExport,
 ];
 

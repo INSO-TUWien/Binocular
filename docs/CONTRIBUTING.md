@@ -106,17 +106,6 @@ ui
       │  │   │   └── index.js
       │  │   ├── sagas              # Sagas/Actions for the visualization
       │  │   └── styles.scss        # Styles for the visualization
-      │  ├── code-ownership-river
-      │  │  ├── chart
-      │  │  ├── config.js
-      │  │  ├── help.js
-      │  │  ├── index.js  
-      │  │   ├── reducers
-      │  │   │   ├── config.js
-      │  │   │   ├── data.js
-      │  │   │   └── index.js
-      │  │   ├── sagas
-      │  │   └── styles.scss
       │  ├── dashboard
       │  │   ├── chart             
       │  │   ├── config.js         

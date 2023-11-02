@@ -10,8 +10,8 @@ import CSSTransition from 'react-transition-group/CSSTransition';
 
 import GlobalZoomableSvg from '../../../components/svg/GlobalZoomableSvg.js';
 import OffsetGroup from '../../../components/svg/OffsetGroup.js';
-import Axis from '../code-ownership-river/chart/Axis.js';
-import CommitMarker from '../code-ownership-river/chart/CommitMarker.js';
+import Axis from './Axis.js';
+import CommitMarker from './CommitMarker.js';
 import hunkTransitions from './hunkTransitions.scss';
 import Asterisk from '../../../components/svg/Asterisk.js';
 import X from '../../../components/svg/X.js';

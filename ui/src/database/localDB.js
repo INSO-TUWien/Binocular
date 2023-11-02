@@ -175,22 +175,6 @@ export default class LocalDB {
     return Files.getOwnershipDataForFiles(db, tripleStore, files);
   }
 
-  static getCommitDataOwnershipRiver(commitSpan, significantSpan, granularity, interval, excludeMergeCommits) {
-    return Commits.getCommitDataOwnershipRiver(db, tripleStore, commitSpan, significantSpan, granularity, interval, excludeMergeCommits);
-  }
-
-  static getBuildDataOwnershipRiver(commitSpan, significantSpan, granularity, interval) {
-    return Builds.getBuildDataOwnershipRiver(db, commitSpan, significantSpan, granularity, interval);
-  }
-
-  static getIssueDataOwnershipRiver(issueSpan, significantSpan, granularity, interval) {
-    return Issues.getIssueDataOwnershipRiver(db, issueSpan, significantSpan, granularity, interval);
-  }
-
-  static getRelatedCommitDataOwnershipRiver(issue) {
-    return Issues.getRelatedCommitDataOwnershipRiver(db, tripleStore, issue);
-  }
-
   static getCommitDateHistogram(granularity, dateField, since, until) {
     return Commits.getCommitDateHistogram(db, tripleStore, granularity, dateField, since, until);
   }
