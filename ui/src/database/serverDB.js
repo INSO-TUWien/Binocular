@@ -65,10 +65,6 @@ export default class ServerDB {
     return Files.getOwnershipDataForFiles(files);
   }
 
-  static getCommitDateHistogram(granularity, dateField, since, until) {
-    return Commits.getCommitDateHistogram(granularity, dateField, since, until);
-  }
-
   static getCommitsForFiles(filenames) {
     return Commits.getCommitsForFiles(filenames, true);
   }

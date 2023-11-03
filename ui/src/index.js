@@ -26,7 +26,6 @@ import newDashboard from './visualizations/dashboard';
 import dataExport from './visualizations/dataExport';
 import dashboard from './visualizations/legacy/dashboard';
 import issueImpact from './visualizations/legacy/issue-impact';
-import hotspotDials from './visualizations/legacy/hotspot-dials';
 import codeHotspots from './visualizations/legacy/code-hotspots';
 import languageModuleRiver from './visualizations/legacy/language-module-river';
 import codeExpertise from './visualizations/code-expertise';
@@ -46,7 +45,6 @@ const visualizationModules = [
   codeOwnership,
   issueImpact,
   distributionDials,
-  hotspotDials,
   codeHotspots,
   languageModuleRiver,
   ciBuilds,

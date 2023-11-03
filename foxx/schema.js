@@ -13,7 +13,6 @@ const paginated = require('./types/paginated.js');
 const queryHelpers = require('./query-helpers.js');
 const Timestamp = require('./types/Timestamp.js');
 const Sort = require('./types/Sort.js');
-const DateHistogramGranularity = require('./types/DateHistogramGranularity.js');
 
 const commits = db._collection('commits');
 const files = db._collection('files');
@@ -21,7 +20,6 @@ const stakeholders = db._collection('stakeholders');
 const modules = db._collection('modules');
 const issues = db._collection('issues');
 const builds = db._collection('builds');
-const commitsBuilds = db._collection('commits-builds');
 const languages = db._collection('languages');
 const branches = db._collection('branches');
 
@@ -71,43 +69,6 @@ const queryType = new gql.GraphQLObjectType({
           return commits.document(args.sha);
         },
       },
-      commitDateHistogram: makeDateHistogramEndpoint(commits, 'date', {
-        args: {
-          buildFilter: {
-            type: new gql.GraphQLEnumType({
-              name: 'BuildFilter',
-              values: {
-                successful: {
-                  value: 'successful',
-                },
-                failed: {
-                  value: 'failed',
-                },
-                all: {
-                  value: 'all',
-                },
-              },
-            }),
-            description: 'Include/exclude commits that have successful builds',
-          },
-        },
-        makeFilter: (args) => {
-          if (!args.buildFilter || args.buildFilter === 'all') {
-            return aql`FILTER TRUE`;
-          }
-
-          const comparatorMap = {
-            successful: '>',
-            failed: '==',
-          };
-
-          const comp = aql.literal(comparatorMap[args.buildFilter]);
-
-          return aql`FILTER (
-            LENGTH((FOR build, edge IN INBOUND item ${commitsBuilds} FILTER (build.status == "success") RETURN 1)) ${comp} 0
-          )`;
-        },
-      }),
       files: paginated({
         type: require('./types/file.js'),
         args: {
@@ -367,7 +328,6 @@ const queryType = new gql.GraphQLObjectType({
           return q;
         },
       }),
-      issueDateHistogram: makeDateHistogramEndpoint(issues),
     };
   },
 });
@@ -375,43 +335,3 @@ const queryType = new gql.GraphQLObjectType({
 module.exports = new gql.GraphQLSchema({
   query: queryType,
 });
-
-function makeDateHistogramEndpoint(collection, dateFieldName, { makeFilter, args } = {}) {
-  const extendedArgs = Object.assign(
-    {
-      granularity: {
-        type: new gql.GraphQLNonNull(DateHistogramGranularity),
-      },
-      since: { type: Timestamp },
-      until: { type: Timestamp },
-    },
-    args
-  );
-
-  if (!dateFieldName) {
-    extendedArgs.dateField = {
-      type: new gql.GraphQLNonNull(gql.GraphQLString),
-    };
-  }
-
-  return {
-    type: require('./types/histogram.js')(gql.GraphQLInt),
-    args: extendedArgs,
-    resolve(root, args) {
-      //collect parts of the query in an array to join them in the end
-      const queryStr = [aql`FOR item IN ${collection}`];
-
-      queryStr.push(queryHelpers.addDateFilterAQL('item.' + (dateFieldName || args.dateField), '>=', args.since));
-      queryStr.push(queryHelpers.addDateFilterAQL('item.' + (dateFieldName || args.dateField), '<=', args.until));
-
-      if (makeFilter) {
-        queryStr.push(makeFilter(args));
-      }
-
-      const granularity = aql.literal(args.granularity(`item.${dateFieldName || args.dateField}`));
-      queryStr.push(aql`COLLECT category = ${granularity} WITH COUNT INTO length RETURN {category: category, count: length}`);
-
-      return db._query(aql.join(queryStr)).toArray();
-    },
-  };
-}

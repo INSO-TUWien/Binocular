@@ -6,7 +6,6 @@ import ProgressBar from './ProgressBar.js';
 
 const mapStateToProps = (state /*, ownProps*/) => {
   const dashState = state.visualizations.dashboard.state;
-  const hotState = state.visualizations.hotspotDials.state;
   const impactState = state.visualizations.issueImpact.state;
 
   return {
@@ -17,7 +16,6 @@ const mapStateToProps = (state /*, ownProps*/) => {
       state.progress.builds.processed < state.progress.builds.total ||
       state.progress.languages.processed < state.progress.languages.total ||
       dashState.data.isFetching ||
-      hotState.data.isFetching ||
       impactState.data.isFetching,
     offlineMode: state.config.offlineMode,
   };

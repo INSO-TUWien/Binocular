@@ -291,35 +291,6 @@ export default class Commits {
       );
   }
 
-  static getCommitDateHistogram(granularity, dateField, since, until) {
-    return graphQl.query(
-      `query($granularity: DateGranularity!, $dateField: String!, $since: Timestamp, $until: Timestamp) {
-           commitDateHistogram(granularity: $granularity, since: $since, until: $until) {
-             category
-             count
-           }
-           goodCommits: commitDateHistogram(granularity: $granularity, buildFilter: successful, since: $since, until: $until) {
-             category
-             count
-           }
-           badCommits: commitDateHistogram(granularity: $granularity, buildFilter: failed, since: $since, until: $until) {
-             category
-             count
-           }
-           issueDateHistogram(granularity: $granularity, dateField: $dateField, since: $since, until: $until) {
-             category
-             count
-           }
-         }`,
-      {
-        granularity: granularity,
-        dateField: dateField,
-        since: since,
-        until: until,
-      }
-    );
-  }
-
   static getCodeHotspotsChangeData(file) {
     return graphQl
       .query(

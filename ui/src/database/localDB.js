@@ -175,10 +175,6 @@ export default class LocalDB {
     return Files.getOwnershipDataForFiles(db, tripleStore, files);
   }
 
-  static getCommitDateHistogram(granularity, dateField, since, until) {
-    return Commits.getCommitDateHistogram(db, tripleStore, granularity, dateField, since, until);
-  }
-
   static issueImpactQuery(iid, since, until) {
     return Issues.issueImpactQuery(db, tripleStore, iid, since, until);
   }
