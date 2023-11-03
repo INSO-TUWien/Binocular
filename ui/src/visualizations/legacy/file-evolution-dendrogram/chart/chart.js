@@ -135,6 +135,35 @@ export default class FileEvolutionDendrogram extends React.PureComponent {
     // sort the tree and apply the layout
     let root = this.chartSettings.tree(d3.hierarchy(this.state.convertedFiles), d => getChildren(d));
 
+    // collapse outer nodes that only have leave nodes as children
+    if (collapseOuter) {
+      const leaves = root.leaves();
+      const parents = new Set();
+
+      // get all parents that have only leave nodes as children
+      for (let leaf of leaves) {
+        if (leaf.parent !== null) {
+          parents.add(leaf.parent);
+          for (let child of leaf.parent.children) {
+            if (child.children !== undefined && child.children.length > 0) {
+              parents.delete(leaf.parent);
+              break;
+            }
+          }
+        }
+      }
+
+      // collapse all children
+      for (let parent of parents) {
+        if (parent.data.children.length !== 0) {
+          let altChildren = parent.data.altChildren || [];
+          let children = parent.data.children;
+          parent.data.children = altChildren;
+          parent.data.altChildren = children;
+        }
+      }
+    } 
+
     let links_data = root.links();
     let links = this.linkgroup
       .selectAll("path")
@@ -216,6 +245,11 @@ export default class FileEvolutionDendrogram extends React.PureComponent {
       .attr("stroke", "white")
       .attr("stroke-width", 1.5);
       */
+
+     // draw the updated parents
+     if(collapseOuter) {
+      this.update(true, false)
+     }
   }
 
   // needs subfiles to be named children, it does not work wth content
