@@ -22,9 +22,8 @@ const logger = createLogger({
   collapsed: () => true,
 });
 
-import newDashboard from './visualizations/dashboard';
+import dashboard from './visualizations/dashboard';
 import dataExport from './visualizations/dataExport';
-import dashboard from './visualizations/legacy/dashboard';
 import issueImpact from './visualizations/legacy/issue-impact';
 import codeHotspots from './visualizations/legacy/code-hotspots';
 import languageModuleRiver from './visualizations/legacy/language-module-river';
@@ -40,20 +39,19 @@ import distributionDials from './visualizations/distribution-dials';
 import RootOffline from './components/RootOffline';
 
 const visualizationModules = [
-  newDashboard,
   dashboard,
   codeOwnership,
-  issueImpact,
   distributionDials,
+  sprints,
   codeHotspots,
-  languageModuleRiver,
+  codeExpertise,
+  issueImpact,
+  timeSpent,
   ciBuilds,
   issues,
   issueBreakdown,
   changes,
-  sprints,
-  codeExpertise,
-  timeSpent,
+  languageModuleRiver,
   dataExport,
 ];
 
