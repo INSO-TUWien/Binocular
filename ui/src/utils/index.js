@@ -74,6 +74,4 @@ export function emojify(str) {
   return emojifyReplace(str);
 }
 
-export { default as ClosingPathContext } from './ClosingPathContext.js';
-
 export * from './graphQl.js';

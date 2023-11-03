@@ -125,7 +125,7 @@ export default class IssueImpact extends React.PureComponent {
 
       return (
         <g key={buildKey} className={styles.buildAxis}>
-          <path d={pie} className={styles.indicatorLine} />
+          <path d={pie.toString()} className={styles.indicatorLine} />
           {jobs}
           <path d={arcData} className={cx(styles.arc, styles[build.status])} />
         </g>
@@ -176,7 +176,7 @@ export default class IssueImpact extends React.PureComponent {
             <g key={hunkKey}>
               <path
                 className={styles.changeIndicator}
-                d={pie}
+                d={pie.toString()}
                 style={{
                   fill: isHighlighted ? dark : light,
                   stroke: dark,

@@ -1,8 +1,7 @@
 'use strict';
 
 import _ from 'lodash';
-
-import { ClosingPathContext } from '../../../utils';
+import * as d3 from 'd3';
 
 export default class SemiCircleScale {
   constructor(cx, cy, radius, options) {
@@ -32,29 +31,17 @@ export default class SemiCircleScale {
   }
 
   getArcForShares(startShare, endShare, sweep = false) {
-    const startAngle = this.getAngleForShare(startShare);
-    const endAngle = this.getAngleForShare(endShare);
-    const start = this.getCoordsForAngle(startAngle);
-    const end = this.getCoordsForAngle(endAngle);
-
-    const ctx = new ClosingPathContext();
-    ctx.moveTo(start.x, -start.y);
-    ctx.arcTo(this.r, this.r, 0, startAngle - endAngle > Math.PI, sweep, end.x, end.y);
-
-    return ctx;
+    const p = d3.path();
+    p.arc(this.cx, this.cy, this.r, 2 * Math.PI - Math.PI * endShare, 2 * Math.PI - Math.PI * startShare);
+    return p;
   }
 
   getPieForShares(startShare, endShare, x1, x2) {
-    const d = new ClosingPathContext();
-    const start = this.getCoordsForShare(startShare);
-    const end = this.getCoordsForShare(endShare);
-    d.moveTo(start.x, -start.y);
-    d.lineTo(x1, this.cy);
+    const d = d3.path();
+    d.moveTo(x1, this.cy);
     d.lineTo(x2, this.cy);
-    d.lineTo(end.x, -end.y);
-
-    const closer = this.getArcForShares(endShare, startShare, true);
-    d.closeToPath(closer, false);
+    d.arc(this.cx, this.cy, this.r, 2 * Math.PI - Math.PI * endShare, 2 * Math.PI - Math.PI * startShare);
+    d.closePath();
     return d;
   }
 
