@@ -1,6 +1,6 @@
 'use strict';
 
-import {expect} from 'chai';
+import { expect } from 'chai';
 
 import fake from './helper/git/repositoryFake.js';
 import helpers from './helper/git/helpers.js';
