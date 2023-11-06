@@ -13,7 +13,7 @@ import GitLabBaseIndexerMock from './helper/gitlab/gitLabBaseIndexerMock';
 
 import OctokitMock from './helper/github/octokitMock';
 
-import GitLabITSIndexer from '../../lib/indexers/its/GitLabITSIndexer';
+import GitLabITSIndexer from './helper/gitlab/gitLabITSIndexerRewire.js';
 
 import BaseGitLabIndexer from '../../lib/indexers/BaseGitLabIndexer.js';
 

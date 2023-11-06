@@ -14,14 +14,12 @@ class GitLabBaseIndexerMock {
     };
   }
 
-  configure(config) {
+  setupGitlab() {
     this.gitlab = new GitLabMock();
-
-    this.gitlabProject = config.project;
   }
 
   getProject() {
-    return this.gitlab.getProject();
+    return new GitLabMock().getProject();
   }
 
   stop() {

@@ -1,20 +1,19 @@
 'use strict';
 
 import { expect } from 'chai';
+
 import ReporterMock from './helper/reporter/reporterMock.js';
 
 import Db from '../../lib/core/db/db.js';
 import conf from '../../lib/config.js';
 
 import ctx from '../../lib/context.js';
-import GitLabCIIndexer from '../../lib/indexers/ci/GitLabCIIndexer.js';
-import GitHubMock from './helper/github/gitHubMock.js';
-import GitHubCIIndexer from '../../lib/indexers/ci/GitHubCIIndexer.js';
+import GitLabCIIndexer from './helper/gitlab/gitLabCIIndexerRewire.js';
+import GitHubCIIndexer from './helper/github/gitHubCIIndexerRewire.js';
 
 import Build from '../../lib/models/Build.js';
-import OctokitMock from './helper/github/octokitMock.js';
 import repositoryFake from './helper/git/repositoryFake.js';
-import GitLabBaseIndexerMock from './helper/gitlab/gitLabBaseIndexerMock.js';
+import GitLabMock from './helper/gitlab/gitLabMock.js';
 
 describe('ci', function () {
   const config = conf.get();
@@ -43,6 +42,7 @@ describe('ci', function () {
       await Build.ensureCollection();
 
       const gitLabCIIndexer = new GitLabCIIndexer(repo, reporter);
+      gitLabCIIndexer.gitlab = new GitLabMock();
       await gitLabCIIndexer.configure(config);
 
       await gitLabCIIndexer.index();
@@ -51,9 +51,9 @@ describe('ci', function () {
       expect(dbBuildsCollectionData.length).to.equal(3);
       expect(dbBuildsCollectionData[0].jobs.length).to.equal(3);
       for (const i in dbBuildsCollectionData[0].jobs) {
-        expect(dbBuildsCollectionData[0].jobs[i].webUrl).to.equal('https://gitlab.com/Test/Test-Project/jobs/' + i);
+        expect(dbBuildsCollectionData[0].jobs[i].webUrl).to.equal('Test/Test-Project/-/jobs/' + i);
       }
-      expect(dbBuildsCollectionData[0].webUrl).to.equal('https://gitlab.com/Test/Test-Project/pipelines/' + dbBuildsCollectionData[0]._key);
+      expect(dbBuildsCollectionData[0].webUrl).to.equal('Test/Test-Project/pipelines/' + dbBuildsCollectionData[0]._key);
     });
   });
 
@@ -78,8 +78,6 @@ describe('ci', function () {
 
       const gitHubCIIndexer = new GitHubCIIndexer(repo, reporter);
       await gitHubCIIndexer.configure(config);
-      gitHubCIIndexer.github = new OctokitMock();
-      gitHubCIIndexer.controller = new GitHubMock();
       await gitHubCIIndexer.index();
       const dbBuildsCollectionData = await (await db.query('FOR i IN @@collection RETURN i', { '@collection': 'builds' })).all();
 
