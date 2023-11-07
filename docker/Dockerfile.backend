@@ -1,0 +1,44 @@
+ARG NODE_VERSION
+ARG BUILDPLATFORM=${BUILDPLATFORM:-amd64}
+FROM --platform=${BUILDPLATFORM} node:${NODE_VERSION}-alpine AS install
+
+# NPM ci first, as to NOT invalidate previous steps except for when package.json changes
+WORKDIR /app/binocular
+
+RUN --mount=type=bind,target=/frontend-mem-nag.sh,src=./docker/frontend-mem-nag.sh \
+  /frontend-mem-nag.sh
+
+RUN --mount=type=bind,target=./package-lock.json,src=./package-lock.json,readonly \
+  --mount=type=bind,target=./package.json,src=./package.json,readonly \
+  npm ci && \
+  npm cache clean --force
+RUN wget https://gobinaries.com/tj/node-prune --output-document - | /bin/sh && node-prune
+
+
+FROM --platform=${BUILDPLATFORM} node:${NODE_VERSION}-alpine AS builder
+ARG NPM_LINK_CMD="link"
+ENV LINK_CMD=${NPM_LINK_CMD} 
+ENV NODE_ENV=production
+ENV NODE_OPTIONS=--max_old_space_size=4096
+ENV GENERATE_SOURCEMAP=false
+
+RUN apk add git
+
+WORKDIR /app/binocular
+
+COPY --from=install --chown=node:node /app/binocular/node_modules ./node_modules
+
+COPY --chown=node:node ./cli ./cli
+COPY --chown=node:node ./lib ./lib
+COPY --chown=node:node ./services ./services
+COPY --chown=node:node ./foxx ./foxx
+COPY --chown=node:node ./binocular.js ./
+COPY --chown=node:node ./cli.js ./
+COPY --chown=node:node ./package.json ./package.json
+
+RUN npm install -g .
+
+USER node
+
+RUN git config --global --add safe.directory /app/binocular/repo
+
