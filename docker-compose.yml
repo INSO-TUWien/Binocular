@@ -1,0 +1,32 @@
+version: "3.8"
+
+services:
+  db:
+    image: ghcr.io/inso-tuwien/binocular-database:6773404196
+    container_name: binocular_db
+    restart: unless-stopped
+    ports:
+      - "8529:8529"
+
+  binocular-indexer:
+    image: binocular-backend:latest
+    depends_on:
+      - db
+    container_name: "binocular-indexer"
+    environment:
+      - DEBUG=idx*,importer*,git*,db*
+    command:
+      [
+        "node",
+        "binocular.js",
+        "--no-open",
+        "--no-server",
+        "/app/binocular/repo"
+      ]
+    volumes:
+      - type: bind
+        source: .binocularrc
+        target: /app/binocular/repo/.binocularrc
+        read_only: true
+      - ./ui/config/context.json:/app/binocular/lib/../ui/config/context.json
+      - ../graphdb-demo/test_repositories/Binocular:/app/binocular/repo
