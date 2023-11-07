@@ -4,11 +4,11 @@ import * as React from 'react';
 import * as d3 from 'd3';
 
 import styles from '../styles.scss';
-import * as _ from 'lodash';
+import _ from 'lodash';
 
 import StackedAreaChart from '../../../../components/StackedAreaChart';
-import * as moment from 'moment';
-import * as chroma from 'chroma-js';
+import moment from 'moment';
+import chroma from 'chroma-js';
 import { Author, Committer, Palette } from '../../../../types/authorTypes';
 import { Commit } from '../../../../types/commitTypes';
 

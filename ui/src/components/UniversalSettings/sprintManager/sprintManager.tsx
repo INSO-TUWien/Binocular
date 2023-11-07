@@ -4,7 +4,7 @@ import * as React from 'react';
 import styles from './sprintManager.scss';
 import DateRangeFilter from '../../DateRangeFilter/dateRangeFilter';
 import SprintDisplay from './sprintDisplay/sprintDisplay';
-import * as moment from 'moment';
+import moment from 'moment';
 import Database from '../../../database/database';
 import MilestoneList from './milestoneList/milestoneList';
 import { Sprint } from '../../../types/sprintTypes';

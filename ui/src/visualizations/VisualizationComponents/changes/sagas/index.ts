@@ -3,8 +3,8 @@
 import { fetchFactory, mapSaga, timestampedActionFactory } from '../../../../sagas/utils';
 import { select, throttle, fork, takeEvery } from 'redux-saga/effects';
 import { createAction } from 'redux-actions';
-import * as chroma from 'chroma-js';
-import * as _ from 'lodash';
+import chroma from 'chroma-js';
+import _ from 'lodash';
 import Database from '../../../../database/database';
 import { GlobalState } from '../../../../types/globalTypes';
 import { Commit } from '../../../../types/commitTypes';

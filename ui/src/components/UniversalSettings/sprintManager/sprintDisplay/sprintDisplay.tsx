@@ -1,8 +1,8 @@
 'use strict';
 
-import * as React from 'react';
+import React from 'react';
 import styles from './sprintDisplay.scss';
-import * as moment from 'moment';
+import moment from 'moment';
 import 'moment/locale/de';
 import { Sprint } from '../../../../types/sprintTypes';
 
