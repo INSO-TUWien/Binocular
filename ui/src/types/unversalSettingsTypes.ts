@@ -2,6 +2,7 @@ import { Author, Committer, Palette } from './authorTypes';
 import { DateRange } from './globalTypes';
 import { Sprint } from './sprintTypes';
 import { BoundsCommit, BoundsIssue } from './boundsTypes';
+import moment from 'moment/moment';
 
 export interface UniversalSettingsConfig {
   hideDateSettings?: boolean;
@@ -12,7 +13,7 @@ export interface UniversalSettingsConfig {
 
 export interface UniversalSettings {
   allAuthors?: Palette;
-  chartResolution: string;
+  chartResolution: moment.unitOfTime.DurationConstructor;
   chartTimeSpan: DateRange;
   excludeMergeCommits: boolean;
   mergedAuthors: Author[];

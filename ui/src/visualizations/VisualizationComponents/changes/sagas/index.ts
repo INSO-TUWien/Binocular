@@ -163,8 +163,8 @@ function getPalette(commits: Commit[], maxNumberOfColors: number, numOfCommitter
     sortable.push([key, totals[key]]);
   });
 
-  sortable.sort((a: number[], b: number[]) => {
-    return b[1] - a[1];
+  sortable.sort((a: (string | number)[], b: (string | number)[]) => {
+    return Number(b[1]) - Number(a[1]);
   });
 
   const returnPalette: Palette = {};

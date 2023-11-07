@@ -3,8 +3,28 @@
 import { connect } from 'react-redux';
 import Chart from './chart';
 import { GlobalState } from '../../../../types/globalTypes';
+import moment from 'moment/moment';
+import { Commit } from '../../../../types/commitTypes';
+import { Author, Committer, Palette } from '../../../../types/authorTypes';
 
-const mapStateToProps = (state: GlobalState) => {
+interface Props {
+  chartResolution: moment.unitOfTime.DurationConstructor;
+  commits: Commit[];
+  filteredCommits: Commit[];
+  committers: string[];
+  displayMetric: string;
+  excludeMergeCommits: boolean;
+  firstCommitTimestamp: number;
+  lastCommitTimestamp: number;
+  firstSignificantTimestamp: number;
+  lastSignificantTimestamp: number;
+  mergedAuthors: Author[];
+  otherAuthors: Committer[];
+  otherCount: number;
+  palette: Palette;
+  selectedAuthors: string[];
+}
+const mapStateToProps = (state: GlobalState): Props => {
   const changesState = state.visualizations.changes.state;
   const universalSettings = state.universalSettings;
   return {
