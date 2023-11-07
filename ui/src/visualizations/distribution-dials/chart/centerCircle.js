@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import chroma from 'chroma-js';
 import { useSelector } from 'react-redux';
-const _ = require('lodash');
+import _ from 'lodash';
 
 function CenterCircle({ radius, label, data, colors, isDataVisible }) {
   //global state
@@ -117,7 +117,7 @@ function DevLine({ devName, data, maxData, x, y, maxLength, authorColor, categor
   const devColorDark = chroma(devColor).darken().hex();
 
   let currentX = x;
-  let rects = [];
+  const rects = [];
 
   if (data.length === 1) {
     rects.push(
