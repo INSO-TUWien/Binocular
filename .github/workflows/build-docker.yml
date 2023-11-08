@@ -20,6 +20,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Setting env variables
+        id: docker_setup
         uses: ./.github/actions/docker-env/
         with:
           imageName: binocular-frontend
@@ -32,8 +33,9 @@ jobs:
           echo ${{ env.IMAGE_NAME }}:${{ github.run_id }}
           echo ${{ env.IMAGE_NAME }}:latest
           echo "##########     env     ##########"
-          echo NODE_VERSION: ${{ steps.nvmrc_node_version.outputs.NODE_VERSION }}
-          echo ${{join(steps.nvmrc_node_version.outputs.*, '\n')}}
+          echo NODE_VERSION: ${{ steps.docker_setup.nvmrc_node_version.outputs.NODE_VERSION }}
+          echo ${{join(steps.docker_setup.nvmrc_node_version.outputs.*, '\n')}}
+          echo ${{steps.docker_setup.nvmrc_node_version.outputs}}
 
       - name: Init Docker
         uses: ./.github/actions/docker-setup
@@ -42,22 +44,22 @@ jobs:
           registry_username: ${{ github.actor }}
           registry_password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build and push Docker image
-        uses: docker/build-push-action@v4
-        with:
-          context: ./
-          file: docker/Dockerfile.frontend
-          push: true
-          build-args: |
-            NODE_VERSION=${{ env.NODE_VERSION }}
-            NPM_BUILD_CMD=build:prod
-          builder: ${{ steps.buildx.outputs.name }}
-          tags: |
-            ${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
-            ${{ env.IMAGE_NAME }}:${{ github.run_id }}
-            ${{ env.IMAGE_NAME }}:latest
-          cache-from: type=local,src=/tmp/.buildx-cache
-          cache-to: type=local,dest=/tmp/.buildx-cache
+      # - name: Build and push Docker image
+      #   uses: docker/build-push-action@v4
+      #   with:
+      #     context: ./
+      #     file: docker/Dockerfile.frontend
+      #     push: true
+      #     build-args: |
+      #       NODE_VERSION=${{ env.NODE_VERSION }}
+      #       NPM_BUILD_CMD=build:prod
+      #     builder: ${{ steps.buildx.outputs.name }}
+      #     tags: |
+      #       ${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
+      #       ${{ env.IMAGE_NAME }}:${{ github.run_id }}
+      #       ${{ env.IMAGE_NAME }}:latest
+      #     cache-from: type=local,src=/tmp/.buildx-cache
+      #     cache-to: type=local,dest=/tmp/.buildx-cache
 
   build-backend:
     runs-on: ubuntu-latest
