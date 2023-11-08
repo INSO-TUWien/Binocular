@@ -13,8 +13,6 @@
     "forceConsistentCasingInFileNames": true,
     "noFallthroughCasesInSwitch": true,
     "esModuleInterop": true,
-    "lib": [
-      "ES2021.String"
-    ],
+    "lib": ["ES2021.String", "dom", "dom.iterable", "esnext"],
   },
 }
