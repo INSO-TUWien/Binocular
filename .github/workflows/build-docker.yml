@@ -49,7 +49,7 @@ jobs:
           file: docker/Dockerfile.frontend
           push: true
           build-args: |
-            NODE_VERSION=${{ env.NODE_VERSION }}
+            NODE_VERSION=${{ steps.docker_setup.outputs.nvmrc_node_version }}
             NPM_BUILD_CMD=build:prod
           builder: ${{ steps.buildx.outputs.name }}
           tags: |
