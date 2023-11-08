@@ -32,6 +32,8 @@ COPY --chown=node:node ./LICENSE ./LICENSE
 COPY --chown=node:node ./ui ./ui
 COPY --chown=node:node ./declaration.d.ts ./declaration.d.ts
 
+RUN echo "{\"repo\":{\"name\":\"TODO: remove static context.json\"}}" > /ui/config/context.json
+
 # This seems to be the most expensive step
 RUN --mount=type=bind,src=./webpack.prod.js,target=./webpack.prod.js,readonly \
     --mount=type=bind,src=./tsconfig.json,target=./tsconfig.json,readonly \
