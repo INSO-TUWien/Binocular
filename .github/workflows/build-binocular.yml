@@ -73,6 +73,9 @@ jobs:
       if: steps.cache.outputs.cache-hit != 'true'
       run: npm ci --ignore-scripts
 
+    - name: Install tsx
+      run: npm i tsx -g
+
     - name: Run binocular
       run: DEBUG=idx*,importer*,git*,db* node binocular.js --no-open --no-server
 
