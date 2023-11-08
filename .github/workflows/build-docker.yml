@@ -23,8 +23,8 @@ jobs:
         shell: bash
         run: |
           pwd
-          ls -lah ./.github/
           ls -lah ./.github/actions
+          ls -lah ./.github/actions/docker-commons
 
       - name: Setting env variables
         uses: ./.github/actions/docker-commons/action
