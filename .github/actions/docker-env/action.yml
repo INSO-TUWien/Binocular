@@ -4,6 +4,10 @@ inputs:
   imageName: 
     description: 'image name'
     default: 'No name provided'
+outputs:
+  nvmrc_node_version:
+    description: "Value of .nvmrc"
+    value: ${{ steps.nvmrc_node_version.outputs.NODE_VERSION }}
 runs:
   using: "composite"
   steps: 
