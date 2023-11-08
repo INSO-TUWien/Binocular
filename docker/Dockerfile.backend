@@ -5,13 +5,13 @@ FROM --platform=${BUILDPLATFORM} node:${NODE_VERSION}-alpine AS install
 # NPM ci first, as to NOT invalidate previous steps except for when package.json changes
 WORKDIR /app/binocular
 
-RUN --mount=type=bind,target=/frontend-mem-nag.sh,src=./docker/frontend-mem-nag.sh \
+RUN --mount=type=bind,src=./docker/frontend-mem-nag.sh,target=/frontend-mem-nag.sh \
   /frontend-mem-nag.sh
 
-RUN --mount=type=bind,target=./package-lock.json,src=./package-lock.json,readonly \
-  --mount=type=bind,target=./package.json,src=./package.json,readonly \
-  npm ci && \
-  npm cache clean --force
+RUN --mount=type=bind,src=./package-lock.json,target=./package-lock.json,readonly \
+    --mount=type=bind,src=./package.json,target=./package.json,readonly \
+    npm ci && \
+    npm cache clean --force
 RUN wget https://gobinaries.com/tj/node-prune --output-document - | /bin/sh && node-prune
 
 

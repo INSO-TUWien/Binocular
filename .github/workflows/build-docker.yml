@@ -80,3 +80,27 @@ jobs:
           echo ${{ steps.docker_setup.outputs.docker_image_name }}:latest
           echo "##########     env     ##########"
           echo NODE_VERSION: ${{ steps.docker_setup.outputs.nvmrc_node_version }}
+      
+      - name: Init Docker
+        uses: ./.github/actions/docker-setup
+        with:
+          registry_url: ${{ env.REGISTRY }}
+          registry_username: ${{ github.actor }}
+          registry_password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v4
+        with:
+          context: ./
+          file: docker/Dockerfile.backend
+          push: true
+          build-args: |
+            NODE_VERSION=${{ steps.docker_setup.outputs.nvmrc_node_version }}
+            NPM_BUILD_CMD=build:prod
+          builder: ${{ steps.buildx.outputs.name }}
+          tags: |
+            ${{ steps.docker_setup.outputs.docker_image_name }}:${{ steps.docker_setup.outputs.docker_image_tag }}
+            ${{ steps.docker_setup.outputs.docker_image_name }}:${{ github.run_id }}
+            ${{ steps.docker_setup.outputs.docker_image_name }}:latest
+          cache-from: type=local,src=/tmp/.buildx-cache
+          cache-to: type=local,dest=/tmp/.buildx-cache
