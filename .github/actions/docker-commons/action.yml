@@ -1,3 +1,5 @@
+name: "My Shared Steps"
+description: "My Shared Steps"
 inputs:
   imageName: 
     description: 'image name'
