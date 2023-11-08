@@ -12,9 +12,9 @@ env:
   IMAGE_NAMESPACE: "ghcr.io/inso-tuwien"
 
 jobs:
+  
   build-frontend:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4

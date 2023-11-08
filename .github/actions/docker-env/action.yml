@@ -1,5 +1,5 @@
-name: "My Shared Steps"
-description: "My Shared Steps"
+name: "Docker env"
+description: "Setting env variables for Docker builds"
 inputs:
   imageName: 
     description: 'image name'
