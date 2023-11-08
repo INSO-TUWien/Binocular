@@ -5,10 +5,10 @@ import { BoundsCommit, BoundsIssue } from './boundsTypes';
 import moment from 'moment/moment';
 
 export interface UniversalSettingsConfig {
-  hideDateSettings?: boolean;
-  hideGranularitySettings?: boolean;
-  hideCommitSettings?: boolean;
-  hideSprintSettings?: boolean;
+  hideDateSettings: boolean;
+  hideGranularitySettings: boolean;
+  hideCommitSettings: boolean;
+  hideSprintSettings: boolean;
 }
 
 export interface UniversalSettings {
@@ -20,8 +20,8 @@ export interface UniversalSettings {
   otherAuthors: Committer[];
   selectedAuthorsGlobal: string[];
   sprints: Sprint[];
-  universalSettingsData?: { data: UniversalSettingsData; isFetching: boolean; receivedAt: any };
-  initialized?: boolean;
+  universalSettingsData?: { data: UniversalSettingsData; isFetching: boolean; receivedAt: any } | undefined;
+  initialized: boolean;
 }
 
 export interface UniversalSettingsData {

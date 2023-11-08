@@ -3,8 +3,8 @@ import styles from './dateRangeFilter.scss';
 import { DateRange } from '../../types/globalTypes';
 
 interface Props {
-  from: string;
-  to: string;
+  from: string | undefined;
+  to: string | undefined;
   type?: string;
   onDateChanged: (newDateRange: DateRange) => void;
 }

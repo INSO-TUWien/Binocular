@@ -76,12 +76,12 @@ export default handleActions(
 );
 
 function updateLocalStorage(key: string, value: any): UniversalSettings {
-  let currConfig: UniversalSettings = undefined;
+  let currConfig: UniversalSettings;
   if (localStorage.getItem(ctx.repo.name + '-UniversalSettings') === null) {
     currConfig = defaultConfig;
   } else {
     try {
-      currConfig = JSON.parse(localStorage.getItem(ctx.repo.name + '-UniversalSettings'));
+      currConfig = JSON.parse(<string>localStorage.getItem(ctx.repo.name + '-UniversalSettings'));
     } catch (e) {
       currConfig = defaultConfig;
     }
@@ -98,12 +98,12 @@ function updateLocalStorage(key: string, value: any): UniversalSettings {
 }
 
 function getLocalStorage(): UniversalSettings {
-  let currConfig: UniversalSettings = undefined;
+  let currConfig: UniversalSettings;
   if (localStorage.getItem(ctx.repo.name + '-UniversalSettings') === null) {
     currConfig = defaultConfig;
   } else {
     try {
-      currConfig = JSON.parse(localStorage.getItem(ctx.repo.name + '-UniversalSettings'));
+      currConfig = JSON.parse(<string>localStorage.getItem(ctx.repo.name + '-UniversalSettings'));
       if (currConfig.initialized === undefined || currConfig.initialized === false) {
         selectAllAuthors(currConfig);
         currConfig.initialized = true;

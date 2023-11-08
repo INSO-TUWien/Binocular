@@ -12,6 +12,6 @@ export interface GlobalState {
 }
 
 export interface DateRange {
-  from?: string;
-  to?: string;
+  from: string | undefined;
+  to: string | undefined;
 }

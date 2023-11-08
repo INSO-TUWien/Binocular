@@ -73,6 +73,7 @@ function CenterCircle({ radius, label, data, colors, isDataVisible }) {
       sortedData.map((d, i) => {
         return (
           <DevLine
+            key={'devLine' + i}
             devName={d.name}
             data={d.data}
             maxData={max}
@@ -91,6 +92,7 @@ function CenterCircle({ radius, label, data, colors, isDataVisible }) {
       result = result.slice(0, maxLines);
       result.push(
         <CenteredText
+          key={'centeredText'}
           text="..."
           x={upperLeftCorner.x + (upperRightCorner.x - upperLeftCorner.x) / 2}
           y={upperLeftCorner.y + (maxLines + 1.5) * linespacing}
@@ -130,6 +132,7 @@ function DevLine({ devName, data, maxData, x, y, maxLength, authorColor, categor
         rx={2}
         ry={2}
         id={`${devName}_rect`}
+        key={`${devName}_rect`}
       />
     );
   } else {

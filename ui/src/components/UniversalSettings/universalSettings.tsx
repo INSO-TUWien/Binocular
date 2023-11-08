@@ -28,29 +28,29 @@ interface Props {
 
 export default (props: Props) => {
   //config
-  const hideDateSettings = props.universalSettingsConfig.hideDateSettings === true;
-  const hideGranularitySettings = props.universalSettingsConfig.hideGranularitySettings === true;
-  const hideCommitSettings = props.universalSettingsConfig.hideCommitSettings === true;
-  const hideSprintSettings = props.universalSettingsConfig.hideSprintSettings === true;
+  const hideDateSettings = props.universalSettingsConfig.hideDateSettings;
+  const hideGranularitySettings = props.universalSettingsConfig.hideGranularitySettings;
+  const hideCommitSettings = props.universalSettingsConfig.hideCommitSettings;
+  const hideSprintSettings = props.universalSettingsConfig.hideSprintSettings;
 
   //global state
 
   const universalSettings: UniversalSettings = useSelector((state: GlobalState) => state.universalSettings);
   const chartResolution = universalSettings.chartResolution;
-  const firstCommit = universalSettings.universalSettingsData.data.firstCommit;
-  const lastCommit = universalSettings.universalSettingsData.data.lastCommit;
-  const committers = universalSettings.universalSettingsData.data.committers;
-  const palette = universalSettings.universalSettingsData.data.palette;
-  const firstSignificantTimestamp = universalSettings.universalSettingsData.data.firstSignificantTimestamp;
-  const lastSignificantTimestamp = universalSettings.universalSettingsData.data.lastSignificantTimestamp;
+  const firstCommit = universalSettings.universalSettingsData?.data.firstCommit;
+  const lastCommit = universalSettings.universalSettingsData?.data.lastCommit;
+  const committers = universalSettings.universalSettingsData?.data.committers;
+  const palette = universalSettings.universalSettingsData?.data.palette;
+  const firstSignificantTimestamp = universalSettings.universalSettingsData?.data.firstSignificantTimestamp;
+  const lastSignificantTimestamp = universalSettings.universalSettingsData?.data.lastSignificantTimestamp;
   const excludeMergeCommits = universalSettings.excludeMergeCommits;
   const mergedAuthorListGlobal = universalSettings.mergedAuthors;
   const otherAuthorListGlobal = universalSettings.otherAuthors;
 
-  let firstDisplayDate: string;
-  let lastDisplayDate: string;
-  let selectedAuthors: string[];
-  let otherAuthorsGlobal: Committer[];
+  let firstDisplayDate: string | undefined;
+  let lastDisplayDate: string | undefined;
+  let selectedAuthors: string[] = [];
+  let otherAuthorsGlobal: Committer[] = [];
   let sprints: Sprint[] = [];
 
   if (universalSettings.chartTimeSpan.from === undefined) {
@@ -88,13 +88,14 @@ export default (props: Props) => {
 
   //local state
   const [showAuthorMerge, setShowAuthorMerge] = React.useState(false);
-  const [mergedAuthorList, setMergedAuthorListLocal] = React.useState([]);
-  const [otherAuthors, setOtherAuthors] = React.useState([]);
+  const [mergedAuthorList, setMergedAuthorListLocal] = React.useState<Author[]>([]);
+  const [otherAuthors, setOtherAuthors] = React.useState<Committer[]>([]);
   const [showSprintManager, setShowSprintManager] = React.useState(false);
 
   //set local state when global state changes
   React.useEffect(() => {
     setOtherAuthors(otherAuthorsGlobal);
+    return;
   }, [otherAuthorsGlobal]);
 
   React.useEffect(() => {
@@ -118,7 +119,10 @@ export default (props: Props) => {
     }
   }, [mergedAuthorListGlobal, otherAuthorListGlobal, committers]);
 
-  const generateCommitterList = (committers: string[], palette: Palette): Author[] => {
+  const generateCommitterList = (committers: string[], palette: Palette | undefined): Author[] => {
+    if (!palette) {
+      return [];
+    }
     const committerList: Author[] = [];
     for (const committer of committers) {
       committerList.push({
@@ -147,6 +151,10 @@ export default (props: Props) => {
       String(date.getSeconds()).padStart(2, '0')
     );
   };
+
+  if (!committers || !palette) {
+    return <div></div>;
+  }
 
   return (
     <div className={styles.universalSettings}>
@@ -216,6 +224,9 @@ export default (props: Props) => {
             <button
               className="button"
               onClick={() => {
+                if (!firstSignificantTimestamp || !lastSignificantTimestamp) {
+                  return;
+                }
                 const defaultTimeSpan = {
                   from: timestampToDateTimeString(firstSignificantTimestamp),
                   to: timestampToDateTimeString(lastSignificantTimestamp),

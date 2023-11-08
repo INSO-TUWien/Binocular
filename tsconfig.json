@@ -10,7 +10,6 @@
     "allowSyntheticDefaultImports": true,
     "strict": true,
     "noImplicitThis": false,
-    "strictNullChecks":false,
     "forceConsistentCasingInFileNames": true,
     "noFallthroughCasesInSwitch": true,
     "esModuleInterop": true,

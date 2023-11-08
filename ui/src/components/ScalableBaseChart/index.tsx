@@ -35,7 +35,7 @@ interface Props {
   keys: string[];
   order: string[];
   paddings: { top: number; left: number; bottom: number; right: number };
-  palette: Palette;
+  palette: Palette | undefined;
   resolution: string;
   xAxisCenter: boolean;
   yDims: number[];
@@ -58,8 +58,8 @@ interface State {
 
 export default class ScalableBaseChart extends React.Component<Props, State> {
   protected styles: any;
-  private svgRef: SVGSVGElement;
-  private tooltipRef: HTMLDivElement;
+  private svgRef: SVGSVGElement | null | undefined;
+  private tooltipRef: HTMLDivElement | null | undefined;
   constructor(props: any, styles: any) {
     super(props);
 
@@ -238,7 +238,7 @@ export default class ScalableBaseChart extends React.Component<Props, State> {
   visualizeData() {
     const { stackedData, data } = this.state.data;
     // cannot proceed without data
-    if (!data || !stackedData) {
+    if (!data || !stackedData || !this.svgRef) {
       return;
     }
 
@@ -323,6 +323,9 @@ export default class ScalableBaseChart extends React.Component<Props, State> {
    * @returns {*}
    */
   getColor(d: any) {
+    if (!this.props.palette) {
+      return '#000000';
+    }
     return this.props.palette[this.getBrushId(d)];
   }
 
@@ -343,6 +346,9 @@ export default class ScalableBaseChart extends React.Component<Props, State> {
   drawChart(svg: any, area: any, brush: any, yScale: any, scales: any, height: any, width: any, paddings: any) {
     const brushArea = svg.append('g');
 
+    if (!this.tooltipRef) {
+      return { brushArea: undefined, axes: { x: undefined, y: undefined } };
+    }
     const tooltip = d3.select(this.tooltipRef);
 
     this.setBrushArea(brushArea.append('g'), brush, area, tooltip, svg, scales);

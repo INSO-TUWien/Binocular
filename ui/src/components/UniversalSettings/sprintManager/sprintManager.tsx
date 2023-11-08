@@ -20,12 +20,16 @@ interface Props {
 export default (props: Props) => {
   const [sprints, setSprints] = React.useState(props.sprints);
 
-  const [newSprintToAdd, setNewSprintToAdd] = React.useState({
+  const [newSprintToAdd, setNewSprintToAdd] = React.useState<{ name: string; from: string | undefined; to: string | undefined }>({
     name: 'Sprint' + (sprints.length + 1),
     from: undefined,
     to: undefined,
   });
-  const [recursiveSprints, setRecursiveSprints] = React.useState({
+  const [recursiveSprints, setRecursiveSprints] = React.useState<{
+    amount: number;
+    sprintLength: number;
+    startDateTime: string | undefined;
+  }>({
     amount: 1,
     sprintLength: 1,
     startDateTime: undefined,
@@ -176,15 +180,15 @@ export default (props: Props) => {
                   onClick={() => {
                     let falseInput = false;
                     if (newSprintToAdd.from === undefined || newSprintToAdd.to === undefined) {
-                      document.getElementById('newSprintToAddDateInput').classList.remove(styles.wrongInput);
-                      document.getElementById('newSprintToAddNameInput').offsetWidth;
-                      document.getElementById('newSprintToAddDateInput').classList.add(styles.wrongInput);
+                      document.getElementById('newSprintToAddDateInput')?.classList.remove(styles.wrongInput);
+                      document.getElementById('newSprintToAddNameInput')?.offsetWidth;
+                      document.getElementById('newSprintToAddDateInput')?.classList.add(styles.wrongInput);
                       falseInput = true;
                     }
                     if (newSprintToAdd.name.length === 0) {
-                      document.getElementById('newSprintToAddNameInput').classList.remove(styles.wrongInput);
-                      document.getElementById('newSprintToAddNameInput').offsetWidth;
-                      document.getElementById('newSprintToAddNameInput').classList.add(styles.wrongInput);
+                      document.getElementById('newSprintToAddNameInput')?.classList.remove(styles.wrongInput);
+                      document.getElementById('newSprintToAddNameInput')?.offsetWidth;
+                      document.getElementById('newSprintToAddNameInput')?.classList.add(styles.wrongInput);
                       falseInput = true;
                     }
                     if (falseInput) {
@@ -247,21 +251,21 @@ export default (props: Props) => {
                   onClick={() => {
                     let falseInput = false;
                     if (recursiveSprints.startDateTime === undefined) {
-                      document.getElementById('recursivelyAddSprintsStartDateInput').classList.remove(styles.wrongInput);
-                      document.getElementById('recursivelyAddSprintsStartDateInput').offsetWidth;
-                      document.getElementById('recursivelyAddSprintsStartDateInput').classList.add(styles.wrongInput);
+                      document.getElementById('recursivelyAddSprintsStartDateInput')?.classList.remove(styles.wrongInput);
+                      document.getElementById('recursivelyAddSprintsStartDateInput')?.offsetWidth;
+                      document.getElementById('recursivelyAddSprintsStartDateInput')?.classList.add(styles.wrongInput);
                       falseInput = true;
                     }
                     if (isNaN(recursiveSprints.amount)) {
-                      document.getElementById('recursivelyAddSprintsSprintAmountInput').classList.remove(styles.wrongInput);
-                      document.getElementById('recursivelyAddSprintsSprintAmountInput').offsetWidth;
-                      document.getElementById('recursivelyAddSprintsSprintAmountInput').classList.add(styles.wrongInput);
+                      document.getElementById('recursivelyAddSprintsSprintAmountInput')?.classList.remove(styles.wrongInput);
+                      document.getElementById('recursivelyAddSprintsSprintAmountInput')?.offsetWidth;
+                      document.getElementById('recursivelyAddSprintsSprintAmountInput')?.classList.add(styles.wrongInput);
                       falseInput = true;
                     }
                     if (isNaN(recursiveSprints.sprintLength)) {
-                      document.getElementById('recursivelyAddSprintsSprintLengthInput').classList.remove(styles.wrongInput);
-                      document.getElementById('recursivelyAddSprintsSprintLengthInput').offsetWidth;
-                      document.getElementById('recursivelyAddSprintsSprintLengthInput').classList.add(styles.wrongInput);
+                      document.getElementById('recursivelyAddSprintsSprintLengthInput')?.classList.remove(styles.wrongInput);
+                      document.getElementById('recursivelyAddSprintsSprintLengthInput')?.offsetWidth;
+                      document.getElementById('recursivelyAddSprintsSprintLengthInput')?.classList.add(styles.wrongInput);
                       falseInput = true;
                     }
                     if (falseInput) {

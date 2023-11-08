@@ -1,9 +1,9 @@
 export interface Bounds {
-  firstCommit?: BoundsCommit;
-  lastCommit?: BoundsCommit;
-  committers?: string[];
-  firstIssue?: BoundsIssue;
-  lastIssue?: BoundsIssue;
+  firstCommit: BoundsCommit;
+  lastCommit: BoundsCommit;
+  committers: string[];
+  firstIssue: BoundsIssue;
+  lastIssue: BoundsIssue;
 }
 
 export interface BoundsCommit {

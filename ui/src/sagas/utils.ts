@@ -6,7 +6,7 @@ import { call, put } from 'redux-saga/effects';
 export function fetchFactory(fn: any, requestActionCreator: any, receiveActionCreator: any, errorActionCreator: any): any {
   return function* (...args: any[]) {
     yield put(requestActionCreator());
-    let result: { [key: string]: any } = null;
+    let result: { [key: string]: any } | null = null;
     try {
       result = yield call(fn, ...args);
       yield put(receiveActionCreator(result));
