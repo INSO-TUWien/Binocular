@@ -2,7 +2,7 @@
 
 import { connect } from 'react-redux';
 import { Tooltip } from 'react-tippy';
-import TabCombo from '../../../components/TabCombo/tabCombo.js';
+import TabCombo from '../../../components/TabCombo';
 
 import { setCategory, setSplitCommits, setIssueField } from './sagas';
 

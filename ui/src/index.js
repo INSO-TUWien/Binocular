@@ -81,7 +81,7 @@ Database.checkBackendConnection().then((connection) => {
     const app = makeAppReducer(visualizationModules);
 
     const socket = io({ path: '/wsapi' });
-    const socketIo = createSocketIoMiddleware(socket, 'api/');
+    const socketIo = createSocketIoMiddleware.default(socket, 'api/');
 
     const store = createStore(
       app,
@@ -101,9 +101,9 @@ Database.checkBackendConnection().then((connection) => {
     saga.run(root);
 
     rootContainer.render(<Root store={store} />);
-    if (module.hot) {
-      module.hot.accept('./components/Root', () => {
-        const NewRoot = require('./components/Root').default;
+    if (import.meta.webpackHot) {
+      import.meta.webpackHot.accept('./components/Root', () => {
+        const NewRoot = Root.default;
         rootContainer.render(<NewRoot store={store} />);
       });
     }
@@ -129,9 +129,9 @@ Database.checkBackendConnection().then((connection) => {
     saga.run(root);
 
     rootContainer.render(<RootOffline store={store} />);
-    if (module.hot) {
-      module.hot.accept('./components/Root', () => {
-        const NewRoot = require('./components/Root').default;
+    if (import.meta.webpackHot) {
+      import.meta.webpackHot.accept('./components/Root', () => {
+        const NewRoot = Root.default;
         rootContainer.render(<NewRoot store={store} />);
       });
     }

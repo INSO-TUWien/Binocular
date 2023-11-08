@@ -1,7 +1,7 @@
 'use strict';
 
-import React, { useEffect, useState } from 'react';
-import { connect, useSelector } from 'react-redux';
+import React from 'react';
+import { useSelector } from 'react-redux';
 import styles from './styles.scss';
 import visualizationRegistry from './visualizationRegistry';
 

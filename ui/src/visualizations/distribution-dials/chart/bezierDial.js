@@ -48,7 +48,7 @@ function BezierDial({ label, innerRad, outerRad, data, color, onHoverData, color
 
     //get the aggregated data for each bucket and which author contributed the most for each bucket
     for (const bucket of data) {
-      let bucketVal = bucket.reduce((prev, curr) => prev + curr.data, 0);
+      const bucketVal = bucket.reduce((prev, curr) => prev + curr.data, 0);
       let localMax = 0;
       let localMaxAuthor = '';
 
@@ -79,7 +79,7 @@ function BezierDial({ label, innerRad, outerRad, data, color, onHoverData, color
       points.push({ x: coordinates[0], y: coordinates[1] });
 
       //circles that indicate the data point
-      circles.push(<circle cx={coordinates[0]} cy={coordinates[1]} r={3} stroke="DarkGray" fill="none" />);
+      circles.push(<circle key={'circle' + i} cx={coordinates[0]} cy={coordinates[1]} r={3} stroke="DarkGray" fill="none" />);
 
       //start- and end angles for this bucket
       const startAngle = getAngle(i / bucketsNum);

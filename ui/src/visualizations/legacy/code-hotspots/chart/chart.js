@@ -139,8 +139,6 @@ export default class CodeHotspots extends React.PureComponent {
     this.setState({ path: path, branch: branch, fileURL: fileURL });
   }
 
-  componentDidMount() {}
-
   render() {
     //console.log(this.state.checkedOutBranch);
     if (this.prevMode !== this.state.mode || this.state.path !== this.prevPath) {

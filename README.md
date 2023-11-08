@@ -15,7 +15,7 @@ via a web-interface.
 
 ## Dependencies
 
-* node.js 18 LTS
+* node.js 20 LTS
 * ArangoDB (tested with 3.11.3)
 
 ## Installation
@@ -146,7 +146,7 @@ happens because to build the frontend it needs an export of the db to
 build so that it can fall back to run without the backend. This
 is necessary when binocular gets executed within a GitLab
 pipeline/GitHub action. Those errors aren't a problem because when
-you execute Binocular for the first time and the indexer are finished it
+you execute Binocular for the first time and the indexers are finished, it
 will create the db export by itself and place it into the correct
 folder. After the exported JSON files of the db are available, it is
 possible to build an offline executable version of Binocular by
@@ -154,7 +154,7 @@ executing the command
 ``` shell
 npm run build
 ```
-This will create a html and js file in the dist folder that can be
+This will create an html and js file in the dist folder that can be
 opened without the backend running. It is also possible
 to place the exported JSON files of a different mining job under `./ui/db_export/` and build the frontend. (not
 all features will be available in the offline build)
@@ -162,6 +162,12 @@ all features will be available in the offline build)
 For more information check `binocular -h`
 
 ## Contributing
+
+**:warning:Binocular is currently in a transition state from javascript to typescript.
+Although it is compatible with both javascript and typescript components, new visualizations
+should be implemented in typescript.
+Please refer to the change visualization/visualization Component
+if you are unsure how to implement a visualization in typescript.:warning:**
 
 For an explanation of Binocular's architecture, please see the [Contribution
 guidelines for this project](docs/CONTRIBUTING.md)

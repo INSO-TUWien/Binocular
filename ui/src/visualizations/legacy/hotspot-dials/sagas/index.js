@@ -5,7 +5,7 @@ import { select, takeEvery, fork, throttle } from 'redux-saga/effects';
 import _ from 'lodash';
 import moment from 'moment';
 
-import { fetchFactory, timestampedActionFactory, mapSaga } from '../../../../sagas/utils.js';
+import { fetchFactory, timestampedActionFactory, mapSaga } from '../../../../sagas/utils.ts';
 import Database from '../../../../database/database';
 
 export const setCategory = createAction('SET_CATEGORY');

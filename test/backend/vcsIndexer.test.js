@@ -1,33 +1,31 @@
 'use strict';
 
-const chai = require('chai');
+import { expect } from 'chai';
 
-const fake = require('./helper/git/repositoryFake.js');
-const helpers = require('./helper/git/helpers.js');
-const GatewayMock = require('./helper/gateway/gatewayMock');
-const ReporterMock = require('./helper/reporter/reporterMock');
+import fake from './helper/git/repositoryFake.js';
+import helpers from './helper/git/helpers.js';
+import GatewayMock from './helper/gateway/gatewayMock';
+import ReporterMock from './helper/reporter/reporterMock';
 
-const Db = require('../../lib/core/db/db');
-const Commit = require('../../lib/models/Commit');
-const Hunk = require('../../lib/models/Hunk');
-const File = require('../../lib/models/File');
-const Language = require('../../lib/models/Language');
-const LanguageFileConnection = require('../../lib/models/LanguageFileConnection');
-const Branch = require('../../lib/models/Branch');
-const Module = require('../../lib/models/Module');
-const ModuleFileConnection = require('../../lib/models/ModuleFileConnection');
-const CommitModuleConnection = require('../../lib/models/CommitModuleConnection');
-const BranchFileConnection = require('../../lib/models/BranchFileConnection');
-const ModuleModuleConnection = require('../../lib/models/ModuleModuleConnection');
-const CommitFileStakeholderConnection = require('../../lib/models/CommitFileStakeholderConnection');
+import Db from '../../lib/core/db/db';
+import Commit from '../../lib/models/Commit';
+import Hunk from '../../lib/models/Hunk';
+import File from '../../lib/models/File';
+import Language from '../../lib/models/Language';
+import LanguageFileConnection from '../../lib/models/LanguageFileConnection';
+import Branch from '../../lib/models/Branch';
+import Module from '../../lib/models/Module';
+import ModuleFileConnection from '../../lib/models/ModuleFileConnection';
+import CommitModuleConnection from '../../lib/models/CommitModuleConnection';
+import BranchFileConnection from '../../lib/models/BranchFileConnection';
+import ModuleModuleConnection from '../../lib/models/ModuleModuleConnection';
+import CommitFileStakeholderConnection from '../../lib/models/CommitFileStakeholderConnection';
+import conf from '../../lib/config.js';
+import ctx from '../../lib/context';
+import GitHubUrlProvider from '../../lib/url-providers/GitHubUrlProvider';
 
-const config = require('../../lib/config.js').get();
-const ctx = require('../../lib/context');
-const GitHubUrlProvider = require('../../lib/url-providers/GitHubUrlProvider');
-
-const VcsIndexer = require('../../lib/indexers/vcs');
-
-const expect = chai.expect;
+import VcsIndexer from '../../lib/indexers/vcs';
+const config = conf.get();
 
 describe('vcs', function () {
   const db = new Db(config.arango);

@@ -6,7 +6,7 @@ import PouchDBAdapterMemory from 'pouchdb-adapter-memory';
 import { addHistoryToAllCommits } from '../utils';
 PouchDB.plugin(PouchDBFind);
 PouchDB.plugin(PouchDBAdapterMemory);
-const _ = require('lodash');
+import _ from 'lodash';
 
 // ###################### GENERAL SEARCH FUNCTIONS ######################
 

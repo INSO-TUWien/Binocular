@@ -3,7 +3,7 @@
 import { createAction } from 'redux-actions';
 import { select, takeEvery, fork } from 'redux-saga/effects';
 
-import { fetchFactory, timestampedActionFactory } from '../../../../sagas/utils.js';
+import { fetchFactory, timestampedActionFactory } from '../../../../sagas/utils.ts';
 import Database from '../../../../database/database';
 
 export const setActiveIssue = createAction('SET_ACTIVE_ISSUE', (i) => i);

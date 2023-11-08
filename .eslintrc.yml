@@ -5,6 +5,8 @@ extends:
   - eslint:recommended
   - prettier
   - lambdas
+  - plugin:@typescript-eslint/eslint-recommended
+  - plugin:@typescript-eslint/recommended
 parserOptions:
   ecmaVersion: 2020
   sourceType: 'module'
@@ -23,5 +25,8 @@ rules:
     - error
     - single
     - avoidEscape: true
+  '@typescript-eslint/no-var-requires': 0
+  '@typescript-eslint/no-this-alias': 0
+  prefer-rest-params: 0
 plugins:
   - prettier

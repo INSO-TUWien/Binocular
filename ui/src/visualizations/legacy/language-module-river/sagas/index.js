@@ -3,7 +3,7 @@
 import { createAction } from 'redux-actions';
 import { throttle, fork, takeEvery } from 'redux-saga/effects';
 
-import { fetchFactory, timestampedActionFactory, mapSaga } from '../../../../sagas/utils.js';
+import { fetchFactory, timestampedActionFactory, mapSaga } from '../../../../sagas/utils.ts';
 import getCommitData from './getCommitData.js';
 import getBuildData from './getBuildData.js';
 import getBounds from './getBounds.js';
