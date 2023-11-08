@@ -15,7 +15,7 @@ RUN --mount=type=bind,src=./package-lock.json,target=./package-lock.json,readonl
 # RUN wget https://gobinaries.com/tj/node-prune --output-document - | /bin/sh && node-prune
 
 FROM --platform=${BUILDPLATFORM} node:${NODE_VERSION}-alpine AS builder
-ARG NPM_BUILD_CMD="build:dev"
+ARG NPM_BUILD_CMD="build:prod"
 ENV BUILD_CMD=${NPM_BUILD_CMD} 
 ENV NODE_ENV=production
 ENV NODE_OPTIONS=--max_old_space_size=4096
@@ -33,7 +33,7 @@ COPY --chown=node:node ./ui ./ui
 COPY --chown=node:node ./declaration.d.ts ./declaration.d.ts
 
 # This seems to be the most expensive step
-RUN --mount=type=bind,src=./webpack.dev.js,target=./webpack.dev.js,readonly \
+RUN --mount=type=bind,src=./webpack.prod.js,target=./webpack.prod.js,readonly \
     --mount=type=bind,src=./tsconfig.json,target=./tsconfig.json,readonly \
     --mount=type=bind,src=./webpack.common.js,target=./webpack.common.js,readonly \
     --mount=type=bind,src=./babel.config.json,target=./babel.config.json,readonly \
@@ -48,8 +48,6 @@ COPY  --from=builder --chown=node:node /app/binocular-frontend/dist /usr/share/n
 
 # copying nginx config from local to image
 COPY nginx/nginx.conf /etc/nginx/conf.d/default.conf
-
-USER nginx
 
 # exposing internal port
 EXPOSE 80
