@@ -16,9 +16,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
       - uses: ./.github/actions/docker-commons/action
-        with:
+        with: 
           imageName: binocular-frontend
         # run: |
         #   # SHORT_SHA source: https://stackoverflow.com/questions/59810838/how-to-get-the-short-sha-for-the-github-workflow
