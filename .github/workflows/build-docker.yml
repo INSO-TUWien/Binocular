@@ -19,6 +19,12 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v3
 
+      - name: list repository
+        shell: bash
+        run: |
+          pwd
+          ls -lah .
+
       - name: Setting env variables
         uses: ./.github/actions/docker-commons/action
         with: 
