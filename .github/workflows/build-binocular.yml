@@ -1,4 +1,4 @@
-name: Build Binocular
+name: Build Offline-Binocular
 
 on:
   schedule:
