@@ -19,7 +19,7 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v3
 
-      - uses: ./.github/actions/docker-commons/action
+      - uses: ./.github/actions/docker-commons/action@latest
         with: 
           imageName: binocular-frontend
         # run: |
