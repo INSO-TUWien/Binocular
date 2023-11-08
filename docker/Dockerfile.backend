@@ -35,6 +35,7 @@ COPY --chown=node:node ./cli.js ./
 COPY --chown=node:node ./package.json ./package.json
 
 RUN npm install -g .
+RUN npm install -g tsx
 
 USER node
 
