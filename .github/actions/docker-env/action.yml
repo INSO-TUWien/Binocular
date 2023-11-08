@@ -8,22 +8,28 @@ outputs:
   nvmrc_node_version:
     description: "Value of .nvmrc"
     value: ${{ steps.nvmrc_node_version.outputs.NODE_VERSION }}
+  docker_image_name:
+    description: "Configured Image Name"
+    value: ${{ steps.docker_image_cfg.outputs.IMAGE_NAME }}
+  docker_image_tag:
+    description: "Configured Image Tag"
+    value: ${{ steps.docker_image_cfg.outputs.IMAGE_TAG }}
+
 runs:
   using: "composite"
   steps: 
-    - shell: bash
+    - id: docker_image_cfg
+      shell: bash
       run: |
         # SHORT_SHA source: https://stackoverflow.com/questions/59810838/how-to-get-the-short-sha-for-the-github-workflow
         SHORT_SHA=$(echo ${{ github.sha }} | cut -c1-8)
-        echo "SHORT_SHA=${SHORT_SHA}" >> $GITHUB_ENV
-        echo "SHORT_SHA" ${SHORT_SHA}
         #
         IMAGE_NAME="${IMAGE_NAMESPACE}/binocular-frontend"
-        echo "IMAGE_NAME=${IMAGE_NAME}" >> $GITHUB_ENV
+        echo "IMAGE_NAME=${IMAGE_NAME}" >> $GITHUB_OUTPUT
         echo "IMAGE_NAME" ${IMAGE_NAME}
         #
         IMAGE_TAG="${GITHUB_REF_NAME////_}-${SHORT_SHA}"
-        echo "IMAGE_TAG=${IMAGE_TAG}" >> $GITHUB_ENV
+        echo "IMAGE_TAG=${IMAGE_TAG}" >> $GITHUB_OUTPUT
         echo "IMAGE_TAG" ${IMAGE_TAG}
     - id: nvmrc_node_version
       shell: bash

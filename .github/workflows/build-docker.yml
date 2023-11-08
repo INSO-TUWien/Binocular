@@ -28,13 +28,12 @@ jobs:
       - name: Debug echo env variables
         run: |
           echo "########## Docker Tags ##########"
-          echo ${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
-          echo ${{ env.IMAGE_NAME }}:${GITHUB_RUN_ID}
-          echo ${{ env.IMAGE_NAME }}:${{ github.run_id }}
-          echo ${{ env.IMAGE_NAME }}:latest
+          echo ${{ steps.docker_setup.outputs.docker_image_name }}:${{ steps.docker_setup.outputs.docker_image_tag }}
+          echo ${{ steps.docker_setup.outputs.docker_image_name }}:${GITHUB_RUN_ID}
+          echo ${{ steps.docker_setup.outputs.docker_image_name }}:${{ github.run_id }}
+          echo ${{ steps.docker_setup.outputs.docker_image_name }}:latest
           echo "##########     env     ##########"
           echo NODE_VERSION: ${{ steps.docker_setup.outputs.nvmrc_node_version }}
-          echo ${{join(steps.docker_setup.outputs.*, '\n')}}
 
       - name: Init Docker
         uses: ./.github/actions/docker-setup
@@ -43,22 +42,22 @@ jobs:
           registry_username: ${{ github.actor }}
           registry_password: ${{ secrets.GITHUB_TOKEN }}
 
-      # - name: Build and push Docker image
-      #   uses: docker/build-push-action@v4
-      #   with:
-      #     context: ./
-      #     file: docker/Dockerfile.frontend
-      #     push: true
-      #     build-args: |
-      #       NODE_VERSION=${{ env.NODE_VERSION }}
-      #       NPM_BUILD_CMD=build:prod
-      #     builder: ${{ steps.buildx.outputs.name }}
-      #     tags: |
-      #       ${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
-      #       ${{ env.IMAGE_NAME }}:${{ github.run_id }}
-      #       ${{ env.IMAGE_NAME }}:latest
-      #     cache-from: type=local,src=/tmp/.buildx-cache
-      #     cache-to: type=local,dest=/tmp/.buildx-cache
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v4
+        with:
+          context: ./
+          file: docker/Dockerfile.frontend
+          push: true
+          build-args: |
+            NODE_VERSION=${{ env.NODE_VERSION }}
+            NPM_BUILD_CMD=build:prod
+          builder: ${{ steps.buildx.outputs.name }}
+          tags: |
+            ${{ steps.docker_setup.outputs.docker_image_name }}:${{ steps.docker_setup.outputs.docker_image_tag }}
+            ${{ steps.docker_setup.outputs.docker_image_name }}:${{ github.run_id }}
+            ${{ steps.docker_setup.outputs.docker_image_name }}:latest
+          cache-from: type=local,src=/tmp/.buildx-cache
+          cache-to: type=local,dest=/tmp/.buildx-cache
 
   build-backend:
     runs-on: ubuntu-latest
