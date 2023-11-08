@@ -1,9 +1,7 @@
 'use strict';
-const Paginator = require('../../../../lib/paginator');
+import Paginator from '../../../../lib/paginator.ts';
 
 class GitLabMock {
-  constructor() {}
-
   getProject() {
     return new Promise((resolve) => {
       resolve({ id: 1, path_with_namespace: 'Test/Test-Project' });
@@ -168,4 +166,4 @@ class GitLabMock {
   }
 }
 
-module.exports = GitLabMock;
+export default GitLabMock;

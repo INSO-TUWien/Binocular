@@ -5,7 +5,7 @@ import { select, throttle, fork, takeEvery } from 'redux-saga/effects';
 import _ from 'lodash';
 import moment from 'moment';
 
-import { fetchFactory, timestampedActionFactory, mapSaga } from '../../../../sagas/utils.js';
+import { fetchFactory, timestampedActionFactory, mapSaga } from '../../../../sagas/utils.ts';
 import { getChartColors } from '../../../../utils';
 import Database from '../../../../database/database';
 import fetchRelatedCommits from './fetchRelatedCommits.js';

@@ -3,7 +3,7 @@
 import { connect } from 'react-redux';
 import { setOverlay, setHighlightedIssue, setCommitAttribute } from './sagas';
 import SearchBox from '../../../components/SearchBox';
-import TabCombo from '../../../components/TabCombo/tabCombo.js';
+import TabCombo from '../../../components/TabCombo';
 import styles from './styles.scss';
 import Database from '../../../database/database';
 

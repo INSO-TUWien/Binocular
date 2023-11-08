@@ -1,38 +1,44 @@
 'use strict';
 
-const chai = require('chai');
-const proxyquire = require('proxyquire');
+import { expect } from 'chai';
+import fake from './helper/git/repositoryFake.js';
+import ReporterMock from './helper/reporter/reporterMock';
+import conf from '../../lib/config.js';
 
-const fake = require('./helper/git/repositoryFake.js');
-const ReporterMock = require('./helper/reporter/reporterMock');
+import Db from '../../lib/core/db/db';
 
-const Db = require('../../lib/core/db/db');
+import ctx from '../../lib/context';
 
-const config = require('../../lib/config.js').get();
-const ctx = require('../../lib/context');
+import GitLabBaseIndexerMock from './helper/gitlab/gitLabBaseIndexerMock';
 
-const GitLabBaseIndexerMock = require('./helper/gitlab/gitLabBaseIndexerMock');
+import OctokitMock from './helper/github/octokitMock';
 
-const OctokitMock = require('./helper/github/octokitMock');
-const GitLabITSIndexer = proxyquire('../../lib/indexers/its/GitLabITSIndexer', {
-  '../../indexers/BaseGitLabIndexer.js': GitLabBaseIndexerMock,
-});
+import GitLabITSIndexer from './helper/gitlab/gitLabITSIndexerRewire.js';
 
-const GitHubMock = require('./helper/github/gitHubMock');
-const GitHubITSIndexer = require('../../lib/indexers/its/GitHubITSIndexer');
+import BaseGitLabIndexer from '../../lib/indexers/BaseGitLabIndexer.js';
 
-const Issue = require('../../lib/models/Issue');
-const MergeRequest = require('../../lib/models/MergeRequest');
-const Stakeholder = require('../../lib/models/Stakeholder');
-const IssueStakeholderConnection = require('../../lib/models/IssueStakeholderConnection');
+import GitHubMock from './helper/github/gitHubMock';
+import GitHubITSIndexer from '../../lib/indexers/its/GitHubITSIndexer';
 
-const expect = chai.expect;
+import Issue from '../../lib/models/Issue';
+import MergeRequest from '../../lib/models/MergeRequest';
+import Stakeholder from '../../lib/models/Stakeholder';
+import IssueStakeholderConnection from '../../lib/models/IssueStakeholderConnection';
+import sinon from 'sinon';
+const config = conf.get();
 
 describe('its', function () {
   const db = new Db(config.arango);
   const reporter = new ReporterMock(['issues', 'mergeRequests']);
 
   config.token = '1234567890';
+  beforeEach(() => {
+    sinon.mock(BaseGitLabIndexer, GitLabBaseIndexerMock);
+  });
+
+  afterEach(() => {
+    sinon.restore();
+  });
 
   describe('#indexGitLab', function () {
     it('should index all GitLab issues and create all necessary db collections and connections', async function () {

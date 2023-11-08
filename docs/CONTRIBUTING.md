@@ -153,13 +153,13 @@ ui
       └── VisualizationComponents              # Small visualizaitons for use in the dashboard
          ├── changes 
          │  ├── chart              # Main chart component
-         │  ├── config.js          # Main config component (shown in the sidebar)
-         │  ├── help.js            # Component shown in the help-section
-         │  ├── index.js           # main entry point for the component, bundles everything together
+         │  ├── config.ts          # Main config component (shown in the sidebar)
+         │  ├── help.ts            # Component shown in the help-section
+         │  ├── index.ts           # main entry point for the component, bundles everything together
          │   ├── reducers           # Reducers for the visualization
-         │   │   ├── config.js      # Configuration-related reducers
-         │   │   ├── data.js        # Data-related reducers
-         │   │   └── index.js
+         │   │   ├── config.ts      # Configuration-related reducers
+         │   │   ├── data.ts        # Data-related reducers
+         │   │   └── index.ts
          │   ├── sagas              # Sagas/Actions for the visualization
          │   └── styles.scss        # Styles for the visualization
          ├── ciBuilds

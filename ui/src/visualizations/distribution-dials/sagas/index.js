@@ -2,7 +2,7 @@ import { createAction } from 'redux-actions';
 import { throttle, fork, takeEvery } from 'redux-saga/effects';
 import _ from 'lodash';
 
-import { fetchFactory, timestampedActionFactory, mapSaga } from '../../../sagas/utils.js';
+import { fetchFactory, timestampedActionFactory, mapSaga } from '../../../sagas/utils.ts';
 import { getBuilds, getCommits, getIssues } from './helper.js';
 
 export const requestDistributionDialsData = createAction('DD_REQUEST_DISTRIBUTION_DIALS_DATA');

@@ -1,6 +1,7 @@
 'use strict';
 
-const GitLabMock = require('./gitLabMock');
+import GitLabMock from './gitLabMock.js';
+
 class GitLabBaseIndexerMock {
   constructor(repo, reporter) {
     this.repo = repo;
@@ -13,14 +14,20 @@ class GitLabBaseIndexerMock {
     };
   }
 
-  configure(config) {
-    this.gitlab = new GitLabMock();
+  setupUrlProvider() {
+    this.urlProvider = {
+      getJobUrl: (id) => 'https://gitlab.com/Test/Test-Project/jobs/' + id,
+      getPipelineUrl: (id) => 'https://gitlab.com/Test/Test-Project/pipelines/' + id,
+    };
+    this.setupGitlab();
+  }
 
-    this.gitlabProject = config.project;
+  setupGitlab() {
+    this.gitlab = new GitLabMock();
   }
 
   getProject() {
-    return this.gitlab.getProject();
+    return new GitLabMock().getProject();
   }
 
   stop() {
@@ -32,4 +39,4 @@ class GitLabBaseIndexerMock {
   }
 }
 
-module.exports = GitLabBaseIndexerMock;
+export default GitLabBaseIndexerMock;

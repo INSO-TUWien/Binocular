@@ -79,4 +79,4 @@ class OctokitMock {
   }
 }
 
-module.exports = OctokitMock;
+export default OctokitMock;

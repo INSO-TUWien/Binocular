@@ -330,23 +330,28 @@ export default ({ data }) => {
     setLegend(
       layers
         .filter((l) => selectedLayers.includes(l))
-        .map((l) => {
+        .map((l, i) => {
           if (l === 'issues') {
             if (splitLayers.includes(l)) {
-              return <LegendCompact text="issues opened/closed" color={issuesColorsSplit[1]} color2={issuesColorsSplit[0]} />;
+              return (
+                <LegendCompact key={'layer' + i} text="issues opened/closed" color={issuesColorsSplit[1]} color2={issuesColorsSplit[0]} />
+              );
             } else {
-              return <LegendCompact text="issues" color={issuesColor} />;
+              return <LegendCompact key={'layer' + i} text="issues" color={issuesColor} />;
             }
           } else if (l === 'changes') {
             if (splitLayers.includes(l)) {
-              return <LegendCompact text="additions/deletions" color={changesColorsSplit[1]} color2={changesColorsSplit[0]} />;
+              return (
+                <LegendCompact key={'layer' + i} text="additions/deletions" color={changesColorsSplit[1]} color2={changesColorsSplit[0]} />
+              );
             } else {
-              return <LegendCompact text="changes" color={changesColor} />;
+              return <LegendCompact key={'layer' + i} text="changes" color={changesColor} />;
             }
           } else if (l === 'commits') {
             if (splitLayers.includes(l)) {
               return (
                 <LegendCompact
+                  key={'layer' + i}
                   text="good/neutral/bad commits"
                   color={commitsColorsSplit[2]}
                   color2={commitsColorsSplit[1]}
@@ -354,7 +359,7 @@ export default ({ data }) => {
                 />
               );
             } else {
-              return <LegendCompact text="commits" color={commitsColor} />;
+              return <LegendCompact key={'layer' + i} text="commits" color={commitsColor} />;
             }
           }
         })
@@ -364,7 +369,7 @@ export default ({ data }) => {
   return (
     <ChartContainer onResize={(evt) => onResize(evt)} className={styles.chartContainer}>
       <div className={styles.legend}>
-        <g>{legend}</g>
+        <div>{legend}</div>
       </div>
       <GlobalZoomableSvg className={styles.chart} scaleExtent={[1, 10]} onZoom={(evt) => onZoom(evt)} transform={transform}>
         <OffsetGroup dims={dimensions} transform={transform}>

@@ -4,7 +4,7 @@ import { createAction } from 'redux-actions';
 import { select, throttle, fork, takeEvery } from 'redux-saga/effects';
 import _ from 'lodash';
 
-import { fetchFactory, timestampedActionFactory, mapSaga } from '../../../../sagas/utils.js';
+import { fetchFactory, timestampedActionFactory, mapSaga } from '../../../../sagas/utils.ts';
 import getCommitData from './getCommitData.js';
 import getIssueData from './getIssueData.js';
 import getBuildData from './getBuildData.js';

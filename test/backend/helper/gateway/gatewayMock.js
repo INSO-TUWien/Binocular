@@ -1,6 +1,6 @@
 'use strict';
 
-const ServiceProviderMock = require('./serviceProviderMock');
+import ServiceProviderMock from './serviceProviderMock';
 
 class GatewayMock {
   constructor() {
@@ -12,4 +12,4 @@ class GatewayMock {
   }
 }
 
-module.exports = GatewayMock;
+export default GatewayMock;

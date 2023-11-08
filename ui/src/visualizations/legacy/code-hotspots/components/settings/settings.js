@@ -3,7 +3,7 @@ import settingsStyles from './settings.scss';
 import styles from '../../styles.scss';
 import { settings_black, settings_white } from '../../images/icons';
 import DateRangeFilter from '../../../../../components/DateRangeFilter/dateRangeFilter';
-require('bulma-switch');
+import 'bulma-switch';
 
 export default class Settings extends React.PureComponent {
   constructor(props) {

@@ -1,7 +1,7 @@
 'use strict';
 
-const _ = require('lodash');
-const inflection = require('inflection');
+import _ from 'lodash';
+import inflection from 'inflection';
 
 function ReporterMock(categories) {
   this.categories = {};
@@ -25,4 +25,4 @@ function ReporterMock(categories) {
   });
 }
 
-module.exports = ReporterMock;
+export default ReporterMock;

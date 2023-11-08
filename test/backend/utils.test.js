@@ -1,14 +1,13 @@
 'use strict';
 
-const chai = require('chai');
-const expect = chai.expect;
+import { expect } from 'chai';
 
-const config = require('../../lib/config.js').get();
+import conf from '../../lib/config.js';
+import Db from '../../lib/core/db/db';
+import TestModel from './helper/db/testModel';
 
-const Db = require('../../lib/core/db/db');
-const TestModel = require('./helper/db/testModel');
-
-const utils = require('../../lib/utils');
+import * as utils from '../../lib/utils';
+const config = conf.get();
 
 describe('utils', function () {
   const db = new Db(config.arango);
