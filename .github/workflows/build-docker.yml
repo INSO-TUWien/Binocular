@@ -63,7 +63,7 @@ jobs:
             NPM_BUILD_CMD=build:prod
           builder: ${{ steps.buildx.outputs.name }}
           tags: |
-            ${{ env.IMAGE_NAME }}:${{ env.BINOCULAR_FRONTEND_IMAGE_TAG}}
+            ${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
             ${{ env.IMAGE_NAME }}:${{ github.run_id }}
             ${{ env.IMAGE_NAME }}:latest
           cache-from: type=local,src=/tmp/.buildx-cache
