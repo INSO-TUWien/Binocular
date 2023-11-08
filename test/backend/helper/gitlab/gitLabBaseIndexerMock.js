@@ -14,6 +14,14 @@ class GitLabBaseIndexerMock {
     };
   }
 
+  setupUrlProvider() {
+    this.urlProvider = {
+      getJobUrl: (id) => 'https://gitlab.com/Test/Test-Project/jobs/' + id,
+      getPipelineUrl: (id) => 'https://gitlab.com/Test/Test-Project/pipelines/' + id,
+    };
+    this.setupGitlab();
+  }
+
   setupGitlab() {
     this.gitlab = new GitLabMock();
   }

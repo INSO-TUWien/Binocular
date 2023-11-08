@@ -51,9 +51,9 @@ describe('ci', function () {
       expect(dbBuildsCollectionData.length).to.equal(3);
       expect(dbBuildsCollectionData[0].jobs.length).to.equal(3);
       for (const i in dbBuildsCollectionData[0].jobs) {
-        expect(dbBuildsCollectionData[0].jobs[i].webUrl).to.equal('Test/Test-Project/-/jobs/' + i);
+        expect(dbBuildsCollectionData[0].jobs[i].webUrl).to.equal('https://gitlab.com/Test/Test-Project/jobs/' + i);
       }
-      expect(dbBuildsCollectionData[0].webUrl).to.equal('Test/Test-Project/pipelines/' + dbBuildsCollectionData[0]._key);
+      expect(dbBuildsCollectionData[0].webUrl).to.equal('https://gitlab.com/Test/Test-Project/pipelines/' + dbBuildsCollectionData[0]._key);
     });
   });
 

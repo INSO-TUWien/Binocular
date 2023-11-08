@@ -9,4 +9,8 @@ export default class GitHubCIIndexerMock {
   setupGithub() {
     this.controller = new GitHubMock();
   }
+
+  setupUrlProvider() {
+    this.urlProvider = {};
+  }
 }
