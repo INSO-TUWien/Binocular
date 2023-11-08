@@ -40,5 +40,5 @@ USER node
 
 RUN git config --global --add safe.directory /app/binocular/repo
 
-ENTRYPOINT ["/usr/bin/dumb-init", "--", "/entrypoint"]
-CMD []
+# ENTRYPOINT ["/usr/bin/dumb-init", "--", "/entrypoint"]
+# CMD []
