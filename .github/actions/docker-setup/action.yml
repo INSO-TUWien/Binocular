@@ -1,5 +1,17 @@
 name: "Docker Setup"
 description: "Shared Steps for setting up docker build and caching"
+
+inputs:
+  registry_url:
+    description: “URL for image registry”
+    required: true
+  registry_username:
+    description: “Username for image registry”
+    required: true
+  registry_password:
+    description: “Password for image registry”
+    required: true
+
 runs:
   using: "composite"
   steps:
@@ -7,9 +19,9 @@ runs:
       shell: bash
       uses: docker/login-action@v2
       with:
-        registry: ${{ env.REGISTRY }}
-        username: ${{ github.actor }}
-        password: ${{ secrets.GITHUB_TOKEN }}
+        registry: ${{ inputs.registry_url }}
+        username: ${{ inputs.registry_username }}
+        password: ${{ inputs.registry_password }}
 
     - name: Set up Builder Buildx
       shell: bash

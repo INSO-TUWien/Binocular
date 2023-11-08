@@ -36,6 +36,10 @@ jobs:
 
       - name: Init Docker
         uses: ./.github/actions/docker-setup
+        with:
+          registry_url: ${{ env.REGISTRY }}
+          registry_username: ${{ github.actor }}
+          registry_password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v4
