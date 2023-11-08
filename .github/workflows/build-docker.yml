@@ -39,9 +39,9 @@ jobs:
 
       - name: Echo docker tags
         run: |
-          echo ${BINOCULAR_FRONTEND_IMAGE_NAME}:${BINOCULAR_FRONTEND_IMAGE_TAG}
-          echo ${BINOCULAR_FRONTEND_IMAGE_NAME}:${GITHUB_RUN_ID}
-          echo ${BINOCULAR_FRONTEND_IMAGE_NAME}:latest
+          echo ${{ env.BINOCULAR_FRONTEND_IMAGE_NAME }}:${{ env.BINOCULAR_FRONTEND_IMAGE_TAG}}
+          echo ${{ env.BINOCULAR_FRONTEND_IMAGE_NAME }}:${{ github.GITHUB_RUN_ID }}
+          echo ${{ env.BINOCULAR_FRONTEND_IMAGE_NAME }}:latest
 
       - name: Get NODE_VERSION from .nvmrc
         run: |
