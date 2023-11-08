@@ -53,3 +53,24 @@ jobs:
             ${{ env.IMAGE_NAME }}:latest
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,dest=/tmp/.buildx-cache
+
+  build-backend:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setting env variables
+        uses: ./.github/actions/docker-env/
+        with:
+          imageName: binocular-backend
+
+      - name: Debug echo env variables
+        run: |
+          echo "########## Docker Tags ##########"
+          echo ${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
+          echo ${{ env.IMAGE_NAME }}:${GITHUB_RUN_ID}
+          echo ${{ env.IMAGE_NAME }}:${{ github.run_id }}
+          echo ${{ env.IMAGE_NAME }}:latest
+          echo "##########     env     ##########"
+          echo NODE_VERSION: ${{ env.NODE_VERSION }}
