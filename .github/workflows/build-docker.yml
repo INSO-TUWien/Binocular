@@ -1,29 +1,29 @@
 name: Docker Image CI
 
+on: push
 # on:
 #   push:
 #     branches:
 #       - develop
 #       - main
-      
+
 env:
   REGISTRY: ghcr.io
   IMAGE_NAMESPACE: "ghcr.io/inso-tuwien"
 
 jobs:
-
   build-frontend:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout Repository
-      uses: actions/checkout@v3
+      - name: Checkout Repository
+        uses: actions/checkout@v3
 
-    - name: downcase REPO
-      run: |
-        echo "REPO=${GITHUB_REPOSITORY,,}" >>${GITHUB_ENV}
-    - name: Set docker image env var
-      run: |
+      - name: downcase REPO
+        run: |
+          echo "REPO=${GITHUB_REPOSITORY,,}" >>${GITHUB_ENV}
+      - name: Set docker image env var
+        run: |
           # SHORT_SHA source: https://stackoverflow.com/questions/59810838/how-to-get-the-short-sha-for-the-github-workflow
           SHORT_SHA=$(echo ${{ github.sha }} | cut -c1-8)
           echo "SHORT_SHA=${SHORT_SHA}" >> $GITHUB_ENV
@@ -36,18 +36,18 @@ jobs:
           BINOCULAR_FRONTEND_IMAGE_TAG="arangodb${ARANGO_VERSION}-${GITHUB_REF_NAME}-${SHORT_SHA}"
           echo "BINOCULAR_FRONTEND_IMAGE_TAG=${BINOCULAR_FRONTEND_IMAGE_TAG}" >> $GITHUB_ENV
           echo "BINOCULAR_FRONTEND_IMAGE_TAG" ${BINOCULAR_FRONTEND_IMAGE_TAG}
-    
-    - name: Echo docker tags
-      run: |
-        echo ${BINOCULAR_FRONTEND_IMAGE_NAME}:${BINOCULAR_FRONTEND_IMAGE_TAG}
-        echo ${BINOCULAR_FRONTEND_IMAGE_NAME}:${GITHUB_RUN_ID}
-        echo ${BINOCULAR_FRONTEND_IMAGE_NAME}:latest
 
-    - name: Get NODE_VERSION from .nvmrc
-      run: |
-        cat .nvmrc
-        NODE_VERSION=$(cat .nvmrc | tr -cd '[:digit:].')
-        echo "NODE_VERSION=${NODE_VERSION}" >> $GITHUB_ENV
+      - name: Echo docker tags
+        run: |
+          echo ${BINOCULAR_FRONTEND_IMAGE_NAME}:${BINOCULAR_FRONTEND_IMAGE_TAG}
+          echo ${BINOCULAR_FRONTEND_IMAGE_NAME}:${GITHUB_RUN_ID}
+          echo ${BINOCULAR_FRONTEND_IMAGE_NAME}:latest
+
+      - name: Get NODE_VERSION from .nvmrc
+        run: |
+          cat .nvmrc
+          NODE_VERSION=$(cat .nvmrc | tr -cd '[:digit:].')
+          echo "NODE_VERSION=${NODE_VERSION}" >> $GITHUB_ENV
     # - name: Log in to the Container registry
     #   uses: docker/login-action@v2
     #   with:
@@ -65,7 +65,7 @@ jobs:
     #     path: /tmp/.buildx-cache
     #     key: ${{ runner.os }}-buildx-${{ github.sha }}
     #     restore-keys: ${{ runner.os }}-buildx-
-        
+
     # - name: Build and push Docker image
     #   uses: docker/build-push-action@v4
     #   with:
