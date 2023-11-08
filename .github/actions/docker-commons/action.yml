@@ -7,12 +7,7 @@ inputs:
 runs:
   using: "composite"
   steps: 
-    # - run: echo Hello ${{ inputs.imageName }}.
-    #   shell: bash
-    # - run: echo "Nice to meet you!"
-    #   shell: pwsh
-    - name: Set docker image env var
-      shell: bash
+    - shell: bash
       run: |
         # SHORT_SHA source: https://stackoverflow.com/questions/59810838/how-to-get-the-short-sha-for-the-github-workflow
         SHORT_SHA=$(echo ${{ github.sha }} | cut -c1-8)
@@ -26,3 +21,8 @@ runs:
         IMAGE_TAG="${GITHUB_REF_NAME////_}-${SHORT_SHA}"
         echo "IMAGE_TAG=${IMAGE_TAG}" >> $GITHUB_ENV
         echo "IMAGE_TAG" ${IMAGE_TAG}
+    - shell: bash
+      run: |
+        cat .nvmrc
+        NODE_VERSION=$(cat .nvmrc | tr -cd '[:digit:].')
+        echo "NODE_VERSION=${NODE_VERSION}" >> $GITHUB_ENV
