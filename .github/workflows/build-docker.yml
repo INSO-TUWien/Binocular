@@ -20,8 +20,8 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Setting env variables
-        uses: ./.github/actions/docker-commons/
-        with: 
+        uses: ./.github/actions/docker-env/
+        with:
           imageName: binocular-frontend
 
       - name: Debug echo env variables
