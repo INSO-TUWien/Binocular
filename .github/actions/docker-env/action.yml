@@ -1,7 +1,7 @@
 name: "Docker env"
 description: "Setting env variables for Docker builds"
 inputs:
-  imageName: 
+  image_name: 
     description: 'image name'
     default: 'No name provided'
 outputs:
@@ -24,7 +24,7 @@ runs:
         # SHORT_SHA source: https://stackoverflow.com/questions/59810838/how-to-get-the-short-sha-for-the-github-workflow
         SHORT_SHA=$(echo ${{ github.sha }} | cut -c1-8)
         #
-        IMAGE_NAME="${IMAGE_NAMESPACE}/binocular-frontend"
+        IMAGE_NAME="${IMAGE_NAMESPACE}/${{ inputs.image_name }}"
         echo "IMAGE_NAME=${IMAGE_NAME}" >> $GITHUB_OUTPUT
         echo "IMAGE_NAME" ${IMAGE_NAME}
         #

@@ -23,7 +23,7 @@ jobs:
         id: docker_setup
         uses: ./.github/actions/docker-env/
         with:
-          imageName: binocular-frontend
+          image_name: binocular-frontend
 
       - name: Debug echo env variables
         run: |
@@ -69,7 +69,7 @@ jobs:
         id: docker_setup
         uses: ./.github/actions/docker-env/
         with:
-          imageName: binocular-backend
+          image_name: binocular-backend
 
       - name: Debug echo env variables
         run: |
