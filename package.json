@@ -1,6 +1,6 @@
 {
   "name": "binocular",
-  "version": "1.0.0",
+  "version": "v2.0.0",
   "description": "Time-based visualizations of combined software engineering data",
   "main": "binocular.js",
   "scripts": {
