@@ -72,7 +72,7 @@ jobs:
         with:
           context: ./
           file: docker/Dockerfile.frontend
-          push: push
+          push: true
           build-args: |
             NODE_VERSION=${NODE_VERSION}
             NPM_BUILD_CMD="build:prod"
