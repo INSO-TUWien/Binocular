@@ -79,7 +79,7 @@ jobs:
           builder: ${{ steps.buildx.outputs.name }}
           tags: |
             ${{ env.BINOCULAR_FRONTEND_IMAGE_NAME }}:${{ env.BINOCULAR_FRONTEND_IMAGE_TAG}}
-            ${{ env.BINOCULAR_FRONTEND_IMAGE_NAME }}:${{GITHUB_RUN_ID}}
+            ${{ env.BINOCULAR_FRONTEND_IMAGE_NAME }}:${{ github.GITHUB_RUN_ID }}
             ${{ env.BINOCULAR_FRONTEND_IMAGE_NAME }}:latest
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,dest=/tmp/.buildx-cache
