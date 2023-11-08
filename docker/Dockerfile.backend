@@ -12,10 +12,10 @@ RUN --mount=type=bind,src=./package-lock.json,target=./package-lock.json,readonl
     --mount=type=bind,src=./package.json,target=./package.json,readonly \
     npm ci && \
     npm cache clean --force
+RUN wget https://gobinaries.com/tj/node-prune --output-document - | /bin/sh && node-prune
 
+###
 FROM --platform=${BUILDPLATFORM} node:${NODE_VERSION}-alpine AS builder
-ARG NPM_LINK_CMD="link"
-ENV LINK_CMD=${NPM_LINK_CMD} 
 ENV NODE_ENV=production
 ENV NODE_OPTIONS=--max_old_space_size=4096
 ENV GENERATE_SOURCEMAP=false
