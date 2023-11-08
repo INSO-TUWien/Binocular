@@ -19,15 +19,8 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: list repository
-        shell: bash
-        run: |
-          pwd
-          ls -lah ./.github/actions
-          ls -lah ./.github/actions/docker-commons
-
       - name: Setting env variables
-        uses: ./.github/actions/docker-commons/action
+        uses: ./.github/actions/docker-commons/
         with: 
           imageName: binocular-frontend
         # run: |
