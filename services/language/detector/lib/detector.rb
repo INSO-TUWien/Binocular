@@ -19,36 +19,32 @@ module Binocular
       @config = config
       @registration_service = registration_service
       @language_service = language_service
-      @logger = Logger.new(config.data.dig('languageService','logger', 'file'))
-      @logger.level = Logger::Severity.const_get(config.data.dig('languageService','logger', 'level'))
+      @logger = Logger.new(config.data.dig('languageService', 'logger', 'file'))
+      @logger.level = Logger::Severity.const_get(config.data.dig('languageService', 'logger', 'level'))
     end
 
     # start gateway communication and language server
     def start
       begin
-        begin
-          @registration_service.start
-          @language_service.start
-        rescue GRPC::BadStatus
-          error = $!
-          @logger.error("The GRPC call failed with the following error #{error.code} and meessage: #{error.details}")
-        end
-      rescue SystemExit, Interrupt
-        # ignored for graceful shutdown
+        @registration_service.start
+        @language_service.start
+      rescue GRPC::BadStatus
+        error = $ERROR_INFO
+        @logger.error("The GRPC call failed with the following error #{error.code} and message: #{error.details}")
       end
+    rescue SystemExit, Interrupt
+      # ignored for graceful shutdown
     end
 
     # stop all services and stops the detection service
     def stop
-      begin
-        @logger.info("stopping service...")
-        @registration_service.stop
-        @language_service.stop
-        @logger.info("service stopped!")
-      rescue GRPC::BadStatus
-        error = $!
-        @logger.warn("The GRPC call failed with the following error #{error.code} and meessage: #{error.details}")
-      end
+      @logger.info('stopping service...')
+      @registration_service.stop
+      @language_service.stop
+      @logger.info('service stopped!')
+    rescue GRPC::BadStatus
+      error = $ERROR_INFO
+      @logger.warn("The GRPC call failed with the following error #{error.code} and message: #{error.details}")
     end
   end
 end

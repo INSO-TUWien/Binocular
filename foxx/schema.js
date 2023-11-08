@@ -21,7 +21,9 @@ const stakeholders = db._collection('stakeholders');
 const modules = db._collection('modules');
 const issues = db._collection('issues');
 const builds = db._collection('builds');
+const commitsBuilds = db._collection('commits-builds');
 const languages = db._collection('languages');
+const branches = db._collection('branches');
 
 const ISSUE_NUMBER_REGEX = /^#?(\d+).*$/;
 
@@ -34,7 +36,7 @@ const queryType = new gql.GraphQLObjectType({
         args: {
           since: { type: Timestamp },
           until: { type: Timestamp },
-          sort: { type: Sort }
+          sort: { type: Sort },
         },
         query: (root, args, limit) => {
           let q = qb.for('commit').in('commits').sort('commit.date', args.sort);
@@ -45,29 +47,29 @@ const queryType = new gql.GraphQLObjectType({
           q = q.limit(limit.offset, limit.count).return('commit');
 
           return q;
-        }
+        },
       }),
       commit: {
         type: require('./types/commit.js'),
         args: {
           sha: {
             description: 'sha of the commit',
-            type: new gql.GraphQLNonNull(gql.GraphQLString)
-          }
+            type: new gql.GraphQLNonNull(gql.GraphQLString),
+          },
         },
         resolve(root, args) {
           return commits.document(args.sha);
-        }
+        },
       },
       latestCommit: {
         type: require('./types/commit.js'),
         args: {
           since: { type: Timestamp },
-          until: { type: Timestamp }
+          until: { type: Timestamp },
         },
         resolve(root, args) {
           return commits.document(args.sha);
-        }
+        },
       },
       commitDateHistogram: makeDateHistogramEndpoint(commits, 'date', {
         args: {
@@ -76,52 +78,73 @@ const queryType = new gql.GraphQLObjectType({
               name: 'BuildFilter',
               values: {
                 successful: {
-                  value: 'successful'
+                  value: 'successful',
                 },
                 failed: {
-                  value: 'failed'
+                  value: 'failed',
                 },
                 all: {
-                  value: 'all'
-                }
-              }
+                  value: 'all',
+                },
+              },
             }),
-            description: 'Include/exclude commits that have successful builds'
-          }
+            description: 'Include/exclude commits that have successful builds',
+          },
         },
-        makeFilter: args => {
+        makeFilter: (args) => {
           if (!args.buildFilter || args.buildFilter === 'all') {
-            return true;
+            return aql`FILTER TRUE`;
           }
 
           const comparatorMap = {
-            successful: 'gt',
-            failed: 'eq'
+            successful: '>',
+            failed: '==',
           };
 
-          return qb[comparatorMap[args.buildFilter]](
-            qb.LENGTH(
-              qb
-                .for('build')
-                .in('builds')
-                .filter(qb.and(qb.eq('build.sha', 'item.sha'), qb.eq('build.status', qb.str('success'))))
-                .return(1)
-            ),
-            0
-          );
-        }
+          const comp = aql.literal(comparatorMap[args.buildFilter]);
+
+          return aql`FILTER (
+            LENGTH((FOR build, edge IN INBOUND item ${commitsBuilds} FILTER (build.status == "success") RETURN 1)) ${comp} 0
+          )`;
+        },
+      }),
+      files: paginated({
+        type: require('./types/file.js'),
+        args: {
+          sort: { type: Sort },
+          paths: { type: new gql.GraphQLList(gql.GraphQLString) },
+        },
+        query: (root, args, limit) => {
+          //if the paths argument exists, only return files where the path is contained in paths
+          if (args.paths) {
+            return aql`
+            FOR file in ${files}
+              FILTER POSITION(${args.paths}, file.path)
+              SORT file.path ${args.sort}
+              ${limit}
+              RETURN file
+            `;
+          } else {
+            return aql`
+            FOR file in ${files}
+              SORT file.path ${args.sort}
+              ${limit}
+              RETURN file
+            `;
+          }
+        },
       }),
       file: {
         type: require('./types/file.js'),
         args: {
           path: {
             description: 'Path of the file',
-            type: new gql.GraphQLNonNull(gql.GraphQLString)
-          }
+            type: new gql.GraphQLNonNull(gql.GraphQLString),
+          },
         },
         resolve(root, args) {
           return files.firstExample({ path: args.path });
-        }
+        },
       },
       languages: paginated({
         type: require('./types/language'),
@@ -130,19 +153,19 @@ const queryType = new gql.GraphQLObjectType({
             IN
             ${languages}
             ${limit}
-              RETURN language`
+              RETURN language`,
       }),
       language: {
         type: require('./types/language'),
         args: {
           name: {
             description: 'name of language',
-            type: new gql.GraphQLNonNull(gql.GraphQLString)
-          }
+            type: new gql.GraphQLNonNull(gql.GraphQLString),
+          },
         },
         resolve(root, args) {
           return languages.firstExample({ name: args.name });
-        }
+        },
       },
       modules: paginated({
         type: require('./types/module'),
@@ -151,19 +174,19 @@ const queryType = new gql.GraphQLObjectType({
             IN
             ${modules}
             ${limit}
-              RETURN module`
+              RETURN module`,
       }),
       module: {
         type: require('./types/module'),
         args: {
           path: {
             description: 'path of module',
-            type: new gql.GraphQLNonNull(gql.GraphQLString)
-          }
+            type: new gql.GraphQLNonNull(gql.GraphQLString),
+          },
         },
         resolve(root, args) {
           return modules.firstExample({ path: args.path });
-        }
+        },
       },
       stakeholders: paginated({
         type: require('./types/stakeholder.js'),
@@ -172,35 +195,58 @@ const queryType = new gql.GraphQLObjectType({
             IN
             ${stakeholders}
             ${limit}
-              RETURN stakeholder`
+              RETURN stakeholder`,
       }),
+      //TODO use stakeholders collection here
       committers: {
         type: new gql.GraphQLList(gql.GraphQLString),
         resolve: () => {
           return db
             ._query(
               aql`
-              FOR commit IN ${commits}
-                SORT commit.signature ASC
-                RETURN DISTINCT commit.signature`
+              FOR stakeholder IN ${stakeholders}
+                SORT stakeholder.gitSignature ASC
+                RETURN DISTINCT stakeholder.gitSignature`
             )
             .toArray();
-        }
+        },
       },
-      builds: paginated({
+      baseBuilds: paginated({
         type: require('./types/build.js'),
         args: {},
         query: (root, args, limit) => aql`
           FOR build IN ${builds}
             SORT build.createdAt ASC
             ${limit}
+            RETURN build`,
+      }),
+      builds: paginated({
+        type: require('./types/build.js'),
+        args: { since: { type: Timestamp }, until: { type: Timestamp } },
+        query: (root, args, limit) => {
+          if (args.since && args.until) {
+            return aql`
+          FOR build IN ${builds}
+            SORT build.createdAt ASC
+            ${limit}
+            FILTER DATE_TIMESTAMP(build.createdAt) >= DATE_TIMESTAMP(${args.since})
+            FILTER DATE_TIMESTAMP(build.createdAt) <= DATE_TIMESTAMP(${args.until})
             LET countsByStatus = (
-              FOR other IN ${builds}
-                FILTER other.finishedAt <= build.createdAt
-                COLLECT status = other.status WITH COUNT INTO statusCount
-                RETURN { [status]: statusCount }
+              COLLECT status = build.status WITH COUNT INTO statusCount
+              RETURN { [status]: statusCount }
             )
-            RETURN MERGE(build, { stats: MERGE(countsByStatus) })`
+            RETURN MERGE(build, { stats: MERGE(countsByStatus) })`;
+          }
+          return aql`
+          FOR build IN ${builds}
+            SORT build.createdAt ASC
+            ${limit}
+            LET countsByStatus = (
+              COLLECT status = build.status WITH COUNT INTO statusCount
+              RETURN { [status]: statusCount }
+            )
+            RETURN MERGE(build, { stats: MERGE(countsByStatus) })`;
+        },
       }),
       issues: paginated({
         type: require('./types/issue.js'),
@@ -208,7 +254,7 @@ const queryType = new gql.GraphQLObjectType({
           q: { type: gql.GraphQLString },
           since: { type: Timestamp },
           until: { type: Timestamp },
-          sort: { type: Sort }
+          sort: { type: Sort },
         },
         query: (root, args, limit) => {
           let exactQuery = [];
@@ -236,15 +282,15 @@ const queryType = new gql.GraphQLObjectType({
           q = q.limit(limit.offset, limit.count).return('issue');
 
           return q;
-        }
+        },
       }),
       issue: {
         type: require('./types/issue.js'),
         args: {
           iid: {
             description: 'Project-Internal issue number',
-            type: new gql.GraphQLNonNull(gql.GraphQLInt)
-          }
+            type: new gql.GraphQLNonNull(gql.GraphQLInt),
+          },
         },
         resolve(root, args) {
           return db
@@ -256,30 +302,95 @@ const queryType = new gql.GraphQLObjectType({
                     RETURN issue`
             )
             .toArray()[0];
-        }
+        },
       },
-      issueDateHistogram: makeDateHistogramEndpoint(issues)
+      branches: paginated({
+        type: require('./types/branch.js'),
+        args: {
+          sort: { type: Sort },
+        },
+        query: (root, args, limit) => {
+          let q = qb.for('branch').in('branches').sort('branch.id', args.sort);
+
+          q = q.limit(limit.offset, limit.count).return('branch');
+
+          return q;
+        },
+      }),
+      branch: {
+        type: require('./types/branch.js'),
+        args: {
+          branchName: {
+            description: 'name of the branch',
+            type: new gql.GraphQLNonNull(gql.GraphQLString),
+          },
+        },
+        resolve(root, args) {
+          return db
+            ._query(
+              aql`FOR branch
+                  IN
+                  ${branches}
+                  FILTER branch.branch == ${args.branchName}
+                    RETURN branch`
+            )
+            .toArray()[0];
+        },
+      },
+      mergeRequests: paginated({
+        type: require('./types/mergeRequest.js'),
+        args: {
+          since: { type: Timestamp },
+          until: { type: Timestamp },
+          sort: { type: Sort },
+        },
+        query: (root, args, limit) => {
+          let q = qb.for('mergeRequest').in('mergeRequests').sort('mergeRequest.createdAt', args.sort);
+
+          q = queryHelpers.addDateFilter('mergeRequest.createdAt', 'gte', args.since, q);
+          q = queryHelpers.addDateFilter('mergeRequest.createdAt', 'lte', args.until, q);
+
+          q = q.limit(limit.offset, limit.count).return('mergeRequest');
+
+          return q;
+        },
+      }),
+      milestones: paginated({
+        type: require('./types/milestone.js'),
+        args: {
+          sort: { type: Sort },
+        },
+        query: (root, args, limit) => {
+          let q = qb.for('milestone').in('milestones').sort('milestone.startDate', args.sort);
+          q = q.limit(limit.offset, limit.count).return('milestone');
+
+          return q;
+        },
+      }),
+      issueDateHistogram: makeDateHistogramEndpoint(issues),
     };
-  }
+  },
 });
 
 module.exports = new gql.GraphQLSchema({
-  query: queryType
+  query: queryType,
 });
 
 function makeDateHistogramEndpoint(collection, dateFieldName, { makeFilter, args } = {}) {
   const extendedArgs = Object.assign(
     {
       granularity: {
-        type: new gql.GraphQLNonNull(DateHistogramGranularity)
-      }
+        type: new gql.GraphQLNonNull(DateHistogramGranularity),
+      },
+      since: { type: Timestamp },
+      until: { type: Timestamp },
     },
     args
   );
 
   if (!dateFieldName) {
     extendedArgs.dateField = {
-      type: new gql.GraphQLNonNull(gql.GraphQLString)
+      type: new gql.GraphQLNonNull(gql.GraphQLString),
     };
   }
 
@@ -287,22 +398,20 @@ function makeDateHistogramEndpoint(collection, dateFieldName, { makeFilter, args
     type: require('./types/histogram.js')(gql.GraphQLInt),
     args: extendedArgs,
     resolve(root, args) {
-      let q = qb.for('item').in(collection);
+      //collect parts of the query in an array to join them in the end
+      const queryStr = [aql`FOR item IN ${collection}`];
+
+      queryStr.push(queryHelpers.addDateFilterAQL('item.' + (dateFieldName || args.dateField), '>=', args.since));
+      queryStr.push(queryHelpers.addDateFilterAQL('item.' + (dateFieldName || args.dateField), '<=', args.until));
 
       if (makeFilter) {
-        q = q.filter(makeFilter(args));
+        queryStr.push(makeFilter(args));
       }
 
-      q = q
-        .collect('category', args.granularity(`item.${dateFieldName || args.dateField}`))
-        .withCountInto('length')
-        .return({
-          category: 'category',
-          count: 'length'
-        })
-        .toAQL();
+      const granularity = aql.literal(args.granularity(`item.${dateFieldName || args.dateField}`));
+      queryStr.push(aql`COLLECT category = ${granularity} WITH COUNT INTO length RETURN {category: category, count: length}`);
 
-      return db._query(q).toArray();
-    }
+      return db._query(aql.join(queryStr)).toArray();
+    },
   };
 }

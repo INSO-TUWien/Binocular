@@ -4,11 +4,13 @@ const gql = require('graphql-sync');
 const arangodb = require('@arangodb');
 const db = arangodb.db;
 const aql = arangodb.aql;
+const commitsToCommits = db._collection('commits-commits');
 const commitsToFiles = db._collection('commits-files');
-const builds = db._collection('builds');
+const commitsToFilesToStakeholders = db._collection('commits-files-stakeholders');
 const commitsToStakeholders = db._collection('commits-stakeholders');
 const commitsToLanguages = db._collection('commits-languages');
 const CommitsToModules = db._collection('commits-modules');
+const commitsToBuilds = db._collection('commits-builds');
 const paginated = require('./paginated.js');
 const Timestamp = require('./Timestamp.js');
 
@@ -19,36 +21,69 @@ module.exports = new gql.GraphQLObjectType({
     return {
       sha: {
         type: new gql.GraphQLNonNull(gql.GraphQLString),
-        resolve: e => e._key
+        resolve: (e) => e._key,
       },
       shortSha: {
         type: new gql.GraphQLNonNull(gql.GraphQLString),
-        resolve: e => e._key.substring(0, 7)
+        resolve: (e) => e._key.substring(0, 7),
       },
       message: {
         type: gql.GraphQLString,
-        description: 'The commit message'
+        description: 'The commit message',
       },
       messageHeader: {
         type: gql.GraphQLString,
         description: 'Header of the commit message',
-        resolve: c => c.message.split('\n')[0]
+        resolve: (c) => c.message.split('\n')[0],
       },
       signature: {
         type: gql.GraphQLString,
-        description: "The commit author's signature"
+        description: "The commit author's signature",
+        resolve(commit) {
+          return db
+            ._query(
+              aql`
+              FOR stakeholder, edge
+              IN INBOUND ${commit} ${commitsToStakeholders}
+              return stakeholder.gitSignature
+          `
+            )
+            .toArray()[0];
+        },
+      },
+      branch: {
+        type: gql.GraphQLString,
+        description: 'The commit branch',
+      },
+      parents: {
+        type: new gql.GraphQLList(gql.GraphQLString),
+        description: 'Parents of the commit',
+        resolve(commit) {
+          return db
+            ._query(
+              aql`
+            FOR c, edge
+            IN inbound ${commit} ${commitsToCommits}
+            RETURN c.sha`
+            )
+            .toArray();
+        },
+      },
+      history: {
+        type: gql.GraphQLString,
+        description: 'sha History of the commit',
       },
       date: {
         type: Timestamp,
-        description: 'The date of the commit'
+        description: 'The date of the commit',
       },
       webUrl: {
         type: gql.GraphQLString,
-        description: 'Web-url (if available) of this commit'
+        description: 'Web-url (if available) of this commit',
       },
       stats: {
         type: require('./stats'),
-        description: 'The changing stats of the commit'
+        description: 'The changing stats of the commit',
       },
       files: paginated({
         type: require('./fileInCommit.js'),
@@ -56,14 +91,49 @@ module.exports = new gql.GraphQLObjectType({
         query: (commit, args, limit) => aql`
           FOR file, edge
             IN INBOUND ${commit} ${commitsToFiles}
+            let o = (
+              FOR stakeholder, conn
+                IN OUTBOUND edge ${commitsToFilesToStakeholders}
+                    RETURN {
+                      stakeholder: stakeholder.gitSignature,
+                      ownedLines: conn.ownedLines,
+                    }
+            )
             ${limit}
+            RETURN {
+              file: file,
+              lineCount: edge.lineCount,
+              stats: edge.stats,
+              hunks: edge.hunks,
+              action: edge.action,
+              ownership: o,
+            }`,
+      }),
+      file: {
+        type: require('./fileInCommit.js'),
+        args: {
+          path: {
+            description: 'Path of the file',
+            type: new gql.GraphQLNonNull(gql.GraphQLString),
+          },
+        },
+        description: 'The file with path touched by this commit',
+        resolve(commit, args) {
+          return db
+            ._query(
+              aql`
+          FOR file, edge
+            IN INBOUND ${commit} ${commitsToFiles}
+            FILTER file.path == ${args.path}
             RETURN {
               file,
               lineCount: edge.lineCount,
-              stats: edge.stats,
               hunks: edge.hunks
             }`
-      }),
+            )
+            .toArray()[0];
+        },
+      },
       stakeholder: {
         type: require('./stakeholder.js'),
         description: 'The author of this commit',
@@ -79,7 +149,7 @@ module.exports = new gql.GraphQLObjectType({
           `
             )
             .toArray()[0];
-        }
+        },
       },
       builds: {
         type: new gql.GraphQLList(require('./build.js')),
@@ -88,13 +158,12 @@ module.exports = new gql.GraphQLObjectType({
           return db
             ._query(
               aql`
-              FOR build
-              IN ${builds}
-              FILTER build.sha == ${commit.sha}
-                RETURN build`
+              FOR build, edge
+              IN INBOUND ${commit} ${commitsToBuilds}
+              RETURN build`
             )
             .toArray();
-        }
+        },
       },
       languages: paginated({
         type: require('./languageInCommit'),
@@ -106,7 +175,7 @@ module.exports = new gql.GraphQLObjectType({
             RETURN {
               language,
               stats: edge.stats
-            }`
+            }`,
       }),
       modules: paginated({
         type: require('./moduleInCommit'),
@@ -119,8 +188,8 @@ module.exports = new gql.GraphQLObjectType({
               module,
               webUrl: edge.webUrl,
               stats: edge.stats
-            }`
-      })
+            }`,
+      }),
     };
-  }
+  },
 });

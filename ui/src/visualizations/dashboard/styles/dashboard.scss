@@ -1,0 +1,203 @@
+.dashboard{
+  margin: 1rem;
+  padding: 0;
+  list-style: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  user-select: none;
+  display: grid;
+  grid-gap: 1rem;
+  grid-template-columns: repeat(2, 1fr);
+  grid-auto-rows:30rem;
+  grid-auto-flow: row;
+  width: 100%;
+  -webkit-touch-callout: none; /* iOS Safari */
+  -webkit-user-select: none; /* Safari */
+  -khtml-user-select: none; /* Konqueror HTML */
+  -moz-user-select: none; /* Old versions of Firefox */
+  -ms-user-select: none; /* Internet Explorer/Edge */
+  user-select: none;
+  margin-top: 5rem;
+}
+
+.visualizationContainer {
+  cursor: move;
+  position: relative;
+  padding: 0;
+  font-size: 20px;
+  background-color: white;
+  box-shadow: 0 0 5px #555A;
+  border-radius: 0.2rem;
+  overflow: hidden;
+}
+
+.inside {
+  background-color: white;
+  position: absolute;
+  top: 2rem;
+  height: calc(100% - 2rem);
+  width: 100%;
+  cursor: default;
+}
+
+.ghost {
+  border: 3px dashed #3273dc;
+  border-radius: 0.3rem;
+  background-color: #fff;
+}
+
+.extendHorizontalButton{
+  display: inline-block;
+  float: right;
+  cursor: pointer;
+}
+
+.windowSizeButton{
+  cursor: pointer;
+  //border-bottom: 1px solid lightgray;
+}
+
+.windowSizeButtonSelected{
+  background: #3273dc;
+  color: white;
+}
+
+.windowSizeButton:hover{
+  background: whitesmoke;
+}
+
+.windowSizeButtonSelected:hover{
+  background: #4882e0;
+}
+
+.menuBar{
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 2rem;
+  border-bottom: 1px solid lightgray;
+}
+
+.visualizationName{
+  display: inline-block;
+  padding-left: 0.5rem;
+  font-weight: bold;
+}
+
+.visualizationSettings{
+  position: absolute;
+  display: none;
+  right: 2px;
+  top: 2rem;
+  width: 20rem;
+  background: white;
+  box-shadow: 0 0 10px #555A;
+  border-radius: 0.5rem 0 0.5rem 0.5rem;
+  z-index: +1;
+  padding: 0 0.5rem;
+  overflow: hidden;
+}
+
+.visualizationSettingsExtended{
+  display: block;
+}
+
+.visualizationSettingsItemIcon{
+  height: 2rem;
+  margin-top: -50%;
+  transform: translate(0, 0.5rem);
+  background: white;
+  margin-right: 0.5rem;
+}
+
+.visualizationSettingsIcon{
+  height: 2rem;
+}
+
+.visualizationSettingsButton{
+  display: inline-block;
+  height: 2rem;
+  float: right;
+  border-radius: 0.2rem;
+  cursor: pointer;
+}
+
+.dashboardMenu{
+  position: absolute;
+  width: 100%;
+  padding-top: 1rem;
+}
+
+.dashboardMenuButton{
+  display: inline-block;
+  background-color: #3273dc;
+  height: 3rem;
+  border-radius: 1.5rem;
+  box-shadow: 0 0 10px #555A;
+  line-height: 2.8rem;
+  font-size: 1.5rem;
+  color: white;
+  text-align: center;
+  cursor: pointer;
+  border:none;
+  padding: 0 1.5rem;
+  transition: all 0.2s ease-in-out;
+  margin: 0 0.5rem;
+}
+
+.dashboardMenuButton:hover{
+  background: #4882e0;
+}
+
+.addVisualization{
+  width: 3rem;
+  line-height: 2.8rem;
+  font-weight: bold;
+  padding: 0;
+}
+
+.dashboardMenuButtonInverted{
+  background-color:transparent;
+  color: #3273dc;
+  border: 1px solid #4882e0;
+  box-shadow: none;
+}
+
+.dashboardMenuButtonInverted:hover{
+  background: #cccccc33;
+}
+
+.dropZone{
+  position: absolute;
+  z-index: +3;
+  width: 100%;
+  height: 100%;
+  background: #EEE5;
+  backdrop-filter: blur(25px);
+  -webkit-backdrop-filter: blur(25px);
+}
+
+.dropZone>span {
+  font-size: 2rem;
+  font-weight: bold;
+  color: #222A;
+  text-shadow: 0 0 10px #CCCA;
+  padding:1rem;
+  text-decoration: underline;
+}
+
+.dropZone>div{
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.dropZone>div>span{
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #555A;
+  text-shadow: 0 0 10px #CCCA;
+}

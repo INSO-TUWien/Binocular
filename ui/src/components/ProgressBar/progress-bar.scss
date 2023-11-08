@@ -2,80 +2,76 @@
 
 .hoverTarget {
   position: absolute;
-  top: 0px;
-  right: 0px;
+  z-index: 1;
+  right: 0.5rem;
+  top: 0.5rem;
+  width: 3rem;
+  height: 3rem;
+  background: white;
+  box-shadow: 0 0 10px #5558;
+  border: 1px solid #4882e0;
+  border-radius: 1.5rem;
+  transition: all ease-in-out 0.2s;
+  overflow: hidden;
+}
 
-  height: 50px;
-  width: 50px;
-  $transition-time: 0.5s;
-  transition: width $transition-time ease-in-out, height $transition-time ease-in-out;
+.hoverTarget:hover{
+  border-radius: 0.5rem;
+  width: 20rem;
+  height: 15rem;
+}
 
-  .donut {
+.progressBoxInner{
+  position: absolute;
+  right: 0;
+  top: 0;
+  width: 20rem;
+  height: 15rem;
+}
 
-    $ring-width: 5;
-    $ring-color: $grey-light;
-    $fill-color: #00fa9a;
+.headline{
+  position: absolute;
+  top: 0.1rem;
+  left: 1rem;
+  font-weight: bold;
+  font-size: 1.5rem;
+}
 
-    .text {
-      text-anchor: middle;
-      alignment-baseline: middle;
-      font-size: 10;
-      fill: $grey;
-    }
+.statusBar{
+  position: absolute;
+  height: 6rem;
+  width: 20rem;
+  top: 0;
+  right: 0;
+}
 
-    .text.details {
-      display: none;
-      font-size: 3;
-    }
+.path{
+  transition: all ease-in-out 0.5s;
+}
 
-    .hole {
-      fill: white;
-    }
+.loadingAnimation{
+  position: absolute;
+  stroke: #53d769;
+  width: 2rem;
+  height: 2rem;
+  right: 0.25rem;
+  top: 0.5rem;
+  stroke-dasharray: 100 200;
+  animation: loadingAnimation 1s linear infinite;
+}
 
-    .ring, .segment {
-      fill: transparent;
-    }
-
-    .ring {
-      stroke-width: $ring-width - 1;
-      stroke: $ring-color;
-    }
-
-    .segment {
-      stroke-width: $ring-width;
-      stroke: $fill-color;
-    }
-  }
-
-  .workIndicator {
-    circle {
-      fill: none;
-      stroke: $white;
-      stroke-width: 5;
-      stroke-dasharray: 4 4;
-    }
+@keyframes loadingAnimation {
+  to {
+    stroke-dashoffset: 314.159;
   }
 }
 
-.hoverTarget:hover {
-  height: 200px;
-  width: 200px;
-
-  .donut {
-    $colors: #00EE76 #00CD66 #008B45;
-    @for $i from 1 through length($colors) {
-      .segment:nth-child(#{$i
-                          }) {
-        stroke: nth($colors, $i);
-      }
-    }
-
-    .text {
-      display: none;
-    }
-
-    .text.details {
-      display: block;
-    }
-  }
+.progressInfo{
+  position: absolute;
+  overflow-y: scroll;
+  height: 10rem;
+  top:5rem;
+  width: 20rem;
+  padding: 0 1rem ;
+  border:1px solid lightgray;
 }

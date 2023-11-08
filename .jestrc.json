@@ -1,7 +1,0 @@
-{
-  "rootDir": "ui/test",
-  "transform": {
-    ".*": "<rootDir>/../../node_modules/babel-jest"
-  },
-  "moduleFileExtensions": ["js", "jsx", "json"]
-}

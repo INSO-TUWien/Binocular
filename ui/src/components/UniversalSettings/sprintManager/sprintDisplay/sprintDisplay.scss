@@ -1,0 +1,144 @@
+:root {
+  --sprintContainerWidth: 15rem;
+}
+
+.sprints{
+  width: 100%;
+  overflow-y: hidden;
+  overflow-x: scroll;
+  height: 10rem;
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+}
+
+.sprintsScroll{
+  width: max-content;
+  height: 100%;
+}
+
+.sprintContainer{
+  display: inline-block;
+  margin: 0 0.1rem;
+  height: 8rem;
+  width: var(--sprintContainerWidth);
+  position: relative;
+}
+
+.sprintContainerInner{
+  position: absolute;
+  top: 2rem;
+  background: #3273dc;
+  color: white;
+  width: var(--sprintContainerWidth);
+  border-radius: 0 0.5rem 0 0.5rem;
+  height: 4rem;
+  overflow-x: hidden;
+}
+
+.sprintContainerInnerText{
+  display: flex;
+  align-items: start;
+  flex-direction: column;
+  justify-content: center;
+  height: 4rem;
+  float: left;
+  margin-left: 1rem;
+}
+.sprintContainerInnerText>div{
+  font-size: 0.6rem;
+}
+
+.sprintContainerInnerDeleteButton{
+  height: 4rem;
+  float: right;
+  color: white;
+  background: #ff3b30;
+  border: none;
+  border-left: 1px solid white;
+  border-radius: 0;
+}
+.sprintContainerInnerDeleteButton:hover{
+  background: #e30c00;
+}
+
+.sprintContainerInnerTextInput{
+  background: transparent;
+  color: white;
+  border: none;
+  border-bottom: 1px solid white;
+}
+
+.sprintContainerInnerTextInput:focus{
+  background: #fff2;
+  outline: none;
+  border-bottom: 2px solid white;
+}
+
+.sprintContainerFrom{
+  position: absolute;
+  top: 0;
+  left: 0;
+  color: gray;
+  padding: 0 1rem;
+  background: #caf4d1;
+  border-radius: 0 0.5rem 0.5rem 0;
+}
+
+.sprintContainerFrom:before{
+  position: absolute;
+  content: '';
+  top:0;
+  left: 0;
+  height: 2rem;
+  width: 1px;
+  background: #4cd964;
+}
+
+.sprintContainerFrom:after{
+  position: absolute;
+  content: '';
+  top:0;
+  left: 0;
+  height: 0;
+  width: 0;
+  border-top: .75rem solid transparent;
+  border-bottom: .75rem  solid transparent;
+
+  border-left: .75rem  solid #4cd964;
+}
+
+.sprintContainerTo{
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  color: gray;
+  padding: 0 1rem;
+  text-align: right;
+  background: #f1d2d2;
+  border-radius: 0.5rem 0 0 0.5rem;
+}
+
+.sprintContainerTo:before{
+  position: absolute;
+  content: '';
+  bottom:0;
+  right: 0;
+  height: 2rem;
+  width: 1px;
+  background: indianred;
+}
+
+.sprintContainerTo:after{
+  position: absolute;
+  content: '';
+  bottom:0;
+  right: 0;
+  height: 0;
+  width: 0;
+  border-top: .75rem solid transparent;
+  border-bottom: .75rem  solid transparent;
+
+  border-right: .75rem  solid indianred;
+}

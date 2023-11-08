@@ -9,10 +9,6 @@ export default class Message extends React.Component {
   }
 
   render() {
-    return (
-      <g>
-        {this.props.children}
-      </g>
-    );
+    return <g>{this.props.children}</g>;
   }
 }

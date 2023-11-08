@@ -1,7 +1,7 @@
 /node_modules
-/ui/assets
-.pupil
-.pupilrc
+/dist
+.binocular
+.binocularrc
 db/
 *.log
 coverage/
@@ -11,3 +11,8 @@ coverage/
 *.gem
 out
 pkg
+.grandle
+/ui/db_export
+/.devcontainer
+.DS_Store
+/ui/config/context.json

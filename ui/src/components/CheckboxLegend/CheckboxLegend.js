@@ -19,19 +19,28 @@ const ICON_HEIGHT = 15;
  *            Callback function for when something is clicked. The function argument contains the selected entries.
  *  - split (Format: true/false)
  *            Split the colors into itself and a brighter version of itself (using chroma-js .brighten())
+ *  - explanation:(string) set custom explanation
  */
 export default class CheckboxLegend extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
       initialized: false,
-      selected: [] //[name1, name2, ...]
+      selected: [], //[name1, name2, ...]
     };
   }
 
   componentWillReceiveProps(nextProps) {
-    if (nextProps.palette && this.state.initialized === false) {
-      const selected = Object.keys(nextProps.palette);
+    this.selectData(nextProps);
+  }
+
+  componentDidMount() {
+    this.selectData(this.props);
+  }
+
+  selectData(props) {
+    if (props.palette && this.state.initialized === false) {
+      const selected = props.selected === undefined ? Object.keys(props.palette) : props.selected;
       this.setState({ initialized: true, selected: selected }, () => this.props.onClick(selected));
     }
   }
@@ -56,7 +65,11 @@ export default class CheckboxLegend extends React.Component {
   }
 
   selectAllAuthors() {
-    const ticked = Object.keys(this.props.palette).length === this.state.selected.length;
+    if (!this.props.palette) {
+      return;
+    }
+
+    const ticked = this.props.palette && Object.keys(this.props.palette).length === this.state.selected.length;
     if (ticked) {
       this.setState({ selected: [] }, () => this.props.onClick([]));
     } else {
@@ -67,38 +80,24 @@ export default class CheckboxLegend extends React.Component {
 
   render() {
     const items = [];
-    if (this.state.initialized) {
+    if (this.state.initialized || (this.state.selected && this.state.selected.length)) {
       const otherCommitters = this.props.otherCommitters;
-      _.each(Object.keys(this.props.palette), key => {
+      _.each(Object.keys(this.props.palette), (key) => {
         let text = key;
         if (text === 'others' && otherCommitters) {
           text = '' + otherCommitters + ' Others';
         }
-        if (this.state.selected.indexOf(key) > -1) {
-          items.push(
-            <CheckboxLegendLine
-              id={key}
-              key={key}
-              text={text}
-              color={this.props.palette[key]}
-              checked={true}
-              onClick={this.clickCallback.bind(this)}
-              split={this.props.split}
-            />
-          );
-        } else {
-          items.push(
-            <CheckboxLegendLine
-              id={key}
-              key={key}
-              text={text}
-              color={this.props.palette[key]}
-              checked={false}
-              onClick={this.clickCallback.bind(this)}
-              split={this.props.split}
-            />
-          );
-        }
+        items.push(
+          <CheckboxLegendLine
+            id={key}
+            key={key}
+            text={text}
+            color={this.props.palette[key]}
+            checked={this.state.selected.indexOf(key) > -1}
+            onClick={this.clickCallback.bind(this)}
+            split={this.props.split}
+          />
+        );
       });
     }
 
@@ -119,18 +118,26 @@ export default class CheckboxLegend extends React.Component {
         const keys = Object.keys(this.props.palette);
         const color1 = chroma(this.props.palette[keys[0]]).hex();
         const color2 = chroma(this.props.palette[keys[0]]).darken(0.5).hex();
-        explanation = <LegendCompact text="Additions | Deletions (# lines per author)" color={color1} color2={color2} />;
+        explanation = (
+          <LegendCompact
+            text={this.props.explanation ? this.props.explanation : 'Additions | Deletions (# lines per author)'}
+            color={color1}
+            color2={color2}
+          />
+        );
       } else {
         const keys = Object.keys(this.props.palette);
         const color = this.props.palette[keys[0]];
-        explanation = <LegendCompact text="Number of commits (per author)" color={color} />;
+        explanation = (
+          <LegendCompact text={this.props.explanation ? this.props.explanation : 'Number of commits (per author)'} color={color} />
+        );
       }
     }
 
     return (
       <div>
         <label className="label">
-          <input type="checkbox" checked={checked} onChange={this.selectAllAuthors.bind(this)} />
+          <input type="checkbox" checked={checked} onChange={this.selectAllAuthors.bind(this)} disabled={!this.props.palette} />
           {this.props.title}
         </label>
         {explanation}

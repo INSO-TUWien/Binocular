@@ -1,15 +1,15 @@
-Contributing to pupil
+Contributing to Binocular
 =====================
 
-***Should you wish to work on pupil, please use
+***Should you wish to work on Binocular, please use
 [prettier](https://github.com/prettier/prettier) to keep your code
 formatted!***
 
-This document aims to give a general overview of pupil's internal
+This document aims to give a general overview of Binocular's internal
 architecture.
 
-Pupil is designed as a node.js command-line application that hosts a
-React/Redux-based Front-End. Pupil is generally split into three components:
+Binocular is designed as a node.js command-line application that hosts a
+React/Redux-based Front-End. Binocular is generally split into three components:
 
 - A back-end responsible for gathering data from the various
   data-sources
@@ -17,7 +17,7 @@ React/Redux-based Front-End. Pupil is generally split into three components:
 - A GraphQL-interface that is mounted into ArangoDB that allows the
   Front-End to easily query data from the back-end
 
-![Architecture](./zivsed-architecture.png)
+![Architecture](./binocular-architecture.png)
 
 Technically, the front-end does not access the GraphQL-interface
 directly, but uses a proxy that the back-end provides to circumvent
@@ -28,9 +28,10 @@ CORS-issues.
 The source-code is organized similarly:
 
 ```
-pupil
+Binocular
 ├── foxx     # Holds the foxx-service that is the GraphQL-interface
 ├── lib      # Holds the back-end
+├── tests    # Unit tests
 └── ui       # Holds the front-end
 ```
 
@@ -52,7 +53,7 @@ lib/indexers
 │   ├── ...                 # (Additional CI-indexers could be added here)
 │   └── index.js
 ├── its                     # ITS-specific indexers
-│   ├── GitHubIndexer.js    # Indexer for GitHub
+│   ├── GitHubITSIndexer.js    # Indexer for GitHub
 │   ├── GitLabITSIndexer.js # Indexer for GitLab
 │   ├── ...                 # (Additional ITS-indexers could be added here)
 │   └── index.js
@@ -66,12 +67,12 @@ lib/indexers
 
 The GraphQl interface is hosted as an ArangoDB-FOXX-service which is
 automatically zipped and installed at startup into the database. It
-enables querying the database easiliy through GraphQl. A very useful
-tool is the GraphiQl-interface exposed by it, which allows developers
+enables querying the database easily through GraphQl. A very useful
+tool is the GraphQl-interface exposed by it, which allows developers
 to interactively query the service. Once the service is installed in
 the database, it can be accessed by pointing your browser to
-`http://ARANGO_HOST:ARANGO_PORT/pupil-PROJECT_NAME/pupil-ql`, e.g.
-http://localhost:8529/_db/pupil-pupil/pupil-ql.
+`http://ARANGO_HOST:ARANGO_PORT/binocular-PROJECT_NAME/binocular-ql`, e.g.
+http://localhost:8529/_db/binocular-Binocular/binocular-ql.
 
 ## Front-End
 
@@ -81,60 +82,114 @@ on D3 to do its work:
 ```
 ui
 ├── index.html                    # Main entry point
+├── config                        # Aditional config files for the fronted (mainly used for automatic builds)
+├── db_export                     # Folder for the json export of the databse for offline use (will be automatically generated during the first execution)
 └── src
    ├── components                 # Holds general components used everywhere in the app
+   ├── database                   # Database functions to access either the arangoDB or local JSON database
    ├── index.js                   # Main JS-entry-point
    ├── reducers                   # Holds general reducers
    ├── sagas                      # Holds general sagas
    ├── utils                      # Utility functions
    └── visualizations             # Each visualization is a directory here, with its own reducers and sagas
-       ├── code-ownership-river
-       │   ├── chart              # Main chart component
-       │   ├── config.js          # Main config component (shown in the sidebar)
-       │   ├── help.js            # Component shown in the help-section
-       │   ├── index.js           # main entry point for the component, bundles everything together
-       │   ├── reducers           # Reducers for the visualization
-       │   │   ├── config.js      # Configuration-related reducers
-       │   │   ├── data.js        # Data-related reducers
-       │   │   └── index.js
-       │   ├── sagas              # Sagas/Actions for the visualization
-       │   └── styles.scss        # Styles for the visualization
-       ├── dashboard
-       │   ├── chart             
-       │   ├── config.js         
-       │   ├── help.js           
-       │   ├── index.js          
-       │   ├── reducers          
-       │   │   ├── config.js     
-       │   │   ├── data.js       
-       │   │   └── index.js
-       │   ├── sagas             
-       │   └── styles.scss       
-       ├── hotspot-dials
-       │   ├── chart.js
-       │   ├── help.js
-       │   ├── reducers
-       │   │   ├── config.js
-       │   │   ├── data.js
-       │   │   └── index.js
-       │   ├── sagas
-       │   │   └── index.js
-       │   └── styles.scss
-       └── issue-impact
-           ├── chart.js
-           ├── config.js
-           ├── help.js
-           ├── index.js
-           ├── reducers
-           │   ├── config.js
-           │   ├── data.js
-           │   └── index.js
-           ├── sagas
-           │   └── index.js
-           └── styles.scss
+      ├── dashboard               # Dashboard component that combines the common visualizaitons
+      ├── dataExport              # Database export component
+      ├── legacy                  # Full size visualizations
+      │  ├── code-hotspots
+      │  │  ├── chart              # Main chart component
+      │  │  ├── config             # Main config component (shown in the sidebar)
+      │  │  ├── help.js            # Component shown in the help-section
+      │  │  ├── index.js           # main entry point for the component, bundles everything together
+      │  │   ├── reducers           # Reducers for the visualization
+      │  │   │   ├── config.js      # Configuration-related reducers
+      │  │   │   ├── data.js        # Data-related reducers
+      │  │   │   └── index.js
+      │  │   ├── sagas              # Sagas/Actions for the visualization
+      │  │   └── styles.scss        # Styles for the visualization
+      │  ├── code-ownership-river
+      │  │  ├── chart
+      │  │  ├── config.js
+      │  │  ├── help.js
+      │  │  ├── index.js  
+      │  │   ├── reducers
+      │  │   │   ├── config.js
+      │  │   │   ├── data.js
+      │  │   │   └── index.js
+      │  │   ├── sagas
+      │  │   └── styles.scss
+      │  ├── dashboard
+      │  │   ├── chart             
+      │  │   ├── config.js         
+      │  │   ├── help.js           
+      │  │   ├── index.js          
+      │  │   ├── reducers          
+      │  │   │   ├── config.js     
+      │  │   │   ├── data.js       
+      │  │   │   └── index.js
+      │  │   ├── sagas             
+      │  │   └── styles.scss       
+      │  ├── hotspot-dials
+      │  │   ├── chart.js
+      │  │   ├── help.js
+      │  │   ├── reducers
+      │  │   │   ├── config.js
+      │  │   │   ├── data.js
+      │  │   │   └── index.js
+      │  │   ├── sagas
+      │  │   │   └── index.js
+      │  │   └── styles.scss
+      │  └── issue-impact
+      │      ├── chart.js
+      │      ├── config.js
+      │      ├── help.js
+      │      ├── index.js
+      │      ├── reducers
+      │      │   ├── config.js
+      │      │   ├── data.js
+      │      │   └── index.js
+      │      ├── sagas
+      │      │   └── index.js
+      │      └── styles.scss
+      └── VisualizationComponents              # Small visualizaitons for use in the dashboard
+         ├── changes 
+         │  ├── chart              # Main chart component
+         │  ├── config.js          # Main config component (shown in the sidebar)
+         │  ├── help.js            # Component shown in the help-section
+         │  ├── index.js           # main entry point for the component, bundles everything together
+         │   ├── reducers           # Reducers for the visualization
+         │   │   ├── config.js      # Configuration-related reducers
+         │   │   ├── data.js        # Data-related reducers
+         │   │   └── index.js
+         │   ├── sagas              # Sagas/Actions for the visualization
+         │   └── styles.scss        # Styles for the visualization
+         ├── ciBuilds
+         │  ├── chart
+         │  ├── config
+         │  ├── help.js
+         │  ├── index.js
+         │   ├── reducers
+         │   │   ├── config.js
+         │   │   ├── data.js
+         │   │   └── index.js
+         │   ├── sagas
+         │   └── styles.scss
+         └── issues
+            ├── chart
+            ├── config
+            ├── help.js
+            ├── index.js
+             ├── reducers
+             │   ├── config.js
+             │   ├── data.js
+             │   └── index.js
+             ├── sagas
+             └── styles.scss
 ```
 
 To add another visualization, check the source code of the existing ones.
+
+To build the frontend the db_export folder has to be available. Either you provide one by yourself and place the files in the correct location (`./ui/db_export/`)
+or one will automatically be generated by the backend when the indexing is finished and no db_export folder is available.
 
 ## Tips to get started (For newbies, from a newbie)
 If you wish to add another visualization, the amount of used libraries/frameworks can be a little daunting.
@@ -142,11 +197,11 @@ I will try to explain the libraries that seemed the most important to me, and th
 
 ### Development Tips
 This project uses the npm package manager. You can check the used dependencies and available scripts (for running in IDE) in the file package.json.
-The most useful to me were "dev" and "build". In your IDE, you can create a Node.js configuration and enter "pupil.js" as the main JavaScript file.
+The most useful to me were "dev" and "build". In your IDE, you can create a Node.js configuration and enter "binocular.js" as the main JavaScript file.
 You can give the application the relative path to a project you want to visualize as a parameter. (e.g. ../Projects/kanban/)
 If you want a run configuration, you can leave it like that. To build & run, tell your IDE to execute the npm script "build" first (or run "npm run-script build" manually).
 If you want to see your changes as they happen in the code, you can use the "dev" script. It re-compiles quickly as soon as changes are detected.
-To use the "dev" script, you need to first run the regular program ("pupil" on console, or use your run configuration), because it takes the data straight from there.
+To use the "dev" script, you need to first run the regular program ("binocular" on console, or use your run configuration), because it takes the data straight from there.
 
 ### React
 The User Interface is built with react.js, a framework where you can define Components that you can write once and re-use as many times as you want.
@@ -214,6 +269,4 @@ The default for the web interface is http://localhost:8529/
 Please make sure ArangoDB is running.
 https://www.arangodb.com/arangodb-training-center/
 To see how content is queried, please see "GraphQL-Interface" above.
-You can also access the GraphiQL interface over the web interface (click services -> pupil-ql -> show interface).
-  
-### Gateway (under construction)
+You can also access the GraphiQL interface over the web interface (click services -> binocular-ql -> show interface).

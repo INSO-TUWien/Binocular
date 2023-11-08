@@ -29,18 +29,18 @@ module Binocular
           'reconnect' => 60,
           'heartbeat' => 300,
           'logger' => {
-              'level' => 'INFO',
-              'file' => STDOUT
+            'level' => 'INFO',
+            'file' => $stdout
           }
         },
         'languageService' => {
-            'address' => '127.0.0.1',
-            'port' => 48_765,
-            'timeout' => 30,
-            'logger' => {
-                'level' => 'INFO',
-                'file' => STDOUT
-            }
+          'address' => '127.0.0.1',
+          'port' => 48_765,
+          'timeout' => 30,
+          'logger' => {
+            'level' => 'INFO',
+            'file' => $stdout
+          }
         }
       }
     end
@@ -58,16 +58,16 @@ module Binocular
     def self.get_config_path(home, root, appname, path)
       unless appname.nil?
         return [
-           travel(appname, path),
-           home.join(".#{appname}rc"),
-           home.join(".#{appname}", 'config'),
-           home.join('.config', appname),
-           home.join('.config', appname, 'config'),
-           root.join('etc', ".#{appname}rc"),
-           root.join('etc', ".#{appname}", 'config')
+          travel(appname, path),
+          home.join(".#{appname}rc"),
+          home.join(".#{appname}", 'config'),
+          home.join('.config', appname),
+          home.join('.config', appname, 'config'),
+          root.join('etc', ".#{appname}rc"),
+          root.join('etc', ".#{appname}", 'config')
         ].flatten.keep_if(&:exist?)
       end
-      return []
+      []
     end
 
     # search until root dir for the app rc file
@@ -75,7 +75,10 @@ module Binocular
       path = Pathname.new(path)
       files = config_path(appname, path)
       if files.nil?
-        travel(appname, path.parent) else files end
+        travel(appname, path.parent)
+      else
+        files
+      end
     end
 
     # check if rc file exists

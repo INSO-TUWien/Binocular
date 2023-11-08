@@ -1,7 +1,7 @@
 {
-  "name": "pupil-graphql",
+  "name": "binocular-graphql",
   "version": "1.0.0",
-  "description": "GraphQl-Interface for pupil",
+  "description": "GraphQl-Interface for Binocular",
   "engines": {
     "arangodb": "^3.1.0"
   },

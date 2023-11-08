@@ -1,6 +1,5 @@
 import _ from 'lodash';
 import { combineReducers } from 'redux';
-import { reducer as formReducer } from 'redux-form';
 import { handleAction } from 'redux-actions';
 
 import activeVisualization from './activeVisualization.js';
@@ -8,10 +7,11 @@ import config from './config.js';
 import notifications from './notifications.js';
 import progress from './progress.js';
 import activeConfigTab from './activeConfigTab.js';
+import universalSettings from './universalSettings';
 
-export default visualizations => {
+export default (visualizations) => {
   const visualizationReducers = {};
-  _.each(visualizations, vis => {
+  _.each(visualizations, (vis) => {
     visualizationReducers[vis.id] = combineReducers({
       id: () => vis.id,
       label: () => vis.label,
@@ -20,7 +20,10 @@ export default visualizations => {
       HelpComponent: () => vis.HelpComponent || (() => <div />),
       saga: () => vis.saga,
       reducer: () => vis.reducer,
-      state: vis.reducer
+      state: vis.reducer,
+      usesUniversalSettings: () => (vis.usesUniversalSettings !== undefined ? vis.usesUniversalSettings : false),
+      universalSettingsConfig: () => (vis.universalSettingsConfig !== undefined ? vis.universalSettingsConfig : {}),
+      //ternary operator (?) needed for compatibility for older visualizations that don't use Universal settings
     });
   });
 
@@ -31,25 +34,7 @@ export default visualizations => {
     notifications,
     progress,
     activeConfigTab,
-    showHelp: handleAction('TOGGLE_HELP', state => !state, false),
-    form: formReducer.plugin({
-      configForm: handleAction(
-        'RECEIVE_CONFIGURATION',
-        function(state, action) {
-          const config = action.payload;
-          return _.merge({}, state, {
-            values: {
-              gitlabUrl: _.get(config, 'gitlab.url'),
-              gitlabToken: _.get(config, 'gitlab.token'),
-              arangoHost: _.get(config, 'arango.host'),
-              arangoPort: _.get(config, 'arango.port'),
-              arangoUser: _.get(config, 'arango.user'),
-              arangoPassword: _.get(config, 'arango.password')
-            }
-          });
-        },
-        {}
-      )
-    })
+    showHelp: handleAction('TOGGLE_HELP', (state) => !state, false),
+    universalSettings,
   });
 };
