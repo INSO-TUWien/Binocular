@@ -32,7 +32,8 @@ jobs:
           echo ${{ env.IMAGE_NAME }}:${{ github.run_id }}
           echo ${{ env.IMAGE_NAME }}:latest
           echo "##########     env     ##########"
-          echo NODE_VERSION: ${{ env.NODE_VERSION }}
+          echo NODE_VERSION: ${{ steps.nvmrc_node_version.outputs.NODE_VERSION }}
+          echo ${{join(steps.nvmrc_node_version.outputs.*, '\n')}}
 
       - name: Init Docker
         uses: ./.github/actions/docker-setup
