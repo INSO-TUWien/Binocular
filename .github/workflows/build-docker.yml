@@ -26,7 +26,7 @@ jobs:
 
       - name: Echo docker tags
         run: |
-          echo ${{ env.IMAGE_NAME }}:${{ env.IMAGE_NAME}}
+          echo ${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG}}
           echo ${{ env.IMAGE_NAME }}:${GITHUB_RUN_ID}
           echo ${{ env.IMAGE_NAME }}:${{ github.run_id }}
           echo ${{ env.IMAGE_NAME }}:latest
