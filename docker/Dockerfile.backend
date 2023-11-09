@@ -39,7 +39,9 @@ RUN npm install -g tsx
 
 USER node
 
-RUN git config --global --add safe.directory /app/binocular/repo
+RUN git config --global --add safe.directory /app/binocular/repo/*
+RUN mkdir -p /app/binocular/lib/../ui/db_export
+RUN mkdir -p /app/binocular/lib/../ui/config
 
 # ENTRYPOINT ["/usr/bin/dumb-init", "--", "/entrypoint"]
 # CMD []
