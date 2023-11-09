@@ -37,11 +37,12 @@ COPY --chown=node:node ./package.json ./package.json
 RUN npm install -g .
 RUN npm install -g tsx
 
-USER node
-
-RUN git config --global --add safe.directory /app/binocular/repo/*
 RUN mkdir -p /app/binocular/lib/../ui/db_export
 RUN mkdir -p /app/binocular/lib/../ui/config
+
+RUN git config --global --add safe.directory /app/binocular/repo/*
+
+USER node
 
 # ENTRYPOINT ["/usr/bin/dumb-init", "--", "/entrypoint"]
 # CMD []
