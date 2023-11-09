@@ -40,6 +40,8 @@ RUN npm install -g tsx
 RUN mkdir -p /app/binocular/lib/../ui/db_export
 RUN mkdir -p /app/binocular/lib/../ui/config
 
+RUN chown node:node /app/binocular/lib/../ui/**
+
 RUN git config --global --add safe.directory /app/binocular/repo/*
 
 USER node
