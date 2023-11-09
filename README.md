@@ -5,6 +5,8 @@ Binocular
 [![Test ESLint](https://github.com/INSO-TUWien/Binocular/actions/workflows/eslint.yml/badge.svg?branch=develop)](https://github.com/INSO-TUWien/Binocular/actions/workflows/eslint.yml)
 [![Docker Image CI](https://github.com/INSO-TUWien/Binocular/actions/workflows/build-docker.yml/badge.svg)](https://github.com/INSO-TUWien/Binocular/actions/workflows/build-docker.yml)
 
+![Default Dashboard](docs/images/screenshots/default_dashboard.png)
+
 Binocular is a tool for visualizing data from various software-engineering
 tools. It works as a command-line tool run from a git-repository. When
 run, Binocular will gather data from the repository and the GitHub or GitLab API
@@ -12,6 +14,10 @@ and persist it to a configured ArangoDB instance.
 
 Binocular then hosts interactive visualizations about the gathered data
 via a web-interface.
+
+## Preview
+- [Demo Page](https://inso-tuwien.github.io/Binocular/)
+- [Screenshots](docs/PREVIEW.md)
 
 ## Dependencies
 
