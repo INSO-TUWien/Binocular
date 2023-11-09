@@ -42,6 +42,9 @@ RUN mkdir -p /app/binocular/lib/../ui/config
 
 RUN chown node:node -R /app/binocular/lib/../ui
 
+RUN mkdir -p /app/binocular/repo
+RUN chmod /app/binocular/repo
+
 RUN git config --global --add safe.directory /app/binocular/repo/*
 
 USER node
