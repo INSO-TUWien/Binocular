@@ -23,6 +23,7 @@ ENV GENERATE_SOURCEMAP=false
 RUN apk add git
 
 WORKDIR /app/binocular
+RUN chown node:node -R /app/binocular
 
 COPY --from=install --chown=node:node /app/binocular/node_modules ./node_modules
 
