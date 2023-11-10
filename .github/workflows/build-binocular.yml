@@ -52,7 +52,7 @@ jobs:
         id: docker_setup
         uses: ./.github/actions/docker-env/
         with:
-          image_name: binocular-offline
+          image_name: binocular-database
 
       - name: Debug echo env variables
         run: |
@@ -62,6 +62,9 @@ jobs:
           echo ${{ steps.docker_setup.outputs.docker_image_name }}:latest
           echo "##########     env     ##########"
           echo NODE_VERSION: ${{ steps.docker_setup.outputs.nvmrc_node_version }}
+          echo "##########   workflow  ##########"
+          echo databaseImage: ${{ inputs.databaseImage }}
+          echo databaseTag: ${{ inputs.databaseTag }}
 
       - name: Set .pupilrc variables
         uses: microsoft/variable-substitution@v1   
