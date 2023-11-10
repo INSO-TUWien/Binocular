@@ -1,7 +1,7 @@
 'use strict';
 
 import { merge } from 'webpack-merge';
-import * as TerserPlugin from "terser-webpack-plugin"
+import TerserPlugin from "terser-webpack-plugin"
 import * as commonConfig from './webpack.common.js';
 import path from 'path';
 import { createRequire } from 'node:module';
