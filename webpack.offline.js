@@ -16,6 +16,13 @@ const opts = {
 export default merge(commonConfig, {
   mode: 'production', // for webpack internal optimization
   entry: [require.resolve('babel-polyfill'), './ui/src/index'],
+  devtool: false,
+  output: {
+    path: path.resolve(__dirname, './dist/'),
+    filename: 'assets/js/[name].[contenthash:8].js',
+    chunkFilename: 'assets/js/[name].[contenthash:8].chunk.js',
+    assetModuleFilename: 'assets/media/[name].[hash][ext]',
+  },
   module: {
     rules: [
       {
@@ -87,9 +94,12 @@ export default merge(commonConfig, {
     removeEmptyChunks: true,
     mergeDuplicateChunks: true,
   },
-  output: {
-    path: path.join(__dirname, '/dist'),
-    pathinfo: true,
-    filename: 'assets/bundle.js',
+  performance: {
+    hints: 'warning',
   },
+  // output: {
+  //   path: path.join(__dirname, '/dist'),
+  //   pathinfo: true,
+  //   filename: 'assets/bundle.js',
+  // },
 });
