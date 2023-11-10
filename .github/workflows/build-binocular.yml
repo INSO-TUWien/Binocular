@@ -109,7 +109,9 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: binocular_ui
-          path: dist/
+          path: |
+            ./dist/
+            ./ui/db_export
 
       - name: docker commit
         run: |
