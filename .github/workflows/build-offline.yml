@@ -160,19 +160,19 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: binocular_ui
-          path: dist/
+          path: artifact/
 
       - name: Display structure of downloaded files
         run: |
           echo "url:" ${{ env.url }}
           echo "page_url:" ${{ steps.deployment.outputs.page_url }}
-          ls -l dist/
+          ls -l artifact/dist/
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v2
         with:
           # Upload entire repository
-          path: 'dist/'
+          path: 'artifact/dist/'
       
       - name: Deploy to GitHub Pages
         id: deployment
