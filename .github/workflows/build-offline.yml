@@ -6,10 +6,7 @@ on:
       - "main"
       - "develop"
   schedule:
-    - cron: '30 4 * * 0' # At 04:30 on Sunday, https://crontab.guru/#30_4_*_*_0
-  # push:
-  #   branches:
-  #     - "develop"
+    - cron: '30 3 * * 1' # At 03:30 on Monday, https://crontab.guru/#30_3_*_*_1
   workflow_dispatch:
     inputs:
       databaseImage: 
@@ -35,7 +32,7 @@ jobs:
       arangodb:
         # image: arangodb:3.11
         # image: ghcr.io/inso-tuwien/binocular-database:arangodb_3.11.3-no_volumes
-        image: ${{ github.event.inputs.databaseImage || 'ghcr.io/inso-tuwien/binocular-database' }}:${{ github.event.inputs.databaseTag || 'latest' }}"
+        image: ${{ github.event.inputs.databaseImage || 'ghcr.io/inso-tuwien/binocular-database' }}:${{ github.event.inputs.databaseTag || 'clean' }}"
         options: --name "arangodb_svc"
         ports:  
           - 8529:8529
