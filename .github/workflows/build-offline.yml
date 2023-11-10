@@ -3,7 +3,8 @@ name: Build Offline-Binocular
 on:
   push:
     branches:
-      - "feature/181-improve-docker-image-building"
+      - "main"
+      - "develop"
   schedule:
     - cron: '30 4 * * 0' # At 04:30 on Sunday, https://crontab.guru/#30_4_*_*_0
   # push:
