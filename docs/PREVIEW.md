@@ -1,6 +1,8 @@
 Preview
 =====
-![Demo](assets/binocular_demo.mp4)
+
+https://github.com/INSO-TUWien/Binocular/assets/48351547/793fabf0-8007-447e-8a67-326dd1b881f0
+
 
 ## Dashboard
 ![Default Dashboard](assets/screenshots/default_dashboard.png)
