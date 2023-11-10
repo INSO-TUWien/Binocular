@@ -32,7 +32,7 @@ jobs:
       arangodb:
         # image: arangodb:3.11
         # image: ghcr.io/inso-tuwien/binocular-database:arangodb_3.11.3-no_volumes
-        image: ${{ github.event.inputs.databaseImage || 'ghcr.io/inso-tuwien/binocular-database' }}:${{ github.event.inputs.databaseTag || 'clean' }}"
+        image: ${{ github.event.inputs.databaseImage || 'ghcr.io/inso-tuwien/binocular-database' }}:${{ github.event.inputs.databaseTag || 'latest' }}"
         options: --name "arangodb_svc"
         ports:  
           - 8529:8529
