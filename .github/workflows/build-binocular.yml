@@ -1,6 +1,9 @@
 name: Build Offline-Binocular
 
 on:
+  push:
+    branches:
+      - "feature/181-improve-docker-image-building"
   schedule:
     - cron: '30 4 * * 0' # At 04:30 on Sunday, https://crontab.guru/#30_4_*_*_0
   # push:
@@ -80,7 +83,7 @@ jobs:
       run: DEBUG=idx*,importer*,git*,db* tsx binocular.js --no-open --no-server
 
     - name: Build
-      run: npm run build
+      run: npm run build:offline
 
     - name: Publish artifact
       uses: actions/upload-artifact@v3
