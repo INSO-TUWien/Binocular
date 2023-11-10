@@ -89,7 +89,7 @@ jobs:
 
       - name: Install dependencies
         if: steps.cache.outputs.cache-hit != 'true'
-        run: npm ci --ignore-scripts
+        run: npm ci --omit=optional --ignore-scripts
 
       - name: Install tsx
         run: npm i tsx -g
