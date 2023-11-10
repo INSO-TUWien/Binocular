@@ -1,6 +1,7 @@
 'use strict';
 
 import { merge } from 'webpack-merge';
+import * as TerserPlugin from "terser-webpack-plugin"
 import * as commonConfig from './webpack.common.js';
 import path from 'path';
 import { createRequire } from 'node:module';
@@ -15,7 +16,7 @@ const opts = {
 
 export default merge(commonConfig, {
   mode: 'production', // for webpack internal optimization
-  devtool: 'cheap-module-source-map',
+  // devtool: 'cheap-module-source-map',
   entry: [require.resolve('babel-polyfill'), './ui/src/index'],
   module: {
     rules: [
@@ -25,6 +26,14 @@ export default merge(commonConfig, {
         use: [{ loader: 'ifdef-loader', options: opts }],
       },
     ],
+  },
+  optimization: {
+    minimize: true,
+    minimizer: [
+      new TerserPlugin({
+        parallel: 4,
+      }),
+    ]
   },
   output: {
     path: path.join(__dirname, '/dist'),
