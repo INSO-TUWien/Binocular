@@ -204,6 +204,7 @@
     "@babel/preset-react": "^7.18.6",
     "@types/archiver": "^5.3.3",
     "@types/debug": "^4.1.9",
+    "@types/event-emitter": "^0.3.5",
     "@types/fs-extra": "^11.0.2",
     "@types/rc": "^1.2.2",
     "babel-jest": "^29.5.0",

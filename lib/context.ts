@@ -3,11 +3,11 @@
 import express from 'express';
 import cors from 'cors';
 import _ from 'lodash';
-import { Server } from 'socket.io';
+import { Server, Socket } from 'socket.io';
 import path from 'path';
 import http from 'http';
 import bodyParser from 'body-parser';
-import EventEmitter from 'event-emitter';
+import ee from 'event-emitter';
 import debug from 'debug';
 
 import { fileURLToPath } from 'url';
@@ -45,6 +45,11 @@ const argv = require('yargs')
     type: 'boolean',
     description: 'Enable/disable server (after indexing is finished)',
   })
+  .option('export', {
+    default: true,
+    type: 'boolean',
+    description: 'Enable/disable the automatic db Export (after indexing is finished)',
+  })
   .help('h')
   .alias('help', 'h').argv;
 
@@ -52,7 +57,7 @@ const app = express();
 const httpServer = http.createServer(app);
 const io = new Server(httpServer, { path: '/wsapi' });
 
-const sockets = [];
+const sockets: Socket[] = [];
 
 io.on('connection', function (socket) {
   sockets.push(socket);
@@ -63,7 +68,9 @@ io.on('connection', function (socket) {
 
 app.use(cors());
 app.use(bodyParser.json());
-const context = new EventEmitter();
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
+const context = ee();
 
 let quitRequested = false;
 
@@ -84,13 +91,13 @@ const fields = {
   },
 };
 
-context.on('bound', (e) => log('Bound:', e));
+context.on('bound', (e: string) => log('Bound:', e));
 
 _.merge(context, fields);
 
 export default new Proxy(context, {
-  set: function (obj, prop, value) {
-    if (!_.includes(_.keys(EventEmitter.prototype), prop)) {
+  set: function (obj: any, prop: string, value) {
+    if (!_.includes(_.keys(ee.prototype), prop)) {
       obj[prop] = value;
       process.nextTick(function () {
         context.emit('bound', { property: prop, value: value });

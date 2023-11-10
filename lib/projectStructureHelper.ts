@@ -15,7 +15,8 @@ log_timestamp(() => '[' + Moment().format('DD-MM-YYYY, HH:mm:ss') + ']');
 
 export function checkProjectStructureAndFix() {
   //check if db_export folder exists
-  if (!fs.existsSync(__dirname + '/../ui/db_export')) {
+
+  if (ctx.argv.export && !fs.existsSync(__dirname + '/../ui/db_export')) {
     this.createAndFillDbExportFolder();
   }
 }

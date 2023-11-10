@@ -21,7 +21,7 @@ function threadWarn(thread) {
  * Main entry point of the binocular application
  */
 
-import ctx from './lib/context.js';
+import ctx from './lib/context.ts';
 
 import open from 'open';
 import _ from 'lodash';
