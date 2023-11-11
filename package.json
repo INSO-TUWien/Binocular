@@ -135,7 +135,7 @@
     "lorem-ipsum": "^2.0.4",
     "moment": "^2.29.1",
     "node-fetch": "^2.6.9",
-    "node-sass": "8.0.0",
+    "node-sass": "9.0.0",
     "open": "^8.4.2",
     "pouchdb-adapter-memory": "^8.0.1",
     "pouchdb-browser": "^8.0.1",
