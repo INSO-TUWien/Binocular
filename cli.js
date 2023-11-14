@@ -1,25 +1,24 @@
 #!/usr/bin/env node
 'use strict';
 
-import { Command, Option } from 'commander';
+import { Argument, Command, Option } from 'commander';
 import { spawn } from 'child_process';
 import figlet from 'figlet';
 import chalk from 'chalk';
-import package_json from './package.json' assert { type: 'json' };
-import open from 'open';
-import * as setupConfig from './cli/setupConfig.js';
+import * as setup from './cli/setup.js';
 import fs from 'fs-extra';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { createRequire } from 'node:module';
+const require = createRequire(import.meta.url);
+
+const package_json = require('./package.json');
 
 const cli = new Command();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-// Show help when no arguments passed
-if (process.argv.length < 3) {
-  console.log(chalk.cyan('Starting the frontend and backend application concurrently...'));
-  execute(`npm run dev-concurrently ${path.resolve('.')}`);
-}
+
+console.log(chalk.green(figlet.textSync('Binocular')));
 
 // Add unknown option handler
 cli.showHelpAfterError();
@@ -34,27 +33,86 @@ cli
       'and the GitHub or GitLab API and persist it to a configured ArangoDB instance.\n' +
       '\n' +
       'Binocular then hosts interactive visualizations about the gathered data via a web-interface.'
-  )
+  );
+
+cli
+  .command('setup')
+  .description('setup the database or the config file of binocular')
+  .action(() => {
+    setup.setup();
+  });
+
+cli
+  .command('run')
+  .addArgument(new Argument('[targetPath]', 'relative path to the repository'))
+  .description('execute the binocular frontend and backend')
+  .addOption(new Option('--no-backend', 'disable the backend'))
+  .addOption(new Option('--no-frontend', 'disable the frontend'))
+  .addOption(new Option('--no-export', 'disable the default db export'))
+  .addOption(new Option('--no-server', 'disable the backed webserver (when used binocular quits after indexing)'))
+  .action((targetPath, options) => {
+    if (options.backend && options.frontend) {
+      console.log(chalk.cyan('Starting the frontend and backend application concurrently...'));
+      execute(
+        `concurrently --kill-others -P  "webpack serve --config webpack.dev.js" "tsx binocular.js ${path.resolve(
+          targetPath ? targetPath : '.'
+        )} ${options.export ? '' : '--no-export'} ${options.server ? '' : '--no-server'}" --`
+      );
+    } else if (options.backend && !options.frontend) {
+      console.log(chalk.cyan('Starting the backend application...'));
+      execute(
+        `tsx binocular.js ${path.resolve(targetPath ? targetPath : '.')} ${options.export ? '' : '--no-export'} ${
+          options.server ? '' : '--no-server'
+        }`
+      );
+    } else if (!options.backend && options.frontend) {
+      console.log(chalk.cyan('Starting the frontend application...'));
+      execute('npm run dev-frontend');
+    }
+  });
+
+cli
+  .command('build')
+  .description('build the fronted of binocular')
+  .addOption(new Option('-i, --run-indexer [repo]', 'run the indexer and db export before building the backend'))
+  .addOption(new Option('-m, --build-mode <mode>', 'define the build mode').choices(['dev', 'prod', 'offline']).default('dev'))
+  .action((options) => {
+    if (options.runIndexer === undefined) {
+      console.log(chalk.cyan('Building frontend...'));
+      execute(`npm run build:${options.buildMode}`);
+    } else if (options.runIndexer === true) {
+      fs.rmSync(`${__dirname}/ui/db_export`, { recursive: true, force: true });
+      console.log(chalk.cyan('Indexing repository . and building frontend for an offline run...'));
+      execute(`tsx binocular.js --no-open --no-server ${path.resolve('.')}`, `npm run build:${options.buildMode}`);
+    } else {
+      fs.rmSync(`${__dirname}/ui/db_export`, { recursive: true, force: true });
+      console.log(chalk.cyan(`Indexing repository ${options.runIndexer} and building frontend for an offline run...`));
+      execute(`tsx binocular.js --no-open --no-server ${path.resolve(options.runIndexer)}`, `npm run build:${options.buildMode}`);
+    }
+  });
+
+cli.parse();
+
+/*
   .addOption(new Option('-sdb, --setup-db', 'helps set up the database needed for the backend application to run'))
   .addOption(new Option('-sc, --setup-config', 'starts an interactive step-by-step wizard that configures the application'))
   .addOption(
     new Option(
       '-rc, --run-concurrently [repo]',
-      'starts the dev backend and frontend application for repository [repo]. Default is current repository.'
+      'starts the dev backend and frontend application for repository [repo]. Default is current repository. ' +
+        "(also exports db when --no-export flag wasn't set)"
     ).preset('.')
   )
   .addOption(
     new Option(
       '-rb, --run-backend [repo]',
-      'starts the dev backend application for repository [repo]. Default is current repository.'
+      'starts the dev backend application for repository [repo]. Default is current repository. ' +
+        "(also exports db when --no-export flag wasn't set)"
     ).preset('.')
   )
   .addOption(new Option('-rf,--run-frontend', 'starts the dev frontend application'))
   .addOption(
-    new Option(
-      '-e, --export-db [repo]',
-      'index the repository [repo] and export the ArangoDB database. Default is current repository.'
-    ).preset('.')
+    new Option('-i, --index [repo]', "index the repository [repo]. (also exports db when --no-export flag wasn't set)").preset('.')
   )
   .addOption(
     new Option(
@@ -62,46 +120,40 @@ cli
       'prepares the artifacts needed for an offline visualization of the repository [repo]. Default is current repository.'
     ).preset('.')
   )
-  .addOption(new Option('--build-offline-no-export', 'builds the frontend application.'))
+  .addOption(new Option('-b, --build', 'builds the frontend application.'))
+  .addOption(
+    new Option('--no-export', 'disables the creation of the automatic db export.(only works when backend gets executed)').default(true)
+  )
 
   .parse(process.argv);
 
-console.log(chalk.green(figlet.textSync('Binocular')));
 
 const options = cli.opts();
 
-if (options.exportDb) {
-  console.log(chalk.cyan(`Indexing repository ${options.exportDb} in offline mode and exporting the database...`));
+if (options.index) {
+  console.log(chalk.cyan(`Indexing repository ${options.index}`));
   fs.rmSync(`${__dirname}/ui/db_export`, { recursive: true, force: true });
-  execute(`node binocular.js --no-open --no-server ${path.resolve(options.exportDb)}`);
-}
-
-if (options.buildOffline) {
+  execute(`tsx binocular.js --no-open --no-server ${path.resolve(options.index)} ${options.export ? '' : '--no-export'}`);
+} else if (options.buildOffline) {
   console.log(chalk.cyan(`Indexing repository ${options.buildOffline} and building frontend for an offline run...`));
-  execute(`node binocular.js --no-open --no-server ${path.resolve(options.buildOffline)}`, 'npm run build');
-}
-
-if (options.buildOfflineNoExport) {
+  execute(`tsx binocular.js --no-open --no-server ${path.resolve(options.buildOffline)}`, 'npm run build');
+} else if (options.build) {
   console.log(chalk.cyan('Building frontend...'));
   execute('npm run build');
-}
-
-if (options.runFrontend) {
+} else if (options.runFrontend) {
   console.log(chalk.cyan('Starting the frontend application...'));
   execute('npm run dev-frontend');
-}
-
-if (options.runBackend) {
+} else if (options.runBackend) {
   console.log(chalk.cyan('Starting the backend application...'));
-  execute(`npm run dev-server ${path.resolve(options.runBackend)}`);
-}
-
-if (options.runConcurrently) {
+  execute(`npm run dev-server -- ${path.resolve(options.runBackend)} ${options.export ? '' : '--no-export'}`);
+} else if (options.runConcurrently || !options.export) {
   console.log(chalk.cyan('Starting the frontend and backend application concurrently...'));
-  execute(`npm run dev-concurrently -- ${path.resolve(options.runConcurrently)}`);
-}
-
-if (options.setupDb) {
+  execute(
+    `concurrently --kill-others -P  "webpack serve --config webpack.dev.js" "npm run dev-server ${path.resolve(
+      options.runConcurrently ? options.runConcurrently : '.'
+    )} -- ${options.export ? '' : '--no-export'}" --`
+  );
+} else if (options.setupDb) {
   console.log(
     'To use binocular you need a version of ' +
       chalk.underline('ArangoDB') +
@@ -111,12 +163,10 @@ if (options.setupDb) {
   );
   console.log(chalk.cyan('Opening the ArangoDB download site...'));
   open('https://www.arangodb.com/download-major/');
-}
-
-if (options.setupConfig) {
+} else if (options.setup) {
   console.log(chalk.cyan('Starting the setup-config wizard...'));
-  setupConfig.promptUserAndSaveConfig();
-}
+  setup.promptUserAndSaveConfig();
+}*/
 
 // Executes statements sequentially
 function execute(...statements) {

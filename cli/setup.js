@@ -1,7 +1,37 @@
 import inquirer from 'inquirer';
 import fs from 'fs-extra';
+import chalk from 'chalk';
+import open from 'open';
 
-export function promptUserAndSaveConfig() {
+export function setup() {
+  inquirer
+    .prompt([
+      {
+        type: 'list',
+        name: 'setupType',
+        message: 'With which setup do you need help?',
+        choices: ['database', 'config'],
+      },
+    ])
+    .then((answers) => {
+      switch (answers.setupType) {
+        case 'database':
+          setupDb();
+
+          break;
+        case 'config':
+        default:
+          console.log(chalk.cyan('Starting the setup-config wizard...'));
+          setupConfig();
+          break;
+      }
+    })
+    .catch((error) => {
+      console.log(error);
+    });
+}
+
+export function setupConfig() {
   inquirer
     .prompt([
       {
@@ -115,5 +145,33 @@ export function promptUserAndSaveConfig() {
           console.log('Config saved successfully!');
         }
       });
+    });
+}
+
+export function setupDb() {
+  console.log(
+    'To use binocular you need a version of ' +
+      chalk.underline('ArangoDB') +
+      ' running (Tested with ArangoDB 3.11). It is recommended to use the ' +
+      chalk.underline('Docker Image') +
+      ' provided by ArangoDB.\n'
+  );
+  inquirer
+    .prompt([
+      {
+        type: 'list',
+        name: 'openArangoDownloadPage',
+        message: 'Do you want to open the ArangoDB download page?',
+        choices: ['Yes', 'No'],
+      },
+    ])
+    .then((answers) => {
+      if (answers.openArangoDownloadPage === 'Yes') {
+        console.log(chalk.cyan('Opening the ArangoDB download site...'));
+        open('https://www.arangodb.com/download-major/');
+      }
+    })
+    .catch((error) => {
+      console.log(error);
     });
 }
