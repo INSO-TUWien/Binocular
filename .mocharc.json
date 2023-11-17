@@ -1,4 +1,5 @@
 {
+  // source: https://github.com/mochajs/mocha-examples/issues/47
   "node-option": [
       "experimental-specifier-resolution=node",
       "loader=ts-node/esm"
