@@ -1,7 +1,7 @@
 'use strict';
 
 import _ from 'lodash';
-import inflection from 'inflection';
+import * as inflection from 'inflection';
 
 function ReporterMock(categories) {
   this.categories = {};
