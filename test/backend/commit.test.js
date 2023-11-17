@@ -18,6 +18,21 @@ import conf from '../../lib/config.js';
 import ctx from '../../lib/context';
 import GitHubUrlProvider from '../../lib/url-providers/GitHubUrlProvider';
 import Stakeholder from '../../lib/models/Stakeholder.js';
+import path from 'path';
+const indexerOptions = {
+  backend: true,
+  frontend: false,
+  open: false,
+  clean: true,
+  its: true,
+  ci: true,
+  export: true,
+  server: false,
+};
+const targetPath = path.resolve('.');
+ctx.setOptions(indexerOptions);
+ctx.setTargetPath(targetPath);
+conf.loadConfig(ctx);
 const config = conf.get();
 
 describe('commit', function () {
@@ -39,7 +54,7 @@ describe('commit', function () {
       urlProvider.configure({ url: 'https://test.com', project: 'testProject' });
 
       //setup DB
-      await db.ensureDatabase('test');
+      await db.ensureDatabase('test', ctx);
       await db.truncate();
       await Commit.ensureCollection();
       await File.ensureCollection();
@@ -79,7 +94,7 @@ describe('commit', function () {
       urlProvider.configure({ url: 'https://test.com', project: 'testProject' });
 
       //setup DB
-      await db.ensureDatabase('test');
+      await db.ensureDatabase('test', ctx);
       await db.truncate();
       await Commit.ensureCollection();
       await File.ensureCollection();
@@ -100,7 +115,7 @@ describe('commit', function () {
 
       for (const commit of commits) {
         const commitDAO = await Commit.persist(repo, commit, urlProvider);
-        await Promise.all(await commitDAO.processTree(repo, commit, currentBranch, urlProvider, gateway));
+        await Promise.all(await commitDAO.processTree(repo, commit, currentBranch, urlProvider, gateway, ctx));
       }
       const dbCommitsCollectionData = await (await db.query('FOR i IN @@collection RETURN i', { '@collection': 'commits' })).all();
       const dbFilesCollectionData = await (await db.query('FOR i IN @@collection RETURN i', { '@collection': 'files' })).all();

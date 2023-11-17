@@ -25,6 +25,21 @@ import ctx from '../../lib/context';
 import GitHubUrlProvider from '../../lib/url-providers/GitHubUrlProvider';
 
 import VcsIndexer from '../../lib/indexers/vcs';
+import path from 'path';
+const indexerOptions = {
+  backend: true,
+  frontend: false,
+  open: false,
+  clean: true,
+  its: true,
+  ci: true,
+  export: true,
+  server: false,
+};
+const targetPath = path.resolve('.');
+ctx.setOptions(indexerOptions);
+ctx.setTargetPath(targetPath);
+conf.loadConfig(ctx);
 const config = conf.get();
 
 describe('vcs', function () {
@@ -55,7 +70,7 @@ describe('vcs', function () {
       urlProvider.configure({ url: 'https://test.com', project: 'testProject' });
 
       //setup DB
-      await db.ensureDatabase('test');
+      await db.ensureDatabase('test', ctx);
       await db.truncate();
       await Commit.ensureCollection();
       await Hunk.ensureCollection();
@@ -82,7 +97,7 @@ describe('vcs', function () {
       await helpers.commit(repo, ['test.js'], bob, 'Commit3');
       await repo.listAllCommits();
 
-      const gitIndexer = VcsIndexer(repo, urlProvider, reporter, true);
+      const gitIndexer = VcsIndexer(repo, urlProvider, reporter, true, conf, ctx);
       gitIndexer.setGateway(gateway);
       gitIndexer.resetCounter();
       await gitIndexer.index();

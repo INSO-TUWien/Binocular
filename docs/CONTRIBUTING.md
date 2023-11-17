@@ -197,7 +197,7 @@ I will try to explain the libraries that seemed the most important to me, and th
 
 ### Development Tips
 This project uses the npm package manager. You can check the used dependencies and available scripts (for running in IDE) in the file package.json.
-The most useful to me were "dev" and "build". In your IDE, you can create a Node.js configuration and enter "binocular.js" as the main JavaScript file.
+The most useful to me were "dev" and "build". In your IDE, you can create a Node.js configuration and enter "binocular.ts" as the main JavaScript file.
 You can give the application the relative path to a project you want to visualize as a parameter. (e.g. ../Projects/kanban/)
 If you want a run configuration, you can leave it like that. To build & run, tell your IDE to execute the npm script "build" first (or run "npm run-script build" manually).
 If you want to see your changes as they happen in the code, you can use the "dev" script. It re-compiles quickly as soon as changes are detected.

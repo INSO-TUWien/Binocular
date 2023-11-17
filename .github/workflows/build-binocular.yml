@@ -77,7 +77,7 @@ jobs:
       run: npm i tsx -g
 
     - name: Run binocular
-      run: DEBUG=idx*,importer*,git*,db* tsx binocular.js --no-open --no-server
+      run: DEBUG=idx*,importer*,git*,db* tsx binocular.ts --no-open --no-server
 
     - name: Build
       run: npm run build

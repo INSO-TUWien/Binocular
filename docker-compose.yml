@@ -19,7 +19,7 @@ services:
     command:
       [
         "tsx",
-        "binocular.js",
+        "binocular.ts",
         "--no-open",
         "--no-server",
         "/app/binocular/repo/test-repo"

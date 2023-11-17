@@ -13,7 +13,7 @@ export function setup() {
         choices: ['database', 'config'],
       },
     ])
-    .then((answers) => {
+    .then((answers: { setupType: string }) => {
       switch (answers.setupType) {
         case 'database':
           setupDb();
@@ -26,7 +26,7 @@ export function setup() {
           break;
       }
     })
-    .catch((error) => {
+    .catch((error: Error) => {
       console.log(error);
     });
 }
@@ -76,7 +76,7 @@ export function setupConfig() {
         type: 'input',
         name: 'arangoPort',
         message: 'Enter your ArangoDB port:',
-        validate: (input) => {
+        validate: (input: string) => {
           const number = parseInt(input);
           return Number.isInteger(number) && number > 0 && number < 65536;
         },
@@ -108,44 +108,60 @@ export function setupConfig() {
         default: 'none',
       },
     ])
-    .then((answers) => {
-      const data = {
-        gitlab: {
-          url: answers.gitlabUrl,
-          project: answers.gitlabProject,
-          token: answers.gitlabToken,
-        },
-        github: {
-          auth: {
-            type: 'token',
-            username: answers.githubUsername,
-            password: answers.githubPassword,
-            token: answers.githubToken,
+    .then(
+      (answers: {
+        gitlabUrl: string;
+        gitlabProject: string;
+        gitlabToken: string;
+        githubUsername: string;
+        githubPassword: string;
+        githubToken: string;
+        arangoHost: string;
+        arangoPort: string;
+        arangoUser: string;
+        arangoPassword: string;
+        its: string;
+        ci: string;
+      }) => {
+        const data = {
+          gitlab: {
+            url: answers.gitlabUrl,
+            project: answers.gitlabProject,
+            token: answers.gitlabToken,
           },
-        },
-        arango: {
-          host: answers.arangoHost,
-          port: parseInt(answers.arangoPort),
-          user: answers.arangoUser,
-          password: answers.arangoPassword,
-        },
-      };
-
-      if (answers.its !== 'none' || answers.ci !== 'none') {
-        data.indexers = {
-          its: answers.its === 'none' ? '' : answers.its,
-          ci: answers.ci === 'none' ? '' : answers.ci,
+          github: {
+            auth: {
+              type: 'token',
+              username: answers.githubUsername,
+              password: answers.githubPassword,
+              token: answers.githubToken,
+            },
+          },
+          arango: {
+            host: answers.arangoHost,
+            port: parseInt(answers.arangoPort),
+            user: answers.arangoUser,
+            password: answers.arangoPassword,
+          },
+          indexers: {},
         };
-      }
 
-      fs.writeJson('.binocularrc', data, (err) => {
-        if (err) {
-          console.error(err);
-        } else {
-          console.log('Config saved successfully!');
+        if (answers.its !== 'none' || answers.ci !== 'none') {
+          data.indexers = {
+            its: answers.its === 'none' ? '' : answers.its,
+            ci: answers.ci === 'none' ? '' : answers.ci,
+          };
         }
-      });
-    });
+
+        fs.writeJson('.binocularrc', data, (err) => {
+          if (err) {
+            console.error(err);
+          } else {
+            console.log('Config saved successfully!');
+          }
+        });
+      }
+    );
 }
 
 export function setupDb() {
@@ -165,13 +181,13 @@ export function setupDb() {
         choices: ['Yes', 'No'],
       },
     ])
-    .then((answers) => {
+    .then((answers: { openArangoDownloadPage: string }) => {
       if (answers.openArangoDownloadPage === 'Yes') {
         console.log(chalk.cyan('Opening the ArangoDB download site...'));
         open('https://www.arangodb.com/download-major/');
       }
     })
-    .catch((error) => {
+    .catch((error: Error) => {
       console.log(error);
     });
 }

@@ -5,6 +5,22 @@ import conf from '../../lib/config.js';
 
 import Db from '../../lib/core/db/db';
 import TestModel from './helper/db/testModel';
+import path from 'path';
+import ctx from '../../lib/context.ts';
+const indexerOptions = {
+  backend: true,
+  frontend: false,
+  open: false,
+  clean: true,
+  its: true,
+  ci: true,
+  export: true,
+  server: false,
+};
+const targetPath = path.resolve('.');
+ctx.setOptions(indexerOptions);
+ctx.setTargetPath(targetPath);
+conf.loadConfig(ctx);
 const config = conf.get();
 
 describe('db', function () {
@@ -28,14 +44,14 @@ describe('db', function () {
 
   describe('#ensureDatabase', function () {
     it('ensure a database', async function () {
-      const ensuredDB = await db.ensureDatabase('test');
+      const ensuredDB = await db.ensureDatabase('test', ctx);
       expect(ensuredDB._name).to.equal('test');
     });
   });
 
   describe('#ensureCollection', function () {
     it('ensure a collection', async function () {
-      await db.ensureDatabase('test');
+      await db.ensureDatabase('test', ctx);
       await db.truncate();
       const ensuredCollection = await TestModel.ensureCollection();
       expect(ensuredCollection.name).to.equal('tests');
@@ -44,7 +60,7 @@ describe('db', function () {
 
   describe('#persistData', function () {
     it('persist data to tests collection', async function () {
-      await db.ensureDatabase('test');
+      await db.ensureDatabase('test', ctx);
       await db.truncate();
       await TestModel.ensureCollection();
 
@@ -64,7 +80,7 @@ describe('db', function () {
 
   describe('#turncate', function () {
     it('turncate Data', async function () {
-      await db.ensureDatabase('test');
+      await db.ensureDatabase('test', ctx);
       await db.truncate();
       await TestModel.ensureCollection();
 

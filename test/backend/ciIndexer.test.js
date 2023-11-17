@@ -7,14 +7,28 @@ import ReporterMock from './helper/reporter/reporterMock.js';
 import Db from '../../lib/core/db/db.js';
 import conf from '../../lib/config.js';
 
-import ctx from '../../lib/context.js';
+import ctx from '../../lib/context.ts';
 import GitLabCIIndexer from './helper/gitlab/gitLabCIIndexerRewire.js';
 import GitHubCIIndexer from './helper/github/gitHubCIIndexerRewire.js';
 
 import Build from '../../lib/models/Build.js';
 import repositoryFake from './helper/git/repositoryFake.js';
 import GitLabMock from './helper/gitlab/gitLabMock.js';
-
+import path from 'path';
+const indexerOptions = {
+  backend: true,
+  frontend: false,
+  open: false,
+  clean: true,
+  its: true,
+  ci: true,
+  export: true,
+  server: false,
+};
+const targetPath = path.resolve('.');
+ctx.setOptions(indexerOptions);
+ctx.setTargetPath(targetPath);
+conf.loadConfig(ctx);
 describe('ci', function () {
   const config = conf.get();
   const db = new Db(config.arango);
@@ -37,7 +51,7 @@ describe('ci', function () {
       };
 
       //setup DB
-      await db.ensureDatabase('test');
+      await db.ensureDatabase('test', ctx);
       await db.truncate();
       await Build.ensureCollection();
 
@@ -72,7 +86,7 @@ describe('ci', function () {
       };
 
       //setup DB
-      await db.ensureDatabase('test');
+      await db.ensureDatabase('test', ctx);
       await db.truncate();
       await Build.ensureCollection();
 

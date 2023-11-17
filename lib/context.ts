@@ -4,54 +4,11 @@ import express from 'express';
 import cors from 'cors';
 import _ from 'lodash';
 import { Server, Socket } from 'socket.io';
-import path from 'path';
 import http from 'http';
 import bodyParser from 'body-parser';
 import ee from 'event-emitter';
 import debug from 'debug';
-
-import { fileURLToPath } from 'url';
-import { createRequire } from 'node:module';
-const require = createRequire(import.meta.url);
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 const log = debug('context');
-
-const argv = require('yargs')
-  .option('ui', {
-    default: true,
-    alias: 'u',
-  })
-  .option('open', {
-    alias: 'o',
-    default: false,
-  })
-  .option('clean', {
-    default: false,
-    type: 'boolean',
-  })
-  .option('its', {
-    default: true,
-    type: 'boolean',
-    description: 'Enable/disable ITS indexing',
-  })
-  .option('ci', {
-    default: true,
-    type: 'boolean',
-    description: 'Enable/disable CI indexing',
-  })
-  .option('server', {
-    default: true,
-    type: 'boolean',
-    description: 'Enable/disable server (after indexing is finished)',
-  })
-  .option('export', {
-    default: true,
-    type: 'boolean',
-    description: 'Enable/disable the automatic db Export (after indexing is finished)',
-  })
-  .help('h')
-  .alias('help', 'h').argv;
 
 const app = express();
 const httpServer = http.createServer(app);
@@ -74,13 +31,31 @@ const context = ee();
 
 let quitRequested = false;
 
+function setOptions(options: {
+  backend: boolean;
+  frontend: boolean;
+  open: boolean;
+  clean: boolean;
+  its: boolean;
+  ci: boolean;
+  export: boolean;
+  server: boolean;
+}) {
+  this.argv = options;
+}
+function setTargetPath(path: string) {
+  this.targetPath = path;
+}
+
 const fields = {
   app,
-  argv,
+  argv: undefined,
   httpServer,
-  targetPath: argv._[0] || '.',
+  targetPath: undefined,
   models: {},
   io,
+  setOptions,
+  setTargetPath,
   isStopping: () => quitRequested,
   quit: () => {
     httpServer.close();
@@ -108,10 +83,3 @@ export default new Proxy(context, {
     return true;
   },
 });
-
-if (argv.ui) {
-  const uiDir = path.join(__dirname, '../ui');
-  const assetDir = path.join(uiDir, 'gen');
-  app.use(express.static(uiDir));
-  app.use('/assets', express.static(assetDir));
-}
