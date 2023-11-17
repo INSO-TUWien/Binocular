@@ -35,6 +35,7 @@ COPY --chown=node:node ./services ./services
 COPY --chown=node:node ./foxx ./foxx
 
 # files
+COPY --chown=node:node ./babel.config.json ./babel.config.json
 COPY --chown=node:node ./index.js ./index.js
 COPY --chown=node:node ./tsconfig.json ./tsconfig.json
 COPY --chown=node:node ./package.json ./package.json
