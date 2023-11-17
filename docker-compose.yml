@@ -1,17 +1,32 @@
 version: "3.8"
 
+x-binocular-backend-image: &binocular-backend-image ghcr.io/inso-tuwien/binocular-backend:6903046272 #:${TAG:-latest-dev}
+x-binocular-db-image: &binocular-db-image ghcr.io/inso-tuwien/binocular-database:6773404196 #:${TAG:-latest-dev}
+x-binocular-frontend-image: &binocular-frontend-image ghcr.io/inso-tuwien/binocular-frontend:${TAG:-latest}
+x-binocular-depends-on: &binocular-depends-on
+  - db
+x-binocular-volumes-backend:
+  &binocular-volumes-backend
+    - ./cli:/app/binocular/cli
+    - ./lib:/app/binocular/lib
+    - ./services:/app/binocular/services
+    - ./foxx:/app/binocular/foxx
+    - ./binocular.js:/app/binocular.js
+    - ./cli.js:/app/binocular/cli.js
+    - ./package.json:/app/binocular/package.json
+    - ./.binocularrc:/app/binocular/.binocularrc
+
 services:
   db:
-    image: ghcr.io/inso-tuwien/binocular-database:latest
+    image: *binocular-db-image
     container_name: binocular_db
     restart: unless-stopped
     ports:
       - "8529:8529"
 
   binocular-init:
-    image: ghcr.io/inso-tuwien/binocular-backend:latest
-    depends_on:
-      - db
+    image: *binocular-backend-image
+    depends_on: *binocular-depends-on
     container_name: "binocular_init"
     tty: true
     environment:
@@ -22,17 +37,34 @@ services:
         "binocular.ts",
         "--no-open",
         "--no-server",
-        "/app/binocular/repo/test-repo"
+        # "/app/binocular/repo/test-repo"
+        "/app/binocular/repo/23ws-ase-pr-inso-06"
       ]
-    volumes:
-      - type: bind
-        source: .binocularrc
-        target: /app/binocular/repo/test-repo/.binocularrc
-        read_only: true
-      - ./:/app/binocular/repo/test-repo
+    volumes: *binocular-volumes-backend
 
   binocular:
     container_name: binocular_app
-    image: ghcr.io/inso-tuwien/binocular-frontend:latest
+    image: *binocular-frontend-image
+    # depends_on:
+    #   - *binocular-depends-on
+    #   - binocular-backend
     ports:
       - 8088:80
+
+  binocular-backend:
+    image: *binocular-backend-image
+    depends_on: *binocular-depends-on
+    container_name: "binocular_backend"
+    user: "root"
+    tty: true
+    environment:
+      - DEBUG=idx*,importer*,git*,db*,context*
+    # command:
+    #   [
+    #     "tsx",
+    #     "watch",
+    #     "binocular.js",
+    #     "--no-ui",
+    #     "--no-open"
+    #   ]
+    # volumes: *binocular-volumes-backend
