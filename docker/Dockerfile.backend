@@ -27,14 +27,22 @@ RUN chown node:node -R /app/binocular
 
 COPY --from=install --chown=node:node /app/binocular/node_modules ./node_modules
 
+# folders
+COPY --chown=node:node ./ui ./ui
 COPY --chown=node:node ./cli ./cli
 COPY --chown=node:node ./lib ./lib
 COPY --chown=node:node ./services ./services
 COPY --chown=node:node ./foxx ./foxx
-COPY --chown=node:node ./binocular.ts ./
+
+# files
+COPY --chown=node:node ./index.js ./index.js
+COPY --chown=node:node ./tsconfig.json ./tsconfig.json
 COPY --chown=node:node ./package.json ./package.json
 COPY --chown=node:node ./webpack.common.js ./webpack.common.js
 COPY --chown=node:node ./webpack.offline.js ./webpack.offline.js
+COPY --chown=node:node ./binocular.ts ./binocular.ts
+COPY --chown=node:node ./declaration.d.ts ./declaration.d.ts
+COPY --chown=node:node ./LICENSE ./LICENSE
 
 RUN npm install -g .
 RUN npm install -g tsx
