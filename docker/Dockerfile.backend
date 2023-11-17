@@ -31,7 +31,6 @@ COPY --chown=node:node ./lib ./lib
 COPY --chown=node:node ./services ./services
 COPY --chown=node:node ./foxx ./foxx
 COPY --chown=node:node ./binocular.ts ./
-COPY --chown=node:node ./cli.js ./
 COPY --chown=node:node ./package.json ./package.json
 
 RUN npm install -g .
