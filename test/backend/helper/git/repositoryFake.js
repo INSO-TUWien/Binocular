@@ -12,7 +12,7 @@ const fakerHelpers = fh(faker);
 import firstNames from 'faker/lib/locales/en/name/first_name.js';
 import lastNames from 'faker/lib/locales/en/name/last_name.js';
 import emailProviders from 'faker/lib/locales/en/internet/free_email.js';
-import loremIpsum from 'lorem-ipsum';
+import * as loremIpsum from 'lorem-ipsum';
 
 import helpers from './helpers.js';
 import Repository from '../../../../lib/core/provider/git.js';
