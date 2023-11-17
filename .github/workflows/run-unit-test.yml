@@ -80,11 +80,8 @@ jobs:
 
       - name: Install dependencies
         run: npm ci
-
+            
       - name: Run tests ui
-        env:
-          # source: https://stackoverflow.com/a/72457381
-          NODE_OPTIONS: "--loader ts-node/esm"
         run: npm run test-ui
 
     # - name: Collect coverage
