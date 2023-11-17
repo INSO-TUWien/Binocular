@@ -94,7 +94,9 @@ export const module = {
   ],
 };
 export const plugins = [
-  new HtmlWebpackPlugin({ template: './ui/index.html' }),
+  new HtmlWebpackPlugin({
+    template: './ui/index.html',
+  }),
   new webpack.ProvidePlugin({
     Buffer: ['buffer', 'Buffer'],
   }),

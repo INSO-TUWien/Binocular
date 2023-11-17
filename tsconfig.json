@@ -13,6 +13,8 @@
     "forceConsistentCasingInFileNames": true,
     "noFallthroughCasesInSwitch": true,
     "esModuleInterop": true,
-    "lib": ["ES2021.String", "dom", "dom.iterable", "esnext"],
+    "lib": ["ES2021.String", "dom", "dom.iterable", "esnext"]
   },
+  // "include": ["lib", "ui", "foxx", "services", "test"],
+  "exclude": ["node_modules"]
 }

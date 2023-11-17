@@ -29,7 +29,6 @@ jobs:
         run: |
           echo "########## Docker Tags ##########"
           echo ${{ steps.docker_setup.outputs.docker_image_name }}:${{ steps.docker_setup.outputs.docker_image_tag }}
-          echo ${{ steps.docker_setup.outputs.docker_image_name }}:${GITHUB_RUN_ID}
           echo ${{ steps.docker_setup.outputs.docker_image_name }}:${{ github.run_id }}
           echo ${{ steps.docker_setup.outputs.docker_image_name }}:latest
           echo "##########     env     ##########"
@@ -75,7 +74,6 @@ jobs:
         run: |
           echo "########## Docker Tags ##########"
           echo ${{ steps.docker_setup.outputs.docker_image_name }}:${{ steps.docker_setup.outputs.docker_image_tag }}
-          echo ${{ steps.docker_setup.outputs.docker_image_name }}:${GITHUB_RUN_ID}
           echo ${{ steps.docker_setup.outputs.docker_image_name }}:${{ github.run_id }}
           echo ${{ steps.docker_setup.outputs.docker_image_name }}:latest
           echo "##########     env     ##########"

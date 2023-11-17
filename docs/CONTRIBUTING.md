@@ -17,13 +17,13 @@ React/Redux-based Front-End. Binocular is generally split into three components:
 - A GraphQL-interface that is mounted into ArangoDB that allows the
   Front-End to easily query data from the back-end
 
-![Architecture](./binocular-architecture.png)
+![Architecture](assets/binocular-architecture.png)
 
 Technically, the front-end does not access the GraphQL-interface
 directly, but uses a proxy that the back-end provides to circumvent
 CORS-issues.
 
-![CORS](./cors.png)
+![CORS](assets/cors.png)
 
 The source-code is organized similarly:
 

@@ -262,14 +262,14 @@ export default (props: Props) => {
           <h2>Commits</h2>
           <div className="field">
             <input
-              id="aggregateTimeSwitch"
+              id="excludeMergeCommitsSwitch"
               type="checkbox"
-              name="aggregateTimeSwitch"
+              name="excludeMergeCommitsSwitch"
               className={'switch is-rounded is-outlined is-info'}
               defaultChecked={excludeMergeCommits}
               onChange={(e) => onSetExcludeMergeCommits(e.target.checked)}
             />
-            <label htmlFor="aggregateTimeSwitch" className={styles.switch}>
+            <label htmlFor="excludeMergeCommitsSwitch" className={styles.switch}>
               Exclude Merge Commits
             </label>
           </div>
