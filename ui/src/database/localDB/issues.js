@@ -89,7 +89,7 @@ export default class Issues {
     // return all issues, filtering according to parameters can be added in the future
     return findAll(db, 'issues').then((res) => {
       res.docs = res.docs
-        .filter((i) => i.title.includes(text))
+        .filter((i) => i.title.includes(text) || `${i.iid}`.startsWith(text))
         .sort((a, b) => {
           return new Date(b.createdAt) - new Date(a.createdAt);
         });

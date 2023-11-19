@@ -8,7 +8,6 @@ const gql = require('graphql-sync');
 const arangodb = require('@arangodb');
 const db = arangodb.db;
 const aql = arangodb.aql;
-const qb = require('aqb');
 const paginated = require('./types/paginated.js');
 const queryHelpers = require('./query-helpers.js');
 const Timestamp = require('./types/Timestamp.js');
@@ -22,8 +21,8 @@ const issues = db._collection('issues');
 const builds = db._collection('builds');
 const languages = db._collection('languages');
 const branches = db._collection('branches');
-
-const ISSUE_NUMBER_REGEX = /^#?(\d+).*$/;
+const mergeRequests = db._collection('mergeRequests');
+const milestones = db._collection('milestones');
 
 const queryType = new gql.GraphQLObjectType({
   name: 'Query',
@@ -37,14 +36,13 @@ const queryType = new gql.GraphQLObjectType({
           sort: { type: Sort },
         },
         query: (root, args, limit) => {
-          let q = qb.for('commit').in('commits').sort('commit.date', args.sort);
-
-          q = queryHelpers.addDateFilter('commit.date', 'gte', args.since, q);
-          q = queryHelpers.addDateFilter('commit.date', 'lte', args.until, q);
-
-          q = q.limit(limit.offset, limit.count).return('commit');
-
-          return q;
+          return aql`
+            FOR commit
+            IN ${commits}
+            ${args.since ? queryHelpers.addDateFilterAQL('commit.date', '>=', args.since) : aql``}
+            ${args.until ? queryHelpers.addDateFilterAQL('commit.date', '<=', args.until) : aql``}
+            ${limit}
+            RETURN commit`;
         },
       }),
       commit: {
@@ -158,7 +156,6 @@ const queryType = new gql.GraphQLObjectType({
             ${limit}
               RETURN stakeholder`,
       }),
-      //TODO use stakeholders collection here
       committers: {
         type: new gql.GraphQLList(gql.GraphQLString),
         resolve: () => {
@@ -185,22 +182,11 @@ const queryType = new gql.GraphQLObjectType({
         type: require('./types/build.js'),
         args: { since: { type: Timestamp }, until: { type: Timestamp } },
         query: (root, args, limit) => {
-          if (args.since && args.until) {
-            return aql`
-          FOR build IN ${builds}
-            SORT build.createdAt ASC
-            ${limit}
-            FILTER DATE_TIMESTAMP(build.createdAt) >= DATE_TIMESTAMP(${args.since})
-            FILTER DATE_TIMESTAMP(build.createdAt) <= DATE_TIMESTAMP(${args.until})
-            LET countsByStatus = (
-              COLLECT status = build.status WITH COUNT INTO statusCount
-              RETURN { [status]: statusCount }
-            )
-            RETURN MERGE(build, { stats: MERGE(countsByStatus) })`;
-          }
           return aql`
           FOR build IN ${builds}
             SORT build.createdAt ASC
+            ${args.since ? queryHelpers.addDateFilterAQL('build.createdAt', '>=', args.since) : aql``}
+            ${args.until ? queryHelpers.addDateFilterAQL('build.createdAt', '<=', args.until) : aql``}
             ${limit}
             LET countsByStatus = (
               COLLECT status = build.status WITH COUNT INTO statusCount
@@ -212,37 +198,19 @@ const queryType = new gql.GraphQLObjectType({
       issues: paginated({
         type: require('./types/issue.js'),
         args: {
-          q: { type: gql.GraphQLString },
           since: { type: Timestamp },
           until: { type: Timestamp },
           sort: { type: Sort },
         },
         query: (root, args, limit) => {
-          let exactQuery = [];
-          let fuzzyQuery = qb.for('issue').in('issues').sort('issue.createdAt', args.sort);
-
-          if (args.q) {
-            const searchString = qb.str('%' + args.q.replace(/\s+/g, '%') + '%');
-            fuzzyQuery = fuzzyQuery.filter(qb.LIKE(qb.CONCAT(qb.str('#'), 'issue.iid', qb.str(' '), 'issue.title'), searchString, true));
-
-            const issueNumberMatch = args.q.match(ISSUE_NUMBER_REGEX);
-            if (issueNumberMatch) {
-              exactQuery = qb.for('issue').in('issues').filter(qb.eq('issue.iid', issueNumberMatch[1])).return('issue');
-
-              fuzzyQuery = fuzzyQuery.filter(qb.neq('issue.iid', issueNumberMatch[1]));
-            }
-          }
-
-          fuzzyQuery = fuzzyQuery.return('issue');
-
-          let q = qb.let('fullList', qb.APPEND(exactQuery, fuzzyQuery)).for('issue').in('fullList');
-
-          q = queryHelpers.addDateFilter('issue.createdAt', 'gte', args.since, q);
-          q = queryHelpers.addDateFilter('issue.createdAt', 'lte', args.until, q);
-
-          q = q.limit(limit.offset, limit.count).return('issue');
-
-          return q;
+          return aql`
+          FOR issue
+          IN issues
+          ${args.since ? queryHelpers.addDateFilterAQL('issue.createdAt', '>=', args.since) : aql``}
+          ${args.until ? queryHelpers.addDateFilterAQL('issue.createdAt', '<=', args.until) : aql``}
+          SORT issue.createdAt ${args.sort}
+          ${limit}
+          RETURN issue`;
         },
       }),
       issue: {
@@ -271,11 +239,12 @@ const queryType = new gql.GraphQLObjectType({
           sort: { type: Sort },
         },
         query: (root, args, limit) => {
-          let q = qb.for('branch').in('branches').sort('branch.id', args.sort);
-
-          q = q.limit(limit.offset, limit.count).return('branch');
-
-          return q;
+          return aql`
+            FOR branch
+            IN ${branches}
+            SORT branch.id ${args.sort}
+            ${limit}
+            RETURN branch`;
         },
       }),
       branch: {
@@ -306,14 +275,14 @@ const queryType = new gql.GraphQLObjectType({
           sort: { type: Sort },
         },
         query: (root, args, limit) => {
-          let q = qb.for('mergeRequest').in('mergeRequests').sort('mergeRequest.createdAt', args.sort);
-
-          q = queryHelpers.addDateFilter('mergeRequest.createdAt', 'gte', args.since, q);
-          q = queryHelpers.addDateFilter('mergeRequest.createdAt', 'lte', args.until, q);
-
-          q = q.limit(limit.offset, limit.count).return('mergeRequest');
-
-          return q;
+          return aql`
+            FOR mergeRequest
+            IN ${mergeRequests}
+            SORT mergeRequest.createdAt ${args.sort}
+            ${args.since ? queryHelpers.addDateFilterAQL('mergeRequest.createdAt', '>=', args.since) : aql``}
+            ${args.until ? queryHelpers.addDateFilterAQL('mergeRequest.createdAt', '<=', args.until) : aql``}
+            ${limit}
+            RETURN mergeRequest`;
         },
       }),
       milestones: paginated({
@@ -322,10 +291,12 @@ const queryType = new gql.GraphQLObjectType({
           sort: { type: Sort },
         },
         query: (root, args, limit) => {
-          let q = qb.for('milestone').in('milestones').sort('milestone.startDate', args.sort);
-          q = q.limit(limit.offset, limit.count).return('milestone');
-
-          return q;
+          return aql`
+            FOR milestone
+            IN ${milestones}
+            SORT milestone.startDate ${args.sort}
+            ${limit}
+            RETURN milestone`;
         },
       }),
     };

@@ -1,31 +1,9 @@
 'use strict';
 
-const qb = require('aqb');
 const arangodb = require('@arangodb');
 const aql = arangodb.aql;
 
 module.exports = {
-  addDateFilter: function (dateField, cmp, comparedValue, q) {
-    if (comparedValue) {
-      if (typeof comparedValue === 'number') {
-        comparedValue = new Date(comparedValue);
-      }
-
-      let val;
-      if (comparedValue instanceof Date) {
-        val = qb.str(comparedValue.toISOString());
-      } else {
-        val = qb.str(comparedValue);
-      }
-
-      const queryDate = qb.DATE_TIMESTAMP(val);
-      const instanceDate = qb.DATE_TIMESTAMP(dateField);
-      return q.filter(qb[cmp](instanceDate, queryDate));
-    }
-
-    return q;
-  },
-
   addDateFilterAQL: function (dateField, cmp, comparedValue) {
     if (comparedValue) {
       if (typeof comparedValue === 'number') {

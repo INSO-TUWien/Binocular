@@ -156,24 +156,22 @@ export default class Issues {
   static searchIssues(text) {
     const issueList = [];
 
-    const getIssuesPageSearch = (text) => (page, perPage) => {
+    const getIssuesPageSearch = () => (page, perPage) => {
       return graphQl
         .query(
-          `
-                  query($q: String) {
-                    issues(page: 1, perPage: 50, q: $q, sort: "DESC") {
-                      data { iid title createdAt closedAt }
-                    }
-                  }`,
-          { q: text }
+          `query {
+            issues(page: 1, perPage: 50, sort: "DESC") {
+              data { iid title createdAt closedAt }
+            }
+          }`,
         )
         .then((resp) => resp.issues);
     };
 
-    return traversePages(getIssuesPageSearch(text), (issue) => {
+    return traversePages(getIssuesPageSearch(), (issue) => {
       issueList.push(issue);
     }).then(function () {
-      return issueList;
+      return issueList.filter((i) => i.title.includes(text) || `${i.iid}`.startsWith(text));
     });
   }
 
