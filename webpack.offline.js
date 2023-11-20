@@ -1,5 +1,5 @@
 import { merge } from 'webpack-merge';
-import TerserPlugin from 'terser-webpack-plugin';
+// import TerserPlugin from 'terser-webpack-plugin'; // suspicious to use too much memory on reset
 import HtmlWebpackPlugin from 'html-webpack-plugin';
 import * as commonConfig from './webpack.common.js';
 import path from 'path';
@@ -15,6 +15,7 @@ const opts = {
 
 export default merge(commonConfig, {
   mode: 'production', // for webpack internal optimization
+  productionSourceMap: false,
   entry: [require.resolve('babel-polyfill'), './ui/src/index'],
   devtool: false,
   output: {
@@ -68,25 +69,25 @@ export default merge(commonConfig, {
       },
     },
     minimize: true,
-    minimizer: [
-      new TerserPlugin({
-        terserOptions: {
-          parse: {
-            ecma: 2018,
-          },
-          compress: {
-            ecma: 5,
-            comparisons: false,
-            inline: 2,
-          },
-          mangle: {
-            safari10: true,
-          },
-          keep_classnames: false,
-          keep_fnames: false,
-        },
-      }),
-    ],
+    // minimizer: [
+    //   new TerserPlugin({
+    //     terserOptions: {
+    //       parse: {
+    //         ecma: 2018,
+    //       },
+    //       compress: {
+    //         ecma: 5,
+    //         comparisons: false,
+    //         inline: 2,
+    //       },
+    //       mangle: {
+    //         safari10: true,
+    //       },
+    //       keep_classnames: false,
+    //       keep_fnames: false,
+    //     },
+    //   }),
+    // ],
     runtimeChunk: {
       name: (entrypoint) => `runtime~${entrypoint.name}`,
     },
