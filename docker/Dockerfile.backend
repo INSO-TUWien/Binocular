@@ -12,7 +12,7 @@ RUN --mount=type=bind,src=./package-lock.json,target=./package-lock.json,readonl
     --mount=type=bind,src=./package.json,target=./package.json,readonly \
     npm ci --omit=optional --ignore-scripts && \
     npm cache clean --force
-RUN wget https://gobinaries.com/tj/node-prune --output-document - | /bin/sh && node-prune
+# RUN wget https://gobinaries.com/tj/node-prune --output-document - | /bin/sh && node-prune
 
 ###
 FROM --platform=${BUILDPLATFORM} node:${NODE_VERSION}-alpine AS builder
