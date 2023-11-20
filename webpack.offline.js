@@ -15,7 +15,6 @@ const opts = {
 
 export default merge(commonConfig, {
   mode: 'production', // for webpack internal optimization
-  productionSourceMap: false,
   entry: [require.resolve('babel-polyfill'), './ui/src/index'],
   devtool: false,
   output: {
