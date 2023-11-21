@@ -44,56 +44,56 @@ export default merge(commonConfig, {
         removeEmptyAttributes: true,
         removeStyleLinkTypeAttributes: true,
         keepClosingSlash: true,
-        minifyJS: true,
-        minifyCSS: true,
-        minifyURLs: true,
+        // minifyJS: true,
+        // minifyCSS: true,
+        // minifyURLs: true,
       },
     }),
   ],
-  optimization: {
-    splitChunks: {
-      chunks: 'all',
-      minSize: 30000,
-      maxSize: 0,
-      cacheGroups: {
-        vendors: {
-          test: /[\\/]node_modules[\\/]/,
-          priority: -10,
-        },
-        default: {
-          minChunks: 2,
-          priority: -20,
-          reuseExistingChunk: true,
-        },
-      },
-    },
-    minimize: true,
-    // minimizer: [
-    //   new TerserPlugin({
-    //     terserOptions: {
-    //       parse: {
-    //         ecma: 2018,
-    //       },
-    //       compress: {
-    //         ecma: 5,
-    //         comparisons: false,
-    //         inline: 2,
-    //       },
-    //       mangle: {
-    //         safari10: true,
-    //       },
-    //       keep_classnames: false,
-    //       keep_fnames: false,
-    //     },
-    //   }),
-    // ],
-    runtimeChunk: {
-      name: (entrypoint) => `runtime~${entrypoint.name}`,
-    },
-    removeAvailableModules: true,
-    removeEmptyChunks: true,
-    mergeDuplicateChunks: true,
-  },
+  // optimization: {
+  //   splitChunks: {
+  //     chunks: 'all',
+  //     minSize: 30000,
+  //     maxSize: 0,
+  //     cacheGroups: {
+  //       vendors: {
+  //         test: /[\\/]node_modules[\\/]/,
+  //         priority: -10,
+  //       },
+  //       default: {
+  //         minChunks: 2,
+  //         priority: -20,
+  //         reuseExistingChunk: true,
+  //       },
+  //     },
+  //   },
+  //   minimize: true,
+  //   // minimizer: [
+  //   //   new TerserPlugin({
+  //   //     terserOptions: {
+  //   //       parse: {
+  //   //         ecma: 2018,
+  //   //       },
+  //   //       compress: {
+  //   //         ecma: 5,
+  //   //         comparisons: false,
+  //   //         inline: 2,
+  //   //       },
+  //   //       mangle: {
+  //   //         safari10: true,
+  //   //       },
+  //   //       keep_classnames: false,
+  //   //       keep_fnames: false,
+  //   //     },
+  //   //   }),
+  //   // ],
+  //   runtimeChunk: {
+  //     name: (entrypoint) => `runtime~${entrypoint.name}`,
+  //   },
+  //   removeAvailableModules: true,
+  //   removeEmptyChunks: true,
+  //   mergeDuplicateChunks: true,
+  // },
   performance: {
     hints: 'warning',
   },
