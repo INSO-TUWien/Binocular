@@ -16,7 +16,7 @@ const opts = {
 export default merge(commonConfig, {
   mode: 'development',
   // devtool: 'cheap-module-source-map', // original
-  devtool: 'eval',
+  devtool: false,
   entry: [require.resolve('babel-polyfill'), './ui/src/index'],
   module: {
     rules: [
