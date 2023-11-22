@@ -10,12 +10,12 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const opts = {
-  ENV: 'production',
+  ENV: 'offline',
 };
 
 export default merge(commonConfig, {
   mode: 'development',
-  devtool: 'cheap-module-source-map',
+  devtool: 'eval',
   entry: [require.resolve('babel-polyfill'), './ui/src/index'],
   module: {
     rules: [
