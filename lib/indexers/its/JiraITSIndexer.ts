@@ -1,91 +1,152 @@
 /* eslint-disable no-useless-escape */
 'use strict';
 //rewrite in typescript
-import _ from 'lodash'
-import Jira from '../../core/provider/jira'
+import _ from 'lodash';
+import Jira from '../../core/provider/jira';
 
 import debug from 'debug';
 
 const log = debug('paginator');
 
 import ConfigurationError from '../../errors/ConfigurationError';
-
-import querystring from 'querystring';
 import Issue from '../../models/Issue.js';
 
 class JiraITSIndexer {
   private repo: string;
   private stopping: boolean;
   private reporter: string;
+
   private jira: any;
-  private projectKey: string = "SCRUM"; // a key of a project is needed to get the issues needed
+  private projectKey = 'SCRUM'; // a key of a project is needed to get the issues needed
+
   constructor(repo: string, reporter: string) {
     this.repo = repo;
     this.stopping = false;
     this.reporter = reporter;
   }
 
-  configure(config: any){
-    if(!config){
-      throw new ConfigurationError("Config is not set")
+  configure(config: any) {
+    if (!config) {
+      throw new ConfigurationError('Config is not set');
     }
-    let options = {
+    const options = {
       baseUrl: config.url,
       email: config.username,
       privateToken: config.token,
       requestTimeout: 40000,
-    }
+    };
 
     this.jira = new Jira(options);
-
-
-
   }
 
-  index(){
-    let omitCount = 0
-    let persistCount = 0
+  index() {
+    let omitCount = 0;
+    let persistCount = 0;
+    const that = this;
     return Promise.all([
-        this.jira.getIssuesWithJQL("project=" + this.projectKey).
-            each(function (issue: any) {
-              if (this.stopping) {
-                return false;
-              }
+      this.jira.getIssuesWithJQL('project=' + this.projectKey).each(
+        function (issue: any) {
+          issue.id = issue.id.toString();
+          if (that.stopping) {
+            return false;
+          }
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          // @ts-ignore
+          return Issue.findOneById(issue.id).then((persistedIssue: any) => {
+            if (!persistedIssue || new Date(persistedIssue.updatedAt).getTime() < new Date(issue.fields.updated).getTime()) {
+              // const mentioned = that.processComments(issue.fields);
 
-              issue.id = issue.id.toString()
-              return Issue.findById(issue.id)
-                  .then ((persistedIssue) => {
-
-                    if (!persistedIssue) {
-                      log('Processing issue #' + issue.iid);
-
-                    } else {
-                      omitCount++;
-                    }
-
-
-
-                  })
-
-        })
-
-
-
-
-
-    ]);
-
+              return that
+                .processComments(issue)
+                .then((mentions: any) => {
+                  const issueToSave = {
+                    id: issue.id,
+                    iid: issue.key,
+                    title: issue.fields.summary,
+                    description: issue.fields.description?.content[0][0]?.text,
+                    state: issue.fields.status.statusCategory.key,
+                    url: issue.self,
+                    closedAt: issue.fields.resolutiondate,
+                    mentions: mentions,
+                    createdAt: issue.fields.createdAt,
+                    updatedAt: issue.fields.updated,
+                    labels: issue.fields.labels,
+                    milestone: issue.milestone,
+                    author: issue.fields.creator.displayName,
+                    assignee: issue.fields?.assignee?.displayName, // there can't be multiple assinges
+                    assignees: issue.assignees,
+                    webUrl: issue.self.split('/rest/api')[0] + '/browse/' + issue.key,
+                  };
+                  if (!persistedIssue) {
+                    log('Persisting new issue');
+                    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                    // @ts-ignore
+                    return Issue.persist(issueToSave);
+                  } else {
+                    log('Issue already exists, only updating values');
+                    _.assign(persistedIssue, issueToSave);
+                    return persistedIssue.save({ ignoreUnknownAttributes: true });
+                  }
+                })
+                .then(() => persistCount++);
+            } else {
+              log('Omitted issue because it already is persisted');
+              omitCount++;
+            }
+          });
+        }.bind(this)
+      ),
+    ]).then((resp) => resp);
   }
 
-  stop(){
+  processComments(issue: any) {
+    // to get comments also use api calls since they have pagination as well
+    console.log('in processComments' + issue);
+    const issueKey = issue.key;
+    const mentioned: string[] = [];
+    issue = issue.fields;
+    if (issue.comment.comments.length <= issue.comment.maxResults) {
+      const comments = issue.comment.comments;
+
+      comments.forEach((comment: any) => {
+        comment.body.content.forEach((commentContent: any) => {
+          commentContent.content.forEach((commentType: any) => {
+            if (commentType.type === 'mention') {
+              const mentionedUser = commentType.attrs.text;
+              if (!mentioned.includes(mentionedUser)) {
+                mentioned.push(mentionedUser);
+              }
+            }
+          });
+        });
+      });
+      return Promise.resolve(mentioned);
+    } else {
+      return this.jira
+        .getComments(issueKey)
+        .each(function (comment: any) {
+          comment.body.content.forEach((commentContent: any) => {
+            commentContent.content.forEach((commentType: any) => {
+              if (commentType.type === 'mention') {
+                const mentionedUser = commentType.attrs.text;
+                if (!mentioned.includes(mentionedUser)) {
+                  mentioned.push(mentionedUser);
+                }
+              }
+            });
+          });
+        })
+        .then(() => mentioned);
+    }
+  }
+
+  stop() {
     this.stopping = true;
   }
 
-  isStopping(){
+  isStopping() {
     return this.stopping;
   }
-
 }
 
 export default JiraITSIndexer;
-
