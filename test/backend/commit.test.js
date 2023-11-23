@@ -9,9 +9,7 @@ const GatewayMock = require('./helper/gateway/gatewayMock');
 const Db = require('../../lib/core/db/db');
 const Commit = require('../../lib/models/Commit');
 const File = require('../../lib/models/File');
-const Language = require('../../lib/models/Language');
 const Hunk = require('../../lib/models/Hunk');
-const LanguageFileConnection = require('../../lib/models/LanguageFileConnection');
 const CommitStakeholderConnection = require('../../lib/models/CommitStakeholderConnection.js');
 
 const config = require('../../lib/config.js').get();
@@ -45,8 +43,6 @@ describe('commit', function () {
       await Commit.ensureCollection();
       await File.ensureCollection();
       await Hunk.ensureCollection();
-      await Language.ensureCollection();
-      await LanguageFileConnection.ensureCollection();
       await CommitStakeholderConnection.ensureCollection();
       await Stakeholder.ensureCollection();
 
@@ -85,8 +81,6 @@ describe('commit', function () {
       await Commit.ensureCollection();
       await File.ensureCollection();
       await Hunk.ensureCollection();
-      await Language.ensureCollection();
-      await LanguageFileConnection.ensureCollection();
 
       await fake.file(repo, 'test.js', testFile);
       await helpers.commit(repo, ['test.js'], bob, 'Commit1');

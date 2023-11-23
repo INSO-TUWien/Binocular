@@ -227,17 +227,6 @@ export default class Database {
   }
 
   /**
-   * LANGUAGES
-   */
-  static async getAllLanguages() {
-    if (await this.checkBackendConnection()) {
-      return ServerDB.getAllLanguages();
-    } else {
-      return LocalDB.getAllLanguages();
-    }
-  }
-
-  /**
    * MODULES
    */
   static async getAllModules() {

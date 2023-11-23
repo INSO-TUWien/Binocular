@@ -163,7 +163,7 @@ export default class Issues {
             issues(page: 1, perPage: 50, sort: "DESC") {
               data { iid title createdAt closedAt }
             }
-          }`,
+          }`
         )
         .then((resp) => resp.issues);
     };

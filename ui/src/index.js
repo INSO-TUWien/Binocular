@@ -26,7 +26,6 @@ import dashboard from './visualizations/dashboard';
 import dataExport from './visualizations/dataExport';
 import issueImpact from './visualizations/legacy/issue-impact';
 import codeHotspots from './visualizations/legacy/code-hotspots';
-import languageModuleRiver from './visualizations/legacy/language-module-river';
 import codeExpertise from './visualizations/code-expertise';
 import ciBuilds from './visualizations/VisualizationComponents/ciBuilds';
 import issues from './visualizations/VisualizationComponents/issues';
@@ -51,7 +50,6 @@ const visualizationModules = [
   issues,
   issueBreakdown,
   changes,
-  languageModuleRiver,
   dataExport,
 ];
 

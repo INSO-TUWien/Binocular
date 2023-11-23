@@ -13,7 +13,6 @@ const mapStateToProps = (state /*, ownProps*/) => {
       state.progress.commits.processed < state.progress.commits.total ||
       state.progress.issues.processed < state.progress.issues.total ||
       state.progress.builds.processed < state.progress.builds.total ||
-      state.progress.languages.processed < state.progress.languages.total ||
       impactState.data.isFetching,
     offlineMode: state.config.offlineMode,
   };

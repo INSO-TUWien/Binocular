@@ -35,7 +35,6 @@ const path = require('path');
 const fs = require('fs');
 const Commit = require('./lib/models/Commit.js');
 const File = require('./lib/models/File.js');
-const Language = require('./lib/models/Language.js');
 const Hunk = require('./lib/models/Hunk.js');
 const Issue = require('./lib/models/Issue.js');
 const Build = require('./lib/models/Build.js');
@@ -48,11 +47,9 @@ const CommitStakeholderConnection = require('./lib/models/CommitStakeholderConne
 const IssueStakeholderConnection = require('./lib/models/IssueStakeholderConnection.js');
 const IssueCommitConnection = require('./lib/models/IssueCommitConnection.js');
 const CommitCommitConnection = require('./lib/models/CommitCommitConnection.js');
-const CommitLanguageConnection = require('./lib/models/CommitLanguageConnection');
 const CommitModuleConnection = require('./lib/models/CommitModuleConnection');
 const ModuleModuleConnection = require('./lib/models/ModuleModuleConnection');
 const ModuleFileConnection = require('./lib/models/ModuleFileConnection');
-const LanguageFileConnection = require('./lib/models/LanguageFileConnection');
 const BranchFileConnection = require('./lib/models/BranchFileConnection');
 const BranchFileFileConnection = require('./lib/models/BranchFileFileConnection.js');
 const CommitFileStakeholderConnection = require('./lib/models/CommitFileStakeholderConnection.js');
@@ -61,17 +58,7 @@ const CommitBuildConnection = require('./lib/models/CommitBuildConnection.js');
 const ConfigurationError = require('./lib/errors/ConfigurationError');
 const DatabaseError = require('./lib/errors/DatabaseError');
 const GateWayService = require('./lib/gateway-service');
-const grpc = require('@grpc/grpc-js');
-const protoLoader = require('@grpc/proto-loader');
 const projectStructureHelper = require('./lib/projectStructureHelper');
-const commPath = path.resolve(__dirname, 'services', 'grpc', 'comm');
-
-const LanguageDetectorPackageDefinition = protoLoader.loadSync(path.join(commPath, 'language.service.proto'), {
-  enums: String,
-});
-
-const LanguageComm = grpc.loadPackageDefinition(LanguageDetectorPackageDefinition).binocular.comm;
-const LanguageDetectionService = (LanguageComm || { LanguageDetectionService: () => {} }).LanguageDetectionService;
 
 // set up the endpoints
 app.get('/api/db-export', require('./lib/endpoints/get-db-export.js'));
@@ -100,17 +87,7 @@ const indexers = {
 const services = [];
 
 const gatewayService = new GateWayService();
-const reporter = new ProgressReporter(io, [
-  'commits',
-  'issues',
-  'builds',
-  'files',
-  'languages',
-  'filesLanguage',
-  'modules',
-  'mergeRequests',
-  'milestones',
-]);
+const reporter = new ProgressReporter(io, ['commits', 'issues', 'builds', 'files', 'modules', 'mergeRequests', 'milestones']);
 let databaseConnection = null;
 
 /**
@@ -488,7 +465,6 @@ function ensureDb(repo, context) {
       return Promise.all([
         context.db.ensureService(path.join(__dirname, 'foxx'), '/binocular-ql'),
         Commit.ensureCollection(),
-        Language.ensureCollection(),
         File.ensureCollection(),
         Hunk.ensureCollection(),
         Stakeholder.ensureCollection(),
@@ -500,12 +476,10 @@ function ensureDb(repo, context) {
         Milestone.ensureCollection(),
         CommitFileConnection.ensureCollection(),
         CommitBuildConnection.ensureCollection(),
-        LanguageFileConnection.ensureCollection(),
         CommitStakeholderConnection.ensureCollection(),
         IssueStakeholderConnection.ensureCollection(),
         IssueCommitConnection.ensureCollection(),
         CommitCommitConnection.ensureCollection(),
-        CommitLanguageConnection.ensureCollection(),
         CommitModuleConnection.ensureCollection(),
         ModuleModuleConnection.ensureCollection(),
         ModuleFileConnection.ensureCollection(),
@@ -581,10 +555,6 @@ Promise.all(
     (async (context, config, gateway) => {
       services.push(gateway);
       await gateway.configure(config.get('gateway'));
-      gateway.addServiceHandler('LanguageDetection', (service) => {
-        service.comm = new LanguageDetectionService(`${service.client.address}:${service.client.port}`, grpc.credentials.createInsecure());
-        reIndex(indexers, context, reporter, gateway, activeIndexingQueue, ++indexingProcess);
-      });
 
       return gateway.start();
     }).bind(this, ctx, config, gatewayService),

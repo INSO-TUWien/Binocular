@@ -11,8 +11,6 @@ const Db = require('../../lib/core/db/db');
 const Commit = require('../../lib/models/Commit');
 const Hunk = require('../../lib/models/Hunk');
 const File = require('../../lib/models/File');
-const Language = require('../../lib/models/Language');
-const LanguageFileConnection = require('../../lib/models/LanguageFileConnection');
 const Branch = require('../../lib/models/Branch');
 const Module = require('../../lib/models/Module');
 const ModuleFileConnection = require('../../lib/models/ModuleFileConnection');
@@ -32,7 +30,7 @@ const expect = chai.expect;
 describe('vcs', function () {
   const db = new Db(config.arango);
   const gateway = new GatewayMock();
-  const reporter = new ReporterMock(['commits', 'files', 'languages', 'filesLanguage', 'modules']);
+  const reporter = new ReporterMock(['commits', 'files', 'modules']);
   const bob = { name: 'Bob Barker', email: 'bob@gmail.com' };
 
   const testFile = 'function helloWorld(){\nconsole.log("Hello World");\n}';
@@ -62,8 +60,6 @@ describe('vcs', function () {
       await Commit.ensureCollection();
       await Hunk.ensureCollection();
       await File.ensureCollection();
-      await Language.ensureCollection();
-      await LanguageFileConnection.ensureCollection();
       await Branch.ensureCollection();
       await Module.ensureCollection();
       await ModuleFileConnection.ensureCollection();

@@ -19,7 +19,6 @@ const stakeholders = db._collection('stakeholders');
 const modules = db._collection('modules');
 const issues = db._collection('issues');
 const builds = db._collection('builds');
-const languages = db._collection('languages');
 const branches = db._collection('branches');
 const mergeRequests = db._collection('mergeRequests');
 const milestones = db._collection('milestones');
@@ -103,27 +102,6 @@ const queryType = new gql.GraphQLObjectType({
         },
         resolve(root, args) {
           return files.firstExample({ path: args.path });
-        },
-      },
-      languages: paginated({
-        type: require('./types/language'),
-        query: (root, args, limit) => aql`
-          FOR language
-            IN
-            ${languages}
-            ${limit}
-              RETURN language`,
-      }),
-      language: {
-        type: require('./types/language'),
-        args: {
-          name: {
-            description: 'name of language',
-            type: new gql.GraphQLNonNull(gql.GraphQLString),
-          },
-        },
-        resolve(root, args) {
-          return languages.firstExample({ name: args.name });
         },
       },
       modules: paginated({

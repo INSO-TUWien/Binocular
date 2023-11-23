@@ -8,7 +8,6 @@ import MergeRequests from './serverDB/mergeRequests';
 import Milestones from './serverDB/milestones';
 import Files from './serverDB/files';
 import Branches from './serverDB/branches';
-import Languages from './serverDB/languages';
 import Modules from './serverDB/modules';
 import Stakeholders from './serverDB/stakeholders';
 
@@ -99,10 +98,6 @@ export default class ServerDB {
 
   static getAllBranches() {
     return Branches.getAllBranches();
-  }
-
-  static getAllLanguages() {
-    return Languages.getAllLanguages();
   }
 
   static getAllModules() {
