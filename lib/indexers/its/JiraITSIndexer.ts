@@ -51,81 +51,76 @@ class JiraITSIndexer {
           if (that.stopping) {
             return false;
           }
-          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-          // @ts-ignore
-          return Issue.findOneById(issue.id).then((persistedIssue: any) => {
-            if (!persistedIssue || new Date(persistedIssue.updatedAt).getTime() < new Date(issue.fields.updated).getTime()) {
-              // const mentioned = that.processComments(issue.fields);
 
-              return that
-                .processComments(issue)
-                .then((mentions: any) => {
-                  const issueToSave = {
-                    id: issue.id,
-                    iid: issue.key,
-                    title: issue.fields.summary,
-                    description: issue.fields.description?.content[0][0]?.text,
-                    state: issue.fields.status.statusCategory.key,
-                    url: issue.self,
-                    closedAt: issue.fields.resolutiondate,
-                    mentions: mentions,
-                    createdAt: issue.fields.createdAt,
-                    updatedAt: issue.fields.updated,
-                    labels: issue.fields.labels,
-                    milestone: issue.milestone,
-                    author: issue.fields.creator.displayName,
-                    assignee: issue.fields?.assignee?.displayName, // there can't be multiple assinges
-                    assignees: issue.assignees,
-                    webUrl: issue.self.split('/rest/api')[0] + '/browse/' + issue.key,
-                  };
-                  if (!persistedIssue) {
-                    log('Persisting new issue');
-                    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                    // @ts-ignore
-                    return Issue.persist(issueToSave);
-                  } else {
-                    log('Issue already exists, only updating values');
-                    _.assign(persistedIssue, issueToSave);
-                    return persistedIssue.save({ ignoreUnknownAttributes: true });
+          return this.jira.getMergeRequest(issue.id).then((mergeRequests: any) => {
+            console.log('inside then');
+
+            if (mergeRequests) {
+              mergeRequests.forEach((mergeRequest: any) => {
+                const toPerist = {
+                  id: mergeRequest.id,
+                  project_id: issue.projectId,
+                  state: mergeRequest.status,
+                  target_branch: mergeRequest.destination.branch,
+                  source_branch: mergeRequest.source.branch,
+                };
+                MergeRequest.findOneById(mergeRequests.id).then((persistedMergerequest: any) => {
+                  if (!persistedMergerequest) {
+                    MergeRequest.persist(toPerist);
                   }
-                })
-                .then(() => persistCount++);
+                });
+              });
             } else {
-              log('Omitted issue because it already is persisted');
-              omitCount++;
+              log('Issue with key  has no pullrequest information');
             }
+
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-ignore
+            return Issue.findOneById(issue.id).then((persistedIssue: any) => {
+              if (!persistedIssue || new Date(persistedIssue.updatedAt).getTime() < new Date(issue.fields.updated).getTime()) {
+                // const mentioned = that.processComments(issue.fields);
+
+                return that
+                  .processComments(issue)
+                  .then((mentions: any) => {
+                    const issueToSave = {
+                      id: issue.id,
+                      iid: issue.key,
+                      title: issue.fields.summary,
+                      description: issue.fields.description?.content[0][0]?.text,
+                      state: issue.fields.status.statusCategory.key,
+                      url: issue.self,
+                      closedAt: issue.fields.resolutiondate,
+                      mentions: mentions,
+                      createdAt: issue.fields.createdAt,
+                      updatedAt: issue.fields.updated,
+                      labels: issue.fields.labels,
+                      milestone: issue.milestone,
+                      author: issue.fields.creator.displayName,
+                      assignee: issue.fields?.assignee?.displayName, // there can't be multiple assinges
+                      assignees: issue.assignees,
+                      webUrl: issue.self.split('/rest/api')[0] + '/browse/' + issue.key,
+                    };
+                    if (!persistedIssue) {
+                      log('Persisting new issue');
+                      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                      // @ts-ignore
+                      return Issue.persist(issueToSave);
+                    } else {
+                      log('Issue already exists, only updating values');
+                      _.assign(persistedIssue, issueToSave);
+                      return persistedIssue.save({ ignoreUnknownAttributes: true });
+                    }
+                  })
+                  .then(() => persistCount++);
+              } else {
+                log('Omitted issue because it already is persisted');
+                omitCount++;
+              }
+            });
           });
         }.bind(this)
       ),
-      this.jira.getIssuesWithJQL('project=' + this.projectKey).each((issue: any) => {
-        issue.id = issue.id.toString();
-        if (that.stopping) {
-          return false;
-        }
-        this.jira.getMergeRequest(issue.id).then((mergeRequests: any) => {
-          console.log('inside then');
-
-          if (mergeRequests) {
-            mergeRequests.forEach((mergeRequest: any) => {
-              const toPerist = {
-                id: mergeRequest.id,
-                project_id: issue.projectId,
-                state: mergeRequest.status,
-                target_branch: mergeRequest.destination.branch,
-                source_branch: mergeRequest.source.branch,
-              };
-              MergeRequest.findOneById(mergeRequests.id).then((persistedMergerequest: any) => {
-                if (!persistedMergerequest) {
-                  MergeRequest.persist(toPerist);
-                }
-              });
-            });
-          } else {
-            log('Issue with key  has no pullrequest information');
-          }
-        });
-      }),
-
       this.jira.getProjectVersions(this.projectKey).each(function (projectVersion: any) {
         projectVersion.id = projectVersion.id.toString();
         return Milestone.findOneById(projectVersion.id)
