@@ -22,6 +22,7 @@ function Paginator(
   this.getPage = getPage;
   this.getItems = getItems;
   this.getCount = getCount;
+  this.its = options?.its;
   this.defaultPageSize = options.defaultPageSize;
 }
 
@@ -69,8 +70,11 @@ Paginator.prototype.execute = function (perPage = this.defaultPageSize) {
   return this.$depaginate(perPage, countHolder);
 };
 
-Paginator.prototype.$depaginate = function (perPage: number, countHolder: { count: number }, page = 1, processed = 0) {
+Paginator.prototype.$depaginate = function (perPage: number, countHolder: { count: number }, page = 1, processed = 0, i = 1) {
   log(`Getting page ${page}`);
+  if (this.its && i === 1) {
+    page--;
+  }
   return this.getPage(page, perPage)
     .then((pageData: any) => {
       this.emit('page', pageData, page);
@@ -98,7 +102,11 @@ Paginator.prototype.$depaginate = function (perPage: number, countHolder: { coun
     .then((stop: boolean) => {
       log(`Finished page #${page}, total items processed: ${processed}/${countHolder.count}`);
       if (stop !== false && processed < countHolder.count) {
-        return this.$depaginate(perPage, countHolder, page + 1, processed);
+        if (this.its && this.its === 'jira') {
+          return this.$depaginate(perPage, countHolder, this.defaultPageSize * i, processed, i + 1);
+        } else {
+          return this.$depaginate(perPage, countHolder, page + 1, processed);
+        }
       }
       return stop;
     });
