@@ -5,11 +5,10 @@ import _ from 'lodash';
 import Jira from '../../core/provider/jira';
 
 import debug from 'debug';
+import ConfigurationError from '../../errors/ConfigurationError';
+import Milestone from '../../models/Milestone';
 
 const log = debug('paginator');
-
-import ConfigurationError from '../../errors/ConfigurationError';
-import Issue from '../../models/Issue.js';
 
 class JiraITSIndexer {
   private repo: string;
@@ -96,6 +95,33 @@ class JiraITSIndexer {
           });
         }.bind(this)
       ),
+      this.jira.getProjectVersions(this.projectKey).each(function (projectVersion: any) {
+        projectVersion.id = projectVersion.id.toString();
+        return Milestone.findOneById(projectVersion.id)
+          .then((persistedVersion: any) => {
+            const expired = new Date(projectVersion.releaseDate).getTime() > new Date().getTime();
+            const versionToPersist = {
+              id: projectVersion.id,
+              project_id: projectVersion.projectId,
+              description: projectVersion.description,
+              start_date: projectVersion.startDate,
+              due_date: projectVersion.endDate,
+              title: projectVersion.name,
+              expired: expired,
+              state: projectVersion.released ? 'released' : 'unreleased',
+            };
+            if (!persistedVersion || !_.isEqual(persistedVersion, versionToPersist)) {
+              console.log('Version has been changed or is not available');
+              if (!persistedVersion) {
+                Milestone.persist(versionToPersist);
+              } else {
+                _.assign(persistedVersion, versionToPersist);
+                return persistedVersion.save({ ignoreUnknownAttributes: true });
+              }
+            }
+          })
+          .then(() => this.reporter.finishMilestone());
+      }),
     ]).then((resp) => resp);
   }
 
@@ -105,7 +131,7 @@ class JiraITSIndexer {
     const issueKey = issue.key;
     const mentioned: string[] = [];
     issue = issue.fields;
-    if (issue.comment.comments.length <= issue.comment.maxResults) {
+    if (issue.comment.comments.total <= issue.comment.maxResults) {
       const comments = issue.comment.comments;
 
       comments.forEach((comment: any) => {
