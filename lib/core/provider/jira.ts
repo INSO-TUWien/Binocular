@@ -1,13 +1,10 @@
 'use strict';
 
 import debug from 'debug';
+import Paginator from '../../paginator';
+import urlJoin from 'url-join';
 
 const log = debug('jira');
-
-import Paginator from '../../paginator';
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
-import urlJoin from 'url-join';
 
 class Jira {
   private baseUrl: any;
@@ -42,12 +39,29 @@ class Jira {
 
   private async getDevelopmentInformation(issueId: string) {
     log('getMergeRequests(%o)', issueId);
-    return await this.request(this.baseUrl.split('api/3')[0] + 'dev-status/latest/issue/detail?issueId=' + issueId);
+    return this.request('dev-status/latest/issue/detail?issueId=' + issueId);
   }
 
-  getMergeRequests(issueId: string) {
+  getMergeRequest(issueId: string) {
     log('getMergeRequests(%o)', issueId);
-    return this.getDevelopmentInformation(issueId);
+    return this.request('dev-status/latest/issue/summary?issueId=' + issueId).then((developmentInformation) => {
+      console.log('inside working');
+      const pullrequests = developmentInformation.pullrequest;
+      if (pullrequests.overall.count !== 0) {
+        console.log('has some pullrqeuest');
+
+        const mergeRequests: any[] = [];
+        for (const [key, value] of Object.entries(pullrequests.byInstanceType)) {
+          this.getDevelopmentInformation(issueId + '&dataType=pullrequest&applicationType=' + key).then((response) => {
+            mergeRequests.push(response);
+          });
+        }
+
+        return mergeRequests;
+      } else {
+        return null;
+      }
+    });
   }
 
   getComments(issueKey: string) {
@@ -92,9 +106,17 @@ class Jira {
         'Accept-Language': 'en_us',
       },
     };
-    return fetch(urlJoin(this.baseUrl, path), header).then(async (response) => {
+    const isNonOfficial = path.includes('dev-status');
+    const requestUrl = isNonOfficial ? this.baseUrl.split('api/3')[0] + path : urlJoin(this.baseUrl, path);
+    return fetch(requestUrl, header).then(async (response) => {
       const data = await response.json();
-      return { headers: response.headers, body: data };
+      if (!isNonOfficial) {
+        return { headers: response.headers, body: data };
+      } else if (path.includes('detail')) {
+        return data.detail;
+      } else {
+        return data.summary;
+      }
     });
   }
 }
