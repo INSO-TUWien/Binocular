@@ -7,6 +7,8 @@ import Jira from '../../core/provider/jira';
 import debug from 'debug';
 import ConfigurationError from '../../errors/ConfigurationError';
 import Milestone from '../../models/Milestone';
+import MergeRequest from '../../models/MergeRequest';
+import Issue from '../../models/Issue';
 
 const log = debug('paginator');
 
@@ -95,6 +97,35 @@ class JiraITSIndexer {
           });
         }.bind(this)
       ),
+      this.jira.getIssuesWithJQL('project=' + this.projectKey).each((issue: any) => {
+        issue.id = issue.id.toString();
+        if (that.stopping) {
+          return false;
+        }
+        this.jira.getMergeRequest(issue.id).then((mergeRequests: any) => {
+          console.log('inside then');
+
+          if (mergeRequests) {
+            mergeRequests.forEach((mergeRequest: any) => {
+              const toPerist = {
+                id: mergeRequest.id,
+                project_id: issue.projectId,
+                state: mergeRequest.status,
+                target_branch: mergeRequest.destination.branch,
+                source_branch: mergeRequest.source.branch,
+              };
+              MergeRequest.findOneById(mergeRequests.id).then((persistedMergerequest: any) => {
+                if (!persistedMergerequest) {
+                  MergeRequest.persist(toPerist);
+                }
+              });
+            });
+          } else {
+            log('Issue with key  has no pullrequest information');
+          }
+        });
+      }),
+
       this.jira.getProjectVersions(this.projectKey).each(function (projectVersion: any) {
         projectVersion.id = projectVersion.id.toString();
         return Milestone.findOneById(projectVersion.id)
@@ -120,7 +151,7 @@ class JiraITSIndexer {
               }
             }
           })
-          .then(() => this.reporter.finishMilestone());
+          .then(() => console.log('finsihed projectversion'));
       }),
     ]).then((resp) => resp);
   }
