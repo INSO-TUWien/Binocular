@@ -34,6 +34,22 @@ class Jira {
 
     return this.paginatedRequest('search?' + jqlSearchString + '&');
   }
+
+  getProjectVersions(projectKey: string) {
+    log('getProjectVersions(%o)', projectKey);
+    return this.paginatedRequest(`project/${projectKey}/version?`);
+  }
+
+  private async getDevelopmentInformation(issueId: string) {
+    log('getMergeRequests(%o)', issueId);
+    return await this.request(this.baseUrl.split('api/3')[0] + 'dev-status/latest/issue/detail?issueId=' + issueId);
+  }
+
+  getMergeRequests(issueId: string) {
+    log('getMergeRequests(%o)', issueId);
+    return this.getDevelopmentInformation(issueId);
+  }
+
   getComments(issueKey: string) {
     log('getComments(%o)', issueKey);
     return this.paginatedRequest(`issue/${issueKey}/comment?`);
@@ -50,8 +66,13 @@ class Jira {
       },
       (resp: any) => {
         if (path.includes('/comment')) {
+          // for comments
           return resp.body.comments;
+        } else if (path.includes('/version')) {
+          // for projectversions
+          return resp.body.values;
         }
+        // for issues
         return resp.body.issues;
       },
       (resp: any) => {
