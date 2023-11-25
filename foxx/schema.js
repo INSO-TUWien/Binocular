@@ -40,6 +40,7 @@ const queryType = new gql.GraphQLObjectType({
             IN ${commits}
             ${args.since ? queryHelpers.addDateFilterAQL('commit.date', '>=', args.since) : aql``}
             ${args.until ? queryHelpers.addDateFilterAQL('commit.date', '<=', args.until) : aql``}
+            SORT commit.date ${args.sort}
             ${limit}
             RETURN commit`;
         },
