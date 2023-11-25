@@ -3,7 +3,7 @@
 import { createAction } from 'redux-actions';
 import { select, takeEvery, fork } from 'redux-saga/effects';
 
-import { fetchFactory, timestampedActionFactory } from '../../../../sagas/utils.js';
+import { fetchFactory, timestampedActionFactory } from '../../../../sagas/utils.ts';
 
 export const setActiveFile = createAction('SET_ACTIVE_FILE', (f) => f);
 export const setActivePath = createAction('SET_ACTIVE_PATH', (p) => p);

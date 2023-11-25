@@ -1,20 +1,21 @@
 'use strict';
 
-const _ = require('lodash');
-const temp = require('temp');
-const fs = require('fs').promises;
-const fse = require('fs-extra');
-const Random = require('random-js');
-const path = require('path');
-const faker = require('faker');
-const fakerHelpers = require('faker/lib/helpers.js')(faker);
-const firstNames = require('faker/lib/locales/en/name/first_name.js');
-const lastNames = require('faker/lib/locales/en/name/last_name.js');
-const emailProviders = require('faker/lib/locales/en/internet/free_email.js');
-const lorem = require('lorem-ipsum').loremIpsum;
+import _ from 'lodash';
+import temp from 'temp';
+import fs from 'fs';
+import fsExtra from 'fs-extra';
+import * as rand from 'random-js';
+import path from 'path';
+import faker from 'faker';
+import fh from 'faker/lib/helpers.js';
+const fakerHelpers = fh(faker);
+import firstNames from 'faker/lib/locales/en/name/first_name.js';
+import lastNames from 'faker/lib/locales/en/name/last_name.js';
+import emailProviders from 'faker/lib/locales/en/internet/free_email.js';
+import loremIpsum from 'lorem-ipsum';
 
-const helpers = require('./helpers.js');
-const Repository = require('../../../../lib/core/provider/git.js');
+import helpers from './helpers.js';
+import Repository from '../../../../lib/core/provider/git.js';
 
 const neutralVerbs = ['removed'];
 const positiveVerbs = ['improved', 'added', 'refactored', 'adjusted', 'tweaked', ...neutralVerbs];
@@ -25,9 +26,9 @@ const positiveNouns = ['feature', 'function', 'documentation', ...neutralNouns];
 const negativeNouns = ['problem', 'bug', 'issue', ...neutralNouns];
 
 // seed with a fixed value for reproducible tests
-const mt = Random.MersenneTwister19937.seed(4); // chosen by fair dice roll, guaranteed to be random ;)
+const mt = rand.MersenneTwister19937.seed(4); // chosen by fair dice roll, guaranteed to be random ;)
 
-const random = new Random.Random(mt);
+const random = new rand.Random(mt);
 
 const repositoryFake = {
   integer: function (...args) {
@@ -41,14 +42,13 @@ const repositoryFake = {
   repository: function (name) {
     return temp
       .mkdir(null)
-
       .then((dirPath) => {
         if (name) {
           dirPath = path.join(dirPath, name);
         }
 
         this.repoPath = dirPath;
-        return fse.emptyDir(dirPath);
+        return fsExtra.emptyDir(dirPath);
       })
       .then(() => {
         return Repository.fromPath(this.repoPath);
@@ -71,14 +71,14 @@ const repositoryFake = {
     return repositoryFake.signatureFor(repositoryFake.name());
   },
 
-  file: function (dirPath, filePath, contents) {
+  file: async function (dirPath, filePath, contents) {
     if (dirPath instanceof Repository) {
       dirPath = dirPath.getRoot();
     }
 
     const fullPath = path.join(dirPath, filePath);
 
-    return fs.writeFile(fullPath, contents);
+    return fs.writeFileSync(fullPath, contents);
   },
   dir: function (dirPath, dir) {
     if (dirPath instanceof Repository) {
@@ -87,7 +87,7 @@ const repositoryFake = {
 
     const fullPath = path.join(dirPath, dir);
 
-    return fs.mkdir(fullPath);
+    return fs.mkdirSync(fullPath);
   },
 
   stageFile: function (repo, filePath, contents) {
@@ -113,7 +113,7 @@ const repositoryFake = {
     const ret = {};
 
     _.each(units, function (unit) {
-      ret[unit] = () => lorem({ count, units: unit });
+      ret[unit] = () => loremIpsum.loremIpsum({ count, units: unit });
     });
 
     return ret;
@@ -139,7 +139,7 @@ const repositoryFake = {
   },
 };
 
-module.exports = repositoryFake;
+export default repositoryFake;
 
 function pickOne(array) {
   return array[repositoryFake.integer(0, array.length - 1)];

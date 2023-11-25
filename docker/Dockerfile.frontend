@@ -1,0 +1,55 @@
+ARG NODE_VERSION
+ARG BUILDPLATFORM=${BUILDPLATFORM:-amd64}
+FROM --platform=${BUILDPLATFORM} node:${NODE_VERSION}-alpine AS install
+
+# NPM ci first, as to NOT invalidate previous steps except for when package.json changes
+WORKDIR /app/binocular-frontend
+
+RUN --mount=type=bind,src=./docker/frontend-mem-nag.sh,target=/frontend-mem-nag.sh \
+    /frontend-mem-nag.sh
+
+RUN --mount=type=bind,src=./package-lock.json,target=./package-lock.json,readonly \
+    --mount=type=bind,src=./package.json,target=./package.json,readonly \
+    npm ci --omit=optional --ignore-scripts && \
+    npm cache clean --force
+
+###
+FROM --platform=${BUILDPLATFORM} node:${NODE_VERSION}-alpine AS builder
+ARG NPM_BUILD_CMD="build:prod"
+ENV BUILD_CMD=${NPM_BUILD_CMD} 
+ENV NODE_ENV=production
+ENV NODE_OPTIONS=--max_old_space_size=4096
+ENV GENERATE_SOURCEMAP=false
+
+RUN --mount=type=bind,src=./docker/frontend-mem-nag.sh,target=/frontend-mem-nag.sh \
+    /frontend-mem-nag.sh
+
+WORKDIR /app/binocular-frontend
+
+COPY --from=install --chown=node:node /app/binocular-frontend/node_modules ./node_modules
+
+COPY --chown=node:node ./LICENSE ./LICENSE
+COPY --chown=node:node ./ui ./ui
+COPY --chown=node:node ./declaration.d.ts ./declaration.d.ts
+
+RUN echo "{\"repo\":{\"name\":\"TODO: remove static context.json\"}}" > ./ui/config/context.json
+
+# This seems to be the most expensive step
+RUN --mount=type=bind,src=./webpack.prod.js,target=./webpack.prod.js,readonly \
+    --mount=type=bind,src=./tsconfig.json,target=./tsconfig.json,readonly \
+    --mount=type=bind,src=./webpack.common.js,target=./webpack.common.js,readonly \
+    --mount=type=bind,src=./babel.config.json,target=./babel.config.json,readonly \
+    --mount=type=bind,src=./package.json,target=./package.json,readonly \
+    --mount=type=bind,src=./binocular.js,target=./binocular.js,readonly \
+    npm run ${BUILD_CMD}
+
+FROM nginx:1.25.3-alpine as ngx
+
+# copying compiled code from dist to nginx folder for serving
+COPY  --from=builder --chown=node:node /app/binocular-frontend/dist /usr/share/nginx/html
+
+# copying nginx config from local to image
+COPY nginx/nginx.conf /etc/nginx/conf.d/default.conf
+
+# exposing internal port
+EXPOSE 80

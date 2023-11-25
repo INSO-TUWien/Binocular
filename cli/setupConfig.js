@@ -1,7 +1,7 @@
-const inquirer = require('inquirer');
-const fs = require('fs-extra');
+import inquirer from 'inquirer';
+import fs from 'fs-extra';
 
-function promptUserAndSaveConfig() {
+export function promptUserAndSaveConfig() {
   inquirer
     .prompt([
       {
@@ -117,7 +117,3 @@ function promptUserAndSaveConfig() {
       });
     });
 }
-
-module.exports = {
-  promptUserAndSaveConfig: promptUserAndSaveConfig,
-};

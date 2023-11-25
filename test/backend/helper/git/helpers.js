@@ -1,5 +1,7 @@
 'use strict';
 
+import fake from './repositoryFake.js';
+
 const helpers = {
   stage: function (repo, filePath) {
     return Promise.resolve(repo.refreshIndex())
@@ -17,8 +19,6 @@ const helpers = {
   },
 
   commit: function (repo, files, committer, message) {
-    const fake = require('./repositoryFake.js');
-
     message = message || fake.message();
 
     return repo.createCommit(files, committer, message);
@@ -33,4 +33,4 @@ const helpers = {
   },
 };
 
-module.exports = helpers;
+export default helpers;

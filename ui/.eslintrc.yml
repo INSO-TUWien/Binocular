@@ -5,6 +5,8 @@ extends:
   - eslint:recommended
   - prettier
   - lambdas
+  - plugin:@typescript-eslint/eslint-recommended
+  - plugin:@typescript-eslint/recommended
 parserOptions:
   ecmaVersion: 8
   sourceType: module
@@ -27,6 +29,7 @@ rules:
     - avoidEscape: true
   react/jsx-uses-vars: 1
   linebreak-style: ["error", "unix"]
+  '@typescript-eslint/no-this-alias': 0
 plugins:
   - prettier
   - react

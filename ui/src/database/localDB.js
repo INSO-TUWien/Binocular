@@ -17,7 +17,7 @@ import Branches from './localDB/branches';
 import Modules from './localDB/modules';
 import Stakeholders from './localDB/stakeholders';
 
-/// #if ENV === 'production'
+/// #if ENV === 'offline'
 import branches from '../../db_export/branches.json';
 import branchesFiles from '../../db_export/branches-files.json';
 import branchesFilesFiles from '../../db_export/branches-files-files.json';

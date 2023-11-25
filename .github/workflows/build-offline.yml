@@ -1,0 +1,179 @@
+name: Build Offline-Binocular
+
+on:
+  push:
+    branches:
+      - "main"
+      - "develop"
+  schedule:
+    - cron: '30 3 * * 1' # At 03:30 on Monday, https://crontab.guru/#30_3_*_*_1
+  workflow_dispatch:
+    inputs:
+      databaseImage: 
+        description: "Base image to build database from"
+        default: "ghcr.io/inso-tuwien/binocular-database"
+      databaseTag:
+        description: "Base tag to build database from"
+        default: "latest"
+
+env:
+  REGISTRY: ghcr.io
+  ARANGO_VERSION: 3.11.3
+  IMAGE_NAMESPACE: "ghcr.io/inso-tuwien"
+  # IMAGE_BASE_NAME: ghcr.io/inso-tuwien/binocular-arangodb_3.11.3
+
+jobs:
+
+  build:
+
+    runs-on: ubuntu-latest
+    services:
+
+      arangodb:
+        # image: arangodb:3.11
+        # image: ghcr.io/inso-tuwien/binocular-database:arangodb_3.11.3-no_volumes
+        image: ${{ github.event.inputs.databaseImage || 'ghcr.io/inso-tuwien/binocular-database' }}:${{ github.event.inputs.databaseTag || 'latest' }}"
+        options: --name "arangodb_svc"
+        ports:  
+          - 8529:8529
+        env: 
+          ARANGO_ROOT_PASSWORD: openSesame
+
+    steps:
+
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Setting env variables
+        id: docker_setup
+        uses: ./.github/actions/docker-env/
+        with:
+          image_name: binocular-database
+
+      - name: Debug echo env variables
+        run: |
+          echo "########## Docker Tags ##########"
+          echo ${{ steps.docker_setup.outputs.docker_image_name }}:${{ steps.docker_setup.outputs.docker_image_tag }}
+          echo ${{ steps.docker_setup.outputs.docker_image_name }}:${{ github.run_id }}
+          echo ${{ steps.docker_setup.outputs.docker_image_name }}:latest
+          echo "##########     env     ##########"
+          echo NODE_VERSION: ${{ steps.docker_setup.outputs.nvmrc_node_version }}
+          echo "##########   workflow  ##########"
+          echo databaseImage: ${{ inputs.databaseImage }}
+          echo databaseTag: ${{ inputs.databaseTag }}
+
+      - name: Set .pupilrc variables
+        uses: microsoft/variable-substitution@v1   
+        with:
+          files: .binocularrc_ci
+        env:
+          github.auth.token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Rename binocularrc
+        run: mv .binocularrc_ci .binocularrc 
+
+      - name: Set node version
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ steps.docker_setup.outputs.nvmrc_node_version }}
+          cache: npm
+          cache-dependency-path: ./package-lock.json
+
+      # Source: https://www.voorhoede.nl/en/blog/super-fast-npm-install-on-github-actions/
+      - name: Cache dependencies
+        uses: actions/cache@v2
+        with:
+          path: ./node_modules
+          key: modules-${{ hashFiles('package-lock.json') }}
+
+      - name: Install dependencies
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: npm ci --omit=optional --ignore-scripts
+
+      - name: Install tsx
+        run: npm i tsx -g
+
+      - name: Run binocular
+        run: DEBUG=idx*,importer*,git*,db* tsx binocular.js --no-open --no-server
+
+      - name: Build
+        env:
+          NODE_OPTIONS: --max_old_space_size=4096
+        run: npm run build:offline
+
+      - name: Publish artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: binocular_ui
+          path: |
+            ./dist/
+            ./ui/db_export
+
+      - name: docker commit
+        run: |
+          echo ${{ steps.docker_setup.outputs.docker_image_name }}:${{ steps.docker_setup.outputs.docker_image_tag }}
+          docker commit arangodb_svc ${{ steps.docker_setup.outputs.docker_image_name }}:${{ steps.docker_setup.outputs.docker_image_tag }}
+        
+      - name: docker images
+        run: docker images
+
+      - name: Init Docker
+        uses: ./.github/actions/docker-setup
+        with:
+          registry_url: ${{ env.REGISTRY }}
+          registry_username: ${{ github.actor }}
+          registry_password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Push image
+        run: |
+          docker push ${{ steps.docker_setup.outputs.docker_image_name }}:${{ steps.docker_setup.outputs.docker_image_tag }}
+          #
+          docker tag ${{ steps.docker_setup.outputs.docker_image_name }}:${{ steps.docker_setup.outputs.docker_image_tag }} ${{ steps.docker_setup.outputs.docker_image_name }}:${{ github.run_id }}
+          docker push ${{ steps.docker_setup.outputs.docker_image_name }}:${{ github.run_id }}
+          #
+          docker tag ${{ steps.docker_setup.outputs.docker_image_name }}:${{ steps.docker_setup.outputs.docker_image_tag }} ${{ steps.docker_setup.outputs.docker_image_name }}:latest
+          docker push ${{ steps.docker_setup.outputs.docker_image_name }}:latest
+
+  deploy:
+    runs-on: ubuntu-latest
+
+    # Add a dependency to the build job
+    needs: build
+
+    # Grant GITHUB_TOKEN the permissions required to make a Pages deployment
+    permissions:
+      pages: write      # to deploy to Pages
+      id-token: write   # to verify the deployment originates from an appropriate source
+
+    # Deploy to the github-pages environment
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: Setup Pages
+        uses: actions/configure-pages@v3
+
+      - name: Download Artifact from previous job
+        uses: actions/download-artifact@v3
+        with:
+          name: binocular_ui
+          path: artifact/
+
+      - name: Display structure of downloaded files
+        run: |
+          echo "url:" ${{ env.url }}
+          echo "page_url:" ${{ steps.deployment.outputs.page_url }}
+          ls -l artifact/dist/
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v2
+        with:
+          # Upload entire repository
+          path: 'artifact/dist/'
+      
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v2

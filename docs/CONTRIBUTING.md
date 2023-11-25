@@ -17,13 +17,13 @@ React/Redux-based Front-End. Binocular is generally split into three components:
 - A GraphQL-interface that is mounted into ArangoDB that allows the
   Front-End to easily query data from the back-end
 
-![Architecture](./binocular-architecture.png)
+![Architecture](assets/binocular-architecture.png)
 
 Technically, the front-end does not access the GraphQL-interface
 directly, but uses a proxy that the back-end provides to circumvent
 CORS-issues.
 
-![CORS](./cors.png)
+![CORS](assets/cors.png)
 
 The source-code is organized similarly:
 
@@ -131,13 +131,13 @@ ui
       └── VisualizationComponents              # Small visualizaitons for use in the dashboard
          ├── changes 
          │  ├── chart              # Main chart component
-         │  ├── config.js          # Main config component (shown in the sidebar)
-         │  ├── help.js            # Component shown in the help-section
-         │  ├── index.js           # main entry point for the component, bundles everything together
+         │  ├── config.ts          # Main config component (shown in the sidebar)
+         │  ├── help.ts            # Component shown in the help-section
+         │  ├── index.ts           # main entry point for the component, bundles everything together
          │   ├── reducers           # Reducers for the visualization
-         │   │   ├── config.js      # Configuration-related reducers
-         │   │   ├── data.js        # Data-related reducers
-         │   │   └── index.js
+         │   │   ├── config.ts      # Configuration-related reducers
+         │   │   ├── data.ts        # Data-related reducers
+         │   │   └── index.ts
          │   ├── sagas              # Sagas/Actions for the visualization
          │   └── styles.scss        # Styles for the visualization
          ├── ciBuilds

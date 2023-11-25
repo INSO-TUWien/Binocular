@@ -5,7 +5,9 @@ class GitHubMock {
     this.pipelineId = 0;
   }
 
-  loadAssignableUsers() {}
+  loadAssignableUsers() {
+    return [];
+  }
 
   getPipelines() {
     return new Promise((resolve) => {
@@ -49,4 +51,4 @@ class GitHubMock {
   }
 }
 
-module.exports = GitHubMock;
+export default GitHubMock;

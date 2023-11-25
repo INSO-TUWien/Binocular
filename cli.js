@@ -1,18 +1,20 @@
 #!/usr/bin/env node
 'use strict';
 
-const { Command, Option } = require('commander');
-const { spawn } = require('child_process');
-const figlet = require('figlet');
-const chalk = require('chalk');
-const package_json = require('./package.json');
-const open = require('open');
-const setupConfig = require('./cli/setupConfig');
-const fs = require('fs-extra');
-const path = require('path');
+import { Command, Option } from 'commander';
+import { spawn } from 'child_process';
+import figlet from 'figlet';
+import chalk from 'chalk';
+import package_json from './package.json' assert { type: 'json' };
+import open from 'open';
+import * as setupConfig from './cli/setupConfig.js';
+import fs from 'fs-extra';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
 const cli = new Command();
-
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 // Show help when no arguments passed
 if (process.argv.length < 3) {
   console.log(chalk.cyan('Starting the frontend and backend application concurrently...'));
@@ -126,7 +128,9 @@ function execute(...statements) {
   spawn(chainedStatement, { stdio: 'inherit', shell: true });
 
   // SIGINT gets sent to the entire process group, so no need to send it again to the child process
-  process.on('SIGINT', () => {});
+  process.on('SIGINT', () => {
+    console.log('Event sent: SIGINT');
+  });
 
   function chainStatements(...statements) {
     return statements.reduce((acc, statement) => {

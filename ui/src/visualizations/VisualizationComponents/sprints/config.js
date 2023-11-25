@@ -4,7 +4,7 @@ import { connect } from 'react-redux';
 import { setColorIssuesMergeRequests } from './sagas';
 import styles from './styles.scss';
 import React from 'react';
-import TabCombo from '../../../components/TabCombo/tabCombo';
+import TabCombo from '../../../components/TabCombo';
 
 const mapStateToProps = (state /*, ownProps*/) => {
   const sprintsState = state.visualizations.sprints.state;

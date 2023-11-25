@@ -1,6 +1,6 @@
 'use strict';
-const Model = require('../../../../lib/models/Model.js');
-const _ = require('lodash');
+import Model from '../../../../lib/models/Model.js';
+import _ from 'lodash';
 
 const TestModel = Model.define('Test', {
   attributes: ['id', 'someText', 'someOtherText'],
@@ -16,4 +16,4 @@ TestModel.persist = function (_buildData) {
   return TestModel.ensureById(buildData.id, buildData, { ignoreUnknownAttributes: true });
 };
 
-module.exports = TestModel;
+export default TestModel;

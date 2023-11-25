@@ -2,7 +2,6 @@
 
 import React from 'react';
 import styles from './CommitMarker.scss';
-import { emojify } from '../../../utils';
 
 export default class CommitMarker extends React.Component {
   constructor(props) {
@@ -24,7 +23,7 @@ export default class CommitMarker extends React.Component {
         />
         {this.state.showText && (
           <text x="15" y="5">
-            {this.props.commit.sha.substring(0, 7)} {emojify(this.props.commit.messageHeader)}
+            {this.props.commit.sha.substring(0, 7)} {this.props.commit.messageHeader}
           </text>
         )}
       </g>

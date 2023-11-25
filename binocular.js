@@ -2,11 +2,12 @@
 'use strict';
 
 // init timestamp for output
-const Moment = require('moment');
+import Moment from 'moment';
+import log_timestamp from 'log-timestamp';
 
 const startTime = Moment.now();
 console.log('Start Time: ' + Moment(startTime).format());
-require('log-timestamp')(() => '[' + Moment().format('DD-MM-YYYY, HH:mm:ss') + ']');
+log_timestamp(() => '[' + Moment().format('DD-MM-YYYY, HH:mm:ss') + ']');
 
 function threadLog(thread) {
   console.log(`[thread=${thread}]`, [...arguments].slice(1).join(' '));
@@ -20,52 +21,78 @@ function threadWarn(thread) {
  * Main entry point of the binocular application
  */
 
-const ctx = require('./lib/context.js');
+import ctx from './lib/context.js';
 
-const open = require('open');
-const _ = require('lodash');
+import open from 'open';
+import _ from 'lodash';
 
-const Repository = require('./lib/core/provider/git.js');
-const { app, argv, httpServer, io } = require('./lib/context.js');
-const config = require('./lib/config.js');
-const GetIndexer = require('./lib/indexers');
-const UrlProvider = require('./lib/url-providers');
-const ProgressReporter = require('./lib/progress-reporter.js');
-const path = require('path');
-const fs = require('fs');
-const Commit = require('./lib/models/Commit.js');
-const File = require('./lib/models/File.js');
-const Hunk = require('./lib/models/Hunk.js');
-const Issue = require('./lib/models/Issue.js');
-const Build = require('./lib/models/Build.js');
-const Branch = require('./lib/models/Branch.js');
-const Module = require('./lib/models/Module');
-const Stakeholder = require('./lib/models/Stakeholder.js');
-const MergeRequest = require('./lib/models/MergeRequest.js');
-const Milestone = require('./lib/models/Milestone.js');
-const CommitStakeholderConnection = require('./lib/models/CommitStakeholderConnection.js');
-const IssueStakeholderConnection = require('./lib/models/IssueStakeholderConnection.js');
-const IssueCommitConnection = require('./lib/models/IssueCommitConnection.js');
-const CommitCommitConnection = require('./lib/models/CommitCommitConnection.js');
-const CommitModuleConnection = require('./lib/models/CommitModuleConnection');
-const ModuleModuleConnection = require('./lib/models/ModuleModuleConnection');
-const ModuleFileConnection = require('./lib/models/ModuleFileConnection');
-const BranchFileConnection = require('./lib/models/BranchFileConnection');
-const BranchFileFileConnection = require('./lib/models/BranchFileFileConnection.js');
-const CommitFileStakeholderConnection = require('./lib/models/CommitFileStakeholderConnection.js');
-const CommitFileConnection = require('./lib/models/CommitFileConnection.js');
-const CommitBuildConnection = require('./lib/models/CommitBuildConnection.js');
-const ConfigurationError = require('./lib/errors/ConfigurationError');
-const DatabaseError = require('./lib/errors/DatabaseError');
-const GateWayService = require('./lib/gateway-service');
-const projectStructureHelper = require('./lib/projectStructureHelper');
+import git from './lib/core/provider/git.js';
+import config from './lib/config';
+import * as GetIndexer from './lib/indexers/index.js';
+import * as UrlProvider from './lib/url-providers/index.js';
+import ProgressReporter from './lib/progress-reporter';
+import path from 'path';
+import fs from 'fs';
+import Commit from './lib/models/Commit.js';
+import File from './lib/models/File.js';
+import Hunk from './lib/models/Hunk.js';
+import Issue from './lib/models/Issue.js';
+import Build from './lib/models/Build.js';
+import Branch from './lib/models/Branch.js';
+import Module from './lib/models/Module.js';
+import Stakeholder from './lib/models/Stakeholder.js';
+import MergeRequest from './lib/models/MergeRequest.js';
+import Milestone from './lib/models/Milestone.js';
+import CommitStakeholderConnection from './lib/models/CommitStakeholderConnection.js';
+import IssueStakeholderConnection from './lib/models/IssueStakeholderConnection.js';
+import IssueCommitConnection from './lib/models/IssueCommitConnection.js';
+import CommitCommitConnection from './lib/models/CommitCommitConnection.js';
+import CommitModuleConnection from './lib/models/CommitModuleConnection.js';
+import ModuleModuleConnection from './lib/models/ModuleModuleConnection.js';
+import ModuleFileConnection from './lib/models/ModuleFileConnection.js';
+import BranchFileConnection from './lib/models/BranchFileConnection.js';
+import BranchFileFileConnection from './lib/models/BranchFileFileConnection.js';
+import CommitFileStakeholderConnection from './lib/models/CommitFileStakeholderConnection.js';
+import CommitFileConnection from './lib/models/CommitFileConnection.js';
+import CommitBuildConnection from './lib/models/CommitBuildConnection.js';
+import ConfigurationError from './lib/errors/ConfigurationError.js';
+import DatabaseError from './lib/errors/DatabaseError.js';
+import GateWayService from './lib/gateway-service.js';
+import * as grpc from '@grpc/grpc-js';
+import * as protoLoader from '@grpc/proto-loader';
+import * as projectStructureHelper from './lib/projectStructureHelper';
+
+import * as getDbExportEndpoint from './lib/endpoints/get-db-export.js';
+
+import * as graphQlEndpoint from './lib/endpoints/graphQl.js';
+
+import * as setupDb from './lib/core/db/setup-db.js';
+
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const commPath = path.resolve(__dirname, 'services', 'grpc', 'comm');
+
+const LanguageDetectorPackageDefinition = protoLoader.loadSync(path.join(commPath, 'language.service.proto'), {
+  enums: String,
+});
+
+const LanguageComm = grpc.loadPackageDefinition(LanguageDetectorPackageDefinition).binocular.comm;
+const LanguageDetectionService = (
+  LanguageComm || {
+    LanguageDetectionService: () => {
+      console.log('No Language Detection Service!');
+    },
+  }
+).LanguageDetectionService;
 
 // set up the endpoints
-app.get('/api/db-export', require('./lib/endpoints/get-db-export.js'));
+ctx.app.get('/api/db-export', getDbExportEndpoint.default);
 
 // proxy to the FOXX-service
-app.get('/graphQl', require('./lib/endpoints/graphQl.js'));
-app.post('/graphQl', require('./lib/endpoints/graphQl.js'));
+ctx.app.get('/graphQl', graphQlEndpoint.default);
+ctx.app.post('/graphQl', graphQlEndpoint.default);
 
 const port = config.get().port;
 
@@ -87,7 +114,7 @@ const indexers = {
 const services = [];
 
 const gatewayService = new GateWayService();
-const reporter = new ProgressReporter(io, ['commits', 'issues', 'builds', 'files', 'modules', 'mergeRequests', 'milestones']);
+const reporter = new ProgressReporter(ctx.io, ['commits', 'issues', 'builds', 'files', 'modules', 'mergeRequests', 'milestones']);
 let databaseConnection = null;
 
 /**
@@ -98,14 +125,13 @@ let databaseConnection = null;
  * @returns {Promise<*>}
  */
 async function startDatabase(context, gateway) {
-  const repository = await Repository.fromPath(ctx.targetPath);
+  const repository = await git.fromPath(ctx.targetPath);
 
   context.repo = repository;
   config.setSource(repository.pathFromRoot('.binocularrc'));
-
+  // configure everything in the context
+  setupDb.default();
   if (databaseConnection === null) {
-    // configure everything in the context
-    require('./lib/core/db/setup-db.js');
     while (databaseConnection === null) {
       try {
         databaseConnection = await ensureDb(repository, context);
@@ -340,7 +366,7 @@ async function getIndexer(indexers, context, reporter, indexingThread) {
   // stores all indexer to call them async
   const indexHandler = [];
   indexHandler.push(
-    async () => (indexers.vcs = await GetIndexer.makeVCSIndexer(context.repo, context.vcsUrlProvider, reporter, context, true))
+    async () => (indexers.vcs = await GetIndexer.makeVCSIndexer(context.repo, context.vcsUrlProvider, reporter, context.argv.clean))
   );
 
   if (context.argv.its) {
@@ -457,7 +483,7 @@ function ensureDb(repo, context) {
       throw new DatabaseError(e.message);
     })
     .then(function () {
-      if (argv.clean) {
+      if (ctx.argv.clean) {
         return context.db.truncate();
       }
     })
@@ -505,7 +531,7 @@ function createManualIssueReferences(issueReferences) {
           return;
         }
 
-        const existingMention = _.find(issue.mentions, (mention) => mention.commit === sha);
+        const existingMention = find(issue.mentions, (mention) => mention.commit === sha);
         if (!existingMention) {
           issue.mentions.push({
             createdAt: commit.date,
@@ -542,9 +568,9 @@ Promise.all(
   [
     () => {
       // start web server
-      httpServer.listen(port, () => {
+      ctx.httpServer.listen(port, () => {
         console.log(`Listening on http://localhost:${port}`);
-        if (argv.ui && argv.open) {
+        if (ctx.argv.ui && ctx.argv.open) {
           open(`http://localhost:${port}/`);
         }
       });

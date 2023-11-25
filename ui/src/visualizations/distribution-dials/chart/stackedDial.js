@@ -1,7 +1,8 @@
 import * as d3 from 'd3';
-const _ = require('lodash');
 import React, { useState, useEffect } from 'react';
 import { getAngle, getNumberOfCategories } from './utils';
+
+import _ from 'lodash';
 
 function StackedDial({ label, innerRad, outerRad, data, colors, onHoverData }) {
   const gutter = 3;

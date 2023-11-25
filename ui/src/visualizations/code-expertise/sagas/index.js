@@ -2,7 +2,7 @@ import { createAction } from 'redux-actions';
 import { select, throttle, fork, takeEvery } from 'redux-saga/effects';
 import _ from 'lodash';
 
-import { fetchFactory, timestampedActionFactory, mapSaga } from '../../../sagas/utils.js';
+import { fetchFactory, timestampedActionFactory, mapSaga } from '../../../sagas/utils.ts';
 
 import { modulesModeData, issuesModeData, commitsToOwnership, getCommitsForBranch } from './helper.js';
 import { extractFileOwnership } from '../../../components/Filepicker/utils.js';
@@ -33,7 +33,7 @@ export default function* () {
   //yield fork(...); for every additional watcher function
 }
 
-//mapSaga is a helper function from ui > src > sagas > utils.js that just returns
+//mapSaga is a helper function from ui > src > sagas > utils.ts that just returns
 // a function that calls the action creator (in this case refresh)
 //throttle ensures that only one refresh action will be dispatched in an interval of 2000ms
 function* watchRefreshRequests() {
