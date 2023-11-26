@@ -72,20 +72,6 @@ import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const commPath = path.resolve(__dirname, 'services', 'grpc', 'comm');
-
-const LanguageDetectorPackageDefinition = protoLoader.loadSync(path.join(commPath, 'language.service.proto'), {
-  enums: String,
-});
-
-const LanguageComm = grpc.loadPackageDefinition(LanguageDetectorPackageDefinition).binocular.comm;
-const LanguageDetectionService = (
-  LanguageComm || {
-    LanguageDetectionService: () => {
-      console.log('No Language Detection Service!');
-    },
-  }
-).LanguageDetectionService;
 
 // set up the endpoints
 ctx.app.get('/api/db-export', getDbExportEndpoint.default);
