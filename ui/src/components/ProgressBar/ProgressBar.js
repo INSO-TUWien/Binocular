@@ -12,7 +12,6 @@ export default class ProgressBar extends React.PureComponent {
       commits: props.progress.commits,
       issues: props.progress.issues,
       builds: props.progress.builds,
-      languages: props.progress.languages,
       files: props.progress.files,
       mergeRequests: props.progress.mergeRequests,
       modules: props.progress.modules,
@@ -24,7 +23,6 @@ export default class ProgressBar extends React.PureComponent {
       commits: nextProps.progress.commits,
       issues: nextProps.progress.issues,
       builds: nextProps.progress.builds,
-      languages: nextProps.progress.languages,
       files: nextProps.progress.files,
       mergeRequests: nextProps.progress.mergeRequests,
       modules: nextProps.progress.modules,
@@ -32,7 +30,7 @@ export default class ProgressBar extends React.PureComponent {
   }
 
   render() {
-    const pieData = [this.state.commits, this.state.issues, this.state.builds, this.state.languages];
+    const pieData = [this.state.commits, this.state.issues, this.state.builds];
 
     const colors = ['#006ee6', '#0055b3', '#003d80', '#003166'];
     const pathWidth = 825 + 100 * Math.PI * 1.5; //width of whole path in px
@@ -167,9 +165,6 @@ export default class ProgressBar extends React.PureComponent {
             <hr style={{ margin: '0.5rem 0' }} />
             <div>Files: {this.state.files.total}</div>
             <div>Modules: {this.state.modules.total}</div>
-            <div>
-              Languages: {pieData[3].processed}/{pieData[3].total} ({Math.round((100 / pieData[3].total) * pieData[3].processed)}%)
-            </div>
             <div>
               Merge Requests: {this.state.mergeRequests.processed}/{this.state.mergeRequests.total} (
               {Math.round((100 / this.state.mergeRequests.total) * this.state.mergeRequests.processed)}%)
