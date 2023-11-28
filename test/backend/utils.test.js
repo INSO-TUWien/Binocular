@@ -7,6 +7,22 @@ import Db from '../../lib/core/db/db';
 import TestModel from './helper/db/testModel';
 
 import * as utils from '../../lib/utils';
+import path from 'path';
+import ctx from '../../lib/context.ts';
+const indexerOptions = {
+  backend: true,
+  frontend: false,
+  open: false,
+  clean: true,
+  its: true,
+  ci: true,
+  export: true,
+  server: false,
+};
+const targetPath = path.resolve('.');
+ctx.setOptions(indexerOptions);
+ctx.setTargetPath(targetPath);
+conf.loadConfig(ctx);
 const config = conf.get();
 
 describe('utils', function () {
@@ -30,8 +46,7 @@ describe('utils', function () {
 
   describe('#getDbExport', function () {
     it('get an export of all db collections', async function () {
-      await db.ensureDatabase('test');
-      await db.ensureDatabase('test');
+      await db.ensureDatabase('test', ctx);
       await db.truncate();
       await TestModel.ensureCollection();
 
