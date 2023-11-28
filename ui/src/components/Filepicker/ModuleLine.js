@@ -127,7 +127,7 @@ const ModuleLine = ({
       .attr('flex-direction', 'row')
       .attr('id', 'svg-' + moduleName);
 
-    if (ownership && !_.isEqual(ownership, {}) && authorColors) {
+    if (ownership && ownership.length !== 0 && !_.isEqual(ownership, {}) && authorColors) {
       //calc sum of additions
       const additions = ownership.reduce((accumulator, { signature, ownedLines }) => accumulator + ownedLines, 0);
 

@@ -8,7 +8,6 @@ const commitsToFiles = db._collection('commits-files');
 const branchesToFiles = db._collection('branches-files');
 const branchesToFilesToFiles = db._collection('branches-files-files');
 const commitsToFilesToStakeholders = db._collection('commits-files-stakeholders');
-const LanguagesToFiles = db._collection('languages-files');
 const paginated = require('./paginated.js');
 
 module.exports = new gql.GraphQLObjectType({
@@ -31,16 +30,6 @@ module.exports = new gql.GraphQLObjectType({
       webUrl: {
         type: gql.GraphQLString,
         description: 'The URL (if available) to the master-version of this file on the ITS',
-      },
-      language: {
-        type: require('./language'),
-        description: 'The used programming language in this file',
-        query: (file, args, limit) => aql`
-          FOR language
-          IN
-          INBOUND ${file} ${LanguagesToFiles}
-            ${limit}
-            RETURN language`,
       },
       commits: paginated({
         type: require('./commitInFile.js'),

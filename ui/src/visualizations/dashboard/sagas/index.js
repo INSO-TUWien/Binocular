@@ -18,7 +18,7 @@ function* watchRefresh() {
 
 function* fetchData() {
   const state = yield select();
-  for (const visualization of state.visualizations.newDashboard.state.config.visualizations) {
+  for (const visualization of state.visualizations.dashboard.state.config.visualizations) {
     const viz = visualizationRegistry[visualization];
     if (viz.saga !== undefined) {
       yield* viz.saga();

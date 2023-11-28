@@ -9,9 +9,7 @@ import GatewayMock from './helper/gateway/gatewayMock';
 import Db from '../../lib/core/db/db';
 import Commit from '../../lib/models/Commit';
 import File from '../../lib/models/File';
-import Language from '../../lib/models/Language';
 import Hunk from '../../lib/models/Hunk';
-import LanguageFileConnection from '../../lib/models/LanguageFileConnection';
 import CommitStakeholderConnection from '../../lib/models/CommitStakeholderConnection.js';
 import conf from '../../lib/config.js';
 
@@ -59,8 +57,6 @@ describe('commit', function () {
       await Commit.ensureCollection();
       await File.ensureCollection();
       await Hunk.ensureCollection();
-      await Language.ensureCollection();
-      await LanguageFileConnection.ensureCollection();
       await CommitStakeholderConnection.ensureCollection();
       await Stakeholder.ensureCollection();
 
@@ -99,8 +95,6 @@ describe('commit', function () {
       await Commit.ensureCollection();
       await File.ensureCollection();
       await Hunk.ensureCollection();
-      await Language.ensureCollection();
-      await LanguageFileConnection.ensureCollection();
 
       await fake.file(repo, 'test.js', testFile);
       await helpers.commit(repo, ['test.js'], bob, 'Commit1');
