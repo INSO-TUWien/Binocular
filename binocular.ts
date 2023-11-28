@@ -28,7 +28,6 @@ import ctx from './lib/context';
 import open from 'open';
 import _ from 'lodash';
 
-import git from './lib/core/provider/git.js';
 import config from './lib/config';
 import * as GetIndexer from './lib/indexers/index.js';
 import * as UrlProvider from './lib/url-providers/index.js';
@@ -37,7 +36,6 @@ import path from 'path';
 import fs from 'fs';
 import Commit from './lib/models/Commit.js';
 import File from './lib/models/File.js';
-import Language from './lib/models/Language.js';
 import Hunk from './lib/models/Hunk.js';
 import Issue from './lib/models/Issue';
 import Build from './lib/models/Build.js';
@@ -50,11 +48,9 @@ import CommitStakeholderConnection from './lib/models/CommitStakeholderConnectio
 import IssueStakeholderConnection from './lib/models/IssueStakeholderConnection.js';
 import IssueCommitConnection from './lib/models/IssueCommitConnection.js';
 import CommitCommitConnection from './lib/models/CommitCommitConnection.js';
-import CommitLanguageConnection from './lib/models/CommitLanguageConnection.js';
 import CommitModuleConnection from './lib/models/CommitModuleConnection.js';
 import ModuleModuleConnection from './lib/models/ModuleModuleConnection.js';
 import ModuleFileConnection from './lib/models/ModuleFileConnection.js';
-import LanguageFileConnection from './lib/models/LanguageFileConnection.js';
 import BranchFileConnection from './lib/models/BranchFileConnection.js';
 import BranchFileFileConnection from './lib/models/BranchFileFileConnection.js';
 import CommitFileStakeholderConnection from './lib/models/CommitFileStakeholderConnection.js';
@@ -67,17 +63,9 @@ import * as grpc from '@grpc/grpc-js';
 import * as protoLoader from '@grpc/proto-loader';
 import * as projectStructureHelper from './lib/projectStructureHelper';
 
-import getCommitsEndpoint from './lib/endpoints/get-commits.js';
-
-import getConfigEndpoint from './lib/endpoints/get-config.js';
-
-import * as getFileSourceCodeEndpoint from './lib/endpoints/get-fileSourceCode.js';
-
 import getDbExportEndpoint from './lib/endpoints/get-db-export.js';
 
 import graphQlEndpoint from './lib/endpoints/graphQl.js';
-
-import * as updateConfigEndpoint from './lib/endpoints/update-config.js';
 
 import * as setupDb from './lib/core/db/setup-db.js';
 
@@ -135,33 +123,13 @@ cli.parse(
 function runBackend() {
   const __filename = fileURLToPath(import.meta.url);
   const __dirname = path.dirname(__filename);
-  const commPath = path.resolve(__dirname, 'services', 'grpc', 'comm');
-
-  const LanguageDetectorPackageDefinition = protoLoader.loadSync(path.join(commPath, 'language.service.proto'), {
-    enums: String,
-  });
-
-  const LanguageComm = (grpc.loadPackageDefinition(LanguageDetectorPackageDefinition).binocular as any).comm;
-  const LanguageDetectionService = (
-    LanguageComm || {
-      LanguageDetectionService: () => {
-        console.log('No Language Detection Service!');
-      },
-    }
-  ).LanguageDetectionService;
 
   // set up the endpoints
-  ctx.app.get('/api/commits', (req: express.Request, res: express.Response) => getCommitsEndpoint(req, res, ctx));
-  ctx.app.get('/api/config', (req: express.Request, res: express.Response) => getConfigEndpoint(req, res, ctx));
-  ctx.app.get('/api/fileSourceCode', getFileSourceCodeEndpoint.default);
   ctx.app.get('/api/db-export', (req: express.Request, res: express.Response) => getDbExportEndpoint(req, res, ctx));
 
   // proxy to the FOXX-service
   ctx.app.get('/graphQl', (req: express.Request, res: express.Response) => graphQlEndpoint(req, res, ctx));
   ctx.app.post('/graphQl', (req: express.Request, res: express.Response) => graphQlEndpoint(req, res, ctx));
-
-  // configuration endpoint (not really used atm)
-  ctx.app.post('/api/config', updateConfigEndpoint.default);
 
   const port = config.get().port;
 
@@ -198,8 +166,6 @@ function runBackend() {
     'issues',
     'builds',
     'files',
-    'languages',
-    'filesLanguage',
     'modules',
     'mergeRequests',
     'milestones',
@@ -214,7 +180,7 @@ function runBackend() {
    * @returns {Promise<*>}
    */
   async function startDatabase(context: typeof ctx, gateway: GateWayService) {
-    const repository = await git.fromPath(ctx.targetPath);
+    const repository = await Repository.fromPath(ctx.targetPath);
 
     context.repo = repository;
     config.setSource(repository.pathFromRoot('.binocularrc'));
@@ -608,8 +574,6 @@ function runBackend() {
         return Promise.all([
           context.db.ensureService(path.join(__dirname, 'foxx'), '/binocular-ql'),
           Commit.ensureCollection(),
-          Language.ensureCollection(),
-          Language.ensureCollection(),
           File.ensureCollection(),
           Hunk.ensureCollection(),
           Stakeholder.ensureCollection(),
@@ -621,12 +585,10 @@ function runBackend() {
           Milestone.ensureCollection(),
           CommitFileConnection.ensureCollection(),
           CommitBuildConnection.ensureCollection(),
-          LanguageFileConnection.ensureCollection(),
           CommitStakeholderConnection.ensureCollection(),
           IssueStakeholderConnection.ensureCollection(),
           IssueCommitConnection.ensureCollection(),
           CommitCommitConnection.ensureCollection(),
-          CommitLanguageConnection.ensureCollection(),
           CommitModuleConnection.ensureCollection(),
           ModuleModuleConnection.ensureCollection(),
           ModuleFileConnection.ensureCollection(),
@@ -739,14 +701,6 @@ function runBackend() {
       (async (context: typeof ctx, conf: typeof config, gateway: GateWayService) => {
         services.push(gateway);
         await gateway.configure(conf.get('gateway'));
-        gateway.addServiceHandler('LanguageDetection', (service: any) => {
-          service.comm = new LanguageDetectionService(
-            `${service.client.address}:${service.client.port}`,
-            grpc.credentials.createInsecure()
-          );
-          reIndex(indexers, context, reporter, gateway, activeIndexingQueue, ++indexingProcess);
-        });
-
         return gateway.start();
       }).bind(this, ctx, config, gatewayService),
     ].map((entryPoint) => serviceStarter(entryPoint))
