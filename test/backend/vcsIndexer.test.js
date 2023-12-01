@@ -11,8 +11,6 @@ import Db from '../../lib/core/db/db';
 import Commit from '../../lib/models/Commit';
 import Hunk from '../../lib/models/Hunk';
 import File from '../../lib/models/File';
-import Language from '../../lib/models/Language';
-import LanguageFileConnection from '../../lib/models/LanguageFileConnection';
 import Branch from '../../lib/models/Branch';
 import Module from '../../lib/models/Module';
 import ModuleFileConnection from '../../lib/models/ModuleFileConnection';
@@ -25,12 +23,27 @@ import ctx from '../../lib/context';
 import GitHubUrlProvider from '../../lib/url-providers/GitHubUrlProvider';
 
 import VcsIndexer from '../../lib/indexers/vcs';
+import path from 'path';
+const indexerOptions = {
+  backend: true,
+  frontend: false,
+  open: false,
+  clean: true,
+  its: true,
+  ci: true,
+  export: true,
+  server: false,
+};
+const targetPath = path.resolve('.');
+ctx.setOptions(indexerOptions);
+ctx.setTargetPath(targetPath);
+conf.loadConfig(ctx);
 const config = conf.get();
 
 describe('vcs', function () {
   const db = new Db(config.arango);
   const gateway = new GatewayMock();
-  const reporter = new ReporterMock(['commits', 'files', 'languages', 'filesLanguage', 'modules']);
+  const reporter = new ReporterMock(['commits', 'files', 'modules']);
   const bob = { name: 'Bob Barker', email: 'bob@gmail.com' };
 
   const testFile = 'function helloWorld(){\nconsole.log("Hello World");\n}';
@@ -55,13 +68,11 @@ describe('vcs', function () {
       urlProvider.configure({ url: 'https://test.com', project: 'testProject' });
 
       //setup DB
-      await db.ensureDatabase('test');
+      await db.ensureDatabase('test', ctx);
       await db.truncate();
       await Commit.ensureCollection();
       await Hunk.ensureCollection();
       await File.ensureCollection();
-      await Language.ensureCollection();
-      await LanguageFileConnection.ensureCollection();
       await Branch.ensureCollection();
       await Module.ensureCollection();
       await ModuleFileConnection.ensureCollection();
@@ -82,7 +93,7 @@ describe('vcs', function () {
       await helpers.commit(repo, ['test.js'], bob, 'Commit3');
       await repo.listAllCommits();
 
-      const gitIndexer = VcsIndexer(repo, urlProvider, reporter, true);
+      const gitIndexer = VcsIndexer(repo, urlProvider, reporter, true, conf, ctx);
       gitIndexer.setGateway(gateway);
       gitIndexer.resetCounter();
       await gitIndexer.index();

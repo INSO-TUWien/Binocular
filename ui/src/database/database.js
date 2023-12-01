@@ -96,30 +96,6 @@ export default class Database {
     }
   }
 
-  static async getCommitDataOwnershipRiver(commitSpan, significantSpan, granularity, interval, excludeMergeCommits) {
-    if (await this.checkBackendConnection()) {
-      return ServerDB.getCommitDataOwnershipRiver(commitSpan, significantSpan, granularity, interval, excludeMergeCommits);
-    } else {
-      return LocalDB.getCommitDataOwnershipRiver(commitSpan, significantSpan, granularity, interval, excludeMergeCommits);
-    }
-  }
-
-  static async getRelatedCommitDataOwnershipRiver(issue) {
-    if (await this.checkBackendConnection()) {
-      return ServerDB.getRelatedCommitDataOwnershipRiver(issue);
-    } else {
-      return LocalDB.getRelatedCommitDataOwnershipRiver(issue);
-    }
-  }
-
-  static async getCommitDateHistogram(granularity, dateField, since, until) {
-    if (await this.checkBackendConnection()) {
-      return ServerDB.getCommitDateHistogram(granularity, dateField, since, until);
-    } else {
-      return LocalDB.getCommitDateHistogram(granularity, dateField, since, until);
-    }
-  }
-
   static async getCodeHotspotsChangeData(file) {
     if (await this.checkBackendConnection()) {
       return ServerDB.getCodeHotspotsChangeData(file);
@@ -139,14 +115,6 @@ export default class Database {
     }
   }
 
-  static async getBuildDataOwnershipRiver(commitSpan, significantSpan, granularity, interval) {
-    if (await this.checkBackendConnection()) {
-      return ServerDB.getBuildDataOwnershipRiver(commitSpan, significantSpan, granularity, interval);
-    } else {
-      return LocalDB.getBuildDataOwnershipRiver(commitSpan, significantSpan, granularity, interval);
-    }
-  }
-
   /**
    * ISSUES
    */
@@ -163,14 +131,6 @@ export default class Database {
       return ServerDB.getCommitsForIssue(iid);
     } else {
       return LocalDB.getCommitsForIssue(iid);
-    }
-  }
-
-  static async getIssueDataOwnershipRiver(issueSpan, significantSpan, granularity, interval) {
-    if (await this.checkBackendConnection()) {
-      return ServerDB.getIssueDataOwnershipRiver(issueSpan, significantSpan, granularity, interval);
-    } else {
-      return LocalDB.getIssueDataOwnershipRiver(issueSpan, significantSpan, granularity, interval);
     }
   }
 
@@ -263,17 +223,6 @@ export default class Database {
       return ServerDB.getAllBranches();
     } else {
       return LocalDB.getAllBranches();
-    }
-  }
-
-  /**
-   * LANGUAGES
-   */
-  static async getAllLanguages() {
-    if (await this.checkBackendConnection()) {
-      return ServerDB.getAllLanguages();
-    } else {
-      return LocalDB.getAllLanguages();
     }
   }
 

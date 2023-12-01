@@ -1,5 +1,7 @@
 {
+  // source: https://github.com/mochajs/mocha-examples/issues/47
   "node-option": [
-    "loader=tsx"
+      "experimental-specifier-resolution=node",
+      "import=tsx"
   ]
 }

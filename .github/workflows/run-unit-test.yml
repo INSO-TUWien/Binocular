@@ -9,7 +9,7 @@ on:
 
 jobs:
 
-  run-tests:
+  test-server:
 
     runs-on: ubuntu-latest
     services:
@@ -39,14 +39,50 @@ jobs:
       - name: Set node version
         uses: actions/setup-node@v3
         with:
-          node-version: 18
+          node-version: 20
           cache: npm
 
       - name: Install dependencies
         run: npm ci
 
-      - name: Run tests
-        run: npm run test
+      - name: Run tests server
+        run: npm run test-server
+  
+  test-ui:
+    runs-on: ubuntu-latest
+    # services:
+    #   arangodb:
+    #     image: arangodb:3.11
+    #     ports:
+    #       - 8529:8529
+    #     env:
+    #       ARANGO_ROOT_PASSWORD: openSesame
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Set .pupilrc variables
+        uses: microsoft/variable-substitution@v1
+        with:
+          files: .binocularrc_ci
+        env:
+          github.auth.token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Rename binocularrc
+        run: mv .binocularrc_ci .binocularrc
+
+      - name: Set node version
+        uses: actions/setup-node@v3
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+            
+      - name: Run tests ui
+        run: npm run test-ui
 
     # - name: Collect coverage
     #   run: npm run coverage

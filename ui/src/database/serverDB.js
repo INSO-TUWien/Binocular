@@ -8,7 +8,6 @@ import MergeRequests from './serverDB/mergeRequests';
 import Milestones from './serverDB/milestones';
 import Files from './serverDB/files';
 import Branches from './serverDB/branches';
-import Languages from './serverDB/languages';
 import Modules from './serverDB/modules';
 import Stakeholders from './serverDB/stakeholders';
 
@@ -65,26 +64,6 @@ export default class ServerDB {
     return Files.getOwnershipDataForFiles(files);
   }
 
-  static getCommitDataOwnershipRiver(commitSpan, significantSpan, granularity, interval, excludeMergeCommits) {
-    return Commits.getCommitDataOwnershipRiver(commitSpan, significantSpan, granularity, interval, excludeMergeCommits);
-  }
-
-  static getBuildDataOwnershipRiver(commitSpan, significantSpan, granularity, interval) {
-    return Builds.getBuildDataOwnershipRiver(commitSpan, significantSpan, granularity, interval);
-  }
-
-  static getIssueDataOwnershipRiver(issueSpan, significantSpan, granularity, interval) {
-    return Issues.getIssueDataOwnershipRiver(issueSpan, significantSpan, granularity, interval);
-  }
-
-  static getRelatedCommitDataOwnershipRiver(issue) {
-    return Commits.getRelatedCommitDataOwnershipRiver(issue);
-  }
-
-  static getCommitDateHistogram(granularity, dateField, since, until) {
-    return Commits.getCommitDateHistogram(granularity, dateField, since, until);
-  }
-
   static getCommitsForFiles(filenames) {
     return Commits.getCommitsForFiles(filenames, true);
   }
@@ -119,10 +98,6 @@ export default class ServerDB {
 
   static getAllBranches() {
     return Branches.getAllBranches();
-  }
-
-  static getAllLanguages() {
-    return Languages.getAllLanguages();
   }
 
   static getAllModules() {

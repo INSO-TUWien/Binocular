@@ -10,8 +10,8 @@ import CSSTransition from 'react-transition-group/CSSTransition';
 
 import GlobalZoomableSvg from '../../../components/svg/GlobalZoomableSvg.js';
 import OffsetGroup from '../../../components/svg/OffsetGroup.js';
-import Axis from '../code-ownership-river/chart/Axis.js';
-import CommitMarker from '../code-ownership-river/chart/CommitMarker.js';
+import Axis from './Axis.js';
+import CommitMarker from './CommitMarker.js';
 import hunkTransitions from './hunkTransitions.scss';
 import Asterisk from '../../../components/svg/Asterisk.js';
 import X from '../../../components/svg/X.js';
@@ -125,7 +125,7 @@ export default class IssueImpact extends React.PureComponent {
 
       return (
         <g key={buildKey} className={styles.buildAxis}>
-          <path d={pie} className={styles.indicatorLine} />
+          <path d={pie.toString()} className={styles.indicatorLine} />
           {jobs}
           <path d={arcData} className={cx(styles.arc, styles[build.status])} />
         </g>
@@ -176,7 +176,7 @@ export default class IssueImpact extends React.PureComponent {
             <g key={hunkKey}>
               <path
                 className={styles.changeIndicator}
-                d={pie}
+                d={pie.toString()}
                 style={{
                   fill: isHighlighted ? dark : light,
                   stroke: dark,

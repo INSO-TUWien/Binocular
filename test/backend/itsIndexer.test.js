@@ -25,6 +25,21 @@ import MergeRequest from '../../lib/models/MergeRequest';
 import Stakeholder from '../../lib/models/Stakeholder';
 import IssueStakeholderConnection from '../../lib/models/IssueStakeholderConnection';
 import sinon from 'sinon';
+import path from 'path';
+const indexerOptions = {
+  backend: true,
+  frontend: false,
+  open: false,
+  clean: true,
+  its: true,
+  ci: true,
+  export: true,
+  server: false,
+};
+const targetPath = path.resolve('.');
+ctx.setOptions(indexerOptions);
+ctx.setTargetPath(targetPath);
+conf.loadConfig(ctx);
 const config = conf.get();
 
 describe('its', function () {
@@ -55,7 +70,7 @@ describe('its', function () {
       };
 
       //setup DB
-      await db.ensureDatabase('test');
+      await db.ensureDatabase('test', ctx);
       await db.truncate();
       await Issue.ensureCollection();
       await MergeRequest.ensureCollection();
@@ -101,7 +116,7 @@ describe('its', function () {
       };
 
       //setup DB
-      await db.ensureDatabase('test');
+      await db.ensureDatabase('test', ctx);
       await db.truncate();
       await Issue.ensureCollection();
       await Stakeholder.ensureCollection();

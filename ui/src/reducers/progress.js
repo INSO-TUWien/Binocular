@@ -12,7 +12,6 @@ export default handleActions(
     commits: { total: 0, processed: 0 },
     issues: { total: 0, processed: 0 },
     builds: { total: 0, processed: 0 },
-    languages: { total: 0, processed: 0 },
     files: { total: 0, processed: 0 },
     mergeRequests: { total: 0, processed: 0 },
     modules: { total: 0, processed: 0 },

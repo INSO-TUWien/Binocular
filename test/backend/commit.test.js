@@ -9,15 +9,28 @@ import GatewayMock from './helper/gateway/gatewayMock';
 import Db from '../../lib/core/db/db';
 import Commit from '../../lib/models/Commit';
 import File from '../../lib/models/File';
-import Language from '../../lib/models/Language';
 import Hunk from '../../lib/models/Hunk';
-import LanguageFileConnection from '../../lib/models/LanguageFileConnection';
 import CommitStakeholderConnection from '../../lib/models/CommitStakeholderConnection.js';
 import conf from '../../lib/config.js';
 
 import ctx from '../../lib/context';
 import GitHubUrlProvider from '../../lib/url-providers/GitHubUrlProvider';
 import Stakeholder from '../../lib/models/Stakeholder.js';
+import path from 'path';
+const indexerOptions = {
+  backend: true,
+  frontend: false,
+  open: false,
+  clean: true,
+  its: true,
+  ci: true,
+  export: true,
+  server: false,
+};
+const targetPath = path.resolve('.');
+ctx.setOptions(indexerOptions);
+ctx.setTargetPath(targetPath);
+conf.loadConfig(ctx);
 const config = conf.get();
 
 describe('commit', function () {
@@ -39,13 +52,11 @@ describe('commit', function () {
       urlProvider.configure({ url: 'https://test.com', project: 'testProject' });
 
       //setup DB
-      await db.ensureDatabase('test');
+      await db.ensureDatabase('test', ctx);
       await db.truncate();
       await Commit.ensureCollection();
       await File.ensureCollection();
       await Hunk.ensureCollection();
-      await Language.ensureCollection();
-      await LanguageFileConnection.ensureCollection();
       await CommitStakeholderConnection.ensureCollection();
       await Stakeholder.ensureCollection();
 
@@ -79,13 +90,11 @@ describe('commit', function () {
       urlProvider.configure({ url: 'https://test.com', project: 'testProject' });
 
       //setup DB
-      await db.ensureDatabase('test');
+      await db.ensureDatabase('test', ctx);
       await db.truncate();
       await Commit.ensureCollection();
       await File.ensureCollection();
       await Hunk.ensureCollection();
-      await Language.ensureCollection();
-      await LanguageFileConnection.ensureCollection();
 
       await fake.file(repo, 'test.js', testFile);
       await helpers.commit(repo, ['test.js'], bob, 'Commit1');
@@ -100,7 +109,7 @@ describe('commit', function () {
 
       for (const commit of commits) {
         const commitDAO = await Commit.persist(repo, commit, urlProvider);
-        await Promise.all(await commitDAO.processTree(repo, commit, currentBranch, urlProvider, gateway));
+        await Promise.all(await commitDAO.processTree(repo, commit, currentBranch, urlProvider, gateway, ctx));
       }
       const dbCommitsCollectionData = await (await db.query('FOR i IN @@collection RETURN i', { '@collection': 'commits' })).all();
       const dbFilesCollectionData = await (await db.query('FOR i IN @@collection RETURN i', { '@collection': 'files' })).all();
