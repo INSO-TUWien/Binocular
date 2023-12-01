@@ -5,11 +5,11 @@ import cli from './cli/cli';
 
 // init timestamp for output
 import Moment from 'moment';
-import log_timestamp from 'log-timestamp';
+import console_stamp from 'console-stamp';
 
 const startTime = Moment.now();
 console.log('Start Time: ' + Moment(startTime).format());
-log_timestamp(() => '[' + Moment().format('DD-MM-YYYY, HH:mm:ss') + ']');
+console_stamp(console, { format: ':date(yyyy/mm/dd HH:MM:ss)' });
 
 function threadLog(thread: number, message: string) {
   console.log(`[thread=${thread}]`, message);
@@ -59,8 +59,6 @@ import CommitBuildConnection from './lib/models/CommitBuildConnection.js';
 import ConfigurationError from './lib/errors/ConfigurationError.js';
 import DatabaseError from './lib/errors/DatabaseError.js';
 import GateWayService from './lib/gateway-service.js';
-import * as grpc from '@grpc/grpc-js';
-import * as protoLoader from '@grpc/proto-loader';
 import * as projectStructureHelper from './lib/projectStructureHelper';
 
 import getDbExportEndpoint from './lib/endpoints/get-db-export.js';
@@ -71,7 +69,6 @@ import * as setupDb from './lib/core/db/setup-db.js';
 
 import { fileURLToPath } from 'url';
 import { spawn } from 'child_process';
-import { options } from 'yargs';
 import express from 'express';
 import { FSWatcher } from 'fs-extra';
 import vcs from './lib/indexers/vcs/index.js';
@@ -79,6 +76,7 @@ import its from './lib/indexers/its/index.js';
 import ci from './lib/indexers/ci/index.js';
 import Repository from './lib/core/provider/git.js';
 import chalk from 'chalk';
+
 cli.parse(
   (targetPath, options) => {
     console.log(`Running binocular with following options on path "${targetPath}":`);
@@ -185,7 +183,7 @@ function runBackend() {
     context.repo = repository;
     config.setSource(repository.pathFromRoot('.binocularrc'));
     // configure everything in the context
-    setupDb.default(config, ctx);
+    context.db = setupDb.default(config.get().arango);
     if (databaseConnection === null) {
       while (databaseConnection === null) {
         try {
@@ -392,7 +390,10 @@ function runBackend() {
 
       await (Issue as any).deduceStakeholders();
       createManualIssueReferences(config.get('issueReferences'));
-      projectStructureHelper.checkProjectStructureAndFix(ctx);
+      if (context.argv.export) {
+        projectStructureHelper.deleteDbExport();
+        projectStructureHelper.createAndFillDbExportFolder(context.db);
+      }
 
       //now that the indexers have finished, we have VCS, ITS and CI data and can connect them.
       // for that purpose, references between e.g. issues and commits have been stored in the collections.
