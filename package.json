@@ -39,8 +39,7 @@
     "dockerize": "whalify generate-installer && ./node_modules/.bin/whalify build",
     "fix:root": "eslint --fix .",
     "fix:ui": "eslint --fix --ignore-path ui/.eslintignore -c ui/.eslintrc.yml ui",
-    "fix": "npm run fix:root && npm run fix:ui",
-    "dev-server-ase": "tsx watch binocular.ts run --no-frontend C:\\Users\\sebas\\Uni_Local\\Semester_9\\ASE"
+    "fix": "npm run fix:root && npm run fix:ui"
   },
   "keywords": [
     "git"
