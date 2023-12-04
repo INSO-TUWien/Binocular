@@ -8,7 +8,7 @@ import { findAll } from './utils';
 PouchDB.plugin(PouchDBFind);
 PouchDB.plugin(PouchDBAdapterMemory);
 
-export default class Languages {
+export default class Modules {
   static getAllModules(db) {
     return findAll(db, 'modules').then((res) => {
       return { modules: { data: res.docs } };

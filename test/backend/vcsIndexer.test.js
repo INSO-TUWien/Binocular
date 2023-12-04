@@ -11,8 +11,6 @@ import Db from '../../lib/core/db/db';
 import Commit from '../../lib/models/Commit';
 import Hunk from '../../lib/models/Hunk';
 import File from '../../lib/models/File';
-import Language from '../../lib/models/Language';
-import LanguageFileConnection from '../../lib/models/LanguageFileConnection';
 import Branch from '../../lib/models/Branch';
 import Module from '../../lib/models/Module';
 import ModuleFileConnection from '../../lib/models/ModuleFileConnection';
@@ -45,7 +43,7 @@ const config = conf.get();
 describe('vcs', function () {
   const db = new Db(config.arango);
   const gateway = new GatewayMock();
-  const reporter = new ReporterMock(['commits', 'files', 'languages', 'filesLanguage', 'modules']);
+  const reporter = new ReporterMock(['commits', 'files', 'modules']);
   const bob = { name: 'Bob Barker', email: 'bob@gmail.com' };
 
   const testFile = 'function helloWorld(){\nconsole.log("Hello World");\n}';
@@ -75,8 +73,6 @@ describe('vcs', function () {
       await Commit.ensureCollection();
       await Hunk.ensureCollection();
       await File.ensureCollection();
-      await Language.ensureCollection();
-      await LanguageFileConnection.ensureCollection();
       await Branch.ensureCollection();
       await Module.ensureCollection();
       await ModuleFileConnection.ensureCollection();

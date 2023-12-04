@@ -61,6 +61,4 @@ export function callSafe(fn) {
   }
 }
 
-export { default as ClosingPathContext } from './ClosingPathContext.js';
-
 export * from './graphQl.js';

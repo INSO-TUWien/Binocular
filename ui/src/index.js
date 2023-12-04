@@ -22,14 +22,10 @@ const logger = createLogger({
   collapsed: () => true,
 });
 
-import newDashboard from './visualizations/dashboard';
+import dashboard from './visualizations/dashboard';
 import dataExport from './visualizations/dataExport';
-import dashboard from './visualizations/legacy/dashboard';
-import codeOwnershipRiver from './visualizations/legacy/code-ownership-river';
 import issueImpact from './visualizations/legacy/issue-impact';
-import hotspotDials from './visualizations/legacy/hotspot-dials';
 import codeHotspots from './visualizations/legacy/code-hotspots';
-import languageModuleRiver from './visualizations/legacy/language-module-river';
 import codeExpertise from './visualizations/code-expertise';
 import ciBuilds from './visualizations/VisualizationComponents/ciBuilds';
 import issues from './visualizations/VisualizationComponents/issues';
@@ -42,22 +38,18 @@ import distributionDials from './visualizations/distribution-dials';
 import RootOffline from './components/RootOffline';
 
 const visualizationModules = [
-  newDashboard,
   dashboard,
-  codeOwnershipRiver,
-  issueImpact,
+  codeOwnership,
   distributionDials,
-  hotspotDials,
+  sprints,
   codeHotspots,
-  languageModuleRiver,
+  codeExpertise,
+  issueImpact,
+  timeSpent,
   ciBuilds,
   issues,
   issueBreakdown,
   changes,
-  sprints,
-  codeExpertise,
-  timeSpent,
-  codeOwnership,
   dataExport,
 ];
 

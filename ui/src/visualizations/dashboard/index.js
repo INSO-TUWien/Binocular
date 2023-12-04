@@ -7,8 +7,8 @@ import saga from './sagas';
 import reducer from './reducers';
 
 export default {
-  id: 'newDashboard',
-  label: 'New Dashboard',
+  id: 'dashboard',
+  label: 'Dashboard',
   saga,
   reducer,
   ChartComponent,

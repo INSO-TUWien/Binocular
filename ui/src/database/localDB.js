@@ -14,7 +14,6 @@ import MergeRequests from './localDB/mergeRequests';
 import Milestones from './localDB/milestones';
 import Files from './localDB/files';
 import Branches from './localDB/branches';
-import Languages from './localDB/languages';
 import Modules from './localDB/modules';
 import Stakeholders from './localDB/stakeholders';
 
@@ -27,7 +26,6 @@ import commitsCommits from '../../db_export/commits-commits.json';
 import commitsFiles from '../../db_export/commits-files.json';
 import commitsBuilds from '../../db_export/commits-builds.json';
 import commitsFilesStakeholders from '../../db_export/commits-files-stakeholders.json';
-import commitsLanguages from '../../db_export/commits-languages.json';
 import commitsModules from '../../db_export/commits-modules.json';
 import commitsStakeholders from '../../db_export/commits-stakeholders.json';
 import commits from '../../db_export/commits.json';
@@ -35,8 +33,6 @@ import files from '../../db_export/files.json';
 import issuesCommits from '../../db_export/issues-commits.json';
 import issuesStakeholders from '../../db_export/issues-stakeholders.json';
 import issues from '../../db_export/issues.json';
-import languagesFiles from '../../db_export/languages-files.json';
-import languages from '../../db_export/languages.json';
 import modulesFiles from '../../db_export/modules-files.json';
 import modulesModules from '../../db_export/modules-modules.json';
 import modules from '../../db_export/modules.json';
@@ -44,19 +40,17 @@ import stakeholders from '../../db_export/stakeholders.json';
 import mergeRequests from '../../db_export/mergeRequests.json';
 import milestones from '../../db_export/milestones.json';
 
-const collections = { branches, builds, commits, files, issues, languages, modules, stakeholders, mergeRequests, milestones };
+const collections = { branches, builds, commits, files, issues, modules, stakeholders, mergeRequests, milestones };
 
 const relations = {
   'commits-commits': commitsCommits,
   'commits-files': commitsFiles,
   'commits-files-stakeholders': commitsFilesStakeholders,
   'commits-builds': commitsBuilds,
-  'commits-languages': commitsLanguages,
   'commits-modules': commitsModules,
   'commits-stakeholders': commitsStakeholders,
   'issues-commits': issuesCommits,
   'issues-stakeholders': issuesStakeholders,
-  'languages-files': languagesFiles,
   'modules-files': modulesFiles,
   'modules-modules': modulesModules,
   'branches-files': branchesFiles,
@@ -175,26 +169,6 @@ export default class LocalDB {
     return Files.getOwnershipDataForFiles(db, tripleStore, files);
   }
 
-  static getCommitDataOwnershipRiver(commitSpan, significantSpan, granularity, interval, excludeMergeCommits) {
-    return Commits.getCommitDataOwnershipRiver(db, tripleStore, commitSpan, significantSpan, granularity, interval, excludeMergeCommits);
-  }
-
-  static getBuildDataOwnershipRiver(commitSpan, significantSpan, granularity, interval) {
-    return Builds.getBuildDataOwnershipRiver(db, commitSpan, significantSpan, granularity, interval);
-  }
-
-  static getIssueDataOwnershipRiver(issueSpan, significantSpan, granularity, interval) {
-    return Issues.getIssueDataOwnershipRiver(db, issueSpan, significantSpan, granularity, interval);
-  }
-
-  static getRelatedCommitDataOwnershipRiver(issue) {
-    return Issues.getRelatedCommitDataOwnershipRiver(db, tripleStore, issue);
-  }
-
-  static getCommitDateHistogram(granularity, dateField, since, until) {
-    return Commits.getCommitDateHistogram(db, tripleStore, granularity, dateField, since, until);
-  }
-
   static issueImpactQuery(iid, since, until) {
     return Issues.issueImpactQuery(db, tripleStore, iid, since, until);
   }
@@ -223,10 +197,6 @@ export default class LocalDB {
     return Branches.getAllBranches(db);
   }
 
-  static getAllLanguages() {
-    return Languages.getAllLanguages(db);
-  }
-
   static getAllModules() {
     return Modules.getAllModules(db);
   }
@@ -251,12 +221,10 @@ export default class LocalDB {
     database.commits_files = relations['commits-files'];
     database.commits_files_stakeholders = relations['commits-files-stakeholders'];
     database.commits_builds = relations['commits-builds'];
-    database.commits_languages = relations['commits-languages'];
     database.commits_modules = relations['commits-modules'];
     database.commits_stakeholders = relations['commits-stakeholders'];
     database.issues_commits = relations['issues-commits'];
     database.issues_stakeholders = relations['issues-stakeholders'];
-    database.languages_files = relations['languages-files'];
     database.modules_files = relations['modules-files'];
     database.modules_modules = relations['modules-modules'];
     database.branches_files = relations['branches-files'];

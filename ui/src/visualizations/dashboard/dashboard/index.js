@@ -28,7 +28,7 @@ import deleteIcon from '../assets/deleteIcon.svg';
 import { setActiveVisualizations, refresh } from '../sagas';
 
 export default () => {
-  const dashState = useSelector((state) => state.visualizations.newDashboard.state);
+  const dashState = useSelector((state) => state.visualizations.dashboard.state);
 
   const dispatch = useDispatch();
 
