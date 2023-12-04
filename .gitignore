@@ -2,7 +2,6 @@
 /dist
 .binocular
 .binocularrc
-db/
 *.log
 coverage/
 .whalify/

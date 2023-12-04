@@ -5,18 +5,69 @@ import * as setupDb from '../lib/core/db/setup-db';
 import DatabaseError from '../lib/errors/DatabaseError';
 import ctx from '../lib/context';
 import * as projectStructureHelper from '../lib/projectStructureHelper';
-
+import fs from 'fs';
+import Db from '../lib/core/db/db';
+import { fileURLToPath } from 'url';
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 export async function exportDB(targetPath: string, options: any) {
-  const targetPathFull = path.resolve(targetPath ?? '.');
-  const arangoHost = '127.0.0.1';
-  const arangoPort = 8529;
-  const arangoUser = 'root';
-  const arangoPassword = '';
+  let targetPathFull = __dirname + '/../ui';
+  if (targetPath) {
+    targetPathFull = path.resolve(targetPath);
+  }
+  let arangoHost = '127.0.0.1';
+  let arangoPort = 8529;
+  let arangoUser = 'root';
+  let arangoPassword = '';
+
+  if (fs.existsSync('.binocularrc')) {
+    const binocularrc = JSON.parse(fs.readFileSync('.binocularrc', 'utf8'));
+    arangoHost = binocularrc.arango.host;
+    arangoPort = binocularrc.arango.port;
+    arangoUser = binocularrc.arango.user;
+    arangoPassword = binocularrc.arango.root;
+  } else {
+    console.log(chalk.red(chalk.underline('No binocular config file found in current folder. Please provide ArangoDB credentials.')));
+    const answers: { arangoHost: string; arangoPort: number; arangoUser: string; arangoPassword: string } = await inquirer.prompt([
+      {
+        type: 'input',
+        name: 'arangoHost',
+        message: 'Enter Arango Host:',
+        default: arangoHost,
+      },
+      {
+        type: 'input',
+        name: 'arangoPort',
+        message: 'Enter your ArangoDB port:',
+        validate: (input: string) => {
+          const number = parseInt(input);
+          return Number.isInteger(number) && number > 0 && number < 65536;
+        },
+        default: arangoPort,
+      },
+      {
+        type: 'input',
+        name: 'arangoUser',
+        message: 'Enter Arango User:',
+        default: arangoUser,
+      },
+      {
+        type: 'password',
+        name: 'arangoPassword',
+        message: 'Enter Arango Password (default empty password):',
+        default: arangoPassword,
+      },
+    ]);
+    arangoHost = answers.arangoHost;
+    arangoPort = answers.arangoPort;
+    arangoUser = answers.arangoUser;
+    arangoPassword = answers.arangoPassword;
+  }
 
   const db = setupDb.default({ host: arangoHost, port: arangoPort, user: arangoUser, password: arangoPassword });
 
   if (options.database) {
-    exportSpecificDatabase(options.database, db);
+    exportSpecificDatabase(options.database, db, targetPathFull);
   } else {
     const avaliableDatabases = await db.listDatabases();
     inquirer
@@ -29,7 +80,7 @@ export async function exportDB(targetPath: string, options: any) {
         },
       ])
       .then((answers: { database: string }) => {
-        exportSpecificDatabase(answers.database, db);
+        exportSpecificDatabase(answers.database, db, targetPathFull);
       })
       .catch((error: Error) => {
         console.log(error);
@@ -37,8 +88,9 @@ export async function exportDB(targetPath: string, options: any) {
   }
 }
 
-function exportSpecificDatabase(name: string, database: any) {
+function exportSpecificDatabase(name: string, database: Db, targetPath: string) {
   console.log(chalk.blue(chalk.underline(`Export DB: ${name}`)));
+  console.log(chalk.italic(`Target Path: ${targetPath}`));
 
   database
     .ensureDatabase(name, ctx)
@@ -46,7 +98,7 @@ function exportSpecificDatabase(name: string, database: any) {
       throw new DatabaseError(e.message);
     })
     .then(async function () {
-      projectStructureHelper.deleteDbExport();
-      projectStructureHelper.createAndFillDbExportFolder(database);
+      projectStructureHelper.deleteDbExport(targetPath);
+      projectStructureHelper.createAndFillDbExportFolder(database, targetPath);
     });
 }
