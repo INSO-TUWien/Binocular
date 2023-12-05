@@ -15,12 +15,12 @@ const log = debug('paginator');
 class JiraITSIndexer {
   private repo: string;
   private stopping: boolean;
-  private reporter: string;
+  private reporter: any;
 
   private jira: any;
   private projectKey = 'SCRUM'; // a key of a project is needed to get the issues needed
 
-  constructor(repo: string, reporter: string) {
+  constructor(repo: string, reporter: any) {
     this.repo = repo;
     this.stopping = false;
     this.reporter = reporter;
@@ -128,10 +128,10 @@ class JiraITSIndexer {
             const expired = new Date(projectVersion.releaseDate).getTime() > new Date().getTime();
             const versionToPersist = {
               id: projectVersion.id,
-              project_id: projectVersion.projectId,
+              iid: projectVersion.projectId,
               description: projectVersion.description,
-              start_date: projectVersion.startDate,
-              due_date: projectVersion.endDate,
+              startDate: projectVersion.startDate,
+              dueDate: projectVersion.releaseDate,
               title: projectVersion.name,
               expired: expired,
               state: projectVersion.released ? 'released' : 'unreleased',
