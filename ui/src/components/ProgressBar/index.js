@@ -2,7 +2,7 @@
 
 import { connect } from 'react-redux';
 
-import ProgressBar from './ProgressBar.js';
+import ProgressBar from './ProgressBar';
 
 const mapStateToProps = (state /*, ownProps*/) => {
   const impactState = state.visualizations.issueImpact.state;

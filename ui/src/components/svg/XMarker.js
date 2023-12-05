@@ -1,6 +1,6 @@
 'use strict';
 
-import X from './X.js';
+import X from './X';
 
 const XMarker = (props) => (
   <marker

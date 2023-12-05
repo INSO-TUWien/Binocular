@@ -1,9 +1,9 @@
 'use strict';
 
 import { connect } from 'react-redux';
-import IssueImpact from './chart.js';
-import ConfigComponent from './config.js';
-import HelpComponent from './help.js';
+import IssueImpact from './chart';
+import ConfigComponent from './config';
+import HelpComponent from './help';
 import saga, { openHunk, openJob, openFile, openCommit } from './sagas';
 import reducer from './reducers';
 

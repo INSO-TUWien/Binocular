@@ -1,9 +1,9 @@
 'use strict';
 
 import { connect } from 'react-redux';
-import { toggleHelp } from '../../../sagas/index.js';
+import { toggleHelp } from '../../../sagas/index';
 
-import HelpButton from './HelpButton.js';
+import HelpButton from './HelpButton';
 
 const mapStateToProps = (state /*, ownProps*/) => {
   return {

@@ -1,7 +1,7 @@
 'use strict';
 
 import { connect } from 'react-redux';
-import Message from './Message.js';
+import Message from './Message';
 
 const mapStateToProps = (/*state, ownProps*/) => {
   return {};

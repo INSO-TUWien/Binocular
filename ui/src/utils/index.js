@@ -61,4 +61,4 @@ export function callSafe(fn) {
   }
 }
 
-export * from './graphQl.js';
+export * from './graphQl';

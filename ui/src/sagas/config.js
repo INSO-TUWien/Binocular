@@ -5,7 +5,7 @@ import { createAction } from 'redux-actions';
 import { endpointUrl } from '../utils';
 import { fetchFactory, timestampedActionFactory } from './utils.ts';
 import { put, takeEvery } from 'redux-saga/effects';
-import { addNotification } from './notifications.js';
+import { addNotification } from './notifications';
 
 export const requestConfig = createAction('REQUEST_CONFIGURATION');
 export const receiveConfig = timestampedActionFactory('RECEIVE_CONFIGURATION');

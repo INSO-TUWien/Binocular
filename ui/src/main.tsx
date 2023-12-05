@@ -8,12 +8,12 @@ import { root } from './sagas';
 import _ from 'lodash';
 import Database from './database/database';
 
-import Root from './components/Root.js';
+import Root from './components/Root';
 import makeAppReducer from './reducers';
 
-import 'bulma';
+// import 'bulma';
 import 'react-tippy/dist/tippy.css';
-import '@fortawesome/fontawesome-free/js/all.js';
+import '@fortawesome/fontawesome-free/js/all';
 import './global.scss';
 
 const saga = createSagaMiddleware();

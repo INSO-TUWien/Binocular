@@ -1,7 +1,7 @@
 'use strict';
 
 import { handleActions } from 'redux-actions';
-import { notification } from '../sagas/notifications.js';
+import { notification } from '../sagas/notifications';
 import _ from 'lodash';
 
 export default handleActions(

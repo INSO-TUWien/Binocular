@@ -1,8 +1,8 @@
 'use strict';
 
 import { connect } from 'react-redux';
-import Notifications from './Notifications.js';
-import { removeNotification } from '../../sagas/notifications.js';
+import Notifications from './Notifications';
+import { removeNotification } from '../../sagas/notifications';
 
 const mapStateToProps = (state = [] /*, ownProps*/) => {
   return {

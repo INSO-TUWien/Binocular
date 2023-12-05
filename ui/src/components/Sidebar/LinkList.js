@@ -2,7 +2,7 @@
 
 import _ from 'lodash';
 import styles from './sidebar.scss';
-import PanelLink from './PanelLink.js';
+import PanelLink from './PanelLink';
 import menu from './assets/menu.svg';
 import close from './assets/close.svg';
 

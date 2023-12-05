@@ -2,7 +2,7 @@
 
 import { connect } from 'react-redux';
 
-import Chart from './chart.js';
+import Chart from './chart';
 
 const mapStateToProps = (state /*, ownProps*/) => {
   const issueBreakdownState = state.visualizations.issueBreakdown.state;

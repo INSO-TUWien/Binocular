@@ -1,5 +1,5 @@
 'use strict';
 
-import LegendCompact from './LegendCompact.js';
+import LegendCompact from './LegendCompact';
 
 export default LegendCompact;

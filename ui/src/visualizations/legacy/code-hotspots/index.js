@@ -1,9 +1,9 @@
 'use strict';
 
 import { connect } from 'react-redux';
-import CodeHotspots from './chart/chart.js';
-import ConfigComponent from './config/config.js';
-import HelpComponent from './help.js';
+import CodeHotspots from './chart/chart';
+import ConfigComponent from './config/config';
+import HelpComponent from './help';
 import saga, { setActiveBranch, setActiveFile, setActiveFiles, setActivePath, setActiveBranches } from './sagas';
 import reducer from './reducers';
 

@@ -2,11 +2,11 @@ import _ from 'lodash';
 import { combineReducers } from 'redux';
 import { handleAction } from 'redux-actions';
 
-import activeVisualization from './activeVisualization.js';
-import config from './config.js';
-import notifications from './notifications.js';
-import progress from './progress.js';
-import activeConfigTab from './activeConfigTab.js';
+import activeVisualization from './activeVisualization';
+import config from './config';
+import notifications from './notifications';
+import progress from './progress';
+import activeConfigTab from './activeConfigTab';
 import universalSettings from './universalSettings';
 
 export default (visualizations) => {

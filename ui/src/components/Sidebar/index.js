@@ -1,7 +1,7 @@
 'use strict';
 
 import { connect } from 'react-redux';
-import Sidebar from './Sidebar.js';
+import Sidebar from './Sidebar';
 import { switchVisualization } from '../../sagas';
 
 const mapStateToProps = (state /*, ownProps*/) => {

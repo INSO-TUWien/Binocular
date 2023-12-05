@@ -2,7 +2,7 @@
 
 import { connect } from 'react-redux';
 import { switchVisualization } from '../../sagas';
-import Link from './Link.js';
+import Link from './Link';
 
 const mapStateToProps = (state, ownProps) => {
   return {

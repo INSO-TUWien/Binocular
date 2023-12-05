@@ -1,6 +1,6 @@
 'use strict';
 
-import ChartComponent from './chart/chart.js';
+import ChartComponent from './chart/chart';
 
 export default {
   id: 'additions_deletions',

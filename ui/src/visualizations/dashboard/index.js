@@ -1,8 +1,8 @@
 'use strict';
 
 import ChartComponent from './dashboard';
-import ConfigComponent from './config.js';
-import HelpComponent from './help.js';
+import ConfigComponent from './config';
+import HelpComponent from './help'
 import saga from './sagas';
 import reducer from './reducers';
 

@@ -1,25 +1,25 @@
 {
   "compilerOptions": {
-    "outDir": "./dist/",
-    "noImplicitAny": true,
-    "module": "esnext",
-    "target": "es6",
-    "jsx": "react",
-    "allowJs": true, // allows a partial TypeScript and JavaScript codebase
-    "moduleResolution": "node",
-    "allowSyntheticDefaultImports": true,
+    "target": "ES2020",
+    "useDefineForClassFields": true,
+    "lib": ["ES2020", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "skipLibCheck": true,
+
+    /* Bundler mode */
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noEmit": true,
+    "jsx": "react-jsx",
+
+    /* Linting */
     "strict": true,
-    "noImplicitThis": false,
-    "forceConsistentCasingInFileNames": true,
-    "noFallthroughCasesInSwitch": true,
-    "esModuleInterop": true,
-    "lib": ["ES2021.String", "dom", "dom.iterable", "esnext"],
-    "checkJs": true, // checks types in .js files (https://github.com/microsoft/TypeScript/wiki/Type-Checking-JavaScript-Files)
-    "skipLibCheck": true, // https://stackoverflow.com/questions/33001237/webpack-not-excluding-node-modules
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true
   },
-  // "include": ["cli", "foxx", "lib", "scripts", "services", "test", "ui"],
-  "exclude": [
-    "node_modules",
-    "arangodb3-client"
-  ]
+  "include": ["src"],
+  "references": [{ "path": "./tsconfig.node.json" }]
 }

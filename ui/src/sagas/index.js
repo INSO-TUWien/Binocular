@@ -3,9 +3,9 @@
 import { createAction } from 'redux-actions';
 import { select, takeEvery, fork, cancel } from 'redux-saga/effects';
 
-import { fetchConfig, fetchConfigOffline, watchConfig } from './config.js';
+import { fetchConfig, fetchConfigOffline, watchConfig } from './config';
 import { fetchUniversalSettingsData } from './universalSettings';
-import { watchNotifications } from './notifications.js';
+import { watchNotifications } from './notifications';
 import Database from '../database/database';
 import { mapSaga } from './utils.ts';
 

@@ -3,20 +3,20 @@
 import React, { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import _ from 'lodash';
-import GlobalZoomableSvg from '../../../components/svg/GlobalZoomableSvg.js';
-import OffsetGroup from '../../../components/svg/OffsetGroup.js';
-import ChartContainer from '../../../components/svg/ChartContainer.js';
-import LegendCompact from '../../../components/LegendCompact/LegendCompact.js';
+import GlobalZoomableSvg from '../../../components/svg/GlobalZoomableSvg';
+import OffsetGroup from '../../../components/svg/OffsetGroup';
+import ChartContainer from '../../../components/svg/ChartContainer';
+import LegendCompact from '../../../components/LegendCompact/LegendCompact';
 import { getChartColors } from '../../../utils';
-import * as zoomUtils from '../../../utils/zoom.js';
+import * as zoomUtils from '../../../utils/zoom';
 import * as d3 from 'd3';
 import styles from '../styles.scss';
 import chroma from 'chroma-js';
-import DotsPattern from '../../../components/svg/patterns/dots.js';
-import HatchPattern from '../../../components/svg/patterns/hatch.js';
+import DotsPattern from '../../../components/svg/patterns/dots';
+import HatchPattern from '../../../components/svg/patterns/hatch';
 
-import Segment from './Segment.js';
-import FullScreenMessage from './full-screen-message.js';
+import Segment from './Segment';
+import FullScreenMessage from './full-screen-message';
 
 const Chart = ({ devData }) => {
   const chartSizeFactor = 0.85;

@@ -2,7 +2,7 @@
 
 import cx from 'classnames';
 
-import Labeled from './Labeled.js';
+import Labeled from './Labeled';
 
 export default function FormControl(props) {
   const { input, label, type, meta, placeholder } = props;

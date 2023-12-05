@@ -4,8 +4,8 @@ import _ from 'lodash';
 
 import { fetchFactory, timestampedActionFactory, mapSaga } from '../../../sagas/utils.ts';
 
-import { modulesModeData, issuesModeData, commitsToOwnership, getCommitsForBranch } from './helper.js';
-import { extractFileOwnership } from '../../../components/Filepicker/utils.js';
+import { modulesModeData, issuesModeData, commitsToOwnership, getCommitsForBranch } from './helper';
+import { extractFileOwnership } from '../../../components/Filepicker/utils';
 
 //define actions
 export const requestCodeExpertiseData = createAction('REQUEST_CODE_EXPERTISE_DATA');

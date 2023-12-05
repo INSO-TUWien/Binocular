@@ -2,7 +2,7 @@
 
 import ChartComponent from './chart';
 import ConfigComponent from './config';
-import HelpComponent from './help.js';
+import HelpComponent from './help';
 import saga from './sagas';
 import reducer from './reducers';
 

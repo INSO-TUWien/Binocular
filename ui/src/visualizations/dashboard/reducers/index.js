@@ -1,7 +1,7 @@
 'use strict';
 
-import config from './config.js';
-import data from './data.js';
+import config from './config'
+import data from './data';
 import { combineReducers } from 'redux';
 
 export default combineReducers({

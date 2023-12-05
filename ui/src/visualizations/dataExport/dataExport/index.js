@@ -2,7 +2,7 @@
 
 import { connect } from 'react-redux';
 
-import DataExport from './dataExport.js';
+import DataExport from './dataExport';
 
 const mapStateToProps = (state /*, ownProps*/) => {
   const exportState = state.visualizations.export.state;

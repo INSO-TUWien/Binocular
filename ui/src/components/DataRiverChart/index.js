@@ -1,5 +1,5 @@
 'use strict';
 
-import DataRiverChartComponent from './data-river-chart.component.js';
+import DataRiverChartComponent from './data-river-chart.component';
 
 export default DataRiverChartComponent;

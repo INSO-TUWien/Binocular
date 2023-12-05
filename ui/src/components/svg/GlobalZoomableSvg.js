@@ -1,6 +1,6 @@
 'use strict';
 
-import ZoomableSvg from './ZoomableSvg.js';
+import ZoomableSvg from './ZoomableSvg';
 import * as d3 from 'd3';
 
 /**

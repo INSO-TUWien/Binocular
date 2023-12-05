@@ -1,6 +1,6 @@
 'use strict';
 
-import chart from './chart/chart.js';
+import chart from './chart/chart';
 
 export default {
   id: 'empty',

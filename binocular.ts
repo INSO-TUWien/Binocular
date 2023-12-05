@@ -29,55 +29,55 @@ import open from 'open';
 import _ from 'lodash';
 
 import config from './lib/config';
-import * as GetIndexer from './lib/indexers/index.js';
-import * as UrlProvider from './lib/url-providers/index.js';
+import * as GetIndexer from './lib/indexers/index';
+import * as UrlProvider from './lib/url-providers/index';
 import ProgressReporter from './lib/progress-reporter';
 import path from 'path';
 import fs from 'fs';
-import Commit from './lib/models/Commit.js';
-import File from './lib/models/File.js';
-import Hunk from './lib/models/Hunk.js';
+import Commit from './lib/models/Commit';
+import File from './lib/models/File';
+import Hunk from './lib/models/Hunk';
 import Issue from './lib/models/Issue';
-import Build from './lib/models/Build.js';
-import Branch from './lib/models/Branch.js';
-import Module from './lib/models/Module.js';
-import Stakeholder from './lib/models/Stakeholder.js';
-import MergeRequest from './lib/models/MergeRequest.js';
-import Milestone from './lib/models/Milestone.js';
-import CommitStakeholderConnection from './lib/models/CommitStakeholderConnection.js';
-import IssueStakeholderConnection from './lib/models/IssueStakeholderConnection.js';
-import IssueCommitConnection from './lib/models/IssueCommitConnection.js';
-import CommitCommitConnection from './lib/models/CommitCommitConnection.js';
-import CommitModuleConnection from './lib/models/CommitModuleConnection.js';
-import ModuleModuleConnection from './lib/models/ModuleModuleConnection.js';
-import ModuleFileConnection from './lib/models/ModuleFileConnection.js';
-import BranchFileConnection from './lib/models/BranchFileConnection.js';
-import BranchFileFileConnection from './lib/models/BranchFileFileConnection.js';
-import CommitFileStakeholderConnection from './lib/models/CommitFileStakeholderConnection.js';
-import CommitFileConnection from './lib/models/CommitFileConnection.js';
-import CommitBuildConnection from './lib/models/CommitBuildConnection.js';
-import ConfigurationError from './lib/errors/ConfigurationError.js';
-import DatabaseError from './lib/errors/DatabaseError.js';
-import GateWayService from './lib/gateway-service.js';
-import * as grpc from '@grpc/grpc-js';
-import * as protoLoader from '@grpc/proto-loader';
+import Build from './lib/models/Build';
+import Branch from './lib/models/Branch';
+import Module from './lib/models/Module';
+import Stakeholder from './lib/models/Stakeholder';
+import MergeRequest from './lib/models/MergeRequest';
+import Milestone from './lib/models/Milestone';
+import CommitStakeholderConnection from './lib/models/CommitStakeholderConnection';
+import IssueStakeholderConnection from './lib/models/IssueStakeholderConnection';
+import IssueCommitConnection from './lib/models/IssueCommitConnection';
+import CommitCommitConnection from './lib/models/CommitCommitConnection';
+import CommitModuleConnection from './lib/models/CommitModuleConnection';
+import ModuleModuleConnection from './lib/models/ModuleModuleConnection';
+import ModuleFileConnection from './lib/models/ModuleFileConnection';
+import BranchFileConnection from './lib/models/BranchFileConnection';
+import BranchFileFileConnection from './lib/models/BranchFileFileConnection';
+import CommitFileStakeholderConnection from './lib/models/CommitFileStakeholderConnection';
+import CommitFileConnection from './lib/models/CommitFileConnection';
+import CommitBuildConnection from './lib/models/CommitBuildConnection';
+import ConfigurationError from './lib/errors/ConfigurationError';
+import DatabaseError from './lib/errors/DatabaseError';
+import GateWayService from './lib/gateway-service';
+// import * as grpc from '@grpc/grpc-js';
+// import * as protoLoader from '@grpc/proto-loader';
 import * as projectStructureHelper from './lib/projectStructureHelper';
 
-import getDbExportEndpoint from './lib/endpoints/get-db-export.js';
+import getDbExportEndpoint from './lib/endpoints/get-db-export';
 
-import graphQlEndpoint from './lib/endpoints/graphQl.js';
+import graphQlEndpoint from './lib/endpoints/graphQl';
 
-import * as setupDb from './lib/core/db/setup-db.js';
+import * as setupDb from './lib/core/db/setup-db';
 
 import { fileURLToPath } from 'url';
 import { spawn } from 'child_process';
-import { options } from 'yargs';
+// import { options } from 'yargs';
 import express from 'express';
 import { FSWatcher } from 'fs-extra';
-import vcs from './lib/indexers/vcs/index.js';
-import its from './lib/indexers/its/index.js';
-import ci from './lib/indexers/ci/index.js';
-import Repository from './lib/core/provider/git.js';
+import vcs from './lib/indexers/vcs/index';
+import its from './lib/indexers/its/index';
+import ci from './lib/indexers/ci/index';
+import Repository from './lib/core/provider/git';
 import chalk from 'chalk';
 cli.parse(
   (targetPath, options) => {
@@ -234,6 +234,7 @@ function runBackend() {
 
     repoWatcher.headTimestamp = fs.statSync(headPath).mtime.valueOf();
     // create watchdog of the head file to detect changes
+    // @ts-ignore
     repoWatcher.listener = fs.watch(headPath, async (event: fs.WatchEventType, file: string) => {
       if (file && !repoWatcher.working) {
         repoWatcher.working = true;
