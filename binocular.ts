@@ -94,7 +94,7 @@ cli.parse(
   },
   (options) => {
     if (options.runIndexer) {
-      projectStructureHelper.deleteDbExport(__dirname + '/../ui');
+      projectStructureHelper.deleteDbExport(__dirname + '/ui');
       const indexerOptions = {
         backend: true,
         frontend: false,
@@ -391,8 +391,8 @@ function runBackend() {
       await (Issue as any).deduceStakeholders();
       createManualIssueReferences(config.get('issueReferences'));
       if (context.argv.export) {
-        projectStructureHelper.deleteDbExport(__dirname + '/../ui');
-        projectStructureHelper.createAndFillDbExportFolder(context.db, __dirname + '/../ui');
+        projectStructureHelper.deleteDbExport(__dirname + '/ui');
+        projectStructureHelper.createAndFillDbExportFolder(context.db, __dirname + '/ui');
       }
 
       //now that the indexers have finished, we have VCS, ITS and CI data and can connect them.
