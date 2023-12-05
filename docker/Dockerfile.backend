@@ -1,6 +1,6 @@
 ARG NODE_VERSION
 ARG BUILDPLATFORM=${BUILDPLATFORM:-amd64}
-FROM --platform=${BUILDPLATFORM} node:${NODE_VERSION}-alpine AS install
+FROM --platform=${BUILDPLATFORM} node:${NODE_VERSION}-alpine3.18 AS install
 
 # NPM ci first, as to NOT invalidate previous steps except for when package.json changes
 WORKDIR /app/binocular
@@ -15,7 +15,7 @@ RUN --mount=type=bind,src=./package-lock.json,target=./package-lock.json,readonl
 # RUN wget https://gobinaries.com/tj/node-prune --output-document - | /bin/sh && node-prune
 
 ###
-FROM --platform=${BUILDPLATFORM} node:${NODE_VERSION}-alpine AS builder
+FROM --platform=${BUILDPLATFORM} node:${NODE_VERSION}-alpine3.18 AS builder
 ENV NODE_ENV=production
 ENV NODE_OPTIONS=--max_old_space_size=4096
 ENV GENERATE_SOURCEMAP=false
@@ -28,11 +28,11 @@ RUN chown node:node -R /app/binocular
 COPY --from=install --chown=node:node /app/binocular/node_modules ./node_modules
 
 # folders
-COPY --chown=node:node ./ui ./ui
 COPY --chown=node:node ./cli ./cli
+COPY --chown=node:node ./foxx ./foxx
 COPY --chown=node:node ./lib ./lib
 COPY --chown=node:node ./services ./services
-COPY --chown=node:node ./foxx ./foxx
+COPY --chown=node:node ./ui ./ui
 
 # files
 COPY --chown=node:node ./babel.config.json ./babel.config.json
@@ -59,7 +59,7 @@ RUN chown node:node /app/binocular/repo
 
 RUN git config --global --add safe.directory /app/binocular/repo/*
 
-USER node
+USER node 
 
 # ENTRYPOINT ["/usr/bin/dumb-init", "--", "/entrypoint"]
 # CMD []

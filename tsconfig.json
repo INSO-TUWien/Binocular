@@ -13,9 +13,11 @@
     "forceConsistentCasingInFileNames": true,
     "noFallthroughCasesInSwitch": true,
     "esModuleInterop": true,
-    "lib": ["ES2021.String", "dom", "dom.iterable", "esnext"]
+    "lib": ["ES2021.String", "dom", "dom.iterable", "esnext"],
+    "checkJs": true, // checks types in .js files (https://github.com/microsoft/TypeScript/wiki/Type-Checking-JavaScript-Files)
+    "skipLibCheck": true, // https://stackoverflow.com/questions/33001237/webpack-not-excluding-node-modules
   },
-  // "include": ["lib", "ui", "foxx", "services", "test"],
+  // "include": ["cli", "foxx", "lib", "scripts", "services", "test", "ui"],
   "exclude": [
     "node_modules",
     "arangodb3-client"

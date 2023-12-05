@@ -35,7 +35,7 @@
     "dev-frontend": "webpack serve --config webpack.dev.js",
     "build:dev": "webpack --config webpack.dev.js --mode=development",
     "build:prod": "webpack --config webpack.prod.js --mode=production",
-    "build:offline": "webpack --config webpack.offline.js --mode=production",
+    "build:offline": "webpack --config webpack.offline.js --progress",
     "dockerize": "whalify generate-installer && ./node_modules/.bin/whalify build",
     "fix:root": "eslint --fix .",
     "fix:ui": "eslint --fix --ignore-path ui/.eslintignore -c ui/.eslintrc.yml ui",
