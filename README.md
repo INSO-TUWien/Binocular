@@ -77,10 +77,12 @@ It will ask you some questions about the repository and generate the config file
   - `its`: Holds the name of the issue tracking system indexer, for instance, GitLab or GitHub
   - `ci`: Since the CI indexer importer is searching for the corresponding file in the repository, it can be necessary to specify the
           correct indexer like, for example, GitLab or GitHub.
+- `fileRenameBranches`: Array containing all branches for which file renames should be indexed. Additions to files that were later renamed are therefore shown in the visualizations. Without tracking renames, addition numbers for authors may be inaccurate. Comes with a performance penalty at index time.
+- `ignoreFiles`: Array containing files/directories ignored by the indexer. Useful for large files (like `package-lock.json`) or irrelevant directories. Wildcards (*) are supported, see example below.
          
 A sample configuration file looks like this:
 
-``` javascript
+```json
 {
   "gitlab": {
     "url": "https://gitlab.com/",
@@ -102,7 +104,15 @@ A sample configuration file looks like this:
   "indexers": {
     "its": "github",
     "ci": "github" 
-  }
+  },
+  "fileRenameBranches": [
+        "main",
+        "develop"
+    ],
+    "ignoreFiles": [
+        "*package-lock.json",
+        "*docs/*"
+    ]
 }
 ```
 
@@ -121,7 +131,7 @@ set those options within, for example, a GitLab pipeline.
 - `projectId`: GitLab project ID
 
 A sample configuration file looks like this:
-``` javascript
+``` json
 {
   "server":"GITLAB_API_URL",
   "projectId":"GITLAB_PROJECT_ID"

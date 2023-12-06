@@ -116,7 +116,7 @@ export default () => {
       distributeToBuckets(buckets, 'issuesClosed', filteredClosedIssues, 'createdAt', (date) => new Date(date).getHours());
     } else if (dataGranularity === 'weeks') {
       //7 buckets (monday - sunday)
-      const weekdays = ['Moday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+      const weekdays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
       initializeBuckets(buckets, 7, (num) => weekdays[num]);
       distributeToBuckets(buckets, 'commits', filteredCommits, 'date', (date) => new Date(date).getDay());
       distributeToBuckets(buckets, 'issuesCreated', filteredCreatedIssues, 'createdAt', (date) => new Date(date).getDay());
