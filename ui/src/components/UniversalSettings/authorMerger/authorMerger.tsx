@@ -13,6 +13,11 @@ interface Props {
   palette: Palette;
   selectedAuthors: string[];
 }
+interface CommiterList {
+  mainCommitter: string;
+  committers: Array<{ signature: string, color: string }>;
+  color:string;
+}
 
 export default (props: Props) => {
   const [committers, setCommitters] = React.useState(props.mergedAuthorList);
@@ -20,7 +25,7 @@ export default (props: Props) => {
   const [other, setOther] = React.useState(props.other);
 
   const generateCommitterList = () => {
-    const newCommitterList = [];
+    const newCommitterList: Array<CommiterList> = [];
     for (const committer of props.committers) {
       newCommitterList.push({
         mainCommitter: committer,
@@ -161,7 +166,7 @@ export default (props: Props) => {
                       <span className={styles.individualCommitterText}>{individualCommitter.signature}</span>
                       <button
                         className={'button ' + styles.removeButton}
-                        onClick={(e) => {
+                        onClick={() => {
                           removeCommitterFromOther(individualCommitter.signature);
                         }}>
                         Remove

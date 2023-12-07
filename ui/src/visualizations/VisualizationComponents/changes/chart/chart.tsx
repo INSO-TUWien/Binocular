@@ -1,5 +1,3 @@
-'use strict';
-
 import * as React from 'react';
 import * as d3 from 'd3';
 
@@ -119,7 +117,7 @@ const extractCommitData = (
     }
   }
 
-  const data = [];
+  const data: Array<{ date: number; statsByAuthor: { [signature: string]: { count: number; additions: number; deletions: number } } }> = [];
   const selectedAuthors: string[] = [];
   const commitChartData: CommitChartData[] = [];
   const commitScale: number[] = [0, 0];

@@ -7,6 +7,7 @@ import createSagaMiddleware from 'redux-saga';
 import { root } from './sagas';
 import _ from 'lodash';
 import Database from './database/database';
+import React from 'react';
 
 import Root from './components/Root';
 import makeAppReducer from './reducers';

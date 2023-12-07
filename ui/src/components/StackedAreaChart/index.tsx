@@ -40,7 +40,7 @@ export default class StackedAreaChart extends ScalableBaseChartComponent {
     return [d3.min(this.state.data.data, (d: any) => d.date), d3.max(this.state.data.data, (d: any) => d.date)];
   }
 
-  // eslint-disable-next-line no-unused-vars
+  //@ts-ignore
   getYDims() {
     return this.props.yDims;
   }
@@ -128,7 +128,7 @@ export default class StackedAreaChart extends ScalableBaseChartComponent {
    * @param scales
    * @param stream
    */
-  // eslint-disable-next-line no-unused-vars
+  //@ts-ignore
   createdTooltipNode(path: any, bisectDate: any, mouseoverDate: any, tooltip: any, event: any, node: any, brushArea: any, scales: any) {
     const palette = this.state.palette;
     const nearestDateIndex = bisectDate(this.state.data.data, mouseoverDate);
@@ -185,7 +185,7 @@ export default class StackedAreaChart extends ScalableBaseChartComponent {
    * @param event
    * @param stream
    */
-  // eslint-disable-next-line no-unused-vars
+  //@ts-ignore
   onMouseover(path: any, tooltip: any, brushArea: any, event: any, stream: any) {
     tooltip.style('display', 'inline');
   }
@@ -198,7 +198,7 @@ export default class StackedAreaChart extends ScalableBaseChartComponent {
    * @param event
    * @param stream
    */
-  // eslint-disable-next-line no-unused-vars
+  //@ts-ignore
   onMouseLeave(path: any, tooltip: any, brushArea: any, event: any, stream: any) {
     tooltip.style('display', 'none');
     brushArea.select('.' + this.styles.indicatorLine).remove();

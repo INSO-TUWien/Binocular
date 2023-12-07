@@ -1,6 +1,6 @@
 'use strict';
 
-// eslint-disable-next-line no-unused-vars
+//@ts-ignore
 import React from 'react';
 
 import * as d3 from 'd3';
@@ -877,7 +877,7 @@ export default class DataRiverChartComponent extends ScalableBaseChartComponent 
    * @param event
    * @param stream
    */
-  // eslint-disable-next-line no-unused-vars
+  //@ts-ignore
   onMouseover(path, tooltip, brushArea, event, stream) {
     this.raiseFilteredStreams(stream.key);
     event.preventDefault();
@@ -891,7 +891,7 @@ export default class DataRiverChartComponent extends ScalableBaseChartComponent 
    * @param event
    * @param stream
    */
-  // eslint-disable-next-line no-unused-vars
+  //@ts-ignore
   onMouseLeave(path, tooltip, brushArea, event, stream) {
     tooltip.attr('data', null);
     brushArea.select('.' + this.styles.indicatorLine).remove();
@@ -907,7 +907,7 @@ export default class DataRiverChartComponent extends ScalableBaseChartComponent 
    * @param data
    * @returns {string}
    */
-  // eslint-disable-next-line no-unused-vars
+  //@ts-ignore
   getBrushId(data) {
     return data.stream ? `issue-${data.key.toId()}` : `stream-${data.key.toId()}`;
   }
