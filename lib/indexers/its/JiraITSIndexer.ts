@@ -18,7 +18,7 @@ class JiraITSIndexer {
   private reporter: any;
 
   private jira: any;
-  private projectKey = 'SCRUM'; // a key of a project is needed to get the issues needed
+  private jiraProject: any;
 
   constructor(repo: string, reporter: any) {
     this.repo = repo;
@@ -36,6 +36,7 @@ class JiraITSIndexer {
       privateToken: config.token,
       requestTimeout: 40000,
     };
+    this.jiraProject = config.project;
 
     this.jira = new Jira(options);
   }
@@ -45,7 +46,7 @@ class JiraITSIndexer {
     let persistCount = 0;
     const that = this;
     return Promise.all([
-      this.jira.getIssuesWithJQL('project=' + this.projectKey).each(
+      this.jira.getIssuesWithJQL('project=' + this.jiraProject).each(
         function (issue: any) {
           issue.id = issue.id.toString();
           if (that.stopping) {
@@ -121,7 +122,7 @@ class JiraITSIndexer {
           });
         }.bind(this)
       ),
-      this.jira.getProjectVersions(this.projectKey).each(function (projectVersion: any) {
+      this.jira.getProjectVersions(this.jiraProject).each(function (projectVersion: any) {
         projectVersion.id = projectVersion.id.toString();
         return Milestone.findOneById(projectVersion.id)
           .then((persistedVersion: any) => {
