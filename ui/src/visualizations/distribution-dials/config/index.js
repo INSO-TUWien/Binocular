@@ -9,7 +9,7 @@ import {
   setSelectLayers,
   setSplitLayers,
 } from '../sagas';
-import styles from '../styles.scss';
+import styles from '../styles.module.scss';
 import DragAndDropList from '../../../components/DragAndDropList/dragAndDropList';
 
 export default () => {

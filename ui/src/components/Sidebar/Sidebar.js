@@ -1,6 +1,6 @@
 'use strict';
 
-import styles from './sidebar.scss';
+import styles from './sidebar.module.scss';
 import menu from './assets/menu.svg';
 import menuWhite from './assets/menuWhite.svg';
 import hideSidebar from './assets/hideSidebar.svg';

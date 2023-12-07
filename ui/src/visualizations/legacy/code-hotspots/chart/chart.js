@@ -5,9 +5,9 @@ import CodeMirror from '@uiw/react-codemirror';
 import { loadLanguage } from '@uiw/codemirror-extensions-langs';
 import { lineNumbers } from '@codemirror/view';
 import { Compartment } from '@codemirror/state';
-import styles from '../styles.scss';
+import styles from '../styles.module.scss';
 
-import '../css/codeMirror.css';
+import '../css/codeMirror.module.css';
 import vcsData from './helper/vcsData';
 import chartUpdater from './charts/chartUpdater';
 import Loading from './helper/loading';
@@ -17,7 +17,7 @@ import BackgroundRefreshIndicator from '../components/backgroundRefreshIndicator
 import VisualizationSelector from '../components/visualizationSelector/visualizationSelector';
 import SearchBar from '../components/searchBar/searchBar';
 import searchAlgorithm from '../components/searchBar/searchAlgorithm';
-import chartStyles from './chart.scss';
+import chartStyles from './chart.module.scss';
 import Database from '../../../../database/database';
 import SourceCodeRequest from './helper/sourceCodeRequest';
 import GitLabConfig from '../../../../../config/gitlab.json';

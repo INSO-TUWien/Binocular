@@ -4,11 +4,11 @@ import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
 import TabCombo from '../../../components/TabCombo';
-import Filepicker from '../../../components/Filepicker/index.js';
-import styles from '../styles.scss';
+import Filepicker from '../../../components/Filepicker/index';
+import styles from '../styles.module.scss';
 import { setMode, setCurrentBranch, setActiveFiles } from '../sagas';
-import { getBranches, getFilenamesForBranch } from '../sagas/helper.js';
-import { ownershipDataForMergedAuthors } from '../../../components/Filepicker/utils.js';
+import { getBranches, getFilenamesForBranch } from '../sagas/helper';
+import { ownershipDataForMergedAuthors } from '../../../components/Filepicker/utils';
 
 export default () => {
   //global state from redux store

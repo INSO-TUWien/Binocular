@@ -12,7 +12,7 @@ import GlobalZoomableSvg from '../../../components/svg/GlobalZoomableSvg.js';
 import OffsetGroup from '../../../components/svg/OffsetGroup.js';
 import Axis from './Axis.js';
 import CommitMarker from './CommitMarker.js';
-import hunkTransitions from './hunkTransitions.scss';
+import hunkTransitions from './hunkTransitions.module.scss';
 import Asterisk from '../../../components/svg/Asterisk.js';
 import X from '../../../components/svg/X.js';
 import ChartContainer from '../../../components/svg/ChartContainer.js';
@@ -20,7 +20,7 @@ import * as zoomUtils from '../../../utils/zoom.js';
 import SemiCircleScale from './SemiCircleScale.js';
 
 import { getChartColors, parseTime, shortenPath } from '../../../utils';
-import styles from './styles.scss';
+import styles from './styles.module.scss';
 
 const CHART_FILL_RATIO = 0.45;
 const MINIMUM_VACANT_SEMICIRCLE_SHARE = 0.2;

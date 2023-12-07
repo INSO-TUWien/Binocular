@@ -3,7 +3,7 @@
 import React from 'react';
 import * as d3 from 'd3';
 
-import styles from '../styles.scss';
+import styles from '../styles.module.scss';
 
 import StackedAreaChart from '../../../../components/StackedAreaChart';
 import moment from 'moment';

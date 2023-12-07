@@ -8,7 +8,7 @@ import OffsetGroup from '../../../components/svg/OffsetGroup.js';
 import ChartContainer from '../../../components/svg/ChartContainer.js';
 import * as zoomUtils from '../../../utils/zoom.js';
 import * as d3 from 'd3';
-import styles from '../styles.scss';
+import styles from '../styles.module.scss';
 import StackedDial from './stackedDial.js';
 import {
   getAngle,

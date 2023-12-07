@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 import cx from 'classnames';
 
 import Icon from '../icon';
-import styles from './config-button.scss';
+import styles from './config-button.module.scss';
 
 const ConfigButton = (props) => (
   <div className={cx('box', styles.configButton)}>

@@ -1,7 +1,7 @@
 'use strict';
 
 import React from 'react';
-import styles from './sprintDisplay.scss';
+import styles from './sprintDisplay.module.scss';
 import moment from 'moment';
 import 'moment/locale/de';
 import { Sprint } from '../../../../types/sprintTypes';

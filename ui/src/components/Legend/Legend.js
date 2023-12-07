@@ -4,7 +4,7 @@ import _ from 'lodash';
 import React from 'react';
 import Measure from 'react-measure';
 
-import styles from './legend.scss';
+import styles from './legend.module.scss';
 
 const ICON_WIDTH = 15;
 const ICON_HEIGHT = 15;

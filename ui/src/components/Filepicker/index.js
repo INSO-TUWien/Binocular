@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Tooltip } from 'react-tippy';
 import ModuleLine from './ModuleLine';
-import styles from './styles.scss';
+import styles from './styles.module.scss';
 import _ from 'lodash';
 
 /**

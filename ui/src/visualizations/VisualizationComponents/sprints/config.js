@@ -2,7 +2,7 @@
 
 import { connect } from 'react-redux';
 import { setColorIssuesMergeRequests } from './sagas';
-import styles from './styles.scss';
+import styles from './styles.module.scss';
 import React from 'react';
 import TabCombo from '../../../components/TabCombo';
 

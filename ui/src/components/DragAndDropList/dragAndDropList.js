@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import _ from 'lodash';
-import styles from './styles.scss';
+import styles from './styles.module.scss';
 
 /**
  * This component renders a list where the order can be changed by dragging the elements.

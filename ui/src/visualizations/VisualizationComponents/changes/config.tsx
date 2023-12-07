@@ -3,7 +3,7 @@
 import { connect } from 'react-redux';
 import { setDisplayMetric, setSelectedAuthors } from './sagas';
 import TabCombo from '../../../components/TabCombo';
-import styles from './styles.scss';
+import styles from './styles.module.scss';
 import { GlobalState } from '../../../types/globalTypes';
 import * as React from 'react';
 import { Palette } from '../../../types/authorTypes';

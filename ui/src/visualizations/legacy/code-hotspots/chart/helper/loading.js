@@ -1,5 +1,5 @@
 import * as d3 from 'd3';
-import loadingStyles from '../../css/loading.scss';
+import loadingStyles from '../../css/loading.module.scss';
 
 export default class Loading {
   static insert() {

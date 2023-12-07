@@ -1,9 +1,9 @@
 import Chart from './chart';
 import Details from './details';
-import styles from '../styles.scss';
+import styles from '../styles.module.scss';
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import FullScreenMessage from './full-screen-message.js';
+import FullScreenMessage from './full-screen-message';
 import _ from 'lodash';
 import {
   addBuildData,

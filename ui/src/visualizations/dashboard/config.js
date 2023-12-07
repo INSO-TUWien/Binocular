@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { useSelector } from 'react-redux';
-import styles from './styles.scss';
+import styles from './styles.module.scss';
 import visualizationRegistry from './visualizationRegistry';
 
 export default () => {

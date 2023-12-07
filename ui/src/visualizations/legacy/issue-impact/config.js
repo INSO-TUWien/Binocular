@@ -7,7 +7,7 @@ import { inflect } from 'inflection';
 import { setActiveIssue, setFilteredCommits, setFilteredFiles } from './sagas';
 import SearchBox from '../../../components/SearchBox';
 import FilterBox from '../../../components/FilterBox';
-import styles from './styles.scss';
+import styles from './styles.module.scss';
 
 import Database from '../../../database/database';
 

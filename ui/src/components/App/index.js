@@ -1,4 +1,4 @@
-import styles from './app.css';
+import styles from './app.module.css';
 import Sidebar from '../Sidebar';
 import HelpButton from '../Help/HelpButton';
 import Help from '../Help';

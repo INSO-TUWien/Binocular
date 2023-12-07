@@ -2,7 +2,7 @@
 
 import cx from 'classnames';
 
-import styles from './progress-bar.scss';
+import styles from './progress-bar.module.scss';
 import React from 'react';
 
 export default class ProgressBar extends React.PureComponent {

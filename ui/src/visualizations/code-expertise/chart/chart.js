@@ -10,7 +10,7 @@ import LegendCompact from '../../../components/LegendCompact/LegendCompact';
 import { getChartColors } from '../../../utils';
 import * as zoomUtils from '../../../utils/zoom';
 import * as d3 from 'd3';
-import styles from '../styles.scss';
+import styles from '../styles.module.scss';
 import chroma from 'chroma-js';
 import DotsPattern from '../../../components/svg/patterns/dots';
 import HatchPattern from '../../../components/svg/patterns/hatch';

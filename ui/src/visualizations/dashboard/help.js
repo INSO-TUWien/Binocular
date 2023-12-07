@@ -2,8 +2,8 @@
 
 import cx from 'classnames';
 
-import styles from '../../styles/styles.scss';
-import helpStyles from './styles/help.scss';
+import styles from '../../styles/styles.module.scss';
+import helpStyles from './styles/help.module.scss';
 import settingsIcon from './assets/settings.svg';
 import filterIcon from './assets/filter.svg';
 import React from 'react';

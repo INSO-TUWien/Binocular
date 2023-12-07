@@ -1,6 +1,6 @@
 import React from 'react';
-import settingsStyles from './settings.scss';
-import styles from '../../styles.scss';
+import settingsStyles from './settings.module.scss';
+import styles from '../../styles.module.scss';
 import { settings_black, settings_white } from '../../images/icons';
 import DateRangeFilter from '../../../../../components/DateRangeFilter/dateRangeFilter';
 import 'bulma-switch';

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
-import styles from '../styles.scss';
+import styles from '../styles.module.scss';
 import _ from 'lodash';
 import Chart from './chart';
 

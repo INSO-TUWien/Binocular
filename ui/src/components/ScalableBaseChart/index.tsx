@@ -2,7 +2,7 @@
 
 import * as React from 'react';
 import * as d3 from 'd3';
-import * as baseStyles from './scalable-base-chart.component.scss';
+import * as baseStyles from './scalable-base-chart.module.scss';
 import { NoImplementationException } from '../../utils/exception/NoImplementationException';
 import { hash } from '../../utils/crypto-utils';
 import { Palette } from '../../types/authorTypes';

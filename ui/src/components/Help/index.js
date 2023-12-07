@@ -6,7 +6,7 @@ import Measure from 'react-measure';
 
 import { callSafe } from '../../utils';
 
-import styles from './styles.scss';
+import styles from './styles.module.scss';
 
 const mapStateToProps = (state /*, ownProps*/) => {
   return {

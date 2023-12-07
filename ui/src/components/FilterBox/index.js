@@ -5,7 +5,7 @@ import _ from 'lodash';
 import cx from 'classnames';
 import fuzzy from 'fuzzy';
 
-import styles from './styles.scss';
+import styles from './styles.module.scss';
 
 export default class FilterBox extends React.Component {
   constructor(props) {

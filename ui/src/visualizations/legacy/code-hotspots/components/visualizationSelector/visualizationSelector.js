@@ -1,6 +1,6 @@
 import React from 'react';
-import styles from '../../styles.scss';
-import visualizationSelectorStyles from './visualizationSelector.scss';
+import styles from '../../styles.module.scss';
+import visualizationSelectorStyles from './visualizationSelector.module.scss';
 
 export default class VisualizationSelector extends React.PureComponent {
   constructor(props) {

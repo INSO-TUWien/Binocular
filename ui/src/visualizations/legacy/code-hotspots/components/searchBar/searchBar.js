@@ -1,5 +1,5 @@
 import React from 'react';
-import styles from './searchBar.scss';
+import styles from './searchBar.module.scss';
 import SearchAlgorithm from './searchAlgorithm';
 import SearchTextHighlighting from './searchTextHighlighting';
 

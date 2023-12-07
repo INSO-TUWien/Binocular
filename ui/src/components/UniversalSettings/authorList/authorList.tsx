@@ -1,8 +1,8 @@
 'use strict';
 
 import * as React from 'react';
-import styles from './authorList.scss';
-import loadingAnimation from './loadingAnimaiton.scss';
+import styles from './authorList.module.scss';
+import loadingAnimation from './loadingAnimaiton.module.scss';
 import { Author, Committer, Palette } from '../../../types/authorTypes';
 
 interface Props {

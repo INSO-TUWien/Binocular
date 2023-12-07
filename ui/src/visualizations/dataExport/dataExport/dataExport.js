@@ -1,8 +1,8 @@
 'use strict';
 
 import React from 'react';
-import styles from '../styles.scss';
-import dataExportStyles from '../styles/dataExport.scss';
+import styles from '../styles.module.scss';
+import dataExportStyles from '../styles/dataExport.module.scss';
 import GetData from './helper/getData';
 import viewIcon from '../assets/viewIcon.svg';
 import downloadIcon from '../assets/downloadIcon.svg';

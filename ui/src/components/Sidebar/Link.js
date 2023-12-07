@@ -2,7 +2,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import styles from './sidebar.scss';
+import styles from './sidebar.module.scss';
 import cx from 'classnames';
 import returnIcon from './assets/return.svg';
 

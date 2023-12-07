@@ -6,7 +6,7 @@ import PropTypes from 'prop-types';
 import cx from 'classnames';
 import fuzzy from 'fuzzy';
 
-import styles from './styles.scss';
+import styles from './styles.module.scss';
 
 export default class SearchBox extends React.Component {
   constructor(props) {

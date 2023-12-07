@@ -1,7 +1,7 @@
 'use strict';
 
 import * as React from 'react';
-import styles from './milestoneList.scss';
+import styles from './milestoneList.module.scss';
 import moment from 'moment';
 import 'moment/locale/de';
 import { Milestone } from '../../../../types/milestoneTypes';

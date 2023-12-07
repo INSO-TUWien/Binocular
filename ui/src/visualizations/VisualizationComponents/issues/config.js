@@ -2,7 +2,7 @@
 
 import { connect } from 'react-redux';
 
-import styles from './styles.scss';
+import styles from './styles.module.scss';
 
 import TabCombo from '../../../components/TabCombo';
 import { setShowIssues } from './sagas';

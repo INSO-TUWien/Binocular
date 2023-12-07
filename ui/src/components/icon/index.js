@@ -1,4 +1,4 @@
-import styles from './icon.css';
+import styles from './icon.module.css';
 import cx from 'classnames';
 import PropTypes from 'prop-types';
 

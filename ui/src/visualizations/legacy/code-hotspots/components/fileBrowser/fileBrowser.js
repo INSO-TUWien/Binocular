@@ -1,5 +1,5 @@
 import React from 'react';
-import styles from './fileBrowser.scss';
+import styles from './fileBrowser.module.scss';
 import { folder_white, folder_open_white } from '../../images/icons';
 import SearchBar from '../searchBar/searchBar';
 

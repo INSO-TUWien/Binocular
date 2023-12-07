@@ -1,7 +1,7 @@
 'use strict';
 
 import * as React from 'react';
-import styles from './sprintManager.scss';
+import styles from './sprintManager.module.scss';
 import DateRangeFilter from '../../DateRangeFilter/dateRangeFilter';
 import SprintDisplay from './sprintDisplay/sprintDisplay';
 import moment from 'moment';

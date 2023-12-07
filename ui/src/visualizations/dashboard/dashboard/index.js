@@ -11,8 +11,8 @@ const DEFAULT_DASHBOARD = {
 };
 
 import React, { useEffect, useState } from 'react';
-import styles from '../styles.scss';
-import dashboardStyles from '../styles/dashboard.scss';
+import styles from '../styles.module.scss';
+import dashboardStyles from '../styles/dashboard.module.scss';
 import VisualizationSelector from '../components/visualizationSelector/visualizationSelector';
 import visualizationRegistry from '../visualizationRegistry';
 

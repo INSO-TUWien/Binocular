@@ -1,7 +1,7 @@
 'use strict';
 
 import React from 'react';
-import styles from './monospaced.scss';
+import styles from './monospaced.module.scss';
 
 export default class Monospaced extends React.Component {
   render() {

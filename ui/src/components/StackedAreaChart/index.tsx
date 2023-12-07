@@ -1,6 +1,6 @@
 'use strict';
 
-import styles from './stackedAreaChart.scss';
+import styles from './stackedAreaChart.module.scss';
 import ScalableBaseChartComponent from '../ScalableBaseChart';
 import * as d3 from 'd3';
 import * as _ from 'lodash';

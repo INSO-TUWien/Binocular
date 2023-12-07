@@ -4,7 +4,7 @@ import _ from 'lodash';
 import React from 'react';
 import chroma from 'chroma-js';
 
-import styles from './checkboxLegend.scss';
+import styles from './checkboxLegend.module.scss';
 import LegendCompact from '../LegendCompact';
 
 const ICON_WIDTH = 15;

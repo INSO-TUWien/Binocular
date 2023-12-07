@@ -1,5 +1,5 @@
 import React from 'react';
-import loadingStyles from '../../css/loading.scss';
+import loadingStyles from '../../css/loading.module.scss';
 import 'bulma-switch';
 
 export default class BackgroundRefreshIndicator extends React.PureComponent {

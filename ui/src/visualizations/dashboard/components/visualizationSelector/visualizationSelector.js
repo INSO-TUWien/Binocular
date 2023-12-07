@@ -1,7 +1,7 @@
 'use strict';
 
 import React from 'react';
-import styles from './visualizationSelector.scss';
+import styles from './visualizationSelector.module.scss';
 
 export default (props) => {
   return (

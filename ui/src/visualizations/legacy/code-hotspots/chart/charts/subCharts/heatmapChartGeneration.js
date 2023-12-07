@@ -2,7 +2,7 @@ import * as d3 from 'd3';
 import * as d3Collection from 'd3-collection';
 import ColorMixer from '../../helper/colorMixer';
 import Loading from '../../helper/loading';
-import styles from '../../../styles.scss';
+import styles from '../../../styles.module.scss';
 
 const HEATMAP_LOW_COLOR = '#ABEBC6';
 const HEATMAP_HIGH_COLOR = '#E6B0AA';

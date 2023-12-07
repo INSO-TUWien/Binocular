@@ -1,6 +1,6 @@
 import React from 'react';
-import styles from '../../styles.scss';
-import apiKeyEntryStyles from './apiKeyEntry.scss';
+import styles from '../../styles.module.scss';
+import apiKeyEntryStyles from './apiKeyEntry.module.scss';
 
 export default class ApiKeyEntry extends React.PureComponent {
   constructor(props) {

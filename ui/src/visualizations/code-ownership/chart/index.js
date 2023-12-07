@@ -2,7 +2,7 @@
 
 import { useSelector } from 'react-redux';
 import StackedAreaChart from '../../../components/StackedAreaChart';
-import styles from '../styles.scss';
+import styles from '../styles.module.scss';
 import * as d3 from 'd3';
 import { useState, useEffect } from 'react';
 import _ from 'lodash';

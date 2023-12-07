@@ -2,7 +2,7 @@
 
 import { connect } from 'react-redux';
 
-import styles from './styles.scss';
+import styles from './styles.module.scss';
 import React from 'react';
 import { setAggregateTime } from './sagas';
 

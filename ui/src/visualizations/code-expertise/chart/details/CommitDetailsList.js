@@ -1,4 +1,4 @@
-import styles from '../../styles.scss';
+import styles from '../../styles.module.scss';
 import CommitDetails from './CommitDetails';
 import _ from 'lodash';
 

@@ -2,8 +2,8 @@
 
 import cx from 'classnames';
 
-import styles from '../../../styles/styles.scss';
-import helpStyles from './css/help.scss';
+import styles from '../../../styles/styles.module.scss';
+import helpStyles from './css/help.module.scss';
 
 function highlightElementByID(id, highlimit = true) {
   try {

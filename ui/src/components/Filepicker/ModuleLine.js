@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useLayoutEffect } from 'react';
 import * as d3 from 'd3';
 import _ from 'lodash';
-import styles from './styles.scss';
+import styles from './styles.module.scss';
 
 const ModuleLine = ({
   moduleName,

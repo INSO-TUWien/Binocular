@@ -6,7 +6,7 @@ import React from 'react';
 import * as d3 from 'd3';
 import chroma from 'chroma-js';
 import { BuildStat, RiverData } from './RiverData';
-import styles from './data-river-chart.component.scss';
+import styles from './data-river-chart.component.module.scss';
 import ScalableBaseChartComponent from '../ScalableBaseChart';
 import _ from 'lodash';
 import { RiverDataContainer } from './RiverDataContainer';

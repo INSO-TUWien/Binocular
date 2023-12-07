@@ -1,7 +1,7 @@
 'use strict';
 
 import React from 'react';
-import styles from '../styles.scss';
+import styles from '../styles.module.scss';
 import data from './data';
 import * as d3 from 'd3';
 

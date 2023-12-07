@@ -3,7 +3,7 @@
 import React, { useRef, useState } from 'react';
 import ReactDOMServer from 'react-dom/server';
 
-import styles from '../styles.scss';
+import styles from '../styles.module.scss';
 import * as d3 from 'd3';
 import moment from 'moment';
 import { aggregateTimeTrackingData, convertToTimeString, extractTimeTrackingDataFromNotes } from '../../../../utils/timeTracking';

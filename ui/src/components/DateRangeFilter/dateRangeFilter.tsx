@@ -1,5 +1,5 @@
 import * as React from 'react';
-import styles from './dateRangeFilter.scss';
+import styles from './dateRangeFilter.module.scss';
 import { DateRange } from '../../types/globalTypes';
 
 interface Props {

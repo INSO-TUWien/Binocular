@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import _ from 'lodash';
-import styles from '../../styles.scss';
+import styles from '../../styles.module.scss';
 import { setDetails } from '../../sagas';
 import TabCombo from '../../../../components/TabCombo';
 import CommitsDetailsList from './CommitDetailsList';

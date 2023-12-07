@@ -1,7 +1,7 @@
 'use strict';
 
 import * as React from 'react';
-import styles from './tabCombo.scss';
+import styles from './tabCombo.module.scss';
 
 interface Props {
   options: Option[];

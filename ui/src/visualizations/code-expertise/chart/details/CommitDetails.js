@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import styles from '../../styles.scss';
+import styles from '../../styles.module.scss';
 
 const CommitDetails = ({ commit }) => {
   const [isExpanded, setExpanded] = useState(false);

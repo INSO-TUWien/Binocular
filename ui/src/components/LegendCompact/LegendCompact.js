@@ -2,7 +2,7 @@
 
 import React from 'react';
 
-import styles from './legendCompact.scss';
+import styles from './legendCompact.module.scss';
 
 const ICON_WIDTH = 15;
 const ICON_HEIGHT = 15;

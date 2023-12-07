@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 import cx from 'classnames';
 
 import Icon from '../../icon';
-import styles from './help-button.scss';
+import styles from './help-button.module.scss';
 
 const HelpButton = (props) => (
   <div className={cx(styles.helpButton)}>

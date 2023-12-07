@@ -3,7 +3,7 @@
 import { connect } from 'react-redux';
 
 import { setActiveFile, setActivePath, setActiveBranch } from '../sagas';
-import styles from '../styles.scss';
+import styles from '../styles.module.scss';
 import FileBrowser from '../components/fileBrowser/fileBrowser';
 
 const mapStateToProps = (state /*, ownProps*/) => {

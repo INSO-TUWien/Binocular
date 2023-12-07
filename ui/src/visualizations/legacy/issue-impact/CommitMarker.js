@@ -1,7 +1,7 @@
 'use strict';
 
 import React from 'react';
-import styles from './CommitMarker.scss';
+import styles from './CommitMarker.module.scss';
 
 export default class CommitMarker extends React.Component {
   constructor(props) {

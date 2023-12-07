@@ -3,7 +3,7 @@
 import React from 'react';
 import cx from 'classnames';
 
-import styles from './notification.scss';
+import styles from './notification.module.scss';
 
 export default class Notification extends React.Component {
   render() {

@@ -1,4 +1,4 @@
-import styles from './data-river-chart.component.scss';
+import styles from './data-river-chart.component.module.scss';
 import { BuildStat } from './RiverData';
 
 import React from 'react';

@@ -1,7 +1,7 @@
 'use strict';
 
 import * as React from 'react';
-import styles from './authorMerger.scss';
+import styles from './authorMerger.module.scss';
 import { Author, Committer, Palette } from '../../../types/authorTypes';
 
 interface Props {

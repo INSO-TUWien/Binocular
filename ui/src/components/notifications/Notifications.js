@@ -5,8 +5,8 @@ import TransitionGroup from 'react-transition-group/TransitionGroup';
 import CSSTransition from 'react-transition-group/CSSTransition';
 import _ from 'lodash';
 
-import Notification from './Notification.js';
-import styles from './notifications.scss';
+import Notification from './Notification';
+import styles from './notifications.module.scss';
 
 export default class Notifications extends React.Component {
   render() {
