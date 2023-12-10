@@ -16,6 +16,7 @@ import Module from '../../lib/models/Module';
 import ModuleFileConnection from '../../lib/models/ModuleFileConnection';
 import CommitModuleConnection from '../../lib/models/CommitModuleConnection';
 import BranchFileConnection from '../../lib/models/BranchFileConnection';
+import BranchFileFileConnection from '../../lib/models/BranchFileFileConnection';
 import ModuleModuleConnection from '../../lib/models/ModuleModuleConnection';
 import CommitFileStakeholderConnection from '../../lib/models/CommitFileStakeholderConnection';
 import conf from '../../lib/config.js';
@@ -78,6 +79,7 @@ describe('vcs', function () {
       await ModuleFileConnection.ensureCollection();
       await CommitModuleConnection.ensureCollection();
       await BranchFileConnection.ensureCollection();
+      await BranchFileFileConnection.ensureCollection();
       await ModuleModuleConnection.ensureCollection();
       await CommitFileStakeholderConnection.ensureCollection();
 
