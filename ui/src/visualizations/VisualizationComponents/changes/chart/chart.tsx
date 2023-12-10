@@ -110,6 +110,9 @@ const extractCommitData = (
   let firstTimestamp = props.firstCommitTimestamp;
   let lastTimestamp = props.lastCommitTimestamp;
   let commits = props.commits;
+
+  // TODO in the standalone version of this visualization (not in the dashboard), props.universalSettings is always false.
+  // This means that we cannot filter merge commits in the standalone version
   if (props.universalSettings) {
     commits = props.filteredCommits;
     firstTimestamp = props.firstSignificantTimestamp;
@@ -187,7 +190,7 @@ const extractCommitData = (
         for (const mergedAuthor of props.mergedAuthors) {
           commitChartPalette['(Additions) ' + mergedAuthor.mainCommitter] = chroma(mergedAuthor.color).hex();
           commitChartPalette['(Deletions) ' + mergedAuthor.mainCommitter] = chroma(mergedAuthor.color).darken(0.5).hex();
-          obj['(Additions) ' + mergedAuthor.mainCommitter] = 0;
+          obj['(Additions) ' + mergedAuthor.mainCommitter] = 0.001;
           obj['(Deletions) ' + mergedAuthor.mainCommitter] = -0.001; //-0.001 for stack layout to realize it belongs on the bottom
         }
         obj['(Additions) others'] = 0;

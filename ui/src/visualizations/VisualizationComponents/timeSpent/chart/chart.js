@@ -187,7 +187,7 @@ export default class TimeSpentChart extends React.Component {
 
         selectedAuthorNames.forEach((sA) => {
           if (dataEntry.data[sA] === undefined) {
-            dataEntry.data[sA] = 0;
+            dataEntry.data[sA] = 0.001;
             dataEntry.dataAggregated[sA] = aggregatedDataPerAuthor[sA];
           }
           if (dataEntry.data[sA] >= 0) {
