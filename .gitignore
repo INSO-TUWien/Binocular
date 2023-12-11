@@ -16,3 +16,4 @@ pkg
 /.devcontainer
 .DS_Store
 /ui/config/context.json
+ui/dist

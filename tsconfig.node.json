@@ -5,10 +5,12 @@
     "module": "ESNext",
     
     /* Bundler mode */
-    "moduleResolution": "Node16",
+    "moduleResolution": "bundler",
 
     /* Interop Constraints */
-    "allowSyntheticDefaultImports": true
+    "allowJs": true,
+    "allowSyntheticDefaultImports": true, // TODO should not be true in the future!
+    "strictBindCallApply": false, // TODO should be set to true!
   },
   "include": ["vite.config.ts"]
 }
