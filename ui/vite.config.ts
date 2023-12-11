@@ -1,22 +1,21 @@
-import { defineConfig, transformWithEsbuild } from "vite";
-import react from "@vitejs/plugin-react-swc";
+import { defineConfig, transformWithEsbuild } from 'vite';
+import react from '@vitejs/plugin-react-swc';
 // import react from "@vitejs/plugin-react";
-import autoprefixer from "autoprefixer";
-import rollupNodePolyFill from 'rollup-plugin-node-polyfills'
+import autoprefixer from 'autoprefixer';
+import rollupNodePolyFill from 'rollup-plugin-node-polyfills';
 import { nodeResolve } from '@rollup/plugin-node-resolve';
 // import { builtinModules, createRequire } from "module";
 import { NodeGlobalsPolyfillPlugin } from '@esbuild-plugins/node-globals-polyfill';
 import { NodeModulesPolyfillPlugin } from '@esbuild-plugins/node-modules-polyfill';
-import { alias as viteAlias } from './vite.alias.ts'
-import { nodePolyfills } from 'vite-plugin-node-polyfills'
-
+import { alias as viteAlias } from './vite.alias';
+//import { nodePolyfills } from 'vite-plugin-node-polyfills';
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  root: "./ui/",
-  base: "",
+  root: './',
+  base: '',
   server: {
-    port: 4200,
+    port: 8080,
     proxy: {
       '/api': {
         target: 'http://localhost:48763/',
@@ -40,11 +39,11 @@ export default defineConfig({
       include: /node_modules/,
       requireReturnsDefault: 'auto',
     },
-    outDir: "./dist",
+    outDir: './dist',
     rollupOptions: {
       cache: false,
       output: {
-        format: "iife",
+        format: 'iife',
       },
       plugins: [
         rollupNodePolyFill({
@@ -62,7 +61,7 @@ export default defineConfig({
     {
       // source: https://stackblitz.com/edit/vitejs-vite-ka3qkc?file=vite.config.js
       // source: https://github.com/vitejs/vite/discussions/3448#discussioncomment-5904031
-      name: "load+transform-js-files-as-jsx",
+      name: 'load+transform-js-files-as-jsx',
       async transform(code, id) {
         if (!id.match(/src\/.*\.js$/)) {
           return null;
@@ -71,8 +70,8 @@ export default defineConfig({
         // Use the exposed transform from vite, instead of directly
         // transforming with esbuild
         return transformWithEsbuild(code, id, {
-          loader: "jsx",
-          jsx: "automatic",
+          loader: 'jsx',
+          jsx: 'automatic',
         });
       },
     },
@@ -90,7 +89,7 @@ export default defineConfig({
     exclude: [],
     esbuildOptions: {
       loader: {
-        ".js": "jsx",
+        '.js': 'jsx',
       },
       // Enable esbuild polyfill plugins
       plugins: [

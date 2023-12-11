@@ -1,13 +1,14 @@
 import { createRoot } from 'react-dom/client';
+import React from 'react';
 import { createStore, applyMiddleware } from 'redux';
 import { createLogger } from 'redux-logger';
+
 import io from 'socket.io-client';
 import createSocketIoMiddleware from 'redux-socket.io';
 import createSagaMiddleware from 'redux-saga';
 import { root } from './sagas';
 import _ from 'lodash';
 import Database from './database/database';
-import React from 'react';
 
 import Root from './components/Root';
 import makeAppReducer from './reducers';
@@ -67,14 +68,14 @@ Database.checkBackendConnection().then((connection) => {
   if (previousActiveVisualization !== null) {
     activeVisualization = previousActiveVisualization;
   }
-
   const container = document.getElementById('root');
-  const rootContainer = createRoot(container);
+  const rootContainer = createRoot(container!);
+
   if (connection) {
     const app = makeAppReducer(visualizationModules);
 
     const socket = io({ path: '/wsapi' });
-    const socketIo = createSocketIoMiddleware.default(socket, 'api/');
+    const socketIo = createSocketIoMiddleware(socket, 'api/');
 
     const store = createStore(
       app,
@@ -88,18 +89,12 @@ Database.checkBackendConnection().then((connection) => {
           offlineMode: false,
         },
       },
-      applyMiddleware(socketIo, saga, logger)
+      applyMiddleware(socketIo, saga, logger),
     );
 
     saga.run(root);
 
     rootContainer.render(<Root store={store} />);
-    if (import.meta.webpackHot) {
-      import.meta.webpackHot.accept('./components/Root', () => {
-        const NewRoot = Root.default;
-        rootContainer.render(<NewRoot store={store} />);
-      });
-    }
   } else {
     Database.initDB().then();
     const app = makeAppReducer(visualizationModules);
@@ -116,17 +111,11 @@ Database.checkBackendConnection().then((connection) => {
           offlineMode: true,
         },
       },
-      applyMiddleware(saga, logger)
+      applyMiddleware(saga, logger),
     );
 
     saga.run(root);
 
     rootContainer.render(<RootOffline store={store} />);
-    if (import.meta.webpackHot) {
-      import.meta.webpackHot.accept('./components/Root', () => {
-        const NewRoot = Root.default;
-        rootContainer.render(<NewRoot store={store} />);
-      });
-    }
   }
 });

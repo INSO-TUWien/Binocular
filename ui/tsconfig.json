@@ -28,6 +28,6 @@
     "noImplicitThis": false,
   },
   "include": ["ui"],
-  "exclude": ["node_modules", "ui/dist"],
-  "references": [{ "path": "./ui/tsconfig.node.json"}]
+  "exclude": ["node_modules", "./dist"],
+  "references": [{ "path": "./tsconfig.node.json"}]
 }

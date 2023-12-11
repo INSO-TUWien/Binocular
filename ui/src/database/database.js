@@ -269,7 +269,7 @@ export default class Database {
         .query(
           `{
          committers
-       }`
+       }`,
         )
         .then(() => {
           resolve(true);
