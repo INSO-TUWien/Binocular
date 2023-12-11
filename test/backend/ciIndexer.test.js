@@ -4,7 +4,7 @@ import { expect } from 'chai';
 
 import ReporterMock from './helper/reporter/reporterMock.js';
 
-import Db from '../../lib/core/db/db.js';
+import Db from '../../lib/core/db/db';
 import conf from '../../lib/config.js';
 
 import ctx from '../../lib/context.ts';
