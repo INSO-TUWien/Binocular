@@ -40,7 +40,7 @@ export default class StreamKey {
   toString() {
     return `${this.direction}-${this.attribute}-${this.name}`;
   }
-  toId() {
-    return hash(this.toString());
+  async toId() {
+    return await hash(this.toString());
   }
 }

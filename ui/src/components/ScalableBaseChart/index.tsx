@@ -60,7 +60,7 @@ export default class ScalableBaseChart extends React.Component<Props, State> {
   protected styles: any;
   private svgRef: SVGSVGElement | null | undefined;
   private tooltipRef: HTMLDivElement | null | undefined;
-  constructor(props: any, styles: any) {
+  constructor(props: Props | Readonly<Props>, styles: any) {
     super(props);
 
     this.styles = Object.freeze(Object.assign({}, baseStyles, styles));
@@ -88,17 +88,15 @@ export default class ScalableBaseChart extends React.Component<Props, State> {
    * @param scales
    * @returns {*}
    */
-  //@ts-ignore
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   createAreaFunction(scales: any) {
     throw new NoImplementationException('Base class is abstract and requires implementation!');
   }
 
-  //@ts-ignore
   getXDims() {
     throw new NoImplementationException('Base class is abstract and requires implementation!');
   }
 
-  //@ts-ignore
   getYDims(): any {
     throw new NoImplementationException('Base class is abstract and requires implementation!');
   }
@@ -110,7 +108,7 @@ export default class ScalableBaseChart extends React.Component<Props, State> {
    * @param brushArea
    * @param area
    */
-  //@ts-ignore
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   resetZoom(scales: any, axes: any, brushArea: any, area: any) {
     throw new NoImplementationException('Base class is abstract and requires implementation!');
   }
@@ -121,7 +119,7 @@ export default class ScalableBaseChart extends React.Component<Props, State> {
    * @param order
    * @returns Stacked chart data for d3 functions and preprocessed data { stackedData, data }
    */
-  //@ts-ignore
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   calculateChartData(data: any, order: any) {
     throw new NoImplementationException('Base class is abstract and requires implementation!');
   }
@@ -137,12 +135,28 @@ export default class ScalableBaseChart extends React.Component<Props, State> {
    * @param brushArea
    * @param scales
    */
-  //@ts-ignore
-  createdTooltipNode(path: any, bisectDate: any, mouseoverDate: any, tooltip: any, event: any, node: any, brushArea: any, scales: any) {
+  createdTooltipNode(
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    path: any,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    bisectDate: any,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    mouseoverDate: any,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    tooltip: any,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    event: any,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    node: any,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    brushArea: any,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    scales: any,
+  ) {
     throw new NoImplementationException('Base class is abstract and requires implementation!');
   }
 
-  //@ts-ignore
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   getBrushId(data: any): any {
     throw new NoImplementationException('Base class is abstract and requires implementation!');
   }
@@ -155,7 +169,7 @@ export default class ScalableBaseChart extends React.Component<Props, State> {
    * @param event
    * @param stream
    */
-  //@ts-ignore
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   onMouseover(path: any, tooltip: any, brushArea: any, event: any, stream: any) {
     throw new NoImplementationException('Base class is abstract and requires implementation!');
   }
@@ -168,7 +182,7 @@ export default class ScalableBaseChart extends React.Component<Props, State> {
    * @param event
    * @param stream
    */
-  //@ts-ignore
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   onMouseLeave(path: any, tooltip: any, brushArea: any, event: any, stream: any) {
     throw new NoImplementationException('Base class is abstract and requires implementation!');
   }
@@ -204,28 +218,38 @@ export default class ScalableBaseChart extends React.Component<Props, State> {
     );
   }
 
-  hasUpdate() {
-    const keysHash = hash(this.props.keys || []);
-    return { hashes: { keysHash }, hasChanges: this.state.data.keysHash !== keysHash || this.state.d3offset !== this.props.d3offset };
+  async hasUpdate() {
+    const keysHash = await hash(this.props.keys || []);
+    return {
+      hashes: { keysHash },
+      hasChanges: this.state.data.keysHash !== keysHash || this.state.d3offset !== this.props.d3offset,
+    };
   }
 
   /**
    * Update the chart element. May only be called if this.props.content is not empty and the component is mounted.
    */
-  updateElement() {
+  async updateElement() {
     //Initialization
-    const contentHash = hash(this.props.content || []);
-    const orderHash = hash(this.props.order || []);
-    const { hashes, hasChanges } = this.hasUpdate();
+    const contentHash = await hash(this.props.content || []);
+    const orderHash = await hash(this.props.order || []);
+    const { hashes, hasChanges } = await this.hasUpdate();
 
     //Get d3-friendly data
     if (this.state.data.hash !== contentHash || this.state.data.orderHash !== orderHash || hasChanges) {
       this.setState(
         {
-          data: Object.assign({ hash: contentHash, orderHash }, hashes, this.calculateChartData(this.props.content, this.props.order)),
+          data: Object.assign(
+            {
+              hash: contentHash,
+              orderHash,
+            },
+            hashes,
+            this.calculateChartData(this.props.content, this.props.order),
+          ),
           d3offset: this.props.d3offset,
         },
-        this.visualizeData
+        this.visualizeData,
       );
     } else {
       this.visualizeData();
@@ -360,7 +384,7 @@ export default class ScalableBaseChart extends React.Component<Props, State> {
         x: this.createXAxis(brushArea, scales, width, height, paddings),
         y: this.createYAxis(brushArea, scales, width, height, paddings),
       },
-      this.additionalAxes(brushArea, scales, width, height, paddings)
+      this.additionalAxes(brushArea, scales, width, height, paddings),
     );
 
     // set vertical zoom option if available

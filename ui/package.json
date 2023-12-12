@@ -2,9 +2,11 @@
   "name": "binocular-frontend",
   "version": "1.0.0",
   "scripts": {
-    "dev-vite-frontend": "vite dev",
-    "build-vite-frontend": "vite build",
-    "serve-vite-frontend": "vite preview"
+    "dev:vite": "vite dev --mode development --debug",
+    "build:dev": "tsc && vite build --mode development --debug",
+    "build:prod": "tsc && vite build --mode production --debug",
+    "preview": "vite preview --mode development",
+    "preview:prod": "vite preview"
   },
   "dependencies": {
     "@apollo/client": "^3.7.10",

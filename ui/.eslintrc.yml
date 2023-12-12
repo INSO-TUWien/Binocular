@@ -30,6 +30,7 @@ rules:
   react/jsx-uses-vars: 1
   linebreak-style: ["error", "unix"]
   '@typescript-eslint/no-this-alias': 0
+  '@typescript-eslint/no-explicit-any': 0
 plugins:
   - prettier
   - react

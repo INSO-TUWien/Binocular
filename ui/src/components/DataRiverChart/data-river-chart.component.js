@@ -1,6 +1,5 @@
 'use strict';
 
-//@ts-ignore
 import React from 'react';
 
 import * as d3 from 'd3';
@@ -80,10 +79,10 @@ export default class DataRiverChartComponent extends ScalableBaseChartComponent 
         this.state.data.stackedData && this.state.data.stackedIssues
           ? [...this.state.data.stackedIssues, ...this.state.data.stackedData].reduce(
               (stack, stream) => [...stack, ...stream.filter((exist) => exist).map((data) => data.data.date)],
-              []
+              [],
             )
-          : this.state.data.data.map((data) => data.date)
-      )
+          : this.state.data.data.map((data) => data.date),
+      ),
     );
     dates.push(new Date());
 
@@ -179,8 +178,8 @@ export default class DataRiverChartComponent extends ScalableBaseChartComponent 
         .domain(IssueStat.getAvailable)
         .range(
           IssueStat.getAvailable.map((_, i, values) =>
-            scale.height(i === 0 ? 100.0 : i === values.length - 1 ? 0.0 : (100.0 / (values.length - 1.0)) * i)
-          )
+            scale.height(i === 0 ? 100.0 : i === values.length - 1 ? 0.0 : (100.0 / (values.length - 1.0)) * i),
+          ),
         ),
       y: d3
         .scaleLinear()
@@ -257,9 +256,9 @@ export default class DataRiverChartComponent extends ScalableBaseChartComponent 
    *
    * @returns {{hasChanges: (boolean), hashes: {keysHash: string} & {issueHash: string}}}
    */
-  hasUpdate() {
-    const update = super.hasUpdate();
-    const issueHash = hash(this.props.issueStreams || []);
+  async hasUpdate() {
+    const update = await super.hasUpdate();
+    const issueHash = await hash(this.props.issueStreams || []);
 
     return {
       hashes: Object.assign(update.hashes, { issueHash }),
@@ -289,7 +288,7 @@ export default class DataRiverChartComponent extends ScalableBaseChartComponent 
     this.setState((prev) =>
       Object.assign({}, prev, {
         yDims: [-d3.max(data, (d) => d.deletions) || 1, d3.max(data, (d) => d.additions) || 1],
-      })
+      }),
     );
 
     return streamingData;
@@ -354,7 +353,7 @@ export default class DataRiverChartComponent extends ScalableBaseChartComponent 
       const nameColorKey = Object.keys(this.props.authorPalette || {}).find(
         (colorKey) =>
           colorKey.toLowerCase().includes(stack.key.name.toLowerCase()) &&
-          colorKey.toLowerCase().includes(stack.key.direction.toLowerCase())
+          colorKey.toLowerCase().includes(stack.key.direction.toLowerCase()),
       );
 
       const color = {
@@ -399,7 +398,7 @@ export default class DataRiverChartComponent extends ScalableBaseChartComponent 
     return dataStreams
       .filter(
         (stream) =>
-          !keys || (keys.length && !!keys.find((key) => key && key.name === stream[0].name && key.attribute === stream[0].attribute))
+          !keys || (keys.length && !!keys.find((key) => key && key.name === stream[0].name && key.attribute === stream[0].attribute)),
       )
       .reduce((stack, dataStream, index) => {
         const stream = {
@@ -501,8 +500,8 @@ export default class DataRiverChartComponent extends ScalableBaseChartComponent 
       (record.buildStat === BuildStat.Success
         ? (record.buildWeight * record.totalDiff) / maxDiff
         : record.buildStat === BuildStat.Failed || record.buildStat === BuildStat.Errored
-        ? (-record.buildWeight * record.totalDiff) / maxDiff
-        : 0.0);
+          ? (-record.buildWeight * record.totalDiff) / maxDiff
+          : 0.0);
 
     // define range of success rate
     record.buildSuccessRate =
@@ -538,7 +537,7 @@ export default class DataRiverChartComponent extends ScalableBaseChartComponent 
       Math.max(
         d3.max(stream, (d) => d.data.additions),
         d3.max(stream, (d) => d.data.deletions),
-        1
+        1,
       );
     dataStream.pattern = {
       size,
@@ -570,10 +569,10 @@ export default class DataRiverChartComponent extends ScalableBaseChartComponent 
               record.data &&
               record.data.shas &&
               record.data.shas.length > 0 &&
-              !!record.data.shas.find((sha) => !!stream.find((issue) => sha === issue.sha))
+              !!record.data.shas.find((sha) => !!stream.find((issue) => sha === issue.sha)),
           ),
         ],
-        []
+        [],
       );
 
       stream.forEach((ticketPoint) => {
@@ -583,7 +582,7 @@ export default class DataRiverChartComponent extends ScalableBaseChartComponent 
 
       stream.__values.sort(
         (point1, point2) =>
-          d3.min(point1.points, (point) => point.data.date.getTime()) - d3.min(point2.points, (point) => point.data.date.getTime())
+          d3.min(point1.points, (point) => point.data.date.getTime()) - d3.min(point2.points, (point) => point.data.date.getTime()),
       );
     });
 
@@ -601,7 +600,7 @@ export default class DataRiverChartComponent extends ScalableBaseChartComponent 
       const data = [];
       for (let i = 0; i < maxStreamCount * 2; i++) {
         const issueStream = [stream.start, ...stream.map((dataPoint) => dataPoint.values[i % dataPoint.values.length])].filter(
-          (exist) => exist
+          (exist) => exist,
         );
         if (stream.isClosed) {
           issueStream.push(stream.end);
@@ -647,11 +646,11 @@ export default class DataRiverChartComponent extends ScalableBaseChartComponent 
 
     const radius = Math.max(
       issueDataPoints.length > 1 ? (scales.x(issueDataPoints[1].data.date) - scales.x(issueDataPoints[0].data.date)) * 0.01 : 0,
-      5
+      5,
     );
     const size = (d) => Math.max(d.data.additions || 0, d.data.deletions || 1, 1);
     issueDataPoints.forEach(
-      (d) => (d.radius = Math.min(Math.max(((scales.diff(0) - scales.diff(size(d))) / 100) * radius, 5), scales.height(50)))
+      (d) => (d.radius = Math.min(Math.max(((scales.diff(0) - scales.diff(size(d))) / 100) * radius, 5), scales.height(50))),
     );
     issueDataPoints.sort((a, b) => b.radius - a.radius);
 
@@ -676,7 +675,7 @@ export default class DataRiverChartComponent extends ScalableBaseChartComponent 
       })
       .attr('cx', (d) => scales.x(d.data.date))
       .attr('cy', (d) =>
-        d instanceof IssueData ? (this.props.useIssueAxis ? scales.issue(d.status.name) : scales.y(0)) : scales.y(d.buildSuccessRate)
+        d instanceof IssueData ? (this.props.useIssueAxis ? scales.issue(d.status.name) : scales.y(0)) : scales.y(d.buildSuccessRate),
       )
       .attr('r', (d) => d.radius)
       .attr('stroke-width', (d) => (!(d instanceof IssueData) && !d.issue ? 0 : 3))
@@ -709,7 +708,7 @@ export default class DataRiverChartComponent extends ScalableBaseChartComponent 
           scales.x(normalizedPoint.data.date),
           coords.y0,
           coords.y1,
-          dataPoint.stream.color.ticket || getColor(dataPoint)
+          dataPoint.stream.color.ticket || getColor(dataPoint),
         );
       })
       .on('mouseout', function (event, stream) {
@@ -737,7 +736,7 @@ export default class DataRiverChartComponent extends ScalableBaseChartComponent 
                 return d;
               }),
             ],
-            []
+            [],
           );
           dataPoints.forEach((item) => {
             item.stream = stream;
@@ -751,8 +750,8 @@ export default class DataRiverChartComponent extends ScalableBaseChartComponent 
             dataStream.push(end);
           }
           return dataStream;
-        }, [])
-      )
+        }, []),
+      ),
     );
   }
 
@@ -834,7 +833,7 @@ export default class DataRiverChartComponent extends ScalableBaseChartComponent 
     const realDataStream = stream.filter((record) => record && record.data && record.data.shas && record.data.shas.length > 0);
     const nearestDateIndex = bisectDate(
       realDataStream.map((record) => record.data),
-      mouseoverDate
+      mouseoverDate,
     );
     const candidate1 = realDataStream[nearestDateIndex] || realDataStream[realDataStream.length - 1];
     const candidate2 = realDataStream[nearestDateIndex - 1] || realDataStream[0];
