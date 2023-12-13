@@ -1,5 +1,5 @@
 'use strict';
-import Paginator from '../../../../lib/paginator.ts';
+import Paginator from '../../../../lib/utils/paginator.ts';
 
 class GitLabMock {
   getProject() {

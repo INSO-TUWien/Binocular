@@ -3,11 +3,11 @@
 import { expect } from 'chai';
 import fake from './helper/git/repositoryFake.js';
 import ReporterMock from './helper/reporter/reporterMock';
-import conf from '../../lib/config.js';
+import conf from '../../lib/utils/config.js';
 
 import Db from '../../lib/core/db/db';
 
-import ctx from '../../lib/context';
+import ctx from '../../lib/utils/context';
 
 import GitLabBaseIndexerMock from './helper/gitlab/gitLabBaseIndexerMock';
 

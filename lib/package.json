@@ -9,20 +9,14 @@
     "test-server": "mocha --config=.mocharc.json --exit --reporter spec test/backend",
     "test-ui": "jest --config jest.config.js",
     "coverage": "npm run coverage-server && npm run coverage-ui && npm run collect-coverage",
-    "coverage-server": "nyc mocha --config=.mocharc.json --exit test/backend",
+    "coverage-server": "nyc mocha --config=.mocharc.json --exit ../test/backend",
     "coverage-ui": "jest --config jest-coverage.config.js",
-    "collect-coverage": "./scripts/collect-coverage.js",
-    "depcheck": "depcheck",
-    "eslint:ui": "eslint --ignore-path ui/.eslintignore -c ui/.eslintrc.yml ui",
-    "eslint:root": "eslint .",
-    "eslint": "npm run eslint:root && npm run eslint:ui",
+    "collect-coverage": "../scripts/collect-coverage.js",
     "check": "npm run eslint",
     "dev": "binocular run",
     "dev-server": "tsx watch binocular.ts run --no-frontend",
     "dockerize": "whalify generate-installer && ./node_modules/.bin/whalify build",
-    "fix:root": "eslint --fix .",
-    "fix:ui": "eslint --fix --ignore-path ui/.eslintignore -c ui/.eslintrc.yml ui",
-    "fix": "npm run fix:root && npm run fix:ui"
+    "fix": "eslint --fix ."
   },
   "keywords": [
     "git"
@@ -150,8 +144,7 @@
     "stream-http": "^3.2.0",
     "temp": "^0.9.4",
     "url-join": "^4.0.1",
-    "util": "^0.12.4",
-    "vite-tsconfig-paths": "^4.2.1"
+    "util": "^0.12.4"
   },
   "devDependencies": {
     "@rollup/plugin-commonjs": "^25.0.7",

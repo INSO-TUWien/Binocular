@@ -6,7 +6,9 @@
     "build:dev": "tsc && vite build --mode development --debug",
     "build:prod": "tsc && vite build --mode production --debug",
     "preview": "vite preview --mode development",
-    "preview:prod": "vite preview"
+    "preview:prod": "vite preview",
+    "check": "npm run eslint",
+    "fix": "eslint --fix ."
   },
   "dependencies": {
     "@apollo/client": "^3.7.10",
@@ -71,6 +73,8 @@
     "vite-tsconfig-paths": "^4.2.1"
   },
   "devDependencies": {
+    "@esbuild-plugins/node-globals-polyfill": "^0.2.3",
+    "@esbuild-plugins/node-modules-polyfill": "^0.2.2",
     "@rollup/plugin-commonjs": "^25.0.7",
     "@rollup/plugin-node-resolve": "^15.2.3",
     "@types/react": "^18.2.37",
@@ -86,6 +90,7 @@
     "eslint-plugin-react": "^7.33.2",
     "prettier": "^3.1.1",
     "react-error-overlay": "^6.0.10",
+    "rollup-plugin-node-polyfills": "^0.2.1",
     "sass": "^1.69.5",
     "typescript": "^5.2.2",
     "vite": "^5.0.0",

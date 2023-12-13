@@ -14,4 +14,3 @@ pkg
 .grandle
 /.devcontainer
 .DS_Store
-ui/dist

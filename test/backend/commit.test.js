@@ -11,9 +11,9 @@ import Commit from '../../lib/models/Commit';
 import File from '../../lib/models/File';
 import Hunk from '../../lib/models/Hunk';
 import CommitStakeholderConnection from '../../lib/models/CommitStakeholderConnection.js';
-import conf from '../../lib/config.js';
+import conf from '../../lib/utils/config.js';
 
-import ctx from '../../lib/context';
+import ctx from '../../lib/utils/context';
 import GitHubUrlProvider from '../../lib/url-providers/GitHubUrlProvider';
 import Stakeholder from '../../lib/models/Stakeholder.js';
 import path from 'path';

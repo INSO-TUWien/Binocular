@@ -2,13 +2,13 @@
 
 import { expect } from 'chai';
 
-import conf from '../../lib/config.js';
+import conf from '../../lib/utils/config.js';
 import Db from '../../lib/core/db/db';
 import TestModel from './helper/db/testModel';
 
-import * as utils from '../../lib/utils';
+import * as utils from '../../lib/utils/utils';
 import path from 'path';
-import ctx from '../../lib/context.ts';
+import ctx from '../../lib/utils/context.ts';
 const indexerOptions = {
   backend: true,
   frontend: false,

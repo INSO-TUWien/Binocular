@@ -63,7 +63,7 @@ function parse(
     .addOption(new Option('--no-export', 'disable the default db export').default(true))
     .addOption(new Option('--no-server', 'disable the backed webserver (when used binocular quits after indexing)').default(true))
     .action((targetPath, options) => {
-      run(path.resolve(targetPath ? targetPath : '.'), options);
+      run(path.resolve(targetPath ? targetPath : '../'), options);
     });
 
   cli

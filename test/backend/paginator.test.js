@@ -7,7 +7,7 @@ import sinonChai from 'sinon-chai';
 
 chai.use(sinonChai);
 
-import Paginator from '../../lib/paginator';
+import Paginator from '../../lib/utils/paginator';
 
 const expect = chai.expect;
 

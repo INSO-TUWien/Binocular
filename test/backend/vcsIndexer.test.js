@@ -18,8 +18,8 @@ import CommitModuleConnection from '../../lib/models/CommitModuleConnection';
 import BranchFileConnection from '../../lib/models/BranchFileConnection';
 import ModuleModuleConnection from '../../lib/models/ModuleModuleConnection';
 import CommitFileStakeholderConnection from '../../lib/models/CommitFileStakeholderConnection';
-import conf from '../../lib/config.js';
-import ctx from '../../lib/context';
+import conf from '../../lib/utils/config.js';
+import ctx from '../../lib/utils/context';
 import GitHubUrlProvider from '../../lib/url-providers/GitHubUrlProvider';
 
 import VcsIndexer from '../../lib/indexers/vcs';

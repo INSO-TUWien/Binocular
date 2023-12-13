@@ -5,9 +5,9 @@ import { expect } from 'chai';
 import ReporterMock from './helper/reporter/reporterMock.js';
 
 import Db from '../../lib/core/db/db.js';
-import conf from '../../lib/config.js';
+import conf from '../../lib/utils/config.js';
 
-import ctx from '../../lib/context.ts';
+import ctx from '../../lib/utils/context.ts';
 import GitLabCIIndexer from './helper/gitlab/gitLabCIIndexerRewire.js';
 import GitHubCIIndexer from './helper/github/gitHubCIIndexerRewire.js';
 

@@ -26,8 +26,6 @@
     "noImplicitAny": false, // TODO should be set to true!
     "forceConsistentCasingInFileNames": true,
     "noImplicitThis": false,
+    "include": ["/"]
   },
-  "include": ["ui"],
-  "exclude": ["node_modules", "ui/dist"],
-  "references": [{ "path": "./ui/tsconfig.node.json"}]
 }

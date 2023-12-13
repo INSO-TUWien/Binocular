@@ -23,61 +23,61 @@ function threadWarn(thread: number, message: string) {
  * Main entry point of the binocular application
  */
 
-import ctx from './lib/context';
+import ctx from './utils/context';
 
 import open from 'open';
 import _ from 'lodash';
 
-import config from './lib/config';
-import * as GetIndexer from './lib/indexers/index';
-import * as UrlProvider from './lib/url-providers/index';
-import ProgressReporter from './lib/progress-reporter';
+import config from './utils/config';
+import * as GetIndexer from './indexers';
+import * as UrlProvider from './url-providers';
+import ProgressReporter from './utils/progress-reporter';
 import path from 'path';
 import fs from 'fs';
-import Commit from './lib/models/Commit';
-import File from './lib/models/File';
-import Hunk from './lib/models/Hunk';
-import Issue from './lib/models/Issue';
-import Build from './lib/models/Build';
-import Branch from './lib/models/Branch';
-import Module from './lib/models/Module';
-import Stakeholder from './lib/models/Stakeholder';
-import MergeRequest from './lib/models/MergeRequest';
-import Milestone from './lib/models/Milestone';
-import CommitStakeholderConnection from './lib/models/CommitStakeholderConnection';
-import IssueStakeholderConnection from './lib/models/IssueStakeholderConnection';
-import IssueCommitConnection from './lib/models/IssueCommitConnection';
-import CommitCommitConnection from './lib/models/CommitCommitConnection';
-import CommitModuleConnection from './lib/models/CommitModuleConnection';
-import ModuleModuleConnection from './lib/models/ModuleModuleConnection';
-import ModuleFileConnection from './lib/models/ModuleFileConnection';
-import BranchFileConnection from './lib/models/BranchFileConnection';
-import BranchFileFileConnection from './lib/models/BranchFileFileConnection';
-import CommitFileStakeholderConnection from './lib/models/CommitFileStakeholderConnection';
-import CommitFileConnection from './lib/models/CommitFileConnection';
-import CommitBuildConnection from './lib/models/CommitBuildConnection';
-import ConfigurationError from './lib/errors/ConfigurationError';
-import DatabaseError from './lib/errors/DatabaseError';
-import GateWayService from './lib/gateway-service';
+import Commit from './models/Commit';
+import File from './models/File';
+import Hunk from './models/Hunk';
+import Issue from './models/Issue';
+import Build from './models/Build';
+import Branch from './models/Branch';
+import Module from './models/Module';
+import Stakeholder from './models/Stakeholder';
+import MergeRequest from './models/MergeRequest';
+import Milestone from './models/Milestone';
+import CommitStakeholderConnection from './models/CommitStakeholderConnection';
+import IssueStakeholderConnection from './models/IssueStakeholderConnection';
+import IssueCommitConnection from './models/IssueCommitConnection';
+import CommitCommitConnection from './models/CommitCommitConnection';
+import CommitModuleConnection from './models/CommitModuleConnection';
+import ModuleModuleConnection from './models/ModuleModuleConnection';
+import ModuleFileConnection from './models/ModuleFileConnection';
+import BranchFileConnection from './models/BranchFileConnection';
+import BranchFileFileConnection from './models/BranchFileFileConnection';
+import CommitFileStakeholderConnection from './models/CommitFileStakeholderConnection';
+import CommitFileConnection from './models/CommitFileConnection';
+import CommitBuildConnection from './models/CommitBuildConnection';
+import ConfigurationError from './errors/ConfigurationError';
+import DatabaseError from './errors/DatabaseError';
+import GateWayService from './utils/gateway-service';
 // import * as grpc from '@grpc/grpc-js';
 // import * as protoLoader from '@grpc/proto-loader';
-import * as projectStructureHelper from './lib/projectStructureHelper';
+import * as projectStructureHelper from './utils/projectStructureHelper';
 
-import getDbExportEndpoint from './lib/endpoints/get-db-export';
+import getDbExportEndpoint from './endpoints/get-db-export';
 
-import graphQlEndpoint from './lib/endpoints/graphQl';
+import graphQlEndpoint from './endpoints/graphQl';
 
-import * as setupDb from './lib/core/db/setup-db';
+import * as setupDb from './core/db/setup-db';
 
 import { fileURLToPath } from 'url';
 import { spawn } from 'child_process';
 // import { options } from 'yargs';
 import express from 'express';
 import { FSWatcher } from 'fs-extra';
-import vcs from './lib/indexers/vcs/index';
-import its from './lib/indexers/its/index';
-import ci from './lib/indexers/ci/index';
-import Repository from './lib/core/provider/git';
+import vcs from './indexers/vcs';
+import its from './indexers/its';
+import ci from './indexers/ci';
+import Repository from './core/provider/git';
 import chalk from 'chalk';
 cli.parse(
   (targetPath, options) => {
@@ -117,7 +117,7 @@ cli.parse(
     } else {
       buildFrontend(options.buildMode);
     }
-  }
+  },
 );
 
 function runBackend() {
@@ -234,7 +234,8 @@ function runBackend() {
 
     repoWatcher.headTimestamp = fs.statSync(headPath).mtime.valueOf();
     // create watchdog of the head file to detect changes
-    // @ts-ignore
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-expect-error
     repoWatcher.listener = fs.watch(headPath, async (event: fs.WatchEventType, file: string) => {
       if (file && !repoWatcher.working) {
         repoWatcher.working = true;
@@ -274,7 +275,7 @@ function runBackend() {
           return reject(err);
         } else if (content && content.length > 0) {
           const branchMatcher = /^([^\n\t]*).*?['"]([^\n\t]*)['"].*?$/gm;
-          const branches = [];
+          const branches: any[] = [];
           let match;
           while ((match = branchMatcher.exec(content))) {
             if (match.length === 3) {
@@ -284,7 +285,7 @@ function runBackend() {
           return resolve(branches);
         }
         return resolve([]);
-      })
+      }),
     );
   }
 
@@ -311,7 +312,7 @@ function runBackend() {
     reporter: typeof ProgressReporter,
     gateway: GateWayService,
     currentQueuePosition: any,
-    indexingThread: number
+    indexingThread: number,
   ) {
     await stopIndexers(gateway);
     await currentQueuePosition;
@@ -333,7 +334,7 @@ function runBackend() {
     context: typeof ctx,
     reporter: typeof ProgressReporter,
     gateway: GateWayService,
-    indexingThread: number
+    indexingThread: number,
   ) {
     threadLog(indexingThread, 'Indexing data...');
     gateway.startIndexing();
@@ -378,7 +379,7 @@ function runBackend() {
             await indexer.index();
             threadLog(indexingThread, `${indexer.constructor.name} ${indexer.isStopping() ? 'stopped' : 'finished'}...`);
             return indexer;
-          })
+          }),
       );
 
       // make sure that the services has not been stopped
@@ -433,7 +434,7 @@ function runBackend() {
     }
 
     // stores all indexer to call them async
-    const indexHandler = [];
+    const indexHandler: any[] = [];
     indexHandler.push(
       async () =>
         (indexers.vcs = await GetIndexer.makeVCSIndexer(
@@ -442,13 +443,13 @@ function runBackend() {
           reporter,
           context.argv.clean,
           config,
-          context
-        ))
+          context,
+        )),
     );
 
     if (context.argv.its) {
       indexHandler.push(
-        optionalIndexerHandler.bind(this, indexingThread, 'its', context.repo, reporter, context, GetIndexer.makeITSIndexer)
+        optionalIndexerHandler.bind(this, indexingThread, 'its', context.repo, reporter, context, GetIndexer.makeITSIndexer),
       );
     }
 
@@ -477,7 +478,7 @@ function runBackend() {
     repository: Repository,
     reporter: typeof ProgressReporter,
     context: typeof ctx,
-    asyncIndexCreator: any
+    asyncIndexCreator: any,
   ) {
     try {
       indexers[key] = await asyncIndexCreator(repository, reporter, context, true);
@@ -485,7 +486,7 @@ function runBackend() {
       if (error instanceof ConfigurationError) {
         threadWarn(
           indexingThread,
-          `The following indexer "${key}" failed with "${error.name}" and holds the following message: ${error.message}`
+          `The following indexer "${key}" failed with "${error.name}" and holds the following message: ${error.message}`,
         );
       } else {
         throw error;
@@ -550,8 +551,8 @@ function runBackend() {
           if (index) {
             index.stop();
           }
-        }
-      )
+        },
+      ),
     );
   }
 
@@ -625,7 +626,7 @@ function runBackend() {
             return issue.save();
           }
         });
-      })
+      }),
     );
   }
 
@@ -704,7 +705,7 @@ function runBackend() {
         await gateway.configure(conf.get('gateway'));
         return gateway.start();
       }).bind(this, ctx, config, gatewayService),
-    ].map((entryPoint) => serviceStarter(entryPoint))
+    ].map((entryPoint) => serviceStarter(entryPoint)),
   ).then(() => {
     // if no-server flag set stop immediately after indexing
     if (!ctx.argv.server) {
