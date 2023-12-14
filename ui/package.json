@@ -1,13 +1,14 @@
 {
   "name": "binocular-frontend",
-  "version": "1.0.0",
+  "version": "v2.0.0",
   "scripts": {
-    "dev:vite": "vite dev --mode development --debug",
+    "dev": "vite dev --mode development",
+    "dev:debug": "vite dev --mode development --debug",
     "build:dev": "tsc && vite build --mode development --debug",
     "build:prod": "tsc && vite build --mode production --debug",
     "preview": "vite preview --mode development",
     "preview:prod": "vite preview",
-    "check": "npm run eslint",
+    "check": "eslint .",
     "fix": "eslint --fix ."
   },
   "dependencies": {

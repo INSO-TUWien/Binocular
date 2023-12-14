@@ -160,7 +160,7 @@ export function setupConfig() {
             console.log('Config saved successfully!');
           }
         });
-      }
+      },
     );
 }
 
@@ -170,7 +170,7 @@ export function setupDb() {
       chalk.underline('ArangoDB') +
       ' running (Tested with ArangoDB 3.11). It is recommended to use the ' +
       chalk.underline('Docker Image') +
-      ' provided by ArangoDB.\n'
+      ' provided by ArangoDB.\n',
   );
   inquirer
     .prompt([

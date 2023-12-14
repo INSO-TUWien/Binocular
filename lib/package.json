@@ -1,5 +1,5 @@
 {
-  "name": "binocular",
+  "name": "binocular-backend",
   "version": "v2.0.0",
   "description": "Time-based visualizations of combined software engineering data",
   "main": "binocular.ts",
@@ -12,43 +12,10 @@
     "coverage-server": "nyc mocha --config=.mocharc.json --exit ../test/backend",
     "coverage-ui": "jest --config jest-coverage.config.js",
     "collect-coverage": "../scripts/collect-coverage.js",
-    "check": "npm run eslint",
-    "dev": "binocular run",
-    "dev-server": "tsx watch binocular.ts run --no-frontend",
+    "check": "eslint .",
+    "dev": "tsx watch binocular.ts run ../ --no-frontend",
     "dockerize": "whalify generate-installer && ./node_modules/.bin/whalify build",
     "fix": "eslint --fix ."
-  },
-  "keywords": [
-    "git"
-  ],
-  "contributors": [
-    {
-      "name": "Roman Decker",
-      "email": "roman.decker@gmail.com"
-    },
-    {
-      "name": "Johann Grabner"
-    },
-    {
-      "name": "Julian Kotrba"
-    },
-    {
-      "name": "Alexander Nemetz-Fiedler"
-    },
-    {
-      "name": "Michael Thurner"
-    },
-    {
-      "name": "Maximilian Zenz"
-    },
-    {
-      "name": "Raphael Lackner"
-    }
-  ],
-  "license": "MIT",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/INSO-TUWien/Binocular.git"
   },
   "bin": {
     "binocular": "index.js"
@@ -182,9 +149,6 @@
     "url-loader": "4.1.1"
   },
   "overrides": {
-    "pouchdb-adapter-memory": {
-      "memdown": "^6.1.1"
-    },
     "lokka-transport-http": {
       "babel-runtime": {
         "core-js": "^3.23.3"

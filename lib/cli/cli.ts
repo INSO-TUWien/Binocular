@@ -2,14 +2,12 @@ import chalk from 'chalk';
 import figlet from 'figlet';
 import { Argument, Command, Option } from 'commander';
 import path from 'path';
-import { fileURLToPath } from 'url';
 import * as setup from './setup.js';
 
 import package_json from '../package.json';
 
 const cli = new Command();
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+
 function parse(
   run: (
     targetPath: string,
@@ -22,9 +20,9 @@ function parse(
       ci: boolean;
       export: boolean;
       server: boolean;
-    }
+    },
   ) => void,
-  build: (options: { runIndexer: boolean; buildMode: string }) => void
+  build: (options: { runIndexer: boolean; buildMode: string }) => void,
 ) {
   console.log(chalk.green(figlet.textSync('Binocular')));
 
@@ -40,7 +38,7 @@ function parse(
         ' When run, Binocular will gather data from the repository ' +
         'and the GitHub or GitLab API and persist it to a configured ArangoDB instance.\n' +
         '\n' +
-        'Binocular then hosts interactive visualizations about the gathered data via a web-interface.'
+        'Binocular then hosts interactive visualizations about the gathered data via a web-interface.',
     );
 
   cli
@@ -63,7 +61,7 @@ function parse(
     .addOption(new Option('--no-export', 'disable the default db export').default(true))
     .addOption(new Option('--no-server', 'disable the backed webserver (when used binocular quits after indexing)').default(true))
     .action((targetPath, options) => {
-      run(path.resolve(targetPath ? targetPath : '../'), options);
+      run(path.resolve(targetPath ? targetPath : '.'), options);
     });
 
   cli

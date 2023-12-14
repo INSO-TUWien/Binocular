@@ -1,4 +1,4 @@
-@import '~bulma/bulma.sass';;
+@import 'bulma/bulma.sass';;
 $commit-stroke: $green;
 $commit-fill-hover: lighten( $commit-stroke, 30% ); 
 $commit-fill: transparentize($commit-fill-hover, 0.75);

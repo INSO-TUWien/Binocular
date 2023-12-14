@@ -6,7 +6,6 @@ import React from 'react';
 export default class ProgressBar extends React.PureComponent {
   constructor(props) {
     super(props);
-    console.log(props)
     this.state = {
       commits: props.progress.commits,
       issues: props.progress.issues,

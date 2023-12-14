@@ -1,0 +1,55 @@
+{
+  "name": "binocular",
+  "version": "2.0.0",
+  "description": "",
+  "scripts": {
+    "postinstall": "npm run install:backend && npm run install:frontend",
+    "install:backend": "cd lib && npm install",
+    "install:frontend": "cd ui && npm install",
+    "dev": "npm run dev:backend & npm run dev:frontend",
+    "dev:concurrently": "concurrently --kill-others -P 'npm run dev:frontend' 'npm run dev:backend' --",
+    "dev:backend": "cd lib && npm run dev",
+    "dev:frontend": "cd ui && npm run dev",
+    "dev:frontend-debug": "cd ui && npm run dev:debug",
+    "check": "npm run check:backend && npm run check:frontend",
+    "check:backend": "cd lib && npm run check",
+    "check:frontend": "cd ui && npm run check",
+    "fix": "npm run fix:backend && npm run fix:frontend",
+    "fix:backend": "cd lib && npm run fix",
+    "fix:frontend": "cd ui && npm run fix"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/INSO-TUWien/Binocular.git"
+  },
+  "bin": {
+    "binocular": "/lib/index.js"
+  },
+  "contributors": [
+    {
+      "name": "Roman Decker",
+      "email": "roman.decker@gmail.com"
+    },
+    {
+      "name": "Johann Grabner"
+    },
+    {
+      "name": "Julian Kotrba"
+    },
+    {
+      "name": "Alexander Nemetz-Fiedler"
+    },
+    {
+      "name": "Michael Thurner"
+    },
+    {
+      "name": "Maximilian Zenz"
+    },
+    {
+      "name": "Raphael Lackner"
+    }
+  ],
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}

@@ -1,6 +1,5 @@
 'use strict';
 
-import _ from 'lodash';
 import archiver from 'archiver';
 import stream from 'stream';
 import Db from '../core/db/db';

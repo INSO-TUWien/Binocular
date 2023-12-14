@@ -9,7 +9,7 @@ function Paginator(
   getPage: (page: number, perPage: number) => Promise<any>,
   getItems: (resp: any) => any,
   getCount: (resp: any) => number,
-  options: any
+  options: any,
 ) {
   options = _.defaults({}, options, { defaultPageSize: 100 });
   this.handlers = {
@@ -136,7 +136,7 @@ Paginator.prototype.each = function (fn: any) {
     this.execute().then((resp: any) => {
       this.off('item', fn);
       resolve(resp);
-    })
+    }),
   );
 };
 
