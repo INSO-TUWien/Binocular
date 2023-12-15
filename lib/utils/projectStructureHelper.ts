@@ -15,17 +15,17 @@ log_timestamp(() => '[' + Moment().format('DD-MM-YYYY, HH:mm:ss') + ']');
 export function checkProjectStructureAndFix(context: typeof Context) {
   //check if db_export folder exists
 
-  if (context.argv.export && !fs.existsSync(__dirname + '/../ui/db_export')) {
+  if (context.argv.export && !fs.existsSync(__dirname + '/../../ui/db_export')) {
     this.createAndFillDbExportFolder(context);
   }
 }
 
 export function createAndFillDbExportFolder(context: typeof Context) {
-  fs.mkdirSync(__dirname + '/../ui/db_export');
+  fs.mkdirSync(__dirname + '/../../ui/db_export');
   utils.getDbExport(context.db).then((db) => {
     let i = 0;
     for (const collection of Object.keys(db)) {
-      fs.writeFileSync(__dirname + '/../ui/db_export/' + collection.replaceAll('_', '-') + '.json', JSON.stringify(db[collection]));
+      fs.writeFileSync(__dirname + '/../../ui/db_export/' + collection.replaceAll('_', '-') + '.json', JSON.stringify(db[collection]));
       i++;
       console.log('Create Db export for offline execution: ' + Math.floor((100 / Object.keys(db).length) * i) + '%');
     }
@@ -40,10 +40,10 @@ export function writeContextToFrontend(context: typeof Context) {
   }
 
   getData(context).then((data) => {
-    fs.writeFileSync(__dirname + '/../ui/config/context.json', JSON.stringify(data));
+    fs.writeFileSync(__dirname + '/../../ui/config/context.json', JSON.stringify(data));
   });
 }
 
 export function deleteDbExport() {
-  fs.rmSync(__dirname + '/../ui/db_export', { recursive: true, force: true });
+  fs.rmSync(__dirname + '/../../ui/db_export', { recursive: true, force: true });
 }

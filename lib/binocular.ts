@@ -574,7 +574,7 @@ function runBackend() {
       })
       .then(() => {
         return Promise.all([
-          context.db.ensureService(path.join(__dirname, 'foxx'), '/binocular-ql'),
+          context.db.ensureService(path.join(__dirname, '../foxx'), '/binocular-ql'),
           Commit.ensureCollection(),
           File.ensureCollection(),
           Hunk.ensureCollection(),
