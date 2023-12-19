@@ -10,8 +10,17 @@ import Files from './serverDB/files';
 import Branches from './serverDB/branches';
 import Modules from './serverDB/modules';
 import Stakeholders from './serverDB/stakeholders';
+import { IDatabase } from './database';
 
-export default class ServerDB {
+export default class ServerDB implements IDatabase {
+  initDB() {
+    throw new Error('Method not implemented.');
+  }
+
+  static async initDB(){
+    return false;
+  }
+
   static getBounds() {
     return Bounds.getBounds();
   }

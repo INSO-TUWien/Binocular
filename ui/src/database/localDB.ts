@@ -1,5 +1,3 @@
-'use strict';
-
 import PouchDB from 'pouchdb-browser';
 import PouchDBFind from 'pouchdb-find';
 import PouchDBAdapterMemory from 'pouchdb-adapter-memory';
@@ -39,6 +37,7 @@ import modules from '../../db_export/modules.json';
 import stakeholders from '../../db_export/stakeholders.json';
 import mergeRequests from '../../db_export/mergeRequests.json';
 import milestones from '../../db_export/milestones.json';
+import { IDatabase } from './database';
 
 const collections = { branches, builds, commits, files, issues, modules, stakeholders, mergeRequests, milestones };
 
@@ -71,7 +70,7 @@ function importCollection(name) {
     delete item._rev;
     delete item._key;
 
-    db.put(item);
+    db.put(item, {force: true});
   });
 }
 
@@ -86,7 +85,7 @@ function importRelation(name) {
     delete item._to;
 
     item.relation = name;
-    tripleStore.put(item);
+    tripleStore.put(item), {force: true};
   });
 }
 
@@ -104,7 +103,11 @@ function importData() {
   });
 }
 
-export default class LocalDB {
+export default class LocalDB implements IDatabase {
+  initDB() {
+    importData();
+  }
+
   static initDB() {
     importData();
   }

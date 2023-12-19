@@ -13,7 +13,7 @@ const mapDispatchToProps = (dispatch /*, ownProps*/) => {
   return {};
 };
 
-const DashboardConfigComponent = (props) => {
+const DashboardConfigComponent: React.FC<any> = (props) => {
   return <div className={styles.configContainer}></div>;
 };
 
