@@ -44,13 +44,13 @@ class Jira {
 
   getMergeRequest(issueId: string) {
     log('getMergeRequests(%o)', issueId);
-    return this.request('dev-status/latest/issue/summary?issueId=' + issueId).then((developmentInformation) => {
+    return this.request('dev-status/latest/issue/summary?issueId=' + issueId).then(async (developmentInformation) => {
       const pullrequests = developmentInformation.pullrequest;
       if (pullrequests.overall.count !== 0) {
-        const mergeRequests: any[] = [];
+        let mergeRequests: any[] = [];
         for (const [key, value] of Object.entries(pullrequests.byInstanceType)) {
-          this.getDevelopmentInformation(issueId + '&dataType=pullrequest&applicationType=' + key).then((response) => {
-            mergeRequests.push(response);
+          await this.getDevelopmentInformation(issueId + '&dataType=pullrequest&applicationType=' + key).then((response) => {
+            mergeRequests = mergeRequests.concat(response[0].pullRequests);
           });
         }
 

@@ -53,20 +53,39 @@ class JiraITSIndexer {
           if (that.stopping) {
             return false;
           }
-
           return this.jira.getMergeRequest(issue.id).then((mergeRequests: any) => {
             if (mergeRequests) {
               mergeRequests.forEach((mergeRequest: any) => {
-                const toPerist = {
+                const toPersist = {
                   id: mergeRequest.id,
-                  project_id: issue.projectId,
-                  state: mergeRequest.status,
-                  target_branch: mergeRequest.destination.branch,
-                  source_branch: mergeRequest.source.branch,
+                  iid: issue.key,
+                  title: mergeRequest.name,
+                  description: issue.fields.description?.content[0][0]?.text,
+                  state: issue.fields.status.statusCategory.key,
+                  url: issue.self,
+                  closedAt: issue.fields.resolutiondate,
+                  createdAt: issue.fields.createdAt,
+                  updatedAt: mergeRequest.lastUpdate,
+                  upvotes: issue.fields?.votes.votes,
+                  weight: issue.fields?.customfield_10016, //this field is used for the storypoints,
+                  watches: issue.fields.watches.watchCount,
+                  labels: issue.fields.labels,
+                  milestone: issue.milestone,
+                  author: issue.fields.creator.displayName,
+                  assignee: issue.fields?.assignee?.displayName, // there can't be multiple assinges
+                  assignees: issue.assignees,
+                  webUrl: mergeRequest.url,
                 };
-                MergeRequest.findOneById(mergeRequests.id).then((persistedMergerequest: any) => {
-                  if (!persistedMergerequest) {
-                    MergeRequest.persist(toPerist);
+                MergeRequest.findOneById(mergeRequests.id).then((persistedMergeRequest: any) => {
+                  if (!persistedMergeRequest || !_.isEqual(toPersist, persistedMergeRequest)) {
+                    if (!persistedMergeRequest) {
+                      log('Persisting new Mergerequest');
+                      return MergeRequest.persist(toPersist);
+                    } else {
+                      log('Mergerequest already exists, only updating values');
+                      _.assign(persistedMergeRequest, toPersist);
+                      return persistedMergeRequest.save({ ignoreUnknownAttributes: true });
+                    }
                   }
                 });
               });
@@ -74,8 +93,6 @@ class JiraITSIndexer {
               // log('Issue with key %o has no pull request information', );
             }
 
-            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-            // @ts-ignore
             return Issue.findOneById(issue.id)
               .then((persistedIssue: any) => {
                 if (!persistedIssue || new Date(persistedIssue.updatedAt).getTime() < new Date(issue.fields.updated).getTime()) {
@@ -142,10 +159,11 @@ class JiraITSIndexer {
               state: projectVersion.released ? 'released' : 'unreleased',
             };
             if (!persistedVersion || !_.isEqual(persistedVersion, versionToPersist)) {
-              log('Version has been changed or is not available');
               if (!persistedVersion) {
+                log('Persisting new Version');
                 Milestone.persist(versionToPersist);
               } else {
+                log('Version already exists, only updating values');
                 _.assign(persistedVersion, versionToPersist);
                 return persistedVersion.save({ ignoreUnknownAttributes: true });
               }
@@ -153,12 +171,12 @@ class JiraITSIndexer {
           })
           .then(() => log('indexing of project versions finished'));
       }),
-    ]).then((resp) => resp);
+    ]).then(() => log('Persisted %d new issues (%d already present)', persistCount, omitCount));
   }
 
   processComments(issue: any) {
     // to get comments also use api calls since they have pagination as well
-    log('processComments(%o)', issue);
+    // log('processComments(%o)', issue);
     const issueKey = issue.key;
     const mentioned: string[] = [];
     issue = issue.fields;
