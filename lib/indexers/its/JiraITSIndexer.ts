@@ -10,7 +10,7 @@ import Milestone from '../../models/Milestone';
 import MergeRequest from '../../models/MergeRequest';
 import Issue from '../../models/Issue';
 
-const log = debug('paginator');
+const log = debug('idx:its:jira');
 
 class JiraITSIndexer {
   private repo: string;
@@ -27,6 +27,7 @@ class JiraITSIndexer {
   }
 
   configure(config: any) {
+    log('configure(%o)', config);
     if (!config) {
       throw new ConfigurationError('Config is not set');
     }
@@ -37,11 +38,11 @@ class JiraITSIndexer {
       requestTimeout: 40000,
     };
     this.jiraProject = config.project;
-
     this.jira = new Jira(options);
   }
 
   index() {
+    log('index()');
     let omitCount = 0;
     let persistCount = 0;
     const that = this;
@@ -54,8 +55,6 @@ class JiraITSIndexer {
           }
 
           return this.jira.getMergeRequest(issue.id).then((mergeRequests: any) => {
-            console.log('inside then');
-
             if (mergeRequests) {
               mergeRequests.forEach((mergeRequest: any) => {
                 const toPerist = {
@@ -72,7 +71,7 @@ class JiraITSIndexer {
                 });
               });
             } else {
-              log('Issue with key  has no pullrequest information');
+              // log('Issue with key %o has no pull request information', );
             }
 
             // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -143,7 +142,7 @@ class JiraITSIndexer {
               state: projectVersion.released ? 'released' : 'unreleased',
             };
             if (!persistedVersion || !_.isEqual(persistedVersion, versionToPersist)) {
-              console.log('Version has been changed or is not available');
+              log('Version has been changed or is not available');
               if (!persistedVersion) {
                 Milestone.persist(versionToPersist);
               } else {
@@ -152,14 +151,14 @@ class JiraITSIndexer {
               }
             }
           })
-          .then(() => console.log('finsihed projectversion'));
+          .then(() => log('indexing of project versions finished'));
       }),
     ]).then((resp) => resp);
   }
 
   processComments(issue: any) {
     // to get comments also use api calls since they have pagination as well
-    console.log('in processComments' + issue);
+    log('processComments(%o)', issue);
     const issueKey = issue.key;
     const mentioned: string[] = [];
     issue = issue.fields;
@@ -199,10 +198,12 @@ class JiraITSIndexer {
   }
 
   stop() {
+    log('stop()');
     this.stopping = true;
   }
 
   isStopping() {
+    log('isStopping()');
     return this.stopping;
   }
 }

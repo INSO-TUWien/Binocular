@@ -45,11 +45,8 @@ class Jira {
   getMergeRequest(issueId: string) {
     log('getMergeRequests(%o)', issueId);
     return this.request('dev-status/latest/issue/summary?issueId=' + issueId).then((developmentInformation) => {
-      console.log('inside working');
       const pullrequests = developmentInformation.pullrequest;
       if (pullrequests.overall.count !== 0) {
-        console.log('has some pullrqeuest');
-
         const mergeRequests: any[] = [];
         for (const [key, value] of Object.entries(pullrequests.byInstanceType)) {
           this.getDevelopmentInformation(issueId + '&dataType=pullrequest&applicationType=' + key).then((response) => {
@@ -70,6 +67,7 @@ class Jira {
   }
 
   paginatedRequest(path: string) {
+    log('paginatedRequest(%o)', path);
     return new (Paginator as any)(
       (start_at: number, per_request: number) => {
         // needs to be changed since in Jira pagination uses startAt index and not page
@@ -97,6 +95,7 @@ class Jira {
   }
 
   async request(path: string) {
+    log('request(%o)', path);
     const credentials = this.usermail + ':' + this.privateToken;
     const header = {
       method: 'GET',
