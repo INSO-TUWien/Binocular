@@ -147,16 +147,16 @@ class JiraITSIndexer {
         projectVersion.id = projectVersion.id.toString();
         return Milestone.findOneById(projectVersion.id)
           .then((persistedVersion: any) => {
-            const expired = new Date(projectVersion.releaseDate).getTime() > new Date().getTime();
             const versionToPersist = {
-              id: projectVersion.id,
+              id: projectVersion.id, // problem is here that when using multiple projects, the versions could have the same ID,
+              // but being in a different project
               iid: projectVersion.projectId,
-              description: projectVersion.description,
-              startDate: projectVersion.startDate,
-              dueDate: projectVersion?.releaseDate,
               title: projectVersion.name,
-              expired: expired,
+              description: projectVersion.description,
+              dueDate: projectVersion.releaseDate,
+              startDate: projectVersion.startDate,
               state: projectVersion.released ? 'released' : 'unreleased',
+              expired: projectVersion.overdue,
             };
             if (!persistedVersion || !_.isEqual(persistedVersion, versionToPersist)) {
               if (!persistedVersion) {
