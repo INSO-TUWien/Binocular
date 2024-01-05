@@ -56,24 +56,25 @@ class JiraITSIndexer {
           return this.jira.getMergeRequest(issue.id).then((mergeRequests: any) => {
             if (mergeRequests) {
               mergeRequests.forEach((mergeRequest: any) => {
+                mergeRequest.id = mergeRequest.id.substring(1);
                 const toPersist = {
                   id: mergeRequest.id,
                   iid: issue.key,
                   title: mergeRequest.name,
                   description: issue.fields.description?.content[0][0]?.text,
-                  state: issue.fields.status.statusCategory.key,
+                  state: mergeRequest.status,
                   url: issue.self,
                   closedAt: issue.fields.resolutiondate,
                   createdAt: issue.fields.createdAt,
                   updatedAt: mergeRequest.lastUpdate,
-                  upvotes: issue.fields?.votes.votes,
+                  upvotes: issue.fields?.votes.votes, // this are the fields from the issue
                   weight: issue.fields?.customfield_10016, //this field is used for the storypoints,
                   watches: issue.fields.watches.watchCount,
                   labels: issue.fields.labels,
                   milestone: issue.milestone,
-                  author: issue.fields.creator.displayName,
+                  author: issue.fields.creator.displayName, // mergeRequest.author.name but it always displays name: User
                   assignee: issue.fields?.assignee?.displayName, // there can't be multiple assinges
-                  assignees: issue.assignees,
+                  assignees: mergeRequest.reviewers,
                   webUrl: mergeRequest.url,
                 };
                 MergeRequest.findOneById(mergeRequests.id).then((persistedMergeRequest: any) => {
@@ -98,29 +99,32 @@ class JiraITSIndexer {
                 if (!persistedIssue || new Date(persistedIssue.updatedAt).getTime() < new Date(issue.fields.updated).getTime()) {
                   // const mentioned = that.processComments(issue.fields);
 
-                  return that
-                    .processComments(issue)
+                  return this.processComments(issue)
                     .then((mentions: any) => {
+                      const description = this.populateDescription(issue.fields.description.content);
                       const issueToSave = {
                         id: issue.id,
                         iid: issue.key,
                         title: issue.fields.summary,
-                        description: issue.fields.description?.content[0][0]?.text,
+                        description: description,
                         state: issue.fields.status.statusCategory.key,
                         url: issue.self,
                         closedAt: issue.fields.resolutiondate,
-                        mentions: mentions,
                         createdAt: issue.fields.createdAt,
                         updatedAt: issue.fields.updated,
-                        upvotes: issue.fields?.votes.votes,
-                        weight: issue.fields?.customfield_10016, //this field is used for the storypoints,
-                        watches: issue.fields.watches.watchCount,
                         labels: issue.fields.labels,
-                        milestone: issue.milestone,
+                        milestone: issue.fixVersions,
                         author: issue.fields.creator.displayName,
                         assignee: issue.fields?.assignee?.displayName, // there can't be multiple assinges
-                        assignees: issue.assignees,
+                        //assignees: issue.assignees, not available in Jira
+                        upvotes: issue.fields?.votes.votes,
+                        dueDate: issue.fields?.dueDate,
+                        // confidential: issue.security-level for this normal Jira software is needed, free version does not have that
+                        weight: issue.fields?.customfield_10016, //this field is used for the storypoints, could be problematic, if having for example this in custom fields
                         webUrl: issue.self.split('/rest/api')[0] + '/browse/' + issue.key,
+                        subscribed: issue.fields.watches.watchCount,
+                        mentions: mentions,
+                        // notes: not found
                       };
                       if (!persistedIssue) {
                         log('Persisting new issue');
@@ -172,6 +176,27 @@ class JiraITSIndexer {
           .then(() => log('indexing of project versions finished'));
       }),
     ]).then(() => log('Persisted %d new issues (%d already present)', persistCount, omitCount));
+  }
+
+  populateDescription(content: any) {
+    if (content === 0) {
+      return null;
+    }
+
+    let descriptionAsString = '';
+
+    content.forEach((line: any) => {
+      if (line.type === 'paragraph') {
+        line.content.forEach((actualContent: any) => {
+          if (actualContent.type === 'text') {
+            descriptionAsString += actualContent.text;
+          }
+        });
+        descriptionAsString += '\n';
+      }
+    });
+
+    return descriptionAsString;
   }
 
   processComments(issue: any) {
