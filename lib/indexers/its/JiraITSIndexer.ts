@@ -57,11 +57,12 @@ class JiraITSIndexer {
             if (mergeRequests) {
               mergeRequests.forEach((mergeRequest: any) => {
                 mergeRequest.id = mergeRequest.id.substring(1);
+                const description = this.populateDescription(issue.fields.description.content);
                 const toPersist = {
                   id: mergeRequest.id,
                   iid: issue.key,
                   title: mergeRequest.name,
-                  description: issue.fields.description?.content[0][0]?.text,
+                  description: description,
                   state: mergeRequest.status,
                   url: issue.self,
                   closedAt: issue.fields.resolutiondate,
@@ -160,7 +161,7 @@ class JiraITSIndexer {
               dueDate: projectVersion.releaseDate,
               startDate: projectVersion.startDate,
               state: projectVersion.released ? 'released' : 'unreleased',
-              expired: projectVersion.overdue,
+              expired: !projectVersion.overdue ? false : projectVersion.overdue, // could maybe not be true, but api does not return overdue if it is released
             };
             if (!persistedVersion || !_.isEqual(persistedVersion, versionToPersist)) {
               if (!persistedVersion) {
