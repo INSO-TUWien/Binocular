@@ -1,6 +1,6 @@
 'use strict';
 
-import { isPrime, nextPrime } from '../../ui/src/utils/math';
+import { isPrime, nextPrime } from '../src/utils/math';
 
 describe('isPrime', function () {
   it('should return true or false depending on if n is a prime number', function () {

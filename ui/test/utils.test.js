@@ -1,6 +1,6 @@
 'use strict';
 
-import { endpointUrl, getChartColors, shortenPath } from '../../ui/src/utils';
+import { endpointUrl, getChartColors, shortenPath } from '../src/utils';
 
 describe('endpointUrl', function () {
   it('should generate an endpointUrl with a provided suffix', function () {

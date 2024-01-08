@@ -16,7 +16,14 @@
     "check:frontend": "cd ui && npm run check",
     "fix": "npm run fix:backend && npm run fix:frontend",
     "fix:backend": "cd lib && npm run fix",
-    "fix:frontend": "cd ui && npm run fix"
+    "fix:frontend": "cd ui && npm run fix",
+    "test": "npm run test:backend && npm run test:frontend",
+    "test:backend": "cd lib && npm run test",
+    "test:frontend": "cd ui && npm run test",
+    "coverage": "npm run coverage:backend && npm run coverage:frontend && npm run collect-coverage",
+    "coverage:backend": "cd lib && npm run coverage",
+    "coverage:frontend": "cd ui && npm run coverage",
+    "collect-coverage": "./scripts/collect-coverage.js"
   },
   "repository": {
     "type": "git",

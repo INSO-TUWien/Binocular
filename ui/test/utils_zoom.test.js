@@ -1,6 +1,6 @@
 'use strict';
 
-import { initialDimensions, onResizeFactoryForFunctional } from '../../ui/src/utils/zoom';
+import { initialDimensions, onResizeFactoryForFunctional } from '../src/utils/zoom';
 
 describe('initialDimensions', function () {
   it('should initialize the Dimensions of the Zoom Factory', function () {

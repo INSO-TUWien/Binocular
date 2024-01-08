@@ -1,14 +1,13 @@
 export default {
   roots: ['<rootDir>'],
+  preset: 'ts-jest',
+  testEnvironment: 'jest-environment-jsdom',
   transform: {
-    '^.+\\.js$': 'babel-jest',
+    '^.+\\.(ts|tsx)?$': 'ts-jest',
+    '^.+\\.(js|jsx)$': 'babel-jest',
   },
-  testMatch: ['<rootDir>/test/frontend/**'],
+  testMatch: ['<rootDir>/test/**'],
   modulePaths: ['<rootDir>'],
-  testEnvironment: 'jsdom',
   transformIgnorePatterns: ['node_modules/(?!d3|d3-array|internmap|delaunator|robust-predicates)'],
   moduleDirectories: ['node_modules'],
-  moduleFileExtensions: ['js', 'jsx', 'json'],
-  collectCoverage: true,
-  coverageDirectory: '<rootDir>/coverage/ui',
 };
