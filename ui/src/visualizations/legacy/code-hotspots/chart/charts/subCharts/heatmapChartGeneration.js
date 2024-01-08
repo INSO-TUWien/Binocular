@@ -97,7 +97,7 @@ export default class heatmapChartGeneration {
     setTimeout(
       function () {
         this.updateHeatmap(data, lines, importantColumns, currThis, mode, maxValue, legendSteps, firstLineNumber, displayProps);
-      }.bind(this)
+      }.bind(this),
     );
   }
 
@@ -330,7 +330,7 @@ export default class heatmapChartGeneration {
                   d.date
                     .substring(0, d.date.length - 5)
                     .split('T')
-                    .join(' ')
+                    .join(' '),
                 );
               subToolTip.append('hr');
               subToolTip.append('div').html(d.message);

@@ -32,5 +32,5 @@ export default handleActions(
     path: '',
     files: [],
     branches: [],
-  }
+  },
 );

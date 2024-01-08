@@ -36,7 +36,7 @@ export default class Builds {
               }
             }
           }`,
-          { page, perPage, since, until }
+          { page, perPage, since, until },
         )
         .then((resp) => resp.builds);
     };

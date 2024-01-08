@@ -8,8 +8,6 @@ parserOptions:
     experimentalObjectRestSpread: true
     jsx: true
   sourceType: module
-plugins:
-  - react
 rules:
   no-console: off
   indent:
@@ -24,4 +22,3 @@ rules:
   semi:
     - error
     - always
-  react/jsx-uses-vars: 1

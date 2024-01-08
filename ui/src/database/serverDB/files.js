@@ -12,7 +12,7 @@ export default class Files {
         }
       }
       `,
-      {}
+      {},
     );
   }
 
@@ -32,7 +32,7 @@ export default class Files {
         }
       }
       `,
-        {}
+        {},
       )
       .then((result) => result.branch.files.data.map((entry) => entry.file.path).sort());
   }
@@ -60,12 +60,12 @@ export default class Files {
         }
       }
       `,
-        {}
+        {},
       )
       .then((result) =>
         result.branch.files.data.map((entry) => {
           return { path: entry.file.path, previousFileNames: entry.file.oldFileNames.data };
-        })
+        }),
       );
   }
 
@@ -88,7 +88,7 @@ export default class Files {
           }
          }
        }`,
-        {}
+        {},
       )
       .then((resp) => resp.commits.data)
       .then((commits) => commits.filter((c) => hashes.includes(c.sha)))
@@ -133,7 +133,7 @@ export default class Files {
             }
           }
        }`,
-        {}
+        {},
       )
       .then((resp) =>
         resp.files.data.map((d) => {
@@ -141,7 +141,7 @@ export default class Files {
             path: d.path,
             ownership: d.commits.data,
           };
-        })
+        }),
       );
   }
 }

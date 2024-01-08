@@ -16,5 +16,5 @@ export default handleActions(
   {
     data: {},
     isFetching: null,
-  }
+  },
 );

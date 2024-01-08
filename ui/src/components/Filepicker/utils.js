@@ -21,13 +21,13 @@ export function extractFileOwnership(ownershipData) {
 export function ownershipDataForMergedAuthors(mergedAuthors, otherAuthors, authorColors, ownershipForFiles, files) {
   if (!mergedAuthors || !otherAuthors || !authorColors || !ownershipForFiles || !files) return null;
 
-  let result = {};
+  const result = {};
 
   for (const [filename, ownership] of Object.entries(ownershipForFiles)) {
     //we are only interested in ownership data of files that actually exist on this branch at the moment
     if (!files.includes(filename)) continue;
 
-    let mergedOwnership = {};
+    const mergedOwnership = {};
 
     //for every stakeholder that ownes lines of this file
     for (const stakeholder of ownership) {

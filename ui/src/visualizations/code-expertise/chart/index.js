@@ -150,7 +150,7 @@ export default () => {
             return sum + tempsum;
           }
         },
-        0
+        0,
       );
     }
 
@@ -177,10 +177,10 @@ export default () => {
     if (!data) return;
 
     //first find out which authors are relevant using the universal data
-    let authors = selectedAuthors.map((a) => (a === 'others' ? 'other' : a));
+    const authors = selectedAuthors.map((a) => (a === 'others' ? 'other' : a));
 
     //only consider dev data of selected authors
-    let relevantDevData = {};
+    const relevantDevData = {};
 
     //for every author from the universal settings
     for (const author of mergedAuthors) {
@@ -201,7 +201,7 @@ export default () => {
             relevantDevData[author.mainCommitter].additions += data.devData[alias].additions;
             relevantDevData[author.mainCommitter].linesOwned += data.devData[alias].linesOwned;
             relevantDevData[author.mainCommitter].commits = _.uniq(
-              relevantDevData[author.mainCommitter].commits.concat(data.devData[alias].commits)
+              relevantDevData[author.mainCommitter].commits.concat(data.devData[alias].commits),
             );
           }
         }
@@ -212,7 +212,7 @@ export default () => {
     if (authors.includes('other')) {
       //get other authors
       const signatures = otherAuthors.map((a) => a.signature);
-      let otherResult = { linesOwned: 0, additions: 0, commits: [] };
+      const otherResult = { linesOwned: 0, additions: 0, commits: [] };
       Object.entries(data.devData).map((item, index) => {
         const name = item[0];
         const data = item[1];

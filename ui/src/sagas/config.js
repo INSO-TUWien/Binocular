@@ -19,7 +19,7 @@ export const fetchConfig = fetchFactory(
     return fetch(endpointUrl('config')).then((resp) => resp.json());
   },
   requestConfig,
-  receiveConfig
+  receiveConfig,
 );
 
 export const fetchConfigOffline = fetchFactory(
@@ -27,7 +27,7 @@ export const fetchConfigOffline = fetchFactory(
     return {};
   },
   requestConfig,
-  receiveConfig
+  receiveConfig,
 );
 
 export const postConfig = fetchFactory(
@@ -41,7 +41,7 @@ export const postConfig = fetchFactory(
     }).then((resp) => resp.json());
   },
   requestConfig,
-  receiveConfig
+  receiveConfig,
 );
 
 export function* watchConfig() {

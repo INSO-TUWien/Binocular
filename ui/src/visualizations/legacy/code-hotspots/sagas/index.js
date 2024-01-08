@@ -40,5 +40,5 @@ export const fetchFileUrl = fetchFactory(
   },
   requestCodeHotspotsData,
   receiveCodeHotspotsData,
-  receiveCodeHotspotsDataError
+  receiveCodeHotspotsDataError,
 );

@@ -2,7 +2,7 @@
 
 import ChartComponent from './dashboard';
 import ConfigComponent from './config';
-import HelpComponent from './help'
+import HelpComponent from './help';
 import saga from './sagas';
 import reducer from './reducers';
 

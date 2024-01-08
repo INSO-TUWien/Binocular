@@ -116,7 +116,7 @@ export default class rowChartGeneration {
     setTimeout(
       function () {
         this.updateRowSummary(data, lines, currThis, mode, legendSteps, firstLineNumber, displayProps);
-      }.bind(this)
+      }.bind(this),
     );
   }
 
@@ -180,7 +180,7 @@ export default class rowChartGeneration {
                   d.value +
                   '</div>' +
                   '<hr>' +
-                  ListGeneration.generateDeveloperList(d.developer)
+                  ListGeneration.generateDeveloperList(d.developer),
               )
               .style('right', 30 + 'px')
               .style('top', (d.row - firstLineNumber + 1) * barHeight + 'px');
@@ -212,7 +212,7 @@ export default class rowChartGeneration {
                   '<div>Changes: ' +
                   d.value +
                   '</div>' +
-                  (d.issues.length > 0 ? '<hr>' + ListGeneration.generateIssueList(d.issues) : '')
+                  (d.issues.length > 0 ? '<hr>' + ListGeneration.generateIssueList(d.issues) : ''),
               )
               .style('right', 30 + 'px')
               .style('top', (d.row - firstLineNumber + 1) * barHeight + 'px');

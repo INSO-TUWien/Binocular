@@ -201,7 +201,7 @@ export default class SearchTextHighlighting {
                 highlight.modifier +
                 '</span> ' +
                 searchTermChunks[i] +
-                '</span>'
+                '</span>',
             );
           }
         }

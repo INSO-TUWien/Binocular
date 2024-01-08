@@ -43,7 +43,7 @@ export default class searchBar extends React.PureComponent {
                 break;
               case 'developerSearch':
                 e.target.parentElement.children[0].innerHTML = SearchTextHighlighting.performDeveloperSearchTextHighlighting(
-                  e.target.value
+                  e.target.value,
                 );
                 onSearchChanged(SearchAlgorithm.performDeveloperSearch(data, e.target.value));
                 break;

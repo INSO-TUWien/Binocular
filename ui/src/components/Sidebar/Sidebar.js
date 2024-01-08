@@ -63,7 +63,7 @@ export default class Sidebar extends React.Component {
                 <div
                   className={cx(
                     styles.visualizationSelector,
-                    this.state.visualizationSelectorActive ? styles.visualizationSelectorExtended : ''
+                    this.state.visualizationSelectorActive ? styles.visualizationSelectorExtended : '',
                   )}>
                   <div
                     className={styles.visualizationSelectorCurrentVisualization}
@@ -98,7 +98,7 @@ export default class Sidebar extends React.Component {
                               (vis) =>
                                 this.state.search === '' ||
                                 vis.id.toLowerCase().includes(this.state.search.toLowerCase()) ||
-                                vis.label.toLowerCase().includes(this.state.search.toLowerCase())
+                                vis.label.toLowerCase().includes(this.state.search.toLowerCase()),
                             )[selectedViz];
                             if (firstViz !== undefined) {
                               this.props.switchVisualization(firstViz.id);
@@ -115,7 +115,7 @@ export default class Sidebar extends React.Component {
                               (vis) =>
                                 this.state.search === '' ||
                                 vis.id.toLowerCase().includes(this.state.search.toLowerCase()) ||
-                                vis.label.toLowerCase().includes(this.state.search.toLowerCase())
+                                vis.label.toLowerCase().includes(this.state.search.toLowerCase()),
                             ).length;
                             if (selectedViz < vizCount - 1) {
                               selectedViz++;

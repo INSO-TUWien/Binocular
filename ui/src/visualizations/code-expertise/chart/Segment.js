@@ -270,7 +270,7 @@ function Segment({ rad, startPercent, endPercent, devName, devData, devColor, ma
     const additionsArcOuterRadius = radius * 0.7 + additionsArcWeight;
 
     setAdditionsArc(
-      d3.arc().innerRadius(additionsArcInnerRadius).outerRadius(additionsArcOuterRadius).startAngle(arcStartAngle).endAngle(arcEndAngle)
+      d3.arc().innerRadius(additionsArcInnerRadius).outerRadius(additionsArcOuterRadius).startAngle(arcStartAngle).endAngle(arcEndAngle),
     );
 
     let ownershipEndAngle;
@@ -293,7 +293,7 @@ function Segment({ rad, startPercent, endPercent, devName, devData, devColor, ma
         .innerRadius(additionsArcInnerRadius)
         .outerRadius(additionsArcOuterRadius)
         .startAngle(arcStartAngle)
-        .endAngle(ownershipEndAngle)
+        .endAngle(ownershipEndAngle),
     );
 
     const additionsTextArcRadius = additionsArcInnerRadius + additionsArcWeight;
@@ -304,7 +304,7 @@ function Segment({ rad, startPercent, endPercent, devName, devData, devColor, ma
         .innerRadius(additionsTextArcRadius)
         .outerRadius(additionsTextArcRadius)
         .startAngle(reverseText ? arcEndAngle : arcStartAngle)
-        .endAngle(reverseText ? arcStartAngle : arcEndAngle)
+        .endAngle(reverseText ? arcStartAngle : arcEndAngle),
     );
   };
 
@@ -339,7 +339,7 @@ function Segment({ rad, startPercent, endPercent, devName, devData, devColor, ma
         .innerRadius(devNameRadius)
         .outerRadius(devNameRadius)
         .startAngle(reverseText ? arcEndAngle : arcStartAngle)
-        .endAngle(reverseText ? arcStartAngle : arcEndAngle)
+        .endAngle(reverseText ? arcStartAngle : arcEndAngle),
     );
   };
 

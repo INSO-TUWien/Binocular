@@ -115,5 +115,5 @@ export const fetchTimeSpentData = fetchFactory(
   },
   requestTimeSpentData,
   receiveTimeSpentData,
-  receiveTimeSpentDataError
+  receiveTimeSpentDataError,
 );

@@ -90,7 +90,7 @@ function BezierDial({ label, innerRad, outerRad, data, color, onHoverData, color
       const authorCol = authorColors[authorsWithMaxContributionPerBucket[i]];
       const authorP = d3.arc().innerRadius(0).outerRadius(outerRadius).startAngle(startAngle).endAngle(endAngle);
       authorSegments.push(
-        <path stroke="DarkGray" fill={authorCol} d={authorP().toString()} clipPath={`url(#${curveId})`} key={`${label}_${i}-author`} />
+        <path stroke="DarkGray" fill={authorCol} d={authorP().toString()} clipPath={`url(#${curveId})`} key={`${label}_${i}-author`} />,
       );
 
       //paths that trigger the onHover function
@@ -111,7 +111,7 @@ function BezierDial({ label, innerRad, outerRad, data, color, onHoverData, color
           onMouseLeave={() => hideTooltip()}
           d={hoverP().toString()}
           key={`${label}_${i}-hover`}
-        />
+        />,
       );
     }
 

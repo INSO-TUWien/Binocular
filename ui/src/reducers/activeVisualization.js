@@ -8,5 +8,5 @@ export default handleAction(
     localStorage.setItem('previousActiveVisualization', action.payload);
     return action.payload;
   },
-  {}
+  {},
 );

@@ -92,7 +92,7 @@ export default class ListGeneration {
           commit.date
             .substring(0, commit.date.length - 5)
             .split('T')
-            .join(' ')
+            .join(' '),
         )
         .style('font-style', 'italic')
         .style('color', '#AAAAAA');

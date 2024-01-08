@@ -88,5 +88,5 @@ export const fetchIssueImpactData = fetchFactory(
   },
   requestIssueImpactData,
   receiveIssueImpactData,
-  receiveIssueImpactDataError
+  receiveIssueImpactDataError,
 );

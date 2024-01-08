@@ -72,7 +72,7 @@ export default handleActions(
     otherAuthors: getLocalStorage().otherAuthors,
     excludeMergeCommits: getLocalStorage().excludeMergeCommits,
     sprints: getLocalStorage().sprints,
-  }
+  },
 );
 
 function updateLocalStorage(key: string, value: any): UniversalSettings {

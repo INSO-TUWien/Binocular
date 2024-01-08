@@ -114,5 +114,5 @@ export const fetchSprintsData = fetchFactory(
   },
   requestSprintsData,
   receiveSprintsData,
-  receiveSprintsDataError
+  receiveSprintsDataError,
 );

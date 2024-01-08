@@ -33,7 +33,7 @@ function CenterCircle({ radius, label, data, colors, isDataVisible }) {
             text={`${label.toUpperCase()}: 0`}
             x={upperLeftCorner.x + (upperRightCorner.x - upperLeftCorner.x) / 2}
             y={upperLeftCorner.y}
-          />
+          />,
         );
       }
       return;
@@ -67,7 +67,7 @@ function CenterCircle({ radius, label, data, colors, isDataVisible }) {
         text={`${label.toUpperCase()}: ${total.toLocaleString()}`}
         x={upperLeftCorner.x + (upperRightCorner.x - upperLeftCorner.x) / 2}
         y={upperLeftCorner.y}
-      />
+      />,
     );
     result = result.concat(
       sortedData.map((d, i) => {
@@ -84,7 +84,7 @@ function CenterCircle({ radius, label, data, colors, isDataVisible }) {
             categoryColors={colors}
           />
         );
-      })
+      }),
     );
 
     //if there are too many lines, trim the array and display '...' in the visualization
@@ -96,7 +96,7 @@ function CenterCircle({ radius, label, data, colors, isDataVisible }) {
           text="..."
           x={upperLeftCorner.x + (upperRightCorner.x - upperLeftCorner.x) / 2}
           y={upperLeftCorner.y + (maxLines + 1.5) * linespacing}
-        />
+        />,
       );
     }
 
@@ -133,7 +133,7 @@ function DevLine({ devName, data, maxData, x, y, maxLength, authorColor, categor
         ry={2}
         id={`${devName}_rect`}
         key={`${devName}_rect`}
-      />
+      />,
     );
   } else {
     const aggregatedData = _.sum(data);
@@ -151,7 +151,7 @@ function DevLine({ devName, data, maxData, x, y, maxLength, authorColor, categor
           ry={2}
           id={`${devName}_rect_${i}`}
           key={`${devName}_rect_${i}`}
-        />
+        />,
       );
 
       currentX = currentX + subBarLength;

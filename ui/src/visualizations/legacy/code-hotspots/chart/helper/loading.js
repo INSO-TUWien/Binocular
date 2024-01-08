@@ -27,7 +27,7 @@ export default class Loading {
           '<div id="loadingBarText" class="' +
           loadingStyles.loadingBarText +
           '">Loading ...</div>' +
-          '</div>'
+          '</div>',
       );
   }
 
@@ -54,7 +54,7 @@ export default class Loading {
           loadingStyles.error +
           "'><div style='font-weight: bold'>Error:</div><div>" +
           text +
-          '</div></div>'
+          '</div></div>',
       );
   }
 

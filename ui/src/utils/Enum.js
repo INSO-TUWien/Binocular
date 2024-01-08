@@ -24,7 +24,7 @@ export function createEnum(plainEnum) {
             value &&
             (data[key] === value ||
               data[key].name.toUpperCase().replace(/\s+/g, '') === `${value}`.replace(/\s+/g, '').toUpperCase() ||
-              data[key].value === value)
+              data[key].value === value),
         );
         return foundKey ? data[foundKey] : data.None;
       };
@@ -46,6 +46,6 @@ export function createEnum(plainEnum) {
       });
 
       return data;
-    })()
+    })(),
   );
 }

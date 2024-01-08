@@ -64,7 +64,7 @@ export default () => {
 
   const deleteVisualization = (e) => {
     const currentVisualizations = visualizations.filter(
-      (viz) => parseInt(viz.id) !== parseInt(e.target.parentNode.parentNode.id.substring('visualizationContainer'.length))
+      (viz) => parseInt(viz.id) !== parseInt(e.target.parentNode.parentNode.id.substring('visualizationContainer'.length)),
     );
     onSetActiveVisualizations(currentVisualizations.map((viz) => viz.key));
     setVisualizations(currentVisualizations);

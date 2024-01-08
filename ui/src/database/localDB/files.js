@@ -120,7 +120,7 @@ export default class Files {
       let fileObjects = resFiles.docs;
       fileObjects = fileObjects.filter((fo) => files.includes(fo.path));
 
-      let result = [];
+      const result = [];
 
       const commits = (await findAll(db, 'commits')).docs;
       const stakeholders = (await findAll(db, 'stakeholders')).docs;
@@ -129,15 +129,15 @@ export default class Files {
 
       //get all commits-files connection of this file
       for (const file of fileObjects) {
-        let fileResult = { path: file.path, ownership: [] };
+        const fileResult = { path: file.path, ownership: [] };
         const relevantConnections = fileCommitConnections.filter((fCC) => fCC.from === file._id);
 
         //for each of these relevant connections, we want to extract the commit data and ownership connections (commits-files-stakeholders)
         for (const conn of relevantConnections) {
           const relevantCommit = commits.filter((c) => c._id === conn.to)[0];
-          let commitResult = { commit: { sha: relevantCommit.sha, date: relevantCommit.date }, ownership: [] };
+          const commitResult = { commit: { sha: relevantCommit.sha, date: relevantCommit.date }, ownership: [] };
 
-          let relevantOwnershipConnections = fileCommitStakeholderConnections.filter((fcsc) => fcsc.from === conn._id);
+          const relevantOwnershipConnections = fileCommitStakeholderConnections.filter((fcsc) => fcsc.from === conn._id);
 
           //for each of the ownership connections, add the signature of the stakeholder and the owned lines to commitResult.ownership
           for (const ownershipConn of relevantOwnershipConnections) {

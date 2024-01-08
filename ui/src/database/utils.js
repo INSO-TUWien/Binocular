@@ -4,12 +4,12 @@ import _ from 'lodash';
 
 export const addHistoryToAllCommits = (allCommits) => {
   //stores the histories of all commits
-  let historycache = {};
+  const historycache = {};
 
   //sort so oldest commit is first
   const commits = allCommits.sort((a, b) => new Date(a.date) - new Date(b.date));
   const commitsShas = commits.map((c) => c.sha);
-  let positions = {};
+  const positions = {};
   for (let i = 0; i < commitsShas.length; i++) {
     positions[commitsShas[i]] = i;
   }

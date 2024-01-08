@@ -137,7 +137,7 @@ export const fetchChangesData = fetchFactory(
   },
   requestChangesData,
   receiveChangesData,
-  receiveChangesDataError
+  receiveChangesDataError,
 );
 
 function getPalette(commits: Commit[], maxNumberOfColors: number, numOfCommitters: number) {

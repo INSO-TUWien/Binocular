@@ -7,5 +7,5 @@ export default handleActions(
   {
     SET_COLOR_ISSUES_MERGE_REQUESTS: (state, action) => _.assign({}, state, { colorIssuesMergeRequests: action.payload }),
   },
-  { colorIssuesMergeRequests: 0 }
+  { colorIssuesMergeRequests: 0 },
 );

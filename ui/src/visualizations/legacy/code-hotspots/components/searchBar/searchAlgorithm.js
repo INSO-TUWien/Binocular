@@ -13,7 +13,7 @@ export default class SearchAlgorithm {
           if (i < searchTermChunks.length - 1) {
             i++;
             filteredDataSet = filteredDataSet.filter((d) =>
-              d.key.split('/')[d.key.split('/').length - 1].split('.')[0].toLowerCase().includes(searchTermChunks[i])
+              d.key.split('/')[d.key.split('/').length - 1].split('.')[0].toLowerCase().includes(searchTermChunks[i]),
             );
           }
           break;
@@ -22,7 +22,7 @@ export default class SearchAlgorithm {
           if (i < searchTermChunks.length - 1) {
             i++;
             filteredDataSet = filteredDataSet.filter((d) =>
-              d.key.split('.')[d.key.split('.').length - 1].toLowerCase().includes(searchTermChunks[i])
+              d.key.split('.')[d.key.split('.').length - 1].toLowerCase().includes(searchTermChunks[i]),
             );
           }
           break;
@@ -140,7 +140,7 @@ export default class SearchAlgorithm {
               d.message.toLowerCase().includes(searchTermChunks[i]) ||
               d.branch.toLowerCase().includes(searchTermChunks[i]) ||
               d.sha.toLowerCase().includes(searchTermChunks[i]) ||
-              d.signature.toLowerCase().includes(searchTermChunks[i])
+              d.signature.toLowerCase().includes(searchTermChunks[i]),
           );
           break;
       }
@@ -300,7 +300,7 @@ export default class SearchAlgorithm {
             (d) =>
               d.title.toLowerCase().includes(searchTermChunks[i]) ||
               ('' + d.description).toLowerCase().includes(searchTermChunks[i]) ||
-              d.iid.toLowerCase().includes(searchTermChunks[i])
+              d.iid.toLowerCase().includes(searchTermChunks[i]),
           );
           break;
         case '-l':

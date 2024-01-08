@@ -16,7 +16,7 @@ export default class chartGeneration {
         maxValue,
         legendSteps,
         firstLineNumber,
-        displayProps
+        displayProps,
       );
     } else {
       heatmapChartGeneration.generateHeatmap(
@@ -28,7 +28,7 @@ export default class chartGeneration {
         maxValue,
         legendSteps,
         firstLineNumber,
-        displayProps
+        displayProps,
       );
     }
     heatmapInteraction.generateHeatmapInteractionLayer(data, lines, importantColumns, currThis, mode, firstLineNumber, displayProps);
@@ -45,7 +45,7 @@ export default class chartGeneration {
         maxValue,
         legendSteps,
         firstLineNumber,
-        displayProps
+        displayProps,
       );
     } else {
       heatmapChartGeneration.updateHeatmap(
@@ -57,7 +57,7 @@ export default class chartGeneration {
         maxValue,
         legendSteps,
         firstLineNumber,
-        displayProps
+        displayProps,
       );
     }
     heatmapInteraction.generateHeatmapInteractionLayer(data, lines, importantColumns, currThis, mode, firstLineNumber, displayProps);

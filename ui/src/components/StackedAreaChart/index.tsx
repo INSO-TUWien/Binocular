@@ -159,7 +159,7 @@ export default class StackedAreaChart extends ScalableBaseChartComponent {
           '</div>' +
           text +
           ': ' +
-          Math.round((value + Number.EPSILON) * 100) / 100
+          Math.round((value + Number.EPSILON) * 100) / 100,
       )
       .style('position', 'absolute')
       .style('left', event.layerX - 20 + 'px')

@@ -38,7 +38,7 @@ export default class Data {
              }
            }
         }`,
-          { page, perPage, until }
+          { page, perPage, until },
         )
         .then((resp) => resp.commits);
     };
@@ -84,7 +84,7 @@ export default class Data {
              closedAt
            }
          }
-       }`
+       }`,
         )
         .then((resp) => ({
           firstCommit: resp.firstCommit.data[0],
@@ -92,7 +92,7 @@ export default class Data {
           firstIssue: resp.firstIssue.data[0],
           lastIssue: resp.lastIssue.data[0],
           committers: resp.committers,
-        }))
+        })),
     );
   }
 

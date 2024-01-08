@@ -114,7 +114,7 @@ export default class SearchBox extends React.Component {
         dirty: true,
         activeSearch,
       },
-      () => null
+      () => null,
     );
   }
 

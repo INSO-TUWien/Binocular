@@ -60,7 +60,7 @@ export default class ProgressBar extends React.PureComponent {
                     Math.max(
                       ((pathWidth * (this.state.hover ? widthExtended : widthCompressed)) / 3 / pieData[0].total) * pieData[0].processed -
                         separatorWidth,
-                      0
+                      0,
                     ) + ' 10000'
                   }
                   strokeDashoffset={'-' + pathWidth * (this.state.hover ? offsetExtended : offsetCompressed)}
@@ -87,7 +87,7 @@ export default class ProgressBar extends React.PureComponent {
                     Math.max(
                       ((pathWidth * (this.state.hover ? widthExtended : widthCompressed)) / 3 / pieData[1].total) * pieData[1].processed -
                         separatorWidth,
-                      0
+                      0,
                     ) + ' 10000'
                   }
                   strokeDashoffset={
@@ -118,7 +118,7 @@ export default class ProgressBar extends React.PureComponent {
                     Math.max(
                       ((pathWidth * (this.state.hover ? widthExtended : widthCompressed)) / 3 / pieData[2].total) * pieData[2].processed -
                         separatorWidth,
-                      0
+                      0,
                     ) + ' 10000'
                   }
                   strokeDashoffset={

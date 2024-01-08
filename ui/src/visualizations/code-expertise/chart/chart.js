@@ -67,7 +67,7 @@ const Chart = ({ devData }) => {
       (sum, adds) => {
         return sum + adds.additions;
       },
-      0
+      0,
     );
 
     const linesOwnedTotal = _.reduce(
@@ -79,7 +79,7 @@ const Chart = ({ devData }) => {
           return sum;
         }
       },
-      0
+      0,
     );
 
     //get the maximum number of commits over all currently relevant devs
@@ -131,7 +131,7 @@ const Chart = ({ devData }) => {
           devData={devData}
           devColor={authorColors[name]}
           maxCommitsPerDev={maxCommitsPerDev}
-        />
+        />,
       );
     });
 

@@ -210,8 +210,8 @@ export default (props) => {
                 <span>Deletions: </span>
                 <InlineLoadingIndicator />
               </div>
-            </div>
-          )
+            </div>,
+          ),
         );
         Database.getCommitsForIssue(d.iid).then((commits) => {
           if (document.getElementById('tooltipCommitCount') !== null) {
@@ -320,8 +320,8 @@ export default (props) => {
                   );
                 })}
               </div>
-            </div>
-          )
+            </div>,
+          ),
         );
       })
       .on('mousemove', function (e, d) {
@@ -385,7 +385,7 @@ export default (props) => {
             (scale(moment(d.from)) + 10) +
             ' 10 ' +
             scale(moment(d.from)) +
-            ' 20'
+            ' 20',
         )
         .attr('stroke-width', '2')
         .attr('fill', '#4cd964')
@@ -406,7 +406,7 @@ export default (props) => {
             (scale(moment(d.to)) - 12) +
             ' 10 ' +
             (scale(moment(d.to)) - 2) +
-            ' 20'
+            ' 20',
         )
         .attr('stroke-width', '2')
         .attr('fill', '#cd5c5c')

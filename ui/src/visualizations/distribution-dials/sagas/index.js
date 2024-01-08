@@ -61,5 +61,5 @@ export const fetchDistributionDialsData = fetchFactory(
   },
   requestDistributionDialsData,
   receiveDistributionDialsData,
-  receiveDistributionDialsDataError
+  receiveDistributionDialsDataError,
 );

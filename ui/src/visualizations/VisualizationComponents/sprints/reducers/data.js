@@ -18,5 +18,5 @@ export default handleActions(
     data: { issues: [], mergeRequests: [] },
     lastFetched: null,
     isFetching: null,
-  }
+  },
 );

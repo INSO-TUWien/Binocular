@@ -35,14 +35,14 @@ export function bulkGet(database, ids) {
 // ###################### SPECIFIC SEARCHES ######################
 
 export async function findAllCommits(database, relations) {
-  let commits = await database.find({
+  const commits = await database.find({
     selector: { _id: { $regex: new RegExp('^commits/.*') } },
   });
   const commitStakeholderConnections = (await findCommitStakeholderConnections(relations)).docs;
   const commitCommitConnections = (await findCommitCommitConnections(relations)).docs;
 
   commits.docs = await Promise.all(
-    commits.docs.map((c) => preprocessCommit(c, database, commitStakeholderConnections, commitCommitConnections))
+    commits.docs.map((c) => preprocessCommit(c, database, commitStakeholderConnections, commitCommitConnections)),
   );
   addHistoryToAllCommits(commits.docs);
 
@@ -50,7 +50,7 @@ export async function findAllCommits(database, relations) {
 }
 
 export async function findCommit(database, relations, sha) {
-  let commit = await database.find({
+  const commit = await database.find({
     selector: { _id: { $regex: new RegExp('^commits/.*') }, sha: { $eq: sha } },
   });
 

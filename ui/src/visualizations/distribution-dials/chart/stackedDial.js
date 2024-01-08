@@ -63,7 +63,7 @@ function StackedDial({ label, innerRad, outerRad, data, colors, onHoverData }) {
       //get the categories that are between the middle line and the outer line
       //if there is a middle segment, leave that one out
       const outerSegments = _.sum(
-        _.flatten(bucket.map((author) => author.data.slice(Math.floor(categoryNum / 2) + (categoryNum % 2 === 1))))
+        _.flatten(bucket.map((author) => author.data.slice(Math.floor(categoryNum / 2) + (categoryNum % 2 === 1)))),
       );
 
       //since the middle segment (if there is one) is directly on the middle line, half of it is in each half of the diagram
@@ -100,7 +100,7 @@ function StackedDial({ label, innerRad, outerRad, data, colors, onHoverData }) {
         const middleSegmentInnerRadius = middleRadius - middleSegmentSize / 2;
 
         middlePaths.push(
-          d3.arc().innerRadius(middleSegmentInnerRadius).outerRadius(middleSegmentOuterRadius).startAngle(startAngle).endAngle(endAngle)
+          d3.arc().innerRadius(middleSegmentInnerRadius).outerRadius(middleSegmentOuterRadius).startAngle(startAngle).endAngle(endAngle),
         );
 
         //set the starting radii for the outer and inner categories so they are properly stacked on the middle segment
@@ -165,7 +165,7 @@ function StackedDial({ label, innerRad, outerRad, data, colors, onHoverData }) {
           onMouseLeave={() => hideTooltip()}
           d={hoverP().toString()}
           key={`${i}-hover`}
-        />
+        />,
       );
     }
 
@@ -186,7 +186,7 @@ function StackedDial({ label, innerRad, outerRad, data, colors, onHoverData }) {
           return pathArray.map((p, index) => {
             return <path stroke="none" fill={innerOuterColors[category]} d={p().toString()} key={`${category}-${index}`}></path>;
           });
-        })
+        }),
       )}
       {onHoverPaths}
     </>

@@ -104,5 +104,5 @@ export const fetchIssuesData = fetchFactory(
   },
   requestIssueData,
   receiveIssueData,
-  receiveIssueDataError
+  receiveIssueDataError,
 );

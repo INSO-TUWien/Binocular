@@ -15,8 +15,8 @@ interface Props {
 }
 interface CommiterList {
   mainCommitter: string;
-  committers: Array<{ signature: string, color: string }>;
-  color:string;
+  committers: Array<{ signature: string; color: string }>;
+  color: string;
 }
 
 export default (props: Props) => {

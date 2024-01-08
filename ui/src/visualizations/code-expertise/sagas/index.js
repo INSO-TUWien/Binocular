@@ -95,7 +95,7 @@ export const fetchCodeExpertiseData = fetchFactory(
             },
             ownershipForFiles: extractFileOwnership(commitsToOwnership(allCommits)),
           };
-        }
+        },
       );
     } else if (mode === 'modules') {
       if (activeFiles === null || activeFiles.length === 0) return result;
@@ -117,5 +117,5 @@ export const fetchCodeExpertiseData = fetchFactory(
   },
   requestCodeExpertiseData,
   receiveCodeExpertiseData,
-  receiveCodeExpertiseDataError
+  receiveCodeExpertiseDataError,
 );

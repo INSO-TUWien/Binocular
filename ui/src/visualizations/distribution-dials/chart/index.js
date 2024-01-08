@@ -45,14 +45,14 @@ export default () => {
 
     // ############ STEP 1: Filter issues, filter commits and add builds ############
 
-    let filteredCreatedIssues = rawData.issues.filter((i) => {
+    const filteredCreatedIssues = rawData.issues.filter((i) => {
       const date = new Date(i['createdAt']);
       const minDate = dateFrom ? new Date(dateFrom) : new Date(0);
       const maxDate = dateUntil ? new Date(dateUntil) : new Date();
       return minDate <= date && date <= maxDate;
     });
 
-    let filteredClosedIssues = rawData.issues.filter((i) => {
+    const filteredClosedIssues = rawData.issues.filter((i) => {
       const date = new Date(i['closedAt']);
       const minDate = dateFrom ? new Date(dateFrom) : new Date(0);
       const maxDate = dateUntil ? new Date(dateUntil) : new Date();

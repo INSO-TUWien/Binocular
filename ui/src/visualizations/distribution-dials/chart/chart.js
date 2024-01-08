@@ -115,7 +115,7 @@ export default ({ data }) => {
                 name: author.name,
                 data: [author.issuesClosed, author.issuesCreated],
               };
-            })
+            }),
           );
 
           dials.push(
@@ -127,7 +127,7 @@ export default ({ data }) => {
               colors={issuesColorsSplit}
               key={'issues_split'}
               onHoverData={onHoverData}
-            />
+            />,
           );
         } else {
           //otherwise, we just have the total number of issues that were either created or closed in the specified timeframe by each author
@@ -137,7 +137,7 @@ export default ({ data }) => {
                 name: author.name,
                 data: author.issues,
               };
-            })
+            }),
           );
 
           //there are no author colors for ITS data, so colorSegmentsForAuthors is hardcoded to false
@@ -151,7 +151,7 @@ export default ({ data }) => {
               key={'issues'}
               onHoverData={onHoverData}
               colorSegmentsForAuthors={false}
-            />
+            />,
           );
         }
       } else if (part === 'changes') {
@@ -164,7 +164,7 @@ export default ({ data }) => {
                 name: author.name,
                 data: [author.deletions, author.additions],
               };
-            })
+            }),
           );
           dials.push(
             <StackedDial
@@ -175,7 +175,7 @@ export default ({ data }) => {
               colors={changesColorsSplit}
               key={'changes_split'}
               onHoverData={onHoverData}
-            />
+            />,
           );
         } else {
           //if the dial is not split, we count the number of changes (additions + deletions) for each author for each bucket
@@ -185,7 +185,7 @@ export default ({ data }) => {
                 name: author.name,
                 data: author.additions + author.deletions,
               };
-            })
+            }),
           );
 
           dials.push(
@@ -198,7 +198,7 @@ export default ({ data }) => {
               key={'changes'}
               onHoverData={onHoverData}
               colorSegmentsForAuthors={colorSegments}
-            />
+            />,
           );
         }
       } else if (part === 'commits') {
@@ -211,7 +211,7 @@ export default ({ data }) => {
                 name: author.name,
                 data: [author.badCommits, neutralCommits, author.goodCommits],
               };
-            })
+            }),
           );
 
           dials.push(
@@ -223,7 +223,7 @@ export default ({ data }) => {
               colors={commitsColorsSplit}
               key={'commits_split'}
               onHoverData={onHoverData}
-            />
+            />,
           );
         } else {
           //just the total number of commits for each author in each bucket
@@ -233,7 +233,7 @@ export default ({ data }) => {
                 name: author.name,
                 data: author.commits,
               };
-            })
+            }),
           );
 
           dials.push(
@@ -246,7 +246,7 @@ export default ({ data }) => {
               key={'commits'}
               onHoverData={onHoverData}
               colorSegmentsForAuthors={colorSegments}
-            />
+            />,
           );
         }
       }
@@ -293,7 +293,7 @@ export default ({ data }) => {
                 {label}
               </textPath>
             </text>
-          </g>
+          </g>,
         );
       } else {
         //else this is a short label. which can be displayed normally
@@ -301,7 +301,7 @@ export default ({ data }) => {
         labels.push(
           <text x={coords[0]} y={coords[1]} key={'label_' + label} textAnchor="middle" alignmentBaseline="middle">
             {label}
-          </text>
+          </text>,
         );
       }
     }
@@ -362,7 +362,7 @@ export default ({ data }) => {
               return <LegendCompact key={'layer' + i} text="commits" color={commitsColor} />;
             }
           }
-        })
+        }),
     );
   }, [layers, selectedLayers, splitLayers]);
 

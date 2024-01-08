@@ -113,7 +113,7 @@ export default class Commits {
             res.ownership = [];
 
             //find connections to stakeholders for ownership data
-            let relevantOwnershipConnections = fileCommitStakeholderConnections.filter((fcsc) => fcsc.from === connection._id);
+            const relevantOwnershipConnections = fileCommitStakeholderConnections.filter((fcsc) => fcsc.from === connection._id);
             //for each of the ownership connections, add the signature of the stakeholder and the owned lines to fileResult.ownership
             for (const ownershipConn of relevantOwnershipConnections) {
               const stakeholder = stakeholders.filter((s) => s._id === ownershipConn.to)[0].gitSignature;
@@ -194,16 +194,16 @@ export default class Commits {
       const fileCommitConnections = (await findFileCommitConnections(relations)).docs;
       const fileCommitStakeholderConnections = (await findFileCommitStakeholderConnections(relations)).docs;
 
-      let result = [];
+      const result = [];
 
       //find commits-files connection of this commit
       const relevantConnections = fileCommitConnections.filter((fCC) => fCC.to === commit._id);
       for (const conn of relevantConnections) {
         const relevantFile = files.filter((f) => f._id === conn.from)[0];
 
-        let fileResult = { path: relevantFile.path, action: conn.action, ownership: [] };
+        const fileResult = { path: relevantFile.path, action: conn.action, ownership: [] };
 
-        let relevantOwnershipConnections = fileCommitStakeholderConnections.filter((fcsc) => fcsc.from === conn._id);
+        const relevantOwnershipConnections = fileCommitStakeholderConnections.filter((fcsc) => fcsc.from === conn._id);
 
         //for each of the ownership connections, add the signature of the stakeholder and the owned lines to fileResult.ownership
         for (const ownershipConn of relevantOwnershipConnections) {
@@ -229,14 +229,14 @@ export default class Commits {
 
       //find commits-files connections for each commit
       return commits.map((commit) => {
-        let commitResult = { sha: commit.sha, date: commit.date, files: [] };
+        const commitResult = { sha: commit.sha, date: commit.date, files: [] };
         const relevantConnections = fileCommitConnections.filter((fCC) => fCC.to === commit._id);
         for (const conn of relevantConnections) {
           const relevantFile = files.filter((f) => f._id === conn.from)[0];
 
-          let fileResult = { path: relevantFile.path, action: conn.action, ownership: [] };
+          const fileResult = { path: relevantFile.path, action: conn.action, ownership: [] };
 
-          let relevantOwnershipConnections = fileCommitStakeholderConnections.filter((fcsc) => fcsc.from === conn._id);
+          const relevantOwnershipConnections = fileCommitStakeholderConnections.filter((fcsc) => fcsc.from === conn._id);
 
           //for each of the ownership connections, add the signature of the stakeholder and the owned lines to fileResult.ownership
           for (const ownershipConn of relevantOwnershipConnections) {

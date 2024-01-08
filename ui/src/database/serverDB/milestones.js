@@ -32,7 +32,7 @@ export default class Milestones {
               }
             }
           }`,
-          { page, perPage }
+          { page, perPage },
         )
         .then((resp) => resp.milestones);
     };

@@ -22,7 +22,9 @@ export default class LinkList extends React.Component {
           _.filter(
             _.filter(visualizations, (vis) => visualizationSelectorActive || vis.id !== activeVisualization),
             (vis) =>
-              search === '' || vis.id.toLowerCase().includes(search.toLowerCase()) || vis.label.toLowerCase().includes(search.toLowerCase())
+              search === '' ||
+              vis.id.toLowerCase().includes(search.toLowerCase()) ||
+              vis.label.toLowerCase().includes(search.toLowerCase()),
           ),
           (vis, i) => (
             <PanelLink
@@ -31,7 +33,7 @@ export default class LinkList extends React.Component {
               odd={i % 2 === 0}
               pressReturnToSelect={visualizationSelectorActive && i === selectedViz}
             />
-          )
+          ),
         )}
       </div>
     );

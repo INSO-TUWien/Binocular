@@ -137,7 +137,7 @@ export default class chartUpdater {
       filteredData = data.data.filter(
         (d) =>
           new Date(d.date.split('.')[0]) >= new Date(displayProps.dateRange.from) &&
-          new Date(d.date.split('.')[0]) <= new Date(displayProps.dateRange.to)
+          new Date(d.date.split('.')[0]) <= new Date(displayProps.dateRange.to),
       );
     }
 
@@ -150,7 +150,7 @@ export default class chartUpdater {
       currThis,
       mode,
       data.legendSteps,
-      displayProps
+      displayProps,
     );
     filteredData = filteredData.filter((d) => importantColumns.includes(d.column));
     chartGeneration.generateRowSummary(filteredData, data.lines, currThis, mode, data.legendSteps, data.firstLineNumber, displayProps);
@@ -164,7 +164,7 @@ export default class chartUpdater {
       data.maxValue,
       data.legendSteps,
       data.firstLineNumber,
-      displayProps
+      displayProps,
     );
   }
 
@@ -174,7 +174,7 @@ export default class chartUpdater {
       filteredData = data.data.filter(
         (d) =>
           new Date(d.date.split('.')[0]) >= new Date(displayProps.dateRange.from) &&
-          new Date(d.date.split('.')[0]) <= new Date(displayProps.dateRange.to)
+          new Date(d.date.split('.')[0]) <= new Date(displayProps.dateRange.to),
       );
     }
 
@@ -185,7 +185,7 @@ export default class chartUpdater {
       currThis,
       mode,
       data.legendSteps,
-      displayProps
+      displayProps,
     );
   }
 
@@ -195,7 +195,7 @@ export default class chartUpdater {
       filteredData = data.data.filter(
         (d) =>
           new Date(d.date.split('.')[0]) >= new Date(displayProps.dateRange.from) &&
-          new Date(d.date.split('.')[0]) <= new Date(displayProps.dateRange.to)
+          new Date(d.date.split('.')[0]) <= new Date(displayProps.dateRange.to),
       );
     }
     const combinedColumnData = chartGeneration.updateColumnData(filteredData, currThis, mode);
@@ -212,7 +212,7 @@ export default class chartUpdater {
       data.maxValue,
       data.legendSteps,
       data.firstLineNumber,
-      displayProps
+      displayProps,
     );
   }
 }

@@ -32,5 +32,5 @@ export const fetchUniversalSettingsData = fetchFactory(
   },
   requestUniversalSettingsData,
   receiveUniversalSettingsData,
-  receiveUniversalSettingsDataError
+  receiveUniversalSettingsDataError,
 );

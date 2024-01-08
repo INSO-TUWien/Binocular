@@ -45,7 +45,7 @@ export default () => {
       return;
     }
 
-    let resultOwnershipData = [];
+    const resultOwnershipData = [];
 
     //stores the current ownership distribution for each file
     const fileCache = {};
@@ -147,7 +147,7 @@ export default () => {
     }
 
     //get all stakeholders
-    let tempKeys = [];
+    const tempKeys = [];
     filteredOwnershipData.map((d) => {
       for (const [authorName] of Object.entries(d.ownership)) {
         //only display authors that are selected in the universal settings
@@ -163,8 +163,8 @@ export default () => {
 
     setKeys(tempKeys);
 
-    let result = filteredOwnershipData.map((d) => {
-      let result = {};
+    const result = filteredOwnershipData.map((d) => {
+      const result = {};
       //set the date as timestamp (in ms)
       result.date = new Date(d.date).getTime();
 
@@ -204,13 +204,13 @@ export default () => {
       } else if (dataGranularity === 'months') {
         groupedResult = _.groupBy(
           result,
-          (dataPoint) => '' + new Date(dataPoint.date).getMonth() + '-' + new Date(dataPoint.date).getFullYear()
+          (dataPoint) => '' + new Date(dataPoint.date).getMonth() + '-' + new Date(dataPoint.date).getFullYear(),
         );
       } else if (dataGranularity === 'weeks') {
         groupedResult = _.groupBy(result, (dataPoint) => {
-          let d = new Date(dataPoint.date);
-          let onejan = new Date(d.getFullYear(), 0, 1);
-          let week = Math.ceil(((d.getTime() - onejan.getTime()) / 86400000 + onejan.getDay() + 1) / 7);
+          const d = new Date(dataPoint.date);
+          const onejan = new Date(d.getFullYear(), 0, 1);
+          const week = Math.ceil(((d.getTime() - onejan.getTime()) / 86400000 + onejan.getDay() + 1) / 7);
           return '' + week + '-' + d.getFullYear();
         });
       } else {
@@ -228,7 +228,7 @@ export default () => {
       }
 
       for (const [, points] of Object.entries(groupedResult)) {
-        let dataPoints = points.sort((a, b) => a.date - b.date);
+        const dataPoints = points.sort((a, b) => a.date - b.date);
         //only consider last element
         coarseResult.push(dataPoints.slice(-1)[0]);
       }
@@ -250,7 +250,7 @@ export default () => {
           resolution={dataGranularity}
           keys={keys}
           order={keys.reverse()}
-        />
+        />,
       );
     } else {
       setChartComponent(null);

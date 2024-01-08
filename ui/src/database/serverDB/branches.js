@@ -12,7 +12,7 @@ export default class Branches {
         }
       }
       `,
-      {}
+      {},
     );
   }
 }

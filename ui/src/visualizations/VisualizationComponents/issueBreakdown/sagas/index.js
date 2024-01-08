@@ -104,5 +104,5 @@ export const fetchIssueBreakdownData = fetchFactory(
   },
   requestIssueBreakdownData,
   receiveIssueBreakdownData,
-  receiveIssueBreakdownDataError
+  receiveIssueBreakdownDataError,
 );

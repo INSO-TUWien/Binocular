@@ -96,7 +96,7 @@ export default class CheckboxLegend extends React.Component {
             checked={this.state.selected.indexOf(key) > -1}
             onClick={this.clickCallback.bind(this)}
             split={this.props.split}
-          />
+          />,
         );
       });
     }

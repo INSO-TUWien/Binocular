@@ -96,5 +96,5 @@ export const fetchBuildsData = fetchFactory(
   },
   requestBuildData,
   receiveBuildData,
-  receiveBuildDataError
+  receiveBuildDataError,
 );

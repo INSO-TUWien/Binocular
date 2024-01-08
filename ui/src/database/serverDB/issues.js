@@ -48,7 +48,7 @@ export default class Issues {
               }
             }
           }`,
-          { page, perPage, since, until }
+          { page, perPage, since, until },
         )
         .then((resp) => resp.issues);
     };
@@ -85,7 +85,7 @@ export default class Issues {
               }
              }
            }`,
-        { iid }
+        { iid },
       )
       .then((resp) => resp.issue.commits.data);
   }
@@ -149,7 +149,7 @@ export default class Issues {
              }
            }
          }`,
-      { iid: iid, since: since, until: until }
+      { iid: iid, since: since, until: until },
     );
   }
 
@@ -163,7 +163,7 @@ export default class Issues {
             issues(page: 1, perPage: 50, sort: "DESC") {
               data { iid title createdAt closedAt }
             }
-          }`
+          }`,
         )
         .then((resp) => resp.issues);
     };
@@ -214,7 +214,7 @@ export default class Issues {
           }
         }
       `,
-      { file: file }
+      { file: file },
     );
   }
 }

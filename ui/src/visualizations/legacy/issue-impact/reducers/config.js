@@ -25,7 +25,7 @@ export default handleActions(
     filteredCommits: [],
     files: [],
     filteredFiles: [],
-  }
+  },
 );
 
 function getAllFiles(issue) {

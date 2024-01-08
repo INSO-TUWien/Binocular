@@ -89,13 +89,13 @@ export default () => {
         temp.push(
           <option key={-1} value={''}>
             Select a Branch
-          </option>
+          </option>,
         );
         for (const i in branches) {
           temp.push(
             <option key={i} value={branches[i]}>
               {branches[i]}
-            </option>
+            </option>,
           );
         }
         setBranchOptions(temp);
@@ -108,13 +108,13 @@ export default () => {
       temp.push(
         <option key={-1} value={''}>
           Select an Issue
-        </option>
+        </option>,
       );
       for (const i of issues) {
         temp.push(
           <option key={i.iid} value={i.iid}>
             {'#' + i.iid + ' ' + i.title}
-          </option>
+          </option>,
         );
       }
       setIssueOptions(temp);

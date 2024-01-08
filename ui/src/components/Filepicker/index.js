@@ -114,7 +114,7 @@ const Filepicker = ({
       const dirOwnership = (obj) => {
         //if this is a directory
         if (obj.children) {
-          let res = {};
+          const res = {};
           for (const [, child] of Object.entries(obj.children)) {
             const childModuleOwnership = dirOwnership(child);
             for (const { signature, ownedLines } of childModuleOwnership) {

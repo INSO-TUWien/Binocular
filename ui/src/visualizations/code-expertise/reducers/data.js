@@ -20,5 +20,5 @@ export default handleActions(
     data: null,
     lastFetched: null,
     isFetching: null,
-  }
+  },
 );

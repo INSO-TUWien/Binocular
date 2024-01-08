@@ -100,7 +100,7 @@ export default (props: Props) => {
 };
 
 const extractCommitData = (
-  props: Props
+  props: Props,
 ): { commitChartData: CommitChartData[]; commitScale: number[]; commitPalette: Palette; selectedAuthors: string[] } => {
   if (!props.commits || props.commits.length === 0) {
     return { commitChartData: [], commitPalette: {}, commitScale: [], selectedAuthors: [] };
@@ -230,7 +230,7 @@ const extractCommitData = (
               }
             }
           }
-        }
+        },
       );
       //Add other if selected
       if (props.selectedAuthors.includes('others')) {

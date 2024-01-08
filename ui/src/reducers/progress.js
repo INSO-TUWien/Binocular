@@ -15,5 +15,5 @@ export default handleActions(
     files: { total: 0, processed: 0 },
     mergeRequests: { total: 0, processed: 0 },
     modules: { total: 0, processed: 0 },
-  }
+  },
 );

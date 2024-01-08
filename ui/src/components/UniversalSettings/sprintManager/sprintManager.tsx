@@ -119,7 +119,7 @@ export default (props: Props) => {
           s.name = newName;
         }
         return s;
-      })
+      }),
     );
     props.setSprints(sprints);
   };

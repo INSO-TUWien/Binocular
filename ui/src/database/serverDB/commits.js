@@ -37,7 +37,7 @@ export default class Commits {
                }
              }
           }`,
-          { page, perPage, until }
+          { page, perPage, until },
         )
         .then((resp) => resp.commits);
     };
@@ -55,7 +55,7 @@ export default class Commits {
   //easier to fetch all commits first because all commits are needed for the history attribute
   static getCommitDataForSha(sha) {
     return this.getCommitData([new Date(0), new Date()], [new Date(0), new Date()]).then(
-      (commits) => commits.filter((c) => c.sha === sha)[0]
+      (commits) => commits.filter((c) => c.sha === sha)[0],
     );
   }
 
@@ -95,7 +95,7 @@ export default class Commits {
              }
             }
           }`,
-          { page, perPage, until }
+          { page, perPage, until },
         )
         .then((resp) => resp.commits);
     };
@@ -149,7 +149,7 @@ export default class Commits {
              }
             }
           }`,
-          { page, perPage, until }
+          { page, perPage, until },
         )
         .then((resp) => resp.commits);
     };
@@ -191,7 +191,7 @@ export default class Commits {
           }
          }
        }`,
-        {}
+        {},
       )
       .then((resp) => resp.commits.data)
       .then((commits) => {
@@ -234,7 +234,7 @@ export default class Commits {
             }
           }
         }
-      `
+      `,
       )
       .then((res) => res.commit.files.data)
       .then((ownershipData) =>
@@ -243,7 +243,7 @@ export default class Commits {
             path: o.file.path,
             ownership: o.ownership,
           };
-        })
+        }),
       );
   }
 
@@ -271,7 +271,7 @@ export default class Commits {
             }
           }
         }
-      `
+      `,
       )
       .then((res) => res.commits.data)
       .then((commits) =>
@@ -287,7 +287,7 @@ export default class Commits {
               };
             }),
           };
-        })
+        }),
       );
   }
 
@@ -330,7 +330,7 @@ export default class Commits {
           }
       }
       `,
-        { file: file }
+        { file: file },
       )
       .then((result) => {
         //get all commits, calculate history, append history to all originally fetched commits
@@ -346,15 +346,15 @@ export default class Commits {
               }
             }
         }
-        `
+        `,
           )
           .then((commits) => {
             const allCommits = commits.commits.data;
             addHistoryToAllCommits(allCommits);
 
             result.file.commits.data = result.file.commits.data.map((d) => {
-              let c = d.commit;
-              let his = allCommits.filter((com) => com.sha === c.sha)[0].history;
+              const c = d.commit;
+              const his = allCommits.filter((com) => com.sha === c.sha)[0].history;
               c.history = his;
               return c;
             });

@@ -32,7 +32,7 @@ export default class Bounds {
              closedAt
            }
          }
-       }`
+       }`,
       )
       .then((resp) => ({
         firstCommit: resp.firstCommit.data[0],

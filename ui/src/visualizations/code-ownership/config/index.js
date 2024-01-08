@@ -74,13 +74,13 @@ export default () => {
         temp.push(
           <option key={-1} value={''}>
             Select a Branch
-          </option>
+          </option>,
         );
         for (const i in branches) {
           temp.push(
             <option key={i} value={branches[i]}>
               {branches[i]}
-            </option>
+            </option>,
           );
         }
         setBranchOptions(temp);

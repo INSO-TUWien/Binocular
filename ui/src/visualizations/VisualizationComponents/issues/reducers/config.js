@@ -10,5 +10,5 @@ export default handleActions(
   {
     chartResolution: 'months', //chart bucket size, can be 'years', 'months', 'weeks' or 'days'
     showIssues: 'all', //Filter for issues, can be 'all', 'open' or 'closed'
-  }
+  },
 );

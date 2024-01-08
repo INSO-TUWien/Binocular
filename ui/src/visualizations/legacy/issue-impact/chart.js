@@ -338,7 +338,7 @@ function extractData(props) {
                 date: parseTime(commit.date),
                 webUrl: commit.webUrl,
               },
-            })
+            }),
           ),
         };
       }
@@ -376,7 +376,7 @@ function extractData(props) {
         jobs: _.map(jobs, (job) =>
           _.assign({}, job, {
             duration: (job.duration / totalJobDuration) * b.duration,
-          })
+          }),
         ),
       });
     });
@@ -384,7 +384,7 @@ function extractData(props) {
 
   const colors = getChartColors(
     'spectral',
-    issue.commits.data.map((c) => c.sha)
+    issue.commits.data.map((c) => c.sha),
   );
 
   const files = _.values(filesById);

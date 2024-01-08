@@ -7,5 +7,5 @@ export default handleAction(
   function (state, action) {
     return action.payload;
   },
-  'its'
+  'its',
 );

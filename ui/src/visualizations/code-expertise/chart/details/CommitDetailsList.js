@@ -9,8 +9,8 @@ const CommitsDetailsList = ({ commits, sort }) => {
     Object.entries(
       _.groupBy(
         commits.sort((a, b) => new Date(b.date) - new Date(a.date)),
-        (commit) => commit.date.substring(0, 10)
-      )
+        (commit) => commit.date.substring(0, 10),
+      ),
     ).map((item, index) => {
       const date = item[0];
       const commits = item[1];
@@ -23,7 +23,7 @@ const CommitsDetailsList = ({ commits, sort }) => {
               <CommitDetails commit={c} key={index}></CommitDetails>
             ))}
           </div>
-        </div>
+        </div>,
       );
     });
 

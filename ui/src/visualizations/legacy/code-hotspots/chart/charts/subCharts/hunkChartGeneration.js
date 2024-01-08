@@ -79,9 +79,9 @@ export default class hunkChartGeneration {
           maxValue,
           legendSteps,
           firstLineNumber,
-          displayProps
+          displayProps,
         );
-      }.bind(this)
+      }.bind(this),
     );
   }
 
@@ -128,12 +128,12 @@ export default class hunkChartGeneration {
             .style('stroke', '#00000033')
             .attr(
               'x1',
-              (commitKey - (compareMode ? 1 : 0)) * barWidth + (parseInt(commitKey - 1) === parseInt(columns) ? width / 2 : barWidth)
+              (commitKey - (compareMode ? 1 : 0)) * barWidth + (parseInt(commitKey - 1) === parseInt(columns) ? width / 2 : barWidth),
             )
             .attr('y1', -barHeight)
             .attr(
               'x2',
-              (commitKey - (compareMode ? 1 : 0)) * barWidth + (parseInt(commitKey - 1) === parseInt(columns) ? width / 2 : barWidth)
+              (commitKey - (compareMode ? 1 : 0)) * barWidth + (parseInt(commitKey - 1) === parseInt(columns) ? width / 2 : barWidth),
             )
             .attr('y2', barHeight * lines);
 
@@ -195,8 +195,8 @@ export default class hunkChartGeneration {
               return d.newLines < d.oldLines
                 ? HUNK_DELETION_COLOR_STROKE
                 : d.newLines > d.oldLines
-                ? HUNK_ADDITION_COLOR_STROKE
-                : HUNK_CHANGE_COLOR_STROKE;
+                  ? HUNK_ADDITION_COLOR_STROKE
+                  : HUNK_CHANGE_COLOR_STROKE;
             });
 
           for (let i = 0; i < lines; i++) {
@@ -298,7 +298,7 @@ export default class hunkChartGeneration {
           if (commitKey === data.data.length - 1) {
             Loading.hideBackgroundRefresh();
           }
-        }.bind(this)
+        }.bind(this),
       );
     }
   }

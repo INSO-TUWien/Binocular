@@ -26,10 +26,10 @@ export async function issuesModeData(currentBranch, issueId) {
 // and collects ownership data until it has the most recent data for every file.
 export function getBlameModules(commit, files, allCommits) {
   //this contains the timeline of all commits from the initial commit until the most recent one
-  let commitsLeft = commit.history.split(',').reverse();
+  const commitsLeft = commit.history.split(',').reverse();
   //filesLeft contains all files we want to get the ownership data from.
   let filesLeft = files;
-  let result = {};
+  const result = {};
 
   while (filesLeft.length !== 0 && commitsLeft.length !== 0) {
     //remove the first (latest) commit from the commitsLeft array

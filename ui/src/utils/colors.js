@@ -41,6 +41,6 @@ function calculateLightness(colorNum, colors) {
 
 export default function generateColorPattern(colorCount) {
   return Array.from({ length: colorCount }, (_, i) =>
-    chroma.hsl(calculateHue(i, colorCount), calculateSaturation(i, colorCount), calculateLightness(i, colorCount)).css()
+    chroma.hsl(calculateHue(i, colorCount), calculateSaturation(i, colorCount), calculateLightness(i, colorCount)).css(),
   );
 }

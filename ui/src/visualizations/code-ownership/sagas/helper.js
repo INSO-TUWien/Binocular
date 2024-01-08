@@ -32,7 +32,7 @@ export async function getPreviousFilenames(filenames, branch) {
     filePathsWithPreviousNames = filePathsWithPreviousNames.filter((pfn) => filenames.includes(pfn.path));
     //add these named to the filenames array
     for (const pfn of filePathsWithPreviousNames) {
-      let pfnObj = [];
+      const pfnObj = [];
       for (const oldFile of pfn.previousFileNames) {
         pfnObj.push(oldFile);
       }

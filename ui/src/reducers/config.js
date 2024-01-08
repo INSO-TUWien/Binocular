@@ -20,5 +20,5 @@ export default handleActions(
       });
     },
   },
-  { lastFetched: null, isFetching: null }
+  { lastFetched: null, isFetching: null },
 );

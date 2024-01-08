@@ -130,7 +130,7 @@ export default class CodeHotspots extends React.PureComponent {
         props.onSetBranches(resp);
         this.setState({ checkedOutBranch: activeBranch });
         this.forceUpdate();
-      }.bind(this)
+      }.bind(this),
     );
   }
 
@@ -213,15 +213,15 @@ export default class CodeHotspots extends React.PureComponent {
                   this.state.mode === 1
                     ? '-n [term] search developer name; ' + '-e [term] search developer email' + '-l [term] search line or multible lines'
                     : this.state.mode === 2
-                    ? '-t [term] search title; ' +
-                      '-d [term] search description; ' +
-                      '-i [term] search iid' +
-                      '-l [term] search line or multible lines'
-                    : '-m [term] search commit message; ' +
-                      '-s [term] search commit sha; ' +
-                      '-d [term] search developer; ' +
-                      '-b [term] search branch; ' +
-                      '-l [term] search line or multible lines'
+                      ? '-t [term] search title; ' +
+                        '-d [term] search description; ' +
+                        '-i [term] search iid' +
+                        '-l [term] search line or multible lines'
+                      : '-m [term] search commit message; ' +
+                        '-s [term] search commit sha; ' +
+                        '-d [term] search developer; ' +
+                        '-b [term] search branch; ' +
+                        '-l [term] search line or multible lines'
                 }
                 onSearchChanged={function (data) {
                   this.dataChanged = true;
@@ -365,7 +365,7 @@ export default class CodeHotspots extends React.PureComponent {
         this.state.selectedCommit.sha,
         this.state.gitlabSettings.projectId,
         this.state.gitlabSettings.apiKey,
-        this.state.gitlabSettings.server
+        this.state.gitlabSettings.server,
       ).then((sourceCode) => {
         if (
           this.state.path === this.prevPath &&
@@ -383,10 +383,10 @@ export default class CodeHotspots extends React.PureComponent {
             this.state.mode === 2
               ? searchAlgorithm.performIssueSearch(data, this.state.filteredData.searchTerm)
               : this.state.mode === 1
-              ? searchAlgorithm.performDeveloperSearch(data, this.state.filteredData.searchTerm)
-              : this.state.mode === 0
-              ? searchAlgorithm.performCommitSearch(data, this.state.filteredData.searchTerm)
-              : data;
+                ? searchAlgorithm.performDeveloperSearch(data, this.state.filteredData.searchTerm)
+                : this.state.mode === 0
+                  ? searchAlgorithm.performCommitSearch(data, this.state.filteredData.searchTerm)
+                  : data;
           if (this.state.selectedCompareCommit.sha !== '') {
             Loading.setState(50, 'Requesting Comparison Source Code');
 
@@ -396,7 +396,7 @@ export default class CodeHotspots extends React.PureComponent {
               this.state.branch,
               this.state.selectedCompareCommit.sha,
               '',
-              ''
+              '',
             ).then((secondarySourceCode) => {
               data.secondaryCode = secondarySourceCode;
 
@@ -443,9 +443,9 @@ export default class CodeHotspots extends React.PureComponent {
                         filteredData: data,
                       });
                     }.bind(this),
-                    0
+                    0,
                   );
-                }.bind(this)
+                }.bind(this),
               );
               break;
             case 2:
@@ -470,9 +470,9 @@ export default class CodeHotspots extends React.PureComponent {
                         filteredData: data,
                       });
                     }.bind(this),
-                    0
+                    0,
                   );
-                }.bind(this)
+                }.bind(this),
               );
               break;
             default:
@@ -503,9 +503,9 @@ export default class CodeHotspots extends React.PureComponent {
                         displayProps: currDisplayProps,
                       });
                     }.bind(this),
-                    0
+                    0,
                   );
-                }.bind(this)
+                }.bind(this),
               );
               break;
           }
@@ -521,7 +521,7 @@ export default class CodeHotspots extends React.PureComponent {
         chartUpdater.generateCharts(this, this.state.mode, this.state.filteredData, this.state.displayProps);
         Loading.remove();
       }.bind(this),
-      0
+      0,
     );
   }
 

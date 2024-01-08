@@ -27,5 +27,5 @@ export default handleActions(
     details: null,
     filterMergeCommits: true,
     onlyDisplayOwnership: false,
-  }
+  },
 );

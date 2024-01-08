@@ -15,5 +15,5 @@ export default handleActions(
     currentBranch: null,
     activeFiles: [],
     mode: 'absolute',
-  }
+  },
 );

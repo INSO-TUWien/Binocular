@@ -49,7 +49,7 @@ export default class Dashboard extends React.Component {
       .domain(
         d3.extent(this.state.commitData, function (d) {
           return Date.parse(d.date);
-        })
+        }),
       )
       .range([0, width]);
     chart
@@ -86,7 +86,7 @@ export default class Dashboard extends React.Component {
           .y(function (d) {
             return y(d.stats.additions);
           })
-          .curve(d3.curveBasis)
+          .curve(d3.curveBasis),
       );
 
     const y2 = d3
@@ -117,7 +117,7 @@ export default class Dashboard extends React.Component {
           .y(function (d) {
             return y2(d.stats.deletions);
           })
-          .curve(d3.curveBasis)
+          .curve(d3.curveBasis),
       );
   }
 }

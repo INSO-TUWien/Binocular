@@ -25,7 +25,7 @@ export function timestampedActionFactory(action: any) {
   return createAction(
     action,
     (id) => id,
-    () => ({ receivedAt: new Date() })
+    () => ({ receivedAt: new Date() }),
   );
 }
 

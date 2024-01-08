@@ -156,7 +156,7 @@ export default class columnChartGeneration {
                   'right',
                   w - (d.i * w) / currThis.combinedColumnData.length - 300 > 0
                     ? w - (d.i * w) / currThis.combinedColumnData.length - 300
-                    : 0 + 'px'
+                    : 0 + 'px',
                 )
                 .style('top', h + 'px');
               tooltip.selectAll('*').remove();
@@ -220,7 +220,7 @@ export default class columnChartGeneration {
                   'right',
                   w - (d.i * w) / currThis.combinedColumnData.length - 300 > 0
                     ? w - (d.i * w) / currThis.combinedColumnData.length - 300
-                    : 0 + 'px'
+                    : 0 + 'px',
                 )
                 .style('top', h + 'px');
               tooltip.selectAll('*').remove();
@@ -270,8 +270,8 @@ export default class columnChartGeneration {
             d.sha.localeCompare(currThis.state.selectedCommit.sha) === 0
               ? '#3273dc22'
               : d.sha.localeCompare(currThis.state.selectedCompareCommit.sha) === 0
-              ? '#4cd96422'
-              : '#EEEEEE88'
+                ? '#4cd96422'
+                : '#EEEEEE88',
           )
           .attr('class', 'sBar')
           .attr('x', (d, i) => (i * w) / currThis.combinedColumnData.length)
@@ -293,8 +293,8 @@ export default class columnChartGeneration {
             d.sha.localeCompare(currThis.state.selectedCommit.sha) === 0
               ? '#3273dc'
               : d.sha.localeCompare(currThis.state.selectedCompareCommit.sha) === 0
-              ? '#4cd964'
-              : '#00000000'
+                ? '#4cd964'
+                : '#00000000',
           );
 
         groupInfo
@@ -346,13 +346,13 @@ export default class columnChartGeneration {
                   '<hr>' +
                   '<div>Changes: ' +
                   d.value +
-                  '</div>'
+                  '</div>',
               )
               .style(
                 'right',
                 w - (d.i * w) / currThis.combinedColumnData.length - 300 > 0
                   ? w - (d.i * w) / currThis.combinedColumnData.length - 300
-                  : 0 + 'px'
+                  : 0 + 'px',
               )
               .style('top', h + 'px');
           })
@@ -369,14 +369,14 @@ export default class columnChartGeneration {
         setTimeout(
           function () {
             this.generateBranchView(data, columns, currThis);
-          }.bind(this)
+          }.bind(this),
         );
         break;
     }
     setTimeout(
       function () {
         this.updateColumnChart(data, columns, currThis, mode, legendSteps, displayProps);
-      }.bind(this)
+      }.bind(this),
     );
   }
 
@@ -475,8 +475,8 @@ export default class columnChartGeneration {
       .attr('fill', (d) =>
         ColorMixer.rainbow(
           branches.length,
-          branches.findIndex((v) => v.key.trim() === d.branch.trim())
-        )
+          branches.findIndex((v) => v.key.trim() === d.branch.trim()),
+        ),
       )
       .attr('class', 'sBar')
       .attr('x', (d, i) => (i * w) / currThis.combinedColumnData.length + w / (currThis.combinedColumnData.length * 2) - versionSize / 2)
@@ -487,8 +487,8 @@ export default class columnChartGeneration {
         d.sha.localeCompare(currThis.state.selectedCommit.sha) === 0
           ? '#3273dc'
           : d.sha.localeCompare(currThis.state.selectedCompareCommit.sha) === 0
-          ? '#4cd964'
-          : '#00000000'
+            ? '#4cd964'
+            : '#00000000',
       )
       .style('stroke-width', '2px')
       .attr('rx', '100%')
@@ -530,13 +530,13 @@ export default class columnChartGeneration {
               '<hr>' +
               '<div>Changes: ' +
               d.value +
-              '</div>'
+              '</div>',
           )
           .style(
             'right',
             w - (d.i * w) / currThis.combinedColumnData.length - 300 > 0
               ? w - (d.i * w) / currThis.combinedColumnData.length - 300
-              : 0 + 'px'
+              : 0 + 'px',
           )
           .style('top', h + 100 + 'px');
       })
@@ -584,21 +584,22 @@ export default class columnChartGeneration {
                 'stroke',
                 ColorMixer.rainbow(
                   branches.length,
-                  branches.findIndex((v) => v.key.trim() === branch.values[i].branch.trim())
-                )
+                  branches.findIndex((v) => v.key.trim() === branch.values[i].branch.trim()),
+                ),
               )
               .style('stroke-width', 5)
               .style('stroke-linecap', 'round')
               .attr('y1', h / 2)
               .attr(
                 'x1',
-                w / (currThis.combinedColumnData.length * 2) + ((parent.column - firstCommitCount) * w) / currThis.combinedColumnData.length
+                w / (currThis.combinedColumnData.length * 2) +
+                  ((parent.column - firstCommitCount) * w) / currThis.combinedColumnData.length,
               )
               .attr('y2', h / 2 + currOffset)
               .attr(
                 'x2',
                 w / (currThis.combinedColumnData.length * 2) +
-                  ((parent.column - firstCommitCount + 0.25) * w) / currThis.combinedColumnData.length
+                  ((parent.column - firstCommitCount + 0.25) * w) / currThis.combinedColumnData.length,
               );
 
             //straight between the diaogonales
@@ -608,8 +609,8 @@ export default class columnChartGeneration {
                 'stroke',
                 ColorMixer.rainbow(
                   branches.length,
-                  branches.findIndex((v) => v.key.trim() === branch.values[i].branch.trim())
-                )
+                  branches.findIndex((v) => v.key.trim() === branch.values[i].branch.trim()),
+                ),
               )
               .style('stroke-width', 5)
               .style('stroke-linecap', 'round')
@@ -617,7 +618,7 @@ export default class columnChartGeneration {
               .attr(
                 'x1',
                 w / (currThis.combinedColumnData.length * 2) +
-                  ((parent.column - firstCommitCount + 0.25) * w) / currThis.combinedColumnData.length
+                  ((parent.column - firstCommitCount + 0.25) * w) / currThis.combinedColumnData.length,
               )
               .attr('y2', h / 2 + currOffset)
               .attr('x2', w / (currThis.combinedColumnData.length * 2) + ((c1 - 0.25) * w) / currThis.combinedColumnData.length);
@@ -629,8 +630,8 @@ export default class columnChartGeneration {
                 'stroke',
                 ColorMixer.rainbow(
                   branches.length,
-                  branches.findIndex((v) => v.key.trim() === branch.values[i].branch.trim())
-                )
+                  branches.findIndex((v) => v.key.trim() === branch.values[i].branch.trim()),
+                ),
               )
               .style('stroke-width', 5)
               .style('stroke-linecap', 'round')
@@ -645,15 +646,16 @@ export default class columnChartGeneration {
                 'stroke',
                 ColorMixer.rainbow(
                   branches.length,
-                  branches.findIndex((v) => v.key.trim() === branch.values[i].branch.trim())
-                )
+                  branches.findIndex((v) => v.key.trim() === branch.values[i].branch.trim()),
+                ),
               )
               .style('stroke-width', 5)
               .style('stroke-linecap', 'round')
               .attr('y1', h / 2)
               .attr(
                 'x1',
-                w / (currThis.combinedColumnData.length * 2) + ((parent.column - firstCommitCount) * w) / currThis.combinedColumnData.length
+                w / (currThis.combinedColumnData.length * 2) +
+                  ((parent.column - firstCommitCount) * w) / currThis.combinedColumnData.length,
               )
               .attr('y2', h / 2)
               .attr('x2', w / (currThis.combinedColumnData.length * 2) + (c1 * w) / currThis.combinedColumnData.length);
@@ -669,8 +671,8 @@ export default class columnChartGeneration {
             'stroke',
             ColorMixer.rainbow(
               branches.length,
-              branches.findIndex((v) => v.key.trim() === branch.values[i].branch.trim())
-            )
+              branches.findIndex((v) => v.key.trim() === branch.values[i].branch.trim()),
+            ),
           )
           .style('stroke-width', 5)
           .style('stroke-linecap', 'round')
@@ -689,8 +691,8 @@ export default class columnChartGeneration {
             'stroke',
             ColorMixer.rainbow(
               branches.length,
-              branches.findIndex((v) => v.key.trim() === branch.values[i].branch.trim())
-            )
+              branches.findIndex((v) => v.key.trim() === branch.values[i].branch.trim()),
+            ),
           )
           .style('stroke-width', 5)
           .style('stroke-linecap', 'round')
@@ -705,8 +707,8 @@ export default class columnChartGeneration {
             'stroke',
             ColorMixer.rainbow(
               branches.length,
-              branches.findIndex((v) => v.key.trim() === branch.values[i].branch.trim())
-            )
+              branches.findIndex((v) => v.key.trim() === branch.values[i].branch.trim()),
+            ),
           )
           .style('stroke-width', 5)
           .style('stroke-linecap', 'round')
@@ -721,8 +723,8 @@ export default class columnChartGeneration {
             'stroke',
             ColorMixer.rainbow(
               branches.length,
-              branches.findIndex((v) => v.key.trim() === branch.values[i].branch.trim())
-            )
+              branches.findIndex((v) => v.key.trim() === branch.values[i].branch.trim()),
+            ),
           )
           .style('stroke-width', 5)
           .style('stroke-linecap', 'round')

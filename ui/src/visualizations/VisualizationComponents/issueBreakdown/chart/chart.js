@@ -132,11 +132,11 @@ export default class IssueBreakdown extends React.Component {
         const nextTimestamp = next.toDate().getTime();
 
         const openedIssues = filteredIssues.filter(
-          (issue) => Date.parse(issue.createdAt) >= currTimestamp && Date.parse(issue.createdAt) < nextTimestamp
+          (issue) => Date.parse(issue.createdAt) >= currTimestamp && Date.parse(issue.createdAt) < nextTimestamp,
         );
 
         const closedIssues = filteredIssues.filter(
-          (issue) => Date.parse(issue.closedAt) >= currTimestamp && Date.parse(issue.closedAt) < nextTimestamp
+          (issue) => Date.parse(issue.closedAt) >= currTimestamp && Date.parse(issue.closedAt) < nextTimestamp,
         );
 
         data.push({

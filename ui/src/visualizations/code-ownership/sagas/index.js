@@ -84,5 +84,5 @@ export const fetchCodeOwnershipData = fetchFactory(
   },
   requestCodeOwnershipData,
   receiveCodeOwnershipData,
-  receiveCodeOwnershipDataError
+  receiveCodeOwnershipDataError,
 );

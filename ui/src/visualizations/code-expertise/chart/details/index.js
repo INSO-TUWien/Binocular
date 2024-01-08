@@ -69,7 +69,7 @@ const Details = ({ devData }) => {
     devOptions.push(
       <option key={-1} value={null}>
         Select a Developer
-      </option>
+      </option>,
     );
 
     Object.entries(devData).map((item, index) => {
@@ -78,7 +78,7 @@ const Details = ({ devData }) => {
       devOptions.push(
         <option key={index} value={name}>
           {displayName}
-        </option>
+        </option>,
       );
     });
 
@@ -141,7 +141,7 @@ const Details = ({ devData }) => {
                       text={
                         devDetails.linesOwned
                           ? `${devDetails.linesOwned} (${((devDetails.linesOwned / devDetails.additions) * 100).toFixed(
-                              2
+                              2,
                             )}% of added lines)`
                           : '0 (0% of added lines)'
                       }
@@ -153,14 +153,14 @@ const Details = ({ devData }) => {
                   <GeneralDetailsData
                     label="Good Commits"
                     text={`${devDetails.goodCommitsNum} (${((devDetails.goodCommitsNum / devDetails.commitsNum) * 100).toFixed(
-                      2
+                      2,
                     )}% of commits)`}
                   />
 
                   <GeneralDetailsData
                     label="Bad Commits"
                     text={`${devDetails.badCommitsNum} (${((devDetails.badCommitsNum / devDetails.commitsNum) * 100).toFixed(
-                      2
+                      2,
                     )}% of commits)`}
                   />
                 </div>

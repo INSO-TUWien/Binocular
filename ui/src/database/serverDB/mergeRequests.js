@@ -53,7 +53,7 @@ export default class MergeRequests {
               }
             }
           }`,
-          { page, perPage, since, until }
+          { page, perPage, since, until },
         )
         .then((resp) => resp.mergeRequests);
     };

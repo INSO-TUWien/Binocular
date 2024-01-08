@@ -76,7 +76,7 @@ const ModuleLine = ({
             key={key}
             globalActiveFiles={globalActiveFiles}
             setActiveFiles={setActiveFiles}
-          />
+          />,
         );
       } else {
         childNodes.push(
@@ -88,7 +88,7 @@ const ModuleLine = ({
             key={key}
             globalActiveFiles={globalActiveFiles}
             setActiveFiles={setActiveFiles}
-          />
+          />,
         );
       }
     }
@@ -119,7 +119,7 @@ const ModuleLine = ({
   useEffect(() => {
     if (!buttonWidth || buttonWidth === 0) return;
 
-    let ownershipLine = d3
+    const ownershipLine = d3
       .create('svg')
       .attr('width', '100%')
       .attr('height', '0px')

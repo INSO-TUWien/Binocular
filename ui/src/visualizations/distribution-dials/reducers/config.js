@@ -24,5 +24,5 @@ export default handleActions(
     filterCommitsChanges: true,
     filterCommitsChangesCutoff: 1000,
     colorSegments: false,
-  }
+  },
 );

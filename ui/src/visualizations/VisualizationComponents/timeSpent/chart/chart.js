@@ -155,7 +155,7 @@ export default class TimeSpentChart extends React.Component {
         const currTimestamp = curr.toDate().getTime();
         const nextTimestamp = next.toDate().getTime();
         const relevantNotes = timeTrackingData.filter(
-          (entry) => Date.parse(entry.createdAt) >= currTimestamp && Date.parse(entry.createdAt) < nextTimestamp
+          (entry) => Date.parse(entry.createdAt) >= currTimestamp && Date.parse(entry.createdAt) < nextTimestamp,
         );
 
         const dataEntry = {

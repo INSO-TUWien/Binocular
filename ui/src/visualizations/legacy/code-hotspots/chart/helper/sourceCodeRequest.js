@@ -16,7 +16,7 @@ export default class SourceCodeRequest {
             '/repository/files/' +
             path.replaceAll('/', '%2F') +
             '/raw?ref=' +
-            (sha === '' ? branch : sha)
+            (sha === '' ? branch : sha),
         );
         sourceCodeRequest.setRequestHeader('PRIVATE-TOKEN', apiKey);
         sourceCodeRequest.onload = function () {
@@ -46,7 +46,7 @@ export default class SourceCodeRequest {
             .replace('github.com', 'raw.githubusercontent.com')
             .replace('/blob', '')
             .replace(checkedOutBranch, sha === '' ? branch : sha),
-          true
+          true,
         );
         sourceCodeRequest.onload = function () {
           if (sourceCodeRequest.readyState === 4) {
