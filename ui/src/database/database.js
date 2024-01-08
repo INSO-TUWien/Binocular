@@ -1,21 +1,7 @@
+'use strict';
 import { graphQl } from '../utils';
 import ServerDB from './serverDB';
 import LocalDB from './localDB';
-
-export interface IDatabase {
-  initDB(): void
-}
-
-type Dependencies = {
-  database: IDatabase;
-};
-
-const makeInitDB =
-  ({ database }: Dependencies) => () => {
-    return database.initDB()
-  };
-
-export { makeInitDB };
 
 export default class Database {
   static async initDB() {

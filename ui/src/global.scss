@@ -1,23 +1,5 @@
 @import 'bulma/bulma.sass';
 
-html,
-body {
-  height: 100vh;
-  display: flex;
-  flex: 1;
-}
- 
-#root {
-  display: flex;
-  flex: 1;
-  flex-direction: column;
-}
-
-img, svg {
-  min-width: 100%;
-  object-fit: contain;
-}
-
 .hidden {
   display: none;
 }
