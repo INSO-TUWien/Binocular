@@ -34,6 +34,8 @@ COPY --chown=node:node package.json package.json
 
 RUN echo "{\"repo\":{\"name\":\"TODO: remove static context.json\"}}" > ./ui/config/context.json
 
+RUN npm install
+
 # This seems to be the most expensive step
 RUN npm run ${BUILD_CMD}
 
