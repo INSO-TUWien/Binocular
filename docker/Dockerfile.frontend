@@ -10,6 +10,7 @@ RUN --mount=type=bind,src=./docker/frontend-mem-nag.sh,target=/frontend-mem-nag.
 
 RUN --mount=type=bind,src=./package-lock.json,target=./package-lock.json,readonly \
     --mount=type=bind,src=./package.json,target=./package.json,readonly \
+    --mount=type=bind,src=./ui/package.json,target=./ui/package.json,readonly \
     npm ci --omit=optional --ignore-scripts && \
     npm run install:frontend && \
     npm cache clean --force
