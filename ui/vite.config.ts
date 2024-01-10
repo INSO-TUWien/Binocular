@@ -72,7 +72,7 @@ export default defineConfig({
       },
     },
     react(),
-    viteSingleFile()
+    viteSingleFile(),
   ],
   css: {
     postcss: {
