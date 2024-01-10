@@ -6,11 +6,12 @@ import { NodeGlobalsPolyfillPlugin } from '@esbuild-plugins/node-globals-polyfil
 import { NodeModulesPolyfillPlugin } from '@esbuild-plugins/node-modules-polyfill';
 import { alias as viteAlias } from './vite.alias';
 import { nodePolyfills } from 'vite-plugin-node-polyfills';
+import { viteSingleFile } from 'vite-plugin-singlefile';
 
 // https://vitejs.dev/config/
 export default defineConfig({
   root: './',
-  base: './',
+  base: '',
   server: {
     port: 8080,
     proxy: {
@@ -71,6 +72,7 @@ export default defineConfig({
       },
     },
     react(),
+    viteSingleFile()
   ],
   css: {
     postcss: {
