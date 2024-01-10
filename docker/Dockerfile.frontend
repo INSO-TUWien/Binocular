@@ -30,12 +30,12 @@ COPY --from=install --chown=node:node /app/binocular-frontend/node_modules ./nod
 
 COPY --chown=node:node ./LICENSE ./LICENSE
 COPY --chown=node:node ./ui ./ui
+COPY --chown=node:node package.json package.json
 
 RUN echo "{\"repo\":{\"name\":\"TODO: remove static context.json\"}}" > ./ui/config/context.json
 
 # This seems to be the most expensive step
-RUN --mount=type=bind,src=./package.json,target=./package.json,readonly \
-    npm run ${BUILD_CMD}
+RUN npm run ${BUILD_CMD}
 
 FROM nginx:1.25.3-alpine as ngx
 
