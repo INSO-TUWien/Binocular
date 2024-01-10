@@ -1,19 +1,16 @@
 import { defineConfig, transformWithEsbuild } from 'vite';
 import react from '@vitejs/plugin-react-swc';
-// import react from "@vitejs/plugin-react";
 import autoprefixer from 'autoprefixer';
-import rollupNodePolyFill from 'rollup-plugin-node-polyfills';
 import { nodeResolve } from '@rollup/plugin-node-resolve';
-// import { builtinModules, createRequire } from "module";
 import { NodeGlobalsPolyfillPlugin } from '@esbuild-plugins/node-globals-polyfill';
 import { NodeModulesPolyfillPlugin } from '@esbuild-plugins/node-modules-polyfill';
 import { alias as viteAlias } from './vite.alias';
-//import { nodePolyfills } from 'vite-plugin-node-polyfills';
+import { nodePolyfills } from 'vite-plugin-node-polyfills';
 
 // https://vitejs.dev/config/
 export default defineConfig({
   root: './',
-  base: '',
+  base: './',
   server: {
     port: 8080,
     proxy: {
@@ -34,30 +31,28 @@ export default defineConfig({
   },
   build: {
     minify: false,
-    sourcemap: true,
+    sourcemap: false, //generating the sourcemap uses way too much memory
     commonjsOptions: {
       include: /node_modules/,
       requireReturnsDefault: 'auto',
     },
-    outDir: './dist',
+    emptyOutDir: true,
+    outDir: '../dist',
     rollupOptions: {
       cache: false,
+      treeshake: false,
       output: {
-        format: 'iife',
+        format: 'esm',
       },
       plugins: [
-        rollupNodePolyFill({
-          sourceMap: true,
-          crypto: true,
-        }),
         nodeResolve({
           browser: true,
         }),
-        // commonjs(),
       ],
     },
   },
   plugins: [
+    nodePolyfills(),
     {
       // source: https://stackblitz.com/edit/vitejs-vite-ka3qkc?file=vite.config.js
       // source: https://github.com/vitejs/vite/discussions/3448#discussioncomment-5904031

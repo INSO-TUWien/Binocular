@@ -5,8 +5,8 @@
   "scripts": {
     "dev": "vite dev --mode development",
     "dev:debug": "vite dev --mode development --debug",
-    "build:dev": "tsc && vite build --mode development --debug",
-    "build:prod": "tsc && vite build --mode production --debug",
+    "build:dev": "node --max_old_space_size=32768 ./node_modules/vite/bin/vite.js build --mode development --debug",
+    "build:prod": "node --max_old_space_size=32768 ./node_modules/vite/bin/vite.js build --mode production --debug",
     "preview": "vite preview --mode development",
     "preview:prod": "vite preview",
     "check": "eslint .",
@@ -86,13 +86,12 @@
   "devDependencies": {
     "@esbuild-plugins/node-globals-polyfill": "^0.2.3",
     "@esbuild-plugins/node-modules-polyfill": "^0.2.2",
-    "@rollup/plugin-commonjs": "^25.0.7",
     "@rollup/plugin-node-resolve": "^15.2.3",
     "@types/react": "^18.2.37",
     "@types/react-dom": "^18.2.15",
     "@typescript-eslint/eslint-plugin": "^6.10.0",
     "@typescript-eslint/parser": "^6.10.0",
-    "@vitejs/plugin-react": "^4.0.3",
+    "@vitejs/plugin-react": "^4.2.1",
     "@vitejs/plugin-react-swc": "^3.5.0",
     "eslint": "^8.53.0",
     "eslint-config-lambdas": "^0.3.0",
@@ -101,10 +100,10 @@
     "eslint-plugin-react": "^7.33.2",
     "prettier": "^3.1.1",
     "react-error-overlay": "^6.0.10",
-    "rollup-plugin-node-polyfills": "^0.2.1",
     "sass": "^1.69.5",
     "typescript": "^5.2.2",
-    "vite": "^5.0.0",
+    "vite": "^5.0.11",
+    "vite-plugin-babel": "^1.2.0",
     "vite-plugin-node-polyfills": "^0.17.0"
   },
   "overrides": {
