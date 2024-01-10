@@ -29,10 +29,9 @@ RUN --mount=type=bind,src=./docker/frontend-mem-nag.sh,target=/frontend-mem-nag.
 WORKDIR /app/binocular-frontend
 
 COPY --from=install --chown=node:node /app/binocular-frontend/node_modules ./node_modules
-
+COPY --from=install --chown=node:node /app/binocular-frontend/ui/node_modules ./ui/node_modules
 COPY --chown=node:node ./LICENSE ./LICENSE
 COPY --chown=node:node ./ui ./ui
-COPY --chown=node:node package.json package.json
 
 RUN echo "{\"repo\":{\"name\":\"TODO: remove static context.json\"}}" > ./ui/config/context.json
 
