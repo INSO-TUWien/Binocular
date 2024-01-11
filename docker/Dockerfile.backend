@@ -10,7 +10,11 @@ RUN --mount=type=bind,src=./docker/frontend-mem-nag.sh,target=/frontend-mem-nag.
 
 RUN --mount=type=bind,src=./package-lock.json,target=./package-lock.json,readonly \
     --mount=type=bind,src=./package.json,target=./package.json,readonly \
+    --mount=type=bind,src=./lib/package.json,target=./lib/package.json,readonly \
+    --mount=type=bind,src=./ui/package.json,target=./ui/package.json,readonly \
     npm ci --omit=optional --ignore-scripts && \
+    npm run install:backend && \
+    npm run install:frontend && \
     npm cache clean --force
 # RUN wget https://gobinaries.com/tj/node-prune --output-document - | /bin/sh && node-prune
 
@@ -26,6 +30,8 @@ WORKDIR /app/binocular
 RUN chown node:node -R /app/binocular
 
 COPY --from=install --chown=node:node /app/binocular/node_modules ./node_modules
+COPY --from=install --chown=node:node /app/binocular/lib/node_modules ./lib/node_modules
+COPY --from=install --chown=node:node /app/binocular/ui/node_modules ./ui/node_modules
 
 # folders
 COPY --chown=node:node ./foxx ./foxx
