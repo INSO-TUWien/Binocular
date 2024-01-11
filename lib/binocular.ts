@@ -715,7 +715,7 @@ function runBackend() {
 }
 
 function runFrontend() {
-  const fronted = spawn('webpack serve --config webpack.dev.js', [], { shell: true });
+  const fronted = spawn('npm run dev:frontend', [], { shell: true, cwd: __dirname + '/..' });
   fronted.stdout.on('data', (data) => {
     console.log(chalk.cyan(`${data}`));
   });
@@ -728,7 +728,7 @@ function runFrontend() {
 }
 
 function buildFrontend(mode: string) {
-  const fronted = spawn(`npm run build:${mode}`, [], { shell: true });
+  const fronted = spawn(`npm run build:${mode}`, [], { shell: true, cwd: __dirname + '/..' });
   fronted.stdout.on('data', (data) => {
     console.log(chalk.cyan(`${data}`));
   });
