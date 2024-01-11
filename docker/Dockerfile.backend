@@ -44,7 +44,7 @@ COPY --chown=node:node ./package.json ./package.json
 COPY --chown=node:node ./package-lock.json ./package-lock.json
 COPY --chown=node:node ./LICENSE ./LICENSE
 
-RUN npm install -g .
+# RUN npm install -g .
 RUN npm install -g tsx
 
 RUN mkdir -p /app/binocular/ui/db_export
