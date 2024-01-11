@@ -28,7 +28,6 @@ RUN chown node:node -R /app/binocular
 COPY --from=install --chown=node:node /app/binocular/node_modules ./node_modules
 
 # folders
-COPY --chown=node:node ./cli ./cli
 COPY --chown=node:node ./foxx ./foxx
 COPY --chown=node:node ./lib ./lib
 COPY --chown=node:node ./services ./services
