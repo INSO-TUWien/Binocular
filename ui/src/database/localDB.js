@@ -17,7 +17,7 @@ import Branches from './localDB/branches';
 import Modules from './localDB/modules';
 import Stakeholders from './localDB/stakeholders';
 
-/// #if ENV === 'offline'
+// #v-ifdef VITE_OFFLINE
 import branches from '../../db_export/branches.json';
 import branchesFiles from '../../db_export/branches-files.json';
 import branchesFilesFiles from '../../db_export/branches-files-files.json';
@@ -56,7 +56,7 @@ const relations = {
   'branches-files': branchesFiles,
   'branches-files-files': branchesFilesFiles,
 };
-/// #endif
+// #v-endif
 
 // create database, index on _id and triple store
 const db = new PouchDB('Binocular_collections', { adapter: 'memory' });

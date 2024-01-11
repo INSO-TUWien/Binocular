@@ -7,6 +7,7 @@ import { NodeModulesPolyfillPlugin } from '@esbuild-plugins/node-modules-polyfil
 import { alias as viteAlias } from './vite.alias';
 import { nodePolyfills } from 'vite-plugin-node-polyfills';
 import { viteSingleFile } from 'vite-plugin-singlefile';
+import ConditionalCompile from 'vite-plugin-conditional-compiler';
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -72,6 +73,7 @@ export default defineConfig({
       },
     },
     react(),
+    ConditionalCompile({ include: ['./src/database/localDB.js'] }),
     viteSingleFile(),
   ],
   css: {

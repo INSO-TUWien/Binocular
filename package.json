@@ -25,7 +25,8 @@
     "coverage:frontend": "cd ui && npm run coverage",
     "collect-coverage": "./scripts/collect-coverage.js",
     "build:dev": "cd ui && npm run build:dev",
-    "build:prod": "cd ui && npm run build:prod"
+    "build:prod": "cd ui && npm run build:prod",
+    "build:offline": "cd ui && npm run build:offline"
   },
   "repository": {
     "type": "git",
