@@ -59,8 +59,6 @@ import CommitBuildConnection from './models/CommitBuildConnection';
 import ConfigurationError from './errors/ConfigurationError';
 import DatabaseError from './errors/DatabaseError';
 import GateWayService from './utils/gateway-service';
-// import * as grpc from '@grpc/grpc-js';
-// import * as protoLoader from '@grpc/proto-loader';
 import * as projectStructureHelper from './utils/projectStructureHelper';
 
 import getDbExportEndpoint from './endpoints/get-db-export';
@@ -71,7 +69,6 @@ import * as setupDb from './core/db/setup-db';
 
 import { fileURLToPath } from 'url';
 import { spawn } from 'child_process';
-// import { options } from 'yargs';
 import express from 'express';
 import { FSWatcher } from 'fs-extra';
 import vcs from './indexers/vcs';
@@ -79,6 +76,7 @@ import its from './indexers/its';
 import ci from './indexers/ci';
 import Repository from './core/provider/git';
 import chalk from 'chalk';
+
 cli.parse(
   (targetPath, options) => {
     console.log(`Running binocular with following options on path "${targetPath}":`);
@@ -96,7 +94,7 @@ cli.parse(
   },
   (options) => {
     if (options.runIndexer) {
-      projectStructureHelper.deleteDbExport();
+      projectStructureHelper.deleteDbExport(__dirname + '/ui');
       const indexerOptions = {
         backend: true,
         frontend: false,
@@ -185,7 +183,7 @@ function runBackend() {
     context.repo = repository;
     config.setSource(repository.pathFromRoot('.binocularrc'));
     // configure everything in the context
-    setupDb.default(config, ctx);
+    context.db = setupDb.default(config.get().arango);
     if (databaseConnection === null) {
       while (databaseConnection === null) {
         try {
@@ -394,7 +392,10 @@ function runBackend() {
 
       await (Issue as any).deduceStakeholders();
       createManualIssueReferences(config.get('issueReferences'));
-      projectStructureHelper.checkProjectStructureAndFix(ctx);
+      if (context.argv.export) {
+        projectStructureHelper.deleteDbExport(__dirname + '/ui');
+        projectStructureHelper.createAndFillDbExportFolder(context.db, __dirname + '/ui');
+      }
 
       //now that the indexers have finished, we have VCS, ITS and CI data and can connect them.
       // for that purpose, references between e.g. issues and commits have been stored in the collections.

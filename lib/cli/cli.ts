@@ -3,6 +3,7 @@ import figlet from 'figlet';
 import { Argument, Command, Option } from 'commander';
 import path from 'path';
 import * as setup from './setup.js';
+import { exportDB } from './exportDB';
 
 import package_json from '../package.json';
 
@@ -58,7 +59,7 @@ function parse(
     .addOption(new Option('--clean', 'clear db before execution').default(false))
     .addOption(new Option('--no-its', 'disable ITS indexing').default(true))
     .addOption(new Option('--no-ci', 'disable CI indexing').default(true))
-    .addOption(new Option('--no-export', 'disable the default db export').default(true))
+    .addOption(new Option('--export', 'export the db to the default folder of binocular').default(false))
     .addOption(new Option('--no-server', 'disable the backed webserver (when used binocular quits after indexing)').default(true))
     .action((targetPath, options) => {
       run(path.resolve(targetPath ? targetPath : '.'), options);
@@ -71,6 +72,15 @@ function parse(
     .addOption(new Option('-m, --build-mode <mode>', 'define the build mode').choices(['dev', 'prod', 'offline']).default('offline'))
     .action((options) => {
       build(options);
+    });
+
+  cli
+    .command('export')
+    .addArgument(new Argument('[targetPath]', 'relative path to where the export should be saved'))
+    .description('export the database of binocular')
+    .addOption(new Option('-db, --database <repo>', 'export specific database'))
+    .action((targetPath, options) => {
+      exportDB(targetPath, options);
     });
 
   cli.parse();

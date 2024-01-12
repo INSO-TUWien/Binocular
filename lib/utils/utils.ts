@@ -16,14 +16,18 @@ export function createZipStream(directory: string) {
   return pass;
 }
 
-export async function getDbExport(db: Db) {
+export async function getDbExport(db: any) {
   const exportJson: any = {};
   const collections = await db.collections();
-  for (const collection of collections) {
-    const name = collection._name;
-    exportJson[name.replaceAll('-', '_')] = await (await db.query('FOR i IN @@collection RETURN i', { '@collection': name })).all();
-  }
+  if (collections !== undefined) {
+    for (const collection of collections) {
+      const name = collection.name;
 
+      exportJson[name.replaceAll('-', '_')] = await (
+        (await db.query('FOR i IN @@collection RETURN i', { '@collection': name })) ?? { all: () => Promise.resolve({}) }
+      ).all();
+    }
+  }
   return exportJson;
 }
 
