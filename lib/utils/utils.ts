@@ -2,7 +2,6 @@
 
 import archiver from 'archiver';
 import stream from 'stream';
-import Db from '../core/db/db';
 
 export function createZipStream(directory: string) {
   const zip = archiver('zip');

@@ -2,12 +2,11 @@
 
 import fs from 'fs';
 import * as utils from './utils';
-import Moment from 'moment';
 import console_stamp from 'console-stamp';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import Context from './context';
-import Db from './core/db/db';
+import Db from '../core/db/db';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
