@@ -5,11 +5,11 @@ import cli from './cli/cli';
 
 // init timestamp for output
 import Moment from 'moment';
-import log_timestamp from 'log-timestamp';
+import console_stamp from 'console-stamp';
 
 const startTime = Moment.now();
 console.log('Start Time: ' + Moment(startTime).format());
-log_timestamp(() => '[' + Moment().format('DD-MM-YYYY, HH:mm:ss') + ']');
+console_stamp(console, { format: ':date(yyyy/mm/dd HH:MM:ss)' });
 
 function threadLog(thread: number, message: string) {
   console.log(`[thread=${thread}]`, message);

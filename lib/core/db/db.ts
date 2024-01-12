@@ -1,7 +1,7 @@
 'use strict';
 
 import _ from 'lodash';
-import * as utils from '../../utils';
+import * as utils from '../../utils/utils.ts';
 import { Database } from 'arangojs';
 import debug from 'debug';
 import { DocumentCollection, EdgeCollection } from 'arangojs/collection';
@@ -26,14 +26,14 @@ class Db {
           if (!_.includes(dbs, name)) {
             return this.arangoServer.createDatabase(name);
           }
-        }.bind(this)
+        }.bind(this),
       )
       .then(
         function () {
           this.arango = this.arangoServer.database(name);
           context.emit('ensure:db', this);
           return this.arango;
-        }.bind(this)
+        }.bind(this),
       );
   }
 
@@ -46,7 +46,7 @@ class Db {
       return Promise.all(
         collections.map((collection: DocumentCollection | EdgeCollection) => {
           return Promise.resolve(collection.truncate());
-        })
+        }),
       );
     });
   }
@@ -102,7 +102,7 @@ class Db {
           log(`${mountPoint} does not exist, creating`);
           return this.arango.installService(mountPoint, stream);
         }
-      }.bind(this)
+      }.bind(this),
     );
   }
 

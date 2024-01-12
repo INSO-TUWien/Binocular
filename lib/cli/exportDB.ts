@@ -1,12 +1,12 @@
 import inquirer from 'inquirer';
 import chalk from 'chalk';
 import path from 'path';
-import * as setupDb from '../lib/core/db/setup-db';
-import DatabaseError from '../lib/errors/DatabaseError';
-import ctx from '../lib/context';
-import * as projectStructureHelper from '../lib/projectStructureHelper';
+import * as setupDb from '../core/db/setup-db';
+import DatabaseError from '../errors/DatabaseError';
+import ctx from '../utils/context';
+import * as projectStructureHelper from '../utils/projectStructureHelper';
 import fs from 'fs';
-import Db from '../lib/core/db/db';
+import Db from '../core/db/db';
 import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
