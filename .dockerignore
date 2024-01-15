@@ -1,6 +1,6 @@
 coverage/
 node_modules/
-ui/db_export/**
+binocular-frontend/db_export/**
 **/.DS_Store
 **/.eslintignore
 **/.eslintrc.yml

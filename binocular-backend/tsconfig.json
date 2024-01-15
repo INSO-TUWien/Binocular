@@ -1,0 +1,31 @@
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "useDefineForClassFields": true,
+    // "binocular-backend": ["ES2021.String", "dom", "dom.iterable", "esnext"],
+    "lib": ["ES2020", "DOM", "DOM.Iterable","ES2021.String"],
+    "module": "ESNext",
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+
+    /* Bundler mode */
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noEmit": true,
+    "jsx": "react-jsx",
+    "allowJs": true,
+    "allowSyntheticDefaultImports": true, // TODO should not be true in the future!
+
+    /* Linting */
+    "strict": true,
+    // "noUnusedLocals": false,
+    // "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true,
+    "noImplicitAny": false, // TODO should be set to true!
+    "forceConsistentCasingInFileNames": true,
+    "noImplicitThis": false,
+    "include": ["/"]
+  },
+}

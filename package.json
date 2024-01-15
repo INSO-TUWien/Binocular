@@ -4,36 +4,36 @@
   "description": "",
   "scripts": {
     "postinstall": "npm run install:backend && npm run install:frontend",
-    "install:backend": "cd lib && npm install",
-    "install:frontend": "cd ui && npm install",
+    "install:backend": "cd binocular-backend && npm install",
+    "install:frontend": "cd binocular-frontend && npm install",
     "dev": "npm run dev:backend & npm run dev:frontend",
     "dev:concurrently": "concurrently --kill-others -P 'npm run dev:frontend' 'npm run dev:backend' --",
-    "dev:backend": "cd lib && npm run dev",
-    "dev:frontend": "cd ui && npm run dev",
-    "dev:frontend-debug": "cd ui && npm run dev:debug",
+    "dev:backend": "cd binocular-backend && npm run dev",
+    "dev:frontend": "cd binocular-frontend && npm run dev",
+    "dev:frontend-debug": "cd binocular-frontend && npm run dev:debug",
     "check": "npm run check:backend && npm run check:frontend",
-    "check:backend": "cd lib && npm run check",
-    "check:frontend": "cd ui && npm run check",
+    "check:backend": "cd binocular-backend && npm run check",
+    "check:frontend": "cd binocular-frontend && npm run check",
     "fix": "npm run fix:backend && npm run fix:frontend",
-    "fix:backend": "cd lib && npm run fix",
-    "fix:frontend": "cd ui && npm run fix",
+    "fix:backend": "cd binocular-backend && npm run fix",
+    "fix:frontend": "cd binocular-frontend && npm run fix",
     "test": "npm run test:backend && npm run test:frontend",
-    "test:backend": "cd lib && npm run test",
-    "test:frontend": "cd ui && npm run test",
+    "test:backend": "cd binocular-backend && npm run test",
+    "test:frontend": "cd binocular-frontend && npm run test",
     "coverage": "npm run coverage:backend && npm run coverage:frontend && npm run collect-coverage",
-    "coverage:backend": "cd lib && npm run coverage",
-    "coverage:frontend": "cd ui && npm run coverage",
+    "coverage:backend": "cd binocular-backend && npm run coverage",
+    "coverage:frontend": "cd binocular-frontend && npm run coverage",
     "collect-coverage": "./scripts/collect-coverage.js",
-    "build:dev": "cd ui && npm run build:dev",
-    "build:prod": "cd ui && npm run build:prod",
-    "build:offline": "cd ui && npm run build:offline"
+    "build:dev": "cd binocular-frontend && npm run build:dev",
+    "build:prod": "cd binocular-frontend && npm run build:prod",
+    "build:offline": "cd binocular-frontend && npm run build:offline"
   },
   "repository": {
     "type": "git",
     "url": "https://github.com/INSO-TUWien/Binocular.git"
   },
   "bin": {
-    "binocular": "/lib/index.js"
+    "binocular": "/binocular-backend/index.js"
   },
   "contributors": [
     {
