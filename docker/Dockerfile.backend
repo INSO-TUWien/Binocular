@@ -10,8 +10,8 @@ RUN --mount=type=bind,src=./docker/frontend-mem-nag.sh,target=/frontend-mem-nag.
 
 RUN --mount=type=bind,src=./package-lock.json,target=./package-lock.json,readonly \
     --mount=type=bind,src=./package.json,target=./package.json,readonly \
-    --mount=type=bind,src=./lib/package.json,target=./lib/package.json,readonly \
-    --mount=type=bind,src=./ui/package.json,target=./ui/package.json,readonly \
+    --mount=type=bind,src=./binocular-backend/package.json,target=./binocular-backend/package.json,readonly \
+    --mount=type=bind,src=./binocular-frontend/package.json,target=./binocular-frontend/package.json,readonly \
     npm ci --omit=optional --ignore-scripts && \
     npm run install:backend && \
     npm run install:frontend && \
@@ -30,14 +30,14 @@ WORKDIR /app/binocular
 RUN chown node:node -R /app/binocular
 
 COPY --from=install --chown=node:node /app/binocular/node_modules ./node_modules
-COPY --from=install --chown=node:node /app/binocular/lib/node_modules ./lib/node_modules
-COPY --from=install --chown=node:node /app/binocular/ui/node_modules ./ui/node_modules
+COPY --from=install --chown=node:node /app/binocular/binocular-backend/node_modules ./binocular-backend/node_modules
+COPY --from=install --chown=node:node /app/binocular/binocular-frontend/node_modules ./binocular-frontend/node_modules
 
 # folders
 COPY --chown=node:node ./foxx ./foxx
-COPY --chown=node:node ./lib ./lib
+COPY --chown=node:node ./binocular-backend ./binocular-backend
 COPY --chown=node:node ./services ./services
-COPY --chown=node:node ./ui ./ui
+COPY --chown=node:node ./binocular-frontend ./binocular-frontend
 
 # files
 COPY --chown=node:node ./package.json ./package.json
@@ -47,10 +47,10 @@ COPY --chown=node:node ./LICENSE ./LICENSE
 # RUN npm install -g .
 RUN npm install -g tsx
 
-RUN mkdir -p /app/binocular/ui/db_export
-RUN mkdir -p /app/binocular/ui/config
+RUN mkdir -p /app/binocular/binocular-frontend/db_export
+RUN mkdir -p /app/binocular/binocular-frontend/config
 
-RUN chown node:node -R /app/binocular/ui
+RUN chown node:node -R /app/binocular/binocular-frontend
 
 RUN mkdir -p /app/binocular/repo
 RUN chown node:node /app/binocular/repo
