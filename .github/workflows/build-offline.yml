@@ -5,7 +5,6 @@ on:
     branches:
       - "main"
       - "develop"
-      - "feature/207"
   schedule:
     - cron: '30 3 * * 1' # At 03:30 on Monday, https://crontab.guru/#30_3_*_*_1
   workflow_dispatch:
