@@ -120,7 +120,7 @@ A sample configuration file looks like this:
 You may override configuration options for specific projects by
 placing another `.binocularrc` file in the project's root directory.
 
-You may also modify a config to the `gitlab.json` file in `./ui/config`. This file sets
+You may also modify a config to the `gitlab.json` file in `./binocular-frontend/config`. This file sets
 the GitLab API settings for the CodeHotspots-visualization for
 offline execution. This is only necessary if you want to automatically
 set those options within, for example, a GitLab pipeline.
@@ -172,7 +172,7 @@ npm run build
 ```
 This will create an html and js file in the dist folder that can be
 opened without the backend running. It is also possible
-to place the exported JSON files of a different mining job under `./ui/db_export/` and build the frontend. (not
+to place the exported JSON files of a different mining job under `./binocular-frontend/db_export/` and build the frontend. (not
 all features will be available in the offline build)
 
 For more information check `binocular -h`

@@ -8,7 +8,7 @@ x-binocular-depends-on: &binocular-depends-on
 x-binocular-volumes-backend:
   &binocular-volumes-backend
     - ./cli:/app/binocular/cli
-    - ./lib:/app/binocular/lib
+    - ./binocular-backend:/app/binocular/binocular-backend
     - ./services:/app/binocular/services
     - ./foxx:/app/binocular/foxx
     - ./binocular.js:/app/binocular.js
@@ -64,7 +64,7 @@ services:
     #     "tsx",
     #     "watch",
     #     "binocular.js",
-    #     "--no-ui",
+    #     "--no-binocular-frontend",
     #     "--no-open"
     #   ]
     # volumes: *binocular-volumes-backend

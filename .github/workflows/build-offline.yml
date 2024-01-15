@@ -90,13 +90,13 @@ jobs:
 
       - name: Install dependencies
         if: steps.cache.outputs.cache-hit != 'true'
-        run: npm ci --omit=optional --ignore-scripts
+        run: npm ci
 
       - name: Install tsx
         run: npm i tsx -g
 
       - name: Run binocular
-        run: DEBUG=idx*,importer*,git*,db* tsx ./binocular.ts run --no-server --no-frontend .
+        run: DEBUG=idx*,importer*,git*,db* tsx ./binocular-backend/binocular.ts run --no-server --no-frontend --export .
 
       - name: Build
         env:

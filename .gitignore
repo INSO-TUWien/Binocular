@@ -11,7 +11,5 @@ coverage/
 out
 pkg
 .grandle
-/ui/db_export
 /.devcontainer
 .DS_Store
-/ui/config/context.json
