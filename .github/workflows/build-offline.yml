@@ -97,7 +97,7 @@ jobs:
         run: npm i tsx -g
 
       - name: Run binocular
-        run: DEBUG=idx*,importer*,git*,db* tsx ./binocular-backend/binocular.ts run --no-server --no-frontend .
+        run: DEBUG=idx*,importer*,git*,db* tsx ./binocular-backend/binocular.ts run --no-server --no-frontend --export .
 
       - name: Build
         env:
