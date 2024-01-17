@@ -39,116 +39,122 @@ class JiraITSIndexer {
     };
     this.jiraProject = config.project;
     this.jira = new Jira(options);
+    return Promise.resolve();
   }
 
   index() {
     log('index()');
     let omitCount = 0;
     let persistCount = 0;
-    const that = this;
+
     return Promise.all([
-      this.jira.getIssuesWithJQL('project=' + this.jiraProject).each(
-        function (issue: any) {
-          issue.id = issue.id.toString();
-          if (that.stopping) {
+      this.jira
+        .getIssuesWithJQL('project=' + this.jiraProject)
+        .on('count', (count: number) => this.reporter.setIssueCount(count))
+        .each((issue: any) => {
+          if (this.stopping) {
             return false;
           }
-          return this.jira.getMergeRequest(issue.id).then((mergeRequests: any) => {
-            if (mergeRequests) {
-              mergeRequests.forEach((mergeRequest: any) => {
-                mergeRequest.id = mergeRequest.id.substring(1);
-                const description = this.populateDescription(issue.fields.description.content);
-                const toPersist = {
-                  id: mergeRequest.id,
-                  iid: issue.key,
-                  title: mergeRequest.name,
-                  description: description,
-                  state: mergeRequest.status,
-                  url: issue.self,
-                  closedAt: issue.fields.resolutiondate,
-                  createdAt: issue.fields.createdAt,
-                  updatedAt: mergeRequest.lastUpdate,
-                  upvotes: issue.fields?.votes.votes, // this are the fields from the issue
-                  weight: issue.fields?.customfield_10016, //this field is used for the storypoints,
-                  watches: issue.fields.watches.watchCount,
-                  labels: issue.fields.labels,
-                  milestone: issue.milestone,
-                  author: issue.fields.creator.displayName, // mergeRequest.author.name but it always displays name: User
-                  assignee: issue.fields?.assignee?.displayName, // there can't be multiple assinges
-                  assignees: mergeRequest.reviewers,
-                  webUrl: mergeRequest.url,
-                };
-                MergeRequest.findOneById(mergeRequests.id).then((persistedMergeRequest: any) => {
-                  if (!persistedMergeRequest || !_.isEqual(toPersist, persistedMergeRequest)) {
-                    if (!persistedMergeRequest) {
-                      log('Persisting new Mergerequest');
-                      return MergeRequest.persist(toPersist);
-                    } else {
-                      log('Mergerequest already exists, only updating values');
-                      _.assign(persistedMergeRequest, toPersist);
-                      return persistedMergeRequest.save({ ignoreUnknownAttributes: true });
-                    }
+
+          issue.id = issue.id.toString();
+          // return this.jira.getMergeRequest(issue.id).then((mergeRequests: any) => {
+          const description = this.populateDescription(issue.fields.description.content);
+
+          // mergeRequests.map((mergeRequest: any) => {
+          //   const toPersist = {
+          //     id: mergeRequest.id.substring(1),
+          //     iid: issue.key,
+          //     title: mergeRequest.name,
+          //     description: description,
+          //     state: mergeRequest.status,
+          //     url: issue.self,
+          //     closedAt: issue.fields.resolutiondate,
+          //     createdAt: issue.fields.createdAt,
+          //     updatedAt: mergeRequest.lastUpdate,
+          //     upvotes: issue.fields?.votes.votes, // this are the fields from the issue
+          //     weight: issue.fields?.customfield_10016, //this field is used for the storypoints,
+          //     watches: issue.fields.watches.watchCount,
+          //     labels: issue.fields.labels,
+          //     milestone: issue.milestone,
+          //     author: issue.fields.creator.displayName, // mergeRequest.author.name but it always displays name: User
+          //     assignee: issue.fields?.assignee?.displayName, // there can't be multiple assinges
+          //     assignees: mergeRequest.reviewers,
+          //     webUrl: mergeRequest.url,
+          //   };
+
+          // return MergeRequest.findOneById(mergeRequests.id)
+          //   .then((persistedMergeRequest: any) => {
+          //     if (!persistedMergeRequest || !_.isEqual(toPersist, persistedMergeRequest)) {
+          //       if (!persistedMergeRequest) {
+          //         log('Persisting new Mergerequest');
+          //         return MergeRequest.persist(toPersist);
+          //       } else {
+          //         log('Mergerequest already exists, only updating values');
+          //         _.assign(persistedMergeRequest, toPersist);
+          //         return persistedMergeRequest.save({ ignoreUnknownAttributes: true });
+          //       }
+          //     } else {
+          //       log('Omitting already persisted mergeRequest');
+          //       return Promise.resolve();
+          //     }
+          //   })
+          //   .then(() => this.reporter.finishMergeRequest());
+          // });
+
+          return Issue.findOneById(issue.id)
+            .then((persistedIssue: any) => {
+              if (!persistedIssue || new Date(persistedIssue.updatedAt).getTime() < new Date(issue.fields.updated).getTime()) {
+                return this.processComments(issue).then((mentioned) => {
+                  // const description = this.populateDescription(issue.fields.description.content);
+                  const issueToSave = {
+                    id: issue.id,
+                    iid: issue.key,
+                    title: issue.fields.summary,
+                    description: description,
+                    state: issue.fields.status.statusCategory.key,
+                    url: issue.self,
+                    closedAt: issue.fields.resolutiondate,
+                    createdAt: issue.fields.createdAt,
+                    updatedAt: issue.fields.updated,
+                    labels: issue.fields.labels,
+                    milestone: issue.fixVersions,
+                    author: issue.fields.creator.displayName,
+                    assignee: issue.fields?.assignee?.displayName, // there can't be multiple assinges
+                    // assignees: issue.assignees, not available in Jira
+                    upvotes: issue.fields?.votes.votes,
+                    dueDate: issue.fields?.dueDate,
+                    // confidential: issue.security-level for this normal Jira software is needed, free version does not have that
+                    weight: issue.fields?.customfield_10016, //this field is used for the storypoints, could be problematic, if having for example this in custom fields
+                    webUrl: issue.self.split('/rest/api')[0] + '/browse/' + issue.key,
+                    subscribed: issue.fields.watches.watchCount,
+                    mentions: mentioned,
+                    // notes: not found
+                  };
+                  if (!persistedIssue) {
+                    persistCount++;
+                    log('Persisting new issue ' + persistCount);
+                    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                    // @ts-ignore
+                    return Issue.persist(issueToSave);
+                  } else {
+                    persistCount++;
+                    log('Issue already exists, only updating values');
+                    _.assign(persistedIssue, issueToSave);
+                    return persistedIssue.save({
+                      ignoreUnknownAttributes: true,
+                    });
                   }
                 });
-              });
-            } else {
-              // log('Issue with key %o has no pull request information', );
-            }
-
-            return Issue.findOneById(issue.id)
-              .then((persistedIssue: any) => {
-                if (!persistedIssue || new Date(persistedIssue.updatedAt).getTime() < new Date(issue.fields.updated).getTime()) {
-                  // const mentioned = that.processComments(issue.fields);
-
-                  return this.processComments(issue)
-                    .then((mentions: any) => {
-                      const description = this.populateDescription(issue.fields.description.content);
-                      const issueToSave = {
-                        id: issue.id,
-                        iid: issue.key,
-                        title: issue.fields.summary,
-                        description: description,
-                        state: issue.fields.status.statusCategory.key,
-                        url: issue.self,
-                        closedAt: issue.fields.resolutiondate,
-                        createdAt: issue.fields.createdAt,
-                        updatedAt: issue.fields.updated,
-                        labels: issue.fields.labels,
-                        milestone: issue.fixVersions,
-                        author: issue.fields.creator.displayName,
-                        assignee: issue.fields?.assignee?.displayName, // there can't be multiple assinges
-                        //assignees: issue.assignees, not available in Jira
-                        upvotes: issue.fields?.votes.votes,
-                        dueDate: issue.fields?.dueDate,
-                        // confidential: issue.security-level for this normal Jira software is needed, free version does not have that
-                        weight: issue.fields?.customfield_10016, //this field is used for the storypoints, could be problematic, if having for example this in custom fields
-                        webUrl: issue.self.split('/rest/api')[0] + '/browse/' + issue.key,
-                        subscribed: issue.fields.watches.watchCount,
-                        mentions: mentions,
-                        // notes: not found
-                      };
-                      if (!persistedIssue) {
-                        log('Persisting new issue');
-                        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                        // @ts-ignore
-                        return Issue.persist(issueToSave);
-                      } else {
-                        log('Issue already exists, only updating values');
-                        _.assign(persistedIssue, issueToSave);
-                        return persistedIssue.save({ ignoreUnknownAttributes: true });
-                      }
-                    })
-                    .then(() => persistCount++);
-                } else {
-                  log('Omitted issue because it already is persisted');
-                  omitCount++;
-                }
-              })
-              .then(() => this.reporter.finishIssue());
-          });
-        }.bind(this)
-      ),
-      this.jira.getProjectVersions(this.jiraProject).each(function (projectVersion: any) {
+              } else {
+                omitCount++;
+                log('Omitted issue ' + omitCount);
+                return Promise.resolve();
+              }
+            })
+            .then(() => this.reporter.finishIssue());
+          // });
+        }),
+      this.jira.getProjectVersions(this.jiraProject).each((projectVersion: any) => {
         projectVersion.id = projectVersion.id.toString();
         return Milestone.findOneById(projectVersion.id)
           .then((persistedVersion: any) => {
@@ -166,17 +172,22 @@ class JiraITSIndexer {
             if (!persistedVersion || !_.isEqual(persistedVersion, versionToPersist)) {
               if (!persistedVersion) {
                 log('Persisting new Version');
-                Milestone.persist(versionToPersist);
+                return Milestone.persist(versionToPersist);
               } else {
                 log('Version already exists, only updating values');
                 _.assign(persistedVersion, versionToPersist);
                 return persistedVersion.save({ ignoreUnknownAttributes: true });
               }
+            } else {
+              return Promise.resolve();
             }
           })
-          .then(() => log('indexing of project versions finished'));
+          .then(() => this.reporter.finishMilestone());
       }),
-    ]).then(() => log('Persisted %d new issues (%d already present)', persistCount, omitCount));
+    ]).then((resp) => {
+      log('Persisted %d new issues (%d already present)', persistCount, omitCount);
+      log(resp);
+    });
   }
 
   populateDescription(content: any) {
@@ -206,44 +217,40 @@ class JiraITSIndexer {
     const issueKey = issue.key;
     const mentioned: string[] = [];
     issue = issue.fields;
-    if (issue.comment.comments.total <= issue.comment.maxResults) {
-      const comments = issue.comment.comments;
+    // if (issue.comment.comments.total <= issue.comment.maxResults) {
+    const comments = issue.comment.comments;
 
-      comments.forEach((comment: any) => {
-        comment.body.content.forEach((commentContent: any) => {
-          commentContent.content.forEach((commentType: any) => {
-            if (commentType.type === 'mention') {
-              const mentionedUser = commentType.attrs.text;
-              if (!mentioned.includes(mentionedUser)) {
-                mentioned.push(mentionedUser);
-              }
+    comments.forEach((comment: any) => {
+      comment.body.content.forEach((commentContent: any) => {
+        commentContent.content.forEach((commentType: any) => {
+          if (commentType.type === 'mention') {
+            const mentionedUser = commentType.attrs.text;
+            if (!mentioned.includes(mentionedUser)) {
+              mentioned.push(mentionedUser);
             }
-          });
+          }
         });
       });
-      return Promise.resolve(mentioned);
-    } else {
-      return this.jira
-        .getComments(issueKey)
-        .each(function (comment: any) {
-          comment.body.content.forEach((commentContent: any) => {
-            commentContent.content.forEach((commentType: any) => {
-              if (commentType.type === 'mention') {
-                const mentionedUser = commentType.attrs.text;
-                if (!mentioned.includes(mentionedUser)) {
-                  mentioned.push(mentionedUser);
-                }
-              }
-            });
-          });
-        })
-        .then(() => mentioned);
-    }
-  }
-
-  stop() {
-    log('stop()');
-    this.stopping = true;
+    });
+    return Promise.resolve(mentioned);
+    // } else {
+    // return this.jira
+    //   .getComments(issueKey)
+    //   .each(function (comment: any) {
+    //     comment.body.content.forEach((commentContent: any) => {
+    //       commentContent.content.forEach((commentType: any) => {
+    //         if (commentType.type === 'mention') {
+    //           const mentionedUser = commentType.attrs.text;
+    //           if (!mentioned.includes(mentionedUser)) {
+    //             mentioned.push(mentionedUser);
+    //           }
+    //         }
+    //       });
+    //     });
+    //   })
+    //   .then(() => mentioned);
+    // }
+    // return Promise.resolve();
   }
 
   isStopping() {
