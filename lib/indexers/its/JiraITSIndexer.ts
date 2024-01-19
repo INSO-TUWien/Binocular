@@ -62,49 +62,49 @@ class JiraITSIndexer {
           return this.jira.getMergeRequest(issue.id).then((mergeRequests: any) => {
             log('mergeRequests %o', mergeRequests);
 
-            mergeRequests
-              ?.map(function (mergeRequest: any) {
-                const toPersist = {
-                  id: mergeRequest.id.substring(1),
-                  iid: issue.key,
-                  title: mergeRequest.name,
-                  description: description,
-                  state: mergeRequest.status,
-                  url: issue.self,
-                  closedAt: issue.fields.resolutiondate,
-                  createdAt: issue.fields.createdAt,
-                  updatedAt: mergeRequest.lastUpdate,
-                  upvotes: issue.fields?.votes.votes, // this are the fields from the issue
-                  weight: issue.fields?.customfield_10016, //this field is used for the storypoints,
-                  watches: issue.fields.watches.watchCount,
-                  labels: issue.fields.labels,
-                  milestone: issue.milestone,
-                  author: issue.fields.creator.displayName, // mergeRequest.author.name but it always displays name: User
-                  assignee: issue.fields?.assignee?.displayName, // there can't be multiple assinges
-                  assignees: mergeRequest.reviewers,
-                  webUrl: mergeRequest.url,
-                };
+            mergeRequests?.map((mergeRequest: any) => {
+              mergeRequest.id = mergeRequest.id.substring(1);
+              const toPersist = {
+                id: mergeRequest.id,
+                iid: issue.key,
+                title: mergeRequest.name,
+                description: description,
+                state: mergeRequest.status,
+                url: issue.self,
+                closedAt: issue.fields.resolutiondate,
+                createdAt: issue.fields.createdAt,
+                updatedAt: mergeRequest.lastUpdate,
+                upvotes: issue.fields?.votes.votes, // this are the fields from the issue
+                weight: issue.fields?.customfield_10016, //this field is used for the storypoints,
+                watches: issue.fields.watches.watchCount,
+                labels: issue.fields.labels,
+                milestone: issue.milestone,
+                author: issue.fields.creator.displayName, // mergeRequest.author.name but it always displays name: User
+                assignee: issue.fields?.assignee?.displayName, // there can't be multiple assinges
+                assignees: mergeRequest.reviewers,
+                webUrl: mergeRequest.url,
+              };
 
-                return MergeRequest.findOneById(mergeRequests.id).then((persistedMergeRequest: any) => {
-                  if (!persistedMergeRequest || !_.isEqual(toPersist, persistedMergeRequest)) {
-                    if (!persistedMergeRequest) {
-                      log('Persisting new Mergerequest');
-                      return MergeRequest.persist(toPersist);
-                    } else {
-                      log('Mergerequest already exists, only updating values');
-                      _.assign(persistedMergeRequest, toPersist);
-                      return persistedMergeRequest.save({ ignoreUnknownAttributes: true });
-                    }
+              MergeRequest.findOneById(toPersist.id).then((persistedMergeRequest: any) => {
+                if (
+                  !persistedMergeRequest ||
+                  new Date(persistedMergeRequest.updatedAt).getTime() < new Date(mergeRequest.lastUpdate).getTime()
+                ) {
+                  if (!persistedMergeRequest) {
+                    log('Persisting new Mergerequest');
+                    MergeRequest.persist(toPersist);
                   } else {
-                    log('Omitting already persisted mergeRequest');
+                    log('Mergerequest already exists, only updating values');
+                    _.assign(persistedMergeRequest, toPersist);
+                    persistedMergeRequest.save({ ignoreUnknownAttributes: true });
                   }
-                });
-                // .then(() => this.reporter.finishMergeRequest());
-                // });
-              })
-              .then(() => {
-                return persistCount++;
+                } else {
+                  log('Omitting already persisted mergeRequest');
+                }
               });
+              // .then(() => this.reporter.finishMergeRequest());
+              // });
+            });
             return Issue.findOneById(issue.id)
               .then((persistedIssue: any) => {
                 if (!persistedIssue || new Date(persistedIssue.updatedAt).getTime() < new Date(issue.fields.updated).getTime()) {
@@ -129,9 +129,11 @@ class JiraITSIndexer {
                         assignee: issue.fields?.assignee?.displayName, // there can't be multiple assinges
                         // assignees: issue.assignees, not available in Jira
                         upvotes: issue.fields?.votes.votes,
+                        // downVotes not available
                         dueDate: issue.fields?.dueDate,
                         // confidential: issue.security-level for this normal Jira software is needed, free version does not have that
-                        weight: issue.fields?.customfield_10016, //this field is used for the storypoints, could be problematic, if having for example this in custom fields
+                        weight: issue.fields?.customfield_10016, //this field is used for the storypoints, could be problematic,
+                        // if having for example this in custom fields
                         webUrl: issue.self.split('/rest/api')[0] + '/browse/' + issue.key,
                         subscribed: issue.fields.watches.watchCount,
                         mentions: mentioned,
@@ -162,9 +164,8 @@ class JiraITSIndexer {
                 }
               })
               .then(() => this.reporter.finishIssue());
+            // });
           });
-
-          // });
         }),
       this.jira.getProjectVersions(this.jiraProject).each((projectVersion: any) => {
         projectVersion.id = projectVersion.id.toString();
@@ -179,7 +180,8 @@ class JiraITSIndexer {
               dueDate: projectVersion.releaseDate,
               startDate: projectVersion.startDate,
               state: projectVersion.released ? 'released' : 'unreleased',
-              expired: !projectVersion.overdue ? false : projectVersion.overdue, // could maybe not be true, but api does not return overdue if it is released
+              expired: !projectVersion.overdue ? false : projectVersion.overdue, // could maybe not be true,
+              // but api does not return overdue if it is released
             };
             if (!persistedVersion || !_.isEqual(persistedVersion, versionToPersist)) {
               if (!persistedVersion) {
@@ -247,7 +249,7 @@ class JiraITSIndexer {
     //   });
 
     // } else {
-    this.jira
+    return this.jira
       .getComments(issueKey)
       .each(function (comment: any) {
         comment.body.content.forEach((commentContent: any) => {
@@ -261,9 +263,7 @@ class JiraITSIndexer {
           });
         });
       })
-      .then(() => {
-        mentioned;
-      });
+      .then(() => mentioned);
   }
 
   isStopping() {
