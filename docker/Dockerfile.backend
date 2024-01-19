@@ -8,8 +8,9 @@ WORKDIR /app/binocular
 RUN --mount=type=bind,src=./docker/frontend-mem-nag.sh,target=/frontend-mem-nag.sh \
   /frontend-mem-nag.sh
 
-RUN --mount=type=bind,src=./package-lock.json,target=./package-lock.json,readonly \
-    --mount=type=bind,src=./package.json,target=./package.json,readonly \
+#RUN --mount=type=bind,src=./package-lock.json,target=./package-lock.json,readonly \
+#    --mount=type=bind,src=./package.json,target=./package.json,readonly \
+RUN --mount=type=bind,src=./package.json,target=./package.json,readonly \
     --mount=type=bind,src=./binocular-backend/package.json,target=./binocular-backend/package.json,readonly \
     --mount=type=bind,src=./binocular-frontend/package.json,target=./binocular-frontend/package.json,readonly \
 #    npm ci --omit=optional --ignore-scripts && \
