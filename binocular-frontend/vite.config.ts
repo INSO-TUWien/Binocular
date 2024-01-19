@@ -1,5 +1,5 @@
 import { defineConfig, transformWithEsbuild } from 'vite';
-import react from '@vitejs/plugin-react';
+import react from '@vitejs/plugin-react-swc';
 import autoprefixer from 'autoprefixer';
 import { nodeResolve } from '@rollup/plugin-node-resolve';
 import { NodeGlobalsPolyfillPlugin } from '@esbuild-plugins/node-globals-polyfill';
