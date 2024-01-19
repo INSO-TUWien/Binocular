@@ -10,13 +10,15 @@ RUN --mount=type=bind,src=./docker/frontend-mem-nag.sh,target=/frontend-mem-nag.
 
 RUN --mount=type=bind,src=./package-lock.json,target=./package-lock.json,readonly \
     --mount=type=bind,src=./package.json,target=./package.json,readonly \
+    --mount=type=bind,src=./binocular-backend/package.json,target=./binocular-backend/package.json,readonly \
     --mount=type=bind,src=./binocular-frontend/package.json,target=./binocular-frontend/package.json,readonly \
 #    npm ci --omit=optional --ignore-scripts && \
 # Error: Cannot find module @rollup/rollup-linux-x64-musl.
     # npm has a bug related to optional dependencies (https://github.com/npm/cli/issues/4828).
     # Please try `npm i` again after removing both package-lock.json and node_modules directory.
-    npm ci --ignore-scripts && \
-    npm run install:frontend && \
+#    npm ci --ignore-scripts && \
+    npm ci && \
+#    npm run install:frontend && \
     npm cache clean --force
 
 ###
