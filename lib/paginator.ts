@@ -70,9 +70,8 @@ Paginator.prototype.execute = function (perPage = this.defaultPageSize) {
   return this.$depaginate(perPage, countHolder);
 };
 
-Paginator.prototype.$depaginate = function (perPage: number, countHolder: { count: number }, page = 1, processed = 0, i = 1) {
-  log(`Getting page ${page}`);
-  if (this.its && i === 1) {
+Paginator.prototype.$depaginate = function (perPage: number, countHolder: { count: number }, page = 1, processed = 0, i = 0) {
+  if (this.its && i === 0) {
     page--;
   }
   return this.getPage(page, perPage)
@@ -82,15 +81,20 @@ Paginator.prototype.$depaginate = function (perPage: number, countHolder: { coun
     })
     .then((page: any) => this.getItems(page))
     .then((items: any[]) => {
-      log(`Got ${items.length} items from page ${page}`);
-
+      if (this.its === 'jira') {
+        log(`Got ${items.length} items from start_at ${page}`);
+      }
       if (items.length === 0) {
-        log(`Reached premature end of data at empty page #${page}`);
+        if (this.its === 'jira') {
+          log(`Reached premature end of data at start_at #${page}`);
+        }
         return false;
       }
 
       return items.map((item: any) => {
-        log(`Processing page[${processed}]`);
+        if (this.its === 'jira') {
+          log(`Processing start_at[${processed}]`);
+        }
         processed++;
         if (processed <= countHolder.count) {
           return this.emit('item', item);
@@ -100,13 +104,14 @@ Paginator.prototype.$depaginate = function (perPage: number, countHolder: { coun
       });
     })
     .then((stop: boolean) => {
-      log(`Finished page #${page}, total items processed: ${processed}/${countHolder.count}`);
-      if (stop !== false && processed < countHolder.count) {
-        if (this.its && this.its === 'jira') {
-          return this.$depaginate(perPage, countHolder, this.defaultPageSize * i, processed, i + 1);
-        } else {
-          return this.$depaginate(perPage, countHolder, page + 1, processed);
-        }
+      if (this.its === 'jira') {
+        log(`Finished start_at #${page}, total items processed: ${processed}/${countHolder.count}`);
+      }
+      if (stop !== false && processed < countHolder.count && !this.its) {
+        return this.$depaginate(perPage, countHolder, page + 1, processed);
+      } else if (stop !== false && this.its) {
+        i++;
+        return this.$depaginate(perPage, countHolder, this.defaultPageSize * i, processed, i);
       }
       return stop;
     });
