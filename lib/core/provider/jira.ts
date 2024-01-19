@@ -37,27 +37,44 @@ class Jira {
     return this.paginatedRequest(`project/${projectKey}/version?`);
   }
 
-  private async getDevelopmentInformation(issueId: string) {
+  getDevelopmentInformation(issueId: string) {
     log('getMergeRequests(%o)', issueId);
     return this.request('dev-status/latest/issue/detail?issueId=' + issueId);
   }
 
+  isStopping() {
+    return this.stopping;
+  }
+
+  stop() {
+    this.stopping = true;
+  }
+
   getMergeRequest(issueId: string) {
     log('getMergeRequests(%o)', issueId);
-    return this.request('dev-status/latest/issue/summary?issueId=' + issueId).then(async (developmentInformation) => {
-      const pullrequests = developmentInformation.pullrequest;
-      if (pullrequests.overall.count !== 0) {
-        let mergeRequests: any[] = [];
-        for (const [key, value] of Object.entries(pullrequests.byInstanceType)) {
-          await this.getDevelopmentInformation(issueId + '&dataType=pullrequest&applicationType=' + key).then((response) => {
-            mergeRequests = mergeRequests.concat(response[0].pullRequests);
-          });
-        }
+    return new Promise((resolve) => {
+      this.request('dev-status/latest/issue/summary?issueId=' + issueId).then((developmentInformation) => {
+        const pullrequests = developmentInformation.pullrequest;
+        if (pullrequests.overall.count !== 0) {
+          const mergeRequests: any[] = [];
 
-        return mergeRequests;
-      } else {
-        return null;
-      }
+          const promises: Promise<any>[] = [];
+
+          for (const [key, value] of Object.entries(pullrequests.byInstanceType)) {
+            promises.push(this.getDevelopmentInformation(issueId + '&dataType=pullrequest&applicationType=' + key));
+          }
+
+          Promise.all(promises).then((responses) => {
+            let mergeRequests: any[] = [];
+            for (const response of responses) {
+              mergeRequests = mergeRequests.concat(response[0].pullRequests);
+            }
+            resolve(mergeRequests);
+          });
+        } else {
+          resolve([]);
+        }
+      });
     });
   }
 
@@ -85,7 +102,7 @@ class Jira {
           return resp.body.values;
         }
         // for issues
-        return resp.body.issues;
+        return resp.body.issues || [];
       },
       (resp: any) => {
         return (this.count = parseInt(resp.body.total, 10));
@@ -94,7 +111,7 @@ class Jira {
     );
   }
 
-  async request(path: string) {
+  request(path: string) {
     log('request(%o)', path);
     const credentials = this.usermail + ':' + this.privateToken;
     const header = {
@@ -107,15 +124,16 @@ class Jira {
     };
     const isNonOfficial = path.includes('dev-status');
     const requestUrl = isNonOfficial ? this.baseUrl.split('api/3')[0] + path : urlJoin(this.baseUrl, path);
-    return fetch(requestUrl, header).then(async (response) => {
-      const data = await response.json();
-      if (!isNonOfficial) {
-        return { headers: response.headers, body: data };
-      } else if (path.includes('detail')) {
-        return data.detail;
-      } else {
-        return data.summary;
-      }
+    return fetch(requestUrl, header).then((response) => {
+      return response.json().then((data) => {
+        if (!isNonOfficial) {
+          return { headers: response.headers, body: data };
+        } else if (path.includes('detail')) {
+          return data.detail;
+        } else {
+          return data.summary;
+        }
+      });
     });
   }
 }
