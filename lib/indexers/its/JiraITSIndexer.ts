@@ -199,8 +199,7 @@ class JiraITSIndexer {
           .then(() => this.reporter.finishMilestone());
       }),
     ]).then((resp) => {
-      log('Persisted %d new issues (%d already present)', persistCount, omitCount);
-      log(resp);
+      return Promise.all(resp.flat()).then(() => log('Persisted %d new issues (%d already present)', persistCount, omitCount));
     });
   }
 

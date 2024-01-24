@@ -109,7 +109,7 @@ Paginator.prototype.$depaginate = function (perPage: number, countHolder: { coun
       }
       if (stop !== false && processed < countHolder.count && !this.its) {
         return this.$depaginate(perPage, countHolder, page + 1, processed);
-      } else if (stop !== false && this.its) {
+      } else if (stop !== false && processed < countHolder.count && this.its) {
         i++;
         return this.$depaginate(perPage, countHolder, this.defaultPageSize * i, processed, i);
       }
