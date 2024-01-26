@@ -60,8 +60,6 @@ class JiraITSIndexer {
           const description = issue.fields.description?.content ? this.populateDescription(issue.fields.description.content) : null;
 
           return this.jira.getMergeRequest(issue.id).then((mergeRequests: any) => {
-            log('mergeRequests %o', mergeRequests);
-
             mergeRequests?.map((mergeRequest: any) => {
               mergeRequest.id = mergeRequest.id.substring(1);
               const toPersist = {
@@ -225,44 +223,40 @@ class JiraITSIndexer {
   }
 
   processComments(issue: any) {
-    // to get comments also use api calls since they have pagination as well
-    // log('processComments(%o)', issue);
-    const mentioned: string[] = [];
+    log('processComments()');
     const issueKey = issue.key;
+    const mentioned: string[] = [];
 
-    //   issue = issue.fields;
-    //   // if (issue.comment.comments.total <= issue.comment.maxResults) {
-    //   const comments = issue.comment.comments;
-    //
-    //   comments.forEach((comment: any) => {
-    //     comment.body.content.forEach((commentContent: any) => {
-    //       commentContent.content.forEach((commentType: any) => {
-    //         if (commentType.type === 'mention') {
-    //           const mentionedUser = commentType.attrs.text;
-    //           if (!mentioned.includes(mentionedUser)) {
-    //             mentioned.push(mentionedUser);
-    //           }
-    //         }
-    //       });
-    //     });
-    //   });
+    issue = issue.fields;
+    const comments = issue.comment.comments;
+    if (issue.comment.total <= issue.comment.maxResults) {
+      comments.forEach((comment: any) => {
+        this.extractMentioned(comment, mentioned);
+      });
+      return Promise.resolve(mentioned);
+    } else {
+      return this.jira
+        .getComments(issueKey)
+        .each(
+          function (comment: any) {
+            this.extractMentioned(comment, mentioned);
+          }.bind(this)
+        )
+        .then(() => mentioned);
+    }
+  }
 
-    // } else {
-    return this.jira
-      .getComments(issueKey)
-      .each(function (comment: any) {
-        comment.body.content.forEach((commentContent: any) => {
-          commentContent.content.forEach((commentType: any) => {
-            if (commentType.type === 'mention') {
-              const mentionedUser = commentType.attrs.text;
-              if (!mentioned.includes(mentionedUser)) {
-                mentioned.push(mentionedUser);
-              }
-            }
-          });
-        });
-      })
-      .then(() => mentioned);
+  private extractMentioned(comment: any, mentioned: string[]) {
+    comment.body.content.forEach((commentContent: any) => {
+      commentContent.content.forEach((commentType: any) => {
+        if (commentType.type === 'mention') {
+          const mentionedUser = commentType.attrs.text;
+          if (!mentioned.includes(mentionedUser)) {
+            mentioned.push(mentionedUser);
+          }
+        }
+      });
+    });
   }
 
   isStopping() {
