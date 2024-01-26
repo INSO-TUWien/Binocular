@@ -152,6 +152,12 @@ export default (props: Props) => {
     );
   };
 
+  const checkTimeSpan = (timeSpan: DateRange): DateRange => {
+    timeSpan.from = timeSpan.from === '' ? undefined : timeSpan.from;
+    timeSpan.to = timeSpan.to === '' ? undefined : timeSpan.to;
+    return timeSpan;
+  };
+
   if (!committers || !palette) {
     return <div></div>;
   }
@@ -215,9 +221,7 @@ export default (props: Props) => {
             <DateRangeFilter
               from={firstDisplayDate}
               to={lastDisplayDate}
-              onDateChanged={(data: DateRange) => {
-                onChangeTimeSpan(data);
-              }}
+              onDateChanged={(data: DateRange) => onChangeTimeSpan(checkTimeSpan(data))}
             />
           </div>
           <div className={styles.marginTop05}>
