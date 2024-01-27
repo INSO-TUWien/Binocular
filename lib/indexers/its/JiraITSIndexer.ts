@@ -92,17 +92,17 @@ class JiraITSIndexer {
                     };
 
                     if (!persistedMergeRequest) {
-                      log('Persisting new Mergerequest');
+                      log('Persisting new mergeRequest');
                       return MergeRequest.persist(toPersist);
                     } else {
-                      log('Mergerequest already exists, only updating values');
+                      log('Updating persisted mergeRequest ' + mergeRequest.id);
                       _.assign(persistedMergeRequest, toPersist);
                       return persistedMergeRequest.save({
                         ignoreUnknownAttributes: true,
                       });
                     }
                   } else {
-                    log('Omitting already persisted mergeRequest');
+                    log('Omitting already persisted mergeRequest ' + mergeRequest.id);
                   }
                 });
               });
@@ -145,10 +145,10 @@ class JiraITSIndexer {
                       // notes: not found
                     };
                     if (!persistedIssue) {
-                      log('Persisting new issue ' + persistCount);
+                      log('Persisting new issue');
                       return Issue.persist(issueToSave);
                     } else {
-                      log('Issue already exists, only updating values');
+                      log('Updating persisted issue ' + issue.id);
                       _.assign(persistedIssue, issueToSave);
                       return persistedIssue.save({
                         ignoreUnknownAttributes: true,
@@ -161,7 +161,7 @@ class JiraITSIndexer {
                   });
               } else {
                 omitCount++;
-                log('Omitted issue ' + omitCount);
+                log('Omitting already persisted issue ' + issue.id);
               }
             })
             .then(() => this.reporter.finishIssue());
@@ -186,17 +186,17 @@ class JiraITSIndexer {
             };
             if (!persistedVersion || !_.isEqual(persistedVersion, versionToPersist)) {
               if (!persistedVersion) {
-                log('Persisting new Version');
+                log('Persisting new version');
                 return Milestone.persist(versionToPersist);
               } else {
-                log('Version already exists, only updating values');
+                log('Updating persisted version ' + projectVersion.id);
                 _.assign(persistedVersion, versionToPersist);
                 return persistedVersion.save({
                   ignoreUnknownAttributes: true,
                 });
               }
             } else {
-              return Promise.resolve();
+              log('Omitting already persisted version ' + projectVersion.id);
             }
           })
           .then(() => this.reporter.finishMilestone());
@@ -206,11 +206,11 @@ class JiraITSIndexer {
     });
   }
 
-  populateDescription(content: any) {
+  private populateDescription(content: any) {
+    log('populateDescription(%o)', content);
     if (content === 0) {
       return null;
     }
-
     let descriptionAsString = '';
 
     content.forEach((line: any) => {
@@ -227,8 +227,8 @@ class JiraITSIndexer {
     return descriptionAsString;
   }
 
-  processComments(issue: any) {
-    log('processComments()');
+  private processComments(issue: any) {
+    log('processComments(%o)', issue);
     const issueKey = issue.key;
     const mentioned: string[] = [];
 
@@ -252,6 +252,7 @@ class JiraITSIndexer {
   }
 
   private extractMentioned(comment: any, mentioned: string[]) {
+    log('extractMentioned()');
     comment.body.content.forEach((commentContent: any) => {
       commentContent.content.forEach((commentType: any) => {
         if (commentType.type === 'mention') {
