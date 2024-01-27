@@ -52,29 +52,27 @@ class Jira {
 
   getMergeRequest(issueId: string) {
     log('getMergeRequests(%o)', issueId);
-    return new Promise((resolve) => {
-      this.request('dev-status/latest/issue/summary?issueId=' + issueId).then((developmentInformation) => {
-        const pullrequests = developmentInformation.pullrequest;
-        if (pullrequests.overall.count !== 0) {
-          const mergeRequests: any[] = [];
 
-          const promises: Promise<any>[] = [];
+    return this.request('dev-status/latest/issue/summary?issueId=' + issueId).then((developmentInformation) => {
+      const pullrequests = developmentInformation.pullrequest;
 
-          for (const [key, value] of Object.entries(pullrequests.byInstanceType)) {
-            promises.push(this.getDevelopmentInformation(issueId + '&dataType=pullrequest&applicationType=' + key));
-          }
+      if (pullrequests.overall.count !== 0) {
+        const promises: Promise<any>[] = [];
 
-          Promise.all(promises).then((responses) => {
-            let mergeRequests: any[] = [];
-            for (const response of responses) {
-              mergeRequests = mergeRequests.concat(response[0].pullRequests);
-            }
-            resolve(mergeRequests);
-          });
-        } else {
-          resolve([]);
+        for (const [key, value] of Object.entries(pullrequests.byInstanceType)) {
+          promises.push(this.getDevelopmentInformation(issueId + '&dataType=pullrequest&applicationType=' + key));
         }
-      });
+
+        return Promise.all(promises).then((responses) => {
+          let mergeRequests: any[] = [];
+          for (const response of responses) {
+            mergeRequests = mergeRequests.concat(response[0].pullRequests);
+          }
+          return mergeRequests; // Return the result of Promise.all()
+        });
+      } else {
+        return Promise.resolve([]); // No pull requests, resolve with an empty array
+      }
     });
   }
 
