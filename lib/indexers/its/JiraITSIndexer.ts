@@ -1,6 +1,4 @@
-/* eslint-disable no-useless-escape */
 'use strict';
-//rewrite in typescript
 import _ from 'lodash';
 import Jira from '../../core/provider/jira';
 
@@ -39,7 +37,6 @@ class JiraITSIndexer {
     };
     this.jiraProject = config.project;
     this.jira = new Jira(options);
-    return Promise.resolve();
   }
 
   index() {
@@ -66,6 +63,8 @@ class JiraITSIndexer {
                 mergeRequest.id = mergeRequest.id.substring(1);
 
                 return MergeRequest.findOneById(mergeRequest.id).then((persistedMergeRequest: any) => {
+                  // TODO: 2 issues share the same merge request then the ID of the merge request is equal and
+                  //  the other merge request will not be persisted because it is found in DB
                   if (
                     !persistedMergeRequest ||
                     new Date(persistedMergeRequest.updatedAt).getTime() < new Date(mergeRequest.lastUpdate).getTime()
@@ -74,21 +73,24 @@ class JiraITSIndexer {
                       id: mergeRequest.id,
                       iid: issue.key,
                       title: mergeRequest.name,
-                      description: description,
+                      description: description, // this description is not the description
+                      // of the merge request in Github but of the issue in Jira
                       state: mergeRequest.status,
-                      url: issue.self,
-                      closedAt: issue.fields.resolutiondate,
                       createdAt: issue.fields.createdAt,
                       updatedAt: mergeRequest.lastUpdate,
-                      upvotes: issue.fields?.votes.votes, // this are the fields from the issue
-                      weight: issue.fields?.customfield_10016, //this field is used for the storypoints,
-                      watches: issue.fields.watches.watchCount,
-                      labels: issue.fields.labels,
-                      milestone: issue.milestone,
+                      labels: issue.fields.labels, // this are labels of issue
+                      milestone: issue.fixVersions, // this are versions of issue
                       author: issue.fields.creator.displayName, // mergeRequest.author.name but it always displays name: User
-                      assignee: issue.fields?.assignee?.displayName, // there can't be multiple assinges
-                      assignees: mergeRequest.reviewers,
+                      assignee: issue.fields?.assignee?.displayName, // this is assignee of issue in Jira
+                      assignees: mergeRequest.reviewers, // not sure if this is correct field
+                      // userNotesCount: NA
+                      upvotes: issue.fields?.votes.votes, // this are the fields from the issue
+                      // downVotes: NA
                       webUrl: mergeRequest.url,
+                      // reference: NA,
+                      // references: NA,
+                      // timeStats: NA,
+                      // notes: NA,
                     };
 
                     if (!persistedMergeRequest) {
@@ -129,7 +131,7 @@ class JiraITSIndexer {
                       createdAt: issue.fields.createdAt,
                       updatedAt: issue.fields.updated,
                       labels: issue.fields.labels,
-                      milestone: issue.fixVersions,
+                      milestone: issue.fixVersions, //to check if this is the correct used field
                       author: issue.fields.creator.displayName,
                       assignee: issue.fields?.assignee?.displayName, // there can't be multiple assinges
                       // assignees: issue.assignees, not available in Jira
@@ -142,7 +144,7 @@ class JiraITSIndexer {
                       webUrl: issue.self.split('/rest/api')[0] + '/browse/' + issue.key,
                       subscribed: issue.fields.watches.watchCount,
                       mentions: mentioned,
-                      // notes: not found
+                      // notes: NA
                     };
                     if (!persistedIssue) {
                       log('Persisting new issue');
@@ -173,14 +175,13 @@ class JiraITSIndexer {
         return Milestone.findOneById(projectVersion.id)
           .then((persistedVersion: any) => {
             const versionToPersist = {
-              id: projectVersion.id, // problem is here that when using multiple projects, the versions could have the same ID,
-              // but being in a different project
-              iid: projectVersion.projectId,
+              id: projectVersion.id,
+              iid: projectVersion.projectId, // no iid for version in Jira
               title: projectVersion.name,
               description: projectVersion.description,
               dueDate: projectVersion.releaseDate,
               startDate: projectVersion.startDate,
-              state: projectVersion.released ? 'released' : 'unreleased',
+              state: projectVersion.released ? 'active' : 'inactive',
               expired: !projectVersion.overdue ? false : projectVersion.overdue, // could maybe not be true,
               // but api does not return overdue if it is released
             };

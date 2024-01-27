@@ -93,10 +93,8 @@ class Jira {
       },
       (resp: any) => {
         if (path.includes('/comment')) {
-          // for comments
           return resp.body.comments;
         } else if (path.includes('/version')) {
-          // for projectversions
           return resp.body.values;
         }
         // for issues
@@ -117,7 +115,6 @@ class Jira {
       headers: {
         Authorization: `Basic ${Buffer.from(credentials).toString('base64')}`,
         Accept: 'application/json',
-        // 'Accept-Language': 'en_us',
       },
     };
     const isNonOfficial = path.includes('dev-status');
