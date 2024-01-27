@@ -14,6 +14,7 @@ class JiraITSIndexer {
   private repo: string;
   private stopping: boolean;
   private reporter: any;
+  private MENTIONED_REGEX = /\[~.+@.+\]/g;
 
   private jira: any;
   private jiraProject: any;
@@ -54,7 +55,7 @@ class JiraITSIndexer {
           }
 
           issue.id = issue.id.toString();
-          const description = issue.fields.description?.content ? this.populateDescription(issue.fields.description.content) : null;
+          const description = this.populateDescription(issue.fields.description);
 
           const mergeRequestPromise = this.jira
             .getMergeRequest(issue.id)
@@ -117,9 +118,6 @@ class JiraITSIndexer {
               if (!persistedIssue || new Date(persistedIssue.updatedAt).getTime() < new Date(issue.fields.updated).getTime()) {
                 return this.processComments(issue)
                   .then((mentioned: any) => {
-                    const description = issue.fields.description?.content
-                      ? this.populateDescription(issue.fields.description.content)
-                      : null;
                     const issueToSave = {
                       id: issue.id,
                       iid: issue.key,
@@ -128,11 +126,11 @@ class JiraITSIndexer {
                       state: issue.fields.status.statusCategory.key,
                       url: issue.self,
                       closedAt: issue.fields.resolutiondate,
-                      createdAt: issue.fields.createdAt,
+                      createdAt: issue.fields.created,
                       updatedAt: issue.fields.updated,
                       labels: issue.fields.labels,
-                      milestone: issue.fixVersions, //to check if this is the correct used field
-                      author: issue.fields.creator.displayName,
+                      milestone: issue.fixVersions, //to check if this is the correct-used field
+                      author: issue.fields.creator.displayName, // display name or email address?
                       assignee: issue.fields?.assignee?.displayName, // there can't be multiple assinges
                       // assignees: issue.assignees, not available in Jira
                       upvotes: issue.fields?.votes.votes,
@@ -142,7 +140,7 @@ class JiraITSIndexer {
                       weight: issue.fields?.customfield_10016, //this field is used for the storypoints, could be problematic,
                       // if having for example this in custom fields
                       webUrl: issue.self.split('/rest/api')[0] + '/browse/' + issue.key,
-                      subscribed: issue.fields.watches.watchCount,
+                      subscribed: issue.fields.watches?.watchCount,
                       mentions: mentioned,
                       // notes: NA
                     };
@@ -207,14 +205,20 @@ class JiraITSIndexer {
     });
   }
 
-  private populateDescription(content: any) {
-    log('populateDescription(%o)', content);
-    if (content === 0) {
+  private populateDescription(description: any) {
+    log('populateDescription(%o)', description);
+
+    if (typeof description === 'string') {
+      // for Jira version where API returns description as plain string
+      return description ? description : null;
+    }
+    // here description is built as arrays of lines and content
+    if (description === 0) {
       return null;
     }
     let descriptionAsString = '';
 
-    content.forEach((line: any) => {
+    description.content.forEach((line: any) => {
       if (line.type === 'paragraph') {
         line.content.forEach((actualContent: any) => {
           if (actualContent.type === 'text') {
@@ -254,16 +258,23 @@ class JiraITSIndexer {
 
   private extractMentioned(comment: any, mentioned: string[]) {
     log('extractMentioned()');
-    comment.body.content.forEach((commentContent: any) => {
-      commentContent.content.forEach((commentType: any) => {
-        if (commentType.type === 'mention') {
-          const mentionedUser = commentType.attrs.text;
-          if (!mentioned.includes(mentionedUser)) {
-            mentioned.push(mentionedUser);
+    if (typeof comment.body === 'string') {
+      Array.prototype.push.apply(
+        mentioned,
+        comment.body.match(this.MENTIONED_REGEX).map((elem: string) => elem.substring(2, elem.length - 1))
+      );
+    } else {
+      comment.body.content.forEach((commentContent: any) => {
+        commentContent.content.forEach((commentType: any) => {
+          if (commentType.type === 'mention') {
+            const mentionedUser = commentType.attrs.text;
+            if (!mentioned.includes(mentionedUser)) {
+              mentioned.push(mentionedUser);
+            }
           }
-        }
+        });
       });
-    });
+    }
   }
 
   isStopping() {
