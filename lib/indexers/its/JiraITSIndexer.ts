@@ -55,7 +55,7 @@ class JiraITSIndexer {
           }
 
           issue.id = issue.id.toString();
-          const description = this.populateDescription(issue.fields.description);
+          const description = issue.fields.description ? this.populateDescription(issue.fields.description) : null;
 
           const mergeRequestPromise = this.jira
             .getMergeRequest(issue.id)
@@ -213,6 +213,7 @@ class JiraITSIndexer {
       return description ? description : null;
     }
     // here description is built as arrays of lines and content
+    description = description.content;
     if (description === 0) {
       return null;
     }
