@@ -8,9 +8,17 @@ WORKDIR /app/binocular-frontend
 RUN --mount=type=bind,src=./docker/frontend-mem-nag.sh,target=/frontend-mem-nag.sh \
     /frontend-mem-nag.sh
 
-RUN --mount=type=bind,src=./package-lock.json,target=./package-lock.json,readonly \
-    --mount=type=bind,src=./package.json,target=./package.json,readonly \
-    npm ci --omit=optional --ignore-scripts && \
+#RUN --mount=type=bind,src=./package-lock.json,target=./package-lock.json,readonly \
+#    --mount=type=bind,src=./package.json,target=./package.json,readonly \
+RUN --mount=type=bind,src=./package.json,target=./package.json,readonly \
+    --mount=type=bind,src=./binocular-backend/package.json,target=./binocular-backend/package.json,readonly \
+    --mount=type=bind,src=./binocular-frontend/package.json,target=./binocular-frontend/package.json,readonly \
+#    npm ci --omit=optional --ignore-scripts && \
+# Error: Cannot find module @rollup/rollup-linux-x64-musl.
+    # npm has a bug related to optional dependencies (https://github.com/npm/cli/issues/4828).
+    # Please try `npm i` again after removing both package-lock.json and node_modules directory.
+    npm i && \
+#    npm run install:frontend && \
     npm cache clean --force
 
 ###
@@ -27,20 +35,14 @@ RUN --mount=type=bind,src=./docker/frontend-mem-nag.sh,target=/frontend-mem-nag.
 WORKDIR /app/binocular-frontend
 
 COPY --from=install --chown=node:node /app/binocular-frontend/node_modules ./node_modules
-
+COPY --from=install --chown=node:node /app/binocular-frontend/binocular-frontend/node_modules ./binocular-frontend/node_modules
 COPY --chown=node:node ./LICENSE ./LICENSE
-COPY --chown=node:node ./ui ./ui
-COPY --chown=node:node ./declaration.d.ts ./declaration.d.ts
+COPY --chown=node:node ./binocular-frontend ./binocular-frontend
 
-RUN echo "{\"repo\":{\"name\":\"TODO: remove static context.json\"}}" > ./ui/config/context.json
+RUN echo "{\"repo\":{\"name\":\"TODO: remove static context.json\"}}" > ./binocular-frontend/config/context.json
 
 # This seems to be the most expensive step
-RUN --mount=type=bind,src=./webpack.prod.js,target=./webpack.prod.js,readonly \
-    --mount=type=bind,src=./tsconfig.json,target=./tsconfig.json,readonly \
-    --mount=type=bind,src=./webpack.common.js,target=./webpack.common.js,readonly \
-    --mount=type=bind,src=./babel.config.json,target=./babel.config.json,readonly \
-    --mount=type=bind,src=./package.json,target=./package.json,readonly \
-#    --mount=type=bind,src=./binocular.ts,target=./binocular.ts,readonly \
+RUN --mount=type=bind,src=./package.json,target=./package.json,readonly \
     npm run ${BUILD_CMD}
 
 FROM nginx:1.25.3-alpine as ngx

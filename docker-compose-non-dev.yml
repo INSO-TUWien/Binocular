@@ -39,10 +39,10 @@ services:
         target: /app/binocular/repo/test-repo/.binocularrc
         read_only: true
       - ./:/app/binocular/repo/test-repo
-      # - ./lib/context.js:/app/binocular/lib/context.js
+      # - ./binocular-backend/context.js:/app/binocular/binocular-backend/context.js
       # - ./binocular.js:/app/binocular/binocular.js
-      # - ./ui/config/context.json:/app/binocular/lib/../ui/config/context.json
-      # - ./gitlab.json:/app/binocular/ui/config/gitlab.json
+      # - ./binocular-frontend/config/context.json:/app/binocular/binocular-backend/../binocular-frontend/config/context.json
+      # - ./gitlab.json:/app/binocular/binocular-frontend/config/gitlab.json
       - /Users/rise/Repositories/SEPM_WS23/23ws-ase-pr-inso-06:/app/binocular/repo/23ws-ase-pr-inso-06
 
 

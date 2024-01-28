@@ -1,0 +1,35 @@
+@import 'bulma/bulma.sass';
+
+.dndItem {
+  display: flex;
+  flex-direction: row;
+
+  margin: 4px;
+  width: 100%;
+
+  cursor: move; //fallback
+  cursor: grab;
+  cursor: -moz-grab;
+  cursor: -webkit-grab;
+}
+
+.dndItem:active {
+  cursor: grabbing;
+  cursor: -moz-grabbing;
+  cursor: -webkit-grabbing;
+}
+
+.dndItem:disabled {
+  cursor: grabbing;
+  cursor: -moz-grabbing;
+  cursor: -webkit-grabbing;
+}
+
+.itemLabel {
+  flex: 1;
+  padding-left: 20;
+
+  span {
+    float: left;
+  }
+}

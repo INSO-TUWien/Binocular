@@ -2,8 +2,8 @@
 
 'use strict';
 
-const serverCoverage = require('../coverage/server/coverage-final.json');
-const uiCoverage = require('../coverage/ui/coverage-final.json');
+const serverCoverage = require('../coverage/backend/coverage-final.json');
+const uiCoverage = require('../coverage/frontend/coverage-final.json');
 const _ = require('lodash');
 
 const stats = {

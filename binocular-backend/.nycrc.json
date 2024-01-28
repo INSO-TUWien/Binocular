@@ -1,0 +1,7 @@
+{
+  "all": true,
+  "reporter": [
+    "json"
+  ],
+  "report-dir": "../coverage/backend"
+}

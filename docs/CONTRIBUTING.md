@@ -29,10 +29,9 @@ The source-code is organized similarly:
 
 ```
 Binocular
-├── foxx     # Holds the foxx-service that is the GraphQL-interface
-├── lib      # Holds the back-end
-├── tests    # Unit tests
-└── ui       # Holds the front-end
+├── foxx                  # Holds the foxx-service that is the GraphQL-interface
+├── binocular-backend     # Holds the back-end
+└── binocular-frontend    # Holds the front-end
 ```
 
 
@@ -42,11 +41,11 @@ The back-end is a pretty straightforward node.js application. It is
 responsible for gathering data and uses express to host the front-end.
 
 The data gathering is done by a type of component called indexer. You
-can see the indexers in the `lib/indexers` directory:
+can see the indexers in the `binocular-backend/indexers` directory:
 
 ```
 
-lib/indexers
+binocular-backend/indexers
 ├── BaseGitLabIndexer.js    # Basic indexer for accessing GitLab-Data
 ├── ci                      # CI-specific indexers
 │   ├── GitLabCIIndexer.js  # Indexer for GitLab-CI
@@ -80,7 +79,7 @@ The front-end is a redux-backed react application that heavily relies
 on D3 to do its work:
 
 ```
-ui
+binocular-frontend
 ├── index.html                    # Main entry point
 ├── config                        # Aditional config files for the fronted (mainly used for automatic builds)
 ├── db_export                     # Folder for the json export of the databse for offline use (will be automatically generated during the first execution)
