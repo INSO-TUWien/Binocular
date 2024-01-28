@@ -116,6 +116,7 @@ class Jira {
         Authorization: `Basic ${Buffer.from(credentials).toString('base64')}`,
         Accept: 'application/json',
       },
+      timeout: this.requestTimeout || 3000,
     };
     const isNonOfficial = path.includes('dev-status');
     const requestUrl = isNonOfficial ? this.baseUrl.split('api/3')[0] + path : urlJoin(this.baseUrl, path);
