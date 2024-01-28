@@ -116,7 +116,7 @@ export default class TimeSpentChart extends React.Component {
     const mergeRequests = props.mergeRequests;
     const timeSpentChartData = [];
     const timeSpentScale = [0, 0];
-    
+
     const aggregatedDataPerAuthor = {};
     let aggregatedTimeSpent = 0;
     if (issues.length > 0) {
@@ -138,10 +138,10 @@ export default class TimeSpentChart extends React.Component {
       filteredMergeRequests.forEach((mergeRequest) => {
         timeTrackingData.push(...extractTimeTrackingDataFromNotes(mergeRequest.notes));
       });
-      
+
       const timetrackingTimestamps = timeTrackingData.map((ttd) => {
-        return (new Date(ttd.createdAt)).getTime()
-      })
+        return new Date(ttd.createdAt).getTime();
+      });
 
       // explicitly check if the value is false, because in standalone mode, this is undefined.
       //   But then we also want the universal settings to have an effect
@@ -153,7 +153,7 @@ export default class TimeSpentChart extends React.Component {
       } else {
         // else, default to the first and last time that some time was tracked
         firstTimestamp = Math.min(...timetrackingTimestamps);
-        lastTimestamp = Math.max(...timetrackingTimestamps)
+        lastTimestamp = Math.max(...timetrackingTimestamps);
       }
 
       const granularity = this.getGranularity(props.chartResolution);
@@ -162,7 +162,8 @@ export default class TimeSpentChart extends React.Component {
       const next = moment(curr).add(1, props.chartResolution);
 
       // the visualization should include the whle bucked of the last timetracking.
-      // So if the last timestracking was done on the first of January and the granularity is month, the last bucket should be the whole month of january
+      // So if the last timestracking was done on the first of January and the granularity is month,
+      // the last bucket should be the whole month of january
       const end = moment(lastTimestamp).endOf(granularity.unit).add(1, props.chartResolution);
       const data = [];
 
@@ -170,7 +171,7 @@ export default class TimeSpentChart extends React.Component {
         //Iterate through time buckets
         const currTimestamp = curr.toDate().getTime();
         const nextTimestamp = next.toDate().getTime();
-        
+
         const relevantNotes = timeTrackingData.filter(
           (entry) => Date.parse(entry.createdAt) >= currTimestamp && Date.parse(entry.createdAt) < nextTimestamp
         );

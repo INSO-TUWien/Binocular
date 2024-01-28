@@ -86,8 +86,8 @@ export default class CIBuilds extends React.Component {
     let builds = props.builds;
 
     // explicitly check if the value is false, because in standalone mode, this is undefined.
-      //   But then we also want the universal settings to have an effect
-      // if this visualization is part of the dashboard, this value is either true or false
+    //   But then we also want the universal settings to have an effect
+    //   if this visualization is part of the dashboard, this value is either true or false
     if (props.universalSettings !== false) {
       builds = props.filteredBuilds;
       firstTimestamp = props.firstSignificantTimestamp;
