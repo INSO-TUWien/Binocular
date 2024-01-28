@@ -110,18 +110,13 @@ export default class TimeSpentChart extends React.Component {
       return {};
     }
 
-    let firstTimestamp = props.firstIssueTimestamp;
-    let lastTimestamp = props.lastIssueTimestamp;
+    let firstTimestamp = null;
+    let lastTimestamp = null;
     const issues = props.issues;
     const mergeRequests = props.mergeRequests;
     const timeSpentChartData = [];
     const timeSpentScale = [0, 0];
-    if (props.universalSettings) {
-      //issues = props.filteredIssues;
-      //mergeRequests = props.filteredMergeRequests;
-      firstTimestamp = props.firstSignificantTimestamp;
-      lastTimestamp = props.lastSignificantTimestamp;
-    }
+    
     const aggregatedDataPerAuthor = {};
     let aggregatedTimeSpent = 0;
     if (issues.length > 0) {
@@ -131,13 +126,6 @@ export default class TimeSpentChart extends React.Component {
       const selectedAuthorNames = _.uniq(props.selectedAuthors.map((sA) => sA.split('<')[0].slice(0, -1)));
 
       //---- STEP 2: AGGREGATE TIME PER TIME INTERVAL ----
-      const granularity = this.getGranularity(props.chartResolution);
-      const curr = moment(firstTimestamp).startOf(granularity.unit).subtract(1, props.chartResolution);
-      const next = moment(curr).add(1, props.chartResolution);
-
-      const end = moment(lastTimestamp).endOf(granularity.unit).add(1, props.chartResolution);
-      const data = [];
-
       const timeTrackingData = [];
       selectedAuthorNames.forEach((sA) => {
         aggregatedDataPerAuthor[sA] = 0;
@@ -150,10 +138,39 @@ export default class TimeSpentChart extends React.Component {
       filteredMergeRequests.forEach((mergeRequest) => {
         timeTrackingData.push(...extractTimeTrackingDataFromNotes(mergeRequest.notes));
       });
+      
+      const timetrackingTimestamps = timeTrackingData.map((ttd) => {
+        return (new Date(ttd.createdAt)).getTime()
+      })
+
+      // explicitly check if the value is false, because in standalone mode, this is undefined.
+      //   But then we also want the universal settings to have an effect
+      // if this visualization is part of the dashboard, this value is either true or false
+      if (props.universalSettings !== false) {
+        // if universal settings should be considered, take the timeframe from there
+        firstTimestamp = props.firstSignificantTimestamp;
+        lastTimestamp = props.lastSignificantTimestamp;
+      } else {
+        // else, default to the first and last time that some time was tracked
+        firstTimestamp = Math.min(...timetrackingTimestamps);
+        lastTimestamp = Math.max(...timetrackingTimestamps)
+      }
+
+      const granularity = this.getGranularity(props.chartResolution);
+
+      const curr = moment(firstTimestamp).startOf(granularity.unit).subtract(1, props.chartResolution);
+      const next = moment(curr).add(1, props.chartResolution);
+
+      // the visualization should include the whle bucked of the last timetracking.
+      // So if the last timestracking was done on the first of January and the granularity is month, the last bucket should be the whole month of january
+      const end = moment(lastTimestamp).endOf(granularity.unit).add(1, props.chartResolution);
+      const data = [];
+
       for (; curr.isSameOrBefore(end); curr.add(1, props.chartResolution), next.add(1, props.chartResolution)) {
         //Iterate through time buckets
         const currTimestamp = curr.toDate().getTime();
         const nextTimestamp = next.toDate().getTime();
+        
         const relevantNotes = timeTrackingData.filter(
           (entry) => Date.parse(entry.createdAt) >= currTimestamp && Date.parse(entry.createdAt) < nextTimestamp
         );
