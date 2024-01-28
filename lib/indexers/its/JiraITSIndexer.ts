@@ -80,12 +80,15 @@ class JiraITSIndexer {
                       createdAt: issue.fields.createdAt,
                       updatedAt: mergeRequest.lastUpdate,
                       labels: issue.fields.labels, // this are labels of issue
-                      milestone: issue.fixVersions, // this are versions of issue
+                      milestone: issue.fields.fixVersions.map((version: any) => this.createVersionObject(version)),
+                      // this are versions of issue
                       author: issue.fields.creator.displayName, // mergeRequest.author.name but it always displays name: User
-                      assignee: issue.fields?.assignee?.displayName, // this is assignee of issue in Jira
+                      assignee: issue.fields?.assignee?.displayName ? issue.fields?.assignee?.displayName : null,
+                      // this is assignee of issue in Jira
                       assignees: mergeRequest.reviewers, // not sure if this is correct field
                       // userNotesCount: NA
-                      upvotes: issue.fields?.votes.votes, // this are the fields from the issue
+                      upvotes: issue.fields?.votes.votes ? issue.fields?.votes.votes : null,
+                      // this are the fields from the issue
                       // downVotes: NA
                       webUrl: mergeRequest.url,
                       // reference: NA,
@@ -129,18 +132,20 @@ class JiraITSIndexer {
                       createdAt: issue.fields.created,
                       updatedAt: issue.fields.updated,
                       labels: issue.fields.labels,
-                      milestone: issue.fixVersions, //to check if this is the correct-used field
+                      //to check if this is the correct-used field
+                      milestone: issue.fields.fixVersions.map((version: any) => this.createVersionObject(version)),
                       author: issue.fields.creator.displayName, // display name or email address?
-                      assignee: issue.fields?.assignee?.displayName, // there can't be multiple assinges
+                      assignee: issue.fields?.assignee?.displayName ? issue.fields?.assignee?.displayName : null,
                       // assignees: issue.assignees, not available in Jira
-                      upvotes: issue.fields?.votes.votes,
+                      upvotes: issue.fields?.votes.votes ? issue.fields?.votes.votes : null,
                       // downVotes not available
-                      dueDate: issue.fields?.dueDate,
+                      dueDate: issue.fields?.dueDate ? issue.fields?.dueDate : null,
                       // confidential: issue.security-level for this normal Jira software is needed, free version does not have that
-                      weight: issue.fields?.customfield_10016, //this field is used for the storypoints, could be problematic,
+                      weight: issue.fields?.customfield_10016 ? issue.fields?.customfield_10016 : null,
+                      //this field is used for the storypoints, could be problematic,
                       // if having for example this in custom fields
                       webUrl: issue.self.split('/rest/api')[0] + '/browse/' + issue.key,
-                      subscribed: issue.fields.watches?.watchCount,
+                      subscribed: issue.fields.watches?.watchCount ? issue.fields.watches?.watchCount : null,
                       mentions: mentioned,
                       // notes: NA
                     };
@@ -172,17 +177,7 @@ class JiraITSIndexer {
         projectVersion.id = projectVersion.id.toString();
         return Milestone.findOneById(projectVersion.id)
           .then((persistedVersion: any) => {
-            const versionToPersist = {
-              id: projectVersion.id,
-              iid: projectVersion.projectId, // no iid for version in Jira
-              title: projectVersion.name,
-              description: projectVersion.description,
-              dueDate: projectVersion.releaseDate,
-              startDate: projectVersion.startDate,
-              state: projectVersion.released ? 'active' : 'inactive',
-              expired: !projectVersion.overdue ? false : projectVersion.overdue, // could maybe not be true,
-              // but api does not return overdue if it is released
-            };
+            const versionToPersist = this.createVersionObject(projectVersion);
             if (!persistedVersion || !_.isEqual(persistedVersion, versionToPersist)) {
               if (!persistedVersion) {
                 log('Persisting new version');
@@ -205,6 +200,21 @@ class JiraITSIndexer {
     });
   }
 
+  private createVersionObject(projectVersion: any) {
+    const versionToPersist = {
+      id: projectVersion.id,
+      iid: projectVersion.projectId, // no iid for version in Jira
+      title: projectVersion.name,
+      description: projectVersion.description,
+      dueDate: projectVersion.releaseDate,
+      startDate: projectVersion.startDate,
+      state: projectVersion.released ? 'active' : 'inactive',
+      expired: !projectVersion.overdue ? false : projectVersion.overdue, // could maybe not be true,
+      // but api does not return overdue if it is released
+    };
+    return versionToPersist;
+  }
+
   private populateDescription(description: any) {
     log('populateDescription(%o)', description);
 
@@ -213,8 +223,7 @@ class JiraITSIndexer {
       return description ? description : null;
     }
     // here description is built as arrays of lines and content
-    description = description.content;
-    if (description === 0) {
+    if (description.content.length === 0) {
       return null;
     }
     let descriptionAsString = '';
