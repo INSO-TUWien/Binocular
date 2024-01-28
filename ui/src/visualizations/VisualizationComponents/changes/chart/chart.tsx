@@ -111,9 +111,10 @@ const extractCommitData = (
   let lastTimestamp = props.lastCommitTimestamp;
   let commits = props.commits;
 
-  // TODO in the standalone version of this visualization (not in the dashboard), props.universalSettings is always false.
-  // This means that we cannot filter merge commits in the standalone version
-  if (props.universalSettings) {
+  // explicitly check if the value is false, because in standalone mode, this is undefined.
+  //   But then we also want the universal settings to have an effect
+  // if this visualization is part of the dashboard, this value is either true or false
+  if (props.universalSettings !== false) {
     commits = props.filteredCommits;
     firstTimestamp = props.firstSignificantTimestamp;
     lastTimestamp = props.lastSignificantTimestamp;

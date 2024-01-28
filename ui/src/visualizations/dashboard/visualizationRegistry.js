@@ -1,7 +1,6 @@
 'use strict';
 
 import empty from '../VisualizationComponents/Empty';
-import additions_deletions from '../VisualizationComponents/Additions_Deletions';
 import issueImpact from '../legacy/issue-impact';
 import ciBuilds from '../VisualizationComponents/ciBuilds';
 import issues from '../VisualizationComponents/issues';
@@ -16,7 +15,6 @@ export default {
   ciBuilds,
   issueImpact,
   issueBreakdown,
-  additions_deletions,
   timeSpent,
   sprints,
   empty,
