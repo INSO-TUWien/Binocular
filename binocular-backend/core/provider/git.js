@@ -63,10 +63,9 @@ class Repository {
         branchName = 'origin/' + branchName;
       }
 
-      const command = `cd ${context.targetPath}
-      && git log --format="%ad" --name-only --follow --diff-filter=AR ${branchName} -- ${fileName}`;
+      const cmd = `cd ${context.targetPath} && git log --format="%ad" --name-only --follow --diff-filter=AR ${branchName} -- ${fileName}`;
       try {
-        const { stdout } = await exec(command, { maxBuffer: 1024 * 1000 });
+        const { stdout } = await exec(cmd, { maxBuffer: 1024 * 1000 });
         if (stdout.length === 0) return [];
         let groups = _.chunk(stdout.split('\n'), 3);
         //since exec returns a newline at the end, the last group is always empty. remove it
