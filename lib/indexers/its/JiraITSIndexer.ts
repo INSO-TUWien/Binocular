@@ -32,8 +32,8 @@ class JiraITSIndexer {
     }
     const options = {
       baseUrl: config.url,
-      email: config.username,
-      privateToken: config.token,
+      email: config?.username,
+      privateToken: config?.token,
       requestTimeout: 40000,
     };
     this.jiraProject = config.project;
@@ -116,11 +116,12 @@ class JiraITSIndexer {
               return Promise.all(mergeRequestPromises);
             })
             .then(() => this.reporter.finishMergeRequest());
+
           const issuePromise = Issue.findOneById(issue.id)
             .then((persistedIssue: any) => {
               if (!persistedIssue || new Date(persistedIssue.updatedAt).getTime() < new Date(issue.fields.updated).getTime()) {
                 return this.processComments(issue)
-                  .then((mentioned: any) => {
+                  .then((data: any) => {
                     const issueToSave = {
                       id: issue.id,
                       iid: issue.key,
@@ -146,8 +147,8 @@ class JiraITSIndexer {
                       // if having for example this in custom fields
                       webUrl: issue.self.split('/rest/api')[0] + '/browse/' + issue.key,
                       subscribed: issue.fields.watches?.watchCount ? issue.fields.watches?.watchCount : null,
-                      mentions: mentioned,
-                      // notes: NA
+                      mentions: data.mentioned,
+                      notes: data.comments,
                     };
                     if (!persistedIssue) {
                       log('Persisting new issue');
@@ -253,16 +254,20 @@ class JiraITSIndexer {
       comments.forEach((comment: any) => {
         this.extractMentioned(comment, mentioned);
       });
-      return Promise.resolve(mentioned);
+      return Promise.resolve({ comments: comments, mentioned: mentioned });
     } else {
+      const comments: any[] = [];
       return this.jira
         .getComments(issueKey)
         .each(
           function (comment: any) {
+            comments.push(comment);
             this.extractMentioned(comment, mentioned);
           }.bind(this)
         )
-        .then(() => mentioned);
+        .then(() => {
+          return { comments: comments, mentioned: mentioned };
+        });
     }
   }
 
