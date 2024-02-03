@@ -123,9 +123,10 @@ class JiraITSIndexer {
               if (!persistedIssue || new Date(persistedIssue.updatedAt).getTime() < new Date(issue.fields.updated).getTime()) {
                 const notesPromise = this.processNotes(issue);
                 const commentsPromise = this.processComments(issue);
+                const changelogPromise = this.processChangelog(issue);
 
-                return Promise.all([notesPromise, commentsPromise])
-                  .then(([notes, data]) => {
+                return Promise.all([notesPromise, commentsPromise, changelogPromise])
+                  .then(([notes, data, changelog]) => {
                     const issueToSave = {
                       id: issue.id,
                       iid: issue.key,
@@ -246,6 +247,22 @@ class JiraITSIndexer {
     });
 
     return descriptionAsString;
+  }
+
+  private processChangelog(issue: any) {
+    let changelog = issue.changelog;
+
+    if (changelog.total <= changelog.maxResults) {
+      return Promise.resolve(changelog.histories);
+    } else {
+      changelog = [];
+      return this.jira
+        .getChangelog(issue.key)
+        .each((changelogEntry: any) => {
+          changelog.push(changelogEntry);
+        })
+        .then(() => changelog);
+    }
   }
 
   private processNotes(issue: any) {

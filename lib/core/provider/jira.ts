@@ -27,7 +27,7 @@ class Jira {
     //can use simple /search requests with jql and expand the results,
     // should be no need to do a request for every single issue to get full data, max return size = 100
     log('getIssuesWithJQL(%o)', jql);
-    const jqlSearchString = `fields=*all&jql=${encodeURIComponent(jql)}`; // part after the "jql=" needs to be encoded
+    const jqlSearchString = `fields=*all&jql=${encodeURIComponent(jql)}&expand=changelog`; // part after the "jql=" needs to be encoded
 
     return this.paginatedRequest('search?' + jqlSearchString + '&');
   }
@@ -81,6 +81,11 @@ class Jira {
     return this.paginatedRequest(`issue/${issueKey}/worklog?expand=properties`);
   }
 
+  getChangelog(issueKey: string) {
+    log('getChangelog(%o)', issueKey);
+    return this.paginatedRequest(`issue/${issueKey}/getChangelog`);
+  }
+
   getComments(issueKey: string) {
     log('getComments(%o)', issueKey);
     return this.paginatedRequest(`issue/${issueKey}/comment?`);
@@ -99,7 +104,7 @@ class Jira {
       (resp: any) => {
         if (path.includes('/comment')) {
           return resp.body.comments;
-        } else if (path.includes('/version')) {
+        } else if (path.includes('/version') || path.includes('/changelog')) {
           return resp.body.values;
         } else if (path.includes('/worklog')) {
           return resp.body.worklogs;
