@@ -121,7 +121,12 @@ class Jira {
     const isNonOfficial = path.includes('dev-status');
     const requestUrl = isNonOfficial ? this.baseUrl.split('api/3')[0] + path : urlJoin(this.baseUrl, path);
     return fetch(requestUrl, header).then((response) => {
+      const successfull = response.ok;
+
       return response.json().then((data) => {
+        if (!successfull) {
+          log('different response code: ' + response.status + '\n' + data);
+        }
         if (!isNonOfficial) {
           return { headers: response.headers, body: data };
         } else if (path.includes('detail')) {
