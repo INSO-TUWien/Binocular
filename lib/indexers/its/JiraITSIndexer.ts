@@ -63,7 +63,7 @@ class JiraITSIndexer {
               const mergeRequestPromises = mergeRequests?.map((mergeRequest: any) => {
                 mergeRequest.id = mergeRequest.id.substring(1);
 
-                return MergeRequest.findOneById(mergeRequest.id).then((persistedMergeRequest: any) => {
+                return (MergeRequest as any).findOneById(mergeRequest.id).then((persistedMergeRequest: any) => {
                   // TODO: 2 issues share the same merge request then the ID of the merge request is equal and
                   //  the other merge request will not be persisted because it is found in DB
                   if (
@@ -99,7 +99,7 @@ class JiraITSIndexer {
 
                     if (!persistedMergeRequest) {
                       log('Persisting new mergeRequest');
-                      return MergeRequest.persist(toPersist);
+                      return (MergeRequest as any).persist(toPersist);
                     } else {
                       log('Updating persisted mergeRequest ' + mergeRequest.id);
                       _.assign(persistedMergeRequest, toPersist);
@@ -117,7 +117,8 @@ class JiraITSIndexer {
             })
             .then(() => this.reporter.finishMergeRequest());
 
-          const issuePromise = Issue.findOneById(issue.id)
+          const issuePromise = (Issue as any)
+            .findOneById(issue.id)
             .then((persistedIssue: any) => {
               if (!persistedIssue || new Date(persistedIssue.updatedAt).getTime() < new Date(issue.fields.updated).getTime()) {
                 const notesPromise = this.processNotes(issue);
@@ -155,7 +156,7 @@ class JiraITSIndexer {
                     };
                     if (!persistedIssue) {
                       log('Persisting new issue');
-                      return Issue.persist(issueToSave);
+                      return (Issue as any).persist(issueToSave);
                     } else {
                       log('Updating persisted issue ' + issue.id);
                       _.assign(persistedIssue, issueToSave);
@@ -179,13 +180,14 @@ class JiraITSIndexer {
         }),
       this.jira.getProjectVersions(this.jiraProject).each((projectVersion: any) => {
         projectVersion.id = projectVersion.id.toString();
-        return Milestone.findOneById(projectVersion.id)
+        return (Milestone as any)
+          .findOneById(projectVersion.id)
           .then((persistedVersion: any) => {
             const versionToPersist = this.createVersionObject(projectVersion);
             if (!persistedVersion || !_.isEqual(persistedVersion, versionToPersist)) {
               if (!persistedVersion) {
                 log('Persisting new version');
-                return Milestone.persist(versionToPersist);
+                return (Milestone as any).persist(versionToPersist);
               } else {
                 log('Updating persisted version ' + projectVersion.id);
                 _.assign(persistedVersion, versionToPersist);
