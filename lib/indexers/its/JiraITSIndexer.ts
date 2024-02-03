@@ -120,8 +120,11 @@ class JiraITSIndexer {
           const issuePromise = Issue.findOneById(issue.id)
             .then((persistedIssue: any) => {
               if (!persistedIssue || new Date(persistedIssue.updatedAt).getTime() < new Date(issue.fields.updated).getTime()) {
-                return this.processComments(issue)
-                  .then((data: any) => {
+                const notesPromise = this.processNotes(issue);
+                const commentsPromise = this.processComments(issue);
+
+                return Promise.all([notesPromise, commentsPromise])
+                  .then(([notes, data]) => {
                     const issueToSave = {
                       id: issue.id,
                       iid: issue.key,
@@ -241,6 +244,22 @@ class JiraITSIndexer {
     });
 
     return descriptionAsString;
+  }
+
+  private processNotes(issue: any) {
+    log('processNotes()');
+    let worklogArray = issue.fields.worklog;
+    if (worklogArray.total <= worklogArray.maxResults) {
+      return Promise.resolve(worklogArray.worklogs);
+    } else {
+      worklogArray = [];
+      this.jira
+        .getWorklog(issue.key)
+        .each((worklog: any) => {
+          worklogArray.push(worklog);
+        })
+        .then(() => log(worklogArray));
+    }
   }
 
   private processComments(issue: any) {

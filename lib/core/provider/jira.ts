@@ -76,6 +76,11 @@ class Jira {
     });
   }
 
+  getWorklog(issueKey: string) {
+    log('getWorklog(%o)', issueKey);
+    return this.paginatedRequest(`issue/${issueKey}/worklog?expand=properties`);
+  }
+
   getComments(issueKey: string) {
     log('getComments(%o)', issueKey);
     return this.paginatedRequest(`issue/${issueKey}/comment?`);
@@ -96,6 +101,8 @@ class Jira {
           return resp.body.comments;
         } else if (path.includes('/version')) {
           return resp.body.values;
+        } else if (path.includes('/worklog')) {
+          return resp.body.worklogs;
         }
         // for issues
         return resp.body.issues || [];
