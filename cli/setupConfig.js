@@ -38,6 +38,26 @@ export function promptUserAndSaveConfig() {
       },
       {
         type: 'input',
+        name: 'jiraUrl',
+        message: 'Enter JIRA URL [only necessary for JIRA Indexer]:',
+      },
+      {
+        type: 'input',
+        name: 'jiraProject',
+        message: 'Enter JIRA Project Name (Format: project key or full project name) [only necessary for JIRA Indexer]:',
+      },
+      {
+        type: 'input',
+        name: 'jiraMail',
+        message: 'Enter JIRA E-Mail [only necessary for JIRA Indexer]:',
+      },
+      {
+        type: 'input',
+        name: 'jiraToken',
+        message: 'Enter JIRA API Token [only necessary for JIRA Indexer]:',
+      },
+      {
+        type: 'input',
         name: 'arangoHost',
         message: 'Enter Arango Host:',
         default: '127.0.0.1',
@@ -67,7 +87,7 @@ export function promptUserAndSaveConfig() {
         type: 'list',
         name: 'its',
         message: 'Select ITS (Issue Tracking System):',
-        choices: ['github', 'gitlab', 'none'],
+        choices: ['github', 'gitlab', 'jira', 'none'],
         default: 'none',
       },
       {
@@ -92,6 +112,12 @@ export function promptUserAndSaveConfig() {
             password: answers.githubPassword,
             token: answers.githubToken,
           },
+        },
+        jira: {
+          url: answers.jiraUrl,
+          username: answers.jiraMail,
+          project: answers.jiraProject,
+          token: answers.jiraToken,
         },
         arango: {
           host: answers.arangoHost,
