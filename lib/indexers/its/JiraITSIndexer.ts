@@ -193,7 +193,7 @@ class JiraITSIndexer {
           .findOneById(projectVersion.id)
           .then((persistedVersion: any) => {
             const versionToPersist = this.createVersionObject(projectVersion);
-            if (!persistedVersion || !_.isEqual(persistedVersion, versionToPersist)) {
+            if (!persistedVersion || !_.isEqual(persistedVersion.data, versionToPersist)) {
               if (!persistedVersion) {
                 log('Persisting new version');
                 return (Milestone as any).persist(versionToPersist);
