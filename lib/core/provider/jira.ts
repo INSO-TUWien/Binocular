@@ -54,9 +54,9 @@ class Jira {
     log('getMergeRequests(%o)', issueId);
 
     return this.request('dev-status/latest/issue/summary?issueId=' + issueId).then((developmentInformation) => {
-      const pullrequests = developmentInformation.pullrequest;
+      const pullrequests = developmentInformation?.pullrequest;
 
-      if (pullrequests.overall.count !== 0) {
+      if (pullrequests && pullrequests.overall.count !== 0) {
         const promises: Promise<any>[] = [];
 
         for (const [key, value] of Object.entries(pullrequests.byInstanceType)) {
