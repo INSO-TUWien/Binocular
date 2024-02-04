@@ -127,6 +127,14 @@ class JiraITSIndexer {
 
                 return Promise.all([notesPromise, commentsPromise, changelogPromise])
                   .then(([notes, data, changelog]) => {
+                    // const notes1 = this.createNotesObject(notes, data, changelog);
+
+                    const assignee = issue.fields.assignee ? issue.fields.assignee : null;
+                    if (assignee) {
+                      assignee.name = assignee.displayName;
+                      delete assignee.displayName;
+                    }
+
                     const issueToSave = {
                       id: issue.id,
                       iid: issue.key,
@@ -141,7 +149,7 @@ class JiraITSIndexer {
                       //to check if this is the correct-used field
                       milestone: issue.fields.fixVersions.map((version: any) => this.createVersionObject(version)),
                       author: issue.fields.creator.displayName, // display name or email address?
-                      assignee: issue.fields?.assignee?.displayName ? issue.fields?.assignee?.displayName : null,
+                      assignee: assignee,
                       // assignees: issue.assignees, not available in Jira
                       upvotes: issue.fields?.votes.votes ? issue.fields?.votes.votes : null,
                       // downVotes not available
@@ -208,7 +216,7 @@ class JiraITSIndexer {
   }
 
   private createVersionObject(projectVersion: any) {
-    const versionToPersist = {
+    return {
       id: projectVersion.id,
       iid: projectVersion.projectId, // no iid for version in Jira
       title: projectVersion.name,
@@ -219,7 +227,6 @@ class JiraITSIndexer {
       expired: !projectVersion.overdue ? false : projectVersion.overdue, // could maybe not be true,
       // but api does not return overdue if it is released
     };
-    return versionToPersist;
   }
 
   private populateDescription(description: any) {
@@ -250,18 +257,29 @@ class JiraITSIndexer {
   }
 
   private processChangelog(issue: any) {
-    let changelog = issue.changelog;
+    const changelogInIssue = issue.changelog;
+    let changelog: any[] = [];
 
-    if (changelog.total <= changelog.maxResults) {
-      return Promise.resolve(changelog.histories);
+    const allowedValues = ['timeestimate', 'timespent', 'WorklogId'];
+
+    if (changelogInIssue.total <= changelogInIssue.maxResults) {
+      changelogInIssue.histories.forEach((changelogEntry: any) => this.filterChangelog(changelogEntry, allowedValues, changelog));
+      return Promise.resolve(changelog);
     } else {
       changelog = [];
       return this.jira
         .getChangelog(issue.key)
         .each((changelogEntry: any) => {
-          changelog.push(changelogEntry);
+          this.filterChangelog(changelogEntry, allowedValues, changelog);
         })
         .then(() => changelog);
+    }
+  }
+
+  private filterChangelog(changelogEntry: any, allowedValues: string[], changelog: any) {
+    changelogEntry.items = changelogEntry.items.filter((item: any) => allowedValues.includes(item.field));
+    if (changelogEntry.items.length > 0) {
+      changelog.push(changelogEntry);
     }
   }
 
@@ -333,6 +351,11 @@ class JiraITSIndexer {
   isStopping() {
     log('isStopping()');
     return this.stopping;
+  }
+
+  private createNotesObject(notes: any[], data: any[], changelog: any[]) {
+    const timeEstimateChange: any[] = [];
+    const time = [];
   }
 }
 
