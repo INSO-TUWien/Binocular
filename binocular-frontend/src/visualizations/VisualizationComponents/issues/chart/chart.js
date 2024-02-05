@@ -85,7 +85,11 @@ export default class Issues extends React.Component {
 
     const issueChartData = [];
     const issueScale = [0, 0];
-    if (props.universalSettings) {
+
+    // explicitly check if the value is false, because in standalone mode, this is undefined.
+    //   But then we also want the universal settings to have an effect
+    // if this visualization is part of the dashboard, this value is either true or false
+    if (props.universalSettings !== false) {
       issues = props.filteredIssues;
       firstTimestamp = props.firstSignificantTimestamp;
       lastTimestamp = props.lastSignificantTimestamp;

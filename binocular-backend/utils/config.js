@@ -58,6 +58,10 @@ export default {
     }
   },
 
+  set: function (key, value) {
+    _.set(config, key, value);
+  },
+
   on: function (eventName, handler) {
     listeners[eventName] = listeners[eventName] || [];
     listeners[eventName].push(handler);

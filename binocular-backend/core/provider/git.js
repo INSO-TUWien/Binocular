@@ -58,34 +58,42 @@ class Repository {
   }
 
   async getPreviousFilenames(branchName, fileName, context) {
-    if (branchName && fileName) {
-      if (!branchName.startsWith('origin')) {
-        branchName = 'origin/' + branchName;
-      }
-
-      const command = `cd ${context.targetPath}
-      && git log --format="%ad" --name-only --follow --diff-filter=AR ${branchName} -- ${fileName}`;
-      try {
-        const { stdout } = await exec(command, { maxBuffer: 1024 * 1000 });
-        if (stdout.length === 0) return [];
-        let groups = _.chunk(stdout.split('\n'), 3);
-        //since exec returns a newline at the end, the last group is always empty. remove it
-        groups = groups.filter((g) => g.length > 1);
-
-        //the first element of the group is always the current filename.
-        //we are only interested in the previous filenames, so we only need groups with length > 1
-        if (groups.length <= 1) return [];
-        //sample entry in group:
-        //["Tue Nov 8 10:59:25 2022 +0100", "", "path/to/file"]
-        return groups.map((g) => {
-          return { fileName: g[2], timestamp: new Date(g[0]) };
-        });
-      } catch (e) {
-        log('error in get-blame.js: ', e);
-        return [];
-      }
+    if (branchName === undefined || branchName === null || fileName === undefined || fileName === null) {
+      return [];
     }
-    return [];
+
+    const cmd = `cd ${context.targetPath} && git log --format="%ad" --name-only --follow --diff-filter=AR ${branchName} -- ${fileName}`;
+    try {
+      const { stdout } = await exec(cmd, { maxBuffer: 1024 * 1000 });
+      if (stdout.length === 0) return [];
+      let groups = _.chunk(stdout.split('\n'), 3);
+      //since exec returns a newline at the end, the last group is always empty. remove it
+      groups = groups.filter((g) => g.length > 1);
+
+      //the first element of the group is always the current filename.
+      //we are only interested in the previous filenames, so we only need groups with length > 1
+      if (groups.length <= 1) return [];
+      //sample entry in group:
+      //["Tue Nov 8 10:59:25 2022 +0100", "", "path/to/file"]
+      return groups.map((g) => {
+        return { fileName: g[2], timestamp: new Date(g[0]) };
+      });
+    } catch (e) {
+      log('error in get-blame.js: ', e);
+      return [];
+    }
+  }
+
+  async getPreviousFilenamesRemote(branchName, fileName, context) {
+    if (branchName === undefined || branchName === null || fileName === undefined || fileName === null) {
+      return [];
+    }
+
+    if (!branchName.startsWith('origin')) {
+      branchName = 'origin/' + branchName;
+    }
+
+    return this.getPreviousFilenames(branchName, fileName, context);
   }
 
   async getOwnershipForFile(file, commit, context) {
@@ -147,6 +155,12 @@ class Repository {
       message,
       author,
     });
+  }
+
+  async removeFromStagingArea(files) {
+    for (const filepath of files) {
+      await isomorphicGit.remove({ fs, dir: this.currPath || '.', filepath });
+    }
   }
 
   createBranch(ref) {

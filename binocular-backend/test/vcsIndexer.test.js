@@ -18,6 +18,7 @@ import CommitModuleConnection from '../models/CommitModuleConnection';
 import BranchFileConnection from '../models/BranchFileConnection';
 import BranchFileFileConnection from '../models/BranchFileFileConnection';
 import ModuleModuleConnection from '../models/ModuleModuleConnection';
+import CommitStakeholderConnection from '../models/CommitStakeholderConnection';
 import CommitFileStakeholderConnection from '../models/CommitFileStakeholderConnection';
 import conf from '../utils/config.js';
 import ctx from '../utils/context';
@@ -47,57 +48,95 @@ describe('vcs', function () {
   const reporter = new ReporterMock(['commits', 'files', 'modules']);
   const bob = { name: 'Bob Barker', email: 'bob@gmail.com' };
 
-  const testFile = 'function helloWorld(){\nconsole.log("Hello World");\n}';
-  const testFileChanged = 'function helloWorld(){\nconsole.log("Hello World!");\n}';
-  const testFileChangedAgain =
-    'function helloWorld(){\nconsole.log("Hello");\nconsole.log("Hello World!");\nconsole.log("World");\nconsole.log("!");\n}';
+  const testFile = `
+    function helloWorld(){
+      console.log("Hello World");
+    }`;
+  const testFileChanged = `
+    function helloWorld(){
+      console.log("Hello World");
+      console.log("Hello World");
+      console.log("Hello World");
+    }`;
+  const testFileChangedAgain = `
+    function helloWorld(){
+      console.log("Hello World");
+      console.log("Hello World again");
+      console.log("Hello World again again");
+    }`;
 
-  const test2File = 'function helloWorld(){\nconsole.log("Hello World");\n}';
+  const test2File = `
+    function helloWorld(){
+      console.log("Hello World");
+    }`;
+
+  const setupRepo = async () => {
+    const repo = await fake.repository();
+    ctx.targetPath = repo.path;
+    //Remap Remote functions to local ones because remote repository doesn't exist anymore.
+    repo.listAllCommitsRemote = repo.listAllCommits;
+    repo.getAllBranchesRemote = repo.getAllBranches;
+    repo.getLatestCommitForBranchRemote = repo.getLatestCommitForBranch;
+    repo.getFilePathsForBranchRemote = repo.getFilePathsForBranch;
+    repo.getPreviousFilenamesRemote = repo.getPreviousFilenames;
+
+    return repo;
+  };
+
+  const setupUrlProvider = (repo) => {
+    const urlProvider = new GitHubUrlProvider(repo);
+    urlProvider.configure({ url: 'https://test.com', project: 'testProject' });
+    return urlProvider;
+  };
+  const initDb = async () => {
+    //setup DB
+    await db.ensureDatabase('test', ctx);
+    await db.truncate();
+    await Commit.ensureCollection();
+    await Hunk.ensureCollection();
+    await File.ensureCollection();
+    await Branch.ensureCollection();
+    await Module.ensureCollection();
+    await CommitStakeholderConnection.ensureCollection();
+    await ModuleFileConnection.ensureCollection();
+    await CommitModuleConnection.ensureCollection();
+    await BranchFileConnection.ensureCollection();
+    await BranchFileFileConnection.ensureCollection();
+    await ModuleModuleConnection.ensureCollection();
+    await CommitFileStakeholderConnection.ensureCollection();
+  };
+
+  const setupIndexer = (repo, urlProvider) => {
+    const gitIndexer = VcsIndexer(repo, urlProvider, reporter, true, conf, ctx);
+    gitIndexer.setGateway(gateway);
+    gitIndexer.resetCounter();
+    return gitIndexer;
+  };
 
   describe('#index', function () {
     it('should index all commits and create all necessary db collections and connections', async function () {
-      const repo = await fake.repository();
-      ctx.targetPath = repo.path;
+      const repo = await setupRepo();
+      const urlProvider = setupUrlProvider(repo);
+      await initDb();
 
-      //Remap Remote functions to local ones because remote repository doesn't exist anymore.
-      repo.listAllCommitsRemote = repo.listAllCommits;
-      repo.getAllBranchesRemote = repo.getAllBranches;
-      repo.getLatestCommitForBranchRemote = repo.getLatestCommitForBranch;
-      repo.getFilePathsForBranchRemote = repo.getFilePathsForBranch;
-
-      const urlProvider = new GitHubUrlProvider(repo);
-      urlProvider.configure({ url: 'https://test.com', project: 'testProject' });
-
-      //setup DB
-      await db.ensureDatabase('test', ctx);
-      await db.truncate();
-      await Commit.ensureCollection();
-      await Hunk.ensureCollection();
-      await File.ensureCollection();
-      await Branch.ensureCollection();
-      await Module.ensureCollection();
-      await ModuleFileConnection.ensureCollection();
-      await CommitModuleConnection.ensureCollection();
-      await BranchFileConnection.ensureCollection();
-      await BranchFileFileConnection.ensureCollection();
-      await ModuleModuleConnection.ensureCollection();
-      await CommitFileStakeholderConnection.ensureCollection();
-
+      // create `test.js` and `testDir/test2.js`
       await fake.file(repo, 'test.js', testFile);
-      await fake.dir(repo, 'testDir');
+      fake.dir(repo, 'testDir');
       await fake.file(repo, 'testDir/test2.js', test2File);
       await helpers.commit(repo, ['test.js', 'testDir/test2.js'], bob, 'Commit1');
+
+      // change `test.js`
       await fake.file(repo, 'test.js', testFileChanged);
       await helpers.commit(repo, ['test.js'], bob, 'Commit2');
+
+      // change `test.js` again and commit to new branch `develop`
       await fake.file(repo, 'test.js', testFileChangedAgain);
       await helpers.branch(repo, 'develop');
       await helpers.checkout(repo, 'develop');
       await helpers.commit(repo, ['test.js'], bob, 'Commit3');
-      await repo.listAllCommits();
 
-      const gitIndexer = VcsIndexer(repo, urlProvider, reporter, true, conf, ctx);
-      gitIndexer.setGateway(gateway);
-      gitIndexer.resetCounter();
+      // start indexing
+      const gitIndexer = setupIndexer(repo, urlProvider);
       await gitIndexer.index();
 
       const dbCommitsCollectionData = await (await db.query('FOR i IN @@collection RETURN i', { '@collection': 'commits' })).all();
@@ -117,6 +156,37 @@ describe('vcs', function () {
       expect(dbModulesCollectionData.length).to.equal(2);
       expect(dbModulesFilesCollectionData.length).to.equal(2);
       expect(dbCommitsModulesCollectionData.length).to.equal(2);
+    });
+
+    it('should index file renames', async function () {
+      const repo = await setupRepo();
+      const urlProvider = setupUrlProvider(repo);
+      await initDb();
+
+      // instruct the indexer to track file renames on the master branch
+      conf.set('fileRenameBranches', ['master']);
+
+      // create test.js
+      await fake.file(repo, 'test.js', testFile);
+      await helpers.commit(repo, ['.'], bob, 'Commit1');
+
+      // rename test.js
+      await fake.renameFile(repo, 'test.js', 'testOne.js');
+      await helpers.renameCommit(repo, ['test.js'], ['testOne.js'], bob, 'Commit2');
+
+      // start indexer
+      const gitIndexer = setupIndexer(repo, urlProvider);
+      await gitIndexer.index();
+
+      // get all file renames from the db
+      const dbBranchesFilesFilesCollectionData = await (
+        await db.query('FOR i IN @@collection RETURN i', { '@collection': 'branches-files-files' })
+      ).all();
+
+      // we expect the branches-files-files collection to have length 2:
+      // - one connection describing that testOne.js was named test.js in the past
+      // - one connection describing that testOne.js is currently named testOne.js
+      expect(dbBranchesFilesFilesCollectionData.length).to.equal(2);
     });
   });
 });

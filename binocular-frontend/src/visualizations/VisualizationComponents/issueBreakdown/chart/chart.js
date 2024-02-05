@@ -95,7 +95,10 @@ export default class IssueBreakdown extends React.Component {
       //---- STEP 1: FILTER ISSUES ----
       let filteredIssues = issues;
 
-      if (props.universalSettings) {
+      // explicitly check if the value is false, because in standalone mode, this is undefined.
+      //   But then we also want the universal settings to have an effect
+      // if this visualization is part of the dashboard, this value is either true or false
+      if (props.universalSettings !== false) {
         filteredIssues = filteredIssues.filter((issue) => {
           let filter = false;
           if (props.selectedAuthors.filter((a) => a === 'others').length > 0) {

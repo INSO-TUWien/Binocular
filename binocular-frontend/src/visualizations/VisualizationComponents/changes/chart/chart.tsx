@@ -108,7 +108,11 @@ const extractCommitData = (
   let firstTimestamp = props.firstCommitTimestamp;
   let lastTimestamp = props.lastCommitTimestamp;
   let commits = props.commits;
-  if (props.universalSettings) {
+
+  // explicitly check if the value is false, because in standalone mode, this is undefined.
+  //   But then we also want the universal settings to have an effect
+  // if this visualization is part of the dashboard, this value is either true or false
+  if (props.universalSettings !== false) {
     commits = props.filteredCommits;
     firstTimestamp = props.firstSignificantTimestamp;
     lastTimestamp = props.lastSignificantTimestamp;
@@ -185,7 +189,7 @@ const extractCommitData = (
         for (const mergedAuthor of props.mergedAuthors) {
           commitChartPalette['(Additions) ' + mergedAuthor.mainCommitter] = chroma(mergedAuthor.color).hex();
           commitChartPalette['(Deletions) ' + mergedAuthor.mainCommitter] = chroma(mergedAuthor.color).darken(0.5).hex();
-          obj['(Additions) ' + mergedAuthor.mainCommitter] = 0;
+          obj['(Additions) ' + mergedAuthor.mainCommitter] = 0.001;
           obj['(Deletions) ' + mergedAuthor.mainCommitter] = -0.001; //-0.001 for stack layout to realize it belongs on the bottom
         }
         obj['(Additions) others'] = 0;

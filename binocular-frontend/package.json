@@ -8,6 +8,7 @@
     "build:dev": "node --max_old_space_size=32768 ./node_modules/vite/bin/vite.js build --mode development --debug",
     "build:prod": "node --max_old_space_size=32768 ./node_modules/vite/bin/vite.js build --mode production --debug",
     "build:offline": "VITE_OFFLINE=true node --max_old_space_size=32768 ./node_modules/vite/bin/vite.js build --mode production --debug",
+    "build:offline-windows": "set VITE_OFFLINE=true && node --max_old_space_size=32768 ./node_modules/vite/bin/vite.js build --mode production --debug",
     "preview": "vite preview --mode development",
     "preview:prod": "vite preview",
     "check": "eslint .",

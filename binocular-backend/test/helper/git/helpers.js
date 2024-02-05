@@ -24,6 +24,12 @@ const helpers = {
     return repo.createCommit(files, committer, message);
   },
 
+  renameCommit: async function (repo, oldFiles, newFiles, committer, message) {
+    //remove old files from staging area. Otherwise, git does not detect the rename.
+    await repo.removeFromStagingArea(oldFiles);
+    return this.commit(repo, newFiles, committer, message);
+  },
+
   branch: function (repo, branchName) {
     return repo.createBranch(branchName);
   },
