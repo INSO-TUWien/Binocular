@@ -11,6 +11,9 @@ import _ from 'lodash';
 
 import { convertToTimeString, extractTimeTrackingDataFromNotes } from '../../../../utils/timeTracking';
 
+// the chart cant deal with 0 values
+const stackedAreaChartMinValue = 0.001;
+
 export default class TimeSpentChart extends React.Component {
   constructor(props) {
     super(props);
@@ -172,6 +175,7 @@ export default class TimeSpentChart extends React.Component {
         const currTimestamp = curr.toDate().getTime();
         const nextTimestamp = next.toDate().getTime();
 
+        // all time-spent notes that are in this time bucket
         const relevantNotes = timeTrackingData.filter(
           (entry) => Date.parse(entry.createdAt) >= currTimestamp && Date.parse(entry.createdAt) < nextTimestamp,
         );
@@ -186,17 +190,36 @@ export default class TimeSpentChart extends React.Component {
 
         const committersDone = [];
 
+        // for every selected author
         props.mergedAuthors.forEach((author) => {
           const authorName = author.mainCommitter.split('<')[0].slice(0, -1);
+
+          // if this author has already been processed, continue with the next one
+          if (committersDone.includes(authorName)) {
+            return;
+          }
+
+          // the stacked area chart cannot deal with 0 values
+          dataEntry.data[authorName] = stackedAreaChartMinValue;
+
+          // initialize the current aggregated value with the one from the last bucket
+          // TODO: when this line is removed, it re-renders correctly when the aggregate switch is clicked.
+          // Theory: because without this line some fields are missing (when an author does not commit one week,
+          //         react realizes that the object is different and re-renders
+          dataEntry.dataAggregated[authorName] = aggregatedDataPerAuthor[authorName];
+
+          // for all pseudonyms of this author
           author.committers.forEach((committer) => {
             const committerName = committer.signature.split('<')[0].slice(0, -1);
+
+            // only process the first one
             if (!committersDone.includes(authorName)) {
               relevantNotes
                 .filter((note) => note.authorName.includes(committerName))
                 .forEach((note) => {
                   committersDone.push(authorName);
                   aggregatedDataPerAuthor[authorName] += note.timeSpent;
-                  dataEntry.data[authorName] = note.timeSpent;
+                  dataEntry.data[authorName] += note.timeSpent;
                   dataEntry.dataAggregated[authorName] = aggregatedDataPerAuthor[authorName];
                 });
             }
@@ -205,8 +228,7 @@ export default class TimeSpentChart extends React.Component {
 
         selectedAuthorNames.forEach((sA) => {
           if (dataEntry.data[sA] === undefined) {
-            dataEntry.data[sA] = 0.001;
-            dataEntry.dataAggregated[sA] = aggregatedDataPerAuthor[sA];
+            dataEntry.data[sA] = stackedAreaChartMinValue;
           }
           if (dataEntry.data[sA] >= 0) {
             dataEntry.aggregatedTimeMax += dataEntry.data[sA];
@@ -216,17 +238,24 @@ export default class TimeSpentChart extends React.Component {
 
           dataEntry.aggregatedTimeAllAuthors += aggregatedDataPerAuthor[sA];
         });
+
         data.push(dataEntry);
       }
 
       //---- STEP 3: CONSTRUCT CHART DATA FROM AGGREGATED Time ----
       data.forEach((dataEntry) => {
+        // if we want to display the aggregated time per author
         if (props.aggregateTime) {
+          // ignore empty data points
+          if (Object.keys(dataEntry.dataAggregated).length <= 1) return;
           timeSpentChartData.push(dataEntry.dataAggregated);
           if (dataEntry.aggregatedTimeAllAuthors > timeSpentScale[1]) {
             timeSpentScale[1] = dataEntry.aggregatedTimeAllAuthors;
           }
         } else {
+          // else we want to display the time spent per time bucket
+          // ignore empty data points
+          if (Object.keys(dataEntry.data).length <= 1) return;
           timeSpentChartData.push(dataEntry.data);
           if (dataEntry.aggregatedTimeMax > timeSpentScale[1]) {
             timeSpentScale[1] = dataEntry.aggregatedTimeMax;
@@ -240,6 +269,7 @@ export default class TimeSpentChart extends React.Component {
         }
       });
     }
+
     return { timeSpentChartData, timeSpentScale, aggregatedDataPerAuthor, aggregatedTimeSpent };
   }
 
