@@ -231,7 +231,9 @@ export default class ScalableBaseChart extends React.Component<Props, State> {
    */
   async updateElement() {
     //Initialization
-    const contentHash = await hash(this.props.content || []);
+    // stringify important, otherwise `[object Object],[object Object]` etc. will be hashed,
+    // leading to skipped updates despite content changes
+    const contentHash = await hash(JSON.stringify(this.props.content) || []);
     const orderHash = await hash(this.props.order || []);
     const { hashes, hasChanges } = await this.hasUpdate();
 

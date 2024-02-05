@@ -64,18 +64,7 @@ export default () => {
 
     if (timeSpentChartData === undefined || timeSpentChartData.length < 2) return;
 
-    const finalData = [timeSpentChartData[0]];
-
-    // remove duplicate elements
-    for (let i = 1; i < timeSpentChartData.length; i++) {
-      const lastElem = timeSpentChartData[i - 1];
-      const currElem = timeSpentChartData[i];
-      if (!_.isEqual(_.omit(lastElem, ['date']), _.omit(currElem, ['date']))) {
-        finalData.push(currElem);
-      }
-    }
-
-    setTimeSpentChartData(finalData);
+    setTimeSpentChartData(timeSpentChartData);
     setTimeSpentScale(timeSpentScale);
     setAggregatedDataPerAuthor(aggregatedDataPerAuthor);
     setAggregatedTimeSpent(aggregatedTimeSpent);
