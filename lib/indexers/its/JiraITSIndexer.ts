@@ -216,15 +216,25 @@ class JiraITSIndexer {
   }
 
   private createVersionObject(projectVersion: any) {
+    let expired = projectVersion.overdue ? projectVersion.overdue : null;
+    const dueDate = projectVersion.releaseDate ? projectVersion.releaseDate : null;
+    if (expired === null) {
+      expired = dueDate ? new Date() > new Date(dueDate) : null;
+    }
+
+    if (dueDate) {
+      log('here');
+    }
+
     return {
       id: projectVersion.id,
       iid: projectVersion.projectId, // no iid for version in Jira
       title: projectVersion.name,
-      description: projectVersion.description,
-      dueDate: projectVersion.releaseDate,
-      startDate: projectVersion.startDate,
+      description: projectVersion.description ? projectVersion.description : null,
+      dueDate: dueDate,
+      startDate: projectVersion.startDate ? projectVersion.startDate : null,
       state: projectVersion.released ? 'active' : 'inactive',
-      expired: !projectVersion.overdue ? false : projectVersion.overdue, // could maybe not be true,
+      expired: expired, // could maybe not be true,
       // but api does not return overdue if it is released
     };
   }
