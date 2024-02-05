@@ -14,7 +14,6 @@ import CommitFileConnection from '../../models/CommitFileConnection.js';
 import CommitFileStakeholderConnection from '../../models/CommitFileStakeholderConnection.js';
 import BranchFileFileConnection from '../../models/BranchFileFileConnection.js';
 import Stakeholder from '../../models/Stakeholder.js';
-//get the names of the branches from the .binocularrc file for which fiule renames should be tracked
 import { fixUTF8 } from '../../utils/utils';
 let fileRenameBranches;
 
@@ -383,22 +382,8 @@ async function createBranchFileConnections(repo, context) {
       //can happen when branches are deleted and program is started with a database that includes the deleted branch
       // in this case, remove this branch and all connections from the database
       if (e.code === 'NotFoundError') {
-        // get all branch-file connections of this branch
-        const branchFileConns = existingBranchFileConnections.filter((bfc) => bfc._to === branch._id);
-        // for each of these connections, get the associated branch-file-file connections
-        for (const bfc of branchFileConns) {
-          const branchFileFileConns = existingBranchFileFileConnections.filter((bffc) => bffc._from === bfc._id);
-          for (const bffc of branchFileFileConns) {
-            // remove branch-file-file connection
-            await BranchFileFileConnection.remove(bffc);
-          }
-          // remove branch-file-conection
-          await BranchFileConnection.remove(bfc);
-        }
-        // remove the branch
-        await Branch.remove(branch);
+        await handleDeletedBranches(branch, existingBranchFileConnections, existingBranchFileFileConnections);
       }
-
       // nothing else to do for this branch. Continue to the next one.
       continue;
     }
@@ -406,43 +391,63 @@ async function createBranchFileConnections(repo, context) {
     await Promise.all(
       //for every file on this branch
       filesDAO.map(async (file) => {
-        if (filePathsForBranch.includes(file.data.path)) {
-          //if this connection already exists, skip
-          if (existingBranchFileConnections.filter((bfc) => bfc._from === file._id && bfc._to === branch._id).length !== 0) {
-            return;
-          }
-          //connect file to branch
-          if (!branch.data.tracksFileRenames) return branch.ensureConnection(file);
-          return branch.ensureConnection(file).then(async (branchFile) => {
-            //get previous filenames if applicable
-            return repo.getPreviousFilenames(name, file.data.path, context).then(async (previousFilenames) => {
-              if (previousFilenames.length !== 0) {
-                //if there are previous filenames, we create a new connection
+        if (!filePathsForBranch.includes(file.data.path)) {
+          return;
+        }
 
-                //sort the list by date descending
-                const prevFilenamesList = previousFilenames.sort((a, b) => b.date - a.date);
+        //if this connection already exists, skip
+        if (existingBranchFileConnections.filter((bfc) => bfc._from === file._id && bfc._to === branch._id).length !== 0) {
+          return;
+        }
+        //connect file to branch
+        if (!branch.data.tracksFileRenames) return branch.ensureConnection(file);
 
-                let currentDate = null;
-                for (const prevFileObj of prevFilenamesList) {
-                  const prevFilename = prevFileObj.fileName;
-                  const hasThisNameUntil = currentDate;
-                  const hasThisNameFrom = prevFileObj.timestamp;
-                  currentDate = prevFileObj.timestamp;
-                  const fileObj = filesDAO.filter((f) => f.data.path === prevFilename)[0];
-                  //connect the new connection to relevant files
-                  //this models file renames (file on this branch was called ... earlier)
-                  BranchFileFileConnection.ensure(
-                    { hasThisNameFrom: hasThisNameFrom, hasThisNameUntil: hasThisNameUntil },
-                    { from: branchFile, to: fileObj },
-                  );
-                }
-              }
-            });
-          });
+        const branchFile = await branch.ensureConnection(file);
+        //get previous filenames if applicable
+        const previousFilenames = await repo.getPreviousFilenamesRemote(name, file.data.path, context);
+        if (previousFilenames.length === 0) {
+          return;
+        }
+
+        //if there are previous filenames, we create a new connection
+        //sort the list by date descending
+        const prevFilenamesList = previousFilenames.sort((a, b) => b.date - a.date);
+
+        // create branches-files-files connection for all previous filenames (and for the current one)
+        let currentDate = null;
+        for (const prevFileObj of prevFilenamesList) {
+          const prevFilename = prevFileObj.fileName;
+          const hasThisNameUntil = currentDate;
+          const hasThisNameFrom = prevFileObj.timestamp;
+          currentDate = prevFileObj.timestamp;
+          const fileObj = filesDAO.filter((f) => f.data.path === prevFilename)[0];
+          //connect the new connection to relevant files
+          //this models file renames (file on this branch was called ... earlier)
+          BranchFileFileConnection.ensure(
+            { hasThisNameFrom: hasThisNameFrom, hasThisNameUntil: hasThisNameUntil },
+            { from: branchFile, to: fileObj },
+          );
         }
       }),
     );
   }
+}
+
+async function handleDeletedBranches(branch, existingBranchFileConnections, existingBranchFileFileConnections) {
+  // get all branch-file connections of this branch
+  const branchFileConns = existingBranchFileConnections.filter((bfc) => bfc._to === branch._id);
+  // for each of these connections, get the associated branch-file-file connections
+  for (const bfc of branchFileConns) {
+    const branchFileFileConns = existingBranchFileFileConnections.filter((bffc) => bffc._from === bfc._id);
+    for (const bffc of branchFileFileConns) {
+      // remove branch-file-file connection
+      await BranchFileFileConnection.remove(bffc);
+    }
+    // remove branch-file-connection
+    await BranchFileConnection.remove(bfc);
+  }
+  // remove the branch
+  await Branch.remove(branch);
 }
 
 async function createOwnershipConnections(repo, context) {

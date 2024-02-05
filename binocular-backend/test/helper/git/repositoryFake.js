@@ -80,6 +80,17 @@ const repositoryFake = {
 
     return fs.writeFileSync(fullPath, contents);
   },
+
+  renameFile: async function (dirPath, oldFilePath, newFilePath) {
+    if (dirPath instanceof Repository) {
+      dirPath = dirPath.getRoot();
+    }
+    const fullOldPath = path.join(dirPath, oldFilePath);
+    const fullNewPath = path.join(dirPath, newFilePath);
+
+    return fs.renameSync(fullOldPath, fullNewPath);
+  },
+
   dir: function (dirPath, dir) {
     if (dirPath instanceof Repository) {
       dirPath = dirPath.getRoot();
