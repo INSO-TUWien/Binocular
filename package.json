@@ -26,7 +26,8 @@
     "collect-coverage": "./scripts/collect-coverage.js",
     "build:dev": "cd binocular-frontend && npm run build:dev",
     "build:prod": "cd binocular-frontend && npm run build:prod",
-    "build:offline": "cd binocular-frontend && npm run build:offline"
+    "build:offline": "cd binocular-frontend && npm run build:offline",
+    "build:offline-windows": "cd binocular-frontend && npm run build:offline-windows"
   },
   "repository": {
     "type": "git",
