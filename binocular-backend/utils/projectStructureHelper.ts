@@ -2,7 +2,6 @@
 
 import fs from 'fs';
 import * as utils from './utils';
-import console_stamp from 'console-stamp';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import Context from './context';
@@ -10,7 +9,6 @@ import Db from '../core/db/db';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-console_stamp(console, { format: ':date(yyyy/mm/dd HH:MM:ss)' });
 
 export function checkProjectStructureAndFix(context: typeof Context) {
   //check if db_export folder exists

@@ -1,16 +1,17 @@
 'use strict';
 
 import { initialDimensions, onResizeFactoryForFunctional } from '../src/utils/zoom';
+import { expect } from 'chai';
 
 describe('initialDimensions', function () {
   it('should initialize the Dimensions of the Zoom Factory', function () {
     const dimensions = initialDimensions();
-    expect(dimensions.fullWidth).toBe(0);
-    expect(dimensions.fullHeight).toBe(0);
-    expect(dimensions.width).toBe(0);
-    expect(dimensions.height).toBe(0);
-    expect(dimensions.wMargin).toBe(0);
-    expect(dimensions.hMargin).toBe(0);
+    expect(dimensions.fullWidth).to.equal(0);
+    expect(dimensions.fullHeight).to.equal(0);
+    expect(dimensions.width).to.equal(0);
+    expect(dimensions.height).to.equal(0);
+    expect(dimensions.wMargin).to.equal(0);
+    expect(dimensions.hMargin).to.equal(0);
   });
 });
 
@@ -26,11 +27,11 @@ describe('onResizeFactoryForFunctional', function () {
     };
 
     dimensions = onResizeFactoryForFunctional(0.8, 0.8)(dimensions);
-    expect(dimensions.fullWidth).toBe(100);
-    expect(dimensions.fullHeight).toBe(100);
-    expect(dimensions.width).toBe(80);
-    expect(dimensions.height).toBe(80);
-    expect(dimensions.wMargin).toBe(10);
-    expect(dimensions.hMargin).toBe(10);
+    expect(dimensions.fullWidth).to.equal(100);
+    expect(dimensions.fullHeight).to.equal(100);
+    expect(dimensions.width).to.equal(80);
+    expect(dimensions.height).to.equal(80);
+    expect(dimensions.wMargin).to.equal(10);
+    expect(dimensions.hMargin).to.equal(10);
   });
 });

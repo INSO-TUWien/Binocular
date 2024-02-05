@@ -6,10 +6,7 @@ import cli from './cli/cli';
 // init timestamp for output
 import Moment from 'moment';
 import console_stamp from 'console-stamp';
-
-const startTime = Moment.now();
-console.log('Start Time: ' + Moment(startTime).format());
-console_stamp(console, { format: ':date(yyyy/mm/dd HH:MM:ss)' });
+let startTime: number;
 
 function threadLog(thread: number, message: string) {
   console.log(`[thread=${thread}]`, message);
@@ -79,12 +76,12 @@ import chalk from 'chalk';
 
 cli.parse(
   (targetPath, options) => {
+    console_stamp(console, { format: ':date(yyyy/mm/dd HH:MM:ss)' });
     console.log(`Running binocular with following options on path "${targetPath}":`);
     console.log(options);
     ctx.setOptions(options);
     ctx.setTargetPath(targetPath);
     config.loadConfig(ctx);
-
     if (options.frontend) {
       runFrontend();
     }
@@ -119,6 +116,9 @@ cli.parse(
 );
 
 function runBackend() {
+  startTime = Moment.now();
+  console.log('Start Time: ' + Moment(startTime).format());
+
   const __filename = fileURLToPath(import.meta.url);
   const __dirname = path.dirname(__filename);
 
