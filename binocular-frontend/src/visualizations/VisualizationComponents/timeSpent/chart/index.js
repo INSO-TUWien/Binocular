@@ -15,6 +15,8 @@ import { useSelector } from 'react-redux';
 // the chart cant deal with 0 values
 const stackedAreaChartMinValue = 0.001;
 
+const timeRemovedPrefix = '(time removed) ';
+
 export default () => {
   // local state
   const [timeSpentChartData, setTimeSpentChartData] = useState([]);
@@ -28,21 +30,15 @@ export default () => {
 
   // global state
   const timeSpentState = useSelector((state) => state.visualizations.timeSpent.state);
-  //const otherCount = timeSpentState.data.data.otherCount;
-  //const filteredIssues = timeSpentState.data.data.filteredIssues;
   const issues = timeSpentState.data.data.issues;
-  //const firstIssueTimestamp = timeSpentState.data.data.firstIssueTimestamp;
-  //const lastIssueTimestamp = timeSpentState.data.data.lastIssueTimestamp;
   const firstSignificantTimestamp = timeSpentState.data.data.firstSignificantTimestamp;
   const lastSignificantTimestamp = timeSpentState.data.data.lastSignificantTimestamp;
   const aggregateTime = timeSpentState.config.aggregateTime;
-  //const filteredMergeRequests = timeSpentState.data.data.filteredMergeRequests;
   const mergeRequests = timeSpentState.data.data.mergeRequests;
 
   const universalSettings = useSelector((state) => state.universalSettings);
   const chartResolution = universalSettings.chartResolution;
   const selectedAuthors = universalSettings.selectedAuthorsGlobal;
-  //const allAuthors = universalSettings.allAuthors;
   const mergedAuthors = universalSettings.mergedAuthors;
 
   // recreate palette when authors change
@@ -50,8 +46,13 @@ export default () => {
     const palette = {};
     mergedAuthors.forEach((author) => {
       const authorName = author.mainCommitter.split('<')[0].slice(0, -1);
+      const authorNameTimeRemoved = timeRemovedPrefix + authorName;
+
       if (palette[authorName] === undefined) {
         palette[authorName] = author.color;
+      }
+      if (palette[authorNameTimeRemoved] === undefined) {
+        palette[authorNameTimeRemoved] = author.color;
       }
     });
     setPalette(palette);
@@ -82,7 +83,6 @@ export default () => {
 
   // recreate html components everytime extracted data changes
   useEffect(() => {
-
     setChartComponent(
       <div className={styles.chartLine}>
         <div className={styles.chart}>
@@ -156,10 +156,12 @@ export default () => {
         aggregatedDataPerAuthor[sA] = 0;
       });
 
+      // get timetracking data from issues
       filteredIssues.forEach((issue) => {
         timeTrackingData.push(...extractTimeTrackingDataFromNotes(issue.notes));
       });
 
+      // get timetracking data from merge requests
       filteredMergeRequests.forEach((mergeRequest) => {
         timeTrackingData.push(...extractTimeTrackingDataFromNotes(mergeRequest.notes));
       });
@@ -169,7 +171,7 @@ export default () => {
       });
 
       // explicitly check if the value is false, because in standalone mode, this is undefined.
-      //   But then we also want the universal settings to have an effect
+      //   But then we also want the universal settings to have an effect.
       // if this visualization is part of the dashboard, this value is either true or false
       if (universalSettings !== false) {
         // if universal settings should be considered, take the timeframe from there
@@ -215,6 +217,7 @@ export default () => {
         // for every selected author
         mergedAuthors.forEach((author) => {
           const authorName = author.mainCommitter.split('<')[0].slice(0, -1);
+          const authorNameTimeRemoved = timeRemovedPrefix + authorName;
 
           // if this author has already been processed, continue with the next one
           if (committersDone.includes(authorName)) {
@@ -223,6 +226,7 @@ export default () => {
 
           // the stacked area chart cannot deal with 0 values
           dataEntry.data[authorName] = stackedAreaChartMinValue;
+          dataEntry.data[authorNameTimeRemoved] = -1 * stackedAreaChartMinValue;
 
           // initialize the current aggregated value with the one from the last bucket
           dataEntry.dataAggregated[authorName] = aggregatedDataPerAuthor[authorName];
@@ -238,7 +242,12 @@ export default () => {
                 .forEach((note) => {
                   committersDone.push(authorName);
                   aggregatedDataPerAuthor[authorName] += note.timeSpent;
-                  dataEntry.data[authorName] += note.timeSpent;
+
+                  if (note.timeSpent >= 0) {
+                    dataEntry.data[authorName] += note.timeSpent;
+                  } else {
+                    dataEntry.data[authorNameTimeRemoved] += note.timeSpent;
+                  }
                   dataEntry.dataAggregated[authorName] = aggregatedDataPerAuthor[authorName];
                 });
             }
@@ -253,6 +262,12 @@ export default () => {
             dataEntry.aggregatedTimeMax += dataEntry.data[sA];
           } else {
             dataEntry.aggregatedTimeMin += dataEntry.data[sA];
+          }
+
+          if (dataEntry.data[timeRemovedPrefix + sA] >= 0) {
+            dataEntry.aggregatedTimeMax += dataEntry.data[timeRemovedPrefix + sA];
+          } else {
+            dataEntry.aggregatedTimeMin += dataEntry.data[timeRemovedPrefix + sA];
           }
 
           dataEntry.aggregatedTimeAllAuthors += aggregatedDataPerAuthor[sA];
