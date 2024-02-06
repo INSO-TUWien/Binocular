@@ -83,6 +83,10 @@ export default class ServerDB {
     return Issues.getCodeHotspotsIssueData(file);
   }
 
+  static getFileDataFileEvolutionDendrogram() {
+    return Files.getFileDataFileEvolutionDendrogram();
+  }
+
   static getDatabase() {
     const xhr = new XMLHttpRequest();
     xhr.open('GET', window.location.protocol + '//' + window.location.hostname + ':48763/api/db-export', false);

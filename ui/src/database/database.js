@@ -137,6 +137,14 @@ export default class Database {
     }
   }
 
+  static async getFileDataFileEvolutionDendrogram() {
+    if (await this.checkBackendConnection()) {
+      return ServerDB.getFileDataFileEvolutionDendrogram();
+    } else {
+      return LocalDB.getFileDataFileEvolutionDendrogram();
+    }
+  }
+
   /**
    * BRANCHES
    */

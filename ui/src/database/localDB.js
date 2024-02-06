@@ -149,6 +149,10 @@ export default class LocalDB {
     return Files.requestFileStructure(db);
   }
 
+  static getFileDataFileEvolutionDendrogram() {
+    return Files.getFileDataFileEvolutionDendrogram(db, tripleStore);
+  }
+
   static getAllBranches() {
     return Branches.getAllBranches(db);
   }

@@ -15,4 +15,75 @@ export default class Files {
       {}
     );
   }
+
+  static getFileDataFileEvolutionDendrogram() {
+
+    const getFileCommits = () => {
+      return graphQl
+        .query(
+          `query {
+            files {
+              data {
+                path
+                webUrl
+                commits {
+                  data {
+                    signature
+                    stats {
+                      additions
+                      deletions
+                    }
+                  }
+                }
+              }
+            }
+          }`,
+          {}
+        )
+        .then((resp) => resp.files.data.map((file) => {
+          const statsByAuthor = {};
+          const totalStats = {
+            count: 0,
+            additions: 0,
+            deletions: 0,
+          };
+    
+          _.each(file.commits.data, function (commit) {
+            let stats = statsByAuthor[commit.signature];
+            if (!stats) {
+              stats = statsByAuthor[commit.signature] = {
+                count: 0,
+                additions: 0,
+                deletions: 0,
+                author: commit.signature,
+              };
+            }
+    
+            stats.count = stats.count + 1;
+            stats.additions = stats.additions + commit.stats.additions;
+            stats.deletions = stats.deletions + commit.stats.deletions;
+    
+            totalStats.count = totalStats.count + 1;
+            totalStats.additions = totalStats.additions + commit.stats.additions;
+            totalStats.deletions = totalStats.deletions + commit.stats.deletions;
+          });
+    
+          const authorMostLinesChanged = _.maxBy(_.values(statsByAuthor), (author) => author.additions + author.deletions);
+          const authorMostCommits = _.maxBy(_.values(statsByAuthor), "count");
+    
+    
+          const returnFile = {
+            path: file.path,
+            webUrl: file.webUrl,
+            totalStats: totalStats,
+            authorMostLinesChanged: authorMostLinesChanged.author,
+            authorMostCommits: authorMostCommits.author,
+          };
+    
+          return returnFile;
+        }));
+    };
+
+    return getFileCommits();
+  }
 }
