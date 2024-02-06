@@ -102,7 +102,7 @@ cli.parse(
         export: true,
         server: false,
       };
-      const targetPath = path.resolve(options.runIndexer === true ? '.' : options.runIndexer);
+      const targetPath = path.resolve(options.runIndexer ? __dirname + '/../' : options.runIndexer);
       ctx.setOptions(indexerOptions);
       ctx.setTargetPath(targetPath);
       config.loadConfig(ctx);
