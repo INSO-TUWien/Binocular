@@ -3,7 +3,7 @@
 import React from 'react';
 import styles from './visualizationSelector.module.scss';
 
-export default (props) => {
+export default (props: { id: string; close: () => void; visualizations: any; addVisualization: (key: string) => void }) => {
   return (
     <div className={styles.visualizationSelector}>
       <div className={styles.backgroundBlur} onClick={props.close}>
@@ -20,7 +20,7 @@ export default (props) => {
               <button
                 key={visualization.id}
                 className={styles.visualizationSelectButton}
-                onClick={(e) => {
+                onClick={() => {
                   props.addVisualization(viz);
                   props.close();
                 }}>

@@ -5,6 +5,13 @@ export interface DashboardState {
 export interface DashboardVisualization {
   key: string;
   id: number;
-  size: string;
-  universalSettings: true;
+  size: DashboardVisualizationSize;
+  universalSettings: boolean;
+}
+
+export enum DashboardVisualizationSize {
+  small,
+  large,
+  wide,
+  high,
 }
