@@ -448,8 +448,12 @@ class JiraITSIndexer {
 
     userObject.name = userObject.displayName;
     userObject.state = userObject.active === true ? 'active' : 'inactive';
+    userObject.avatar_url = Object.values(userObject.avatarUrls)[0];
+    userObject.web_url = userObject.self.split('/rest/api')[0] + '/jira/people/icht ' + userObject.accountId;
+    userObject.id = userObject.accountId;
 
     delete userObject.displayName;
+    delete userObject.accountId;
     delete userObject.active;
 
     return userObject;
