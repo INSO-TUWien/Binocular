@@ -37,9 +37,32 @@ class Jira {
     return this.paginatedRequest(`project/${projectKey}/version?`);
   }
 
-  getDevelopmentInformation(issueId: string) {
+  getDevelopmentDetails(issueId: string, objectType: any, isPullRequest: boolean) {
     log('getMergeRequests(%o)', issueId);
-    return this.request('dev-status/latest/issue/detail?issueId=' + issueId);
+
+    if ((!isPullRequest && !objectType) || (!isPullRequest && objectType && objectType.overall.count === 0)) {
+      return Promise.resolve(null);
+    }
+
+    const dataType = isPullRequest ? 'pullrequest' : 'repository';
+
+    const promises: Promise<any>[] = [];
+
+    for (const [key, value] of Object.entries(objectType.byInstanceType)) {
+      promises.push(this.request('dev-status/latest/issue/detail?issueId=' + issueId + `&dataType=${dataType}&applicationType=` + key));
+    }
+
+    return Promise.all(promises).then((responses) => {
+      let informationToReturn: any[] = [];
+      for (const response of responses) {
+        if (isPullRequest) {
+          informationToReturn = informationToReturn.concat(response[0].pullRequests);
+        } else {
+          informationToReturn = informationToReturn.concat(response[0].repositories);
+        }
+      }
+      return informationToReturn;
+    });
   }
 
   isStopping() {
@@ -50,30 +73,13 @@ class Jira {
     this.stopping = true;
   }
 
-  getMergeRequest(issueId: string) {
+  getDevelopmentSummary(issueId: string) {
     log('getMergeRequests(%o)', issueId);
 
-    return this.request('dev-status/latest/issue/summary?issueId=' + issueId).then((developmentInformation) => {
-      const pullrequests = developmentInformation?.pullrequest;
-
-      if (pullrequests && pullrequests.overall.count !== 0) {
-        const promises: Promise<any>[] = [];
-
-        for (const [key, value] of Object.entries(pullrequests.byInstanceType)) {
-          promises.push(this.getDevelopmentInformation(issueId + '&dataType=pullrequest&applicationType=' + key));
-        }
-
-        return Promise.all(promises).then((responses) => {
-          let mergeRequests: any[] = [];
-          for (const response of responses) {
-            mergeRequests = mergeRequests.concat(response[0].pullRequests);
-          }
-          return mergeRequests; // Return the result of Promise.all()
-        });
-      } else {
-        return Promise.resolve([]); // No pull requests, resolve with an empty array
-      }
-    });
+    return this.request('dev-status/latest/issue/summary?issueId=' + issueId).then((developmentInformation) => ({
+      commits: developmentInformation?.repository,
+      pullrequests: developmentInformation?.pullrequest,
+    }));
   }
 
   getWorklog(issueKey: string) {

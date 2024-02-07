@@ -41,7 +41,7 @@ class JiraITSIndexer {
   }
 
   index() {
-    //log('index()');
+    log('index()');
     let omitCount = 0;
     let persistCount = 0;
 
@@ -56,130 +56,139 @@ class JiraITSIndexer {
 
           issue.id = issue.id.toString();
           const description = issue.fields.description ? this.populateDescription(issue.fields.description) : null;
+          return this.jira.getDevelopmentSummary(issue.id).then((developmentInformation: { commits: any; pullrequests: any }) => {
+            let mergeRequestPromise: Promise<any> = Promise.resolve();
 
-          const mergeRequestPromise = this.jira
-            .getMergeRequest(issue.id)
-            .then((mergeRequests: any) => {
-              const mergeRequestPromises = mergeRequests?.map((mergeRequest: any) => {
-                mergeRequest.id = mergeRequest.id.substring(1);
+            if (developmentInformation.pullrequests && developmentInformation.pullrequests.overall.count !== 0) {
+              mergeRequestPromise = this.jira
+                .getDevelopmentDetails(issue.id, developmentInformation.pullrequests, true)
+                .then((mergeRequests: any) => {
+                  const mergeRequestPromises = mergeRequests?.map((mergeRequest: any) => {
+                    mergeRequest.id = mergeRequest.id.substring(1);
 
-                return (MergeRequest as any).findOneById(mergeRequest.id).then((persistedMergeRequest: any) => {
-                  // TODO: 2 issues share the same merge request then the ID of the merge request is equal and
-                  //  the other merge request will not be persisted because it is found in DB
-                  if (
-                    !persistedMergeRequest ||
-                    new Date(persistedMergeRequest.updatedAt).getTime() < new Date(mergeRequest.lastUpdate).getTime()
-                  ) {
-                    const toPersist = {
-                      id: mergeRequest.id,
-                      iid: issue.key,
-                      title: mergeRequest.name,
-                      description: description, // this description is not the description
-                      // of the merge request in Github but of the issue in Jira
-                      state: mergeRequest.status,
-                      createdAt: issue.fields.createdAt,
-                      updatedAt: mergeRequest.lastUpdate,
-                      labels: issue.fields.labels, // this are labels of issue
-                      milestone: issue.fields.fixVersions.map((version: any) => this.createVersionObject(version)),
-                      // this are versions of issue
-                      author: issue.fields.creator.displayName, // mergeRequest.author.name but it always displays name: User
-                      assignee: issue.fields?.assignee?.displayName ? issue.fields?.assignee?.displayName : null,
-                      // this is assignee of issue in Jira
-                      assignees: mergeRequest.reviewers, // not sure if this is correct field
-                      // userNotesCount: NA
-                      upvotes: issue.fields?.votes.votes ? issue.fields?.votes.votes : null,
-                      // this are the fields from the issue
-                      // downVotes: NA
-                      webUrl: mergeRequest.url,
-                      // reference: NA,
-                      // references: NA,
-                      // timeStats: NA,
-                      // notes: NA,
-                    };
+                    return (MergeRequest as any).findOneById(mergeRequest.id).then((persistedMergeRequest: any) => {
+                      // TODO: 2 issues share the same merge request then the ID of the merge request is equal and
+                      //  the other merge request will not be persisted because it is found in DB
+                      if (
+                        !persistedMergeRequest ||
+                        new Date(persistedMergeRequest.updatedAt).getTime() < new Date(mergeRequest.lastUpdate).getTime()
+                      ) {
+                        const toPersist = {
+                          id: mergeRequest.id,
+                          iid: issue.key,
+                          title: mergeRequest.name,
+                          description: description, // this description is not the description
+                          // of the merge request in Github but of the issue in Jira
+                          state: mergeRequest.status,
+                          createdAt: issue.fields.createdAt,
+                          updatedAt: mergeRequest.lastUpdate,
+                          labels: issue.fields.labels, // this are labels of issue
+                          milestone: issue.fields.fixVersions.map((version: any) => this.createVersionObject(version)),
+                          // this are versions of issue
+                          author: issue.fields.creator.displayName, // mergeRequest.author.name but it always displays name: User
+                          assignee: issue.fields?.assignee?.displayName ? issue.fields?.assignee?.displayName : null,
+                          // this is assignee of issue in Jira
+                          assignees: mergeRequest.reviewers, // not sure if this is correct field
+                          // userNotesCount: NA
+                          upvotes: issue.fields?.votes.votes ? issue.fields?.votes.votes : null,
+                          // this are the fields from the issue
+                          // downVotes: NA
+                          webUrl: mergeRequest.url,
+                          // reference: NA,
+                          // references: NA,
+                          // timeStats: NA,
+                          // notes: NA,
+                        };
 
-                    if (!persistedMergeRequest) {
-                      //log('Persisting new mergeRequest');
-                      return (MergeRequest as any).persist(toPersist);
-                    } else {
-                      //log('Updating persisted mergeRequest ' + mergeRequest.id);
-                      _.assign(persistedMergeRequest, toPersist);
-                      return persistedMergeRequest.save({
-                        ignoreUnknownAttributes: true,
-                      });
-                    }
-                  } else {
-                    //log('Omitting already persisted mergeRequest ' + mergeRequest.id);
-                  }
-                });
-              });
-
-              return Promise.all(mergeRequestPromises);
-            })
-            .then(() => this.reporter.finishMergeRequest());
-
-          const issuePromise = (Issue as any)
-            .findOneById(issue.id)
-            .then((persistedIssue: any) => {
-              if (!persistedIssue || new Date(persistedIssue.updatedAt).getTime() < new Date(issue.fields.updated).getTime()) {
-                const notesPromise = this.processNotes(issue);
-                const commentsPromise = this.processComments(issue);
-                const changelogPromise = this.processChangelog(issue);
-
-                return Promise.all([notesPromise, commentsPromise, changelogPromise])
-                  .then(([notes, data, changelog]) => {
-                    const notes1 = this.createNotesObject(notes, data, changelog);
-                    const assignee = this.getUpdatedUserObject(issue.fields.assignee);
-                    const issueToSave = {
-                      id: issue.id,
-                      iid: issue.key,
-                      title: issue.fields.summary,
-                      description: description,
-                      state: issue.fields.status.statusCategory.key,
-                      url: issue.self,
-                      closedAt: issue.fields.resolutiondate,
-                      createdAt: issue.fields.created,
-                      updatedAt: issue.fields.updated,
-                      labels: issue.fields.labels,
-                      //to check if this is the correct-used field
-                      milestone: issue.fields.fixVersions.map((version: any) => this.createVersionObject(version)),
-                      author: this.getUpdatedUserObject(issue.fields.reporter), // display name or email address?
-                      assignee: assignee,
-                      assignees: [assignee], // only 1 assignee per issue
-                      upvotes: issue.fields?.votes.votes ? issue.fields?.votes.votes : null,
-                      // downVotes not available
-                      dueDate: issue.fields?.dueDate ? issue.fields?.dueDate : null,
-                      // confidential: issue.security-level for this normal Jira software is needed, free version does not have that
-                      weight: issue.fields?.customfield_10016 ? issue.fields?.customfield_10016 : null,
-                      //this field is used for the storypoints, could be problematic,
-                      // if having for example this in custom fields
-                      webUrl: issue.self.split('/rest/api')[0] + '/browse/' + issue.key,
-                      subscribed: issue.fields.watches?.watchCount ? issue.fields.watches?.watchCount : null,
-                      mentions: notes1.allMentioned,
-                      notes: notes1.notesObjectsToReturn,
-                    };
-                    if (!persistedIssue) {
-                      //log('Persisting new issue');
-                      return (Issue as any).persist(issueToSave);
-                    } else {
-                      //log('Updating persisted issue ' + issue.id);
-                      _.assign(persistedIssue, issueToSave);
-                      return persistedIssue.save({
-                        ignoreUnknownAttributes: true,
-                      });
-                    }
-                  })
-                  .then(() => {
-                    persistCount++;
-                    //log('persistCount: ' + persistCount);
+                        if (!persistedMergeRequest) {
+                          //log('Persisting new mergeRequest');
+                          return (MergeRequest as any).persist(toPersist);
+                        } else {
+                          //log('Updating persisted mergeRequest ' + mergeRequest.id);
+                          _.assign(persistedMergeRequest, toPersist);
+                          return persistedMergeRequest.save({
+                            ignoreUnknownAttributes: true,
+                          });
+                        }
+                      } else {
+                        //log('Omitting already persisted mergeRequest ' + mergeRequest.id);
+                      }
+                    });
                   });
-              } else {
-                omitCount++;
-                //log('Omitting already persisted issue ' + issue.id);
-              }
-            })
-            .then(() => this.reporter.finishIssue());
 
-          return Promise.all([mergeRequestPromise, issuePromise]);
+                  return Promise.all(mergeRequestPromises);
+                })
+                .then(() => this.reporter.finishMergeRequest());
+            }
+            const issuePromise = (Issue as any)
+              .findOneById(issue.id)
+              .then((persistedIssue: any) => {
+                if (!persistedIssue || new Date(persistedIssue.updatedAt).getTime() < new Date(issue.fields.updated).getTime()) {
+                  return this.jira.getDevelopmentDetails(issue.id, developmentInformation.commits, false).then((linkedCommits: any) => {
+                    const commits = this.buildMentions(linkedCommits);
+
+                    const notesPromise = this.processNotes(issue);
+                    const commentsPromise = this.processComments(issue);
+                    const changelogPromise = this.processChangelog(issue);
+
+                    return Promise.all([notesPromise, commentsPromise, changelogPromise])
+                      .then(([notes, data, changelog]) => {
+                        const notes1 = this.createNotesObject(notes, data, changelog);
+                        const assignee = this.getUpdatedUserObject(issue.fields.assignee);
+                        const issueToSave = {
+                          id: issue.id,
+                          iid: issue.key,
+                          title: issue.fields.summary,
+                          description: description,
+                          state: issue.fields.status.statusCategory.key,
+                          url: issue.self,
+                          closedAt: issue.fields.resolutiondate, // TODO: check to do toIsostring
+                          createdAt: new Date(issue.fields.created).toISOString(),
+                          updatedAt: new Date(issue.fields.updated).toISOString(),
+                          labels: issue.fields.labels,
+                          //to check if this is the correct-used field
+                          milestone: issue.fields.fixVersions.map((version: any) => this.createVersionObject(version)),
+                          author: this.getUpdatedUserObject(issue.fields.reporter), // display name or email address?
+                          assignee: assignee,
+                          assignees: assignee ? [assignee] : [], // only 1 assignee per issue
+                          upvotes: issue.fields?.votes.votes ? issue.fields?.votes.votes : null,
+                          // downVotes not available
+                          dueDate: issue.fields?.dueDate ? issue.fields?.dueDate : null,
+                          // confidential: issue.security-level for this normal Jira software is needed, free version does not have that
+                          weight: issue.fields?.customfield_10016 ? issue.fields?.customfield_10016 : null,
+                          //this field is used for the storypoints, could be problematic,
+                          // if having for example this in custom fields
+                          webUrl: issue.self.split('/rest/api')[0] + '/browse/' + issue.key,
+                          subscribed: issue.fields.watches?.watchCount ? issue.fields.watches?.watchCount : null,
+                          mentions: commits,
+                          notes:
+                            !notes1.notesObjectsToReturn || notes1.notesObjectsToReturn.length === 0 ? [] : notes1.notesObjectsToReturn,
+                        };
+                        if (!persistedIssue) {
+                          log('Persisting new issue');
+                          return (Issue as any).persist(issueToSave);
+                        } else {
+                          log('Updating persisted issue ' + issue.id);
+                          _.assign(persistedIssue, issueToSave);
+                          return persistedIssue.save({
+                            ignoreUnknownAttributes: true,
+                          });
+                        }
+                      })
+                      .then(() => {
+                        persistCount++;
+                        // log('persistCount: ' + persistCount);
+                      });
+                  });
+                } else {
+                  omitCount++;
+                  log('Omitting already persisted issue ' + issue.id);
+                }
+              })
+              .then(() => this.reporter.finishIssue());
+
+            return Promise.all([mergeRequestPromise, issuePromise]);
+          });
         }),
       this.jira.getProjectVersions(this.jiraProject).each((projectVersion: any) => {
         projectVersion.id = projectVersion.id.toString();
@@ -207,6 +216,27 @@ class JiraITSIndexer {
     ]).then((resp) => {
       return Promise.all(resp.flat()).then(() => log('Persisted %d new issues (%d already present)', persistCount, omitCount));
     });
+  }
+
+  private buildMentions(commitsObject: any) {
+    if (!commitsObject) {
+      return [];
+    } else {
+      const commits = commitsObject[0].commits;
+      const returnObjects: any[] = [];
+
+      commits.forEach((commit: any) => {
+        returnObjects.push({
+          commit: commit.id,
+          createdAt: commit.authorTimestamp,
+          closes: commit.merge,
+          displayId: commit.displayId,
+          author: commit.author,
+        });
+      });
+
+      return returnObjects;
+    }
   }
 
   private createVersionObject(projectVersion: any) {
@@ -450,6 +480,7 @@ class JiraITSIndexer {
     userObject.state = userObject.active === true ? 'active' : 'inactive';
     userObject.avatar_url = Object.values(userObject.avatarUrls)[0];
     userObject.web_url = userObject.self.split('/rest/api')[0] + '/jira/people/icht ' + userObject.accountId;
+    userObject.login = userObject.emailAddress;
     userObject.id = userObject.accountId;
 
     delete userObject.displayName;
