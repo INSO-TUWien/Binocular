@@ -128,13 +128,7 @@ class JiraITSIndexer {
                 return Promise.all([notesPromise, commentsPromise, changelogPromise])
                   .then(([notes, data, changelog]) => {
                     const notes1 = this.createNotesObject(notes, data, changelog);
-
-                    const assignee = issue.fields.assignee ? issue.fields.assignee : null;
-                    if (assignee) {
-                      assignee.name = assignee.displayName;
-                      delete assignee.displayName;
-                    }
-
+                    const assignee = this.getUpdatedUserObject(issue.fields.assignee);
                     const issueToSave = {
                       id: issue.id,
                       iid: issue.key,
@@ -148,9 +142,9 @@ class JiraITSIndexer {
                       labels: issue.fields.labels,
                       //to check if this is the correct-used field
                       milestone: issue.fields.fixVersions.map((version: any) => this.createVersionObject(version)),
-                      author: issue.fields.creator.displayName, // display name or email address?
+                      author: this.getUpdatedUserObject(issue.fields.reporter), // display name or email address?
                       assignee: assignee,
-                      // assignees: issue.assignees, not available in Jira
+                      assignees: [assignee], // only 1 assignee per issue
                       upvotes: issue.fields?.votes.votes ? issue.fields?.votes.votes : null,
                       // downVotes not available
                       dueDate: issue.fields?.dueDate ? issue.fields?.dueDate : null,
@@ -373,7 +367,7 @@ class JiraITSIndexer {
   }
 
   private createNotesObject(notes: any[], data: { comments: any; mentioned: string[] }, changelog: any[]) {
-    const SECOND_POST_FIX = 'm'; // TODO: change to "2" since this is used to identify as seconds
+    const SECOND_POST_FIX = '2'; // TODO: change to "2" since this is used to identify as seconds
 
     const notesObjectsToReturn: any[] = [];
     const notesMentioned: any[] = [];
@@ -429,8 +423,9 @@ class JiraITSIndexer {
             objectToAdd = { author: authorObject };
           }
           objectToAdd.body = body;
-          objectToAdd.createdAt = created;
+          objectToAdd.created_at = created;
           objectToAdd.worklogId = workLogId;
+          objectToAdd.author = this.getUpdatedUserObject(objectToAdd.author);
 
           notesObjectsToReturn.push(objectToAdd);
         }
@@ -444,6 +439,20 @@ class JiraITSIndexer {
     const allMentioned: string[] = notesMentioned.concat(data.mentioned);
 
     return { notesObjectsToReturn, allMentioned };
+  }
+
+  private getUpdatedUserObject(userObject: any) {
+    if (!userObject) {
+      return null;
+    }
+
+    userObject.name = userObject.displayName;
+    userObject.state = userObject.active === true ? 'active' : 'inactive';
+
+    delete userObject.displayName;
+    delete userObject.active;
+
+    return userObject;
   }
 }
 
