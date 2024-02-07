@@ -4,6 +4,7 @@
 import { UniversalSettings } from '../types/unversalSettingsTypes.ts';
 import { Author } from '../types/authorTypes.ts';
 import { getContext } from './context';
+import { DashboardState, DashboardVisualization } from '../types/dashboardTypes.ts';
 
 const ctx = getContext();
 const LOCAL_STORAGE_VERSION: number = 1;
@@ -46,6 +47,19 @@ export function getUniversalSettingsLocalStorage(defaultConfig: UniversalSetting
   }
 
   return currConfig;
+}
+
+export function getDashboardSaveStateLocalStorage(defaultDashboard: DashboardState): DashboardState {
+  let dashboardSaveState = JSON.parse(<string>localStorage.getItem('dashboardState-V' + LOCAL_STORAGE_VERSION));
+  if (dashboardSaveState === null) {
+    dashboardSaveState = defaultDashboard;
+    localStorage.setItem('dashboardState-V' + LOCAL_STORAGE_VERSION, JSON.stringify({ visualizations: defaultDashboard.visualizations }));
+  }
+  return dashboardSaveState;
+}
+
+export function setDashboardSaveStateLocalStorage(visualizations: DashboardVisualization[]) {
+  localStorage.setItem('dashboardState-V' + LOCAL_STORAGE_VERSION, JSON.stringify({ visualizations: visualizations }));
 }
 
 function selectAllAuthors(config: UniversalSettings) {

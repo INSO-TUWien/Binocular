@@ -26,6 +26,7 @@ import highVisualizationIcon from '../assets/highVisualizationIcon.svg';
 import deleteIcon from '../assets/deleteIcon.svg';
 
 import { setActiveVisualizations, refresh } from '../sagas';
+import { getDashboardSaveStateLocalStorage, setDashboardSaveStateLocalStorage } from '../../../utils/localStorage';
 
 export default () => {
   const dashState = useSelector((state) => state.visualizations.dashboard.state);
@@ -39,21 +40,17 @@ export default () => {
   const [selectVisualization, setSelectVisualization] = useState(false);
 
   useEffect(() => {
-    let dashboardSaveState = JSON.parse(localStorage.getItem('dashboardState'));
-    if (dashboardSaveState === null) {
-      dashboardSaveState = DEFAULT_DASHBOARD;
-      localStorage.setItem('dashboardState', JSON.stringify({ visualizations: DEFAULT_DASHBOARD.visualizations }));
-    }
+    const dashboardSaveState = getDashboardSaveStateLocalStorage(DEFAULT_DASHBOARD);
     setVisualizations(dashboardSaveState.visualizations);
     onSetActiveVisualizations(dashboardSaveState.visualizations.map((viz) => viz.key));
   }, []);
 
   useEffect(() => {
     sortable(document.getElementById('dashboardContainer'), visualizations, setVisualizations);
-    localStorage.setItem('dashboardState', JSON.stringify({ visualizations: visualizations }));
+    setDashboardSaveStateLocalStorage(visualizations);
   });
 
-  const addVisualization = (key, id) => {
+  const addVisualization = (key) => {
     const currentVisualizations = visualizations;
 
     currentVisualizations.push({ key: key, id: visualizations.length, size: 'small', universalSettings: true });
@@ -213,7 +210,7 @@ export default () => {
       return viz;
     });
     setVisualizations(newVisualizations);
-    localStorage.setItem('dashboardState', JSON.stringify({ visualizations: visualizations }));
+    //localStorage.setItem('dashboardState', JSON.stringify({ visualizations: visualizations }));
   };
 
   const selectButton = (target) => {
@@ -287,7 +284,7 @@ export default () => {
         newVisualizationOrder.push(visualizations.filter((viz) => parseInt(viz.id) === parseInt(id))[0]);
       }
       setVisualizations(newVisualizationOrder);
-      localStorage.setItem('dashboardState', JSON.stringify({ visualizations: visualizations }));
+      //localStorage.setItem('dashboardState', JSON.stringify({ visualizations: visualizations }));
     }
   };
 
@@ -301,7 +298,7 @@ export default () => {
       return viz;
     });
     setVisualizations(newVisualizations);
-    localStorage.setItem('dashboardState', JSON.stringify({ visualizations: visualizations }));
+    //localStorage.setItem('dashboardState', JSON.stringify({ visualizations: visualizations }));
   };
 
   const showDropZones = (visualizations, currentTargetID) => {
