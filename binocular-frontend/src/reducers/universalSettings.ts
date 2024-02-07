@@ -2,11 +2,10 @@
 
 import { handleActions, Action } from 'redux-actions';
 import * as _ from 'lodash';
-import { getContext } from '../utils/context';
 import { UniversalSettings } from '../types/unversalSettingsTypes';
-import { Author } from '../types/authorTypes';
+import { updateUniversalSettingsLocalStorage, getUniversalSettingsLocalStorage } from '../utils/localStorage.ts';
+import { Author, Committer, Palette } from '../types/authorTypes.ts';
 
-const ctx = getContext();
 const defaultConfig: UniversalSettings = {
   chartResolution: 'months',
   chartTimeSpan: { from: undefined, to: undefined },
@@ -17,37 +16,50 @@ const defaultConfig: UniversalSettings = {
   initialized: false,
   excludeMergeCommits: false,
 };
+
+/**
+ * If something changes with the structure of the Universal Settings, please update
+ * the localStorage version number in src/utils/localStorage.ts
+ **/
 export default handleActions(
   {
     SET_RESOLUTION: (state, action: Action<any>) => {
-      updateLocalStorage('chartResolution', action.payload);
+      updateUniversalSettingsLocalStorage('chartResolution', action.payload, defaultConfig);
       return _.assign({}, state, { chartResolution: action.payload });
     },
     SET_TIME_SPAN: (state, action: Action<any>) => {
-      updateLocalStorage('chartTimeSpan', action.payload);
+      updateUniversalSettingsLocalStorage('chartTimeSpan', action.payload, defaultConfig);
       return _.assign({}, state, { chartTimeSpan: action.payload });
     },
     SET_SELECTED_AUTHORS_GLOBAL: (state, action: Action<any>) => {
-      updateLocalStorage('selectedAuthorsGlobal', action.payload);
+      updateUniversalSettingsLocalStorage('selectedAuthorsGlobal', action.payload, defaultConfig);
       return _.assign({}, state, { selectedAuthorsGlobal: action.payload });
     },
     SET_All_AUTHORS: (state, action: Action<any>) => {
+      const mergedAndOtherAuthorsCount = sumMergedAndOtherAuthors(state.mergedAuthors, state.otherAuthors);
+      const allAuthorCount = Object.keys(action.payload).length;
+      if (mergedAndOtherAuthorsCount > 0 && mergedAndOtherAuthorsCount < allAuthorCount - 1) {
+        console.log('Current localStorage does not align with the Author list loaded from the Database! New Authors will be added.');
+        const missingAuthors = findMissingAuthors(action.payload, state.mergedAuthors, state.otherAuthors);
+        state.mergedAuthors.push(...missingAuthors);
+        const config: UniversalSettings = updateUniversalSettingsLocalStorage('mergedAuthors', state.mergedAuthors, defaultConfig);
+      }
       return _.assign({}, state, { allAuthors: action.payload });
     },
     SET_MERGED_AUTHOR_LIST: (state, action: Action<any>) => {
-      const config: UniversalSettings = updateLocalStorage('mergedAuthors', action.payload);
+      const config: UniversalSettings = updateUniversalSettingsLocalStorage('mergedAuthors', action.payload, defaultConfig);
       return _.assign({}, state, { mergedAuthors: action.payload, selectedAuthorsGlobal: config.selectedAuthorsGlobal });
     },
     SET_OTHER_AUTHOR_LIST: (state, action: Action<any>) => {
-      updateLocalStorage('otherAuthors', action.payload);
+      updateUniversalSettingsLocalStorage('otherAuthors', action.payload, defaultConfig);
       return _.assign({}, state, { otherAuthors: action.payload });
     },
     SET_EXCLUDE_MERGE_COMMITS: (state, action: Action<any>) => {
-      updateLocalStorage('excludeMergeCommits', action.payload);
+      updateUniversalSettingsLocalStorage('excludeMergeCommits', action.payload, defaultConfig);
       return _.assign({}, state, { excludeMergeCommits: action.payload });
     },
     SET_SPRINTS: (state, action: Action<any>) => {
-      updateLocalStorage('sprints', action.payload);
+      updateUniversalSettingsLocalStorage('sprints', action.payload, defaultConfig);
       return _.assign({}, state, { sprints: action.payload });
     },
     REQUEST_UNIVERSAL_SETTINGS_DATA: (state) =>
@@ -64,58 +76,49 @@ export default handleActions(
   },
   {
     universalSettingsData: { data: {}, lastFetched: null, isFetching: null },
-    chartResolution: getLocalStorage().chartResolution,
-    chartTimeSpan: getLocalStorage().chartTimeSpan,
-    selectedAuthorsGlobal: getLocalStorage().selectedAuthorsGlobal,
+    chartResolution: getUniversalSettingsLocalStorage(defaultConfig).chartResolution,
+    chartTimeSpan: getUniversalSettingsLocalStorage(defaultConfig).chartTimeSpan,
+    selectedAuthorsGlobal: getUniversalSettingsLocalStorage(defaultConfig).selectedAuthorsGlobal,
     allAuthors: [],
-    mergedAuthors: getLocalStorage().mergedAuthors,
-    otherAuthors: getLocalStorage().otherAuthors,
-    excludeMergeCommits: getLocalStorage().excludeMergeCommits,
-    sprints: getLocalStorage().sprints,
+    mergedAuthors: getUniversalSettingsLocalStorage(defaultConfig).mergedAuthors,
+    otherAuthors: getUniversalSettingsLocalStorage(defaultConfig).otherAuthors,
+    excludeMergeCommits: getUniversalSettingsLocalStorage(defaultConfig).excludeMergeCommits,
+    sprints: getUniversalSettingsLocalStorage(defaultConfig).sprints,
   },
 );
 
-function updateLocalStorage(key: string, value: any): UniversalSettings {
-  let currConfig: UniversalSettings;
-  if (localStorage.getItem(ctx.repo.name + '-UniversalSettings') === null) {
-    currConfig = defaultConfig;
-  } else {
-    try {
-      currConfig = JSON.parse(<string>localStorage.getItem(ctx.repo.name + '-UniversalSettings'));
-    } catch (e) {
-      currConfig = defaultConfig;
+function sumMergedAndOtherAuthors(mergedAuthors: Author[], otherAuthors: Committer[]) {
+  let sum = otherAuthors.length;
+  for (const author of mergedAuthors) {
+    sum += author.committers.length;
+  }
+  return sum;
+}
+
+function findMissingAuthors(allAuthors: Palette, mergedAuthors: Author[], otherAuthors: Committer[]) {
+  const missingAuthors: Author[] = [];
+  for (const signature of Object.keys(allAuthors)) {
+    missingAuthors.push({
+      mainCommitter: signature,
+      committers: [{ signature: signature, color: allAuthors[signature] }],
+      color: allAuthors[signature],
+    });
+  }
+  _.remove(missingAuthors, (a) => a.mainCommitter === 'other');
+
+  for (const committer of otherAuthors) {
+    if (missingAuthors.find((a) => a.mainCommitter === committer.signature)) {
+      _.remove(missingAuthors, (a) => a.mainCommitter === committer.signature);
     }
   }
 
-  (currConfig[key as keyof UniversalSettings] as any) = value;
-  if (currConfig.mergedAuthors.length > 0 && (currConfig.initialized === undefined || currConfig.initialized === false)) {
-    selectAllAuthors(currConfig);
-    currConfig.initialized = true;
-  }
-
-  localStorage.setItem(ctx.repo.name + '-UniversalSettings', JSON.stringify(currConfig));
-  return currConfig;
-}
-
-function getLocalStorage(): UniversalSettings {
-  let currConfig: UniversalSettings;
-  if (localStorage.getItem(ctx.repo.name + '-UniversalSettings') === null) {
-    currConfig = defaultConfig;
-  } else {
-    try {
-      currConfig = JSON.parse(<string>localStorage.getItem(ctx.repo.name + '-UniversalSettings'));
-      if (currConfig.initialized === undefined || currConfig.initialized === false) {
-        selectAllAuthors(currConfig);
-        currConfig.initialized = true;
+  for (const author of mergedAuthors) {
+    for (const committer of author.committers) {
+      if (missingAuthors.find((a) => a.mainCommitter === committer.signature)) {
+        _.remove(missingAuthors, (a) => a.mainCommitter === committer.signature);
       }
-    } catch (e) {
-      currConfig = defaultConfig;
     }
   }
 
-  return currConfig;
-}
-
-function selectAllAuthors(config: UniversalSettings) {
-  config.selectedAuthorsGlobal = config.mergedAuthors.map((mergedAuthor: Author) => mergedAuthor.mainCommitter);
+  return missingAuthors;
 }
