@@ -16,6 +16,7 @@ const defaultConfig: UniversalSettings = {
   sprints: [],
   initialized: false,
   excludeMergeCommits: false,
+  excludeCommits: [],
 };
 export default handleActions(
   {
@@ -46,6 +47,10 @@ export default handleActions(
       updateLocalStorage('excludeMergeCommits', action.payload);
       return _.assign({}, state, { excludeMergeCommits: action.payload });
     },
+    SET_EXCLUDE_COMMITS: (state, action: Action<any>) => {
+      updateLocalStorage('excludeCommits', action.payload);
+      return _.assign({}, state, { excludeCommits: action.payload });
+    },
     SET_SPRINTS: (state, action: Action<any>) => {
       updateLocalStorage('sprints', action.payload);
       return _.assign({}, state, { sprints: action.payload });
@@ -71,6 +76,7 @@ export default handleActions(
     mergedAuthors: getLocalStorage().mergedAuthors,
     otherAuthors: getLocalStorage().otherAuthors,
     excludeMergeCommits: getLocalStorage().excludeMergeCommits,
+    excludeCommits: getLocalStorage().excludeCommits,
     sprints: getLocalStorage().sprints,
   },
 );

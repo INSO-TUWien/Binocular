@@ -22,7 +22,7 @@ export const setResolution = createAction('SET_RESOLUTION');
 export const requestRefresh = createAction('REQUEST_REFRESH');
 
 export const setExcludeMergeCommits = createAction('SET_EXCLUDE_MERGE_COMMITS');
-
+export const setExcludeCommits = createAction('SET_EXCLUDE_COMMITS');
 export const setSprints = createAction('SET_SPRINTS');
 
 let currentComponentSaga = null;

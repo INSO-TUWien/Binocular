@@ -43,6 +43,7 @@ module.exports = new gql.GraphQLObjectType({
                       RETURN {
                           stakeholder: stakeholder.gitSignature,
                           ownedLines: conn.ownedLines,
+                          hunks: conn.hunks,
                       }
             )
             ${limit}

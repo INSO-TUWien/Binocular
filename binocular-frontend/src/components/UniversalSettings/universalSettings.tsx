@@ -11,12 +11,13 @@ import {
   setMergedAuthorList,
   setOtherAuthorList,
   setExcludeMergeCommits,
-  setSprints,
+  setSprints, setExcludeCommits,
 } from '../../sagas';
 import DateRangeFilter from '../DateRangeFilter/dateRangeFilter';
 import AuthorMerger from './authorMerger/authorMerger';
 import AuthorList from './authorList/authorList';
 import SprintManager from './sprintManager/sprintManager';
+import ExcludeCommitsComponent from './excludeCommitsComponent/ExcludeCommitsComponent';
 import { Author, Committer, Palette } from '../../types/authorTypes';
 import { UniversalSettings, UniversalSettingsConfig } from '../../types/unversalSettingsTypes';
 import { DateRange, GlobalState } from '../../types/globalTypes';
@@ -30,7 +31,8 @@ export default (props: Props) => {
   //config
   const hideDateSettings = props.universalSettingsConfig.hideDateSettings;
   const hideGranularitySettings = props.universalSettingsConfig.hideGranularitySettings;
-  const hideCommitSettings = props.universalSettingsConfig.hideCommitSettings;
+  const hideMergeCommitSettings = props.universalSettingsConfig.hideMergeCommitSettings;
+  const hideExcludeCommitSettings = props.universalSettingsConfig.hideExcludeCommitSettings;
   const hideSprintSettings = props.universalSettingsConfig.hideSprintSettings;
 
   //global state
@@ -44,6 +46,7 @@ export default (props: Props) => {
   const firstSignificantTimestamp = universalSettings.universalSettingsData?.data.firstSignificantTimestamp;
   const lastSignificantTimestamp = universalSettings.universalSettingsData?.data.lastSignificantTimestamp;
   const excludeMergeCommits = universalSettings.excludeMergeCommits;
+  const excludeCommits = universalSettings.excludeCommits;
   const mergedAuthorListGlobal = universalSettings.mergedAuthors;
   const otherAuthorListGlobal = universalSettings.otherAuthors;
 
@@ -84,6 +87,7 @@ export default (props: Props) => {
   const onOtherAuthorListChanged = (otherAuthorList: Committer[]) => dispatch(setOtherAuthorList(otherAuthorList));
   const onSetPalette = (allAuthors: Palette) => dispatch(setAllAuthors(allAuthors));
   const onSetExcludeMergeCommits = (checked: boolean) => dispatch(setExcludeMergeCommits(checked));
+  const onSetExcludeCommits = (commitsToExclude: string[]) => dispatch(setExcludeCommits(commitsToExclude));
   const onSetSprints = (sprints: Sprint[]) => dispatch(setSprints(sprints));
 
   //local state
@@ -261,22 +265,29 @@ export default (props: Props) => {
         }}>
         Merge duplicate Authors
       </button>
-      {!hideCommitSettings && (
+      {(!hideMergeCommitSettings || !hideExcludeCommitSettings) && (
         <>
           <h2>Commits</h2>
-          <div className="field">
-            <input
-              id="excludeMergeCommitsSwitch"
-              type="checkbox"
-              name="excludeMergeCommitsSwitch"
-              className={'switch is-rounded is-outlined is-info'}
-              defaultChecked={excludeMergeCommits}
-              onChange={(e) => onSetExcludeMergeCommits(e.target.checked)}
-            />
-            <label htmlFor="excludeMergeCommitsSwitch" className={styles.switch}>
-              Exclude Merge Commits
-            </label>
-          </div>
+          {!hideMergeCommitSettings && (
+            <div className="field">
+              <input
+                id="excludeMergeCommitsSwitch"
+                type="checkbox"
+                name="excludeMergeCommitsSwitch"
+                className={'switch is-rounded is-outlined is-info'}
+                defaultChecked={excludeMergeCommits}
+                onChange={(e) => onSetExcludeMergeCommits(e.target.checked)}
+              />
+              <label htmlFor="excludeMergeCommitsSwitch" className={styles.switch}>
+                Exclude Merge Commits
+              </label>
+            </div>
+          )}
+          {!hideExcludeCommitSettings && (
+            <ExcludeCommitsComponent
+              excludedCommits={excludeCommits}
+              setGlobalExcludeCommits={onSetExcludeCommits}></ExcludeCommitsComponent>
+          )}
         </>
       )}
       {!hideSprintSettings && (

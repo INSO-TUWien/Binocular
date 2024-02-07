@@ -13,6 +13,35 @@ module.exports = new gql.GraphQLObjectType({
       ownedLines: {
         type: new gql.GraphQLNonNull(gql.GraphQLInt),
       },
+      hunks: {
+        type: new gql.GraphQLList(OwnershipHunk),
+      },
     };
   },
 });
+
+
+
+const OwnershipHunk = new gql.GraphQLObjectType({
+  name: 'OwnershipHunk',
+  description: '',
+  fields() {
+    return {
+      signature: {
+        type: new gql.GraphQLNonNull(gql.GraphQLString),
+      },
+      linesChanged: {
+        type: new gql.GraphQLNonNull(gql.GraphQLInt),
+      },
+      startLine: {
+        type: new gql.GraphQLNonNull(gql.GraphQLInt),
+      },
+      endLine: {
+        type: new gql.GraphQLNonNull(gql.GraphQLInt),
+      },
+      commitSha: {
+        type: new gql.GraphQLNonNull(gql.GraphQLString),
+      },
+    }
+  }
+})
