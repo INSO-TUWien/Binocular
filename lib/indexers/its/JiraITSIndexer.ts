@@ -26,7 +26,7 @@ class JiraITSIndexer {
   }
 
   configure(config: any) {
-    log('configure(%o)', config);
+    //log('configure()', config);
     if (!config) {
       throw new ConfigurationError('Config is not set');
     }
@@ -41,7 +41,7 @@ class JiraITSIndexer {
   }
 
   index() {
-    log('index()');
+    //log('index()');
     let omitCount = 0;
     let persistCount = 0;
 
@@ -98,17 +98,17 @@ class JiraITSIndexer {
                     };
 
                     if (!persistedMergeRequest) {
-                      log('Persisting new mergeRequest');
+                      //log('Persisting new mergeRequest');
                       return (MergeRequest as any).persist(toPersist);
                     } else {
-                      log('Updating persisted mergeRequest ' + mergeRequest.id);
+                      //log('Updating persisted mergeRequest ' + mergeRequest.id);
                       _.assign(persistedMergeRequest, toPersist);
                       return persistedMergeRequest.save({
                         ignoreUnknownAttributes: true,
                       });
                     }
                   } else {
-                    log('Omitting already persisted mergeRequest ' + mergeRequest.id);
+                    //log('Omitting already persisted mergeRequest ' + mergeRequest.id);
                   }
                 });
               });
@@ -127,7 +127,7 @@ class JiraITSIndexer {
 
                 return Promise.all([notesPromise, commentsPromise, changelogPromise])
                   .then(([notes, data, changelog]) => {
-                    // const notes1 = this.createNotesObject(notes, data, changelog);
+                    const notes1 = this.createNotesObject(notes, data, changelog);
 
                     const assignee = issue.fields.assignee ? issue.fields.assignee : null;
                     if (assignee) {
@@ -160,14 +160,14 @@ class JiraITSIndexer {
                       // if having for example this in custom fields
                       webUrl: issue.self.split('/rest/api')[0] + '/browse/' + issue.key,
                       subscribed: issue.fields.watches?.watchCount ? issue.fields.watches?.watchCount : null,
-                      mentions: data.mentioned,
-                      notes: data.comments,
+                      mentions: notes1.allMentioned,
+                      notes: notes1.notesObjectsToReturn,
                     };
                     if (!persistedIssue) {
-                      log('Persisting new issue');
+                      //log('Persisting new issue');
                       return (Issue as any).persist(issueToSave);
                     } else {
-                      log('Updating persisted issue ' + issue.id);
+                      //log('Updating persisted issue ' + issue.id);
                       _.assign(persistedIssue, issueToSave);
                       return persistedIssue.save({
                         ignoreUnknownAttributes: true,
@@ -176,11 +176,11 @@ class JiraITSIndexer {
                   })
                   .then(() => {
                     persistCount++;
-                    log('persistCount: ' + persistCount);
+                    //log('persistCount: ' + persistCount);
                   });
               } else {
                 omitCount++;
-                log('Omitting already persisted issue ' + issue.id);
+                //log('Omitting already persisted issue ' + issue.id);
               }
             })
             .then(() => this.reporter.finishIssue());
@@ -195,17 +195,17 @@ class JiraITSIndexer {
             const versionToPersist = this.createVersionObject(projectVersion);
             if (!persistedVersion || !_.isEqual(persistedVersion.data, versionToPersist)) {
               if (!persistedVersion) {
-                log('Persisting new version');
+                //log('Persisting new version');
                 return (Milestone as any).persist(versionToPersist);
               } else {
-                log('Updating persisted version ' + projectVersion.id);
+                //log('Updating persisted version ' + projectVersion.id);
                 _.assign(persistedVersion, versionToPersist);
                 return persistedVersion.save({
                   ignoreUnknownAttributes: true,
                 });
               }
             } else {
-              log('Omitting already persisted version ' + projectVersion.id);
+              //log('Omitting already persisted version ' + projectVersion.id);
             }
           })
           .then(() => this.reporter.finishMilestone());
@@ -222,10 +222,6 @@ class JiraITSIndexer {
       expired = dueDate ? new Date() > new Date(dueDate) : null;
     }
 
-    if (dueDate) {
-      log('here');
-    }
-
     return {
       id: projectVersion.id,
       iid: projectVersion.projectId, // no iid for version in Jira
@@ -240,7 +236,7 @@ class JiraITSIndexer {
   }
 
   private populateDescription(description: any) {
-    log('populateDescription(%o)', description);
+    //log('populateDescription()', description);
 
     if (typeof description === 'string') {
       // for Jira version where API returns description as plain string
@@ -294,7 +290,7 @@ class JiraITSIndexer {
   }
 
   private processNotes(issue: any) {
-    log('processNotes()');
+    //log('processNotes()');
     let worklogArray = issue.fields.worklog;
     if (worklogArray.total <= worklogArray.maxResults) {
       return Promise.resolve(worklogArray.worklogs);
@@ -310,7 +306,7 @@ class JiraITSIndexer {
   }
 
   private processComments(issue: any) {
-    log('processComments(%o)', issue);
+    //log('processComments()', issue);
     const issueKey = issue.key;
     const mentioned: string[] = [];
 
@@ -338,7 +334,7 @@ class JiraITSIndexer {
   }
 
   private extractMentioned(comment: any, mentioned: string[]) {
-    log('extractMentioned()');
+    //log('extractMentioned()');
     if (typeof comment.body === 'string') {
       Array.prototype.push.apply(
         mentioned,
@@ -346,26 +342,108 @@ class JiraITSIndexer {
       );
     } else {
       comment.body.content.forEach((commentContent: any) => {
-        commentContent.content.forEach((commentType: any) => {
-          if (commentType.type === 'mention') {
-            const mentionedUser = commentType.attrs.text;
+        this.extractFromContentArray(commentContent, mentioned);
+      });
+    }
+  }
+
+  private extractFromContentArray(commentContent: any, mentioned: string[]) {
+    commentContent.content.forEach((commentType: any) => {
+      if (commentType.type === 'mention') {
+        const mentionedUser = commentType.attrs.text;
+        if (!mentioned.includes(mentionedUser)) {
+          mentioned.push(mentionedUser);
+        }
+      } else if (commentType.type === 'paragraph' && commentType.content) {
+        commentType.content.forEach((contentType: any) => {
+          if (contentType.type === 'mention') {
+            const mentionedUser = contentType.attrs.text;
             if (!mentioned.includes(mentionedUser)) {
               mentioned.push(mentionedUser);
             }
           }
         });
-      });
-    }
+      }
+    });
   }
 
   isStopping() {
-    log('isStopping()');
+    //log('isStopping()');
     return this.stopping;
   }
 
-  private createNotesObject(notes: any[], data: any[], changelog: any[]) {
-    const timeEstimateChange: any[] = [];
-    const time = [];
+  private createNotesObject(notes: any[], data: { comments: any; mentioned: string[] }, changelog: any[]) {
+    const SECOND_POST_FIX = 'm'; // TODO: change to "2" since this is used to identify as seconds
+
+    const notesObjectsToReturn: any[] = [];
+    const notesMentioned: any[] = [];
+    notes.forEach((note: any) => {
+      if (note.comment.content) {
+        this.extractFromContentArray(note.comment, notesMentioned);
+      }
+    });
+    changelog.forEach((worklogEntry: any) => {
+      const authorObject: any = worklogEntry.author;
+      const user: string = worklogEntry.author.displayName;
+      let isWorklogIdDeleted: boolean | null = null;
+      let isTimeSpentSet: boolean | null = null;
+      let workLogId: number | null = null;
+      let from = -1;
+      let to = -1;
+      let entriesEqual = false;
+      const created = worklogEntry.created;
+      worklogEntry.items.forEach((item: any) => {
+        if (item.field === 'timespent') {
+          from = item.from ? parseInt(item.from, 10) : -1;
+          to = item.to ? parseInt(item.to, 10) : -1;
+          entriesEqual = from === to;
+          isTimeSpentSet = true;
+        }
+        if (item.field === 'WorklogId') {
+          isWorklogIdDeleted = item.from && !item.to;
+          workLogId = item.to ? item.to : item.from;
+        }
+      });
+
+      let body = '';
+      if (isTimeSpentSet && workLogId && !entriesEqual) {
+        if (isWorklogIdDeleted) {
+          body = `deleted ${(from - (to !== -1 ? to : 0)) / 60}${SECOND_POST_FIX} of spent time ${user}`;
+          //könnte zu viel sein was entfernt wird
+        } else if (!isWorklogIdDeleted && to > from && to !== -1) {
+          // from = from !== -1 ? from : 0;s
+          body = `added ${(to - (from !== -1 ? from : 0)) / 60}${SECOND_POST_FIX} of time spent ${user}`;
+          //removed some time
+        } else if (!isWorklogIdDeleted && from > to && from !== -1) {
+          body = `subtracted ${(from - (to !== -1 ? to : 0)) / 60}${SECOND_POST_FIX} of spent time ${user}`;
+        }
+
+        if (body !== '' && workLogId) {
+          let objectToAdd: any;
+          const notesWithComment = notes.filter((note: any) => note.id === workLogId);
+          if (notesWithComment.length > 1) {
+            log('should not be case');
+          } else if (notesWithComment.length === 1) {
+            objectToAdd = structuredClone(notesWithComment[0]);
+          } else {
+            objectToAdd = { author: authorObject };
+          }
+          objectToAdd.body = body;
+          objectToAdd.createdAt = created;
+          objectToAdd.worklogId = workLogId;
+
+          notesObjectsToReturn.push(objectToAdd);
+        }
+      }
+
+      if (body !== '') {
+        log('%s', body);
+      }
+    });
+
+    const allMentioned: string[] = notesMentioned.concat(data.mentioned);
+
+    return { notesObjectsToReturn, allMentioned };
   }
 }
 
