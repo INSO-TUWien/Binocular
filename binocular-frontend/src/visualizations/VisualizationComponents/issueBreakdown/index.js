@@ -15,4 +15,5 @@ export default {
   ConfigComponent,
   HelpComponent,
   usesUniversalSettings: true,
+  universalSettingsConfig: { hideExcludeCommitSettings: true, hideMergeCommitSettings: true },
 };

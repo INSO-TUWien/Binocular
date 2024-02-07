@@ -18,6 +18,7 @@ const mapStateToProps = (state /*, ownProps*/) => {
     chartResolution: universalSettings.chartResolution,
     selectedAuthors: universalSettings.selectedAuthorsGlobal,
     allAuthors: universalSettings.allAuthors,
+    excludeCommits: universalSettings.excludeCommits,
   };
 };
 

@@ -93,6 +93,11 @@ export default class CIBuilds extends React.Component {
       firstTimestamp = props.firstSignificantTimestamp;
       lastTimestamp = props.lastSignificantTimestamp;
       builds = builds.filter((build) => {
+        // TODO: build.commit is null with gitlab repo
+        // if the commit of this build is explicitly excluded, filter this build
+        if (build.commit !== null && props.excludeCommits.includes(build.commit.sha)) {
+          return false;
+        }
         let filter = false;
         if (props.selectedAuthors.filter((a) => a === 'others').length > 0) {
           filter = true;
