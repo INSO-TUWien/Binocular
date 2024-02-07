@@ -4,6 +4,7 @@ import { Argument, Command, Option } from 'commander';
 import path from 'path';
 import * as setup from './setup.js';
 import { exportDB } from './exportDB';
+import { runTests } from './runTests.ts';
 
 import package_json from '../package.json';
 
@@ -81,6 +82,15 @@ function parse(
     .addOption(new Option('-db, --database <repo>', 'export specific database'))
     .action((targetPath, options) => {
       exportDB(targetPath, options);
+    });
+
+  cli
+    .command('test')
+    .description('run the test cases for binocular')
+    .addOption(new Option('-f, --frontend [value]', 'specify if the frontend tests should be executed').default('true'))
+    .addOption(new Option('-b, --backend [value]', 'specify if the backend tests should be executed').default('true'))
+    .action((options) => {
+      runTests(options);
     });
 
   cli.parse();
