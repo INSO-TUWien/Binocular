@@ -19,6 +19,7 @@ export default () => {
   const selectedAuthors = universalSettings.selectedAuthorsGlobal;
   const otherAuthors = universalSettings.otherAuthors;
   const mergedAuthors = universalSettings.mergedAuthors;
+  const excludeCommits = universalSettings.excludeCommits;
 
   const rawData = useSelector((state) => state.visualizations.codeExpertise.state.data.data);
   const config = useSelector((state) => state.visualizations.codeExpertise.state.config);
@@ -80,6 +81,11 @@ export default () => {
       if (filterMergeCommits && commit.parents.length > 1) {
         return false;
       }
+
+      if (excludeCommits.includes(commit.sha)) {
+        return false;
+      }
+
       return relevantCommitHashes.includes(commit.sha);
     });
 
@@ -163,14 +169,14 @@ export default () => {
     }
 
     const latestBranchCommit = branchCommits.sort((a, b) => new Date(b.date) - new Date(a.date))[0];
-    const blameRes = getBlameModules(latestBranchCommit, activeFiles, branchCommits);
+    const blameRes = getBlameModules(latestBranchCommit, activeFiles, branchCommits, excludeCommits);
     for (const [name, val] of Object.entries(blameRes)) {
       if (result['devData'][name]) {
         result['devData'][name]['linesOwned'] = val;
       }
     }
     setData(result);
-  }, [rawData, activeFiles]);
+  }, [rawData, activeFiles, excludeCommits]);
 
   //calculate the data for relevant (selected) developers
   useEffect(() => {
