@@ -1,5 +1,6 @@
 'use-strict';
 
+import { extractOwnershipFromFileExcludingCommits } from '../../../utils/ownership.js';
 import { useSelector } from 'react-redux';
 import StackedAreaChart from '../../../components/StackedAreaChart';
 import styles from '../styles.module.scss';
@@ -32,6 +33,7 @@ export default () => {
   const authorColors = universalSettings.universalSettingsData.data.palette;
   const dateFrom = universalSettings.chartTimeSpan.from;
   const dateUntil = universalSettings.chartTimeSpan.to;
+  const excludeCommits = universalSettings.excludeCommits;
 
   const resetData = () => {
     setKeys([]);
@@ -73,7 +75,7 @@ export default () => {
               //for all previous filenames of the file we are currently looking at
               for (const name of previousNames) {
                 //if this old filename is the one the current commit touches
-                // (same path and committed at a time where the file had that path),
+                // (same path and committed at a time when the file had that path),
                 // this file is relevant
                 if (
                   name.oldFilePath === file.path &&
@@ -88,7 +90,7 @@ export default () => {
           }
 
           if (relevant) {
-            fileCache[file.path] = file.ownership;
+            fileCache[file.path] = extractOwnershipFromFileExcludingCommits(file.ownership, excludeCommits);
           }
         }
       }
@@ -106,7 +108,7 @@ export default () => {
       resultOwnershipData.push(commitResult);
     }
     setOwnershipData(resultOwnershipData);
-  }, [relevantOwnershipData, previousFilenames, activeFiles]);
+  }, [relevantOwnershipData, previousFilenames, activeFiles, excludeCommits]);
 
   //everytime the settings change (different files selected, mode changed etc.) recompute the chart data
   useEffect(() => {
