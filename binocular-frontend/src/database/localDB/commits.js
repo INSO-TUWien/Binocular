@@ -117,7 +117,7 @@ export default class Commits {
             //for each of the ownership connections, add the signature of the stakeholder and the owned lines to fileResult.ownership
             for (const ownershipConn of relevantOwnershipConnections) {
               const stakeholder = stakeholders.filter((s) => s._id === ownershipConn.to)[0].gitSignature;
-              res.ownership.push({ stakeholder: stakeholder, ownedLines: ownershipConn.ownedLines });
+              res.ownership.push({ stakeholder: stakeholder, ownedLines: ownershipConn.ownedLines, hunks: ownershipConn.hunks });
             }
 
             return res;
@@ -138,7 +138,7 @@ export default class Commits {
       let files = res.docs;
       files = files.filter((f) => filenames.includes(f.path));
 
-      //this stores the ahshes of the commits associated to the given filenames
+      //this stores the hashes of the commits associated to the given filenames
       const resultCommitHashes = [];
 
       //stores file objects for commit hashes. Add this to the commit objects later
@@ -208,7 +208,7 @@ export default class Commits {
         //for each of the ownership connections, add the signature of the stakeholder and the owned lines to fileResult.ownership
         for (const ownershipConn of relevantOwnershipConnections) {
           const stakeholder = stakeholders.filter((s) => s._id === ownershipConn.to)[0].gitSignature;
-          fileResult.ownership.push({ stakeholder: stakeholder, ownedLines: ownershipConn.ownedLines });
+          fileResult.ownership.push({ stakeholder: stakeholder, ownedLines: ownershipConn.ownedLines, hunks: ownershipConn.hunks });
         }
         //add to the result object of the current file
         result.push(fileResult);
@@ -241,7 +241,7 @@ export default class Commits {
           //for each of the ownership connections, add the signature of the stakeholder and the owned lines to fileResult.ownership
           for (const ownershipConn of relevantOwnershipConnections) {
             const stakeholder = stakeholders.filter((s) => s._id === ownershipConn.to)[0].gitSignature;
-            fileResult.ownership.push({ stakeholder: stakeholder, ownedLines: ownershipConn.ownedLines });
+            fileResult.ownership.push({ stakeholder: stakeholder, ownedLines: ownershipConn.ownedLines, hunks: ownershipConn.hunks });
           }
           //add to the result object of the current file
           commitResult.files.push(fileResult);
