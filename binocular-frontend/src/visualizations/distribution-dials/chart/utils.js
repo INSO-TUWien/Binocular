@@ -86,7 +86,10 @@ export const splitIssuesByAuthor = (issuesCreated, issuesClosed) => {
   const allIssues = _.uniqBy(issuesCreated.concat(issuesClosed), (i) => i.iid);
 
   for (const i of allIssues) {
-    const name = i.author.login;
+    let name = i.author.login;
+    if (name === null) {
+      name = i.author.name;
+    }
     if (!result[name]) {
       result[name] = {
         issues: 0,

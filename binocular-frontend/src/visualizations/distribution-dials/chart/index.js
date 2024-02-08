@@ -154,7 +154,7 @@ export default () => {
     }
 
     setChartData(buckets);
-  }, [rawData, universalSettings, filterCommitsChanges, filterCommitsChangesCutoff]);
+  }, [rawData, universalSettings, filterCommitsChanges, filterCommitsChangesCutoff, excludeCommits, excludeMergeCommits]);
 
   if (isFetching || chartData === null) {
     return (
