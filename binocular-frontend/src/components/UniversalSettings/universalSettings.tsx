@@ -11,7 +11,9 @@ import {
   setMergedAuthorList,
   setOtherAuthorList,
   setExcludeMergeCommits,
-  setSprints, setExcludeCommits,
+  setSprints,
+  setExcludeCommits,
+  setExcludedCommits,
 } from '../../sagas';
 import DateRangeFilter from '../DateRangeFilter/dateRangeFilter';
 import AuthorMerger from './authorMerger/authorMerger';
@@ -47,6 +49,7 @@ export default (props: Props) => {
   const lastSignificantTimestamp = universalSettings.universalSettingsData?.data.lastSignificantTimestamp;
   const excludeMergeCommits = universalSettings.excludeMergeCommits;
   const excludeCommits = universalSettings.excludeCommits;
+  const excludedCommits = universalSettings.excludedCommits;
   const mergedAuthorListGlobal = universalSettings.mergedAuthors;
   const otherAuthorListGlobal = universalSettings.otherAuthors;
 
@@ -87,7 +90,8 @@ export default (props: Props) => {
   const onOtherAuthorListChanged = (otherAuthorList: Committer[]) => dispatch(setOtherAuthorList(otherAuthorList));
   const onSetPalette = (allAuthors: Palette) => dispatch(setAllAuthors(allAuthors));
   const onSetExcludeMergeCommits = (checked: boolean) => dispatch(setExcludeMergeCommits(checked));
-  const onSetExcludeCommits = (commitsToExclude: string[]) => dispatch(setExcludeCommits(commitsToExclude));
+  const onSetExcludeCommits = (checked: boolean) => dispatch(setExcludeCommits(checked));
+  const onSetExcludedCommits = (commitsToExclude: string[]) => dispatch(setExcludedCommits(commitsToExclude));
   const onSetSprints = (sprints: Sprint[]) => dispatch(setSprints(sprints));
 
   //local state
@@ -284,9 +288,25 @@ export default (props: Props) => {
             </div>
           )}
           {!hideExcludeCommitSettings && (
-            <ExcludeCommitsComponent
-              excludedCommits={excludeCommits}
-              setGlobalExcludeCommits={onSetExcludeCommits}></ExcludeCommitsComponent>
+            <>
+              <input
+                id="excludeCommitsSwitch"
+                type="checkbox"
+                name="excludeCommitsSwitch"
+                className={'switch is-rounded is-outlined is-info'}
+                defaultChecked={excludeCommits}
+                onChange={(e) => onSetExcludeCommits(e.target.checked)}
+              />
+              <label htmlFor="excludeCommitsSwitch" className={styles.switch}>
+                Exclude Specific Commits
+              </label>
+
+              {excludeCommits && excludedCommits !== undefined && (
+                <ExcludeCommitsComponent
+                  excludedCommits={excludedCommits}
+                  setGlobalExcludeCommits={onSetExcludedCommits}></ExcludeCommitsComponent>
+              )}
+            </>
           )}
         </>
       )}

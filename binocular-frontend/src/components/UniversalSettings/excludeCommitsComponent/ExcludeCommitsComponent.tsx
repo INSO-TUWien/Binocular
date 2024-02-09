@@ -35,25 +35,22 @@ export default ({ excludedCommits, setGlobalExcludeCommits }) => {
 
   return (
     <div className={styles.field}>
-      <label htmlFor="hideExcludeCommitSettingsInput">Exclude specific commits:</label>
       <div className={styles.inputBar}>
         <input
           id="hideExcludeCommitSettingsInput"
           name="hideExcludeCommitSettingsInput"
           className={'input'}
+          placeholder={'enter commit sha'}
           value={excludeCommitsInput}
           onChange={(e) => setExcludeCommitsInput(e.target.value)}
         />
-        <button className={'button'} onClick={() => addExcludedCommits()}>
+        <button className={'button is-light is-primary'} onClick={() => addExcludedCommits()}>
           <i className={'fa fa-check'} />
         </button>
       </div>
 
       {excludedCommits.length > 0 && (
         <>
-          <button className={styles.button} onClick={removeAllExcludedCommits}>
-            Remove all
-          </button>
           <div className={styles.commitList}>
             {excludedCommits.map((c: string) => (
               <div className={styles.card + ' ' + styles.listItem} key={`exclude_${c}`}>
@@ -64,6 +61,9 @@ export default ({ excludedCommits, setGlobalExcludeCommits }) => {
               </div>
             ))}
           </div>
+          <button className={'button is-light is-danger'} onClick={removeAllExcludedCommits}>
+            Remove all
+          </button>
         </>
       )}
     </div>

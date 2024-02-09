@@ -33,6 +33,7 @@ export default () => {
   const authorColors = universalSettings.universalSettingsData.data.palette;
   const dateFrom = universalSettings.chartTimeSpan.from;
   const dateUntil = universalSettings.chartTimeSpan.to;
+  const excludedCommits = universalSettings.excludedCommits;
   const excludeCommits = universalSettings.excludeCommits;
 
   const resetData = () => {
@@ -90,7 +91,7 @@ export default () => {
           }
 
           if (relevant) {
-            fileCache[file.path] = extractOwnershipFromFileExcludingCommits(file.ownership, excludeCommits);
+            fileCache[file.path] = extractOwnershipFromFileExcludingCommits(file.ownership, excludeCommits ? excludedCommits : []);
           }
         }
       }
@@ -108,7 +109,7 @@ export default () => {
       resultOwnershipData.push(commitResult);
     }
     setOwnershipData(resultOwnershipData);
-  }, [relevantOwnershipData, previousFilenames, activeFiles, excludeCommits]);
+  }, [relevantOwnershipData, previousFilenames, activeFiles, excludedCommits, excludeCommits]);
 
   //everytime the settings change (different files selected, mode changed etc.) recompute the chart data
   useEffect(() => {

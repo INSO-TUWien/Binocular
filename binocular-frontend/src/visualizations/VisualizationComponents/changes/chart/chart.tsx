@@ -18,7 +18,8 @@ interface Props {
   committers: string[];
   displayMetric: string;
   excludeMergeCommits: boolean;
-  excludeCommits: string[];
+  excludedCommits: string[];
+  excludeCommits: boolean;
   firstCommitTimestamp: number;
   lastCommitTimestamp: number;
   firstSignificantTimestamp: number;
@@ -120,7 +121,9 @@ const extractCommitData = (
     if (props.excludeMergeCommits) {
       commits = commits.filter((c: Commit) => !c.message.includes('Merge'));
     }
-    commits = commits.filter((c) => !props.excludeCommits.includes(c.sha));
+    if (props.excludeCommits) {
+      commits = commits.filter((c) => !props.excludedCommits.includes(c.sha));
+    }
   }
 
   const data: Array<{ date: number; statsByAuthor: { [signature: string]: { count: number; additions: number; deletions: number } } }> = [];

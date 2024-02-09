@@ -17,7 +17,8 @@ export interface UniversalSettings {
   chartResolution: moment.unitOfTime.DurationConstructor;
   chartTimeSpan: DateRange;
   excludeMergeCommits: boolean;
-  excludeCommits: string[];
+  excludedCommits: string[];
+  excludeCommits: boolean;
   mergedAuthors: Author[];
   otherAuthors: Committer[];
   selectedAuthorsGlobal: string[];
