@@ -24,7 +24,7 @@ const logger = createLogger({
   collapsed: () => true,
 });
 
-import dashboard from './visualizations/dashboard';
+import dashboard from './visualizations/dashboard/index.ts';
 import dataExport from './visualizations/dataExport';
 import issueImpact from './visualizations/legacy/issue-impact';
 import codeHotspots from './visualizations/legacy/code-hotspots';
@@ -83,6 +83,7 @@ Database.checkBackendConnection().then((connection) => {
         activeVisualization: activeVisualization,
         visualizations,
         config: {
+          // @ts-ignore
           isFetching: false,
           lastFetched: null,
           isShown: false,
@@ -105,6 +106,7 @@ Database.checkBackendConnection().then((connection) => {
         activeVisualization: _.keys(visualizations)[0],
         visualizations,
         config: {
+          // @ts-ignore
           isFetching: false,
           lastFetched: null,
           isShown: false,

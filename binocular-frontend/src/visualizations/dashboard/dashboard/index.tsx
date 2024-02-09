@@ -2,14 +2,6 @@
 
 import { useDispatch, useSelector } from 'react-redux';
 
-const DEFAULT_DASHBOARD = {
-  visualizations: [
-    { key: 'changes', id: 0, size: 'large', universalSettings: true },
-    { key: 'issues', id: 1, size: 'small', universalSettings: true },
-    { key: 'ciBuilds', id: 2, size: 'small', universalSettings: true },
-  ],
-};
-
 import React, { useEffect, useState } from 'react';
 import styles from '../styles.module.scss';
 import dashboardStyles from '../styles/dashboard.module.scss';
@@ -25,46 +17,53 @@ import wideVisualizationIcon from '../assets/wideVisualizationIcon.svg';
 import highVisualizationIcon from '../assets/highVisualizationIcon.svg';
 import deleteIcon from '../assets/deleteIcon.svg';
 
-import { setActiveVisualizations, refresh } from '../sagas';
+import { refresh, setActiveVisualizations } from '../sagas';
+import { getDashboardSaveStateLocalStorage, setDashboardSaveStateLocalStorage } from '../../../utils/localStorage';
+import { DashboardState, DashboardVisualization, DashboardVisualizationSize } from '../../../types/dashboardTypes';
+import { GlobalState } from '../../../types/globalTypes';
+
+const DEFAULT_DASHBOARD: DashboardState = {
+  visualizations: [
+    { key: 'changes', id: 0, size: DashboardVisualizationSize.wide, universalSettings: true },
+    { key: 'issues', id: 1, size: DashboardVisualizationSize.small, universalSettings: true },
+    { key: 'ciBuilds', id: 2, size: DashboardVisualizationSize.small, universalSettings: true },
+  ],
+};
 
 export default () => {
-  const dashState = useSelector((state) => state.visualizations.dashboard.state);
+  const dashState = useSelector((state: GlobalState) => state.visualizations.dashboard.state);
 
   const dispatch = useDispatch();
 
   const onSetActiveVisualizations = (visualizations) => dispatch(setActiveVisualizations(visualizations));
   const onRefresh = () => dispatch(refresh());
 
-  const [visualizations, setVisualizations] = useState([]);
+  const [visualizations, setVisualizations] = useState<DashboardVisualization[]>([]);
   const [selectVisualization, setSelectVisualization] = useState(false);
 
   useEffect(() => {
-    let dashboardSaveState = JSON.parse(localStorage.getItem('dashboardState'));
-    if (dashboardSaveState === null) {
-      dashboardSaveState = DEFAULT_DASHBOARD;
-      localStorage.setItem('dashboardState', JSON.stringify({ visualizations: DEFAULT_DASHBOARD.visualizations }));
-    }
+    const dashboardSaveState = getDashboardSaveStateLocalStorage(DEFAULT_DASHBOARD);
     setVisualizations(dashboardSaveState.visualizations);
     onSetActiveVisualizations(dashboardSaveState.visualizations.map((viz) => viz.key));
   }, []);
 
   useEffect(() => {
     sortable(document.getElementById('dashboardContainer'), visualizations, setVisualizations);
-    localStorage.setItem('dashboardState', JSON.stringify({ visualizations: visualizations }));
+    setDashboardSaveStateLocalStorage(visualizations);
   });
 
-  const addVisualization = (key, id) => {
+  const addVisualization = (key: string) => {
     const currentVisualizations = visualizations;
 
-    currentVisualizations.push({ key: key, id: visualizations.length, size: 'small', universalSettings: true });
+    currentVisualizations.push({ key: key, id: visualizations.length, size: DashboardVisualizationSize.small, universalSettings: true });
 
     onSetActiveVisualizations(currentVisualizations.map((viz) => viz.key));
     setVisualizations(currentVisualizations);
   };
 
-  const deleteVisualization = (e) => {
+  const deleteVisualization = (e: any) => {
     const currentVisualizations = visualizations.filter(
-      (viz) => parseInt(viz.id) !== parseInt(e.target.parentNode.parentNode.id.substring('visualizationContainer'.length)),
+      (viz) => viz.id !== parseInt(e.target.parentNode.parentNode.id.substring('visualizationContainer'.length)),
     );
     onSetActiveVisualizations(currentVisualizations.map((viz) => viz.key));
     setVisualizations(currentVisualizations);
@@ -73,23 +72,30 @@ export default () => {
     onRefresh();
   };
 
-  const loadDefaultDashboard = (e) => {
+  const loadDefaultDashboard = () => {
     setVisualizations(DEFAULT_DASHBOARD.visualizations);
     onSetActiveVisualizations(DEFAULT_DASHBOARD.visualizations.map((viz) => viz.key));
     onRefresh();
   };
 
-  const renderVisualizationWithWindow = (visualization, visualizations, setVisualizations) => {
-    let style = { gridArea: 'span 1/span 1' };
+  const renderVisualizationWithWindow = (
+    visualization: DashboardVisualization,
+    visualizations: DashboardVisualization[],
+    setVisualizations: React.Dispatch<React.SetStateAction<DashboardVisualization[]>>,
+  ) => {
+    let style: { gridArea: string };
     switch (visualization.size) {
-      case 'large':
+      case DashboardVisualizationSize.large:
         style = { gridArea: 'span 2/span 2' };
         break;
-      case 'wide':
+      case DashboardVisualizationSize.wide:
         style = { gridArea: 'span 1/span 2' };
         break;
-      case 'high':
+      case DashboardVisualizationSize.high:
         style = { gridArea: 'span 2/span 1' };
+        break;
+      default:
+        style = { gridArea: 'span 1/span 1' };
         break;
     }
     return (
@@ -126,7 +132,8 @@ export default () => {
         <div className={dashboardStyles.visualizationSettings}>
           <div
             className={
-              dashboardStyles.windowSizeButton + (visualization.size === 'small' ? ' ' + dashboardStyles.windowSizeButtonSelected : '')
+              dashboardStyles.windowSizeButton +
+              (visualization.size === DashboardVisualizationSize.small ? ' ' + dashboardStyles.windowSizeButtonSelected : '')
             }
             onClick={(e) => changeWindowSizeSmall(e, visualizations, setVisualizations)}>
             <img className={dashboardStyles.visualizationSettingsItemIcon} src={smallVisualizationIcon}></img>
@@ -134,7 +141,8 @@ export default () => {
           </div>
           <div
             className={
-              dashboardStyles.windowSizeButton + (visualization.size === 'large' ? ' ' + dashboardStyles.windowSizeButtonSelected : '')
+              dashboardStyles.windowSizeButton +
+              (visualization.size === DashboardVisualizationSize.large ? ' ' + dashboardStyles.windowSizeButtonSelected : '')
             }
             onClick={(e) => changeWindowSizeLarge(e, visualizations, setVisualizations)}>
             <img className={dashboardStyles.visualizationSettingsItemIcon} src={largeVisualizationIcon}></img>
@@ -142,7 +150,8 @@ export default () => {
           </div>
           <div
             className={
-              dashboardStyles.windowSizeButton + (visualization.size === 'wide' ? ' ' + dashboardStyles.windowSizeButtonSelected : '')
+              dashboardStyles.windowSizeButton +
+              (visualization.size === DashboardVisualizationSize.wide ? ' ' + dashboardStyles.windowSizeButtonSelected : '')
             }
             onClick={(e) => changeWindowSizeWide(e, visualizations, setVisualizations)}>
             <img className={dashboardStyles.visualizationSettingsItemIcon} src={wideVisualizationIcon}></img>
@@ -150,14 +159,15 @@ export default () => {
           </div>
           <div
             className={
-              dashboardStyles.windowSizeButton + (visualization.size === 'high' ? ' ' + dashboardStyles.windowSizeButtonSelected : '')
+              dashboardStyles.windowSizeButton +
+              (visualization.size === DashboardVisualizationSize.high ? ' ' + dashboardStyles.windowSizeButtonSelected : '')
             }
             onClick={(e) => changeWindowSizeHigh(e, visualizations, setVisualizations)}>
             <img className={dashboardStyles.visualizationSettingsItemIcon} src={highVisualizationIcon}></img>
             High (2x1)
           </div>
           <hr />
-          <div className={dashboardStyles.windowSizeButton} onClick={(e) => deleteVisualization(e, visualizations, setVisualizations)}>
+          <div className={dashboardStyles.windowSizeButton} onClick={(e) => deleteVisualization(e)}>
             <img className={dashboardStyles.visualizationSettingsItemIcon} src={deleteIcon}></img>Delete
           </div>
         </div>
@@ -178,55 +188,83 @@ export default () => {
     );
   };
 
-  const openVisualizationSelector = (e) => {
+  const openVisualizationSelector = () => {
     setSelectVisualization(true);
   };
 
-  const changeWindowSizeSmall = (e, visualizations, setVisualizations) => {
-    changeVisualizationSize(e, 'small', visualizations, setVisualizations);
+  const changeWindowSizeSmall = (
+    e: any,
+    visualizations: DashboardVisualization[],
+    setVisualizations: React.Dispatch<React.SetStateAction<DashboardVisualization[]>>,
+  ) => {
+    changeVisualizationSize(e, DashboardVisualizationSize.small, visualizations, setVisualizations);
   };
 
-  const changeWindowSizeLarge = (e, visualizations, setVisualizations) => {
-    changeVisualizationSize(e, 'large', visualizations, setVisualizations);
+  const changeWindowSizeLarge = (
+    e: any,
+    visualizations: DashboardVisualization[],
+    setVisualizations: React.Dispatch<React.SetStateAction<DashboardVisualization[]>>,
+  ) => {
+    changeVisualizationSize(e, DashboardVisualizationSize.large, visualizations, setVisualizations);
   };
 
-  const changeWindowSizeWide = (e, visualizations, setVisualizations) => {
-    changeVisualizationSize(e, 'wide', visualizations, setVisualizations);
+  const changeWindowSizeWide = (
+    e: any,
+    visualizations: DashboardVisualization[],
+    setVisualizations: React.Dispatch<React.SetStateAction<DashboardVisualization[]>>,
+  ) => {
+    changeVisualizationSize(e, DashboardVisualizationSize.wide, visualizations, setVisualizations);
   };
 
-  const changeWindowSizeHigh = (e, visualizations, setVisualizations) => {
-    changeVisualizationSize(e, 'high', visualizations, setVisualizations);
+  const changeWindowSizeHigh = (
+    e: any,
+    visualizations: DashboardVisualization[],
+    setVisualizations: React.Dispatch<React.SetStateAction<DashboardVisualization[]>>,
+  ) => {
+    changeVisualizationSize(e, DashboardVisualizationSize.high, visualizations, setVisualizations);
   };
 
-  const changeVisualizationSize = (e, size, visualizations, setVisualizations) => {
+  const changeVisualizationSize = (
+    e: any,
+    size: DashboardVisualizationSize,
+    visualizations: DashboardVisualization[],
+    setVisualizations: React.Dispatch<React.SetStateAction<DashboardVisualization[]>>,
+  ) => {
     selectButton(e.target);
     const visualizationContainer = e.target.parentNode.parentNode;
     visualizationContainer.style.gridArea =
-      size === 'large' ? 'span 4/span 4' : size === 'wide' ? 'span 2/span 4' : size === 'high' ? 'span 4/span 2' : 'span 2/span 2';
+      size === DashboardVisualizationSize.large
+        ? 'span 4/span 4'
+        : size === DashboardVisualizationSize.wide
+          ? 'span 2/span 4'
+          : size === DashboardVisualizationSize.high
+            ? 'span 4/span 2'
+            : 'span 2/span 2';
     const visualizationSettings = visualizationContainer.querySelector('.' + dashboardStyles.visualizationSettings);
     visualizationSettings.classList.remove(dashboardStyles.visualizationSettingsExtended);
     const id = visualizationContainer.id.substring('visualizationContainer'.length);
     const newVisualizations = visualizations.map((viz) => {
-      if (parseInt(viz.id) === parseInt(id)) {
+      if (viz.id === parseInt(id)) {
         viz.size = size;
       }
       return viz;
     });
     setVisualizations(newVisualizations);
-    localStorage.setItem('dashboardState', JSON.stringify({ visualizations: visualizations }));
   };
 
-  const selectButton = (target) => {
-    for (const element of target.parentNode.children) {
-      if (element.classList.contains(dashboardStyles.windowSizeButton)) {
-        element.classList.remove(dashboardStyles.windowSizeButtonSelected);
+  const selectButton = (target: HTMLElement) => {
+    if (target.parentNode !== null) {
+      for (const element of target.parentNode.children) {
+        if (element.classList.contains(dashboardStyles.windowSizeButton)) {
+          element.classList.remove(dashboardStyles.windowSizeButtonSelected);
+        }
       }
     }
 
     target.classList.add(dashboardStyles.windowSizeButtonSelected);
   };
 
-  const switchVisualizationSettingsVisibility = (e) => {
+  const switchVisualizationSettingsVisibility = (e: any) => {
     const visualizationSettings = e.target.parentNode.parentNode.parentNode.querySelector('.' + dashboardStyles.visualizationSettings);
     if (visualizationSettings.classList.contains(dashboardStyles.visualizationSettingsExtended)) {
       visualizationSettings.classList.remove(dashboardStyles.visualizationSettingsExtended);
@@ -235,14 +273,26 @@ export default () => {
     }
   };
 
-  const sortable = (section, visualizations, setVisualizations) => {
-    let dragEl, nextEl, newPos, dragGhost;
+  const sortable = (
+    section: HTMLElement | null,
+    visualizations: DashboardVisualization[],
+    setVisualizations: React.Dispatch<React.SetStateAction<DashboardVisualization[]>>,
+  ) => {
+    let dragEl: HTMLElement;
+    let nextEl: ChildNode | null;
 
-    [...section.children].map((item) => {
+    if (section === null) {
+      return;
+    }
+
+    [...section.children].map((item: any) => {
       item.draggable = true;
-      return document.getElementById(item.id).getBoundingClientRect();
+      return document.getElementById(item.id)?.getBoundingClientRect();
     });
-    const _onDragOver = (e) => {
+    function _onDragOver(e: any) {
+      if (section === null) {
+        return;
+      }
       const target = e.target.parentNode.parentNode;
       if (target && target !== dragEl && target.nodeName === 'DIV' && target.classList.contains(dashboardStyles.visualizationContainer)) {
         e.preventDefault();
@@ -250,18 +300,21 @@ export default () => {
 
         section.insertBefore(dragEl, target);
       }
-    };
+    }
 
-    const _onDragEnd = (evt, visualizations, setVisualizations) => {
-      evt.preventDefault();
+    function _onDragEnd(e: any) {
+      if (section === null) {
+        return;
+      }
+      e.preventDefault();
       removeDropZones([...section.children]);
       dragEl.classList.remove(dashboardStyles.ghost);
       section.removeEventListener('dragover', _onDragOver, false);
       section.removeEventListener('dragend', _onDragEnd, false);
       reorderVisualizations(visualizations, setVisualizations);
-    };
+    }
 
-    section.addEventListener('dragstart', (e) => {
+    section.addEventListener('dragstart', (e: any) => {
       showDropZones([...section.children], e.target.id);
       dragEl = e.target;
       if (!dragEl.classList.contains(dashboardStyles.inside)) {
@@ -269,8 +322,8 @@ export default () => {
         e.dataTransfer.effectAllowed = 'move';
         e.dataTransfer.setData('Text', dragEl.textContent);
 
-        section.addEventListener('dragover', (e) => _onDragOver(e, visualizations, setVisualizations), false);
-        section.addEventListener('dragend', (e) => _onDragEnd(e, visualizations, setVisualizations), false);
+        section.addEventListener('dragover', _onDragOver, false);
+        section.addEventListener('dragend', _onDragEnd, false);
 
         setTimeout(function () {
           dragEl.classList.add(dashboardStyles.ghost);
@@ -279,32 +332,37 @@ export default () => {
     });
   };
 
-  const reorderVisualizations = (visualizations, setVisualizations) => {
+  const reorderVisualizations = (
+    visualizations: DashboardVisualization[],
+    setVisualizations: React.Dispatch<React.SetStateAction<DashboardVisualization[]>>,
+  ) => {
     if (visualizations.length > 0) {
-      const newVisualizationOrder = [];
+      const newVisualizationOrder: DashboardVisualization[] = [];
       for (const visualizationContainer of document.getElementsByClassName(dashboardStyles.visualizationContainer)) {
         const id = visualizationContainer.id.substring('visualizationContainer'.length);
-        newVisualizationOrder.push(visualizations.filter((viz) => parseInt(viz.id) === parseInt(id))[0]);
+        newVisualizationOrder.push(visualizations.filter((viz) => viz.id === parseInt(id))[0]);
       }
       setVisualizations(newVisualizationOrder);
-      localStorage.setItem('dashboardState', JSON.stringify({ visualizations: visualizations }));
     }
   };
 
-  const switchVisualizationUniversalFilterBehaviour = (e, visualizations, setVisualizations) => {
+  const switchVisualizationUniversalFilterBehaviour = (
+    e: any,
+    visualizations: DashboardVisualization[],
+    setVisualizations: React.Dispatch<React.SetStateAction<DashboardVisualization[]>>,
+  ) => {
     const visualizationContainer = e.target.parentNode.parentNode.parentNode;
     const id = visualizationContainer.id.substring('visualizationContainer'.length);
     const newVisualizations = visualizations.map((viz) => {
-      if (parseInt(viz.id) === parseInt(id)) {
+      if (viz.id === parseInt(id)) {
         viz.universalSettings = !viz.universalSettings;
       }
       return viz;
     });
     setVisualizations(newVisualizations);
-    localStorage.setItem('dashboardState', JSON.stringify({ visualizations: visualizations }));
   };
 
-  const showDropZones = (visualizations, currentTargetID) => {
+  const showDropZones = (visualizations: any[], currentTargetID: any) => {
     visualizations.forEach((item) => {
       if (item.id !== currentTargetID) {
         item.childNodes.item('dropZone').style.display = 'inline-block';
@@ -312,7 +370,7 @@ export default () => {
     });
   };
 
-  const removeDropZones = (visualizations) => {
+  const removeDropZones = (visualizations: any[]) => {
     visualizations.forEach((item) => {
       item.childNodes.item('dropZone').style.display = 'none';
     });

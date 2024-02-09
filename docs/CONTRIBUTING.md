@@ -50,16 +50,16 @@ binocular-backend/indexers
 ├── ci                      # CI-specific indexers
 │   ├── GitLabCIIndexer.js  # Indexer for GitLab-CI
 │   ├── ...                 # (Additional CI-indexers could be added here)
-│   └── index.js
+│   └── index.tsx
 ├── its                     # ITS-specific indexers
 │   ├── GitHubITSIndexer.js    # Indexer for GitHub
 │   ├── GitLabITSIndexer.js # Indexer for GitLab
 │   ├── ...                 # (Additional ITS-indexers could be added here)
-│   └── index.js
+│   └── index.tsx
 └── vcs
     ├── GitIndexer.js       # Indexer for git
 │   ├── ...                 # (Additional VCS-indexers could be added here)
-    └── index.js
+    └── index.tsx
 ```
 
 ## GraphQL-Interface
@@ -86,7 +86,7 @@ binocular-frontend
 └── src
    ├── components                 # Holds general components used everywhere in the app
    ├── database                   # Database functions to access either the arangoDB or local JSON database
-   ├── index.js                   # Main JS-entry-point
+   ├── index.tsx                   # Main JS-entry-point
    ├── reducers                   # Holds general reducers
    ├── sagas                      # Holds general sagas
    ├── utils                      # Utility functions
@@ -98,11 +98,11 @@ binocular-frontend
       │  │  ├── chart              # Main chart component
       │  │  ├── config             # Main config component (shown in the sidebar)
       │  │  ├── help.js            # Component shown in the help-section
-      │  │  ├── index.js           # main entry point for the component, bundles everything together
+      │  │  ├── index.tsx           # main entry point for the component, bundles everything together
       │  │   ├── reducers           # Reducers for the visualization
       │  │   │   ├── config.js      # Configuration-related reducers
       │  │   │   ├── data.js        # Data-related reducers
-      │  │   │   └── index.js
+      │  │   │   └── index.tsx
       │  │   ├── sagas              # Sagas/Actions for the visualization
       │  │   └── styles.scss        # Styles for the visualization      
       │  ├── hotspot-dials
@@ -111,54 +111,54 @@ binocular-frontend
       │  │   ├── reducers
       │  │   │   ├── config.js
       │  │   │   ├── data.js
-      │  │   │   └── index.js
+      │  │   │   └── index.tsx
       │  │   ├── sagas
-      │  │   │   └── index.js
+      │  │   │   └── index.tsx
       │  │   └── styles.scss
       │  └── issue-impact
       │      ├── chart.js
       │      ├── config.js
       │      ├── help.js
-      │      ├── index.js
+      │      ├── index.tsx
       │      ├── reducers
       │      │   ├── config.js
       │      │   ├── data.js
-      │      │   └── index.js
+      │      │   └── index.tsx
       │      ├── sagas
-      │      │   └── index.js
+      │      │   └── index.tsx
       │      └── styles.scss
       └── VisualizationComponents              # Small visualizaitons for use in the dashboard
          ├── changes 
          │  ├── chart              # Main chart component
          │  ├── config.ts          # Main config component (shown in the sidebar)
          │  ├── help.ts            # Component shown in the help-section
-         │  ├── index.ts           # main entry point for the component, bundles everything together
+         │  ├── index.tsx           # main entry point for the component, bundles everything together
          │   ├── reducers           # Reducers for the visualization
          │   │   ├── config.ts      # Configuration-related reducers
          │   │   ├── data.ts        # Data-related reducers
-         │   │   └── index.ts
+         │   │   └── index.tsx
          │   ├── sagas              # Sagas/Actions for the visualization
          │   └── styles.scss        # Styles for the visualization
          ├── ciBuilds
          │  ├── chart
          │  ├── config
          │  ├── help.js
-         │  ├── index.js
+         │  ├── index.tsx
          │   ├── reducers
          │   │   ├── config.js
          │   │   ├── data.js
-         │   │   └── index.js
+         │   │   └── index.tsx
          │   ├── sagas
          │   └── styles.scss
          └── issues
             ├── chart
             ├── config
             ├── help.js
-            ├── index.js
+            ├── index.tsx
              ├── reducers
              │   ├── config.js
              │   ├── data.js
-             │   └── index.js
+             │   └── index.tsx
              ├── sagas
              └── styles.scss
 ```

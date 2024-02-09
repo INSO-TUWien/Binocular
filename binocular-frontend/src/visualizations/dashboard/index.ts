@@ -1,6 +1,6 @@
 'use strict';
 
-import ChartComponent from './dashboard';
+import ChartComponent from './dashboard/index';
 import ConfigComponent from './config';
 import HelpComponent from './help';
 import saga from './sagas';

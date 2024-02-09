@@ -6,9 +6,9 @@ import styles from './styles.module.scss';
 import visualizationRegistry from './visualizationRegistry';
 
 export default () => {
-  const dashboardState = useSelector((state) => state.visualizations.dashboard.state);
+  const dashboardState = useSelector((state: any) => state.visualizations.dashboard.state);
 
-  const visualizations = [];
+  const visualizations: any[] = [];
   for (const visualization in visualizationRegistry) {
     const vis = visualizationRegistry[visualization];
     if (vis.ConfigComponent !== undefined) {
