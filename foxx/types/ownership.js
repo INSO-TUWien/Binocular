@@ -27,12 +27,6 @@ const OwnershipHunk = new gql.GraphQLObjectType({
   description: '',
   fields() {
     return {
-      signature: {
-        type: new gql.GraphQLNonNull(gql.GraphQLString),
-      },
-      linesChanged: {
-        type: new gql.GraphQLNonNull(gql.GraphQLInt),
-      },
       startLine: {
         type: new gql.GraphQLNonNull(gql.GraphQLInt),
       },

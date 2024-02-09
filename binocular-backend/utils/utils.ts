@@ -67,18 +67,17 @@ export function parseBlameOutput(output: string) {
 
       if (signature in hunks) {
         if (this.fixUTF8(currHunk.signature) === signature && currHunk.commitSha === currentSha) {
-          currHunk.linesChanged += 1;
           currHunk.endLine = currLineNumber;
         } else {
           hunks[this.fixUTF8(currHunk.signature)].push(currHunk);
-          currHunk = { signature: signature, linesChanged: 1, startLine: currLineNumber, endLine: currLineNumber, commitSha: currentSha };
+          currHunk = { signature: signature, startLine: currLineNumber, endLine: currLineNumber, commitSha: currentSha };
         }
       } else {
         if (currHunk.signature !== undefined) {
           hunks[this.fixUTF8(currHunk.signature)].push(currHunk);
         }
         hunks[signature] = [];
-        currHunk = { signature: signature, linesChanged: 1, startLine: currLineNumber, endLine: currLineNumber, commitSha: currentSha };
+        currHunk = { signature: signature, startLine: currLineNumber, endLine: currLineNumber, commitSha: currentSha };
       }
 
       if (signature in ownershipData) {

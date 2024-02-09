@@ -117,7 +117,7 @@ export default class Commits {
             //for each of the ownership connections, add the signature of the stakeholder and the owned lines to fileResult.ownership
             for (const ownershipConn of relevantOwnershipConnections) {
               const stakeholder = stakeholders.filter((s) => s._id === ownershipConn.to)[0].gitSignature;
-              res.ownership.push({ stakeholder: stakeholder, ownedLines: ownershipConn.ownedLines, hunks: ownershipConn.hunks });
+              res.ownership.push({ stakeholder: stakeholder, hunks: ownershipConn.hunks });
             }
 
             return res;
@@ -208,7 +208,7 @@ export default class Commits {
         //for each of the ownership connections, add the signature of the stakeholder and the owned lines to fileResult.ownership
         for (const ownershipConn of relevantOwnershipConnections) {
           const stakeholder = stakeholders.filter((s) => s._id === ownershipConn.to)[0].gitSignature;
-          fileResult.ownership.push({ stakeholder: stakeholder, ownedLines: ownershipConn.ownedLines, hunks: ownershipConn.hunks });
+          fileResult.ownership.push({ stakeholder: stakeholder, hunks: ownershipConn.hunks });
         }
         //add to the result object of the current file
         result.push(fileResult);
@@ -241,7 +241,7 @@ export default class Commits {
           //for each of the ownership connections, add the signature of the stakeholder and the owned lines to fileResult.ownership
           for (const ownershipConn of relevantOwnershipConnections) {
             const stakeholder = stakeholders.filter((s) => s._id === ownershipConn.to)[0].gitSignature;
-            fileResult.ownership.push({ stakeholder: stakeholder, ownedLines: ownershipConn.ownedLines, hunks: ownershipConn.hunks });
+            fileResult.ownership.push({ stakeholder: stakeholder, hunks: ownershipConn.hunks });
           }
           //add to the result object of the current file
           commitResult.files.push(fileResult);

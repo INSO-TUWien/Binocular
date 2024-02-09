@@ -142,7 +142,7 @@ export default class Files {
           //for each of the ownership connections, add the signature of the stakeholder and the owned lines to commitResult.ownership
           for (const ownershipConn of relevantOwnershipConnections) {
             const stakeholder = stakeholders.filter((s) => s._id === ownershipConn.to)[0].gitSignature;
-            commitResult.ownership.push({ stakeholder: stakeholder, ownedLines: ownershipConn.ownedLines, hunks: ownershipConn.hunks });
+            commitResult.ownership.push({ stakeholder: stakeholder, hunks: ownershipConn.hunks });
           }
           //add to the result object of the current file
           fileResult.ownership.push(commitResult);

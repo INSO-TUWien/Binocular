@@ -42,7 +42,6 @@ module.exports = new gql.GraphQLObjectType({
                   IN OUTBOUND edge ${commitsToFilesToStakeholders}
                       RETURN {
                           stakeholder: stakeholder.gitSignature,
-                          ownedLines: conn.ownedLines,
                           hunks: conn.hunks,
                       }
             )
