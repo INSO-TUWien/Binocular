@@ -206,6 +206,7 @@
     "@types/debug": "^4.1.9",
     "@types/fs-extra": "^11.0.2",
     "@types/rc": "^1.2.2",
+    "@types/url-join": "^4.0.3",
     "babel-jest": "^29.5.0",
     "babel-loader": "^8.2.3",
     "case-sensitive-paths-webpack-plugin": "2.4.0",
