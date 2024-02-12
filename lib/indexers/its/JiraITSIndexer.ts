@@ -20,6 +20,8 @@ import {
   PullRequestDetail,
   PullRequestsSummary,
   JiraVersion,
+  JiraWorklog,
+  JiraComment,
 } from '../../types/jiraRestApiTypes';
 import { Mentions } from '../../types/issueTypes';
 
@@ -100,7 +102,7 @@ class JiraITSIndexer {
                             createdAt: issue.fields.createdAt,
                             updatedAt: mergeRequest.lastUpdate,
                             labels: issue.fields.labels, // this are labels of issue
-                            milestone: issue.fields.fixVersions.map((version: any) => this.createVersionObject(version)),
+                            milestone: issue.fields.fixVersions.map((version: JiraVersion) => this.createVersionObject(version)),
                             // this are versions of issue
                             author: issue.fields.creator.displayName, // mergeRequest.author.name but it always displays name: User
                             assignee: issue.fields?.assignee?.displayName ? issue.fields?.assignee?.displayName : null,
@@ -167,7 +169,7 @@ class JiraITSIndexer {
                               labels: issue.fields.labels,
                               links: issue.fields.links,
                               //to check if this is the correct-used field
-                              milestone: issue.fields.fixVersions.map((version: any) => this.createVersionObject(version)),
+                              milestone: issue.fields.fixVersions.map((version: JiraVersion) => this.createVersionObject(version)),
                               author: this.getUpdatedUserObject(issue.fields.reporter), // display name or email address?
                               assignee: assignee,
                               assignees: assignee ? [assignee] : [], // only 1 assignee per issue
@@ -210,12 +212,13 @@ class JiraITSIndexer {
               return Promise.all([mergeRequestPromise, issuePromise]);
             });
         }),
-      this.jira.getProjectVersions(this.jiraProject).each((projectVersion: any) => {
+      this.jira.getProjectVersions(this.jiraProject).each((projectVersion: JiraVersion) => {
         projectVersion.id = projectVersion.id.toString();
         return (Milestone as any)
           .findOneById(projectVersion.id)
           .then((persistedVersion: any) => {
             const versionToPersist = this.createVersionObject(projectVersion);
+
             if (!persistedVersion || !_.isEqual(persistedVersion.data, versionToPersist)) {
               if (!persistedVersion) {
                 //log('Persisting new version');
@@ -333,19 +336,19 @@ class JiraITSIndexer {
     }
   }
 
-  private processNotes(issue: any) {
+  private processNotes(issue: JiraIssueResponse) {
     //log('processNotes()');
-    let worklogArray = issue.fields.worklog;
+    const worklogArray = issue.fields.worklog;
     if (worklogArray.total <= worklogArray.maxResults) {
       return Promise.resolve(worklogArray.worklogs);
     } else {
-      worklogArray = [];
+      const arrayToReturn: JiraWorklog[] = [];
       this.jira
         .getWorklog(issue.key)
-        .each((worklog: any) => {
-          worklogArray.push(worklog);
+        .each((worklog: JiraWorklog) => {
+          arrayToReturn.push(worklog);
         })
-        .then(() => log(worklogArray));
+        .then(() => arrayToReturn);
     }
   }
 
@@ -355,18 +358,18 @@ class JiraITSIndexer {
     const mentioned: string[] = [];
 
     const issue_fields = issue.fields;
-    const comments = issue_fields.comment.comments;
+    const comments: JiraComment[] = issue_fields.comment.comments;
     if (issue_fields.comment.total <= issue_fields.comment.maxResults) {
-      comments.forEach((comment) => {
+      comments.forEach((comment: JiraComment) => {
         this.extractMentioned(comment, mentioned);
       });
       return Promise.resolve({ comments: comments, mentioned: mentioned });
     } else {
-      const comments: Comment[] = [];
+      const comments: JiraComment[] = [];
       return this.jira
         .getComments(issueKey)
         .each(
-          function (comment: any) {
+          function (comment: JiraComment) {
             comments.push(comment);
             this.extractMentioned(comment, mentioned);
           }.bind(this)
@@ -377,13 +380,16 @@ class JiraITSIndexer {
     }
   }
 
-  private extractMentioned(comment: any, mentioned: string[]) {
+  private extractMentioned(comment: JiraComment, mentioned: string[]) {
     //log('extractMentioned()');
     if (typeof comment.body === 'string') {
-      Array.prototype.push.apply(
-        mentioned,
-        comment.body.match(this.MENTIONED_REGEX).map((elem: string) => elem.substring(2, elem.length - 1))
-      );
+      const ret = comment.body.match(this.MENTIONED_REGEX);
+      if (ret != null) {
+        Array.prototype.push.apply(
+          mentioned,
+          ret.map((elem: string) => elem.substring(2, elem.length - 1))
+        );
+      }
     } else {
       comment.body.content.forEach((commentContent: any) => {
         this.extractFromContentArray(commentContent, mentioned);
@@ -411,17 +417,24 @@ class JiraITSIndexer {
     });
   }
 
-  private createNotesObject(notes: any[], data: { comments: Comment[]; mentioned: string[] }, changelog: any[]) {
+  private createNotesObject(
+    notes: JiraWorklog[] | undefined,
+    data: { comments: JiraComment[]; mentioned: string[] },
+    changelog: JiraChangelog[]
+  ) {
     const SECOND_POST_FIX = '2'; // TODO: change to "2" since this is used to identify as seconds
 
     const notesObjectsToReturn: any[] = [];
-    const notesMentioned: any[] = [];
-    notes.forEach((note: any) => {
-      if (note.comment.content) {
-        this.extractFromContentArray(note.comment, notesMentioned);
-      }
-    });
-    changelog.forEach((worklogEntry: any) => {
+    const notesMentioned: string[] = [];
+    if (notes) {
+      notes.forEach((note: JiraWorklog) => {
+        if (note.comment.content) {
+          this.extractFromContentArray(note.comment, notesMentioned);
+        }
+      });
+    }
+
+    changelog.forEach((worklogEntry) => {
       const authorObject: JiraFullAuthor = worklogEntry.author;
       const user: string = worklogEntry.author.displayName;
       let isWorklogIdDeleted: null | boolean = null;
@@ -459,7 +472,10 @@ class JiraITSIndexer {
 
         if (body !== '' && workLogId) {
           let objectToAdd: any;
-          const notesWithComment = notes.filter((note: any) => note.id === workLogId);
+          let notesWithComment: string | any[] = [];
+          if (notes) {
+            notesWithComment = notes.filter((note) => parseInt(note.id, 10) === workLogId);
+          }
           if (notesWithComment.length > 1) {
             log('should not be case');
           } else if (notesWithComment.length === 1) {
@@ -492,7 +508,7 @@ class JiraITSIndexer {
     }
 
     userObject.name = userObject.displayName;
-    userObject.state = userObject.active === true ? 'active' : 'inactive';
+    userObject.state = userObject.active ? 'active' : 'inactive';
     userObject.avatar_url = Object.values(userObject.avatarUrls)[0];
     userObject.web_url = userObject.self.split('/rest/api')[0] + '/jira/people/icht ' + userObject.accountId;
     userObject.login = userObject.emailAddress;

@@ -3,6 +3,7 @@
 import debug from 'debug';
 import Paginator from '../../paginator';
 import urlJoin from 'url-join';
+import { CommitSummary, PullRequestsSummary } from '../../types/jiraRestApiTypes';
 
 const log = debug('jira');
 
@@ -37,7 +38,7 @@ class Jira {
     return this.paginatedRequest(`project/${projectKey}/version?`);
   }
 
-  getDevelopmentDetails(issueId: string, objectType: any, isPullRequest: boolean) {
+  getDevelopmentDetails(issueId: string, objectType: PullRequestsSummary | CommitSummary, isPullRequest: boolean) {
     log('getMergeRequests(%o)', issueId);
 
     if ((!isPullRequest && !objectType) || (!isPullRequest && objectType && objectType.overall.count === 0)) {
@@ -118,7 +119,7 @@ class Jira {
         // for issues
         return resp.body.issues || [];
       },
-      (resp: any) => {
+      (resp: { headers: any; body: { total: string; [key: string]: any } }) => {
         return (this.count = parseInt(resp.body.total, 10));
       },
       { its: 'jira' }

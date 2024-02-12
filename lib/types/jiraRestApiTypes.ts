@@ -112,22 +112,24 @@ export interface JiraFullAuthor {
   id: string | null;
 }
 
-export interface Comment {
+export interface JiraComment {
   self: string;
   id: string;
   author: JiraFullAuthor;
-  body: {
-    version: number;
-    type: string;
-    content: {
-      type: string;
-      content: {
+  body:
+    | {
+        version: number;
         type: string;
+        content: {
+          type: string;
+          content: {
+            type: string;
+            [key: string]: any;
+          }[];
+        }[];
         [key: string]: any;
-      }[];
-    }[];
-    [key: string]: any;
-  };
+      }
+    | string;
   updateAuthor: JiraFullAuthor;
   created: string;
   updated: string;
@@ -170,10 +172,15 @@ export interface JiraIssueResponse {
       maxResults: number;
       total: number;
       startAt: number;
-      comments: Comment[];
+      comments: JiraComment[];
     };
     issuelinks: object[];
-    worklog: JiraWorklog[];
+    worklog: {
+      startAt: number;
+      maxResults: number;
+      total: number;
+      worklogs: JiraWorklog[];
+    };
     updated: string;
     duedate: string | null;
     summary: string;
@@ -200,17 +207,7 @@ export interface JiraWorklog {
     displayName: string;
     self: string;
   };
-  comment: {
-    type: string;
-    version: number;
-    content: {
-      type: string;
-      content: {
-        type: string;
-        text: string;
-      }[];
-    }[];
-  };
+  comment: JiraComment;
   created: string;
   id: string;
   issueId: string;
