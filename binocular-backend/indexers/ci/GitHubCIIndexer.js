@@ -5,7 +5,6 @@ import * as UrlProvider from '../../url-providers/index';
 import ConfigurationError from '../../errors/ConfigurationError';
 import CIIndexer from './CIIndexer';
 import moment from 'moment';
-import { Octokit } from '@octokit/rest';
 import GitHub from '../../core/provider/github';
 import debug from 'debug';
 
@@ -22,7 +21,6 @@ class GitHubCIIndexer {
 
   async configure(config) {
     await this.setupUrlProvider(this.repo, this.reporter);
-    this.setupOctokit(config);
 
     //prerequisites to permit the use of travis
     if (!this.urlProvider || !config) {
@@ -106,12 +104,6 @@ class GitHubCIIndexer {
 
   async setupUrlProvider(repo, reporter) {
     this.urlProvider = await UrlProvider.getCiUrlProvider(repo, reporter);
-  }
-  setupOctokit(config) {
-    this.github = new Octokit({
-      baseUrl: 'https://api.github.com',
-      auth: config?.auth?.token,
-    });
   }
   setupGithub(config) {
     this.controller = new GitHub({

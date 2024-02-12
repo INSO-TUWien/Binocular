@@ -1,7 +1,6 @@
 'use strict';
 
 import debug from 'debug';
-import Paginator from '../../utils/paginator';
 import { Octokit } from '@octokit/rest';
 import { Octokit as OctokitCore } from '@octokit/core';
 import { paginateGraphql } from '@octokit/plugin-paginate-graphql';
@@ -59,16 +58,10 @@ class GitHub {
 
   getPipelines(projectId) {
     log('getPipelines(%o)', projectId);
-    return this.paginatedRequest((page) => {
-      return this.github.rest.actions.listWorkflowRunsForRepo({
-        owner: projectId.split('/')[0],
-        repo: projectId.split('/')[1],
-        page: page,
-      });
-    })
-      .each((resp) => resp)
-      .then((resp) => Promise.all(resp))
-      .then((resp) => resp.map((elem) => elem[0]));
+    return this.github.paginate(this.github.rest.actions.listWorkflowRunsForRepo, {
+      owner: projectId.split('/')[0],
+      repo: projectId.split('/')[1],
+    });
   }
 
   getPipelineJobs(projectId, pipelineId) {
@@ -90,27 +83,6 @@ class GitHub {
 
   stop() {
     this.stopping = true;
-  }
-
-  paginatedRequest(rq) {
-    return new Paginator(
-      (page) => {
-        if (this.stopping) {
-          return Promise.resolve({
-            data: {
-              workflow_runs: [],
-            },
-          });
-        }
-        return rq(page);
-      },
-      (resp) => {
-        return resp.data.workflow_runs || [];
-      },
-      (resp) => {
-        return (this.count = parseInt(resp.data.total_count, 10));
-      },
-    );
   }
 }
 
