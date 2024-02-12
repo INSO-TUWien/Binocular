@@ -137,15 +137,16 @@ class JiraITSIndexer {
                         const assignee = this.getUpdatedUserObject(issue.fields.assignee);
                         const issueToSave = {
                           id: issue.id,
-                          iid: issue.key,
+                          iid: issue.key.split('-')[1], // TODO: Check if leads to problems with multiple projects => not unique?
                           title: issue.fields.summary,
                           description: description,
                           state: issue.fields.status.statusCategory.key,
                           url: issue.self,
-                          closedAt: issue.fields.resolutiondate, // TODO: check to do toIsostring
+                          closedAt: issue.fields.resolutiondate ? new Date(issue.fields.resolutiondate).toISOString() : null, // TODO: check to do toIsostring
                           createdAt: new Date(issue.fields.created).toISOString(),
                           updatedAt: new Date(issue.fields.updated).toISOString(),
                           labels: issue.fields.labels,
+                          links: issue.fields.links,
                           //to check if this is the correct-used field
                           milestone: issue.fields.fixVersions.map((version: any) => this.createVersionObject(version)),
                           author: this.getUpdatedUserObject(issue.fields.reporter), // display name or email address?
