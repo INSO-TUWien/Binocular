@@ -7,14 +7,14 @@ import urlJoin from 'url-join';
 const log = debug('jira');
 
 class Jira {
-  private baseUrl: any;
-  private privateToken: any;
-  private requestTimeout: any;
+  private baseUrl: string;
+  private privateToken: string;
+  private requestTimeout: number;
   private count: number;
   private stopping = false;
-  private usermail: any;
+  private usermail: string | undefined;
 
-  constructor(options: { baseUrl: any; email?: any; privateToken: any; requestTimeout: any }) {
+  constructor(options: { baseUrl: string; email?: string | undefined; privateToken: string; requestTimeout: number }) {
     this.baseUrl = urlJoin(options.baseUrl, '/rest/api/3/');
     this.privateToken = options.privateToken;
     this.usermail = options.email;
