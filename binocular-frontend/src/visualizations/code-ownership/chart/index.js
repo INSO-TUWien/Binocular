@@ -96,6 +96,8 @@ export default () => {
         }
       }
 
+      let sum = 0;
+
       //now filecache stores the current ownership for each file that exists at the time of the current commit
       for (const [, fileOwnershipData] of Object.entries(fileCache)) {
         for (const ownershipOfStakeholder of fileOwnershipData) {
@@ -104,9 +106,12 @@ export default () => {
           } else {
             commitResult.ownership[ownershipOfStakeholder.stakeholder] = ownershipOfStakeholder.ownedLines;
           }
+          sum += ownershipOfStakeholder.ownedLines;
         }
       }
-      resultOwnershipData.push(commitResult);
+      if (sum !== 0) {
+        resultOwnershipData.push(commitResult);
+      }
     }
     setOwnershipData(resultOwnershipData);
   }, [relevantOwnershipData, previousFilenames, activeFiles, excludedCommits, excludeCommits]);
