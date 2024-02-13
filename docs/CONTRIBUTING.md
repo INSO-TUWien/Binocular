@@ -52,7 +52,7 @@ binocular-backend/indexers
 │   ├── ...                 # (Additional CI-indexers could be added here)
 │   └── index.tsx
 ├── its                     # ITS-specific indexers
-│   ├── GitHubITSIndexer.js    # Indexer for GitHub
+│   ├── GitHubITSIndexer.ts    # Indexer for GitHub
 │   ├── GitLabITSIndexer.js # Indexer for GitLab
 │   ├── ...                 # (Additional ITS-indexers could be added here)
 │   └── index.tsx

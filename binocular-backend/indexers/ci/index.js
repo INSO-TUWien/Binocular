@@ -6,7 +6,7 @@ import TravisCIIndexer from './TravisCIIndexer.js';
 
 import GitLabCIIndexer from './GitLabCIIndexer.js';
 
-import GitHubCIIndexer from './GitHubCIIndexer.js';
+import GitHubCIIndexer from './GitHubCIIndexer.ts';
 
 let provider;
 

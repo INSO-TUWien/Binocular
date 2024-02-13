@@ -7,13 +7,21 @@ import CIIndexer from './CIIndexer';
 import moment from 'moment';
 import GitHub from '../../core/provider/github';
 import debug from 'debug';
+import ProgressReporter from '../../utils/progress-reporter.ts';
 
 const log = debug('importer:github-ci-indexer');
 
 const GITHUB_ORIGIN_REGEX = /(?:git@github.com:|https:\/\/github.com\/)([^/]+)\/(.*?)(?=\.git|$)/;
 
 class GitHubCIIndexer {
-  constructor(repository, progressReporter) {
+  private repo: any;
+  private reporter: typeof ProgressReporter;
+  private stopping: boolean;
+  private urlProvider: boolean | undefined;
+  private owner: string = '';
+  private controller: GitHub | undefined;
+  private indexer: CIIndexer | undefined;
+  constructor(repository, progressReporter: typeof ProgressReporter) {
     this.repo = repository;
     this.reporter = progressReporter;
     this.stopping = false;
@@ -47,7 +55,9 @@ class GitHubCIIndexer {
 
     log(`fetching branch data from ${currentBranch}[${currentBranch}]`);
     this.setupGithub(config);
-
+    if (this.controller === undefined) {
+      throw Error('Controller not defined!');
+    }
     await this.controller.loadAssignableUsers(this.owner, this.repo);
 
     this.indexer = new CIIndexer(this.reporter, this.controller, repoName, async (pipeline, jobs) => {
@@ -65,6 +75,9 @@ class GitHubCIIndexer {
         })}`,
       );
       const username = (pipeline.actor || {}).login;
+      if (this.controller === undefined) {
+        throw Error('Controller not defined!');
+      }
       const userFullName = username !== undefined ? this.controller.getUser(username).name : '';
       let status = 'cancelled';
       let lastStartedAt = pipeline.run_started_at;
@@ -74,6 +87,9 @@ class GitHubCIIndexer {
         lastStartedAt = jobs[jobs.length - 1].created_at;
         lastFinishedAt = jobs[jobs.length - 1].completed_at;
       }
+      // TODO: Currently necessary because the implementation of the Models isn't really compatible with typescript.
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-expect-error
       return Build.persist({
         id: pipeline.id,
         sha: pipeline.head_sha,
@@ -115,8 +131,10 @@ class GitHubCIIndexer {
 
   index() {
     try {
-      return this.indexer.index();
-    } catch (e) {
+      if (this.indexer !== undefined) {
+        return this.indexer.index();
+      }
+    } catch (e: any) {
       console.log('GitHubCI Indexer Failed! - ' + e.message);
     }
   }

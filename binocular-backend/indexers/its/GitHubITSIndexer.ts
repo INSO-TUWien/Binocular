@@ -5,19 +5,21 @@ import debug from 'debug';
 import ConfigurationError from '../../errors/ConfigurationError.js';
 import Issue from '../../models/Issue';
 import MergeRequest from '../../models/MergeRequest.js';
-import GitHub from '../../core/provider/github.js';
+import GitHub from '../../core/provider/github.ts';
+import ProgressReporter from '../../utils/progress-reporter.ts';
+import { ItsIssue, ItsIssueEvent, ItsIssueMention } from '../../types/itsTypes.ts';
 
 const log = debug('idx:its:github');
 
 const GITHUB_ORIGIN_REGEX = /(?:git@github.com:|https:\/\/github.com\/)([^\/]+)\/(.*?)(?=\.git|$)/;
 
-function GitHubITSIndexer(repo, reporter) {
+function GitHubITSIndexer(repo: any, reporter: typeof ProgressReporter) {
   this.repo = repo;
   this.stopping = false;
   this.reporter = reporter;
 }
 
-GitHubITSIndexer.prototype.configure = async function (config) {
+GitHubITSIndexer.prototype.configure = async function (config: any) {
   if (!config) {
     throw ConfigurationError('configuration object has to be set!');
   }
@@ -31,7 +33,8 @@ GitHubITSIndexer.prototype.configure = async function (config) {
 };
 
 GitHubITSIndexer.prototype.index = function () {
-  let owner, repo;
+  let owner: string;
+  let repo: string;
   let omitCount = 0;
   let persistCount = 0;
 
@@ -57,7 +60,7 @@ GitHubITSIndexer.prototype.index = function () {
           state: 'all',
           per_page: 100,
         })
-        .then((issues) => {
+        .then((issues: ItsIssue[]) => {
           this.reporter.setIssueCount(issues.length);
           return issues.forEach((issue) => {
             log('Processing Issue #' + issue.number);
@@ -71,10 +74,16 @@ GitHubITSIndexer.prototype.index = function () {
               issue.assignees[i].name = this.controller.getUser(issue.assignees[i].login).name;
             }
             if (issue.pull_request === undefined) {
+              // TODO: Currently necessary because the implementation of the Models isn't really compatible with typescript.
+              // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+              // @ts-expect-error
               Issue.findOneById(issue.id)
                 .then((existingIssue) => {
                   if (!existingIssue || new Date(existingIssue.updatedAt).getTime() < new Date(issue.updated_at).getTime()) {
                     log('Processing issue #' + issue.iid);
+                    // TODO: Currently necessary because the implementation of the Models isn't really compatible with typescript.
+                    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                    // @ts-expect-error
                     return Issue.persist({
                       id: issue.id,
                       iid: issue.number,
@@ -91,13 +100,11 @@ GitHubITSIndexer.prototype.index = function () {
                       assignee: issue.assignee,
                       assignees: issue.assignees,
                       webUrl: issue.html_url,
-                    }).then((results) => {
-                      const issue = results[0];
-                      const wasCreated = results[1];
+                    }).then(([issue, wasCreated]) => {
                       if (wasCreated) {
                         persistCount++;
 
-                        const mentions = [];
+                        const mentions: ItsIssueMention[] = [];
 
                         return this.controller.github
                           .paginate(this.controller.github.issues.listEvents, {
@@ -106,7 +113,7 @@ GitHubITSIndexer.prototype.index = function () {
                             issue_number: issue.iid,
                             per_page: 100,
                           })
-                          .then((events) => {
+                          .then((events: ItsIssueEvent[]) => {
                             log('Processing', events.length, 'events for Issue #' + issue.iid);
                             for (const event of events) {
                               if (event.event === 'referenced' || event.event === 'closed') {
@@ -133,10 +140,16 @@ GitHubITSIndexer.prototype.index = function () {
                 })
                 .then(() => this.reporter.finishIssue());
             } else {
+              // TODO: Currently necessary because the implementation of the Models isn't really compatible with typescript.
+              // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+              // @ts-expect-error
               return MergeRequest.findOneById(issue.id)
                 .then((existingMergeRequest) => {
                   if (!existingMergeRequest || new Date(existingMergeRequest.updatedAt).getTime() < new Date(issue.updated_at).getTime()) {
                     log('Processing existingMergeRequest #' + issue.iid);
+                    // TODO: Currently necessary because the implementation of the Models isn't really compatible with typescript.
+                    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                    // @ts-expect-error
                     return MergeRequest.persist({
                       id: issue.id,
                       iid: issue.number,
@@ -153,13 +166,11 @@ GitHubITSIndexer.prototype.index = function () {
                       assignee: issue.assignee,
                       assignees: issue.assignees,
                       webUrl: issue.html_url,
-                    }).then((results) => {
-                      const mergeRequest = results[0];
-                      const wasCreated = results[1];
+                    }).then(([mergeRequest, wasCreated]) => {
                       if (wasCreated) {
                         persistCount++;
 
-                        const mentions = [];
+                        const mentions: ItsIssueMention[] = [];
 
                         return this.controller.github
                           .paginate(this.controller.github.issues.listEvents, {
@@ -168,7 +179,7 @@ GitHubITSIndexer.prototype.index = function () {
                             issue_number: mergeRequest.iid,
                             per_page: 100,
                           })
-                          .then((events) => {
+                          .then((events: ItsIssueEvent[]) => {
                             log('Processing', events.length, 'events for MergeRequest #' + mergeRequest.iid);
                             for (const event of events) {
                               if (event.event === 'referenced' || event.event === 'closed') {
