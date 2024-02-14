@@ -26,12 +26,12 @@ export interface JiraVersion {
   name: string;
   archived: boolean;
   released: boolean;
-  startDate: string;
+  startDate: string | undefined;
   releaseDate: string;
   userStartDate: string;
   overdue: boolean | undefined;
   userReleaseDate: string;
-  projectId: number;
+  projectId: string;
 }
 
 export interface PullRequestDetail {
@@ -47,10 +47,10 @@ export interface PullRequestDetail {
     branch: string;
     url: string;
   };
-  reviewers: any[]; // You can replace this with a more specific type if needed
+  reviewers: any[];
   status: string;
   url: string;
-  lastUpdate: string; // Consider using a Date type if you parse this timestamp
+  lastUpdate: string;
   repositoryId: string;
   repositoryName: string;
   repositoryUrl: string;
@@ -133,6 +133,7 @@ export interface JiraComment {
   updateAuthor: JiraFullAuthor;
   created: string;
   updated: string;
+
   [key: string]: any;
 }
 
@@ -175,12 +176,60 @@ export interface JiraIssueResponse {
       comments: JiraComment[];
     };
     issuelinks: object[];
+    priority: {
+      self: string;
+      iconUrl: string;
+      name: string;
+      id: string;
+    };
+
+    issuetype: {
+      self: string;
+      id: string;
+      description: string;
+      name: string;
+      subtask: boolean;
+      [key: string]: any;
+    };
+
+    issuerestriction: {
+      issuerestrictions: object;
+      shouldDisplay: boolean;
+    };
+
     worklog: {
       startAt: number;
       maxResults: number;
       total: number;
       worklogs: JiraWorklog[];
     };
+
+    votes: {
+      self: string;
+      votes: number;
+      hasVoted: boolean;
+    };
+
+    watches: {
+      self: string;
+      watchCount: number;
+      isWatching: boolean;
+    };
+
+    status: {
+      self: string;
+      name: string;
+      id: string;
+      statusCategory: {
+        self: string;
+        id: number;
+        key: string;
+        name: string;
+        [key: string]: any;
+      };
+      [key: string]: any;
+    };
+
     updated: string;
     duedate: string | null;
     summary: string;

@@ -1,9 +1,10 @@
 export interface Version {
-  id: number;
-  iid: number;
+  id: string;
+  iid: string;
   description: string | null;
-  dueDate: Date | null;
-  startDate: Date | null;
+  dueDate: string | null;
+  title: string;
+  startDate: string | null;
   state: string;
   expired: boolean | null;
 }

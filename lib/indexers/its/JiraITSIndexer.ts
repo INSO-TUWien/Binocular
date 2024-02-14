@@ -163,28 +163,32 @@ class JiraITSIndexer {
                               description: description,
                               state: issue.fields.status.statusCategory.key,
                               url: issue.self,
-                              closedAt: issue.fields.resolutiondate ? new Date(issue.fields.resolutiondate).toISOString() : null,
+                              closedAt: issue.fields.resolutiondate !== null ? new Date(issue.fields.resolutiondate).toISOString() : null,
                               createdAt: new Date(issue.fields.created).toISOString(),
                               updatedAt: new Date(issue.fields.updated).toISOString(),
                               labels: issue.fields.labels,
-                              links: issue.fields.links,
+                              links: issue.fields.issuelinks,
                               //to check if this is the correct-used field
                               milestone: issue.fields.fixVersions.map((version: JiraVersion) => this.createVersionObject(version)),
                               author: this.getUpdatedUserObject(issue.fields.reporter), // display name or email address?
                               assignee: assignee,
                               assignees: assignee ? [assignee] : [], // only 1 assignee per issue
-                              upvotes: issue.fields?.votes.votes ? issue.fields?.votes.votes : null,
+                              upvotes: issue.fields.votes.votes,
                               // downVotes not available
-                              dueDate: issue.fields?.dueDate ? issue.fields?.dueDate : null,
+                              dueDate: issue.fields.duedate,
                               // confidential: issue.security-level for this normal Jira software is needed, free version does not have that
                               weight: issue.fields?.customfield_10016 ? issue.fields?.customfield_10016 : null,
                               //this field is used for the storypoints, could be problematic,
                               // if having for example this in custom fields
                               webUrl: issue.self.split('/rest/api')[0] + '/browse/' + issue.key,
-                              subscribed: issue.fields.watches?.watchCount ? issue.fields.watches?.watchCount : null,
+                              subscribed: issue.fields.watches.watchCount,
                               mentions: commits,
                               notes:
                                 !notes1.notesObjectsToReturn || notes1.notesObjectsToReturn.length === 0 ? [] : notes1.notesObjectsToReturn,
+                              priority: issue.fields.priority,
+                              restrictions: issue.fields.issuerestriction,
+                              issuetype: issue.fields.issuetype,
+                              fullStatus: issue.fields.status,
                             };
                             if (!persistedIssue) {
                               log('Persisting new issue');
@@ -263,10 +267,10 @@ class JiraITSIndexer {
   }
 
   private createVersionObject(projectVersion: JiraVersion) {
-    let expired = projectVersion.overdue != null ? projectVersion.overdue : null;
+    let expired = projectVersion.overdue !== null ? projectVersion.overdue : null;
     const dueDate = projectVersion.releaseDate ? projectVersion.releaseDate : null;
-    if (expired === null) {
-      expired = dueDate != null ? new Date() > new Date(dueDate) : null;
+    if (expired === null || expired === undefined) {
+      expired = dueDate !== null ? new Date() > new Date(dueDate) : null;
     }
 
     return {
@@ -277,8 +281,7 @@ class JiraITSIndexer {
       dueDate: dueDate,
       startDate: projectVersion.startDate ? projectVersion.startDate : null,
       state: projectVersion.released ? 'active' : 'inactive',
-      expired: expired, // could maybe not be true,
-      // but api does not return overdue if it is released
+      expired: expired, // TODO: check if this is correct if overdue is not set in response
     };
   }
 
@@ -384,7 +387,7 @@ class JiraITSIndexer {
     //log('extractMentioned()');
     if (typeof comment.body === 'string') {
       const ret = comment.body.match(this.MENTIONED_REGEX);
-      if (ret != null) {
+      if (ret !== null) {
         Array.prototype.push.apply(
           mentioned,
           ret.map((elem: string) => elem.substring(2, elem.length - 1))
@@ -452,8 +455,8 @@ class JiraITSIndexer {
           isTimeSpentSet = true;
         }
         if (item.field === 'WorklogId') {
-          isWorklogIdDeleted = item.from != null && item.to == null;
-          workLogId = item.to != null ? parseInt(item.to) : parseInt(typeof item.from === 'string' ? item.from : '0');
+          isWorklogIdDeleted = item.from !== null && item.to === null;
+          workLogId = item.to !== null ? parseInt(item.to) : parseInt(typeof item.from === 'string' ? item.from : '0');
         }
       });
 
