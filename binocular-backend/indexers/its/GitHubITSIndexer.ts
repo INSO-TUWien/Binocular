@@ -7,7 +7,7 @@ import Issue from '../../models/Issue';
 import MergeRequest from '../../models/MergeRequest.js';
 import GitHub from '../../core/provider/github.ts';
 import ProgressReporter from '../../utils/progress-reporter.ts';
-import { ItsIssue, ItsIssueEvent, ItsIssueMention } from '../../types/itsTypes.ts';
+import { ItsIssue, ItsIssueEvent } from '../../types/itsTypes.ts';
 
 const log = debug('idx:its:github');
 
@@ -100,36 +100,34 @@ GitHubITSIndexer.prototype.index = function () {
                       assignee: issue.assignee,
                       assignees: issue.assignees,
                       webUrl: issue.html_url,
-                    }).then(([issue, wasCreated]) => {
+                      mentions: [],
+                    }).then(([persistedIssue, wasCreated]) => {
                       if (wasCreated) {
                         persistCount++;
-
-                        const mentions: ItsIssueMention[] = [];
 
                         return this.controller.github
                           .paginate(this.controller.github.issues.listEvents, {
                             owner,
                             repo,
-                            issue_number: issue.iid,
+                            issue_number: persistedIssue.data.iid,
                             per_page: 100,
                           })
                           .then((events: ItsIssueEvent[]) => {
-                            log('Processing', events.length, 'events for Issue #' + issue.iid);
-                            for (const event of events) {
+                            log('Processing', events.length, 'events for Issue #' + persistedIssue.data.iid);
+                            return events.forEach((event) => {
                               if (event.event === 'referenced' || event.event === 'closed') {
-                                mentions.push({
+                                persistedIssue.data.mentions.push({
                                   commit: event.commit_id,
                                   createdAt: event.created_at,
                                   closes: event.event === 'closed',
                                 });
                               }
-                            }
+                            });
                           })
-                          .then(() => {
-                            if (mentions.length > 0) {
-                              issue.mentions = mentions;
-                              return issue.save();
-                            }
+                          .then(async () => {
+                            return persistedIssue.save().then(() => {
+                              log('Saved issue #' + persistedIssue.data.iid);
+                            });
                           });
                       }
                     });
@@ -166,36 +164,34 @@ GitHubITSIndexer.prototype.index = function () {
                       assignee: issue.assignee,
                       assignees: issue.assignees,
                       webUrl: issue.html_url,
-                    }).then(([mergeRequest, wasCreated]) => {
+                      mentions: [],
+                    }).then(([persistedMergeRequest, wasCreated]) => {
                       if (wasCreated) {
                         persistCount++;
-
-                        const mentions: ItsIssueMention[] = [];
 
                         return this.controller.github
                           .paginate(this.controller.github.issues.listEvents, {
                             owner,
                             repo,
-                            issue_number: mergeRequest.iid,
+                            issue_number: persistedMergeRequest.data.iid,
                             per_page: 100,
                           })
                           .then((events: ItsIssueEvent[]) => {
-                            log('Processing', events.length, 'events for MergeRequest #' + mergeRequest.iid);
-                            for (const event of events) {
+                            log('Processing', events.length, 'events for MergeRequest #' + persistedMergeRequest.data.iid);
+                            return events.forEach((event) => {
                               if (event.event === 'referenced' || event.event === 'closed') {
-                                mentions.push({
+                                persistedMergeRequest.data.mentions.push({
                                   commit: event.commit_id,
                                   createdAt: event.created_at,
                                   closes: event.event === 'closed',
                                 });
                               }
-                            }
+                            });
                           })
                           .then(() => {
-                            if (mentions.length > 0) {
-                              mergeRequest.mentions = mentions;
-                              return mergeRequest.save();
-                            }
+                            return persistedMergeRequest.save().then(() => {
+                              log('Saved MergeRequest #' + persistedMergeRequest.data.iid);
+                            });
                           });
                       }
                     });
