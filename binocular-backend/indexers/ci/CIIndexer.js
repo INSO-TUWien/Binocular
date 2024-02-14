@@ -50,7 +50,7 @@ class CIIndexer {
                   /*Only necessary fot GitHub.
                   GitLab already requests all jobs as part of the pipelines gwl query
                   All of this can be removed once GitHub supports GraphQl for Workflows.*/
-                  return Promise.resolve(this.controller.getPipelineJobs(projectId, pipeline.id))
+                  /*return Promise.resolve(this.controller.getPipelineJobs(projectId, pipeline.id))
                     .then((jobs) => {
                       if (jobs === 'gitlab') {
                         return this.buildMapper(
@@ -63,7 +63,8 @@ class CIIndexer {
                     })
                     .then(() => {
                       persistCount++;
-                    });
+                    });*/
+                  return this.buildMapper(pipeline, []);
                 } else {
                   log(`Skipping build #${pipeline.id} [${persistCount + omitCount}]`);
                   omitCount++;
