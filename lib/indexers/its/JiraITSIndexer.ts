@@ -158,7 +158,7 @@ class JiraITSIndexer {
                             const assignee = this.getUpdatedUserObject(issue.fields.assignee);
                             const issueToSave = {
                               id: issue.id,
-                              iid: issue.key.split('-')[1], // TODO: Check if leads to problems with multiple projects => not unique?
+                              iid: parseInt(issue.key.split('-')[1], 10), // TODO: Check if leads to problems with multiple projects => not unique?
                               title: issue.fields.summary,
                               description: description,
                               state: issue.fields.status.statusCategory.key,
@@ -172,19 +172,21 @@ class JiraITSIndexer {
                               milestone: issue.fields.fixVersions.map((version: JiraVersion) => this.createVersionObject(version)),
                               author: this.getUpdatedUserObject(issue.fields.reporter), // display name or email address?
                               assignee: assignee,
-                              assignees: assignee ? [assignee] : [], // only 1 assignee per issue
+                              assignees: assignee ? [assignee] : [],
                               upvotes: issue.fields.votes.votes,
                               // downVotes not available
                               dueDate: issue.fields.duedate,
                               // confidential: issue.security-level for this normal Jira software is needed, free version does not have that
                               weight: issue.fields?.customfield_10016 ? issue.fields?.customfield_10016 : null,
-                              //this field is used for the storypoints, could be problematic,
-                              // if having for example this in custom fields
                               webUrl: issue.self.split('/rest/api')[0] + '/browse/' + issue.key,
                               subscribed: issue.fields.watches.watchCount,
                               mentions: commits,
                               notes:
                                 !notes1.notesObjectsToReturn || notes1.notesObjectsToReturn.length === 0 ? [] : notes1.notesObjectsToReturn,
+
+                              // BELOW FIELDS NOT IN MODEL
+
+                              comments: data.comments,
                               priority: issue.fields.priority,
                               restrictions: issue.fields.issuerestriction,
                               issuetype: issue.fields.issuetype,
@@ -275,7 +277,7 @@ class JiraITSIndexer {
 
     return {
       id: projectVersion.id,
-      iid: projectVersion.projectId, // no iid for version in Jira
+      iid: parseInt(projectVersion.projectId, 10), // no iid for version in Jira
       title: projectVersion.name,
       description: projectVersion.description ? projectVersion.description : null,
       dueDate: dueDate,
