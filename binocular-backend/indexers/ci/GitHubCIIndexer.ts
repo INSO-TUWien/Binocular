@@ -61,6 +61,7 @@ class GitHubCIIndexer {
     await this.controller.loadAssignableUsers(this.owner, this.repo);
 
     this.indexer = new CIIndexer(this.reporter, this.controller, repoName, async (pipeline, jobs) => {
+      console.log(pipeline.conclusion);
       jobs = jobs || [];
       log(
         `create build ${JSON.stringify({
