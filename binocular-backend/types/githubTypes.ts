@@ -53,19 +53,14 @@ export interface GithubActor {
 
 export interface GithubMilestone {
   id: number;
-  node_id: string;
   url: string;
-  html_url: string;
-  labels_url: string;
   number: number;
   state: string;
   title: string;
   description: string;
-  creator: GithubUser;
-  open_issues: number;
-  closed_issues: number;
-  created_at: string;
-  updated_at: string;
-  closed_at: string;
-  due_on: string;
+  creator: GithubActor;
+  createdAt: string;
+  updatedAt: string;
+  closedAt: string;
+  dueOn: string;
 }
