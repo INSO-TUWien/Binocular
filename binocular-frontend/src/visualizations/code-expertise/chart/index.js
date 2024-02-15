@@ -170,7 +170,7 @@ export default () => {
     }
 
     const latestBranchCommit = branchCommits.sort((a, b) => new Date(b.date) - new Date(a.date))[0];
-    const blameRes = getBlameModules(latestBranchCommit, activeFiles, branchCommits, excludedCommits);
+    const blameRes = getBlameModules(latestBranchCommit, activeFiles, branchCommits, excludeCommits ? excludedCommits : []);
     for (const [name, val] of Object.entries(blameRes)) {
       if (result['devData'][name]) {
         result['devData'][name]['linesOwned'] = val;
