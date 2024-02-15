@@ -2,19 +2,20 @@
 
 import { connect } from 'react-redux';
 
-import { setActiveFile, setActivePath, setActiveBranch } from '../sagas';
+import { setActiveFile, setActivePath, setActiveBranch, setDisplayMetric, setDisplayByAuthors } from '../sagas';
 import styles from '../styles.scss';
 import FileBrowser from '../components/fileBrowser/fileBrowser';
+import TabCombo from '../../../../components/TabCombo';
+import CheckboxLegend from '../components/checkboxLegend';
 
 const mapStateToProps = (state /*, ownProps*/) => {
   const State = state.visualizations.fileEvolutionDendrogram.state;
 
   return {
-    fileURL: State.data.data.fileURL,
-    path: State.data.data.path,
     branch: State.data.data.branch,
     files: State.data.data.files,
-    branches: State.data.data.branches,
+    palette: State.data.data.palette,
+    displayMetric: State.config.displayMetric,
   };
 };
 
@@ -23,16 +24,44 @@ const mapDispatchToProps = (dispatch /*, ownProps*/) => {
     onSetFile: (url) => dispatch(setActiveFile(url)),
     onSetPath: (path) => dispatch(setActivePath(path)),
     onSetBranch: (branch) => dispatch(setActiveBranch(branch)),
+    onClickMetric: (metric) => dispatch(setDisplayMetric(metric)),
+    onClickCheckboxLegend: (isSet) => dispatch(setDisplayByAuthors(isSet)),
   };
 };
 
 const FileEvolutionDendrogramConfigComponent = (props) => {
+  let otherCommitters;
+  if (props.palette && 'others' in props.palette) {
+    otherCommitters = props.committers.length - (Object.keys(props.palette).length - 1);
+  }
   const options = [];
   for (const i in props.branches) {
     options.push(<option key={i}>{props.branches[i].branch}</option>);
   }
   return (
+
     <div className={styles.config}>
+      <div className={styles.field}>
+        <label className="label">Changes</label>
+        <div style={{ marginBottom: '0.5em' }}>
+          <TabCombo
+            value={props.displayMetric}
+            options={[
+              { label: '# lines changed', icon: 'file-alt', value: 'linesChanged' },
+              { label: '# commits', icon: 'cloud-upload-alt', value: 'commits' },
+            ]}
+            onChange={(value) => props.onClickMetric(value)}
+          />
+        </div>
+        <CheckboxLegend
+          palette={props.palette}
+          onClick={props.onClickCheckboxLegend.bind(this)}
+          title="Authors:"
+          otherCommitters={otherCommitters}
+          displayMetric={props.displayMetric}
+        />
+      </div>
+
       <div className={styles.label}> Branch:</div>
       <div id={'branchSelector'} className={'select ' + styles.branchSelect}>
         <select

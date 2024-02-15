@@ -5,14 +5,6 @@ import _ from 'lodash';
 
 export default handleActions(
   {
-    SET_ACTIVE_FILE: (state, action) =>
-      _.assign({}, state, {
-        fileURL: action.payload ? action.payload : null,
-      }),
-    SET_ACTIVE_PATH: (state, action) =>
-      _.assign({}, state, {
-        path: action.payload ? action.payload : null,
-      }),
     SET_ACTIVE_BRANCH: (state, action) =>
       _.assign({}, state, {
         branch: action.payload ? action.payload : null,
@@ -21,22 +13,21 @@ export default handleActions(
       _.assign({}, state, {
         files: action.payload ? action.payload : null,
       }),
-    SET_ACTIVE_BRANCHES: (state, action) =>
+    SET_DISPLAY_METRIC: (state, action) =>
       _.assign({}, state, {
-        branches: action.payload ? action.payload : null,
+        displayMetric: action.payload ? action.payload : null,
+      }),
+    SET_DISPLAY_BY_AUTHORS: (state, action) =>
+      _.assign({}, state, {
+        displayByAuthors: action.payload ? action.payload : null,
       }),
 
 
-      // for zoom
-      //COR_SET_VIEWPORT: (state, action) => _.assign({}, state, { viewport: action.payload }),
   },
   {
-    fileURL: '',
     branch: 'main',
-    path: '',
     files: [],
-    branches: [],
-    // for zoom
-    //viewport: [0, null],
+    displayByAuthors: false,
+    displayMetric: 'linesChanged',
   }
 );

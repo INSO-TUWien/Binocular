@@ -2,7 +2,6 @@
 
 import React from 'react';
 import * as d3 from 'd3';
-import cx from 'classnames';
 
 import '../css/codeMirror.css';
 import styles from '../styles.scss';
@@ -14,37 +13,22 @@ export default class FileEvolutionDendrogram extends React.PureComponent {
   constructor(props) {
     super(props);
 
-    this.elems = {};
     this.state = {
       files: props.files,
+      palette: props.palette,
       convertedFiles: this.convertData(props.files),
-      //isPanning: false,
-      dimensions: zoomUtils.initialDimensions(),
       transform: d3.zoomIdentity,
+      displayMetric: props.displayMetric,
+      displayByAuthors: props.displayByAuthors,
     };
 
-    /*
-    const zoom_x = d3.scaleTime().rangeRound([0, 0]);
-    const zoom_y = d3.scaleLinear().rangeRound([0, 0]);
-
-    this.scales = {
-      x: zoom_x,
-      y: zoom_y,
-      scaledX: zoom_x,
-      scaledY: zoom_y,
-    };
-
-    this.scales.x.domain([0, 928]);
-    this.scales.y.domain([0, 928]);
-    */
 
     this.onResize = zoomUtils.onResizeFactory(0.7, 0.7);
     this.onZoom = zoomUtils.onZoomFactory({ constrain: false });
-    this.createChart();
   }
 
   componentWillReceiveProps(nextProps) {
-    const { files } = nextProps;
+    const { files, palette, displayMetric, displayByAuthors } = nextProps;
     const convertedFiles = this.convertData(files);
 
     // setState is async - call createChart on callback
@@ -52,14 +36,20 @@ export default class FileEvolutionDendrogram extends React.PureComponent {
     this.setState({
       files: files,
       convertedFiles: convertedFiles,
+      palette: palette,
+      displayMetric: displayMetric,
+      displayByAuthors: displayByAuthors,
     }, () => {
-      this.createChart();
+      //this.createChart();
+      this.update(false, true);
     });
 
     //this.createChart();
   }
 
-  componentDidMount() { }
+  componentDidMount() { 
+    this.createChart();
+  }
 
 
   render() {
@@ -71,7 +61,6 @@ export default class FileEvolutionDendrogram extends React.PureComponent {
           scaleExtent={[1, 10]}
           onZoom={(evt) => this.onZoom(evt)}
           transform={this.state.transform}
-          //unzoomed={<Legend x="10" y="10" categories={legend} />}
         >
 
           <g ref={g => this.chartRef = g}></g>
@@ -82,11 +71,11 @@ export default class FileEvolutionDendrogram extends React.PureComponent {
   }
 
   // render is called while zooming, so this has to be separated from render
-  // is called als callback from props changing
+  // is called as callback from props changing
   createChart() {
     this.chartSettings = {};
     // Specify the chart’s dimensions.
-    this.chartSettings.width = 2000;
+    this.chartSettings.width = 2500;
     this.chartSettings.height = this.chartSettings.width;
     this.chartSettings.center_x = this.chartSettings.width * 0.5;
     this.chartSettings.center_y = this.chartSettings.height * 0.59;
@@ -94,8 +83,9 @@ export default class FileEvolutionDendrogram extends React.PureComponent {
 
     // create a radial tree layout
     this.chartSettings.tree = d3.tree()
+      //.nodeSize([2 * Math.PI, 100])
       .size([2 * Math.PI, this.chartSettings.radius])
-      .separation((a, b) => (a.parent == b.parent ? 1 : 2) / a.depth*2);
+      .separation((a, b) => (a.parent == b.parent ? 1 : 2) / a.depth);
 
     // selects the container for the chart
     this.g = d3.select(this.chartRef)
@@ -124,7 +114,6 @@ export default class FileEvolutionDendrogram extends React.PureComponent {
         .attr("stroke-width", 1.5);
       }
 
-
       // initial update, draws the chart for the first time
       this.update(false, true);
   }
@@ -133,7 +122,7 @@ export default class FileEvolutionDendrogram extends React.PureComponent {
     // get class context into this function
     const _this = this;
     // sort the tree and apply the layout
-    let root = this.chartSettings.tree(d3.hierarchy(this.state.convertedFiles), d => getChildren(d));
+    let root = this.chartSettings.tree(d3.hierarchy(this.state.convertedFiles));
 
     // collapse outer nodes that only have leave nodes as children
     if (collapseOuter) {
@@ -194,8 +183,20 @@ export default class FileEvolutionDendrogram extends React.PureComponent {
 
     let nodes = this.nodegroup
       .selectAll("g")
-      .data(nodes_data, function (d) {
-        return d.data.path;
+      .data(nodes_data, (d) => d.data.path)
+      .style("fill", (d) => this.getColor(d.data))
+      .on('mouseover', function (d) {
+        if (d.children) {
+          d3.select(this).style("cursor", "pointer")
+        }
+      })
+      .on("click", function (event, d) {
+        // switch out children, to not draw them in the next update
+        let altChildren = d.data.altChildren || [];
+        let children = d.data.children;
+        d.data.children = altChildren;
+        d.data.altChildren = children;
+        _this.update(true, false);
       });
 
     // remove dom elements without data attached after updating
@@ -211,21 +212,8 @@ export default class FileEvolutionDendrogram extends React.PureComponent {
          translate(${d.y},0)`);
     
     newnodes.append("circle")
-    .attr("r", d => d.children ? 6 : 3)
-      .on('mouseover', function (d) {
-        if (d.children) {
-          d3.select(this).style("cursor", "pointer")
-        }
-      })
-      .filter(d => d.children)
-      .on("click", function (event, d) {
-        // switch out children, to not draw them in the next update
-        let altChildren = d.data.altChildren || [];
-        let children = d.data.children;
-        d.data.children = altChildren;
-        d.data.altChildren = children;
-        _this.update(true, false);
-      })
+    .style("fill", (d) => this.getColor(d.data))
+    .attr("r", d => d.children ? 6 : 3);
 
       // instead of just adding text to newnodes, redraw all the text
       // resets the text orienation -> would be destroyed when collapsing nodes
@@ -233,12 +221,14 @@ export default class FileEvolutionDendrogram extends React.PureComponent {
       this.nodegroup.selectAll("g").append("text")
       .text(d => d.data.name)
       .attr("x", 10)
-      .attr("dy", ".31em");
+      .attr("dy", ".31em")
+      .style("fill", (d) => this.getColor(d.data));
 
       this.nodegroup.selectAll("text")
       .attr("text-anchor", d => d.x < Math.PI === !d.children ? "start" : "end")
       .attr("transform", d => d.x >= Math.PI ? "rotate(180)" : null)
       .attr("x", d => d.x < Math.PI === !d.children ? 10 : -10)
+      .style("fill", (d) => this.getColor(d.data));
       /*
     .filter(d => d.children)
     .clone(true).lower()
@@ -252,7 +242,7 @@ export default class FileEvolutionDendrogram extends React.PureComponent {
      }
   }
 
-  // needs subfiles to be named children, it does not work wth content
+  // needs subfiles to be named children, it does not work with content
   getChildren(data) {
     return data?.children ?? [];
   }
@@ -263,7 +253,8 @@ export default class FileEvolutionDendrogram extends React.PureComponent {
     const convertedData = { name: "root", children: [] };
     for (const file of data) {
       const pathParts = file.key.split('/');
-      this.genPathObjectString(convertedData.children, pathParts, file.webUrl, file.key, "");
+      this.genPathObjectString(convertedData.children, pathParts, file.webUrl, file.key, file.totalStats,
+        file.authorMostLinesChanged, file.authorMostCommits, "");
     }
 
     return convertedData;
@@ -272,19 +263,23 @@ export default class FileEvolutionDendrogram extends React.PureComponent {
   // traversedPath is needed to give all folders a unique path
   // only path is not enough, since there is no way to differentiate between 
   // two folders of the same name in a path, e.g. -> a/b/a/c/...
-  genPathObjectString(convertedData, pathParts, Url, Path, traversedPath ) {
+  genPathObjectString(convertedData, pathParts, Url, Path, totalStats, authorMostLinesChanged, authorMostCommits, traversedPath ) {
     const currElm = pathParts.shift();
 
     if (pathParts.length === 0) {
-      convertedData.push({ name: currElm, type: 'file', url: Url, path: Path });
+      convertedData.push({ name: currElm, type: 'file', url: Url, path: Path, totalStats: totalStats,
+       authorMostLinesChanged: authorMostLinesChanged, authorMostCommits:authorMostCommits });
     } else {
       let elem = convertedData.find((d) => d.name === currElm);
       if (elem === undefined) {
-        elem = { name: currElm, type: 'folder', path: this.updateTraversedPath(traversedPath, currElm),  children: [] };
-        this.genPathObjectString(elem.children, pathParts, Url, Path, this.updateTraversedPath(traversedPath, currElm));
+        elem = { name: currElm, type: 'folder', path: this.updateTraversedPath(traversedPath, currElm), totalStats, children: [] };
+        this.genPathObjectString(elem.children, pathParts, Url, Path, totalStats, authorMostLinesChanged, authorMostCommits, this.updateTraversedPath(traversedPath, currElm));
         convertedData.push(elem);
       } else {
-        this.genPathObjectString(elem.children, pathParts, Url, Path, this.updateTraversedPath(traversedPath, currElm));
+        elem.totalStats.count = elem.totalStats.count + totalStats.count;
+        elem.totalStats.additions = elem.totalStats.additions + totalStats.additions;
+        elem.totalStats.deletions = elem.totalStats.deletions + totalStats.deletions;
+        this.genPathObjectString(elem.children, pathParts, Url, Path, totalStats, authorMostLinesChanged, authorMostCommits, this.updateTraversedPath(traversedPath, currElm));
       }
     }
   }
@@ -297,4 +292,32 @@ export default class FileEvolutionDendrogram extends React.PureComponent {
     }
   }
 
+  getColor(file) {
+    let color = "#000000";
+
+    if (this.state.displayByAuthors === true) {
+      if (this.state.palette === undefined) {
+        return "#000000";
+      }
+
+      if (this.state.displayMetric === 'linesChanged') {
+        _.each(Object.keys(this.state.palette), (key) => {
+          if (key === file.authorMostLinesChanged) {
+            color = this.state.palette[key];
+          }
+        });
+      } else if (this.state.displayMetric === 'commits') {
+        _.each(Object.keys(this.state.palette), (key) => {
+          if (key === file.authorMostCommits) {
+            color = this.state.palette[key];
+          }
+        });
+      }
+      
+    } else {
+    }
+
+    
+    return color;
+  }
 }
