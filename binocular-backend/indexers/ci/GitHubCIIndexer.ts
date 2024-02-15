@@ -67,7 +67,7 @@ class GitHubCIIndexer {
           id: pipeline.id,
           number: pipeline.run_number,
           sha: pipeline.head_commit.sha,
-          status: convertState(pipeline.status),
+          status: convertState(pipeline.conclusion),
           updatedAt: moment(pipeline.updated_at).toISOString(),
           startedAt: moment(pipeline.run_started_at).toISOString(),
           finishedAt: moment(pipeline.updated_at).toISOString(),
@@ -79,11 +79,9 @@ class GitHubCIIndexer {
         throw Error('Controller not defined!');
       }
       const userFullName = username !== undefined ? this.controller.getUser(username).name : '';
-      let status = 'cancelled';
       let lastStartedAt = pipeline.run_started_at;
       let lastFinishedAt = pipeline.updated_at;
       if (jobs.length > 0) {
-        status = convertState(jobs[jobs.length - 1].conclusion);
         lastStartedAt = jobs[jobs.length - 1].created_at;
         lastFinishedAt = jobs[jobs.length - 1].completed_at;
       }
@@ -94,7 +92,7 @@ class GitHubCIIndexer {
         id: pipeline.id,
         sha: pipeline.head_sha,
         ref: pipeline.head_commit.id,
-        status: status,
+        status: convertState(pipeline.conclusion),
         tag: pipeline.display_title,
         user: username,
         userFullName: userFullName !== null ? userFullName : username,
