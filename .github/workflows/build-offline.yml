@@ -5,7 +5,7 @@ on:
     branches:
       - "main"
       - "develop"
-      - "feature/225" #For testing
+#      - "feature/225" #For testing
   schedule:
     - cron: '30 3 * * 1' # At 03:30 on Monday, https://crontab.guru/#30_3_*_*_1
   workflow_dispatch:
