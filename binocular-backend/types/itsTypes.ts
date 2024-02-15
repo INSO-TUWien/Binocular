@@ -29,13 +29,13 @@ export interface ItsIssue {
   reactions: { nodes: ItsIssueReaction[] };
   timeline_url: string;
   pull_request: string;
-  timelineItems:{nodes:ItsIssueEvent[]};
+  timelineItems: { nodes: ItsIssueEvent[] };
 }
 
 export interface ItsIssueEvent {
   id: number;
   createdAt: string;
-  commit:{oid:string}
+  commit: { oid: string };
 }
 
 export interface ItsIssueMention {
