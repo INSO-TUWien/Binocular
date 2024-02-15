@@ -1,7 +1,7 @@
 'use strict';
 
 import GenericImporter from '../../importer/GenericImporter.js';
-import GitHubITSIndexer from './GitHubITSIndexer.js';
+import GitHubITSIndexer from './GitHubITSIndexer.ts';
 import GitLabITSIndexer from './GitLabITSIndexer.js';
 let provider;
 

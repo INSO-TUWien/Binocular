@@ -1,33 +1,39 @@
 'use strict';
 
 import debug from 'debug';
-import Paginator from '../../utils/paginator';
 import { Octokit } from '@octokit/rest';
 import { Octokit as OctokitCore } from '@octokit/core';
 import { paginateGraphql } from '@octokit/plugin-paginate-graphql';
+import { GithubJob, GithubUser } from '../../types/githubTypes.ts';
 
 const log = debug('github');
 
 class GitHub {
-  constructor(options) {
-    this.baseUrl = options.baseUrl;
+  private privateToken: string;
+  private requestTimeout: any;
+  private count: number;
+  private stopping: boolean;
+  private github: any;
+  private githubGraphQL: any;
+  private users: { [login: string]: GithubUser };
+  constructor(options: { baseUrl: string; privateToken: string; requestTimeout: any }) {
     this.privateToken = options.privateToken;
     this.requestTimeout = options.requestTimeout;
     this.count = 0;
     this.stopping = false;
     this.github = new Octokit({
-      baseUrl: 'https://api.github.com',
+      baseUrl: options.baseUrl,
       auth: this.privateToken,
     });
     const PaginatedGraphQL = OctokitCore.plugin(paginateGraphql);
-    this.graphqlWithAuth = new PaginatedGraphQL({ auth: this.privateToken });
+    this.githubGraphQL = new PaginatedGraphQL({ auth: this.privateToken });
     this.users = {};
   }
 
-  async loadAssignableUsers(owner, name) {
-    const { repository } = await this.graphqlWithAuth.graphql.paginate(
+  async loadAssignableUsers(repositoryOwner: string, repositoryName: string) {
+    const { repository } = await this.githubGraphQL.graphql.paginate(
       `query paginate($cursor: String) {
-         repository(owner: "${owner}", name: "${name}") {
+         repository(owner: "${repositoryOwner}", name: "${repositoryName}") {
           name,
           assignableUsers(first: 100, after:$cursor) {
             nodes {
@@ -44,12 +50,12 @@ class GitHub {
       }
       `,
     );
-    repository.assignableUsers.nodes.forEach((user) => {
+    repository.assignableUsers.nodes.forEach((user: GithubUser) => {
       this.users[user.login] = user;
     });
   }
 
-  getUser(login) {
+  getUser(login: string) {
     if (this.users[login] !== undefined) {
       return this.users[login];
     } else {
@@ -57,21 +63,15 @@ class GitHub {
     }
   }
 
-  getPipelines(projectId) {
+  getPipelines(projectId: string) {
     log('getPipelines(%o)', projectId);
-    return this.paginatedRequest((page) => {
-      return this.github.rest.actions.listWorkflowRunsForRepo({
-        owner: projectId.split('/')[0],
-        repo: projectId.split('/')[1],
-        page: page,
-      });
-    })
-      .each((resp) => resp)
-      .then((resp) => Promise.all(resp))
-      .then((resp) => resp.map((elem) => elem[0]));
+    return this.github.paginate(this.github.rest.actions.listWorkflowRunsForRepo, {
+      owner: projectId.split('/')[0],
+      repo: projectId.split('/')[1],
+    });
   }
 
-  getPipelineJobs(projectId, pipelineId) {
+  getPipelineJobs(projectId: string, pipelineId: string) {
     log('getPipelineJobs(%o,%o)', projectId, pipelineId);
     return this.github.rest.actions
       .listJobsForWorkflowRun({
@@ -79,7 +79,7 @@ class GitHub {
         repo: projectId.split('/')[1],
         run_id: pipelineId,
       })
-      .then((jobs) => {
+      .then((jobs: { data: { jobs: GithubJob[] } }) => {
         return jobs.data.jobs;
       });
   }
@@ -90,27 +90,6 @@ class GitHub {
 
   stop() {
     this.stopping = true;
-  }
-
-  paginatedRequest(rq) {
-    return new Paginator(
-      (page) => {
-        if (this.stopping) {
-          return Promise.resolve({
-            data: {
-              workflow_runs: [],
-            },
-          });
-        }
-        return rq(page);
-      },
-      (resp) => {
-        return resp.data.workflow_runs || [];
-      },
-      (resp) => {
-        return (this.count = parseInt(resp.data.total_count, 10));
-      },
-    );
   }
 }
 
