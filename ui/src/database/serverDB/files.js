@@ -44,8 +44,7 @@ export default class Files {
           const statsByAuthor = {};
           const totalStats = {
             count: 0,
-            additions: 0,
-            deletions: 0,
+            linesChanged: 0,
           };
     
           _.each(file.commits.data, function (commit) {
@@ -64,8 +63,7 @@ export default class Files {
             stats.deletions = stats.deletions + commit.stats.deletions;
     
             totalStats.count = totalStats.count + 1;
-            totalStats.additions = totalStats.additions + commit.stats.additions;
-            totalStats.deletions = totalStats.deletions + commit.stats.deletions;
+            totalStats.linesChanged = totalStats.linesChanged + commit.stats.additions + commit.stats.deletions;
           });
     
           const authorMostLinesChanged = _.maxBy(_.values(statsByAuthor), (author) => author.additions + author.deletions);

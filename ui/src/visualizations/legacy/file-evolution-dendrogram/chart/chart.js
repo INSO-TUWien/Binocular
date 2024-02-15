@@ -2,6 +2,7 @@
 
 import React from 'react';
 import * as d3 from 'd3';
+import chroma from 'chroma-js';
 
 import '../css/codeMirror.css';
 import styles from '../styles.scss';
@@ -13,13 +14,16 @@ export default class FileEvolutionDendrogram extends React.PureComponent {
   constructor(props) {
     super(props);
 
+    const convertedFiles = this.convertData(props.files);
+
     this.state = {
-      files: props.files,
       palette: props.palette,
-      convertedFiles: this.convertData(props.files),
+      convertedFiles: convertedFiles,
       transform: d3.zoomIdentity,
       displayMetric: props.displayMetric,
       displayByAuthors: props.displayByAuthors,
+      linesChangedScale: this.getColorScale(convertedFiles.totalStats.linesChanged),
+      commitScale: this.getColorScale(convertedFiles.totalStats.count), 
     };
 
 
@@ -34,17 +38,15 @@ export default class FileEvolutionDendrogram extends React.PureComponent {
     // setState is async - call createChart on callback
     // createChart is used seperately from render(), since render is called on zoom
     this.setState({
-      files: files,
       convertedFiles: convertedFiles,
       palette: palette,
       displayMetric: displayMetric,
       displayByAuthors: displayByAuthors,
+      linesChangedScale: this.getColorScale(convertedFiles.totalStats.linesChanged),
+      commitScale: this.getColorScale(convertedFiles.totalStats.count),
     }, () => {
-      //this.createChart();
       this.update(false, true);
     });
-
-    //this.createChart();
   }
 
   componentDidMount() { 
@@ -191,6 +193,8 @@ export default class FileEvolutionDendrogram extends React.PureComponent {
         }
       })
       .on("click", function (event, d) {
+        console.log("dddddddddddddddddddd");
+        console.log(d);
         // switch out children, to not draw them in the next update
         let altChildren = d.data.altChildren || [];
         let children = d.data.children;
@@ -212,7 +216,6 @@ export default class FileEvolutionDendrogram extends React.PureComponent {
          translate(${d.y},0)`);
     
     newnodes.append("circle")
-    .style("fill", (d) => this.getColor(d.data))
     .attr("r", d => d.children ? 6 : 3);
 
       // instead of just adding text to newnodes, redraw all the text
@@ -257,6 +260,10 @@ export default class FileEvolutionDendrogram extends React.PureComponent {
         file.authorMostLinesChanged, file.authorMostCommits, "");
     }
 
+    this.fillInTotalStats(convertedData);
+
+    this.getColorScale(convertedData.totalStats.linesChanged);
+
     return convertedData;
   }
 
@@ -272,13 +279,10 @@ export default class FileEvolutionDendrogram extends React.PureComponent {
     } else {
       let elem = convertedData.find((d) => d.name === currElm);
       if (elem === undefined) {
-        elem = { name: currElm, type: 'folder', path: this.updateTraversedPath(traversedPath, currElm), totalStats, children: [] };
+        elem = { name: currElm, type: 'folder', path: this.updateTraversedPath(traversedPath, currElm), children: [] };
         this.genPathObjectString(elem.children, pathParts, Url, Path, totalStats, authorMostLinesChanged, authorMostCommits, this.updateTraversedPath(traversedPath, currElm));
         convertedData.push(elem);
       } else {
-        elem.totalStats.count = elem.totalStats.count + totalStats.count;
-        elem.totalStats.additions = elem.totalStats.additions + totalStats.additions;
-        elem.totalStats.deletions = elem.totalStats.deletions + totalStats.deletions;
         this.genPathObjectString(elem.children, pathParts, Url, Path, totalStats, authorMostLinesChanged, authorMostCommits, this.updateTraversedPath(traversedPath, currElm));
       }
     }
@@ -289,6 +293,24 @@ export default class FileEvolutionDendrogram extends React.PureComponent {
       return currElm;
     } else {
       return traversedPath + "/" + currElm;
+    }
+  }
+
+  fillInTotalStats(data) {
+    if (data.children) {
+      let totalStats = {
+      count: 0,
+      linesChanged: 0,
+      };
+      _.each(data.children, (child) => {
+        const childStats = this.fillInTotalStats(child);
+        totalStats.linesChanged = totalStats.linesChanged + childStats.linesChanged;
+        totalStats.count = totalStats.count + childStats.count;
+      });
+      data.totalStats = totalStats;
+      return totalStats;
+    } else { // basecase
+      return data.totalStats;
     }
   }
 
@@ -315,9 +337,41 @@ export default class FileEvolutionDendrogram extends React.PureComponent {
       }
       
     } else {
-    }
+      if (this.state.displayMetric === 'linesChanged') {
+        const scaleEntry = this.state.linesChangedScale.find((color) => file.totalStats.linesChanged <= color.value);
+        color = scaleEntry.color;
+      } else if (this.state.displayMetric === 'commits') {
+        const scaleEntry = this.state.commitScale.find((color) => file.totalStats.count <= color.value);
 
+        color = scaleEntry.color;
+      }
+    }
     
     return color;
+  }
+
+  // returns a colorscale array which scales values from 1 to "highest" on a scale of yellow to red
+  getColorScale(highest) {
+    const scale = [];
+    const start = 1;
+    const steps = 256; // possible colors between yellow and red
+    const ratio = Math.pow(highest / start, 1 / (steps - 1));
+    const chromaScale = chroma.scale(['yellow', 'red']);
+
+    for (let i = 0; i < steps; i++) {
+      const value = start * Math.pow(ratio, i);
+      let result = {
+        value: value,
+        color: chromaScale(this.mapNumRange(i + 1, 1, steps, 0, 1)).hex(),
+      }
+      scale.push(result);
+    }
+    scale[steps-1].value = scale[steps-1].value + 1; // fight some inaccuracies
+    return scale;
+  }
+
+  // map value inside one range to value inside another range to the same spot relatively
+  mapNumRange(num, inMin, inMax, outMin, outMax) {
+    return ((num - inMin) * (outMax - outMin)) / (inMax - inMin) + outMin;
   }
 }
