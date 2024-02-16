@@ -8,38 +8,34 @@ export interface ItsIssue {
   number: number;
   title: string;
   body: string;
-  user: GithubActor;
+  author: GithubActor;
   repository_url: string;
   labels_url: string;
   comments_url: string;
   events_url: string;
   html_url: string;
-  labels: ItsIssueLabel[];
+  labels: { nodes: ItsIssueLabel[] };
   state: string;
   locked: boolean;
   assignee: GithubActor;
-  assignees: GithubActor[];
+  assignees: { nodes: GithubActor[] };
   milestone: GithubMilestone;
   comments: number;
-  created_at: string;
-  updated_at: string;
-  closed_at: string;
+  createdAt: string;
+  updatedAt: string;
+  closedAt: string;
   author_association: string;
   active_lock_reason: string;
-  reactions: ItsIssueReaction[];
+  reactions: { nodes: ItsIssueReaction[] };
   timeline_url: string;
   pull_request: string;
+  timelineItems: { nodes: ItsIssueEvent[] };
 }
 
 export interface ItsIssueEvent {
   id: number;
-  node_id: string;
-  url: string;
-  actor: GithubActor;
-  event: string;
-  commit_id: string;
-  commit_url: string;
-  created_at: string;
+  createdAt: string;
+  commit: { oid: string };
 }
 
 export interface ItsIssueMention {
@@ -50,12 +46,11 @@ export interface ItsIssueMention {
 
 export interface ItsIssueLabel {
   id: number;
-  node_id: string;
   url: string;
   name: string;
   description: string;
   color: string;
-  default: boolean;
+  isDefault: boolean;
 }
 
 export interface ItsIssueReaction {

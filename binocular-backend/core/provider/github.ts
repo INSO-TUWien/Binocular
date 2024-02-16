@@ -84,6 +84,170 @@ class GitHub {
       });
   }
 
+  /**
+   * Currently the number of timeline items is fixed to 200 items.
+   * This could improve in the future through nested pagination.
+   * Nested pagination is not possible with @octokit/plugin-paginate-graphql
+   */
+  getIssuesWithEvents(repositoryOwner: string, repositoryName: string) {
+    return this.githubGraphQL.graphql
+      .paginate(
+        `query paginate($cursor: String) {
+           repository(owner: "${repositoryOwner}", name: "${repositoryName}") {
+              issues(first: 100, after:$cursor) {
+                  totalCount
+                  nodes {
+                      id
+                      number
+                      title
+                      body
+                      state
+                      url
+                      closedAt
+                      createdAt
+                      updatedAt
+                      labels(first: 100) {
+                          nodes {
+                              id
+                              url
+                              name
+                              color
+                              isDefault
+                              description
+                          }
+                      }
+                      milestone {
+                          id
+                          url
+                          number
+                          state
+                          title
+                          description
+                          creator {
+                              login
+                          }
+                          createdAt
+                          updatedAt
+                          closedAt
+                          dueOn
+                      }
+                      author {
+                          login
+                      }
+                      assignees(first: 100) {
+                          nodes {
+                              login
+                          }
+                      }
+                      timelineItems(first: 200, itemTypes: [CLOSED_EVENT, REFERENCED_EVENT]) {
+                          totalCount
+                          nodes {
+                              ... on ReferencedEvent {
+                                  createdAt
+                                  commit {
+                                      oid
+                                  }
+                              }
+                              ... on ClosedEvent {
+                                  createdAt
+                              }
+                          }
+                      }
+                  }
+                  pageInfo {
+                    hasNextPage
+                    endCursor
+                  }
+              }
+          }
+        }
+      `,
+      )
+      .then((repository: any) => repository.repository.issues.nodes);
+  }
+
+  /**
+   * Currently the number of timeline items is fixed to 200 items.
+   * This could improve in the future through nested pagination.
+   * Nested pagination is not possible with @octokit/plugin-paginate-graphql
+   */
+  getPullRequestsWithEvents(repositoryOwner: string, repositoryName: string) {
+    return this.githubGraphQL.graphql
+      .paginate(
+        `query paginate($cursor: String) {
+           repository(owner: "${repositoryOwner}", name: "${repositoryName}") {
+              pullRequests(first: 100, after:$cursor) {
+                  totalCount
+                  nodes {
+                      id
+                      number
+                      title
+                      body
+                      state
+                      url
+                      closedAt
+                      createdAt
+                      updatedAt
+                      labels(first: 100) {
+                          nodes {
+                              id
+                              url
+                              name
+                              color
+                              isDefault
+                              description
+                          }
+                      }
+                      milestone {
+                          id
+                          url
+                          number
+                          state
+                          title
+                          description
+                          creator {
+                              login
+                          }
+                          createdAt
+                          updatedAt
+                          closedAt
+                          dueOn
+                      }
+                      author {
+                          login
+                      }
+                      assignees(first: 100) {
+                          nodes {
+                              login
+                          }
+                      }
+                      timelineItems(first: 200, itemTypes: [CLOSED_EVENT, REFERENCED_EVENT]) {
+                          totalCount
+                          nodes {
+                              ... on ReferencedEvent {
+                                  createdAt
+                                  commit {
+                                      oid
+                                  }
+                              }
+                              ... on ClosedEvent {
+                                  createdAt
+                              }
+                          }
+                      }
+                  }
+                  pageInfo {
+                    hasNextPage
+                    endCursor
+                  }
+              }
+          }
+        }
+      `,
+      )
+      .then((repository: any) => repository.repository.pullRequests.nodes);
+  }
+
   isStopping() {
     return this.stopping;
   }

@@ -64,6 +64,7 @@ class CIIndexer {
                     .then(() => {
                       persistCount++;
                     });
+                  return this.buildMapper(pipeline, []);
                 } else {
                   log(`Skipping build #${pipeline.id} [${persistCount + omitCount}]`);
                   omitCount++;
