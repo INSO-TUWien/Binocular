@@ -11,8 +11,6 @@ import ctx from '../utils/context';
 
 import GitLabBaseIndexerMock from './helper/gitlab/gitLabBaseIndexerMock';
 
-import OctokitMock from './helper/github/octokitMock';
-
 import GitLabITSIndexer from './helper/gitlab/gitLabITSIndexerRewire.js';
 
 import BaseGitLabIndexer from '../indexers/BaseGitLabIndexer.js';
@@ -123,7 +121,6 @@ describe('its', function () {
       await IssueStakeholderConnection.ensureCollection();
 
       const gitHubITSIndexer = new GitHubITSIndexer(repo, reporter);
-      gitHubITSIndexer.github = new OctokitMock();
       gitHubITSIndexer.controller = new GitHubMock();
       await gitHubITSIndexer.index();
 

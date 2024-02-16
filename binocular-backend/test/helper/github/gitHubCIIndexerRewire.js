@@ -1,4 +1,4 @@
-import GitHubCIIndexer from '../../../indexers/ci/GitHubCIIndexer.js';
+import GitHubCIIndexer from '../../../indexers/ci/GitHubCIIndexer.ts';
 import GitHubCIIndexerMock from './gitHubCIIndexerMock.js';
 
 GitHubCIIndexer.prototype.setupOctokit = GitHubCIIndexerMock.prototype.setupOctokit;
