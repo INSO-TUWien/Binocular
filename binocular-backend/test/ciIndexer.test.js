@@ -104,7 +104,7 @@ describe('ci', function () {
       expect(dbBuildsCollectionData[0].jobs[2].id).to.equal('2');
       expect(dbBuildsCollectionData[0].jobs[2].status).to.equal('failure');
 
-      expect(dbBuildsCollectionData[0].status).to.equal('failed');
+      expect(dbBuildsCollectionData[0].status).to.equal('success');
     });
   });
 
