@@ -3,7 +3,7 @@
 import debug from 'debug';
 import Paginator from '../../paginator';
 import urlJoin from 'url-join';
-import { CommitSummary, PullRequestsSummary } from '../../types/jiraRestApiTypes';
+import { CommitRestResponse, CommitsFullDetail, CommitSummary, PullRequestsSummary } from '../../types/jiraRestApiTypes';
 
 const log = debug('jira');
 
@@ -61,6 +61,37 @@ class Jira {
         } else {
           informationToReturn = informationToReturn.concat(response[0].repositories);
         }
+      }
+      return informationToReturn;
+    });
+  }
+
+  getDetailsPromises(issueId: string, summaryObject: CommitSummary | PullRequestsSummary, dataType: string) {
+    const promises: Promise<any>[] = [];
+
+    for (const [key] of Object.entries(summaryObject.byInstanceType)) {
+      promises.push(this.request('dev-status/latest/issue/detail?issueId=' + issueId + `&dataType=${dataType}&applicationType=` + key));
+    }
+
+    return promises;
+  }
+
+  getCommitDetails(issueId: string, summaryObject: CommitSummary) {
+    if (!summaryObject) {
+      return Promise.resolve([]);
+    }
+    const promises: Promise<CommitRestResponse>[] = this.getDetailsPromises(issueId, summaryObject, 'repository');
+
+    let informationToReturn: CommitsFullDetail[] = [];
+
+    return Promise.all(promises).then((responses) => {
+      for (const response of responses) {
+        let repositories: CommitsFullDetail[] = [];
+        response.detail.forEach((detail) => {
+          repositories = detail.repositories;
+        });
+
+        informationToReturn = informationToReturn.concat(repositories).flat();
       }
       return informationToReturn;
     });

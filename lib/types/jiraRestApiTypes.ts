@@ -56,6 +56,13 @@ export interface PullRequestDetail {
   repositoryUrl: string;
 }
 
+export interface CommitRestResponse {
+  detail: {
+    repositories: CommitsFullDetail[];
+    _instance: { name: string; baseUrl: string; [key: string]: any };
+  }[];
+}
+
 export interface CommitsFullDetail {
   id: string;
   name: string;
