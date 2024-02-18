@@ -3,24 +3,32 @@
 import debug from 'debug';
 import Paginator from '../../paginator';
 import urlJoin from 'url-join';
-import { CommitRestResponse, CommitsFullDetail, CommitSummary, PullRequestsSummary } from '../../types/jiraRestApiTypes';
+import {
+  CommitRestResponse,
+  CommitsFullDetail,
+  CommitSummary,
+  DevelopmentSummary,
+  PullRequestDetail,
+  PullrequestRestResponse,
+  PullRequestsSummary,
+} from '../../types/jiraRestApiTypes';
 
 const log = debug('jira');
 
 class Jira {
-  private baseUrl: string;
-  private privateToken: string;
-  private requestTimeout: number;
-  private count: number;
-  private stopping = false;
+  private readonly API_VERSION = '2';
+  private baseUrl;
+  private count!: number;
+  private privateToken;
+  private requestTimeout;
+  private stopping;
   private usermail: string | undefined;
 
   constructor(options: { baseUrl: string; email?: string | undefined; privateToken: string; requestTimeout: number }) {
-    this.baseUrl = urlJoin(options.baseUrl, '/rest/api/3/');
+    this.baseUrl = urlJoin(options.baseUrl, `/rest/api/${this.API_VERSION}/`);
     this.privateToken = options.privateToken;
     this.usermail = options.email;
     this.requestTimeout = options.requestTimeout;
-    this.count = 0;
     this.stopping = false;
   }
 
@@ -38,35 +46,7 @@ class Jira {
     return this.paginatedRequest(`project/${projectKey}/version?`);
   }
 
-  getDevelopmentDetails(issueId: string, objectType: PullRequestsSummary | CommitSummary, isPullRequest: boolean) {
-    log('getMergeRequests(%o)', issueId);
-
-    if ((!isPullRequest && !objectType) || (!isPullRequest && objectType && objectType.overall.count === 0)) {
-      return Promise.resolve(null);
-    }
-
-    const dataType = isPullRequest ? 'pullrequest' : 'repository';
-
-    const promises: Promise<any>[] = [];
-
-    for (const [key, value] of Object.entries(objectType.byInstanceType)) {
-      promises.push(this.request('dev-status/latest/issue/detail?issueId=' + issueId + `&dataType=${dataType}&applicationType=` + key));
-    }
-
-    return Promise.all(promises).then((responses) => {
-      let informationToReturn: any[] = [];
-      for (const response of responses) {
-        if (isPullRequest) {
-          informationToReturn = informationToReturn.concat(response[0].pullRequests);
-        } else {
-          informationToReturn = informationToReturn.concat(response[0].repositories);
-        }
-      }
-      return informationToReturn;
-    });
-  }
-
-  getDetailsPromises(issueId: string, summaryObject: CommitSummary | PullRequestsSummary, dataType: string) {
+  private getDetailsPromises(issueId: string, summaryObject: CommitSummary | PullRequestsSummary, dataType: string) {
     const promises: Promise<any>[] = [];
 
     for (const [key] of Object.entries(summaryObject.byInstanceType)) {
@@ -80,18 +60,33 @@ class Jira {
     if (!summaryObject) {
       return Promise.resolve([]);
     }
-    const promises: Promise<CommitRestResponse>[] = this.getDetailsPromises(issueId, summaryObject, 'repository');
+    const promises: Promise<CommitRestResponse[]>[] = this.getDetailsPromises(issueId, summaryObject, 'repository');
 
     let informationToReturn: CommitsFullDetail[] = [];
 
     return Promise.all(promises).then((responses) => {
       for (const response of responses) {
-        let repositories: CommitsFullDetail[] = [];
-        response.detail.forEach((detail) => {
-          repositories = detail.repositories;
+        response.forEach((developmentDetailedObject) => {
+          informationToReturn = informationToReturn.concat(developmentDetailedObject.repositories).flat();
         });
+      }
+      return informationToReturn;
+    });
+  }
 
-        informationToReturn = informationToReturn.concat(repositories).flat();
+  getPullrequestDetails(issueId: string, summaryObject: PullRequestsSummary) {
+    if (!summaryObject) {
+      return Promise.resolve([]);
+    }
+    const promises: Promise<PullrequestRestResponse[]>[] = this.getDetailsPromises(issueId, summaryObject, 'pullrequest');
+
+    let informationToReturn: PullRequestDetail[] = [];
+
+    return Promise.all(promises).then((responses) => {
+      for (const response of responses) {
+        response.forEach((developmentDetailedObject) => {
+          informationToReturn = informationToReturn.concat(developmentDetailedObject.pullRequests).flat();
+        });
       }
       return informationToReturn;
     });
@@ -108,9 +103,9 @@ class Jira {
   getDevelopmentSummary(issueId: string) {
     log('getMergeRequests(%o)', issueId);
 
-    return this.request('dev-status/latest/issue/summary?issueId=' + issueId).then((developmentInformation) => ({
-      commits: developmentInformation?.repository,
-      pullrequests: developmentInformation?.pullrequest,
+    return this.request('dev-status/latest/issue/summary?issueId=' + issueId).then((developmentInformation: DevelopmentSummary) => ({
+      commits: developmentInformation.repository,
+      pullrequests: developmentInformation.pullrequest,
     }));
   }
 
@@ -157,7 +152,7 @@ class Jira {
     );
   }
 
-  request(path: string) {
+  private request(path: string) {
     log('request(%o)', path);
     const credentials = this.usermail + ':' + this.privateToken;
     const header = {
@@ -169,12 +164,12 @@ class Jira {
       timeout: this.requestTimeout || 3000,
     };
     const isNonOfficial = path.includes('dev-status');
-    const requestUrl = isNonOfficial ? this.baseUrl.split('api/3')[0] + path : urlJoin(this.baseUrl, path);
+    const requestUrl = isNonOfficial ? this.baseUrl.split(`api/${this.API_VERSION}`)[0] + path : urlJoin(this.baseUrl, path);
     return fetch(requestUrl, header).then((response) => {
-      const successfull = response.ok;
+      const successful = response.ok;
 
       return response.json().then((data) => {
-        if (!successfull) {
+        if (!successful) {
           log('different response code: ' + response.status + '\n' + data);
         }
         if (!isNonOfficial) {

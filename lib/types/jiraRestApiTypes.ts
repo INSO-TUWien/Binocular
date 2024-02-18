@@ -10,6 +10,12 @@ export interface PullRequestsSummary {
   byInstanceType: any;
 }
 
+export interface DevelopmentSummary {
+  pullrequest: PullRequestsSummary;
+  repository: CommitSummary;
+  [key: string]: any;
+}
+
 export interface CommitSummary {
   overall: {
     count: number;
@@ -57,10 +63,20 @@ export interface PullRequestDetail {
 }
 
 export interface CommitRestResponse {
-  detail: {
-    repositories: CommitsFullDetail[];
-    _instance: { name: string; baseUrl: string; [key: string]: any };
-  }[];
+  repositories: CommitsFullDetail[];
+  _instance: _instance;
+}
+
+export interface _instance {
+  name: string;
+  baseUrl: string;
+  [key: string]: any;
+}
+
+export interface PullrequestRestResponse {
+  branches: any[];
+  pullRequests: PullRequestDetail[];
+  instance: _instance;
 }
 
 export interface CommitsFullDetail {
