@@ -83,8 +83,8 @@ export default class ServerDB {
     return Issues.getCodeHotspotsIssueData(file);
   }
 
-  static getFileDataFileEvolutionDendrogram() {
-    return Files.getFileDataFileEvolutionDendrogram();
+  static getFileDataFileEvolutionDendrogram(activeBranch) {
+    return Files.getFileDataFileEvolutionDendrogram(activeBranch);
   }
 
   static getDatabase() {

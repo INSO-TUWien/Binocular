@@ -137,9 +137,9 @@ export default class Database {
     }
   }
 
-  static async getFileDataFileEvolutionDendrogram() {
+  static async getFileDataFileEvolutionDendrogram(activeBranch) {
     if (await this.checkBackendConnection()) {
-      return ServerDB.getFileDataFileEvolutionDendrogram();
+      return ServerDB.getFileDataFileEvolutionDendrogram(activeBranch);
     } else {
       return LocalDB.getFileDataFileEvolutionDendrogram();
     }

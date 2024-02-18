@@ -2,7 +2,7 @@
 
 import { connect } from 'react-redux';
 
-import { setActiveFile, setActivePath, setActiveBranch, setDisplayMetric, setDisplayByAuthors } from '../sagas';
+import { setActiveBranch, setDisplayMetric, setDisplayByAuthors } from '../sagas';
 import styles from '../styles.scss';
 import FileBrowser from '../components/fileBrowser/fileBrowser';
 import TabCombo from '../../../../components/TabCombo';
@@ -12,6 +12,7 @@ const mapStateToProps = (state /*, ownProps*/) => {
   const State = state.visualizations.fileEvolutionDendrogram.state;
 
   return {
+    branches: State.data.data.branches,
     branch: State.data.data.branch,
     files: State.data.data.files,
     palette: State.data.data.palette,
@@ -21,8 +22,6 @@ const mapStateToProps = (state /*, ownProps*/) => {
 
 const mapDispatchToProps = (dispatch /*, ownProps*/) => {
   return {
-    onSetFile: (url) => dispatch(setActiveFile(url)),
-    onSetPath: (path) => dispatch(setActivePath(path)),
     onSetBranch: (branch) => dispatch(setActiveBranch(branch)),
     onClickMetric: (metric) => dispatch(setDisplayMetric(metric)),
     onClickCheckboxLegend: (isSet) => dispatch(setDisplayByAuthors(isSet)),

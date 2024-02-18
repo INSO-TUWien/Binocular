@@ -16,7 +16,7 @@ export default class Files {
     );
   }
 
-  static getFileDataFileEvolutionDendrogram() {
+  static getFileDataFileEvolutionDendrogram(activeBranch) {
 
     const getFileCommits = () => {
       return graphQl

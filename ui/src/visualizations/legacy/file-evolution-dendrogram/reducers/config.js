@@ -9,10 +9,6 @@ export default handleActions(
       _.assign({}, state, {
         branch: action.payload ? action.payload : null,
       }),
-    SET_ACTIVE_FILES: (state, action) =>
-      _.assign({}, state, {
-        files: action.payload ? action.payload : null,
-      }),
     SET_DISPLAY_METRIC: (state, action) =>
       _.assign({}, state, {
         displayMetric: action.payload ? action.payload : null,
