@@ -147,7 +147,7 @@ class JiraITSIndexer {
                     const changelogPromise = this.processChangelog(issue);
 
                     return Promise.all([notesPromise, commentsPromise, changelogPromise])
-                      .then(([notes, data, changelog]) => {
+                      .then(([notes, comments, changelog]) => {
                         const notes1 = this.createNotesObject(notes, changelog);
                         const assignee = this.getUpdatedUserObject(issue.fields.assignee);
                         const issueToSave = {
@@ -179,7 +179,7 @@ class JiraITSIndexer {
 
                           // BELOW FIELDS NOT IN MODEL
 
-                          comments: data.comments,
+                          comments: comments,
                           priority: issue.fields.priority,
                           restrictions: issue.fields.issuerestriction,
                           issuetype: issue.fields.issuetype,
@@ -331,18 +331,14 @@ class JiraITSIndexer {
     }
   }
 
-  private processComments(issue: JiraIssueResponse): Promise<{ comments: JiraComment[]; mentioned: string[] }> {
+  private processComments(issue: JiraIssueResponse): Promise<JiraComment[]> {
     //log('processComments()', issue);
     const issueKey = issue.key;
-    const mentioned: string[] = [];
 
     const issue_fields = issue.fields;
-    const comments: JiraComment[] = issue_fields.comment.comments;
+    const comments = issue_fields.comment.comments;
     if (issue_fields.comment.total <= issue_fields.comment.maxResults) {
-      comments.forEach((comment) => {
-        this.extractMentioned(comment, mentioned);
-      });
-      return Promise.resolve({ comments: comments, mentioned: mentioned });
+      return Promise.resolve(comments);
     } else {
       const comments: JiraComment[] = [];
       return this.jira
@@ -350,50 +346,12 @@ class JiraITSIndexer {
         .each(
           function (comment: JiraComment) {
             comments.push(comment);
-            this.extractMentioned(comment, mentioned);
           }.bind(this)
         )
         .then(() => {
-          return { comments: comments, mentioned: mentioned };
+          return comments;
         });
     }
-  }
-
-  private extractMentioned(comment: JiraComment, mentioned: string[]) {
-    //log('extractMentioned()');
-    if (typeof comment.body === 'string') {
-      const ret = comment.body.match(this.MENTIONED_REGEX);
-      if (ret !== null) {
-        Array.prototype.push.apply(
-          mentioned,
-          ret.map((elem) => elem.substring(2, elem.length - 1))
-        );
-      }
-    } else {
-      comment.body.content.forEach((commentContent) => {
-        this.extractFromContentArray(commentContent, mentioned);
-      });
-    }
-  }
-
-  private extractFromContentArray(commentContent: any, mentioned: string[]) {
-    commentContent.content.forEach((commentType: any) => {
-      if (commentType.type === 'mention') {
-        const mentionedUser = commentType.attrs.text;
-        if (!mentioned.includes(mentionedUser)) {
-          mentioned.push(mentionedUser);
-        }
-      } else if (commentType.type === 'paragraph' && commentType.content) {
-        commentType.content.forEach((contentType: any) => {
-          if (contentType.type === 'mention') {
-            const mentionedUser = contentType.attrs.text;
-            if (!mentioned.includes(mentionedUser)) {
-              mentioned.push(mentionedUser);
-            }
-          }
-        });
-      }
-    });
   }
 
   private createNotesObject(worklogData: JiraWorklog[], changelog: JiraChangelog[]) {
@@ -402,8 +360,8 @@ class JiraITSIndexer {
     const notesObjectsToReturn: ChangelogType[] = [];
 
     changelog.forEach((worklogEntry) => {
-      const authorObject: JiraFullAuthor = worklogEntry.author;
-      const user: string = authorObject.displayName;
+      const authorObject = worklogEntry.author;
+      const user = authorObject.displayName;
       let isWorklogIdDeleted: null | boolean = null;
       let isTimeSpentSet: boolean | null = null;
       let workLogId: number | null = null;
