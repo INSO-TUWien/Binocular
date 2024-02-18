@@ -292,33 +292,6 @@ class JiraITSIndexer {
     };
   }
 
-  private populateDescription(description: any) {
-    //log('populateDescription()', description);
-
-    if (typeof description === 'string') {
-      // for Jira version where API returns description as plain string
-      return description ? description : null;
-    }
-    // here description is built as arrays of lines and content
-    if (description.content.length === 0) {
-      return null;
-    }
-    let descriptionAsString = '';
-
-    description.content.forEach((line: any) => {
-      if (line.type === 'paragraph') {
-        line.content.forEach((actualContent: any) => {
-          if (actualContent.type === 'text') {
-            descriptionAsString += actualContent.text;
-          }
-        });
-        descriptionAsString += '\n';
-      }
-    });
-
-    return descriptionAsString;
-  }
-
   private processChangelog(issue: JiraIssueResponse) {
     const changelogInIssue = issue.changelog;
     let changelog: JiraChangelog[] = [];
