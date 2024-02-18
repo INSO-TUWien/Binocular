@@ -33,7 +33,7 @@ export interface JiraVersion {
   archived: boolean;
   released: boolean;
   startDate: string | undefined;
-  releaseDate: string;
+  releaseDate: string | undefined;
   userStartDate: string;
   overdue: boolean | undefined;
   userReleaseDate: string;
