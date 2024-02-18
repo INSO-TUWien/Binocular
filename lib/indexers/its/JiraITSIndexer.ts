@@ -8,6 +8,7 @@ import Milestone from '../../models/Milestone';
 import Issue from '../../models/Issue';
 import { JiraConfigType } from '../../types/jiraConfigType';
 import {
+  ChangelogType,
   CommitsFullDetail,
   JiraChangelog,
   JiraComment,
@@ -150,7 +151,7 @@ class JiraITSIndexer {
 
                     return Promise.all([notesPromise, commentsPromise, changelogPromise])
                       .then(([notes, data, changelog]) => {
-                        const notes1 = this.createNotesObject(notes, data, changelog);
+                        const notes1 = this.createNotesObject(notes, changelog);
                         const assignee = this.getUpdatedUserObject(issue.fields.assignee);
                         const issueToSave = {
                           id: issue.id,
@@ -177,8 +178,7 @@ class JiraITSIndexer {
                           webUrl: issue.self.split('/rest/api')[0] + '/browse/' + issue.key,
                           subscribed: issue.fields.watches.watchCount,
                           mentions: commits,
-                          notes:
-                            !notes1.notesObjectsToReturn || notes1.notesObjectsToReturn.length === 0 ? [] : notes1.notesObjectsToReturn,
+                          notes: notes1,
 
                           // BELOW FIELDS NOT IN MODEL
 
@@ -287,7 +287,7 @@ class JiraITSIndexer {
     };
   }
 
-  private processChangelog(issue: JiraIssueResponse) {
+  private processChangelog(issue: JiraIssueResponse): Promise<JiraChangelog[]> {
     const changelogInIssue = issue.changelog;
     let changelog: JiraChangelog[] = [];
 
@@ -334,7 +334,7 @@ class JiraITSIndexer {
     }
   }
 
-  private processComments(issue: JiraIssueResponse) {
+  private processComments(issue: JiraIssueResponse): Promise<{ comments: JiraComment[]; mentioned: string[] }> {
     //log('processComments()', issue);
     const issueKey = issue.key;
     const mentioned: string[] = [];
@@ -399,25 +399,14 @@ class JiraITSIndexer {
     });
   }
 
-  private createNotesObject(
-    worklogData: JiraWorklog[],
-    commentData: { comments: JiraComment[]; mentioned: string[] },
-    changelog: JiraChangelog[]
-  ) {
+  private createNotesObject(worklogData: JiraWorklog[], changelog: JiraChangelog[]) {
     const SECOND_POST_FIX = '2'; // change to "2" since this is used to identify as seconds
 
-    const notesObjectsToReturn: any[] = [];
-    const notesMentioned: string[] = [];
-
-    worklogData.forEach((worklogItem) => {
-      if (worklogItem.comment.content) {
-        this.extractFromContentArray(worklogItem.comment, notesMentioned);
-      }
-    });
+    const notesObjectsToReturn: ChangelogType[] = [];
 
     changelog.forEach((worklogEntry) => {
       const authorObject: JiraFullAuthor = worklogEntry.author;
-      const user: string = worklogEntry.author.displayName;
+      const user: string = authorObject.displayName;
       let isWorklogIdDeleted: null | boolean = null;
       let isTimeSpentSet: boolean | null = null;
       let workLogId: number | null = null;
@@ -476,9 +465,7 @@ class JiraITSIndexer {
       }
     });
 
-    const allMentioned: string[] = notesMentioned.concat(commentData.mentioned);
-
-    return { notesObjectsToReturn, allMentioned };
+    return notesObjectsToReturn;
   }
 
   private getUpdatedUserObject(userObject: JiraFullAuthor | null) {

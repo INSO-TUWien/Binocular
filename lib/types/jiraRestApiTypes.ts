@@ -62,6 +62,14 @@ export interface PullRequestDetail {
   repositoryUrl: string;
 }
 
+export interface ChangelogType {
+  body: string;
+  created_at: string;
+  worklogId: string;
+  author: JiraFullAuthor;
+  [key: string]: any;
+}
+
 export interface CommitRestResponse {
   repositories: CommitsFullDetail[];
   _instance: _instance;
