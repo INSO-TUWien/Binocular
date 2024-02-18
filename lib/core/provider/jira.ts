@@ -33,8 +33,6 @@ class Jira {
   }
 
   getIssuesWithJQL(jql: string) {
-    //can use simple /search requests with jql and expand the results,
-    // should be no need to do a request for every single issue to get full data, max return size = 100
     log('getIssuesWithJQL(%o)', jql);
     const jqlSearchString = `fields=*all&jql=${encodeURIComponent(jql)}&expand=changelog`; // part after the "jql=" needs to be encoded
 

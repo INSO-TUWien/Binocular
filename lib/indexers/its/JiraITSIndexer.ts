@@ -8,18 +8,13 @@ import Milestone from '../../models/Milestone';
 import Issue from '../../models/Issue';
 import { JiraConfigType } from '../../types/jiraConfigType';
 import {
-  CommitDetail,
   CommitsFullDetail,
-  CommitSummary,
   JiraChangelog,
+  JiraComment,
   JiraFullAuthor,
   JiraIssueResponse,
-  JiraChangelogItem,
-  PullRequestDetail,
-  PullRequestsSummary,
   JiraVersion,
   JiraWorklog,
-  JiraComment,
 } from '../../types/jiraRestApiTypes';
 import { Mentions } from '../../types/issueTypes';
 import ProgressReporter from '../../progress-reporter';
@@ -274,9 +269,9 @@ class JiraITSIndexer {
   }
 
   private createVersionObject(projectVersion: JiraVersion) {
-    let expired = projectVersion.overdue !== null ? projectVersion.overdue : null;
+    let expired = projectVersion.overdue !== undefined ? projectVersion.overdue : null;
     const dueDate = projectVersion.releaseDate ? projectVersion.releaseDate : null;
-    if (expired === null || expired === undefined) {
+    if (expired === null) {
       expired = dueDate !== null ? new Date() > new Date(dueDate) : null;
     }
 
@@ -299,34 +294,38 @@ class JiraITSIndexer {
     const allowedValues = ['timeestimate', 'timespent', 'WorklogId'];
 
     if (changelogInIssue.total <= changelogInIssue.maxResults) {
-      changelogInIssue.histories.forEach((changelogEntry) => this.filterChangelog(changelogEntry, allowedValues, changelog));
+      changelogInIssue.histories.forEach((changelogEntry) => {
+        changelog = this.filterChangelog(changelogEntry, allowedValues);
+      });
       return Promise.resolve(changelog);
     } else {
-      changelog = [];
       return this.jira
         .getChangelog(issue.key)
         .each((changelogEntry: JiraChangelog) => {
-          this.filterChangelog(changelogEntry, allowedValues, changelog);
+          changelog = this.filterChangelog(changelogEntry, allowedValues);
         })
         .then(() => changelog);
     }
   }
 
-  private filterChangelog(changelogEntry: JiraChangelog, allowedValues: string[], changelog: JiraChangelog[]) {
+  private filterChangelog(changelogEntry: JiraChangelog, allowedValues: string[]) {
+    const changelog: JiraChangelog[] = [];
     changelogEntry.items = changelogEntry.items.filter((item) => allowedValues.includes(item.field));
     if (changelogEntry.items.length > 0) {
       changelog.push(changelogEntry);
     }
+
+    return changelog;
   }
 
-  private processWorklog(issue: JiraIssueResponse) {
+  private processWorklog(issue: JiraIssueResponse): Promise<JiraWorklog[]> {
     //log('processWorklog()');
     const worklogArray = issue.fields.worklog;
     if (worklogArray.total <= worklogArray.maxResults) {
       return Promise.resolve(worklogArray.worklogs);
     } else {
       const arrayToReturn: JiraWorklog[] = [];
-      this.jira
+      return this.jira
         .getWorklog(issue.key)
         .each((worklog: JiraWorklog) => {
           arrayToReturn.push(worklog);
@@ -401,21 +400,20 @@ class JiraITSIndexer {
   }
 
   private createNotesObject(
-    notes: JiraWorklog[] | undefined,
-    data: { comments: JiraComment[]; mentioned: string[] },
+    worklogData: JiraWorklog[],
+    commentData: { comments: JiraComment[]; mentioned: string[] },
     changelog: JiraChangelog[]
   ) {
-    const SECOND_POST_FIX = '2'; // TODO: change to "2" since this is used to identify as seconds
+    const SECOND_POST_FIX = '2'; // change to "2" since this is used to identify as seconds
 
     const notesObjectsToReturn: any[] = [];
     const notesMentioned: string[] = [];
-    if (notes) {
-      notes.forEach((note) => {
-        if (note.comment.content) {
-          this.extractFromContentArray(note.comment, notesMentioned);
-        }
-      });
-    }
+
+    worklogData.forEach((worklogItem) => {
+      if (worklogItem.comment.content) {
+        this.extractFromContentArray(worklogItem.comment, notesMentioned);
+      }
+    });
 
     changelog.forEach((worklogEntry) => {
       const authorObject: JiraFullAuthor = worklogEntry.author;
@@ -455,10 +453,8 @@ class JiraITSIndexer {
 
         if (body !== '' && workLogId) {
           let objectToAdd: any;
-          let notesWithComment: JiraWorklog[] = [];
-          if (notes) {
-            notesWithComment = notes.filter((note) => parseInt(note.id, 10) === workLogId);
-          }
+          const notesWithComment = worklogData.filter((note) => parseInt(note.id, 10) === workLogId);
+
           if (notesWithComment.length > 1) {
             log('should not be case');
           } else if (notesWithComment.length === 1) {
@@ -480,7 +476,7 @@ class JiraITSIndexer {
       }
     });
 
-    const allMentioned: string[] = notesMentioned.concat(data.mentioned);
+    const allMentioned: string[] = notesMentioned.concat(commentData.mentioned);
 
     return { notesObjectsToReturn, allMentioned };
   }
