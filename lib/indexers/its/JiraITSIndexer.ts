@@ -295,14 +295,14 @@ class JiraITSIndexer {
 
     if (changelogInIssue.total <= changelogInIssue.maxResults) {
       changelogInIssue.histories.forEach((changelogEntry) => {
-        changelog = this.filterChangelog(changelogEntry, allowedValues);
+        changelog = changelog.concat(this.filterChangelog(changelogEntry, allowedValues));
       });
       return Promise.resolve(changelog);
     } else {
       return this.jira
         .getChangelog(issue.key)
         .each((changelogEntry: JiraChangelog) => {
-          changelog = this.filterChangelog(changelogEntry, allowedValues);
+          changelog = changelog.concat(this.filterChangelog(changelogEntry, allowedValues));
         })
         .then(() => changelog);
     }
