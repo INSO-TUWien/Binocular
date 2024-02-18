@@ -24,8 +24,8 @@ import MergeRequest from '../../models/MergeRequest';
 const log = debug('idx:its:jira');
 
 class JiraITSIndexer {
-  private repo: string;
-  private stopping: boolean;
+  private repo;
+  private stopping;
   private reporter;
   private MENTIONED_REGEX = /\[~.+@.+\]/g;
 
@@ -70,74 +70,71 @@ class JiraITSIndexer {
             return false;
           }
           return this.jira.getDevelopmentSummary(issue.id).then((developmentInformation) => {
-            let mergeRequestPromise: Promise<any> = Promise.resolve([]);
+            const mergeRequestPromise = this.jira
+              .getPullrequestDetails(issue.id, developmentInformation.pullrequests)
+              .then((mergeRequests) => {
+                const mergeRequestPromises = mergeRequests?.map((mergeRequest) => {
+                  mergeRequest.id = mergeRequest.id.substring(1);
 
-            if (developmentInformation.pullrequests && developmentInformation.pullrequests.overall.count !== 0) {
-              mergeRequestPromise = this.jira
-                .getPullrequestDetails(issue.id, developmentInformation.pullrequests)
-                .then((mergeRequests) => {
-                  const mergeRequestPromises = mergeRequests?.map((mergeRequest) => {
-                    mergeRequest.id = mergeRequest.id.substring(1);
+                  return (MergeRequest as any).findOneById(mergeRequest.id).then((persistedMergeRequest: any) => {
+                    // TODO: 2 issues share the same merge request then the ID of the merge request is equal and
+                    //  the other merge request will not be persisted because it is found in DB
+                    if (
+                      !persistedMergeRequest ||
+                      new Date(persistedMergeRequest.updatedAt).getTime() < new Date(mergeRequest.lastUpdate).getTime()
+                    ) {
+                      const toPersist = {
+                        id: mergeRequest.id,
+                        iid: parseInt(mergeRequest.id, 10),
+                        title: mergeRequest.name,
+                        // description: description, // this description is not the description
+                        // of the merge request in Github but of the issue in Jira
+                        state: mergeRequest.status,
+                        // createdAt: issue.fields.createdAt,
+                        updatedAt: mergeRequest.lastUpdate,
+                        // labels: NA
+                        // milestone: issue.fields.fixVersions.map((version: JiraVersion) => this.createVersionObject(version)),
+                        // this are versions of issue
+                        author: mergeRequest.author, // mergeRequest.author.name but it always displays name: User
+                        assignee: mergeRequest.reviewers.length > 0 ? mergeRequest.reviewers[0] : null,
+                        // this is assignee of issue in Jira
+                        assignees: mergeRequest.reviewers, // not sure if this is correct field
+                        // userNotesCount: NA
+                        // upvotes: issue.fields?.votes.votes ? issue.fields?.votes.votes : null,
+                        // this are the fields from the issue
+                        // downVotes: NA
+                        webUrl: mergeRequest.url,
+                        repositoryName: mergeRequest.repositoryName,
+                        repositoryUrl: mergeRequest.repositoryUrl,
+                        commentCount: mergeRequest.commentCount,
+                        // reference: NA,
+                        // references: NA,
+                        // timeStats: NA,
+                        // notes: NA,
+                      };
 
-                    return (MergeRequest as any).findOneById(mergeRequest.id).then((persistedMergeRequest: any) => {
-                      // TODO: 2 issues share the same merge request then the ID of the merge request is equal and
-                      //  the other merge request will not be persisted because it is found in DB
-                      if (
-                        !persistedMergeRequest ||
-                        new Date(persistedMergeRequest.updatedAt).getTime() < new Date(mergeRequest.lastUpdate).getTime()
-                      ) {
-                        const toPersist = {
-                          id: mergeRequest.id,
-                          iid: parseInt(mergeRequest.id, 10),
-                          title: mergeRequest.name,
-                          // description: description, // this description is not the description
-                          // of the merge request in Github but of the issue in Jira
-                          state: mergeRequest.status,
-                          // createdAt: issue.fields.createdAt,
-                          updatedAt: mergeRequest.lastUpdate,
-                          // labels: NA
-                          // milestone: issue.fields.fixVersions.map((version: JiraVersion) => this.createVersionObject(version)),
-                          // this are versions of issue
-                          author: mergeRequest.author, // mergeRequest.author.name but it always displays name: User
-                          assignee: mergeRequest.reviewers.length > 0 ? mergeRequest.reviewers[0] : null,
-                          // this is assignee of issue in Jira
-                          assignees: mergeRequest.reviewers, // not sure if this is correct field
-                          // userNotesCount: NA
-                          // upvotes: issue.fields?.votes.votes ? issue.fields?.votes.votes : null,
-                          // this are the fields from the issue
-                          // downVotes: NA
-                          webUrl: mergeRequest.url,
-                          repositoryName: mergeRequest.repositoryName,
-                          repositoryUrl: mergeRequest.repositoryUrl,
-                          commentCount: mergeRequest.commentCount,
-                          // reference: NA,
-                          // references: NA,
-                          // timeStats: NA,
-                          // notes: NA,
-                        };
-
-                        if (!persistedMergeRequest) {
-                          log('Persisting new mergeRequest');
-                          return (MergeRequest as any).persist(toPersist);
-                        } else {
-                          log('Updating persisted mergeRequest ' + mergeRequest.id);
-                          _.assign(persistedMergeRequest, toPersist);
-                          return persistedMergeRequest.save({
-                            ignoreUnknownAttributes: true,
-                          });
-                        }
+                      if (!persistedMergeRequest) {
+                        log('Persisting new mergeRequest');
+                        return (MergeRequest as any).persist(toPersist);
                       } else {
-                        log('Omitting already persisted mergeRequest ' + mergeRequest.id);
+                        log('Updating persisted mergeRequest ' + mergeRequest.id);
+                        _.assign(persistedMergeRequest, toPersist);
+                        return persistedMergeRequest.save({
+                          ignoreUnknownAttributes: true,
+                        });
                       }
-                    });
+                    } else {
+                      log('Omitting already persisted mergeRequest ' + mergeRequest.id);
+                    }
                   });
+                });
 
-                  return Promise.all(mergeRequestPromises);
-                })
-                // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                // @ts-ignore
-                .then(() => this.reporter.finishMergeRequest());
-            }
+                return Promise.all(mergeRequestPromises);
+              })
+              // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+              // @ts-ignore
+              .then(() => this.reporter.finishMergeRequest());
+
             const issuePromise = (Issue as any)
               .findOneById(issue.id)
               .then((persistedIssue: any) => {
