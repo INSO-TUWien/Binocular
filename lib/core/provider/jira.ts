@@ -102,8 +102,8 @@ class Jira {
     log('getMergeRequests(%o)', issueId);
 
     return this.request('dev-status/latest/issue/summary?issueId=' + issueId).then((developmentInformation: DevelopmentSummary) => ({
-      commits: developmentInformation.repository,
-      pullrequests: developmentInformation.pullrequest,
+      commits: developmentInformation?.repository,
+      pullrequests: developmentInformation?.pullrequest,
     }));
   }
 

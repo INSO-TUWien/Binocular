@@ -71,7 +71,7 @@ class JiraITSIndexer {
           }
           return this.jira.getDevelopmentSummary(issue.id).then((developmentInformation) => {
             const mergeRequestPromise = this.jira
-              .getPullrequestDetails(issue.id, developmentInformation.pullrequests)
+              .getPullrequestDetails(issue.id, developmentInformation?.pullrequests)
               .then((mergeRequests) => {
                 const mergeRequestPromises = mergeRequests?.map((mergeRequest) => {
                   mergeRequest.id = mergeRequest.id.substring(1);
@@ -139,7 +139,7 @@ class JiraITSIndexer {
               .findOneById(issue.id)
               .then((persistedIssue: any) => {
                 if (!persistedIssue || new Date(persistedIssue.updatedAt).getTime() < new Date(issue.fields.updated).getTime()) {
-                  return this.jira.getCommitDetails(issue.id, developmentInformation.commits).then((linkedCommits) => {
+                  return this.jira.getCommitDetails(issue.id, developmentInformation?.commits).then((linkedCommits) => {
                     const commits = this.buildMentions(linkedCommits);
 
                     const notesPromise = this.processWorklog(issue);
