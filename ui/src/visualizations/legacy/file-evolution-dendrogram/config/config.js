@@ -13,7 +13,7 @@ const mapStateToProps = (state /*, ownProps*/) => {
 
   return {
     branches: State.data.data.branches,
-    branch: State.data.data.branch,
+    branch: State.config.branch,
     files: State.data.data.files,
     palette: State.data.data.palette,
     displayMetric: State.config.displayMetric,
@@ -34,9 +34,11 @@ const FileEvolutionDendrogramConfigComponent = (props) => {
     otherCommitters = props.committers.length - (Object.keys(props.palette).length - 1);
   }
   const options = [];
+  options.push(<option key={'No Branch Chosen'}>{'No Branch Chosen'}</option>);
   for (const i in props.branches) {
     options.push(<option key={i}>{props.branches[i].branch}</option>);
   }
+
   return (
 
     <div className={styles.config}>

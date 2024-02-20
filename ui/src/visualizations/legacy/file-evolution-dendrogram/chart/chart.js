@@ -367,6 +367,7 @@ export default class FileEvolutionDendrogram extends React.PureComponent {
       scale.push(result);
     }
     scale[steps-1].value = scale[steps-1].value + 1; // fight some inaccuracies
+    scale[0].color = '#000000'; // very low values or 0 should be black
     return scale;
   }
 

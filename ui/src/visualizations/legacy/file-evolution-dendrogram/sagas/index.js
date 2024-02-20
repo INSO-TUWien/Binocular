@@ -1,9 +1,9 @@
 'use strict';
 
 import { createAction } from 'redux-actions';
-import { fork, takeEvery } from 'redux-saga/effects';
+import { select, fork, takeEvery } from 'redux-saga/effects';
 
-import { fetchFactory, timestampedActionFactory, mapSaga } from '../../../../sagas/utils.js';
+import { fetchFactory, timestampedActionFactory } from '../../../../sagas/utils.js';
 import Database from '../../../../database/database';
 import { getChartColors } from '../../../../utils';
 
@@ -28,8 +28,8 @@ export function* watchSetActiveFile() {
 
 export const fetchFileEvolutionDendrogramData = fetchFactory(
   function* () {
-    //const state = yield select();
-    //const activeBranch = state.visualizations.fileEvolutionDendrogram.state.config.branch;
+    const state = yield select();
+    const activeBranch = state.visualizations.fileEvolutionDendrogram.state.config.branch;
     let branches = [];
     yield Database.getAllBranches()
     .then(function (branchesData) {
@@ -37,7 +37,7 @@ export const fetchFileEvolutionDendrogramData = fetchFactory(
     });
 
     const files = [];
-    yield Promise.resolve(Database.getFileDataFileEvolutionDendrogram(/*activeBranch*/ ""))
+    yield Promise.resolve(Database.getFileDataFileEvolutionDendrogram(activeBranch))
     .then(function (resp) {
       for (const i in resp) {
         files.push({ key: resp[i].path, webUrl: resp[i].webUrl, totalStats: resp[i].totalStats,

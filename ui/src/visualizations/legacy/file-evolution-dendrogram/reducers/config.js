@@ -21,7 +21,7 @@ export default handleActions(
 
   },
   {
-    branch: 'main',
+    branch: 'No Branch Chosen',
     files: [],
     displayByAuthors: false,
     displayMetric: 'linesChanged',

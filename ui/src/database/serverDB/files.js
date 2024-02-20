@@ -18,7 +18,7 @@ export default class Files {
 
   static getFileDataFileEvolutionDendrogram(activeBranch) {
 
-    const getFileCommits = () => {
+    const getFileCommits = (activeBranch) => {
       return graphQl
         .query(
           `query {
@@ -26,8 +26,9 @@ export default class Files {
               data {
                 path
                 webUrl
-                commits {
+                commits{
                   data {
+                    branch
                     signature
                     stats {
                       additions
@@ -48,6 +49,9 @@ export default class Files {
           };
     
           _.each(file.commits.data, function (commit) {
+            if (activeBranch !== 'No Branch Chosen' && commit.branch !== activeBranch ) {
+              return;
+            }
             let stats = statsByAuthor[commit.signature];
             if (!stats) {
               stats = statsByAuthor[commit.signature] = {
@@ -74,14 +78,14 @@ export default class Files {
             path: file.path,
             webUrl: file.webUrl,
             totalStats: totalStats,
-            authorMostLinesChanged: authorMostLinesChanged.author,
-            authorMostCommits: authorMostCommits.author,
+            authorMostLinesChanged: authorMostLinesChanged ? authorMostLinesChanged.author : undefined,
+            authorMostCommits: authorMostCommits ? authorMostCommits.author : undefined,
           };
-    
+  
           return returnFile;
         }));
     };
 
-    return getFileCommits();
+    return getFileCommits(activeBranch);
   }
 }
