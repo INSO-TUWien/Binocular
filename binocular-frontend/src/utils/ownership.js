@@ -23,8 +23,7 @@ export function extractFileOwnership(ownershipData, commitsToExclude = []) {
   const result = {};
   for (const commit of commits) {
     for (const file of commit.files) {
-      //since we start with the most recent commit, we are only interested in the first occurence of each file
-      //and because this is used for the filepicker, we are also not concerned about file renames
+      //since we start with the most recent commit, we are only interested in the first occurrence of each file.
       if (!result[file.path]) {
         // iterate over all stakeholders
         result[file.path] = extractOwnershipFromFileExcludingCommits(file.ownership, commitsToExclude);

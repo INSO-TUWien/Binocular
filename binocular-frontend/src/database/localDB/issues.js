@@ -3,8 +3,6 @@
 import PouchDB from 'pouchdb-browser';
 import PouchDBFind from 'pouchdb-find';
 import PouchDBAdapterMemory from 'pouchdb-adapter-memory';
-import moment from 'moment/moment';
-import _ from 'lodash';
 import {
   findAll,
   findAllCommits,
@@ -13,8 +11,8 @@ import {
   findFile,
   findID,
   findFileConnections,
-  findCommitFileConnections,
   findIssueCommitConnections,
+  findFileCommitConnections,
 } from './utils';
 PouchDB.plugin(PouchDBFind);
 PouchDB.plugin(PouchDBAdapterMemory);
@@ -55,6 +53,7 @@ export default class Issues {
     });
   }
 
+  // Note: very slow implementation. Rewrite similarly to functions in commits.js
   static issueImpactQuery(db, relations, iid, since, until) {
     return findIssue(db, iid).then(async (resIssue) => {
       const issue = resIssue.docs[0];
@@ -101,7 +100,7 @@ export default class Issues {
     return findAll(db, 'issues').then(async (res) => {
       const issues = [];
       const allCommits = (await findAllCommits(db, relations)).docs;
-      const allCommitFileConnections = (await findCommitFileConnections(relations)).docs;
+      const allCommitFileConnections = (await findFileCommitConnections(relations)).docs;
       const allIssueCommitConnections = (await findIssueCommitConnections(relations)).docs;
 
       let fileObj = null;
