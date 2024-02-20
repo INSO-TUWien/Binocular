@@ -11,7 +11,8 @@ import {
   findCommit,
   findFile,
   findFileCommitConnections,
-  findFileCommitStakeholderConnections, sortByAttributeString,
+  findFileCommitStakeholderConnections,
+  sortByAttributeString,
 } from './utils';
 
 PouchDB.plugin(PouchDBFind);
@@ -42,6 +43,7 @@ export default class Commits {
     });
   }
 
+  // Note: very slow implementation. If this function is needed, rewrite it similarly to ./commits.js `getOwnershipDataForCommits`
   static getCommitDataWithFiles(db, relations, commitSpan, significantSpan) {
     const first = new Date(significantSpan[0]).getTime();
     const last = new Date(significantSpan[1]).getTime();
@@ -85,27 +87,24 @@ export default class Commits {
     const last = new Date(significantSpan[1]).getTime();
 
     return findAllCommits(db, relations).then(async (res) => {
+      // make sure we only consider commits in the specified timeframe
       const commits = res.docs
         .filter((c) => new Date(c.date) >= first && new Date(c.date) <= last)
         .sort((a, b) => {
           return new Date(a.date) - new Date(b.date);
         });
-      const allFiles = (await findAll(db, 'files')).docs;
-      const fileCommitConnections = (await findFileCommitConnections(relations)).docs;
-      const fileCommitStakeholderConnections = (await findFileCommitStakeholderConnections(relations)).docs;
-      const stakeholders = (await findAll(db, 'stakeholders')).docs;
+
+      // fetch and sort all collections and relations (sorting needed for binary search)
+      const collections = await this.fetchAndSortOwnershipCollections(db, relations);
       const result = [];
 
       for (const commit of commits) {
         commit.files = {};
+        const relevantConnections = binarySearchArray(collections.fileCommitConnections, commit._id, 'to');
 
-        const relevantConnections = fileCommitConnections.filter((fCC) => fCC.to === commit._id);
-
-        //concurrently
         commit.files.data = relevantConnections.map((connection) => {
-          const resultFile = allFiles.filter((file) => file._id === connection.from);
-          if (resultFile.length > 0) {
-            const file = resultFile[0];
+          const file = binarySearch(collections.files, connection.from, '_id');
+          if (file !== null) {
             const res = { file: {} };
             res.file.path = file.path;
             res.stats = connection.stats;
@@ -113,10 +112,10 @@ export default class Commits {
             res.ownership = [];
 
             //find connections to stakeholders for ownership data
-            const relevantOwnershipConnections = fileCommitStakeholderConnections.filter((fcsc) => fcsc.from === connection._id);
+            const relevantOwnershipConnections = binarySearchArray(collections.fileCommitStakeholderConnections, connection._id, 'from');
             //for each of the ownership connections, add the signature of the stakeholder and the owned lines to fileResult.ownership
             for (const ownershipConn of relevantOwnershipConnections) {
-              const stakeholder = stakeholders.filter((s) => s._id === ownershipConn.to)[0].gitSignature;
+              const stakeholder = collections.stakeholders[ownershipConn.to];
               res.ownership.push({ stakeholder: stakeholder, hunks: ownershipConn.hunks });
             }
 
@@ -130,6 +129,7 @@ export default class Commits {
     });
   }
 
+  // Note: very slow implementation. If this function is needed, rewrite it similarly to ./commits.js `getOwnershipDataForCommits`
   static getCommitsForFiles(db, relations, filenames, omitFiles) {
     if (filenames.length === 0) {
       return [];
@@ -283,6 +283,4 @@ export default class Commits {
       fileCommitStakeholderConnections: fileCommitStakeholderConnections,
     };
   }
-
-
 }

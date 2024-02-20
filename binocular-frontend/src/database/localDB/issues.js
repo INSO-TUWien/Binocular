@@ -13,6 +13,7 @@ import {
   findFileConnections,
   findIssueCommitConnections,
   findFileCommitConnections,
+  binarySearch,
 } from './utils';
 PouchDB.plugin(PouchDBFind);
 PouchDB.plugin(PouchDBAdapterMemory);
@@ -44,8 +45,8 @@ export default class Issues {
       const result = [];
       const issueCommitConnections = (await findIssueCommitConnections(relations)).docs.filter((r) => r.to === issue._id);
       for (const conn of issueCommitConnections) {
-        const commitObject = allCommits.filter((c) => c._id === conn.from)[0];
-        if (commitObject) {
+        const commitObject = binarySearch(allCommits, conn.from, '_id');
+        if (commitObject !== null) {
           result.push(commitObject);
         }
       }
@@ -53,7 +54,7 @@ export default class Issues {
     });
   }
 
-  // Note: very slow implementation. Rewrite similarly to functions in commits.js
+  // Note: very slow implementation. Rewrite similarly to functions in commits.js (use binary search)
   static issueImpactQuery(db, relations, iid, since, until) {
     return findIssue(db, iid).then(async (resIssue) => {
       const issue = resIssue.docs[0];
