@@ -34,7 +34,7 @@ class Jira {
 
   getIssuesWithJQL(jql: string) {
     log('getIssuesWithJQL(%o)', jql);
-    const jqlSearchString = `fields=*all&jql=${encodeURIComponent(jql)}&expand=changelog`; // part after the "jql=" needs to be encoded
+    const jqlSearchString = `fields=*all&jql=${encodeURIComponent(jql)}&expand=changelog`;
 
     return this.paginatedRequest('search?' + jqlSearchString + '&');
   }
@@ -124,7 +124,9 @@ class Jira {
 
   paginatedRequest(path: string) {
     log('paginatedRequest(%o)', path);
-    return new (Paginator as any)(
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-expect-error
+    return new Paginator(
       (start_at: number, per_request: number) => {
         // needs to be changed since in Jira pagination uses startAt index and not page
         if (this.stopping) {

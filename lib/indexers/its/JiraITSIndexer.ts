@@ -27,8 +27,6 @@ class JiraITSIndexer {
   private repo;
   private stopping;
   private reporter;
-  private MENTIONED_REGEX = /\[~.+@.+\]/g;
-
   private jiraProject!: string;
   private jira!: Jira;
 
@@ -57,7 +55,6 @@ class JiraITSIndexer {
     log('index()');
     let omitCount = 0;
     let persistCount = 0;
-    // Reporter methods are dynamically created, therefore an error is shown
 
     return Promise.all([
       this.jira
@@ -70,13 +67,16 @@ class JiraITSIndexer {
             return false;
           }
           return this.jira.getDevelopmentSummary(issue.id).then((developmentInformation) => {
-            const mergeRequestPromise = this.jira
+            const mergeRequestDetailsPromise = this.jira
               .getPullrequestDetails(issue.id, developmentInformation?.pullrequests)
               .then((mergeRequests) => {
                 const mergeRequestPromises = mergeRequests?.map((mergeRequest) => {
                   mergeRequest.id = mergeRequest.id.substring(1);
 
-                  return (MergeRequest as any).findOneById(mergeRequest.id).then((persistedMergeRequest: any) => {
+                  // TODO: Currently necessary because the implementation of the Models isn't really compatible with typescript.
+                  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                  // @ts-expect-error
+                  return MergeRequest.findOneById(mergeRequest.id).then((persistedMergeRequest) => {
                     // TODO: 2 issues share the same merge request then the ID of the merge request is equal and
                     //  the other merge request will not be persisted because it is found in DB
                     if (
@@ -115,7 +115,11 @@ class JiraITSIndexer {
 
                       if (!persistedMergeRequest) {
                         log('Persisting new mergeRequest');
-                        return (MergeRequest as any).persist(toPersist);
+
+                        // TODO: Currently necessary because the implementation of the Models isn't really compatible with typescript.
+                        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                        // @ts-expect-error
+                        return MergeRequest.persist(toPersist);
                       } else {
                         log('Updating persisted mergeRequest ' + mergeRequest.id);
                         _.assign(persistedMergeRequest, toPersist);
@@ -135,9 +139,14 @@ class JiraITSIndexer {
               // @ts-ignore
               .then(() => this.reporter.finishMergeRequest());
 
-            const issuePromise = (Issue as any)
-              .findOneById(issue.id)
-              .then((persistedIssue: any) => {
+            // TODO: Currently necessary because the implementation of the Models isn't really compatible with typescript.
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-expect-error
+            const issuePromise = Issue.findOneById(issue.id)
+              // TODO: Currently necessary because the implementation of the Models isn't really compatible with typescript.
+              // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+              // @ts-expect-error
+              .then((persistedIssue) => {
                 if (!persistedIssue || new Date(persistedIssue.updatedAt).getTime() < new Date(issue.fields.updated).getTime()) {
                   return this.jira.getCommitDetails(issue.id, developmentInformation?.commits).then((linkedCommits) => {
                     const commits = this.buildMentions(linkedCommits);
@@ -147,9 +156,9 @@ class JiraITSIndexer {
                     const changelogPromise = this.processChangelog(issue);
 
                     return Promise.all([notesPromise, commentsPromise, changelogPromise])
-                      .then(([notes, comments, changelog]) => {
-                        const notes1 = this.createNotesObject(notes, changelog);
-                        const assignee = this.getUpdatedUserObject(issue.fields.assignee);
+                      .then(([notes, comments, changelogs]) => {
+                        const notesToPersist = this.createNotesObject(notes, changelogs);
+                        const assigneeToPersist = this.getUpdatedUserObject(issue.fields.assignee);
                         const issueToSave = {
                           id: issue.id,
                           iid: parseInt(issue.fields.project.id + issue.key.split('-')[1], 10),
@@ -165,8 +174,8 @@ class JiraITSIndexer {
                           links: issue.fields.issuelinks,
                           milestone: issue.fields.fixVersions.map((version: JiraVersion) => this.createVersionObject(version)),
                           author: this.getUpdatedUserObject(issue.fields.reporter),
-                          assignee: assignee,
-                          assignees: assignee ? [assignee] : [],
+                          assignee: assigneeToPersist,
+                          assignees: assigneeToPersist ? [assigneeToPersist] : [],
                           upvotes: issue.fields.votes.votes,
                           // downVotes not available
                           dueDate: issue.fields.duedate,
@@ -175,7 +184,7 @@ class JiraITSIndexer {
                           webUrl: issue.self.split('/rest/api')[0] + '/browse/' + issue.key,
                           subscribed: issue.fields.watches.watchCount,
                           mentions: commits,
-                          notes: notes1,
+                          notes: notesToPersist,
 
                           // BELOW FIELDS NOT IN MODEL
 
@@ -187,7 +196,10 @@ class JiraITSIndexer {
                         };
                         if (!persistedIssue) {
                           log('Persisting new issue');
-                          return (Issue as any).persist(issueToSave);
+                          // TODO: Currently necessary because the implementation of the Models isn't really compatible with typescript.
+                          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                          // @ts-expect-error
+                          return Issue.persist(issueToSave);
                         } else {
                           log('Updating persisted issue ' + issue.id);
                           _.assign(persistedIssue, issueToSave);
@@ -209,20 +221,28 @@ class JiraITSIndexer {
               // @ts-ignore
               .then(() => this.reporter.finishIssue());
 
-            return Promise.all([mergeRequestPromise, issuePromise]);
+            return Promise.all([mergeRequestDetailsPromise, issuePromise]);
           });
         }),
       this.jira.getProjectVersions(this.jiraProject).each((projectVersion: JiraVersion) => {
         return (
-          (Milestone as any)
-            .findOneById(projectVersion.id)
-            .then((persistedVersion: any) => {
+          // TODO: Currently necessary because the implementation of the Models isn't really compatible with typescript.
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          // @ts-expect-error
+          Milestone.findOneById(projectVersion.id)
+            // TODO: Currently necessary because the implementation of the Models isn't really compatible with typescript.
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-expect-error
+            .then((persistedVersion) => {
               const versionToPersist = this.createVersionObject(projectVersion);
 
               if (!persistedVersion || !_.isEqual(persistedVersion.data, versionToPersist)) {
                 if (!persistedVersion) {
                   //log('Persisting new version');
-                  return (Milestone as any).persist(versionToPersist);
+                  // TODO: Currently necessary because the implementation of the Models isn't really compatible with typescript.
+                  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                  // @ts-expect-error
+                  return Milestone.persist(versionToPersist);
                 } else {
                   //log('Updating persisted version ' + projectVersion.id);
                   _.assign(persistedVersion, versionToPersist);
@@ -249,10 +269,10 @@ class JiraITSIndexer {
       return [];
     } else {
       const commits = commitsObject[0].commits;
-      const returnObjects: Mentions[] = [];
+      const mentionsResult: Mentions[] = [];
 
       commits.forEach((commit) => {
-        returnObjects.push({
+        mentionsResult.push({
           commit: commit.id,
           createdAt: commit.authorTimestamp,
           closes: commit.merge,
@@ -261,7 +281,7 @@ class JiraITSIndexer {
         });
       });
 
-      return returnObjects;
+      return mentionsResult;
     }
   }
 
@@ -333,16 +353,13 @@ class JiraITSIndexer {
 
   private processComments(issue: JiraIssueResponse): Promise<JiraComment[]> {
     //log('processComments()', issue);
-    const issueKey = issue.key;
-
-    const issue_fields = issue.fields;
-    const comments = issue_fields.comment.comments;
-    if (issue_fields.comment.total <= issue_fields.comment.maxResults) {
-      return Promise.resolve(comments);
+    const issue_comments = issue.fields.comment;
+    if (issue_comments.total <= issue_comments.maxResults) {
+      return Promise.resolve(issue_comments.comments);
     } else {
       const comments: JiraComment[] = [];
       return this.jira
-        .getComments(issueKey)
+        .getComments(issue.key)
         .each(
           function (comment: JiraComment) {
             comments.push(comment);
