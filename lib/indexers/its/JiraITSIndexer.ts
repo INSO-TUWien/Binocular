@@ -358,7 +358,7 @@ class JiraITSIndexer {
     const SECOND_POST_FIX = '2'; // change to "2" since this is used to identify as seconds
 
     const notesObjectsToReturn: ChangelogType[] = [];
-
+    // TODO: refactor variable names e.g. below worklogEntry is false
     changelog.forEach((worklogEntry) => {
       const authorObject = worklogEntry.author;
       const user = authorObject.displayName;
@@ -385,14 +385,14 @@ class JiraITSIndexer {
       let body = '';
       if (isTimeSpentSet && workLogId && !entriesEqual) {
         if (isWorklogIdDeleted) {
-          body = `deleted ${(from - (to !== -1 ? to : 0)) / 60}${SECOND_POST_FIX} of spent time ${user}`;
+          body = `deleted ${from - (to !== -1 ? to : 0)}${SECOND_POST_FIX} of spent time ${user}`;
           //könnte zu viel sein was entfernt wird
         } else if (!isWorklogIdDeleted && to > from && to !== -1) {
           // from = from !== -1 ? from : 0;s
-          body = `added ${(to - (from !== -1 ? from : 0)) / 60}${SECOND_POST_FIX} of time spent ${user}`;
+          body = `added ${to - (from !== -1 ? from : 0)}${SECOND_POST_FIX} of time spent ${user}`;
           //removed some time
         } else if (!isWorklogIdDeleted && from > to && from !== -1) {
-          body = `subtracted ${(from - (to !== -1 ? to : 0)) / 60}${SECOND_POST_FIX} of spent time ${user}`;
+          body = `subtracted ${from - (to !== -1 ? to : 0)}${SECOND_POST_FIX} of time spent ${user}`;
         }
 
         if (body !== '' && workLogId) {
