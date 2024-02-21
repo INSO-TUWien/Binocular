@@ -30,6 +30,11 @@ class JiraITSIndexer {
   private jiraProject!: string;
   private jira!: Jira;
 
+  private readonly GITHUB_ID = 1;
+  private readonly GITLAB_ID = 2;
+  private readonly BITBUCKET_ID = 3;
+  private readonly OTHER_ID = 4;
+
   constructor(repo: string, reporter: typeof ProgressReporter) {
     this.repo = repo;
     this.stopping = false;
@@ -71,7 +76,16 @@ class JiraITSIndexer {
               .getPullrequestDetails(issue.id, developmentInformation?.pullrequests)
               .then((mergeRequests) => {
                 const mergeRequestPromises = mergeRequests?.map((mergeRequest) => {
-                  mergeRequest.id = mergeRequest.id.substring(1);
+                  if (mergeRequest.instance.name === 'GitHub') {
+                    mergeRequest.id = this.GITHUB_ID + mergeRequest.id.substring(1);
+                  } else if (mergeRequest.instance.name === 'GitLab') {
+                    const splitUrl = mergeRequest.url.split('/');
+                    mergeRequest.id = this.GITLAB_ID + splitUrl[splitUrl.length - 1];
+                  } else if (mergeRequest.instance.name === 'BitBucket') {
+                    mergeRequest.id = this.BITBUCKET_ID + mergeRequest.id;
+                  } else {
+                    mergeRequest.id = this.OTHER_ID + mergeRequest.id;
+                  }
 
                   // TODO: Currently necessary because the implementation of the Models isn't really compatible with typescript.
                   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -114,7 +128,7 @@ class JiraITSIndexer {
                       };
 
                       if (!persistedMergeRequest) {
-                        log('Persisting new mergeRequest');
+                        log('Persisting new mergeRequest ' + mergeRequest.id);
 
                         // TODO: Currently necessary because the implementation of the Models isn't really compatible with typescript.
                         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -161,7 +175,7 @@ class JiraITSIndexer {
                         const assigneeToPersist = this.getUpdatedUserObject(issue.fields.assignee);
                         const issueToSave = {
                           id: issue.id,
-                          iid: parseInt(issue.fields.project.id + issue.key.split('-')[1], 10),
+                          iid: parseInt(issue.id, 10),
                           issuekey: issue.key,
                           title: issue.fields.summary,
                           description: issue.fields.description,
@@ -286,14 +300,11 @@ class JiraITSIndexer {
   }
 
   private createVersionObject(projectVersion: JiraVersion) {
-    let expired = projectVersion.overdue !== undefined ? projectVersion.overdue : null;
-    const dueDate = projectVersion.releaseDate ? projectVersion.releaseDate : null;
-    if (expired === null) {
-      expired = dueDate !== null ? new Date() > new Date(dueDate) : null;
-    }
+    const expired = projectVersion.overdue !== undefined ? projectVersion.overdue : null;
+    const dueDate = projectVersion.releaseDate !== undefined ? projectVersion.releaseDate : null;
 
     return {
-      id: projectVersion.id,
+      id: projectVersion.projectId + projectVersion.id,
       iid: parseInt(projectVersion.projectId + projectVersion.id, 10),
       title: projectVersion.name,
       description: projectVersion.description ? projectVersion.description : null,

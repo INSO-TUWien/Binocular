@@ -26,6 +26,7 @@ export interface JiraCommitsSummary {
 }
 
 export interface JiraPullRequestDetails {
+  instance: JiraDevelopment_instance;
   author: JiraDevelopmentDetailsAuthor;
   id: string;
   name: string;
@@ -84,7 +85,7 @@ export interface JiraDevelopment_instance {
 export interface JiraPullRequestsFullDetails {
   branches: any[];
   pullRequests: JiraPullRequestDetails[];
-  instance: JiraDevelopment_instance;
+  _instance: JiraDevelopment_instance;
 }
 
 export interface JiraCommitsDetails {

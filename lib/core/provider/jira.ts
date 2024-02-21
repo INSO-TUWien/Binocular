@@ -87,6 +87,9 @@ class Jira {
     return Promise.all(promises).then((responses) => {
       for (const response of responses) {
         response.forEach((developmentDetailedObject) => {
+          developmentDetailedObject.pullRequests.forEach((pullRequestDetails) => {
+            pullRequestDetails.instance = developmentDetailedObject._instance;
+          });
           informationToReturn = informationToReturn.concat(developmentDetailedObject.pullRequests).flat();
         });
       }
