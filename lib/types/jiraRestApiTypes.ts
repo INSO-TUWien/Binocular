@@ -1,43 +1,28 @@
-export interface JiraPullRequestsSummary {
-  overall: {
-    count: number;
-    lastUpdated: string | null;
-    stateCount: number;
-    state: string;
-    dataType: string;
-    open: boolean;
-  };
-  byInstanceType: any;
-}
-
 export interface JiraDevelopmentSummary {
   pullrequest: JiraPullRequestsSummary;
   repository: JiraCommitsSummary;
   [key: string]: any;
 }
 
-export interface JiraCommitsSummary {
+export interface JiraPullRequestsSummary {
   overall: {
     count: number;
     lastUpdated: string | null;
-    dataType: string;
+    stateCount: number;
+    state: string;
+    dataType: 'pullrequest';
+    open: boolean;
   };
   byInstanceType: any;
 }
 
-export interface JiraVersion {
-  self: string;
-  id: string;
-  description: string | undefined;
-  name: string;
-  archived: boolean;
-  released: boolean;
-  startDate: string | undefined;
-  releaseDate: string | undefined;
-  userStartDate: string;
-  overdue: boolean | undefined;
-  userReleaseDate: string;
-  projectId: string;
+export interface JiraCommitsSummary {
+  overall: {
+    count: number;
+    lastUpdated: string | null;
+    dataType: 'repository';
+  };
+  byInstanceType: any;
 }
 
 export interface JiraPullRequestDetails {
@@ -62,6 +47,21 @@ export interface JiraPullRequestDetails {
   repositoryUrl: string;
 }
 
+export interface JiraVersion {
+  self: string;
+  id: string;
+  description: string | undefined;
+  name: string;
+  archived: boolean;
+  released: boolean;
+  startDate: string | undefined;
+  releaseDate: string | undefined;
+  userStartDate: string | undefined;
+  overdue: boolean | undefined;
+  userReleaseDate: string | undefined;
+  projectId: number;
+}
+
 export interface ChangelogType {
   body: string;
   created_at: string;
@@ -70,31 +70,31 @@ export interface ChangelogType {
   [key: string]: any;
 }
 
-export interface CommitRestResponse {
-  repositories: CommitsFullDetail[];
-  _instance: _instance;
+export interface JiraCommitsFullDetails {
+  repositories: JiraCommitsDetails[];
+  _instance: JiraDevelopment_instance;
 }
 
-export interface _instance {
+export interface JiraDevelopment_instance {
   name: string;
   baseUrl: string;
   [key: string]: any;
 }
 
-export interface PullrequestRestResponse {
+export interface JiraPullRequestsFullDetails {
   branches: any[];
   pullRequests: JiraPullRequestDetails[];
-  instance: _instance;
+  instance: JiraDevelopment_instance;
 }
 
-export interface CommitsFullDetail {
+export interface JiraCommitsDetails {
   id: string;
   name: string;
   url: string;
-  commits: CommitDetail[];
+  commits: JiraCommit[];
 }
 
-export interface CommitDetail {
+export interface JiraCommit {
   id: string;
   displayId: string;
   authorTimestamp: string;
@@ -103,10 +103,10 @@ export interface CommitDetail {
   fileCount: number;
   merge: boolean;
   message: string;
-  files: CommitFiles[];
+  files: JiraCommitFiles[];
 }
 
-export interface CommitFiles {
+export interface JiraCommitFiles {
   path: string;
   url: string;
   changeType: string;

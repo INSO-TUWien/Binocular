@@ -9,7 +9,7 @@ import Issue from '../../models/Issue';
 import { JiraConfigType } from '../../types/jiraConfigType';
 import {
   ChangelogType,
-  CommitsFullDetail,
+  JiraCommitsDetails,
   JiraChangelog,
   JiraComment,
   JiraFullAuthor,
@@ -265,7 +265,7 @@ class JiraITSIndexer {
     });
   }
 
-  private buildMentions(commitsObject: CommitsFullDetail[]) {
+  private buildMentions(commitsObject: JiraCommitsDetails[]) {
     if (commitsObject.length === 0) {
       return [];
     } else {

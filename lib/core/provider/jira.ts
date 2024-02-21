@@ -4,12 +4,12 @@ import debug from 'debug';
 import Paginator from '../../paginator';
 import urlJoin from 'url-join';
 import {
-  CommitRestResponse,
-  CommitsFullDetail,
+  JiraCommitsFullDetails,
+  JiraCommitsDetails,
   JiraCommitsSummary,
   JiraDevelopmentSummary,
   JiraPullRequestDetails,
-  PullrequestRestResponse,
+  JiraPullRequestsFullDetails,
   JiraPullRequestsSummary,
 } from '../../types/jiraRestApiTypes';
 
@@ -44,11 +44,15 @@ class Jira {
     return this.paginatedRequest(`project/${projectKey}/version?`);
   }
 
-  private getDetailsPromises(issueId: string, summaryObject: JiraCommitsSummary | JiraPullRequestsSummary, dataType: string) {
+  private getDetailsPromises(issueId: string, summaryObject: JiraCommitsSummary | JiraPullRequestsSummary) {
     const promises: Promise<any>[] = [];
 
     for (const [key] of Object.entries(summaryObject.byInstanceType)) {
-      promises.push(this.request('dev-status/latest/issue/detail?issueId=' + issueId + `&dataType=${dataType}&applicationType=` + key));
+      promises.push(
+        this.request(
+          'dev-status/latest/issue/detail?issueId=' + issueId + `&dataType=${summaryObject.overall.dataType}&applicationType=` + key
+        )
+      );
     }
 
     return promises;
@@ -58,9 +62,9 @@ class Jira {
     if (!summaryObject) {
       return Promise.resolve([]);
     }
-    const promises: Promise<CommitRestResponse[]>[] = this.getDetailsPromises(issueId, summaryObject, 'repository');
+    const promises: Promise<JiraCommitsFullDetails[]>[] = this.getDetailsPromises(issueId, summaryObject);
 
-    let informationToReturn: CommitsFullDetail[] = [];
+    let informationToReturn: JiraCommitsDetails[] = [];
 
     return Promise.all(promises).then((responses) => {
       for (const response of responses) {
@@ -76,7 +80,7 @@ class Jira {
     if (!summaryObject) {
       return Promise.resolve([]);
     }
-    const promises: Promise<PullrequestRestResponse[]>[] = this.getDetailsPromises(issueId, summaryObject, 'pullrequest');
+    const promises: Promise<JiraPullRequestsFullDetails[]>[] = this.getDetailsPromises(issueId, summaryObject);
 
     let informationToReturn: JiraPullRequestDetails[] = [];
 
