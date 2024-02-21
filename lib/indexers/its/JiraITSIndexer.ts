@@ -156,8 +156,8 @@ class JiraITSIndexer {
                     const changelogPromise = this.processChangelog(issue);
 
                     return Promise.all([notesPromise, commentsPromise, changelogPromise])
-                      .then(([notes, comments, changelogs]) => {
-                        const notesToPersist = this.createNotesObject(notes, changelogs);
+                      .then(([worklogs, comments, changelogs]) => {
+                        const notesToPersist = this.createNotesObject(worklogs, changelogs);
                         const assigneeToPersist = this.getUpdatedUserObject(issue.fields.assignee);
                         const issueToSave = {
                           id: issue.id,
@@ -193,6 +193,7 @@ class JiraITSIndexer {
                           restrictions: issue.fields.issuerestriction,
                           issuetype: issue.fields.issuetype,
                           fullStatus: issue.fields.status,
+                          originalWorklog: worklogs,
                         };
                         if (!persistedIssue) {
                           log('Persisting new issue');
@@ -403,15 +404,21 @@ class JiraITSIndexer {
 
       let body = '';
       if (isTimeSpentSet && workLogId && !entriesEqual) {
+        let timeSpentSeconds = -1;
         if (isWorklogIdDeleted) {
-          body = `deleted ${from - (to !== -1 ? to : 0)}${SECOND_POST_FIX} of spent time`;
+          timeSpentSeconds = from - (to !== -1 ? to : 0);
+          body = `deleted ${timeSpentSeconds}${SECOND_POST_FIX} of spent time`;
+          timeSpentSeconds = timeSpentSeconds * -1;
           //könnte zu viel sein was entfernt wird
         } else if (!isWorklogIdDeleted && to > from && to !== -1) {
           // from = from !== -1 ? from : 0;s
-          body = `added ${to - (from !== -1 ? from : 0)}${SECOND_POST_FIX} of time spent`;
+          timeSpentSeconds = to - (from !== -1 ? from : 0);
+          body = `added ${timeSpentSeconds}${SECOND_POST_FIX} of time spent`;
           //removed some time
         } else if (!isWorklogIdDeleted && from > to && from !== -1) {
-          body = `subtracted ${from - (to !== -1 ? to : 0)}${SECOND_POST_FIX} of time spent`;
+          timeSpentSeconds = from - (to !== -1 ? to : 0);
+          body = `subtracted ${timeSpentSeconds}${SECOND_POST_FIX} of time spent`;
+          timeSpentSeconds = timeSpentSeconds * -1;
         }
 
         if (body !== '' && workLogId) {
@@ -428,6 +435,8 @@ class JiraITSIndexer {
           noteToAdd.body = body;
           noteToAdd.created_at = created;
           noteToAdd.worklogId = workLogId;
+          noteToAdd.timeSpentSeconds = timeSpentSeconds;
+          noteToAdd.timeSpent = timeSpentSeconds / 60 + 'm';
           noteToAdd.author = this.getUpdatedUserObject(noteToAdd.author);
 
           notes.push(noteToAdd);
