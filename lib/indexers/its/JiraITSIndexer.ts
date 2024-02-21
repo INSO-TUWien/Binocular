@@ -269,19 +269,20 @@ class JiraITSIndexer {
     if (commitsObject.length === 0) {
       return [];
     } else {
-      const commits = commitsObject[0].commits;
       const mentionsResult: Mentions[] = [];
+      commitsObject.forEach((commitInstanceObject) => {
+        const commits = commitInstanceObject.commits;
 
-      commits.forEach((commit) => {
-        mentionsResult.push({
-          commit: commit.id,
-          createdAt: commit.authorTimestamp,
-          closes: commit.merge,
-          displayId: commit.displayId,
-          author: commit.author,
+        commits.forEach((commit) => {
+          mentionsResult.push({
+            commit: commit.id,
+            createdAt: commit.authorTimestamp,
+            closes: commit.merge,
+            displayId: commit.displayId,
+            author: commit.author,
+          });
         });
       });
-
       return mentionsResult;
     }
   }
