@@ -354,64 +354,66 @@ class JiraITSIndexer {
     }
   }
 
-  private createNotesObject(worklogData: JiraWorklog[], changelog: JiraChangelog[]) {
+  private createNotesObject(jiraWorklogs: JiraWorklog[], jiraChangelogs: JiraChangelog[]) {
     const SECOND_POST_FIX = '2'; // change to "2" since this is used to identify as seconds
 
-    const notesObjectsToReturn: ChangelogType[] = [];
+    const notes: ChangelogType[] = [];
     // TODO: refactor variable names e.g. below worklogEntry is false
-    changelog.forEach((worklogEntry) => {
-      const authorObject = worklogEntry.author;
-      const user = authorObject.displayName;
+    jiraChangelogs.forEach((jiraChangelog) => {
+      const authorObject = jiraChangelog.author;
       let isWorklogIdDeleted: null | boolean = null;
       let isTimeSpentSet: boolean | null = null;
       let workLogId: number | null = null;
       let from = -1;
       let to = -1;
       let entriesEqual = false;
-      const created = worklogEntry.created;
-      worklogEntry.items.forEach((item) => {
-        if (item.field === 'timespent') {
-          from = item.from ? parseInt(item.from, 10) : -1;
-          to = item.to ? parseInt(item.to, 10) : -1;
+      const created = jiraChangelog.created;
+      jiraChangelog.items.forEach((changelogItem) => {
+        if (changelogItem.field === 'timespent') {
+          from = changelogItem.from ? parseInt(changelogItem.from, 10) : -1;
+          to = changelogItem.to ? parseInt(changelogItem.to, 10) : -1;
           entriesEqual = from === to;
           isTimeSpentSet = true;
         }
-        if (item.field === 'WorklogId') {
-          isWorklogIdDeleted = item.from !== null && item.to === null;
-          workLogId = item.to !== null ? parseInt(item.to) : parseInt(typeof item.from === 'string' ? item.from : '0');
+        if (changelogItem.field === 'WorklogId') {
+          isWorklogIdDeleted = changelogItem.from !== null && changelogItem.to === null;
+          workLogId =
+            changelogItem.to !== null
+              ? parseInt(changelogItem.to)
+              : parseInt(typeof changelogItem.from === 'string' ? changelogItem.from : '0');
         }
       });
 
       let body = '';
       if (isTimeSpentSet && workLogId && !entriesEqual) {
         if (isWorklogIdDeleted) {
-          body = `deleted ${from - (to !== -1 ? to : 0)}${SECOND_POST_FIX} of spent time ${user}`;
+          body = `deleted ${from - (to !== -1 ? to : 0)}${SECOND_POST_FIX} of spent time`;
           //könnte zu viel sein was entfernt wird
         } else if (!isWorklogIdDeleted && to > from && to !== -1) {
           // from = from !== -1 ? from : 0;s
-          body = `added ${to - (from !== -1 ? from : 0)}${SECOND_POST_FIX} of time spent ${user}`;
+          body = `added ${to - (from !== -1 ? from : 0)}${SECOND_POST_FIX} of time spent`;
           //removed some time
         } else if (!isWorklogIdDeleted && from > to && from !== -1) {
-          body = `subtracted ${from - (to !== -1 ? to : 0)}${SECOND_POST_FIX} of time spent ${user}`;
+          body = `subtracted ${from - (to !== -1 ? to : 0)}${SECOND_POST_FIX} of time spent`;
         }
 
         if (body !== '' && workLogId) {
-          let objectToAdd: any;
-          const notesWithComment = worklogData.filter((note) => parseInt(note.id, 10) === workLogId);
+          let noteToAdd: any;
+          const worklogsMatchingId = jiraWorklogs.filter((jiraWorklog) => parseInt(jiraWorklog.id, 10) === workLogId);
 
-          if (notesWithComment.length > 1) {
+          if (worklogsMatchingId.length > 1) {
             log('should not be case');
-          } else if (notesWithComment.length === 1) {
-            objectToAdd = structuredClone(notesWithComment[0]);
+          } else if (worklogsMatchingId.length === 1) {
+            noteToAdd = structuredClone(worklogsMatchingId[0]);
           } else {
-            objectToAdd = { author: authorObject };
+            noteToAdd = { author: authorObject };
           }
-          objectToAdd.body = body;
-          objectToAdd.created_at = created;
-          objectToAdd.worklogId = workLogId;
-          objectToAdd.author = this.getUpdatedUserObject(objectToAdd.author);
+          noteToAdd.body = body;
+          noteToAdd.created_at = created;
+          noteToAdd.worklogId = workLogId;
+          noteToAdd.author = this.getUpdatedUserObject(noteToAdd.author);
 
-          notesObjectsToReturn.push(objectToAdd);
+          notes.push(noteToAdd);
         }
       }
 
@@ -420,7 +422,7 @@ class JiraITSIndexer {
       }
     });
 
-    return notesObjectsToReturn;
+    return notes;
   }
 
   private getUpdatedUserObject(userObject: JiraFullAuthor | null) {
