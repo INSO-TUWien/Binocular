@@ -274,7 +274,7 @@ class JiraITSIndexer {
 
     return {
       id: projectVersion.id,
-      iid: parseInt(projectVersion.projectId, 10), // no iid for version in Jira
+      iid: parseInt(projectVersion.projectId + projectVersion.id, 10),
       title: projectVersion.name,
       description: projectVersion.description ? projectVersion.description : null,
       dueDate: dueDate,
