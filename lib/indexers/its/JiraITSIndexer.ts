@@ -37,7 +37,7 @@ class JiraITSIndexer {
   }
 
   configure(config: JiraConfigType) {
-    //log('configure()', config);
+    log('configure()', config);
     if (!config) {
       throw new ConfigurationError('Config is not set');
     }
@@ -239,20 +239,20 @@ class JiraITSIndexer {
 
               if (!persistedVersion || !_.isEqual(persistedVersion.data, versionToPersist)) {
                 if (!persistedVersion) {
-                  //log('Persisting new version');
+                  log('Persisting new version');
                   // TODO: Currently necessary because the implementation of the Models isn't really compatible with typescript.
                   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
                   // @ts-expect-error
                   return Milestone.persist(versionToPersist);
                 } else {
-                  //log('Updating persisted version ' + projectVersion.id);
+                  log('Updating persisted version ' + projectVersion.id);
                   _.assign(persistedVersion, versionToPersist);
                   return persistedVersion.save({
                     ignoreUnknownAttributes: true,
                   });
                 }
               } else {
-                //log('Omitting already persisted version ' + projectVersion.id);
+                log('Omitting already persisted version ' + projectVersion.id);
               }
             })
             // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -306,57 +306,57 @@ class JiraITSIndexer {
   }
 
   private processChangelog(issue: JiraIssueResponse): Promise<JiraChangelog[]> {
-    const changelogInIssue = issue.changelog;
-    let changelog: JiraChangelog[] = [];
+    const issueChangelogs = issue.changelog;
+    let changelogs: JiraChangelog[] = [];
 
     const allowedValues = ['timeestimate', 'timespent', 'WorklogId'];
 
-    if (changelogInIssue.total <= changelogInIssue.maxResults) {
-      changelogInIssue.histories.forEach((changelogEntry) => {
-        changelog = changelog.concat(this.filterChangelog(changelogEntry, allowedValues));
+    if (issueChangelogs.total <= issueChangelogs.maxResults) {
+      issueChangelogs.histories.forEach((changelogEntry) => {
+        changelogs = changelogs.concat(this.filterChangelog(changelogEntry, allowedValues));
       });
-      return Promise.resolve(changelog);
+      return Promise.resolve(changelogs);
     } else {
       return this.jira
         .getChangelog(issue.key)
         .each((changelogEntry: JiraChangelog) => {
-          changelog = changelog.concat(this.filterChangelog(changelogEntry, allowedValues));
+          changelogs = changelogs.concat(this.filterChangelog(changelogEntry, allowedValues));
         })
-        .then(() => changelog);
+        .then(() => changelogs);
     }
   }
 
   private filterChangelog(changelogEntry: JiraChangelog, allowedValues: string[]) {
-    const changelog: JiraChangelog[] = [];
+    const changelogs: JiraChangelog[] = [];
     changelogEntry.items = changelogEntry.items.filter((item) => allowedValues.includes(item.field));
     if (changelogEntry.items.length > 0) {
-      changelog.push(changelogEntry);
+      changelogs.push(changelogEntry);
     }
 
-    return changelog;
+    return changelogs;
   }
 
   private processWorklog(issue: JiraIssueResponse): Promise<JiraWorklog[]> {
-    //log('processWorklog()');
-    const worklogArray = issue.fields.worklog;
-    if (worklogArray.total <= worklogArray.maxResults) {
-      return Promise.resolve(worklogArray.worklogs);
+    log('processWorklog()');
+    const issueWorklogs = issue.fields.worklog;
+    if (issueWorklogs.total <= issueWorklogs.maxResults) {
+      return Promise.resolve(issueWorklogs.worklogs);
     } else {
-      const arrayToReturn: JiraWorklog[] = [];
+      const worklogsToReturn: JiraWorklog[] = [];
       return this.jira
         .getWorklog(issue.key)
         .each((worklog: JiraWorklog) => {
-          arrayToReturn.push(worklog);
+          worklogsToReturn.push(worklog);
         })
-        .then(() => arrayToReturn);
+        .then(() => worklogsToReturn);
     }
   }
 
   private processComments(issue: JiraIssueResponse): Promise<JiraComment[]> {
-    //log('processComments()', issue);
-    const issue_comments = issue.fields.comment;
-    if (issue_comments.total <= issue_comments.maxResults) {
-      return Promise.resolve(issue_comments.comments);
+    log('processComments()', issue);
+    const issueComments = issue.fields.comment;
+    if (issueComments.total <= issueComments.maxResults) {
+      return Promise.resolve(issueComments.comments);
     } else {
       const comments: JiraComment[] = [];
       return this.jira
@@ -373,10 +373,9 @@ class JiraITSIndexer {
   }
 
   private createNotesObject(jiraWorklogs: JiraWorklog[], jiraChangelogs: JiraChangelog[]) {
-    const SECOND_POST_FIX = '2'; // change to "2" since this is used to identify as seconds
+    const SECONDS_POST_FIX = '2';
 
     const notes: ChangelogType[] = [];
-    // TODO: refactor variable names e.g. below worklogEntry is false
     jiraChangelogs.forEach((jiraChangelog) => {
       const authorObject = jiraChangelog.author;
       let isWorklogIdDeleted: null | boolean = null;
@@ -407,17 +406,17 @@ class JiraITSIndexer {
         let timeSpentSeconds = -1;
         if (isWorklogIdDeleted) {
           timeSpentSeconds = from - (to !== -1 ? to : 0);
-          body = `deleted ${timeSpentSeconds}${SECOND_POST_FIX} of spent time`;
+          body = `deleted ${timeSpentSeconds}${SECONDS_POST_FIX} of spent time`;
           timeSpentSeconds = timeSpentSeconds * -1;
           //könnte zu viel sein was entfernt wird
         } else if (!isWorklogIdDeleted && to > from && to !== -1) {
           // from = from !== -1 ? from : 0;s
           timeSpentSeconds = to - (from !== -1 ? from : 0);
-          body = `added ${timeSpentSeconds}${SECOND_POST_FIX} of time spent`;
+          body = `added ${timeSpentSeconds}${SECONDS_POST_FIX} of time spent`;
           //removed some time
         } else if (!isWorklogIdDeleted && from > to && from !== -1) {
           timeSpentSeconds = from - (to !== -1 ? to : 0);
-          body = `subtracted ${timeSpentSeconds}${SECOND_POST_FIX} of time spent`;
+          body = `subtracted ${timeSpentSeconds}${SECONDS_POST_FIX} of time spent`;
           timeSpentSeconds = timeSpentSeconds * -1;
         }
 
@@ -466,7 +465,7 @@ class JiraITSIndexer {
   }
 
   isStopping() {
-    //log('isStopping()');
+    log('isStopping()');
     return this.stopping;
   }
 }
