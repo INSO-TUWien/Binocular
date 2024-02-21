@@ -6,7 +6,7 @@ import debug from 'debug';
 import ConfigurationError from '../../errors/ConfigurationError';
 import Milestone from '../../models/Milestone';
 import Issue from '../../models/Issue';
-import { JiraConfigType } from '../../types/jiraConfigType';
+import { JiraConfigType } from '../../types/configTypes';
 import {
   ChangelogType,
   JiraCommitsDetails,
@@ -16,7 +16,7 @@ import {
   JiraIssue,
   JiraVersion,
   JiraWorklog,
-} from '../../types/jiraRestApiTypes';
+} from '../../types/jiraTypes';
 import { Mentions } from '../../types/issueTypes';
 import ProgressReporter from '../../progress-reporter';
 import MergeRequest from '../../models/MergeRequest';
@@ -278,8 +278,6 @@ class JiraITSIndexer {
             commit: commit.id,
             createdAt: commit.authorTimestamp,
             closes: commit.merge,
-            displayId: commit.displayId,
-            author: commit.author,
           });
         });
       });

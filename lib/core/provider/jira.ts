@@ -11,7 +11,7 @@ import {
   JiraPullRequestDetails,
   JiraPullRequestsFullDetails,
   JiraPullRequestsSummary,
-} from '../../types/jiraRestApiTypes';
+} from '../../types/jiraTypes';
 
 const log = debug('jira');
 
