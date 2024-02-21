@@ -6,11 +6,11 @@ import urlJoin from 'url-join';
 import {
   CommitRestResponse,
   CommitsFullDetail,
-  CommitSummary,
-  DevelopmentSummary,
-  PullRequestDetail,
+  JiraCommitsSummary,
+  JiraDevelopmentSummary,
+  JiraPullRequestDetails,
   PullrequestRestResponse,
-  PullRequestsSummary,
+  JiraPullRequestsSummary,
 } from '../../types/jiraRestApiTypes';
 
 const log = debug('jira');
@@ -44,7 +44,7 @@ class Jira {
     return this.paginatedRequest(`project/${projectKey}/version?`);
   }
 
-  private getDetailsPromises(issueId: string, summaryObject: CommitSummary | PullRequestsSummary, dataType: string) {
+  private getDetailsPromises(issueId: string, summaryObject: JiraCommitsSummary | JiraPullRequestsSummary, dataType: string) {
     const promises: Promise<any>[] = [];
 
     for (const [key] of Object.entries(summaryObject.byInstanceType)) {
@@ -54,7 +54,7 @@ class Jira {
     return promises;
   }
 
-  getCommitDetails(issueId: string, summaryObject: CommitSummary) {
+  getCommitDetails(issueId: string, summaryObject: JiraCommitsSummary) {
     if (!summaryObject) {
       return Promise.resolve([]);
     }
@@ -72,13 +72,13 @@ class Jira {
     });
   }
 
-  getPullrequestDetails(issueId: string, summaryObject: PullRequestsSummary) {
+  getPullrequestDetails(issueId: string, summaryObject: JiraPullRequestsSummary) {
     if (!summaryObject) {
       return Promise.resolve([]);
     }
     const promises: Promise<PullrequestRestResponse[]>[] = this.getDetailsPromises(issueId, summaryObject, 'pullrequest');
 
-    let informationToReturn: PullRequestDetail[] = [];
+    let informationToReturn: JiraPullRequestDetails[] = [];
 
     return Promise.all(promises).then((responses) => {
       for (const response of responses) {
@@ -101,7 +101,7 @@ class Jira {
   getDevelopmentSummary(issueId: string) {
     log('getMergeRequests(%o)', issueId);
 
-    return this.request('dev-status/latest/issue/summary?issueId=' + issueId).then((developmentInformation: DevelopmentSummary) => ({
+    return this.request('dev-status/latest/issue/summary?issueId=' + issueId).then((developmentInformation: JiraDevelopmentSummary) => ({
       commits: developmentInformation?.repository,
       pullrequests: developmentInformation?.pullrequest,
     }));

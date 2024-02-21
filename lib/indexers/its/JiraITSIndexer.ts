@@ -13,7 +13,7 @@ import {
   JiraChangelog,
   JiraComment,
   JiraFullAuthor,
-  JiraIssueResponse,
+  JiraIssue,
   JiraVersion,
   JiraWorklog,
 } from '../../types/jiraRestApiTypes';
@@ -62,7 +62,7 @@ class JiraITSIndexer {
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
         .on('count', (count: number) => this.reporter.setIssueCount(count))
-        .each((issue: JiraIssueResponse) => {
+        .each((issue: JiraIssue) => {
           if (this.stopping) {
             return false;
           }
@@ -305,7 +305,7 @@ class JiraITSIndexer {
     };
   }
 
-  private processChangelog(issue: JiraIssueResponse): Promise<JiraChangelog[]> {
+  private processChangelog(issue: JiraIssue): Promise<JiraChangelog[]> {
     const issueChangelogs = issue.changelog;
     let changelogs: JiraChangelog[] = [];
 
@@ -336,7 +336,7 @@ class JiraITSIndexer {
     return changelogs;
   }
 
-  private processWorklog(issue: JiraIssueResponse): Promise<JiraWorklog[]> {
+  private processWorklog(issue: JiraIssue): Promise<JiraWorklog[]> {
     log('processWorklog()');
     const issueWorklogs = issue.fields.worklog;
     if (issueWorklogs.total <= issueWorklogs.maxResults) {
@@ -352,7 +352,7 @@ class JiraITSIndexer {
     }
   }
 
-  private processComments(issue: JiraIssueResponse): Promise<JiraComment[]> {
+  private processComments(issue: JiraIssue): Promise<JiraComment[]> {
     log('processComments()', issue);
     const issueComments = issue.fields.comment;
     if (issueComments.total <= issueComments.maxResults) {

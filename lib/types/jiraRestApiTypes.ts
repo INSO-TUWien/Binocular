@@ -1,4 +1,4 @@
-export interface PullRequestsSummary {
+export interface JiraPullRequestsSummary {
   overall: {
     count: number;
     lastUpdated: string | null;
@@ -10,13 +10,13 @@ export interface PullRequestsSummary {
   byInstanceType: any;
 }
 
-export interface DevelopmentSummary {
-  pullrequest: PullRequestsSummary;
-  repository: CommitSummary;
+export interface JiraDevelopmentSummary {
+  pullrequest: JiraPullRequestsSummary;
+  repository: JiraCommitsSummary;
   [key: string]: any;
 }
 
-export interface CommitSummary {
+export interface JiraCommitsSummary {
   overall: {
     count: number;
     lastUpdated: string | null;
@@ -40,8 +40,8 @@ export interface JiraVersion {
   projectId: string;
 }
 
-export interface PullRequestDetail {
-  author: JiraShortAuthor;
+export interface JiraPullRequestDetails {
+  author: JiraDevelopmentDetailsAuthor;
   id: string;
   name: string;
   commentCount: number;
@@ -83,7 +83,7 @@ export interface _instance {
 
 export interface PullrequestRestResponse {
   branches: any[];
-  pullRequests: PullRequestDetail[];
+  pullRequests: JiraPullRequestDetails[];
   instance: _instance;
 }
 
@@ -99,7 +99,7 @@ export interface CommitDetail {
   displayId: string;
   authorTimestamp: string;
   url: string;
-  author: JiraShortAuthor;
+  author: JiraDevelopmentDetailsAuthor;
   fileCount: number;
   merge: boolean;
   message: string;
@@ -114,7 +114,7 @@ export interface CommitFiles {
   linesRemoved: number;
 }
 
-export interface JiraShortAuthor {
+export interface JiraDevelopmentDetailsAuthor {
   name: string;
   avatar: string;
 }
@@ -168,7 +168,7 @@ export interface JiraComment {
   [key: string]: any;
 }
 
-export interface JiraIssueResponse {
+export interface JiraIssue {
   id: string;
   key: string;
   self: string;
