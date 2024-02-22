@@ -17,6 +17,10 @@ export default handleActions(
       _.assign({}, state, {
         displayByAuthors: action.payload ? action.payload : null,
       }),
+    SET_TIME_SPAN: (state, action) =>
+      _.assign({}, state, {
+        timeSpan: action.payload ? action.payload : null,
+      }),
 
 
   },
@@ -25,5 +29,6 @@ export default handleActions(
     files: [],
     displayByAuthors: false,
     displayMetric: 'linesChanged',
+    timeSpan: {from: '', to: ''},
   }
 );

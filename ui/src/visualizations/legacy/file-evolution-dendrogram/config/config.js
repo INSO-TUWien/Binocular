@@ -2,11 +2,12 @@
 
 import { connect } from 'react-redux';
 
-import { setActiveBranch, setDisplayMetric, setDisplayByAuthors } from '../sagas';
+import { setActiveBranch, setDisplayMetric, setDisplayByAuthors, setTimeSpan } from '../sagas';
 import styles from '../styles.scss';
 import FileBrowser from '../components/fileBrowser/fileBrowser';
 import TabCombo from '../../../../components/TabCombo';
 import CheckboxLegend from '../components/checkboxLegend';
+import DateRangeFilter from '../../../../components/DateRangeFilter/dateRangeFilter';
 
 const mapStateToProps = (state /*, ownProps*/) => {
   const State = state.visualizations.fileEvolutionDendrogram.state;
@@ -17,6 +18,7 @@ const mapStateToProps = (state /*, ownProps*/) => {
     files: State.data.data.files,
     palette: State.data.data.palette,
     displayMetric: State.config.displayMetric,
+    timeSpan: State.config.timeSpan,
   };
 };
 
@@ -25,6 +27,7 @@ const mapDispatchToProps = (dispatch /*, ownProps*/) => {
     onSetBranch: (branch) => dispatch(setActiveBranch(branch)),
     onClickMetric: (metric) => dispatch(setDisplayMetric(metric)),
     onClickCheckboxLegend: (isSet) => dispatch(setDisplayByAuthors(isSet)),
+    onChangeTimeSpan: (span) => dispatch(setTimeSpan(span)),
   };
 };
 
@@ -74,6 +77,17 @@ const FileEvolutionDendrogramConfigComponent = (props) => {
           {options}
         </select>
       </div>
+      <label className="label">Date Range</label>
+      <div>
+          <DateRangeFilter
+            from={props.timeSpan.from}
+            to={props.timeSpan.to}
+            onDateChanged={(data) => {
+              console.log(data);
+              props.onChangeTimeSpan(data);
+            }}
+          />
+        </div>
       <hr />
       <div id={'fileSelector'}>
         <FileBrowser files={props.files} props={props} />
