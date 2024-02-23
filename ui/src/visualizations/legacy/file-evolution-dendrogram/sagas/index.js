@@ -48,7 +48,7 @@ export const fetchFileEvolutionDendrogramData = fetchFactory(
       timeSpan.from = firstCommitTimestamp;
     }
     if (timeSpan.to === '') {
-      timeSpan.to = firstCommitTimestamp;
+      timeSpan.to = lastCommitTimestamp;
     }
 
     const files = [];

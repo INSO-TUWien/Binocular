@@ -7,6 +7,7 @@ const aql = arangodb.aql;
 const commitsToFiles = db._collection('commits-files');
 const LanguagesToFiles = db._collection('languages-files');
 const paginated = require('./paginated.js');
+const Timestamp = require('./Timestamp.js');
 
 module.exports = new gql.GraphQLObjectType({
   name: 'File',
@@ -42,13 +43,26 @@ module.exports = new gql.GraphQLObjectType({
       commits: paginated({
         type: require('./commit.js'),
         description: 'The commits touching this file',
-        query: (file, args, limit) => aql`
+        args: {
+          since: { type: Timestamp, required: false },
+          until: { type: Timestamp, required: false },
+        },
+        query: (file, args, limit) => {
+          let query = aql`
           FOR commit
           IN
           OUTBOUND ${file} ${commitsToFiles}
             ${limit}
-            SORT commit.date ASC
-            RETURN commit`,
+            SORT commit.date ASC`;
+          if (args.since !== undefined) {
+            query = aql`${query} FILTER DATE_TIMESTAMP(commit.date) >= DATE_TIMESTAMP(${args.since})`;
+          }
+          if (args.until !== undefined) {
+            query = aql`${query} FILTER DATE_TIMESTAMP(commit.date) <= DATE_TIMESTAMP(${args.until})`;
+          }
+          query = aql`${query} RETURN commit`;
+          return query;
+        },
       }),
     };
   },

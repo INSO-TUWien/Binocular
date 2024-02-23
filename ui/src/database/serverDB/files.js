@@ -16,17 +16,17 @@ export default class Files {
     );
   }
 
-  static getFileDataFileEvolutionDendrogram(activeBranch) {
+  static getFileDataFileEvolutionDendrogram(activeBranch, since, until) {
 
-    const getFileCommits = (activeBranch) => {
+    const getFileCommits = (activeBranch, since, until) => {
       return graphQl
         .query(
-          `query {
+          `query ($since: Timestamp, $until: Timestamp) {
             files {
               data {
                 path
                 webUrl
-                commits{
+                commits (since: $since, until: $until) {
                   data {
                     branch
                     signature
@@ -39,7 +39,7 @@ export default class Files {
               }
             }
           }`,
-          {}
+          {activeBranch, since, until}
         )
         .then((resp) => resp.files.data.map((file) => {
           const statsByAuthor = {};
@@ -86,6 +86,6 @@ export default class Files {
         }));
     };
 
-    return getFileCommits(activeBranch);
+    return getFileCommits(activeBranch, since, until);
   }
 }
