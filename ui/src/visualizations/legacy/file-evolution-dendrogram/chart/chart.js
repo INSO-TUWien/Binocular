@@ -166,6 +166,7 @@ export default class FileEvolutionDendrogram extends React.PureComponent {
 
     links.enter()
       .append("path")
+      .style("stroke", (d) => this.getColor(d.target.data))
       .attr("d", d3.linkRadial()
         .angle(d => d.x)
         .radius(10));
@@ -176,6 +177,7 @@ export default class FileEvolutionDendrogram extends React.PureComponent {
 
     this.linkgroup.selectAll("path")
       .transition(t)
+      .style("stroke", (d) => this.getColor(d.target.data))
       .attr("d", d3.linkRadial()
         .angle(d => d.x)
         .radius(d => d.y));
@@ -338,12 +340,25 @@ export default class FileEvolutionDendrogram extends React.PureComponent {
       
     } else {
       if (this.state.displayMetric === 'linesChanged') {
-        const scaleEntry = this.state.linesChangedScale.find((color) => file.totalStats.linesChanged <= color.value);
-        color = scaleEntry.color;
+        
+        if (file.totalStats.linesChanged == 0) { // 0 should be black
+          color = '#000000'
+        } else {
+          const scaleEntry = this.state.linesChangedScale.find((color) => file.totalStats.linesChanged <= color.value);
+          if (scaleEntry === undefined) {
+            console.log(file.name);
+            console.log(file.totalStats.linesChanged);
+            console.log(this.state.linesChangedScale);
+          }
+          color = scaleEntry.color;
+        }
       } else if (this.state.displayMetric === 'commits') {
-        const scaleEntry = this.state.commitScale.find((color) => file.totalStats.count <= color.value);
-
-        color = scaleEntry.color;
+        if (file.totalStats.count == 0) { // 0 should be black
+          color = '#000000'
+        } else {
+          const scaleEntry = this.state.commitScale.find((color) => file.totalStats.count <= color.value);
+          color = scaleEntry.color;
+        }
       }
     }
     
@@ -367,7 +382,6 @@ export default class FileEvolutionDendrogram extends React.PureComponent {
       scale.push(result);
     }
     scale[steps-1].value = scale[steps-1].value + 1; // fight some inaccuracies
-    scale[0].color = '#000000'; // very low values or 0 should be black
     return scale;
   }
 

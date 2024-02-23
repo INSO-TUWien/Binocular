@@ -83,7 +83,6 @@ const FileEvolutionDendrogramConfigComponent = (props) => {
             from={props.timeSpan.from}
             to={props.timeSpan.to}
             onDateChanged={(data) => {
-              console.log(data);
               props.onChangeTimeSpan(data);
             }}
           />
