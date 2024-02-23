@@ -301,7 +301,7 @@ class JiraITSIndexer {
 
   private createVersionObject(projectVersion: JiraVersion) {
     const expired = projectVersion.overdue !== undefined ? projectVersion.overdue : null;
-    const dueDate = projectVersion.releaseDate !== undefined ? projectVersion.releaseDate : null;
+    const dueDate = projectVersion.releaseDate !== undefined ? new Date(projectVersion.releaseDate).toISOString() : null;
 
     return {
       id: projectVersion.projectId + projectVersion.id,
@@ -309,7 +309,7 @@ class JiraITSIndexer {
       title: projectVersion.name,
       description: projectVersion.description ? projectVersion.description : null,
       dueDate: dueDate,
-      startDate: projectVersion.startDate ? projectVersion.startDate : null,
+      startDate: projectVersion.startDate ? new Date(projectVersion.startDate).toISOString() : null,
       state: projectVersion.released ? 'active' : 'inactive',
       expired: expired, // TODO: check if this is correct if overdue is not set in response
     };
@@ -464,11 +464,11 @@ class JiraITSIndexer {
     if (!userObject) {
       return null;
     }
-    userObject.name = userObject.displayName;
+    userObject.name = userObject.displayName + ' <' + 'e52004305@student.tuwien.ac.at' + '>';
     userObject.state = userObject.active ? 'active' : 'inactive';
     userObject.avatar_url = Object.values(userObject.avatarUrls)[0];
     userObject.web_url = userObject.self.split('/rest/api')[0] + '/jira/people/' + userObject.accountId;
-    userObject.login = userObject.emailAddress;
+    userObject.login = userObject.displayName;
     userObject.id = userObject.accountId;
 
     return userObject;
