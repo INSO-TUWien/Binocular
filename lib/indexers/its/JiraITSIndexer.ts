@@ -97,6 +97,21 @@ class JiraITSIndexer {
                       !persistedMergeRequest ||
                       new Date(persistedMergeRequest.updatedAt).getTime() < new Date(mergeRequest.lastUpdate).getTime()
                     ) {
+                      let closedAt = null;
+
+                      if (
+                        (persistedMergeRequest && persistedMergeRequest.status !== 'MERGED' && mergeRequest.status === 'MERGED') ||
+                        (!persistedMergeRequest && mergeRequest.status === 'MERGED')
+                      ) {
+                        closedAt = mergeRequest.lastUpdate;
+                      }
+                      let createdAt = null;
+                      if (!persistedMergeRequest) {
+                        createdAt = mergeRequest.lastUpdate;
+                      } else {
+                        createdAt = persistedMergeRequest.createdAt;
+                      }
+
                       const toPersist = {
                         id: mergeRequest.id,
                         iid: parseInt(mergeRequest.id, 10),
@@ -104,15 +119,17 @@ class JiraITSIndexer {
                         // description: description, // this description is not the description
                         // of the merge request in Github but of the issue in Jira
                         state: mergeRequest.status,
-                        // createdAt: issue.fields.createdAt,
-                        updatedAt: mergeRequest.lastUpdate,
+                        createdAt: new Date(createdAt).toISOString(),
+                        updatedAt: new Date(mergeRequest.lastUpdate).toISOString(),
+                        closedAt: closedAt ? new Date(closedAt).toISOString() : null,
                         // labels: NA
                         // milestone: issue.fields.fixVersions.map((version: JiraVersion) => this.createVersionObject(version)),
                         // this are versions of issue
                         author: mergeRequest.author, // mergeRequest.author.name but it always displays name: User
                         assignee: mergeRequest.reviewers.length > 0 ? mergeRequest.reviewers[0] : null,
-                        // this is assignee of issue in Jira
-                        assignees: mergeRequest.reviewers, // not sure if this is correct field
+                        assignees: mergeRequest.reviewers,
+                        sourceBranch: mergeRequest.source.branch,
+                        targetBranch: mergeRequest.destination.branch,
                         // userNotesCount: NA
                         // upvotes: issue.fields?.votes.votes ? issue.fields?.votes.votes : null,
                         // this are the fields from the issue
@@ -120,7 +137,9 @@ class JiraITSIndexer {
                         webUrl: mergeRequest.url,
                         repositoryName: mergeRequest.repositoryName,
                         repositoryUrl: mergeRequest.repositoryUrl,
-                        commentCount: mergeRequest.commentCount,
+                        userNotesCount: mergeRequest.commentCount,
+                        notes: [],
+                        timeStats: null,
                         // reference: NA,
                         // references: NA,
                         // timeStats: NA,
@@ -244,7 +263,7 @@ class JiraITSIndexer {
           // TODO: Currently necessary because the implementation of the Models isn't really compatible with typescript.
           // eslint-disable-next-line @typescript-eslint/ban-ts-comment
           // @ts-expect-error
-          Milestone.findOneById(projectVersion.id)
+          Milestone.findOneById(projectVersion.projectId + projectVersion.id)
             // TODO: Currently necessary because the implementation of the Models isn't really compatible with typescript.
             // eslint-disable-next-line @typescript-eslint/ban-ts-comment
             // @ts-expect-error
@@ -464,7 +483,7 @@ class JiraITSIndexer {
     if (!userObject) {
       return null;
     }
-    userObject.name = userObject.displayName + ' <' + 'e52004305@student.tuwien.ac.at' + '>';
+    userObject.name = userObject.displayName + ' <' + userObject.emailAddress + '>';
     userObject.state = userObject.active ? 'active' : 'inactive';
     userObject.avatar_url = Object.values(userObject.avatarUrls)[0];
     userObject.web_url = userObject.self.split('/rest/api')[0] + '/jira/people/' + userObject.accountId;
