@@ -15,6 +15,7 @@ export default class FileEvolutionDendrogram extends React.PureComponent {
     super(props);
 
     const convertedFiles = this.convertData(props.files);
+    console.log(convertedFiles);
 
     this.state = {
       palette: props.palette,
@@ -255,16 +256,15 @@ export default class FileEvolutionDendrogram extends React.PureComponent {
   // taken from code hotspots, changed by giving base folder a name
   // needs subfiles to be named children, it does not work with content
   convertData(data) {
+    console.log(data);
     const convertedData = { name: "root", children: [] };
     for (const file of data) {
       const pathParts = file.key.split('/');
       this.genPathObjectString(convertedData.children, pathParts, file.webUrl, file.key, file.totalStats,
-        file.authorMostLinesChanged, file.authorMostCommits, "");
+        file.statsByAuthor, "");
     }
 
-    this.fillInTotalStats(convertedData);
-
-    this.getColorScale(convertedData.totalStats.linesChanged);
+    this.fillInFolderStats(convertedData);
 
     return convertedData;
   }
@@ -272,20 +272,22 @@ export default class FileEvolutionDendrogram extends React.PureComponent {
   // traversedPath is needed to give all folders a unique path
   // only path is not enough, since there is no way to differentiate between 
   // two folders of the same name in a path, e.g. -> a/b/a/c/...
-  genPathObjectString(convertedData, pathParts, Url, Path, totalStats, authorMostLinesChanged, authorMostCommits, traversedPath ) {
+  genPathObjectString(convertedData, pathParts, Url, Path, totalStats, statsByAuthor, traversedPath ) {
     const currElm = pathParts.shift();
 
     if (pathParts.length === 0) {
+      const authorMostLinesChanged = _.maxBy(_.values(statsByAuthor), "linesChanged");
+      const authorMostCommits = _.maxBy(_.values(statsByAuthor), "count");
       convertedData.push({ name: currElm, type: 'file', url: Url, path: Path, totalStats: totalStats,
-       authorMostLinesChanged: authorMostLinesChanged, authorMostCommits:authorMostCommits });
+       authorMostLinesChanged: authorMostLinesChanged, authorMostCommits: authorMostCommits, statsByAuthor });
     } else {
       let elem = convertedData.find((d) => d.name === currElm);
       if (elem === undefined) {
         elem = { name: currElm, type: 'folder', path: this.updateTraversedPath(traversedPath, currElm), children: [] };
-        this.genPathObjectString(elem.children, pathParts, Url, Path, totalStats, authorMostLinesChanged, authorMostCommits, this.updateTraversedPath(traversedPath, currElm));
+        this.genPathObjectString(elem.children, pathParts, Url, Path, totalStats, statsByAuthor, this.updateTraversedPath(traversedPath, currElm));
         convertedData.push(elem);
       } else {
-        this.genPathObjectString(elem.children, pathParts, Url, Path, totalStats, authorMostLinesChanged, authorMostCommits, this.updateTraversedPath(traversedPath, currElm));
+        this.genPathObjectString(elem.children, pathParts, Url, Path, totalStats, statsByAuthor, this.updateTraversedPath(traversedPath, currElm));
       }
     }
   }
@@ -298,21 +300,47 @@ export default class FileEvolutionDendrogram extends React.PureComponent {
     }
   }
 
-  fillInTotalStats(data) {
+  fillInFolderStats(data) {
     if (data.children) {
-      let totalStats = {
+
+      const totalStats = {
       count: 0,
       linesChanged: 0,
       };
+
+      const totalStatsByAuthor = {};
+
       _.each(data.children, (child) => {
-        const childStats = this.fillInTotalStats(child);
-        totalStats.linesChanged = totalStats.linesChanged + childStats.linesChanged;
-        totalStats.count = totalStats.count + childStats.count;
+        const childData = this.fillInFolderStats(child);
+        // total stats
+        totalStats.linesChanged = totalStats.linesChanged + childData.totalStats.linesChanged;
+        totalStats.count = totalStats.count + childData.totalStats.count;
+        data.totalStats = totalStats;
+
+        // stats for each author
+        _.each(childData.statsByAuthor, (authorStats) => {
+          let stats = totalStatsByAuthor[authorStats.author];
+          if (!stats) {
+            totalStatsByAuthor[authorStats.author] = authorStats;
+          } else {
+            totalStatsByAuthor[authorStats.author].count = totalStatsByAuthor[authorStats.author].count + authorStats.count;
+            totalStatsByAuthor[authorStats.author].linesChanged = totalStatsByAuthor[authorStats.author].linesChanged + authorStats.linesChanged;
+          }
+
+        });
       });
+
+      const authorMostLinesChanged = _.maxBy(_.values(totalStatsByAuthor), "linesChanged");
+      const authorMostCommits = _.maxBy(_.values(totalStatsByAuthor), "count");
+
+      data.authorMostLinesChanged = authorMostLinesChanged;
+      data.authorMostCommits = authorMostCommits;
+
       data.totalStats = totalStats;
-      return totalStats;
+      data.statsByAuthor = totalStatsByAuthor;
+      return data;
     } else { // basecase
-      return data.totalStats;
+      return data;
     }
   }
 
@@ -326,13 +354,13 @@ export default class FileEvolutionDendrogram extends React.PureComponent {
 
       if (this.state.displayMetric === 'linesChanged') {
         _.each(Object.keys(this.state.palette), (key) => {
-          if (key === file.authorMostLinesChanged) {
+          if (key === file.authorMostLinesChanged?.author) {
             color = this.state.palette[key];
           }
         });
       } else if (this.state.displayMetric === 'commits') {
         _.each(Object.keys(this.state.palette), (key) => {
-          if (key === file.authorMostCommits) {
+          if (key === file.authorMostCommits?.author) {
             color = this.state.palette[key];
           }
         });
@@ -346,9 +374,7 @@ export default class FileEvolutionDendrogram extends React.PureComponent {
         } else {
           const scaleEntry = this.state.linesChangedScale.find((color) => file.totalStats.linesChanged <= color.value);
           if (scaleEntry === undefined) {
-            console.log(file.name);
-            console.log(file.totalStats.linesChanged);
-            console.log(this.state.linesChangedScale);
+            return '#000000';
           }
           color = scaleEntry.color;
         }
@@ -357,6 +383,9 @@ export default class FileEvolutionDendrogram extends React.PureComponent {
           color = '#000000'
         } else {
           const scaleEntry = this.state.commitScale.find((color) => file.totalStats.count <= color.value);
+          if (scaleEntry === undefined) {
+            return '#000000';
+          }
           color = scaleEntry.color;
         }
       }

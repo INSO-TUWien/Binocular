@@ -56,32 +56,25 @@ export default class Files {
             if (!stats) {
               stats = statsByAuthor[commit.signature] = {
                 count: 0,
-                additions: 0,
-                deletions: 0,
+                linesChanged: 0,
                 author: commit.signature,
               };
             }
     
             stats.count = stats.count + 1;
-            stats.additions = stats.additions + commit.stats.additions;
-            stats.deletions = stats.deletions + commit.stats.deletions;
+            stats.linesChanged = stats.linesChanged + commit.stats.additions + commit.stats.deletions;
     
             totalStats.count = totalStats.count + 1;
             totalStats.linesChanged = totalStats.linesChanged + commit.stats.additions + commit.stats.deletions;
           });
-    
-          const authorMostLinesChanged = _.maxBy(_.values(statsByAuthor), (author) => author.additions + author.deletions);
-          const authorMostCommits = _.maxBy(_.values(statsByAuthor), "count");
     
     
           const returnFile = {
             path: file.path,
             webUrl: file.webUrl,
             totalStats: totalStats,
-            authorMostLinesChanged: authorMostLinesChanged ? authorMostLinesChanged.author : undefined,
-            authorMostCommits: authorMostCommits ? authorMostCommits.author : undefined,
+            statsByAuthor: statsByAuthor,
           };
-  
           return returnFile;
         }));
     };

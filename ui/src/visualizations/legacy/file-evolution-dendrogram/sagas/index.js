@@ -56,7 +56,7 @@ export const fetchFileEvolutionDendrogramData = fetchFactory(
     .then(function (resp) {
       for (const i in resp) {
         files.push({ key: resp[i].path, webUrl: resp[i].webUrl, totalStats: resp[i].totalStats,
-          authorMostLinesChanged: resp[i].authorMostLinesChanged, authorMostCommits: resp[i].authorMostCommits });
+          statsByAuthor: resp[i].statsByAuthor });
       }
     });
 
