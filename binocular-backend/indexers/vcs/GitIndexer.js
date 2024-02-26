@@ -487,10 +487,8 @@ async function createOwnershipConnections(repo, context) {
         try {
           const res = await repo.getOwnershipForFile(file, sha, context);
           for (const [stakeholder] of Object.entries(res.ownershipData)) {
-            CommitFileStakeholderConnection.ensure(
-              { ownedLines: res.ownershipData[stakeholder], hunks: res.hunks[stakeholder] },
-              { from: cfc, to: stakeholderIds[fixUTF8(stakeholder)] },
-            );
+            const hunks = res.hunks[stakeholder].map((h) => _.omit(h, ['signature']));
+            CommitFileStakeholderConnection.ensure({ hunks: hunks }, { from: cfc, to: stakeholderIds[fixUTF8(stakeholder)] });
           }
         } catch (e) {
           console.log(`Cant get ownership for ${file} at commit ${cfc._to}`);

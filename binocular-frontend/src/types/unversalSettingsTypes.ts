@@ -7,7 +7,8 @@ import moment from 'moment/moment';
 export interface UniversalSettingsConfig {
   hideDateSettings: boolean;
   hideGranularitySettings: boolean;
-  hideCommitSettings: boolean;
+  hideMergeCommitSettings: boolean;
+  hideExcludeCommitSettings: boolean;
   hideSprintSettings: boolean;
 }
 
@@ -16,6 +17,8 @@ export interface UniversalSettings {
   chartResolution: moment.unitOfTime.DurationConstructor;
   chartTimeSpan: DateRange;
   excludeMergeCommits: boolean;
+  excludedCommits: string[];
+  excludeCommits: boolean;
   mergedAuthors: Author[];
   otherAuthors: Committer[];
   selectedAuthorsGlobal: string[];

@@ -11,7 +11,8 @@ import ConditionalCompile from 'vite-plugin-conditional-compiler';
 
 // https://vitejs.dev/config/
 export default () => {
-  const isOfflineBuild = () => process.env.VITE_OFFLINE === 'true';
+  const isOfflineBuild = () => process.env.VITE_OFFLINE !== undefined && process.env.VITE_OFFLINE.trim() === 'true';
+
   return defineConfig({
     root: './',
     base: '',

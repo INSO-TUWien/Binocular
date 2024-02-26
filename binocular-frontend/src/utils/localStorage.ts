@@ -7,7 +7,7 @@ import { getContext } from './context';
 import { DashboardState, DashboardVisualization } from '../types/dashboardTypes.ts';
 
 const ctx = getContext();
-const LOCAL_STORAGE_VERSION: number = 1;
+const LOCAL_STORAGE_VERSION: number = 2;
 export function updateUniversalSettingsLocalStorage(key: string, value: any, defaultConfig: UniversalSettings): UniversalSettings {
   let currConfig: UniversalSettings;
   if (localStorage.getItem(ctx.repo.name + '-UniversalSettings-V' + LOCAL_STORAGE_VERSION) === null) {

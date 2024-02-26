@@ -66,19 +66,18 @@ export function parseBlameOutput(output: string) {
       const signature = this.fixUTF8(author['author'] + ' ' + author['author-mail']);
 
       if (signature in hunks) {
-        if (this.fixUTF8(currHunk.signature) === signature) {
-          currHunk.linesChanged += 1;
+        if (this.fixUTF8(currHunk.signature) === signature && currHunk.commitSha === currentSha) {
           currHunk.endLine = currLineNumber;
         } else {
           hunks[this.fixUTF8(currHunk.signature)].push(currHunk);
-          currHunk = { signature: signature, linesChanged: 1, startLine: currLineNumber, endLine: currLineNumber };
+          currHunk = { signature: signature, startLine: currLineNumber, endLine: currLineNumber, commitSha: currentSha };
         }
       } else {
         if (currHunk.signature !== undefined) {
           hunks[this.fixUTF8(currHunk.signature)].push(currHunk);
         }
         hunks[signature] = [];
-        currHunk = { signature: signature, linesChanged: 1, startLine: currLineNumber, endLine: currLineNumber };
+        currHunk = { signature: signature, startLine: currLineNumber, endLine: currLineNumber, commitSha: currentSha };
       }
 
       if (signature in ownershipData) {

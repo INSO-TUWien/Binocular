@@ -124,7 +124,9 @@ describe('its', function () {
       gitHubITSIndexer.controller = new GitHubMock();
       await gitHubITSIndexer.index();
 
-      const dbIssuesCollectionData = await (await db.query('FOR i IN @@collection RETURN i', { '@collection': 'issues' })).all();
+      const dbIssuesCollectionData = await (
+        await db.query('FOR i IN @@collection SORT i.id ASC RETURN i', { '@collection': 'issues' })
+      ).all();
 
       expect(dbIssuesCollectionData.length).to.equal(2);
 

@@ -26,6 +26,8 @@ export default () => {
   const dateFrom = universalSettings.chartTimeSpan.from;
   const dateUntil = universalSettings.chartTimeSpan.to;
   const excludeMergeCommits = universalSettings.excludeMergeCommits;
+  const excludedCommits = universalSettings.excludedCommits;
+  const excludeCommits = universalSettings.excludeCommits;
 
   useEffect(() => {
     if (!rawData) {
@@ -64,11 +66,16 @@ export default () => {
     if (excludeMergeCommits) {
       filteredCommits = filteredCommits.filter((c) => c.parents && c.parents.length < 2);
     }
+    // filter explicitly excluded commits
+    if (excludeCommits) {
+      filteredCommits = filteredCommits.filter((c) => !excludedCommits.includes(c.sha));
+    }
+
     //exclude commits with a certain number of changes if option is set in config component
     if (filterCommitsChanges) {
       filteredCommits = filteredCommits.filter((c) => c.stats.additions + c.stats.deletions < filterCommitsChangesCutoff);
     }
-    // we dont need commits from authors that are noit checked or which are not in the specified timespan
+    // we don't need commits from authors that are not checked or which are not in the specified timespan
     filteredCommits = filteredCommits
       .map((c) => {
         const date = new Date(c.date);
@@ -150,7 +157,7 @@ export default () => {
     }
 
     setChartData(buckets);
-  }, [rawData, universalSettings, filterCommitsChanges, filterCommitsChangesCutoff]);
+  }, [rawData, universalSettings, filterCommitsChanges, filterCommitsChangesCutoff, excludedCommits, excludeCommits, excludeMergeCommits]);
 
   if (isFetching || chartData === null) {
     return (

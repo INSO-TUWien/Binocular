@@ -8,7 +8,7 @@ import Filepicker from '../../../components/Filepicker/index';
 import styles from '../styles.module.scss';
 import { setMode, setCurrentBranch, setActiveFiles } from '../sagas';
 import { getBranches, getFilenamesForBranch } from '../sagas/helper';
-import { ownershipDataForMergedAuthors } from '../../../components/Filepicker/utils';
+import { ownershipDataForMergedAuthors } from '../../../utils/ownership.js';
 
 export default () => {
   //global state from redux store

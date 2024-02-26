@@ -14,6 +14,8 @@ interface Props {
   committers: string[];
   displayMetric: string;
   excludeMergeCommits: boolean;
+  excludedCommits: string[];
+  excludeCommits: boolean;
   firstCommitTimestamp: number;
   lastCommitTimestamp: number;
   firstSignificantTimestamp: number;
@@ -43,6 +45,8 @@ const mapStateToProps = (state: GlobalState): Props => {
     mergedAuthors: universalSettings.mergedAuthors,
     chartResolution: universalSettings.chartResolution,
     excludeMergeCommits: universalSettings.excludeMergeCommits,
+    excludedCommits: universalSettings.excludedCommits,
+    excludeCommits: universalSettings.excludeCommits,
   };
 };
 

@@ -15,5 +15,10 @@ export default {
   ConfigComponent,
   HelpComponent,
   usesUniversalSettings: true,
-  universalSettingsConfig: { hideGranularitySettings: true, hideDateSettings: true, hideCommitSettings: true, hideSprintSettings: true },
+  universalSettingsConfig: {
+    hideGranularitySettings: true,
+    hideDateSettings: true,
+    hideMergeCommitSettings: true,
+    hideSprintSettings: true,
+  },
 };

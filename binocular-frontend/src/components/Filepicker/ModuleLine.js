@@ -134,6 +134,7 @@ const ModuleLine = ({
       //append colored line for every dev
       let margin = 0;
       for (const { signature, ownedLines } of _.sortBy(ownership, ['signature'])) {
+        if (ownedLines === 0) continue;
         const devWidth = buttonWidth * (ownedLines / additions);
         ownershipLine.append('rect').attr('x', margin).attr('width', devWidth).attr('height', '100%').attr('fill', authorColors[signature]);
 

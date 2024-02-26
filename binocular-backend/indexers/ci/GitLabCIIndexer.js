@@ -30,7 +30,7 @@ class GitLabCIIndexer extends BaseGitLabIndexer {
       }));
       pipeline.id = String(pipeline.id).replace('gid://gitlab/Ci::Pipeline/', '');
       pipeline.webUrl = this.urlProvider.getPipelineUrl(pipeline.id);
-      pipeline.status = pipeline.status.toLowerCase();
+      pipeline.status = pipeline.status.toLowerCase().replace('canceled', 'cancelled');
       pipeline.userFullName = pipeline.user.name;
       return Build.persist(_.mapKeys(pipeline, (v, k) => _.camelCase(k)));
     });
