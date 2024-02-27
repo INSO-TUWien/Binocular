@@ -137,7 +137,7 @@ export default class FileEvolutionDendrogram extends React.PureComponent {
         if (leaf.parent !== null) {
           parents.add(leaf.parent);
           for (let child of leaf.parent.children) {
-            if (child.children !== undefined && child.children.length > 0) {
+            if (child.data.children !== undefined && child.data.children.length > 0) {
               parents.delete(leaf.parent);
               break;
             }
@@ -154,7 +154,7 @@ export default class FileEvolutionDendrogram extends React.PureComponent {
           parent.data.altChildren = children;
         }
       }
-    } 
+    }
 
     let links_data = root.links();
     let links = this.linkgroup
@@ -188,38 +188,40 @@ export default class FileEvolutionDendrogram extends React.PureComponent {
 
     let nodes = this.nodegroup
       .selectAll("g")
-      .data(nodes_data, (d) => d.data.path)
-      .style("fill", (d) => this.getColor(d.data))
-      .on('mouseover', function (d) {
-        if (d.children) {
-          d3.select(this).style("cursor", "pointer")
-        }
-      })
-      .on("click", function (event, d) {
-        console.log("dddddddddddddddddddd");
-        console.log(d);
-        // switch out children, to not draw them in the next update
-        let altChildren = d.data.altChildren || [];
-        let children = d.data.children;
-        d.data.children = altChildren;
-        d.data.altChildren = children;
-        _this.update(true, false);
-      });
+      .data(nodes_data, (d) => d.data.path);
 
     // remove dom elements without data attached after updating
     nodes.exit().remove();
 
     // nodes that have to be drawn
     let newnodes = nodes
-      .enter().append("g");
+      .enter().append("g")
+      .on("click", function (event, d) {
+        if (d.data.children) {
+          // switch out children, to not draw them in the next update
+          let altChildren = d.data.altChildren || [];
+          let children = d.data.children;
+          d.data.children = altChildren;
+          d.data.altChildren = children;
+          _this.update(true, false);
+        }
+        console.log(d);
+        
+      });
 
     let allnodes = animate ? this.nodegroup.selectAll("g").transition(t) : this.nodegroup.selectAll("g");
     allnodes.attr("transform", d => `
          rotate(${d.x * 180 / Math.PI - 90})
-         translate(${d.y},0)`);
+         translate(${d.y},0)`)
+         .attr("r", d => d.data.children ? 6 : 3);
+
+    allnodes.select("circle")
+      .attr("r", d => d.data.children ? 6 : 3)
+      .style("fill", (d) => this.getColor(d.data));
     
     newnodes.append("circle")
-    .attr("r", d => d.children ? 6 : 3);
+      .attr("r", d => d.data.children ? 6 : 3)
+      .style("fill", (d) => this.getColor(d.data));
 
       // instead of just adding text to newnodes, redraw all the text
       // resets the text orienation -> would be destroyed when collapsing nodes
@@ -231,12 +233,12 @@ export default class FileEvolutionDendrogram extends React.PureComponent {
       .style("fill", (d) => this.getColor(d.data));
 
       this.nodegroup.selectAll("text")
-      .attr("text-anchor", d => d.x < Math.PI === !d.children ? "start" : "end")
+      .attr("text-anchor", d => d.x < Math.PI === !d.data.children ? "start" : "end")
       .attr("transform", d => d.x >= Math.PI ? "rotate(180)" : null)
-      .attr("x", d => d.x < Math.PI === !d.children ? 10 : -10)
+      .attr("x", d => d.x < Math.PI === !d.data.children ? 10 : -10)
       .style("fill", (d) => this.getColor(d.data));
       /*
-    .filter(d => d.children)
+    .filter(d => d.data.children)
     .clone(true).lower()
       .attr("stroke", "white")
       .attr("stroke-width", 1.5);
@@ -246,11 +248,6 @@ export default class FileEvolutionDendrogram extends React.PureComponent {
      if(collapseOuter) {
       this.update(true, false)
      }
-  }
-
-  // needs subfiles to be named children, it does not work with content
-  getChildren(data) {
-    return data?.children ?? [];
   }
 
   // taken from code hotspots, changed by giving base folder a name
