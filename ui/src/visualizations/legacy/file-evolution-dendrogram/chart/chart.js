@@ -10,12 +10,20 @@ import * as zoomUtils from '../../../../utils/zoom.js';
 import GlobalZoomableSvg from '../../../../components/svg/GlobalZoomableSvg.js';
 import ChartContainer from '../../../../components/svg/ChartContainer.js';
 
+// TODOS:
+// - cleanup the code, chart still has unnecessary stuff in it
+// - changing to author view does reset the tree - try to prevent this (e.g. collapsed nodes should stay collapsed)
+// - filter for certain files and jump to it
+// - change size depending on the project size
+// - after calculating the authors with most commits/linesChanged, remove the statsbyAuthors on nodes to save on memory
+// - add information when hovering over nodes displaying how many linesChanged/commits and who is the author if authorview
+// - make the config look nicer
+
 export default class FileEvolutionDendrogram extends React.PureComponent {
   constructor(props) {
     super(props);
 
     const convertedFiles = this.convertData(props.files);
-    console.log(convertedFiles);
 
     this.state = {
       palette: props.palette,
@@ -237,12 +245,6 @@ export default class FileEvolutionDendrogram extends React.PureComponent {
       .attr("transform", d => d.x >= Math.PI ? "rotate(180)" : null)
       .attr("x", d => d.x < Math.PI === !d.data.children ? 10 : -10)
       .style("fill", (d) => this.getColor(d.data));
-      /*
-    .filter(d => d.data.children)
-    .clone(true).lower()
-      .attr("stroke", "white")
-      .attr("stroke-width", 1.5);
-      */
 
      // draw the updated parents
      if(collapseOuter) {
@@ -253,7 +255,6 @@ export default class FileEvolutionDendrogram extends React.PureComponent {
   // taken from code hotspots, changed by giving base folder a name
   // needs subfiles to be named children, it does not work with content
   convertData(data) {
-    console.log(data);
     const convertedData = { name: "root", children: [] };
     for (const file of data) {
       const pathParts = file.key.split('/');

@@ -57,13 +57,6 @@ const FileEvolutionDendrogramConfigComponent = (props) => {
             onChange={(value) => props.onClickMetric(value)}
           />
         </div>
-        <CheckboxLegend
-          palette={props.palette}
-          onClick={props.onClickCheckboxLegend.bind(this)}
-          title="Authors:"
-          otherCommitters={otherCommitters}
-          displayMetric={props.displayMetric}
-        />
       </div>
 
       <div className={styles.label}> Branch:</div>
@@ -88,9 +81,14 @@ const FileEvolutionDendrogramConfigComponent = (props) => {
           />
         </div>
       <hr />
-      <div id={'fileSelector'}>
-        <FileBrowser files={props.files} props={props} />
-      </div>
+
+      <CheckboxLegend
+          palette={props.palette}
+          onClick={props.onClickCheckboxLegend.bind(this)}
+          title="Authors:"
+          otherCommitters={otherCommitters}
+          displayMetric={props.displayMetric}
+        />
     </div>
   );
 };
