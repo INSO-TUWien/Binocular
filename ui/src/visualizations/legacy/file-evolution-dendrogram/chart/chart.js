@@ -18,12 +18,14 @@ import ChartContainer from '../../../../components/svg/ChartContainer.js';
 // - after calculating the authors with most commits/linesChanged, remove the statsbyAuthors on nodes to save on memory
 // - add information when hovering over nodes displaying how many linesChanged/commits and who is the author if authorview
 // - make the config look nicer
+// - author config component doesnt allow to exclude authors
+// - config changes recalculate convertedFiles and reload the tree - make it smart
 
 export default class FileEvolutionDendrogram extends React.PureComponent {
   constructor(props) {
     super(props);
 
-    const convertedFiles = this.convertData(props.files);
+    const convertedFiles = this.convertData(props.files, props.omitFiles);
 
     this.state = {
       palette: props.palette,
@@ -33,6 +35,7 @@ export default class FileEvolutionDendrogram extends React.PureComponent {
       displayByAuthors: props.displayByAuthors,
       linesChangedScale: this.getColorScale(convertedFiles.totalStats.linesChanged),
       commitScale: this.getColorScale(convertedFiles.totalStats.count), 
+      omitFiles: props.omitFiles,
     };
 
 
@@ -41,8 +44,8 @@ export default class FileEvolutionDendrogram extends React.PureComponent {
   }
 
   componentWillReceiveProps(nextProps) {
-    const { files, palette, displayMetric, displayByAuthors } = nextProps;
-    const convertedFiles = this.convertData(files);
+    const { files, palette, displayMetric, displayByAuthors, omitFiles } = nextProps;
+    const convertedFiles = this.convertData(files, omitFiles);
 
     // setState is async - call createChart on callback
     // createChart is used seperately from render(), since render is called on zoom
@@ -53,6 +56,7 @@ export default class FileEvolutionDendrogram extends React.PureComponent {
       displayByAuthors: displayByAuthors,
       linesChangedScale: this.getColorScale(convertedFiles.totalStats.linesChanged),
       commitScale: this.getColorScale(convertedFiles.totalStats.count),
+      omitFiles: omitFiles,
     }, () => {
       this.update(false, true);
     });
@@ -136,7 +140,7 @@ export default class FileEvolutionDendrogram extends React.PureComponent {
     let root = this.chartSettings.tree(d3.hierarchy(this.state.convertedFiles));
 
     // collapse outer nodes that only have leave nodes as children
-    if (collapseOuter) {
+    if (collapseOuter && !this.state.omitFiles) {
       const leaves = root.leaves();
       const parents = new Set();
 
@@ -247,14 +251,14 @@ export default class FileEvolutionDendrogram extends React.PureComponent {
       .style("fill", (d) => this.getColor(d.data));
 
      // draw the updated parents
-     if(collapseOuter) {
+     if(collapseOuter && !this.state.omitFiles) {
       this.update(true, false)
      }
   }
 
   // taken from code hotspots, changed by giving base folder a name
   // needs subfiles to be named children, it does not work with content
-  convertData(data) {
+  convertData(data, omitFiles) {
     const convertedData = { name: "root", children: [] };
     for (const file of data) {
       const pathParts = file.key.split('/');
@@ -263,6 +267,10 @@ export default class FileEvolutionDendrogram extends React.PureComponent {
     }
 
     this.fillInFolderStats(convertedData);
+
+    if (omitFiles) {
+      this.removeFiles(convertedData);
+    }
 
     return convertedData;
   }
@@ -340,6 +348,13 @@ export default class FileEvolutionDendrogram extends React.PureComponent {
     } else { // basecase
       return data;
     }
+  }
+
+  removeFiles(data) {
+    data.children = data.children.filter((child) => child.type == "folder");
+    _.each(data.children, (child) => {
+      this.removeFiles(child);
+    });
   }
 
   getColor(file) {

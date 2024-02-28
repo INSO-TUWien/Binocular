@@ -15,11 +15,15 @@ export default handleActions(
       }),
     SET_DISPLAY_BY_AUTHORS: (state, action) =>
       _.assign({}, state, {
-        displayByAuthors: action.payload ? action.payload : null,
+        displayByAuthors: action.payload,
       }),
     SET_TIME_SPAN: (state, action) =>
       _.assign({}, state, {
         timeSpan: action.payload ? action.payload : null,
+      }),
+    SET_OMIT_FILES: (state, action) =>
+      _.assign({}, state, {
+        omitFiles: action.payload,
       }),
 
 
@@ -30,5 +34,6 @@ export default handleActions(
     displayByAuthors: false,
     displayMetric: 'linesChanged',
     timeSpan: {from: '', to: ''},
+    omitFiles: false,
   }
 );

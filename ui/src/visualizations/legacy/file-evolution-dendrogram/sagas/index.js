@@ -12,6 +12,7 @@ export const setActiveBranch = createAction('SET_ACTIVE_BRANCH', (b) => b);
 export const setDisplayByAuthors = createAction('SET_DISPLAY_BY_AUTHORS', (a) => a);
 export const setDisplayMetric = createAction('SET_DISPLAY_METRIC', (m) => m);
 export const setTimeSpan = createAction('SET_TIME_SPAN', (t) => t);
+export const setOmitFiles = createAction('SET_OMIT_FILES', (o) => o);
 
 export const requestFileEvolutionDendrogramData = createAction('REQUEST_FILE_EVOLUTION_DENDROGRAM_DATA');
 export const receiveFileEvolutionDendrogramData = timestampedActionFactory('RECEIVE_FILE_EVOLUTION_DENDROGRAM_DATA');

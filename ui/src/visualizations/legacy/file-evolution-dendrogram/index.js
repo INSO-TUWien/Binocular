@@ -14,6 +14,7 @@ const mapStateToProps = (state) => {
     palette: State.data.data.palette,
     displayMetric: State.config.displayMetric,
     displayByAuthors: State.config.displayByAuthors,
+    omitFiles: State.config.omitFiles,
   };
 };
 

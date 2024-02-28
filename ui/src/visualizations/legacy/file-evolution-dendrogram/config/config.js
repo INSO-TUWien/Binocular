@@ -2,9 +2,8 @@
 
 import { connect } from 'react-redux';
 
-import { setActiveBranch, setDisplayMetric, setDisplayByAuthors, setTimeSpan } from '../sagas';
+import { setActiveBranch, setDisplayMetric, setDisplayByAuthors, setTimeSpan, setOmitFiles } from '../sagas';
 import styles from '../styles.scss';
-import FileBrowser from '../components/fileBrowser/fileBrowser';
 import TabCombo from '../../../../components/TabCombo';
 import CheckboxLegend from '../components/checkboxLegend';
 import DateRangeFilter from '../../../../components/DateRangeFilter/dateRangeFilter';
@@ -19,6 +18,7 @@ const mapStateToProps = (state /*, ownProps*/) => {
     palette: State.data.data.palette,
     displayMetric: State.config.displayMetric,
     timeSpan: State.config.timeSpan,
+    omitFiles: State.config.omitFiles,
   };
 };
 
@@ -28,6 +28,7 @@ const mapDispatchToProps = (dispatch /*, ownProps*/) => {
     onClickMetric: (metric) => dispatch(setDisplayMetric(metric)),
     onClickCheckboxLegend: (isSet) => dispatch(setDisplayByAuthors(isSet)),
     onChangeTimeSpan: (span) => dispatch(setTimeSpan(span)),
+    onClickOmitFiles: (omitFiles) => dispatch(setOmitFiles(omitFiles)),
   };
 };
 
@@ -89,6 +90,18 @@ const FileEvolutionDendrogramConfigComponent = (props) => {
           otherCommitters={otherCommitters}
           displayMetric={props.displayMetric}
         />
+      <div className={styles.field}>
+        <div style={{ marginBottom: '0.5em' }}>
+          <TabCombo
+            value={props.omitFiles}
+            options={[
+              { label: '# showFiles', icon: 'file-alt', value: false },
+              { label: '# omitFiles', icon: 'file-alt', value: true },
+            ]}
+            onChange={(value) => props.onClickOmitFiles(value)}
+          />
+        </div>
+      </div>
     </div>
   );
 };
