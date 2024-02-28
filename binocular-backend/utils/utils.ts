@@ -2,6 +2,7 @@
 
 import archiver from 'archiver';
 import stream from 'stream';
+import _ from 'lodash';
 
 export function createZipStream(directory: string) {
   const zip = archiver('zip');
@@ -113,6 +114,26 @@ export function parseBlameOutput(output: string) {
   if (currHunk.signature !== undefined) {
     hunks[currHunk.signature].push(currHunk);
   }
+
+  // group hunks by commit sha
+  for (const [stakeholder, hbs] of Object.entries(hunks)) {
+    const hunksByStakeholder = hbs as any[];
+    const hunksBySha: object = _.groupBy(hunksByStakeholder, 'commitSha');
+    const resultHunks: any[] = [];
+
+    for (const [sha, hunks] of Object.entries(hunksBySha)) {
+      const h = hunks as any[];
+      resultHunks.push({
+        originalCommit: sha,
+        lines: h.map((v) => {
+          return { from: v.startLine, to: v.endLine };
+        }),
+      });
+    }
+
+    hunks[stakeholder] = resultHunks;
+  }
+
   return { ownershipData: ownershipData, hunks: hunks };
 }
 

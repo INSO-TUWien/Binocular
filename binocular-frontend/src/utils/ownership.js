@@ -7,8 +7,10 @@ export function extractOwnershipFromFileExcludingCommits(fileOwnershipData, comm
 
     // iterate over owned hunks, only count those of commits that are not excluded
     for (const hunk of o.hunks) {
-      if (!commitsToExclude.includes(hunk.commitSha)) {
-        res.ownedLines += hunk.endLine - hunk.startLine + 1;
+      if (!commitsToExclude.includes(hunk.originalCommit)) {
+        for (const lineObj of hunk.lines) {
+          res.ownedLines += lineObj.to - lineObj.from + 1;
+        }
       }
     }
     return res;
