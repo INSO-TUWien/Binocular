@@ -8,7 +8,6 @@ const commitsToCommits = db._collection('commits-commits');
 const commitsToFiles = db._collection('commits-files');
 const commitsToFilesToStakeholders = db._collection('commits-files-stakeholders');
 const commitsToStakeholders = db._collection('commits-stakeholders');
-const commitsToLanguages = db._collection('commits-languages');
 const CommitsToModules = db._collection('commits-modules');
 const commitsToBuilds = db._collection('commits-builds');
 const paginated = require('./paginated.js');
@@ -96,7 +95,7 @@ module.exports = new gql.GraphQLObjectType({
                 IN OUTBOUND edge ${commitsToFilesToStakeholders}
                     RETURN {
                       stakeholder: stakeholder.gitSignature,
-                      ownedLines: conn.ownedLines,
+                      hunks: conn.hunks,
                     }
             )
             ${limit}
@@ -165,18 +164,6 @@ module.exports = new gql.GraphQLObjectType({
             .toArray();
         },
       },
-      languages: paginated({
-        type: require('./languageInCommit'),
-        description: 'languages modified in the particular commit',
-        query: (commit, args, limit) => aql`
-          FOR language, edge
-            IN INBOUND ${commit} ${commitsToLanguages}
-            ${limit}
-            RETURN {
-              language,
-              stats: edge.stats
-            }`,
-      }),
       modules: paginated({
         type: require('./moduleInCommit'),
         description: 'modules modified in the particular commit',

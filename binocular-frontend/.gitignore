@@ -1,0 +1,5 @@
+/node_modules
+/db_export
+/config/context.json
+/dist
+.nyc_output

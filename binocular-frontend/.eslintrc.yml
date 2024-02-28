@@ -1,0 +1,38 @@
+env:
+  es6: true
+  browser: true
+extends:
+  - eslint:recommended
+  - prettier
+  - lambdas
+  - plugin:@typescript-eslint/eslint-recommended
+  - plugin:@typescript-eslint/recommended
+parserOptions:
+  ecmaVersion: 8
+  sourceType: module
+  ecmaFeatures:
+    experimentalObjectRestSpread: true
+    jsx: true
+rules:
+  prettier/prettier:
+    - error
+    - singleQuote: true
+      printWidth: 140
+      jsxBracketSameLine: true
+  no-console: off
+  max-len: ["error", { "code": 140 }]
+  comma-dangle: ["error", "only-multiline"]
+  operator-linebreak: ['error', 'after', { "overrides": { "?": "before", ":": "before"} }]
+  quotes:
+    - error
+    - single
+    - avoidEscape: true
+  react/jsx-uses-vars: 1
+  linebreak-style: ["error", "unix"]
+  '@typescript-eslint/no-this-alias': 0
+  '@typescript-eslint/no-explicit-any': 0
+  '@typescript-eslint/no-unused-vars': 0
+  '@typescript-eslint/ban-ts-comment': 0
+plugins:
+  - prettier
+  - react

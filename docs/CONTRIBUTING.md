@@ -17,22 +17,21 @@ React/Redux-based Front-End. Binocular is generally split into three components:
 - A GraphQL-interface that is mounted into ArangoDB that allows the
   Front-End to easily query data from the back-end
 
-![Architecture](./binocular-architecture.png)
+![Architecture](assets/binocular-architecture.png)
 
 Technically, the front-end does not access the GraphQL-interface
 directly, but uses a proxy that the back-end provides to circumvent
 CORS-issues.
 
-![CORS](./cors.png)
+![CORS](assets/cors.png)
 
 The source-code is organized similarly:
 
 ```
 Binocular
-├── foxx     # Holds the foxx-service that is the GraphQL-interface
-├── lib      # Holds the back-end
-├── tests    # Unit tests
-└── ui       # Holds the front-end
+├── foxx                  # Holds the foxx-service that is the GraphQL-interface
+├── binocular-backend     # Holds the back-end
+└── binocular-frontend    # Holds the front-end
 ```
 
 
@@ -42,25 +41,25 @@ The back-end is a pretty straightforward node.js application. It is
 responsible for gathering data and uses express to host the front-end.
 
 The data gathering is done by a type of component called indexer. You
-can see the indexers in the `lib/indexers` directory:
+can see the indexers in the `binocular-backend/indexers` directory:
 
 ```
 
-lib/indexers
+binocular-backend/indexers
 ├── BaseGitLabIndexer.js    # Basic indexer for accessing GitLab-Data
 ├── ci                      # CI-specific indexers
 │   ├── GitLabCIIndexer.js  # Indexer for GitLab-CI
 │   ├── ...                 # (Additional CI-indexers could be added here)
-│   └── index.js
+│   └── index.tsx
 ├── its                     # ITS-specific indexers
-│   ├── GitHubITSIndexer.js    # Indexer for GitHub
+│   ├── GitHubITSIndexer.ts    # Indexer for GitHub
 │   ├── GitLabITSIndexer.js # Indexer for GitLab
 │   ├── ...                 # (Additional ITS-indexers could be added here)
-│   └── index.js
+│   └── index.tsx
 └── vcs
     ├── GitIndexer.js       # Indexer for git
 │   ├── ...                 # (Additional VCS-indexers could be added here)
-    └── index.js
+    └── index.tsx
 ```
 
 ## GraphQL-Interface
@@ -80,14 +79,14 @@ The front-end is a redux-backed react application that heavily relies
 on D3 to do its work:
 
 ```
-ui
+binocular-frontend
 ├── index.html                    # Main entry point
 ├── config                        # Aditional config files for the fronted (mainly used for automatic builds)
 ├── db_export                     # Folder for the json export of the databse for offline use (will be automatically generated during the first execution)
 └── src
    ├── components                 # Holds general components used everywhere in the app
    ├── database                   # Database functions to access either the arangoDB or local JSON database
-   ├── index.js                   # Main JS-entry-point
+   ├── index.tsx                   # Main JS-entry-point
    ├── reducers                   # Holds general reducers
    ├── sagas                      # Holds general sagas
    ├── utils                      # Utility functions
@@ -99,89 +98,67 @@ ui
       │  │  ├── chart              # Main chart component
       │  │  ├── config             # Main config component (shown in the sidebar)
       │  │  ├── help.js            # Component shown in the help-section
-      │  │  ├── index.js           # main entry point for the component, bundles everything together
+      │  │  ├── index.tsx           # main entry point for the component, bundles everything together
       │  │   ├── reducers           # Reducers for the visualization
       │  │   │   ├── config.js      # Configuration-related reducers
       │  │   │   ├── data.js        # Data-related reducers
-      │  │   │   └── index.js
+      │  │   │   └── index.tsx
       │  │   ├── sagas              # Sagas/Actions for the visualization
-      │  │   └── styles.scss        # Styles for the visualization
-      │  ├── code-ownership-river
-      │  │  ├── chart
-      │  │  ├── config.js
-      │  │  ├── help.js
-      │  │  ├── index.js  
-      │  │   ├── reducers
-      │  │   │   ├── config.js
-      │  │   │   ├── data.js
-      │  │   │   └── index.js
-      │  │   ├── sagas
-      │  │   └── styles.scss
-      │  ├── dashboard
-      │  │   ├── chart             
-      │  │   ├── config.js         
-      │  │   ├── help.js           
-      │  │   ├── index.js          
-      │  │   ├── reducers          
-      │  │   │   ├── config.js     
-      │  │   │   ├── data.js       
-      │  │   │   └── index.js
-      │  │   ├── sagas             
-      │  │   └── styles.scss       
+      │  │   └── styles.scss        # Styles for the visualization      
       │  ├── hotspot-dials
       │  │   ├── chart.js
       │  │   ├── help.js
       │  │   ├── reducers
       │  │   │   ├── config.js
       │  │   │   ├── data.js
-      │  │   │   └── index.js
+      │  │   │   └── index.tsx
       │  │   ├── sagas
-      │  │   │   └── index.js
+      │  │   │   └── index.tsx
       │  │   └── styles.scss
       │  └── issue-impact
       │      ├── chart.js
       │      ├── config.js
       │      ├── help.js
-      │      ├── index.js
+      │      ├── index.tsx
       │      ├── reducers
       │      │   ├── config.js
       │      │   ├── data.js
-      │      │   └── index.js
+      │      │   └── index.tsx
       │      ├── sagas
-      │      │   └── index.js
+      │      │   └── index.tsx
       │      └── styles.scss
       └── VisualizationComponents              # Small visualizaitons for use in the dashboard
          ├── changes 
          │  ├── chart              # Main chart component
          │  ├── config.ts          # Main config component (shown in the sidebar)
          │  ├── help.ts            # Component shown in the help-section
-         │  ├── index.ts           # main entry point for the component, bundles everything together
+         │  ├── index.tsx           # main entry point for the component, bundles everything together
          │   ├── reducers           # Reducers for the visualization
          │   │   ├── config.ts      # Configuration-related reducers
          │   │   ├── data.ts        # Data-related reducers
-         │   │   └── index.ts
+         │   │   └── index.tsx
          │   ├── sagas              # Sagas/Actions for the visualization
          │   └── styles.scss        # Styles for the visualization
          ├── ciBuilds
          │  ├── chart
          │  ├── config
          │  ├── help.js
-         │  ├── index.js
+         │  ├── index.tsx
          │   ├── reducers
          │   │   ├── config.js
          │   │   ├── data.js
-         │   │   └── index.js
+         │   │   └── index.tsx
          │   ├── sagas
          │   └── styles.scss
          └── issues
             ├── chart
             ├── config
             ├── help.js
-            ├── index.js
+            ├── index.tsx
              ├── reducers
              │   ├── config.js
              │   ├── data.js
-             │   └── index.js
+             │   └── index.tsx
              ├── sagas
              └── styles.scss
 ```
@@ -197,7 +174,7 @@ I will try to explain the libraries that seemed the most important to me, and th
 
 ### Development Tips
 This project uses the npm package manager. You can check the used dependencies and available scripts (for running in IDE) in the file package.json.
-The most useful to me were "dev" and "build". In your IDE, you can create a Node.js configuration and enter "binocular.js" as the main JavaScript file.
+The most useful to me were "dev" and "build". In your IDE, you can create a Node.js configuration and enter "binocular.ts" as the main JavaScript file.
 You can give the application the relative path to a project you want to visualize as a parameter. (e.g. ../Projects/kanban/)
 If you want a run configuration, you can leave it like that. To build & run, tell your IDE to execute the npm script "build" first (or run "npm run-script build" manually).
 If you want to see your changes as they happen in the code, you can use the "dev" script. It re-compiles quickly as soon as changes are detected.

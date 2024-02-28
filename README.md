@@ -5,6 +5,8 @@ Binocular
 [![Test ESLint](https://github.com/INSO-TUWien/Binocular/actions/workflows/eslint.yml/badge.svg?branch=develop)](https://github.com/INSO-TUWien/Binocular/actions/workflows/eslint.yml)
 [![Docker Image CI](https://github.com/INSO-TUWien/Binocular/actions/workflows/build-docker.yml/badge.svg)](https://github.com/INSO-TUWien/Binocular/actions/workflows/build-docker.yml)
 
+![Default Dashboard](docs/assets/screenshots/default_dashboard.png)
+
 Binocular is a tool for visualizing data from various software-engineering
 tools. It works as a command-line tool run from a git-repository. When
 run, Binocular will gather data from the repository and the GitHub or GitLab API
@@ -12,6 +14,10 @@ and persist it to a configured ArangoDB instance.
 
 Binocular then hosts interactive visualizations about the gathered data
 via a web-interface.
+
+## Preview
+- [Demo Page](https://inso-tuwien.github.io/Binocular/)
+- [Screenshots](docs/PREVIEW.md)
 
 ## Dependencies
 
@@ -71,10 +77,12 @@ It will ask you some questions about the repository and generate the config file
   - `its`: Holds the name of the issue tracking system indexer, for instance, GitLab or GitHub
   - `ci`: Since the CI indexer importer is searching for the corresponding file in the repository, it can be necessary to specify the
           correct indexer like, for example, GitLab or GitHub.
+- `fileRenameBranches`: Array containing all branches for which file renames should be indexed. Additions to files that were later renamed are therefore shown in the visualizations. Without tracking renames, addition numbers for authors may be inaccurate. Comes with a performance penalty at index time.
+- `ignoreFiles`: Array containing files/directories ignored by the indexer. Useful for large files (like `package-lock.json`) or irrelevant directories. Wildcards (*) are supported, see example below.
          
 A sample configuration file looks like this:
 
-``` javascript
+```json
 {
   "gitlab": {
     "url": "https://gitlab.com/",
@@ -96,7 +104,15 @@ A sample configuration file looks like this:
   "indexers": {
     "its": "github",
     "ci": "github" 
-  }
+  },
+  "fileRenameBranches": [
+        "main",
+        "develop"
+    ],
+    "ignoreFiles": [
+        "*package-lock.json",
+        "*docs/*"
+    ]
 }
 ```
 
@@ -104,7 +120,7 @@ A sample configuration file looks like this:
 You may override configuration options for specific projects by
 placing another `.binocularrc` file in the project's root directory.
 
-You may also modify a config to the `gitlab.json` file in `./ui/config`. This file sets
+You may also modify a config to the `gitlab.json` file in `./binocular-frontend/config`. This file sets
 the GitLab API settings for the CodeHotspots-visualization for
 offline execution. This is only necessary if you want to automatically
 set those options within, for example, a GitLab pipeline.
@@ -115,7 +131,7 @@ set those options within, for example, a GitLab pipeline.
 - `projectId`: GitLab project ID
 
 A sample configuration file looks like this:
-``` javascript
+``` json
 {
   "server":"GITLAB_API_URL",
   "projectId":"GITLAB_PROJECT_ID"
@@ -156,7 +172,7 @@ npm run build
 ```
 This will create an html and js file in the dist folder that can be
 opened without the backend running. It is also possible
-to place the exported JSON files of a different mining job under `./ui/db_export/` and build the frontend. (not
+to place the exported JSON files of a different mining job under `./binocular-frontend/db_export/` and build the frontend. (not
 all features will be available in the offline build)
 
 For more information check `binocular -h`
