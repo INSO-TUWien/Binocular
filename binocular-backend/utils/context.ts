@@ -36,6 +36,7 @@ function setOptions(options: {
   frontend: boolean;
   open: boolean;
   clean: boolean;
+  vcs: boolean;
   its: boolean;
   ci: boolean;
   export: boolean;

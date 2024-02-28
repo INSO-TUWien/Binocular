@@ -97,6 +97,7 @@ cli.parse(
         frontend: false,
         open: false,
         clean: true,
+        vcs: true,
         its: true,
         ci: true,
         export: true,
@@ -436,17 +437,19 @@ function runBackend() {
 
     // stores all indexer to call them async
     const indexHandler: any[] = [];
-    indexHandler.push(
-      async () =>
-        (indexers.vcs = await GetIndexer.makeVCSIndexer(
-          context.repo,
-          context.vcsUrlProvider,
-          reporter,
-          context.argv.clean,
-          config,
-          context,
-        )),
-    );
+    if (context.argv.vcs) {
+      indexHandler.push(
+        async () =>
+          (indexers.vcs = await GetIndexer.makeVCSIndexer(
+            context.repo,
+            context.vcsUrlProvider,
+            reporter,
+            context.argv.clean,
+            config,
+            context,
+          )),
+      );
+    }
 
     if (context.argv.its) {
       indexHandler.push(
