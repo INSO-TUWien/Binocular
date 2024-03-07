@@ -187,3 +187,6 @@ if you are unsure how to implement a visualization in typescript.:warning:**
 
 For an explanation of Binocular's architecture, please see the [Contribution
 guidelines for this project](docs/CONTRIBUTING.md)
+
+For an overview of the database collections and connections Binocular creates,
+please see the [database documentation](docs/DATABASE.md)
