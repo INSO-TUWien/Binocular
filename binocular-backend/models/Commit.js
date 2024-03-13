@@ -69,13 +69,13 @@ Commit.persist = async function (repo, nCommit, urlProvider) {
           if (parentSha === '') {
             return;
           }
-          return Commit.findOneBy('sha', parentSha).then((parentCommit) => commit.connect(parentCommit));
+          return Commit.findOneBy('sha', parentSha).then((parentCommit) => Commit.connect(commit, parentCommit));
         }),
       );
       //connect commit to author
       return Stakeholder.ensureBy('gitSignature', authorSignature, {}).then(async (results) => {
         const stakeholder = results[0];
-        await commit.connect(stakeholder);
+        await Commit.connect(commit, stakeholder);
         return commit;
       });
     });
@@ -247,7 +247,7 @@ Commit.processTree = function (commitDAO, repo, nCommit, currentBranch, urlProvi
     ),
   ).then((patches) =>
     patches.map(async (patch) => {
-      const connection = await commitDAO.ensureConnection(patch.file, {
+      const connection = await Commit.ensureConnection(commitDAO, patch.file, {
         lineCount: patch.lineCount,
         hunks: patch.hunks,
         stats: patch.stats,

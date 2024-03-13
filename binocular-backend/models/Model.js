@@ -19,7 +19,6 @@ export default class Model {
 
     this.collectionName = inflection.pluralize(_.lowerFirst(name));
     this.log = debug(`db:${name}`);
-    this.connections = {};
 
     ctx.on(
       'ensure:db',
@@ -29,58 +28,23 @@ export default class Model {
         this.collection = db.arango.collection(this.collectionName);
       }.bind(this),
     );
-
-    //_.each(this.attributes, function (attribute) {
-    /*Object.defineProperty(Instance.prototype, attribute, {
-        get: function () {
-          return this.data[attribute];
-        },
-        set: function (value) {
-          return (this.data[attribute] = value);
-        },
-      });*/
-
-    //const Attr = _.upperFirst(attribute);
-
-    /*this[`findAllBy${Attr}`] = function (value) {
-        this.log(`findAllBy${Attr}`, value);
-        return Promise.resolve(this.collection.all({ [attribute]: value }));
-      };
-
-      this[`findOneBy${Attr}`] = function (value) {
-        return this.firstExample({ [attribute]: value });
-      };
-
-      this[`ensureBy${Attr}`] = function (value, data, options) {
-        return this[`findOneBy${Attr}`](value).then(function (resp) {
-          if (resp) {
-            return [this.parse(resp), false];
-          } else {
-            const inst = new Instance(data, this.attributes, options);
-            inst[attribute] = value;
-
-            return inst.save().then((i) => [i, true]);
-          }
-        });
-      };*/
-    //});
-
-    /*Object.defineProperty(this.prototype, '_key', {
-      get: function () {
-        return this.data[options.keyAttribute];
-      },
-
-      set: function (value) {
-        return (this.data[options.keyAttribute] = value);
-      },
-    });*/
   }
-  firstExample = function (data) {
+
+  ensureCollection() {
+    return this.db.ensureCollection(this.collectionName);
+  }
+
+  async firstExample(data) {
     this.log('firstExample %o', data);
-    return Promise.resolve(this.collection.firstExample(data))
-      .catch(() => null)
-      .then((d) => this.parse(d));
-  };
+    let d;
+    try {
+      d = await Promise.resolve(this.collection.firstExample(data));
+    } catch (e) {
+      d = null;
+    }
+    return this.parse(d);
+  }
+
   async findById(id) {
     this.log('findById %o', id);
     const docs = await Promise.resolve(this.collection.lookupByKeys([id.toString()]));
@@ -135,10 +99,6 @@ export default class Model {
   findOneBy(key, value) {
     this.log(`findBy${key} ${value}`);
     return this.firstExample({ [key]: value });
-  }
-
-  ensureCollection() {
-    return this.db.ensureCollection(this.collectionName);
   }
 
   create(data, options) {
@@ -243,6 +203,18 @@ export default class Model {
         });
     }
   }
+
+  connect(from, to, data) {
+    return connectionHandling.bind(this)(from, to, data, (ConnectionClass, data, fromTo) => ConnectionClass.create(data, fromTo));
+  }
+
+  ensureConnection(from, to, data) {
+    return connectionHandling.bind(this)(from, to, data, (ConnectionClass, data, fromTo) => ConnectionClass.ensure(data, fromTo));
+  }
+
+  storeConnection(from, to, data) {
+    return connectionHandling.bind(this)(from, to, data, (ConnectionClass, data, fromTo) => ConnectionClass.store(data, fromTo));
+  }
 }
 
 class Entry {
@@ -266,39 +238,27 @@ class Entry {
       }.bind(this),
     );
   }
-
-  connect(target, data) {
-    return connectionHandling.bind(this)(this, target, data, (ConnectionClass, data, fromTo) => ConnectionClass.create(data, fromTo));
-  }
-
-  ensureConnection(target, data) {
-    return connectionHandling.bind(this)(this, target, data, (ConnectionClass, data, fromTo) => ConnectionClass.ensure(data, fromTo));
-  }
-
-  storeConnection(target, data) {
-    return connectionHandling.bind(this)(this, target, data, (ConnectionClass, data, fromTo) => ConnectionClass.store(data, fromTo));
-  }
 }
 
-function connectionHandling(entry, target, data, cb) {
-  if (!(target instanceof Entry)) {
+function connectionHandling(fromEntry, toEntry, data, cb) {
+  if (!(toEntry instanceof Entry)) {
     throw new IllegalArgumentError('${target} is not an instance of Model');
   }
 
-  const ConnectionClass = entry.model.connections[target.model.collectionName];
+  const ConnectionClass = fromEntry.model.connections[toEntry.model.collectionName];
 
   if (!ConnectionClass) {
-    throw new IllegalArgumentError(`${entry.model.collectionName} is not connected to ${target.model.collectionName}`);
+    throw new IllegalArgumentError(`${fromEntry.model.collectionName} is not connected to ${toEntry.model.collectionName}`);
   }
 
   let from, to;
 
-  if (ConnectionClass.fromModel === entry.model) {
-    from = this;
-    to = target;
+  if (ConnectionClass.fromModel === fromEntry.model) {
+    from = fromEntry;
+    to = toEntry;
   } else {
-    from = target;
-    to = this;
+    from = toEntry;
+    to = fromEntry;
   }
 
   return cb(ConnectionClass, data, { from: from, to: to });

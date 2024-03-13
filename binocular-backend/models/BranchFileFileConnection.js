@@ -4,7 +4,7 @@ import Connection from './Connection.js';
 import BranchFile from './BranchFileConnection.js';
 import File from './File.js';
 
-const BranchFileFileConnection = Connection.define(BranchFile, File);
+const BranchFileFileConnection = new Connection(BranchFile, File);
 
 BranchFileFileConnection.remove = async function (conn) {
   await BranchFileFileConnection.rawDb

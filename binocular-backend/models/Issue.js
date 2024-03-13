@@ -97,7 +97,7 @@ Issue.deduceStakeholders = async function () {
               log('No stakeholder match found for %o', issuesPerAuthor.author.name);
               return;
             }
-            return issuesPerAuthor.issues.map((issue) => stakeholder.connect(Issue.parse(issue)));
+            return issuesPerAuthor.issues.map((issue) => Stakeholder.connect(stakeholder, Issue.parse(issue)));
           });
       });
     });

@@ -4,6 +4,6 @@ const Connection = require('./Connection.js').default;
 const Commit = require('./Commit.js').default;
 const BlameHunk = require('./BlameHunk.js').default;
 
-const CommitBlameHunkConnection = Connection.define(Commit, BlameHunk);
+const CommitBlameHunkConnection = new Connection(Commit, BlameHunk);
 
 module.exports = CommitBlameHunkConnection;

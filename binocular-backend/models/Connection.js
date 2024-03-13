@@ -6,104 +6,99 @@ import * as collection from 'arangojs/collection.js';
 import ModelCursor from './ModelCursor.js';
 import _ from 'lodash';
 
-class Connection {}
+export default class Connection {
+  connections = {};
+  constructor(FromModel, ToModel, options) {
+    options = _.defaults({}, options, { attributes: [] });
+    const name = `${FromModel.collectionName}${ToModel.collectionName}Connection`;
+    this.FromModel = FromModel;
+    this.ToModel = ToModel;
+    this.attributes = options.attributes;
+    this.collectionName = `${FromModel.collectionName}-${ToModel.collectionName}`;
+    this.log = debug(`db:${name}`);
 
-Connection.define = function (FromModel, ToModel, attributes = []) {
-  const name = `${FromModel.collectionName}${ToModel.collectionName}Connection`;
+    ctx.on(
+      'ensure:db',
+      function (db) {
+        this.db = db;
+        this.rawDb = db.arango;
+        this.collection = db.arango.collection(this.collectionName);
+      }.bind(this),
+    );
 
-  const ConnectionClass = class extends Connection {
-    constructor(data = {}) {
-      super(arguments);
-      this.data = data;
-    }
+    FromModel.connections[ToModel.collectionName] = this;
+    ToModel.connections[FromModel.collectionName] = this;
+  }
 
-    static get name() {
-      return name;
-    }
+  ensureCollection() {
+    return this.db.ensureEdgeCollection(this.collectionName, { type: collection.CollectionType.EDGE_COLLECTION });
+  }
 
-    static ensureCollection() {
-      return this.db.ensureEdgeCollection(this.collectionName, { type: collection.CollectionType.EDGE_COLLECTION });
-    }
-
-    static findByIds(fromTo) {
-      const keys = { _from: fromTo.from._id, _to: fromTo.to._id };
-      return Promise.resolve(ConnectionClass.collection.firstExample(keys)).catch((err) => {
-        if (err.code === 404) {
-          return null;
-        }
-      });
-    }
-
-    static ensure(data, fromTo) {
-      return ConnectionClass.findByIds(fromTo).then((instance) => {
-        if (instance) {
-          instance.isStored = true;
-          return instance;
-        } else {
-          return this.create(data, fromTo);
-        }
-      });
-    }
-
-    static store(data, fromTo) {
-      return ConnectionClass.findByIds(fromTo).then((instance) => {
-        if (instance) {
-          return ConnectionClass.collection.update(instance._key, data);
-        } else {
-          return this.create(data, fromTo);
-        }
-      });
-    }
-
-    static create(data, fromTo) {
-      this.log('connect %o %o', { from: fromTo.from._id, to: fromTo.to._id }, data);
-      data = data || {};
-      data._from = fromTo.from._id;
-      data._to = fromTo.to._id;
-      return Promise.resolve(this.collection.save(data));
-    }
-
-    static parse(data) {
-      if (data === null) {
+  async findByIds(fromTo) {
+    const keys = { _from: fromTo.from._id, _to: fromTo.to._id };
+    try {
+      return await Promise.resolve(this.collection.firstExample(keys));
+    } catch (err) {
+      if (err.code === 404) {
         return null;
       }
+    }
+  }
 
-      const instance = new ConnectionClass(_.pick(data, ...attributes));
-      instance._id = data._id;
-      instance._key = data._key;
-      instance._from = data._from;
-      instance._to = data._to;
+  async ensure(data, fromTo) {
+    const entry = await this.findByIds(fromTo);
+    if (entry) {
+      entry.isStored = true;
+      return entry;
+    } else {
+      return this.create(data, fromTo);
+    }
+  }
 
-      return instance;
+  async store(data, fromTo) {
+    const entry = await this.findByIds(fromTo);
+    if (entry) {
+      return this.collection.update(entry._key, data);
+    } else {
+      return this.create(data, fromTo);
+    }
+  }
+
+  create(data, fromTo) {
+    this.log('connect %o %o', { from: fromTo.from._id, to: fromTo.to._id }, data);
+    data = data || {};
+    data._from = fromTo.from._id;
+    data._to = fromTo.to._id;
+    return Promise.resolve(this.collection.save(data));
+  }
+
+  parse(data) {
+    if (data === null) {
+      return null;
     }
 
-    static wrapCursor(rawCursor) {
-      return new ModelCursor(ConnectionClass, rawCursor);
-    }
+    const entry = new Entry(_.pick(data, ...this.attributes));
+    entry._id = data._id;
+    entry._key = data._key;
+    entry._from = data._from;
+    entry._to = data._to;
 
-    static findAll() {
-      return Promise.resolve(ConnectionClass.collection.all())
-        .then((cursor) => cursor.all())
-        .then((ds) => ds.map((d) => ConnectionClass.parse(d)));
-    }
-  };
+    return entry;
+  }
 
-  ConnectionClass.connections = {};
-  ConnectionClass.FromModel = FromModel;
-  ConnectionClass.ToModel = ToModel;
-  ConnectionClass.collectionName = `${FromModel.collectionName}-${ToModel.collectionName}`;
+  wrapCursor(rawCursor) {
+    return new ModelCursor(Connection, rawCursor);
+  }
 
-  ctx.on('ensure:db', function (db) {
-    ConnectionClass.db = db;
-    ConnectionClass.rawDb = db.arango;
-    ConnectionClass.log = debug(`db:${name}`);
-    ConnectionClass.collection = db.arango.collection(ConnectionClass.collectionName);
-  });
+  async findAll() {
+    const cursor = await Promise.resolve(this.collection.all());
+    const ds = await cursor.all();
+    return ds.map((d) => this.parse(d));
+  }
+}
 
-  FromModel.connections[ToModel.collectionName] = ConnectionClass;
-  ToModel.connections[FromModel.collectionName] = ConnectionClass;
-
-  return ConnectionClass;
-};
-
-export default Connection;
+class Entry {
+  constructor(data = {}) {
+    this.data = data;
+  }
+}

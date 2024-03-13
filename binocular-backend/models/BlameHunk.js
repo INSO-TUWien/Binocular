@@ -3,7 +3,7 @@
 import { aql } from 'arangojs';
 import Model from './Model.js';
 
-const BlameHunk = Model.define('BlameHunk', {
+const BlameHunk = new Model('BlameHunk', {
   attributes: ['startLine', 'lineCount', 'signature'],
 });
 
@@ -35,7 +35,7 @@ BlameHunk.deduceStakeholders = function () {
         // walk over all hunks with that signature
         return Promise.map(signature.hunks, function (rawHunk) {
           // assign the hunk to the stakeholder
-          return BlameHunk.parse(rawHunk).connect(stakeholder);
+          return BlameHunk.connect(BlameHunk.parse(rawHunk), stakeholder);
         });
       });
     });

@@ -265,7 +265,7 @@ async function moduleCreationAndLinking(commit, connections, files, newFiles) {
 
     const parent = modules.find((module) => module.data.path === parentPath);
     if (parent) {
-      parent.connect(module);
+      Module.connect(parent, module);
     }
   });
 
@@ -274,7 +274,7 @@ async function moduleCreationAndLinking(commit, connections, files, newFiles) {
     const dir = File.dir(file.data);
     const module = modules.find((module) => module.data.path === dir);
     if (module) {
-      module.connect(file);
+      Module.connect(module, file);
     }
   });
 
@@ -298,7 +298,7 @@ async function moduleCreationAndLinking(commit, connections, files, newFiles) {
               },
               { additions: 0, deletions: 0 },
             ) || {};
-        return commit.storeConnection(module, {
+        return Commit.storeConnection(commit, module, {
           stats,
           webUrl: this.urlProvider.getDirUrl(commit.data.sha, module.data.path),
         });
@@ -404,9 +404,9 @@ async function createBranchFileConnections(repo, context) {
           return;
         }
         //connect file to branch
-        if (!branch.data.tracksFileRenames) return branch.ensureConnection(file);
+        if (!branch.data.tracksFileRenames) return Branch.ensureConnection(branch, file);
 
-        const branchFile = await branch.ensureConnection(file);
+        const branchFile = await Branch.ensureConnection(branch, file);
         //get previous filenames if applicable
         const previousFilenames = await repo.getPreviousFilenamesRemote(name, file.data.path, context);
         if (previousFilenames.length === 0) {
