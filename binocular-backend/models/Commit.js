@@ -11,7 +11,7 @@ import config from '../utils/config.js';
 
 const log = debug('git:commit');
 
-const Commit = Model.define('Commit', {
+const Commit = new Model('Commit', {
   attributes: ['sha', 'message', 'signature', 'date', 'stats', 'branch', 'history', 'parents', 'webUrl'],
   keyAttribute: 'sha',
 });
@@ -31,7 +31,7 @@ Commit.persist = async function (repo, nCommit, urlProvider) {
 
   const sha = nCommit.oid;
 
-  return Commit.findById(sha).then(function (instance) {
+  return Commit.findOneBy('sha', sha).then(function (instance) {
     if (instance) {
       log('Skipped', sha);
 
@@ -69,11 +69,11 @@ Commit.persist = async function (repo, nCommit, urlProvider) {
           if (parentSha === '') {
             return;
           }
-          return Commit.findById(parentSha).then((parentCommit) => commit.connect(parentCommit));
+          return Commit.findOneBy('sha', parentSha).then((parentCommit) => commit.connect(parentCommit));
         }),
       );
       //connect commit to author
-      return Stakeholder.ensureByGitSignature(authorSignature).then(async (results) => {
+      return Stakeholder.ensureBy('gitSignature', authorSignature, {}).then(async (results) => {
         const stakeholder = results[0];
         await commit.connect(stakeholder);
         return commit;
@@ -92,11 +92,12 @@ Commit.persist = async function (repo, nCommit, urlProvider) {
  * @param gateway contains the given gateway object to process commits based on various registered services
  * @returns {*}
  */
-Commit.prototype.processTree = function (repo, nCommit, currentBranch, urlProvider, gateway, context) {
+Commit.processTree = function (commitDAO, repo, nCommit, currentBranch, urlProvider, gateway, context) {
   const ignoreFiles = config.get().ignoreFiles || [];
   const ignoreFilesRegex = ignoreFiles.map((i) => new RegExp(i.replace('*', '.*')));
   return Promise.resolve(
     repo.getCommitChanges.bind(this)(
+      commitDAO,
       repo,
       nCommit.oid,
       nCommit.commit.parent[0],
@@ -197,7 +198,7 @@ Commit.prototype.processTree = function (repo, nCommit, currentBranch, urlProvid
           }
 
           const webUrl = urlProvider.getFileUrl(currentBranch, filepath);
-          const file = File.ensureByPath(filepath, {
+          const file = await File.ensureBy('path', filepath, {
             webUrl: webUrl,
           }).then((f) => f[0]);
 
@@ -210,8 +211,8 @@ Commit.prototype.processTree = function (repo, nCommit, currentBranch, urlProvid
             const newStart = change.rhs.at;
             const newLines = change.rhs.add;
             //add additions and deletions of this change to this commit obj
-            this.stats.additions += newLines;
-            this.stats.deletions += oldLines;
+            commitDAO.data.stats.additions += newLines;
+            commitDAO.data.stats.deletions += oldLines;
             //add additions and deletions of this change to counter for the commits-files connection
             additionsForFile += newLines;
             deletionsForFile += oldLines;
@@ -224,7 +225,7 @@ Commit.prototype.processTree = function (repo, nCommit, currentBranch, urlProvid
             };
           });
 
-          await this.save();
+          await commitDAO.model.save(commitDAO);
 
           return Promise.all([file, lineCount, { additions: additionsForFile, deletions: deletionsForFile }, hunks]).then((results) => {
             const file = results[0];
@@ -246,7 +247,7 @@ Commit.prototype.processTree = function (repo, nCommit, currentBranch, urlProvid
     ),
   ).then((patches) =>
     patches.map(async (patch) => {
-      const connection = await this.ensureConnection(patch.file, {
+      const connection = await commitDAO.ensureConnection(patch.file, {
         lineCount: patch.lineCount,
         hunks: patch.hunks,
         stats: patch.stats,
@@ -254,7 +255,7 @@ Commit.prototype.processTree = function (repo, nCommit, currentBranch, urlProvid
       });
 
       return Object.assign(patch, {
-        hunkConnection: !this.justCreated ? null : connection,
+        hunkConnection: !commitDAO.justCreated ? null : connection,
       });
     }),
   );

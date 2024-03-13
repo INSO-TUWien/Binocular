@@ -2,7 +2,7 @@
 
 import Model from './Model.js';
 
-const Branch = Model.define('Branch', {
+const Branch = new Model('Branch', {
   attributes: ['id', 'branch', 'active', 'tracksFileRenames', 'latestCommit'],
   keyAttribute: 'id',
 });

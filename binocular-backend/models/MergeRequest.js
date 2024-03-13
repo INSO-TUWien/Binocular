@@ -3,7 +3,7 @@
 import _ from 'lodash';
 import Model from './Model.js';
 
-const MergeRequest = Model.define('MergeRequest', {
+const MergeRequest = new Model('MergeRequest', {
   attributes: [
     'id',
     'iid',

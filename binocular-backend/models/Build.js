@@ -4,7 +4,7 @@ import _ from 'lodash';
 import Model from './Model.js';
 import { aql } from 'arangojs';
 
-const Build = Model.define('Build', {
+const Build = new Model('Build', {
   attributes: [
     'id',
     'sha',

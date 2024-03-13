@@ -227,10 +227,10 @@ class Repository {
     return commits;
   }
 
-  async getCommitChanges(repo, sha, parentSha, mapFunction) {
+  async getCommitChanges(commitDAO, repo, sha, parentSha, mapFunction) {
     //reset addition/deletion counters
-    this.stats.additions = 0;
-    this.stats.deletions = 0;
+    commitDAO.data.stats.additions = 0;
+    commitDAO.data.stats.deletions = 0;
 
     let files;
     let parentFiles;

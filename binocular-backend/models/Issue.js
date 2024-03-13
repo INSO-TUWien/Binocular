@@ -8,7 +8,7 @@ import debug from 'debug';
 
 const log = debug('db:Issue');
 
-const Issue = Model.define('Issue', {
+const Issue = new Model('Issue', {
   attributes: [
     'id',
     'iid',
@@ -71,7 +71,7 @@ Issue.deduceStakeholders = async function () {
     .then((cursor) => cursor.all())
     .then((authors) => {
       return authors.map(function (issuesPerAuthor) {
-        return Stakeholder.findOneByGitlabId(issuesPerAuthor.author.id)
+        return Stakeholder.findOneBy('gitlabID', issuesPerAuthor.author.id)
           .then(function (stakeholder) {
             if (!stakeholder) {
               log('No existing stakeholder found for gitlabId %o', issuesPerAuthor.author.id);

@@ -9,7 +9,7 @@ import _ from 'lodash';
 class Connection {}
 
 Connection.define = function (FromModel, ToModel, attributes = []) {
-  const name = `${FromModel.name}${ToModel.name}Connection`;
+  const name = `${FromModel.collectionName}${ToModel.collectionName}Connection`;
 
   const ConnectionClass = class extends Connection {
     constructor(data = {}) {
@@ -100,8 +100,8 @@ Connection.define = function (FromModel, ToModel, attributes = []) {
     ConnectionClass.collection = db.arango.collection(ConnectionClass.collectionName);
   });
 
-  FromModel.connections[ToModel.name] = ConnectionClass;
-  ToModel.connections[FromModel.name] = ConnectionClass;
+  FromModel.connections[ToModel.collectionName] = ConnectionClass;
+  ToModel.connections[FromModel.collectionName] = ConnectionClass;
 
   return ConnectionClass;
 };

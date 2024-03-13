@@ -4,7 +4,7 @@ import { aql } from 'arangojs';
 import Model from './Model.js';
 import path from 'path';
 
-const File = Model.define('File', { attributes: ['path', 'webUrl'] });
+const File = new Model('File', { attributes: ['path', 'webUrl'] });
 
 File.deduceMaxLengths = async function () {
   const Hunk = (await import('./Hunk.js')).default;
@@ -24,8 +24,8 @@ File.deduceMaxLengths = async function () {
   );
 };
 
-File.prototype.dir = function () {
-  const directory = path.dirname(this.path);
+File.dir = function (fileDAO) {
+  const directory = path.dirname(fileDAO.path);
   return directory.startsWith('.') ? directory : `./${directory}`;
 };
 
@@ -34,8 +34,8 @@ File.prototype.dir = function () {
  *
  * @returns {*[]}
  */
-File.prototype.getModules = function () {
-  return this.dir()
+File.getModules = function (fileDAO) {
+  return this.dir(fileDAO)
     .split('/')
     .reduce((dirs, dir, index) => dirs.concat(index ? `${dirs[index - 1]}/${dir}` : dir), []);
 };

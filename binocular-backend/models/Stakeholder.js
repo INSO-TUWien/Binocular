@@ -2,7 +2,7 @@
 
 import Model from './Model.js';
 
-const Stakeholder = Model.define('Stakeholder', {
+const Stakeholder = new Model('Stakeholder', {
   attributes: ['gitSignature', 'gitlabId', 'gitlabName', 'gitlabAvatarUrl', 'gitlabWebUrl'],
 });
 

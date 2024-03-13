@@ -7,7 +7,7 @@ import debug from 'debug';
 
 const log = debug('git:commit:module');
 
-const Module = Model.define('Module', { attributes: ['path'] });
+const Module = new Model('Module', { attributes: ['path'] });
 
 /**
  * get or create a new module based on its path
@@ -21,8 +21,8 @@ Module.persist = function (data) {
   }
 
   const path = data.path.toString();
-  delete data.path;
-  return Module.ensureByPath(path, data, { ignoreUnknownAttributes: true }).then(([instance]) => {
+  //delete data.path;
+  return Module.ensureBy('path', path, data, { ignoreUnknownAttributes: true }).then(([instance]) => {
     log(`Finished persisted ${path} with ${instance.data.path} and ${instance._id}!`);
     return instance;
   });

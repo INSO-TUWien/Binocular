@@ -3,7 +3,7 @@
 import _ from 'lodash';
 import Model from './Model.js';
 
-const Milestone = Model.define('Milestone', {
+const Milestone = new Model('Milestone', {
   attributes: ['id', 'iid', 'title', 'description', 'dueDate', 'startDate', 'state', 'createdAt', 'updatedAt', 'expired', 'webURL'],
   keyAttribute: 'id',
 });

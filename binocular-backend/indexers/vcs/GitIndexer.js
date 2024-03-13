@@ -176,7 +176,7 @@ async function processCommit(commit, currentBranch) {
     // needed to cancel walking
     throw { stop: true };
   }
-  if ((await Commit.findById(commit.oid)) !== null) {
+  if ((await Commit.findOneBy('sha', commit.oid)) !== null) {
     this.reporter.finishCommit();
     return;
   }
@@ -197,7 +197,7 @@ async function processCommit(commit, currentBranch) {
 
   serve(`${this.counter.commits.omitCount + this.counter.commits.persistCount}/${this.counter.commits.total} commits processed`);
   // create new connections
-  const connections = await commitDAO.processTree(this.repo, commit, currentBranch, this.urlProvider, this.gateway, this.context);
+  const connections = await Commit.processTree(commitDAO, this.repo, commit, currentBranch, this.urlProvider, this.gateway, this.context);
 
   return postProcessing.bind(this)(
     commitDAO,
@@ -246,7 +246,11 @@ async function postProcessing(commit, connections) {
  */
 async function moduleCreationAndLinking(commit, connections, files, newFiles) {
   const modules = await Promise.all(
-    _.uniq(files.reduce((reduction, file) => reduction.concat(file.getModules()), [])).map((path) => Module.persist({ path })),
+    _.uniq(
+      files.reduce((reduction, file) => {
+        return reduction.concat(File.getModules(file.data));
+      }, []),
+    ).map((path) => Module.persist({ path })),
   );
   const newModules = modules.filter((module) => module.justCreated);
 
@@ -267,7 +271,7 @@ async function moduleCreationAndLinking(commit, connections, files, newFiles) {
 
   // connect files to modules
   newFiles.forEach((file) => {
-    const dir = file.dir();
+    const dir = File.dir(file.data);
     const module = modules.find((module) => module.data.path === dir);
     if (module) {
       module.connect(file);
@@ -279,13 +283,13 @@ async function moduleCreationAndLinking(commit, connections, files, newFiles) {
     await Promise.all(
       modules.map(async (module) => {
         // update all connections according to the change of the new stats if the file belongs to this module or a submodule
-        if (!newFiles.find((file) => file.dir().startsWith(module.data.path))) {
+        if (!newFiles.find((file) => File.dir(file.data).startsWith(module.data.path))) {
           return;
         }
 
         const stats =
           connections
-            .filter((connection) => connection && connection.stats && connection.file.dir().startsWith(module.data.path))
+            .filter((connection) => connection && connection.stats && File.dir(connection.file.data).startsWith(module.data.path))
             .reduce(
               (stats, item) => {
                 stats.additions += item.stats.additions;
@@ -473,7 +477,7 @@ async function createOwnershipConnections(repo, context) {
   const commitFileConnectionsGrouped = Object.entries(_.groupBy(commitFileConnections, (cfc) => cfc._to));
 
   for (const [commitId, cfcGroup] of commitFileConnectionsGrouped) {
-    const commitObject = commitObjects.filter((c) => c._id === commitId)[0];
+    const commitObject = commitObjects.filter((c) => c._id === commitId)[0].data;
     const sha = commitObject.sha;
 
     await Promise.all(
@@ -482,7 +486,7 @@ async function createOwnershipConnections(repo, context) {
         if (cfc.data.action === 'deleted') {
           return;
         }
-        const fileObject = fileObjects.filter((f) => f._id === cfc._from)[0];
+        const fileObject = fileObjects.filter((f) => f._id === cfc._from)[0].data;
         const file = fileObject.path;
         try {
           const res = await repo.getOwnershipForFile(file, sha, context);
