@@ -655,18 +655,17 @@ function runBackend() {
   }
 
   async function connectIssuesAndCommits() {
-    const issues = await (Issue as any).findAll();
+    const issues = await Issue.findAll();
     const commits = await Commit.findAll();
-
     //at this point, most issues have a mentions attribute which stores the sha hashes of the commits that mention the issue.
     //connect these commits to the issue:
     for (const issue of issues) {
       //some issues are not mentioned by any commits
-      if (!issue.mentions) continue;
-      for (const mention of issue.mentions) {
-        const commit = commits.filter((c: any) => c.sha === mention.commit);
+      if (!issue.data.mentions) continue;
+      for (const mention of issue.data.mentions) {
+        const commit = commits.filter((c: any) => c.data.sha === mention.commit);
         if (commit && commit[0]) {
-          issue.connect(commit[0], { closes: mention.closes });
+          Issue.connect(issue, commit[0], { closes: mention.closes });
         }
       }
     }
