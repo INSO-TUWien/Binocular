@@ -8,9 +8,20 @@ import * as inflection from 'inflection';
 import IllegalArgumentError from '../errors/IllegalArgumentError.js';
 import ctx from '../utils/context.ts';
 import ModelCursor from './ModelCursor.js';
+import Db from '../core/db/db.ts';
+import { Collection } from 'arangojs/collection';
+import { Database } from 'arangojs';
+import Connection from './Connection.ts';
+import { AqlQuery } from 'arangojs/aql';
 
 export default class Model {
   connections = {};
+  attributes: string[];
+  collectionName: string;
+  log: debug.Debugger;
+  db: Db | undefined;
+  collection: Collection | undefined;
+  rawDb: Database | undefined;
 
   constructor(name, options) {
     options = _.defaults({}, options, { attributes: [], keyAttribute: '_key' });
@@ -22,20 +33,28 @@ export default class Model {
 
     ctx.on(
       'ensure:db',
-      function (db) {
-        this.db = db;
-        this.rawDb = db.arango;
-        this.collection = db.arango.collection(this.collectionName);
+      function (db: Db) {
+        if (db.arango !== undefined) {
+          this.db = db;
+          this.rawDb = db.arango;
+          this.collection = db.arango.collection(this.collectionName);
+        }
       }.bind(this),
     );
   }
 
   ensureCollection() {
+    if (this.db === undefined) {
+      throw Error('Database undefined!');
+    }
     return this.db.ensureCollection(this.collectionName);
   }
 
-  async firstExample(data) {
+  async firstExample(data: any) {
     this.log('firstExample %o', data);
+    if (this.collection === undefined) {
+      throw Error('Collection undefined!');
+    }
     let d;
     try {
       d = await Promise.resolve(this.collection.firstExample(data));
@@ -45,16 +64,19 @@ export default class Model {
     return this.parse(d);
   }
 
-  async findById(id) {
+  async findById(id: string) {
     this.log('findById %o', id);
+    if (this.collection === undefined) {
+      throw Error('Collection undefined!');
+    }
     const docs = await Promise.resolve(this.collection.lookupByKeys([id.toString()]));
     if (docs.length > 0) {
-      return Entry.parse(docs[0]);
+      return this.parse(docs[0]);
     }
     return null;
   }
 
-  async ensureById(id, data) {
+  async ensureById(id: string, data: any) {
     return this.findOneById(id).then(
       function (resp) {
         if (resp) {
@@ -65,7 +87,7 @@ export default class Model {
             isNew: true,
             ignoreUnknownAttributes: true,
           });
-          entry.id = id;
+          entry._id = id;
 
           return this.save(entry).then((i) => [i, true]);
         }
@@ -73,12 +95,12 @@ export default class Model {
     );
   }
 
-  findOneById(id) {
+  findOneById(id: string) {
     this.log('findById %o', id);
     return this.firstExample({ id: id });
   }
 
-  async ensureBy(key, value, data, options) {
+  async ensureBy(key: string, value: any, data: any, options: { isNew: boolean }) {
     data[key] = value;
     return this.findOneBy(key, value).then(
       function (resp) {
@@ -96,12 +118,12 @@ export default class Model {
     );
   }
 
-  findOneBy(key, value) {
+  findOneBy(key: string, value: any) {
     this.log(`findBy${key} ${value}`);
     return this.firstExample({ [key]: value });
   }
 
-  create(data, options) {
+  create(data: any, options: { isNew: boolean }) {
     const entry = new Entry(data, this, {
       attributes: this.attributes,
       isNew: options ? options.isNew : true,
@@ -110,21 +132,24 @@ export default class Model {
     return this.save(entry);
   }
 
-  bulkCreate(datas) {
+  bulkCreate(datas: any[]) {
     this.log('bulkCreate %o items', datas.length);
-    return this.collection.import(datas).then(function () {
+    if (this.collection === undefined) {
+      throw Error('Collection undefined!');
+    }
+    return this.collection.import(datas).then(() => {
       return datas.map((data) => this.parse(data));
     });
   }
 
-  ensure(data) {
-    return this.findOneBy('_key', this._key).then((instance) => {
+  ensure(entry: Entry) {
+    return this.findOneBy('_key', entry._key).then((instance) => {
       if (instance) {
         instance.isStored = true;
         return instance;
       } else {
         return this.save(
-          new Entry(data, this, {
+          new Entry(entry.data, this, {
             attributes: this.attributes,
             isNew: false,
             ignoreUnknownAttributes: true,
@@ -134,7 +159,7 @@ export default class Model {
     });
   }
 
-  parse(data) {
+  parse(data: any) {
     if (data === null) {
       return null;
     }
@@ -150,34 +175,47 @@ export default class Model {
     return entry;
   }
 
-  wrapCursor(rawCursor) {
+  wrapCursor(rawCursor: any) {
     return new ModelCursor(Model, rawCursor);
   }
 
-  cursor(query) {
+  async cursor(query: AqlQuery) {
+    if (this.collection === undefined) {
+      throw Error('Collection undefined!');
+    }
+    if (this.rawDb === undefined) {
+      throw Error('RawDb undefined!');
+    }
     if (!query) {
-      return Promise.resolve(this.collection.all()).then((rawCursor) => this.wrapCursor(rawCursor));
+      const rawCursor = await Promise.resolve(this.collection.all());
+      return this.wrapCursor(rawCursor);
     } else {
-      return Promise.resolve(this.rawDb.query(query)).then((rawCursor) => this.wrapCursor(rawCursor));
+      const rawCursor_2 = await Promise.resolve(this.rawDb.query(query));
+      return this.wrapCursor(rawCursor_2);
     }
   }
 
   async findAll() {
+    if (this.collection === undefined) {
+      throw Error('Collection undefined!');
+    }
     const cursor1 = await Promise.resolve(this.collection.all());
     const ds = await cursor1.all();
     return ds.map((d) => this.parse(d));
   }
 
-  save(entry) {
+  save(entry: Entry) {
     this.log('save %o', entry.data);
-
+    if (this.collection === undefined) {
+      throw Error('Collection undefined!');
+    }
     if (entry.isNew) {
       entry.justCreated = true;
       return Promise.resolve(this.collection.save(_.defaults({ _key: entry._key }, entry.data)))
         .catch(() => {
           entry.justCreated = false;
           entry.justUpdated = false;
-          return this.ensure();
+          return this.ensure(entry);
         })
         .then(function (resp) {
           entry._key = resp._key;
@@ -188,11 +226,11 @@ export default class Model {
         });
     } else {
       entry.justUpdated = true;
-      return Promise.resolve(this.collection.update({ _key: entry._key }, entry.data))
+      return Promise.resolve(this.collection.update({ _id: entry._id, _key: entry._key === undefined ? '' : entry._key }, entry.data))
         .catch(() => {
           entry.justCreated = false;
           entry.justUpdated = false;
-          return this.ensure();
+          return this.ensure(entry);
         })
         .then(function (resp) {
           entry._key = resp._key;
@@ -204,21 +242,30 @@ export default class Model {
     }
   }
 
-  connect(from, to, data) {
+  connect(from: Entry, to: Entry, data: any) {
     return connectionHandling.bind(this)(from, to, data, (ConnectionClass, data, fromTo) => ConnectionClass.create(data, fromTo));
   }
 
-  ensureConnection(from, to, data) {
+  ensureConnection(from: Entry, to: Entry, data: any) {
     return connectionHandling.bind(this)(from, to, data, (ConnectionClass, data, fromTo) => ConnectionClass.ensure(data, fromTo));
   }
 
-  storeConnection(from, to, data) {
+  storeConnection(from: Entry, to: Entry, data: any) {
     return connectionHandling.bind(this)(from, to, data, (ConnectionClass, data, fromTo) => ConnectionClass.store(data, fromTo));
   }
 }
 
-class Entry {
-  constructor(data, model, options) {
+export class Entry {
+  data: any;
+  _id: string | undefined;
+  _key: string | undefined;
+  isStored: boolean | undefined;
+  isNew: boolean;
+  log: debug.Debugger;
+  model: Model;
+  justCreated: boolean | undefined;
+  justUpdated: boolean | undefined;
+  constructor(data: any, model: Model, options: { attributes: string[]; isNew: boolean; ignoreUnknownAttributes: boolean }) {
     this.data = _.defaults({}, data);
     options = _.defaults({}, options, { isNew: true, ignoreUnknownAttributes: false });
 
@@ -240,18 +287,20 @@ class Entry {
   }
 }
 
-function connectionHandling(fromEntry, toEntry, data, cb) {
-  if (!(toEntry instanceof Entry)) {
-    throw new IllegalArgumentError('${target} is not an instance of Model');
-  }
-
+function connectionHandling(
+  fromEntry: Entry,
+  toEntry: Entry,
+  data: any,
+  cb: (connection: Connection, data: any, entries: { from: Entry; to: Entry }) => any,
+) {
   const ConnectionClass = fromEntry.model.connections[toEntry.model.collectionName];
 
   if (!ConnectionClass) {
     throw new IllegalArgumentError(`${fromEntry.model.collectionName} is not connected to ${toEntry.model.collectionName}`);
   }
 
-  let from, to;
+  let from: Entry;
+  let to: Entry;
 
   if (ConnectionClass.fromModel === fromEntry.model) {
     from = fromEntry;

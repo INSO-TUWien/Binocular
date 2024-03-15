@@ -8,6 +8,8 @@ import _ from 'lodash';
 import Db from '../core/db/db.ts';
 import { Collection } from 'arangojs/collection.js';
 import Model from './Model';
+import { Entry as ModelEntry } from './Model';
+import { Database } from 'arangojs';
 
 export default class Connection {
   connections = {};
@@ -16,9 +18,10 @@ export default class Connection {
   attributes: string[];
   collectionName: string;
   log: debug.Debugger;
-  private db: Db | undefined;
-  private collection: Collection | undefined;
-  constructor(FromModel, ToModel, options) {
+  db: Db | undefined;
+  collection: Collection | undefined;
+  rawDb: Database | undefined;
+  constructor(FromModel: Model, ToModel: Model, options: { attributes: string[] }) {
     options = _.defaults({}, options, { attributes: [] });
     const name = `${FromModel.collectionName}${ToModel.collectionName}Connection`;
     this.FromModel = FromModel;
@@ -49,7 +52,7 @@ export default class Connection {
     return this.db.ensureEdgeCollection(this.collectionName, { type: collection.CollectionType.EDGE_COLLECTION });
   }
 
-  async findByIds(fromTo) {
+  async findByIds(fromTo: { from: ModelEntry; to: ModelEntry }) {
     if (this.collection === undefined) {
       throw Error('Collection undefined!');
     }
@@ -63,7 +66,7 @@ export default class Connection {
     }
   }
 
-  async ensure(data, fromTo) {
+  async ensure(data: any, fromTo: { from: ModelEntry; to: ModelEntry }) {
     const entry = await this.findByIds(fromTo);
     if (entry) {
       entry.isStored = true;
@@ -73,7 +76,7 @@ export default class Connection {
     }
   }
 
-  async store(data, fromTo) {
+  async store(data: any, fromTo: { from: ModelEntry; to: ModelEntry }) {
     if (this.collection === undefined) {
       throw Error('Collection undefined!');
     }
@@ -85,7 +88,7 @@ export default class Connection {
     }
   }
 
-  create(data, fromTo) {
+  create(data: any, fromTo: { from: ModelEntry; to: ModelEntry }) {
     if (this.collection === undefined) {
       throw Error('Collection undefined!');
     }
@@ -96,7 +99,7 @@ export default class Connection {
     return Promise.resolve(this.collection.save(data));
   }
 
-  parse(data) {
+  parse(data: any) {
     if (data === null) {
       return null;
     }
@@ -110,7 +113,7 @@ export default class Connection {
     return entry;
   }
 
-  wrapCursor(rawCursor) {
+  wrapCursor(rawCursor: any) {
     return new ModelCursor(Connection, rawCursor);
   }
 
@@ -125,7 +128,7 @@ export default class Connection {
 }
 
 class Entry {
-  private data: any;
+  data: any;
   _id: string | undefined;
   _key: string | undefined;
   _from: string | undefined;
