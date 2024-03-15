@@ -1,6 +1,6 @@
 'use strict';
 
-const Connection = require('./Connection.js').default;
+const Connection = require('./Connection').default;
 const Commit = require('./Commit.js').default;
 const BlameHunk = require('./BlameHunk.js').default;
 

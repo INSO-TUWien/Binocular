@@ -1,6 +1,6 @@
 'use strict';
 
-import Connection from './Connection.js';
+import Connection from './Connection';
 import CommitFile from './CommitFileConnection.js';
 import Stakeholder from './Stakeholder.js';
 

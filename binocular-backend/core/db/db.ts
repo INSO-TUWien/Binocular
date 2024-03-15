@@ -9,8 +9,8 @@ import { DocumentCollection, EdgeCollection } from 'arangojs/collection';
 const log = debug('db');
 
 class Db {
-  private arangoServer: Database;
-  private arango: any;
+  arangoServer: Database;
+  arango: Database | undefined;
   constructor(config: { host: string; port: number; user: string; password: string }) {
     const connectionString = `http://${config.host}:${config.port}`;
     this.arangoServer = new Database(connectionString);

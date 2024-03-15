@@ -1,6 +1,6 @@
 'use strict';
 
-import Connection from './Connection.js';
+import Connection from './Connection';
 import Issue from './Issue.js';
 import Stakeholder from './Stakeholder.js';
 

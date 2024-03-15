@@ -1,6 +1,6 @@
 'use strict';
 
-import Connection from './Connection.js';
+import Connection from './Connection';
 import Module from './Module.js';
 import File from './File.js';
 

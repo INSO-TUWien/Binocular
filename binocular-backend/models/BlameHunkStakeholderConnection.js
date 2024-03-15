@@ -1,8 +1,8 @@
 'use strict';
 
-const Connection = require('./Connection.js').default;
-const BlameHunk = require('./BlameHunk.js').default;
-const Stakeholder = require('./Stakeholder.js').default;
+import Connection from './Connection';
+import BlameHunk from './BlameHunk.js';
+import Stakeholder from './Stakeholder.js';
 
 const BlameHunkStakeholderConnection = new Connection(BlameHunk, Stakeholder);
 

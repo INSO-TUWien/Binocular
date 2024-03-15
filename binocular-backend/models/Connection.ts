@@ -5,9 +5,19 @@ import ctx from '../utils/context.ts';
 import * as collection from 'arangojs/collection.js';
 import ModelCursor from './ModelCursor.js';
 import _ from 'lodash';
+import Db from '../core/db/db.ts';
+import { Collection } from 'arangojs/collection.js';
+import Model from './Model';
 
 export default class Connection {
   connections = {};
+  FromModel: Model;
+  ToModel: Model;
+  attributes: string[];
+  collectionName: string;
+  log: debug.Debugger;
+  private db: Db | undefined;
+  private collection: Collection | undefined;
   constructor(FromModel, ToModel, options) {
     options = _.defaults({}, options, { attributes: [] });
     const name = `${FromModel.collectionName}${ToModel.collectionName}Connection`;
@@ -19,10 +29,12 @@ export default class Connection {
 
     ctx.on(
       'ensure:db',
-      function (db) {
-        this.db = db;
-        this.rawDb = db.arango;
-        this.collection = db.arango.collection(this.collectionName);
+      function (db: Db) {
+        if (db.arango !== undefined) {
+          this.db = db;
+          this.rawDb = db.arango;
+          this.collection = db.arango.collection(this.collectionName);
+        }
       }.bind(this),
     );
 
@@ -31,14 +43,20 @@ export default class Connection {
   }
 
   ensureCollection() {
+    if (this.db === undefined) {
+      throw Error('Database undefined!');
+    }
     return this.db.ensureEdgeCollection(this.collectionName, { type: collection.CollectionType.EDGE_COLLECTION });
   }
 
   async findByIds(fromTo) {
+    if (this.collection === undefined) {
+      throw Error('Collection undefined!');
+    }
     const keys = { _from: fromTo.from._id, _to: fromTo.to._id };
     try {
       return await Promise.resolve(this.collection.firstExample(keys));
-    } catch (err) {
+    } catch (err: any) {
       if (err.code === 404) {
         return null;
       }
@@ -56,6 +74,9 @@ export default class Connection {
   }
 
   async store(data, fromTo) {
+    if (this.collection === undefined) {
+      throw Error('Collection undefined!');
+    }
     const entry = await this.findByIds(fromTo);
     if (entry) {
       return this.collection.update(entry._key, data);
@@ -65,6 +86,9 @@ export default class Connection {
   }
 
   create(data, fromTo) {
+    if (this.collection === undefined) {
+      throw Error('Collection undefined!');
+    }
     this.log('connect %o %o', { from: fromTo.from._id, to: fromTo.to._id }, data);
     data = data || {};
     data._from = fromTo.from._id;
@@ -91,6 +115,9 @@ export default class Connection {
   }
 
   async findAll() {
+    if (this.collection === undefined) {
+      throw Error('Collection undefined!');
+    }
     const cursor = await Promise.resolve(this.collection.all());
     const ds = await cursor.all();
     return ds.map((d) => this.parse(d));
@@ -98,6 +125,11 @@ export default class Connection {
 }
 
 class Entry {
+  private data: any;
+  _id: string | undefined;
+  _key: string | undefined;
+  _from: string | undefined;
+  _to: string | undefined;
   constructor(data = {}) {
     this.data = data;
   }
