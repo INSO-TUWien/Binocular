@@ -1,7 +1,7 @@
 'use strict';
 
 import { aql } from 'arangojs';
-import Model from './Model.js';
+import Model from './Model';
 import path from 'path';
 
 const File = new Model('File', { attributes: ['path', 'webUrl'] });

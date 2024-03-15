@@ -1,6 +1,6 @@
 'use strict';
 
-import Model from './Model.js';
+import Model from './Model';
 import IllegalArgumentError from '../errors/IllegalArgumentError.js';
 
 import debug from 'debug';

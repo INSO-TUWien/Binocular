@@ -1,7 +1,7 @@
 'use strict';
 
 import _ from 'lodash';
-import Model from './Model.js';
+import Model from './Model';
 
 const Milestone = new Model('Milestone', {
   attributes: ['id', 'iid', 'title', 'description', 'dueDate', 'startDate', 'state', 'createdAt', 'updatedAt', 'expired', 'webURL'],

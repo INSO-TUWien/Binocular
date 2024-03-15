@@ -21,7 +21,7 @@ export default class Connection {
   db: Db | undefined;
   collection: Collection | undefined;
   rawDb: Database | undefined;
-  constructor(FromModel: Model, ToModel: Model, options: { attributes: string[] }) {
+  constructor(FromModel: Model, ToModel: Model, options?: { attributes: string[] }) {
     options = _.defaults({}, options, { attributes: [] });
     const name = `${FromModel.collectionName}${ToModel.collectionName}Connection`;
     this.FromModel = FromModel;

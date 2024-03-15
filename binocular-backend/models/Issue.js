@@ -2,7 +2,7 @@
 
 import _ from 'lodash';
 import { aql } from 'arangojs';
-import Model from './Model.js';
+import Model from './Model';
 import Stakeholder from './Stakeholder.js';
 import debug from 'debug';
 

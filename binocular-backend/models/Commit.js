@@ -1,7 +1,7 @@
 'use strict';
 
 import debug from 'debug';
-import Model from './Model.js';
+import Model from './Model';
 import File from './File.js';
 import IllegalArgumentError from '../errors/IllegalArgumentError.js';
 import { exec } from 'child_process';

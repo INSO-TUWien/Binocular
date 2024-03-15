@@ -1,7 +1,7 @@
 'use strict';
 
 import { aql } from 'arangojs';
-import Model from './Model.js';
+import Model from './Model';
 
 const BlameHunk = new Model('BlameHunk', {
   attributes: ['startLine', 'lineCount', 'signature'],

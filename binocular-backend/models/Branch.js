@@ -1,6 +1,6 @@
 'use strict';
 
-import Model from './Model.js';
+import Model from './Model';
 
 const Branch = new Model('Branch', {
   attributes: ['id', 'branch', 'active', 'tracksFileRenames', 'latestCommit'],

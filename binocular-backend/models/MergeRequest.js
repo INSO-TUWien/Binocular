@@ -1,7 +1,7 @@
 'use strict';
 
 import _ from 'lodash';
-import Model from './Model.js';
+import Model from './Model';
 
 const MergeRequest = new Model('MergeRequest', {
   attributes: [
