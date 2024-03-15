@@ -20,6 +20,8 @@ import ChartContainer from '../../../../components/svg/ChartContainer.js';
 // - make the config look nicer
 // - author config component doesnt allow to exclude authors
 // - config changes recalculate convertedFiles and reload the tree - make it smart
+// - adapt size to project size
+// - thicker lines for more changes
 
 export default class FileEvolutionDendrogram extends React.PureComponent {
   constructor(props) {
@@ -268,6 +270,11 @@ export default class FileEvolutionDendrogram extends React.PureComponent {
 
     this.fillInFolderStats(convertedData);
 
+    console.log("here");
+    console.log(convertedData);
+
+    this.removeEmptyFilesAndFolders(convertedData);
+
     if (omitFiles) {
       this.removeFiles(convertedData);
     }
@@ -348,6 +355,15 @@ export default class FileEvolutionDendrogram extends React.PureComponent {
     } else { // basecase
       return data;
     }
+  }
+
+  removeEmptyFilesAndFolders(data) {
+    data.children = data.children.filter((child) => child.totalStats.count > 0);
+    _.each(data.children, (child) => {
+      if (child.type === "folder") {
+        this.removeEmptyFilesAndFolders(child);
+      }
+    });
   }
 
   removeFiles(data) {
