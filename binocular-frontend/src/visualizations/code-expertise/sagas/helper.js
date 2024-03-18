@@ -179,10 +179,6 @@ export function getFilenamesForBranch(branchName) {
   return Database.getFilenamesForBranch(branchName);
 }
 
-export function getFilesForCommits(hashes) {
-  return Database.getFilesForCommits(hashes);
-}
-
 export function addBuildData(relevantCommits, builds) {
   return relevantCommits.map((commit) => {
     const resultCommit = commit;
