@@ -58,8 +58,9 @@ function parse(
     .addOption(new Option('--no-frontend', 'disable the frontend').default(true))
     .addOption(new Option('--open', 'automatic open frontend on launch').default(false))
     .addOption(new Option('--clean', 'clear db before execution').default(false))
-    .addOption(new Option('--no-its', 'disable ITS indexing').default(true))
-    .addOption(new Option('--no-ci', 'disable CI indexing').default(true))
+    .addOption(new Option('--no-vcs', 'disable Version Control System indexing').default(true))
+    .addOption(new Option('--no-its', 'disable Issue Tracking System indexing').default(true))
+    .addOption(new Option('--no-ci', 'disable Continuous Integration indexing').default(true))
     .addOption(new Option('--export', 'export the db to the default folder of binocular').default(false))
     .addOption(new Option('--no-server', 'disable the backed webserver (when used binocular quits after indexing)').default(true))
     .action((targetPath, options) => {
