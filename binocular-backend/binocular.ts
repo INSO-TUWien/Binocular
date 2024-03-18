@@ -33,7 +33,6 @@ import path from 'path';
 import fs from 'fs';
 import Commit from './models/Commit';
 import File from './models/File';
-import Hunk from './models/Hunk';
 import Issue from './models/Issue';
 import Build from './models/Build';
 import Branch from './models/Branch';
@@ -581,7 +580,6 @@ function runBackend() {
           context.db.ensureService(path.join(__dirname, '../foxx'), '/binocular-ql'),
           Commit.ensureCollection(),
           File.ensureCollection(),
-          Hunk.ensureCollection(),
           Stakeholder.ensureCollection(),
           Issue.ensureCollection(),
           Build.ensureCollection(),
@@ -660,6 +658,9 @@ function runBackend() {
     //at this point, most issues have a mentions attribute which stores the sha hashes of the commits that mention the issue.
     //connect these commits to the issue:
     for (const issue of issues) {
+      if (issue === null) {
+        continue;
+      }
       //some issues are not mentioned by any commits
       if (!issue.data.mentions) continue;
       for (const mention of issue.data.mentions) {
@@ -678,10 +679,13 @@ function runBackend() {
     const commits = await Commit.findAll();
 
     for (const build of builds) {
-      if (!build.sha) continue;
-      const commit = commits.filter((c: any) => c.sha === build.sha);
+      if (build === null) {
+        continue;
+      }
+      if (!build.data.sha) continue;
+      const commit = commits.filter((c: any) => c.sha === build.data.sha);
       if (commit && commit[0]) {
-        commit[0].connect(build);
+        Commit.connect(commit[0], build);
       }
     }
 

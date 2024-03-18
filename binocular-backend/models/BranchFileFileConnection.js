@@ -4,19 +4,23 @@ import Connection from './Connection';
 import BranchFile from './BranchFileConnection.js';
 import File from './File.js';
 
-const BranchFileFileConnection = new Connection(BranchFile, File);
+class BranchFileFileConnection extends Connection {
+  constructor() {
+    super(BranchFile, File);
+  }
 
-BranchFileFileConnection.remove = async function (conn) {
-  await BranchFileFileConnection.rawDb
-    .query({
-      query: `
+  async remove(conn) {
+    await this.rawDb
+      .query({
+        query: `
         FOR conn in @@coll
         FILTER conn._key == @key
         REMOVE conn in @@coll`,
-      // eslint-disable-next-line prettier/prettier
-      bindVars: { '@coll': BranchFileFileConnection.collectionName, 'key': conn._key },
-    })
-    .catch((error) => console.log(error.message));
-};
+        // eslint-disable-next-line prettier/prettier
+        bindVars: { '@coll': this.collectionName, 'key': conn._key },
+      })
+      .catch((error) => console.log(error.message));
+  }
+}
 
-export default BranchFileFileConnection;
+export default new BranchFileFileConnection();

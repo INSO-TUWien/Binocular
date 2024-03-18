@@ -4,6 +4,9 @@ import Connection from './Connection';
 import Issue from './Issue.js';
 import Commit from './Commit.js';
 
-const IssueCommitConnection = new Connection(Issue, Commit);
-
-export default IssueCommitConnection;
+class IssueCommitConnection extends Connection {
+  constructor() {
+    super(Issue, Commit);
+  }
+}
+export default new IssueCommitConnection();

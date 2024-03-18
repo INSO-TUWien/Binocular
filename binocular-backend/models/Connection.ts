@@ -13,15 +13,15 @@ import { Database } from 'arangojs';
 
 export default class Connection {
   connections = {};
-  FromModel: Model;
-  ToModel: Model;
+  FromModel: Model | Connection;
+  ToModel: Model | Connection;
   attributes: string[];
   collectionName: string;
   log: debug.Debugger;
   db: Db | undefined;
   collection: Collection | undefined;
   rawDb: Database | undefined;
-  constructor(FromModel: Model, ToModel: Model, options?: { attributes: string[] }) {
+  constructor(FromModel: Model | Connection, ToModel: Model | Connection, options?: { attributes: string[] }) {
     options = _.defaults({}, options, { attributes: [] });
     const name = `${FromModel.collectionName}${ToModel.collectionName}Connection`;
     this.FromModel = FromModel;

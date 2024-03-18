@@ -8,7 +8,7 @@ class File extends Model {
     super('File', { attributes: ['path', 'webUrl'] });
   }
   async deduceMaxLengths() {
-    const Hunk = (await import('./Hunk.js')).default;
+    const CommitFileConnection = (await import('./CommitFileConnection.js')).default;
     return Promise.resolve(
       this.rawDb.query(
         aql`
@@ -16,7 +16,7 @@ class File extends Model {
       UPDATE file WITH {
         maxLength: MAX(
           FOR commit, edge
-          IN OUTBOUND file ${Hunk.collection}
+          IN OUTBOUND file ${CommitFileConnection.collection}
           RETURN edge.lineCount
         )
       } IN ${this.collection}
