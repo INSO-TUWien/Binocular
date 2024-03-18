@@ -76,7 +76,7 @@ export default class Model {
     return null;
   }
 
-  async ensureById(id: string, data: any) {
+  async ensureById(id: string, data: any, options?: { ignoreUnknownAttributes?: boolean; isNew?: boolean }) {
     return this.findOneById(id).then(
       function (resp) {
         if (resp) {
@@ -84,8 +84,8 @@ export default class Model {
         } else {
           const entry = new Entry(data, this, {
             attributes: this.attributes,
-            isNew: true,
-            ignoreUnknownAttributes: true,
+            isNew: options && options.isNew ? options.isNew : true,
+            ignoreUnknownAttributes: options && options.ignoreUnknownAttributes ? options.ignoreUnknownAttributes : true,
           });
           entry._id = id;
 
@@ -100,7 +100,7 @@ export default class Model {
     return this.firstExample({ id: id });
   }
 
-  async ensureBy(key: string, value: any, data: any, options: { isNew: boolean }) {
+  async ensureBy(key: string, value: any, data: any, options?: { ignoreUnknownAttributes?: boolean; isNew?: boolean }) {
     data[key] = value;
     return this.findOneBy(key, value).then(
       function (resp) {
@@ -109,8 +109,8 @@ export default class Model {
         } else {
           const entry = new Entry(data, this, {
             attributes: this.attributes,
-            isNew: options ? options.isNew : true,
-            ignoreUnknownAttributes: true,
+            isNew: options && options.isNew ? options.isNew : true,
+            ignoreUnknownAttributes: options && options.ignoreUnknownAttributes ? options.ignoreUnknownAttributes : true,
           });
           return this.save(entry).then((i) => [i, true]);
         }
@@ -123,7 +123,7 @@ export default class Model {
     return this.firstExample({ [key]: value });
   }
 
-  create(data: any, options: { isNew: boolean }) {
+  create(data: any, options?: { isNew: boolean }) {
     const entry = new Entry(data, this, {
       attributes: this.attributes,
       isNew: options ? options.isNew : true,
@@ -176,7 +176,7 @@ export default class Model {
   }
 
   wrapCursor(rawCursor: any) {
-    return new ModelCursor(Model, rawCursor);
+    return new ModelCursor(this, rawCursor);
   }
 
   async cursor(query: AqlQuery) {
@@ -242,15 +242,15 @@ export default class Model {
     }
   }
 
-  connect(from: Entry, to: Entry, data: any) {
+  connect(from: Entry, to: Entry, data?: any) {
     return connectionHandling.bind(this)(from, to, data, (ConnectionClass, data, fromTo) => ConnectionClass.create(data, fromTo));
   }
 
-  ensureConnection(from: Entry, to: Entry, data: any) {
+  ensureConnection(from: Entry, to: Entry, data?: any) {
     return connectionHandling.bind(this)(from, to, data, (ConnectionClass, data, fromTo) => ConnectionClass.ensure(data, fromTo));
   }
 
-  storeConnection(from: Entry, to: Entry, data: any) {
+  storeConnection(from: Entry, to: Entry, data?: any) {
     return connectionHandling.bind(this)(from, to, data, (ConnectionClass, data, fromTo) => ConnectionClass.store(data, fromTo));
   }
 }

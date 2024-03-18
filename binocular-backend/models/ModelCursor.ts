@@ -1,9 +1,13 @@
 'use strict';
 
 import IllegalArgumentError from '../errors/IllegalArgumentError.js';
+import Model from './Model';
+import Connection from './Connection';
 
 export default class ModelCursor {
-  constructor(Model, cursor) {
+  private Model: any;
+  private cursor: any;
+  constructor(Model: Model | Connection, cursor: any) {
     this.Model = Model;
     this.cursor = cursor;
   }
@@ -12,24 +16,24 @@ export default class ModelCursor {
     return this.cursor.count(...arguments);
   }
 
-  all() {
-    return Promise.resolve(this.cursor.all(...arguments)).then((ds) => ds.map((d) => this.Model.parse(d)));
+  async all() {
+    const ds = await Promise.resolve(this.cursor.all(...arguments));
+    return await ds.map((d) => this.Model.parse(d));
   }
 
-  next() {
-    return Promise.resolve(this.cursor.next(...arguments)).then((data) => {
-      if (data) {
-        return this.Model.parse(data);
-      }
-    });
+  async next() {
+    const data = await Promise.resolve(this.cursor.next(...arguments));
+    if (data) {
+      return this.Model.parse(data);
+    }
   }
 
   hasNext() {
     return this.cursor.hasNext(...arguments);
   }
 
-  each(fn) {
-    const next = (cur) => {
+  each(fn: (m: any) => any) {
+    const next = (cur: ModelCursor) => {
       if (cur.hasNext()) {
         return cur
           .next()

@@ -114,7 +114,7 @@ export default class Connection {
   }
 
   wrapCursor(rawCursor: any) {
-    return new ModelCursor(Connection, rawCursor);
+    return new ModelCursor(this, rawCursor);
   }
 
   async findAll() {

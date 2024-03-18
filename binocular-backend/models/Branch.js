@@ -2,15 +2,18 @@
 
 import Model from './Model';
 
-const Branch = new Model('Branch', {
-  attributes: ['id', 'branch', 'active', 'tracksFileRenames', 'latestCommit'],
-  keyAttribute: 'id',
-});
+class Branch extends Model {
+  constructor() {
+    super('Branch', {
+      attributes: ['id', 'branch', 'active', 'tracksFileRenames', 'latestCommit'],
+      keyAttribute: 'id',
+    });
+  }
 
-Branch.persist = function (nBranch) {
-  return Branch.findById(nBranch.id).then(function (instance) {
+  async persist(nBranch) {
+    const instance = await this.findById(nBranch.id);
     if (!instance) {
-      return Branch.create({
+      return this.create({
         id: nBranch.id,
         branch: nBranch.branchName,
         active: nBranch.currentActive,
@@ -19,16 +22,16 @@ Branch.persist = function (nBranch) {
       }).then((branch) => [branch, true]);
     }
     return [instance, false];
-  });
-};
+  }
 
-Branch.remove = async function (branch) {
-  await Branch.rawDb.query({
-    query: `FOR branch in ${Branch.collectionName}
+  async remove(branch) {
+    await this.rawDb.query({
+      query: `FOR branch in ${this.collectionName}
     FILTER branch._key == @key
-    REMOVE branch in ${Branch.collectionName}`,
-    bindVars: { key: branch._key },
-  });
-};
+    REMOVE branch in ${this.collectionName}`,
+      bindVars: { key: branch._key },
+    });
+  }
+}
 
-export default Branch;
+export default new Branch();

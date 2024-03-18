@@ -3,20 +3,24 @@
 import _ from 'lodash';
 import Model from './Model';
 
-const Milestone = new Model('Milestone', {
-  attributes: ['id', 'iid', 'title', 'description', 'dueDate', 'startDate', 'state', 'createdAt', 'updatedAt', 'expired', 'webURL'],
-  keyAttribute: 'id',
-});
-
-Milestone.persist = function (_milestoneData) {
-  const milestoneData = _.clone(_milestoneData);
-  if (milestoneData.id) {
-    milestoneData.id = milestoneData.id.toString();
+class Milestone extends Model {
+  constructor() {
+    super('Milestone', {
+      attributes: ['id', 'iid', 'title', 'description', 'dueDate', 'startDate', 'state', 'createdAt', 'updatedAt', 'expired', 'webURL'],
+      keyAttribute: 'id',
+    });
   }
 
-  delete milestoneData.projectId;
+  persist(_milestoneData) {
+    const milestoneData = _.clone(_milestoneData);
+    if (milestoneData.id) {
+      milestoneData.id = milestoneData.id.toString();
+    }
 
-  return Milestone.ensureById(milestoneData.id, milestoneData, { ignoreUnknownAttributes: true });
-};
+    delete milestoneData.projectId;
 
-export default Milestone;
+    return this.ensureById(milestoneData.id, milestoneData, { ignoreUnknownAttributes: true });
+  }
+}
+
+export default new Milestone();

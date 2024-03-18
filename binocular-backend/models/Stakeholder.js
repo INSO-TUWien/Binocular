@@ -2,8 +2,12 @@
 
 import Model from './Model';
 
-const Stakeholder = new Model('Stakeholder', {
-  attributes: ['gitSignature', 'gitlabId', 'gitlabName', 'gitlabAvatarUrl', 'gitlabWebUrl'],
-});
+class Stakeholder extends Model {
+  constructor() {
+    super('Stakeholder', {
+      attributes: ['gitSignature', 'gitlabId', 'gitlabName', 'gitlabAvatarUrl', 'gitlabWebUrl'],
+    });
+  }
+}
 
-export default Stakeholder;
+export default new Stakeholder();
