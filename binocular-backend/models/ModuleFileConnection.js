@@ -1,8 +1,8 @@
 'use strict';
 
 import Connection from './Connection';
-import Module from './Module.js';
-import File from './File.js';
+import Module from './Module';
+import File from './File';
 
 class ModuleFileConnection extends Connection {
   constructor() {

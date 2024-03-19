@@ -1,7 +1,7 @@
 'use strict';
 
 import Connection from './Connection';
-import Branch from './Branch.js';
+import Branch from './Branch';
 import File from './File.js';
 
 class BranchFileConnection extends Connection {

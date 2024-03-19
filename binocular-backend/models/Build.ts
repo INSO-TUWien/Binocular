@@ -29,7 +29,7 @@ class Build extends Model {
       keyAttribute: 'id',
     });
   }
-  persist(_buildData) {
+  persist(_buildData: any) {
     const buildData = _.clone(_buildData);
     if (_buildData.id) {
       buildData.id = _buildData.id.toString();
@@ -39,6 +39,9 @@ class Build extends Model {
   }
 
   deleteShaRefAttributes() {
+    if (this.rawDb === undefined) {
+      throw Error('Database undefined!');
+    }
     return this.rawDb.query(
       aql`
     FOR b IN builds

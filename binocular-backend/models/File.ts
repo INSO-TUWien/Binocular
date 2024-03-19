@@ -8,6 +8,9 @@ class File extends Model {
     super('File', { attributes: ['path', 'webUrl'] });
   }
   async deduceMaxLengths() {
+    if (this.rawDb === undefined) {
+      throw Error('Database undefined!');
+    }
     const CommitFileConnection = (await import('./CommitFileConnection.js')).default;
     return Promise.resolve(
       this.rawDb.query(
@@ -25,7 +28,7 @@ class File extends Model {
     );
   }
 
-  dir(fileDAO) {
+  dir(fileDAO: any): string {
     const directory = path.dirname(fileDAO.path);
     return directory.startsWith('.') ? directory : `./${directory}`;
   }
@@ -35,10 +38,10 @@ class File extends Model {
    *
    * @returns {*[]}
    */
-  getModules(fileDAO) {
+  getModules(fileDAO: any): string[] {
     return this.dir(fileDAO)
       .split('/')
-      .reduce((dirs, dir, index) => dirs.concat(index ? `${dirs[index - 1]}/${dir}` : dir), []);
+      .reduce((dirs: string[], dir: string, index: number) => dirs.concat(index ? `${dirs[index - 1]}/${dir}` : dir), []);
   }
 }
 

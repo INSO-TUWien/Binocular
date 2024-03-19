@@ -11,7 +11,7 @@ class Milestone extends Model {
     });
   }
 
-  persist(_milestoneData) {
+  persist(_milestoneData: any) {
     const milestoneData = _.clone(_milestoneData);
     if (milestoneData.id) {
       milestoneData.id = milestoneData.id.toString();

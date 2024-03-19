@@ -2,7 +2,7 @@
 
 import _ from 'lodash';
 import { aql } from 'arangojs';
-import Model from './Model';
+import Model, { Entry } from './Model';
 import Stakeholder from './Stakeholder.js';
 import debug from 'debug';
 const log = debug('db:Issue');
@@ -40,7 +40,7 @@ class Issue extends Model {
     });
   }
 
-  persist(_issueData) {
+  persist(_issueData: any) {
     const issueData = _.clone(_issueData);
     if (_issueData.id) {
       issueData.id = _issueData.id.toString();
@@ -53,6 +53,9 @@ class Issue extends Model {
   }
 
   async deduceStakeholders() {
+    if (this.rawDb === undefined) {
+      throw Error('Database undefined!');
+    }
     const IssueStakeholderConnection = (await import('./IssueStakeholderConnection.js')).default;
     return Promise.resolve(
       this.rawDb.query(
@@ -99,13 +102,25 @@ class Issue extends Model {
                 log('No stakeholder match found for %o', issuesPerAuthor.author.name);
                 return;
               }
-              return issuesPerAuthor.issues.map((issue) => Stakeholder.connect(stakeholder, this.parse(issue)));
+              return issuesPerAuthor.issues.map((issueData) => {
+                if (issueData === null) {
+                  return;
+                }
+                const issue = this.parse(issueData);
+                if (issue === null) {
+                  return;
+                }
+                return Stakeholder.connect(stakeholder, issue);
+              });
             }),
         );
       });
   }
 
   deleteMentionsAttribute() {
+    if (this.rawDb === undefined) {
+      throw Error('Database undefined!');
+    }
     return this.rawDb.query(
       aql`
     FOR i IN issues
@@ -116,10 +131,13 @@ class Issue extends Model {
 
 export default new Issue();
 
-async function findBestStakeholderMatch(author) {
+async function findBestStakeholderMatch(author: any) {
   const stakeholder = await Stakeholder.findAll();
-  const bestMatch = stakeholder.reduce(function (best, stakeholder_1) {
-    const stakeholderName = normalizeName(stakeholder_1.gitSignature);
+  const bestMatch = stakeholder.reduce((best: any, stakeholderEntry: Entry | null) => {
+    if (stakeholderEntry === null) {
+      return;
+    }
+    const stakeholderName = normalizeName(stakeholderEntry.data.gitSignature);
     const authorName = normalizeName(author.name);
     let score = 0;
 
@@ -137,10 +155,10 @@ async function findBestStakeholderMatch(author) {
       return best;
     }
   }, null);
-  return bestMatch ? bestMatch.stakeholder : null;
+  return bestMatch ? bestMatch.data.stakeholder : null;
 }
 
-function normalizeName(name) {
+function normalizeName(name: string) {
   const plain = _.chain(name).deburr().lowerCase().trim().value();
   const sorted = _.chain(plain).split(/\s+/).sort().join(' ').value();
 

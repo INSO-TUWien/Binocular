@@ -1,7 +1,7 @@
 'use strict';
 
 import Connection from './Connection';
-import Module from './Module.js';
+import Module from './Module';
 
 class ModuleModuleConnection extends Connection {
   constructor() {

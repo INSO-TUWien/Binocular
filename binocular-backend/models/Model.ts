@@ -159,7 +159,7 @@ export default class Model {
     });
   }
 
-  parse(data: any) {
+  parse(data: any): Entry | null {
     if (data === null) {
       return null;
     }

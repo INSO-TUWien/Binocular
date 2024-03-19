@@ -8,6 +8,11 @@ import { exec } from 'child_process';
 import * as utils from '../utils/utils.ts';
 import Stakeholder from './Stakeholder.js';
 import config from '../utils/config.js';
+import Repository from '../core/provider/git';
+import GitHubUrlProvider from '../url-providers/GitHubUrlProvider';
+import GitLabUrlProvider from '../url-providers/GitLabUrlProvider';
+import GatewayService from '../utils/gateway-service';
+import Context from '../utils/context.ts';
 
 const log = debug('git:commit');
 
@@ -27,7 +32,7 @@ class Commit extends Model {
    * @param urlProvider contains the given remote vcs webapp provider to link them
    * @returns Commit returns an already existing or newly created commit
    */
-  async persist(repo, nCommit, urlProvider) {
+  async persist(repo: Repository, nCommit: any, urlProvider: GitHubUrlProvider | GitLabUrlProvider) {
     if (!repo || !nCommit) {
       throw IllegalArgumentError('repository and git-commit has to be set!');
     }
@@ -42,8 +47,8 @@ class Commit extends Model {
     }
     log('Processing', sha);
     let parents = '';
-    for (const i in nCommit.commit.parent) {
-      parents += nCommit.commit.parent[i].toString();
+    for (const i of nCommit.commit.parent) {
+      parents += nCommit.commit.parent[i];
       if (i < nCommit.commit.parent.length - 1) {
         parents += ',';
       }
@@ -63,12 +68,17 @@ class Commit extends Model {
       },
       { isNew: true },
     );
-    Promise.resolve(
+    await Promise.all(
       parents.split(',').map((parentSha) => {
         if (parentSha === '') {
           return;
         }
-        return this.findOneBy('sha', parentSha).then((parentCommit) => this.connect(commit, parentCommit));
+        return this.findOneBy('sha', parentSha).then((parentCommit) => {
+          if (parentCommit === null) {
+            return;
+          }
+          return this.connect(commit, parentCommit);
+        });
       }),
     );
     const results = await Stakeholder.ensureBy('gitSignature', authorSignature, {});
@@ -80,14 +90,24 @@ class Commit extends Model {
   /**
    * process and store a commit and its associated data objects
    *
+   * @param commitDAO
    * @param repo contains the repository object
    * @param nCommit contains the current commit that is created by the given repo object and holds the required data
    * @param currentBranch current checked out branch of the repository
    * @param urlProvider contains the given remote vcs webapp provider to link them
    * @param gateway contains the given gateway object to process commits based on various registered services
+   * @param context
    * @returns {*}
    */
-  processTree(commitDAO, repo, nCommit, currentBranch, urlProvider, gateway, context) {
+  processTree(
+    commitDAO: any,
+    repo: Repository,
+    nCommit: any,
+    currentBranch: string,
+    urlProvider: GitHubUrlProvider | GitLabUrlProvider,
+    gateway: GatewayService,
+    context: typeof Context,
+  ): any {
     const ignoreFiles = config.get().ignoreFiles || [];
     const ignoreFilesRegex = ignoreFiles.map((i) => new RegExp(i.replace('*', '.*')));
     return Promise.resolve(
@@ -96,7 +116,7 @@ class Commit extends Model {
         repo,
         nCommit.oid,
         nCommit.commit.parent[0],
-        async (filepath, parentCommitEntry, currentCommitEntry, commitFiles, parentCommitFiles) => {
+        async (filepath: string, parentCommitEntry: any, currentCommitEntry: any, commitFiles: string[], parentCommitFiles: string[]) => {
           try {
             // ignore directories
             const currentOid = nCommit.oid;
@@ -112,7 +132,7 @@ class Commit extends Model {
               }
             }
 
-            const changes = [];
+            const changes: any[] = [];
 
             let parentContent = '';
             let currentContent = '';
@@ -145,7 +165,7 @@ class Commit extends Model {
                   return;
                 }
 
-                const diffOutput = await new Promise((resolve) => {
+                const diffOutput: string = await new Promise((resolve) => {
                   //go to the target directory, execute git diff for a specific file to get the changes between the parent/current commit
                   exec(
                     `cd ${context.targetPath} && git diff --unified=0 ${nCommit.commit.parent[0]} ${nCommit.oid} -- ${filepath}`,
@@ -166,8 +186,8 @@ class Commit extends Model {
 
                 //diff output also includes the changed lines which we dont care about.
                 //we only need the chunk headers: "@@ -oldFileStartLine,oldFileLineNumbers +newFileStartLine,newFileLineNumbers @@"
-                const hunkheaders = diffOutput.split('\n').filter((s) => s.startsWith('@@'));
-                hunkheaders.forEach((header) => {
+                const hunkHeaders: string[] = diffOutput.split('\n').filter((s) => s.startsWith('@@'));
+                hunkHeaders.forEach((header) => {
                   //remove the '+' and '-'
                   const headerArray = header.replace('+', '').replace('-', '').split(' ');
                   //part of the header containing the numbers for the old/new file
@@ -188,7 +208,7 @@ class Commit extends Model {
                   });
                 });
               }
-            } catch (e) {
+            } catch (e: any) {
               console.log(e.message);
             }
 
@@ -241,7 +261,7 @@ class Commit extends Model {
         },
       ),
     ).then((patches) =>
-      patches.map(async (patch) => {
+      patches.map(async (patch: any) => {
         const connection = await this.ensureConnection(commitDAO, patch.file, {
           lineCount: patch.lineCount,
           hunks: patch.hunks,

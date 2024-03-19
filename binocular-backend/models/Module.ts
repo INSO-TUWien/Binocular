@@ -18,7 +18,7 @@ class Module extends Model {
    * @param data
    * @returns Module returns an already existing or newly created module
    */
-  async persist(data) {
+  async persist(data: any) {
     if (!data || !data.path) {
       throw IllegalArgumentError('Module does not hold the required data!');
     }

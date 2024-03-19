@@ -1,8 +1,8 @@
 'use strict';
 
 import Connection from './Connection';
-import Issue from './Issue.js';
-import Stakeholder from './Stakeholder.js';
+import Issue from './Issue';
+import Stakeholder from './Stakeholder';
 
 class IssueStakeholderConnection extends Connection {
   constructor() {

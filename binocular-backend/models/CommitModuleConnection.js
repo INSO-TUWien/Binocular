@@ -1,8 +1,8 @@
 'use strict';
 
 import Connection from './Connection';
-import Commit from './Commit.js';
-import Module from './Module.js';
+import Commit from './Commit';
+import Module from './Module';
 
 class CommitModuleConnection extends Connection {
   constructor() {

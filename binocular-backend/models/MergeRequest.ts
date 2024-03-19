@@ -31,7 +31,7 @@ class MergeRequest extends Model {
       keyAttribute: 'id',
     });
   }
-  persist(_mergeRequestData) {
+  persist(_mergeRequestData: any) {
     const mergeRequestData = _.clone(_mergeRequestData);
     if (_mergeRequestData.id) {
       mergeRequestData.id = _mergeRequestData.id.toString();

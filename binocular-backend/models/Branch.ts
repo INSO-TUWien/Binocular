@@ -10,7 +10,7 @@ class Branch extends Model {
     });
   }
 
-  async persist(nBranch) {
+  async persist(nBranch: any) {
     const instance = await this.findById(nBranch.id);
     if (!instance) {
       return this.create({
@@ -24,7 +24,10 @@ class Branch extends Model {
     return [instance, false];
   }
 
-  async remove(branch) {
+  async remove(branch: any) {
+    if (this.rawDb === undefined) {
+      throw Error('Database undefined!');
+    }
     await this.rawDb.query({
       query: `FOR branch in ${this.collectionName}
     FILTER branch._key == @key
