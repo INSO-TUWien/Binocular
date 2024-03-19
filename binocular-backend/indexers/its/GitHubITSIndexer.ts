@@ -71,16 +71,11 @@ GitHubITSIndexer.prototype.index = function () {
                 issue.assignees.nodes[i].name = this.controller.getUser(issue.assignees.nodes[i].login).name;
               }
               return new Promise((resolve) => {
-                // TODO: Currently necessary because the implementation of the Models isn't really compatible with typescript.
-                // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                // @ts-expect-error
-                Issue.findOneById(issue.id)
+                Issue.findOneById(String(issue.id))
                   .then((existingIssue) => {
-                    if (!existingIssue || new Date(existingIssue.updatedAt).getTime() < new Date(issue.updatedAt).getTime()) {
+                    if (!existingIssue || new Date(existingIssue.data.updatedAt).getTime() < new Date(issue.updatedAt).getTime()) {
                       log('Processing issue #' + issue.iid);
-                      // TODO: Currently necessary because the implementation of the Models isn't really compatible with typescript.
-                      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                      // @ts-expect-error
+
                       return Issue.persist({
                         id: issue.id,
                         iid: issue.number,
@@ -138,19 +133,13 @@ GitHubITSIndexer.prototype.index = function () {
                 mergeRequest.assignees.nodes[i].name = this.controller.getUser(mergeRequest.assignees.nodes[i].login).name;
               }
               return new Promise((resolve) => {
-                // TODO: Currently necessary because the implementation of the Models isn't really compatible with typescript.
-                // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                // @ts-expect-error
-                return MergeRequest.findOneById(mergeRequest.id)
+                return MergeRequest.findOneById(String(mergeRequest.id))
                   .then((existingMergeRequest) => {
                     if (
                       !existingMergeRequest ||
-                      new Date(existingMergeRequest.updatedAt).getTime() < new Date(mergeRequest.updatedAt).getTime()
+                      new Date(existingMergeRequest.data.updatedAt).getTime() < new Date(mergeRequest.updatedAt).getTime()
                     ) {
                       log('Processing issue #' + mergeRequest.iid);
-                      // TODO: Currently necessary because the implementation of the Models isn't really compatible with typescript.
-                      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                      // @ts-expect-error
                       return MergeRequest.persist({
                         id: mergeRequest.id,
                         iid: mergeRequest.number,

@@ -1,15 +1,18 @@
 'use strict';
 
 import Connection from './Connection';
-import Branch from './Branch';
-import File from './File.js';
+import BranchFile from './BranchFileConnection';
+import File from './File';
 
-class BranchFileConnection extends Connection {
+class BranchFileFileConnection extends Connection {
   constructor() {
-    super(Branch, File);
+    super(BranchFile, File);
   }
 
-  async remove(conn) {
+  async remove(conn: any) {
+    if (this.rawDb === undefined) {
+      throw Error('Database undefined!');
+    }
     await this.rawDb
       .query({
         query: `
@@ -23,4 +26,4 @@ class BranchFileConnection extends Connection {
   }
 }
 
-export default new BranchFileConnection();
+export default new BranchFileFileConnection();

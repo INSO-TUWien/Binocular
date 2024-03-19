@@ -11,7 +11,7 @@ class File extends Model {
     if (this.rawDb === undefined) {
       throw Error('Database undefined!');
     }
-    const CommitFileConnection = (await import('./CommitFileConnection.js')).default;
+    const CommitFileConnection = (await import('./CommitFileConnection')).default;
     return Promise.resolve(
       this.rawDb.query(
         aql`

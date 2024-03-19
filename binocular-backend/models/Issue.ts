@@ -56,7 +56,7 @@ class Issue extends Model {
     if (this.rawDb === undefined) {
       throw Error('Database undefined!');
     }
-    const IssueStakeholderConnection = (await import('./IssueStakeholderConnection.js')).default;
+    const IssueStakeholderConnection = (await import('./IssueStakeholderConnection')).default;
     return Promise.resolve(
       this.rawDb.query(
         aql`
