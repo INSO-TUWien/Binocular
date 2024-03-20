@@ -9,10 +9,10 @@ import ReporterMock from './helper/reporter/reporterMock';
 
 import Db from '../core/db/db';
 import Commit from '../models/Commit';
-import Hunk from '../models/Hunk';
 import File from '../models/File';
 import Branch from '../models/Branch';
 import Module from '../models/Module';
+import CommitFileConnection from '../models/CommitFileConnection';
 import ModuleFileConnection from '../models/ModuleFileConnection';
 import CommitModuleConnection from '../models/CommitModuleConnection';
 import BranchFileConnection from '../models/BranchFileConnection';
@@ -93,7 +93,7 @@ describe('vcs', function () {
     await db.ensureDatabase('test', ctx);
     await db.truncate();
     await Commit.ensureCollection();
-    await Hunk.ensureCollection();
+    await CommitFileConnection.ensureCollection();
     await File.ensureCollection();
     await Branch.ensureCollection();
     await Module.ensureCollection();

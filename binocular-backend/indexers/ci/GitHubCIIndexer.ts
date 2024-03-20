@@ -85,9 +85,7 @@ class GitHubCIIndexer {
         lastStartedAt = jobs[jobs.length - 1].created_at;
         lastFinishedAt = jobs[jobs.length - 1].completed_at;
       }
-      // TODO: Currently necessary because the implementation of the Models isn't really compatible with typescript.
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-expect-error
+
       return Build.persist({
         id: pipeline.id,
         sha: pipeline.head_sha,

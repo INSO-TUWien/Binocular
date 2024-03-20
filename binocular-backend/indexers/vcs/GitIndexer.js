@@ -5,15 +5,15 @@ import debug from 'debug';
 const serve = debug('idx:vcs:git');
 const log = debug('log:idx:vcs:git');
 import _ from 'lodash';
-import Commit from '../../models/Commit.js';
-import Module from '../../models/Module.js';
-import File from '../../models/File.js';
-import Branch from '../../models/Branch.js';
-import BranchFileConnection from '../../models/BranchFileConnection.js';
-import CommitFileConnection from '../../models/CommitFileConnection.js';
-import CommitFileStakeholderConnection from '../../models/CommitFileStakeholderConnection.js';
-import BranchFileFileConnection from '../../models/BranchFileFileConnection.js';
-import Stakeholder from '../../models/Stakeholder.js';
+import Commit from '../../models/Commit';
+import Module from '../../models/Module';
+import File from '../../models/File';
+import Branch from '../../models/Branch';
+import BranchFileConnection from '../../models/BranchFileConnection';
+import CommitFileConnection from '../../models/CommitFileConnection';
+import CommitFileStakeholderConnection from '../../models/CommitFileStakeholderConnection';
+import BranchFileFileConnection from '../../models/BranchFileFileConnection';
+import Stakeholder from '../../models/Stakeholder';
 import { fixUTF8 } from '../../utils/utils';
 let fileRenameBranches;
 
@@ -176,7 +176,7 @@ async function processCommit(commit, currentBranch) {
     // needed to cancel walking
     throw { stop: true };
   }
-  if ((await Commit.findById(commit.oid)) !== null) {
+  if ((await Commit.findOneBy('sha', commit.oid)) !== null) {
     this.reporter.finishCommit();
     return;
   }
@@ -197,7 +197,7 @@ async function processCommit(commit, currentBranch) {
 
   serve(`${this.counter.commits.omitCount + this.counter.commits.persistCount}/${this.counter.commits.total} commits processed`);
   // create new connections
-  const connections = await commitDAO.processTree(this.repo, commit, currentBranch, this.urlProvider, this.gateway, this.context);
+  const connections = await Commit.processTree(commitDAO, this.repo, commit, currentBranch, this.urlProvider, this.gateway, this.context);
 
   return postProcessing.bind(this)(
     commitDAO,
@@ -246,7 +246,11 @@ async function postProcessing(commit, connections) {
  */
 async function moduleCreationAndLinking(commit, connections, files, newFiles) {
   const modules = await Promise.all(
-    _.uniq(files.reduce((reduction, file) => reduction.concat(file.getModules()), [])).map((path) => Module.persist({ path })),
+    _.uniq(
+      files.reduce((reduction, file) => {
+        return reduction.concat(File.getModules(file.data));
+      }, []),
+    ).map((path) => Module.persist({ path })),
   );
   const newModules = modules.filter((module) => module.justCreated);
 
@@ -261,16 +265,16 @@ async function moduleCreationAndLinking(commit, connections, files, newFiles) {
 
     const parent = modules.find((module) => module.data.path === parentPath);
     if (parent) {
-      parent.connect(module);
+      Module.connect(parent, module);
     }
   });
 
   // connect files to modules
   newFiles.forEach((file) => {
-    const dir = file.dir();
+    const dir = File.dir(file.data);
     const module = modules.find((module) => module.data.path === dir);
     if (module) {
-      module.connect(file);
+      Module.connect(module, file);
     }
   });
 
@@ -279,13 +283,13 @@ async function moduleCreationAndLinking(commit, connections, files, newFiles) {
     await Promise.all(
       modules.map(async (module) => {
         // update all connections according to the change of the new stats if the file belongs to this module or a submodule
-        if (!newFiles.find((file) => file.dir().startsWith(module.data.path))) {
+        if (!newFiles.find((file) => File.dir(file.data).startsWith(module.data.path))) {
           return;
         }
 
         const stats =
           connections
-            .filter((connection) => connection && connection.stats && connection.file.dir().startsWith(module.data.path))
+            .filter((connection) => connection && connection.stats && File.dir(connection.file.data).startsWith(module.data.path))
             .reduce(
               (stats, item) => {
                 stats.additions += item.stats.additions;
@@ -294,7 +298,7 @@ async function moduleCreationAndLinking(commit, connections, files, newFiles) {
               },
               { additions: 0, deletions: 0 },
             ) || {};
-        return commit.storeConnection(module, {
+        return Commit.storeConnection(commit, module, {
           stats,
           webUrl: this.urlProvider.getDirUrl(commit.data.sha, module.data.path),
         });
@@ -400,9 +404,9 @@ async function createBranchFileConnections(repo, context) {
           return;
         }
         //connect file to branch
-        if (!branch.data.tracksFileRenames) return branch.ensureConnection(file);
+        if (!branch.data.tracksFileRenames) return Branch.ensureConnection(branch, file);
 
-        const branchFile = await branch.ensureConnection(file);
+        const branchFile = await Branch.ensureConnection(branch, file);
         //get previous filenames if applicable
         const previousFilenames = await repo.getPreviousFilenamesRemote(name, file.data.path, context);
         if (previousFilenames.length === 0) {
@@ -473,7 +477,7 @@ async function createOwnershipConnections(repo, context) {
   const commitFileConnectionsGrouped = Object.entries(_.groupBy(commitFileConnections, (cfc) => cfc._to));
 
   for (const [commitId, cfcGroup] of commitFileConnectionsGrouped) {
-    const commitObject = commitObjects.filter((c) => c._id === commitId)[0];
+    const commitObject = commitObjects.filter((c) => c._id === commitId)[0].data;
     const sha = commitObject.sha;
 
     await Promise.all(
@@ -482,7 +486,7 @@ async function createOwnershipConnections(repo, context) {
         if (cfc.data.action === 'deleted') {
           return;
         }
-        const fileObject = fileObjects.filter((f) => f._id === cfc._from)[0];
+        const fileObject = fileObjects.filter((f) => f._id === cfc._from)[0].data;
         const file = fileObject.path;
         try {
           const res = await repo.getOwnershipForFile(file, sha, context);

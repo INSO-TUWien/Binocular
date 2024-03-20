@@ -1,19 +1,23 @@
 'use strict';
-import Model from '../../../models/Model.js';
+import Model from '../../../models/Model';
 import _ from 'lodash';
 
-const TestModel = Model.define('Test', {
-  attributes: ['id', 'someText', 'someOtherText'],
-  keyAttribute: 'id',
-});
-
-TestModel.persist = function (_buildData) {
-  const buildData = _.clone(_buildData);
-  if (_buildData.id) {
-    buildData.id = _buildData.id.toString();
+class TestModel extends Model {
+  constructor() {
+    super('Test', {
+      attributes: ['id', 'someText', 'someOtherText'],
+      keyAttribute: 'id',
+    });
   }
 
-  return TestModel.ensureById(buildData.id, buildData, { ignoreUnknownAttributes: true });
-};
+  persist(_buildData) {
+    const buildData = _.clone(_buildData);
+    if (_buildData.id) {
+      buildData.id = _buildData.id.toString();
+    }
 
-export default TestModel;
+    return this.ensureById(buildData.id, buildData, { ignoreUnknownAttributes: true });
+  }
+}
+
+export default new TestModel();

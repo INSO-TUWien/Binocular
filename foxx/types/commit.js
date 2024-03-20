@@ -20,11 +20,10 @@ module.exports = new gql.GraphQLObjectType({
     return {
       sha: {
         type: new gql.GraphQLNonNull(gql.GraphQLString),
-        resolve: (e) => e._key,
       },
       shortSha: {
         type: new gql.GraphQLNonNull(gql.GraphQLString),
-        resolve: (e) => e._key.substring(0, 7),
+        resolve: (e) => e.sha.substring(0, 7),
       },
       message: {
         type: gql.GraphQLString,
