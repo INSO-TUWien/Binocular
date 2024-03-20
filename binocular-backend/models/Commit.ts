@@ -6,7 +6,6 @@ import Model from './Model';
 import File, { FileDao } from './File';
 import Stakeholder, { StakeholderDao } from './Stakeholder';
 import StatsDao from './supportingTypes/StatsDao';
-import { CommitCommitConnectionDao } from './CommitCommitConnection';
 
 import IllegalArgumentError from '../errors/IllegalArgumentError.js';
 import { exec } from 'child_process';
@@ -49,6 +48,8 @@ class Commit extends Model<CommitDao> {
     if (!repo || !nCommit) {
       throw IllegalArgumentError('repository and git-commit has to be set!');
     }
+    const CommitCommitConnection = (await import('./CommitCommitConnection')).default;
+    const CommitStakeholderConnection = (await import('./CommitStakeholderConnection')).default;
 
     const sha = nCommit.oid;
 
@@ -92,13 +93,13 @@ class Commit extends Model<CommitDao> {
           if (parentCommit === null) {
             return;
           }
-          return this.connect<CommitCommitConnectionDao, CommitDao>(commit, parentCommit);
+          return CommitCommitConnection.connect({}, { from: commit, to: parentCommit });
         });
       }),
     );
     const results = await Stakeholder.ensureBy('gitSignature', authorSignature, {} as StakeholderDao);
     const stakeholder = results[0];
-    await this.connect<CommitCommitConnectionDao, StakeholderDao>(commit, stakeholder);
+    await CommitStakeholderConnection.connect({}, { from: commit, to: stakeholder });
     return commit;
   }
 
@@ -114,7 +115,7 @@ class Commit extends Model<CommitDao> {
    * @param context
    * @returns {*}
    */
-  processTree(
+  async processTree(
     commitDAO: any,
     repo: Repository,
     nCommit: any,
@@ -122,7 +123,8 @@ class Commit extends Model<CommitDao> {
     urlProvider: GitHubUrlProvider | GitLabUrlProvider,
     gateway: GatewayService,
     context: typeof Context,
-  ): any {
+  ): Promise<any> {
+    const CommitFileConnection = (await import('./CommitFileConnection')).default;
     const ignoreFiles = config.get().ignoreFiles || [];
     const ignoreFilesRegex = ignoreFiles.map((i) => new RegExp(i.replace('*', '.*')));
     return Promise.resolve(
@@ -257,7 +259,15 @@ class Commit extends Model<CommitDao> {
 
             await commitDAO.model.save(commitDAO);
 
-            return Promise.all([file, lineCount, { additions: additionsForFile, deletions: deletionsForFile }, hunks]).then((results) => {
+            return Promise.all([
+              file,
+              lineCount,
+              {
+                additions: additionsForFile,
+                deletions: deletionsForFile,
+              },
+              hunks,
+            ]).then((results) => {
               const file = results[0];
               const lineCount = results[1];
               const stats = results[2];
@@ -277,12 +287,15 @@ class Commit extends Model<CommitDao> {
       ),
     ).then((patches) =>
       patches.map(async (patch: any) => {
-        const connection = await this.ensureConnection(commitDAO, patch.file, {
-          lineCount: patch.lineCount,
-          hunks: patch.hunks,
-          stats: patch.stats,
-          action: patch.action,
-        });
+        const connection = await CommitFileConnection.ensure(
+          {
+            lineCount: patch.lineCount,
+            hunks: patch.hunks,
+            stats: patch.stats,
+            action: patch.action,
+          },
+          { from: commitDAO, to: patch.file },
+        );
 
         return Object.assign(patch, {
           hunkConnection: !commitDAO.justCreated ? null : connection,

@@ -26,7 +26,7 @@ class File extends Model<FileDao> {
       UPDATE file WITH {
         maxLength: MAX(
           FOR commit, edge
-          IN OUTBOUND file ${CommitFileConnection.collection}
+          IN INBOUND file ${CommitFileConnection.collection}
           RETURN edge.lineCount
         )
       } IN ${this.collection}

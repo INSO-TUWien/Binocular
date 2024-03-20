@@ -76,7 +76,7 @@ export default class Connection<ConnectionDaoType, FromDaoType, ToDaoType> {
       entry.isStored = true;
       return entry;
     } else {
-      return this.create(data, fromTo);
+      return this.connect(data, fromTo);
     }
   }
 
@@ -91,11 +91,11 @@ export default class Connection<ConnectionDaoType, FromDaoType, ToDaoType> {
     if (entry) {
       return this.collection.update(entry._key, data as object);
     } else {
-      return this.create(data, fromTo);
+      return this.connect(data, fromTo);
     }
   }
 
-  create(
+  connect(
     data: any,
     fromTo: { from: ModelEntry<FromDaoType> | Entry<ConnectionDaoType>; to: ModelEntry<ToDaoType> | Entry<ConnectionDaoType> },
   ) {

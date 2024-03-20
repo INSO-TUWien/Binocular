@@ -107,7 +107,7 @@ class Issue extends Model<IssueDao> {
                 if (issue === null) {
                   return;
                 }
-                return Stakeholder.connect(stakeholder, issue);
+                return IssueStakeholderConnection.connect({}, { from: issue, to: stakeholder });
               });
             }),
         );

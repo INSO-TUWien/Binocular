@@ -5,7 +5,6 @@ import _ from 'lodash';
 import debug from 'debug';
 import * as inflection from 'inflection';
 
-import IllegalArgumentError from '../errors/IllegalArgumentError.js';
 import ctx from '../utils/context.ts';
 import ModelCursor from './ModelCursor';
 import Db from '../core/db/db.ts';
@@ -79,7 +78,7 @@ export default class Model<DaoType> {
         if (resp) {
           return [this.parse(resp), false];
         } else {
-          const entry = new Entry<DaoType>(data, this, {
+          const entry = new Entry<DaoType>(data, {
             isNew: options && options.isNew ? options.isNew : true,
             ignoreUnknownAttributes: options && options.ignoreUnknownAttributes ? options.ignoreUnknownAttributes : true,
           });
@@ -103,7 +102,7 @@ export default class Model<DaoType> {
         if (resp) {
           return [this.parse(resp.data), false];
         } else {
-          const entry = new Entry<DaoType>(data, this, {
+          const entry = new Entry<DaoType>(data, {
             isNew: options && options.isNew ? options.isNew : true,
             ignoreUnknownAttributes: options && options.ignoreUnknownAttributes ? options.ignoreUnknownAttributes : true,
           });
@@ -119,7 +118,7 @@ export default class Model<DaoType> {
   }
 
   create(data: any, options?: { isNew: boolean }) {
-    const entry = new Entry<DaoType>(data, this, {
+    const entry = new Entry<DaoType>(data, {
       isNew: options ? options.isNew : true,
       ignoreUnknownAttributes: true,
     });
@@ -143,7 +142,7 @@ export default class Model<DaoType> {
         return instance;
       } else {
         return this.save(
-          new Entry<DaoType>(entry.data, this, {
+          new Entry<DaoType>(entry.data, {
             isNew: false,
             ignoreUnknownAttributes: true,
           }),
@@ -157,7 +156,7 @@ export default class Model<DaoType> {
       return null;
     }
 
-    const entry = new Entry<DaoType>(data, this, {
+    const entry = new Entry<DaoType>(data, {
       isNew: false,
       ignoreUnknownAttributes: true,
     });
@@ -235,24 +234,6 @@ export default class Model<DaoType> {
         });
     }
   }
-
-  connect<ConnectionDaoType, ToDaoType>(from: Entry<DaoType>, to: Entry<ToDaoType>, data?: any) {
-    return connectionHandling<ConnectionDaoType, DaoType, ToDaoType>(from, to, data, (ConnectionClass, data, fromTo) =>
-      ConnectionClass.create(data, fromTo),
-    );
-  }
-
-  ensureConnection<ConnectionDaoType, ToDaoType>(from: Entry<DaoType>, to: Entry<ToDaoType>, data?: any) {
-    return connectionHandling<ConnectionDaoType, DaoType, ToDaoType>(from, to, data, (ConnectionClass, data, fromTo) =>
-      ConnectionClass.ensure(data, fromTo),
-    );
-  }
-
-  storeConnection<ConnectionDaoType, ToDaoType>(from: Entry<DaoType>, to: Entry<ToDaoType>, data?: any) {
-    return connectionHandling<ConnectionDaoType, DaoType, ToDaoType>(from, to, data, (ConnectionClass, data, fromTo) =>
-      ConnectionClass.store(data, fromTo),
-    );
-  }
 }
 
 export class Entry<DaoType> {
@@ -261,36 +242,12 @@ export class Entry<DaoType> {
   _key: string | undefined;
   isStored: boolean | undefined;
   isNew: boolean;
-  log: debug.Debugger;
-  model: Model<DaoType>;
   justCreated: boolean | undefined;
   justUpdated: boolean | undefined;
-  constructor(data: DaoType, model: Model<DaoType>, options: { isNew: boolean; ignoreUnknownAttributes: boolean }) {
+  constructor(data: DaoType, options: { isNew: boolean; ignoreUnknownAttributes: boolean }) {
     this.data = _.defaults({}, data);
     options = _.defaults({}, options, { isNew: true, ignoreUnknownAttributes: false });
 
     this.isNew = options.isNew;
-    this.log = debug(`db:${model.collectionName}`);
-    this.model = model;
-    _.each(_.keys(data), (key) => {
-      if (!options.ignoreUnknownAttributes) {
-        throw new IllegalArgumentError(`${key} is not a valid data property for collection ${model.collectionName}`);
-      }
-    });
   }
-}
-
-function connectionHandling<ConnectionDaoType, FromDaoType, ToDaoType>(
-  fromEntry: Entry<FromDaoType>,
-  toEntry: Entry<ToDaoType>,
-  data: ConnectionDaoType,
-  cb: (connection: any, data: ConnectionDaoType, entries: { from: Entry<FromDaoType>; to: Entry<ToDaoType> }) => any,
-) {
-  const ConnectionClass = fromEntry.model.connections[toEntry.model.collectionName];
-
-  if (!ConnectionClass) {
-    throw new IllegalArgumentError(`${fromEntry.model.collectionName} is not connected to ${toEntry.model.collectionName}`);
-  }
-
-  return cb(ConnectionClass, data, { from: fromEntry, to: toEntry });
 }

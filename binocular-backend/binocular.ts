@@ -666,7 +666,7 @@ function runBackend() {
       for (const mention of issue.data.mentions) {
         const commit = commits.filter((c: any) => c.data.sha === mention.commit);
         if (commit && commit[0]) {
-          Issue.connect(issue, commit[0], { closes: mention.closes });
+          await IssueCommitConnection.connect({ closes: mention.closes }, { from: issue, to: commit[0] });
         }
       }
     }
@@ -685,7 +685,7 @@ function runBackend() {
       if (!build.data.sha) continue;
       const commit = commits.filter((c: any) => c.sha === build.data.sha);
       if (commit && commit[0]) {
-        Commit.connect(commit[0], build);
+        await CommitBuildConnection.connect({}, { from: commit[0], to: build });
       }
     }
 
