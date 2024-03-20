@@ -1,10 +1,12 @@
 'use strict';
 
 import Connection from './Connection';
-import Commit from './Commit';
-import Build from './Build';
+import Commit, { CommitDao } from './Commit';
+import Build, { BuildDao } from './Build';
 
-class CommitBuildConnection extends Connection {
+interface CommitBuildConnectionDao {}
+
+class CommitBuildConnection extends Connection<CommitBuildConnectionDao, CommitDao, BuildDao> {
   constructor() {
     super(Commit, Build);
   }

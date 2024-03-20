@@ -11,6 +11,7 @@ import Commit from '../models/Commit';
 import File from '../models/File';
 import CommitStakeholderConnection from '../models/CommitStakeholderConnection';
 import CommitFileConnection from '../models/CommitFileConnection';
+import CommitCommitConnection from '../models/CommitCommitConnection';
 import Stakeholder from '../models/Stakeholder';
 
 import conf from '../utils/config.js';
@@ -57,6 +58,7 @@ describe('commit', function () {
       await db.truncate();
       await Commit.ensureCollection();
       await File.ensureCollection();
+      await CommitCommitConnection.ensureCollection();
       await CommitFileConnection.ensureCollection();
       await CommitStakeholderConnection.ensureCollection();
       await Stakeholder.ensureCollection();

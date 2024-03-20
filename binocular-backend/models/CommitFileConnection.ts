@@ -1,12 +1,21 @@
 'use strict';
 
 import Connection from './Connection';
-import Commit from './Commit';
-import File from './File';
+import Commit, { CommitDao } from './Commit';
+import File, { FileDao } from './File';
+import StatsDao from './supportingTypes/StatsDao';
+import HunkDao from './supportingTypes/HunkDao';
 
-class CommitFileConnection extends Connection {
+export interface CommitFileConnectionDao {
+  action: string;
+  lineCount: number;
+  hunks: HunkDao[];
+  stats: StatsDao;
+}
+
+class CommitFileConnection extends Connection<CommitFileConnectionDao, CommitDao, FileDao> {
   constructor() {
-    super(Commit, File, { attributes: ['action', 'stats', 'hunks', 'lineCount'] });
+    super(Commit, File);
   }
 }
 export default new CommitFileConnection();

@@ -1,10 +1,12 @@
 'use strict';
 
 import Connection from './Connection';
-import Module from './Module';
-import File from './File';
+import Module, { ModuleDao } from './Module';
+import File, { FileDao } from './File';
 
-class ModuleFileConnection extends Connection {
+interface ModuleFileConnectionDao {}
+
+class ModuleFileConnection extends Connection<ModuleFileConnectionDao, ModuleDao, FileDao> {
   constructor() {
     super(Module, File);
   }

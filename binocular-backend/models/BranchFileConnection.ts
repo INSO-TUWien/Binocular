@@ -1,10 +1,12 @@
 'use strict';
 
 import Connection from './Connection';
-import Branch from './Branch';
-import File from './File.js';
+import Branch, { BranchDao } from './Branch';
+import File, { FileDao } from './File';
 
-class BranchFileConnection extends Connection {
+export interface BranchFileConnectionDao {}
+
+class BranchFileConnection extends Connection<BranchFileConnectionDao, BranchDao, FileDao> {
   constructor() {
     super(Branch, File);
   }

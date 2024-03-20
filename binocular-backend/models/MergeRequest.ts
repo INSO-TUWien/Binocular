@@ -2,32 +2,33 @@
 
 import _ from 'lodash';
 import Model from './Model';
+import LabelDao from './supportingTypes/LabelDao';
+import UserDao from './supportingTypes/UserDao';
+import MentionsDao from './supportingTypes/MentionsDao';
 
-class MergeRequest extends Model {
+interface MergeRequestDao {
+  id: string;
+  iid: number;
+  title: string;
+  description: string;
+  createdAt: string;
+  closedAt: string;
+  updatedAt: string;
+  labels: LabelDao[];
+  milestone: any; //TODO: Add type for milestone
+  state: string;
+  url: string;
+  webUrl: string;
+  author: UserDao;
+  assignee: UserDao;
+  assignees: UserDao[];
+  mentions: MentionsDao[];
+}
+
+class MergeRequest extends Model<MergeRequestDao> {
   constructor() {
-    super('MergeRequest', {
-      attributes: [
-        'id',
-        'iid',
-        'title',
-        'description',
-        'state',
-        'createdAt',
-        'updatedAt',
-        'labels',
-        'milestone',
-        'author',
-        'assignee',
-        'assignees',
-        'userNotesCount',
-        'upvotes',
-        'downvotes',
-        'webUrl',
-        'reference',
-        'references',
-        'timeStats',
-        'notes',
-      ],
+    super({
+      name: 'MergeRequest',
       keyAttribute: 'id',
     });
   }

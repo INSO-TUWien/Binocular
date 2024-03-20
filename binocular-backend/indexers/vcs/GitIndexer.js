@@ -427,7 +427,7 @@ async function createBranchFileConnections(repo, context) {
           const fileObj = filesDAO.filter((f) => f.data.path === prevFilename)[0];
           //connect the new connection to relevant files
           //this models file renames (file on this branch was called ... earlier)
-          BranchFileFileConnection.ensure(
+          await BranchFileFileConnection.ensure(
             { hasThisNameFrom: hasThisNameFrom, hasThisNameUntil: hasThisNameUntil },
             { from: branchFile, to: fileObj },
           );
@@ -474,7 +474,7 @@ async function createOwnershipConnections(repo, context) {
   commitFileConnections = commitFileConnections.filter(
     (cfc) => !(cfc.data.action === 'added' && cfc.data.stats.additions === 0 && cfc.data.stats.deletions === 0),
   );
-  const commitFileConnectionsGrouped = Object.entries(_.groupBy(commitFileConnections, (cfc) => cfc._to));
+  const commitFileConnectionsGrouped = Object.entries(_.groupBy(commitFileConnections, (cfc) => cfc._from));
 
   for (const [commitId, cfcGroup] of commitFileConnectionsGrouped) {
     const commitObject = commitObjects.filter((c) => c._id === commitId)[0].data;
@@ -484,18 +484,26 @@ async function createOwnershipConnections(repo, context) {
       cfcGroup.map(async (cfc) => {
         //if this connection tells us that the file has been deleted in this commit, we can ignore this connection
         if (cfc.data.action === 'deleted') {
-          return;
-        }
-        const fileObject = fileObjects.filter((f) => f._id === cfc._from)[0].data;
-        const file = fileObject.path;
-        try {
-          const res = await repo.getOwnershipForFile(file, sha, context);
-          for (const [stakeholder] of Object.entries(res.ownershipData)) {
-            const hunks = res.hunks[stakeholder].map((h) => _.omit(h, ['signature']));
-            CommitFileStakeholderConnection.ensure({ hunks: hunks }, { from: cfc, to: stakeholderIds[fixUTF8(stakeholder)] });
+          if (cfc.data.action === 'deleted') {
+            return;
           }
-        } catch (e) {
-          console.log(`Cant get ownership for ${file} at commit ${cfc._to}`);
+          const fileObject = fileObjects.filter((f) => f._id === cfc._to)[0].data;
+          const file = fileObject.path;
+          try {
+            const res = await repo.getOwnershipForFile(file, sha, context);
+            for (const [stakeholder] of Object.entries(res.ownershipData)) {
+              const hunks = res.hunks[stakeholder].map((h) => _.omit(h, ['signature']));
+              await CommitFileStakeholderConnection.ensure(
+                { hunks: hunks },
+                {
+                  from: cfc,
+                  to: stakeholderIds[fixUTF8(stakeholder)],
+                },
+              );
+            }
+          } catch (e) {
+            console.log(`Cant get ownership for ${file} at commit ${cfc._to}`);
+          }
         }
       }),
     );

@@ -1,10 +1,12 @@
 'use strict';
 
 import Connection from './Connection';
-import Commit from './Commit';
-import Stakeholder from './Stakeholder';
+import Commit, { CommitDao } from './Commit';
+import Stakeholder, { StakeholderDao } from './Stakeholder';
 
-class CommitStakeholderConnection extends Connection {
+export interface CommitStakeholderConnectionDao {}
+
+class CommitStakeholderConnection extends Connection<CommitStakeholderConnectionDao, CommitDao, StakeholderDao> {
   constructor() {
     super(Commit, Stakeholder);
   }

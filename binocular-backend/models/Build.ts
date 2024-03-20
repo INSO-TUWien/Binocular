@@ -3,29 +3,28 @@
 import _ from 'lodash';
 import Model from './Model';
 import { aql } from 'arangojs';
+import JobDao from './supportingTypes/JobDao';
 
-class Build extends Model {
+export interface BuildDao {
+  id: string;
+  user: string;
+  userFullName: string;
+  committedAt: string;
+  createdAt: string;
+  startedAt: string;
+  updatedAt: string;
+  webUrl: string;
+  tag: string;
+  status: string;
+  duration: number;
+  sha: string;
+  jobs: JobDao[];
+}
+
+class Build extends Model<BuildDao> {
   constructor() {
-    super('Build', {
-      attributes: [
-        'id',
-        'sha',
-        'beforeSha',
-        'ref',
-        'status',
-        'tag',
-        'yamlErrors',
-        'user',
-        'createdAt',
-        'updatedAt',
-        'startedAt',
-        'finishedAt',
-        'committedAt',
-        'duration',
-        'jobs',
-        'coverage',
-        'webUrl',
-      ],
+    super({
+      name: 'Build',
       keyAttribute: 'id',
     });
   }

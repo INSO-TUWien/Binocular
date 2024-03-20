@@ -7,9 +7,12 @@ import debug from 'debug';
 
 const log = debug('git:commit:module');
 
-class Module extends Model {
+export interface ModuleDao {
+  path: string;
+}
+class Module extends Model<ModuleDao> {
   constructor() {
-    super('Module', { attributes: ['path'] });
+    super({ name: 'Module' });
   }
 
   /**

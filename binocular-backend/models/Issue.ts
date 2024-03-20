@@ -2,40 +2,37 @@
 
 import _ from 'lodash';
 import { aql } from 'arangojs';
-import Model, { Entry } from './Model';
+import Model from './Model';
 import Stakeholder from './Stakeholder.js';
 import debug from 'debug';
+import LabelDao from './supportingTypes/LabelDao';
+import UserDao from './supportingTypes/UserDao';
+import MentionsDao from './supportingTypes/MentionsDao';
 const log = debug('db:Issue');
 
-class Issue extends Model {
+export interface IssueDao {
+  id: string;
+  iid: number;
+  title: string;
+  description: string;
+  createdAt: string;
+  closedAt: string;
+  updatedAt: string;
+  labels: LabelDao[];
+  milestone: any; //TODO: Add type for milestone
+  state: string;
+  url: string;
+  webUrl: string;
+  author: UserDao;
+  assignee: UserDao;
+  assignees: UserDao[];
+  mentions: MentionsDao[];
+}
+
+class Issue extends Model<IssueDao> {
   constructor() {
-    super('Issue', {
-      attributes: [
-        'id',
-        'iid',
-        'title',
-        'description',
-        'state',
-        'url',
-        'closedAt',
-        'createdAt',
-        'updatedAt',
-        'labels',
-        'milestone',
-        'author',
-        'assignee',
-        'assignees',
-        'userNotesCount',
-        'upvotes',
-        'downvotes',
-        'dueDate',
-        'confidential',
-        'weight',
-        'webUrl',
-        'subscribed',
-        'mentions',
-        'notes',
-      ],
+    super({
+      name: 'Issue',
       keyAttribute: 'id',
     });
   }
@@ -133,7 +130,7 @@ export default new Issue();
 
 async function findBestStakeholderMatch(author: any) {
   const stakeholder = await Stakeholder.findAll();
-  const bestMatch = stakeholder.reduce((best: any, stakeholderEntry: Entry | null) => {
+  const bestMatch = stakeholder.reduce((best: any, stakeholderEntry) => {
     if (stakeholderEntry === null) {
       return;
     }

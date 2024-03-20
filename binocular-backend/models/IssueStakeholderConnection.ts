@@ -1,10 +1,12 @@
 'use strict';
 
 import Connection from './Connection';
-import Issue from './Issue';
-import Stakeholder from './Stakeholder';
+import Issue, { IssueDao } from './Issue';
+import Stakeholder, { StakeholderDao } from './Stakeholder';
 
-class IssueStakeholderConnection extends Connection {
+interface IssueStakeholderConnectionDao {}
+
+class IssueStakeholderConnection extends Connection<IssueStakeholderConnectionDao, IssueDao, StakeholderDao> {
   constructor() {
     super(Issue, Stakeholder);
   }

@@ -3,10 +3,24 @@
 import _ from 'lodash';
 import Model from './Model';
 
-class Milestone extends Model {
+interface MilestoneDao {
+  id: string;
+  iid: number;
+  title: string;
+  description: string;
+  createdAt: string;
+  updatedAt: string;
+  startDate: string;
+  dueDate: string;
+  state: string;
+  expired: boolean;
+  webUrl: string;
+}
+
+class Milestone extends Model<MilestoneDao> {
   constructor() {
-    super('Milestone', {
-      attributes: ['id', 'iid', 'title', 'description', 'dueDate', 'startDate', 'state', 'createdAt', 'updatedAt', 'expired', 'webURL'],
+    super({
+      name: 'Milestone',
       keyAttribute: 'id',
     });
   }

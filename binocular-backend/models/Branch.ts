@@ -2,10 +2,18 @@
 
 import Model from './Model';
 
-class Branch extends Model {
+export interface BranchDao {
+  id: string;
+  branch: string;
+  active: boolean;
+  trackFileRenames: boolean;
+  latestCommit: string;
+}
+
+class Branch extends Model<BranchDao> {
   constructor() {
-    super('Branch', {
-      attributes: ['id', 'branch', 'active', 'tracksFileRenames', 'latestCommit'],
+    super({
+      name: 'Branch',
       keyAttribute: 'id',
     });
   }

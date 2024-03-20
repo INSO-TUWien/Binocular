@@ -2,10 +2,14 @@
 
 import Model from './Model';
 
-class Stakeholder extends Model {
+export interface StakeholderDao {
+  gitSignature: string;
+}
+
+class Stakeholder extends Model<StakeholderDao> {
   constructor() {
-    super('Stakeholder', {
-      attributes: ['gitSignature', 'gitlabId', 'gitlabName', 'gitlabAvatarUrl', 'gitlabWebUrl'],
+    super({
+      name: 'Stakeholder',
     });
   }
 }

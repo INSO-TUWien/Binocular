@@ -3,9 +3,16 @@
 import { aql } from 'arangojs';
 import Model from './Model';
 import path from 'path';
-class File extends Model {
+
+export interface FileDao {
+  path: string;
+  webUrl: string;
+  maxLength: number;
+}
+
+class File extends Model<FileDao> {
   constructor() {
-    super('File', { attributes: ['path', 'webUrl'] });
+    super({ name: 'File' });
   }
   async deduceMaxLengths() {
     if (this.rawDb === undefined) {

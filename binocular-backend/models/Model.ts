@@ -7,29 +7,26 @@ import * as inflection from 'inflection';
 
 import IllegalArgumentError from '../errors/IllegalArgumentError.js';
 import ctx from '../utils/context.ts';
-import ModelCursor from './ModelCursor.js';
+import ModelCursor from './ModelCursor';
 import Db from '../core/db/db.ts';
 import { Collection } from 'arangojs/collection';
 import { Database } from 'arangojs';
-import Connection from './Connection.ts';
 import { AqlQuery } from 'arangojs/aql';
 
-export default class Model {
+export default class Model<DaoType> {
   connections = {};
-  attributes: string[];
   collectionName: string;
   log: debug.Debugger;
   db: Db | undefined;
   collection: Collection | undefined;
   rawDb: Database | undefined;
 
-  constructor(name, options) {
+  constructor(options) {
     options = _.defaults({}, options, { attributes: [], keyAttribute: '_key' });
-    this.attributes = options.attributes;
-    this.collectionName = name;
+    this.collectionName = options.name;
 
-    this.collectionName = inflection.pluralize(_.lowerFirst(name));
-    this.log = debug(`db:${name}`);
+    this.collectionName = inflection.pluralize(_.lowerFirst(options.name));
+    this.log = debug(`db:${options.name}`);
 
     ctx.on(
       'ensure:db',
@@ -76,14 +73,13 @@ export default class Model {
     return null;
   }
 
-  async ensureById(id: string, data: any, options?: { ignoreUnknownAttributes?: boolean; isNew?: boolean }) {
+  async ensureById(id: string, data: DaoType, options?: { ignoreUnknownAttributes?: boolean; isNew?: boolean }) {
     return this.findOneById(id).then(
       function (resp) {
         if (resp) {
           return [this.parse(resp), false];
         } else {
-          const entry = new Entry(data, this, {
-            attributes: this.attributes,
+          const entry = new Entry<DaoType>(data, this, {
             isNew: options && options.isNew ? options.isNew : true,
             ignoreUnknownAttributes: options && options.ignoreUnknownAttributes ? options.ignoreUnknownAttributes : true,
           });
@@ -100,15 +96,14 @@ export default class Model {
     return this.firstExample({ id: id });
   }
 
-  async ensureBy(key: string, value: any, data: any, options?: { ignoreUnknownAttributes?: boolean; isNew?: boolean }) {
+  async ensureBy(key: string, value: any, data: DaoType, options?: { ignoreUnknownAttributes?: boolean; isNew?: boolean }) {
     data[key] = value;
     return this.findOneBy(key, value).then(
       function (resp) {
         if (resp) {
           return [this.parse(resp.data), false];
         } else {
-          const entry = new Entry(data, this, {
-            attributes: this.attributes,
+          const entry = new Entry<DaoType>(data, this, {
             isNew: options && options.isNew ? options.isNew : true,
             ignoreUnknownAttributes: options && options.ignoreUnknownAttributes ? options.ignoreUnknownAttributes : true,
           });
@@ -124,8 +119,7 @@ export default class Model {
   }
 
   create(data: any, options?: { isNew: boolean }) {
-    const entry = new Entry(data, this, {
-      attributes: this.attributes,
+    const entry = new Entry<DaoType>(data, this, {
       isNew: options ? options.isNew : true,
       ignoreUnknownAttributes: true,
     });
@@ -142,15 +136,14 @@ export default class Model {
     });
   }
 
-  ensure(entry: Entry) {
+  ensure(entry: Entry<DaoType>) {
     return this.findOneBy('_key', entry._key).then((instance) => {
       if (instance) {
         instance.isStored = true;
         return instance;
       } else {
         return this.save(
-          new Entry(entry.data, this, {
-            attributes: this.attributes,
+          new Entry<DaoType>(entry.data, this, {
             isNew: false,
             ignoreUnknownAttributes: true,
           }),
@@ -159,13 +152,12 @@ export default class Model {
     });
   }
 
-  parse(data: any): Entry | null {
+  parse(data: any): Entry<DaoType> | null {
     if (data === null) {
       return null;
     }
 
-    const entry = new Entry(data, this, {
-      attributes: this.attributes,
+    const entry = new Entry<DaoType>(data, this, {
       isNew: false,
       ignoreUnknownAttributes: true,
     });
@@ -204,7 +196,7 @@ export default class Model {
     return ds.map((d) => this.parse(d));
   }
 
-  save(entry: Entry) {
+  save(entry: Entry<DaoType>) {
     this.log('save %o', entry.data);
     if (this.collection === undefined) {
       throw Error('Collection undefined!');
@@ -226,7 +218,9 @@ export default class Model {
         });
     } else {
       entry.justUpdated = true;
-      return Promise.resolve(this.collection.update({ _id: entry._id, _key: entry._key === undefined ? '' : entry._key }, entry.data))
+      return Promise.resolve(
+        this.collection.update({ _id: entry._id, _key: entry._key === undefined ? '' : entry._key }, entry.data as object),
+      )
         .catch(() => {
           entry.justCreated = false;
           entry.justUpdated = false;
@@ -242,56 +236,55 @@ export default class Model {
     }
   }
 
-  connect(from: Entry, to: Entry, data?: any) {
-    return connectionHandling.bind(this)(from, to, data, (ConnectionClass, data, fromTo) => ConnectionClass.create(data, fromTo));
+  connect<ConnectionDaoType, ToDaoType>(from: Entry<DaoType>, to: Entry<ToDaoType>, data?: any) {
+    return connectionHandling<ConnectionDaoType, DaoType, ToDaoType>(from, to, data, (ConnectionClass, data, fromTo) =>
+      ConnectionClass.create(data, fromTo),
+    );
   }
 
-  ensureConnection(from: Entry, to: Entry, data?: any) {
-    return connectionHandling.bind(this)(from, to, data, (ConnectionClass, data, fromTo) => ConnectionClass.ensure(data, fromTo));
+  ensureConnection<ConnectionDaoType, ToDaoType>(from: Entry<DaoType>, to: Entry<ToDaoType>, data?: any) {
+    return connectionHandling<ConnectionDaoType, DaoType, ToDaoType>(from, to, data, (ConnectionClass, data, fromTo) =>
+      ConnectionClass.ensure(data, fromTo),
+    );
   }
 
-  storeConnection(from: Entry, to: Entry, data?: any) {
-    return connectionHandling.bind(this)(from, to, data, (ConnectionClass, data, fromTo) => ConnectionClass.store(data, fromTo));
+  storeConnection<ConnectionDaoType, ToDaoType>(from: Entry<DaoType>, to: Entry<ToDaoType>, data?: any) {
+    return connectionHandling<ConnectionDaoType, DaoType, ToDaoType>(from, to, data, (ConnectionClass, data, fromTo) =>
+      ConnectionClass.store(data, fromTo),
+    );
   }
 }
 
-export class Entry {
-  data: any;
+export class Entry<DaoType> {
+  data: DaoType;
   _id: string | undefined;
   _key: string | undefined;
   isStored: boolean | undefined;
   isNew: boolean;
   log: debug.Debugger;
-  model: Model;
+  model: Model<DaoType>;
   justCreated: boolean | undefined;
   justUpdated: boolean | undefined;
-  constructor(data: any, model: Model, options: { attributes: string[]; isNew: boolean; ignoreUnknownAttributes: boolean }) {
+  constructor(data: DaoType, model: Model<DaoType>, options: { isNew: boolean; ignoreUnknownAttributes: boolean }) {
     this.data = _.defaults({}, data);
     options = _.defaults({}, options, { isNew: true, ignoreUnknownAttributes: false });
 
     this.isNew = options.isNew;
     this.log = debug(`db:${model.collectionName}`);
     this.model = model;
-    _.each(
-      _.keys(data),
-      function (key) {
-        if (!_.includes(options.attributes, key)) {
-          this.log(`${key} is not a valid data property for collection ${model.collectionName}`);
-
-          if (!options.ignoreUnknownAttributes) {
-            throw new IllegalArgumentError(`${key} is not a valid data property for collection ${model.collectionName}`);
-          }
-        }
-      }.bind(this),
-    );
+    _.each(_.keys(data), (key) => {
+      if (!options.ignoreUnknownAttributes) {
+        throw new IllegalArgumentError(`${key} is not a valid data property for collection ${model.collectionName}`);
+      }
+    });
   }
 }
 
-function connectionHandling(
-  fromEntry: Entry,
-  toEntry: Entry,
-  data: any,
-  cb: (connection: Connection, data: any, entries: { from: Entry; to: Entry }) => any,
+function connectionHandling<ConnectionDaoType, FromDaoType, ToDaoType>(
+  fromEntry: Entry<FromDaoType>,
+  toEntry: Entry<ToDaoType>,
+  data: ConnectionDaoType,
+  cb: (connection: any, data: ConnectionDaoType, entries: { from: Entry<FromDaoType>; to: Entry<ToDaoType> }) => any,
 ) {
   const ConnectionClass = fromEntry.model.connections[toEntry.model.collectionName];
 
@@ -299,16 +292,5 @@ function connectionHandling(
     throw new IllegalArgumentError(`${fromEntry.model.collectionName} is not connected to ${toEntry.model.collectionName}`);
   }
 
-  let from: Entry;
-  let to: Entry;
-
-  if (ConnectionClass.fromModel === fromEntry.model) {
-    from = fromEntry;
-    to = toEntry;
-  } else {
-    from = toEntry;
-    to = fromEntry;
-  }
-
-  return cb(ConnectionClass, data, { from: from, to: to });
+  return cb(ConnectionClass, data, { from: fromEntry, to: toEntry });
 }

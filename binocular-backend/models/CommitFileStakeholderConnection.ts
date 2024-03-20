@@ -1,10 +1,15 @@
 'use strict';
 
 import Connection from './Connection';
-import CommitFile from './CommitFileConnection';
-import Stakeholder from './Stakeholder';
+import CommitFile, { CommitFileConnectionDao } from './CommitFileConnection';
+import Stakeholder, { StakeholderDao } from './Stakeholder';
+import OwnershipHunkDao from './supportingTypes/OwnershipHunkDao';
 
-class CommitFileStakeholderConnection extends Connection {
+interface CommitFileStakeholderConnectionDao {
+  hunks: OwnershipHunkDao[];
+}
+
+class CommitFileStakeholderConnection extends Connection<CommitFileStakeholderConnectionDao, CommitFileConnectionDao, StakeholderDao> {
   constructor() {
     super(CommitFile, Stakeholder);
   }

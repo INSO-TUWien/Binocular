@@ -1,9 +1,11 @@
 'use strict';
 
 import Connection from './Connection';
-import Commit from './Commit';
+import Commit, { CommitDao } from './Commit';
 
-class CommitCommitConnection extends Connection {
+export interface CommitCommitConnectionDao {}
+
+class CommitCommitConnection extends Connection<CommitCommitConnectionDao, CommitDao, CommitDao> {
   constructor() {
     super(Commit, Commit);
   }

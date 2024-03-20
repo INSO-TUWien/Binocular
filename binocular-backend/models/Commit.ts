@@ -2,11 +2,15 @@
 
 import debug from 'debug';
 import Model from './Model';
-import File from './File.js';
+
+import File, { FileDao } from './File';
+import Stakeholder, { StakeholderDao } from './Stakeholder';
+import StatsDao from './supportingTypes/StatsDao';
+import { CommitCommitConnectionDao } from './CommitCommitConnection';
+
 import IllegalArgumentError from '../errors/IllegalArgumentError.js';
 import { exec } from 'child_process';
 import * as utils from '../utils/utils.ts';
-import Stakeholder from './Stakeholder.js';
 import config from '../utils/config.js';
 import Repository from '../core/provider/git';
 import GitHubUrlProvider from '../url-providers/GitHubUrlProvider';
@@ -16,10 +20,19 @@ import Context from '../utils/context.ts';
 
 const log = debug('git:commit');
 
-class Commit extends Model {
+export interface CommitDao {
+  sha: string;
+  date: string;
+  message: string;
+  webUrl: string;
+  branch: string;
+  stats: StatsDao;
+}
+
+class Commit extends Model<CommitDao> {
   constructor() {
-    super('Commit', {
-      attributes: ['sha', 'message', 'signature', 'date', 'stats', 'branch', 'history', 'parents', 'webUrl'],
+    super({
+      name: 'Commit',
       keyAttribute: 'sha',
     });
   }
@@ -47,12 +60,14 @@ class Commit extends Model {
     }
     log('Processing', sha);
     let parents = '';
-    for (const i of nCommit.commit.parent) {
-      parents += nCommit.commit.parent[i];
+
+    nCommit.commit.parent.forEach((p, i) => {
+      parents += p;
       if (i < nCommit.commit.parent.length - 1) {
         parents += ',';
       }
-    }
+    });
+
     const authorSignature = utils.fixUTF8(nCommit.commit.author.name + ' <' + nCommit.commit.author.email + '>');
     const commit = await this.create(
       {
@@ -77,13 +92,13 @@ class Commit extends Model {
           if (parentCommit === null) {
             return;
           }
-          return this.connect(commit, parentCommit);
+          return this.connect<CommitCommitConnectionDao, CommitDao>(commit, parentCommit);
         });
       }),
     );
-    const results = await Stakeholder.ensureBy('gitSignature', authorSignature, {});
+    const results = await Stakeholder.ensureBy('gitSignature', authorSignature, {} as StakeholderDao);
     const stakeholder = results[0];
-    await this.connect(commit, stakeholder);
+    await this.connect<CommitCommitConnectionDao, StakeholderDao>(commit, stakeholder);
     return commit;
   }
 
@@ -215,7 +230,7 @@ class Commit extends Model {
             const webUrl = urlProvider.getFileUrl(currentBranch, filepath);
             const file = await File.ensureBy('path', filepath, {
               webUrl: webUrl,
-            }).then((f) => f[0]);
+            } as FileDao).then((f) => f[0]);
 
             let additionsForFile = 0;
             let deletionsForFile = 0;
