@@ -159,15 +159,7 @@ function runBackend() {
   const services: any[] = [];
 
   const gatewayService = new GateWayService();
-  const reporter = new (ProgressReporter as any)(ctx.io, [
-    'commits',
-    'issues',
-    'builds',
-    'files',
-    'modules',
-    'mergeRequests',
-    'milestones',
-  ]);
+  const reporter = new ProgressReporter(ctx.io, ['commits', 'issues', 'builds', 'files', 'modules', 'mergeRequests', 'milestones']);
   let databaseConnection: any = null;
 
   /**
@@ -390,7 +382,7 @@ function runBackend() {
         return;
       }
 
-      await (Issue as any).deduceStakeholders();
+      await Issue.deduceStakeholders();
       createManualIssueReferences(config.get('issueReferences'));
       if (context.argv.export) {
         projectStructureHelper.deleteDbExport(__dirname + '/../binocular-frontend');
@@ -608,7 +600,7 @@ function runBackend() {
       _.keys(issueReferences).map((sha) => {
         const iid = issueReferences[sha];
 
-        return Promise.all([(Commit as any).findOneBySha(sha), (Issue as any).findOneByIid(iid)]).then(([commit, issue]) => {
+        return Promise.all([Commit.findOneBy('sha', sha), Issue.findOneBy('iid', iid)]).then(([commit, issue]) => {
           if (!commit) {
             console.warn(`Ignored issue #${iid} referencing non-existing commit ${sha}`);
             return;
@@ -618,14 +610,15 @@ function runBackend() {
             return;
           }
 
-          const existingMention = _.find(issue.mentions, (mention) => mention.commit === sha);
+          const existingMention = _.find(issue.data.mentions, (mention) => mention.commit === sha);
           if (!existingMention) {
-            issue.mentions.push({
-              createdAt: commit.date,
+            issue.data.mentions.push({
+              createdAt: commit.data.date,
               commit: sha,
+              closes: false,
               manual: true,
             });
-            return issue.save();
+            return Issue.save(issue);
           }
         });
       }),
@@ -671,7 +664,7 @@ function runBackend() {
       }
     }
     //remove the temporary `mentions` attribute since we have the connections now
-    await (Issue as any).deleteMentionsAttribute();
+    await Issue.deleteMentionsAttribute();
   }
 
   async function connectCommitsAndBuilds() {
@@ -689,7 +682,7 @@ function runBackend() {
       }
     }
 
-    await (Build as any).deleteShaRefAttributes();
+    await Build.deleteShaRefAttributes();
   }
 
   // start services
