@@ -1,4 +1,4 @@
-export default interface StatsDao {
+export default interface Stats {
   additions: number;
   deletions: number;
 }

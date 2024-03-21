@@ -2,9 +2,9 @@
 
 import _ from 'lodash';
 import Model from '../Model.ts';
-import LabelDao from '../supportingTypes/LabelDao.ts';
-import UserDao from '../supportingTypes/UserDao.ts';
-import MentionsDao from '../supportingTypes/MentionsDao.ts';
+import Label from '../supportingTypes/Label';
+import User from '../supportingTypes/User';
+import Mentions from '../supportingTypes/Mentions';
 
 interface MergeRequestDao {
   id: string;
@@ -14,15 +14,15 @@ interface MergeRequestDao {
   createdAt: string;
   closedAt: string;
   updatedAt: string;
-  labels: LabelDao[];
+  labels: Label[];
   milestone: any; //TODO: Add type for milestone
   state: string;
   url: string;
   webUrl: string;
-  author: UserDao;
-  assignee: UserDao;
-  assignees: UserDao[];
-  mentions: MentionsDao[];
+  author: User;
+  assignee: User;
+  assignees: User[];
+  mentions: Mentions[];
 }
 
 class MergeRequest extends Model<MergeRequestDao> {

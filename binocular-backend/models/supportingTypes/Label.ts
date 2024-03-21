@@ -1,4 +1,4 @@
-export default interface LabelDao {
+export default interface Label {
   id: string;
   name: string;
   description: string;

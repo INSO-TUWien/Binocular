@@ -3,10 +3,10 @@
 import Connection from '../Connection.ts';
 import CommitFile, { CommitFileConnectionDao } from './CommitFileConnection';
 import Stakeholder, { StakeholderDao } from '../models/Stakeholder';
-import OwnershipHunkDao from '../supportingTypes/OwnershipHunkDao';
+import OwnershipHunk from '../supportingTypes/OwnershipHunk';
 
 interface CommitFileStakeholderConnectionDao {
-  hunks: OwnershipHunkDao[];
+  hunks: OwnershipHunk[];
 }
 
 class CommitFileStakeholderConnection extends Connection<CommitFileStakeholderConnectionDao, CommitFileConnectionDao, StakeholderDao> {

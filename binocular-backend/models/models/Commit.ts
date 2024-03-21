@@ -4,8 +4,8 @@ import debug from 'debug';
 import Model from '../Model.ts';
 
 import File, { FileDao } from './File.ts';
-import Stakeholder, { StakeholderDao } from './Stakeholder.ts';
-import StatsDao from '../supportingTypes/StatsDao.ts';
+import Stakeholder, { StakeholderDao } from './Stakeholder';
+import Stats from '../supportingTypes/Stats.ts';
 import CommitCommitConnection from '../connections/CommitCommitConnection';
 import CommitFileConnection from '../connections/CommitFileConnection';
 import CommitStakeholderConnection from '../connections/CommitStakeholderConnection';
@@ -29,7 +29,7 @@ export interface CommitDao {
   message: string;
   webUrl: string;
   branch: string;
-  stats: StatsDao;
+  stats: Stats;
 }
 
 class Commit extends Model<CommitDao> {

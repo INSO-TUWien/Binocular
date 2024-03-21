@@ -1,4 +1,4 @@
-export default interface MentionsDao {
+export default interface Mentions {
   commit: string;
   createdAt: string;
   closes: boolean;

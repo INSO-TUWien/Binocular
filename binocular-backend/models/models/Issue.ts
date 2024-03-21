@@ -7,9 +7,9 @@ import Stakeholder from './Stakeholder.js';
 import IssueStakeholderConnection from '../connections/IssueStakeholderConnection';
 
 import debug from 'debug';
-import LabelDao from '../supportingTypes/LabelDao.ts';
-import UserDao from '../supportingTypes/UserDao.ts';
-import MentionsDao from '../supportingTypes/MentionsDao.ts';
+import Label from '../supportingTypes/Label.ts';
+import User from '../supportingTypes/User.ts';
+import Mentions from '../supportingTypes/Mentions';
 const log = debug('db:Issue');
 
 export interface IssueDao {
@@ -20,15 +20,15 @@ export interface IssueDao {
   createdAt: string;
   closedAt: string;
   updatedAt: string;
-  labels: LabelDao[];
+  labels: Label[];
   milestone: any; //TODO: Add type for milestone
   state: string;
   url: string;
   webUrl: string;
-  author: UserDao;
-  assignee: UserDao;
-  assignees: UserDao[];
-  mentions: MentionsDao[];
+  author: User;
+  assignee: User;
+  assignees: User[];
+  mentions: Mentions[];
 }
 
 class Issue extends Model<IssueDao> {

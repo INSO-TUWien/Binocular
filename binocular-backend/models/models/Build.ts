@@ -3,7 +3,7 @@
 import _ from 'lodash';
 import Model from '../Model.ts';
 import { aql } from 'arangojs';
-import JobDao from '../supportingTypes/JobDao.ts';
+import Job from '../supportingTypes/Job';
 
 export interface BuildDao {
   id: string;
@@ -18,7 +18,7 @@ export interface BuildDao {
   status: string;
   duration: number;
   sha: string;
-  jobs: JobDao[];
+  jobs: Job[];
 }
 
 class Build extends Model<BuildDao> {

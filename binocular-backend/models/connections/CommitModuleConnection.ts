@@ -3,10 +3,10 @@
 import Connection from '../Connection.ts';
 import Commit, { CommitDao } from '../models/Commit';
 import Module, { ModuleDao } from '../models/Module';
-import StatsDao from '../supportingTypes/StatsDao';
+import Stats from '../supportingTypes/Stats';
 
 interface CommitModuleConnectionDao {
-  stats: StatsDao;
+  stats: Stats;
   webUrl: string;
 }
 

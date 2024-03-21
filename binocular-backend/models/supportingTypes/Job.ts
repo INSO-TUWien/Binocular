@@ -1,4 +1,4 @@
-export default interface JobDao {
+export default interface Job {
   id: string;
   name: string;
   createdAt: string;

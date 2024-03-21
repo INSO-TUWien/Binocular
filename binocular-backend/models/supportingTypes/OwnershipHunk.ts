@@ -1,4 +1,4 @@
-export default interface OwnershipHunkDao {
+export default interface OwnershipHunk {
   startLine: number;
   endLine: number;
   commitSha: string;
