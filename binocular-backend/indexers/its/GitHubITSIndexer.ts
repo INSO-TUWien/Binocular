@@ -3,8 +3,8 @@
 
 import debug from 'debug';
 import ConfigurationError from '../../errors/ConfigurationError.js';
-import Issue from '../../models/Issue';
-import MergeRequest from '../../models/MergeRequest.js';
+import Issue from '../../models/models/Issue.ts';
+import MergeRequest from '../../models/models/MergeRequest.js';
 import GitHub from '../../core/provider/github.ts';
 import ProgressReporter from '../../utils/progress-reporter.ts';
 import { ItsIssue, ItsIssueEvent } from '../../types/itsTypes.ts';

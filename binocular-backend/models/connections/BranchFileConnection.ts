@@ -1,8 +1,8 @@
 'use strict';
 
-import Connection from './Connection';
-import Branch, { BranchDao } from './Branch';
-import File, { FileDao } from './File';
+import Connection from '../Connection.ts';
+import Branch, { BranchDao } from '../models/Branch.ts';
+import File, { FileDao } from '../models/File.ts';
 
 export interface BranchFileConnectionDao {}
 

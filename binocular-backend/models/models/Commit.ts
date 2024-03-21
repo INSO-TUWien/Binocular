@@ -1,21 +1,21 @@
 'use strict';
 
 import debug from 'debug';
-import Model from './Model';
+import Model from '../Model.ts';
 
-import File, { FileDao } from './File';
-import Stakeholder, { StakeholderDao } from './Stakeholder';
-import StatsDao from './supportingTypes/StatsDao';
+import File, { FileDao } from './File.ts';
+import Stakeholder, { StakeholderDao } from './Stakeholder.ts';
+import StatsDao from '../supportingTypes/StatsDao.ts';
 
-import IllegalArgumentError from '../errors/IllegalArgumentError.js';
+import IllegalArgumentError from '../../errors/IllegalArgumentError.js';
 import { exec } from 'child_process';
-import * as utils from '../utils/utils.ts';
-import config from '../utils/config.js';
-import Repository from '../core/provider/git';
-import GitHubUrlProvider from '../url-providers/GitHubUrlProvider';
-import GitLabUrlProvider from '../url-providers/GitLabUrlProvider';
-import GatewayService from '../utils/gateway-service';
-import Context from '../utils/context.ts';
+import * as utils from '../../utils/utils.ts';
+import config from '../../utils/config.js';
+import Repository from '../../core/provider/git';
+import GitHubUrlProvider from '../../url-providers/GitHubUrlProvider';
+import GitLabUrlProvider from '../../url-providers/GitLabUrlProvider';
+import GatewayService from '../../utils/gateway-service';
+import Context from '../../utils/context.ts';
 
 const log = debug('git:commit');
 
@@ -48,8 +48,8 @@ class Commit extends Model<CommitDao> {
     if (!repo || !nCommit) {
       throw IllegalArgumentError('repository and git-commit has to be set!');
     }
-    const CommitCommitConnection = (await import('./CommitCommitConnection')).default;
-    const CommitStakeholderConnection = (await import('./CommitStakeholderConnection')).default;
+    const CommitCommitConnection = (await import('../connections/CommitCommitConnection.ts')).default;
+    const CommitStakeholderConnection = (await import('../connections/CommitStakeholderConnection.ts')).default;
 
     const sha = nCommit.oid;
 
@@ -124,7 +124,7 @@ class Commit extends Model<CommitDao> {
     gateway: GatewayService,
     context: typeof Context,
   ): Promise<any> {
-    const CommitFileConnection = (await import('./CommitFileConnection')).default;
+    const CommitFileConnection = (await import('../connections/CommitFileConnection.ts')).default;
     const ignoreFiles = config.get().ignoreFiles || [];
     const ignoreFilesRegex = ignoreFiles.map((i) => new RegExp(i.replace('*', '.*')));
     return Promise.resolve(
@@ -257,7 +257,7 @@ class Commit extends Model<CommitDao> {
               };
             });
 
-            await commitDAO.model.save(commitDAO);
+            await this.save(commitDAO);
 
             return Promise.all([
               file,

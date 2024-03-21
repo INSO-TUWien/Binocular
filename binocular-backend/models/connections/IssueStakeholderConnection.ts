@@ -1,8 +1,8 @@
 'use strict';
 
-import Connection from './Connection';
-import Issue, { IssueDao } from './Issue';
-import Stakeholder, { StakeholderDao } from './Stakeholder';
+import Connection from '../Connection.ts';
+import Issue, { IssueDao } from '../models/Issue.ts';
+import Stakeholder, { StakeholderDao } from '../models/Stakeholder.ts';
 
 interface IssueStakeholderConnectionDao {}
 

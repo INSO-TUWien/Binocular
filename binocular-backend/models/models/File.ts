@@ -1,7 +1,7 @@
 'use strict';
 
 import { aql } from 'arangojs';
-import Model from './Model';
+import Model from '../Model.ts';
 import path from 'path';
 
 export interface FileDao {
@@ -18,7 +18,7 @@ class File extends Model<FileDao> {
     if (this.rawDb === undefined) {
       throw Error('Database undefined!');
     }
-    const CommitFileConnection = (await import('./CommitFileConnection')).default;
+    const CommitFileConnection = (await import('../connections/CommitFileConnection.ts')).default;
     return Promise.resolve(
       this.rawDb.query(
         aql`

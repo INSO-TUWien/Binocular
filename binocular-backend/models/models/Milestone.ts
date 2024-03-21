@@ -1,7 +1,7 @@
 'use strict';
 
 import _ from 'lodash';
-import Model from './Model';
+import Model from '../Model.ts';
 
 interface MilestoneDao {
   id: string;

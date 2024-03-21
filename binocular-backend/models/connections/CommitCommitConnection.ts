@@ -1,7 +1,7 @@
 'use strict';
 
-import Connection from './Connection';
-import Commit, { CommitDao } from './Commit';
+import Connection from '../Connection.ts';
+import Commit, { CommitDao } from '../models/Commit.ts';
 
 export interface CommitCommitConnectionDao {}
 

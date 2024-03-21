@@ -1,8 +1,8 @@
 'use strict';
 
-import Connection from './Connection';
-import Commit, { CommitDao } from './Commit';
-import Build, { BuildDao } from './Build';
+import Connection from '../Connection.ts';
+import Commit, { CommitDao } from '../models/Commit.ts';
+import Build, { BuildDao } from '../models/Build.ts';
 
 interface CommitBuildConnectionDao {}
 

@@ -1,9 +1,9 @@
 'use strict';
 
 import _ from 'lodash';
-import Model from './Model';
+import Model from '../Model.ts';
 import { aql } from 'arangojs';
-import JobDao from './supportingTypes/JobDao';
+import JobDao from '../supportingTypes/JobDao.ts';
 
 export interface BuildDao {
   id: string;

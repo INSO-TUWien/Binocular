@@ -1,6 +1,6 @@
 'use strict';
 
-import Build from '../../models/Build';
+import Build from '../../models/models/Build.ts';
 import * as UrlProvider from '../../url-providers/index';
 import ConfigurationError from '../../errors/ConfigurationError';
 import CIIndexer from './CIIndexer';

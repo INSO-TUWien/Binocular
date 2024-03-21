@@ -1,10 +1,10 @@
 'use strict';
 
 import _ from 'lodash';
-import Model from './Model';
-import LabelDao from './supportingTypes/LabelDao';
-import UserDao from './supportingTypes/UserDao';
-import MentionsDao from './supportingTypes/MentionsDao';
+import Model from '../Model.ts';
+import LabelDao from '../supportingTypes/LabelDao.ts';
+import UserDao from '../supportingTypes/UserDao.ts';
+import MentionsDao from '../supportingTypes/MentionsDao.ts';
 
 interface MergeRequestDao {
   id: string;

@@ -1,6 +1,6 @@
 'use strict';
 
-import Build from '../../models/Build';
+import Build from '../../models/models/Build';
 import debug from 'debug';
 
 const log = debug('idx:ci:indexer');

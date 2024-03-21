@@ -1,7 +1,7 @@
 'use strict';
 
-import Model from './Model';
-import IllegalArgumentError from '../errors/IllegalArgumentError.js';
+import Model from '../Model.ts';
+import IllegalArgumentError from '../../errors/IllegalArgumentError.js';
 
 import debug from 'debug';
 

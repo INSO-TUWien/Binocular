@@ -1,10 +1,10 @@
 'use strict';
 
-import Connection from './Connection';
-import Commit, { CommitDao } from './Commit';
-import File, { FileDao } from './File';
-import StatsDao from './supportingTypes/StatsDao';
-import HunkDao from './supportingTypes/HunkDao';
+import Connection from '../Connection.ts';
+import Commit, { CommitDao } from '../models/Commit.ts';
+import File, { FileDao } from '../models/File.ts';
+import StatsDao from '../supportingTypes/StatsDao.ts';
+import HunkDao from '../supportingTypes/HunkDao.ts';
 
 export interface CommitFileConnectionDao {
   action: string;

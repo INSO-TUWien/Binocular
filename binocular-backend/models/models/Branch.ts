@@ -1,6 +1,6 @@
 'use strict';
 
-import Model from './Model';
+import Model from '../Model.ts';
 
 export interface BranchDao {
   id: string;

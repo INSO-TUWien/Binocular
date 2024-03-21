@@ -7,12 +7,12 @@ import helpers from './helper/git/helpers.js';
 import GatewayMock from './helper/gateway/gatewayMock';
 
 import Db from '../core/db/db';
-import Commit from '../models/Commit';
-import File from '../models/File';
-import CommitStakeholderConnection from '../models/CommitStakeholderConnection';
-import CommitFileConnection from '../models/CommitFileConnection';
-import CommitCommitConnection from '../models/CommitCommitConnection';
-import Stakeholder from '../models/Stakeholder';
+import Commit from '../models/models/Commit';
+import File from '../models/models/File';
+import CommitStakeholderConnection from '../models/connections/CommitStakeholderConnection';
+import CommitFileConnection from '../models/connections/CommitFileConnection';
+import CommitCommitConnection from '../models/connections/CommitCommitConnection';
+import Stakeholder from '../models/models/Stakeholder';
 
 import conf from '../utils/config.js';
 import ctx from '../utils/context';

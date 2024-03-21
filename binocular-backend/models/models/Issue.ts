@@ -2,12 +2,12 @@
 
 import _ from 'lodash';
 import { aql } from 'arangojs';
-import Model from './Model';
+import Model from '../Model.ts';
 import Stakeholder from './Stakeholder.js';
 import debug from 'debug';
-import LabelDao from './supportingTypes/LabelDao';
-import UserDao from './supportingTypes/UserDao';
-import MentionsDao from './supportingTypes/MentionsDao';
+import LabelDao from '../supportingTypes/LabelDao.ts';
+import UserDao from '../supportingTypes/UserDao.ts';
+import MentionsDao from '../supportingTypes/MentionsDao.ts';
 const log = debug('db:Issue');
 
 export interface IssueDao {
@@ -53,7 +53,7 @@ class Issue extends Model<IssueDao> {
     if (this.rawDb === undefined) {
       throw Error('Database undefined!');
     }
-    const IssueStakeholderConnection = (await import('./IssueStakeholderConnection')).default;
+    const IssueStakeholderConnection = (await import('../connections/IssueStakeholderConnection.ts')).default;
     return Promise.resolve(
       this.rawDb.query(
         aql`

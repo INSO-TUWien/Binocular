@@ -2,7 +2,7 @@
 
 import _ from 'lodash';
 
-import Build from '../../models/Build';
+import Build from '../../models/models/Build';
 
 import BaseGitLabIndexer from '../BaseGitLabIndexer.js';
 import CIIndexer from './CIIndexer.js';

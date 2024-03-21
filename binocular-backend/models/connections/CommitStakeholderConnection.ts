@@ -1,8 +1,8 @@
 'use strict';
 
-import Connection from './Connection';
-import Commit, { CommitDao } from './Commit';
-import Stakeholder, { StakeholderDao } from './Stakeholder';
+import Connection from '../Connection.ts';
+import Commit, { CommitDao } from '../models/Commit.ts';
+import Stakeholder, { StakeholderDao } from '../models/Stakeholder.ts';
 
 export interface CommitStakeholderConnectionDao {}
 
