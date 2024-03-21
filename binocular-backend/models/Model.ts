@@ -8,20 +8,20 @@ import * as inflection from 'inflection';
 import ctx from '../utils/context.ts';
 import ModelCursor from './ModelCursor';
 import Db from '../core/db/db.ts';
-import { Collection } from 'arangojs/collection';
+import { DocumentCollection, EdgeCollection } from 'arangojs/collection';
 import { Database } from 'arangojs';
 import { AqlQuery } from 'arangojs/aql';
 
-export default class Model<DaoType> {
+export default class Model<DataType> {
   connections = {};
   collectionName: string;
   log: debug.Debugger;
   db: Db | undefined;
-  collection: Collection | undefined;
+  collection: (DocumentCollection<any> & EdgeCollection<any>) | undefined;
   rawDb: Database | undefined;
 
-  constructor(options) {
-    options = _.defaults({}, options, { attributes: [], keyAttribute: '_key' });
+  constructor(options: { name: string; keyAttribute?: string }) {
+    options = _.defaults({}, options, { keyAttribute: '_key' });
     this.collectionName = options.name;
 
     this.collectionName = inflection.pluralize(_.lowerFirst(options.name));
@@ -33,7 +33,6 @@ export default class Model<DaoType> {
         if (db.arango !== undefined) {
           this.db = db;
           this.rawDb = db.arango;
-          this.collection = db.arango.collection(this.collectionName);
         }
       }.bind(this),
     );
@@ -43,6 +42,10 @@ export default class Model<DaoType> {
     if (this.db === undefined) {
       throw Error('Database undefined!');
     }
+    if (this.rawDb === undefined) {
+      throw Error('Model rawDb undefined!');
+    }
+    this.collection = this.rawDb.collection(this.collectionName);
     return this.db.ensureCollection(this.collectionName);
   }
 
@@ -72,13 +75,13 @@ export default class Model<DaoType> {
     return null;
   }
 
-  async ensureById(id: string, data: DaoType, options?: { ignoreUnknownAttributes?: boolean; isNew?: boolean }) {
+  async ensureById(id: string, data: DataType, options?: { ignoreUnknownAttributes?: boolean; isNew?: boolean }) {
     return this.findOneById(id).then(
       function (resp) {
         if (resp) {
           return [this.parse(resp), false];
         } else {
-          const entry = new Entry<DaoType>(data, {
+          const entry = new Entry<DataType>(data, {
             isNew: options && options.isNew ? options.isNew : true,
             ignoreUnknownAttributes: options && options.ignoreUnknownAttributes ? options.ignoreUnknownAttributes : true,
           });
@@ -95,14 +98,14 @@ export default class Model<DaoType> {
     return this.firstExample({ id: id });
   }
 
-  async ensureBy(key: string, value: any, data: DaoType, options?: { ignoreUnknownAttributes?: boolean; isNew?: boolean }) {
+  async ensureBy(key: string, value: any, data: DataType, options?: { ignoreUnknownAttributes?: boolean; isNew?: boolean }) {
     data[key] = value;
     return this.findOneBy(key, value).then(
       function (resp) {
         if (resp) {
           return [this.parse(resp.data), false];
         } else {
-          const entry = new Entry<DaoType>(data, {
+          const entry = new Entry<DataType>(data, {
             isNew: options && options.isNew ? options.isNew : true,
             ignoreUnknownAttributes: options && options.ignoreUnknownAttributes ? options.ignoreUnknownAttributes : true,
           });
@@ -118,7 +121,7 @@ export default class Model<DaoType> {
   }
 
   create(data: any, options?: { isNew: boolean }) {
-    const entry = new Entry<DaoType>(data, {
+    const entry = new Entry<DataType>(data, {
       isNew: options ? options.isNew : true,
       ignoreUnknownAttributes: true,
     });
@@ -135,14 +138,14 @@ export default class Model<DaoType> {
     });
   }
 
-  ensure(entry: Entry<DaoType>) {
+  ensure(entry: Entry<DataType>) {
     return this.findOneBy('_key', entry._key).then((instance) => {
       if (instance) {
         instance.isStored = true;
         return instance;
       } else {
         return this.save(
-          new Entry<DaoType>(entry.data, {
+          new Entry<DataType>(entry.data, {
             isNew: false,
             ignoreUnknownAttributes: true,
           }),
@@ -151,12 +154,12 @@ export default class Model<DaoType> {
     });
   }
 
-  parse(data: any): Entry<DaoType> | null {
+  parse(data: DataType & { _id: string; _key: string }): Entry<DataType> | null {
     if (data === null) {
       return null;
     }
 
-    const entry = new Entry<DaoType>(data, {
+    const entry = new Entry<DataType>(data, {
       isNew: false,
       ignoreUnknownAttributes: true,
     });
@@ -195,7 +198,7 @@ export default class Model<DaoType> {
     return ds.map((d) => this.parse(d));
   }
 
-  save(entry: Entry<DaoType>) {
+  save(entry: Entry<DataType>) {
     this.log('save %o', entry.data);
     if (this.collection === undefined) {
       throw Error('Collection undefined!');
@@ -236,15 +239,15 @@ export default class Model<DaoType> {
   }
 }
 
-export class Entry<DaoType> {
-  data: DaoType;
+export class Entry<DataType> {
+  data: DataType;
   _id: string | undefined;
   _key: string | undefined;
   isStored: boolean | undefined;
   isNew: boolean;
   justCreated: boolean | undefined;
   justUpdated: boolean | undefined;
-  constructor(data: DaoType, options: { isNew: boolean; ignoreUnknownAttributes: boolean }) {
+  constructor(data: DataType, options: { isNew: boolean; ignoreUnknownAttributes: boolean }) {
     this.data = _.defaults({}, data);
     options = _.defaults({}, options, { isNew: true, ignoreUnknownAttributes: false });
 

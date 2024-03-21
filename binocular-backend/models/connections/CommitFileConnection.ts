@@ -1,10 +1,10 @@
 'use strict';
 
 import Connection from '../Connection.ts';
-import Commit, { CommitDao } from '../models/Commit.ts';
-import File, { FileDao } from '../models/File.ts';
-import StatsDao from '../supportingTypes/StatsDao.ts';
-import HunkDao from '../supportingTypes/HunkDao.ts';
+import Commit, { CommitDao } from '../models/Commit';
+import File, { FileDao } from '../models/File';
+import StatsDao from '../supportingTypes/StatsDao';
+import HunkDao from '../supportingTypes/HunkDao';
 
 export interface CommitFileConnectionDao {
   action: string;
@@ -15,7 +15,11 @@ export interface CommitFileConnectionDao {
 
 class CommitFileConnection extends Connection<CommitFileConnectionDao, CommitDao, FileDao> {
   constructor() {
-    super(Commit, File);
+    super();
+  }
+
+  ensureCollection() {
+    return super.ensureCollection(Commit, File);
   }
 }
 export default new CommitFileConnection();

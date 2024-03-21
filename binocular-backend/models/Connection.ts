@@ -7,52 +7,56 @@ import Db from '../core/db/db.ts';
 import Model from './Model';
 import { Entry as ModelEntry } from './Model';
 import { Database } from 'arangojs';
-import { Collection, CollectionType } from 'arangojs/collection';
+import { CollectionType, DocumentCollection, EdgeCollection } from 'arangojs/collection';
 
-export default class Connection<ConnectionDaoType, FromDaoType, ToDaoType> {
+export default class Connection<ConnectionDataType, FromDataType, ToDataType> {
   connections = {};
-  fromModel: Model<FromDaoType> | Connection<FromDaoType, unknown, unknown>;
-  toModel: Model<ToDaoType> | Connection<ToDaoType, unknown, unknown>;
-  collectionName: string;
-  log: debug.Debugger;
+  collectionName: string | undefined;
+  log = debug('db:unnamedConnection');
   db: Db | undefined;
-  collection: Collection | undefined;
+  collection: (DocumentCollection<any> & EdgeCollection<any>) | undefined;
   rawDb: Database | undefined;
-  constructor(
-    fromModel: Model<FromDaoType> | Connection<FromDaoType, unknown, unknown>,
-    toModel: Model<ToDaoType> | Connection<ToDaoType, unknown, unknown>,
-  ) {
-    const name = `${fromModel.collectionName}${toModel.collectionName}Connection`;
-    this.fromModel = fromModel;
-    this.toModel = toModel;
-    this.collectionName = `${fromModel.collectionName}-${toModel.collectionName}`;
-    this.log = debug(`db:${name}`);
-
-    ctx.on(
-      'ensure:db',
-      function (db: Db) {
-        if (db.arango !== undefined) {
-          this.db = db;
-          this.rawDb = db.arango;
-          this.collection = db.arango.collection(this.collectionName);
-        }
-      }.bind(this),
-    );
-
-    fromModel.connections[toModel.collectionName] = this;
-    toModel.connections[fromModel.collectionName] = this;
+  constructor() {
+    ctx.on('ensure:db', (db: Db) => {
+      if (db.arango !== undefined) {
+        //ensure db
+        this.db = db;
+        this.rawDb = db.arango;
+      }
+    });
   }
 
-  ensureCollection() {
+  ensureCollection(
+    fromModel: Model<FromDataType> | Connection<FromDataType, unknown, unknown>,
+    toModel: Model<ToDataType> | Connection<ToDataType, unknown, unknown>,
+  ) {
     if (this.db === undefined) {
       throw Error('Database undefined!');
     }
+    if (this.rawDb === undefined) {
+      throw Error('Model rawDb undefined!');
+    }
+    if (fromModel.collectionName === undefined) {
+      throw Error('From model collection name undefined!');
+    }
+    if (toModel.collectionName === undefined) {
+      throw Error('To model collection name undefined!');
+    }
+    //configure Collection
+    const name = `${fromModel.collectionName}${toModel.collectionName}Connection`;
+    this.collectionName = `${fromModel.collectionName}-${toModel.collectionName}`;
+    this.log = debug(`db:${name}`);
+    fromModel.connections[toModel.collectionName] = this;
+    toModel.connections[fromModel.collectionName] = this;
+
+    //ensure Collection
+    this.collection = this.rawDb.collection(this.collectionName);
     return this.db.ensureEdgeCollection(this.collectionName, { type: CollectionType.EDGE_COLLECTION });
   }
 
   async findByIds(fromTo: {
-    from: ModelEntry<FromDaoType> | Entry<ConnectionDaoType>;
-    to: ModelEntry<ToDaoType> | Entry<ConnectionDaoType>;
+    from: ModelEntry<FromDataType> | Entry<ConnectionDataType>;
+    to: ModelEntry<ToDataType> | Entry<ConnectionDataType>;
   }) {
     if (this.collection === undefined) {
       throw Error('Collection undefined!');
@@ -68,8 +72,8 @@ export default class Connection<ConnectionDaoType, FromDaoType, ToDaoType> {
   }
 
   async ensure(
-    data: ConnectionDaoType,
-    fromTo: { from: ModelEntry<FromDaoType> | Entry<ConnectionDaoType>; to: ModelEntry<ToDaoType> | Entry<ConnectionDaoType> },
+    data: ConnectionDataType,
+    fromTo: { from: ModelEntry<FromDataType> | Entry<ConnectionDataType>; to: ModelEntry<ToDataType> | Entry<ConnectionDataType> },
   ) {
     const entry = await this.findByIds(fromTo);
     if (entry) {
@@ -81,8 +85,8 @@ export default class Connection<ConnectionDaoType, FromDaoType, ToDaoType> {
   }
 
   async store(
-    data: ConnectionDaoType,
-    fromTo: { from: ModelEntry<FromDaoType> | Entry<ConnectionDaoType>; to: ModelEntry<ToDaoType> | Entry<ConnectionDaoType> },
+    data: ConnectionDataType,
+    fromTo: { from: ModelEntry<FromDataType> | Entry<ConnectionDataType>; to: ModelEntry<ToDataType> | Entry<ConnectionDataType> },
   ) {
     if (this.collection === undefined) {
       throw Error('Collection undefined!');
@@ -97,7 +101,7 @@ export default class Connection<ConnectionDaoType, FromDaoType, ToDaoType> {
 
   connect(
     data: any,
-    fromTo: { from: ModelEntry<FromDaoType> | Entry<ConnectionDaoType>; to: ModelEntry<ToDaoType> | Entry<ConnectionDaoType> },
+    fromTo: { from: ModelEntry<FromDataType> | Entry<ConnectionDataType>; to: ModelEntry<ToDataType> | Entry<ConnectionDataType> },
   ) {
     if (this.collection === undefined) {
       throw Error('Collection undefined!');
@@ -109,7 +113,7 @@ export default class Connection<ConnectionDaoType, FromDaoType, ToDaoType> {
     return Promise.resolve(this.collection.save(data));
   }
 
-  parse(data: any) {
+  parse(data: ConnectionDataType & { _id: string; _key: string; _from: string; _to: string }) {
     if (data === null) {
       return null;
     }
@@ -138,13 +142,13 @@ export default class Connection<ConnectionDaoType, FromDaoType, ToDaoType> {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-class Entry<DaoType> {
-  data: DaoType;
+class Entry<DataType> {
+  data: DataType;
   _id: string | undefined;
   _key: string | undefined;
   _from: string | undefined;
   _to: string | undefined;
-  constructor(data: DaoType = {} as DaoType) {
+  constructor(data: DataType = {} as DataType) {
     this.data = data;
   }
 }

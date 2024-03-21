@@ -4,6 +4,8 @@ import _ from 'lodash';
 import { aql } from 'arangojs';
 import Model from '../Model.ts';
 import Stakeholder from './Stakeholder.js';
+import IssueStakeholderConnection from '../connections/IssueStakeholderConnection';
+
 import debug from 'debug';
 import LabelDao from '../supportingTypes/LabelDao.ts';
 import UserDao from '../supportingTypes/UserDao.ts';
@@ -53,7 +55,6 @@ class Issue extends Model<IssueDao> {
     if (this.rawDb === undefined) {
       throw Error('Database undefined!');
     }
-    const IssueStakeholderConnection = (await import('../connections/IssueStakeholderConnection.ts')).default;
     return Promise.resolve(
       this.rawDb.query(
         aql`

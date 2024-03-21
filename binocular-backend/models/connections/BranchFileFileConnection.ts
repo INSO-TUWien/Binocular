@@ -1,14 +1,18 @@
 'use strict';
 
-import Connection from '../Connection.ts';
-import BranchFile, { BranchFileConnectionDao } from './BranchFileConnection.ts';
-import File, { FileDao } from '../models/File.ts';
+import Connection from '../Connection';
+import BranchFile, { BranchFileConnectionDao } from './BranchFileConnection';
+import File, { FileDao } from '../models/File';
 
 interface BranchFileFileConnectionDao {}
 
 class BranchFileFileConnection extends Connection<BranchFileFileConnectionDao, BranchFileConnectionDao, FileDao> {
   constructor() {
-    super(BranchFile, File);
+    super();
+  }
+
+  ensureCollection() {
+    return super.ensureCollection(BranchFile, File);
   }
 
   async remove(conn: any) {

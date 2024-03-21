@@ -6,6 +6,9 @@ import Model from '../Model.ts';
 import File, { FileDao } from './File.ts';
 import Stakeholder, { StakeholderDao } from './Stakeholder.ts';
 import StatsDao from '../supportingTypes/StatsDao.ts';
+import CommitCommitConnection from '../connections/CommitCommitConnection';
+import CommitFileConnection from '../connections/CommitFileConnection';
+import CommitStakeholderConnection from '../connections/CommitStakeholderConnection';
 
 import IllegalArgumentError from '../../errors/IllegalArgumentError.js';
 import { exec } from 'child_process';
@@ -16,6 +19,7 @@ import GitHubUrlProvider from '../../url-providers/GitHubUrlProvider';
 import GitLabUrlProvider from '../../url-providers/GitLabUrlProvider';
 import GatewayService from '../../utils/gateway-service';
 import Context from '../../utils/context.ts';
+import _ from 'lodash';
 
 const log = debug('git:commit');
 
@@ -40,18 +44,17 @@ class Commit extends Model<CommitDao> {
    * get or create an new commit and connect it to its parents
    *
    * @param repo contains the repository object
-   * @param nCommit contains the current commit that is created by the given repo object and holds the required data
+   * @param commitData contains the current commit that is created by the given repo object and holds the required data
    * @param urlProvider contains the given remote vcs webapp provider to link them
    * @returns Commit returns an already existing or newly created commit
    */
-  async persist(repo: Repository, nCommit: any, urlProvider: GitHubUrlProvider | GitLabUrlProvider) {
-    if (!repo || !nCommit) {
+  async persist(repo: Repository, _commitData: any, urlProvider: GitHubUrlProvider | GitLabUrlProvider) {
+    const commitData = _.clone(_commitData);
+    if (!repo || !commitData) {
       throw IllegalArgumentError('repository and git-commit has to be set!');
     }
-    const CommitCommitConnection = (await import('../connections/CommitCommitConnection.ts')).default;
-    const CommitStakeholderConnection = (await import('../connections/CommitStakeholderConnection.ts')).default;
 
-    const sha = nCommit.oid;
+    const sha = commitData.oid;
 
     const instance = await this.findOneBy('sha', sha);
     if (instance) {
@@ -62,21 +65,21 @@ class Commit extends Model<CommitDao> {
     log('Processing', sha);
     let parents = '';
 
-    nCommit.commit.parent.forEach((p, i) => {
+    commitData.commit.parent.forEach((p, i) => {
       parents += p;
-      if (i < nCommit.commit.parent.length - 1) {
+      if (i < commitData.commit.parent.length - 1) {
         parents += ',';
       }
     });
 
-    const authorSignature = utils.fixUTF8(nCommit.commit.author.name + ' <' + nCommit.commit.author.email + '>');
+    const authorSignature = utils.fixUTF8(commitData.commit.author.name + ' <' + commitData.commit.author.email + '>');
     const commit = await this.create(
       {
         sha,
-        date: new Date(nCommit.commit.author.timestamp * 1000),
-        message: nCommit.commit.message,
+        date: new Date(commitData.commit.author.timestamp * 1000),
+        message: commitData.commit.message,
         webUrl: urlProvider ? urlProvider.getCommitUrl(sha) : '',
-        branch: nCommit.commit.branch,
+        branch: commitData.commit.branch,
         stats: {
           additions: 0,
           deletions: 0,
@@ -124,7 +127,6 @@ class Commit extends Model<CommitDao> {
     gateway: GatewayService,
     context: typeof Context,
   ): Promise<any> {
-    const CommitFileConnection = (await import('../connections/CommitFileConnection.ts')).default;
     const ignoreFiles = config.get().ignoreFiles || [];
     const ignoreFilesRegex = ignoreFiles.map((i) => new RegExp(i.replace('*', '.*')));
     return Promise.resolve(

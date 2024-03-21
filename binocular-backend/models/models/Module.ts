@@ -18,17 +18,17 @@ class Module extends Model<ModuleDao> {
   /**
    * get or create a new module based on its path
    *
-   * @param data
+   * @param _moduleData
    * @returns Module returns an already existing or newly created module
    */
-  async persist(data: any) {
-    if (!data || !data.path) {
+  async persist(_moduleData: any) {
+    if (!_moduleData || !_moduleData.path) {
       throw IllegalArgumentError('Module does not hold the required data!');
     }
 
-    const path = data.path.toString();
+    const path = _moduleData.path.toString();
     //delete data.path;
-    const [instance] = await this.ensureBy('path', path, data, { ignoreUnknownAttributes: true });
+    const [instance] = await this.ensureBy('path', path, _moduleData, { ignoreUnknownAttributes: true });
     log(`Finished persisted ${path} with ${instance.data.path} and ${instance._id}!`);
     return instance;
   }

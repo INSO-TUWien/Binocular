@@ -1,14 +1,18 @@
 'use strict';
 
 import Connection from '../Connection.ts';
-import Module, { ModuleDao } from '../models/Module.ts';
-import File, { FileDao } from '../models/File.ts';
+import Module, { ModuleDao } from '../models/Module';
+import File, { FileDao } from '../models/File';
 
 interface ModuleFileConnectionDao {}
 
 class ModuleFileConnection extends Connection<ModuleFileConnectionDao, ModuleDao, FileDao> {
   constructor() {
-    super(Module, File);
+    super();
+  }
+
+  ensureCollection() {
+    return super.ensureCollection(Module, File);
   }
 }
 export default new ModuleFileConnection();

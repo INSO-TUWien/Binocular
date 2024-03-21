@@ -1,7 +1,10 @@
 'use strict';
 
 import { aql } from 'arangojs';
+
 import Model from '../Model.ts';
+import CommitFileConnection from '../connections/CommitFileConnection';
+
 import path from 'path';
 
 export interface FileDao {
@@ -18,7 +21,6 @@ class File extends Model<FileDao> {
     if (this.rawDb === undefined) {
       throw Error('Database undefined!');
     }
-    const CommitFileConnection = (await import('../connections/CommitFileConnection.ts')).default;
     return Promise.resolve(
       this.rawDb.query(
         aql`
@@ -35,8 +37,8 @@ class File extends Model<FileDao> {
     );
   }
 
-  dir(fileDAO: any): string {
-    const directory = path.dirname(fileDAO.path);
+  dir(file: any): string {
+    const directory = path.dirname(file.path);
     return directory.startsWith('.') ? directory : `./${directory}`;
   }
 
@@ -45,8 +47,8 @@ class File extends Model<FileDao> {
    *
    * @returns {*[]}
    */
-  getModules(fileDAO: any): string[] {
-    return this.dir(fileDAO)
+  getModules(file: any): string[] {
+    return this.dir(file)
       .split('/')
       .reduce((dirs: string[], dir: string, index: number) => dirs.concat(index ? `${dirs[index - 1]}/${dir}` : dir), []);
   }

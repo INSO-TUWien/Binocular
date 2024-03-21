@@ -1,9 +1,9 @@
 'use strict';
 
 import Connection from '../Connection.ts';
-import CommitFile, { CommitFileConnectionDao } from './CommitFileConnection.ts';
-import Stakeholder, { StakeholderDao } from '../models/Stakeholder.ts';
-import OwnershipHunkDao from '../supportingTypes/OwnershipHunkDao.ts';
+import CommitFile, { CommitFileConnectionDao } from './CommitFileConnection';
+import Stakeholder, { StakeholderDao } from '../models/Stakeholder';
+import OwnershipHunkDao from '../supportingTypes/OwnershipHunkDao';
 
 interface CommitFileStakeholderConnectionDao {
   hunks: OwnershipHunkDao[];
@@ -11,7 +11,11 @@ interface CommitFileStakeholderConnectionDao {
 
 class CommitFileStakeholderConnection extends Connection<CommitFileStakeholderConnectionDao, CommitFileConnectionDao, StakeholderDao> {
   constructor() {
-    super(CommitFile, Stakeholder);
+    super();
+  }
+
+  ensureCollection() {
+    return super.ensureCollection(CommitFile, Stakeholder);
   }
 }
 export default new CommitFileStakeholderConnection();

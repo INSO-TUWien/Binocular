@@ -1,6 +1,7 @@
 'use strict';
 
 import Model from '../Model.ts';
+import _ from 'lodash';
 
 export interface BranchDao {
   id: string;
@@ -18,15 +19,16 @@ class Branch extends Model<BranchDao> {
     });
   }
 
-  async persist(nBranch: any) {
-    const instance = await this.findById(nBranch.id);
+  async persist(_branchData: any) {
+    const branchData = _.clone(_branchData);
+    const instance = await this.findById(_branchData.id);
     if (!instance) {
       return this.create({
-        id: nBranch.id,
-        branch: nBranch.branchName,
-        active: nBranch.currentActive,
-        tracksFileRenames: nBranch.tracksFileRenames,
-        latestCommit: nBranch.latestCommit,
+        id: branchData.id,
+        branch: branchData.branchName,
+        active: branchData.currentActive,
+        tracksFileRenames: branchData.tracksFileRenames,
+        latestCommit: branchData.latestCommit,
       }).then((branch) => [branch, true]);
     }
     return [instance, false];
