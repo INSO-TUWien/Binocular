@@ -1,6 +1,6 @@
 'use strict';
 
-import Connection from '../Connection.ts';
+import Connection from '../Connection';
 import Module, { ModuleDao } from '../models/Module';
 
 interface ModuleModuleConnectionDao {}

@@ -5,10 +5,10 @@ import Model from './Model';
 import Connection from './Connection';
 
 export default class ModelCursor<DaoType> {
-  private Model: any;
+  private model: Model<DaoType> | Connection<DaoType, unknown, unknown>;
   private cursor: any;
-  constructor(Model: Model<DaoType> | Connection<DaoType, unknown, unknown>, cursor: any) {
-    this.Model = Model;
+  constructor(model: Model<DaoType> | Connection<DaoType, unknown, unknown>, cursor: any) {
+    this.model = model;
     this.cursor = cursor;
   }
 
@@ -18,13 +18,13 @@ export default class ModelCursor<DaoType> {
 
   async all() {
     const ds = await Promise.resolve(this.cursor.all(...arguments));
-    return await ds.map((d) => this.Model.parse(d));
+    return await ds.map((d) => this.model.parse(d));
   }
 
   async next() {
     const data = await Promise.resolve(this.cursor.next(...arguments));
     if (data) {
-      return this.Model.parse(data);
+      return this.model.parse(data);
     }
   }
 

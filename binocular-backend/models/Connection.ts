@@ -1,9 +1,9 @@
 'use strict';
 import debug from 'debug';
 
-import ctx from '../utils/context.ts';
-import ModelCursor from './ModelCursor.js';
-import Db from '../core/db/db.ts';
+import ctx from '../utils/context';
+import ModelCursor from './ModelCursor';
+import Db from '../core/db/db';
 import Model from './Model';
 import { Entry as ModelEntry } from './Model';
 import { Database } from 'arangojs';
@@ -113,7 +113,7 @@ export default class Connection<ConnectionDataType, FromDataType, ToDataType> {
     return Promise.resolve(this.collection.save(data));
   }
 
-  parse(data: ConnectionDataType & { _id: string; _key: string; _from: string; _to: string }) {
+  parse(data: ConnectionDataType & { _id: string; _key: string; _from: string; _to: string }): Entry<ConnectionDataType> | null {
     if (data === null) {
       return null;
     }
@@ -131,7 +131,7 @@ export default class Connection<ConnectionDataType, FromDataType, ToDataType> {
     return new ModelCursor(this, rawCursor);
   }
 
-  async findAll() {
+  async findAll(): Promise<(Entry<ConnectionDataType> | null)[]> {
     if (this.collection === undefined) {
       throw Error('Collection undefined!');
     }
@@ -142,7 +142,7 @@ export default class Connection<ConnectionDataType, FromDataType, ToDataType> {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-class Entry<DataType> {
+export class Entry<DataType> {
   data: DataType;
   _id: string | undefined;
   _key: string | undefined;

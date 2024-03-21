@@ -1,10 +1,11 @@
 'use strict';
 
 import _ from 'lodash';
-import Model from '../Model.ts';
-import Label from '../supportingTypes/Label';
-import User from '../supportingTypes/User';
-import Mentions from '../supportingTypes/Mentions';
+import Model from '../Model';
+import Label from '../../types/supportingTypes/Label';
+import User from '../../types/supportingTypes/User';
+import Mention from '../../types/supportingTypes/Mention';
+import MergeRequestDto from '../../types/dtos/MergeRequestDto';
 
 interface MergeRequestDao {
   id: string;
@@ -22,7 +23,7 @@ interface MergeRequestDao {
   author: User;
   assignee: User;
   assignees: User[];
-  mentions: Mentions[];
+  mentions: Mention[];
 }
 
 class MergeRequest extends Model<MergeRequestDao> {
@@ -32,7 +33,7 @@ class MergeRequest extends Model<MergeRequestDao> {
       keyAttribute: 'id',
     });
   }
-  persist(_mergeRequestData: any) {
+  persist(_mergeRequestData: MergeRequestDto) {
     const mergeRequestData = _.clone(_mergeRequestData);
     if (_mergeRequestData.id) {
       mergeRequestData.id = _mergeRequestData.id.toString();

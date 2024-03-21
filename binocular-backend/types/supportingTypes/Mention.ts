@@ -1,4 +1,4 @@
-export default interface Mentions {
+export default interface Mention {
   commit: string;
   createdAt: string;
   closes: boolean;

@@ -2,14 +2,15 @@
 
 import _ from 'lodash';
 import { aql } from 'arangojs';
-import Model from '../Model.ts';
-import Stakeholder from './Stakeholder.js';
+import Model from '../Model';
+import Stakeholder from './Stakeholder';
 import IssueStakeholderConnection from '../connections/IssueStakeholderConnection';
 
 import debug from 'debug';
-import Label from '../supportingTypes/Label.ts';
-import User from '../supportingTypes/User.ts';
-import Mentions from '../supportingTypes/Mentions';
+import Label from '../../types/supportingTypes/Label';
+import User from '../../types/supportingTypes/User';
+import Mention from '../../types/supportingTypes/Mention';
+import IssueDto from '../../types/dtos/IssueDto';
 const log = debug('db:Issue');
 
 export interface IssueDao {
@@ -28,7 +29,7 @@ export interface IssueDao {
   author: User;
   assignee: User;
   assignees: User[];
-  mentions: Mentions[];
+  mentions: Mention[];
 }
 
 class Issue extends Model<IssueDao> {
@@ -39,7 +40,7 @@ class Issue extends Model<IssueDao> {
     });
   }
 
-  persist(_issueData: any) {
+  persist(_issueData: IssueDto) {
     const issueData = _.clone(_issueData);
     if (_issueData.id) {
       issueData.id = _issueData.id.toString();
@@ -129,7 +130,7 @@ class Issue extends Model<IssueDao> {
 
 export default new Issue();
 
-async function findBestStakeholderMatch(author: any) {
+async function findBestStakeholderMatch(author: User) {
   const stakeholder = await Stakeholder.findAll();
   const bestMatch = stakeholder.reduce((best: any, stakeholderEntry) => {
     if (stakeholderEntry === null) {

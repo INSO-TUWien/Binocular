@@ -3,7 +3,8 @@
 import _ from 'lodash';
 import Model from '../Model.ts';
 import { aql } from 'arangojs';
-import Job from '../supportingTypes/Job';
+import Job from '../../types/supportingTypes/Job';
+import BuildDto from '../../types/dtos/BuildDto';
 
 export interface BuildDao {
   id: string;
@@ -28,7 +29,7 @@ class Build extends Model<BuildDao> {
       keyAttribute: 'id',
     });
   }
-  persist(_buildData: any) {
+  persist(_buildData: BuildDto) {
     const buildData = _.clone(_buildData);
     if (_buildData.id) {
       buildData.id = _buildData.id.toString();

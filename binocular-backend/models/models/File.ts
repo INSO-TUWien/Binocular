@@ -2,7 +2,7 @@
 
 import { aql } from 'arangojs';
 
-import Model from '../Model.ts';
+import Model from '../Model';
 import CommitFileConnection from '../connections/CommitFileConnection';
 
 import path from 'path';
@@ -37,7 +37,7 @@ class File extends Model<FileDao> {
     );
   }
 
-  dir(file: any): string {
+  dir(file: FileDao): string {
     const directory = path.dirname(file.path);
     return directory.startsWith('.') ? directory : `./${directory}`;
   }
@@ -47,7 +47,7 @@ class File extends Model<FileDao> {
    *
    * @returns {*[]}
    */
-  getModules(file: any): string[] {
+  getModules(file: FileDao): string[] {
     return this.dir(file)
       .split('/')
       .reduce((dirs: string[], dir: string, index: number) => dirs.concat(index ? `${dirs[index - 1]}/${dir}` : dir), []);

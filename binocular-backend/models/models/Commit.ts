@@ -1,25 +1,26 @@
 'use strict';
 
 import debug from 'debug';
-import Model from '../Model.ts';
+import Model, { Entry } from '../Model';
 
-import File, { FileDao } from './File.ts';
+import File, { FileDao } from './File';
 import Stakeholder, { StakeholderDao } from './Stakeholder';
-import Stats from '../supportingTypes/Stats.ts';
+import Stats from '../../types/supportingTypes/Stats';
 import CommitCommitConnection from '../connections/CommitCommitConnection';
 import CommitFileConnection from '../connections/CommitFileConnection';
 import CommitStakeholderConnection from '../connections/CommitStakeholderConnection';
 
-import IllegalArgumentError from '../../errors/IllegalArgumentError.js';
+import IllegalArgumentError from '../../errors/IllegalArgumentError';
 import { exec } from 'child_process';
-import * as utils from '../../utils/utils.ts';
+import * as utils from '../../utils/utils';
 import config from '../../utils/config.js';
 import Repository from '../../core/provider/git';
 import GitHubUrlProvider from '../../url-providers/GitHubUrlProvider';
 import GitLabUrlProvider from '../../url-providers/GitLabUrlProvider';
 import GatewayService from '../../utils/gateway-service';
-import Context from '../../utils/context.ts';
+import Context from '../../utils/context';
 import _ from 'lodash';
+import CommitDto from '../../types/dtos/CommitDto';
 
 const log = debug('git:commit');
 
@@ -44,11 +45,11 @@ class Commit extends Model<CommitDao> {
    * get or create an new commit and connect it to its parents
    *
    * @param repo contains the repository object
-   * @param commitData contains the current commit that is created by the given repo object and holds the required data
+   * @param _commitData contains the current commit that is created by the given repo object and holds the required data
    * @param urlProvider contains the given remote vcs webapp provider to link them
    * @returns Commit returns an already existing or newly created commit
    */
-  async persist(repo: Repository, _commitData: any, urlProvider: GitHubUrlProvider | GitLabUrlProvider) {
+  async persist(repo: Repository, _commitData: CommitDto, urlProvider: GitHubUrlProvider | GitLabUrlProvider) {
     const commitData = _.clone(_commitData);
     if (!repo || !commitData) {
       throw IllegalArgumentError('repository and git-commit has to be set!');
@@ -73,10 +74,15 @@ class Commit extends Model<CommitDao> {
     });
 
     const authorSignature = utils.fixUTF8(commitData.commit.author.name + ' <' + commitData.commit.author.email + '>');
+
+    if (!commitData.commit.author.timestamp) {
+      throw Error('Timestamp undefined!');
+    }
+
     const commit = await this.create(
       {
         sha,
-        date: new Date(commitData.commit.author.timestamp * 1000),
+        date: new Date(commitData.commit.author.timestamp * 1000).toISOString(),
         message: commitData.commit.message,
         webUrl: urlProvider ? urlProvider.getCommitUrl(sha) : '',
         branch: commitData.commit.branch,
@@ -111,7 +117,7 @@ class Commit extends Model<CommitDao> {
    *
    * @param commitDAO
    * @param repo contains the repository object
-   * @param nCommit contains the current commit that is created by the given repo object and holds the required data
+   * @param commitData contains the current commit that is created by the given repo object and holds the required data
    * @param currentBranch current checked out branch of the repository
    * @param urlProvider contains the given remote vcs webapp provider to link them
    * @param gateway contains the given gateway object to process commits based on various registered services
@@ -119,9 +125,9 @@ class Commit extends Model<CommitDao> {
    * @returns {*}
    */
   async processTree(
-    commitDAO: any,
+    commitDAO: Entry<CommitDao>,
     repo: Repository,
-    nCommit: any,
+    commitData: CommitDto,
     currentBranch: string,
     urlProvider: GitHubUrlProvider | GitLabUrlProvider,
     gateway: GatewayService,
@@ -133,12 +139,12 @@ class Commit extends Model<CommitDao> {
       repo.getCommitChanges.bind(this)(
         commitDAO,
         repo,
-        nCommit.oid,
-        nCommit.commit.parent[0],
+        commitData.oid,
+        commitData.commit.parent[0],
         async (filepath: string, parentCommitEntry: any, currentCommitEntry: any, commitFiles: string[], parentCommitFiles: string[]) => {
           try {
             // ignore directories
-            const currentOid = nCommit.oid;
+            const currentOid = commitData.oid;
             if (!(commitFiles.includes(filepath) || parentCommitFiles.includes(filepath))) {
               return;
             }
@@ -187,7 +193,7 @@ class Commit extends Model<CommitDao> {
                 const diffOutput: string = await new Promise((resolve) => {
                   //go to the target directory, execute git diff for a specific file to get the changes between the parent/current commit
                   exec(
-                    `cd ${context.targetPath} && git diff --unified=0 ${nCommit.commit.parent[0]} ${nCommit.oid} -- ${filepath}`,
+                    `cd ${context.targetPath} && git diff --unified=0 ${commitData.commit.parent[0]} ${commitData.oid} -- ${filepath}`,
                     { maxBuffer: 1024 * 10000 },
                     (error, stdout, stderr) => {
                       if (error) {

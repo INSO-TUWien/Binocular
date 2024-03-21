@@ -3,11 +3,12 @@
 
 import debug from 'debug';
 import ConfigurationError from '../../errors/ConfigurationError.js';
-import Issue from '../../models/models/Issue.ts';
-import MergeRequest from '../../models/models/MergeRequest.js';
-import GitHub from '../../core/provider/github.ts';
+import Issue from '../../models/models/Issue';
+import MergeRequest from '../../models/models/MergeRequest';
+import Mention from '../../types/supportingTypes/Mention';
+import GitHub from '../../core/provider/github';
 import ProgressReporter from '../../utils/progress-reporter.ts';
-import { ItsIssue, ItsIssueEvent } from '../../types/itsTypes.ts';
+import { ItsIssue, ItsIssueEvent } from '../../types/ItsTypes';
 
 const log = debug('idx:its:github');
 
@@ -77,7 +78,7 @@ GitHubITSIndexer.prototype.index = function () {
                       log('Processing issue #' + issue.iid);
 
                       return Issue.persist({
-                        id: issue.id,
+                        id: issue.id.toString(),
                         iid: issue.number,
                         title: issue.title,
                         description: issue.body,
@@ -97,7 +98,7 @@ GitHubITSIndexer.prototype.index = function () {
                             commit: event.commit ? event.commit.oid : null,
                             createdAt: event.createdAt,
                             closes: event.commit === undefined,
-                          };
+                          } as Mention;
                         }),
                       }).then(([persistedIssue, wasCreated]) => {
                         if (wasCreated) {
@@ -141,7 +142,7 @@ GitHubITSIndexer.prototype.index = function () {
                     ) {
                       log('Processing issue #' + mergeRequest.iid);
                       return MergeRequest.persist({
-                        id: mergeRequest.id,
+                        id: mergeRequest.id.toString(),
                         iid: mergeRequest.number,
                         title: mergeRequest.title,
                         description: mergeRequest.body,
@@ -161,7 +162,7 @@ GitHubITSIndexer.prototype.index = function () {
                             commit: event.commit ? event.commit.oid : null,
                             createdAt: event.createdAt,
                             closes: event.commit === undefined,
-                          };
+                          } as Mention;
                         }),
                       }).then(([persistedMergeRequest, wasCreated]) => {
                         if (wasCreated) {

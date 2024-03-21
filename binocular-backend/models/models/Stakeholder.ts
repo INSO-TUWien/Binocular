@@ -1,6 +1,6 @@
 'use strict';
 
-import Model from '../Model.ts';
+import Model from '../Model';
 
 export interface StakeholderDao {
   gitSignature: string;

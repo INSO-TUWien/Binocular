@@ -1,4 +1,5 @@
-import { GithubActor, GithubMilestone } from './githubTypes.ts';
+import { GithubActor, GithubMilestone } from './GithubTypes';
+import Label from './supportingTypes/Label.ts';
 
 export interface ItsIssue {
   id: number;
@@ -14,7 +15,7 @@ export interface ItsIssue {
   comments_url: string;
   events_url: string;
   html_url: string;
-  labels: { nodes: ItsIssueLabel[] };
+  labels: { nodes: Label[] };
   state: string;
   locked: boolean;
   assignee: GithubActor;
@@ -36,21 +37,6 @@ export interface ItsIssueEvent {
   id: number;
   createdAt: string;
   commit: { oid: string };
-}
-
-export interface ItsIssueMention {
-  commit: string;
-  createdAt: string;
-  closes: boolean;
-}
-
-export interface ItsIssueLabel {
-  id: number;
-  url: string;
-  name: string;
-  description: string;
-  color: string;
-  isDefault: boolean;
 }
 
 export interface ItsIssueReaction {

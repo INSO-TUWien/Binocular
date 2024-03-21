@@ -1,9 +1,9 @@
 'use strict';
 
-import Connection from '../Connection.ts';
+import Connection from '../Connection';
 import Commit, { CommitDao } from '../models/Commit';
 import Module, { ModuleDao } from '../models/Module';
-import Stats from '../supportingTypes/Stats';
+import Stats from '../../types/supportingTypes/Stats';
 
 interface CommitModuleConnectionDao {
   stats: Stats;

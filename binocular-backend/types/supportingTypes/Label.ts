@@ -4,5 +4,5 @@ export default interface Label {
   description: string;
   url: string;
   color: string;
-  isDefault: string;
+  isDefault: boolean;
 }

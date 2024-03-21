@@ -1,13 +1,14 @@
 'use strict';
 
-import Model from '../Model.ts';
+import Model, { Entry } from '../Model';
 import _ from 'lodash';
+import BranchDto from '../../types/dtos/BranchDto';
 
 export interface BranchDao {
   id: string;
   branch: string;
   active: boolean;
-  trackFileRenames: boolean;
+  tracksFileRenames: boolean;
   latestCommit: string;
 }
 
@@ -19,7 +20,7 @@ class Branch extends Model<BranchDao> {
     });
   }
 
-  async persist(_branchData: any) {
+  async persist(_branchData: BranchDto) {
     const branchData = _.clone(_branchData);
     const instance = await this.findById(_branchData.id);
     if (!instance) {
@@ -34,7 +35,7 @@ class Branch extends Model<BranchDao> {
     return [instance, false];
   }
 
-  async remove(branch: any) {
+  async remove(branch: Entry<BranchDao>) {
     if (this.rawDb === undefined) {
       throw Error('Database undefined!');
     }

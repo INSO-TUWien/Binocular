@@ -1,7 +1,8 @@
 'use strict';
 
 import _ from 'lodash';
-import Model from '../Model.ts';
+import Model from '../Model';
+import MilestoneDto from '../../types/dtos/MilestoneDto';
 
 interface MilestoneDao {
   id: string;
@@ -25,7 +26,7 @@ class Milestone extends Model<MilestoneDao> {
     });
   }
 
-  persist(_milestoneData: any) {
+  persist(_milestoneData: MilestoneDto) {
     const milestoneData = _.clone(_milestoneData);
     if (milestoneData.id) {
       milestoneData.id = milestoneData.id.toString();
