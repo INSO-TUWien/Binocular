@@ -7,7 +7,7 @@ import Db from '../core/db/db';
 import Model from './Model';
 import { Entry as ModelEntry } from './Model';
 import { Database } from 'arangojs';
-import { CollectionType, DocumentCollection, EdgeCollection } from 'arangojs/collection';
+import { Collection, CollectionType, DocumentCollection, EdgeCollection } from 'arangojs/collection';
 
 export default class Connection<ConnectionDataType, FromDataType, ToDataType> {
   connections = {};
@@ -29,7 +29,7 @@ export default class Connection<ConnectionDataType, FromDataType, ToDataType> {
   ensureCollection(
     fromModel: Model<FromDataType> | Connection<FromDataType, unknown, unknown>,
     toModel: Model<ToDataType> | Connection<ToDataType, unknown, unknown>,
-  ) {
+  ): Promise<Collection> | undefined {
     if (this.db === undefined) {
       throw Error('Database undefined!');
     }

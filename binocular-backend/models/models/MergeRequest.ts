@@ -41,7 +41,7 @@ class MergeRequest extends Model<MergeRequestDao> {
 
     delete mergeRequestData.projectId;
 
-    return this.ensureById(mergeRequestData.id, mergeRequestData, { ignoreUnknownAttributes: true });
+    return this.ensureById(mergeRequestData.id, mergeRequestData, {});
   }
 }
 

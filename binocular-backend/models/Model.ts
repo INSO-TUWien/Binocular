@@ -8,7 +8,7 @@ import * as inflection from 'inflection';
 import ctx from '../utils/context';
 import ModelCursor from './ModelCursor';
 import Db from '../core/db/db';
-import { DocumentCollection, EdgeCollection } from 'arangojs/collection';
+import { Collection, DocumentCollection, EdgeCollection } from 'arangojs/collection';
 import { Database } from 'arangojs';
 import { AqlQuery } from 'arangojs/aql';
 
@@ -38,7 +38,7 @@ export default class Model<DataType> {
     );
   }
 
-  ensureCollection() {
+  ensureCollection(): Promise<Collection> | undefined {
     if (this.db === undefined) {
       throw Error('Database undefined!');
     }
@@ -63,7 +63,7 @@ export default class Model<DataType> {
     return this.parse(d);
   }
 
-  async findById(id: string) {
+  async findById(id: string): Promise<Entry<DataType> | null> {
     this.log('findById %o', id);
     if (this.collection === undefined) {
       throw Error('Collection undefined!');
@@ -75,7 +75,7 @@ export default class Model<DataType> {
     return null;
   }
 
-  async ensureById(id: string, data: DataType, options?: { ignoreUnknownAttributes?: boolean; isNew?: boolean }) {
+  async ensureById(id: string, data: DataType, options?: { isNew?: boolean }) {
     return this.findOneById(id).then(
       function (resp) {
         if (resp) {
@@ -83,7 +83,6 @@ export default class Model<DataType> {
         } else {
           const entry = new Entry<DataType>(data, {
             isNew: options && options.isNew ? options.isNew : true,
-            ignoreUnknownAttributes: options && options.ignoreUnknownAttributes ? options.ignoreUnknownAttributes : true,
           });
           entry._id = id;
 
@@ -98,12 +97,7 @@ export default class Model<DataType> {
     return this.firstExample({ _id: id } as DataType & { _id: string; _key: string });
   }
 
-  async ensureBy(
-    key: string,
-    value: string | boolean | number | undefined,
-    data: DataType,
-    options?: { ignoreUnknownAttributes?: boolean; isNew?: boolean },
-  ) {
+  async ensureBy(key: string, value: string | boolean | number | undefined, data: DataType, options?: { isNew?: boolean }) {
     data[key] = value;
     return this.findOneBy(key, value).then(
       function (resp) {
@@ -112,7 +106,6 @@ export default class Model<DataType> {
         } else {
           const entry = new Entry<DataType>(data, {
             isNew: options && options.isNew ? options.isNew : true,
-            ignoreUnknownAttributes: options && options.ignoreUnknownAttributes ? options.ignoreUnknownAttributes : true,
           });
           return this.save(entry).then((i) => [i, true]);
         }
@@ -128,7 +121,6 @@ export default class Model<DataType> {
   create(data: DataType, options?: { isNew: boolean }): Promise<Entry<DataType>> {
     const entry = new Entry<DataType>(data, {
       isNew: options ? options.isNew : true,
-      ignoreUnknownAttributes: true,
     });
     return this.save(entry);
   }
@@ -152,7 +144,6 @@ export default class Model<DataType> {
       return this.save(
         new Entry<DataType>(entry.data, {
           isNew: false,
-          ignoreUnknownAttributes: true,
         }),
       );
     }
@@ -165,7 +156,6 @@ export default class Model<DataType> {
 
     const entry = new Entry<DataType>(data, {
       isNew: false,
-      ignoreUnknownAttributes: true,
     });
     entry._id = data._id;
     entry._key = data._key;
@@ -252,12 +242,12 @@ export class Entry<DataType> {
   _id: string | undefined;
   _key: string | undefined;
   isStored: boolean | undefined;
-  isNew: boolean;
+  isNew: boolean | undefined;
   justCreated: boolean | undefined;
   justUpdated: boolean | undefined;
-  constructor(data: DataType, options: { isNew: boolean; ignoreUnknownAttributes: boolean }) {
+  constructor(data: DataType, options: { isNew?: boolean }) {
     this.data = _.defaults({}, data);
-    options = _.defaults({}, options, { isNew: true, ignoreUnknownAttributes: false });
+    options = _.defaults({}, options, { isNew: true });
 
     this.isNew = options.isNew;
   }

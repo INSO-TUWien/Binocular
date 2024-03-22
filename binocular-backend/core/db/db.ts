@@ -4,7 +4,7 @@ import _ from 'lodash';
 import * as utils from '../../utils/utils.ts';
 import { Database } from 'arangojs';
 import debug from 'debug';
-import { DocumentCollection, EdgeCollection } from 'arangojs/collection';
+import { Collection, DocumentCollection, EdgeCollection } from 'arangojs/collection';
 
 const log = debug('db');
 
@@ -18,7 +18,7 @@ class Db {
     log('DB:', connectionString);
   }
 
-  ensureDatabase(name: string, context: any) {
+  ensureDatabase(name: string, context: any): Promise<Database> {
     log('Ensuring database', name);
     return Promise.resolve(this.arangoServer.listDatabases())
       .then(
@@ -51,12 +51,12 @@ class Db {
     });
   }
 
-  listDatabases() {
+  listDatabases(): Promise<string[]> {
     log('List all databases');
     return Promise.resolve(this.arangoServer.listDatabases());
   }
 
-  collections() {
+  collections(): Promise<(DocumentCollection<any> & EdgeCollection<any>)[]> | undefined {
     if (this.arango === undefined) {
       return;
     }
@@ -72,15 +72,15 @@ class Db {
     return Promise.resolve(this.arango.query(q, bindVars));
   }
 
-  ensureCollection(name: string, ...rest: any) {
+  ensureCollection(name: string, ...rest: any): Promise<Collection> | undefined {
     return this.ensure('collection', name, ...rest);
   }
 
-  ensureEdgeCollection(name: string, ...rest: any) {
+  ensureEdgeCollection(name: string, ...rest: any): Promise<Collection> | undefined {
     return this.ensure('collection', name, ...rest);
   }
 
-  ensureGraph(name: string, ...rest: any) {
+  ensureGraph(name: string, ...rest: any): Promise<Collection> | undefined {
     return this.ensure('graph', name, ...rest);
   }
 
@@ -106,7 +106,7 @@ class Db {
     );
   }
 
-  ensure(type: string | number, name: string, ...rest: any) {
+  ensure(type: string | number, name: string, ...rest: any): Promise<Collection> | undefined {
     if (this.arango === undefined) {
       return;
     }

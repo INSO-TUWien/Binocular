@@ -49,7 +49,7 @@ class Issue extends Model<IssueDao> {
     delete issueData.projectId;
     delete issueData.timeStats;
 
-    return this.ensureById(issueData.id, issueData, { ignoreUnknownAttributes: true });
+    return this.ensureById(issueData.id, issueData, {});
   }
 
   async deduceStakeholders() {

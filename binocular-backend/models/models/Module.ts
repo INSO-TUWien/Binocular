@@ -29,7 +29,7 @@ class Module extends Model<ModuleDao> {
 
     const path = _moduleData.path;
     //delete data.path;
-    const [instance] = await this.ensureBy('path', path, _moduleData, { ignoreUnknownAttributes: true });
+    const [instance] = await this.ensureBy('path', path, _moduleData, {});
     log(`Finished persisted ${path} with ${instance.data.path} and ${instance._id}!`);
     return instance;
   }

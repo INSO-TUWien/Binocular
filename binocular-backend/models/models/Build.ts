@@ -35,7 +35,7 @@ class Build extends Model<BuildDao> {
       buildData.id = _buildData.id.toString();
     }
 
-    return this.ensureById(buildData.id, buildData, { ignoreUnknownAttributes: true });
+    return this.ensureById(buildData.id, buildData, {});
   }
 
   deleteShaRefAttributes() {

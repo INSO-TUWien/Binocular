@@ -34,7 +34,7 @@ class Milestone extends Model<MilestoneDao> {
 
     delete milestoneData.projectId;
 
-    return this.ensureById(milestoneData.id, milestoneData, { ignoreUnknownAttributes: true });
+    return this.ensureById(milestoneData.id, milestoneData, {});
   }
 }
 
