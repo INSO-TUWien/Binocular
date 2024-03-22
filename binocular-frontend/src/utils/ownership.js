@@ -7,8 +7,10 @@ export function extractOwnershipFromFileExcludingCommits(fileOwnershipData, comm
 
     // iterate over owned hunks, only count those of commits that are not excluded
     for (const hunk of o.hunks) {
-      if (!commitsToExclude.includes(hunk.commitSha)) {
-        res.ownedLines += hunk.endLine - hunk.startLine + 1;
+      if (!commitsToExclude.includes(hunk.originalCommit)) {
+        for (const lineObj of hunk.lines) {
+          res.ownedLines += lineObj.to - lineObj.from + 1;
+        }
       }
     }
     return res;
@@ -23,8 +25,7 @@ export function extractFileOwnership(ownershipData, commitsToExclude = []) {
   const result = {};
   for (const commit of commits) {
     for (const file of commit.files) {
-      //since we start with the most recent commit, we are only interested in the first occurence of each file
-      //and because this is used for the filepicker, we are also not concerned about file renames
+      //since we start with the most recent commit, we are only interested in the first occurrence of each file.
       if (!result[file.path]) {
         // iterate over all stakeholders
         result[file.path] = extractOwnershipFromFileExcludingCommits(file.ownership, commitsToExclude);
