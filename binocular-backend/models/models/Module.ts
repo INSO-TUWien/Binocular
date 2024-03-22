@@ -8,10 +8,10 @@ import ModuleDto from '../../types/dtos/ModuleDto';
 
 const log = debug('git:commit:module');
 
-export interface ModuleDao {
+export interface ModuleDataType {
   path: string;
 }
-class Module extends Model<ModuleDao> {
+class Module extends Model<ModuleDataType> {
   constructor() {
     super({ name: 'Module' });
   }

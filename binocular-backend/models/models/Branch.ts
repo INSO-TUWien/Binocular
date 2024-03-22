@@ -4,7 +4,7 @@ import Model, { Entry } from '../Model';
 import _ from 'lodash';
 import BranchDto from '../../types/dtos/BranchDto';
 
-export interface BranchDao {
+export interface BranchDataType {
   id: string;
   branch: string;
   active: boolean;
@@ -12,7 +12,7 @@ export interface BranchDao {
   latestCommit: string;
 }
 
-class Branch extends Model<BranchDao> {
+class Branch extends Model<BranchDataType> {
   constructor() {
     super({
       name: 'Branch',
@@ -35,7 +35,7 @@ class Branch extends Model<BranchDao> {
     return [instance, false];
   }
 
-  async remove(branch: Entry<BranchDao>) {
+  async remove(branch: Entry<BranchDataType>) {
     if (this.rawDb === undefined) {
       throw Error('Database undefined!');
     }

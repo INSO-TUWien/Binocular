@@ -1,12 +1,12 @@
 'use strict';
 
 import Connection from '../Connection.ts';
-import Issue, { IssueDao } from '../models/Issue';
-import Commit, { CommitDao } from '../models/Commit';
+import Issue, { IssueDataType } from '../models/Issue';
+import Commit, { CommitDataType } from '../models/Commit';
 
-interface IssueCommitConnectionDao {}
+interface IssueCommitConnectionDataType {}
 
-class IssueCommitConnection extends Connection<IssueCommitConnectionDao, IssueDao, CommitDao> {
+class IssueCommitConnection extends Connection<IssueCommitConnectionDataType, IssueDataType, CommitDataType> {
   constructor() {
     super();
   }

@@ -1,12 +1,12 @@
 'use strict';
 
 import Connection from '../Connection.ts';
-import Commit, { CommitDao } from '../models/Commit';
-import Stakeholder, { StakeholderDao } from '../models/Stakeholder';
+import Commit, { CommitDataType } from '../models/Commit';
+import Stakeholder, { StakeholderDataType } from '../models/Stakeholder';
 
-export interface CommitStakeholderConnectionDao {}
+export interface CommitStakeholderConnectionDataType {}
 
-class CommitStakeholderConnection extends Connection<CommitStakeholderConnectionDao, CommitDao, StakeholderDao> {
+class CommitStakeholderConnection extends Connection<CommitStakeholderConnectionDataType, CommitDataType, StakeholderDataType> {
   constructor() {
     super();
   }

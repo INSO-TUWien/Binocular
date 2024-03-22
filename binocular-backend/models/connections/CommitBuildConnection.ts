@@ -1,12 +1,12 @@
 'use strict';
 
 import Connection from '../Connection.ts';
-import Commit, { CommitDao } from '../models/Commit';
-import Build, { BuildDao } from '../models/Build';
+import Commit, { CommitDataType } from '../models/Commit';
+import Build, { BuildDataType } from '../models/Build';
 
-interface CommitBuildConnectionDao {}
+interface CommitBuildConnectionDataType {}
 
-class CommitBuildConnection extends Connection<CommitBuildConnectionDao, CommitDao, BuildDao> {
+class CommitBuildConnection extends Connection<CommitBuildConnectionDataType, CommitDataType, BuildDataType> {
   constructor() {
     super();
   }

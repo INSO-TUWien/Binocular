@@ -4,10 +4,10 @@ import IllegalArgumentError from '../errors/IllegalArgumentError.js';
 import Model from './Model';
 import Connection from './Connection';
 
-export default class ModelCursor<DaoType> {
-  private model: Model<DaoType> | Connection<DaoType, unknown, unknown>;
+export default class ModelCursor<DataType> {
+  private model: Model<DataType> | Connection<DataType, unknown, unknown>;
   private cursor: any;
-  constructor(model: Model<DaoType> | Connection<DaoType, unknown, unknown>, cursor: any) {
+  constructor(model: Model<DataType> | Connection<DataType, unknown, unknown>, cursor: any) {
     this.model = model;
     this.cursor = cursor;
   }
@@ -33,7 +33,7 @@ export default class ModelCursor<DaoType> {
   }
 
   each(fn: (m: any) => any) {
-    const next = (cur: ModelCursor<DaoType>) => {
+    const next = (cur: ModelCursor<DataType>) => {
       if (cur.hasNext()) {
         return cur
           .next()

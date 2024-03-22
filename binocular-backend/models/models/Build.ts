@@ -6,7 +6,7 @@ import { aql } from 'arangojs';
 import Job from '../../types/supportingTypes/Job';
 import BuildDto from '../../types/dtos/BuildDto';
 
-export interface BuildDao {
+export interface BuildDataType {
   id: string;
   user: string;
   userFullName: string;
@@ -22,7 +22,7 @@ export interface BuildDao {
   jobs: Job[];
 }
 
-class Build extends Model<BuildDao> {
+class Build extends Model<BuildDataType> {
   constructor() {
     super({
       name: 'Build',

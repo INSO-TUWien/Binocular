@@ -1,16 +1,16 @@
 'use strict';
 
 import Connection from '../Connection';
-import Commit, { CommitDao } from '../models/Commit';
-import Module, { ModuleDao } from '../models/Module';
+import Commit, { CommitDataType } from '../models/Commit';
+import Module, { ModuleDataType } from '../models/Module';
 import Stats from '../../types/supportingTypes/Stats';
 
-interface CommitModuleConnectionDao {
+interface CommitModuleConnectionDataType {
   stats: Stats;
   webUrl: string;
 }
 
-class CommitModuleConnection extends Connection<CommitModuleConnectionDao, CommitDao, ModuleDao> {
+class CommitModuleConnection extends Connection<CommitModuleConnectionDataType, CommitDataType, ModuleDataType> {
   constructor() {
     super();
   }

@@ -2,11 +2,11 @@
 
 import Model from '../Model';
 
-export interface StakeholderDao {
+export interface StakeholderDataType {
   gitSignature: string;
 }
 
-class Stakeholder extends Model<StakeholderDao> {
+class Stakeholder extends Model<StakeholderDataType> {
   constructor() {
     super({
       name: 'Stakeholder',

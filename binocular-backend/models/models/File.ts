@@ -7,13 +7,13 @@ import CommitFileConnection from '../connections/CommitFileConnection';
 
 import path from 'path';
 
-export interface FileDao {
+export interface FileDataType {
   path: string;
   webUrl: string;
   maxLength: number;
 }
 
-class File extends Model<FileDao> {
+class File extends Model<FileDataType> {
   constructor() {
     super({ name: 'File' });
   }
@@ -37,7 +37,7 @@ class File extends Model<FileDao> {
     );
   }
 
-  dir(file: FileDao): string {
+  dir(file: FileDataType): string {
     const directory = path.dirname(file.path);
     return directory.startsWith('.') ? directory : `./${directory}`;
   }
@@ -47,7 +47,7 @@ class File extends Model<FileDao> {
    *
    * @returns {*[]}
    */
-  getModules(file: FileDao): string[] {
+  getModules(file: FileDataType): string[] {
     return this.dir(file)
       .split('/')
       .reduce((dirs: string[], dir: string, index: number) => dirs.concat(index ? `${dirs[index - 1]}/${dir}` : dir), []);

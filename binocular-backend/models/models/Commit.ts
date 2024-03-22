@@ -3,8 +3,8 @@
 import debug from 'debug';
 import Model, { Entry } from '../Model';
 
-import File, { FileDao } from './File';
-import Stakeholder, { StakeholderDao } from './Stakeholder';
+import File, { FileDataType } from './File';
+import Stakeholder, { StakeholderDataType } from './Stakeholder';
 import Stats from '../../types/supportingTypes/Stats';
 import CommitCommitConnection from '../connections/CommitCommitConnection';
 import CommitFileConnection from '../connections/CommitFileConnection';
@@ -24,7 +24,7 @@ import CommitDto from '../../types/dtos/CommitDto';
 
 const log = debug('git:commit');
 
-export interface CommitDao {
+export interface CommitDataType {
   sha: string;
   date: string;
   message: string;
@@ -33,7 +33,7 @@ export interface CommitDao {
   stats: Stats;
 }
 
-class Commit extends Model<CommitDao> {
+class Commit extends Model<CommitDataType> {
   constructor() {
     super({
       name: 'Commit',
@@ -106,7 +106,7 @@ class Commit extends Model<CommitDao> {
         });
       }),
     );
-    const results = await Stakeholder.ensureBy('gitSignature', authorSignature, {} as StakeholderDao);
+    const results = await Stakeholder.ensureBy('gitSignature', authorSignature, {} as StakeholderDataType);
     const stakeholder = results[0];
     await CommitStakeholderConnection.connect({}, { from: commit, to: stakeholder });
     return commit;
@@ -125,7 +125,7 @@ class Commit extends Model<CommitDao> {
    * @returns {*}
    */
   async processTree(
-    commitDAO: Entry<CommitDao>,
+    commitDAO: Entry<CommitDataType>,
     repo: Repository,
     commitData: CommitDto,
     currentBranch: string,
@@ -240,7 +240,7 @@ class Commit extends Model<CommitDao> {
             const webUrl = urlProvider.getFileUrl(currentBranch, filepath);
             const file = await File.ensureBy('path', filepath, {
               webUrl: webUrl,
-            } as FileDao).then((f) => f[0]);
+            } as FileDataType).then((f) => f[0]);
 
             let additionsForFile = 0;
             let deletionsForFile = 0;

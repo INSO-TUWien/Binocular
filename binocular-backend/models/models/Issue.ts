@@ -13,7 +13,7 @@ import Mention from '../../types/supportingTypes/Mention';
 import IssueDto from '../../types/dtos/IssueDto';
 const log = debug('db:Issue');
 
-export interface IssueDao {
+export interface IssueDataType {
   id: string;
   iid: number;
   title: string;
@@ -32,7 +32,7 @@ export interface IssueDao {
   mentions: Mention[];
 }
 
-class Issue extends Model<IssueDao> {
+class Issue extends Model<IssueDataType> {
   constructor() {
     super({
       name: 'Issue',

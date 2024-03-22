@@ -1,12 +1,12 @@
 'use strict';
 
 import Connection, { Entry } from '../Connection';
-import BranchFile, { BranchFileConnectionDao } from './BranchFileConnection';
-import File, { FileDao } from '../models/File';
+import BranchFile, { BranchFileConnectionDataType } from './BranchFileConnection';
+import File, { FileDataType } from '../models/File';
 
-interface BranchFileFileConnectionDao {}
+interface BranchFileFileConnectionDataType {}
 
-class BranchFileFileConnection extends Connection<BranchFileFileConnectionDao, BranchFileConnectionDao, FileDao> {
+class BranchFileFileConnection extends Connection<BranchFileFileConnectionDataType, BranchFileConnectionDataType, FileDataType> {
   constructor() {
     super();
   }
@@ -15,7 +15,7 @@ class BranchFileFileConnection extends Connection<BranchFileFileConnectionDao, B
     return super.ensureCollection(BranchFile, File);
   }
 
-  async remove(conn: Entry<BranchFileConnectionDao>) {
+  async remove(conn: Entry<BranchFileConnectionDataType>) {
     if (this.rawDb === undefined) {
       throw Error('Database undefined!');
     }

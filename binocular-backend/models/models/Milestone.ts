@@ -4,7 +4,7 @@ import _ from 'lodash';
 import Model from '../Model';
 import MilestoneDto from '../../types/dtos/MilestoneDto';
 
-interface MilestoneDao {
+interface MilestoneDataType {
   id: string;
   iid: number;
   title: string;
@@ -18,7 +18,7 @@ interface MilestoneDao {
   webUrl: string;
 }
 
-class Milestone extends Model<MilestoneDao> {
+class Milestone extends Model<MilestoneDataType> {
   constructor() {
     super({
       name: 'Milestone',

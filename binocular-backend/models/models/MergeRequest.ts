@@ -7,7 +7,7 @@ import User from '../../types/supportingTypes/User';
 import Mention from '../../types/supportingTypes/Mention';
 import MergeRequestDto from '../../types/dtos/MergeRequestDto';
 
-interface MergeRequestDao {
+interface MergeRequestDataType {
   id: string;
   iid: number;
   title: string;
@@ -26,7 +26,7 @@ interface MergeRequestDao {
   mentions: Mention[];
 }
 
-class MergeRequest extends Model<MergeRequestDao> {
+class MergeRequest extends Model<MergeRequestDataType> {
   constructor() {
     super({
       name: 'MergeRequest',
