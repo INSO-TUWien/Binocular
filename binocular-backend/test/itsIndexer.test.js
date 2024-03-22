@@ -18,10 +18,10 @@ import BaseGitLabIndexer from '../indexers/BaseGitLabIndexer.js';
 import GitHubMock from './helper/github/gitHubMock';
 import GitHubITSIndexer from '../indexers/its/GitHubITSIndexer';
 
-import Issue from '../models/Issue';
-import MergeRequest from '../models/MergeRequest';
-import Stakeholder from '../models/Stakeholder';
-import IssueStakeholderConnection from '../models/IssueStakeholderConnection';
+import Issue from '../models/models/Issue';
+import MergeRequest from '../models/models/MergeRequest';
+import Stakeholder from '../models/models/Stakeholder';
+import IssueStakeholderConnection from '../models/connections/IssueStakeholderConnection';
 import sinon from 'sinon';
 import path from 'path';
 const indexerOptions = {

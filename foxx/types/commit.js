@@ -20,11 +20,10 @@ module.exports = new gql.GraphQLObjectType({
     return {
       sha: {
         type: new gql.GraphQLNonNull(gql.GraphQLString),
-        resolve: (e) => e._key,
       },
       shortSha: {
         type: new gql.GraphQLNonNull(gql.GraphQLString),
-        resolve: (e) => e._key.substring(0, 7),
+        resolve: (e) => e.sha.substring(0, 7),
       },
       message: {
         type: gql.GraphQLString,
@@ -43,7 +42,7 @@ module.exports = new gql.GraphQLObjectType({
             ._query(
               aql`
               FOR stakeholder, edge
-              IN INBOUND ${commit} ${commitsToStakeholders}
+              IN OUTBOUND ${commit} ${commitsToStakeholders}
               return stakeholder.gitSignature
           `
             )
@@ -62,7 +61,7 @@ module.exports = new gql.GraphQLObjectType({
             ._query(
               aql`
             FOR c, edge
-            IN inbound ${commit} ${commitsToCommits}
+            IN OUTBOUND ${commit} ${commitsToCommits}
             RETURN c.sha`
             )
             .toArray();
@@ -89,7 +88,7 @@ module.exports = new gql.GraphQLObjectType({
         description: 'The files touched by this commit',
         query: (commit, args, limit) => aql`
           FOR file, edge
-            IN INBOUND ${commit} ${commitsToFiles}
+            IN OUTBOUND ${commit} ${commitsToFiles}
             let o = (
               FOR stakeholder, conn
                 IN OUTBOUND edge ${commitsToFilesToStakeholders}
@@ -122,7 +121,7 @@ module.exports = new gql.GraphQLObjectType({
             ._query(
               aql`
           FOR file, edge
-            IN INBOUND ${commit} ${commitsToFiles}
+            IN OUTBOUND ${commit} ${commitsToFiles}
             FILTER file.path == ${args.path}
             RETURN {
               file,
@@ -143,7 +142,7 @@ module.exports = new gql.GraphQLObjectType({
             FOR
             stakeholder
             IN
-            INBOUND ${commit} ${commitsToStakeholders}
+            OUTBOUND ${commit} ${commitsToStakeholders}
               RETURN stakeholder
           `
             )
@@ -158,7 +157,7 @@ module.exports = new gql.GraphQLObjectType({
             ._query(
               aql`
               FOR build, edge
-              IN INBOUND ${commit} ${commitsToBuilds}
+              IN OUTBOUND ${commit} ${commitsToBuilds}
               RETURN build`
             )
             .toArray();
@@ -169,7 +168,7 @@ module.exports = new gql.GraphQLObjectType({
         description: 'modules modified in the particular commit',
         query: (commit, args, limit) => aql`
           FOR module, edge
-            IN INBOUND ${commit} ${CommitsToModules}
+            IN OUTBOUND ${commit} ${CommitsToModules}
             ${limit}
             RETURN {
               module,

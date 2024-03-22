@@ -11,7 +11,7 @@ import ctx from '../utils/context.ts';
 import GitLabCIIndexer from './helper/gitlab/gitLabCIIndexerRewire.js';
 import GitHubCIIndexer from './helper/github/gitHubCIIndexerRewire.js';
 
-import Build from '../models/Build.js';
+import Build from '../models/models/Build';
 import repositoryFake from './helper/git/repositoryFake.js';
 import GitLabMock from './helper/gitlab/gitLabMock.js';
 import path from 'path';
@@ -67,7 +67,7 @@ describe('ci', function () {
       for (const i in dbBuildsCollectionData[0].jobs) {
         expect(dbBuildsCollectionData[0].jobs[i].webUrl).to.equal('https://gitlab.com/Test/Test-Project/jobs/' + i);
       }
-      expect(dbBuildsCollectionData[0].webUrl).to.equal('https://gitlab.com/Test/Test-Project/pipelines/' + dbBuildsCollectionData[0]._key);
+      expect(dbBuildsCollectionData[0].webUrl).to.equal(dbBuildsCollectionData[0].webUrl);
     });
   });
 

@@ -36,7 +36,7 @@ module.exports = new gql.GraphQLObjectType({
         description: 'The commits touching this file',
         query: (file, args, limit) => aql`
           FOR commit, edge
-            IN OUTBOUND ${file} ${commitsToFiles}
+            IN INBOUND ${file} ${commitsToFiles}
             let o = (
               FOR stakeholder, conn
                   IN OUTBOUND edge ${commitsToFilesToStakeholders}
