@@ -41,7 +41,7 @@ module.exports = new gql.GraphQLObjectType({
             RETURN language`,
       },
       commits: paginated({
-        type: require('./commit.js'),
+        type: require('./commitInFile.js'),
         description: 'The commits touching this file',
         args: {
           since: { type: Timestamp, required: false },
@@ -49,7 +49,7 @@ module.exports = new gql.GraphQLObjectType({
         },
         query: (file, args, limit) => {
           let query = aql`
-          FOR commit
+          FOR commit, edge
           IN
           OUTBOUND ${file} ${commitsToFiles}
             ${limit}
@@ -60,7 +60,10 @@ module.exports = new gql.GraphQLObjectType({
           if (args.until !== undefined) {
             query = aql`${query} FILTER DATE_TIMESTAMP(commit.date) <= DATE_TIMESTAMP(${args.until})`;
           }
-          query = aql`${query} RETURN commit`;
+          query = aql`${query} RETURN {
+            commit,
+            hunks: edge.hunks,
+          }`;
           return query;
         },
       }),

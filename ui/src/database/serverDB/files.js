@@ -28,11 +28,13 @@ export default class Files {
                 webUrl
                 commits (since: $since, until: $until) {
                   data {
-                    branch
-                    signature
-                    stats {
-                      additions
-                      deletions
+                    commit {
+                      branch
+                      signature
+                    }
+                    hunks{
+                      newLines
+                      oldLines
                     }
                   }
                 }
@@ -49,23 +51,30 @@ export default class Files {
           };
     
           _.each(file.commits.data, function (commit) {
-            if (activeBranch !== 'No Branch Chosen' && commit.branch !== activeBranch ) {
+            if (activeBranch !== 'No Branch Chosen' && commit.commit.branch !== activeBranch ) {
               return;
             }
-            let stats = statsByAuthor[commit.signature];
+
+            let linesChanged = 0;
+            _.each(commit.hunks, function (hunks) {
+              linesChanged = linesChanged + hunks.newLines + hunks.oldLines;
+            });
+
+
+            let stats = statsByAuthor[commit.commit.signature];
             if (!stats) {
-              stats = statsByAuthor[commit.signature] = {
+              stats = statsByAuthor[commit.commit.signature] = {
                 count: 0,
                 linesChanged: 0,
-                author: commit.signature,
+                author: commit.commit.signature,
               };
             }
     
             stats.count = stats.count + 1;
-            stats.linesChanged = stats.linesChanged + commit.stats.additions + commit.stats.deletions;
+            stats.linesChanged = stats.linesChanged + linesChanged;
     
             totalStats.count = totalStats.count + 1;
-            totalStats.linesChanged = totalStats.linesChanged + commit.stats.additions + commit.stats.deletions;
+            totalStats.linesChanged = totalStats.linesChanged + linesChanged;
           });
     
     
