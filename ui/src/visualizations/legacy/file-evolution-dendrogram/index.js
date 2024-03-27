@@ -27,7 +27,7 @@ const ChartComponent = connect(mapStateToProps, mapDispatchToProps)(FileEvolutio
 
 export default {
   id: 'fileEvolutionDendrogram',
-  label: 'File Evolution Dendrogram',
+  label: 'File Evolution Tree',
   saga,
   reducer,
   ChartComponent,

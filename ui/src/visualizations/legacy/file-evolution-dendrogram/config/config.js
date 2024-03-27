@@ -90,6 +90,7 @@ const FileEvolutionDendrogramConfigComponent = (props) => {
           otherCommitters={otherCommitters}
           displayMetric={props.displayMetric}
         />
+      <label className="label">Change Abstraction:</label>
       <div className={styles.field}>
         <div style={{ marginBottom: '0.5em' }}>
           <TabCombo

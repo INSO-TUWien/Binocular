@@ -14,7 +14,8 @@ import ChartContainer from '../../../../components/svg/ChartContainer.js';
 // - cleanup the code, chart still has unnecessary stuff in it
 // - changing to author view does reset the tree - try to prevent this (e.g. collapsed nodes should stay collapsed)
 // - filter for certain files and jump to it
-// - change size depending on the project size
+// - filter authors
+// - change size depending on the project size / how much is collapsed
 // - after calculating the authors with most commits/linesChanged, remove the statsbyAuthors on nodes to save on memory
 // - add information when hovering over nodes displaying how many linesChanged/commits and who is the author if authorview
 // - make the config look nicer
@@ -22,6 +23,16 @@ import ChartContainer from '../../../../components/svg/ChartContainer.js';
 // - config changes recalculate convertedFiles and reload the tree - make it smart
 // - adapt size to project size
 // - thicker lines for more changes
+// - open link and go to github when clicking on file
+// - remember zoom and drag position after re-rendering
+// - feature to collapse every node after a certain depth
+// - feature to combine files into one node, on hover show the files either as text popup or as actual nodes
+// - filter by how much change occured
+// - change  view between additions/deletions
+// - add other metrics (dev active per file)
+// - filter for top x% of activity
+// - metric switch shouldnt reload everything
+// - rename from file evolution dendrogram to tree
 
 export default class FileEvolutionDendrogram extends React.PureComponent {
   constructor(props) {
@@ -35,8 +46,8 @@ export default class FileEvolutionDendrogram extends React.PureComponent {
       transform: d3.zoomIdentity,
       displayMetric: props.displayMetric,
       displayByAuthors: props.displayByAuthors,
-      linesChangedScale: this.getColorScale(convertedFiles.totalStats.linesChanged),
-      commitScale: this.getColorScale(convertedFiles.totalStats.count), 
+      linesChangedScale: this.getColorScale(convertedFiles.mostLinesChanged),
+      commitScale: this.getColorScale(convertedFiles.mostCommits),
       omitFiles: props.omitFiles,
     };
 
@@ -56,12 +67,15 @@ export default class FileEvolutionDendrogram extends React.PureComponent {
       palette: palette,
       displayMetric: displayMetric,
       displayByAuthors: displayByAuthors,
-      linesChangedScale: this.getColorScale(convertedFiles.totalStats.linesChanged),
-      commitScale: this.getColorScale(convertedFiles.totalStats.count),
+      linesChangedScale: this.getColorScale(convertedFiles.mostLinesChanged),
+      commitScale: this.getColorScale(convertedFiles.mostCommits),
       omitFiles: omitFiles,
     }, () => {
       this.update(false, true);
     });
+
+    console.log(this.state.linesChangedScale);
+    console.log(this.state.commitScale);
   }
 
   componentDidMount() { 
@@ -109,7 +123,7 @@ export default class FileEvolutionDendrogram extends React.PureComponent {
       .attr("width", this.chartSettings.width)
       .attr("height", this.chartSettings.height)
       .attr("viewBox", [-this.chartSettings.center_x, -this.chartSettings.center_y, this.chartSettings.width, this.chartSettings.height])
-      .attr("style", "width: 100%; height: auto; font: 10px sans-serif;");
+      .attr("style", "width: 100%; height: auto; font: 8px sans-serif;");
 
       // prevent creating a new group on each createChart call
       this.linkgroup = this.g.select(".linkgroup");
@@ -118,8 +132,8 @@ export default class FileEvolutionDendrogram extends React.PureComponent {
         .classed("linkgroup", true)
         .attr("fill", "none")
         .attr("stroke", "#555")
-        .attr("stroke-opacity", 0.4)
-        .attr("stroke-width", 1.5);
+        .attr("stroke-opacity", 0.2)
+        .attr("stroke-width", 2.5);
       }
 
       // prevent creating a new group on each createChart call
@@ -227,14 +241,14 @@ export default class FileEvolutionDendrogram extends React.PureComponent {
     allnodes.attr("transform", d => `
          rotate(${d.x * 180 / Math.PI - 90})
          translate(${d.y},0)`)
-         .attr("r", d => d.data.children ? 6 : 3);
+         .attr("r", d => d.data.children ? 5 : 2);
 
     allnodes.select("circle")
-      .attr("r", d => d.data.children ? 6 : 3)
+      .attr("r", d => d.data.children ? 5 : 2)
       .style("fill", (d) => this.getColor(d.data));
     
     newnodes.append("circle")
-      .attr("r", d => d.data.children ? 6 : 3)
+      .attr("r", d => d.data.children ? 5 : 2)
       .style("fill", (d) => this.getColor(d.data));
 
       // instead of just adding text to newnodes, redraw all the text
@@ -244,12 +258,16 @@ export default class FileEvolutionDendrogram extends React.PureComponent {
       .text(d => d.data.name)
       .attr("x", 10)
       .attr("dy", ".31em")
+      //.style("font-weight", d => d.data.children ? 400 : 100)
+      .style("font", d => d.data.children ? "10px sans-serif" : "7px sans-serif")
       .style("fill", (d) => this.getColor(d.data));
 
       this.nodegroup.selectAll("text")
       .attr("text-anchor", d => d.x < Math.PI === !d.data.children ? "start" : "end")
       .attr("transform", d => d.x >= Math.PI ? "rotate(180)" : null)
       .attr("x", d => d.x < Math.PI === !d.data.children ? 10 : -10)
+      //.style("font-weight", d => d.data.children ? 400 : 100)
+      .style("font", d => d.data.children ? "10px sans-serif" : "7px sans-serif")
       .style("fill", (d) => this.getColor(d.data));
 
      // draw the updated parents
@@ -262,16 +280,25 @@ export default class FileEvolutionDendrogram extends React.PureComponent {
   // needs subfiles to be named children, it does not work with content
   convertData(data, omitFiles) {
     const convertedData = { name: "root", children: [] };
+    let mostLinesChanged = 0;
+    let mostCommits = 0;
     for (const file of data) {
       const pathParts = file.key.split('/');
       this.genPathObjectString(convertedData.children, pathParts, file.webUrl, file.key, file.totalStats,
         file.statsByAuthor, "");
+
+      if (file.totalStats.linesChanged > mostLinesChanged) {
+        mostLinesChanged = file.totalStats.linesChanged;
+      }
+      if (file.totalStats.count > mostCommits) {
+        mostCommits = file.totalStats.count;
+      }
     }
 
-    this.fillInFolderStats(convertedData);
+    convertedData.mostLinesChanged = mostLinesChanged;
+    convertedData.mostCommits = mostCommits;
 
-    console.log("here");
-    console.log(convertedData);
+    this.fillInFolderStats(convertedData);
 
     this.removeEmptyFilesAndFolders(convertedData);
 
@@ -349,7 +376,10 @@ export default class FileEvolutionDendrogram extends React.PureComponent {
       data.authorMostLinesChanged = authorMostLinesChanged;
       data.authorMostCommits = authorMostCommits;
 
+      totalStats.linesChanged = totalStats.linesChanged / data.children.length;
+      totalStats.count = totalStats.count / data.children.length;
       data.totalStats = totalStats;
+
       data.statsByAuthor = totalStatsByAuthor;
       return data;
     } else { // basecase
