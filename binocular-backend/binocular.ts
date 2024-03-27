@@ -72,6 +72,9 @@ import its from './indexers/its';
 import ci from './indexers/ci';
 import Repository from './core/provider/git';
 import chalk from 'chalk';
+import Account from './models/models/Account.ts';
+import IssueAccountConnection from './models/connections/IssueAccountConnection.ts';
+import MergeRequestAccountConnection from './models/connections/MergeRequestAccountConnection.ts';
 
 cli.parse(
   (targetPath, options) => {
@@ -579,6 +582,7 @@ function runBackend() {
           Module.ensureCollection(),
           MergeRequest.ensureCollection(),
           Milestone.ensureCollection(),
+          Account.ensureCollection(),
           CommitFileConnection.ensureCollection(),
           CommitBuildConnection.ensureCollection(),
           CommitStakeholderConnection.ensureCollection(),
@@ -591,6 +595,8 @@ function runBackend() {
           BranchFileConnection.ensureCollection(),
           BranchFileFileConnection.ensureCollection(),
           CommitFileStakeholderConnection.ensureCollection(),
+          IssueAccountConnection.ensureCollection(),
+          MergeRequestAccountConnection.ensureCollection(),
         ]);
       });
   }
