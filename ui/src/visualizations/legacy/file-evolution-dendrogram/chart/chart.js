@@ -73,9 +73,6 @@ export default class FileEvolutionDendrogram extends React.PureComponent {
     }, () => {
       this.update(false, true);
     });
-
-    console.log(this.state.linesChangedScale);
-    console.log(this.state.commitScale);
   }
 
   componentDidMount() { 
