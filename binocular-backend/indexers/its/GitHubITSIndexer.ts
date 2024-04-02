@@ -61,15 +61,6 @@ GitHubITSIndexer.prototype.index = async function () {
         assigneeEntries.push((await Account.ensureGitHubAccount(this.controller.getUser(a.login)))[0]);
       }
 
-      // TODO these attributes are replaced by the connections. Remove later on
-      issue.author.name = this.controller.getUser(issue.author.login).name;
-      if (issue.assignees.nodes.length > 0) {
-        issue.assignees.nodes[0].name = this.controller.getUser(issue.assignees.nodes[0].login).name;
-      }
-      for (let i = 0; i < issue.assignees.nodes.length; i++) {
-        issue.assignees.nodes[i].name = this.controller.getUser(issue.assignees.nodes[i].login).name;
-      }
-
       await targetCollection
         .findOneByExample({ id: String(issue.id) })
         .then((existingIssue) => {
@@ -89,9 +80,6 @@ GitHubITSIndexer.prototype.index = async function () {
                 updatedAt: issue.updatedAt,
                 labels: issue.labels.nodes,
                 milestone: issue.milestone,
-                author: issue.author,
-                assignee: issue.assignees.nodes[0],
-                assignees: issue.assignees.nodes,
                 webUrl: issue.url,
                 mentions: issue.timelineItems.nodes.map((event: ItsIssueEvent) => {
                   return {
@@ -100,6 +88,7 @@ GitHubITSIndexer.prototype.index = async function () {
                     closes: event.commit === undefined,
                   } as Mention;
                 }),
+                notes: [], // not supported by GitHub
               })
               .then(([persistedIssue, wasCreated]) => {
                 // save the entry object of the issue so we can connect it to the github users later

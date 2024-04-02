@@ -1,5 +1,4 @@
 import Label from '../supportingTypes/Label.ts';
-import User from '../supportingTypes/User.ts';
 import Mention from '../supportingTypes/Mention.ts';
 
 export default interface IssueDto {
@@ -17,8 +16,6 @@ export default interface IssueDto {
   webUrl: string;
   projectId?: string;
   timeStats?: string;
-  author: User;
-  assignee: User;
-  assignees: User[];
   mentions: Mention[];
+  notes: any[]; //TODO: Add type for gitlab notes
 }

@@ -68,11 +68,11 @@ class GitLabITSIndexer extends BaseGitLabIndexer {
                 if (!existingIssue || new Date(existingIssue.updatedAt).getTime() < new Date(issue.updated_at).getTime()) {
                   log('Processing issue #' + issue.iid);
                   // first, get the mentioned commits
-                  const results = this.processComments(project, issue);
+                  const results = await this.processComments(project, issue);
                   const mentions = results[0];
                   const closedAt = results[1];
                   const notes = results[2];
-                  const issueData = _.merge(
+                  let issueData = _.merge(
                     _.mapKeys(issue, (v, k) => _.camelCase(k)),
                     {
                       mentions,
@@ -80,6 +80,26 @@ class GitLabITSIndexer extends BaseGitLabIndexer {
                       notes,
                     },
                   );
+
+                  // only keep properties as defined in the IssueDto interface
+                  issueData = _.pick(issueData, [
+                    'id',
+                    'iid',
+                    'title',
+                    'description',
+                    'createdAt',
+                    'closedAt',
+                    'updatedAt',
+                    'labels',
+                    'milestone',
+                    'state',
+                    'url',
+                    'webUrl',
+                    'projectId',
+                    'timeStats',
+                    'mentions',
+                    'notes',
+                  ]);
                   // if this is a new issue, persist it
                   if (!existingIssue) {
                     issueEntry = (await Issue.persist(issueData))[0];
@@ -117,12 +137,30 @@ class GitLabITSIndexer extends BaseGitLabIndexer {
                 log('Processing mergeRequest #' + mergeRequest.iid);
                 await this.processMergeRequestNotes(project, mergeRequest)
                   .then(async (notes) => {
-                    const mergeRequestData = _.merge(
+                    let mergeRequestData = _.merge(
                       _.mapKeys(mergeRequest, (v, k) => _.camelCase(k)),
                       {
                         notes,
                       },
                     );
+                    // only keep properties from MergeRequestDto
+                    mergeRequestData = _.pick(mergeRequestData, [
+                      'id',
+                      'iid',
+                      'title',
+                      'description',
+                      'createdAt',
+                      'closedAt',
+                      'updatedAt',
+                      'labels',
+                      'milestone',
+                      'state',
+                      'url',
+                      'webUrl',
+                      'projectId',
+                      'mentions',
+                      'notes',
+                    ]);
                     if (!existingMergeRequest) {
                       mrEntry = (await MergeRequest.persist(mergeRequestData))[0];
                     } else {
@@ -163,11 +201,11 @@ class GitLabITSIndexer extends BaseGitLabIndexer {
       });
   }
 
-  processComments(project, issue) {
+  async processComments(project, issue) {
     let closedAt;
     const mentions = [];
     const notes = [];
-    return this.gitlab
+    return await this.gitlab
       .getNotes(project.id, issue.iid)
       .each((note) => {
         notes.push(note);
@@ -183,9 +221,9 @@ class GitLabITSIndexer extends BaseGitLabIndexer {
       .then(() => [mentions, closedAt, notes]);
   }
 
-  processMergeRequestNotes(project, mergeRequest) {
+  async processMergeRequestNotes(project, mergeRequest) {
     const notes = [];
-    return this.gitlab
+    return await this.gitlab
       .getMergeRequestNotes(project.id, mergeRequest.iid)
       .each((note) => {
         notes.push(note);
