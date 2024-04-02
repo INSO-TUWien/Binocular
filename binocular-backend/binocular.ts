@@ -72,6 +72,11 @@ import its from './indexers/its';
 import ci from './indexers/ci';
 import Repository from './core/provider/git';
 import chalk from 'chalk';
+import ReviewThread from './models/ReviewThread';
+import Comment from './models/Comment';
+import ReviewThreadCommentConnection from './models/ReviewThreadCommentConnection';
+import MergeRequestCommentConnection from './models/MergeRequestCommentConnection';
+import MergeRequestReviewThreadConnection from './models/MergeRequestReviewThreadConnection';
 
 cli.parse(
   (targetPath, options) => {
@@ -405,6 +410,9 @@ function runBackend() {
       // (like the `mentions` field in issues).
       await connectIssuesAndCommits();
       await connectCommitsAndBuilds();
+      await connectReviewThreadsAndMergeRequests();
+      await connectCommentsAndReviewThreads();
+      await connectCommentsAndMergeRequests();
       const endTime = Moment.now();
       console.log('End Time: ' + Moment(endTime).format());
       const executionTime = Moment(endTime).diff(startTime, 'seconds');
@@ -587,6 +595,8 @@ function runBackend() {
           Module.ensureCollection(),
           MergeRequest.ensureCollection(),
           Milestone.ensureCollection(),
+          ReviewThread.ensureCollection(),
+          Comment.ensureCollection(),
           CommitFileConnection.ensureCollection(),
           CommitBuildConnection.ensureCollection(),
           CommitStakeholderConnection.ensureCollection(),
@@ -599,6 +609,9 @@ function runBackend() {
           BranchFileConnection.ensureCollection(),
           BranchFileFileConnection.ensureCollection(),
           CommitFileStakeholderConnection.ensureCollection(),
+          ReviewThreadCommentConnection.ensureCollection(),
+          MergeRequestCommentConnection.ensureCollection(),
+          MergeRequestReviewThreadConnection.ensureCollection(),
         ]);
       });
   }
@@ -690,6 +703,57 @@ function runBackend() {
     }
 
     await (Build as any).deleteShaRefAttributes();
+  }
+
+  async function connectReviewThreadsAndMergeRequests() {
+    const mergeRequests = await MergeRequest.findAll();
+    const reviewThreads = await ReviewThread.findAll();
+    
+    for (const reviewThread of reviewThreads) {
+      if(reviewThread === null) continue;
+      if(!reviewThread.data.mergeRequest) continue;
+
+      const mergeRequest = mergeRequests.filter((m: any) => m.data.id === reviewThread.data.mergeRequest);
+      if(mergeRequest && mergeRequest[0]) {
+        ReviewThread.connect(reviewThread, mergeRequest[0]);
+      }
+    }
+
+    await (ReviewThread as any).deleteMergeRequestRefAttribute();
+  }
+
+  async function connectCommentsAndReviewThreads() {
+    const reviewThreads = await ReviewThread.findAll();
+    const comments = await Comment.findAll();
+
+    for(const comment of comments) {
+      if(comment === null) continue;
+      if(!comment.data.reviewThread) continue;
+
+      const reviewThread = reviewThreads.filter((r: any) => r.data.id === comment.data.reviewThread);
+      if(reviewThread && reviewThread[0]) {
+        Comment.connect(comment, reviewThread[0]);
+      }
+    }
+
+    await (Comment as any).deleteReviewThreadRefAttribute();
+  }
+
+  async function connectCommentsAndMergeRequests() {
+    const mergeRequests = await MergeRequest.findAll();
+    const comments = await Comment.findAll();
+
+    for(const comment of comments) {
+      if(comment === null) continue;
+      if(!comment.data.mergeRequest) continue;
+
+      const mergeRequest = mergeRequests.filter((m: any) => m.data.id === comment.data.mergeRequest);
+      if(mergeRequest && mergeRequest[0]) {
+        Comment.connect(comment, mergeRequest[0]);
+      }
+    }
+
+    await (Comment as any).deleteMergeRequestRefAttribute();
   }
 
   // start services
