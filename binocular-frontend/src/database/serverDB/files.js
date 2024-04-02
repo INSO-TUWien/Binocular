@@ -127,9 +127,11 @@ export default class Files {
                   ownership {
                     stakeholder
                     hunks {
-                      commitSha
-                      startLine
-                      endLine
+                      originalCommit
+                      lines {
+                        from
+                        to
+                      }
                     }
                   }
                 }

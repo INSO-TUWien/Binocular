@@ -141,9 +141,11 @@ export default class Commits {
                    ownership {
                     stakeholder
                     hunks {
-                      commitSha
-                      startLine
-                      endLine
+                      originalCommit
+                      lines {
+                        from
+                        to
+                      }
                     }
                    }
                    stats {additions,deletions},
@@ -233,9 +235,11 @@ export default class Commits {
                 ownership {
                   stakeholder
                   hunks {
-                    commitSha
-                    startLine
-                    endLine
+                    originalCommit
+                    lines {
+                      from
+                      to
+                    }
                   }
                 }
               }
@@ -273,9 +277,11 @@ export default class Commits {
                   ownership {
                     stakeholder
                     hunks {
-                      commitSha
-                      startLine
-                      endLine
+                      originalCommit
+                      lines {
+                        from
+                        to
+                      }
                     }
                   }
                 }

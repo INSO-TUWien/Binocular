@@ -1,4 +1,14 @@
 {
  "github": { "auth": { "token": ""}},
- "arango": { "host": "localhost", "port": "8529", "user": "root", "password":"openSesame"}
+ "arango": { "host": "localhost", "port": "8529", "user": "root", "password":"openSesame"},
+ "fileRenameBranches": [
+    "develop"
+ ],
+ "ignoreFiles": [
+    "package-lock.json",
+    "docs/*",
+    "*.png",
+    "*.svg",
+    "yarn.lock"
+ ]
 }
