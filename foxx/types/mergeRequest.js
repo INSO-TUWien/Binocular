@@ -1,7 +1,11 @@
 'use strict';
 
 const gql = require('graphql-sync');
+const arangodb = require('@arangodb');
 const Timestamp = require('./Timestamp');
+const db = arangodb.db;
+const aql = arangodb.aql;
+const mergeRequestsToAccounts = db._collection('mergeRequests-accounts')
 
 module.exports = new gql.GraphQLObjectType({
   name: 'mergeRequest',
@@ -11,12 +15,57 @@ module.exports = new gql.GraphQLObjectType({
       author: {
         type: require('./gitHubUser.js'),
         description: 'The github/gitlab author of this mergeRequest',
+        resolve(mr /*, args*/) {
+          return db
+            ._query(
+              aql`
+              FOR
+              account, edge
+              IN
+              OUTBOUND ${mr} ${mergeRequestsToAccounts}
+              FILTER edge.role == "author"
+              RETURN account
+              `
+            )
+            .toArray()[0];
+        },
       },
       assignee: {
         type: require('./gitHubUser.js'),
         description: 'The assignee of this mergeRequest',
+        resolve(mr /*, args*/) {
+          return db
+            ._query(
+              aql`
+              FOR
+              account, edge
+              IN
+              OUTBOUND ${mr} ${mergeRequestsToAccounts}
+              FILTER edge.role == "assignee"
+              RETURN account
+              `
+            )
+            .toArray()[0];
+        },
       },
-      assignees: { type: new gql.GraphQLList(require('./gitHubUser.js')), description: 'All the assignees of this mergeRequest' },
+      assignees: {
+        type: new gql.GraphQLList(require('./gitHubUser.js')),
+        description: 'All the assignees of this mergeRequest',
+        resolve(mr /*, args*/) {
+          return db
+            ._query(
+              aql`
+              FOR
+              account, edge
+              IN
+              OUTBOUND ${mr} ${mergeRequestsToAccounts}
+              FILTER edge.role == "assignees"
+              RETURN account
+              `
+            )
+            .toArray();
+        },
+      },
       id: {
         type: gql.GraphQLString,
         description: 'id of the mergeRequest',

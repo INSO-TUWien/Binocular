@@ -26,9 +26,6 @@ export interface IssueDataType {
   state: string;
   url: string;
   webUrl: string;
-  author: User;
-  assignee: User;
-  assignees: User[];
   mentions: Mention[];
 }
 

@@ -3,7 +3,6 @@
 import _ from 'lodash';
 import Model from '../Model';
 import Label from '../../types/supportingTypes/Label';
-import User from '../../types/supportingTypes/User';
 import Mention from '../../types/supportingTypes/Mention';
 import MergeRequestDto from '../../types/dtos/MergeRequestDto';
 
@@ -20,9 +19,6 @@ export interface MergeRequestDataType {
   state: string;
   url: string;
   webUrl: string;
-  author: User;
-  assignee: User;
-  assignees: User[];
   mentions: Mention[];
 }
 
