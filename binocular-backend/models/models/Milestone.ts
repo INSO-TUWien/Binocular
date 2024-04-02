@@ -34,7 +34,7 @@ class Milestone extends Model<MilestoneDataType> {
 
     delete milestoneData.projectId;
 
-    return this.ensureById(milestoneData.id, milestoneData, {});
+    return this.ensureByExample({ id: milestoneData.id }, milestoneData, {});
   }
 }
 

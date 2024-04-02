@@ -35,7 +35,7 @@ class Build extends Model<BuildDataType> {
       buildData.id = _buildData.id.toString();
     }
 
-    return this.ensureById(buildData.id, buildData, {});
+    return this.ensureByExample({ id: buildData.id }, buildData, {});
   }
 
   deleteShaRefAttributes() {

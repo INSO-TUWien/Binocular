@@ -36,7 +36,7 @@ class MergeRequest extends Model<MergeRequestDataType> {
 
     delete mergeRequestData.projectId;
 
-    return this.ensureById(mergeRequestData.id, mergeRequestData, {});
+    return this.ensureByExample({ id: mergeRequestData.id }, mergeRequestData, {});
   }
 }
 

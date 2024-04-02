@@ -177,7 +177,7 @@ class GitLabITSIndexer extends BaseGitLabIndexer {
           }),
           this.gitlab.getMileStones(project.id).each(
             function (milestone) {
-              return Milestone.findOneById(milestone.id)
+              return Milestone.findOneByExample({ id: milestone.id })
                 .then((existingMilestone) => {
                   const mileStoneData = _.merge(_.mapKeys(milestone, (v, k) => _.camelCase(k)));
                   if (!existingMilestone || new Date(existingMilestone.updatedAt).getTime() < new Date(milestone.updated_at).getTime()) {
