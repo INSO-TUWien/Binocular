@@ -6,6 +6,8 @@ import Issue from '../../models/models/Issue';
 import MergeRequest from '../../models/models/MergeRequest';
 import Milestone from '../../models/models/Milestone';
 import BaseGitLabIndexer from '../BaseGitLabIndexer';
+import Account from '../../models/models/Account';
+import IssueAccountConnection from '../../models/connections/IssueAccountConnection';
 
 const log = debug('idx:its:gitlab');
 
@@ -28,7 +30,7 @@ class GitLabITSIndexer extends BaseGitLabIndexer {
     );
   }
 
-  index() {
+  async index() {
     let omitCount = 0;
     let persistCount = 0;
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -42,46 +44,60 @@ class GitLabITSIndexer extends BaseGitLabIndexer {
           this.gitlab
             .getIssues(project.id)
             .on('count', (count) => this.reporter.setIssueCount(count))
-            .each(
-              function (issue) {
+            .collect(async (issues) => {
+              // collect all issues and process them one by one
+              for (const issue of issues) {
                 if (this.stopping) {
                   return false;
                 }
 
-                issue.id = issue.id.toString();
-                return Issue.findOneById(issue.id)
-                  .then((existingIssue) => {
-                    if (!existingIssue || new Date(existingIssue.updatedAt).getTime() < new Date(issue.updated_at).getTime()) {
-                      log('Processing issue #' + issue.iid);
-                      return this.processComments(project, issue)
-                        .then((results) => {
-                          const mentions = results[0];
-                          const closedAt = results[1];
-                          const notes = results[2];
-                          const issueData = _.merge(
-                            _.mapKeys(issue, (v, k) => _.camelCase(k)),
-                            {
-                              mentions,
-                              closedAt,
-                              notes,
-                            },
-                          );
-                          if (!existingIssue) {
-                            return Issue.persist(issueData);
-                          } else {
-                            _.assign(existingIssue, issueData);
-                            return existingIssue.save({ ignoreUnknownAttributes: true });
-                          }
-                        })
-                        .then(() => persistCount++);
-                    } else {
-                      log('Skipping issue #' + issue.iid);
-                      omitCount++;
-                    }
-                  })
-                  .then(() => this.reporter.finishIssue());
-              }.bind(this),
-            ),
+                // for each issue, check if it already exists
+                const existingIssue = await Issue.findOneById(String(issue.id));
+
+                let issueEntry = existingIssue;
+
+                // first, persist the author/assignees associated to this issue
+                const authorEntry = (await Account.ensureGitLabAccount(issue.author))[0];
+                const assigneesEntries = [];
+                for (const assignee of issue.assignees) {
+                  assigneesEntries.push((await Account.ensureGitLabAccount(assignee))[0]);
+                }
+
+                // if the issue is not yet persisted or has been updated since it has last been persisted, process it
+                if (!existingIssue || new Date(existingIssue.updatedAt).getTime() < new Date(issue.updated_at).getTime()) {
+                  log('Processing issue #' + issue.iid);
+                  // first, get the mentioned commits
+                  const results = this.processComments(project, issue);
+                  const mentions = results[0];
+                  const closedAt = results[1];
+                  const notes = results[2];
+                  const issueData = _.merge(
+                    _.mapKeys(issue, (v, k) => _.camelCase(k)),
+                    {
+                      mentions,
+                      closedAt,
+                      notes,
+                    },
+                  );
+                  // if this is a new issue, persist it
+                  if (!existingIssue) {
+                    issueEntry = (await Issue.persist(issueData))[0];
+                  } else {
+                    // if this issue already exists, update its fields and save
+                    _.assign(existingIssue, issueData);
+                    issueEntry = (await existingIssue.save({ ignoreUnknownAttributes: true }))[0];
+                  }
+
+                  await this.connectIssuesToUsers(IssueAccountConnection, issueEntry, authorEntry, assigneesEntries);
+
+                  persistCount++;
+                } else {
+                  log('Skipping issue #' + issue.iid);
+                  omitCount++;
+                }
+                this.reporter.finishIssue();
+              }
+            }),
           this.gitlab.getMergeRequests(project.id).each(
             function (mergeRequest) {
               return MergeRequest.findOneById(mergeRequest.id)
@@ -172,6 +188,19 @@ class GitLabITSIndexer extends BaseGitLabIndexer {
   isStopping() {
     return this.stopping;
   }
+
+  // connects issues or merge requests to accounts
+  connectIssuesToUsers = async (conn, issue, author, assignees) => {
+    await conn.ensureWithData({ role: 'author' }, { from: issue, to: author });
+    if (assignees.length > 0) {
+      await conn.ensureWithData({ role: 'assignee' }, { from: issue, to: assignees[0] });
+    }
+    await Promise.all(
+      assignees.map(async (ae) => {
+        await conn.ensureWithData({ role: 'assignees' }, { from: issue, to: ae });
+      }),
+    );
+  };
 }
 
 export default GitLabITSIndexer;

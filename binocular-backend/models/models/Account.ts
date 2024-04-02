@@ -33,6 +33,22 @@ class Account extends Model<AccountDataType> {
       },
     );
   }
+
+  ensureGitLabAccount(acc: any) {
+    return this.ensureByExample(
+      {
+        platform: 'GitLab',
+        login: acc.username,
+      },
+      {
+        platform: 'GitHub',
+        login: acc.username,
+        name: acc.name,
+        avatarUrl: acc.avatar_url,
+        url: acc.web_url,
+      },
+    );
+  }
 }
 
 export default new Account();
