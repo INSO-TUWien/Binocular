@@ -30,6 +30,8 @@ export interface ItsIssue {
   timeline_url: string;
   pull_request: string;
   timelineItems: { nodes: ItsIssueEvent[] };
+  reviewThreads: { nodes: ItsReviewThread[] };
+  commentNodes: { nodes: ItsComment[]};
 }
 
 export interface ItsIssueEvent {
@@ -64,4 +66,22 @@ export interface ItsIssueReaction {
   heart: number;
   rocket: number;
   eyes: number;
+}
+
+export interface ItsReviewThread {
+  id: number;
+  isResolved: boolean;
+  resolvedBy: GithubActor;
+  path: string;
+  comments: { nodes: ItsComment[] };
+}
+
+export interface ItsComment {
+  author: GithubActor;
+  createdAt: string;
+  updatedAt: string;
+  lastEditedAt: string;
+  id: string;
+  path: string;
+  bodyText: string;
 }
