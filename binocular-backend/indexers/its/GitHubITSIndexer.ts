@@ -74,7 +74,6 @@ GitHubITSIndexer.prototype.index = async function () {
                 title: issue.title,
                 description: issue.body,
                 state: issue.state,
-                url: issue.url,
                 closedAt: issue.closedAt,
                 createdAt: issue.createdAt,
                 updatedAt: issue.updatedAt,

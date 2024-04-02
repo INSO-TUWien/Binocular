@@ -17,7 +17,6 @@ export interface MergeRequestDataType {
   labels: Label[];
   milestone: any; //TODO: Add type for milestone
   state: string;
-  url: string;
   webUrl: string;
   mentions: Mention[];
 }

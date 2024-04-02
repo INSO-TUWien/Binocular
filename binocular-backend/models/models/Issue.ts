@@ -11,6 +11,7 @@ import Label from '../../types/supportingTypes/Label';
 import User from '../../types/supportingTypes/User';
 import Mention from '../../types/supportingTypes/Mention';
 import IssueDto from '../../types/dtos/IssueDto';
+import IssueAccountConnection from '../connections/IssueAccountConnection.ts';
 const log = debug('db:Issue');
 
 export interface IssueDataType {
@@ -24,7 +25,6 @@ export interface IssueDataType {
   labels: Label[];
   milestone: any; //TODO: Add type for milestone
   state: string;
-  url: string;
   webUrl: string;
   mentions: Mention[];
 }
@@ -46,7 +46,7 @@ class Issue extends Model<IssueDataType> {
     delete issueData.projectId;
     delete issueData.timeStats;
 
-    return this.ensureById(issueData.id, issueData, {});
+    return this.ensureByExample({ id: issueData.id }, issueData, {});
   }
 
   async deduceStakeholders() {
@@ -55,16 +55,23 @@ class Issue extends Model<IssueDataType> {
     }
     return Promise.resolve(
       this.rawDb.query(
-        aql`
-    FOR issue IN ${this.collection}
+        aql`FOR issue IN issues
         LET stakeholders = (FOR stakeholder
                             IN
                             INBOUND issue ${IssueStakeholderConnection.collection}
-                                RETURN stakeholder)
+                            RETURN stakeholder)
+        LET a = FIRST(
+              FOR
+              account, edge
+              IN
+              OUTBOUND issue ${IssueAccountConnection.collection}
+              FILTER edge.role == "author"
+              RETURN account
+        )
         FILTER LENGTH(stakeholders) == 0
-        COLLECT authorId = issue.author.id INTO issuesPerAuthor = issue
+        COLLECT author = a INTO issuesPerAuthor = issue
         RETURN {
-          "author": FIRST(issuesPerAuthor).author,
+          "author": author,
           "issues": issuesPerAuthor
         }`,
       ),

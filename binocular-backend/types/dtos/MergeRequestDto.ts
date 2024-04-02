@@ -13,7 +13,6 @@ export default interface MergeRequestDto {
   labels: Label[];
   milestone: any; //TODO: Add type for milestone
   state: string;
-  url: string;
   webUrl: string;
   projectId?: string;
   mentions: Mention[];

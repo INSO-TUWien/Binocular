@@ -12,7 +12,6 @@ export default interface IssueDto {
   labels: Label[];
   milestone: any; //TODO: Add type for milestone
   state: string;
-  url: string;
   webUrl: string;
   projectId?: string;
   timeStats?: string;
