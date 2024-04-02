@@ -170,6 +170,7 @@ class GitHub {
    * Currently the number of timeline items is fixed to 200 items.
    * This could improve in the future through nested pagination.
    * Nested pagination is not possible with @octokit/plugin-paginate-graphql
+   * This also applies to review threads and comments
    */
   getPullRequestsWithEvents(repositoryOwner: string, repositoryName: string) {
     return this.githubGraphQL.graphql
@@ -235,6 +236,44 @@ class GitHub {
                               }
                           }
                       }
+                      reviewThreads (first: 40) {
+                          totalCount
+                          nodes {
+                              id
+                              path
+                              isResolved
+                              resolvedBy {
+                                login
+                              }
+                              comments (first: 100) {
+                                    totalCount
+                                    nodes {
+                                        id
+                                        createdAt
+                                        updatedAt
+                                        path
+                                        bodyText
+                                        author {
+                                            login
+                                        }
+                                    }
+                              }
+                          }
+                     }
+                     commentNodes: comments(first: 100) {
+                          totalCount
+                          nodes {
+                              author {
+                                  login
+                              }
+                              bodyText
+                              createdAt
+                              updatedAt
+                              lastEditedAt
+                              id
+                              body
+                          }
+                     }     
                   }
                   pageInfo {
                     hasNextPage
