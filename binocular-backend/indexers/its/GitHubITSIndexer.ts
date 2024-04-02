@@ -8,6 +8,9 @@ import MergeRequest from '../../models/MergeRequest.js';
 import GitHub from '../../core/provider/github.ts';
 import ProgressReporter from '../../utils/progress-reporter.ts';
 import { ItsIssue, ItsIssueEvent } from '../../types/itsTypes.ts';
+import ReviewThread from '../../models/ReviewThread.ts';
+import { createHash } from 'crypto';
+import Comment from '../../models/Comment.ts';
 
 const log = debug('idx:its:github');
 
@@ -37,8 +40,12 @@ GitHubITSIndexer.prototype.index = function () {
   let repo: string;
   let omitIssueCount = 0;
   let omitMergeRequestCount = 0;
+  let omitReviewThreadCount = 0;
+  let omitCommentCount = 0;
   let persistIssueCount = 0;
   let persistMergeRequestCount = 0;
+  let persistReviewThreadCount = 0;
+  let persistCommentCount = 0;
 
   return Promise.resolve(this.repo.getOriginUrl())
     .then(async (url) => {
@@ -131,7 +138,18 @@ GitHubITSIndexer.prototype.index = function () {
 
               for (let i = 0; i < mergeRequest.assignees.nodes.length; i++) {
                 mergeRequest.assignees.nodes[i].name = this.controller.getUser(mergeRequest.assignees.nodes[i].login).name;
+              }         
+             
+              for (let i = 0; i < mergeRequest.commentNodes.nodes.length; i++) {
+                mergeRequest.commentNodes.nodes[i].author.name = this.controller.getUser(mergeRequest.commentNodes.nodes[i].author.login).name;
               }
+
+              for(let i = 0; i < mergeRequest.reviewThreads.nodes.length; i++) {
+                for(let j = 0; j < mergeRequest.reviewThreads.nodes[i].comments.nodes.length; j++) {
+                  mergeRequest.reviewThreads.nodes[i].comments.nodes[j].author.name = this.controller.getUser(mergeRequest.reviewThreads.nodes[i].comments.nodes[j].author.login).name;
+                }
+              }
+              
               return new Promise((resolve) => {
                 return MergeRequest.findOneById(String(mergeRequest.id))
                   .then((existingMergeRequest) => {
@@ -175,6 +193,103 @@ GitHubITSIndexer.prototype.index = function () {
                     }
                   })
                   .then(() => {
+                    log('Processing comments for mergeRequest #' + mergeRequest.id);
+                    Promise.all(mergeRequest.commentNodes.nodes.map((comment) => {
+                      return new Promise((resolve) => {
+                        return Comment.findOneById(String(comment.id)).then((existingComment) => {
+                          if(!existingComment ||
+                            new Date(existingComment.data.updatedAt).getTime() < new Date(comment.updatedAt).getTime()) {
+                              log('Processing comment #' + comment.id);
+                              return Comment.persist({
+                                id: comment.id,
+                                author: comment.author,
+                                updatedAt: comment.updatedAt,
+                                createdAt: comment.createdAt,
+                                lastEditedAt: comment.lastEditedAt,
+                                path: comment.path,
+                                bodyText: comment.bodyText,
+                                mergeRequest: mergeRequest.id
+                              }).then(([persistedComment, wasCreated]) => {
+                                if(wasCreated) {
+                                  persistCommentCount++;
+                                }
+                                log('Persisted comment #' + comment.id);
+                              });
+                            } else {
+                              log('Skipping comment #' + comment.id);
+                              omitCommentCount;
+                            }
+                        });
+                      });
+                    }))
+                  })
+                  .then(() => {
+                    log('Processing Reviews for Issue #' + mergeRequest.number);
+                    Promise.all(mergeRequest.reviewThreads.nodes.map((reviewThread => {
+                      return new Promise((resolve) => {
+                        return ReviewThread.findOneById(String(reviewThread.id)).then((existingReviewThread) => {                 
+                          if(!existingReviewThread ||
+                            reviewThread.path === existingReviewThread.data.path
+                            && reviewThread.isResolved === existingReviewThread.data.isResolved
+                            && reviewThread.resolvedBy === existingReviewThread.data.resolvedBy) {
+                              log('Processing reviewThread #' + reviewThread.id);
+                              return ReviewThread.persist({
+                                id: reviewThread.id,
+                                isResolved: reviewThread.isResolved,
+                                resolvedBy: reviewThread.resolvedBy,
+                                path: reviewThread.path,
+                                mergeRequest: mergeRequest.id
+                              }).then(([persitedReviewThread, wasCreated]) => {
+                                if(wasCreated) {
+                                  persistReviewThreadCount++;
+                                }
+                                log('Persisted reviewThread #' + reviewThread.id);
+                              })
+                            } else {
+                              log('Skippig reviewThread #' + reviewThread.id);
+                              omitReviewThreadCount++;
+                            }
+                        })
+                        .then(() => {
+                          log('Processing comments for reviewThread #' + reviewThread.id);
+                          Promise.all(reviewThread.comments.nodes.map((comment) => {
+                            return new Promise((resolve) => {
+                              return Comment.findOneById(String(comment.id)).then((existingComment) => {
+                                if(!existingComment || 
+                                  new Date(existingComment.data.updatedAt).getTime() < new Date(comment.updatedAt).getTime()) {
+                                    log('Processing comment #' + comment.id);
+                                    return Comment.persist({
+                                      id: comment.id,
+                                      author: comment.author,
+                                      createdAt: comment.createdAt,
+                                      bodyText: comment.bodyText,
+                                      updatedAt: comment.updatedAt,
+                                      path: comment.path,
+                                      lastEditedAt: comment.lastEditedAt,
+                                      reviewThread: reviewThread.id,
+                                    }).then(([persistedComment, wasCreated]) => {
+                                      if(wasCreated) {
+                                        persistCommentCount++;
+                                      }
+                                      log('Persisted comment #' + comment.id);
+                                    })
+                                  } else {
+                                    log('Skipping comment #' + comment.id);
+                                    omitCommentCount++;
+                                  }
+                              }).then(() => {
+                                resolve(true);
+                              })
+                            })
+                          }));
+                        })
+                        .then(() => {
+                          resolve(true);
+                        });
+                      });
+                    })));                  
+                  })
+                  .then(() => {
                     this.reporter.finishMergeRequest();
                     resolve(true);
                   });
@@ -187,6 +302,8 @@ GitHubITSIndexer.prototype.index = function () {
     .then(() => {
       log('Persisted %d new issues (%d already present)', persistIssueCount, omitIssueCount);
       log('Persisted %d new mergeRequests (%d already present)', persistMergeRequestCount, omitMergeRequestCount);
+      log('Persisted %d new reviewThreads (%d already present)', persistReviewThreadCount, omitReviewThreadCount);
+      log('Persisted %d new comments (%d already present)', persistCommentCount, omitCommentCount);
     });
 };
 
