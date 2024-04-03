@@ -708,13 +708,13 @@ function runBackend() {
   async function connectReviewThreadsAndMergeRequests() {
     const mergeRequests = await MergeRequest.findAll();
     const reviewThreads = await ReviewThread.findAll();
-    
+
     for (const reviewThread of reviewThreads) {
-      if(reviewThread === null) continue;
-      if(!reviewThread.data.mergeRequest) continue;
+      if (reviewThread === null) continue;
+      if (!reviewThread.data.mergeRequest) continue;
 
       const mergeRequest = mergeRequests.filter((m: any) => m.data.id === reviewThread.data.mergeRequest);
-      if(mergeRequest && mergeRequest[0]) {
+      if (mergeRequest && mergeRequest[0]) {
         ReviewThread.connect(reviewThread, mergeRequest[0]);
       }
     }
@@ -726,12 +726,12 @@ function runBackend() {
     const reviewThreads = await ReviewThread.findAll();
     const comments = await Comment.findAll();
 
-    for(const comment of comments) {
-      if(comment === null) continue;
-      if(!comment.data.reviewThread) continue;
+    for (const comment of comments) {
+      if (comment === null) continue;
+      if (!comment.data.reviewThread) continue;
 
       const reviewThread = reviewThreads.filter((r: any) => r.data.id === comment.data.reviewThread);
-      if(reviewThread && reviewThread[0]) {
+      if (reviewThread && reviewThread[0]) {
         Comment.connect(comment, reviewThread[0]);
       }
     }
@@ -743,12 +743,12 @@ function runBackend() {
     const mergeRequests = await MergeRequest.findAll();
     const comments = await Comment.findAll();
 
-    for(const comment of comments) {
-      if(comment === null) continue;
-      if(!comment.data.mergeRequest) continue;
+    for (const comment of comments) {
+      if (comment === null) continue;
+      if (!comment.data.mergeRequest) continue;
 
       const mergeRequest = mergeRequests.filter((m: any) => m.data.id === comment.data.mergeRequest);
-      if(mergeRequest && mergeRequest[0]) {
+      if (mergeRequest && mergeRequest[0]) {
         Comment.connect(comment, mergeRequest[0]);
       }
     }

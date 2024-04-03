@@ -1,22 +1,13 @@
 'use strict';
 
 import _ from 'lodash';
-import Model, { Entry } from './Model';
-import debug from 'debug';
+import Model from './Model';
 import { aql } from 'arangojs/aql';
-const log = debug('db:Issue');
 
 class ReviewThread extends Model {
   constructor() {
     super('ReviewThread', {
-      attributes: [
-        'id',
-        'createdAt',
-        'updatedAt',
-        'isResolved',
-        'resolvedBy',
-        'mergeRequest',
-      ],
+      attributes: ['id', 'createdAt', 'updatedAt', 'isResolved', 'resolvedBy', 'mergeRequest'],
       keyAttribute: 'id',
     });
   }

@@ -2,23 +2,12 @@
 
 import _ from 'lodash';
 import Model from './Model';
-import debug from 'debug';
 import { aql } from 'arangojs/aql';
-const log = debug('db:Issue');
 
 class ReviewComment extends Model {
   constructor() {
     super('Comment', {
-      attributes: [
-        'id',
-        'path',
-        'createdAt',
-        'updatedAt',
-        'bodyText',
-        'author',
-        'reviewThread',
-        'mergeRequest',
-      ],
+      attributes: ['id', 'path', 'createdAt', 'updatedAt', 'bodyText', 'author', 'reviewThread', 'mergeRequest'],
       keyAttribute: 'id',
     });
   }

@@ -31,7 +31,7 @@ export interface ItsIssue {
   pull_request: string;
   timelineItems: { nodes: ItsIssueEvent[] };
   reviewThreads: { nodes: ItsReviewThread[] };
-  commentNodes: { nodes: ItsComment[]};
+  commentNodes: { nodes: ItsComment[] };
 }
 
 export interface ItsIssueEvent {
