@@ -1,4 +1,3 @@
-import Label from '../supportingTypes/Label.ts';
 import Mention from '../supportingTypes/Mention.ts';
 
 export default interface IssueDto {
@@ -9,7 +8,7 @@ export default interface IssueDto {
   createdAt: string;
   closedAt: string;
   updatedAt: string;
-  labels: Label[];
+  labels: string[];
   milestone: any; //TODO: Add type for milestone
   state: string;
   webUrl: string;

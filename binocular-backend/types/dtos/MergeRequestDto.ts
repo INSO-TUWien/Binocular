@@ -1,5 +1,3 @@
-import Label from '../supportingTypes/Label';
-import User from '../supportingTypes/User';
 import Mention from '../supportingTypes/Mention.ts';
 
 export default interface MergeRequestDto {
@@ -10,7 +8,7 @@ export default interface MergeRequestDto {
   createdAt: string;
   closedAt: string;
   updatedAt: string;
-  labels: Label[];
+  labels: string[];
   milestone: any; //TODO: Add type for milestone
   state: string;
   webUrl: string;

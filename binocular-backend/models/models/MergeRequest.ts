@@ -2,7 +2,6 @@
 
 import _ from 'lodash';
 import Model from '../Model';
-import Label from '../../types/supportingTypes/Label';
 import Mention from '../../types/supportingTypes/Mention';
 import MergeRequestDto from '../../types/dtos/MergeRequestDto';
 
@@ -14,7 +13,7 @@ export interface MergeRequestDataType {
   createdAt: string;
   closedAt: string;
   updatedAt: string;
-  labels: Label[];
+  labels: string[];
   milestone: any; //TODO: Add type for milestone
   state: string;
   webUrl: string;

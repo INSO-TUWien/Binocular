@@ -7,7 +7,6 @@ import Stakeholder from './Stakeholder';
 import IssueStakeholderConnection from '../connections/IssueStakeholderConnection';
 
 import debug from 'debug';
-import Label from '../../types/supportingTypes/Label';
 import User from '../../types/supportingTypes/User';
 import Mention from '../../types/supportingTypes/Mention';
 import IssueDto from '../../types/dtos/IssueDto';
@@ -22,7 +21,7 @@ export interface IssueDataType {
   createdAt: string;
   closedAt: string;
   updatedAt: string;
-  labels: Label[];
+  labels: string[];
   milestone: any; //TODO: Add type for milestone
   state: string;
   webUrl: string;

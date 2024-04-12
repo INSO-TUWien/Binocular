@@ -16,6 +16,7 @@ import Connection from '../../models/Connection.ts';
 import MergeRequestAccountConnection, {
   MergeRequestAccountConnectionDataType,
 } from '../../models/connections/MergeRequestAccountConnection.ts';
+import Label from '../../types/supportingTypes/Label.ts';
 
 const log = debug('idx:its:github');
 
@@ -77,7 +78,7 @@ GitHubITSIndexer.prototype.index = async function () {
                 closedAt: issue.closedAt,
                 createdAt: issue.createdAt,
                 updatedAt: issue.updatedAt,
-                labels: issue.labels.nodes,
+                labels: issue.labels.nodes.map((l: Label) => l.name),
                 milestone: issue.milestone,
                 webUrl: issue.url,
                 mentions: issue.timelineItems.nodes.map((event: ItsIssueEvent) => {
