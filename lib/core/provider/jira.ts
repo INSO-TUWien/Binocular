@@ -4,13 +4,15 @@ import debug from 'debug';
 import Paginator from '../../paginator';
 import urlJoin from 'url-join';
 import {
-  JiraCommitsFullDetails,
   JiraCommitsDetails,
+  JiraCommitsFullDetails,
   JiraCommitsSummary,
   JiraDevelopmentSummary,
+  JiraFullAuthor,
   JiraPullRequestDetails,
   JiraPullRequestsFullDetails,
   JiraPullRequestsSummary,
+  JiraUserEndpoint,
 } from '../../types/jiraTypes';
 
 const log = debug('jira');
@@ -18,6 +20,7 @@ const log = debug('jira');
 class Jira {
   private readonly API_VERSION = '2';
   private baseUrl;
+  private applicationbaseUrl;
   private count!: number;
   private privateToken;
   private requestTimeout;
@@ -26,6 +29,7 @@ class Jira {
 
   constructor(options: { baseUrl: string; email?: string | undefined; privateToken: string; requestTimeout: number }) {
     this.baseUrl = urlJoin(options.baseUrl, `/rest/api/${this.API_VERSION}/`);
+    this.applicationbaseUrl = options.baseUrl;
     this.privateToken = options.privateToken;
     this.usermail = options.email;
     this.requestTimeout = options.requestTimeout;
@@ -179,13 +183,62 @@ class Jira {
         if (!successful) {
           log('different response code: ' + response.status + '\n' + data);
         }
-        if (!isNonOfficial) {
+        if (path.includes('user?accountId=')) {
+          return data;
+        } else if (!isNonOfficial) {
           return { headers: response.headers, body: data };
         } else if (path.includes('detail')) {
           return data.detail;
         } else {
           return data.summary;
         }
+      });
+    });
+  }
+
+  private requestTeamMembers(path: string) {
+    log('team(%o)', path);
+    const credentials = this.usermail + ':' + this.privateToken;
+    const header = {
+      method: 'POST',
+      headers: {
+        Authorization: `Basic ${Buffer.from(credentials).toString('base64')}`,
+        Accept: 'application/json',
+      },
+      timeout: this.requestTimeout || 3000,
+    };
+
+    return fetch(path, header).then((response) => {
+      const successful = response.ok;
+
+      return response.json().then((data) => {
+        if (!successful) {
+          log('different response code: ' + response.status + '\n' + data);
+        }
+        return data.results;
+      });
+    });
+  }
+
+  getTeamMembers(organizationId: string | undefined, teamsId: string | undefined, id: JiraFullAuthor | null) {
+    let assigneeMissing = true;
+    if (!organizationId || !teamsId) {
+      return Promise.resolve({ teamsAssignees: [], assigneeMissing: assigneeMissing });
+    }
+
+    const teamMembersUrl = `${this.applicationbaseUrl}gateway/api/public/teams/v1/org/${organizationId}/teams/${teamsId}/members`;
+
+    return this.requestTeamMembers(teamMembersUrl).then((response: [{ accountId: string }]) => {
+      const membersPromises: any[] = response.map((memberId) => {
+        if (id && id !== memberId) {
+          return this.request(`/user?accountId=${memberId.accountId}`);
+        } else {
+          assigneeMissing = false;
+        }
+      });
+
+      return Promise.all(membersPromises).then((assignees: JiraUserEndpoint[]) => {
+        return { teamsAssignees: assignees, assigneeMissing: assigneeMissing };
       });
     });
   }
