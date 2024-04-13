@@ -58,6 +58,16 @@ export function promptUserAndSaveConfig() {
       },
       {
         type: 'input',
+        name: 'jiraOrganizationId',
+        message: 'Only if your organization is using the teams field for issues: Enter the organization ID:',
+      },
+      {
+        type: 'input',
+        name: 'jiraTeamsFieldId',
+        message: 'Only if your organization is using the teams field for issues: Enter the ID of the teams field:',
+      },
+      {
+        type: 'input',
         name: 'arangoHost',
         message: 'Enter Arango Host:',
         default: '127.0.0.1',
@@ -118,6 +128,8 @@ export function promptUserAndSaveConfig() {
           username: answers.jiraMail,
           project: answers.jiraProject,
           token: answers.jiraToken,
+          organizationId: answers.jiraOrganizationId,
+          teamsId: answers.jiraTeamsFieldId,
         },
         arango: {
           host: answers.arangoHost,

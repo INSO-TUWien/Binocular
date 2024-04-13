@@ -144,6 +144,13 @@ export interface JiraFullAuthor {
   id: string | null;
 }
 
+export interface JiraUserEndpoint extends JiraFullAuthor {
+  locale: string;
+  groups: any;
+  applicationRoles: any;
+  expand: string;
+}
+
 export interface JiraComment {
   self: string;
   id: string;
