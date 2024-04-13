@@ -3,4 +3,6 @@ export interface JiraConfigType {
   username: string;
   project: string;
   token: string;
+  organizationId: string | undefined;
+  teamsId: string | undefined;
 }
