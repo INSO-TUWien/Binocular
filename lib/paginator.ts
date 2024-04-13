@@ -71,7 +71,7 @@ Paginator.prototype.execute = function (perPage = this.defaultPageSize) {
 };
 
 Paginator.prototype.$depaginate = function (perPage: number, countHolder: { count: number }, page = 1, processed = 0, i = 0) {
-  if (this.its && i === 0) {
+  if (this.its === 'jira' && i === 0) {
     page--;
   }
   return this.getPage(page, perPage)
@@ -81,20 +81,11 @@ Paginator.prototype.$depaginate = function (perPage: number, countHolder: { coun
     })
     .then((page: any) => this.getItems(page))
     .then((items: any[]) => {
-      if (this.its === 'jira') {
-        log(`Got ${items.length} items from start_at ${page}`);
-      }
       if (items.length === 0) {
-        if (this.its === 'jira') {
-          log(`Reached premature end of data at start_at #${page}`);
-        }
         return false;
       }
 
       return items.map((item: any) => {
-        if (this.its === 'jira') {
-          log(`Processing start_at[${processed}]`);
-        }
         processed++;
         if (processed <= countHolder.count) {
           return this.emit('item', item);
@@ -104,12 +95,9 @@ Paginator.prototype.$depaginate = function (perPage: number, countHolder: { coun
       });
     })
     .then((stop: boolean) => {
-      if (this.its === 'jira') {
-        log(`Finished start_at #${page}, total items processed: ${processed}/${countHolder.count}`);
-      }
       if (stop !== false && processed < countHolder.count && !this.its) {
         return this.$depaginate(perPage, countHolder, page + 1, processed);
-      } else if (stop !== false && processed < countHolder.count && this.its) {
+      } else if (stop !== false && processed < countHolder.count && this.its === 'jira') {
         i++;
         return this.$depaginate(perPage, countHolder, this.defaultPageSize * i, processed, i);
       }
