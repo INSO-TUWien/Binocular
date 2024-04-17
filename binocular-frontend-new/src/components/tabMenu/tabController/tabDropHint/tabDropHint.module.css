@@ -1,0 +1,60 @@
+.dropZone {
+  position: absolute;
+  border-radius: 5px;
+  background: repeating-linear-gradient(45deg, #007AFF, white 2px, white 8px, #007AFF 10px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.dropZoneTop {
+  top: 0;
+  left: 0;
+}
+
+.dropZoneRight {
+  right: 0;
+  top: 2rem;
+}
+
+.dropZoneBottom {
+  bottom: 0;
+  left: 0;
+}
+
+.dropZoneLeft {
+  left: 0;
+  top: 2rem;
+}
+
+.dropZoneLeft > div {
+  rotate: 180deg;
+}
+
+.dropZoneHorizontal {
+  width: 100%;
+  height: 2rem;
+}
+
+.dropZoneVertical {
+  height: calc(100% - 2rem);
+  width: 2rem;
+}
+
+.dropZoneHorizontal > div {
+  background: #007AFF;
+  color: white;
+  padding: 0.25rem;
+  border-radius: 1rem;
+}
+
+.dropZoneVertical > div {
+  background: #007AFF;
+  color: white;
+  padding: 0.25rem;
+  border-radius: 1rem;
+  writing-mode: vertical-lr;
+  text-orientation: mixed;
+}
+
+/*# sourceMappingURL=tabDropHint.module.css.map */

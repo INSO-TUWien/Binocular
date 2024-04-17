@@ -1,0 +1,100 @@
+.tabHandel {
+  position: relative;
+  height: calc(2rem - 1px - 5px);
+  border: 1px solid #CCCCCC;
+  border-color: transparent;
+  line-height: calc(2rem - 1px);
+  padding: 0 1rem;
+  margin: 0 0.25rem;
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  cursor: pointer;
+}
+
+.tabHandelVertical {
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  width: calc(2rem - 1px - 5px);
+  height: auto;
+  margin: 0.25rem 0;
+  padding: 1rem 0;
+}
+
+.tabHandelSelectedTop {
+  border-radius: 5px 5px 0 0;
+  border-color: #CCCCCC;
+  border-bottom-color: transparent;
+  box-shadow: 0 0 10px #CCCCCC;
+  background: white;
+}
+
+.tabHandelSelectedVertical {
+  border-radius: 0 5px 5px 0;
+  border-color: #CCCCCC;
+  border-left-color: transparent;
+  box-shadow: 0 0 10px #CCCCCC;
+  background: white;
+}
+
+.tabHandelSelectedBottom {
+  border-radius: 0 0 5px 5px;
+  border-color: #CCCCCC;
+  border-top-color: transparent;
+  box-shadow: 0 0 10px #CCCCCC;
+  background: white;
+}
+
+.tabHandelSelectedTop:after {
+  content: "";
+  background: white;
+  width: 100%;
+  height: 1rem;
+  position: absolute;
+  bottom: -1rem;
+  left: 0;
+}
+
+.tabHandelSelectedVertical:after {
+  content: "";
+  background: white;
+  height: 100%;
+  width: 1rem;
+  position: absolute;
+  left: -1rem;
+  top: 0;
+}
+
+.tabHandelSelectedBottom:after {
+  content: "";
+  background: white;
+  width: 100%;
+  height: 1rem;
+  position: absolute;
+  top: -1rem;
+  left: 0;
+}
+
+.tabHandelSwitch {
+  color: transparent;
+  background: transparent;
+  border-color: transparent;
+  box-shadow: none;
+}
+
+.tabHandelSwitch:after {
+  content: url("../../../assets/swap_horizontal_white.svg");
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: absolute;
+  background-color: #007AFF;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 5px;
+  line-height: 100%;
+}
+
+/*# sourceMappingURL=tabHandle.module.css.map */

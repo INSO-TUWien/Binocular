@@ -6,7 +6,8 @@ module.exports = {
     'plugin:@typescript-eslint/recommended-type-checked',
     'plugin:react-hooks/recommended',
     'plugin:react/recommended',
-    'plugin:react/jsx-runtime'
+    'plugin:react/jsx-runtime',
+    'plugin:prettier/recommended'
   ],
   ignorePatterns: ['dist', '.eslintrc.cjs'],
   parser: '@typescript-eslint/parser',
@@ -16,6 +17,14 @@ module.exports = {
       'warn',
       { allowConstantExport: true },
     ],
+    'prettier/prettier':[
+      'error',
+      {
+        singleQuote: true,
+        printWidth: 140,
+        jsxBracketSameLine: true
+      },
+      ]
   },
   parserOptions: {
     ecmaVersion: 'latest',

@@ -1,0 +1,27 @@
+.statusBarSeparatorHorizontal {
+  height: 80%;
+  width: 2px;
+  background: darkgray;
+  display: inline-block;
+  margin: 0 2rem;
+  rotate: 90deg;
+}
+
+.statusBarSeparatorVertical {
+  height: 80%;
+  width: 2px;
+  background: darkgray;
+  display: inline-block;
+  margin: 0 1rem;
+}
+
+.statusBarSeparatorDiagonal {
+  height: 80%;
+  width: 2px;
+  background: darkgray;
+  display: inline-block;
+  margin: 0 1rem;
+  rotate: 20deg;
+}
+
+/*# sourceMappingURL=statusBarSeparator.module.css.map */
