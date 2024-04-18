@@ -2,8 +2,9 @@
   position: relative;
   width: 100%;
   height: 100%;
-  background: whitesmoke;
-  border: 1px solid #CCCCCC;
+  @apply bg-base-200;
+  border: 1px solid;
+  @apply border-base-300;
   box-shadow: 0 0 10px #CCCCCC;
   display: flex;
   justify-content: left;

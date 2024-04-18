@@ -1,4 +1,7 @@
 @import './variables.scss';
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 #root{
   background: $bg-color-primary;

@@ -6,6 +6,7 @@
   position: relative;
   height: calc($tab-bar-thickness - $border-default-width - 5px);
   border: $border-default;
+  @apply border-base-300;
   border-color: transparent;
   line-height: calc($tab-bar-thickness - $border-default-width);
   padding: 0 1rem;
@@ -27,31 +28,31 @@
 
 .tabHandelSelectedTop{
   border-radius: $border-radius-default $border-radius-default 0 0;
-  border-color: $border-default-color;
+  @apply border-base-300;
   border-bottom-color: transparent;
   box-shadow: $shadow-default;
-  background: white;
+  @apply bg-base-100;
 }
 
 .tabHandelSelectedVertical{
   border-radius: 0 $border-radius-default $border-radius-default 0;
-  border-color: $border-default-color;
+  @apply border-base-300;
   border-left-color: transparent;
   box-shadow: $shadow-default;
-  background: white;
+  @apply bg-base-100;
 }
 
 .tabHandelSelectedBottom{
   border-radius: 0 0 $border-radius-default $border-radius-default;
-  border-color: $border-default-color;
+  @apply border-base-300;
   border-top-color: transparent;
   box-shadow: $shadow-default;
-  background: white;
+  @apply bg-base-100;
 }
 
 .tabHandelSelectedTop:after{
   content:'';
-  background: white;
+  @apply bg-base-100;
   width: 100%;
   height: 1rem;
   position: absolute;
@@ -61,7 +62,7 @@
 
 .tabHandelSelectedVertical:after{
   content:'';
-  background: white;
+  @apply bg-base-100;
   height: 100%;
   width: 1rem;
   position: absolute;
@@ -71,7 +72,7 @@
 
 .tabHandelSelectedBottom:after{
   content:'';
-  background: white;
+  @apply bg-base-100;
   width: 100%;
   height: 1rem;
   position: absolute;
@@ -91,7 +92,7 @@
   justify-content: center;
   align-items: center;
   position: absolute;
-  background-color: $highlight-color-primary;
+  @apply bg-accent;
   top: 0;
   left: 0;
   width: 100%;

@@ -14,7 +14,7 @@
 }
 
 .appName{
-  color: $highlight-color-primary;
+  @apply text-accent;
   height: calc($tab-bar-thickness - $border-default-width - 5px);
   padding: 0 1rem;
   margin: 0 0 0 .5rem;
@@ -75,48 +75,52 @@
 
 .tabContentBackgroundTop{
   position: absolute;
-  background: white;
+  @apply bg-base-100;
   top: $tab-bar-thickness;
   left: 3px;
   height: $tab-content-thickness-horizontal;
   width: calc(100% - 8px);
   border: $border-default;
+  @apply border-base-300;
   border-radius: $border-radius-default;
   box-shadow: $shadow-default;
 }
 
 .tabContentBackgroundRight{
   position: absolute;
-  background: white;
+  @apply bg-base-100;
   top: $tab-bar-thickness;
   right: $tab-bar-thickness;
   width: $tab-content-thickness-vertical;
   height: calc(100% - 4px);
   border: $border-default;
+  @apply border-base-300;
   border-radius: $border-radius-default;
   box-shadow: $shadow-default;
 }
 
 .tabContentBackgroundBottom{
   position: absolute;
-  background: white;
+  @apply bg-base-100;
   bottom: $tab-bar-thickness;
   left: 3px;
   height: $tab-content-thickness-horizontal;
   width: calc(100% - 8px);
   border: $border-default;
+  @apply border-base-300;
   border-radius: $border-radius-default;
   box-shadow: $shadow-default;
 }
 
 .tabContentBackgroundLeft{
   position: absolute;
-  background: white;
+  @apply bg-base-100;
   top: $tab-bar-thickness;
   left: $tab-bar-thickness;
   width: $tab-content-thickness-vertical;
   height: calc(100% - 4px);
   border: $border-default;
+  @apply border-base-300;
   border-radius: $border-radius-default;
   box-shadow: $shadow-default;
 }

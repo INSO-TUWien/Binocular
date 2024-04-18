@@ -4,8 +4,9 @@
   position: relative;
   width: 100%;
   height: 100%;
-  background: whitesmoke;
+  @apply bg-base-200;
   border: $border-default;
+  @apply border-base-300;
   box-shadow: $shadow-default;
   display: flex;
   justify-content: left;

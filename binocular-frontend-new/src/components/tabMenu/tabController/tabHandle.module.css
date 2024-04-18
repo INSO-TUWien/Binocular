@@ -1,7 +1,8 @@
 .tabHandel {
   position: relative;
   height: calc(2rem - 1px - 5px);
-  border: 1px solid #CCCCCC;
+  border: 1px solid;
+  @apply border-base-300;
   border-color: transparent;
   line-height: calc(2rem - 1px);
   padding: 0 1rem;
@@ -23,31 +24,31 @@
 
 .tabHandelSelectedTop {
   border-radius: 5px 5px 0 0;
-  border-color: #CCCCCC;
+  @apply border-base-300;
   border-bottom-color: transparent;
   box-shadow: 0 0 10px #CCCCCC;
-  background: white;
+  @apply bg-base-100;
 }
 
 .tabHandelSelectedVertical {
   border-radius: 0 5px 5px 0;
-  border-color: #CCCCCC;
+  @apply border-base-300;
   border-left-color: transparent;
   box-shadow: 0 0 10px #CCCCCC;
-  background: white;
+  @apply bg-base-100;
 }
 
 .tabHandelSelectedBottom {
   border-radius: 0 0 5px 5px;
-  border-color: #CCCCCC;
+  @apply border-base-300;
   border-top-color: transparent;
   box-shadow: 0 0 10px #CCCCCC;
-  background: white;
+  @apply bg-base-100;
 }
 
 .tabHandelSelectedTop:after {
   content: "";
-  background: white;
+  @apply bg-base-100;
   width: 100%;
   height: 1rem;
   position: absolute;
@@ -57,7 +58,7 @@
 
 .tabHandelSelectedVertical:after {
   content: "";
-  background: white;
+  @apply bg-base-100;
   height: 100%;
   width: 1rem;
   position: absolute;
@@ -67,7 +68,7 @@
 
 .tabHandelSelectedBottom:after {
   content: "";
-  background: white;
+  @apply bg-base-100;
   width: 100%;
   height: 1rem;
   position: absolute;
@@ -88,7 +89,7 @@
   justify-content: center;
   align-items: center;
   position: absolute;
-  background-color: #007AFF;
+  @apply bg-accent;
   top: 0;
   left: 0;
   width: 100%;
