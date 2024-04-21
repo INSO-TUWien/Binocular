@@ -48,6 +48,12 @@ export function promptUserAndSaveConfig() {
       },
       {
         type: 'input',
+        name: 'jiraJql',
+        message:
+          'Enter JIRA JQL search string (note: it has to use the same project as in the previous field) [only necessary for JIRA Indexer]:',
+      },
+      {
+        type: 'input',
         name: 'jiraMail',
         message: 'Enter JIRA E-Mail [only necessary for JIRA Indexer]:',
       },
@@ -127,6 +133,7 @@ export function promptUserAndSaveConfig() {
           url: answers.jiraUrl,
           username: answers.jiraMail,
           project: answers.jiraProject,
+          jql: answers.jiraJql,
           token: answers.jiraToken,
           organizationId: answers.jiraOrganizationId,
           teamsId: answers.jiraTeamsFieldId,

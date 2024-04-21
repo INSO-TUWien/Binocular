@@ -28,7 +28,8 @@ class JiraITSIndexer {
   private repo;
   private stopping;
   private reporter;
-  private jiraProject!: string;
+  private project!: string;
+  private searchString: string | undefined;
   private organizationId: string | undefined;
   private teamsId: string | undefined;
   private jira!: Jira;
@@ -55,7 +56,9 @@ class JiraITSIndexer {
       privateToken: config?.token,
       requestTimeout: 40000,
     };
-    this.jiraProject = config.project;
+    this.project = config.project;
+    this.searchString = config?.jql;
+
     this.jira = new Jira(options);
     this.organizationId = config.organizationId;
     this.teamsId = config.teamsId;
@@ -66,9 +69,11 @@ class JiraITSIndexer {
     let omitCount = 0;
     let persistCount = 0;
 
+    const issueSearchTerm = this.searchString ? this.searchString : `project = ${this.project}`;
+
     return Promise.all([
       this.jira
-        .getIssuesWithJQL('project=' + this.jiraProject)
+        .getIssuesWithJQL(issueSearchTerm)
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
         .on('count', (count: number) => this.reporter.setIssueCount(count))
@@ -283,7 +288,7 @@ class JiraITSIndexer {
             return Promise.all([mergeRequestDetailsPromise, issuePromise]);
           });
         }),
-      this.jira.getProjectVersions(this.jiraProject).each((projectVersion: JiraVersion) => {
+      this.jira.getProjectVersions(this.project).each((projectVersion: JiraVersion) => {
         return (
           // TODO: Currently necessary because the implementation of the Models isn't really compatible with typescript.
           // eslint-disable-next-line @typescript-eslint/ban-ts-comment
