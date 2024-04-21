@@ -4,7 +4,7 @@ import _ from 'lodash';
 import Model from '../Model';
 import MilestoneDto from '../../types/dtos/MilestoneDto';
 
-interface MilestoneDataType {
+export interface MilestoneDataType {
   id: string;
   iid: number;
   title: string;

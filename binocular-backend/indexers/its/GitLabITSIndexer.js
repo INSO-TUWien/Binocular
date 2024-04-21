@@ -9,6 +9,8 @@ import BaseGitLabIndexer from '../BaseGitLabIndexer';
 import Account from '../../models/models/Account';
 import IssueAccountConnection from '../../models/connections/IssueAccountConnection';
 import MergeRequestAccountConnection from '../../models/connections/MergeRequestAccountConnection';
+import IssueMilestoneConnection from '../../models/connections/IssueMilestoneConnection';
+import MergeRequestMilestoneConnection from '../../models/connections/MergeRequestMilestoneConnection';
 
 const log = debug('idx:its:gitlab');
 
@@ -39,8 +41,45 @@ class GitLabITSIndexer extends BaseGitLabIndexer {
     let persistMergeRequestCount = 0;
     let omitMilestoneCount = 0;
     let persistMilestoneCount = 0;
-    return this.getProject()
-      .then((project) => {
+
+    // get the gitlab project
+    const project = await this.getProject();
+
+    // STEP 1: save all milestones
+    const milestonePromises = await this.gitlab.getMileStones(project.id).each(async (milestone) => {
+      let entry;
+      const existingMilestone = await Milestone.findOneByExample({ id: milestone.id });
+      const mileStoneData = _.merge(_.mapKeys(milestone, (v, k) => _.camelCase(k)));
+
+      if (!existingMilestone || new Date(existingMilestone.updatedAt).getTime() < new Date(milestone.updated_at).getTime()) {
+        log('Processing mergeRequest #' + milestone.iid);
+        entry = (await Milestone.persist(mileStoneData))[0];
+        persistMilestoneCount++;
+      } else {
+        _.assign(existingMilestone, mileStoneData).then(() => omitMilestoneCount++);
+        entry = await existingMilestone.save({ ignoreUnknownAttributes: true });
+      }
+
+      this.reporter.finishMilestone();
+
+      // return the milestone entry (either the newly persisted one or the old one)
+      return entry;
+    });
+
+    return Promise.all(milestonePromises)
+      .then((entries) => {
+        //TODO check if this also works when milestones already exist!
+
+        // now we have the entries for all milestones.
+        // store this in a map so we can access them by their iid
+        const milestonesByIid = {};
+        entries.map((e) => {
+          const ms = e[0];
+          milestonesByIid[ms.data.iid] = ms;
+        });
+
+        // STEP 2: persist issues and merge requests
+        // we use the milestone entries to connect issues and merge requests to their respective milestones.
         return Promise.all([
           this.gitlab
             .getIssues(project.id)
@@ -81,6 +120,9 @@ class GitLabITSIndexer extends BaseGitLabIndexer {
                     },
                   );
 
+                  // store the milestone this issue belongs to separately
+                  const milestoneIid = issueData.milestone?.iid;
+
                   // only keep properties as defined in the IssueDto interface
                   issueData = _.pick(issueData, [
                     'id',
@@ -91,7 +133,6 @@ class GitLabITSIndexer extends BaseGitLabIndexer {
                     'closedAt',
                     'updatedAt',
                     'labels',
-                    'milestone',
                     'state',
                     'webUrl',
                     'projectId',
@@ -99,6 +140,7 @@ class GitLabITSIndexer extends BaseGitLabIndexer {
                     'mentions',
                     'notes',
                   ]);
+
                   // if this is a new issue, persist it
                   if (!existingIssue) {
                     issueEntry = (await Issue.persist(issueData))[0];
@@ -107,6 +149,11 @@ class GitLabITSIndexer extends BaseGitLabIndexer {
                     _.assign(existingIssue, issueData);
                     issueEntry = (await existingIssue.save({ ignoreUnknownAttributes: true }))[0];
                   }
+
+                  if (milestoneIid !== null && milestoneIid !== undefined) {
+                    await this.connectIssuesToMilestones(IssueMilestoneConnection, issueEntry, milestonesByIid[milestoneIid]);
+                  }
+
                   persistCount++;
                 } else {
                   log('Skipping issue #' + issue.iid);
@@ -142,6 +189,10 @@ class GitLabITSIndexer extends BaseGitLabIndexer {
                         notes,
                       },
                     );
+
+                    // store the milestone this issue belongs to separately
+                    const milestoneIid = mergeRequestData.milestone?.iid;
+
                     // only keep properties from MergeRequestDto
                     mergeRequestData = _.pick(mergeRequestData, [
                       'id',
@@ -152,7 +203,6 @@ class GitLabITSIndexer extends BaseGitLabIndexer {
                       'closedAt',
                       'updatedAt',
                       'labels',
-                      'milestone',
                       'state',
                       'webUrl',
                       'projectId',
@@ -165,6 +215,9 @@ class GitLabITSIndexer extends BaseGitLabIndexer {
                       _.assign(existingMergeRequest, mergeRequestData);
                       mrEntry = (await existingMergeRequest.save({ ignoreUnknownAttributes: true }))[0];
                     }
+                    if (milestoneIid !== null && milestoneIid !== undefined) {
+                      await this.connectIssuesToMilestones(MergeRequestMilestoneConnection, mrEntry, milestonesByIid[milestoneIid]);
+                    }
                   })
                   .then(() => persistMergeRequestCount++);
               } else {
@@ -175,27 +228,10 @@ class GitLabITSIndexer extends BaseGitLabIndexer {
               this.reporter.finishMergeRequest();
             }
           }),
-          this.gitlab.getMileStones(project.id).each(
-            function (milestone) {
-              return Milestone.findOneByExample({ id: milestone.id })
-                .then((existingMilestone) => {
-                  const mileStoneData = _.merge(_.mapKeys(milestone, (v, k) => _.camelCase(k)));
-                  if (!existingMilestone || new Date(existingMilestone.updatedAt).getTime() < new Date(milestone.updated_at).getTime()) {
-                    log('Processing mergeRequest #' + milestone.iid);
-                    return Milestone.persist(mileStoneData).then(() => persistMilestoneCount++);
-                  } else {
-                    _.assign(existingMilestone, mileStoneData).then(() => omitMilestoneCount++);
-                    return existingMilestone.save({ ignoreUnknownAttributes: true });
-                  }
-                })
-                .then(() => this.reporter.finishMilestone());
-            }.bind(this),
-          ),
-        ]).then((resp) => resp);
+        ]);
       })
-      .then(function (resp) {
+      .then(() => {
         log('Persisted %d new issues (%d already present)', persistCount, omitCount);
-        return Promise.all(resp.flat());
       });
   }
 
@@ -244,6 +280,13 @@ class GitLabITSIndexer extends BaseGitLabIndexer {
         await conn.ensureWithData({ role: 'assignees' }, { from: issue, to: ae });
       }),
     );
+  };
+
+  connectIssuesToMilestones = async (conn, issue, milestone) => {
+    if (issue === null || issue === undefined || milestone === null || milestone === undefined) {
+      return;
+    }
+    await conn.ensure({}, { from: issue, to: milestone });
   };
 }
 

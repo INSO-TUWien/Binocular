@@ -7,6 +7,7 @@ const aql = arangodb.aql;
 const issuesToStakeholders = db._collection('issues-stakeholders');
 const issuesToAccounts = db._collection('issues-accounts')
 const issuesToCommits = db._collection('issues-commits');
+const issuesToMilestones = db._collection('issues-milestones');
 const paginated = require('./paginated.js');
 const Timestamp = require('./Timestamp.js');
 
@@ -142,6 +143,23 @@ module.exports = new gql.GraphQLObjectType({
           return query;
         },
       }),
+      milestone: {
+        type: require('./milestone.js'),
+        description: 'The milestone this issue belongs to',
+        resolve(issue /*, args*/) {
+          return db
+            ._query(
+              aql`
+              FOR
+              milestone, edge
+              IN
+              OUTBOUND ${issue} ${issuesToMilestones}
+              RETURN milestone
+              `
+            )
+            .toArray()[0];
+        },
+      },
       notes: {
         type: new gql.GraphQLList(require('./gitlabNote.js')),
         description: 'Notes attached to the issue',

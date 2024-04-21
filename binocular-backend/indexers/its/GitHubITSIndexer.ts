@@ -68,6 +68,8 @@ GitHubITSIndexer.prototype.index = async function () {
           if (!existingIssue || new Date(existingIssue.data.updatedAt).getTime() < new Date(issue.updatedAt).getTime()) {
             log(`Processing ${type} #` + issue.iid);
 
+            // Note: contrary to GitLab, milestones are not supported yet by the GitHub indexer.
+
             return targetCollection
               .persist({
                 id: issue.id.toString(),
@@ -79,7 +81,6 @@ GitHubITSIndexer.prototype.index = async function () {
                 createdAt: issue.createdAt,
                 updatedAt: issue.updatedAt,
                 labels: issue.labels.nodes.map((l: Label) => l.name),
-                milestone: issue.milestone,
                 webUrl: issue.url,
                 mentions: issue.timelineItems.nodes.map((event: ItsIssueEvent) => {
                   return {

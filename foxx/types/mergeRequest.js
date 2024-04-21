@@ -6,6 +6,8 @@ const Timestamp = require('./Timestamp');
 const db = arangodb.db;
 const aql = arangodb.aql;
 const mergeRequestsToAccounts = db._collection('mergeRequests-accounts')
+const mergeRequestsToMilestones = db._collection('mergeRequests-milestones');
+
 
 module.exports = new gql.GraphQLObjectType({
   name: 'mergeRequest',
@@ -101,6 +103,23 @@ module.exports = new gql.GraphQLObjectType({
       createdAt: {
         type: Timestamp,
         description: 'Creation date of the mergeRequest',
+      },
+      milestone: {
+        type: require('./milestone.js'),
+        description: 'The milestone this issue belongs to',
+        resolve(mr /*, args*/) {
+          return db
+            ._query(
+              aql`
+              FOR
+              milestone, edge
+              IN
+              OUTBOUND ${mr} ${mergeRequestsToMilestones}
+              RETURN milestone
+              `
+            )
+            .toArray()[0];
+        },
       },
       notes: {
         type: new gql.GraphQLList(require('./gitlabNote.js')),

@@ -75,6 +75,8 @@ import chalk from 'chalk';
 import Account from './models/models/Account.ts';
 import IssueAccountConnection from './models/connections/IssueAccountConnection.ts';
 import MergeRequestAccountConnection from './models/connections/MergeRequestAccountConnection.ts';
+import IssueMilestoneConnection from './models/connections/IssueMilestoneConnection.ts';
+import MergeRequestMilestoneConnection from './models/connections/MergeRequestMilestoneConnection.ts';
 
 cli.parse(
   (targetPath, options) => {
@@ -597,6 +599,8 @@ function runBackend() {
           CommitFileStakeholderConnection.ensureCollection(),
           IssueAccountConnection.ensureCollection(),
           MergeRequestAccountConnection.ensureCollection(),
+          IssueMilestoneConnection.ensureCollection(),
+          MergeRequestMilestoneConnection.ensureCollection(),
         ]);
       });
   }
