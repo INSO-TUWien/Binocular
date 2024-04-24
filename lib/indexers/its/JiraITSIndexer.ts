@@ -64,6 +64,10 @@ class JiraITSIndexer {
     this.teamsId = config.teamsId;
   }
 
+  setJira(jira: Jira) {
+    this.jira = jira;
+  }
+
   index() {
     log('index()');
     let omitCount = 0;
