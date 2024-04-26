@@ -38,8 +38,7 @@ export default class Commits {
   static getCommitDataForSha(db, relations, sha) {
     //dont use findCommit here since we need to fetch all commits anyway in order to add history data
     return findAllCommits(db, relations).then((res) => {
-      const result = res.docs.filter((c) => c.sha === sha)[0];
-      return result;
+      return res.docs.filter((c) => c.sha === sha)[0];
     });
   }
 
@@ -61,11 +60,11 @@ export default class Commits {
       for (const commit of commits) {
         commit.files = {};
 
-        const relevantConnections = fileCommitConnections.filter((fCC) => fCC.to === commit._id);
+        const relevantConnections = fileCommitConnections.filter((fCC) => fCC.from === commit._id);
 
         //concurrently
         commit.files.data = relevantConnections.map((connection) => {
-          const resultFile = allFiles.filter((file) => file._id === connection.from);
+          const resultFile = allFiles.filter((file) => file._id === connection.to);
           if (resultFile.length > 0) {
             const file = resultFile[0];
             const res = { file: {} };
@@ -100,10 +99,10 @@ export default class Commits {
 
       for (const commit of commits) {
         commit.files = {};
-        const relevantConnections = binarySearchArray(collections.fileCommitConnections, commit._id, 'to');
+        const relevantConnections = binarySearchArray(collections.fileCommitConnections, commit._id, 'from');
 
         commit.files.data = relevantConnections.map((connection) => {
-          const file = binarySearch(collections.files, connection.from, '_id');
+          const file = binarySearch(collections.files, connection.to, '_id');
           if (file !== null) {
             const res = { file: {} };
             res.file.path = file.path;
@@ -149,24 +148,24 @@ export default class Commits {
 
       for (const file of files) {
         //get the connections from the current file to commits
-        const relevantConnections = fileCommitConnections.filter((fCC) => fCC.from === file._id);
+        const relevantConnections = fileCommitConnections.filter((fCC) => fCC.to === file._id);
         for (const connection of relevantConnections) {
           //if we also want file objects in our commit objects,
           // we have to push the file object to an intermediary array to add to the commits later
           if (!omitFiles) {
             let fileArray = [];
-            if (filesForCommits[connection.to] !== null && filesForCommits[connection.to] !== undefined) {
-              fileArray = filesForCommits[connection.to];
+            if (filesForCommits[connection.from] !== null && filesForCommits[connection.from] !== undefined) {
+              fileArray = filesForCommits[connection.from];
             }
             fileArray.push({ file: { path: file.path } });
-            filesForCommits[connection.to] = fileArray;
+            filesForCommits[connection.from] = fileArray;
           }
 
           //if this commit was not already connected to another file, push it to the array
-          if (resultCommitHashes.includes(connection.to)) {
+          if (resultCommitHashes.includes(connection.from)) {
             continue;
           }
-          resultCommitHashes.push(connection.to);
+          resultCommitHashes.push(connection.from);
         }
       }
 
@@ -208,10 +207,10 @@ export default class Commits {
       const file = resFile.docs[0];
       const allCommits = (await findAllCommits(db, relations)).docs;
 
-      const fileCommitConnections = (await findFileCommitConnections(relations)).docs.filter((fCC) => fCC.from === file._id);
+      const fileCommitConnections = (await findFileCommitConnections(relations)).docs.filter((fCC) => fCC.to === file._id);
       let commits = [];
       for (const fileCommitConnection of fileCommitConnections) {
-        const commit = allCommits.filter((c) => c._id === fileCommitConnection.to)[0];
+        const commit = allCommits.filter((c) => c._id === fileCommitConnection.from)[0];
         if (commit) {
           commit.file = { file: {} };
           commit.file.file.path = file.path;
@@ -229,9 +228,9 @@ export default class Commits {
 
   static extractOwnershipDataForCommit(commit, collections) {
     const commitResult = { sha: commit.sha, date: commit.date, files: [] };
-    const relevantConnections = binarySearchArray(collections.fileCommitConnections, commit._id, 'to');
+    const relevantConnections = binarySearchArray(collections.fileCommitConnections, commit._id, 'from');
     for (const conn of relevantConnections) {
-      const relevantFile = binarySearch(collections.files, conn.from, '_id');
+      const relevantFile = binarySearch(collections.files, conn.to, '_id');
       const fileResult = { path: relevantFile.path, action: conn.action, ownership: [] };
       const relevantOwnershipConnections = binarySearchArray(collections.fileCommitStakeholderConnections, conn._id, 'from');
 
@@ -267,7 +266,7 @@ export default class Commits {
     });
     // sort the collections, so we can use binary search later on
     files = sortByAttributeString(files, '_id');
-    fileCommitConnections = sortByAttributeString(fileCommitConnections, 'to');
+    fileCommitConnections = sortByAttributeString(fileCommitConnections, 'from');
     fileCommitStakeholderConnections = sortByAttributeString(fileCommitStakeholderConnections, 'from');
 
     // we don't expect the stakeholders collection to be very large, so we can store it in a map for quicker access

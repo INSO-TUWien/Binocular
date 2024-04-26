@@ -40,6 +40,7 @@ class GitLabITSIndexer extends BaseGitLabIndexer {
     let omitMergeRequestCount = 0;
     let persistMergeRequestCount = 0;
     let omitMilestoneCount = 0;
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     let persistMilestoneCount = 0;
 
     // get the gitlab project
@@ -68,8 +69,6 @@ class GitLabITSIndexer extends BaseGitLabIndexer {
 
     return Promise.all(milestonePromises)
       .then((entries) => {
-        //TODO check if this also works when milestones already exist!
-
         // now we have the entries for all milestones.
         // store this in a map so we can access them by their iid
         const milestonesByIid = {};
