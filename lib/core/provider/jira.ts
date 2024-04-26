@@ -38,7 +38,7 @@ class Jira {
 
   getIssuesWithJQL(jql: string) {
     log('getIssuesWithJQL(%o)', jql);
-    const jqlSearchString = `fields=*all&jql=${encodeURIComponent(jql)}&expand=changelog`;
+    const jqlSearchString = `fields=*all&jql=${jql}&expand=changelog`;
 
     return this.paginatedRequest('search?' + jqlSearchString + '&');
   }
