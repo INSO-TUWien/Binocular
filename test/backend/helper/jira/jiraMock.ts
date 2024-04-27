@@ -262,7 +262,7 @@ class JiraMock {
   }
 
   getTeamMembers() {
-    return Promise.resolve({ teamsAssignees: [], assigneeMissing: true });
+    return Promise.resolve([]);
   }
 }
 
