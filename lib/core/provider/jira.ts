@@ -220,25 +220,34 @@ class Jira {
     });
   }
 
-  getTeamMembers(organizationId: string | undefined, teamsId: string | undefined, id: JiraFullAuthor | null) {
-    let assigneeMissing = true;
+  getTeamMembers(
+    organizationId: string | undefined,
+    teamsId: string | undefined,
+    originalAssignee: JiraFullAuthor | null,
+    seenUsers: Map<string, JiraFullAuthor>
+  ) {
+    log('getTeamMembers()');
+    const retAssignees = originalAssignee ? [originalAssignee] : [];
     if (!organizationId || !teamsId) {
-      return Promise.resolve({ teamsAssignees: [], assigneeMissing: assigneeMissing });
+      return Promise.resolve(retAssignees);
     }
 
     const teamMembersUrl = `${this.applicationbaseUrl}gateway/api/public/teams/v1/org/${organizationId}/teams/${teamsId}/members`;
 
     return this.requestTeamMembers(teamMembersUrl).then((response: [{ accountId: string }]) => {
       const membersPromises: any[] = response.map((memberId) => {
-        if (id && id !== memberId) {
-          return this.request(`/user?accountId=${memberId.accountId}`);
-        } else {
-          assigneeMissing = false;
+        if (originalAssignee && originalAssignee.accountId !== memberId.accountId) {
+          const cachedUser = seenUsers.get(memberId.accountId);
+          if (!cachedUser) {
+            return this.request(`/user?accountId=${memberId.accountId}`);
+          } else {
+            retAssignees.push(cachedUser);
+          }
         }
       });
 
-      return Promise.all(membersPromises).then((assignees: JiraUserEndpoint[]) => {
-        return { teamsAssignees: assignees, assigneeMissing: assigneeMissing };
+      return Promise.all(membersPromises).then((assignees: any[]) => {
+        return assignees.concat(retAssignees);
       });
     });
   }

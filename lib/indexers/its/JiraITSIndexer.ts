@@ -39,6 +39,8 @@ class JiraITSIndexer {
   private readonly BITBUCKET_ID = 3;
   private readonly OTHER_ID = 4;
 
+  private seenUsers: Map<string, JiraFullAuthor> = new Map();
+
   constructor(repo: string, reporter: typeof ProgressReporter) {
     this.repo = repo;
     this.stopping = false;
@@ -206,75 +208,70 @@ class JiraITSIndexer {
                       .then(([worklogs, comments, changelogs]) => {
                         const notesToPersist = this.createNotesObject(worklogs, changelogs);
                         const assigneeToPersist = this.getUpdatedUserObject(issue.fields.assignee);
-                        let assignees: JiraFullAuthor[] = [];
+                        const assignees: JiraFullAuthor[] = [];
 
                         const teamsField = this.teamsId && issue.fields[this.teamsId] ? issue.fields[this.teamsId].id : null;
 
-                        return this.jira.getTeamMembers(this.organizationId, teamsField, assigneeToPersist).then((retValue) => {
-                          if (this.organizationId && this.teamsId && issue.fields[this.teamsId]) {
-                            for (const retElement of retValue.teamsAssignees) {
-                              const updated = this.getUpdatedUserObject(retElement);
-                              if (updated) {
-                                assignees.push(updated);
+                        return this.jira
+                          .getTeamMembers(this.organizationId, teamsField, assigneeToPersist, this.seenUsers)
+                          .then((retValue) => {
+                            for (const retElement of retValue) {
+                              const updatedUserObject = this.getUpdatedUserObject(retElement);
+                              if (updatedUserObject) {
+                                assignees.push(updatedUserObject);
                               }
                             }
-                            if (retValue.assigneeMissing && assigneeToPersist) {
-                              assignees.push(assigneeToPersist);
+
+                            const issueToSave = {
+                              id: issue.id,
+                              iid: parseInt(issue.id, 10),
+                              issuekey: issue.key,
+                              title: issue.fields.summary,
+                              description: issue.fields.description,
+                              state: issue.fields.status.statusCategory.key,
+                              url: issue.self,
+                              closedAt: issue.fields.resolutiondate !== null ? new Date(issue.fields.resolutiondate).toISOString() : null,
+                              createdAt: new Date(issue.fields.created).toISOString(),
+                              updatedAt: new Date(issue.fields.updated).toISOString(),
+                              labels: issue.fields.labels,
+                              links: issue.fields.issuelinks,
+                              milestone: issue.fields.fixVersions.map((version: JiraVersion) => this.createVersionObject(version)),
+                              author: this.getUpdatedUserObject(issue.fields.reporter),
+                              assignee: assigneeToPersist,
+                              assignees: assignees,
+                              upvotes: issue.fields.votes.votes,
+                              // downVotes not available
+                              dueDate: issue.fields.duedate,
+                              // confidential: issue.security-level for this normal Jira software is needed, free version does not have that
+                              weight: issue.fields?.customfield_10016 ? issue.fields?.customfield_10016 : null,
+                              webUrl: issue.self.split('/rest/api')[0] + '/browse/' + issue.key,
+                              subscribed: issue.fields.watches.watchCount,
+                              mentions: commits,
+                              notes: notesToPersist,
+
+                              // BELOW FIELDS NOT IN MODEL
+
+                              comments: comments,
+                              priority: issue.fields.priority,
+                              restrictions: issue.fields.issuerestriction,
+                              issuetype: issue.fields.issuetype,
+                              fullStatus: issue.fields.status,
+                              originalWorklog: worklogs,
+                            };
+                            if (!persistedIssue) {
+                              log('Persisting new issue');
+                              // TODO: Currently necessary because the implementation of the Models isn't really compatible with typescript.
+                              // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                              // @ts-expect-error
+                              return Issue.persist(issueToSave);
+                            } else {
+                              log('Updating persisted issue ' + issue.id);
+                              _.assign(persistedIssue, issueToSave);
+                              return persistedIssue.save({
+                                ignoreUnknownAttributes: true,
+                              });
                             }
-                          } else {
-                            assignees = assigneeToPersist ? [assigneeToPersist] : [];
-                          }
-
-                          const issueToSave = {
-                            id: issue.id,
-                            iid: parseInt(issue.id, 10),
-                            issuekey: issue.key,
-                            title: issue.fields.summary,
-                            description: issue.fields.description,
-                            state: issue.fields.status.statusCategory.key,
-                            url: issue.self,
-                            closedAt: issue.fields.resolutiondate !== null ? new Date(issue.fields.resolutiondate).toISOString() : null,
-                            createdAt: new Date(issue.fields.created).toISOString(),
-                            updatedAt: new Date(issue.fields.updated).toISOString(),
-                            labels: issue.fields.labels,
-                            links: issue.fields.issuelinks,
-                            milestone: issue.fields.fixVersions.map((version: JiraVersion) => this.createVersionObject(version)),
-                            author: this.getUpdatedUserObject(issue.fields.reporter),
-                            assignee: assigneeToPersist,
-                            assignees: assignees,
-                            upvotes: issue.fields.votes.votes,
-                            // downVotes not available
-                            dueDate: issue.fields.duedate,
-                            // confidential: issue.security-level for this normal Jira software is needed, free version does not have that
-                            weight: issue.fields?.customfield_10016 ? issue.fields?.customfield_10016 : null,
-                            webUrl: issue.self.split('/rest/api')[0] + '/browse/' + issue.key,
-                            subscribed: issue.fields.watches.watchCount,
-                            mentions: commits,
-                            notes: notesToPersist,
-
-                            // BELOW FIELDS NOT IN MODEL
-
-                            comments: comments,
-                            priority: issue.fields.priority,
-                            restrictions: issue.fields.issuerestriction,
-                            issuetype: issue.fields.issuetype,
-                            fullStatus: issue.fields.status,
-                            originalWorklog: worklogs,
-                          };
-                          if (!persistedIssue) {
-                            log('Persisting new issue');
-                            // TODO: Currently necessary because the implementation of the Models isn't really compatible with typescript.
-                            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                            // @ts-expect-error
-                            return Issue.persist(issueToSave);
-                          } else {
-                            log('Updating persisted issue ' + issue.id);
-                            _.assign(persistedIssue, issueToSave);
-                            return persistedIssue.save({
-                              ignoreUnknownAttributes: true,
-                            });
-                          }
-                        });
+                          });
                       })
                       .then(() => {
                         persistCount++;
@@ -523,6 +520,8 @@ class JiraITSIndexer {
     userObject.web_url = userObject.self.split('/rest/api')[0] + '/jira/people/' + userObject.accountId;
     userObject.login = userObject.displayName;
     userObject.id = userObject.accountId;
+
+    this.seenUsers.set(userObject.accountId, userObject);
 
     return userObject;
   }
