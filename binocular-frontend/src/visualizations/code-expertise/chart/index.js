@@ -21,13 +21,13 @@ export default () => {
   const mergedAuthors = universalSettings.mergedAuthors;
   const excludedCommits = universalSettings.excludedCommits;
   const excludeCommits = universalSettings.excludeCommits;
+  const filterMergeCommits = universalSettings.excludeMergeCommits;
 
   const rawData = useSelector((state) => state.visualizations.codeExpertise.state.data.data);
   const config = useSelector((state) => state.visualizations.codeExpertise.state.config);
   const isFetching = useSelector((state) => state.visualizations.codeExpertise.state.data.isFetching);
   const mode = useSelector((state) => state.visualizations.codeExpertise.state.config.mode);
   const activeFiles = useSelector((state) => state.visualizations.codeExpertise.state.config.activeFiles);
-  const filterMergeCommits = useSelector((state) => state.visualizations.codeExpertise.state.config.filterMergeCommits);
 
   //processed data
   const [data, setData] = useState(null);
@@ -177,7 +177,7 @@ export default () => {
       }
     }
     setData(result);
-  }, [rawData, activeFiles, excludedCommits, excludeCommits]);
+  }, [rawData, activeFiles, excludedCommits, excludeCommits, filterMergeCommits]);
 
   //calculate the data for relevant (selected) developers
   useEffect(() => {
