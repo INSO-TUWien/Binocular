@@ -183,7 +183,7 @@ export default class LocalDB {
   }
 
   static searchIssues(text) {
-    return Issues.searchIssues(db, relations, text);
+    return Issues.searchIssues(db, tripleStore, text);
   }
 
   static requestFileStructure() {
