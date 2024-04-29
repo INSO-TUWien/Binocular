@@ -686,7 +686,7 @@ function runBackend() {
         continue;
       }
       if (!build.data.sha) continue;
-      const commit = commits.filter((c: any) => c.sha === build.data.sha);
+      const commit = commits.filter((c: any) => c.data.sha === build.data.sha);
       if (commit && commit[0]) {
         await CommitBuildConnection.connect({}, { from: commit[0], to: build });
       }

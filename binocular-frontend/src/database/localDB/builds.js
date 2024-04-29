@@ -31,9 +31,9 @@ export default class Builds {
         build.stats = stats;
         build.commit = { sha: null };
 
-        const relevantConnection = commitBuildConnections.filter((cb) => cb.from === build._id);
+        const relevantConnection = commitBuildConnections.filter((cb) => cb.to === build._id);
         if (relevantConnection.length !== 0) {
-          const relevantCommit = allCommits.filter((c) => c._id === relevantConnection[0].to);
+          const relevantCommit = allCommits.filter((c) => c._id === relevantConnection[0].from);
           if (relevantCommit.length !== 0) {
             build.commit.sha = relevantCommit[0].sha;
           }
