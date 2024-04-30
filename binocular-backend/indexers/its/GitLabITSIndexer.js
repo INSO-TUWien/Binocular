@@ -58,6 +58,7 @@ class GitLabITSIndexer extends BaseGitLabIndexer {
         persistMilestoneCount++;
       } else {
         _.assign(existingMilestone, mileStoneData).then(() => omitMilestoneCount++);
+        // TODO I think this is not correct. Check for Issues/MRs too!
         entry = await existingMilestone.save({ ignoreUnknownAttributes: true });
       }
 
@@ -68,7 +69,7 @@ class GitLabITSIndexer extends BaseGitLabIndexer {
     });
 
     return Promise.all(milestonePromises)
-      .then((entries) => {
+      .then(async (entries) => {
         // now we have the entries for all milestones.
         // store this in a map so we can access them by their iid
         const milestonesByIid = {};
@@ -79,51 +80,120 @@ class GitLabITSIndexer extends BaseGitLabIndexer {
 
         // STEP 2: persist issues and merge requests
         // we use the milestone entries to connect issues and merge requests to their respective milestones.
-        return Promise.all([
-          this.gitlab
-            .getIssues(project.id)
-            .on('count', (count) => this.reporter.setIssueCount(count))
-            .collect(async (issues) => {
-              // collect all issues and process them one by one
-              for (const issue of issues) {
-                if (this.stopping) {
-                  return false;
+        // Note: this has to happen sequentially since both issues and milestones create Account entries in the db.
+        //       If we wrap this in a Promise.all, in could happen that two identical account entries are created in the database.
+        await this.gitlab
+          .getIssues(project.id)
+          .on('count', (count) => this.reporter.setIssueCount(count))
+          .collect(async (issues) => {
+            // collect all issues and process them one by one
+            for (const issue of issues) {
+              if (this.stopping) {
+                return false;
+              }
+
+              // for each issue, check if it already exists
+              const existingIssue = await Issue.findOneByExample({ id: String(issue.id) });
+
+              let issueEntry = existingIssue;
+
+              // first, persist the author/assignees associated to this issue
+              const authorEntry = (await Account.ensureGitLabAccount(issue.author))[0];
+              const assigneesEntries = [];
+              for (const assignee of issue.assignees) {
+                assigneesEntries.push((await Account.ensureGitLabAccount(assignee))[0]);
+              }
+
+              // if the issue is not yet persisted or has been updated since it has last been persisted, process it
+              if (!existingIssue || new Date(existingIssue.updatedAt).getTime() < new Date(issue.updated_at).getTime()) {
+                log('Processing issue #' + issue.iid);
+                // first, get the mentioned commits
+                const results = await this.processComments(project, issue);
+                const mentions = results[0];
+                const closedAt = results[1];
+                const notes = results[2];
+                let issueData = _.merge(
+                  _.mapKeys(issue, (v, k) => _.camelCase(k)),
+                  {
+                    mentions,
+                    closedAt,
+                    notes,
+                  },
+                );
+
+                // store the milestone this issue belongs to separately
+                const milestoneIid = issueData.milestone?.iid;
+
+                // only keep properties as defined in the IssueDto interface
+                issueData = _.pick(issueData, [
+                  'id',
+                  'iid',
+                  'title',
+                  'description',
+                  'createdAt',
+                  'closedAt',
+                  'updatedAt',
+                  'labels',
+                  'state',
+                  'webUrl',
+                  'projectId',
+                  'timeStats',
+                  'mentions',
+                  'notes',
+                ]);
+
+                // if this is a new issue, persist it
+                if (!existingIssue) {
+                  issueEntry = (await Issue.persist(issueData))[0];
+                } else {
+                  // if this issue already exists, update its fields and save
+                  _.assign(existingIssue, issueData);
+                  issueEntry = (await existingIssue.save({ ignoreUnknownAttributes: true }))[0];
                 }
 
-                // for each issue, check if it already exists
-                const existingIssue = await Issue.findOneByExample({ id: String(issue.id) });
-
-                let issueEntry = existingIssue;
-
-                // first, persist the author/assignees associated to this issue
-                const authorEntry = (await Account.ensureGitLabAccount(issue.author))[0];
-                const assigneesEntries = [];
-                for (const assignee of issue.assignees) {
-                  assigneesEntries.push((await Account.ensureGitLabAccount(assignee))[0]);
+                if (milestoneIid !== null && milestoneIid !== undefined) {
+                  await this.connectIssuesToMilestones(IssueMilestoneConnection, issueEntry, milestonesByIid[milestoneIid]);
                 }
 
-                // if the issue is not yet persisted or has been updated since it has last been persisted, process it
-                if (!existingIssue || new Date(existingIssue.updatedAt).getTime() < new Date(issue.updated_at).getTime()) {
-                  log('Processing issue #' + issue.iid);
-                  // first, get the mentioned commits
-                  const results = await this.processComments(project, issue);
-                  const mentions = results[0];
-                  const closedAt = results[1];
-                  const notes = results[2];
-                  let issueData = _.merge(
-                    _.mapKeys(issue, (v, k) => _.camelCase(k)),
+                persistCount++;
+              } else {
+                log('Skipping issue #' + issue.iid);
+                omitCount++;
+              }
+              await this.connectIssuesToUsers(IssueAccountConnection, issueEntry, authorEntry, assigneesEntries);
+              this.reporter.finishIssue();
+            }
+          });
+
+        await this.gitlab.getMergeRequests(project.id).collect(async (mergeRequests) => {
+          for (const mergeRequest of mergeRequests) {
+            const existingMergeRequest = await MergeRequest.findOneByExample({ id: String(mergeRequest.id) });
+
+            // first, persist the author/assignees associated to this MR
+            const authorEntry = (await Account.ensureGitLabAccount(mergeRequest.author))[0];
+            const assigneesEntries = [];
+            for (const assignee of mergeRequest.assignees) {
+              assigneesEntries.push((await Account.ensureGitLabAccount(assignee))[0]);
+            }
+
+            let mrEntry = existingMergeRequest;
+
+            if (!existingMergeRequest || new Date(existingMergeRequest.updatedAt).getTime() < new Date(mergeRequest.updated_at).getTime()) {
+              log('Processing mergeRequest #' + mergeRequest.iid);
+              await this.processMergeRequestNotes(project, mergeRequest)
+                .then(async (notes) => {
+                  let mergeRequestData = _.merge(
+                    _.mapKeys(mergeRequest, (v, k) => _.camelCase(k)),
                     {
-                      mentions,
-                      closedAt,
                       notes,
                     },
                   );
 
                   // store the milestone this issue belongs to separately
-                  const milestoneIid = issueData.milestone?.iid;
+                  const milestoneIid = mergeRequestData.milestone?.iid;
 
-                  // only keep properties as defined in the IssueDto interface
-                  issueData = _.pick(issueData, [
+                  // only keep properties from MergeRequestDto
+                  mergeRequestData = _.pick(mergeRequestData, [
                     'id',
                     'iid',
                     'title',
@@ -135,99 +205,28 @@ class GitLabITSIndexer extends BaseGitLabIndexer {
                     'state',
                     'webUrl',
                     'projectId',
-                    'timeStats',
                     'mentions',
                     'notes',
                   ]);
-
-                  // if this is a new issue, persist it
-                  if (!existingIssue) {
-                    issueEntry = (await Issue.persist(issueData))[0];
+                  if (!existingMergeRequest) {
+                    mrEntry = (await MergeRequest.persist(mergeRequestData))[0];
                   } else {
-                    // if this issue already exists, update its fields and save
-                    _.assign(existingIssue, issueData);
-                    issueEntry = (await existingIssue.save({ ignoreUnknownAttributes: true }))[0];
+                    _.assign(existingMergeRequest, mergeRequestData);
+                    mrEntry = (await existingMergeRequest.save({ ignoreUnknownAttributes: true }))[0];
                   }
-
                   if (milestoneIid !== null && milestoneIid !== undefined) {
-                    await this.connectIssuesToMilestones(IssueMilestoneConnection, issueEntry, milestonesByIid[milestoneIid]);
+                    await this.connectIssuesToMilestones(MergeRequestMilestoneConnection, mrEntry, milestonesByIid[milestoneIid]);
                   }
-
-                  persistCount++;
-                } else {
-                  log('Skipping issue #' + issue.iid);
-                  omitCount++;
-                }
-                await this.connectIssuesToUsers(IssueAccountConnection, issueEntry, authorEntry, assigneesEntries);
-                this.reporter.finishIssue();
-              }
-            }),
-          this.gitlab.getMergeRequests(project.id).collect(async (mergeRequests) => {
-            for (const mergeRequest of mergeRequests) {
-              const existingMergeRequest = await MergeRequest.findOneByExample({ id: String(mergeRequest.id) });
-
-              // first, persist the author/assignees associated to this MR
-              const authorEntry = (await Account.ensureGitLabAccount(mergeRequest.author))[0];
-              const assigneesEntries = [];
-              for (const assignee of mergeRequest.assignees) {
-                assigneesEntries.push((await Account.ensureGitLabAccount(assignee))[0]);
-              }
-
-              let mrEntry = existingMergeRequest;
-
-              if (
-                !existingMergeRequest ||
-                new Date(existingMergeRequest.updatedAt).getTime() < new Date(mergeRequest.updated_at).getTime()
-              ) {
-                log('Processing mergeRequest #' + mergeRequest.iid);
-                await this.processMergeRequestNotes(project, mergeRequest)
-                  .then(async (notes) => {
-                    let mergeRequestData = _.merge(
-                      _.mapKeys(mergeRequest, (v, k) => _.camelCase(k)),
-                      {
-                        notes,
-                      },
-                    );
-
-                    // store the milestone this issue belongs to separately
-                    const milestoneIid = mergeRequestData.milestone?.iid;
-
-                    // only keep properties from MergeRequestDto
-                    mergeRequestData = _.pick(mergeRequestData, [
-                      'id',
-                      'iid',
-                      'title',
-                      'description',
-                      'createdAt',
-                      'closedAt',
-                      'updatedAt',
-                      'labels',
-                      'state',
-                      'webUrl',
-                      'projectId',
-                      'mentions',
-                      'notes',
-                    ]);
-                    if (!existingMergeRequest) {
-                      mrEntry = (await MergeRequest.persist(mergeRequestData))[0];
-                    } else {
-                      _.assign(existingMergeRequest, mergeRequestData);
-                      mrEntry = (await existingMergeRequest.save({ ignoreUnknownAttributes: true }))[0];
-                    }
-                    if (milestoneIid !== null && milestoneIid !== undefined) {
-                      await this.connectIssuesToMilestones(MergeRequestMilestoneConnection, mrEntry, milestonesByIid[milestoneIid]);
-                    }
-                  })
-                  .then(() => persistMergeRequestCount++);
-              } else {
-                log('Skipping mergeRequest #' + mergeRequest.iid);
-                omitMergeRequestCount++;
-              }
-              await this.connectIssuesToUsers(MergeRequestAccountConnection, mrEntry, authorEntry, assigneesEntries);
-              this.reporter.finishMergeRequest();
+                })
+                .then(() => persistMergeRequestCount++);
+            } else {
+              log('Skipping mergeRequest #' + mergeRequest.iid);
+              omitMergeRequestCount++;
             }
-          }),
-        ]);
+            await this.connectIssuesToUsers(MergeRequestAccountConnection, mrEntry, authorEntry, assigneesEntries);
+            this.reporter.finishMergeRequest();
+          }
+        });
       })
       .then(() => {
         log('Persisted %d new issues (%d already present)', persistCount, omitCount);
