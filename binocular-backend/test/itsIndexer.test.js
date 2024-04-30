@@ -193,6 +193,39 @@ describe('its', function () {
         expectExamples({ _from: mr._id, _to: milestoneId }, collections['mergeRequests-milestones'], 1);
       }
     });
+
+    it('should not persist objects twice if indexer is called twice', async function () {
+      const repo = await fake.repository();
+      ctx.targetPath = repo.path;
+
+      //Remap Remote functions to local ones because remote repository doesn't exist anymore.
+      remapRemoteFunctions(repo);
+      repo.getOriginUrl = async function () {
+        return 'git@gitlab.com:Test/Test-Project.git';
+      };
+
+      // init all relevant collections for ITS indexing
+      await setupDb(db, relevantCollections);
+
+      const gitLabITSIndexer = new GitLabITSIndexer(repo, reporter);
+      gitLabITSIndexer.configure(config);
+
+      // start indexer. gets data from GitLab Mock implementation (see ./gitlab)
+      await gitLabITSIndexer.index();
+      // get all entries from all relevant collections
+      const collections = await getAllCollections();
+
+      // run indexer a second time. Second run should not add additional data to the database
+      await gitLabITSIndexer.index();
+      // get all entries from all relevant collections
+      const updatedCollections = await getAllCollections();
+
+      Object.entries(collections).map(([collectionName, collectionArray]) => {
+        // check if updated collection has the same size
+        console.log(collectionName, collectionArray.length, updatedCollections[collectionName].length);
+        expect(collectionArray.length).to.equal(updatedCollections[collectionName].length);
+      });
+    });
   });
 
   describe('#indexGitHub', function () {

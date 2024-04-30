@@ -39,6 +39,7 @@ class GitLabITSIndexer extends BaseGitLabIndexer {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     let omitMergeRequestCount = 0;
     let persistMergeRequestCount = 0;
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     let omitMilestoneCount = 0;
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     let persistMilestoneCount = 0;
@@ -57,9 +58,9 @@ class GitLabITSIndexer extends BaseGitLabIndexer {
         entry = (await Milestone.persist(mileStoneData))[0];
         persistMilestoneCount++;
       } else {
-        _.assign(existingMilestone, mileStoneData).then(() => omitMilestoneCount++);
-        // TODO I think this is not correct. Check for Issues/MRs too!
-        entry = await existingMilestone.save({ ignoreUnknownAttributes: true });
+        _.assign(existingMilestone, mileStoneData);
+        omitMilestoneCount++;
+        entry = await Milestone.save(existingMilestone);
       }
 
       this.reporter.finishMilestone();
@@ -148,7 +149,7 @@ class GitLabITSIndexer extends BaseGitLabIndexer {
                 } else {
                   // if this issue already exists, update its fields and save
                   _.assign(existingIssue, issueData);
-                  issueEntry = (await existingIssue.save({ ignoreUnknownAttributes: true }))[0];
+                  issueEntry = await Issue.save(existingIssue);
                 }
 
                 if (milestoneIid !== null && milestoneIid !== undefined) {
@@ -212,7 +213,7 @@ class GitLabITSIndexer extends BaseGitLabIndexer {
                     mrEntry = (await MergeRequest.persist(mergeRequestData))[0];
                   } else {
                     _.assign(existingMergeRequest, mergeRequestData);
-                    mrEntry = (await existingMergeRequest.save({ ignoreUnknownAttributes: true }))[0];
+                    mrEntry = await MergeRequest.save(existingMergeRequest);
                   }
                   if (milestoneIid !== null && milestoneIid !== undefined) {
                     await this.connectIssuesToMilestones(MergeRequestMilestoneConnection, mrEntry, milestonesByIid[milestoneIid]);

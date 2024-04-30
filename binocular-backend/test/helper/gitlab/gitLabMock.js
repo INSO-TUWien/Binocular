@@ -49,7 +49,7 @@ class GitLabMock {
   }
 
   getMileStones() {
-    return this.testPaginator(testMilestones)
+    return this.testPaginator(testMilestones);
   }
 
   getPipelineJobs() {
