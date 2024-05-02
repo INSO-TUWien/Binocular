@@ -1,15 +1,21 @@
 'use strict';
 
-import Connection from './Connection';
-import Branch from './Branch';
-import File from './File.js';
+import Connection, { Entry } from '../Connection';
+import Branch, { BranchDataType } from '../models/Branch';
+import File, { FileDataType } from '../models/File';
 
-class BranchFileConnection extends Connection {
+export interface BranchFileConnectionDataType {}
+
+class BranchFileConnection extends Connection<BranchFileConnectionDataType, BranchDataType, FileDataType> {
   constructor() {
-    super(Branch, File);
+    super();
   }
 
-  async remove(conn: any) {
+  ensureCollection() {
+    return super.ensureCollection(Branch, File);
+  }
+
+  async remove(conn: Entry<BranchFileConnectionDataType>) {
     if (this.rawDb === undefined) {
       throw Error('Database undefined!');
     }

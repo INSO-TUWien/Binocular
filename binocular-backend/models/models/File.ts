@@ -1,17 +1,26 @@
 'use strict';
 
 import { aql } from 'arangojs';
-import Model from './Model';
+
+import Model from '../Model';
+import CommitFileConnection from '../connections/CommitFileConnection';
+
 import path from 'path';
-class File extends Model {
+
+export interface FileDataType {
+  path: string;
+  webUrl: string;
+  maxLength: number;
+}
+
+class File extends Model<FileDataType> {
   constructor() {
-    super('File', { attributes: ['path', 'webUrl'] });
+    super({ name: 'File' });
   }
   async deduceMaxLengths() {
     if (this.rawDb === undefined) {
       throw Error('Database undefined!');
     }
-    const CommitFileConnection = (await import('./CommitFileConnection')).default;
     return Promise.resolve(
       this.rawDb.query(
         aql`
@@ -19,7 +28,7 @@ class File extends Model {
       UPDATE file WITH {
         maxLength: MAX(
           FOR commit, edge
-          IN OUTBOUND file ${CommitFileConnection.collection}
+          IN INBOUND file ${CommitFileConnection.collection}
           RETURN edge.lineCount
         )
       } IN ${this.collection}
@@ -28,8 +37,8 @@ class File extends Model {
     );
   }
 
-  dir(fileDAO: any): string {
-    const directory = path.dirname(fileDAO.path);
+  dir(file: FileDataType): string {
+    const directory = path.dirname(file.path);
     return directory.startsWith('.') ? directory : `./${directory}`;
   }
 
@@ -38,8 +47,8 @@ class File extends Model {
    *
    * @returns {*[]}
    */
-  getModules(fileDAO: any): string[] {
-    return this.dir(fileDAO)
+  getModules(file: FileDataType): string[] {
+    return this.dir(file)
       .split('/')
       .reduce((dirs: string[], dir: string, index: number) => dirs.concat(index ? `${dirs[index - 1]}/${dir}` : dir), []);
   }

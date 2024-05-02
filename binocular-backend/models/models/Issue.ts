@@ -2,45 +2,45 @@
 
 import _ from 'lodash';
 import { aql } from 'arangojs';
-import Model, { Entry } from './Model';
-import Stakeholder from './Stakeholder.js';
+import Model from '../Model';
+import Stakeholder from './Stakeholder';
+import IssueStakeholderConnection from '../connections/IssueStakeholderConnection';
+
 import debug from 'debug';
+import Label from '../../types/supportingTypes/Label';
+import User from '../../types/supportingTypes/User';
+import Mention from '../../types/supportingTypes/Mention';
+import IssueDto from '../../types/dtos/IssueDto';
 const log = debug('db:Issue');
 
-class Issue extends Model {
+export interface IssueDataType {
+  id: string;
+  iid: number;
+  title: string;
+  description: string;
+  createdAt: string;
+  closedAt: string;
+  updatedAt: string;
+  labels: Label[];
+  milestone: any; //TODO: Add type for milestone
+  state: string;
+  url: string;
+  webUrl: string;
+  author: User;
+  assignee: User;
+  assignees: User[];
+  mentions: Mention[];
+}
+
+class Issue extends Model<IssueDataType> {
   constructor() {
-    super('Issue', {
-      attributes: [
-        'id',
-        'iid',
-        'title',
-        'description',
-        'state',
-        'url',
-        'closedAt',
-        'createdAt',
-        'updatedAt',
-        'labels',
-        'milestone',
-        'author',
-        'assignee',
-        'assignees',
-        'userNotesCount',
-        'upvotes',
-        'downvotes',
-        'dueDate',
-        'confidential',
-        'weight',
-        'webUrl',
-        'subscribed',
-        'mentions',
-        'notes',
-      ],
+    super({
+      name: 'Issue',
       keyAttribute: 'id',
     });
   }
 
-  persist(_issueData: any) {
+  persist(_issueData: IssueDto) {
     const issueData = _.clone(_issueData);
     if (_issueData.id) {
       issueData.id = _issueData.id.toString();
@@ -49,14 +49,13 @@ class Issue extends Model {
     delete issueData.projectId;
     delete issueData.timeStats;
 
-    return this.ensureById(issueData.id, issueData, { ignoreUnknownAttributes: true });
+    return this.ensureById(issueData.id, issueData, {});
   }
 
   async deduceStakeholders() {
     if (this.rawDb === undefined) {
       throw Error('Database undefined!');
     }
-    const IssueStakeholderConnection = (await import('./IssueStakeholderConnection')).default;
     return Promise.resolve(
       this.rawDb.query(
         aql`
@@ -110,7 +109,7 @@ class Issue extends Model {
                 if (issue === null) {
                   return;
                 }
-                return Stakeholder.connect(stakeholder, issue);
+                return IssueStakeholderConnection.connect({}, { from: issue, to: stakeholder });
               });
             }),
         );
@@ -131,9 +130,9 @@ class Issue extends Model {
 
 export default new Issue();
 
-async function findBestStakeholderMatch(author: any) {
+async function findBestStakeholderMatch(author: User) {
   const stakeholder = await Stakeholder.findAll();
-  const bestMatch = stakeholder.reduce((best: any, stakeholderEntry: Entry | null) => {
+  const bestMatch = stakeholder.reduce((best: any, stakeholderEntry) => {
     if (stakeholderEntry === null) {
       return;
     }

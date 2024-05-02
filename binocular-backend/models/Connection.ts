@@ -1,58 +1,63 @@
 'use strict';
 import debug from 'debug';
 
-import ctx from '../utils/context.ts';
-import * as collection from 'arangojs/collection.js';
-import ModelCursor from './ModelCursor.js';
-import _ from 'lodash';
-import Db from '../core/db/db.ts';
-import { Collection } from 'arangojs/collection.js';
+import ctx from '../utils/context';
+import ModelCursor from './ModelCursor';
+import Db from '../core/db/db';
 import Model from './Model';
 import { Entry as ModelEntry } from './Model';
 import { Database } from 'arangojs';
+import { Collection, CollectionType, DocumentCollection, EdgeCollection } from 'arangojs/collection';
 
-export default class Connection {
+export default class Connection<ConnectionDataType, FromDataType, ToDataType> {
   connections = {};
-  FromModel: Model | Connection;
-  ToModel: Model | Connection;
-  attributes: string[];
-  collectionName: string;
-  log: debug.Debugger;
+  collectionName: string | undefined;
+  log = debug('db:unnamedConnection');
   db: Db | undefined;
-  collection: Collection | undefined;
+  collection: (DocumentCollection<any> & EdgeCollection<any>) | undefined;
   rawDb: Database | undefined;
-  constructor(FromModel: Model | Connection, ToModel: Model | Connection, options?: { attributes: string[] }) {
-    options = _.defaults({}, options, { attributes: [] });
-    const name = `${FromModel.collectionName}${ToModel.collectionName}Connection`;
-    this.FromModel = FromModel;
-    this.ToModel = ToModel;
-    this.attributes = options.attributes;
-    this.collectionName = `${FromModel.collectionName}-${ToModel.collectionName}`;
-    this.log = debug(`db:${name}`);
-
-    ctx.on(
-      'ensure:db',
-      function (db: Db) {
-        if (db.arango !== undefined) {
-          this.db = db;
-          this.rawDb = db.arango;
-          this.collection = db.arango.collection(this.collectionName);
-        }
-      }.bind(this),
-    );
-
-    FromModel.connections[ToModel.collectionName] = this;
-    ToModel.connections[FromModel.collectionName] = this;
+  constructor() {
+    ctx.on('ensure:db', (db: Db) => {
+      if (db.arango !== undefined) {
+        //ensure db
+        this.db = db;
+        this.rawDb = db.arango;
+      }
+    });
   }
 
-  ensureCollection() {
+  ensureCollection(
+    fromModel: Model<FromDataType> | Connection<FromDataType, unknown, unknown>,
+    toModel: Model<ToDataType> | Connection<ToDataType, unknown, unknown>,
+  ): Promise<Collection> | undefined {
     if (this.db === undefined) {
       throw Error('Database undefined!');
     }
-    return this.db.ensureEdgeCollection(this.collectionName, { type: collection.CollectionType.EDGE_COLLECTION });
+    if (this.rawDb === undefined) {
+      throw Error('Model rawDb undefined!');
+    }
+    if (fromModel.collectionName === undefined) {
+      throw Error('From model collection name undefined!');
+    }
+    if (toModel.collectionName === undefined) {
+      throw Error('To model collection name undefined!');
+    }
+    //configure Collection
+    const name = `${fromModel.collectionName}${toModel.collectionName}Connection`;
+    this.collectionName = `${fromModel.collectionName}-${toModel.collectionName}`;
+    this.log = debug(`db:${name}`);
+    fromModel.connections[toModel.collectionName] = this;
+    toModel.connections[fromModel.collectionName] = this;
+
+    //ensure Collection
+    this.collection = this.rawDb.collection(this.collectionName);
+    return this.db.ensureEdgeCollection(this.collectionName, { type: CollectionType.EDGE_COLLECTION });
   }
 
-  async findByIds(fromTo: { from: ModelEntry; to: ModelEntry }) {
+  async findByIds(fromTo: {
+    from: ModelEntry<FromDataType> | Entry<ConnectionDataType>;
+    to: ModelEntry<ToDataType> | Entry<ConnectionDataType>;
+  }) {
     if (this.collection === undefined) {
       throw Error('Collection undefined!');
     }
@@ -66,29 +71,38 @@ export default class Connection {
     }
   }
 
-  async ensure(data: any, fromTo: { from: ModelEntry; to: ModelEntry }) {
+  async ensure(
+    data: ConnectionDataType,
+    fromTo: { from: ModelEntry<FromDataType> | Entry<ConnectionDataType>; to: ModelEntry<ToDataType> | Entry<ConnectionDataType> },
+  ) {
     const entry = await this.findByIds(fromTo);
     if (entry) {
       entry.isStored = true;
       return entry;
     } else {
-      return this.create(data, fromTo);
+      return this.connect(data, fromTo);
     }
   }
 
-  async store(data: any, fromTo: { from: ModelEntry; to: ModelEntry }) {
+  async store(
+    data: ConnectionDataType,
+    fromTo: { from: ModelEntry<FromDataType> | Entry<ConnectionDataType>; to: ModelEntry<ToDataType> | Entry<ConnectionDataType> },
+  ) {
     if (this.collection === undefined) {
       throw Error('Collection undefined!');
     }
     const entry = await this.findByIds(fromTo);
     if (entry) {
-      return this.collection.update(entry._key, data);
+      return this.collection.update(entry._key, data as object);
     } else {
-      return this.create(data, fromTo);
+      return this.connect(data, fromTo);
     }
   }
 
-  create(data: any, fromTo: { from: ModelEntry; to: ModelEntry }) {
+  connect(
+    data: any,
+    fromTo: { from: ModelEntry<FromDataType> | Entry<ConnectionDataType>; to: ModelEntry<ToDataType> | Entry<ConnectionDataType> },
+  ) {
     if (this.collection === undefined) {
       throw Error('Collection undefined!');
     }
@@ -99,12 +113,12 @@ export default class Connection {
     return Promise.resolve(this.collection.save(data));
   }
 
-  parse(data: any) {
+  parse(data: ConnectionDataType & { _id: string; _key: string; _from: string; _to: string }): Entry<ConnectionDataType> | null {
     if (data === null) {
       return null;
     }
 
-    const entry = new Entry(_.pick(data, ...this.attributes));
+    const entry = new Entry(data);
     entry._id = data._id;
     entry._key = data._key;
     entry._from = data._from;
@@ -117,7 +131,7 @@ export default class Connection {
     return new ModelCursor(this, rawCursor);
   }
 
-  async findAll() {
+  async findAll(): Promise<(Entry<ConnectionDataType> | null)[]> {
     if (this.collection === undefined) {
       throw Error('Collection undefined!');
     }
@@ -127,13 +141,14 @@ export default class Connection {
   }
 }
 
-class Entry {
-  data: any;
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export class Entry<DataType> {
+  data: DataType;
   _id: string | undefined;
   _key: string | undefined;
   _from: string | undefined;
   _to: string | undefined;
-  constructor(data = {}) {
+  constructor(data: DataType = {} as DataType) {
     this.data = data;
   }
 }

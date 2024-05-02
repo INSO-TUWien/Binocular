@@ -4,8 +4,8 @@ import _ from 'lodash';
 
 class TestModel extends Model {
   constructor() {
-    super('Test', {
-      attributes: ['id', 'someText', 'someOtherText'],
+    super({
+      name: 'Test',
       keyAttribute: 'id',
     });
   }

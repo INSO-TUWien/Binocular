@@ -1,6 +1,6 @@
 'use strict';
 
-import Build from '../../models/Build';
+import Build from '../../models/models/Build.ts';
 import * as UrlProvider from '../../url-providers/index';
 import ConfigurationError from '../../errors/ConfigurationError';
 import CIIndexer from './CIIndexer';
@@ -8,6 +8,9 @@ import moment from 'moment';
 import GitHub from '../../core/provider/github';
 import debug from 'debug';
 import ProgressReporter from '../../utils/progress-reporter.ts';
+import { GithubJob } from '../../types/GithubTypes.ts';
+import Config from '../../utils/config';
+import Repository from '../../core/provider/git';
 
 const log = debug('importer:github-ci-indexer');
 
@@ -21,7 +24,7 @@ class GitHubCIIndexer {
   private owner: string = '';
   private controller: GitHub | undefined;
   private indexer: CIIndexer | undefined;
-  constructor(repository, progressReporter: typeof ProgressReporter) {
+  constructor(repository: Repository, progressReporter: typeof ProgressReporter) {
     this.repo = repository;
     this.reporter = progressReporter;
     this.stopping = false;
@@ -100,7 +103,7 @@ class GitHubCIIndexer {
         finishedAt: moment(lastFinishedAt).toISOString(),
         committedAt: moment(pipeline.head_commit.committed_at).toISOString(),
         duration: moment(lastFinishedAt).unix() - moment(lastStartedAt).unix(),
-        jobs: jobs.map((job) => ({
+        jobs: jobs.map((job: GithubJob) => ({
           id: job.id,
           name: username,
           status: job.conclusion,
@@ -114,10 +117,10 @@ class GitHubCIIndexer {
     });
   }
 
-  async setupUrlProvider(repo, reporter) {
+  async setupUrlProvider(repo: Repository, reporter: typeof ProgressReporter) {
     this.urlProvider = await UrlProvider.getCiUrlProvider(repo, reporter);
   }
-  setupGithub(config) {
+  setupGithub(config: typeof Config) {
     this.controller = new GitHub({
       baseUrl: 'https://api.github.com',
       privateToken: config?.auth?.token,

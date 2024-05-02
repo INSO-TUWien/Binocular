@@ -11,7 +11,7 @@ import ctx from '../utils/context.ts';
 import GitLabCIIndexer from './helper/gitlab/gitLabCIIndexerRewire.js';
 import GitHubCIIndexer from './helper/github/gitHubCIIndexerRewire.js';
 
-import Build from '../models/Build';
+import Build from '../models/models/Build';
 import repositoryFake from './helper/git/repositoryFake.js';
 import GitLabMock from './helper/gitlab/gitLabMock.js';
 import path from 'path';

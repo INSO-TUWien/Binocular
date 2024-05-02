@@ -1,25 +1,42 @@
 'use strict';
 
 import debug from 'debug';
-import Model from './Model';
-import File from './File.js';
-import IllegalArgumentError from '../errors/IllegalArgumentError.js';
+import Model, { Entry } from '../Model';
+
+import File, { FileDataType } from './File';
+import Stakeholder, { StakeholderDataType } from './Stakeholder';
+import Stats from '../../types/supportingTypes/Stats';
+import CommitCommitConnection from '../connections/CommitCommitConnection';
+import CommitFileConnection from '../connections/CommitFileConnection';
+import CommitStakeholderConnection from '../connections/CommitStakeholderConnection';
+
+import IllegalArgumentError from '../../errors/IllegalArgumentError';
 import { exec } from 'child_process';
-import * as utils from '../utils/utils.ts';
-import Stakeholder from './Stakeholder.js';
-import config from '../utils/config.js';
-import Repository from '../core/provider/git';
-import GitHubUrlProvider from '../url-providers/GitHubUrlProvider';
-import GitLabUrlProvider from '../url-providers/GitLabUrlProvider';
-import GatewayService from '../utils/gateway-service';
-import Context from '../utils/context.ts';
+import * as utils from '../../utils/utils';
+import config from '../../utils/config.js';
+import Repository from '../../core/provider/git';
+import GitHubUrlProvider from '../../url-providers/GitHubUrlProvider';
+import GitLabUrlProvider from '../../url-providers/GitLabUrlProvider';
+import GatewayService from '../../utils/gateway-service';
+import Context from '../../utils/context';
+import _ from 'lodash';
+import CommitDto from '../../types/dtos/CommitDto';
 
 const log = debug('git:commit');
 
-class Commit extends Model {
+export interface CommitDataType {
+  sha: string;
+  date: string;
+  message: string;
+  webUrl: string;
+  branch: string;
+  stats: Stats;
+}
+
+class Commit extends Model<CommitDataType> {
   constructor() {
-    super('Commit', {
-      attributes: ['sha', 'message', 'signature', 'date', 'stats', 'branch', 'history', 'parents', 'webUrl'],
+    super({
+      name: 'Commit',
       keyAttribute: 'sha',
     });
   }
@@ -28,16 +45,17 @@ class Commit extends Model {
    * get or create an new commit and connect it to its parents
    *
    * @param repo contains the repository object
-   * @param nCommit contains the current commit that is created by the given repo object and holds the required data
+   * @param _commitData contains the current commit that is created by the given repo object and holds the required data
    * @param urlProvider contains the given remote vcs webapp provider to link them
    * @returns Commit returns an already existing or newly created commit
    */
-  async persist(repo: Repository, nCommit: any, urlProvider: GitHubUrlProvider | GitLabUrlProvider) {
-    if (!repo || !nCommit) {
+  async persist(repo: Repository, _commitData: CommitDto, urlProvider: GitHubUrlProvider | GitLabUrlProvider) {
+    const commitData = _.clone(_commitData);
+    if (!repo || !commitData) {
       throw IllegalArgumentError('repository and git-commit has to be set!');
     }
 
-    const sha = nCommit.oid;
+    const sha = commitData.oid;
 
     const instance = await this.findOneBy('sha', sha);
     if (instance) {
@@ -47,20 +65,27 @@ class Commit extends Model {
     }
     log('Processing', sha);
     let parents = '';
-    for (const i of nCommit.commit.parent) {
-      parents += nCommit.commit.parent[i];
-      if (i < nCommit.commit.parent.length - 1) {
+
+    commitData.commit.parent.forEach((p, i) => {
+      parents += p;
+      if (i < commitData.commit.parent.length - 1) {
         parents += ',';
       }
+    });
+
+    const authorSignature = utils.fixUTF8(commitData.commit.author.name + ' <' + commitData.commit.author.email + '>');
+
+    if (!commitData.commit.author.timestamp) {
+      throw Error('Timestamp undefined!');
     }
-    const authorSignature = utils.fixUTF8(nCommit.commit.author.name + ' <' + nCommit.commit.author.email + '>');
+
     const commit = await this.create(
       {
         sha,
-        date: new Date(nCommit.commit.author.timestamp * 1000),
-        message: nCommit.commit.message,
+        date: new Date(commitData.commit.author.timestamp * 1000).toISOString(),
+        message: commitData.commit.message,
         webUrl: urlProvider ? urlProvider.getCommitUrl(sha) : '',
-        branch: nCommit.commit.branch,
+        branch: commitData.commit.branch,
         stats: {
           additions: 0,
           deletions: 0,
@@ -77,13 +102,13 @@ class Commit extends Model {
           if (parentCommit === null) {
             return;
           }
-          return this.connect(commit, parentCommit);
+          return CommitCommitConnection.connect({}, { from: commit, to: parentCommit });
         });
       }),
     );
-    const results = await Stakeholder.ensureBy('gitSignature', authorSignature, {});
+    const results = await Stakeholder.ensureBy('gitSignature', authorSignature, {} as StakeholderDataType);
     const stakeholder = results[0];
-    await this.connect(commit, stakeholder);
+    await CommitStakeholderConnection.connect({}, { from: commit, to: stakeholder });
     return commit;
   }
 
@@ -92,34 +117,34 @@ class Commit extends Model {
    *
    * @param commitDAO
    * @param repo contains the repository object
-   * @param nCommit contains the current commit that is created by the given repo object and holds the required data
+   * @param commitData contains the current commit that is created by the given repo object and holds the required data
    * @param currentBranch current checked out branch of the repository
    * @param urlProvider contains the given remote vcs webapp provider to link them
    * @param gateway contains the given gateway object to process commits based on various registered services
    * @param context
    * @returns {*}
    */
-  processTree(
-    commitDAO: any,
+  async processTree(
+    commitDAO: Entry<CommitDataType>,
     repo: Repository,
-    nCommit: any,
+    commitData: CommitDto,
     currentBranch: string,
     urlProvider: GitHubUrlProvider | GitLabUrlProvider,
     gateway: GatewayService,
     context: typeof Context,
-  ): any {
+  ): Promise<any> {
     const ignoreFiles = config.get().ignoreFiles || [];
     const ignoreFilesRegex = ignoreFiles.map((i) => new RegExp(i.replace('*', '.*')));
     return Promise.resolve(
       repo.getCommitChanges.bind(this)(
         commitDAO,
         repo,
-        nCommit.oid,
-        nCommit.commit.parent[0],
+        commitData.oid,
+        commitData.commit.parent[0],
         async (filepath: string, parentCommitEntry: any, currentCommitEntry: any, commitFiles: string[], parentCommitFiles: string[]) => {
           try {
             // ignore directories
-            const currentOid = nCommit.oid;
+            const currentOid = commitData.oid;
             if (!(commitFiles.includes(filepath) || parentCommitFiles.includes(filepath))) {
               return;
             }
@@ -168,7 +193,7 @@ class Commit extends Model {
                 const diffOutput: string = await new Promise((resolve) => {
                   //go to the target directory, execute git diff for a specific file to get the changes between the parent/current commit
                   exec(
-                    `cd ${context.targetPath} && git diff --unified=0 ${nCommit.commit.parent[0]} ${nCommit.oid} -- ${filepath}`,
+                    `cd ${context.targetPath} && git diff --unified=0 ${commitData.commit.parent[0]} ${commitData.oid} -- ${filepath}`,
                     { maxBuffer: 1024 * 10000 },
                     (error, stdout, stderr) => {
                       if (error) {
@@ -215,7 +240,7 @@ class Commit extends Model {
             const webUrl = urlProvider.getFileUrl(currentBranch, filepath);
             const file = await File.ensureBy('path', filepath, {
               webUrl: webUrl,
-            }).then((f) => f[0]);
+            } as FileDataType).then((f) => f[0]);
 
             let additionsForFile = 0;
             let deletionsForFile = 0;
@@ -240,9 +265,17 @@ class Commit extends Model {
               };
             });
 
-            await commitDAO.model.save(commitDAO);
+            await this.save(commitDAO);
 
-            return Promise.all([file, lineCount, { additions: additionsForFile, deletions: deletionsForFile }, hunks]).then((results) => {
+            return Promise.all([
+              file,
+              lineCount,
+              {
+                additions: additionsForFile,
+                deletions: deletionsForFile,
+              },
+              hunks,
+            ]).then((results) => {
               const file = results[0];
               const lineCount = results[1];
               const stats = results[2];
@@ -262,12 +295,15 @@ class Commit extends Model {
       ),
     ).then((patches) =>
       patches.map(async (patch: any) => {
-        const connection = await this.ensureConnection(commitDAO, patch.file, {
-          lineCount: patch.lineCount,
-          hunks: patch.hunks,
-          stats: patch.stats,
-          action: patch.action,
-        });
+        const connection = await CommitFileConnection.ensure(
+          {
+            lineCount: patch.lineCount,
+            hunks: patch.hunks,
+            stats: patch.stats,
+            action: patch.action,
+          },
+          { from: commitDAO, to: patch.file },
+        );
 
         return Object.assign(patch, {
           hunkConnection: !commitDAO.justCreated ? null : connection,

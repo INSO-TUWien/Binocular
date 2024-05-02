@@ -5,16 +5,19 @@ import debug from 'debug';
 const serve = debug('idx:vcs:git');
 const log = debug('log:idx:vcs:git');
 import _ from 'lodash';
-import Commit from '../../models/Commit';
-import Module from '../../models/Module';
-import File from '../../models/File';
-import Branch from '../../models/Branch';
-import BranchFileConnection from '../../models/BranchFileConnection';
-import CommitFileConnection from '../../models/CommitFileConnection';
-import CommitFileStakeholderConnection from '../../models/CommitFileStakeholderConnection';
-import BranchFileFileConnection from '../../models/BranchFileFileConnection';
-import Stakeholder from '../../models/Stakeholder';
+import Commit from '../../models/models/Commit';
+import Module from '../../models/models/Module';
+import File from '../../models/models/File';
+import Branch from '../../models/models/Branch';
+import BranchFileConnection from '../../models/connections/BranchFileConnection';
+import CommitFileConnection from '../../models/connections/CommitFileConnection';
+import CommitFileStakeholderConnection from '../../models/connections/CommitFileStakeholderConnection';
+import BranchFileFileConnection from '../../models/connections/BranchFileFileConnection';
+import Stakeholder from '../../models/models/Stakeholder';
 import { fixUTF8 } from '../../utils/utils';
+import ModuleFileConnection from '../../models/connections/ModuleFileConnection';
+import CommitModuleConnection from '../../models/connections/CommitModuleConnection';
+import ModuleModuleConnection from '../../models/connections/ModuleModuleConnection';
 let fileRenameBranches;
 
 class GitIndexer {
@@ -96,7 +99,7 @@ class GitIndexer {
             latestCommit: latestCommit[0].oid,
             tracksFileRenames: tracksFileRenames,
           };
-          Branch.persist(branch);
+          await Branch.persist(branch);
         }
       }
       log('Processing', this.counter.commits.total, 'commits');
@@ -265,7 +268,7 @@ async function moduleCreationAndLinking(commit, connections, files, newFiles) {
 
     const parent = modules.find((module) => module.data.path === parentPath);
     if (parent) {
-      Module.connect(parent, module);
+      ModuleModuleConnection.connect({}, { from: parent, to: module });
     }
   });
 
@@ -274,7 +277,7 @@ async function moduleCreationAndLinking(commit, connections, files, newFiles) {
     const dir = File.dir(file.data);
     const module = modules.find((module) => module.data.path === dir);
     if (module) {
-      Module.connect(module, file);
+      ModuleFileConnection.connect({}, { from: module, to: file });
     }
   });
 
@@ -298,10 +301,13 @@ async function moduleCreationAndLinking(commit, connections, files, newFiles) {
               },
               { additions: 0, deletions: 0 },
             ) || {};
-        return Commit.storeConnection(commit, module, {
-          stats,
-          webUrl: this.urlProvider.getDirUrl(commit.data.sha, module.data.path),
-        });
+        return CommitModuleConnection.store(
+          {
+            stats,
+            webUrl: this.urlProvider.getDirUrl(commit.data.sha, module.data.path),
+          },
+          { from: commit, to: module },
+        );
       }),
     );
   }
@@ -404,9 +410,11 @@ async function createBranchFileConnections(repo, context) {
           return;
         }
         //connect file to branch
-        if (!branch.data.tracksFileRenames) return Branch.ensureConnection(branch, file);
+        const branchFile = await BranchFileConnection.ensure({}, { from: branch, to: file });
+        if (!branch.data.tracksFileRenames) {
+          return branchFile;
+        }
 
-        const branchFile = await Branch.ensureConnection(branch, file);
         //get previous filenames if applicable
         const previousFilenames = await repo.getPreviousFilenamesRemote(name, file.data.path, context);
         if (previousFilenames.length === 0) {
@@ -427,7 +435,7 @@ async function createBranchFileConnections(repo, context) {
           const fileObj = filesDAO.filter((f) => f.data.path === prevFilename)[0];
           //connect the new connection to relevant files
           //this models file renames (file on this branch was called ... earlier)
-          BranchFileFileConnection.ensure(
+          await BranchFileFileConnection.ensure(
             { hasThisNameFrom: hasThisNameFrom, hasThisNameUntil: hasThisNameUntil },
             { from: branchFile, to: fileObj },
           );
@@ -474,7 +482,7 @@ async function createOwnershipConnections(repo, context) {
   commitFileConnections = commitFileConnections.filter(
     (cfc) => !(cfc.data.action === 'added' && cfc.data.stats.additions === 0 && cfc.data.stats.deletions === 0),
   );
-  const commitFileConnectionsGrouped = Object.entries(_.groupBy(commitFileConnections, (cfc) => cfc._to));
+  const commitFileConnectionsGrouped = Object.entries(_.groupBy(commitFileConnections, (cfc) => cfc._from));
 
   for (const [commitId, cfcGroup] of commitFileConnectionsGrouped) {
     const commitObject = commitObjects.filter((c) => c._id === commitId)[0].data;
@@ -486,13 +494,19 @@ async function createOwnershipConnections(repo, context) {
         if (cfc.data.action === 'deleted') {
           return;
         }
-        const fileObject = fileObjects.filter((f) => f._id === cfc._from)[0].data;
+        const fileObject = fileObjects.filter((f) => f._id === cfc._to)[0].data;
         const file = fileObject.path;
         try {
           const res = await repo.getOwnershipForFile(file, sha, context);
           for (const [stakeholder] of Object.entries(res.ownershipData)) {
             const hunks = res.hunks[stakeholder].map((h) => _.omit(h, ['signature']));
-            CommitFileStakeholderConnection.ensure({ hunks: hunks }, { from: cfc, to: stakeholderIds[fixUTF8(stakeholder)] });
+            await CommitFileStakeholderConnection.ensure(
+              { hunks: hunks },
+              {
+                from: cfc,
+                to: stakeholderIds[fixUTF8(stakeholder)],
+              },
+            );
           }
         } catch (e) {
           console.log(`Cant get ownership for ${file} at commit ${cfc._to}`);
