@@ -38,6 +38,7 @@ import timeSpent from './visualizations/VisualizationComponents/timeSpent';
 import codeOwnership from './visualizations/code-ownership';
 import distributionDials from './visualizations/distribution-dials';
 import RootOffline from './components/RootOffline';
+import codeReviewMetrics from './visualizations/code-review-metrics/index.ts';
 
 const visualizationModules = [
   dashboard,
@@ -52,6 +53,7 @@ const visualizationModules = [
   issues,
   issueBreakdown,
   changes,
+  codeReviewMetrics,
   dataExport,
 ];
 
