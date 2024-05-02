@@ -9,8 +9,8 @@ import Mention from '../../types/supportingTypes/Mention';
 import GitHub from '../../core/provider/github';
 import ProgressReporter from '../../utils/progress-reporter.ts';
 import { ItsIssue, ItsIssueEvent } from '../../types/ItsTypes';
-import ReviewThread from '../../models/ReviewThread.ts';
-import Comment from '../../models/Comment.ts';
+import ReviewThread from '../../models/models/ReviewThread.ts';
+import Comment from '../../models/models/Comment.ts';
 
 const log = debug('idx:its:github');
 

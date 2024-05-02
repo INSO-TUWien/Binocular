@@ -1,13 +1,25 @@
 'use strict';
 
 import _ from 'lodash';
-import Model from './Model';
+import Model from '../Model';
 import { aql } from 'arangojs/aql';
+import User from '../../types/supportingTypes/User';
+import { ItsIssue } from '../../types/ItsTypes';
 
-class ReviewThread extends Model {
+export interface ReviewThreadDataType {
+  id: string;
+  createdAt: string;
+  updatedAt: string;
+  path: string;
+  isResolved: boolean;
+  resolvedBy: User;
+  mergeRequest: ItsIssue;
+}
+
+class ReviewThread extends Model<ReviewThreadDataType> {
   constructor() {
-    super('ReviewThread', {
-      attributes: ['id', 'createdAt', 'updatedAt', 'isResolved', 'resolvedBy', 'mergeRequest'],
+    super({
+      name: 'ReviewThread',
       keyAttribute: 'id',
     });
   }
@@ -18,9 +30,7 @@ class ReviewThread extends Model {
       reviewData.id = _reviewData.id.toString();
     }
 
-    return this.ensureById(reviewData.id, reviewData, {
-      ignoreUnknownAttributes: true,
-    });
+    return this.ensureById(reviewData.id, reviewData, {});
   }
 
   deleteMergeRequestRefAttribute() {

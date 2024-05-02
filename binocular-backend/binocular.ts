@@ -72,11 +72,11 @@ import its from './indexers/its';
 import ci from './indexers/ci';
 import Repository from './core/provider/git';
 import chalk from 'chalk';
-import ReviewThread from './models/ReviewThread';
-import Comment from './models/Comment';
-import ReviewThreadCommentConnection from './models/ReviewThreadCommentConnection';
-import MergeRequestCommentConnection from './models/MergeRequestCommentConnection';
-import MergeRequestReviewThreadConnection from './models/MergeRequestReviewThreadConnection';
+import ReviewThread from './models/models/ReviewThread.ts';
+import Comment from './models/models/Comment.ts';
+import ReviewThreadCommentConnection from './models/connections/ReviewThreadCommentConnection.ts';
+import MergeRequestCommentConnection from './models/connections/MergeRequestCommentConnection.ts';
+import MergeRequestReviewThreadConnection from './models/connections/MergeRequestReviewThreadConnection.ts';
 
 cli.parse(
   (targetPath, options) => {
@@ -708,7 +708,7 @@ function runBackend() {
 
       const mergeRequest = mergeRequests.filter((m: any) => m.data.id === reviewThread.data.mergeRequest);
       if (mergeRequest && mergeRequest[0]) {
-        ReviewThread.connect(reviewThread, mergeRequest[0]);
+        MergeRequestReviewThreadConnection.connect({}, { from: mergeRequest[0], to: reviewThread });
       }
     }
 
@@ -725,7 +725,7 @@ function runBackend() {
 
       const reviewThread = reviewThreads.filter((r: any) => r.data.id === comment.data.reviewThread);
       if (reviewThread && reviewThread[0]) {
-        Comment.connect(comment, reviewThread[0]);
+        ReviewThreadCommentConnection.connect({}, { from: reviewThread[0], to: comment });
       }
     }
 
@@ -742,7 +742,7 @@ function runBackend() {
 
       const mergeRequest = mergeRequests.filter((m: any) => m.data.id === comment.data.mergeRequest);
       if (mergeRequest && mergeRequest[0]) {
-        Comment.connect(comment, mergeRequest[0]);
+        MergeRequestCommentConnection.connect({}, { from: mergeRequest[0], to: comment });
       }
     }
 

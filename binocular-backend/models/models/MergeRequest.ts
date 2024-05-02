@@ -7,7 +7,7 @@ import User from '../../types/supportingTypes/User';
 import Mention from '../../types/supportingTypes/Mention';
 import MergeRequestDto from '../../types/dtos/MergeRequestDto';
 
-interface MergeRequestDataType {
+export interface MergeRequestDataType {
   id: string;
   iid: number;
   title: string;
