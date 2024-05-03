@@ -15,7 +15,11 @@ function App() {
         </TabController>
       </div>
       <div className={appStyles.statusBar}>
-        <StatusBar vcsIndexer={'VCS Placeholder'} itsIndexer={'ITS Placeholder'} ciIndexer={'CI Placeholder'} repository={'Repository Placeholder'}></StatusBar>
+        <StatusBar
+          vcsIndexer={'VCS Placeholder'}
+          itsIndexer={'ITS Placeholder'}
+          ciIndexer={'CI Placeholder'}
+          repository={'Repository Placeholder'}></StatusBar>
       </div>
     </>
   );

@@ -24,7 +24,6 @@ export default {
       {
         binocularLight: {
           "primary": "#555555",
-          "secondary": "#f6d860",
           "accent": "#007AFF",
           "accent-content":"#FFFFFF",
           "neutral": "#3d4451",
