@@ -2,6 +2,8 @@ import { ReactElement, useState } from 'react';
 import tabControllerStyles from './tabController.module.scss';
 import tabHandleStyles from './tabHandle.module.scss';
 import TabDropHint from './tabDropHint/tabDropHint.tsx';
+import Tab from '../tab/tab.tsx';
+import TabMenuContent from '../tabMenuContent/tabMenuContent.tsx';
 
 interface TabType {
   selected: boolean;
@@ -11,6 +13,13 @@ interface TabType {
   position: number;
 }
 
+/**
+ * Helper Function to generate the click and draggable handle of each tab
+ * @param tab Tab object that includes all necessary information about a tab
+ * @param tabList List of all tabs
+ * @param setTabList Set state function for a list of all tabs
+ * @param setDragState Set state Function for drag and drop state of tabs
+ */
 function generateHandel(
   tab: TabType,
   tabList: TabType[],
@@ -83,6 +92,14 @@ function generateHandel(
   );
 }
 
+/**
+ * Moves the tab to a different side
+ * @param name Name of the tab
+ * @param alignment New alignment of the tab
+ * @param tabList List of all tabs
+ * @param setTabList Set state function for a list of all tabs
+ * @param setDragState Set state Function for drag and drop state of tabs
+ */
 function moveTab(
   name: string,
   alignment: string,
@@ -106,6 +123,14 @@ function moveTab(
   );
 }
 
+/**
+ * Switches two tabs with each other
+ * @param name Name of the tab that is switched
+ * @param targetTabName Name of the other tab with whom the first tab is switched
+ * @param tabList List of all tabs
+ * @param setTabList Set state function for a list of all tabs
+ * @param setDragState Set state Function for drag and drop state of tabs
+ */
 function switchTabs(
   name: string,
   targetTabName: string,
@@ -139,48 +164,77 @@ function TabController(props: { children: ReactElement<{ displayName: string; de
   const firstFound = [false, false, false, false];
   let tabOrder = 0;
   const [tabList, setTabList] = useState(
-    props.children.map((tab) => {
-      const selected =
-        (tab.props.defaultAlignment === 'top' && !firstFound[0]) ||
-        (tab.props.defaultAlignment === 'right' && !firstFound[1]) ||
-        (tab.props.defaultAlignment === 'bottom' && !firstFound[2]) ||
-        (tab.props.defaultAlignment === 'left' && !firstFound[3]);
-      if (selected) {
-        switch (tab.props.defaultAlignment) {
-          case 'right':
-            firstFound[1] = true;
-            break;
-          case 'bottom':
-            firstFound[2] = true;
-            break;
-          case 'left':
-            firstFound[3] = true;
-            break;
-          default:
-            firstFound[0] = true;
-            break;
+    props.children
+      .filter((child) => child.type === Tab)
+      .map((tab) => {
+        const selected =
+          (tab.props.defaultAlignment === 'top' && !firstFound[0]) ||
+          (tab.props.defaultAlignment === 'right' && !firstFound[1]) ||
+          (tab.props.defaultAlignment === 'bottom' && !firstFound[2]) ||
+          (tab.props.defaultAlignment === 'left' && !firstFound[3]);
+        if (selected) {
+          switch (tab.props.defaultAlignment) {
+            case 'right':
+              firstFound[1] = true;
+              break;
+            case 'bottom':
+              firstFound[2] = true;
+              break;
+            case 'left':
+              firstFound[3] = true;
+              break;
+            default:
+              firstFound[0] = true;
+              break;
+          }
         }
-      }
-      return {
-        displayName: tab.props.displayName,
-        alignment: tab.props.defaultAlignment,
-        selected: selected,
-        content: tab,
-        position: tabOrder++,
-      };
-    }),
+        return {
+          displayName: tab.props.displayName,
+          alignment: tab.props.defaultAlignment,
+          selected: selected,
+          content: tab,
+          position: tabOrder++,
+        };
+      }),
   );
-
   const [dragState, setDragState] = useState(false);
+
+  const [tabMenuContent] = useState(props.children.filter((child) => child.type === TabMenuContent)[0]);
 
   const tabBarTopCollapsed = tabList.filter((tab) => tab.alignment === 'top' && tab.selected).length === 0;
   const tabBarRightCollapsed = tabList.filter((tab) => tab.alignment === 'right' && tab.selected).length === 0;
   const tabBarBottomCollapsed = tabList.filter((tab) => tab.alignment === 'bottom' && tab.selected).length === 0;
   const tabBarLeftCollapsed = tabList.filter((tab) => tab.alignment === 'left' && tab.selected).length === 0;
 
+  const tabCountRight = tabList.filter((tab) => tab.alignment === 'right').length;
+  const tabCountBottom = tabList.filter((tab) => tab.alignment === 'bottom').length;
+  const tabCountLeft = tabList.filter((tab) => tab.alignment === 'left').length;
+
+  console.log(
+    tabBarTopCollapsed
+      ? tabBarBottomCollapsed
+        ? `calc(100% - ${tabControllerStyles.tabBarThickness} * ${tabCountBottom > 0 ? 2 : 1} - 10px)`
+        : `calc(100% - ${tabControllerStyles.tabContentThicknessHorizontal} - ${tabControllerStyles.tabBarThickness} * ${tabCountBottom > 0 ? 2 : 1}- 6px)`
+      : tabBarBottomCollapsed
+        ? `calc(100% - ${tabControllerStyles.tabContentThicknessHorizontal} - ${tabControllerStyles.tabBarThickness} * ${tabCountBottom > 0 ? 2 : 1} - 14px)`
+        : `calc(100% - ${tabControllerStyles.tabContentThicknessHorizontal} * 2 - ${tabControllerStyles.tabBarThickness} * ${tabCountBottom > 0 ? 2 : 1} - 10px)`,
+  );
+
   return (
     <div className={tabControllerStyles.tabController}>
       <TabDropHint dragState={dragState}></TabDropHint>
+      <>
+        <div
+          className={tabControllerStyles.content}
+          style={{
+            top: `calc(${tabControllerStyles.tabBarThickness} + ${tabControllerStyles.tabContentThicknessHorizontal} * ${tabBarTopCollapsed ? 0 : 1} + 4px)`,
+            left: `calc(${tabControllerStyles.tabBarThickness} * ${tabCountLeft > 0 ? 1 : 0} + ${tabControllerStyles.tabContentThicknessVertical} * ${tabBarLeftCollapsed ? 0 : 1} + 4px)`,
+            height: `calc(100% - ${tabControllerStyles.tabContentThicknessHorizontal} * ${(tabBarTopCollapsed ? 0 : 1) + (tabBarBottomCollapsed ? 0 : 1)} - ${tabControllerStyles.tabBarThickness} * ${tabCountBottom > 0 ? 2 : 1} - 10px)`,
+            width: `calc(100% -  ${tabControllerStyles.tabContentThicknessVertical} * ${(tabBarLeftCollapsed ? 0 : 1) + (tabBarRightCollapsed ? 0 : 1)} - ${tabControllerStyles.tabBarThickness} * ${(tabCountLeft > 0 ? 1 : 0) + (tabCountRight > 0 ? 1 : 0)} - 8px)`,
+          }}>
+          {tabMenuContent}
+        </div>
+      </>
       <>
         <div
           className={
@@ -191,16 +245,8 @@ function TabController(props: { children: ReactElement<{ displayName: string; de
             tabControllerStyles.tabContentBackgroundRight + (tabBarRightCollapsed ? ' ' + tabControllerStyles.tabContentCollapsed : '')
           }
           style={{
-            top: tabBarTopCollapsed
-              ? tabControllerStyles.tabBarThickness
-              : `calc(${tabControllerStyles.tabBarThickness} + ${tabControllerStyles.tabContentThicknessHorizontal} + 4px)`,
-            height: tabBarTopCollapsed
-              ? tabBarBottomCollapsed
-                ? `calc(100% - 10px - ${tabControllerStyles.tabBarThickness})`
-                : `calc(calc(100% - 6px  - ${tabControllerStyles.tabBarThickness}*2 - ${tabControllerStyles.tabContentThicknessHorizontal})`
-              : tabBarBottomCollapsed
-                ? `calc(calc(100% - 10px  - ${tabControllerStyles.tabBarThickness} - ${tabControllerStyles.tabContentThicknessHorizontal})`
-                : `calc(calc(100% - 10px  - ${tabControllerStyles.tabBarThickness} * 2 - ${tabControllerStyles.tabContentThicknessHorizontal} * 2)`,
+            top: `calc(${tabControllerStyles.tabBarThickness} + ${tabControllerStyles.tabContentThicknessHorizontal} * ${tabBarTopCollapsed ? 0 : 1} + 4px)`,
+            height: `calc(100% - ${tabControllerStyles.tabContentThicknessHorizontal} * ${(tabBarTopCollapsed ? 0 : 1) + (tabBarBottomCollapsed ? 0 : 1)} - ${tabControllerStyles.tabBarThickness} * ${tabCountBottom > 0 ? 2 : 1} - 10px)`,
           }}></div>
         <div
           className={
@@ -211,16 +257,8 @@ function TabController(props: { children: ReactElement<{ displayName: string; de
             tabControllerStyles.tabContentBackgroundLeft + (tabBarLeftCollapsed ? ' ' + tabControllerStyles.tabContentCollapsed : '')
           }
           style={{
-            top: tabBarTopCollapsed
-              ? tabControllerStyles.tabBarThickness
-              : `calc(${tabControllerStyles.tabBarThickness} + ${tabControllerStyles.tabContentThicknessHorizontal} + 4px)`,
-            height: tabBarTopCollapsed
-              ? tabBarBottomCollapsed
-                ? `calc(100% - 10px - ${tabControllerStyles.tabBarThickness} )`
-                : `calc(calc(100% - 6px  - ${tabControllerStyles.tabBarThickness}*2 - ${tabControllerStyles.tabContentThicknessHorizontal})`
-              : tabBarBottomCollapsed
-                ? `calc(calc(100% - 10px  - ${tabControllerStyles.tabBarThickness} - ${tabControllerStyles.tabContentThicknessHorizontal})`
-                : `calc(calc(100% - 10px  - ${tabControllerStyles.tabBarThickness} * 2 - ${tabControllerStyles.tabContentThicknessHorizontal} * 2)`,
+            top: `calc(${tabControllerStyles.tabBarThickness} + ${tabControllerStyles.tabContentThicknessHorizontal} * ${tabBarTopCollapsed ? 0 : 1} + 4px)`,
+            height: `calc(100% - ${tabControllerStyles.tabContentThicknessHorizontal} * ${(tabBarTopCollapsed ? 0 : 1) + (tabBarBottomCollapsed ? 0 : 1)} - ${tabControllerStyles.tabBarThickness} * ${tabCountBottom > 0 ? 2 : 1} - 10px)`,
           }}></div>
       </>
       <>
@@ -245,16 +283,8 @@ function TabController(props: { children: ReactElement<{ displayName: string; de
           id={'tabBarRight'}
           className={tabControllerStyles.tabBar + ' ' + tabControllerStyles.tabBarVertical + ' ' + tabControllerStyles.tabBarRight}
           style={{
-            top: tabBarTopCollapsed
-              ? `calc(${tabControllerStyles.tabBarThickness} + 4px)`
-              : `calc(${tabControllerStyles.tabBarThickness} + ${tabControllerStyles.tabContentThicknessHorizontal} + 4px)`,
-            height: tabBarTopCollapsed
-              ? tabBarBottomCollapsed
-                ? `calc(100% - 4px - ${tabControllerStyles.tabBarThickness} * 2)`
-                : `calc(calc(100% - 4px  - ${tabControllerStyles.tabBarThickness} * 2 - ${tabControllerStyles.tabContentThicknessHorizontal})`
-              : tabBarBottomCollapsed
-                ? `calc(calc(100% - 4px  - ${tabControllerStyles.tabBarThickness} * 2 - ${tabControllerStyles.tabContentThicknessHorizontal})`
-                : `calc(calc(100% - 4px  - ${tabControllerStyles.tabBarThickness} * 2 - ${tabControllerStyles.tabContentThicknessHorizontal} * 2)`,
+            top: `calc(${tabControllerStyles.tabBarThickness} + ${tabControllerStyles.tabContentThicknessHorizontal} * ${tabBarTopCollapsed ? 0 : 1} + 4px)`,
+            height: `calc(100% - ${tabControllerStyles.tabContentThicknessHorizontal} * ${(tabBarTopCollapsed ? 0 : 1) + (tabBarBottomCollapsed ? 0 : 1)} - ${tabControllerStyles.tabBarThickness} * ${tabCountBottom > 0 ? 2 : 1} - 10px)`,
           }}
           onDragOver={(event) => {
             event.stopPropagation();
@@ -287,16 +317,8 @@ function TabController(props: { children: ReactElement<{ displayName: string; de
           id={'tabBarLeft'}
           className={tabControllerStyles.tabBar + ' ' + tabControllerStyles.tabBarVertical + ' ' + tabControllerStyles.tabBarLeft}
           style={{
-            top: tabBarTopCollapsed
-              ? `calc(${tabControllerStyles.tabBarThickness} + 4px)`
-              : `calc(${tabControllerStyles.tabBarThickness} + ${tabControllerStyles.tabContentThicknessHorizontal} + 4px)`,
-            height: tabBarTopCollapsed
-              ? tabBarBottomCollapsed
-                ? `calc(100% - 4px - ${tabControllerStyles.tabBarThickness} * 2)`
-                : `calc(calc(100% - 4px  - ${tabControllerStyles.tabBarThickness} * 2 - ${tabControllerStyles.tabContentThicknessHorizontal})`
-              : tabBarBottomCollapsed
-                ? `calc(calc(100% - 4px  - ${tabControllerStyles.tabBarThickness} * 2 - ${tabControllerStyles.tabContentThicknessHorizontal})`
-                : `calc(calc(100% - 4px  - ${tabControllerStyles.tabBarThickness} * 2 - ${tabControllerStyles.tabContentThicknessHorizontal} * 2)`,
+            top: `calc(${tabControllerStyles.tabBarThickness} + ${tabControllerStyles.tabContentThicknessHorizontal} * ${tabBarTopCollapsed ? 0 : 1} + 4px)`,
+            height: `calc(100% - ${tabControllerStyles.tabContentThicknessHorizontal} * ${(tabBarTopCollapsed ? 0 : 1) + (tabBarBottomCollapsed ? 0 : 1)} - ${tabControllerStyles.tabBarThickness} * ${tabCountBottom > 0 ? 2 : 1} - 10px)`,
           }}
           onDragOver={(event) => {
             event.stopPropagation();

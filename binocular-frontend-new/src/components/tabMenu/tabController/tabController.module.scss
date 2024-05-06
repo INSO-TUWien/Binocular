@@ -53,6 +53,7 @@
   left: 0;
   height: $tab-bar-thickness;
   width: 100%;
+  padding-left: 5px;
 }
 
 .tabBarLeft{
@@ -156,4 +157,10 @@
   left: $tab-bar-thickness;
   width: $tab-content-thickness-vertical;
   height: calc(100% - 4px);
+}
+
+.content{
+  position: absolute;
+  box-shadow: $shadow-default-inset;
+  border-radius: $border-radius-default;
 }

@@ -1,11 +1,7 @@
 import tabStyles from './tab.module.scss';
-function Tab(props: { displayName: string; defaultAlignment: string }) {
-  return (
-    <>
-      <div className={tabStyles.tab}>{props.displayName}-Content</div>
-      <button className={'btn btn-accent'}>Hello daisyUI</button>
-    </>
-  );
+import { ReactElement } from 'react';
+function Tab(props: { children: ReactElement; displayName: string; defaultAlignment: string }) {
+  return <div className={tabStyles.tab}>{props.children}</div>;
 }
 
 export default Tab;
