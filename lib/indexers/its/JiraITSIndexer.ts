@@ -354,13 +354,13 @@ class JiraITSIndexer {
     const dueDate = projectVersion.releaseDate !== undefined ? new Date(projectVersion.releaseDate).toISOString() : null;
 
     return {
-      id: projectVersion.projectId + projectVersion.id,
-      iid: parseInt(projectVersion.projectId + projectVersion.id, 10),
+      id: projectVersion.id,
+      iid: parseInt(projectVersion.id, 10),
       title: projectVersion.name,
       description: projectVersion.description ? projectVersion.description : null,
       dueDate: dueDate,
       startDate: projectVersion.startDate ? new Date(projectVersion.startDate).toISOString() : null,
-      state: projectVersion.released ? 'active' : 'inactive',
+      state: projectVersion.released ? 'closed' : 'active',
       expired: expired, // TODO: check if this is correct if overdue is not set in response
     };
   }
@@ -500,10 +500,6 @@ class JiraITSIndexer {
 
           notes.push(noteToAdd);
         }
-      }
-
-      if (body !== '') {
-        log('%s', body);
       }
     });
 
