@@ -236,7 +236,7 @@ class GitHub {
                               }
                           }
                       }
-                      reviewThreads (first: 40) {
+                      reviewThreads (first: 20) {
                           totalCount
                           nodes {
                               id
@@ -245,7 +245,7 @@ class GitHub {
                               resolvedBy {
                                 login
                               }
-                              comments (first: 100) {
+                              comments (first: 50) {
                                     totalCount
                                     nodes {
                                         id
@@ -260,7 +260,7 @@ class GitHub {
                               }
                           }
                      }
-                     commentNodes: comments(first: 100) {
+                     commentNodes: comments(first: 50) {
                           totalCount
                           nodes {
                               author {
