@@ -2,9 +2,9 @@
 
 import _ from 'lodash';
 import debug from 'debug';
-import Issue from '../../models/Issue';
-import MergeRequest from '../../models/MergeRequest';
-import Milestone from '../../models/Milestone';
+import Issue from '../../models/models/Issue';
+import MergeRequest from '../../models/models/MergeRequest';
+import Milestone from '../../models/models/Milestone';
 import BaseGitLabIndexer from '../BaseGitLabIndexer';
 
 const log = debug('idx:its:gitlab');

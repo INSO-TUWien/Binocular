@@ -4,11 +4,11 @@ import IllegalArgumentError from '../errors/IllegalArgumentError.js';
 import Model from './Model';
 import Connection from './Connection';
 
-export default class ModelCursor {
-  private Model: any;
+export default class ModelCursor<DataType> {
+  private model: Model<DataType> | Connection<DataType, unknown, unknown>;
   private cursor: any;
-  constructor(Model: Model | Connection, cursor: any) {
-    this.Model = Model;
+  constructor(model: Model<DataType> | Connection<DataType, unknown, unknown>, cursor: any) {
+    this.model = model;
     this.cursor = cursor;
   }
 
@@ -18,13 +18,13 @@ export default class ModelCursor {
 
   async all() {
     const ds = await Promise.resolve(this.cursor.all(...arguments));
-    return await ds.map((d) => this.Model.parse(d));
+    return await ds.map((d) => this.model.parse(d));
   }
 
   async next() {
     const data = await Promise.resolve(this.cursor.next(...arguments));
     if (data) {
-      return this.Model.parse(data);
+      return this.model.parse(data);
     }
   }
 
@@ -33,7 +33,7 @@ export default class ModelCursor {
   }
 
   each(fn: (m: any) => any) {
-    const next = (cur: ModelCursor) => {
+    const next = (cur: ModelCursor<DataType>) => {
       if (cur.hasNext()) {
         return cur
           .next()

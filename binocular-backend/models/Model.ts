@@ -5,31 +5,27 @@ import _ from 'lodash';
 import debug from 'debug';
 import * as inflection from 'inflection';
 
-import IllegalArgumentError from '../errors/IllegalArgumentError.js';
-import ctx from '../utils/context.ts';
-import ModelCursor from './ModelCursor.js';
-import Db from '../core/db/db.ts';
-import { Collection } from 'arangojs/collection';
+import ctx from '../utils/context';
+import ModelCursor from './ModelCursor';
+import Db from '../core/db/db';
+import { Collection, DocumentCollection, EdgeCollection } from 'arangojs/collection';
 import { Database } from 'arangojs';
-import Connection from './Connection.ts';
 import { AqlQuery } from 'arangojs/aql';
 
-export default class Model {
+export default class Model<DataType> {
   connections = {};
-  attributes: string[];
   collectionName: string;
   log: debug.Debugger;
   db: Db | undefined;
-  collection: Collection | undefined;
+  collection: (DocumentCollection<any> & EdgeCollection<any>) | undefined;
   rawDb: Database | undefined;
 
-  constructor(name, options) {
-    options = _.defaults({}, options, { attributes: [], keyAttribute: '_key' });
-    this.attributes = options.attributes;
-    this.collectionName = name;
+  constructor(options: { name: string; keyAttribute?: string }) {
+    options = _.defaults({}, options, { keyAttribute: '_key' });
+    this.collectionName = options.name;
 
-    this.collectionName = inflection.pluralize(_.lowerFirst(name));
-    this.log = debug(`db:${name}`);
+    this.collectionName = inflection.pluralize(_.lowerFirst(options.name));
+    this.log = debug(`db:${options.name}`);
 
     ctx.on(
       'ensure:db',
@@ -37,20 +33,23 @@ export default class Model {
         if (db.arango !== undefined) {
           this.db = db;
           this.rawDb = db.arango;
-          this.collection = db.arango.collection(this.collectionName);
         }
       }.bind(this),
     );
   }
 
-  ensureCollection() {
+  ensureCollection(): Promise<Collection> | undefined {
     if (this.db === undefined) {
       throw Error('Database undefined!');
     }
+    if (this.rawDb === undefined) {
+      throw Error('Model rawDb undefined!');
+    }
+    this.collection = this.rawDb.collection(this.collectionName);
     return this.db.ensureCollection(this.collectionName);
   }
 
-  async firstExample(data: any) {
+  async firstExample(data: DataType & { _id?: string; _key?: string }): Promise<Entry<DataType> | null> {
     this.log('firstExample %o', data);
     if (this.collection === undefined) {
       throw Error('Collection undefined!');
@@ -64,7 +63,7 @@ export default class Model {
     return this.parse(d);
   }
 
-  async findById(id: string) {
+  async findById(id: string): Promise<Entry<DataType> | null> {
     this.log('findById %o', id);
     if (this.collection === undefined) {
       throw Error('Collection undefined!');
@@ -76,16 +75,14 @@ export default class Model {
     return null;
   }
 
-  async ensureById(id: string, data: any, options?: { ignoreUnknownAttributes?: boolean; isNew?: boolean }) {
+  async ensureById(id: string, data: DataType, options?: { isNew?: boolean }) {
     return this.findOneById(id).then(
       function (resp) {
         if (resp) {
           return [this.parse(resp), false];
         } else {
-          const entry = new Entry(data, this, {
-            attributes: this.attributes,
+          const entry = new Entry<DataType>(data, {
             isNew: options && options.isNew ? options.isNew : true,
-            ignoreUnknownAttributes: options && options.ignoreUnknownAttributes ? options.ignoreUnknownAttributes : true,
           });
           entry._id = id;
 
@@ -95,22 +92,20 @@ export default class Model {
     );
   }
 
-  findOneById(id: string) {
+  findOneById(id: string): Promise<Entry<DataType> | null> {
     this.log('findById %o', id);
-    return this.firstExample({ id: id });
+    return this.firstExample({ _id: id } as DataType & { _id: string; _key: string });
   }
 
-  async ensureBy(key: string, value: any, data: any, options?: { ignoreUnknownAttributes?: boolean; isNew?: boolean }) {
+  async ensureBy(key: string, value: string | boolean | number | undefined, data: DataType, options?: { isNew?: boolean }) {
     data[key] = value;
     return this.findOneBy(key, value).then(
       function (resp) {
         if (resp) {
           return [this.parse(resp.data), false];
         } else {
-          const entry = new Entry(data, this, {
-            attributes: this.attributes,
+          const entry = new Entry<DataType>(data, {
             isNew: options && options.isNew ? options.isNew : true,
-            ignoreUnknownAttributes: options && options.ignoreUnknownAttributes ? options.ignoreUnknownAttributes : true,
           });
           return this.save(entry).then((i) => [i, true]);
         }
@@ -118,21 +113,19 @@ export default class Model {
     );
   }
 
-  findOneBy(key: string, value: any) {
+  findOneBy(key: string, value: string | boolean | number | undefined): Promise<Entry<DataType> | null> {
     this.log(`findBy${key} ${value}`);
-    return this.firstExample({ [key]: value });
+    return this.firstExample({ [key]: value } as DataType & { _id: string; _key: string });
   }
 
-  create(data: any, options?: { isNew: boolean }) {
-    const entry = new Entry(data, this, {
-      attributes: this.attributes,
+  create(data: DataType, options?: { isNew: boolean }): Promise<Entry<DataType>> {
+    const entry = new Entry<DataType>(data, {
       isNew: options ? options.isNew : true,
-      ignoreUnknownAttributes: true,
     });
     return this.save(entry);
   }
 
-  bulkCreate(datas: any[]) {
+  bulkCreate(datas: (DataType & { _id: string; _key: string })[]) {
     this.log('bulkCreate %o items', datas.length);
     if (this.collection === undefined) {
       throw Error('Collection undefined!');
@@ -142,32 +135,27 @@ export default class Model {
     });
   }
 
-  ensure(entry: Entry) {
-    return this.findOneBy('_key', entry._key).then((instance) => {
-      if (instance) {
-        instance.isStored = true;
-        return instance;
-      } else {
-        return this.save(
-          new Entry(entry.data, this, {
-            attributes: this.attributes,
-            isNew: false,
-            ignoreUnknownAttributes: true,
-          }),
-        );
-      }
-    });
+  async ensure(entry: Entry<DataType>): Promise<Entry<DataType>> {
+    const instance = await this.findOneBy('_key', entry._key);
+    if (instance) {
+      instance.isStored = true;
+      return instance;
+    } else {
+      return this.save(
+        new Entry<DataType>(entry.data, {
+          isNew: false,
+        }),
+      );
+    }
   }
 
-  parse(data: any): Entry | null {
+  parse(data: DataType & { _id: string; _key: string }): Entry<DataType> | null {
     if (data === null) {
       return null;
     }
 
-    const entry = new Entry(data, this, {
-      attributes: this.attributes,
+    const entry = new Entry<DataType>(data, {
       isNew: false,
-      ignoreUnknownAttributes: true,
     });
     entry._id = data._id;
     entry._key = data._key;
@@ -195,120 +183,72 @@ export default class Model {
     }
   }
 
-  async findAll() {
+  async findAll(): Promise<(Entry<DataType> | null)[]> {
     if (this.collection === undefined) {
       throw Error('Collection undefined!');
     }
     const cursor1 = await Promise.resolve(this.collection.all());
     const ds = await cursor1.all();
-    return ds.map((d) => this.parse(d));
+    return ds.map((d: DataType & { _id: string; _key: string }) => this.parse(d));
   }
 
-  save(entry: Entry) {
+  async save(entry: Entry<DataType>): Promise<Entry<DataType>> {
     this.log('save %o', entry.data);
     if (this.collection === undefined) {
       throw Error('Collection undefined!');
     }
+    let resp: any;
+
     if (entry.isNew) {
       entry.justCreated = true;
-      return Promise.resolve(this.collection.save(_.defaults({ _key: entry._key }, entry.data)))
-        .catch(() => {
-          entry.justCreated = false;
-          entry.justUpdated = false;
-          return this.ensure(entry);
-        })
-        .then(function (resp) {
-          entry._key = resp._key;
-          entry._id = resp._id;
-          entry.isNew = false;
-
-          return entry;
-        });
+      try {
+        resp = await Promise.resolve(this.collection.save(_.defaults({ _key: entry._key }, entry.data)));
+      } catch {
+        entry.justCreated = false;
+        entry.justUpdated = false;
+        resp = await this.ensure(entry);
+      }
+      entry._key = resp._key;
+      entry._id = resp._id;
+      entry.isNew = false;
+      return entry;
     } else {
       entry.justUpdated = true;
-      return Promise.resolve(this.collection.update({ _id: entry._id, _key: entry._key === undefined ? '' : entry._key }, entry.data))
-        .catch(() => {
-          entry.justCreated = false;
-          entry.justUpdated = false;
-          return this.ensure(entry);
-        })
-        .then(function (resp) {
-          entry._key = resp._key;
-          entry._id = resp._id;
-          entry.isNew = false;
-
-          return entry;
-        });
+      try {
+        resp = await Promise.resolve(
+          this.collection.update(
+            {
+              _id: entry._id,
+              _key: entry._key === undefined ? '' : entry._key,
+            },
+            entry.data as object,
+          ),
+        );
+      } catch {
+        entry.justCreated = false;
+        entry.justUpdated = false;
+        resp = await this.ensure(entry);
+      }
+      entry._key = resp._key;
+      entry._id = resp._id;
+      entry.isNew = false;
+      return entry;
     }
-  }
-
-  connect(from: Entry, to: Entry, data?: any) {
-    return connectionHandling.bind(this)(from, to, data, (ConnectionClass, data, fromTo) => ConnectionClass.create(data, fromTo));
-  }
-
-  ensureConnection(from: Entry, to: Entry, data?: any) {
-    return connectionHandling.bind(this)(from, to, data, (ConnectionClass, data, fromTo) => ConnectionClass.ensure(data, fromTo));
-  }
-
-  storeConnection(from: Entry, to: Entry, data?: any) {
-    return connectionHandling.bind(this)(from, to, data, (ConnectionClass, data, fromTo) => ConnectionClass.store(data, fromTo));
   }
 }
 
-export class Entry {
-  data: any;
+export class Entry<DataType> {
+  data: DataType;
   _id: string | undefined;
   _key: string | undefined;
   isStored: boolean | undefined;
-  isNew: boolean;
-  log: debug.Debugger;
-  model: Model;
+  isNew: boolean | undefined;
   justCreated: boolean | undefined;
   justUpdated: boolean | undefined;
-  constructor(data: any, model: Model, options: { attributes: string[]; isNew: boolean; ignoreUnknownAttributes: boolean }) {
+  constructor(data: DataType, options: { isNew?: boolean }) {
     this.data = _.defaults({}, data);
-    options = _.defaults({}, options, { isNew: true, ignoreUnknownAttributes: false });
+    options = _.defaults({}, options, { isNew: true });
 
     this.isNew = options.isNew;
-    this.log = debug(`db:${model.collectionName}`);
-    this.model = model;
-    _.each(
-      _.keys(data),
-      function (key) {
-        if (!_.includes(options.attributes, key)) {
-          this.log(`${key} is not a valid data property for collection ${model.collectionName}`);
-
-          if (!options.ignoreUnknownAttributes) {
-            throw new IllegalArgumentError(`${key} is not a valid data property for collection ${model.collectionName}`);
-          }
-        }
-      }.bind(this),
-    );
   }
-}
-
-function connectionHandling(
-  fromEntry: Entry,
-  toEntry: Entry,
-  data: any,
-  cb: (connection: Connection, data: any, entries: { from: Entry; to: Entry }) => any,
-) {
-  const ConnectionClass = fromEntry.model.connections[toEntry.model.collectionName];
-
-  if (!ConnectionClass) {
-    throw new IllegalArgumentError(`${fromEntry.model.collectionName} is not connected to ${toEntry.model.collectionName}`);
-  }
-
-  let from: Entry;
-  let to: Entry;
-
-  if (ConnectionClass.fromModel === fromEntry.model) {
-    from = fromEntry;
-    to = toEntry;
-  } else {
-    from = toEntry;
-    to = fromEntry;
-  }
-
-  return cb(ConnectionClass, data, { from: from, to: to });
 }

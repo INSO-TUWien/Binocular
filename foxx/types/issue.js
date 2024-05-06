@@ -102,7 +102,7 @@ module.exports = new gql.GraphQLObjectType({
         query: (issue, args, limit) => {
           let query = aql`
             FOR commit, edge IN
-            INBOUND ${issue} ${issuesToCommits}`;
+            OUTBOUND ${issue} ${issuesToCommits}`;
 
           if (args.since !== undefined) {
             query = aql`${query} FILTER DATE_TIMESTAMP(commit.date) >= DATE_TIMESTAMP(${args.since})`;

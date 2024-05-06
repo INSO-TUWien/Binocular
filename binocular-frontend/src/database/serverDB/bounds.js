@@ -31,6 +31,18 @@ export default class Bounds {
              createdAt
              closedAt
            }
+         },
+         firstMergeRequest: mergeRequests( perPage: 1, sort: "ASC") {
+           data {
+             createdAt
+             updatedAt
+           }
+         },
+         lastMergeRequest: mergeRequests( perPage: 1, sort: "DESC") {
+           data {
+            createdAt
+            updatedAt
+           }
          }
        }`,
       )
@@ -40,6 +52,8 @@ export default class Bounds {
         firstIssue: resp.firstIssue.data[0],
         lastIssue: resp.lastIssue.data[0],
         committers: resp.committers,
+        firstMergeRequest: resp.firstMergeReqest,
+        lastMergeRequest: resp.lastMergeRequest,
       }));
   }
 }

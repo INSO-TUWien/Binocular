@@ -1,7 +1,7 @@
 Binocular
 =====
 
-[![Build Binocular](https://github.com/INSO-TUWien/Binocular/actions/workflows/build-binocular.yml/badge.svg?branch=develop)](https://github.com/INSO-TUWien/Binocular/actions/workflows/build-binocular.yml)
+[![Build Offline-Binocular](https://github.com/INSO-TUWien/Binocular/actions/workflows/build-offline.yml/badge.svg?branch=develop)](https://github.com/INSO-TUWien/Binocular/actions/workflows/build-offline.yml)
 [![Test ESLint](https://github.com/INSO-TUWien/Binocular/actions/workflows/eslint.yml/badge.svg?branch=develop)](https://github.com/INSO-TUWien/Binocular/actions/workflows/eslint.yml)
 [![Docker Image CI](https://github.com/INSO-TUWien/Binocular/actions/workflows/build-docker.yml/badge.svg)](https://github.com/INSO-TUWien/Binocular/actions/workflows/build-docker.yml)
 
