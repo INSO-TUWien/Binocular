@@ -3,6 +3,7 @@ import Tab from './components/tabMenu/tab/tab.tsx';
 import appStyles from './app.module.scss';
 import StatusBar from './components/statusBar/statusBar.tsx';
 import TabMenuContent from './components/tabMenu/tabMenuContent/tabMenuContent.tsx';
+import Dashboard from "./components/dashboard/dashboard.tsx";
 function App() {
   return (
     <>
@@ -24,7 +25,7 @@ function App() {
             <span>File Tree Tab</span>
           </Tab>
           <TabMenuContent>
-            <div style={{ border: '2px dashed blue', margin: '5px', width: 'calc(100% - 10px)', height: 'calc(100% - 10px)' }}>Charts</div>
+            <Dashboard></Dashboard>
           </TabMenuContent>
         </TabController>
       </div>

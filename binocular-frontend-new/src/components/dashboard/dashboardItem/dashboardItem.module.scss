@@ -1,0 +1,27 @@
+@import "../../../variables.scss";
+
+
+.dashboardItem{
+  position: absolute;
+  @apply bg-base-200;
+  border-radius: $border-radius-default;
+  box-shadow: $shadow-default;
+  overflow: hidden;
+}
+
+.dashboardItemsInteractionBar{
+  @apply bg-base-100;
+  box-shadow: $shadow-default;
+  user-select: none;
+}
+
+.dragIndicator{
+  position: absolute;
+  border-radius: $border-radius-default;
+  @apply bg-base-100;
+  opacity: .5;
+  user-select: none;
+  overflow: hidden;
+  border: $border-default;
+  @apply border-accent;
+}
