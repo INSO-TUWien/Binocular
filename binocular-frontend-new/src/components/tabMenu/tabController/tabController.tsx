@@ -210,16 +210,6 @@ function TabController(props: { children: ReactElement<{ displayName: string; de
   const tabCountBottom = tabList.filter((tab) => tab.alignment === 'bottom').length;
   const tabCountLeft = tabList.filter((tab) => tab.alignment === 'left').length;
 
-  console.log(
-    tabBarTopCollapsed
-      ? tabBarBottomCollapsed
-        ? `calc(100% - ${tabControllerStyles.tabBarThickness} * ${tabCountBottom > 0 ? 2 : 1} - 10px)`
-        : `calc(100% - ${tabControllerStyles.tabContentThicknessHorizontal} - ${tabControllerStyles.tabBarThickness} * ${tabCountBottom > 0 ? 2 : 1}- 6px)`
-      : tabBarBottomCollapsed
-        ? `calc(100% - ${tabControllerStyles.tabContentThicknessHorizontal} - ${tabControllerStyles.tabBarThickness} * ${tabCountBottom > 0 ? 2 : 1} - 14px)`
-        : `calc(100% - ${tabControllerStyles.tabContentThicknessHorizontal} * 2 - ${tabControllerStyles.tabBarThickness} * ${tabCountBottom > 0 ? 2 : 1} - 10px)`,
-  );
-
   return (
     <div className={tabControllerStyles.tabController}>
       <TabDropHint dragState={dragState}></TabDropHint>

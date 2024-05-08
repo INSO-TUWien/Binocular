@@ -6,10 +6,31 @@
   overflow: hidden;
 }
 
-.dashboardItemsInteractionBar {
+.dashboardItemContent {
+  position: absolute;
+  width: 100%;
+  height: calc(100% - 1.5rem);
+  top: 1.5rem;
+  @apply bg-base-100;
+}
+
+.dashboardItemInteractionBar {
+  position: absolute;
   @apply bg-base-100;
   box-shadow: 0 0 10px #CCCCCC;
   user-select: none;
+  cursor: grab;
+  height: 1.5rem;
+  width: 100%;
+}
+
+.dragResizeZone {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  cursor: grabbing;
 }
 
 .dragIndicator {
@@ -21,6 +42,42 @@
   overflow: hidden;
   border: 1px solid;
   @apply border-accent;
+}
+
+.dashboardItemResizeBarTop {
+  position: absolute;
+  top: 0;
+  left: 3px;
+  width: calc(100% - 6px);
+  height: 3px;
+  cursor: ns-resize;
+}
+
+.dashboardItemResizeBarRight {
+  position: absolute;
+  top: 3px;
+  right: 0;
+  width: 3px;
+  height: calc(100% - 6px);
+  cursor: ew-resize;
+}
+
+.dashboardItemResizeBarBottom {
+  position: absolute;
+  bottom: 0;
+  left: 3px;
+  width: calc(100% - 6px);
+  height: 3px;
+  cursor: ns-resize;
+}
+
+.dashboardItemResizeBarLeft {
+  position: absolute;
+  top: 3px;
+  left: 0;
+  width: 3px;
+  height: calc(100% - 6px);
+  cursor: ew-resize;
 }
 
 /*# sourceMappingURL=dashboardItem.module.css.map */

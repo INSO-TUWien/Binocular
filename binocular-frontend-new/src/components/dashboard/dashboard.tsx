@@ -10,7 +10,7 @@ function StatusBar() {
 
   useEffect(() => {
     if (dashboardRef.current !== null) {
-      setCellSize(dashboardRef.current.offsetWidth / columnCount);
+      setCellSize(dashboardRef.current.clientWidth / columnCount);
     }
   }, [dashboardRef]);
 
@@ -49,8 +49,10 @@ function StatusBar() {
             y={0}
             width={5}
             height={4}
-            highlightDropArea={(posY, posX, width, height) => {
-              highlightDropArea(posY, posX, width, height, columnCount, rowCount);
+            colCount={columnCount}
+            rowCount={rowCount}
+            highlightDropArea={(posX, posY, width, height) => {
+              highlightDropArea(posX, posY, width, height, columnCount, rowCount);
             }}
             clearHighlightDropArea={() => {
               clearHighlightDropArea(columnCount, rowCount);
@@ -61,7 +63,7 @@ function StatusBar() {
   );
 }
 
-function highlightDropArea(posY: number, posX: number, width: number, height: number, columnCount: number, rowCount: number) {
+function highlightDropArea(posX: number, posY: number, width: number, height: number, columnCount: number, rowCount: number) {
   for (let y = 0; y < rowCount; y++) {
     for (let x = 0; x < columnCount; x++) {
       if (y > posY - 1 && x > posX - 1 && y < posY + height && x < posX + width) {

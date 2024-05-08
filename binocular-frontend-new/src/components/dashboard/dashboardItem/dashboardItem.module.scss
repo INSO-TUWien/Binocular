@@ -1,6 +1,7 @@
 @import "../../../variables.scss";
 
-
+$dashboardItemInteractionBarThickness: 1.5rem;
+$dashboardItemResizeBarThickness: 3px;
 .dashboardItem{
   position: absolute;
   @apply bg-base-200;
@@ -9,10 +10,31 @@
   overflow: hidden;
 }
 
-.dashboardItemsInteractionBar{
+.dashboardItemContent{
+  position: absolute;
+  width: 100%;
+  height: calc(100% - $dashboardItemInteractionBarThickness);
+  top: $dashboardItemInteractionBarThickness;
+  @apply bg-base-100;
+}
+
+.dashboardItemInteractionBar{
+  position: absolute;
   @apply bg-base-100;
   box-shadow: $shadow-default;
   user-select: none;
+  cursor: grab;
+  height: $dashboardItemInteractionBarThickness;
+  width: 100%;
+}
+
+.dragResizeZone{
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  cursor: grabbing;
 }
 
 .dragIndicator{
@@ -24,4 +46,40 @@
   overflow: hidden;
   border: $border-default;
   @apply border-accent;
+}
+
+.dashboardItemResizeBarTop{
+  position: absolute;
+  top: 0;
+  left: $dashboardItemResizeBarThickness;
+  width: calc(100% - $dashboardItemResizeBarThickness * 2);
+  height: $dashboardItemResizeBarThickness;
+  cursor: ns-resize;
+}
+
+.dashboardItemResizeBarRight{
+  position: absolute;
+  top: $dashboardItemResizeBarThickness;
+  right: 0;
+  width: $dashboardItemResizeBarThickness;
+  height: calc(100% - $dashboardItemResizeBarThickness * 2);
+  cursor: ew-resize;
+}
+
+.dashboardItemResizeBarBottom{
+  position: absolute;
+  bottom: 0;
+  left: $dashboardItemResizeBarThickness;
+  width: calc(100% - $dashboardItemResizeBarThickness * 2);
+  height: $dashboardItemResizeBarThickness;
+  cursor: ns-resize;
+}
+
+.dashboardItemResizeBarLeft{
+  position: absolute;
+  top: $dashboardItemResizeBarThickness;
+  left: 0;
+  width: $dashboardItemResizeBarThickness;
+  height: calc(100% - $dashboardItemResizeBarThickness * 2);
+  cursor: ew-resize;
 }
