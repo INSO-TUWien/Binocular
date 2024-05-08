@@ -62,8 +62,8 @@ class Jira {
     return promises;
   }
 
-  getCommitDetails(issueId: string, summaryObject: JiraCommitsSummary) {
-    if (!summaryObject) {
+  getCommitDetails(issueId: string, summaryObject: JiraCommitsSummary, areCommitsInformationUpdated: boolean) {
+    if (!summaryObject || !areCommitsInformationUpdated) {
       return Promise.resolve([]);
     }
     const promises: Promise<JiraCommitsFullDetails[]>[] = this.getDetailsPromises(issueId, summaryObject);
