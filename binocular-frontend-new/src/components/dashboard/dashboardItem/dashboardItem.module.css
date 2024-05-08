@@ -2,6 +2,8 @@
   position: absolute;
   @apply bg-base-200;
   border-radius: 5px;
+  border: 1px solid;
+  @apply border-base-300;
   box-shadow: 0 0 10px #CCCCCC;
   overflow: hidden;
 }

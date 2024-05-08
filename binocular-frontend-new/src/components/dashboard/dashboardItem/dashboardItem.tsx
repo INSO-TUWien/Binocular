@@ -39,10 +39,10 @@ function DashboardItem(props: {
       <div
         className={dashboardItemStyles.dashboardItem}
         style={{
-          top: props.cellSize * y + 10,
-          left: props.cellSize * x + 10,
-          width: props.cellSize * width - 20,
-          height: props.cellSize * height - 20,
+          top: `calc(${100.0/props.rowCount*y}% + 10px)`,
+          left: `calc(${100.0/props.colCount*x}% + 10px)`,
+          width: `calc(${100.0/props.colCount*width}% - 20px)`,
+          height: `calc(${100.0/props.rowCount*height}% - 20px)`,
         }}>
         <div className={dashboardItemStyles.dashboardItemContent}>test</div>
         <div
@@ -84,10 +84,10 @@ function DashboardItem(props: {
             ref={dragIndicatorRef}
             className={dashboardItemStyles.dragIndicator}
             style={{
-              top: props.cellSize * y + 10,
-              left: props.cellSize * x + 10,
-              width: props.cellSize * width - 20,
-              height: props.cellSize * height - 20,
+              top: `calc(${100.0/props.rowCount*y}% + 10px)`,
+              left: `calc(${100.0/props.colCount*x}% + 10px)`,
+              width: `calc(${100.0/props.colCount*width}% - 20px)`,
+              height: `calc(${100.0/props.rowCount*height}% - 20px)`,
             }}></div>
           <div
             className={dashboardItemStyles.dragResizeZone}
@@ -95,36 +95,32 @@ function DashboardItem(props: {
               event.stopPropagation();
               const target = dragIndicatorRef.current;
               if (target !== null) {
-                const currX = Number(target.style.left.substring(0, target.style.left.length - 2));
-                const currY = Number(target.style.top.substring(0, target.style.top.length - 2));
-                const currWidth = Number(target.style.width.substring(0, target.style.width.length - 2));
-                const currHeight = Number(target.style.height.substring(0, target.style.height.length - 2));
                 switch (dragResizeMode) {
                   case dragResizeModes.drag:
-                    target.style.top = currY + event.movementY + 'px';
-                    target.style.left = currX + event.movementX + 'px';
-                    setTargetX(Math.round((currX + event.movementX) / props.cellSize));
-                    setTargetY(Math.round((currY + event.movementY) / props.cellSize));
+                    target.style.left = target.offsetLeft + event.movementX + 'px';
+                    target.style.top = target.offsetTop + event.movementY + 'px';
+                    setTargetX(Math.round((target.offsetLeft + event.movementX) / props.cellSize));
+                    setTargetY(Math.round((target.offsetTop + event.movementY) / props.cellSize));
                     break;
                   case dragResizeModes.resizeTop:
-                    target.style.top = currY + event.movementY + 'px';
-                    target.style.height = currHeight - event.movementY + 'px';
-                    setTargetY(Math.round((currY + event.movementY) / props.cellSize));
-                    setTargetHeight(Math.round((currHeight + event.movementY) / props.cellSize));
+                    target.style.top = target.offsetTop + event.movementY + 'px';
+                    target.style.height = target.offsetHeight - event.movementY + 'px';
+                    setTargetY(Math.round((target.offsetTop + event.movementY) / props.cellSize));
+                    setTargetHeight(Math.round((target.offsetHeight  + event.movementY) / props.cellSize));
                     break;
                   case dragResizeModes.resizeRight:
-                    target.style.width = currWidth + event.movementX + 'px';
-                    setTargetWidth(Math.round((currWidth + event.movementX) / props.cellSize));
+                    target.style.width = target.offsetWidth  + event.movementX + 'px';
+                    setTargetWidth(Math.round((target.offsetWidth + event.movementX) / props.cellSize));
                     break;
                   case dragResizeModes.resizeBottom:
-                    target.style.height = currHeight + event.movementY + 'px';
-                    setTargetHeight(Math.round((currHeight + event.movementX) / props.cellSize));
+                    target.style.height = target.offsetHeight  + event.movementY + 'px';
+                    setTargetHeight(Math.round((target.offsetHeight  + event.movementX) / props.cellSize));
                     break;
                   case dragResizeModes.resizeLeft:
-                    target.style.left = currX + event.movementX + 'px';
-                    target.style.width = currWidth - event.movementX + 'px';
-                    setTargetX(Math.round((currX + event.movementX) / props.cellSize));
-                    setTargetWidth(Math.round((currWidth + event.movementX) / props.cellSize));
+                    target.style.left = target.offsetLeft + event.movementX + 'px';
+                    target.style.width = target.offsetWidth  - event.movementX + 'px';
+                    setTargetX(Math.round((target.offsetLeft + event.movementX) / props.cellSize));
+                    setTargetWidth(Math.round((target.offsetWidth  + event.movementX) / props.cellSize));
                     break;
                   default:
                     break;
@@ -137,11 +133,27 @@ function DashboardItem(props: {
               setDragResizeMode(dragResizeModes.none);
               props.clearHighlightDropArea();
               if (targetX < 0 || targetY < 0 || targetX + targetWidth > props.colCount || targetY + targetHeight > props.rowCount) {
+                setTargetX(x)
+                setTargetY(y)
+                setTargetWidth(width);
+                setTargetHeight(height);
                 console.warn(
                   `Cannot move/resize to position ${targetX},${targetY} with size ${targetWidth},${targetHeight} as its out of bounds`,
                 );
                 return;
               }
+
+              if (targetWidth < 1 || targetHeight < 1 ) {
+                setTargetX(x)
+                setTargetY(y)
+                setTargetWidth(width);
+                setTargetHeight(height);
+                console.warn(
+                  `Cannot resize to size ${targetWidth},${targetHeight} as its too small`,
+                );
+                return;
+              }
+
               setX(targetX);
               setY(targetY);
               setWidth(targetWidth);

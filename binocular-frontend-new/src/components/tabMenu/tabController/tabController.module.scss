@@ -164,4 +164,5 @@
   box-shadow: $shadow-default-inset;
   border-radius: $border-radius-default;
   overflow: hidden;
+  transition: all ease-in-out .2s;
 }

@@ -6,6 +6,8 @@ $dashboardItemResizeBarThickness: 3px;
   position: absolute;
   @apply bg-base-200;
   border-radius: $border-radius-default;
+  border: $border-default;
+  @apply border-base-300;
   box-shadow: $shadow-default;
   overflow: hidden;
 }

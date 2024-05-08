@@ -160,6 +160,7 @@
   box-shadow: 0 0 10px #CCCCCC inset;
   border-radius: 5px;
   overflow: hidden;
+  transition: all ease-in-out 0.2s;
 }
 
 /*# sourceMappingURL=tabController.module.css.map */

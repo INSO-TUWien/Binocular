@@ -29,7 +29,7 @@ export default {
           "neutral": "#3d4451",
           "base-100": "#FFFFFF",
           "base-200": "#FAFAFA",
-          "base-300": "#CCCCCC",
+          "base-300": "#E0E0E0",
         }
       },
     ], // false: only light + dark | true: all themes | array: specific themes like this ["light", "dark", "cupcake"]

@@ -10,7 +10,7 @@ function StatusBar() {
 
   useEffect(() => {
     if (dashboardRef.current !== null) {
-      setCellSize(dashboardRef.current.clientWidth / columnCount);
+      setCellSize(dashboardRef.current.offsetWidth / columnCount);
     }
   }, [dashboardRef]);
 

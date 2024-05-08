@@ -3,17 +3,14 @@
 
 .dropZone{
   position: absolute;
-  border-radius: $border-radius-default;
-  background: repeating-linear-gradient(
-      45deg,
-      $highlight-color-primary,
-      white 2px,
-      white 8px,
-      $highlight-color-primary 10px
-  );
+  @apply bg-accent/10;
   display: flex;
   justify-content: center;
   align-items: center;
+}
+
+.dropZone:hover{
+  @apply bg-accent/50;
 }
 
 .dropZoneTop{
@@ -46,22 +43,16 @@
 }
 
 .dropZoneVertical{
-  height: calc(100% - $tab-bar-thickness);
+  height: calc(100% - $tab-bar-thickness * 2);
   width: $tab-bar-thickness;
 }
 
 .dropZoneHorizontal>div{
-  background: $highlight-color-primary;
-  color: white;
-  padding: .25rem;
-  border-radius: 1rem;
+  @apply text-accent;
 }
 
 .dropZoneVertical>div{
-  background: $highlight-color-primary;
-  color: white;
-  padding: .25rem;
-  border-radius: 1rem;
+  @apply text-accent;
   writing-mode: vertical-lr;
   text-orientation: mixed;
 }

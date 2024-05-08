@@ -6,8 +6,7 @@
   position: relative;
   height: calc($tab-bar-thickness - $border-default-width - 5px);
   border: $border-default;
-  @apply border-base-300;
-  border-color: transparent;
+  @apply border-transparent;
   line-height: calc($tab-bar-thickness - $border-default-width);
   padding: 0 1rem;
   margin: 0 .25rem;
