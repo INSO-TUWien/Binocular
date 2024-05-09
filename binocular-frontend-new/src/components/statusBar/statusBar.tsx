@@ -14,7 +14,9 @@ function StatusBar(props: { vcsIndexer: string; itsIndexer: string; ciIndexer: s
           <span className={statusBarStyles.text}>Repository: {props.repository}</span>
         </div>
         <div className={statusBarStyles.statusRight}>
-          <span className={statusBarStyles.text}>Indexing State</span>
+          <span className={statusBarStyles.text}>
+            Indexing <span className="loading loading-spinner loading-xs text-accent"></span>
+          </span>
         </div>
       </div>
     </>

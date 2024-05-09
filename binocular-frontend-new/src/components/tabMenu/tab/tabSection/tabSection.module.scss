@@ -7,6 +7,7 @@
   padding: .5rem;
   border-right: 1px solid;
   @apply border-base-300;
+  float: left;
 }
 
 .tabSectionVertical{
@@ -16,4 +17,10 @@
   padding: .5rem;
   border-bottom: 1px solid;
   @apply border-base-300;
+  float: left;
+}
+
+.tabSectionName{
+  font-size: .6rem;
+  @apply text-neutral-400;
 }

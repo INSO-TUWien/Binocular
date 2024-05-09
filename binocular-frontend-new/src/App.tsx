@@ -3,19 +3,22 @@ import Tab from './components/tabMenu/tab/tab.tsx';
 import appStyles from './app.module.scss';
 import StatusBar from './components/statusBar/statusBar.tsx';
 import TabMenuContent from './components/tabMenu/tabMenuContent/tabMenuContent.tsx';
-import Dashboard from "./components/dashboard/dashboard.tsx";
-import TabSection from "./components/tabMenu/tab/tabSection/tabSection.tsx";
+import Dashboard from './components/dashboard/dashboard.tsx';
+import TabSection from './components/tabMenu/tab/tabSection/tabSection.tsx';
+import ParametersDateRange from './components/tabs/parameters/parametersDateRange/parametersDateRange.tsx';
+import ParametersGeneral from './components/tabs/parameters/parametersGeneral/parametersGeneral.tsx';
+import InformationDialog from './components/informationDialog/informationDialog.tsx';
 function App() {
   return (
     <>
       <div className={appStyles.mainView}>
         <TabController appName={'Binocular'}>
           <Tab displayName={'Parameters'} alignment={'top'}>
-            <TabSection>
-              <span>Parameter Section 1</span>
+            <TabSection name={'Date Range'}>
+              <ParametersDateRange></ParametersDateRange>
             </TabSection>
-            <TabSection>
-              <span>Parameter Section 2</span>
+            <TabSection name={'General'}>
+              <ParametersGeneral></ParametersGeneral>
             </TabSection>
           </Tab>
           <Tab displayName={'Components'} alignment={'top'}>
@@ -42,6 +45,7 @@ function App() {
           ciIndexer={'CI Placeholder'}
           repository={'Repository Placeholder'}></StatusBar>
       </div>
+      <InformationDialog></InformationDialog>
     </>
   );
 }

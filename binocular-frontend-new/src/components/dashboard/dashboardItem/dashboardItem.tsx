@@ -1,5 +1,6 @@
 import dashboardItemStyles from './dashboardItem.module.scss';
 import { createRef, useState } from 'react';
+import { showDialog } from '../../informationDialog/dialogHelper.ts';
 
 enum dragResizeModes {
   none,
@@ -39,10 +40,10 @@ function DashboardItem(props: {
       <div
         className={dashboardItemStyles.dashboardItem}
         style={{
-          top: `calc(${100.0/props.rowCount*y}% + 10px)`,
-          left: `calc(${100.0/props.colCount*x}% + 10px)`,
-          width: `calc(${100.0/props.colCount*width}% - 20px)`,
-          height: `calc(${100.0/props.rowCount*height}% - 20px)`,
+          top: `calc(${(100.0 / props.rowCount) * y}% + 10px)`,
+          left: `calc(${(100.0 / props.colCount) * x}% + 10px)`,
+          width: `calc(${(100.0 / props.colCount) * width}% - 20px)`,
+          height: `calc(${(100.0 / props.rowCount) * height}% - 20px)`,
         }}>
         <div className={dashboardItemStyles.dashboardItemContent}>test</div>
         <div
@@ -84,10 +85,10 @@ function DashboardItem(props: {
             ref={dragIndicatorRef}
             className={dashboardItemStyles.dragIndicator}
             style={{
-              top: `calc(${100.0/props.rowCount*y}% + 10px)`,
-              left: `calc(${100.0/props.colCount*x}% + 10px)`,
-              width: `calc(${100.0/props.colCount*width}% - 20px)`,
-              height: `calc(${100.0/props.rowCount*height}% - 20px)`,
+              top: `calc(${(100.0 / props.rowCount) * y}% + 10px)`,
+              left: `calc(${(100.0 / props.colCount) * x}% + 10px)`,
+              width: `calc(${(100.0 / props.colCount) * width}% - 20px)`,
+              height: `calc(${(100.0 / props.rowCount) * height}% - 20px)`,
             }}></div>
           <div
             className={dashboardItemStyles.dragResizeZone}
@@ -106,21 +107,21 @@ function DashboardItem(props: {
                     target.style.top = target.offsetTop + event.movementY + 'px';
                     target.style.height = target.offsetHeight - event.movementY + 'px';
                     setTargetY(Math.round((target.offsetTop + event.movementY) / props.cellSize));
-                    setTargetHeight(Math.round((target.offsetHeight  + event.movementY) / props.cellSize));
+                    setTargetHeight(Math.round((target.offsetHeight + event.movementY) / props.cellSize));
                     break;
                   case dragResizeModes.resizeRight:
-                    target.style.width = target.offsetWidth  + event.movementX + 'px';
+                    target.style.width = target.offsetWidth + event.movementX + 'px';
                     setTargetWidth(Math.round((target.offsetWidth + event.movementX) / props.cellSize));
                     break;
                   case dragResizeModes.resizeBottom:
-                    target.style.height = target.offsetHeight  + event.movementY + 'px';
-                    setTargetHeight(Math.round((target.offsetHeight  + event.movementX) / props.cellSize));
+                    target.style.height = target.offsetHeight + event.movementY + 'px';
+                    setTargetHeight(Math.round((target.offsetHeight + event.movementX) / props.cellSize));
                     break;
                   case dragResizeModes.resizeLeft:
                     target.style.left = target.offsetLeft + event.movementX + 'px';
-                    target.style.width = target.offsetWidth  - event.movementX + 'px';
+                    target.style.width = target.offsetWidth - event.movementX + 'px';
                     setTargetX(Math.round((target.offsetLeft + event.movementX) / props.cellSize));
-                    setTargetWidth(Math.round((target.offsetWidth  + event.movementX) / props.cellSize));
+                    setTargetWidth(Math.round((target.offsetWidth + event.movementX) / props.cellSize));
                     break;
                   default:
                     break;
@@ -133,24 +134,27 @@ function DashboardItem(props: {
               setDragResizeMode(dragResizeModes.none);
               props.clearHighlightDropArea();
               if (targetX < 0 || targetY < 0 || targetX + targetWidth > props.colCount || targetY + targetHeight > props.rowCount) {
-                setTargetX(x)
-                setTargetY(y)
+                setTargetX(x);
+                setTargetY(y);
                 setTargetWidth(width);
                 setTargetHeight(height);
+                showDialog(
+                  'Warning!',
+                  `Cannot move/resize to position ${targetX},${targetY} with size ${targetWidth},${targetHeight} as its out of bounds`,
+                );
                 console.warn(
                   `Cannot move/resize to position ${targetX},${targetY} with size ${targetWidth},${targetHeight} as its out of bounds`,
                 );
                 return;
               }
 
-              if (targetWidth < 1 || targetHeight < 1 ) {
-                setTargetX(x)
-                setTargetY(y)
+              if (targetWidth < 1 || targetHeight < 1) {
+                setTargetX(x);
+                setTargetY(y);
                 setTargetWidth(width);
                 setTargetHeight(height);
-                console.warn(
-                  `Cannot resize to size ${targetWidth},${targetHeight} as its too small`,
-                );
+                showDialog('Warning!', `Cannot resize to size ${targetWidth},${targetHeight} as its too small`);
+                console.warn(`Cannot resize to size ${targetWidth},${targetHeight} as its too small`);
                 return;
               }
 
