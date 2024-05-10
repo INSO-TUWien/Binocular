@@ -17,6 +17,11 @@ module.exports = {
       'warn',
       { allowConstantExport: true },
     ],
+    '@typescript-eslint/no-unsafe-return':0,
+    '@typescript-eslint/no-unsafe-assignment':0,
+    '@typescript-eslint/no-unsafe-call':0,
+    '@typescript-eslint/no-unsafe-member-access':0,
+    '@typescript-eslint/no-unsafe-argument':0,
     'prettier/prettier':[
       'error',
       {

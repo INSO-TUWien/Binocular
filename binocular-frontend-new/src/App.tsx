@@ -8,6 +8,8 @@ import TabSection from './components/tabMenu/tab/tabSection/tabSection.tsx';
 import ParametersDateRange from './components/tabs/parameters/parametersDateRange/parametersDateRange.tsx';
 import ParametersGeneral from './components/tabs/parameters/parametersGeneral/parametersGeneral.tsx';
 import InformationDialog from './components/informationDialog/informationDialog.tsx';
+import VisualizationSelector from './components/tabs/components/visualizationSelector/visualizationSelector.tsx';
+
 function App() {
   return (
     <>
@@ -22,7 +24,9 @@ function App() {
             </TabSection>
           </Tab>
           <Tab displayName={'Components'} alignment={'top'}>
-            <span>Component Tab</span>
+            <TabSection name={'Visualization Selector'}>
+              <VisualizationSelector></VisualizationSelector>
+            </TabSection>
           </Tab>
           <Tab displayName={'Sprints'} alignment={'top'}>
             <span>Sprint Tab</span>

@@ -1,0 +1,20 @@
+.selector {
+  max-width: 100%;
+  box-shadow: 0 0 10px #CCCCCC inset;
+  border-radius: 5px;
+  height: 3rem;
+}
+
+.visualizationButton {
+  display: inline-block;
+  float: left;
+  margin: 0.5rem;
+  height: 2rem;
+  width: 3rem;
+  overflow: hidden;
+  box-shadow: 0 0 10px #CCCCCC;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+/*# sourceMappingURL=visualizationSelector.module.css.map */

@@ -42,4 +42,26 @@
   opacity: 1;
 }
 
+.dragIndicator {
+  position: absolute;
+  border-radius: 5px;
+  opacity: 0.5;
+  user-select: none;
+  overflow: hidden;
+  border: 1px solid;
+  @apply border-accent;
+  display: none;
+  backdrop-filter: blur(30px);
+  -webkit-backdrop-filter: blur(30px);
+}
+
+.dragResizeZone {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  cursor: grabbing;
+}
+
 /*# sourceMappingURL=dashboard.module.css.map */

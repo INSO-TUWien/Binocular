@@ -1,4 +1,4 @@
-import {ReactElement, useEffect, useState} from 'react';
+import { ReactElement, useEffect, useState } from 'react';
 import tabControllerStyles from './tabController.module.scss';
 import tabHandleStyles from './tabHandle.module.scss';
 import TabDropHint from './tabDropHint/tabDropHint.tsx';
@@ -7,15 +7,16 @@ import TabMenuContent from '../tabMenuContent/tabMenuContent.tsx';
 
 interface TabType {
   selected: boolean;
-  content: ReactElement[]|ReactElement;
+  content: ReactElement[] | ReactElement;
   displayName: string;
   alignment: string;
   position: number;
 }
 
-
-
-function TabController(props: { children: ReactElement<{children: ReactElement[]|ReactElement; displayName: string; alignment: string }>[]; appName: string }) {
+function TabController(props: {
+  children: ReactElement<{ children: ReactElement[] | ReactElement; displayName: string; alignment: string }>[];
+  appName: string;
+}) {
   const [tabList, setTabList] = useState(generateTabs(props.children));
 
   const [dragState, setDragState] = useState(false);
@@ -32,7 +33,7 @@ function TabController(props: { children: ReactElement<{children: ReactElement[]
   const tabCountLeft = tabList.filter((tab) => tab.alignment === 'left').length;
 
   useEffect(() => {
-    setTabList(generateTabs(props.children))
+    setTabList(generateTabs(props.children));
   }, [props.children]);
 
   return (
@@ -43,9 +44,9 @@ function TabController(props: { children: ReactElement<{children: ReactElement[]
           className={tabControllerStyles.content}
           style={{
             top: `calc(${tabControllerStyles.tabBarThickness} + ${tabControllerStyles.tabContentThicknessHorizontal} * ${tabBarTopCollapsed ? 0 : 1} + 4px)`,
-            left: `calc(${tabControllerStyles.tabBarThickness} * ${tabCountLeft > 0||dragState ? 1 : 0} + ${tabControllerStyles.tabContentThicknessVertical} * ${tabBarLeftCollapsed ? 0 : 1} + 4px)`,
-            height: `calc(100% - ${tabControllerStyles.tabContentThicknessHorizontal} * ${(tabBarTopCollapsed ? 0 : 1) + (tabBarBottomCollapsed ? 0 : 1)} - ${tabControllerStyles.tabBarThickness} * ${tabCountBottom > 0||dragState ? 2 : 1} - 10px)`,
-            width: `calc(100% -  ${tabControllerStyles.tabContentThicknessVertical} * ${(tabBarLeftCollapsed ? 0 : 1) + (tabBarRightCollapsed ? 0 : 1)} - ${tabControllerStyles.tabBarThickness} * ${(tabCountLeft > 0||dragState ? 1 : 0) + (tabCountRight > 0||dragState ? 1 : 0)} - 8px)`,
+            left: `calc(${tabControllerStyles.tabBarThickness} * ${tabCountLeft > 0 || dragState ? 1 : 0} + ${tabControllerStyles.tabContentThicknessVertical} * ${tabBarLeftCollapsed ? 0 : 1} + 4px)`,
+            height: `calc(100% - ${tabControllerStyles.tabContentThicknessHorizontal} * ${(tabBarTopCollapsed ? 0 : 1) + (tabBarBottomCollapsed ? 0 : 1)} - ${tabControllerStyles.tabBarThickness} * ${tabCountBottom > 0 || dragState ? 2 : 1} - 10px)`,
+            width: `calc(100% -  ${tabControllerStyles.tabContentThicknessVertical} * ${(tabBarLeftCollapsed ? 0 : 1) + (tabBarRightCollapsed ? 0 : 1)} - ${tabControllerStyles.tabBarThickness} * ${(tabCountLeft > 0 || dragState ? 1 : 0) + (tabCountRight > 0 || dragState ? 1 : 0)} - 8px)`,
           }}>
           {tabMenuContent}
         </div>
@@ -150,11 +151,17 @@ function TabController(props: { children: ReactElement<{children: ReactElement[]
       </>
       <>
         <div className={tabControllerStyles.tabContentTop + (tabBarTopCollapsed ? ' ' + tabControllerStyles.tabContentCollapsed : '')}>
-            {tabList
+          {
+            tabList
               .filter((tab) => tab.alignment === 'top' && tab.selected)
-              .map((tab)=> {
-                return <Tab displayName={tab.displayName} alignment={'top'}>{tab.content}</Tab>;
-              })[0]}
+              .map((tab, i) => {
+                return (
+                  <Tab key={'tabTop' + i} displayName={tab.displayName} alignment={'top'}>
+                    {tab.content}
+                  </Tab>
+                );
+              })[0]
+          }
         </div>
         <div
           className={tabControllerStyles.tabContentRight + (tabBarRightCollapsed ? ' ' + tabControllerStyles.tabContentCollapsed : '')}
@@ -168,21 +175,31 @@ function TabController(props: { children: ReactElement<{children: ReactElement[]
                 ? `calc(calc(100% - 4px  - ${tabControllerStyles.tabBarThickness} * 2 - ${tabControllerStyles.tabContentThicknessHorizontal})`
                 : `calc(calc(100% - 4px  - ${tabControllerStyles.tabBarThickness} * 2 - ${tabControllerStyles.tabContentThicknessHorizontal} * 2)`,
           }}>
-            {tabList
+          {
+            tabList
               .filter((tab) => tab.alignment === 'right' && tab.selected)
-              .map((tab)=> {
-                return <Tab displayName={tab.displayName} alignment={'right'}>{tab.content}</Tab>;
+              .map((tab, i) => {
+                return (
+                  <Tab key={'tabRight' + i} displayName={tab.displayName} alignment={'right'}>
+                    {tab.content}
+                  </Tab>
+                );
               })[0]
-            }
+          }
         </div>
         <div
           className={tabControllerStyles.tabContentBottom + (tabBarBottomCollapsed ? ' ' + tabControllerStyles.tabContentCollapsed : '')}>
-            {tabList
+          {
+            tabList
               .filter((tab) => tab.alignment === 'bottom' && tab.selected)
-              .map((tab)=> {
-                return <Tab displayName={tab.displayName} alignment={'bottom'}>{tab.content}</Tab>;
+              .map((tab, i) => {
+                return (
+                  <Tab key={'tabBottom' + i} displayName={tab.displayName} alignment={'bottom'}>
+                    {tab.content}
+                  </Tab>
+                );
               })[0]
-            }
+          }
         </div>
         <div
           className={tabControllerStyles.tabContentLeft + (tabBarLeftCollapsed ? ' ' + tabControllerStyles.tabContentCollapsed : '')}
@@ -196,12 +213,17 @@ function TabController(props: { children: ReactElement<{children: ReactElement[]
                 ? `calc(calc(100% - 4px  - ${tabControllerStyles.tabBarThickness} * 2 - ${tabControllerStyles.tabContentThicknessHorizontal})`
                 : `calc(calc(100% - 4px  - ${tabControllerStyles.tabBarThickness} * 2 - ${tabControllerStyles.tabContentThicknessHorizontal} * 2)`,
           }}>
-            {tabList
+          {
+            tabList
               .filter((tab) => tab.alignment === 'left' && tab.selected)
-              .map((tab)=> {
-                return <Tab displayName={tab.displayName} alignment={'left'}>{tab.content}</Tab>;
+              .map((tab, i) => {
+                return (
+                  <Tab key={'tabLeft' + i} displayName={tab.displayName} alignment={'left'}>
+                    {tab.content}
+                  </Tab>
+                );
               })[0]
-            }
+          }
         </div>
       </>
     </div>
@@ -216,8 +238,9 @@ function generateTabs(
   children: React.ReactElement<{
     children: React.ReactElement[] | React.ReactElement;
     displayName: string;
-    alignment: string
-  }>[]) {
+    alignment: string;
+  }>[],
+) {
   const firstFound = [false, false, false, false];
   let tabOrder = 0;
 
@@ -259,8 +282,8 @@ function generateTabs(
  * Helper Function to generate the click and draggable handle of each tab
  * @param tab Tab object that includes all necessary information about a tab
  * @param tabList List of all tabs
- * @param setTabList Set state function for a list of all tabs
- * @param setDragState Set state Function for drag and drop state of tabs
+ * @param setTabList Set redux function for a list of all tabs
+ * @param setDragState Set redux Function for drag and drop redux of tabs
  */
 function generateHandel(
   tab: TabType,
@@ -339,8 +362,8 @@ function generateHandel(
  * @param name Name of the tab
  * @param alignment New alignment of the tab
  * @param tabList List of all tabs
- * @param setTabList Set state function for a list of all tabs
- * @param setDragState Set state Function for drag and drop state of tabs
+ * @param setTabList Set redux function for a list of all tabs
+ * @param setDragState Set redux Function for drag and drop redux of tabs
  */
 function moveTab(
   name: string,
@@ -370,8 +393,8 @@ function moveTab(
  * @param name Name of the tab that is switched
  * @param targetTabName Name of the other tab with whom the first tab is switched
  * @param tabList List of all tabs
- * @param setTabList Set state function for a list of all tabs
- * @param setDragState Set state Function for drag and drop state of tabs
+ * @param setTabList Set redux function for a list of all tabs
+ * @param setDragState Set redux Function for drag and drop redux of tabs
  */
 function switchTabs(
   name: string,

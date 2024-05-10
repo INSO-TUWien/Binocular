@@ -30,26 +30,6 @@ $dashboardItemResizeBarThickness: 3px;
   width: 100%;
 }
 
-.dragResizeZone{
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  cursor: grabbing;
-}
-
-.dragIndicator{
-  position: absolute;
-  border-radius: $border-radius-default;
-  @apply bg-base-100;
-  opacity: .5;
-  user-select: none;
-  overflow: hidden;
-  border: $border-default;
-  @apply border-accent;
-}
-
 .dashboardItemResizeBarTop{
   position: absolute;
   top: 0;

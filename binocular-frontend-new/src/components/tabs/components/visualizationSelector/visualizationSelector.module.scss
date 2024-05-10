@@ -1,0 +1,21 @@
+@import '../../../../variables.scss';
+
+
+.selector{
+  max-width: 100%;
+  box-shadow: $shadow-default-inset;
+  border-radius: $border-radius-default;
+  height: 3rem;
+}
+
+.visualizationButton{
+  display: inline-block;
+  float:left;
+  margin: .5rem;
+  height: 2rem;
+  width: 3rem;
+  overflow: hidden;
+  box-shadow: $shadow-default;
+  border-radius: $border-radius-default;
+  cursor: pointer;
+}
