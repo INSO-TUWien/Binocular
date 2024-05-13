@@ -11,6 +11,10 @@ import IssueAccountConnection from '../../models/connections/IssueAccountConnect
 import MergeRequestAccountConnection from '../../models/connections/MergeRequestAccountConnection';
 import IssueMilestoneConnection from '../../models/connections/IssueMilestoneConnection';
 import MergeRequestMilestoneConnection from '../../models/connections/MergeRequestMilestoneConnection';
+import Note from '../../models/models/Note';
+import NoteAccountConnection from '../../models/connections/NoteAccountConnection';
+import IssueNoteConnection from '../../models/connections/IssueNoteConnection';
+import MergeRequestNoteConnection from '../../models/connections/MergeRequestNoteConnection';
 
 const log = debug('idx:its:gitlab');
 
@@ -105,10 +109,13 @@ class GitLabITSIndexer extends BaseGitLabIndexer {
                 assigneesEntries.push((await Account.ensureGitLabAccount(assignee))[0]);
               }
 
+              // array that stores the persisted notes in order to connect them to the issue later on
+              let noteEntries = [];
+
               // if the issue is not yet persisted or has been updated since it has last been persisted, process it
               if (!existingIssue || new Date(existingIssue.updatedAt).getTime() < new Date(issue.updated_at).getTime()) {
                 log('Processing issue #' + issue.iid);
-                // first, get the mentioned commits
+                // first, get the mentioned commits and notes (used for time-tracking data)
                 const results = await this.processComments(project, issue);
                 const mentions = results[0];
                 const closedAt = results[1];
@@ -118,9 +125,11 @@ class GitLabITSIndexer extends BaseGitLabIndexer {
                   {
                     mentions,
                     closedAt,
-                    notes,
                   },
                 );
+
+                // process notes
+                noteEntries = await this.processNotes(notes);
 
                 // store the milestone this issue belongs to separately
                 const milestoneIid = issueData.milestone?.iid;
@@ -140,7 +149,6 @@ class GitLabITSIndexer extends BaseGitLabIndexer {
                   'projectId',
                   'timeStats',
                   'mentions',
-                  'notes',
                 ]);
 
                 // if this is a new issue, persist it
@@ -161,14 +169,17 @@ class GitLabITSIndexer extends BaseGitLabIndexer {
                 log('Skipping issue #' + issue.iid);
                 omitCount++;
               }
+
+              // connect issue to accounts and notes
               await this.connectIssuesToUsers(IssueAccountConnection, issueEntry, authorEntry, assigneesEntries);
+              await this.connectIssuesToNotes(IssueNoteConnection, issueEntry, noteEntries);
               this.reporter.finishIssue();
             }
           });
 
         await this.gitlab.getMergeRequests(project.id).collect(async (mergeRequests) => {
           for (const mergeRequest of mergeRequests) {
-            const existingMergeRequest = await MergeRequest.findOneByExample({ id: String(mergeRequest.id) });
+            const existingMergeRequest = await MergeRequest.findOneByExample({ id: `${mergeRequest.id}` });
 
             // first, persist the author/assignees associated to this MR
             const authorEntry = (await Account.ensureGitLabAccount(mergeRequest.author))[0];
@@ -179,22 +190,20 @@ class GitLabITSIndexer extends BaseGitLabIndexer {
 
             let mrEntry = existingMergeRequest;
 
+            // array that stores the persisted notes in order to connect them to the issue later on
+            let noteEntries = [];
+
             if (!existingMergeRequest || new Date(existingMergeRequest.updatedAt).getTime() < new Date(mergeRequest.updated_at).getTime()) {
               log('Processing mergeRequest #' + mergeRequest.iid);
               await this.processMergeRequestNotes(project, mergeRequest)
                 .then(async (notes) => {
-                  let mergeRequestData = _.merge(
-                    _.mapKeys(mergeRequest, (v, k) => _.camelCase(k)),
-                    {
-                      notes,
-                    },
-                  );
+                  noteEntries = await this.processNotes(notes);
 
                   // store the milestone this issue belongs to separately
-                  const milestoneIid = mergeRequestData.milestone?.iid;
+                  const milestoneIid = mergeRequest.milestone?.iid;
 
                   // only keep properties from MergeRequestDto
-                  mergeRequestData = _.pick(mergeRequestData, [
+                  const mergeRequestDto = _.pick(mergeRequest, [
                     'id',
                     'iid',
                     'title',
@@ -207,12 +216,11 @@ class GitLabITSIndexer extends BaseGitLabIndexer {
                     'webUrl',
                     'projectId',
                     'mentions',
-                    'notes',
                   ]);
                   if (!existingMergeRequest) {
-                    mrEntry = (await MergeRequest.persist(mergeRequestData))[0];
+                    mrEntry = (await MergeRequest.persist(mergeRequestDto))[0];
                   } else {
-                    _.assign(existingMergeRequest, mergeRequestData);
+                    _.assign(existingMergeRequest, mergeRequestDto);
                     mrEntry = await MergeRequest.save(existingMergeRequest);
                   }
                   if (milestoneIid !== null && milestoneIid !== undefined) {
@@ -225,6 +233,7 @@ class GitLabITSIndexer extends BaseGitLabIndexer {
               omitMergeRequestCount++;
             }
             await this.connectIssuesToUsers(MergeRequestAccountConnection, mrEntry, authorEntry, assigneesEntries);
+            await this.connectIssuesToNotes(MergeRequestNoteConnection, mrEntry, noteEntries);
             this.reporter.finishMergeRequest();
           }
         });
@@ -268,6 +277,35 @@ class GitLabITSIndexer extends BaseGitLabIndexer {
     return this.stopping;
   }
 
+  processNotes = async (notes) => {
+    const noteEntries = [];
+    for (const note of notes) {
+      const newNote = {
+        id: note.id,
+        body: note.body,
+        createdAt: note.created_at,
+        updatedAt: note.updated_at,
+        system: note.system,
+        resolvable: note.resolvable,
+        confidential: note.confidential,
+        internal: note.internal,
+        imported: note.imported,
+        importedFrom: note.imported_from,
+      };
+
+      // persist author and note
+      const noteAuthorEntry = (await Account.ensureGitLabAccount(note.author))[0];
+
+      const noteEntry = (await Note.ensureByExample({ id: note.id }, newNote))[0];
+
+      // connect author and note
+      await NoteAccountConnection.ensure({}, { from: noteEntry, to: noteAuthorEntry });
+      noteEntries.push(noteEntry);
+    }
+
+    return noteEntries;
+  };
+
   // connects issues or merge requests to accounts
   connectIssuesToUsers = async (conn, issue, author, assignees) => {
     await conn.ensureWithData({ role: 'author' }, { from: issue, to: author });
@@ -279,6 +317,10 @@ class GitLabITSIndexer extends BaseGitLabIndexer {
         await conn.ensureWithData({ role: 'assignees' }, { from: issue, to: ae });
       }),
     );
+  };
+
+  connectIssuesToNotes = async (conn, issue, notes) => {
+    await Promise.all(notes.map((note) => conn.ensure({}, { from: issue, to: note })));
   };
 
   connectIssuesToMilestones = async (conn, issue, milestone) => {

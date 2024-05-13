@@ -77,6 +77,10 @@ import IssueAccountConnection from './models/connections/IssueAccountConnection.
 import MergeRequestAccountConnection from './models/connections/MergeRequestAccountConnection.ts';
 import IssueMilestoneConnection from './models/connections/IssueMilestoneConnection.ts';
 import MergeRequestMilestoneConnection from './models/connections/MergeRequestMilestoneConnection.ts';
+import Note from './models/models/Note.ts';
+import IssueNoteConnection from './models/connections/IssueNoteConnection.ts';
+import NoteAccountConnection from './models/connections/NoteAccountConnection.ts';
+import MergeRequestNoteConnection from './models/connections/MergeRequestNoteConnection.ts';
 
 cli.parse(
   (targetPath, options) => {
@@ -579,6 +583,7 @@ function runBackend() {
           File.ensureCollection(),
           Stakeholder.ensureCollection(),
           Issue.ensureCollection(),
+          Note.ensureCollection(),
           Build.ensureCollection(),
           Branch.ensureCollection(),
           Module.ensureCollection(),
@@ -590,6 +595,9 @@ function runBackend() {
           CommitStakeholderConnection.ensureCollection(),
           IssueStakeholderConnection.ensureCollection(),
           IssueCommitConnection.ensureCollection(),
+          IssueNoteConnection.ensureCollection(),
+          MergeRequestNoteConnection.ensureCollection(),
+          NoteAccountConnection.ensureCollection(),
           CommitCommitConnection.ensureCollection(),
           CommitModuleConnection.ensureCollection(),
           ModuleModuleConnection.ensureCollection(),

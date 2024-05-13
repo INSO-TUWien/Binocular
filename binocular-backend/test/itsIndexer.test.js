@@ -30,6 +30,10 @@ import MergeRequestMilestoneConnection from '../models/connections/MergeRequestM
 import Account from '../models/models/Account';
 import IssueAccountConnection from '../models/connections/IssueAccountConnection';
 import MergeRequestAccountConnection from '../models/connections/MergeRequestAccountConnection';
+import IssueNoteConnection from '../models/connections/IssueNoteConnection';
+import MergeRequestNoteConnection from '../models/connections/MergeRequestNoteConnection';
+import Note from '../models/models/Note';
+import NoteAccountConnection from '../models/connections/NoteAccountConnection';
 
 const indexerOptions = {
   backend: true,
@@ -78,6 +82,10 @@ describe('its', function () {
     Account,
     IssueAccountConnection,
     MergeRequestAccountConnection,
+    IssueNoteConnection,
+    MergeRequestNoteConnection,
+    Note,
+    NoteAccountConnection,
   ];
 
   // helper functions
@@ -103,8 +111,12 @@ describe('its', function () {
     return res;
   };
 
+  // checks if there are a certain number of entries in the collectionArray that fit the specified example.
+  // returns the found examples
   const expectExamples = (example, collectionArray, number) => {
-    expect(findInCollection(example, collectionArray).length).to.equal(number);
+    const res = findInCollection(example, collectionArray);
+    expect(res.length).to.equal(number);
+    return res;
   };
 
   const setupDb = async (db, collections) => {
@@ -154,13 +166,13 @@ describe('its', function () {
         expect(issue.mentions.length).to.equal(2);
         expect(issue.mentions[0].closes).to.equal(true);
         expect(issue.mentions[1].commit).to.equal('1234567890');
-        expect(issue.notes.length).to.equal(3);
+        expectExamples({ _from: issue._id }, collections['issues-notes'], 3);
       }
 
       // mergeRequests
       expect(collections['mergeRequests'].length).to.equal(3);
       for (const mergeRequest of collections['mergeRequests']) {
-        expect(mergeRequest.notes.length).to.equal(3);
+        expectExamples({ _from: mergeRequest._id }, collections['mergeRequests-notes'], 3);
       }
 
       // issues-accounts
@@ -192,6 +204,31 @@ describe('its', function () {
         // every issue is connected to the only milestone there is
         expectExamples({ _from: mr._id, _to: milestoneId }, collections['mergeRequests-milestones'], 1);
       }
+
+      let noteCounter = 0;
+
+      // issues-notes
+      for (const issue of collections['issues']) {
+        const issueNoteConnections = expectExamples({ _from: issue._id }, collections['issues-notes'], 3);
+        for (const conn of issueNoteConnections) {
+          noteCounter++;
+          // for each note connected to this issue, we expect to have one connection to an account
+          expectExamples({ _from: conn._to }, collections['notes-accounts'], 1);
+        }
+      }
+
+      // mergeRequests-notes
+      for (const mr of collections['mergeRequests']) {
+        const mrNoteConnections = expectExamples({ _from: mr._id }, collections['mergeRequests-notes'], 3);
+        for (const conn of mrNoteConnections) {
+          noteCounter++;
+          // for each note connected to this mr, we expect to have one connection to an account
+          expectExamples({ _from: conn._to }, collections['notes-accounts'], 1);
+        }
+      }
+
+      // we don't want notes that are not connected to any issue/mr
+      expect(collections['notes'].length).to.equal(noteCounter);
     });
 
     it('should not persist objects twice if indexer is called twice (GitLab)', async function () {
