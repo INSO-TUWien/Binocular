@@ -8,6 +8,7 @@ const issuesToStakeholders = db._collection('issues-stakeholders');
 const issuesToAccounts = db._collection('issues-accounts')
 const issuesToCommits = db._collection('issues-commits');
 const issuesToMilestones = db._collection('issues-milestones');
+const issuesToNotes = db._collection('issues-notes');
 const paginated = require('./paginated.js');
 const Timestamp = require('./Timestamp.js');
 
@@ -163,6 +164,17 @@ module.exports = new gql.GraphQLObjectType({
       notes: {
         type: new gql.GraphQLList(require('./gitlabNote.js')),
         description: 'Notes attached to the issue',
+        resolve(issue /*, args*/) {
+          return db
+            ._query(
+              aql`
+              FOR note, edge
+              IN outbound ${issue} ${issuesToNotes}
+              RETURN note
+              `
+            )
+            .toArray();
+        },
       },
     };
   },

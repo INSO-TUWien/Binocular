@@ -217,8 +217,8 @@ Exactly like the [milestones Object](#milestones), with one additional field:
 | `body`             | string                                        |                                                         |
 | `attachment`       |                                               |                                                         |
 | `author`           | [GitLab-Author](#gitlab-author-object) Object |                                                         |
-| `created_at`       | string (timestamp)                            |                                                         |
-| `updated_at`       | string (timestamp)                            |                                                         |
+| `createdAt`        | string (timestamp)                            |                                                         |
+| `updatedAt`        | string (timestamp)                            |                                                         |
 | `system`           | boolean                                       |                                                         |
 | `noteable_id`      | number                                        | internal ArangoDB id of the issue this notes belongs to |
 | `noteable_type`    | string                                        | type of the issue this note belongs to                  |

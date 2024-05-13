@@ -39,7 +39,7 @@ export default class Issues {
                 }
                 notes{
                   body
-                  created_at
+                  createdAt
                   author{
                     login
                     name
