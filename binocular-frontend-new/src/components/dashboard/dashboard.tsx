@@ -99,13 +99,8 @@ function Dashboard() {
               return (
                 <DashboardItem
                   key={'dashboardItem' + dashboardItem.id}
-                  id={dashboardItem.id}
-                  name={'Unnamed'}
                   cellSize={cellSize}
-                  x={dashboardItem.x}
-                  y={dashboardItem.y}
-                  width={dashboardItem.width}
-                  height={dashboardItem.height}
+                  item={dashboardItem}
                   colCount={columnCount}
                   rowCount={rowCount}
                   setDragResizeItem={setDragResizeItem}></DashboardItem>
@@ -220,7 +215,16 @@ function Dashboard() {
                     }
 
                     if (dragResizeMode === DragResizeMode.place) {
-                      dispatch(addDashboardItem({ id: item.id, x: targetX, y: targetY, width: targetWidth, height: targetHeight }));
+                      dispatch(
+                        addDashboardItem({
+                          id: item.id,
+                          x: targetX,
+                          y: targetY,
+                          width: targetWidth,
+                          height: targetHeight,
+                          pluginName: placeableItem.pluginName,
+                        }),
+                      );
                     } else {
                       dispatch(moveDashboardItem({ id: item.id, x: targetX, y: targetY, width: targetWidth, height: targetHeight }));
                     }

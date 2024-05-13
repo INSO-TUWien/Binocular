@@ -1,8 +1,9 @@
 import ExampleVisualization from './visualizations/exampleVisualization';
+import { ReactNode } from 'react';
 
-export interface VisualizationPlugin {
+interface VisualizationPlugin {
   name: string;
-  chart: unknown;
+  chart: () => ReactNode;
   images: {
     preview: string;
   };

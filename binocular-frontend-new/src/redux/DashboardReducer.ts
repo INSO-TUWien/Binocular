@@ -11,7 +11,7 @@ export interface DashboardInitialState {
 const initialState: DashboardInitialState = {
   dashboardItems: [],
   dragResizeMode: DragResizeMode.none,
-  placeableItem: { id: 0, x: 0, y: 0, width: 1, height: 1 },
+  placeableItem: { id: 0, x: 0, y: 0, width: 1, height: 1, pluginName: '' },
 };
 
 export const dashboardSlice = createSlice({

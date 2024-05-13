@@ -10,11 +10,39 @@
   float: left;
   margin: 0.5rem;
   height: 2rem;
-  width: 3rem;
   overflow: hidden;
   box-shadow: 0 0 10px #CCCCCC;
   border-radius: 5px;
   cursor: pointer;
+  transition: scale ease-in-out 0.2s;
+}
+
+.visualizationButton:hover {
+  scale: 1.1;
+}
+
+.visualizationButton > div {
+  height: 100%;
+  display: flex;
+  align-items: start;
+  justify-content: start;
+}
+
+.visualizationButton > div > img {
+  border: 1px solid;
+  border-radius: 5px;
+  box-shadow: 0 0 10px #CCCCCC;
+  @apply border-base-300;
+  height: 2rem;
+  width: 3rem;
+}
+
+.visualizationButton > div > span {
+  margin: 0 0.5rem;
+  height: 2rem;
+  line-height: 2rem;
+  font-size: 1rem;
+  @apply text-neutral-700;
 }
 
 /*# sourceMappingURL=visualizationSelector.module.css.map */

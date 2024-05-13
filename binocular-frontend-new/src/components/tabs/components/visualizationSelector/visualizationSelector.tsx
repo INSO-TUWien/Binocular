@@ -15,12 +15,15 @@ function VisualizationSelector() {
               key={'VisualizationSelectorV' + i}
               className={visualizationSelectorStyles.visualizationButton}
               onClick={() => {
-                dispatch(addDashboardItem({ id: 0, x: 0, y: 0, width: 5, height: 4 }));
+                dispatch(addDashboardItem({ id: 0, x: 0, y: 0, width: 5, height: 4, pluginName: plugin.name }));
               }}
               onMouseDown={() => {
-                dispatch(placeDashboardItem({ id: 0, x: 0, y: 0, width: 5, height: 4 }));
+                dispatch(placeDashboardItem({ id: 0, x: 0, y: 0, width: 5, height: 4, pluginName: plugin.name }));
               }}>
-              <img draggable={'false'} src={plugin.images.preview} alt={plugin.name} />
+              <div>
+                <img draggable={'false'} src={plugin.images.preview} alt={plugin.name} />
+                <span>{plugin.name}</span>
+              </div>
             </div>
           );
         })}
