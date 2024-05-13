@@ -2,12 +2,10 @@
 
 import _ from 'lodash';
 import Model from '../Model';
-import Label from '../../types/supportingTypes/Label';
-import User from '../../types/supportingTypes/User';
 import Mention from '../../types/supportingTypes/Mention';
 import MergeRequestDto from '../../types/dtos/MergeRequestDto';
 
-interface MergeRequestDataType {
+export interface MergeRequestDataType {
   id: string;
   iid: number;
   title: string;
@@ -15,14 +13,9 @@ interface MergeRequestDataType {
   createdAt: string;
   closedAt: string;
   updatedAt: string;
-  labels: Label[];
-  milestone: any; //TODO: Add type for milestone
+  labels: string[];
   state: string;
-  url: string;
   webUrl: string;
-  author: User;
-  assignee: User;
-  assignees: User[];
   mentions: Mention[];
 }
 
@@ -41,7 +34,7 @@ class MergeRequest extends Model<MergeRequestDataType> {
 
     delete mergeRequestData.projectId;
 
-    return this.ensureById(mergeRequestData.id, mergeRequestData, {});
+    return this.ensureByExample({ id: mergeRequestData.id }, mergeRequestData, {});
   }
 }
 

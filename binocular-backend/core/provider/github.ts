@@ -40,6 +40,8 @@ class GitHub {
               login
               email
               name
+              url
+              avatarUrl
             }
             pageInfo {
               hasNextPage

@@ -5,7 +5,9 @@ const arangodb = require('@arangodb');
 const db = arangodb.db;
 const aql = arangodb.aql;
 const issuesToStakeholders = db._collection('issues-stakeholders');
+const issuesToAccounts = db._collection('issues-accounts')
 const issuesToCommits = db._collection('issues-commits');
+const issuesToMilestones = db._collection('issues-milestones');
 const paginated = require('./paginated.js');
 const Timestamp = require('./Timestamp.js');
 
@@ -33,26 +35,6 @@ module.exports = new gql.GraphQLObjectType({
       state: {
         type: gql.GraphQLString,
         description: 'The issue state',
-      },
-      upvotes: {
-        type: gql.GraphQLInt,
-        description: 'Number of upvotes on this issue',
-      },
-      downvotes: {
-        type: gql.GraphQLInt,
-        description: 'Number of downvotes on this issue',
-      },
-      dueDate: {
-        type: gql.GraphQLString,
-        description: 'The due date of this issue',
-      },
-      confidential: {
-        type: gql.GraphQLBoolean,
-        description: 'Wether or not this issue is confidential',
-      },
-      weight: {
-        type: gql.GraphQLInt,
-        description: 'Weight of the issue',
       },
       webUrl: {
         type: gql.GraphQLString,
@@ -86,12 +68,57 @@ module.exports = new gql.GraphQLObjectType({
       author: {
         type: require('./gitHubUser.js'),
         description: 'The github author of this issue',
+        resolve(issue /*, args*/) {
+          return db
+            ._query(
+              aql`
+              FOR
+              account, edge
+              IN
+              OUTBOUND ${issue} ${issuesToAccounts}
+              FILTER edge.role == "author"
+              RETURN account
+              `
+            )
+            .toArray()[0];
+        },
       },
       assignee: {
         type: require('./gitHubUser.js'),
         description: 'The assignee of this issue',
+        resolve(issue /*, args*/) {
+          return db
+            ._query(
+              aql`
+              FOR
+              account, edge
+              IN
+              OUTBOUND ${issue} ${issuesToAccounts}
+              FILTER edge.role == "assignee"
+              RETURN account
+              `
+            )
+            .toArray()[0];
+        },
       },
-      assignees: { type: new gql.GraphQLList(require('./gitHubUser.js')), description: 'All the assignees of this issue' },
+      assignees: {
+        type: new gql.GraphQLList(require('./gitHubUser.js')),
+        description: 'All the assignees of this issue',
+        resolve(issue /*, args*/) {
+          return db
+            ._query(
+              aql`
+              FOR
+              account, edge
+              IN
+              OUTBOUND ${issue} ${issuesToAccounts}
+              FILTER edge.role == "assignees"
+              RETURN account
+              `
+            )
+            .toArray();
+        },
+      },
       commits: paginated({
         type: require('./commit.js'),
         description: 'All commits mentioning this issue',
@@ -116,6 +143,23 @@ module.exports = new gql.GraphQLObjectType({
           return query;
         },
       }),
+      milestone: {
+        type: require('./milestone.js'),
+        description: 'The milestone this issue belongs to',
+        resolve(issue /*, args*/) {
+          return db
+            ._query(
+              aql`
+              FOR
+              milestone, edge
+              IN
+              OUTBOUND ${issue} ${issuesToMilestones}
+              RETURN milestone
+              `
+            )
+            .toArray()[0];
+        },
+      },
       notes: {
         type: new gql.GraphQLList(require('./gitlabNote.js')),
         description: 'Notes attached to the issue',

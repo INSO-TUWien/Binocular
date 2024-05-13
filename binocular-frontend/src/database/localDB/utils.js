@@ -131,8 +131,9 @@ export function findID(database, id) {
 
 export async function findAllCommits(database, relations) {
   const commits = await findAll(database, 'commits');
-  const commitStakeholderConnections = sortByAttributeString((await findCommitStakeholderConnections(relations)).docs, 'to');
-  const commitCommitConnections = sortByAttributeString((await findCommitCommitConnections(relations)).docs, 'to');
+  const allCommits = sortByAttributeString(commits.docs, '_id');
+  const commitStakeholderConnections = sortByAttributeString((await findCommitStakeholderConnections(relations)).docs, 'from');
+  const commitCommitConnections = sortByAttributeString((await findCommitCommitConnections(relations)).docs, 'from');
 
   const stakeholderObjects = (await findAll(database, 'stakeholders')).docs;
   const stakeholders = {};
@@ -141,7 +142,7 @@ export async function findAllCommits(database, relations) {
   });
 
   commits.docs = await Promise.all(
-    commits.docs.map((c) => preprocessCommit(c, database, commitStakeholderConnections, commitCommitConnections, stakeholders)),
+    commits.docs.map((c) => preprocessCommit(c, allCommits, commitStakeholderConnections, commitCommitConnections, stakeholders)),
   );
 
   addHistoryToAllCommits(commits.docs);
@@ -150,40 +151,52 @@ export async function findAllCommits(database, relations) {
 }
 
 export async function findCommit(database, relations, sha) {
+  const allCommits = sortByAttributeString((await findAll(database, 'commits')).docs, '_id');
   const commit = await database.find({
     selector: { _id: { $regex: new RegExp('^commits/.*') }, sha: { $eq: sha } },
   });
 
   if (commit.docs && commit.docs[0]) {
-    const commitStakeholderConnections = sortByAttributeString((await findCommitStakeholderConnections(relations)).docs, 'to');
-    const commitCommitConnections = sortByAttributeString((await findCommitCommitConnections(relations)).docs, 'to');
+    const commitStakeholderConnections = sortByAttributeString((await findCommitStakeholderConnections(relations)).docs, 'from');
+    const commitCommitConnections = sortByAttributeString((await findCommitCommitConnections(relations)).docs, 'from');
 
     const stakeholderObjects = (await findAll(database, 'stakeholders')).docs;
     const stakeholders = {};
     stakeholderObjects.map((s) => {
       stakeholders[s._id] = s.gitSignature;
     });
-    commit.docs[0] = await preprocessCommit(commit.docs[0], database, commitStakeholderConnections, commitCommitConnections, stakeholders);
+    commit.docs[0] = await preprocessCommit(
+      commit.docs[0],
+      allCommits,
+      commitStakeholderConnections,
+      commitCommitConnections,
+      stakeholders,
+    );
   }
   return commit;
 }
 
 //add stakeholder, parents to commit
-async function preprocessCommit(commit, database, commitStakeholder, commitCommit, stakeholders) {
-  //add parents
-  commit.parents = binarySearchArray(commitCommit, commit._id, 'to').map((r) => r.from.split('/')[1]);
+async function preprocessCommit(commit, allCommits, commitStakeholder, commitCommit, stakeholders) {
+  //add parents: first get the ids of the parents using the commits-commits connection, then find the actual commits to get the hashes
+  commit.parents = binarySearchArray(commitCommit, commit._id, 'from').map((r) => {
+    const parent = binarySearch(allCommits, r.to, '_id');
+    if (parent !== null) {
+      return parent.sha;
+    }
+  });
 
   //add stakeholder
-  const commitStakeholderRelation = binarySearch(commitStakeholder, commit._id, 'to');
+  const commitStakeholderRelation = binarySearch(commitStakeholder, commit._id, 'from');
 
   if (!commitStakeholderRelation) {
     console.log('Error in localDB: commit: no stakeholder found for commit ' + commit.sha);
     return commit;
   }
-  const author = stakeholders[commitStakeholderRelation.from];
+  const author = stakeholders[commitStakeholderRelation.to];
 
   if (!author) {
-    console.log('Error in localDB: commit: no stakeholder found with ID ' + commitStakeholderRelation.from);
+    console.log('Error in localDB: commit: no stakeholder found with ID ' + commitStakeholderRelation.to);
     return commit;
   }
   return _.assign(commit, { signature: author });
@@ -199,6 +212,48 @@ export function findFile(database, file) {
   return database.find({
     selector: { _id: { $regex: new RegExp('^files/.*') }, path: { $eq: file } },
   });
+}
+
+export async function findAllIssues(database, relations) {
+  return findAllIssuesOrMergeRequests(database, relations, 'issues');
+}
+
+export async function findAllMergeRequests(database, relations) {
+  return findAllIssuesOrMergeRequests(database, relations, 'mergeRequests');
+}
+
+// finds all Issues/MRs and infers author, assignee and assignees using the respective relations
+async function findAllIssuesOrMergeRequests(database, relations, type) {
+  if (type !== 'issues' && type !== 'mergeRequests') {
+    return [];
+  }
+  const issues = await findAll(database, type);
+
+  // get issues-accounts connections and sort by the issues ids
+  const issuesAccounts = sortByAttributeString((await findAll(relations, `${type}-accounts`)).docs, 'from');
+  const accounts = sortByAttributeString((await findAll(database, 'accounts')).docs, '_id');
+
+  issues.docs = issues.docs.map((i) => {
+    i.author = {};
+    i.assignee = {};
+    i.assignees = [];
+    // find all related accounts
+    const relevantConnections = binarySearchArray(issuesAccounts, i._id, 'from');
+    relevantConnections.forEach((c) => {
+      // find account
+      const a = binarySearch(accounts, c.to, '_id');
+      // add account to the issue i the role defined by the connection
+      if (c.role === 'author') {
+        i.author = a;
+      } else if (c.role === 'assignee') {
+        i.assignee = a;
+      } else if (c.role === 'assignees') {
+        i.assignees.push(a);
+      }
+    });
+    return i;
+  });
+  return issues;
 }
 
 // ###################### CONNECTIONS ######################
@@ -244,11 +299,11 @@ export function findBuild(database, sha) {
 }
 
 // TODO should probably not be used, very slow
-export function findFileConnections(relations, sha) {
+export function findFileConnections(relations, commitId) {
   return relations.find({
     selector: {
       _id: { $regex: new RegExp('^commits-files/.*') },
-      to: { $eq: 'commits/' + sha },
+      from: { $eq: commitId },
     },
   });
 }

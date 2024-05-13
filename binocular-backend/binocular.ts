@@ -72,6 +72,11 @@ import its from './indexers/its';
 import ci from './indexers/ci';
 import Repository from './core/provider/git';
 import chalk from 'chalk';
+import Account from './models/models/Account.ts';
+import IssueAccountConnection from './models/connections/IssueAccountConnection.ts';
+import MergeRequestAccountConnection from './models/connections/MergeRequestAccountConnection.ts';
+import IssueMilestoneConnection from './models/connections/IssueMilestoneConnection.ts';
+import MergeRequestMilestoneConnection from './models/connections/MergeRequestMilestoneConnection.ts';
 
 cli.parse(
   (targetPath, options) => {
@@ -579,6 +584,7 @@ function runBackend() {
           Module.ensureCollection(),
           MergeRequest.ensureCollection(),
           Milestone.ensureCollection(),
+          Account.ensureCollection(),
           CommitFileConnection.ensureCollection(),
           CommitBuildConnection.ensureCollection(),
           CommitStakeholderConnection.ensureCollection(),
@@ -591,6 +597,10 @@ function runBackend() {
           BranchFileConnection.ensureCollection(),
           BranchFileFileConnection.ensureCollection(),
           CommitFileStakeholderConnection.ensureCollection(),
+          IssueAccountConnection.ensureCollection(),
+          MergeRequestAccountConnection.ensureCollection(),
+          IssueMilestoneConnection.ensureCollection(),
+          MergeRequestMilestoneConnection.ensureCollection(),
         ]);
       });
   }
@@ -676,7 +686,7 @@ function runBackend() {
         continue;
       }
       if (!build.data.sha) continue;
-      const commit = commits.filter((c: any) => c.sha === build.data.sha);
+      const commit = commits.filter((c: any) => c.data.sha === build.data.sha);
       if (commit && commit[0]) {
         await CommitBuildConnection.connect({}, { from: commit[0], to: build });
       }

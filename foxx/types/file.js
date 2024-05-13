@@ -64,7 +64,7 @@ module.exports = new gql.GraphQLObjectType({
           FOR branch IN branches
           FILTER branch.branch == ${args.branch}
           FOR file, edge
-              IN OUTBOUND ${file} ${branchesToFiles}
+              IN INBOUND ${file} ${branchesToFiles}
               FOR oldFile, conn
                   IN OUTBOUND edge ${branchesToFilesToFiles}
                       RETURN {

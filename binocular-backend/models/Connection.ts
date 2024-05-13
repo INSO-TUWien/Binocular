@@ -54,6 +54,9 @@ export default class Connection<ConnectionDataType, FromDataType, ToDataType> {
     return this.db.ensureEdgeCollection(this.collectionName, { type: CollectionType.EDGE_COLLECTION });
   }
 
+  /**
+   * finds the first example of a connection between two objects.
+   */
   async findByIds(fromTo: {
     from: ModelEntry<FromDataType> | Entry<ConnectionDataType>;
     to: ModelEntry<ToDataType> | Entry<ConnectionDataType>;
@@ -71,11 +74,58 @@ export default class Connection<ConnectionDataType, FromDataType, ToDataType> {
     }
   }
 
+  /**
+   * finds the first example of a connection between two objects where the data of the connection matches.
+   */
+  async findByIdsAndData(
+    fromTo: {
+      from: ModelEntry<FromDataType> | Entry<ConnectionDataType>;
+      to: ModelEntry<ToDataType> | Entry<ConnectionDataType>;
+    },
+    data: ConnectionDataType,
+  ) {
+    if (this.collection === undefined) {
+      throw Error('Collection undefined!');
+    }
+    const keys = { _from: fromTo.from._id, _to: fromTo.to._id };
+    for (const [key, value] of Object.entries(data as object)) {
+      keys[key] = value;
+    }
+    try {
+      return await Promise.resolve(this.collection.firstExample(keys));
+    } catch (err: any) {
+      if (err.code === 404) {
+        return null;
+      }
+    }
+  }
+
+  /**
+   * ensures that a connection between A and B exists.
+   * Note: only checks if there is *some* connection between A and B, not if there is a connection between A and B with data `data`.
+   */
   async ensure(
     data: ConnectionDataType,
     fromTo: { from: ModelEntry<FromDataType> | Entry<ConnectionDataType>; to: ModelEntry<ToDataType> | Entry<ConnectionDataType> },
   ) {
     const entry = await this.findByIds(fromTo);
+    if (entry) {
+      entry.isStored = true;
+      return entry;
+    } else {
+      return this.connect(data, fromTo);
+    }
+  }
+
+  /**
+   * ensures that a connection between A and B exists with the provided data.
+   * Note: If there already exists a connection between A and B but the connection data does not match, a second connection is stored.
+   */
+  async ensureWithData(
+    data: ConnectionDataType,
+    fromTo: { from: ModelEntry<FromDataType> | Entry<ConnectionDataType>; to: ModelEntry<ToDataType> | Entry<ConnectionDataType> },
+  ) {
+    const entry = await this.findByIdsAndData(fromTo, data);
     if (entry) {
       entry.isStored = true;
       return entry;

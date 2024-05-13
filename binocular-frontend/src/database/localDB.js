@@ -39,8 +39,13 @@ import modules from '../../db_export/modules.json';
 import stakeholders from '../../db_export/stakeholders.json';
 import mergeRequests from '../../db_export/mergeRequests.json';
 import milestones from '../../db_export/milestones.json';
+import issuesMilestones from '../../db_export/issues-milestones.json';
+import mergeRequestsMilestones from '../../db_export/mergeRequests-milestones.json';
+import accounts from '../../db_export/accounts.json';
+import issuesAccounts from '../../db_export/issues-accounts.json';
+import mergeRequestsAccounts from '../../db_export/mergeRequests-accounts.json';
 
-const collections = { branches, builds, commits, files, issues, modules, stakeholders, mergeRequests, milestones };
+const collections = { accounts, branches, builds, commits, files, issues, modules, stakeholders, mergeRequests, milestones };
 
 const relations = {
   'commits-commits': commitsCommits,
@@ -51,8 +56,12 @@ const relations = {
   'commits-stakeholders': commitsStakeholders,
   'issues-commits': issuesCommits,
   'issues-stakeholders': issuesStakeholders,
+  'issues-accounts': issuesAccounts,
+  'issues-milestones': issuesMilestones,
   'modules-files': modulesFiles,
   'modules-modules': modulesModules,
+  'mergeRequests-accounts': mergeRequestsAccounts,
+  'mergeRequests-milestones': mergeRequestsMilestones,
   'branches-files': branchesFiles,
   'branches-files-files': branchesFilesFiles,
 };
@@ -134,7 +143,7 @@ export default class LocalDB {
   }
 
   static getMergeRequestData(mergeRequestSpan, significantSpan) {
-    return MergeRequests.getMergeRequestData(db, mergeRequestSpan, significantSpan);
+    return MergeRequests.getMergeRequestData(db, tripleStore, mergeRequestSpan, significantSpan);
   }
 
   static getMilestoneData() {
@@ -174,7 +183,7 @@ export default class LocalDB {
   }
 
   static searchIssues(text) {
-    return Issues.searchIssues(db, text);
+    return Issues.searchIssues(db, tripleStore, text);
   }
 
   static requestFileStructure() {
@@ -225,8 +234,12 @@ export default class LocalDB {
     database.commits_stakeholders = relations['commits-stakeholders'];
     database.issues_commits = relations['issues-commits'];
     database.issues_stakeholders = relations['issues-stakeholders'];
+    database.issues_accounts = relations['issues-accounts'];
+    database.issues_milestones = relations['issues-milestones'];
     database.modules_files = relations['modules-files'];
     database.modules_modules = relations['modules-modules'];
+    database.mergeRequests_accounts = relations['mergeRequests-accounts'];
+    database.mergeRequests_milestones = relations['mergeRequests-milestones'];
     database.branches_files = relations['branches-files'];
     database.branches_files_files = relations['branches-files-files'];
 

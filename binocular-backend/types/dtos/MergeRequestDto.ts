@@ -1,5 +1,3 @@
-import Label from '../supportingTypes/Label';
-import User from '../supportingTypes/User';
 import Mention from '../supportingTypes/Mention.ts';
 
 export default interface MergeRequestDto {
@@ -10,14 +8,10 @@ export default interface MergeRequestDto {
   createdAt: string;
   closedAt: string;
   updatedAt: string;
-  labels: Label[];
-  milestone: any; //TODO: Add type for milestone
+  labels: string[];
   state: string;
-  url: string;
   webUrl: string;
   projectId?: string;
-  author: User;
-  assignee: User;
-  assignees: User[];
   mentions: Mention[];
+  notes: any[]; //TODO: Add type for gitlab notes
 }

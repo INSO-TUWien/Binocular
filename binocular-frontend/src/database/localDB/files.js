@@ -28,10 +28,12 @@ export default class Files {
     return findBranch(db, branchName).then(async (resBranch) => {
       const branch = resBranch.docs[0];
       const files = (await findAll(db, 'files')).docs;
-      const branchFileConnections = (await findBranchFileConnections(relations)).docs.filter((connection) => connection.to === branch._id);
+      const branchFileConnections = (await findBranchFileConnections(relations)).docs.filter(
+        (connection) => connection.from === branch._id,
+      );
       const filenames = [];
       for (const connection of branchFileConnections) {
-        const file = binarySearch(files, connection.from, '_id');
+        const file = binarySearch(files, connection.to, '_id');
         if (file !== null) {
           filenames.push(file.path);
         }

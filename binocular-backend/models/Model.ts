@@ -98,8 +98,20 @@ export default class Model<DataType> {
   }
 
   async ensureBy(key: string, value: string | boolean | number | undefined, data: DataType, options?: { isNew?: boolean }) {
-    data[key] = value;
-    return this.findOneBy(key, value).then(
+    return this.ensureByExample({ [key]: value }, data, options);
+  }
+
+  findOneBy(key: string, value: string | boolean | number | undefined): Promise<Entry<DataType> | null> {
+    this.log(`findBy${key} ${value}`);
+    return this.firstExample({ [key]: value } as DataType & { _id: string; _key: string });
+  }
+
+  async ensureByExample(example: object, data: DataType, options?: { isNew?: boolean }) {
+    for (const [key, value] of Object.entries(example)) {
+      data[key] = value;
+    }
+
+    return this.findOneByExample(example).then(
       function (resp) {
         if (resp) {
           return [this.parse(resp.data), false];
@@ -113,9 +125,9 @@ export default class Model<DataType> {
     );
   }
 
-  findOneBy(key: string, value: string | boolean | number | undefined): Promise<Entry<DataType> | null> {
-    this.log(`findBy${key} ${value}`);
-    return this.firstExample({ [key]: value } as DataType & { _id: string; _key: string });
+  findOneByExample(example: object): Promise<Entry<DataType> | null> {
+    this.log(`findByExample ${example}`);
+    return this.firstExample(example as DataType & { _id: string; _key: string });
   }
 
   create(data: DataType, options?: { isNew: boolean }): Promise<Entry<DataType>> {
