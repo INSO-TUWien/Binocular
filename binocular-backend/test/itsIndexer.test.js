@@ -194,7 +194,7 @@ describe('its', function () {
       }
     });
 
-    it('should not persist objects twice if indexer is called twice', async function () {
+    it('should not persist objects twice if indexer is called twice (GitLab)', async function () {
       const repo = await fake.repository();
       ctx.targetPath = repo.path;
 
@@ -222,7 +222,6 @@ describe('its', function () {
 
       Object.entries(collections).map(([collectionName, collectionArray]) => {
         // check if updated collection has the same size
-        console.log(collectionName, collectionArray.length, updatedCollections[collectionName].length);
         expect(collectionArray.length).to.equal(updatedCollections[collectionName].length);
       });
     });
@@ -239,41 +238,79 @@ describe('its', function () {
         return 'git@github.com/Test/Test-Project.git';
       };
 
-      //setup DB
-      await db.ensureDatabase('test', ctx);
-      await db.truncate();
-      await Issue.ensureCollection();
-      await Stakeholder.ensureCollection();
-      await IssueStakeholderConnection.ensureCollection();
+      // init all relevant collections for ITS indexing
+      await setupDb(db, relevantCollections);
 
       const gitHubITSIndexer = new GitHubITSIndexer(repo, reporter);
       gitHubITSIndexer.controller = new GitHubMock();
+
       await gitHubITSIndexer.index();
 
-      const dbIssuesCollectionData = await (
-        await db.query('FOR i IN @@collection SORT i.id ASC RETURN i', { '@collection': 'issues' })
-      ).all();
+      // get all entries from all relevant collections
+      const collections = await getAllCollections();
 
-      expect(dbIssuesCollectionData.length).to.equal(2);
+      // test data for issues is the same as for merge requests
+      for (const coll of ['issues', 'mergeRequests']) {
+        const dbIssuesCollectionData = collections[coll].sort((a, b) => a.id.localeCompare(b.id));
+        expect(dbIssuesCollectionData.length).to.equal(2);
 
-      expect(dbIssuesCollectionData[0].mentions.length).to.equal(2);
-      expect(dbIssuesCollectionData[0].author.login).to.equal('tester1');
-      expect(dbIssuesCollectionData[0].assignee.login).to.equal('tester2');
-      expect(dbIssuesCollectionData[0].assignees.length).to.equal(1);
-      expect(dbIssuesCollectionData[1].assignees[0].login).to.equal('tester1');
-      expect(dbIssuesCollectionData[0].mentions[0].closes).to.equal(false);
-      expect(dbIssuesCollectionData[0].mentions[0].commit).to.equal('1234567890');
-      expect(dbIssuesCollectionData[0].mentions[1].closes).to.equal(true);
+        const issue0 = collections[coll][0];
+        const issue1 = collections[coll][1];
 
-      expect(dbIssuesCollectionData[1].mentions.length).to.equal(2);
-      expect(dbIssuesCollectionData[1].author.login).to.equal('tester2');
-      expect(dbIssuesCollectionData[1].assignee.login).to.equal('tester1');
-      expect(dbIssuesCollectionData[1].assignees.length).to.equal(2);
-      expect(dbIssuesCollectionData[1].assignees[0].login).to.equal('tester1');
-      expect(dbIssuesCollectionData[1].assignees[1].login).to.equal('tester2');
-      expect(dbIssuesCollectionData[1].mentions[0].closes).to.equal(false);
-      expect(dbIssuesCollectionData[1].mentions[0].commit).to.equal('1234567890');
-      expect(dbIssuesCollectionData[1].mentions[1].closes).to.equal(true);
+        const t1Id = collections['accounts'].filter((a) => a.login === 'tester1')[0]._id;
+        const t2Id = collections['accounts'].filter((a) => a.login === 'tester2')[0]._id;
+
+        expect(issue0.mentions.length).to.equal(2);
+        expectExamples({ _from: issue0._id, _to: t1Id, role: 'author' }, collections[`${coll}-accounts`], 1);
+        expectExamples({ _from: issue0._id, _to: t2Id, role: 'assignee' }, collections[`${coll}-accounts`], 1);
+        expectExamples({ _from: issue0._id, _to: t2Id, role: 'assignees' }, collections[`${coll}-accounts`], 1);
+        expect(issue0.mentions[0].closes).to.equal(false);
+        expect(issue0.mentions[0].commit).to.equal('1234567890');
+        expect(issue0.mentions[1].closes).to.equal(true);
+
+        expect(dbIssuesCollectionData[1].mentions.length).to.equal(2);
+        expectExamples({ _from: issue1._id, _to: t2Id, role: 'author' }, collections[`${coll}-accounts`], 1);
+        expectExamples({ _from: issue1._id, _to: t1Id, role: 'assignee' }, collections[`${coll}-accounts`], 1);
+        expectExamples({ _from: issue1._id, _to: t1Id, role: 'assignees' }, collections[`${coll}-accounts`], 1);
+        expectExamples({ _from: issue1._id, _to: t2Id, role: 'assignees' }, collections[`${coll}-accounts`], 1);
+        expect(dbIssuesCollectionData[1].mentions[0].closes).to.equal(false);
+        expect(dbIssuesCollectionData[1].mentions[0].commit).to.equal('1234567890');
+        expect(dbIssuesCollectionData[1].mentions[1].closes).to.equal(true);
+      }
+    });
+
+    it('should not persist objects twice if indexer is called twice (GitHub)', async function () {
+      const repo = await fake.repository();
+      ctx.targetPath = repo.path;
+
+      //Remap Remote functions to local ones because remote repository doesn't exist anymore.
+      remapRemoteFunctions(repo);
+      repo.getOriginUrl = async function () {
+        return 'git@github.com/Test/Test-Project.git';
+      };
+
+      // init all relevant collections for ITS indexing
+      await setupDb(db, relevantCollections);
+
+      const gitHubITSIndexer = new GitHubITSIndexer(repo, reporter);
+      gitHubITSIndexer.controller = new GitHubMock();
+
+      // first index run should add all necessary entries
+      await gitHubITSIndexer.index();
+
+      // get all entries from all relevant collections
+      const collections = await getAllCollections();
+
+      // run indexer a second time. Second run should not add additional data to the database
+      await gitHubITSIndexer.index();
+
+      // again get all entries
+      const updatedCollections = await getAllCollections();
+
+      Object.entries(collections).map(([collectionName, collectionArray]) => {
+        // check if updated collection has the same size
+        expect(collectionArray.length).to.equal(updatedCollections[collectionName].length);
+      });
     });
   });
 });

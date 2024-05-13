@@ -106,13 +106,13 @@ GitHubITSIndexer.prototype.index = async function () {
             omitCount++;
           }
         })
-        .then(() => {
+        .then(async () => {
           // connect the issue/MR to the users (either as author, assignee or assignees)
           if (type === 'issue') {
-            connectIssuesToUsers(IssueAccountConnection, issueEntry, authorEntry, assigneeEntries);
+            await connectIssuesToUsers(IssueAccountConnection, issueEntry, authorEntry, assigneeEntries);
             this.reporter.finishIssue();
           } else if (type === 'mergeRequest') {
-            connectIssuesToUsers(MergeRequestAccountConnection, issueEntry, authorEntry, assigneeEntries);
+            await connectIssuesToUsers(MergeRequestAccountConnection, issueEntry, authorEntry, assigneeEntries);
             this.reporter.finishMergeRequest();
           }
         });
