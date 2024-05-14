@@ -222,7 +222,7 @@ export async function findAllMergeRequests(database, relations) {
   return findAllIssuesOrMergeRequests(database, relations, 'mergeRequests');
 }
 
-// finds all Issues/MRs and infers author, assignee and assignees using the respective relations
+// finds all Issues/MRs and infers notes, author, assignee and assignees using the respective relations
 async function findAllIssuesOrMergeRequests(database, relations, type) {
   if (type !== 'issues' && type !== 'mergeRequests') {
     return [];
@@ -233,13 +233,34 @@ async function findAllIssuesOrMergeRequests(database, relations, type) {
   const issuesAccounts = sortByAttributeString((await findAll(relations, `${type}-accounts`)).docs, 'from');
   const accounts = sortByAttributeString((await findAll(database, 'accounts')).docs, '_id');
 
+  // get relevant connections for notes
+  // notes array should already be sorted by _id
+  const notes = (await findAll(database, 'notes')).docs;
+  const issuesNotesConnections = sortByAttributeString((await findIssueNoteConnections(relations)).docs, 'from');
+  const notesAccountsConnections = sortByAttributeString((await findNoteAccountConnections(relations)).docs, 'from');
+
   issues.docs = issues.docs.map((i) => {
+    // related notes
+    i.notes = [];
+    const relevantNotesConnections = binarySearchArray(issuesNotesConnections, i._id, 'from');
+    i.notes = relevantNotesConnections.map((issueNote) => {
+      // find note this connection points to
+      const note = binarySearch(notes, issueNote.to, '_id');
+      // find author of this note
+      // find the outgoing connection from this note to the acc of the author
+      const noteAccConnection = binarySearch(notesAccountsConnections, note._id, 'from');
+      // find the actual acc the connection points to
+      note.author = binarySearch(accounts, noteAccConnection.to, '_id');
+      return note;
+    });
+
+    // related accounts
     i.author = {};
     i.assignee = {};
     i.assignees = [];
     // find all related accounts
-    const relevantConnections = binarySearchArray(issuesAccounts, i._id, 'from');
-    relevantConnections.forEach((c) => {
+    const relevantAccConnections = binarySearchArray(issuesAccounts, i._id, 'from');
+    relevantAccConnections.forEach((c) => {
       // find account
       const a = binarySearch(accounts, c.to, '_id');
       // add account to the issue i the role defined by the connection
@@ -314,4 +335,12 @@ export function findIssueCommitConnections(relations) {
 
 export function findCommitBuildConnections(relations) {
   return findAll(relations, 'commits-builds');
+}
+
+export function findIssueNoteConnections(relations) {
+  return findAll(relations, 'issues-notes');
+}
+
+export function findNoteAccountConnections(relations) {
+  return findAll(relations, 'notes-accounts');
 }

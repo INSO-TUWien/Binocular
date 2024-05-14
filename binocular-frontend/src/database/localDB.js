@@ -44,8 +44,12 @@ import mergeRequestsMilestones from '../../db_export/mergeRequests-milestones.js
 import accounts from '../../db_export/accounts.json';
 import issuesAccounts from '../../db_export/issues-accounts.json';
 import mergeRequestsAccounts from '../../db_export/mergeRequests-accounts.json';
+import notes from '../../db_export/notes.json';
+import issuesNotes from '../../db_export/issues-notes.json';
+import mergeRequestsNotes from '../../db_export/mergeRequests-notes.json';
+import notesAccounts from '../../db_export/notes-accounts.json';
 
-const collections = { accounts, branches, builds, commits, files, issues, modules, stakeholders, mergeRequests, milestones };
+const collections = { accounts, branches, builds, commits, files, issues, modules, stakeholders, mergeRequests, milestones, notes };
 
 const relations = {
   'commits-commits': commitsCommits,
@@ -64,6 +68,9 @@ const relations = {
   'mergeRequests-milestones': mergeRequestsMilestones,
   'branches-files': branchesFiles,
   'branches-files-files': branchesFilesFiles,
+  'issues-notes': issuesNotes,
+  'mergeRequests-notes': mergeRequestsNotes,
+  'notes-accounts': notesAccounts,
 };
 // #v-endif
 
@@ -242,6 +249,9 @@ export default class LocalDB {
     database.mergeRequests_milestones = relations['mergeRequests-milestones'];
     database.branches_files = relations['branches-files'];
     database.branches_files_files = relations['branches-files-files'];
+    database.issues_notes = relations['issues-notes'];
+    database.mergeRequests_notes = relations['mergeRequests-notes'];
+    database.notes_accounts = relations['notes-accounts'];
 
     return database;
   }
