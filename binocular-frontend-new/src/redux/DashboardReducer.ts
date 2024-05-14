@@ -6,12 +6,14 @@ export interface DashboardInitialState {
   dashboardItems: DashboardItemType[];
   dragResizeMode: DragResizeMode;
   placeableItem: DashboardItemType;
+  dashboardItemCount: number;
 }
 
 const initialState: DashboardInitialState = {
   dashboardItems: [],
   dragResizeMode: DragResizeMode.none,
   placeableItem: { id: 0, x: 0, y: 0, width: 1, height: 1, pluginName: '' },
+  dashboardItemCount: 0,
 };
 
 export const dashboardSlice = createSlice({
@@ -20,7 +22,8 @@ export const dashboardSlice = createSlice({
   reducers: {
     addDashboardItem: (state, action: PayloadAction<DashboardItemType>) => {
       state.dragResizeMode = DragResizeMode.none;
-      action.payload.id = state.dashboardItems.length;
+      action.payload.id = state.dashboardItemCount;
+      state.dashboardItemCount++;
       state.dashboardItems = [...state.dashboardItems, action.payload];
     },
     moveDashboardItem: (state, action: PayloadAction<DashboardItemType>) => {
@@ -38,11 +41,14 @@ export const dashboardSlice = createSlice({
       state.dragResizeMode = DragResizeMode.place;
       state.placeableItem = action.payload;
     },
+    deleteDashboardItem: (state, action: PayloadAction<DashboardItemType>) => {
+      state.dashboardItems = state.dashboardItems.filter((item) => item.id !== action.payload.id);
+    },
     setDragResizeMode: (state, action: PayloadAction<DragResizeMode>) => {
       state.dragResizeMode = action.payload;
     },
   },
 });
 
-export const { addDashboardItem, moveDashboardItem, placeDashboardItem, setDragResizeMode } = dashboardSlice.actions;
+export const { addDashboardItem, moveDashboardItem, placeDashboardItem, deleteDashboardItem, setDragResizeMode } = dashboardSlice.actions;
 export default dashboardSlice.reducer;

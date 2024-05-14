@@ -1,21 +1,9 @@
 import { AreaChart } from './areaChart.tsx';
 import styles from './chatStyles.module.scss';
 import { createRef, useEffect, useState } from 'react';
+import { SettingsType } from '../settings/settings.tsx';
 
-function Chart() {
-  const data = [
-    { x: 1, y: 90 },
-    { x: 2, y: 12 },
-    { x: 3, y: 34 },
-    { x: 4, y: 53 },
-    { x: 5, y: 52 },
-    { x: 6, y: 9 },
-    { x: 7, y: 18 },
-    { x: 8, y: 78 },
-    { x: 9, y: 28 },
-    { x: 10, y: 34 },
-  ];
-
+function Chart(props: { settings: unknown }) {
   const chartContainerRef = createRef<HTMLDivElement>();
 
   const [chartWidth, setChartWidth] = useState(100);
@@ -30,12 +18,17 @@ function Chart() {
         setChartHeight(chartContainerRef.current.offsetHeight);
       }
     }
-  }, [chartContainerRef]);
+  }, [chartContainerRef, chartHeight, chartWidth]);
 
   return (
     <>
       <div className={styles.chartContainer} ref={chartContainerRef}>
-        <AreaChart data={data} width={chartWidth} height={chartHeight} />
+        <AreaChart
+          data={(props.settings as SettingsType).data}
+          width={chartWidth}
+          height={chartHeight}
+          color={(props.settings as SettingsType).color}
+        />
       </div>
     </>
   );

@@ -13,22 +13,23 @@ type AreaChartProps = {
   width: number;
   height: number;
   data: DataPoint[];
+  color: string;
 };
 
-export const AreaChart = ({ width, height, data }: AreaChartProps) => {
+export const AreaChart = ({ width, height, data, color }: AreaChartProps) => {
   // bounds = area inside the graph axis = calculated by substracting the margins
   const axesRef = useRef(null);
   const boundsWidth = width - MARGIN.right - MARGIN.left;
   const boundsHeight = height - MARGIN.top - MARGIN.bottom;
 
   // Y axis
-  const [, max] = d3.extent(data, (d) => d.y);
+  const [min, max] = d3.extent(data, (d) => d.y);
   const yScale = useMemo(() => {
     return d3
       .scaleLinear()
-      .domain([0, max || 0])
+      .domain([min && min < 0 ? min : 0, max && max > 0 ? max : 0])
       .range([boundsHeight, 0]);
-  }, [data, height]);
+  }, [boundsHeight, max, min]);
 
   // X axis
   const [xMin, xMax] = d3.extent(data, (d) => d.x);
@@ -37,7 +38,7 @@ export const AreaChart = ({ width, height, data }: AreaChartProps) => {
       .scaleLinear()
       .domain([xMin || 0, xMax || 0])
       .range([0, boundsWidth]);
-  }, [data, width]);
+  }, [boundsWidth, xMax, xMin]);
 
   // Render the X and Y axis using d3.js, not react
   useEffect(() => {
@@ -76,8 +77,8 @@ export const AreaChart = ({ width, height, data }: AreaChartProps) => {
     <div>
       <svg width={width} height={height}>
         <g width={boundsWidth} height={boundsHeight} transform={`translate(${[MARGIN.left, MARGIN.top].join(',')})`}>
-          <path d={areaPath} opacity={1} stroke="none" fill="#9a6fb0" fillOpacity={0.4} />
-          <path d={linePath} opacity={1} stroke="#9a6fb0" fill="none" strokeWidth={2} />
+          <path d={areaPath} opacity={1} stroke={'none'} fill={color} fillOpacity={0.4} />
+          <path d={linePath} opacity={1} stroke={color} fill={'none'} strokeWidth={2} />
         </g>
         <g width={boundsWidth} height={boundsHeight} ref={axesRef} transform={`translate(${[MARGIN.left, MARGIN.top].join(',')})`} />
       </svg>

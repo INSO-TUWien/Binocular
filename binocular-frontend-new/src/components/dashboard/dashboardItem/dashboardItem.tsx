@@ -1,6 +1,8 @@
 import dashboardItemStyles from './dashboardItem.module.scss';
 import { DragResizeMode } from '../resizeMode.ts';
 import { visualizationPlugins } from '../../../plugins/pluginRegistry.ts';
+import { useState } from 'react';
+
 export interface DashboardItemDTO {
   id: number;
   x: number;
@@ -18,7 +20,12 @@ function DashboardItem(props: {
   colCount: number;
   rowCount: number;
   setDragResizeItem: (item: DashboardItemDTO, mode: DragResizeMode) => void;
+  deleteItem: (item: DashboardItemDTO) => void;
 }) {
+  const [settingsVisible, setSettingsVisible] = useState(false);
+  const plugin = visualizationPlugins.filter((p) => p.name === props.item.pluginName)[0];
+  const [settings, setSettings] = useState(plugin.defaultSettings);
+
   return (
     <>
       <div
@@ -31,13 +38,11 @@ function DashboardItem(props: {
           height: `calc(${(100.0 / props.rowCount) * props.item.height}% - 20px)`,
         }}>
         <div className={dashboardItemStyles.dashboardItemContent}>
-          {props.item.pluginName !== ''
-            ? visualizationPlugins
-                .filter((p) => p.name === props.item.pluginName)
-                .map((p) => {
-                  return <p.chart key={p.name}></p.chart>;
-                })
-            : ''}
+          {visualizationPlugins
+            .filter((p) => p.name === props.item.pluginName)
+            .map((p) => {
+              return <p.chartComponent key={p.name} settings={settings}></p.chartComponent>;
+            })}
         </div>
         <div
           className={dashboardItemStyles.dashboardItemInteractionBar}
@@ -49,6 +54,12 @@ function DashboardItem(props: {
             );
           }}>
           <span>{props.item.pluginName}</span>
+          <button
+            className={dashboardItemStyles.settingsButton}
+            onMouseDown={(event) => {
+              event.stopPropagation();
+              setSettingsVisible(!settingsVisible);
+            }}></button>
         </div>
         <div
           className={dashboardItemStyles.dashboardItemResizeBarTop}
@@ -87,6 +98,42 @@ function DashboardItem(props: {
             );
           }}></div>
       </div>
+      {settingsVisible && (
+        <div className={dashboardItemStyles.settingsBackground} onClick={() => setSettingsVisible(false)}>
+          <div
+            onClick={(event) => event.stopPropagation()}
+            className={'text-xs ' + dashboardItemStyles.settingsWindow}
+            style={{
+              top: `calc(${(100.0 / props.rowCount) * props.item.y}% + 10px + 1.5rem)`,
+              left: `calc(${(100.0 / props.colCount) * (props.item.x + props.item.width)}% - 10px - 20rem)`,
+            }}>
+            <div className={'font-bold underline'}>{props.item.pluginName + ' (#' + props.item.id + ')'}</div>
+            <hr className={'text-base-300 m-1'} />
+            <div>
+              <table>
+                <tbody>
+                  <tr>
+                    <td>Ignore Global Parameters:</td>
+                    <td>
+                      <input type="checkbox" className="toggle toggle-accent toggle-sm" />
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <hr className={'text-base-300 m-1'} />
+            {visualizationPlugins
+              .filter((p) => p.name === props.item.pluginName)
+              .map((p) => {
+                return <p.settingsComponent key={p.name} defaultSettings={settings} setSettings={setSettings}></p.settingsComponent>;
+              })}
+            <hr className={'text-base-300 m-1'} />
+            <button className={'btn btn-error btn-xs w-full'} onClick={() => props.deleteItem(props.item)}>
+              Delete
+            </button>
+          </div>
+        </div>
+      )}
     </>
   );
 }

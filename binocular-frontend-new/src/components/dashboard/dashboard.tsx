@@ -5,7 +5,7 @@ import { showDialog } from '../informationDialog/dialogHelper.ts';
 import { DragResizeMode } from './resizeMode.ts';
 import { useSelector } from 'react-redux';
 import { AppDispatch, RootState, useAppDispatch } from '../../redux';
-import { addDashboardItem, moveDashboardItem, setDragResizeMode } from '../../redux/DashboardReducer.ts';
+import { addDashboardItem, moveDashboardItem, setDragResizeMode, deleteDashboardItem } from '../../redux/DashboardReducer.ts';
 
 function Dashboard() {
   const dispatch: AppDispatch = useAppDispatch();
@@ -63,7 +63,7 @@ function Dashboard() {
     if (dashboardRef.current !== null) {
       setCellSize(dashboardRef.current.offsetWidth / columnCount);
     }
-  }, [dashboardRef]);
+  }, [columnCount, dashboardRef]);
 
   return (
     <>
@@ -103,7 +103,8 @@ function Dashboard() {
                   item={dashboardItem}
                   colCount={columnCount}
                   rowCount={rowCount}
-                  setDragResizeItem={setDragResizeItem}></DashboardItem>
+                  setDragResizeItem={setDragResizeItem}
+                  deleteItem={(item) => dispatch(deleteDashboardItem(item))}></DashboardItem>
               );
             })}
           </>
