@@ -9,6 +9,8 @@ import ParametersDateRange from './components/tabs/parameters/parametersDateRang
 import ParametersGeneral from './components/tabs/parameters/parametersGeneral/parametersGeneral.tsx';
 import InformationDialog from './components/informationDialog/informationDialog.tsx';
 import VisualizationSelector from './components/tabs/components/visualizationSelector/visualizationSelector.tsx';
+import AuthorList from './components/tabs/authors/authorList/authorList.tsx';
+import OtherAuthors from './components/tabs/authors/otherAuthors/otherAuthors.tsx';
 
 function App() {
   return (
@@ -32,7 +34,12 @@ function App() {
             <span>Sprint Tab</span>
           </Tab>
           <Tab displayName={'Authors'} alignment={'right'}>
-            <span>Author Tab</span>
+            <TabSection name={'Authors'}>
+              <AuthorList></AuthorList>
+            </TabSection>
+            <TabSection name={'Other'}>
+              <OtherAuthors></OtherAuthors>
+            </TabSection>
           </Tab>
           <Tab displayName={'File Tree'} alignment={'right'}>
             <span>File Tree Tab</span>

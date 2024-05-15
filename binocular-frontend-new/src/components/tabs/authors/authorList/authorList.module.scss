@@ -1,0 +1,130 @@
+@import '../../../../variables.scss';
+
+$authorRowHeight :1.5rem;
+
+.authorList{
+  @apply bg-base-100;
+  overflow: hidden;
+  border-radius: $border-radius-default;
+  transition: max-height ease-in-out .2s;
+}
+
+.authorListHorizontal{
+  width: 30rem;
+  margin-left: .5rem;
+  height: 3rem;
+  box-shadow: $shadow-default-inset;
+  overflow-x: scroll;
+}
+.authorListHorizontal>div{
+  width: 1000rem;
+}
+.authorListHorizontal>div>div{
+  display: inline-block;
+  float: left;
+  width: 15rem;
+}
+
+.authorListVertical{
+  width: 100%;
+  max-height: 30rem;
+  overflow-y: scroll;
+}
+
+.authorContainer{
+  height: $authorRowHeight;
+  width: 100%;
+  margin-top: .5rem;
+}
+
+.authorContainerDrop{
+  border: 2px dashed;
+  @apply border-accent;
+}
+
+.authorCheckbox{
+  height: $authorRowHeight;
+  width: $authorRowHeight;
+  margin-right: .5rem;
+  float: left;
+}
+
+.authorInset{
+  height: $authorRowHeight;
+  width: $authorRowHeight;
+  margin-right: .5rem;
+  float: left;
+  position: relative;
+}
+
+.authorInsetMiddle:before{
+  content: '';
+  position: absolute;
+  display: block;
+  height: $authorRowHeight;
+  width: calc($authorRowHeight / 2);
+  border-right: 2px solid;
+  @apply border-neutral-900;
+}
+
+.authorInsetEnd:before{
+  content: '';
+  position: absolute;
+  display: block;
+  height: calc($authorRowHeight / 2);;
+  width: calc($authorRowHeight / 2);
+  border-right: 2px solid;
+  @apply border-neutral-900;
+}
+
+.authorInset:after{
+  content: '';
+  position: absolute;
+  display: block;
+  left: calc($authorRowHeight / 2);
+  height: calc($authorRowHeight / 2);
+  width: calc($authorRowHeight / 2);
+  border-bottom: 2px solid;
+  @apply border-neutral-900;
+}
+
+.authorName{
+  position:relative;
+  height: $authorRowHeight;
+  width: calc(100% - $authorRowHeight - 1rem);
+  float: left;
+  border-radius: $border-radius-default;
+  overflow: hidden;
+  border: 2px solid;
+}
+
+.authorNameBackground{
+  position: absolute;
+  height: 100%;
+  width: 100%;
+  opacity: .5;
+  pointer-events: none;
+}
+
+.authorNameText{
+  position: absolute;
+  @apply font-bold;
+  height: 100%;
+  width: 100%;
+  line-height: calc($authorRowHeight - 2px);
+  padding-left: .5rem;
+  pointer-events: none;
+}
+
+.authorDropNoParent{
+  width: 100%;
+  height: $authorRowHeight;
+  border: 2px dashed;
+  @apply border-accent;
+  margin: .5rem 0;
+  border-radius: $border-radius-default;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+

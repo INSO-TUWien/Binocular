@@ -2,10 +2,12 @@ import { configureStore } from '@reduxjs/toolkit';
 import { useDispatch } from 'react-redux';
 
 import DashboardReducer from './DashboardReducer';
+import AuthorsReducer from './AuthorsReducer.ts';
 
 export const store = configureStore({
   reducer: {
     dashboard: DashboardReducer,
+    authors: AuthorsReducer,
   },
 });
 
