@@ -16,6 +16,7 @@
     "d3": "^7.9.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "react-popout": "^3.0.4",
     "react-redux": "^9.1.2"
   },
   "devDependencies": {

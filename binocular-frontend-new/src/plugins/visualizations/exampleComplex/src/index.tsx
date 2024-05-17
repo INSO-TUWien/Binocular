@@ -3,12 +3,12 @@ import PreviewImage from '../assets/preview.svg';
 import Settings from './settings/settings.tsx';
 
 export default {
-  name: 'Example Stats',
+  name: 'Example Complex',
   chartComponent: Chart,
   settingsComponent: Settings,
   defaultSettings: {},
   capabilities: {
-    popoutOnly: false,
+    popoutOnly: true,
   },
   images: {
     preview: PreviewImage,

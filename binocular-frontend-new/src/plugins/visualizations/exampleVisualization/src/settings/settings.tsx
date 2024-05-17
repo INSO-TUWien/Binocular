@@ -31,34 +31,20 @@ function Settings(props: { defaultSettings: unknown; setSettings: (newSettings: 
   return (
     <>
       <div>
-        <div className="form-control">
-          <label className="label cursor-pointer">
-            <span className="label-text">Dataset 1</span>
-            <input
-              type="radio"
-              name="radio-10"
-              className="radio checked:bg-accent"
-              onChange={() => {}}
-              onClick={() => {
-                props.setSettings({ data: data1, color: (props.defaultSettings as SettingsType).color });
-              }}
-            />
-          </label>
-        </div>
-        <div className="form-control">
-          <label className="label cursor-pointer">
-            <span className="label-text">Dataset 2</span>
-            <input
-              type="radio"
-              name="radio-10"
-              className="radio checked:bg-accent"
-              onChange={() => {}}
-              onClick={() => {
-                props.setSettings({ data: data2, color: (props.defaultSettings as SettingsType).color });
-              }}
-            />
-          </label>
-        </div>
+        <button
+          className={'btn btn-xs btn-accent w-full mb-1'}
+          onClick={() => {
+            props.setSettings({ data: data1, color: (props.defaultSettings as SettingsType).color });
+          }}>
+          Dataset 1
+        </button>
+        <button
+          className={'btn btn-xs btn-accent w-full mb-1'}
+          onClick={() => {
+            props.setSettings({ data: data2, color: (props.defaultSettings as SettingsType).color });
+          }}>
+          Dataset 2
+        </button>
         <div>
           <label htmlFor={'hs-color-input'} className={'block text-sm font-medium mb-2 dark:text-white'}>
             Chart Color
@@ -67,7 +53,7 @@ function Settings(props: { defaultSettings: unknown; setSettings: (newSettings: 
             type={'color'}
             className={'p-1 h-10 w-14 block bg-white bordercursor-pointer rounded-lg disabled:opacity-50 disabled:pointer-events-none  '}
             id={'hs-color-input'}
-            value={'#2563eb'}
+            value={(props.defaultSettings as SettingsType).color}
             title={'Choose your color'}
             onChange={(event) => {
               props.setSettings({ data: (props.defaultSettings as SettingsType).data, color: event.target.value });

@@ -3,12 +3,19 @@ import visualizationSelectorStyles from './visualizationSelector.module.scss';
 import { addDashboardItem, placeDashboardItem } from '../../../../redux/DashboardReducer.ts';
 import { AppDispatch, useAppDispatch } from '../../../../redux';
 
-function VisualizationSelector() {
+function VisualizationSelector(props: { orientation: string }) {
   const dispatch: AppDispatch = useAppDispatch();
 
   return (
     <div className={'text-xs'}>
-      <div className={visualizationSelectorStyles.selector}>
+      <div
+        className={
+          visualizationSelectorStyles.selector +
+          ' ' +
+          (props.orientation === 'horizontal'
+            ? visualizationSelectorStyles.selectorHorizontal
+            : visualizationSelectorStyles.selectorVertical)
+        }>
         {visualizationPlugins.map((plugin, i) => {
           return (
             <div

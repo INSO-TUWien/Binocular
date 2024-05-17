@@ -31,13 +31,13 @@ $dashboardItemResizeBarThickness: 3px;
 }
 
 .dashboardItemInteractionBar>span{
-  margin: 0 .5rem;
+  margin-left: .5rem;
   float: left;
   @apply text-neutral-500;
 }
 
 .dashboardItemInteractionBar>button{
-  margin: 0 .5rem;
+  margin-right: .5rem;
   width: $dashboardItemInteractionBarThickness;
   height: $dashboardItemInteractionBarThickness;
   float: right;
@@ -83,6 +83,10 @@ $dashboardItemResizeBarThickness: 3px;
   background: url("../../../assets/dots_horizontal_gray.svg");
 }
 
+.popoutButton{
+  background: url("../../../assets/open_in_new_gray.svg");
+}
+
 .settingsBackground{
   position: absolute;
   top: 0;
@@ -102,4 +106,19 @@ $dashboardItemResizeBarThickness: 3px;
   border: $border-default;
   @apply border-accent;
   padding: .5rem;
+}
+
+.popoutWarning{
+  @apply text-xs;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.popoutWarning>div{
+  width: 80%;
+  text-align: center;
 }

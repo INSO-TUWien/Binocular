@@ -7,6 +7,9 @@ export default {
   chartComponent: Chart,
   settingsComponent: Settings,
   defaultSettings: { data: [], color: '#007AFF' },
+  capabilities: {
+    popoutOnly: false,
+  },
   images: {
     preview: PreviewImage,
   },

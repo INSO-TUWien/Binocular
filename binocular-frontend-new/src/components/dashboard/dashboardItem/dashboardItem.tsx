@@ -2,6 +2,10 @@ import dashboardItemStyles from './dashboardItem.module.scss';
 import { DragResizeMode } from '../resizeMode.ts';
 import { visualizationPlugins } from '../../../plugins/pluginRegistry.ts';
 import { useState } from 'react';
+import DashboardItemPopout from '../dashboardItemPopout/dashboardItemPopout.tsx';
+import { increasePopupCount } from '../../../redux/DashboardReducer.ts';
+import { AppDispatch, useAppDispatch } from '../../../redux';
+import openInNewGray from '../../../assets/open_in_new_white.svg';
 
 export interface DashboardItemDTO {
   id: number;
@@ -22,9 +26,13 @@ function DashboardItem(props: {
   setDragResizeItem: (item: DashboardItemDTO, mode: DragResizeMode) => void;
   deleteItem: (item: DashboardItemDTO) => void;
 }) {
+  const dispatch: AppDispatch = useAppDispatch();
+
   const [settingsVisible, setSettingsVisible] = useState(false);
   const plugin = visualizationPlugins.filter((p) => p.name === props.item.pluginName)[0];
   const [settings, setSettings] = useState(plugin.defaultSettings);
+
+  const [poppedOut, setPoppedOut] = useState(false);
 
   return (
     <>
@@ -37,13 +45,35 @@ function DashboardItem(props: {
           width: `calc(${(100.0 / props.colCount) * props.item.width}% - 20px)`,
           height: `calc(${(100.0 / props.rowCount) * props.item.height}% - 20px)`,
         }}>
-        <div className={dashboardItemStyles.dashboardItemContent}>
-          {visualizationPlugins
-            .filter((p) => p.name === props.item.pluginName)
-            .map((p) => {
-              return <p.chartComponent key={p.name} settings={settings}></p.chartComponent>;
-            })}
-        </div>
+        {poppedOut ? (
+          <div className={dashboardItemStyles.dashboardItemContent}>
+            <span>Popped Out!</span>
+            <DashboardItemPopout onClosing={() => setPoppedOut(false)}>
+              <plugin.chartComponent key={plugin.name} settings={settings}></plugin.chartComponent>
+            </DashboardItemPopout>
+          </div>
+        ) : (
+          <div className={dashboardItemStyles.dashboardItemContent}>
+            {plugin.capabilities.popoutOnly ? (
+              <div className={dashboardItemStyles.popoutWarning}>
+                <div>This Visualization is too complex to display as part of the Dashboard.</div>
+                <div> Please open it in a new window to view!</div>
+                <button
+                  className={'btn btn-accent'}
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    dispatch(increasePopupCount());
+                    setPoppedOut(true);
+                  }}>
+                  <div>Open Visualization in new Window</div>
+                  <img src={openInNewGray} alt="Open Visualization" />
+                </button>
+              </div>
+            ) : (
+              <plugin.chartComponent key={plugin.name} settings={settings}></plugin.chartComponent>
+            )}
+          </div>
+        )}
         <div
           className={dashboardItemStyles.dashboardItemInteractionBar}
           onMouseDown={() => {
@@ -56,10 +86,19 @@ function DashboardItem(props: {
           <span>{props.item.pluginName}</span>
           <button
             className={dashboardItemStyles.settingsButton}
-            onMouseDown={(event) => {
+            onClick={(event) => {
               event.stopPropagation();
               setSettingsVisible(!settingsVisible);
-            }}></button>
+            }}
+            onMouseDown={(event) => event.stopPropagation()}></button>
+          <button
+            className={dashboardItemStyles.popoutButton}
+            onClick={(event) => {
+              event.stopPropagation();
+              dispatch(increasePopupCount());
+              setPoppedOut(true);
+            }}
+            onMouseDown={(event) => event.stopPropagation()}></button>
         </div>
         <div
           className={dashboardItemStyles.dashboardItemResizeBarTop}

@@ -1,8 +1,7 @@
-import { AreaChart } from './areaChart.tsx';
 import { createRef, useEffect, useState } from 'react';
-import { SettingsType } from '../settings/settings.tsx';
+import { SunburstChart } from './sunburstChart.tsx';
 
-function Chart(props: { settings: unknown }) {
+function Chart() {
   const chartContainerRef = createRef<HTMLDivElement>();
 
   const [chartWidth, setChartWidth] = useState(100);
@@ -22,12 +21,7 @@ function Chart(props: { settings: unknown }) {
   return (
     <>
       <div className={'w-full h-full'} ref={chartContainerRef}>
-        <AreaChart
-          data={(props.settings as SettingsType).data}
-          width={chartWidth}
-          height={chartHeight}
-          color={(props.settings as SettingsType).color}
-        />
+        <SunburstChart width={chartWidth} height={chartHeight} />
       </div>
     </>
   );

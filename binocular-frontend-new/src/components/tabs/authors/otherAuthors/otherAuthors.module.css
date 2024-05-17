@@ -6,7 +6,8 @@
 }
 
 .authorListHorizontal {
-  display: inline;
+  display: inline-block;
+  float: left;
   width: 30rem;
   margin-left: 0.5rem;
   height: 3rem;
@@ -15,7 +16,7 @@
 }
 
 .authorListHorizontal > div {
-  width: 1000rem;
+  width: max-content;
 }
 
 .authorListHorizontal > div > div {

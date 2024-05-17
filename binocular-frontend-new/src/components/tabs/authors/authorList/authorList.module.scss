@@ -10,6 +10,8 @@ $authorRowHeight :1.5rem;
 }
 
 .authorListHorizontal{
+  display: inline-block;
+  float: left;
   width: 30rem;
   margin-left: .5rem;
   height: 3rem;
@@ -17,12 +19,10 @@ $authorRowHeight :1.5rem;
   overflow-x: scroll;
 }
 .authorListHorizontal>div{
-  width: 1000rem;
+  width: max-content;
 }
 .authorListHorizontal>div>div{
   display: inline-block;
-  float: left;
-  width: 15rem;
 }
 
 .authorListVertical{
@@ -35,6 +35,12 @@ $authorRowHeight :1.5rem;
   height: $authorRowHeight;
   width: 100%;
   margin-top: .5rem;
+}
+
+.authorContainerHorizontal{
+  display: inline-block;
+  float: left;
+  width: 15rem;
 }
 
 .authorContainerDrop{
@@ -117,6 +123,7 @@ $authorRowHeight :1.5rem;
 }
 
 .authorDropNoParent{
+  @apply text-xs;
   width: 100%;
   height: $authorRowHeight;
   border: 2px dashed;
@@ -127,4 +134,18 @@ $authorRowHeight :1.5rem;
   align-items: center;
   justify-content: center;
 }
+
+.authorDropNoParentHorizontal{
+  font-size: .6rem;
+  display: inline-block;
+  float: left;
+  height: 2.5rem;
+  width: 5rem;
+  margin-left: .5rem;
+}
+
+.authorDropNoParentVertical{
+
+}
+
 

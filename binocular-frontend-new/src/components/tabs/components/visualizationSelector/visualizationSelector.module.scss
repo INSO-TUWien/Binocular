@@ -3,9 +3,17 @@
 
 .selector{
   max-width: 100%;
+
+}
+
+.selectorHorizontal{
   box-shadow: $shadow-default-inset;
   border-radius: $border-radius-default;
   height: 3rem;
+}
+
+.selectorVertical{
+
 }
 
 .visualizationButton{

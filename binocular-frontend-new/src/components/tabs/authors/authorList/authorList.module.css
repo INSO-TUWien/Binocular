@@ -6,6 +6,8 @@
 }
 
 .authorListHorizontal {
+  display: inline-block;
+  float: left;
   width: 30rem;
   margin-left: 0.5rem;
   height: 3rem;
@@ -14,13 +16,11 @@
 }
 
 .authorListHorizontal > div {
-  width: 1000rem;
+  width: max-content;
 }
 
 .authorListHorizontal > div > div {
   display: inline-block;
-  float: left;
-  width: 15rem;
 }
 
 .authorListVertical {
@@ -33,6 +33,12 @@
   height: 1.5rem;
   width: 100%;
   margin-top: 0.5rem;
+}
+
+.authorContainerHorizontal {
+  display: inline-block;
+  float: left;
+  width: 15rem;
 }
 
 .authorContainerDrop {
@@ -115,6 +121,7 @@
 }
 
 .authorDropNoParent {
+  @apply text-xs;
   width: 100%;
   height: 1.5rem;
   border: 2px dashed;
@@ -124,6 +131,15 @@
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+.authorDropNoParentHorizontal {
+  font-size: 0.6rem;
+  display: inline-block;
+  float: left;
+  height: 2.5rem;
+  width: 5rem;
+  margin-left: 0.5rem;
 }
 
 /*# sourceMappingURL=authorList.module.css.map */

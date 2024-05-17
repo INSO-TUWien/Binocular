@@ -7,6 +7,7 @@ export interface DashboardInitialState {
   dragResizeMode: DragResizeMode;
   placeableItem: DashboardItemType;
   dashboardItemCount: number;
+  popupCount: number;
 }
 
 const initialState: DashboardInitialState = {
@@ -14,6 +15,7 @@ const initialState: DashboardInitialState = {
   dragResizeMode: DragResizeMode.none,
   placeableItem: { id: 0, x: 0, y: 0, width: 1, height: 1, pluginName: '' },
   dashboardItemCount: 0,
+  popupCount: 0,
 };
 
 export const dashboardSlice = createSlice({
@@ -47,8 +49,12 @@ export const dashboardSlice = createSlice({
     setDragResizeMode: (state, action: PayloadAction<DragResizeMode>) => {
       state.dragResizeMode = action.payload;
     },
+    increasePopupCount: (state) => {
+      state.popupCount++;
+    },
   },
 });
 
-export const { addDashboardItem, moveDashboardItem, placeDashboardItem, deleteDashboardItem, setDragResizeMode } = dashboardSlice.actions;
+export const { addDashboardItem, moveDashboardItem, placeDashboardItem, deleteDashboardItem, setDragResizeMode, increasePopupCount } =
+  dashboardSlice.actions;
 export default dashboardSlice.reducer;

@@ -1,5 +1,8 @@
 .selector {
   max-width: 100%;
+}
+
+.selectorHorizontal {
   box-shadow: 0 0 10px #CCCCCC inset;
   border-radius: 5px;
   height: 3rem;
