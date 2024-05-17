@@ -3,7 +3,7 @@ import visualizationSelectorStyles from './visualizationSelector.module.scss';
 import { addDashboardItem, placeDashboardItem } from '../../../../redux/DashboardReducer.ts';
 import { AppDispatch, useAppDispatch } from '../../../../redux';
 
-function VisualizationSelector(props: { orientation: string }) {
+function VisualizationSelector(props: { orientation?: string }) {
   const dispatch: AppDispatch = useAppDispatch();
 
   return (

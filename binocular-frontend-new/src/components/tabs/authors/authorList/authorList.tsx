@@ -3,7 +3,7 @@ import { useSelector } from 'react-redux';
 import { AppDispatch, RootState, useAppDispatch } from '../../../../redux';
 import { setAuthorList, setDragging } from '../../../../redux/AuthorsReducer.ts';
 
-function AuthorList(props: { orientation: string }) {
+function AuthorList(props: { orientation?: string }) {
   const dispatch: AppDispatch = useAppDispatch();
 
   const authors = useSelector((state: RootState) => state.authors.authorList);
