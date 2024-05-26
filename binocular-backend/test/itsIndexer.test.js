@@ -120,6 +120,14 @@ describe('its', function () {
     return res;
   };
 
+  // checks if the specified collection and all connections from/to this collection are empty
+  const expectEmptyCollectionAndConnections = (collections, collectionName) => {
+    const relevantCollectionNames = relevantCollections.map((c) => c.collection.name).filter((cn) => cn.includes(collectionName));
+    for (const name of relevantCollectionNames) {
+      expect(collections[name].length).to.equal(0);
+    }
+  };
+
   const setupDb = async (db, collections) => {
     await db.ensureDatabase('test', ctx);
     await db.truncate();
@@ -277,16 +285,11 @@ describe('its', function () {
       // get all entries from all relevant collections
       const collections = await getAllCollections();
 
-      // check if the data was indexed as expected:
-      // issues
+      // check if the data was indexed as expected
       expectDefaultIssues(collections);
-      // mergeRequests
       expectDefaultMergeRequests(collections);
-      // milestones
       expectDefaultMilestones(collections);
-      // accounts
       expectDefaultAccounts(collections);
-      // notes
       expectDefaultNotes(collections);
     });
 
@@ -309,7 +312,7 @@ describe('its', function () {
       });
     });
 
-    it('can handle empty milestone collection', async function () {
+    it('can handle empty milestones collection', async function () {
       const gitLabITSIndexer = await gitlabSetup();
       remapGitlabApiCall(gitLabITSIndexer, 'getMileStones', []);
       // start indexer. gets data from GitLab Mock implementation (see ./gitlab)
@@ -318,7 +321,8 @@ describe('its', function () {
       // get all entries from all relevant collections
       const collections = await getAllCollections();
 
-      // other collections should be unaffected (except connections to milestones)
+      // milestones (and all its connections) should be empty, the other collections should be unaffected
+      expectEmptyCollectionAndConnections(collections, 'milestones');
       expectDefaultIssues(collections, true, false, true);
       expectDefaultMergeRequests(collections, true, false, true);
       expectDefaultAccounts(collections);
@@ -334,14 +338,15 @@ describe('its', function () {
       // get all entries from all relevant collections
       const collections = await getAllCollections();
 
-      // other collections should be unaffected
+      // issues (and all its connections) should be empty, the other collections should be unaffected
+      expectEmptyCollectionAndConnections(collections, 'issues');
       expectDefaultMergeRequests(collections);
       expectDefaultMilestones(collections);
       expectDefaultAccounts(collections);
       expectDefaultNotes(collections);
     });
 
-    it('can handle empty getMileStones collection', async function () {
+    it('can handle empty mergeRequests collection', async function () {
       const gitLabITSIndexer = await gitlabSetup();
       remapGitlabApiCall(gitLabITSIndexer, 'getMergeRequests', []);
       // start indexer. gets data from GitLab Mock implementation (see ./gitlab)
@@ -350,7 +355,8 @@ describe('its', function () {
       // get all entries from all relevant collections
       const collections = await getAllCollections();
 
-      // other collections should be unaffected
+      // mergeRequests (and all its connections) should be empty, the other collections should be unaffected
+      expectEmptyCollectionAndConnections(collections, 'mergeRequests');
       expectDefaultIssues(collections);
       expectDefaultMilestones(collections);
       expectDefaultAccounts(collections);
@@ -367,7 +373,8 @@ describe('its', function () {
       // get all entries from all relevant collections
       const collections = await getAllCollections();
 
-      // other collections should be unaffected
+      // notes (and all its connections) should be empty, the other collections should be unaffected
+      expectEmptyCollectionAndConnections(collections, 'notes');
       expectDefaultIssues(collections, true, true, false);
       expectDefaultMergeRequests(collections, true, true, false);
       expectDefaultMilestones(collections);
@@ -376,7 +383,11 @@ describe('its', function () {
   });
 
   describe('#indexGitHub', function () {
-    it('should index all GitHub issues and create all necessary db collections and connections', async function () {
+    // GITHUB HELPER FUNCTIONS
+
+    // basic setup for github. Returns the github indexer.
+    // Sets up the default github mock implementation.
+    const githubSetup = async () => {
       const repo = await fake.repository();
       ctx.targetPath = repo.path;
 
@@ -391,57 +402,79 @@ describe('its', function () {
 
       const gitHubITSIndexer = new GitHubITSIndexer(repo, reporter);
       gitHubITSIndexer.controller = new GitHubMock();
+      return gitHubITSIndexer;
+    };
+
+    // the github mock implementation returns some standard test data.
+    // But for some tests, we need the mock api to return something else.
+    const remapGitHubApiCall = (indexer, functionName, newData) => {
+      if (indexer.controller === null || indexer.controller === undefined) {
+        throw Error('Test Error: indexer.controller does not exist, function "' + functionName + '" cannot be remapped');
+      }
+      const fun = indexer.controller[functionName];
+      if (fun === null || fun === undefined) {
+        throw Error('Test Error: function "' + functionName + '" does not exist, cannot be remapped');
+      }
+      indexer.controller[functionName] = () => {
+        return new Promise((resolve) => {
+          resolve(newData);
+        });
+      };
+    };
+
+    // some helper functions that check if the expected data has been indexed when the default github mock implementation is used.
+    const expectDefaultIssues = (collections, coll = 'issues') => {
+      const dbIssuesCollectionData = collections[coll].sort((a, b) => a.id.localeCompare(b.id));
+      expect(dbIssuesCollectionData.length).to.equal(2);
+
+      const issue0 = collections[coll][0];
+      const issue1 = collections[coll][1];
+
+      const t1Id = collections['accounts'].filter((a) => a.login === 'tester1')[0]._id;
+      const t2Id = collections['accounts'].filter((a) => a.login === 'tester2')[0]._id;
+
+      expect(issue0.mentions.length).to.equal(2);
+      expectExamples({ _from: issue0._id, _to: t1Id, role: 'author' }, collections[`${coll}-accounts`], 1);
+      expectExamples({ _from: issue0._id, _to: t2Id, role: 'assignee' }, collections[`${coll}-accounts`], 1);
+      expectExamples({ _from: issue0._id, _to: t2Id, role: 'assignees' }, collections[`${coll}-accounts`], 1);
+      expect(issue0.mentions[0].closes).to.equal(false);
+      expect(issue0.mentions[0].commit).to.equal('1234567890');
+      expect(issue0.mentions[1].closes).to.equal(true);
+
+      expect(dbIssuesCollectionData[1].mentions.length).to.equal(2);
+      expectExamples({ _from: issue1._id, _to: t2Id, role: 'author' }, collections[`${coll}-accounts`], 1);
+      expectExamples({ _from: issue1._id, _to: t1Id, role: 'assignee' }, collections[`${coll}-accounts`], 1);
+      expectExamples({ _from: issue1._id, _to: t1Id, role: 'assignees' }, collections[`${coll}-accounts`], 1);
+      expectExamples({ _from: issue1._id, _to: t2Id, role: 'assignees' }, collections[`${coll}-accounts`], 1);
+      expect(dbIssuesCollectionData[1].mentions[0].closes).to.equal(false);
+      expect(dbIssuesCollectionData[1].mentions[0].commit).to.equal('1234567890');
+      expect(dbIssuesCollectionData[1].mentions[1].closes).to.equal(true);
+    };
+    // atm, PRs and Issue mock data is the same
+    const expectDefaultMergeRequests = (collections) => {
+      expectDefaultIssues(collections, 'mergeRequests');
+    };
+    const expectDefaultAccounts = (collections) => {
+      expect(collections['accounts'].length).to.equal(2);
+    };
+
+    // TESTS
+
+    it('should index all GitHub issues and create all necessary db collections and connections', async function () {
+      const gitHubITSIndexer = await githubSetup();
 
       await gitHubITSIndexer.index();
 
       // get all entries from all relevant collections
       const collections = await getAllCollections();
 
-      // test data for issues is the same as for merge requests
-      for (const coll of ['issues', 'mergeRequests']) {
-        const dbIssuesCollectionData = collections[coll].sort((a, b) => a.id.localeCompare(b.id));
-        expect(dbIssuesCollectionData.length).to.equal(2);
-
-        const issue0 = collections[coll][0];
-        const issue1 = collections[coll][1];
-
-        const t1Id = collections['accounts'].filter((a) => a.login === 'tester1')[0]._id;
-        const t2Id = collections['accounts'].filter((a) => a.login === 'tester2')[0]._id;
-
-        expect(issue0.mentions.length).to.equal(2);
-        expectExamples({ _from: issue0._id, _to: t1Id, role: 'author' }, collections[`${coll}-accounts`], 1);
-        expectExamples({ _from: issue0._id, _to: t2Id, role: 'assignee' }, collections[`${coll}-accounts`], 1);
-        expectExamples({ _from: issue0._id, _to: t2Id, role: 'assignees' }, collections[`${coll}-accounts`], 1);
-        expect(issue0.mentions[0].closes).to.equal(false);
-        expect(issue0.mentions[0].commit).to.equal('1234567890');
-        expect(issue0.mentions[1].closes).to.equal(true);
-
-        expect(dbIssuesCollectionData[1].mentions.length).to.equal(2);
-        expectExamples({ _from: issue1._id, _to: t2Id, role: 'author' }, collections[`${coll}-accounts`], 1);
-        expectExamples({ _from: issue1._id, _to: t1Id, role: 'assignee' }, collections[`${coll}-accounts`], 1);
-        expectExamples({ _from: issue1._id, _to: t1Id, role: 'assignees' }, collections[`${coll}-accounts`], 1);
-        expectExamples({ _from: issue1._id, _to: t2Id, role: 'assignees' }, collections[`${coll}-accounts`], 1);
-        expect(dbIssuesCollectionData[1].mentions[0].closes).to.equal(false);
-        expect(dbIssuesCollectionData[1].mentions[0].commit).to.equal('1234567890');
-        expect(dbIssuesCollectionData[1].mentions[1].closes).to.equal(true);
-      }
+      expectDefaultIssues(collections);
+      expectDefaultMergeRequests(collections);
+      expectDefaultAccounts(collections);
     });
 
     it('should not persist objects twice if indexer is called twice (GitHub)', async function () {
-      const repo = await fake.repository();
-      ctx.targetPath = repo.path;
-
-      //Remap Remote functions to local ones because remote repository doesn't exist anymore.
-      remapRemoteFunctions(repo);
-      repo.getOriginUrl = async function () {
-        return 'git@github.com/Test/Test-Project.git';
-      };
-
-      // init all relevant collections for ITS indexing
-      await setupDb(db, relevantCollections);
-
-      const gitHubITSIndexer = new GitHubITSIndexer(repo, reporter);
-      gitHubITSIndexer.controller = new GitHubMock();
+      const gitHubITSIndexer = await githubSetup();
 
       // first index run should add all necessary entries
       await gitHubITSIndexer.index();
@@ -459,6 +492,38 @@ describe('its', function () {
         // check if updated collection has the same size
         expect(collectionArray.length).to.equal(updatedCollections[collectionName].length);
       });
+    });
+
+    it('can handle empty issues collection', async function () {
+      const gitHubITSIndexer = await githubSetup();
+
+      remapGitHubApiCall(gitHubITSIndexer, 'getIssuesWithEvents', []);
+
+      await gitHubITSIndexer.index();
+
+      // get all entries from all relevant collections
+      const collections = await getAllCollections();
+
+      // issues (and all its connections) should be empty, the other collections should be unaffected
+      expectEmptyCollectionAndConnections(collections, 'issues');
+      expectDefaultMergeRequests(collections);
+      expectDefaultAccounts(collections);
+    });
+
+    it('can handle empty mergeRequests collection', async function () {
+      const gitHubITSIndexer = await githubSetup();
+
+      remapGitHubApiCall(gitHubITSIndexer, 'getPullRequestsWithEvents', []);
+
+      await gitHubITSIndexer.index();
+
+      // get all entries from all relevant collections
+      const collections = await getAllCollections();
+
+      // mergeRequests (and all its connections) should be empty, the other collections should be unaffected
+      expectEmptyCollectionAndConnections(collections, 'mergeRequests');
+      expectDefaultIssues(collections);
+      expectDefaultAccounts(collections);
     });
   });
 });
