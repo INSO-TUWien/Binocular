@@ -1,4 +1,4 @@
-import User from '../supportingTypes/User.ts';
+import User from '../supportingTypes/AccountUser.ts';
 
 export default interface CommitDto {
   oid: string;

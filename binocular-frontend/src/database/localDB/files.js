@@ -11,7 +11,7 @@ import {
   findBranchFileConnections,
   findBranchFileFileConnections,
   findFileCommitConnections,
-  findFileCommitStakeholderConnections,
+  findFileCommitUserConnections,
   sortByAttributeString,
 } from './utils';
 PouchDB.plugin(PouchDBFind);
@@ -125,26 +125,26 @@ export default class Files {
       const result = [];
 
       const commits = (await findAll(db, 'commits')).docs;
-      const stakeholders = (await findAll(db, 'stakeholders')).docs;
+      const users = (await findAll(db, 'users')).docs;
       const fileCommitConnections = (await findFileCommitConnections(relations)).docs;
-      const fileCommitStakeholderConnections = (await findFileCommitStakeholderConnections(relations)).docs;
+      const fileCommitUserConnections = (await findFileCommitUserConnections(relations)).docs;
 
       //get all commits-files connection of this file
       for (const file of fileObjects) {
         const fileResult = { path: file.path, ownership: [] };
         const relevantConnections = fileCommitConnections.filter((fCC) => fCC.from === file._id);
 
-        //for each of these relevant connections, we want to extract the commit data and ownership connections (commits-files-stakeholders)
+        //for each of these relevant connections, we want to extract the commit data and ownership connections (commits-files-users)
         for (const conn of relevantConnections) {
           const relevantCommit = commits.filter((c) => c._id === conn.to)[0];
           const commitResult = { commit: { sha: relevantCommit.sha, date: relevantCommit.date }, ownership: [] };
 
-          const relevantOwnershipConnections = fileCommitStakeholderConnections.filter((fcsc) => fcsc.from === conn._id);
+          const relevantOwnershipConnections = fileCommitUserConnections.filter((fcsc) => fcsc.from === conn._id);
 
-          //for each of the ownership connections, add the signature of the stakeholder and the owned lines to commitResult.ownership
+          //for each of the ownership connections, add the signature of the user and the owned lines to commitResult.ownership
           for (const ownershipConn of relevantOwnershipConnections) {
-            const stakeholder = stakeholders.filter((s) => s._id === ownershipConn.to)[0].gitSignature;
-            commitResult.ownership.push({ stakeholder: stakeholder, hunks: ownershipConn.hunks });
+            const user = users.filter((s) => s._id === ownershipConn.to)[0].gitSignature;
+            commitResult.ownership.push({ user: user, hunks: ownershipConn.hunks });
           }
           //add to the result object of the current file
           fileResult.ownership.push(commitResult);

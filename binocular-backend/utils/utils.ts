@@ -33,7 +33,7 @@ export async function getDbExport(db: any) {
 
 export function parseBlameOutput(output: string) {
   //this function parses git blame output with the -p flag (porcelain).
-  //it extracts how many lines of code each stakeholder owns.
+  //it extracts how many lines of code each user owns.
   //How it works:
   //  - git blame porcelain output outputs the commit sha followed by one or multiple lines of code (each prepended by a \t).
   //  - This means that these lines were added/modified by that commit.
@@ -116,9 +116,9 @@ export function parseBlameOutput(output: string) {
   }
 
   // group hunks by commit sha
-  for (const [stakeholder, hbs] of Object.entries(hunks)) {
-    const hunksByStakeholder = hbs as any[];
-    const hunksBySha: object = _.groupBy(hunksByStakeholder, 'commitSha');
+  for (const [user, hbs] of Object.entries(hunks)) {
+    const hunksByUser = hbs as any[];
+    const hunksBySha: object = _.groupBy(hunksByUser, 'commitSha');
     const resultHunks: any[] = [];
 
     for (const [sha, hunks] of Object.entries(hunksBySha)) {
@@ -131,7 +131,7 @@ export function parseBlameOutput(output: string) {
       });
     }
 
-    hunks[stakeholder] = resultHunks;
+    hunks[user] = resultHunks;
   }
 
   return { ownershipData: ownershipData, hunks: hunks };

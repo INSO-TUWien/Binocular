@@ -1,7 +1,7 @@
 # Database Scheme
 
 This document lists all collections and connections of the ArangoDB Database used by Binocular.
-Complicated connections such as `branches-files-files` and `commits-files-stakeholders` are explained in detail.
+Complicated connections such as `branches-files-files` and `commits-files-users` are explained in detail.
 
 Note: Collections may have different attributes, depending on the source of the data (GitLab, GitHub).
 
@@ -16,18 +16,18 @@ Note: Collections may have different attributes, depending on the source of the 
    8. [mergeRequests (GitLab)](#mergerequests-gitlab)
    9. [milestones](#milestones)
    10. [modules](#modules)
-   11. [stakeholders](#stakeholders)
+   11. [users](#users)
 2. [Connections](#connections)
    1. [branches-files](#branches-files)
    2. [branches-files-files](#branches-files-files)
    3. [commits-builds](#commits-builds)
    4. [commits-commits](#commits-commits)
    5. [commits-files](#commits-files)
-   6. [commits-files-stakeholders](#commits-files-stakeholders)
+   6. [commits-files-users](#commits-files-users)
    7. [commits-modules](#commits-modules)
-   8. [commits-stakeholders](#commits-stakeholders)
+   8. [commits-users](#commits-users)
    9. [issues-commits](#issues-commits)
-   10. [issues-stakeholders](#issues-stakeholders)
+   10. [issues-users](#issues-users)
    11. [modules-files](#modules-files)
    12. [modules-modules](#modules-modules)
 
@@ -315,7 +315,7 @@ Also contains directories that have been deleted/renamed.
 |----------------|--------|----------------------------------------------------------------------------|
 | `path`         | string | full path of the module starting at the project root (**with leading ./**) |
 
-### stakeholders
+### users
 
 All users that have ever committed to the project.
 
@@ -427,7 +427,7 @@ Tracks which files were added/deleted/modified by commits.
 | `additions`    | number | number of lines added to this file in this commit     |
 | `deletions`    | number | number of lines deleted from this file in this commit |                                                       |
 
-### commits-files-stakeholders
+### commits-files-users
 
 This connection is used to track ownership of lines of a file.
 
@@ -436,15 +436,15 @@ This connection is used to track ownership of lines of a file.
 | attribute name | type                                           | details                                             |
 |----------------|------------------------------------------------|-----------------------------------------------------|
 | `_from`        | string                                         | internal ArangoDB key of a commits-files connection |
-| `_to`          | string                                         | internal ArangoDB key of a stakeholder object       |
-| `hunks`        | Array\[[OwnershipHunk](#ownershiphunk-object)] | which parts of the file this stakeholder owns       |
+| `_to`          | string                                         | internal ArangoDB key of a user object              |
+| `hunks`        | Array\[[OwnershipHunk](#ownershiphunk-object)] | which parts of the file this user owns              |
 
 ##### OwnershipHunk Object
 
-| attribute name   | type                           | details                                                              |
-|------------------|--------------------------------|----------------------------------------------------------------------|
-| `originalCommit` | string                         | sha of the commit where these lines were modified by the stakeholder |
-| `lines`          | Array\[[Lines](#lines-object)] | lines that were modified by this commit                              |
+| attribute name   | type                           | details                                                       |
+|------------------|--------------------------------|---------------------------------------------------------------|
+| `originalCommit` | string                         | sha of the commit where these lines were modified by the user |
+| `lines`          | Array\[[Lines](#lines-object)] | lines that were modified by this commit                       |
 
 ##### Lines Object
 
@@ -457,10 +457,10 @@ This connection is used to track ownership of lines of a file.
 
 - A file `f` was altered by a commit `c`.
   - There exists a connection `cf` from `f` to `c` in `commits-files`.
-  - There exist connections `cfs0`...`cfsn` from `cf` to each stakeholder `s` that owns lines of `f` at the time of
-    commit `c` in `commits-files-stakeholders`.
+  - There exist connections `cfu0`...`cfun` from `cf` to each user `u` that owns lines of `f` at the time of
+    commit `c` in `commits-files-users`.
 
-![commits-files-stakeholders.png](assets/commits-files-stakeholders.png)
+![commits-files-users.png](assets/commits-files-users.png)
 
 #### Details
 
@@ -469,9 +469,9 @@ of `git blame` ([git blame documentation](https://git-scm.com/docs/git-blame)).
 
 Example 2:
 
-![commits-files-stakeholders_example.png](assets/commits-files-stakeholders_example.png)
+![commits-files-users_example.png](assets/commits-files-users_example.png)
 
-Stakeholder `alice` creates file `f` consisting of 4 lines in commit `c0`:
+User `alice` creates file `f` consisting of 4 lines in commit `c0`:
 
 There now is the following document `c0f` in the `commits-files` collection:
 
@@ -486,11 +486,11 @@ _to: commits/c0
 }
 ```
 
-Furthermore, there is a document `c0fa` in the `commits-files-stakeholders` collection:
+Furthermore, there is a document `c0fa` in the `commits-files-users` collection:
 
 ```
 _from: commits-files/c0f
-_to: stakeholders/alice
+_to: users/alice
 {
   hunks: [
     {
@@ -508,7 +508,7 @@ _to: stakeholders/alice
 
 This document tells us that right after commit `c0`, `alice` owns 4 lines of the file `f` (lines 1 to 4).
 
-Now the stakeholder `bob` modifies `f` in commit `c1` by changing the second line.
+Now the user `bob` modifies `f` in commit `c1` by changing the second line.
 
 There is now one additional document `c1f` in the `commits-files` collection:
 
@@ -521,11 +521,11 @@ _to: commits/c1
 }
 ```
 
-Additionally, there are two more documents in the `commits-files-stakeholders` collection (`c1fa` and `c1fb`):
+Additionally, there are two more documents in the `commits-files-users` collection (`c1fa` and `c1fb`):
 
 ```
 _from: commits-files/c1f
-_to: stakeholders/alice
+_to: users/alice
 {
   hunks: [
     {
@@ -547,7 +547,7 @@ _to: stakeholders/alice
 
 ```
 _from: commits-files/c1f
-_to: stakeholders/bob
+_to: users/bob
 {
   hunks: [
     {
@@ -590,13 +590,13 @@ Tracks which modules were modified by this commit.
 | `additions`    | number | number of lines added to this module in this commit     |
 | `deletions`    | number | number of lines deleted from this module in this commit |                                                       |
 
-### commits-stakeholders
+### commits-users
 
-Tracks which stakeholder committed the specified commit.
+Tracks which user committed the specified commit.
 
 | attribute name | type   | details                                       |
 |----------------|--------|-----------------------------------------------|
-| `_from`        | string | internal ArangoDB key of a stakeholder object |
+| `_from`        | string | internal ArangoDB key of a user object |
 | `_to`          | string | internal ArangoDB key of a commit object      |
 
 ### issues-commits
@@ -609,14 +609,14 @@ Tracks which commits belong to an issue (which use `#iid` in the commit message)
 | `_to`          | string  | internal ArangoDB key of an issue object |
 | `closes`       | boolean | does this commit close the issue         |
 
-### issues-stakeholders
+### issues-users
 
-Tracks which stakeholders are involved in an issue through commits that reference that issue.
+Tracks which users are involved in an issue through commits that reference that issue.
 
 | attribute name | type   | details                                       |
 |----------------|--------|-----------------------------------------------|
 | `_from`        | string | internal ArangoDB key of an issue object      |
-| `_to`          | string | internal ArangoDB key of a stakeholder object |
+| `_to`          | string | internal ArangoDB key of a user object |
 
 ### modules-files
 

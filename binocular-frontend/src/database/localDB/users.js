@@ -8,10 +8,10 @@ import { findAll } from './utils';
 PouchDB.plugin(PouchDBFind);
 PouchDB.plugin(PouchDBAdapterMemory);
 
-export default class Stakeholders {
-  static getAllStakeholders(db) {
-    return findAll(db, 'stakeholders').then((res) => {
-      return { stakeholders: { data: res.docs } };
+export default class Users {
+  static getAllUsers(db) {
+    return findAll(db, 'users').then((res) => {
+      return { users: { data: res.docs } };
     });
   }
 }

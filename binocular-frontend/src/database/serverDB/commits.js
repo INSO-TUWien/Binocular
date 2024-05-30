@@ -139,7 +139,7 @@ export default class Commits {
                      path
                    }
                    ownership {
-                    stakeholder
+                    user
                     hunks {
                       originalCommit
                       lines {
@@ -233,7 +233,7 @@ export default class Commits {
                   path
                 }
                 ownership {
-                  stakeholder
+                  user
                   hunks {
                     originalCommit
                     lines {
@@ -275,7 +275,7 @@ export default class Commits {
                   }
                   action
                   ownership {
-                    stakeholder
+                    user
                     hunks {
                       originalCommit
                       lines {

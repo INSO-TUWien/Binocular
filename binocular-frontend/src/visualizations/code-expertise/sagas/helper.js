@@ -55,10 +55,10 @@ export function getBlameModules(commit, files, allCommits, commitsToExclude) {
       for (const fileOwnershipElement of ownershipData) {
         //for each ownership element of the current file
         for (const ownershipElement of fileOwnershipElement.ownership) {
-          if (!result[ownershipElement.stakeholder]) {
-            result[ownershipElement.stakeholder] = ownershipElement.ownedLines;
+          if (!result[ownershipElement.user]) {
+            result[ownershipElement.user] = ownershipElement.ownedLines;
           } else {
-            result[ownershipElement.stakeholder] += ownershipElement.ownedLines;
+            result[ownershipElement.user] += ownershipElement.ownedLines;
           }
         }
       }

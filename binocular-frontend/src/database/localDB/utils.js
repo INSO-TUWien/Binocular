@@ -98,7 +98,7 @@ export const sortByAttributeString = (arr, attribute, order = 'asc') => {
   }
 };
 
-// find all documents of a given collection (example: 'issues' or 'commits-stakeholders')
+// find all documents of a given collection (example: 'issues' or 'commits-users')
 export function findAll(database, collection) {
   //this fetches documents starting with _id startKey until _id endKey.
   // this works because the ids of our documents include the collection name.
@@ -132,17 +132,17 @@ export function findID(database, id) {
 export async function findAllCommits(database, relations) {
   const commits = await findAll(database, 'commits');
   const allCommits = sortByAttributeString(commits.docs, '_id');
-  const commitStakeholderConnections = sortByAttributeString((await findCommitStakeholderConnections(relations)).docs, 'from');
+  const commitUserConnections = sortByAttributeString((await findCommitUserConnections(relations)).docs, 'from');
   const commitCommitConnections = sortByAttributeString((await findCommitCommitConnections(relations)).docs, 'from');
 
-  const stakeholderObjects = (await findAll(database, 'stakeholders')).docs;
-  const stakeholders = {};
-  stakeholderObjects.map((s) => {
-    stakeholders[s._id] = s.gitSignature;
+  const userObjects = (await findAll(database, 'users')).docs;
+  const users = {};
+  userObjects.map((s) => {
+    users[s._id] = s.gitSignature;
   });
 
   commits.docs = await Promise.all(
-    commits.docs.map((c) => preprocessCommit(c, allCommits, commitStakeholderConnections, commitCommitConnections, stakeholders)),
+    commits.docs.map((c) => preprocessCommit(c, allCommits, commitUserConnections, commitCommitConnections, users)),
   );
 
   addHistoryToAllCommits(commits.docs);
@@ -157,27 +157,27 @@ export async function findCommit(database, relations, sha) {
   });
 
   if (commit.docs && commit.docs[0]) {
-    const commitStakeholderConnections = sortByAttributeString((await findCommitStakeholderConnections(relations)).docs, 'from');
+    const commitUserConnections = sortByAttributeString((await findCommitUserConnections(relations)).docs, 'from');
     const commitCommitConnections = sortByAttributeString((await findCommitCommitConnections(relations)).docs, 'from');
 
-    const stakeholderObjects = (await findAll(database, 'stakeholders')).docs;
-    const stakeholders = {};
-    stakeholderObjects.map((s) => {
-      stakeholders[s._id] = s.gitSignature;
+    const userObjects = (await findAll(database, 'users')).docs;
+    const users = {};
+    userObjects.map((s) => {
+      users[s._id] = s.gitSignature;
     });
     commit.docs[0] = await preprocessCommit(
       commit.docs[0],
       allCommits,
-      commitStakeholderConnections,
+      commitUserConnections,
       commitCommitConnections,
-      stakeholders,
+      users,
     );
   }
   return commit;
 }
 
-//add stakeholder, parents to commit
-async function preprocessCommit(commit, allCommits, commitStakeholder, commitCommit, stakeholders) {
+//add user, parents to commit
+async function preprocessCommit(commit, allCommits, commitUser, commitCommit, users) {
   //add parents: first get the ids of the parents using the commits-commits connection, then find the actual commits to get the hashes
   commit.parents = binarySearchArray(commitCommit, commit._id, 'from').map((r) => {
     const parent = binarySearch(allCommits, r.to, '_id');
@@ -186,17 +186,17 @@ async function preprocessCommit(commit, allCommits, commitStakeholder, commitCom
     }
   });
 
-  //add stakeholder
-  const commitStakeholderRelation = binarySearch(commitStakeholder, commit._id, 'from');
+  //add user
+  const commitUserRelation = binarySearch(commitUser, commit._id, 'from');
 
-  if (!commitStakeholderRelation) {
-    console.log('Error in localDB: commit: no stakeholder found for commit ' + commit.sha);
+  if (!commitUserRelation) {
+    console.log('Error in localDB: commit: no user found for commit ' + commit.sha);
     return commit;
   }
-  const author = stakeholders[commitStakeholderRelation.to];
+  const author = users[commitUserRelation.to];
 
   if (!author) {
-    console.log('Error in localDB: commit: no stakeholder found with ID ' + commitStakeholderRelation.to);
+    console.log('Error in localDB: commit: no user found with ID ' + commitUserRelation.to);
     return commit;
   }
   return _.assign(commit, { signature: author });
@@ -283,16 +283,16 @@ export function findFileCommitConnections(relations) {
   return findAll(relations, 'commits-files');
 }
 
-export function findCommitStakeholderConnections(relations) {
-  return findAll(relations, 'commits-stakeholders');
+export function findCommitUserConnections(relations) {
+  return findAll(relations, 'commits-users');
 }
 
 export function findCommitCommitConnections(relations) {
   return findAll(relations, 'commits-commits');
 }
 
-export function findFileCommitStakeholderConnections(relations) {
-  return findAll(relations, 'commits-files-stakeholders');
+export function findFileCommitUserConnections(relations) {
+  return findAll(relations, 'commits-files-users');
 }
 
 export function findBranch(database, branch) {

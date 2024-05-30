@@ -238,13 +238,13 @@ export default class Database {
   }
 
   /**
-   * STAKEHOLDER
+   * USER
    */
-  static async getAllStakeholders() {
+  static async getAllUsers() {
     if (await this.checkBackendConnection()) {
-      return ServerDB.getAllStakeholders();
+      return ServerDB.getAllUsers();
     } else {
-      return LocalDB.getAllStakeholders();
+      return LocalDB.getAllUsers();
     }
   }
 

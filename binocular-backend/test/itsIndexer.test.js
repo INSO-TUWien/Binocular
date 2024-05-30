@@ -20,8 +20,8 @@ import GitHubITSIndexer from '../indexers/its/GitHubITSIndexer';
 
 import Issue from '../models/models/Issue';
 import MergeRequest from '../models/models/MergeRequest';
-import Stakeholder from '../models/models/Stakeholder';
-import IssueStakeholderConnection from '../models/connections/IssueStakeholderConnection';
+import User from '../models/models/User';
+import IssueUserConnection from '../models/connections/IssueUserConnection';
 import sinon from 'sinon';
 import path from 'path';
 import Milestone from '../models/models/Milestone';
@@ -75,8 +75,8 @@ describe('its', function () {
   const relevantCollections = [
     Issue,
     MergeRequest,
-    Stakeholder,
-    IssueStakeholderConnection,
+    User,
+    IssueUserConnection,
     Milestone,
     IssueMilestoneConnection,
     MergeRequestMilestoneConnection,
