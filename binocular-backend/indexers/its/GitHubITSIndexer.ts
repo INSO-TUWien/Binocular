@@ -89,7 +89,6 @@ GitHubITSIndexer.prototype.index = async function () {
                     closes: event.commit === undefined,
                   } as Mention;
                 }),
-                notes: [], // not supported by GitHub
               })
               .then(([persistedIssue, wasCreated]) => {
                 // save the entry object of the issue so we can connect it to the github users later

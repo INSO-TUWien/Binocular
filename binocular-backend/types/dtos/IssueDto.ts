@@ -14,5 +14,4 @@ export default interface IssueDto {
   projectId?: string;
   timeStats?: string;
   mentions: Mention[];
-  notes: any[]; //TODO: Add type for gitlab notes
 }

@@ -13,5 +13,4 @@ export default interface MergeRequestDto {
   webUrl: string;
   projectId?: string;
   mentions: Mention[];
-  notes: any[]; //TODO: Add type for gitlab notes
 }
