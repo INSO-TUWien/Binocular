@@ -98,25 +98,12 @@ export default class CIBuilds extends React.Component {
         if (build.commit !== null && props.excludeCommits && props.excludedCommits.includes(build.commit.sha)) {
           return false;
         }
-        let filter = false;
-        if (props.selectedAuthors.filter((a) => a === 'others').length > 0) {
-          filter = true;
-        }
-        for (const author of Object.keys(props.allAuthors)) {
-          const authorName = author.split('<')[0].slice(0, -1);
-          if (build.userFullName === authorName) {
-            if (props.selectedAuthors.filter((a) => a === author).length > 0) {
-              filter = true;
-              break;
-            } else {
-              filter = false;
-              break;
-            }
-          }
-        }
-        return filter;
+        return true;
       });
     }
+
+    builds = builds.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+
     //---- STEP 1: AGGREGATE BUILDS PER TIME INTERVAL ----
     const data = [];
     const granularity = this.getGranularity(props.chartResolution);

@@ -165,13 +165,7 @@ export async function findCommit(database, relations, sha) {
     userObjects.map((s) => {
       users[s._id] = s.gitSignature;
     });
-    commit.docs[0] = await preprocessCommit(
-      commit.docs[0],
-      allCommits,
-      commitUserConnections,
-      commitCommitConnections,
-      users,
-    );
+    commit.docs[0] = await preprocessCommit(commit.docs[0], allCommits, commitUserConnections, commitCommitConnections, users);
   }
   return commit;
 }

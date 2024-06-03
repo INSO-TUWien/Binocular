@@ -42,9 +42,7 @@ export default () => (
         <li>
           <i class="fa fa-code-commit"></i> Number of Commits
           <ul>
-            <li>
-              The inner dotted part of a segment depicts the number of commits relative to the other users for the current selection
-            </li>
+            <li>The inner dotted part of a segment depicts the number of commits relative to the other users for the current selection</li>
           </ul>
         </li>
       </ul>

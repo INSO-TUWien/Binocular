@@ -79,7 +79,9 @@ export default class Files {
       //find all files and extract the ones that are on this branch
       const files = (await findAll(db, 'files')).docs;
       // find connections from this branch to files
-      const branchFileConnections = (await findBranchFileConnections(relations)).docs.filter((connection) => connection.from === branch._id);
+      const branchFileConnections = (await findBranchFileConnections(relations)).docs.filter(
+        (connection) => connection.from === branch._id,
+      );
 
       // for each connection, extract the file object and find all connections to other files (previous names)
       for (const branchFileConnection of branchFileConnections) {

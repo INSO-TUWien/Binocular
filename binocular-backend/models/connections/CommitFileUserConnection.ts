@@ -9,11 +9,7 @@ interface CommitFileUserConnectionDataType {
   hunks: OwnershipHunk[];
 }
 
-class CommitFileUserConnection extends Connection<
-  CommitFileUserConnectionDataType,
-  CommitFileConnectionDataType,
-  UserDataType
-> {
+class CommitFileUserConnection extends Connection<CommitFileUserConnectionDataType, CommitFileConnectionDataType, UserDataType> {
   constructor() {
     super();
   }
