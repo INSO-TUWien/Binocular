@@ -433,22 +433,26 @@ describe('its', function () {
       const t1Id = collections['accounts'].filter((a) => a.login === 'tester1')[0]._id;
       const t2Id = collections['accounts'].filter((a) => a.login === 'tester2')[0]._id;
 
-      expect(issue0.mentions.length).to.equal(2);
       expectExamples({ _from: issue0._id, _to: t1Id, role: 'author' }, collections[`${coll}-accounts`], 1);
       expectExamples({ _from: issue0._id, _to: t2Id, role: 'assignee' }, collections[`${coll}-accounts`], 1);
       expectExamples({ _from: issue0._id, _to: t2Id, role: 'assignees' }, collections[`${coll}-accounts`], 1);
-      expect(issue0.mentions[0].closes).to.equal(false);
-      expect(issue0.mentions[0].commit).to.equal('1234567890');
-      expect(issue0.mentions[1].closes).to.equal(true);
-
-      expect(dbIssuesCollectionData[1].mentions.length).to.equal(2);
       expectExamples({ _from: issue1._id, _to: t2Id, role: 'author' }, collections[`${coll}-accounts`], 1);
+
       expectExamples({ _from: issue1._id, _to: t1Id, role: 'assignee' }, collections[`${coll}-accounts`], 1);
       expectExamples({ _from: issue1._id, _to: t1Id, role: 'assignees' }, collections[`${coll}-accounts`], 1);
       expectExamples({ _from: issue1._id, _to: t2Id, role: 'assignees' }, collections[`${coll}-accounts`], 1);
-      expect(dbIssuesCollectionData[1].mentions[0].closes).to.equal(false);
-      expect(dbIssuesCollectionData[1].mentions[0].commit).to.equal('1234567890');
-      expect(dbIssuesCollectionData[1].mentions[1].closes).to.equal(true);
+
+      // mentions attribute only relevant for issues, not merge requests
+      if (coll === 'issues') {
+        expect(issue0.mentions.length).to.equal(2);
+        expect(issue0.mentions[0].closes).to.equal(false);
+        expect(issue0.mentions[0].commit).to.equal('1234567890');
+        expect(issue0.mentions[1].closes).to.equal(true);
+        expect(dbIssuesCollectionData[1].mentions.length).to.equal(2);
+        expect(dbIssuesCollectionData[1].mentions[0].closes).to.equal(false);
+        expect(dbIssuesCollectionData[1].mentions[0].commit).to.equal('1234567890');
+        expect(dbIssuesCollectionData[1].mentions[1].closes).to.equal(true);
+      }
     };
     // atm, PRs and Issue mock data is the same
     const expectDefaultMergeRequests = (collections) => {

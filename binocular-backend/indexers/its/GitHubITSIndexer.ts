@@ -69,35 +69,38 @@ GitHubITSIndexer.prototype.index = async function () {
             log(`Processing ${type} #` + issue.iid);
 
             // Note: contrary to GitLab, milestones are not supported yet by the GitHub indexer.
+            const toBePersisted: any = {
+              id: issue.id.toString(),
+              iid: issue.number,
+              title: issue.title,
+              description: issue.body,
+              state: issue.state,
+              closedAt: issue.closedAt,
+              createdAt: issue.createdAt,
+              updatedAt: issue.updatedAt,
+              labels: issue.labels.nodes.map((l: Label) => l.name),
+              webUrl: issue.url,
+            };
 
-            return targetCollection
-              .persist({
-                id: issue.id.toString(),
-                iid: issue.number,
-                title: issue.title,
-                description: issue.body,
-                state: issue.state,
-                closedAt: issue.closedAt,
-                createdAt: issue.createdAt,
-                updatedAt: issue.updatedAt,
-                labels: issue.labels.nodes.map((l: Label) => l.name),
-                webUrl: issue.url,
-                mentions: issue.timelineItems.nodes.map((event: ItsIssueEvent) => {
-                  return {
-                    commit: event.commit ? event.commit.oid : null,
-                    createdAt: event.createdAt,
-                    closes: event.commit === undefined,
-                  } as Mention;
-                }),
-              })
-              .then(([persistedIssue, wasCreated]) => {
-                // save the entry object of the issue so we can connect it to the github users later
-                issueEntry = persistedIssue;
-                if (wasCreated) {
-                  persistCount++;
-                }
-                log(`Persisted ${type} #` + persistedIssue.data.iid);
+            // mentions attribute is only relevant for issues, not for merge requests
+            if (targetCollection === Issue) {
+              toBePersisted.mentions = issue.timelineItems.nodes.map((event: ItsIssueEvent) => {
+                return {
+                  commit: event.commit ? event.commit.oid : null,
+                  createdAt: event.createdAt,
+                  closes: event.commit === undefined,
+                } as Mention;
               });
+            }
+
+            return targetCollection.persist(toBePersisted).then(([persistedIssue, wasCreated]) => {
+              // save the entry object of the issue so we can connect it to the github users later
+              issueEntry = persistedIssue;
+              if (wasCreated) {
+                persistCount++;
+              }
+              log(`Persisted ${type} #` + persistedIssue.data.iid);
+            });
           } else {
             // save the entry object of the issue so we can connect it to the github users later
             issueEntry = existingIssue;
