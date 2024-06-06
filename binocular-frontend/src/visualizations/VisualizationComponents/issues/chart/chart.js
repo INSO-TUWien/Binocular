@@ -118,27 +118,11 @@ export default class Issues extends React.Component {
           break;
         default:
       }
-      if (props.universalSettings) {
-        filteredIssues = filteredIssues.filter((issue) => {
-          let filter = false;
-          if (props.selectedAuthors.filter((a) => a === 'others').length > 0) {
-            filter = true;
-          }
-          for (const author of Object.keys(props.allAuthors)) {
-            const authorName = author.split('<')[0].slice(0, -1);
-            if (issue.author.name === authorName) {
-              if (props.selectedAuthors.filter((a) => a === author).length > 0) {
-                filter = true;
-                break;
-              } else {
-                filter = false;
-                break;
-              }
-            }
-          }
-          return filter;
-        });
-      }
+
+      // note: author selector in universal settings has no influence on this visualization at the time.
+      // The reason is that the author selector only includes git accounts, not GitLab or GitHub accounts.
+      // since this visualization uses data from either GitLab or GitHub,
+      // the users in the selector do not necessarily match the users that create/close issues.
 
       //---- STEP 2: AGGREGATE ISSUES PER TIME INTERVAL ----
       const data = [];

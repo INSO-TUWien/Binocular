@@ -98,7 +98,25 @@ export default class CIBuilds extends React.Component {
         if (build.commit !== null && props.excludeCommits && props.excludedCommits.includes(build.commit.sha)) {
           return false;
         }
-        return true;
+
+        // check if the author of the commit that triggered this build is selected in the universal settings
+        let filter = false;
+        if (props.selectedAuthors.filter((a) => a === 'others').length > 0) {
+          filter = true;
+        }
+        // for all authors in the universal settings author list
+        for (const authorSignature of Object.keys(props.allAuthors)) {
+          if (build.commit?.signature === authorSignature) {
+            if (props.selectedAuthors.filter((a) => a === authorSignature).length > 0) {
+              filter = true;
+              break;
+            } else {
+              filter = false;
+              break;
+            }
+          }
+        }
+        return filter;
       });
     }
 
