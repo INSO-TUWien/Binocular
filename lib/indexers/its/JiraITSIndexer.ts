@@ -197,7 +197,7 @@ class JiraITSIndexer {
               // @ts-expect-error
               .then((persistedIssue) => {
                 let commitsLastUpdated: string | null;
-                if (developmentInformation?.commits.overall.lastUpdated) {
+                if (developmentInformation && developmentInformation?.commits?.overall?.lastUpdated) {
                   commitsLastUpdated = developmentInformation.commits.overall.lastUpdated;
                 } else {
                   commitsLastUpdated = null;
@@ -212,7 +212,7 @@ class JiraITSIndexer {
 
                 if (!persistedIssue || areIssueFieldsUpdated || areCommitInformationUpdated) {
                   return this.jira
-                    .getCommitDetails(issue.id, developmentInformation?.commits, areCommitInformationUpdated)
+                    .getCommitDetails(issue.id, developmentInformation?.commits, persistedIssue === null || areCommitInformationUpdated)
                     .then((linkedCommits) => {
                       const commits = this.buildMentions(linkedCommits);
 

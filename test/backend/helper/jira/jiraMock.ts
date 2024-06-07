@@ -237,7 +237,9 @@ class JiraMock {
   }
 
   getDevelopmentSummary() {
-    return Promise.resolve({ commits: undefined, pullrequests: undefined });
+    return Promise.resolve({
+      commits: { overall: { count: 0, lastUpdated: null, dataType: 'repository' } },
+    });
   }
 
   getPullrequestDetails() {

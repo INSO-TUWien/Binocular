@@ -62,8 +62,8 @@ class Jira {
     return promises;
   }
 
-  getCommitDetails(issueId: string, summaryObject: JiraCommitsSummary, areCommitsInformationUpdated: boolean) {
-    if (!summaryObject || !areCommitsInformationUpdated) {
+  getCommitDetails(issueId: string, summaryObject: JiraCommitsSummary, shouldFetch: boolean) {
+    if (!summaryObject || !shouldFetch) {
       return Promise.resolve([]);
     }
     const promises: Promise<JiraCommitsFullDetails[]>[] = this.getDetailsPromises(issueId, summaryObject);
@@ -120,12 +120,12 @@ class Jira {
 
   getWorklog(issueKey: string) {
     log('getWorklog(%o)', issueKey);
-    return this.paginatedRequest(`issue/${issueKey}/worklog?expand=properties`);
+    return this.paginatedRequest(`issue/${issueKey}/worklog?`);
   }
 
   getChangelog(issueKey: string) {
     log('getChangelog(%o)', issueKey);
-    return this.paginatedRequest(`issue/${issueKey}/getChangelog`);
+    return this.paginatedRequest(`issue/${issueKey}/changelog?`);
   }
 
   getComments(issueKey: string) {
@@ -178,11 +178,11 @@ class Jira {
     const requestUrl = isNonOfficial ? this.baseUrl.split(`api/${this.API_VERSION}`)[0] + path : urlJoin(this.baseUrl, path);
     return fetch(requestUrl, header).then((response) => {
       const successful = response.ok;
-
+      if (!successful) {
+        console.log('different response code: ' + response.status + '\n' + requestUrl);
+        return { headers: response.headers, body: [] };
+      }
       return response.json().then((data) => {
-        if (!successful) {
-          log('different response code: ' + response.status + '\n' + data);
-        }
         if (path.includes('user?accountId=')) {
           return data;
         } else if (!isNonOfficial) {
