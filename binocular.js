@@ -332,14 +332,8 @@ async function indexing(indexers, context, reporter, gateway, indexingThread) {
             indexer.setGateway(gateway);
           }
           threadLog(indexingThread, `${indexer.constructor.name} fetching data...`);
-          const startTime = performance.now();
           await indexer.index();
-          const endTime = performance.now();
 
-          const elapsedTime = endTime - startTime;
-          if (indexer.constructor.name.includes('Jira')) {
-            console.log(`Time taken: ${elapsedTime} milliseconds`);
-          }
           threadLog(indexingThread, `${indexer.constructor.name} ${indexer.isStopping() ? 'stopped' : 'finished'}...`);
           return indexer;
         })
