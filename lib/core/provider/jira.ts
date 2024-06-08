@@ -12,7 +12,6 @@ import {
   JiraPullRequestDetails,
   JiraPullRequestsFullDetails,
   JiraPullRequestsSummary,
-  JiraUserEndpoint,
 } from '../../types/jiraTypes';
 
 const log = debug('jira');
@@ -166,20 +165,14 @@ class Jira {
   private request(path: string) {
     log('request(%o)', path);
     const credentials = this.usermail + ':' + this.privateToken;
-    const header = {
-      method: 'GET',
-      headers: {
-        Authorization: `Basic ${Buffer.from(credentials).toString('base64')}`,
-        Accept: 'application/json',
-      },
-      timeout: this.requestTimeout || 3000,
-    };
+    const header = this.createHeader(credentials, 'GET');
+
     const isNonOfficial = path.includes('dev-status');
     const requestUrl = isNonOfficial ? this.baseUrl.split(`api/${this.API_VERSION}`)[0] + path : urlJoin(this.baseUrl, path);
     return fetch(requestUrl, header).then((response) => {
       const successful = response.ok;
       if (!successful) {
-        console.log('different response code: ' + response.status + '\n' + requestUrl);
+        log('different response code: ' + response.status + '\n' + requestUrl);
         return { headers: response.headers, body: [] };
       }
       return response.json().then((data) => {
@@ -196,17 +189,23 @@ class Jira {
     });
   }
 
+  private createHeader(credentials: string, methodType: string) {
+    const myHeader = new Headers();
+    myHeader.set('Accept', 'application/json');
+    if (this.usermail && this.privateToken) {
+      myHeader.set('Authorization', `Basic ${Buffer.from(credentials).toString('base64')}`);
+    }
+    return {
+      method: methodType,
+      headers: myHeader,
+      timeout: this.requestTimeout || 3000,
+    };
+  }
+
   private requestTeamMembers(path: string) {
     log('team(%o)', path);
     const credentials = this.usermail + ':' + this.privateToken;
-    const header = {
-      method: 'POST',
-      headers: {
-        Authorization: `Basic ${Buffer.from(credentials).toString('base64')}`,
-        Accept: 'application/json',
-      },
-      timeout: this.requestTimeout || 3000,
-    };
+    const header = this.createHeader(credentials, 'POST');
 
     return fetch(path, header).then((response) => {
       const successful = response.ok;
@@ -214,6 +213,7 @@ class Jira {
       return response.json().then((data) => {
         if (!successful) {
           log('different response code: ' + response.status + '\n' + data);
+          return [];
         }
         return data.results;
       });
