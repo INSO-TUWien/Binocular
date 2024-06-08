@@ -50,7 +50,7 @@ export function promptUserAndSaveConfig() {
         type: 'input',
         name: 'jiraJql',
         message:
-          'Enter JIRA JQL search string (note: it has to use the same project as in the previous field) [only necessary for JIRA Indexer]:',
+          'Enter JIRA JQL search string (optional field: if this field is not populated then all issue of the previous project parameter will be fetched) [only necessary for JIRA Indexer]:',
       },
       {
         type: 'input',
@@ -65,12 +65,14 @@ export function promptUserAndSaveConfig() {
       {
         type: 'input',
         name: 'jiraOrganizationId',
-        message: 'Only if your organization is using the teams field for issues: Enter the organization ID:',
+        message:
+          'Enter organization ID (only required if your organization is using the "Team" field for assigning multiple assignees to an issue) [only necessary for JIRA Indexer]:',
       },
       {
         type: 'input',
         name: 'jiraTeamsFieldId',
-        message: 'Only if your organization is using the teams field for issues: Enter the ID of the teams field:',
+        message:
+          'Enter customfield key of "Team" field (only if your organization is using the "Team" field for assigning multiple assignees to an issue) [only necessary for JIRA Indexer]:',
       },
       {
         type: 'input',
