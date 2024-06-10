@@ -1,0 +1,36 @@
+@import '../tabControllerVariables.module';
+
+.tabControllerButton{
+  height: calc($tab-bar-thickness - 10px);
+  width: calc($tab-bar-thickness - 10px);
+  margin: 0 .5rem;
+}
+
+.animationRotate{
+  transform-origin: 50% 50%;
+  rotate: 180deg;
+  transition: all .5s ease-in-out;
+}
+
+.animationJump{
+  animation-name: animationJumpKeyframes;
+  animation-duration: .5s;
+}
+
+@keyframes animationJumpKeyframes {
+  0%{
+    margin-bottom: 0;
+  }
+  30%{
+    margin-bottom: 8px;
+  }
+  60%{
+    margin-bottom: 0;
+  }
+  80%{
+    margin-bottom: 4px;
+  }
+  100%{
+    margin-bottom: 0;
+  }
+}

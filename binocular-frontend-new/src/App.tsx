@@ -11,12 +11,31 @@ import InformationDialog from './components/informationDialog/informationDialog.
 import VisualizationSelector from './components/tabs/components/visualizationSelector/visualizationSelector.tsx';
 import AuthorList from './components/tabs/authors/authorList/authorList.tsx';
 import OtherAuthors from './components/tabs/authors/otherAuthors/otherAuthors.tsx';
+import TabControllerButton from './components/tabMenu/tabControllerButton/tabControllerButton.tsx';
+import SettingsGray from './assets/settings_gray.svg';
+import ExportGray from './assets/export_gray.svg';
+import ExportDialog from './components/exportDialog/exportDialog.tsx';
+import SettingsDialog from './components/settingsDialog/settingsDialog.tsx';
 
 function App() {
   return (
     <>
       <div className={appStyles.mainView}>
         <TabController appName={'Binocular'}>
+          <TabControllerButton
+            onClick={() => {
+              (document.getElementById('exportDialog') as HTMLDialogElement).showModal();
+            }}
+            icon={ExportGray}
+            name={'Export'}
+            animation={'jump'}></TabControllerButton>
+          <TabControllerButton
+            onClick={() => {
+              (document.getElementById('settingsDialog') as HTMLDialogElement).showModal();
+            }}
+            icon={SettingsGray}
+            name={'Settings'}
+            animation={'rotate'}></TabControllerButton>
           <Tab displayName={'Parameters'} alignment={'top'}>
             <TabSection name={'Date Range'}>
               <ParametersDateRange></ParametersDateRange>
@@ -56,7 +75,10 @@ function App() {
           ciIndexer={'CI Placeholder'}
           repository={'Repository Placeholder'}></StatusBar>
       </div>
+      <button className={appStyles.settingsButton}></button>
       <InformationDialog></InformationDialog>
+      <ExportDialog></ExportDialog>
+      <SettingsDialog></SettingsDialog>
     </>
   );
 }

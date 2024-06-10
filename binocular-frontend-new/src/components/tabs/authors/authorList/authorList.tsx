@@ -1,7 +1,7 @@
 import authorListStyles from './authorList.module.scss';
 import { useSelector } from 'react-redux';
 import { AppDispatch, RootState, useAppDispatch } from '../../../../redux';
-import { setAuthorList, setDragging } from '../../../../redux/AuthorsReducer.ts';
+import { setAuthorList, setDragging } from '../../../../redux/authorsReducer.ts';
 
 function AuthorList(props: { orientation?: string }) {
   const dispatch: AppDispatch = useAppDispatch();

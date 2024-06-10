@@ -5,7 +5,7 @@ import { showDialog } from '../informationDialog/dialogHelper.ts';
 import { DragResizeMode } from './resizeMode.ts';
 import { useSelector } from 'react-redux';
 import { AppDispatch, RootState, useAppDispatch } from '../../redux';
-import { addDashboardItem, moveDashboardItem, setDragResizeMode, deleteDashboardItem } from '../../redux/DashboardReducer.ts';
+import { addDashboardItem, moveDashboardItem, setDragResizeMode, deleteDashboardItem } from '../../redux/dashboardReducer.ts';
 
 function Dashboard() {
   const dispatch: AppDispatch = useAppDispatch();

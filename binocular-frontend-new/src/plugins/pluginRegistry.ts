@@ -1,19 +1,15 @@
-import ExampleVisualization from './visualizations/exampleVisualization';
-import ExampleStats from './visualizations/exampleStats';
-import ExampleComplex from './visualizations/exampleComplex';
-import { ReactNode } from 'react';
+import Commits from './visualizationPlugins/changes';
+import ExampleVisualization from './visualizationPlugins/exampleVisualization';
+import ExampleStats from './visualizationPlugins/exampleStats';
+import ExampleComplex from './visualizationPlugins/exampleComplex';
 
-interface VisualizationPlugin {
-  name: string;
-  chartComponent: (props: { settings: unknown }) => ReactNode;
-  settingsComponent: (props: { defaultSettings: unknown; setSettings: (newSettings: unknown) => void }) => ReactNode;
-  defaultSettings: unknown;
-  capabilities: {
-    popoutOnly: boolean;
-  };
-  images: {
-    preview: string;
-  };
-}
+import BinocularBackend from './dataPlugins/binocularBackend';
+import MockData from './dataPlugins/mockData';
 
-export const visualizationPlugins: VisualizationPlugin[] = [ExampleVisualization, ExampleStats, ExampleComplex];
+import { VisualizationPlugin } from './interfaces/visualizationPlugin.ts';
+import { DataPlugin } from './interfaces/dataPlugin.ts';
+
+export const visualizationPlugins: VisualizationPlugin[] = [Commits, ExampleVisualization, ExampleStats, ExampleComplex];
+
+//Order = priority used when nothing selected by the user.
+export const dataPlugins: DataPlugin[] = [MockData, BinocularBackend];

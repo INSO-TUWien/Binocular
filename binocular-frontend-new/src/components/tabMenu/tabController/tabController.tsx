@@ -4,6 +4,7 @@ import tabHandleStyles from './tabHandle.module.scss';
 import TabDropHint from './tabDropHint/tabDropHint.tsx';
 import Tab from '../tab/tab.tsx';
 import TabMenuContent from '../tabMenuContent/tabMenuContent.tsx';
+import TabControllerButton from '../tabControllerButton/tabControllerButton.tsx';
 
 interface TabType {
   selected: boolean;
@@ -36,6 +37,16 @@ function TabController(props: {
     setTabList(generateTabs(props.children));
   }, [props.children]);
 
+  /*
+  The Tab view gets rendered in a 3-part process.
+  At first, the backgrounds for every side get rendered depending on if the sides have an active tab selected.
+  Next, all the handles for each tab are getting generated.
+  Last the content for the active tabs is getting rendered above the backgrounds.
+  This is necessary because the Handles overlap the backgrounds,
+  but the content of each tab overlaps the handles,
+  so the content cant be rendered as part of the backgrounds directly.
+   */
+
   return (
     <div className={tabControllerStyles.tabController}>
       <TabDropHint dragState={dragState}></TabDropHint>
@@ -52,6 +63,7 @@ function TabController(props: {
         </div>
       </>
       <>
+        {/*Background for all tabs. This has to be rendered before the tab handle for each tab and the content for each tab*/}
         <div
           className={
             tabControllerStyles.tabContentBackgroundTop + (tabBarTopCollapsed ? ' ' + tabControllerStyles.tabContentCollapsed : '')
@@ -78,6 +90,7 @@ function TabController(props: {
           }}></div>
       </>
       <>
+        {/*Handles for all tabs. Here all the handles for all the tabs get rendered */}
         <div
           id={'tabBarTop'}
           className={tabControllerStyles.tabBar + ' ' + tabControllerStyles.tabBarHorizontal + ' ' + tabControllerStyles.tabBarTop}
@@ -93,7 +106,7 @@ function TabController(props: {
           {tabList
             .filter((tab) => tab.alignment === 'top')
             .sort((tabA, tabB) => tabA.position - tabB.position)
-            .map((tab) => generateHandel(tab, tabList, setTabList, setDragState))}
+            .map((tab) => generateHandle(tab, tabList, setTabList, setDragState))}
         </div>
         <div
           id={'tabBarRight'}
@@ -112,7 +125,7 @@ function TabController(props: {
           {tabList
             .filter((tab) => tab.alignment === 'right')
             .sort((tabA, tabB) => tabA.position - tabB.position)
-            .map((tab) => generateHandel(tab, tabList, setTabList, setDragState))}
+            .map((tab) => generateHandle(tab, tabList, setTabList, setDragState))}
         </div>
         <div
           id={'tabBarBottom'}
@@ -127,7 +140,7 @@ function TabController(props: {
           {tabList
             .filter((tab) => tab.alignment === 'bottom')
             .sort((tabA, tabB) => tabA.position - tabB.position)
-            .map((tab) => generateHandel(tab, tabList, setTabList, setDragState))}
+            .map((tab) => generateHandle(tab, tabList, setTabList, setDragState))}
         </div>
         <div
           id={'tabBarLeft'}
@@ -146,10 +159,11 @@ function TabController(props: {
           {tabList
             .filter((tab) => tab.alignment === 'left')
             .sort((tabA, tabB) => tabA.position - tabB.position)
-            .map((tab) => generateHandel(tab, tabList, setTabList, setDragState))}
+            .map((tab) => generateHandle(tab, tabList, setTabList, setDragState))}
         </div>
       </>
       <>
+        {/*Content for all tabs. Here all the content for all active tabs get rendered */}
         <div className={tabControllerStyles.tabContentTop + (tabBarTopCollapsed ? ' ' + tabControllerStyles.tabContentCollapsed : '')}>
           {
             tabList
@@ -226,6 +240,12 @@ function TabController(props: {
           }
         </div>
       </>
+      <>
+        {/*Additional Buttons. Here additional buttons like Settings or export get rendered that get displayed in the top right corner */}
+        <div className={tabControllerStyles.tabBar + ' ' + tabControllerStyles.tabBarHorizontal + ' ' + tabControllerStyles.tabBarTopRight}>
+          {props.children.filter((child) => child.type === TabControllerButton)}
+        </div>
+      </>
     </div>
   );
 }
@@ -285,7 +305,7 @@ function generateTabs(
  * @param setTabList Set redux function for a list of all tabs
  * @param setDragState Set redux Function for drag and drop redux of tabs
  */
-function generateHandel(
+function generateHandle(
   tab: TabType,
   tabList: TabType[],
   setTabList: (newTabList: TabType[]) => void,
@@ -298,17 +318,17 @@ function generateHandel(
       id={'tab_' + tab.displayName}
       className={
         (tab.alignment === 'left' || tab.alignment === 'right'
-          ? tabHandleStyles.tabHandel + ' ' + tabHandleStyles.tabHandelVertical
-          : tabHandleStyles.tabHandel) +
+          ? tabHandleStyles.tabHandle + ' ' + tabHandleStyles.tabHandleVertical
+          : tabHandleStyles.tabHandle) +
         (tab.selected
           ? ' ' +
             (tab.alignment === 'right'
-              ? tabHandleStyles.tabHandelSelectedVertical
+              ? tabHandleStyles.tabHandleSelectedVertical
               : tab.alignment === 'bottom'
-                ? tabHandleStyles.tabHandelSelectedBottom
+                ? tabHandleStyles.tabHandleSelectedBottom
                 : tab.alignment === 'left'
-                  ? tabHandleStyles.tabHandelSelectedVertical
-                  : tabHandleStyles.tabHandelSelectedTop)
+                  ? tabHandleStyles.tabHandleSelectedVertical
+                  : tabHandleStyles.tabHandleSelectedTop)
           : '')
       }
       onClick={() => {
@@ -317,10 +337,10 @@ function generateHandel(
             if (listTab.alignment === tab.alignment) {
               if (listTab.displayName === tab.displayName) {
                 listTab.selected = !listTab.selected;
-                document.getElementById('tab_' + listTab.displayName)?.classList.add(tabHandleStyles.tabHandelSelected);
+                document.getElementById('tab_' + listTab.displayName)?.classList.add(tabHandleStyles.tabHandleSelected);
               } else {
                 listTab.selected = false;
-                document.getElementById('tab_' + listTab.displayName)?.classList.remove(tabHandleStyles.tabHandelSelected);
+                document.getElementById('tab_' + listTab.displayName)?.classList.remove(tabHandleStyles.tabHandleSelected);
               }
             }
             return listTab;
@@ -342,14 +362,14 @@ function generateHandel(
         event.preventDefault();
       }}
       onDragEnter={() => {
-        document.getElementById('tab_' + tab.displayName)?.classList.add(tabHandleStyles.tabHandelSwitch);
+        document.getElementById('tab_' + tab.displayName)?.classList.add(tabHandleStyles.tabHandleSwitch);
       }}
       onDragLeave={() => {
-        document.getElementById('tab_' + tab.displayName)?.classList.remove(tabHandleStyles.tabHandelSwitch);
+        document.getElementById('tab_' + tab.displayName)?.classList.remove(tabHandleStyles.tabHandleSwitch);
       }}
       onDrop={(event) => {
         event.stopPropagation();
-        document.getElementById('tab_' + tab.displayName)?.classList.remove(tabHandleStyles.tabHandelSwitch);
+        document.getElementById('tab_' + tab.displayName)?.classList.remove(tabHandleStyles.tabHandleSwitch);
         switchTabs(event.dataTransfer.getData('text/plain'), tab.displayName, tabList, setTabList, setDragState);
       }}>
       {tab.displayName}

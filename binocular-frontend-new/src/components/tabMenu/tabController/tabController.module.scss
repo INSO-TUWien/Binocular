@@ -1,5 +1,5 @@
 @import '../../../variables.scss';
-@import './tabControllerVariables.module.scss';
+@import '../tabControllerVariables.module';
 
 :export {
   tabBarThickness : $tab-bar-thickness;
@@ -34,6 +34,14 @@
   left: 0;
   height: $tab-bar-thickness;
   width: 100%;
+}
+
+.tabBarTopRight{
+  justify-content: end;
+  align-items: center;
+  top:0;
+  right: 0;
+  height: $tab-bar-thickness;
 }
 
 .tabBarRight{

@@ -8,6 +8,13 @@ export default defineConfig({
     watch: {
       usePolling: true,
     },
+    proxy: {
+      '/graphQl': {
+        target: 'http://localhost:48763/',
+        secure: false,
+        changeOrigin: true,
+      },
+    },
   },
   plugins: [react()],
 });

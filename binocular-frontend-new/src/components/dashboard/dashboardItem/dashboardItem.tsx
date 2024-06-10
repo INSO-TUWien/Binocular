@@ -1,11 +1,12 @@
 import dashboardItemStyles from './dashboardItem.module.scss';
 import { DragResizeMode } from '../resizeMode.ts';
-import { visualizationPlugins } from '../../../plugins/pluginRegistry.ts';
+import { dataPlugins, visualizationPlugins } from '../../../plugins/pluginRegistry.ts';
 import { useState } from 'react';
 import DashboardItemPopout from '../dashboardItemPopout/dashboardItemPopout.tsx';
-import { increasePopupCount } from '../../../redux/DashboardReducer.ts';
-import { AppDispatch, useAppDispatch } from '../../../redux';
+import { increasePopupCount } from '../../../redux/dashboardReducer.ts';
+import { AppDispatch, RootState, useAppDispatch } from '../../../redux';
 import openInNewGray from '../../../assets/open_in_new_white.svg';
+import { useSelector } from 'react-redux';
 
 export interface DashboardItemDTO {
   id: number;
@@ -27,12 +28,13 @@ function DashboardItem(props: {
   deleteItem: (item: DashboardItemDTO) => void;
 }) {
   const dispatch: AppDispatch = useAppDispatch();
-
   const [settingsVisible, setSettingsVisible] = useState(false);
   const plugin = visualizationPlugins.filter((p) => p.name === props.item.pluginName)[0];
   const [settings, setSettings] = useState(plugin.defaultSettings);
 
   const [poppedOut, setPoppedOut] = useState(false);
+
+  const currentDataPlugin = useSelector((state: RootState) => state.settings.dataPlugin);
 
   return (
     <>
@@ -49,7 +51,10 @@ function DashboardItem(props: {
           <div className={dashboardItemStyles.dashboardItemContent}>
             <span>Popped Out!</span>
             <DashboardItemPopout onClosing={() => setPoppedOut(false)}>
-              <plugin.chartComponent key={plugin.name} settings={settings}></plugin.chartComponent>
+              <plugin.chartComponent
+                key={plugin.name}
+                settings={settings}
+                dataConnection={dataPlugins.filter((plugin) => plugin.name === currentDataPlugin)[0]}></plugin.chartComponent>
             </DashboardItemPopout>
           </div>
         ) : (
@@ -70,7 +75,10 @@ function DashboardItem(props: {
                 </button>
               </div>
             ) : (
-              <plugin.chartComponent key={plugin.name} settings={settings}></plugin.chartComponent>
+              <plugin.chartComponent
+                key={plugin.name}
+                settings={settings}
+                dataConnection={dataPlugins.filter((plugin) => plugin.name === currentDataPlugin)[0]}></plugin.chartComponent>
             )}
           </div>
         )}

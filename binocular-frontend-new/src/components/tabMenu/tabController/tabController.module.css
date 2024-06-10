@@ -33,6 +33,14 @@
   width: 100%;
 }
 
+.tabBarTopRight {
+  justify-content: end;
+  align-items: center;
+  top: 0;
+  right: 0;
+  height: 2rem;
+}
+
 .tabBarRight {
   justify-content: start;
   align-items: start;

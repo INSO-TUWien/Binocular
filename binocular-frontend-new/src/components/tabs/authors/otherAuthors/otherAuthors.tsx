@@ -1,7 +1,7 @@
 import otherAuthorsStyles from './otherAuthors.module.scss';
 import { useSelector } from 'react-redux';
 import { AppDispatch, RootState, useAppDispatch } from '../../../../redux';
-import { setAuthorList, setDragging } from '../../../../redux/AuthorsReducer.ts';
+import { setAuthorList, setDragging } from '../../../../redux/authorsReducer.ts';
 
 function OtherAuthors(props: { orientation?: string }) {
   const dispatch: AppDispatch = useAppDispatch();
