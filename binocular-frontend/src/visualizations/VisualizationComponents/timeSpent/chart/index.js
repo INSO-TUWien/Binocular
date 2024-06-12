@@ -253,6 +253,9 @@ export default () => {
             dataEntry.aggregatedTimeMin += dataEntry.data[sA];
           }
 
+          if (dataEntry.data[timeRemovedPrefix + sA] === undefined) {
+            dataEntry.data[timeRemovedPrefix + sA] = stackedAreaChartMinValue * -1;
+          }
           if (dataEntry.data[timeRemovedPrefix + sA] >= 0) {
             dataEntry.aggregatedTimeMax += dataEntry.data[timeRemovedPrefix + sA];
           } else {
