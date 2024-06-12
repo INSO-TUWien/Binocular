@@ -1,4 +1,4 @@
-import styles from './chatStyles.module.scss';
+import styles from './chartStyles.module.scss';
 
 function Chart() {
   return (
