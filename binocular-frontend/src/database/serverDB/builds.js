@@ -32,6 +32,7 @@ export default class Builds {
                 }
                 commit {
                   sha
+                  signature
                 }
               }
             }

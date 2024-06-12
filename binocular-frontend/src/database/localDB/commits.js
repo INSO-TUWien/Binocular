@@ -11,7 +11,7 @@ import {
   findCommit,
   findFile,
   findFileCommitConnections,
-  findFileCommitStakeholderConnections,
+  findFileCommitUserConnections,
   sortByAttributeString,
 } from './utils';
 
@@ -110,12 +110,12 @@ export default class Commits {
             res.hunks = connection.hunks;
             res.ownership = [];
 
-            //find connections to stakeholders for ownership data
-            const relevantOwnershipConnections = binarySearchArray(collections.fileCommitStakeholderConnections, connection._id, 'from');
-            //for each of the ownership connections, add the signature of the stakeholder and the owned lines to fileResult.ownership
+            //find connections to users for ownership data
+            const relevantOwnershipConnections = binarySearchArray(collections.fileCommitUserConnections, connection._id, 'from');
+            //for each of the ownership connections, add the signature of the user and the owned lines to fileResult.ownership
             for (const ownershipConn of relevantOwnershipConnections) {
-              const stakeholder = collections.stakeholders[ownershipConn.to];
-              res.ownership.push({ stakeholder: stakeholder, hunks: ownershipConn.hunks });
+              const user = collections.users[ownershipConn.to];
+              res.ownership.push({ user: user, hunks: ownershipConn.hunks });
             }
 
             return res;
@@ -232,12 +232,12 @@ export default class Commits {
     for (const conn of relevantConnections) {
       const relevantFile = binarySearch(collections.files, conn.to, '_id');
       const fileResult = { path: relevantFile.path, action: conn.action, ownership: [] };
-      const relevantOwnershipConnections = binarySearchArray(collections.fileCommitStakeholderConnections, conn._id, 'from');
+      const relevantOwnershipConnections = binarySearchArray(collections.fileCommitUserConnections, conn._id, 'from');
 
-      //for each of the ownership connections, add the signature of the stakeholder and the owned lines to fileResult.ownership
+      //for each of the ownership connections, add the signature of the user and the owned lines to fileResult.ownership
       for (const ownershipConn of relevantOwnershipConnections) {
-        const stakeholder = collections.stakeholders[ownershipConn.to];
-        fileResult.ownership.push({ stakeholder: stakeholder, hunks: ownershipConn.hunks });
+        const user = collections.users[ownershipConn.to];
+        fileResult.ownership.push({ user: user, hunks: ownershipConn.hunks });
       }
       //add to the result object of the current file
       commitResult.files.push(fileResult);
@@ -249,37 +249,37 @@ export default class Commits {
   // sorts the arrays so they can be used for binary search later on (see for example `extractOwnershipDataForCommit()`).
   static async fetchAndSortOwnershipCollections(db, relations) {
     let files = [];
-    let stakeholdersObjects = [];
+    let usersObjects = [];
     let fileCommitConnections = [];
-    let fileCommitStakeholderConnections = [];
+    let fileCommitUserConnections = [];
 
     await Promise.all([
       findAll(db, 'files'),
-      findAll(db, 'stakeholders'),
+      findAll(db, 'users'),
       findFileCommitConnections(relations),
-      findFileCommitStakeholderConnections(relations),
+      findFileCommitUserConnections(relations),
     ]).then(([f, s, fc, fcs]) => {
       files = f.docs;
-      stakeholdersObjects = s.docs;
+      usersObjects = s.docs;
       fileCommitConnections = fc.docs;
-      fileCommitStakeholderConnections = fcs.docs;
+      fileCommitUserConnections = fcs.docs;
     });
     // sort the collections, so we can use binary search later on
     files = sortByAttributeString(files, '_id');
     fileCommitConnections = sortByAttributeString(fileCommitConnections, 'from');
-    fileCommitStakeholderConnections = sortByAttributeString(fileCommitStakeholderConnections, 'from');
+    fileCommitUserConnections = sortByAttributeString(fileCommitUserConnections, 'from');
 
-    // we don't expect the stakeholders collection to be very large, so we can store it in a map for quicker access
-    const stakeholders = {};
-    stakeholdersObjects.map((s) => {
-      stakeholders[s._id] = s.gitSignature;
+    // we don't expect the users collection to be very large, so we can store it in a map for quicker access
+    const users = {};
+    usersObjects.map((s) => {
+      users[s._id] = s.gitSignature;
     });
 
     return {
       files: files,
-      stakeholders: stakeholders,
+      users: users,
       fileCommitConnections: fileCommitConnections,
-      fileCommitStakeholderConnections: fileCommitStakeholderConnections,
+      fileCommitUserConnections: fileCommitUserConnections,
     };
   }
 }

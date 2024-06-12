@@ -4,10 +4,11 @@ const gql = require('graphql-sync');
 const arangodb = require('@arangodb');
 const db = arangodb.db;
 const aql = arangodb.aql;
-const issuesToStakeholders = db._collection('issues-stakeholders');
+const issuesToUsers = db._collection('issues-users');
 const issuesToAccounts = db._collection('issues-accounts')
 const issuesToCommits = db._collection('issues-commits');
 const issuesToMilestones = db._collection('issues-milestones');
+const issuesToNotes = db._collection('issues-notes');
 const paginated = require('./paginated.js');
 const Timestamp = require('./Timestamp.js');
 
@@ -49,17 +50,17 @@ module.exports = new gql.GraphQLObjectType({
         description: 'Close date of the issue',
       },
       creator: {
-        type: require('./stakeholder.js'),
+        type: require('./user.js'),
         description: 'The creator of this issue',
         resolve(issue /*, args*/) {
           return db
             ._query(
               aql`
               FOR
-              stakeholder
+              user
               IN
-              OUTBOUND ${issue} ${issuesToStakeholders}
-                RETURN stakeholder
+              OUTBOUND ${issue} ${issuesToUsers}
+                RETURN user
               `
             )
             .toArray()[0];
@@ -163,6 +164,17 @@ module.exports = new gql.GraphQLObjectType({
       notes: {
         type: new gql.GraphQLList(require('./gitlabNote.js')),
         description: 'Notes attached to the issue',
+        resolve(issue /*, args*/) {
+          return db
+            ._query(
+              aql`
+              FOR note, edge
+              IN outbound ${issue} ${issuesToNotes}
+              RETURN note
+              `
+            )
+            .toArray();
+        },
       },
     };
   },

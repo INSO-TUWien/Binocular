@@ -11,7 +11,7 @@ import {
   findBranchFileConnections,
   findBranchFileFileConnections,
   findFileCommitConnections,
-  findFileCommitStakeholderConnections,
+  findFileCommitUserConnections,
   sortByAttributeString,
 } from './utils';
 PouchDB.plugin(PouchDBFind);
@@ -79,11 +79,13 @@ export default class Files {
       //find all files and extract the ones that are on this branch
       const files = (await findAll(db, 'files')).docs;
       // find connections from this branch to files
-      const branchFileConnections = (await findBranchFileConnections(relations)).docs.filter((connection) => connection.to === branch._id);
+      const branchFileConnections = (await findBranchFileConnections(relations)).docs.filter(
+        (connection) => connection.from === branch._id,
+      );
 
       // for each connection, extract the file object and find all connections to other files (previous names)
       for (const branchFileConnection of branchFileConnections) {
-        const currentFile = binarySearch(files, branchFileConnection.from, '_id');
+        const currentFile = binarySearch(files, branchFileConnection.to, '_id');
         if (currentFile !== null) {
           //get connections to other files
           const connectionsToOtherFiles = binarySearchArray(branchFileFileConnections, branchFileConnection._id, 'from');
@@ -125,26 +127,26 @@ export default class Files {
       const result = [];
 
       const commits = (await findAll(db, 'commits')).docs;
-      const stakeholders = (await findAll(db, 'stakeholders')).docs;
+      const users = (await findAll(db, 'users')).docs;
       const fileCommitConnections = (await findFileCommitConnections(relations)).docs;
-      const fileCommitStakeholderConnections = (await findFileCommitStakeholderConnections(relations)).docs;
+      const fileCommitUserConnections = (await findFileCommitUserConnections(relations)).docs;
 
       //get all commits-files connection of this file
       for (const file of fileObjects) {
         const fileResult = { path: file.path, ownership: [] };
         const relevantConnections = fileCommitConnections.filter((fCC) => fCC.from === file._id);
 
-        //for each of these relevant connections, we want to extract the commit data and ownership connections (commits-files-stakeholders)
+        //for each of these relevant connections, we want to extract the commit data and ownership connections (commits-files-users)
         for (const conn of relevantConnections) {
           const relevantCommit = commits.filter((c) => c._id === conn.to)[0];
           const commitResult = { commit: { sha: relevantCommit.sha, date: relevantCommit.date }, ownership: [] };
 
-          const relevantOwnershipConnections = fileCommitStakeholderConnections.filter((fcsc) => fcsc.from === conn._id);
+          const relevantOwnershipConnections = fileCommitUserConnections.filter((fcsc) => fcsc.from === conn._id);
 
-          //for each of the ownership connections, add the signature of the stakeholder and the owned lines to commitResult.ownership
+          //for each of the ownership connections, add the signature of the user and the owned lines to commitResult.ownership
           for (const ownershipConn of relevantOwnershipConnections) {
-            const stakeholder = stakeholders.filter((s) => s._id === ownershipConn.to)[0].gitSignature;
-            commitResult.ownership.push({ stakeholder: stakeholder, hunks: ownershipConn.hunks });
+            const user = users.filter((s) => s._id === ownershipConn.to)[0].gitSignature;
+            commitResult.ownership.push({ user: user, hunks: ownershipConn.hunks });
           }
           //add to the result object of the current file
           fileResult.ownership.push(commitResult);

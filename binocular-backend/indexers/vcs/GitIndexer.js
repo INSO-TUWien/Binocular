@@ -11,9 +11,9 @@ import File from '../../models/models/File';
 import Branch from '../../models/models/Branch';
 import BranchFileConnection from '../../models/connections/BranchFileConnection';
 import CommitFileConnection from '../../models/connections/CommitFileConnection';
-import CommitFileStakeholderConnection from '../../models/connections/CommitFileStakeholderConnection';
+import CommitFileUserConnection from '../../models/connections/CommitFileUserConnection';
 import BranchFileFileConnection from '../../models/connections/BranchFileFileConnection';
-import Stakeholder from '../../models/models/Stakeholder';
+import User from '../../models/models/User';
 import { fixUTF8 } from '../../utils/utils';
 import ModuleFileConnection from '../../models/connections/ModuleFileConnection';
 import CommitModuleConnection from '../../models/connections/CommitModuleConnection';
@@ -105,7 +105,7 @@ class GitIndexer {
       log('Processing', this.counter.commits.total, 'commits');
 
       //persist commits
-      //also creates (and connects) stakeholder objects from commit signature
+      //also creates (and connects) user objects from commit signature
       for (const commit of commits) {
         await processCommit
           .bind(this)(commit, currentBranch)
@@ -116,8 +116,8 @@ class GitIndexer {
       //in the process, check which files have been renamed and store these in the branch-file-file connection
       await createBranchFileConnections(this.repo, this.context);
 
-      //create commit-file-stakeholder connections to model ownership of files
-      //models the following: at the time of commit c, stakeholder s owns x lines of file f
+      //create commit-file-user connections to model ownership of files
+      //models the following: at the time of commit c, user s owns x lines of file f
       await createOwnershipConnections(this.repo, this.context);
 
       this.printStats();
@@ -465,17 +465,17 @@ async function handleDeletedBranches(branch, existingBranchFileConnections, exis
 async function createOwnershipConnections(repo, context) {
   const commitObjects = await Commit.findAll();
   const fileObjects = await File.findAll();
-  const stakeholderObjects = await Stakeholder.findAll();
-  const stakeholderIds = {};
-  for (const s of stakeholderObjects) {
-    stakeholderIds[s.data.gitSignature] = s;
+  const userObjects = await User.findAll();
+  const userIds = {};
+  for (const s of userObjects) {
+    userIds[s.data.gitSignature] = s;
   }
 
   //get existing connections to skip commits that were already connected
-  const existingCommitFileStakeholderConnections = _.uniq((await CommitFileStakeholderConnection.findAll()).map((c) => c._from));
+  const existingCommitFileUserConnections = _.uniq((await CommitFileUserConnection.findAll()).map((c) => c._from));
   let commitFileConnections = await CommitFileConnection.findAll();
   //we are not interested in connections that have already been processed
-  commitFileConnections = commitFileConnections.filter((cfc) => !existingCommitFileStakeholderConnections.includes(cfc._id));
+  commitFileConnections = commitFileConnections.filter((cfc) => !existingCommitFileUserConnections.includes(cfc._id));
   //filter connections that represent a file deletion
   commitFileConnections = commitFileConnections.filter((cfc) => cfc.data.action !== 'deleted');
   //also filter connections where files have been renamed without changes
@@ -498,13 +498,13 @@ async function createOwnershipConnections(repo, context) {
         const file = fileObject.path;
         try {
           const res = await repo.getOwnershipForFile(file, sha, context);
-          for (const [stakeholder] of Object.entries(res.ownershipData)) {
-            const hunks = res.hunks[stakeholder].map((h) => _.omit(h, ['signature']));
-            await CommitFileStakeholderConnection.ensure(
+          for (const [user] of Object.entries(res.ownershipData)) {
+            const hunks = res.hunks[user].map((h) => _.omit(h, ['signature']));
+            await CommitFileUserConnection.ensure(
               { hunks: hunks },
               {
                 from: cfc,
-                to: stakeholderIds[fixUTF8(stakeholder)],
+                to: userIds[fixUTF8(user)],
               },
             );
           }

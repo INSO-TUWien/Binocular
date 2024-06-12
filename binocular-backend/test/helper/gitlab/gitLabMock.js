@@ -9,6 +9,7 @@ import {
   testPipelines,
   testProject,
 } from './gitLabTestData';
+import _ from 'lodash';
 
 class GitLabMock {
   testPaginator = (data) => {
@@ -38,8 +39,15 @@ class GitLabMock {
     return this.testPaginator(testIssues);
   }
 
-  getNotes() {
-    return this.testPaginator(testNotes);
+  getNotes(projectId, issueId) {
+    // each note is unique, there are no notes that belong to multiple issues/mrs. Therefore, ids have to be unique.
+    return this.testPaginator(
+      testNotes.map((note) => {
+        const newNote = _.clone(note);
+        newNote.id = issueId * 100 + note.id;
+        return newNote;
+      }),
+    );
   }
 
   getPipelines() {
@@ -60,8 +68,14 @@ class GitLabMock {
     return this.testPaginator(testMergeRequests);
   }
 
-  getMergeRequestNotes() {
-    return this.testPaginator(testMergeRequestNotes);
+  getMergeRequestNotes(projectId, issueId) {
+    return this.testPaginator(
+      testMergeRequestNotes.map((note) => {
+        const newNote = _.clone(note);
+        newNote.id = issueId * 100 + note.id;
+        return newNote;
+      }),
+    );
   }
 
   isStopping() {

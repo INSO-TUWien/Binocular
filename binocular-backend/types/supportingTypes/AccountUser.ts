@@ -1,4 +1,4 @@
-export default interface User {
+export default interface AccountUser {
   login: string;
   name: string;
   timestamp?: number;

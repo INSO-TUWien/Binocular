@@ -15,7 +15,7 @@ import Milestones from './localDB/milestones';
 import Files from './localDB/files';
 import Branches from './localDB/branches';
 import Modules from './localDB/modules';
-import Stakeholders from './localDB/stakeholders';
+import Users from './localDB/users';
 
 // #v-ifdef VITE_OFFLINE
 import branches from '../../db_export/branches.json';
@@ -25,18 +25,18 @@ import builds from '../../db_export/builds.json';
 import commitsCommits from '../../db_export/commits-commits.json';
 import commitsFiles from '../../db_export/commits-files.json';
 import commitsBuilds from '../../db_export/commits-builds.json';
-import commitsFilesStakeholders from '../../db_export/commits-files-stakeholders.json';
+import commitsFilesUsers from '../../db_export/commits-files-users.json';
 import commitsModules from '../../db_export/commits-modules.json';
-import commitsStakeholders from '../../db_export/commits-stakeholders.json';
+import commitsUsers from '../../db_export/commits-users.json';
 import commits from '../../db_export/commits.json';
 import files from '../../db_export/files.json';
 import issuesCommits from '../../db_export/issues-commits.json';
-import issuesStakeholders from '../../db_export/issues-stakeholders.json';
+import issuesUsers from '../../db_export/issues-users.json';
 import issues from '../../db_export/issues.json';
 import modulesFiles from '../../db_export/modules-files.json';
 import modulesModules from '../../db_export/modules-modules.json';
 import modules from '../../db_export/modules.json';
-import stakeholders from '../../db_export/stakeholders.json';
+import users from '../../db_export/users.json';
 import mergeRequests from '../../db_export/mergeRequests.json';
 import milestones from '../../db_export/milestones.json';
 import issuesMilestones from '../../db_export/issues-milestones.json';
@@ -44,18 +44,22 @@ import mergeRequestsMilestones from '../../db_export/mergeRequests-milestones.js
 import accounts from '../../db_export/accounts.json';
 import issuesAccounts from '../../db_export/issues-accounts.json';
 import mergeRequestsAccounts from '../../db_export/mergeRequests-accounts.json';
+import notes from '../../db_export/notes.json';
+import issuesNotes from '../../db_export/issues-notes.json';
+import mergeRequestsNotes from '../../db_export/mergeRequests-notes.json';
+import notesAccounts from '../../db_export/notes-accounts.json';
 
-const collections = { accounts, branches, builds, commits, files, issues, modules, stakeholders, mergeRequests, milestones };
+const collections = { accounts, branches, builds, commits, files, issues, modules, users, mergeRequests, milestones, notes };
 
 const relations = {
   'commits-commits': commitsCommits,
   'commits-files': commitsFiles,
-  'commits-files-stakeholders': commitsFilesStakeholders,
+  'commits-files-users': commitsFilesUsers,
   'commits-builds': commitsBuilds,
   'commits-modules': commitsModules,
-  'commits-stakeholders': commitsStakeholders,
+  'commits-users': commitsUsers,
   'issues-commits': issuesCommits,
-  'issues-stakeholders': issuesStakeholders,
+  'issues-users': issuesUsers,
   'issues-accounts': issuesAccounts,
   'issues-milestones': issuesMilestones,
   'modules-files': modulesFiles,
@@ -64,6 +68,9 @@ const relations = {
   'mergeRequests-milestones': mergeRequestsMilestones,
   'branches-files': branchesFiles,
   'branches-files-files': branchesFilesFiles,
+  'issues-notes': issuesNotes,
+  'mergeRequests-notes': mergeRequestsNotes,
+  'notes-accounts': notesAccounts,
 };
 // #v-endif
 
@@ -210,8 +217,8 @@ export default class LocalDB {
     return Modules.getAllModules(db);
   }
 
-  static getAllStakeholders() {
-    return Stakeholders.getAllStakeholders(db);
+  static getAllUsers() {
+    return Users.getAllUsers(db);
   }
 
   static getCodeHotspotsChangeData(file) {
@@ -228,12 +235,12 @@ export default class LocalDB {
     //relations need to be mapped so that they have the same names as with the server based variant
     database.commits_commits = relations['commits-commits'];
     database.commits_files = relations['commits-files'];
-    database.commits_files_stakeholders = relations['commits-files-stakeholders'];
+    database.commits_files_users = relations['commits-files-users'];
     database.commits_builds = relations['commits-builds'];
     database.commits_modules = relations['commits-modules'];
-    database.commits_stakeholders = relations['commits-stakeholders'];
+    database.commits_users = relations['commits-users'];
     database.issues_commits = relations['issues-commits'];
-    database.issues_stakeholders = relations['issues-stakeholders'];
+    database.issues_users = relations['issues-users'];
     database.issues_accounts = relations['issues-accounts'];
     database.issues_milestones = relations['issues-milestones'];
     database.modules_files = relations['modules-files'];
@@ -242,6 +249,9 @@ export default class LocalDB {
     database.mergeRequests_milestones = relations['mergeRequests-milestones'];
     database.branches_files = relations['branches-files'];
     database.branches_files_files = relations['branches-files-files'];
+    database.issues_notes = relations['issues-notes'];
+    database.mergeRequests_notes = relations['mergeRequests-notes'];
+    database.notes_accounts = relations['notes-accounts'];
 
     return database;
   }

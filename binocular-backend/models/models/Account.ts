@@ -35,6 +35,7 @@ class Account extends Model<AccountDataType> {
   }
 
   ensureGitLabAccount(acc: any) {
+    if (acc === undefined || acc === null) return;
     return this.ensureByExample(
       {
         platform: 'GitLab',

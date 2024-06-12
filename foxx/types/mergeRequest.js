@@ -7,6 +7,7 @@ const db = arangodb.db;
 const aql = arangodb.aql;
 const mergeRequestsToAccounts = db._collection('mergeRequests-accounts')
 const mergeRequestsToMilestones = db._collection('mergeRequests-milestones');
+const mergeRequestsToNotes = db._collection('mergeRequests-notes');
 
 
 module.exports = new gql.GraphQLObjectType({
@@ -124,6 +125,17 @@ module.exports = new gql.GraphQLObjectType({
       notes: {
         type: new gql.GraphQLList(require('./gitlabNote.js')),
         description: 'Notes attached to the Merge Request',
+        resolve(mr /*, args*/) {
+          return db
+            ._query(
+              aql`
+              FOR note, edge
+              IN outbound ${mr} ${mergeRequestsToNotes}
+              RETURN note
+              `
+            )
+            .toArray();
+        },
       },
     };
   },

@@ -56,9 +56,39 @@ export const testIssues = [
 ];
 
 export const testNotes = [
-  { id: 0, created_at: testTimestamp, body: 'closed' },
-  { id: 1, created_at: testTimestamp, body: 'mentioned in commit 1234567890' },
-  { id: 2, created_at: testTimestamp, body: 'some text' },
+  {
+    id: 0,
+    created_at: testTimestamp,
+    updatedAt: testTimestamp,
+    system: false,
+    resolvable: false,
+    confidential: false,
+    internal: false,
+    author: testAcc,
+    body: 'closed',
+  },
+  {
+    id: 1,
+    created_at: testTimestamp,
+    updatedAt: testTimestamp,
+    system: false,
+    resolvable: false,
+    confidential: false,
+    internal: false,
+    author: testAcc,
+    body: 'mentioned in commit 1234567890',
+  },
+  {
+    id: 2,
+    created_at: testTimestamp,
+    updatedAt: testTimestamp,
+    system: false,
+    resolvable: false,
+    confidential: false,
+    internal: false,
+    author: testAcc,
+    body: 'some text',
+  },
 ];
 
 export const testPipelines = [
@@ -109,7 +139,37 @@ export const testMergeRequests = [
 ];
 
 export const testMergeRequestNotes = [
-  { id: 0, created_at: testTimestamp, body: 'closed' },
-  { id: 0, created_at: testTimestamp, body: 'mentioned in commit 1234567890' },
-  { id: 0, created_at: testTimestamp, body: 'some text' },
+  {
+    id: 0,
+    created_at: testTimestamp,
+    updatedAt: testTimestamp,
+    system: false,
+    resolvable: false,
+    confidential: false,
+    internal: false,
+    author: testAcc,
+    body: 'closed',
+  },
+  {
+    id: 1,
+    created_at: testTimestamp,
+    updatedAt: testTimestamp,
+    system: false,
+    resolvable: false,
+    confidential: false,
+    internal: false,
+    author: testAcc,
+    body: 'mentioned in commit 1234567890',
+  },
+  {
+    id: 2,
+    created_at: testTimestamp,
+    updatedAt: testTimestamp,
+    system: false,
+    resolvable: false,
+    confidential: false,
+    internal: false,
+    author: testAcc,
+    body: 'some text',
+  },
 ];

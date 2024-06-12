@@ -1,50 +1,74 @@
 # Database Scheme
 
 This document lists all collections and connections of the ArangoDB Database used by Binocular.
-Complicated connections such as `branches-files-files` and `commits-files-stakeholders` are explained in detail.
+Complicated connections such as `branches-files-files` and `commits-files-users` are explained in detail.
 
-Note: Collections may have different attributes, depending on the source of the data (GitLab, GitHub).
+* [Collections](#collections)
+  * [accounts](#accounts)
+  * [branches](#branches)
+  * [builds](#builds)
+  * [commits](#commits)
+  * [files](#files)
+  * [issues](#issues)
+  * [mergeRequests](#mergerequests)
+  * [milestones](#milestones)
+  * [modules](#modules)
+  * [notes](#notes)
+  * [users](#users)
+* [Connections](#connections)
+  * [branches-files](#branches-files)
+  * [branches-files-files](#branches-files-files)
+    * [Attributes](#attributes)
+    * [Example](#example)
+    * [Details](#details)
+  * [commits-builds](#commits-builds)
+  * [commits-commits](#commits-commits)
+  * [commits-files](#commits-files)
+  * [commits-files-users](#commits-files-users)
+    * [Attributes](#attributes-1)
+    * [Example](#example-1)
+    * [Details](#details-1)
+  * [commits-modules](#commits-modules)
+  * [commits-users](#commits-users)
+  * [issues-accounts](#issues-accounts)
+  * [issues-commits](#issues-commits)
+  * [issues-milestones](#issues-milestones)
+  * [issues-notes](#issues-notes)
+  * [mergeRequests-accounts](#mergerequests-accounts)
+  * [mergeRequests-milestones](#mergerequests-milestones)
+  * [mergeRequests-notes](#mergerequests-notes)
+  * [issues-users](#issues-users)
+  * [modules-files](#modules-files)
+  * [modules-modules](#modules-modules)
+  * [notes-accounts](#notes-accounts)
 
-1. [Collections](#collections)
-   1. [branches](#branches)
-   2. [builds](#builds)
-   3. [commits](#commits)
-   4. [files](#files)
-   5. [issues (GitHub)](#issues-github)
-   6. [issues (GitLab)](#issues-gitlab)
-   7. [mergeRequests (GitHub)](#mergeRequests-github)
-   8. [mergeRequests (GitLab)](#mergerequests-gitlab)
-   9. [milestones](#milestones)
-   10. [modules](#modules)
-   11. [stakeholders](#stakeholders)
-2. [Connections](#connections)
-   1. [branches-files](#branches-files)
-   2. [branches-files-files](#branches-files-files)
-   3. [commits-builds](#commits-builds)
-   4. [commits-commits](#commits-commits)
-   5. [commits-files](#commits-files)
-   6. [commits-files-stakeholders](#commits-files-stakeholders)
-   7. [commits-modules](#commits-modules)
-   8. [commits-stakeholders](#commits-stakeholders)
-   9. [issues-commits](#issues-commits)
-   10. [issues-stakeholders](#issues-stakeholders)
-   11. [modules-files](#modules-files)
-   12. [modules-modules](#modules-modules)
 
 ## Collections
+
+### accounts
+
+Accounts from platforms like GitHub or GitLab.
+
+| attribute name | type           | details                    |
+|----------------|----------------|----------------------------|
+| `platform`     | string         | e.g. GitHub                |
+| `login`        | string         | username                   |
+| `name`         | string \| null | full name                  |
+| `avatarUrl`    | string         | url of the profile picture |
+| `url`          | string         | url of the profile         |
 
 ### branches
 
 All branches that exist in the project at the time of indexing.
 Deleted branches are not indexed.
 
-| attribute name      | type    | details                                                                                                                                                                                                                                                                                          |
-|---------------------|---------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| ``id``              | string  | internal ArangoDB key                                                                                                                                                                                                                                                                            |
-| `branch`            | string  | Name of the branch                                                                                                                                                                                                                                                                               |
+| attribute name      | type    | details                                                                                                                                                                                                                                                                                        |
+|---------------------|---------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `id`                | string  | internal ArangoDB key                                                                                                                                                                                                                                                                          |
+| `branch`            | string  | Name of the branch                                                                                                                                                                                                                                                                             |
 | `active`            | boolean | If this is the checked-out branch at the time of indexing.<br/> Which branches track file renames is controlled by the `fileRenameBranches` array in the `.binocularrc` file.<br/> For more information, check the documentation of the [branches-files-files connection](#branches-files-files) |
-| `tracksFileRenames` | boolean | If the indexer tracked file-renames on this branch                                                                                                                                                                                                                                               |
-| `latestCommit`      | string  | The hash of the last commit of this branch                                                                                                                                                                                                                                                       |
+| `tracksFileRenames` | boolean | If the indexer tracked file-renames on this branch                                                                                                                                                                                                                                            |
+| `latestCommit`      | string  | The hash of the last commit of this branch                                                                                                                                                                                                                                                     |
 
 ### builds
 
@@ -53,7 +77,7 @@ Builds by the CI system.
 | attribute name | type                       | details                                                    |
 |----------------|----------------------------|------------------------------------------------------------|
 | `id`           | string                     | internal ArangoDB key                                      |
-| `committedAt`  | string (timestamp)         |                                                            |                |                    |                     |
+| `committedAt`  | string (timestamp)         |                                                            |
 | `createdAt`    | string (timestamp)         |                                                            |
 | `duration`     | number                     | duration in seconds                                        |
 | `finishedAt`   | string (timestamp)         |                                                            |
@@ -64,19 +88,19 @@ Builds by the CI system.
 | `updatedAt`    | string (timestamp)         |                                                            |
 | `user`         | string                     | user that triggered this build                             |
 | `userFullName` | string                     |                                                            |
-| `webUrl`       | string                     | link to GitHub                                             |
+| `webUrl`       | string                     | link to platform                                           |
 
 #### Job Object
 
 | attribute name | type               | details                                |
 |----------------|--------------------|----------------------------------------|
-| `id`           | number             | internal GitHub id of the job          |
+| `id`           | number             | internal GitHub/GitLab id of the job   |
 | `name`         | string             | name of the user who triggered the job |
 | `status`       | string             |                                        |
 | `stage`        | string             |                                        |
 | `createdAt`    | string (timestamp) |                                        |
 | `finishedAt`   | string (timestamp) |                                        |
-| `webUrl`       | string             | link to GitHub                         |
+| `webUrl`       | string             | link to GitHub/GitLab                  |
 
 ### commits
 
@@ -104,191 +128,43 @@ Note that renaming files technically deletes the old file and creates a new file
 
 | attribute name | type   | details                                                                     |
 |----------------|--------|-----------------------------------------------------------------------------|
-| `webUrl`       | string | link to GitHub                                                              |
+| `webUrl`       | string | link to GitHub/GitLab                                                       |
 | `path`         | string | full path of the file starting at the project root (**without leading ./**) |
 | `maxLength`    | number | maximum number of lines of the file across its lifecycle                    |
 
-### issues (GitHub)
+### issues
 
-Issues from the GitHub ITS.
+Issues from the GitHub/GitLab ITS.
 
-| attribute name | type                                           | details                             |
-|----------------|------------------------------------------------|-------------------------------------|
-| `id`           | string                                         | internal ArangoDB key               |
-| `assignee`     | [GitHub-Author](#github-author-object) Object  | current assignee                    |
-| `assignees`    | Array\[[GitHub-Author](#github-author-object)] | past assignees                      |
-| `author`       | [GitHub-Author](#github-author-object) Object  | who created the issue               |
-| `createdAt`    | string (timestamp)                             |                                     |
-| `closedAt`     | string (timestamp)                             |                                     |
-| `title`        | string                                         |                                     |
-| `description`  | string                                         |                                     |
-| `iid`          | number                                         | GitHub issue id                     |
-| `labels`       | Array\[[GitHub-Label](#github-label-object)]   |                                     |
-| `milestone`    | [Milestone](#milestones) Object                |                                     |
-| `state`        | string                                         | if the issue is opened, closed etc. |
-| `updatedAt`    | string (timestamp)                             |                                     |
-| `url`          | string                                         | link to GitHub                      |
-| `webUrl`       | string                                         | link to GitHub                      |
+| attribute name | type                            | details                          |
+|----------------|---------------------------------|----------------------------------|
+| `id`           | string                          | internal ArangoDB key            |
+| `createdAt`    | string (timestamp)              |                                  |
+| `closedAt`     | string (timestamp)              |                                  |
+| `updatedAt`    | string (timestamp)              |                                  |
+| `title`        | string                          |                                  |
+| `description`  | string                          |                                  |
+| `iid`          | number                          | GitHub/GitLab issue id           |
+| `labels`       | Array\[string]                  |                                  |
+| `state`        | string                          | is the issue opened, closed etc. |
+| `webUrl`       | string                          | link to GitHub//GitLab           |
 
-#### GitHub-Author Object
+### mergeRequests
 
-| attribute name | type   | details |
-|----------------|--------|---------|
-| `login`        | string |         |
-| `name`         | string |         |
+Merge Requests from the GitHub/GitLab ITS.
 
-#### GitHub-Label Object
-
-| attribute name | type    | details                                         |
-|----------------|---------|-------------------------------------------------|
-| `id`           | string  | internal Github key                             |
-| `url`          | string  | link to GitHub                                  |
-| `name`         | string  |                                                 |
-| `color`        | string  | hex code of the label color (without leading #) |
-| `isDefault`    | boolean |                                                 |
-| `description`  | string  |                                                 |
-
-### issues (GitLab)
-
-Issues from the GitLab ITS
-
-| attribute name         | type                                                | details                                                          |
-|------------------------|-----------------------------------------------------|------------------------------------------------------------------|
-| `id`                   | string                                              | internal ArangoDB key                                            |
-| `assignee`             | [GitLab-Author](#gitlab-author-object) Object       | current assignee                                                 |
-| `assignees`            | Array\[[GitLab-Author](#gitlab-author-object)]      | past assignees                                                   |
-| `author`               | [GitLab-Author](#gitlab-author-object) Object       | who created the issue                                            |
-| `createdAt`            | string (timestamp)                                  |                                                                  |
-| `closedAt`             | string (timestamp)                                  |                                                                  |
-| `closedBy`             | [GitLab-Author](#gitlab-author-object) Object       |                                                                  |
-| `confidential`         | boolean                                             |                                                                  |
-| `description`          | string                                              |                                                                  |
-| `discussionLocked`     |                                                     |                                                                  |
-| `downvotes`            | number                                              |                                                                  |
-| `dueDate`              | string                                              |                                                                  |
-| `hasTasks`             | boolean                                             |                                                                  |
-| `iid`                  | number                                              | GitLab issue id                                                  |
-| `issueType`            | string                                              |                                                                  |
-| `labels`               | Array\[string]                                      |                                                                  |
-| `links`                | Object                                              | Object with links to related resources (the project, notes etc.) |
-| `mergeRequestsCount`   | number                                              |                                                                  |
-| `milestone`            | [GitLab-Milestone](#gitlab-milestone-object) Object |                                                                  |
-| `movedToId`            | number \| null                                      |                                                                  |
-| `notes`                | Array\[[GitLab-Notes](#gitlab-notes-object)]        |                                                                  |
-| `references`           | Object                                              |                                                                  |
-| `serviceDeskReplyTo`   |                                                     |                                                                  |
-| `severity`             | string                                              |                                                                  |
-| `state`                | string                                              |                                                                  |
-| `taskCompletionStatus` |                                                     |                                                                  |
-| `taskStatus`           | string                                              |                                                                  |
-| `title`                | string                                              |                                                                  |
-| `type`                 | string                                              |                                                                  |
-| `updatedAt`            | string (timestamp)                                  |                                                                  |
-| `upvotes`              | number                                              |                                                                  |
-| `userNotesCount`       | number                                              |                                                                  |
-| `webUrl`               | string                                              |                                                                  |
-
-#### GitLab-Author Object
-
-| attribute name | type    | details |
-|----------------|---------|---------|
-| `id`           | number  |         |
-| `username`     | string  |         |
-| `name`         | string  |         |
-| `state`        | string  |         |
-| `locked`       | boolean |         |
-| `avatar_url`   | string  |         |
-| `web_url`      | string  |         |
-
-#### GitLab-Milestone Object
-
-Exactly like the [milestones Object](#milestones), with one additional field:
-
-| attribute name | type   | details |
-|----------------|--------|---------|
-| `project_id`   | number |         |
-
-#### GitLab-Notes Object
-
-| attribute name     | type                                          | details                                                 |
-|--------------------|-----------------------------------------------|---------------------------------------------------------|
-| `id`               | number                                        |                                                         |
-| `type`             |                                               |                                                         |
-| `body`             | string                                        |                                                         |
-| `attachment`       |                                               |                                                         |
-| `author`           | [GitLab-Author](#gitlab-author-object) Object |                                                         |
-| `created_at`       | string (timestamp)                            |                                                         |
-| `updated_at`       | string (timestamp)                            |                                                         |
-| `system`           | boolean                                       |                                                         |
-| `noteable_id`      | number                                        | internal ArangoDB id of the issue this notes belongs to |
-| `noteable_type`    | string                                        | type of the issue this note belongs to                  |
-| `noteable_iid`     | number                                        | iid of the issue this note belongs to                   |
-| `project_id`       | number                                        |                                                         |
-| `resolvable`       | boolean                                       |                                                         |
-| `confidential`     | boolean                                       |                                                         |
-| `internal`         | boolean                                       |                                                         |
-| `commands_changes` | Object                                        |                                                         |
-
-### mergeRequests (GitHub)
-
-Open and merged MRs.
-Attributes are identical to [GitHub issues](#issues-github), except for one additional one:
-
-| attribute name | type   | details |
-|----------------|--------|---------|
-| `state`        | string |         |
-
-### mergeRequests (GitLab)
-
-| attribute name                | type                                                | details               |
-|-------------------------------|-----------------------------------------------------|-----------------------|
-| `id`                          | string                                              | internal ArangoDB key |
-| `iid`                         | number                                              |                       |
-| `title`                       | string                                              |                       |
-| `description`                 | string                                              |                       |
-| `state`                       | string                                              |                       |
-| `createdAt`                   | string (timestamp)                                  |                       |
-| `updatedAt`                   | string (timestamp)                                  |                       |
-| `mergedBy`                    | [GitLab-Author](#gitlab-author-object) Object       |                       |
-| `mergeUser`                   | [GitLab-Author](#gitlab-author-object) Object       |                       |
-| `mergedAt`                    |                                                     |                       |
-| `closedBy`                    | [GitLab-Author](#gitlab-author-object) Object       |                       |
-| `closedAt`                    | string (timestamp)                                  |                       |
-| `targetBranch`                | string                                              |                       |
-| `sourceBranch`                | string                                              |                       |
-| `userNotesCount`              | number                                              |                       |
-| `upvotes`                     | number                                              |                       |
-| `downvotes`                   | number                                              |                       |
-| `author`                      | [GitLab-Author](#gitlab-author-object) Object       |                       |
-| `assignees`                   | Array\[[GitLab-Author](#gitlab-author-object)]      |                       |
-| `assignee`                    | [GitLab-Author](#gitlab-author-object) Object       |                       |
-| `reviewers`                   | Array\[[GitLab-Author](#gitlab-author-object)]      |                       |
-| `sourceProjectId`             | number                                              |                       |
-| `targetProjectId`             | number                                              |                       |
-| `labels`                      | Array\[string]                                      |                       |
-| `draft`                       | boolean                                             |                       |
-| `workInProgress`              | boolean                                             |                       |
-| `milestone`                   | [GitLab-Milestone](#gitlab-milestone-object) Object |                       |
-| `mergeWhenPipelineSucceeds`   | boolean                                             |                       |
-| `mergeStatus`                 | string                                              |                       |
-| `detailedMergeStatus`         | string                                              |                       |
-| `sha`                         | string                                              |                       |
-| `mergeCommitSha`              | string                                              |                       |
-| `squashCommitSha`             | string                                              |                       |
-| `discussionLocked`            |                                                     |                       |
-| `shouldRemoveSourceBranch`    | boolean                                             |                       |
-| `forceRemoveSourceBranch`     | boolean                                             |                       |
-| `preparedAt`                  | string (timestamp)                                  |                       |
-| `reference`                   | string                                              |                       |
-| `references`                  | Object                                              |                       |
-| `webUrl`                      | string                                              |                       |
-| `timeStats`                   | Object                                              |                       |
-| `squash`                      | boolean                                             |                       |
-| `squashOnMerge`               | boolean                                             |                       |
-| `taskCompletionStatus`        |                                                     |                       |
-| `hasConflicts`                | boolean                                             |                       |
-| `blockingDiscussionsResolved` | boolean                                             |                       |
-| `notes`                       | Array\[[GitLab-Notes](#gitlab-notes-object)]        |                       |
+| attribute name | type                            | details                       |
+|----------------|---------------------------------|-------------------------------|
+| `id`           | string                          | internal ArangoDB key         |
+| `createdAt`    | string (timestamp)              |                               |
+| `closedAt`     | string (timestamp)              |                               |
+| `updatedAt`    | string (timestamp)              |                               |
+| `title`        | string                          |                               |
+| `description`  | string                          |                               |
+| `iid`          | number                          | GitHub/GitLab issue id        |
+| `labels`       | Array\[string]                  |                               |
+| `state`        | string                          | is the MR opened, merged etc. |
+| `webUrl`       | string                          | link to GitHub/GitLab         |
 
 ### milestones
 
@@ -315,13 +191,31 @@ Also contains directories that have been deleted/renamed.
 |----------------|--------|----------------------------------------------------------------------------|
 | `path`         | string | full path of the module starting at the project root (**with leading ./**) |
 
-### stakeholders
+### notes
+
+extracted comments from issues or merge requests from GitLab that are used for e.g. time tracking
+
+| attribute name | type               | details               |
+|----------------|--------------------|-----------------------|
+| `id`           | string             | internal ArangoDB key |
+| `body`         | string             |                       |
+| `createdAt`    | string (timestamp) |                       |
+| `updatedAt`    | string (timestamp) |                       |
+| `system`       | boolean            |                       |
+| `resolvable`   | boolean            |                       |
+| `confidential` | boolean            |                       |
+| `internal`     | boolean            |                       |
+| `imported`     | boolean            |                       |
+| `importedFrom` | string             |                       |
+
+### users
 
 All users that have ever committed to the project.
 
 | attribute name | type   | details                                             |
 |----------------|--------|-----------------------------------------------------|
 | `gitSignature` | string | Signature with the following format: `name <email>` |
+
 
 ## Connections
 
@@ -331,8 +225,8 @@ Tracks which files *currently* exists on a branch.
 
 | attribute name | type   | details                                  |
 |----------------|--------|------------------------------------------|
-| `_from`        | string | internal ArangoDB key of a file object   |
-| `_to`          | string | internal ArangoDB key of a branch object |
+| `_from`        | string | internal ArangoDB key of a branch object |
+| `_to`          | string | internal ArangoDB key of a file object   |
 
 ### branches-files-files
 
@@ -385,8 +279,8 @@ Tracks which builds were triggered because of which commits.
 
 | attribute name | type   | details                                  |
 |----------------|--------|------------------------------------------|
-| `_from`        | string | internal ArangoDB key of a build object  |
-| `_to`          | string | internal ArangoDB key of a commit object |
+| `_from`        | string | internal ArangoDB key of a commit object |
+| `_to`          | string | internal ArangoDB key of a build object  |
 
 ### commits-commits
 
@@ -403,8 +297,8 @@ Tracks which files were added/deleted/modified by commits.
 
 | attribute name | type                         | details                                                                             |
 |----------------|------------------------------|-------------------------------------------------------------------------------------|
-| `_from`        | string                       | internal ArangoDB key of a file object                                              |
-| `_to`          | string                       | internal ArangoDB key of a commit object                                            |
+| `_from`        | string                       | internal ArangoDB key of a commit object                                            |
+| `_to`          | string                       | internal ArangoDB key of a file object                                              |
 | `hunks`        | Array\[[Hunk](#hunk-object)] | tracks which parts of a file have been modified by this commit                      |
 | `lineCount`    | number                       | if the file was added in this commit, this is the original line count. Otherwise 0. |
 | `stats`        | Stats Object                 |                                                                                     |
@@ -418,7 +312,7 @@ Tracks which files were added/deleted/modified by commits.
 | `newLines`     | number | number of newly added lines                   |                                                       |
 | `oldStart`     | number | line number where deletions start             |                                                       |
 | `oldLines`     | number | number of lines deleted                       |                                                       |
-| `webUrl`       | string | link to GitHub                                |                                                       |
+| `webUrl`       | string | link to /GitLab                               |                                                       |
 
 #### Stats Object
 
@@ -427,7 +321,7 @@ Tracks which files were added/deleted/modified by commits.
 | `additions`    | number | number of lines added to this file in this commit     |
 | `deletions`    | number | number of lines deleted from this file in this commit |                                                       |
 
-### commits-files-stakeholders
+### commits-files-users
 
 This connection is used to track ownership of lines of a file.
 
@@ -436,15 +330,15 @@ This connection is used to track ownership of lines of a file.
 | attribute name | type                                           | details                                             |
 |----------------|------------------------------------------------|-----------------------------------------------------|
 | `_from`        | string                                         | internal ArangoDB key of a commits-files connection |
-| `_to`          | string                                         | internal ArangoDB key of a stakeholder object       |
-| `hunks`        | Array\[[OwnershipHunk](#ownershiphunk-object)] | which parts of the file this stakeholder owns       |
+| `_to`          | string                                         | internal ArangoDB key of a user object              |
+| `hunks`        | Array\[[OwnershipHunk](#ownershiphunk-object)] | which parts of the file this user owns              |
 
 ##### OwnershipHunk Object
 
-| attribute name   | type                           | details                                                              |
-|------------------|--------------------------------|----------------------------------------------------------------------|
-| `originalCommit` | string                         | sha of the commit where these lines were modified by the stakeholder |
-| `lines`          | Array\[[Lines](#lines-object)] | lines that were modified by this commit                              |
+| attribute name   | type                           | details                                                       |
+|------------------|--------------------------------|---------------------------------------------------------------|
+| `originalCommit` | string                         | sha of the commit where these lines were modified by the user |
+| `lines`          | Array\[[Lines](#lines-object)] | lines that were modified by this commit                       |
 
 ##### Lines Object
 
@@ -457,10 +351,10 @@ This connection is used to track ownership of lines of a file.
 
 - A file `f` was altered by a commit `c`.
   - There exists a connection `cf` from `f` to `c` in `commits-files`.
-  - There exist connections `cfs0`...`cfsn` from `cf` to each stakeholder `s` that owns lines of `f` at the time of
-    commit `c` in `commits-files-stakeholders`.
+  - There exist connections `cfu0`...`cfun` from `cf` to each user `u` that owns lines of `f` at the time of
+    commit `c` in `commits-files-users`.
 
-![commits-files-stakeholders.png](assets/commits-files-stakeholders.png)
+![commits-files-users.png](assets/commits-files-users.png)
 
 #### Details
 
@@ -469,9 +363,9 @@ of `git blame` ([git blame documentation](https://git-scm.com/docs/git-blame)).
 
 Example 2:
 
-![commits-files-stakeholders_example.png](assets/commits-files-stakeholders_example.png)
+![commits-files-users_example.png](assets/commits-files-users_example.png)
 
-Stakeholder `alice` creates file `f` consisting of 4 lines in commit `c0`:
+User `alice` creates file `f` consisting of 4 lines in commit `c0`:
 
 There now is the following document `c0f` in the `commits-files` collection:
 
@@ -486,11 +380,11 @@ _to: commits/c0
 }
 ```
 
-Furthermore, there is a document `c0fa` in the `commits-files-stakeholders` collection:
+Furthermore, there is a document `c0fa` in the `commits-files-users` collection:
 
 ```
 _from: commits-files/c0f
-_to: stakeholders/alice
+_to: users/alice
 {
   hunks: [
     {
@@ -508,7 +402,7 @@ _to: stakeholders/alice
 
 This document tells us that right after commit `c0`, `alice` owns 4 lines of the file `f` (lines 1 to 4).
 
-Now the stakeholder `bob` modifies `f` in commit `c1` by changing the second line.
+Now the user `bob` modifies `f` in commit `c1` by changing the second line.
 
 There is now one additional document `c1f` in the `commits-files` collection:
 
@@ -521,11 +415,11 @@ _to: commits/c1
 }
 ```
 
-Additionally, there are two more documents in the `commits-files-stakeholders` collection (`c1fa` and `c1fb`):
+Additionally, there are two more documents in the `commits-files-users` collection (`c1fa` and `c1fb`):
 
 ```
 _from: commits-files/c1f
-_to: stakeholders/alice
+_to: users/alice
 {
   hunks: [
     {
@@ -547,7 +441,7 @@ _to: stakeholders/alice
 
 ```
 _from: commits-files/c1f
-_to: stakeholders/bob
+_to: users/bob
 {
   hunks: [
     {
@@ -578,10 +472,10 @@ Tracks which modules were modified by this commit.
 
 | attribute name | type         | details                                                 |
 |----------------|--------------|---------------------------------------------------------|
-| `_from`        | string       | internal ArangoDB key of a module object                |
-| `_to`          | string       | internal ArangoDB key of a commit object                |
+| `_from`        | string       | internal ArangoDB key of a commit object                |
+| `_to`          | string       | internal ArangoDB key of a module object                |
 | `stats`        | Stats Object | how many lines were added to / deleted from this module |
-| `webUrl`       | string       | link to GitHub                                          |
+| `webUrl`       | string       | link to GitHub/GitLab                                   |
 
 #### Stats Object
 
@@ -590,33 +484,74 @@ Tracks which modules were modified by this commit.
 | `additions`    | number | number of lines added to this module in this commit     |
 | `deletions`    | number | number of lines deleted from this module in this commit |                                                       |
 
-### commits-stakeholders
+### commits-users
 
-Tracks which stakeholder committed the specified commit.
+Tracks which user committed the specified commit.
 
-| attribute name | type   | details                                       |
-|----------------|--------|-----------------------------------------------|
-| `_from`        | string | internal ArangoDB key of a stakeholder object |
-| `_to`          | string | internal ArangoDB key of a commit object      |
+| attribute name | type   | details                                  |
+|----------------|--------|------------------------------------------|
+| `_from`        | string | internal ArangoDB key of a commit object |
+| `_to`          | string | internal ArangoDB key of an user object  |
+
+### issues-accounts
+
+Tracks which accounts have which role for an issue
+
+| attribute name | type   | details                                                                                    |
+|----------------|--------|--------------------------------------------------------------------------------------------|
+| `_from`        | string | internal ArangoDB key of an issue object                                                   |
+| `_to`          | string | internal ArangoDB key of an account object                                                 |
+| `role`         | string | either 'author', 'assignee' (current assignee) or 'assignees' (current and past assignees) |
 
 ### issues-commits
 
 Tracks which commits belong to an issue (which use `#iid` in the commit message)
 
+| attribute name | type    | details                                   |
+|----------------|---------|-------------------------------------------|
+| `_from`        | string  | internal ArangoDB key of a issue object   |
+| `_to`          | string  | internal ArangoDB key of an commit object |
+| `closes`       | boolean | does this commit close the issue          |
+
+### issues-milestones
+
+To which milestone a given issue belongs
+
+| attribute name | type    | details                                     |
+|----------------|---------|---------------------------------------------|
+| `_from`        | string  | internal ArangoDB key of an issue object    |
+| `_to`          | string  | internal ArangoDB key of a milestone object |
+
+### issues-notes
+
+which notes have been posted for an issue.
+A note belongs to exactly one issue, an issue can have 0 or more notes.
+
 | attribute name | type    | details                                  |
 |----------------|---------|------------------------------------------|
-| `_from`        | string  | internal ArangoDB key of a commit object |
-| `_to`          | string  | internal ArangoDB key of an issue object |
-| `closes`       | boolean | does this commit close the issue         |
+| `_from`        | string  | internal ArangoDB key of an issue object |
+| `_to`          | string  | internal ArangoDB key of a notes object  |
 
-### issues-stakeholders
+### mergeRequests-accounts
 
-Tracks which stakeholders are involved in an issue through commits that reference that issue.
+analogous to [issues-accounts](#issues-accounts)
 
-| attribute name | type   | details                                       |
-|----------------|--------|-----------------------------------------------|
-| `_from`        | string | internal ArangoDB key of an issue object      |
-| `_to`          | string | internal ArangoDB key of a stakeholder object |
+### mergeRequests-milestones
+
+analogous to [issues-milestones](#issues-milestones)
+
+### mergeRequests-notes
+
+analogous to [issues-notes](#issues-notes)
+
+### issues-users
+
+Tracks which users are involved in an issue through commits that reference that issue.
+
+| attribute name | type   | details                                  |
+|----------------|--------|------------------------------------------|
+| `_from`        | string | internal ArangoDB key of an issue object |
+| `_to`          | string | internal ArangoDB key of a user object   |
 
 ### modules-files
 
@@ -624,8 +559,8 @@ Which files belong to which modules.
 
 | attribute name | type   | details                                  |
 |----------------|--------|------------------------------------------|
-| `_from`        | string | internal ArangoDB key of a file object   |
-| `_to`          | string | internal ArangoDB key of a module object |
+| `_from`        | string | internal ArangoDB key of a module object |
+| `_to`          | string | internal ArangoDB key of a file object   |
 
 ### modules-modules
 
@@ -636,3 +571,13 @@ For example `./src/backend` belongs to `./src`.
 |----------------|--------|---------------------------------------------------|
 | `_from`        | string | internal ArangoDB key of the submodule object     |
 | `_to`          | string | internal ArangoDB key of the parent module object |
+
+### notes-accounts
+
+Which account has posted a given note.
+One-to-one relation.
+
+| attribute name | type    | details                                    |
+|----------------|---------|--------------------------------------------|
+| `_from`        | string  | internal ArangoDB key of a note object     |
+| `_to`          | string  | internal ArangoDB key of an account object |
