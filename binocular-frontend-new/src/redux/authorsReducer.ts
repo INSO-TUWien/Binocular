@@ -1,11 +1,5 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-
-interface Author {
-  name: string;
-  id: number;
-  parent: number;
-  color: string;
-}
+import { Author } from '../types/authorType.ts';
 
 export interface AuthorsInitialState {
   authorList: Author[];
@@ -13,13 +7,7 @@ export interface AuthorsInitialState {
 }
 
 const initialState: AuthorsInitialState = {
-  authorList: [
-    { name: 'Author 1', id: 1, parent: -1, color: '#ffcc00' },
-    { name: 'Author 2', id: 2, parent: -1, color: '#5856d6' },
-    { name: 'Author 3', id: 3, parent: -1, color: '#4cd964' },
-    { name: 'Author 4', id: 4, parent: -1, color: '#ff2d55' },
-    { name: 'Author 5', id: 5, parent: -1, color: '#5ac8fa' },
-  ],
+  authorList: [],
   dragging: false,
 };
 

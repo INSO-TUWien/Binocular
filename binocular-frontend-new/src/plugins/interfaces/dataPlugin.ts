@@ -1,14 +1,19 @@
 export interface DataPlugin {
   name: string;
   description: string;
-  commits: Commits;
+  commits: DataCommits;
+  authors: DataAuthors;
 }
 
-interface Commits {
-  getAll: (from: string, to: string) => Promise<Commit[]>;
+interface DataCommits {
+  getAll: (from: string, to: string) => Promise<DataCommit[]>;
 }
 
-export interface Commit {
+interface DataAuthors {
+  getAll: () => Promise<DataAuthor[]>;
+}
+
+export interface DataCommit {
   sha: string;
   shortSha: string;
   messageHeader: string;
@@ -18,10 +23,14 @@ export interface Commit {
   date: string;
   parents: string[];
   webUrl: string;
-  stats: Stats;
+  stats: DataStats;
 }
 
-interface Stats {
+interface DataStats {
   additions: number;
   deletions: number;
+}
+
+export interface DataAuthor {
+  gitSignature: string;
 }

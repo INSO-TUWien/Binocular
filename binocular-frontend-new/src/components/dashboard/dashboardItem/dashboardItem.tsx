@@ -35,6 +35,7 @@ function DashboardItem(props: {
   const [poppedOut, setPoppedOut] = useState(false);
 
   const currentDataPlugin = useSelector((state: RootState) => state.settings.dataPlugin);
+  const authorList = useSelector((state: RootState) => state.authors.authorList);
 
   return (
     <>
@@ -54,6 +55,7 @@ function DashboardItem(props: {
               <plugin.chartComponent
                 key={plugin.name}
                 settings={settings}
+                authorList={authorList}
                 dataConnection={dataPlugins.filter((plugin) => plugin.name === currentDataPlugin)[0]}></plugin.chartComponent>
             </DashboardItemPopout>
           </div>
@@ -78,6 +80,7 @@ function DashboardItem(props: {
               <plugin.chartComponent
                 key={plugin.name}
                 settings={settings}
+                authorList={authorList}
                 dataConnection={dataPlugins.filter((plugin) => plugin.name === currentDataPlugin)[0]}></plugin.chartComponent>
             )}
           </div>

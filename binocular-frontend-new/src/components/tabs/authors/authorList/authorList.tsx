@@ -2,12 +2,39 @@ import authorListStyles from './authorList.module.scss';
 import { useSelector } from 'react-redux';
 import { AppDispatch, RootState, useAppDispatch } from '../../../../redux';
 import { setAuthorList, setDragging } from '../../../../redux/authorsReducer.ts';
-
+import { useEffect } from 'react';
+import { dataPlugins } from '../../../../plugins/pluginRegistry.ts';
+import distinctColors from 'distinct-colors';
 function AuthorList(props: { orientation?: string }) {
   const dispatch: AppDispatch = useAppDispatch();
 
   const authors = useSelector((state: RootState) => state.authors.authorList);
   const dragging = useSelector((state: RootState) => state.authors.dragging);
+
+  const currentDataPlugin = useSelector((state: RootState) => state.settings.dataPlugin);
+
+  useEffect(() => {
+    dataPlugins
+      .filter((plugin) => plugin.name === currentDataPlugin)[0]
+      .authors.getAll()
+      .then((authors) => {
+        const colors = distinctColors({ count: authors.length, lightMin: 50 });
+        dispatch(
+          setAuthorList(
+            authors.map((author, i) => {
+              return {
+                name: author.gitSignature,
+                id: i,
+                parent: -1,
+                color: { main: colors[i].hex(), secondary: colors[i].hex() + '55' },
+                selected: true,
+              };
+            }),
+          ),
+        );
+      })
+      .catch(() => console.log('Error loading Authors from selected data source!'));
+  }, [currentDataPlugin]);
 
   return (
     <>
@@ -38,7 +65,7 @@ function AuthorList(props: { orientation?: string }) {
                       defaultChecked={true}
                     />
                     <div
-                      style={{ borderColor: parentAuthor.color }}
+                      style={{ borderColor: parentAuthor.color.main }}
                       className={authorListStyles.authorName}
                       draggable={true}
                       onDrop={(event) => {
@@ -50,10 +77,10 @@ function AuthorList(props: { orientation?: string }) {
                             authors.map((a) => {
                               if (parentAuthor.id !== Number(event.dataTransfer.getData('draggingAuthorId'))) {
                                 if (a.parent === Number(event.dataTransfer.getData('draggingAuthorId'))) {
-                                  return { name: a.name, id: a.id, color: a.color, parent: parentAuthor.id };
+                                  return { name: a.name, id: a.id, color: a.color, parent: parentAuthor.id, selected: a.selected };
                                 }
                                 if (a.id === Number(event.dataTransfer.getData('draggingAuthorId'))) {
-                                  return { name: a.name, id: a.id, color: a.color, parent: parentAuthor.id };
+                                  return { name: a.name, id: a.id, color: a.color, parent: parentAuthor.id, selected: a.selected };
                                 }
                               }
                               return a;
@@ -67,7 +94,7 @@ function AuthorList(props: { orientation?: string }) {
                         event.dataTransfer.setData('draggingAuthorId', String(parentAuthor.id));
                       }}
                       onDragEnd={() => dispatch(setDragging(false))}>
-                      <div style={{ background: parentAuthor.color }} className={authorListStyles.authorNameBackground}></div>
+                      <div style={{ background: parentAuthor.color.secondary }} className={authorListStyles.authorNameBackground}></div>
                       <div className={authorListStyles.authorNameText}>{parentAuthor.name}</div>
                     </div>
                   </div>
@@ -93,7 +120,7 @@ function AuthorList(props: { orientation?: string }) {
                           )}
 
                           <div
-                            style={{ borderColor: author.color }}
+                            style={{ borderColor: author.color.main }}
                             className={authorListStyles.authorName}
                             draggable={true}
                             onDragStart={(event) => {
@@ -102,7 +129,7 @@ function AuthorList(props: { orientation?: string }) {
                               event.dataTransfer.setData('draggingAuthorId', String(author.id));
                             }}
                             onDragEnd={() => dispatch(setDragging(false))}>
-                            <div style={{ background: author.color }} className={authorListStyles.authorNameBackground}></div>
+                            <div style={{ background: author.color.secondary }} className={authorListStyles.authorNameBackground}></div>
                             <div className={authorListStyles.authorNameText}>{author.name}</div>
                           </div>
                         </div>
@@ -129,10 +156,10 @@ function AuthorList(props: { orientation?: string }) {
               setAuthorList(
                 authors.map((a) => {
                   if (a.parent === Number(event.dataTransfer.getData('draggingAuthorId'))) {
-                    return { name: a.name, id: a.id, color: a.color, parent: -1 };
+                    return { name: a.name, id: a.id, color: a.color, parent: -1, selected: a.selected };
                   }
                   if (a.id === Number(event.dataTransfer.getData('draggingAuthorId'))) {
-                    return { name: a.name, id: a.id, color: a.color, parent: -1 };
+                    return { name: a.name, id: a.id, color: a.color, parent: -1, selected: a.selected };
                   }
                   return a;
                 }),

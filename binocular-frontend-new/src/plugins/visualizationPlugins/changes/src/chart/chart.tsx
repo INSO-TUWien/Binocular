@@ -1,23 +1,28 @@
-import { AreaChart } from './areaChart.tsx';
-import { createRef, useEffect, useRef, useState } from 'react';
-import { Commit, DataPlugin } from '../../../../interfaces/dataPlugin.ts';
+import { StackedAreaChart } from './stackedAreaChart.tsx';
+import { createRef, useEffect, useState } from 'react';
+import { DataPlugin } from '../../../../interfaces/dataPlugin.ts';
 import { SettingsType } from '../settings/settings.tsx';
+import { Author } from '../../../../../types/authorType.ts';
+import { convertCommitDataToChangesChartData } from '../utilies/dataConverter.ts';
 
-function Chart(props: { settings: SettingsType; dataConnection: DataPlugin }) {
+export interface CommitChartData {
+  date: number;
+  [signature: string]: number;
+}
+
+export interface Palette {
+  [signature: string]: { main: string; secondary: string };
+}
+
+function Chart(props: { settings: SettingsType; dataConnection: DataPlugin; authorList: Author[] }) {
   const chartContainerRef = createRef<HTMLDivElement>();
 
   const [chartWidth, setChartWidth] = useState(100);
   const [chartHeight, setChartHeight] = useState(100);
 
-  const commitData = useRef<Commit[]>([]);
-
-  props.dataConnection.commits
-    .getAll('2010-01-01T12:00:00.000Z', new Date().toISOString())
-    .then((commits) => {
-      console.log(commits);
-      commitData.current = commits;
-    })
-    .catch(() => console.log('Promise Error'));
+  const [chartData, setChartData] = useState<CommitChartData[]>([]);
+  const [chartScale, setChartScale] = useState<number[]>([]);
+  const [chartPalette, setChartPalette] = useState<Palette>({});
 
   useEffect(() => {
     if (chartContainerRef.current) {
@@ -28,12 +33,24 @@ function Chart(props: { settings: SettingsType; dataConnection: DataPlugin }) {
         setChartHeight(chartContainerRef.current.offsetHeight);
       }
     }
-  }, [chartContainerRef]);
+  }, [chartContainerRef, chartHeight, chartWidth]);
+
+  useEffect(() => {
+    props.dataConnection.commits
+      .getAll('2010-01-01T12:00:00.000Z', new Date().toISOString())
+      .then((commits) => {
+        const { commitChartData, commitScale, commitPalette } = convertCommitDataToChangesChartData(commits, props.authorList);
+        setChartData(commitChartData);
+        setChartScale(commitScale);
+        setChartPalette(commitPalette);
+      })
+      .catch(() => console.log('Promise Error'));
+  }, [props.dataConnection, props.authorList]);
 
   return (
     <>
       <div className={'w-full h-full'} ref={chartContainerRef}>
-        <AreaChart data={commitData.current} width={chartWidth} height={chartHeight} color={props.settings.color} />
+        <StackedAreaChart data={chartData} scale={chartScale} palette={chartPalette} width={chartWidth} height={chartHeight} />
       </div>
     </>
   );

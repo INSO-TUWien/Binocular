@@ -25,7 +25,7 @@ function OtherAuthors(props: { orientation?: string }) {
                 <div key={'author' + i}>
                   <div className={otherAuthorsStyles.authorContainer}>
                     <div
-                      style={{ borderColor: parentAuthor.color }}
+                      style={{ borderColor: parentAuthor.color.main }}
                       className={otherAuthorsStyles.authorName}
                       draggable={true}
                       onDragStart={(event) => {
@@ -33,7 +33,7 @@ function OtherAuthors(props: { orientation?: string }) {
                         event.dataTransfer.setData('draggingAuthorId', String(parentAuthor.id));
                       }}
                       onDragEnd={() => dispatch(setDragging(false))}>
-                      <div style={{ background: parentAuthor.color }} className={otherAuthorsStyles.authorNameBackground}></div>
+                      <div style={{ background: parentAuthor.color.secondary }} className={otherAuthorsStyles.authorNameBackground}></div>
                       <div className={otherAuthorsStyles.authorNameText}>{parentAuthor.name}</div>
                     </div>
                   </div>
@@ -57,10 +57,10 @@ function OtherAuthors(props: { orientation?: string }) {
               setAuthorList(
                 authors.map((a) => {
                   if (a.parent === Number(event.dataTransfer.getData('draggingAuthorId'))) {
-                    return { name: a.name, id: a.id, color: a.color, parent: 0 };
+                    return { name: a.name, id: a.id, color: a.color, parent: 0, selected: a.selected };
                   }
                   if (a.id === Number(event.dataTransfer.getData('draggingAuthorId'))) {
-                    return { name: a.name, id: a.id, color: a.color, parent: 0 };
+                    return { name: a.name, id: a.id, color: a.color, parent: 0, selected: a.selected };
                   }
                   return a;
                 }),

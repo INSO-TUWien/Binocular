@@ -1,13 +1,11 @@
-import { Commit } from '../../../interfaces/dataPlugin.ts';
+import { DataCommit } from '../../../interfaces/dataPlugin.ts';
 import { graphQl, traversePages } from './utils';
 import { gql } from '@apollo/client';
 
 export default {
-  getAll: (from: string, to: string) => {
+  getAll: async (from: string, to: string) => {
     console.log(`Getting Commits from ${from} to ${to}`);
-    const commitList: Commit[] = [];
-    //important: we do not use significantSince in the query directly
-    // because we need a full commit history to add the `history` attribute to all changes.
+    const commitList: DataCommit[] = [];
     const getCommitsPage = (to?: string) => async (page: number, perPage: number) => {
       const resp = await graphQl.query({
         query: gql`
@@ -34,17 +32,15 @@ export default {
             }
           }
         `,
-        variables: { page, perPage, to },
+        variables: {page, perPage, to},
       });
       return resp.data.commits;
     };
 
-    return traversePages(getCommitsPage(to), (commit: Commit) => {
+    await traversePages(getCommitsPage(to), (commit: DataCommit) => {
       commitList.push(commit);
-    }).then(function () {
-      const allCommits = commitList.sort((a, b) => new Date(b.date).getMilliseconds() - new Date(a.date).getMilliseconds());
-
-      return allCommits.filter((c) => new Date(c.date) >= new Date(from) && new Date(c.date) <= new Date(to));
     });
+    const allCommits = commitList.sort((a, b) => new Date(b.date).getMilliseconds() - new Date(a.date).getMilliseconds());
+    return allCommits.filter((c) => new Date(c.date) >= new Date(from) && new Date(c.date) <= new Date(to));
   },
 };

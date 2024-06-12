@@ -1,10 +1,10 @@
-import { Commit } from '../../../interfaces/dataPlugin.ts';
+import { DataCommit } from '../../../interfaces/dataPlugin.ts';
 
 export default {
   getAll: (from?: string, to?: string) => {
     console.log(`Getting Commits from ${from} to ${to}`);
-    return new Promise<Commit[]>((resolve) => {
-      const commits: Commit[] = [
+    return new Promise<DataCommit[]>((resolve) => {
+      const commits: DataCommit[] = [
         {
           sha: '0000000001',
           shortSha: '00001',
@@ -22,7 +22,7 @@ export default {
           shortSha: '00002',
           messageHeader: 'Commit 2',
           message: 'This is the second Commit',
-          signature: 'tester@github.com',
+          signature: 'tester2@github.com',
           branch: 'main',
           date: '2024-06-02T12:00:00.000Z',
           parents: ['0000000001'],
@@ -34,7 +34,7 @@ export default {
           shortSha: '00003',
           messageHeader: 'Commit 3',
           message: 'This is the third Commit',
-          signature: 'tester@github.com',
+          signature: 'tester2@github.com',
           branch: 'main',
           date: '2024-06-03T12:00:00.000Z',
           parents: ['0000000002'],
