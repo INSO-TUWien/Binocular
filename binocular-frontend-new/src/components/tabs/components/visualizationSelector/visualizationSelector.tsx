@@ -28,7 +28,7 @@ function VisualizationSelector(props: { orientation?: string }) {
                 dispatch(placeDashboardItem({ id: 0, x: 0, y: 0, width: 5, height: 4, pluginName: plugin.name }));
               }}>
               <div>
-                <img draggable={'false'} src={plugin.images.preview} alt={plugin.name} />
+                <img draggable={'false'} src={plugin.images.thumbnail} alt={plugin.name} />
                 <span>{plugin.name}</span>
               </div>
             </div>

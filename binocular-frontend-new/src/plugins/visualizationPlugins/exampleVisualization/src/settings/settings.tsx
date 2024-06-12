@@ -3,7 +3,7 @@ export interface SettingsType {
   color: string;
 }
 
-function Settings(props: { defaultSettings: SettingsType; setSettings: (newSettings: unknown) => void }) {
+function Settings(props: { defaultSettings: SettingsType; setSettings: (newSettings: SettingsType) => void }) {
   const data1 = [
     { x: 1, y: 90 },
     { x: 2, y: 80 },

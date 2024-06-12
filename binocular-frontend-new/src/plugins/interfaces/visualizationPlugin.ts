@@ -1,15 +1,15 @@
 import { ReactNode } from 'react';
 import { DataPlugin } from './dataPlugin.ts';
 
-export interface VisualizationPlugin {
+export interface VisualizationPlugin<SettingsType> {
   name: string;
-  chartComponent: (props: { settings: unknown; dataConnection: DataPlugin }) => ReactNode;
-  settingsComponent: (props: { defaultSettings: unknown; setSettings: (newSettings: unknown) => void }) => ReactNode;
+  chartComponent: (props: { settings: SettingsType; dataConnection: DataPlugin }) => ReactNode;
+  settingsComponent: (props: { defaultSettings: SettingsType; setSettings: (newSettings: SettingsType) => void }) => ReactNode;
   defaultSettings: unknown;
   capabilities: {
     popoutOnly: boolean;
   };
   images: {
-    preview: string;
+    thumbnail: string;
   };
 }

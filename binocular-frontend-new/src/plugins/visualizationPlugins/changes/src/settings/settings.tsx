@@ -2,7 +2,7 @@ export interface SettingsType {
   color: string;
 }
 
-function Settings(props: { defaultSettings: SettingsType; setSettings: (newSettings: unknown) => void }) {
+function Settings(props: { defaultSettings: SettingsType; setSettings: (newSettings: SettingsType) => void }) {
   return (
     <>
       <div>

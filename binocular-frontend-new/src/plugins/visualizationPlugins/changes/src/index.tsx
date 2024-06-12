@@ -1,8 +1,9 @@
 import Chart from './chart/chart.tsx';
-import PreviewImage from '../assets/preview.svg';
-import Settings from './settings/settings.tsx';
+import PreviewImage from '../assets/thumbnail.svg';
+import Settings, { SettingsType } from './settings/settings.tsx';
+import { VisualizationPlugin } from '../../../interfaces/visualizationPlugin.ts';
 
-export default {
+const Changes: VisualizationPlugin<SettingsType> = {
   name: 'Changes',
   chartComponent: Chart,
   settingsComponent: Settings,
@@ -11,6 +12,8 @@ export default {
     popoutOnly: false,
   },
   images: {
-    preview: PreviewImage,
+    thumbnail: PreviewImage,
   },
 };
+
+export default Changes;
