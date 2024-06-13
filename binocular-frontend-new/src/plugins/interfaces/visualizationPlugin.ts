@@ -5,7 +5,7 @@ import { Author } from '../../types/authorType.ts';
 export interface VisualizationPlugin<SettingsType> {
   name: string;
   chartComponent: (props: { settings: SettingsType; dataConnection: DataPlugin; authorList: Author[] }) => ReactNode;
-  settingsComponent: (props: { defaultSettings: SettingsType; setSettings: (newSettings: SettingsType) => void }) => ReactNode;
+  settingsComponent: (props: { settings: SettingsType; setSettings: (newSettings: SettingsType) => void }) => ReactNode;
   defaultSettings: unknown;
   capabilities: {
     popoutOnly: boolean;

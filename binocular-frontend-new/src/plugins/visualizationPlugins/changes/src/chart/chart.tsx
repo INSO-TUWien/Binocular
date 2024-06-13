@@ -16,7 +16,6 @@ export interface Palette {
 
 function Chart(props: { settings: SettingsType; dataConnection: DataPlugin; authorList: Author[] }) {
   const chartContainerRef = createRef<HTMLDivElement>();
-
   const [chartWidth, setChartWidth] = useState(100);
   const [chartHeight, setChartHeight] = useState(100);
 
@@ -39,18 +38,29 @@ function Chart(props: { settings: SettingsType; dataConnection: DataPlugin; auth
     props.dataConnection.commits
       .getAll('2010-01-01T12:00:00.000Z', new Date().toISOString())
       .then((commits) => {
-        const { commitChartData, commitScale, commitPalette } = convertCommitDataToChangesChartData(commits, props.authorList);
+        const { commitChartData, commitScale, commitPalette } = convertCommitDataToChangesChartData(
+          commits,
+          props.authorList,
+          props.settings.splitAdditionsDeletions,
+        );
         setChartData(commitChartData);
         setChartScale(commitScale);
         setChartPalette(commitPalette);
       })
       .catch(() => console.log('Promise Error'));
-  }, [props.dataConnection, props.authorList]);
+  }, [props.dataConnection, props.authorList, props.settings]);
 
   return (
     <>
       <div className={'w-full h-full'} ref={chartContainerRef}>
-        <StackedAreaChart data={chartData} scale={chartScale} palette={chartPalette} width={chartWidth} height={chartHeight} />
+        <StackedAreaChart
+          data={chartData}
+          scale={chartScale}
+          palette={chartPalette}
+          width={chartWidth}
+          height={chartHeight}
+          visualizationStyle={props.settings.visualizationStyle}
+        />
       </div>
     </>
   );

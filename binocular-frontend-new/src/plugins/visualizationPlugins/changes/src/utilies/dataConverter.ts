@@ -7,6 +7,7 @@ import { CommitChartData, Palette } from '../chart/chart.tsx';
 export function convertCommitDataToChangesChartData(
   commits: DataCommit[],
   authors: Author[],
+  splitAdditionsDeletions: boolean,
 ): {
   commitChartData: CommitChartData[];
   commitScale: number[];
@@ -78,8 +79,7 @@ export function convertCommitDataToChangesChartData(
     }
 
     //---- STEP 2: CONSTRUCT CHART DATA FROM AGGREGATED COMMITS ----
-    const chartIsSplit = false; //TODO: Make Chart splittable gain
-    if (chartIsSplit) {
+    if (splitAdditionsDeletions) {
       commitPalette['(Additions) others'] = { main: '#555555', secondary: '#777777' };
       commitPalette['(Deletions) others'] = { main: '#AAAAAA', secondary: '#CCCCCC' };
     } else {
@@ -89,7 +89,7 @@ export function convertCommitDataToChangesChartData(
       //commit has structure {date, statsByAuthor: {}} (see next line)}
       const obj: CommitChartData = { date: commit.date };
 
-      if (chartIsSplit) {
+      if (splitAdditionsDeletions) {
         for (const author of authors) {
           commitPalette['(Additions) ' + author.name] = {
             main: chroma(author.color.main).hex(),
@@ -115,26 +115,29 @@ export function convertCommitDataToChangesChartData(
         obj['others'] = 0;
       }
       authors.forEach((author) => {
-        if (chartIsSplit) {
+        if (!author.selected) return;
+        const name =
+          author.parent === -1 ? author.name : author.parent === 0 ? 'others' : authors.filter((a) => a.id === author.parent)[0].name;
+        if (splitAdditionsDeletions) {
           if (author.name in commit.statsByAuthor) {
             //Insert number of changes with the author name as key,
             //statsByAuthor has structure {{authorName: {count, additions, deletions, changes}}, ...}
-            if ('(Additions) ' + author.name in obj && '(Deletions) ' + author.name in obj) {
-              obj['(Additions) ' + author.name] += commit.statsByAuthor[author.name].additions;
+            if ('(Additions) ' + name in obj && '(Deletions) ' + name in obj) {
+              obj['(Additions) ' + name] += commit.statsByAuthor[author.name].additions;
               //-0.001 for stack layout to realize it belongs on the bottom
-              obj['(Deletions) ' + author.name] += commit.statsByAuthor[author.name].deletions * -1 - 0.001;
+              obj['(Deletions) ' + name] += commit.statsByAuthor[author.name].deletions * -1 - 0.001;
             } else {
-              obj['(Additions) ' + author.name] = commit.statsByAuthor[author.name].additions;
+              obj['(Additions) ' + name] = commit.statsByAuthor[author.name].additions;
               //-0.001 for stack layout to realize it belongs on the bottom
-              obj['(Deletions) ' + author.name] = commit.statsByAuthor[author.name].deletions * -1 - 0.001;
+              obj['(Deletions) ' + name] = commit.statsByAuthor[author.name].deletions * -1 - 0.001;
             }
           }
         } else {
           if (author.name in commit.statsByAuthor) {
-            if (author.name in obj) {
-              obj[author.name] += commit.statsByAuthor[author.name].count;
+            if (name in obj) {
+              obj[name] += commit.statsByAuthor[author.name].additions + commit.statsByAuthor[author.name].deletions;
             } else {
-              obj[author.name] = commit.statsByAuthor[author.name].count;
+              obj[name] = commit.statsByAuthor[author.name].additions + commit.statsByAuthor[author.name].deletions;
             }
           }
         }
@@ -144,6 +147,8 @@ export function convertCommitDataToChangesChartData(
     });
     //Output in commitChartData has format [{author1: 123, author2: 123, ...}, ...],
     //e.g. series names are the authors with their corresponding values
+
+    console.log(commitChartData)
 
     //---- STEP 3: SCALING ----
     commitChartData.forEach((dataPoint) => {

@@ -24,7 +24,7 @@ function AuthorList(props: { orientation?: string }) {
             authors.map((author, i) => {
               return {
                 name: author.gitSignature,
-                id: i,
+                id: i + 1,
                 parent: -1,
                 color: { main: colors[i].hex(), secondary: colors[i].hex() + '55' },
                 selected: true,
@@ -62,7 +62,19 @@ function AuthorList(props: { orientation?: string }) {
                     <input
                       type={'checkbox'}
                       className={'checkbox checkbox-accent ' + authorListStyles.authorCheckbox}
-                      defaultChecked={true}
+                      defaultChecked={parentAuthor.selected}
+                      onChange={(e) =>
+                        dispatch(
+                          setAuthorList(
+                            authors.map((a) => {
+                              if (a.id === parentAuthor.id) {
+                                return { name: a.name, id: a.id, color: a.color, parent: a.parent, selected: e.target.checked };
+                              }
+                              return a;
+                            }),
+                          ),
+                        )
+                      }
                     />
                     <div
                       style={{ borderColor: parentAuthor.color.main }}

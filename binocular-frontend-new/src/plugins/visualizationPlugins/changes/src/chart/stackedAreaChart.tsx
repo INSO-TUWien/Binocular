@@ -14,12 +14,13 @@ type AreaChartProps = {
   data: CommitChartData[];
   scale: number[];
   palette: Palette;
+  visualizationStyle: string;
 };
 
-export const StackedAreaChart = ({ width, height, data, scale, palette }: AreaChartProps) => {
+export const StackedAreaChart = ({ width, height, data, scale, palette, visualizationStyle }: AreaChartProps) => {
   // bounds = area inside the graph axis = calculated by substracting the margins
   const svgRef = useRef(null);
-  const tooltippRef = useRef(null);
+  const tooltipRef = useRef(null);
   const boundsWidth = width - MARGIN.right - MARGIN.left;
   const boundsHeight = height - MARGIN.top - MARGIN.bottom;
 
@@ -37,6 +38,11 @@ export const StackedAreaChart = ({ width, height, data, scale, palette }: AreaCh
       .range([0, boundsWidth]);
   }, [boundsWidth, xMax, xMin]);
 
+  let idleTimeout: number | null = null;
+  function idled() {
+    idleTimeout = null;
+  }
+
   const brush = d3
     .brushX()
     .extent([
@@ -47,11 +53,17 @@ export const StackedAreaChart = ({ width, height, data, scale, palette }: AreaCh
       const svgElement = d3.select(svgRef.current);
       const extent = e.selection;
       if (!extent) {
+        //This Timeout is necessary because it not the reset of the brush would trigger the reset of the domain
+        // and the brushing wouldn't work.
+        if (!idleTimeout) return (idleTimeout = setTimeout(idled, 350));
         xScale.domain([xMin || 0, xMax || 0]);
       } else {
         xScale.domain([xScale.invert(extent[0]), xScale.invert(extent[1])]);
-        svgElement.select('.brush').remove();
-        svgElement.append('g').attr('class', 'brush').call(brush);
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-expect-error
+        // eslint-disable-next-line @typescript-eslint/unbound-method
+        svgElement.select('.brush').call(brush.move, null);
       }
       // d3/typescript sometimes does weird things and throws an error where no error is.
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -61,7 +73,7 @@ export const StackedAreaChart = ({ width, height, data, scale, palette }: AreaCh
       Object.keys(palette).forEach((_author, i) => {
         const areaBuilder = d3
           .area<CommitChartData>()
-          .curve(d3.curveBasis)
+          .curve(visualizationStyle === 'curved' ? d3.curveMonotoneX : visualizationStyle === 'stepped' ? d3.curveStep : d3.curveLinear)
           .x((d) => xScale(new Date(d.date).getTime()))
           .y1((_d, j) => yScale(stackedData[i][j][0]))
           .y0((_d, j) => yScale(stackedData[i][j][1]));
@@ -87,7 +99,7 @@ export const StackedAreaChart = ({ width, height, data, scale, palette }: AreaCh
     Object.keys(palette).forEach((author, i) => {
       const areaBuilder = d3
         .area<CommitChartData>()
-        .curve(d3.curveBasis)
+        .curve(visualizationStyle === 'curved' ? d3.curveMonotoneX : visualizationStyle === 'stepped' ? d3.curveStep : d3.curveLinear)
         .x((d) => xScale(new Date(d.date).getTime()))
         .y1((_d, j) => yScale(stackedData[i][j][0]))
         .y0((_d, j) => yScale(stackedData[i][j][1]));
@@ -101,11 +113,11 @@ export const StackedAreaChart = ({ width, height, data, scale, palette }: AreaCh
         .attr('stroke-width', 1)
         .attr('d', areaBuilder)
         .on('mouseover', () => {
-          return d3.select(tooltippRef.current).style('visibility', 'visible');
+          return d3.select(tooltipRef.current).style('visibility', 'visible');
         })
         .on('mousemove', (e) => {
           return d3
-            .select(tooltippRef.current)
+            .select(tooltipRef.current)
             .style('top', 20 + e.pageY + 'px')
             .style('left', e.pageX + 'px')
             .style('background', palette[author].secondary)
@@ -113,7 +125,7 @@ export const StackedAreaChart = ({ width, height, data, scale, palette }: AreaCh
             .text(author);
         })
         .on('mouseout', () => {
-          return d3.select(tooltippRef.current).style('visibility', 'hidden');
+          return d3.select(tooltipRef.current).style('visibility', 'hidden');
         });
     });
   }, [xScale, yScale, boundsHeight]);
@@ -121,7 +133,7 @@ export const StackedAreaChart = ({ width, height, data, scale, palette }: AreaCh
   return (
     <div>
       <div
-        ref={tooltippRef}
+        ref={tooltipRef}
         style={{ position: 'fixed', visibility: 'hidden', border: '2px solid', padding: '.2rem', borderRadius: '4px', fontSize: '.75rem' }}>
         Tooltipp
       </div>

@@ -160,22 +160,16 @@ function DashboardItem(props: {
             <div className={'font-bold underline'}>{props.item.pluginName + ' (#' + props.item.id + ')'}</div>
             <hr className={'text-base-300 m-1'} />
             <div>
-              <table>
-                <tbody>
-                  <tr>
-                    <td>Ignore Global Parameters:</td>
-                    <td>
-                      <input type="checkbox" className="toggle toggle-accent toggle-sm" />
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
+              <label className="label cursor-pointer">
+                <span className="label-text">Ignore Global Parameters:</span>
+                <input type="checkbox" className="toggle toggle-accent toggle-sm"/>
+              </label>
             </div>
-            <hr className={'text-base-300 m-1'} />
+            <hr className={'text-base-300 m-1'}/>
             {visualizationPlugins
               .filter((p) => p.name === props.item.pluginName)
               .map((p) => {
-                return <p.settingsComponent key={p.name} defaultSettings={settings} setSettings={setSettings}></p.settingsComponent>;
+                return <p.settingsComponent key={p.name} settings={settings} setSettings={setSettings}></p.settingsComponent>;
               })}
             <hr className={'text-base-300 m-1'} />
             <button className={'btn btn-error btn-xs w-full'} onClick={() => props.deleteItem(props.item)}>

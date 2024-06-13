@@ -7,7 +7,7 @@ const Changes: VisualizationPlugin<SettingsType> = {
   name: 'Changes',
   chartComponent: Chart,
   settingsComponent: Settings,
-  defaultSettings: { color: '#007AFF' },
+  defaultSettings: { splitAdditionsDeletions: false, visualizationStyle: 'curved' },
   capabilities: {
     popoutOnly: false,
   },

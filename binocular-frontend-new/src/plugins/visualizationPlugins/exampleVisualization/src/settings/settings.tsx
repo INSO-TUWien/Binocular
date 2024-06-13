@@ -3,7 +3,7 @@ export interface SettingsType {
   color: string;
 }
 
-function Settings(props: { defaultSettings: SettingsType; setSettings: (newSettings: SettingsType) => void }) {
+function Settings(props: { settings: SettingsType; setSettings: (newSettings: SettingsType) => void }) {
   const data1 = [
     { x: 1, y: 90 },
     { x: 2, y: 80 },
@@ -34,14 +34,14 @@ function Settings(props: { defaultSettings: SettingsType; setSettings: (newSetti
         <button
           className={'btn btn-xs btn-accent w-full mb-1'}
           onClick={() => {
-            props.setSettings({ data: data1, color: props.defaultSettings.color });
+            props.setSettings({ data: data1, color: props.settings.color });
           }}>
           Dataset 1
         </button>
         <button
           className={'btn btn-xs btn-accent w-full mb-1'}
           onClick={() => {
-            props.setSettings({ data: data2, color: props.defaultSettings.color });
+            props.setSettings({ data: data2, color: props.settings.color });
           }}>
           Dataset 2
         </button>
@@ -53,10 +53,10 @@ function Settings(props: { defaultSettings: SettingsType; setSettings: (newSetti
             type={'color'}
             className={'p-1 h-10 w-14 block bg-white bordercursor-pointer rounded-lg disabled:opacity-50 disabled:pointer-events-none  '}
             id={'hs-color-input'}
-            value={props.defaultSettings.color}
+            value={props.settings.color}
             title={'Choose your color'}
             onChange={(event) => {
-              props.setSettings({ data: props.defaultSettings.data, color: event.target.value });
+              props.setSettings({ data: props.settings.data, color: event.target.value });
             }}
           />
         </div>

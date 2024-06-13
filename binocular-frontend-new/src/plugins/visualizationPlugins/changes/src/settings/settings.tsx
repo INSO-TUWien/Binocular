@@ -1,24 +1,44 @@
 export interface SettingsType {
-  color: string;
+  splitAdditionsDeletions: boolean;
+  visualizationStyle: string;
 }
 
-function Settings(props: { defaultSettings: SettingsType; setSettings: (newSettings: SettingsType) => void }) {
+function Settings(props: { settings: SettingsType; setSettings: (newSettings: SettingsType) => void }) {
   return (
     <>
       <div>
-        <label htmlFor={'hs-color-input'} className={'block text-sm font-medium mb-2 dark:text-white'}>
-          Chart Color
+        <label className="label cursor-pointer">
+          <span className="label-text">Split Additions and Deletions:</span>
+          <input
+            type="checkbox"
+            className="toggle toggle-accent toggle-sm"
+            checked={props.settings.splitAdditionsDeletions}
+            onChange={(event) =>
+              props.setSettings({
+                splitAdditionsDeletions: event.target.checked,
+                visualizationStyle: props.settings.visualizationStyle,
+              })
+            }
+          />
         </label>
-        <input
-          type={'color'}
-          className={'p-1 h-10 w-14 block bg-white bordercursor-pointer rounded-lg disabled:opacity-50 disabled:pointer-events-none  '}
-          id={'hs-color-input'}
-          value={props.defaultSettings.color}
-          title={'Choose your color'}
-          onChange={(event) => {
-            props.setSettings({ color: event.target.value });
-          }}
-        />
+        <label className="form-control w-full max-w-xs">
+          <div className="label">
+            <span className="label-text">Visualization Style:</span>
+          </div>
+          <select
+            className="select select-bordered select-sm"
+            defaultValue={props.settings.visualizationStyle}
+            onChange={(e) =>
+              props.setSettings({
+                splitAdditionsDeletions: props.settings.splitAdditionsDeletions,
+                visualizationStyle: e.target.value,
+              })
+            }>
+            <option value={'curved'}>curved</option>
+            <option value={'stepped'}>stepped</option>
+            <option value={'linear'}>linear</option>
+          </select>
+        </label>
       </div>
     </>
   );
