@@ -4,6 +4,7 @@ import { DataPlugin } from '../../../../interfaces/dataPlugin.ts';
 import { SettingsType } from '../settings/settings.tsx';
 import { Author } from '../../../../../types/authorType.ts';
 import { convertCommitDataToChangesChartData } from '../utilies/dataConverter.ts';
+import { ParametersInitialState } from '../../../../../redux/parametersReducer.ts';
 
 export interface CommitChartData {
   date: number;
@@ -14,7 +15,7 @@ export interface Palette {
   [signature: string]: { main: string; secondary: string };
 }
 
-function Chart(props: { settings: SettingsType; dataConnection: DataPlugin; authorList: Author[] }) {
+function Chart(props: { settings: SettingsType; dataConnection: DataPlugin; authorList: Author[]; parameters: ParametersInitialState }) {
   const chartContainerRef = createRef<HTMLDivElement>();
   const [chartWidth, setChartWidth] = useState(100);
   const [chartHeight, setChartHeight] = useState(100);
@@ -36,19 +37,20 @@ function Chart(props: { settings: SettingsType; dataConnection: DataPlugin; auth
 
   useEffect(() => {
     props.dataConnection.commits
-      .getAll('2010-01-01T12:00:00.000Z', new Date().toISOString())
+      .getAll(props.parameters.parametersDateRange.from, props.parameters.parametersDateRange.to)
       .then((commits) => {
         const { commitChartData, commitScale, commitPalette } = convertCommitDataToChangesChartData(
           commits,
           props.authorList,
           props.settings.splitAdditionsDeletions,
+          props.parameters,
         );
         setChartData(commitChartData);
         setChartScale(commitScale);
         setChartPalette(commitPalette);
       })
       .catch(() => console.log('Promise Error'));
-  }, [props.dataConnection, props.authorList, props.settings]);
+  }, [props.dataConnection, props.authorList, props.settings, props.parameters]);
 
   return (
     <>

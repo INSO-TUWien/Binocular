@@ -3,11 +3,13 @@ import { DataCommit } from '../../../../interfaces/dataPlugin.ts';
 import { Author } from '../../../../../types/authorType.ts';
 import chroma from 'chroma-js';
 import { CommitChartData, Palette } from '../chart/chart.tsx';
+import { ParametersInitialState } from '../../../../../redux/parametersReducer.ts';
 
 export function convertCommitDataToChangesChartData(
   commits: DataCommit[],
   authors: Author[],
   splitAdditionsDeletions: boolean,
+  parameters: ParametersInitialState,
 ): {
   commitChartData: CommitChartData[];
   commitScale: number[];
@@ -33,18 +35,21 @@ export function convertCommitDataToChangesChartData(
   if (commits.length > 0) {
     //---- STEP 1: AGGREGATE COMMITS GROUPED BY AUTHORS PER TIME INTERVAL ----
 
-    const resolution = 'months';
-
-    const granularity = getGranularity(resolution); //TODO: Make granularity settable through parameters and visualization settings
+    const granularity = getGranularity(parameters.parametersGeneral.granularity);
     const curr = moment(firstTimestamp)
       .startOf(granularity.unit as moment.unitOfTime.StartOf)
-      .subtract(1, resolution);
+      .subtract(1, <moment.unitOfTime.DurationConstructor>parameters.parametersGeneral.granularity);
     const end = moment(lastTimestamp)
       .endOf(granularity.unit as moment.unitOfTime.StartOf)
-      .add(1, resolution);
-    const next = moment(curr).add(1, resolution);
+      .add(1, <moment.unitOfTime.DurationConstructor>parameters.parametersGeneral.granularity);
+    const next = moment(curr).add(1, <moment.unitOfTime.DurationConstructor>parameters.parametersGeneral.granularity);
     const totalChangesPerAuthor: { [signature: string]: number } = {};
-    for (let i = 0; curr.isSameOrBefore(end); curr.add(1, resolution), next.add(1, resolution)) {
+    for (
+      let i = 0;
+      curr.isSameOrBefore(end);
+      curr.add(1, <moment.unitOfTime.DurationConstructor>parameters.parametersGeneral.granularity),
+        next.add(1, <moment.unitOfTime.DurationConstructor>parameters.parametersGeneral.granularity)
+    ) {
       //Iterate through time buckets
       const currTimestamp = curr.toDate().getTime();
       const nextTimestamp = next.toDate().getTime();
@@ -147,8 +152,6 @@ export function convertCommitDataToChangesChartData(
     });
     //Output in commitChartData has format [{author1: 123, author2: 123, ...}, ...],
     //e.g. series names are the authors with their corresponding values
-
-    console.log(commitChartData)
 
     //---- STEP 3: SCALING ----
     commitChartData.forEach((dataPoint) => {

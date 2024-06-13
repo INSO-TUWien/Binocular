@@ -7,6 +7,8 @@ import { increasePopupCount } from '../../../redux/dashboardReducer.ts';
 import { AppDispatch, RootState, useAppDispatch } from '../../../redux';
 import openInNewGray from '../../../assets/open_in_new_white.svg';
 import { useSelector } from 'react-redux';
+import DashboardItemSettings from '../dashboardItemSettings/dashboardItemSettings.tsx';
+import { parametersInitialState } from '../../../redux/parametersReducer.ts';
 
 export interface DashboardItemDTO {
   id: number;
@@ -37,6 +39,12 @@ function DashboardItem(props: {
   const currentDataPlugin = useSelector((state: RootState) => state.settings.dataPlugin);
   const authorList = useSelector((state: RootState) => state.authors.authorList);
 
+  const [ignoreGlobalParameters, setIgnoreGlobalParameters] = useState(false);
+  const parametersGeneralGlobal = useSelector((state: RootState) => state.parameters.parametersGeneral);
+  const [parametersGeneralLocal, setParametersGeneralLocal] = useState(parametersInitialState.parametersGeneral);
+  const parametersDateRangeGlobal = useSelector((state: RootState) => state.parameters.parametersDateRange);
+  const [parametersDateRangeLocal, setParametersDateRangeLocal] = useState(parametersInitialState.parametersDateRange);
+
   return (
     <>
       <div
@@ -56,6 +64,10 @@ function DashboardItem(props: {
                 key={plugin.name}
                 settings={settings}
                 authorList={authorList}
+                parameters={{
+                  parametersGeneral: ignoreGlobalParameters ? parametersGeneralLocal : parametersGeneralGlobal,
+                  parametersDateRange: ignoreGlobalParameters ? parametersDateRangeLocal : parametersDateRangeGlobal,
+                }}
                 dataConnection={dataPlugins.filter((plugin) => plugin.name === currentDataPlugin)[0]}></plugin.chartComponent>
             </DashboardItemPopout>
           </div>
@@ -81,6 +93,10 @@ function DashboardItem(props: {
                 key={plugin.name}
                 settings={settings}
                 authorList={authorList}
+                parameters={{
+                  parametersGeneral: ignoreGlobalParameters ? parametersGeneralLocal : parametersGeneralGlobal,
+                  parametersDateRange: ignoreGlobalParameters ? parametersDateRangeLocal : parametersDateRangeGlobal,
+                }}
                 dataConnection={dataPlugins.filter((plugin) => plugin.name === currentDataPlugin)[0]}></plugin.chartComponent>
             )}
           </div>
@@ -157,24 +173,22 @@ function DashboardItem(props: {
               top: `calc(${(100.0 / props.rowCount) * props.item.y}% + 10px + 1.5rem)`,
               left: `calc(${(100.0 / props.colCount) * (props.item.x + props.item.width)}% - 10px - 20rem)`,
             }}>
-            <div className={'font-bold underline'}>{props.item.pluginName + ' (#' + props.item.id + ')'}</div>
-            <hr className={'text-base-300 m-1'} />
-            <div>
-              <label className="label cursor-pointer">
-                <span className="label-text">Ignore Global Parameters:</span>
-                <input type="checkbox" className="toggle toggle-accent toggle-sm"/>
-              </label>
-            </div>
-            <hr className={'text-base-300 m-1'}/>
-            {visualizationPlugins
-              .filter((p) => p.name === props.item.pluginName)
-              .map((p) => {
-                return <p.settingsComponent key={p.name} settings={settings} setSettings={setSettings}></p.settingsComponent>;
-              })}
-            <hr className={'text-base-300 m-1'} />
-            <button className={'btn btn-error btn-xs w-full'} onClick={() => props.deleteItem(props.item)}>
-              Delete
-            </button>
+            <DashboardItemSettings
+              item={props.item}
+              settingsComponent={
+                visualizationPlugins
+                  .filter((p) => p.name === props.item.pluginName)
+                  .map((p) => {
+                    return <p.settingsComponent key={p.name} settings={settings} setSettings={setSettings}></p.settingsComponent>;
+                  })[0]
+              }
+              onClickDelete={() => props.deleteItem(props.item)}
+              ignoreGlobalParameters={ignoreGlobalParameters}
+              setIgnoreGlobalParameters={setIgnoreGlobalParameters}
+              parametersGeneral={parametersGeneralLocal}
+              setParametersGeneral={setParametersGeneralLocal}
+              parametersDateRange={parametersDateRangeLocal}
+              setParametersDateRange={setParametersDateRangeLocal}></DashboardItemSettings>
           </div>
         </div>
       )}

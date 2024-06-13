@@ -4,12 +4,14 @@ import { useDispatch } from 'react-redux';
 import DashboardReducer from './dashboardReducer';
 import AuthorsReducer from './authorsReducer.ts';
 import SettingsReducer from './settingsReducer.ts';
+import ParametersReducer from './parametersReducer.ts';
 
 export const store = configureStore({
   reducer: {
     dashboard: DashboardReducer,
     authors: AuthorsReducer,
     settings: SettingsReducer,
+    parameters: ParametersReducer,
   },
 });
 

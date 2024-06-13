@@ -16,8 +16,15 @@ import SettingsGray from './assets/settings_gray.svg';
 import ExportGray from './assets/export_gray.svg';
 import ExportDialog from './components/exportDialog/exportDialog.tsx';
 import SettingsDialog from './components/settingsDialog/settingsDialog.tsx';
+import { AppDispatch, RootState, useAppDispatch } from './redux';
+import { useSelector } from 'react-redux';
+import { setParametersDateRange, setParametersGeneral } from './redux/parametersReducer.ts';
 
 function App() {
+  const dispatch: AppDispatch = useAppDispatch();
+  const parametersGeneral = useSelector((state: RootState) => state.parameters.parametersGeneral);
+  const parametersDateRange = useSelector((state: RootState) => state.parameters.parametersDateRange);
+
   return (
     <>
       <div className={appStyles.mainView}>
@@ -38,10 +45,18 @@ function App() {
             animation={'rotate'}></TabControllerButton>
           <Tab displayName={'Parameters'} alignment={'top'}>
             <TabSection name={'Date Range'}>
-              <ParametersDateRange></ParametersDateRange>
+              <ParametersDateRange
+                disabled={false}
+                parametersDateRange={parametersDateRange}
+                setParametersDateRange={(parametersDateRange) =>
+                  dispatch(setParametersDateRange(parametersDateRange))
+                }></ParametersDateRange>
             </TabSection>
             <TabSection name={'General'}>
-              <ParametersGeneral></ParametersGeneral>
+              <ParametersGeneral
+                disabled={false}
+                parametersGeneral={parametersGeneral}
+                setParametersGeneral={(parametersGeneral) => dispatch(setParametersGeneral(parametersGeneral))}></ParametersGeneral>
             </TabSection>
           </Tab>
           <Tab displayName={'Components'} alignment={'top'}>
