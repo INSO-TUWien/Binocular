@@ -10,6 +10,8 @@ const graphQl = new ApolloClient({
 
 export { graphQl };
 
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-expect-error
 export async function traversePages(getPage, fn, pageNumber = 1, perPage = 1000) {
   const page = await Promise.resolve(getPage(pageNumber, perPage));
   if (!page) {
