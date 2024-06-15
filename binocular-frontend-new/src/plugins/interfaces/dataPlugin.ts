@@ -1,15 +1,19 @@
 export interface DataPlugin {
   name: string;
   description: string;
-  commits: DataCommits;
-  authors: DataAuthors;
+  commits: DataPluginCommits;
+  authors: DataPluginAuthors;
+  capabilities: string[];
+  experimental: boolean;
+  requirements: { apiKey: boolean; endpoint: boolean };
+  setApiKey: (apiKey: string) => void;
 }
 
-interface DataCommits {
+export interface DataPluginCommits {
   getAll: (from: string, to: string) => Promise<DataCommit[]>;
 }
 
-interface DataAuthors {
+export interface DataPluginAuthors {
   getAll: () => Promise<DataAuthor[]>;
 }
 

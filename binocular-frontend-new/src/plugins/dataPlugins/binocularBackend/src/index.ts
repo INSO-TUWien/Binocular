@@ -2,11 +2,21 @@ import Commits from './commits.ts';
 import { DataPlugin } from '../../../interfaces/dataPlugin.ts';
 import Authors from './authors.ts';
 
-const BinocularBackend: DataPlugin = {
-  name: 'Binocular Backend',
-  description: 'Connection to the Binocular GraphQL Backend!',
-  commits: Commits,
-  authors: Authors,
-};
+class BinocularBackend implements DataPlugin {
+  public name = 'Binocular Backend';
+  public description = 'Connection to the Binocular GraphQL Backend!';
+  public capabilities = ['authors', 'commits'];
+  public experimental = false;
+  public requirements = {
+    apiKey: false,
+    endpoint: false,
+  };
+  public commits = Commits;
+  public authors = Authors;
+
+  constructor() {}
+
+  public setApiKey() {}
+}
 
 export default BinocularBackend;

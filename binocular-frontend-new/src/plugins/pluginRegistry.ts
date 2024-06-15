@@ -15,4 +15,4 @@ import { DataPlugin } from './interfaces/dataPlugin.ts';
 export const visualizationPlugins: VisualizationPlugin<any>[] = [Commits, ExampleVisualization, ExampleStats, ExampleComplex];
 
 //Order = priority used when nothing selected by the user.
-export const dataPlugins: DataPlugin[] = [MockData, BinocularBackend, Github];
+export const dataPlugins: DataPlugin[] = [new MockData(), new BinocularBackend(), new Github()];

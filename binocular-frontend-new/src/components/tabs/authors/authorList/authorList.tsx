@@ -14,8 +14,9 @@ function AuthorList(props: { orientation?: string }) {
   const currentDataPlugin = useSelector((state: RootState) => state.settings.dataPlugin);
 
   useEffect(() => {
+    dataPlugins.filter((plugin) => plugin.name === currentDataPlugin.name)[0].setApiKey(currentDataPlugin.parameters.apiKey);
     dataPlugins
-      .filter((plugin) => plugin.name === currentDataPlugin)[0]
+      .filter((plugin) => plugin.name === currentDataPlugin.name)[0]
       .authors.getAll()
       .then((authors) => {
         const colors = distinctColors({ count: authors.length, lightMin: 50 });
@@ -34,7 +35,7 @@ function AuthorList(props: { orientation?: string }) {
         );
       })
       .catch(() => console.log('Error loading Authors from selected data source!'));
-  }, [currentDataPlugin]);
+  }, [currentDataPlugin.name]);
 
   return (
     <>

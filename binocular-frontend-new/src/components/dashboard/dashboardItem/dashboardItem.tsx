@@ -36,7 +36,7 @@ function DashboardItem(props: {
 
   const [poppedOut, setPoppedOut] = useState(false);
 
-  const currentDataPlugin = useSelector((state: RootState) => state.settings.dataPlugin);
+  const currentDataPluginName = useSelector((state: RootState) => state.settings.dataPlugin.name);
   const authorList = useSelector((state: RootState) => state.authors.authorList);
 
   const [ignoreGlobalParameters, setIgnoreGlobalParameters] = useState(false);
@@ -68,7 +68,7 @@ function DashboardItem(props: {
                   parametersGeneral: ignoreGlobalParameters ? parametersGeneralLocal : parametersGeneralGlobal,
                   parametersDateRange: ignoreGlobalParameters ? parametersDateRangeLocal : parametersDateRangeGlobal,
                 }}
-                dataConnection={dataPlugins.filter((plugin) => plugin.name === currentDataPlugin)[0]}></plugin.chartComponent>
+                dataConnection={dataPlugins.filter((plugin) => plugin.name === currentDataPluginName)[0]}></plugin.chartComponent>
             </DashboardItemPopout>
           </div>
         ) : (
@@ -97,7 +97,7 @@ function DashboardItem(props: {
                   parametersGeneral: ignoreGlobalParameters ? parametersGeneralLocal : parametersGeneralGlobal,
                   parametersDateRange: ignoreGlobalParameters ? parametersDateRangeLocal : parametersDateRangeGlobal,
                 }}
-                dataConnection={dataPlugins.filter((plugin) => plugin.name === currentDataPlugin)[0]}></plugin.chartComponent>
+                dataConnection={dataPlugins.filter((plugin) => plugin.name === currentDataPluginName)[0]}></plugin.chartComponent>
             )}
           </div>
         )}

@@ -1,43 +1,48 @@
-import { DataAuthor } from '../../../interfaces/dataPlugin.ts';
-import { graphQl } from './utils';
-import { gql } from '@apollo/client';
+import { DataAuthor, DataPluginAuthors } from '../../../interfaces/dataPlugin.ts';
+import { GraphQL } from './utils';
+import { ApolloQueryResult, gql } from '@apollo/client';
 
-export default {
-  getAll: async () => {
+interface AuthorsQueryResult {
+  repository: { assignableUsers: { totalCount: number; nodes: { name: string; email: string; login: string }[] } };
+}
+
+export default class Authors implements DataPluginAuthors {
+  private graphQl;
+
+  constructor(apiKey: string) {
+    this.graphQl = new GraphQL(apiKey);
+  }
+  public async getAll() {
     console.log(`Getting Authors`);
+    return await Promise.resolve(this.getAuthors(100));
+  }
 
-    async function getAuthors(perPage: number): Promise<DataAuthor[]> {
-      const resp = await graphQl
-        .query<
-          { repository: { assignableUsers: { totalCount: number; nodes: { name: string; email: string; login: string }[] } } },
-          { perPage: number }
-        >({
-          query: gql`
-            query ($perPage: Int) {
-              repository(owner: "INSO-TUWIEN", name: "Binocular") {
-                assignableUsers(first: $perPage) {
-                  totalCount
-                  nodes {
-                    name
-                    email
-                    login
-                  }
+  private async getAuthors(perPage: number): Promise<DataAuthor[]> {
+    const resp: void | ApolloQueryResult<AuthorsQueryResult> = await this.graphQl.client
+      .query<AuthorsQueryResult, { perPage: number }>({
+        query: gql`
+          query ($perPage: Int) {
+            repository(owner: "INSO-TUWIEN", name: "Binocular") {
+              assignableUsers(first: $perPage) {
+                totalCount
+                nodes {
+                  name
+                  email
+                  login
                 }
               }
             }
-          `,
-          variables: { perPage },
-        })
-        .catch((e) => console.log(e));
-      if (resp) {
-        return resp.data.repository.assignableUsers.nodes.map((assignableUser) => {
-          return { gitSignature: assignableUser.login };
-        });
-      } else {
-        return [];
-      }
+          }
+        `,
+        variables: { perPage },
+      })
+      .catch((e) => console.log(e));
+    if (resp) {
+      return resp.data.repository.assignableUsers.nodes.map((assignableUser) => {
+        return { gitSignature: assignableUser.login };
+      });
+    } else {
+      return [];
     }
-
-    return await Promise.resolve(getAuthors(100));
-  },
-};
+  }
+}

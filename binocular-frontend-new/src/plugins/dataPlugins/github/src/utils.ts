@@ -2,12 +2,17 @@
 
 import { ApolloClient, InMemoryCache } from '@apollo/client';
 
-const token = '';
+class GraphQL {
+  public client;
 
-const graphQl = new ApolloClient({
-  uri: 'https://api.github.com/graphql',
-  headers: { authorization: `Bearer ${token}` },
-  cache: new InMemoryCache(),
-});
+  constructor(apiKey: string) {
+    console.log(apiKey);
+    this.client = new ApolloClient({
+      uri: 'https://api.github.com/graphql',
+      headers: { authorization: `Bearer ${apiKey}` },
+      cache: new InMemoryCache(),
+    });
+  }
+}
 
-export { graphQl };
+export { GraphQL };

@@ -2,22 +2,40 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { dataPlugins } from '../plugins/pluginRegistry.ts';
 
 export interface SettingsInitialState {
-  dataPlugin: string;
+  dataPlugin: {
+    name: string;
+    parameters: {
+      apiKey: string;
+      endpoint: string;
+    };
+  };
 }
 
 const initialState: SettingsInitialState = {
-  dataPlugin: dataPlugins[0].name,
+  dataPlugin: {
+    name: dataPlugins[0].name,
+    parameters: {
+      apiKey: '',
+      endpoint: '',
+    },
+  },
 };
 
 export const settingsSlice = createSlice({
   name: 'settings',
   initialState,
   reducers: {
-    setDataPlugin: (state, action: PayloadAction<string>) => {
-      state.dataPlugin = action.payload;
+    setDataPluginName: (state, action: PayloadAction<string>) => {
+      state.dataPlugin.name = action.payload;
+    },
+    setDataPluginParameterApiKey: (state, action: PayloadAction<string>) => {
+      state.dataPlugin.parameters.apiKey = action.payload;
+    },
+    setDataPluginParameterEndpoint: (state, action: PayloadAction<string>) => {
+      state.dataPlugin.parameters.endpoint = action.payload;
     },
   },
 });
 
-export const { setDataPlugin } = settingsSlice.actions;
+export const { setDataPluginName, setDataPluginParameterApiKey, setDataPluginParameterEndpoint } = settingsSlice.actions;
 export default settingsSlice.reducer;
