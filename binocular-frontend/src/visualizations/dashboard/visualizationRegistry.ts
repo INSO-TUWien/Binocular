@@ -8,6 +8,7 @@ import issueBreakdown from '../VisualizationComponents/issueBreakdown';
 import changes from '../VisualizationComponents/changes';
 import sprints from '../VisualizationComponents/sprints';
 import timeSpent from '../VisualizationComponents/timeSpent';
+import commitTimeTracking from '../VisualizationComponents/commitTimeTracking';
 
 export default {
   changes,
@@ -18,4 +19,5 @@ export default {
   timeSpent,
   sprints,
   empty,
+  commitTimeTracking,
 };

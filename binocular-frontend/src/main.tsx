@@ -35,6 +35,7 @@ import issueBreakdown from './visualizations/VisualizationComponents/issueBreakd
 import changes from './visualizations/VisualizationComponents/changes';
 import sprints from './visualizations/VisualizationComponents/sprints';
 import timeSpent from './visualizations/VisualizationComponents/timeSpent';
+import commitTimeTracking from './visualizations/VisualizationComponents/commitTimeTracking';
 import codeOwnership from './visualizations/code-ownership';
 import distributionDials from './visualizations/distribution-dials';
 import RootOffline from './components/RootOffline';
@@ -53,6 +54,7 @@ const visualizationModules = [
   issueBreakdown,
   changes,
   dataExport,
+  commitTimeTracking,
 ];
 
 Database.checkBackendConnection().then((connection) => {
