@@ -1,6 +1,6 @@
 import { ParametersDateRangeType } from '../../../../types/parametersDateRangeType.ts';
 
-function ParametersDateRange(props: {
+function DateRange(props: {
   disabled: boolean;
   parametersDateRange: ParametersDateRangeType;
   setParametersDateRange: (parametersDateRange: ParametersDateRangeType) => void;
@@ -39,4 +39,4 @@ function ParametersDateRange(props: {
   );
 }
 
-export default ParametersDateRange;
+export default DateRange;

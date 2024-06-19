@@ -5,6 +5,8 @@ import DashboardReducer from './dashboardReducer';
 import AuthorsReducer from './authorsReducer.ts';
 import SettingsReducer from './settingsReducer.ts';
 import ParametersReducer from './parametersReducer.ts';
+import SprintsReducer from './sprintsReducer.ts';
+import NotificationsReducer from './notificationsReducer.ts';
 
 export const store = configureStore({
   reducer: {
@@ -12,6 +14,8 @@ export const store = configureStore({
     authors: AuthorsReducer,
     settings: SettingsReducer,
     parameters: ParametersReducer,
+    sprints: SprintsReducer,
+    notifications: NotificationsReducer,
   },
 });
 

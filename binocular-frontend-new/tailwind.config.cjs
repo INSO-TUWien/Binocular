@@ -30,6 +30,10 @@ export default {
           "base-100": "#FFFFFF",
           "base-200": "#FAFAFA",
           "base-300": "#E0E0E0",
+          "success":"#4cd964",
+          "error":"#ff3b30",
+          "warning":"#ffcc00",
+          "info":"#5ac8fa",
         }
       },
     ], // false: only light + dark | true: all themes | array: specific themes like this ["light", "dark", "cupcake"]

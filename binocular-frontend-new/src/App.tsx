@@ -5,7 +5,7 @@ import StatusBar from './components/statusBar/statusBar.tsx';
 import TabMenuContent from './components/tabMenu/tabMenuContent/tabMenuContent.tsx';
 import Dashboard from './components/dashboard/dashboard.tsx';
 import TabSection from './components/tabMenu/tab/tabSection/tabSection.tsx';
-import ParametersDateRange from './components/tabs/parameters/parametersDateRange/parametersDateRange.tsx';
+import DateRange from './components/tabs/parameters/dataRange/dateRange.tsx';
 import ParametersGeneral from './components/tabs/parameters/parametersGeneral/parametersGeneral.tsx';
 import InformationDialog from './components/informationDialog/informationDialog.tsx';
 import VisualizationSelector from './components/tabs/components/visualizationSelector/visualizationSelector.tsx';
@@ -19,6 +19,9 @@ import SettingsDialog from './components/settingsDialog/settingsDialog.tsx';
 import { AppDispatch, RootState, useAppDispatch } from './redux';
 import { useSelector } from 'react-redux';
 import { setParametersDateRange, setParametersGeneral } from './redux/parametersReducer.ts';
+import SprintView from './components/tabs/sprints/sprintView/sprintView.tsx';
+import AddSprint from './components/tabs/sprints/addSprint/addSprint.tsx';
+import NotificationController from "./components/notificationController/notificationController.tsx";
 
 function App() {
   const dispatch: AppDispatch = useAppDispatch();
@@ -45,12 +48,10 @@ function App() {
             animation={'rotate'}></TabControllerButton>
           <Tab displayName={'Parameters'} alignment={'top'}>
             <TabSection name={'Date Range'}>
-              <ParametersDateRange
+              <DateRange
                 disabled={false}
                 parametersDateRange={parametersDateRange}
-                setParametersDateRange={(parametersDateRange) =>
-                  dispatch(setParametersDateRange(parametersDateRange))
-                }></ParametersDateRange>
+                setParametersDateRange={(parametersDateRange) => dispatch(setParametersDateRange(parametersDateRange))}></DateRange>
             </TabSection>
             <TabSection name={'General'}>
               <ParametersGeneral
@@ -65,7 +66,12 @@ function App() {
             </TabSection>
           </Tab>
           <Tab displayName={'Sprints'} alignment={'top'}>
-            <span>Sprint Tab</span>
+            <TabSection name={'Sprints'}>
+              <SprintView></SprintView>
+            </TabSection>
+            <TabSection name={'Add Sprint'}>
+              <AddSprint></AddSprint>
+            </TabSection>
           </Tab>
           <Tab displayName={'Authors'} alignment={'right'}>
             <TabSection name={'Authors'}>
@@ -94,6 +100,7 @@ function App() {
       <InformationDialog></InformationDialog>
       <ExportDialog></ExportDialog>
       <SettingsDialog></SettingsDialog>
+      <NotificationController></NotificationController>
     </>
   );
 }
