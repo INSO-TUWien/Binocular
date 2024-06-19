@@ -22,7 +22,7 @@ export const receiveChangesDataError = createAction('RECEIVE_CHANGES_DATA_ERROR'
 export const requestRefresh = createAction('REQUEST_REFRESH');
 const refresh = createAction('REFRESH');
 
-interface ChangesData {
+interface CommitTimeTrackingData {
   otherCount: number;
   filteredCommits: Commit[];
   commits: Commit[];
@@ -100,7 +100,7 @@ export const fetchChangesData = fetchFactory(
     const timeSpan = state.universalSettings.chartTimeSpan;
     firstSignificantTimestamp = timeSpan.from === undefined ? firstSignificantTimestamp : new Date(timeSpan.from).getTime();
     lastSignificantTimestamp = timeSpan.to === undefined ? lastSignificantTimestamp : new Date(timeSpan.to).getTime();
-    const changesData: ChangesData = yield Promise.all([
+    const commitTimeTrackingData: CommitTimeTrackingData = yield Promise.all([
       Database.getCommitData([firstCommitTimestamp, lastCommitTimestamp], [firstSignificantTimestamp, lastSignificantTimestamp]),
       Database.getCommitData([firstCommitTimestamp, lastCommitTimestamp], [firstCommitTimestamp, lastCommitTimestamp]),
     ])
@@ -126,7 +126,7 @@ export const fetchChangesData = fetchFactory(
         console.error(e.stack);
         throw e;
       });
-    return changesData;
+    return commitTimeTrackingData;
   },
   requestChangesData,
   receiveChangesData,
