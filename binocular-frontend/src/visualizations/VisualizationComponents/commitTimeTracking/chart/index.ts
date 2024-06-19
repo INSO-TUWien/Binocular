@@ -23,7 +23,7 @@ interface Props {
   commitType: string;
   threshold: {
     hours: { lower: number; upper: number };
-    time: { lower: number; upper: number };
+    change: { lower: number; upper: number };
     ratio: { lower: number; upper: number };
   };
   mergedAuthors: Author[];

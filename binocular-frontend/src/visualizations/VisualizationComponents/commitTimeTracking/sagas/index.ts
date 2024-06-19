@@ -11,7 +11,6 @@ import { Commit } from '../../../../types/commitTypes';
 import { Palette } from '../../../../types/authorTypes';
 import { Bounds } from '../../../../types/boundsTypes';
 
-export const setSelectedAuthors = createAction('SET_SELECTED_AUTHORS');
 export const setSelectedBranch = createAction('SET_SELECTED_BRANCH');
 export const setSelectedCommitType = createAction('SET_SELECTED_COMMIT_TYPE');
 export const setThreshold = createAction('SET_THRESHOLD');
