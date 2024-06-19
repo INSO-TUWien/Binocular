@@ -1,20 +1,42 @@
 import dashboardStyles from './dashboard.module.scss';
 import { createRef, useEffect, useState } from 'react';
-import DashboardItem, { DashboardItemDTO } from './dashboardItem/dashboardItem.tsx';
+import DashboardItem from './dashboardItem/dashboardItem.tsx';
 import { showDialog } from '../informationDialog/dialogHelper.ts';
 import { DragResizeMode } from './resizeMode.ts';
 import { useSelector } from 'react-redux';
 import { AppDispatch, RootState, useAppDispatch } from '../../redux';
 import { addDashboardItem, moveDashboardItem, setDragResizeMode, deleteDashboardItem } from '../../redux/dashboardReducer.ts';
 import DashboardItemPlaceholder from './dashboardItemPlaceholder/dashboardItemPlaceholder.tsx';
+import { SettingsGeneralGridSize } from '../../types/generalSettingsType.ts';
+import { DashboardItemDTO, DashboardItemType } from '../../types/dashboardItemType.ts';
 
 function Dashboard() {
   const dispatch: AppDispatch = useAppDispatch();
 
   const [itemMoved, setItemMoved] = useState(false);
 
-  const [columnCount] = useState(20);
-  const [rowCount] = useState(20);
+  const gridSize = useSelector((state: RootState) => state.settings.general.gridSize);
+  let cellCount: number;
+  let gridMultiplyer: number;
+
+  switch (gridSize) {
+    case SettingsGeneralGridSize.small:
+      cellCount = 40;
+      gridMultiplyer = 0.5;
+      break;
+    case SettingsGeneralGridSize.medium:
+    default:
+      cellCount = 20;
+      gridMultiplyer = 1;
+      break;
+    case SettingsGeneralGridSize.large:
+      cellCount = 10;
+      gridMultiplyer = 2;
+      break;
+  }
+
+  const columnCount = cellCount;
+  const rowCount = cellCount;
 
   const dashboardRef = createRef<HTMLDivElement>();
   const dragIndicatorRef = createRef<HTMLDivElement>();
@@ -62,7 +84,7 @@ function Dashboard() {
     if (dashboardRef.current !== null) {
       setCellSize(dashboardRef.current.offsetWidth / columnCount);
     }
-  }, [columnCount, dashboardRef]);
+  }, [columnCount, dashboardRef, gridSize]);
 
   return (
     <>
@@ -94,14 +116,14 @@ function Dashboard() {
           </table>
           <div className={dashboardStyles.dragIndicator} ref={dragIndicatorRef} id={'dragIndicator'}></div>
           <>
-            {dashboardItems.map((dashboardItem) => {
+            {dashboardItems.map((dashboardItem: DashboardItemType) => {
               return dragResizeMode === DragResizeMode.none ? (
                 <DashboardItem
                   key={'dashboardItem' + dashboardItem.id}
                   cellSize={cellSize}
                   item={dashboardItem}
-                  colCount={columnCount}
-                  rowCount={rowCount}
+                  colCount={columnCount * gridMultiplyer}
+                  rowCount={rowCount * gridMultiplyer}
                   setDragResizeItem={setDragResizeItem}
                   deleteItem={(item) => dispatch(deleteDashboardItem(item))}></DashboardItem>
               ) : (
@@ -109,8 +131,8 @@ function Dashboard() {
                   key={'dashboardItem' + dashboardItem.id}
                   cellSize={cellSize}
                   item={dashboardItem}
-                  colCount={columnCount}
-                  rowCount={rowCount}></DashboardItemPlaceholder>
+                  colCount={columnCount * gridMultiplyer}
+                  rowCount={rowCount * gridMultiplyer}></DashboardItemPlaceholder>
               );
             })}
           </>
@@ -124,16 +146,16 @@ function Dashboard() {
                   if (dragIndicatorRef.current !== null) {
                     if (dragResizeMode === DragResizeMode.place) {
                       dragIndicatorRef.current.style.display = 'block';
-                      dragIndicatorRef.current.style.top = `calc(${(50.0 / columnCount) * (1 - placeableItem.width)}% + 10px)`;
-                      dragIndicatorRef.current.style.left = `calc(${(50.0 / columnCount) * (1 - placeableItem.height)}% + 10px)`;
-                      dragIndicatorRef.current.style.width = `calc(${(100.0 / columnCount) * placeableItem.width}% - 20px)`;
-                      dragIndicatorRef.current.style.height = `calc(${(100.0 / rowCount) * placeableItem.height}% - 20px)`;
+                      dragIndicatorRef.current.style.top = `calc(${(50.0 / columnCount / gridMultiplyer) * (1 - placeableItem.width)}% + 10px)`;
+                      dragIndicatorRef.current.style.left = `calc(${(50.0 / columnCount / gridMultiplyer) * (1 - placeableItem.height)}% + 10px)`;
+                      dragIndicatorRef.current.style.width = `calc(${(100.0 / columnCount / gridMultiplyer) * placeableItem.width}% - 20px)`;
+                      dragIndicatorRef.current.style.height = `calc(${(100.0 / rowCount / gridMultiplyer) * placeableItem.height}% - 20px)`;
                     } else {
                       dragIndicatorRef.current.style.display = 'block';
-                      dragIndicatorRef.current.style.top = `calc(${(100.0 / rowCount) * movingItem.y}% + 10px)`;
-                      dragIndicatorRef.current.style.left = `calc(${(100.0 / columnCount) * movingItem.x}% + 10px)`;
-                      dragIndicatorRef.current.style.width = `calc(${(100.0 / columnCount) * movingItem.width}% - 20px)`;
-                      dragIndicatorRef.current.style.height = `calc(${(100.0 / rowCount) * movingItem.height}% - 20px)`;
+                      dragIndicatorRef.current.style.top = `calc(${(100.0 / rowCount / gridMultiplyer) * movingItem.y}% + 10px)`;
+                      dragIndicatorRef.current.style.left = `calc(${(100.0 / columnCount / gridMultiplyer) * movingItem.x}% + 10px)`;
+                      dragIndicatorRef.current.style.width = `calc(${(100.0 / columnCount / gridMultiplyer) * movingItem.width}% - 20px)`;
+                      dragIndicatorRef.current.style.height = `calc(${(100.0 / rowCount / gridMultiplyer) * movingItem.height}% - 20px)`;
                     }
                   }
                 }}
@@ -146,15 +168,15 @@ function Dashboard() {
                         dragIndicatorRef.current.style.top = dragIndicatorRef.current.offsetTop + event.movementY + 'px';
                         setTargetX(Math.round((dragIndicatorRef.current.offsetLeft + event.movementX) / cellSize));
                         setTargetY(Math.round((dragIndicatorRef.current.offsetTop + event.movementY) / cellSize));
-                        setTargetWidth(movingItem.width);
-                        setTargetHeight(movingItem.height);
+                        setTargetWidth(movingItem.width / gridMultiplyer);
+                        setTargetHeight(movingItem.height / gridMultiplyer);
                         break;
                       case DragResizeMode.resizeTop:
                         dragIndicatorRef.current.style.top = dragIndicatorRef.current.offsetTop + event.movementY + 'px';
                         dragIndicatorRef.current.style.height = dragIndicatorRef.current.offsetHeight - event.movementY + 'px';
                         setTargetX(movingItem.x);
                         setTargetY(Math.round((dragIndicatorRef.current.offsetTop + event.movementY) / cellSize));
-                        setTargetWidth(movingItem.width);
+                        setTargetWidth(movingItem.width / gridMultiplyer);
                         setTargetHeight(Math.round((dragIndicatorRef.current.offsetHeight + event.movementY) / cellSize));
                         break;
                       case DragResizeMode.resizeRight:
@@ -162,13 +184,13 @@ function Dashboard() {
                         setTargetX(movingItem.x);
                         setTargetY(movingItem.y);
                         setTargetWidth(Math.round((dragIndicatorRef.current.offsetWidth + event.movementX) / cellSize));
-                        setTargetHeight(movingItem.height);
+                        setTargetHeight(movingItem.height / gridMultiplyer);
                         break;
                       case DragResizeMode.resizeBottom:
                         dragIndicatorRef.current.style.height = dragIndicatorRef.current.offsetHeight + event.movementY + 'px';
                         setTargetX(movingItem.x);
                         setTargetY(movingItem.y);
-                        setTargetWidth(movingItem.width);
+                        setTargetWidth(movingItem.width / gridMultiplyer);
                         setTargetHeight(Math.round((dragIndicatorRef.current.offsetHeight + event.movementX) / cellSize));
                         break;
                       case DragResizeMode.resizeLeft:
@@ -177,15 +199,15 @@ function Dashboard() {
                         setTargetX(Math.round((dragIndicatorRef.current.offsetLeft + event.movementX) / cellSize));
                         setTargetY(movingItem.y);
                         setTargetWidth(Math.round((dragIndicatorRef.current.offsetWidth + event.movementX) / cellSize));
-                        setTargetHeight(movingItem.height);
+                        setTargetHeight(movingItem.height / gridMultiplyer);
                         break;
                       case DragResizeMode.place:
                         dragIndicatorRef.current.style.left = dragIndicatorRef.current.offsetLeft + event.movementX + 'px';
                         dragIndicatorRef.current.style.top = dragIndicatorRef.current.offsetTop + event.movementY + 'px';
                         setTargetX(Math.round((dragIndicatorRef.current.offsetLeft + event.movementX) / cellSize));
                         setTargetY(Math.round((dragIndicatorRef.current.offsetTop + event.movementY) / cellSize));
-                        setTargetWidth(placeableItem.width);
-                        setTargetHeight(placeableItem.height);
+                        setTargetWidth(placeableItem.width / gridMultiplyer);
+                        setTargetHeight(placeableItem.height / gridMultiplyer);
                         break;
                       default:
                         break;
@@ -225,15 +247,23 @@ function Dashboard() {
                       dispatch(
                         addDashboardItem({
                           id: movingItem.id,
-                          x: targetX,
-                          y: targetY,
-                          width: targetWidth,
-                          height: targetHeight,
+                          x: targetX * gridMultiplyer,
+                          y: targetY * gridMultiplyer,
+                          width: targetWidth * gridMultiplyer,
+                          height: targetHeight * gridMultiplyer,
                           pluginName: placeableItem.pluginName,
                         }),
                       );
                     } else {
-                      dispatch(moveDashboardItem({ id: movingItem.id, x: targetX, y: targetY, width: targetWidth, height: targetHeight }));
+                      dispatch(
+                        moveDashboardItem({
+                          id: movingItem.id,
+                          x: targetX * gridMultiplyer,
+                          y: targetY * gridMultiplyer,
+                          width: targetWidth * gridMultiplyer,
+                          height: targetHeight * gridMultiplyer,
+                        }),
+                      );
                     }
                   }
                   setItemMoved(false);

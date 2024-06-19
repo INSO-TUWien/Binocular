@@ -9,18 +9,8 @@ import openInNewGray from '../../../assets/open_in_new_white.svg';
 import { useSelector } from 'react-redux';
 import DashboardItemSettings from '../dashboardItemSettings/dashboardItemSettings.tsx';
 import { parametersInitialState } from '../../../redux/parametersReducer.ts';
+import { DashboardItemDTO, DashboardItemType } from '../../../types/dashboardItemType.ts';
 
-export interface DashboardItemDTO {
-  id: number;
-  x: number;
-  y: number;
-  width: number;
-  height: number;
-}
-
-export interface DashboardItemType extends DashboardItemDTO {
-  pluginName?: string;
-}
 function DashboardItem(props: {
   item: DashboardItemType;
   cellSize: number;

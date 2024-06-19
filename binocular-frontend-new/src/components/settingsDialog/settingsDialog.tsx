@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import DatabaseSettings from './databaseSettings.tsx';
+import DatabaseSettings from './databaseSettings/databaseSettings.tsx';
+import GeneralSettings from "./generalSettings/generalSettings.tsx";
 
 function SettingsDialog() {
   const [activeTab, setActiveTab] = useState('General');
@@ -20,7 +21,7 @@ function SettingsDialog() {
             </a>
           </div>
         </div>
-        {activeTab === 'General' && <div>General Settings</div>}
+        {activeTab === 'General' && <GeneralSettings></GeneralSettings>}
         {activeTab === 'Database' && <DatabaseSettings></DatabaseSettings>}
         <div className={'modal-action absolute bottom-4 right-4'}>
           <form method={'dialog'}>

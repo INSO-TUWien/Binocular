@@ -1,7 +1,7 @@
-import { dataPlugins } from '../../plugins/pluginRegistry.ts';
-import { setDataPluginParameterApiKey, setDataPluginParameterEndpoint, setDataPluginName } from '../../redux/settingsReducer.ts';
+import { dataPlugins } from '../../../plugins/pluginRegistry.ts';
+import { setDataPluginParameterApiKey, setDataPluginParameterEndpoint, setDataPluginName } from '../../../redux/settingsReducer.ts';
 import { useSelector } from 'react-redux';
-import { AppDispatch, RootState, useAppDispatch } from '../../redux';
+import { AppDispatch, RootState, useAppDispatch } from '../../../redux';
 
 function DatabaseSettings() {
   const dispatch: AppDispatch = useAppDispatch();
@@ -16,7 +16,7 @@ function DatabaseSettings() {
           {dataPlugins.map((dataPlugin) => (
             <div
               className={
-                'card w-96 bg-base-100 shadow-xl mb-3 ml-3 border-2 ' +
+                'card w-96 bg-base-100 shadow-xl mb-3 mr-3 border-2 ' +
                 (currentDataPlugin.name === dataPlugin.name ? 'border-accent' : 'border-base-300')
               }
               key={dataPlugin.name}>
