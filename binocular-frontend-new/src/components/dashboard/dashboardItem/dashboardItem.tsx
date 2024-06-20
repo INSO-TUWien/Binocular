@@ -28,6 +28,7 @@ function DashboardItem(props: {
 
   const currentDataPluginName = useSelector((state: RootState) => state.settings.dataPlugin.name);
   const authorList = useSelector((state: RootState) => state.authors.authorList);
+  const sprintList = useSelector((state: RootState) => state.sprints.sprintList);
 
   const [ignoreGlobalParameters, setIgnoreGlobalParameters] = useState(false);
   const parametersGeneralGlobal = useSelector((state: RootState) => state.parameters.parametersGeneral);
@@ -54,6 +55,7 @@ function DashboardItem(props: {
                 key={plugin.name}
                 settings={settings}
                 authorList={authorList}
+                sprintList={sprintList}
                 parameters={{
                   parametersGeneral: ignoreGlobalParameters ? parametersGeneralLocal : parametersGeneralGlobal,
                   parametersDateRange: ignoreGlobalParameters ? parametersDateRangeLocal : parametersDateRangeGlobal,
@@ -83,6 +85,7 @@ function DashboardItem(props: {
                 key={plugin.name}
                 settings={settings}
                 authorList={authorList}
+                sprintList={sprintList}
                 parameters={{
                   parametersGeneral: ignoreGlobalParameters ? parametersGeneralLocal : parametersGeneralGlobal,
                   parametersDateRange: ignoreGlobalParameters ? parametersDateRangeLocal : parametersDateRangeGlobal,

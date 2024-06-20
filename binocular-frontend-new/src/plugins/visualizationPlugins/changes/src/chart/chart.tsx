@@ -5,6 +5,7 @@ import { SettingsType } from '../settings/settings.tsx';
 import { Author } from '../../../../../types/authorType.ts';
 import { convertCommitDataToChangesChartData } from '../utilies/dataConverter.ts';
 import { ParametersInitialState } from '../../../../../redux/parametersReducer.ts';
+import { Sprint } from '../../../../../types/sprintType.ts';
 
 export interface CommitChartData {
   date: number;
@@ -15,7 +16,13 @@ export interface Palette {
   [signature: string]: { main: string; secondary: string };
 }
 
-function Chart(props: { settings: SettingsType; dataConnection: DataPlugin; authorList: Author[]; parameters: ParametersInitialState }) {
+function Chart(props: {
+  settings: SettingsType;
+  dataConnection: DataPlugin;
+  authorList: Author[];
+  sprintList: Sprint[];
+  parameters: ParametersInitialState;
+}) {
   const chartContainerRef = createRef<HTMLDivElement>();
   const [chartWidth, setChartWidth] = useState(100);
   const [chartHeight, setChartHeight] = useState(100);
@@ -59,9 +66,10 @@ function Chart(props: { settings: SettingsType; dataConnection: DataPlugin; auth
           data={chartData}
           scale={chartScale}
           palette={chartPalette}
+          sprintList={props.sprintList}
           width={chartWidth}
           height={chartHeight}
-          visualizationStyle={props.settings.visualizationStyle}
+          settings={props.settings}
         />
       </div>
     </>

@@ -1,6 +1,7 @@
 export interface SettingsType {
   splitAdditionsDeletions: boolean;
   visualizationStyle: string;
+  showSprints: boolean;
 }
 
 function Settings(props: { settings: SettingsType; setSettings: (newSettings: SettingsType) => void }) {
@@ -17,6 +18,7 @@ function Settings(props: { settings: SettingsType; setSettings: (newSettings: Se
               props.setSettings({
                 splitAdditionsDeletions: event.target.checked,
                 visualizationStyle: props.settings.visualizationStyle,
+                showSprints: props.settings.showSprints,
               })
             }
           />
@@ -32,12 +34,28 @@ function Settings(props: { settings: SettingsType; setSettings: (newSettings: Se
               props.setSettings({
                 splitAdditionsDeletions: props.settings.splitAdditionsDeletions,
                 visualizationStyle: e.target.value,
+                showSprints: props.settings.showSprints,
               })
             }>
             <option value={'curved'}>curved</option>
             <option value={'stepped'}>stepped</option>
             <option value={'linear'}>linear</option>
           </select>
+        </label>
+        <label className="label cursor-pointer">
+          <span className="label-text">Show Sprints:</span>
+          <input
+            type="checkbox"
+            className="toggle toggle-accent toggle-sm"
+            checked={props.settings.showSprints}
+            onChange={(event) =>
+              props.setSettings({
+                splitAdditionsDeletions: props.settings.splitAdditionsDeletions,
+                visualizationStyle: props.settings.visualizationStyle,
+                showSprints: event.target.checked,
+              })
+            }
+          />
         </label>
       </div>
     </>
