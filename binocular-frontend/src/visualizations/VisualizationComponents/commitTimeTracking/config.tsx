@@ -5,17 +5,17 @@ import { GlobalState } from '../../../types/globalTypes.ts';
 import { setThreshold, setSelectedCommitType, setSelectedBranch } from './sagas';
 import { Palette } from '../../../types/authorTypes.ts';
 import styles from './styles.module.scss';
-import TabCombo from "../../../components/TabCombo";
-import * as React from "react";
+import * as React from 'react';
 
 const mapStateToProps = (state: GlobalState) => {
-  const dashboardState = state.visualizations.changes.state;
+  const dashboardState = state.visualizations.commitTimeTracking.state;
 
   return {
     committers: dashboardState.data.data.committers,
     resolution: dashboardState.config.chartResolution,
     palette: dashboardState.data.data.palette,
     selectedBranch: dashboardState.config.selectedBranch,
+    branches: dashboardState.data.data.branches,
     commitType: dashboardState.config.commitType,
     threshold: dashboardState.config.threshold,
     selectedAuthors: dashboardState.config.selectedAuthors,
@@ -33,6 +33,7 @@ const mapDispatchToProps = (dispatch: any) => {
 interface Props {
   committers: string[];
   selectedBranch: string;
+  branches: string[];
   commitType: string;
   threshold: {
     hours: { lower: number; upper: number };
@@ -52,6 +53,19 @@ const CommitTimeTrackingConfigComponent = (props: Props) => {
     <div className={styles.configContainer}>
       <div className={styles.field}>
         <label className="label">Branch</label>
+        <div style={{ marginBottom: '0.5em' }}>
+          <div className="select">
+            <select value={props.selectedBranch} onChange={(e) => props.onChangeBranch(e.target.value)}>
+              {props.branches
+                ? props.branches.map((b) => (
+                    <option value={b} key={b}>
+                      {b}
+                    </option>
+                  ))
+                : 'Nothing'}
+            </select>
+          </div>
+        </div>
         <label className="label">Threshold</label>
         <div style={{ marginBottom: '0.5em' }}>
           <label className="label">Time spent</label>
@@ -110,7 +124,8 @@ const CommitTimeTrackingConfigComponent = (props: Props) => {
         </div>
       </div>
     </div>
-  );};
+  );
+};
 
 const DashboardConfig = connect(mapStateToProps, mapDispatchToProps)(CommitTimeTrackingConfigComponent);
 

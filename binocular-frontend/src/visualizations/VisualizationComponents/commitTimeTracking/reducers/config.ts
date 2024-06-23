@@ -16,7 +16,7 @@ export default handleActions(
     },
   },
   {
-    selectedBranch: 'main', //Branch to be displayed
+    selectedBranch: 'master', //Branch to be displayed
     commitType: 'all', //Filter to display relevant commits, can be 'all' or any of the commit types
     threshold: {
       hours: { lower: 0, upper: 0 },

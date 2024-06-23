@@ -26,6 +26,7 @@ interface CommitTimeTrackingData {
   otherCount: number;
   filteredCommits: Commit[];
   commits: Commit[];
+  branches: string[];
   committers: string[];
   palette: Palette;
   firstCommitTimestamp: number;
@@ -103,17 +104,18 @@ export const fetchChangesData = fetchFactory(
     const commitTimeTrackingData: CommitTimeTrackingData = yield Promise.all([
       Database.getCommitData([firstCommitTimestamp, lastCommitTimestamp], [firstSignificantTimestamp, lastSignificantTimestamp]),
       Database.getCommitData([firstCommitTimestamp, lastCommitTimestamp], [firstCommitTimestamp, lastCommitTimestamp]),
+      Database.getAllBranches(),
     ])
       .then((result) => {
         const filteredCommits = result[0];
         const commits = result[1];
-
+        const branches = result[2].branches.data.map((b) => b.branch);
         const palette = getPalette(commits, 15, bounds.committers.length);
-
         return {
           otherCount: 0,
           filteredCommits,
           commits,
+          branches,
           committers: bounds.committers,
           palette,
           firstCommitTimestamp,
