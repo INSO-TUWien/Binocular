@@ -24,7 +24,7 @@ const mapStateToProps = (state: GlobalState) => {
 
 const mapDispatchToProps = (dispatch: any) => {
   return {
-    onChangeThreshold: (value: number, threshold: string) => dispatch(setThreshold(value, threshold)),
+    onChangeThreshold: (threshold: {value: number, threshold: string}) => dispatch(setThreshold(threshold)),
     onChangeBranch: (branch: string) => dispatch(setSelectedBranch(branch)),
     onChangeCommitType: (commitType: string) => dispatch(setSelectedCommitType(commitType)),
   };
@@ -43,7 +43,7 @@ interface Props {
   palette: Palette;
   resolution: string;
   selectedAuthors: string[];
-  onChangeThreshold: (value: number, threshold: string) => void;
+  onChangeThreshold: (threshold: {value: number, threshold: string}) => void;
   onChangeBranch: (branchName: string) => void;
   onChangeCommitType: (commitType: string) => void;
 }
@@ -73,39 +73,39 @@ const CommitTimeTrackingConfigComponent = (props: Props) => {
           <input
             type="number"
             value={props.threshold.hours.lower}
-            onChange={(e) => props.onChangeThreshold(+e.target.value, 'hours-lower')}
+            onChange={(e) => props.onChangeThreshold({ value: +e.target.value, threshold: 'hours-lower'})}
           />
           <label className="label">Upper bound</label>
           <input
             type="number"
             value={props.threshold.hours.upper}
-            onChange={(e) => props.onChangeThreshold(+e.target.value, 'hours-upper')}
+            onChange={(e) => props.onChangeThreshold({ value: +e.target.value, threshold: 'hours-upper'})}
           />
           <label className="label">Lines changed</label>
           <label className="label">Lower bound</label>
           <input
             type="number"
             value={props.threshold.change.lower}
-            onChange={(e) => props.onChangeThreshold(+e.target.value, 'change-lower')}
+            onChange={(e) => props.onChangeThreshold({ value: + e.target.value, threshold: 'change-lower'})}
           />
           <label className="label">Upper bound</label>
           <input
             type="number"
             value={props.threshold.change.upper}
-            onChange={(e) => props.onChangeThreshold(+e.target.value, 'change-upper')}
+            onChange={(e) => props.onChangeThreshold({ value: + e.target.value, threshold: 'change-upper'})}
           />
           <label className="label">Ratio</label>
           <label className="label">Lower bound</label>
           <input
             type="number"
             value={props.threshold.ratio.lower}
-            onChange={(e) => props.onChangeThreshold(+e.target.value, 'ratio-lower')}
+            onChange={(e) => props.onChangeThreshold({ value: + e.target.value, threshold: 'ratio-lower'})}
           />
           <label className="label">Upper bound</label>
           <input
             type="number"
             value={props.threshold.ratio.upper}
-            onChange={(e) => props.onChangeThreshold(+e.target.value, 'ratio-upper')}
+            onChange={(e) => props.onChangeThreshold({ value: + e.target.value, threshold: 'ratio-upper'})}
           />
         </div>
 

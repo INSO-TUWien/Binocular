@@ -11,8 +11,8 @@ export default handleActions(
       const currState = { ...state };
       const value = action.payload.value;
       const threshold = action.payload.threshold.split('-'); // combinations of hours/time/ratio and lower/upper separated by a dash
-      currState[threshold[0]][threshold[1]] = value;
-      _.assign({}, state, { threshold: { ...currState } });
+      currState.threshold[threshold[0]][threshold[1]] = value;
+      return _.assign({}, state, { threshold: { ...currState.threshold } });
     },
   },
   {
