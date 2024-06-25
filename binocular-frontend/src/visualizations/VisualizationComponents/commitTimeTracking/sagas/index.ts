@@ -109,7 +109,8 @@ export const fetchChangesData = fetchFactory(
       .then((result) => {
         const filteredCommits = result[0];
         const commits = result[1];
-        const branches = result[2].branches.data.map((b) => b.branch);
+        //Figure out why there are duplicates in the first place
+        const branches = result[2].branches.data.map((b) => b.branch).filter((value, index, array) => array.indexOf(value) === index);
         const palette = getPalette(commits, 15, bounds.committers.length);
         return {
           otherCount: 0,
