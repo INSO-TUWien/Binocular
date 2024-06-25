@@ -61,5 +61,4 @@ const mapDispatchToProps = () => {
   return {};
 };
 
-// @ts-ignore
 export default connect(mapStateToProps, mapDispatchToProps)(Chart);
