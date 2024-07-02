@@ -3,8 +3,10 @@
 import PouchDB from 'pouchdb-browser';
 import PouchDBFind from 'pouchdb-find';
 import PouchDBAdapterMemory from 'pouchdb-adapter-memory';
+import WorkerPouch from 'worker-pouch';
 PouchDB.plugin(PouchDBFind);
 PouchDB.plugin(PouchDBAdapterMemory);
+PouchDB.adapter('worker', WorkerPouch);
 
 import Bounds from './localDB/bounds';
 import Commits from './localDB/commits';
@@ -74,55 +76,66 @@ const relations = {
 };
 // #v-endif
 
-// create database, index on _id and triple store
-const db = new PouchDB('Binocular_collections', { adapter: 'memory' });
-const tripleStore = new PouchDB('Binocular_triple', { adapter: 'memory' });
+let db;
+let tripleStore;
 
-db.createIndex({
-  index: { fields: ['_id'] },
-});
+const assignDB = (adapter) => {
+  db = new PouchDB('Binocular_collections', { adapter: adapter });
+  tripleStore = new PouchDB('Binocular_triple', { adapter: adapter });
+};
+
+// use the memory adapter as default
+assignDB('memory');
 
 function importCollection(name) {
-  collections[name].forEach((item) => {
-    delete item._rev;
-    delete item._key;
-
-    db.put(item);
-  });
+  db.bulkDocs(
+    collections[name].map((item) => {
+      delete item._rev;
+      delete item._key;
+      return item;
+    }),
+  );
 }
 
 function importRelation(name) {
-  relations[name].forEach((item) => {
-    delete item._rev;
-    delete item._key;
+  tripleStore.bulkDocs(
+    relations[name].map((item) => {
+      delete item._rev;
+      delete item._key;
 
-    item.from = item._from;
-    item.to = item._to;
-    delete item._from;
-    delete item._to;
+      item.from = item._from;
+      item.to = item._to;
+      delete item._from;
+      delete item._to;
 
-    item.relation = name;
-    tripleStore.put(item);
-  });
+      item.relation = name;
+      return item;
+    }),
+  );
 }
 
 function importData() {
-  Object.keys(collections).forEach((name) => {
+  Object.keys(collections).map((name) => {
     console.log(`Importing collection ${name}`);
-
     importCollection(name);
   });
 
-  Object.keys(relations).forEach((name) => {
+  Object.keys(relations).map((name) => {
     console.log(`Importing relation ${name}`);
-
     importRelation(name);
   });
 }
 
 export default class LocalDB {
-  static initDB() {
-    importData();
+  static async initDB() {
+    // check if web workers are supported
+    return WorkerPouch.isSupportedBrowser().then((supported) => {
+      if (supported) {
+        // using web workers does not block the main thread, making the UI load faster.
+        assignDB('worker');
+        return importData();
+      }
+    });
   }
 
   static getBounds() {
