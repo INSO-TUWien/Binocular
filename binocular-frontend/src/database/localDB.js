@@ -39,6 +39,7 @@ import modules from '../../db_export/modules.json';
 import stakeholders from '../../db_export/stakeholders.json';
 import mergeRequests from '../../db_export/mergeRequests.json';
 import milestones from '../../db_export/milestones.json';
+import Comments from './serverDB/comments';
 
 const collections = { branches, builds, commits, files, issues, modules, stakeholders, mergeRequests, milestones };
 
@@ -211,6 +212,10 @@ export default class LocalDB {
 
   static getCodeHotspotsIssueData(file) {
     return Issues.getCodeHotspotsIssueData(db, tripleStore, file);
+  }
+
+  static getCommentData(commentSpan, significantSpan) {
+    return Comments.getCommentData(commentSpan, significantSpan);
   }
 
   static getDatabase() {

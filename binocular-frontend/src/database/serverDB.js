@@ -10,6 +10,7 @@ import Files from './serverDB/files';
 import Branches from './serverDB/branches';
 import Modules from './serverDB/modules';
 import Stakeholders from './serverDB/stakeholders';
+import Comments from './serverDB/comments';
 
 export default class ServerDB {
   static getBounds() {
@@ -114,6 +115,10 @@ export default class ServerDB {
 
   static getCodeHotspotsIssueData(file) {
     return Issues.getCodeHotspotsIssueData(file);
+  }
+
+  static getCommentData(commentSpan, significantSpan) {
+    return Comments.getCommentData(commentSpan, significantSpan);
   }
 
   static getDatabase() {

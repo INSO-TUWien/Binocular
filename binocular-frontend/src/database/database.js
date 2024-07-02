@@ -170,6 +170,17 @@ export default class Database {
   }
 
   /**
+   * COMMENTS
+   */
+  static async getCommentData(commentRequestSpan, significantSpan) {
+    if (await this.checkBackendConnection()) {
+      return ServerDB.getCommentData(commentRequestSpan, significantSpan);
+    } else {
+      return LocalDB.getCommentData(commentRequestSpan, significantSpan);
+    }
+  }
+
+  /**
    * MILESTONES
    */
   static async getMilestoneData() {
