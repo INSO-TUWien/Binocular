@@ -35,7 +35,7 @@ export default () => {
       },
     },
     build: {
-      minify: false,
+      minify: 'esbuild',
       sourcemap: false, //generating the sourcemap uses way too much memory
       commonjsOptions: {
         include: /node_modules/,
