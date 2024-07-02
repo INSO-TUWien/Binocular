@@ -39,6 +39,7 @@ import codeOwnership from './visualizations/code-ownership';
 import distributionDials from './visualizations/distribution-dials';
 import RootOffline from './components/RootOffline';
 import codeReviewMetrics from './visualizations/code-review-metrics/index.ts';
+import mergeRequestLifecycle from './visualizations/merge-request-lifecycle/index.ts';
 
 const visualizationModules = [
   dashboard,
@@ -54,6 +55,7 @@ const visualizationModules = [
   issueBreakdown,
   changes,
   codeReviewMetrics,
+  mergeRequestLifecycle,
   dataExport,
 ];
 
