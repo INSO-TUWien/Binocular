@@ -53,6 +53,10 @@ module.exports = new gql.GraphQLObjectType({
         type: Timestamp,
         description: 'Creation date of the mergeRequest',
       },
+      closedAt: {
+        type: Timestamp,
+        description: 'Close date of the mergeRequest',
+      },
       notes: {
         type: new gql.GraphQLList(require('./gitlabNote.js')),
         description: 'Notes attached to the Merge Request',

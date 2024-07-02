@@ -22,6 +22,8 @@ const builds = db._collection('builds');
 const branches = db._collection('branches');
 const mergeRequests = db._collection('mergeRequests');
 const milestones = db._collection('milestones');
+const comments = db._collection('comments');
+const reviewThreads = db._collection('reviewThreads');
 
 const queryType = new gql.GraphQLObjectType({
   name: 'Query',
@@ -143,7 +145,7 @@ const queryType = new gql.GraphQLObjectType({
               aql`
               FOR stakeholder IN ${stakeholders}
                 SORT stakeholder.gitSignature ASC
-                RETURN DISTINCT stakeholder.gitSignature`
+                RETURN DISTINCT stakeholder.gitSignature`,
             )
             .toArray();
         },
@@ -207,7 +209,7 @@ const queryType = new gql.GraphQLObjectType({
                   IN
                   ${issues}
                   FILTER issue.iid == ${args.iid}
-                    RETURN issue`
+                    RETURN issue`,
             )
             .toArray()[0];
         },
@@ -241,7 +243,7 @@ const queryType = new gql.GraphQLObjectType({
                   IN
                   ${branches}
                   FILTER branch.branch == ${args.branchName}
-                    RETURN branch`
+                    RETURN branch`,
             )
             .toArray()[0];
         },
@@ -276,6 +278,30 @@ const queryType = new gql.GraphQLObjectType({
             SORT milestone.startDate ${args.sort}
             ${limit}
             RETURN milestone`;
+        },
+      }),
+      comments: paginated({
+        type: require('./types/comment.js'),
+        args: {
+          sort: { type: Sort },
+        },
+        query: (root, args, limit) => {
+          return aql`
+            FOR comment
+            IN ${comments}
+            SORT comment.createdAt ${args.sort}
+            ${limit}
+            RETURN comment`;
+        },
+      }),
+      reviewThreads: paginated({
+        type: require('./types/reviewThread.js'),
+        query: (root, args, limit) => {
+          return aql`
+            FOR reviewThread
+            IN ${reviewThreads}
+            ${limit}
+            RETURN reviewThread`;
         },
       }),
     };
