@@ -42,6 +42,7 @@ export default class MergeRequests {
                   name 
                 }
                 createdAt
+                closedAt
                 notes{
                   body
                   created_at
