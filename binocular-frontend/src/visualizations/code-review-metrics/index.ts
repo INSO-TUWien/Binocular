@@ -13,5 +13,5 @@ export default {
   ChartComponent,
   ConfigComponent,
   HelpComponent,
-  usesUniversalSettings: true,
+  usesUniversalSettings: false,
 };
