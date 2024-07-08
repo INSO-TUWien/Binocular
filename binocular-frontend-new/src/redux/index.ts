@@ -7,12 +7,14 @@ import SettingsReducer from './settingsReducer.ts';
 import ParametersReducer from './parametersReducer.ts';
 import SprintsReducer from './sprintsReducer.ts';
 import NotificationsReducer from './notificationsReducer.ts';
+import ExportReducer from './exportReducer.ts';
 
 export const store = configureStore({
   reducer: {
     dashboard: DashboardReducer,
     authors: AuthorsReducer,
     settings: SettingsReducer,
+    export: ExportReducer,
     parameters: ParametersReducer,
     sprints: SprintsReducer,
     notifications: NotificationsReducer,

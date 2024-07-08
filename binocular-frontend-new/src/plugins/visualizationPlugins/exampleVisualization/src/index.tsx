@@ -8,8 +8,12 @@ const ExampleVisualization: VisualizationPlugin<SettingsType> = {
   chartComponent: Chart,
   settingsComponent: Settings,
   defaultSettings: { data: [], color: '#007AFF' },
+  export: {
+    getSVGData: () => '<svg></svg>',
+  },
   capabilities: {
     popoutOnly: false,
+    export: false,
   },
   images: {
     thumbnail: PreviewImage,

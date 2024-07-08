@@ -15,8 +15,12 @@ export interface VisualizationPlugin<SettingsType> {
   }) => ReactNode;
   settingsComponent: (props: { settings: SettingsType; setSettings: (newSettings: SettingsType) => void }) => ReactNode;
   defaultSettings: unknown;
+  export: {
+    getSVGData: () => string;
+  };
   capabilities: {
     popoutOnly: boolean;
+    export: boolean;
   };
   images: {
     thumbnail: string;

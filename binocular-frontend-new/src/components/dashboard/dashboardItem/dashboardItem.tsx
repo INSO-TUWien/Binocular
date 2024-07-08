@@ -10,6 +10,7 @@ import { useSelector } from 'react-redux';
 import DashboardItemSettings from '../dashboardItemSettings/dashboardItemSettings.tsx';
 import { parametersInitialState } from '../../../redux/parametersReducer.ts';
 import { DashboardItemDTO, DashboardItemType } from '../../../types/dashboardItemType.ts';
+import { ExportType, setExportName, setExportSVGData, setExportType } from '../../../redux/exportReducer.ts';
 
 function DashboardItem(props: {
   item: DashboardItemType;
@@ -119,6 +120,18 @@ function DashboardItem(props: {
               setPoppedOut(true);
             }}
             onMouseDown={(event) => event.stopPropagation()}></button>
+          {plugin.capabilities.export && (
+            <button
+              className={dashboardItemStyles.exportButton}
+              onClick={(event) => {
+                event.stopPropagation();
+                dispatch(setExportType(ExportType.image));
+                dispatch(setExportSVGData(plugin.export.getSVGData()));
+                dispatch(setExportName(`${plugin.name}Export`));
+                (document.getElementById('exportDialog') as HTMLDialogElement).showModal();
+              }}
+              onMouseDown={(event) => event.stopPropagation()}></button>
+          )}
         </div>
         <div
           className={dashboardItemStyles.dashboardItemResizeBarTop}

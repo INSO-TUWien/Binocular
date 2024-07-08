@@ -96,16 +96,16 @@ export const StackedAreaChart = ({ width, height, data, scale, palette, sprintLi
   }, [xScale, yScale, boundsHeight, settings.showSprints]);
 
   return (
-    <div>
+    <>
       <div
         ref={tooltipRef}
         style={{ position: 'fixed', visibility: 'hidden', border: '2px solid', padding: '.2rem', borderRadius: '4px', fontSize: '.75rem' }}>
         Tooltipp
       </div>
-      <svg width={width} height={height}>
+      <svg width={width} height={height} xmlns="http://www.w3.org/2000/svg">
         <g width={boundsWidth} height={boundsHeight} ref={svgRef} transform={`translate(${[MARGIN.left, MARGIN.top].join(',')})`}></g>
       </svg>
-    </div>
+    </>
   );
 };
 

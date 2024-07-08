@@ -16,6 +16,8 @@ export interface Palette {
   [signature: string]: { main: string; secondary: string };
 }
 
+const chartContainerRef = createRef<HTMLDivElement>();
+
 function Chart(props: {
   settings: SettingsType;
   dataConnection: DataPlugin;
@@ -23,7 +25,6 @@ function Chart(props: {
   sprintList: Sprint[];
   parameters: ParametersInitialState;
 }) {
-  const chartContainerRef = createRef<HTMLDivElement>();
   const [chartWidth, setChartWidth] = useState(100);
   const [chartHeight, setChartHeight] = useState(100);
 
@@ -74,6 +75,14 @@ function Chart(props: {
       </div>
     </>
   );
+}
+
+export function getSVGData(): string {
+  const svgData = chartContainerRef.current?.children[1].outerHTML;
+  if (svgData === undefined) {
+    return '<svg xmlns="http://www.w3.org/2000/svg"></svg>';
+  }
+  return svgData;
 }
 
 export default Chart;

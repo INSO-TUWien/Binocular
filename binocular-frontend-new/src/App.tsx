@@ -21,7 +21,8 @@ import { useSelector } from 'react-redux';
 import { setParametersDateRange, setParametersGeneral } from './redux/parametersReducer.ts';
 import SprintView from './components/tabs/sprints/sprintView/sprintView.tsx';
 import AddSprint from './components/tabs/sprints/addSprint/addSprint.tsx';
-import NotificationController from "./components/notificationController/notificationController.tsx";
+import NotificationController from './components/notificationController/notificationController.tsx';
+import { ExportType, setExportType } from './redux/exportReducer.ts';
 
 function App() {
   const dispatch: AppDispatch = useAppDispatch();
@@ -34,6 +35,7 @@ function App() {
         <TabController appName={'Binocular'}>
           <TabControllerButton
             onClick={() => {
+              dispatch(setExportType(ExportType.all));
               (document.getElementById('exportDialog') as HTMLDialogElement).showModal();
             }}
             icon={ExportGray}
