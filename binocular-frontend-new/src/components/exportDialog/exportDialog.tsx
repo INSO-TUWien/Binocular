@@ -28,6 +28,11 @@ function ExportDialog() {
         )}
         {exportType === ExportType.image && (
           <div>
+            <h3>Preview:</h3>
+            <div
+              className={'w-full overflow-scroll border-base-300 border mb-3'}
+              style={{ height: '30rem' }}
+              dangerouslySetInnerHTML={{ __html: exportSVGData }}></div>
             <button
               className={'btn btn-accent'}
               onClick={() => {
