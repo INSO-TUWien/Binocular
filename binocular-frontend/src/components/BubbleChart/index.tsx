@@ -49,7 +49,6 @@ export default class BubbleChart extends React.Component<Props, State> {
   }
 
   async updateElement() {
-    console.log(this.props.data);
     this.visualizeData();
   }
 
