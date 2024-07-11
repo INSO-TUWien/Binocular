@@ -85,9 +85,6 @@ const assignDB = (adapter) => {
   tripleStore = new PouchDB('Binocular_triple', { adapter: adapter });
 };
 
-// use the memory adapter as default
-assignDB('memory');
-
 const preprocessCollection = (coll) => {
   return coll.map((i) => {
     // key and rev not needed for pouchDB
@@ -132,9 +129,12 @@ export default class LocalDB {
     return WorkerPouch.isSupportedBrowser().then((supported) => {
       if (supported) {
         // using web workers does not block the main thread, making the UI load faster.
+        // note: worker adapter does not support custom indices!
         assignDB('worker');
-        return importData();
+      } else {
+        assignDB('memory');
       }
+      importData();
     });
   }
 
