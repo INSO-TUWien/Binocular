@@ -79,13 +79,13 @@ class ChartComponent extends React.Component<Props, State> {
       let color: string;
       switch (mergeRequest.state) {
         case 'OPEN':
-          color = 'green';
+          color = '#6cc644';
           break;
         case 'CLOSED':
-          color = 'red';
+          color = '#bd2c00';
           break;
         case 'MERGED':
-          color = 'purple';
+          color = '#6e5494';
           break;
         default:
           color = 'yellow';
