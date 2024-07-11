@@ -50,6 +50,7 @@ import notes from '../../db_export/notes.json';
 import issuesNotes from '../../db_export/issues-notes.json';
 import mergeRequestsNotes from '../../db_export/mergeRequests-notes.json';
 import notesAccounts from '../../db_export/notes-accounts.json';
+import { decompressJson } from '../../../utils/json-utils.ts';
 
 const collections = { accounts, branches, builds, commits, files, issues, modules, users, mergeRequests, milestones, notes };
 
@@ -87,31 +88,30 @@ const assignDB = (adapter) => {
 // use the memory adapter as default
 assignDB('memory');
 
+const preprocessCollection = (coll) => {
+  return coll.map((i) => {
+    // key and rev not needed for pouchDB
+    delete i._key;
+    delete i._rev;
+    // rename _from/_to if this is a connection
+    if (i._from !== undefined) {
+      i.from = i._from;
+      i.to = i._to;
+      delete i._from;
+      delete i._to;
+    }
+    return i;
+  });
+};
+
 function importCollection(name) {
-  db.bulkDocs(
-    collections[name].map((item) => {
-      delete item._rev;
-      delete item._key;
-      return item;
-    }),
-  );
+  // first decompress the json file, then remove attributes that are not needed by PouchDB
+  db.bulkDocs(preprocessCollection(decompressJson(name, collections[name])));
 }
 
 function importRelation(name) {
-  tripleStore.bulkDocs(
-    relations[name].map((item) => {
-      delete item._rev;
-      delete item._key;
-
-      item.from = item._from;
-      item.to = item._to;
-      delete item._from;
-      delete item._to;
-
-      item.relation = name;
-      return item;
-    }),
-  );
+  // first decompress the json file, then remove attributes that are not needed by PouchDB
+  tripleStore.bulkDocs(preprocessCollection(decompressJson(name, relations[name])));
 }
 
 function importData() {
