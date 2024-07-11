@@ -40,6 +40,7 @@ import distributionDials from './visualizations/distribution-dials';
 import RootOffline from './components/RootOffline';
 import codeReviewMetrics from './visualizations/code-review-metrics/index.ts';
 import mergeRequestLifecycle from './visualizations/merge-request-lifecycle/index.ts';
+import mergeRequestOwnership from './visualizations/merge-request-ownership/index.tsx';
 
 const visualizationModules = [
   dashboard,
@@ -56,6 +57,7 @@ const visualizationModules = [
   changes,
   codeReviewMetrics,
   mergeRequestLifecycle,
+  mergeRequestOwnership,
   dataExport,
 ];
 
