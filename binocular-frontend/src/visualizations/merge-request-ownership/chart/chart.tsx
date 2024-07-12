@@ -3,7 +3,7 @@ import React from 'react';
 import _ from 'lodash';
 import { connect } from 'react-redux';
 import BubbleChart, { Bubble } from '../../../components/BubbleChart';
-import { MergeRequest } from '../../../types/dbTypes';
+import { Author, MergeRequest } from '../../../types/dbTypes';
 import styles from '../styles.module.scss';
 
 interface Props {
@@ -69,13 +69,13 @@ class ChartComponent extends React.Component<Props, State> {
         ? this.extractAssigneeCount(mergeRequests, props)
         : this.extractReviewerCount(mergeRequests, props);
 
-    categoryCount.forEach((count, assignee) => {
-      const colors = ['red', 'green', 'blue', 'yellow'];
+    categoryCount.forEach((value, assignee) => {
+      const [count, color] = value;
       const bubble: Bubble = {
         x: 10,
         y: 10,
         size: 50 + count,
-        color: colors[Math.floor(Math.random() * (3 - 0 + 1) + 0)],
+        color: color,
       };
       ownershipData.push(bubble);
     });
@@ -84,7 +84,7 @@ class ChartComponent extends React.Component<Props, State> {
   }
 
   extractAssigneeCount(mergeRequests, props) {
-    const assigneeCounts = new Map<string, number>();
+    const assigneeCounts = new Map<string, [number, string]>();
 
     _.each(mergeRequests, (mergeRequest: MergeRequest) => {
       this.filterCollectionForSelectedAuthors(mergeRequest.assignee, mergeRequest.assignees, props, assigneeCounts);
@@ -94,7 +94,7 @@ class ChartComponent extends React.Component<Props, State> {
   }
 
   extractReviewerCount(mergeRequests, props) {
-    const reviewerCounts = new Map<string, number>();
+    const reviewerCounts = new Map<string, [count: number, color: string]>();
 
     _.each(mergeRequests, (mergeRequest: MergeRequest) => {
       this.filterCollectionForSelectedAuthors(mergeRequest.reviewer, mergeRequest.reviewers, props, reviewerCounts);
@@ -103,20 +103,24 @@ class ChartComponent extends React.Component<Props, State> {
     return reviewerCounts;
   }
 
-  filterCollectionForSelectedAuthors(field, collection, props, map) {
+  filterCollectionForSelectedAuthors(field: Author, collection: Author[], props, map: Map<string, [number, string]>) {
     if (!field || collection.length === 0) {
       return;
     }
 
+    const colors = ['#6cc644', '#bd2c00', '#6e5494'];
+
     for (const person of collection) {
       let authorHit = false;
       let filter = false;
+      let col = colors[Math.floor(Math.random() * (2 - 0 + 1) + 0)];
 
       for (const author of Object.keys(props.allAuthors)) {
         const authorName = author.split('<')[0].slice(0, -1).replace(/\s+/g, '');
 
         if (person.login === authorName) {
           authorHit = true;
+          col = props.allAuthors[author];
           if (props.selectedAuthors.filter((a: string) => a === author).length > 0) {
             filter = !props.mergeRequestOwnershipState.config.onlyShowAuthors;
             break;
@@ -125,7 +129,8 @@ class ChartComponent extends React.Component<Props, State> {
       }
 
       if (authorHit && !filter) return;
-      map.set(person.login, (map.get(person.login) || 0) + 1);
+      const [count, color] = map.get(person.login) || [0, col];
+      map.set(person.login, [count, color]);
     }
   }
 }
