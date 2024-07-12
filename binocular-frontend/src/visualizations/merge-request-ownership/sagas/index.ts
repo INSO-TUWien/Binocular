@@ -9,6 +9,7 @@ export const requestMergeRequestOwnershipData = createAction('REQUEST_MERGE_REQU
 export const receiveMergeRequestOwnershipData = timestampedActionFactory('RECEIVE_MERGE_REQUEST_OWNERSHIP_DATA');
 export const receiveMergeRequestOwnershipDataError = createAction('RECEIVE_MERGE_REQUEST_OWNERSHIP_DATA_ERROR');
 export const setCategory = createAction('SET_CATEGORY');
+export const onlyShowAuthors = createAction('SET_ONLY_SHOW_AUTHORS');
 
 export default function* () {
   yield* fetchMergeRequestOwnershipData();

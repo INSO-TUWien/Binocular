@@ -3,7 +3,7 @@ import React from 'react';
 import _ from 'lodash';
 import { connect } from 'react-redux';
 import BubbleChart, { Bubble } from '../../../components/BubbleChart';
-import { Author, MergeRequest } from '../../../types/dbTypes';
+import { MergeRequest } from '../../../types/dbTypes';
 import styles from '../styles.module.scss';
 
 interface Props {
@@ -72,8 +72,8 @@ class ChartComponent extends React.Component<Props, State> {
     categoryCount.forEach((count, assignee) => {
       const colors = ['red', 'green', 'blue', 'yellow'];
       const bubble: Bubble = {
-        x: 10 + Math.random(),
-        y: 10 + Math.random(),
+        x: 10,
+        y: 10,
         size: 50 + count,
         color: colors[Math.floor(Math.random() * (3 - 0 + 1) + 0)],
       };
@@ -110,17 +110,21 @@ class ChartComponent extends React.Component<Props, State> {
 
     for (const person of collection) {
       let authorHit = false;
+      let filter = false;
+
       for (const author of Object.keys(props.allAuthors)) {
-        const authorName = author.split('<')[0].slice(0, -1);
+        const authorName = author.split('<')[0].slice(0, -1).replace(/\s+/g, '');
+
         if (person.login === authorName) {
+          authorHit = true;
           if (props.selectedAuthors.filter((a: string) => a === author).length > 0) {
-            authorHit = true;
+            filter = !props.mergeRequestOwnershipState.config.onlyShowAuthors;
             break;
           }
         }
       }
 
-      if (!authorHit) return;
+      if (authorHit && !filter) return;
       map.set(person.login, (map.get(person.login) || 0) + 1);
     }
   }
