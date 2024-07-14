@@ -42,9 +42,11 @@ const extractCommitData = (props: Props): { commitChartData: CommitChartData[]; 
   }
 
   const filteredCommits = props.commits.filter((value, index, array) => array.findIndex((el) => el.date === value.date) === index);
-  const commitsWithTime = addTimeToCommits(filteredCommits);
+  const commitsWithTime = addTimeToCommits(addTypeToCommits(filteredCommits));
   const commitChartData = commitsWithTime.map((c, i) => {
-    return {timeSpent: c.timeSpent,
+    return {
+      commitType: c.commitType,
+      timeSpent: c.timeSpent,
       commitLink: c.webUrl,
       lineChanges: c.stats.additions + c.stats.deletions,
       commitMessage: c.message,
@@ -56,8 +58,14 @@ const extractCommitData = (props: Props): { commitChartData: CommitChartData[]; 
   return { commitChartData: commitChartData, maxTime: maxTime, maxChange: 0 };
 };
 
-function addTimeToCommits(commits: Commit[]) {
+function addTimeToCommits(commits: any[]) {
   return commits.map((c, i) => {
     return {...c, timeSpent: {estimated: i, actual: i}};
   });
+}
+
+function addTypeToCommits(commits: any[]) {
+  return commits.map(c => {
+    return {...c, commitType : "unknown"};
+  })
 }
