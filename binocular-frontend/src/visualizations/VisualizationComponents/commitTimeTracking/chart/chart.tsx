@@ -73,7 +73,15 @@ const extractCommitData = (props: Props): { commitChartData: CommitChartData[]; 
 
 function addTimeToCommits(commits: any[]) {
   return commits.map((c, i) => {
-    return {...c, timeSpent: {estimated: i, actual: i}};
+    const timeSpent = {estimated: i, actual: i};
+    const regex = 'Time-spent: [0-9]*h[0-9]*m';
+    const timeStamp = c.message.match(regex);
+    if (timeStamp) {
+      const time = timeStamp.split(' ')[1];
+      timeSpent.actual = +time.substring(0, time.indexOf('h')) * 60
+        + +time.substring(time.indexOf('h') + 1, time.indexOf('m'));
+    }
+    return {...c, timeSpent: timeSpent};
   });
 }
 
