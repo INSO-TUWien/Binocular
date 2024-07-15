@@ -3,14 +3,14 @@ import { DragResizeMode } from '../resizeMode.ts';
 import { dataPlugins, visualizationPlugins } from '../../../plugins/pluginRegistry.ts';
 import { useState } from 'react';
 import DashboardItemPopout from '../dashboardItemPopout/dashboardItemPopout.tsx';
-import { increasePopupCount } from '../../../redux/dashboardReducer.ts';
+import { increasePopupCount } from '../../../redux/general/dashboardReducer.ts';
 import { AppDispatch, RootState, useAppDispatch } from '../../../redux';
 import openInNewGray from '../../../assets/open_in_new_white.svg';
 import { useSelector } from 'react-redux';
 import DashboardItemSettings from '../dashboardItemSettings/dashboardItemSettings.tsx';
-import { parametersInitialState } from '../../../redux/parametersReducer.ts';
-import { DashboardItemDTO, DashboardItemType } from '../../../types/dashboardItemType.ts';
-import { ExportType, setExportName, setExportSVGData, setExportType } from '../../../redux/exportReducer.ts';
+import { parametersInitialState } from '../../../redux/parameters/parametersReducer.ts';
+import { DashboardItemDTO, DashboardItemType } from '../../../types/general/dashboardItemType.ts';
+import { ExportType, setExportName, setExportSVGData, setExportType } from '../../../redux/export/exportReducer.ts';
 
 function DashboardItem(props: {
   item: DashboardItemType;

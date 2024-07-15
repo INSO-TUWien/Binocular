@@ -1,8 +1,8 @@
 import { useSelector } from 'react-redux';
 import { AppDispatch, RootState, useAppDispatch } from '../../redux';
 import notificationControllerStyles from './notificationController.module.scss';
-import { NotificationType } from '../../types/notificationType.ts';
-import { removeNotification } from '../../redux/notificationsReducer.ts';
+import { AlertType } from '../../types/general/alertType.ts';
+import { removeNotification } from '../../redux/general/notificationsReducer.ts';
 
 function NotificationController() {
   const dispatch: AppDispatch = useAppDispatch();
@@ -21,11 +21,11 @@ function NotificationController() {
               id={`notification${notification.id}`}
               role={'alert'}
               className={`alert w-3/5 m-1 transition-all ease-in-out ${
-                notification.type === NotificationType.error
+                notification.type === AlertType.error
                   ? 'alert-error'
-                  : notification.type === NotificationType.warning
+                  : notification.type === AlertType.warning
                     ? 'alert-warning'
-                    : notification.type === NotificationType.success
+                    : notification.type === AlertType.success
                       ? 'alert-success'
                       : 'alert-info'
               }`}
@@ -33,7 +33,7 @@ function NotificationController() {
                 (e.target as HTMLDivElement).style.marginLeft = '200vw';
                 setTimeout(() => dispatch(removeNotification(notification.id || 0)), 1000);
               }}>
-              {notification.type === NotificationType.information && (
+              {notification.type === AlertType.information && (
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" className="stroke-current shrink-0 w-6 h-6">
                   <path
                     strokeLinecap="round"
@@ -42,7 +42,7 @@ function NotificationController() {
                     d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                 </svg>
               )}
-              {notification.type === NotificationType.error && (
+              {notification.type === AlertType.error && (
                 <svg xmlns="http://www.w3.org/2000/svg" className="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
                   <path
                     strokeLinecap="round"
@@ -52,7 +52,7 @@ function NotificationController() {
                   />
                 </svg>
               )}
-              {notification.type === NotificationType.warning && (
+              {notification.type === AlertType.warning && (
                 <svg xmlns="http://www.w3.org/2000/svg" className="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
                   <path
                     strokeLinecap="round"
@@ -62,7 +62,7 @@ function NotificationController() {
                   />
                 </svg>
               )}
-              {notification.type === NotificationType.success && (
+              {notification.type === AlertType.success && (
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   className="stroke-current shrink-0 h-6 w-6 pointer-events-none"

@@ -6,7 +6,6 @@ class GraphQL {
   public client;
 
   constructor(apiKey: string) {
-    console.log(apiKey);
     this.client = new ApolloClient({
       uri: 'https://api.github.com/graphql',
       headers: { authorization: `Bearer ${apiKey}` },

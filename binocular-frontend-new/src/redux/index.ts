@@ -1,13 +1,14 @@
 import { configureStore } from '@reduxjs/toolkit';
 import { useDispatch } from 'react-redux';
 
-import DashboardReducer from './dashboardReducer';
-import AuthorsReducer from './authorsReducer.ts';
-import SettingsReducer from './settingsReducer.ts';
-import ParametersReducer from './parametersReducer.ts';
-import SprintsReducer from './sprintsReducer.ts';
-import NotificationsReducer from './notificationsReducer.ts';
-import ExportReducer from './exportReducer.ts';
+import DashboardReducer from './general/dashboardReducer.ts';
+import AuthorsReducer from './data/authorsReducer.ts';
+import SettingsReducer from './settings/settingsReducer.ts';
+import ParametersReducer from './parameters/parametersReducer.ts';
+import SprintsReducer from './data/sprintsReducer.ts';
+import NotificationsReducer from './general/notificationsReducer.ts';
+import ExportReducer from './export/exportReducer.ts';
+import TabsReducer from './general/tabsReducer.ts';
 
 export const store = configureStore({
   reducer: {
@@ -18,6 +19,7 @@ export const store = configureStore({
     parameters: ParametersReducer,
     sprints: SprintsReducer,
     notifications: NotificationsReducer,
+    tabs: TabsReducer,
   },
 });
 

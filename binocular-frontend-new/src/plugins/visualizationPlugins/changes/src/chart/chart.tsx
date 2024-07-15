@@ -2,10 +2,10 @@ import { StackedAreaChart } from './stackedAreaChart.tsx';
 import { createRef, useEffect, useState } from 'react';
 import { DataPlugin } from '../../../../interfaces/dataPlugin.ts';
 import { SettingsType } from '../settings/settings.tsx';
-import { Author } from '../../../../../types/authorType.ts';
+import { AuthorType } from '../../../../../types/data/authorType.ts';
 import { convertCommitDataToChangesChartData } from '../utilies/dataConverter.ts';
-import { ParametersInitialState } from '../../../../../redux/parametersReducer.ts';
-import { Sprint } from '../../../../../types/sprintType.ts';
+import { ParametersInitialState } from '../../../../../redux/parameters/parametersReducer.ts';
+import { SprintType } from '../../../../../types/data/sprintType.ts';
 
 export interface CommitChartData {
   date: number;
@@ -21,8 +21,8 @@ const chartContainerRef = createRef<HTMLDivElement>();
 function Chart(props: {
   settings: SettingsType;
   dataConnection: DataPlugin;
-  authorList: Author[];
-  sprintList: Sprint[];
+  authorList: AuthorType[];
+  sprintList: SprintType[];
   parameters: ParametersInitialState;
 }) {
   const [chartWidth, setChartWidth] = useState(100);

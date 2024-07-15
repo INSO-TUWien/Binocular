@@ -1,7 +1,7 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { DragResizeMode } from '../components/dashboard/resizeMode.ts';
-import Config from '../config.ts';
-import { DashboardItemType } from '../types/dashboardItemType.ts';
+import { DragResizeMode } from '../../components/dashboard/resizeMode.ts';
+import Config from '../../config.ts';
+import { DashboardItemType } from '../../types/general/dashboardItemType.ts';
 export interface DashboardInitialState {
   dashboardItems: DashboardItemType[];
   dragResizeMode: DragResizeMode;

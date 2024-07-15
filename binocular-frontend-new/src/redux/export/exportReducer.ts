@@ -19,7 +19,7 @@ const initialState: ExportInitialState = {
 };
 
 export const exportSlice = createSlice({
-  name: 'settings',
+  name: 'export',
   initialState,
   reducers: {
     setExportType: (state, action: PayloadAction<ExportType>) => {

@@ -1,8 +1,8 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { Author } from '../types/authorType.ts';
+import { AuthorType } from '../../types/data/authorType.ts';
 
 export interface AuthorsInitialState {
-  authorList: Author[];
+  authorList: AuthorType[];
   dragging: boolean;
 }
 
@@ -15,7 +15,7 @@ export const authorsSlice = createSlice({
   name: 'authors',
   initialState,
   reducers: {
-    setAuthorList: (state, action: PayloadAction<Author[]>) => {
+    setAuthorList: (state, action: PayloadAction<AuthorType[]>) => {
       state.authorList = action.payload;
     },
     setDragging: (state, action: PayloadAction<boolean>) => {

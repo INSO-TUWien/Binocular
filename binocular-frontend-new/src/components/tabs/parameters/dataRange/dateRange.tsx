@@ -1,4 +1,4 @@
-import { ParametersDateRangeType } from '../../../../types/parametersDateRangeType.ts';
+import { ParametersDateRangeType } from '../../../../types/parameters/parametersDateRangeType.ts';
 
 function DateRange(props: {
   disabled: boolean;

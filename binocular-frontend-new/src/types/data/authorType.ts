@@ -1,4 +1,4 @@
-export interface Author {
+export interface AuthorType {
   name: string;
   id: number;
   parent: number;

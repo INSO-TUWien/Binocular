@@ -1,4 +1,4 @@
-export interface Sprint {
+export interface SprintType {
   id?: number;
   name: string;
   startDate: string;

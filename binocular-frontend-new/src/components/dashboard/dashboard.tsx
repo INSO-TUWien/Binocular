@@ -5,10 +5,10 @@ import { showDialog } from '../informationDialog/dialogHelper.ts';
 import { DragResizeMode } from './resizeMode.ts';
 import { useSelector } from 'react-redux';
 import { AppDispatch, RootState, useAppDispatch } from '../../redux';
-import { addDashboardItem, moveDashboardItem, setDragResizeMode, deleteDashboardItem } from '../../redux/dashboardReducer.ts';
+import { addDashboardItem, moveDashboardItem, setDragResizeMode, deleteDashboardItem } from '../../redux/general/dashboardReducer.ts';
 import DashboardItemPlaceholder from './dashboardItemPlaceholder/dashboardItemPlaceholder.tsx';
-import { SettingsGeneralGridSize } from '../../types/generalSettingsType.ts';
-import { DashboardItemDTO, DashboardItemType } from '../../types/dashboardItemType.ts';
+import { SettingsGeneralGridSize } from '../../types/settings/generalSettingsType.ts';
+import { DashboardItemDTO, DashboardItemType } from '../../types/general/dashboardItemType.ts';
 
 function Dashboard() {
   const dispatch: AppDispatch = useAppDispatch();

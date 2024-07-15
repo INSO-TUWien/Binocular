@@ -1,9 +1,9 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { Sprint } from '../types/sprintType.ts';
-import Config from '../config.ts';
+import { SprintType } from '../../types/data/sprintType.ts';
+import Config from '../../config.ts';
 
 export interface SprintsInitialState {
-  sprintList: Sprint[];
+  sprintList: SprintType[];
   currID: number;
 }
 
@@ -24,11 +24,11 @@ export const sprintsSlice = createSlice({
     }
   },
   reducers: {
-    setSprints: (state, action: PayloadAction<Sprint[]>) => {
+    setSprints: (state, action: PayloadAction<SprintType[]>) => {
       state.sprintList = action.payload;
       localStorage.setItem(`sprintsStateV${Config.localStorageVersion}`, JSON.stringify(state));
     },
-    addSprint: (state, action: PayloadAction<Sprint>) => {
+    addSprint: (state, action: PayloadAction<SprintType>) => {
       action.payload.id = state.currID;
       state.sprintList.push(action.payload);
       state.currID++;

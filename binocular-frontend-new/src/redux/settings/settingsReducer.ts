@@ -1,7 +1,7 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { dataPlugins } from '../plugins/pluginRegistry.ts';
-import Config from '../config.ts';
-import { GeneralSettingsType, SettingsGeneralGridSize } from '../types/generalSettingsType.ts';
+import { dataPlugins } from '../../plugins/pluginRegistry.ts';
+import Config from '../../config.ts';
+import { GeneralSettingsType, SettingsGeneralGridSize } from '../../types/settings/generalSettingsType.ts';
 
 export interface SettingsInitialState {
   general: GeneralSettingsType;

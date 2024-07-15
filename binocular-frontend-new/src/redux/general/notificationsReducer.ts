@@ -1,8 +1,8 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { Notification } from '../types/notificationType.ts';
+import { NotificationType } from '../../types/general/alertType.ts';
 
 export interface NotificationsInitialState {
-  notificationList: Notification[];
+  notificationList: NotificationType[];
   currID: number;
 }
 
@@ -12,10 +12,10 @@ const initialState: NotificationsInitialState = {
 };
 
 export const notificationsSlice = createSlice({
-  name: 'sprints',
+  name: 'notifications',
   initialState,
   reducers: {
-    addNotification: (state, action: PayloadAction<Notification>) => {
+    addNotification: (state, action: PayloadAction<NotificationType>) => {
       action.payload.id = state.currID;
       state.notificationList.push(action.payload);
       state.currID++;

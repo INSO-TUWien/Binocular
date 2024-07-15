@@ -1,6 +1,6 @@
 import { visualizationPlugins } from '../../../../plugins/pluginRegistry.ts';
 import visualizationSelectorStyles from './visualizationSelector.module.scss';
-import { addDashboardItem, placeDashboardItem } from '../../../../redux/dashboardReducer.ts';
+import { addDashboardItem, placeDashboardItem } from '../../../../redux/general/dashboardReducer.ts';
 import { AppDispatch, useAppDispatch } from '../../../../redux';
 
 function VisualizationSelector(props: { orientation?: string }) {

@@ -18,11 +18,11 @@ import ExportDialog from './components/exportDialog/exportDialog.tsx';
 import SettingsDialog from './components/settingsDialog/settingsDialog.tsx';
 import { AppDispatch, RootState, useAppDispatch } from './redux';
 import { useSelector } from 'react-redux';
-import { setParametersDateRange, setParametersGeneral } from './redux/parametersReducer.ts';
+import { setParametersDateRange, setParametersGeneral } from './redux/parameters/parametersReducer.ts';
 import SprintView from './components/tabs/sprints/sprintView/sprintView.tsx';
 import AddSprint from './components/tabs/sprints/addSprint/addSprint.tsx';
 import NotificationController from './components/notificationController/notificationController.tsx';
-import { ExportType, setExportType } from './redux/exportReducer.ts';
+import { ExportType, setExportType } from './redux/export/exportReducer.ts';
 
 function App() {
   const dispatch: AppDispatch = useAppDispatch();

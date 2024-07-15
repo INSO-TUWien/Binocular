@@ -1,7 +1,7 @@
 import { useSelector } from 'react-redux';
 import { AppDispatch, RootState, useAppDispatch } from '../../../redux';
-import { setGeneralSettings } from '../../../redux/settingsReducer.ts';
-import { SettingsGeneralGridSize } from '../../../types/generalSettingsType.ts';
+import { setGeneralSettings } from '../../../redux/settings/settingsReducer.ts';
+import { SettingsGeneralGridSize } from '../../../types/settings/generalSettingsType.ts';
 
 function GeneralSettings() {
   const dispatch: AppDispatch = useAppDispatch();

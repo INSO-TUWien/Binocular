@@ -2,8 +2,8 @@ import { ReactElement } from 'react';
 import { DashboardItemType } from '../dashboardItem/dashboardItem.tsx';
 import DateRange from '../../tabs/parameters/dataRange/dateRange.tsx';
 import ParametersGeneral from '../../tabs/parameters/parametersGeneral/parametersGeneral.tsx';
-import { ParametersGeneralType } from '../../../types/parametersGeneralType.ts';
-import { ParametersDateRangeType } from '../../../types/parametersDateRangeType.ts';
+import { ParametersGeneralType } from '../../../types/parameters/parametersGeneralType.ts';
+import { ParametersDateRangeType } from '../../../types/parameters/parametersDateRangeType.ts';
 
 function DashboardItemSettings(props: {
   item: DashboardItemType;

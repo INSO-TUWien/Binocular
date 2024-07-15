@@ -1,7 +1,7 @@
 import { MutableRefObject, useEffect, useMemo, useRef } from 'react';
 import * as d3 from 'd3';
 import { CommitChartData, Palette } from './chart.tsx';
-import { Sprint } from '../../../../../types/sprintType.ts';
+import { SprintType } from '../../../../../types/data/sprintType.ts';
 import { ScaleLinear, ScaleTime, symbol, symbolTriangle } from 'd3';
 import { SettingsType } from '../settings/settings.tsx';
 
@@ -17,7 +17,7 @@ type AreaChartProps = {
   data: CommitChartData[];
   scale: number[];
   palette: Palette;
-  sprintList: Sprint[];
+  sprintList: SprintType[];
   settings: SettingsType;
 };
 
@@ -178,7 +178,7 @@ function updateDataLines(
 }
 
 function generateSprintAreas(
-  sprints: Sprint[],
+  sprints: SprintType[],
   xScale: ScaleTime<number, number, never>,
   yScale: ScaleLinear<number, number, never>,
   yMax: number,
@@ -264,7 +264,7 @@ function generateSprintAreas(
 }
 
 function updateSprintAreas(
-  sprints: Sprint[],
+  sprints: SprintType[],
   xScale: ScaleTime<number, number, never>,
   yScale: ScaleLinear<number, number, never>,
   yMax: number,

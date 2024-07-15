@@ -1,4 +1,4 @@
-import { ParametersGeneralType } from '../../../../types/parametersGeneralType.ts';
+import { ParametersGeneralType } from '../../../../types/parameters/parametersGeneralType.ts';
 
 function ParametersGeneral(props: {
   disabled: boolean;

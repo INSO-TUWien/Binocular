@@ -5,36 +5,44 @@ import TabDropHint from './tabDropHint/tabDropHint.tsx';
 import Tab from '../tab/tab.tsx';
 import TabMenuContent from '../tabMenuContent/tabMenuContent.tsx';
 import TabControllerButton from '../tabControllerButton/tabControllerButton.tsx';
+import { TabType } from '../../../types/general/tabType.ts';
+import { AppDispatch, RootState, useAppDispatch } from '../../../redux';
+import { useSelector } from 'react-redux';
+import { setTabList } from '../../../redux/general/tabsReducer.ts';
+import _ from 'lodash';
 
-interface TabType {
-  selected: boolean;
-  content: ReactElement[] | ReactElement;
-  displayName: string;
-  alignment: string;
-  position: number;
+interface TabContents {
+  [id: number]: ReactElement;
 }
 
 function TabController(props: {
   children: ReactElement<{ children: ReactElement[] | ReactElement; displayName: string; alignment: string }>[];
   appName: string;
 }) {
-  const [tabList, setTabList] = useState(generateTabs(props.children));
+  const dispatch: AppDispatch = useAppDispatch();
+  const tabList = useSelector((state: RootState) => state.tabs.tabList);
+
+  const [tabContents, setTabContents] = useState<TabContents>({});
 
   const [dragState, setDragState] = useState(false);
 
   const [tabMenuContent] = useState(props.children.filter((child) => child.type === TabMenuContent)[0]);
 
-  const tabBarTopCollapsed = tabList.filter((tab) => tab.alignment === 'top' && tab.selected).length === 0;
-  const tabBarRightCollapsed = tabList.filter((tab) => tab.alignment === 'right' && tab.selected).length === 0;
-  const tabBarBottomCollapsed = tabList.filter((tab) => tab.alignment === 'bottom' && tab.selected).length === 0;
-  const tabBarLeftCollapsed = tabList.filter((tab) => tab.alignment === 'left' && tab.selected).length === 0;
+  const tabBarTopCollapsed = tabList.filter((tab: TabType) => tab.alignment === 'top' && tab.selected).length === 0;
+  const tabBarRightCollapsed = tabList.filter((tab: TabType) => tab.alignment === 'right' && tab.selected).length === 0;
+  const tabBarBottomCollapsed = tabList.filter((tab: TabType) => tab.alignment === 'bottom' && tab.selected).length === 0;
+  const tabBarLeftCollapsed = tabList.filter((tab: TabType) => tab.alignment === 'left' && tab.selected).length === 0;
 
-  const tabCountRight = tabList.filter((tab) => tab.alignment === 'right').length;
-  const tabCountBottom = tabList.filter((tab) => tab.alignment === 'bottom').length;
-  const tabCountLeft = tabList.filter((tab) => tab.alignment === 'left').length;
+  const tabCountRight = tabList.filter((tab: TabType) => tab.alignment === 'right').length;
+  const tabCountBottom = tabList.filter((tab: TabType) => tab.alignment === 'bottom').length;
+  const tabCountLeft = tabList.filter((tab: TabType) => tab.alignment === 'left').length;
 
   useEffect(() => {
-    setTabList(generateTabs(props.children));
+    const [newTabList, tabContents] = generateTabs(props.children);
+    setTabContents(tabContents);
+    if (tabList.length !== newTabList.length) {
+      dispatch(setTabList(newTabList));
+    }
   }, [props.children]);
 
   /*
@@ -99,14 +107,14 @@ function TabController(props: {
             event.preventDefault();
           }}
           onDrop={(event) => {
-            moveTab(event.dataTransfer.getData('text/plain'), 'top', tabList, setTabList, setDragState);
+            moveTab(event.dataTransfer.getData('text/plain'), 'top', tabList, (tabs) => dispatch(setTabList(tabs)), setDragState);
           }}>
           <div className={tabControllerStyles.appName}>{props.appName}</div>
 
           {tabList
-            .filter((tab) => tab.alignment === 'top')
-            .sort((tabA, tabB) => tabA.position - tabB.position)
-            .map((tab) => generateHandle(tab, tabList, setTabList, setDragState))}
+            .filter((tab: TabType) => tab.alignment === 'top')
+            .sort((tabA: TabType, tabB: TabType) => tabA.position - tabB.position)
+            .map((tab: TabType) => generateHandle(tab, tabList, (tabs) => dispatch(setTabList(tabs)), setDragState))}
         </div>
         <div
           id={'tabBarRight'}
@@ -120,12 +128,12 @@ function TabController(props: {
             event.preventDefault();
           }}
           onDrop={(event) => {
-            moveTab(event.dataTransfer.getData('text/plain'), 'right', tabList, setTabList, setDragState);
+            moveTab(event.dataTransfer.getData('text/plain'), 'right', tabList, (tabs) => dispatch(setTabList(tabs)), setDragState);
           }}>
           {tabList
-            .filter((tab) => tab.alignment === 'right')
-            .sort((tabA, tabB) => tabA.position - tabB.position)
-            .map((tab) => generateHandle(tab, tabList, setTabList, setDragState))}
+            .filter((tab: TabType) => tab.alignment === 'right')
+            .sort((tabA: TabType, tabB: TabType) => tabA.position - tabB.position)
+            .map((tab: TabType) => generateHandle(tab, tabList, (tabs) => dispatch(setTabList(tabs)), setDragState))}
         </div>
         <div
           id={'tabBarBottom'}
@@ -135,12 +143,12 @@ function TabController(props: {
             event.preventDefault();
           }}
           onDrop={(event) => {
-            moveTab(event.dataTransfer.getData('text/plain'), 'bottom', tabList, setTabList, setDragState);
+            moveTab(event.dataTransfer.getData('text/plain'), 'bottom', tabList, (tabs) => dispatch(setTabList(tabs)), setDragState);
           }}>
           {tabList
-            .filter((tab) => tab.alignment === 'bottom')
-            .sort((tabA, tabB) => tabA.position - tabB.position)
-            .map((tab) => generateHandle(tab, tabList, setTabList, setDragState))}
+            .filter((tab: TabType) => tab.alignment === 'bottom')
+            .sort((tabA: TabType, tabB: TabType) => tabA.position - tabB.position)
+            .map((tab: TabType) => generateHandle(tab, tabList, (tabs) => dispatch(setTabList(tabs)), setDragState))}
         </div>
         <div
           id={'tabBarLeft'}
@@ -154,12 +162,12 @@ function TabController(props: {
             event.preventDefault();
           }}
           onDrop={(event) => {
-            moveTab(event.dataTransfer.getData('text/plain'), 'left', tabList, setTabList, setDragState);
+            moveTab(event.dataTransfer.getData('text/plain'), 'left', tabList, (tabs) => dispatch(setTabList(tabs)), setDragState);
           }}>
           {tabList
-            .filter((tab) => tab.alignment === 'left')
-            .sort((tabA, tabB) => tabA.position - tabB.position)
-            .map((tab) => generateHandle(tab, tabList, setTabList, setDragState))}
+            .filter((tab: TabType) => tab.alignment === 'left')
+            .sort((tabA: TabType, tabB: TabType) => tabA.position - tabB.position)
+            .map((tab: TabType) => generateHandle(tab, tabList, (tabs) => dispatch(setTabList(tabs)), setDragState))}
         </div>
       </>
       <>
@@ -167,11 +175,14 @@ function TabController(props: {
         <div className={tabControllerStyles.tabContentTop + (tabBarTopCollapsed ? ' ' + tabControllerStyles.tabContentCollapsed : '')}>
           {
             tabList
-              .filter((tab) => tab.alignment === 'top' && tab.selected)
-              .map((tab, i) => {
+              .filter((tab: TabType) => tab.alignment === 'top' && tab.selected)
+              .map((tab: TabType, i: number) => {
+                if (tabContents[tab.contentID] === undefined) {
+                  return;
+                }
                 return (
                   <Tab key={'tabTop' + i} displayName={tab.displayName} alignment={'top'}>
-                    {tab.content}
+                    {tabContents[tab.contentID].props.children}
                   </Tab>
                 );
               })[0]
@@ -191,11 +202,14 @@ function TabController(props: {
           }}>
           {
             tabList
-              .filter((tab) => tab.alignment === 'right' && tab.selected)
-              .map((tab, i) => {
+              .filter((tab: TabType) => tab.alignment === 'right' && tab.selected)
+              .map((tab: TabType, i: number) => {
+                if (tabContents[tab.contentID] === undefined) {
+                  return;
+                }
                 return (
                   <Tab key={'tabRight' + i} displayName={tab.displayName} alignment={'right'}>
-                    {tab.content}
+                    {tabContents[tab.contentID].props.children}
                   </Tab>
                 );
               })[0]
@@ -205,11 +219,14 @@ function TabController(props: {
           className={tabControllerStyles.tabContentBottom + (tabBarBottomCollapsed ? ' ' + tabControllerStyles.tabContentCollapsed : '')}>
           {
             tabList
-              .filter((tab) => tab.alignment === 'bottom' && tab.selected)
-              .map((tab, i) => {
+              .filter((tab: TabType) => tab.alignment === 'bottom' && tab.selected)
+              .map((tab: TabType, i: number) => {
+                if (tabContents[tab.contentID] === undefined) {
+                  return;
+                }
                 return (
                   <Tab key={'tabBottom' + i} displayName={tab.displayName} alignment={'bottom'}>
-                    {tab.content}
+                    {tabContents[tab.contentID].props.children}
                   </Tab>
                 );
               })[0]
@@ -229,11 +246,14 @@ function TabController(props: {
           }}>
           {
             tabList
-              .filter((tab) => tab.alignment === 'left' && tab.selected)
-              .map((tab, i) => {
+              .filter((tab: TabType) => tab.alignment === 'left' && tab.selected)
+              .map((tab: TabType, i: number) => {
+                if (tabContents[tab.contentID] === undefined) {
+                  return;
+                }
                 return (
                   <Tab key={'tabLeft' + i} displayName={tab.displayName} alignment={'left'}>
-                    {tab.content}
+                    {tabContents[tab.contentID].props.children}
                   </Tab>
                 );
               })[0]
@@ -260,11 +280,13 @@ function generateTabs(
     displayName: string;
     alignment: string;
   }>[],
-) {
+): [TabType[], TabContents] {
   const firstFound = [false, false, false, false];
   let tabOrder = 0;
 
-  return children
+  let id = 0;
+  const tabContents: TabContents = {};
+  const tabList = children
     .filter((child) => child.type === Tab)
     .map((tab) => {
       const selected =
@@ -288,14 +310,18 @@ function generateTabs(
             break;
         }
       }
+      id++;
+      tabContents[id] = tab;
       return {
         displayName: tab.props.displayName,
         alignment: tab.props.alignment,
         selected: selected,
-        content: tab.props.children,
+        contentID: id,
         position: tabOrder++,
       };
     });
+
+  return [tabList, tabContents];
 }
 
 /**
@@ -334,16 +360,17 @@ function generateHandle(
       onClick={() => {
         setTabList(
           tabList.map((listTab) => {
-            if (listTab.alignment === tab.alignment) {
-              if (listTab.displayName === tab.displayName) {
-                listTab.selected = !listTab.selected;
-                document.getElementById('tab_' + listTab.displayName)?.classList.add(tabHandleStyles.tabHandleSelected);
+            const localListTab = _.clone(listTab); //necessary because of reducer behavior of making ListTab read-only
+            if (localListTab.alignment === tab.alignment) {
+              if (localListTab.displayName === tab.displayName) {
+                localListTab.selected = !listTab.selected;
+                document.getElementById('tab_' + localListTab.displayName)?.classList.add(tabHandleStyles.tabHandleSelected);
               } else {
-                listTab.selected = false;
-                document.getElementById('tab_' + listTab.displayName)?.classList.remove(tabHandleStyles.tabHandleSelected);
+                localListTab.selected = false;
+                document.getElementById('tab_' + localListTab.displayName)?.classList.remove(tabHandleStyles.tabHandleSelected);
               }
             }
-            return listTab;
+            return localListTab;
           }),
         );
       }}
@@ -396,14 +423,15 @@ function moveTab(
   setDragState(false);
   setTabList(
     tabList.map((tab) => {
-      if (tab.alignment === alignment) {
-        tab.selected = false;
+      const localTab = _.clone(tab); //necessary because of reducer behavior of making ListTab read-only
+      if (localTab.alignment === alignment) {
+        localTab.selected = false;
       }
-      if (tab.displayName === name) {
-        tab.alignment = alignment;
-        tab.selected = true;
+      if (localTab.displayName === name) {
+        localTab.alignment = alignment;
+        localTab.selected = true;
       }
-      return tab;
+      return localTab;
     }),
   );
 }

@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { AppDispatch, useAppDispatch } from '../../../../redux';
-import { addSprint } from '../../../../redux/sprintsReducer.ts';
-import { addNotification } from '../../../../redux/notificationsReducer.ts';
-import { NotificationType } from '../../../../types/notificationType.ts';
+import { addSprint } from '../../../../redux/data/sprintsReducer.ts';
+import { addNotification } from '../../../../redux/general/notificationsReducer.ts';
+import { AlertType } from '../../../../types/general/alertType.ts';
 
 function AddSprintDialog() {
   const dispatch: AppDispatch = useAppDispatch();
@@ -57,10 +57,10 @@ function AddSprintDialog() {
             className={'btn btn-sm btn-success text-base-100 mr-4'}
             onClick={() => {
               if (name.length > 0) {
-                dispatch(addNotification({ text: `Added Sprint: ${name}`, type: NotificationType.success }));
+                dispatch(addNotification({ text: `Added Sprint: ${name}`, type: AlertType.success }));
                 dispatch(addSprint({ name: name, startDate: from, endDate: to }));
               } else {
-                dispatch(addNotification({ text: `Error adding Sprint, no name given`, type: NotificationType.error }));
+                dispatch(addNotification({ text: `Error adding Sprint, no name given`, type: AlertType.error }));
               }
             }}>
             Add

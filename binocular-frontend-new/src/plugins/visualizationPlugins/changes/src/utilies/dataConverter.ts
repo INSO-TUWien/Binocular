@@ -1,13 +1,13 @@
 import moment from 'moment/moment';
 import { DataCommit } from '../../../../interfaces/dataPlugin.ts';
-import { Author } from '../../../../../types/authorType.ts';
+import { AuthorType } from '../../../../../types/data/authorType.ts';
 import chroma from 'chroma-js';
 import { CommitChartData, Palette } from '../chart/chart.tsx';
-import { ParametersInitialState } from '../../../../../redux/parametersReducer.ts';
+import { ParametersInitialState } from '../../../../../redux/parameters/parametersReducer.ts';
 
 export function convertCommitDataToChangesChartData(
   commits: DataCommit[],
-  authors: Author[],
+  authors: AuthorType[],
   splitAdditionsDeletions: boolean,
   parameters: ParametersInitialState,
 ): {

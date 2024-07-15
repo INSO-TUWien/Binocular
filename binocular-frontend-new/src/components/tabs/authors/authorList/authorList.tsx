@@ -1,7 +1,7 @@
 import authorListStyles from './authorList.module.scss';
 import { useSelector } from 'react-redux';
 import { AppDispatch, RootState, useAppDispatch } from '../../../../redux';
-import { setAuthorList, setDragging } from '../../../../redux/authorsReducer.ts';
+import { setAuthorList, setDragging } from '../../../../redux/data/authorsReducer.ts';
 import { useEffect } from 'react';
 import { dataPlugins } from '../../../../plugins/pluginRegistry.ts';
 import distinctColors from 'distinct-colors';

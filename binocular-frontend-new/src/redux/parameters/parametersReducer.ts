@@ -1,7 +1,7 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { ParametersGeneralType } from '../types/parametersGeneralType.ts';
-import { ParametersDateRangeType } from '../types/parametersDateRangeType.ts';
-import Config from "../config.ts";
+import { ParametersGeneralType } from '../../types/parameters/parametersGeneralType.ts';
+import { ParametersDateRangeType } from '../../types/parameters/parametersDateRangeType.ts';
+import Config from "../../config.ts";
 
 export interface ParametersInitialState {
   parametersGeneral: ParametersGeneralType;
