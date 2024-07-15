@@ -61,6 +61,8 @@ import getDbExportEndpoint from './endpoints/get-db-export';
 
 import graphQlEndpoint from './endpoints/graphQl';
 
+import getCommitType from './endpoints/getCommitType.ts';
+
 import * as setupDb from './core/db/setup-db';
 
 import { fileURLToPath } from 'url';
@@ -124,6 +126,7 @@ function runBackend() {
 
   // set up the endpoints
   ctx.app.get('/api/db-export', (req: express.Request, res: express.Response) => getDbExportEndpoint(req, res, ctx));
+  ctx.app.get('/api/getCommitType', (req: express.Request, res: express.Response) => getCommitType(req, res, ctx));
 
   // proxy to the FOXX-service
   ctx.app.get('/graphQl', (req: express.Request, res: express.Response) => graphQlEndpoint(req, res, ctx));

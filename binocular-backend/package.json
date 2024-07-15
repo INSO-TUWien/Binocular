@@ -39,6 +39,7 @@
     "express-http-proxy": "^1.6.3",
     "faker": "^5.5.3",
     "fast-myers-diff": "^3.0.1",
+    "fasttext": "^1.0.0",
     "figlet": "^1.6.0",
     "file-regex": "^3.1.0",
     "file-saver": "^2.0.5",
