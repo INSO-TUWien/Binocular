@@ -1,5 +1,7 @@
-import {Author, Committer, Palette} from '../../../../types/authorTypes.ts';
+import {Author, Committer} from '../../../../types/authorTypes.ts';
 import {Commit} from "../../../../types/commitTypes.ts";
+import getCommitType from '../../../../utils/getCommitType.ts';
+import * as React from "react";
 
 interface Props {
   commits: Commit[];
@@ -32,7 +34,19 @@ interface CommitChartData {
 }
 
 export default (props: Props) => {
-  console.log(extractCommitData(props))
+  const extractedCommitData = extractCommitData(props);
+  const [commitChartData, setCommitChartData] = React.useState(extractedCommitData.commitChartData);
+  const [maxTime, setMaxTime] = React.useState(extractedCommitData.maxTime);
+  const [maxChange, setMaxChange] = React.useState(extractedCommitData.maxChange);
+
+  React.useEffect(() => {
+    const extractedCommitData = extractCommitData(props);
+    setCommitChartData(extractedCommitData.commitChartData);
+    setMaxTime(extractedCommitData.maxTime);
+    setMaxChange(extractedCommitData.maxChange);
+  }, [props]);
+  console.log(commitChartData);
+
   return (<div>Content</div>);
 };
 
@@ -54,7 +68,6 @@ const extractCommitData = (props: Props): { commitChartData: CommitChartData[]; 
   });
 
   const maxTime = {estimated: 0, actual: 0};
-
   return { commitChartData: commitChartData, maxTime: maxTime, maxChange: 0 };
 };
 
@@ -64,8 +77,8 @@ function addTimeToCommits(commits: any[]) {
   });
 }
 
-function addTypeToCommits(commits: any[]) {
-  return commits.map(c => {
-    return {...c, commitType : "unknown"};
+function addTypeToCommits(commits: Commit[]) {
+  return commits.map((c) => {
+    return {...c, commitType : getCommitType(c.message)};
   })
 }
