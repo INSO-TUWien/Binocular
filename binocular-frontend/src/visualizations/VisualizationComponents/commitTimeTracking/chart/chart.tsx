@@ -143,8 +143,8 @@ function drawNodeChart(data: CommitChartData[]) {
     .append("circle")
     .attr("class", "node")
     .attr("cx", d => x(d.date.toString()) + x.bandwidth() / 2) // Center the node along x-axis
-    .attr("cy", height / 2 - x.bandwidth() / 3) // Place nodes at the middle of the chart
-    .attr("r", x.bandwidth() / 2) // Radius of the nodes
+    .attr("cy", height / 2 - Math.min(15, x.bandwidth() / 2) / 3) // Place nodes at the middle of the chart
+    .attr("r", Math.min(15, x.bandwidth() / 2)) // Radius of the nodes
     .attr("stroke", "#000") // Add a border around nodes
     .attr("stroke-width", 1); // Width of the border
 }
@@ -216,7 +216,7 @@ const extractCommitData = async (props: Props): Promise<{ commitChartData: Commi
   const maxTime = {estimated: Math.max(...commitChartData.map(data => data.timeSpent.estimated)),
     actual: Math.max(...commitChartData.map(data => data.timeSpent.actual))};
   const maxChange = Math.max(...commitChartData.map(data => data.lineChanges));
-  return { commitChartData: commitChartData, maxTime: maxTime, maxChange: maxChange};
+  return { commitChartData: commitChartData.slice(0,40), maxTime: maxTime, maxChange: maxChange};
 };
 
 const firstCommitAdd = 120; // TODO: Replace constant with variable from state;
