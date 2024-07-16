@@ -33,25 +33,29 @@ interface CommitChartData {
   commitMessage: string;
   author: string;
   date: Date;
+  commitType: string[];
 }
 
 export default (props: Props) => {
-  const extractedCommitData = extractCommitData(props);
-  const [commitChartData, setCommitChartData] = React.useState(extractedCommitData.commitChartData);
-  const [maxTime, setMaxTime] = React.useState(extractedCommitData.maxTime);
-  const [maxChange, setMaxChange] = React.useState(extractedCommitData.maxChange);
+  const [commitChartData, setCommitChartData] = React.useState<CommitChartData[]>([]);
+  const [maxTime, setMaxTime] = React.useState({ estimated: 0, actual: 0 });
+  const [maxChange, setMaxChange] = React.useState(0);
 
   React.useEffect(() => {
-    const extractedCommitData = extractCommitData(props);
-    setCommitChartData(extractedCommitData.commitChartData);
-    setMaxTime(extractedCommitData.maxTime);
-    setMaxChange(extractedCommitData.maxChange);
+    const fetchData = async () => {
+      const extractedCommitData = await extractCommitData(props);
+      setCommitChartData(extractedCommitData.commitChartData);
+      setMaxTime(extractedCommitData.maxTime);
+      setMaxChange(extractedCommitData.maxChange);
+    };
+
+    fetchData();
   }, [props]);
 
   return (<div>Content</div>);
 };
 
-const extractCommitData = (props: Props): { commitChartData: CommitChartData[]; maxTime: { estimated: number; actual: number; }; maxChange: number; } => {
+const extractCommitData = async (props: Props): Promise<{ commitChartData: CommitChartData[]; maxTime: { estimated: number; actual: number; }; maxChange: number; }> => {
   if (!props.commits || props.commits.length === 0) {
     return { commitChartData: [], maxTime: {estimated: 0, actual: 0}, maxChange: 0 };
   }
@@ -60,11 +64,11 @@ const extractCommitData = (props: Props): { commitChartData: CommitChartData[]; 
   const commitsWithDate = filteredCommits.map(commit => {
     return {...commit, date : new Date(commit.date), commitType: [], timeSpent: {estimated: 0, actual: 0}};
   })
-  addTypeToCommits(commitsWithDate)
+  await addTypeToCommits(commitsWithDate)
   const sortedCommits = commitsWithDate.sort((a, b) => a.date.getTime() - b.date.getTime());
   addActualTime(sortedCommits);
   addEstimatedTime(sortedCommits, props);
-  const commitChartData = commitsWithDate.map((c, i) => {
+  const commitChartData = commitsWithDate.map(c => {
     return {
       commitType: c.commitType,
       timeSpent: c.timeSpent,
@@ -78,7 +82,6 @@ const extractCommitData = (props: Props): { commitChartData: CommitChartData[]; 
   const maxTime = {estimated: Math.max(...commitChartData.map(data => data.timeSpent.estimated)),
     actual: Math.max(...commitChartData.map(data => data.timeSpent.actual))};
   const maxChange = Math.max(...commitChartData.map(data => data.lineChanges));
-  console.log({ commitChartData: commitChartData, maxTime: maxTime, maxChange: maxChange});
   return { commitChartData: commitChartData, maxTime: maxTime, maxChange: maxChange};
 };
 
@@ -123,9 +126,8 @@ function addActualTime(commits: any[]) {
   });
 }
 
-function addTypeToCommits(commits: any[]) {
-  commits.forEach(c => {
-      c.commitType = getCommitType(c.message);
+async function addTypeToCommits(commits: any[]) {
+  for (const c of commits) {
+      c.commitType = await getCommitType(c.message);
     }
-  )
 }
