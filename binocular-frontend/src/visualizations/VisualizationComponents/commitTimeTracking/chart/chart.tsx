@@ -168,7 +168,7 @@ function drawLowerChart(data: CommitChartData[]) {
     .padding(0.1);
 
   const y = d3.scaleLinear()
-    .domain([0, d3.max(data, d => d.timeSpent.estimated)])
+    .domain([0, d3.max(data, d => Math.log2(d.lineChanges))])
     .nice()
     .range([0, height]);
 
@@ -185,7 +185,7 @@ function drawLowerChart(data: CommitChartData[]) {
     .attr("x", d => x(d.date.toString()))
     .attr("y", 0) // Set y to 0 to start from the top
     .attr("width", x.bandwidth())
-    .attr("height", d => y(d.timeSpent.estimated)) // Height is directly proportional to the estimated time spent
+    .attr("height", d => y(Math.log2(d.lineChanges))) // Height is directly proportional to the estimated time spent
     .attr("fill", d => color(d.commitType[0].label));
 }
 
