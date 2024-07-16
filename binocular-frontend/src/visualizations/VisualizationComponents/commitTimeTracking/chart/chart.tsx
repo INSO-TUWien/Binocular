@@ -128,6 +128,13 @@ function addActualTime(commits: any[]) {
 
 async function addTypeToCommits(commits: any[]) {
   for (const c of commits) {
-      c.commitType = await getCommitType(c.message);
+      const commitType = (await getCommitType(c.message));
+      if (!commitType || commitType.length === 0) {
+        c.commitType = [{label: 'unknown', value: 1}];
+      } else {
+        c.commitType = commitType.map(type => {
+          return {label: type.label.substring(9), value: type.value};
+        });
+      }
     }
 }
