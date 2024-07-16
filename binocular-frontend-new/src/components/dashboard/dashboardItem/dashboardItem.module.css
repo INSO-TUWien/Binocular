@@ -123,4 +123,20 @@
   text-align: center;
 }
 
+.popoutTextContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  width: 100%;
+  flex-direction: column;
+}
+
+.popoutTextContainer > div {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
 /*# sourceMappingURL=dashboardItem.module.css.map */

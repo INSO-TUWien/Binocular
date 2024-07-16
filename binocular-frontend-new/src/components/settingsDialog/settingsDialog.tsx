@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import DatabaseSettings from './databaseSettings/databaseSettings.tsx';
-import GeneralSettings from "./generalSettings/generalSettings.tsx";
+import GeneralSettings from './generalSettings/generalSettings.tsx';
 
 function SettingsDialog() {
   const [activeTab, setActiveTab] = useState('General');

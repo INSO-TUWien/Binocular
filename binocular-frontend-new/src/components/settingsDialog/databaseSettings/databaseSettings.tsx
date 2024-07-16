@@ -1,5 +1,9 @@
 import { dataPlugins } from '../../../plugins/pluginRegistry.ts';
-import { setDataPluginParameterApiKey, setDataPluginParameterEndpoint, setDataPluginName } from '../../../redux/settings/settingsReducer.ts';
+import {
+  setDataPluginParameterApiKey,
+  setDataPluginParameterEndpoint,
+  setDataPluginName,
+} from '../../../redux/settings/settingsReducer.ts';
 import { useSelector } from 'react-redux';
 import { AppDispatch, RootState, useAppDispatch } from '../../../redux';
 

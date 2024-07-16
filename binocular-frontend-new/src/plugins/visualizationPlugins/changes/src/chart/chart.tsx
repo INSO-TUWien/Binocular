@@ -33,14 +33,18 @@ function Chart(props: {
   const [chartPalette, setChartPalette] = useState<Palette>({});
 
   useEffect(() => {
-    if (chartContainerRef.current) {
+    if (!chartContainerRef.current) return;
+    const resizeObserver = new ResizeObserver(() => {
+      if (!chartContainerRef.current) return;
       if (chartContainerRef.current?.offsetWidth !== chartWidth) {
         setChartWidth(chartContainerRef.current.offsetWidth);
       }
       if (chartContainerRef.current?.offsetHeight !== chartHeight) {
         setChartHeight(chartContainerRef.current.offsetHeight);
       }
-    }
+    });
+    resizeObserver.observe(chartContainerRef.current);
+    return () => resizeObserver.disconnect();
   }, [chartContainerRef, chartHeight, chartWidth]);
 
   useEffect(() => {

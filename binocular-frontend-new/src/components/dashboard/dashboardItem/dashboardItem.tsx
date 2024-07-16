@@ -6,6 +6,7 @@ import DashboardItemPopout from '../dashboardItemPopout/dashboardItemPopout.tsx'
 import { increasePopupCount } from '../../../redux/general/dashboardReducer.ts';
 import { AppDispatch, RootState, useAppDispatch } from '../../../redux';
 import openInNewGray from '../../../assets/open_in_new_white.svg';
+import openInNewBlack from '../../../assets/open_in_new_black.svg';
 import { useSelector } from 'react-redux';
 import DashboardItemSettings from '../dashboardItemSettings/dashboardItemSettings.tsx';
 import { parametersInitialState } from '../../../redux/parameters/parametersReducer.ts';
@@ -50,8 +51,21 @@ function DashboardItem(props: {
         }}>
         {poppedOut ? (
           <div className={dashboardItemStyles.dashboardItemContent}>
-            <span>Popped Out!</span>
-            <DashboardItemPopout onClosing={() => setPoppedOut(false)}>
+            <div className={dashboardItemStyles.popoutTextContainer}>
+              <div>
+                <img src={openInNewBlack} alt="Open Visualization" style={{ width: '2rem', height: '2rem' }} />
+                <div className={'font-bold text-2xl'}>Popped Out!</div>
+              </div>
+              <button
+                className={'btn btn-sm'}
+                onClick={(event) => {
+                  event.stopPropagation();
+                  setPoppedOut(false);
+                }}>
+                <div>Dispatch Popout</div>
+              </button>
+            </div>
+            <DashboardItemPopout name={plugin.name} onClosing={() => setPoppedOut(false)}>
               <plugin.chartComponent
                 key={plugin.name}
                 settings={settings}
