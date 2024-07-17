@@ -3,8 +3,10 @@
 import PouchDB from 'pouchdb-browser';
 import PouchDBFind from 'pouchdb-find';
 import PouchDBAdapterMemory from 'pouchdb-adapter-memory';
+import WorkerPouch from 'worker-pouch';
 PouchDB.plugin(PouchDBFind);
 PouchDB.plugin(PouchDBAdapterMemory);
+PouchDB.adapter('worker', WorkerPouch);
 
 import Bounds from './localDB/bounds';
 import Commits from './localDB/commits';
@@ -48,6 +50,7 @@ import notes from '../../db_export/notes.json';
 import issuesNotes from '../../db_export/issues-notes.json';
 import mergeRequestsNotes from '../../db_export/mergeRequests-notes.json';
 import notesAccounts from '../../db_export/notes-accounts.json';
+import { decompressJson } from '../../../utils/json-utils.ts';
 
 const collections = { accounts, branches, builds, commits, files, issues, modules, users, mergeRequests, milestones, notes };
 
@@ -74,55 +77,65 @@ const relations = {
 };
 // #v-endif
 
-// create database, index on _id and triple store
-const db = new PouchDB('Binocular_collections', { adapter: 'memory' });
-const tripleStore = new PouchDB('Binocular_triple', { adapter: 'memory' });
+let db;
+let tripleStore;
 
-db.createIndex({
-  index: { fields: ['_id'] },
-});
+const assignDB = (adapter) => {
+  db = new PouchDB('Binocular_collections', { adapter: adapter });
+  tripleStore = new PouchDB('Binocular_triple', { adapter: adapter });
+};
+
+const preprocessCollection = (coll) => {
+  return coll.map((i) => {
+    // key and rev not needed for pouchDB
+    delete i._key;
+    delete i._rev;
+    // rename _from/_to if this is a connection
+    if (i._from !== undefined) {
+      i.from = i._from;
+      i.to = i._to;
+      delete i._from;
+      delete i._to;
+    }
+    return i;
+  });
+};
 
 function importCollection(name) {
-  collections[name].forEach((item) => {
-    delete item._rev;
-    delete item._key;
-
-    db.put(item);
-  });
+  // first decompress the json file, then remove attributes that are not needed by PouchDB
+  db.bulkDocs(preprocessCollection(decompressJson(name, collections[name])));
 }
 
 function importRelation(name) {
-  relations[name].forEach((item) => {
-    delete item._rev;
-    delete item._key;
-
-    item.from = item._from;
-    item.to = item._to;
-    delete item._from;
-    delete item._to;
-
-    item.relation = name;
-    tripleStore.put(item);
-  });
+  // first decompress the json file, then remove attributes that are not needed by PouchDB
+  tripleStore.bulkDocs(preprocessCollection(decompressJson(name, relations[name])));
 }
 
 function importData() {
-  Object.keys(collections).forEach((name) => {
+  Object.keys(collections).map((name) => {
     console.log(`Importing collection ${name}`);
-
     importCollection(name);
   });
 
-  Object.keys(relations).forEach((name) => {
+  Object.keys(relations).map((name) => {
     console.log(`Importing relation ${name}`);
-
     importRelation(name);
   });
 }
 
 export default class LocalDB {
-  static initDB() {
-    importData();
+  static async initDB() {
+    // check if web workers are supported
+    return WorkerPouch.isSupportedBrowser().then((supported) => {
+      if (supported) {
+        // using web workers does not block the main thread, making the UI load faster.
+        // note: worker adapter does not support custom indices!
+        assignDB('worker');
+      } else {
+        assignDB('memory');
+      }
+      importData();
+    });
   }
 
   static getBounds() {
