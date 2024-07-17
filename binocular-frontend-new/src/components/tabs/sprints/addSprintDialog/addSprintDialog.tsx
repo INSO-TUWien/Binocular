@@ -34,7 +34,7 @@ function AddSprintDialog() {
             type="text"
             placeholder="Type here"
             value={name}
-            className="input input-bordered w-full max-w-xs"
+            className="input input-xs input-bordered w-full"
             onChange={(e) => setName(e.target.value)}
           />
         </label>
@@ -45,7 +45,7 @@ function AddSprintDialog() {
           <input
             type="datetime-local"
             value={from}
-            className="input input-bordered w-full max-w-xs"
+            className="input input-xs input-bordered w-full"
             onChange={(e) => setFrom(e.target.value)}
           />
         </label>
@@ -56,7 +56,7 @@ function AddSprintDialog() {
           <input
             type="datetime-local"
             value={to}
-            className="input input-bordered w-full max-w-xs"
+            className="input input-xs input-bordered w-full"
             onChange={(e) => setTo(e.target.value)}
           />
         </label>

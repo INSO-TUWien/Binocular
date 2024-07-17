@@ -4,4 +4,5 @@ export interface AuthorType {
   parent: number;
   color: { main: string; secondary: string };
   selected: boolean;
+  displayName?: string;
 }

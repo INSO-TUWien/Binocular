@@ -1,0 +1,20 @@
+@import '../../../../variables.scss';
+
+.colorPicker{
+  border-radius: 100%;
+  border: 2px solid;
+  width: 2rem;
+  height: 2rem;
+  background-image: url('../../../../assets/edit_black.svg');
+  background-size: 80%;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+.colorPicker::-moz-color-swatch{
+  display: none;
+}
+
+.colorPicker::-webkit-color-swatch{
+  display: none;
+}

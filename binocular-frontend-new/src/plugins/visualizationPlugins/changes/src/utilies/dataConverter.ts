@@ -96,33 +96,37 @@ export function convertCommitDataToChangesChartData(
 
       if (splitAdditionsDeletions) {
         for (const author of authors) {
-          commitPalette['(Additions) ' + author.name] = {
+          commitPalette['(Additions) ' + author.displayName || author.name] = {
             main: chroma(author.color.main).hex(),
             secondary: chroma(author.color.secondary).hex(),
           };
-          commitPalette['(Deletions) ' + author.name] = {
+          commitPalette['(Deletions) ' + author.displayName || author.name] = {
             main: chroma(author.color.main).darken(0.5).hex(),
             secondary: chroma(author.color.secondary).darken(0.5).hex(),
           };
-          obj['(Additions) ' + author.name] = 0.001;
-          obj['(Deletions) ' + author.name] = -0.001; //-0.001 for stack layout to realize it belongs on the bottom
+          obj['(Additions) ' + author.displayName || author.name] = 0.001;
+          obj['(Deletions) ' + author.displayName || author.name] = -0.001; //-0.001 for stack layout to realize it belongs on the bottom
         }
         obj['(Additions) others'] = 0;
         obj['(Deletions) others'] = -0.001;
       } else {
         for (const author of authors) {
-          commitPalette[author.name] = {
+          commitPalette[author.displayName || author.name] = {
             main: chroma(author.color.main).hex(),
             secondary: chroma(author.color.secondary).hex(),
           };
-          obj[author.name] = 0;
+          obj[author.displayName || author.name] = 0;
         }
         obj['others'] = 0;
       }
       authors.forEach((author) => {
         if (!author.selected) return;
         const name =
-          author.parent === -1 ? author.name : author.parent === 0 ? 'others' : authors.filter((a) => a.id === author.parent)[0].name;
+          author.parent === -1
+            ? author.displayName || author.name
+            : author.parent === 0
+              ? 'others'
+              : authors.filter((a) => a.id === author.parent)[0].name;
         if (splitAdditionsDeletions) {
           if (author.name in commit.statsByAuthor) {
             //Insert number of changes with the author name as key,

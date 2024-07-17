@@ -1,10 +1,21 @@
 import authorListStyles from './authorList.module.scss';
 import { useSelector } from 'react-redux';
 import { AppDispatch, RootState, useAppDispatch } from '../../../../redux';
-import { setAuthorList, setDragging } from '../../../../redux/data/authorsReducer.ts';
+import {
+  editAuthor,
+  moveAuthorToOther,
+  resetAuthor,
+  setAuthorList,
+  setDragging,
+  switchAuthorSelection,
+} from '../../../../redux/data/authorsReducer.ts';
 import { useEffect } from 'react';
 import { dataPlugins } from '../../../../plugins/pluginRegistry.ts';
 import distinctColors from 'distinct-colors';
+import { showContextMenu } from '../../../contextMenu/contextMenuHelper.ts';
+import addToOtherIcon from '../../../../assets/group_add_black.svg';
+import editIcon from '../../../../assets/edit_black.svg';
+
 function AuthorList(props: { orientation?: string }) {
   const dispatch: AppDispatch = useAppDispatch();
 
@@ -64,18 +75,7 @@ function AuthorList(props: { orientation?: string }) {
                       type={'checkbox'}
                       className={'checkbox checkbox-accent ' + authorListStyles.authorCheckbox}
                       defaultChecked={parentAuthor.selected}
-                      onChange={(e) =>
-                        dispatch(
-                          setAuthorList(
-                            authors.map((a) => {
-                              if (a.id === parentAuthor.id) {
-                                return { name: a.name, id: a.id, color: a.color, parent: a.parent, selected: e.target.checked };
-                              }
-                              return a;
-                            }),
-                          ),
-                        )
-                      }
+                      onChange={() => dispatch(switchAuthorSelection(parentAuthor.id))}
                     />
                     <div
                       style={{ borderColor: parentAuthor.color.main }}
@@ -106,9 +106,25 @@ function AuthorList(props: { orientation?: string }) {
                         setTimeout(() => dispatch(setDragging(true), 1));
                         event.dataTransfer.setData('draggingAuthorId', String(parentAuthor.id));
                       }}
-                      onDragEnd={() => dispatch(setDragging(false))}>
+                      onDragEnd={() => dispatch(setDragging(false))}
+                      onContextMenu={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        showContextMenu(e.clientX, e.clientY, [
+                          {
+                            label: 'edit author',
+                            icon: editIcon,
+                            function: () => dispatch(editAuthor(parentAuthor.id)),
+                          },
+                          {
+                            label: 'move to other',
+                            icon: addToOtherIcon,
+                            function: () => dispatch(moveAuthorToOther(parentAuthor.id)),
+                          },
+                        ]);
+                      }}>
                       <div style={{ background: parentAuthor.color.secondary }} className={authorListStyles.authorNameBackground}></div>
-                      <div className={authorListStyles.authorNameText}>{parentAuthor.name}</div>
+                      <div className={authorListStyles.authorNameText}>{parentAuthor.displayName || parentAuthor.name}</div>
                     </div>
                   </div>
                   {authors
@@ -141,9 +157,25 @@ function AuthorList(props: { orientation?: string }) {
 
                               event.dataTransfer.setData('draggingAuthorId', String(author.id));
                             }}
-                            onDragEnd={() => dispatch(setDragging(false))}>
+                            onDragEnd={() => dispatch(setDragging(false))}
+                            onContextMenu={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              showContextMenu(e.clientX, e.clientY, [
+                                {
+                                  label: 'edit author',
+                                  icon: editIcon,
+                                  function: () => dispatch(editAuthor(author.id)),
+                                },
+                                {
+                                  label: 'move to other',
+                                  icon: addToOtherIcon,
+                                  function: () => dispatch(moveAuthorToOther(author.id)),
+                                },
+                              ]);
+                            }}>
                             <div style={{ background: author.color.secondary }} className={authorListStyles.authorNameBackground}></div>
-                            <div className={authorListStyles.authorNameText}>{author.name}</div>
+                            <div className={authorListStyles.authorNameText}>{author.displayName || author.name}</div>
                           </div>
                         </div>
                       );
@@ -165,19 +197,7 @@ function AuthorList(props: { orientation?: string }) {
           onDrop={(event) => {
             event.stopPropagation();
             dispatch(setDragging(false));
-            dispatch(
-              setAuthorList(
-                authors.map((a) => {
-                  if (a.parent === Number(event.dataTransfer.getData('draggingAuthorId'))) {
-                    return { name: a.name, id: a.id, color: a.color, parent: -1, selected: a.selected };
-                  }
-                  if (a.id === Number(event.dataTransfer.getData('draggingAuthorId'))) {
-                    return { name: a.name, id: a.id, color: a.color, parent: -1, selected: a.selected };
-                  }
-                  return a;
-                }),
-              ),
-            );
+            dispatch(resetAuthor(Number(event.dataTransfer.getData('draggingAuthorId'))));
           }}
           onDragOver={(event) => event.preventDefault()}>
           <span>Drop here to remove Parent!</span>
