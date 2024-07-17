@@ -37,10 +37,12 @@ interface CommitChartData {
   commitType: [{label: string; value: number}];
 }
 
+
 export default (props: Props) => {
   const [commitChartData, setCommitChartData] = React.useState<CommitChartData[]>([]);
   const [maxTime, setMaxTime] = React.useState({ estimated: 0, actual: 0 });
   const [maxChange, setMaxChange] = React.useState(0);
+  const [page, setPage] = React.useState(0);
 
   React.useEffect(() => {
     const fetchData = async () => {
@@ -56,23 +58,85 @@ export default (props: Props) => {
   React.useEffect(() => {
     if (commitChartData.length > 0) {
       console.log(commitChartData);
-      drawChart(commitChartData);
+      const numberOfPages = Math.ceil(commitChartData.length / 50.0);
+      drawChart(commitChartData, numberOfPages);
     }
-  }, [commitChartData]);
+  }, [commitChartData, page]);
 
-
-
-  const drawChart = (data: CommitChartData[]) => {
-    drawUpperChart(data);
-    drawNodeChart(data);
-    drawLowerChart(data);
+  const drawChart = (data: CommitChartData[], numberOfPages: number) => {
+    const pagedData = data.slice(page * 50, 50 + page * 50);
+    drawUpperChart(pagedData);
+    drawNodeChart(pagedData);
+    drawLowerChart(pagedData);
+    drawNavigation(numberOfPages);
   };
+
+  const drawNavigation = function (numberOfPages: number) {
+    const height = 25;
+
+    // Create the SVG container
+    const svgLeftArrow = d3.select("#navigation")
+      .html("")
+      .append("svg")
+      .attr("width", 25)
+      .attr("height", height);
+
+    svgLeftArrow.append("path")
+      .attr("d", "M20,0 L20,25 L0,12.5 Z")
+      .attr("class", "arrowhead")
+      .on("click", () => {
+        if (page < 1) {
+          return;
+        }
+        setPage(page - 1);
+      });
+
+    const inputDiv = d3.select("#navigation")
+      .append("div")
+      .attr("style", `vertical-align: top; width: 75; height: ${height}; display: inline`);
+
+    const input = inputDiv
+      .append("input")
+      .attr("type", "text")
+      .attr("style", `text-align: center;font-size: 16px; width: 20; height: ${height}`)
+      .attr('value', page + 1)
+      .on("change", (e) => {
+        if (isNaN(e.target.value)) {
+          e.target.value = "";
+        }
+        if (+e.target.value > 0 && +e.target.value <= numberOfPages) {
+          setPage(+e.target.value - 1);
+        }
+      });
+
+    const pageNumber = inputDiv
+      .append("span")
+      .attr("style", `width: 20; height: ${height}`)
+      .html(`/${numberOfPages}`);
+
+    const svgRightArrow = d3.select("#navigation")
+      .append("svg")
+      .attr("width", 25)
+      .attr("height", height);
+
+    // Append the arrowhead path directly to the SVG container
+    svgRightArrow.append("path")
+      .attr("d", "M5,0 L5,25 L25,12.5 Z")
+      .attr("class", "arrowhead")
+      .on("click", () => {
+        if (page + 1 >= numberOfPages) {
+          return;
+        }
+        setPage(page + 1);
+      });
+  }
 
   return (
     <span style={{height: '100%'}}>
-      <div id="upperChart" style={{height: 'calc(50% - 20px)'}}>upperChart</div>
+      <div id="upperChart" style={{height: 'calc(50% - 42.5px)'}}>upperChart</div>
       <div id="nodeChart" style={{height: '40px'}}> Nodes </div>
-      <div id="lowerChart" style={{height: 'calc(50% - 20px)'}}>lowerChart</div>
+      <div id="lowerChart" style={{height: 'calc(50% - 42.5px)'}}>lowerChart</div>
+      <div id="navigation" style={{margin: '10px 0px 10px 10px', fill: 'black', height: '25px'}}></div>
     </span>
   );
 };
@@ -185,7 +249,7 @@ function drawLowerChart(data: CommitChartData[]) {
     .attr("x", d => x(d.date.toString()))
     .attr("y", 0) // Set y to 0 to start from the top
     .attr("width", x.bandwidth())
-    .attr("height", d => y(Math.log2(d.lineChanges))) // Height is directly proportional to the estimated time spent
+    .attr("height", d => d.lineChanges <= 0 ? 0 : y(Math.log2(d.lineChanges)) < 1 ? 1 : y(Math.log2(d.lineChanges))) // Height is directly proportional to the estimated time spent
     .attr("fill", d => color(d.commitType[0].label));
 }
 
@@ -216,7 +280,7 @@ const extractCommitData = async (props: Props): Promise<{ commitChartData: Commi
   const maxTime = {estimated: Math.max(...commitChartData.map(data => data.timeSpent.estimated)),
     actual: Math.max(...commitChartData.map(data => data.timeSpent.actual))};
   const maxChange = Math.max(...commitChartData.map(data => data.lineChanges));
-  return { commitChartData: commitChartData.slice(0,40), maxTime: maxTime, maxChange: maxChange};
+  return { commitChartData: commitChartData, maxTime: maxTime, maxChange: maxChange};
 };
 
 const firstCommitAdd = 120; // TODO: Replace constant with variable from state;
