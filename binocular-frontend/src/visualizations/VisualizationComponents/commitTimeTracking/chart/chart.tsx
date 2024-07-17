@@ -34,22 +34,17 @@ interface CommitChartData {
   commitMessage: string;
   author: string;
   date: Date;
-  commitType: [{label: string; value: number}];
+  commitType: {label: string; value: number}[];
 }
 
 
 export default (props: Props) => {
   const [commitChartData, setCommitChartData] = React.useState<CommitChartData[]>([]);
-  const [maxTime, setMaxTime] = React.useState({ estimated: 0, actual: 0 });
-  const [maxChange, setMaxChange] = React.useState(0);
   const [page, setPage] = React.useState(0);
 
   React.useEffect(() => {
     const fetchData = async () => {
-      const extractedCommitData = await extractCommitData(props);
-      setCommitChartData(extractedCommitData.commitChartData);
-      setMaxTime(extractedCommitData.maxTime);
-      setMaxChange(extractedCommitData.maxChange);
+      setCommitChartData(await extractCommitData(props));
     };
 
     fetchData();
@@ -143,8 +138,8 @@ export default (props: Props) => {
 
 function drawUpperChart(data: CommitChartData[]) {
   const margin = {top: 40, right: 30, bottom: 0, left: 40};
-  const width = visualViewport?.width - 511 - margin.left - margin.right;
-  const height = 449.5 - margin.top;
+  const width = (visualViewport?.width ?? 1920) - 511 - margin.left - margin.right;
+  const height = (visualViewport?.height ? (visualViewport?.height - 40 - 25) / 2 : 427) - margin.bottom;
 
   const svg = d3.select("#upperChart")
     .html("")
@@ -160,12 +155,13 @@ function drawUpperChart(data: CommitChartData[]) {
     .padding(0.1);
 
   const y = d3.scaleLinear()
-    .domain([0, d3.max(data, d => d.timeSpent.estimated)])
+    .domain([0, d3.max(data, d => d.timeSpent.estimated) || 0])
     .nice()
     .range([height, 0]);
 
   const color = d3.scaleOrdinal()
     .domain(['corrective', 'features', 'unknown', 'nonfunctional', 'perfective'])
+    .unknown('#000000')
     .range(['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd']);
 
   svg.append("g")
@@ -174,16 +170,16 @@ function drawUpperChart(data: CommitChartData[]) {
     .enter()
     .append("rect")
     .attr("class", "bar")
-    .attr("x", d => x(d.date.toString()))
+    .attr("x", d => x(d.date.toString())!)
     .attr("y", d => y(d.timeSpent.estimated))
     .attr("width", x.bandwidth())
     .attr("height", d => height - y(d.timeSpent.estimated))
-    .attr("fill", d => color(d.commitType[0].label));
+    .attr("fill", d => color(d.commitType[0].label) as string);
 }
 
 function drawNodeChart(data: CommitChartData[]) {
   const margin = { top: 5, right: 30, bottom: 5, left: 40 };
-  const width = visualViewport?.width - 511 - margin.left - margin.right || 600; // Fallback width
+  const width = (visualViewport?.width ?? 1920)- 511 - margin.left - margin.right || 600; // Fallback width
   const height = 40;
 
   const svg = d3.select("#nodeChart")
@@ -194,29 +190,25 @@ function drawNodeChart(data: CommitChartData[]) {
     .append("g")
     .attr("transform", `translate(${margin.left},${margin.top})`);
 
-  // Create a scale for x based on the number of nodes
   const x = d3.scaleBand()
     .domain(data.map(d => d.date.toString()))
     .range([0, width])
     .padding(0.1);
 
-  // Append circles (nodes) along the x-axis
   svg.selectAll(".node")
     .data(data)
     .enter()
     .append("circle")
     .attr("class", "node")
-    .attr("cx", d => x(d.date.toString()) + x.bandwidth() / 2) // Center the node along x-axis
-    .attr("cy", height / 2 - Math.min(15, x.bandwidth() / 2) / 3) // Place nodes at the middle of the chart
-    .attr("r", Math.min(15, x.bandwidth() / 2)) // Radius of the nodes
-    .attr("stroke", "#000") // Add a border around nodes
-    .attr("stroke-width", 1); // Width of the border
+    .attr("cx", d => (x(d.date.toString()) ?? 0) + x.bandwidth() / 2)
+    .attr("cy", height / 2 - Math.min(15, x.bandwidth() / 2) / 3)
+    .attr("r", Math.min(15, x.bandwidth() / 2))
 }
 
 function drawLowerChart(data: CommitChartData[]) {
   const margin = {top: 0, right: 30, bottom: 40, left: 40};
-  const width = visualViewport?.width - 511 - margin.left - margin.right;
-  const height = 449.5 - margin.bottom; // Define the height of the chart area
+  const width = (visualViewport?.width ?? 1920) - 511 - margin.left - margin.right;
+  const height = (visualViewport?.height ? (visualViewport?.height - 40 - 25) / 2 : 427) - margin.bottom;
 
   const svg = d3.select("#lowerChart")
     .html("")
@@ -232,12 +224,13 @@ function drawLowerChart(data: CommitChartData[]) {
     .padding(0.1);
 
   const y = d3.scaleLinear()
-    .domain([0, d3.max(data, d => Math.log2(d.lineChanges))])
+    .domain([0, d3.max(data, d => Math.log2(d.lineChanges)) || 0])
     .nice()
     .range([0, height]);
 
   const color = d3.scaleOrdinal()
     .domain(['corrective', 'features', 'unknown', 'nonfunctional', 'perfective'])
+    .unknown('#000000')
     .range(['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd']);
 
   svg.append("g")
@@ -246,27 +239,27 @@ function drawLowerChart(data: CommitChartData[]) {
     .enter()
     .append("rect")
     .attr("class", "bar")
-    .attr("x", d => x(d.date.toString()))
-    .attr("y", 0) // Set y to 0 to start from the top
+    .attr("x", d => x(d.date.toString())!)
+    .attr("y", 0)
     .attr("width", x.bandwidth())
-    .attr("height", d => d.lineChanges <= 0 ? 0 : y(Math.log2(d.lineChanges)) < 1 ? 1 : y(Math.log2(d.lineChanges))) // Height is directly proportional to the estimated time spent
-    .attr("fill", d => color(d.commitType[0].label));
+    .attr("height", d => d.lineChanges <= 0 ? 0 : y(Math.log2(d.lineChanges)) < 1 ? 1 : y(Math.log2(d.lineChanges)))
+    .attr("fill", d=> color(d.commitType[0].label) as string);
 }
 
-const extractCommitData = async (props: Props): Promise<{ commitChartData: CommitChartData[]; maxTime: { estimated: number; actual: number; }; maxChange: number; }> => {
+const extractCommitData = async (props: Props): Promise<CommitChartData[]> => {
   if (!props.commits || props.commits.length === 0) {
-    return { commitChartData: [], maxTime: {estimated: 0, actual: 0}, maxChange: 0 };
+    return [];
   }
 
   const filteredCommits = props.commits.filter((value, index, array) => array.findIndex((el) => el.date === value.date) === index);
   const commitsWithDate = filteredCommits.map(commit => {
-    return {...commit, date : new Date(commit.date), commitType: [], timeSpent: {estimated: 0, actual: 0}};
+    return {...commit, date : new Date(commit.date), commitType: [{label: 'unknown', value: 1}], timeSpent: {estimated: 0, actual: 0}};
   })
   await addTypeToCommits(commitsWithDate)
   const sortedCommits = commitsWithDate.sort((a, b) => a.date.getTime() - b.date.getTime());
   addActualTime(sortedCommits);
   addEstimatedTime(sortedCommits, props);
-  const commitChartData = commitsWithDate.map(c => {
+  return commitsWithDate.map(c => {
     return {
       commitType: c.commitType,
       timeSpent: c.timeSpent,
@@ -274,20 +267,14 @@ const extractCommitData = async (props: Props): Promise<{ commitChartData: Commi
       lineChanges: c.stats.additions + c.stats.deletions,
       commitMessage: c.message,
       date: c.date,
-      author: c.signature.substring(0, c.signature.indexOf('<') - 1)};
+      author: c.signature.substring(0, c.signature.indexOf('<') - 1)
+    };
   });
-
-  const maxTime = {estimated: Math.max(...commitChartData.map(data => data.timeSpent.estimated)),
-    actual: Math.max(...commitChartData.map(data => data.timeSpent.actual))};
-  const maxChange = Math.max(...commitChartData.map(data => data.lineChanges));
-  return { commitChartData: commitChartData, maxTime: maxTime, maxChange: maxChange};
 };
 
-const firstCommitAdd = 120; // TODO: Replace constant with variable from state;
-const maxCommitDiff = 120; // TODO: Replace constant with variable from state;
-
 function addEstimatedTime(commits: any[], props: Props) {
-
+  const firstCommitAdd = 120; // TODO: Replace constant with variable from state;
+  const maxCommitDiff = 120; // TODO: Replace constant with variable from state;
   const mergedAuthors = [...props.mergedAuthors].filter(author => props.selectedAuthors.includes(author.mainCommitter));
   mergedAuthors.forEach(mergedAuthor => {
     const filteredCommits = commits.filter(commit => _.map(mergedAuthor.committers, 'signature').includes(commit.signature));
@@ -330,7 +317,7 @@ async function addTypeToCommits(commits: any[]) {
       if (!commitType || commitType.length === 0) {
         c.commitType = [{label: 'unknown', value: 1}];
       } else {
-        c.commitType = commitType.map(type => {
+        c.commitType = commitType.map((type: { label: string; value: any; }) => {
           return {label: type.label.substring(9), value: type.value};
         });
       }
