@@ -3,7 +3,7 @@
 import { findAll } from './utils';
 
 export default class Comments {
-  static getIssueData(db, relations, issueSpan, significantSpan) {
+  static getCommentData(db, relations, issueSpan, significantSpan) {
     return findAll(db, 'comments').then((res) => {
       res.docs = res.docs
         .sort((a, b) => {

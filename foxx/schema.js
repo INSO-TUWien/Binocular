@@ -284,12 +284,16 @@ const queryType = new gql.GraphQLObjectType({
         type: require('./types/comment.js'),
         args: {
           sort: { type: Sort },
+          since: { type: Timestamp },
+          until: { type: Timestamp },
         },
         query: (root, args, limit) => {
           return aql`
             FOR comment
             IN ${comments}
             SORT comment.createdAt ${args.sort}
+            ${args.since ? queryHelpers.addDateFilterAQL('mergeRequest.createdAt', '>=', args.since) : aql``}
+            ${args.until ? queryHelpers.addDateFilterAQL('mergeRequest.createdAt', '<=', args.until) : aql``}
             ${limit}
             RETURN comment`;
         },
@@ -300,7 +304,6 @@ const queryType = new gql.GraphQLObjectType({
           return aql`
             FOR reviewThread
             IN ${reviewThreads}
-            ${limit}
             RETURN reviewThread`;
         },
       }),

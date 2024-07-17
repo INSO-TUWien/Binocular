@@ -18,20 +18,35 @@ export default function* () {
 
 export const fetchCodeReviewMetricsData = fetchFactory(
   function* () {
-    const { firstMergeRequest, lastMergeRequest } = yield Database.getBounds();
+    const { firstMergeRequest, lastMergeRequest, firstComment, lastComment } = yield Database.getBounds();
 
     const firstMergeRequestTimestamp = Date.parse(firstMergeRequest.date);
-    const lastMergeRequestTimestamp = Date.parse(firstMergeRequest.date);
+    const lastMergeRequestTimestamp = Date.parse(lastMergeRequest.date);
+    const firstCommentTimestamp = Date.parse(firstComment.date);
+    const lastCommentTimestamp = Date.parse(lastComment.date);
 
-    return yield Promise.resolve(
-      Database.getMergeRequestData(
-        [firstMergeRequestTimestamp, lastMergeRequestTimestamp],
-        [firstMergeRequestTimestamp, lastMergeRequestTimestamp],
-      ),
-    ).then((result) => {
-      const mergeRequests = result;
+    return yield Promise.all([
+      new Promise((resolve) => {
+        Database.getMergeRequestData(
+          [firstMergeRequestTimestamp, lastMergeRequestTimestamp],
+          [firstMergeRequestTimestamp, lastMergeRequestTimestamp],
+        ).then(resolve);
+      }),
+      new Promise((resolve) => {
+        Database.getCommentData([firstCommentTimestamp, lastCommentTimestamp], [firstCommentTimestamp, lastCommentTimestamp]).then(resolve);
+      }),
+      new Promise((resolve) => {
+        Database.getReviewThreadData().then(resolve);
+      }),
+    ]).then((values) => {
+      const mergeRequests = values[0];
+      const comments = values[1];
+      const reviewThreads = values[2];
+      console.log(reviewThreads);
       return {
         mergeRequests,
+        comments,
+        reviewThreads,
       };
     });
   },

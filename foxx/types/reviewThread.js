@@ -1,9 +1,12 @@
 'use strict';
 
 const gql = require('graphql-sync');
+const arangodb = require('@arangodb');
+const db = arangodb.db;
+const aql = arangodb.aql;
 
 module.exports = new gql.GraphQLObjectType({
-  name: 'ReviewThread',
+  name: 'reviewThread',
   description: 'A review thread',
   fields() {
     return {
@@ -23,9 +26,28 @@ module.exports = new gql.GraphQLObjectType({
         type: gql.GraphQLString,
         description: 'the path to the file this thread is referencing',
       },
+      rt: {
+        type: gql.GraphQLString,
+        resolve(reviewThread) {
+          return reviewThread._id;
+        },
+      },
       comments: {
         type: new gql.GraphQLList(require('./comment.js')),
         description: 'the comments belonging to this review thread',
+        resolve(reviewThread) {
+          return db
+            ._query(
+              aql`
+              FOR rtc IN \`reviewThreads-comments\`
+              FILTER rtc._from == ${reviewThread._id}
+              FOR comment IN comments
+              FILTER comment._id == rtc._to
+              RETURN comment
+            `,
+            )
+            .toArray();
+        },
       },
     };
   },

@@ -11,6 +11,7 @@ import Branches from './serverDB/branches';
 import Modules from './serverDB/modules';
 import Stakeholders from './serverDB/stakeholders';
 import Comments from './serverDB/comments';
+import ReviewThreads from './serverDB/reviewThreads';
 
 export default class ServerDB {
   static getBounds() {
@@ -119,6 +120,10 @@ export default class ServerDB {
 
   static getCommentData(commentSpan, significantSpan) {
     return Comments.getCommentData(commentSpan, significantSpan);
+  }
+
+  static getReviewThreadData() {
+    return ReviewThreads.getReviewThreadData();
   }
 
   static getDatabase() {

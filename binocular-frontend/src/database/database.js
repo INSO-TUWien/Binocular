@@ -181,6 +181,17 @@ export default class Database {
   }
 
   /**
+   * REVIEW THREADS
+   */
+  static async getReviewThreadData() {
+    if (await this.checkBackendConnection()) {
+      return ServerDB.getReviewThreadData();
+    } else {
+      return LocalDB.getReviewThreadData();
+    }
+  }
+
+  /**
    * MILESTONES
    */
   static async getMilestoneData() {

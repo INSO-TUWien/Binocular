@@ -27,18 +27,6 @@ export default class Comments {
                 lastEditedAt
                 path
                 bodyText
-                comments {
-                  id
-                  author {
-                    login
-                    name
-                  }
-                  createdAt
-                  updatedAt
-                  lastEditedAt
-                  path
-                  bodyText
-                }
               }
             }
           }`,
