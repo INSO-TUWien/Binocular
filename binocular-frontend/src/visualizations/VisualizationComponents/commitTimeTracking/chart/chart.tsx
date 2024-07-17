@@ -195,6 +195,17 @@ function drawNodeChart(data: CommitChartData[]) {
     .range([0, width])
     .padding(0.1);
 
+  const tooltip = d3.select("body")
+    .append("div")
+    .attr("class", "tooltip")
+    .style("position", "absolute")
+    .style("background", "#f4d5a6")
+    .style("border", "1px solid #000")
+    .style("padding", "10px")
+    .style("display", "none")
+    .style("border-radius", "10px")
+    .style("opacity", 0.9);
+
   svg.selectAll(".node")
     .data(data)
     .enter()
@@ -203,6 +214,31 @@ function drawNodeChart(data: CommitChartData[]) {
     .attr("cx", d => (x(d.date.toString()) ?? 0) + x.bandwidth() / 2)
     .attr("cy", height / 2 - Math.min(15, x.bandwidth() / 2) / 3)
     .attr("r", Math.min(15, x.bandwidth() / 2))
+    .on("click", (event, d) => {
+      tooltip
+        .html(`
+            Author: ${d.author}<br>
+            Date: ${d.date.toLocaleDateString()}<br>
+            Lines changed: ${d.lineChanges} lines<br>
+            Time spent: ${d.timeSpent.estimated} minutes<br>
+            Commit type: ${d.commitType[0].label}<br>
+            <a href="${d.commitLink}" target=”_blank”>Link to commit</a>`)
+        .style("display", "block");
+
+      const tooltipWidth = +(tooltip.style('width').substring(0, tooltip.style('width').length - 2));
+      const tooltipHeight = +tooltip.style('height').substring(0, tooltip.style('height').length - 2);
+      tooltip
+        .style("left", `${event.x - tooltipWidth / 2}px`)
+        .style("top", `calc(50% - ${35 + tooltipHeight}px)`);
+
+    });
+
+  d3.select(document).on("click", event => {
+    const target = event.target;
+    if (!target.closest(".node") && !target.closest(".tooltip")) {
+      tooltip.style("display", "none");
+    }
+  });
 }
 
 function drawLowerChart(data: CommitChartData[]) {
