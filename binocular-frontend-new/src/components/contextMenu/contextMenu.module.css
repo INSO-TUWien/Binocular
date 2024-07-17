@@ -1,0 +1,27 @@
+.contextMenu {
+  background: transparent;
+  width: 100%;
+  height: 100%;
+  position: relative;
+  margin: 0;
+}
+
+.contextMenu::backdrop {
+  background: transparent;
+}
+
+.contextMenu > div {
+  position: absolute;
+  top: 100px;
+}
+
+.contextMenu > div > ul {
+  @apply menu;
+  @apply bg-base-100;
+  @apply rounded;
+  @apply w-56;
+  border-top-left-radius: 0;
+  box-shadow: 0 0 10px #CCCCCC;
+}
+
+/*# sourceMappingURL=contextMenu.module.css.map */
