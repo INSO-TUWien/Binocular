@@ -63,28 +63,25 @@ export default (props: Props) => {
     drawUpperChart(pagedData);
     drawNodeChart(pagedData);
     drawLowerChart(pagedData);
-    drawNavigation(numberOfPages);
+    if (numberOfPages > 1) drawNavigation(numberOfPages);
   };
 
   const drawNavigation = function (numberOfPages: number) {
     const height = 25;
 
-    // Create the SVG container
     const svgLeftArrow = d3.select("#navigation")
       .html("")
       .append("svg")
       .attr("width", 25)
       .attr("height", height);
 
-    svgLeftArrow.append("path")
-      .attr("d", "M20,0 L20,25 L0,12.5 Z")
-      .attr("class", "arrowhead")
-      .on("click", () => {
-        if (page < 1) {
-          return;
-        }
-        setPage(page - 1);
-      });
+    if (page > 0 && numberOfPages > 1) {
+      svgLeftArrow.append("path")
+        .attr("d", "M20,0 L20,25 L0,12.5 Z")
+        .attr("class", "arrowhead")
+        .on("click", () => setPage(page - 1)
+        );
+    }
 
     const inputDiv = d3.select("#navigation")
       .append("div")
@@ -114,16 +111,12 @@ export default (props: Props) => {
       .attr("width", 25)
       .attr("height", height);
 
-    // Append the arrowhead path directly to the SVG container
-    svgRightArrow.append("path")
-      .attr("d", "M5,0 L5,25 L25,12.5 Z")
-      .attr("class", "arrowhead")
-      .on("click", () => {
-        if (page + 1 >= numberOfPages) {
-          return;
-        }
-        setPage(page + 1);
-      });
+    if (page + 1 < numberOfPages) {
+      svgRightArrow.append("path")
+        .attr("d", "M5,0 L5,25 L25,12.5 Z")
+        .attr("class", "arrowhead")
+        .on("click", () => setPage(page + 1));
+    }
   }
 
   return (
@@ -138,7 +131,7 @@ export default (props: Props) => {
 
 function drawUpperChart(data: CommitChartData[]) {
   const margin = {top: 40, right: 30, bottom: 0, left: 40};
-  const width = (visualViewport?.width ?? 1920) - 511 - margin.left - margin.right;
+  const width = ((visualViewport?.width ?? 1920) - 511 - margin.left - margin.right) * (data.length / 50.0);
   const height = (visualViewport?.height ? (visualViewport?.height - 40 - 25) / 2 : 427) - margin.bottom;
 
   const svg = d3.select("#upperChart")
@@ -179,7 +172,7 @@ function drawUpperChart(data: CommitChartData[]) {
 
 function drawNodeChart(data: CommitChartData[]) {
   const margin = { top: 5, right: 30, bottom: 5, left: 40 };
-  const width = (visualViewport?.width ?? 1920)- 511 - margin.left - margin.right || 600; // Fallback width
+  const width = ((visualViewport?.width ?? 1920) - 511 - margin.left - margin.right) * (data.length / 50.0);
   const height = 40;
 
   const svg = d3.select("#nodeChart")
@@ -243,7 +236,7 @@ function drawNodeChart(data: CommitChartData[]) {
 
 function drawLowerChart(data: CommitChartData[]) {
   const margin = {top: 0, right: 30, bottom: 40, left: 40};
-  const width = (visualViewport?.width ?? 1920) - 511 - margin.left - margin.right;
+  const width = ((visualViewport?.width ?? 1920) - 511 - margin.left - margin.right) * (data.length / 50.0);
   const height = (visualViewport?.height ? (visualViewport?.height - 40 - 25) / 2 : 427) - margin.bottom;
 
   const svg = d3.select("#lowerChart")
