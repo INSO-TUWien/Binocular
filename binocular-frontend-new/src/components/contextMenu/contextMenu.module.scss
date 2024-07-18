@@ -2,10 +2,13 @@
 
 .contextMenu{
   background: transparent;
-  width: 100%;
-  height: 100%;
-  position: relative;
+  width: 100vw;
+  max-width: 100vw;
+  height: 100vh;
+  max-height: 100vh;
+  position: fixed;
   margin: 0;
+  overflow: hidden;
 }
 
 .contextMenu::backdrop{
