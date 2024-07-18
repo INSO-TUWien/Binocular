@@ -90,6 +90,8 @@ class ChartComponent extends React.Component<Props, State> {
       this.filterCollectionForSelectedAuthors(mergeRequest.assignee, mergeRequest.assignees, props, assigneeCounts);
     });
 
+    console.error(assigneeCounts);
+
     return assigneeCounts;
   }
 
@@ -111,26 +113,27 @@ class ChartComponent extends React.Component<Props, State> {
     const colors = ['#6cc644', '#bd2c00', '#6e5494'];
 
     for (const person of collection) {
-      let authorHit = false;
-      let filter = false;
+      let shouldDisplay = false;
       let col = colors[Math.floor(Math.random() * (2 - 0 + 1) + 0)];
 
       for (const author of Object.keys(props.allAuthors)) {
         const authorName = author.split('<')[0].slice(0, -1).replace(/\s+/g, '');
 
         if (person.login === authorName) {
-          authorHit = true;
           col = props.allAuthors[author];
           if (props.selectedAuthors.filter((a: string) => a === author).length > 0) {
-            filter = !props.mergeRequestOwnershipState.config.onlyShowAuthors;
+            shouldDisplay = true;
             break;
           }
         }
       }
 
-      if (authorHit && !filter) return;
+      // if the person is not an author => add depending on settings
+      if (!shouldDisplay) shouldDisplay = !props.mergeRequestOwnershipState.config.onlyShowAuthors;
+      if (!shouldDisplay) return;
+
       const [count, color] = map.get(person.login) || [0, col];
-      map.set(person.login, [count, color]);
+      map.set(person.login, [count + 1, color]);
     }
   }
 }
