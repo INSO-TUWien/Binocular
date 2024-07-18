@@ -1,5 +1,5 @@
 export interface AuthorType {
-  name: string;
+  signature: string;
   id: number;
   parent: number;
   color: { main: string; secondary: string };

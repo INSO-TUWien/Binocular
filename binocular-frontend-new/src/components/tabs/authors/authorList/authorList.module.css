@@ -92,33 +92,6 @@
   @apply border-neutral-900;
 }
 
-.authorName {
-  position: relative;
-  height: 1.5rem;
-  width: calc(100% - 1.5rem - 1rem);
-  float: left;
-  @apply rounded-btn;
-  overflow: hidden;
-  border: 2px solid;
-}
-
-.authorNameBackground {
-  position: absolute;
-  height: 100%;
-  width: 100%;
-  pointer-events: none;
-}
-
-.authorNameText {
-  position: absolute;
-  @apply font-bold;
-  height: 100%;
-  width: 100%;
-  line-height: calc(1.5rem - 2px);
-  padding-left: 0.5rem;
-  pointer-events: none;
-}
-
 .authorDropNoParent {
   @apply text-xs;
   width: 100%;

@@ -1,10 +1,13 @@
 import otherAuthorsStyles from './otherAuthors.module.scss';
+import authorStyles from '../authors.module.scss';
 import { useSelector } from 'react-redux';
 import { AppDispatch, RootState, useAppDispatch } from '../../../../redux';
 import { editAuthor, moveAuthorToOther, resetAuthor, setDragging } from '../../../../redux/data/authorsReducer.ts';
 import { showContextMenu } from '../../../contextMenu/contextMenuHelper.ts';
 import removeFromOtherIcon from '../../../../assets/group_remove_black.svg';
 import editIcon from '../../../../assets/edit_black.svg';
+import { AuthorType } from '../../../../types/data/authorType.ts';
+import dragIndicatorIcon from '../../../../assets/drag_indicator_gray.svg';
 
 function OtherAuthors(props: { orientation?: string }) {
   const dispatch: AppDispatch = useAppDispatch();
@@ -22,14 +25,14 @@ function OtherAuthors(props: { orientation?: string }) {
         }>
         <div>
           {authors
-            .filter((a) => a.parent === 0)
-            .map((parentAuthor, i) => {
+            .filter((a: AuthorType) => a.parent === 0)
+            .map((parentAuthor: AuthorType, i: number) => {
               return (
                 <div key={'author' + i}>
                   <div className={otherAuthorsStyles.authorContainer}>
                     <div
                       style={{ borderColor: parentAuthor.color.main }}
-                      className={otherAuthorsStyles.authorName}
+                      className={authorStyles.authorName}
                       draggable={true}
                       onDragStart={(event) => {
                         setTimeout(() => dispatch(setDragging(true), 1));
@@ -52,14 +55,21 @@ function OtherAuthors(props: { orientation?: string }) {
                           },
                         ]);
                       }}>
-                      <div style={{ background: parentAuthor.color.secondary }} className={otherAuthorsStyles.authorNameBackground}></div>
-                      <div className={otherAuthorsStyles.authorNameText}>{parentAuthor.displayName || parentAuthor.name}</div>
+                      <div style={{ background: parentAuthor.color.secondary }} className={authorStyles.authorNameBackground}></div>
+                      <div className={authorStyles.authorNameText}>
+                        <img src={dragIndicatorIcon} alt={'drag'} />
+                        <span>{parentAuthor.displayName || parentAuthor.signature}</span>
+                        <div
+                          style={{
+                            background: `linear-gradient(to right , ${parentAuthor.color.main}00 , ${parentAuthor.color.secondary})`,
+                          }}></div>
+                      </div>
                     </div>
                   </div>
                 </div>
               );
             })}
-          {authors.filter((a) => a.parent === 0).length === 0 && <div className={'m-1'}>No Authors in Other</div>}
+          {authors.filter((a: AuthorType) => a.parent === 0).length === 0 && <div className={'m-1'}>No Authors in Other</div>}
         </div>
       </div>
       {(dragging || props.orientation === 'horizontal') && (

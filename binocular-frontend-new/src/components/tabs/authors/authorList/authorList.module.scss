@@ -94,33 +94,6 @@ $authorRowHeight :1.5rem;
   @apply border-neutral-900;
 }
 
-.authorName{
-  position:relative;
-  height: $authorRowHeight;
-  width: calc(100% - $authorRowHeight - 1rem);
-  float: left;
-  @apply rounded-btn;
-  overflow: hidden;
-  border: 2px solid;
-}
-
-.authorNameBackground{
-  position: absolute;
-  height: 100%;
-  width: 100%;
-  pointer-events: none;
-}
-
-.authorNameText{
-  position: absolute;
-  @apply font-bold;
-  height: 100%;
-  width: 100%;
-  line-height: calc($authorRowHeight - 2px);
-  padding-left: .5rem;
-  pointer-events: none;
-}
-
 .authorDropNoParent{
   @apply text-xs;
   width: 100%;
@@ -146,5 +119,6 @@ $authorRowHeight :1.5rem;
 .authorDropNoParentVertical{
 
 }
+
 
 

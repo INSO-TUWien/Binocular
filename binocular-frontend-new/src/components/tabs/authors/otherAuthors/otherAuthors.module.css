@@ -55,16 +55,6 @@
   pointer-events: none;
 }
 
-.authorNameText {
-  position: absolute;
-  @apply font-bold;
-  height: 100%;
-  width: 100%;
-  line-height: calc(1.5rem - 2px);
-  padding-left: 0.5rem;
-  pointer-events: none;
-}
-
 .authorDropOther {
   border: 2px dashed;
   @apply border-accent;

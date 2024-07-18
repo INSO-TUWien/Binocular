@@ -1,5 +1,6 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { AuthorType } from '../../types/data/authorType.ts';
+import Config from '../../config.ts';
 
 export interface AuthorsInitialState {
   authorList: AuthorType[];
@@ -15,66 +16,80 @@ const initialState: AuthorsInitialState = {
 
 export const authorsSlice = createSlice({
   name: 'authors',
-  initialState,
+  initialState: () => {
+    const storedState = localStorage.getItem(`authorsStateV${Config.localStorageVersion}`);
+    if (storedState === null) {
+      localStorage.setItem(`authorsStateV${Config.localStorageVersion}`, JSON.stringify(initialState));
+      return initialState;
+    } else {
+      return JSON.parse(storedState);
+    }
+  },
   reducers: {
     setAuthorList: (state, action: PayloadAction<AuthorType[]>) => {
-      state.authorList = action.payload;
+      if (state.authorList.length !== action.payload.length) {
+        action.payload.forEach((author) => {
+          if (!state.authorList.find((a: AuthorType) => a.signature === author.signature)) {
+            author.id = state.authorList.length + 1;
+            state.authorList.push(author);
+          }
+        });
+      }
+      localStorage.setItem(`authorsStateV${Config.localStorageVersion}`, JSON.stringify(state));
     },
     setDragging: (state, action: PayloadAction<boolean>) => {
       state.dragging = action.payload;
     },
     moveAuthorToOther: (state, action: PayloadAction<number>) => {
-      state.authorList = state.authorList.map((a) => {
-        if (a.parent === action.payload) {
-          return { name: a.name, id: a.id, color: a.color, parent: 0, selected: a.selected };
-        }
-        if (a.id === action.payload) {
-          return { name: a.name, id: a.id, color: a.color, parent: 0, selected: a.selected };
+      state.authorList = state.authorList.map((a: AuthorType) => {
+        if (a.parent === action.payload || a.id === action.payload) {
+          a.parent = 0;
         }
         return a;
       });
+      localStorage.setItem(`authorsStateV${Config.localStorageVersion}`, JSON.stringify(state));
     },
     resetAuthor: (state, action: PayloadAction<number>) => {
-      state.authorList = state.authorList.map((a) => {
-        if (a.parent === action.payload) {
-          return { name: a.name, id: a.id, color: a.color, parent: -1, selected: a.selected };
-        }
-        if (a.id === action.payload) {
-          return { name: a.name, id: a.id, color: a.color, parent: -1, selected: a.selected };
+      state.authorList = state.authorList.map((a: AuthorType) => {
+        if (a.parent === action.payload || a.id === action.payload) {
+          a.parent = -1;
         }
         return a;
       });
+      localStorage.setItem(`authorsStateV${Config.localStorageVersion}`, JSON.stringify(state));
     },
     setParentAuthor: (state, action: PayloadAction<{ author: number; parent: number }>) => {
-      state.authorList = state.authorList.map((a) => {
-        if (a.parent === action.payload.author) {
-          return { name: a.name, id: a.id, color: a.color, parent: action.payload.parent, selected: a.selected };
-        }
-        if (a.id === action.payload.author) {
-          return { name: a.name, id: a.id, color: a.color, parent: action.payload.parent, selected: a.selected };
-        }
-        return a;
-      });
+      if (action.payload.author !== action.payload.parent) {
+        state.authorList = state.authorList.map((a: AuthorType) => {
+          if (a.parent === action.payload.author || a.id === action.payload.author) {
+            a.parent = action.payload.parent;
+          }
+          return a;
+        });
+        localStorage.setItem(`authorsStateV${Config.localStorageVersion}`, JSON.stringify(state));
+      }
     },
     editAuthor: (state, action: PayloadAction<number>) => {
       (document.getElementById('editAuthorDialog') as HTMLDialogElement).showModal();
       state.authorToEdit = state.authorList.find((a: AuthorType) => a.id === action.payload);
     },
     saveAuthor: (state, action: PayloadAction<AuthorType>) => {
-      state.authorList = state.authorList.map((a) => {
+      state.authorList = state.authorList.map((a: AuthorType) => {
         if (a.id === action.payload.id) {
           return action.payload;
         }
         return a;
       });
+      localStorage.setItem(`authorsStateV${Config.localStorageVersion}`, JSON.stringify(state));
     },
     switchAuthorSelection: (state, action: PayloadAction<number>) => {
-      state.authorList = state.authorList.map((a) => {
+      state.authorList = state.authorList.map((a: AuthorType) => {
         if (a.id === action.payload) {
           a.selected = !a.selected;
         }
         return a;
       });
+      localStorage.setItem(`authorsStateV${Config.localStorageVersion}`, JSON.stringify(state));
     },
   },
 });

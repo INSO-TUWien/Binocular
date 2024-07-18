@@ -1,4 +1,5 @@
 import authorListStyles from './authorList.module.scss';
+import authorStyles from '../authors.module.scss';
 import { useSelector } from 'react-redux';
 import { AppDispatch, RootState, useAppDispatch } from '../../../../redux';
 import {
@@ -16,7 +17,9 @@ import distinctColors from 'distinct-colors';
 import { showContextMenu } from '../../../contextMenu/contextMenuHelper.ts';
 import addToOtherIcon from '../../../../assets/group_add_black.svg';
 import editIcon from '../../../../assets/edit_black.svg';
+import dragIndicatorIcon from '../../../../assets/drag_indicator_gray.svg';
 import removePersonIcon from '../../../../assets/remove_person_black.svg';
+import { AuthorType } from '../../../../types/data/authorType.ts';
 
 function AuthorList(props: { orientation?: string }) {
   const dispatch: AppDispatch = useAppDispatch();
@@ -37,8 +40,8 @@ function AuthorList(props: { orientation?: string }) {
           setAuthorList(
             authors.map((author, i) => {
               return {
-                name: author.gitSignature,
-                id: i + 1,
+                signature: author.gitSignature,
+                id: 0, // real id gets set in reducer
                 parent: -1,
                 color: { main: colors[i].hex(), secondary: colors[i].hex() + '55' },
                 selected: true,
@@ -61,8 +64,8 @@ function AuthorList(props: { orientation?: string }) {
         }>
         <div>
           {authors
-            .filter((a) => a.parent === -1)
-            .map((parentAuthor, i) => {
+            .filter((a: AuthorType) => a.parent === -1)
+            .map((parentAuthor: AuthorType, i: number) => {
               return (
                 <div key={'author' + i}>
                   <div
@@ -81,7 +84,7 @@ function AuthorList(props: { orientation?: string }) {
                     />
                     <div
                       style={{ borderColor: parentAuthor.color.main }}
-                      className={authorListStyles.authorName}
+                      className={authorStyles.authorName}
                       draggable={true}
                       onDrop={(event) => {
                         event.stopPropagation();
@@ -113,13 +116,20 @@ function AuthorList(props: { orientation?: string }) {
                           },
                         ]);
                       }}>
-                      <div style={{ background: parentAuthor.color.secondary }} className={authorListStyles.authorNameBackground}></div>
-                      <div className={authorListStyles.authorNameText}>{parentAuthor.displayName || parentAuthor.name}</div>
+                      <div style={{ background: parentAuthor.color.secondary }} className={authorStyles.authorNameBackground}></div>
+                      <div className={authorStyles.authorNameText}>
+                        <img src={dragIndicatorIcon} alt={'drag'} />
+                        <span>{parentAuthor.displayName || parentAuthor.signature}</span>
+                        <div
+                          style={{
+                            background: `linear-gradient(to right , ${parentAuthor.color.main}00 , ${parentAuthor.color.secondary})`,
+                          }}></div>
+                      </div>
                     </div>
                   </div>
                   {authors
-                    .filter((a) => a.parent === parentAuthor.id)
-                    .map((author, i) => {
+                    .filter((a: AuthorType) => a.parent === parentAuthor.id)
+                    .map((author: AuthorType, i: number) => {
                       return (
                         <div
                           key={'author' + i}
@@ -132,7 +142,7 @@ function AuthorList(props: { orientation?: string }) {
                           }>
                           {props.orientation === 'horizontal' ? (
                             <div className={authorListStyles.authorInset}></div>
-                          ) : i === authors.filter((a) => a.parent === parentAuthor.id).length - 1 ? (
+                          ) : i === authors.filter((a: AuthorType) => a.parent === parentAuthor.id).length - 1 ? (
                             <div className={authorListStyles.authorInset + ' ' + authorListStyles.authorInsetEnd}></div>
                           ) : (
                             <div className={authorListStyles.authorInset + ' ' + authorListStyles.authorInsetMiddle}></div>
@@ -140,7 +150,7 @@ function AuthorList(props: { orientation?: string }) {
 
                           <div
                             style={{ borderColor: author.color.main }}
-                            className={authorListStyles.authorName}
+                            className={authorStyles.authorName}
                             draggable={true}
                             onDragStart={(event) => {
                               setTimeout(() => dispatch(setDragging(true), 1));
@@ -169,8 +179,15 @@ function AuthorList(props: { orientation?: string }) {
                                 },
                               ]);
                             }}>
-                            <div style={{ background: author.color.secondary }} className={authorListStyles.authorNameBackground}></div>
-                            <div className={authorListStyles.authorNameText}>{author.displayName || author.name}</div>
+                            <div style={{ background: author.color.secondary }} className={authorStyles.authorNameBackground}></div>
+                            <div className={authorStyles.authorNameText}>
+                              <img src={dragIndicatorIcon} alt={'drag'} />
+                              <span>{author.displayName || author.signature}</span>
+                              <div
+                                style={{
+                                  background: `linear-gradient(to right , ${author.color.main}00 , ${author.color.secondary})`,
+                                }}></div>
+                            </div>
                           </div>
                         </div>
                       );

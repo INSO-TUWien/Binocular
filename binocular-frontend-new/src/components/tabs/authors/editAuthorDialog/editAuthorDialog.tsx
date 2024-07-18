@@ -3,6 +3,7 @@ import { AppDispatch, RootState, useAppDispatch } from '../../../../redux';
 import { useEffect, useState } from 'react';
 import editAuthorDialogStyles from './editAuthorDialog.module.scss';
 import { editAuthor, resetAuthor, saveAuthor, setParentAuthor } from '../../../../redux/data/authorsReducer.ts';
+import { AuthorType } from '../../../../types/data/authorType.ts';
 
 function EditAuthorDialog() {
   const dispatch: AppDispatch = useAppDispatch();
@@ -13,14 +14,14 @@ function EditAuthorDialog() {
   const [displayName, setDisplayName] = useState(authorToEdit && authorToEdit.displayName ? authorToEdit.displayName : '');
   const [colorMain, setColorMain] = useState(authorToEdit ? authorToEdit.color.main : '#CCCCC');
   const [colorSecondary, setColorSecondary] = useState(authorToEdit ? authorToEdit.color.secondary : '#CCCCC55');
-  const [mergedAuthors, setMergedAuthors] = useState(authorToEdit && authors.filter((a) => a.parent === authorToEdit.id));
-  const [parent, setParent] = useState(authorToEdit && authors.filter((a) => a.id === authorToEdit.parent)[0]);
+  const [mergedAuthors, setMergedAuthors] = useState(authorToEdit && authors.filter((a: AuthorType) => a.parent === authorToEdit.id));
+  const [parent, setParent] = useState(authorToEdit && authors.filter((a: AuthorType) => a.id === authorToEdit.parent)[0]);
   useEffect(() => {
     setDisplayName(authorToEdit && authorToEdit.displayName ? authorToEdit.displayName : '');
     setColorMain(authorToEdit ? authorToEdit.color.main : '#CCCCC');
     setColorSecondary(authorToEdit ? authorToEdit.color.secondary : '#CCCCC55');
-    setMergedAuthors(authorToEdit && authors.filter((a) => a.parent === authorToEdit.id));
-    setParent(authorToEdit && authors.filter((a) => a.id === authorToEdit.parent)[0]);
+    setMergedAuthors(authorToEdit && authors.filter((a: AuthorType) => a.parent === authorToEdit.id));
+    setParent(authorToEdit && authors.filter((a: AuthorType) => a.id === authorToEdit.parent)[0]);
   }, [authorToEdit, authors]);
   return (
     <dialog id={'editAuthorDialog'} className={'modal'}>
@@ -33,7 +34,7 @@ function EditAuthorDialog() {
             <div className="label">
               <span className="label-text font-bold">Signature:</span>
             </div>
-            <div className={'text-neutral-600'}>{authorToEdit.name}</div>
+            <div className={'text-neutral-600'}>{authorToEdit.signature}</div>
             <label className="form-control w-full">
               <div className="label">
                 <span className="label-text font-bold">Display Name:</span>
@@ -72,7 +73,7 @@ function EditAuthorDialog() {
                       style={{ borderColor: parent.color.main, background: parent.color.secondary }}
                       className={editAuthorDialogStyles.authorName}
                       onClick={() => dispatch(editAuthor(parent?.id))}>
-                      {parent.displayName || parent.name}
+                      {parent.displayName || parent.signature}
                     </span>
                   </div>
                 </div>
@@ -89,32 +90,35 @@ function EditAuthorDialog() {
                     className="input input-xs input-bordered w-full mb-2"
                     placeholder={'Add Author'}
                     onChange={(e) => {
-                      const searchedAuthors = authors.filter((a) => a.id === Number(e.target.value));
-                      if (searchedAuthors.length === 1) {
-                        e.target.value = '';
-                        dispatch(setParentAuthor({ author: searchedAuthors[0].id, parent: authorToEdit.id }));
+                      if (e.target.value.length > 0) {
+                        const searchedAuthors = authors.filter((a: AuthorType) => a.id === Number(e.target.value));
+                        console.log(e.target.value);
+                        if (searchedAuthors.length === 1) {
+                          e.target.value = '';
+                          dispatch(setParentAuthor({ author: searchedAuthors[0].id, parent: authorToEdit.id }));
+                        }
                       }
                     }}
                   />
                   <datalist id="allAuthors">
                     {authors
-                      .filter((a) => a.id !== authorToEdit.id)
-                      .map((a) => (
+                      .filter((a: AuthorType) => a.id !== authorToEdit.id)
+                      .map((a: AuthorType) => (
                         <option key={a.id} value={a.id}>
-                          {a.displayName || a.name}
+                          {a.displayName || a.signature}
                         </option>
                       ))}
                   </datalist>
                 </div>
                 <div className={editAuthorDialogStyles.authorList}>
                   {mergedAuthors && mergedAuthors.length > 0
-                    ? mergedAuthors.map((ma) => (
+                    ? mergedAuthors.map((ma: AuthorType) => (
                         <div className={editAuthorDialogStyles.authorListItem} key={ma.id}>
                           <span
                             style={{ borderColor: ma.color.main, background: ma.color.secondary }}
                             className={editAuthorDialogStyles.authorName}
                             onClick={() => dispatch(editAuthor(ma.id))}>
-                            {ma.displayName || ma.name}
+                            {ma.displayName || ma.signature}
                           </span>
                           <button className={editAuthorDialogStyles.removeButton} onClick={() => dispatch(resetAuthor(ma.id))}>
                             Remove
@@ -136,7 +140,7 @@ function EditAuthorDialog() {
                 dispatch(
                   saveAuthor({
                     id: authorToEdit.id,
-                    name: authorToEdit.name,
+                    signature: authorToEdit.signature,
                     parent: authorToEdit.parent,
                     displayName: displayName,
                     color: {

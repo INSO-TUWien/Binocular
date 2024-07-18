@@ -96,26 +96,26 @@ export function convertCommitDataToChangesChartData(
 
       if (splitAdditionsDeletions) {
         for (const author of authors) {
-          commitPalette['(Additions) ' + author.displayName || author.name] = {
+          commitPalette['(Additions) ' + author.displayName || author.signature] = {
             main: chroma(author.color.main).hex(),
             secondary: chroma(author.color.secondary).hex(),
           };
-          commitPalette['(Deletions) ' + author.displayName || author.name] = {
+          commitPalette['(Deletions) ' + author.displayName || author.signature] = {
             main: chroma(author.color.main).darken(0.5).hex(),
             secondary: chroma(author.color.secondary).darken(0.5).hex(),
           };
-          obj['(Additions) ' + author.displayName || author.name] = 0.001;
-          obj['(Deletions) ' + author.displayName || author.name] = -0.001; //-0.001 for stack layout to realize it belongs on the bottom
+          obj['(Additions) ' + author.displayName || author.signature] = 0.001;
+          obj['(Deletions) ' + author.displayName || author.signature] = -0.001; //-0.001 for stack layout to realize it belongs on the bottom
         }
         obj['(Additions) others'] = 0;
         obj['(Deletions) others'] = -0.001;
       } else {
         for (const author of authors) {
-          commitPalette[author.displayName || author.name] = {
+          commitPalette[author.displayName || author.signature] = {
             main: chroma(author.color.main).hex(),
             secondary: chroma(author.color.secondary).hex(),
           };
-          obj[author.displayName || author.name] = 0;
+          obj[author.displayName || author.signature] = 0;
         }
         obj['others'] = 0;
       }
@@ -123,30 +123,30 @@ export function convertCommitDataToChangesChartData(
         if (!author.selected) return;
         const name =
           author.parent === -1
-            ? author.displayName || author.name
+            ? author.displayName || author.signature
             : author.parent === 0
               ? 'others'
-              : authors.filter((a) => a.id === author.parent)[0].name;
+              : authors.filter((a) => a.id === author.parent)[0].signature;
         if (splitAdditionsDeletions) {
-          if (author.name in commit.statsByAuthor) {
+          if (author.signature in commit.statsByAuthor) {
             //Insert number of changes with the author name as key,
             //statsByAuthor has structure {{authorName: {count, additions, deletions, changes}}, ...}
             if ('(Additions) ' + name in obj && '(Deletions) ' + name in obj) {
-              obj['(Additions) ' + name] += commit.statsByAuthor[author.name].additions;
+              obj['(Additions) ' + name] += commit.statsByAuthor[author.signature].additions;
               //-0.001 for stack layout to realize it belongs on the bottom
-              obj['(Deletions) ' + name] += commit.statsByAuthor[author.name].deletions * -1 - 0.001;
+              obj['(Deletions) ' + name] += commit.statsByAuthor[author.signature].deletions * -1 - 0.001;
             } else {
-              obj['(Additions) ' + name] = commit.statsByAuthor[author.name].additions;
+              obj['(Additions) ' + name] = commit.statsByAuthor[author.signature].additions;
               //-0.001 for stack layout to realize it belongs on the bottom
-              obj['(Deletions) ' + name] = commit.statsByAuthor[author.name].deletions * -1 - 0.001;
+              obj['(Deletions) ' + name] = commit.statsByAuthor[author.signature].deletions * -1 - 0.001;
             }
           }
         } else {
-          if (author.name in commit.statsByAuthor) {
+          if (author.signature in commit.statsByAuthor) {
             if (name in obj) {
-              obj[name] += commit.statsByAuthor[author.name].additions + commit.statsByAuthor[author.name].deletions;
+              obj[name] += commit.statsByAuthor[author.signature].additions + commit.statsByAuthor[author.signature].deletions;
             } else {
-              obj[name] = commit.statsByAuthor[author.name].additions + commit.statsByAuthor[author.name].deletions;
+              obj[name] = commit.statsByAuthor[author.signature].additions + commit.statsByAuthor[author.signature].deletions;
             }
           }
         }

@@ -43,6 +43,8 @@ $authorRowHeight :1.5rem;
   line-height: calc($authorRowHeight - 2px);
   padding-left: .2rem;
   cursor: pointer;
+  font-size: .8rem;
+  text-wrap: nowrap;
 }
 
 .removeButton{
