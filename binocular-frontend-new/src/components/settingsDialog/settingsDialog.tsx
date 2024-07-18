@@ -8,7 +8,7 @@ function SettingsDialog() {
   return (
     <dialog id={'settingsDialog'} className={'modal'}>
       <div className={'modal-box max-w-full h-full relative'}>
-        <h3 id={'informationDialogHeadline'} className={'font-bold text-lg'}>
+        <h3 id={'informationDialogHeadline'} className={'font-bold text-lg underline'}>
           Settings
         </h3>
         <div>

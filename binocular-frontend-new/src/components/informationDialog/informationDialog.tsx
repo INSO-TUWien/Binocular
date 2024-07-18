@@ -2,7 +2,7 @@ function InformationDialog() {
   return (
     <dialog id={'informationDialog'} className={'modal'}>
       <div className={'modal-box'}>
-        <h3 id={'informationDialogHeadline'} className={'font-bold text-lg'}>
+        <h3 id={'informationDialogHeadline'} className={'font-bold text-lg underline'}>
           Dialog
         </h3>
         <p id={'informationDialogText'} className={'py-4'}>

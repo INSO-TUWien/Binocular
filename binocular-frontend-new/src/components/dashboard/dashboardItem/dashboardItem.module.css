@@ -4,7 +4,7 @@
   border-radius: 5px;
   border: 1px solid;
   @apply border-base-300;
-  box-shadow: 0 0 10px #CCCCCC;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
   overflow: hidden;
 }
 
@@ -19,7 +19,7 @@
 .dashboardItemInteractionBar {
   position: absolute;
   @apply bg-base-100;
-  box-shadow: 0 0 10px #CCCCCC;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
   user-select: none;
   cursor: grab;
   height: 1.5rem;
@@ -102,7 +102,7 @@
   min-height: 5rem;
   border-radius: 5px;
   @apply bg-base-100;
-  box-shadow: 0 0 10px #CCCCCC;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
   border: 1px solid;
   @apply border-accent;
   padding: 0.5rem;

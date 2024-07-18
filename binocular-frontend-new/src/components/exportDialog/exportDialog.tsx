@@ -12,17 +12,17 @@ function ExportDialog() {
     <dialog id={'exportDialog'} className={'modal'}>
       <div className={'modal-box'}>
         {exportType === ExportType.all && (
-          <h3 id={'informationDialogHeadline'} className={'font-bold text-lg'}>
+          <h3 id={'informationDialogHeadline'} className={'font-bold text-lg underline'}>
             Export
           </h3>
         )}
         {exportType === ExportType.image && (
-          <h3 id={'informationDialogHeadline'} className={'font-bold text-lg'}>
+          <h3 id={'informationDialogHeadline'} className={'font-bold text-lg underline'}>
             Image Export
           </h3>
         )}
         {exportType === ExportType.data && (
-          <h3 id={'informationDialogHeadline'} className={'font-bold text-lg'}>
+          <h3 id={'informationDialogHeadline'} className={'font-bold text-lg underline'}>
             Data Export
           </h3>
         )}

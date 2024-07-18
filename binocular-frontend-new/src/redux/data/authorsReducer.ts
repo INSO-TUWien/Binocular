@@ -45,6 +45,17 @@ export const authorsSlice = createSlice({
         return a;
       });
     },
+    setParentAuthor: (state, action: PayloadAction<{ author: number; parent: number }>) => {
+      state.authorList = state.authorList.map((a) => {
+        if (a.parent === action.payload.author) {
+          return { name: a.name, id: a.id, color: a.color, parent: action.payload.parent, selected: a.selected };
+        }
+        if (a.id === action.payload.author) {
+          return { name: a.name, id: a.id, color: a.color, parent: action.payload.parent, selected: a.selected };
+        }
+        return a;
+      });
+    },
     editAuthor: (state, action: PayloadAction<number>) => {
       (document.getElementById('editAuthorDialog') as HTMLDialogElement).showModal();
       state.authorToEdit = state.authorList.find((a: AuthorType) => a.id === action.payload);
@@ -68,6 +79,14 @@ export const authorsSlice = createSlice({
   },
 });
 
-export const { setAuthorList, setDragging, moveAuthorToOther, resetAuthor, editAuthor, saveAuthor, switchAuthorSelection } =
-  authorsSlice.actions;
+export const {
+  setAuthorList,
+  setDragging,
+  moveAuthorToOther,
+  resetAuthor,
+  setParentAuthor,
+  editAuthor,
+  saveAuthor,
+  switchAuthorSelection,
+} = authorsSlice.actions;
 export default authorsSlice.reducer;

@@ -7,6 +7,7 @@ import {
   resetAuthor,
   setAuthorList,
   setDragging,
+  setParentAuthor,
   switchAuthorSelection,
 } from '../../../../redux/data/authorsReducer.ts';
 import { useEffect } from 'react';
@@ -15,6 +16,7 @@ import distinctColors from 'distinct-colors';
 import { showContextMenu } from '../../../contextMenu/contextMenuHelper.ts';
 import addToOtherIcon from '../../../../assets/group_add_black.svg';
 import editIcon from '../../../../assets/edit_black.svg';
+import removePersonIcon from '../../../../assets/remove_person_black.svg';
 
 function AuthorList(props: { orientation?: string }) {
   const dispatch: AppDispatch = useAppDispatch();
@@ -86,19 +88,7 @@ function AuthorList(props: { orientation?: string }) {
                         dispatch(setDragging(false));
 
                         dispatch(
-                          setAuthorList(
-                            authors.map((a) => {
-                              if (parentAuthor.id !== Number(event.dataTransfer.getData('draggingAuthorId'))) {
-                                if (a.parent === Number(event.dataTransfer.getData('draggingAuthorId'))) {
-                                  return { name: a.name, id: a.id, color: a.color, parent: parentAuthor.id, selected: a.selected };
-                                }
-                                if (a.id === Number(event.dataTransfer.getData('draggingAuthorId'))) {
-                                  return { name: a.name, id: a.id, color: a.color, parent: parentAuthor.id, selected: a.selected };
-                                }
-                              }
-                              return a;
-                            }),
-                          ),
+                          setParentAuthor({ author: Number(event.dataTransfer.getData('draggingAuthorId')), parent: parentAuthor.id }),
                         );
                       }}
                       onDragOver={(event) => event.preventDefault()}
@@ -166,6 +156,11 @@ function AuthorList(props: { orientation?: string }) {
                                   label: 'edit author',
                                   icon: editIcon,
                                   function: () => dispatch(editAuthor(author.id)),
+                                },
+                                {
+                                  label: 'remove from parent',
+                                  icon: removePersonIcon,
+                                  function: () => dispatch(resetAuthor(author.id)),
                                 },
                                 {
                                   label: 'move to other',

@@ -25,7 +25,7 @@
   border-radius: 5px 5px 0 0;
   @apply border-base-300;
   border-bottom-color: transparent;
-  box-shadow: 0 0 10px #CCCCCC;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
   @apply bg-base-100;
 }
 
@@ -33,7 +33,7 @@
   border-radius: 0 5px 5px 0;
   @apply border-base-300;
   border-left-color: transparent;
-  box-shadow: 0 0 10px #CCCCCC;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
   @apply bg-base-100;
 }
 
@@ -41,7 +41,7 @@
   border-radius: 0 0 5px 5px;
   @apply border-base-300;
   border-top-color: transparent;
-  box-shadow: 0 0 10px #CCCCCC;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
   @apply bg-base-100;
 }
 

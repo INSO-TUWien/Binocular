@@ -89,7 +89,7 @@
   border: 1px solid;
   @apply border-base-300;
   border-radius: 5px;
-  box-shadow: 0 0 10px #CCCCCC;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
 }
 
 .tabContentBackgroundRight {
@@ -102,7 +102,7 @@
   border: 1px solid;
   @apply border-base-300;
   border-radius: 5px;
-  box-shadow: 0 0 10px #CCCCCC;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
 }
 
 .tabContentBackgroundBottom {
@@ -115,7 +115,7 @@
   border: 1px solid;
   @apply border-base-300;
   border-radius: 5px;
-  box-shadow: 0 0 10px #CCCCCC;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
 }
 
 .tabContentBackgroundLeft {
@@ -128,7 +128,7 @@
   border: 1px solid;
   @apply border-base-300;
   border-radius: 5px;
-  box-shadow: 0 0 10px #CCCCCC;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
 }
 
 .tabContentTop {
@@ -165,7 +165,7 @@
 
 .content {
   position: absolute;
-  box-shadow: 0 0 10px #CCCCCC inset;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2) inset;
   border-radius: 5px;
   overflow: hidden;
   transition: all ease-in-out 0.2s;

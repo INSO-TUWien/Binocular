@@ -44,7 +44,7 @@ $authorRowHeight :1.5rem;
   height: $authorRowHeight;
   width: calc(100% - $authorRowHeight - 1rem);
   float: left;
-  border-radius: $border-radius-default;
+  @apply rounded-btn;
   overflow: hidden;
   border: 2px solid;
 }
@@ -71,7 +71,7 @@ $authorRowHeight :1.5rem;
   border: 2px dashed;
   @apply border-accent;
   margin: .5rem 0;
-  border-radius: $border-radius-default;
+  @apply rounded-btn;
   display: flex;
   align-items: center;
   justify-content: center;

@@ -23,7 +23,7 @@ function AddSprintDialog() {
   return (
     <dialog id={'addSprintDialog'} className={'modal'}>
       <div className={'modal-box'}>
-        <h3 id={'informationDialogHeadline'} className={'font-bold text-lg'}>
+        <h3 id={'informationDialogHeadline'} className={'font-bold text-lg underline'}>
           {sprintToEdit ? 'Edit Sprint' : 'Add Sprint'}
         </h3>
         <label className="form-control w-full max-w-xs">

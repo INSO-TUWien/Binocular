@@ -4,7 +4,7 @@
   border-radius: 5px;
   border: 1px solid;
   @apply border-base-300;
-  box-shadow: 0 0 10px #CCCCCC;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
   overflow: hidden;
   display: flex;
   align-items: center;
