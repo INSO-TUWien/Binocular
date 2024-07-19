@@ -37,6 +37,7 @@ interface CommitChartData {
   author: string;
   date: Date;
   commitType: {label: string; value: number}[];
+  commitSHA: string;
 }
 
 
@@ -60,8 +61,15 @@ export default (props: Props) => {
             Lines changed: ${d.lineChanges} lines<br>
             Time spent: ${d.timeSpent.estimated} minutes<br>
             Commit type: ${d.commitType[0].label}<br>
-            <a href="${d.commitLink}" target=”_blank”>Link to commit</a>`)
-        .style("display", "block");
+            <br>
+            Commit message:<br>
+            ${d.commitMessage}<br>
+            <br>
+            <a href="${d.commitLink}" target=”_blank”><i class="fa fa-link" ></i></a>Link to commit
+            <div style="display: inline; float: right"> Copy sha <i class="fa fa-copy" onclick="navigator.clipboard.writeText('${d.commitSHA}')"></i></div>`)
+        .style("display", "block")
+        .style("max-width", "400px")
+        .style("min-width", "250px");
 
       const tooltipWidth = +(tooltip.style('width').substring(0, tooltip.style('width').length - 2));
       const tooltipHeight = +tooltip.style('height').substring(0, tooltip.style('height').length - 2);
@@ -122,7 +130,8 @@ const extractCommitData = async (props: Props): Promise<CommitChartData[]> => {
       lineChanges: c.stats.additions + c.stats.deletions,
       commitMessage: c.message,
       date: c.date,
-      author: c.signature.substring(0, c.signature.indexOf('<') - 1)
+      author: c.signature.substring(0, c.signature.indexOf('<') - 1),
+      commitSHA: c.sha
     };
   });
 };
