@@ -6,6 +6,7 @@ import { AuthorType } from '../../../../../types/data/authorType.ts';
 import { convertCommitDataToChangesChartData } from '../utilies/dataConverter.ts';
 import { ParametersInitialState } from '../../../../../redux/parameters/parametersReducer.ts';
 import { SprintType } from '../../../../../types/data/sprintType.ts';
+import { throttle } from 'throttle-debounce';
 
 export interface CommitChartData {
   date: number;
@@ -32,9 +33,13 @@ function Chart(props: {
   const [chartScale, setChartScale] = useState<number[]>([]);
   const [chartPalette, setChartPalette] = useState<Palette>({});
 
-  useEffect(() => {
-    if (!chartContainerRef.current) return;
-    const resizeObserver = new ResizeObserver(() => {
+  /*
+  Throttle the resize of the svg (refresh rate) to every 1s to not overwhelm the renderer,
+  This isn't really necessary for this visualization, but for bigger visualization this can be quite essential
+   */
+  const throttledResize = throttle(
+    1000,
+    () => {
       if (!chartContainerRef.current) return;
       if (chartContainerRef.current?.offsetWidth !== chartWidth) {
         setChartWidth(chartContainerRef.current.offsetWidth);
@@ -42,6 +47,14 @@ function Chart(props: {
       if (chartContainerRef.current?.offsetHeight !== chartHeight) {
         setChartHeight(chartContainerRef.current.offsetHeight);
       }
+    },
+    { noLeading: false, noTrailing: false },
+  );
+
+  useEffect(() => {
+    if (!chartContainerRef.current) return;
+    const resizeObserver = new ResizeObserver(() => {
+      throttledResize();
     });
     resizeObserver.observe(chartContainerRef.current);
     return () => resizeObserver.disconnect();
