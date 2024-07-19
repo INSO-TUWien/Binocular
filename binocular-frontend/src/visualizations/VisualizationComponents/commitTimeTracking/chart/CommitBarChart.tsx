@@ -275,6 +275,13 @@ export default class CommitBarChart extends React.Component<Props, State> {
       .attr("y", d => !showUpsideDown ? y(d.barHeight) : 0)
       .attr("width", x.bandwidth())
       .attr("height", d => !showUpsideDown ? height - y(d.barHeight) : y(d.barHeight))
-      .attr("fill", d => colorScale(d.color) as string);
+      .attr("fill", d => colorScale(d.color) as string)
+      .attr("opacity", "0.7")
+      .on("mouseover", function() {
+        d3.select(this).style("opacity", 1);
+      })
+      .on("mouseout", function() {
+        d3.select(this).style("opacity", 0.7);
+      });
   }
 }

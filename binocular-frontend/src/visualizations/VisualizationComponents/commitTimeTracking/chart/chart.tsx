@@ -86,7 +86,7 @@ export default (props: Props) => {
         lowerChart: commitChartData.map(d => {return {ticks: d.date.toString(), barHeight: d.lineChanges, color: d.commitType[0].label}})
       }}
     colorDomain={['corrective', 'features', 'unknown', 'nonfunctional', 'perfective']}
-    colorPalette={['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd']}
+    colorPalette={["#fd7f6f", "#7eb0d5", "#b2e061", "#bd7ebe", "#ffb55a"]}
     defaultColor={'#000000'}
     dimensions={[visualViewport?.width ?? 1920, visualViewport?.height ?? 919]}
     displayTooltip={displayTooltip}
