@@ -20,7 +20,7 @@ interface Props {
   firstSignificantTimestamp: number;
   lastSignificantTimestamp: number;
   selectedBranch: string;
-  commitType: string;
+  commitType: string[];
   threshold: {
     hours: { lower: number; upper: number };
     change: { lower: number; upper: number };
@@ -31,6 +31,10 @@ interface Props {
   otherCount: number;
   palette: Palette;
   selectedAuthors: string[];
+  searchTerm: string;
+  firstCommitTime: number;
+  maxSessionLength: number;
+  useActualTime: boolean;
 }
 const mapStateToProps = (state: GlobalState): Props => {
   const timeTrackingState = state.visualizations.commitTimeTracking.state;
@@ -55,6 +59,10 @@ const mapStateToProps = (state: GlobalState): Props => {
     excludeMergeCommits: universalSettings.excludeMergeCommits,
     excludedCommits: universalSettings.excludedCommits,
     excludeCommits: universalSettings.excludeCommits,
+    searchTerm: timeTrackingState.config.searchTerm,
+    firstCommitTime: timeTrackingState.config.firstCommitTime,
+    maxSessionLength: timeTrackingState.config.maxSessionLength,
+    useActualTime: timeTrackingState.config.useActualTime,
   };
 };
 const mapDispatchToProps = () => {

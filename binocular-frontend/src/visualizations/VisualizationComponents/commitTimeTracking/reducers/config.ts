@@ -21,7 +21,7 @@ export default handleActions(
   },
   {
     searchTerm: '',
-    selectedBranch: 'master',
+    selectedBranch: '',
     commitType: ["corrective", "features", "perfective", "nonfunctional", "unknown"],
     threshold: {
       hours: { lower: undefined, upper: undefined },

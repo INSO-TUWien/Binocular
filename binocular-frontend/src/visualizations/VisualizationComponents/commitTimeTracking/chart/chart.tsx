@@ -3,7 +3,6 @@ import {Commit} from "../../../../types/commitTypes.ts";
 import getCommitType from '../../../../utils/getCommitType.ts';
 import * as React from "react";
 import _ from 'lodash';
-import * as d3 from 'd3';
 import CommitBarChart from "./CommitBarChart.tsx";
 import styles from '../styles.module.scss';
 
@@ -11,7 +10,7 @@ interface Props {
   commits: Commit[];
   selectedBranch: string;
   branches: string[];
-  commitType: string;
+  commitType: string[];
   threshold: {
     hours: { lower: number; upper: number };
     change: { lower: number; upper: number };
@@ -25,6 +24,10 @@ interface Props {
   otherAuthors: Committer[];
   selectedAuthors: string[];
   universalSettings: boolean;
+  searchTerm: string;
+  firstCommitTime: number;
+  maxSessionLength: number;
+  useActualTime: boolean;
 }
 interface CommitChartData {
   timeSpent: {
@@ -43,7 +46,6 @@ interface CommitChartData {
 
 export default (props: Props) => {
   const [commitChartData, setCommitChartData] = React.useState<CommitChartData[]>([]);
-  const [page, setPage] = React.useState(0);
 
   React.useEffect(() => {
     const fetchData = async () => {
@@ -61,6 +63,7 @@ export default (props: Props) => {
             Lines changed: ${d.lineChanges} lines<br>
             Time spent: ${d.timeSpent.estimated} minutes<br>
             Commit type: ${d.commitType[0].label}<br>
+            Branch: ${d.branch}<br>
             <br>
             Commit message:<br>
             ${d.commitMessage}<br>
@@ -78,7 +81,9 @@ export default (props: Props) => {
         .style("top", `calc(50% - ${35 + tooltipHeight}px)`);
 
     };
+  console.log(commitChartData);
   const commitChart = commitChartData !== undefined && commitChartData.length > 0 ? <CommitBarChart
+    key={commitChartData.map(d => d.commitSHA).join("-")}
     content={
       {commitData: commitChartData,
         upperChart: commitChartData.map(d => {return {ticks: d.date.toString(), barHeight: d.timeSpent.estimated, color: d.commitType[0].label}}),
@@ -122,7 +127,7 @@ const extractCommitData = async (props: Props): Promise<CommitChartData[]> => {
   const sortedCommits = commitsWithDate.sort((a, b) => a.date.getTime() - b.date.getTime());
   addActualTime(sortedCommits);
   addEstimatedTime(sortedCommits, props);
-  return commitsWithDate.map(c => {
+  return filterCommits(commitsWithDate, props).map(c => {
     return {
       commitType: c.commitType,
       timeSpent: c.timeSpent,
@@ -131,26 +136,27 @@ const extractCommitData = async (props: Props): Promise<CommitChartData[]> => {
       commitMessage: c.message,
       date: c.date,
       author: c.signature.substring(0, c.signature.indexOf('<') - 1),
-      commitSHA: c.sha
+      commitSHA: c.sha,
+      branch: c.branch
     };
   });
 };
 
 function addEstimatedTime(commits: any[], props: Props) {
-  const firstCommitAdd = 120; // TODO: Replace constant with variable from state;
-  const maxCommitDiff = 120; // TODO: Replace constant with variable from state;
+  const firstCommitTime = props.firstCommitTime;
+  const maxCommitDiff = props.maxSessionLength;
   const mergedAuthors = [...props.mergedAuthors].filter(author => props.selectedAuthors.includes(author.mainCommitter));
   mergedAuthors.forEach(mergedAuthor => {
     const filteredCommits = commits.filter(commit => _.map(mergedAuthor.committers, 'signature').includes(commit.signature));
     if (filteredCommits.length === 0) {
       return;
     }
-    filteredCommits[0].timeSpent.estimated = firstCommitAdd;
+    filteredCommits[0].timeSpent.estimated = firstCommitTime;
     let prevCommit = filteredCommits.shift();
     let curCommit = filteredCommits.shift();
     while (curCommit != null) {
       if ((curCommit.date.getTime() - prevCommit.date.getTime()) / 1000 / 60 > maxCommitDiff) {
-        curCommit.timeSpent.estimated = firstCommitAdd;
+        curCommit.timeSpent.estimated = firstCommitTime;
       } else {
         curCommit.timeSpent.estimated = Math.round((curCommit.date.getTime() - prevCommit.date.getTime()) / 1000 / 60);
       }
@@ -186,4 +192,47 @@ async function addTypeToCommits(commits: any[]) {
         });
       }
     }
+}
+
+function filterCommits(commits: any[], props: Props) {
+  console.log(commits);
+  console.log(props);
+  const filteredCommits = commits.filter(c => {
+    if (props.selectedBranch && c.branch != props.selectedBranch) {
+      return false;
+    }
+    const commitTime = (props.useActualTime ? c.timeSpent.actual : c.timeSpent.estimated);
+    if (commitTime < props.threshold.hours.lower || commitTime > props.threshold.hours.upper) {
+      return false;
+    }
+    const lineChanges = c.stats.additions + c.stats.deletions;
+    if (lineChanges < props.threshold.change.lower || lineChanges > props.threshold.change.upper) {
+      return false;
+    }
+    if (lineChanges / (commitTime <= 0 ? 1 : commitTime) < props.threshold.ratio.lower ||
+      lineChanges / (commitTime <= 0 ? 1 : commitTime) > props.threshold.ratio.upper) {
+      return false;
+    }
+    if (!props.commitType.includes(c.commitType[0].label)) {
+      return false;
+    }
+    if (props.searchTerm && !c.message.toLowerCase().includes(props.searchTerm.toLowerCase())) {
+      return false;
+    }
+
+    if (!props.selectedAuthors.includes(c.signature)) {
+      return false;
+    }
+
+    if (props.excludeMergeCommits && c.message.includes("Merge")) {
+      return false;
+    }
+
+    if (props.excludeCommits && props.excludedCommits.includes(c.sha)) {
+      return false;
+    }
+
+    return true;
+  });
+  return filteredCommits;
 }

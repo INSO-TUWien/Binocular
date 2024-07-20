@@ -61,7 +61,7 @@ export default class CommitBarChart extends React.Component<Props, State> {
       displayTooltip: props.displayTooltip,
       page: 0
     };
-    window.addEventListener('resize', () => this.loadChart());
+    window.addEventListener('resize', () => this.componentDidUpdate());
   }
 
   componentDidMount() {
@@ -97,7 +97,7 @@ export default class CommitBarChart extends React.Component<Props, State> {
     const numberOfBarcharts = this.state.content.upperChart && this.state.content.lowerChart ? 2 : 1;
     // 25 is for nav, 427 is the default value for a normal screen.
     const height = ((visualViewport?.height ?? 919) - nodeChartHeight - 25 - 20) / numberOfBarcharts;
-
+    console.log(this.state.content);
 
     const mainDiv = d3.select(this.divRef).html("");
     // Upper chart
@@ -133,8 +133,6 @@ export default class CommitBarChart extends React.Component<Props, State> {
   drawNodes(mainDiv: d3.Selection<HTMLDivElement, unknown, null, undefined>, width: number) {
     const svg = this.createSVG(mainDiv,'nodeChart', { top: 5, right: 30, bottom: 5, left: 40 }, 40);
     const x = this.createXAxis(this.state.content.nodeChart.slice(this.state.page * 50, 50 + this.state.page * 50), width);
-
-    console.log(this.state.content);
 
     const nodes =svg.selectAll(".node")
       .data(this.state.content.nodeChart.slice(this.state.page * 50, 50 + this.state.page * 50))

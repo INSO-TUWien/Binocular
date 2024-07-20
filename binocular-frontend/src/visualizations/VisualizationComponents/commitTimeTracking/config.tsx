@@ -67,8 +67,8 @@ interface Props {
   commitType: string[];
   threshold: Threshold;
   searchTerm: string;
-  firstCommitTime: string;
-  maxSessionLength: string;
+  firstCommitTime: number;
+  maxSessionLength: number;
   useActualTime: boolean;
   palette: Palette;
   resolution: string;
@@ -136,8 +136,8 @@ function setThresholds(commits: Commit[], props: Props) {
 }
 
 function addEstimatedTime(commits: any[], props: Props) {
-  const firstCommitAdd = 120; // TODO: Replace constant with variable from state;
-  const maxCommitDiff = 120; // TODO: Replace constant with variable from state;
+  const firstCommitAdd = props.firstCommitTime;
+  const maxCommitDiff = props.maxSessionLength;
   const mergedAuthors = props.mergedAuthors;
   mergedAuthors.forEach(mergedAuthor => {
     const filteredCommits = commits.filter(commit => _.map(mergedAuthor.committers, 'signature').includes(commit.signature));
@@ -182,7 +182,6 @@ const CommitTimeTrackingConfigComponent = (props: Props) => {
       </h6>
     </div>);
   const threshold = setThresholds(props.commits, props);
-  console.log(props);
   const [hoursLowerInput, setHoursLowerInput] = React.useState(props.threshold.hours.lower);
   const [hoursUpperInput, setHoursUpperInput] = React.useState(props.threshold.hours.upper);
   const [changesLowerInput, setChangesLowerInput] = React.useState(props.threshold.change.lower);
@@ -198,6 +197,7 @@ const CommitTimeTrackingConfigComponent = (props: Props) => {
         <div style={{ marginBottom: '0.5em' }}>
           <div className="select">
             <select value={props.selectedBranch} onChange={(e) => props.onChangeBranch(e.target.value)}>
+              <option value="" key="">All branches</option>
               {props.branches
                 ? props.branches.map((b) => (
                     <option value={b} key={b}>
@@ -374,9 +374,9 @@ const CommitTimeTrackingConfigComponent = (props: Props) => {
 
         <label className="label">Time estimation parameters</label>
         <h2>First commit time (in minutes):</h2>
-        <input type="number" value={props.firstCommitTime} onChange={(e) => props.onFirstCommitTime(+e.target.value)}/>
+        <input type="number" value={+props.firstCommitTime} onChange={(e) => props.onFirstCommitTime(+e.target.value)}/>
         <h2>Maximum session length (in minutes):</h2>
-        <input type="number" value={props.maxSessionLength} onChange={(e) => props.onMaxSessionLength(+e.target.value)}/>
+        <input type="number" value={+props.maxSessionLength} onChange={(e) => props.onMaxSessionLength(+e.target.value)}/>
 
         <label className="label">Search term</label>
         <textarea className={'textarea'} cols={50} rows={3}
