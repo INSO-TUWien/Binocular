@@ -6,10 +6,11 @@ import { setThreshold, setSelectedCommitType, setSelectedBranch } from './sagas'
 import { Palette } from '../../../types/authorTypes.ts';
 import styles from './styles.module.scss';
 import * as React from 'react';
+import {Commit} from "../../../types/commitTypes.ts";
+import _ from "lodash";
 
 const mapStateToProps = (state: GlobalState) => {
   const dashboardState = state.visualizations.commitTimeTracking.state;
-
   return {
     committers: dashboardState.data.data.committers,
     resolution: dashboardState.config.chartResolution,
@@ -18,7 +19,9 @@ const mapStateToProps = (state: GlobalState) => {
     branches: dashboardState.data.data.branches,
     commitType: dashboardState.config.commitType,
     threshold: dashboardState.config.threshold,
-    selectedAuthors: dashboardState.config.selectedAuthors,
+    selectedAuthors: state.universalSettings.selectedAuthorsGlobal,
+    commits: dashboardState.data.data.commits,
+    mergedAuthors: state.universalSettings.mergedAuthors,
   };
 };
 
@@ -34,6 +37,8 @@ interface Props {
   committers: string[];
   selectedBranch: string;
   branches: string[];
+  commits: Commit[];
+  mergedAuthors: any[];
   commitType: string;
   threshold: {
     hours: { lower: number; upper: number };
@@ -42,13 +47,86 @@ interface Props {
   };
   palette: Palette;
   resolution: string;
-  selectedAuthors: string[];
+  selectedAuthors: any[];
   onChangeThreshold: (threshold: {value: number, threshold: string}) => void;
   onChangeBranch: (branchName: string) => void;
   onChangeCommitType: (commitType: string) => void;
 }
 
+function calculateThresholds(commits: Commit[], props: Props) {
+  if (!commits || !props.selectedAuthors) return;
+
+  const commitsWithDate = commits.map(commit => {
+    return {...commit, date : new Date(commit.date), timeSpent: {estimated: 0, actual: 0}};
+  })
+  addActualTime(commitsWithDate);
+  addEstimatedTime(commitsWithDate, props);
+  return {
+    hours: {
+      lower: Math.min(...commitsWithDate.map(c => c.timeSpent.estimated)),
+      upper: Math.max(...commitsWithDate.map(c => c.timeSpent.estimated))
+    },
+    change: {
+      lower: Math.min(...commitsWithDate.map(c => c.stats.deletions + c.stats.additions)),
+      upper: Math.max(...commitsWithDate.map(c => c.stats.deletions + c.stats.additions))
+    },
+    ratio: {
+      lower: Math.min(...commitsWithDate.map(c => {
+        const changes = c.stats.deletions + c.stats.additions;
+        const time = c.timeSpent.estimated;
+        return changes/time;
+      })),
+      upper: Math.max(...commitsWithDate.map(c => {
+        const changes = c.stats.deletions + c.stats.additions;
+        const time = c.timeSpent.estimated === 0 ? 1 : c.timeSpent.estimated;
+        return changes/time;
+      }))
+    }
+  };
+}
+
+function addEstimatedTime(commits: any[], props: Props) {
+  const firstCommitAdd = 120; // TODO: Replace constant with variable from state;
+  const maxCommitDiff = 120; // TODO: Replace constant with variable from state;
+  const mergedAuthors = props.mergedAuthors;
+  mergedAuthors.forEach(mergedAuthor => {
+    const filteredCommits = commits.filter(commit => _.map(mergedAuthor.committers, 'signature').includes(commit.signature));
+    if (!filteredCommits || filteredCommits.length === 0) {
+      return;
+    }
+    filteredCommits[0].timeSpent.estimated = firstCommitAdd;
+    let prevCommit = filteredCommits.shift();
+    let curCommit = filteredCommits.shift();
+    while (curCommit != null) {
+      if ((curCommit.date.getTime() - prevCommit.date.getTime()) / 1000 / 60 > maxCommitDiff) {
+        curCommit.timeSpent.estimated = firstCommitAdd;
+      } else {
+        curCommit.timeSpent.estimated = Math.round((curCommit.date.getTime() - prevCommit.date.getTime()) / 1000 / 60);
+      }
+      prevCommit = curCommit;
+      curCommit = filteredCommits.shift();
+    }
+  });
+}
+
+function addActualTime(commits: any[]) {
+  return commits.forEach(c => {
+    let timeSpent = 0;
+    const regex = 'Time-spent: [0-9]*h[0-9]*m';
+
+    const timeStamp = c.message.match(regex);
+    if (timeStamp) {
+      const time = timeStamp.split(' ')[1];
+      timeSpent = +time.substring(0, time.indexOf('h')) * 60
+        + +time.substring(time.indexOf('h') + 1, time.indexOf('m'));
+    }
+    c.timeSpent.actual = timeSpent;
+  });
+}
+
 const CommitTimeTrackingConfigComponent = (props: Props) => {
+  const threshold = calculateThresholds(props.commits, props);
+  console.log(threshold);
   return (
     <div className={styles.configContainer}>
       <div className={styles.field}>
