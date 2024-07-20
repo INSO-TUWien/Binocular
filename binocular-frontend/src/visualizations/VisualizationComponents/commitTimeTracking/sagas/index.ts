@@ -14,6 +14,10 @@ import { Bounds } from '../../../../types/boundsTypes';
 export const setSelectedBranch = createAction('SET_SELECTED_BRANCH');
 export const setSelectedCommitType = createAction('SET_SELECTED_COMMIT_TYPE');
 export const setThreshold = createAction('SET_THRESHOLD');
+export const setSearchTerm = createAction('SET_SEARCH_TERM');
+export const setFirstCommitTime = createAction('SET_FIRST_COMMIT_TIME');
+export const setMaxSessionLength = createAction('SET_MAX_SESSION_LENGTH');
+export const setUseActualTime = createAction('SET_USE_ACTUAL_TIME');
 
 export const requestChangesData = createAction('REQUEST_CHANGES_DATA');
 export const receiveChangesData = timestampedActionFactory('RECEIVE_CHANGES_DATA');

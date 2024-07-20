@@ -14,14 +14,22 @@ export default handleActions(
       currState.threshold[threshold[0]][threshold[1]] = value;
       return _.assign({}, state, { threshold: { ...currState.threshold } });
     },
+    SET_SEARCH_TERM: (state, action: Action<any>) => _.assign({}, state, { searchTerm: action.payload }),
+    SET_FIRST_COMMIT_TIME: (state, action: Action<any>) => _.assign({}, state, { firstCommitTime: action.payload }),
+    SET_MAX_SESSION_LENGTH: (state, action: Action<any>) => _.assign({}, state, { maxSessionLength: action.payload }),
+    SET_USE_ACTUAL_TIME: (state, action: Action<any>) => _.assign({}, state, { useActualTime: action.payload }),
   },
   {
-    selectedBranch: 'master', //Branch to be displayed
-    commitType: 'all', //Filter to display relevant commits, can be 'all' or any of the commit types
+    searchTerm: '',
+    selectedBranch: 'master',
+    commitType: ["corrective", "features", "perfective", "nonfunctional", "unknown"],
     threshold: {
-      hours: { lower: 0, upper: 0 },
-      change: { lower: 0, upper: 0 },
-      ratio: { lower: 0, upper: 0 },
-    }, //Filter for threshold for commits based on line changes, time spent and their ratio
+      hours: { lower: undefined, upper: undefined },
+      change: { lower: undefined, upper: undefined },
+      ratio: { lower: undefined, upper: undefined },
+    },
+    firstCommitTime: 120,
+    maxSessionLength: 120,
+    useActualTime: false,
   },
 );
