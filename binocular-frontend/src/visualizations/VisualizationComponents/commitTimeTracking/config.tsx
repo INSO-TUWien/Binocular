@@ -243,6 +243,57 @@ const CommitTimeTrackingConfigComponent = (props: Props) => {
   return (
     <div className={styles.configContainer}>
       <div className={styles.field}>
+        <label className="label">Branch</label>
+        <div className={styles.inputSections}>
+          <div className="select">
+            <select value={props.selectedBranch} onChange={(e) => props.onChangeBranch(e.target.value)}>
+              <option value="" key="">All branches</option>
+              {props.branches
+                ? props.branches.map((b) => (
+                    <option value={b} key={b}>
+                      {b}
+                    </option>
+                  ))
+                : 'Nothing'}
+            </select>
+          </div>
+        </div>
+        <label className="label">Thresholds</label>
+        <div className={styles.inputSections}>
+          <h2>Time spent (in minutes)</h2>
+          {sliderInput(React.useState(props.threshold.hours.lower), React.useState(props.threshold.hours.upper),
+            'hours', threshold, props)}
+          <h2>Lines changed</h2>
+          {sliderInput(React.useState(props.threshold.change.lower), React.useState(props.threshold.change.upper),
+            'change', threshold, props)}
+          <h2>Ratio (lines changed/time spent in minutes</h2>
+          {sliderInput(React.useState(props.threshold.ratio.lower), React.useState(props.threshold.ratio.upper),
+            'ratio', threshold, props)}
+        </div>
+
+        <label className="label">Commit type</label>
+        <MultiSelect
+          className={styles.inputSections}
+          options={[
+            { label: 'corrective', value: 'corrective'},
+            { label: 'features', value: 'features'},
+            { label: 'perfective', value: 'perfective'},
+            { label: 'nonfunctional', value: 'nonfunctional'},
+            { label: 'unknown', value: 'unknown'}
+          ]}
+          value={props.commitType.map(type => {
+            return {label: type, value: type};
+          })}
+          onChange={(selected: {label: string, value: string}[]) => props.onChangeCommitType(selected.map(s => s.value))}
+          labelledBy={"Select commit type"}
+        />
+
+        <label className="label">Search term</label>
+        <div className={styles.inputSections}>
+          <input className={'input'}
+                 onChange={(e) => props.onChangeSearchTerm(e.target.value)}/>
+        </div>
+
         <label className={'label'}>Time settings</label>
         <div className={styles.inputSections}>
           <input
@@ -266,64 +317,10 @@ const CommitTimeTrackingConfigComponent = (props: Props) => {
           <label htmlFor="useRatio" className={styles.switch}>
             Use line change/time ratio in chart
           </label>
-        </div>
-        <label className="label">Branch</label>
-        <div className={styles.inputSections}>
-          <div className="select">
-            <select value={props.selectedBranch} onChange={(e) => props.onChangeBranch(e.target.value)}>
-              <option value="" key="">All branches</option>
-              {props.branches
-                ? props.branches.map((b) => (
-                    <option value={b} key={b}>
-                      {b}
-                    </option>
-                  ))
-                : 'Nothing'}
-            </select>
-          </div>
-        </div>
-        <label className="label">Thresholds</label>
-        <div className={styles.inputSections}>
-          <h2>Time spent</h2>
-          {sliderInput(React.useState(props.threshold.hours.lower), React.useState(props.threshold.hours.upper),
-            'hours', threshold, props)}
-          <h2>Lines changed</h2>
-          {sliderInput(React.useState(props.threshold.change.lower), React.useState(props.threshold.change.upper),
-            'change', threshold, props)}
-          <h2>Ratio</h2>
-          {sliderInput(React.useState(props.threshold.ratio.lower), React.useState(props.threshold.ratio.upper),
-            'ratio', threshold, props)}
-        </div>
-
-        <label className="label">Commit type</label>
-        <MultiSelect
-          className={styles.inputSections}
-          options={[
-            { label: 'corrective', value: 'corrective'},
-            { label: 'features', value: 'features'},
-            { label: 'perfective', value: 'perfective'},
-            { label: 'nonfunctional', value: 'nonfunctional'},
-            { label: 'unknown', value: 'unknown'}
-          ]}
-          value={props.commitType.map(type => {
-            return {label: type, value: type};
-          })}
-          onChange={(selected: {label: string, value: string}[]) => props.onChangeCommitType(selected.map(s => s.value))}
-          labelledBy={"Select commit type"}
-        />
-
-        <label className="label">Time estimation parameters</label>
-        <div className={styles.inputSections}>
           <h2>First commit time (in minutes):</h2>
           <input className={'input'} type="number" value={+props.firstCommitTime} onChange={(e) => props.onFirstCommitTime(+e.target.value)}/>
           <h2>Maximum session length (in minutes):</h2>
           <input className={'input'} type="number" value={+props.maxSessionLength} onChange={(e) => props.onMaxSessionLength(+e.target.value)}/>
-        </div>
-
-        <label className="label">Search term</label>
-        <div className={styles.inputSections}>
-          <input className={'input'}
-                 onChange={(e) => props.onChangeSearchTerm(e.target.value)}/>
         </div>
       </div>
     </div>

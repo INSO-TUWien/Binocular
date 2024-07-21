@@ -15,5 +15,5 @@ export default {
   ConfigComponent,
   HelpComponent,
   usesUniversalSettings: true,
-  universalSettingsConfig: { hideGranularitySettings: true },
+  universalSettingsConfig: { hideGranularitySettings: true, hideSprintSettings: true },
 };
