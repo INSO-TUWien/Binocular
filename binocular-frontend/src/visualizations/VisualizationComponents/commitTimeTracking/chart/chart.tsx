@@ -123,7 +123,7 @@ const extractCommitData = async (props: Props): Promise<CommitChartData[]> => {
     return [];
   }
 
-  const filteredCommits = props.commits.filter((value, index, array) => array.findIndex((el) => el.date === value.date) === index);
+  const filteredCommits = props.filteredCommits.filter((value, index, array) => array.findIndex((el) => el.date === value.date) === index);
   const commitsWithDate = filteredCommits.map(commit => {
     return {...commit, date : new Date(commit.date), commitType: [{label: 'unknown', value: 1}], timeSpent: {estimated: 0, actual: 0}};
   })

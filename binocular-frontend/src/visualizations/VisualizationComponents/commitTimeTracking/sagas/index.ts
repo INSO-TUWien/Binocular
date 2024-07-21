@@ -52,10 +52,15 @@ export default function* () {
   yield fork(watchToggleHelp);
 
   // keep looking for universal settings changes
+  yield fork(watchTimeSpan);
   yield fork(watchSelectedAuthorsGlobal);
   yield fork(watchMergedAuthors);
   yield fork(watchOtherAuthors);
   yield fork(watchExcludeMergeCommits);
+}
+
+function* watchTimeSpan() {
+  yield takeEvery('SET_TIME_SPAN', fetchChangesData);
 }
 
 function* watchSelectedAuthorsGlobal() {
