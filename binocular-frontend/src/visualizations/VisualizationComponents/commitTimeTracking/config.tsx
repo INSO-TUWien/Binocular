@@ -238,11 +238,11 @@ const CommitTimeTrackingConfigComponent = (props: Props) => {
         <div style={{ marginBottom: '0.5em' }}>
           <h2>Time spent</h2>
           <div>
-            <br/>
             <input
+              className={'input'}
               type="text"
               value={hoursLowerInput}
-              style={{display: 'inline', maxWidth: '70px'}}
+              style={{display: 'inline', maxWidth: '100px'}}
               onChange={(e) => setHoursLowerInput(+e.target.value)}
               onBlur={(e) => {
                 if (isNaN(+e.target.value) || +e.target.value >= props.threshold.hours.upper || +e.target.value < threshold.hours.lower) {
@@ -268,9 +268,10 @@ const CommitTimeTrackingConfigComponent = (props: Props) => {
                 setHoursUpperInput(e.maxValue);
               }}
             /><input
+            className={'input'}
             type="text"
             value={hoursUpperInput}
-            style={{display: 'inline', maxWidth: '70px'}}
+            style={{display: 'inline', maxWidth: '100px'}}
             onChange={(e) => setHoursUpperInput(+e.target.value)}
             onBlur={(e) => {
               if (isNaN(+e.target.value) || +e.target.value <= props.threshold.hours.lower || +e.target.value > threshold.hours.upper) {
@@ -285,9 +286,10 @@ const CommitTimeTrackingConfigComponent = (props: Props) => {
           <h2>Lines changed</h2>
           <div>
             <input
+              className={'input'}
               type="text"
               value={changesLowerInput}
-              style={{display: 'inline', maxWidth: '70px'}}
+              style={{display: 'inline', maxWidth: '100px'}}
               onChange={(e) => setChangesLowerInput(+e.target.value)}
               onBlur={(e) => {
                 if (isNaN(+e.target.value) || +e.target.value >= props.threshold.change.upper || +e.target.value < threshold.change.lower) {
@@ -306,16 +308,17 @@ const CommitTimeTrackingConfigComponent = (props: Props) => {
               canMinMaxValueSame={true}
               label={false}
               ruler={false}
-              onChange={e => {
+              onInput={e => {
                 props.onChangeThreshold({value: e.minValue, threshold: 'change-lower'});
                 props.onChangeThreshold({value: e.maxValue, threshold: 'change-upper'});
                 setChangesLowerInput(e.minValue);
                 setChangesUpperInput(e.maxValue);
               }}
             /><input
+            className={'input'}
             type="text"
             value={changesUpperInput}
-            style={{display: 'inline', maxWidth: '70px'}}
+            style={{display: 'inline', maxWidth: '100px'}}
             onChange={(e) => setChangesUpperInput(+e.target.value)}
             onBlur={(e) => {
               if (isNaN(+e.target.value) || +e.target.value <= props.threshold.change.lower || +e.target.value > threshold.change.upper) {
@@ -329,9 +332,10 @@ const CommitTimeTrackingConfigComponent = (props: Props) => {
           <h2>Ratio</h2>
           <div>
             <input
+              className={'input'}
               type="text"
               value={ratioLowerInput}
-              style={{display: 'inline', maxWidth: '70px'}}
+              style={{display: 'inline', maxWidth: '100px'}}
               onChange={(e) => setRatioLowerInput(+e.target.value)}
               onBlur={(e) => {
                 if (isNaN(+e.target.value) || +e.target.value >= props.threshold.ratio.upper || +e.target.value < threshold.ratio.lower) {
@@ -357,9 +361,10 @@ const CommitTimeTrackingConfigComponent = (props: Props) => {
                 setRatioUpperInput(e.maxValue);
               }}
             /><input
+            className={'input'}
             type="text"
             value={ratioUpperInput}
-            style={{display: 'inline', maxWidth: '70px'}}
+            style={{display: 'inline', maxWidth: '100px'}}
             onChange={(e) => setRatioUpperInput(+e.target.value)}
             onBlur={(e) => {
               if (isNaN(+e.target.value) || +e.target.value <= props.threshold.ratio.lower || +e.target.value > threshold.ratio.upper) {
@@ -390,14 +395,13 @@ const CommitTimeTrackingConfigComponent = (props: Props) => {
 
         <label className="label">Time estimation parameters</label>
         <h2>First commit time (in minutes):</h2>
-        <input type="number" value={+props.firstCommitTime} onChange={(e) => props.onFirstCommitTime(+e.target.value)}/>
+        <input className={'input'} type="number" value={+props.firstCommitTime} onChange={(e) => props.onFirstCommitTime(+e.target.value)}/>
         <h2>Maximum session length (in minutes):</h2>
-        <input type="number" value={+props.maxSessionLength} onChange={(e) => props.onMaxSessionLength(+e.target.value)}/>
+        <input className={'input'} type="number" value={+props.maxSessionLength} onChange={(e) => props.onMaxSessionLength(+e.target.value)}/>
 
         <label className="label">Search term</label>
-        <textarea className={'textarea'} cols={50} rows={3}
-                  onChange={(e) => props.onChangeSearchTerm(e.target.value)}>
-        </textarea>
+        <input className={'input'}
+                  onChange={(e) => props.onChangeSearchTerm(e.target.value)}/>
       </div>
     </div>
   );
