@@ -61,7 +61,7 @@ export default (props: Props) => {
             Author: ${d.author}<br>
             Date: ${d.date.toLocaleDateString()}<br>
             Lines changed: ${d.lineChanges} lines<br>
-            Time spent: ${d.timeSpent.estimated} minutes<br>
+            Time spent: ${d.timeSpent[props.useActualTime ? "actual" : "estimated"]} minutes<br>
             Commit type: ${d.commitType[0].label}<br>
             Branch: ${d.branch}<br>
             <br>
@@ -86,7 +86,7 @@ export default (props: Props) => {
     key={commitChartData.map(d => d.commitSHA).join("-") + (props.useActualTime ? "" : commitChartData.map(d => d.timeSpent.estimated).join("-"))}
     content={
       {commitData: commitChartData,
-        upperChart: commitChartData.map(d => {return {ticks: d.date.toString(), barHeight: d.timeSpent.estimated, color: d.commitType[0].label}}),
+        upperChart: commitChartData.map(d => {return {ticks: d.date.toString(), barHeight: d.timeSpent[props.useActualTime ? "actual" : "estimated"], color: d.commitType[0].label}}),
         nodeChart: commitChartData.map(d => {return {ticks: d.date.toString(), barHeight: 0, color: d.commitType[0].label}}),
         lowerChart: commitChartData.map(d => {return {ticks: d.date.toString(), barHeight: d.lineChanges, color: d.commitType[0].label}})
       }}

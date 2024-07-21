@@ -102,12 +102,14 @@ function setThresholds(commits: Commit[], props: Props) {
     ratio: {
       lower: Math.min(...commitsWithDate.map(c => {
         const changes = c.stats.deletions + c.stats.additions;
-        const time = c.timeSpent.estimated;
+        const time = Math.min(c.timeSpent.estimated, c.timeSpent.actual) === 0 ? 1 :
+          Math.max(c.timeSpent.estimated, c.timeSpent.actual);
         return changes/time;
       })),
       upper: Math.max(...commitsWithDate.map(c => {
         const changes = c.stats.deletions + c.stats.additions;
-        const time = c.timeSpent.estimated === 0 ? 1 : c.timeSpent.estimated;
+        const time = Math.max(c.timeSpent.estimated, c.timeSpent.actual) == 0 ? 1 :
+          Math.max(c.timeSpent.estimated, c.timeSpent.actual);
         return changes/time;
       }))
     }
