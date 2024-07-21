@@ -10,5 +10,5 @@ export default async function (req, res) {
   if (!req.query.commitMessage) {
     res.sendStatus(400);
   }
-  res.send(JSON.stringify(await classifier.predict('' + req.query.commitMessage, 5)))
+  res.send(JSON.stringify(await classifier.predict('' + req.query.commitMessage, 5)));
 }
