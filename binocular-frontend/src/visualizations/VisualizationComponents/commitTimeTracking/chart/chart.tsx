@@ -83,7 +83,7 @@ export default (props: Props) => {
     };
   console.log(commitChartData);
   const commitChart = commitChartData !== undefined && commitChartData.length > 0 ? <CommitBarChart
-    key={commitChartData.map(d => d.commitSHA).join("-")}
+    key={commitChartData.map(d => d.commitSHA).join("-") + (props.useActualTime ? "" : commitChartData.map(d => d.timeSpent.estimated).join("-"))}
     content={
       {commitData: commitChartData,
         upperChart: commitChartData.map(d => {return {ticks: d.date.toString(), barHeight: d.timeSpent.estimated, color: d.commitType[0].label}}),
