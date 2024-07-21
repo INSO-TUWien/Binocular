@@ -1,7 +1,7 @@
-"use strict";
+'use strict';
 
-import { connect } from "react-redux";
-import { GlobalState } from "../../../types/globalTypes.ts";
+import { connect } from 'react-redux';
+import { GlobalState } from '../../../types/globalTypes.ts';
 import {
   setThreshold,
   setSelectedCommitType,
@@ -11,15 +11,15 @@ import {
   setMaxSessionLength,
   setUseActualTime,
   setUseRatio,
-} from "./sagas";
-import { Palette } from "../../../types/authorTypes.ts";
-import styles from "./styles.module.scss";
-import * as React from "react";
-import { Commit } from "../../../types/commitTypes.ts";
-import _ from "lodash";
-import MultiRangeSlider from "multi-range-slider-react";
-import "./sliderStyles.css";
-import { MultiSelect } from "react-multi-select-component";
+} from './sagas';
+import { Palette } from '../../../types/authorTypes.ts';
+import styles from './styles.module.scss';
+import * as React from 'react';
+import { Commit } from '../../../types/commitTypes.ts';
+import _ from 'lodash';
+import MultiRangeSlider from 'multi-range-slider-react';
+import './sliderStyles.css';
+import { MultiSelect } from 'react-multi-select-component';
 
 const mapStateToProps = (state: GlobalState) => {
   const dashboardState = state.visualizations.commitTimeTracking.state;
@@ -44,19 +44,13 @@ const mapStateToProps = (state: GlobalState) => {
 
 const mapDispatchToProps = (dispatch: any) => {
   return {
-    onChangeThreshold: (threshold: { value: number; threshold: string }) =>
-      dispatch(setThreshold(threshold)),
+    onChangeThreshold: (threshold: { value: number; threshold: string }) => dispatch(setThreshold(threshold)),
     onChangeBranch: (branch: string) => dispatch(setSelectedBranch(branch)),
-    onChangeCommitType: (commitType: string[]) =>
-      dispatch(setSelectedCommitType(commitType)),
-    onChangeSearchTerm: (searchTerm: string) =>
-      dispatch(setSearchTerm(searchTerm)),
-    onFirstCommitTime: (firstCommitTime: number) =>
-      dispatch(setFirstCommitTime(firstCommitTime)),
-    onMaxSessionLength: (maxSessionLength: number) =>
-      dispatch(setMaxSessionLength(maxSessionLength)),
-    onToggleUseActualTime: (actualTime: boolean) =>
-      dispatch(setUseActualTime(actualTime)),
+    onChangeCommitType: (commitType: string[]) => dispatch(setSelectedCommitType(commitType)),
+    onChangeSearchTerm: (searchTerm: string) => dispatch(setSearchTerm(searchTerm)),
+    onFirstCommitTime: (firstCommitTime: number) => dispatch(setFirstCommitTime(firstCommitTime)),
+    onMaxSessionLength: (maxSessionLength: number) => dispatch(setMaxSessionLength(maxSessionLength)),
+    onToggleUseActualTime: (actualTime: boolean) => dispatch(setUseActualTime(actualTime)),
     onToggleUseRatio: (useRatio: boolean) => dispatch(setUseRatio(useRatio)),
   };
 };
@@ -94,12 +88,13 @@ interface Props {
 }
 
 function setThresholds(commits: Commit[], props: Props) {
-  if (!commits || !props.selectedAuthors)
+  if (!commits || !props.selectedAuthors) {
     return {
       hours: { lower: 0, upper: 0 },
       change: { lower: 0, upper: 0 },
       ratio: { lower: 0, upper: 0 },
     };
+  }
 
   const commitsWithDate = commits.map((commit) => {
     return {
@@ -112,43 +107,25 @@ function setThresholds(commits: Commit[], props: Props) {
   addEstimatedTime(commitsWithDate, props);
   const threshold = {
     hours: {
-      lower: Math.min(
-        ...commitsWithDate.map((c) =>
-          Math.min(c.timeSpent.estimated, c.timeSpent.actual),
-        ),
-      ),
-      upper: Math.max(
-        ...commitsWithDate.map((c) =>
-          Math.max(c.timeSpent.estimated, c.timeSpent.actual),
-        ),
-      ),
+      lower: Math.min(...commitsWithDate.map((c) => Math.min(c.timeSpent.estimated, c.timeSpent.actual))),
+      upper: Math.max(...commitsWithDate.map((c) => Math.max(c.timeSpent.estimated, c.timeSpent.actual))),
     },
     change: {
-      lower: Math.min(
-        ...commitsWithDate.map((c) => c.stats.deletions + c.stats.additions),
-      ),
-      upper: Math.max(
-        ...commitsWithDate.map((c) => c.stats.deletions + c.stats.additions),
-      ),
+      lower: Math.min(...commitsWithDate.map((c) => c.stats.deletions + c.stats.additions)),
+      upper: Math.max(...commitsWithDate.map((c) => c.stats.deletions + c.stats.additions)),
     },
     ratio: {
       lower: Math.min(
         ...commitsWithDate.map((c) => {
           const changes = c.stats.deletions + c.stats.additions;
-          const time =
-            Math.min(c.timeSpent.estimated, c.timeSpent.actual) === 0
-              ? 1
-              : Math.max(c.timeSpent.estimated, c.timeSpent.actual);
+          const time = Math.min(c.timeSpent.estimated, c.timeSpent.actual) === 0 ? 1 : Math.max(c.timeSpent.estimated, c.timeSpent.actual);
           return changes / time;
         }),
       ),
       upper: Math.max(
         ...commitsWithDate.map((c) => {
           const changes = c.stats.deletions + c.stats.additions;
-          const time =
-            Math.max(c.timeSpent.estimated, c.timeSpent.actual) == 0
-              ? 1
-              : Math.max(c.timeSpent.estimated, c.timeSpent.actual);
+          const time = Math.max(c.timeSpent.estimated, c.timeSpent.actual) === 0 ? 1 : Math.max(c.timeSpent.estimated, c.timeSpent.actual);
           return changes / time;
         }),
       ),
@@ -182,25 +159,18 @@ function addEstimatedTime(commits: any[], props: Props) {
   const maxCommitDiff = props.maxSessionLength;
   const mergedAuthors = props.mergedAuthors;
   mergedAuthors.forEach((mergedAuthor) => {
-    const filteredCommits = commits.filter((commit) =>
-      _.map(mergedAuthor.committers, "signature").includes(commit.signature),
-    );
+    const filteredCommits = commits.filter((commit) => _.map(mergedAuthor.committers, 'signature').includes(commit.signature));
     if (!filteredCommits || filteredCommits.length === 0) {
       return;
     }
     filteredCommits[0].timeSpent.estimated = firstCommitAdd;
     let prevCommit = filteredCommits.shift();
     let curCommit = filteredCommits.shift();
-    while (curCommit != null) {
-      if (
-        (curCommit.date.getTime() - prevCommit.date.getTime()) / 1000 / 60 >
-        maxCommitDiff
-      ) {
+    while (curCommit !== null) {
+      if ((curCommit.date.getTime() - prevCommit.date.getTime()) / 1000 / 60 > maxCommitDiff) {
         curCommit.timeSpent.estimated = firstCommitAdd;
       } else {
-        curCommit.timeSpent.estimated = Math.round(
-          (curCommit.date.getTime() - prevCommit.date.getTime()) / 1000 / 60,
-        );
+        curCommit.timeSpent.estimated = Math.round((curCommit.date.getTime() - prevCommit.date.getTime()) / 1000 / 60);
       }
       prevCommit = curCommit;
       curCommit = filteredCommits.shift();
@@ -211,14 +181,12 @@ function addEstimatedTime(commits: any[], props: Props) {
 function addActualTime(commits: any[]) {
   return commits.forEach((c) => {
     let timeSpent = 0;
-    const regex = "Time-spent: [0-9]*h[0-9]*m";
+    const regex = 'Time-spent: [0-9]*h[0-9]*m';
 
     const timeStamp = c.message.match(regex);
     if (timeStamp) {
-      const time = timeStamp.split(" ")[1];
-      timeSpent =
-        +time.substring(0, time.indexOf("h")) * 60 +
-        +time.substring(time.indexOf("h") + 1, time.indexOf("m"));
+      const time = timeStamp.split(' ')[1];
+      timeSpent = +time.substring(0, time.indexOf('h')) * 60 + +time.substring(time.indexOf('h') + 1, time.indexOf('m'));
     }
     c.timeSpent.actual = timeSpent;
   });
@@ -249,7 +217,7 @@ function sliderInput(
           }
           props.onChangeThreshold({
             value: +e.target.value,
-            threshold: inputFieldName + "-lower",
+            threshold: inputFieldName + '-lower',
           });
         }}
       />
@@ -265,11 +233,11 @@ function sliderInput(
         onChange={(e) => {
           props.onChangeThreshold({
             value: e.minValue,
-            threshold: inputFieldName + "-lower",
+            threshold: inputFieldName + '-lower',
           });
           props.onChangeThreshold({
             value: e.maxValue,
-            threshold: inputFieldName + "-upper",
+            threshold: inputFieldName + '-upper',
           });
           lowerInput[1](e.minValue);
           upperInput[1](e.maxValue);
@@ -291,7 +259,7 @@ function sliderInput(
           }
           props.onChangeThreshold({
             value: +e.target.value,
-            threshold: inputFieldName + "-upper",
+            threshold: inputFieldName + '-upper',
           });
         }}
       />
@@ -300,7 +268,7 @@ function sliderInput(
 }
 
 const CommitTimeTrackingConfigComponent = (props: Props) => {
-  if (!props.commits)
+  if (!props.commits) {
     return (
       <div className={styles.configContainer}>
         <h6 className={styles.loadingHint}>
@@ -308,6 +276,7 @@ const CommitTimeTrackingConfigComponent = (props: Props) => {
         </h6>
       </div>
     );
+  }
   const threshold = setThresholds(props.commits, props);
 
   return (
@@ -316,84 +285,64 @@ const CommitTimeTrackingConfigComponent = (props: Props) => {
         <label className="label">Branch</label>
         <div className={styles.inputSections}>
           <div className="select">
-            <select
-              value={props.selectedBranch}
-              onChange={(e) => props.onChangeBranch(e.target.value)}
-            >
+            <select value={props.selectedBranch} onChange={(e) => props.onChangeBranch(e.target.value)}>
               <option value="" key="">
                 All branches
               </option>
               {props.branches
                 ? props.branches.map((b) => (
                     <option value={b} key={b}>
-                      {b}
+                      {b}0
                     </option>
                   ))
-                : "Nothing"}
+                : 'Nothing'}
             </select>
           </div>
         </div>
         <label className="label">Thresholds</label>
         <div className={styles.inputSections}>
           <h2>Time spent (in minutes)</h2>
-          {sliderInput(
-            React.useState(props.threshold.hours.lower),
-            React.useState(props.threshold.hours.upper),
-            "hours",
-            threshold,
-            props,
-          )}
+          {sliderInput(React.useState(props.threshold.hours.lower), React.useState(props.threshold.hours.upper), 'hours', threshold, props)}
           <h2>Lines changed</h2>
           {sliderInput(
             React.useState(props.threshold.change.lower),
             React.useState(props.threshold.change.upper),
-            "change",
+            'change',
             threshold,
             props,
           )}
           <h2>Ratio (lines changed/time spent in minutes</h2>
-          {sliderInput(
-            React.useState(props.threshold.ratio.lower),
-            React.useState(props.threshold.ratio.upper),
-            "ratio",
-            threshold,
-            props,
-          )}
+          {sliderInput(React.useState(props.threshold.ratio.lower), React.useState(props.threshold.ratio.upper), 'ratio', threshold, props)}
         </div>
 
         <label className="label">Commit type</label>
         <MultiSelect
           className={styles.inputSections}
           options={[
-            { label: "corrective", value: "corrective" },
-            { label: "features", value: "features" },
-            { label: "perfective", value: "perfective" },
-            { label: "nonfunctional", value: "nonfunctional" },
-            { label: "unknown", value: "unknown" },
+            { label: 'corrective', value: 'corrective' },
+            { label: 'features', value: 'features' },
+            { label: 'perfective', value: 'perfective' },
+            { label: 'nonfunctional', value: 'nonfunctional' },
+            { label: 'unknown', value: 'unknown' },
           ]}
           value={props.commitType.map((type) => {
             return { label: type, value: type };
           })}
-          onChange={(selected: { label: string; value: string }[]) =>
-            props.onChangeCommitType(selected.map((s) => s.value))
-          }
-          labelledBy={"Select commit type"}
+          onChange={(selected: { label: string; value: string }[]) => props.onChangeCommitType(selected.map((s) => s.value))}
+          labelledBy={'Select commit type'}
         />
 
         <label className="label">Search term</label>
         <div className={styles.inputSections}>
-          <input
-            className={"input"}
-            onChange={(e) => props.onChangeSearchTerm(e.target.value)}
-          />
+          <input className={'input'} onChange={(e) => props.onChangeSearchTerm(e.target.value)} />
         </div>
 
-        <label className={"label"}>Time settings</label>
+        <label className={'label'}>Time settings</label>
         <div className={styles.inputSections}>
           <input
             id="useActualTime"
             type="checkbox"
-            className={"switch is-rounded is-outlined is-info"}
+            className={'switch is-rounded is-outlined is-info'}
             defaultChecked={props.useActualTime}
             onChange={(e) => props.onToggleUseActualTime(e.target.checked)}
           />
@@ -404,7 +353,7 @@ const CommitTimeTrackingConfigComponent = (props: Props) => {
           <input
             id="useRatio"
             type="checkbox"
-            className={"switch is-rounded is-outlined is-info"}
+            className={'switch is-rounded is-outlined is-info'}
             defaultChecked={props.useRatio}
             onChange={(e) => props.onToggleUseRatio(e.target.checked)}
           />
@@ -413,14 +362,14 @@ const CommitTimeTrackingConfigComponent = (props: Props) => {
           </label>
           <h2>First commit time (in minutes):</h2>
           <input
-            className={"input"}
+            className={'input'}
             type="number"
             value={+props.firstCommitTime}
             onChange={(e) => props.onFirstCommitTime(+e.target.value)}
           />
           <h2>Maximum session length (in minutes):</h2>
           <input
-            className={"input"}
+            className={'input'}
             type="number"
             value={+props.maxSessionLength}
             onChange={(e) => props.onMaxSessionLength(+e.target.value)}
@@ -431,9 +380,6 @@ const CommitTimeTrackingConfigComponent = (props: Props) => {
   );
 };
 
-const DashboardConfig = connect(
-  mapStateToProps,
-  mapDispatchToProps,
-)(CommitTimeTrackingConfigComponent);
+const DashboardConfig = connect(mapStateToProps, mapDispatchToProps)(CommitTimeTrackingConfigComponent);
 
 export default DashboardConfig;

@@ -1,39 +1,31 @@
-"use strict";
+'use strict';
 
-import {
-  fetchFactory,
-  mapSaga,
-  timestampedActionFactory,
-} from "../../../../sagas/utils";
-import { select, throttle, fork, takeEvery } from "redux-saga/effects";
-import { createAction } from "redux-actions";
-import chroma from "chroma-js";
-import _ from "lodash";
-import Database from "../../../../database/database";
-import { GlobalState } from "../../../../types/globalTypes";
-import { Commit } from "../../../../types/commitTypes";
-import { Palette } from "../../../../types/authorTypes";
-import { Bounds } from "../../../../types/boundsTypes";
+import { fetchFactory, mapSaga, timestampedActionFactory } from '../../../../sagas/utils';
+import { select, throttle, fork, takeEvery } from 'redux-saga/effects';
+import { createAction } from 'redux-actions';
+import chroma from 'chroma-js';
+import _ from 'lodash';
+import Database from '../../../../database/database';
+import { GlobalState } from '../../../../types/globalTypes';
+import { Commit } from '../../../../types/commitTypes';
+import { Palette } from '../../../../types/authorTypes';
+import { Bounds } from '../../../../types/boundsTypes';
 
-export const setSelectedBranch = createAction("SET_SELECTED_BRANCH");
-export const setSelectedCommitType = createAction("SET_SELECTED_COMMIT_TYPE");
-export const setThreshold = createAction("SET_THRESHOLD");
-export const setSearchTerm = createAction("SET_SEARCH_TERM");
-export const setFirstCommitTime = createAction("SET_FIRST_COMMIT_TIME");
-export const setMaxSessionLength = createAction("SET_MAX_SESSION_LENGTH");
-export const setUseActualTime = createAction("SET_USE_ACTUAL_TIME");
-export const setUseRatio = createAction("SET_USE_RATIO");
+export const setSelectedBranch = createAction('SET_SELECTED_BRANCH');
+export const setSelectedCommitType = createAction('SET_SELECTED_COMMIT_TYPE');
+export const setThreshold = createAction('SET_THRESHOLD');
+export const setSearchTerm = createAction('SET_SEARCH_TERM');
+export const setFirstCommitTime = createAction('SET_FIRST_COMMIT_TIME');
+export const setMaxSessionLength = createAction('SET_MAX_SESSION_LENGTH');
+export const setUseActualTime = createAction('SET_USE_ACTUAL_TIME');
+export const setUseRatio = createAction('SET_USE_RATIO');
 
-export const requestChangesData = createAction("REQUEST_CHANGES_DATA");
-export const receiveChangesData = timestampedActionFactory(
-  "RECEIVE_CHANGES_DATA",
-);
-export const receiveChangesDataError = createAction(
-  "RECEIVE_CHANGES_DATA_ERROR",
-);
+export const requestChangesData = createAction('REQUEST_CHANGES_DATA');
+export const receiveChangesData = timestampedActionFactory('RECEIVE_CHANGES_DATA');
+export const receiveChangesDataError = createAction('RECEIVE_CHANGES_DATA_ERROR');
 
-export const requestRefresh = createAction("REQUEST_REFRESH");
-const refresh = createAction("REFRESH");
+export const requestRefresh = createAction('REQUEST_REFRESH');
+const refresh = createAction('REFRESH');
 
 interface CommitTimeTrackingData {
   otherCount: number;
@@ -68,39 +60,39 @@ export default function* () {
 }
 
 function* watchTimeSpan() {
-  yield takeEvery("SET_TIME_SPAN", fetchChangesData);
+  yield takeEvery('SET_TIME_SPAN', fetchChangesData);
 }
 
 function* watchSelectedAuthorsGlobal() {
-  yield takeEvery("SET_SELECTED_AUTHORS_GLOBAL", fetchChangesData);
+  yield takeEvery('SET_SELECTED_AUTHORS_GLOBAL', fetchChangesData);
 }
 
 function* watchOtherAuthors() {
-  yield takeEvery("SET_OTHER_AUTHORS", fetchChangesData);
+  yield takeEvery('SET_OTHER_AUTHORS', fetchChangesData);
 }
 
 function* watchExcludeMergeCommits() {
-  yield takeEvery("SET_EXCLUDE_MERGE_COMMITS", fetchChangesData);
+  yield takeEvery('SET_EXCLUDE_MERGE_COMMITS', fetchChangesData);
 }
 
 function* watchMergedAuthors() {
-  yield takeEvery("SET_MERGED_AUTHORS", fetchChangesData);
+  yield takeEvery('SET_MERGED_AUTHORS', fetchChangesData);
 }
 
 function* watchRefreshRequests() {
-  yield throttle(5000, "REQUEST_REFRESH", mapSaga(refresh));
+  yield throttle(5000, 'REQUEST_REFRESH', mapSaga(refresh));
 }
 
 function* watchMessages() {
-  yield takeEvery("message", mapSaga(requestRefresh));
+  yield takeEvery('message', mapSaga(requestRefresh));
 }
 
 function* watchToggleHelp() {
-  yield takeEvery("TOGGLE_HELP", mapSaga(refresh));
+  yield takeEvery('TOGGLE_HELP', mapSaga(refresh));
 }
 
 function* watchRefresh() {
-  yield takeEvery("REFRESH", fetchChangesData);
+  yield takeEvery('REFRESH', fetchChangesData);
 }
 
 export const fetchChangesData = fetchFactory(
@@ -109,52 +101,26 @@ export const fetchChangesData = fetchFactory(
     const firstCommitTimestamp = Date.parse(bounds.firstCommit.date);
     const lastCommitTimestamp = Date.parse(bounds.lastCommit.date);
 
-    const firstIssueTimestamp = bounds.firstIssue
-      ? Date.parse(bounds.firstIssue.createdAt)
-      : firstCommitTimestamp;
-    const lastIssueTimestamp = bounds.lastIssue
-      ? Date.parse(bounds.lastIssue.createdAt)
-      : lastCommitTimestamp;
+    const firstIssueTimestamp = bounds.firstIssue ? Date.parse(bounds.firstIssue.createdAt) : firstCommitTimestamp;
+    const lastIssueTimestamp = bounds.lastIssue ? Date.parse(bounds.lastIssue.createdAt) : lastCommitTimestamp;
 
     const state: GlobalState = yield select();
-    const viewport = state.visualizations.changes.state.config.viewport || [
-      0,
-      null,
-    ];
-    let firstSignificantTimestamp = Math.max(
-      viewport[0],
-      Math.min(firstCommitTimestamp, firstIssueTimestamp),
-    );
-    let lastSignificantTimestamp = viewport[1]
-      ? viewport[1].getTime()
-      : Math.max(lastCommitTimestamp, lastIssueTimestamp);
+    const viewport = state.visualizations.changes.state.config.viewport || [0, null];
+    let firstSignificantTimestamp = Math.max(viewport[0], Math.min(firstCommitTimestamp, firstIssueTimestamp));
+    let lastSignificantTimestamp = viewport[1] ? viewport[1].getTime() : Math.max(lastCommitTimestamp, lastIssueTimestamp);
     const timeSpan = state.universalSettings.chartTimeSpan;
-    firstSignificantTimestamp =
-      timeSpan.from === undefined
-        ? firstSignificantTimestamp
-        : new Date(timeSpan.from).getTime();
-    lastSignificantTimestamp =
-      timeSpan.to === undefined
-        ? lastSignificantTimestamp
-        : new Date(timeSpan.to).getTime();
+    firstSignificantTimestamp = timeSpan.from === undefined ? firstSignificantTimestamp : new Date(timeSpan.from).getTime();
+    lastSignificantTimestamp = timeSpan.to === undefined ? lastSignificantTimestamp : new Date(timeSpan.to).getTime();
     const commitTimeTrackingData: CommitTimeTrackingData = yield Promise.all([
-      Database.getCommitData(
-        [firstCommitTimestamp, lastCommitTimestamp],
-        [firstSignificantTimestamp, lastSignificantTimestamp],
-      ),
-      Database.getCommitData(
-        [firstCommitTimestamp, lastCommitTimestamp],
-        [firstCommitTimestamp, lastCommitTimestamp],
-      ),
+      Database.getCommitData([firstCommitTimestamp, lastCommitTimestamp], [firstSignificantTimestamp, lastSignificantTimestamp]),
+      Database.getCommitData([firstCommitTimestamp, lastCommitTimestamp], [firstCommitTimestamp, lastCommitTimestamp]),
       Database.getAllBranches(),
     ])
       .then((result) => {
         const filteredCommits = result[0];
         const commits = result[1];
         //Figure out why there are duplicates in the first place
-        const branches = result[2].branches.data
-          .map((b) => b.branch)
-          .filter((value, index, array) => array.indexOf(value) === index);
+        const branches = result[2].branches.data.map((b) => b.branch).filter((value, index, array) => array.indexOf(value) === index);
         const palette = getPalette(commits, 15, bounds.committers.length);
         return {
           otherCount: 0,
@@ -180,21 +146,13 @@ export const fetchChangesData = fetchFactory(
   receiveChangesDataError,
 );
 
-function getPalette(
-  commits: Commit[],
-  maxNumberOfColors: number,
-  numOfCommitters: number,
-) {
-  function chartColors(
-    band: string,
-    maxLength: number,
-    length: number,
-  ): string[] {
+function getPalette(commits: Commit[], maxNumberOfColors: number, numOfCommitters: number) {
+  function chartColors(band: string, maxLength: number, length: number): string[] {
     const len = length > maxLength ? maxLength : length;
-    return chroma.scale(band).mode("lch").colors(len);
+    return chroma.scale(band).mode('lch').colors(len);
   }
 
-  const palette = chartColors("spectral", maxNumberOfColors, numOfCommitters);
+  const palette = chartColors('spectral', maxNumberOfColors, numOfCommitters);
 
   const totals: { [signature: string]: number } = {};
   _.each(commits, (commit) => {
@@ -221,10 +179,9 @@ function getPalette(
     returnPalette[sortable[i][0]] = palette[i];
   }
   if (sortable.length > maxNumberOfColors) {
-    returnPalette["others"] = palette[maxNumberOfColors - 1];
+    returnPalette['others'] = palette[maxNumberOfColors - 1];
   } else {
-    returnPalette[sortable[sortable.length - 1][0]] =
-      palette[palette.length - 1];
+    returnPalette[sortable[sortable.length - 1][0]] = palette[palette.length - 1];
   }
 
   return returnPalette;
