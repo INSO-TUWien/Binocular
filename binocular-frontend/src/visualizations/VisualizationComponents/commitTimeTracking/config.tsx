@@ -180,6 +180,59 @@ function addActualTime(commits: any[]) {
   });
 }
 
+function sliderInput(lowerInput: [number, React.Dispatch<React.SetStateAction<number>>],
+                     upperInput: [number, React.Dispatch<React.SetStateAction<number>>],
+                     inputFieldName: string,threshold: Threshold, props: Props) {
+  
+  return <div>
+    <input
+      className={'input'}
+      type="text"
+      value={lowerInput[0]}
+      style={{display: 'inline', maxWidth: '100px'}}
+      onChange={(e) => lowerInput[1](+e.target.value)}
+      onBlur={(e) => {
+        if (isNaN(+e.target.value) || +e.target.value >= props.threshold[inputFieldName].upper
+          || +e.target.value < threshold[inputFieldName].lower) {
+          lowerInput[1](props.threshold[inputFieldName].lower);
+          return;
+        }
+        props.onChangeThreshold({value: +e.target.value, threshold: inputFieldName + '-lower'})
+      }}
+    />
+    <MultiRangeSlider
+      style={{margin: '0 10px'}}
+      min={threshold[inputFieldName].lower}
+      max={threshold[inputFieldName].upper}
+      minValue={props.threshold[inputFieldName].lower}
+      maxValue={props.threshold[inputFieldName].upper}
+      canMinMaxValueSame={true}
+      label={false}
+      ruler={false}
+      onChange={e => {
+        props.onChangeThreshold({value: e.minValue, threshold: inputFieldName + '-lower'});
+        props.onChangeThreshold({value: e.maxValue, threshold: inputFieldName + '-upper'});
+        lowerInput[1](e.minValue);
+        upperInput[1](e.maxValue);
+      }}
+    /><input
+    className={'input'}
+    type="text"
+    value={upperInput[0]}
+    style={{display: 'inline', maxWidth: '100px'}}
+    onChange={(e) => upperInput[1](+e.target.value)}
+    onBlur={(e) => {
+      if (isNaN(+e.target.value) || +e.target.value <= props.threshold[inputFieldName].lower
+        || +e.target.value > threshold[inputFieldName].upper) {
+        upperInput[1](props.threshold[inputFieldName].upper);
+        return;
+      }
+      props.onChangeThreshold({value: +e.target.value, threshold: inputFieldName + '-upper'})
+    }}
+  />
+  </div>
+}
+
 const CommitTimeTrackingConfigComponent = (props: Props) => {
   if (!props.commits) return (
     <div>
@@ -188,12 +241,6 @@ const CommitTimeTrackingConfigComponent = (props: Props) => {
       </h6>
     </div>);
   const threshold = setThresholds(props.commits, props);
-  const [hoursLowerInput, setHoursLowerInput] = React.useState(props.threshold.hours.lower);
-  const [hoursUpperInput, setHoursUpperInput] = React.useState(props.threshold.hours.upper);
-  const [changesLowerInput, setChangesLowerInput] = React.useState(props.threshold.change.lower);
-  const [changesUpperInput, setChangesUpperInput] = React.useState(props.threshold.change.upper);
-  const [ratioLowerInput, setRatioLowerInput] = React.useState(props.threshold.ratio.lower);
-  const [ratioUpperInput, setRatioUpperInput] = React.useState(props.threshold.ratio.upper);
 
   return (
     <div className={styles.configContainer}>
@@ -237,144 +284,14 @@ const CommitTimeTrackingConfigComponent = (props: Props) => {
         <label className="label">Thresholds</label>
         <div style={{ marginBottom: '0.5em' }}>
           <h2>Time spent</h2>
-          <div>
-            <input
-              className={'input'}
-              type="text"
-              value={hoursLowerInput}
-              style={{display: 'inline', maxWidth: '100px'}}
-              onChange={(e) => setHoursLowerInput(+e.target.value)}
-              onBlur={(e) => {
-                if (isNaN(+e.target.value) || +e.target.value >= props.threshold.hours.upper || +e.target.value < threshold.hours.lower) {
-                  setHoursLowerInput(props.threshold.hours.lower);
-                  return;
-                }
-                props.onChangeThreshold({value: +e.target.value, threshold: 'hours-lower'})
-              }}
-            />
-            <MultiRangeSlider
-              style={{margin: '0 10px'}}
-              min={threshold.hours.lower}
-              max={threshold.hours.upper}
-              minValue={props.threshold.hours.lower}
-              maxValue={props.threshold.hours.upper}
-              canMinMaxValueSame={true}
-              label={false}
-              ruler={false}
-              onChange={e => {
-                props.onChangeThreshold({value: e.minValue, threshold: 'hours-lower'});
-                props.onChangeThreshold({value: e.maxValue, threshold: 'hours-upper'});
-                setHoursLowerInput(e.minValue);
-                setHoursUpperInput(e.maxValue);
-              }}
-            /><input
-            className={'input'}
-            type="text"
-            value={hoursUpperInput}
-            style={{display: 'inline', maxWidth: '100px'}}
-            onChange={(e) => setHoursUpperInput(+e.target.value)}
-            onBlur={(e) => {
-              if (isNaN(+e.target.value) || +e.target.value <= props.threshold.hours.lower || +e.target.value > threshold.hours.upper) {
-                setHoursUpperInput(props.threshold.hours.upper);
-                return;
-              }
-              props.onChangeThreshold({value: +e.target.value, threshold: 'hours-upper'})
-            }}
-          />
-          </div>
-
+          {sliderInput(React.useState(props.threshold.hours.lower), React.useState(props.threshold.hours.upper),
+            'hours', threshold, props)}
           <h2>Lines changed</h2>
-          <div>
-            <input
-              className={'input'}
-              type="text"
-              value={changesLowerInput}
-              style={{display: 'inline', maxWidth: '100px'}}
-              onChange={(e) => setChangesLowerInput(+e.target.value)}
-              onBlur={(e) => {
-                if (isNaN(+e.target.value) || +e.target.value >= props.threshold.change.upper || +e.target.value < threshold.change.lower) {
-                  setChangesLowerInput(props.threshold.change.lower);
-                  return;
-                }
-                props.onChangeThreshold({value: +e.target.value, threshold: 'change-lower'})
-              }}
-            />
-            <MultiRangeSlider
-              style={{margin: '0 10px'}}
-              min={threshold.change.lower}
-              max={threshold.change.upper}
-              minValue={props.threshold.change.lower}
-              maxValue={props.threshold.change.upper}
-              canMinMaxValueSame={true}
-              label={false}
-              ruler={false}
-              onInput={e => {
-                props.onChangeThreshold({value: e.minValue, threshold: 'change-lower'});
-                props.onChangeThreshold({value: e.maxValue, threshold: 'change-upper'});
-                setChangesLowerInput(e.minValue);
-                setChangesUpperInput(e.maxValue);
-              }}
-            /><input
-            className={'input'}
-            type="text"
-            value={changesUpperInput}
-            style={{display: 'inline', maxWidth: '100px'}}
-            onChange={(e) => setChangesUpperInput(+e.target.value)}
-            onBlur={(e) => {
-              if (isNaN(+e.target.value) || +e.target.value <= props.threshold.change.lower || +e.target.value > threshold.change.upper) {
-                setChangesUpperInput(props.threshold.change.upper);
-                return;
-              }
-              props.onChangeThreshold({value: +e.target.value, threshold: 'change-upper'})
-            }}
-          />
-          </div>
+          {sliderInput(React.useState(props.threshold.change.lower), React.useState(props.threshold.change.upper),
+            'change', threshold, props)}
           <h2>Ratio</h2>
-          <div>
-            <input
-              className={'input'}
-              type="text"
-              value={ratioLowerInput}
-              style={{display: 'inline', maxWidth: '100px'}}
-              onChange={(e) => setRatioLowerInput(+e.target.value)}
-              onBlur={(e) => {
-                if (isNaN(+e.target.value) || +e.target.value >= props.threshold.ratio.upper || +e.target.value < threshold.ratio.lower) {
-                  setRatioLowerInput(props.threshold.ratio.lower);
-                  return;
-                }
-                props.onChangeThreshold({value: +e.target.value, threshold: 'ratio-lower'})
-              }}
-            />
-            <MultiRangeSlider
-              style={{margin: '0 10px'}}
-              min={threshold.ratio.lower}
-              max={threshold.ratio.upper}
-              minValue={props.threshold.ratio.lower}
-              maxValue={props.threshold.ratio.upper}
-              canMinMaxValueSame={true}
-              label={false}
-              ruler={false}
-              onChange={e => {
-                props.onChangeThreshold({value: e.minValue, threshold: 'ratio-lower'});
-                props.onChangeThreshold({value: e.maxValue, threshold: 'ratio-upper'});
-                setRatioLowerInput(e.minValue);
-                setRatioUpperInput(e.maxValue);
-              }}
-            /><input
-            className={'input'}
-            type="text"
-            value={ratioUpperInput}
-            style={{display: 'inline', maxWidth: '100px'}}
-            onChange={(e) => setRatioUpperInput(+e.target.value)}
-            onBlur={(e) => {
-              if (isNaN(+e.target.value) || +e.target.value <= props.threshold.ratio.lower || +e.target.value > threshold.ratio.upper) {
-                setRatioUpperInput(props.threshold.ratio.upper);
-                return;
-              }
-              props.onChangeThreshold({value: +e.target.value, threshold: 'ratio-upper'})
-            }}
-          />
-          </div>
+          {sliderInput(React.useState(props.threshold.ratio.lower), React.useState(props.threshold.ratio.upper),
+            'ratio', threshold, props)}
         </div>
 
         <label className="label">Commit type</label>
@@ -389,7 +306,7 @@ const CommitTimeTrackingConfigComponent = (props: Props) => {
           value={props.commitType.map(type => {
             return {label: type, value: type};
           })}
-          onChange={(selected) => props.onChangeCommitType(selected.map(s => s.value))}
+          onChange={(selected: {label: string, value: string}[]) => props.onChangeCommitType(selected.map(s => s.value))}
           labelledBy={"Select commit type"}
         />
 
