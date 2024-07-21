@@ -28,6 +28,7 @@ interface Props {
   firstCommitTime: number;
   maxSessionLength: number;
   useActualTime: boolean;
+  useRatio: boolean;
 }
 interface CommitChartData {
   timeSpent: {
@@ -62,6 +63,7 @@ export default (props: Props) => {
             Date: ${d.date.toLocaleDateString()}<br>
             Lines changed: ${d.lineChanges} lines<br>
             Time spent: ${d.timeSpent[props.useActualTime ? "actual" : "estimated"]} minutes<br>
+            Ratio: ${Math.round(d.lineChanges / Math.max(1,d.timeSpent[props.useActualTime ? "actual" : "estimated"]) * 100) / 100.0} lines/minute<br>
             Commit type: ${d.commitType[0].label}<br>
             Branch: ${d.branch}<br>
             <br>
@@ -83,12 +85,14 @@ export default (props: Props) => {
     };
   console.log(commitChartData);
   const commitChart = commitChartData !== undefined && commitChartData.length > 0 ? <CommitBarChart
-    key={commitChartData.map(d => d.commitSHA).join("-") + (props.useActualTime ? "" : commitChartData.map(d => d.timeSpent.estimated).join("-"))}
+    key={commitChartData.map(d => d.commitSHA).join("-")
+      + (props.useActualTime ? "" : commitChartData.map(d => d.timeSpent.estimated).join("-"))
+      + (commitChartData.map(d => props.useRatio ? d.lineChanges / Math.max(d.timeSpent[props.useActualTime ? "actual" : "estimated"], 1) : d.lineChanges)).join("-")}
     content={
       {commitData: commitChartData,
         upperChart: commitChartData.map(d => {return {ticks: d.date.toString(), barHeight: d.timeSpent[props.useActualTime ? "actual" : "estimated"], color: d.commitType[0].label}}),
         nodeChart: commitChartData.map(d => {return {ticks: d.date.toString(), barHeight: 0, color: d.commitType[0].label}}),
-        lowerChart: commitChartData.map(d => {return {ticks: d.date.toString(), barHeight: d.lineChanges, color: d.commitType[0].label}})
+        lowerChart: commitChartData.map(d => {return {ticks: d.date.toString(), barHeight: props.useRatio ? d.lineChanges / Math.max(d.timeSpent[props.useActualTime ? "actual" : "estimated"], 1) : d.lineChanges, color: d.commitType[0].label}})
       }}
     colorDomain={['corrective', 'features', 'unknown', 'nonfunctional', 'perfective']}
     colorPalette={["#fd7f6f", "#7eb0d5", "#b2e061", "#bd7ebe", "#ffb55a"]}

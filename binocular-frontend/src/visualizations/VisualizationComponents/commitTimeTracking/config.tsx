@@ -9,7 +9,7 @@ import {
   setSearchTerm,
   setFirstCommitTime,
   setMaxSessionLength,
-  setUseActualTime
+  setUseActualTime, setUseRatio
 } from './sagas';
 import { Palette } from '../../../types/authorTypes.ts';
 import styles from './styles.module.scss';
@@ -37,6 +37,7 @@ const mapStateToProps = (state: GlobalState) => {
     firstCommitTime: dashboardState.config.firstCommitTime,
     maxSessionLength: dashboardState.config.maxSessionLength,
     useActualTime: dashboardState.config.useActualTime,
+    useRatio: dashboardState.config.useRatio,
   };
 };
 
@@ -49,6 +50,7 @@ const mapDispatchToProps = (dispatch: any) => {
     onFirstCommitTime: (firstCommitTime: number) => dispatch(setFirstCommitTime(firstCommitTime)),
     onMaxSessionLength: (maxSessionLength: number) => dispatch(setMaxSessionLength(maxSessionLength)),
     onToggleUseActualTime: (actualTime: boolean) => dispatch(setUseActualTime(actualTime)),
+    onToggleUseRatio: (useRatio: boolean) => dispatch(setUseRatio(useRatio)),
   };
 };
 
@@ -70,6 +72,7 @@ interface Props {
   firstCommitTime: number;
   maxSessionLength: number;
   useActualTime: boolean;
+  useRatio: boolean;
   palette: Palette;
   resolution: string;
   selectedAuthors: any[];
@@ -80,6 +83,7 @@ interface Props {
   onFirstCommitTime: (firstCommitTime: number) => void;
   onMaxSessionLength: (maxSessionLength: number) => void;
   onToggleUseActualTime: (actualTime: boolean) => void;
+  onToggleUseRatio: (useRatio: boolean) => void;
 }
 
 function setThresholds(commits: Commit[], props: Props) {
@@ -194,7 +198,27 @@ const CommitTimeTrackingConfigComponent = (props: Props) => {
   return (
     <div className={styles.configContainer}>
       <div className={styles.field}>
-
+        <input
+          id='useActualTime'
+          type="checkbox"
+          className={'switch is-rounded is-outlined is-info'}
+          defaultChecked={props.useActualTime}
+          onChange={(e) => props.onToggleUseActualTime(e.target.checked)}
+        />
+        <label htmlFor="useActualTime" className={styles.switch}>
+          Use actual time
+        </label>
+        <br/>
+        <input
+          id='useRatio'
+          type="checkbox"
+          className={'switch is-rounded is-outlined is-info'}
+          defaultChecked={props.useRatio}
+          onChange={(e) => props.onToggleUseRatio(e.target.checked)}
+        />
+        <label htmlFor="useRatio" className={styles.switch}>
+          Use line change/time ratio in chart
+        </label>
         <label className="label">Branch</label>
         <div style={{ marginBottom: '0.5em' }}>
           <div className="select">
@@ -214,16 +238,6 @@ const CommitTimeTrackingConfigComponent = (props: Props) => {
         <div style={{ marginBottom: '0.5em' }}>
           <h2>Time spent</h2>
           <div>
-            <input
-              id='useActualTime'
-              type="checkbox"
-              className={'switch is-rounded is-outlined is-info'}
-              defaultChecked={props.useActualTime}
-              onChange={(e) => props.onToggleUseActualTime(e.target.checked)}
-            />
-            <label htmlFor="useActualTime" className={styles.switch}>
-              Use Actual Time
-            </label>
             <br/>
             <input
               type="text"

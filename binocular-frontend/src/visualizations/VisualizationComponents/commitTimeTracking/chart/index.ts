@@ -35,6 +35,7 @@ interface Props {
   firstCommitTime: number;
   maxSessionLength: number;
   useActualTime: boolean;
+  useRatio: boolean;
 }
 const mapStateToProps = (state: GlobalState): Props => {
   const timeTrackingState = state.visualizations.commitTimeTracking.state;
@@ -63,6 +64,7 @@ const mapStateToProps = (state: GlobalState): Props => {
     firstCommitTime: timeTrackingState.config.firstCommitTime,
     maxSessionLength: timeTrackingState.config.maxSessionLength,
     useActualTime: timeTrackingState.config.useActualTime,
+    useRatio: timeTrackingState.config.useRatio,
   };
 };
 const mapDispatchToProps = () => {

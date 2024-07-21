@@ -18,6 +18,7 @@ export default handleActions(
     SET_FIRST_COMMIT_TIME: (state, action: Action<any>) => _.assign({}, state, { firstCommitTime: action.payload }),
     SET_MAX_SESSION_LENGTH: (state, action: Action<any>) => _.assign({}, state, { maxSessionLength: action.payload }),
     SET_USE_ACTUAL_TIME: (state, action: Action<any>) => _.assign({}, state, { useActualTime: action.payload }),
+    SET_USE_RATIO: (state, action: Action<any>) => _.assign({}, state, { useRatio: action.payload }),
   },
   {
     searchTerm: '',
@@ -31,5 +32,6 @@ export default handleActions(
     firstCommitTime: 120,
     maxSessionLength: 120,
     useActualTime: false,
+    useRatio: false,
   },
 );

@@ -18,6 +18,7 @@ export const setSearchTerm = createAction('SET_SEARCH_TERM');
 export const setFirstCommitTime = createAction('SET_FIRST_COMMIT_TIME');
 export const setMaxSessionLength = createAction('SET_MAX_SESSION_LENGTH');
 export const setUseActualTime = createAction('SET_USE_ACTUAL_TIME');
+export const setUseRatio = createAction('SET_USE_RATIO');
 
 export const requestChangesData = createAction('REQUEST_CHANGES_DATA');
 export const receiveChangesData = timestampedActionFactory('RECEIVE_CHANGES_DATA');
