@@ -1,5 +1,6 @@
 import * as React from "react";
 import * as d3 from "d3";
+import styles from "../styles.module.scss";
 
 interface Props {
   content: {
@@ -84,7 +85,7 @@ export default class CommitBarChart extends React.Component<Props, State> {
 
   render() {
     return (
-      <div style={{width: '100%', display: 'inline'}} ref={(div) => (this.divRef = div)}></div>
+      <div className={styles.chartContainer} ref={(div) => (this.divRef = div)}></div>
     );
   }
 
@@ -97,7 +98,6 @@ export default class CommitBarChart extends React.Component<Props, State> {
     const numberOfBarcharts = this.state.content.upperChart && this.state.content.lowerChart ? 2 : 1;
     // 25 is for nav, 427 is the default value for a normal screen.
     const height = ((visualViewport?.height ?? 919) - nodeChartHeight - 25 - 20) / numberOfBarcharts;
-    console.log(this.state.content);
 
     const mainDiv = d3.select(this.divRef).html("");
     // Upper chart

@@ -83,7 +83,7 @@ export default (props: Props) => {
         .style("top", `calc(50% - ${35 + tooltipHeight}px)`);
 
     };
-  console.log(commitChartData);
+
   const commitChart = commitChartData !== undefined && commitChartData.length > 0 ? <CommitBarChart
     key={commitChartData.map(d => d.commitSHA).join("-")
       + (props.useActualTime ? "" : commitChartData.map(d => d.timeSpent.estimated).join("-"))
@@ -111,7 +111,7 @@ export default (props: Props) => {
   );
 
   return (
-    <div style={{width: '100%'}}>
+    <div>
       {commitChartData === null && loadingHint}
       {commitChartData && commitChart}
     </div>

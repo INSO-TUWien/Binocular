@@ -186,10 +186,9 @@ function sliderInput(lowerInput: [number, React.Dispatch<React.SetStateAction<nu
   
   return <div>
     <input
-      className={'input'}
+      className={styles.input}
       type="text"
       value={lowerInput[0]}
-      style={{display: 'inline', maxWidth: '100px'}}
       onChange={(e) => lowerInput[1](+e.target.value)}
       onBlur={(e) => {
         if (isNaN(+e.target.value) || +e.target.value >= props.threshold[inputFieldName].upper
@@ -201,7 +200,7 @@ function sliderInput(lowerInput: [number, React.Dispatch<React.SetStateAction<nu
       }}
     />
     <MultiRangeSlider
-      style={{margin: '0 10px'}}
+      className={styles.slider}
       min={threshold[inputFieldName].lower}
       max={threshold[inputFieldName].upper}
       minValue={props.threshold[inputFieldName].lower}
@@ -216,10 +215,9 @@ function sliderInput(lowerInput: [number, React.Dispatch<React.SetStateAction<nu
         upperInput[1](e.maxValue);
       }}
     /><input
-    className={'input'}
+    className={styles.input}
     type="text"
     value={upperInput[0]}
-    style={{display: 'inline', maxWidth: '100px'}}
     onChange={(e) => upperInput[1](+e.target.value)}
     onBlur={(e) => {
       if (isNaN(+e.target.value) || +e.target.value <= props.threshold[inputFieldName].lower
@@ -235,7 +233,7 @@ function sliderInput(lowerInput: [number, React.Dispatch<React.SetStateAction<nu
 
 const CommitTimeTrackingConfigComponent = (props: Props) => {
   if (!props.commits) return (
-    <div>
+    <div className={styles.configContainer}>
       <h6 className={styles.loadingHint}>
         Loading... <i className="fas fa-spinner fa-pulse" />
       </h6>
@@ -245,29 +243,32 @@ const CommitTimeTrackingConfigComponent = (props: Props) => {
   return (
     <div className={styles.configContainer}>
       <div className={styles.field}>
-        <input
-          id='useActualTime'
-          type="checkbox"
-          className={'switch is-rounded is-outlined is-info'}
-          defaultChecked={props.useActualTime}
-          onChange={(e) => props.onToggleUseActualTime(e.target.checked)}
-        />
-        <label htmlFor="useActualTime" className={styles.switch}>
-          Use actual time
-        </label>
-        <br/>
-        <input
-          id='useRatio'
-          type="checkbox"
-          className={'switch is-rounded is-outlined is-info'}
-          defaultChecked={props.useRatio}
-          onChange={(e) => props.onToggleUseRatio(e.target.checked)}
-        />
-        <label htmlFor="useRatio" className={styles.switch}>
-          Use line change/time ratio in chart
-        </label>
+        <label className={'label'}>Time settings</label>
+        <div className={styles.inputSections}>
+          <input
+            id='useActualTime'
+            type="checkbox"
+            className={'switch is-rounded is-outlined is-info'}
+            defaultChecked={props.useActualTime}
+            onChange={(e) => props.onToggleUseActualTime(e.target.checked)}
+          />
+          <label htmlFor="useActualTime" className={styles.switch}>
+            Use actual time
+          </label>
+          <br/>
+          <input
+            id='useRatio'
+            type="checkbox"
+            className={'switch is-rounded is-outlined is-info'}
+            defaultChecked={props.useRatio}
+            onChange={(e) => props.onToggleUseRatio(e.target.checked)}
+          />
+          <label htmlFor="useRatio" className={styles.switch}>
+            Use line change/time ratio in chart
+          </label>
+        </div>
         <label className="label">Branch</label>
-        <div style={{ marginBottom: '0.5em' }}>
+        <div className={styles.inputSections}>
           <div className="select">
             <select value={props.selectedBranch} onChange={(e) => props.onChangeBranch(e.target.value)}>
               <option value="" key="">All branches</option>
@@ -282,7 +283,7 @@ const CommitTimeTrackingConfigComponent = (props: Props) => {
           </div>
         </div>
         <label className="label">Thresholds</label>
-        <div style={{ marginBottom: '0.5em' }}>
+        <div className={styles.inputSections}>
           <h2>Time spent</h2>
           {sliderInput(React.useState(props.threshold.hours.lower), React.useState(props.threshold.hours.upper),
             'hours', threshold, props)}
@@ -296,6 +297,7 @@ const CommitTimeTrackingConfigComponent = (props: Props) => {
 
         <label className="label">Commit type</label>
         <MultiSelect
+          className={styles.inputSections}
           options={[
             { label: 'corrective', value: 'corrective'},
             { label: 'features', value: 'features'},
@@ -311,14 +313,18 @@ const CommitTimeTrackingConfigComponent = (props: Props) => {
         />
 
         <label className="label">Time estimation parameters</label>
-        <h2>First commit time (in minutes):</h2>
-        <input className={'input'} type="number" value={+props.firstCommitTime} onChange={(e) => props.onFirstCommitTime(+e.target.value)}/>
-        <h2>Maximum session length (in minutes):</h2>
-        <input className={'input'} type="number" value={+props.maxSessionLength} onChange={(e) => props.onMaxSessionLength(+e.target.value)}/>
+        <div className={styles.inputSections}>
+          <h2>First commit time (in minutes):</h2>
+          <input className={'input'} type="number" value={+props.firstCommitTime} onChange={(e) => props.onFirstCommitTime(+e.target.value)}/>
+          <h2>Maximum session length (in minutes):</h2>
+          <input className={'input'} type="number" value={+props.maxSessionLength} onChange={(e) => props.onMaxSessionLength(+e.target.value)}/>
+        </div>
 
         <label className="label">Search term</label>
-        <input className={'input'}
-                  onChange={(e) => props.onChangeSearchTerm(e.target.value)}/>
+        <div className={styles.inputSections}>
+          <input className={'input'}
+                 onChange={(e) => props.onChangeSearchTerm(e.target.value)}/>
+        </div>
       </div>
     </div>
   );
