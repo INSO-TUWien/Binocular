@@ -12,12 +12,12 @@ export default () => (
     <p>
       The main goal of this visualization is to gain fine grained information
       about parts of the project, which were time intensive or contain
-      'difficult' logic. The first one is apparent from the upper chart, while
+      &apos;difficult&apos; logic. The first one is apparent from the upper chart, while
       the later one can be deducted from the lower chart using ratios for line
       change/minute. In order to gain more information, one can click on the
       commit nodes in the middle of the graph, which displays essential
-      information about the commit with a link to the commit itself and a 'Copy
-      sha' button (which can be used for excluding specific commits).
+      information about the commit with a link to the commit itself and a &apos;Copy
+      sha&apos; button (which can be used for excluding specific commits).
     </p>
     <h2>Usage of this visualization</h2>
     <p>
@@ -44,6 +44,7 @@ export default () => (
       on that in
       <a
         href="https://www.conventionalcommits.org/en/v1.0.0/#summary"
+        rel="noreferrer"
         target="_blank"
       >
         conventional commits

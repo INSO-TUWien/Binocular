@@ -279,7 +279,7 @@ export default class CommitBarChart extends React.Component<Props, State> {
         `vertical-align: top; width: 75; height: ${height}; display: inline`,
       );
 
-    const input = inputDiv
+    inputDiv
       .append("input")
       .attr("type", "text")
       .attr(
@@ -296,7 +296,7 @@ export default class CommitBarChart extends React.Component<Props, State> {
         }
       });
 
-    const pageNumber = inputDiv
+    inputDiv
       .append("span")
       .attr("style", `width: 20; height: ${height}`)
       .html(`/${numberOfPages}`);
