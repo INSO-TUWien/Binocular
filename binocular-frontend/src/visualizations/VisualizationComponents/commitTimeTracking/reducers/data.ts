@@ -1,7 +1,7 @@
-'use strict';
+"use strict";
 
-import { Action, handleActions } from 'redux-actions';
-import * as _ from 'lodash';
+import { Action, handleActions } from "redux-actions";
+import * as _ from "lodash";
 
 export default handleActions(
   {

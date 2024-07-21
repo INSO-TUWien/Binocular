@@ -1,11 +1,11 @@
-'use strict';
+"use strict";
 
-import { connect } from 'react-redux';
-import Chart from './chart.tsx';
-import { GlobalState } from '../../../../types/globalTypes.ts';
-import moment from 'moment';
-import { Commit } from '../../../../types/commitTypes.ts';
-import { Author, Committer, Palette } from '../../../../types/authorTypes.ts';
+import { connect } from "react-redux";
+import Chart from "./chart.tsx";
+import { GlobalState } from "../../../../types/globalTypes.ts";
+import moment from "moment";
+import { Commit } from "../../../../types/commitTypes.ts";
+import { Author, Committer, Palette } from "../../../../types/authorTypes.ts";
 
 interface Props {
   chartResolution: moment.unitOfTime.DurationConstructor;
@@ -48,8 +48,10 @@ const mapStateToProps = (state: GlobalState): Props => {
     committers: timeTrackingState.data.data.committers,
     firstCommitTimestamp: timeTrackingState.data.data.firstCommitTimestamp,
     lastCommitTimestamp: timeTrackingState.data.data.lastCommitTimestamp,
-    firstSignificantTimestamp: timeTrackingState.data.data.firstSignificantTimestamp,
-    lastSignificantTimestamp: timeTrackingState.data.data.lastSignificantTimestamp,
+    firstSignificantTimestamp:
+      timeTrackingState.data.data.firstSignificantTimestamp,
+    lastSignificantTimestamp:
+      timeTrackingState.data.data.lastSignificantTimestamp,
     selectedBranch: timeTrackingState.config.selectedBranch,
     commitType: timeTrackingState.config.commitType,
     threshold: timeTrackingState.config.threshold,
