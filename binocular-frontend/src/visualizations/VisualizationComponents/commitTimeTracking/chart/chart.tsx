@@ -81,7 +81,11 @@ export default (props: Props) => {
 
     const tooltipWidth = +tooltip.style('width').substring(0, tooltip.style('width').length - 2);
     const tooltipHeight = +tooltip.style('height').substring(0, tooltip.style('height').length - 2);
-    tooltip.style('left', `${event.x - tooltipWidth / 2 - 511}px`).style('top', `calc(50% - ${35 + tooltipHeight}px)`);
+    const tooltipXPosition =
+      event.x + tooltipWidth / 2 < (visualViewport?.width ?? 1920)
+        ? event.x - tooltipWidth / 2 - 511
+        : (visualViewport?.width ?? 1920) - tooltipWidth - 512;
+    tooltip.style('left', `${tooltipXPosition}px`).style('top', `calc(50% - ${35 + tooltipHeight}px)`);
   };
 
   const commitChart =
