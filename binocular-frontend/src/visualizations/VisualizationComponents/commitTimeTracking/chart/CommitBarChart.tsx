@@ -116,8 +116,15 @@ export default class CommitBarChart extends React.Component<Props, State> {
     }
 
     this.drawNavigation(mainDiv, Math.ceil(this.state.content.commitData.length / 50.0));
+    this.drawLegend(mainDiv);
   }
 
+  drawLegend(mainDiv: d3.Selection<HTMLDivElement, unknown, null, undefined>) {
+    const legend = mainDiv
+      .append('div')
+      .attr('class', styles.legend)
+      .html(`${this.colorDomain.map((c, i) => c + ` <span style="color: ${this.colorPalette[i]};">&#9632;</span>`).join('<br/>')}`);
+  }
   drawChart(
     mainDiv: d3.Selection<HTMLDivElement, unknown, null, undefined>,
     width: number,
