@@ -166,7 +166,8 @@ function addEstimatedTime(commits: any[], props: Props) {
     filteredCommits[0].timeSpent.estimated = firstCommitAdd;
     let prevCommit = filteredCommits.shift();
     let curCommit = filteredCommits.shift();
-    while (curCommit !== null) {
+    // eslint-disable-next-line eqeqeq
+    while (curCommit != null) {
       if ((curCommit.date.getTime() - prevCommit.date.getTime()) / 1000 / 60 > maxCommitDiff) {
         curCommit.timeSpent.estimated = firstCommitAdd;
       } else {
