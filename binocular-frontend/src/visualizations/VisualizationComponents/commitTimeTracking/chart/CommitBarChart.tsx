@@ -117,10 +117,34 @@ export default class CommitBarChart extends React.Component<Props, State> {
 
     this.drawNavigation(mainDiv, Math.ceil(this.state.content.commitData.length / 50.0));
     this.drawLegend(mainDiv);
+    this.drawStatisticsToggle(mainDiv);
+  }
+
+  drawStatisticsToggle(mainDiv: d3.Selection<HTMLDivElement, unknown, null, undefined>) {
+    const toggleDiv = mainDiv.append('div').attr('class', styles.statisticsToggle);
+    const toggleDivArrow = toggleDiv
+      .append('svg')
+      .attr('class', styles.arrowSvg)
+      .append('path')
+      .attr('d', 'M10,10 L20,20 L30,10 Z')
+      .attr('class', 'arrowhead');
+    const statisticsWindow = mainDiv.append('div').attr('class', styles.statisticsWindow);
+
+    toggleDiv.on('click', () => {
+      if (statisticsWindow.style('display') === 'none') {
+        toggleDiv.style('top', '195px');
+        toggleDivArrow.attr('d', 'M10,20 L20,10 L30,20 Z');
+        statisticsWindow.style('display', 'block');
+      } else {
+        toggleDiv.style('top', '-5px');
+        toggleDivArrow.attr('d', 'M10,10 L20,20 L30,10 Z');
+        statisticsWindow.style('display', 'none');
+      }
+    });
   }
 
   drawLegend(mainDiv: d3.Selection<HTMLDivElement, unknown, null, undefined>) {
-    const legend = mainDiv
+    mainDiv
       .append('div')
       .attr('class', styles.legend)
       .html(`${this.colorDomain.map((c, i) => c + ` <span style="color: ${this.colorPalette[i]};">&#9632;</span>`).join('<br/>')}`);

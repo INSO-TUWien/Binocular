@@ -35,6 +35,36 @@
   width: 100%;
   display: inline;
 
+  .statisticsToggle{
+    position: absolute;
+    background: #ffffff;
+    z-index: 1;
+    opacity: 0.9;
+    left: 50%;
+    border: 1px solid #000;
+    border-radius: 0 0 10px 10px;
+    top: -5px;
+    width: 40px;
+    height: 25px;
+    font-size: 40px;
+
+    .arrowSvg {
+      width: 40px;
+      height: 25px;
+    }
+  }
+
+  .statisticsWindow {
+    position: absolute;
+    top: 0;
+    z-index: 2;
+    width: 100%;
+    height: 200px;
+    background: #ffffff;
+    padding: 10px;
+    display: none;
+  }
+
   .legend {
     position: absolute;
     background: #ffffff;
