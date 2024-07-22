@@ -158,17 +158,7 @@ export default class CommitBarChart extends React.Component<Props, State> {
       .attr('r', Math.min(15, x.bandwidth() / 2));
 
     if (this.state.displayTooltip) {
-      const tooltip = mainDiv
-        .append('div')
-        .attr('class', 'tooltip')
-        .style('position', 'absolute')
-        .style('background', '#f0f0f0')
-        .style('color', '#333')
-        .style('border', '1px solid #000')
-        .style('padding', '10px')
-        .style('display', 'none')
-        .style('border-radius', '10px')
-        .style('opacity', 0.9);
+      const tooltip = mainDiv.append('div').attr('class', styles.tooltip);
       nodes.on('click', (event, d) =>
         this.state.displayTooltip(
           event,
@@ -190,9 +180,9 @@ export default class CommitBarChart extends React.Component<Props, State> {
     //Height of navigation
     const height = 25;
 
-    const navigationDiv = mainDiv.append('div').attr('id', 'navigation').attr('height', height).style('margin', '10px 0px 10px 10px');
+    const navigationDiv = mainDiv.append('div').attr('class', styles.navigationDiv);
 
-    const svgLeftArrow = navigationDiv.append('svg').attr('width', 25).attr('height', height);
+    const svgLeftArrow = navigationDiv.append('svg').attr('class', styles.arrowSvg);
 
     if (this.state.page > 0 && numberOfPages > 1) {
       svgLeftArrow
@@ -202,25 +192,25 @@ export default class CommitBarChart extends React.Component<Props, State> {
         .on('click', () => this.setState({ page: this.state.page - 1 }));
     }
 
-    const inputDiv = navigationDiv.append('div').attr('style', `vertical-align: top; width: 75; height: ${height}; display: inline`);
+    const inputDiv = navigationDiv.append('div').attr('class', styles.inputDiv);
 
     inputDiv
       .append('input')
       .attr('type', 'text')
-      .attr('style', `text-align: center;font-size: 16px; width: 20; height: ${height}`)
+      .attr('class', styles.pageNumberInput)
       .attr('value', this.state.page + 1)
       .on('change', (e) => {
         if (isNaN(e.target.value)) {
-          e.target.value = '';
+          e.target.value = this.state.page + 1;
         }
         if (+e.target.value > 0 && +e.target.value <= numberOfPages) {
           this.setState({ page: +e.target.value - 1 });
         }
       });
 
-    inputDiv.append('span').attr('style', `width: 20; height: ${height}`).html(`/${numberOfPages}`);
+    inputDiv.append('span').attr('class', styles.maxPageCount).html(`/${numberOfPages}`);
 
-    const svgRightArrow = navigationDiv.append('svg').attr('width', 25).attr('height', height);
+    const svgRightArrow = navigationDiv.append('svg').attr('class', styles.arrowSvg);
 
     if (this.state.page + 1 < numberOfPages) {
       svgRightArrow

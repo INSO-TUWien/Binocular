@@ -77,9 +77,7 @@ export default (props: Props) => {
               d.commitSHA
             }')"></i></div>`,
       )
-      .style('display', 'block')
-      .style('max-width', '400px')
-      .style('min-width', '250px');
+      .style('display', 'block');
 
     const tooltipWidth = +tooltip.style('width').substring(0, tooltip.style('width').length - 2);
     const tooltipHeight = +tooltip.style('height').substring(0, tooltip.style('height').length - 2);
@@ -235,9 +233,7 @@ async function addTypeToCommits(commits: any[]) {
 }
 
 function filterCommits(commits: any[], props: Props) {
-  console.log(commits);
-  console.log(props);
-  const filteredCommits = commits.filter((c) => {
+  return commits.filter((c) => {
     if (props.selectedBranch && c.branch !== props.selectedBranch) {
       return false;
     }
@@ -276,5 +272,4 @@ function filterCommits(commits: any[], props: Props) {
 
     return true;
   });
-  return filteredCommits;
 }
