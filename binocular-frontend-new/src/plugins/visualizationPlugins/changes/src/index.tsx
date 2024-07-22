@@ -2,7 +2,7 @@ import Chart, { getSVGData } from './chart/chart.tsx';
 import PreviewImage from '../assets/thumbnail.svg';
 import Settings, { SettingsType } from './settings/settings.tsx';
 import { VisualizationPlugin } from '../../../interfaces/visualizationPlugin.ts';
-
+import { store } from './redux';
 const Changes: VisualizationPlugin<SettingsType> = {
   name: 'Changes',
   chartComponent: Chart,
@@ -18,6 +18,7 @@ const Changes: VisualizationPlugin<SettingsType> = {
   images: {
     thumbnail: PreviewImage,
   },
+  store: store,
 };
 
 export default Changes;

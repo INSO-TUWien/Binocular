@@ -3,6 +3,7 @@ import { DataPlugin } from './dataPlugin.ts';
 import { AuthorType } from '../../types/data/authorType.ts';
 import { ParametersInitialState } from '../../redux/parameters/parametersReducer.ts';
 import { SprintType } from '../../types/data/sprintType.ts';
+import {Action, Store} from "@reduxjs/toolkit";
 
 export interface VisualizationPlugin<SettingsType> {
   name: string;
@@ -25,4 +26,5 @@ export interface VisualizationPlugin<SettingsType> {
   images: {
     thumbnail: string;
   };
+  store: Store<unknown, Action, unknown>;
 }

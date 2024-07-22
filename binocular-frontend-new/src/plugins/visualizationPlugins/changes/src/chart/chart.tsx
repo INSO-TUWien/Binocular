@@ -7,6 +7,8 @@ import { convertCommitDataToChangesChartData } from '../utilies/dataConverter.ts
 import { ParametersInitialState } from '../../../../../redux/parameters/parametersReducer.ts';
 import { SprintType } from '../../../../../types/data/sprintType.ts';
 import { throttle } from 'throttle-debounce';
+import { useSelector } from 'react-redux';
+import { RootState } from '../redux';
 
 export interface CommitChartData {
   date: number;
@@ -32,7 +34,10 @@ function Chart(props: {
   const [chartData, setChartData] = useState<CommitChartData[]>([]);
   const [chartScale, setChartScale] = useState<number[]>([]);
   const [chartPalette, setChartPalette] = useState<Palette>({});
-
+  const changesState = useSelector((state: RootState) => state.changes);
+  useEffect(() => {
+    console.log(changesState);
+  }, [changesState]);
   /*
   Throttle the resize of the svg (refresh rate) to every 1s to not overwhelm the renderer,
   This isn't really necessary for this visualization, but for bigger visualization this can be quite essential
