@@ -13,6 +13,7 @@ import { parametersInitialState } from '../../../redux/parameters/parametersRedu
 import { DashboardItemDTO, DashboardItemType } from '../../../types/general/dashboardItemType.ts';
 import { ExportType, setExportName, setExportSVGData, setExportType } from '../../../redux/export/exportReducer.ts';
 import ReduxSubAppStoreWrapper from '../reduxSubAppStoreWrapper/reduxSubAppStoreWrapper.tsx';
+import { configureStore } from '@reduxjs/toolkit';
 
 function DashboardItem(props: {
   item: DashboardItemType;
@@ -40,6 +41,13 @@ function DashboardItem(props: {
   const [parametersDateRangeLocal, setParametersDateRangeLocal] = useState(parametersInitialState.parametersDateRange);
 
   const chartContainerRef = useRef<HTMLDivElement>(null);
+
+  /**
+   * Create Redux Store from Reducer for individual Item
+   */
+  const store = configureStore({
+    reducer: plugin.reducer,
+  });
 
   return (
     <>
@@ -69,7 +77,7 @@ function DashboardItem(props: {
               </button>
             </div>
             <DashboardItemPopout name={plugin.name} onClosing={() => setPoppedOut(false)}>
-              <ReduxSubAppStoreWrapper store={plugin.store}>
+              <ReduxSubAppStoreWrapper store={store}>
                 <plugin.chartComponent
                   key={plugin.name}
                   settings={settings}
@@ -80,7 +88,8 @@ function DashboardItem(props: {
                     parametersDateRange: ignoreGlobalParameters ? parametersDateRangeLocal : parametersDateRangeGlobal,
                   }}
                   dataConnection={dataPlugins.filter((plugin) => plugin.name === currentDataPluginName)[0]}
-                  chartContainerRef={chartContainerRef}></plugin.chartComponent>
+                  chartContainerRef={chartContainerRef}
+                  store={store}></plugin.chartComponent>
               </ReduxSubAppStoreWrapper>
             </DashboardItemPopout>
           </div>
@@ -102,7 +111,7 @@ function DashboardItem(props: {
                 </button>
               </div>
             ) : (
-              <ReduxSubAppStoreWrapper store={plugin.store}>
+              <ReduxSubAppStoreWrapper store={store}>
                 <plugin.chartComponent
                   key={plugin.name}
                   settings={settings}
@@ -113,7 +122,8 @@ function DashboardItem(props: {
                     parametersDateRange: ignoreGlobalParameters ? parametersDateRangeLocal : parametersDateRangeGlobal,
                   }}
                   dataConnection={dataPlugins.filter((plugin) => plugin.name === currentDataPluginName)[0]}
-                  chartContainerRef={chartContainerRef}></plugin.chartComponent>
+                  chartContainerRef={chartContainerRef}
+                  store={store}></plugin.chartComponent>
               </ReduxSubAppStoreWrapper>
             )}
           </div>

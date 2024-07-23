@@ -328,8 +328,8 @@ function generateTabs(
  * Helper Function to generate the click and draggable handle of each tab
  * @param tab Tab object that includes all necessary information about a tab
  * @param tabList List of all tabs
- * @param setTabList Set redux function for a list of all tabs
- * @param setDragState Set redux Function for drag and drop redux of tabs
+ * @param setTabList Set reducer function for a list of all tabs
+ * @param setDragState Set reducer Function for drag and drop reducer of tabs
  */
 function generateHandle(
   tab: TabType,
@@ -409,8 +409,8 @@ function generateHandle(
  * @param name Name of the tab
  * @param alignment New alignment of the tab
  * @param tabList List of all tabs
- * @param setTabList Set redux function for a list of all tabs
- * @param setDragState Set redux Function for drag and drop redux of tabs
+ * @param setTabList Set reducer function for a list of all tabs
+ * @param setDragState Set reducer Function for drag and drop reducer of tabs
  */
 function moveTab(
   name: string,
@@ -441,8 +441,8 @@ function moveTab(
  * @param name Name of the tab that is switched
  * @param targetTabName Name of the other tab with whom the first tab is switched
  * @param tabList List of all tabs
- * @param setTabList Set redux function for a list of all tabs
- * @param setDragState Set redux Function for drag and drop redux of tabs
+ * @param setTabList Set reducer function for a list of all tabs
+ * @param setDragState Set reducer Function for drag and drop reducer of tabs
  */
 function switchTabs(
   name: string,

@@ -2,7 +2,7 @@ import Chart from './chart/chart.tsx';
 import PreviewImage from '../assets/thumbnail.svg';
 import Settings, { SettingsType } from './settings/settings.tsx';
 import { VisualizationPlugin } from '../../../interfaces/visualizationPlugin.ts';
-import { store } from './redux';
+import Reducer from './reducer';
 
 const ExampleStats: VisualizationPlugin<SettingsType> = {
   name: 'Example Stats',
@@ -19,6 +19,6 @@ const ExampleStats: VisualizationPlugin<SettingsType> = {
   images: {
     thumbnail: PreviewImage,
   },
-  store: store,
+  reducer: Reducer,
 };
 export default ExampleStats;

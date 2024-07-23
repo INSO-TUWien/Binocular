@@ -13,7 +13,6 @@ export const changesSlice = createSlice({
   initialState,
   reducers: {
     setName: (state, action: PayloadAction<string>) => {
-      console.log(action);
       state.name = action.payload;
     },
   },

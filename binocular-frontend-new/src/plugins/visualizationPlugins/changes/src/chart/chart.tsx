@@ -6,9 +6,10 @@ import { AuthorType } from '../../../../../types/data/authorType.ts';
 import { convertCommitDataToChangesChartData } from '../utilities/dataConverter.ts';
 import { SprintType } from '../../../../../types/data/sprintType.ts';
 import { throttle } from 'throttle-debounce';
-import { useSelector } from 'react-redux';
-import { ChangesState } from '../redux/reducer.ts';
+import { useDispatch, useSelector } from 'react-redux';
 import { ParametersType } from '../../../../../types/parameters/parametersType.ts';
+import { Store } from '@reduxjs/toolkit';
+import { setName } from '../reducer';
 
 export interface CommitChartData {
   date: number;
@@ -26,8 +27,13 @@ function Chart(props: {
   sprintList: SprintType[];
   parameters: ParametersType;
   chartContainerRef: RefObject<HTMLDivElement>;
+  store: Store;
 }) {
   ///const chartContainerRef = createRef<HTMLDivElement>();
+  type RootState = ReturnType<typeof props.store.getState>;
+  type AppDispatch = typeof props.store.dispatch;
+  const useAppDispatch = () => useDispatch<AppDispatch>();
+  const dispatch: AppDispatch = useAppDispatch();
 
   const [chartWidth, setChartWidth] = useState(100);
   const [chartHeight, setChartHeight] = useState(100);
@@ -35,7 +41,7 @@ function Chart(props: {
   const [chartData, setChartData] = useState<CommitChartData[]>([]);
   const [chartScale, setChartScale] = useState<number[]>([]);
   const [chartPalette, setChartPalette] = useState<Palette>({});
-  const changesState = useSelector((state: ChangesState) => state);
+  const changesState = useSelector((state: RootState) => state);
   useEffect(() => {
     console.log(changesState);
   }, [changesState]);
@@ -85,6 +91,7 @@ function Chart(props: {
 
   return (
     <>
+      <input value={changesState.name} onChange={(e) => dispatch(setName(e.target.value))} />
       <div className={'w-full h-full'} ref={props.chartContainerRef}>
         <StackedAreaChart
           data={chartData}
