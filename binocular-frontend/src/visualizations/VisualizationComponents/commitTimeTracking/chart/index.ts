@@ -20,6 +20,7 @@ interface Props {
   firstSignificantTimestamp: number;
   lastSignificantTimestamp: number;
   selectedBranch: string;
+  branches: string[];
   commitType: string[];
   threshold: {
     hours: { lower: number; upper: number };
@@ -50,6 +51,7 @@ const mapStateToProps = (state: GlobalState): Props => {
     lastCommitTimestamp: timeTrackingState.data.data.lastCommitTimestamp,
     firstSignificantTimestamp: timeTrackingState.data.data.firstSignificantTimestamp,
     lastSignificantTimestamp: timeTrackingState.data.data.lastSignificantTimestamp,
+    branches: timeTrackingState.data.data.branches,
     selectedBranch: timeTrackingState.config.selectedBranch,
     commitType: timeTrackingState.config.commitType,
     threshold: timeTrackingState.config.threshold,

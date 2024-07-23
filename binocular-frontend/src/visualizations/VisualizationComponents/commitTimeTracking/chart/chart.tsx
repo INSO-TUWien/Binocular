@@ -46,10 +46,13 @@ interface CommitChartData {
 
 export default (props: Props) => {
   const [commitChartData, setCommitChartData] = React.useState<CommitChartData[]>([]);
+  const [statistics, setStatistics] = React.useState({});
 
   React.useEffect(() => {
     const fetchData = async () => {
-      setCommitChartData(await extractCommitData(props));
+      const extractedData = await extractCommitData(props);
+      setCommitChartData(extractedData.commitChartData);
+      setStatistics(extractedData.statistics);
     };
 
     fetchData();
@@ -142,7 +145,7 @@ export default (props: Props) => {
       </h1>
     </div>
   );
-
+  console.log(statistics);
   return (
     <div>
       {commitChartData === null && loadingHint}
@@ -151,9 +154,9 @@ export default (props: Props) => {
   );
 };
 
-const extractCommitData = async (props: Props): Promise<CommitChartData[]> => {
+const extractCommitData = async (props: Props): Promise<{ commitChartData: CommitChartData[]; statistics: any }> => {
   if (!props.commits || props.commits.length === 0) {
-    return [];
+    return { commitChartData: [], statistics: {} };
   }
 
   const filteredCommits = props.filteredCommits.filter((value, index, array) => array.findIndex((el) => el.date === value.date) === index);
@@ -169,7 +172,8 @@ const extractCommitData = async (props: Props): Promise<CommitChartData[]> => {
   const sortedCommits = commitsWithDate.sort((a, b) => a.date.getTime() - b.date.getTime());
   addActualTime(sortedCommits);
   addEstimatedTime(sortedCommits, props);
-  return filterCommits(commitsWithDate, props).map((c) => {
+  const statistics = calculateStatistics(sortedCommits, props);
+  const commitChartData = filterCommits(commitsWithDate, props).map((c) => {
     return {
       commitType: c.commitType,
       timeSpent: c.timeSpent,
@@ -182,6 +186,7 @@ const extractCommitData = async (props: Props): Promise<CommitChartData[]> => {
       branch: c.branch,
     };
   });
+  return { commitChartData: commitChartData, statistics: statistics };
 };
 
 function addEstimatedTime(commits: any[], props: Props) {
@@ -276,4 +281,82 @@ function filterCommits(commits: any[], props: Props) {
 
     return true;
   });
+}
+
+function calculateStatistics(commits: any[], props: Props) {
+  if (commits.length === 0) {
+    return {};
+  }
+
+  const initialValue = {};
+  ['corrective', 'features', 'unknown', 'nonfunctional', 'perfective'].forEach((c) => {
+    initialValue[c] = 0;
+  });
+  const branches = [...props.branches, 'All branches'];
+  const authors = [...props.selectedAuthors, 'All authors'];
+  const statistics = {};
+
+  branches.forEach((b) => {
+    statistics[b] = {};
+    if (b === 'All branches') {
+      authors.forEach((a) => {
+        if (a === 'All authors') {
+          statistics[b][a] = calculateRatios(commits, initialValue);
+        } else {
+          const filteredForAuthor = commits.filter((c) => c.signature === a);
+          statistics[b][a] = filteredForAuthor.length === 0 ? {} : calculateRatios(filteredForAuthor, initialValue);
+        }
+      });
+    } else {
+      const filteredForBranch = commits.filter((c) => c.branch === b);
+      if (filteredForBranch.length === 0) {
+        return;
+      }
+      authors.forEach((a) => {
+        if (a === 'All authors') {
+          statistics[b][a] = calculateRatios(filteredForBranch, initialValue);
+        } else {
+          const filteredForAuthor = filteredForBranch.filter((c) => c.signature === a);
+          statistics[b][a] = filteredForAuthor.length === 0 ? {} : calculateRatios(filteredForAuthor, initialValue);
+        }
+      });
+    }
+  });
+
+  return statistics;
+}
+
+function calculateRatios(commits: any[], initialValue: any) {
+  return {
+    timeEstimated: reduceForMetric(commits, initialValue, 'timeEstimated'),
+    timeActual: reduceForMetric(commits, initialValue, 'timeActual'),
+    lines: reduceForMetric(commits, initialValue, 'lines'),
+    number: reduceForMetric(commits, initialValue, 'number'),
+  };
+}
+
+function reduceForMetric(commits: any[], initialValue: any, metric: string) {
+  return commits.reduce(
+    (prev, cur) => {
+      const type = cur.commitType[0].label;
+      switch (metric) {
+        case 'number':
+          prev[type] += 1;
+          break;
+        case 'lines':
+          prev[type] += cur.stats.additions + cur.stats.deletions;
+          break;
+        case 'timeActual':
+          prev[type] += cur.timeSpent.actual;
+          break;
+        case 'timeEstimated':
+          prev[type] += cur.timeSpent.estimated;
+          break;
+        default:
+          break;
+      }
+      return prev;
+    },
+    { ...initialValue },
+  );
 }
