@@ -1,14 +1,14 @@
 import { StackedAreaChart } from './stackedAreaChart.tsx';
-import { createRef, useEffect, useState } from 'react';
+import { RefObject, useEffect, useState } from 'react';
 import { DataPlugin } from '../../../../interfaces/dataPlugin.ts';
 import { SettingsType } from '../settings/settings.tsx';
 import { AuthorType } from '../../../../../types/data/authorType.ts';
-import { convertCommitDataToChangesChartData } from '../utilies/dataConverter.ts';
-import { ParametersInitialState } from '../../../../../redux/parameters/parametersReducer.ts';
+import { convertCommitDataToChangesChartData } from '../utilities/dataConverter.ts';
 import { SprintType } from '../../../../../types/data/sprintType.ts';
 import { throttle } from 'throttle-debounce';
 import { useSelector } from 'react-redux';
-import { RootState } from '../redux';
+import { ChangesState } from '../redux/reducer.ts';
+import { ParametersType } from '../../../../../types/parameters/parametersType.ts';
 
 export interface CommitChartData {
   date: number;
@@ -19,22 +19,23 @@ export interface Palette {
   [signature: string]: { main: string; secondary: string };
 }
 
-const chartContainerRef = createRef<HTMLDivElement>();
-
 function Chart(props: {
   settings: SettingsType;
   dataConnection: DataPlugin;
   authorList: AuthorType[];
   sprintList: SprintType[];
-  parameters: ParametersInitialState;
+  parameters: ParametersType;
+  chartContainerRef: RefObject<HTMLDivElement>;
 }) {
+  ///const chartContainerRef = createRef<HTMLDivElement>();
+
   const [chartWidth, setChartWidth] = useState(100);
   const [chartHeight, setChartHeight] = useState(100);
 
   const [chartData, setChartData] = useState<CommitChartData[]>([]);
   const [chartScale, setChartScale] = useState<number[]>([]);
   const [chartPalette, setChartPalette] = useState<Palette>({});
-  const changesState = useSelector((state: RootState) => state.changes);
+  const changesState = useSelector((state: ChangesState) => state);
   useEffect(() => {
     console.log(changesState);
   }, [changesState]);
@@ -45,25 +46,25 @@ function Chart(props: {
   const throttledResize = throttle(
     1000,
     () => {
-      if (!chartContainerRef.current) return;
-      if (chartContainerRef.current?.offsetWidth !== chartWidth) {
-        setChartWidth(chartContainerRef.current.offsetWidth);
+      if (!props.chartContainerRef.current) return;
+      if (props.chartContainerRef.current?.offsetWidth !== chartWidth) {
+        setChartWidth(props.chartContainerRef.current.offsetWidth);
       }
-      if (chartContainerRef.current?.offsetHeight !== chartHeight) {
-        setChartHeight(chartContainerRef.current.offsetHeight);
+      if (props.chartContainerRef.current?.offsetHeight !== chartHeight) {
+        setChartHeight(props.chartContainerRef.current.offsetHeight);
       }
     },
     { noLeading: false, noTrailing: false },
   );
 
   useEffect(() => {
-    if (!chartContainerRef.current) return;
+    if (!props.chartContainerRef.current) return;
     const resizeObserver = new ResizeObserver(() => {
       throttledResize();
     });
-    resizeObserver.observe(chartContainerRef.current);
+    resizeObserver.observe(props.chartContainerRef.current);
     return () => resizeObserver.disconnect();
-  }, [chartContainerRef, chartHeight, chartWidth]);
+  }, [props.chartContainerRef, chartHeight, chartWidth]);
 
   useEffect(() => {
     props.dataConnection.commits
@@ -84,7 +85,7 @@ function Chart(props: {
 
   return (
     <>
-      <div className={'w-full h-full'} ref={chartContainerRef}>
+      <div className={'w-full h-full'} ref={props.chartContainerRef}>
         <StackedAreaChart
           data={chartData}
           scale={chartScale}
@@ -97,14 +98,6 @@ function Chart(props: {
       </div>
     </>
   );
-}
-
-export function getSVGData(): string {
-  const svgData = chartContainerRef.current?.children[1].outerHTML;
-  if (svgData === undefined) {
-    return '<svg xmlns="http://www.w3.org/2000/svg"></svg>';
-  }
-  return svgData;
 }
 
 export default Chart;

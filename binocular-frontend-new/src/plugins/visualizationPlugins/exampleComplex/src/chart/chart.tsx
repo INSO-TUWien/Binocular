@@ -1,6 +1,6 @@
 import { createRef, useEffect, useState } from 'react';
 import { SunburstChart } from './sunburstChart.tsx';
-import {throttle} from "throttle-debounce";
+import { throttle } from 'throttle-debounce';
 
 function Chart() {
   const chartContainerRef = createRef<HTMLDivElement>();

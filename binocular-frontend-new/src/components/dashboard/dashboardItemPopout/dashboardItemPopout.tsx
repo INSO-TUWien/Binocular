@@ -8,9 +8,7 @@ import { AlertType } from '../../../types/general/alertType.ts';
 
 function DashboardItemPopout(props: { children: ReactElement; name: string; onClosing: () => void }) {
   const dispatch: AppDispatch = useAppDispatch();
-
   const popupCount = useSelector((state: RootState) => state.dashboard.popupCount);
-
   return (
     <PopoutController
       url={'popout.html'}
