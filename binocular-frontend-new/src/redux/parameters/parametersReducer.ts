@@ -10,7 +10,7 @@ currentDateLastYear.setFullYear(currentDate.getFullYear() - 1);
 
 export const parametersInitialState: ParametersType = {
   parametersGeneral: { granularity: 'months', excludeMergeCommits: false },
-  parametersDateRange: { from: currentDateLastYear.toISOString(), to: currentDate.toISOString() },
+  parametersDateRange: { from: currentDateLastYear.toISOString().split('.')[0], to: currentDate.toISOString().split('.')[0] },
 };
 
 export const paramtersSlice = createSlice({
