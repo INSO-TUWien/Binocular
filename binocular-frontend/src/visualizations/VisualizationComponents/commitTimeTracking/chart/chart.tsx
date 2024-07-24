@@ -5,6 +5,7 @@ import * as React from 'react';
 import _ from 'lodash';
 import CommitBarChart from './CommitBarChart.tsx';
 import styles from '../styles.module.scss';
+import {string} from "prop-types";
 
 interface Props {
   commits: Commit[];
@@ -293,18 +294,20 @@ function calculateStatistics(commits: any[], props: Props) {
     initialValue[c] = 0;
   });
   const branches = [...props.branches, 'All branches'];
-  const authors = [...props.selectedAuthors, 'All authors'];
+  const authors = [...props.mergedAuthors, 'All authors'];
   const statistics = {};
 
   branches.forEach((b) => {
     statistics[b] = {};
     if (b === 'All branches') {
       authors.forEach((a) => {
-        if (a === 'All authors') {
+        if (typeof a === 'string' && a === 'All authors') {
           statistics[b][a] = calculateRatios(commits, initialValue);
         } else {
-          const filteredForAuthor = commits.filter((c) => c.signature === a);
-          statistics[b][a] = filteredForAuthor.length === 0 ? {} : calculateRatios(filteredForAuthor, initialValue);
+          const author = a as Author;
+          const authorName = author.mainCommitter.substring(0, author.mainCommitter.indexOf('<') - 1);
+          const filteredForAuthor = commits.filter((c) => author.committers.map((committer) => committer.signature).includes(c.signature));
+          statistics[b][authorName] = filteredForAuthor.length === 0 ? {} : calculateRatios(filteredForAuthor, initialValue);
         }
       });
     } else {
@@ -316,8 +319,12 @@ function calculateStatistics(commits: any[], props: Props) {
         if (a === 'All authors') {
           statistics[b][a] = calculateRatios(filteredForBranch, initialValue);
         } else {
-          const filteredForAuthor = filteredForBranch.filter((c) => c.signature === a);
-          statistics[b][a] = filteredForAuthor.length === 0 ? {} : calculateRatios(filteredForAuthor, initialValue);
+          const author = a as Author;
+          const authorName = author.mainCommitter.substring(0, author.mainCommitter.indexOf('<') - 1);
+          const filteredForAuthor = filteredForBranch.filter((c) =>
+            author.committers.map((committer) => committer.signature).includes(c.signature),
+          );
+          statistics[b][authorName] = filteredForAuthor.length === 0 ? {} : calculateRatios(filteredForAuthor, initialValue);
         }
       });
     }
