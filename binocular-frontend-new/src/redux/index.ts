@@ -9,7 +9,11 @@ import SprintsReducer from './data/sprintsReducer.ts';
 import NotificationsReducer from './general/notificationsReducer.ts';
 import ExportReducer from './export/exportReducer.ts';
 import TabsReducer from './general/tabsReducer.ts';
+import { createLogger } from 'redux-logger';
 
+const logger = createLogger({
+  collapsed: () => true,
+});
 export const store = configureStore({
   reducer: {
     dashboard: DashboardReducer,
@@ -21,6 +25,7 @@ export const store = configureStore({
     notifications: NotificationsReducer,
     tabs: TabsReducer,
   },
+  middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(logger),
 });
 
 export type RootState = ReturnType<typeof store.getState>;

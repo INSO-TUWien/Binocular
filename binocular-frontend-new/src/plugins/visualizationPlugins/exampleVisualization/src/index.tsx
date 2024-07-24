@@ -3,6 +3,7 @@ import PreviewImage from '../assets/thumbnail.svg';
 import Settings, { SettingsType } from './settings/settings.tsx';
 import { VisualizationPlugin } from '../../../interfaces/visualizationPlugin.ts';
 import Reducer from './reducer';
+import Saga from './saga';
 
 const ExampleVisualization: VisualizationPlugin<SettingsType> = {
   name: 'Example Visualization',
@@ -20,5 +21,6 @@ const ExampleVisualization: VisualizationPlugin<SettingsType> = {
     thumbnail: PreviewImage,
   },
   reducer: Reducer,
+  saga: Saga,
 };
 export default ExampleVisualization;

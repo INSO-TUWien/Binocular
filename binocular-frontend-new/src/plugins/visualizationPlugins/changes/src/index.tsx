@@ -4,6 +4,8 @@ import Settings, { SettingsType } from './settings/settings.tsx';
 import { VisualizationPlugin } from '../../../interfaces/visualizationPlugin.ts';
 import { getSVGData } from './utilities/utilities.ts';
 import Reducer from './reducer';
+import Saga from './saga';
+
 const Changes: VisualizationPlugin<SettingsType> = {
   name: 'Changes',
   chartComponent: Chart,
@@ -20,6 +22,7 @@ const Changes: VisualizationPlugin<SettingsType> = {
     thumbnail: PreviewImage,
   },
   reducer: Reducer,
+  saga: Saga,
 };
 
 export default Changes;

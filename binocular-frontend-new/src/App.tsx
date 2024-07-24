@@ -24,7 +24,7 @@ import AddSprint from './components/tabs/sprints/addSprint/addSprint.tsx';
 import NotificationController from './components/notificationController/notificationController.tsx';
 import { ExportType, setExportType } from './redux/export/exportReducer.ts';
 import ContextMenu from './components/contextMenu/contextMenu.tsx';
-import EditAuthorDialog from "./components/tabs/authors/editAuthorDialog/editAuthorDialog.tsx";
+import EditAuthorDialog from './components/tabs/authors/editAuthorDialog/editAuthorDialog.tsx';
 
 function App() {
   const dispatch: AppDispatch = useAppDispatch();

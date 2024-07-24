@@ -33,7 +33,7 @@ export default function* () {
   //yield fork(...); for every additional watcher function
 }
 
-//mapSaga is a utilities function from binocular-frontend > src > sagas > utils.ts that just returns
+//mapSaga is a utilities function from binocular-frontend > src > saga > utils.ts that just returns
 // a function that calls the action creator (in this case refresh)
 //throttle ensures that only one refresh action will be dispatched in an interval of 2000ms
 function* watchRefreshRequests() {

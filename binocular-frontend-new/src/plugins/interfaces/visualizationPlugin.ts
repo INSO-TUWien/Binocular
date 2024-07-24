@@ -37,4 +37,5 @@ export interface VisualizationPlugin<SettingsType> {
     thumbnail: string;
   };
   reducer: Reducer;
+  saga: (dataConnection: DataPlugin) => Generator;
 }

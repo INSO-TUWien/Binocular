@@ -14,6 +14,12 @@ import { DashboardItemDTO, DashboardItemType } from '../../../types/general/dash
 import { ExportType, setExportName, setExportSVGData, setExportType } from '../../../redux/export/exportReducer.ts';
 import ReduxSubAppStoreWrapper from '../reduxSubAppStoreWrapper/reduxSubAppStoreWrapper.tsx';
 import { configureStore } from '@reduxjs/toolkit';
+import createSagaMiddleware from 'redux-saga';
+import { createLogger } from 'redux-logger';
+
+const logger = createLogger({
+  collapsed: () => true,
+});
 
 function DashboardItem(props: {
   item: DashboardItemType;
@@ -42,12 +48,17 @@ function DashboardItem(props: {
 
   const chartContainerRef = useRef<HTMLDivElement>(null);
 
+  const dataPlugin = dataPlugins.filter((plugin) => plugin.name === currentDataPluginName)[0];
+
   /**
-   * Create Redux Store from Reducer for individual Item
+   * Create Redux Store from Reducer for individual Item and run saga
    */
+  const sagaMiddleware = createSagaMiddleware();
   const store = configureStore({
     reducer: plugin.reducer,
+    middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(sagaMiddleware, logger),
   });
+  sagaMiddleware.run(() => plugin.saga(dataPlugin));
 
   return (
     <>

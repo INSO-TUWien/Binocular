@@ -9,7 +9,7 @@ import { throttle } from 'throttle-debounce';
 import { useDispatch, useSelector } from 'react-redux';
 import { ParametersType } from '../../../../../types/parameters/parametersType.ts';
 import { Store } from '@reduxjs/toolkit';
-import { setName } from '../reducer';
+import { setDateRange } from '../reducer';
 
 export interface CommitChartData {
   date: number;
@@ -29,11 +29,29 @@ function Chart(props: {
   chartContainerRef: RefObject<HTMLDivElement>;
   store: Store;
 }) {
-  ///const chartContainerRef = createRef<HTMLDivElement>();
+  /*
+   * Creating Dispatch and Root State for interaction with the reducer State
+   */
   type RootState = ReturnType<typeof props.store.getState>;
   type AppDispatch = typeof props.store.dispatch;
   const useAppDispatch = () => useDispatch<AppDispatch>();
   const dispatch: AppDispatch = useAppDispatch();
+  const changesState = useSelector((state: RootState) => state);
+  // Effect on state change
+  useEffect(() => {
+    const { commitChartData, commitScale, commitPalette } = convertCommitDataToChangesChartData(
+      changesState.commits,
+      props.authorList,
+      props.settings.splitAdditionsDeletions,
+      props.parameters,
+    );
+    setChartData(commitChartData);
+    setChartScale(commitScale);
+    setChartPalette(commitPalette);
+  }, [changesState]);
+  /*
+   * -----------------------------
+   */
 
   const [chartWidth, setChartWidth] = useState(100);
   const [chartHeight, setChartHeight] = useState(100);
@@ -41,10 +59,7 @@ function Chart(props: {
   const [chartData, setChartData] = useState<CommitChartData[]>([]);
   const [chartScale, setChartScale] = useState<number[]>([]);
   const [chartPalette, setChartPalette] = useState<Palette>({});
-  const changesState = useSelector((state: RootState) => state);
-  useEffect(() => {
-    console.log(changesState);
-  }, [changesState]);
+
   /*
   Throttle the resize of the svg (refresh rate) to every 1s to not overwhelm the renderer,
   This isn't really necessary for this visualization, but for bigger visualization this can be quite essential
@@ -73,25 +88,17 @@ function Chart(props: {
   }, [props.chartContainerRef, chartHeight, chartWidth]);
 
   useEffect(() => {
-    props.dataConnection.commits
-      .getAll(props.parameters.parametersDateRange.from, props.parameters.parametersDateRange.to)
-      .then((commits) => {
-        const { commitChartData, commitScale, commitPalette } = convertCommitDataToChangesChartData(
-          commits,
-          props.authorList,
-          props.settings.splitAdditionsDeletions,
-          props.parameters,
-        );
-        setChartData(commitChartData);
-        setChartScale(commitScale);
-        setChartPalette(commitPalette);
-      })
-      .catch(() => console.log('Promise Error'));
-  }, [props.dataConnection, props.authorList, props.settings, props.parameters]);
+    dispatch(setDateRange(props.parameters.parametersDateRange));
+  }, [props.parameters]);
+
+  useEffect(() => {
+    dispatch({
+      type: 'REFRESH',
+    });
+  }, [props.dataConnection, props.authorList, props.settings]);
 
   return (
     <>
-      <input value={changesState.name} onChange={(e) => dispatch(setName(e.target.value))} />
       <div className={'w-full h-full'} ref={props.chartContainerRef}>
         <StackedAreaChart
           data={chartData}

@@ -3,13 +3,14 @@ import { DataCommit } from '../../../../interfaces/dataPlugin.ts';
 import { AuthorType } from '../../../../../types/data/authorType.ts';
 import chroma from 'chroma-js';
 import { CommitChartData, Palette } from '../chart/chart.tsx';
-import { ParametersInitialState } from '../../../../../redux/parameters/parametersReducer.ts';
+import { ParametersType } from '../../../../../types/parameters/parametersType.ts';
+import _ from "lodash";
 
 export function convertCommitDataToChangesChartData(
   commits: DataCommit[],
   authors: AuthorType[],
   splitAdditionsDeletions: boolean,
-  parameters: ParametersInitialState,
+  parameters: ParametersType,
 ): {
   commitChartData: CommitChartData[];
   commitScale: number[];
@@ -20,10 +21,10 @@ export function convertCommitDataToChangesChartData(
   }
 
   //Sort commits after their commit time in case they arnt sorted
-  commits = commits.sort((c1, c2) => new Date(c1.date).getTime() - new Date(c2.date).getTime());
+  const sortedCommits = _.clone(commits).sort((c1, c2) => new Date(c1.date).getTime() - new Date(c2.date).getTime());
 
-  const firstTimestamp = commits[0].date;
-  const lastTimestamp = commits[commits.length - 1].date;
+  const firstTimestamp = sortedCommits[0].date;
+  const lastTimestamp = sortedCommits[sortedCommits.length - 1].date;
 
   //TODO: Filter and merge selected Authors
 
@@ -32,7 +33,7 @@ export function convertCommitDataToChangesChartData(
   const commitScale: number[] = [0, 0];
   const commitPalette: Palette = {};
 
-  if (commits.length > 0) {
+  if (sortedCommits.length > 0) {
     //---- STEP 1: AGGREGATE COMMITS GROUPED BY AUTHORS PER TIME INTERVAL ----
 
     const granularity = getGranularity(parameters.parametersGeneral.granularity);
@@ -57,12 +58,12 @@ export function convertCommitDataToChangesChartData(
         date: currTimestamp,
         statsByAuthor: {},
       }; //Save date of time bucket, create object
-      for (; i < commits.length && Date.parse(commits[i].date) < nextTimestamp; i++) {
+      for (; i < sortedCommits.length && Date.parse(sortedCommits[i].date) < nextTimestamp; i++) {
         //Iterate through commits that fall into this time bucket
-        const additions = commits[i].stats.additions;
-        const deletions = commits[i].stats.deletions;
+        const additions = sortedCommits[i].stats.additions;
+        const deletions = sortedCommits[i].stats.deletions;
         const changes = additions + deletions;
-        const commitAuthor = commits[i].signature;
+        const commitAuthor = sortedCommits[i].signature;
         if (totalChangesPerAuthor[commitAuthor] === null) {
           totalChangesPerAuthor[commitAuthor] = 0;
         }
