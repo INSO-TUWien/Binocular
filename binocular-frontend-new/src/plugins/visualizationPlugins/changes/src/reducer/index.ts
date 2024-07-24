@@ -1,6 +1,12 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { DataCommit } from '../../../../interfaces/dataPlugin.ts';
 
+export enum DataState {
+  EMPTY,
+  FETCHING,
+  COMPLETE,
+}
+
 interface DateRange {
   from: string;
   to: string;
@@ -9,11 +15,13 @@ interface DateRange {
 export interface ChangesState {
   commits: DataCommit[];
   dateRange: DateRange;
+  dataState: DataState;
 }
 
 const initialState: ChangesState = {
   commits: [],
   dateRange: { from: new Date().toISOString(), to: new Date().toISOString() },
+  dataState: DataState.EMPTY,
 };
 
 export const changesSlice = createSlice({
@@ -26,8 +34,11 @@ export const changesSlice = createSlice({
     setDateRange: (state, action: PayloadAction<DateRange>) => {
       state.dateRange = action.payload;
     },
+    setDataState: (state, action: PayloadAction<DataState>) => {
+      state.dataState = action.payload;
+    },
   },
 });
 
-export const { setCommits, setDateRange } = changesSlice.actions;
+export const { setCommits, setDateRange, setDataState } = changesSlice.actions;
 export default changesSlice.reducer;

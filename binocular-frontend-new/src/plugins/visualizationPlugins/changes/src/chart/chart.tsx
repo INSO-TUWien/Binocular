@@ -9,7 +9,7 @@ import { throttle } from 'throttle-debounce';
 import { useDispatch, useSelector } from 'react-redux';
 import { ParametersType } from '../../../../../types/parameters/parametersType.ts';
 import { Store } from '@reduxjs/toolkit';
-import { setDateRange } from '../reducer';
+import { DataState, setDateRange } from '../reducer';
 
 export interface CommitChartData {
   date: number;
@@ -36,23 +36,15 @@ function Chart(props: {
   type AppDispatch = typeof props.store.dispatch;
   const useAppDispatch = () => useDispatch<AppDispatch>();
   const dispatch: AppDispatch = useAppDispatch();
-  const changesState = useSelector((state: RootState) => state);
-  // Effect on state change
-  useEffect(() => {
-    const { commitChartData, commitScale, commitPalette } = convertCommitDataToChangesChartData(
-      changesState.commits,
-      props.authorList,
-      props.settings.splitAdditionsDeletions,
-      props.parameters,
-    );
-    setChartData(commitChartData);
-    setChartScale(commitScale);
-    setChartPalette(commitPalette);
-  }, [changesState]);
   /*
    * -----------------------------
    */
 
+  //Redux Global State
+  const commits = useSelector((state: RootState) => state.commits);
+  const dataState = useSelector((state: RootState) => state.dataState);
+
+  //React Component State
   const [chartWidth, setChartWidth] = useState(100);
   const [chartHeight, setChartHeight] = useState(100);
 
@@ -78,6 +70,7 @@ function Chart(props: {
     { noLeading: false, noTrailing: false },
   );
 
+  //Resize Observer -> necessary for dynamically refreshing d3 chart
   useEffect(() => {
     if (!props.chartContainerRef.current) return;
     const resizeObserver = new ResizeObserver(() => {
@@ -87,28 +80,51 @@ function Chart(props: {
     return () => resizeObserver.disconnect();
   }, [props.chartContainerRef, chartHeight, chartWidth]);
 
+  // Effect on data change
+  useEffect(() => {
+    const { commitChartData, commitScale, commitPalette } = convertCommitDataToChangesChartData(
+      commits,
+      props.authorList,
+      props.settings.splitAdditionsDeletions,
+      props.parameters,
+    );
+    setChartData(commitChartData);
+    setChartScale(commitScale);
+    setChartPalette(commitPalette);
+  }, [commits, props.authorList, props.parameters, props.settings.splitAdditionsDeletions]);
+
+  //Set Global state when parameters change. This will also conclude in a refresh of the data.
   useEffect(() => {
     dispatch(setDateRange(props.parameters.parametersDateRange));
   }, [props.parameters]);
 
+  //Trigger Refresh when dataConnection changes
   useEffect(() => {
     dispatch({
       type: 'REFRESH',
     });
-  }, [props.dataConnection, props.authorList, props.settings]);
+  }, [props.dataConnection]);
 
   return (
     <>
-      <div className={'w-full h-full'} ref={props.chartContainerRef}>
-        <StackedAreaChart
-          data={chartData}
-          scale={chartScale}
-          palette={chartPalette}
-          sprintList={props.sprintList}
-          width={chartWidth}
-          height={chartHeight}
-          settings={props.settings}
-        />
+      <div className={'w-full h-full flex justify-center items-center'} ref={props.chartContainerRef}>
+        {dataState === DataState.EMPTY && <div>NoData</div>}
+        {dataState === DataState.FETCHING && (
+          <div>
+            <span className="loading loading-spinner loading-lg text-accent"></span>
+          </div>
+        )}
+        {dataState === DataState.COMPLETE && (
+          <StackedAreaChart
+            data={chartData}
+            scale={chartScale}
+            palette={chartPalette}
+            sprintList={props.sprintList}
+            width={chartWidth}
+            height={chartHeight}
+            settings={props.settings}
+          />
+        )}
       </div>
     </>
   );
