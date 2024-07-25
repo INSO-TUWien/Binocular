@@ -14,6 +14,9 @@ interface Props {
   defaultColor: string;
   colorPalette: string[];
   displayTooltip: (event: any, d: any, tooltip: any) => void | undefined;
+  statistics: any;
+  branches: string[];
+  authors: string[];
 }
 
 interface State {
@@ -47,14 +50,19 @@ export default class CommitBarChart extends React.Component<Props, State> {
   private readonly defaultColor: string;
   private readonly colorPalette: string[];
   private readonly dimensions: number[];
+  private readonly statistics: any;
+  private readonly branches: string[];
+  private readonly authors: string[];
 
   constructor(props: Props | Readonly<Props>) {
     super(props);
-
+    this.statistics = props.statistics;
     this.colorDomain = props.colorDomain;
     this.defaultColor = props.defaultColor;
     this.colorPalette = props.colorPalette;
     this.dimensions = props.dimensions;
+    this.branches = props.branches;
+    this.authors = props.authors;
 
     this.state = {
       content: props.content,
@@ -134,13 +142,82 @@ export default class CommitBarChart extends React.Component<Props, State> {
       if (statisticsWindow.style('display') === 'none') {
         toggleDiv.style('top', '195px');
         toggleDivArrow.attr('d', 'M10,20 L20,10 L30,20 Z');
-        statisticsWindow.style('display', 'block');
+        statisticsWindow.style('display', 'flex');
       } else {
         toggleDiv.style('top', '-5px');
         toggleDivArrow.attr('d', 'M10,10 L20,20 L30,10 Z');
         statisticsWindow.style('display', 'none');
       }
     });
+    const statistics = this.statistics['All branches']['All authors']['number'];
+    const categories = [];
+    for (const key of Object.keys(statistics)) {
+      // @ts-ignore
+      categories.push({ name: key, value: statistics[key] });
+    }
+
+    const selectDiv = statisticsWindow.append('div').attr('class', styles.selectWrapper);
+
+    const branchSelect = selectDiv
+      .append('div')
+      .attr('class', 'select ' + styles.select)
+      .append('select')
+      .attr('value', 'All branches');
+
+    branchSelect
+      .selectAll('option')
+      .data(['All branches', ...this.branches])
+      .enter()
+      .append('option')
+      .attr('value', (a) => a)
+      .text((a) => a);
+
+    const authorSelect = selectDiv
+      .append('div')
+      .attr('class', 'select ' + styles.select)
+      .append('select')
+      .attr('value', 'All authors');
+
+    authorSelect
+      .selectAll('option')
+      .data(['All authors', ...this.authors])
+      .enter()
+      .append('option')
+      .attr('value', (a) => a)
+      .text((a) => a);
+
+    const metricSelect = selectDiv
+      .append('div')
+      .attr('class', 'select ' + styles.select)
+      .append('select')
+      .attr('value', 'number');
+
+    metricSelect.append('option').attr('value', 'number').text('Number of commits');
+    metricSelect.append('option').attr('value', 'lines').text('Number of line changes');
+    metricSelect.append('option').attr('value', 'timeEstimated').text('Time spent (estimated)');
+    metricSelect.append('option').attr('value', 'timeActual').text('Time spent (actual)');
+    const svg = statisticsWindow
+      .append('svg')
+      .style('width', '180px')
+      .style('height', '180px')
+      .append('g')
+      .attr('transform', 'translate(90,90)');
+    const pie = d3.pie().value((d) => d.value);
+    const pieData = pie(categories);
+
+    const color = d3.scaleOrdinal().domain(this.colorDomain).range(this.colorPalette);
+
+    svg
+      .selectAll('whatever')
+      .data(pieData)
+      .enter()
+      .append('path')
+      // @ts-ignore
+      .attr('d', d3.arc().innerRadius(0).outerRadius(80))
+      .attr('fill', (d) => color(d.data.name) as string)
+      .attr('stroke', 'black')
+      .style('stroke-width', '2px')
+      .style('opacity', 0.7);
   }
 
   drawLegend(mainDiv: d3.Selection<HTMLDivElement, unknown, null, undefined>) {

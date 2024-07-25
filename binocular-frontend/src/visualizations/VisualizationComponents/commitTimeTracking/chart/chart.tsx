@@ -5,7 +5,6 @@ import * as React from 'react';
 import _ from 'lodash';
 import CommitBarChart from './CommitBarChart.tsx';
 import styles from '../styles.module.scss';
-import {string} from "prop-types";
 
 interface Props {
   commits: Commit[];
@@ -95,6 +94,9 @@ export default (props: Props) => {
   const commitChart =
     commitChartData !== undefined && commitChartData.length > 0 ? (
       <CommitBarChart
+        authors={props.mergedAuthors.map((author) => author.mainCommitter.substring(0, author.mainCommitter.indexOf('<') - 1))}
+        branches={props.branches}
+        statistics={statistics}
         key={
           commitChartData.map((d) => d.commitSHA).join('-') +
           (props.useActualTime ? '' : commitChartData.map((d) => d.timeSpent.estimated).join('-')) +
@@ -146,7 +148,7 @@ export default (props: Props) => {
       </h1>
     </div>
   );
-  console.log(statistics);
+  // console.log(statistics);
   return (
     <div>
       {commitChartData === null && loadingHint}
