@@ -1,8 +1,6 @@
 import * as React from 'react';
 import * as d3 from 'd3';
 import styles from '../styles.module.scss';
-import { arc } from 'd3';
-import { keys } from 'lodash';
 
 interface Props {
   content: {
@@ -16,9 +14,13 @@ interface Props {
   defaultColor: string;
   colorPalette: string[];
   displayTooltip: (event: any, d: any, tooltip: any) => void | undefined;
-  statistics: any;
-  branches: string[];
-  authors: string[];
+  displayStatistics: (
+    statisticsWindow: any,
+    statisticsSettings: any,
+    setState: any,
+    colorDomain: any,
+    colorPalette: any,
+  ) => void | undefined;
 }
 
 interface State {
@@ -54,19 +56,21 @@ export default class CommitBarChart extends React.Component<Props, State> {
   private readonly defaultColor: string;
   private readonly colorPalette: string[];
   private readonly dimensions: number[];
-  private readonly statistics: any;
-  private readonly branches: string[];
-  private readonly authors: string[];
+  private readonly displayStatistics: (
+    statisticsWindow: any,
+    statisticsSettings: any,
+    setState: any,
+    colorDomain: any,
+    colorPalette: any,
+  ) => void | undefined;
 
   constructor(props: Props | Readonly<Props>) {
     super(props);
-    this.statistics = props.statistics;
+    this.displayStatistics = props.displayStatistics;
     this.colorDomain = props.colorDomain;
     this.defaultColor = props.defaultColor;
     this.colorPalette = props.colorPalette;
     this.dimensions = props.dimensions;
-    this.branches = props.branches;
-    this.authors = props.authors;
 
     this.state = {
       content: props.content,
@@ -110,21 +114,18 @@ export default class CommitBarChart extends React.Component<Props, State> {
       (this.state.content.commitData.slice(50 * this.state.page, 50 + 50 * this.state.page).length / 50.0);
     const nodeChartHeight = this.state.content.nodeChart ? 40 : 0;
     const numberOfBarcharts = this.state.content.upperChart && this.state.content.lowerChart ? 2 : 1;
-    // 25 is for nav, 427 is the default value for a normal screen.
+    // 25 is for navigation, 20 for it's margin and 427 is the default value for a normal screen.
     const height = ((visualViewport?.height ?? 919) - nodeChartHeight - 25 - 20) / numberOfBarcharts;
 
     const mainDiv = d3.select(this.divRef).html('');
-    // Upper chart
     if (this.state.content.upperChart) {
       this.drawChart(mainDiv, width, height, { top: 40, right: 30, bottom: 0, left: 40 }, false);
     }
 
-    // Nodes
     if (this.state.content.nodeChart) {
       this.drawNodes(mainDiv, width);
     }
 
-    // Lower chart
     if (this.state.content.lowerChart) {
       this.drawChart(mainDiv, width, height, { top: 0, right: 30, bottom: 40, left: 40 }, true);
     }
@@ -146,7 +147,7 @@ export default class CommitBarChart extends React.Component<Props, State> {
     const showStatistics = this.state.showStatistics;
     if (showStatistics) {
       toggleDiv.style('top', '220px');
-      toggleDivArrow.attr('d', 'M8,20 L18,10 L28,20 Z');
+      toggleDivArrow.attr('d', 'M8,15 L18,5 L28,15 Z');
       statisticsWindow.style('display', 'flex');
     } else {
       toggleDiv.style('top', '-5px');
@@ -157,163 +158,7 @@ export default class CommitBarChart extends React.Component<Props, State> {
       this.setState({ showStatistics: !showStatistics });
     });
 
-    const selectDiv = statisticsWindow.append('div').attr('class', styles.selectWrapper);
-    const that = this;
-
-    const branchSelect = selectDiv
-      .append('div')
-      .attr('class', 'select ' + styles.select)
-      .append('select')
-      .attr('value', this.state.statisticsSettings.branch)
-      .on('change', function () {
-        const settingsCopy = { ...that.state.statisticsSettings };
-        settingsCopy.branch = this.value;
-        that.setState({ statisticsSettings: settingsCopy });
-      });
-
-    branchSelect
-      .selectAll('option')
-      .data(['All branches', ...this.branches])
-      .enter()
-      .append('option')
-      .attr('value', (a) => a)
-      .text((a) => (a.length <= 22 ? a : a.substring(0, 20) + '...'))
-      .each(function (a) {
-        if (branchSelect.attr('value') === a) {
-          d3.select(this).attr('selected', true);
-        }
-      });
-
-    const authorSelect = selectDiv
-      .append('div')
-      .attr('class', 'select ' + styles.select)
-      .append('select')
-      .attr('value', this.state.statisticsSettings.author)
-      .on('change', function () {
-        const settingsCopy = { ...that.state.statisticsSettings };
-        settingsCopy.author = this.value;
-        that.setState({ statisticsSettings: settingsCopy });
-      });
-
-    authorSelect
-      .selectAll('option')
-      .data(['All authors', ...this.authors])
-      .enter()
-      .append('option')
-      .attr('value', (a) => a)
-      .text((a) => (a.length <= 22 ? a : a.substring(0, 20) + '...'))
-      .each(function (a) {
-        if (authorSelect.attr('value') === a) {
-          d3.select(this).attr('selected', true);
-        }
-      });
-
-    const metricSelect = selectDiv
-      .append('div')
-      .attr('class', 'select ' + styles.select)
-      .append('select')
-      .attr('value', this.state.statisticsSettings.metric)
-      .on('change', function () {
-        const settingsCopy = { ...that.state.statisticsSettings };
-        settingsCopy.metric = this.value;
-        that.setState({ statisticsSettings: settingsCopy });
-      });
-
-    const metricOptions = [
-      { value: 'number', text: 'Number of commits' },
-      { value: 'lines', text: 'Number of line changes' },
-      { value: 'timeEstimated', text: 'Time spent (estimated)' },
-      { value: 'timeActual', text: 'Time spent (actual)' },
-    ];
-
-    metricSelect
-      .selectAll('option')
-      .data(metricOptions)
-      .enter()
-      .append('option')
-      .attr('value', (a) => a.value)
-      .text((a) => a.text)
-      .each(function (a) {
-        if (metricSelect.attr('value') === a.value) {
-          d3.select(this).attr('selected', true);
-        }
-      });
-
-    const settings = this.state.statisticsSettings;
-    const statistics = this.statistics[settings.branch][settings.author][settings.metric];
-    const categories = [];
-    const total = Object.values<number>(statistics).reduce((prev: number, cur: number) => prev + cur);
-    for (const key of Object.keys(statistics)) {
-      // @ts-ignore
-      categories.push({ name: key, value: statistics[key], ratio: (statistics[key] / total) * 100 });
-    }
-
-    if (total === 0) {
-      statisticsWindow.append('div').attr('class', styles.noDataDiv).text('No data for this selection');
-      return;
-    }
-
-    const statisticsDiv = statisticsWindow.append('div').attr('class', styles.statisticsDiv);
-
-    let displayText = '';
-    switch (this.state.statisticsSettings.metric) {
-      case 'number':
-        displayText = `Number of commits: ${total}`;
-        break;
-      case 'lines':
-        displayText = `Number of line changes: ${total} lines`;
-        break;
-      case 'timeActual':
-        displayText = `Time spent (actual): ${total} minutes`;
-        break;
-      default:
-        displayText = `Time spent (estimated): ${total} minutes`;
-    }
-
-    statisticsDiv.text(displayText);
-
-    const svg = statisticsDiv.append('svg').attr('class', styles.statisticsSvg).append('g').attr('transform', 'translate(90,90)');
-    const pie = d3.pie().value((d) => d.value);
-    const pieData = pie(categories);
-
-    const color = d3.scaleOrdinal().domain(this.colorDomain).range(this.colorPalette);
-
-    const arcGenerator = d3.arc().innerRadius(0).outerRadius(90);
-
-    svg
-      .selectAll('pieSections')
-      .data(pieData)
-      .enter()
-      .append('path')
-      // @ts-ignore
-      .attr('d', arcGenerator)
-      .attr('fill', (d) => color(d.data.name) as string)
-      .attr('stroke', 'black')
-      .style('stroke-width', '1px')
-      .style('opacity', 0.7)
-      .on('mouseover', function () {
-        d3.select(this).style('opacity', 1);
-      })
-      .on('mouseout', function () {
-        d3.select(this).style('opacity', 0.7);
-      });
-
-    svg
-      .selectAll('pieSections')
-      .data(pieData)
-      .enter()
-      .append('text')
-      .text((d) => (d.data.ratio === 0 ? '' : Math.round(d.data.ratio * 100) / 100 + '%'))
-      .attr('transform', (d) => {
-        // @ts-ignore
-        const c = arcGenerator.centroid(d);
-        const x = c[0];
-        const y = c[1];
-        const h = Math.sqrt(x * x + y * y);
-        return `translate(${(x / h) * 60}, ${(y / h) * 60})`;
-      })
-      .style('text-anchor', 'middle')
-      .style('font-size', 14);
+    this.displayStatistics(statisticsWindow, this.state.statisticsSettings, this.setState.bind(this), this.colorDomain, this.colorPalette);
   }
 
   drawLegend(mainDiv: d3.Selection<HTMLDivElement, unknown, null, undefined>) {

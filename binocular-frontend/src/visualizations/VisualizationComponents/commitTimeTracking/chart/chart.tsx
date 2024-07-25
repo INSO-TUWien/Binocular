@@ -5,6 +5,7 @@ import * as React from 'react';
 import _ from 'lodash';
 import CommitBarChart from './CommitBarChart.tsx';
 import styles from '../styles.module.scss';
+import * as d3 from "d3";
 
 interface Props {
   commits: Commit[];
@@ -91,12 +92,170 @@ export default (props: Props) => {
     tooltip.style('left', `${tooltipXPosition}px`).style('top', `calc(50% - ${35 + tooltipHeight}px)`);
   };
 
+  const displayStatistics = (statisticsWindow, statisticsSettings, setState, colorDomain, colorPalette) => {
+    const selectDiv = statisticsWindow.append('div').attr('class', styles.selectWrapper);
+
+    const branchSelect = selectDiv
+      .append('div')
+      .attr('class', 'select ' + styles.select)
+      .append('select')
+      .attr('value', statisticsSettings.branch)
+      .on('change', function () {
+        const settingsCopy = { ...statisticsSettings };
+        settingsCopy.branch = this.value;
+        setState({ statisticsSettings: settingsCopy });
+      });
+
+    branchSelect
+      .selectAll('option')
+      .data(['All branches', ...props.branches])
+      .enter()
+      .append('option')
+      .attr('value', (a) => a)
+      .text((a) => (a.length <= 22 ? a : a.substring(0, 20) + '...'))
+      .each(function (a) {
+        if (branchSelect.attr('value') === a) {
+          d3.select(this).attr('selected', true);
+        }
+      });
+
+    const authors = props.mergedAuthors.map((author) => author.mainCommitter.substring(0, author.mainCommitter.indexOf('<') - 1));
+
+    const authorSelect = selectDiv
+      .append('div')
+      .attr('class', 'select ' + styles.select)
+      .append('select')
+      .attr('value', statisticsSettings.author)
+      .on('change', function () {
+        const settingsCopy = { ...statisticsSettings };
+        settingsCopy.author = this.value;
+        setState({ statisticsSettings: settingsCopy });
+      });
+
+    authorSelect
+      .selectAll('option')
+      .data(['All authors', ...authors])
+      .enter()
+      .append('option')
+      .attr('value', (a) => a)
+      .text((a) => (a.length <= 22 ? a : a.substring(0, 20) + '...'))
+      .each(function (a) {
+        if (authorSelect.attr('value') === a) {
+          d3.select(this).attr('selected', true);
+        }
+      });
+
+    const metricSelect = selectDiv
+      .append('div')
+      .attr('class', 'select ' + styles.select)
+      .append('select')
+      .attr('value', statisticsSettings.metric)
+      .on('change', function () {
+        const settingsCopy = { ...statisticsSettings };
+        settingsCopy.metric = this.value;
+        setState({ statisticsSettings: settingsCopy });
+      });
+
+    const metricOptions = [
+      { value: 'number', text: 'Number of commits' },
+      { value: 'lines', text: 'Number of line changes' },
+      { value: 'timeEstimated', text: 'Time spent (estimated)' },
+      { value: 'timeActual', text: 'Time spent (actual)' },
+    ];
+
+    metricSelect
+      .selectAll('option')
+      .data(metricOptions)
+      .enter()
+      .append('option')
+      .attr('value', (a) => a.value)
+      .text((a) => a.text)
+      .each(function (a) {
+        if (metricSelect.attr('value') === a.value) {
+          d3.select(this).attr('selected', true);
+        }
+      });
+
+    const statisticsSubset = statistics[statisticsSettings.branch][statisticsSettings.author][statisticsSettings.metric];
+    const categories = [];
+    const total = Object.values<number>(statisticsSubset).reduce((prev: number, cur: number) => prev + cur);
+    for (const key of Object.keys(statisticsSubset)) {
+      // @ts-ignore
+      categories.push({ name: key, value: statisticsSubset[key], ratio: (statisticsSubset[key] / total) * 100 });
+    }
+
+    if (total === 0) {
+      statisticsWindow.append('div').attr('class', styles.noDataDiv).text('No data for this selection');
+      return;
+    }
+
+    const statisticsDiv = statisticsWindow.append('div').attr('class', styles.statisticsDiv);
+
+    let displayText = '';
+    switch (statisticsSettings.metric) {
+      case 'number':
+        displayText = `Number of commits: ${total}`;
+        break;
+      case 'lines':
+        displayText = `Number of line changes: ${total} lines`;
+        break;
+      case 'timeActual':
+        displayText = `Time spent (actual): ${total} minutes`;
+        break;
+      default:
+        displayText = `Time spent (estimated): ${total} minutes`;
+    }
+
+    statisticsDiv.text(displayText);
+
+    const svg = statisticsDiv.append('svg').attr('class', styles.statisticsSvg).append('g').attr('transform', 'translate(90,90)');
+    const pie = d3.pie().value((d) => d.value);
+    const pieData = pie(categories);
+
+    const color = d3.scaleOrdinal().domain(colorDomain).range(colorPalette);
+
+    const arcGenerator = d3.arc().innerRadius(0).outerRadius(90);
+
+    svg
+      .selectAll('pieSections')
+      .data(pieData)
+      .enter()
+      .append('path')
+      // @ts-ignore
+      .attr('d', arcGenerator)
+      .attr('fill', (d) => color(d.data.name) as string)
+      .attr('stroke', 'black')
+      .style('stroke-width', '1px')
+      .style('opacity', 0.7)
+      .on('mouseover', function () {
+        d3.select(this).style('opacity', 1);
+      })
+      .on('mouseout', function () {
+        d3.select(this).style('opacity', 0.7);
+      });
+
+    svg
+      .selectAll('pieSections')
+      .data(pieData)
+      .enter()
+      .append('text')
+      .text((d) => (d.data.ratio === 0 ? '' : Math.round(d.data.ratio * 100) / 100 + '%'))
+      .attr('transform', (d) => {
+        // @ts-ignore
+        const c = arcGenerator.centroid(d);
+        const x = c[0];
+        const y = c[1];
+        const h = Math.sqrt(x * x + y * y);
+        return `translate(${(x / h) * 60}, ${(y / h) * 60})`;
+      })
+      .style('text-anchor', 'middle')
+      .style('font-size', 14);
+  };
+
   const commitChart =
     commitChartData !== undefined && commitChartData.length > 0 ? (
       <CommitBarChart
-        authors={props.mergedAuthors.map((author) => author.mainCommitter.substring(0, author.mainCommitter.indexOf('<') - 1))}
-        branches={props.branches}
-        statistics={statistics}
+        displayStatistics={displayStatistics}
         key={
           commitChartData.map((d) => d.commitSHA).join('-') +
           (props.useActualTime ? '' : commitChartData.map((d) => d.timeSpent.estimated).join('-')) +
@@ -148,7 +307,6 @@ export default (props: Props) => {
       </h1>
     </div>
   );
-  // console.log(statistics);
   return (
     <div>
       {commitChartData === null && loadingHint}
