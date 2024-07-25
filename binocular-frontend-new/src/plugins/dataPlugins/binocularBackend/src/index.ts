@@ -1,6 +1,7 @@
 import Commits from './commits.ts';
 import { DataPlugin } from '../../../interfaces/dataPlugin.ts';
 import Authors from './authors.ts';
+import General from './general.ts';
 
 class BinocularBackend implements DataPlugin {
   public name = 'Binocular Backend';
@@ -13,6 +14,7 @@ class BinocularBackend implements DataPlugin {
   };
   public commits = Commits;
   public authors = Authors;
+  public general = General;
 
   constructor() {}
 

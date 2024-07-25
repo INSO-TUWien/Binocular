@@ -1,6 +1,7 @@
 import Commits from './commits.ts';
 import { DataPlugin } from '../../../interfaces/dataPlugin.ts';
 import Authors from './authors.ts';
+import General from './general.ts';
 
 class MockData implements DataPlugin {
   public name = 'Mock Data';
@@ -13,6 +14,7 @@ class MockData implements DataPlugin {
   };
   public commits = Commits;
   public authors = Authors;
+  public general = General;
 
   constructor() {}
 

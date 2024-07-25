@@ -35,4 +35,9 @@
   padding: 0 0.2rem;
 }
 
+.text {
+  display: flex;
+  align-items: center;
+}
+
 /*# sourceMappingURL=statusBar.module.css.map */

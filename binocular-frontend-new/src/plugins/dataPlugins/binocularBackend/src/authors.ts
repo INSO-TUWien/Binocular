@@ -1,11 +1,11 @@
-import { DataAuthor } from '../../../interfaces/dataPlugin.ts';
 import { graphQl, traversePages } from './utils';
 import { gql } from '@apollo/client';
+import { DataPluginAuthor } from '../../../interfaces/dataPluginInterfaces/dataPluginAuthors.ts';
 
 export default {
   getAll: async () => {
     console.log(`Getting Authors`);
-    const authorList: DataAuthor[] = [];
+    const authorList: DataPluginAuthor[] = [];
     const getAuthorsPage = () => async (page: number, perPage: number) => {
       const resp = await graphQl.query({
         query: gql`
@@ -25,7 +25,7 @@ export default {
       return resp.data.stakeholders;
     };
 
-    await traversePages(getAuthorsPage(), (author: DataAuthor) => {
+    await traversePages(getAuthorsPage(), (author: DataPluginAuthor) => {
       authorList.push(author);
     });
     return authorList;

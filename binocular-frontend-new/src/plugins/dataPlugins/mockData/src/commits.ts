@@ -1,10 +1,10 @@
-import { DataCommit } from '../../../interfaces/dataPlugin.ts';
+import { DataPluginCommit } from '../../../interfaces/dataPluginInterfaces/dataPluginCommits.ts';
 
 export default {
   getAll: (from?: string, to?: string) => {
     console.log(`Getting Commits from ${from} to ${to}`);
-    return new Promise<DataCommit[]>((resolve) => {
-      const commits: DataCommit[] = [
+    return new Promise<DataPluginCommit[]>((resolve) => {
+      const commits: DataPluginCommit[] = [
         {
           sha: '0000000001',
           shortSha: '00001',

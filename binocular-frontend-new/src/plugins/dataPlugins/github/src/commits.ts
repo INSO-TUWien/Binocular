@@ -1,6 +1,6 @@
-import { DataCommit, DataPluginCommits } from '../../../interfaces/dataPlugin.ts';
 import { GraphQL } from './utils.ts';
 import { ApolloQueryResult, gql } from '@apollo/client';
+import { DataPluginCommit, DataPluginCommits } from '../../../interfaces/dataPluginInterfaces/dataPluginCommits.ts';
 
 interface CommitQueryResult {
   repository: {
@@ -28,25 +28,31 @@ interface CommitQueryResult {
 
 export default class Commits implements DataPluginCommits {
   private graphQl;
-
-  constructor(apiKey: string) {
+  private owner;
+  private name;
+  constructor(apiKey: string, endpoint: string) {
     this.graphQl = new GraphQL(apiKey);
+    this.owner = endpoint.split('/')[0];
+    this.name = endpoint.split('/')[1];
   }
   public async getAll(from: string, to: string) {
     return await Promise.resolve(this.getCommits(100, new Date(from).toISOString(), new Date(to).toISOString()));
   }
-  private async getCommits(perPage: number, from: string, to: string): Promise<DataCommit[]> {
+  private async getCommits(perPage: number, from: string, to: string): Promise<DataPluginCommit[]> {
     let hasNextPage: boolean = true;
     let nextPageCursor: string | null = null;
 
-    const commitNodes: DataCommit[] = [];
+    const commitNodes: DataPluginCommit[] = [];
 
     while (hasNextPage) {
       const resp: void | ApolloQueryResult<CommitQueryResult> = await this.graphQl.client
-        .query<CommitQueryResult, { nextPageCursor: string | null; perPage: number; from: string; to: string }>({
+        .query<
+          CommitQueryResult,
+          { nextPageCursor: string | null; perPage: number; from: string; to: string; owner: string; name: string }
+        >({
           query: gql`
-            query ($nextPageCursor: String, $perPage: Int, $from: GitTimestamp, $to: GitTimestamp) {
-              repository(owner: "INSO-TUWIEN", name: "Binocular") {
+            query ($nextPageCursor: String, $perPage: Int, $from: GitTimestamp, $to: GitTimestamp, $owner: String, $name: String) {
+              repository(owner: $owner, name: $name) {
                 defaultBranchRef {
                   target {
                     ... on Commit {
@@ -83,7 +89,7 @@ export default class Commits implements DataPluginCommits {
               }
             }
           `,
-          variables: { nextPageCursor, perPage, from, to },
+          variables: { nextPageCursor, perPage, from, to, owner: this.owner, name: this.name },
         })
         .catch((e) => console.log(e));
 

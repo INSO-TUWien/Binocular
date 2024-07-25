@@ -1,11 +1,11 @@
-import { DataCommit } from '../../../interfaces/dataPlugin.ts';
 import { graphQl, traversePages } from './utils';
 import { gql } from '@apollo/client';
+import { DataPluginCommit } from '../../../interfaces/dataPluginInterfaces/dataPluginCommits.ts';
 
 export default {
   getAll: async (from: string, to: string) => {
     console.log(`Getting Commits from ${from} to ${to}`);
-    const commitList: DataCommit[] = [];
+    const commitList: DataPluginCommit[] = [];
     const getCommitsPage = (to?: string) => async (page: number, perPage: number) => {
       const resp = await graphQl.query({
         query: gql`
@@ -32,12 +32,12 @@ export default {
             }
           }
         `,
-        variables: {page, perPage, to},
+        variables: { page, perPage, to },
       });
       return resp.data.commits;
     };
 
-    await traversePages(getCommitsPage(to), (commit: DataCommit) => {
+    await traversePages(getCommitsPage(to), (commit: DataPluginCommit) => {
       commitList.push(commit);
     });
     const allCommits = commitList.sort((a, b) => new Date(b.date).getMilliseconds() - new Date(a.date).getMilliseconds());
