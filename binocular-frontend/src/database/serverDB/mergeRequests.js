@@ -51,6 +51,38 @@ export default class MergeRequests {
                     name
                   }
                 }
+                comments {
+                  id
+                  author{
+                    login
+                    name
+                  }
+                  createdAt
+                  updatedAt
+                  lastEditedAt
+                  path
+                  bodyText
+                }
+                reviewThreads {
+                  id
+                  isResolved
+                  path
+                  resolvedBy {
+                    login
+                  }
+                  comments {
+                    id
+                    author{
+                      login
+                      name
+                    }
+                    createdAt
+                    updatedAt
+                    lastEditedAt
+                    path
+                    bodyText
+                  }
+                }
               }
             }
           }`,
