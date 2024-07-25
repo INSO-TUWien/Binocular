@@ -6,8 +6,11 @@ import Chart from './chart';
 
 const mapStateToProps = (state) => {
   const codeReviewMetricsState = state.visualizations.codeReviewMetrics.state;
+  const universalSettings = state.universalSettings;
   return {
     mergeRequests: codeReviewMetricsState.data.data.mergeRequests,
+    selectedAuthors: universalSettings.selectedAuthorsGlobal,
+    allAuthors: universalSettings.allAuthors,
   };
 };
 

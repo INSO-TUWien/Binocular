@@ -13,5 +13,11 @@ export default {
   ChartComponent,
   ConfigComponent,
   HelpComponent,
-  usesUniversalSettings: false,
+  usesUniversalSettings: true,
+  universalSettingsConfig: {
+    hideExcludeCommitSettings: true,
+    hideMergeCommitSettings: true,
+    hideSprintSettings: true,
+    hideGranularitySettings: true,
+  },
 };

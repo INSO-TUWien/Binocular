@@ -16,6 +16,14 @@
   border-radius: 4px;
 }
 
+.BCHighlighted {
+  background-color: #aedbfb;
+}
+
+.BCHighlighted:hover {
+  background-color: #f0c6c6;
+}
+
 .ACOdd{
   background-color: #4882e0;
   color: whitesmoke;
@@ -93,4 +101,8 @@
 
 .searchBoxHint:focus-within{
   height: 4rem;
+}
+
+.highlight {
+
 }

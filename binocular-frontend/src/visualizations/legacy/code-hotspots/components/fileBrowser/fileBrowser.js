@@ -66,7 +66,12 @@ export default class FileBrowser extends React.PureComponent {
 
         {fileCount === 0 ? <div>Loading Files ...</div> : filteredFileCount === 0 ? <div>No Files found!</div> : null}
         <div className={styles.fileBrowser}>
-          <FileStruct data={convertedData} foldOut={fileCount !== filteredFileCount} props={this.props.props} />
+          <FileStruct
+            data={convertedData}
+            foldOut={fileCount !== filteredFileCount}
+            props={this.props.props}
+            highlights={this.props.highlights}
+          />
         </div>
       </div>
     );
@@ -80,9 +85,15 @@ class FileStruct extends React.PureComponent {
       <div>
         {this.props.data.content.map((data, i) => {
           if (data.type === 'file') {
+            // only highlight if set is present
+            let shouldHighlight = false;
+            if (this.props.highlights) {
+              shouldHighlight = this.props.highlights.has(data.name);
+            }
+            const classes = shouldHighlight ? styles.BCHighlighted : i % 2 === 0 ? styles.BCEven : styles.BCOdd;
             return (
               <div
-                className={styles.button + ' ' + (i % 2 === 0 ? styles.BCEven : styles.BCOdd)}
+                className={styles.button + ' ' + classes}
                 key={data.name}
                 onClick={() => {
                   this.clickFile(data.url, data.path);

@@ -3,12 +3,16 @@
 import { createAction } from 'redux-actions';
 import { fetchFactory, timestampedActionFactory } from '../../../sagas/utils';
 import Database from '../../../database/database';
+import { put } from 'redux-saga/effects';
 
 export const setActiveVisualizations = createAction('SET_ACTIVE_VISUALIZATIONS');
-export const setMergeRequests = createAction('SET_SHOW_MERGE_REQUESTS');
-export const setGroup = createAction('CRM_SET_GROUP');
 export const refresh = createAction('REFRESH');
 export const requestCodeReviewMetricsData = createAction('REQUEST_CODE_REVIEW_METRICS_DATA');
+export const setGrouping = createAction('SET_GROUPING');
+export const setCategory = createAction('SET_CATEGORY');
+export const setFile = createAction('SET_FILE');
+export const setPath = createAction('SET_PATH');
+export const initHighlights = createAction('INIT_HIGHLIGHTS');
 export const receiveCodeReviewMetricsData = timestampedActionFactory('RECEIVE_CODE_REVIEW_METRICS_DATA');
 export const receiveCodeReviewMetricsDataError = createAction('RECEIVE_CODE_REVIEW_METRICS_DATA_ERROR');
 
@@ -16,39 +20,47 @@ export default function* () {
   yield* fetchCodeReviewMetricsData();
 }
 
+export interface File {
+  key: string;
+  webUrl: string;
+}
+
 export const fetchCodeReviewMetricsData = fetchFactory(
   function* () {
-    const { firstMergeRequest, lastMergeRequest, firstComment, lastComment } = yield Database.getBounds();
+    const { firstMergeRequest, lastMergeRequest } = yield Database.getBounds();
 
     const firstMergeRequestTimestamp = Date.parse(firstMergeRequest.date);
     const lastMergeRequestTimestamp = Date.parse(lastMergeRequest.date);
-    const firstCommentTimestamp = Date.parse(firstComment.date);
-    const lastCommentTimestamp = Date.parse(lastComment.date);
 
-    return yield Promise.all([
+    const results = yield Promise.all([
       new Promise((resolve) => {
-        Database.getMergeRequestData(
+        const results = Database.getMergeRequestData(
           [firstMergeRequestTimestamp, lastMergeRequestTimestamp],
           [firstMergeRequestTimestamp, lastMergeRequestTimestamp],
-        ).then(resolve);
+        );
+        resolve(results);
       }),
       new Promise((resolve) => {
-        Database.getCommentData([firstCommentTimestamp, lastCommentTimestamp], [firstCommentTimestamp, lastCommentTimestamp]).then(resolve);
+        const files: File[] = [];
+        Database.requestFileStructure().then((result) => {
+          const fs = result.files.data;
+          for (const f in fs) {
+            files.push({ key: fs[f].path, webUrl: fs[f].webUrl });
+          }
+          resolve(files);
+        });
       }),
-      new Promise((resolve) => {
-        Database.getReviewThreadData().then(resolve);
-      }),
-    ]).then((values) => {
-      const mergeRequests = values[0];
-      const comments = values[1];
-      const reviewThreads = values[2];
-      console.log(reviewThreads);
-      return {
-        mergeRequests,
-        comments,
-        reviewThreads,
-      };
-    });
+    ]);
+
+    const mergeRequests = results[0];
+    const files = results[1];
+
+    yield put(initHighlights(files.map((file) => file.key)));
+
+    return {
+      mergeRequests,
+      files,
+    };
   },
   requestCodeReviewMetricsData,
   receiveCodeReviewMetricsData,

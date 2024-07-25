@@ -1,14 +1,17 @@
 'use-strict';
 import React from 'react';
 import BubbleChart, { Bubble } from '../../../components/BubbleChart';
-import { MergeRequest } from '../../../types/dbTypes';
+import { Author, Comment, MergeRequest, ReviewThread } from '../../../types/dbTypes';
 import LegendCompact from '../../../components/LegendCompact';
 import _ from 'lodash';
 import styles from '../styles.module.scss';
 import { connect } from 'react-redux';
+import { incrementCollectionForSelectedAuthors } from '../../merge-request-ownership/chart/utils';
 
 interface Props {
   mergeRequests: any[];
+  allAuthors: any;
+  selectedAuthors: any;
   codeReviewMetricsState: any;
 }
 
@@ -73,12 +76,119 @@ class ChartComponent extends React.Component<Props, State> {
 
     const mergeRequests = props.mergeRequests;
     const metricsData: Bubble[] = [];
+    const usersData = new Map<string, [number, string]>();
+    const filesData = new Map<string, number>();
 
-    console.log(props.codeReviewMetricsState);
-
-    _.each(mergeRequests, (mergeRequest: MergeRequest) => {});
+    const configState = props.codeReviewMetricsState.config;
+    if (configState.grouping === 'user') {
+      switch (configState.category) {
+        case 'comment':
+          this.getCommentOwnershipCountByUser(mergeRequests, usersData, props);
+          break;
+        case 'review':
+          this.getReviewOwnershipCountByUser(mergeRequests, usersData, props);
+          break;
+        default:
+          break;
+      }
+      this.extractUsersData(metricsData, usersData);
+    } else if (configState.grouping === 'file') {
+      this.getReviewThreadOwnershipCountByFile(mergeRequests, filesData, props);
+      this.extractFilesData(metricsData, filesData);
+    }
 
     return { metricsData };
+  }
+
+  extractUsersData(metricsData: Bubble[], usersData: Map<string, [number, string]>): void {
+    usersData.forEach((entry) => {
+      const [count, color] = entry;
+      const bubble: Bubble = {
+        x: 0,
+        y: 0,
+        color: color,
+        size: count,
+      };
+      metricsData.push(bubble);
+    });
+  }
+
+  extractFilesData(metricsData: Bubble[], filesData: Map<string, number>): void {
+    filesData.forEach((count) => {
+      const bubble: Bubble = {
+        x: 0,
+        y: 0,
+        color: 'red',
+        size: count,
+      };
+      metricsData.push(bubble);
+    });
+  }
+
+  /**
+   * returns the amount of review threads owned per user
+   * @param mergeRequests all mergerequests in the project
+   * @param authorMap map that stores the results (key: user login, value: count)
+   */
+  getReviewOwnershipCountByUser(mergeRequests: MergeRequest[], authorMap: Map<string, [number, string]>, props): void {
+    const authors: Author[] = [];
+    _.each(mergeRequests, (mergeRequest: MergeRequest) => {
+      mergeRequest.reviewThreads.forEach((reviewThread: ReviewThread) => {
+        const ownership = reviewThread.comments[0];
+        if (!ownership || !ownership.author) return;
+        authors.push(ownership.author);
+      });
+    });
+    incrementCollectionForSelectedAuthors(authors, props.allAuthors, props.selectedAuthors, authorMap);
+  }
+
+  /**
+   * returns the amount of comments owned per user
+   * @param mergeRequests all mergerequests in the project
+   * @param authorMap map that stores the results (key: user login, value: count)
+   */
+  getCommentOwnershipCountByUser(mergeRequests: MergeRequest[], authorMap: Map<string, [number, string]>, props): void {
+    const authors: Author[] = [];
+    _.each(mergeRequests, (mergeRequest: MergeRequest) => {
+      // process comments directly inside the merge request
+      mergeRequest.comments.forEach((comment: Comment) => {
+        if (!comment.author) return;
+        authors.push(comment.author);
+      });
+      // process comments of a review thread inside the merge request
+      mergeRequest.reviewThreads.forEach((reviewThread: ReviewThread) => {
+        reviewThread.comments.forEach((comment: Comment) => {
+          if (!comment.author) return;
+          authors.push(comment.author);
+        });
+      });
+    });
+    incrementCollectionForSelectedAuthors(authors, props.allAuthors, props.selectedAuthors, authorMap);
+  }
+
+  /**
+   * returns the amount of review threads for any file
+   * @param mergeRequests all mergerequests in the project
+   * @param fileMap map that stores the results (key: path, value: count)
+   */
+  getReviewThreadOwnershipCountByFile(mergeRequests: MergeRequest[], fileMap: Map<string, number>, props) {
+    _.each(mergeRequests, (mergeRequest: MergeRequest) => {
+      mergeRequest.reviewThreads.forEach((reviewThread: ReviewThread) => {
+        if (props.codeReviewMetricsState.config.path.has(reviewThread.path)) {
+          this.handleMapIncrementation(reviewThread.path, fileMap);
+        }
+      });
+    });
+  }
+
+  /**
+   * increments the  count  on a map
+   * @param key key of the element to be incremented
+   * @param map the map to be incremented on
+   */
+  handleMapIncrementation(key: string, map: Map<string, number>): void {
+    const count = map.get(key) || 0;
+    map.set(key, count + 1);
   }
 }
 
