@@ -145,7 +145,7 @@ export default class CommitBarChart extends React.Component<Props, State> {
     const statisticsWindow = mainDiv.append('div').attr('class', styles.statisticsWindow);
     const showStatistics = this.state.showStatistics;
     if (showStatistics) {
-      toggleDiv.style('top', '195px');
+      toggleDiv.style('top', '220px');
       toggleDivArrow.attr('d', 'M8,20 L18,10 L28,20 Z');
       statisticsWindow.style('display', 'flex');
     } else {
@@ -253,7 +253,26 @@ export default class CommitBarChart extends React.Component<Props, State> {
       return;
     }
 
-    const svg = statisticsWindow.append('svg').attr('class', styles.statisticsSvg).append('g').attr('transform', 'translate(90,90)');
+    const statisticsDiv = statisticsWindow.append('div').attr('class', styles.statisticsDiv);
+
+    let displayText = '';
+    switch (this.state.statisticsSettings.metric) {
+      case 'number':
+        displayText = `Number of commits: ${total}`;
+        break;
+      case 'lines':
+        displayText = `Number of line changes: ${total} lines`;
+        break;
+      case 'timeActual':
+        displayText = `Time spent (actual): ${total} minutes`;
+        break;
+      default:
+        displayText = `Time spent (estimated): ${total} minutes`;
+    }
+
+    statisticsDiv.text(displayText);
+
+    const svg = statisticsDiv.append('svg').attr('class', styles.statisticsSvg).append('g').attr('transform', 'translate(90,90)');
     const pie = d3.pie().value((d) => d.value);
     const pieData = pie(categories);
 

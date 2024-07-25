@@ -62,7 +62,7 @@
     left: 25%;
     border: 2px solid black;
     border-radius: 0 0 20px 20px;
-    height: 200px;
+    height: 225px;
     background: #ffffff;
     padding: 10px;
     display: none;
@@ -91,10 +91,16 @@
       }
     }
 
+    .statisticsDiv {
+      margin-left: 10px;
+      text-align: center;
+    }
+
     .statisticsSvg {
-      width: 180px;
-      height: 180px;
-      margin-left: 5px;
+      width: 181px;
+      height: 181px;
+      display: block;
+      margin: auto;
     }
 
     .noDataDiv {
