@@ -5,6 +5,7 @@ import { connect } from 'react-redux';
 import BubbleChart, { Bubble } from '../../../components/BubbleChart';
 import { Author, MergeRequest } from '../../../types/dbTypes';
 import styles from '../styles.module.scss';
+import { incrementCollectionForSelectedAuthors } from './utils';
 
 interface Props {
   mergeRequestOwnershipState: any;
@@ -69,7 +70,7 @@ class ChartComponent extends React.Component<Props, State> {
         ? this.extractAssigneeCount(mergeRequests, props)
         : this.extractReviewerCount(mergeRequests, props);
 
-    categoryCount.forEach((value, assignee) => {
+    categoryCount.forEach((value, author) => {
       const [count, color] = value;
       const bubble: Bubble = {
         x: 10,
@@ -87,10 +88,14 @@ class ChartComponent extends React.Component<Props, State> {
     const assigneeCounts = new Map<string, [number, string]>();
 
     _.each(mergeRequests, (mergeRequest: MergeRequest) => {
-      this.filterCollectionForSelectedAuthors(mergeRequest.assignee, mergeRequest.assignees, props, assigneeCounts);
+      incrementCollectionForSelectedAuthors(
+        mergeRequest.assignees,
+        props.allAuthors,
+        props.selectedAuthors,
+        assigneeCounts,
+        props.mergeRequestOwnershipState.config.onlyShowAuthors,
+      );
     });
-
-    console.error(assigneeCounts);
 
     return assigneeCounts;
   }
@@ -99,42 +104,16 @@ class ChartComponent extends React.Component<Props, State> {
     const reviewerCounts = new Map<string, [count: number, color: string]>();
 
     _.each(mergeRequests, (mergeRequest: MergeRequest) => {
-      this.filterCollectionForSelectedAuthors(mergeRequest.reviewer, mergeRequest.reviewers, props, reviewerCounts);
+      incrementCollectionForSelectedAuthors(
+        mergeRequest.reviewers,
+        props.allAuthors,
+        props.selectedAuthors,
+        reviewerCounts,
+        props.mergeRequestOwnershipState.config.onlyShowAuthors,
+      );
     });
 
     return reviewerCounts;
-  }
-
-  filterCollectionForSelectedAuthors(field: Author, collection: Author[], props, map: Map<string, [number, string]>) {
-    if (!field || collection.length === 0) {
-      return;
-    }
-
-    const colors = ['#6cc644', '#bd2c00', '#6e5494'];
-
-    for (const person of collection) {
-      let shouldDisplay = false;
-      let col = colors[Math.floor(Math.random() * (2 - 0 + 1) + 0)];
-
-      for (const author of Object.keys(props.allAuthors)) {
-        const authorName = author.split('<')[0].slice(0, -1).replace(/\s+/g, '');
-
-        if (person.login === authorName) {
-          col = props.allAuthors[author];
-          if (props.selectedAuthors.filter((a: string) => a === author).length > 0) {
-            shouldDisplay = true;
-            break;
-          }
-        }
-      }
-
-      // if the person is not an author => add depending on settings
-      if (!shouldDisplay) shouldDisplay = !props.mergeRequestOwnershipState.config.onlyShowAuthors;
-      if (!shouldDisplay) return;
-
-      const [count, color] = map.get(person.login) || [0, col];
-      map.set(person.login, [count + 1, color]);
-    }
   }
 }
 
