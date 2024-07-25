@@ -309,14 +309,11 @@ function calculateStatistics(commits: any[], props: Props) {
           const author = a as Author;
           const authorName = author.mainCommitter.substring(0, author.mainCommitter.indexOf('<') - 1);
           const filteredForAuthor = commits.filter((c) => author.committers.map((committer) => committer.signature).includes(c.signature));
-          statistics[b][authorName] = filteredForAuthor.length === 0 ? {} : calculateRatios(filteredForAuthor, initialValue);
+          statistics[b][authorName] = calculateRatios(filteredForAuthor, initialValue);
         }
       });
     } else {
       const filteredForBranch = commits.filter((c) => c.branch === b);
-      if (filteredForBranch.length === 0) {
-        return;
-      }
       authors.forEach((a) => {
         if (a === 'All authors') {
           statistics[b][a] = calculateRatios(filteredForBranch, initialValue);
@@ -326,7 +323,7 @@ function calculateStatistics(commits: any[], props: Props) {
           const filteredForAuthor = filteredForBranch.filter((c) =>
             author.committers.map((committer) => committer.signature).includes(c.signature),
           );
-          statistics[b][authorName] = filteredForAuthor.length === 0 ? {} : calculateRatios(filteredForAuthor, initialValue);
+          statistics[b][authorName] = calculateRatios(filteredForAuthor, initialValue);
         }
       });
     }

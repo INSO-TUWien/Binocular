@@ -2,6 +2,7 @@ import * as React from 'react';
 import * as d3 from 'd3';
 import styles from '../styles.module.scss';
 import { arc } from 'd3';
+import { keys } from 'lodash';
 
 interface Props {
   content: {
@@ -30,6 +31,8 @@ interface State {
   displayTooltip: (event: any, d: any, window: d3.Selection<HTMLDivElement, unknown, null, any> | undefined) => void | undefined;
   componentMounted: boolean;
   page: number;
+  showStatistics: boolean;
+  statisticsSettings: { branch: string; author: string; metric: string };
 }
 
 interface Margin {
@@ -70,6 +73,8 @@ export default class CommitBarChart extends React.Component<Props, State> {
       componentMounted: false,
       displayTooltip: props.displayTooltip,
       page: 0,
+      showStatistics: false,
+      statisticsSettings: { branch: 'All branches', author: 'All authors', metric: 'number' },
     };
     window.addEventListener('resize', () => this.componentDidUpdate());
   }
@@ -126,10 +131,10 @@ export default class CommitBarChart extends React.Component<Props, State> {
 
     this.drawNavigation(mainDiv, Math.ceil(this.state.content.commitData.length / 50.0));
     this.drawLegend(mainDiv);
-    this.drawStatisticsToggle(mainDiv);
+    this.drawStatistics(mainDiv);
   }
 
-  drawStatisticsToggle(mainDiv: d3.Selection<HTMLDivElement, unknown, null, undefined>) {
+  drawStatistics(mainDiv: d3.Selection<HTMLDivElement, unknown, null, undefined>) {
     const toggleDiv = mainDiv.append('div').attr('class', styles.statisticsToggle);
     const toggleDivArrow = toggleDiv
       .append('svg')
@@ -138,33 +143,33 @@ export default class CommitBarChart extends React.Component<Props, State> {
       .attr('d', 'M10,10 L20,20 L30,10 Z')
       .attr('class', 'arrowhead');
     const statisticsWindow = mainDiv.append('div').attr('class', styles.statisticsWindow);
-
-    toggleDiv.on('click', () => {
-      if (statisticsWindow.style('display') === 'none') {
-        toggleDiv.style('top', '195px');
-        toggleDivArrow.attr('d', 'M10,20 L20,10 L30,20 Z');
-        statisticsWindow.style('display', 'flex');
-      } else {
-        toggleDiv.style('top', '-5px');
-        toggleDivArrow.attr('d', 'M10,10 L20,20 L30,10 Z');
-        statisticsWindow.style('display', 'none');
-      }
-    });
-    const statistics = this.statistics['All branches']['All authors']['number'];
-    const categories = [];
-    const total = Object.values<number>(statistics).reduce((prev: number, cur: number) => prev + cur);
-    for (const key of Object.keys(statistics)) {
-      // @ts-ignore
-      categories.push({ name: key, value: statistics[key], ratio: statistics[key] / total * 100 });
+    const showStatistics = this.state.showStatistics;
+    if (showStatistics) {
+      toggleDiv.style('top', '195px');
+      toggleDivArrow.attr('d', 'M8,20 L18,10 L28,20 Z');
+      statisticsWindow.style('display', 'flex');
+    } else {
+      toggleDiv.style('top', '-5px');
+      toggleDivArrow.attr('d', 'M8,10 L18,20 L28,10 Z');
+      statisticsWindow.style('display', 'none');
     }
+    toggleDiv.on('click', () => {
+      this.setState({ showStatistics: !showStatistics });
+    });
 
     const selectDiv = statisticsWindow.append('div').attr('class', styles.selectWrapper);
+    const that = this;
 
     const branchSelect = selectDiv
       .append('div')
       .attr('class', 'select ' + styles.select)
       .append('select')
-      .attr('value', 'All branches');
+      .attr('value', this.state.statisticsSettings.branch)
+      .on('change', function () {
+        const settingsCopy = { ...that.state.statisticsSettings };
+        settingsCopy.branch = this.value;
+        that.setState({ statisticsSettings: settingsCopy });
+      });
 
     branchSelect
       .selectAll('option')
@@ -172,13 +177,23 @@ export default class CommitBarChart extends React.Component<Props, State> {
       .enter()
       .append('option')
       .attr('value', (a) => a)
-      .text((a) => a);
+      .text((a) => (a.length <= 22 ? a : a.substring(0, 20) + '...'))
+      .each(function (a) {
+        if (branchSelect.attr('value') === a) {
+          d3.select(this).attr('selected', true);
+        }
+      });
 
     const authorSelect = selectDiv
       .append('div')
       .attr('class', 'select ' + styles.select)
       .append('select')
-      .attr('value', 'All authors');
+      .attr('value', this.state.statisticsSettings.author)
+      .on('change', function () {
+        const settingsCopy = { ...that.state.statisticsSettings };
+        settingsCopy.author = this.value;
+        that.setState({ statisticsSettings: settingsCopy });
+      });
 
     authorSelect
       .selectAll('option')
@@ -186,33 +201,68 @@ export default class CommitBarChart extends React.Component<Props, State> {
       .enter()
       .append('option')
       .attr('value', (a) => a)
-      .text((a) => a);
+      .text((a) => (a.length <= 22 ? a : a.substring(0, 20) + '...'))
+      .each(function (a) {
+        if (authorSelect.attr('value') === a) {
+          d3.select(this).attr('selected', true);
+        }
+      });
 
     const metricSelect = selectDiv
       .append('div')
       .attr('class', 'select ' + styles.select)
       .append('select')
-      .attr('value', 'number');
+      .attr('value', this.state.statisticsSettings.metric)
+      .on('change', function () {
+        const settingsCopy = { ...that.state.statisticsSettings };
+        settingsCopy.metric = this.value;
+        that.setState({ statisticsSettings: settingsCopy });
+      });
 
-    metricSelect.append('option').attr('value', 'number').text('Number of commits');
-    metricSelect.append('option').attr('value', 'lines').text('Number of line changes');
-    metricSelect.append('option').attr('value', 'timeEstimated').text('Time spent (estimated)');
-    metricSelect.append('option').attr('value', 'timeActual').text('Time spent (actual)');
-    const svg = statisticsWindow
-      .append('svg')
-      .style('width', '180px')
-      .style('height', '180px')
-      .append('g')
-      .attr('transform', 'translate(90,90)');
+    const metricOptions = [
+      { value: 'number', text: 'Number of commits' },
+      { value: 'lines', text: 'Number of line changes' },
+      { value: 'timeEstimated', text: 'Time spent (estimated)' },
+      { value: 'timeActual', text: 'Time spent (actual)' },
+    ];
+
+    metricSelect
+      .selectAll('option')
+      .data(metricOptions)
+      .enter()
+      .append('option')
+      .attr('value', (a) => a.value)
+      .text((a) => a.text)
+      .each(function (a) {
+        if (metricSelect.attr('value') === a.value) {
+          d3.select(this).attr('selected', true);
+        }
+      });
+
+    const settings = this.state.statisticsSettings;
+    const statistics = this.statistics[settings.branch][settings.author][settings.metric];
+    const categories = [];
+    const total = Object.values<number>(statistics).reduce((prev: number, cur: number) => prev + cur);
+    for (const key of Object.keys(statistics)) {
+      // @ts-ignore
+      categories.push({ name: key, value: statistics[key], ratio: (statistics[key] / total) * 100 });
+    }
+
+    if (total === 0) {
+      statisticsWindow.append('div').attr('class', styles.noDataDiv).text('No data for this selection');
+      return;
+    }
+
+    const svg = statisticsWindow.append('svg').attr('class', styles.statisticsSvg).append('g').attr('transform', 'translate(90,90)');
     const pie = d3.pie().value((d) => d.value);
     const pieData = pie(categories);
 
     const color = d3.scaleOrdinal().domain(this.colorDomain).range(this.colorPalette);
 
-    const arcGenerator = d3.arc().innerRadius(0).outerRadius(80);
+    const arcGenerator = d3.arc().innerRadius(0).outerRadius(90);
 
     svg
-      .selectAll('whatever')
+      .selectAll('pieSections')
       .data(pieData)
       .enter()
       .append('path')
@@ -230,18 +280,18 @@ export default class CommitBarChart extends React.Component<Props, State> {
       });
 
     svg
-      .selectAll('whatever')
+      .selectAll('pieSections')
       .data(pieData)
       .enter()
       .append('text')
-      .text((d) => Math.round(d.data.ratio * 100) / 100 + '%')
+      .text((d) => (d.data.ratio === 0 ? '' : Math.round(d.data.ratio * 100) / 100 + '%'))
       .attr('transform', (d) => {
         // @ts-ignore
         const c = arcGenerator.centroid(d);
         const x = c[0];
         const y = c[1];
         const h = Math.sqrt(x * x + y * y);
-        return `translate(${(x / h) * 50}, ${(y / h) * 50})`;
+        return `translate(${(x / h) * 60}, ${(y / h) * 60})`;
       })
       .style('text-anchor', 'middle')
       .style('font-size', 14);

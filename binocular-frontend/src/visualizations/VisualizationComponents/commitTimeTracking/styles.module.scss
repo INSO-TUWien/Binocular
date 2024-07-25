@@ -41,7 +41,7 @@
     z-index: 1;
     opacity: 0.9;
     left: 50%;
-    border: 1px solid #000;
+    border: 2px solid #000;
     border-radius: 0 0 10px 10px;
     top: -5px;
     width: 40px;
@@ -56,9 +56,12 @@
 
   .statisticsWindow {
     position: absolute;
-    top: 0;
+    top: -2px;
     z-index: 2;
-    width: 100%;
+    width: 50%;
+    left: 25%;
+    border: 2px solid black;
+    border-radius: 0 0 20px 20px;
     height: 200px;
     background: #ffffff;
     padding: 10px;
@@ -70,8 +73,9 @@
       display: inline-block;
       flex-direction: column;
       align-items: stretch;
-      max-width: 400px;
+      max-width: 225px;
       width: 100%;
+      margin-right: 5px;
 
       .select {
         display: flex;
@@ -85,6 +89,21 @@
           min-width: 0;
         }
       }
+    }
+
+    .statisticsSvg {
+      width: 180px;
+      height: 180px;
+      margin-left: 5px;
+    }
+
+    .noDataDiv {
+      width: 180px;
+      height: 180px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin-left: 5px;
     }
   }
 

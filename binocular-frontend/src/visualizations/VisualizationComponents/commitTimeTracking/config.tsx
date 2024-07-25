@@ -293,7 +293,7 @@ const CommitTimeTrackingConfigComponent = (props: Props) => {
               {props.branches
                 ? props.branches.map((b) => (
                     <option value={b} key={b}>
-                      {b}0
+                      {b}
                     </option>
                   ))
                 : 'Nothing'}
