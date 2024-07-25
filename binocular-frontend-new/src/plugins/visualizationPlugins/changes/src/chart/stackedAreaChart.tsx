@@ -1,9 +1,10 @@
 import { MutableRefObject, useEffect, useMemo, useRef } from 'react';
 import * as d3 from 'd3';
+import { ScaleLinear, ScaleTime, symbol, symbolTriangle } from 'd3';
 import { CommitChartData, Palette } from './chart.tsx';
 import { SprintType } from '../../../../../types/data/sprintType.ts';
-import { ScaleLinear, ScaleTime, symbol, symbolTriangle } from 'd3';
 import { SettingsType } from '../settings/settings.tsx';
+import { PositiveNegativeSide, splitPositiveNegativeData } from '../utilities/dataConverter.ts';
 
 /**
  * Example from https://www.react-graph-gallery.com/area-plot
@@ -27,7 +28,6 @@ export const StackedAreaChart = ({ width, height, data, scale, palette, sprintLi
   const tooltipRef = useRef(null);
   const boundsWidth = width - MARGIN.right - MARGIN.left;
   const boundsHeight = height - MARGIN.top - MARGIN.bottom;
-
   // Y axis
   const yScale = useMemo(() => {
     return d3.scaleLinear().domain([scale[0], scale[1]]).range([boundsHeight, 0]);
@@ -119,14 +119,15 @@ function generateDataLines(
   tooltipRef: MutableRefObject<null>,
 ) {
   const svgElement = d3.select(svgRef.current);
-  const stackedData = d3.stack().keys(Object.keys(palette))(data);
+  const stackedPositiveData = d3.stack().keys(Object.keys(palette))(splitPositiveNegativeData(data, PositiveNegativeSide.POSITIVE));
+  const stackedNegativeData = d3.stack().keys(Object.keys(palette))(splitPositiveNegativeData(data, PositiveNegativeSide.NEGATIVE));
   Object.keys(palette).forEach((author, i) => {
-    const areaBuilder = d3
+    const areaBuilderPositive = d3
       .area<CommitChartData>()
       .curve(visualizationStyle === 'curved' ? d3.curveMonotoneX : visualizationStyle === 'stepped' ? d3.curveStep : d3.curveLinear)
       .x((d) => xScale(new Date(d.date).getTime()))
-      .y1((_d, j) => yScale(stackedData[i][j][0]))
-      .y0((_d, j) => yScale(stackedData[i][j][1]));
+      .y1((_d, j) => yScale(stackedPositiveData[i][j][0]))
+      .y0((_d, j) => yScale(stackedPositiveData[i][j][1]));
     svgElement
       .append('path')
       .datum(data)
@@ -135,7 +136,38 @@ function generateDataLines(
       .attr('fill-opacity', 0.3)
       .attr('stroke', palette[author].main)
       .attr('stroke-width', 1)
-      .attr('d', areaBuilder)
+      .attr('d', areaBuilderPositive)
+      .on('mouseover', () => {
+        return d3.select(tooltipRef.current).style('visibility', 'visible');
+      })
+      .on('mousemove', (e: MouseEvent) => {
+        return d3
+          .select(tooltipRef.current)
+          .style('top', 20 + e.pageY + 'px')
+          .style('left', e.pageX + 'px')
+          .style('background', palette[author].secondary)
+          .style('border-color', palette[author].secondary)
+          .text(author);
+      })
+      .on('mouseout', () => {
+        return d3.select(tooltipRef.current).style('visibility', 'hidden');
+      });
+
+    const areaBuilderNegative = d3
+      .area<CommitChartData>()
+      .curve(visualizationStyle === 'curved' ? d3.curveMonotoneX : visualizationStyle === 'stepped' ? d3.curveStep : d3.curveLinear)
+      .x((d) => xScale(new Date(d.date).getTime()))
+      .y1((_d, j) => yScale(stackedNegativeData[i][j][0]))
+      .y0((_d, j) => yScale(stackedNegativeData[i][j][1]));
+    svgElement
+      .append('path')
+      .datum(data)
+      .attr('class', `chartArea${i}`)
+      .attr('fill', palette[author].main)
+      .attr('fill-opacity', 0.3)
+      .attr('stroke', palette[author].main)
+      .attr('stroke-width', 1)
+      .attr('d', areaBuilderNegative)
       .on('mouseover', () => {
         return d3.select(tooltipRef.current).style('visibility', 'visible');
       })
@@ -163,17 +195,27 @@ function updateDataLines(
   svgRef: MutableRefObject<null>,
 ) {
   const svgElement = d3.select(svgRef.current);
-  const stackedData = d3.stack().keys(Object.keys(palette))(data);
+  const stackedPositiveData = d3.stack().keys(Object.keys(palette))(splitPositiveNegativeData(data, PositiveNegativeSide.POSITIVE));
+  const stackedNegativeData = d3.stack().keys(Object.keys(palette))(splitPositiveNegativeData(data, PositiveNegativeSide.NEGATIVE));
   Object.keys(palette).forEach((_author, i) => {
-    const areaBuilder = d3
+    const areaBuilderPositive = d3
       .area<CommitChartData>()
       .curve(visualizationStyle === 'curved' ? d3.curveMonotoneX : visualizationStyle === 'stepped' ? d3.curveStep : d3.curveLinear)
       .x((d) => xScale(new Date(d.date).getTime()))
-      .y1((_d, j) => yScale(stackedData[i][j][0]))
-      .y0((_d, j) => yScale(stackedData[i][j][1]));
+      .y1((_d, j) => yScale(stackedPositiveData[i][j][0]))
+      .y0((_d, j) => yScale(stackedPositiveData[i][j][1]));
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-expect-error
-    svgElement.select(`.chartArea${i}`).transition().duration(1000).attr('d', areaBuilder);
+    svgElement.select(`.chartArea${i}`).transition().duration(1000).attr('d', areaBuilderPositive);
+    const areaBuilderNegative = d3
+      .area<CommitChartData>()
+      .curve(visualizationStyle === 'curved' ? d3.curveMonotoneX : visualizationStyle === 'stepped' ? d3.curveStep : d3.curveLinear)
+      .x((d) => xScale(new Date(d.date).getTime()))
+      .y1((_d, j) => yScale(stackedNegativeData[i][j][0]))
+      .y0((_d, j) => yScale(stackedNegativeData[i][j][1]));
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-expect-error
+    svgElement.select(`.chartArea${i}`).transition().duration(1000).attr('d', areaBuilderNegative);
   });
 }
 

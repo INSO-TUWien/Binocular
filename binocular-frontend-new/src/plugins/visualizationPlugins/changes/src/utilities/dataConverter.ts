@@ -1,13 +1,13 @@
 import moment from 'moment/moment';
-import { DataCommit } from '../../../../interfaces/dataPlugin.ts';
 import { AuthorType } from '../../../../../types/data/authorType.ts';
 import chroma from 'chroma-js';
 import { CommitChartData, Palette } from '../chart/chart.tsx';
 import { ParametersType } from '../../../../../types/parameters/parametersType.ts';
-import _ from "lodash";
+import _ from 'lodash';
+import { DataPluginCommit } from '../../../../interfaces/dataPluginInterfaces/dataPluginCommits.ts';
 
 export function convertCommitDataToChangesChartData(
-  commits: DataCommit[],
+  commits: DataPluginCommit[],
   authors: AuthorType[],
   splitAdditionsDeletions: boolean,
   parameters: ParametersType,
@@ -25,8 +25,6 @@ export function convertCommitDataToChangesChartData(
 
   const firstTimestamp = sortedCommits[0].date;
   const lastTimestamp = sortedCommits[sortedCommits.length - 1].date;
-
-  //TODO: Filter and merge selected Authors
 
   const data: Array<{ date: number; statsByAuthor: { [signature: string]: { count: number; additions: number; deletions: number } } }> = [];
   const commitChartData: CommitChartData[] = [];
@@ -97,16 +95,16 @@ export function convertCommitDataToChangesChartData(
 
       if (splitAdditionsDeletions) {
         for (const author of authors) {
-          commitPalette['(Additions) ' + author.displayName || author.signature] = {
+          commitPalette['(Additions) ' + (author.displayName || author.signature)] = {
             main: chroma(author.color.main).hex(),
             secondary: chroma(author.color.secondary).hex(),
           };
-          commitPalette['(Deletions) ' + author.displayName || author.signature] = {
+          commitPalette['(Deletions) ' + (author.displayName || author.signature)] = {
             main: chroma(author.color.main).darken(0.5).hex(),
             secondary: chroma(author.color.secondary).darken(0.5).hex(),
           };
-          obj['(Additions) ' + author.displayName || author.signature] = 0.001;
-          obj['(Deletions) ' + author.displayName || author.signature] = -0.001; //-0.001 for stack layout to realize it belongs on the bottom
+          obj['(Additions) ' + (author.displayName || author.signature)] = 0.001;
+          obj['(Deletions) ' + (author.displayName || author.signature)] = -0.001; //-0.001 for stack layout to realize it belongs on the bottom
         }
         obj['(Additions) others'] = 0;
         obj['(Deletions) others'] = -0.001;
@@ -196,4 +194,26 @@ function getGranularity(resolution: string): { unit: string; interval: moment.Du
     default:
       return { interval: moment.duration(1, 'day'), unit: 'day' };
   }
+}
+
+export enum PositiveNegativeSide {
+  POSITIVE,
+  NEGATIVE,
+}
+export function splitPositiveNegativeData(data: CommitChartData[], side: PositiveNegativeSide) {
+  return data.map((d) => {
+    const newD: CommitChartData = { date: d.date };
+    Object.keys(d).forEach((k) => {
+      if (k !== 'date') {
+        if (d[k] >= 0 && side === PositiveNegativeSide.POSITIVE) {
+          newD[k] = d[k];
+        } else if (d[k] < 0 && side === PositiveNegativeSide.NEGATIVE) {
+          newD[k] = d[k];
+        } else {
+          newD[k] = 0;
+        }
+      }
+    });
+    return newD;
+  });
 }
