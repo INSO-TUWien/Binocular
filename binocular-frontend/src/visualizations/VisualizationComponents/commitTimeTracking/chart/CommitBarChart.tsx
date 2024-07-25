@@ -1,6 +1,7 @@
 import * as React from 'react';
 import * as d3 from 'd3';
 import styles from '../styles.module.scss';
+import { arc } from 'd3';
 
 interface Props {
   content: {
@@ -151,9 +152,10 @@ export default class CommitBarChart extends React.Component<Props, State> {
     });
     const statistics = this.statistics['All branches']['All authors']['number'];
     const categories = [];
+    const total = Object.values<number>(statistics).reduce((prev: number, cur: number) => prev + cur);
     for (const key of Object.keys(statistics)) {
       // @ts-ignore
-      categories.push({ name: key, value: statistics[key] });
+      categories.push({ name: key, value: statistics[key], ratio: statistics[key] / total * 100 });
     }
 
     const selectDiv = statisticsWindow.append('div').attr('class', styles.selectWrapper);
@@ -207,17 +209,42 @@ export default class CommitBarChart extends React.Component<Props, State> {
 
     const color = d3.scaleOrdinal().domain(this.colorDomain).range(this.colorPalette);
 
+    const arcGenerator = d3.arc().innerRadius(0).outerRadius(80);
+
     svg
       .selectAll('whatever')
       .data(pieData)
       .enter()
       .append('path')
       // @ts-ignore
-      .attr('d', d3.arc().innerRadius(0).outerRadius(80))
+      .attr('d', arcGenerator)
       .attr('fill', (d) => color(d.data.name) as string)
       .attr('stroke', 'black')
-      .style('stroke-width', '2px')
-      .style('opacity', 0.7);
+      .style('stroke-width', '1px')
+      .style('opacity', 0.7)
+      .on('mouseover', function () {
+        d3.select(this).style('opacity', 1);
+      })
+      .on('mouseout', function () {
+        d3.select(this).style('opacity', 0.7);
+      });
+
+    svg
+      .selectAll('whatever')
+      .data(pieData)
+      .enter()
+      .append('text')
+      .text((d) => Math.round(d.data.ratio * 100) / 100 + '%')
+      .attr('transform', (d) => {
+        // @ts-ignore
+        const c = arcGenerator.centroid(d);
+        const x = c[0];
+        const y = c[1];
+        const h = Math.sqrt(x * x + y * y);
+        return `translate(${(x / h) * 50}, ${(y / h) * 50})`;
+      })
+      .style('text-anchor', 'middle')
+      .style('font-size', 14);
   }
 
   drawLegend(mainDiv: d3.Selection<HTMLDivElement, unknown, null, undefined>) {
