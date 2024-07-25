@@ -2,6 +2,9 @@
 
 const gql = require('graphql-sync');
 const Timestamp = require('./Timestamp');
+const arangodb = require('@arangodb');
+const db = arangodb.db;
+const aql = arangodb.aql;
 
 module.exports = new gql.GraphQLObjectType({
   name: 'mergeRequest',
@@ -60,6 +63,40 @@ module.exports = new gql.GraphQLObjectType({
       notes: {
         type: new gql.GraphQLList(require('./gitlabNote.js')),
         description: 'Notes attached to the Merge Request',
+      },
+      comments: {
+        type: new gql.GraphQLList(require('./comment.js')),
+        description: 'The comments belonging to the mergeRequest',
+        resolve(mergeRequest) {
+          return db
+            ._query(
+              aql`
+            FOR mrc IN \`mergeRequests-comments\`
+            FILTER mrc._from == ${mergeRequest._id}
+            FOR comment IN comments
+            FILTER mrc._to == comment._id
+            RETURN comment
+            `,
+            )
+            .toArray();
+        },
+      },
+      reviewThreads: {
+        type: new gql.GraphQLList(require('./reviewThread.js')),
+        description: 'The review threads belonging to this mergeRequest',
+        resolve(reviewThread) {
+          return db
+            ._query(
+              aql`
+            FOR mrr IN \`mergeRequests-reviewThreads\`
+            FILTER mrr._from == ${reviewThread._id}
+            FOR reviewThread IN reviewThreads
+            FILTER reviewThread._id == mrr._to
+            RETURN reviewThread
+            `,
+            )
+            .toArray();
+        },
       },
     };
   },
