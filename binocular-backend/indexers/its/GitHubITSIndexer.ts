@@ -69,7 +69,12 @@ GitHubITSIndexer.prototype.index = function () {
             issues.map((issue) => {
               log('Processing Issue #' + issue.number);
 
-              issue.author.name = this.controller.getUser(issue.author.login).name;
+              if (!issue.author) {
+                issue.author = this.controller.getGhost();
+              } else {
+                issue.author.name = this.controller.getUser(issue.author.login).name;
+              }
+
               if (issue.assignees.nodes.length > 0) {
                 issue.assignees.nodes[0].name = this.controller.getUser(issue.assignees.nodes[0].login).name;
               }
@@ -131,26 +136,48 @@ GitHubITSIndexer.prototype.index = function () {
             mergeRequests.map((mergeRequest) => {
               log('Processing Issue #' + mergeRequest.number);
 
-              mergeRequest.author.name = this.controller.getUser(mergeRequest.author.login).name;
+              if (!mergeRequest.author) {
+                mergeRequest.author = this.controller.getGhost();
+              } else {
+                mergeRequest.author.name = this.controller.getUser(mergeRequest.author.login).name;
+              }
+
               if (mergeRequest.assignees.nodes.length > 0) {
-                mergeRequest.assignees.nodes[0].name = this.controller.getUser(mergeRequest.assignees.nodes[0].login).name;
+                const firstAssignee = mergeRequest.assignees.nodes[0];
+                if (!firstAssignee) {
+                  mergeRequest.assignees.nodes[0] = this.controller.getGhost();
+                } else {
+                  mergeRequest.assignees.nodes[0].name = this.controller.getUser(firstAssignee.login).name;
+                }
               }
 
               for (let i = 0; i < mergeRequest.assignees.nodes.length; i++) {
-                mergeRequest.assignees.nodes[i].name = this.controller.getUser(mergeRequest.assignees.nodes[i].login).name;
+                const assignee = mergeRequest.assignees.nodes[i];
+                if (!assignee) {
+                  mergeRequest.assignees.nodes[i] = this.controller.getGhost();
+                } else {
+                  mergeRequest.assignees.nodes[i].name = this.controller.getUser(assignee.login).name;
+                }
               }
 
               for (let i = 0; i < mergeRequest.commentNodes.nodes.length; i++) {
-                mergeRequest.commentNodes.nodes[i].author.name = this.controller.getUser(
-                  mergeRequest.commentNodes.nodes[i].author.login,
-                ).name;
+                const author = mergeRequest.commentNodes.nodes[i].author;
+
+                if (!author) {
+                  mergeRequest.commentNodes.nodes[i].author = this.controller.getGhost();
+                } else {
+                  author.name = this.controller.getUser(author.login).name;
+                }
               }
 
               for (let i = 0; i < mergeRequest.reviewThreads.nodes.length; i++) {
                 for (let j = 0; j < mergeRequest.reviewThreads.nodes[i].comments.nodes.length; j++) {
-                  mergeRequest.reviewThreads.nodes[i].comments.nodes[j].author.name = this.controller.getUser(
-                    mergeRequest.reviewThreads.nodes[i].comments.nodes[j].author.login,
-                  ).name;
+                  const author = mergeRequest.reviewThreads.nodes[i].comments.nodes[j].author;
+                  if (!author) {
+                    mergeRequest.reviewThreads.nodes[i].comments.nodes[j].author = this.controller.getGhost();
+                  } else {
+                    author.name = this.controller.getUser(author.login).name;
+                  }
                 }
               }
 

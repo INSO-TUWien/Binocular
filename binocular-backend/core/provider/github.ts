@@ -16,6 +16,7 @@ class GitHub {
   private github: any;
   private githubGraphQL: any;
   private users: { [login: string]: GithubUser };
+  private ghost?: GithubUser;
   constructor(options: { baseUrl: string; privateToken: string; requestTimeout: any }) {
     this.privateToken = options.privateToken;
     this.requestTimeout = options.requestTimeout;
@@ -31,7 +32,7 @@ class GitHub {
   }
 
   async loadAssignableUsers(repositoryOwner: string, repositoryName: string) {
-    const { repository } = await this.githubGraphQL.graphql.paginate(
+    const { repository, ghostUser } = await this.githubGraphQL.graphql.paginate(
       `query paginate($cursor: String) {
          repository(owner: "${repositoryOwner}", name: "${repositoryName}") {
           name,
@@ -47,12 +48,20 @@ class GitHub {
             }
           }
         }
+        ghostUser: node(id: "MDQ6VXNlcjEwMTM3") {
+          ... on User {
+            login
+            email
+            name
+          }
+        }
       }
       `,
     );
     repository.assignableUsers.nodes.forEach((user: GithubUser) => {
       this.users[user.login] = user;
     });
+    this.ghost = ghostUser;
   }
 
   getUser(login: string) {
@@ -61,6 +70,10 @@ class GitHub {
     } else {
       return { name: null };
     }
+  }
+
+  getGhost() {
+    return this.ghost;
   }
 
   getPipelines(projectId: string) {
