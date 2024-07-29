@@ -41,6 +41,14 @@ export default class MergeRequests {
                   login
                   name 
                 }
+                reviewer {
+                  login
+                  name
+                }
+                reviewers {
+                  login
+                  name
+                }
                 createdAt
                 closedAt
                 notes{

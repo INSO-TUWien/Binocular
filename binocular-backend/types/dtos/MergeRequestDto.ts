@@ -19,5 +19,7 @@ export default interface MergeRequestDto {
   author: User;
   assignee: User;
   assignees: User[];
+  reviewer: User;
+  reviewers: User[];
   mentions: Mention[];
 }

@@ -23,6 +23,8 @@ export interface MergeRequestDataType {
   author: User;
   assignee: User;
   assignees: User[];
+  reviewer: User;
+  reviewers: User[];
   mentions: Mention[];
 }
 

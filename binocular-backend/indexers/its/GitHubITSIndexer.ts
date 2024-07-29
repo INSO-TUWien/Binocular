@@ -11,6 +11,7 @@ import ProgressReporter from '../../utils/progress-reporter.ts';
 import { ItsIssue, ItsIssueEvent } from '../../types/ItsTypes';
 import ReviewThread from '../../models/models/ReviewThread.ts';
 import Comment from '../../models/models/Comment.ts';
+import { GithubActor } from '../../types/GithubTypes.ts';
 
 const log = debug('idx:its:github');
 
@@ -189,6 +190,15 @@ GitHubITSIndexer.prototype.index = function () {
                       new Date(existingMergeRequest.data.updatedAt).getTime() < new Date(mergeRequest.updatedAt).getTime()
                     ) {
                       log('Processing issue #' + mergeRequest.iid);
+
+                      const reviewers = new Map<string, GithubActor>();
+                      mergeRequest.reviewThreads.nodes.forEach((reviewThread) => {
+                        const author = reviewThread.comments.nodes[0].author;
+                        if (!reviewers.has(author.login)) {
+                          reviewers.set(author.login, author);
+                        }
+                      });
+
                       return MergeRequest.persist({
                         id: mergeRequest.id.toString(),
                         iid: mergeRequest.number,
@@ -204,6 +214,8 @@ GitHubITSIndexer.prototype.index = function () {
                         author: mergeRequest.author,
                         assignee: mergeRequest.assignees.nodes[0],
                         assignees: mergeRequest.assignees.nodes,
+                        reviewer: [...reviewers.values()][0],
+                        reviewers: [...reviewers.values()],
                         webUrl: mergeRequest.url,
                         mentions: mergeRequest.timelineItems.nodes.map((event: ItsIssueEvent) => {
                           return {
