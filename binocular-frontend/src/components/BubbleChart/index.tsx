@@ -3,6 +3,7 @@
 import React from 'react';
 import * as d3 from 'd3';
 import * as baseStyles from './bubbleChart.module.scss';
+import _ from 'lodash';
 
 interface Props {
   data: Bubble[];
@@ -10,6 +11,7 @@ interface Props {
 }
 
 interface State {
+  simulationData: Bubble[];
   data: Bubble[];
 }
 
@@ -29,10 +31,21 @@ export default class BubbleChart extends React.Component<Props, State> {
     super(props);
     this.styles = Object.freeze(Object.assign({}, baseStyles, styles));
     this.state = {
+      simulationData: _.cloneDeep(props.data),
       data: props.data,
     };
+    window.addEventListener('resize', this.handleResize);
+  }
 
-    window.addEventListener('resize', () => this.updateElement());
+  handleResize = () => {
+    this.setState({
+      simulationData: _.cloneDeep(this.state.data),
+    });
+    this.updateElement();
+  };
+
+  componentWillUnmount() {
+    window.removeEventListener('resize', () => this.updateElement());
   }
 
   componentDidMount() {
@@ -43,6 +56,7 @@ export default class BubbleChart extends React.Component<Props, State> {
     if (prevProps.data !== this.props.data || prevState.data !== this.state.data) {
       this.setState({
         data: this.props.data,
+        simulationData: _.cloneDeep(this.props.data),
       });
       this.updateElement();
     }
@@ -52,20 +66,32 @@ export default class BubbleChart extends React.Component<Props, State> {
     this.visualizeData();
   }
 
+  /**
+   * calculates x dims based on paddings and min/max values
+   * @returns the x dims for the chart
+   */
   getXDims() {
-    const extent = d3.extent(this.state.data, (d) => d.x);
+    const extent = d3.extent(this.state.simulationData, (d) => d.x);
     const padding = (extent[1]! - extent[0]!) * 0.1;
     return [extent[0]! - padding, extent[1]! + padding];
   }
 
+  /**
+   * calculates y dims based on paddings and min/max values
+   * @returns the y dims for the chart
+   */
   getYDims() {
-    const extent = d3.extent(this.state.data, (d) => d.y);
+    const extent = d3.extent(this.state.simulationData, (d) => d.y);
     const padding = (extent[1]! - extent[0]!) * 0.1;
     return [extent[0]! - padding, extent[1]! + padding];
   }
 
+  /**
+   * calculates radius dims
+   * @returns the radius dims for the chart
+   */
   getRadiusDims() {
-    return [0, d3.max(this.state.data, (d: any) => d.size)];
+    return [0, d3.max(this.state.simulationData, (d: any) => d.size)];
   }
 
   createScales(xDims, xRange, yDims, yRange, radiusDims, radiusRange) {
@@ -86,13 +112,11 @@ export default class BubbleChart extends React.Component<Props, State> {
     return { width, height, paddings };
   }
 
-  setBrushBubble(brushBubble: any, brush: any, scales) {
-    brushBubble.append('g').attr('class', 'brush').call(brush);
-
-    const bubbleStreams = brushBubble
+  createBubbleChart(chartGroup: any, scales) {
+    const bubbleChart = chartGroup
       .append('g')
       .selectAll('circle')
-      .data(this.state.data)
+      .data(this.state.simulationData)
       .enter()
       .append('circle')
       .attr('cx', (d) => scales.x(d.x))
@@ -101,19 +125,19 @@ export default class BubbleChart extends React.Component<Props, State> {
       .attr('fill', (d) => d.color)
       .classed('bubble', true);
 
-    return bubbleStreams;
+    return bubbleChart;
   }
 
-  drawChart(svg, brush, scales, height, width, paddings) {
-    const brushBubble = svg.append('g');
-    const bubble = this.setBrushBubble(brushBubble.append('g'), brush, scales);
+  drawChart(svg, scales, height, width, paddings) {
+    const chartGroup = svg.append('g');
+    const bubbleChart = this.createBubbleChart(chartGroup.append('g'), scales);
 
     const axes = Object.assign({
-      x: this.createXAxis(brushBubble, scales, height, paddings),
-      y: this.createYAxis(brushBubble, scales, height, paddings),
+      x: this.createXAxis(chartGroup, scales, height, paddings),
+      y: this.createYAxis(chartGroup, scales, paddings),
     });
 
-    return { brushBubble, axes, bubble };
+    return { chartGroup, axes, bubbleChart };
   }
 
   createXAxis(brushBubble, scales, height, paddings) {
@@ -124,16 +148,16 @@ export default class BubbleChart extends React.Component<Props, State> {
       .call(d3.axisBottom(scales.x));
   }
 
-  createYAxis(brushBubble, scales, height, paddings) {
+  createYAxis(brushBubble, scales, paddings) {
     return brushBubble
       .append('g')
       .attr('class', this.styles.axis)
-      .attr('transform', 'translate(' + paddings.left + ',0)')
+      .attr('transform', `translate(${paddings.left},0)`)
       .call(d3.axisLeft(scales.y));
   }
 
   visualizeData() {
-    const { data } = this.state;
+    const { simulationData: data } = this.state;
     if (!data) {
       return;
     }
@@ -152,12 +176,7 @@ export default class BubbleChart extends React.Component<Props, State> {
 
     svg.selectAll('*').remove();
 
-    const brush = d3.brushX().extent([
-      [paddings.left, 0],
-      [width - paddings.right, height],
-    ]);
-
-    const { bubble } = this.drawChart(svg, brush, scales, height, width, paddings);
+    const { bubbleChart } = this.drawChart(svg, scales, height, width, paddings);
 
     d3.forceSimulation(data)
       .force(
@@ -172,7 +191,7 @@ export default class BubbleChart extends React.Component<Props, State> {
         'collision',
         d3.forceCollide((d) => scales.radius(d.size) + 1),
       )
-      .on('tick', () => bubble.attr('cx', (d) => d.x).attr('cy', (d) => d.y));
+      .on('tick', () => bubbleChart.attr('cx', (d) => d.x).attr('cy', (d) => d.y));
   }
 
   render() {
