@@ -91,16 +91,14 @@ class ChartComponent extends React.Component<Props, State> {
           color = 'yellow';
           break;
       }
-
       const bubble: Bubble = {
         x: Math.round((referenceDate - Date.parse(mergeRequest.createdAt)) / this.getTimeConversionFactor(props)),
-        y: 10 + Math.random(),
-        size: 3,
+        y: 0,
+        size: 10,
         color: color,
       };
       lifeCycleData.push(bubble);
     });
-
     if (props.mergeRequestLifeCycleState.config.grouping === 'cumulative') {
       const groupedData: Bubble[] = this.getGroupedDataCumulative(lifeCycleData);
       return { lifeCycleData: groupedData };
@@ -120,9 +118,9 @@ class ChartComponent extends React.Component<Props, State> {
       for (const x in groupedData[color]) {
         const bubble: Bubble = {
           x: parseInt(x),
-          y: 10 + Math.random(),
+          y: 0,
           color: color,
-          size: 10 + groupedData[color][x].length / 10,
+          size: groupedData[color][x].length,
         };
 
         cumulativeData.push(bubble);
@@ -144,7 +142,7 @@ class ChartComponent extends React.Component<Props, State> {
       const bubble: Bubble = {
         x: 0,
         y: 0,
-        size: 10 + size / 10,
+        size: size,
         color: color,
       };
 

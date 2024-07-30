@@ -8,5 +8,5 @@ export default handleActions(
     SET_GROUPING: (state, action) => _.assign({}, state, { grouping: action.payload }),
     SET_GRANULARITY: (state, action) => _.assign({}, state, { granularity: action.payload }),
   },
-  { visualizations: [], grouping: 'category', granularity: 'hour' },
+  { visualizations: [], grouping: 'single', granularity: 'hour' },
 );

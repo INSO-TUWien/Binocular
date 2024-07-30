@@ -29,8 +29,8 @@ class ConfigComponent extends React.Component<Props> {
           <div className="control">
             <TabCombo
               options={[
-                { label: 'Category', icon: 'folder', value: 'category' },
                 { label: 'Single', icon: 'cube', value: 'single' },
+                { label: 'Category', icon: 'folder', value: 'category' },
                 { label: 'Cumulative', icon: 'cubes', value: 'cumulative' },
               ]}
               value={this.props.mergeRequestLifeCycleState.config.grouping}

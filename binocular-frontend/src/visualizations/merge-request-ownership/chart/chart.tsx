@@ -73,9 +73,9 @@ class ChartComponent extends React.Component<Props, State> {
     categoryCount.forEach((value, author) => {
       const [count, color] = value;
       const bubble: Bubble = {
-        x: 10,
-        y: 10,
-        size: 50 + count,
+        x: 0,
+        y: 0,
+        size: count,
         color: color,
       };
       ownershipData.push(bubble);
