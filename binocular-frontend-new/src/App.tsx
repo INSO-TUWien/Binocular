@@ -25,6 +25,7 @@ import NotificationController from './components/notificationController/notifica
 import { ExportType, setExportType } from './redux/export/exportReducer.ts';
 import ContextMenu from './components/contextMenu/contextMenu.tsx';
 import EditAuthorDialog from './components/tabs/authors/editAuthorDialog/editAuthorDialog.tsx';
+import FileList from './components/tabs/fileTree/fileList/fileList.tsx';
 
 function App() {
   const dispatch: AppDispatch = useAppDispatch();
@@ -86,7 +87,9 @@ function App() {
             </TabSection>
           </Tab>
           <Tab displayName={'File Tree'} alignment={'right'}>
-            <span>File Tree Tab</span>
+            <TabSection name={'File Tree'}>
+              <FileList></FileList>
+            </TabSection>
           </Tab>
           <TabMenuContent>
             <Dashboard></Dashboard>
@@ -94,11 +97,7 @@ function App() {
         </TabController>
       </div>
       <div className={appStyles.statusBar}>
-        <StatusBar
-          vcsIndexer={'VCS Placeholder'}
-          itsIndexer={'ITS Placeholder'}
-          ciIndexer={'CI Placeholder'}
-          repository={'Repository Placeholder'}></StatusBar>
+        <StatusBar></StatusBar>
       </div>
       <button className={appStyles.settingsButton}></button>
       <InformationDialog></InformationDialog>

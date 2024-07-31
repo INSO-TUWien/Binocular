@@ -1,0 +1,23 @@
+.element{
+  display: flex;
+  align-items: center;
+  justify-content: start;
+  cursor: pointer;
+  border-bottom: 1px solid;
+  @apply border-neutral-200;
+  height: 1.5rem;
+}
+
+.element:hover{
+  @apply bg-neutral-100;
+}
+
+.element>img{
+  margin-right: .25rem;
+}
+
+.inset{
+  padding-left: .5rem;
+  border-left: 1px solid;
+  @apply border-neutral-400;
+}

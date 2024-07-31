@@ -2,6 +2,7 @@ import Commits from './commits.ts';
 import { DataPlugin } from '../../../interfaces/dataPlugin.ts';
 import Authors from './authors.ts';
 import General from './general.ts';
+import Files from './files.ts';
 
 class Github implements DataPlugin {
   public name = 'Github';
@@ -15,6 +16,7 @@ class Github implements DataPlugin {
   public commits;
   public authors;
   public general;
+  public files = Files;
 
   constructor() {
     this.commits = new Commits('', '');
