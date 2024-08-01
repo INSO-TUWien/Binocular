@@ -23,6 +23,7 @@ export interface VisualizationPlugin<SettingsType> {
     // The store gets dynamically created for each visualization item within the components/dashboard/dashboardItem component
   }) => ReactNode;
   settingsComponent: (props: { settings: SettingsType; setSettings: (newSettings: SettingsType) => void }) => ReactNode;
+  helpComponent: () => ReactNode;
   defaultSettings: unknown;
   export: {
     getSVGData: (chartContainerRef: RefObject<HTMLDivElement>) => string; // method that extracts and returns a svg element as a string from a RefObject

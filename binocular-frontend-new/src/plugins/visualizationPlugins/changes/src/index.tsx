@@ -5,11 +5,13 @@ import { VisualizationPlugin } from '../../../interfaces/visualizationPlugin.ts'
 import { getSVGData } from './utilities/utilities.ts';
 import Reducer from './reducer';
 import Saga from './saga';
+import Help from './help/help.tsx';
 
 const Changes: VisualizationPlugin<SettingsType> = {
   name: 'Changes',
   chartComponent: Chart,
   settingsComponent: Settings,
+  helpComponent: Help,
   defaultSettings: { splitAdditionsDeletions: false, visualizationStyle: 'curved' },
   export: {
     getSVGData: getSVGData,

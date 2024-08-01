@@ -145,6 +145,8 @@
   right: 2rem;
   width: 20rem;
   height: calc(100% - 4px);
+  overflow-x: hidden;
+  overflow-y: scroll;
 }
 
 .tabContentBottom {
@@ -161,6 +163,9 @@
   left: 2rem;
   width: 20rem;
   height: calc(100% - 4px);
+  overflow-x: hidden;
+  overflow-y: scroll;
+  direction: rtl;
 }
 
 .content {

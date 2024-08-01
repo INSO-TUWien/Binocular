@@ -4,11 +4,13 @@ import Settings, { SettingsType } from './settings/settings.tsx';
 import { VisualizationPlugin } from '../../../interfaces/visualizationPlugin.ts';
 import Reducer from './reducer';
 import Saga from './saga';
+import Help from './help/help.tsx';
 
 const ExampleVisualization: VisualizationPlugin<SettingsType> = {
   name: 'Example Visualization',
   chartComponent: Chart,
   settingsComponent: Settings,
+  helpComponent: Help,
   defaultSettings: { data: [], color: '#007AFF' },
   export: {
     getSVGData: () => '<svg></svg>',

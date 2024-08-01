@@ -26,6 +26,8 @@ import { ExportType, setExportType } from './redux/export/exportReducer.ts';
 import ContextMenu from './components/contextMenu/contextMenu.tsx';
 import EditAuthorDialog from './components/tabs/authors/editAuthorDialog/editAuthorDialog.tsx';
 import FileList from './components/tabs/fileTree/fileList/fileList.tsx';
+import HelpGeneral from './components/tabs/help/helpGeneral/helpGeneral.tsx';
+import HelpComponents from './components/tabs/help/helpComponents/helpComponents.tsx';
 
 function App() {
   const dispatch: AppDispatch = useAppDispatch();
@@ -89,6 +91,14 @@ function App() {
           <Tab displayName={'File Tree'} alignment={'right'}>
             <TabSection name={'File Tree'}>
               <FileList></FileList>
+            </TabSection>
+          </Tab>
+          <Tab displayName={'Help'} alignment={'right'}>
+            <TabSection name={'General'}>
+              <HelpGeneral></HelpGeneral>
+            </TabSection>
+            <TabSection name={'Components'}>
+              <HelpComponents></HelpComponents>
             </TabSection>
           </Tab>
           <TabMenuContent>

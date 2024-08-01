@@ -149,6 +149,8 @@
   right: $tab-bar-thickness;
   width: $tab-content-thickness-vertical;
   height: calc(100% - 4px);
+  overflow-x: hidden;
+  overflow-y: scroll;
 }
 
 .tabContentBottom{
@@ -165,6 +167,9 @@
   left: $tab-bar-thickness;
   width: $tab-content-thickness-vertical;
   height: calc(100% - 4px);
+  overflow-x: hidden;
+  overflow-y: scroll;
+  direction: rtl;
 }
 
 .content{

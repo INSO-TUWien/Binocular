@@ -31,6 +31,8 @@ function DashboardItem(props: {
 }) {
   const dispatch: AppDispatch = useAppDispatch();
   const [settingsVisible, setSettingsVisible] = useState(false);
+  const [helpVisible, setHelpVisible] = useState(false);
+
   const plugin = visualizationPlugins.filter((p) => p.name === props.item.pluginName)[0];
   const [settings, setSettings] = useState(plugin.defaultSettings);
 
@@ -157,6 +159,13 @@ function DashboardItem(props: {
             }}
             onMouseDown={(event) => event.stopPropagation()}></button>
           <button
+            className={dashboardItemStyles.helpButton}
+            onClick={(event) => {
+              event.stopPropagation();
+              setHelpVisible(!helpVisible);
+            }}
+            onMouseDown={(event) => event.stopPropagation()}></button>
+          <button
             className={dashboardItemStyles.popoutButton}
             onClick={(event) => {
               event.stopPropagation();
@@ -227,11 +236,7 @@ function DashboardItem(props: {
               <DashboardItemSettings
                 item={props.item}
                 settingsComponent={
-                  visualizationPlugins
-                    .filter((p) => p.name === props.item.pluginName)
-                    .map((p) => {
-                      return <p.settingsComponent key={p.name} settings={settings} setSettings={setSettings}></p.settingsComponent>;
-                    })[0]
+                  <plugin.settingsComponent key={plugin.name} settings={settings} setSettings={setSettings}></plugin.settingsComponent>
                 }
                 onClickDelete={() => props.deleteItem(props.item)}
                 ignoreGlobalParameters={ignoreGlobalParameters}
@@ -240,6 +245,21 @@ function DashboardItem(props: {
                 setParametersGeneral={setParametersGeneralLocal}
                 parametersDateRange={parametersDateRangeLocal}
                 setParametersDateRange={setParametersDateRangeLocal}></DashboardItemSettings>
+            </div>
+          </div>
+        )}
+      </>
+      <>
+        {helpVisible && (
+          <div className={dashboardItemStyles.settingsBackground} onClick={() => setHelpVisible(false)}>
+            <div
+              onClick={(event) => event.stopPropagation()}
+              className={'text-xs ' + dashboardItemStyles.settingsWindow}
+              style={{
+                top: `calc(${(100.0 / props.rowCount) * props.item.y}% + 10px + 1.5rem)`,
+                left: `calc(${(100.0 / props.colCount) * (props.item.x + props.item.width)}% - 10px - 20rem)`,
+              }}>
+              <plugin.helpComponent key={plugin.name}></plugin.helpComponent>
             </div>
           </div>
         )}

@@ -10,7 +10,7 @@ import Github from './dataPlugins/github';
 import { VisualizationPlugin } from './interfaces/visualizationPlugin.ts';
 import { DataPlugin } from './interfaces/dataPlugin.ts';
 
-//The implicit type here ahs to be any because every Visualization plugin has a different settings type implied
+//The implicit type here has to be any because every Visualization plugin has a different settings type implied
 //eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const visualizationPlugins: VisualizationPlugin<any>[] = [Commits, ExampleVisualization, ExampleStats, ExampleComplex];
 

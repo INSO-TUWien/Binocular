@@ -1,5 +1,5 @@
 import { ReactElement } from 'react';
-import { DashboardItemType } from '../dashboardItem/dashboardItem.tsx';
+import { DashboardItemType } from '../../../types/general/dashboardItemType.ts';
 import DateRange from '../../tabs/parameters/dataRange/dateRange.tsx';
 import ParametersGeneral from '../../tabs/parameters/parametersGeneral/parametersGeneral.tsx';
 import { ParametersGeneralType } from '../../../types/parameters/parametersGeneralType.ts';
@@ -18,7 +18,7 @@ function DashboardItemSettings(props: {
 }) {
   return (
     <>
-      <div className={'font-bold underline'}>{props.item.pluginName + ' (#' + props.item.id + ')'}</div>
+      <h2>{props.item.pluginName + ' (#' + props.item.id + ')'}</h2>
       <hr className={'text-base-300 m-1'} />
       <div>
         <label className="label cursor-pointer">

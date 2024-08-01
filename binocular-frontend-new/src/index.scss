@@ -1,7 +1,24 @@
 @import './variables.scss';
 @tailwind base;
+@layer base {
+  h1 {
+    @apply text-2xl;
+    @apply font-bold;
+    @apply underline;
+  }
+  h2 {
+    @apply text-xl;
+    @apply font-bold;
+  }
+  h3 {
+    @apply text-lg;
+    @apply underline;
+  }
+}
 @tailwind components;
 @tailwind utilities;
+
+
 
 #root{
   @apply bg-base-100;
