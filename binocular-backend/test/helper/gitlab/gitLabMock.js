@@ -52,7 +52,7 @@ class GitLabMock {
 
   getPipelines() {
     return new Promise((resolve) => {
-      resolve(testPipelines);
+      resolve(_.cloneDeep(testPipelines));
     });
   }
 

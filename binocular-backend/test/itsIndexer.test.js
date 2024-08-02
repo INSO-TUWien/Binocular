@@ -34,6 +34,7 @@ import IssueNoteConnection from '../models/connections/IssueNoteConnection';
 import MergeRequestNoteConnection from '../models/connections/MergeRequestNoteConnection';
 import Note from '../models/models/Note';
 import NoteAccountConnection from '../models/connections/NoteAccountConnection';
+import { remapGitHubApiCall, remapGitlabApiCall } from './helper/utils';
 
 const indexerOptions = {
   backend: true,
@@ -160,21 +161,6 @@ describe('its', function () {
       gitLabITSIndexer.configure(config);
 
       return gitLabITSIndexer;
-    };
-
-    // the gitlab mock implementation returns some standard test data.
-    // But for some tests, we need the mock api to return something else.
-    const remapGitlabApiCall = (indexer, functionName, newData) => {
-      if (indexer.gitlab === null || indexer.gitlab === undefined) {
-        throw Error('Test Error: indexer.gitlab does not exist, function "' + functionName + '" cannot be remapped');
-      }
-      const fun = indexer.gitlab[functionName];
-      if (fun === null || fun === undefined) {
-        throw Error('Test Error: function "' + functionName + '" does not exist, cannot be remapped');
-      }
-      indexer.gitlab[functionName] = () => {
-        return indexer.gitlab.testPaginator(newData);
-      };
     };
 
     // some helper functions that check if the expected data has been indexed when the default gitlab mock implementation is used.
@@ -403,23 +389,6 @@ describe('its', function () {
       const gitHubITSIndexer = new GitHubITSIndexer(repo, reporter);
       gitHubITSIndexer.controller = new GitHubMock();
       return gitHubITSIndexer;
-    };
-
-    // the github mock implementation returns some standard test data.
-    // But for some tests, we need the mock api to return something else.
-    const remapGitHubApiCall = (indexer, functionName, newData) => {
-      if (indexer.controller === null || indexer.controller === undefined) {
-        throw Error('Test Error: indexer.controller does not exist, function "' + functionName + '" cannot be remapped');
-      }
-      const fun = indexer.controller[functionName];
-      if (fun === null || fun === undefined) {
-        throw Error('Test Error: function "' + functionName + '" does not exist, cannot be remapped');
-      }
-      indexer.controller[functionName] = () => {
-        return new Promise((resolve) => {
-          resolve(newData);
-        });
-      };
     };
 
     // some helper functions that check if the expected data has been indexed when the default github mock implementation is used.
