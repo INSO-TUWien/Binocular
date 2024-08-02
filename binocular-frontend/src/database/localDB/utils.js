@@ -3,7 +3,6 @@
 import PouchDB from 'pouchdb-browser';
 import PouchDBFind from 'pouchdb-find';
 import PouchDBAdapterMemory from 'pouchdb-adapter-memory';
-import { addHistoryToAllCommits } from '../utils';
 import _ from 'lodash';
 
 PouchDB.plugin(PouchDBFind);
@@ -144,8 +143,6 @@ export async function findAllCommits(database, relations) {
   commits.docs = await Promise.all(
     commits.docs.map((c) => preprocessCommit(c, allCommits, commitUserConnections, commitCommitConnections, users)),
   );
-
-  addHistoryToAllCommits(commits.docs);
 
   return commits;
 }

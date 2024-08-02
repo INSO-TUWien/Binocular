@@ -227,7 +227,7 @@ export default class Commits {
   // Helper functions
 
   static extractOwnershipDataForCommit(commit, collections) {
-    const commitResult = { sha: commit.sha, date: commit.date, files: [] };
+    const commitResult = { sha: commit.sha, date: commit.date, parents: commit.parents, files: [] };
     const relevantConnections = binarySearchArray(collections.fileCommitConnections, commit._id, 'from');
     for (const conn of relevantConnections) {
       const relevantFile = binarySearch(collections.files, conn.to, '_id');
