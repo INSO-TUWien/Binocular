@@ -36,7 +36,12 @@ class ChartComponent extends React.Component<Props, State> {
     const lifeCycleChart = (
       <div className={styles.chart}>
         {this.state.lifeCycleData !== undefined && this.state.lifeCycleData.length > 0 ? (
-          <BubbleChart data={this.state.lifeCycleData} paddings={{ top: 20, left: 60, bottom: 20, right: 30 }} />
+          <BubbleChart
+            data={this.state.lifeCycleData}
+            paddings={{ top: 20, left: 60, bottom: 20, right: 30 }}
+            showXAxis={true}
+            showYAxis={false}
+          />
         ) : (
           <div>No data during this time period!</div>
         )}
@@ -91,11 +96,19 @@ class ChartComponent extends React.Component<Props, State> {
           color = 'yellow';
           break;
       }
+      const timespan = Math.round((referenceDate - Date.parse(mergeRequest.createdAt)) / this.getTimeConversionFactor(props));
+      const y = 0 + Math.random();
       const bubble: Bubble = {
-        x: Math.round((referenceDate - Date.parse(mergeRequest.createdAt)) / this.getTimeConversionFactor(props)),
-        y: 0,
+        x: timespan,
+        y: y,
+        originalX: timespan,
+        originalY: y,
         size: 10,
         color: color,
+        data: [
+          { label: 'State', value: color },
+          { label: 'Duration', value: timespan },
+        ],
       };
       lifeCycleData.push(bubble);
     });
@@ -116,11 +129,15 @@ class ChartComponent extends React.Component<Props, State> {
 
     for (const color in groupedData) {
       for (const x in groupedData[color]) {
+        const y = 0 + Math.random();
         const bubble: Bubble = {
           x: parseInt(x),
-          y: 0,
+          y: y,
+          originalX: parseInt(x),
+          originalY: y,
           color: color,
           size: groupedData[color][x].length,
+          data: [],
         };
 
         cumulativeData.push(bubble);
@@ -142,8 +159,14 @@ class ChartComponent extends React.Component<Props, State> {
       const bubble: Bubble = {
         x: 0,
         y: 0,
+        originalX: 0,
+        originalY: 0,
         size: size,
         color: color,
+        data: [
+          { label: 'State', value: color },
+          { label: 'Pull Requests', value: size },
+        ],
       };
 
       categoryData.push(bubble);

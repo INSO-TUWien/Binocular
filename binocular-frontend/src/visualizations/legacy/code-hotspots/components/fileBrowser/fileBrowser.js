@@ -85,10 +85,9 @@ class FileStruct extends React.PureComponent {
       <div>
         {this.props.data.content.map((data, i) => {
           if (data.type === 'file') {
-            // only highlight if set is present
             let shouldHighlight = false;
             if (this.props.highlights) {
-              shouldHighlight = this.props.highlights.has(data.name);
+              shouldHighlight = this.props.highlights.has(data.path);
             }
             const classes = shouldHighlight ? styles.BCHighlighted : i % 2 === 0 ? styles.BCEven : styles.BCOdd;
             return (
@@ -124,7 +123,7 @@ class FileStruct extends React.PureComponent {
                   {data.name}
                 </button>
                 <div id={'' + i + 'panel' + data.name} className={styles.panel} style={{ display: this.props.foldOut ? 'block' : 'none' }}>
-                  <FileStruct data={data} foldOut={this.props.foldOut} props={this.props.props} />
+                  <FileStruct data={data} foldOut={this.props.foldOut} props={this.props.props} highlights={this.props.highlights} />
                 </div>
               </div>
             );

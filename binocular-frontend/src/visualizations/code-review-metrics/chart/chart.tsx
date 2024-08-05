@@ -39,7 +39,12 @@ class ChartComponent extends React.Component<Props, State> {
     const metricsChart = (
       <div className={styles.chart}>
         {this.state.metricsData !== undefined && this.state.metricsData.length > 0 ? (
-          <BubbleChart data={this.state.metricsData} paddings={{ top: 20, left: 60, bottom: 20, right: 30 }} />
+          <BubbleChart
+            data={this.state.metricsData}
+            paddings={{ top: 20, left: 60, bottom: 20, right: 30 }}
+            showXAxis={true}
+            showYAxis={false}
+          />
         ) : (
           <div>No data during this time period!</div>
         )}
@@ -81,17 +86,20 @@ class ChartComponent extends React.Component<Props, State> {
 
     const configState = props.codeReviewMetricsState.config;
     if (configState.grouping === 'user') {
+      let label = '';
       switch (configState.category) {
         case 'comment':
+          label = 'Comments posted';
           this.getCommentOwnershipCountByUser(mergeRequests, usersData, props);
           break;
         case 'review':
+          label = 'Reviews done';
           this.getReviewOwnershipCountByUser(mergeRequests, usersData, props);
           break;
         default:
           break;
       }
-      this.extractUsersData(metricsData, usersData);
+      this.extractUsersData(metricsData, usersData, label);
     } else if (configState.grouping === 'file') {
       this.getReviewThreadOwnershipCountByFile(mergeRequests, filesData, props);
       this.extractFilesData(metricsData, filesData);
@@ -100,26 +108,38 @@ class ChartComponent extends React.Component<Props, State> {
     return { metricsData };
   }
 
-  extractUsersData(metricsData: Bubble[], usersData: Map<string, [number, string]>): void {
-    usersData.forEach((entry) => {
+  extractUsersData(metricsData: Bubble[], usersData: Map<string, [number, string]>, label: string): void {
+    usersData.forEach((entry, user) => {
       const [count, color] = entry;
       const bubble: Bubble = {
         x: 0,
         y: 0,
+        originalX: 0,
+        originalY: 0,
         color: color,
         size: count,
+        data: [
+          { label: 'login', value: user },
+          { label: label, value: count },
+        ],
       };
       metricsData.push(bubble);
     });
   }
 
   extractFilesData(metricsData: Bubble[], filesData: Map<string, number>): void {
-    filesData.forEach((count) => {
+    filesData.forEach((count, file) => {
       const bubble: Bubble = {
         x: 0,
         y: 0,
+        originalX: 0,
+        originalY: 0,
         color: 'red',
         size: count,
+        data: [
+          { label: 'filename', value: file },
+          { label: 'Reviews inside file', value: count },
+        ],
       };
       metricsData.push(bubble);
     });

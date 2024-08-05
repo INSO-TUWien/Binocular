@@ -3,7 +3,7 @@ import React from 'react';
 import _ from 'lodash';
 import { connect } from 'react-redux';
 import BubbleChart, { Bubble } from '../../../components/BubbleChart';
-import { Author, MergeRequest } from '../../../types/dbTypes';
+import { MergeRequest } from '../../../types/dbTypes';
 import styles from '../styles.module.scss';
 import { incrementCollectionForSelectedAuthors } from './utils';
 
@@ -35,7 +35,12 @@ class ChartComponent extends React.Component<Props, State> {
     const ownershipChart = (
       <div className={styles.chart}>
         {this.state.ownershipData !== undefined && this.state.ownershipData.length > 0 ? (
-          <BubbleChart data={this.state.ownershipData} paddings={{ top: 20, left: 60, bottom: 20, right: 30 }} />
+          <BubbleChart
+            data={this.state.ownershipData}
+            paddings={{ top: 20, left: 60, bottom: 20, right: 30 }}
+            showXAxis={false}
+            showYAxis={false}
+          />
         ) : (
           <div>No data during this time period!</div>
         )}
@@ -75,8 +80,14 @@ class ChartComponent extends React.Component<Props, State> {
       const bubble: Bubble = {
         x: 0,
         y: 0,
+        originalX: 0,
+        originalY: 0,
         size: count,
         color: color,
+        data: [
+          { label: 'login', value: author },
+          { label: 'Amount', value: count },
+        ],
       };
       ownershipData.push(bubble);
     });
