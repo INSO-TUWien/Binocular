@@ -22,10 +22,19 @@ function VisualizationSelector(props: { orientation?: string }) {
               key={'VisualizationSelectorV' + i}
               className={visualizationSelectorStyles.visualizationButton}
               onClick={() => {
-                dispatch(addDashboardItem({ id: 0, x: 0, y: 0, width: 5, height: 4, pluginName: plugin.name }));
+                dispatch(addDashboardItem({ id: 0, x: 0, y: 0, width: 12, height: 8, pluginName: plugin.name }));
               }}
               onMouseDown={() => {
-                dispatch(placeDashboardItem({ id: 0, x: 0, y: 0, width: 5, height: 4, pluginName: plugin.name }));
+                dispatch(
+                  placeDashboardItem({
+                    id: 0,
+                    x: 0,
+                    y: 0,
+                    width: 12,
+                    height: 8,
+                    pluginName: plugin.name,
+                  }),
+                );
               }}>
               <div>
                 <img draggable={'false'} src={plugin.images.thumbnail} alt={plugin.name} />
