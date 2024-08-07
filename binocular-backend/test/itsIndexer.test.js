@@ -34,7 +34,7 @@ import IssueNoteConnection from '../models/connections/IssueNoteConnection';
 import MergeRequestNoteConnection from '../models/connections/MergeRequestNoteConnection';
 import Note from '../models/models/Note';
 import NoteAccountConnection from '../models/connections/NoteAccountConnection';
-import { remapGitHubApiCall, remapGitlabApiCall } from './helper/utils';
+import { expectExamples, getAllRelevantCollections, remapGitHubApiCall, remapGitlabApiCall } from './helper/utils';
 
 const indexerOptions = {
   backend: true,
@@ -91,35 +91,14 @@ describe('its', function () {
   ];
 
   // helper functions
-  const getAllInCollection = async (collection) => {
-    return (await db.query('FOR i IN @@collection RETURN i', { '@collection': collection })).all();
-  };
 
-  const getAllCollections = async () => {
-    const res = {};
-    await Promise.all(
-      relevantCollections.map(async (c) => {
-        res[c.collection.name] = await getAllInCollection(c.collection.name);
-      }),
+  //const getAllInCollection = async (collection) => getAllEntriesInCollection(db, collection);
+
+  const getAllCollections = async () =>
+    getAllRelevantCollections(
+      db,
+      relevantCollections.map((c) => c.collection.name),
     );
-    return res;
-  };
-
-  const findInCollection = (example, collectionArray) => {
-    let res = collectionArray;
-    Object.entries(example).forEach(([key, value]) => {
-      res = res.filter((conn) => conn[key] && conn[key] === value);
-    });
-    return res;
-  };
-
-  // checks if there are a certain number of entries in the collectionArray that fit the specified example.
-  // returns the found examples
-  const expectExamples = (example, collectionArray, number) => {
-    const res = findInCollection(example, collectionArray);
-    expect(res.length).to.equal(number);
-    return res;
-  };
 
   // checks if the specified collection and all connections from/to this collection are empty
   const expectEmptyCollectionAndConnections = (collections, collectionName) => {
@@ -129,11 +108,11 @@ describe('its', function () {
     }
   };
 
-  const setupDb = async (db, collections) => {
+  const setupDb = async (db) => {
     await db.ensureDatabase('test', ctx);
     await db.truncate();
     await Promise.all(
-      collections.map(async (c) => {
+      relevantCollections.map(async (c) => {
         await c.ensureCollection();
       }),
     );
@@ -155,7 +134,7 @@ describe('its', function () {
       };
 
       // init all relevant collections for ITS indexing
-      await setupDb(db, relevantCollections);
+      await setupDb(db);
 
       const gitLabITSIndexer = new GitLabITSIndexer(repo, reporter);
       gitLabITSIndexer.configure(config);
@@ -384,7 +363,7 @@ describe('its', function () {
       };
 
       // init all relevant collections for ITS indexing
-      await setupDb(db, relevantCollections);
+      await setupDb(db);
 
       const gitHubITSIndexer = new GitHubITSIndexer(repo, reporter);
       gitHubITSIndexer.controller = new GitHubMock();

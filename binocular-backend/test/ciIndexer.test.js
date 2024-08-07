@@ -15,7 +15,7 @@ import Build from '../models/models/Build';
 import repositoryFake from './helper/git/repositoryFake.js';
 import GitLabMock from './helper/gitlab/gitLabMock.js';
 import path from 'path';
-import { remapGitHubApiCall, remapUnpaginatedGitlabApiCall } from './helper/utils';
+import { getAllEntriesInCollection, remapGitHubApiCall, remapUnpaginatedGitlabApiCall } from './helper/utils';
 const indexerOptions = {
   backend: true,
   frontend: false,
@@ -50,9 +50,7 @@ describe('ci', function () {
     repo.getFilePathsForBranchRemote = repo.getFilePathsForBranch;
   };
 
-  const getAllInCollection = async (collection) => {
-    return (await db.query('FOR i IN @@collection RETURN i', { '@collection': collection })).all();
-  };
+  const getAllInCollection = async (collection) => getAllEntriesInCollection(db, collection);
 
   describe('#indexGitLab', function () {
     const gitLabSetup = async () => {
