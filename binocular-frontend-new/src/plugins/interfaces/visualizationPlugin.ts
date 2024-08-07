@@ -14,7 +14,7 @@ export interface VisualizationPlugin<SettingsType> {
     // !!
     // Not every dataPlugin has all capabilities.
     // !!
-    authorList: AuthorType[]; //list of Authors set by Binocular
+    authorList: AuthorType[]; //list of Users set by Binocular
     sprintList: SprintType[]; //list of Sprints set by Binocular
     parameters: ParametersType; // General Parameters Provided By Binocular
     chartContainerRef: RefObject<HTMLDivElement>; //forwarded ref that should reference the chart div

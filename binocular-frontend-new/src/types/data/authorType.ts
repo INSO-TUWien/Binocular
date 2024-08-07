@@ -1,5 +1,7 @@
+import { DataPluginUser } from '../../plugins/interfaces/dataPluginInterfaces/dataPluginUsers.ts';
+
 export interface AuthorType {
-  signature: string;
+  user: DataPluginUser;
   id: number;
   parent: number;
   color: { main: string; secondary: string };

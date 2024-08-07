@@ -19,7 +19,10 @@ export default {
                 shortSha
                 message
                 messageHeader
-                signature
+                user {
+                  id
+                  gitSignature
+                }
                 branch
                 parents
                 date

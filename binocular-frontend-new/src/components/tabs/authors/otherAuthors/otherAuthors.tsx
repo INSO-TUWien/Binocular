@@ -58,7 +58,7 @@ function OtherAuthors(props: { orientation?: string }) {
                       <div style={{ background: parentAuthor.color.secondary }} className={authorStyles.authorNameBackground}></div>
                       <div className={authorStyles.authorNameText}>
                         <img src={dragIndicatorIcon} alt={'drag'} />
-                        <span>{parentAuthor.displayName || parentAuthor.signature}</span>
+                        <span>{parentAuthor.displayName || parentAuthor.user.gitSignature}</span>
                         <div
                           style={{
                             background: `linear-gradient(to right , ${parentAuthor.color.main}00 , ${parentAuthor.color.secondary})`,

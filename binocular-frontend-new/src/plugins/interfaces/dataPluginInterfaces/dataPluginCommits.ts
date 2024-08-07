@@ -1,3 +1,5 @@
+import { DataPluginUser } from './dataPluginUsers.ts';
+
 export interface DataPluginCommits {
   getAll: (from: string, to: string) => Promise<DataPluginCommit[]>;
 }
@@ -7,7 +9,7 @@ export interface DataPluginCommit {
   shortSha: string;
   messageHeader: string;
   message: string;
-  signature: string;
+  user: DataPluginUser;
   branch: string;
   date: string;
   parents: string[];

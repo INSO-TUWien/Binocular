@@ -33,14 +33,14 @@ function AuthorList(props: { orientation?: string }) {
     dataPlugins.filter((plugin) => plugin.name === currentDataPlugin.name)[0].setApiKey(currentDataPlugin.parameters.apiKey);
     dataPlugins
       .filter((plugin) => plugin.name === currentDataPlugin.name)[0]
-      .authors.getAll()
-      .then((authors) => {
-        const colors = distinctColors({ count: authors.length, lightMin: 50 });
+      .users.getAll()
+      .then((users) => {
+        const colors = distinctColors({ count: users.length, lightMin: 50 });
         dispatch(
           setAuthorList(
-            authors.map((author, i) => {
+            users.map((user, i) => {
               return {
-                signature: author.gitSignature,
+                user: user,
                 id: 0, // real id gets set in reducer
                 parent: -1,
                 color: { main: colors[i].hex(), secondary: colors[i].hex() + '55' },
@@ -50,7 +50,7 @@ function AuthorList(props: { orientation?: string }) {
           ),
         );
       })
-      .catch(() => console.log('Error loading Authors from selected data source!'));
+      .catch(() => console.log('Error loading Users from selected data source!'));
   }, [currentDataPlugin.name]);
 
   return (
@@ -119,7 +119,7 @@ function AuthorList(props: { orientation?: string }) {
                       <div style={{ background: parentAuthor.color.secondary }} className={authorStyles.authorNameBackground}></div>
                       <div className={authorStyles.authorNameText}>
                         <img src={dragIndicatorIcon} alt={'drag'} />
-                        <span>{parentAuthor.displayName || parentAuthor.signature}</span>
+                        <span>{parentAuthor.displayName || parentAuthor.user.gitSignature}</span>
                         <div
                           style={{
                             background: `linear-gradient(to right , ${parentAuthor.color.main}00 , ${parentAuthor.color.secondary})`,
@@ -182,7 +182,7 @@ function AuthorList(props: { orientation?: string }) {
                             <div style={{ background: author.color.secondary }} className={authorStyles.authorNameBackground}></div>
                             <div className={authorStyles.authorNameText}>
                               <img src={dragIndicatorIcon} alt={'drag'} />
-                              <span>{author.displayName || author.signature}</span>
+                              <span>{author.displayName || author.user.gitSignature}</span>
                               <div
                                 style={{
                                   background: `linear-gradient(to right , ${author.color.main}00 , ${author.color.secondary})`,

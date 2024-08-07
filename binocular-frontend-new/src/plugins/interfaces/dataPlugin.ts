@@ -1,6 +1,6 @@
 import { DataPluginGeneral } from './dataPluginInterfaces/dataPluginGeneral.ts';
 import { DataPluginCommits } from './dataPluginInterfaces/dataPluginCommits.ts';
-import { DataPluginAuthors } from './dataPluginInterfaces/dataPluginAuthors.ts';
+import { DataPluginUsers } from './dataPluginInterfaces/dataPluginUsers.ts';
 import { DataPluginFiles } from './dataPluginInterfaces/dataPluginFiles.ts';
 
 export interface DataPlugin {
@@ -8,7 +8,7 @@ export interface DataPlugin {
   description: string;
   general: DataPluginGeneral;
   commits: DataPluginCommits;
-  authors: DataPluginAuthors;
+  users: DataPluginUsers;
   files: DataPluginFiles;
   capabilities: string[];
   experimental: boolean;

@@ -1,12 +1,12 @@
 import { graphQl, traversePages } from './utils';
 import { gql } from '@apollo/client';
-import { DataPluginAuthor } from '../../../interfaces/dataPluginInterfaces/dataPluginAuthors.ts';
+import { DataPluginUser } from '../../../interfaces/dataPluginInterfaces/dataPluginUsers.ts';
 
 export default {
   getAll: async () => {
     console.log(`Getting Authors`);
-    const authorList: DataPluginAuthor[] = [];
-    const getAuthorsPage = () => async (page: number, perPage: number) => {
+    const userList: DataPluginUser[] = [];
+    const getUsersPage = () => async (page: number, perPage: number) => {
       const resp = await graphQl.query({
         query: gql`
           query ($page: Int, $perPage: Int) {
@@ -15,6 +15,7 @@ export default {
               page
               perPage
               data {
+                id
                 gitSignature
               }
             }
@@ -25,9 +26,9 @@ export default {
       return resp.data.users;
     };
 
-    await traversePages(getAuthorsPage(), (author: DataPluginAuthor) => {
-      authorList.push(author);
+    await traversePages(getUsersPage(), (author: DataPluginUser) => {
+      userList.push(author);
     });
-    return authorList;
+    return userList;
   },
 };

@@ -1,6 +1,6 @@
 import Commits from './commits.ts';
 import { DataPlugin } from '../../../interfaces/dataPlugin.ts';
-import Authors from './authors.ts';
+import Users from './users.ts';
 import General from './general.ts';
 import Files from './files.ts';
 
@@ -14,7 +14,7 @@ class MockData implements DataPlugin {
     endpoint: false,
   };
   public commits = Commits;
-  public authors = Authors;
+  public users = Users;
   public general = General;
   public files = Files;
 

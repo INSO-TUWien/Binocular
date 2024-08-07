@@ -29,7 +29,7 @@ export const authorsSlice = createSlice({
     setAuthorList: (state, action: PayloadAction<AuthorType[]>) => {
       if (state.authorList.length !== action.payload.length) {
         action.payload.forEach((author) => {
-          if (!state.authorList.find((a: AuthorType) => a.signature === author.signature)) {
+          if (!state.authorList.find((a: AuthorType) => a.user.id === author.user.id)) {
             author.id = state.authorList.length + 1;
             state.authorList.push(author);
           }

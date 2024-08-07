@@ -17,7 +17,7 @@ interface CommitQueryResult {
             url: string;
             deletions: number;
             additions: number;
-            author: { user: { login: string } };
+            author: { user: { id: string; login: string } };
             parents: { totalCount: number; nodes: { oid: string }[] };
           }[];
         };
@@ -72,6 +72,7 @@ export default class Commits implements DataPluginCommits {
                           additions
                           author {
                             user {
+                              id
                               login
                             }
                           }
@@ -104,7 +105,7 @@ export default class Commits implements DataPluginCommits {
             shortSha: '',
             messageHeader: commit.messageHeadline,
             message: commit.message,
-            signature: commit.author.user.login,
+            user: { id: commit.author.user.id, gitSignature: commit.author.user.login },
             branch: '',
             date: commit.committedDate,
             parents: commit.parents.nodes.map((parent) => parent.oid),

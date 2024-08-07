@@ -1,12 +1,12 @@
 import { GraphQL } from './utils';
 import { ApolloQueryResult, gql } from '@apollo/client';
-import { DataPluginAuthor, DataPluginAuthors } from '../../../interfaces/dataPluginInterfaces/dataPluginAuthors.ts';
+import { DataPluginUser, DataPluginUsers } from '../../../interfaces/dataPluginInterfaces/dataPluginUsers.ts';
 
 interface AuthorsQueryResult {
-  repository: { assignableUsers: { totalCount: number; nodes: { name: string; email: string; login: string }[] } };
+  repository: { assignableUsers: { totalCount: number; nodes: { id: string; name: string; email: string; login: string }[] } };
 }
 
-export default class Authors implements DataPluginAuthors {
+export default class Users implements DataPluginUsers {
   private graphQl;
   private owner;
   private name;
@@ -20,7 +20,7 @@ export default class Authors implements DataPluginAuthors {
     return await Promise.resolve(this.getAuthors(100));
   }
 
-  private async getAuthors(perPage: number): Promise<DataPluginAuthor[]> {
+  private async getAuthors(perPage: number): Promise<DataPluginUser[]> {
     const resp: void | ApolloQueryResult<AuthorsQueryResult> = await this.graphQl.client
       .query<AuthorsQueryResult, { perPage: number; owner: string; name: string }>({
         query: gql`
@@ -29,6 +29,7 @@ export default class Authors implements DataPluginAuthors {
               assignableUsers(first: $perPage) {
                 totalCount
                 nodes {
+                  id
                   name
                   email
                   login
@@ -42,7 +43,7 @@ export default class Authors implements DataPluginAuthors {
       .catch((e) => console.log(e));
     if (resp) {
       return resp.data.repository.assignableUsers.nodes.map((assignableUser) => {
-        return { gitSignature: assignableUser.login };
+        return { id: assignableUser.id, gitSignature: assignableUser.login };
       });
     } else {
       return [];

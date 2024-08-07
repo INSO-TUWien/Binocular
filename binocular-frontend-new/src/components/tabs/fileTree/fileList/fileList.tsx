@@ -18,7 +18,7 @@ function FileList(props: { orientation?: string }) {
       .filter((plugin) => plugin.name === currentDataPlugin.name)[0]
       .files.getAll()
       .then((files) => setFileList(generateFileTree(files)))
-      .catch(() => console.log('Error loading Authors from selected data source!'));
+      .catch(() => console.log('Error loading Users from selected data source!'));
   }, [currentDataPlugin.name]);
 
   return (

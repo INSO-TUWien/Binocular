@@ -105,7 +105,7 @@ function EditAuthorDialog() {
                       .filter((a: AuthorType) => a.id !== authorToEdit.id)
                       .map((a: AuthorType) => (
                         <option key={a.id} value={a.id}>
-                          {a.displayName || a.signature}
+                          {a.displayName || a.user.gitSignature}
                         </option>
                       ))}
                   </datalist>
@@ -118,7 +118,7 @@ function EditAuthorDialog() {
                             style={{ borderColor: ma.color.main, background: ma.color.secondary }}
                             className={editAuthorDialogStyles.authorName}
                             onClick={() => dispatch(editAuthor(ma.id))}>
-                            {ma.displayName || ma.signature}
+                            {ma.displayName || ma.user.gitSignature}
                           </span>
                           <button className={editAuthorDialogStyles.removeButton} onClick={() => dispatch(resetAuthor(ma.id))}>
                             Remove
@@ -140,7 +140,7 @@ function EditAuthorDialog() {
                 dispatch(
                   saveAuthor({
                     id: authorToEdit.id,
-                    signature: authorToEdit.signature,
+                    user: authorToEdit.user,
                     parent: authorToEdit.parent,
                     displayName: displayName,
                     color: {
