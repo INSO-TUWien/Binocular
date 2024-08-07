@@ -22,7 +22,6 @@ interface FileBrowserProps {
 
 class ConfigComponent extends React.Component<Props> {
   onClickGrouping(group) {
-    console.log(this.props);
     this.props.setGrouping(group);
   }
 

@@ -44,6 +44,7 @@ class ChartComponent extends React.Component<Props, State> {
             paddings={{ top: 20, left: 60, bottom: 20, right: 30 }}
             showXAxis={true}
             showYAxis={false}
+            useGroups={this.props.codeReviewMetricsState.config.grouping === 'file'}
           />
         ) : (
           <div>No data during this time period!</div>
@@ -104,7 +105,7 @@ class ChartComponent extends React.Component<Props, State> {
       this.getReviewThreadOwnershipCountByFile(mergeRequests, filesData, props);
       this.extractFilesData(metricsData, filesData);
     }
-
+    console.log(metricsData);
     return { metricsData };
   }
 
@@ -129,6 +130,15 @@ class ChartComponent extends React.Component<Props, State> {
 
   extractFilesData(metricsData: Bubble[], filesData: Map<string, number>): void {
     filesData.forEach((count, file) => {
+      // get group
+      let identifier = '/';
+      let foldername = '/';
+      const paths = file.split('/');
+      if (paths && paths.length > 1) {
+        identifier += paths.slice(0, -1).join('/');
+        foldername += paths[paths.length - 2];
+      }
+
       const bubble: Bubble = {
         x: 0,
         y: 0,
@@ -140,6 +150,7 @@ class ChartComponent extends React.Component<Props, State> {
           { label: 'filename', value: file },
           { label: 'Reviews inside file', value: count },
         ],
+        group: { identifier, foldername },
       };
       metricsData.push(bubble);
     });

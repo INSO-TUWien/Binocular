@@ -11,6 +11,7 @@ interface Props {
   paddings: Padding;
   showXAxis: boolean;
   showYAxis: boolean;
+  useGroups?: boolean;
 }
 
 interface Padding {
@@ -37,6 +38,7 @@ export interface Bubble {
   color: string;
   xLabel?: string;
   yLabel?: string;
+  group?: { identifier: string; foldername: string };
   data: ToolTipData[];
 }
 
@@ -50,6 +52,11 @@ interface WindowSpecs {
   height: number;
   width: number;
   paddings: Padding;
+}
+
+interface Folder {
+  datapoints: Bubble[];
+  subfolders: Map<string, Folder>;
 }
 
 // TODO: refactor to remove duplicate code from ScalableBaseChart
@@ -281,7 +288,7 @@ export default class BubbleChart extends React.Component<Props, State> {
   /**
    * visualizes the bubbles array via a bubble chart
    */
-  visualizeData(data): void {
+  visualizeData(data: Bubble[]): void {
     if (!data) {
       return;
     }
@@ -294,6 +301,10 @@ export default class BubbleChart extends React.Component<Props, State> {
     });
 
     const { width, height, paddings } = this.getDimsAndPaddings(svg);
+
+    if (this.props.useGroups) {
+      this.groupData(data, svg, height, width);
+    }
 
     const scales = this.createScales(
       this.getXDims(),
@@ -334,6 +345,77 @@ export default class BubbleChart extends React.Component<Props, State> {
         d3.forceCollide((d: Bubble) => scales.radius(d.size) + 1),
       )
       .on('tick', () => bubbleChart.attr('cx', (d) => d.x).attr('cy', (d) => d.y));
+  }
+
+  groupData(data: Bubble[], svg, heigth: number, width: number) {
+    const palette = ['#957186', '#D9B8C4', '#703d57', '#402A2C', '#241715'];
+
+    // get all different groups (folders)
+    const groups = Array.from(
+      new Set(
+        data.map((d) => {
+          const { identifier } = d.group!;
+          return identifier;
+        }),
+      ),
+    );
+
+    // build grouped data
+    const root = new Map<string, Folder>();
+    data.forEach((dp) => {
+      const folderStructure = dp.group!.identifier.split('/');
+
+      // file is inside root folder and folder has not yet been initialized
+      if (folderStructure.length === 2 && !root.has(folderStructure[1])) {
+        root.set(folderStructure[1], { datapoints: [dp], subfolders: new Map<string, Folder>() });
+        return;
+      }
+
+      // file is inside root folder but folder has already been initzialized
+      if (folderStructure.length === 2 && root.has(folderStructure[1])) {
+        root.get(folderStructure[1])?.datapoints.push(dp);
+        return;
+      }
+
+      // track sub folders
+      let currentFolder = root.has(folderStructure[1])
+        ? root.get(folderStructure[1])?.subfolders
+        : root.set(folderStructure[1], { datapoints: [], subfolders: new Map<string, Folder>() });
+
+      folderStructure.forEach((folder, index) => {
+        // first node was already set
+        if (index < 2) return;
+        currentFolder = currentFolder!.has(folder)
+          ? currentFolder!.get(folder)?.subfolders
+          : currentFolder!.set(folder, { datapoints: [], subfolders: new Map<string, Folder>() });
+        // place dp in correct folder
+        if (index === folderStructure.length - 1) currentFolder!.get(folder)?.datapoints.push(dp);
+      });
+    });
+
+    console.log(root);
+
+    const radius = Math.min(width / 2, heigth / 2);
+    const angle = (2 * Math.PI) / groups.length;
+
+    // calc the center cords of the groups on the canvas
+    const groupCenters = new Map<string, { x: number; y: number }>();
+    const groupColors = new Map<string, string>();
+    groups.forEach((group, index) => {
+      const x = width / 2 + radius * Math.cos(angle * index);
+      const y = heigth / 2 + radius * Math.sin(angle * index);
+      groupCenters.set(group, { x, y });
+      groupColors.set(group, palette[index % palette.length]);
+    });
+
+    // adjust the position of each data point to match the group
+    data.forEach((dp) => {
+      const { identifier } = dp.group!;
+      const groupPosition = groupCenters.get(identifier);
+      dp.x = groupPosition?.x || dp.x;
+      dp.y = groupPosition?.y || dp.y;
+      dp.color = groupColors.get(identifier) || dp.color;
+    });
   }
 
   render() {

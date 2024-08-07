@@ -249,7 +249,7 @@ class GitHub {
                               }
                           }
                       }
-                      reviewThreads (first: 20) {
+                      reviewThreads (first: 50) {
                           totalCount
                           nodes {
                               id
