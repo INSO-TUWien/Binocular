@@ -13,9 +13,9 @@ const initialState: TabsInitialState = {
 export const tabsSlice = createSlice({
   name: 'tabs',
   initialState: () => {
-    const storedState = localStorage.getItem(`tabsStateV${Config.localStorageVersion}`);
+    const storedState = localStorage.getItem(`${tabsSlice.name}StateV${Config.localStorageVersion}`);
     if (storedState === null) {
-      localStorage.setItem(`tabsStateV${Config.localStorageVersion}`, JSON.stringify(initialState));
+      localStorage.setItem(`${tabsSlice.name}StateV${Config.localStorageVersion}`, JSON.stringify(initialState));
       return initialState;
     } else {
       return JSON.parse(storedState);
@@ -24,10 +24,17 @@ export const tabsSlice = createSlice({
   reducers: {
     setTabList: (state, action: PayloadAction<TabType[]>) => {
       state.tabList = action.payload;
-      localStorage.setItem(`tabsStateV${Config.localStorageVersion}`, JSON.stringify(state));
+      localStorage.setItem(`${tabsSlice.name}StateV${Config.localStorageVersion}`, JSON.stringify(state));
+    },
+    clearTabsStorage: () => {
+      localStorage.removeItem(`${tabsSlice.name}StateV${Config.localStorageVersion}`);
+    },
+    importTabsStorage: (state, action: PayloadAction<TabsInitialState>) => {
+      state = action.payload;
+      localStorage.setItem(`${tabsSlice.name}StateV${Config.localStorageVersion}`, JSON.stringify(state));
     },
   },
 });
 
-export const { setTabList } = tabsSlice.actions;
+export const { setTabList, clearTabsStorage, importTabsStorage } = tabsSlice.actions;
 export default tabsSlice.reducer;

@@ -67,7 +67,7 @@ function DatabaseSettings() {
                 <p></p>
                 <div className="card-actions justify-end">
                   <button
-                    className="btn btn-accent"
+                    className="btn btn-outline"
                     disabled={
                       (dataPlugin.requirements.apiKey && currentDataPlugin.parameters.apiKey.length === 0) ||
                       (dataPlugin.requirements.endpoint && currentDataPlugin.parameters.endpoint.length === 0)

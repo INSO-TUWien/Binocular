@@ -30,9 +30,9 @@ const initialState: SettingsInitialState = {
 export const settingsSlice = createSlice({
   name: 'settings',
   initialState: () => {
-    const storedState = localStorage.getItem(`settingsStateV${Config.localStorageVersion}`);
+    const storedState = localStorage.getItem(`${settingsSlice.name}StateV${Config.localStorageVersion}`);
     if (storedState === null) {
-      localStorage.setItem(`settingsStateV${Config.localStorageVersion}`, JSON.stringify(initialState));
+      localStorage.setItem(`${settingsSlice.name}StateV${Config.localStorageVersion}`, JSON.stringify(initialState));
       return initialState;
     } else {
       return JSON.parse(storedState);
@@ -41,23 +41,36 @@ export const settingsSlice = createSlice({
   reducers: {
     setGeneralSettings: (state, action: PayloadAction<GeneralSettingsType>) => {
       state.general = action.payload;
-      localStorage.setItem(`settingsStateV${Config.localStorageVersion}`, JSON.stringify(state));
+      localStorage.setItem(`${settingsSlice.name}StateV${Config.localStorageVersion}`, JSON.stringify(state));
     },
     setDataPluginName: (state, action: PayloadAction<string>) => {
       state.dataPlugin.name = action.payload;
-      localStorage.setItem(`settingsStateV${Config.localStorageVersion}`, JSON.stringify(state));
+      localStorage.setItem(`${settingsSlice.name}StateV${Config.localStorageVersion}`, JSON.stringify(state));
     },
     setDataPluginParameterApiKey: (state, action: PayloadAction<string>) => {
       state.dataPlugin.parameters.apiKey = action.payload;
-      localStorage.setItem(`settingsStateV${Config.localStorageVersion}`, JSON.stringify(state));
+      localStorage.setItem(`${settingsSlice.name}StateV${Config.localStorageVersion}`, JSON.stringify(state));
     },
     setDataPluginParameterEndpoint: (state, action: PayloadAction<string>) => {
       state.dataPlugin.parameters.endpoint = action.payload;
-      localStorage.setItem(`settingsStateV${Config.localStorageVersion}`, JSON.stringify(state));
+      localStorage.setItem(`${settingsSlice.name}StateV${Config.localStorageVersion}`, JSON.stringify(state));
+    },
+    clearSettingsStorage: () => {
+      localStorage.removeItem(`${settingsSlice.name}StateV${Config.localStorageVersion}`);
+    },
+    importSettingsStorage: (state, action: PayloadAction<SettingsInitialState>) => {
+      state = action.payload;
+      localStorage.setItem(`${settingsSlice.name}StateV${Config.localStorageVersion}`, JSON.stringify(state));
     },
   },
 });
 
-export const { setGeneralSettings, setDataPluginName, setDataPluginParameterApiKey, setDataPluginParameterEndpoint } =
-  settingsSlice.actions;
+export const {
+  setGeneralSettings,
+  setDataPluginName,
+  setDataPluginParameterApiKey,
+  setDataPluginParameterEndpoint,
+  clearSettingsStorage,
+  importSettingsStorage,
+} = settingsSlice.actions;
 export default settingsSlice.reducer;

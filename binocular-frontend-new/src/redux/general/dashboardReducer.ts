@@ -2,6 +2,7 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { DragResizeMode } from '../../components/dashboard/resizeMode.ts';
 import Config from '../../config.ts';
 import { DashboardItemType } from '../../types/general/dashboardItemType.ts';
+
 export interface DashboardInitialState {
   dashboardItems: DashboardItemType[];
   dragResizeMode: DragResizeMode;
@@ -29,9 +30,9 @@ const initialState: DashboardInitialState = {
 export const dashboardSlice = createSlice({
   name: 'dashboard',
   initialState: () => {
-    const storedState = localStorage.getItem(`dashboardStateV${Config.localStorageVersion}`);
+    const storedState = localStorage.getItem(`${dashboardSlice.name}StateV${Config.localStorageVersion}`);
     if (storedState === null) {
-      localStorage.setItem(`dashboardStateV${Config.localStorageVersion}`, JSON.stringify(initialState));
+      localStorage.setItem(`${dashboardSlice.name}StateV${Config.localStorageVersion}`, JSON.stringify(initialState));
       return initialState;
     } else {
       return JSON.parse(storedState);
@@ -50,7 +51,7 @@ export const dashboardSlice = createSlice({
         state.dashboardItemCount++;
         state.dashboardItems = [...state.dashboardItems, action.payload];
         state.dashboardState = updateDashboardState(state.dashboardState, action.payload, DashboardStateUpdateType.place);
-        localStorage.setItem(`dashboardStateV${Config.localStorageVersion}`, JSON.stringify(state));
+        localStorage.setItem(`${dashboardSlice.name}StateV${Config.localStorageVersion}`, JSON.stringify(state));
       }
     },
     moveDashboardItem: (state, action: PayloadAction<DashboardItemType>) => {
@@ -66,34 +67,49 @@ export const dashboardSlice = createSlice({
         });
         state.dashboardState = updateDashboardState(state.dashboardState, action.payload, DashboardStateUpdateType.move);
       }
-      localStorage.setItem(`dashboardStateV${Config.localStorageVersion}`, JSON.stringify(state));
+      localStorage.setItem(`${dashboardSlice.name}StateV${Config.localStorageVersion}`, JSON.stringify(state));
     },
     placeDashboardItem: (state, action: PayloadAction<DashboardItemType>) => {
       state.dragResizeMode = DragResizeMode.place;
       if (checkIfEmpty(state.dashboardState, action.payload)) {
         state.placeableItem = action.payload;
         state.dashboardState = updateDashboardState(state.dashboardState, action.payload, DashboardStateUpdateType.place);
-        localStorage.setItem(`dashboardStateV${Config.localStorageVersion}`, JSON.stringify(state));
+        localStorage.setItem(`${dashboardSlice.name}StateV${Config.localStorageVersion}`, JSON.stringify(state));
       }
     },
     deleteDashboardItem: (state, action: PayloadAction<DashboardItemType>) => {
       state.dashboardItems = state.dashboardItems.filter((item: DashboardItemType) => item.id !== action.payload.id);
       state.dashboardState = updateDashboardState(state.dashboardState, action.payload, DashboardStateUpdateType.delete);
-      localStorage.setItem(`dashboardStateV${Config.localStorageVersion}`, JSON.stringify(state));
+      localStorage.setItem(`${dashboardSlice.name}StateV${Config.localStorageVersion}`, JSON.stringify(state));
     },
     setDragResizeMode: (state, action: PayloadAction<DragResizeMode>) => {
       state.dragResizeMode = action.payload;
-      localStorage.setItem(`dashboardStateV${Config.localStorageVersion}`, JSON.stringify(state));
+      localStorage.setItem(`${dashboardSlice.name}StateV${Config.localStorageVersion}`, JSON.stringify(state));
     },
     increasePopupCount: (state) => {
       state.popupCount++;
-      localStorage.setItem(`dashboardStateV${Config.localStorageVersion}`, JSON.stringify(state));
+      localStorage.setItem(`${dashboardSlice.name}StateV${Config.localStorageVersion}`, JSON.stringify(state));
+    },
+    clearDashboardStorage: () => {
+      localStorage.removeItem(`${dashboardSlice.name}StateV${Config.localStorageVersion}`);
+    },
+    importDashboardStorage: (state, action: PayloadAction<DashboardInitialState>) => {
+      state = action.payload;
+      localStorage.setItem(`${dashboardSlice.name}StateV${Config.localStorageVersion}`, JSON.stringify(state));
     },
   },
 });
 
-export const { addDashboardItem, moveDashboardItem, placeDashboardItem, deleteDashboardItem, setDragResizeMode, increasePopupCount } =
-  dashboardSlice.actions;
+export const {
+  addDashboardItem,
+  moveDashboardItem,
+  placeDashboardItem,
+  deleteDashboardItem,
+  setDragResizeMode,
+  increasePopupCount,
+  clearDashboardStorage,
+  importDashboardStorage,
+} = dashboardSlice.actions;
 export default dashboardSlice.reducer;
 
 function checkIfEmpty(dashboardState: number[][], item: DashboardItemType) {

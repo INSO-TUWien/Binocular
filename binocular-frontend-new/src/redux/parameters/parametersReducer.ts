@@ -13,12 +13,12 @@ export const parametersInitialState: ParametersType = {
   parametersDateRange: { from: currentDateLastYear.toISOString().split('.')[0], to: currentDate.toISOString().split('.')[0] },
 };
 
-export const paramtersSlice = createSlice({
+export const parametersSlice = createSlice({
   name: 'parameters',
   initialState: () => {
-    const storedState = localStorage.getItem(`parametersStateV${Config.localStorageVersion}`);
+    const storedState = localStorage.getItem(`${parametersSlice.name}StateV${Config.localStorageVersion}`);
     if (storedState === null) {
-      localStorage.setItem(`parametersStateV${Config.localStorageVersion}`, JSON.stringify(parametersInitialState));
+      localStorage.setItem(`${parametersSlice.name}StateV${Config.localStorageVersion}`, JSON.stringify(parametersInitialState));
       return parametersInitialState;
     } else {
       return JSON.parse(storedState);
@@ -27,14 +27,21 @@ export const paramtersSlice = createSlice({
   reducers: {
     setParametersGeneral: (state, action: PayloadAction<ParametersGeneralType>) => {
       state.parametersGeneral = action.payload;
-      localStorage.setItem(`parametersStateV${Config.localStorageVersion}`, JSON.stringify(state));
+      localStorage.setItem(`${parametersSlice.name}StateV${Config.localStorageVersion}`, JSON.stringify(state));
     },
     setParametersDateRange: (state, action: PayloadAction<ParametersDateRangeType>) => {
       state.parametersDateRange = action.payload;
-      localStorage.setItem(`parametersStateV${Config.localStorageVersion}`, JSON.stringify(state));
+      localStorage.setItem(`${parametersSlice.name}StateV${Config.localStorageVersion}`, JSON.stringify(state));
+    },
+    clearParametersStorage: () => {
+      localStorage.removeItem(`${parametersSlice.name}StateV${Config.localStorageVersion}`);
+    },
+    importParametersStorage: (state, action: PayloadAction<ParametersType>) => {
+      state = action.payload;
+      localStorage.setItem(`${parametersSlice.name}StateV${Config.localStorageVersion}`, JSON.stringify(state));
     },
   },
 });
 
-export const { setParametersGeneral, setParametersDateRange } = paramtersSlice.actions;
-export default paramtersSlice.reducer;
+export const { setParametersGeneral, setParametersDateRange, clearParametersStorage, importParametersStorage } = parametersSlice.actions;
+export default parametersSlice.reducer;

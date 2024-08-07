@@ -17,9 +17,9 @@ const initialState: SprintsInitialState = {
 export const sprintsSlice = createSlice({
   name: 'sprints',
   initialState: () => {
-    const storedState = localStorage.getItem(`sprintsStateV${Config.localStorageVersion}`);
+    const storedState = localStorage.getItem(`${sprintsSlice.name}StateV${Config.localStorageVersion}`);
     if (storedState === null) {
-      localStorage.setItem(`sprintsStateV${Config.localStorageVersion}`, JSON.stringify(initialState));
+      localStorage.setItem(`${sprintsSlice.name}StateV${Config.localStorageVersion}`, JSON.stringify(initialState));
       return initialState;
     } else {
       return JSON.parse(storedState);
@@ -28,17 +28,17 @@ export const sprintsSlice = createSlice({
   reducers: {
     setSprints: (state, action: PayloadAction<SprintType[]>) => {
       state.sprintList = action.payload;
-      localStorage.setItem(`sprintsStateV${Config.localStorageVersion}`, JSON.stringify(state));
+      localStorage.setItem(`${sprintsSlice.name}StateV${Config.localStorageVersion}`, JSON.stringify(state));
     },
     addSprint: (state, action: PayloadAction<SprintType>) => {
       action.payload.id = state.currID;
       state.sprintList.push(action.payload);
       state.currID++;
-      localStorage.setItem(`sprintsStateV${Config.localStorageVersion}`, JSON.stringify(state));
+      localStorage.setItem(`${sprintsSlice.name}StateV${Config.localStorageVersion}`, JSON.stringify(state));
     },
     deleteSprint: (state, action: PayloadAction<SprintType>) => {
       state.sprintList = state.sprintList.filter((s: SprintType) => s.id !== action.payload.id);
-      localStorage.setItem(`sprintsStateV${Config.localStorageVersion}`, JSON.stringify(state));
+      localStorage.setItem(`${sprintsSlice.name}StateV${Config.localStorageVersion}`, JSON.stringify(state));
     },
     sprintToEdit: (state, action: PayloadAction<SprintType | null>) => {
       state.sprintToEdit = action.payload;
@@ -52,10 +52,18 @@ export const sprintsSlice = createSlice({
         }
         return s;
       });
-      localStorage.setItem(`sprintsStateV${Config.localStorageVersion}`, JSON.stringify(state));
+      localStorage.setItem(`${sprintsSlice.name}StateV${Config.localStorageVersion}`, JSON.stringify(state));
+    },
+    clearSprintStorage: () => {
+      localStorage.removeItem(`${sprintsSlice.name}StateV${Config.localStorageVersion}`);
+    },
+    importSprintStorage: (state, action: PayloadAction<SprintsInitialState>) => {
+      state = action.payload;
+      localStorage.setItem(`${sprintsSlice.name}StateV${Config.localStorageVersion}`, JSON.stringify(state));
     },
   },
 });
 
-export const { setSprints, addSprint, deleteSprint, sprintToEdit, saveSprint } = sprintsSlice.actions;
+export const { setSprints, addSprint, deleteSprint, sprintToEdit, saveSprint, clearSprintStorage, importSprintStorage } =
+  sprintsSlice.actions;
 export default sprintsSlice.reducer;
