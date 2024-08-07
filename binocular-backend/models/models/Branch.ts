@@ -22,7 +22,7 @@ class Branch extends Model<BranchDataType> {
 
   async persist(_branchData: BranchDto) {
     const branchData = _.clone(_branchData);
-    const instance = await this.findById(_branchData.id);
+    const instance = await this.findOneByExample({ id: _branchData.id });
     if (!instance) {
       return this.create({
         id: branchData.id,

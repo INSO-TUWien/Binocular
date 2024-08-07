@@ -11,7 +11,7 @@ import {
   findCommit,
   findFile,
   findFileCommitConnections,
-  findFileCommitStakeholderConnections,
+  findFileCommitUserConnections,
   sortByAttributeString,
 } from './utils';
 
@@ -38,8 +38,7 @@ export default class Commits {
   static getCommitDataForSha(db, relations, sha) {
     //dont use findCommit here since we need to fetch all commits anyway in order to add history data
     return findAllCommits(db, relations).then((res) => {
-      const result = res.docs.filter((c) => c.sha === sha)[0];
-      return result;
+      return res.docs.filter((c) => c.sha === sha)[0];
     });
   }
 
@@ -61,11 +60,11 @@ export default class Commits {
       for (const commit of commits) {
         commit.files = {};
 
-        const relevantConnections = fileCommitConnections.filter((fCC) => fCC.to === commit._id);
+        const relevantConnections = fileCommitConnections.filter((fCC) => fCC.from === commit._id);
 
         //concurrently
         commit.files.data = relevantConnections.map((connection) => {
-          const resultFile = allFiles.filter((file) => file._id === connection.from);
+          const resultFile = allFiles.filter((file) => file._id === connection.to);
           if (resultFile.length > 0) {
             const file = resultFile[0];
             const res = { file: {} };
@@ -100,10 +99,10 @@ export default class Commits {
 
       for (const commit of commits) {
         commit.files = {};
-        const relevantConnections = binarySearchArray(collections.fileCommitConnections, commit._id, 'to');
+        const relevantConnections = binarySearchArray(collections.fileCommitConnections, commit._id, 'from');
 
         commit.files.data = relevantConnections.map((connection) => {
-          const file = binarySearch(collections.files, connection.from, '_id');
+          const file = binarySearch(collections.files, connection.to, '_id');
           if (file !== null) {
             const res = { file: {} };
             res.file.path = file.path;
@@ -111,12 +110,12 @@ export default class Commits {
             res.hunks = connection.hunks;
             res.ownership = [];
 
-            //find connections to stakeholders for ownership data
-            const relevantOwnershipConnections = binarySearchArray(collections.fileCommitStakeholderConnections, connection._id, 'from');
-            //for each of the ownership connections, add the signature of the stakeholder and the owned lines to fileResult.ownership
+            //find connections to users for ownership data
+            const relevantOwnershipConnections = binarySearchArray(collections.fileCommitUserConnections, connection._id, 'from');
+            //for each of the ownership connections, add the signature of the user and the owned lines to fileResult.ownership
             for (const ownershipConn of relevantOwnershipConnections) {
-              const stakeholder = collections.stakeholders[ownershipConn.to];
-              res.ownership.push({ stakeholder: stakeholder, hunks: ownershipConn.hunks });
+              const user = collections.users[ownershipConn.to];
+              res.ownership.push({ user: user, hunks: ownershipConn.hunks });
             }
 
             return res;
@@ -149,24 +148,24 @@ export default class Commits {
 
       for (const file of files) {
         //get the connections from the current file to commits
-        const relevantConnections = fileCommitConnections.filter((fCC) => fCC.from === file._id);
+        const relevantConnections = fileCommitConnections.filter((fCC) => fCC.to === file._id);
         for (const connection of relevantConnections) {
           //if we also want file objects in our commit objects,
           // we have to push the file object to an intermediary array to add to the commits later
           if (!omitFiles) {
             let fileArray = [];
-            if (filesForCommits[connection.to] !== null && filesForCommits[connection.to] !== undefined) {
-              fileArray = filesForCommits[connection.to];
+            if (filesForCommits[connection.from] !== null && filesForCommits[connection.from] !== undefined) {
+              fileArray = filesForCommits[connection.from];
             }
             fileArray.push({ file: { path: file.path } });
-            filesForCommits[connection.to] = fileArray;
+            filesForCommits[connection.from] = fileArray;
           }
 
           //if this commit was not already connected to another file, push it to the array
-          if (resultCommitHashes.includes(connection.to)) {
+          if (resultCommitHashes.includes(connection.from)) {
             continue;
           }
-          resultCommitHashes.push(connection.to);
+          resultCommitHashes.push(connection.from);
         }
       }
 
@@ -208,10 +207,10 @@ export default class Commits {
       const file = resFile.docs[0];
       const allCommits = (await findAllCommits(db, relations)).docs;
 
-      const fileCommitConnections = (await findFileCommitConnections(relations)).docs.filter((fCC) => fCC.from === file._id);
+      const fileCommitConnections = (await findFileCommitConnections(relations)).docs.filter((fCC) => fCC.to === file._id);
       let commits = [];
       for (const fileCommitConnection of fileCommitConnections) {
-        const commit = allCommits.filter((c) => c._id === fileCommitConnection.to)[0];
+        const commit = allCommits.filter((c) => c._id === fileCommitConnection.from)[0];
         if (commit) {
           commit.file = { file: {} };
           commit.file.file.path = file.path;
@@ -228,17 +227,17 @@ export default class Commits {
   // Helper functions
 
   static extractOwnershipDataForCommit(commit, collections) {
-    const commitResult = { sha: commit.sha, date: commit.date, files: [] };
-    const relevantConnections = binarySearchArray(collections.fileCommitConnections, commit._id, 'to');
+    const commitResult = { sha: commit.sha, date: commit.date, parents: commit.parents, files: [] };
+    const relevantConnections = binarySearchArray(collections.fileCommitConnections, commit._id, 'from');
     for (const conn of relevantConnections) {
-      const relevantFile = binarySearch(collections.files, conn.from, '_id');
+      const relevantFile = binarySearch(collections.files, conn.to, '_id');
       const fileResult = { path: relevantFile.path, action: conn.action, ownership: [] };
-      const relevantOwnershipConnections = binarySearchArray(collections.fileCommitStakeholderConnections, conn._id, 'from');
+      const relevantOwnershipConnections = binarySearchArray(collections.fileCommitUserConnections, conn._id, 'from');
 
-      //for each of the ownership connections, add the signature of the stakeholder and the owned lines to fileResult.ownership
+      //for each of the ownership connections, add the signature of the user and the owned lines to fileResult.ownership
       for (const ownershipConn of relevantOwnershipConnections) {
-        const stakeholder = collections.stakeholders[ownershipConn.to];
-        fileResult.ownership.push({ stakeholder: stakeholder, hunks: ownershipConn.hunks });
+        const user = collections.users[ownershipConn.to];
+        fileResult.ownership.push({ user: user, hunks: ownershipConn.hunks });
       }
       //add to the result object of the current file
       commitResult.files.push(fileResult);
@@ -250,37 +249,37 @@ export default class Commits {
   // sorts the arrays so they can be used for binary search later on (see for example `extractOwnershipDataForCommit()`).
   static async fetchAndSortOwnershipCollections(db, relations) {
     let files = [];
-    let stakeholdersObjects = [];
+    let usersObjects = [];
     let fileCommitConnections = [];
-    let fileCommitStakeholderConnections = [];
+    let fileCommitUserConnections = [];
 
     await Promise.all([
       findAll(db, 'files'),
-      findAll(db, 'stakeholders'),
+      findAll(db, 'users'),
       findFileCommitConnections(relations),
-      findFileCommitStakeholderConnections(relations),
+      findFileCommitUserConnections(relations),
     ]).then(([f, s, fc, fcs]) => {
       files = f.docs;
-      stakeholdersObjects = s.docs;
+      usersObjects = s.docs;
       fileCommitConnections = fc.docs;
-      fileCommitStakeholderConnections = fcs.docs;
+      fileCommitUserConnections = fcs.docs;
     });
     // sort the collections, so we can use binary search later on
     files = sortByAttributeString(files, '_id');
-    fileCommitConnections = sortByAttributeString(fileCommitConnections, 'to');
-    fileCommitStakeholderConnections = sortByAttributeString(fileCommitStakeholderConnections, 'from');
+    fileCommitConnections = sortByAttributeString(fileCommitConnections, 'from');
+    fileCommitUserConnections = sortByAttributeString(fileCommitUserConnections, 'from');
 
-    // we don't expect the stakeholders collection to be very large, so we can store it in a map for quicker access
-    const stakeholders = {};
-    stakeholdersObjects.map((s) => {
-      stakeholders[s._id] = s.gitSignature;
+    // we don't expect the users collection to be very large, so we can store it in a map for quicker access
+    const users = {};
+    usersObjects.map((s) => {
+      users[s._id] = s.gitSignature;
     });
 
     return {
       files: files,
-      stakeholders: stakeholders,
+      users: users,
       fileCommitConnections: fileCommitConnections,
-      fileCommitStakeholderConnections: fileCommitStakeholderConnections,
+      fileCommitUserConnections: fileCommitUserConnections,
     };
   }
 }

@@ -18,8 +18,8 @@ import CommitModuleConnection from '../models/connections/CommitModuleConnection
 import BranchFileConnection from '../models/connections/BranchFileConnection';
 import BranchFileFileConnection from '../models/connections/BranchFileFileConnection';
 import ModuleModuleConnection from '../models/connections/ModuleModuleConnection';
-import CommitStakeholderConnection from '../models/connections/CommitStakeholderConnection';
-import CommitFileStakeholderConnection from '../models/connections/CommitFileStakeholderConnection';
+import CommitUserConnection from '../models/connections/CommitUserConnection';
+import CommitFileUserConnection from '../models/connections/CommitFileUserConnection';
 import conf from '../utils/config.js';
 import ctx from '../utils/context';
 import GitHubUrlProvider from '../url-providers/GitHubUrlProvider';
@@ -97,13 +97,13 @@ describe('vcs', function () {
     await File.ensureCollection();
     await Branch.ensureCollection();
     await Module.ensureCollection();
-    await CommitStakeholderConnection.ensureCollection();
+    await CommitUserConnection.ensureCollection();
     await ModuleFileConnection.ensureCollection();
     await CommitModuleConnection.ensureCollection();
     await BranchFileConnection.ensureCollection();
     await BranchFileFileConnection.ensureCollection();
     await ModuleModuleConnection.ensureCollection();
-    await CommitFileStakeholderConnection.ensureCollection();
+    await CommitFileUserConnection.ensureCollection();
   };
 
   const setupIndexer = (repo, urlProvider) => {

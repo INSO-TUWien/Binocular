@@ -1,60 +1,41 @@
 'use strict';
 
-import _ from 'lodash';
+// Returns an array of commit hashes that represent the history of this commit.
+// Array is in reverse order, starting with the sha of the commit in question.
+// History is calculated by following the parent commits back to the genesis commit of the project.
+// every element of allCommits must have the `sha`, `date` and `parents` attributes.
+// Note: We can't rely on the fact that parent commits have a `date` <= the `date` commit in question
+//  (see e.g. https://softwareengineering.stackexchange.com/questions/314761/github-parent-commit-committed-after-child-commit)
+//  So it is not enough that `allCommits` contains all commits with date <= the date of the commit in question.
+//  To be safe, `allCommits` should really contain all commits of the project.
+//  Otherwise, this function may return wrong results (if there are commits in the history that have a `date` > the `commit` date).
+export const getHistoryForCommit = (commit, allCommits) => {
+  // each commit only has the hash of the parent. Build a map, so we can get the actual commit for a given sha.
+  const commitsForShas = {};
+  allCommits.forEach((c) => {
+    commitsForShas[c.sha] = c;
+  });
 
-export const addHistoryToAllCommits = (allCommits) => {
-  //stores the histories of all commits
-  const historycache = {};
+  const history = [commit];
 
-  //sort so oldest commit is first
-  const commits = allCommits.sort((a, b) => new Date(a.date) - new Date(b.date));
-  const commitsShas = commits.map((c) => c.sha);
-  const positions = {};
-  for (let i = 0; i < commitsShas.length; i++) {
-    positions[commitsShas[i]] = i;
-  }
-
-  //for all commits that do not have parents, add them to the cache
-  //necessary for gitlab projects that can have multiple initial commits
-  const initialCommits = allCommits.filter((c) => c.parents.length === 0);
-
-  let children = [];
-  let frontier = [];
-
-  for (const genesis of initialCommits) {
-    historycache[genesis.sha] = [genesis.sha];
-    //find all children of genesis
-    children = children.concat(allCommits.filter((child) => child.parents.includes(genesis.sha)));
-  }
-
-  for (const child of children) {
-    frontier.push(child);
-  }
-  frontier = _.uniqBy(frontier, (c) => c.sha);
-
-  const helper = (commit) => {
-    let history = [commit.sha];
-    for (const p of commit.parents) {
-      if (!historycache[p]) {
-        frontier.push(commit);
-        return;
+  // recursively add parents to history
+  const addParentsToHistory = (c) => {
+    // if we reach the first commit, we are done
+    if (!c.parents || c.parents.length === 0) return;
+    // add each parent to the history (if it is not already there
+    c.parents.forEach((p) => {
+      const parent = commitsForShas[p];
+      if (!history.includes(parent)) {
+        history.push(parent);
+        // continue with parents of parent
+        addParentsToHistory(parent);
       }
-      history = history.concat(historycache[p]);
-    }
-    history = _.uniq(history).sort((a, b) => positions[b] - positions[a]);
-    historycache[commit.sha] = history;
-    commit.history = history.join();
-
-    //find all children of commit
-    const children = allCommits.filter((child) => child.parents.includes(commit.sha));
-    for (const child of children) {
-      if (!historycache[child.sha]) {
-        frontier.unshift(child);
-      }
-    }
+    });
   };
 
-  while (frontier.length !== 0) {
-    helper(frontier.shift());
-  }
+  // kick off recursive function with the commit for which we want to get the history
+  addParentsToHistory(commit);
+
+  // sort by date (newest first). Only return the hashes of the commits
+  return history.sort((a, b) => new Date(b.date) - new Date(a.date)).map((c) => c.sha);
 };

@@ -37,11 +37,11 @@ import Issue from './models/models/Issue.ts';
 import Build from './models/models/Build.ts';
 import Branch from './models/models/Branch.ts';
 import Module from './models/models/Module.ts';
-import Stakeholder from './models/models/Stakeholder.ts';
+import User from './models/models/User.ts';
 import MergeRequest from './models/models/MergeRequest.ts';
 import Milestone from './models/models/Milestone.ts';
-import CommitStakeholderConnection from './models/connections/CommitStakeholderConnection.ts';
-import IssueStakeholderConnection from './models/connections/IssueStakeholderConnection.ts';
+import CommitUserConnection from './models/connections/CommitUserConnection.ts';
+import IssueUserConnection from './models/connections/IssueUserConnection.ts';
 import IssueCommitConnection from './models/connections/IssueCommitConnection.ts';
 import CommitCommitConnection from './models/connections/CommitCommitConnection.ts';
 import CommitModuleConnection from './models/connections/CommitModuleConnection.ts';
@@ -49,7 +49,7 @@ import ModuleModuleConnection from './models/connections/ModuleModuleConnection.
 import ModuleFileConnection from './models/connections/ModuleFileConnection.ts';
 import BranchFileConnection from './models/connections/BranchFileConnection.ts';
 import BranchFileFileConnection from './models/connections/BranchFileFileConnection.ts';
-import CommitFileStakeholderConnection from './models/connections/CommitFileStakeholderConnection.ts';
+import CommitFileUserConnection from './models/connections/CommitFileUserConnection.ts';
 import CommitFileConnection from './models/connections/CommitFileConnection.ts';
 import CommitBuildConnection from './models/connections/CommitBuildConnection.ts';
 import ConfigurationError from './errors/ConfigurationError';
@@ -72,6 +72,15 @@ import its from './indexers/its';
 import ci from './indexers/ci';
 import Repository from './core/provider/git';
 import chalk from 'chalk';
+import Account from './models/models/Account.ts';
+import IssueAccountConnection from './models/connections/IssueAccountConnection.ts';
+import MergeRequestAccountConnection from './models/connections/MergeRequestAccountConnection.ts';
+import IssueMilestoneConnection from './models/connections/IssueMilestoneConnection.ts';
+import MergeRequestMilestoneConnection from './models/connections/MergeRequestMilestoneConnection.ts';
+import Note from './models/models/Note.ts';
+import IssueNoteConnection from './models/connections/IssueNoteConnection.ts';
+import NoteAccountConnection from './models/connections/NoteAccountConnection.ts';
+import MergeRequestNoteConnection from './models/connections/MergeRequestNoteConnection.ts';
 
 cli.parse(
   (targetPath, options) => {
@@ -382,7 +391,7 @@ function runBackend() {
         return;
       }
 
-      await Issue.deduceStakeholders();
+      await Issue.deduceUsers();
       createManualIssueReferences(config.get('issueReferences'));
       if (context.argv.export) {
         projectStructureHelper.deleteDbExport(__dirname + '/../binocular-frontend');
@@ -572,25 +581,34 @@ function runBackend() {
           context.db.ensureService(path.join(__dirname, '../foxx'), '/binocular-ql'),
           Commit.ensureCollection(),
           File.ensureCollection(),
-          Stakeholder.ensureCollection(),
+          User.ensureCollection(),
           Issue.ensureCollection(),
+          Note.ensureCollection(),
           Build.ensureCollection(),
           Branch.ensureCollection(),
           Module.ensureCollection(),
           MergeRequest.ensureCollection(),
           Milestone.ensureCollection(),
+          Account.ensureCollection(),
           CommitFileConnection.ensureCollection(),
           CommitBuildConnection.ensureCollection(),
-          CommitStakeholderConnection.ensureCollection(),
-          IssueStakeholderConnection.ensureCollection(),
+          CommitUserConnection.ensureCollection(),
+          IssueUserConnection.ensureCollection(),
           IssueCommitConnection.ensureCollection(),
+          IssueNoteConnection.ensureCollection(),
+          MergeRequestNoteConnection.ensureCollection(),
+          NoteAccountConnection.ensureCollection(),
           CommitCommitConnection.ensureCollection(),
           CommitModuleConnection.ensureCollection(),
           ModuleModuleConnection.ensureCollection(),
           ModuleFileConnection.ensureCollection(),
           BranchFileConnection.ensureCollection(),
           BranchFileFileConnection.ensureCollection(),
-          CommitFileStakeholderConnection.ensureCollection(),
+          CommitFileUserConnection.ensureCollection(),
+          IssueAccountConnection.ensureCollection(),
+          MergeRequestAccountConnection.ensureCollection(),
+          IssueMilestoneConnection.ensureCollection(),
+          MergeRequestMilestoneConnection.ensureCollection(),
         ]);
       });
   }
@@ -676,7 +694,7 @@ function runBackend() {
         continue;
       }
       if (!build.data.sha) continue;
-      const commit = commits.filter((c: any) => c.sha === build.data.sha);
+      const commit = commits.filter((c: any) => c.data.sha === build.data.sha);
       if (commit && commit[0]) {
         await CommitBuildConnection.connect({}, { from: commit[0], to: build });
       }

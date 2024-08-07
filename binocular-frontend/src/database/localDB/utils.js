@@ -3,7 +3,6 @@
 import PouchDB from 'pouchdb-browser';
 import PouchDBFind from 'pouchdb-find';
 import PouchDBAdapterMemory from 'pouchdb-adapter-memory';
-import { addHistoryToAllCommits } from '../utils';
 import _ from 'lodash';
 
 PouchDB.plugin(PouchDBFind);
@@ -98,7 +97,7 @@ export const sortByAttributeString = (arr, attribute, order = 'asc') => {
   }
 };
 
-// find all documents of a given collection (example: 'issues' or 'commits-stakeholders')
+// find all documents of a given collection (example: 'issues' or 'commits-users')
 export function findAll(database, collection) {
   //this fetches documents starting with _id startKey until _id endKey.
   // this works because the ids of our documents include the collection name.
@@ -131,59 +130,64 @@ export function findID(database, id) {
 
 export async function findAllCommits(database, relations) {
   const commits = await findAll(database, 'commits');
-  const commitStakeholderConnections = sortByAttributeString((await findCommitStakeholderConnections(relations)).docs, 'to');
-  const commitCommitConnections = sortByAttributeString((await findCommitCommitConnections(relations)).docs, 'to');
+  const allCommits = sortByAttributeString(commits.docs, '_id');
+  const commitUserConnections = sortByAttributeString((await findCommitUserConnections(relations)).docs, 'from');
+  const commitCommitConnections = sortByAttributeString((await findCommitCommitConnections(relations)).docs, 'from');
 
-  const stakeholderObjects = (await findAll(database, 'stakeholders')).docs;
-  const stakeholders = {};
-  stakeholderObjects.map((s) => {
-    stakeholders[s._id] = s.gitSignature;
+  const userObjects = (await findAll(database, 'users')).docs;
+  const users = {};
+  userObjects.map((s) => {
+    users[s._id] = s.gitSignature;
   });
 
   commits.docs = await Promise.all(
-    commits.docs.map((c) => preprocessCommit(c, database, commitStakeholderConnections, commitCommitConnections, stakeholders)),
+    commits.docs.map((c) => preprocessCommit(c, allCommits, commitUserConnections, commitCommitConnections, users)),
   );
-
-  addHistoryToAllCommits(commits.docs);
 
   return commits;
 }
 
 export async function findCommit(database, relations, sha) {
+  const allCommits = sortByAttributeString((await findAll(database, 'commits')).docs, '_id');
   const commit = await database.find({
     selector: { _id: { $regex: new RegExp('^commits/.*') }, sha: { $eq: sha } },
   });
 
   if (commit.docs && commit.docs[0]) {
-    const commitStakeholderConnections = sortByAttributeString((await findCommitStakeholderConnections(relations)).docs, 'to');
-    const commitCommitConnections = sortByAttributeString((await findCommitCommitConnections(relations)).docs, 'to');
+    const commitUserConnections = sortByAttributeString((await findCommitUserConnections(relations)).docs, 'from');
+    const commitCommitConnections = sortByAttributeString((await findCommitCommitConnections(relations)).docs, 'from');
 
-    const stakeholderObjects = (await findAll(database, 'stakeholders')).docs;
-    const stakeholders = {};
-    stakeholderObjects.map((s) => {
-      stakeholders[s._id] = s.gitSignature;
+    const userObjects = (await findAll(database, 'users')).docs;
+    const users = {};
+    userObjects.map((s) => {
+      users[s._id] = s.gitSignature;
     });
-    commit.docs[0] = await preprocessCommit(commit.docs[0], database, commitStakeholderConnections, commitCommitConnections, stakeholders);
+    commit.docs[0] = await preprocessCommit(commit.docs[0], allCommits, commitUserConnections, commitCommitConnections, users);
   }
   return commit;
 }
 
-//add stakeholder, parents to commit
-async function preprocessCommit(commit, database, commitStakeholder, commitCommit, stakeholders) {
-  //add parents
-  commit.parents = binarySearchArray(commitCommit, commit._id, 'to').map((r) => r.from.split('/')[1]);
+//add user, parents to commit
+async function preprocessCommit(commit, allCommits, commitUser, commitCommit, users) {
+  //add parents: first get the ids of the parents using the commits-commits connection, then find the actual commits to get the hashes
+  commit.parents = binarySearchArray(commitCommit, commit._id, 'from').map((r) => {
+    const parent = binarySearch(allCommits, r.to, '_id');
+    if (parent !== null) {
+      return parent.sha;
+    }
+  });
 
-  //add stakeholder
-  const commitStakeholderRelation = binarySearch(commitStakeholder, commit._id, 'to');
+  //add user
+  const commitUserRelation = binarySearch(commitUser, commit._id, 'from');
 
-  if (!commitStakeholderRelation) {
-    console.log('Error in localDB: commit: no stakeholder found for commit ' + commit.sha);
+  if (!commitUserRelation) {
+    console.log('Error in localDB: commit: no user found for commit ' + commit.sha);
     return commit;
   }
-  const author = stakeholders[commitStakeholderRelation.from];
+  const author = users[commitUserRelation.to];
 
   if (!author) {
-    console.log('Error in localDB: commit: no stakeholder found with ID ' + commitStakeholderRelation.from);
+    console.log('Error in localDB: commit: no user found with ID ' + commitUserRelation.to);
     return commit;
   }
   return _.assign(commit, { signature: author });
@@ -201,22 +205,85 @@ export function findFile(database, file) {
   });
 }
 
+export async function findAllIssues(database, relations) {
+  return findAllIssuesOrMergeRequests(database, relations, 'issues');
+}
+
+export async function findAllMergeRequests(database, relations) {
+  return findAllIssuesOrMergeRequests(database, relations, 'mergeRequests');
+}
+
+// finds all Issues/MRs and infers notes, author, assignee and assignees using the respective relations
+async function findAllIssuesOrMergeRequests(database, relations, type) {
+  if (type !== 'issues' && type !== 'mergeRequests') {
+    return [];
+  }
+  const issues = await findAll(database, type);
+
+  // get issues-accounts connections and sort by the issues ids
+  const issuesAccounts = sortByAttributeString((await findAll(relations, `${type}-accounts`)).docs, 'from');
+  const accounts = sortByAttributeString((await findAll(database, 'accounts')).docs, '_id');
+
+  // get relevant connections for notes
+  // notes array should already be sorted by _id
+  const notes = (await findAll(database, 'notes')).docs;
+  const issuesNotesConnections = sortByAttributeString((await findIssueNoteConnections(relations)).docs, 'from');
+  const notesAccountsConnections = sortByAttributeString((await findNoteAccountConnections(relations)).docs, 'from');
+
+  issues.docs = issues.docs.map((i) => {
+    // related notes
+    i.notes = [];
+    const relevantNotesConnections = binarySearchArray(issuesNotesConnections, i._id, 'from');
+    i.notes = relevantNotesConnections.map((issueNote) => {
+      // find note this connection points to
+      const note = binarySearch(notes, issueNote.to, '_id');
+      // find author of this note
+      // find the outgoing connection from this note to the acc of the author
+      const noteAccConnection = binarySearch(notesAccountsConnections, note._id, 'from');
+      // find the actual acc the connection points to
+      note.author = binarySearch(accounts, noteAccConnection.to, '_id');
+      return note;
+    });
+
+    // related accounts
+    i.author = {};
+    i.assignee = {};
+    i.assignees = [];
+    // find all related accounts
+    const relevantAccConnections = binarySearchArray(issuesAccounts, i._id, 'from');
+    relevantAccConnections.forEach((c) => {
+      // find account
+      const a = binarySearch(accounts, c.to, '_id');
+      // add account to the issue i the role defined by the connection
+      if (c.role === 'author') {
+        i.author = a;
+      } else if (c.role === 'assignee') {
+        i.assignee = a;
+      } else if (c.role === 'assignees') {
+        i.assignees.push(a);
+      }
+    });
+    return i;
+  });
+  return issues;
+}
+
 // ###################### CONNECTIONS ######################
 
 export function findFileCommitConnections(relations) {
   return findAll(relations, 'commits-files');
 }
 
-export function findCommitStakeholderConnections(relations) {
-  return findAll(relations, 'commits-stakeholders');
+export function findCommitUserConnections(relations) {
+  return findAll(relations, 'commits-users');
 }
 
 export function findCommitCommitConnections(relations) {
   return findAll(relations, 'commits-commits');
 }
 
-export function findFileCommitStakeholderConnections(relations) {
-  return findAll(relations, 'commits-files-stakeholders');
+export function findFileCommitUserConnections(relations) {
+  return findAll(relations, 'commits-files-users');
 }
 
 export function findBranch(database, branch) {
@@ -244,11 +311,11 @@ export function findBuild(database, sha) {
 }
 
 // TODO should probably not be used, very slow
-export function findFileConnections(relations, sha) {
+export function findFileConnections(relations, commitId) {
   return relations.find({
     selector: {
       _id: { $regex: new RegExp('^commits-files/.*') },
-      to: { $eq: 'commits/' + sha },
+      from: { $eq: commitId },
     },
   });
 }
@@ -259,4 +326,12 @@ export function findIssueCommitConnections(relations) {
 
 export function findCommitBuildConnections(relations) {
   return findAll(relations, 'commits-builds');
+}
+
+export function findIssueNoteConnections(relations) {
+  return findAll(relations, 'issues-notes');
+}
+
+export function findNoteAccountConnections(relations) {
+  return findAll(relations, 'notes-accounts');
 }

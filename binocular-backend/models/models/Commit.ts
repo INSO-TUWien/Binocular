@@ -4,11 +4,11 @@ import debug from 'debug';
 import Model, { Entry } from '../Model';
 
 import File, { FileDataType } from './File';
-import Stakeholder, { StakeholderDataType } from './Stakeholder';
+import User, { UserDataType } from './User';
 import Stats from '../../types/supportingTypes/Stats';
 import CommitCommitConnection from '../connections/CommitCommitConnection';
 import CommitFileConnection from '../connections/CommitFileConnection';
-import CommitStakeholderConnection from '../connections/CommitStakeholderConnection';
+import CommitUserConnection from '../connections/CommitUserConnection';
 
 import IllegalArgumentError from '../../errors/IllegalArgumentError';
 import { exec } from 'child_process';
@@ -106,9 +106,9 @@ class Commit extends Model<CommitDataType> {
         });
       }),
     );
-    const results = await Stakeholder.ensureBy('gitSignature', authorSignature, {} as StakeholderDataType);
-    const stakeholder = results[0];
-    await CommitStakeholderConnection.connect({}, { from: commit, to: stakeholder });
+    const results = await User.ensureBy('gitSignature', authorSignature, {} as UserDataType);
+    const user = results[0];
+    await CommitUserConnection.connect({}, { from: commit, to: user });
     return commit;
   }
 
