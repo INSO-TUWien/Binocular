@@ -10,7 +10,7 @@ export default {
       const resp = await graphQl.query({
         query: gql`
           query ($page: Int, $perPage: Int) {
-            stakeholders(page: $page, perPage: $perPage) {
+            users(page: $page, perPage: $perPage) {
               count
               page
               perPage
@@ -22,7 +22,7 @@ export default {
         `,
         variables: { page, perPage },
       });
-      return resp.data.stakeholders;
+      return resp.data.users;
     };
 
     await traversePages(getAuthorsPage(), (author: DataPluginAuthor) => {
