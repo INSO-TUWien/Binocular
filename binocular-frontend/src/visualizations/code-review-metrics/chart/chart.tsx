@@ -60,17 +60,10 @@ class ChartComponent extends React.Component<Props, State> {
       </div>
     );
 
-    const legend = (
-      <div>
-        <LegendCompact text="Open | Closed | Merged" color="#6cc644" color2="#bd2c00" color3="#6e5494" />
-      </div>
-    );
-
     return (
       <div className={styles.chartContainer}>
         {this.state.metricsData === null && loadingHint}
         {metricsChart}
-        {legend}
       </div>
     );
   }

@@ -21,7 +21,7 @@ interface Padding {
   right: number;
 }
 
-interface State {
+export interface State {
   data: Bubble[];
   tooltipX: number;
   tooltipY: number;
@@ -54,9 +54,10 @@ interface WindowSpecs {
   paddings: Padding;
 }
 
-interface Folder {
-  datapoints: Bubble[];
-  subfolders: Map<string, Folder>;
+interface Node {
+  name: string;
+  datapoint?: Bubble;
+  children: Node[];
 }
 
 // TODO: refactor to remove duplicate code from ScalableBaseChart
@@ -302,8 +303,11 @@ export default class BubbleChart extends React.Component<Props, State> {
 
     const { width, height, paddings } = this.getDimsAndPaddings(svg);
 
+    svg.selectAll('*').remove();
+
     if (this.props.useGroups) {
-      this.groupData(data, svg, height, width);
+      this.group(svg, this.groupData(data, svg, height, width));
+      return;
     }
 
     const scales = this.createScales(
@@ -315,13 +319,74 @@ export default class BubbleChart extends React.Component<Props, State> {
       [d3.min(data, (d: any) => d.size), d3.max(data, (d: any) => d.size)],
     );
 
-    svg.selectAll('*').remove();
-
     this.createBrush(svg, data, width, height);
 
     const { bubbleChart } = this.getChart(svg, scales, height, paddings);
-
     this.simulateData(data, scales, bubbleChart);
+  }
+
+  groupData(data: Bubble[], svg, heigth: number, width: number) {
+    const root: Node = { name: 'root', children: [] };
+    data.forEach((dp) => {
+      const folderStructure = dp.group!.identifier.split('/');
+      let currentLevel = root.children;
+
+      folderStructure.slice(1).forEach((folder, index) => {
+        let existingFolder = currentLevel.find((d) => d.name === folder);
+
+        if (!existingFolder) {
+          existingFolder = { name: folder, children: [] };
+          currentLevel.push(existingFolder);
+        }
+
+        if (index === folderStructure.length - 2) {
+          existingFolder.children.push({ name: dp.data[0].value.toString(), children: [], datapoint: dp });
+        }
+
+        currentLevel = existingFolder.children;
+      });
+    });
+    console.log(root);
+
+    const hierarchy = d3.hierarchy(root).sum((d) => (d.datapoint ? d.datapoint.size : 0));
+    console.log(hierarchy);
+
+    const pack = d3.pack<any>().size([width, heigth]).padding(20);
+    const abc = pack(hierarchy);
+    console.log(abc);
+    return abc.descendants();
+  }
+
+  group(svg, groupedData) {
+    const leaf = svg
+      .selectAll('g')
+      .data(groupedData)
+      .enter()
+      .append('g')
+      .attr('transform', (d: any) => `translate(${d.x + 1},${d.y + 1})`);
+
+    const files = ['#00000', '#062F4F', '#813772', '#B82601'];
+
+    const circle = leaf
+      .append('circle')
+      .attr('r', (d: any) => d.r)
+      .attr('fill', (d) => (d.data.datapoint ? files[d.depth % 4] : 'none'))
+      .style('stroke', (d) => (d.data.datapoint ? 'none' : '#000'))
+      .style('stroke-width', (d) => (d.data.datapoint ? 'none' : 10))
+      .on('mouseover', (event, d) => {
+        this.setState({
+          tooltipX: event.layerX,
+          tooltipY: event.layerY,
+          tooltipVisible: true,
+          tooltipData: d.data.datapoint ? d.data.datapoint.data : [{ label: 'Foldername', value: d.data.name }],
+        });
+      })
+      .on('mouseout', () => {
+        this.setState({
+          tooltipData: [],
+          tooltipVisible: false,
+        });
+      });
   }
 
   /**
@@ -344,78 +409,9 @@ export default class BubbleChart extends React.Component<Props, State> {
         'collision',
         d3.forceCollide((d: Bubble) => scales.radius(d.size) + 1),
       )
-      .on('tick', () => bubbleChart.attr('cx', (d) => d.x).attr('cy', (d) => d.y));
-  }
-
-  groupData(data: Bubble[], svg, heigth: number, width: number) {
-    const palette = ['#957186', '#D9B8C4', '#703d57', '#402A2C', '#241715'];
-
-    // get all different groups (folders)
-    const groups = Array.from(
-      new Set(
-        data.map((d) => {
-          const { identifier } = d.group!;
-          return identifier;
-        }),
-      ),
-    );
-
-    // build grouped data
-    const root = new Map<string, Folder>();
-    data.forEach((dp) => {
-      const folderStructure = dp.group!.identifier.split('/');
-
-      // file is inside root folder and folder has not yet been initialized
-      if (folderStructure.length === 2 && !root.has(folderStructure[1])) {
-        root.set(folderStructure[1], { datapoints: [dp], subfolders: new Map<string, Folder>() });
-        return;
-      }
-
-      // file is inside root folder but folder has already been initzialized
-      if (folderStructure.length === 2 && root.has(folderStructure[1])) {
-        root.get(folderStructure[1])?.datapoints.push(dp);
-        return;
-      }
-
-      // track sub folders
-      let currentFolder = root.has(folderStructure[1])
-        ? root.get(folderStructure[1])?.subfolders
-        : root.set(folderStructure[1], { datapoints: [], subfolders: new Map<string, Folder>() });
-
-      folderStructure.forEach((folder, index) => {
-        // first node was already set
-        if (index < 2) return;
-        currentFolder = currentFolder!.has(folder)
-          ? currentFolder!.get(folder)?.subfolders
-          : currentFolder!.set(folder, { datapoints: [], subfolders: new Map<string, Folder>() });
-        // place dp in correct folder
-        if (index === folderStructure.length - 1) currentFolder!.get(folder)?.datapoints.push(dp);
+      .on('tick', () => {
+        bubbleChart.attr('cx', (d) => d.x).attr('cy', (d) => d.y);
       });
-    });
-
-    console.log(root);
-
-    const radius = Math.min(width / 2, heigth / 2);
-    const angle = (2 * Math.PI) / groups.length;
-
-    // calc the center cords of the groups on the canvas
-    const groupCenters = new Map<string, { x: number; y: number }>();
-    const groupColors = new Map<string, string>();
-    groups.forEach((group, index) => {
-      const x = width / 2 + radius * Math.cos(angle * index);
-      const y = heigth / 2 + radius * Math.sin(angle * index);
-      groupCenters.set(group, { x, y });
-      groupColors.set(group, palette[index % palette.length]);
-    });
-
-    // adjust the position of each data point to match the group
-    data.forEach((dp) => {
-      const { identifier } = dp.group!;
-      const groupPosition = groupCenters.get(identifier);
-      dp.x = groupPosition?.x || dp.x;
-      dp.y = groupPosition?.y || dp.y;
-      dp.color = groupColors.get(identifier) || dp.color;
-    });
   }
 
   render() {
