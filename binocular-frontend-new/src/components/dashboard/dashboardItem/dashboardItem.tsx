@@ -1,7 +1,7 @@
 import dashboardItemStyles from './dashboardItem.module.scss';
 import { DragResizeMode } from '../resizeMode.ts';
 import { dataPlugins, visualizationPlugins } from '../../../plugins/pluginRegistry.ts';
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import DashboardItemPopout from '../dashboardItemPopout/dashboardItemPopout.tsx';
 import { increasePopupCount } from '../../../redux/general/dashboardReducer.ts';
 import { AppDispatch, RootState, useAppDispatch } from '../../../redux';
@@ -16,6 +16,8 @@ import ReduxSubAppStoreWrapper from '../reduxSubAppStoreWrapper/reduxSubAppStore
 import { configureStore } from '@reduxjs/toolkit';
 import createSagaMiddleware from 'redux-saga';
 import { createLogger } from 'redux-logger';
+import { DataPlugin } from '../../../plugins/interfaces/dataPlugin.ts';
+import { DatabaseSettingsDataPluginType } from '../../../types/settings/databaseSettingsType.ts';
 
 const logger = createLogger({
   collapsed: () => true,
@@ -38,7 +40,7 @@ function DashboardItem(props: {
 
   const [poppedOut, setPoppedOut] = useState(false);
 
-  const currentDataPluginName = useSelector((state: RootState) => state.settings.database.dataPlugin.name);
+  const configuredDataPlugins = useSelector((state: RootState) => state.settings.database.dataPlugins);
   const authorList = useSelector((state: RootState) => state.authors.authorList);
   const sprintList = useSelector((state: RootState) => state.sprints.sprintList);
 
@@ -50,17 +52,31 @@ function DashboardItem(props: {
 
   const chartContainerRef = useRef<HTMLDivElement>(null);
 
-  const dataPlugin = dataPlugins.filter((plugin) => plugin.name === currentDataPluginName)[0];
+  const [dataPlugin, setDataPlugin] = useState<DataPlugin | undefined>();
+
+  useEffect(() => {
+    const currentDataPlugin = configuredDataPlugins.filter((dP: DatabaseSettingsDataPluginType) => dP.isDefault)[0];
+    if (currentDataPlugin) {
+      setDataPlugin(dataPlugins.filter((plugin) => plugin.name === currentDataPlugin.name)[0]);
+    } else {
+      setDataPlugin(undefined);
+    }
+  }, [configuredDataPlugins]);
 
   /**
    * Create Redux Store from Reducer for individual Item and run saga
    */
-  const sagaMiddleware = createSagaMiddleware();
-  const store = configureStore({
-    reducer: plugin.reducer,
-    middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(sagaMiddleware, logger),
-  });
-  sagaMiddleware.run(() => plugin.saga(dataPlugin));
+  let store;
+  if (dataPlugin) {
+    const sagaMiddleware = createSagaMiddleware();
+    store = configureStore({
+      reducer: plugin.reducer,
+      middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(sagaMiddleware, logger),
+    });
+    sagaMiddleware.run(() => plugin.saga(dataPlugin));
+  } else {
+    store = undefined;
+  }
 
   return (
     <>
@@ -89,22 +105,26 @@ function DashboardItem(props: {
                 <div>Dispatch Popout</div>
               </button>
             </div>
-            <DashboardItemPopout name={plugin.name} onClosing={() => setPoppedOut(false)}>
-              <ReduxSubAppStoreWrapper store={store}>
-                <plugin.chartComponent
-                  key={plugin.name}
-                  settings={settings}
-                  authorList={authorList}
-                  sprintList={sprintList}
-                  parameters={{
-                    parametersGeneral: ignoreGlobalParameters ? parametersGeneralLocal : parametersGeneralGlobal,
-                    parametersDateRange: ignoreGlobalParameters ? parametersDateRangeLocal : parametersDateRangeGlobal,
-                  }}
-                  dataConnection={dataPlugins.filter((plugin) => plugin.name === currentDataPluginName)[0]}
-                  chartContainerRef={chartContainerRef}
-                  store={store}></plugin.chartComponent>
-              </ReduxSubAppStoreWrapper>
-            </DashboardItemPopout>
+            {dataPlugin && store ? (
+              <DashboardItemPopout name={plugin.name} onClosing={() => setPoppedOut(false)}>
+                <ReduxSubAppStoreWrapper store={store}>
+                  <plugin.chartComponent
+                    key={plugin.name}
+                    settings={settings}
+                    authorList={authorList}
+                    sprintList={sprintList}
+                    parameters={{
+                      parametersGeneral: ignoreGlobalParameters ? parametersGeneralLocal : parametersGeneralGlobal,
+                      parametersDateRange: ignoreGlobalParameters ? parametersDateRangeLocal : parametersDateRangeGlobal,
+                    }}
+                    dataConnection={dataPlugin}
+                    chartContainerRef={chartContainerRef}
+                    store={store}></plugin.chartComponent>
+                </ReduxSubAppStoreWrapper>
+              </DashboardItemPopout>
+            ) : (
+              <div>No Data Plugin Selected</div>
+            )}
           </div>
         ) : (
           <div className={dashboardItemStyles.dashboardItemContent}>
@@ -123,7 +143,7 @@ function DashboardItem(props: {
                   <img src={openInNewGray} alt="Open Visualization" />
                 </button>
               </div>
-            ) : (
+            ) : dataPlugin && store ? (
               <ReduxSubAppStoreWrapper store={store}>
                 <plugin.chartComponent
                   key={plugin.name}
@@ -134,10 +154,12 @@ function DashboardItem(props: {
                     parametersGeneral: ignoreGlobalParameters ? parametersGeneralLocal : parametersGeneralGlobal,
                     parametersDateRange: ignoreGlobalParameters ? parametersDateRangeLocal : parametersDateRangeGlobal,
                   }}
-                  dataConnection={dataPlugins.filter((plugin) => plugin.name === currentDataPluginName)[0]}
+                  dataConnection={dataPlugin}
                   chartContainerRef={chartContainerRef}
                   store={store}></plugin.chartComponent>
               </ReduxSubAppStoreWrapper>
+            ) : (
+              <div>No Data Plugin Selected</div>
             )}
           </div>
         )}

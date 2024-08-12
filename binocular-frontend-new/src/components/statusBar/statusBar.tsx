@@ -9,23 +9,37 @@ import ConnectedToApi from '../../assets/connected_to_api_blue.svg';
 import ConnectedToApiFailed from '../../assets/connected_to_api_failed_red.svg';
 import CheckedCircle from '../../assets/check_circle_blue.svg';
 import Idle from '../../assets/idle_blue.svg';
+import { DatabaseSettingsDataPluginType } from '../../types/settings/databaseSettingsType.ts';
 
 function StatusBar() {
-  const currentDataPluginName = useSelector((state: RootState) => state.settings.database.dataPlugin.name);
-  const dataPlugin = dataPlugins.filter((plugin) => plugin.name === currentDataPluginName)[0];
+  const currentDataPlugins = useSelector((state: RootState) => state.settings.database.dataPlugins);
 
   const [indexer, setIndexer] = useState<DataPluginIndexer>();
   const [indexerState, setIndexerState] = useState<DataPluginIndexerState>();
   const [repository, setRepository] = useState<string>();
 
   useEffect(() => {
-    setIndexer(dataPlugin.general.getIndexer());
-    setIndexerState(dataPlugin.general.getIndexerState());
-    dataPlugin.general
-      .getRepositoryName()
-      .then((name) => setRepository(name))
-      .catch((e) => console.log(e));
-  }, [currentDataPluginName]);
+    const defaultDataPlugin = currentDataPlugins.filter((dP: DatabaseSettingsDataPluginType) => dP.isDefault)[0];
+    if (defaultDataPlugin) {
+      const dataPlugin = dataPlugins.filter((plugin) => plugin.name === defaultDataPlugin.name)[0];
+      setIndexer(dataPlugin.general.getIndexer());
+      setIndexerState(dataPlugin.general.getIndexerState());
+      dataPlugin.general
+        .getRepositoryName()
+        .then((name) => setRepository(name))
+        .catch((e) => console.log(e));
+    }
+  }, [currentDataPlugins]);
+
+  if (currentDataPlugins.length === 0) {
+    return (
+      <>
+        <div className={statusBarStyles.statusBar}>
+          <div className={statusBarStyles.statusLeft}>No DataPlugins Configured</div>
+        </div>
+      </>
+    );
+  }
 
   return (
     <>

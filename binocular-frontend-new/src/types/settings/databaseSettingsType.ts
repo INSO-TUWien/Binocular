@@ -1,11 +1,13 @@
 export interface DatabaseSettingsType {
-  dataPlugin: DatabaseSettingsDataPulginType;
+  dataPlugins: DatabaseSettingsDataPluginType[];
 }
 
-export interface DatabaseSettingsDataPulginType {
+export interface DatabaseSettingsDataPluginType {
+  id?: number;
   name: string;
+  isDefault?: boolean;
   parameters: {
-    apiKey: string;
-    endpoint: string;
+    apiKey?: string;
+    endpoint?: string;
   };
 }

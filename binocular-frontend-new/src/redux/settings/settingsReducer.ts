@@ -1,8 +1,7 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { dataPlugins } from '../../plugins/pluginRegistry.ts';
 import Config from '../../config.ts';
 import { GeneralSettingsType, SettingsGeneralGridSize } from '../../types/settings/generalSettingsType.ts';
-import { DatabaseSettingsType } from '../../types/settings/databaseSettingsType.ts';
+import { DatabaseSettingsDataPluginType, DatabaseSettingsType } from '../../types/settings/databaseSettingsType.ts';
 
 export interface SettingsInitialState {
   general: GeneralSettingsType;
@@ -14,13 +13,7 @@ const initialState: SettingsInitialState = {
     gridSize: SettingsGeneralGridSize.medium,
   },
   database: {
-    dataPlugin: {
-      name: dataPlugins[0].name,
-      parameters: {
-        apiKey: '',
-        endpoint: '',
-      },
-    },
+    dataPlugins: [],
   },
 };
 
@@ -40,16 +33,25 @@ export const settingsSlice = createSlice({
       state.general = action.payload;
       localStorage.setItem(`${settingsSlice.name}StateV${Config.localStorageVersion}`, JSON.stringify(state));
     },
-    setDataPluginName: (state, action: PayloadAction<string>) => {
-      state.database.dataPlugin.name = action.payload;
+    addDataPlugin: (state, action: PayloadAction<DatabaseSettingsDataPluginType>) => {
+      if (state.database.dataPlugins.length === 0) {
+        action.payload.isDefault = true;
+      } else {
+        action.payload.isDefault = false;
+      }
+      action.payload.id = state.database.dataPlugins.length;
+      state.database.dataPlugins.push(action.payload);
       localStorage.setItem(`${settingsSlice.name}StateV${Config.localStorageVersion}`, JSON.stringify(state));
     },
-    setDataPluginParameterApiKey: (state, action: PayloadAction<string>) => {
-      state.database.dataPlugin.parameters.apiKey = action.payload;
+    removeDataPlugin: (state, action: PayloadAction<number>) => {
+      state.database.dataPlugins = state.database.dataPlugins.filter((dP: DatabaseSettingsDataPluginType) => dP.id !== action.payload);
       localStorage.setItem(`${settingsSlice.name}StateV${Config.localStorageVersion}`, JSON.stringify(state));
     },
-    setDataPluginParameterEndpoint: (state, action: PayloadAction<string>) => {
-      state.database.dataPlugin.parameters.endpoint = action.payload;
+    setDataPluginAsDefault: (state, action: PayloadAction<number>) => {
+      state.database.dataPlugins = state.database.dataPlugins.map((dP: DatabaseSettingsDataPluginType) => {
+        dP.isDefault = dP.id === action.payload;
+        return dP;
+      });
       localStorage.setItem(`${settingsSlice.name}StateV${Config.localStorageVersion}`, JSON.stringify(state));
     },
     clearSettingsStorage: () => {
@@ -62,12 +64,6 @@ export const settingsSlice = createSlice({
   },
 });
 
-export const {
-  setGeneralSettings,
-  setDataPluginName,
-  setDataPluginParameterApiKey,
-  setDataPluginParameterEndpoint,
-  clearSettingsStorage,
-  importSettingsStorage,
-} = settingsSlice.actions;
+export const { setGeneralSettings, addDataPlugin, removeDataPlugin, setDataPluginAsDefault, clearSettingsStorage, importSettingsStorage } =
+  settingsSlice.actions;
 export default settingsSlice.reducer;

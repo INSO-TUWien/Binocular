@@ -20,6 +20,7 @@ import editIcon from '../../../../assets/edit_black.svg';
 import dragIndicatorIcon from '../../../../assets/drag_indicator_gray.svg';
 import removePersonIcon from '../../../../assets/remove_person_black.svg';
 import { AuthorType } from '../../../../types/data/authorType.ts';
+import { DatabaseSettingsDataPluginType } from '../../../../types/settings/databaseSettingsType.ts';
 
 function AuthorList(props: { orientation?: string }) {
   const dispatch: AppDispatch = useAppDispatch();
@@ -27,31 +28,34 @@ function AuthorList(props: { orientation?: string }) {
   const authors = useSelector((state: RootState) => state.authors.authorList);
   const dragging = useSelector((state: RootState) => state.authors.dragging);
 
-  const currentDataPlugin = useSelector((state: RootState) => state.settings.database.dataPlugin);
+  const currentDataPlugins = useSelector((state: RootState) => state.settings.database.dataPlugins);
 
   useEffect(() => {
-    dataPlugins.filter((plugin) => plugin.name === currentDataPlugin.name)[0].setApiKey(currentDataPlugin.parameters.apiKey);
-    dataPlugins
-      .filter((plugin) => plugin.name === currentDataPlugin.name)[0]
-      .users.getAll()
-      .then((users) => {
-        const colors = distinctColors({ count: users.length, lightMin: 50 });
-        dispatch(
-          setAuthorList(
-            users.map((user, i) => {
-              return {
-                user: user,
-                id: 0, // real id gets set in reducer
-                parent: -1,
-                color: { main: colors[i].hex(), secondary: colors[i].hex() + '55' },
-                selected: true,
-              };
-            }),
-          ),
-        );
-      })
-      .catch(() => console.log('Error loading Users from selected data source!'));
-  }, [currentDataPlugin.name]);
+    const defaultDataPlugin = currentDataPlugins.filter((dP: DatabaseSettingsDataPluginType) => dP.isDefault)[0];
+    if (defaultDataPlugin) {
+      dataPlugins.filter((plugin) => plugin.name === defaultDataPlugin.name)[0].setApiKey(defaultDataPlugin.parameters.apiKey);
+      dataPlugins
+        .filter((plugin) => plugin.name === defaultDataPlugin.name)[0]
+        .users.getAll()
+        .then((users) => {
+          const colors = distinctColors({ count: users.length, lightMin: 50 });
+          dispatch(
+            setAuthorList(
+              users.map((user, i) => {
+                return {
+                  user: user,
+                  id: 0, // real id gets set in reducer
+                  parent: -1,
+                  color: { main: colors[i].hex(), secondary: colors[i].hex() + '55' },
+                  selected: true,
+                };
+              }),
+            ),
+          );
+        })
+        .catch(() => console.log('Error loading Users from selected data source!'));
+    }
+  }, [currentDataPlugins]);
 
   return (
     <>
