@@ -10,7 +10,7 @@ import { AppDispatch, RootState, useAppDispatch } from '../../../redux';
 function DatabaseSettings() {
   const dispatch: AppDispatch = useAppDispatch();
 
-  const currentDataPlugin = useSelector((state: RootState) => state.settings.dataPlugin);
+  const currentDataPlugin = useSelector((state: RootState) => state.settings.database.dataPlugin);
 
   return (
     <>

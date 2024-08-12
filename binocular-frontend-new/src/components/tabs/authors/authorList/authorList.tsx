@@ -27,7 +27,7 @@ function AuthorList(props: { orientation?: string }) {
   const authors = useSelector((state: RootState) => state.authors.authorList);
   const dragging = useSelector((state: RootState) => state.authors.dragging);
 
-  const currentDataPlugin = useSelector((state: RootState) => state.settings.dataPlugin);
+  const currentDataPlugin = useSelector((state: RootState) => state.settings.database.dataPlugin);
 
   useEffect(() => {
     dataPlugins.filter((plugin) => plugin.name === currentDataPlugin.name)[0].setApiKey(currentDataPlugin.parameters.apiKey);

@@ -38,7 +38,7 @@ function DashboardItem(props: {
 
   const [poppedOut, setPoppedOut] = useState(false);
 
-  const currentDataPluginName = useSelector((state: RootState) => state.settings.dataPlugin.name);
+  const currentDataPluginName = useSelector((state: RootState) => state.settings.database.dataPlugin.name);
   const authorList = useSelector((state: RootState) => state.authors.authorList);
   const sprintList = useSelector((state: RootState) => state.sprints.sprintList);
 

@@ -11,7 +11,7 @@ import CheckedCircle from '../../assets/check_circle_blue.svg';
 import Idle from '../../assets/idle_blue.svg';
 
 function StatusBar() {
-  const currentDataPluginName = useSelector((state: RootState) => state.settings.dataPlugin.name);
+  const currentDataPluginName = useSelector((state: RootState) => state.settings.database.dataPlugin.name);
   const dataPlugin = dataPlugins.filter((plugin) => plugin.name === currentDataPluginName)[0];
 
   const [indexer, setIndexer] = useState<DataPluginIndexer>();
