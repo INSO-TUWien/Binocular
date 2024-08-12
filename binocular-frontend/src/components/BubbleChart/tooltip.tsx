@@ -35,7 +35,8 @@ export default class BubbleToolTip extends React.Component<Props> {
       <div style={this.style} className={styles.tooltip}>
         {this.props.data.map((data, index) => (
           <div key={index}>
-            <p>{data.label + ': ' + data.value}</p>
+            <span>{data.label + ': '}</span>
+            <span>{data.value}</span>
           </div>
         ))}
       </div>

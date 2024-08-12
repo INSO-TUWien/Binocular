@@ -57,6 +57,7 @@ interface WindowSpecs {
 interface Node {
   name: string;
   datapoint?: Bubble;
+  isRoot?: boolean;
   children: Node[];
 }
 
@@ -193,8 +194,8 @@ export default class BubbleChart extends React.Component<Props, State> {
       .classed('bubble', true)
       .on('mouseover', (event, d: Bubble) => {
         this.setState({
-          tooltipX: event.layerX,
-          tooltipY: event.layerY,
+          tooltipX: event.layerX + 20,
+          tooltipY: event.layerY + 20,
           tooltipVisible: true,
           tooltipData: d.data,
         });
@@ -326,13 +327,19 @@ export default class BubbleChart extends React.Component<Props, State> {
   }
 
   groupData(data: Bubble[], svg, heigth: number, width: number) {
-    const root: Node = { name: 'root', children: [] };
+    const root: Node = { name: 'root', children: [], isRoot: true };
     data.forEach((dp) => {
       const folderStructure = dp.group!.identifier.split('/');
       let currentLevel = root.children;
 
       folderStructure.slice(1).forEach((folder, index) => {
         let existingFolder = currentLevel.find((d) => d.name === folder);
+
+        // in root directory
+        if (folder === '') {
+          root.children.push({ name: dp.data[0].value.toString(), children: [], datapoint: dp });
+          return;
+        }
 
         if (!existingFolder) {
           existingFolder = { name: folder, children: [] };
@@ -348,13 +355,11 @@ export default class BubbleChart extends React.Component<Props, State> {
     });
     console.log(root);
 
-    const hierarchy = d3.hierarchy(root).sum((d) => (d.datapoint ? d.datapoint.size : 0));
-    console.log(hierarchy);
+    const hierarchy = d3.hierarchy(root).sum((d) => (d.datapoint ? d.datapoint.size : 10));
 
     const pack = d3.pack<any>().size([width, heigth]).padding(20);
-    const abc = pack(hierarchy);
-    console.log(abc);
-    return abc.descendants();
+    const packedHierarchy = pack(hierarchy);
+    return packedHierarchy.descendants();
   }
 
   group(svg, groupedData) {
@@ -370,15 +375,21 @@ export default class BubbleChart extends React.Component<Props, State> {
     const circle = leaf
       .append('circle')
       .attr('r', (d: any) => d.r)
-      .attr('fill', (d) => (d.data.datapoint ? files[d.depth % 4] : 'none'))
-      .style('stroke', (d) => (d.data.datapoint ? 'none' : '#000'))
-      .style('stroke-width', (d) => (d.data.datapoint ? 'none' : 10))
+      .attr('fill', (d) => (d.data.datapoint ? files[d.depth % 4] : 'white'))
+      .style('stroke', (d) => (d.data.datapoint || d.data.isRoot ? 'none' : '#000'))
+      .style('stroke-width', (d) => (d.data.datapoint ? 'none' : 2))
       .on('mouseover', (event, d) => {
         this.setState({
-          tooltipX: event.layerX,
-          tooltipY: event.layerY,
+          tooltipX: event.layerX + 20,
+          tooltipY: event.layerY + 20,
           tooltipVisible: true,
           tooltipData: d.data.datapoint ? d.data.datapoint.data : [{ label: 'Foldername', value: d.data.name }],
+        });
+      })
+      .on('mousemove', (event, d) => {
+        this.setState({
+          tooltipX: event.layerX + 20,
+          tooltipY: event.layerY + 20,
         });
       })
       .on('mouseout', () => {
