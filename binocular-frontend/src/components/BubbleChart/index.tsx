@@ -363,6 +363,12 @@ export default class BubbleChart extends React.Component<Props, State> {
   }
 
   group(svg, groupedData) {
+    const simulation = d3
+      .forceSimulation(groupedData)
+      .force('charge', d3.forceManyBody().strength(0))
+      .force('x', d3.forceX())
+      .force('y', d3.forceY());
+
     const leaf = svg
       .selectAll('g')
       .data(groupedData)
@@ -398,6 +404,10 @@ export default class BubbleChart extends React.Component<Props, State> {
           tooltipVisible: false,
         });
       });
+
+    simulation.on('tick', () => {
+      circle.attr('cx', (d) => d.x).attr('cy', (d) => d.y);
+    });
   }
 
   /**

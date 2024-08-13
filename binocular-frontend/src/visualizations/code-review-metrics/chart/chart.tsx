@@ -2,7 +2,6 @@
 import React from 'react';
 import BubbleChart, { Bubble } from '../../../components/BubbleChart';
 import { Author, Comment, MergeRequest, ReviewThread } from '../../../types/dbTypes';
-import LegendCompact from '../../../components/LegendCompact';
 import _ from 'lodash';
 import styles from '../styles.module.scss';
 import { connect } from 'react-redux';
@@ -140,8 +139,8 @@ class ChartComponent extends React.Component<Props, State> {
         color: 'red',
         size: count,
         data: [
-          { label: 'filename', value: file },
-          { label: 'Reviews inside file', value: count },
+          { label: 'Filename', value: file },
+          { label: 'Reviews', value: count },
         ],
         group: { identifier, foldername },
       };
@@ -198,7 +197,7 @@ class ChartComponent extends React.Component<Props, State> {
   getReviewThreadOwnershipCountByFile(mergeRequests: MergeRequest[], fileMap: Map<string, number>, props) {
     _.each(mergeRequests, (mergeRequest: MergeRequest) => {
       mergeRequest.reviewThreads.forEach((reviewThread: ReviewThread) => {
-        if (props.codeReviewMetricsState.config.path.has(reviewThread.path)) {
+        if (props.codeReviewMetricsState.config.globalActiveFiles.find((file) => file === reviewThread.path)) {
           this.handleMapIncrementation(reviewThread.path, fileMap);
         }
       });

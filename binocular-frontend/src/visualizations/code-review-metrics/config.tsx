@@ -2,22 +2,16 @@
 
 import React from 'react';
 import * as styles from './styles.module.scss';
-import { connect } from 'react-redux';
+import { connect, useDispatch } from 'react-redux';
 import TabCombo from '../../components/TabCombo';
-import { File, setCategory, setFile, setGrouping, setPath } from './sagas';
-import FileBrowser from '../legacy/code-hotspots/components/fileBrowser/fileBrowser';
+import { setActiveFiles, setCategory, setGrouping } from './sagas';
+import Filepicker from '../../components/Filepicker';
 
 interface Props {
   codeReviewMetricsState: any;
   setGrouping: (group: any) => void;
   setCategory: (category: any) => void;
-  setPath: (path: string) => void;
-  setFile: (file: string) => void;
-  fileBrowserProps: FileBrowserProps;
-}
-
-interface FileBrowserProps {
-  files: File[];
+  setActiveFiles: (files: any) => void;
 }
 
 class ConfigComponent extends React.Component<Props> {
@@ -27,6 +21,10 @@ class ConfigComponent extends React.Component<Props> {
 
   onClickCategory(category) {
     this.props.setCategory(category);
+  }
+
+  onSetActiveFiles(files) {
+    this.props.setActiveFiles(files);
   }
 
   render() {
@@ -60,10 +58,10 @@ class ConfigComponent extends React.Component<Props> {
         )}
         {this.props.codeReviewMetricsState.config.grouping === 'file' && (
           <div className="field">
-            <FileBrowser
-              files={this.props.codeReviewMetricsState.data.data.files}
-              props={this.props}
-              highlights={this.props.codeReviewMetricsState.config.path}
+            <Filepicker
+              fileList={this.props.codeReviewMetricsState.data.data.fileList}
+              globalActiveFiles={this.props.codeReviewMetricsState.config.globalActiveFiles}
+              setActiveFiles={(files) => this.onSetActiveFiles(files)}
             />
           </div>
         )}
@@ -80,8 +78,7 @@ const mapDispatchToProps = (dispatch /*, ownProps*/) => {
   return {
     setGrouping: (group) => dispatch(setGrouping(group)),
     setCategory: (category) => dispatch(setCategory(category)),
-    onSetPath: (path) => dispatch(setPath(path)),
-    onSetFile: (file) => dispatch(setFile(file)),
+    setActiveFiles: (files) => dispatch(setActiveFiles(files)),
   };
 };
 

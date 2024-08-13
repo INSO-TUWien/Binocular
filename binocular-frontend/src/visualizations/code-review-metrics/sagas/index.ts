@@ -10,9 +10,7 @@ export const refresh = createAction('REFRESH');
 export const requestCodeReviewMetricsData = createAction('REQUEST_CODE_REVIEW_METRICS_DATA');
 export const setGrouping = createAction('SET_GROUPING');
 export const setCategory = createAction('SET_CATEGORY');
-export const setFile = createAction('SET_FILE');
-export const setPath = createAction('SET_PATH');
-export const initHighlights = createAction('INIT_HIGHLIGHTS');
+export const setActiveFiles = createAction('CRM_SET_ACTIVE_FILES');
 export const receiveCodeReviewMetricsData = timestampedActionFactory('RECEIVE_CODE_REVIEW_METRICS_DATA');
 export const receiveCodeReviewMetricsDataError = createAction('RECEIVE_CODE_REVIEW_METRICS_DATA_ERROR');
 
@@ -53,13 +51,13 @@ export const fetchCodeReviewMetricsData = fetchFactory(
     ]);
 
     const mergeRequests = results[0];
-    const files = results[1];
+    let fileList = results[1];
 
-    yield put(initHighlights(files.map((file) => file.key)));
-
+    fileList = fileList.map((file) => file.key);
+    console.log(fileList);
     return {
       mergeRequests,
-      files,
+      fileList,
     };
   },
   requestCodeReviewMetricsData,

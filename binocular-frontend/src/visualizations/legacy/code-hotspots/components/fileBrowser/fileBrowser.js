@@ -85,14 +85,9 @@ class FileStruct extends React.PureComponent {
       <div>
         {this.props.data.content.map((data, i) => {
           if (data.type === 'file') {
-            let shouldHighlight = false;
-            if (this.props.highlights) {
-              shouldHighlight = this.props.highlights.has(data.path);
-            }
-            const classes = shouldHighlight ? styles.BCHighlighted : i % 2 === 0 ? styles.BCEven : styles.BCOdd;
             return (
               <div
-                className={styles.button + ' ' + classes}
+                className={styles.button + ' ' + (i % 2 === 0 ? styles.BCEven : styles.BCOdd)}
                 key={data.name}
                 onClick={() => {
                   this.clickFile(data.url, data.path);
@@ -123,7 +118,7 @@ class FileStruct extends React.PureComponent {
                   {data.name}
                 </button>
                 <div id={'' + i + 'panel' + data.name} className={styles.panel} style={{ display: this.props.foldOut ? 'block' : 'none' }}>
-                  <FileStruct data={data} foldOut={this.props.foldOut} props={this.props.props} highlights={this.props.highlights} />
+                  <FileStruct data={data} foldOut={this.props.foldOut} props={this.props.props} />
                 </div>
               </div>
             );
