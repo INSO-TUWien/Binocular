@@ -108,7 +108,7 @@ function loadConfig(context) {
     travis: {},
     gateway: {
       address: '127.0.0.1',
-      port: parseInt(context.argv.gqlPort)+1,
+      port: parseInt(context.argv.gqlPort) + 1,
       token: 'B1nocul4r!',
     },
   });
