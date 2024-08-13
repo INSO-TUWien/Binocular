@@ -25,37 +25,44 @@ import { DatabaseSettingsDataPluginType } from '../../../../types/settings/datab
 function AuthorList(props: { orientation?: string }) {
   const dispatch: AppDispatch = useAppDispatch();
 
-  const authors = useSelector((state: RootState) => state.authors.authorList);
+  const authorLists = useSelector((state: RootState) => state.authors.authorLists);
   const dragging = useSelector((state: RootState) => state.authors.dragging);
+  const authorsDataPluginId = useSelector((state: RootState) => state.authors.dataPluginId);
 
-  const currentDataPlugins = useSelector((state: RootState) => state.settings.database.dataPlugins);
+  const authors = authorLists[authorsDataPluginId] || [];
+
+  const configuredDataPlugins = useSelector((state: RootState) => state.settings.database.dataPlugins);
 
   useEffect(() => {
-    const defaultDataPlugin = currentDataPlugins.filter((dP: DatabaseSettingsDataPluginType) => dP.isDefault)[0];
-    if (defaultDataPlugin) {
-      dataPlugins.filter((plugin) => plugin.name === defaultDataPlugin.name)[0].setApiKey(defaultDataPlugin.parameters.apiKey);
-      dataPlugins
-        .filter((plugin) => plugin.name === defaultDataPlugin.name)[0]
-        .users.getAll()
-        .then((users) => {
-          const colors = distinctColors({ count: users.length, lightMin: 50 });
-          dispatch(
-            setAuthorList(
-              users.map((user, i) => {
-                return {
-                  user: user,
-                  id: 0, // real id gets set in reducer
-                  parent: -1,
-                  color: { main: colors[i].hex(), secondary: colors[i].hex() + '55' },
-                  selected: true,
-                };
+    configuredDataPlugins.forEach((dP: DatabaseSettingsDataPluginType) => {
+      const dataPlugin = dataPlugins.filter((dataPlugin) => dataPlugin.name === dP.name)[0];
+      if (dataPlugin) {
+        if (dP.parameters.apiKey) {
+          dataPlugin.setApiKey(dP.parameters.apiKey);
+        }
+        dataPlugin.users
+          .getAll()
+          .then((users) => {
+            const colors = distinctColors({ count: users.length, lightMin: 50 });
+            dispatch(
+              setAuthorList({
+                dataPluginId: dP.id !== undefined ? dP.id : -1,
+                authors: users.map((user, i) => {
+                  return {
+                    user: user,
+                    id: 0, // real id gets set in reducer
+                    parent: -1,
+                    color: { main: colors[i].hex(), secondary: colors[i].hex() + '55' },
+                    selected: true,
+                  };
+                }),
               }),
-            ),
-          );
-        })
-        .catch(() => console.log('Error loading Users from selected data source!'));
-    }
-  }, [currentDataPlugins]);
+            );
+          })
+          .catch(() => console.log('Error loading Users from selected data source!'));
+      }
+    });
+  }, [authorsDataPluginId, configuredDataPlugins]);
 
   return (
     <>
@@ -83,7 +90,7 @@ function AuthorList(props: { orientation?: string }) {
                     <input
                       type={'checkbox'}
                       className={'checkbox checkbox-accent ' + authorListStyles.authorCheckbox}
-                      defaultChecked={parentAuthor.selected}
+                      checked={parentAuthor.selected}
                       onChange={() => dispatch(switchAuthorSelection(parentAuthor.id))}
                     />
                     <div

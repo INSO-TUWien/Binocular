@@ -3,15 +3,17 @@ import { AuthorType } from '../../types/data/authorType.ts';
 import Config from '../../config.ts';
 
 export interface AuthorsInitialState {
-  authorList: AuthorType[];
+  authorLists: { [signature: string]: AuthorType[] };
   dragging: boolean;
   authorToEdit: AuthorType | undefined;
+  dataPluginId: number | undefined;
 }
 
 const initialState: AuthorsInitialState = {
-  authorList: [],
+  authorLists: {},
   dragging: false,
   authorToEdit: undefined,
+  dataPluginId: undefined,
 };
 
 export const authorsSlice = createSlice({
@@ -26,27 +28,30 @@ export const authorsSlice = createSlice({
     }
   },
   reducers: {
-    setAuthorList: (state, action: PayloadAction<AuthorType[]>) => {
-      if (state.authorList.length !== action.payload.length) {
-        state.authorList.forEach((author: AuthorType) => {
-          if (!action.payload.find((a: AuthorType) => a.user.id === author.user.id)) {
-            state.authorList = state.authorList.filter((a: AuthorType) => a.user.id !== author.user.id);
+    setAuthorList: (state, action: PayloadAction<{ dataPluginId: number; authors: AuthorType[] }>) => {
+      let authorList = state.authorLists[action.payload.dataPluginId] || [];
+
+      if (authorList.length !== action.payload.authors.length) {
+        authorList.forEach((author: AuthorType) => {
+          if (!action.payload.authors.find((a: AuthorType) => a.user.id === author.user.id)) {
+            authorList = authorList.filter((a: AuthorType) => a.user.id !== author.user.id);
           }
         });
-        action.payload.forEach((author) => {
-          if (!state.authorList.find((a: AuthorType) => a.user.id === author.user.id)) {
-            author.id = state.authorList.length + 1;
-            state.authorList.push(author);
+        action.payload.authors.forEach((author) => {
+          if (!authorList.find((a: AuthorType) => a.user.id === author.user.id)) {
+            author.id = authorList.length + 1;
+            authorList.push(author);
           }
         });
       }
+      state.authorLists[action.payload.dataPluginId] = authorList;
       localStorage.setItem(`${authorsSlice.name}StateV${Config.localStorageVersion}`, JSON.stringify(state));
     },
     setDragging: (state, action: PayloadAction<boolean>) => {
       state.dragging = action.payload;
     },
     moveAuthorToOther: (state, action: PayloadAction<number>) => {
-      state.authorList = state.authorList.map((a: AuthorType) => {
+      state.authorLists[state.dataPluginId] = state.authorLists[state.dataPluginId].map((a: AuthorType) => {
         if (a.parent === action.payload || a.id === action.payload) {
           a.parent = 0;
         }
@@ -55,7 +60,7 @@ export const authorsSlice = createSlice({
       localStorage.setItem(`${authorsSlice.name}StateV${Config.localStorageVersion}`, JSON.stringify(state));
     },
     resetAuthor: (state, action: PayloadAction<number>) => {
-      state.authorList = state.authorList.map((a: AuthorType) => {
+      state.authorLists[state.dataPluginId] = state.authorLists[state.dataPluginId].map((a: AuthorType) => {
         if (a.parent === action.payload || a.id === action.payload) {
           a.parent = -1;
         }
@@ -65,7 +70,7 @@ export const authorsSlice = createSlice({
     },
     setParentAuthor: (state, action: PayloadAction<{ author: number; parent: number }>) => {
       if (action.payload.author !== action.payload.parent) {
-        state.authorList = state.authorList.map((a: AuthorType) => {
+        state.authorLists[state.dataPluginId] = state.authorLists[state.dataPluginId].map((a: AuthorType) => {
           if (a.parent === action.payload.author || a.id === action.payload.author) {
             a.parent = action.payload.parent;
           }
@@ -79,7 +84,7 @@ export const authorsSlice = createSlice({
       state.authorToEdit = state.authorList.find((a: AuthorType) => a.id === action.payload);
     },
     saveAuthor: (state, action: PayloadAction<AuthorType>) => {
-      state.authorList = state.authorList.map((a: AuthorType) => {
+      state.authorLists[state.dataPluginId] = state.authorLists[state.dataPluginId].map((a: AuthorType) => {
         if (a.id === action.payload.id) {
           return action.payload;
         }
@@ -88,12 +93,16 @@ export const authorsSlice = createSlice({
       localStorage.setItem(`${authorsSlice.name}StateV${Config.localStorageVersion}`, JSON.stringify(state));
     },
     switchAuthorSelection: (state, action: PayloadAction<number>) => {
-      state.authorList = state.authorList.map((a: AuthorType) => {
+      state.authorLists[state.dataPluginId] = state.authorLists[state.dataPluginId].map((a: AuthorType) => {
         if (a.id === action.payload) {
           a.selected = !a.selected;
         }
         return a;
       });
+      localStorage.setItem(`${authorsSlice.name}StateV${Config.localStorageVersion}`, JSON.stringify(state));
+    },
+    setAuthorsDataPluginId: (state, action: PayloadAction<number>) => {
+      state.dataPluginId = action.payload;
       localStorage.setItem(`${authorsSlice.name}StateV${Config.localStorageVersion}`, JSON.stringify(state));
     },
     clearAuthorsStorage: () => {
@@ -115,6 +124,7 @@ export const {
   editAuthor,
   saveAuthor,
   switchAuthorSelection,
+  setAuthorsDataPluginId,
   clearAuthorsStorage,
   importAuthorsStorage,
 } = authorsSlice.actions;

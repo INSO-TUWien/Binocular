@@ -12,8 +12,10 @@ import dragIndicatorIcon from '../../../../assets/drag_indicator_gray.svg';
 function OtherAuthors(props: { orientation?: string }) {
   const dispatch: AppDispatch = useAppDispatch();
 
-  const authors = useSelector((state: RootState) => state.authors.authorList);
+  const authorLists = useSelector((state: RootState) => state.authors.authorLists);
   const dragging = useSelector((state: RootState) => state.authors.dragging);
+  const authorsDataPluginId = useSelector((state: RootState) => state.authors.dataPluginId);
+  const authors = authorLists[authorsDataPluginId] || [];
 
   return (
     <div className={'text-xs'}>

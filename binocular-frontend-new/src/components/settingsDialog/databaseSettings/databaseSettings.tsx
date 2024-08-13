@@ -5,6 +5,7 @@ import { DataPlugin } from '../../../plugins/interfaces/dataPlugin.ts';
 import { createRef } from 'react';
 import { addDataPlugin, removeDataPlugin, setDataPluginAsDefault } from '../../../redux/settings/settingsReducer.ts';
 import { DatabaseSettingsDataPluginType } from '../../../types/settings/databaseSettingsType.ts';
+import distinctColors from 'distinct-colors';
 
 function DatabaseSettings() {
   const dispatch: AppDispatch = useAppDispatch();
@@ -13,6 +14,7 @@ function DatabaseSettings() {
 
   const apiKeyRef = createRef<HTMLInputElement>();
   const endpointRef = createRef<HTMLInputElement>();
+  const colors = distinctColors({ count: 50 });
 
   return (
     <>
@@ -25,34 +27,27 @@ function DatabaseSettings() {
             {settingsDatabaseDataPlugins.map((settingsDatabaseDataPlugin: DatabaseSettingsDataPluginType) => (
               <div
                 className={'card w-96 bg-base-100 shadow-xl mb-3 mr-3 border-2 border-base-300'}
+                style={{ background: settingsDatabaseDataPlugin.color }}
                 key={`settingsDatabasePlugin${settingsDatabaseDataPlugin.id}`}>
                 <div className="card-body">
                   <h2 className="card-title">
-                    {settingsDatabaseDataPlugin.name}
+                    {settingsDatabaseDataPlugin.name} #{settingsDatabaseDataPlugin.id}
                     {settingsDatabaseDataPlugin.isDefault && <div className="badge badge-accent">Default</div>}
                   </h2>
-                  {settingsDatabaseDataPlugin.parameters.apiKey ? (
-                    <div>
-                      <span className={'font-bold'}>API Key:</span>
-                      <span> {settingsDatabaseDataPlugin.parameters.apiKey}</span>
-                    </div>
-                  ) : (
-                    <div>
-                      <span className={'font-bold text-base-300'}>API Key:</span>
-                      <span className={'text-base-300'}> Not necessary</span>
-                    </div>
-                  )}
-                  {settingsDatabaseDataPlugin.parameters.endpoint ? (
-                    <div>
-                      <span className={'font-bold'}>Endpoint:</span>
-                      <span> {settingsDatabaseDataPlugin.parameters.endpoint}</span>
-                    </div>
-                  ) : (
-                    <div>
-                      <span className={'font-bold text-base-300'}>Endpoint:</span>
-                      <span className={'text-base-300'}> Not necessary</span>
-                    </div>
-                  )}
+                  <div>
+                    <span className={'font-bold'}>API Key:</span>
+                    <span>
+                      {' '}
+                      {settingsDatabaseDataPlugin.parameters.apiKey ? settingsDatabaseDataPlugin.parameters.apiKey : 'Not necessary'}
+                    </span>
+                  </div>
+                  <div>
+                    <span className={'font-bold'}>Endpoint:</span>
+                    <span>
+                      {' '}
+                      {settingsDatabaseDataPlugin.parameters.endpoint ? settingsDatabaseDataPlugin.parameters.endpoint : 'Not necessary'}
+                    </span>
+                  </div>
                   <button
                     className={'btn btn-outline'}
                     onClick={() => {
@@ -120,6 +115,7 @@ function DatabaseSettings() {
                       dispatch(
                         addDataPlugin({
                           name: dataPlugin.name,
+                          color: colors[settingsDatabaseDataPlugins.length].hex() + '22',
                           parameters: { apiKey: apiKeyRef.current?.value, endpoint: endpointRef.current?.value },
                         }),
                       );

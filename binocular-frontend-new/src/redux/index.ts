@@ -10,6 +10,7 @@ import NotificationsReducer from './general/notificationsReducer.ts';
 import ExportReducer from './export/exportReducer.ts';
 import TabsReducer from './general/tabsReducer.ts';
 import { createLogger } from 'redux-logger';
+import FilesReducer from './data/filesReducer.ts';
 
 const logger = createLogger({
   collapsed: () => true,
@@ -18,6 +19,7 @@ export const store = configureStore({
   reducer: {
     dashboard: DashboardReducer,
     authors: AuthorsReducer,
+    files: FilesReducer,
     settings: SettingsReducer,
     export: ExportReducer,
     parameters: ParametersReducer,

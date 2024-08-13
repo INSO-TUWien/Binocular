@@ -1,5 +1,5 @@
-import {ParametersGeneralType} from "./parametersGeneralType.ts";
-import {ParametersDateRangeType} from "./parametersDateRangeType.ts";
+import { ParametersGeneralType } from './parametersGeneralType.ts';
+import { ParametersDateRangeType } from './parametersDateRangeType.ts';
 
 export interface ParametersType {
   parametersGeneral: ParametersGeneralType;

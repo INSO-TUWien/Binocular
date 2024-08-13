@@ -8,4 +8,5 @@ export interface DashboardItemDTO {
 
 export interface DashboardItemType extends DashboardItemDTO {
   pluginName?: string;
+  dataPluginId: number | undefined;
 }

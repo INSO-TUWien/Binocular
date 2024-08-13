@@ -4,7 +4,7 @@ import appStyles from './app.module.scss';
 import StatusBar from './components/statusBar/statusBar.tsx';
 import TabMenuContent from './components/tabMenu/tabMenuContent/tabMenuContent.tsx';
 import Dashboard from './components/dashboard/dashboard.tsx';
-import TabSection from './components/tabMenu/tab/tabSection/tabSection.tsx';
+import TabSection from './components/tabMenu/tabSection/tabSection.tsx';
 import DateRange from './components/tabs/parameters/dataRange/dateRange.tsx';
 import ParametersGeneral from './components/tabs/parameters/parametersGeneral/parametersGeneral.tsx';
 import InformationDialog from './components/informationDialog/informationDialog.tsx';
@@ -28,12 +28,20 @@ import EditAuthorDialog from './components/tabs/authors/editAuthorDialog/editAut
 import FileList from './components/tabs/fileTree/fileList/fileList.tsx';
 import HelpGeneral from './components/tabs/help/helpGeneral/helpGeneral.tsx';
 import HelpComponents from './components/tabs/help/helpComponents/helpComponents.tsx';
+import DataPluginQuickSelect from './components/dataPluginQuickSelect/dataPluginQuickSelect.tsx';
+import { DatabaseSettingsDataPluginType } from './types/settings/databaseSettingsType.ts';
+import { setAuthorsDataPluginId } from './redux/data/authorsReducer.ts';
+import { setFilesDataPluginId } from './redux/data/filesReducer.ts';
 
 function App() {
   const dispatch: AppDispatch = useAppDispatch();
   const parametersGeneral = useSelector((state: RootState) => state.parameters.parametersGeneral);
   const parametersDateRange = useSelector((state: RootState) => state.parameters.parametersDateRange);
-
+  const avaliableDataPlugins = useSelector((state: RootState) => state.settings.database.dataPlugins);
+  const authorsDataPluginId = useSelector((state: RootState) => state.authors.dataPluginId);
+  const authorsDataPlugin = authorsDataPluginId !== undefined ? avaliableDataPlugins[authorsDataPluginId] : undefined;
+  const filesDataPluginId = useSelector((state: RootState) => state.files.dataPluginId);
+  const filesDataPlugin = filesDataPluginId !== undefined ? avaliableDataPlugins[filesDataPluginId] : undefined;
   return (
     <>
       <div className={appStyles.mainView}>
@@ -81,6 +89,15 @@ function App() {
             </TabSection>
           </Tab>
           <Tab displayName={'Authors'} alignment={'right'}>
+            <TabSection name={'Database'}>
+              <DataPluginQuickSelect
+                selected={authorsDataPlugin}
+                onChange={(selectedDataPlugin: DatabaseSettingsDataPluginType) => {
+                  if (selectedDataPlugin.id !== undefined) {
+                    dispatch(setAuthorsDataPluginId(selectedDataPlugin.id));
+                  }
+                }}></DataPluginQuickSelect>
+            </TabSection>
             <TabSection name={'Authors'}>
               <AuthorList></AuthorList>
             </TabSection>
@@ -89,6 +106,15 @@ function App() {
             </TabSection>
           </Tab>
           <Tab displayName={'File Tree'} alignment={'right'}>
+            <TabSection name={'Database'}>
+              <DataPluginQuickSelect
+                selected={filesDataPlugin}
+                onChange={(selectedDataPlugin: DatabaseSettingsDataPluginType) => {
+                  if (selectedDataPlugin.id !== undefined) {
+                    dispatch(setFilesDataPluginId(selectedDataPlugin.id));
+                  }
+                }}></DataPluginQuickSelect>
+            </TabSection>
             <TabSection name={'File Tree'}>
               <FileList></FileList>
             </TabSection>

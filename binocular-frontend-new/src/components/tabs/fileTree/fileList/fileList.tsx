@@ -6,20 +6,25 @@ import { dataPlugins } from '../../../../plugins/pluginRegistry.ts';
 import { FileListElementType } from '../../../../types/data/fileListType.ts';
 import { generateFileTree } from './fileListUtilities/fileTreeUtilities.ts';
 import FileListFolder from './fileListElements/fileListFolder.tsx';
+import { DatabaseSettingsDataPluginType } from '../../../../types/settings/databaseSettingsType.ts';
 
 function FileList(props: { orientation?: string }) {
-  const currentDataPlugin = useSelector((state: RootState) => state.settings.dataPlugin);
+  const currentDataPlugins = useSelector((state: RootState) => state.settings.database.dataPlugins);
 
   const [fileList, setFileList] = useState<FileListElementType[]>();
+  const filesDataPluginId = useSelector((state: RootState) => state.files.dataPluginId);
 
   useEffect(() => {
-    dataPlugins.filter((plugin) => plugin.name === currentDataPlugin.name)[0].setApiKey(currentDataPlugin.parameters.apiKey);
-    dataPlugins
-      .filter((plugin) => plugin.name === currentDataPlugin.name)[0]
-      .files.getAll()
-      .then((files) => setFileList(generateFileTree(files)))
-      .catch(() => console.log('Error loading Users from selected data source!'));
-  }, [currentDataPlugin.name]);
+    const selectedDataPlugin = currentDataPlugins.filter((dP: DatabaseSettingsDataPluginType) => dP.id === filesDataPluginId)[0];
+    if (selectedDataPlugin) {
+      dataPlugins.filter((plugin) => plugin.name === selectedDataPlugin.name)[0].setApiKey(selectedDataPlugin.parameters.apiKey);
+      dataPlugins
+        .filter((plugin) => plugin.name === selectedDataPlugin.name)[0]
+        .files.getAll()
+        .then((files) => setFileList(generateFileTree(files)))
+        .catch(() => console.log('Error loading Users from selected data source!'));
+    }
+  }, [currentDataPlugins, filesDataPluginId]);
 
   return (
     <>

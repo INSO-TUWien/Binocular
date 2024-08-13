@@ -4,8 +4,12 @@ import DateRange from '../../tabs/parameters/dataRange/dateRange.tsx';
 import ParametersGeneral from '../../tabs/parameters/parametersGeneral/parametersGeneral.tsx';
 import { ParametersGeneralType } from '../../../types/parameters/parametersGeneralType.ts';
 import { ParametersDateRangeType } from '../../../types/parameters/parametersDateRangeType.ts';
+import DataPluginQuickSelect from '../../dataPluginQuickSelect/dataPluginQuickSelect.tsx';
+import { DatabaseSettingsDataPluginType } from '../../../types/settings/databaseSettingsType.ts';
 
 function DashboardItemSettings(props: {
+  selectedDataPluginId: number | undefined;
+  onSelectDataPlugin: (dP: DatabaseSettingsDataPluginType) => void;
   item: DashboardItemType;
   settingsComponent: ReactElement;
   onClickDelete: () => void;
@@ -19,6 +23,8 @@ function DashboardItemSettings(props: {
   return (
     <>
       <h2>{props.item.pluginName + ' (#' + props.item.id + ')'}</h2>
+      <hr className={'text-base-300 m-1'} />
+      <DataPluginQuickSelect selected={props.selectedDataPluginId} onChange={props.onSelectDataPlugin}></DataPluginQuickSelect>
       <hr className={'text-base-300 m-1'} />
       <div>
         <label className="label cursor-pointer">

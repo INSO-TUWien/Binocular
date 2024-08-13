@@ -21,7 +21,7 @@ enum DashboardStateUpdateType {
 const initialState: DashboardInitialState = {
   dashboardItems: [],
   dragResizeMode: DragResizeMode.none,
-  placeableItem: { id: 0, x: 0, y: 0, width: 1, height: 1, pluginName: '' },
+  placeableItem: { id: 0, x: 0, y: 0, width: 1, height: 1, pluginName: '', dataPluginId: undefined },
   dashboardItemCount: 0,
   popupCount: 0,
   dashboardState: Array.from(Array(40), () => new Array(40).fill(0)),
@@ -77,9 +77,19 @@ export const dashboardSlice = createSlice({
         localStorage.setItem(`${dashboardSlice.name}StateV${Config.localStorageVersion}`, JSON.stringify(state));
       }
     },
+
     deleteDashboardItem: (state, action: PayloadAction<DashboardItemType>) => {
       state.dashboardItems = state.dashboardItems.filter((item: DashboardItemType) => item.id !== action.payload.id);
       state.dashboardState = updateDashboardState(state.dashboardState, action.payload, DashboardStateUpdateType.delete);
+      localStorage.setItem(`${dashboardSlice.name}StateV${Config.localStorageVersion}`, JSON.stringify(state));
+    },
+    updateDashboardItem: (state, action: PayloadAction<DashboardItemType>) => {
+      state.dashboardItems = state.dashboardItems.map((item: DashboardItemType) => {
+        if (item.id === action.payload.id) {
+          return action.payload;
+        }
+        return item;
+      });
       localStorage.setItem(`${dashboardSlice.name}StateV${Config.localStorageVersion}`, JSON.stringify(state));
     },
     setDragResizeMode: (state, action: PayloadAction<DragResizeMode>) => {
@@ -105,6 +115,7 @@ export const {
   moveDashboardItem,
   placeDashboardItem,
   deleteDashboardItem,
+  updateDashboardItem,
   setDragResizeMode,
   increasePopupCount,
   clearDashboardStorage,
@@ -149,7 +160,9 @@ function updateDashboardState(dashboardState: number[][], item: DashboardItemTyp
 function findNextFreePosition(dashboardState: number[][], item: DashboardItemType): { x: number; y: number } | null {
   for (let y = 0; y < dashboardState.length; y++) {
     for (let x = 0; x < dashboardState[y].length; x++) {
-      if (checkIfEmpty(dashboardState, { id: 0, x: x, y: y, width: item.width, height: item.height, pluginName: '' })) {
+      if (
+        checkIfEmpty(dashboardState, { id: 0, x: x, y: y, width: item.width, height: item.height, pluginName: '', dataPluginId: undefined })
+      ) {
         return { x: x, y: y };
       }
     }

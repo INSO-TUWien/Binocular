@@ -1,9 +1,9 @@
 import dashboardItemStyles from './dashboardItem.module.scss';
 import { DragResizeMode } from '../resizeMode.ts';
 import { dataPlugins, visualizationPlugins } from '../../../plugins/pluginRegistry.ts';
-import { useEffect, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import DashboardItemPopout from '../dashboardItemPopout/dashboardItemPopout.tsx';
-import { increasePopupCount } from '../../../redux/general/dashboardReducer.ts';
+import { increasePopupCount, updateDashboardItem } from '../../../redux/general/dashboardReducer.ts';
 import { AppDispatch, RootState, useAppDispatch } from '../../../redux';
 import openInNewGray from '../../../assets/open_in_new_white.svg';
 import openInNewBlack from '../../../assets/open_in_new_black.svg';
@@ -16,8 +16,8 @@ import ReduxSubAppStoreWrapper from '../reduxSubAppStoreWrapper/reduxSubAppStore
 import { configureStore } from '@reduxjs/toolkit';
 import createSagaMiddleware from 'redux-saga';
 import { createLogger } from 'redux-logger';
-import { DataPlugin } from '../../../plugins/interfaces/dataPlugin.ts';
 import { DatabaseSettingsDataPluginType } from '../../../types/settings/databaseSettingsType.ts';
+import _ from 'lodash';
 
 const logger = createLogger({
   collapsed: () => true,
@@ -35,14 +35,11 @@ function DashboardItem(props: {
   const [settingsVisible, setSettingsVisible] = useState(false);
   const [helpVisible, setHelpVisible] = useState(false);
 
-  const plugin = visualizationPlugins.filter((p) => p.name === props.item.pluginName)[0];
-  const [settings, setSettings] = useState(plugin.defaultSettings);
-
   const [poppedOut, setPoppedOut] = useState(false);
 
-  const configuredDataPlugins = useSelector((state: RootState) => state.settings.database.dataPlugins);
-  const authorList = useSelector((state: RootState) => state.authors.authorList);
+  const authorLists = useSelector((state: RootState) => state.authors.authorLists);
   const sprintList = useSelector((state: RootState) => state.sprints.sprintList);
+  const avaliableDataPlugins = useSelector((state: RootState) => state.settings.database.dataPlugins);
 
   const [ignoreGlobalParameters, setIgnoreGlobalParameters] = useState(false);
   const parametersGeneralGlobal = useSelector((state: RootState) => state.parameters.parametersGeneral);
@@ -52,16 +49,16 @@ function DashboardItem(props: {
 
   const chartContainerRef = useRef<HTMLDivElement>(null);
 
-  const [dataPlugin, setDataPlugin] = useState<DataPlugin | undefined>();
+  const plugin = visualizationPlugins.filter((p) => p.name === props.item.pluginName)[0];
+  const selectedDataPlugin =
+    props.item.dataPluginId !== undefined
+      ? avaliableDataPlugins.filter((dP: DatabaseSettingsDataPluginType) => dP.id === props.item.dataPluginId)[0]
+      : undefined;
+  const dataPlugin =
+    selectedDataPlugin !== undefined ? dataPlugins.filter((dataPlugin) => dataPlugin.name === selectedDataPlugin.name)[0] : undefined;
 
-  useEffect(() => {
-    const currentDataPlugin = configuredDataPlugins.filter((dP: DatabaseSettingsDataPluginType) => dP.isDefault)[0];
-    if (currentDataPlugin) {
-      setDataPlugin(dataPlugins.filter((plugin) => plugin.name === currentDataPlugin.name)[0]);
-    } else {
-      setDataPlugin(undefined);
-    }
-  }, [configuredDataPlugins]);
+  const authors = props.item.dataPluginId !== undefined ? authorLists[props.item.dataPluginId] : [];
+  const [settings, setSettings] = useState(plugin.defaultSettings);
 
   /**
    * Create Redux Store from Reducer for individual Item and run saga
@@ -111,7 +108,7 @@ function DashboardItem(props: {
                   <plugin.chartComponent
                     key={plugin.name}
                     settings={settings}
-                    authorList={authorList}
+                    authorList={authors}
                     sprintList={sprintList}
                     parameters={{
                       parametersGeneral: ignoreGlobalParameters ? parametersGeneralLocal : parametersGeneralGlobal,
@@ -148,7 +145,7 @@ function DashboardItem(props: {
                 <plugin.chartComponent
                   key={plugin.name}
                   settings={settings}
-                  authorList={authorList}
+                  authorList={authors}
                   sprintList={sprintList}
                   parameters={{
                     parametersGeneral: ignoreGlobalParameters ? parametersGeneralLocal : parametersGeneralGlobal,
@@ -165,6 +162,7 @@ function DashboardItem(props: {
         )}
         <div
           className={dashboardItemStyles.dashboardItemInteractionBar}
+          style={{ background: `linear-gradient(90deg, ${selectedDataPlugin ? selectedDataPlugin.color : 'white'}, white)` }}
           onMouseDown={() => {
             console.log('Start dragging dashboard item ' + props.item.pluginName);
             props.setDragResizeItem(
@@ -173,6 +171,11 @@ function DashboardItem(props: {
             );
           }}>
           <span>{props.item.pluginName}</span>
+          {selectedDataPlugin && (
+            <span>
+              ({selectedDataPlugin.name} #{selectedDataPlugin.id})
+            </span>
+          )}
           <button
             className={dashboardItemStyles.settingsButton}
             onClick={(event) => {
@@ -256,6 +259,12 @@ function DashboardItem(props: {
                 left: `calc(${(100.0 / props.colCount) * (props.item.x + props.item.width)}% - 10px - 20rem)`,
               }}>
               <DashboardItemSettings
+                selectedDataPluginId={selectedDataPlugin ? selectedDataPlugin : undefined}
+                onSelectDataPlugin={(dP: DatabaseSettingsDataPluginType) => {
+                  const newItem = _.clone(props.item);
+                  newItem.dataPluginId = dP.id;
+                  dispatch(updateDashboardItem(newItem));
+                }}
                 item={props.item}
                 settingsComponent={
                   <plugin.settingsComponent key={plugin.name} settings={settings} setSettings={setSettings}></plugin.settingsComponent>
