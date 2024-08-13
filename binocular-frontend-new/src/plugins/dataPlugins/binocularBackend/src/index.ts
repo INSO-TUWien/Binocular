@@ -11,16 +11,32 @@ class BinocularBackend implements DataPlugin {
   public experimental = false;
   public requirements = {
     apiKey: false,
-    endpoint: false,
+    endpoint: true,
   };
-  public commits = Commits;
-  public users = Users;
-  public general = General;
-  public files = Files;
+  public commits;
+  public users;
+  public general;
+  public files;
 
-  constructor() {}
+  constructor() {
+    this.commits = new Commits('/graphQl');
+    this.users = new Users('/graphQl');
+    this.general = new General(/*'/graphQl'*/);
+    this.files = new Files('/graphQl');
 
-  public setApiKey() {}
+  }
+
+  public init(apiKey: string|undefined,endpoint: string|undefined) {
+    console.log(`Init Binocular Backend with ApiKey: ${apiKey} and Endpoint ${endpoint}`)
+    if(endpoint===undefined||endpoint.length===0){
+      endpoint='/graphQl';
+    }
+    this.commits = new Commits(endpoint);
+    this.users = new Users(endpoint);
+    this.general = new General(/*endpoint*/);
+    this.files = new Files(endpoint);
+
+  }
 }
 
 export default BinocularBackend;

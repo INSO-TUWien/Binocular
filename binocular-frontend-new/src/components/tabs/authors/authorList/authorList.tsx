@@ -37,9 +37,7 @@ function AuthorList(props: { orientation?: string }) {
     configuredDataPlugins.forEach((dP: DatabaseSettingsDataPluginType) => {
       const dataPlugin = dataPlugins.filter((dataPlugin) => dataPlugin.name === dP.name)[0];
       if (dataPlugin) {
-        if (dP.parameters.apiKey) {
-          dataPlugin.setApiKey(dP.parameters.apiKey);
-        }
+        dataPlugin.init(dP.parameters.apiKey,dP.parameters.endpoint);
         dataPlugin.users
           .getAll()
           .then((users) => {
@@ -62,7 +60,7 @@ function AuthorList(props: { orientation?: string }) {
           .catch(() => console.log('Error loading Users from selected data source!'));
       }
     });
-  }, [authorsDataPluginId, configuredDataPlugins]);
+  }, [configuredDataPlugins]);
 
   return (
     <>

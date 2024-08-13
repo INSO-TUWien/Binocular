@@ -13,5 +13,5 @@ export interface DataPlugin {
   capabilities: string[];
   experimental: boolean;
   requirements: { apiKey: boolean; endpoint: boolean };
-  setApiKey: (apiKey: string) => void;
+  init: (apiKey: string|undefined,endpoint:string|undefined) => void;
 }

@@ -61,6 +61,7 @@ function parse(
     .addOption(new Option('--no-vcs', 'disable Version Control System indexing').default(true))
     .addOption(new Option('--no-its', 'disable Issue Tracking System indexing').default(true))
     .addOption(new Option('--no-ci', 'disable Continuous Integration indexing').default(true))
+    .addOption(new Option('--gql-port <port>', 'port where the graphql service is hosted').default(48763))
     .addOption(new Option('--export', 'export the db to the default folder of binocular').default(false))
     .addOption(new Option('--no-server', 'disable the backed webserver (when used binocular quits after indexing)').default(true))
     .action((targetPath, options) => {

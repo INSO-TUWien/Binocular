@@ -56,6 +56,9 @@ function DashboardItem(props: {
       : undefined;
   const dataPlugin =
     selectedDataPlugin !== undefined ? dataPlugins.filter((dataPlugin) => dataPlugin.name === selectedDataPlugin.name)[0] : undefined;
+  if(dataPlugin){
+    dataPlugin.init(selectedDataPlugin.parameters.apiKey,selectedDataPlugin.parameters.endpoint)
+  }
 
   const authors = props.item.dataPluginId !== undefined ? authorLists[props.item.dataPluginId] : [];
   const [settings, setSettings] = useState(plugin.defaultSettings);

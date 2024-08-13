@@ -64,6 +64,7 @@ class GatewayService {
    * @returns {Promise<void>}
    */
   async start() {
+    console.log(this.config.port)
     this.server.bindAsync(`0.0.0.0:${this.config.port}`, grpc.ServerCredentials.createInsecure(), (e, port) => {
       console.log(`Gateway is running at http://0.0.0.0:${port}`);
       return this.server.start();

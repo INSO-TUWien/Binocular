@@ -20,7 +20,7 @@ class MockData implements DataPlugin {
 
   constructor() {}
 
-  public setApiKey() {}
+  public init() {}
 }
 
 export default MockData;

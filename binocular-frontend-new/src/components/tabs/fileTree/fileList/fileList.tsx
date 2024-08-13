@@ -17,7 +17,8 @@ function FileList(props: { orientation?: string }) {
   useEffect(() => {
     const selectedDataPlugin = currentDataPlugins.filter((dP: DatabaseSettingsDataPluginType) => dP.id === filesDataPluginId)[0];
     if (selectedDataPlugin) {
-      dataPlugins.filter((plugin) => plugin.name === selectedDataPlugin.name)[0].setApiKey(selectedDataPlugin.parameters.apiKey);
+      dataPlugins.filter((plugin) => plugin.name === selectedDataPlugin.name)[0].init(selectedDataPlugin.parameters.apiKey,selectedDataPlugin.parameters.endpoint);
+
       dataPlugins
         .filter((plugin) => plugin.name === selectedDataPlugin.name)[0]
         .files.getAll()

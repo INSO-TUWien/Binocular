@@ -1,14 +1,19 @@
 'use strict';
-
 import _ from 'lodash';
 import { ApolloClient, InMemoryCache } from '@apollo/client';
 
-const graphQl = new ApolloClient({
-  uri: '/graphQl',
-  cache: new InMemoryCache(),
-});
+class GraphQL {
+  public client;
 
-export { graphQl };
+  constructor(endpoint: string) {
+    this.client = new ApolloClient({
+      uri: endpoint,
+      cache: new InMemoryCache(),
+    });
+  }
+}
+
+export { GraphQL };
 
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-expect-error
