@@ -1,7 +1,7 @@
 import dashboardItemStyles from './dashboardItem.module.scss';
 import { DragResizeMode } from '../resizeMode.ts';
 import { dataPlugins, visualizationPlugins } from '../../../plugins/pluginRegistry.ts';
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import DashboardItemPopout from '../dashboardItemPopout/dashboardItemPopout.tsx';
 import { increasePopupCount, updateDashboardItem } from '../../../redux/general/dashboardReducer.ts';
 import { AppDispatch, RootState, useAppDispatch } from '../../../redux';
@@ -10,7 +10,7 @@ import openInNewBlack from '../../../assets/open_in_new_black.svg';
 import { useSelector } from 'react-redux';
 import DashboardItemSettings from '../dashboardItemSettings/dashboardItemSettings.tsx';
 import { parametersInitialState } from '../../../redux/parameters/parametersReducer.ts';
-import { DashboardItemDTO, DashboardItemType } from '../../../types/general/dashboardItemType.ts';
+import { DashboardItemType } from '../../../types/general/dashboardItemType.ts';
 import { ExportType, setExportName, setExportSVGData, setExportType } from '../../../redux/export/exportReducer.ts';
 import ReduxSubAppStoreWrapper from '../reduxSubAppStoreWrapper/reduxSubAppStoreWrapper.tsx';
 import { configureStore } from '@reduxjs/toolkit';
@@ -18,6 +18,7 @@ import createSagaMiddleware from 'redux-saga';
 import { createLogger } from 'redux-logger';
 import { DatabaseSettingsDataPluginType } from '../../../types/settings/databaseSettingsType.ts';
 import _ from 'lodash';
+import { DataPlugin } from '../../../plugins/interfaces/dataPlugin.ts';
 
 const logger = createLogger({
   collapsed: () => true,
@@ -28,8 +29,8 @@ function DashboardItem(props: {
   cellSize: number;
   colCount: number;
   rowCount: number;
-  setDragResizeItem: (item: DashboardItemDTO, mode: DragResizeMode) => void;
-  deleteItem: (item: DashboardItemDTO) => void;
+  setDragResizeItem: (item: DashboardItemType, mode: DragResizeMode) => void;
+  deleteItem: (item: DashboardItemType) => void;
 }) {
   const dispatch: AppDispatch = useAppDispatch();
   const [settingsVisible, setSettingsVisible] = useState(false);
@@ -49,18 +50,37 @@ function DashboardItem(props: {
 
   const chartContainerRef = useRef<HTMLDivElement>(null);
 
-  const plugin = visualizationPlugins.filter((p) => p.name === props.item.pluginName)[0];
-  const selectedDataPlugin =
-    props.item.dataPluginId !== undefined
-      ? avaliableDataPlugins.filter((dP: DatabaseSettingsDataPluginType) => dP.id === props.item.dataPluginId)[0]
-      : undefined;
-  const dataPlugin =
-    selectedDataPlugin !== undefined ? dataPlugins.filter((dataPlugin) => dataPlugin.name === selectedDataPlugin.name)[0] : undefined;
-  if(dataPlugin){
-    dataPlugin.init(selectedDataPlugin.parameters.apiKey,selectedDataPlugin.parameters.endpoint)
-  }
+  const [selectedDataPlugin, setSelectedDataPlugin] = useState<DatabaseSettingsDataPluginType | undefined>(undefined);
 
-  const authors = props.item.dataPluginId !== undefined ? authorLists[props.item.dataPluginId] : [];
+  useEffect(() => {
+    if (props.item.dataPluginId !== undefined) {
+      setSelectedDataPlugin(avaliableDataPlugins.filter((dP: DatabaseSettingsDataPluginType) => dP.id === props.item.dataPluginId)[0]);
+    }
+  }, [avaliableDataPlugins, props.item.dataPluginId]);
+
+  const [plugin] = useState(visualizationPlugins.filter((p) => p.name === props.item.pluginName)[0]);
+
+  const [dataPlugin, setDataPlugin] = useState<DataPlugin | undefined>(undefined);
+
+  useEffect(() => {
+    if (selectedDataPlugin) {
+      const newDataPlugin = dataPlugins
+        .map((pluginClass) => new pluginClass())
+        .filter((dataPlugin) => dataPlugin.name === selectedDataPlugin.name)[0];
+      console.log(selectedDataPlugin);
+      console.log(newDataPlugin);
+      newDataPlugin.init(selectedDataPlugin.parameters.apiKey, selectedDataPlugin.parameters.endpoint);
+      setDataPlugin(newDataPlugin);
+    }
+  }, [selectedDataPlugin]);
+
+  const [authors, setAuthors] = useState([]);
+  useEffect(() => {
+    if (props.item.dataPluginId !== undefined) {
+      setAuthors(authorLists[props.item.dataPluginId]);
+    }
+  }, [authorLists, props.item.dataPluginId]);
+
   const [settings, setSettings] = useState(plugin.defaultSettings);
 
   /**
@@ -168,10 +188,7 @@ function DashboardItem(props: {
           style={{ background: `linear-gradient(90deg, ${selectedDataPlugin ? selectedDataPlugin.color : 'white'}, white)` }}
           onMouseDown={() => {
             console.log('Start dragging dashboard item ' + props.item.pluginName);
-            props.setDragResizeItem(
-              { id: props.item.id, x: props.item.x, y: props.item.y, width: props.item.width, height: props.item.height },
-              DragResizeMode.drag,
-            );
+            props.setDragResizeItem(props.item, DragResizeMode.drag);
           }}>
           <span>{props.item.pluginName}</span>
           {selectedDataPlugin && (
@@ -218,37 +235,25 @@ function DashboardItem(props: {
           className={dashboardItemStyles.dashboardItemResizeBarTop}
           onMouseDown={() => {
             console.log('Start resizing dashboard item ' + props.item.pluginName + ' at the top');
-            props.setDragResizeItem(
-              { id: props.item.id, x: props.item.x, y: props.item.y, width: props.item.width, height: props.item.height },
-              DragResizeMode.resizeTop,
-            );
+            props.setDragResizeItem(props.item, DragResizeMode.resizeTop);
           }}></div>
         <div
           className={dashboardItemStyles.dashboardItemResizeBarRight}
           onMouseDown={() => {
             console.log('Start resizing dashboard item ' + props.item.pluginName + ' at the right');
-            props.setDragResizeItem(
-              { id: props.item.id, x: props.item.x, y: props.item.y, width: props.item.width, height: props.item.height },
-              DragResizeMode.resizeRight,
-            );
+            props.setDragResizeItem(props.item, DragResizeMode.resizeRight);
           }}></div>
         <div
           className={dashboardItemStyles.dashboardItemResizeBarBottom}
           onMouseDown={() => {
             console.log('Start resizing dashboard item ' + props.item.pluginName + ' at the bottom');
-            props.setDragResizeItem(
-              { id: props.item.id, x: props.item.x, y: props.item.y, width: props.item.width, height: props.item.height },
-              DragResizeMode.resizeBottom,
-            );
+            props.setDragResizeItem(props.item, DragResizeMode.resizeBottom);
           }}></div>
         <div
           className={dashboardItemStyles.dashboardItemResizeBarLeft}
           onMouseDown={() => {
             console.log('Start resizing dashboard item ' + props.item.pluginName + ' at the left');
-            props.setDragResizeItem(
-              { id: props.item.id, x: props.item.x, y: props.item.y, width: props.item.width, height: props.item.height },
-              DragResizeMode.resizeLeft,
-            );
+            props.setDragResizeItem(props.item, DragResizeMode.resizeLeft);
           }}></div>
       </div>
       <>
@@ -262,7 +267,7 @@ function DashboardItem(props: {
                 left: `calc(${(100.0 / props.colCount) * (props.item.x + props.item.width)}% - 10px - 20rem)`,
               }}>
               <DashboardItemSettings
-                selectedDataPluginId={selectedDataPlugin ? selectedDataPlugin : undefined}
+                selectedDataPlugin={selectedDataPlugin ? selectedDataPlugin : undefined}
                 onSelectDataPlugin={(dP: DatabaseSettingsDataPluginType) => {
                   const newItem = _.clone(props.item);
                   newItem.dataPluginId = dP.id;

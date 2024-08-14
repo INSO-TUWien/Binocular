@@ -21,13 +21,15 @@ function StatusBar() {
   useEffect(() => {
     const defaultDataPlugin = currentDataPlugins.filter((dP: DatabaseSettingsDataPluginType) => dP.isDefault)[0];
     if (defaultDataPlugin) {
-      const dataPlugin = dataPlugins.filter((plugin) => plugin.name === defaultDataPlugin.name)[0];
-      setIndexer(dataPlugin.general.getIndexer());
-      setIndexerState(dataPlugin.general.getIndexerState());
-      dataPlugin.general
-        .getRepositoryName()
-        .then((name) => setRepository(name))
-        .catch((e) => console.log(e));
+      const dataPlugin = dataPlugins.map((pluginClass) => new pluginClass()).filter((plugin) => plugin.name === defaultDataPlugin.name)[0];
+      if (dataPlugin) {
+        setIndexer(dataPlugin.general.getIndexer());
+        setIndexerState(dataPlugin.general.getIndexerState());
+        dataPlugin.general
+          .getRepositoryName()
+          .then((name) => setRepository(name))
+          .catch((e) => console.log(e));
+      }
     }
   }, [currentDataPlugins]);
 

@@ -41,14 +41,12 @@ export const dashboardSlice = createSlice({
   reducers: {
     addDashboardItem: (state, action: PayloadAction<DashboardItemType>) => {
       state.dragResizeMode = DragResizeMode.none;
-      console.log(state.dashboardState);
       const nextFreePosition = findNextFreePosition(state.dashboardState, action.payload);
       if (nextFreePosition !== null) {
         state.dashboardItemCount++;
         action.payload.id = state.dashboardItemCount;
         action.payload.x = nextFreePosition.x;
         action.payload.y = nextFreePosition.y;
-        console.log(action.payload);
         state.dashboardItems = [...state.dashboardItems, action.payload];
         state.dashboardState = updateDashboardState(state.dashboardState, action.payload, DashboardStateUpdateType.place);
         localStorage.setItem(`${dashboardSlice.name}StateV${Config.localStorageVersion}`, JSON.stringify(state));

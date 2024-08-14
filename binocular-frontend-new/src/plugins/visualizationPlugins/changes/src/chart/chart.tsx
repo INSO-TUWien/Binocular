@@ -39,11 +39,9 @@ function Chart(props: {
   /*
    * -----------------------------
    */
-
   //Redux Global State
   const commits = useSelector((state: RootState) => state.commits);
   const dataState = useSelector((state: RootState) => state.dataState);
-
   //React Component State
   const [chartWidth, setChartWidth] = useState(100);
   const [chartHeight, setChartHeight] = useState(100);

@@ -73,59 +73,61 @@ function DatabaseSettings() {
         )}
         <h2 className={'font-bold'}>Add Database Connection:</h2>
         <div className={'flex'}>
-          {dataPlugins.map((dataPlugin: DataPlugin) => (
-            <div className={'card w-96 bg-base-100 shadow-xl mb-3 mr-3 border-2 border-base-300'} key={dataPlugin.name}>
-              <div className="card-body">
-                <h2 className="card-title">
-                  {dataPlugin.name}
-                  {dataPlugin.experimental && <div className="badge badge-warning">Experimental</div>}
-                </h2>
-                <div>{dataPlugin.description}</div>
-                <h3 className="font-bold">Capabilities:</h3>
-                <ul className={'list-disc ml-6'}>
-                  {dataPlugin.capabilities.map((capability) => (
-                    <li key={`plugin${dataPlugin.name}Capability${capability}`}>{capability}</li>
-                  ))}
-                </ul>
-                {dataPlugin.requirements.apiKey && (
-                  <label className="form-control w-full max-w-xs">
-                    <div className="label">
-                      <span className="font-bold">API Key:</span>
-                    </div>
-                    <input type="text" placeholder="API Key" className="input input-bordered w-full max-w-xs" ref={apiKeyRef} />
-                  </label>
-                )}
-                {dataPlugin.requirements.endpoint && (
-                  <label className="form-control w-full max-w-xs">
-                    <div className="label">
-                      <span className="font-bold">Endpoint URL:</span>
-                    </div>
-                    <input type="text" placeholder="Endpoint URL" className="input input-bordered w-full max-w-xs" ref={endpointRef} />
-                  </label>
-                )}
-                <p></p>
-                <div className="card-actions justify-end">
-                  <button
-                    className="btn btn-outline"
-                    disabled={
-                      (dataPlugin.requirements.apiKey && apiKeyRef.current?.value.length === 0) ||
-                      (dataPlugin.requirements.endpoint && endpointRef.current?.value.length === 0)
-                    }
-                    onClick={() => {
-                      dispatch(
-                        addDataPlugin({
-                          name: dataPlugin.name,
-                          color: colors[settingsDatabaseDataPlugins.length].hex() + '22',
-                          parameters: { apiKey: apiKeyRef.current?.value, endpoint: endpointRef.current?.value },
-                        }),
-                      );
-                    }}>
-                    Add
-                  </button>
+          {dataPlugins
+            .map((dataPlugin) => new dataPlugin())
+            .map((dataPlugin: DataPlugin) => (
+              <div className={'card w-96 bg-base-100 shadow-xl mb-3 mr-3 border-2 border-base-300'} key={dataPlugin.name}>
+                <div className="card-body">
+                  <h2 className="card-title">
+                    {dataPlugin.name}
+                    {dataPlugin.experimental && <div className="badge badge-warning">Experimental</div>}
+                  </h2>
+                  <div>{dataPlugin.description}</div>
+                  <h3 className="font-bold">Capabilities:</h3>
+                  <ul className={'list-disc ml-6'}>
+                    {dataPlugin.capabilities.map((capability) => (
+                      <li key={`plugin${dataPlugin.name}Capability${capability}`}>{capability}</li>
+                    ))}
+                  </ul>
+                  {dataPlugin.requirements.apiKey && (
+                    <label className="form-control w-full max-w-xs">
+                      <div className="label">
+                        <span className="font-bold">API Key:</span>
+                      </div>
+                      <input type="text" placeholder="API Key" className="input input-bordered w-full max-w-xs" ref={apiKeyRef} />
+                    </label>
+                  )}
+                  {dataPlugin.requirements.endpoint && (
+                    <label className="form-control w-full max-w-xs">
+                      <div className="label">
+                        <span className="font-bold">Endpoint URL:</span>
+                      </div>
+                      <input type="text" placeholder="Endpoint URL" className="input input-bordered w-full max-w-xs" ref={endpointRef} />
+                    </label>
+                  )}
+                  <p></p>
+                  <div className="card-actions justify-end">
+                    <button
+                      className="btn btn-outline"
+                      disabled={
+                        (dataPlugin.requirements.apiKey && apiKeyRef.current?.value.length === 0) ||
+                        (dataPlugin.requirements.endpoint && endpointRef.current?.value.length === 0)
+                      }
+                      onClick={() => {
+                        dispatch(
+                          addDataPlugin({
+                            name: dataPlugin.name,
+                            color: colors[settingsDatabaseDataPlugins.length].hex() + '22',
+                            parameters: { apiKey: apiKeyRef.current?.value, endpoint: endpointRef.current?.value },
+                          }),
+                        );
+                      }}>
+                      Add
+                    </button>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
+            ))}
         </div>
       </div>
     </>

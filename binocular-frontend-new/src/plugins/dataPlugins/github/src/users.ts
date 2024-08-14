@@ -24,8 +24,8 @@ export default class Users implements DataPluginUsers {
     const resp: void | ApolloQueryResult<AuthorsQueryResult> = await this.graphQl.client
       .query<AuthorsQueryResult, { perPage: number; owner: string; name: string }>({
         query: gql`
-          query ($perPage: Int,$owner: String, $name: String) {
-            repository($owner: String, $name: String) {
+          query ($perPage: Int, $owner: String!, $name: String!) {
+            repository(owner: $owner, name: $name) {
               assignableUsers(first: $perPage) {
                 totalCount
                 nodes {

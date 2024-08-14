@@ -51,7 +51,7 @@ export default class Commits implements DataPluginCommits {
           { nextPageCursor: string | null; perPage: number; from: string; to: string; owner: string; name: string }
         >({
           query: gql`
-            query ($nextPageCursor: String, $perPage: Int, $from: GitTimestamp, $to: GitTimestamp, $owner: String, $name: String) {
+            query ($nextPageCursor: String, $perPage: Int, $from: GitTimestamp, $to: GitTimestamp, $owner: String!, $name: String!) {
               repository(owner: $owner, name: $name) {
                 defaultBranchRef {
                   target {

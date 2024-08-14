@@ -9,6 +9,7 @@ import { addDashboardItem, moveDashboardItem, setDragResizeMode, deleteDashboard
 import DashboardItemPlaceholder from './dashboardItemPlaceholder/dashboardItemPlaceholder.tsx';
 import { SettingsGeneralGridSize } from '../../types/settings/generalSettingsType.ts';
 import { DashboardItemDTO, DashboardItemType } from '../../types/general/dashboardItemType.ts';
+import { DatabaseSettingsDataPluginType } from '../../types/settings/databaseSettingsType.ts';
 
 function Dashboard() {
   const dispatch: AppDispatch = useAppDispatch();
@@ -52,6 +53,10 @@ function Dashboard() {
   const dragResizeMode = useSelector((state: RootState) => state.dashboard.dragResizeMode);
   const placeableItem = useSelector((state: RootState) => state.dashboard.placeableItem);
   const dashboardState = useSelector((state: RootState) => state.dashboard.dashboardState);
+
+  const configuredDataPlugins = useSelector((state: RootState) => state.settings.database.dataPlugins);
+
+  const defaultDataPlugin = configuredDataPlugins.filter((dP: DatabaseSettingsDataPluginType) => dP.isDefault)[0];
 
   function setDragResizeItem(item: DashboardItemDTO, mode: DragResizeMode) {
     setMovingItem(item);
@@ -266,6 +271,7 @@ function Dashboard() {
                           width: targetWidth * gridMultiplier,
                           height: targetHeight * gridMultiplier,
                           pluginName: placeableItem.pluginName,
+                          dataPluginId: defaultDataPlugin ? defaultDataPlugin.id : undefined,
                         }),
                       );
                     } else {
@@ -276,6 +282,7 @@ function Dashboard() {
                           y: targetY * gridMultiplier,
                           width: targetWidth * gridMultiplier,
                           height: targetHeight * gridMultiplier,
+                          dataPluginId: defaultDataPlugin ? defaultDataPlugin.id : undefined,
                         }),
                       );
                     }

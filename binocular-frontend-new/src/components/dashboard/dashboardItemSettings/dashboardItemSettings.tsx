@@ -8,7 +8,7 @@ import DataPluginQuickSelect from '../../dataPluginQuickSelect/dataPluginQuickSe
 import { DatabaseSettingsDataPluginType } from '../../../types/settings/databaseSettingsType.ts';
 
 function DashboardItemSettings(props: {
-  selectedDataPluginId: number | undefined;
+  selectedDataPlugin: DatabaseSettingsDataPluginType | undefined;
   onSelectDataPlugin: (dP: DatabaseSettingsDataPluginType) => void;
   item: DashboardItemType;
   settingsComponent: ReactElement;
@@ -24,7 +24,7 @@ function DashboardItemSettings(props: {
     <>
       <h2>{props.item.pluginName + ' (#' + props.item.id + ')'}</h2>
       <hr className={'text-base-300 m-1'} />
-      <DataPluginQuickSelect selected={props.selectedDataPluginId} onChange={props.onSelectDataPlugin}></DataPluginQuickSelect>
+      <DataPluginQuickSelect selected={props.selectedDataPlugin} onChange={props.onSelectDataPlugin}></DataPluginQuickSelect>
       <hr className={'text-base-300 m-1'} />
       <div>
         <label className="label cursor-pointer">

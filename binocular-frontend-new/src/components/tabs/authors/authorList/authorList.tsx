@@ -35,9 +35,9 @@ function AuthorList(props: { orientation?: string }) {
 
   useEffect(() => {
     configuredDataPlugins.forEach((dP: DatabaseSettingsDataPluginType) => {
-      const dataPlugin = dataPlugins.filter((dataPlugin) => dataPlugin.name === dP.name)[0];
+      const dataPlugin = dataPlugins.map((pluginClass) => new pluginClass()).filter((dataPlugin) => dataPlugin.name === dP.name)[0];
       if (dataPlugin) {
-        dataPlugin.init(dP.parameters.apiKey,dP.parameters.endpoint);
+        dataPlugin.init(dP.parameters.apiKey, dP.parameters.endpoint);
         dataPlugin.users
           .getAll()
           .then((users) => {

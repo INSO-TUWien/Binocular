@@ -24,14 +24,13 @@ class Github implements DataPlugin {
     this.general = new General('');
   }
 
-  public init(apiKey: string|undefined,endpoint:string|undefined) {
-    console.log(`Init GitHub Backend with ApiKey: ${apiKey} and Endpoint ${endpoint}`)
-    if(apiKey!==undefined){
-      this.commits = new Commits(apiKey, 'INSO-TUWIEN/Binocular');
-      this.users = new Users(apiKey, 'INSO-TUWIEN/Binocular');
-      this.general = new General('INSO-TUWIEN/Binocular');
+  public init(apiKey: string | undefined, endpoint: string | undefined) {
+    console.log(`Init GitHub Backend with ApiKey: ${apiKey} and Endpoint ${endpoint}`);
+    if (apiKey !== undefined) {
+      this.commits = new Commits(apiKey, 'INSO-TUWien/Binocular');
+      this.users = new Users(apiKey, 'INSO-TUWien/Binocular');
+      this.general = new General('INSO-TUWien/Binocular');
     }
-
   }
 }
 
