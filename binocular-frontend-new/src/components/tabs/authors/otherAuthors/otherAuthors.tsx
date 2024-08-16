@@ -4,8 +4,8 @@ import { useSelector } from 'react-redux';
 import { AppDispatch, RootState, useAppDispatch } from '../../../../redux';
 import { editAuthor, moveAuthorToOther, resetAuthor, setDragging } from '../../../../redux/data/authorsReducer.ts';
 import { showContextMenu } from '../../../contextMenu/contextMenuHelper.ts';
-import removeFromOtherIcon from '../../../../assets/group_remove_black.svg';
-import editIcon from '../../../../assets/edit_black.svg';
+import removeFromOtherIcon from '../../../../assets/group_remove_gray.svg';
+import editIcon from '../../../../assets/edit_gray.svg';
 import { AuthorType } from '../../../../types/data/authorType.ts';
 import dragIndicatorIcon from '../../../../assets/drag_indicator_gray.svg';
 

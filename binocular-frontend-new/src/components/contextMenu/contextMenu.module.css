@@ -23,6 +23,7 @@
   @apply bg-base-100;
   @apply rounded;
   @apply w-56;
+  @apply text-neutral-content;
   border-top-left-radius: 0;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
 }

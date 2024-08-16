@@ -4,22 +4,23 @@
   justify-content: start;
   cursor: pointer;
   border-bottom: 1px solid;
-  @apply border-neutral-200;
+  @apply border-base-300;
   height: 1.5rem;
 }
 
 .element:hover {
-  @apply bg-neutral-100;
+  @apply bg-neutral;
 }
 
 .element > img {
+  fill: gray;
   margin-right: 0.25rem;
 }
 
 .inset {
   padding-left: 0.5rem;
   border-left: 1px solid;
-  @apply border-neutral-400;
+  @apply border-base-300;
 }
 
 /*# sourceMappingURL=fileListElements.module.css.map */

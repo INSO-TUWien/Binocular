@@ -29,7 +29,7 @@
 .dashboardItemInteractionBar > span {
   margin-left: 0.5rem;
   float: left;
-  @apply text-neutral-600;
+  @apply text-neutral-content;
 }
 
 .dashboardItemInteractionBar > button {
@@ -108,7 +108,7 @@
   @apply bg-base-100;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
   border: 1px solid;
-  @apply border-accent;
+  @apply border-base-300;
   padding: 0.5rem;
 }
 

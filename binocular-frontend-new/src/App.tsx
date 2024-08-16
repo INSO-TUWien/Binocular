@@ -32,6 +32,8 @@ import DataPluginQuickSelect from './components/dataPluginQuickSelect/dataPlugin
 import { DatabaseSettingsDataPluginType } from './types/settings/databaseSettingsType.ts';
 import { setAuthorsDataPluginId } from './redux/data/authorsReducer.ts';
 import { setFilesDataPluginId } from './redux/data/filesReducer.ts';
+import TabControllerButtonThemeSwitch from './components/tabMenu/tabControllerButtonThemeSwitch/tabControllerButtonThemeSwitch.tsx';
+import { useState } from 'react';
 
 function App() {
   const dispatch: AppDispatch = useAppDispatch();
@@ -42,10 +44,20 @@ function App() {
   const authorsDataPlugin = authorsDataPluginId !== undefined ? avaliableDataPlugins[authorsDataPluginId] : undefined;
   const filesDataPluginId = useSelector((state: RootState) => state.files.dataPluginId);
   const filesDataPlugin = filesDataPluginId !== undefined ? avaliableDataPlugins[filesDataPluginId] : undefined;
+
+  const storedTheme = localStorage.getItem('theme');
+  const [theme, setTheme] = useState(storedTheme || 'binocularLight');
+
   return (
     <>
-      <div className={appStyles.mainView}>
+      <div data-theme={theme} className={appStyles.mainView}>
         <TabController appName={'Binocular'}>
+          <TabControllerButtonThemeSwitch
+            theme={theme}
+            onChange={(theme: string) => {
+              localStorage.setItem('theme', theme);
+              setTheme(theme);
+            }}></TabControllerButtonThemeSwitch>
           <TabControllerButton
             onClick={() => {
               dispatch(setExportType(ExportType.all));
@@ -132,16 +144,17 @@ function App() {
           </TabMenuContent>
         </TabController>
       </div>
-      <div className={appStyles.statusBar}>
+      <div data-theme={theme} className={appStyles.statusBar}>
         <StatusBar></StatusBar>
       </div>
-      <button className={appStyles.settingsButton}></button>
-      <InformationDialog></InformationDialog>
-      <ExportDialog></ExportDialog>
-      <SettingsDialog></SettingsDialog>
-      <NotificationController></NotificationController>
-      <EditAuthorDialog></EditAuthorDialog>
-      <ContextMenu></ContextMenu>
+      <div data-theme={theme}>
+        <InformationDialog></InformationDialog>
+        <ExportDialog></ExportDialog>
+        <SettingsDialog></SettingsDialog>
+        <NotificationController></NotificationController>
+        <EditAuthorDialog></EditAuthorDialog>
+        <ContextMenu></ContextMenu>
+      </div>
     </>
   );
 }

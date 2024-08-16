@@ -15,10 +15,10 @@ import { useEffect } from 'react';
 import { dataPlugins } from '../../../../plugins/pluginRegistry.ts';
 import distinctColors from 'distinct-colors';
 import { showContextMenu } from '../../../contextMenu/contextMenuHelper.ts';
-import addToOtherIcon from '../../../../assets/group_add_black.svg';
-import editIcon from '../../../../assets/edit_black.svg';
+import addToOtherIcon from '../../../../assets/group_add_gray.svg';
+import editIcon from '../../../../assets/edit_gray.svg';
 import dragIndicatorIcon from '../../../../assets/drag_indicator_gray.svg';
-import removePersonIcon from '../../../../assets/remove_person_black.svg';
+import removePersonIcon from '../../../../assets/remove_person_gray.svg';
 import { AuthorType } from '../../../../types/data/authorType.ts';
 import { DatabaseSettingsDataPluginType } from '../../../../types/settings/databaseSettingsType.ts';
 

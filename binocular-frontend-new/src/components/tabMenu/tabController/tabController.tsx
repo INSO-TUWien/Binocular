@@ -10,6 +10,7 @@ import { AppDispatch, RootState, useAppDispatch } from '../../../redux';
 import { useSelector } from 'react-redux';
 import { setTabList } from '../../../redux/general/tabsReducer.ts';
 import _ from 'lodash';
+import TabControllerButtonThemeSwitch from '../tabControllerButtonThemeSwitch/tabControllerButtonThemeSwitch.tsx';
 
 interface TabContents {
   [id: number]: ReactElement;
@@ -251,7 +252,7 @@ function TabController(props: {
       <>
         {/*Additional Buttons. Here additional buttons like Settings or export get rendered that get displayed in the top right corner */}
         <div className={tabControllerStyles.tabBar + ' ' + tabControllerStyles.tabBarHorizontal + ' ' + tabControllerStyles.tabBarTopRight}>
-          {props.children.filter((child) => child.type === TabControllerButton)}
+          {props.children.filter((child) => child.type === TabControllerButton || child.type === TabControllerButtonThemeSwitch)}
         </div>
       </>
     </div>

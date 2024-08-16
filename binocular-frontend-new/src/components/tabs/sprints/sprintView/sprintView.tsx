@@ -3,7 +3,7 @@ import { useSelector } from 'react-redux';
 import { AppDispatch, RootState, useAppDispatch } from '../../../../redux';
 import { SprintType } from '../../../../types/data/sprintType.ts';
 import { showContextMenu } from '../../../contextMenu/contextMenuHelper.ts';
-import editIcon from '../../../../assets/edit_black.svg';
+import editIcon from '../../../../assets/edit_gray.svg';
 import deleteIcon from '../../../../assets/delete_red.svg';
 import { deleteSprint, sprintToEdit } from '../../../../redux/data/sprintsReducer.ts';
 

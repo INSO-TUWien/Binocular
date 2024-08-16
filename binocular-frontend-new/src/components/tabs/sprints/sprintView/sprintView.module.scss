@@ -21,6 +21,7 @@
   border: 2px solid;
   border-radius: 4px;
   @apply border-base-300;
+  @apply bg-base-200;
   @apply shadow;
 }
 
@@ -40,7 +41,8 @@
   content: '';
   height: 1.5rem;
   border-top: 2px solid transparent;
-  border-right: 2px solid #ff3b30;
+  border-right: 2px solid;
+  @apply border-r-error;
   position: absolute;
   right: -2px;
   bottom: 0;
@@ -49,7 +51,7 @@
 .endDate:after{
   content: '';
   border: .35rem solid transparent;
-  border-right-color: #ff3b30;
+  @apply border-r-error;
   position: absolute;
   right: 0;
 }
@@ -70,7 +72,8 @@
   content: '';
   height: 1.5rem;
   border-bottom: 2px solid transparent;
-  border-left: 2px solid #4cd964;
+  border-left: 2px solid;
+  @apply border-l-success;
   position: absolute;
   left: -2px;
   top: 0;
@@ -79,7 +82,7 @@
 .startDate:after{
   content: '';
   border: .35rem solid transparent;
-  border-left-color: #4cd964;
+  @apply border-l-success;
   position: absolute;
   left: 0;
 }

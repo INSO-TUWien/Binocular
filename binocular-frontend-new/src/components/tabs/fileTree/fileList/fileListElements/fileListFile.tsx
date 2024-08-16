@@ -1,6 +1,6 @@
 import fileListElementsStyles from './fileListElements.module.scss';
 import { FileListElementType } from '../../../../../types/data/fileListType.ts';
-import FileIcon from '../../../../../assets/file_black.svg';
+import FileIcon from '../../../../../assets/file_gray.svg';
 
 function FileListFile(props: { file: FileListElementType }) {
   return (

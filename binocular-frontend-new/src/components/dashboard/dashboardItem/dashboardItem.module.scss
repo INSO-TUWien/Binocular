@@ -33,7 +33,7 @@ $dashboardItemResizeBarThickness: 3px;
 .dashboardItemInteractionBar>span{
   margin-left: .5rem;
   float: left;
-  @apply text-neutral-600;
+  @apply text-neutral-content;
 }
 
 .dashboardItemInteractionBar>button{
@@ -113,7 +113,7 @@ $dashboardItemResizeBarThickness: 3px;
   @apply bg-base-100;
   box-shadow: $shadow-default;
   border: $border-default;
-  @apply border-accent;
+  @apply border-base-300;
   padding: .5rem;
 }
 

@@ -32,7 +32,7 @@ function DashboardItemSettings(props: {
           <input
             type="checkbox"
             className="toggle toggle-accent toggle-sm"
-            checked={props.ignoreGlobalParameters}
+            defaultChecked={props.ignoreGlobalParameters}
             onChange={(e) => props.setIgnoreGlobalParameters(e.target.checked)}
           />
         </label>

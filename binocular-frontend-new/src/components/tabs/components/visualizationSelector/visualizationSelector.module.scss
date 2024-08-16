@@ -26,6 +26,7 @@
   border-radius: $border-radius-default;
   cursor: pointer;
   transition: scale ease-in-out .2s;
+  @apply bg-base-300;
 }
 
 .visualizationButton:hover{
@@ -46,6 +47,7 @@
   @apply border-base-300;
   height: 2rem;
   width: 3rem;
+  background: white;
 }
 
 .visualizationButton>div>span{
@@ -53,5 +55,4 @@
   height: 2rem;
   line-height: 2rem;
   font-size: 1rem;
-  @apply text-neutral-700;
 }

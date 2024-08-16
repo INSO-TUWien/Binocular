@@ -81,7 +81,7 @@ export const authorsSlice = createSlice({
     },
     editAuthor: (state, action: PayloadAction<number>) => {
       (document.getElementById('editAuthorDialog') as HTMLDialogElement).showModal();
-      state.authorToEdit = state.authorList.find((a: AuthorType) => a.id === action.payload);
+      state.authorToEdit = state.authorLists[state.dataPluginId].find((a: AuthorType) => a.id === action.payload);
     },
     saveAuthor: (state, action: PayloadAction<AuthorType>) => {
       state.authorLists[state.dataPluginId] = state.authorLists[state.dataPluginId].map((a: AuthorType) => {

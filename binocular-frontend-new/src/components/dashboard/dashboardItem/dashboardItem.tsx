@@ -185,7 +185,7 @@ function DashboardItem(props: {
         )}
         <div
           className={dashboardItemStyles.dashboardItemInteractionBar}
-          style={{ background: `linear-gradient(90deg, ${selectedDataPlugin ? selectedDataPlugin.color : 'white'}, white)` }}
+          style={{ background: `linear-gradient(90deg, ${selectedDataPlugin ? selectedDataPlugin.color : 'oklch(var(--b2))'}, oklch(var(--b1))` }}
           onMouseDown={() => {
             console.log('Start dragging dashboard item ' + props.item.pluginName);
             props.setDragResizeItem(props.item, DragResizeMode.drag);

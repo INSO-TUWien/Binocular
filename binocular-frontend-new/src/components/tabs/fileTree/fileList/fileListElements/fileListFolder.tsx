@@ -1,8 +1,8 @@
 import fileListElementsStyles from './fileListElements.module.scss';
 import { FileListElementType, FileListElementTypeType } from '../../../../../types/data/fileListType.ts';
 import { useState } from 'react';
-import FolderIcon from '../../../../../assets/folder_black.svg';
-import FolderOpenIcon from '../../../../../assets/folder_open_black.svg';
+import FolderIcon from '../../../../../assets/folder_gray.svg';
+import FolderOpenIcon from '../../../../../assets/folder_open_gray.svg';
 import FileListFile from './fileListFile.tsx';
 
 function FileListFolder(props: { folder: FileListElementType[]; name: string; foldedOut: boolean }) {

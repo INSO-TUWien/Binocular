@@ -9,7 +9,13 @@ function EditAuthorDialog() {
   const dispatch: AppDispatch = useAppDispatch();
 
   const authorToEdit = useSelector((state: RootState) => state.authors.authorToEdit);
-  const authors = useSelector((state: RootState) => state.authors.authorList);
+  const authorLists = useSelector((state: RootState) => state.authors.authorLists);
+  const authorsDataPluginId = useSelector((state: RootState) => state.authors.dataPluginId);
+  const [authors, setAuthors] = useState(authorLists[authorsDataPluginId] || []);
+
+  useEffect(() => {
+    setAuthors(authorLists[authorsDataPluginId] || []);
+  }, [authorLists, authorsDataPluginId]);
 
   const [displayName, setDisplayName] = useState(authorToEdit && authorToEdit.displayName ? authorToEdit.displayName : '');
   const [colorMain, setColorMain] = useState(authorToEdit ? authorToEdit.color.main : '#CCCCC');
@@ -34,7 +40,7 @@ function EditAuthorDialog() {
             <div className="label">
               <span className="label-text font-bold">Signature:</span>
             </div>
-            <div className={'text-neutral-600'}>{authorToEdit.signature}</div>
+            <div className={'text-neutral-600'}>{authorToEdit.user.gitSignature}</div>
             <label className="form-control w-full">
               <div className="label">
                 <span className="label-text font-bold">Display Name:</span>

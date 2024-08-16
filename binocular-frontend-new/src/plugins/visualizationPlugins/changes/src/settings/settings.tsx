@@ -13,7 +13,7 @@ function Settings(props: { settings: SettingsType; setSettings: (newSettings: Se
           <input
             type="checkbox"
             className="toggle toggle-accent toggle-sm"
-            checked={props.settings.splitAdditionsDeletions}
+            defaultChecked={props.settings.splitAdditionsDeletions}
             onChange={(event) =>
               props.setSettings({
                 splitAdditionsDeletions: event.target.checked,
@@ -47,7 +47,7 @@ function Settings(props: { settings: SettingsType; setSettings: (newSettings: Se
           <input
             type="checkbox"
             className="toggle toggle-accent toggle-sm"
-            checked={props.settings.showSprints}
+            defaultChecked={props.settings.showSprints}
             onChange={(event) =>
               props.setSettings({
                 splitAdditionsDeletions: props.settings.splitAdditionsDeletions,
