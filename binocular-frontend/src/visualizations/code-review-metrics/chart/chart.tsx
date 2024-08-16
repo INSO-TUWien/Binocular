@@ -1,11 +1,14 @@
 'use-strict';
 import React from 'react';
-import BubbleChart, { Bubble } from '../../../components/BubbleChart';
+import * as d3 from 'd3';
 import { Author, Comment, MergeRequest, ReviewThread } from '../../../types/dbTypes';
 import _ from 'lodash';
 import styles from '../styles.module.scss';
 import { connect } from 'react-redux';
 import { incrementCollectionForSelectedAuthors } from '../../merge-request-ownership/chart/utils';
+import { CoordinateDataPoint, HierarchicalDataPoint, HierarchicalDataPointNode } from '../../../components/BubbleChart/types';
+import CoordinateBubbleChart from '../../../components/BubbleChart/CoordinateBubbleChart';
+import HierarchicalBubbleChart from '../../../components/BubbleChart/HierarchicalBubbleChart';
 
 interface Props {
   mergeRequests: any[];
@@ -15,38 +18,53 @@ interface Props {
 }
 
 interface State {
-  metricsData: Bubble[];
+  hierarchicalMetricsData: HierarchicalDataPoint[];
+  coordinateMetricsData: CoordinateDataPoint[];
 }
 
 class ChartComponent extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
-    const { metricsData } = this.extractMergeRequestData(props);
+    const { hierarchicalMetricsData, coordinateMetricsData } = this.extractMergeRequestData(props);
     this.state = {
-      metricsData,
+      hierarchicalMetricsData,
+      coordinateMetricsData,
     };
   }
 
   componentWillReceiveProps(nextProps) {
-    const { metricsData } = this.extractMergeRequestData(nextProps);
+    const { hierarchicalMetricsData, coordinateMetricsData } = this.extractMergeRequestData(nextProps);
     this.setState({
-      metricsData,
+      hierarchicalMetricsData,
+      coordinateMetricsData,
     });
   }
 
   render() {
-    const metricsChart = (
+    const noData = <div>No data during this time period!</div>;
+    const renderFile = this.props.codeReviewMetricsState.config.grouping === 'file';
+
+    const hiearchicalChart = (
       <div className={styles.chart}>
-        {this.state.metricsData !== undefined && this.state.metricsData.length > 0 ? (
-          <BubbleChart
-            data={this.state.metricsData}
+        {this.state.hierarchicalMetricsData !== undefined && this.state.hierarchicalMetricsData.length > 0 ? (
+          <HierarchicalBubbleChart data={this.state.hierarchicalMetricsData} paddings={{ top: 20, left: 60, bottom: 20, right: 30 }} />
+        ) : (
+          noData
+        )}
+      </div>
+    );
+
+    const coordinateChart = (
+      <div className={styles.chart}>
+        {this.state.coordinateMetricsData !== undefined && this.state.coordinateMetricsData.length > 0 ? (
+          <CoordinateBubbleChart
+            data={this.state.coordinateMetricsData}
             paddings={{ top: 20, left: 60, bottom: 20, right: 30 }}
             showXAxis={true}
             showYAxis={false}
-            useGroups={this.props.codeReviewMetricsState.config.grouping === 'file'}
           />
         ) : (
-          <div>No data during this time period!</div>
+          noData
         )}
       </div>
     );
@@ -61,19 +79,20 @@ class ChartComponent extends React.Component<Props, State> {
 
     return (
       <div className={styles.chartContainer}>
-        {this.state.metricsData === null && loadingHint}
-        {metricsChart}
+        {(this.state.hierarchicalMetricsData === null || this.state.coordinateMetricsData === null) && loadingHint}
+        {renderFile ? hiearchicalChart : coordinateChart}
       </div>
     );
   }
 
   extractMergeRequestData(props) {
     if (!props.mergeRequests || props.mergeRequests.length === 0) {
-      return { metricsData: [] };
+      return { hierarchicalMetricsData: [], coordinateMetricsData: [] };
     }
 
     const mergeRequests = props.mergeRequests;
-    const metricsData: Bubble[] = [];
+    const coordinateMetricsData: CoordinateDataPoint[] = [];
+    const hierarchicalMetricsData: HierarchicalDataPoint[] = [];
     const usersData = new Map<string, [number, string]>();
     const filesData = new Map<string, number>();
 
@@ -92,35 +111,35 @@ class ChartComponent extends React.Component<Props, State> {
         default:
           break;
       }
-      this.extractUsersData(metricsData, usersData, label);
+      this.extractUsersData(coordinateMetricsData, usersData, label);
     } else if (configState.grouping === 'file') {
       this.getReviewThreadOwnershipCountByFile(mergeRequests, filesData, props);
-      this.extractFilesData(metricsData, filesData);
+      this.extractFilesData(hierarchicalMetricsData, filesData);
     }
-    console.log(metricsData);
-    return { metricsData };
+
+    return { hierarchicalMetricsData, coordinateMetricsData };
   }
 
-  extractUsersData(metricsData: Bubble[], usersData: Map<string, [number, string]>, label: string): void {
+  extractUsersData(data: CoordinateDataPoint[], usersData: Map<string, [number, string]>, label: string): void {
     usersData.forEach((entry, user) => {
       const [count, color] = entry;
-      const bubble: Bubble = {
+      const datapoint: CoordinateDataPoint = {
         x: 0,
         y: 0,
         originalX: 0,
         originalY: 0,
         color: color,
         size: count,
-        data: [
+        tooltipData: [
           { label: 'login', value: user },
           { label: label, value: count },
         ],
       };
-      metricsData.push(bubble);
+      data.push(datapoint);
     });
   }
 
-  extractFilesData(metricsData: Bubble[], filesData: Map<string, number>): void {
+  extractFilesData(data: HierarchicalDataPoint[], filesData: Map<string, number>): void {
     filesData.forEach((count, file) => {
       // get group
       let identifier = '/';
@@ -131,20 +150,16 @@ class ChartComponent extends React.Component<Props, State> {
         foldername += paths[paths.length - 2];
       }
 
-      const bubble: Bubble = {
-        x: 0,
-        y: 0,
-        originalX: 0,
-        originalY: 0,
-        color: 'red',
+      const bubble: HierarchicalDataPoint = {
         size: count,
-        data: [
+        tooltipData: [
           { label: 'Filename', value: file },
           { label: 'Reviews', value: count },
         ],
-        group: { identifier, foldername },
+        identifier,
+        subgroupPath: foldername,
       };
-      metricsData.push(bubble);
+      data.push(bubble);
     });
   }
 

@@ -54,7 +54,7 @@ export const fetchCodeReviewMetricsData = fetchFactory(
     let fileList = results[1];
 
     fileList = fileList.map((file) => file.key);
-    console.log(fileList);
+
     return {
       mergeRequests,
       fileList,

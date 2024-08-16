@@ -1,88 +1,29 @@
 'use strict';
 
 import React from 'react';
-import * as d3 from 'd3';
 import * as baseStyles from './bubbleChart.module.scss';
 import _ from 'lodash';
-import BubbleToolTip, { ToolTipData } from './tooltip';
-
-interface Props {
-  data: Bubble[];
-  paddings: Padding;
-  showXAxis: boolean;
-  showYAxis: boolean;
-  useGroups?: boolean;
-}
-
-interface Padding {
-  top: number;
-  left: number;
-  bottom: number;
-  right: number;
-}
-
-export interface State {
-  data: Bubble[];
-  tooltipX: number;
-  tooltipY: number;
-  tooltipVisible: boolean;
-  tooltipData: ToolTipData[];
-}
-
-export interface Bubble {
-  x: number;
-  y: number;
-  originalX: number;
-  originalY: number;
-  size: number;
-  color: string;
-  xLabel?: string;
-  yLabel?: string;
-  group?: { identifier: string; foldername: string };
-  data: ToolTipData[];
-}
-
-interface Scales {
-  x: any;
-  y: any;
-  radius: any;
-}
-
-interface WindowSpecs {
-  height: number;
-  width: number;
-  paddings: Padding;
-}
-
-interface Node {
-  name: string;
-  datapoint?: Bubble;
-  isRoot?: boolean;
-  children: Node[];
-}
+import BubbleToolTip from './tooltip';
+import { BubbleChartProps, BubbleChartState, BubbleChartWindowSpecs } from './types';
 
 // TODO: refactor to remove duplicate code from ScalableBaseChart
-export default class BubbleChart extends React.Component<Props, State> {
-  private styles: any;
-  private svgRef: SVGSVGElement | null | undefined;
+export default class BubbleChart<
+  P extends BubbleChartProps = BubbleChartProps,
+  S extends BubbleChartState = BubbleChartState,
+> extends React.Component<P, S> {
+  protected styles: any;
+  protected svgRef: SVGSVGElement | null | undefined;
 
-  constructor(props: Props | Readonly<Props>, styles: any) {
+  constructor(props: P | Readonly<P>, styles: any) {
     super(props);
     this.styles = Object.freeze(Object.assign({}, baseStyles, styles));
-    this.state = {
-      data: props.data,
-      tooltipX: 0,
-      tooltipY: 0,
-      tooltipVisible: false,
-      tooltipData: [],
-    };
+    this.updateElement = this.updateElement.bind(this);
     window.addEventListener('resize', this.handleResize);
   }
 
-  handleResize = () => {
-    this.reassignOriginalDataPointValues();
+  handleResize() {
     this.updateElement();
-  };
+  }
 
   componentWillUnmount() {
     window.removeEventListener('resize', () => this.updateElement());
@@ -92,79 +33,11 @@ export default class BubbleChart extends React.Component<Props, State> {
     this.updateElement();
   }
 
-  componentDidUpdate(prevProps: Readonly<Props>, prevState: Readonly<State>) {
-    if (prevProps.data !== this.props.data) {
-      this.setState({
-        data: this.props.data,
-      });
-      this.updateElement();
-    }
-
-    if (prevState.data !== this.state.data) {
-      this.reassignOriginalDataPointValues();
-      this.updateElement();
-    }
-  }
-
   async updateElement() {
-    const { data } = this.state;
-    this.visualizeData(data);
+    throw new Error('Function not implemented by subcomponent');
   }
 
-  reassignOriginalDataPointValues() {
-    this.state.data.forEach((d) => {
-      d.x = d.originalX;
-      d.y = d.originalY;
-    });
-  }
-
-  /**
-   * calculates x dims based on paddings and min/max values
-   * @returns the x dims for the chart
-   */
-  getXDims(): [number, number] {
-    const extent = d3.extent(this.state.data, (d) => d.x);
-    const padding = (extent[1]! - extent[0]!) * 0.1;
-    return [extent[0]! - padding, extent[1]! + padding];
-  }
-
-  /**
-   * calculates y dims based on paddings and min/max values
-   * @returns the y dims for the chart
-   */
-  getYDims(): [number, number] {
-    const extent = d3.extent(this.state.data, (d) => d.y);
-    const padding = (extent[1]! - extent[0]!) * 0.1;
-    return [extent[0]! - padding, extent[1]! + padding];
-  }
-
-  /**
-   * calculates radius dims
-   * @returns the radius dims for the chart
-   */
-  getRadiusDims(): [number, number] {
-    return [0, d3.max(this.state.data, (d: any) => d.size)];
-  }
-
-  /**
-   * return the scales for the chart
-   * @param xDims domain of x values
-   * @param xRange range of x values
-   * @param yDims domain of y values
-   * @param yRange rango of y values
-   * @param radiusDims domain of the radius of the bubble
-   * @param radiusRange range of the radius of the bubble
-   * @returns d3 scales for x y and radius
-   */
-  createScales(xDims, xRange, yDims, yRange, radiusDims, radiusRange): Scales {
-    const x = d3.scaleLinear().domain(xDims).range(xRange);
-    const y = d3.scaleLinear().domain(yDims).range(yRange);
-    const radius = d3.scaleSqrt().domain(radiusDims).range(radiusRange);
-
-    return { x, y, radius };
-  }
-
-  getDimsAndPaddings(svg: any): WindowSpecs {
+  getDimsAndPaddings(svg: any): BubbleChartWindowSpecs {
     const paddings = this.props.paddings || { left: 0, right: 0, top: 0, bottom: 0 };
     const node = !svg || typeof svg.node !== 'function' ? { getBoundingClientRec: () => ({}) } : svg.node();
     const clientRect = node ? node.getBoundingClientRect() : {};
@@ -172,267 +45,6 @@ export default class BubbleChart extends React.Component<Props, State> {
     const height = clientRect.height || 0;
 
     return { width, height, paddings };
-  }
-
-  /**
-   * fills the bubble chart group in the svg with the bubbles
-   * @param chartGroup the group where the chart is placed
-   * @param scales the scales for the chart
-   * @returns the group of the bubble chart
-   */
-  createBubbleChart(chartGroup: any, scales) {
-    const bubbleChart = chartGroup
-      .append('g')
-      .selectAll('circle')
-      .data(this.state.data)
-      .enter()
-      .append('circle')
-      .attr('cx', (d) => scales.x(d.x))
-      .attr('cy', (d) => scales.y(d.y))
-      .attr('r', (d) => scales.radius(d.size))
-      .attr('fill', (d) => d.color)
-      .classed('bubble', true)
-      .on('mouseover', (event, d: Bubble) => {
-        this.setState({
-          tooltipX: event.layerX + 20,
-          tooltipY: event.layerY + 20,
-          tooltipVisible: true,
-          tooltipData: d.data,
-        });
-      })
-      .on('mouseout', () => {
-        this.setState({
-          tooltipData: [],
-          tooltipVisible: false,
-        });
-      });
-
-    return bubbleChart;
-  }
-
-  /**
-   * @param svg the svg for the chart
-   * @param scales the scales of the chart
-   * @param height the height of the window
-   * @param paddings the paddings of the chart
-   */
-  getChart(svg, scales, height, paddings) {
-    const chartGroup = svg.append('g');
-    const bubbleChart = this.createBubbleChart(chartGroup.append('g'), scales);
-
-    const axes = Object.assign({
-      x: this.createXAxis(chartGroup, scales, height, paddings),
-      y: this.createYAxis(chartGroup, scales, paddings),
-    });
-
-    return { chartGroup, axes, bubbleChart };
-  }
-
-  /**
-   * creates the x axis for the chart
-   * @param chartGroup the group of the d3 element where the chart is
-   * @param scales the scales for the chart
-   * @param height the height of the window
-   * @param paddings the paddings for the chart
-   * @returns the x axis for the chart
-   */
-  createXAxis(chartGroup, scales, height: number, paddings: Padding) {
-    if (!this.props.showXAxis) return;
-
-    return chartGroup
-      .append('g')
-      .attr('class', this.styles.axis)
-      .attr('transform', `translate(0,${height - paddings.bottom})`)
-      .call(d3.axisBottom(scales.x));
-  }
-
-  /**
-   * creates the x axis for the chart
-   * @param chartGroup the group of the d3 element where the chart is
-   * @param scales the scales for the chart
-   * @param paddings the paddings for the chart
-   * @returns the y axis for the chart
-   */
-  createYAxis(chartGroup, scales, paddings: Padding) {
-    if (!this.props.showYAxis) return;
-
-    return chartGroup
-      .append('g')
-      .attr('class', this.styles.axis)
-      .attr('transform', `translate(${paddings.left},0)`)
-      .call(d3.axisLeft(scales.y));
-  }
-
-  createBrush(svg, data, width, heigth) {
-    const component = this;
-    const brush = d3
-      .brushX()
-      .extent([
-        [0, 0],
-        [width, heigth],
-      ])
-      .on('end', selectionEnd);
-
-    function selectionEnd(event) {
-      const selection = event.selection;
-      if (!selection) return;
-      const [min, max] = selection;
-
-      const selectedData = data.filter((d) => d.x >= min && d.x <= max);
-      component.setState({
-        data: selectedData,
-      });
-    }
-
-    svg.append('g').attr('class', 'brush').call(brush);
-  }
-
-  /**
-   * visualizes the bubbles array via a bubble chart
-   */
-  visualizeData(data: Bubble[]): void {
-    if (!data) {
-      return;
-    }
-
-    const svg = d3.select(this.svgRef!);
-    svg.on('dblclick', () => {
-      this.setState({
-        data: this.props.data,
-      });
-    });
-
-    const { width, height, paddings } = this.getDimsAndPaddings(svg);
-
-    svg.selectAll('*').remove();
-
-    if (this.props.useGroups) {
-      this.group(svg, this.groupData(data, svg, height, width));
-      return;
-    }
-
-    const scales = this.createScales(
-      this.getXDims(),
-      [paddings.left, width - paddings.right],
-      this.getYDims(),
-      [height - paddings.bottom, paddings.top],
-      this.getRadiusDims(),
-      [d3.min(data, (d: any) => d.size), d3.max(data, (d: any) => d.size)],
-    );
-
-    this.createBrush(svg, data, width, height);
-
-    const { bubbleChart } = this.getChart(svg, scales, height, paddings);
-    this.simulateData(data, scales, bubbleChart);
-  }
-
-  groupData(data: Bubble[], svg, heigth: number, width: number) {
-    const root: Node = { name: 'root', children: [], isRoot: true };
-    data.forEach((dp) => {
-      const folderStructure = dp.group!.identifier.split('/');
-      let currentLevel = root.children;
-
-      folderStructure.slice(1).forEach((folder, index) => {
-        let existingFolder = currentLevel.find((d) => d.name === folder);
-
-        // in root directory
-        if (folder === '') {
-          root.children.push({ name: dp.data[0].value.toString(), children: [], datapoint: dp });
-          return;
-        }
-
-        if (!existingFolder) {
-          existingFolder = { name: folder, children: [] };
-          currentLevel.push(existingFolder);
-        }
-
-        if (index === folderStructure.length - 2) {
-          existingFolder.children.push({ name: dp.data[0].value.toString(), children: [], datapoint: dp });
-        }
-
-        currentLevel = existingFolder.children;
-      });
-    });
-    console.log(root);
-
-    const hierarchy = d3.hierarchy(root).sum((d) => (d.datapoint ? d.datapoint.size : 10));
-
-    const pack = d3.pack<any>().size([width, heigth]).padding(20);
-    const packedHierarchy = pack(hierarchy);
-    return packedHierarchy.descendants();
-  }
-
-  group(svg, groupedData) {
-    const simulation = d3
-      .forceSimulation(groupedData)
-      .force('charge', d3.forceManyBody().strength(0))
-      .force('x', d3.forceX())
-      .force('y', d3.forceY());
-
-    const leaf = svg
-      .selectAll('g')
-      .data(groupedData)
-      .enter()
-      .append('g')
-      .attr('transform', (d: any) => `translate(${d.x + 1},${d.y + 1})`);
-
-    const files = ['#00000', '#062F4F', '#813772', '#B82601'];
-
-    const circle = leaf
-      .append('circle')
-      .attr('r', (d: any) => d.r)
-      .attr('fill', (d) => (d.data.datapoint ? files[d.depth % 4] : 'white'))
-      .style('stroke', (d) => (d.data.datapoint || d.data.isRoot ? 'none' : '#000'))
-      .style('stroke-width', (d) => (d.data.datapoint ? 'none' : 2))
-      .on('mouseover', (event, d) => {
-        this.setState({
-          tooltipX: event.layerX + 20,
-          tooltipY: event.layerY + 20,
-          tooltipVisible: true,
-          tooltipData: d.data.datapoint ? d.data.datapoint.data : [{ label: 'Foldername', value: d.data.name }],
-        });
-      })
-      .on('mousemove', (event, d) => {
-        this.setState({
-          tooltipX: event.layerX + 20,
-          tooltipY: event.layerY + 20,
-        });
-      })
-      .on('mouseout', () => {
-        this.setState({
-          tooltipData: [],
-          tooltipVisible: false,
-        });
-      });
-
-    simulation.on('tick', () => {
-      circle.attr('cx', (d) => d.x).attr('cy', (d) => d.y);
-    });
-  }
-
-  /**
-   * transforms the data using d3 simulation to avoid collision and allign toward its supposed coordinates
-   * @param data array that contains the bubbles to be drawn
-   * @param scales scales of the chart
-   * @param bubbleChart group containing the bubble chart
-   */
-  simulateData(data: Bubble[], scales, bubbleChart) {
-    d3.forceSimulation(data)
-      .force(
-        'x',
-        d3.forceX((d: any) => scales.x(d.x)),
-      )
-      .force(
-        'y',
-        d3.forceY((d: any) => scales.y(d.y)),
-      )
-      .force(
-        'collision',
-        d3.forceCollide((d: Bubble) => scales.radius(d.size) + 1),
-      )
-      .on('tick', () => {
-        bubbleChart.attr('cx', (d) => d.x).attr('cy', (d) => d.y);
-      });
   }
 
   render() {

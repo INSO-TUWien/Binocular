@@ -2,17 +2,18 @@
 import React from 'react';
 import _ from 'lodash';
 import { connect } from 'react-redux';
-import BubbleChart, { Bubble } from '../../../components/BubbleChart';
 import { MergeRequest } from '../../../types/dbTypes';
 import styles from '../styles.module.scss';
 import { incrementCollectionForSelectedAuthors } from './utils';
+import CoordinateBubbleChart from '../../../components/BubbleChart/CoordinateBubbleChart';
+import { CoordinateDataPoint } from '../../../components/BubbleChart/types';
 
 interface Props {
   mergeRequestOwnershipState: any;
 }
 
 interface State {
-  ownershipData: Bubble[];
+  ownershipData: CoordinateDataPoint[];
 }
 
 class ChartComponent extends React.Component<Props, State> {
@@ -35,7 +36,7 @@ class ChartComponent extends React.Component<Props, State> {
     const ownershipChart = (
       <div className={styles.chart}>
         {this.state.ownershipData !== undefined && this.state.ownershipData.length > 0 ? (
-          <BubbleChart
+          <CoordinateBubbleChart
             data={this.state.ownershipData}
             paddings={{ top: 20, left: 60, bottom: 20, right: 30 }}
             showXAxis={false}
@@ -69,7 +70,7 @@ class ChartComponent extends React.Component<Props, State> {
     }
 
     const mergeRequests = props.mergeRequests;
-    const ownershipData: Bubble[] = [];
+    const ownershipData: CoordinateDataPoint[] = [];
     const categoryCount =
       props.mergeRequestOwnershipState.config.category === 'assignees'
         ? this.extractAssigneeCount(mergeRequests, props)
@@ -77,14 +78,14 @@ class ChartComponent extends React.Component<Props, State> {
 
     categoryCount.forEach((value, author) => {
       const [count, color] = value;
-      const bubble: Bubble = {
+      const bubble: CoordinateDataPoint = {
         x: 0,
         y: 0,
         originalX: 0,
         originalY: 0,
         size: count,
         color: color,
-        data: [
+        tooltipData: [
           { label: 'login', value: author },
           { label: 'Amount', value: count },
         ],

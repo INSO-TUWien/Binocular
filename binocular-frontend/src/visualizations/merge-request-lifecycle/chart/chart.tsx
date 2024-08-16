@@ -1,11 +1,12 @@
 'use-strict';
 import React from 'react';
-import BubbleChart, { Bubble } from '../../../components/BubbleChart';
 import { MergeRequest } from '../../../types/dbTypes';
 import LegendCompact from '../../../components/LegendCompact';
 import _ from 'lodash';
 import styles from '../styles.module.scss';
 import { connect } from 'react-redux';
+import { CoordinateDataPoint } from '../../../components/BubbleChart/types';
+import CoordinateBubbleChart from '../../../components/BubbleChart/CoordinateBubbleChart';
 
 interface Props {
   mergeRequests: any[];
@@ -13,10 +14,15 @@ interface Props {
 }
 
 interface State {
-  lifeCycleData: Bubble[];
+  lifeCycleData: CoordinateDataPoint[];
 }
 
 class ChartComponent extends React.Component<Props, State> {
+  private COLOR_MR_OPEN = '#6cc644';
+  private COLOR_MR_CLOSED = '#bd2c00';
+  private COLOR_MR_MERGED = '#6e5494';
+  private COLOR_MR_UNDEFINED = 'yellow';
+
   constructor(props: Props) {
     super(props);
     const { lifeCycleData } = this.extractLifeCycleData(props);
@@ -36,7 +42,7 @@ class ChartComponent extends React.Component<Props, State> {
     const lifeCycleChart = (
       <div className={styles.chart}>
         {this.state.lifeCycleData !== undefined && this.state.lifeCycleData.length > 0 ? (
-          <BubbleChart
+          <CoordinateBubbleChart
             data={this.state.lifeCycleData}
             paddings={{ top: 20, left: 60, bottom: 20, right: 30 }}
             showXAxis={true}
@@ -58,7 +64,12 @@ class ChartComponent extends React.Component<Props, State> {
 
     const legend = (
       <div>
-        <LegendCompact text="Open | Closed | Merged" color="#6cc644" color2="#bd2c00" color3="#6e5494" />
+        <LegendCompact
+          text="Open | Closed | Merged"
+          color={this.COLOR_MR_OPEN}
+          color2={this.COLOR_MR_CLOSED}
+          color3={this.COLOR_MR_MERGED}
+        />
       </div>
     );
 
@@ -77,67 +88,70 @@ class ChartComponent extends React.Component<Props, State> {
     }
 
     const mergeRequests = props.mergeRequests;
-    const lifeCycleData: Bubble[] = [];
+    const lifeCycleData: CoordinateDataPoint[] = [];
 
     _.each(mergeRequests, (mergeRequest: MergeRequest) => {
       const referenceDate = mergeRequest.closedAt ? Date.parse(mergeRequest.closedAt) : Date.now();
       let color: string;
       switch (mergeRequest.state) {
         case 'OPEN':
-          color = '#6cc644';
+          color = this.COLOR_MR_OPEN;
           break;
         case 'CLOSED':
-          color = '#bd2c00';
+          color = this.COLOR_MR_CLOSED;
           break;
         case 'MERGED':
-          color = '#6e5494';
+          color = this.COLOR_MR_MERGED;
           break;
         default:
-          color = 'yellow';
+          color = this.COLOR_MR_UNDEFINED;
           break;
       }
       const timespan = Math.round((referenceDate - Date.parse(mergeRequest.createdAt)) / this.getTimeConversionFactor(props));
       const y = 0 + Math.random();
-      const bubble: Bubble = {
+      const bubble: CoordinateDataPoint = {
         x: timespan,
         y: y,
         originalX: timespan,
         originalY: y,
         size: 10,
         color: color,
-        data: [
-          { label: 'State', value: color },
+        tooltipData: [
+          { label: 'State', value: this.getStateForColor(color) },
           { label: 'Duration', value: timespan },
         ],
       };
       lifeCycleData.push(bubble);
     });
     if (props.mergeRequestLifeCycleState.config.grouping === 'cumulative') {
-      const groupedData: Bubble[] = this.getGroupedDataCumulative(lifeCycleData);
+      const groupedData: CoordinateDataPoint[] = this.getGroupedDataCumulative(lifeCycleData);
       return { lifeCycleData: groupedData };
     } else if (props.mergeRequestLifeCycleState.config.grouping === 'category') {
-      const groupedData: Bubble[] = this.getGroupedDataCategory(lifeCycleData);
+      const groupedData: CoordinateDataPoint[] = this.getGroupedDataCategory(lifeCycleData);
       return { lifeCycleData: groupedData };
     }
 
     return { lifeCycleData: lifeCycleData };
   }
 
-  getGroupedDataCumulative(lifeCycleData: Bubble[]): Bubble[] {
+  getGroupedDataCumulative(lifeCycleData: CoordinateDataPoint[]): CoordinateDataPoint[] {
     const groupedData = this.groupData(lifeCycleData);
-    const cumulativeData: Bubble[] = [];
+    const cumulativeData: CoordinateDataPoint[] = [];
 
     for (const color in groupedData) {
       for (const x in groupedData[color]) {
         const y = 0 + Math.random();
-        const bubble: Bubble = {
+        const bubble: CoordinateDataPoint = {
           x: parseInt(x),
           y: y,
           originalX: parseInt(x),
           originalY: y,
           color: color,
           size: groupedData[color][x].length,
-          data: [],
+          tooltipData: [
+            { label: 'State', value: this.getStateForColor(color) },
+            { label: 'Duration', value: x + ' ' + this.props.mergeRequestLifeCycleState.config.granularity + 's' },
+          ],
         };
 
         cumulativeData.push(bubble);
@@ -147,24 +161,24 @@ class ChartComponent extends React.Component<Props, State> {
     return cumulativeData;
   }
 
-  getGroupedDataCategory(lifeCycleData: Bubble[]): Bubble[] {
+  getGroupedDataCategory(lifeCycleData: CoordinateDataPoint[]): CoordinateDataPoint[] {
     const groupedData = this.groupData(lifeCycleData);
-    const categoryData: Bubble[] = [];
+    const categoryData: CoordinateDataPoint[] = [];
 
     for (const color in groupedData) {
       let size = 0;
       for (const x in groupedData[color]) {
         size += groupedData[color][x].length;
       }
-      const bubble: Bubble = {
+      const bubble: CoordinateDataPoint = {
         x: 0,
         y: 0,
         originalX: 0,
         originalY: 0,
         size: size,
         color: color,
-        data: [
-          { label: 'State', value: color },
+        tooltipData: [
+          { label: 'State', value: this.getStateForColor(color) },
           { label: 'Pull Requests', value: size },
         ],
       };
@@ -181,7 +195,7 @@ class ChartComponent extends React.Component<Props, State> {
    * @param lifeCycleData the data to be grouped
    * @returns the grouped data as an object
    */
-  groupData(lifeCycleData: Bubble[]) {
+  groupData(lifeCycleData: CoordinateDataPoint[]) {
     const groupedData = {};
     lifeCycleData.forEach((item) => {
       const { x, color } = item;
@@ -228,6 +242,19 @@ class ChartComponent extends React.Component<Props, State> {
         return CONVERT_MILLIS_TO_YEARS;
       default:
         return CONVERT_MILLIS_TO_DAYS;
+    }
+  }
+
+  getStateForColor(color: string) {
+    switch (color) {
+      case this.COLOR_MR_OPEN:
+        return 'OPEN';
+      case this.COLOR_MR_CLOSED:
+        return 'CLOSED';
+      case this.COLOR_MR_MERGED:
+        return 'MERGED';
+      default:
+        return this.COLOR_MR_UNDEFINED;
     }
   }
 }
