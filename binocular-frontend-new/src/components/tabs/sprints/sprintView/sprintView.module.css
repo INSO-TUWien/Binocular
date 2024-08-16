@@ -1,6 +1,9 @@
 .timelineHorizontal {
   display: flex;
   flex-direction: row;
+  max-width: 50rem;
+  overflow-y: hidden;
+  overflow-x: scroll;
 }
 
 .timelineVertical {
@@ -11,8 +14,9 @@
 .sprint {
   position: relative;
   min-width: 7rem;
+  font-size: 0.5rem;
   margin: 0.5rem 0.1rem;
-  padding: 0.2rem;
+  padding: 0 0.2rem;
   border: 2px solid;
   border-radius: 4px;
   @apply border-base-300;
@@ -24,8 +28,8 @@
   width: max-content;
   background: rgba(255, 59, 48, 0.3333333333);
   right: 0;
-  bottom: -0.8rem;
-  font-size: 0.5rem;
+  bottom: -0.6rem;
+  font-size: 0.4rem;
   height: 0.6rem;
   padding: 0 1rem 0 0.1rem;
   line-height: 0.7rem;
@@ -33,7 +37,7 @@
 
 .endDate:before {
   content: "";
-  height: 2rem;
+  height: 1.5rem;
   border-top: 2px solid transparent;
   border-right: 2px solid #ff3b30;
   position: absolute;
@@ -54,8 +58,8 @@
   width: max-content;
   background: rgba(76, 217, 100, 0.3333333333);
   left: 0;
-  top: -0.8rem;
-  font-size: 0.5rem;
+  top: -0.6rem;
+  font-size: 0.4rem;
   height: 0.6rem;
   padding: 0 0.1rem 0 1rem;
   line-height: 0.7rem;
@@ -63,7 +67,7 @@
 
 .startDate:before {
   content: "";
-  height: 2rem;
+  height: 1.5rem;
   border-bottom: 2px solid transparent;
   border-left: 2px solid #4cd964;
   position: absolute;

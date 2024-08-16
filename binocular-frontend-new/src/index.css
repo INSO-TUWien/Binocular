@@ -39,4 +39,32 @@ body {
   height: 100%;
 }
 
+/*
+----------------------------------------
+Custom Scrollbar
+----------------------------------------
+ */
+/* width */
+::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+  @apply bg-base-300;
+  border-radius: 3px;
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+  @apply bg-neutral-400;
+  border-radius: 3px;
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-accent;
+}
+
 /*# sourceMappingURL=index.css.map */
