@@ -20,12 +20,13 @@ export default class CoordinateBubbleChart extends BubbleChart<CoordinateBubbleC
       tooltipData: [],
       data: props.data,
     };
+    this.handleResize = this.handleResize.bind(this);
   }
 
-  handleResize = () => {
+  handleResize() {
     this.reassignOriginalDataPointValues();
     super.handleResize();
-  };
+  }
 
   async updateElement() {
     const { data } = this.state;
@@ -33,14 +34,10 @@ export default class CoordinateBubbleChart extends BubbleChart<CoordinateBubbleC
   }
 
   componentDidUpdate(prevProps: Readonly<CoordinateBubbleChartProps>, prevState: Readonly<CoordinateBubbleChartState>) {
-    if (prevProps.data !== this.props.data) {
+    if (prevProps.data !== this.props.data || prevState.data !== this.state.data) {
       this.setState({
         data: this.props.data,
       });
-      this.updateElement();
-    }
-
-    if (prevState.data !== this.state.data) {
       this.reassignOriginalDataPointValues();
       this.updateElement();
     }

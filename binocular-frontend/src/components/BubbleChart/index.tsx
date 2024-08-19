@@ -18,6 +18,7 @@ export default class BubbleChart<
     super(props);
     this.styles = Object.freeze(Object.assign({}, baseStyles, styles));
     this.updateElement = this.updateElement.bind(this);
+    this.handleResize = this.handleResize.bind(this);
     window.addEventListener('resize', this.handleResize);
   }
 

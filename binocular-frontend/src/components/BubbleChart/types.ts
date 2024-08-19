@@ -6,7 +6,9 @@ export interface BubbleChartProps {
 }
 
 export interface HierarchicalBubbleChartProps extends BubbleChartProps {
-  data: HierarchicalDataPoint[];
+  data: HierarchicalDataPointNode;
+  handleSubgroupClick: (node: d3.HierarchyCircularNode<HierarchicalDataPointNode>) => void;
+  handleDoubleClick: () => void;
 }
 
 export interface CoordinateBubbleChartProps extends BubbleChartProps {
@@ -26,7 +28,7 @@ export interface BubbleChartState {
 }
 
 export interface HierarchicalBubbleChartState extends BubbleChartState {
-  data: HierarchicalDataPoint[];
+  data: HierarchicalDataPointNode;
 }
 
 export interface CoordinateBubbleChartState extends BubbleChartState {

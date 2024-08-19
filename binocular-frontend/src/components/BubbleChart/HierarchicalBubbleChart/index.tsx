@@ -16,12 +16,21 @@ export default class HierarchicalBubbleChart extends BubbleChart<HierarchicalBub
     };
   }
 
+  componentDidUpdate(prevProps: Readonly<HierarchicalBubbleChartProps>, prevState: Readonly<HierarchicalBubbleChartState>): void {
+    if (prevProps.data !== this.props.data || prevState.data !== this.props.data) {
+      this.setState({
+        data: this.props.data,
+      });
+      this.updateElement();
+    }
+  }
+
   async updateElement() {
     const { data } = this.state;
     this.visualizeData(data);
   }
 
-  visualizeData(data: HierarchicalDataPoint[]) {
+  visualizeData(data: HierarchicalDataPointNode) {
     if (!data) {
       return;
     }
@@ -33,47 +42,10 @@ export default class HierarchicalBubbleChart extends BubbleChart<HierarchicalBub
     this.drawChart(svg, this.buildHierarchy(data, height, width));
   }
 
-  buildHierarchy(data: HierarchicalDataPoint[], heigth: number, width: number) {
-    const root: HierarchicalDataPointNode = { subgroupName: 'root', children: [], isRoot: true, subgroupPath: '' };
-
-    data.forEach((dp) => {
-      let path = '';
-      const folderStructure = dp.identifier.split('/');
-      let currentLevel = root.children;
-
-      folderStructure.slice(1).forEach((folder, index) => {
-        let existingFolder = currentLevel.find((d) => d.subgroupName === folder);
-
-        // in root directory
-        if (folder === '') {
-          root.children.push({ subgroupName: dp.tooltipData[0].value.toString(), children: [], datapoint: dp, subgroupPath: path });
-          return;
-        }
-
-        path += folder;
-
-        if (!existingFolder) {
-          existingFolder = { subgroupName: folder, children: [], subgroupPath: path };
-          currentLevel.push(existingFolder);
-        }
-
-        if (index === folderStructure.length - 2) {
-          existingFolder.children.push({
-            subgroupName: dp.tooltipData[0].value.toString(),
-            children: [],
-            datapoint: dp,
-            subgroupPath: path,
-          });
-        }
-
-        currentLevel = existingFolder.children;
-        path += '/';
-      });
-    });
-
+  buildHierarchy(root, height, width) {
     const hierarchy = d3.hierarchy(root).sum((d) => (d.datapoint ? d.datapoint.size : 10));
 
-    const pack = d3.pack<HierarchicalDataPointNode>().size([width, heigth]).padding(20);
+    const pack = d3.pack<HierarchicalDataPointNode>().size([width, height]).padding(20);
     const packedHierarchy = pack(hierarchy);
     return packedHierarchy.descendants();
   }
@@ -100,6 +72,7 @@ export default class HierarchicalBubbleChart extends BubbleChart<HierarchicalBub
       .attr('fill', (d) => (d.data.datapoint ? files[d.depth % 4] : 'white'))
       .style('stroke', (d) => (d.data.datapoint || d.data.isRoot ? 'none' : '#000'))
       .style('stroke-width', (d) => (d.data.datapoint ? 'none' : 2))
+      .style('cursor', (d) => (d.data.datapoint ? 'default' : 'pointer'))
       .on('mouseover', (event, d) => {
         this.setState({
           tooltipX: event.layerX + 20,
@@ -121,8 +94,11 @@ export default class HierarchicalBubbleChart extends BubbleChart<HierarchicalBub
         });
       })
       .on('click', (event, d) => {
-        console.log(event);
-        console.log(d);
+        if (d.data.datapoint) return;
+        this.props.handleSubgroupClick(d);
+      })
+      .on('dblclick', (event, d) => {
+        this.props.handleDoubleClick();
       });
 
     simulation.on('tick', () => {

@@ -9,16 +9,18 @@ import { incrementCollectionForSelectedAuthors } from '../../merge-request-owner
 import { CoordinateDataPoint, HierarchicalDataPoint, HierarchicalDataPointNode } from '../../../components/BubbleChart/types';
 import CoordinateBubbleChart from '../../../components/BubbleChart/CoordinateBubbleChart';
 import HierarchicalBubbleChart from '../../../components/BubbleChart/HierarchicalBubbleChart';
+import { setActiveFiles } from '../sagas';
 
 interface Props {
   mergeRequests: any[];
   allAuthors: any;
   selectedAuthors: any;
   codeReviewMetricsState: any;
+  setActiveFiles: (files: any) => void;
 }
 
 interface State {
-  hierarchicalMetricsData: HierarchicalDataPoint[];
+  hierarchicalMetricsData: HierarchicalDataPointNode;
   coordinateMetricsData: CoordinateDataPoint[];
 }
 
@@ -30,10 +32,16 @@ class ChartComponent extends React.Component<Props, State> {
       hierarchicalMetricsData,
       coordinateMetricsData,
     };
+    this.handleFolderClicked = this.handleFolderClicked.bind(this);
+    this.handleFolderDoubleClicked = this.handleFolderDoubleClicked.bind(this);
   }
 
   componentWillReceiveProps(nextProps) {
-    const { hierarchicalMetricsData, coordinateMetricsData } = this.extractMergeRequestData(nextProps);
+    this.updateState(nextProps);
+  }
+
+  updateState(props = this.props) {
+    const { hierarchicalMetricsData, coordinateMetricsData } = this.extractMergeRequestData(props);
     this.setState({
       hierarchicalMetricsData,
       coordinateMetricsData,
@@ -46,8 +54,13 @@ class ChartComponent extends React.Component<Props, State> {
 
     const hiearchicalChart = (
       <div className={styles.chart}>
-        {this.state.hierarchicalMetricsData !== undefined && this.state.hierarchicalMetricsData.length > 0 ? (
-          <HierarchicalBubbleChart data={this.state.hierarchicalMetricsData} paddings={{ top: 20, left: 60, bottom: 20, right: 30 }} />
+        {this.state.hierarchicalMetricsData !== undefined && this.state.hierarchicalMetricsData.children.length > 0 ? (
+          <HierarchicalBubbleChart
+            data={this.state.hierarchicalMetricsData}
+            paddings={{ top: 20, left: 60, bottom: 20, right: 30 }}
+            handleSubgroupClick={this.handleFolderClicked}
+            handleDoubleClick={this.handleFolderDoubleClicked}
+          />
         ) : (
           noData
         )}
@@ -87,7 +100,7 @@ class ChartComponent extends React.Component<Props, State> {
 
   extractMergeRequestData(props) {
     if (!props.mergeRequests || props.mergeRequests.length === 0) {
-      return { hierarchicalMetricsData: [], coordinateMetricsData: [] };
+      return { hierarchicalMetricsData: { subgroupName: '', subgroupPath: '', children: [] }, coordinateMetricsData: [] };
     }
 
     const mergeRequests = props.mergeRequests;
@@ -117,7 +130,7 @@ class ChartComponent extends React.Component<Props, State> {
       this.extractFilesData(hierarchicalMetricsData, filesData);
     }
 
-    return { hierarchicalMetricsData, coordinateMetricsData };
+    return { hierarchicalMetricsData: this.prepareHierarchy(hierarchicalMetricsData), coordinateMetricsData };
   }
 
   extractUsersData(data: CoordinateDataPoint[], usersData: Map<string, [number, string]>, label: string): void {
@@ -142,12 +155,12 @@ class ChartComponent extends React.Component<Props, State> {
   extractFilesData(data: HierarchicalDataPoint[], filesData: Map<string, number>): void {
     filesData.forEach((count, file) => {
       // get group
-      let identifier = '/';
-      let foldername = '/';
+      let identifier = file;
+      let foldername = '';
       const paths = file.split('/');
       if (paths && paths.length > 1) {
-        identifier += paths.slice(0, -1).join('/');
-        foldername += paths[paths.length - 2];
+        identifier = paths.slice(-1)[0];
+        foldername += paths.slice(0, -1).join('/');
       }
 
       const bubble: HierarchicalDataPoint = {
@@ -228,12 +241,81 @@ class ChartComponent extends React.Component<Props, State> {
     const count = map.get(key) || 0;
     map.set(key, count + 1);
   }
+
+  prepareHierarchy(data: HierarchicalDataPoint[]): HierarchicalDataPointNode {
+    const root: HierarchicalDataPointNode = { subgroupName: 'root', children: [], isRoot: true, subgroupPath: '' };
+
+    data.forEach((dp) => {
+      let path = '';
+      const folderStructure = dp.subgroupPath.split('/');
+      let currentLevel = root.children;
+
+      folderStructure.forEach((folder, index) => {
+        let existingFolder = currentLevel.find((d) => d.subgroupName === folder);
+
+        // in root directory
+        if (folder === '') {
+          root.children.push({ subgroupName: dp.tooltipData[0].value.toString(), children: [], datapoint: dp, subgroupPath: path });
+          return;
+        }
+
+        path += folder;
+
+        if (!existingFolder) {
+          existingFolder = { subgroupName: folder, children: [], subgroupPath: path };
+          currentLevel.push(existingFolder);
+        }
+
+        if (index === folderStructure.length - 1) {
+          existingFolder.children.push({
+            subgroupName: dp.tooltipData[0].value.toString(),
+            children: [],
+            datapoint: dp,
+            subgroupPath: path,
+          });
+        }
+
+        currentLevel = existingFolder.children;
+        path += '/';
+      });
+    });
+
+    return root;
+  }
+
+  handleFolderClicked(root: d3.HierarchyCircularNode<HierarchicalDataPointNode>) {
+    const queue: d3.HierarchyCircularNode<HierarchicalDataPointNode>[] = [root];
+    const files: any[] = [];
+
+    while (queue.length > 0) {
+      const currentNode = queue.shift()!;
+
+      for (const child of currentNode.children!) {
+        if (!child.data.datapoint) {
+          queue.push(child);
+          continue;
+        }
+        const filepath =
+          child.data.datapoint.subgroupPath === ''
+            ? child.data.datapoint.identifier
+            : child.data.datapoint.subgroupPath + '/' + child.data.datapoint.identifier;
+        files.push(filepath);
+      }
+    }
+    this.props.setActiveFiles(files);
+  }
+
+  handleFolderDoubleClicked() {
+    this.props.setActiveFiles(this.props.codeReviewMetricsState.data.data.fileList);
+  }
 }
 
 const mapStateToProps = (state) => ({
   codeReviewMetricsState: state.visualizations.codeReviewMetrics.state,
 });
 
-const mapDispatchToProps = {};
+const mapDispatchToProps = (dispatch /*, ownProps*/) => {
+  return { setActiveFiles: (files) => dispatch(setActiveFiles(files)) };
+};
 
 export default connect(mapStateToProps, mapDispatchToProps)(ChartComponent);
