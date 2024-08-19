@@ -2,11 +2,11 @@ import fileListStyles from './fileList.module.scss';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../../../redux';
 import { useEffect, useState } from 'react';
-import { dataPlugins } from '../../../../plugins/pluginRegistry.ts';
 import { FileListElementType } from '../../../../types/data/fileListType.ts';
 import { generateFileTree } from './fileListUtilities/fileTreeUtilities.ts';
 import FileListFolder from './fileListElements/fileListFolder.tsx';
 import { DatabaseSettingsDataPluginType } from '../../../../types/settings/databaseSettingsType.ts';
+import DataPluginStorage from '../../../../utils/dataPluginStorage.ts';
 
 function FileList(props: { orientation?: string }) {
   const currentDataPlugins = useSelector((state: RootState) => state.settings.database.dataPlugins);
@@ -16,10 +16,9 @@ function FileList(props: { orientation?: string }) {
 
   useEffect(() => {
     const selectedDataPlugin = currentDataPlugins.filter((dP: DatabaseSettingsDataPluginType) => dP.id === filesDataPluginId)[0];
-    if (selectedDataPlugin) {
-      const dataPlugin = dataPlugins.map((pluginClass) => new pluginClass()).filter((plugin) => plugin.name === selectedDataPlugin.name)[0];
+    if (selectedDataPlugin && selectedDataPlugin.id !== undefined) {
+      const dataPlugin = DataPluginStorage.getDataPlugin(selectedDataPlugin);
       if (dataPlugin) {
-        dataPlugin.init(selectedDataPlugin.parameters.apiKey, selectedDataPlugin.parameters.endpoint);
         dataPlugin.files
           .getAll()
           .then((files) => setFileList(generateFileTree(files)))

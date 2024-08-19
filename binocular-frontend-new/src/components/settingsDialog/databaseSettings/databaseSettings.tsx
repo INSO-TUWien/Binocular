@@ -2,19 +2,24 @@ import { dataPlugins } from '../../../plugins/pluginRegistry.ts';
 import { useSelector } from 'react-redux';
 import { AppDispatch, RootState, useAppDispatch } from '../../../redux';
 import { DataPlugin } from '../../../plugins/interfaces/dataPlugin.ts';
-import { createRef } from 'react';
+import { createRef, useEffect } from 'react';
 import { addDataPlugin, removeDataPlugin, setDataPluginAsDefault } from '../../../redux/settings/settingsReducer.ts';
 import { DatabaseSettingsDataPluginType } from '../../../types/settings/databaseSettingsType.ts';
-import distinctColors from 'distinct-colors';
+import DataPluginStorage from '../../../utils/dataPluginStorage.ts';
 
 function DatabaseSettings() {
   const dispatch: AppDispatch = useAppDispatch();
 
   const settingsDatabaseDataPlugins = useSelector((state: RootState) => state.settings.database.dataPlugins);
 
+  useEffect(() => {
+    settingsDatabaseDataPlugins.forEach((dP: DatabaseSettingsDataPluginType) => {
+      DataPluginStorage.addDataPlugin(dP);
+    });
+  }, [settingsDatabaseDataPlugins]);
+
   const apiKeyRef = createRef<HTMLInputElement>();
   const endpointRef = createRef<HTMLInputElement>();
-  const colors = distinctColors({ count: 50 });
 
   return (
     <>
@@ -117,7 +122,7 @@ function DatabaseSettings() {
                         dispatch(
                           addDataPlugin({
                             name: dataPlugin.name,
-                            color: colors[settingsDatabaseDataPlugins.length].hex() + '22',
+                            color: '#000',
                             parameters: { apiKey: apiKeyRef.current?.value, endpoint: endpointRef.current?.value },
                           }),
                         );

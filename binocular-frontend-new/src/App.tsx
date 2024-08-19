@@ -41,9 +41,15 @@ function App() {
   const parametersDateRange = useSelector((state: RootState) => state.parameters.parametersDateRange);
   const avaliableDataPlugins = useSelector((state: RootState) => state.settings.database.dataPlugins);
   const authorsDataPluginId = useSelector((state: RootState) => state.authors.dataPluginId);
-  const authorsDataPlugin = authorsDataPluginId !== undefined ? avaliableDataPlugins[authorsDataPluginId] : undefined;
+  const authorsDataPlugin =
+    authorsDataPluginId !== undefined
+      ? avaliableDataPlugins.find((dP: DatabaseSettingsDataPluginType) => dP.id === authorsDataPluginId)
+      : undefined;
   const filesDataPluginId = useSelector((state: RootState) => state.files.dataPluginId);
-  const filesDataPlugin = filesDataPluginId !== undefined ? avaliableDataPlugins[filesDataPluginId] : undefined;
+  const filesDataPlugin =
+    filesDataPluginId !== undefined
+      ? avaliableDataPlugins.find((dP: DatabaseSettingsDataPluginType) => dP.id === filesDataPluginId)
+      : undefined;
 
   const storedTheme = localStorage.getItem('theme');
   const [theme, setTheme] = useState(storedTheme || 'binocularLight');

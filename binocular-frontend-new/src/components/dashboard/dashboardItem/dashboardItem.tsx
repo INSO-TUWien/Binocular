@@ -1,6 +1,6 @@
 import dashboardItemStyles from './dashboardItem.module.scss';
 import { DragResizeMode } from '../resizeMode.ts';
-import { dataPlugins, visualizationPlugins } from '../../../plugins/pluginRegistry.ts';
+import { visualizationPlugins } from '../../../plugins/pluginRegistry.ts';
 import { useEffect, useRef, useState } from 'react';
 import DashboardItemPopout from '../dashboardItemPopout/dashboardItemPopout.tsx';
 import { increasePopupCount, updateDashboardItem } from '../../../redux/general/dashboardReducer.ts';
@@ -19,6 +19,7 @@ import { createLogger } from 'redux-logger';
 import { DatabaseSettingsDataPluginType } from '../../../types/settings/databaseSettingsType.ts';
 import _ from 'lodash';
 import { DataPlugin } from '../../../plugins/interfaces/dataPlugin.ts';
+import DataPluginStorage from '../../../utils/dataPluginStorage.ts';
 
 const logger = createLogger({
   collapsed: () => true,
@@ -63,14 +64,11 @@ function DashboardItem(props: {
   const [dataPlugin, setDataPlugin] = useState<DataPlugin | undefined>(undefined);
 
   useEffect(() => {
-    if (selectedDataPlugin) {
-      const newDataPlugin = dataPlugins
-        .map((pluginClass) => new pluginClass())
-        .filter((dataPlugin) => dataPlugin.name === selectedDataPlugin.name)[0];
-      console.log(selectedDataPlugin);
-      console.log(newDataPlugin);
-      newDataPlugin.init(selectedDataPlugin.parameters.apiKey, selectedDataPlugin.parameters.endpoint);
-      setDataPlugin(newDataPlugin);
+    if (selectedDataPlugin && selectedDataPlugin.id !== undefined) {
+      const newDataPlugin = DataPluginStorage.getDataPlugin(selectedDataPlugin);
+      if (newDataPlugin) {
+        setDataPlugin(newDataPlugin);
+      }
     }
   }, [selectedDataPlugin]);
 
@@ -163,7 +161,7 @@ function DashboardItem(props: {
                   <img src={openInNewGray} alt="Open Visualization" />
                 </button>
               </div>
-            ) : dataPlugin && store ? (
+            ) : dataPlugin && store && authors ? (
               <ReduxSubAppStoreWrapper store={store}>
                 <plugin.chartComponent
                   key={plugin.name}
@@ -185,7 +183,9 @@ function DashboardItem(props: {
         )}
         <div
           className={dashboardItemStyles.dashboardItemInteractionBar}
-          style={{ background: `linear-gradient(90deg, ${selectedDataPlugin ? selectedDataPlugin.color : 'oklch(var(--b2))'}, oklch(var(--b1))` }}
+          style={{
+            background: `linear-gradient(90deg, ${selectedDataPlugin ? selectedDataPlugin.color : 'oklch(var(--b2))'}, oklch(var(--b1))`,
+          }}
           onMouseDown={() => {
             console.log('Start dragging dashboard item ' + props.item.pluginName);
             props.setDragResizeItem(props.item, DragResizeMode.drag);
