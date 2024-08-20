@@ -7,6 +7,10 @@ function HelpComponents() {
   return (
     <div className={'h-4/5 overflow-x-hidden max-w-3xl'}>
       <h2>Components</h2>
+      <p>
+        Every Component can be customized with which previously defined database connection is used and if it respects the globally defined
+        parameters. Every other aspect is component specific and can be looked up in the specific help
+      </p>
       {selectedComponent
         ? selectedVisualisationPlugin && (
             <>

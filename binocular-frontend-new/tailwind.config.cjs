@@ -21,6 +21,8 @@ export default {
   plugins: [require("daisyui")],
   daisyui: {
     themes: [
+      'cyberpunk',
+      'black',
       {
         binocularLight: {
           "primary": "#555555",
