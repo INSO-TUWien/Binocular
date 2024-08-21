@@ -146,15 +146,15 @@ class GitLabITSIndexer extends BaseGitLabIndexer {
                                     Promise.all(promises)
                                       .then(() => {
                                         if (
+                                          discussion.notes.nodes[0].position &&
                                           (!existingReviewThread ||
                                             existingReviewThread.isResolved !== discussion.isResolved ||
                                             existingReviewThread.resolvedBy !== discussion.resolvedBy ||
-                                            existingReviewThread.path !== discussion.path) &&
-                                          discussion.notes.nodes[0].position
+                                            existingReviewThread.path !== discussion.notes.nodes[0].position.filePath)
                                         ) {
                                           return ReviewThread.persist({
                                             id: discussion.id,
-                                            path: discussion.position?.filePath,
+                                            path: discussion.notes.nodes[0].position.filePath,
                                             isResolved: discussion.resolved,
                                             resolvedBy: discussion.resolvedBy,
                                           }).then(([persistedDiscussion]) => {
