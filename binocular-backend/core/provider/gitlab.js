@@ -131,6 +131,50 @@ class GitLab {
     return this.paginatedRequest(`/projects/${projectId}/merge_requests/${issueId}/notes`);
   }
 
+  getMergeRequestDiscussions(projectId, issueId) {
+    log('getMergeRequestDiscussions(%o, %o)', projectId, issueId);
+    return this.graphQL
+      .request(
+        gql`
+      {
+        project(fullPath: "${projectId.replaceAll('%2F', '/')}") {
+          name
+          mergeRequest(iid: "${issueId}") {
+            discussions {
+              nodes {
+                id
+                notes {
+                  nodes {
+                    id
+                    createdAt
+                    updatedAt
+                    lastEditedAt
+                    body
+                    system
+                    author {
+                      name
+                      username
+                    }
+                    position {
+                      filePath
+                    }
+                  }
+                }
+                resolved
+                resolvedBy {
+                  name
+                  username
+                }
+              }
+            }
+          }
+        }
+      }
+    `,
+      )
+      .then((response) => response.project.mergeRequest.discussions.nodes);
+  }
+
   isStopping() {
     return this.stopping;
   }

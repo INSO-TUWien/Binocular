@@ -6,6 +6,8 @@ import Issue from '../../models/models/Issue';
 import MergeRequest from '../../models/models/MergeRequest';
 import Milestone from '../../models/models/Milestone';
 import BaseGitLabIndexer from '../BaseGitLabIndexer';
+import ReviewThread from '../../models/models/ReviewThread';
+import Comment from '../../models/models/Comment';
 
 const log = debug('idx:its:gitlab');
 
@@ -106,6 +108,70 @@ class GitLabITSIndexer extends BaseGitLabIndexer {
                           return existingMergeRequest.save({ ignoreUnknownAttributes: true });
                         }
                       })
+                      .then(() => {
+                        log('Processing discussions for mergeRequest #' + mergeRequest.iid);
+                        return this.processMergeRequestDiscussions(project, mergeRequest).then((discussions) => {
+                          Promise.all(
+                            discussions.map((discussion) => {
+                              return new Promise((resolve) => {
+                                return ReviewThread.findOneById(String(discussion.id))
+                                  .then((existingReviewThread) => {
+                                    const promises = discussion.notes.nodes.map((note) => {
+                                      return Comment.findOneById(note.id).then((existingComment) => {
+                                        if (
+                                          !note.system &&
+                                          (!existingComment ||
+                                            new Date(existingComment.data.updatedAt).getTime() < new Date(note.updatedAt).getTime())
+                                        ) {
+                                          log('Processing note #' + note.id);
+                                          return Comment.persist({
+                                            id: note.id,
+                                            author: note.author,
+                                            createdAt: note.createdAt,
+                                            bodyText: note.body,
+                                            updatedAt: note.updatedAt,
+                                            path: note.position?.filePath,
+                                            lastEditedAt: note.lastEditedAt,
+                                            reviewThread: note.position ? discussion.id : null,
+                                            mergeRequest: note.position ? null : mergeRequest.id,
+                                          }).then(([persistedComment]) => {
+                                            log('Persisted comment #' + persistedComment.data.id);
+                                          });
+                                        } else {
+                                          log('Skipping comment #' + note.id);
+                                        }
+                                      });
+                                    });
+
+                                    Promise.all(promises)
+                                      .then(() => {
+                                        if (
+                                          (!existingReviewThread ||
+                                            existingReviewThread.isResolved !== discussion.isResolved ||
+                                            existingReviewThread.resolvedBy !== discussion.resolvedBy ||
+                                            existingReviewThread.path !== discussion.path) &&
+                                          discussion.notes.nodes[0].position
+                                        ) {
+                                          return ReviewThread.persist({
+                                            id: discussion.id,
+                                            path: discussion.position?.filePath,
+                                            isResolved: discussion.resolved,
+                                            resolvedBy: discussion.resolvedBy,
+                                          }).then(([persistedDiscussion]) => {
+                                            log('Persisted discussion #' + persistedDiscussion.data.id);
+                                          });
+                                        } else {
+                                          log('Skipping discussion #' + discussion.id);
+                                        }
+                                      })
+                                      .then(() => resolve(true));
+                                  })
+                                  .then(() => resolve(true));
+                              });
+                            }),
+                          );
+                        });
+                      })
                       .then(() => persistMergeRequestCount++);
                   } else {
                     log('Skipping mergeRequest #' + mergeRequest.iid);
@@ -167,6 +233,16 @@ class GitLabITSIndexer extends BaseGitLabIndexer {
         notes.push(note);
       })
       .then(() => notes);
+  }
+
+  processMergeRequestDiscussions(project, mergeRequest) {
+    return this.gitlab.getMergeRequestDiscussions(project.path_with_namespace, mergeRequest.iid).then((response) => {
+      const discussions = [];
+      _.each(response, (discussion) => {
+        discussions.push(discussion);
+      });
+      return discussions;
+    });
   }
 
   isStopping() {
