@@ -359,7 +359,7 @@ const CommitTimeTrackingConfigComponent = (props: Props) => {
             onChange={(e) => props.onToggleUseRatio(e.target.checked)}
           />
           <label htmlFor="useRatio" className={styles.switch}>
-            Use line change/time ratio in chart
+            Use minutes/line change ratio in chart
           </label>
           <h2>First commit time (in minutes):</h2>
           <input

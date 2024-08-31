@@ -68,8 +68,8 @@ export default (props: Props) => {
             Lines changed: ${d.lineChanges} lines<br>
             Time spent: ${d.timeSpent[props.useActualTime ? 'actual' : 'estimated']} minutes<br>
             Ratio: ${
-              Math.round((d.lineChanges / Math.max(1, d.timeSpent[props.useActualTime ? 'actual' : 'estimated'])) * 100) / 100.0
-            } lines/minute<br>
+              Math.round((d.timeSpent[props.useActualTime ? 'actual' : 'estimated'] / Math.max(d.lineChanges, 1)) * 100) / 100.0
+            } Minutes/line change<br>
             Commit type: ${d.commitType[0].label}<br>
             Branch: ${d.branch}<br>
             <br>
@@ -262,7 +262,7 @@ export default (props: Props) => {
           (props.useActualTime ? '' : commitChartData.map((d) => d.timeSpent.estimated).join('-')) +
           commitChartData
             .map((d) =>
-              props.useRatio ? d.lineChanges / Math.max(d.timeSpent[props.useActualTime ? 'actual' : 'estimated'], 1) : d.lineChanges,
+              props.useRatio ? d.timeSpent[props.useActualTime ? 'actual' : 'estimated'] / Math.max(d.lineChanges, 1): d.lineChanges,
             )
             .join('-')
         }
@@ -286,7 +286,7 @@ export default (props: Props) => {
             return {
               ticks: d.date.toString(),
               barHeight: props.useRatio
-                ? d.lineChanges / Math.max(d.timeSpent[props.useActualTime ? 'actual' : 'estimated'], 1)
+                ? d.timeSpent[props.useActualTime ? 'actual' : 'estimated'] / Math.max(d.lineChanges, 1)
                 : d.lineChanges,
               color: d.commitType[0].label,
             };
