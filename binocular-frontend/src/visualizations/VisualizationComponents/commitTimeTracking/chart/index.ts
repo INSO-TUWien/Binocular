@@ -2,7 +2,7 @@
 
 import { connect } from 'react-redux';
 import Chart from './chart.tsx';
-import { GlobalState } from '../../../../types/globalTypes.ts';
+import {DateRange, GlobalState} from '../../../../types/globalTypes.ts';
 import moment from 'moment';
 import { Commit } from '../../../../types/commitTypes.ts';
 import { Author, Committer, Palette } from '../../../../types/authorTypes.ts';
@@ -37,6 +37,7 @@ interface Props {
   maxSessionLength: number;
   useActualTime: boolean;
   useRatio: boolean;
+  chartTimeSpan: DateRange;
 }
 const mapStateToProps = (state: GlobalState): Props => {
   const timeTrackingState = state.visualizations.commitTimeTracking.state;
@@ -67,6 +68,7 @@ const mapStateToProps = (state: GlobalState): Props => {
     maxSessionLength: timeTrackingState.config.maxSessionLength,
     useActualTime: timeTrackingState.config.useActualTime,
     useRatio: timeTrackingState.config.useRatio,
+    chartTimeSpan: universalSettings.chartTimeSpan,
   };
 };
 const mapDispatchToProps = () => {

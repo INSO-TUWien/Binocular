@@ -6,6 +6,7 @@ import _ from 'lodash';
 import CommitBarChart from './CommitBarChart.tsx';
 import styles from '../styles.module.scss';
 import * as d3 from "d3";
+import { DateRange } from "../../../../types/globalTypes.ts";
 
 interface Props {
   commits: Commit[];
@@ -30,6 +31,7 @@ interface Props {
   maxSessionLength: number;
   useActualTime: boolean;
   useRatio: boolean;
+  chartTimeSpan: DateRange;
 }
 interface CommitChartData {
   timeSpent: {
@@ -49,6 +51,7 @@ export default (props: Props) => {
   const [commitChartData, setCommitChartData] = React.useState<CommitChartData[]>([]);
   const [statistics, setStatistics] = React.useState({});
 
+  console.log(props.chartTimeSpan);
   React.useEffect(() => {
     const fetchData = async () => {
       const extractedData = await extractCommitData(props);
@@ -321,7 +324,7 @@ const extractCommitData = async (props: Props): Promise<{ commitChartData: Commi
     return { commitChartData: [], statistics: {} };
   }
 
-  const filteredCommits = props.filteredCommits.filter((value, index, array) => array.findIndex((el) => el.date === value.date) === index);
+  const filteredCommits = props.commits.filter((value, index, array) => array.findIndex((el) => el.date === value.date) === index);
   const commitsWithDate = filteredCommits.map((commit) => {
     return {
       ...commit,
@@ -438,6 +441,14 @@ function filterCommits(commits: any[], props: Props) {
     }
 
     if (props.excludeCommits && props.excludedCommits.includes(c.sha)) {
+      return false;
+    }
+
+    if (new Date(props.chartTimeSpan.from ?? 0).getTime() > c.date.getTime()) {
+      return false;
+    }
+
+    if (new Date(props.chartTimeSpan.to ?? 0).getTime() < c.date.getTime()) {
       return false;
     }
 
