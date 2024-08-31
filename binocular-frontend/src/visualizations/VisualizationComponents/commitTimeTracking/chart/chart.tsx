@@ -256,6 +256,7 @@ export default (props: Props) => {
     commitChartData !== undefined && commitChartData.length > 0 ? (
       <CommitBarChart
         displayStatistics={displayStatistics}
+        axisTitles={['Time (in minutes)', props.useRatio ? 'Minutes/line' : 'Number of line change']}
         key={
           commitChartData.map((d) => d.commitSHA).join('-') +
           (props.useActualTime ? '' : commitChartData.map((d) => d.timeSpent.estimated).join('-')) +
@@ -382,7 +383,7 @@ function addActualTime(commits: any[]) {
 
     const timeStamp = c.message.match(regex);
     if (timeStamp) {
-      const time = timeStamp.split(' ')[1];
+      const time = timeStamp[0].split(' ')[1];
       timeSpent = +time.substring(0, time.indexOf('h')) * 60 + +time.substring(time.indexOf('h') + 1, time.indexOf('m'));
     }
     c.timeSpent = { actual: timeSpent };

@@ -21,6 +21,7 @@ interface Props {
     colorDomain: any,
     colorPalette: any,
   ) => void | undefined;
+  axisTitles: string[];
 }
 
 interface State {
@@ -56,6 +57,7 @@ export default class CommitBarChart extends React.Component<Props, State> {
   private readonly defaultColor: string;
   private readonly colorPalette: string[];
   private readonly dimensions: number[];
+  private readonly axisTitles: string[];
   private readonly displayStatistics: (
     statisticsWindow: any,
     statisticsSettings: any,
@@ -71,6 +73,7 @@ export default class CommitBarChart extends React.Component<Props, State> {
     this.defaultColor = props.defaultColor;
     this.colorPalette = props.colorPalette;
     this.dimensions = props.dimensions;
+    this.axisTitles = props.axisTitles;
 
     this.state = {
       content: props.content,
@@ -110,7 +113,7 @@ export default class CommitBarChart extends React.Component<Props, State> {
       return;
     }
     const width =
-      ((visualViewport?.width ?? 1920) - 511 - 40 - 30) *
+      ((visualViewport?.width ?? 1920) - 511 - 80 - 30) *
       (this.state.content.commitData.slice(50 * this.state.page, 50 + 50 * this.state.page).length / 50.0);
     const nodeChartHeight = this.state.content.nodeChart ? 40 : 0;
     const numberOfBarcharts = this.state.content.upperChart && this.state.content.lowerChart ? 2 : 1;
@@ -119,7 +122,7 @@ export default class CommitBarChart extends React.Component<Props, State> {
 
     const mainDiv = d3.select(this.divRef).html('');
     if (this.state.content.upperChart) {
-      this.drawChart(mainDiv, width, height, { top: 40, right: 30, bottom: 0, left: 40 }, false);
+      this.drawChart(mainDiv, width, height, { top: 40, right: 30, bottom: 0, left: 80 }, false, this.axisTitles[0]);
     }
 
     if (this.state.content.nodeChart) {
@@ -127,7 +130,7 @@ export default class CommitBarChart extends React.Component<Props, State> {
     }
 
     if (this.state.content.lowerChart) {
-      this.drawChart(mainDiv, width, height, { top: 0, right: 30, bottom: 40, left: 40 }, true);
+      this.drawChart(mainDiv, width, height, { top: 0, right: 30, bottom: 40, left: 80 }, true, this.axisTitles[1]);
     }
 
     this.drawNavigation(mainDiv, Math.ceil(this.state.content.commitData.length / 50.0));
@@ -173,6 +176,7 @@ export default class CommitBarChart extends React.Component<Props, State> {
     height: number,
     margin: Margin,
     showUpsideDown: boolean,
+    axisTitle: string,
   ) {
     const chartData = !showUpsideDown
       ? this.state.content.upperChart.slice(this.state.page * 50, 50 + this.state.page * 50)
@@ -183,10 +187,26 @@ export default class CommitBarChart extends React.Component<Props, State> {
     const colorScale = this.createColorScale(this.colorDomain, this.defaultColor, this.colorPalette);
 
     this.appendBars(svg, chartData, x, y, colorScale, showUpsideDown, height);
+    svg
+      .append('g')
+      .attr('transform', `translate(${-10},0)`)
+      .call(d3.axisLeft(y).tickFormat((y) => (y * 1).toFixed()))
+      .call((g) => g.select('.domain').remove())
+      .call((g) =>
+        g
+          .append('text')
+          .attr('x', -50)
+          .attr('y', height / 2)
+          .attr('fill', 'currentColor')
+          .style('writing-mode', 'vertical-rl')
+          .style('font-size', '20px')
+          .attr('text-anchor', 'middle')
+          .text(axisTitle),
+      );
   }
 
   drawNodes(mainDiv: d3.Selection<HTMLDivElement, unknown, null, undefined>, width: number) {
-    const svg = this.createSVG(mainDiv, 'nodeChart', { top: 5, right: 30, bottom: 5, left: 40 }, 40);
+    const svg = this.createSVG(mainDiv, 'nodeChart', { top: 5, right: 30, bottom: 5, left: 80 }, 40);
     const x = this.createXAxis(this.state.content.nodeChart.slice(this.state.page * 50, 50 + this.state.page * 50), width);
 
     const nodes = svg
