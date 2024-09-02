@@ -4,12 +4,12 @@ const gql = require('graphql-sync');
 const arangodb = require('@arangodb');
 const db = arangodb.db;
 const aql = arangodb.aql;
-const commitsToStakeholders = db._collection('commits-stakeholders');
+const commitsToUsers = db._collection('commits-users');
 const paginated = require('./paginated.js');
 
 module.exports = new gql.GraphQLObjectType({
-  name: 'Stakeholder',
-  description: 'A project stakeholder (developer, issue-reporter, etc...)',
+  name: 'User',
+  description: 'A project user (developer, issue-reporter, etc...)',
   fields() {
     return {
       id: {
@@ -22,25 +22,25 @@ module.exports = new gql.GraphQLObjectType({
       },
       gitlabName: {
         type: gql.GraphQLString,
-        description: 'The name of the stakeholder, according to GitLab',
+        description: 'The name of the user, according to GitLab',
       },
       gitlabWebUrl: {
         type: gql.GraphQLString,
-        description: "The GitLab-Web-URL to the stakeholder's GitLab profile",
+        description: "The GitLab-Web-URL to the user's GitLab profile",
       },
       gitlabAvatarUrl: {
         type: gql.GraphQLString,
-        description: "The URL to the stakeholder's gitlab avatar picture",
+        description: "The URL to the user's gitlab avatar picture",
       },
       commits: paginated({
         type: require('./commit.js'),
-        description: 'The commits made by this stakeholder',
-        resolve(stakeholder, args, limit) {
+        description: 'The commits made by this user',
+        resolve(user, args, limit) {
           return db
             ._query(
               aql`FOR commit
                   IN
-                  OUTBOUND ${stakeholder} ${commitsToStakeholders}
+                  OUTBOUND ${user} ${commitsToUsers}
                   ${limit}
                     RETURN commit`
             )

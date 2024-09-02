@@ -152,7 +152,7 @@ module.exports = new gql.GraphQLObjectType({
             ._query(
               aql`
               FOR commit, edge
-              IN OUTBOUND ${build} ${commitsToBuilds}
+              IN INBOUND ${build} ${commitsToBuilds}
               RETURN commit`
             )
             .toArray()[0];

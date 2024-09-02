@@ -4,7 +4,7 @@ import Connection from '../Connection';
 import Comment, { ReviewCommentDataType } from '../models/Comment';
 import MergeRequest, { MergeRequestDataType } from '../models/MergeRequest';
 
-interface MergeRequestCommentConnectionDataType {}
+export interface MergeRequestCommentConnectionDataType {}
 
 class MergeRequestCommentConnection extends Connection<MergeRequestCommentConnectionDataType, MergeRequestDataType, ReviewCommentDataType> {
   constructor() {

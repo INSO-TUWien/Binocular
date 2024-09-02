@@ -125,7 +125,7 @@ export default class Files {
                     date
                   }
                   ownership {
-                    stakeholder
+                    user
                     hunks {
                       originalCommit
                       lines {

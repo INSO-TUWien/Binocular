@@ -9,10 +9,10 @@ import GatewayMock from './helper/gateway/gatewayMock';
 import Db from '../core/db/db';
 import Commit from '../models/models/Commit';
 import File from '../models/models/File';
-import CommitStakeholderConnection from '../models/connections/CommitStakeholderConnection';
+import CommitUserConnection from '../models/connections/CommitUserConnection';
 import CommitFileConnection from '../models/connections/CommitFileConnection';
 import CommitCommitConnection from '../models/connections/CommitCommitConnection';
-import Stakeholder from '../models/models/Stakeholder';
+import User from '../models/models/User';
 
 import conf from '../utils/config.js';
 import ctx from '../utils/context';
@@ -60,8 +60,8 @@ describe('commit', function () {
       await File.ensureCollection();
       await CommitCommitConnection.ensureCollection();
       await CommitFileConnection.ensureCollection();
-      await CommitStakeholderConnection.ensureCollection();
-      await Stakeholder.ensureCollection();
+      await CommitUserConnection.ensureCollection();
+      await User.ensureCollection();
 
       await fake.file(repo, 'test.js', testFile);
       await helpers.commit(repo, ['test.js'], bob, 'Commit1');

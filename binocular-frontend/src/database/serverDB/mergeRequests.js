@@ -53,7 +53,7 @@ export default class MergeRequests {
                 closedAt
                 notes{
                   body
-                  created_at
+                  createdAt
                   author{
                     login
                     name

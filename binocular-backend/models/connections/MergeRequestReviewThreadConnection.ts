@@ -4,7 +4,7 @@ import Connection from '../Connection';
 import MergeRequest, { MergeRequestDataType } from '../models/MergeRequest';
 import ReviewThread, { ReviewThreadDataType } from '../models/ReviewThread';
 
-interface MergeRequestReviewThreadConnectionDataType {}
+export interface MergeRequestReviewThreadConnectionDataType {}
 
 class MergeRequestReviewThreadConnection extends Connection<
   MergeRequestReviewThreadConnectionDataType,

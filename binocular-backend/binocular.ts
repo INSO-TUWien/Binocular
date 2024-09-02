@@ -37,11 +37,11 @@ import Issue from './models/models/Issue.ts';
 import Build from './models/models/Build.ts';
 import Branch from './models/models/Branch.ts';
 import Module from './models/models/Module.ts';
-import Stakeholder from './models/models/Stakeholder.ts';
+import User from './models/models/User.ts';
 import MergeRequest from './models/models/MergeRequest.ts';
 import Milestone from './models/models/Milestone.ts';
-import CommitStakeholderConnection from './models/connections/CommitStakeholderConnection.ts';
-import IssueStakeholderConnection from './models/connections/IssueStakeholderConnection.ts';
+import CommitUserConnection from './models/connections/CommitUserConnection.ts';
+import IssueUserConnection from './models/connections/IssueUserConnection.ts';
 import IssueCommitConnection from './models/connections/IssueCommitConnection.ts';
 import CommitCommitConnection from './models/connections/CommitCommitConnection.ts';
 import CommitModuleConnection from './models/connections/CommitModuleConnection.ts';
@@ -49,7 +49,7 @@ import ModuleModuleConnection from './models/connections/ModuleModuleConnection.
 import ModuleFileConnection from './models/connections/ModuleFileConnection.ts';
 import BranchFileConnection from './models/connections/BranchFileConnection.ts';
 import BranchFileFileConnection from './models/connections/BranchFileFileConnection.ts';
-import CommitFileStakeholderConnection from './models/connections/CommitFileStakeholderConnection.ts';
+import CommitFileUserConnection from './models/connections/CommitFileUserConnection.ts';
 import CommitFileConnection from './models/connections/CommitFileConnection.ts';
 import CommitBuildConnection from './models/connections/CommitBuildConnection.ts';
 import ConfigurationError from './errors/ConfigurationError';
@@ -72,10 +72,21 @@ import its from './indexers/its';
 import ci from './indexers/ci';
 import Repository from './core/provider/git';
 import chalk from 'chalk';
+import Account from './models/models/Account.ts';
+import IssueAccountConnection from './models/connections/IssueAccountConnection.ts';
+import MergeRequestAccountConnection from './models/connections/MergeRequestAccountConnection.ts';
+import IssueMilestoneConnection from './models/connections/IssueMilestoneConnection.ts';
+import MergeRequestMilestoneConnection from './models/connections/MergeRequestMilestoneConnection.ts';
+import Note from './models/models/Note.ts';
+import IssueNoteConnection from './models/connections/IssueNoteConnection.ts';
+import NoteAccountConnection from './models/connections/NoteAccountConnection.ts';
+import MergeRequestNoteConnection from './models/connections/MergeRequestNoteConnection.ts';
 import ReviewThread from './models/models/ReviewThread.ts';
-import Comment from './models/models/Comment.ts';
 import ReviewThreadCommentConnection from './models/connections/ReviewThreadCommentConnection.ts';
+import Comment from './models/models/Comment.ts';
 import MergeRequestCommentConnection from './models/connections/MergeRequestCommentConnection.ts';
+import ReviewThreadAccountConnection from './models/connections/ReviewThreadAccountConnection.ts';
+import CommentAccountConnection from './models/connections/CommentAccountConnection.ts';
 import MergeRequestReviewThreadConnection from './models/connections/MergeRequestReviewThreadConnection.ts';
 
 cli.parse(
@@ -387,7 +398,7 @@ function runBackend() {
         return;
       }
 
-      await Issue.deduceStakeholders();
+      await Issue.deduceUsers();
       createManualIssueReferences(config.get('issueReferences'));
       if (context.argv.export) {
         projectStructureHelper.deleteDbExport(__dirname + '/../binocular-frontend');
@@ -402,9 +413,6 @@ function runBackend() {
       // (like the `mentions` field in issues).
       await connectIssuesAndCommits();
       await connectCommitsAndBuilds();
-      await connectReviewThreadsAndMergeRequests();
-      await connectCommentsAndReviewThreads();
-      await connectCommentsAndMergeRequests();
       const endTime = Moment.now();
       console.log('End Time: ' + Moment(endTime).format());
       const executionTime = Moment(endTime).diff(startTime, 'seconds');
@@ -580,29 +588,40 @@ function runBackend() {
           context.db.ensureService(path.join(__dirname, '../foxx'), '/binocular-ql'),
           Commit.ensureCollection(),
           File.ensureCollection(),
-          Stakeholder.ensureCollection(),
+          User.ensureCollection(),
           Issue.ensureCollection(),
+          Note.ensureCollection(),
           Build.ensureCollection(),
           Branch.ensureCollection(),
           Module.ensureCollection(),
           MergeRequest.ensureCollection(),
           Milestone.ensureCollection(),
-          ReviewThread.ensureCollection(),
+          Account.ensureCollection(),
           Comment.ensureCollection(),
+          ReviewThread.ensureCollection(),
           CommitFileConnection.ensureCollection(),
           CommitBuildConnection.ensureCollection(),
-          CommitStakeholderConnection.ensureCollection(),
-          IssueStakeholderConnection.ensureCollection(),
+          CommitUserConnection.ensureCollection(),
+          IssueUserConnection.ensureCollection(),
           IssueCommitConnection.ensureCollection(),
+          IssueNoteConnection.ensureCollection(),
+          MergeRequestNoteConnection.ensureCollection(),
+          NoteAccountConnection.ensureCollection(),
           CommitCommitConnection.ensureCollection(),
           CommitModuleConnection.ensureCollection(),
           ModuleModuleConnection.ensureCollection(),
           ModuleFileConnection.ensureCollection(),
           BranchFileConnection.ensureCollection(),
           BranchFileFileConnection.ensureCollection(),
-          CommitFileStakeholderConnection.ensureCollection(),
-          ReviewThreadCommentConnection.ensureCollection(),
+          CommitFileUserConnection.ensureCollection(),
+          IssueAccountConnection.ensureCollection(),
+          MergeRequestAccountConnection.ensureCollection(),
+          IssueMilestoneConnection.ensureCollection(),
+          MergeRequestMilestoneConnection.ensureCollection(),
           MergeRequestCommentConnection.ensureCollection(),
+          ReviewThreadCommentConnection.ensureCollection(),
+          ReviewThreadAccountConnection.ensureCollection(),
+          CommentAccountConnection.ensureCollection(),
           MergeRequestReviewThreadConnection.ensureCollection(),
         ]);
       });
@@ -689,64 +708,13 @@ function runBackend() {
         continue;
       }
       if (!build.data.sha) continue;
-      const commit = commits.filter((c: any) => c.sha === build.data.sha);
+      const commit = commits.filter((c: any) => c.data.sha === build.data.sha);
       if (commit && commit[0]) {
         await CommitBuildConnection.connect({}, { from: commit[0], to: build });
       }
     }
 
     await Build.deleteShaRefAttributes();
-  }
-
-  async function connectReviewThreadsAndMergeRequests() {
-    const mergeRequests = await MergeRequest.findAll();
-    const reviewThreads = await ReviewThread.findAll();
-
-    for (const reviewThread of reviewThreads) {
-      if (reviewThread === null) continue;
-      if (!reviewThread.data.mergeRequest) continue;
-
-      const mergeRequest = mergeRequests.filter((m: any) => m.data.id === reviewThread.data.mergeRequest);
-      if (mergeRequest && mergeRequest[0]) {
-        MergeRequestReviewThreadConnection.connect({}, { from: mergeRequest[0], to: reviewThread });
-      }
-    }
-
-    await (ReviewThread as any).deleteMergeRequestRefAttribute();
-  }
-
-  async function connectCommentsAndReviewThreads() {
-    const reviewThreads = await ReviewThread.findAll();
-    const comments = await Comment.findAll();
-
-    for (const comment of comments) {
-      if (comment === null) continue;
-      if (!comment.data.reviewThread) continue;
-
-      const reviewThread = reviewThreads.filter((r: any) => r.data.id === comment.data.reviewThread);
-      if (reviewThread && reviewThread[0]) {
-        ReviewThreadCommentConnection.connect({}, { from: reviewThread[0], to: comment });
-      }
-    }
-
-    await (Comment as any).deleteReviewThreadRefAttribute();
-  }
-
-  async function connectCommentsAndMergeRequests() {
-    const mergeRequests = await MergeRequest.findAll();
-    const comments = await Comment.findAll();
-
-    for (const comment of comments) {
-      if (comment === null) continue;
-      if (!comment.data.mergeRequest) continue;
-
-      const mergeRequest = mergeRequests.filter((m: any) => m.data.id === comment.data.mergeRequest);
-      if (mergeRequest && mergeRequest[0]) {
-        MergeRequestCommentConnection.connect({}, { from: mergeRequest[0], to: comment });
-      }
-    }
-
-    await (Comment as any).deleteMergeRequestRefAttribute();
   }
 
   // start services

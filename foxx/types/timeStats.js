@@ -4,7 +4,7 @@ const gql = require('graphql-sync');
 const arangodb = require('@arangodb');
 const db = arangodb.db;
 const aql = arangodb.aql;
-const commitsToStakeholders = db._collection('commits-stakeholders');
+const commitsToUsers = db._collection('commits-users');
 const paginated = require('./paginated.js');
 
 module.exports = new gql.GraphQLObjectType({

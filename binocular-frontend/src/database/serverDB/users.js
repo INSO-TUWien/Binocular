@@ -2,12 +2,12 @@
 
 import { graphQl } from '../../utils';
 
-export default class Stakeholders {
-  static getAllStakeholders() {
+export default class Users {
+  static getAllUsers() {
     return graphQl.query(
       `
       query{
-       stakeholders{
+       users{
            data{
                id,
                gitSignature,

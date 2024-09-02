@@ -3,6 +3,7 @@
 import Database from '../../../database/database';
 import _ from 'lodash';
 import { extractOwnershipFromFileExcludingCommits } from '../../../utils/ownership.js';
+import { getHistoryForCommit } from '../../../database/utils.js';
 
 const minDate = new Date(0);
 const maxDate = new Date();
@@ -27,7 +28,7 @@ export async function issuesModeData(currentBranch, issueId) {
 // and collects ownership data until it has the most recent data for every file.
 export function getBlameModules(commit, files, allCommits, commitsToExclude) {
   //this contains the timeline of all commits from the initial commit until the most recent one
-  const commitsLeft = commit.history.split(',').reverse();
+  const commitsLeft = getHistoryForCommit(commit, allCommits).reverse();
   //filesLeft contains all files we want to get the ownership data from.
   let filesLeft = files;
   const result = {};
@@ -55,10 +56,10 @@ export function getBlameModules(commit, files, allCommits, commitsToExclude) {
       for (const fileOwnershipElement of ownershipData) {
         //for each ownership element of the current file
         for (const ownershipElement of fileOwnershipElement.ownership) {
-          if (!result[ownershipElement.stakeholder]) {
-            result[ownershipElement.stakeholder] = ownershipElement.ownedLines;
+          if (!result[ownershipElement.user]) {
+            result[ownershipElement.user] = ownershipElement.ownedLines;
           } else {
-            result[ownershipElement.stakeholder] += ownershipElement.ownedLines;
+            result[ownershipElement.user] += ownershipElement.ownedLines;
           }
         }
       }
@@ -196,11 +197,10 @@ export function getAllCommits() {
   return Database.getCommitDataWithFilesAndOwnership([minDate, maxDate], [minDate, maxDate]);
 }
 
-//recursively get all parent commits of the selected branch.
 export function getCommitsForBranch(branch, allCommits) {
   const latestCommitSha = branch.latestCommit;
   const latestCommit = allCommits.filter((commit) => commit.sha === latestCommitSha)[0];
-  const history = latestCommit.history.split(',');
+  const history = getHistoryForCommit(latestCommit, allCommits);
   return allCommits.filter((c) => _.includes(history, c.sha));
 }
 

@@ -3,14 +3,14 @@
 import _ from 'lodash';
 import { aql } from 'arangojs';
 import Model from '../Model';
-import Stakeholder from './Stakeholder';
-import IssueStakeholderConnection from '../connections/IssueStakeholderConnection';
+import User from './User';
+import IssueUserConnection from '../connections/IssueUserConnection';
 
 import debug from 'debug';
-import Label from '../../types/supportingTypes/Label';
-import User from '../../types/supportingTypes/User';
+import AccountUser from '../../types/supportingTypes/AccountUser';
 import Mention from '../../types/supportingTypes/Mention';
 import IssueDto from '../../types/dtos/IssueDto';
+import IssueAccountConnection from '../connections/IssueAccountConnection.ts';
 const log = debug('db:Issue');
 
 export interface IssueDataType {
@@ -21,14 +21,9 @@ export interface IssueDataType {
   createdAt: string;
   closedAt: string;
   updatedAt: string;
-  labels: Label[];
-  milestone: any; //TODO: Add type for milestone
+  labels: string[];
   state: string;
-  url: string;
   webUrl: string;
-  author: User;
-  assignee: User;
-  assignees: User[];
   mentions: Mention[];
 }
 
@@ -49,25 +44,32 @@ class Issue extends Model<IssueDataType> {
     delete issueData.projectId;
     delete issueData.timeStats;
 
-    return this.ensureById(issueData.id, issueData, {});
+    return this.ensureByExample({ id: issueData.id }, issueData, {});
   }
 
-  async deduceStakeholders() {
+  async deduceUsers() {
     if (this.rawDb === undefined) {
       throw Error('Database undefined!');
     }
     return Promise.resolve(
       this.rawDb.query(
-        aql`
-    FOR issue IN ${this.collection}
-        LET stakeholders = (FOR stakeholder
+        aql`FOR issue IN issues
+        LET users = (FOR user
                             IN
-                            INBOUND issue ${IssueStakeholderConnection.collection}
-                                RETURN stakeholder)
-        FILTER LENGTH(stakeholders) == 0
-        COLLECT authorId = issue.author.id INTO issuesPerAuthor = issue
+                            INBOUND issue ${IssueUserConnection.collection}
+                            RETURN user)
+        LET a = FIRST(
+              FOR
+              account, edge
+              IN
+              OUTBOUND issue ${IssueAccountConnection.collection}
+              FILTER edge.role == "author"
+              RETURN account
+        )
+        FILTER LENGTH(users) == 0
+        COLLECT author = a INTO issuesPerAuthor = issue
         RETURN {
-          "author": FIRST(issuesPerAuthor).author,
+          "author": author,
           "issues": issuesPerAuthor
         }`,
       ),
@@ -75,30 +77,30 @@ class Issue extends Model<IssueDataType> {
       .then((cursor) => cursor.all())
       .then((authors) => {
         return authors.map((issuesPerAuthor) =>
-          Stakeholder.findOneBy('gitlabID', issuesPerAuthor.author.id)
-            .then(function (stakeholder) {
-              if (!stakeholder) {
-                log('No existing stakeholder found for gitlabId %o', issuesPerAuthor.author.id);
-                return findBestStakeholderMatch(issuesPerAuthor.author).then(function (stakeholder) {
-                  if (!stakeholder) {
+          User.findOneBy('gitlabID', issuesPerAuthor.author.id)
+            .then(function (user) {
+              if (!user) {
+                log('No existing user found for gitlabId %o', issuesPerAuthor.author.id);
+                return findBestUserMatch(issuesPerAuthor.author).then(function (user) {
+                  if (!user) {
                     return;
                   }
 
-                  log('Best stakeholder match: %o', stakeholder.toString());
+                  log('Best user match: %o', user.toString());
 
-                  stakeholder.gitlabId = issuesPerAuthor.author.id;
-                  stakeholder.gitlabName = issuesPerAuthor.author.name;
-                  stakeholder.gitlabWebUrl = issuesPerAuthor.author.web_url;
-                  stakeholder.gitlabAvatarUrl = issuesPerAuthor.author.avatar_url;
-                  return stakeholder.save();
+                  user.gitlabId = issuesPerAuthor.author.id;
+                  user.gitlabName = issuesPerAuthor.author.name;
+                  user.gitlabWebUrl = issuesPerAuthor.author.web_url;
+                  user.gitlabAvatarUrl = issuesPerAuthor.author.avatar_url;
+                  return user.save();
                 });
               }
 
-              return stakeholder;
+              return user;
             })
-            .then((stakeholder) => {
-              if (!stakeholder) {
-                log('No stakeholder match found for %o', issuesPerAuthor.author.name);
+            .then((user) => {
+              if (!user) {
+                log('No user match found for %o', issuesPerAuthor.author.name);
                 return;
               }
               return issuesPerAuthor.issues.map((issueData) => {
@@ -109,7 +111,7 @@ class Issue extends Model<IssueDataType> {
                 if (issue === null) {
                   return;
                 }
-                return IssueStakeholderConnection.connect({}, { from: issue, to: stakeholder });
+                return IssueUserConnection.connect({}, { from: issue, to: user });
               });
             }),
         );
@@ -130,31 +132,31 @@ class Issue extends Model<IssueDataType> {
 
 export default new Issue();
 
-async function findBestStakeholderMatch(author: User) {
-  const stakeholder = await Stakeholder.findAll();
-  const bestMatch = stakeholder.reduce((best: any, stakeholderEntry) => {
-    if (stakeholderEntry === null) {
+async function findBestUserMatch(author: AccountUser) {
+  const user = await User.findAll();
+  const bestMatch = user.reduce((best: any, userEntry) => {
+    if (userEntry === null) {
       return;
     }
-    const stakeholderName = normalizeName(stakeholderEntry.data.gitSignature);
+    const userName = normalizeName(userEntry.data.gitSignature);
     const authorName = normalizeName(author.name);
     let score = 0;
 
-    if (stakeholderName.plain === authorName.plain) {
+    if (userName.plain === authorName.plain) {
       score++;
     }
 
-    if (stakeholderName.sorted === authorName.sorted) {
+    if (userName.sorted === authorName.sorted) {
       score++;
     }
 
     if (!best || score > best.score) {
-      return { score, stakeholder };
+      return { score, user };
     } else if (score > 0) {
       return best;
     }
   }, null);
-  return bestMatch ? bestMatch.data.stakeholder : null;
+  return bestMatch ? bestMatch.data.user : null;
 }
 
 function normalizeName(name: string) {

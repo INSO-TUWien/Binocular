@@ -1,10 +1,13 @@
 'use strict';
 
 const gql = require('graphql-sync');
-const Timestamp = require('./Timestamp');
 const arangodb = require('@arangodb');
+const Timestamp = require('./Timestamp');
 const db = arangodb.db;
 const aql = arangodb.aql;
+const mergeRequestsToAccounts = db._collection('mergeRequests-accounts');
+const mergeRequestsToMilestones = db._collection('mergeRequests-milestones');
+const mergeRequestsToNotes = db._collection('mergeRequests-notes');
 
 module.exports = new gql.GraphQLObjectType({
   name: 'mergeRequest',
@@ -14,17 +17,93 @@ module.exports = new gql.GraphQLObjectType({
       author: {
         type: require('./gitHubUser.js'),
         description: 'The github/gitlab author of this mergeRequest',
+        resolve(mr /*, args*/) {
+          return db
+            ._query(
+              aql`
+              FOR
+              account, edge
+              IN
+              OUTBOUND ${mr} ${mergeRequestsToAccounts}
+              FILTER edge.role == "author"
+              RETURN account
+              `,
+            )
+            .toArray()[0];
+        },
       },
       assignee: {
         type: require('./gitHubUser.js'),
         description: 'The assignee of this mergeRequest',
+        resolve(mr /*, args*/) {
+          return db
+            ._query(
+              aql`
+              FOR
+              account, edge
+              IN
+              OUTBOUND ${mr} ${mergeRequestsToAccounts}
+              FILTER edge.role == "assignee"
+              RETURN account
+              `,
+            )
+            .toArray()[0];
+        },
       },
-      assignees: { type: new gql.GraphQLList(require('./gitHubUser.js')), description: 'All the assignees of this mergeRequest' },
+      assignees: {
+        type: new gql.GraphQLList(require('./gitHubUser.js')),
+        description: 'All the assignees of this mergeRequest',
+        resolve(mr /*, args*/) {
+          return db
+            ._query(
+              aql`
+              FOR
+              account, edge
+              IN
+              OUTBOUND ${mr} ${mergeRequestsToAccounts}
+              FILTER edge.role == "assignees"
+              RETURN account
+              `,
+            )
+            .toArray();
+        },
+      },
       reviewer: {
         type: require('./gitHubUser.js'),
         description: 'The reviewer of this mergeRequest',
+        resolve(mr /*, args*/) {
+          return db
+            ._query(
+              aql`
+              FOR
+              account, edge
+              IN
+              OUTBOUND ${mr} ${mergeRequestsToAccounts}
+              FILTER edge.role == "reviewer"
+              RETURN account
+              `,
+            )
+            .toArray()[0];
+        },
       },
-      reviewers: { type: new gql.GraphQLList(require('./gitHubUser.js')), description: 'All users who have reviewed this pull request' },
+      reviewers: {
+        type: new gql.GraphQLList(require('./gitHubUser.js')),
+        description: 'All the reviewers of this mergeRequest',
+        resolve(mr /*, args*/) {
+          return db
+            ._query(
+              aql`
+              FOR
+              account, edge
+              IN
+              OUTBOUND ${mr} ${mergeRequestsToAccounts}
+              FILTER edge.role == "reviewers"
+              RETURN account
+              `,
+            )
+            .toArray();
+        },
+      },
       id: {
         type: gql.GraphQLString,
         description: 'id of the mergeRequest',
@@ -65,9 +144,37 @@ module.exports = new gql.GraphQLObjectType({
         type: Timestamp,
         description: 'Close date of the mergeRequest',
       },
+      milestone: {
+        type: require('./milestone.js'),
+        description: 'The milestone this issue belongs to',
+        resolve(mr /*, args*/) {
+          return db
+            ._query(
+              aql`
+            FOR
+            milestone, edge
+            IN
+            OUTBOUND ${mr} ${mergeRequestsToMilestones}
+            RETURN milestone
+            `,
+            )
+            .toArray()[0];
+        },
+      },
       notes: {
         type: new gql.GraphQLList(require('./gitlabNote.js')),
         description: 'Notes attached to the Merge Request',
+        resolve(mr /*, args*/) {
+          return db
+            ._query(
+              aql`
+            FOR note, edge
+            IN outbound ${mr} ${mergeRequestsToNotes}
+            RETURN note
+            `,
+            )
+            .toArray();
+        },
       },
       comments: {
         type: new gql.GraphQLList(require('./comment.js')),
@@ -76,12 +183,12 @@ module.exports = new gql.GraphQLObjectType({
           return db
             ._query(
               aql`
-            FOR mrc IN \`mergeRequests-comments\`
-            FILTER mrc._from == ${mergeRequest._id}
-            FOR comment IN comments
-            FILTER mrc._to == comment._id
-            RETURN comment
-            `,
+          FOR mrc IN \`mergeRequests-comments\`
+          FILTER mrc._from == ${mergeRequest._id}
+          FOR comment IN comments
+          FILTER mrc._to == comment._id
+          RETURN comment
+          `,
             )
             .toArray();
         },
@@ -93,12 +200,12 @@ module.exports = new gql.GraphQLObjectType({
           return db
             ._query(
               aql`
-            FOR mrr IN \`mergeRequests-reviewThreads\`
-            FILTER mrr._from == ${reviewThread._id}
-            FOR reviewThread IN reviewThreads
-            FILTER reviewThread._id == mrr._to
-            RETURN reviewThread
-            `,
+          FOR mrr IN \`mergeRequests-reviewThreads\`
+          FILTER mrr._from == ${reviewThread._id}
+          FOR reviewThread IN reviewThreads
+          FILTER reviewThread._id == mrr._to
+          RETURN reviewThread
+          `,
             )
             .toArray();
         },

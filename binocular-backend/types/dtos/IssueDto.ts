@@ -1,5 +1,3 @@
-import Label from '../supportingTypes/Label.ts';
-import User from '../supportingTypes/User.ts';
 import Mention from '../supportingTypes/Mention.ts';
 
 export default interface IssueDto {
@@ -10,15 +8,10 @@ export default interface IssueDto {
   createdAt: string;
   closedAt: string;
   updatedAt: string;
-  labels: Label[];
-  milestone: any; //TODO: Add type for milestone
+  labels: string[];
   state: string;
-  url: string;
   webUrl: string;
   projectId?: string;
   timeStats?: string;
-  author: User;
-  assignee: User;
-  assignees: User[];
   mentions: Mention[];
 }

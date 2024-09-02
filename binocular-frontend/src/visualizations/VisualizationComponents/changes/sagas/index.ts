@@ -112,8 +112,9 @@ export const fetchChangesData = fetchFactory(
       Database.getCommitData([firstCommitTimestamp, lastCommitTimestamp], [firstCommitTimestamp, lastCommitTimestamp]),
     ])
       .then((result) => {
-        const filteredCommits = result[0];
-        const commits = result[1];
+        // sort from oldest to newest commit
+        const filteredCommits = result[0].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+        const commits = result[1].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
         const palette = getPalette(commits, 15, bounds.committers.length);
 

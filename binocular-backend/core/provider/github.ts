@@ -41,6 +41,8 @@ class GitHub {
               login
               email
               name
+              url
+              avatarUrl
             }
             pageInfo {
               hasNextPage
@@ -258,7 +260,7 @@ class GitHub {
                               resolvedBy {
                                 login
                               }
-                              comments (first: 50) {
+                              commentNodes: comments (first: 50) {
                                     totalCount
                                     nodes {
                                         id

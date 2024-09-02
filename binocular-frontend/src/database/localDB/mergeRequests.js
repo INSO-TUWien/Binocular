@@ -3,15 +3,14 @@
 import PouchDB from 'pouchdb-browser';
 import PouchDBFind from 'pouchdb-find';
 import PouchDBAdapterMemory from 'pouchdb-adapter-memory';
-import { findAll } from './utils';
-import _ from 'lodash';
+import { findAllMergeRequests } from './utils';
 PouchDB.plugin(PouchDBFind);
 PouchDB.plugin(PouchDBAdapterMemory);
 
 export default class MergeRequests {
-  static getMergeRequestData(db, mergeRequestsSpan, significantSpan) {
+  static getMergeRequestData(db, relations, mergeRequestsSpan, significantSpan) {
     // return all issues, filtering according to parameters can be added in the future
-    return findAll(db, 'mergeRequests').then((res) => {
+    return findAllMergeRequests(db, relations).then((res) => {
       res.docs = res.docs
         .sort((a, b) => {
           return new Date(a.createdAt) - new Date(b.createdAt);

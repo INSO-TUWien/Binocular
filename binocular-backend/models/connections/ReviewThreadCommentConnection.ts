@@ -4,7 +4,7 @@ import Connection from '../Connection';
 import ReviewThread, { ReviewThreadDataType } from '../models/ReviewThread';
 import ReviewComment, { ReviewCommentDataType } from '../models/Comment';
 
-interface ReviewThreadCommentConnectionDataType {}
+export interface ReviewThreadCommentConnectionDataType {}
 
 class ReviewThreadCommentConnenction extends Connection<
   ReviewThreadCommentConnectionDataType,

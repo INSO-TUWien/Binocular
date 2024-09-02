@@ -1,22 +1,22 @@
 'use strict';
 import Paginator from '../../../utils/paginator.ts';
+import {
+  testIssues,
+  testMergeRequestNotes,
+  testMergeRequests,
+  testMilestones,
+  testNotes,
+  testPipelines,
+  testProject,
+} from './gitLabTestData';
+import _ from 'lodash';
 
 class GitLabMock {
-  getProject() {
-    return new Promise((resolve) => {
-      resolve({ id: 1, path_with_namespace: 'Test/Test-Project' });
-    });
-  }
-
-  getIssues() {
+  testPaginator = (data) => {
     return new Paginator(
       () => {
         return new Promise((resolve) => {
-          resolve([
-            { id: 0, iid: 1001, updated_at: '1970-01-01T07:00:00.000Z' },
-            { id: 1, iid: 1002, updated_at: '1970-01-01T07:00:00.000Z' },
-            { id: 2, iid: 1003, updated_at: '1970-01-01T07:00:00.000Z' },
-          ]);
+          resolve(data);
         });
       },
       (resp) => {
@@ -27,88 +27,37 @@ class GitLabMock {
         return this.count;
       },
     );
+  };
+
+  getProject() {
+    return new Promise((resolve) => {
+      resolve(testProject);
+    });
   }
 
-  getNotes() {
-    return new Paginator(
-      () => {
-        return new Promise((resolve) => {
-          resolve([
-            { id: 0, created_at: '1970-01-01T07:00:00.000Z', body: 'closed' },
-            { id: 1, created_at: '1970-01-01T07:00:00.000Z', body: 'mentioned in commit 1234567890' },
-            { id: 2, created_at: '1970-01-01T07:00:00.000Z', body: 'some text' },
-          ]);
-        });
-      },
-      (resp) => {
-        return resp;
-      },
-      () => {
-        this.count = 3;
-        return this.count;
-      },
+  getIssues() {
+    return this.testPaginator(testIssues);
+  }
+
+  getNotes(projectId, issueId) {
+    // each note is unique, there are no notes that belong to multiple issues/mrs. Therefore, ids have to be unique.
+    return this.testPaginator(
+      testNotes.map((note) => {
+        const newNote = _.clone(note);
+        newNote.id = issueId * 100 + note.id;
+        return newNote;
+      }),
     );
   }
 
   getPipelines() {
     return new Promise((resolve) => {
-      resolve([
-        {
-          id: '0',
-          status: 'SUCCESS',
-          user: { name: 'Tester1' },
-
-          jobs: {
-            edges: [
-              { node: { id: '0', stage: { name: '' } } },
-              { node: { id: '1', stage: { name: '' } } },
-              { node: { id: '2', stage: { name: '' } } },
-            ],
-          },
-        },
-        {
-          id: '1',
-          status: 'SUCCESS',
-          user: { name: 'Tester1' },
-          jobs: {
-            edges: [
-              { node: { id: '0', stage: { name: '' } } },
-              { node: { id: '1', stage: { name: '' } } },
-              { node: { id: '2', stage: { name: '' } } },
-            ],
-          },
-        },
-        {
-          id: '2',
-          status: 'SUCCESS',
-          user: { name: 'Tester1' },
-
-          jobs: {
-            edges: [
-              { node: { id: '0', stage: { name: '' } } },
-              { node: { id: '1', stage: { name: '' } } },
-              { node: { id: '2', stage: { name: '' } } },
-            ],
-          },
-        },
-      ]);
+      resolve(testPipelines);
     });
   }
 
   getMileStones() {
-    return new Paginator(
-      () => {
-        return new Promise((resolve) => {
-          resolve([]);
-        });
-      },
-      (resp) => {
-        return resp;
-      },
-      () => {
-        return 0;
-      },
-    );
+    return this.testPaginator(testMilestones);
   }
 
   getPipelineJobs() {
@@ -116,44 +65,16 @@ class GitLabMock {
   }
 
   getMergeRequests() {
-    return new Paginator(
-      () => {
-        return new Promise((resolve) => {
-          resolve([
-            { id: 1, iid: 1 },
-            { id: 2, iid: 2 },
-            { id: 3, iid: 3 },
-          ]);
-        });
-      },
-      (resp) => {
-        return resp;
-      },
-      (resp) => {
-        this.count = resp.length;
-        return this.count;
-      },
-    );
+    return this.testPaginator(testMergeRequests);
   }
 
-  getMergeRequestNotes() {
-    return new Paginator(
-      () => {
-        return new Promise((resolve) => {
-          resolve([
-            { id: 0, created_at: '1970-01-01T07:00:00.000Z', body: 'closed' },
-            { id: 0, created_at: '1970-01-01T07:00:00.000Z', body: 'mentioned in commit 1234567890' },
-            { id: 0, created_at: '1970-01-01T07:00:00.000Z', body: 'some text' },
-          ]);
-        });
-      },
-      (resp) => {
-        return resp;
-      },
-      () => {
-        this.count = 3;
-        return this.count;
-      },
+  getMergeRequestNotes(projectId, issueId) {
+    return this.testPaginator(
+      testMergeRequestNotes.map((note) => {
+        const newNote = _.clone(note);
+        newNote.id = issueId * 100 + note.id;
+        return newNote;
+      }),
     );
   }
 

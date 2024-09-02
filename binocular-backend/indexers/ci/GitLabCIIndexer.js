@@ -15,7 +15,6 @@ class GitLabCIIndexer extends BaseGitLabIndexer {
   async configure(config) {
     await super.configure(config);
     const project = await this.getProject();
-
     const projectId = project.path_with_namespace.replaceAll('/', '%2F');
 
     this.indexer = new CIIndexer(this.reporter, this.gitlab, projectId, (pipeline, jobs) => {

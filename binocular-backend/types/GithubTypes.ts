@@ -2,6 +2,8 @@ export interface GithubUser {
   login: string;
   email: string;
   name: string;
+  url: string;
+  avatarUrl: string;
 }
 
 export interface GithubJob {

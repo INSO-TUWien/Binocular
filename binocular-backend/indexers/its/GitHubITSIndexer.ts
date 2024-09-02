@@ -3,15 +3,36 @@
 
 import debug from 'debug';
 import ConfigurationError from '../../errors/ConfigurationError.js';
-import Issue from '../../models/models/Issue';
-import MergeRequest from '../../models/models/MergeRequest';
+import Issue, { IssueDataType } from '../../models/models/Issue';
+import MergeRequest, { MergeRequestDataType } from '../../models/models/MergeRequest';
 import Mention from '../../types/supportingTypes/Mention';
 import GitHub from '../../core/provider/github';
 import ProgressReporter from '../../utils/progress-reporter.ts';
-import { ItsIssue, ItsIssueEvent } from '../../types/ItsTypes';
-import ReviewThread from '../../models/models/ReviewThread.ts';
-import Comment from '../../models/models/Comment.ts';
-import { GithubActor } from '../../types/GithubTypes.ts';
+import { ItsIssueEvent } from '../../types/ItsTypes';
+import Account, { AccountDataType } from '../../models/models/Account.ts';
+import { Entry } from '../../models/Model.ts';
+import IssueAccountConnection, { IssueAccountConnectionDataType } from '../../models/connections/IssueAccountConnection.ts';
+import Connection from '../../models/Connection.ts';
+import MergeRequestAccountConnection, {
+  MergeRequestAccountConnectionDataType,
+} from '../../models/connections/MergeRequestAccountConnection.ts';
+import Label from '../../types/supportingTypes/Label.ts';
+import ReviewThread, { ReviewThreadDataType } from '../../models/models/ReviewThread.ts';
+import _ from 'lodash';
+import Comment, { ReviewCommentDataType } from '../../models/models/Comment.ts';
+import MergeRequestCommentConnection, {
+  MergeRequestCommentConnectionDataType,
+} from '../../models/connections/MergeRequestCommentConnection.ts';
+import ReviewThreadCommentConnection, {
+  ReviewThreadCommentConnectionDataType,
+} from '../../models/connections/ReviewThreadCommentConnection.ts';
+import MergeRequestReviewThreadConnection, {
+  MergeRequestReviewThreadConnectionDataType,
+} from '../../models/connections/MergeRequestReviewThreadConnection.ts';
+import CommentAccountConnection, { CommentAccountConnectionDataType } from '../../models/connections/CommentAccountConnection.ts';
+import ReviewThreadAccountConnection, {
+  ReviewThreadAccountConnectionDataType,
+} from '../../models/connections/ReviewThreadAccountConnection.ts';
 
 const log = debug('idx:its:github');
 
@@ -36,337 +57,288 @@ GitHubITSIndexer.prototype.configure = async function (config: any) {
   return Promise.resolve();
 };
 
-GitHubITSIndexer.prototype.index = function () {
+GitHubITSIndexer.prototype.index = async function () {
   let owner: string;
   let repo: string;
-  let omitIssueCount = 0;
-  let omitMergeRequestCount = 0;
-  let omitReviewThreadCount = 0;
-  let omitCommentCount = 0;
-  let persistIssueCount = 0;
-  let persistMergeRequestCount = 0;
-  let persistReviewThreadCount = 0;
-  let persistCommentCount = 0;
 
-  return Promise.resolve(this.repo.getOriginUrl())
-    .then(async (url) => {
-      if (url.includes('@')) {
-        url = 'https://github.com/' + url.split('@github.com/')[1];
+  // helper function that persists the issues/mergeRequests and associated GitHub user accounts (plus connections)
+  const processIssues = async (issues: any, type: string, targetCollection: typeof Issue | typeof MergeRequest) => {
+    let persistCount = 0;
+    let omitCount = 0;
+
+    for (const issue of issues) {
+      log(`Processing ${type} #` + issue.number);
+
+      let issueEntry: Entry<IssueDataType | MergeRequestDataType>;
+
+      // create GitHub account objects for each relevant user (author, assignee, assignees)
+      const authorEntry: Entry<AccountDataType> = (await Account.ensureGitHubAccount(this.controller.getUser(issue.author.login)))[0];
+      const assigneeEntries: Entry<AccountDataType>[] = [];
+      for (const a of issue.assignees.nodes) {
+        assigneeEntries.push((await Account.ensureGitHubAccount(this.controller.getUser(a.login)))[0]);
       }
-      const match = url.match(GITHUB_ORIGIN_REGEX);
-      if (!match) {
-        throw new Error('Unable to determine github owner and repo from origin url: ' + url);
+
+      await targetCollection
+        .findOneByExample({ id: String(issue.id) })
+        .then(async (existingIssue) => {
+          if (!existingIssue || new Date(existingIssue.data.updatedAt).getTime() < new Date(issue.updatedAt).getTime()) {
+            log(`Processing ${type} #` + issue.iid);
+
+            // Note: contrary to GitLab, milestones are not supported yet by the GitHub indexer.
+            const toBePersisted: any = {
+              id: issue.id.toString(),
+              iid: issue.number,
+              title: issue.title,
+              description: issue.body,
+              state: issue.state,
+              closedAt: issue.closedAt,
+              createdAt: issue.createdAt,
+              updatedAt: issue.updatedAt,
+              labels: issue.labels.nodes.map((l: Label) => l.name),
+              webUrl: issue.url,
+            };
+
+            // mentions attribute is only relevant for issues, not for merge requests
+            if (targetCollection === Issue) {
+              toBePersisted.mentions = issue.timelineItems.nodes.map((event: ItsIssueEvent) => {
+                return {
+                  commit: event.commit ? event.commit.oid : null,
+                  createdAt: event.createdAt,
+                  closes: event.commit === undefined,
+                } as Mention;
+              });
+            }
+
+            return targetCollection.persist(toBePersisted).then(([persistedIssue, wasCreated]) => {
+              // save the entry object of the issue so we can connect it to the github users later
+              issueEntry = persistedIssue;
+              if (wasCreated) {
+                persistCount++;
+              }
+              log(`Persisted ${type} #` + persistedIssue.data.iid);
+            });
+          } else {
+            // save the entry object of the issue so we can connect it to the github users later
+            issueEntry = existingIssue;
+            log(`Skipping ${type} #` + issue.iid);
+            omitCount++;
+          }
+        })
+        .then(async () => {
+          let reviewerEntries: Entry<AccountDataType>[] = [];
+          // connect the issue/MR to the users (either as author, assignee or assignees)
+          if (type === 'issue') {
+            await connectIssuesToUsers(IssueAccountConnection, issueEntry, authorEntry, assigneeEntries, reviewerEntries);
+            this.reporter.finishIssue();
+          } else if (type === 'mergeRequest') {
+            reviewerEntries = await processReviewThreads(issue, 'reviewThread', 'issue', ReviewThread, issueEntry);
+            await connectIssuesToUsers(MergeRequestAccountConnection, issueEntry, authorEntry, assigneeEntries, reviewerEntries);
+            await processComments(issue, 'comment', 'mergeRequest', Comment, targetCollection, issueEntry);
+
+            this.reporter.finishMergeRequest();
+          }
+        });
+    }
+    log(`Persisted %d new ${type}s (%d already present)`, persistCount, omitCount);
+  };
+
+  // helper function that persists review threads for a merge request
+  const processReviewThreads = async (
+    issue: any,
+    type: string,
+    parentType: string,
+    targetCollection: typeof ReviewThread,
+    issueEntry: Entry<MergeRequestDataType>,
+  ) => {
+    // get reviewers for merge request (not available as field in graphql)
+    const reviewers = new Set<string>();
+
+    log(`Processing ${type} for ${parentType} #` + issue.idd);
+    for (const reviewThread of issue.reviewThreads.nodes) {
+      let reviewThreadEntry: Entry<ReviewThreadDataType>;
+      const author = reviewThread.commentNodes.nodes[0].author;
+      if (!reviewers.has(author.login)) {
+        reviewers.add(author.login);
       }
 
-      owner = match[1];
-      repo = match[2];
-      await this.controller.loadAssignableUsers(owner, repo);
+      await targetCollection
+        .findOneByExample({ id: String(reviewThread.id) })
+        .then(async (existingReviewThread) => {
+          if (!existingReviewThread || !_.isEqual(existingReviewThread.data, reviewThread)) {
+            const toBePersistedRT: any = {
+              id: reviewThread.id,
+              path: reviewThread.path,
+              isResolved: reviewThread.isResolved,
+            };
+            return targetCollection.persist(toBePersistedRT).then(([persitedReviewThread]) => {
+              reviewThreadEntry = persitedReviewThread;
+            });
+          } else {
+            reviewThreadEntry = existingReviewThread;
+          }
+        })
+        .then(async () => {
+          await processComments(reviewThread, 'comment', 'reviewThread', Comment, ReviewThread, reviewThreadEntry);
+          connectReviewThreadsToMergeRequests(MergeRequestReviewThreadConnection, issueEntry, reviewThreadEntry);
+          if (reviewThread.isResolved) {
+            const resolvedByEntry: Entry<AccountDataType> = (
+              await Account.ensureGitHubAccount(this.controller.getUser(reviewThread.resolvedBy.login))
+            )[0];
+            connectReviewThreadsToUsers(ReviewThreadAccountConnection, reviewThreadEntry, resolvedByEntry);
+          }
+        });
+    }
 
-      log('Getting issues for', `${owner}/${repo}`);
-      return Promise.all([
-        this.controller.getIssuesWithEvents(owner, repo).then((issues: ItsIssue[]) => {
-          this.reporter.setIssueCount(issues.length);
-          return Promise.all(
-            issues.map((issue) => {
-              log('Processing Issue #' + issue.number);
+    const reviewerEntries: Entry<AccountDataType>[] = [];
+    for (const a of reviewers) {
+      reviewerEntries.push((await Account.ensureGitHubAccount(this.controller.getUser(a)))[0]);
+    }
+    return reviewerEntries;
+  };
 
-              if (!issue.author) {
-                issue.author = this.controller.getGhost();
-              } else {
-                issue.author.name = this.controller.getUser(issue.author.login).name;
-              }
+  // helper function that persists comment for a review thread or a merge request
+  const processComments = async (
+    parent: any,
+    type: string,
+    parentType: string,
+    targetCollection: typeof Comment,
+    parentCollection: typeof MergeRequest | typeof ReviewThread,
+    parentEntry: Entry<ReviewThreadDataType> | Entry<MergeRequestDataType>,
+  ) => {
+    log(`Processing ${type} for ${parentType} #` + parent.id);
+    for (const comment of parent.commentNodes.nodes) {
+      let commentEntry: Entry<ReviewCommentDataType>;
+      await targetCollection
+        .findOneByExample({ id: String(comment.id) })
+        .then((existingComment) => {
+          if (!existingComment || !_.isEqual(existingComment, comment)) {
+            const toBePersistedC: any = {
+              id: comment.id,
+              updatedAt: comment.updatedAt,
+              createdAt: comment.createdAt,
+              lastEditedAt: comment.lastEditedAt,
+              path: comment.path,
+              bodyText: comment.bodyText,
+            };
 
-              if (issue.assignees.nodes.length > 0) {
-                issue.assignees.nodes[0].name = this.controller.getUser(issue.assignees.nodes[0].login).name;
-              }
+            return targetCollection.persist(toBePersistedC).then(([persistedComment]) => {
+              commentEntry = persistedComment;
+            });
+          } else {
+            commentEntry = existingComment;
+          }
+        })
+        .then(async () => {
+          if (parentCollection === MergeRequest) {
+            connectCommentsToParents(MergeRequestCommentConnection, parentEntry, commentEntry);
+          } else if (parentCollection === ReviewThread) {
+            connectCommentsToParents(ReviewThreadCommentConnection, parentEntry, commentEntry);
+          } // issues...
 
-              for (let i = 0; i < issue.assignees.nodes.length; i++) {
-                issue.assignees.nodes[i].name = this.controller.getUser(issue.assignees.nodes[i].login).name;
-              }
-              return new Promise((resolve) => {
-                Issue.findOneById(String(issue.id))
-                  .then((existingIssue) => {
-                    if (!existingIssue || new Date(existingIssue.data.updatedAt).getTime() < new Date(issue.updatedAt).getTime()) {
-                      log('Processing issue #' + issue.iid);
+          const authorEntry: Entry<AccountDataType> = (await Account.ensureGitHubAccount(this.controller.getUser(comment.author.login)))[0];
+          connectCommentsToUsers(CommentAccountConnection, commentEntry, authorEntry);
+        });
+    }
+  };
 
-                      return Issue.persist({
-                        id: issue.id.toString(),
-                        iid: issue.number,
-                        title: issue.title,
-                        description: issue.body,
-                        state: issue.state,
-                        url: issue.url,
-                        closedAt: issue.closedAt,
-                        createdAt: issue.createdAt,
-                        updatedAt: issue.updatedAt,
-                        labels: issue.labels.nodes,
-                        milestone: issue.milestone,
-                        author: issue.author,
-                        assignee: issue.assignees.nodes[0],
-                        assignees: issue.assignees.nodes,
-                        webUrl: issue.url,
-                        mentions: issue.timelineItems.nodes.map((event: ItsIssueEvent) => {
-                          return {
-                            commit: event.commit ? event.commit.oid : null,
-                            createdAt: event.createdAt,
-                            closes: event.commit === undefined,
-                          } as Mention;
-                        }),
-                      }).then(([persistedIssue, wasCreated]) => {
-                        if (wasCreated) {
-                          persistIssueCount++;
-                        }
-                        log('Persisted issue #' + persistedIssue.data.iid);
-                      });
-                    } else {
-                      log('Skipping issue #' + issue.iid);
-                      omitIssueCount++;
-                    }
-                  })
-                  .then(() => {
-                    this.reporter.finishIssue();
-                    resolve(true);
-                  });
-              });
-            }),
-          );
-        }),
-        this.controller.getPullRequestsWithEvents(owner, repo).then((mergeRequests: ItsIssue[]) => {
-          this.reporter.setMergeRequestCount(mergeRequests.length);
-          return Promise.all(
-            mergeRequests.map((mergeRequest) => {
-              log('Processing Issue #' + mergeRequest.number);
+  return Promise.resolve(this.repo.getOriginUrl()).then(async (url) => {
+    if (url.includes('@')) {
+      url = 'https://github.com/' + url.split('@github.com/')[1];
+    }
+    const match = url.match(GITHUB_ORIGIN_REGEX);
+    if (!match) {
+      throw new Error('Unable to determine github owner and repo from origin url: ' + url);
+    }
 
-              if (!mergeRequest.author) {
-                mergeRequest.author = this.controller.getGhost();
-              } else {
-                mergeRequest.author.name = this.controller.getUser(mergeRequest.author.login).name;
-              }
+    owner = match[1];
+    repo = match[2];
+    await this.controller.loadAssignableUsers(owner, repo);
 
-              if (mergeRequest.assignees.nodes.length > 0) {
-                const firstAssignee = mergeRequest.assignees.nodes[0];
-                if (!firstAssignee) {
-                  mergeRequest.assignees.nodes[0] = this.controller.getGhost();
-                } else {
-                  mergeRequest.assignees.nodes[0].name = this.controller.getUser(firstAssignee.login).name;
-                }
-              }
+    log('Getting issues for', `${owner}/${repo}`);
 
-              for (let i = 0; i < mergeRequest.assignees.nodes.length; i++) {
-                const assignee = mergeRequest.assignees.nodes[i];
-                if (!assignee) {
-                  mergeRequest.assignees.nodes[i] = this.controller.getGhost();
-                } else {
-                  mergeRequest.assignees.nodes[i].name = this.controller.getUser(assignee.login).name;
-                }
-              }
+    // Persist Issues and Authors/Assignees
+    const issues = await this.controller.getIssuesWithEvents(owner, repo);
+    this.reporter.setIssueCount(issues.length);
+    await processIssues(issues, 'issue', Issue);
 
-              for (let i = 0; i < mergeRequest.commentNodes.nodes.length; i++) {
-                const author = mergeRequest.commentNodes.nodes[i].author;
+    // Persist Merge Requests and Authors/Assignees
+    const mergeRequests = await this.controller.getPullRequestsWithEvents(owner, repo);
+    this.reporter.setMergeRequestCount(mergeRequests.length);
+    await processIssues(mergeRequests, 'mergeRequest', MergeRequest);
+  });
+};
 
-                if (!author) {
-                  mergeRequest.commentNodes.nodes[i].author = this.controller.getGhost();
-                } else {
-                  author.name = this.controller.getUser(author.login).name;
-                }
-              }
+// connects issues or merge requests to accounts
+const connectIssuesToUsers = async (
+  conn: Connection<
+    IssueAccountConnectionDataType | MergeRequestAccountConnectionDataType,
+    IssueDataType | MergeRequestDataType,
+    AccountDataType
+  >,
+  issue: Entry<IssueDataType | MergeRequestDataType>,
+  author: Entry<AccountDataType>,
+  assignees: Entry<AccountDataType>[],
+  reviewers: Entry<AccountDataType>[],
+) => {
+  await conn.ensureWithData({ role: 'author' }, { from: issue, to: author });
+  if (assignees.length > 0) {
+    await conn.ensureWithData({ role: 'assignee' }, { from: issue, to: assignees[0] });
+  }
+  await Promise.all(
+    assignees.map(async (ae) => {
+      await conn.ensureWithData({ role: 'assignees' }, { from: issue, to: ae });
+    }),
+  );
 
-              for (let i = 0; i < mergeRequest.reviewThreads.nodes.length; i++) {
-                for (let j = 0; j < mergeRequest.reviewThreads.nodes[i].comments.nodes.length; j++) {
-                  const author = mergeRequest.reviewThreads.nodes[i].comments.nodes[j].author;
-                  if (!author) {
-                    mergeRequest.reviewThreads.nodes[i].comments.nodes[j].author = this.controller.getGhost();
-                  } else {
-                    author.name = this.controller.getUser(author.login).name;
-                  }
-                }
-              }
+  if (!reviewers) return;
+  if (reviewers.length > 0) {
+    await conn.ensureWithData({ role: 'reviewer' }, { from: issue, to: reviewers[0] });
+  }
+  await Promise.all(
+    reviewers.map(async (reviewer) => {
+      await conn.ensureWithData({ role: 'reviewers' }, { from: issue, to: reviewer });
+    }),
+  );
+};
 
-              return new Promise((resolve) => {
-                return MergeRequest.findOneById(String(mergeRequest.id))
-                  .then((existingMergeRequest) => {
-                    if (
-                      !existingMergeRequest ||
-                      new Date(existingMergeRequest.data.updatedAt).getTime() < new Date(mergeRequest.updatedAt).getTime()
-                    ) {
-                      log('Processing issue #' + mergeRequest.iid);
+// connects comments to their respective parent entity (review thread or merge request)
+const connectCommentsToParents = async (
+  conn: Connection<
+    MergeRequestCommentConnectionDataType | ReviewThreadCommentConnectionDataType,
+    MergeRequestDataType | ReviewThreadDataType,
+    ReviewCommentDataType
+  >,
+  parent: Entry<ReviewThreadDataType | MergeRequestDataType>,
+  comment: Entry<ReviewCommentDataType>,
+) => {
+  await conn.ensureWithData({}, { from: parent, to: comment });
+};
 
-                      const reviewers = new Map<string, GithubActor>();
-                      mergeRequest.reviewThreads.nodes.forEach((reviewThread) => {
-                        const author = reviewThread.comments.nodes[0].author;
-                        if (!reviewers.has(author.login)) {
-                          reviewers.set(author.login, author);
-                        }
-                      });
+// connects review threads to their respective merge requests
+const connectReviewThreadsToMergeRequests = async (
+  conn: Connection<MergeRequestReviewThreadConnectionDataType, MergeRequestDataType, ReviewThreadDataType>,
+  mergeRequest: Entry<MergeRequestDataType>,
+  reviewThread: Entry<ReviewThreadDataType>,
+) => {
+  await conn.ensureWithData({}, { from: mergeRequest, to: reviewThread });
+};
 
-                      return MergeRequest.persist({
-                        id: mergeRequest.id.toString(),
-                        iid: mergeRequest.number,
-                        title: mergeRequest.title,
-                        description: mergeRequest.body,
-                        state: mergeRequest.state,
-                        url: mergeRequest.url,
-                        closedAt: mergeRequest.closedAt,
-                        createdAt: mergeRequest.createdAt,
-                        updatedAt: mergeRequest.updatedAt,
-                        labels: mergeRequest.labels.nodes,
-                        milestone: mergeRequest.milestone,
-                        author: mergeRequest.author,
-                        assignee: mergeRequest.assignees.nodes[0],
-                        assignees: mergeRequest.assignees.nodes,
-                        reviewer: [...reviewers.values()][0],
-                        reviewers: [...reviewers.values()],
-                        webUrl: mergeRequest.url,
-                        mentions: mergeRequest.timelineItems.nodes.map((event: ItsIssueEvent) => {
-                          return {
-                            commit: event.commit ? event.commit.oid : null,
-                            createdAt: event.createdAt,
-                            closes: event.commit === undefined,
-                          } as Mention;
-                        }),
-                      }).then(([persistedMergeRequest, wasCreated]) => {
-                        if (wasCreated) {
-                          persistMergeRequestCount++;
-                        }
-                        log('Persisted mergeRequest #' + persistedMergeRequest.data.iid);
-                      });
-                    } else {
-                      log('Skipping mergeRequest #' + mergeRequest.iid);
-                      omitMergeRequestCount++;
-                    }
-                  })
-                  .then(() => {
-                    log('Processing comments for mergeRequest #' + mergeRequest.id);
-                    Promise.all(
-                      mergeRequest.commentNodes.nodes.map((comment) => {
-                        return new Promise((resolve) => {
-                          return Comment.findOneById(String(comment.id))
-                            .then((existingComment) => {
-                              if (
-                                !existingComment ||
-                                new Date(existingComment.data.updatedAt).getTime() < new Date(comment.updatedAt).getTime()
-                              ) {
-                                log('Processing comment #' + comment.id);
-                                return Comment.persist({
-                                  id: comment.id,
-                                  author: comment.author,
-                                  updatedAt: comment.updatedAt,
-                                  createdAt: comment.createdAt,
-                                  lastEditedAt: comment.lastEditedAt,
-                                  path: comment.path,
-                                  bodyText: comment.bodyText,
-                                  mergeRequest: mergeRequest.id,
-                                }).then(([persistedComment, wasCreated]) => {
-                                  if (wasCreated) {
-                                    persistCommentCount++;
-                                  }
-                                  log('Persisted comment #' + persistedComment.data.id);
-                                });
-                              } else {
-                                log('Skipping comment #' + comment.id);
-                                omitCommentCount++;
-                              }
-                            })
-                            .then(() => {
-                              resolve(true);
-                            });
-                        });
-                      }),
-                    );
-                  })
-                  .then(() => {
-                    log('Processing Reviews for Issue #' + mergeRequest.number);
-                    Promise.all(
-                      mergeRequest.reviewThreads.nodes.map((reviewThread) => {
-                        return new Promise((resolve) => {
-                          return ReviewThread.findOneById(String(reviewThread.id))
-                            .then((existingReviewThread) => {
-                              if (
-                                !existingReviewThread ||
-                                (reviewThread.path === existingReviewThread.data.path &&
-                                  reviewThread.isResolved === existingReviewThread.data.isResolved &&
-                                  reviewThread.resolvedBy === existingReviewThread.data.resolvedBy)
-                              ) {
-                                log('Processing reviewThread #' + reviewThread.id);
-                                return ReviewThread.persist({
-                                  id: reviewThread.id,
-                                  isResolved: reviewThread.isResolved,
-                                  resolvedBy: reviewThread.resolvedBy,
-                                  path: reviewThread.path,
-                                  mergeRequest: mergeRequest.id,
-                                }).then(([persistedReviewThread, wasCreated]) => {
-                                  if (wasCreated) {
-                                    persistReviewThreadCount++;
-                                  }
-                                  log('Persisted reviewThread #' + persistedReviewThread.data.id);
-                                });
-                              } else {
-                                log('Skippig reviewThread #' + reviewThread.id);
-                                omitReviewThreadCount++;
-                              }
-                            })
-                            .then(() => {
-                              log('Processing comments for reviewThread #' + reviewThread.id);
-                              Promise.all(
-                                reviewThread.comments.nodes.map((comment) => {
-                                  return new Promise((resolve) => {
-                                    return Comment.findOneById(String(comment.id))
-                                      .then((existingComment) => {
-                                        if (
-                                          !existingComment ||
-                                          new Date(existingComment.data.updatedAt).getTime() < new Date(comment.updatedAt).getTime()
-                                        ) {
-                                          log('Processing comment #' + comment.id);
-                                          return Comment.persist({
-                                            id: comment.id,
-                                            author: comment.author,
-                                            createdAt: comment.createdAt,
-                                            bodyText: comment.bodyText,
-                                            updatedAt: comment.updatedAt,
-                                            path: comment.path,
-                                            lastEditedAt: comment.lastEditedAt,
-                                            reviewThread: reviewThread.id,
-                                          }).then(([persistedComment, wasCreated]) => {
-                                            if (wasCreated) {
-                                              persistCommentCount++;
-                                            }
-                                            log('Persisted comment #' + persistedComment.data.id);
-                                          });
-                                        } else {
-                                          log('Skipping comment #' + comment.id);
-                                          omitCommentCount++;
-                                        }
-                                      })
-                                      .then(() => {
-                                        resolve(true);
-                                      });
-                                  });
-                                }),
-                              );
-                            })
-                            .then(() => {
-                              resolve(true);
-                            });
-                        });
-                      }),
-                    );
-                  })
-                  .then(() => {
-                    this.reporter.finishMergeRequest();
-                    resolve(true);
-                  });
-              });
-            }),
-          );
-        }),
-      ]);
-    })
-    .then(() => {
-      log('Persisted %d new issues (%d already present)', persistIssueCount, omitIssueCount);
-      log('Persisted %d new mergeRequests (%d already present)', persistMergeRequestCount, omitMergeRequestCount);
-      log('Persisted %d new reviewThreads (%d already present)', persistReviewThreadCount, omitReviewThreadCount);
-      log('Persisted %d new comments (%d already present)', persistCommentCount, omitCommentCount);
-    });
+// connects comments to accounts
+const connectCommentsToUsers = async (
+  conn: Connection<CommentAccountConnectionDataType, ReviewCommentDataType, AccountDataType>,
+  comment: Entry<ReviewCommentDataType>,
+  account: Entry<AccountDataType>,
+) => {
+  await conn.ensureWithData({ role: 'author' }, { from: comment, to: account });
+};
+
+// connects review threads to accounts
+const connectReviewThreadsToUsers = async (
+  conn: Connection<ReviewThreadAccountConnectionDataType, ReviewThreadDataType, AccountDataType>,
+  reviewThread: Entry<ReviewThreadDataType>,
+  account: Entry<AccountDataType>,
+) => {
+  await conn.ensureWithData({ role: 'resolvedBy' }, { from: reviewThread, to: account });
 };
 
 GitHubITSIndexer.prototype.isStopping = function () {
