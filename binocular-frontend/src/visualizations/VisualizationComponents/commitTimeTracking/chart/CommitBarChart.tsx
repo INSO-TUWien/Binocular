@@ -113,7 +113,7 @@ export default class CommitBarChart extends React.Component<Props, State> {
       return;
     }
     const width =
-      ((visualViewport?.width ?? 1920) - 511 - 80 - 30) *
+      (this.divRef?.getBoundingClientRect().width - 80 - 30) *
       (this.state.content.commitData.slice(40 * this.state.page, 40 + 40 * this.state.page).length / 40.0);
     const nodeChartHeight = this.state.content.nodeChart ? 40 : 0;
     const numberOfBarcharts = this.state.content.upperChart && this.state.content.lowerChart ? 2 : 1;
