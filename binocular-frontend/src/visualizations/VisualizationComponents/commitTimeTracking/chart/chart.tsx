@@ -5,8 +5,8 @@ import * as React from 'react';
 import _ from 'lodash';
 import CommitBarChart from './CommitBarChart.tsx';
 import styles from '../styles.module.scss';
-import * as d3 from "d3";
-import { DateRange } from "../../../../types/globalTypes.ts";
+import * as d3 from 'd3';
+import { DateRange } from '../../../../types/globalTypes.ts';
 
 interface Props {
   commits: Commit[];
@@ -265,7 +265,7 @@ export default (props: Props) => {
           (props.useActualTime ? '' : commitChartData.map((d) => d.timeSpent.estimated).join('-')) +
           commitChartData
             .map((d) =>
-              props.useRatio ? d.timeSpent[props.useActualTime ? 'actual' : 'estimated'] / Math.max(d.lineChanges, 1): d.lineChanges,
+              props.useRatio ? d.timeSpent[props.useActualTime ? 'actual' : 'estimated'] / Math.max(d.lineChanges, 1) : d.lineChanges,
             )
             .join('-')
         }

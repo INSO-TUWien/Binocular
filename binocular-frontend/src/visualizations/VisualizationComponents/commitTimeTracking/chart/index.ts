@@ -2,7 +2,7 @@
 
 import { connect } from 'react-redux';
 import Chart from './chart.tsx';
-import {DateRange, GlobalState} from '../../../../types/globalTypes.ts';
+import { DateRange, GlobalState } from '../../../../types/globalTypes.ts';
 import moment from 'moment';
 import { Commit } from '../../../../types/commitTypes.ts';
 import { Author, Committer, Palette } from '../../../../types/authorTypes.ts';
