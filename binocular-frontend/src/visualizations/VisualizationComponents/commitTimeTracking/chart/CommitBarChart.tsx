@@ -114,7 +114,7 @@ export default class CommitBarChart extends React.Component<Props, State> {
     }
     const width =
       ((visualViewport?.width ?? 1920) - 511 - 80 - 30) *
-      (this.state.content.commitData.slice(50 * this.state.page, 50 + 50 * this.state.page).length / 50.0);
+      (this.state.content.commitData.slice(40 * this.state.page, 40 + 40 * this.state.page).length / 40.0);
     const nodeChartHeight = this.state.content.nodeChart ? 40 : 0;
     const numberOfBarcharts = this.state.content.upperChart && this.state.content.lowerChart ? 2 : 1;
     // 25 is for navigation, 20 for it's margin and 427 is the default value for a normal screen.
@@ -133,7 +133,7 @@ export default class CommitBarChart extends React.Component<Props, State> {
       this.drawChart(mainDiv, width, height, { top: 0, right: 30, bottom: 40, left: 80 }, true, this.axisTitles[1]);
     }
 
-    this.drawNavigation(mainDiv, Math.ceil(this.state.content.commitData.length / 50.0));
+    this.drawNavigation(mainDiv, Math.ceil(this.state.content.commitData.length / 40.0));
     this.drawLegend(mainDiv);
     this.drawStatistics(mainDiv);
   }
@@ -179,8 +179,8 @@ export default class CommitBarChart extends React.Component<Props, State> {
     axisTitle: string,
   ) {
     const chartData = !showUpsideDown
-      ? this.state.content.upperChart.slice(this.state.page * 50, 50 + this.state.page * 50)
-      : this.state.content.lowerChart.slice(this.state.page * 50, 50 + this.state.page * 50);
+      ? this.state.content.upperChart.slice(this.state.page * 40, 40 + this.state.page * 40)
+      : this.state.content.lowerChart.slice(this.state.page * 40, 40 + this.state.page * 40);
     const svg = this.createSVG(mainDiv, !showUpsideDown ? 'upperChart' : 'lowerChart', margin, height);
     const x = this.createXAxis(chartData, width);
     const y = this.createYAxis(chartData, height, showUpsideDown);
@@ -195,7 +195,7 @@ export default class CommitBarChart extends React.Component<Props, State> {
       .call((g) =>
         g
           .append('text')
-          .attr('x', -50)
+          .attr('x', -40)
           .attr('y', height / 2)
           .attr('fill', 'currentColor')
           .style('writing-mode', 'vertical-rl')
@@ -206,22 +206,48 @@ export default class CommitBarChart extends React.Component<Props, State> {
   }
 
   drawNodes(mainDiv: d3.Selection<HTMLDivElement, unknown, null, undefined>, width: number) {
-    const svg = this.createSVG(mainDiv, 'nodeChart', { top: 5, right: 30, bottom: 5, left: 80 }, 40);
-    const x = this.createXAxis(this.state.content.nodeChart.slice(this.state.page * 50, 50 + this.state.page * 50), width);
+    const svg = this.createSVG(mainDiv, 'nodeChart', { top: 0, right: 30, bottom: 0, left: 80 }, 40);
+    const x = this.createXAxis(this.state.content.nodeChart.slice(this.state.page * 40, 40 + this.state.page * 40), width);
 
-    const nodes = svg
-      .selectAll('.node')
-      .data(this.state.content.nodeChart.slice(this.state.page * 50, 50 + this.state.page * 50))
+    svg
+      .append('rect')
+      .attr('x', -5)
+      .attr('y', 20 - Math.min(15, x.bandwidth() * 0.5) / 4)
+      .attr('height', Math.min(15, x.bandwidth() * 0.5) / 2)
+      .attr('width', width + 10);
+
+    const blackNodes = svg
+      .selectAll('.blackNodes')
+      .data(this.state.content.nodeChart.slice(this.state.page * 40, 40 + this.state.page * 40))
       .enter()
       .append('circle')
       .attr('class', 'node')
       .attr('cx', (d) => (x(d.ticks) ?? 0) + x.bandwidth() / 2)
-      .attr('cy', 20 - Math.min(15, x.bandwidth() / 2) / 3)
-      .attr('r', Math.min(15, x.bandwidth() / 2));
+      .attr('cy', 20)
+      .attr('r', Math.min(15, x.bandwidth() * 0.4));
+
+    const whiteNodes = svg
+      .selectAll('.whiteNode')
+      .data(this.state.content.nodeChart.slice(this.state.page * 40, 40 + this.state.page * 40))
+      .enter()
+      .append('circle')
+      .attr('class', 'node')
+      .attr('fill', 'white')
+      .attr('cx', (d) => (x(d.ticks) ?? 0) + x.bandwidth() / 2)
+      .attr('cy', 20)
+      .attr('r', Math.min(7.5, x.bandwidth() * 0.2));
 
     if (this.state.displayTooltip) {
       const tooltip = mainDiv.append('div').attr('class', styles.tooltip);
-      nodes.on('click', (event, d) =>
+      blackNodes.on('click', (event, d) =>
+        this.state.displayTooltip(
+          event,
+          this.state.content.commitData.find((data) => data.date.toString() === d.ticks),
+          tooltip,
+        ),
+      );
+
+      whiteNodes.on('click', (event, d) =>
         this.state.displayTooltip(
           event,
           this.state.content.commitData.find((data) => data.date.toString() === d.ticks),
