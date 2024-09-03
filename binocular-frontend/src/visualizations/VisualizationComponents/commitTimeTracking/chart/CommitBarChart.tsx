@@ -195,7 +195,7 @@ export default class CommitBarChart extends React.Component<Props, State> {
       .call((g) =>
         g
           .append('text')
-          .attr('x', -40)
+          .attr('x', -50)
           .attr('y', height / 2)
           .attr('fill', 'currentColor')
           .style('writing-mode', 'vertical-rl')
