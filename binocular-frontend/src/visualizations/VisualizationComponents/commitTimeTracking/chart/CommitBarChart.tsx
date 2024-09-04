@@ -183,7 +183,7 @@ export default class CommitBarChart extends React.Component<Props, State> {
       : this.state.content.lowerChart.slice(this.state.page * 40, 40 + this.state.page * 40);
     const svg = this.createSVG(mainDiv, !showUpsideDown ? 'upperChart' : 'lowerChart', margin, height);
     const x = this.createXAxis(chartData, width);
-    const y = this.createYAxis(chartData, height, showUpsideDown);
+    const y = this.createYAxis(this.state.content[!showUpsideDown ? 'upperChart' : 'lowerChart'], height, showUpsideDown);
     const colorScale = this.createColorScale(this.colorDomain, this.defaultColor, this.colorPalette);
 
     this.appendBars(svg, chartData, x, y, colorScale, showUpsideDown, height);
