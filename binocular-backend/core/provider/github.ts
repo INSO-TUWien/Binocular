@@ -66,9 +66,11 @@ class GitHub {
     this.ghost = ghostUser;
   }
 
-  getUser(login: string) {
-    if (this.users[login] !== undefined) {
-      return this.users[login];
+  getUser(author) {
+    if (!author) return this.getGhost();
+
+    if (this.users[author.login] !== undefined) {
+      return this.users[author.login];
     } else {
       return { name: null };
     }
@@ -232,7 +234,7 @@ class GitHub {
                       author {
                           login
                       }
-                      assignees(first: 100) {
+                      assignees(first: 10) {
                           nodes {
                               login
                           }
@@ -251,44 +253,18 @@ class GitHub {
                               }
                           }
                       }
-                      reviewThreads (first: 50) {
+                      reviewThreads (first: 30) {
                           totalCount
                           nodes {
                               id
-                              path
-                              isResolved
-                              resolvedBy {
-                                login
-                              }
-                              commentNodes: comments (first: 50) {
-                                    totalCount
-                                    nodes {
-                                        id
-                                        createdAt
-                                        updatedAt
-                                        path
-                                        bodyText
-                                        author {
-                                            login
-                                        }
-                                    }
-                              }
                           }
-                     }
-                     commentNodes: comments(first: 50) {
+                      }
+                      commentNodes: comments(first: 30) {
                           totalCount
                           nodes {
-                              author {
-                                  login
-                              }
-                              bodyText
-                              createdAt
-                              updatedAt
-                              lastEditedAt
                               id
-                              body
                           }
-                     }     
+                      }     
                   }
                   pageInfo {
                     hasNextPage
@@ -300,6 +276,80 @@ class GitHub {
       `,
       )
       .then((repository: any) => repository.repository.pullRequests.nodes);
+  }
+
+  getReviewThreadsByIds(ids: string[]) {
+    return this.githubGraphQL
+      .graphql(
+        `query ($ids: [ID!]!) {
+         nodes(ids: $ids) {
+            ... on PullRequestReviewThread {
+              id
+              path
+              isResolved
+              resolvedBy {
+                login
+              }
+              commentNodes: comments(first: 20) {
+                totalCount
+                nodes {
+                  id
+                  createdAt
+                  updatedAt
+                  path
+                  bodyText
+                  author {
+                    login
+                  }
+                }
+              }
+              pullRequest {
+                id
+              }
+            }
+         }
+      }`,
+        { ids: ids },
+      )
+      .then((data: any) => data.nodes);
+  }
+
+  getCommentsByIds(ids: string[]) {
+    return this.githubGraphQL
+      .graphql(
+        `query ($ids: [ID!]!) {
+           nodes(ids: $ids) {
+             ... on IssueComment {
+               id
+               createdAt
+               updatedAt
+               bodyText
+               author {
+                login
+               }
+               pullRequest {
+                 id
+               }
+             }
+             ... on PullRequestReviewComment {
+               id
+               createdAt
+               updatedAt
+               bodyText
+               path
+               position
+               author {
+                 login
+               }
+               pullRequestReview {
+                 id
+               }
+             }
+           }
+         }`,
+        { ids: ids },
+      )
+      .then((data: any) => data.nodes);
   }
 
   isStopping() {
