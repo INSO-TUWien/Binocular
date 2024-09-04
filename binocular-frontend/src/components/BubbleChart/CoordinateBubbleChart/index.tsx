@@ -34,10 +34,15 @@ export default class CoordinateBubbleChart extends BubbleChart<CoordinateBubbleC
   }
 
   componentDidUpdate(prevProps: Readonly<CoordinateBubbleChartProps>, prevState: Readonly<CoordinateBubbleChartState>) {
-    if (prevProps.data !== this.props.data || prevState.data !== this.state.data) {
+    if (prevProps.data !== this.props.data) {
       this.setState({
         data: this.props.data,
       });
+      this.reassignOriginalDataPointValues();
+      this.updateElement();
+    }
+
+    if (prevState.data !== this.state.data) {
       this.reassignOriginalDataPointValues();
       this.updateElement();
     }
@@ -228,13 +233,15 @@ export default class CoordinateBubbleChart extends BubbleChart<CoordinateBubbleC
 
     svg.selectAll('*').remove();
 
+    const radiusRange = Math.sqrt((width * height) / (8 * Math.PI * data.length));
+
     const scales = this.createScales(
       this.getXDims(),
       [paddings.left, width - paddings.right],
       this.getYDims(),
       [height - paddings.bottom, paddings.top],
       this.getRadiusDims(),
-      [d3.min(data, (d: any) => d.size), d3.max(data, (d: any) => d.size)],
+      [0.2 * radiusRange, radiusRange],
     );
 
     this.createBrush(svg, data, width, height);
