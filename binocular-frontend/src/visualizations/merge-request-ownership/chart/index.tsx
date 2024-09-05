@@ -11,6 +11,8 @@ const mapStateToProps = (state) => {
     mergeRequests: mergeRequestOwnershipState.data.data.mergeRequests,
     selectedAuthors: universalSettings.selectedAuthorsGlobal,
     allAuthors: universalSettings.allAuthors,
+    firstSignificantTimestamp: mergeRequestOwnershipState.data.data.firstSignificantTimestamp,
+    lastSignificantTimestamp: mergeRequestOwnershipState.data.data.lastSignificantTimestamp,
   };
 };
 
