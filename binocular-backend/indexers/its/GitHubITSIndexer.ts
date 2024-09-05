@@ -279,7 +279,6 @@ GitHubITSIndexer.prototype.index = async function () {
       }
       // connect the comment to its correcsponding parent
       if (comment.pullRequest.id) {
-        log(comment.id);
         commentIds.get(comment.id);
         connectCommentsToParents(MergeRequestCommentConnection, commentIds.get(comment.id)!, commentEntry);
       } else if (comment.pullRequestReview.id) {
@@ -375,7 +374,6 @@ const connectCommentsToParents = async (
   parent: Entry<ReviewThreadDataType | MergeRequestDataType>,
   comment: Entry<ReviewCommentDataType>,
 ) => {
-  log(parent);
   await conn.ensureWithData({}, { from: parent, to: comment });
 };
 
