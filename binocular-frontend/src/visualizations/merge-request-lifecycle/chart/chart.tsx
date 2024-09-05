@@ -124,7 +124,7 @@ class ChartComponent extends React.Component<Props, State> {
       lifeCycleData.push(bubble);
     });
     if (props.mergeRequestLifeCycleState.config.grouping === 'cumulative') {
-      const groupedData: CoordinateDataPoint[] = this.getGroupedDataCumulative(lifeCycleData);
+      const groupedData: CoordinateDataPoint[] = this.getGroupedDataCumulative(lifeCycleData, props);
       return { lifeCycleData: groupedData };
     } else if (props.mergeRequestLifeCycleState.config.grouping === 'category') {
       const groupedData: CoordinateDataPoint[] = this.getGroupedDataCategory(lifeCycleData);
@@ -134,7 +134,7 @@ class ChartComponent extends React.Component<Props, State> {
     return { lifeCycleData: lifeCycleData };
   }
 
-  getGroupedDataCumulative(lifeCycleData: CoordinateDataPoint[]): CoordinateDataPoint[] {
+  getGroupedDataCumulative(lifeCycleData: CoordinateDataPoint[], props): CoordinateDataPoint[] {
     const groupedData = this.groupData(lifeCycleData);
     const cumulativeData: CoordinateDataPoint[] = [];
 
@@ -150,7 +150,7 @@ class ChartComponent extends React.Component<Props, State> {
           size: groupedData[color][x].length,
           tooltipData: [
             { label: 'State', value: this.getStateForColor(color) },
-            { label: 'Duration', value: x + ' ' + this.props.mergeRequestLifeCycleState.config.granularity + 's' },
+            { label: 'Duration', value: x + ' ' + props.mergeRequestLifeCycleState.config.granularity + 's' },
           ],
         };
 
