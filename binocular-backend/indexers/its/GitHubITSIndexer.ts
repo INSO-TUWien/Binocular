@@ -122,6 +122,25 @@ GitHubITSIndexer.prototype.index = async function () {
           persistCount++;
         }
         log(`Persisted ${type} #` + persistedIssue.data.iid);
+
+        if (type === 'mergeRequest') {
+          // persist comments and review threads
+          for (const reviewThread of issue.reviewThreads.nodes) {
+            if (reviewThreadIds.size >= BATCH_SIZE) {
+              await fetchReviewThreads(reviewThreadIds);
+              reviewThreadIds.clear();
+            }
+            reviewThreadIds.set(reviewThread.id, issueEntry);
+          }
+
+          for (const comment of issue.commentNodes.nodes) {
+            if (commentIds.size >= BATCH_SIZE) {
+              await fetchComments(commentIds);
+              commentIds.clear();
+            }
+            commentIds.set(comment.id, issueEntry);
+          }
+        }
       } else {
         // save the entry object of the issue so we can connect it to the github users later
         issueEntry = existingIssue;
@@ -134,22 +153,6 @@ GitHubITSIndexer.prototype.index = async function () {
         await connectIssuesToUsers(IssueAccountConnection, issueEntry, authorEntry, assigneeEntries);
         this.reporter.finishIssue();
       } else if (type === 'mergeRequest') {
-        for (const reviewThread of issue.reviewThreads.nodes) {
-          if (reviewThreadIds.size >= BATCH_SIZE) {
-            await fetchReviewThreads(reviewThreadIds);
-            reviewThreadIds.clear();
-          }
-          reviewThreadIds.set(reviewThread.id, issueEntry);
-        }
-
-        for (const comment of issue.commentNodes.nodes) {
-          if (commentIds.size >= BATCH_SIZE) {
-            await fetchComments(commentIds);
-            commentIds.clear();
-          }
-          commentIds.set(comment.id, issueEntry);
-        }
-
         await connectIssuesToUsers(MergeRequestAccountConnection, issueEntry, authorEntry, assigneeEntries);
         this.reporter.finishMergeRequest();
       }
@@ -175,17 +178,20 @@ GitHubITSIndexer.prototype.index = async function () {
     });
 
     const reviewThreads = await this.controller.getReviewThreadsByIds(ids);
-    processReviewThreads(reviewThreads, 'reviewThread', ReviewThread, reviewThreadIds);
+    await processReviewThreads(reviewThreads, 'reviewThread', ReviewThread, reviewThreadIds);
   };
 
-  const fetchComments = async (commentIds: Map<string, Entry<MergeRequestDataType | ReviewThreadDataType>>) => {
+  const fetchComments = async (
+    commentIds: Map<string, Entry<MergeRequestDataType | ReviewThreadDataType>>,
+    reviewRelevantComments: Map<string, Entry<MergeRequestDataType>> = new Map<string, Entry<MergeRequestDataType>>(),
+  ) => {
     const ids: string[] = [];
     commentIds.forEach((value, key) => {
       ids.push(key);
     });
 
     const comments = await this.controller.getCommentsByIds(ids);
-    processComments(comments, Comment, commentIds);
+    await processComments(comments, Comment, commentIds, reviewRelevantComments);
   };
 
   // helper function that persists review threads for a merge request
@@ -218,22 +224,25 @@ GitHubITSIndexer.prototype.index = async function () {
           path: reviewThread.path,
           isResolved: reviewThread.isResolved,
         };
-        return targetCollection.persist(toBePersistedRT).then(([persitedReviewThread]) => {
-          reviewThreadEntry = persitedReviewThread;
-        });
+        const [persistedReviewThread] = await targetCollection.persist(toBePersistedRT);
+        reviewThreadEntry = persistedReviewThread;
       } else {
         reviewThreadEntry = existingReviewThread;
       }
 
-      reviewThread.commentNodes.nodes.forEach((comment) => {
+      for (const comment of reviewThread.commentNodes.nodes) {
         if (commentIds.size >= BATCH_SIZE) {
-          fetchComments(commentIds);
+          await fetchComments(commentIds, reviewRelevantComments);
           commentIds.clear();
         }
         commentIds.set(comment.id, reviewThreadEntry);
-      });
+      }
 
-      connectReviewThreadsToMergeRequests(MergeRequestReviewThreadConnection, reviewThreadIds.get(reviewThread.id)!, reviewThreadEntry);
+      await connectReviewThreadsToMergeRequests(
+        MergeRequestReviewThreadConnection,
+        reviewThreadIds.get(reviewThread.id)!,
+        reviewThreadEntry,
+      );
       if (reviewThread.isResolved) {
         const resolvedByEntry: Entry<AccountDataType> = (
           await Account.ensureGitHubAccount(this.controller.getUser(reviewThread.resolvedBy))
@@ -244,7 +253,7 @@ GitHubITSIndexer.prototype.index = async function () {
 
     // fetch the remaining batch
     if (commentIds.size > 0) {
-      await fetchComments(commentIds);
+      await fetchComments(commentIds, reviewRelevantComments);
       commentIds.clear();
     }
   };
@@ -254,8 +263,9 @@ GitHubITSIndexer.prototype.index = async function () {
     comments: any,
     targetCollection: typeof Comment,
     commentIds: Map<string, Entry<MergeRequestDataType | ReviewThreadDataType>>,
-    reviewRelevantComments: Map<string, Entry<MergeRequestDataType>> = new Map<string, Entry<MergeRequestDataType>>(),
+    reviewRelevantComments: Map<string, Entry<MergeRequestDataType>>,
   ) => {
+    log('Processing comment batch');
     for (const comment of comments) {
       let commentEntry: Entry<ReviewCommentDataType>;
 
@@ -271,24 +281,23 @@ GitHubITSIndexer.prototype.index = async function () {
           bodyText: comment.bodyText,
         };
 
-        return targetCollection.persist(toBePersistedC).then(([persistedComment]) => {
-          commentEntry = persistedComment;
-        });
+        const [persistedComment] = await targetCollection.persist(toBePersistedC);
+        commentEntry = persistedComment;
       } else {
         commentEntry = existingComment;
       }
       // connect the comment to its correcsponding parent
-      if (comment.pullRequest.id) {
+      if (comment.pullRequest) {
         commentIds.get(comment.id);
-        connectCommentsToParents(MergeRequestCommentConnection, commentIds.get(comment.id)!, commentEntry);
-      } else if (comment.pullRequestReview.id) {
-        connectCommentsToParents(ReviewThreadCommentConnection, commentIds.get(comment.id)!, commentEntry);
+        await connectCommentsToParents(MergeRequestCommentConnection, commentIds.get(comment.id)!, commentEntry);
+      } else if (comment.pullRequestReview) {
+        await connectCommentsToParents(ReviewThreadCommentConnection, commentIds.get(comment.id)!, commentEntry);
 
         // connect the reviewer to the merge request
         for (const [key, value] of reviewRelevantComments) {
-          if (key !== comment.id) return;
+          if (key !== comment.id) continue;
           const reviewer = await Account.ensureGitHubAccount(this.controller.getUser(comment.author))[0];
-          connectReviewersToIssues(MergeRequestAccountConnection, value, reviewer);
+          await connectReviewersToIssues(MergeRequestAccountConnection, value, reviewer);
           reviewRelevantComments.delete(key);
         }
       }
