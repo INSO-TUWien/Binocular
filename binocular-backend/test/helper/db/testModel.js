@@ -16,7 +16,7 @@ class TestModel extends Model {
       buildData.id = _buildData.id.toString();
     }
 
-    return this.ensureById(buildData.id, buildData, { ignoreUnknownAttributes: true });
+    return this.ensureByExample({ id: buildData.id }, buildData);
   }
 }
 

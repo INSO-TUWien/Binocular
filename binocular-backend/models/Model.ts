@@ -75,23 +75,7 @@ export default class Model<DataType> {
     return null;
   }
 
-  async ensureById(id: string, data: DataType, options?: { isNew?: boolean }) {
-    return this.findOneById(id).then(
-      function (resp) {
-        if (resp) {
-          return [this.parse(resp), false];
-        } else {
-          const entry = new Entry<DataType>(data, {
-            isNew: options && options.isNew ? options.isNew : true,
-          });
-          entry._id = id;
-
-          return this.save(entry).then((i) => [i, true]);
-        }
-      }.bind(this),
-    );
-  }
-
+  // finds first example with `_id` equal to specified id
   findOneById(id: string): Promise<Entry<DataType> | null> {
     this.log('findById %o', id);
     return this.firstExample({ _id: id } as DataType & { _id: string; _key: string });
@@ -107,16 +91,13 @@ export default class Model<DataType> {
   }
 
   async ensureByExample(example: object, data: DataType, options?: { isNew?: boolean }) {
-    for (const [key, value] of Object.entries(example)) {
-      data[key] = value;
-    }
-
+    const d = Object.assign({}, data, example);
     return this.findOneByExample(example).then(
       function (resp) {
         if (resp) {
           return [this.parse(resp.data), false];
         } else {
-          const entry = new Entry<DataType>(data, {
+          const entry = new Entry<DataType>(d, {
             isNew: options && options.isNew ? options.isNew : true,
           });
           return this.save(entry).then((i) => [i, true]);
@@ -147,6 +128,8 @@ export default class Model<DataType> {
     });
   }
 
+  // ensures that an entry **with the specified _key property** is in the database.
+  // If not, a new object is stored and returned. Otherwise, the existing entry is returned.
   async ensure(entry: Entry<DataType>): Promise<Entry<DataType>> {
     const instance = await this.findOneBy('_key', entry._key);
     if (instance) {
@@ -155,12 +138,13 @@ export default class Model<DataType> {
     } else {
       return this.save(
         new Entry<DataType>(entry.data, {
-          isNew: false,
+          isNew: true,
         }),
       );
     }
   }
 
+  // wraps the data in an Entry object
   parse(data: DataType & { _id: string; _key: string }): Entry<DataType> | null {
     if (data === null) {
       return null;
@@ -204,6 +188,8 @@ export default class Model<DataType> {
     return ds.map((d: DataType & { _id: string; _key: string }) => this.parse(d));
   }
 
+  // creates new entries or updates already existing ones,
+  // depending on the isNew property of the entry.
   async save(entry: Entry<DataType>): Promise<Entry<DataType>> {
     this.log('save %o', entry.data);
     if (this.collection === undefined) {
@@ -211,6 +197,7 @@ export default class Model<DataType> {
     }
     let resp: any;
 
+    // if this entry is new, store it in the db
     if (entry.isNew) {
       entry.justCreated = true;
       try {
@@ -225,6 +212,7 @@ export default class Model<DataType> {
       entry.isNew = false;
       return entry;
     } else {
+      // else update the already existing entry
       entry.justUpdated = true;
       try {
         resp = await Promise.resolve(
