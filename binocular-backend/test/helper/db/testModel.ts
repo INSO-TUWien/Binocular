@@ -2,7 +2,14 @@
 import Model from '../../../models/Model';
 import _ from 'lodash';
 
-class TestModel extends Model {
+
+export interface TestModelDataType {
+  id: string;
+  someText: string;
+  someOtherText: string;
+}
+
+class TestModel extends Model<TestModelDataType> {
   constructor() {
     super({
       name: 'Test',

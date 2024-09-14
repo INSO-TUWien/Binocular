@@ -9,6 +9,8 @@ import path from 'path';
 import ctx from '../utils/context.ts';
 import { expectExamples, getAllEntriesInCollection } from './helper/utils';
 import _ from 'lodash';
+import TestConnection from './helper/db/testConnection';
+import TestConnToModelConnection from './helper/db/testConnToModelConnection';
 const indexerOptions = {
   backend: true,
   frontend: false,
@@ -28,27 +30,27 @@ const config = conf.get();
 describe('db', function () {
   const db = new Db(config.arango);
 
+  const t1 = {
+    id: '1',
+    someText: 'someText1',
+    someOtherText: 'someOtherText1',
+  };
+  const t2 = {
+    id: '2',
+    someText: 'someText2',
+    someOtherText: 'someOtherText2',
+  };
+  const t3 = {
+    id: '3',
+    someText: 'someText3',
+    someOtherText: 'someOtherText3',
+  };
+
   const getAllInCollection = async (collection) => getAllEntriesInCollection(db, collection);
 
   // these tests cover the basic functionality of the database,
   //  as well as the functions in the Model class (binocular-backend/models/Model.ts)
   describe('db/model basic functionality', function () {
-    const t1 = {
-      id: '1',
-      someText: 'someText1',
-      someOtherText: 'someOtherText1',
-    };
-    const t2 = {
-      id: '2',
-      someText: 'someText2',
-      someOtherText: 'someOtherText2',
-    };
-    const t3 = {
-      id: '3',
-      someText: 'someText3',
-      someOtherText: 'someOtherText3',
-    };
-
     const testModelDbSetup = async () => {
       await db.ensureDatabase('test', ctx);
       await db.truncate();
@@ -364,7 +366,7 @@ describe('db', function () {
 
       // mutate object
       t1Stored.data.someText = 'newText';
-      // update the enttry using save
+      // update the entry using save
       await TestModel.save(t1Stored);
 
       const allEntries = await TestModel.findAll();
@@ -373,5 +375,205 @@ describe('db', function () {
     });
 
     // TODO tests for cursor
+  });
+
+  // these tests cover the basic functions of the Connection class (binocular-backend/models/Connection.ts)
+  describe('connection basic functionality', function () {
+    const testConnectionDbSetup = async () => {
+      await db.ensureDatabase('test', ctx);
+      await db.truncate();
+      await TestModel.ensureCollection();
+      await TestConnection.ensureCollection();
+      await TestConnToModelConnection.ensureCollection();
+      const test1 = await TestModel.create(t1);
+      const test2 = await TestModel.create(t2);
+      const test3 = await TestModel.create(t3);
+      return {
+        t1: test1,
+        t2: test2,
+        t3: test3,
+      };
+    };
+
+    const testConnectionDbSetupWithConnections = async () => {
+      const testEntries = await testConnectionDbSetup();
+      await TestConnection.connect({ connectionData: 'data' }, { from: testEntries.t1, to: testEntries.t2 });
+      await TestConnection.connect({ connectionData: 'data' }, { from: testEntries.t1, to: testEntries.t3 });
+    };
+
+    it('ensure a connection collection', async function () {
+      await db.ensureDatabase('test', ctx);
+      await db.truncate();
+      const ensuredCollection = await TestConnection.ensureCollection();
+      expect(ensuredCollection.name).to.equal('tests-tests');
+      const ensuresConnToModelConnection = await TestConnToModelConnection.ensureCollection();
+      expect(ensuresConnToModelConnection.name).to.equal('tests-tests-tests');
+    });
+
+    it('connect: stores data correctly', async function () {
+      const testEntries = await testConnectionDbSetup();
+      // store t1 -> t2 connection
+      await TestConnection.connect({ connectionData: 'data' }, { from: testEntries.t1, to: testEntries.t2 });
+      let allConnections = await getAllInCollection('tests-tests');
+      expect(allConnections.length).to.equal(1);
+      expectExamples({ _from: testEntries.t1._id, _to: testEntries.t2._id }, allConnections, 1);
+
+      await TestConnection.connect({ connectionData: 'data' }, { from: testEntries.t1, to: testEntries.t3 });
+      allConnections = await getAllInCollection('tests-tests');
+      expect(allConnections.length).to.equal(2);
+      expectExamples({ _from: testEntries.t1._id, _to: testEntries.t2._id }, allConnections, 1);
+      expectExamples({ _from: testEntries.t1._id, _to: testEntries.t3._id }, allConnections, 1);
+    });
+
+    it('connect: stores connection with same nodes but different data correctly', async function () {
+      const testEntries = await testConnectionDbSetup();
+      // store t1 -> t2 connection
+      await TestConnection.connect({ connectionData: 'data' }, { from: testEntries.t1, to: testEntries.t2 });
+      let allConnections = await getAllInCollection('tests-tests');
+      expect(allConnections.length).to.equal(1);
+      expectExamples({ _from: testEntries.t1._id, _to: testEntries.t2._id }, allConnections, 1);
+
+      await TestConnection.connect({ connectionData: 'different data' }, { from: testEntries.t1, to: testEntries.t2 });
+      allConnections = await getAllInCollection('tests-tests');
+      expect(allConnections.length).to.equal(2);
+      expectExamples({ _from: testEntries.t1._id, _to: testEntries.t2._id, connectionData: 'data' }, allConnections, 1);
+      expectExamples({ _from: testEntries.t1._id, _to: testEntries.t2._id, connectionData: 'different data' }, allConnections, 1);
+    });
+
+    it('connect: stores data correctly for complex connections', async function () {
+      // for more complex relations, we need connections from a connection to a model
+      // test if this works as expected
+      await testConnectionDbSetupWithConnections();
+      const modelEntries = await getAllInCollection('tests');
+      const connectionEntries = await getAllInCollection('tests-tests');
+
+      // now connect the t1->t2 connection to t3, so we have (t1-t2)->t3
+      await TestConnToModelConnection.connect({ connectionData: 'data' }, { from: connectionEntries[0], to: modelEntries[2] });
+      const allComplexConnections = await getAllInCollection('tests-tests-tests');
+      expect(allComplexConnections.length).to.equal(1);
+      expectExamples({ _from: connectionEntries[0]._id, _to: modelEntries[2]._id }, allComplexConnections, 1);
+    });
+
+    it('findByIds: returns correct entry', async function () {
+      const testEntries = await testConnectionDbSetup();
+      // store t1 -> t2 connection
+      await TestConnection.connect({ connectionData: 'data' }, { from: testEntries.t1, to: testEntries.t2 });
+      const connectionEntries = await getAllInCollection('tests-tests');
+      const result = await TestConnection.findByIds({ from: testEntries.t1, to: testEntries.t2 });
+      expect(_.isEqual(result, connectionEntries[0])).to.equal(true);
+    });
+
+    it('findByIds: returns null if not found', async function () {
+      const testEntries = await testConnectionDbSetup();
+      // store t1 -> t2 connection
+      await TestConnection.connect({ connectionData: 'data' }, { from: testEntries.t1, to: testEntries.t2 });
+      // search for t1->t3, which should return null
+      const result = await TestConnection.findByIds({ from: testEntries.t1, to: testEntries.t3 });
+      expect(result).to.equal(null);
+    });
+
+    it('findByIdsAndData: returns correct entry', async function () {
+      const testEntries = await testConnectionDbSetup();
+      // store t1 -> t2 connection
+      await TestConnection.connect({ connectionData: 'data' }, { from: testEntries.t1, to: testEntries.t2 });
+      const connectionEntries = await getAllInCollection('tests-tests');
+      const result = await TestConnection.findByIdsAndData({ from: testEntries.t1, to: testEntries.t2 }, { connectionData: 'data' });
+      expect(_.isEqual(result, connectionEntries[0])).to.equal(true);
+    });
+
+    it('findByIdsAndData: returns correct null if data does not match', async function () {
+      const testEntries = await testConnectionDbSetup();
+      // store t1 -> t2 connection
+      await TestConnection.connect({ connectionData: 'data' }, { from: testEntries.t1, to: testEntries.t2 });
+      const result = await TestConnection.findByIdsAndData({ from: testEntries.t1, to: testEntries.t2 }, { connectionData: 'not correct' });
+      expect(result).to.equal(null);
+    });
+
+    it('ensure: connects entries correctly', async function () {
+      const testEntries = await testConnectionDbSetup();
+      // store t1 -> t2 connection
+      await TestConnection.ensure({ connectionData: 'data' }, { from: testEntries.t1, to: testEntries.t2 });
+      const allConnections = await getAllInCollection('tests-tests');
+      expect(allConnections.length).to.equal(1);
+      expectExamples({ _from: testEntries.t1._id, _to: testEntries.t2._id, connectionData: 'data' }, allConnections, 1);
+      // another call to ensure with different data should NOT store another entry or overwrite the stored one
+      await TestConnection.ensure({ connectionData: 'different data' }, { from: testEntries.t1, to: testEntries.t2 });
+      expect(allConnections.length).to.equal(1);
+      expectExamples({ _from: testEntries.t1._id, _to: testEntries.t2._id, connectionData: 'data' }, allConnections, 1);
+    });
+
+    it('ensureWithData: connects entries twice if data is different', async function () {
+      const testEntries = await testConnectionDbSetup();
+      // store t1 -> t2 connection
+      await TestConnection.ensure({ connectionData: 'data' }, { from: testEntries.t1, to: testEntries.t2 });
+      let allConnections = await getAllInCollection('tests-tests');
+      expect(allConnections.length).to.equal(1);
+      expectExamples({ _from: testEntries.t1._id, _to: testEntries.t2._id, connectionData: 'data' }, allConnections, 1);
+      // another call to ensure with different data should store another entry
+      await TestConnection.ensureWithData({ connectionData: 'different data' }, { from: testEntries.t1, to: testEntries.t2 });
+      allConnections = await getAllInCollection('tests-tests');
+      expect(allConnections.length).to.equal(2);
+      expectExamples({ _from: testEntries.t1._id, _to: testEntries.t2._id, connectionData: 'data' }, allConnections, 1);
+      expectExamples({ _from: testEntries.t1._id, _to: testEntries.t2._id, connectionData: 'different data' }, allConnections, 1);
+    });
+
+    it('ensureWithData: does not connect twice if data also matches', async function () {
+      const testEntries = await testConnectionDbSetup();
+      // store t1 -> t2 connection
+      await TestConnection.ensure({ connectionData: 'data' }, { from: testEntries.t1, to: testEntries.t2 });
+      let allConnections = await getAllInCollection('tests-tests');
+      expect(allConnections.length).to.equal(1);
+      expectExamples({ _from: testEntries.t1._id, _to: testEntries.t2._id, connectionData: 'data' }, allConnections, 1);
+      // another call to ensureWithData with the same data should NOT store another entry
+      await TestConnection.ensureWithData({ connectionData: 'data' }, { from: testEntries.t1, to: testEntries.t2 });
+      allConnections = await getAllInCollection('tests-tests');
+      expect(allConnections.length).to.equal(1);
+      expectExamples({ _from: testEntries.t1._id, _to: testEntries.t2._id, connectionData: 'data' }, allConnections, 1);
+    });
+
+    it('store: stores new connection correctly', async function () {
+      const testEntries = await testConnectionDbSetup();
+      // store t1 -> t2 connection
+      await TestConnection.store({ connectionData: 'data' }, { from: testEntries.t1, to: testEntries.t2 });
+      let allConnections = await getAllInCollection('tests-tests');
+      expect(allConnections.length).to.equal(1);
+      expectExamples({ _from: testEntries.t1._id, _to: testEntries.t2._id, connectionData: 'data' }, allConnections, 1);
+    });
+
+    it('store: updates connection correctly', async function () {
+      const testEntries = await testConnectionDbSetup();
+      // store t1 -> t2 connection
+      await TestConnection.store({ connectionData: 'data' }, { from: testEntries.t1, to: testEntries.t2 });
+      // another call to store with the same ids but different data should replace connection
+      await TestConnection.store({ connectionData: 'different data' }, { from: testEntries.t1, to: testEntries.t2 });
+      const allConnections = await getAllInCollection('tests-tests');
+      expect(allConnections.length).to.equal(1);
+      expectExamples({ _from: testEntries.t1._id, _to: testEntries.t2._id, connectionData: 'different data' }, allConnections, 1);
+    });
+
+    it('parse: returns null if data is null', async function () {
+      expect(TestConnection.parse(null)).to.equal(null);
+    });
+
+    it('parse: parses data correctly', async function () {
+      const testEntries = await testConnectionDbSetup();
+      const parsed = TestConnection.parse({ _from: testEntries.t1._id, _to: testEntries.t2._id, connectionData: 'different data' });
+      expect(parsed._from).to.equal(testEntries.t1._id);
+      expect(parsed._to).to.equal(testEntries.t2._id);
+    });
+
+    it('findAll: return correct number of entries', async function () {
+      const testEntries = await testConnectionDbSetup();
+      expect((await TestConnection.findAll()).length).to.equal(0);
+
+      await TestConnection.store({ connectionData: 'data' }, { from: testEntries.t1, to: testEntries.t2 });
+      expect((await TestConnection.findAll()).length).to.equal(1);
+
+      await TestConnection.store({ connectionData: 'data' }, { from: testEntries.t1, to: testEntries.t3 });
+      expect((await TestConnection.findAll()).length).to.equal(2);
+
+      await TestConnection.store({ connectionData: 'data' }, { from: testEntries.t2, to: testEntries.t3 });
+      expect((await TestConnection.findAll()).length).to.equal(3);
+    });
   });
 });
