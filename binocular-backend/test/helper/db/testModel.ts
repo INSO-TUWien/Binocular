@@ -2,7 +2,6 @@
 import Model from '../../../models/Model';
 import _ from 'lodash';
 
-
 export interface TestModelDataType {
   id: string;
   someText: string;
