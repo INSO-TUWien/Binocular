@@ -6,12 +6,13 @@ import Users from './users.ts';
 
 class BinocularBackend implements DataPlugin {
   public name = 'Binocular Backend';
-  public description = 'Connection to the Binocular GraphQL Backend!';
+  public description = 'Connection to the Binocular GraphQL Backend.';
   public capabilities = ['authors', 'commits', 'files'];
   public experimental = false;
   public requirements = {
     apiKey: false,
     endpoint: true,
+    file: false,
   };
   public commits;
   public users;
@@ -25,7 +26,8 @@ class BinocularBackend implements DataPlugin {
     this.files = new Files('/graphQl');
   }
 
-  public init(apiKey: string | undefined, endpoint: string | undefined) {
+  // eslint-disable-next-line @typescript-eslint/require-await
+  public async init(apiKey: string | undefined, endpoint: string | undefined) {
     console.log(`Init Binocular Backend with ApiKey: ${apiKey} and Endpoint ${endpoint}`);
     if (endpoint === undefined || endpoint.length === 0) {
       endpoint = '/graphQl';

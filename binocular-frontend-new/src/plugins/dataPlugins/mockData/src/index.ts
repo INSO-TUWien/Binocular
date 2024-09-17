@@ -6,21 +6,27 @@ import Files from './files.ts';
 
 class MockData implements DataPlugin {
   public name = 'Mock Data';
-  public description = 'Mocked Data for testing purposes!';
+  public description = 'Mocked Data for testing purposes.';
   public capabilities = ['authors', 'commits', 'files'];
   public experimental = false;
   public requirements = {
     apiKey: false,
     endpoint: false,
+    file: false,
   };
-  public commits = Commits;
-  public users = Users;
-  public general = General;
-  public files = Files;
+  public commits;
+  public users;
+  public general;
+  public files;
 
-  constructor() {}
+  constructor() {
+    this.commits = new Commits();
+    this.users = new Users();
+    this.general = new General();
+    this.files = new Files();
+  }
 
-  public init() {}
+  public async init() {}
 }
 
 export default MockData;

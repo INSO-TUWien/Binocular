@@ -1,7 +1,9 @@
-import { DataPluginUser } from '../../../interfaces/dataPluginInterfaces/dataPluginUsers.ts';
+import { DataPluginUser, DataPluginUsers } from '../../../interfaces/dataPluginInterfaces/dataPluginUsers.ts';
 
-export default {
-  getAll: () => {
+export default class Users implements DataPluginUsers {
+  constructor() {}
+
+  public async getAll() {
     console.log(`Getting Authors`);
     return new Promise<DataPluginUser[]>((resolve) => {
       const users: DataPluginUser[] = [
@@ -16,5 +18,5 @@ export default {
       ];
       resolve(users);
     });
-  },
-};
+  }
+}

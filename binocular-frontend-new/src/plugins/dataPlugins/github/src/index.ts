@@ -6,12 +6,13 @@ import Files from './files.ts';
 
 class Github implements DataPlugin {
   public name = 'Github';
-  public description = 'Connect directly to the github API!';
+  public description = 'Connect directly to the github API.';
   public capabilities = ['authors', 'commits'];
   public experimental = true;
   public requirements = {
     apiKey: true,
     endpoint: false,
+    file: false,
   };
   public commits;
   public users;
@@ -24,7 +25,8 @@ class Github implements DataPlugin {
     this.general = new General('');
   }
 
-  public init(apiKey: string | undefined, endpoint: string | undefined) {
+  // eslint-disable-next-line @typescript-eslint/require-await
+  public async init(apiKey: string | undefined, endpoint: string | undefined) {
     console.log(`Init GitHub Backend with ApiKey: ${apiKey} and Endpoint ${endpoint}`);
     if (apiKey !== undefined) {
       this.commits = new Commits(apiKey, 'INSO-TUWien/Binocular');

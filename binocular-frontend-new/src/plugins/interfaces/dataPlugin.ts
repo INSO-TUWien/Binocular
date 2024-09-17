@@ -12,6 +12,6 @@ export interface DataPlugin {
   files: DataPluginFiles;
   capabilities: string[];
   experimental: boolean;
-  requirements: { apiKey: boolean; endpoint: boolean };
-  init: (apiKey: string|undefined,endpoint:string|undefined) => void;
+  requirements: { apiKey: boolean; endpoint: boolean; file: boolean };
+  init: (apiKey: string | undefined, endpoint: string | undefined, file: File | undefined) => Promise<void>;
 }

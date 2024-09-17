@@ -21,6 +21,7 @@ import removePersonIcon from '../../../../assets/remove_person_gray.svg';
 import { AuthorType } from '../../../../types/data/authorType.ts';
 import { DatabaseSettingsDataPluginType } from '../../../../types/settings/databaseSettingsType.ts';
 import DataPluginStorage from '../../../../utils/dataPluginStorage.ts';
+import { DataPluginUser } from '../../../../plugins/interfaces/dataPluginInterfaces/dataPluginUsers.ts';
 
 function AuthorList(props: { orientation?: string }) {
   const dispatch: AppDispatch = useAppDispatch();
@@ -36,33 +37,35 @@ function AuthorList(props: { orientation?: string }) {
   useEffect(() => {
     configuredDataPlugins.forEach((dP: DatabaseSettingsDataPluginType) => {
       if (dP && dP.id !== undefined) {
-        const dataPlugin = DataPluginStorage.getDataPlugin(dP);
-        if (dataPlugin) {
-          dataPlugin.users
-            .getAll()
-            .then((users) => {
-              const colors = distinctColors({ count: users.length, lightMin: 50 });
-              dispatch(
-                setAuthorList({
-                  dataPluginId: dP.id !== undefined ? dP.id : -1,
-                  authors: users.map((user, i) => {
-                    return {
-                      user: user,
-                      id: 0, // real id gets set in reducer
-                      parent: -1,
-                      color: { main: colors[i].hex(), secondary: colors[i].hex() + '55' },
-                      selected: true,
-                    };
-                  }),
-                }),
-              );
-            })
-            .catch(() => console.log('Error loading Users from selected data source!'));
-        }
+        DataPluginStorage.getDataPlugin(dP)
+          .then((dataPlugin) => {
+            if (dataPlugin) {
+              dataPlugin.users
+                .getAll()
+                .then((users: DataPluginUser[]) => {
+                  const colors = distinctColors({ count: users.length, lightMin: 50 });
+                  dispatch(
+                    setAuthorList({
+                      dataPluginId: dP.id !== undefined ? dP.id : -1,
+                      authors: users.map((user, i) => {
+                        return {
+                          user: user,
+                          id: 0, // real id gets set in reducer
+                          parent: -1,
+                          color: { main: colors[i].hex(), secondary: colors[i].hex() + '55' },
+                          selected: true,
+                        };
+                      }),
+                    }),
+                  );
+                })
+                .catch(() => console.log('Error loading Users from selected data source!'));
+            }
+          })
+          .catch((e) => console.log(e));
       }
     });
   }, [configuredDataPlugins]);
-
   return (
     <>
       <div

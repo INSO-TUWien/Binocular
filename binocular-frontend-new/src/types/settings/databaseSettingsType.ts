@@ -11,5 +11,6 @@ export interface DatabaseSettingsDataPluginType {
   parameters: {
     apiKey?: string;
     endpoint?: string;
+    file?: File;
   };
 }

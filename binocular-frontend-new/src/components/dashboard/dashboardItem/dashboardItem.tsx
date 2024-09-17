@@ -65,10 +65,11 @@ function DashboardItem(props: {
 
   useEffect(() => {
     if (selectedDataPlugin && selectedDataPlugin.id !== undefined) {
-      const newDataPlugin = DataPluginStorage.getDataPlugin(selectedDataPlugin);
-      if (newDataPlugin) {
-        setDataPlugin(newDataPlugin);
-      }
+      DataPluginStorage.getDataPlugin(selectedDataPlugin).then((newDataPlugin) => {
+        if (newDataPlugin) {
+          setDataPlugin(newDataPlugin);
+        }
+      }).catch(e=>console.log(e));
     }
   }, [selectedDataPlugin]);
 
