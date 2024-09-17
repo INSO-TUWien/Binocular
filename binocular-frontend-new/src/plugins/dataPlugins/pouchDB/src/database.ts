@@ -23,43 +23,69 @@ class Database {
 
   constructor() {}
 
-  async init(file: File) {
-    await this.initDB().then((newDatabaseInitialized: boolean) => {
-      if (newDatabaseInitialized) {
-        const jszip = new JSZip();
-        jszip
-          .loadAsync(file)
-          .then((zip) => {
-            zip.forEach((fileName: string) => {
-              zip
-                .file(fileName)
-                ?.async('string')
-                .then((content) => {
-                  const name = fileName.slice(0, fileName.length - 5).split('/')[1];
-                  const JSONContent = JSON.parse(content);
-                  if (name.includes('-')) {
-                    this.importEdge(name, JSONContent);
-                  } else {
-                    this.importDocument(name, JSONContent);
-                  }
-                })
-                .catch((e) => console.log(e));
-            });
-          })
-          .catch((e) => console.log(e));
+  async init(file: { name: string | undefined; file: File | undefined }) {
+    if (file.name) {
+      return this.initDB(file.name).then((newDatabaseInitialized: boolean) => {
+        if (newDatabaseInitialized && file.file !== undefined) {
+          return new Promise((resolve) => {
+            const jszip = new JSZip();
+            let collectionsImported = 0;
+            jszip
+              .loadAsync(file.file)
+              .then((zip) => {
+                zip.forEach((fileName: string) => {
+                  zip
+                    .file(fileName)
+                    ?.async('string')
+                    .then((content) => {
+                      const name = fileName.slice(0, fileName.length - 5).split('/')[1];
+                      const JSONContent = JSON.parse(content);
+                      if (name.includes('-')) {
+                        this.importEdge(name, JSONContent).then(() => {
+                          collectionsImported++;
+                          if (collectionsImported >= Object.keys(zip.files).length) {
+                            resolve(true);
+                          }
+                        });
+                      } else {
+                        this.importDocument(name, JSONContent).then(() => {
+                          collectionsImported++;
+                          if (collectionsImported >= Object.keys(zip.files).length) {
+                            resolve(true);
+                          }
+                        });
+                      }
+                    })
+                    .catch((e) => console.log(e));
+                });
+              })
+              .catch((e) => console.log(e));
+          });
+        }
+      });
+    }
+  }
+
+  public delete(name: string) {
+    this.initDB(name).then(() => {
+      if (this.documentStore) {
+        this.documentStore.destroy();
+      }
+      if (this.edgeStore) {
+        this.edgeStore.destroy();
       }
     });
   }
 
-  private initDB() {
+  private initDB(name: string) {
     // check if web workers are supported
     return WorkerPouch.isSupportedBrowser().then((supported: boolean) => {
       if (supported) {
         // using web workers does not block the main thread, making the UI load faster.
         // note: worker adapter does not support custom indices!
-        return this.assignDB('worker');
+        return this.assignDB(name, 'worker');
       } else {
-        return this.assignDB('memory');
+        return this.assignDB(name, 'memory');
       }
     });
   }
@@ -67,9 +93,9 @@ class Database {
   /*
   Return true when a new database was initialized and false when the database already existed
    */
-  async assignDB(adapter: string): Promise<boolean> {
-    this.documentStore = new PouchDB('Binocular_documents', { adapter: adapter });
-    this.edgeStore = new PouchDB('Binocular_edges', { adapter: adapter });
+  async assignDB(name: string, adapter: string): Promise<boolean> {
+    this.documentStore = new PouchDB(`${name}_documents`, { adapter: adapter });
+    this.edgeStore = new PouchDB(`${name}_edges`, { adapter: adapter });
     const documentStoreInfo = await this.documentStore.info();
     const edgeStoreInfo = await this.edgeStore.info();
     return !(documentStoreInfo.doc_count > 0 && edgeStoreInfo.doc_count > 0);
@@ -92,23 +118,39 @@ class Database {
   }
 
   importDocument(name: string, content: JSONObject[]) {
-    // first decompress the json file, then remove attributes that are not needed by PouchDB
-    if (this.documentStore) {
-      this.documentStore
-        .bulkDocs(this.preprocessCollection(decompressJson(name, content)))
-        .then(() => console.log(`${name} imported successfully`))
-        .catch(() => console.log(`error importing ${name}`));
-    }
+    return new Promise((resolve, reject) => {
+      // first decompress the json file, then remove attributes that are not needed by PouchDB
+      if (this.documentStore) {
+        this.documentStore
+          .bulkDocs(this.preprocessCollection(decompressJson(name, content)))
+          .then(() => {
+            console.log(`${name} imported successfully`);
+            resolve(true);
+          })
+          .catch(() => {
+            console.log(`error importing ${name}`);
+            reject();
+          });
+      }
+    });
   }
 
   importEdge(name: string, content: JSONObject[]) {
-    // first decompress the json file, then remove attributes that are not needed by PouchDB
-    if (this.edgeStore) {
-      this.edgeStore
-        .bulkDocs(this.preprocessCollection(decompressJson(name, content)))
-        .then(() => console.log(`${name} imported successfully`))
-        .catch(() => console.log(`error importing ${name}`));
-    }
+    return new Promise((resolve, reject) => {
+      // first decompress the json file, then remove attributes that are not needed by PouchDB
+      if (this.edgeStore) {
+        this.edgeStore
+          .bulkDocs(this.preprocessCollection(decompressJson(name, content)))
+          .then(() => {
+            console.log(`${name} imported successfully`);
+            resolve(true);
+          })
+          .catch(() => {
+            console.log(`error importing ${name}`);
+            reject();
+          });
+      }
+    });
   }
 }
 

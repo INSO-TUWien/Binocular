@@ -20,21 +20,29 @@ class PouchDb implements DataPlugin {
   public general;
   public files;
 
+  private database;
+
   constructor() {
     this.commits = new Commits(undefined);
     this.users = new Users(undefined);
     this.general = new General();
     this.files = new Files();
+    this.database = new Database();
   }
 
-  public async init(_apiKey: string | undefined, _endpoint: string | undefined, file: File | undefined) {
+  public async init(_apiKey: string | undefined, _endpoint: string | undefined, file: { name:string| undefined,file: File|undefined }|undefined) {
     if (file !== undefined) {
-      const database = new Database();
-      await database.init(file);
-      this.commits = new Commits(database);
-      this.users = new Users(database);
+      await this.database.init(file);
+      this.commits = new Commits(this.database);
+      this.users = new Users(this.database);
       this.general = new General();
       this.files = new Files();
+    }
+  }
+
+  public async clearRemains(fileName:string|undefined) {
+    if(fileName){
+      this.database.delete(fileName)
     }
   }
 }

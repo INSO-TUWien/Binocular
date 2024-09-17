@@ -9,8 +9,6 @@ export default abstract class DataPluginStorage {
     if (dP.id !== undefined) {
       const dataPlugin = await this.createDataPluginObject(dP);
       if (dataPlugin) {
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-expect-error
         this.configuredDataPlugins[dP.name + dP.id] = dataPlugin;
       }
     }
@@ -24,8 +22,6 @@ export default abstract class DataPluginStorage {
       } else {
         const dataPlugin = await this.createDataPluginObject(dP);
         if (dataPlugin) {
-          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-          // @ts-expect-error
           this.configuredDataPlugins[dP.name + dP.id] = dataPlugin;
           return dataPlugin;
         }
@@ -37,7 +33,7 @@ export default abstract class DataPluginStorage {
   private static async createDataPluginObject(dP: DatabaseSettingsDataPluginType) {
     const dataPlugin = dataPlugins.map((pluginClass) => new pluginClass()).filter((dataPlugin) => dataPlugin.name === dP.name)[0];
     if (dataPlugin && dP.id !== undefined) {
-      await dataPlugin.init(dP.parameters.apiKey, dP.parameters.endpoint, dP.parameters.file);
+      await dataPlugin.init(dP.parameters.apiKey, dP.parameters.endpoint, {name:dP.parameters.fileName,file:undefined});
     }
     return dataPlugin;
   }

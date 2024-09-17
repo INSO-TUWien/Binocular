@@ -51,6 +51,12 @@ function DatabaseSettings() {
                       {settingsDatabaseDataPlugin.parameters.endpoint ? settingsDatabaseDataPlugin.parameters.endpoint : 'Not necessary'}
                     </span>
                   </div>
+                  <div>
+                    <span className={'font-bold'}>Database:</span>
+                    <span>
+                      {settingsDatabaseDataPlugin.parameters.fileName ? settingsDatabaseDataPlugin.parameters.fileName : 'Not necessary'}
+                    </span>
+                  </div>
                   <button
                     className={'btn btn-outline'}
                     onClick={() => {
@@ -64,7 +70,21 @@ function DatabaseSettings() {
                     className={'btn btn-error btn-outline'}
                     onClick={() => {
                       if (settingsDatabaseDataPlugin.id !== undefined) {
-                        dispatch(removeDataPlugin(settingsDatabaseDataPlugin.id));
+                        if(settingsDatabaseDataPlugin.parameters.fileName) {
+                          DataPluginStorage.getDataPlugin(settingsDatabaseDataPlugin)
+                            .then((dataPlugin) => {
+                              if(dataPlugin){
+                                dataPlugin.clearRemains(settingsDatabaseDataPlugin.parameters.fileName).then(()=> {
+                                  console.log(`${settingsDatabaseDataPlugin.name} #${settingsDatabaseDataPlugin.id} cleared`);
+                                  if (settingsDatabaseDataPlugin.id !== undefined) {
+                                    dispatch(removeDataPlugin(settingsDatabaseDataPlugin.id));
+                                  }
+                                });
+                              }
+                            }).catch(e=>console.log(e));
+                        }else{
+                          dispatch(removeDataPlugin(settingsDatabaseDataPlugin.id));
+                        }
                       }
                     }}>
                     Delete

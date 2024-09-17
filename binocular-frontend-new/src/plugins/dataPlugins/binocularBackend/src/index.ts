@@ -26,7 +26,6 @@ class BinocularBackend implements DataPlugin {
     this.files = new Files('/graphQl');
   }
 
-  // eslint-disable-next-line @typescript-eslint/require-await
   public async init(apiKey: string | undefined, endpoint: string | undefined) {
     console.log(`Init Binocular Backend with ApiKey: ${apiKey} and Endpoint ${endpoint}`);
     if (endpoint === undefined || endpoint.length === 0) {
@@ -36,6 +35,9 @@ class BinocularBackend implements DataPlugin {
     this.users = new Users(endpoint);
     this.general = new General(/*endpoint*/);
     this.files = new Files(endpoint);
+  }
+
+  public async clearRemains() {
   }
 }
 

@@ -27,6 +27,9 @@ class MockData implements DataPlugin {
   }
 
   public async init() {}
+
+  public async clearRemains() {
+  }
 }
 
 export default MockData;

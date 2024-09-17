@@ -34,6 +34,9 @@ class Github implements DataPlugin {
       this.general = new General('INSO-TUWien/Binocular');
     }
   }
+
+  public async clearRemains() {
+  }
 }
 
 export default Github;
