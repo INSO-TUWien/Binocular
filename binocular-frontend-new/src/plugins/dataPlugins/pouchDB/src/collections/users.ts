@@ -11,8 +11,8 @@ export default class Users implements DataPluginUsers {
   public async getAll() {
     console.log(`Getting Authors`);
     if (this.database && this.database.documentStore) {
-      return findAll(this.database.documentStore, 'users').then((res: { docs: { gitSignature: string; _id: string; rev: string }[] }) => {
-        return res.docs.map((user) => {
+      return findAll(this.database.documentStore, 'users').then((res: { docs: unknown[] }) => {
+        return (res.docs as { gitSignature: string; _id: string; rev: string }[]).map((user) => {
           return { gitSignature: user.gitSignature, id: user._id };
         });
       });

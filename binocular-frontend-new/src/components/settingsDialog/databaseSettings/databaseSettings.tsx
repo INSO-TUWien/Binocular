@@ -74,12 +74,15 @@ function DatabaseSettings() {
                           DataPluginStorage.getDataPlugin(settingsDatabaseDataPlugin)
                             .then((dataPlugin) => {
                               if (dataPlugin) {
-                                dataPlugin.clearRemains().then(() => {
-                                  console.log(`${settingsDatabaseDataPlugin.name} #${settingsDatabaseDataPlugin.id} cleared`);
-                                  if (settingsDatabaseDataPlugin.id !== undefined) {
-                                    dispatch(removeDataPlugin(settingsDatabaseDataPlugin.id));
-                                  }
-                                });
+                                dataPlugin
+                                  .clearRemains()
+                                  .then(() => {
+                                    console.log(`${settingsDatabaseDataPlugin.name} #${settingsDatabaseDataPlugin.id} cleared`);
+                                    if (settingsDatabaseDataPlugin.id !== undefined) {
+                                      dispatch(removeDataPlugin(settingsDatabaseDataPlugin.id));
+                                    }
+                                  })
+                                  .catch((e) => console.log(e));
                               }
                             })
                             .catch((e) => console.log(e));

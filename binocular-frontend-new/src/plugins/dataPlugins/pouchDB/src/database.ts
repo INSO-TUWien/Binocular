@@ -23,7 +23,7 @@ class Database {
 
   constructor() {}
 
-  async init(file: { name: string | undefined; file: File | undefined }) {
+  init(file: { name: string | undefined; file: File | undefined }) {
     if (file.name) {
       return this.initDB(file.name).then((newDatabaseInitialized: boolean) => {
         if (newDatabaseInitialized && file.file !== undefined) {
@@ -41,19 +41,23 @@ class Database {
                       const name = fileName.slice(0, fileName.length - 5).split('/')[1];
                       const JSONContent = JSON.parse(content);
                       if (name.includes('-')) {
-                        this.importEdge(name, JSONContent).then(() => {
-                          collectionsImported++;
-                          if (collectionsImported >= Object.keys(zip.files).length) {
-                            resolve(true);
-                          }
-                        });
+                        this.importEdge(name, JSONContent)
+                          .then(() => {
+                            collectionsImported++;
+                            if (collectionsImported >= Object.keys(zip.files).length) {
+                              resolve(true);
+                            }
+                          })
+                          .catch((e) => console.log(e));
                       } else {
-                        this.importDocument(name, JSONContent).then(() => {
-                          collectionsImported++;
-                          if (collectionsImported >= Object.keys(zip.files).length) {
-                            resolve(true);
-                          }
-                        });
+                        this.importDocument(name, JSONContent)
+                          .then(() => {
+                            collectionsImported++;
+                            if (collectionsImported >= Object.keys(zip.files).length) {
+                              resolve(true);
+                            }
+                          })
+                          .catch((e) => console.log(e));
                       }
                     })
                     .catch((e) => console.log(e));
@@ -66,12 +70,12 @@ class Database {
     }
   }
 
-  public delete() {
+  public async delete() {
     if (this.documentStore) {
-      this.documentStore.destroy();
+      await this.documentStore.destroy();
     }
     if (this.edgeStore) {
-      this.edgeStore.destroy();
+      await this.edgeStore.destroy();
     }
   }
 

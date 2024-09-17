@@ -92,9 +92,9 @@ function AddDataPluginCard(props: { dataPlugin: DataPlugin }) {
                       const file: File = fileInput.files[0];
                       setState(State.uploading);
                       props.dataPlugin
-                        .init(undefined, undefined, { name: fileNameInput.value.replace(' ','_'), file: file })
+                        .init(undefined, undefined, { name: fileNameInput.value.replace(' ', '_'), file: file })
                         .then(() => {
-                          setFileName(fileNameInput.value.replace(' ','_'));
+                          setFileName(fileNameInput.value.replace(' ', '_'));
                           setState(State.configured);
                         })
                         .catch(() => {

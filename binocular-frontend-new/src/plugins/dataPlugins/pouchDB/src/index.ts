@@ -30,7 +30,11 @@ class PouchDb implements DataPlugin {
     this.database = new Database();
   }
 
-  public async init(_apiKey: string | undefined, _endpoint: string | undefined, file: { name:string| undefined,file: File|undefined }|undefined) {
+  public async init(
+    _apiKey: string | undefined,
+    _endpoint: string | undefined,
+    file: { name: string | undefined; file: File | undefined } | undefined,
+  ) {
     if (file !== undefined) {
       await this.database.init(file);
       this.commits = new Commits(this.database);
@@ -41,7 +45,7 @@ class PouchDb implements DataPlugin {
   }
 
   public async clearRemains() {
-      this.database.delete()
+    await this.database.delete();
   }
 }
 

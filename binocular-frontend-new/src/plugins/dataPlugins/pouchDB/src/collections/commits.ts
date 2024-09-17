@@ -13,15 +13,15 @@ export default class Commits implements DataPluginCommits {
     // return all commits, filtering according to parameters can be added in the future
     const first = new Date(from).getTime();
     const last = new Date(to).getTime();
-    if (this.database) {
-      return findAllCommits(this.database.documentStore, this.database.edgeStore).then((res: { docs: DataPluginCommit[] }) => {
-        res.docs = res.docs
+    if (this.database && this.database.documentStore && this.database.edgeStore) {
+      return findAllCommits(this.database.documentStore, this.database.edgeStore).then((res: { docs: unknown[] }) => {
+        res.docs = (res.docs as DataPluginCommit[])
           .filter((c) => new Date(c.date).getTime() >= first && new Date(c.date).getTime() <= last)
           .sort((a, b) => {
             return new Date(a.date).getTime() - new Date(b.date).getTime();
           });
 
-        return res.docs;
+        return res.docs as unknown as DataPluginCommit[];
       });
     } else {
       return new Promise<DataPluginCommit[]>((resolve) => {
