@@ -13,6 +13,10 @@ export interface DataPlugin {
   capabilities: string[];
   experimental: boolean;
   requirements: { apiKey: boolean; endpoint: boolean; file: boolean };
-  init: (apiKey: string | undefined, endpoint: string | undefined, file: { name:string| undefined,file: File| undefined } | undefined) => Promise<void>;
+  init: (
+    apiKey: string | undefined,
+    endpoint: string | undefined,
+    file: { name: string | undefined; file: File | undefined } | undefined,
+  ) => Promise<void>;
   clearRemains: () => Promise<void>;
 }

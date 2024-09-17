@@ -17,13 +17,16 @@ function FileList(props: { orientation?: string }) {
   useEffect(() => {
     const selectedDataPlugin = currentDataPlugins.filter((dP: DatabaseSettingsDataPluginType) => dP.id === filesDataPluginId)[0];
     if (selectedDataPlugin && selectedDataPlugin.id !== undefined) {
-      const dataPlugin = DataPluginStorage.getDataPlugin(selectedDataPlugin);
-      if (dataPlugin) {
-        dataPlugin.files
-          .getAll()
-          .then((files) => setFileList(generateFileTree(files)))
-          .catch(() => console.log('Error loading Users from selected data source!'));
-      }
+      DataPluginStorage.getDataPlugin(selectedDataPlugin)
+        .then((dataPlugin) => {
+          if (dataPlugin) {
+            dataPlugin.files
+              .getAll()
+              .then((files) => setFileList(generateFileTree(files)))
+              .catch(() => console.log('Error loading Users from selected data source!'));
+          }
+        })
+        .catch((e) => console.log(e));
     }
   }, [currentDataPlugins, filesDataPluginId]);
 
