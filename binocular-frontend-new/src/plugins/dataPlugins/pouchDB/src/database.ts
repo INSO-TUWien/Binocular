@@ -66,15 +66,13 @@ class Database {
     }
   }
 
-  public delete(name: string) {
-    this.initDB(name).then(() => {
-      if (this.documentStore) {
-        this.documentStore.destroy();
-      }
-      if (this.edgeStore) {
-        this.edgeStore.destroy();
-      }
-    });
+  public delete() {
+    if (this.documentStore) {
+      this.documentStore.destroy();
+    }
+    if (this.edgeStore) {
+      this.edgeStore.destroy();
+    }
   }
 
   private initDB(name: string) {

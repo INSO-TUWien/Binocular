@@ -14,5 +14,5 @@ export interface DataPlugin {
   experimental: boolean;
   requirements: { apiKey: boolean; endpoint: boolean; file: boolean };
   init: (apiKey: string | undefined, endpoint: string | undefined, file: { name:string| undefined,file: File| undefined } | undefined) => Promise<void>;
-  clearRemains: (fileName:string| undefined) => Promise<void>;
+  clearRemains: () => Promise<void>;
 }

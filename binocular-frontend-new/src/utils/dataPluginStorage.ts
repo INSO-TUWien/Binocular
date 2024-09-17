@@ -33,7 +33,7 @@ export default abstract class DataPluginStorage {
   private static async createDataPluginObject(dP: DatabaseSettingsDataPluginType) {
     const dataPlugin = dataPlugins.map((pluginClass) => new pluginClass()).filter((dataPlugin) => dataPlugin.name === dP.name)[0];
     if (dataPlugin && dP.id !== undefined) {
-      await dataPlugin.init(dP.parameters.apiKey, dP.parameters.endpoint, {name:dP.parameters.fileName,file:undefined});
+      await dataPlugin.init(dP.parameters.apiKey, dP.parameters.endpoint, { name: dP.parameters.fileName, file: undefined });
     }
     return dataPlugin;
   }

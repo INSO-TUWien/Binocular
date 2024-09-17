@@ -40,10 +40,8 @@ class PouchDb implements DataPlugin {
     }
   }
 
-  public async clearRemains(fileName:string|undefined) {
-    if(fileName){
-      this.database.delete(fileName)
-    }
+  public async clearRemains() {
+      this.database.delete()
   }
 }
 

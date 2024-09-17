@@ -70,19 +70,20 @@ function DatabaseSettings() {
                     className={'btn btn-error btn-outline'}
                     onClick={() => {
                       if (settingsDatabaseDataPlugin.id !== undefined) {
-                        if(settingsDatabaseDataPlugin.parameters.fileName) {
+                        if (settingsDatabaseDataPlugin.parameters.fileName) {
                           DataPluginStorage.getDataPlugin(settingsDatabaseDataPlugin)
                             .then((dataPlugin) => {
-                              if(dataPlugin){
-                                dataPlugin.clearRemains(settingsDatabaseDataPlugin.parameters.fileName).then(()=> {
+                              if (dataPlugin) {
+                                dataPlugin.clearRemains().then(() => {
                                   console.log(`${settingsDatabaseDataPlugin.name} #${settingsDatabaseDataPlugin.id} cleared`);
                                   if (settingsDatabaseDataPlugin.id !== undefined) {
                                     dispatch(removeDataPlugin(settingsDatabaseDataPlugin.id));
                                   }
                                 });
                               }
-                            }).catch(e=>console.log(e));
-                        }else{
+                            })
+                            .catch((e) => console.log(e));
+                        } else {
                           dispatch(removeDataPlugin(settingsDatabaseDataPlugin.id));
                         }
                       }
