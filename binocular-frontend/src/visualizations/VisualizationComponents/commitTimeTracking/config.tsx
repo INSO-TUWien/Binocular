@@ -117,16 +117,16 @@ function setThresholds(commits: Commit[], props: Props) {
     ratio: {
       lower: Math.min(
         ...commitsWithDate.map((c) => {
-          const changes = c.stats.deletions + c.stats.additions;
-          const time = Math.min(c.timeSpent.estimated, c.timeSpent.actual) === 0 ? 1 : Math.max(c.timeSpent.estimated, c.timeSpent.actual);
-          return changes / time;
+          const changes = c.stats.deletions + c.stats.additions === 0 ? 1 : c.stats.deletions + c.stats.additions;
+          const time = Math.min(c.timeSpent.estimated, c.timeSpent.actual);
+          return time / changes;
         }),
       ),
       upper: Math.max(
         ...commitsWithDate.map((c) => {
-          const changes = c.stats.deletions + c.stats.additions;
-          const time = Math.max(c.timeSpent.estimated, c.timeSpent.actual) === 0 ? 1 : Math.max(c.timeSpent.estimated, c.timeSpent.actual);
-          return changes / time;
+          const changes = c.stats.deletions + c.stats.additions === 0 ? 1 : c.stats.deletions + c.stats.additions;
+          const time = Math.max(c.timeSpent.estimated, c.timeSpent.actual);
+          return time / changes;
         }),
       ),
     },
@@ -312,7 +312,7 @@ const CommitTimeTrackingConfigComponent = (props: Props) => {
             threshold,
             props,
           )}
-          <h2>Ratio (lines changed/time spent in minutes</h2>
+          <h2>Ratio (time spent in minutes/lines changed)</h2>
           {sliderInput(React.useState(props.threshold.ratio.lower), React.useState(props.threshold.ratio.upper), 'ratio', threshold, props)}
         </div>
 

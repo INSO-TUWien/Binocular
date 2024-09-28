@@ -422,8 +422,8 @@ function filterCommits(commits: any[], props: Props) {
       return false;
     }
     if (
-      lineChanges / (commitTime <= 0 ? 1 : commitTime) < props.threshold.ratio.lower ||
-      lineChanges / (commitTime <= 0 ? 1 : commitTime) > props.threshold.ratio.upper
+      commitTime / (lineChanges <= 0 ? 1 : lineChanges) < props.threshold.ratio.lower ||
+      commitTime / (lineChanges <= 0 ? 1 : lineChanges) > props.threshold.ratio.upper
     ) {
       return false;
     }
