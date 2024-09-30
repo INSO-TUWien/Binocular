@@ -1,3 +1,7 @@
+// test data for github mock API (./gitHubMock.js)
+// if you need the mock API to return different data, add (and export) it here
+// and use the remapGitHubApiCall() function from ../utils.js in your tests
+
 export const assignableUsers = [];
 
 export const pipelines = [
