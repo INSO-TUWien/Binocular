@@ -2,7 +2,6 @@
 
 import archiver from 'archiver';
 import stream from 'stream';
-import _ from 'lodash';
 
 export function createZipStream(directory: string) {
   const zip = archiver('zip');
@@ -33,7 +32,7 @@ export async function getDbExport(db: any) {
 
 export function parseBlameOutput(output: string) {
   //this function parses git blame output with the -p flag (porcelain).
-  //it extracts how many lines of code each user owns.
+  //it extracts how many lines of code each stakeholder owns.
   //How it works:
   //  - git blame porcelain output outputs the commit sha followed by one or multiple lines of code (each prepended by a \t).
   //  - This means that these lines were added/modified by that commit.
@@ -114,26 +113,6 @@ export function parseBlameOutput(output: string) {
   if (currHunk.signature !== undefined) {
     hunks[currHunk.signature].push(currHunk);
   }
-
-  // group hunks by commit sha
-  for (const [user, hbs] of Object.entries(hunks)) {
-    const hunksByUser = hbs as any[];
-    const hunksBySha: object = _.groupBy(hunksByUser, 'commitSha');
-    const resultHunks: any[] = [];
-
-    for (const [sha, hunks] of Object.entries(hunksBySha)) {
-      const h = hunks as any[];
-      resultHunks.push({
-        originalCommit: sha,
-        lines: h.map((v) => {
-          return { from: v.startLine, to: v.endLine };
-        }),
-      });
-    }
-
-    hunks[user] = resultHunks;
-  }
-
   return { ownershipData: ownershipData, hunks: hunks };
 }
 

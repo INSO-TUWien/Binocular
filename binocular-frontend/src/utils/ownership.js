@@ -1,16 +1,14 @@
 export function extractOwnershipFromFileExcludingCommits(fileOwnershipData, commitsToExclude = []) {
   return fileOwnershipData.map((o) => {
     const res = {
-      user: o.user,
+      stakeholder: o.stakeholder,
       ownedLines: 0,
     };
 
     // iterate over owned hunks, only count those of commits that are not excluded
     for (const hunk of o.hunks) {
-      if (!commitsToExclude.includes(hunk.originalCommit)) {
-        for (const lineObj of hunk.lines) {
-          res.ownedLines += lineObj.to - lineObj.from + 1;
-        }
+      if (!commitsToExclude.includes(hunk.commitSha)) {
+        res.ownedLines += hunk.endLine - hunk.startLine + 1;
       }
     }
     return res;
@@ -25,9 +23,10 @@ export function extractFileOwnership(ownershipData, commitsToExclude = []) {
   const result = {};
   for (const commit of commits) {
     for (const file of commit.files) {
-      //since we start with the most recent commit, we are only interested in the first occurrence of each file.
+      //since we start with the most recent commit, we are only interested in the first occurence of each file
+      //and because this is used for the filepicker, we are also not concerned about file renames
       if (!result[file.path]) {
-        // iterate over all users
+        // iterate over all stakeholders
         result[file.path] = extractOwnershipFromFileExcludingCommits(file.ownership, commitsToExclude);
       }
     }
@@ -48,10 +47,10 @@ export function ownershipDataForMergedAuthors(mergedAuthors, otherAuthors, autho
 
     const mergedOwnership = {};
 
-    //for every user that ownes lines of this file
-    for (const user of ownership) {
-      const sig = user.user;
-      const lines = user.ownedLines;
+    //for every stakeholder that ownes lines of this file
+    for (const stakeholder of ownership) {
+      const sig = stakeholder.stakeholder;
+      const lines = stakeholder.ownedLines;
 
       //first check if this author is in the 'other' category
       if (otherAuthors.map((a) => a.signature).includes(sig)) {
@@ -66,7 +65,7 @@ export function ownershipDataForMergedAuthors(mergedAuthors, otherAuthors, autho
           let breakOut = false;
           const mainSignature = committer.mainCommitter;
           for (const alias of committer.committers) {
-            //if the user is an alias of this main committer
+            //if the stakeholder is an alias of this main committer
             if (alias.signature === sig) {
               if (!mergedOwnership[mainSignature]) {
                 mergedOwnership[mainSignature] = lines;

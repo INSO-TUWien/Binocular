@@ -2,7 +2,8 @@
 
 import { collectPages, graphQl, traversePages } from '../../utils';
 import _ from 'lodash';
-import { getHistoryForCommit } from '../utils.js';
+import moment from 'moment/moment';
+import { addHistoryToAllCommits } from '../utils';
 
 export default class Commits {
   static getCommitData(commitSpan, significantSpan) {
@@ -45,6 +46,8 @@ export default class Commits {
       commitList.push(commit);
     }).then(function () {
       const allCommits = commitList.sort((a, b) => new Date(b.date) - new Date(a.date));
+      addHistoryToAllCommits(allCommits);
+      //we can now remove commits that happened before significantSince, because now the history has been calculated
       return allCommits.filter((c) => new Date(c.date) >= new Date(significantSince));
     });
   }
@@ -101,6 +104,7 @@ export default class Commits {
       commitList.push(commit);
     }).then(function () {
       const allCommits = commitList.sort((a, b) => new Date(b.date) - new Date(a.date));
+      addHistoryToAllCommits(allCommits);
       return allCommits.filter((c) => new Date(c.date) >= new Date(significantSince));
     });
   }
@@ -135,13 +139,11 @@ export default class Commits {
                      path
                    }
                    ownership {
-                    user
+                    stakeholder
                     hunks {
-                      originalCommit
-                      lines {
-                        from
-                        to
-                      }
+                      commitSha
+                      startLine
+                      endLine
                     }
                    }
                    stats {additions,deletions},
@@ -160,6 +162,7 @@ export default class Commits {
       commitList.push(commit);
     }).then(function () {
       const allCommits = commitList.sort((a, b) => new Date(b.date) - new Date(a.date));
+      addHistoryToAllCommits(allCommits);
       return allCommits.filter((c) => new Date(c.date) >= new Date(significantSince));
     });
   }
@@ -197,6 +200,7 @@ export default class Commits {
       .then((resp) => resp.commits.data)
       .then((commits) => {
         const allCommits = commits.sort((a, b) => new Date(b.date) - new Date(a.date));
+        addHistoryToAllCommits(allCommits);
         const result = [];
         for (const commit of allCommits) {
           for (const cFile of commit.files.data) {
@@ -227,13 +231,11 @@ export default class Commits {
                   path
                 }
                 ownership {
-                  user
+                  stakeholder
                   hunks {
-                    originalCommit
-                    lines {
-                      from
-                      to
-                    }
+                    commitSha
+                    startLine
+                    endLine
                   }
                 }
               }
@@ -262,7 +264,6 @@ export default class Commits {
             data {
               sha
               date
-              parents
               files {
                 data {
                   file {
@@ -270,13 +271,11 @@ export default class Commits {
                   }
                   action
                   ownership {
-                    user
+                    stakeholder
                     hunks {
-                      originalCommit
-                      lines {
-                        from
-                        to
-                      }
+                      commitSha
+                      startLine
+                      endLine
                     }
                   }
                 }
@@ -292,7 +291,6 @@ export default class Commits {
           return {
             sha: c.sha,
             date: c.date,
-            parents: c.parents,
             files: c.files.data.map((fileData) => {
               return {
                 path: fileData.file.path,
@@ -364,14 +362,12 @@ export default class Commits {
           )
           .then((commits) => {
             const allCommits = commits.commits.data;
-            // TODO: history not calculated for all commits anymore!
-            //addHistoryToAllCommits(allCommits);
+            addHistoryToAllCommits(allCommits);
 
             result.file.commits.data = result.file.commits.data.map((d) => {
               const c = d.commit;
-              // const his = allCommits.filter((com) => com.sha === c.sha)[0].history;
-              // c.history = his;
-              c.history = getHistoryForCommit(c, allCommits).join();
+              const his = allCommits.filter((com) => com.sha === c.sha)[0].history;
+              c.history = his;
               return c;
             });
             return result;

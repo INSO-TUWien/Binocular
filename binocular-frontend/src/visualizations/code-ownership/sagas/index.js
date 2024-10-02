@@ -1,5 +1,6 @@
 import { createAction } from 'redux-actions';
 import { select, throttle, fork, takeEvery } from 'redux-saga/effects';
+import _ from 'lodash';
 
 import { fetchFactory, timestampedActionFactory, mapSaga } from '../../../sagas/utils.ts';
 import { getCommitDataForSha, getOwnershipForCommits, getFilenamesForBranch, getPreviousFilenames } from './helper';
@@ -61,8 +62,9 @@ export const fetchCodeOwnershipData = fetchFactory(
 
         //get previous filenames for all active files
         const previousFilenames = await getPreviousFilenames(activeFiles, currentBranch);
+
         //get actual ownership data for all commits on the selected branch
-        let relevantOwnershipData = await getOwnershipForCommits(latestBranchCommit);
+        let relevantOwnershipData = await getOwnershipForCommits(latestBranchCommit.history);
         if (relevantOwnershipData.length === 0) {
           throw new Error('No ownership data found for the current branch');
         }

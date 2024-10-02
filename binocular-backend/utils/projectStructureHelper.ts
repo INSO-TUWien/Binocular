@@ -6,7 +6,6 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import Context from './context';
 import Db from '../core/db/db';
-import { compressJson } from '../../utils/json-utils.ts';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -23,10 +22,7 @@ export function createAndFillDbExportFolder(db: Db, targetPath: string) {
   utils.getDbExport(db).then((db) => {
     let i = 0;
     for (const collection of Object.keys(db)) {
-      const collName = collection.replaceAll('_', '-');
-      // make the json files smaller to help with offline performance
-      const compressedObj = compressJson(collName, db[collection]);
-      fs.writeFileSync(targetPath + '/db_export/' + collName + '.json', JSON.stringify(compressedObj));
+      fs.writeFileSync(targetPath + '/db_export/' + collection.replaceAll('_', '-') + '.json', JSON.stringify(db[collection]));
       i++;
       console.log('Create Db export for offline execution: ' + Math.floor((100 / Object.keys(db).length) * i) + '%');
     }

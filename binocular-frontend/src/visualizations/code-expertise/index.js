@@ -18,6 +18,7 @@ export default {
   universalSettingsConfig: {
     hideGranularitySettings: true,
     hideDateSettings: true,
+    hideMergeCommitSettings: true,
     hideSprintSettings: true,
   },
 };

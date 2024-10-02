@@ -44,7 +44,7 @@ export default class MergeRequests {
                 createdAt
                 notes{
                   body
-                  createdAt
+                  created_at
                   author{
                     login
                     name

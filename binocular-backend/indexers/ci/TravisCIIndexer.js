@@ -1,6 +1,6 @@
 'use strict';
 
-import Build from '../../models/models/Build';
+import Build from '../../models/Build';
 import FindFiles from 'file-regex';
 import * as UrlProvider from '../../url-providers/index';
 import TravisCI from '../../core/provider/travis-ci';

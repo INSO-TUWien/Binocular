@@ -15,7 +15,7 @@ const Sort = require('./types/Sort.js');
 
 const commits = db._collection('commits');
 const files = db._collection('files');
-const users = db._collection('users');
+const stakeholders = db._collection('stakeholders');
 const modules = db._collection('modules');
 const issues = db._collection('issues');
 const builds = db._collection('builds');
@@ -126,14 +126,14 @@ const queryType = new gql.GraphQLObjectType({
           return modules.firstExample({ path: args.path });
         },
       },
-      users: paginated({
-        type: require('./types/user.js'),
+      stakeholders: paginated({
+        type: require('./types/stakeholder.js'),
         query: (root, args, limit) => aql`
-          FOR user
+          FOR stakeholder
             IN
-            ${users}
+            ${stakeholders}
             ${limit}
-              RETURN user`,
+              RETURN stakeholder`,
       }),
       committers: {
         type: new gql.GraphQLList(gql.GraphQLString),
@@ -141,9 +141,9 @@ const queryType = new gql.GraphQLObjectType({
           return db
             ._query(
               aql`
-              FOR user IN ${users}
-                SORT user.gitSignature ASC
-                RETURN DISTINCT user.gitSignature`
+              FOR stakeholder IN ${stakeholders}
+                SORT stakeholder.gitSignature ASC
+                RETURN DISTINCT stakeholder.gitSignature`
             )
             .toArray();
         },

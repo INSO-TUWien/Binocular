@@ -11,11 +11,10 @@ import ctx from '../utils/context.ts';
 import GitLabCIIndexer from './helper/gitlab/gitLabCIIndexerRewire.js';
 import GitHubCIIndexer from './helper/github/gitHubCIIndexerRewire.js';
 
-import Build from '../models/models/Build';
+import Build from '../models/Build.js';
 import repositoryFake from './helper/git/repositoryFake.js';
 import GitLabMock from './helper/gitlab/gitLabMock.js';
 import path from 'path';
-import { getAllEntriesInCollection, remapGitHubApiCall, remapUnpaginatedGitlabApiCall } from './helper/utils';
 const indexerOptions = {
   backend: true,
   frontend: false,
@@ -37,95 +36,64 @@ describe('ci', function () {
 
   config.token = '1234567890';
 
-  const setupDb = async () => {
-    await db.ensureDatabase('test', ctx);
-    await db.truncate();
-    await Build.ensureCollection();
-  };
-
-  const remapRemoteFunctions = (repo) => {
-    repo.listAllCommitsRemote = repo.listAllCommits;
-    repo.getAllBranchesRemote = repo.getAllBranches;
-    repo.getLatestCommitForBranchRemote = repo.getLatestCommitForBranch;
-    repo.getFilePathsForBranchRemote = repo.getFilePathsForBranch;
-  };
-
-  const getAllInCollection = async (collection) => getAllEntriesInCollection(db, collection);
-
   describe('#indexGitLab', function () {
-    const gitLabSetup = async () => {
+    it('should index all GitLab pipelines and create all necessary db collections and connections', async function () {
       const repo = await repositoryFake.repository();
       ctx.targetPath = repo.path;
 
       //Remap Remote functions to local ones because remote repository doesn't exist anymore.
-      remapRemoteFunctions(repo);
-
+      repo.listAllCommitsRemote = repo.listAllCommits;
+      repo.getAllBranchesRemote = repo.getAllBranches;
+      repo.getLatestCommitForBranchRemote = repo.getLatestCommitForBranch;
+      repo.getFilePathsForBranchRemote = repo.getFilePathsForBranch;
       repo.getOriginUrl = async function () {
         return 'git@gitlab.com:Test/Test-Project.git';
       };
-      await setupDb();
+
+      //setup DB
+      await db.ensureDatabase('test', ctx);
+      await db.truncate();
+      await Build.ensureCollection();
+
       const gitLabCIIndexer = new GitLabCIIndexer(repo, reporter);
       gitLabCIIndexer.gitlab = new GitLabMock();
       await gitLabCIIndexer.configure(config);
-      return gitLabCIIndexer;
-    };
 
-    it('should index all GitLab pipelines and create all necessary db collections and connections', async function () {
-      const gitLabCIIndexer = await gitLabSetup();
       await gitLabCIIndexer.index();
-      const dbBuildsCollectionData = await getAllInCollection('builds');
+      const dbBuildsCollectionData = await (await db.query('FOR i IN @@collection RETURN i', { '@collection': 'builds' })).all();
 
       expect(dbBuildsCollectionData.length).to.equal(3);
       expect(dbBuildsCollectionData[0].jobs.length).to.equal(3);
       for (const i in dbBuildsCollectionData[0].jobs) {
         expect(dbBuildsCollectionData[0].jobs[i].webUrl).to.equal('https://gitlab.com/Test/Test-Project/jobs/' + i);
       }
-      expect(dbBuildsCollectionData[0].webUrl).to.equal(dbBuildsCollectionData[0].webUrl);
-    });
-
-    it('should not persist GitLab workflows twice if indexer is called twice', async function () {
-      const gitLabCIIndexer = await gitLabSetup();
-
-      await gitLabCIIndexer.index();
-      const builds = await getAllInCollection('builds');
-
-      // index again. Should not add documents to the collection.
-      await gitLabCIIndexer.index();
-      const buildsUpdated = await getAllInCollection('builds');
-
-      expect(builds.length).to.equal(buildsUpdated.length);
-    });
-
-    it('should be able to handle empty response', async function () {
-      const gitLabCIIndexer = await gitLabSetup();
-      remapUnpaginatedGitlabApiCall(gitLabCIIndexer, 'getPipelines', []);
-
-      await gitLabCIIndexer.index();
-      const builds = await getAllInCollection('builds');
-
-      expect(builds.length).to.equal(0);
+      expect(dbBuildsCollectionData[0].webUrl).to.equal('https://gitlab.com/Test/Test-Project/pipelines/' + dbBuildsCollectionData[0]._key);
     });
   });
 
   describe('#indexGitHub', function () {
-    const gitHubSetup = async () => {
+    it('should index all GitHub workflows and create all necessary db collections and connections', async function () {
       const repo = await repositoryFake.repository();
       ctx.targetPath = repo.path;
+
       //Remap Remote functions to local ones because remote repository doesn't exist anymore.
-      remapRemoteFunctions(repo);
+      repo.listAllCommitsRemote = repo.listAllCommits;
+      repo.getAllBranchesRemote = repo.getAllBranches;
+      repo.getLatestCommitForBranchRemote = repo.getLatestCommitForBranch;
+      repo.getFilePathsForBranchRemote = repo.getFilePathsForBranch;
       repo.getOriginUrl = async function () {
         return 'git@github.com/Test/Test-Project.git';
       };
-      await setupDb();
+
+      //setup DB
+      await db.ensureDatabase('test', ctx);
+      await db.truncate();
+      await Build.ensureCollection();
+
       const gitHubCIIndexer = new GitHubCIIndexer(repo, reporter);
       await gitHubCIIndexer.configure(config);
-      return gitHubCIIndexer;
-    };
-
-    it('should index all GitHub workflows and create all necessary db collections and connections', async function () {
-      const gitHubCIIndexer = await gitHubSetup();
       await gitHubCIIndexer.index();
-      const dbBuildsCollectionData = await getAllInCollection('builds');
+      const dbBuildsCollectionData = await (await db.query('FOR i IN @@collection RETURN i', { '@collection': 'builds' })).all();
 
       expect(dbBuildsCollectionData.length).to.equal(3);
       expect(dbBuildsCollectionData[0].jobs.length).to.equal(3);
@@ -137,29 +105,6 @@ describe('ci', function () {
       expect(dbBuildsCollectionData[0].jobs[2].status).to.equal('failure');
 
       expect(dbBuildsCollectionData[0].status).to.equal('success');
-    });
-
-    it('should not persist GitHub workflows twice if indexer is called twice', async function () {
-      const gitHubCIIndexer = await gitHubSetup();
-
-      await gitHubCIIndexer.index();
-      const builds = await getAllInCollection('builds');
-
-      // index again. Should not add documents to the collection.
-      await gitHubCIIndexer.index();
-      const buildsUpdated = await getAllInCollection('builds');
-
-      expect(builds.length).to.equal(buildsUpdated.length);
-    });
-
-    it('should be able to handle empty response', async function () {
-      const gitHubCIIndexer = await gitHubSetup();
-      remapGitHubApiCall(gitHubCIIndexer, 'getPipelines', []);
-
-      await gitHubCIIndexer.index();
-      const builds = await getAllInCollection('builds');
-
-      expect(builds.length).to.equal(0);
     });
   });
 

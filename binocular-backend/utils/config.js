@@ -100,7 +100,7 @@ function loadConfig(context) {
   const cwd = process.cwd();
   process.chdir(context.targetPath);
   const configuration = rc('binocular', {
-    port: context.argv.gqlPort,
+    port: 48763,
     arango: {
       host: 'localhost',
       port: 8529,
@@ -108,7 +108,7 @@ function loadConfig(context) {
     travis: {},
     gateway: {
       address: '127.0.0.1',
-      port: parseInt(context.argv.gqlPort) + 1,
+      port: 48764,
       token: 'B1nocul4r!',
     },
   });

@@ -37,7 +37,7 @@ module.exports = new gql.GraphQLObjectType({
         description: 'The files existing in this branch',
         query: (branch, args, limit) => aql`
           FOR file, edge
-            IN OUTBOUND ${branch} ${branchesToFiles}
+            IN INBOUND ${branch} ${branchesToFiles}
             ${limit}
             RETURN {
               file,

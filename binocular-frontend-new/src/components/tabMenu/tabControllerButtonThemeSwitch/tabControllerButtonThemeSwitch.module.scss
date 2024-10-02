@@ -1,8 +1,0 @@
-@import '../tabControllerVariables.module';
-
-.tabControllerButton{
-  height: calc($tab-bar-thickness - 10px);
-  width: calc($tab-bar-thickness - 10px);
-  margin: 0 .5rem;
-  place-content: start!important;
-}

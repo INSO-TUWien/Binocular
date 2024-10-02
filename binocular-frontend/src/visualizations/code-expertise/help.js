@@ -12,7 +12,7 @@ export default () => (
         <li>
           <i className="fa fa-plus" /> Added Code
           <ul>
-            <li>The size of a segment depicts the amount of code a developer has added relative to the other users</li>
+            <li>The size of a segment depicts the amount of code a developer has added relative to the other stakeholders</li>
           </ul>
         </li>
         <li>
@@ -42,7 +42,9 @@ export default () => (
         <li>
           <i class="fa fa-code-commit"></i> Number of Commits
           <ul>
-            <li>The inner dotted part of a segment depicts the number of commits relative to the other users for the current selection</li>
+            <li>
+              The inner dotted part of a segment depicts the number of commits relative to the other stakeholders for the current selection
+            </li>
           </ul>
         </li>
       </ul>

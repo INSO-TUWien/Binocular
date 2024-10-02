@@ -1,6 +1,6 @@
 'use strict';
 
-import Build from '../../models/models/Build';
+import Build from '../../models/Build.js';
 import debug from 'debug';
 
 const log = debug('idx:ci:indexer');
@@ -39,8 +39,6 @@ class CIIndexer {
           this.reporter.setBuildCount(pipelines.length);
           return pipelines.map((pipeline) => {
             pipeline.id = pipeline.id.toString();
-            // TODO i think this won't work. `findOneById` checks if there is a build in the db with `_id === pipeline.id`,
-            //  but we want to find a build with `id === pipeline.id`
             return Build.findOneById(pipeline.id)
               .then((existingBuild) => {
                 if (

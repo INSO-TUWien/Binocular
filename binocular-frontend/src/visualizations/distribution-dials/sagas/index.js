@@ -42,11 +42,15 @@ export const fetchDistributionDialsData = fetchFactory(
       },
     };
 
+    console.time('fetch Distribution Dials Data');
+
     return yield Promise.all([getCommits(), getIssues(), getBuilds()])
       .then(([commits, issues, builds]) => {
         result.rawData.commits = commits;
         result.rawData.issues = issues;
         result.rawData.builds = builds;
+
+        console.timeEnd('fetch Distribution Dials Data');
 
         return result;
       })

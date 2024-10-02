@@ -12,6 +12,8 @@ export default handleActions(
     SET_ACTIVE_FILES: (state, action) => _.assign({}, state, { activeFiles: action.payload ? action.payload : [], details: null }),
     SET_MODE: (state, action) => _.assign({}, state, { mode: action.payload ? action.payload : null, details: null }),
     SET_DETAILS: (state, action) => _.assign({}, state, { details: action.payload ? action.payload : null }),
+    SET_FILTER_MERGE_COMMITS: (state, action) =>
+      _.assign({}, state, { filterMergeCommits: action.payload ? action.payload : false, details: null }),
     SET_ONLY_DISPLAY_OWNERSHIP: (state, action) =>
       _.assign({}, state, { onlyDisplayOwnership: action.payload ? action.payload : false, details: null }),
   },
@@ -23,6 +25,7 @@ export default handleActions(
     activeFiles: [],
     mode: 'modules',
     details: null,
+    filterMergeCommits: true,
     onlyDisplayOwnership: false,
   },
 );

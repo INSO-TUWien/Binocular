@@ -1,7 +1,7 @@
 Binocular
 =====
 
-[![Build Offline-Binocular](https://github.com/INSO-TUWien/Binocular/actions/workflows/build-offline.yml/badge.svg?branch=develop)](https://github.com/INSO-TUWien/Binocular/actions/workflows/build-offline.yml)
+[![Build Binocular](https://github.com/INSO-TUWien/Binocular/actions/workflows/build-binocular.yml/badge.svg?branch=develop)](https://github.com/INSO-TUWien/Binocular/actions/workflows/build-binocular.yml)
 [![Test ESLint](https://github.com/INSO-TUWien/Binocular/actions/workflows/eslint.yml/badge.svg?branch=develop)](https://github.com/INSO-TUWien/Binocular/actions/workflows/eslint.yml)
 [![Docker Image CI](https://github.com/INSO-TUWien/Binocular/actions/workflows/build-docker.yml/badge.svg)](https://github.com/INSO-TUWien/Binocular/actions/workflows/build-docker.yml)
 
@@ -177,17 +177,6 @@ all features will be available in the offline build)
 
 For more information check `binocular -h`
 
-### New Frontend (:warning: Experimental)
-To try the experimental new frontend navigate to the folder
-`binocular-frontend-new` and run the following command in that specific folder.
-``` shell
-npm run dev
-```
-This new frontend is a complete rework from the current implementation
-and is currently in its development and test phase.
-It is not yet ready for use but gives a glimpse into the future of what binocular could look like.
-
-
 ## Contributing
 
 **:warning:Binocular is currently in a transition state from javascript to typescript.
@@ -198,6 +187,3 @@ if you are unsure how to implement a visualization in typescript.:warning:**
 
 For an explanation of Binocular's architecture, please see the [Contribution
 guidelines for this project](docs/CONTRIBUTING.md)
-
-For an overview of the database collections and connections Binocular creates,
-please see the [database documentation](docs/DATABASE.md)

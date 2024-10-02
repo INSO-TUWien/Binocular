@@ -55,7 +55,7 @@ const visualizationModules = [
   dataExport,
 ];
 
-Database.checkBackendConnection().then(async (connection) => {
+Database.checkBackendConnection().then((connection) => {
   const visualizations = {};
   _.each(visualizationModules, (viz) => {
     visualizations[viz.id] = viz;
@@ -97,7 +97,7 @@ Database.checkBackendConnection().then(async (connection) => {
 
     rootContainer.render(<Root store={store} />);
   } else {
-    await Database.initDB();
+    Database.initDB().then();
     const app = makeAppReducer(visualizationModules);
 
     const store = createStore(

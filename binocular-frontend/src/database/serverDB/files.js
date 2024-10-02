@@ -125,13 +125,11 @@ export default class Files {
                     date
                   }
                   ownership {
-                    user
+                    stakeholder
                     hunks {
-                      originalCommit
-                      lines {
-                        from
-                        to
-                      }
+                      commitSha
+                      startLine
+                      endLine
                     }
                   }
                 }

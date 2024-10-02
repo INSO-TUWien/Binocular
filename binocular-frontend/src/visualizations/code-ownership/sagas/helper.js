@@ -1,15 +1,10 @@
 'use strict';
 
 import Database from '../../../database/database';
-import { getHistoryForCommit } from '../../../database/utils.js';
+import _ from 'lodash';
 
-export async function getOwnershipForCommits(latestBranchCommit) {
-  // first get all commits (with parent data)
+export async function getOwnershipForCommits(history) {
   const ownershipData = await Database.getOwnershipDataForCommits();
-  // calculate history for this branch
-  const history = getHistoryForCommit(latestBranchCommit, ownershipData);
-
-  // only return commits of this branch
   return ownershipData.filter((d) => history.includes(d.sha));
 }
 
