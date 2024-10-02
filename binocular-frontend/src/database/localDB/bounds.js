@@ -9,7 +9,7 @@ PouchDB.plugin(PouchDBAdapterMemory);
 
 export default class Bounds {
   static getBounds(db) {
-    return Promise.all([findAll(db, 'stakeholders'), findAll(db, 'commits'), findAll(db, 'issues')]).then((res) => {
+    return Promise.all([findAll(db, 'users'), findAll(db, 'commits'), findAll(db, 'issues')]).then((res) => {
       const response = { committers: [] };
 
       // all committers

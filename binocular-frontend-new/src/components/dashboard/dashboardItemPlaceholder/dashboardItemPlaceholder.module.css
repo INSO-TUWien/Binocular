@@ -1,0 +1,20 @@
+.dashboardItemPlaceholder {
+  position: absolute;
+  @apply bg-accent;
+  border-radius: 5px;
+  border: 1px solid;
+  @apply border-base-300;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  @apply font-bold;
+  @apply text-base-300;
+  opacity: 0.5;
+  backdrop-filter: blur(30px);
+  -webkit-backdrop-filter: blur(30px);
+}
+
+/*# sourceMappingURL=dashboardItemPlaceholder.module.css.map */

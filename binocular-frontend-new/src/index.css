@@ -1,0 +1,70 @@
+@tailwind base;
+@layer base {
+  h1 {
+    @apply mt-2;
+    @apply text-2xl;
+    @apply font-bold;
+    @apply underline;
+  }
+  h2 {
+    @apply mt-1;
+    @apply text-xl;
+    @apply font-bold;
+  }
+  h3 {
+    @apply mt-1;
+    @apply text-lg;
+    @apply underline;
+  }
+}
+@tailwind components;
+@tailwind utilities;
+#root {
+  @apply bg-base-100;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  user-select: none;
+}
+
+body {
+  margin: 0;
+  width: 100vw;
+  height: 100vh;
+}
+
+#popout-content-container {
+  width: 100%;
+  height: 100%;
+}
+
+/*
+----------------------------------------
+Custom Scrollbar
+----------------------------------------
+ */
+/* width */
+::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+  @apply bg-base-300;
+  border-radius: 3px;
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+  @apply bg-neutral-400;
+  border-radius: 3px;
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-accent;
+}
+
+/*# sourceMappingURL=index.css.map */

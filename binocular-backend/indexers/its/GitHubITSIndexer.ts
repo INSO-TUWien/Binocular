@@ -3,11 +3,20 @@
 
 import debug from 'debug';
 import ConfigurationError from '../../errors/ConfigurationError.js';
-import Issue from '../../models/Issue';
-import MergeRequest from '../../models/MergeRequest.js';
-import GitHub from '../../core/provider/github.ts';
+import Issue, { IssueDataType } from '../../models/models/Issue';
+import MergeRequest, { MergeRequestDataType } from '../../models/models/MergeRequest';
+import Mention from '../../types/supportingTypes/Mention';
+import GitHub from '../../core/provider/github';
 import ProgressReporter from '../../utils/progress-reporter.ts';
-import { ItsIssue, ItsIssueEvent } from '../../types/itsTypes.ts';
+import { ItsIssueEvent } from '../../types/ItsTypes';
+import Account, { AccountDataType } from '../../models/models/Account.ts';
+import { Entry } from '../../models/Model.ts';
+import IssueAccountConnection, { IssueAccountConnectionDataType } from '../../models/connections/IssueAccountConnection.ts';
+import Connection from '../../models/Connection.ts';
+import MergeRequestAccountConnection, {
+  MergeRequestAccountConnectionDataType,
+} from '../../models/connections/MergeRequestAccountConnection.ts';
+import Label from '../../types/supportingTypes/Label.ts';
 
 const log = debug('idx:its:github');
 
@@ -32,173 +41,135 @@ GitHubITSIndexer.prototype.configure = async function (config: any) {
   return Promise.resolve();
 };
 
-GitHubITSIndexer.prototype.index = function () {
+GitHubITSIndexer.prototype.index = async function () {
   let owner: string;
   let repo: string;
-  let omitIssueCount = 0;
-  let omitMergeRequestCount = 0;
-  let persistIssueCount = 0;
-  let persistMergeRequestCount = 0;
 
-  return Promise.resolve(this.repo.getOriginUrl())
-    .then(async (url) => {
-      if (url.includes('@')) {
-        url = 'https://github.com/' + url.split('@github.com/')[1];
+  // helper function that persists the issues/mergeRequests and associated GitHub user accounts (plus connections)
+  const processIssues = async (issues: any, type: string, targetCollection: typeof Issue | typeof MergeRequest) => {
+    let persistCount = 0;
+    let omitCount = 0;
+
+    for (const issue of issues) {
+      log(`Processing ${type} #` + issue.number);
+
+      let issueEntry: Entry<IssueDataType | MergeRequestDataType>;
+
+      // create GitHub account objects for each relevant user (author, assignee, assignees)
+      const authorEntry: Entry<AccountDataType> = (await Account.ensureGitHubAccount(this.controller.getUser(issue.author.login)))[0];
+      const assigneeEntries: Entry<AccountDataType>[] = [];
+      for (const a of issue.assignees.nodes) {
+        assigneeEntries.push((await Account.ensureGitHubAccount(this.controller.getUser(a.login)))[0]);
       }
-      const match = url.match(GITHUB_ORIGIN_REGEX);
-      if (!match) {
-        throw new Error('Unable to determine github owner and repo from origin url: ' + url);
-      }
 
-      owner = match[1];
-      repo = match[2];
-      await this.controller.loadAssignableUsers(owner, repo);
+      await targetCollection
+        .findOneByExample({ id: String(issue.id) })
+        .then((existingIssue) => {
+          if (!existingIssue || new Date(existingIssue.data.updatedAt).getTime() < new Date(issue.updatedAt).getTime()) {
+            log(`Processing ${type} #` + issue.iid);
 
-      log('Getting issues for', `${owner}/${repo}`);
-      return Promise.all([
-        this.controller.getIssuesWithEvents(owner, repo).then((issues: ItsIssue[]) => {
-          this.reporter.setIssueCount(issues.length);
-          return Promise.all(
-            issues.map((issue) => {
-              log('Processing Issue #' + issue.number);
+            // Note: contrary to GitLab, milestones are not supported yet by the GitHub indexer.
+            const toBePersisted: any = {
+              id: issue.id.toString(),
+              iid: issue.number,
+              title: issue.title,
+              description: issue.body,
+              state: issue.state,
+              closedAt: issue.closedAt,
+              createdAt: issue.createdAt,
+              updatedAt: issue.updatedAt,
+              labels: issue.labels.nodes.map((l: Label) => l.name),
+              webUrl: issue.url,
+            };
 
-              issue.author.name = this.controller.getUser(issue.author.login).name;
-              if (issue.assignees.nodes.length > 0) {
-                issue.assignees.nodes[0].name = this.controller.getUser(issue.assignees.nodes[0].login).name;
-              }
-
-              for (let i = 0; i < issue.assignees.nodes.length; i++) {
-                issue.assignees.nodes[i].name = this.controller.getUser(issue.assignees.nodes[i].login).name;
-              }
-              return new Promise((resolve) => {
-                // TODO: Currently necessary because the implementation of the Models isn't really compatible with typescript.
-                // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                // @ts-expect-error
-                Issue.findOneById(issue.id)
-                  .then((existingIssue) => {
-                    if (!existingIssue || new Date(existingIssue.updatedAt).getTime() < new Date(issue.updatedAt).getTime()) {
-                      log('Processing issue #' + issue.iid);
-                      // TODO: Currently necessary because the implementation of the Models isn't really compatible with typescript.
-                      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                      // @ts-expect-error
-                      return Issue.persist({
-                        id: issue.id,
-                        iid: issue.number,
-                        title: issue.title,
-                        description: issue.body,
-                        state: issue.state,
-                        url: issue.url,
-                        closedAt: issue.closedAt,
-                        createdAt: issue.createdAt,
-                        updatedAt: issue.updatedAt,
-                        labels: issue.labels.nodes,
-                        milestone: issue.milestone,
-                        author: issue.author,
-                        assignee: issue.assignees.nodes[0],
-                        assignees: issue.assignees.nodes,
-                        webUrl: issue.url,
-                        mentions: issue.timelineItems.nodes.map((event: ItsIssueEvent) => {
-                          return {
-                            commit: event.commit ? event.commit.oid : null,
-                            createdAt: event.createdAt,
-                            closes: event.commit === undefined,
-                          };
-                        }),
-                      }).then(([persistedIssue, wasCreated]) => {
-                        if (wasCreated) {
-                          persistIssueCount++;
-                        }
-                        log('Persisted issue #' + persistedIssue.data.iid);
-                      });
-                    } else {
-                      log('Skipping issue #' + issue.iid);
-                      omitIssueCount++;
-                    }
-                  })
-                  .then(() => {
-                    this.reporter.finishIssue();
-                    resolve(true);
-                  });
+            // mentions attribute is only relevant for issues, not for merge requests
+            if (targetCollection === Issue) {
+              toBePersisted.mentions = issue.timelineItems.nodes.map((event: ItsIssueEvent) => {
+                return {
+                  commit: event.commit ? event.commit.oid : null,
+                  createdAt: event.createdAt,
+                  closes: event.commit === undefined,
+                } as Mention;
               });
-            }),
-          );
-        }),
-        this.controller.getPullRequestsWithEvents(owner, repo).then((mergeRequests: ItsIssue[]) => {
-          this.reporter.setMergeRequestCount(mergeRequests.length);
-          return Promise.all(
-            mergeRequests.map((mergeRequest) => {
-              log('Processing Issue #' + mergeRequest.number);
+            }
 
-              mergeRequest.author.name = this.controller.getUser(mergeRequest.author.login).name;
-              if (mergeRequest.assignees.nodes.length > 0) {
-                mergeRequest.assignees.nodes[0].name = this.controller.getUser(mergeRequest.assignees.nodes[0].login).name;
+            return targetCollection.persist(toBePersisted).then(([persistedIssue, wasCreated]) => {
+              // save the entry object of the issue so we can connect it to the github users later
+              issueEntry = persistedIssue;
+              if (wasCreated) {
+                persistCount++;
               }
+              log(`Persisted ${type} #` + persistedIssue.data.iid);
+            });
+          } else {
+            // save the entry object of the issue so we can connect it to the github users later
+            issueEntry = existingIssue;
+            log(`Skipping ${type} #` + issue.iid);
+            omitCount++;
+          }
+        })
+        .then(async () => {
+          // connect the issue/MR to the users (either as author, assignee or assignees)
+          if (type === 'issue') {
+            await connectIssuesToUsers(IssueAccountConnection, issueEntry, authorEntry, assigneeEntries);
+            this.reporter.finishIssue();
+          } else if (type === 'mergeRequest') {
+            await connectIssuesToUsers(MergeRequestAccountConnection, issueEntry, authorEntry, assigneeEntries);
+            this.reporter.finishMergeRequest();
+          }
+        });
+    }
 
-              for (let i = 0; i < mergeRequest.assignees.nodes.length; i++) {
-                mergeRequest.assignees.nodes[i].name = this.controller.getUser(mergeRequest.assignees.nodes[i].login).name;
-              }
-              return new Promise((resolve) => {
-                // TODO: Currently necessary because the implementation of the Models isn't really compatible with typescript.
-                // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                // @ts-expect-error
-                return MergeRequest.findOneById(mergeRequest.id)
-                  .then((existingMergeRequest) => {
-                    if (
-                      !existingMergeRequest ||
-                      new Date(existingMergeRequest.updatedAt).getTime() < new Date(mergeRequest.updatedAt).getTime()
-                    ) {
-                      log('Processing issue #' + mergeRequest.iid);
-                      // TODO: Currently necessary because the implementation of the Models isn't really compatible with typescript.
-                      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                      // @ts-expect-error
-                      return MergeRequest.persist({
-                        id: mergeRequest.id,
-                        iid: mergeRequest.number,
-                        title: mergeRequest.title,
-                        description: mergeRequest.body,
-                        state: mergeRequest.state,
-                        url: mergeRequest.url,
-                        closedAt: mergeRequest.closedAt,
-                        createdAt: mergeRequest.createdAt,
-                        updatedAt: mergeRequest.updatedAt,
-                        labels: mergeRequest.labels.nodes,
-                        milestone: mergeRequest.milestone,
-                        author: mergeRequest.author,
-                        assignee: mergeRequest.assignees.nodes[0],
-                        assignees: mergeRequest.assignees.nodes,
-                        webUrl: mergeRequest.url,
-                        mentions: mergeRequest.timelineItems.nodes.map((event: ItsIssueEvent) => {
-                          return {
-                            commit: event.commit ? event.commit.oid : null,
-                            createdAt: event.createdAt,
-                            closes: event.commit === undefined,
-                          };
-                        }),
-                      }).then(([persistedMergeRequest, wasCreated]) => {
-                        if (wasCreated) {
-                          persistMergeRequestCount++;
-                        }
-                        log('Persisted mergeRequest #' + persistedMergeRequest.data.iid);
-                      });
-                    } else {
-                      log('Skipping mergeRequest #' + mergeRequest.iid);
-                      omitMergeRequestCount++;
-                    }
-                  })
-                  .then(() => {
-                    this.reporter.finishMergeRequest();
-                    resolve(true);
-                  });
-              });
-            }),
-          );
-        }),
-      ]);
-    })
-    .then(() => {
-      log('Persisted %d new issues (%d already present)', persistIssueCount, omitIssueCount);
-      log('Persisted %d new mergeRequests (%d already present)', persistMergeRequestCount, omitMergeRequestCount);
-    });
+    log(`Persisted %d new ${type}s (%d already present)`, persistCount, omitCount);
+  };
+
+  return Promise.resolve(this.repo.getOriginUrl()).then(async (url) => {
+    if (url.includes('@')) {
+      url = 'https://github.com/' + url.split('@github.com/')[1];
+    }
+    const match = url.match(GITHUB_ORIGIN_REGEX);
+    if (!match) {
+      throw new Error('Unable to determine github owner and repo from origin url: ' + url);
+    }
+
+    owner = match[1];
+    repo = match[2];
+    await this.controller.loadAssignableUsers(owner, repo);
+
+    log('Getting issues for', `${owner}/${repo}`);
+
+    // Persist Issues and Users/Assignees
+    const issues = await this.controller.getIssuesWithEvents(owner, repo);
+    this.reporter.setIssueCount(issues.length);
+    await processIssues(issues, 'issue', Issue);
+
+    // Persist Merge Requests and Users/Assignees
+    const mergeRequests = await this.controller.getPullRequestsWithEvents(owner, repo);
+    this.reporter.setMergeRequestCount(mergeRequests.length);
+    await processIssues(mergeRequests, 'mergeRequest', MergeRequest);
+  });
+};
+
+// connects issues or merge requests to accounts
+const connectIssuesToUsers = async (
+  conn: Connection<
+    IssueAccountConnectionDataType | MergeRequestAccountConnectionDataType,
+    IssueDataType | MergeRequestDataType,
+    AccountDataType
+  >,
+  issue: Entry<IssueDataType | MergeRequestDataType>,
+  author: Entry<AccountDataType>,
+  assignees: Entry<AccountDataType>[],
+) => {
+  await conn.ensureWithData({ role: 'author' }, { from: issue, to: author });
+  if (assignees.length > 0) {
+    await conn.ensureWithData({ role: 'assignee' }, { from: issue, to: assignees[0] });
+  }
+  await Promise.all(
+    assignees.map(async (ae) => {
+      await conn.ensureWithData({ role: 'assignees' }, { from: issue, to: ae });
+    }),
+  );
 };
 
 GitHubITSIndexer.prototype.isStopping = function () {

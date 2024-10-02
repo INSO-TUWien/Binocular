@@ -8,6 +8,7 @@
     "coverage": "nyc mocha --config=.mocharc.json --exit test",
     "check": "eslint .",
     "dev": "tsx watch binocular.ts run ../ --no-frontend",
+    "dev:no-indexing": "tsx watch binocular.ts run ../ --no-frontend --no-vcs --no-ci --no-its",
     "fix": "eslint --fix ."
   },
   "bin": {

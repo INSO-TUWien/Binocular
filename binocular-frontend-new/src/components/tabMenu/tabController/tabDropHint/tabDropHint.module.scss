@@ -1,0 +1,58 @@
+@import '../../../../variables.scss';
+@import '../../tabControllerVariables.module';
+
+.dropZone{
+  position: absolute;
+  @apply bg-accent/10;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.dropZone:hover{
+  @apply bg-accent/50;
+}
+
+.dropZoneTop{
+  top:0;
+  left: 0;
+}
+
+.dropZoneRight{
+  right:0;
+  top: $tab-bar-thickness;
+}
+
+.dropZoneBottom{
+  bottom:0;
+  left: 0;
+}
+
+.dropZoneLeft{
+  left:0;
+  top: $tab-bar-thickness;
+}
+
+.dropZoneLeft>div{
+  rotate: 180deg;
+}
+
+.dropZoneHorizontal{
+  width: 100%;
+  height: $tab-bar-thickness;
+}
+
+.dropZoneVertical{
+  height: calc(100% - $tab-bar-thickness * 2);
+  width: $tab-bar-thickness;
+}
+
+.dropZoneHorizontal>div{
+  @apply text-accent;
+}
+
+.dropZoneVertical>div{
+  @apply text-accent;
+  writing-mode: vertical-lr;
+  text-orientation: mixed;
+}

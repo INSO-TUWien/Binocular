@@ -3,8 +3,6 @@
 import PouchDB from 'pouchdb-browser';
 import PouchDBFind from 'pouchdb-find';
 import PouchDBAdapterMemory from 'pouchdb-adapter-memory';
-import moment from 'moment/moment';
-import _ from 'lodash';
 import {
   findAll,
   findAllCommits,
@@ -13,8 +11,10 @@ import {
   findFile,
   findID,
   findFileConnections,
-  findCommitFileConnections,
   findIssueCommitConnections,
+  findFileCommitConnections,
+  binarySearch,
+  findAllIssues,
 } from './utils';
 PouchDB.plugin(PouchDBFind);
 PouchDB.plugin(PouchDBAdapterMemory);
@@ -22,7 +22,7 @@ PouchDB.plugin(PouchDBAdapterMemory);
 export default class Issues {
   static getIssueData(db, relations, issueSpan, significantSpan) {
     // return all issues, filtering according to parameters can be added in the future
-    return findAll(db, 'issues').then((res) => {
+    return findAllIssues(db, relations).then((res) => {
       res.docs = res.docs
         .sort((a, b) => {
           return new Date(a.createdAt) - new Date(b.createdAt);
@@ -44,10 +44,10 @@ export default class Issues {
       const issue = resIssue.docs[0];
       const allCommits = (await findAllCommits(db, relations)).docs;
       const result = [];
-      const issueCommitConnections = (await findIssueCommitConnections(relations)).docs.filter((r) => r.to === issue._id);
+      const issueCommitConnections = (await findIssueCommitConnections(relations)).docs.filter((r) => r.from === issue._id);
       for (const conn of issueCommitConnections) {
-        const commitObject = allCommits.filter((c) => c._id === conn.from)[0];
-        if (commitObject) {
+        const commitObject = binarySearch(allCommits, conn.to, '_id');
+        if (commitObject !== null) {
           result.push(commitObject);
         }
       }
@@ -55,6 +55,7 @@ export default class Issues {
     });
   }
 
+  // Note: very slow implementation. Rewrite similarly to functions in commits.js (use binary search)
   static issueImpactQuery(db, relations, iid, since, until) {
     return findIssue(db, iid).then(async (resIssue) => {
       const issue = resIssue.docs[0];
@@ -67,7 +68,7 @@ export default class Issues {
         if (commit && new Date(commit.date) >= new Date(since) && new Date(commit.date) <= new Date(until)) {
           const builds = (await findBuild(db, commit.sha)).docs;
           commit.files = { data: [] };
-          const fileConnections = (await findFileConnections(relations, commit.sha)).docs;
+          const fileConnections = (await findFileConnections(relations, commit._id)).docs;
           if (builds.length > 0) {
             commit.build = builds[0];
           }
@@ -85,9 +86,9 @@ export default class Issues {
     });
   }
 
-  static searchIssues(db, text) {
+  static searchIssues(db, relations, text) {
     // return all issues, filtering according to parameters can be added in the future
-    return findAll(db, 'issues').then((res) => {
+    return findAllIssues(db, relations).then((res) => {
       res.docs = res.docs
         .filter((i) => i.title.includes(text) || `${i.iid}`.startsWith(text))
         .sort((a, b) => {
@@ -101,7 +102,7 @@ export default class Issues {
     return findAll(db, 'issues').then(async (res) => {
       const issues = [];
       const allCommits = (await findAllCommits(db, relations)).docs;
-      const allCommitFileConnections = (await findCommitFileConnections(relations)).docs;
+      const allCommitFileConnections = (await findFileCommitConnections(relations)).docs;
       const allIssueCommitConnections = (await findIssueCommitConnections(relations)).docs;
 
       let fileObj = null;

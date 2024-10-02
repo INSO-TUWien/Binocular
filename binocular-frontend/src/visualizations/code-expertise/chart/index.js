@@ -21,13 +21,13 @@ export default () => {
   const mergedAuthors = universalSettings.mergedAuthors;
   const excludedCommits = universalSettings.excludedCommits;
   const excludeCommits = universalSettings.excludeCommits;
+  const filterMergeCommits = universalSettings.excludeMergeCommits;
 
   const rawData = useSelector((state) => state.visualizations.codeExpertise.state.data.data);
   const config = useSelector((state) => state.visualizations.codeExpertise.state.config);
   const isFetching = useSelector((state) => state.visualizations.codeExpertise.state.data.isFetching);
   const mode = useSelector((state) => state.visualizations.codeExpertise.state.config.mode);
   const activeFiles = useSelector((state) => state.visualizations.codeExpertise.state.config.activeFiles);
-  const filterMergeCommits = useSelector((state) => state.visualizations.codeExpertise.state.config.filterMergeCommits);
 
   //processed data
   const [data, setData] = useState(null);
@@ -98,23 +98,23 @@ export default () => {
     //########### add build data to commits ###########
     relevantCommits = addBuildData(relevantCommits, builds);
 
-    //########### extract data for each stakeholder ###########
+    //########### extract data for each user ###########
 
-    //first group all relevant commits by stakeholder
-    const commitsByStakeholders = _.groupBy(relevantCommits, (commit) => commit.signature);
+    //first group all relevant commits by user
+    const commitsByUsers = _.groupBy(relevantCommits, (commit) => commit.signature);
 
-    for (const stakeholder in commitsByStakeholders) {
-      result['devData'][stakeholder] = {};
+    for (const user in commitsByUsers) {
+      result['devData'][user] = {};
 
-      //add commits to each stakeholder
-      result['devData'][stakeholder]['commits'] = commitsByStakeholders[stakeholder];
+      //add commits to each user
+      result['devData'][user]['commits'] = commitsByUsers[user];
 
       //initialize linesOwned with 0. If program runs in online mode, this will be updated later
-      result['devData'][stakeholder]['linesOwned'] = 0;
+      result['devData'][user]['linesOwned'] = 0;
 
-      //for each stakeholder, sum up relevant additions
-      result['devData'][stakeholder]['additions'] = _.reduce(
-        commitsByStakeholders[stakeholder],
+      //for each user, sum up relevant additions
+      result['devData'][user]['additions'] = _.reduce(
+        commitsByUsers[user],
         (sum, commit) => {
           if (mode === 'issues') {
             //we are interested in all additions made in each commit
@@ -177,7 +177,7 @@ export default () => {
       }
     }
     setData(result);
-  }, [rawData, activeFiles, excludedCommits, excludeCommits]);
+  }, [rawData, activeFiles, excludedCommits, excludeCommits, filterMergeCommits]);
 
   //calculate the data for relevant (selected) developers
   useEffect(() => {

@@ -1,0 +1,59 @@
+@import '../../../../variables.scss';
+
+$authorRowHeight :1.5rem;
+
+.colorPicker{
+  border-radius: 100%;
+  border: 2px solid;
+  width: 2rem;
+  height: 2rem;
+  background-image: url('../../../../assets/edit_black.svg');
+  background-size: 80%;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+.colorPicker::-moz-color-swatch{
+  display: none;
+}
+
+.colorPicker::-webkit-color-swatch{
+  display: none;
+}
+
+.authorList{
+  display: flex;
+  flex-direction: column;
+  @apply mb-2;
+}
+
+.authorListItem{
+  display: flex;
+  @apply mb-1;
+}
+
+.authorName{
+  height: $authorRowHeight;
+  width: 50%;
+  float: left;
+  @apply rounded-btn;
+  overflow: hidden;
+  border: 2px solid;
+  @apply font-bold;
+  line-height: calc($authorRowHeight - 2px);
+  padding-left: .2rem;
+  cursor: pointer;
+  font-size: .8rem;
+  text-wrap: nowrap;
+}
+
+.removeButton{
+  @apply btn;
+  @apply btn-error;
+  @apply ml-1;
+  height: $authorRowHeight;
+  line-height: $authorRowHeight;
+  padding: 0 1rem;
+  min-height: 0;
+}
+

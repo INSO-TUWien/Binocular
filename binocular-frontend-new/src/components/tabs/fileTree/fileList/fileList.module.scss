@@ -1,0 +1,24 @@
+@import '../../../../variables.scss';
+
+.fileList{
+  @apply bg-base-100;
+  overflow: hidden;
+  border-radius: $border-radius-default;
+  transition: max-height ease-in-out .2s;
+}
+
+.fileListHorizontal{
+  display: inline-block;
+  float: left;
+  width: 30rem;
+  margin-left: .5rem;
+  height: 3rem;
+  box-shadow: $shadow-default-inset;
+  overflow-y: scroll;
+}
+
+.fileListVertical{
+  width: 100%;
+  max-height: 30rem;
+  overflow-y: scroll;
+}

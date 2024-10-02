@@ -11,7 +11,7 @@ import { getBranches, getFilenamesForBranch } from '../sagas/helper';
 import { ownershipDataForMergedAuthors } from '../../../utils/ownership.js';
 
 export default () => {
-  //global state from redux store
+  //global state from reducer store
   const ownershipState = useSelector((state) => state.visualizations.codeOwnership.state);
   const currentMode = ownershipState.config.mode;
   const currentBranch = ownershipState.config.currentBranch;

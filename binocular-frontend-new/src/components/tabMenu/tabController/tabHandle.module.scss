@@ -1,0 +1,101 @@
+@import '../../../variables.scss';
+@import '../tabControllerVariables.module';
+
+
+.tabHandle{
+  position: relative;
+  height: calc($tab-bar-thickness - $border-default-width - 5px);
+  border: $border-default;
+  @apply border-transparent;
+  line-height: calc($tab-bar-thickness - $border-default-width);
+  padding: 0 1rem;
+  margin: 0 .25rem;
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  cursor: pointer;
+}
+
+.tabHandleVertical{
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  width: calc($tab-bar-thickness - $border-default-width - 5px);
+  height: auto;
+  margin: .25rem 0;
+  padding: 1rem 0;
+}
+
+.tabHandleSelectedTop{
+  border-radius: $border-radius-default $border-radius-default 0 0;
+  @apply border-base-300;
+  border-bottom-color: transparent;
+  box-shadow: $shadow-default;
+  @apply bg-base-100;
+}
+
+.tabHandleSelectedVertical{
+  border-radius: 0 $border-radius-default $border-radius-default 0;
+  @apply border-base-300;
+  border-left-color: transparent;
+  box-shadow: $shadow-default;
+  @apply bg-base-100;
+}
+
+.tabHandleSelectedBottom{
+  border-radius: 0 0 $border-radius-default $border-radius-default;
+  @apply border-base-300;
+  border-top-color: transparent;
+  box-shadow: $shadow-default;
+  @apply bg-base-100;
+}
+
+.tabHandleSelectedTop:after{
+  content:'';
+  @apply bg-base-100;
+  width: 100%;
+  height: 1rem;
+  position: absolute;
+  bottom: -1rem;
+  left: 0;
+}
+
+.tabHandleSelectedVertical:after{
+  content:'';
+  @apply bg-base-100;
+  height: 100%;
+  width: 1rem;
+  position: absolute;
+  left: -1rem;
+  top: 0;
+}
+
+.tabHandleSelectedBottom:after{
+  content:'';
+  @apply bg-base-100;
+  width: 100%;
+  height: 1rem;
+  position: absolute;
+  top: -1rem;
+  left: 0;
+}
+.tabHandleSwitch{
+  color: transparent;
+  background: transparent;
+  border-color: transparent;
+  box-shadow: none;
+}
+
+.tabHandleSwitch:after{
+  content:url("../../../assets/swap_horizontal_white.svg");
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: absolute;
+  @apply bg-accent;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: $border-radius-default;
+  line-height: 100%;
+}

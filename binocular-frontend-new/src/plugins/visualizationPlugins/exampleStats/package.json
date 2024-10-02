@@ -1,0 +1,9 @@
+{
+  "name": "example_stats",
+  "version": "1.0.0",
+  "description": "",
+  "main": "src/index.tsx",
+  "scripts": {
+  },
+  "private": true
+}

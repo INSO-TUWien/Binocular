@@ -1,0 +1,21 @@
+@import "../../../variables.scss";
+
+
+.dashboardItemPlaceholder{
+  position: absolute;
+  @apply bg-accent;
+  border-radius: $border-radius-default;
+  border: $border-default;
+  @apply border-base-300;
+  box-shadow: $shadow-default;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  @apply font-bold;
+  @apply text-base-300;
+  opacity: .5;
+  backdrop-filter: blur(30px);
+  -webkit-backdrop-filter: blur(30px);
+}
