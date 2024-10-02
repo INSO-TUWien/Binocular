@@ -7,18 +7,19 @@ import _ from 'lodash';
 import Filepicker from '../../../components/Filepicker/index';
 import TabCombo from '../../../components/TabCombo';
 import styles from '../styles.module.scss';
-import { setActiveIssue, setMode, setCurrentBranch, setActiveFiles, setOnlyDisplayOwnership } from '../sagas';
+import { setActiveIssue, setMode, setCurrentBranch, setActiveFiles, setFilterMergeCommits, setOnlyDisplayOwnership } from '../sagas';
 import { getBranches, getFilenamesForBranch, getIssues } from '../sagas/helper';
 import { ownershipDataForMergedAuthors } from '../../../utils/ownership.js';
 
 export default () => {
-  //global state from reducer store
+  //global state from redux store
   const expertiseState = useSelector((state) => state.visualizations.codeExpertise.state);
   const currentMode = expertiseState.config.mode;
   const currentBranch = expertiseState.config.currentBranch;
   const activeFiles = expertiseState.config.activeFiles;
   const currentBranchName = currentBranch && currentBranch.branch;
   const activeIssueId = expertiseState.config.activeIssueId;
+  const filterMergeCommits = expertiseState.config.filterMergeCommits;
   const onlyDisplayOwnership = expertiseState.config.onlyDisplayOwnership;
   const mode = expertiseState.config.mode;
   const ownershipForFiles = expertiseState.data.data ? expertiseState.data.data.ownershipForFiles : null;
@@ -53,6 +54,10 @@ export default () => {
 
   const resetActiveFiles = () => {
     dispatch(setActiveFiles([]));
+  };
+
+  const onSetFilterMergeCommits = (isChecked) => {
+    dispatch(setFilterMergeCommits(isChecked));
   };
 
   const onSetOnlyDisplayOwnership = (isChecked) => {
@@ -159,6 +164,15 @@ export default () => {
             <p>If you want to track file renames for this branch, add it to the 'fileRenameBranches' array in '.binocularrc'</p>
           </>
         )}
+
+        {/* select if merge commits should be filtered */}
+        <div className="field">
+          <div className="control">
+            <label className="label">Filter Commits:</label>
+            <input type="checkbox" checked={filterMergeCommits} onChange={(event) => onSetFilterMergeCommits(event.target.checked)} />
+            <span>Exclude merge commits</span>
+          </div>
+        </div>
 
         {mode !== 'issues' && (
           <div className="field">

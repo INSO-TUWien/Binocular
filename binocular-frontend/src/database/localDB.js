@@ -3,10 +3,8 @@
 import PouchDB from 'pouchdb-browser';
 import PouchDBFind from 'pouchdb-find';
 import PouchDBAdapterMemory from 'pouchdb-adapter-memory';
-import WorkerPouch from 'worker-pouch';
 PouchDB.plugin(PouchDBFind);
 PouchDB.plugin(PouchDBAdapterMemory);
-PouchDB.adapter('worker', WorkerPouch);
 
 import Bounds from './localDB/bounds';
 import Commits from './localDB/commits';
@@ -17,7 +15,7 @@ import Milestones from './localDB/milestones';
 import Files from './localDB/files';
 import Branches from './localDB/branches';
 import Modules from './localDB/modules';
-import Users from './localDB/users';
+import Stakeholders from './localDB/stakeholders';
 
 // #v-ifdef VITE_OFFLINE
 import branches from '../../db_export/branches.json';
@@ -27,115 +25,88 @@ import builds from '../../db_export/builds.json';
 import commitsCommits from '../../db_export/commits-commits.json';
 import commitsFiles from '../../db_export/commits-files.json';
 import commitsBuilds from '../../db_export/commits-builds.json';
-import commitsFilesUsers from '../../db_export/commits-files-users.json';
+import commitsFilesStakeholders from '../../db_export/commits-files-stakeholders.json';
 import commitsModules from '../../db_export/commits-modules.json';
-import commitsUsers from '../../db_export/commits-users.json';
+import commitsStakeholders from '../../db_export/commits-stakeholders.json';
 import commits from '../../db_export/commits.json';
 import files from '../../db_export/files.json';
 import issuesCommits from '../../db_export/issues-commits.json';
-import issuesUsers from '../../db_export/issues-users.json';
+import issuesStakeholders from '../../db_export/issues-stakeholders.json';
 import issues from '../../db_export/issues.json';
 import modulesFiles from '../../db_export/modules-files.json';
 import modulesModules from '../../db_export/modules-modules.json';
 import modules from '../../db_export/modules.json';
-import users from '../../db_export/users.json';
+import stakeholders from '../../db_export/stakeholders.json';
 import mergeRequests from '../../db_export/mergeRequests.json';
 import milestones from '../../db_export/milestones.json';
-import issuesMilestones from '../../db_export/issues-milestones.json';
-import mergeRequestsMilestones from '../../db_export/mergeRequests-milestones.json';
-import accounts from '../../db_export/accounts.json';
-import issuesAccounts from '../../db_export/issues-accounts.json';
-import mergeRequestsAccounts from '../../db_export/mergeRequests-accounts.json';
-import notes from '../../db_export/notes.json';
-import issuesNotes from '../../db_export/issues-notes.json';
-import mergeRequestsNotes from '../../db_export/mergeRequests-notes.json';
-import notesAccounts from '../../db_export/notes-accounts.json';
-import { decompressJson } from '../../../utils/json-utils.ts';
 
-const collections = { accounts, branches, builds, commits, files, issues, modules, users, mergeRequests, milestones, notes };
+const collections = { branches, builds, commits, files, issues, modules, stakeholders, mergeRequests, milestones };
 
 const relations = {
   'commits-commits': commitsCommits,
   'commits-files': commitsFiles,
-  'commits-files-users': commitsFilesUsers,
+  'commits-files-stakeholders': commitsFilesStakeholders,
   'commits-builds': commitsBuilds,
   'commits-modules': commitsModules,
-  'commits-users': commitsUsers,
+  'commits-stakeholders': commitsStakeholders,
   'issues-commits': issuesCommits,
-  'issues-users': issuesUsers,
-  'issues-accounts': issuesAccounts,
-  'issues-milestones': issuesMilestones,
+  'issues-stakeholders': issuesStakeholders,
   'modules-files': modulesFiles,
   'modules-modules': modulesModules,
-  'mergeRequests-accounts': mergeRequestsAccounts,
-  'mergeRequests-milestones': mergeRequestsMilestones,
   'branches-files': branchesFiles,
   'branches-files-files': branchesFilesFiles,
-  'issues-notes': issuesNotes,
-  'mergeRequests-notes': mergeRequestsNotes,
-  'notes-accounts': notesAccounts,
 };
 // #v-endif
 
-let db;
-let tripleStore;
+// create database, index on _id and triple store
+const db = new PouchDB('Binocular_collections', { adapter: 'memory' });
+const tripleStore = new PouchDB('Binocular_triple', { adapter: 'memory' });
 
-const assignDB = (adapter) => {
-  db = new PouchDB('Binocular_collections', { adapter: adapter });
-  tripleStore = new PouchDB('Binocular_triple', { adapter: adapter });
-};
-
-const preprocessCollection = (coll) => {
-  return coll.map((i) => {
-    // key and rev not needed for pouchDB
-    delete i._key;
-    delete i._rev;
-    // rename _from/_to if this is a connection
-    if (i._from !== undefined) {
-      i.from = i._from;
-      i.to = i._to;
-      delete i._from;
-      delete i._to;
-    }
-    return i;
-  });
-};
+db.createIndex({
+  index: { fields: ['_id'] },
+});
 
 function importCollection(name) {
-  // first decompress the json file, then remove attributes that are not needed by PouchDB
-  db.bulkDocs(preprocessCollection(decompressJson(name, collections[name])));
+  collections[name].forEach((item) => {
+    delete item._rev;
+    delete item._key;
+
+    db.put(item);
+  });
 }
 
 function importRelation(name) {
-  // first decompress the json file, then remove attributes that are not needed by PouchDB
-  tripleStore.bulkDocs(preprocessCollection(decompressJson(name, relations[name])));
+  relations[name].forEach((item) => {
+    delete item._rev;
+    delete item._key;
+
+    item.from = item._from;
+    item.to = item._to;
+    delete item._from;
+    delete item._to;
+
+    item.relation = name;
+    tripleStore.put(item);
+  });
 }
 
 function importData() {
-  Object.keys(collections).map((name) => {
+  Object.keys(collections).forEach((name) => {
     console.log(`Importing collection ${name}`);
+
     importCollection(name);
   });
 
-  Object.keys(relations).map((name) => {
+  Object.keys(relations).forEach((name) => {
     console.log(`Importing relation ${name}`);
+
     importRelation(name);
   });
 }
 
 export default class LocalDB {
-  static async initDB() {
-    // check if web workers are supported
-    return WorkerPouch.isSupportedBrowser().then((supported) => {
-      if (supported) {
-        // using web workers does not block the main thread, making the UI load faster.
-        // note: worker adapter does not support custom indices!
-        assignDB('worker');
-      } else {
-        assignDB('memory');
-      }
-      importData();
-    });
+  static initDB() {
+    importData();
   }
 
   static getBounds() {
@@ -163,7 +134,7 @@ export default class LocalDB {
   }
 
   static getMergeRequestData(mergeRequestSpan, significantSpan) {
-    return MergeRequests.getMergeRequestData(db, tripleStore, mergeRequestSpan, significantSpan);
+    return MergeRequests.getMergeRequestData(db, mergeRequestSpan, significantSpan);
   }
 
   static getMilestoneData() {
@@ -203,7 +174,7 @@ export default class LocalDB {
   }
 
   static searchIssues(text) {
-    return Issues.searchIssues(db, tripleStore, text);
+    return Issues.searchIssues(db, text);
   }
 
   static requestFileStructure() {
@@ -230,8 +201,8 @@ export default class LocalDB {
     return Modules.getAllModules(db);
   }
 
-  static getAllUsers() {
-    return Users.getAllUsers(db);
+  static getAllStakeholders() {
+    return Stakeholders.getAllStakeholders(db);
   }
 
   static getCodeHotspotsChangeData(file) {
@@ -248,23 +219,16 @@ export default class LocalDB {
     //relations need to be mapped so that they have the same names as with the server based variant
     database.commits_commits = relations['commits-commits'];
     database.commits_files = relations['commits-files'];
-    database.commits_files_users = relations['commits-files-users'];
+    database.commits_files_stakeholders = relations['commits-files-stakeholders'];
     database.commits_builds = relations['commits-builds'];
     database.commits_modules = relations['commits-modules'];
-    database.commits_users = relations['commits-users'];
+    database.commits_stakeholders = relations['commits-stakeholders'];
     database.issues_commits = relations['issues-commits'];
-    database.issues_users = relations['issues-users'];
-    database.issues_accounts = relations['issues-accounts'];
-    database.issues_milestones = relations['issues-milestones'];
+    database.issues_stakeholders = relations['issues-stakeholders'];
     database.modules_files = relations['modules-files'];
     database.modules_modules = relations['modules-modules'];
-    database.mergeRequests_accounts = relations['mergeRequests-accounts'];
-    database.mergeRequests_milestones = relations['mergeRequests-milestones'];
     database.branches_files = relations['branches-files'];
     database.branches_files_files = relations['branches-files-files'];
-    database.issues_notes = relations['issues-notes'];
-    database.mergeRequests_notes = relations['mergeRequests-notes'];
-    database.notes_accounts = relations['notes-accounts'];
 
     return database;
   }

@@ -4,13 +4,13 @@ import _ from 'lodash';
 import * as utils from '../../utils/utils.ts';
 import { Database } from 'arangojs';
 import debug from 'debug';
-import { Collection, DocumentCollection, EdgeCollection } from 'arangojs/collection';
+import { DocumentCollection, EdgeCollection } from 'arangojs/collection';
 
 const log = debug('db');
 
 class Db {
-  arangoServer: Database;
-  arango: Database | undefined;
+  private arangoServer: Database;
+  private arango: any;
   constructor(config: { host: string; port: number; user: string; password: string }) {
     const connectionString = `http://${config.host}:${config.port}`;
     this.arangoServer = new Database(connectionString);
@@ -18,7 +18,7 @@ class Db {
     log('DB:', connectionString);
   }
 
-  ensureDatabase(name: string, context: any): Promise<Database> {
+  ensureDatabase(name: string, context: any) {
     log('Ensuring database', name);
     return Promise.resolve(this.arangoServer.listDatabases())
       .then(
@@ -51,12 +51,12 @@ class Db {
     });
   }
 
-  listDatabases(): Promise<string[]> {
+  listDatabases() {
     log('List all databases');
     return Promise.resolve(this.arangoServer.listDatabases());
   }
 
-  collections(): Promise<(DocumentCollection<any> & EdgeCollection<any>)[]> | undefined {
+  collections() {
     if (this.arango === undefined) {
       return;
     }
@@ -72,15 +72,15 @@ class Db {
     return Promise.resolve(this.arango.query(q, bindVars));
   }
 
-  ensureCollection(name: string, ...rest: any): Promise<Collection> | undefined {
+  ensureCollection(name: string, ...rest: any) {
     return this.ensure('collection', name, ...rest);
   }
 
-  ensureEdgeCollection(name: string, ...rest: any): Promise<Collection> | undefined {
+  ensureEdgeCollection(name: string, ...rest: any) {
     return this.ensure('collection', name, ...rest);
   }
 
-  ensureGraph(name: string, ...rest: any): Promise<Collection> | undefined {
+  ensureGraph(name: string, ...rest: any) {
     return this.ensure('graph', name, ...rest);
   }
 
@@ -106,7 +106,7 @@ class Db {
     );
   }
 
-  ensure(type: string | number, name: string, ...rest: any): Promise<Collection> | undefined {
+  ensure(type: string | number, name: string, ...rest: any) {
     if (this.arango === undefined) {
       return;
     }

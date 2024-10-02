@@ -98,16 +98,14 @@ export default class CIBuilds extends React.Component {
         if (build.commit !== null && props.excludeCommits && props.excludedCommits.includes(build.commit.sha)) {
           return false;
         }
-
-        // check if the author of the commit that triggered this build is selected in the universal settings
         let filter = false;
         if (props.selectedAuthors.filter((a) => a === 'others').length > 0) {
           filter = true;
         }
-        // for all authors in the universal settings author list
-        for (const authorSignature of Object.keys(props.allAuthors)) {
-          if (build.commit?.signature === authorSignature) {
-            if (props.selectedAuthors.filter((a) => a === authorSignature).length > 0) {
+        for (const author of Object.keys(props.allAuthors)) {
+          const authorName = author.split('<')[0].slice(0, -1);
+          if (build.userFullName === authorName) {
+            if (props.selectedAuthors.filter((a) => a === author).length > 0) {
               filter = true;
               break;
             } else {
@@ -119,9 +117,6 @@ export default class CIBuilds extends React.Component {
         return filter;
       });
     }
-
-    builds = builds.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
-
     //---- STEP 1: AGGREGATE BUILDS PER TIME INTERVAL ----
     const data = [];
     const granularity = this.getGranularity(props.chartResolution);

@@ -16,25 +16,25 @@ export function extractTimeTrackingDataFromNotes(notes) {
         timeTrackingData.push({
           authorName: byAuthorName ? byAuthorName[1] : note.author.name,
           timeSpent: convertTime(timeAddedNote[1]) / 3600,
-          createdAt: note.createdAt,
+          createdAt: note.created_at,
         });
       } else if (timeSubtractedNote) {
         timeTrackingData.push({
           authorName: byAuthorName ? byAuthorName[1] : note.author.name,
           timeSpent: -convertTime(timeSubtractedNote[1]) / 3600,
-          createdAt: note.createdAt,
+          createdAt: note.created_at,
         });
       } else if (timeDeletedNote) {
         timeTrackingData.push({
           authorName: byAuthorName ? byAuthorName[1] : note.author.name,
           timeSpent: -convertTime(timeDeletedNote[1]) / 3600,
-          createdAt: note.createdAt,
+          createdAt: note.created_at,
         });
       } else if (timeSubtractedDeletedNote) {
         timeTrackingData.push({
           authorName: byAuthorName ? byAuthorName[1] : note.author.name,
           timeSpent: convertTime(timeSubtractedDeletedNote[1]) / 3600,
-          createdAt: note.createdAt,
+          createdAt: note.created_at,
         });
       } else if (removedTimeSpentNote) {
         timeTrackingData = [];

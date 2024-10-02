@@ -4,7 +4,7 @@ import debug from 'debug';
 import { Octokit } from '@octokit/rest';
 import { Octokit as OctokitCore } from '@octokit/core';
 import { paginateGraphql } from '@octokit/plugin-paginate-graphql';
-import { GithubJob, GithubUser } from '../../types/GithubTypes';
+import { GithubJob, GithubUser } from '../../types/githubTypes.ts';
 
 const log = debug('github');
 
@@ -40,8 +40,6 @@ class GitHub {
               login
               email
               name
-              url
-              avatarUrl
             }
             pageInfo {
               hasNextPage

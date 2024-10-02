@@ -7,18 +7,16 @@ import helpers from './helper/git/helpers.js';
 import GatewayMock from './helper/gateway/gatewayMock';
 
 import Db from '../core/db/db';
-import Commit from '../models/models/Commit';
-import File from '../models/models/File';
-import CommitUserConnection from '../models/connections/CommitUserConnection';
-import CommitFileConnection from '../models/connections/CommitFileConnection';
-import CommitCommitConnection from '../models/connections/CommitCommitConnection';
-import User from '../models/models/User';
-
+import Commit from '../models/Commit';
+import File from '../models/File';
+import Hunk from '../models/Hunk';
+import CommitStakeholderConnection from '../models/CommitStakeholderConnection.js';
 import conf from '../utils/config.js';
+
 import ctx from '../utils/context';
 import GitHubUrlProvider from '../url-providers/GitHubUrlProvider';
+import Stakeholder from '../models/Stakeholder.js';
 import path from 'path';
-
 const indexerOptions = {
   backend: true,
   frontend: false,
@@ -58,10 +56,9 @@ describe('commit', function () {
       await db.truncate();
       await Commit.ensureCollection();
       await File.ensureCollection();
-      await CommitCommitConnection.ensureCollection();
-      await CommitFileConnection.ensureCollection();
-      await CommitUserConnection.ensureCollection();
-      await User.ensureCollection();
+      await Hunk.ensureCollection();
+      await CommitStakeholderConnection.ensureCollection();
+      await Stakeholder.ensureCollection();
 
       await fake.file(repo, 'test.js', testFile);
       await helpers.commit(repo, ['test.js'], bob, 'Commit1');
@@ -97,7 +94,7 @@ describe('commit', function () {
       await db.truncate();
       await Commit.ensureCollection();
       await File.ensureCollection();
-      await CommitFileConnection.ensureCollection();
+      await Hunk.ensureCollection();
 
       await fake.file(repo, 'test.js', testFile);
       await helpers.commit(repo, ['test.js'], bob, 'Commit1');
@@ -112,7 +109,7 @@ describe('commit', function () {
 
       for (const commit of commits) {
         const commitDAO = await Commit.persist(repo, commit, urlProvider);
-        await Promise.all(await Commit.processTree(commitDAO, repo, commit, currentBranch, urlProvider, gateway, ctx));
+        await Promise.all(await commitDAO.processTree(repo, commit, currentBranch, urlProvider, gateway, ctx));
       }
       const dbCommitsCollectionData = await (await db.query('FOR i IN @@collection RETURN i', { '@collection': 'commits' })).all();
       const dbFilesCollectionData = await (await db.query('FOR i IN @@collection RETURN i', { '@collection': 'files' })).all();

@@ -7,7 +7,7 @@ const aql = arangodb.aql;
 const commitsToFiles = db._collection('commits-files');
 const branchesToFiles = db._collection('branches-files');
 const branchesToFilesToFiles = db._collection('branches-files-files');
-const commitsToFilesToUsers = db._collection('commits-files-users');
+const commitsToFilesToStakeholders = db._collection('commits-files-stakeholders');
 const paginated = require('./paginated.js');
 
 module.exports = new gql.GraphQLObjectType({
@@ -36,12 +36,12 @@ module.exports = new gql.GraphQLObjectType({
         description: 'The commits touching this file',
         query: (file, args, limit) => aql`
           FOR commit, edge
-            IN INBOUND ${file} ${commitsToFiles}
+            IN OUTBOUND ${file} ${commitsToFiles}
             let o = (
-              FOR user, conn
-                  IN OUTBOUND edge ${commitsToFilesToUsers}
+              FOR stakeholder, conn
+                  IN OUTBOUND edge ${commitsToFilesToStakeholders}
                       RETURN {
-                          user: user.gitSignature,
+                          stakeholder: stakeholder.gitSignature,
                           hunks: conn.hunks,
                       }
             )
@@ -64,7 +64,7 @@ module.exports = new gql.GraphQLObjectType({
           FOR branch IN branches
           FILTER branch.branch == ${args.branch}
           FOR file, edge
-              IN INBOUND ${file} ${branchesToFiles}
+              IN OUTBOUND ${file} ${branchesToFiles}
               FOR oldFile, conn
                   IN OUTBOUND edge ${branchesToFilesToFiles}
                       RETURN {

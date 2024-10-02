@@ -9,7 +9,7 @@ import Milestones from './serverDB/milestones';
 import Files from './serverDB/files';
 import Branches from './serverDB/branches';
 import Modules from './serverDB/modules';
-import Users from './serverDB/users';
+import Stakeholders from './serverDB/stakeholders';
 
 export default class ServerDB {
   static getBounds() {
@@ -104,8 +104,8 @@ export default class ServerDB {
     return Modules.getAllModules();
   }
 
-  static getAllUsers() {
-    return Users.getAllUsers();
+  static getAllStakeholders() {
+    return Stakeholders.getAllStakeholders();
   }
 
   static getCodeHotspotsChangeData(file) {

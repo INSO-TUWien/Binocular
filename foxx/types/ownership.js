@@ -4,10 +4,10 @@ const gql = require('graphql-sync');
 
 module.exports = new gql.GraphQLObjectType({
   name: 'Ownership',
-  description: 'how many lines of a file does a user own at the time of a commit',
+  description: 'how many lines of a file does a stakeholder own at the time of a commit',
   fields() {
     return {
-      user: {
+      stakeholder: {
         type: new gql.GraphQLNonNull(gql.GraphQLString),
       },
       ownedLines: {
@@ -27,26 +27,14 @@ const OwnershipHunk = new gql.GraphQLObjectType({
   description: '',
   fields() {
     return {
-      originalCommit: {
+      startLine: {
+        type: new gql.GraphQLNonNull(gql.GraphQLInt),
+      },
+      endLine: {
+        type: new gql.GraphQLNonNull(gql.GraphQLInt),
+      },
+      commitSha: {
         type: new gql.GraphQLNonNull(gql.GraphQLString),
-      },
-      lines: {
-        type: new gql.GraphQLList(OwnershipHunkLines)
-      }
-    }
-  }
-})
-
-const OwnershipHunkLines = new gql.GraphQLObjectType({
-  name: 'OwnershipHunkLines',
-  description: '',
-  fields() {
-    return {
-      from: {
-        type: new gql.GraphQLNonNull(gql.GraphQLInt)
-      },
-      to: {
-        type: new gql.GraphQLNonNull(gql.GraphQLInt)
       },
     }
   }

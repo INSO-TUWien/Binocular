@@ -20,17 +20,17 @@ export default class DataExport extends React.Component {
         files: [],
         issues: [],
         modules: [],
-        users: [],
+        stakeholders: [],
         mergeRequests: [],
       },
       relations: {
         commits_commits: [],
         commits_files: [],
-        commits_files_users: [],
+        commits_files_stakeholders: [],
         commits_modules: [],
-        commits_users: [],
+        commits_stakeholders: [],
         issues_commits: [],
-        issues_users: [],
+        issues_stakeholders: [],
         modules_files: [],
         modules_modules: [],
       },
@@ -217,15 +217,15 @@ export default class DataExport extends React.Component {
       collections.files = database.files;
       collections.issues = database.issues;
       collections.modules = database.modules;
-      collections.users = database.users;
+      collections.stakeholders = database.stakeholders;
       collections.mergeRequests = database.mergeRequests;
 
       relations.commits_commits = database.commits_commits;
       relations.commits_files = database.commits_files;
-      relations.commits_files_users = database.commits_files_users;
-      relations.commits_users = database.commits_users;
+      relations.commits_files_stakeholders = database.commits_files_stakeholders;
+      relations.commits_stakeholders = database.commits_stakeholders;
       relations.issues_commits = database.issues_commits;
-      relations.issues_users = database.issues_users;
+      relations.issues_stakeholders = database.issues_stakeholders;
       relations.modules_files = database.modules_files;
       relations.modules_modules = database.modules_modules;
 

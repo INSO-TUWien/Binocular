@@ -100,13 +100,13 @@ export default () => {
 
       //now filecache stores the current ownership for each file that exists at the time of the current commit
       for (const [, fileOwnershipData] of Object.entries(fileCache)) {
-        for (const ownershipOfUser of fileOwnershipData) {
-          if (commitResult.ownership[ownershipOfUser.user]) {
-            commitResult.ownership[ownershipOfUser.user] += ownershipOfUser.ownedLines;
+        for (const ownershipOfStakeholder of fileOwnershipData) {
+          if (commitResult.ownership[ownershipOfStakeholder.stakeholder]) {
+            commitResult.ownership[ownershipOfStakeholder.stakeholder] += ownershipOfStakeholder.ownedLines;
           } else {
-            commitResult.ownership[ownershipOfUser.user] = ownershipOfUser.ownedLines;
+            commitResult.ownership[ownershipOfStakeholder.stakeholder] = ownershipOfStakeholder.ownedLines;
           }
-          sum += ownershipOfUser.ownedLines;
+          sum += ownershipOfStakeholder.ownedLines;
         }
       }
       if (sum !== 0) {
@@ -154,7 +154,7 @@ export default () => {
       setScale([0, max * 1.1]);
     }
 
-    //get all users
+    //get all stakeholders
     const tempKeys = [];
     filteredOwnershipData.map((d) => {
       for (const [authorName] of Object.entries(d.ownership)) {
@@ -176,12 +176,12 @@ export default () => {
       //set the date as timestamp (in ms)
       result.date = new Date(d.date).getTime();
 
-      //set the ownership to 0 for all users
+      //set the ownership to 0 for all stakeholders
       for (const name of tempKeys) {
         result[name] = 0;
       }
 
-      //also for special user "other"
+      //also for special stakeholder "other"
       result['other'] = 0;
 
       //set the ownership of everyone to the real value

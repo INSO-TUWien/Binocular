@@ -134,7 +134,7 @@ const extractCommitData = (
 
   if (commits.length > 0) {
     //---- STEP 1: AGGREGATE COMMITS GROUPED BY AUTHORS PER TIME INTERVAL ----
-    //let granularity = dashboard.getGranularity(props.resolution);
+    //let granularity = Dashboard.getGranularity(props.resolution);
     const granularity = getGranularity(props.chartResolution);
     const curr = moment(firstTimestamp)
       .startOf(granularity.unit as moment.unitOfTime.StartOf)

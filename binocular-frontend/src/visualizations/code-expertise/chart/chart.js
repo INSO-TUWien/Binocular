@@ -21,7 +21,7 @@ import FullScreenMessage from './full-screen-message';
 const Chart = ({ devData }) => {
   const chartSizeFactor = 0.85;
 
-  //global state from reducer store
+  //global state from redux store
   const config = useSelector((state) => state.visualizations.codeExpertise.state.config);
   const mode = useSelector((state) => state.visualizations.codeExpertise.state.config.mode);
 
@@ -61,7 +61,7 @@ const Chart = ({ devData }) => {
 
   //only (re-)create segments if data changes
   useEffect(() => {
-    //total number of added lines by all users of the currently selected issue
+    //total number of added lines by all stakeholders of the currently selected issue
     const additionsTotal = _.reduce(
       devData,
       (sum, adds) => {
@@ -101,7 +101,7 @@ const Chart = ({ devData }) => {
       const devAdditions = devData.additions;
       const devLinesOwned = devData.linesOwned;
 
-      //we dont care about users that for example only have deletions for selected files
+      //we dont care about stakeholders that for example only have deletions for selected files
       if (devAdditions === 0) return;
 
       //at which point in a circle should the segment start
