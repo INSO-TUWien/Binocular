@@ -177,6 +177,17 @@ all features will be available in the offline build)
 
 For more information check `binocular -h`
 
+### New Frontend (:warning: Experimental)
+To try the experimental new frontend navigate to the folder
+`binocular-frontend-new` and run the following command in that specific folder.
+``` shell
+npm run dev
+```
+This new frontend is a complete rework from the current implementation
+and is currently in its development and test phase.
+It is not yet ready for use but gives a glimpse into the future of what binocular could look like.
+
+
 ## Contributing
 
 **:warning:Binocular is currently in a transition state from javascript to typescript.

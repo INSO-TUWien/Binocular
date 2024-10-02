@@ -1,0 +1,147 @@
+@import "../../../variables.scss";
+
+$dashboardItemInteractionBarThickness: 1.5rem;
+$dashboardItemResizeBarThickness: 3px;
+.dashboardItem{
+  position: absolute;
+  @apply bg-base-200;
+  border-radius: $border-radius-default;
+  border: $border-default;
+  @apply border-base-300;
+  box-shadow: $shadow-default;
+  overflow: hidden;
+}
+
+.dashboardItemContent{
+  position: absolute;
+  width: 100%;
+  height: calc(100% - $dashboardItemInteractionBarThickness);
+  top: $dashboardItemInteractionBarThickness;
+  @apply bg-base-100;
+}
+
+.dashboardItemInteractionBar{
+  position: absolute;
+  @apply bg-base-100;
+  box-shadow: $shadow-default;
+  user-select: none;
+  cursor: grab;
+  height: $dashboardItemInteractionBarThickness;
+  width: 100%;
+}
+
+.dashboardItemInteractionBar>span{
+  margin-left: .5rem;
+  float: left;
+}
+
+.dashboardItemInteractionBar>button{
+  margin-right: .5rem;
+  width: $dashboardItemInteractionBarThickness;
+  height: $dashboardItemInteractionBarThickness;
+  float: right;
+}
+
+.dashboardItemResizeBarTop{
+  position: absolute;
+  top: 0;
+  left: $dashboardItemResizeBarThickness;
+  width: calc(100% - $dashboardItemResizeBarThickness * 2);
+  height: $dashboardItemResizeBarThickness;
+  cursor: ns-resize;
+}
+
+.dashboardItemResizeBarRight{
+  position: absolute;
+  top: $dashboardItemResizeBarThickness;
+  right: 0;
+  width: $dashboardItemResizeBarThickness;
+  height: calc(100% - $dashboardItemResizeBarThickness * 2);
+  cursor: ew-resize;
+}
+
+.dashboardItemResizeBarBottom{
+  position: absolute;
+  bottom: 0;
+  left: $dashboardItemResizeBarThickness;
+  width: calc(100% - $dashboardItemResizeBarThickness * 2);
+  height: $dashboardItemResizeBarThickness;
+  cursor: ns-resize;
+}
+
+.dashboardItemResizeBarLeft{
+  position: absolute;
+  top: $dashboardItemResizeBarThickness;
+  left: 0;
+  width: $dashboardItemResizeBarThickness;
+  height: calc(100% - $dashboardItemResizeBarThickness * 2);
+  cursor: ew-resize;
+}
+
+.settingsButton{
+  background: url("../../../assets/dots_horizontal_gray.svg");
+}
+
+.popoutButton{
+  background: url("../../../assets/open_in_new_gray.svg");
+}
+
+.exportButton{
+  background: url("../../../assets/export_gray_window.svg");
+}
+
+.helpButton{
+  background: url("../../../assets/info_gray.svg");
+}
+
+
+.settingsBackground{
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: +1;
+}
+
+.settingsWindow{
+  position: absolute;
+  width: 20rem;
+  min-height: 5rem;
+  border-radius: $border-radius-default;
+  @apply bg-base-100;
+  box-shadow: $shadow-default;
+  border: $border-default;
+  @apply border-base-300;
+  padding: .5rem;
+}
+
+.popoutWarning{
+  @apply text-xs;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.popoutWarning>div{
+  width: 80%;
+  text-align: center;
+}
+
+.popoutTextContainer{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  width: 100%;
+  flex-direction: column;
+}
+.popoutTextContainer>div{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 1rem;
+}

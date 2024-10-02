@@ -1,0 +1,73 @@
+.dashboard {
+  width: 100%;
+  height: 100%;
+  overflow-y: scroll;
+  overflow-x: hidden;
+}
+
+.dashboardContent {
+  position: relative;
+  width: 100%;
+}
+
+.dashboardBackground {
+  position: relative;
+  top: 0;
+  left: 0;
+  width: 100%;
+}
+
+.dashboardBackgroundCell {
+  position: relative;
+  width: 80%;
+  height: 80%;
+  @apply bg-base-200;
+  margin: auto;
+  border-radius: 5px;
+}
+
+.dashboardBackgroundCellHighlight {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border-radius: 5px;
+  scale: 0.5;
+  transition: all ease-in-out 0.2s;
+  opacity: 0;
+}
+
+.dashboardBackgroundCellHighlightActive {
+  @apply bg-accent;
+  scale: 1.1;
+  opacity: 1;
+}
+
+.dashboardBackgroundCellHighlightNotPossible {
+  @apply bg-error;
+  scale: 1.1;
+  opacity: 1;
+}
+
+.dragIndicator {
+  position: absolute;
+  border-radius: 5px;
+  opacity: 0.5;
+  user-select: none;
+  overflow: hidden;
+  border: 1px solid;
+  @apply border-accent;
+  display: none;
+  backdrop-filter: blur(30px);
+  -webkit-backdrop-filter: blur(30px);
+}
+
+.dragResizeZone {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  cursor: grabbing;
+}
+
+/*# sourceMappingURL=dashboard.module.css.map */

@@ -138,12 +138,12 @@ GitHubITSIndexer.prototype.index = async function () {
 
     log('Getting issues for', `${owner}/${repo}`);
 
-    // Persist Issues and Authors/Assignees
+    // Persist Issues and Users/Assignees
     const issues = await this.controller.getIssuesWithEvents(owner, repo);
     this.reporter.setIssueCount(issues.length);
     await processIssues(issues, 'issue', Issue);
 
-    // Persist Merge Requests and Authors/Assignees
+    // Persist Merge Requests and Users/Assignees
     const mergeRequests = await this.controller.getPullRequestsWithEvents(owner, repo);
     this.reporter.setMergeRequestCount(mergeRequests.length);
     await processIssues(mergeRequests, 'mergeRequest', MergeRequest);

@@ -21,7 +21,7 @@ import FullScreenMessage from './full-screen-message';
 const Chart = ({ devData }) => {
   const chartSizeFactor = 0.85;
 
-  //global state from redux store
+  //global state from reducer store
   const config = useSelector((state) => state.visualizations.codeExpertise.state.config);
   const mode = useSelector((state) => state.visualizations.codeExpertise.state.config.mode);
 

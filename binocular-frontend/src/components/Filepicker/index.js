@@ -20,7 +20,7 @@ import _ from 'lodash';
  *                                   and where the file `fortytwo.txt` is not checked.
  * @param setActiveFiles function that takes an array of filenames and mutates the global/local state.
  *                       This function is called everytime a file is checked and will get an array of *all* currently checked files.
- *                       Example: If `globalActiveFiles` is in the global state managed by redux,
+ *                       Example: If `globalActiveFiles` is in the global state managed by reducer,
  *                       `setActiveFiles` should look something like `(files) => dispatch(setGlobalFiles(files))`
  * @param showSelectButtons (optional, default true) If set to false, the `Select All` and `Deselect All` buttons are hidden.
  * @param fileOwnership (optional) if set, colors in the filepicker will represent ownership of files and modules.

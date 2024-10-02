@@ -1,0 +1,11 @@
+.mainView {
+  width: 100%;
+  height: calc(100% - 1.5rem);
+}
+
+.statusBar {
+  height: 1.5rem;
+  width: 100%;
+}
+
+/*# sourceMappingURL=app.module.css.map */

@@ -12,7 +12,7 @@ import { getBranches, getFilenamesForBranch, getIssues } from '../sagas/helper';
 import { ownershipDataForMergedAuthors } from '../../../utils/ownership.js';
 
 export default () => {
-  //global state from redux store
+  //global state from reducer store
   const expertiseState = useSelector((state) => state.visualizations.codeExpertise.state);
   const currentMode = expertiseState.config.mode;
   const currentBranch = expertiseState.config.currentBranch;

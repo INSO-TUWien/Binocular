@@ -41,7 +41,7 @@ export default handleActions(
       const mergedAndOtherAuthorsCount = sumMergedAndOtherAuthors(state.mergedAuthors, state.otherAuthors);
       const allAuthorCount = Object.keys(action.payload).length;
       if (mergedAndOtherAuthorsCount > 0 && mergedAndOtherAuthorsCount < allAuthorCount - 1) {
-        console.log('Current localStorage does not align with the Author list loaded from the Database! New Authors will be added.');
+        console.log('Current localStorage does not align with the Author list loaded from the Database! New Users will be added.');
         const missingAuthors = findMissingAuthors(action.payload, state.mergedAuthors, state.otherAuthors);
         state.mergedAuthors.push(...missingAuthors);
         const config: UniversalSettings = updateUniversalSettingsLocalStorage('mergedAuthors', state.mergedAuthors, defaultConfig);
