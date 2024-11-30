@@ -11,7 +11,7 @@ const RepositoryStats: VisualizationPlugin<SettingsType> = {
   chartComponent: Chart,
   settingsComponent: Settings,
   helpComponent: Help,
-  defaultSettings: {},
+  defaultSettings: {commits: true, contributors: true, issues: true},
   export: {
     getSVGData: () => '<svg></svg>',
   },

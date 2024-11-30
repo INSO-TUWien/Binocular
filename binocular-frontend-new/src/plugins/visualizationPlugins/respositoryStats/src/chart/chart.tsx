@@ -27,6 +27,7 @@ function Chart(props: {
   const commitNumber = useSelector((state: RootState) => state.commitNumber);
   const userNumber = useSelector((state: RootState) => state.userNumber);
   const issueNumber = useSelector((state: RootState) => state.issueNumber);
+  const buildNumber = useSelector((state: RootState) => state.buildNumber);
   const dataState = useSelector((state: RootState) => state.dataState);
   //React Component State
   const [chartWidth, setChartWidth] = useState(100);
@@ -35,6 +36,7 @@ function Chart(props: {
   const [commits, setCommits] = useState<number>(0);
   const [users, setUsers] = useState<number>(0);
   const [issues, setIssues] = useState<number>(0);
+  const [builds, setBuilds] = useState<number>(0);
 
   /*
 Throttle the resize of the svg (refresh rate) to every 1s to not overwhelm the renderer,
@@ -69,6 +71,7 @@ This isn't really necessary for this visualization, but for bigger visualization
     setCommits(commitNumber);
     setUsers(userNumber);
     setIssues(issueNumber);
+    setBuilds(buildNumber);
   }, [commitNumber, users, props.parameters]);
 
   //Set Global state when parameters change. This will also conclude in a refresh of the data.
@@ -95,20 +98,30 @@ This isn't really necessary for this visualization, but for bigger visualization
         {dataState === DataState.COMPLETE && (
           <div className={styles.chartContainer}>
             <div className="stats shadow stats-vertical m-2 w-11/12">
-              <div className="stat">
-                <div className="stat-title">Contributors</div>
-                <div className="stat-value text-primary">{users}</div>
-              </div>
-
-              <div className="stat">
-                <div className="stat-title">Commits</div>
-                <div className="stat-value text-primary">{commits}</div>
-              </div>
-
-              <div className="stat">
-                <div className="stat-title">Issues</div>
-                <div className="stat-value text-primary">{issues}</div>
-              </div>
+              {props.settings.contributors && (
+                <div className="stat">
+                  <div className="stat-title">Contributors</div>
+                  <div className="stat-value text-primary">{users}</div>
+                </div>
+              )}
+              {props.settings.commits && (
+                <div className="stat">
+                  <div className="stat-title">Commits</div>
+                  <div className="stat-value text-primary">{commits}</div>
+                </div>
+              )}
+              {props.settings.issues && (
+                <div className="stat">
+                  <div className="stat-title">Issues</div>
+                  <div className="stat-value text-primary">{issues}</div>
+                </div>
+              )}
+              {props.settings.builds && (
+                <div className="stat">
+                  <div className="stat-title">Builds</div>
+                  <div className="stat-value text-primary">{builds}</div>
+                </div>
+              )}
             </div>
           </div>
         )}
