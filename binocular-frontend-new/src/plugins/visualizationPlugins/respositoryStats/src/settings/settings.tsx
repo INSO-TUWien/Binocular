@@ -58,21 +58,21 @@ function Settings(props: { settings: SettingsType; setSettings: (newSettings: Se
           />
         </label>
         <label className="label cursor-pointer">
-        <span className="label-text">Show builds:</span>
-        <input
-          type="checkbox"
-          className="toggle toggle-accent toggle-sm"
-          defaultChecked={props.settings.builds}
-          onChange={(event) =>
-            props.setSettings({
-              commits: props.settings.commits,
-              contributors: props.settings.contributors,
-              issues: props.settings.issues,
-              builds: event.target.checked,
-            })
-          }
-        />
-      </label>
+          <span className="label-text">Show builds:</span>
+          <input
+            type="checkbox"
+            className="toggle toggle-accent toggle-sm"
+            defaultChecked={props.settings.builds}
+            onChange={(event) =>
+              props.setSettings({
+                commits: props.settings.commits,
+                contributors: props.settings.contributors,
+                issues: props.settings.issues,
+                builds: event.target.checked,
+              })
+            }
+          />
+        </label>
       </div>
     </>
   );

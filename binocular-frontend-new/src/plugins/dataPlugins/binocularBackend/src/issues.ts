@@ -15,36 +15,36 @@ export default class Issues implements DataPluginIssues {
     const getIssuePage = (since?: string, until?: string) => async (page: number, perPage: number) => {
       const resp = await this.graphQl.client.query({
         query: gql`
-        query($page: Int, $perPage: Int, $since: Timestamp, $until: Timestamp) {
-          issues(page: $page, perPage: $perPage, since: $since, until: $until) {
-            page
-            perPage
-            count
-            data {
-              iid
-              title
-              state
-              webUrl
-              createdAt
-              closedAt
-              author{
-                login
-                name
-              }
-              assignee {
-                login
-                name
-              }
-              assignees {
-                login
-                name
+          query ($page: Int, $perPage: Int, $since: Timestamp, $until: Timestamp) {
+            issues(page: $page, perPage: $perPage, since: $since, until: $until) {
+              page
+              perPage
+              count
+              data {
+                iid
+                title
+                state
+                webUrl
+                createdAt
+                closedAt
+                author {
+                  login
+                  name
+                }
+                assignee {
+                  login
+                  name
+                }
+                assignees {
+                  login
+                  name
+                }
               }
             }
           }
-        }`,
+        `,
         variables: { page, perPage, since, until },
       });
-      console.log(resp.data.issues);
       return resp.data.issues;
     };
 
