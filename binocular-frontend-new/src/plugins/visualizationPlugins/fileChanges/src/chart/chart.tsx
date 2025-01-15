@@ -82,18 +82,18 @@ function Chart(props: {
     return () => resizeObserver.disconnect();
   }, [props.chartContainerRef, chartHeight, chartWidth]);
 
-  // Effect on data change
-  //useEffect(() => {
-  //  const { commitChartData, commitScale, commitPalette } = convertCommitDataToChangesChartData(
-  //    commits,
-  //    props.authorList,
-  //    props.settings.splitAdditionsDeletions,
-  //    props.parameters,
-  //  );
-  //  setChartData(commitChartData);
-  //  setChartScale(commitScale);
-  //  setChartPalette(commitPalette);
-  //}, [commits, props.authorList, props.parameters, props.settings.splitAdditionsDeletions]);
+  //Effect on data change
+  useEffect(() => {
+    const { commitChartData, commitScale, commitPalette } = convertCommitDataToChangesChartData(
+      current_file_commits,
+      props.authorList,
+      props.settings.splitAdditionsDeletions,
+      props.parameters,
+    );
+    setChartData(commitChartData);
+    setChartScale(commitScale);
+    setChartPalette(commitPalette);
+  }, [current_file_commits, props.authorList, props.parameters, props.settings.splitAdditionsDeletions]);
 
   //Set Global state when parameters change. This will also conclude in a refresh of the data.
   useEffect(() => {
