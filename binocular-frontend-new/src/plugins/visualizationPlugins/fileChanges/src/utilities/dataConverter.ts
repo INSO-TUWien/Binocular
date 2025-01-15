@@ -31,6 +31,8 @@ export function convertCommitDataToChangesChartData(
   const commitScale: number[] = [0, 0];
   const commitPalette: Palette = {};
 
+  console.log("SortedCommits: ", sortedCommits)
+
   if (sortedCommits.length > 0) {
     //---- STEP 1: AGGREGATE COMMITS GROUPED BY AUTHORS PER TIME INTERVAL ----
 
@@ -58,8 +60,22 @@ export function convertCommitDataToChangesChartData(
       }; //Save date of time bucket, create object
       for (; i < sortedCommits.length && Date.parse(sortedCommits[i].date) < nextTimestamp; i++) {
         //Iterate through commits that fall into this time bucket
-        const additions = sortedCommits[i].stats.additions;
-        const deletions = sortedCommits[i].stats.deletions;
+        var additions = 0;
+        for (const f of sortedCommits[i].files.data) {
+          for (const h of f.hunks) {
+            if (h.newLines) {
+              additions += h.newLines;
+            }
+          }
+        }
+        var deletions = 0;
+        for (const f of sortedCommits[i].files.data) {
+          for (const h of f.hunks) {
+            if (h.oldLines) {
+              deletions += h.oldLines;
+            }
+          }
+        }
         const changes = additions + deletions;
         const commitAuthor = sortedCommits[i].user.id;
         if (totalChangesPerAuthor[commitAuthor] === undefined) {
@@ -155,6 +171,7 @@ export function convertCommitDataToChangesChartData(
     });
     //Output in commitChartData has format [{author1: 123, author2: 123, ...}, ...],
     //e.g. series names are the authors with their corresponding values
+
 
     //---- STEP 3: SCALING ----
     commitChartData.forEach((dataPoint) => {
