@@ -1,5 +1,5 @@
 export interface SettingsType {
-  fileName: string;
+  file: string;
   splitAdditionsDeletions: boolean;
   visualizationStyle: string;
   showSprints: boolean;
@@ -15,12 +15,12 @@ function Settings(props: { settings: SettingsType; setSettings: (newSettings: Se
           </div>
           <select
             className="select select-bordered select-sm"
-            defaultValue={props.settings.visualizationStyle}
+            defaultValue={props.settings.file}
             onChange={(e) =>
               props.setSettings({
-                fileName: e.target.value,
+                file: e.target.value,
                 splitAdditionsDeletions: props.settings.splitAdditionsDeletions,
-                visualizationStyle: props.settings.visualizationStyle,
+                visualizationStyle: e.target.value,
                 showSprints: props.settings.showSprints,
               })
             }>
@@ -37,7 +37,7 @@ function Settings(props: { settings: SettingsType; setSettings: (newSettings: Se
             defaultChecked={props.settings.splitAdditionsDeletions}
             onChange={(event) =>
               props.setSettings({
-                fileName: props.settings.fileName,
+                file: props.settings.file,
                 splitAdditionsDeletions: event.target.checked,
                 visualizationStyle: props.settings.visualizationStyle,
                 showSprints: props.settings.showSprints,
@@ -54,7 +54,7 @@ function Settings(props: { settings: SettingsType; setSettings: (newSettings: Se
             defaultValue={props.settings.visualizationStyle}
             onChange={(e) =>
               props.setSettings({
-                fileName: props.settings.fileName,
+                file: props.settings.file,
                 splitAdditionsDeletions: props.settings.splitAdditionsDeletions,
                 visualizationStyle: e.target.value,
                 showSprints: props.settings.showSprints,
@@ -73,7 +73,7 @@ function Settings(props: { settings: SettingsType; setSettings: (newSettings: Se
             defaultChecked={props.settings.showSprints}
             onChange={(event) =>
               props.setSettings({
-                fileName: props.settings.fileName,
+                file: props.settings.file,
                 splitAdditionsDeletions: props.settings.splitAdditionsDeletions,
                 visualizationStyle: props.settings.visualizationStyle,
                 showSprints: event.target.checked,

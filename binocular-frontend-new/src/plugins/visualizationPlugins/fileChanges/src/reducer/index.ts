@@ -1,5 +1,6 @@
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { DataPluginCommit } from '../../../../interfaces/dataPluginInterfaces/dataPluginCommits.ts';
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { DataPluginFile } from "../../../../interfaces/dataPluginInterfaces/dataPluginFiles.ts";
+import { DataPluginCommit } from "../../../../interfaces/dataPluginInterfaces/dataPluginCommits.ts";
 
 export enum DataState {
   EMPTY,
@@ -13,23 +14,28 @@ interface DateRange {
 }
 
 export interface ChangesState {
-  commits: DataPluginCommit[];
+  current_file_commits: DataPluginCommit[];
+  files: DataPluginFile[];
   dateRange: DateRange;
   dataState: DataState;
 }
 
 const initialState: ChangesState = {
-  commits: [],
+  current_file_commits : [],
+  files: [],
   dateRange: { from: new Date().toISOString(), to: new Date().toISOString() },
   dataState: DataState.EMPTY,
 };
 
 export const changesSlice = createSlice({
-  name: 'changes',
+  name: "changes",
   initialState,
   reducers: {
-    setCommits: (state, action: PayloadAction<DataPluginCommit[]>) => {
-      state.commits = action.payload;
+    setCurrentFileCommits(state, action: PayloadAction<DataPluginCommit[]>) {
+      state.current_file_commits = action.payload;
+    },
+    setFiles: (state, action: PayloadAction<DataPluginFile[]>) => {
+      state.files = action.payload;
     },
     setDateRange: (state, action: PayloadAction<DateRange>) => {
       state.dateRange = action.payload;
@@ -40,5 +46,6 @@ export const changesSlice = createSlice({
   },
 });
 
-export const { setCommits, setDateRange, setDataState } = changesSlice.actions;
+export const { setCurrentFileCommits, setFiles, setDateRange, setDataState } =
+  changesSlice.actions;
 export default changesSlice.reducer;

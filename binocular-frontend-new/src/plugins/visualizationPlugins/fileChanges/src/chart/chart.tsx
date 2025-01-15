@@ -40,7 +40,8 @@ function Chart(props: {
    * -----------------------------
    */
   //Redux Global State
-  const commits = useSelector((state: RootState) => state.commits);
+  const files = useSelector((state: RootState) => state.files);
+  const current_file_commits = useSelector((state: RootState) => state.current_file_commits);
   const dataState = useSelector((state: RootState) => state.dataState);
   //React Component State
   const [chartWidth, setChartWidth] = useState(100);
@@ -49,6 +50,9 @@ function Chart(props: {
   const [chartData, setChartData] = useState<CommitChartData[]>([]);
   const [chartScale, setChartScale] = useState<number[]>([]);
   const [chartPalette, setChartPalette] = useState<Palette>({});
+
+  console.log(files)
+  console.log(current_file_commits)
 
   /*
   Throttle the resize of the svg (refresh rate) to every 1s to not overwhelm the renderer,
@@ -79,17 +83,17 @@ function Chart(props: {
   }, [props.chartContainerRef, chartHeight, chartWidth]);
 
   // Effect on data change
-  useEffect(() => {
-    const { commitChartData, commitScale, commitPalette } = convertCommitDataToChangesChartData(
-      commits,
-      props.authorList,
-      props.settings.splitAdditionsDeletions,
-      props.parameters,
-    );
-    setChartData(commitChartData);
-    setChartScale(commitScale);
-    setChartPalette(commitPalette);
-  }, [commits, props.authorList, props.parameters, props.settings.splitAdditionsDeletions]);
+  //useEffect(() => {
+  //  const { commitChartData, commitScale, commitPalette } = convertCommitDataToChangesChartData(
+  //    commits,
+  //    props.authorList,
+  //    props.settings.splitAdditionsDeletions,
+  //    props.parameters,
+  //  );
+  //  setChartData(commitChartData);
+  //  setChartScale(commitScale);
+  //  setChartPalette(commitPalette);
+  //}, [commits, props.authorList, props.parameters, props.settings.splitAdditionsDeletions]);
 
   //Set Global state when parameters change. This will also conclude in a refresh of the data.
   useEffect(() => {

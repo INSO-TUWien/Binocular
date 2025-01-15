@@ -1,6 +1,7 @@
-import { put, takeEvery, fork, call, select, throttle } from 'redux-saga/effects';
-import { ChangesState, DataState, setCommits, setDataState, setDateRange } from '../reducer';
+import { put, takeEvery, fork, call, throttle } from 'redux-saga/effects';
+import { DataState, setCurrentFileCommits, setDataState, setDateRange, setFiles } from '../reducer';
 import { DataPlugin } from '../../../../interfaces/dataPlugin.ts';
+import { DataPluginFile } from '../../../../interfaces/dataPluginInterfaces/dataPluginFiles.ts';
 import { DataPluginCommit } from '../../../../interfaces/dataPluginInterfaces/dataPluginCommits.ts';
 
 export default function* (dataConnection: DataPlugin) {
@@ -18,8 +19,9 @@ function* watchDateRangeChange(dataConnection: DataPlugin) {
 
 function* fetchChangesData(dataConnection: DataPlugin) {
   yield put(setDataState(DataState.FETCHING));
-  const state: ChangesState = yield select();
-  const commits: DataPluginCommit[] = yield call(() => dataConnection.commits.getAll(state.dateRange.from, state.dateRange.to));
-  yield put(setCommits(commits));
+  const files : DataPluginFile[] = yield call(() => dataConnection.files.getAll());
+  const current_file_commits : DataPluginCommit[] = yield call(() => dataConnection.commits.getByFile("init.lua"));
+  yield put(setFiles(files));
+  yield put(setCurrentFileCommits(current_file_commits))
   yield put(setDataState(DataState.COMPLETE));
 }

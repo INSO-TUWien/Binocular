@@ -12,7 +12,7 @@ const FileChanges: VisualizationPlugin<SettingsType> = {
   chartComponent: Chart,
   settingsComponent: Settings,
   helpComponent: Help,
-  defaultSettings: { splitAdditionsDeletions: false, visualizationStyle: 'curved' },
+  defaultSettings: { file: "README.md", splitAdditionsDeletions: false, visualizationStyle: 'curved' },
   export: {
     getSVGData: getSVGData,
   },
