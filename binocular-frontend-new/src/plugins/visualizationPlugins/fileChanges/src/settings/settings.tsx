@@ -1,3 +1,6 @@
+import { useSelector } from "react-redux";
+import { store } from "../../../../../redux";
+
 export interface SettingsType {
   file: string;
   splitAdditionsDeletions: boolean;
@@ -5,7 +8,18 @@ export interface SettingsType {
   showSprints: boolean;
 }
 
-function Settings(props: { settings: SettingsType; setSettings: (newSettings: SettingsType) => void }) {
+function Settings(props: { 
+  settings: SettingsType; 
+  setSettings: (newSettings: SettingsType) => void,
+  }) {
+  //const files = useSelector((state: any) => state.files);
+  //const files = ["init.lua"]
+  type RootState = ReturnType<typeof store.getState>;
+  const f = useSelector((state: RootState) => state);
+  console.log("Files: ", f);
+
+  const files = ["init.lua"]
+
   return (
     <>
       <div>
@@ -24,9 +38,11 @@ function Settings(props: { settings: SettingsType; setSettings: (newSettings: Se
                 showSprints: props.settings.showSprints,
               })
             }>
-            <option value={'curved'}>curved</option>
-            <option value={'stepped'}>stepped</option>
-            <option value={'linear'}>linear</option>
+            {files.map((f, index) => (
+              <option key={index} value={f}>
+                {f}
+              </option>
+            ))}
           </select>
         </label>
         <label className="label cursor-pointer">
