@@ -51,9 +51,6 @@ function Chart(props: {
   const [chartScale, setChartScale] = useState<number[]>([]);
   const [chartPalette, setChartPalette] = useState<Palette>({});
 
-  console.log(files)
-  console.log(current_file_commits)
-
   /*
   Throttle the resize of the svg (refresh rate) to every 1s to not overwhelm the renderer,
   This isn't really necessary for this visualization, but for bigger visualization this can be quite essential

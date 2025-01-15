@@ -46,6 +46,5 @@ export const changesSlice = createSlice({
   },
 });
 
-export const { setCurrentFileCommits, setFiles, setDateRange, setDataState } =
-  changesSlice.actions;
+export const { setCurrentFileCommits, setFiles, setDateRange, setDataState } = changesSlice.actions;
 export default changesSlice.reducer;
