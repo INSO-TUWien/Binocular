@@ -14,6 +14,7 @@ interface DateRange {
 }
 
 export interface ChangesState {
+  current_file: string;
   current_file_commits: DataPluginCommit[];
   files: DataPluginFile[];
   dateRange: DateRange;
@@ -21,6 +22,7 @@ export interface ChangesState {
 }
 
 const initialState: ChangesState = {
+  current_file: "",
   current_file_commits : [],
   files: [],
   dateRange: { from: new Date().toISOString(), to: new Date().toISOString() },
@@ -34,6 +36,9 @@ export const changesSlice = createSlice({
     setCurrentFileCommits(state, action: PayloadAction<DataPluginCommit[]>) {
       state.current_file_commits = action.payload;
     },
+    setCurrentFile(state, action: PayloadAction<string>) {
+      state.current_file = action.payload;
+    },
     setFiles: (state, action: PayloadAction<DataPluginFile[]>) => {
       state.files = action.payload;
     },
@@ -46,5 +51,5 @@ export const changesSlice = createSlice({
   },
 });
 
-export const { setCurrentFileCommits, setFiles, setDateRange, setDataState } = changesSlice.actions;
+export const { setCurrentFileCommits, setCurrentFile, setFiles, setDateRange, setDataState } = changesSlice.actions;
 export default changesSlice.reducer;

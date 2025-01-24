@@ -31,8 +31,6 @@ export function convertCommitDataToChangesChartData(
   const commitScale: number[] = [0, 0];
   const commitPalette: Palette = {};
 
-  console.log("SortedCommits: ", sortedCommits)
-
   if (sortedCommits.length > 0) {
     //---- STEP 1: AGGREGATE COMMITS GROUPED BY AUTHORS PER TIME INTERVAL ----
 
@@ -171,6 +169,7 @@ export function convertCommitDataToChangesChartData(
     });
     //Output in commitChartData has format [{author1: 123, author2: 123, ...}, ...],
     //e.g. series names are the authors with their corresponding values
+    
 
 
     //---- STEP 3: SCALING ----

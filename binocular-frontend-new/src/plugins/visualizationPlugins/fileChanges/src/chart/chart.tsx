@@ -40,7 +40,6 @@ function Chart(props: {
    * -----------------------------
    */
   //Redux Global State
-  const files = useSelector((state: RootState) => state.files);
   const current_file_commits = useSelector((state: RootState) => state.current_file_commits);
   const dataState = useSelector((state: RootState) => state.dataState);
   //React Component State
