@@ -13,8 +13,20 @@ interface DateRange {
   to: string;
 }
 
+export let files: DataPluginFile[] = [];
+export let current_file: string = "README.md";
+
+export function setGlobalFiles(newFiles: DataPluginFile[]) {
+  files = newFiles;
+}
+
+export function setGlobalCurrentFile(newCurrentFile: string) {
+  current_file = newCurrentFile;
+}
+
 export interface ChangesState {
   current_file: string;
+  last_current_file: string;
   current_file_commits: DataPluginCommit[];
   files: DataPluginFile[];
   dateRange: DateRange;
@@ -22,7 +34,8 @@ export interface ChangesState {
 }
 
 const initialState: ChangesState = {
-  current_file: "",
+  current_file: "README.md",
+  last_current_file: "",
   current_file_commits : [],
   files: [],
   dateRange: { from: new Date().toISOString(), to: new Date().toISOString() },
@@ -37,6 +50,7 @@ export const changesSlice = createSlice({
       state.current_file_commits = action.payload;
     },
     setCurrentFile(state, action: PayloadAction<string>) {
+      state.last_current_file = state.current_file;
       state.current_file = action.payload;
     },
     setFiles: (state, action: PayloadAction<DataPluginFile[]>) => {

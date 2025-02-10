@@ -1,4 +1,5 @@
-import { setCurrentFile } from "../reducer";
+import { setGlobalCurrentFile } from "../reducer";
+import { files } from "../reducer";
 
 export interface SettingsType {
   file: string;
@@ -11,8 +12,6 @@ function Settings(props: {
   settings: SettingsType;
   setSettings: (newSettings: SettingsType) => void;
 }) {
-  const files = ["init.lua", "README.md", "lua/plugins/telescope.lua"];
-
   return (
     <>
       <div>
@@ -24,7 +23,7 @@ function Settings(props: {
             className="select select-bordered select-sm"
             defaultValue={props.settings.file}
             onChange={(e) => {
-              setCurrentFile(e.target.value);
+              setGlobalCurrentFile(e.target.value);
               props.setSettings({
                 file: e.target.value,
                 splitAdditionsDeletions: props.settings.splitAdditionsDeletions,
@@ -34,8 +33,8 @@ function Settings(props: {
             }}
           >
             {files.map((f, index) => (
-              <option key={index} value={f}>
-                {f}
+              <option key={index} value={f.path}>
+                {f.path}
               </option>
             ))}
           </select>

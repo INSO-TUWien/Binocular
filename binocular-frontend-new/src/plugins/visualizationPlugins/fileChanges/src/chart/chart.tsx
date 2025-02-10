@@ -50,6 +50,8 @@ function Chart(props: {
   const [chartScale, setChartScale] = useState<number[]>([]);
   const [chartPalette, setChartPalette] = useState<Palette>({});
 
+  console.log("Current file commits", current_file_commits);
+
   /*
   Throttle the resize of the svg (refresh rate) to every 1s to not overwhelm the renderer,
   This isn't really necessary for this visualization, but for bigger visualization this can be quite essential
@@ -90,6 +92,8 @@ function Chart(props: {
     setChartScale(commitScale);
     setChartPalette(commitPalette);
   }, [current_file_commits, props.authorList, props.parameters, props.settings.splitAdditionsDeletions]);
+
+  console.log(chartData);
 
   //Set Global state when parameters change. This will also conclude in a refresh of the data.
   useEffect(() => {

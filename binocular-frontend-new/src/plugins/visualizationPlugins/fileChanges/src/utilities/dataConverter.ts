@@ -47,7 +47,7 @@ export function convertCommitDataToChangesChartData(
       let i = 0;
       curr.isSameOrBefore(end);
       curr.add(1, <moment.unitOfTime.DurationConstructor>parameters.parametersGeneral.granularity),
-        next.add(1, <moment.unitOfTime.DurationConstructor>parameters.parametersGeneral.granularity)
+      next.add(1, <moment.unitOfTime.DurationConstructor>parameters.parametersGeneral.granularity)
     ) {
       //Iterate through time buckets
       const currTimestamp = curr.toDate().getTime();
@@ -74,6 +74,7 @@ export function convertCommitDataToChangesChartData(
             }
           }
         }
+        console.log("Commit:", i, "Additions:", additions, "Deletions:", deletions);
         const changes = additions + deletions;
         const commitAuthor = sortedCommits[i].user.id;
         if (totalChangesPerAuthor[commitAuthor] === undefined) {
@@ -93,8 +94,11 @@ export function convertCommitDataToChangesChartData(
           obj.statsByAuthor[commitAuthor] = { count: 1, additions: additions, deletions: deletions };
         }
       }
+      console.log("1", obj);
       data.push(obj);
     }
+
+    console.log("Data:", data);
 
     //---- STEP 2: CONSTRUCT CHART DATA FROM AGGREGATED COMMITS ----
     if (splitAdditionsDeletions) {
@@ -169,7 +173,7 @@ export function convertCommitDataToChangesChartData(
     });
     //Output in commitChartData has format [{author1: 123, author2: 123, ...}, ...],
     //e.g. series names are the authors with their corresponding values
-    
+
 
 
     //---- STEP 3: SCALING ----
