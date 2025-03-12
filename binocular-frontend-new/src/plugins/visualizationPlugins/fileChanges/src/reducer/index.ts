@@ -16,12 +16,12 @@ interface DateRange {
 export let files: DataPluginFile[] = [];
 export let current_file: string = "README.md";
 
-export function setGlobalFiles(newFiles: DataPluginFile[]) {
-  files = newFiles;
+export function setGlobalCurrentFileData(newCurrentFile: string) {
+  current_file = newCurrentFile;
 }
 
-export function setGlobalCurrentFile(newCurrentFile: string) {
-  current_file = newCurrentFile;
+export function setGlobalFiles(newFiles: DataPluginFile[]) {
+  files = newFiles;
 }
 
 export interface ChangesState {
