@@ -1,14 +1,12 @@
 import { put, takeEvery, fork, call, throttle } from 'redux-saga/effects';
-import { DataState, setCurrentFile, setCurrentFileCommits, setDataState, setDateRange, setGlobalFiles } from '../reducer';
+import { DataState, current_file, setCurrentFileCommits, setDataState, setDateRange, setGlobalFiles } from '../reducer';
 import { DataPlugin } from '../../../../interfaces/dataPlugin.ts';
-import { DataPluginCommit } from '../../../../interfaces/dataPluginInterfaces/dataPluginCommits.ts';
 import { DataPluginFile } from '../../../../interfaces/dataPluginInterfaces/dataPluginFiles.ts';
-import { current_file } from '../reducer';
+import { DataPluginCommit } from '../../../../interfaces/dataPluginInterfaces/dataPluginCommits.ts';
 
 export default function* (dataConnection: DataPlugin) {
   yield fork(() => watchRefresh(dataConnection));
   yield fork(() => watchDateRangeChange(dataConnection));
-  yield fork(() => watchCurrentFileChange(dataConnection));
 }
 
 function* watchRefresh(dataConnection: DataPlugin) {
@@ -17,10 +15,6 @@ function* watchRefresh(dataConnection: DataPlugin) {
 
 function* watchDateRangeChange(dataConnection: DataPlugin) {
   yield takeEvery(setDateRange, () => fetchChangesData(dataConnection));
-}
-
-function* watchCurrentFileChange(dataConnection: DataPlugin) {
-  yield takeEvery(setCurrentFile, () => fetchChangesData(dataConnection));
 }
 
 //function* fetchChangesData(dataConnection: DataPlugin) {
@@ -63,13 +57,9 @@ function* fetchChangesData(dataConnection: DataPlugin) {
 
   // TODO: File list ist in global state. 
   const files : DataPluginFile[] = yield call(() => dataConnection.files.getAll());
-
   setGlobalFiles(files);
 
   const current_file_commits : DataPluginCommit[] = yield call(() => dataConnection.commits.getByFile(current_file));
-
-  //yield put(setFiles(files));
-  //yield put(setCurrentFile(current_file));
   yield put(setCurrentFileCommits(current_file_commits))
   yield put(setDataState(DataState.COMPLETE));
 }

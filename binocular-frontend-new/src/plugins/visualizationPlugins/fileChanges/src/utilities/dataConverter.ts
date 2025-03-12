@@ -74,7 +74,6 @@ export function convertCommitDataToChangesChartData(
             }
           }
         }
-        console.log("Commit:", i, "Additions:", additions, "Deletions:", deletions);
         const changes = additions + deletions;
         const commitAuthor = sortedCommits[i].user.id;
         if (totalChangesPerAuthor[commitAuthor] === undefined) {
@@ -94,11 +93,9 @@ export function convertCommitDataToChangesChartData(
           obj.statsByAuthor[commitAuthor] = { count: 1, additions: additions, deletions: deletions };
         }
       }
-      console.log("1", obj);
       data.push(obj);
     }
 
-    console.log("Data:", data);
 
     //---- STEP 2: CONSTRUCT CHART DATA FROM AGGREGATED COMMITS ----
     if (splitAdditionsDeletions) {
