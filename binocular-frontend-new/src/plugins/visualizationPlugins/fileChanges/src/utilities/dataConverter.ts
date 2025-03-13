@@ -33,15 +33,17 @@ export function convertCommitDataToChangesChartData(
   const overallLastTimestampNumber = new Date(dateOfOverallLastCommit).getTime();
   const timeInterval = overallLastTimestampNumber - overallFirstTimestampNumber;
 
-  const entropy_distribution: number[] = new Array<number>(10).fill(0);
+  const mpc_range = 100;
+
+  const entropy_distribution: number[] = new Array<number>(mpc_range).fill(0);
 
   sortedCommits.forEach((commit) => {
     const dateTimestampNumber = new Date(commit.date).getTime();
     const dateCoefficient = (dateTimestampNumber - overallFirstTimestampNumber) / timeInterval;
-    const date_id = Math.floor(dateCoefficient * 10);
+    const date_id = Math.floor(dateCoefficient * mpc_range);
 
-    if (date_id >= 10) {
-      entropy_distribution[9] = entropy_distribution[9] + 1;
+    if (date_id >= mpc_range) {
+      entropy_distribution[mpc_range - 1] = entropy_distribution[mpc_range - 1] + 1;
     } else {
       entropy_distribution[date_id] = entropy_distribution[date_id] + 1;
     }
