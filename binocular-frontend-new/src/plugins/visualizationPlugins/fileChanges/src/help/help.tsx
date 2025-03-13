@@ -33,10 +33,11 @@ function Help() {
           <li>
             <span className={"font-bold"}>Show Extra Metrics:</span> Displays
             the mean period of change on the chart, indicating the timeframes
-            with the most activity (across the entire project). This metric ranges from 0 to 100 and is
-            calculated as the weighted sum of changes across timeframes: ∑(i *
-            (changes in timeframe i / total changes)), where i ranges from 0 to
-            100. A higher value means the majority of changes were made in a more recent timeframe.
+            with the most activity (across the entire project). This metric
+            ranges from 0 to 100 and is calculated as the weighted sum of
+            changes across timeframes: ∑(i * (changes in timeframe i / total
+            changes)), where i ranges from 0 to 100. A higher value means the
+            majority of changes were made in a more recent timeframe.
           </li>
         </ul>
       </div>

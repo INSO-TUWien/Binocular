@@ -1137,4 +1137,18 @@ export default class Commits implements DataPluginCommits {
     // Sort by date in descending order
     return filteredCommits.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
   }
+
+  public async getDateOfFirstCommit() {
+    console.log(`Getting Date of First Commit`);
+    return new Promise<string>((resolve) => {
+      resolve('2024-06-01T12:00:00.000Z');
+    });
+  }
+
+  public async getDateOfLastCommit() {
+    console.log(`Getting Date of Last Commit`);
+    return new Promise<string>((resolve) => {
+      resolve('2024-06-05T12:00:00.000Z');
+    });
+  }
 }
