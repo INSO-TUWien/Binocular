@@ -16,6 +16,7 @@ const FileChanges: VisualizationPlugin<SettingsType> = {
     file: "README.md",
     splitAdditionsDeletions: true,
     visualizationStyle: "curved",
+    showExtraMetrics: true,
   },
   export: {
     getSVGData: getSVGData,

@@ -1,15 +1,15 @@
-import { StackedAreaChart } from './stackedAreaChart.tsx';
-import { RefObject, useEffect, useState } from 'react';
-import { DataPlugin } from '../../../../interfaces/dataPlugin.ts';
-import { SettingsType } from '../settings/settings.tsx';
-import { AuthorType } from '../../../../../types/data/authorType.ts';
-import { convertCommitDataToChangesChartData } from '../utilities/dataConverter.ts';
-import { SprintType } from '../../../../../types/data/sprintType.ts';
-import { throttle } from 'throttle-debounce';
-import { useDispatch, useSelector } from 'react-redux';
-import { ParametersType } from '../../../../../types/parameters/parametersType.ts';
-import { Store } from '@reduxjs/toolkit';
-import { DataState, setDateRange } from '../reducer';
+import { StackedAreaChart } from "./stackedAreaChart.tsx";
+import { RefObject, useEffect, useState } from "react";
+import { DataPlugin } from "../../../../interfaces/dataPlugin.ts";
+import { SettingsType } from "../settings/settings.tsx";
+import { AuthorType } from "../../../../../types/data/authorType.ts";
+import { convertCommitDataToChangesChartData } from "../utilities/dataConverter.ts";
+import { SprintType } from "../../../../../types/data/sprintType.ts";
+import { throttle } from "throttle-debounce";
+import { useDispatch, useSelector } from "react-redux";
+import { ParametersType } from "../../../../../types/parameters/parametersType.ts";
+import { Store } from "@reduxjs/toolkit";
+import { DataState, setDateRange } from "../reducer";
 
 export interface CommitChartData {
   date: number;
@@ -40,8 +40,16 @@ function Chart(props: {
    * -----------------------------
    */
   //Redux Global State
-  const current_file_commits = useSelector((state: RootState) => state.current_file_commits);
+  const current_file_commits = useSelector(
+    (state: RootState) => state.current_file_commits,
+  );
   const dataState = useSelector((state: RootState) => state.dataState);
+  const dateOverallFirstCommit = useSelector(
+    (state: RootState) => state.dateOfOverallFirstCommit,
+  );
+  const dateOverallLastCommit = useSelector(
+    (state: RootState) => state.dateOfOverallLastCommit,
+  );
   //React Component State
   const [chartWidth, setChartWidth] = useState(100);
   const [chartHeight, setChartHeight] = useState(100);
@@ -49,6 +57,7 @@ function Chart(props: {
   const [chartData, setChartData] = useState<CommitChartData[]>([]);
   const [chartScale, setChartScale] = useState<number[]>([]);
   const [chartPalette, setChartPalette] = useState<Palette>({});
+  const [mpc, setMpc] = useState<number>(0);
 
   /*
   Throttle the resize of the svg (refresh rate) to every 1s to not overwhelm the renderer,
@@ -80,16 +89,25 @@ function Chart(props: {
 
   //Effect on data change
   useEffect(() => {
-    const { commitChartData, commitScale, commitPalette } = convertCommitDataToChangesChartData(
-      current_file_commits,
-      props.authorList,
-      props.settings.splitAdditionsDeletions,
-      props.parameters,
-    );
+    const { commitChartData, commitScale, commitPalette, mpc } =
+      convertCommitDataToChangesChartData(
+        current_file_commits,
+        props.authorList,
+        props.settings.splitAdditionsDeletions,
+        props.parameters,
+        dateOverallFirstCommit,
+        dateOverallLastCommit,
+      );
     setChartData(commitChartData);
     setChartScale(commitScale);
     setChartPalette(commitPalette);
-  }, [current_file_commits, props.authorList, props.parameters, props.settings.splitAdditionsDeletions]);
+    setMpc(mpc);
+  }, [
+    current_file_commits,
+    props.authorList,
+    props.parameters,
+    props.settings.splitAdditionsDeletions,
+  ]);
 
   //Set Global state when parameters change. This will also conclude in a refresh of the data.
   useEffect(() => {
@@ -99,13 +117,16 @@ function Chart(props: {
   //Trigger Refresh when dataConnection changes
   useEffect(() => {
     dispatch({
-      type: 'REFRESH',
+      type: "REFRESH",
     });
   }, [props.dataConnection]);
 
   return (
     <>
-      <div className={'w-full h-full flex justify-center items-center'} ref={props.chartContainerRef}>
+      <div
+        className={"w-full h-full flex justify-center items-center"}
+        ref={props.chartContainerRef}
+      >
         {dataState === DataState.EMPTY && <div>NoData</div>}
         {dataState === DataState.FETCHING && (
           <div>
@@ -122,6 +143,11 @@ function Chart(props: {
             height={chartHeight}
             settings={props.settings}
           />
+        )}
+        {props.settings.showExtraMetrics && (
+          <span className="text-xs text-gray-500 absolute bottom-0 right-0 p-2">
+            Mean Period of Change: {mpc.toFixed(2)}
+          </span>
         )}
       </div>
     </>

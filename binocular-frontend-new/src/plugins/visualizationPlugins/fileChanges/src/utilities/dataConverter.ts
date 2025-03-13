@@ -3,7 +3,7 @@ import { AuthorType } from '../../../../../types/data/authorType.ts';
 import chroma from 'chroma-js';
 import { CommitChartData, Palette } from '../chart/chart.tsx';
 import { ParametersType } from '../../../../../types/parameters/parametersType.ts';
-import _ from 'lodash';
+import _, { over } from 'lodash';
 import { DataPluginCommit } from '../../../../interfaces/dataPluginInterfaces/dataPluginCommits.ts';
 
 export function convertCommitDataToChangesChartData(
@@ -11,13 +11,16 @@ export function convertCommitDataToChangesChartData(
   authors: AuthorType[],
   splitAdditionsDeletions: boolean,
   parameters: ParametersType,
+  dateOfOverallFirstCommit: string,
+  dateOfOverallLastCommit: string
 ): {
   commitChartData: CommitChartData[];
   commitScale: number[];
   commitPalette: Palette;
+  mpc: number;
 } {
   if (!commits || commits.length === 0) {
-    return { commitChartData: [], commitPalette: {}, commitScale: [] };
+    return { commitChartData: [], commitPalette: {}, commitScale: [], mpc: 0 };
   }
 
   //Sort commits after their commit time in case they arnt sorted
@@ -25,6 +28,35 @@ export function convertCommitDataToChangesChartData(
 
   const firstTimestamp = sortedCommits[0].date;
   const lastTimestamp = sortedCommits[sortedCommits.length - 1].date;
+
+  const overallFirstTimestampNumber = new Date(dateOfOverallFirstCommit).getTime();
+  const overallLastTimestampNumber = new Date(dateOfOverallLastCommit).getTime();
+  const timeInterval = overallLastTimestampNumber - overallFirstTimestampNumber;
+
+  const entropy_distribution: number[] = new Array<number>(10).fill(0);
+
+  sortedCommits.forEach((commit) => {
+    const dateTimestampNumber = new Date(commit.date).getTime();
+    const dateCoefficient = (dateTimestampNumber - overallFirstTimestampNumber) / timeInterval;
+    const date_id = Math.floor(dateCoefficient * 10);
+
+    if (date_id >= 10) {
+      entropy_distribution[9] = entropy_distribution[9] + 1;
+    } else {
+      entropy_distribution[date_id] = entropy_distribution[date_id] + 1;
+    }
+  });
+
+  var mpc = 0;
+  var total_commits = sortedCommits.length;
+
+  entropy_distribution.forEach((value, i) => {
+    if (value > 0) {
+      var probability = value / total_commits;
+      //entropy = entropy - probability * Math.log2(probability);
+      mpc += i * probability;
+    }
+  });
 
   const data: Array<{ date: number; statsByAuthor: { [signature: string]: { count: number; additions: number; deletions: number } } }> = [];
   const commitChartData: CommitChartData[] = [];
@@ -196,7 +228,7 @@ export function convertCommitDataToChangesChartData(
       }
     });
   }
-  return { commitChartData, commitScale, commitPalette };
+  return { commitChartData, commitScale, commitPalette, mpc };
 }
 
 function getGranularity(resolution: string): { unit: string; interval: moment.Duration } {

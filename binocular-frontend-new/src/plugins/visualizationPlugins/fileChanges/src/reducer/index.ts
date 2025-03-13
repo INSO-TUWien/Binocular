@@ -31,6 +31,8 @@ export interface ChangesState {
   files: DataPluginFile[];
   dateRange: DateRange;
   dataState: DataState;
+  dateOfOverallFirstCommit: string;
+  dateOfOverallLastCommit: string;
 }
 
 const initialState: ChangesState = {
@@ -40,6 +42,8 @@ const initialState: ChangesState = {
   files: [],
   dateRange: { from: new Date().toISOString(), to: new Date().toISOString() },
   dataState: DataState.EMPTY,
+  dateOfOverallFirstCommit: "",
+  dateOfOverallLastCommit: "",
 };
 
 export const changesSlice = createSlice({
@@ -62,8 +66,14 @@ export const changesSlice = createSlice({
     setDataState: (state, action: PayloadAction<DataState>) => {
       state.dataState = action.payload;
     },
+    setDateOfOverallFirstCommit: (state, action: PayloadAction<string>) => {
+      state.dateOfOverallFirstCommit = action.payload;
+    },
+    setDateOfOverallLastCommit: (state, action: PayloadAction<string>) => {
+      state.dateOfOverallLastCommit = action.payload;
+    },
   },
 });
 
-export const { setCurrentFileCommits, setCurrentFile, setFiles, setDateRange, setDataState } = changesSlice.actions;
+export const { setCurrentFileCommits, setCurrentFile, setFiles, setDateRange, setDataState, setDateOfOverallFirstCommit, setDateOfOverallLastCommit } = changesSlice.actions;
 export default changesSlice.reducer;

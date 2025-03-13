@@ -9,6 +9,7 @@ export interface SettingsType {
   splitAdditionsDeletions: boolean;
   visualizationStyle: string;
   showSprints: boolean;
+  showExtraMetrics: boolean;
 }
 
 function FileSelector({
@@ -76,10 +77,8 @@ function Settings(props: {
             onFileChange={(file) => {
               setGlobalCurrentFileData(file);
               props.setSettings({
+                ...props.settings,
                 file: file,
-                splitAdditionsDeletions: props.settings.splitAdditionsDeletions,
-                visualizationStyle: props.settings.visualizationStyle,
-                showSprints: props.settings.showSprints,
               });
             }}
           />
@@ -92,10 +91,8 @@ function Settings(props: {
             defaultChecked={props.settings.splitAdditionsDeletions}
             onChange={(event) =>
               props.setSettings({
-                file: props.settings.file,
+                ...props.settings,
                 splitAdditionsDeletions: event.target.checked,
-                visualizationStyle: props.settings.visualizationStyle,
-                showSprints: props.settings.showSprints,
               })
             }
           />
@@ -109,10 +106,8 @@ function Settings(props: {
             defaultValue={props.settings.visualizationStyle}
             onChange={(e) =>
               props.setSettings({
-                file: props.settings.file,
-                splitAdditionsDeletions: props.settings.splitAdditionsDeletions,
+                ...props.settings,
                 visualizationStyle: e.target.value,
-                showSprints: props.settings.showSprints,
               })
             }
           >
@@ -129,10 +124,22 @@ function Settings(props: {
             defaultChecked={props.settings.showSprints}
             onChange={(event) =>
               props.setSettings({
-                file: props.settings.file,
-                splitAdditionsDeletions: props.settings.splitAdditionsDeletions,
-                visualizationStyle: props.settings.visualizationStyle,
+                ...props.settings,
                 showSprints: event.target.checked,
+              })
+            }
+          />
+        </label>
+        <label className="label cursor-pointer">
+          <span className="label-text">Show extra Metrics (Mean Period of Change)</span>
+          <input
+            type="checkbox"
+            className="toggle toggle-accent toggle-sm"
+            defaultChecked={props.settings.showExtraMetrics}
+            onChange={(event) =>
+              props.setSettings({
+                ...props.settings,
+                showExtraMetrics: event.target.checked,
               })
             }
           />
