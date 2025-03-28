@@ -1,0 +1,10 @@
+{
+    "name": "code_expertise",
+    "version": "1.0.0",
+    "description": "",
+    "main": "src/index.tsx",
+    "scripts": {
+    },
+    "private": true
+  }
+  

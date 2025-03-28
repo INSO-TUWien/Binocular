@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
+  <!-- Academic Hat (Graduation Cap) -->
+  <path d="M12 2L2 6.5L12 11L22 6.5L12 2Z" fill="#4285F4"/>
+  <path d="M19 7.5V13.5C19 13.5 16 16 12 16C8 16 5 13.5 5 13.5V7.5" fill="none" stroke="#4285F4" stroke-width="1.5"/>
+  <rect x="18" y="7" width="2" height="6" fill="#4285F4"/>
+</svg>
