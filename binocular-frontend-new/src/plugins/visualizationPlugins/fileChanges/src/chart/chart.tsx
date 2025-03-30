@@ -3,13 +3,17 @@ import { RefObject, useEffect, useState } from "react";
 import { DataPlugin } from "../../../../interfaces/dataPlugin.ts";
 import { SettingsType } from "../settings/settings.tsx";
 import { AuthorType } from "../../../../../types/data/authorType.ts";
-import { convertCommitDataToChangesChartData } from "../utilities/dataConverter.ts";
+import {
+  convertCommitDataToChangesChartData,
+  convertCommitDataToMetrics,
+} from "../utilities/dataConverter.ts";
 import { SprintType } from "../../../../../types/data/sprintType.ts";
 import { throttle } from "throttle-debounce";
 import { useDispatch, useSelector } from "react-redux";
 import { ParametersType } from "../../../../../types/parameters/parametersType.ts";
 import { Store } from "@reduxjs/toolkit";
 import { DataState, setDateRange } from "../reducer";
+import { MetricsChart } from "./metricsCharts.tsx";
 
 export interface CommitChartData {
   date: number;
@@ -43,6 +47,9 @@ function Chart(props: {
   const current_file_commits = useSelector(
     (state: RootState) => state.current_file_commits,
   );
+  const current_file_total_commits = useSelector(
+    (state: RootState) => state.current_file_total_commits,
+  );
   const dataState = useSelector((state: RootState) => state.dataState);
   const dateOverallFirstCommit = useSelector(
     (state: RootState) => state.dateOfOverallFirstCommit,
@@ -57,7 +64,12 @@ function Chart(props: {
   const [chartData, setChartData] = useState<CommitChartData[]>([]);
   const [chartScale, setChartScale] = useState<number[]>([]);
   const [chartPalette, setChartPalette] = useState<Palette>({});
+
   const [mpc, setMpc] = useState<number>(0);
+  const [entropy, setEntropy] = useState<number>(0);
+  const [maxBurst, setMaxBurst] = useState<number>(0);
+  const [maxChangeset, setMaxChangeset] = useState<number>(0);
+  const [avgChangeset, setAvgChangeset] = useState<number>(0);
 
   /*
   Throttle the resize of the svg (refresh rate) to every 1s to not overwhelm the renderer,
@@ -89,25 +101,36 @@ function Chart(props: {
 
   //Effect on data change
   useEffect(() => {
-    const { commitChartData, commitScale, commitPalette, mpc } =
+    const { commitChartData, commitScale, commitPalette } =
       convertCommitDataToChangesChartData(
         current_file_commits,
         props.authorList,
         props.settings.splitAdditionsDeletions,
         props.parameters,
-        dateOverallFirstCommit,
-        dateOverallLastCommit,
       );
     setChartData(commitChartData);
     setChartScale(commitScale);
     setChartPalette(commitPalette);
-    setMpc(mpc);
   }, [
     current_file_commits,
     props.authorList,
     props.parameters,
     props.settings.splitAdditionsDeletions,
   ]);
+
+  useEffect(() => {
+    const { mpc, entropy, maxBurst, maxChangeset, avgChangeset } = convertCommitDataToMetrics(
+      current_file_total_commits,
+      dateOverallFirstCommit,
+      dateOverallLastCommit,
+    );
+
+    setMpc(mpc);
+    setEntropy(entropy);
+    setMaxBurst(maxBurst);
+    setMaxChangeset(maxChangeset);
+    setAvgChangeset(avgChangeset);
+  }, [current_file_total_commits, dateOverallFirstCommit, dateOverallLastCommit]);
 
   //Set Global state when parameters change. This will also conclude in a refresh of the data.
   useEffect(() => {
@@ -133,7 +156,7 @@ function Chart(props: {
             <span className="loading loading-spinner loading-lg text-accent"></span>
           </div>
         )}
-        {dataState === DataState.COMPLETE && (
+        {dataState === DataState.COMPLETE && !props.settings.showExtraMetrics && (
           <StackedAreaChart
             data={chartData}
             scale={chartScale}
@@ -145,9 +168,17 @@ function Chart(props: {
           />
         )}
         {props.settings.showExtraMetrics && (
-          <span className="text-xs text-gray-500 absolute bottom-0 right-0 p-2">
-            Mean Period of Change: {mpc.toFixed(2)}
-          </span>
+          <MetricsChart
+            width={chartWidth}
+            height={chartHeight}
+            metrics={{
+              mpc: mpc,
+              entropy: entropy,
+              maxburst: maxBurst,
+              maxchangeset: maxChangeset,
+              avgchangeset: avgChangeset,
+            }}
+          />
         )}
       </div>
     </>

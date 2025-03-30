@@ -28,6 +28,7 @@ export interface ChangesState {
   current_file: string;
   last_current_file: string;
   current_file_commits: DataPluginCommit[];
+  current_file_total_commits: DataPluginCommit[];
   files: DataPluginFile[];
   dateRange: DateRange;
   dataState: DataState;
@@ -39,6 +40,7 @@ const initialState: ChangesState = {
   current_file: "README.md",
   last_current_file: "",
   current_file_commits : [],
+  current_file_total_commits : [],
   files: [],
   dateRange: { from: new Date().toISOString(), to: new Date().toISOString() },
   dataState: DataState.EMPTY,
@@ -52,6 +54,9 @@ export const changesSlice = createSlice({
   reducers: {
     setCurrentFileCommits(state, action: PayloadAction<DataPluginCommit[]>) {
       state.current_file_commits = action.payload;
+    },
+    setCurrentFileTotalCommits(state, action: PayloadAction<DataPluginCommit[]>) {
+      state.current_file_total_commits = action.payload;
     },
     setCurrentFile(state, action: PayloadAction<string>) {
       state.last_current_file = state.current_file;
@@ -75,5 +80,5 @@ export const changesSlice = createSlice({
   },
 });
 
-export const { setCurrentFileCommits, setCurrentFile, setFiles, setDateRange, setDataState, setDateOfOverallFirstCommit, setDateOfOverallLastCommit } = changesSlice.actions;
+export const { setCurrentFileCommits, setCurrentFileTotalCommits, setCurrentFile, setFiles, setDateRange, setDataState, setDateOfOverallFirstCommit, setDateOfOverallLastCommit } = changesSlice.actions;
 export default changesSlice.reducer;

@@ -32,12 +32,37 @@ function Help() {
           </li>
           <li>
             <span className={"font-bold"}>Show Extra Metrics:</span> Displays
-            the mean period of change on the chart, indicating the timeframes
-            with the most activity (across the entire project). This metric
-            ranges from 0 to 100 and is calculated as the weighted sum of
-            changes across timeframes: ∑(i * (changes in timeframe i / total
-            changes)), where i ranges from 0 to 100. A higher value means the
-            majority of changes were made in a more recent timeframe.
+            additional metrics
+          </li>
+        </ul>
+      </div>
+      <h3>Metrics (in Metrics View)</h3>
+      <div>
+        <ul className={"list-disc ml-5"}>
+          <li>
+            <strong>Mean Period of Change (MPC):</strong> Represents the
+            weighted sum of changes over time, indicating when most changes
+            occurred. Range: [0, 100].
+          </li>
+          <li>
+            <strong>Entropy:</strong> Measures the unpredictability of changes,
+            with higher values indicating more evenly distributed changes.
+            Range: [0, log2(total commits)].
+          </li>
+          <li>
+            <strong>MaxBurst:</strong> The maximum number of consecutive changes
+            within a short period, showing intense modification bursts. Range:
+            [1, total commits].
+          </li>
+          <li>
+            <strong>MaxChangeset:</strong> The highest number of files changed
+            together in a single commit, indicating large-scale changes. Range:
+            [0, max files changed in a commit].
+          </li>
+          <li>
+            <strong>AvgChangeset:</strong> The average number of files modified
+            alongside a given file per commit, providing insight into
+            co-changes. Range: [0, max files changed in a commit].
           </li>
         </ul>
       </div>
