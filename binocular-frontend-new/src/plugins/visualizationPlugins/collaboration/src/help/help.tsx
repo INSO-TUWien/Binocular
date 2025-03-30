@@ -1,7 +1,7 @@
 function Help() {
   return (
     <>
-      <h2>Collaboration Visualization Help</h2>
+      <h2>Example Visualization Help</h2>
       Here the help for the visualization can be located!
     </>
   );
