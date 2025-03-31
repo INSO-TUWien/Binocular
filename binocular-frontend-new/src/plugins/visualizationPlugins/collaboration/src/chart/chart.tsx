@@ -1,6 +1,6 @@
-import { AreaChart } from './areaChart.tsx';
-import { createRef, useEffect, useState } from 'react';
-import { SettingsType } from '../settings/settings.tsx';
+import { NetworkChart } from "./networkChart.tsx";
+import { createRef, useEffect, useState } from "react";
+import { SettingsType } from "../settings/settings.tsx";
 
 function Chart(props: { settings: SettingsType }) {
   const chartContainerRef = createRef<HTMLDivElement>();
@@ -25,8 +25,13 @@ function Chart(props: { settings: SettingsType }) {
 
   return (
     <>
-      <div className={'w-full h-full'} ref={chartContainerRef}>
-        <AreaChart data={props.settings.data} width={chartWidth} height={chartHeight} color={props.settings.color} />
+      <div className={"w-full h-full"} ref={chartContainerRef}>
+        <NetworkChart
+          data={props.settings.data}
+          width={chartWidth}
+          height={chartHeight}
+          color={props.settings.color}
+        />
       </div>
     </>
   );
