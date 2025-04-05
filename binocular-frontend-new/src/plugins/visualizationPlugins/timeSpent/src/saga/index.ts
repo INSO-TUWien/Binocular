@@ -1,7 +1,7 @@
 import { put, takeEvery, fork, call, select, throttle } from 'redux-saga/effects';
-import { TimeSpentState, DataState, setTimeSpent, setDataState, setDateRange } from '../reducer';
+import { TimeSpentState, DataState, setNotes, setDataState, setDateRange } from '../reducer';
 import { DataPlugin } from '../../../../interfaces/dataPlugin.ts';
-import { DataPluginTimeSpent } from '../../../../interfaces/dataPluginInterfaces/dataPluginTimeSpent.ts';
+import { DataPluginNote } from '../../../../interfaces/dataPluginInterfaces/dataPluginNote.ts';
 
 export default function* (dataConnection: DataPlugin) {
   yield fork(() => watchRefresh(dataConnection));
@@ -19,10 +19,7 @@ function* watchDateRangeChange(dataConnection: DataPlugin) {
 function* fetchTimeSpentData(dataConnection: DataPlugin) {
   yield put(setDataState(DataState.FETCHING));
   const state: TimeSpentState = yield select();
-  console.log(dataConnection);
-  const timeSpentEntries: DataPluginTimeSpent[] = yield call(() =>
-    dataConnection.timeSpent.getAll(state.dateRange.from, state.dateRange.to),
-  );
-  yield put(setTimeSpent(timeSpentEntries));
+  const notes: DataPluginNote[] = yield call(() => dataConnection.notes.getAll(state.dateRange.from, state.dateRange.to));
+  yield put(setNotes(notes));
   yield put(setDataState(DataState.COMPLETE));
 }

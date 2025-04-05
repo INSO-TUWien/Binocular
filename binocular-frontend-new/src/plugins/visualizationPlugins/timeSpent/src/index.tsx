@@ -2,19 +2,20 @@ import PreviewImage from '../assets/thumbnail.svg';
 import Settings, { SettingsType } from './settings/settings.tsx';
 import { VisualizationPlugin } from '../../../interfaces/visualizationPlugin.ts';
 import { getSVGData } from './utilities/utilities.ts';
-import Reducer from '../../simpleVisualizationPlugin/src/reducer';
+import Reducer from './reducer';
+import { convertToChartData } from './utilities/dataConverter.ts';
 import Saga from './saga';
 import Help from './help/help.tsx';
-import { convertToChartData } from './utilities/dataConverter.ts';
-import { DataPluginTimeSpent } from '../../../interfaces/dataPluginInterfaces/dataPluginTimeSpent.ts';
+import { DataPluginNote } from '../../../interfaces/dataPluginInterfaces/dataPluginNote.ts';
 
-const TimeSpent: VisualizationPlugin<SettingsType, DataPluginTimeSpent> = {
-  name: 'TimeSpent',
-  chartComponent: null,
+const TimeSpent: VisualizationPlugin<SettingsType, DataPluginNote> = {
+  name: 'Time Spent',
+  chartComponent: undefined,
   settingsComponent: Settings,
   helpComponent: Help,
+  dataConnectionName: 'notes',
   dataConverter: convertToChartData,
-  defaultSettings: { splitAdditionsDeletions: true, visualizationStyle: 'curved' },
+  defaultSettings: { splitTimePerIssue: false, splitAdditionsDeletions: true, visualizationStyle: 'curved', showSprints: false },
   export: {
     getSVGData: getSVGData,
   },

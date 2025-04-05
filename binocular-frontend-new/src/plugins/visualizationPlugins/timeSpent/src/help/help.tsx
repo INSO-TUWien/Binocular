@@ -1,20 +1,18 @@
 function Help() {
   return (
     <>
-      <h2>Changes Help</h2>
+      <h2>Builds Help</h2>
       <h3>Data</h3>
       <p>
-        The changes visualization is designed to show an overview of all the additions and deletions that were done to the repository by the
-        individual authors. It can both display the absolut amount of all changes per author per time period or split into additions and
-        deletions.
+        The builds visualization provides an overview of the build statuses. It allows users to track the outcomes of builds, including
+        successful, failed, and cancelled builds.
       </p>
       <h3>Parameters</h3>
       <div>
         <ul className={'list-disc ml-5'}>
           <li>
-            <span className={'font-bold'}>Split Additions and Deletions:</span> Change the mode of the visualization to either show all
-            changes or split the changes into additions and deletions while additions are displayed in the positive direction and deletions
-            in the negative direction.
+            <span className={'font-bold'}>Split Authors per Build:</span> Change the mode of visualization to either show all builds grouped
+            by status or split the builds by authors. Negative builds are all builds, which are not successful.
           </li>
           <li>
             <span className={'font-bold'}>Visualization Style:</span> Change the style of how the lines are calculated into either curved

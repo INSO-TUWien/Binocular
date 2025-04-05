@@ -1,5 +1,6 @@
 export interface SettingsType {
-  splitAdditionsDeletions: boolean;
+  splitTimePerIssue: boolean;
+  splitSpentRemoved: boolean;
   visualizationStyle: string;
   showSprints: boolean;
 }
@@ -9,14 +10,31 @@ function Settings(props: { settings: SettingsType; setSettings: (newSettings: Se
     <>
       <div>
         <label className="label cursor-pointer">
-          <span className="label-text">Split Additions and Deletions:</span>
+          <span className="label-text">Split Time per Issue:</span>
           <input
             type="checkbox"
             className="toggle toggle-accent toggle-sm"
-            defaultChecked={props.settings.splitAdditionsDeletions}
+            defaultChecked={props.settings.splitTimePerIssue}
             onChange={(event) =>
               props.setSettings({
-                splitAdditionsDeletions: event.target.checked,
+                splitTimePerIssue: event.target.checked,
+                splitSpentRemoved: props.settings.splitSpentRemoved,
+                visualizationStyle: props.settings.visualizationStyle,
+                showSprints: props.settings.showSprints,
+              })
+            }
+          />
+        </label>
+        <label className="label cursor-pointer">
+          <span className="label-text">Split Spent and Removed:</span>
+          <input
+            type="checkbox"
+            className="toggle toggle-accent toggle-sm"
+            defaultChecked={props.settings.splitSpentRemoved}
+            onChange={(event) =>
+              props.setSettings({
+                splitTimePerIssue: props.settings.splitTimePerIssue,
+                splitSpentRemoved: event.target.checked,
                 visualizationStyle: props.settings.visualizationStyle,
                 showSprints: props.settings.showSprints,
               })
@@ -30,10 +48,11 @@ function Settings(props: { settings: SettingsType; setSettings: (newSettings: Se
           <select
             className="select select-bordered select-sm"
             defaultValue={props.settings.visualizationStyle}
-            onChange={(e) =>
+            onChange={(event) =>
               props.setSettings({
-                splitAdditionsDeletions: props.settings.splitAdditionsDeletions,
-                visualizationStyle: e.target.value,
+                splitTimePerIssue: props.settings.splitTimePerIssue,
+                splitSpentRemoved: props.settings.splitSpentRemoved,
+                visualizationStyle: event.target.value,
                 showSprints: props.settings.showSprints,
               })
             }>
@@ -50,7 +69,8 @@ function Settings(props: { settings: SettingsType; setSettings: (newSettings: Se
             defaultChecked={props.settings.showSprints}
             onChange={(event) =>
               props.setSettings({
-                splitAdditionsDeletions: props.settings.splitAdditionsDeletions,
+                splitTimePerIssue: props.settings.splitTimePerIssue,
+                splitSpentRemoved: props.settings.splitSpentRemoved,
                 visualizationStyle: props.settings.visualizationStyle,
                 showSprints: event.target.checked,
               })

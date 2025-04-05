@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { DataPluginTimeSpent } from '../../../../interfaces/dataPluginInterfaces/dataPluginTimeSpent.ts';
+import { DataPluginNote } from '../../../../interfaces/dataPluginInterfaces/dataPluginNote.ts';
 
 export enum DataState {
   EMPTY,
@@ -13,23 +13,23 @@ interface DateRange {
 }
 
 export interface TimeSpentState {
-  timeSpentEntries: DataPluginTimeSpent[];
+  notes: DataPluginNote[];
   dateRange: DateRange;
   dataState: DataState;
 }
 
 const initialState: TimeSpentState = {
-  timeSpentEntries: [],
+  notes: [],
   dateRange: { from: new Date().toISOString(), to: new Date().toISOString() },
   dataState: DataState.EMPTY,
 };
 
-export const changesSlice = createSlice({
-  name: 'timeSpentEntries',
+export const timeSpentSlice = createSlice({
+  name: 'timeSpent',
   initialState,
   reducers: {
-    setTimeSpent: (state, action: PayloadAction<DataPluginTimeSpent[]>) => {
-      state.timeSpentEntries = action.payload;
+    setNotes: (state, action: PayloadAction<DataPluginNote[]>) => {
+      state.notes = action.payload;
     },
     setDateRange: (state, action: PayloadAction<DateRange>) => {
       state.dateRange = action.payload;
@@ -40,5 +40,5 @@ export const changesSlice = createSlice({
   },
 });
 
-export const { setTimeSpent, setDateRange, setDataState } = changesSlice.actions;
-export default changesSlice.reducer;
+export const { setNotes, setDateRange, setDataState } = timeSpentSlice.actions;
+export default timeSpentSlice.reducer;
