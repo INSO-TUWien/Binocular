@@ -2,18 +2,20 @@ import PreviewImage from '../assets/thumbnail.svg';
 import Settings, { SettingsType } from './settings/settings';
 import { VisualizationPlugin } from '../../../interfaces/visualizationPlugin';
 import { getSVGData } from './utilities/utilities';
-import Reducer from './reducer';
+import { dataSlice } from './reducer';
 import Saga from './saga/index';
 import Help from './help/help';
 import Chart from './chart/chart';
+import { DataPluginCommit } from '../../../interfaces/dataPluginInterfaces/dataPluginCommits';
+import { convertToChartData } from './utilities/dataConverter';
 
-const CodeExpertise: VisualizationPlugin<SettingsType> = {
+const CodeExpertise: VisualizationPlugin<SettingsType, DataPluginCommit> = {
   name: 'Code Expertise',
-  // ts-expect-error
   chartComponent: Chart,
   settingsComponent: Settings,
   helpComponent: Help,
   defaultSettings: {},
+  dataConverter: convertToChartData,
   export: {
     getSVGData: getSVGData,
   },
@@ -24,7 +26,7 @@ const CodeExpertise: VisualizationPlugin<SettingsType> = {
   images: {
     thumbnail: PreviewImage,
   },
-  reducer: Reducer,
+  reducer: dataSlice.reducer,
   saga: Saga,
 };
 

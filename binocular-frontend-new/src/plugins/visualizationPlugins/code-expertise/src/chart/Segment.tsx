@@ -3,6 +3,7 @@ import chroma from 'chroma-js';
 import React, { useState, useEffect, useRef } from 'react';
 import DotsPattern from '../../../../../components/svg/patterns/dots';
 import HatchPattern from '../../../../../components/svg/patterns/hatch';
+import { DataPluginCommit } from '../../../../interfaces/dataPluginInterfaces/dataPluginCommits.ts';
 
 // Define interfaces for props and data
 interface Commit {
@@ -15,7 +16,7 @@ interface Commit {
 }
 
 interface DevData {
-  commits: Commit[];
+  commits: DataPluginCommit[];
   additions?: number;
   linesOwned?: number;
 }
