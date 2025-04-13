@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import DotsPattern from '../../../../../components/svg/patterns/dots';
 import HatchPattern from '../../../../../components/svg/patterns/hatch';
 import { DataPluginCommit } from '../../../../interfaces/dataPluginInterfaces/dataPluginCommits.ts';
+import { DataPluginCommitBuild } from '../../../../interfaces/dataPluginInterfaces/dataPluginCommitsBuilds.ts';
 
 // Define interfaces for props and data
 interface Commit {
@@ -15,8 +16,8 @@ interface Commit {
   build?: string | null;
 }
 
-interface DevData {
-  commits: DataPluginCommit[];
+export interface DevData {
+  commits: DataPluginCommitBuild[];
   additions?: number;
   linesOwned?: number;
 }
@@ -44,21 +45,6 @@ function Segment({ rad, startPercent, endPercent, devName, devData, devColor, ma
   const [radius, setRadius] = useState(rad);
   const [focus, setFocus] = useState(false);
   const [readyToAnimate, setReadyToAnimate] = useState(false);
-
-  // Process commit data to ensure it has the build property
-  // Map status to build for the dummy data
-  const processedCommits = devData.commits.map(commit => ({
-    ...commit,
-    build: commit.status === 'success' ? 'success' : 
-           commit.status === 'failed' ? 'failed' : 
-           commit.status === 'pending' ? 'pending' : null
-  }));
-
-  // Update devData with processed commits
-  const processedDevData = {
-    ...devData,
-    commits: processedCommits
-  };
 
   // #### COLORS ####
 
@@ -142,16 +128,7 @@ function Segment({ rad, startPercent, endPercent, devName, devData, devColor, ma
   }
 
   //additions/ownership arc text
-  let additionsText = '';
-
-  if (config.mode === 'issues') {
-    additionsText += processedDevData.additions !== undefined ? processedDevData.additions : '0';
-  } else {
-    additionsText += processedDevData.linesOwned !== undefined ? processedDevData.linesOwned : '0';
-    if (!config.onlyDisplayOwnership) {
-      additionsText += '/' + (processedDevData.additions !== undefined ? processedDevData.additions : '0');
-    }
-  }
+  let additionsText = (devData.additions !== undefined ? devData.additions : '0');
 
   // #### FUNCTIONS ####
 
@@ -279,9 +256,9 @@ function Segment({ rad, startPercent, endPercent, devName, devData, devColor, ma
   //this displays the ratio of good/bad commits to the number of total commits
   //this sets the bounds for this section of the chart
   const buildWeight = radius * 0.2;
-  const commitsNumber = processedDevData.commits.length;
-  const goodCommits = processedDevData.commits.filter((c) => c.build === 'success').length;
-  const badCommits = processedDevData.commits.filter((c) => c.build !== null && c.build !== 'success').length;
+  const commitsNumber = devData.commits.length;
+  const goodCommits = devData.commits.filter((c) => c.build?.status === 'success').length;
+  const badCommits = devData.commits.filter((c) => c.build !== null && c.build?.status !== 'success').length;
 
   const setCommitPath = (): void => {
     const goodCommitsRadius = radius + buildWeight * (goodCommits / commitsNumber);
@@ -309,8 +286,8 @@ function Segment({ rad, startPercent, endPercent, devName, devData, devColor, ma
       ownershipEndAngle = arcEndAngle;
     } else {
       ownershipEndAngle = arcStartAngle;
-      if (processedDevData.linesOwned) {
-        ownershipEndAngle += getAngle((endPercent - startPercent) * (processedDevData.linesOwned / (processedDevData.additions || 1)));
+      if (devData.linesOwned) {
+        ownershipEndAngle += getAngle((endPercent - startPercent) * (devData.linesOwned / (devData.additions || 1)));
         if (ownershipEndAngle > arcEndAngle) {
           ownershipEndAngle = arcEndAngle;
         }
@@ -341,7 +318,7 @@ function Segment({ rad, startPercent, endPercent, devName, devData, devColor, ma
   // #### COMMITS ####
 
   const setInnerCommitsSegment = (): void => {
-    const newRadius = radius / 3 + radius * 0.2 * (processedDevData.commits.length / maxCommitsPerDev);
+    const newRadius = radius / 3 + radius * 0.2 * (devData.commits.length / maxCommitsPerDev);
 
     const newCommitsPath = d3.path();
     newCommitsPath.moveTo(0, 0);

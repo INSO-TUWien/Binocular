@@ -8,8 +8,9 @@ import Help from './help/help';
 import Chart from './chart/chart';
 import { DataPluginCommit } from '../../../interfaces/dataPluginInterfaces/dataPluginCommits';
 import { convertToChartData } from './utilities/dataConverter';
+import { DataPluginCommitBuild } from '../../../interfaces/dataPluginInterfaces/dataPluginCommitsBuilds';
 
-const CodeExpertise: VisualizationPlugin<SettingsType, DataPluginCommit> = {
+const CodeExpertise: VisualizationPlugin<SettingsType, DataPluginCommitBuild> = {
   name: 'Code Expertise',
   chartComponent: Chart,
   settingsComponent: Settings,

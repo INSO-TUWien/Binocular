@@ -11,7 +11,9 @@ import { SettingsType } from '../settings/settings.tsx';
 import { useSelector, useDispatch } from 'react-redux';
 import styles from '../styles.module.scss';
 import { DataPluginCommit } from '../../../../interfaces/dataPluginInterfaces/dataPluginCommits.ts';
-import { dataSlice } from '../reducer';
+import { dataSlice, DataState } from '../reducer';
+import { DevData } from './Segment';
+
 // Define types
 export interface ChartData {
   date: number;
@@ -20,15 +22,6 @@ export interface ChartData {
 
 export interface Palette {
   [signature: string]: { main: string; secondary: string };
-}
-
-interface DevData {
-  [key: string]: {
-    additions: number;
-    linesOwned?: number;
-    commits: number;
-    [key: string]: any;
-  };
 }
 
 
@@ -105,120 +98,109 @@ function Chart( properties: Properties<SettingsType, DataPluginCommit>) {
   }, [properties.parameters]);
 
   useEffect(() => {
-    console.log("data changed")
-    console.log(data)
     const { chartData, scale, palette } = properties.dataConverter(data, properties);
     setChartData(chartData);
     setChartScale(scale);
     setChartPalette(palette);
   }, [data, properties]);
 
-  // Process chartData into devData format
-  useEffect(() => {
-    console.log(chartData)
-    if (!chartData || chartData.length === 0) return;
+// Process chartData into devData format
+useEffect(() => {
+  if (!chartData || chartData.length === 0 || !data || data.length === 0) return;
+  
+  // Extract the data point (we're only using one timestamp)
+  const dataPoint = chartData[0];
+  
+  // Get unique developer names from the data
+  const developerNames = new Set<string>();
+  Object.keys(dataPoint).forEach(key => {
+    if (key === 'date') return;
     
-    // Extract the data point (we're only using one timestamp)
-    const dataPoint = chartData[0];
+    // Extract developer name from the key (format: "Developer Name - Metric")
+    const parts = key.split(' - ');
+    if (parts.length === 2) {
+      developerNames.add(parts[0]);
+    }
+  });
+  
+  // Group commits by developer
+  const commitsByDev = _.groupBy(data, 'user.gitSignature');
+  
+  // Calculate totals for percentages
+  let totalAdditions = 0;
+  let totalLinesOwned = 0;
+  
+  // Create a map of developer data
+  const devDataMap: Record<string, DevData> = {};
+  
+  // Initialize devData for each developer
+  developerNames.forEach(devName => {
+    const devCommits = commitsByDev[devName] || [];
     
-    // Convert chartData to devData format
-    const devData: DevData = {};
-    
-    // Get unique developer names from the data
-    const developerNames = new Set<string>();
-    Object.keys(dataPoint).forEach(key => {
-      if (key === 'date') return;
-      
-      // Extract developer name from the key (format: "Developer Name - Metric")
-      const parts = key.split(' - ');
-      if (parts.length === 2) {
-        developerNames.add(parts[0]);
-      }
-    });
-    
-    // Populate devData with metrics for each developer
-    developerNames.forEach(devName => {
-      devData[devName] = {
-        additions: dataPoint[`${devName} - Total Additions`] || 0,
-        linesOwned: dataPoint[`${devName} - Lines Owned`] || 0,
-        commits: dataPoint[`${devName} - Relative Commits`] || 0
-      };
-    });
-    
-    // Calculate totals for percentages
-    const additionsTotal = _.reduce(
-      devData,
-      (sum, data) => sum + data.additions,
-      0
-    );
-    
-    const linesOwnedTotal = _.reduce(
-      devData,
-      (sum, data) => sum + (data.linesOwned || 0),
-      0
-    );
-    
-    // Get the maximum relative commits value
-    let maxCommitsValue = 0;
-    Object.values(devData).forEach(data => {
-      if (data.commits > maxCommitsValue) {
-        maxCommitsValue = data.commits;
-      }
-    });
-    
-    // Create segments
-    const newSegments: JSX.Element[] = [];
-    let totalPercent = 0;
-    
-    // Config from properties
-    const config = {
-      onlyDisplayOwnership: false
+    devDataMap[devName] = {
+      commits: devCommits,
+      additions: dataPoint[`${devName} - Total Additions`] || 0,
+      linesOwned: dataPoint[`${devName} - Lines Owned`] || 0
     };
     
-    Object.entries(devData).forEach(([name, data], index) => {
-      const devAdditions = data.additions;
-      const devLinesOwned = data.linesOwned;
-      
-      // Skip developers with no additions
-      if (devAdditions === 0) return;
-      
-      // Calculate segment percentages
-      const startPercent = totalPercent;
-      
-      if (config.onlyDisplayOwnership) {
-        // Don't display a segment for a dev who does not own lines
-        if (!devLinesOwned) return;
-        totalPercent += devLinesOwned / linesOwnedTotal;
-      } else {
-        totalPercent += devAdditions / additionsTotal;
-      }
-      
-      const endPercent = totalPercent;
-      
-      // Get color from palette
-      const metricKey = `${name} - Total Additions`;
-      const devColor = palette[metricKey]?.main || '#cccc';
-      
-      newSegments.push(
-        <Segment
-          key={index}
-          rad={radius}
-          startPercent={startPercent}
-          endPercent={endPercent}
-          devName={name}
-          devData={data}
-          devColor={devColor}
-          maxCommitsPerDev={maxCommitsValue}
-        />
-      );
-    });
+    totalAdditions += devDataMap[devName].additions || 0;
+    totalLinesOwned += devDataMap[devName].linesOwned || 0;
+  });
+  
+  // Find the maximum number of commits per developer for scaling
+  const maxCommitsPerDev = Math.max(...Object.values(commitsByDev).map(commits => commits.length));
+  
+  // Create segments
+  const newSegments: JSX.Element[] = [];
+  let totalPercent = 0;
+  
+  // Sort developers by additions to ensure consistent ordering
+  const sortedDevs = Object.entries(devDataMap).sort((a, b) => 
+    (b[1].additions || 0) - (a[1].additions || 0)
+  );
+  
+  // Create a segment for each developer with additions
+  sortedDevs.forEach(([devName, devData]) => {
+    // Skip developers with no additions
+    if (!devData.additions || devData.additions === 0) return;
     
-    setSegments(newSegments);
-  }, [chartData, palette, radius, properties.settings]);
+    // Calculate segment percentages
+    const segmentSize = devData.additions / totalAdditions;
+    const startPercent = totalPercent;
+    const endPercent = totalPercent + segmentSize;
+    totalPercent = endPercent;
+    
+    // Get color from palette
+    const metricKey = `${devName} - Total Additions`;
+    const devColor = palette[metricKey]?.main || '#cccccc';
+    console.log(devData);
+    newSegments.push(
+      <Segment
+        key={devName}
+        rad={radius}
+        startPercent={startPercent}
+        endPercent={endPercent}
+        devName={devName}
+        devData={devData}
+        devColor={devColor}
+        maxCommitsPerDev={maxCommitsPerDev}
+      />
+    );
+  });
+  
+  setSegments(newSegments);
+}, [chartData, palette, radius, data, properties.settings]);
 
   return (
     <>
       <div ref={containerRef} className={styles.chartContainer} style={{ width: '100%', height: '100%', position: 'relative' }}>
+        {dataState === DataState.EMPTY && <div>NoData</div>}
+        {dataState === DataState.FETCHING && (
+          <div>
+            <span className="loading loading-spinner loading-lg text-accent"></span>
+          </div>
+        )}
+        {dataState === DataState.COMPLETE && 
         <svg 
           className={styles.chart} 
           width="100%" 
@@ -231,6 +213,8 @@ function Chart( properties: Properties<SettingsType, DataPluginCommit>) {
             <circle cx="0" cy="0" r={radius / 3} stroke="black" fill="white" />
           </g>
         </svg>
+        }
+
       </div>
     </>
   );

@@ -3,13 +3,13 @@ import { SettingsType } from '../settings/settings.tsx';
 import { AuthorType } from '../../../../../types/data/authorType.ts';
 import chroma from 'chroma-js';
 import _ from 'lodash';
-import { DataPluginCommit } from '../../../../interfaces/dataPluginInterfaces/dataPluginCommits.ts';
 import { ChartData, Palette } from '../../../simpleVisualizationPlugin/src/chart/chart.tsx';
+import { DataPluginCommitBuild } from '../../../../interfaces/dataPluginInterfaces/dataPluginCommitsBuilds.ts';
 
 
 export function convertToChartData(
-  commits: DataPluginCommit[],
-  props: Properties<SettingsType, DataPluginCommit>
+  commits: DataPluginCommitBuild[],
+  props: Properties<SettingsType, DataPluginCommitBuild>
 ): {
   chartData: ChartData[];
   scale: number[];

@@ -1,29 +1,42 @@
 import { put, takeEvery, fork, call, select } from 'redux-saga/effects';
 import { State, DataState, dataSlice } from '../reducer';
 import { DataPlugin } from '../../../../interfaces/dataPlugin.ts';
+import { DataPluginCommitBuild, DataPluginCommitsBuilds } from '../../../../interfaces/dataPluginInterfaces/dataPluginCommitsBuilds.ts';
+import { DataPluginCommit } from '../../../../interfaces/dataPluginInterfaces/dataPluginCommits.ts';
+import _ from 'lodash';
 
-export default function* <DataType>(dataConnection: DataPlugin, name?: string) {
-  yield fork(() => watchRefresh<DataType>(dataConnection, name!));
-  yield fork(() => watchDateRangeChange<DataType>(dataConnection, name!));
+export default function* <DataType>(dataConnection: DataPlugin) {
+  yield fork(() => watchRefresh<DataType>(dataConnection));
+  yield fork(() => watchDateRangeChange<DataType>(dataConnection));
 }
 
-function* watchRefresh<DataType>(dataConnection: DataPlugin, name: string) {
-  yield takeEvery('REFRESH', () => fetchChangesData<DataType>(dataConnection, name));
+function* watchRefresh<DataType>(dataConnection: DataPlugin) {
+  yield takeEvery('REFRESH', () => fetchChangesData<DataType>(dataConnection));
 }
 
-function* watchDateRangeChange<DataType>(dataConnection: DataPlugin, name: string) {
-  yield takeEvery(dataSlice.actions.setDateRange, () => fetchChangesData<DataType>(dataConnection, name));
+function* watchDateRangeChange<DataType>(dataConnection: DataPlugin) {
+  yield takeEvery(dataSlice.actions.setDateRange, () => fetchChangesData<DataType>(dataConnection));
 }
 
-function* fetchChangesData<DataType>(dataConnection: DataPlugin, name: string) {
+function* fetchChangesData<DataType>(dataConnection: DataPlugin) {
   const { setData, setDataState } = dataSlice.actions;
   yield put(setDataState(DataState.FETCHING));
   const state: State<DataType> = yield select();
 
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  const commits: DataType[] = yield call(() => dataConnection.commits_builds.getAll(state.dateRange.from, state.dateRange.to));
-  const builds: DataType[] = yield call(() => dataConnection.builds.getAll(state.dateRange.from, state.dateRange.to));
-  yield put(setData([commits, builds]));
+  // Fetch data
+  const commitsBuilds: DataPluginCommitBuild[] = yield call(() => dataConnection.commits_builds.getAll(state.dateRange.from, state.dateRange.to));
+  const commits: DataPluginCommit[] = yield call(() => dataConnection.commits.getAll(state.dateRange.from, state.dateRange.to));
+  
+  // Convert regular commits to DataPluginCommitBuild format (with build set to undefined)
+  const commitsAsCommitBuilds: DataPluginCommitBuild[] = commits.map(commit => ({
+    ...commit,
+    build: undefined
+  }));
+  
+  // Combine both arrays and use lodash to remove duplicates where commitsBuilds gets prefered
+  const combinedCommits = _.uniqBy([...commitsBuilds, ...commitsAsCommitBuilds], 'sha');
+  
+  yield put(setData(combinedCommits));
   yield put(setDataState(DataState.COMPLETE));
-  console.log(state)
+  console.log(state);
 }
