@@ -1,0 +1,82 @@
+import { gql } from "@apollo/client";
+import { GraphQL, traversePages } from "./utils";
+import {
+  DataPluginAccount,
+  DataPluginAccounts,
+} from "../../../interfaces/dataPluginInterfaces/dataPluginAccount.ts";
+
+export default class AccountsIssues implements DataPluginAccounts {
+  private graphQl: GraphQL;
+
+  constructor(endpoint: string) {
+    this.graphQl = new GraphQL(endpoint);
+  }
+
+  /**
+   * Retrieves all accounts with their related issues from the backend.
+   */
+  public async getAll(): Promise<DataPluginAccount[]> {
+    console.log("Getting all Accounts with Issues");
+    const relationships: DataPluginAccount[] = [];
+
+    // Page fetcher function for issues-accounts
+    const getPage =
+      () =>
+      async (page: number, perPage: number = 50) => {
+        const response = await this.graphQl.client.query({
+          query: gql`
+            query ($page: Int, $perPage: Int) {
+              accounts(page: $page, perPage: $perPage) {
+                count
+                page
+                perPage
+                data {
+                  platform
+                  login
+                  name
+                  url
+                  avatarUrl
+                  issues {
+                    id
+                    iid
+                    title
+                    description
+                    createdAt
+                    closedAt
+                    state
+                    webUrl
+                  }
+                }
+              }
+            }
+          `,
+          variables: { page, perPage },
+        });
+        console.log(response.data.accounts);
+        return response.data.gitHubUsers;
+      };
+
+    await traversePages(getPage(), (record: any) => {
+      relationships.push({
+        id: record.login,
+        login: record.login,
+        name: record.name,
+        avatarUrl: record.avatarUrl,
+        url: record.url,
+        issues: record.issues.map((issue: any) => ({
+          id: issue.id,
+          iid: String(issue.iid),
+          title: issue.title,
+          description: issue.description,
+          createdAt: issue.createdAt,
+          closedAt: issue.closedAt,
+          state: issue.state,
+          webUrl: issue.webUrl,
+        })),
+      });
+    });
+
+    //TODO: console log?!
+    return relationships;
+  }
+}

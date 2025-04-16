@@ -10,25 +10,27 @@ function Settings(props: {
   settings: SettingsType;
   setSettings: (newSettings: SettingsType) => void;
 }) {
+  /*
   const data1 = {
     nodes: [
-      { id: "Myriel", group: "team1" },
-      { id: "Anne", group: "team1" },
-      { id: "Gabriel", group: "team1" },
-      { id: "Mel", group: "team1" },
-      { id: "Yan", group: "team2" },
-      { id: "Tom", group: "team2" },
-      { id: "Cyril", group: "team2" },
+      { id: "Myriel", group: "team2" },
+      { id: "Anne", group: "team2" },
+      { id: "Gabriel", group: "team2" },
+      { id: "Mel", group: "team2" },
+      { id: "Yan", group: "team1" },
+      { id: "Tom", group: "team1" },
+      { id: "Cyril", group: "team1" },
       { id: "Tuck", group: "team2" },
       { id: "Antoine", group: "team3" },
       { id: "Rob", group: "team3" },
-      { id: "Napoleon", group: "team3" },
-      { id: "Toto", group: "team4" },
-      { id: "Tutu", group: "team4" },
-      { id: "Titi", group: "team4" },
-      { id: "Tata", group: "team4" },
-      { id: "Turlututu", group: "team4" },
-      { id: "Tita", group: "team4" },
+      { id: "Napoleon", group: "team2" },
+      { id: "Toto", group: "team3" },
+      { id: "Tutu", group: "team3" },
+      { id: "Titi", group: "team3" },
+      { id: "Tata", group: "team3" },
+      { id: "Turlututu", group: "team3" },
+      { id: "Tita", group: "team3" },
+      { id: "Sheldon", group: "team4" },
     ],
     links: [
       { source: "Anne", target: "Myriel", value: 1 },
@@ -54,23 +56,24 @@ function Settings(props: {
   };
   const data2 = {
     nodes: [
-      { id: "Myriel", group: "team1" },
-      { id: "Anne", group: "team1" },
-      { id: "Gabriel", group: "team1" },
-      { id: "Mel", group: "team1" },
-      { id: "Yan", group: "team2" },
-      { id: "Tom", group: "team2" },
-      { id: "Cyril", group: "team2" },
+      { id: "Myriel", group: "team2" },
+      { id: "Anne", group: "team2" },
+      { id: "Gabriel", group: "team2" },
+      { id: "Mel", group: "team2" },
+      { id: "Yan", group: "team1" },
+      { id: "Tom", group: "team1" },
+      { id: "Cyril", group: "team1" },
       { id: "Tuck", group: "team2" },
       { id: "Antoine", group: "team3" },
       { id: "Rob", group: "team3" },
-      { id: "Napoleon", group: "team3" },
-      { id: "Toto", group: "team4" },
-      { id: "Tutu", group: "team4" },
-      { id: "Titi", group: "team4" },
-      { id: "Tata", group: "team4" },
-      { id: "Turlututu", group: "team4" },
-      { id: "Tita", group: "team4" },
+      { id: "Napoleon", group: "team2" },
+      { id: "Toto", group: "team3" },
+      { id: "Tutu", group: "team3" },
+      { id: "Titi", group: "team3" },
+      { id: "Tata", group: "team3" },
+      { id: "Turlututu", group: "team3" },
+      { id: "Tita", group: "team3" },
+      { id: "Sheldon", group: "team4" },
     ],
     links: [
       { source: "Anne", target: "Myriel", value: 1 },
@@ -87,33 +90,18 @@ function Settings(props: {
       { source: "Tata", target: "Tutu", value: 1 },
       { source: "Tata", target: "Titi", value: 1 },
       { source: "Tata", target: "Toto", value: 1 },
-      { source: "Tata", target: "Tita", value: 100 },
-      { source: "Tita", target: "Toto", value: 10 },
-      { source: "Tita", target: "Titi", value: 10 },
-      { source: "Tita", target: "Turlututu", value: 10 },
+      { source: "Tata", target: "Tita", value: 3 },
+      { source: "Tita", target: "Toto", value: 3 },
+      { source: "Tita", target: "Titi", value: 3 },
+      { source: "Tita", target: "Turlututu", value: 5 },
       { source: "Rob", target: "Turlututu", value: 10 },
     ],
   };
 
+   */
   return (
     <>
       <div>
-        <button
-          className={"btn btn-xs btn-accent w-full mb-1"}
-          onClick={() => {
-            props.setSettings({ data: data1, color: props.settings.color });
-          }}
-        >
-          Dataset 1
-        </button>
-        <button
-          className={"btn btn-xs btn-accent w-full mb-1"}
-          onClick={() => {
-            props.setSettings({ data: data2, color: props.settings.color });
-          }}
-        >
-          Dataset 2
-        </button>
         <div>
           <label
             htmlFor={"hs-color-input"}
