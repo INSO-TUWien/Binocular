@@ -30,7 +30,7 @@ function* fetchChangesData<DataType>(dataConnection: DataPlugin) {
   // Convert regular commits to DataPluginCommitBuild format (with build set to undefined)
   const commitsAsCommitBuilds: DataPluginCommitBuild[] = commits.map(commit => ({
     ...commit,
-    build: undefined
+    builds: undefined
   }));
   
   // Combine both arrays and use lodash to remove duplicates where commitsBuilds gets prefered
@@ -38,5 +38,4 @@ function* fetchChangesData<DataType>(dataConnection: DataPlugin) {
   
   yield put(setData(combinedCommits));
   yield put(setDataState(DataState.COMPLETE));
-  console.log(state);
 }

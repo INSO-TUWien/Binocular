@@ -1,9 +1,16 @@
 import { RefObject } from 'react';
 
 export function getSVGData(chartContainerRef: RefObject<HTMLDivElement | undefined>): string {
-  const svgData = chartContainerRef.current?.children[1].outerHTML;
-  if (svgData === undefined) {
+  if (!chartContainerRef.current) {
     return '<svg xmlns="http://www.w3.org/2000/svg"></svg>';
   }
-  return svgData;
+
+  const children = Array.from(chartContainerRef.current.children);
+  const svgElement = children.find((child) => child instanceof SVGElement);
+
+  if (!svgElement) {
+    return '<svg xmlns="http://www.w3.org/2000/svg"></svg>';
+  }
+
+  return svgElement.outerHTML;
 }

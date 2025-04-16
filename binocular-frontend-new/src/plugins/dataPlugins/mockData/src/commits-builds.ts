@@ -31,7 +31,7 @@ export default class CommitsBuilds implements DataPluginCommitsBuilds {
       if (matchingBuild) {
         const commitBuild: DataPluginCommitBuild = {
           ...commit,
-          build: {
+          builds: [{
             id: matchingBuild.id,
             status: matchingBuild.status,
             duration: matchingBuild.duration,
@@ -43,7 +43,7 @@ export default class CommitsBuilds implements DataPluginCommitsBuilds {
               status: job.status,
               stage: job.stage
             }))
-          }
+          }]
         };
         
         commitsBuilds.push(commitBuild);

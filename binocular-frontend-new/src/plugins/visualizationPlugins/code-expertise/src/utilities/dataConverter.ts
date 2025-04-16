@@ -15,8 +15,6 @@ export function convertToChartData(
   scale: number[];
   palette: Palette;
 } {
-  console.log("Converter")
-  console.log("!"+commits)
   if (!commits || commits.length === 0) {
     return { 
       chartData: [{ date: Date.now() }], 
@@ -71,34 +69,17 @@ export function convertToChartData(
 function generatePalette(authors: AuthorType[]): Palette {
   const palette: Palette = {};
 
-  authors.forEach(author => {
+  authors.forEach((author) => {
     if (!author.selected) return;
 
     const displayName = author.displayName || author.user.gitSignature;
-    const baseColor = chroma(author.color.main);
-    
+
     // Create palette entries for each metric
-    palette[`${displayName} - Total Additions`] = {
-      main: baseColor.hex(),
+    palette[`${displayName}`] = {
+      main: chroma(author.color.main).hex(),
       secondary: chroma(author.color.secondary).hex()
     };
-    
-    palette[`${displayName} - Lines Owned`] = {
-      main: baseColor.darken(0.5).hex(),
-      secondary: baseColor.darken(0.3).alpha(0.7).hex()
-    };
-    
-    palette[`${displayName} - Relative Commits`] = {
-      main: baseColor.brighten(0.5).hex(),
-      secondary: baseColor.brighten(0.3).alpha(0.7).hex()
-    };
   });
-
-  // Add others category
-  palette['others'] = {
-    main: chroma('#5555').hex(),
-    secondary: chroma('#7777').hex()
-  };
 
   return palette;
 }

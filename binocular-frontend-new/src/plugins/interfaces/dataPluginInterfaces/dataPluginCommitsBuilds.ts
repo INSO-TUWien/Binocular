@@ -6,7 +6,7 @@ export interface DataPluginCommitsBuilds {
 
 // Interface that combines commit and build information
 export interface DataPluginCommitBuild extends DataPluginCommit {
-    build?: {
+    builds: {
       id: number;
       status: string;
       duration: string;
@@ -18,5 +18,5 @@ export interface DataPluginCommitBuild extends DataPluginCommit {
         status: string;
         stage: string;
       }[];
-    };
+    }[];
   }

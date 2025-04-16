@@ -257,8 +257,8 @@ function Segment({ rad, startPercent, endPercent, devName, devData, devColor, ma
   //this sets the bounds for this section of the chart
   const buildWeight = radius * 0.2;
   const commitsNumber = devData.commits.length;
-  const goodCommits = devData.commits.filter((c) => c.build?.status === 'success').length;
-  const badCommits = devData.commits.filter((c) => c.build !== null && c.build?.status !== 'success').length;
+  const goodCommits = devData.commits.filter((c) => c.builds !== undefined && (c.builds.length>0) && c.builds[0]?.status === 'success').length;
+  const badCommits = devData.commits.filter((c) => c.builds !== undefined && (c.builds.length>0) && c.builds[0]?.status !== 'success').length;
 
   const setCommitPath = (): void => {
     const goodCommitsRadius = radius + buildWeight * (goodCommits / commitsNumber);
