@@ -1,12 +1,12 @@
-import type { Store } from '@reduxjs/toolkit';
+import { Store } from '@reduxjs/toolkit';
 import { throttle } from 'throttle-debounce';
 
-export function handlePopoutResizing(store: Store, fn: () => void) {
+export function handelPopoutResizing(store: Store, fn: () => void) {
   /**
-   * Throttle the resize of the svg (refresh rate) to every 100ms to not overwhelm the renderer,
+   * Throttle the resize of the svg (refresh rate) to every 1s to not overwhelm the renderer,
    * This isn't really necessary for this visualization, but for bigger visualization this can be quite essential
    */
-  const throttledResize = throttle(100, fn, { noLeading: false, noTrailing: false });
+  const throttledResize = throttle(1000, fn, { noLeading: false, noTrailing: false });
 
   store.subscribe(() => {
     if (store !== undefined) {
