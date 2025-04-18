@@ -1,0 +1,9 @@
+{
+  "name": "code_ownership",
+  "version": "1.0.0",
+  "description": "",
+  "main": "src/index.tsx",
+  "scripts": {
+  },
+  "private": true
+}
