@@ -96,12 +96,13 @@ export const CommitChangeViz: React.FC<Props> = ({ width, height, data }: Props)
               display: 'flex',
               justifyContent: 'space-between',
               alignItems: 'space-between',
-              gap: '1px',
               flexDirection: isVertical ? 'row' : 'column',
               position: 'relative',
               borderRadius: '10px',
               border: '2px solid #3182ce',
-            }}>
+            }}
+            title={`${folderName} — +${files.reduce((acc, file) => acc + file.stats.additions, 0)} / -${files.reduce((acc, file) => acc + file.stats.deletions, 0)}`}
+          >
             <div
               style={{
                 position: 'absolute',
@@ -113,6 +114,7 @@ export const CommitChangeViz: React.FC<Props> = ({ width, height, data }: Props)
                 backgroundColor: 'white',
                 padding: '0 4px',
                 zIndex: 1,
+                cursor: 'default',
               }}>
               {folderName}
             </div>
@@ -121,11 +123,11 @@ export const CommitChangeViz: React.FC<Props> = ({ width, height, data }: Props)
               const fileStyle = isVertical
                 ? {
                     height: '100%',
-                    width: `${(file.changeRatio / folderChangeRatio) * 100 - 1}%`,
+                    width: `${(file.changeRatio / folderChangeRatio) * 98}%`,
                   }
                 : {
                     width: '100%',
-                    height: `${(file.changeRatio / folderChangeRatio) * 100 - 1}%`,
+                    height: `${(file.changeRatio / folderChangeRatio) * 98}%`,
                   };
 
               const bgColor = getFileColor(file.stats.additions, file.stats.deletions);
@@ -143,7 +145,7 @@ export const CommitChangeViz: React.FC<Props> = ({ width, height, data }: Props)
                     borderRadius: '10px',
                   }}
                   title={`${file.file.path} — +${file.stats.additions} / -${file.stats.deletions}`}>
-                  {file.file.path.split('/').pop()}
+                  <p style={{ zIndex: '1', fontWeight: 'bold' }}>{file.file.path.split('/').pop()}</p>
                 </div>
               );
             })}

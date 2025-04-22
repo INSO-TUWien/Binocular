@@ -6,15 +6,13 @@ import {
 import { gql } from '@apollo/client';
 
 export default class CommitsFilesChanges implements DataPluginCommitsFilesChanges {
-  private graphQl;
+  private readonly graphQl;
 
   constructor(endpoint: string) {
     this.graphQl = new GraphQL(endpoint);
   }
 
   public async getAll(sha: string) {
-    //TODO: remove this hardcoded sha
-    sha = '6af2dbe4380c1f4420b8d7aa41c3c4c9cabff887';
     console.log(`Getting Commits Files for ${sha}`);
     const fileList: DataPluginCommitFileChanges[] = [];
     const getFilesPage = (sha: string) => async (page: number, perPage: number) => {
