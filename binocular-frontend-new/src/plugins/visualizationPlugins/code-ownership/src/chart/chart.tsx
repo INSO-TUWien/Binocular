@@ -10,7 +10,7 @@ import { DataPluginCommit } from '../../../../interfaces/dataPluginInterfaces/da
 import { throttle } from 'throttle-debounce';
 import { Palette } from '../../../../../types/data/authorType.ts';
 import { FileOwnershipCollection, OwnershipData, PreviousFileData } from '../../../../../types/data/ownershipType.ts';
-import { DataState } from '../reducer';
+import { DataState, setDateRange } from '../reducer';
 
 function Chart<SettingsType extends CodeOwnerShipSettings, DataType>(props: Properties<SettingsType, DataType>) {
   // /!*
@@ -42,6 +42,7 @@ function Chart<SettingsType extends CodeOwnerShipSettings, DataType>(props: Prop
   const relevantOwnershipData = data.rawData;
   const fileList = props.fileList;
   const previousFilenames: { [id: string]: PreviousFileData[] } = data.previousFilenames;
+  const granularity = props.parameters.parametersGeneral.granularity;
   const excludedCommits: DataPluginCommit[] = [];
   const excludeCommits = false;
 
@@ -133,7 +134,6 @@ function Chart<SettingsType extends CodeOwnerShipSettings, DataType>(props: Prop
           }
         }
       }
-
       let sum = 0;
       //now filecache stores the current ownership for each file that exists at the time of the current commit
       for (const [, fileOwnershipData] of Object.entries(fileCache)) {
@@ -150,7 +150,6 @@ function Chart<SettingsType extends CodeOwnerShipSettings, DataType>(props: Prop
         resultOwnershipData.push(commitResult);
       }
     }
-
     setOwnershipData(resultOwnershipData);
   }, [relevantOwnershipData, previousFilenames]);
 
@@ -172,7 +171,6 @@ function Chart<SettingsType extends CodeOwnerShipSettings, DataType>(props: Prop
       const maxDate = props.parameters.parametersDateRange.to ? new Date(props.parameters.parametersDateRange.to) : new Date();
       return minDate <= date && date <= maxDate;
     });
-
     const palette: Palette = {};
 
     //compute scale
@@ -223,7 +221,6 @@ function Chart<SettingsType extends CodeOwnerShipSettings, DataType>(props: Prop
         if (otherAuthors.map((oa) => oa.user.gitSignature).includes(authorName)) {
           result['other'] += ownership;
         }
-
         if (keys.includes(authorName)) result[authorName] += ownership;
         else {
           //check if the author is part of a merges author from the universal settings
@@ -239,19 +236,19 @@ function Chart<SettingsType extends CodeOwnerShipSettings, DataType>(props: Prop
       return result;
     });
 
-    if (props.parameters.parametersGeneral.granularity === 'days') {
+    if (granularity === 'days') {
       setChartData(result);
     } else {
       let groupedResult;
 
-      if (props.parameters.parametersGeneral.granularity === 'years') {
+      if (granularity === 'years') {
         groupedResult = _.groupBy(result, (dataPoint) => '' + new Date(dataPoint.date).getFullYear());
       } else if (props.parameters.parametersGeneral.granularity === 'months') {
         groupedResult = _.groupBy(
           result,
           (dataPoint) => '' + new Date(dataPoint.date).getMonth() + '-' + new Date(dataPoint.date).getFullYear(),
         );
-      } else if (props.parameters.parametersGeneral.granularity === 'weeks') {
+      } else if (granularity === 'weeks') {
         groupedResult = _.groupBy(result, (dataPoint) => {
           const d = new Date(dataPoint.date);
           const onejan = new Date(d.getFullYear(), 0, 1);
@@ -260,7 +257,7 @@ function Chart<SettingsType extends CodeOwnerShipSettings, DataType>(props: Prop
         });
       } else {
         //invalid granularity
-        console.log('Error in Code Ownership: granularity "' + props.parameters.parametersGeneral.granularity + '" not valid');
+        console.log('Error in Code Ownership: granularity "' + granularity + '" not valid');
         setChartData(result);
         return;
       }
@@ -280,7 +277,12 @@ function Chart<SettingsType extends CodeOwnerShipSettings, DataType>(props: Prop
       setChartPalette(palette);
       setChartData(coarseResult);
     }
-  }, [ownershipData, props.parameters]);
+  }, [ownershipData, granularity]);
+
+  //Set Global state when parameters change. This will also conclude in a refresh of the data.
+  useEffect(() => {
+    dispatch(setDateRange(props.parameters.parametersDateRange));
+  }, [props.parameters]);
 
   //Trigger Refresh when dataConnection changes
   useEffect(() => {
@@ -306,7 +308,7 @@ function Chart<SettingsType extends CodeOwnerShipSettings, DataType>(props: Prop
             height={chartHeight}
             yDims={chartScale}
             d3offset={props.settings.displayMode === 'relative' ? d3.stackOffsetExpand : d3.stackOffsetNone}
-            resolution={props.parameters.parametersGeneral.granularity}
+            resolution={granularity}
             keys={keys}
             order={keys.reverse()}
           />

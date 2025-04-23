@@ -96,11 +96,11 @@ export default class ScalableBaseChart extends React.Component<Props, State> {
     throw new NoImplementationException('Base class is abstract and requires implementation!');
   }
 
-  getXDims() {
+  getXDims(): number[] {
     throw new NoImplementationException('Base class is abstract and requires implementation!');
   }
 
-  getYDims(): any {
+  getYDims(): number[] {
     throw new NoImplementationException('Base class is abstract and requires implementation!');
   }
 
@@ -111,7 +111,7 @@ export default class ScalableBaseChart extends React.Component<Props, State> {
    * @param brushArea
    * @param area
    */
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  // @ts-ignore
   resetZoom(scales: any, axes: any, brushArea: any, area: any) {
     throw new NoImplementationException('Base class is abstract and requires implementation!');
   }
@@ -122,7 +122,7 @@ export default class ScalableBaseChart extends React.Component<Props, State> {
    * @param order
    * @returns Stacked chart data for d3 functions and preprocessed data { stackedData, data }
    */
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  // @ts-ignore
   calculateChartData(data: any, order: any) {
     throw new NoImplementationException('Base class is abstract and requires implementation!');
   }
@@ -139,27 +139,27 @@ export default class ScalableBaseChart extends React.Component<Props, State> {
    * @param scales
    */
   createdTooltipNode(
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    // @ts-ignore
     path: any,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    // @ts-ignore
     bisectDate: any,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    // @ts-ignore
     mouseoverDate: any,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    // @ts-ignore
     tooltip: any,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    // @ts-ignore
     event: any,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    // @ts-ignore
     node: any,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    // @ts-ignore
     brushArea: any,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    // @ts-ignore
     scales: any,
   ) {
     throw new NoImplementationException('Base class is abstract and requires implementation!');
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  // @ts-ignore
   getBrushId(data: any): any {
     throw new NoImplementationException('Base class is abstract and requires implementation!');
   }
@@ -172,7 +172,7 @@ export default class ScalableBaseChart extends React.Component<Props, State> {
    * @param event
    * @param stream
    */
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  // @ts-ignore
   onMouseover(path: any, tooltip: any, brushArea: any, event: any, stream: any) {
     throw new NoImplementationException('Base class is abstract and requires implementation!');
   }
@@ -185,7 +185,7 @@ export default class ScalableBaseChart extends React.Component<Props, State> {
    * @param event
    * @param stream
    */
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  // @ts-ignore
   onMouseLeave(path: any, tooltip: any, brushArea: any, event: any, stream: any) {
     throw new NoImplementationException('Base class is abstract and requires implementation!');
   }
@@ -370,7 +370,7 @@ export default class ScalableBaseChart extends React.Component<Props, State> {
    * @returns {{brushArea: *, xAxis: *}} brushArea: Area that has all the contents appended to it,
    *               xAxis: d3 x-Axis for later transitioning (for zooming)
    */
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  // @ts-ignore
   drawChart(svg: any, area: any, brush: any, yScale: any, scales: any, height: any, width: any, paddings: any) {
     const brushArea = svg.append('g');
     if (!this.tooltipRef) {
@@ -418,6 +418,7 @@ export default class ScalableBaseChart extends React.Component<Props, State> {
    * @param paddings
    * @returns {*}
    */
+  // @ts-ignore
   createXAxis(brushArea: any, scales: any, width: any, height: any, paddings: any) {
     if (this.props.xAxisCenter) {
       return brushArea
@@ -465,7 +466,7 @@ export default class ScalableBaseChart extends React.Component<Props, State> {
    * @param height
    * @param paddings
    */
-  //@ts-ignore
+  //@ts-expect-error
   additionalAxes(brushArea: any, scales: any, width: any, height: any, paddings: any) {
     return;
   }
@@ -506,7 +507,7 @@ export default class ScalableBaseChart extends React.Component<Props, State> {
       .on('mouseout', (event: any, stream: any) => {
         return this.onMouseLeave(this, tooltip, brushArea, event, stream);
       })
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      // @ts-ignore
       .on('mousemove', (event: any, stream: any) => {
         //Calculate values and text for tooltip
         const node = svg.node();

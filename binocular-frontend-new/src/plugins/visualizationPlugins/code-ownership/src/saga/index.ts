@@ -23,7 +23,7 @@ function* fetchCodeOwnershipData(dataConnection: DataPlugin) {
       branch: 'develop',
       active: 'false',
       tracksFileRenames: 'true',
-      latestCommit: 'b41e4505fe31b63a0ce047607ced1a4b7b66d1bb',
+      latestCommit: '5f13d85a7c3a2e62711e5e78f79f04854ecc5907',
     };
 
     const result: CodeOwnershipData = { rawData: [], previousFilenames: {} };

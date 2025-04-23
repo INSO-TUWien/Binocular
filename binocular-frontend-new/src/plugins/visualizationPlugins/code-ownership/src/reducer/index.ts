@@ -8,8 +8,8 @@ export enum DataState {
 }
 
 export interface CodeOwnershipData {
-  rawData: DataPluginOwnership[];
-  previousFilenames: { [p: string]: string[] };
+  rawData?: DataPluginOwnership[];
+  previousFilenames?: { [p: string]: string[] };
   //fileOwnership: FileOwnershipCollection;
 }
 
@@ -19,13 +19,13 @@ interface DateRange {
 }
 
 export interface CodeOwnershipState {
-  data: CodeOwnershipData;
+  data?: CodeOwnershipData;
   dateRange: DateRange;
   dataState: DataState;
 }
 
 const initialState: CodeOwnershipState = {
-  data: { rawData: [], previousFilenames: {} },
+  data: { rawData: undefined, previousFilenames: {} },
   dateRange: { from: new Date().toISOString(), to: new Date().toISOString() },
   dataState: DataState.EMPTY,
 };

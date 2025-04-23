@@ -1,12 +1,10 @@
 export class RuntimeException extends Error {
-  constructor(message, name, code) {
+
+  code?: number;
+  constructor(message: string, name: string, code?: number) {
     super(message);
     this.code = code;
     this.name = name || RuntimeException.name || this.constructor.name;
-    if (typeof Error.captureStackTrace === 'function') {
-      Error.captureStackTrace(this, this.constructor);
-    } else {
-      this.stack = new Error(this.message).stack;
-    }
+    this.stack = new Error(this.message).stack;
   }
 }
