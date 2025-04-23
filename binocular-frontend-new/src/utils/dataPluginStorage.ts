@@ -39,6 +39,13 @@ export default abstract class DataPluginStorage {
         { name: dP.parameters.fileName, file: undefined, dbObjects: undefined },
         dP.parameters.progressUpdate,
       );
+      Object.defineProperty(dataPlugin, 'sumCommits', {
+        get() {
+          return this.commits;
+        },
+        enumerable: true,
+        configurable: true,
+      });
     }
     return dataPlugin;
   }
