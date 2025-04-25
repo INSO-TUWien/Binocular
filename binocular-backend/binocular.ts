@@ -387,6 +387,12 @@ function runBackend() {
         return !provider || !provider.isStopping();
       });
 
+      // export db if required
+      if (context.argv.export) {
+        projectStructureHelper.deleteDbExport(__dirname + '/../binocular-frontend');
+        projectStructureHelper.createAndFillDbExportFolder(context.db, __dirname + '/../binocular-frontend');
+      }
+
       if (activeProviders.length < 1) {
         threadLog(indexingThread, 'All indexers stopped!');
       }
