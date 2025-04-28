@@ -35,11 +35,14 @@ export const ColumnChart = ({ width, height, data, scale, palette, sprintList, s
       .domain([xMin || 0, xMax || 0])
       .range([0, boundsWidth]);
   }, [boundsWidth, xMax, xMin]);
+
+  // X axis - time scale
   const xTime = d3
     .scaleTime()
     .domain([xMin || 0, xMax || 0])
     .range([0, boundsWidth]);
 
+  // X axis - band scale / users
   const xBand = d3
     .scaleBand<string>()
     .domain(Array.from(new Set(data.map((d) => d.user))))
@@ -91,9 +94,24 @@ export const ColumnChart = ({ width, height, data, scale, palette, sprintList, s
     const svg = d3.select(svgRef.current);
     svg.selectAll('*').remove();
 
-    svg.append('g').attr('class', 'xAxis').attr('transform', `translate(0,${boundsHeight})`).call(d3.axisBottom(xBand)).selectAll('text').attr('transform', 'rotate(-4ß)').style('text-anchor', 'end');
+    svg
+      .append('g')
+      .attr('class', 'xAxis')
+      .attr('transform', `translate(0,${boundsHeight})`)
+      .call(d3.axisBottom(xBand))
+      .selectAll('text')
+      .style('text-anchor', 'middle');
 
-    svg.append('g').attr('class', 'yAxis').call(d3.axisLeft(yScale).ticks(scale[1] - scale[0]).tickFormat(d3.format('d')));
+    svg
+      .append('g')
+      .attr('class', 'yAxis')
+      .call(
+        d3
+          .axisLeft(yScale)
+          .ticks(scale[1] - scale[0])
+          .tickFormat(d3.format('d')),
+      );
+
     svg.append('g').attr('class', 'brush').call(brush);
 
     generateBars(palette, data, xBand, yScale, svgRef, tooltipRef);
