@@ -77,15 +77,6 @@ export const ColumnChart = ({ width, height, data, scale, palette, sprintList, s
 
       svgElement.select('.xAxis').transition().duration(1000).call(d3.axisBottom(xTime));
 
-      xBand.domain(
-        data
-          .filter((d) => {
-            const t = new Date(d.date).getTime();
-            return t >= xTime.domain()[0].getTime() && t <= xTime.domain()[1].getTime();
-          })
-          .map((d) => new Date(d.date).getTime()),
-      );
-
       updateBars(palette, data, xBand, yScale, svgRef);
       updateSprintAreas(sprintList, xBand, yScale, scale[0], scale[1], svgRef);
     });
