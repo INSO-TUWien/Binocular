@@ -338,20 +338,3 @@ function updateSprintAreas(
       .attr('height', 10);
   });
 }
-
-function getClosestIndex(x: number, data: ChartData[], xScale: ScaleTime<number, number, never>) {
-  const targetTimestamp = Math.round(xScale.invert(x).getTime());
-  const timestamps = data.map((d) => new Date(d.date).getTime());
-
-  let closestIndex = 0;
-  let minDiff = Math.abs(timestamps[0] - targetTimestamp);
-
-  for (let i = 1; i < timestamps.length; i++) {
-    const diff = Math.abs(timestamps[i] - targetTimestamp);
-    if (diff < minDiff) {
-      closestIndex = i;
-      minDiff = diff;
-    }
-  }
-  return closestIndex;
-}
