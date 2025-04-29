@@ -28,26 +28,11 @@ export const ColumnChart = ({ width, height, data, scale, palette, sprintList, s
   }, [boundsHeight, scale]);
 
   // X axis
+  const alLUsers = Array.from(new Set(data.map((d) => d.user)));
   const [xMin, xMax] = d3.extent(data, (d) => new Date(d.date).getTime());
-  useMemo(() => {
-    return d3
-      .scaleBand()
-      .domain([xMin || 0, xMax || 0])
-      .range([0, boundsWidth]);
+  const xScale = useMemo(() => {
+    return d3.scaleBand<string>().domain(alLUsers).range([0, boundsWidth]).padding(0.1);
   }, [boundsWidth, xMax, xMin]);
-
-  // X axis - time scale
-  const xTime = d3
-    .scaleTime()
-    .domain([xMin || 0, xMax || 0])
-    .range([0, boundsWidth]);
-
-  // X axis - band scale / users
-  const xBand = d3
-    .scaleBand<string>()
-    .domain(Array.from(new Set(data.map((d) => d.user))))
-    .range([0, boundsWidth])
-    .padding(0.2);
 
   let idleTimeout: number | null = null;
   function idled() {
@@ -58,7 +43,7 @@ export const ColumnChart = ({ width, height, data, scale, palette, sprintList, s
     .brushX()
     .extent([
       [0, 0],
-      [width, height],
+      [boundsWidth, boundsHeight],
     ])
     .on('end', (e) => {
       const svgElement = d3.select(svgRef.current);
@@ -69,16 +54,32 @@ export const ColumnChart = ({ width, height, data, scale, palette, sprintList, s
           idleTimeout = window.setTimeout(idled, 350);
           return;
         }
-        xTime.domain([xMin || 0, xMax || 0]);
+        xScale.domain(alLUsers);
       } else {
-        xTime.domain([xTime.invert(extent[0]), xTime.invert(extent[1])]);
-        svgElement.select('.brush').call(brush.move, null);
+        const selectedUsers = alLUsers.filter((u) => {
+          const x0 = xScale(u);
+          const x1 = x0 + xScale.bandwidth();
+          return x1 >= extent[0] && x0 <= extent[1];
+        });
+        if (selectedUsers.length) {
+          xScale.domain(selectedUsers);
+        }
       }
 
-      svgElement.select('.xAxis').transition().duration(1000).call(d3.axisBottom(xTime));
+      svgElement.select('.brush').call(brush.move, null);
 
-      updateBars(palette, data, xBand, yScale, svgRef);
-      updateSprintAreas(sprintList, xBand, yScale, scale[0], scale[1], svgRef);
+      svgElement.select('.xAxis').transition().duration(1000).call(d3.axisBottom(xScale));
+
+      //svgElement.select('.xAxis').transition().duration(1000).call(d3.axisBottom(xTime));
+
+      updateBars(
+        palette,
+        data.filter((d) => xScale.domain().includes(d.user)),
+        xScale,
+        yScale,
+        svgRef,
+      );
+      updateSprintAreas(sprintList, xScale, yScale, scale[0], scale[1], svgRef);
     });
 
   useEffect(() => {
@@ -89,7 +90,7 @@ export const ColumnChart = ({ width, height, data, scale, palette, sprintList, s
       .append('g')
       .attr('class', 'xAxis')
       .attr('transform', `translate(0,${boundsHeight})`)
-      .call(d3.axisBottom(xBand))
+      .call(d3.axisBottom(xScale))
       .selectAll('text')
       .style('text-anchor', 'middle');
 
@@ -105,11 +106,11 @@ export const ColumnChart = ({ width, height, data, scale, palette, sprintList, s
 
     svg.append('g').attr('class', 'brush').call(brush);
 
-    generateBars(palette, data, xBand, yScale, svgRef, tooltipRef);
+    generateBars(palette, data, xScale, yScale, svgRef, tooltipRef);
     if (settings.showSprints) {
-      generateSprintAreas(sprintList, xBand, yScale, scale[0], scale[1], svgRef);
+      generateSprintAreas(sprintList, xScale, yScale, scale[0], scale[1], svgRef);
     }
-  }, [xTime, xBand, yScale, boundsHeight, settings.showSprints]);
+  }, [xScale, yScale, boundsHeight, settings.showSprints]);
 
   return (
     <>
@@ -171,12 +172,27 @@ function updateBars(
   svg
     .selectAll<SVGRectElement, { user: string; value: number }>('.bar')
     .data(data, (d) => d.user)
-    .transition()
-    .duration(750)
-    .attr('x', (d) => x(d.user)!)
-    .attr('y', (d) => y(d.value))
-    .attr('height', (d) => y(0) - y(d.value))
-    .attr('fill', (d) => palette[d.user].main);
+    .join(
+      (enter) =>
+        enter
+          .append('rect')
+          .attr('class', 'bar')
+          .attr('x', (d) => x(d.user)!)
+          .attr('y', (d) => y(d.value))
+          .attr('width', x.bandwidth())
+          .attr('height', 0)
+          .attr('fill', (d) => palette[d.user].main)
+          .transition()
+          .attr('y', (d) => y(d.value))
+          .attr('height', (d) => y(0) - y(d.value)),
+      (update) =>
+        update
+          .transition()
+          .attr('x', (d) => x(d.user)!)
+          .attr('y', (d) => y(d.value))
+          .attr('height', (d) => y(0) - y(d.value)),
+      (exit) => exit.transition().attr('height', 0).attr('y', y(0)).remove(),
+    );
 }
 
 function generateSprintAreas(
