@@ -189,6 +189,7 @@ function updateBars(
         update
           .transition()
           .attr('x', (d) => x(d.user)!)
+          .attr('width', x.bandwidth())
           .attr('y', (d) => y(d.value))
           .attr('height', (d) => y(0) - y(d.value)),
       (exit) => exit.transition().attr('height', 0).attr('y', y(0)).remove(),
