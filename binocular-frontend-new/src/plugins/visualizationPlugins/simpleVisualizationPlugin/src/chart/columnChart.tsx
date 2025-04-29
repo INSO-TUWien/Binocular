@@ -1,7 +1,7 @@
 import { MutableRefObject, useEffect, useMemo, useRef } from 'react';
 import * as d3 from 'd3';
-import { ScaleBand, ScaleLinear, ScaleTime, symbol, symbolTriangle } from 'd3';
-import { ChartData, Palette } from './chart.tsx';
+import { ScaleBand, ScaleLinear, symbol, symbolTriangle } from 'd3';
+import { BarChartData, Palette } from './chart.tsx';
 import { SprintType } from '../../../../../types/data/sprintType.ts';
 import { DefaultSettings } from '../settings/settings.tsx';
 const MARGIN = { top: 30, right: 30, bottom: 50, left: 50 };
@@ -9,7 +9,7 @@ const MARGIN = { top: 30, right: 30, bottom: 50, left: 50 };
 type BarChartProps = {
   width: number;
   height: number;
-  data: ChartData[];
+  data: BarChartData[];
   scale: number[];
   palette: Palette;
   sprintList: SprintType[];
@@ -57,7 +57,7 @@ export const ColumnChart = ({ width, height, data, scale, palette, sprintList, s
         xScale.domain(alLUsers);
       } else {
         const selectedUsers = alLUsers.filter((u) => {
-          const x0 = xScale(u);
+          const x0 = xScale(u)!;
           const x1 = x0 + xScale.bandwidth();
           return x1 >= extent[0] && x0 <= extent[1];
         });
@@ -69,8 +69,6 @@ export const ColumnChart = ({ width, height, data, scale, palette, sprintList, s
       svgElement.select('.brush').call(brush.move, null);
 
       svgElement.select('.xAxis').transition().duration(1000).call(d3.axisBottom(xScale));
-
-      //svgElement.select('.xAxis').transition().duration(1000).call(d3.axisBottom(xTime));
 
       updateBars(
         palette,
