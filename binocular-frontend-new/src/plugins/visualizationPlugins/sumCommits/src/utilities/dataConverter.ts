@@ -40,9 +40,15 @@ export function convertToChartData(
   /**
    * Add the data for each author
    */
+
+  const selectedIds = new Set<string>();
+  const knownIds = new Set(props.authorList.map((author) => author.user.id));
   props.authorList.forEach((author: AuthorType) => {
+    if (!author.selected) return;
     const label = author.displayName || author.user.gitSignature;
     const total = countsByUser[author.user.id] ?? 0;
+
+    selectedIds.add(author.user.id);
 
     chartData.push({ user: label, value: total });
 
@@ -53,13 +59,19 @@ export function convertToChartData(
   });
 
   /* optional: sum up commits from unknown users */
+  /* TODO: Make it so unknown users get shown when being optionally enabled
   const knownSum = _.sum(chartData.map((d) => d.value));
   const unknown = commits.length - knownSum;
+  */
+  const unknown = commits.filter((c) => !knownIds.has(c.user.id)).length;
   if (unknown > 0) {
     chartData.push({ user: 'others', value: unknown });
     palette['others'] = { main: '#555555', secondary: '#777777' };
   }
 
+  /**
+   * Scale
+   */
   const max = _.max(chartData.map((d) => d.value)) ?? 0;
   const scale: number[] = [0, max];
 
