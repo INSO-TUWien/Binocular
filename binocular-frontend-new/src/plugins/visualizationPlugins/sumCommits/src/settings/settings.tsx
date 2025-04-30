@@ -1,5 +1,6 @@
 export interface SettingsType {
   showMean: boolean;
+  showOther: boolean;
 }
 
 function Settings(props: { settings: SettingsType; setSettings: (newSettings: SettingsType) => void }) {
@@ -15,6 +16,21 @@ function Settings(props: { settings: SettingsType; setSettings: (newSettings: Se
             onChange={(event) =>
               props.setSettings({
                 showMean: event.target.checked,
+                showOther: props.settings.showOther,
+              })
+            }
+          />
+        </label>
+        <label className="label cursor-pointer">
+          <span className="label-text">Show unknown authors:</span>
+          <input
+            type="checkbox"
+            className="toggle toggle-accent toggle-sm"
+            defaultChecked={props.settings.showOther}
+            onChange={(event) =>
+              props.setSettings({
+                ...props.settings,
+                showOther: event.target.checked,
               })
             }
           />
