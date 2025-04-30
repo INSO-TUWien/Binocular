@@ -1,8 +1,7 @@
 import { MutableRefObject, useEffect, useMemo, useRef } from 'react';
 import * as d3 from 'd3';
 import { BarChartData, Palette } from './chart.tsx';
-import { SprintType } from '../../../../../types/data/sprintType.ts';
-import { DefaultSettings } from '../settings/settings.tsx';
+import { SumSettings } from '../settings/settings.tsx';
 const MARGIN = { top: 30, right: 30, bottom: 50, left: 50 };
 
 type BarChartProps = {
@@ -11,8 +10,7 @@ type BarChartProps = {
   data: BarChartData[];
   scale: number[];
   palette: Palette;
-  sprintList: SprintType[];
-  settings: DefaultSettings;
+  settings: SumSettings;
 };
 
 export const ColumnChart = ({ width, height, data, scale, palette, settings }: BarChartProps) => {
@@ -109,7 +107,11 @@ export const ColumnChart = ({ width, height, data, scale, palette, settings }: B
     svg.append('g').attr('class', 'brush').call(brush);
 
     generateBars(palette, data, xScale, yScale, svgRef, tooltipRef);
-  }, [xScale, yScale, boundsHeight, settings.showSprints]);
+
+    if (settings.showMean) {
+      generateMeanLine(data, boundsWidth, yScale, svgRef);
+    }
+  }, [xScale, yScale, boundsHeight, settings.showMean]);
 
   return (
     <>
@@ -193,4 +195,25 @@ function updateBars(
           .attr('height', (d) => y(0) - y(d.value)),
       (exit) => exit.transition().attr('height', 0).attr('y', y(0)).remove(),
     );
+}
+
+function generateMeanLine(
+  data: { user: string; value: number }[],
+  boundsWidth: number,
+  y: d3.ScaleLinear<number, number>,
+  svgRef: MutableRefObject<null>,
+) {
+  const svg = d3.select(svgRef.current);
+  const mean = d3.mean(data, (d) => d.value) ?? 0;
+
+  svg
+    .append('line')
+    .attr('class', 'meanLine')
+    .attr('x1', 0)
+    .attr('x2', boundsWidth)
+    .attr('stroke', '#ff3b30')
+    .attr('stroke-width', 2)
+    .attr('stroke-dasharray', '5,5')
+    .attr('y1', y(mean))
+    .attr('y2', y(mean));
 }
