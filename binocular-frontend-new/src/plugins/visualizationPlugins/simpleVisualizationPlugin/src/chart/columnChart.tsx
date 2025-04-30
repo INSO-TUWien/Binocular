@@ -29,10 +29,9 @@ export const ColumnChart = ({ width, height, data, scale, palette, sprintList, s
 
   // X axis
   const alLUsers = Array.from(new Set(data.map((d) => d.user)));
-  const [xMin, xMax] = d3.extent(data, (d) => new Date(d.date).getTime());
   const xScale = useMemo(() => {
     return d3.scaleBand<string>().domain(alLUsers).range([0, boundsWidth]).padding(0.1);
-  }, [boundsWidth, xMax, xMin]);
+  }, [boundsWidth]);
 
   let idleTimeout: number | null = null;
   function idled() {
