@@ -1,6 +1,5 @@
 import { MutableRefObject, useEffect, useMemo, useRef } from 'react';
 import * as d3 from 'd3';
-import { ScaleBand, ScaleLinear, symbol, symbolTriangle } from 'd3';
 import { BarChartData, Palette } from './chart.tsx';
 import { SprintType } from '../../../../../types/data/sprintType.ts';
 import { DefaultSettings } from '../settings/settings.tsx';
@@ -16,7 +15,7 @@ type BarChartProps = {
   settings: DefaultSettings;
 };
 
-export const ColumnChart = ({ width, height, data, scale, palette, sprintList, settings }: BarChartProps) => {
+export const ColumnChart = ({ width, height, data, scale, palette, settings }: BarChartProps) => {
   // bounds = area inside the graph axis = calculated by substracting the margins
   const svgRef = useRef(null);
   const tooltipRef = useRef(null);
@@ -31,7 +30,7 @@ export const ColumnChart = ({ width, height, data, scale, palette, sprintList, s
   const alLUsers = Array.from(new Set(data.map((d) => d.user)));
   const xScale = useMemo(() => {
     return d3.scaleBand<string>().domain(alLUsers).range([0, boundsWidth]).padding(0.1);
-  }, [boundsWidth]);
+  }, [alLUsers, boundsWidth]);
 
   let idleTimeout: number | null = null;
   function idled() {
@@ -65,8 +64,15 @@ export const ColumnChart = ({ width, height, data, scale, palette, sprintList, s
         }
       }
 
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-expect-error
+      // eslint-disable-next-line @typescript-eslint/unbound-method
       svgElement.select('.brush').call(brush.move, null);
 
+      // d3/typescript sometimes does weird things and throws an error where no error is.
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-expect-error
       svgElement.select('.xAxis').transition().duration(1000).call(d3.axisBottom(xScale));
 
       updateBars(
@@ -76,7 +82,6 @@ export const ColumnChart = ({ width, height, data, scale, palette, sprintList, s
         yScale,
         svgRef,
       );
-      updateSprintAreas(sprintList, xScale, yScale, scale[0], scale[1], svgRef);
     });
 
   useEffect(() => {
@@ -104,9 +109,6 @@ export const ColumnChart = ({ width, height, data, scale, palette, sprintList, s
     svg.append('g').attr('class', 'brush').call(brush);
 
     generateBars(palette, data, xScale, yScale, svgRef, tooltipRef);
-    if (settings.showSprints) {
-      generateSprintAreas(sprintList, xScale, yScale, scale[0], scale[1], svgRef);
-    }
   }, [xScale, yScale, boundsHeight, settings.showSprints]);
 
   return (
@@ -135,7 +137,7 @@ function generateBars(
 
   svg
     .selectAll('.bar')
-    .data(data, (d) => d.user)
+    .data(data)
     .enter()
     .append('rect')
     .attr('class', 'bar')
@@ -191,148 +193,4 @@ function updateBars(
           .attr('height', (d) => y(0) - y(d.value)),
       (exit) => exit.transition().attr('height', 0).attr('y', y(0)).remove(),
     );
-}
-
-function generateSprintAreas(
-  sprints: SprintType[],
-  xScale: ScaleBand<number>,
-  yScale: ScaleLinear<number, number, never>,
-  yMax: number,
-  yMin: number,
-  svgRef: React.MutableRefObject<null>,
-) {
-  const svgElement = d3.select(svgRef.current);
-  svgElement
-    .append('defs')
-    .append('pattern')
-    .attr('id', 'diagonalHatch')
-    .attr('patternUnits', 'userSpaceOnUse')
-    .attr('width', 8)
-    .attr('height', 8)
-    .append('path')
-    .attr('d', 'M-1,1 l2,-2 M0,8 l8,-8 M3,5 l2,-2')
-    .attr('stroke', '#ff3b30')
-    .attr('stroke-width', 1);
-
-  sprints.forEach((sprint) => {
-    svgElement
-      .append('rect')
-      .attr('id', `sprintStartLine${sprint.id}`)
-      .attr('y', yScale(yMin))
-      .attr('x', xScale(new Date(sprint.startDate)))
-      .attr('height', yScale(yMax) - yScale(yMin))
-      .attr('width', 1)
-      .attr('fill', '#4cd964');
-    svgElement
-      .append('path')
-      .attr('id', `sprintStartLineTriangle${sprint.id}`)
-      .attr('d', symbol().type(symbolTriangle))
-      .attr('width', '10')
-      .attr('height', '10')
-      .attr('transform', 'translate(' + (xScale(new Date(sprint.startDate)) + 4) + ',' + (yScale(yMin) + 5) + ') rotate(90)')
-      .style('fill', '#4cd964');
-    svgElement
-      .append('rect')
-      .attr('id', `sprintEndLine${sprint.id}`)
-      .attr('y', yScale(yMin))
-      .attr('x', xScale(new Date(sprint.endDate)))
-      .attr('height', yScale(yMax) - yScale(yMin))
-      .attr('width', 1)
-      .attr('fill', '#ff3b30');
-    svgElement
-      .append('path')
-      .attr('id', `sprintEndLineTriangle${sprint.id}`)
-      .attr('d', symbol().type(symbolTriangle))
-      .attr('width', '10')
-      .attr('height', '10')
-      .attr('transform', 'translate(' + (xScale(new Date(sprint.endDate)) - 3) + ',' + (yScale(yMin) + 5) + ') rotate(-90)')
-      .style('fill', '#ff3b30');
-
-    svgElement
-      .append('rect')
-      .attr('id', `sprintBackground${sprint.id}`)
-      .attr('y', yScale(0) - 15)
-      .attr('x', xScale(new Date(sprint.startDate)))
-      .attr('height', 15)
-      .attr('width', xScale(new Date(sprint.endDate)) - xScale(new Date(sprint.startDate)))
-      .attr('fill', 'white');
-    svgElement
-      .append('rect')
-      .attr('id', `sprintBackgroundStripes${sprint.id}`)
-      .attr('y', yScale(0) - 15)
-      .attr('x', xScale(new Date(sprint.startDate)))
-      .attr('height', 15)
-      .attr('width', xScale(new Date(sprint.endDate)) - xScale(new Date(sprint.startDate)))
-      .attr('fill', 'url(#diagonalHatch)')
-      .attr('stroke', '#ff3b30');
-    svgElement
-      .append('text')
-      .attr('id', `sprintText${sprint.id}`)
-      .attr('y', yScale(0) - 4)
-      .attr('x', xScale(new Date(sprint.startDate)) + 2)
-      .attr('height', 10)
-      .attr('font-size', '.75rem')
-      .attr('paint-order', 'stroke')
-      .attr('stroke', 'white')
-      .attr('stroke-width', '4px')
-      .text(sprint.name);
-  });
-}
-
-function updateSprintAreas(
-  sprints: SprintType[],
-  xScale: ScaleBand<number>,
-  yScale: ScaleLinear<number, number, never>,
-  yMax: number,
-  yMin: number,
-  svgRef: React.MutableRefObject<null>,
-) {
-  const svgElement = d3.select(svgRef.current);
-  sprints.forEach((sprint) => {
-    svgElement
-      .select(`#sprintStartLine${sprint.id}`)
-      .attr('y', yScale(yMin))
-      .attr('x', xScale(new Date(sprint.startDate)))
-      .attr('height', yScale(yMax) - yScale(yMin))
-      .attr('width', 1);
-
-    svgElement
-      .select(`#sprintStartLineTriangle${sprint.id}`)
-      .attr('width', '10')
-      .attr('height', '10')
-      .attr('transform', 'translate(' + (xScale(new Date(sprint.startDate)) + 4) + ',' + (yScale(yMin) + 5) + ') rotate(90)');
-
-    svgElement
-      .select(`#sprintEndLine${sprint.id}`)
-      .attr('y', yScale(yMin))
-      .attr('x', xScale(new Date(sprint.endDate)))
-      .attr('height', yScale(yMax) - yScale(yMin))
-      .attr('width', 1);
-
-    svgElement
-      .select(`#sprintEndLineTriangle${sprint.id}`)
-      .attr('width', '10')
-      .attr('height', '10')
-      .attr('transform', 'translate(' + (xScale(new Date(sprint.endDate)) - 3) + ',' + (yScale(yMin) + 5) + ') rotate(-90)');
-
-    svgElement
-      .select(`#sprintBackground${sprint.id}`)
-      .attr('y', yScale(0) - 15)
-      .attr('x', xScale(new Date(sprint.startDate)))
-      .attr('height', 15)
-      .attr('width', xScale(new Date(sprint.endDate)) - xScale(new Date(sprint.startDate)));
-
-    svgElement
-      .select(`#sprintBackgroundStripes${sprint.id}`)
-      .attr('y', yScale(0) - 15)
-      .attr('x', xScale(new Date(sprint.startDate)))
-      .attr('height', 15)
-      .attr('width', xScale(new Date(sprint.endDate)) - xScale(new Date(sprint.startDate)));
-
-    svgElement
-      .select(`#sprintText${sprint.id}`)
-      .attr('y', yScale(0) - 4)
-      .attr('x', xScale(new Date(sprint.startDate)) + 2)
-      .attr('height', 10);
-  });
 }
