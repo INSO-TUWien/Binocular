@@ -27,7 +27,7 @@ export const ColumnChart = ({ width, height, data, scale, palette, settings }: B
   // X axis
   const alLUsers = Array.from(new Set(data.map((d) => d.user)));
   const xScale = useMemo(() => {
-    return d3.scaleBand<string>().domain(alLUsers).range([0, boundsWidth]).padding(0.1);
+    return d3.scaleBand<string>().domain(alLUsers).range([0, boundsWidth]).paddingInner(0.01).paddingOuter(0.05);
   }, [alLUsers, boundsWidth]);
 
   let idleTimeout: number | null = null;
@@ -136,6 +136,8 @@ function generateBars(
   tooltipRef: MutableRefObject<null>,
 ) {
   const svg = d3.select(svgRef.current);
+  const barWidth = x.bandwidth() / 2;
+  const barOffset = x.bandwidth() / 4;
 
   svg
     .selectAll('.bar')
@@ -143,9 +145,9 @@ function generateBars(
     .enter()
     .append('rect')
     .attr('class', 'bar')
-    .attr('x', (d) => x(d.user)!)
+    .attr('x', (d) => x(d.user)! + barOffset)
     .attr('y', (d) => y(d.value))
-    .attr('width', x.bandwidth())
+    .attr('width', barWidth)
     .attr('height', (d) => y(0) - y(d.value))
     .attr('fill', (d) => palette[d.user].main)
     .on('mouseover', () => d3.select(tooltipRef.current).style('visibility', 'visible'))
@@ -169,6 +171,8 @@ function updateBars(
   svgRef: MutableRefObject<null>,
 ) {
   const svg = d3.select(svgRef.current);
+  const barWidth = x.bandwidth() / 2;
+  const barOffset = x.bandwidth() / 4;
 
   svg
     .selectAll<SVGRectElement, { user: string; value: number }>('.bar')
@@ -178,9 +182,9 @@ function updateBars(
         enter
           .append('rect')
           .attr('class', 'bar')
-          .attr('x', (d) => x(d.user)!)
+          .attr('x', (d) => x(d.user)! + barOffset)
           .attr('y', (d) => y(d.value))
-          .attr('width', x.bandwidth())
+          .attr('width', barWidth)
           .attr('height', 0)
           .attr('fill', (d) => palette[d.user].main)
           .transition()
@@ -189,8 +193,8 @@ function updateBars(
       (update) =>
         update
           .transition()
-          .attr('x', (d) => x(d.user)!)
-          .attr('width', x.bandwidth())
+          .attr('x', (d) => x(d.user)! + barOffset)
+          .attr('width', barWidth)
           .attr('y', (d) => y(d.value))
           .attr('height', (d) => y(0) - y(d.value)),
       (exit) => exit.transition().attr('height', 0).attr('y', y(0)).remove(),
