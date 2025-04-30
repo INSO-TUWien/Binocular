@@ -42,6 +42,7 @@ export function convertToChartData(
    */
 
   const selectedIds = new Set<string>();
+  const knownIds = new Set(props.authorList.map((a) => a.user.id));
   props.authorList.forEach((author: AuthorType) => {
     if (!author.selected) return;
     const label = author.displayName || author.user.gitSignature;
@@ -57,10 +58,9 @@ export function convertToChartData(
     };
   });
 
-  // TODO: Fix so possibly unticked authors aren't being added in? Defeats the purpose of unknown authors!
   /* optional: sum up commits from unknown users */
   if (props.settings.showOther) {
-    const unknown = commits.filter((c) => !selectedIds.has(c.user.id)).length;
+    const unknown = commits.filter((c) => !knownIds.has(c.user.id)).length;
     if (unknown > 0) {
       chartData.push({ user: 'others', value: unknown });
       palette['others'] = { main: '#555555', secondary: '#777777' };
