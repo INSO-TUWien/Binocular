@@ -1,5 +1,6 @@
-import { DataPluginCommitFileChanges } from '../../../../interfaces/dataPluginInterfaces/dataPluginCommitsFilesChanges.ts';
+import { DataPluginCommitFile } from '../../../../interfaces/dataPluginInterfaces/dataPluginCommitsFiles.ts';
 import { createSlice } from '@reduxjs/toolkit';
+import { DataPluginCommitShort } from '../../../../interfaces/dataPluginInterfaces/dataPluginCommits.ts';
 
 export enum DataState {
   EMPTY,
@@ -8,13 +9,15 @@ export enum DataState {
 }
 
 export interface CommitByFileState {
-  commitFiles: DataPluginCommitFileChanges[];
+  commitFiles: DataPluginCommitFile[];
+  commits: DataPluginCommitShort[];
   sha: string;
   dataState: DataState;
 }
 
 const initialState: CommitByFileState = {
   commitFiles: [],
+  commits: [],
   sha: '',
   dataState: DataState.EMPTY,
 };
@@ -23,7 +26,7 @@ export const commitByFileSlice = createSlice({
   name: 'commitByFile',
   initialState,
   reducers: {
-    setCommitFiles: (state, action: { payload: DataPluginCommitFileChanges[] }) => {
+    setCommitFiles: (state, action: { payload: DataPluginCommitFile[] }) => {
       state.commitFiles = action.payload;
     },
     setSha: (state, action: { payload: string }) => {
@@ -32,8 +35,11 @@ export const commitByFileSlice = createSlice({
     setDataState: (state, action: { payload: DataState }) => {
       state.dataState = action.payload;
     },
+    setCommits: (state, action: { payload: DataPluginCommitShort[] }) => {
+      state.commits = action.payload;
+    },
   },
 });
 
-export const { setCommitFiles, setSha, setDataState } = commitByFileSlice.actions;
+export const { setCommitFiles, setSha, setDataState, setCommits } = commitByFileSlice.actions;
 export default commitByFileSlice.reducer;

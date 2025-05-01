@@ -25,7 +25,7 @@ type Props = {
   data: FileChange[];
 };
 
-export const CommitChangeViz: React.FC<Props> = ({ width, height, data }: Props) => {
+export const CommitByFileViz: React.FC<Props> = ({ width, height, data }: Props) => {
   const grouped = groupByTopLevelFolderWithRatios(data);
 
   const boundsWidth = width - MARGIN.right - MARGIN.left;
@@ -34,6 +34,7 @@ export const CommitChangeViz: React.FC<Props> = ({ width, height, data }: Props)
 
   const rootGroup = grouped['root'];
   const otherGroups = Object.entries(grouped).filter(([key]) => key !== 'root');
+  const spaceReduction = rootGroup ? 10 * (rootGroup.files.length + otherGroups.length) : 10 * otherGroups.length;
 
   return (
     <div
@@ -49,11 +50,11 @@ export const CommitChangeViz: React.FC<Props> = ({ width, height, data }: Props)
         const fileStyle = !isVertical
           ? {
               height: '100%',
-              width: `${file.changeRatio * (boundsWidth - 10 * rootGroup.files.length)}px`,
+              width: `${file.changeRatio * (boundsWidth - spaceReduction)}px`,
             }
           : {
               width: '100%',
-              height: `${file.changeRatio * (boundsHeight - 10 * rootGroup.files.length)}px`,
+              height: `${file.changeRatio * (boundsHeight - spaceReduction)}px`,
             };
 
         const bgColor = getFileColor(file.stats.additions, file.stats.deletions);
@@ -71,7 +72,7 @@ export const CommitChangeViz: React.FC<Props> = ({ width, height, data }: Props)
               borderRadius: '10px',
             }}
             title={`${file.file.path} — +${file.stats.additions} / -${file.stats.deletions}`}>
-            <p style={{ zIndex: '1', fontWeight: 'bold' }}>{file.file.path.split('/').pop()}</p>
+            <p style={{ fontWeight: 'bold' }}>{file.file.path.split('/').pop()}</p>
           </div>
         );
       })}
@@ -80,11 +81,11 @@ export const CommitChangeViz: React.FC<Props> = ({ width, height, data }: Props)
         const folderStyle = isVertical
           ? {
               width: '100%',
-              height: `${folderChangeRatio * (boundsHeight - 10 * otherGroups.length)}px`,
+              height: `${folderChangeRatio * (boundsHeight - spaceReduction)}px`,
             }
           : {
               height: '100%',
-              width: `${folderChangeRatio * (boundsWidth - 10 * otherGroups.length)}px`,
+              width: `${folderChangeRatio * (boundsWidth - spaceReduction)}px`,
             };
 
         return (
@@ -101,8 +102,7 @@ export const CommitChangeViz: React.FC<Props> = ({ width, height, data }: Props)
               borderRadius: '10px',
               border: '2px solid #3182ce',
             }}
-            title={`${folderName} — +${files.reduce((acc, file) => acc + file.stats.additions, 0)} / -${files.reduce((acc, file) => acc + file.stats.deletions, 0)}`}
-          >
+            title={`${folderName} — +${files.reduce((acc, file) => acc + file.stats.additions, 0)} / -${files.reduce((acc, file) => acc + file.stats.deletions, 0)}`}>
             <div
               style={{
                 position: 'absolute',
@@ -113,7 +113,6 @@ export const CommitChangeViz: React.FC<Props> = ({ width, height, data }: Props)
                 color: '#2c5282',
                 backgroundColor: 'white',
                 padding: '0 4px',
-                zIndex: 1,
                 cursor: 'default',
               }}>
               {folderName}
@@ -145,7 +144,7 @@ export const CommitChangeViz: React.FC<Props> = ({ width, height, data }: Props)
                     borderRadius: '10px',
                   }}
                   title={`${file.file.path} — +${file.stats.additions} / -${file.stats.deletions}`}>
-                  <p style={{ zIndex: '1', fontWeight: 'bold' }}>{file.file.path.split('/').pop()}</p>
+                  <p style={{ fontWeight: 'bold' }}>{file.file.path.split('/').pop()}</p>
                 </div>
               );
             })}

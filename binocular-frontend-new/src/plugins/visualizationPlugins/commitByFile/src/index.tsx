@@ -4,10 +4,10 @@ import { VisualizationPlugin } from '../../../interfaces/visualizationPlugin.ts'
 import Reducer from './reducer';
 import Saga from './saga';
 import Help from './help/help.tsx';
-import { DataPluginCommitFileChanges } from '../../../interfaces/dataPluginInterfaces/dataPluginCommitsFilesChanges.ts';
+import { DataPluginCommitFile } from '../../../interfaces/dataPluginInterfaces/dataPluginCommitsFiles.ts';
 import Chart from './chart/chart.tsx';
 
-const CommitByFile: VisualizationPlugin<SettingsType, DataPluginCommitFileChanges> = {
+const CommitByFile: VisualizationPlugin<SettingsType, DataPluginCommitFile> = {
   name: 'Commit By File',
   chartComponent: Chart,
   settingsComponent: Settings,

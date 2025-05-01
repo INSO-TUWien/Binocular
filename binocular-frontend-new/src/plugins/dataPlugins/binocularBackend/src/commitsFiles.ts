@@ -1,11 +1,8 @@
 import { GraphQL, traversePages } from './utils.ts';
-import {
-  DataPluginCommitFileChanges,
-  DataPluginCommitsFilesChanges,
-} from '../../../interfaces/dataPluginInterfaces/dataPluginCommitsFilesChanges.ts';
+import { DataPluginCommitFile, DataPluginCommitsFiles } from '../../../interfaces/dataPluginInterfaces/dataPluginCommitsFiles.ts';
 import { gql } from '@apollo/client';
 
-export default class CommitsFilesChanges implements DataPluginCommitsFilesChanges {
+export default class CommitsFiles implements DataPluginCommitsFiles {
   private readonly graphQl;
 
   constructor(endpoint: string) {
@@ -14,7 +11,7 @@ export default class CommitsFilesChanges implements DataPluginCommitsFilesChange
 
   public async getAll(sha: string) {
     console.log(`Getting Commits Files for ${sha}`);
-    const fileList: DataPluginCommitFileChanges[] = [];
+    const fileList: DataPluginCommitFile[] = [];
     const getFilesPage = (sha: string) => async (page: number, perPage: number) => {
       const resp = await this.graphQl.client.query({
         query: gql`
@@ -49,7 +46,7 @@ export default class CommitsFilesChanges implements DataPluginCommitsFilesChange
       return files;
     };
 
-    await traversePages(getFilesPage(sha), (file: DataPluginCommitFileChanges) => {
+    await traversePages(getFilesPage(sha), (file: DataPluginCommitFile) => {
       fileList.push(file);
     });
     return fileList;

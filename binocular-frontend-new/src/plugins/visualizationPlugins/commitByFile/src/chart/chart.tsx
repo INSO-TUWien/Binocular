@@ -1,12 +1,14 @@
 import { createRef, useEffect, useState } from 'react';
-import { CommitChangeViz } from './newVis.tsx';
+import { CommitByFileViz } from './commitByFileViz.tsx';
 import { Properties } from '../../../../interfaces/visualizationPluginInterfaces/properties.ts';
 import { SettingsType } from '../settings/settings.tsx';
-import { DataPluginCommitFileChanges } from '../../../../interfaces/dataPluginInterfaces/dataPluginCommitsFilesChanges.ts';
+import { DataPluginCommitFile } from '../../../../interfaces/dataPluginInterfaces/dataPluginCommitsFiles.ts';
 import { DataState, setSha } from '../reducer';
 import { useDispatch, useSelector } from 'react-redux';
+import Select from 'react-select';
+import { DataPluginCommitShort } from '../../../../interfaces/dataPluginInterfaces/dataPluginCommits.ts';
 
-function Chart(props: Readonly<Properties<SettingsType, DataPluginCommitFileChanges>>) {
+function Chart(props: Readonly<Properties<SettingsType, DataPluginCommitFile>>) {
   type RootState = ReturnType<typeof props.store.getState>;
   type AppDispatch = typeof props.store.dispatch;
   const useAppDispatch = () => useDispatch<AppDispatch>();
@@ -14,9 +16,18 @@ function Chart(props: Readonly<Properties<SettingsType, DataPluginCommitFileChan
 
   const data = useSelector((state: RootState) => state.commitFiles);
   const dataState = useSelector((state: RootState) => state.dataState);
+  const commits = useSelector((state: RootState) => state.commits);
+
+  const commitOptions = commits.map((commit: DataPluginCommitShort) => ({
+    value: commit.sha,
+    label: `${commit.messageHeader} (${commit.sha.slice(0, 7)})`,
+  }));
+
+  const [selectedCommit, setSelectedCommit] = useState<{ value: string; label: string } | null>(null);
 
   useEffect(() => {
     dispatch(setSha(props.settings.sha));
+    setSelectedCommit(null);
   }, [props.settings]);
 
   useEffect(() => {
@@ -38,23 +49,41 @@ function Chart(props: Readonly<Properties<SettingsType, DataPluginCommitFileChan
         setChartWidth(chartContainerRef.current.offsetWidth);
       }
       if (chartContainerRef.current?.offsetHeight !== chartHeight) {
-        setChartHeight(chartContainerRef.current.offsetHeight);
+        setChartHeight(chartContainerRef.current.offsetHeight - 20);
       }
     });
     resizeObserver.observe(chartContainerRef.current);
     return () => resizeObserver.disconnect();
   }, [chartContainerRef, chartHeight, chartWidth]);
+
+  const handleCommitSelect = (selectedOption: { value: string; label: string } | null) => {
+    if (!selectedOption) {
+      return;
+    }
+    setSelectedCommit(selectedOption);
+    dispatch(setSha(selectedOption.value));
+  };
+
   return (
-    <div className={'w-full h-full flex justify-center items-center'} ref={chartContainerRef}>
+    <div className={'w-full h-full flex flex-col items-center'} ref={chartContainerRef}>
+      {dataState !== DataState.FETCHING && commits.length > 0 && (
+        <Select
+          className="text-sm w-100 m-2"
+          value={selectedCommit}
+          options={commitOptions}
+          onChange={handleCommitSelect}
+          placeholder="Select a commit..."
+          isSearchable
+        />
+      )}
+      {dataState !== DataState.FETCHING && commits.length === 0 && <div>No Commits Found</div>}
       {dataState === DataState.EMPTY && <div>No Data</div>}
       {dataState === DataState.FETCHING && (
         <div>
           <span className="loading loading-spinner loading-lg text-accent"></span>
         </div>
       )}
-      {dataState === DataState.COMPLETE && (
-        <CommitChangeViz data={data} width={chartWidth} height={chartHeight} />
-      )}
+      {dataState === DataState.COMPLETE && <CommitByFileViz data={data} width={chartWidth} height={chartHeight} />}
     </div>
   );
 }
