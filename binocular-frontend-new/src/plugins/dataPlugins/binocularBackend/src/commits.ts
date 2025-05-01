@@ -3,7 +3,7 @@ import { gql } from '@apollo/client';
 import { DataPluginCommit, DataPluginCommitShort, DataPluginCommits } from '../../../interfaces/dataPluginInterfaces/dataPluginCommits.ts';
 
 export default class Commits implements DataPluginCommits {
-  private graphQl;
+  private readonly graphQl;
 
   constructor(endpoint: string) {
     this.graphQl = new GraphQL(endpoint);
