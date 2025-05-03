@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 46 30">
+  <!-- Code brackets for context, closer to the chart -->
+  <text x="8" y="18" font-size="8" font-family="monospace" fill="#222">{</text>
+  <text x="33" y="18" font-size="8" font-family="monospace" fill="#222">}</text>
+  <!-- Radar chart group, centered -->
+  <g transform="translate(23,15)">
+    <!-- Axes -->
+    <g stroke="#222" stroke-width="0.8">
+      <line x1="0" y1="0" x2="0" y2="-9"/>
+      <line x1="0" y1="0" x2="7.8" y2="-4.5"/>
+      <line x1="0" y1="0" x2="7.8" y2="4.5"/>
+      <line x1="0" y1="0" x2="0" y2="9"/>
+      <line x1="0" y1="0" x2="-7.8" y2="4.5"/>
+      <line x1="0" y1="0" x2="-7.8" y2="-4.5"/>
+    </g>
+    <!-- Outer polygon (max knowledge) -->
+    <polygon points="0,-9 7.8,-4.5 7.8,4.5 0,9 -7.8,4.5 -7.8,-4.5"
+             fill="none" stroke="#888" stroke-width="0.8"/>
+    <!-- Inner polygon (actual knowledge) -->
+    <polygon points="0,-5.5 5.5,-3.2 6,2.5 0,6 -6,2.5 -5.5,-3.2"
+             fill="#4fd1c5" fill-opacity="0.5" stroke="#319795" stroke-width="1.2"/>
+    <!-- Dots at each axis for actual knowledge -->
+    <circle cx="0" cy="-5.5" r="1.2" fill="#319795"/>
+    <circle cx="5.5" cy="-3.2" r="1.2" fill="#319795"/>
+    <circle cx="6" cy="2.5" r="1.2" fill="#319795"/>
+    <circle cx="0" cy="6" r="1.2" fill="#319795"/>
+    <circle cx="-6" cy="2.5" r="1.2" fill="#319795"/>
+    <circle cx="-5.5" cy="-3.2" r="1.2" fill="#319795"/>
+  </g>
+</svg>
