@@ -1,0 +1,324 @@
+// Custom variables to replace Bulma variables
+$monospace-font: 'Courier New', Courier, monospace;
+
+// Legend on the top left
+.legend {
+  position: absolute;
+  top: 5px;
+  left: 5px;
+  background: rgba(255, 255, 255, 0.67);
+}
+
+// Overall container for the chart and the details sideboard
+.chartDetailsContainer {
+  width: 100%;
+  display: flex;
+  overflow: hidden;
+
+  .chartContainer {
+    flex: 1;
+    display: flex;
+
+    .chart {
+      flex: 1;
+    }
+  }
+
+  .messageContainer {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  .details {
+    display: flex;
+    overflow: hidden;
+
+    .expandButton {
+      background-color: gray;
+      color: white;
+      font-size: 120%;
+      font-weight: bold;
+      padding: 2px;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .content {
+      flex: 1;
+      padding: 15px;
+      display: flex;
+      flex-direction: column;
+      overflow: auto;
+
+      .field {
+        border-color: #bebebe;
+        margin-bottom: 20px;
+        padding: 0.5rem;
+        border: 1px solid #dbdbdb;
+        border-radius: 4px;
+      }
+
+      .generalDetails {
+        display: flex;
+        flex-direction: column;
+        padding-right: 10px;
+
+        .generalDetailsContainer {
+          display: flex;
+        }
+
+        .generalDetailsDots {
+          flex: 1;
+          margin-left: 5px;
+          margin-right: 5px;
+          margin-bottom: 5px;
+          border-bottom: dotted;
+          border-color: #606060;
+        }
+
+        .issueButton {
+          width: fit-content;
+          margin-top: 15px;
+          padding: 0.375rem 0.75rem;
+          background-color: #4882e0;
+          color: white;
+          border: none;
+          border-radius: 4px;
+          cursor: pointer;
+          
+          &:hover {
+            background-color: #3a6fc0;
+          }
+        }
+      }
+    }
+
+    .monospaced {
+      font-family: $monospace-font;
+    }
+
+    .commitsDetailsListContainer {
+      margin-bottom: 15px;
+
+      label {
+        font-weight: 500;
+        display: block;
+        margin-bottom: 0.5rem;
+      }
+    }
+
+    .commitDetailsList {
+      display: flex;
+      flex-direction: column;
+      padding-left: 10px;
+    }
+
+    .commitDetailsGood {
+      background-color: #4cb13a;
+      border-color: darkgreen;
+      color: white;
+      border: solid;
+      border-width: 1px;
+      border-radius: 5px;
+    }
+
+    .commitDetailsBad {
+      background-color: #ff5a36;
+      border-color: darkred;
+      color: white;
+      border: solid;
+      border-width: 1px;
+      border-radius: 5px;
+    }
+
+    .commitDetailsNeutral {
+      background-color: #f8f8f8;
+      border-color: #dbdbdb;
+      border: solid;
+      border-width: 1px;
+      border-radius: 5px;
+    }
+
+    .commitDetails {
+      width: 500px;
+      padding: 10px;
+      margin: 2px;
+      border: solid;
+      border-width: 1px;
+      border-radius: 5px;
+      cursor: pointer;
+      display: flex;
+      flex-direction: row;
+      
+      .ciIcon {
+        min-width: fit-content;
+        padding: 2px;
+        display: flex;
+        align-items: center;
+        text-align: center;
+        border-width: 1px;
+      }
+      
+      .stats {
+        flex: 1;
+        padding: 2px;
+        border-width: 1px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 4px;
+      }
+      
+      .commitMessage {
+        flex: 3;
+        padding: 2px;
+        padding-left: 4px;
+        margin-bottom: 0px;
+        display: flex;
+        align-items: center;
+        min-width: 0;
+
+        span {
+          text-overflow: ellipsis;
+          white-space: nowrap;
+          overflow: hidden;
+        }
+      }
+      
+      .link {
+        padding: 2px;
+        align-items: center;
+        justify-content: center;
+      }
+    }
+
+    .commitDetailsExpanded {
+      width: 500px;
+      padding: 10px;
+      margin: 2px;
+      gap: 8px;
+      border: solid;
+      border-width: 1px;
+      border-radius: 5px;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+
+      .dateAndLink {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+
+        p {
+          margin: 0px;
+        }
+      }
+    }
+  }
+}
+
+.configContainer {
+  width: 100%;
+
+  form {
+    width: 100%;
+
+    #select {
+      width: 100%;
+      padding: 0.5rem;
+      border: 1px solid #dbdbdb;
+      border-radius: 4px;
+      background-color: white;
+      font-size: 1rem;
+      line-height: 1.5;
+    }
+
+    .filepicker {
+      .moduleLine {
+        border: 1px solid #4882e0;
+        display: flex;
+        flex-direction: row;
+        margin: 4px;
+        cursor: default;
+        background-color: #4882e0;
+        color: whitesmoke;
+        font-weight: bold;
+      }
+      
+      .fileLine {
+        display: flex;
+        flex-direction: row;
+        margin: 4px;
+        cursor: default;
+        background-color: #F8F8F8;
+      }
+      
+      .moduleName {
+        flex: 1;
+        padding-left: 10px;
+        cursor: pointer;
+        
+        span {
+          float: left;
+        }
+      }
+      
+      .fileName {
+        flex: 1;
+        padding-left: 10px;
+        
+        span {
+          float: left;
+        }
+      }
+      
+      .childContainer {
+        margin-left: 10px;
+        border-left: solid;
+        border-color: #bebebe;
+        padding-left: 10px;
+      }
+    }
+  }
+}
+
+.help {
+  width: 100%;
+  overflow-y: scroll;
+  font-size: 1.5em;
+
+  h2 {
+    font-size: 1.2em;
+    font-weight: bold;
+    margin-bottom: 0.75em;
+    margin-top: 1em;
+  }
+
+  h3 {
+    font-size: 1.1em;
+    font-weight: bold;
+    margin-bottom: 0.5em;
+    margin-top: 0.75em;
+  }
+
+  ul {
+    list-style-type: circle;
+    margin-left: 1.5em;
+    margin-bottom: 1em;
+  }
+
+  ol {
+    margin-left: 1.5em;
+    margin-bottom: 1em;
+  }
+
+  p {
+    margin-bottom: 1em;
+    line-height: 1.5;
+  }
+}

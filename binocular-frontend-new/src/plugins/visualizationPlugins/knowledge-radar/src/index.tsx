@@ -6,8 +6,6 @@ import { dataSlice } from './reducer';
 import Saga from './saga/index';
 import Help from './help/help';
 import Chart from './chart/chart';
-import { DataPluginCommit } from '../../../interfaces/dataPluginInterfaces/dataPluginCommits';
-import { convertToChartData } from './utilities/dataConverter';
 import { DataPluginCommitBuild } from '../../../interfaces/dataPluginInterfaces/dataPluginCommitsBuilds';
 
 const KnowledgeRadar: VisualizationPlugin<SettingsType, DataPluginCommitBuild> = {
