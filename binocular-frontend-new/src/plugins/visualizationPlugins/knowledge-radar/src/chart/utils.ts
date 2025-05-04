@@ -1,4 +1,6 @@
-export const createGradients = (defs: d3.Selection<SVGDefsElement, unknown, null, undefined>, colorScheme: any) => {
+import {AuthorType} from "../../../../../types/data/authorType.ts";
+
+export const createGradients = (defs: d3.Selection<SVGDefsElement, unknown, null, undefined>, colorScheme: AuthorType) => {
   // Radial gradient for background
   const radialGradient = defs.append("radialGradient")
     .attr("id", "radar-background-gradient")
@@ -24,11 +26,11 @@ export const createGradients = (defs: d3.Selection<SVGDefsElement, unknown, null
 
   linearGradient.append("stop")
     .attr("offset", "0%")
-    .attr("stop-color", `${colorScheme.primary}`)
+    .attr("stop-color", `${colorScheme.color.main}`)
     .attr("stop-opacity", "0.7");
 
   linearGradient.append("stop")
     .attr("offset", "100%")
-    .attr("stop-color", `${colorScheme.highlight}`)
+    .attr("stop-color", `${colorScheme.color.secondary}`)
     .attr("stop-opacity", "0.5");
 };

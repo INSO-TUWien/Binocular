@@ -10,9 +10,9 @@ export const developerKnowledge: Package[] = [
         score: 0.7,
         subpackages: [
           { name: "Route", score: 0.8 },
-          { name: "Link", score: 0.9 },
+          { name: "Link", score: 1 },
           { name: "Switch", score: 0.7 },
-          { name: "Redirect", score: 0.6 }
+          { name: "Redirect", score: 1 }
         ]
       },
       { name: "Redux", score: 0.6 },

@@ -1,5 +1,7 @@
 import * as d3 from "d3";
 import { Package, SubPackage } from './type.ts';
+import {AuthorType} from "../../../../../types/data/authorType.ts";
+import chroma from "chroma-js";
 
 /**
  * Draws a radar chart for either top-level packages or subpackages
@@ -9,6 +11,7 @@ const drawRadarChart = (
   data: Package[] | SubPackage[],
   radius: number,
   colorScheme: any,
+  developerColor: AuthorType,
   options: {
     isSubpackageView?: boolean;
     parentName?: string;
@@ -126,7 +129,7 @@ const drawRadarChart = (
       } else {
         const pkg = chartData.find(p => p.name === d);
         if (pkg) {
-          handlePackageSelect(pkg, 'Home');
+          handlePackageSelect(pkg, '/');
         }
       }
     });
@@ -170,9 +173,9 @@ const drawRadarChart = (
       .attr("ry", 10)
       .style("fill", "white")
       .style("stroke", () => {
-        return hasSubpackages ? colorScheme.primary : colorScheme.grid;
+        return hasSubpackages ? chroma(developerColor.color.main).hex() : colorScheme.grid;
       })
-      .style("stroke-width", "1px")
+      .style("stroke-width", "2px")
       .style("opacity", 0.8);
   });
 
@@ -189,7 +192,7 @@ const drawRadarChart = (
     .style("fill", (d: string) => {
       const pkg = chartData.find(p => p.name === d);
       return pkg && pkg.subpackages && pkg.subpackages.length > 0 ?
-        colorScheme.accent : "transparent";
+        chroma(developerColor.color.main).saturate(5).hex() : "transparent";
     });
 
   // Apply transition to the group
@@ -210,7 +213,7 @@ const drawRadarChart = (
     .attr("class", "radar-path")
     .attr("d", radarLine)
     .style("fill", "url(#radar-area-gradient)")
-    .style("stroke", isSubpackageView ? colorScheme.highlight : colorScheme.primary)
+    .style("stroke", chroma(developerColor.color.secondary).darken(2).hex())
     .style("stroke-width", "2px")
     .style("opacity", 0);
 
@@ -229,7 +232,7 @@ const drawRadarChart = (
     .attr("cx", (d, i) => rScale(d.score) * Math.cos(angles[i] - Math.PI / 2))
     .attr("cy", (d, i) => rScale(d.score) * Math.sin(angles[i] - Math.PI / 2))
     .attr("r", 0)
-    .style("fill", colorScheme.accent)
+    .style("fill", chroma(developerColor.color.main).saturate(5).hex())
     .style("stroke", "white")
     .style("stroke-width", "2px")
     .style("cursor", (d) => {
@@ -262,7 +265,7 @@ const drawRadarChart = (
           handlePackageSelect(d, parentPackage?.name || 'Unknown');
         }
       } else {
-        handlePackageSelect(d, 'Home');
+        handlePackageSelect(d, '/');
       }
     });
 
@@ -302,7 +305,7 @@ const drawRadarChart = (
     .attr("cy", 0)
     .attr("r", 0)
     .style("fill", "white")
-    .style("stroke", colorScheme.secondary)
+    .style("stroke", developerColor.color.main)
     .style("stroke-width", "3px")
     .transition()
     .duration(800)
@@ -322,7 +325,7 @@ const drawRadarChart = (
       .attr("height", 30)
       .attr("rx", 15)
       .attr("ry", 15)
-      .style("fill", colorScheme.secondary)
+      .style("fill", developerColor.color.main)
       .style("opacity", 0.9);
 
     // Back text
@@ -399,9 +402,10 @@ export const drawTopLevel = (
   data: Package[],
   radius: number,
   colorScheme: any,
+  developerColor: AuthorType,
   handlePackageSelect: (pkg: Package | SubPackage, parentName: string) => void
 ) => {
-  drawRadarChart(svg, data, radius, colorScheme, {
+  drawRadarChart(svg, data, radius, colorScheme, developerColor, {
     isSubpackageView: false,
     handlePackageSelect
   });
@@ -412,13 +416,20 @@ export const drawSubpackages = (
   pkg: Package | SubPackage,
   radius: number,
   colorScheme: any,
+  developerColor: AuthorType,
   handleBackNavigation: () => void,
   handlePackageSelect: (pkg: Package | SubPackage, parentName: string) => void
 ) => {
-  drawRadarChart(svg, [pkg], radius, colorScheme, {
+  drawRadarChart(svg, [pkg], radius, colorScheme, developerColor, {
     isSubpackageView: true,
     parentName: pkg.name,
     handlePackageSelect,
     handleBackNavigation
   });
+};
+
+// Utility function to get complementary color
+const getComplementaryColor = (color: string): string => {
+  const hsl = d3.hsl(color);
+  return d3.hsl((hsl.h + 180) % 360, 0.8, 0.8).toString();
 };
