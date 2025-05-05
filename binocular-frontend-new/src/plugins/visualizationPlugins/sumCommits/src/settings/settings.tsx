@@ -1,9 +1,29 @@
+import { useEffect, useState } from 'react';
+
 export interface SettingsType {
   showMean: boolean;
   showOther: boolean;
 }
 
-function Settings(props: { settings: SettingsType; setSettings: (newSettings: SettingsType) => void }) {
+interface SettingsProps {
+  settings: SettingsType;
+  setSettings: (newSettings: SettingsType) => void;
+  users: string[];
+}
+
+function Settings({ settings, setSettings, users }: SettingsProps) {
+  const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
+
+  useEffect(() => setSelectedUsers(users), [users]);
+
+  const toggleUser = (user: string) => {
+    if (selectedUsers.includes(user)) {
+      setSelectedUsers(selectedUsers.filter((u) => u !== user));
+    } else {
+      setSelectedUsers([...selectedUsers, user]);
+    }
+  };
+
   return (
     <>
       <div>
@@ -12,11 +32,11 @@ function Settings(props: { settings: SettingsType; setSettings: (newSettings: Se
           <input
             type="checkbox"
             className="toggle toggle-accent toggle-sm"
-            defaultChecked={props.settings.showMean}
+            defaultChecked={settings.showMean}
             onChange={(event) =>
-              props.setSettings({
+              setSettings({
+                ...settings,
                 showMean: event.target.checked,
-                showOther: props.settings.showOther,
               })
             }
           />
@@ -26,16 +46,42 @@ function Settings(props: { settings: SettingsType; setSettings: (newSettings: Se
           <input
             type="checkbox"
             className="toggle toggle-accent toggle-sm"
-            defaultChecked={props.settings.showOther}
+            defaultChecked={settings.showOther}
             onChange={(event) =>
-              props.setSettings({
-                ...props.settings,
+              setSettings({
+                ...settings,
                 showOther: event.target.checked,
               })
             }
           />
         </label>
       </div>
+
+      <div className="divider my-0" />
+
+      <span className="label-text">Combine users:</span>
+      <div className="flex flex-wrap gap-4">
+        {users.map((u) => (
+          <label key={u} className="label cursor-pointer gap-2">
+            <input
+              type="checkbox"
+              className="checkbox checkbox-primary checkbox-sm"
+              checked={selectedUsers.includes(u)}
+              onChange={() => toggleUser(u)}
+            />
+            <span className="label-text">{u}</span>
+          </label>
+        ))}
+      </div>
+
+      <button
+        className="btn btn-accent btn-sm"
+        disabled={selectedUsers.length < 2}
+        onClick={() => {
+          //TODO: Add the combine logic
+        }}>
+        Combine
+      </button>
     </>
   );
 }

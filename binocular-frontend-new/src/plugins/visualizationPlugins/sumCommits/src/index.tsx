@@ -15,7 +15,7 @@ const SumCommits: VisualizationPlugin<SettingsType, DataPluginCommit> = {
   settingsComponent: Settings,
   helpComponent: Help,
   dataConverter: convertToChartData,
-  defaultSettings: { splitAdditionsDeletions: true, visualizationStyle: 'curved' },
+  defaultSettings: { showMean: false, showOther: false },
   export: {
     getSVGData: getSVGData,
   },
