@@ -82,6 +82,7 @@ export const ColumnChart = ({ width, height, data, scale, palette, settings }: B
       );
 
       if (settings.showMean) {
+        svgElement.selectAll('.meanLine').remove();
         generateMeanLine(data, boundsWidth, yScale, svgRef);
       }
     });
