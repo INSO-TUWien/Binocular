@@ -111,7 +111,7 @@ export const ColumnChart = ({ width, height, data, scale, palette, settings }: B
     if (settings.showMean) {
       generateMeanLine(data, boundsWidth, yScale, svgRef);
     }
-  }, [xScale, yScale, boundsHeight, settings.showMean]);
+  }, [xScale, yScale, boundsHeight, settings.showMean, scale, brush, palette, data, boundsWidth]);
 
   return (
     <>
@@ -129,7 +129,7 @@ export const ColumnChart = ({ width, height, data, scale, palette, settings }: B
 
 function generateBars(
   palette: Palette,
-  data: { user: string; value: number }[],
+  data: { user: string; value: number; segments?: { label: string; value: number }[] }[],
   x: d3.ScaleBand<string>,
   y: d3.ScaleLinear<number, number>,
   svgRef: MutableRefObject<null>,
@@ -149,7 +149,7 @@ function generateBars(
     .attr('y', (d) => y(d.value))
     .attr('width', barWidth)
     .attr('height', (d) => y(0) - y(d.value))
-    .attr('fill', (d) => palette[d.user].main)
+    .attr('fill', (d) => palette[d.user]?.main)
     .on('mouseover', () => d3.select(tooltipRef.current).style('visibility', 'visible'))
     .on('mousemove', (e, d) =>
       d3
@@ -160,12 +160,41 @@ function generateBars(
         .style('border-color', palette[d.user].secondary)
         .text(`${d.user}: ${d.value} Commits`),
     )
-    .on('mouseout', () => d3.select(tooltipRef.current).style('visibility', 'hidden'));
+    .on('mouseout', () => d3.select(tooltipRef.current).style('visibility', 'hidden'))
+    .filter((d) => d.segments && d.segments.length)
+    .each(function (d) {
+      const xPos = x(d.user)! + barOffset;
+      let yPos = 0;
+      d.segments?.forEach((seg) => {
+        const h = y(0) - y(seg.value);
+        svg
+          .append('rect')
+          .attr('class', 'bar')
+          .attr('x', xPos)
+          .attr('y', y(seg.value + yPos))
+          .attr('width', barWidth)
+          .attr('height', h)
+          .attr('fill', palette[seg.label]?.main)
+          .on('mouseover', () => d3.select(tooltipRef.current).style('visibility', 'visible'))
+          .on('mousemove', (e, d) =>
+            d3
+              .select(tooltipRef.current)
+              .style('top', 20 + e.pageY + 'px')
+              .style('left', e.pageX + 'px')
+              .style('background', palette[d.user].secondary)
+              .style('border-color', palette[d.user].secondary)
+              .text(`${d.user}: ${d.value} Commits`),
+          )
+          .on('mouseout', () => d3.select(tooltipRef.current).style('visibility', 'hidden'));
+        yPos += seg.value;
+      });
+      d3.select(this).remove();
+    });
 }
 
 function updateBars(
   palette: Palette,
-  data: { user: string; value: number }[],
+  data: { user: string; value: number; segments?: { label: string; value: number }[] }[],
   x: d3.ScaleBand<string>,
   y: d3.ScaleLinear<number, number>,
   svgRef: MutableRefObject<null>,

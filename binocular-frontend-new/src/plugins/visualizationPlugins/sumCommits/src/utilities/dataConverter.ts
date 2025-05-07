@@ -8,6 +8,7 @@ import { SettingsType } from '../settings/settings.tsx';
 interface BarChartData {
   user: string;
   value: number;
+  segments?: { label: string; value: number }[];
 }
 
 interface Palette {
@@ -26,10 +27,12 @@ export function convertToChartData(
     return { chartData: [], palette: {}, scale: [0, 0] };
   }
 
+  const combinedGroups = props.settings?.combinedUsers ?? [];
+
   /**
    * Count the number of commits per user
    */
-  const countsByUser = _.countBy(commits, (c) => c.user.id);
+  const countsByUser = _.countBy(commits, (c) => c.user.gitSignature);
 
   /**
    * Create the chart data
@@ -40,22 +43,43 @@ export function convertToChartData(
   /**
    * Add the data for each author
    */
-
   const selectedIds = new Set<string>();
   const knownIds = new Set(props.authorList.map((a) => a.user.id));
   props.authorList.forEach((author: AuthorType) => {
     if (!author.selected) return;
+
     const label = author.displayName || author.user.gitSignature;
-    const total = countsByUser[author.user.id] ?? 0;
+    const total = countsByUser[author.user.gitSignature] ?? 0;
 
     selectedIds.add(author.user.id);
 
-    chartData.push({ user: label, value: total });
-
-    palette[label] = {
+    palette[author.user.gitSignature] = {
       main: chroma(author.color.main).hex(),
       secondary: chroma(author.color.secondary).hex(),
     };
+
+    const isGrouped = combinedGroups.some((group) => group.includes(author.user.gitSignature));
+    if (isGrouped) return;
+
+    chartData.push({ user: label, value: total });
+  });
+
+  combinedGroups.forEach((group) => {
+    const activeSegs = group.filter((sig) => props.authorList.find((a) => a.user.gitSignature === sig && a.selected));
+
+    if (activeSegs.length < 2) return;
+
+    const value = group.reduce((sum, sig) => sum + (countsByUser[sig] ?? 0), 0);
+    if (value === 0) return;
+
+    const label = group.join(' + ');
+
+    const segments = activeSegs.map((sig) => ({
+      label: sig,
+      value: countsByUser[sig] ?? 0,
+    }));
+
+    chartData.push({ user: label, value, segments });
   });
 
   /* optional: sum up commits from unknown users */

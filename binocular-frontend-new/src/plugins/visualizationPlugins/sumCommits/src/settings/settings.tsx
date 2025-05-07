@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 export interface SettingsType {
   showMean: boolean;
   showOther: boolean;
+  combinedUsers: string[][];
 }
 
 interface SettingsProps {
@@ -22,6 +23,18 @@ function Settings({ settings, setSettings, users }: SettingsProps) {
     } else {
       setSelectedUsers([...selectedUsers, user]);
     }
+  };
+
+  const combinedUsers = settings.combinedUsers ?? [];
+
+  const combineUsers = () => {
+    if (selectedUsers.length < 2) return;
+
+    setSettings({
+      ...settings,
+      combinedUsers: [...combinedUsers, [...selectedUsers]],
+    });
+    setSelectedUsers([]);
   };
 
   return (
@@ -78,7 +91,7 @@ function Settings({ settings, setSettings, users }: SettingsProps) {
         className="btn btn-accent btn-sm"
         disabled={selectedUsers.length < 2}
         onClick={() => {
-          //TODO: Add the combine logic
+          combineUsers();
         }}>
         Combine
       </button>
