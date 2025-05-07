@@ -80,6 +80,10 @@ export const ColumnChart = ({ width, height, data, scale, palette, settings }: B
         yScale,
         svgRef,
       );
+
+      if (settings.showMean) {
+        generateMeanLine(data, boundsWidth, yScale, svgRef);
+      }
     });
 
   useEffect(() => {
