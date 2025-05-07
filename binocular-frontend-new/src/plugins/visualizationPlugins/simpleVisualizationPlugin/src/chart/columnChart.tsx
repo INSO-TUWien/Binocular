@@ -139,6 +139,8 @@ function generateBars(
   const barWidth = x.bandwidth() / 2;
   const barOffset = x.bandwidth() / 4;
 
+  svg.selectAll('.bar').remove();
+
   svg
     .selectAll('.bar')
     .data(data)
@@ -200,34 +202,9 @@ function updateBars(
   svgRef: MutableRefObject<null>,
 ) {
   const svg = d3.select(svgRef.current);
-  const barWidth = x.bandwidth() / 2;
-  const barOffset = x.bandwidth() / 4;
+  svg.selectAll('.bar').remove();
 
-  svg
-    .selectAll<SVGRectElement, { user: string; value: number }>('.bar')
-    .data(data, (d) => d.user)
-    .join(
-      (enter) =>
-        enter
-          .append('rect')
-          .attr('class', 'bar')
-          .attr('x', (d) => x(d.user)! + barOffset)
-          .attr('y', (d) => y(d.value))
-          .attr('width', barWidth)
-          .attr('height', 0)
-          .attr('fill', (d) => palette[d.user].main)
-          .transition()
-          .attr('y', (d) => y(d.value))
-          .attr('height', (d) => y(0) - y(d.value)),
-      (update) =>
-        update
-          .transition()
-          .attr('x', (d) => x(d.user)! + barOffset)
-          .attr('width', barWidth)
-          .attr('y', (d) => y(d.value))
-          .attr('height', (d) => y(0) - y(d.value)),
-      (exit) => exit.transition().attr('height', 0).attr('y', y(0)).remove(),
-    );
+  generateBars(palette, data, x, y, svgRef, { current: null });
 }
 
 function generateMeanLine(
