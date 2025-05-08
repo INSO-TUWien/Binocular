@@ -169,7 +169,7 @@ function generateBars(
         .text(`${d.user}: ${d.value} Commits`),
     )
     .on('mouseout', () => d3.select(tooltipRef.current).style('visibility', 'hidden'))
-    .filter((d) => d.segments && d.segments.length)
+    .filter((d) => (d.segments?.length ?? 0) > 0)
     .each(function (d) {
       const xPos = x(d.user)! + barOffset;
       let yPos = 0;
