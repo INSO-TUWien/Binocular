@@ -1,4 +1,4 @@
-import { MutableRefObject, useEffect, useMemo, useRef } from 'react';
+import { MutableRefObject, useEffect, useMemo, useRef, useState } from 'react';
 import * as d3 from 'd3';
 import { BarChartData, Palette } from './chart.tsx';
 import { SumSettings } from '../settings/settings.tsx';
@@ -13,10 +13,17 @@ type BarChartProps = {
   settings: SumSettings;
 };
 
+interface InfoState {
+  label: string;
+  value: number;
+  segments?: { label: string; value: number }[];
+}
+
 export const ColumnChart = ({ width, height, data, scale, palette, settings }: BarChartProps) => {
   // bounds = area inside the graph axis = calculated by substracting the margins
   const svgRef = useRef(null);
   const tooltipRef = useRef(null);
+  const [info, setInfo] = useState<null | InfoState>(null);
   const boundsWidth = width - MARGIN.right - MARGIN.left;
   const boundsHeight = height - MARGIN.top - MARGIN.bottom;
   // Y axis
@@ -112,7 +119,7 @@ export const ColumnChart = ({ width, height, data, scale, palette, settings }: B
 
     svg.append('g').attr('class', 'brush').call(brush);
 
-    generateBars(palette, data, xScale, yScale, svgRef, tooltipRef);
+    generateBars(palette, data, xScale, yScale, svgRef, tooltipRef, setInfo);
 
     if (settings.showMean) {
       generateMeanLine(data, boundsWidth, yScale, svgRef);
@@ -129,6 +136,7 @@ export const ColumnChart = ({ width, height, data, scale, palette, settings }: B
       <svg width={width} height={height} xmlns="http://www.w3.org/2000/svg">
         <g width={boundsWidth} height={boundsHeight} ref={svgRef} transform={`translate(${[MARGIN.left, MARGIN.top].join(',')})`}></g>
       </svg>
+      {info && <div>INFOBOX PLACEHOLDER</div>}
     </>
   );
 };
@@ -140,6 +148,7 @@ function generateBars(
   y: d3.ScaleLinear<number, number>,
   svgRef: MutableRefObject<null>,
   tooltipRef: MutableRefObject<null>,
+  setInfo: React.Dispatch<React.SetStateAction<null | InfoState>> = () => {},
 ) {
   const svg = d3.select(svgRef.current);
   const barWidth = x.bandwidth() / 2;
@@ -169,6 +178,13 @@ function generateBars(
         .text(`${d.user}: ${d.value} Commits`),
     )
     .on('mouseout', () => d3.select(tooltipRef.current).style('visibility', 'hidden'))
+    .on('click', (e, d) => {
+      setInfo({
+        label: d.user,
+        value: d.value,
+        segments: d.segments,
+      });
+    })
     .filter((d) => (d.segments?.length ?? 0) > 0)
     .each(function (d) {
       const xPos = x(d.user)! + barOffset;
