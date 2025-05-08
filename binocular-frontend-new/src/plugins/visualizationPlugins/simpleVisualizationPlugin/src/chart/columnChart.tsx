@@ -183,13 +183,13 @@ function generateBars(
           .attr('height', h)
           .attr('fill', palette[seg.label]?.main)
           .on('mouseover', () => d3.select(tooltipRef.current).style('visibility', 'visible'))
-          .on('mousemove', (e, d) =>
+          .on('mousemove', (e) =>
             d3
               .select(tooltipRef.current)
               .style('top', 20 + e.pageY + 'px')
               .style('left', e.pageX + 'px')
-              .style('background', palette[d.user].secondary)
-              .style('border-color', palette[d.user].secondary)
+              .style('background', palette[seg.label].secondary)
+              .style('border-color', palette[seg.label].secondary)
               .text(`${d.user}: ${d.value} Commits`),
           )
           .on('mouseout', () => d3.select(tooltipRef.current).style('visibility', 'hidden'));
@@ -205,11 +205,12 @@ function updateBars(
   x: d3.ScaleBand<string>,
   y: d3.ScaleLinear<number, number>,
   svgRef: MutableRefObject<null>,
+  tooltipRef: MutableRefObject<null>,
 ) {
   const svg = d3.select(svgRef.current);
   svg.selectAll('.bar').remove();
 
-  generateBars(palette, data, x, y, svgRef, { current: null });
+  generateBars(palette, data, x, y, svgRef, tooltipRef);
 }
 
 function generateMeanLine(
