@@ -79,6 +79,7 @@ export const ColumnChart = ({ width, height, data, scale, palette, settings }: B
         xScale,
         yScale,
         svgRef,
+        tooltipRef,
       );
 
       if (settings.showMean) {
