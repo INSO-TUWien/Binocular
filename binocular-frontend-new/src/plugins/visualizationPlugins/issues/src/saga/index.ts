@@ -1,0 +1,25 @@
+import { put, takeEvery, fork, call, select } from 'redux-saga/effects';
+import { DataState, IssuesState, setDataState, setDateRange, setIssues } from '../reducer';
+import { DataPlugin } from '../../../../interfaces/dataPlugin.ts';
+import { DataPluginIssue } from '../../../../interfaces/dataPluginInterfaces/dataPluginIssues.ts';
+
+export default function* (dataConnection: DataPlugin) {
+  yield fork(() => watchRefresh(dataConnection));
+  yield fork(() => watchDateRangeChange(dataConnection));
+}
+
+function* watchRefresh(dataConnection: DataPlugin) {
+  yield takeEvery('REFRESH', () => fetchChangesData(dataConnection));
+}
+
+function* watchDateRangeChange(dataConnection: DataPlugin) {
+  yield takeEvery(setDateRange, () => fetchChangesData(dataConnection));
+}
+
+function* fetchChangesData(dataConnection: DataPlugin) {
+  yield put(setDataState(DataState.FETCHING));
+  const state: { plugin: IssuesState } = yield select();
+  const issues: DataPluginIssue[] = yield call(() => dataConnection.issues.getAll(state.plugin.dateRange.from, state.plugin.dateRange.to));
+  yield put(setIssues(issues));
+  yield put(setDataState(DataState.COMPLETE));
+}
