@@ -24,6 +24,7 @@ export const ColumnChart = ({ width, height, data, scale, palette, settings }: B
   const svgRef = useRef(null);
   const tooltipRef = useRef(null);
   const [info, setInfo] = useState<null | InfoState>(null);
+  const infoRef = useRef<HTMLDivElement | null>(null);
   const boundsWidth = width - MARGIN.right - MARGIN.left;
   const boundsHeight = height - MARGIN.top - MARGIN.bottom;
   // Y axis
@@ -41,6 +42,20 @@ export const ColumnChart = ({ width, height, data, scale, palette, settings }: B
   function idled() {
     idleTimeout = null;
   }
+
+  //Listener for the infobox to close when the user clicks outside of it
+  useEffect(() => {
+    if (!info) return;
+
+    const handleClickOutside = (e: MouseEvent) => {
+      if (infoRef.current && !infoRef.current.contains(e.target as Node)) {
+        setInfo(null);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [info]);
 
   const brush = d3
     .brushX()
@@ -136,7 +151,7 @@ export const ColumnChart = ({ width, height, data, scale, palette, settings }: B
       <svg width={width} height={height} xmlns="http://www.w3.org/2000/svg">
         <g width={boundsWidth} height={boundsHeight} ref={svgRef} transform={`translate(${[MARGIN.left, MARGIN.top].join(',')})`}></g>
       </svg>
-      {info && <div>INFOBOX PLACEHOLDER</div>}
+      {info && <div ref={infoRef}>INFOBOX PLACEHOLDER</div>}
     </>
   );
 };
