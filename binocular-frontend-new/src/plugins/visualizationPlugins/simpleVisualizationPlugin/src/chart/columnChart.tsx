@@ -104,12 +104,14 @@ export const ColumnChart = ({ width, height, data, scale, palette, settings }: B
         }
       }
 
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-expect-error
-      // eslint-disable-next-line @typescript-eslint/unbound-method
-      svgElement.select('.brush').call(brush.move, null);
-
+      //Needed to fix the brush being called endlessly leading to a stack overflow
+      if (extent) {
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-expect-error
+        // eslint-disable-next-line @typescript-eslint/unbound-method
+        svgElement.select('.brush').call(brush.move, null);
+      }
       // d3/typescript sometimes does weird things and throws an error where no error is.
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-expect-error
