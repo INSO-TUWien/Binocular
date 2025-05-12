@@ -27,16 +27,33 @@ export const ColumnChart = ({ width, height, data, scale, palette, settings }: B
   const infoRef = useRef<HTMLDivElement | null>(null);
   const boundsWidth = width - MARGIN.right - MARGIN.left;
   const boundsHeight = height - MARGIN.top - MARGIN.bottom;
+
+  //Create array with users that are visible on zoom, otherwise when opening the infobox it zooms out
+  const allUsers = Array.from(new Set(data.map((d) => d.user)));
+  const [visibleUsers, setVisibleUsers] = useState<string[]>([]);
+
+  //This is needed to make sure that the chart stays zoomed in when clicking on a user for the infobox
+  useEffect(() => {
+    if (!allUsers.length) return;
+
+    setVisibleUsers((prev) => {
+      if (!prev.length) return allUsers;
+
+      // Reset state if its not zoomed in anymore
+      const stillValid = prev.every((u) => allUsers.includes(u));
+      return stillValid ? prev : allUsers;
+    });
+  }, [allUsers]);
+
   // Y axis
   const yScale = useMemo(() => {
     return d3.scaleLinear().domain([scale[0], scale[1]]).range([boundsHeight, 0]);
   }, [boundsHeight, scale]);
 
   // X axis
-  const alLUsers = Array.from(new Set(data.map((d) => d.user)));
   const xScale = useMemo(() => {
-    return d3.scaleBand<string>().domain(alLUsers).range([0, boundsWidth]).paddingInner(0.01).paddingOuter(0.05);
-  }, [alLUsers, boundsWidth]);
+    return d3.scaleBand<string>().domain(visibleUsers).range([0, boundsWidth]).paddingInner(0.01).paddingOuter(0.05);
+  }, [visibleUsers, boundsWidth]);
 
   let idleTimeout: number | null = null;
   function idled() {
@@ -72,15 +89,15 @@ export const ColumnChart = ({ width, height, data, scale, palette, settings }: B
           idleTimeout = window.setTimeout(idled, 350);
           return;
         }
-        xScale.domain(alLUsers);
+        setVisibleUsers(allUsers);
       } else {
-        const selectedUsers = alLUsers.filter((u) => {
+        const selectedUsers = allUsers.filter((u) => {
           const x0 = xScale(u)!;
           const x1 = x0 + xScale.bandwidth();
           return x1 >= extent[0] && x0 <= extent[1];
         });
         if (selectedUsers.length) {
-          xScale.domain(selectedUsers);
+          setVisibleUsers(selectedUsers);
         }
       }
 
@@ -102,6 +119,7 @@ export const ColumnChart = ({ width, height, data, scale, palette, settings }: B
         yScale,
         svgRef,
         tooltipRef,
+        setInfo,
       );
 
       if (settings.showMean) {
@@ -134,7 +152,15 @@ export const ColumnChart = ({ width, height, data, scale, palette, settings }: B
 
     svg.append('g').attr('class', 'brush').call(brush);
 
-    generateBars(palette, data, xScale, yScale, svgRef, tooltipRef, setInfo);
+    generateBars(
+      palette,
+      data.filter((d) => xScale.domain().includes(d.user)),
+      xScale,
+      yScale,
+      svgRef,
+      tooltipRef,
+      setInfo,
+    );
 
     if (settings.showMean) {
       generateMeanLine(data, boundsWidth, yScale, svgRef);
@@ -193,7 +219,9 @@ function generateBars(
         .text(`${d.user}: ${d.value} Commits`),
     )
     .on('mouseout', () => d3.select(tooltipRef.current).style('visibility', 'hidden'))
+    .on('mousedown', (e) => e.stopPropagation())
     .on('click', (e, d) => {
+      e.stopPropagation();
       setInfo({
         label: d.user,
         value: d.value,
@@ -214,6 +242,7 @@ function generateBars(
           .attr('width', barWidth)
           .attr('height', h)
           .attr('fill', palette[seg.label]?.main)
+          .on('mousedown', (e) => e.stopPropagation())
           .on('mouseover', () => d3.select(tooltipRef.current).style('visibility', 'visible'))
           .on('mousemove', (e) =>
             d3
@@ -238,11 +267,12 @@ function updateBars(
   y: d3.ScaleLinear<number, number>,
   svgRef: MutableRefObject<null>,
   tooltipRef: MutableRefObject<null>,
+  setInfo: React.Dispatch<React.SetStateAction<null | InfoState>> = () => {},
 ) {
   const svg = d3.select(svgRef.current);
   svg.selectAll('.bar').remove();
 
-  generateBars(palette, data, x, y, svgRef, tooltipRef);
+  generateBars(palette, data, x, y, svgRef, tooltipRef, setInfo);
 }
 
 function generateMeanLine(
