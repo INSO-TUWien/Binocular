@@ -8,6 +8,7 @@ import { SettingsType } from '../settings/settings.tsx';
 interface BarChartData {
   user: string;
   value: number;
+  avgCommitsPerWeek: number;
   segments?: { label: string; value: number }[];
 }
 
@@ -33,6 +34,21 @@ export function convertToChartData(
    * Count the number of commits per user
    */
   const countsByUser = _.countBy(commits, (c) => c.user.gitSignature);
+  const commitsByUser = _.groupBy(commits, (c) => c.user.gitSignature);
+
+  /**
+   * Calculate the average commits per week
+   */
+  const avgCommitsPerWeek = (userCommits: DataPluginCommit[]): number => {
+    if (userCommits.length === 0) return 0;
+    const dates = userCommits.map((c) => new Date(c.date));
+    const minDate = _.min(dates) ?? new Date();
+    const maxDate = _.max(dates) ?? new Date();
+    //Use Math.max because otherwise it will say infinity if commits == 1
+    const weeks = Math.max(1, Math.ceil((maxDate.getTime() - minDate.getTime()) / (1000 * 60 * 60 * 24 * 7)));
+
+    return userCommits.length / weeks;
+  };
 
   /**
    * Create the chart data
@@ -61,7 +77,7 @@ export function convertToChartData(
     const isGrouped = combinedGroups.some((group) => group.includes(author.user.gitSignature));
     if (isGrouped) return;
 
-    chartData.push({ user: label, value: total });
+    chartData.push({ user: label, value: total, avgCommitsPerWeek: avgCommitsPerWeek(commitsByUser[author.user.gitSignature] ?? []) });
   });
 
   combinedGroups.forEach((group) => {

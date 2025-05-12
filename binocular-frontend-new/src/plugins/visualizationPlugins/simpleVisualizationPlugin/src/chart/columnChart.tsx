@@ -18,6 +18,7 @@ type BarChartProps = {
 interface InfoState {
   label: string;
   value: number;
+  avgCommitsPerWeek: number;
   segments?: { label: string; value: number }[];
 }
 
@@ -192,6 +193,7 @@ export const ColumnChart = ({ width, height, data, scale, palette, settings }: B
             <div onClick={(e) => e.stopPropagation()} className={columnChartStyles.infoBox}>
               <h3 className={columnChartStyles.infoBoxHeader}>{info.label}</h3>
               <p>Sum Commits: {info.value}</p>
+              <p>Avg Commits per week: {info.avgCommitsPerWeek}</p>
             </div>
           </div>
         )}
@@ -202,7 +204,7 @@ export const ColumnChart = ({ width, height, data, scale, palette, settings }: B
 
 function generateBars(
   palette: Palette,
-  data: { user: string; value: number; segments?: { label: string; value: number }[] }[],
+  data: { user: string; value: number; avgCommitsPerWeek: number; segments?: { label: string; value: number }[] }[],
   x: d3.ScaleBand<string>,
   y: d3.ScaleLinear<number, number>,
   svgRef: MutableRefObject<null>,
@@ -244,6 +246,7 @@ function generateBars(
         label: d.user,
         value: d.value,
         segments: d.segments,
+        avgCommitsPerWeek: d.avgCommitsPerWeek,
       });
     })
     .filter((d) => (d.segments?.length ?? 0) > 0)
@@ -280,7 +283,7 @@ function generateBars(
 
 function updateBars(
   palette: Palette,
-  data: { user: string; value: number; segments?: { label: string; value: number }[] }[],
+  data: { user: string; value: number; avgCommitsPerWeek: number; segments?: { label: string; value: number }[] }[],
   x: d3.ScaleBand<string>,
   y: d3.ScaleLinear<number, number>,
   svgRef: MutableRefObject<null>,
