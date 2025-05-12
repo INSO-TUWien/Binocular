@@ -1,7 +1,9 @@
+import columnChartStyles from './columnChart.module.scss';
 import { MutableRefObject, useEffect, useMemo, useRef, useState } from 'react';
 import * as d3 from 'd3';
 import { BarChartData, Palette } from './chart.tsx';
 import { SumSettings } from '../settings/settings.tsx';
+
 const MARGIN = { top: 30, right: 30, bottom: 50, left: 50 };
 
 type BarChartProps = {
@@ -169,15 +171,31 @@ export const ColumnChart = ({ width, height, data, scale, palette, settings }: B
 
   return (
     <>
-      <div
-        ref={tooltipRef}
-        style={{ position: 'fixed', visibility: 'hidden', border: '2px solid', padding: '.2rem', borderRadius: '4px', fontSize: '.75rem' }}>
-        Tooltipp
+      <div style={{ position: 'relative', width, height }}>
+        <div
+          ref={tooltipRef}
+          style={{
+            position: 'fixed',
+            visibility: 'hidden',
+            border: '2px solid',
+            padding: '.2rem',
+            borderRadius: '4px',
+            fontSize: '.75rem',
+          }}>
+          Tooltipp
+        </div>
+        <svg width={width} height={height} xmlns="http://www.w3.org/2000/svg">
+          <g width={boundsWidth} height={boundsHeight} ref={svgRef} transform={`translate(${[MARGIN.left, MARGIN.top].join(',')})`}></g>
+        </svg>
+        {info && (
+          <div ref={infoRef} onClick={() => setInfo(null)}>
+            <div onClick={(e) => e.stopPropagation()} className={columnChartStyles.infoBox}>
+              <h3 className={columnChartStyles.infoBoxHeader}>{info.label}</h3>
+              <p>Sum Commits: {info.value}</p>
+            </div>
+          </div>
+        )}
       </div>
-      <svg width={width} height={height} xmlns="http://www.w3.org/2000/svg">
-        <g width={boundsWidth} height={boundsHeight} ref={svgRef} transform={`translate(${[MARGIN.left, MARGIN.top].join(',')})`}></g>
-      </svg>
-      {info && <div ref={infoRef}>INFOBOX PLACEHOLDER</div>}
     </>
   );
 };
