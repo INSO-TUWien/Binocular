@@ -32,21 +32,14 @@ export const ColumnChart = ({ width, height, data, scale, palette, settings }: B
   const boundsHeight = height - MARGIN.top - MARGIN.bottom;
 
   //Create array with users that are visible on zoom, otherwise when opening the infobox it zooms out
-  const allUsers = Array.from(new Set(data.map((d) => d.user)));
   const [visibleUsers, setVisibleUsers] = useState<string[]>([]);
+  const [isZoomed, setIsZoomed] = useState(false);
+  const allUsers = useMemo(() => data.map((d) => d.user), [data]);
 
   //This is needed to make sure that the chart stays zoomed in when clicking on a user for the infobox
   useEffect(() => {
-    if (!allUsers.length) return;
-
-    setVisibleUsers((prev) => {
-      if (!prev.length) return allUsers;
-
-      // Reset state if its not zoomed in anymore
-      const stillValid = prev.every((u) => allUsers.includes(u));
-      return stillValid ? prev : allUsers;
-    });
-  }, [allUsers]);
+    if (!isZoomed) setVisibleUsers(allUsers);
+  }, [allUsers, isZoomed]);
 
   // Y axis
   const yScale = useMemo(() => {
@@ -92,6 +85,7 @@ export const ColumnChart = ({ width, height, data, scale, palette, settings }: B
           idleTimeout = window.setTimeout(idled, 350);
           return;
         }
+        setIsZoomed(false);
         setVisibleUsers(allUsers);
       } else {
         const selectedUsers = allUsers.filter((u) => {
@@ -99,6 +93,7 @@ export const ColumnChart = ({ width, height, data, scale, palette, settings }: B
           const x1 = x0 + xScale.bandwidth();
           return x1 >= extent[0] && x0 <= extent[1];
         });
+        setIsZoomed(true);
         if (selectedUsers.length) {
           setVisibleUsers(selectedUsers);
         }
