@@ -38,6 +38,8 @@ export const ColumnChart = ({ width, height, data, scale, palette, settings }: B
 
   //Create userdata for the infobox (sum/diff commits)
   const [compareUser, setCompareUser] = useState<string>('');
+  const [sumUsers, setSumUsers] = useState<string[]>([]);
+  const [userToAdd, setUserToAdd] = useState<string>('');
 
   const diffCommits = useMemo(() => {
     if (!info || !compareUser) return null;
@@ -49,6 +51,13 @@ export const ColumnChart = ({ width, height, data, scale, palette, settings }: B
 
     return baseUser.value - compareUserData.value;
   }, [info, compareUser, data]);
+
+  const sumCommits = useMemo(() => {
+    return sumUsers.reduce((acc, u) => {
+      const d = data.find((d) => d.user === u);
+      return acc + (d ? d.value : 0);
+    }, info?.value ?? 0);
+  }, [sumUsers, info, data]);
 
   //This is needed to make sure that the chart stays zoomed in when clicking on a user for the infobox
   useEffect(() => {
@@ -224,6 +233,38 @@ export const ColumnChart = ({ width, height, data, scale, palette, settings }: B
                   <strong>{diffCommits}</strong>
                 </span>
               )}
+
+              <div>
+                <span>Sum with user:</span>
+                <select value={userToAdd} onChange={(e) => setUserToAdd(e.target.value)}>
+                  <option value={''} disabled>
+                    Pick user...
+                  </option>
+                  {allUsers
+                    .filter((u) => u !== info.label && !sumUsers.includes(u))
+                    .map((u) => (
+                      <option key={u} value={u}>
+                        {u}
+                      </option>
+                    ))}
+                </select>
+
+                <button
+                  onClick={() => {
+                    if (userToAdd && !sumUsers.includes(userToAdd)) {
+                      setSumUsers((prev) => [...prev, userToAdd]);
+                      setUserToAdd('');
+                    }
+                  }}>
+                  <strong>+</strong>
+                </button>
+
+                {sumUsers.length > 0 && (
+                  <p>
+                    <strong>{sumCommits}</strong>
+                  </p>
+                )}
+              </div>
             </div>
           </div>
         )}
