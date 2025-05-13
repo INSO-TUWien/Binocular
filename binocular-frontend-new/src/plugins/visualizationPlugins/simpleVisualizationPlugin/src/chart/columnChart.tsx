@@ -36,6 +36,20 @@ export const ColumnChart = ({ width, height, data, scale, palette, settings }: B
   const [isZoomed, setIsZoomed] = useState(false);
   const allUsers = useMemo(() => data.map((d) => d.user), [data]);
 
+  //Create userdata for the infobox (sum/diff commits)
+  const [compareUser, setCompareUser] = useState<string>('');
+
+  const diffCommits = useMemo(() => {
+    if (!info || !compareUser) return null;
+
+    const baseUser = data.find((d) => d.user === info.label);
+    const compareUserData = data.find((d) => d.user === compareUser);
+
+    if (!baseUser || !compareUserData) return null;
+
+    return baseUser.value - compareUserData.value;
+  }, [info, compareUser, data]);
+
   //This is needed to make sure that the chart stays zoomed in when clicking on a user for the infobox
   useEffect(() => {
     if (!isZoomed) setVisibleUsers(allUsers);
@@ -191,6 +205,25 @@ export const ColumnChart = ({ width, height, data, scale, palette, settings }: B
               <h3 className={columnChartStyles.infoBoxHeader}>{info.label}</h3>
               <p>Sum Commits: {info.value}</p>
               <p>Avg Commits per week: {info.avgCommitsPerWeek}</p>
+
+              <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                Diff&nbsp;to:
+                <select value={compareUser} onChange={(e) => setCompareUser(e.target.value)}>
+                  {allUsers
+                    .filter((u) => u !== info.label)
+                    .map((u) => (
+                      <option key={u} value={u}>
+                        {u}
+                      </option>
+                    ))}
+                </select>
+              </label>
+
+              {diffCommits !== null && (
+                <span>
+                  <strong>{diffCommits}</strong>
+                </span>
+              )}
             </div>
           </div>
         )}

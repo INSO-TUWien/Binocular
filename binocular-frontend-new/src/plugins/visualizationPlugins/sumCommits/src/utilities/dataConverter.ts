@@ -32,7 +32,6 @@ export function convertToChartData(
   /**
    * Get time interval and filter out commits not in between the given dates
    */
-
   const from = moment(props.parameters.parametersDateRange.from);
   const to = moment(props.parameters.parametersDateRange.to);
 
