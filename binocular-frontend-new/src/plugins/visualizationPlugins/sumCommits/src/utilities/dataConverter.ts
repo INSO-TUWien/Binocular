@@ -1,3 +1,4 @@
+import moment from 'moment/moment';
 import chroma from 'chroma-js';
 import _ from 'lodash';
 import { DataPluginCommit } from '../../../../interfaces/dataPluginInterfaces/dataPluginCommits.ts';
@@ -28,11 +29,25 @@ export function convertToChartData(
     return { chartData: [], palette: {}, scale: [0, 0] };
   }
 
-  const combinedGroups = props.settings?.combinedUsers ?? [];
+  /**
+   * Get time interval and filter out commits not in between the given dates
+   */
+
+  const from = moment(props.parameters.parametersDateRange.from);
+  const to = moment(props.parameters.parametersDateRange.to);
+
+  commits = commits.filter((c) => {
+    const date = moment(c.date);
+    const afterFrom = date.isSameOrAfter(from);
+    const beforeTo = date.isSameOrBefore(to);
+
+    return afterFrom && beforeTo;
+  });
 
   /**
    * Count the number of commits per user
    */
+  const combinedGroups = props.settings?.combinedUsers ?? [];
   const countsByUser = _.countBy(commits, (c) => c.user.gitSignature);
   const commitsByUser = _.groupBy(commits, (c) => c.user.gitSignature);
 
@@ -47,7 +62,7 @@ export function convertToChartData(
     //Use Math.max because otherwise it will say infinity if commits == 1
     const weeks = Math.max(1, Math.ceil((maxDate.getTime() - minDate.getTime()) / (1000 * 60 * 60 * 24 * 7)));
 
-    return userCommits.length / weeks;
+    return Number((userCommits.length / weeks).toFixed(2));
   };
 
   /**
