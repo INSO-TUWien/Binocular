@@ -37,6 +37,20 @@ function Settings({ settings, setSettings, users }: SettingsProps) {
     setSelectedUsers([]);
   };
 
+  const uncombineUsers = () => {
+    if (selectedUsers.length < 2) return;
+
+    const newCombinedUsers = combinedUsers.filter((group) => {
+      !group.every((u) => selectedUsers.includes(u));
+    });
+
+    setSettings({
+      ...settings,
+      combinedUsers: newCombinedUsers,
+    });
+    setSelectedUsers([]);
+  };
+
   return (
     <>
       <div>
@@ -94,6 +108,15 @@ function Settings({ settings, setSettings, users }: SettingsProps) {
           combineUsers();
         }}>
         Combine
+      </button>
+
+      <button
+        className="btn btn-accent btn-sm"
+        disabled={selectedUsers.length < 2}
+        onClick={uncombineUsers}
+        style={{ marginLeft: '0.5rem' }}
+      >
+        Uncombine
       </button>
     </>
   );
