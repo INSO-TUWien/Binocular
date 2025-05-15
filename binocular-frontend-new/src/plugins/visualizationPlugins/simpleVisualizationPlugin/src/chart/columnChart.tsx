@@ -257,13 +257,29 @@ export const ColumnChart = ({ width, height, data, scale, palette, settings }: B
                       setUserToAdd('');
                     }
                   }}>
-                  <strong>+</strong>
+                  <strong style={{ marginLeft: '0.5rem' }}>+</strong>
                 </button>
 
                 {sumUsers.length > 0 && (
-                  <p>
-                    <strong>{sumCommits}</strong>
-                  </p>
+                  <div>
+                    <span>Remove user:</span>
+                    <div>
+                      {sumUsers.map((u) => (
+                        <span key={u}>
+                          {u}
+                          <button
+                            onClick={() => {
+                              setSumUsers((prev) => prev.filter((user) => user !== u));
+                            }}>
+                            <strong style={{ marginLeft: '0.5rem' }}>x</strong>
+                          </button>
+                        </span>
+                      ))}
+                    </div>
+                    <p>
+                      <strong>{sumCommits}</strong>
+                    </p>
+                  </div>
                 )}
               </div>
             </div>
