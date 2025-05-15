@@ -117,9 +117,9 @@ export function convertToChartData(
    *  optional: sum up commits from unknown users
    */
   if (props.settings.showOther) {
-    const unknown = commits.filter((c) => !knownIds.has(c.user.id)).length;
-    if (unknown > 0) {
-      chartData.push({ user: 'others', value: unknown });
+    const unknown = commits.filter((c) => !knownIds.has(c.user.id));
+    if (unknown.length > 0) {
+      chartData.push({ user: 'others', value: unknown.length, avgCommitsPerWeek: avgCommitsPerWeek(unknown) });
       palette['others'] = { main: '#555555', secondary: '#777777' };
     }
   }
