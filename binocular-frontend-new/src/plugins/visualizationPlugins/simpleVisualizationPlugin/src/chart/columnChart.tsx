@@ -208,6 +208,7 @@ export const ColumnChart = ({ width, height, data, scale, palette, settings }: B
         <svg width={width} height={height} xmlns="http://www.w3.org/2000/svg">
           <g width={boundsWidth} height={boundsHeight} ref={svgRef} transform={`translate(${[MARGIN.left, MARGIN.top].join(',')})`}></g>
         </svg>
+
         {info && (
           <div ref={infoRef} onClick={() => setInfo(null)}>
             <div onClick={(e) => e.stopPropagation()} className={columnChartStyles.infoBox}>
@@ -336,6 +337,15 @@ function generateBars(
           .attr('fill', palette[seg.label]?.main)
           .on('mousedown', (e) => e.stopPropagation())
           .on('mouseover', () => d3.select(tooltipRef.current).style('visibility', 'visible'))
+          .on('click', (e) => {
+            e.stopPropagation();
+            setInfo({
+              label: d.user,
+              value: d.value,
+              segments: d.segments,
+              avgCommitsPerWeek: d.avgCommitsPerWeek,
+            });
+          })
           .on('mousemove', (e) =>
             d3
               .select(tooltipRef.current)

@@ -99,20 +99,23 @@ export function convertToChartData(
 
     if (activeSegs.length < 2) return;
 
-    const value = group.reduce((sum, sig) => sum + (countsByUser[sig] ?? 0), 0);
+    const value = _.sumBy(activeSegs, (sig) => countsByUser[sig] ?? 0);
     if (value === 0) return;
 
     const label = group.join(' + ');
+    const commitsByGroup = _.flatMap(activeSegs, (sig) => commitsByUser[sig] ?? []);
 
     const segments = activeSegs.map((sig) => ({
       label: sig,
       value: countsByUser[sig] ?? 0,
     }));
 
-    chartData.push({ user: label, value, segments });
+    chartData.push({ user: label, value, avgCommitsPerWeek: avgCommitsPerWeek(commitsByGroup), segments });
   });
 
-  /* optional: sum up commits from unknown users */
+  /**
+   *  optional: sum up commits from unknown users
+   */
   if (props.settings.showOther) {
     const unknown = commits.filter((c) => !knownIds.has(c.user.id)).length;
     if (unknown > 0) {
