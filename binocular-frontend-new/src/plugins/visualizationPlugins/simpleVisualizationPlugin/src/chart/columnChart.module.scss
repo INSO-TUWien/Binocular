@@ -11,7 +11,8 @@
   border-radius: 5px;
   --tw-bg-opacity: 1;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
-  z-index: +1;
+  background-color: var(--fallback-b1,oklch(var(--b1)/var(--tw-bg-opacity)));
+  z-index: 4;
 }
 
 .infoBoxHeader {

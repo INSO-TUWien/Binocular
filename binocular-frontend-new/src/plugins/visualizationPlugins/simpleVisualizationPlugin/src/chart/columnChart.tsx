@@ -192,19 +192,21 @@ export const ColumnChart = ({ width, height, data, scale, palette, settings }: B
 
   return (
     <>
+      <div
+        ref={tooltipRef}
+        style={{
+          position: 'fixed',
+          visibility: 'hidden',
+          border: '2px solid',
+          padding: '.2rem',
+          borderRadius: '4px',
+          fontSize: '.75rem',
+          zIndex: +1,
+        }}>
+        Tooltipp
+      </div>
+
       <div style={{ position: 'relative', width, height }}>
-        <div
-          ref={tooltipRef}
-          style={{
-            position: 'fixed',
-            visibility: 'hidden',
-            border: '2px solid',
-            padding: '.2rem',
-            borderRadius: '4px',
-            fontSize: '.75rem',
-          }}>
-          Tooltipp
-        </div>
         <svg width={width} height={height} xmlns="http://www.w3.org/2000/svg">
           <g width={boundsWidth} height={boundsHeight} ref={svgRef} transform={`translate(${[MARGIN.left, MARGIN.top].join(',')})`}></g>
         </svg>
@@ -388,9 +390,61 @@ function updateBars(
   setInfo: React.Dispatch<React.SetStateAction<null | InfoState>> = () => {},
 ) {
   const svg = d3.select(svgRef.current);
-  svg.selectAll('.bar').remove();
+  const barWidth = x.bandwidth() / 2;
+  const barOffset = x.bandwidth() / 4;
 
-  generateBars(palette, data, x, y, svgRef, tooltipRef, setInfo);
+  const zoomedBars = svg
+    .selectAll<SVGRectElement, BarChartData>('.bar')
+    .data(data, (d) => d.user)
+    .join(
+      (enter) =>
+        enter
+          .append('rect')
+          .attr('class', 'bar')
+          .attr('x', (d) => x(d.user)! + barOffset)
+          .attr('y', y(0))
+          .attr('width', barWidth)
+          .attr('height', 0)
+          .attr('fill', (d) => palette[d.user]?.main)
+          .transition()
+          .duration(400)
+          .attr('y', (d) => y(d.value))
+          .attr('height', (d) => y(0) - y(d.value)),
+
+      (update) =>
+        update
+          .transition()
+          .duration(400)
+          .attr('x', (d) => x(d.user)! + barOffset)
+          .attr('y', (d) => y(d.value))
+          .attr('width', barWidth)
+          .attr('height', (d) => y(0) - y(d.value)),
+
+      (exit) => exit.transition().duration(200).attr('y', y(0)).attr('height', 0).remove(),
+    );
+
+  zoomedBars
+    .on('mouseover', () => d3.select(tooltipRef.current).style('visibility', 'visible'))
+    .on('mousemove', (e, d) =>
+      d3
+        .select(tooltipRef.current)
+        .style('top', 20 + e.pageY + 'px')
+        .style('left', e.pageX + 'px')
+        .style('background', palette[d.user].secondary)
+        .style('border-color', palette[d.user].secondary)
+        .text(`${d.user}: ${d.value} Commits`),
+    )
+    .on('mouseout', () => d3.select(tooltipRef.current).style('visibility', 'hidden'))
+    .on('mousedown', (e) => e.stopPropagation())
+    .on('click', (e, d) => {
+      e.stopPropagation();
+      setInfo({
+        label: d.user,
+        value: d.value,
+        segments: d.segments,
+        avgCommitsPerWeek: d.avgCommitsPerWeek,
+      });
+    });
 }
 
 function generateMeanLine(
