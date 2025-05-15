@@ -3,14 +3,14 @@
   top: 20px;
   right: 20px;
 
-  width: clamp(5rem, 30%, 15rem);
+  width: clamp(5rem, 30%, 20rem);
   max-height: calc(100% - 40px);
 
   overflow-y: auto;
   padding: 0.5rem;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-  background-color: lightgrey;
+  border-radius: 5px;
+  --tw-bg-opacity: 1;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
   z-index: +1;
 }
 
