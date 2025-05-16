@@ -89,7 +89,7 @@ function getDataByStatus(
   palette: Palette,
   chartData: IssueChartData[],
 ) {
-  const data: Array<{ date: number; statsBySortingObject: { [signature: string]: { count: number } } }> = [];
+  const data: Array<{ date: number; statsBySortingObject: { [status: string]: { count: number } } }> = [];
   //---- STEP 1: AGGREGATE Issues GROUPED BY STATUS PER TIME INTERVAL ----
   const granularity = getGranularity(parameters.parametersGeneral.granularity);
   const curr = moment(firstTimestamp)
@@ -117,7 +117,7 @@ function getDataByStatus(
     //Iterate through time buckets
     const currTimestamp = curr.toDate().getTime();
     const nextTimestamp = next.toDate().getTime();
-    const obj: { date: number; statsBySortingObject: { [signature: string]: { count: number } } } = {
+    const obj: { date: number; statsBySortingObject: { [status: string]: { count: number } } } = {
       date: currTimestamp,
       statsBySortingObject: {},
     }; //Save date of time bucket, create object
@@ -219,7 +219,7 @@ function getDataByStatus(
 
 function getDataByAuthors(
   parameters: ParametersType,
-  _breakdown: boolean,
+  breakdown: boolean,
   firstTimestamp: string,
   lastTimestamp: string,
   sortedIssues: DataPluginIssue[],
@@ -228,7 +228,10 @@ function getDataByAuthors(
   chartData: IssueChartData[],
   authors: AuthorType[],
 ) {
-  const data: Array<{ date: number; statsBySortingObject: { [signature: string]: { OPENED: number; CLOSED: number } } }> = [];
+  const data: Array<{
+    date: number;
+    statsBySortingObject: { [signature: string]: { OPENED?: number; CLOSED?: number; OPEN?: number } };
+  }> = [];
   //---- STEP 1: AGGREGATE COMMITS GROUPED BY AUTHORS PER TIME INTERVAL ----
   const granularity = getGranularity(parameters.parametersGeneral.granularity);
   const curr = moment(firstTimestamp)
@@ -238,7 +241,9 @@ function getDataByAuthors(
     .endOf(granularity.unit as moment.unitOfTime.StartOf)
     .add(1, <moment.unitOfTime.DurationConstructor>parameters.parametersGeneral.granularity);
   const next = moment(curr).add(1, <moment.unitOfTime.DurationConstructor>parameters.parametersGeneral.granularity);
+
   const totalIssuesPerAuthor: { [signature: string]: number } = {};
+
   for (
     ;
     curr.isSameOrBefore(end);
@@ -248,76 +253,129 @@ function getDataByAuthors(
     //Iterate through time buckets
     const currTimestamp = curr.toDate().getTime();
     const nextTimestamp = next.toDate().getTime();
-    const obj: { date: number; statsBySortingObject: { [signature: string]: { OPENED: number; CLOSED: number } } } = {
+    const obj: {
+      date: number;
+      statsBySortingObject: {
+        [signature: string]: { OPENED?: number; CLOSED?: number; OPEN?: number };
+      };
+    } = {
       date: currTimestamp,
       statsBySortingObject: {},
     }; //Save date of time bucket, create object
     for (let i = 0; i < sortedIssues.length; i++) {
+      let assignee = UNASSIGNED;
+      if (sortedIssues[i].assignee !== null) {
+        assignee = sortedIssues[i].assignee.user.id;
+      }
       if (Date.parse(sortedIssues[i].createdAt) >= currTimestamp && Date.parse(sortedIssues[i].createdAt) < nextTimestamp) {
-        let assignee = 'unassigned';
-        if (sortedIssues[i].assignee !== null) {
-          assignee = sortedIssues[i].assignee.login;
-        }
-
-        if (totalIssuesPerAuthor[assignee] === null) {
+        if (!(assignee in totalIssuesPerAuthor)) {
           totalIssuesPerAuthor[assignee] = 0;
         }
         totalIssuesPerAuthor[assignee] += 1;
-
-        if (IssueStatus.OPENED in obj.statsBySortingObject) {
-          obj.statsBySortingObject[assignee] = {
-            OPENED: obj.statsBySortingObject[assignee].OPENED + 1,
-            CLOSED: obj.statsBySortingObject[assignee].CLOSED,
-          };
+        if (breakdown) {
+          if (IssueStatus.OPENED in obj.statsBySortingObject) {
+            obj.statsBySortingObject[assignee] = {
+              // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+              // @ts-expect-error
+              OPEN: obj.statsBySortingObject[assignee].OPEN + 1,
+            };
+          } else {
+            obj.statsBySortingObject[assignee] = { OPEN: totalIssuesPerAuthor[assignee] };
+          }
         } else {
-          obj.statsBySortingObject[assignee] = { OPENED: 1, CLOSED: 0 };
+          if (assignee in obj.statsBySortingObject) {
+            obj.statsBySortingObject[assignee] = {
+              // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+              // @ts-expect-error
+              OPENED: obj.statsBySortingObject[assignee].OPENED + 1,
+              CLOSED: obj.statsBySortingObject[assignee].CLOSED,
+            };
+          } else {
+            obj.statsBySortingObject[assignee] = { OPENED: 1, CLOSED: 0 };
+          }
         }
       }
       if (Date.parse(sortedIssues[i].closedAt) >= currTimestamp && Date.parse(sortedIssues[i].closedAt) < nextTimestamp) {
-        let assignee = UNASSIGNED;
-        if (sortedIssues[i].assignee !== null) {
-          assignee = sortedIssues[i].assignee.login;
-        }
 
-        if (totalIssuesPerAuthor[assignee] === null) {
+        if (!(assignee in totalIssuesPerAuthor)) {
           totalIssuesPerAuthor[assignee] = 0;
         }
-        totalIssuesPerAuthor[assignee] += 1;
+        totalIssuesPerAuthor[assignee] -= 1;
 
-        if (IssueStatus.CLOSED in obj.statsBySortingObject) {
-          obj.statsBySortingObject[assignee] = {
-            OPENED: obj.statsBySortingObject[assignee].OPENED,
-            CLOSED: obj.statsBySortingObject[assignee].CLOSED - 1,
-          };
+        if (breakdown) {
+          if (IssueStatus.OPENED in obj.statsBySortingObject) {
+            obj.statsBySortingObject[assignee] = {
+              // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+              // @ts-expect-error
+              OPEN: obj.statsBySortingObject[assignee].OPEN - 1,
+            };
+          } else {
+            obj.statsBySortingObject[assignee] = { OPEN: totalIssuesPerAuthor[assignee] };
+          }
         } else {
-          obj.statsBySortingObject[assignee] = { OPENED: 0, CLOSED: -1 };
+          if (assignee in obj.statsBySortingObject) {
+            obj.statsBySortingObject[assignee] = {
+              OPENED: obj.statsBySortingObject[assignee].OPENED,
+              // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+              // @ts-expect-error
+              CLOSED: obj.statsBySortingObject[assignee].CLOSED - 1,
+            };
+          } else {
+            obj.statsBySortingObject[assignee] = { OPENED: 0, CLOSED: -1 };
+          }
+        }
+      }
+      if (breakdown) {
+        if (!(assignee in obj.statsBySortingObject)) {
+          obj.statsBySortingObject[assignee] = { OPEN: totalIssuesPerAuthor[assignee] };
+        }
+      } else {
+        if (!(assignee in obj.statsBySortingObject)) {
+          obj.statsBySortingObject[assignee] = { OPENED: 0, CLOSED: 0 };
+        }
+        if (!(assignee in obj.statsBySortingObject)) {
+          obj.statsBySortingObject[assignee] = { OPENED: 0, CLOSED: 0 };
         }
       }
     }
     data.push(obj);
   }
-
   //---- STEP 2: CONSTRUCT CHART DATA FROM AGGREGATED COMMITS ----
-  palette['Opened Issues ' + UNASSIGNED] = { main: '#555555', secondary: '#777777' };
-  palette['Closed Issues ' + UNASSIGNED] = { main: '#444444', secondary: '#666666' };
+  if (breakdown) {
+    palette['Open Issues ' + UNASSIGNED] = { main: '#555555', secondary: '#777777' };
+  } else {
+    palette['Opened Issues ' + UNASSIGNED] = { main: '#555555', secondary: '#777777' };
+    palette['Closed Issues ' + UNASSIGNED] = { main: '#444444', secondary: '#666666' };
+  }
   data.forEach((issue) => {
     //commit has structure {date, statsByAuthor: {}} (see next line)}
     const obj: IssueChartData = { date: issue.date };
 
-    for (const author of authors) {
-      palette['Opened Issues ' + (author.displayName || author.user.gitSignature)] = {
-        main: chroma(author.color.main).hex(),
-        secondary: chroma(author.color.secondary).hex(),
-      };
-      palette['Closed Issues ' + (author.displayName || author.user.gitSignature)] = {
-        main: chroma(author.color.main).darken(0.5).hex(),
-        secondary: chroma(author.color.secondary).darken(0.5).hex(),
-      };
-      obj['Opened Issues ' + (author.displayName || author.user.gitSignature)] = 0;
-      obj['Closed Issues ' + (author.displayName || author.user.gitSignature)] = 0;
+    if (breakdown) {
+      for (const author of authors) {
+        palette['Open Issues ' + (author.displayName || author.user.gitSignature)] = {
+          main: chroma(author.color.main).hex(),
+          secondary: chroma(author.color.secondary).hex(),
+        };
+        obj['Open Issues ' + (author.displayName || author.user.gitSignature)] = 0;
+      }
+      obj['Open Issues ' + UNASSIGNED] = 0;
+    } else {
+      for (const author of authors) {
+        palette['Opened Issues ' + (author.displayName || author.user.gitSignature)] = {
+          main: chroma(author.color.main).hex(),
+          secondary: chroma(author.color.secondary).hex(),
+        };
+        palette['Closed Issues ' + (author.displayName || author.user.gitSignature)] = {
+          main: chroma(author.color.main).darken(0.5).hex(),
+          secondary: chroma(author.color.secondary).darken(0.5).hex(),
+        };
+        obj['Opened Issues ' + (author.displayName || author.user.gitSignature)] = 0;
+        obj['Closed Issues ' + (author.displayName || author.user.gitSignature)] = 0;
+      }
+      obj['Opened Issues ' + UNASSIGNED] = 0;
+      obj['Closed Issues ' + UNASSIGNED] = 0;
     }
-    obj['Opened Issues ' + UNASSIGNED] = 0;
-    obj['Closed Issues ' + UNASSIGNED] = 0;
 
     authors.forEach((author) => {
       if (!author.selected) return;
@@ -331,24 +389,42 @@ function getDataByAuthors(
       if (author.user.id in issue.statsBySortingObject) {
         //Insert number of changes with the author name as key,
         //statsByAuthor has structure {{authorName: {count, additions, deletions, changes}}, ...}
-        if ('Opened Issues ' + name in obj && 'Failed Issues ' + name in obj) {
-          obj['Opened Issues ' + name] += issue.statsBySortingObject[author.user.id].OPENED;
-          obj['Closed Issues ' + name] += issue.statsBySortingObject[author.user.id].CLOSED;
+        if (breakdown) {
+          if ('Open Issues ' + name in obj) {
+            obj['Open Issues ' + name] += issue.statsBySortingObject[author.user.id].OPEN || 0;
+          } else {
+            obj['Open Issues ' + name] = issue.statsBySortingObject[author.user.id].OPEN || 0;
+          }
         } else {
-          obj['Opened Issues ' + name] = issue.statsBySortingObject[author.user.id].OPENED;
-          obj['Closed Issues ' + name] = issue.statsBySortingObject[author.user.id].CLOSED;
+          if ('Opened Issues ' + name in obj && 'Failed Issues ' + name in obj) {
+            obj['Opened Issues ' + name] += issue.statsBySortingObject[author.user.id].OPENED || 0;
+            obj['Closed Issues ' + name] += issue.statsBySortingObject[author.user.id].CLOSED || 0;
+          } else {
+            obj['Opened Issues ' + name] = issue.statsBySortingObject[author.user.id].OPENED || 0;
+            obj['Closed Issues ' + name] = issue.statsBySortingObject[author.user.id].CLOSED || 0;
+          }
         }
       }
     });
     if (UNASSIGNED in issue.statsBySortingObject) {
-      if ('Opened Issues ' + UNASSIGNED in obj && 'Failed Issues ' + UNASSIGNED in obj) {
-        obj['Opened Issues ' + UNASSIGNED] += issue.statsBySortingObject[UNASSIGNED].OPENED;
-        //-0.001 for stack layout to realize it belongs on the bottom
-        obj['Closed Issues ' + UNASSIGNED] += issue.statsBySortingObject[UNASSIGNED].CLOSED;
+      if (breakdown) {
+        if ('Open Issues ' + UNASSIGNED in obj) {
+          obj['Open Issues ' + UNASSIGNED] += issue.statsBySortingObject[UNASSIGNED].OPEN || 0;
+        } else {
+          obj['Opened Issues ' + UNASSIGNED] = issue.statsBySortingObject[UNASSIGNED].OPENED || 0;
+          //-0.001 for stack layout to realize it belongs on the bottom
+          obj['Closed Issues ' + UNASSIGNED] = issue.statsBySortingObject[UNASSIGNED].CLOSED || 0;
+        }
       } else {
-        obj['Opened Issues ' + UNASSIGNED] = issue.statsBySortingObject[UNASSIGNED].OPENED;
-        //-0.001 for stack layout to realize it belongs on the bottom
-        obj['Closed Issues ' + UNASSIGNED] = issue.statsBySortingObject[UNASSIGNED].CLOSED;
+        if ('Opened Issues ' + UNASSIGNED in obj && 'Failed Issues ' + UNASSIGNED in obj) {
+          obj['Opened Issues ' + UNASSIGNED] += issue.statsBySortingObject[UNASSIGNED].OPENED || 0;
+          //-0.001 for stack layout to realize it belongs on the bottom
+          obj['Closed Issues ' + UNASSIGNED] += issue.statsBySortingObject[UNASSIGNED].CLOSED || 0;
+        } else {
+          obj['Opened Issues ' + UNASSIGNED] = issue.statsBySortingObject[UNASSIGNED].OPENED || 0;
+          //-0.001 for stack layout to realize it belongs on the bottom
+          obj['Closed Issues ' + UNASSIGNED] = issue.statsBySortingObject[UNASSIGNED].CLOSED || 0;
+        }
       }
     }
 
@@ -369,6 +445,12 @@ function getDataByAuthors(
           positiveTotals += dataPoint[key];
         } else if (key.includes('Closed Issues ')) {
           negativeTotals += dataPoint[key];
+        } else if (key.includes('Open Issues ')) {
+          if (dataPoint[key] > 0) {
+            positiveTotals += dataPoint[key];
+          } else {
+            negativeTotals += dataPoint[key];
+          }
         } else {
           positiveTotals += dataPoint[key];
         }
