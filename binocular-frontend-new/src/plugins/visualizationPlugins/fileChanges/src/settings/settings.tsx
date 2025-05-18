@@ -136,7 +136,7 @@ function Settings(props: {
           />
         </label>
         <label className="label cursor-pointer">
-          <span className="label-text">Show extra Metrics (Mean Period of Change)</span>
+          <span className="label-text">Show extra Metrics</span>
           <input
             type="checkbox"
             className="toggle toggle-accent toggle-sm"

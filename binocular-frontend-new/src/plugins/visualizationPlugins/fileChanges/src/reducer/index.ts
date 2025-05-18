@@ -18,6 +18,7 @@ export let current_file: string = "README.md";
 
 export function setGlobalCurrentFileData(newCurrentFile: string) {
   current_file = newCurrentFile;
+  setCurrentFile(newCurrentFile);
 }
 
 export function setGlobalFiles(newFiles: DataPluginFile[]) {

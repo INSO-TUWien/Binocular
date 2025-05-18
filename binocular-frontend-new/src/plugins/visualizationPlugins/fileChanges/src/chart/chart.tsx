@@ -71,6 +71,10 @@ function Chart(props: {
   const [maxChangeset, setMaxChangeset] = useState<number>(0);
   const [avgChangeset, setAvgChangeset] = useState<number>(0);
 
+  console.log("Author List: ", props.authorList);
+
+  console.log("Current File Commits: ", current_file_commits);
+
   /*
   Throttle the resize of the svg (refresh rate) to every 1s to not overwhelm the renderer,
   This isn't really necessary for this visualization, but for bigger visualization this can be quite essential
@@ -108,6 +112,7 @@ function Chart(props: {
         props.settings.splitAdditionsDeletions,
         props.parameters,
       );
+    console.log("Chart Data: ", commitChartData);
     setChartData(commitChartData);
     setChartScale(commitScale);
     setChartPalette(commitPalette);
