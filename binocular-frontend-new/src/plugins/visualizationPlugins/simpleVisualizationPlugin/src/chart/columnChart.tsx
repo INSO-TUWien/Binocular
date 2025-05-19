@@ -89,8 +89,8 @@ export const ColumnChart = ({ width, height, data, scale, palette, settings }: B
       }
     };
 
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    document.addEventListener('click', handleClickOutside);
+    return () => document.removeEventListener('click', handleClickOutside);
   }, [info]);
 
   const brush = d3
