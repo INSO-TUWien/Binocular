@@ -135,16 +135,6 @@ export const ColumnChart = ({ width, height, data, scale, palette, settings }: B
       // @ts-expect-error
       svgElement.select('.xAxis').transition().duration(1000).call(d3.axisBottom(xScale));
 
-      updateBars(
-        palette,
-        data.filter((d) => xScale.domain().includes(d.user)),
-        xScale,
-        yScale,
-        svgRef,
-        tooltipRef,
-        setInfo,
-      );
-
       if (settings.showMean) {
         svgElement.selectAll('.meanLine').remove();
         generateMeanLine(data, boundsWidth, yScale, svgRef);
@@ -175,6 +165,16 @@ export const ColumnChart = ({ width, height, data, scale, palette, settings }: B
 
     svg.append('g').attr('class', 'brush').call(brush);
 
+    updateBars(
+      palette,
+      data.filter((d) => xScale.domain().includes(d.user)),
+      xScale,
+      yScale,
+      svgRef,
+      tooltipRef,
+      setInfo,
+    );
+
     generateBars(
       palette,
       data.filter((d) => xScale.domain().includes(d.user)),
@@ -188,7 +188,7 @@ export const ColumnChart = ({ width, height, data, scale, palette, settings }: B
     if (settings.showMean) {
       generateMeanLine(data, boundsWidth, yScale, svgRef);
     }
-  }, [xScale, yScale, boundsHeight, settings.showMean, scale, brush, palette, data, boundsWidth]);
+  }, [xScale, yScale, boundsHeight, settings.showMean, scale, palette, data, boundsWidth]);
 
   return (
     <>
@@ -305,8 +305,6 @@ function generateBars(
   const barWidth = x.bandwidth() / 2;
   const barOffset = x.bandwidth() / 4;
 
-  svg.selectAll('.bar').remove();
-
   svg
     .selectAll('.bar')
     .data(data)
@@ -407,14 +405,14 @@ function updateBars(
           .attr('height', 0)
           .attr('fill', (d) => palette[d.user]?.main)
           .transition()
-          .duration(400)
+          .duration(600)
           .attr('y', (d) => y(d.value))
           .attr('height', (d) => y(0) - y(d.value)),
 
       (update) =>
         update
           .transition()
-          .duration(400)
+          .duration(600)
           .attr('x', (d) => x(d.user)! + barOffset)
           .attr('y', (d) => y(d.value))
           .attr('width', barWidth)
