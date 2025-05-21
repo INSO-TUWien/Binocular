@@ -139,6 +139,15 @@ export const ColumnChart = ({ width, height, data, scale, palette, settings }: B
         svgElement.selectAll('.meanLine').remove();
         generateMeanLine(data, boundsWidth, yScale, svgRef);
       }
+      updateBars(
+        palette,
+        data.filter((d) => xScale.domain().includes(d.user)),
+        xScale,
+        yScale,
+        svgRef,
+        tooltipRef,
+        setInfo,
+      );
     });
 
   useEffect(() => {
@@ -164,16 +173,6 @@ export const ColumnChart = ({ width, height, data, scale, palette, settings }: B
       );
 
     svg.append('g').attr('class', 'brush').call(brush);
-
-    updateBars(
-      palette,
-      data.filter((d) => xScale.domain().includes(d.user)),
-      xScale,
-      yScale,
-      svgRef,
-      tooltipRef,
-      setInfo,
-    );
 
     generateBars(
       palette,
@@ -305,16 +304,16 @@ function generateBars(
   const barWidth = x.bandwidth() / 2;
   const barOffset = x.bandwidth() / 4;
 
-  svg
-    .selectAll('.bar')
+  const bars = svg
+    .selectAll('.bar.main')
     .data(data)
     .enter()
     .append('rect')
-    .attr('class', 'bar')
+    .attr('class', 'bar main')
     .attr('x', (d) => x(d.user)! + barOffset)
-    .attr('y', (d) => y(d.value))
     .attr('width', barWidth)
-    .attr('height', (d) => y(0) - y(d.value))
+    .attr('y', y(0))
+    .attr('height', 0)
     .attr('fill', (d) => palette[d.user]?.main)
     .on('mouseover', () => d3.select(tooltipRef.current).style('visibility', 'visible'))
     .on('mousemove', (e, d) =>
@@ -322,8 +321,8 @@ function generateBars(
         .select(tooltipRef.current)
         .style('top', 20 + e.pageY + 'px')
         .style('left', e.pageX + 'px')
-        .style('background', palette[d.user].secondary)
-        .style('border-color', palette[d.user].secondary)
+        .style('background', palette[d.user]?.secondary)
+        .style('border-color', palette[d.user]?.secondary)
         .text(`${d.user}: ${d.value} Commits`),
     )
     .on('mouseout', () => d3.select(tooltipRef.current).style('visibility', 'hidden'))
@@ -336,7 +335,8 @@ function generateBars(
         segments: d.segments,
         avgCommitsPerWeek: d.avgCommitsPerWeek,
       });
-    })
+    });
+  bars
     .filter((d) => (d.segments?.length ?? 0) > 0)
     .each(function (d) {
       const xPos = x(d.user)! + barOffset;
@@ -345,11 +345,11 @@ function generateBars(
         const h = y(0) - y(seg.value);
         svg
           .append('rect')
-          .attr('class', 'bar')
+          .attr('class', 'bar segment')
           .attr('x', xPos)
-          .attr('y', y(seg.value + yPos))
+          .attr('y', y(0))
           .attr('width', barWidth)
-          .attr('height', h)
+          .attr('height', 0)
           .attr('fill', palette[seg.label]?.main)
           .on('mousedown', (e) => e.stopPropagation())
           .on('mouseover', () => d3.select(tooltipRef.current).style('visibility', 'visible'))
@@ -367,15 +367,24 @@ function generateBars(
               .select(tooltipRef.current)
               .style('top', 20 + e.pageY + 'px')
               .style('left', e.pageX + 'px')
-              .style('background', palette[seg.label].secondary)
-              .style('border-color', palette[seg.label].secondary)
+              .style('background', palette[seg.label]?.secondary)
+              .style('border-color', palette[seg.label]?.secondary)
               .text(`${d.user}: ${d.value} Commits`),
           )
-          .on('mouseout', () => d3.select(tooltipRef.current).style('visibility', 'hidden'));
+          .on('mouseout', () => d3.select(tooltipRef.current).style('visibility', 'hidden'))
+          .transition()
+          .duration(600)
+          .attr('y', y(seg.value + yPos))
+          .attr('height', h);
         yPos += seg.value;
       });
-      d3.select(this).remove();
     });
+
+  bars
+    .transition()
+    .duration(600)
+    .attr('y', (d) => y(d.value))
+    .attr('height', (d) => y(0) - y(d.value));
 }
 
 function updateBars(
@@ -392,13 +401,13 @@ function updateBars(
   const barOffset = x.bandwidth() / 4;
 
   const zoomedBars = svg
-    .selectAll<SVGRectElement, BarChartData>('.bar')
+    .selectAll<SVGRectElement, BarChartData>('.bar.main')
     .data(data, (d) => d.user)
     .join(
       (enter) =>
         enter
           .append('rect')
-          .attr('class', 'bar')
+          .attr('class', 'bar main')
           .attr('x', (d) => x(d.user)! + barOffset)
           .attr('y', y(0))
           .attr('width', barWidth)
@@ -428,8 +437,8 @@ function updateBars(
         .select(tooltipRef.current)
         .style('top', 20 + e.pageY + 'px')
         .style('left', e.pageX + 'px')
-        .style('background', palette[d.user].secondary)
-        .style('border-color', palette[d.user].secondary)
+        .style('background', palette[d.user]?.secondary)
+        .style('border-color', palette[d.user]?.secondary)
         .text(`${d.user}: ${d.value} Commits`),
     )
     .on('mouseout', () => d3.select(tooltipRef.current).style('visibility', 'hidden'))
