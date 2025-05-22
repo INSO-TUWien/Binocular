@@ -12,7 +12,7 @@ export interface ChangeFrequencyState {
 const initialState: ChangeFrequencyState = {
   hoveredFile: null,
   selectedFile: null,
-  currentPath: '', 
+  currentPath: '',
   hierarchyStack: [],
   hierarchyData: [],
 };
@@ -21,7 +21,7 @@ export default handleActions<ChangeFrequencyState, any>(
   {
     SET_CHANGE_FREQUENCY_STATE: (state, action) => ({
       ...state,
-      ...action.payload
+      ...action.payload,
     }),
 
     HIERARCHY_DATA_LOADED: (state, action) => ({
@@ -29,5 +29,5 @@ export default handleActions<ChangeFrequencyState, any>(
       hierarchyData: action.payload,
     }),
   },
-  initialState
-); 
+  initialState,
+);

@@ -17,7 +17,7 @@ export interface FileChangeData {
       additions: number;
       deletions: number;
       changes: number;
-    }
+    };
   };
 }
 
@@ -30,7 +30,7 @@ const initialState: ChangeFrequencyDataState = {
 };
 
 export default handleActions<ChangeFrequencyDataState, any>(
-  { 
+  {
     // Data are still being loaded from the database
     HIERARCHY_DATA_START_LOADING: (state) => ({
       ...state,
@@ -43,5 +43,5 @@ export default handleActions<ChangeFrequencyDataState, any>(
       loading: false,
     }),
   },
-  initialState
-); 
+  initialState,
+);

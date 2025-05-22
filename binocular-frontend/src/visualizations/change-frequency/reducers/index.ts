@@ -12,5 +12,5 @@ export interface ChangeFrequencyReducerState {
 export default combineReducers<ChangeFrequencyReducerState>({
   config,
   data,
-  state: stateReducer
-}); 
+  state: stateReducer,
+});

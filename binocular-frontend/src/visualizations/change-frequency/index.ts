@@ -21,7 +21,7 @@ const changeFrequencyVisualization: VisualizationModule = {
   reducer,
   ChartComponent,
   ConfigComponent,
-  HelpComponent
+  HelpComponent,
 };
 
-export default changeFrequencyVisualization; 
+export default changeFrequencyVisualization;

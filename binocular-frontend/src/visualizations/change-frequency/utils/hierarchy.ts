@@ -25,7 +25,7 @@ export function generateFullHierarchy(files: FileChangeData[]): HierarchyNode[] 
   if (hierarchyCache) {
     return hierarchyCache;
   }
-    
+
   // Function to aggregate statistics for a specific path
   function aggregateDirectoryStats(directoryPath: string): {
     files: FileChangeData[];
@@ -38,41 +38,49 @@ export function generateFullHierarchy(files: FileChangeData[]): HierarchyNode[] 
     lastMod: number;
     lineCount: number;
   } {
-    const dirFiles = files.filter(file => file.path.startsWith(directoryPath + '/') || file.path === directoryPath);
-    
-    const additions = dirFiles.reduce(function(sum, file) { return sum + file.totalAdditions; }, 0);
-    const deletions = dirFiles.reduce(function(sum, file) { return sum + file.totalDeletions; }, 0);
-    const changes = dirFiles.reduce(function(sum, file) { return sum + file.totalChanges; }, 0);
-    const lineCount = dirFiles.reduce(function(sum, file) { return sum + (file.lineCount || 0); }, 0);
-    
+    const dirFiles = files.filter((file) => file.path.startsWith(directoryPath + '/') || file.path === directoryPath);
+
+    const additions = dirFiles.reduce(function (sum, file) {
+      return sum + file.totalAdditions;
+    }, 0);
+    const deletions = dirFiles.reduce(function (sum, file) {
+      return sum + file.totalDeletions;
+    }, 0);
+    const changes = dirFiles.reduce(function (sum, file) {
+      return sum + file.totalChanges;
+    }, 0);
+    const lineCount = dirFiles.reduce(function (sum, file) {
+      return sum + (file.lineCount || 0);
+    }, 0);
+
     const commits = new Set<string>();
-    
+
     const ownershipData: Record<string, { changes: number; additions: number; deletions: number }> = {};
-    
+
     let firstMod = dirFiles.length > 0 ? new Date(dirFiles[0].firstModification || 0).getTime() : 0;
     let lastMod = 0;
-    
+
     for (const file of dirFiles) {
       if (file.commits) {
         for (const commit of file.commits) {
           commits.add(commit);
         }
       }
-      
+
       if (file.owners) {
         for (const author in file.owners) {
           if (!ownershipData[author]) {
             ownershipData[author] = { changes: 0, additions: 0, deletions: 0 };
           }
-          
+
           const stats = file.owners[author];
-          
+
           ownershipData[author].additions += stats.additions || 0;
           ownershipData[author].deletions += stats.deletions || 0;
           ownershipData[author].changes += stats.changes || 0;
         }
       }
-      
+
       if (file.firstModification) {
         const time = new Date(file.firstModification).getTime();
         if (time < firstMod || firstMod === 0) {
@@ -86,7 +94,7 @@ export function generateFullHierarchy(files: FileChangeData[]): HierarchyNode[] 
         }
       }
     }
-    
+
     return {
       files: dirFiles,
       additions,
@@ -100,18 +108,21 @@ export function generateFullHierarchy(files: FileChangeData[]): HierarchyNode[] 
     };
   }
 
-  const pathMap = new Map<string, {
-    path: string,
-    isDirectory: boolean,
-    isRoot?: boolean,
-    files: FileChangeData[],
-    children: Set<string>
-  }>();
-  
+  const pathMap = new Map<
+    string,
+    {
+      path: string;
+      isDirectory: boolean;
+      isRoot?: boolean;
+      files: FileChangeData[];
+      children: Set<string>;
+    }
+  >();
+
   for (const file of files) {
     const pathParts = file.path.split('/');
     let currentPath = '';
-    
+
     for (let i = 0; i < pathParts.length - 1; i++) {
       const part = pathParts[i];
       let nextPath = '';
@@ -120,46 +131,46 @@ export function generateFullHierarchy(files: FileChangeData[]): HierarchyNode[] 
       } else {
         nextPath = part;
       }
-      
+
       if (!pathMap.has(nextPath)) {
         pathMap.set(nextPath, {
           path: nextPath,
           isDirectory: true,
           isRoot: i === 0,
           files: [],
-          children: new Set<string>()
+          children: new Set<string>(),
         });
       }
-      
+
       if (currentPath) {
         pathMap.get(currentPath)?.children.add(nextPath);
       }
-      
+
       currentPath = nextPath;
     }
-    
+
     const filePath = file.path;
     if (!pathMap.has(filePath)) {
       pathMap.set(filePath, {
         path: filePath,
         isDirectory: false,
         files: [file],
-        children: new Set<string>()
+        children: new Set<string>(),
       });
     } else {
       pathMap.get(filePath)!.files.push(file);
     }
-    
+
     const dirPath = pathParts.slice(0, -1).join('/');
     if (dirPath && pathMap.has(dirPath)) {
       pathMap.get(dirPath)?.children.add(filePath);
     }
   }
-  
+
   function buildHierarchyNode(path: string): HierarchyNode {
     const nodeInfo = pathMap.get(path)!;
     const name = path.split('/').pop() || path;
-    
+
     if (!nodeInfo.isDirectory) {
       const file = nodeInfo.files[0];
       return {
@@ -175,20 +186,20 @@ export function generateFullHierarchy(files: FileChangeData[]): HierarchyNode[] 
         firstModification: file.firstModification,
         lastModification: file.lastModification,
         owners: file.owners,
-        commits: file.commits
+        commits: file.commits,
       };
     }
-    
+
     const children: HierarchyNode[] = [];
     const childPaths: string[] = [];
-    
-    nodeInfo.children.forEach(childPath => {
+
+    nodeInfo.children.forEach((childPath) => {
       children.push(buildHierarchyNode(childPath));
       childPaths.push(childPath);
     });
-    
+
     const stats = aggregateDirectoryStats(path);
-    
+
     return {
       path,
       name,
@@ -197,26 +208,25 @@ export function generateFullHierarchy(files: FileChangeData[]): HierarchyNode[] 
       totalAdditions: stats.additions,
       totalDeletions: stats.deletions,
       totalChanges: stats.changes,
-      averageChangesPerCommit: stats.commits.size > 0 ? 
-        stats.changes / stats.commits.size : 0,
+      averageChangesPerCommit: stats.commits.size > 0 ? stats.changes / stats.commits.size : 0,
       lineCount: stats.lineCount,
       childPaths,
       children,
       firstModification: stats.firstMod > 0 ? new Date(stats.firstMod).toISOString() : undefined,
       lastModification: stats.lastMod > 0 ? new Date(stats.lastMod).toISOString() : undefined,
       owners: stats.owners,
-      commits: Array.from(stats.commits)
+      commits: Array.from(stats.commits),
     };
   }
-  
+
   const rootNodes: HierarchyNode[] = [];
-  
+
   for (const [path, info] of pathMap.entries()) {
     if (info.isRoot || path.indexOf('/') === -1) {
       rootNodes.push(buildHierarchyNode(path));
     }
   }
-  
+
   hierarchyCache = rootNodes.sort((a, b) => a.path.localeCompare(b.path));
   return hierarchyCache;
 }
@@ -232,7 +242,7 @@ export function getHierarchyForPath(path: string): HierarchyNode | null {
       if (node.path === targetPath) {
         return node;
       }
-      
+
       if (node.children) {
         const found = findNodeAtPath(node.children, targetPath);
         if (found) {
@@ -240,7 +250,7 @@ export function getHierarchyForPath(path: string): HierarchyNode | null {
         }
       }
     }
-    
+
     return null;
   }
   return findNodeAtPath(hierarchyCache, path);
@@ -249,4 +259,4 @@ export function getHierarchyForPath(path: string): HierarchyNode | null {
 // Function to clear the hierarchy cache
 export function clearHierarchyCache(): void {
   hierarchyCache = null;
-} 
+}
