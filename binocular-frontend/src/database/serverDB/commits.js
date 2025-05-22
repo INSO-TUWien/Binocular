@@ -134,6 +134,7 @@ export default class Commits {
                    file{
                      path
                    }
+                   lineCount
                    ownership {
                     user
                     hunks {
