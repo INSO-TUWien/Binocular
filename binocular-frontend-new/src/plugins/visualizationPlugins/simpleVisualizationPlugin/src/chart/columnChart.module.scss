@@ -3,7 +3,7 @@
   top: 20px;
   right: 20px;
 
-  width: clamp(5rem, 30%, 20rem);
+  width: clamp(10rem, 30%, 20rem);
   max-height: calc(100% - 40px);
 
   overflow-y: auto;
@@ -13,6 +13,20 @@
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
   background-color: var(--fallback-b1,oklch(var(--b1)/var(--tw-bg-opacity)));
   z-index: 4;
+}
+
+.infoBoxLabel {
+  @apply font-medium text-base-content/80;
+}
+
+.infoBoxValue  {
+  @apply font-semibold text-primary;
+}
+
+.infoBoxButton {
+  @apply btn btn-xs btn-outline transition-colors;
+  vertical-align: middle;
+  margin-left: 0.5rem;
 }
 
 .infoBoxHeader {

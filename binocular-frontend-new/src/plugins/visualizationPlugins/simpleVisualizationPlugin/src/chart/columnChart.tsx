@@ -213,17 +213,35 @@ export const ColumnChart = ({ width, height, data, scale, palette, settings }: B
         {info && (
           <div ref={infoRef} onClick={() => setInfo(null)}>
             <div onClick={(e) => e.stopPropagation()} className={columnChartStyles.infoBox}>
-              <h3 className={columnChartStyles.infoBoxHeader}>{info.label}</h3>
-              <p>Sum Commits: {info.value}</p>
-              <p>Avg Commits per week: {info.avgCommitsPerWeek}</p>
 
-              <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <button
+                aria-label="Close"
+                onClick={() => setInfo(null)}
+                className="btn btn-sm btn-ghost absolute right-0.5 top-0.5"
+              >
+                <strong>X</strong>
+              </button>
+
+              <h3 className={columnChartStyles.infoBoxHeader}>{info.label}</h3>
+              <p>
+                <span className={columnChartStyles.infoBoxLabel}>Sum Commits: </span>
+                <span className={columnChartStyles.infoBoxValue}>{info.value}</span>
+              </p>
+              <p>
+                <span className={columnChartStyles.infoBoxLabel}>Avg Commits per week: </span>
+                <span className={columnChartStyles.infoBoxValue}>{info.avgCommitsPerWeek} </span>
+              </p>
+
+              <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }} className={columnChartStyles.infoBoxLabel}>
                 Diff&nbsp;to:
-                <select value={compareUser} onChange={(e) => setCompareUser(e.target.value)}>
+                <select className={columnChartStyles.infoBoxValue} value={compareUser} onChange={(e) => setCompareUser(e.target.value)}>
+                  <option value={''} className={columnChartStyles.infoBoxValue} disabled>
+                    Pick user...
+                  </option>
                   {allUsers
                     .filter((u) => u !== info.label)
                     .map((u) => (
-                      <option key={u} value={u}>
+                      <option key={u} value={u} className={columnChartStyles.infoBoxValue}>
                         {u}
                       </option>
                     ))}
@@ -232,54 +250,56 @@ export const ColumnChart = ({ width, height, data, scale, palette, settings }: B
 
               {diffCommits !== null && (
                 <span>
-                  <strong>{diffCommits}</strong>
+                  <strong className={columnChartStyles.infoBoxValue}>{diffCommits} Commits</strong>
                 </span>
               )}
 
               <div>
-                <span>Sum with user:</span>
-                <select value={userToAdd} onChange={(e) => setUserToAdd(e.target.value)}>
-                  <option value={''} disabled>
+                <span className={columnChartStyles.infoBoxLabel}>Sum with user:</span>
+                <select className={columnChartStyles.infoBoxValue} value={userToAdd} onChange={(e) => setUserToAdd(e.target.value)}>
+                  <option value={''} className={columnChartStyles.infoBoxValue} disabled>
                     Pick user...
                   </option>
                   {allUsers
                     .filter((u) => u !== info.label && !sumUsers.includes(u))
                     .map((u) => (
-                      <option key={u} value={u}>
+                      <option key={u} value={u} className={columnChartStyles.infoBoxValue}>
                         {u}
                       </option>
                     ))}
                 </select>
 
                 <button
+                  className={columnChartStyles.infoBoxButton}
                   onClick={() => {
                     if (userToAdd && !sumUsers.includes(userToAdd)) {
                       setSumUsers((prev) => [...prev, userToAdd]);
                       setUserToAdd('');
                     }
                   }}>
-                  <strong style={{ marginLeft: '0.5rem' }}>+</strong>
+                  <strong>+</strong>
                 </button>
 
                 {sumUsers.length > 0 && (
                   <div>
-                    <span>Remove user:</span>
+                    <p>
+                      <strong className={columnChartStyles.infoBoxValue}>{sumCommits} Commits</strong>
+                    </p>
+                    <span className={columnChartStyles.infoBoxLabel}>Remove user from sum:</span>
                     <div>
                       {sumUsers.map((u) => (
-                        <span key={u}>
+                        <span key={u} className={columnChartStyles.infoBoxValue}>
                           {u}
                           <button
+                            className={columnChartStyles.infoBoxButton}
                             onClick={() => {
                               setSumUsers((prev) => prev.filter((user) => user !== u));
                             }}>
-                            <strong style={{ marginLeft: '0.5rem' }}>x</strong>
+                            <strong>x</strong>
                           </button>
                         </span>
                       ))}
                     </div>
-                    <p>
-                      <strong>{sumCommits}</strong>
-                    </p>
                   </div>
                 )}
               </div>
