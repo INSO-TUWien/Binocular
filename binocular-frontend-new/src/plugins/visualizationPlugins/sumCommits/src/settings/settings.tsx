@@ -110,12 +110,7 @@ function Settings({ settings, setSettings, users }: SettingsProps) {
         Combine
       </button>
 
-      <button
-        className="btn btn-accent btn-sm"
-        disabled={selectedUsers.length < 2}
-        onClick={uncombineUsers}
-        style={{ marginLeft: '0.5rem' }}
-      >
+      <button className="btn btn-accent btn-sm" onClick={uncombineUsers} style={{ marginLeft: '0.5rem' }}>
         Uncombine
       </button>
     </>
