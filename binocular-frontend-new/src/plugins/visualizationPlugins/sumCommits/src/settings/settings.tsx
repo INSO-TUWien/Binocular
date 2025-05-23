@@ -38,8 +38,6 @@ function Settings({ settings, setSettings, users }: SettingsProps) {
   };
 
   const uncombineUsers = () => {
-    if (selectedUsers.length < 2) return;
-
     const newCombinedUsers = combinedUsers.filter((group) => {
       !group.every((u) => selectedUsers.includes(u));
     });
@@ -69,7 +67,7 @@ function Settings({ settings, setSettings, users }: SettingsProps) {
           />
         </label>
         <label className="label cursor-pointer">
-          <span className="label-text">Show unknown authors:</span>
+          <span className="label-text">Show other authors:</span>
           <input
             type="checkbox"
             className="toggle toggle-accent toggle-sm"
@@ -87,16 +85,16 @@ function Settings({ settings, setSettings, users }: SettingsProps) {
       <div className="divider my-0" />
 
       <span className="label-text">Combine users:</span>
-      <div className="flex flex-wrap gap-4">
+      <div className="grid grid-cols-2 gap-x-2 gap-y-1">
         {users.map((u) => (
-          <label key={u} className="label cursor-pointer gap-2">
+          <label key={u} className="label cursor-pointer gap-2 min-w-0 justify-start">
             <input
               type="checkbox"
               className="checkbox checkbox-primary checkbox-sm"
               checked={selectedUsers.includes(u)}
               onChange={() => toggleUser(u)}
             />
-            <span className="label-text">{u}</span>
+            <span className="truncate max-w-[6rem]">{u}</span>
           </label>
         ))}
       </div>
