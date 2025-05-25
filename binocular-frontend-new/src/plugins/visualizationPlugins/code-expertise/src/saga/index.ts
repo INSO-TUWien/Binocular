@@ -24,7 +24,7 @@ function* fetchChangesData<DataType>(dataConnection: DataPlugin) {
   const state: State<DataType> = yield select();
 
   // Fetch data
-  const commitsBuilds: DataPluginCommitBuild[] = yield call(() => dataConnection.commits_builds.getAll(state.dateRange.from, state.dateRange.to));
+  const commitsBuilds: DataPluginCommitBuild[] = yield call(() => dataConnection.commits.getCommitsWithBuilds(state.dateRange.from, state.dateRange.to));
   const commits: DataPluginCommit[] = yield call(() => dataConnection.commits.getAll(state.dateRange.from, state.dateRange.to));
   
   // Convert regular commits to DataPluginCommitBuild format (with build set to undefined)

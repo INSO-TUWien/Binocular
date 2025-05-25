@@ -10,7 +10,6 @@ import { Properties } from '../../../simpleVisualizationPlugin/src/interfaces/pr
 import { SettingsType } from '../settings/settings.tsx';
 import { useSelector, useDispatch } from 'react-redux';
 import styles from '../styles.module.scss';
-import { DataPluginCommit } from '../../../../interfaces/dataPluginInterfaces/dataPluginCommits.ts';
 import { dataSlice, DataState } from '../reducer';
 import { DevData } from './Segment';
 import {DataPluginCommitBuild} from "../../../../interfaces/dataPluginInterfaces/dataPluginCommitsBuilds.ts";
