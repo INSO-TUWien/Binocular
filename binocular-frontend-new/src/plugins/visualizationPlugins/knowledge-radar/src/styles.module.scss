@@ -1,324 +1,113 @@
-// Custom variables to replace Bulma variables
-$monospace-font: 'Courier New', Courier, monospace;
+// styles.module.scss (add these styles to your existing file)
 
-// Legend on the top left
-.legend {
-  position: absolute;
-  top: 5px;
-  left: 5px;
-  background: rgba(255, 255, 255, 0.67);
+.authorSelector {
+  margin: 0 auto;
+  position: relative;
 }
 
-// Overall container for the chart and the details sideboard
-.chartDetailsContainer {
-  width: 100%;
+.authorSelectorToggle {
+  border-width: 1px;
+  border-style: solid;
+  border-radius: 0.375em;
+  cursor: pointer;
   display: flex;
+  align-items: center;
+  transition: all 0.3s ease-in-out;
+  width: 100%;
+
+  &.open {
+    // Styles for when dropdown is open
+  }
+}
+
+.selectedAuthorContainer {
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.authorDot {
+  border-radius: 50%;
+  margin-right: 0.75em;
+  transition: transform 0.3s ease-in-out;
+}
+
+.authorName {
+  font-weight: 500;
+  white-space: nowrap;
   overflow: hidden;
+  text-overflow: ellipsis;
+}
 
-  .chartContainer {
-    flex: 1;
-    display: flex;
+.placeholderText {
+  color: gray;
+}
 
-    .chart {
-      flex: 1;
-    }
-  }
+.dropdownArrow {
+  margin-left: auto;
 
-  .messageContainer {
-    flex: 1;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-  }
-  
-  .details {
-    display: flex;
-    overflow: hidden;
-
-    .expandButton {
-      background-color: gray;
-      color: white;
-      font-size: 120%;
-      font-weight: bold;
-      padding: 2px;
-      cursor: pointer;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-    }
-
-    .content {
-      flex: 1;
-      padding: 15px;
-      display: flex;
-      flex-direction: column;
-      overflow: auto;
-
-      .field {
-        border-color: #bebebe;
-        margin-bottom: 20px;
-        padding: 0.5rem;
-        border: 1px solid #dbdbdb;
-        border-radius: 4px;
-      }
-
-      .generalDetails {
-        display: flex;
-        flex-direction: column;
-        padding-right: 10px;
-
-        .generalDetailsContainer {
-          display: flex;
-        }
-
-        .generalDetailsDots {
-          flex: 1;
-          margin-left: 5px;
-          margin-right: 5px;
-          margin-bottom: 5px;
-          border-bottom: dotted;
-          border-color: #606060;
-        }
-
-        .issueButton {
-          width: fit-content;
-          margin-top: 15px;
-          padding: 0.375rem 0.75rem;
-          background-color: #4882e0;
-          color: white;
-          border: none;
-          border-radius: 4px;
-          cursor: pointer;
-          
-          &:hover {
-            background-color: #3a6fc0;
-          }
-        }
-      }
-    }
-
-    .monospaced {
-      font-family: $monospace-font;
-    }
-
-    .commitsDetailsListContainer {
-      margin-bottom: 15px;
-
-      label {
-        font-weight: 500;
-        display: block;
-        margin-bottom: 0.5rem;
-      }
-    }
-
-    .commitDetailsList {
-      display: flex;
-      flex-direction: column;
-      padding-left: 10px;
-    }
-
-    .commitDetailsGood {
-      background-color: #4cb13a;
-      border-color: darkgreen;
-      color: white;
-      border: solid;
-      border-width: 1px;
-      border-radius: 5px;
-    }
-
-    .commitDetailsBad {
-      background-color: #ff5a36;
-      border-color: darkred;
-      color: white;
-      border: solid;
-      border-width: 1px;
-      border-radius: 5px;
-    }
-
-    .commitDetailsNeutral {
-      background-color: #f8f8f8;
-      border-color: #dbdbdb;
-      border: solid;
-      border-width: 1px;
-      border-radius: 5px;
-    }
-
-    .commitDetails {
-      width: 500px;
-      padding: 10px;
-      margin: 2px;
-      border: solid;
-      border-width: 1px;
-      border-radius: 5px;
-      cursor: pointer;
-      display: flex;
-      flex-direction: row;
-      
-      .ciIcon {
-        min-width: fit-content;
-        padding: 2px;
-        display: flex;
-        align-items: center;
-        text-align: center;
-        border-width: 1px;
-      }
-      
-      .stats {
-        flex: 1;
-        padding: 2px;
-        border-width: 1px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 4px;
-      }
-      
-      .commitMessage {
-        flex: 3;
-        padding: 2px;
-        padding-left: 4px;
-        margin-bottom: 0px;
-        display: flex;
-        align-items: center;
-        min-width: 0;
-
-        span {
-          text-overflow: ellipsis;
-          white-space: nowrap;
-          overflow: hidden;
-        }
-      }
-      
-      .link {
-        padding: 2px;
-        align-items: center;
-        justify-content: center;
-      }
-    }
-
-    .commitDetailsExpanded {
-      width: 500px;
-      padding: 10px;
-      margin: 2px;
-      gap: 8px;
-      border: solid;
-      border-width: 1px;
-      border-radius: 5px;
-      cursor: pointer;
-      display: flex;
-      flex-direction: column;
-
-      .dateAndLink {
-        display: flex;
-        flex-direction: row;
-        justify-content: space-between;
-        align-items: center;
-
-        p {
-          margin: 0px;
-        }
-      }
-    }
+  svg {
+    transition: transform 0.3s ease-in-out;
   }
 }
 
-.configContainer {
+.dropdown {
+  position: absolute;
+  z-index: 10;
   width: 100%;
+  top: 100%;
+  left: 0;
+  margin-top: 0.25em;
+  border-radius: 0.375em;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  overflow: hidden;
+  border-width: 1px;
+  border-style: solid;
+  animation: dropdownFadeIn 0.2s ease-out forwards;
+}
 
-  form {
-    width: 100%;
+.searchContainer {
+  // Padding is set dynamically
+}
 
-    #select {
-      width: 100%;
-      padding: 0.5rem;
-      border: 1px solid #dbdbdb;
-      border-radius: 4px;
-      background-color: white;
-      font-size: 1rem;
-      line-height: 1.5;
-    }
+.searchInput {
+  width: 100%;
+  border-width: 1px;
+  border-style: solid;
+  border-radius: 0.375em;
+  font-size: 1em;
+  outline: none;
+}
 
-    .filepicker {
-      .moduleLine {
-        border: 1px solid #4882e0;
-        display: flex;
-        flex-direction: row;
-        margin: 4px;
-        cursor: default;
-        background-color: #4882e0;
-        color: whitesmoke;
-        font-weight: bold;
-      }
-      
-      .fileLine {
-        display: flex;
-        flex-direction: row;
-        margin: 4px;
-        cursor: default;
-        background-color: #F8F8F8;
-      }
-      
-      .moduleName {
-        flex: 1;
-        padding-left: 10px;
-        cursor: pointer;
-        
-        span {
-          float: left;
-        }
-      }
-      
-      .fileName {
-        flex: 1;
-        padding-left: 10px;
-        
-        span {
-          float: left;
-        }
-      }
-      
-      .childContainer {
-        margin-left: 10px;
-        border-left: solid;
-        border-color: #bebebe;
-        padding-left: 10px;
-      }
-    }
+.authorList {
+  max-height: 180px;
+  overflow-y: auto;
+}
+
+.authorItem {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  border-left-width: 3px;
+  border-left-style: solid;
+  transition: background-color 0.2s ease-in-out;
+
+  &.selected {
+    // Selected styles are applied dynamically
   }
 }
 
-.help {
-  width: 100%;
-  overflow-y: scroll;
-  font-size: 1.5em;
+.noResults {
+  text-align: center;
+}
 
-  h2 {
-    font-size: 1.2em;
-    font-weight: bold;
-    margin-bottom: 0.75em;
-    margin-top: 1em;
+@keyframes dropdownFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
   }
-
-  h3 {
-    font-size: 1.1em;
-    font-weight: bold;
-    margin-bottom: 0.5em;
-    margin-top: 0.75em;
-  }
-
-  ul {
-    list-style-type: circle;
-    margin-left: 1.5em;
-    margin-bottom: 1em;
-  }
-
-  ol {
-    margin-left: 1.5em;
-    margin-bottom: 1em;
-  }
-
-  p {
-    margin-bottom: 1em;
-    line-height: 1.5;
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }

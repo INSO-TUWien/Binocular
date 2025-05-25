@@ -35,7 +35,6 @@ function* fetchChangesData<DataType>(dataConnection: DataPlugin) {
   
   // Combine both arrays and use lodash to remove duplicates where commitsBuilds gets prefered
   const combinedCommits = _.uniqBy([...commitsBuilds, ...commitsAsCommitBuilds], 'sha');
-  
   yield put(setData(combinedCommits));
   yield put(setDataState(DataState.COMPLETE));
 }

@@ -108,16 +108,13 @@ const drawRadarChart = (
     .append("g")
     .attr("class", "axis-label-group")
     .attr("transform", (_: string, i: number) => {
-      const x = rScale(1.35) * Math.cos(angles[i] - Math.PI / 2);
-      const y = rScale(1.35) * Math.sin(angles[i] - Math.PI / 2);
+      const x = rScale(1.4) * Math.cos(angles[i] - Math.PI / 2);
+      const y = rScale(1.4) * Math.sin(angles[i] - Math.PI / 2);
       return `translate(${x}, ${y})`;
     })
     .style("cursor", (d: string) => {
-      if (isSubpackageView) {
         const subpkg = chartData.find(p => p.name === d);
         return subpkg && subpkg.subpackages && subpkg.subpackages.length > 0 ? "pointer" : "default";
-      }
-      return "pointer";
     })
     .style("opacity", 0)
     .on("click", (_event: MouseEvent, d: string) => {
@@ -128,8 +125,8 @@ const drawRadarChart = (
         }
       } else {
         const pkg = chartData.find(p => p.name === d);
-        if (pkg) {
-          handlePackageSelect(pkg, '/');
+        if (pkg && pkg.subpackages && pkg.subpackages.length > 0) {
+          handlePackageSelect(pkg, './');
         }
       }
     });
@@ -149,7 +146,10 @@ const drawRadarChart = (
 
   // Add tooltip for truncated text
   axisLabels.append("title")
-    .text((d: string) => d);
+    .text((d: string) => {
+      const pkg = chartData.find(p => p.name === d);
+      return d+" > "+pkg?.score*100+"%";
+    });
 
   // Add label background sized to text and account for indicator circle
   axisLabels.each(function(this: SVGGElement, d: string) {
@@ -198,7 +198,7 @@ const drawRadarChart = (
   // Apply transition to the group
   axisLabels.transition()
     .duration(800)
-    .delay((_: string, i: number) => 300 + i * 100)
+    .delay(300)
     .style("opacity", 1);
 
   // Draw radar path with animation
@@ -240,7 +240,7 @@ const drawRadarChart = (
     })
     .transition()
     .duration(800)
-    .delay((_, i) => 800 + i * 100)
+    .delay(300)
     .attr("r", 6)
     .on("end", function() {
       d3.select(this)
@@ -260,13 +260,9 @@ const drawRadarChart = (
   // Add click event to points
   svg.selectAll(".radar-point")
     .on("click", (_event, d: any) => {
-      if (isSubpackageView) {
         if (d.subpackages && d.subpackages.length > 0) {
-          handlePackageSelect(d, parentPackage?.name || 'Unknown');
+          handlePackageSelect(d, isSubpackageView ? parentPackage?.name || 'Unknown' : './');
         }
-      } else {
-        handlePackageSelect(d, '/');
-      }
     });
 
   // Add score labels with animation
@@ -286,7 +282,7 @@ const drawRadarChart = (
     .style("opacity", 0)
     .transition()
     .duration(800)
-    .delay((_, i) => 1000 + i * 100)
+    .delay(1000)
     .style("opacity", 1);
 
   // Add center circle
@@ -426,10 +422,4 @@ export const drawSubpackages = (
     handlePackageSelect,
     handleBackNavigation
   });
-};
-
-// Utility function to get complementary color
-const getComplementaryColor = (color: string): string => {
-  const hsl = d3.hsl(color);
-  return d3.hsl((hsl.h + 180) % 360, 0.8, 0.8).toString();
 };
