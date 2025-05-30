@@ -35,6 +35,8 @@ export default class StackedAreaChart extends ScalableBaseChartComponent {
    *
    * @returns {[]}
    */
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-expect-error
   getXDims() {
     return [d3.min(this.state.data.data, (d: any) => d.date), d3.max(this.state.data.data, (d: any) => d.date)];
   }

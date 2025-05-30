@@ -1,11 +1,13 @@
-import { put, takeEvery, fork, call } from 'redux-saga/effects';
-import { DataState, setDateRange, setDataState, setData, CodeOwnershipData } from '../reducer';
+import { put, takeEvery, fork, call, select } from 'redux-saga/effects';
+import { DataState, setDateRange, setDataState, setData, CodeOwnershipData, CodeOwnershipState, setCurrentBranch } from '../reducer';
 import { DataPlugin } from '../../../../interfaces/dataPlugin.ts';
-import { getCommitDataForSha, getFilenamesForBranch, getOwnershipForCommits, getPreviousFilenames } from './helper.ts';
+import { getCommitDataForSha, getDefaultBranch, getFilenamesForBranch, getOwnershipForCommits, getPreviousFilenames } from './helper.ts';
+import { PreviousFileData } from '../../../../../types/data/ownershipType.ts';
 
 export default function* (dataConnection: DataPlugin) {
   yield fork(() => watchRefresh(dataConnection));
   yield fork(() => watchDateRangeChange(dataConnection));
+  yield fork(() => watchBranchChange(dataConnection));
 }
 
 function* watchRefresh(dataConnection: DataPlugin) {
@@ -16,15 +18,20 @@ function* watchDateRangeChange(dataConnection: DataPlugin) {
   yield takeEvery(setDateRange, () => fetchCodeOwnershipData(dataConnection));
 }
 
+function* watchBranchChange(dataConnection: DataPlugin) {
+  yield takeEvery(setCurrentBranch, () => fetchCodeOwnershipData(dataConnection));
+}
+
 function* fetchCodeOwnershipData(dataConnection: DataPlugin) {
+  const state: CodeOwnershipState = yield select();
   yield put(setDataState(DataState.FETCHING));
-  const data: CodeOwnershipData = yield call(() => {
-    const currentBranch = {
-      branch: 'develop',
-      active: 'false',
-      tracksFileRenames: 'true',
-      latestCommit: '5f13d85a7c3a2e62711e5e78f79f04854ecc5907',
-    };
+  const branchId = state.branch;
+  const data: CodeOwnershipData = yield call(async () => {
+    if (!dataConnection.branches) return;
+    const branches = (await dataConnection.branches.getAllBranches()).sort((a, b) => a.branch.localeCompare(b.branch));
+    let currentBranch = undefined;
+    if (!branchId) currentBranch = getDefaultBranch(branches);
+    else currentBranch = branches[branchId];
 
     const result: CodeOwnershipData = { rawData: [], previousFilenames: {} };
 
@@ -42,7 +49,11 @@ function* fetchCodeOwnershipData(dataConnection: DataPlugin) {
         const activeFiles = await getFilenamesForBranch(currentBranch.branch, dataConnection);
 
         //get previous filenames for all active files
-        const previousFilenames: { [p: string]: string[] } = await getPreviousFilenames(activeFiles, currentBranch, dataConnection);
+        const previousFilenames: { [p: string]: PreviousFileData[] } = await getPreviousFilenames(
+          activeFiles,
+          currentBranch,
+          dataConnection,
+        );
         //get actual ownership data for all commits on the selected branch
         let relevantOwnershipData = await getOwnershipForCommits(latestBranchCommit, dataConnection);
         if (relevantOwnershipData.length === 0) {

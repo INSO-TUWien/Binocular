@@ -3,6 +3,8 @@
 import { getHistoryForCommit } from '../utils/dbUtils.ts';
 import { DataPlugin } from '../../../../interfaces/dataPlugin.ts';
 import { DataPluginCommit } from '../../../../interfaces/dataPluginInterfaces/dataPluginCommits.ts';
+import { PreviousFileData } from '../../../../../types/data/ownershipType.ts';
+import { DataPluginBranch } from '../../../../interfaces/dataPluginInterfaces/dataPluginBranches.ts';
 
 export async function getOwnershipForCommits(latestBranchCommit: DataPluginCommit, dataConnection: DataPlugin) {
   // first get all commits (with parent data)
@@ -30,8 +32,8 @@ export async function getFilenamesForBranch(branchName: string, dataConnection: 
 
 export async function getPreviousFilenames(filenames: any, branch: any, dataConnection: DataPlugin) {
   //if this branch tracks file renames, we first have to find out how the relevant files were named in the past
-  let filePathsWithPreviousNames: { path: string; previousFileNames: string[] }[] = [];
-  const previousFilenameObjects: { [id: string]: string[] } = {};
+  let filePathsWithPreviousNames: { path: string; previousFileNames: PreviousFileData[] }[] = [];
+  const previousFilenameObjects: { [id: string]: PreviousFileData[] } = {};
   if (branch.tracksFileRenames) {
     filePathsWithPreviousNames = await dataConnection.files.getPreviousFilenamesForFilesOnBranch(branch.branch);
     //we only care about files that were renamed
@@ -51,4 +53,10 @@ export async function getPreviousFilenames(filenames: any, branch: any, dataConn
     }
   }
   return previousFilenameObjects;
+}
+
+export function getDefaultBranch(branches: DataPluginBranch[]): DataPluginBranch {
+  let branch = branches.find((branch) => branch.branch == 'develop' || branch.branch == 'dev');
+  if (!branch) branch = branches.find((branch) => branch.branch == 'main' || branch.branch == 'master');
+  return branch ? branch : branches[0];
 }

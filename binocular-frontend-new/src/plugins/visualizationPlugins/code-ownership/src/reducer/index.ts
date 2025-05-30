@@ -1,5 +1,7 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { DataPluginOwnership } from '../../../../interfaces/dataPluginInterfaces/dataPluginCommits.ts';
+import { PreviousFileData } from '../../../../../types/data/ownershipType.ts';
+import { DataPluginBranch } from '../../../../interfaces/dataPluginInterfaces/dataPluginBranches.ts';
 
 export enum DataState {
   EMPTY,
@@ -9,7 +11,7 @@ export enum DataState {
 
 export interface CodeOwnershipData {
   rawData?: DataPluginOwnership[];
-  previousFilenames?: { [p: string]: string[] };
+  previousFilenames?: { [p: string]: PreviousFileData[] };
   //fileOwnership: FileOwnershipCollection;
 }
 
@@ -20,12 +22,16 @@ interface DateRange {
 
 export interface CodeOwnershipState {
   data?: CodeOwnershipData;
+  branch?: number;
+  allBranches: DataPluginBranch[];
   dateRange: DateRange;
   dataState: DataState;
 }
 
 const initialState: CodeOwnershipState = {
   data: { rawData: undefined, previousFilenames: {} },
+  branch: undefined,
+  allBranches: [],
   dateRange: { from: new Date().toISOString(), to: new Date().toISOString() },
   dataState: DataState.EMPTY,
 };
@@ -43,8 +49,11 @@ export const dataSlice = createSlice({
     setDataState: (state, action: PayloadAction<DataState>) => {
       state.dataState = action.payload;
     },
+    setCurrentBranch: (state, action: PayloadAction<number | undefined>) => {
+      state.branch = action.payload;
+    },
   },
 });
 
-export const { setData, setDateRange, setDataState } = dataSlice.actions;
+export const { setData, setDateRange, setDataState, setCurrentBranch } = dataSlice.actions;
 export default dataSlice.reducer;

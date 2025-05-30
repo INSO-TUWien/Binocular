@@ -10,7 +10,8 @@ import { DataPluginCommit } from '../../../../interfaces/dataPluginInterfaces/da
 import { throttle } from 'throttle-debounce';
 import { Palette } from '../../../../../types/data/authorType.ts';
 import { FileOwnershipCollection, OwnershipData, PreviousFileData } from '../../../../../types/data/ownershipType.ts';
-import { DataState, setDateRange } from '../reducer';
+import { DataState, setCurrentBranch, setDateRange } from '../reducer';
+import { getBranches } from '../saga/helper.ts';
 
 function Chart<SettingsType extends CodeOwnerShipSettings, DataType>(props: Properties<SettingsType, DataType>) {
   // /!*
@@ -282,14 +283,22 @@ function Chart<SettingsType extends CodeOwnerShipSettings, DataType>(props: Prop
   //Set Global state when parameters change. This will also conclude in a refresh of the data.
   useEffect(() => {
     dispatch(setDateRange(props.parameters.parametersDateRange));
-  }, [props.parameters]);
+  }, [props.parameters.parametersDateRange]);
+
+  useEffect(() => {
+    void getBranches(props.dataConnection).then((branches) => (props.settings.allBranches = branches));
+  }, [props.dataConnection]);
+
+  useEffect(() => {
+    dispatch(setCurrentBranch(props.settings.currentBranch ? props.settings.currentBranch : 0));
+  }, [props.settings.currentBranch]);
 
   //Trigger Refresh when dataConnection changes
   useEffect(() => {
     dispatch({
       type: 'REFRESH',
     });
-  }, [props.dataConnection]);
+  }, [props.dataConnection, fileList]);
 
   return (
     <>

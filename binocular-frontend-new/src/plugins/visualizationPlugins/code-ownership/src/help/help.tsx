@@ -48,12 +48,7 @@ function Help() {
       <div>
         <ul className={'list-disc ml-5'}>
           <li>
-            <span className={'font-bold'}>Split Authors per Build:</span> Change the mode of visualization to either show all builds grouped
-            by status or split the builds by authors. Negative builds are all builds, which are not successful.
-          </li>
-          <li>
-            <span className={'font-bold'}>Visualization Style:</span> Change the style of how the lines are calculated into either curved
-            (default), stepped or linear.
+            <span className={'font-bold'}>Display Mode:</span> Change how the data is displayed. With relative or absolute values.
           </li>
           <li>
             <span className={'font-bold'}>Show Sprints:</span> Overlay the in the dashboard defined sprints onto the chart.

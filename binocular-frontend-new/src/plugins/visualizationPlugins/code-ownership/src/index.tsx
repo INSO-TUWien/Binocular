@@ -15,12 +15,8 @@ const CodeOwnership: VisualizationPlugin<CodeOwnerShipSettings, null> = {
     hideMergeCommitSettings: true,
     hideSprintSettings: true,
     displayMode: 'absolute',
-    currentBranch: {
-      branch: 'develop',
-      active: 'false',
-      tracksFileRenames: 'true',
-      latestCommit: '5f13d85a7c3a2e62711e5e78f79f04854ecc5907',
-    },
+    currentBranch: undefined,
+    allBranches: [],
   },
   export: {
     getSVGData: () => '<svg></svg>',

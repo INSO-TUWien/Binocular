@@ -1,11 +1,50 @@
 import { DataPluginBranch } from '../../../../interfaces/dataPluginInterfaces/dataPluginBranches.ts';
+import { useEffect, useState } from 'react';
+import { CodeOwnershipState, setCurrentBranch } from '../reducer';
+import { useSelector } from 'react-redux';
+import { toNumber } from 'lodash';
 
 export interface CodeOwnerShipSettings {
   displayMode: string;
-  currentBranch: DataPluginBranch;
+  allBranches: DataPluginBranch[];
+  currentBranch?: number;
 }
 
 function Settings(props: { settings: CodeOwnerShipSettings; setSettings: (newSettings: CodeOwnerShipSettings) => void }) {
+  const state = useSelector((state: CodeOwnershipState) => state);
+
+  const [branchOptions, setBranchOptions] = useState([
+    <option key={-1} value={''}>
+      Select a Branch
+    </option>,
+  ]);
+
+  function setBranches() {
+    if (props.settings.allBranches) {
+      const branches = props.settings.allBranches.sort((a, b) => a.branch.localeCompare(b.branch)).map((b) => b.branch);
+      //build the selection box
+      const temp = [];
+      //placeholder option
+      temp.push(
+        <option key={-1} value={''}>
+          Select a Branch
+        </option>,
+      );
+      branches.forEach((value: string, index: number) => {
+        temp.push(
+          <option key={index} value={index}>
+            {value}
+          </option>,
+        );
+      });
+      setBranchOptions(temp);
+    }
+  }
+
+  useEffect(() => {
+    setBranches();
+  }, [props.settings.allBranches, state.allBranches]);
+
   return (
     <>
       <div>
@@ -19,28 +58,30 @@ function Settings(props: { settings: CodeOwnerShipSettings; setSettings: (newSet
             onChange={(e) =>
               props.setSettings({
                 displayMode: e.target.value,
-                currentBranch: props.settings.currentBranch,
+                allBranches: props.settings.allBranches,
               })
             }>
             <option value={'absolute'}>absolute</option>
             <option value={'relative'}>relative</option>
           </select>
         </label>
-        <label className="label cursor-pointer">
-          <span className="label-text">Select branch:</span>
-          {/*<input*/}
-          {/*  type="checkbox"*/}
-          {/*  className="toggle toggle-accent toggle-sm"*/}
-          {/*  defaultChecked={props.settings.showSprints}*/}
-          {/*  onChange={(event) =>*/}
-          {/*    props.setSettings({*/}
-          {/*      splitBuildsPerAuthor: props.settings.splitBuildsPerAuthor,*/}
-          {/*      visualizationStyle: props.settings.visualizationStyle,*/}
-          {/*      showSprints: event.target.checked,*/}
-          {/*    })*/}
-          {/*  }*/}
-          {/*/>*/}
-          <div>todo</div>
+        <label className="form-control w-full max-w-xs">
+          <div className="label">
+            <span className="label-text">Branch:</span>
+          </div>
+          <select
+            value={state.branch}
+            className="select select-bordered select-sm"
+            onChange={(e) => {
+              setCurrentBranch(toNumber(e.target.value));
+              props.setSettings({
+                displayMode: props.settings.displayMode,
+                allBranches: props.settings.allBranches,
+                currentBranch: toNumber(e.target.value),
+              });
+            }}>
+            {branchOptions}
+          </select>
         </label>
       </div>
     </>
