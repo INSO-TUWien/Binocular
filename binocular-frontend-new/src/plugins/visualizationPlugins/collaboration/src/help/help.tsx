@@ -1,3 +1,4 @@
+//TODO: write comprehensive Help page for finished feature
 function Help() {
   return (
     <>
