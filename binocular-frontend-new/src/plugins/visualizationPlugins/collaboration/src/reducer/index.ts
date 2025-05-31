@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { DataPluginIssue } from "../../../../interfaces/dataPluginInterfaces/dataPluginIssues.ts";
+import { DataPluginAccount } from "../../../../interfaces/dataPluginInterfaces/dataPluginAccount.ts";
 
 export enum DataState {
   EMPTY,
@@ -12,33 +12,40 @@ interface DateRange {
   to: string;
 }
 
-export interface IssuesState {
-  issues: DataPluginIssue[];
+/**
+ * Redux state for collaboration visualization
+ */
+export interface CollaborationState {
+  accounts: DataPluginAccount[];
   dateRange: DateRange;
   dataState: DataState;
 }
 
-const initialState: IssuesState = {
-  issues: [],
+const initialState: CollaborationState = {
+  accounts: [],
   dateRange: { from: new Date().toISOString(), to: new Date().toISOString() },
   dataState: DataState.EMPTY,
 };
 
-export const changesSlice = createSlice({
-  name: "issues",
+export const collaborationSlice = createSlice({
+  name: "collaboration",
   initialState,
   reducers: {
-    setIssues: (state, action: PayloadAction<DataPluginIssue[]>) => {
-      state.issues = action.payload;
+    /** Replace the entire accounts list */
+    setAccounts: (state, action: PayloadAction<DataPluginAccount[]>) => {
+      state.accounts = action.payload;
     },
+    /** Update the date range for fetching data */
     setDateRange: (state, action: PayloadAction<DateRange>) => {
       state.dateRange = action.payload;
     },
+    /** Set the current data loading status */
     setDataState: (state, action: PayloadAction<DataState>) => {
       state.dataState = action.payload;
     },
   },
 });
 
-export const { setIssues, setDateRange, setDataState } = changesSlice.actions;
-export default changesSlice.reducer;
+export const { setAccounts, setDateRange, setDataState } =
+  collaborationSlice.actions;
+export default collaborationSlice.reducer;
