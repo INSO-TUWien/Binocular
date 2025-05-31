@@ -2,21 +2,28 @@ import Chart from "./chart/chart.tsx";
 import PreviewImage from "../assets/thumbnail.svg";
 import Settings, { SettingsType } from "./settings/settings.tsx";
 import { VisualizationPlugin } from "../../../interfaces/visualizationPlugin.ts";
-import { changesSlice } from "./reducer";
+import Reducer from "./reducer";
 import Saga from "./saga";
 import Help from "./help/help.tsx";
-import { DataPluginIssue } from "../../../interfaces/dataPluginInterfaces/dataPluginIssues.ts";
 import { getSVGData } from "./utilities/utilities.ts";
+import { DataPluginAccount } from "../../../interfaces/dataPluginInterfaces/dataPluginAccount.ts";
+import { convertIssuesToGraphData } from "./utilities/dataConverter.ts";
 
 const CollaborationVisualization: VisualizationPlugin<
   SettingsType,
-  DataPluginIssue
+  DataPluginAccount
 > = {
   name: "Collaboration",
   chartComponent: Chart,
   settingsComponent: Settings,
   helpComponent: Help,
-  defaultSettings: { data: { nodes: [], links: [] }, color: "#007AFF" },
+  defaultSettings: {
+    color: "#007AFF",
+    minEdgeValue: 1,
+    maxEdgeValue: 999,
+  },
+  dataConverter: convertIssuesToGraphData,
+  dataConnectionName: "accountsIssues",
   export: {
     getSVGData: getSVGData,
   },
@@ -27,7 +34,7 @@ const CollaborationVisualization: VisualizationPlugin<
   images: {
     thumbnail: PreviewImage,
   },
-  reducer: changesSlice.reducer,
+  reducer: Reducer,
   saga: Saga,
 };
 export default CollaborationVisualization;
