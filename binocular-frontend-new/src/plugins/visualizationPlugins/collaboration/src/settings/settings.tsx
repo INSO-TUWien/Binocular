@@ -1,133 +1,77 @@
+import React, { useCallback } from "react";
+
 export interface SettingsType {
   data: {
-    nodes: { id: string; group: string }[];
+    nodes: { id: string; group: string; url: string }[];
     links: { source: string; target: string; value: number }[];
   };
+  minEdgeValue: number;
+  maxEdgeValue: number;
   color: string;
 }
+const MIN_POSSIBLE = 1;
+const MAX_POSSIBLE = Infinity;
 
-function Settings(props: {
+interface Props {
   settings: SettingsType;
   setSettings: (newSettings: SettingsType) => void;
-}) {
-  /*
-  const data1 = {
-    nodes: [
-      { id: "Myriel", group: "team2" },
-      { id: "Anne", group: "team2" },
-      { id: "Gabriel", group: "team2" },
-      { id: "Mel", group: "team2" },
-      { id: "Yan", group: "team1" },
-      { id: "Tom", group: "team1" },
-      { id: "Cyril", group: "team1" },
-      { id: "Tuck", group: "team2" },
-      { id: "Antoine", group: "team3" },
-      { id: "Rob", group: "team3" },
-      { id: "Napoleon", group: "team2" },
-      { id: "Toto", group: "team3" },
-      { id: "Tutu", group: "team3" },
-      { id: "Titi", group: "team3" },
-      { id: "Tata", group: "team3" },
-      { id: "Turlututu", group: "team3" },
-      { id: "Tita", group: "team3" },
-      { id: "Sheldon", group: "team4" },
-    ],
-    links: [
-      { source: "Anne", target: "Myriel", value: 1 },
-      { source: "Napoleon", target: "Myriel", value: 1 },
-      { source: "Gabriel", target: "Myriel", value: 1 },
-      { source: "Mel", target: "Myriel", value: 1 },
-      { source: "Yan", target: "Tom", value: 1 },
-      { source: "Tom", target: "Cyril", value: 1 },
-      { source: "Tuck", target: "Myriel", value: 1 },
-      { source: "Tuck", target: "Mel", value: 1 },
-      { source: "Tuck", target: "Myriel", value: 1 },
-      { source: "Mel", target: "Myriel", value: 2 },
-      { source: "Rob", target: "Antoine", value: 1 },
-      { source: "Tata", target: "Tutu", value: 1 },
-      { source: "Tata", target: "Titi", value: 1 },
-      { source: "Tata", target: "Toto", value: 1 },
-      { source: "Tata", target: "Tita", value: 3 },
-      { source: "Tita", target: "Toto", value: 3 },
-      { source: "Tita", target: "Titi", value: 3 },
-      { source: "Tita", target: "Turlututu", value: 5 },
-      { source: "Rob", target: "Turlututu", value: 10 },
-    ],
-  };
-  const data2 = {
-    nodes: [
-      { id: "Myriel", group: "team2" },
-      { id: "Anne", group: "team2" },
-      { id: "Gabriel", group: "team2" },
-      { id: "Mel", group: "team2" },
-      { id: "Yan", group: "team1" },
-      { id: "Tom", group: "team1" },
-      { id: "Cyril", group: "team1" },
-      { id: "Tuck", group: "team2" },
-      { id: "Antoine", group: "team3" },
-      { id: "Rob", group: "team3" },
-      { id: "Napoleon", group: "team2" },
-      { id: "Toto", group: "team3" },
-      { id: "Tutu", group: "team3" },
-      { id: "Titi", group: "team3" },
-      { id: "Tata", group: "team3" },
-      { id: "Turlututu", group: "team3" },
-      { id: "Tita", group: "team3" },
-      { id: "Sheldon", group: "team4" },
-    ],
-    links: [
-      { source: "Anne", target: "Myriel", value: 1 },
-      { source: "Napoleon", target: "Myriel", value: 1 },
-      { source: "Gabriel", target: "Myriel", value: 1 },
-      { source: "Mel", target: "Myriel", value: 1 },
-      { source: "Yan", target: "Tom", value: 1 },
-      { source: "Tom", target: "Cyril", value: 1 },
-      { source: "Tuck", target: "Myriel", value: 1 },
-      { source: "Tuck", target: "Mel", value: 1 },
-      { source: "Tuck", target: "Myriel", value: 1 },
-      { source: "Mel", target: "Myriel", value: 2 },
-      { source: "Rob", target: "Antoine", value: 1 },
-      { source: "Tata", target: "Tutu", value: 1 },
-      { source: "Tata", target: "Titi", value: 1 },
-      { source: "Tata", target: "Toto", value: 1 },
-      { source: "Tata", target: "Tita", value: 3 },
-      { source: "Tita", target: "Toto", value: 3 },
-      { source: "Tita", target: "Titi", value: 3 },
-      { source: "Tita", target: "Turlututu", value: 5 },
-      { source: "Rob", target: "Turlututu", value: 10 },
-    ],
-  };
+}
 
-   */
+export default function Settings(props: Props) {
+  const { settings, setSettings } = props;
+  const { minEdgeValue, maxEdgeValue } = settings;
+
+  const handleMinChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const value = Number(e.target.value);
+      setSettings({
+        ...settings,
+        minEdgeValue: Math.min(value, maxEdgeValue), //limit to maxEdgeValue
+      });
+    },
+    [maxEdgeValue, settings, setSettings],
+  );
+
+  const handleMaxChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const value = Number(e.target.value);
+      setSettings({
+        ...settings,
+        maxEdgeValue: Math.max(value, minEdgeValue), //limit to minEdgeValue
+      });
+    },
+    [minEdgeValue, settings, setSettings],
+  );
+
   return (
-    <>
-      <div>
-        <div>
-          <label
-            htmlFor={"hs-color-input"}
-            className={"block text-sm font-medium mb-2 dark:text-white"}
-          >
-            Chart Color
-          </label>
+    <div className="mt-6 space-y-4">
+      <label className="block text-sm font-medium dark:text-white">
+        Collaboration Strength Range
+      </label>
+      <div className="flex items-center space-x-4">
+        <div className="flex items-center space-x-2">
+          <span className="text-sm w-12">Min</span>
           <input
-            type={"color"}
-            className={
-              "p-1 h-10 w-14 block bg-white bordercursor-pointer rounded-lg disabled:opacity-50 disabled:pointer-events-none  "
-            }
-            id={"hs-color-input"}
-            value={props.settings.color}
-            title={"Choose your color"}
-            onChange={(event) => {
-              props.setSettings({
-                data: props.settings.data,
-                color: event.target.value,
-              });
-            }}
+            type="number"
+            min={MIN_POSSIBLE}
+            max={maxEdgeValue}
+            value={minEdgeValue}
+            onChange={handleMinChange}
+            className="w-16 border rounded px-2 py-1"
+          />
+        </div>
+        <div className="flex items-center space-x-2">
+          <span className="text-sm w-12">Max</span>
+          <input
+            type="number"
+            min={minEdgeValue}
+            max={MAX_POSSIBLE}
+            value={maxEdgeValue}
+            onChange={handleMaxChange}
+            className="w-16 border rounded px-2 py-1"
           />
         </div>
       </div>
-    </>
+    </div>
   );
 }
-
-export default Settings;
