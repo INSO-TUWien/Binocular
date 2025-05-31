@@ -52,8 +52,7 @@ export default class AccountsIssues implements DataPluginAccounts {
           `,
           variables: { page, perPage },
         });
-        console.log(response.data.accounts);
-        return response.data.gitHubUsers;
+        return response.data.accounts;
       };
 
     await traversePages(getPage(), (record: any) => {
