@@ -1,40 +1,69 @@
 import { NetworkChart } from "./networkChart.tsx";
-import { createRef, useEffect, useState } from "react";
+import { RefObject, useEffect, useMemo, useState } from "react";
 import { SettingsType } from "../settings/settings.tsx";
+import { Store } from "@reduxjs/toolkit";
+import { convertIssuesToGraphData } from "../utilities/dataConverter.ts";
+import { DataState } from "../reducer";
+import { DataPluginAccount } from "../../../../interfaces/dataPluginInterfaces/dataPluginAccount.ts";
 
-function Chart(props: { settings: SettingsType }) {
-  const chartContainerRef = createRef<HTMLDivElement>();
+export default function Chart(
+  props: {
+    settings: SettingsType;
+    dataConnection: any;
+    chartContainerRef: RefObject<HTMLDivElement>;
+    showAfterCooldown: boolean;
+  } & { store: Store },
+) {
+  const chartContainerRef = props.chartContainerRef;
 
-  const [chartWidth, setChartWidth] = useState(100);
-  const [chartHeight, setChartHeight] = useState(100);
+  // force re-render on change
+  const [, forceUpdate] = useState(0);
+  useEffect(
+    () => props.store.subscribe(() => forceUpdate((v) => v + 1)),
+    [props.store],
+  );
 
+  // dispatch your refresh
   useEffect(() => {
-    if (!chartContainerRef.current) return;
-    const resizeObserver = new ResizeObserver(() => {
-      if (!chartContainerRef.current) return;
-      if (chartContainerRef.current?.offsetWidth !== chartWidth) {
-        setChartWidth(chartContainerRef.current.offsetWidth);
-      }
-      if (chartContainerRef.current?.offsetHeight !== chartHeight) {
-        setChartHeight(chartContainerRef.current.offsetHeight);
-      }
-    });
-    resizeObserver.observe(chartContainerRef.current);
-    return () => resizeObserver.disconnect();
-  }, [chartContainerRef, chartHeight, chartWidth]);
+    props.store.dispatch({ type: "REFRESH" });
+  }, [props.store]);
+
+  // read slice from store
+  const state = props.store.getState() as {
+    accounts: DataPluginAccount[];
+    dataState: DataState;
+  };
+  const { accounts, dataState } = state;
+
+  const graphData = useMemo(
+    () => convertIssuesToGraphData(accounts, { settings: props.settings }),
+    [accounts, props.settings.minEdgeValue, props.settings.maxEdgeValue],
+  );
+
+  if (dataState !== DataState.COMPLETE || accounts.length === 0) {
+    return (
+      <div
+        ref={props.chartContainerRef}
+        className="w-full h-full flex items-center justify-center"
+      >
+        Loading graph…
+      </div>
+    );
+  }
 
   return (
     <>
       <div className={"w-full h-full"} ref={chartContainerRef}>
         <NetworkChart
-          data={props.settings.data}
-          width={chartWidth}
-          height={chartHeight}
+          data={{
+            nodes: graphData.nodes,
+            links: graphData.links,
+          }}
+          width={chartContainerRef.current!.offsetWidth}
+          height={chartContainerRef.current!.offsetHeight}
           color={props.settings.color}
         />
       </div>
     </>
   );
 }
-
-export default Chart;
