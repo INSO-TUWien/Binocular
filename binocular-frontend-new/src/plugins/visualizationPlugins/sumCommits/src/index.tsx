@@ -9,12 +9,13 @@ import { convertToChartData } from './utilities/dataConverter.ts';
 import { DataPluginCommit } from '../../../interfaces/dataPluginInterfaces/dataPluginCommits.ts';
 
 const SumCommits: VisualizationPlugin<SettingsType, DataPluginCommit> = {
-  name: 'Sum Commits',
+  name: 'SumCommits',
   // ts-expect-error
   chartComponent: null,
   settingsComponent: Settings,
   helpComponent: Help,
   dataConverter: convertToChartData,
+  dataConnectionName: 'commits',
   defaultSettings: { showMean: false, showOther: false },
   export: {
     getSVGData: getSVGData,
