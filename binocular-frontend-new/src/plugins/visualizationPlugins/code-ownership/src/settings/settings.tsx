@@ -42,8 +42,7 @@ function Settings(props: { settings: CodeOwnerShipSettings; setSettings: (newSet
   }
 
   useEffect(() => {
-    if (props.settings.allBranches.length > 0)
-      setBranches();
+    if (props.settings.allBranches.length > 0) setBranches();
   }, [props.settings.allBranches, state]);
 
   return (
