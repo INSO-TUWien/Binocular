@@ -23,13 +23,14 @@ interface InfoState {
 }
 
 export const ColumnChart = ({ width, height, data, scale, palette, settings }: BarChartProps) => {
-  // bounds = area inside the graph axis = calculated by substracting the margins
+  // bounds = area inside the graph axis = ccalculated by substracting the margins
   const svgRef = useRef(null);
   const tooltipRef = useRef(null);
   const [info, setInfo] = useState<null | InfoState>(null);
   const infoRef = useRef<HTMLDivElement | null>(null);
   const boundsWidth = width - MARGIN.right - MARGIN.left;
   const boundsHeight = height - MARGIN.top - MARGIN.bottom;
+  const MAX_CHARS = 20; // Maximum characters for x-axis labels
 
   //Create array with users that are visible on zoom, otherwise when opening the infobox it zooms out
   const [visibleUsers, setVisibleUsers] = useState<string[]>([]);
@@ -58,6 +59,8 @@ export const ColumnChart = ({ width, height, data, scale, palette, settings }: B
       return acc + (d ? d.value : 0);
     }, info?.value ?? 0);
   }, [sumUsers, info, data]);
+
+  const ellipsis = (label: string) => (label.length > MAX_CHARS ? label.slice(0, MAX_CHARS - 1) + '…' : label);
 
   //This is needed to make sure that the chart stays zoomed in when clicking on a user for the infobox
   useEffect(() => {
@@ -133,7 +136,7 @@ export const ColumnChart = ({ width, height, data, scale, palette, settings }: B
       // d3/typescript sometimes does weird things and throws an error where no error is.
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-expect-error
-      svgElement.select('.xAxis').transition().duration(1000).call(d3.axisBottom(xScale));
+      svgElement.select('.xAxis').transition().duration(1000).call(d3.axisBottom(xScale).tickFormat(ellipsis));
 
       if (settings.showMean) {
         svgElement.selectAll('.meanLine').remove();
@@ -158,7 +161,7 @@ export const ColumnChart = ({ width, height, data, scale, palette, settings }: B
       .append('g')
       .attr('class', 'xAxis')
       .attr('transform', `translate(0,${boundsHeight})`)
-      .call(d3.axisBottom(xScale))
+      .call(d3.axisBottom(xScale).tickFormat(ellipsis))
       .selectAll('text')
       .style('text-anchor', 'middle');
 
@@ -213,12 +216,7 @@ export const ColumnChart = ({ width, height, data, scale, palette, settings }: B
         {info && (
           <div ref={infoRef} onClick={() => setInfo(null)}>
             <div onClick={(e) => e.stopPropagation()} className={columnChartStyles.infoBox}>
-
-              <button
-                aria-label="Close"
-                onClick={() => setInfo(null)}
-                className="btn btn-sm btn-ghost absolute right-0.5 top-0.5"
-              >
+              <button aria-label="Close" onClick={() => setInfo(null)} className="btn btn-sm btn-ghost absolute right-0.5 top-0.5">
                 <strong>X</strong>
               </button>
 
@@ -232,10 +230,10 @@ export const ColumnChart = ({ width, height, data, scale, palette, settings }: B
                 <span className={columnChartStyles.infoBoxValue}>{info.avgCommitsPerWeek} </span>
               </p>
 
-              <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }} className={columnChartStyles.infoBoxLabel}>
-                Diff&nbsp;to:
-                <select className={columnChartStyles.infoBoxValue} value={compareUser} onChange={(e) => setCompareUser(e.target.value)}>
-                  <option value={''} className={columnChartStyles.infoBoxValue} disabled>
+              <div className={columnChartStyles.infoRow}>
+                <span className={columnChartStyles.infoBoxLabel}> Diff&nbsp;to:</span>
+                <select className={columnChartStyles.selectBox} value={compareUser} onChange={(e) => setCompareUser(e.target.value)}>
+                  <option value={''} className={columnChartStyles.infoBoxValue}>
                     Pick user...
                   </option>
                   {allUsers
@@ -246,7 +244,7 @@ export const ColumnChart = ({ width, height, data, scale, palette, settings }: B
                       </option>
                     ))}
                 </select>
-              </label>
+              </div>
 
               {diffCommits !== null && (
                 <span>
@@ -254,55 +252,56 @@ export const ColumnChart = ({ width, height, data, scale, palette, settings }: B
                 </span>
               )}
 
-              <div>
-                <span className={columnChartStyles.infoBoxLabel}>Sum with user:</span>
-                <select className={columnChartStyles.infoBoxValue} value={userToAdd} onChange={(e) => setUserToAdd(e.target.value)}>
-                  <option value={''} className={columnChartStyles.infoBoxValue} disabled>
-                    Pick user...
-                  </option>
-                  {allUsers
-                    .filter((u) => u !== info.label && !sumUsers.includes(u))
-                    .map((u) => (
-                      <option key={u} value={u} className={columnChartStyles.infoBoxValue}>
-                        {u}
-                      </option>
-                    ))}
-                </select>
-
-                <button
-                  className={columnChartStyles.infoBoxButton}
-                  onClick={() => {
-                    if (userToAdd && !sumUsers.includes(userToAdd)) {
-                      setSumUsers((prev) => [...prev, userToAdd]);
-                      setUserToAdd('');
-                    }
-                  }}>
-                  <strong>+</strong>
-                </button>
-
-                {sumUsers.length > 0 && (
-                  <div>
-                    <p>
-                      <strong className={columnChartStyles.infoBoxValue}>{sumCommits} Commits</strong>
-                    </p>
-                    <span className={columnChartStyles.infoBoxLabel}>Remove user from sum:</span>
-                    <div>
-                      {sumUsers.map((u) => (
-                        <span key={u} className={columnChartStyles.infoBoxValue}>
+              <div className={columnChartStyles.infoRow}>
+                <span className={columnChartStyles.infoBoxLabel}>Sum with</span>
+                <div className={columnChartStyles.combineUsersBlock}>
+                  <select className={columnChartStyles.selectBox} value={userToAdd} onChange={(e) => setUserToAdd(e.target.value)}>
+                    <option value={''} disabled>
+                      Pick user...
+                    </option>
+                    {allUsers
+                      .filter((u) => u !== info.label && !sumUsers.includes(u))
+                      .map((u) => (
+                        <option key={u} value={u} className={columnChartStyles.userName}>
                           {u}
-                          <button
-                            className={columnChartStyles.infoBoxButton}
-                            onClick={() => {
-                              setSumUsers((prev) => prev.filter((user) => user !== u));
-                            }}>
-                            <strong>x</strong>
-                          </button>
-                        </span>
+                        </option>
                       ))}
-                    </div>
-                  </div>
-                )}
+                  </select>
+                  <button
+                    className={columnChartStyles.addButton}
+                    onClick={() => {
+                      if (userToAdd && !sumUsers.includes(userToAdd)) {
+                        setSumUsers((prev) => [...prev, userToAdd]);
+                        setUserToAdd('');
+                      }
+                    }}>
+                    +
+                  </button>
+                </div>
               </div>
+
+              {sumUsers.length > 0 && (
+                <div>
+                  <p>
+                    <strong className={columnChartStyles.infoBoxValue}>{sumCommits} Commits</strong>
+                  </p>
+                  <span className={columnChartStyles.infoBoxLabel}>Remove user from sum:</span>
+                  <div className={columnChartStyles.userChips}>
+                    {sumUsers.map((u) => (
+                      <span key={u} className={columnChartStyles.userChip}>
+                        <span className={columnChartStyles.userName}>{u}</span>
+                        <button
+                          className={columnChartStyles.chipClose}
+                          onClick={() => {
+                            setSumUsers((prev) => prev.filter((user) => user !== u));
+                          }}>
+                          x
+                        </button>
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         )}

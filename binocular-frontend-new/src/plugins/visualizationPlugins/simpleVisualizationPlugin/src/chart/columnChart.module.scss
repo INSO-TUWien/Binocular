@@ -1,26 +1,73 @@
 .infoBox {
   position: absolute;
-  top: 20px;
-  right: 20px;
+  top: 1rem;
+  right: 1rem;
 
-  width: clamp(10rem, 30%, 20rem);
-  max-height: calc(100% - 40px);
+  width: fit-content;
+  inline-size: fit-content;
+  min-inline-size: 14rem;
+  max-inline-size: 24rem;
 
-  overflow-y: auto;
+  height: fit-content;
+  max-block-size: calc(100% + 4rem);
+  overflow: hidden;
+
   padding: 0.5rem;
   border-radius: 5px;
   --tw-bg-opacity: 1;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
   background-color: var(--fallback-b1,oklch(var(--b1)/var(--tw-bg-opacity)));
-  z-index: 4;
+
+  z-index: 1;
+
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.infoBoxSpace {
+  height: 1px;
+  background: oklch(var(--bc) / .2);
+  margin: 0.25rem 0;
+}
+
+.infoRow {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: baseline;
+  gap: 1rem;
+}
+
+.selectBox {
+  @apply select select-bordered select-xs;
+  max-width: 12rem;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .infoBoxLabel {
-  @apply font-medium text-base-content/80;
+  @apply font-medium text-base-content/70;
 }
 
 .infoBoxValue  {
   @apply font-semibold text-primary;
+}
+
+.infoBoxHeader {
+  text-align: center;
+  font-weight: bold;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+  max-width: 100%;
+}
+
+// Buttons
+.addButton {
+  @apply btn btn-xs btn-outline ml-2;
 }
 
 .infoBoxButton {
@@ -29,7 +76,42 @@
   margin-left: 0.5rem;
 }
 
-.infoBoxHeader {
-  text-align: center;
-  font-weight: bold;
+.combineUsersBlock {
+  display: flex;
+  align-items: center;
 }
+
+// User chips
+.userChips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+}
+
+.userChip {
+  @apply badge badge-outline;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  max-width: 12rem;
+
+  button: {
+    line-height: 1;
+  }
+}
+
+.userName {
+  flex: 1 1 auto;
+  min-width: 0;
+  max-width: 12rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.chipClose {
+  flex: 0 0 auto;
+  line-height: 1;
+  @apply btn btn-xs btn-ghost p-0 min-h-0 h-auto w-auto;
+}
+
