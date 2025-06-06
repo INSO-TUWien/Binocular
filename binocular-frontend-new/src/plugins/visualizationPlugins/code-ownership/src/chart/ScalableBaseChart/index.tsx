@@ -16,6 +16,7 @@ import { Palette } from '../../../../../../types/data/authorType.ts';
  *  - paddings (optional) (Format: {top: number, left: number, right: number, bottom: number},
  *             number being amount of pixels) Each field in the object is optional and can be left out)
  *  - height (optional) height of the chart
+ *  - width (optional) width of the chart
  *  - xAxisCenter (optional) (Format: true/false,
  *             whether the x axis should be at the 0 line (true), or at the bottom (false/unspecified))
  *  - yDims (Format: [topValue, bottomValue],
@@ -215,7 +216,7 @@ export default class ScalableBaseChart extends React.Component<Props, State> {
 
   render() {
     return (
-      <div className={this.styles.chartDiv}>
+      <div className={this.styles.chartDiv + 'h-full w-full'}>
         <svg className={this.styles.chartSvg} ref={(svg) => (this.svgRef = svg)} />
         <div className={this.styles.tooltip} ref={(div) => (this.tooltipRef = div)} />
       </div>
