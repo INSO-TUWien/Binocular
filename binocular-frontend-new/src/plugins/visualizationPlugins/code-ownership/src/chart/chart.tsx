@@ -7,11 +7,11 @@ import _ from 'lodash';
 import { CodeOwnerShipSettings } from '../settings/settings.tsx';
 import { Properties } from '../../../../interfaces/visualizationPluginInterfaces/properties.ts';
 import { DataPluginCommit } from '../../../../interfaces/dataPluginInterfaces/dataPluginCommits.ts';
-import { throttle } from 'throttle-debounce';
 import { Palette } from '../../../../../types/data/authorType.ts';
 import { FileOwnershipCollection, OwnershipData, PreviousFileData } from '../../../../../types/data/ownershipType.ts';
-import { DataState, setCurrentBranch, setDateRange } from '../reducer';
+import { DataState, setCurrentBranch } from '../reducer';
 import { getBranches } from '../saga/helper.ts';
+import { handelPopoutResizing } from '../../../../utils/resizing.ts';
 
 function Chart<SettingsType extends CodeOwnerShipSettings, DataType>(props: Properties<SettingsType, DataType>) {
   // /!*
@@ -25,8 +25,8 @@ function Chart<SettingsType extends CodeOwnerShipSettings, DataType>(props: Prop
   //  * -----------------------------
   //  *!/
   // //Redux Global State
-  const data = useSelector((state: RootState) => state.data);
-  const dataState = useSelector((state: RootState) => state.dataState);
+  const data = useSelector((state: RootState) => state.plugin.data);
+  const dataState = useSelector((state: RootState) => state.plugin.dataState);
 
   //React Component State
   const [chartWidth, setChartWidth] = useState(100);
@@ -47,19 +47,21 @@ function Chart<SettingsType extends CodeOwnerShipSettings, DataType>(props: Prop
   const excludedCommits: DataPluginCommit[] = [];
   const excludeCommits = false;
 
-  const throttledResize = throttle(
-    1000,
-    () => {
-      if (!props.chartContainerRef.current) return;
-      if (props.chartContainerRef.current?.offsetWidth !== chartWidth) {
-        setChartWidth(props.chartContainerRef.current.offsetWidth);
-      }
-      if (props.chartContainerRef.current?.offsetHeight !== chartHeight) {
-        setChartHeight(props.chartContainerRef.current.offsetHeight);
-      }
-    },
-    { noLeading: false, noTrailing: false },
-  );
+  function resize() {
+    if (!props.chartContainerRef.current) return;
+    if (props.chartContainerRef.current?.offsetWidth !== chartWidth) {
+      setChartWidth(props.chartContainerRef.current.offsetWidth);
+    }
+    if (props.chartContainerRef.current?.offsetHeight !== chartHeight) {
+      setChartHeight(props.chartContainerRef.current.offsetHeight);
+    }
+  }
+
+  useEffect(() => {
+    resize();
+  }, [props.chartContainerRef, chartHeight, chartWidth]);
+
+  handelPopoutResizing(props.store, resize);
 
   const resetData = () => {
     setKeys([]);
@@ -67,22 +69,11 @@ function Chart<SettingsType extends CodeOwnerShipSettings, DataType>(props: Prop
     setChartScale([]);
   };
 
-  //Resize Observer -> necessary for dynamically refreshing d3 chart
-  useEffect(() => {
-    if (!props.chartContainerRef.current) return;
-    const resizeObserver = new ResizeObserver(() => {
-      throttledResize();
-    });
-    resizeObserver.observe(props.chartContainerRef.current);
-    return () => resizeObserver.disconnect();
-  }, [props.chartContainerRef, chartHeight, chartWidth]);
-
   //when a new branch is selected, new data is fetched. When the data is ready, prepare it for further processing.
   useEffect(() => {
     if (relevantOwnershipData === undefined || relevantOwnershipData === null || fileList === undefined || fileList === null) {
       return;
     }
-
     const activeFiles: { [id: string]: boolean } = {};
     fileList.map((item) => {
       activeFiles[item.element.path] = item.checked;
@@ -278,12 +269,7 @@ function Chart<SettingsType extends CodeOwnerShipSettings, DataType>(props: Prop
       setChartPalette(palette);
       setChartData(coarseResult);
     }
-  }, [ownershipData, granularity]);
-
-  //Set Global state when parameters change. This will also conclude in a refresh of the data.
-  useEffect(() => {
-    dispatch(setDateRange(props.parameters.parametersDateRange));
-  }, [props.parameters.parametersDateRange]);
+  }, [ownershipData, granularity, props.settings.displayMode, props.parameters.parametersDateRange, props.authorList]);
 
   useEffect(() => {
     void getBranches(props.dataConnection).then((branches) => (props.settings.allBranches = branches));
@@ -303,18 +289,19 @@ function Chart<SettingsType extends CodeOwnerShipSettings, DataType>(props: Prop
   return (
     <>
       <div className={'w-full h-full flex justify-center items-center'} ref={props.chartContainerRef}>
-        {dataState === DataState.EMPTY && <div>NoData</div>}
+        {dataState === DataState.EMPTY && ownershipData.length === 0 && <div>NoData</div>}
         {dataState === DataState.FETCHING && (
           <div>
             <span className="loading loading-spinner loading-lg text-accent"></span>
           </div>
         )}
-        {dataState === DataState.COMPLETE && (
+        {dataState !== DataState.FETCHING && ownershipData.length > 0 && (
           <StackedAreaChart
             content={chartData}
             palette={chartPalette}
             paddings={{ top: 20, left: 70, bottom: 40, right: 30 }}
             height={chartHeight}
+            width={chartWidth}
             yDims={chartScale}
             d3offset={props.settings.displayMode === 'relative' ? d3.stackOffsetExpand : d3.stackOffsetNone}
             resolution={granularity}

@@ -37,6 +37,7 @@ interface Props {
   order: string[];
   paddings: { top: number; left: number; bottom: number; right: number };
   height?: number;
+  width?: number;
   palette: Palette | undefined;
   resolution: string;
   xAxisCenter?: boolean;
@@ -309,7 +310,7 @@ export default class ScalableBaseChart extends React.Component<Props, State> {
     const paddings = this.props.paddings || { left: 0, right: 0, top: 0, bottom: 0 };
     const node = !svg || typeof svg.node !== 'function' ? { getBoundingClientRec: () => ({}) } : svg.node();
     const clientRect = node ? node.getBoundingClientRect() : {};
-    const width = clientRect.width || 0;
+    const width = this.props.width ? this.props.width : clientRect.width || 0;
     const height = this.props.height ? this.props.height : clientRect.height || 0;
 
     return { width, height, paddings };

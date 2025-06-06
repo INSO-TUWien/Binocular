@@ -1,31 +1,26 @@
-import { put, takeEvery, fork, call, select } from 'redux-saga/effects';
-import { DataState, setDateRange, setDataState, setData, CodeOwnershipData, CodeOwnershipState, setCurrentBranch } from '../reducer';
+import { put, takeLatest, fork, call, select } from 'redux-saga/effects';
+import { DataState, setDataState, setData, CodeOwnershipData, CodeOwnershipState, setCurrentBranch } from '../reducer';
 import { DataPlugin } from '../../../../interfaces/dataPlugin.ts';
 import { getCommitDataForSha, getDefaultBranch, getFilenamesForBranch, getOwnershipForCommits, getPreviousFilenames } from './helper.ts';
 import { PreviousFileData } from '../../../../../types/data/ownershipType.ts';
 
 export default function* (dataConnection: DataPlugin) {
   yield fork(() => watchRefresh(dataConnection));
-  yield fork(() => watchDateRangeChange(dataConnection));
   yield fork(() => watchBranchChange(dataConnection));
 }
 
 function* watchRefresh(dataConnection: DataPlugin) {
-  yield takeEvery('REFRESH', () => fetchCodeOwnershipData(dataConnection));
-}
-
-function* watchDateRangeChange(dataConnection: DataPlugin) {
-  yield takeEvery(setDateRange, () => fetchCodeOwnershipData(dataConnection));
+  yield takeLatest('REFRESH', () => fetchCodeOwnershipData(dataConnection));
 }
 
 function* watchBranchChange(dataConnection: DataPlugin) {
-  yield takeEvery(setCurrentBranch, () => fetchCodeOwnershipData(dataConnection));
+  yield takeLatest(setCurrentBranch, () => fetchCodeOwnershipData(dataConnection));
 }
 
 function* fetchCodeOwnershipData(dataConnection: DataPlugin) {
-  const state: CodeOwnershipState = yield select();
+  const state: { plugin: CodeOwnershipState } = yield select();
   yield put(setDataState(DataState.FETCHING));
-  const branchId = state.branch;
+  const branchId = state.plugin.branch;
   const data: CodeOwnershipData = yield call(async () => {
     if (!dataConnection.branches) return;
     const branches = (await dataConnection.branches.getAllBranches()).sort((a, b) => a.branch.localeCompare(b.branch));

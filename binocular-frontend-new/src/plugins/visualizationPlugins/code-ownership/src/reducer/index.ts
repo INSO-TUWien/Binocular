@@ -15,16 +15,10 @@ export interface CodeOwnershipData {
   //fileOwnership: FileOwnershipCollection;
 }
 
-interface DateRange {
-  from: string;
-  to: string;
-}
-
 export interface CodeOwnershipState {
   data?: CodeOwnershipData;
   branch?: number;
   allBranches: DataPluginBranch[];
-  dateRange: DateRange;
   dataState: DataState;
 }
 
@@ -32,7 +26,6 @@ const initialState: CodeOwnershipState = {
   data: { rawData: undefined, previousFilenames: {} },
   branch: undefined,
   allBranches: [],
-  dateRange: { from: new Date().toISOString(), to: new Date().toISOString() },
   dataState: DataState.EMPTY,
 };
 
@@ -43,17 +36,14 @@ export const dataSlice = createSlice({
     setData: (state: CodeOwnershipState, action: PayloadAction<CodeOwnershipData>) => {
       state.data = action.payload;
     },
-    setDateRange: (state, action: PayloadAction<DateRange>) => {
-      state.dateRange = action.payload;
-    },
-    setDataState: (state, action: PayloadAction<DataState>) => {
+    setDataState: (state: CodeOwnershipState, action: PayloadAction<DataState>) => {
       state.dataState = action.payload;
     },
-    setCurrentBranch: (state, action: PayloadAction<number | undefined>) => {
+    setCurrentBranch: (state: CodeOwnershipState, action: PayloadAction<number | undefined>) => {
       state.branch = action.payload;
     },
   },
 });
 
-export const { setData, setDateRange, setDataState, setCurrentBranch } = dataSlice.actions;
+export const { setData, setDataState, setCurrentBranch } = dataSlice.actions;
 export default dataSlice.reducer;

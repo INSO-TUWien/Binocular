@@ -1,7 +1,6 @@
 import { DataPluginBranch } from '../../../../interfaces/dataPluginInterfaces/dataPluginBranches.ts';
 import { useEffect, useState } from 'react';
-import { CodeOwnershipState, setCurrentBranch } from '../reducer';
-import { useSelector } from 'react-redux';
+import { setCurrentBranch } from '../reducer';
 import { toNumber } from 'lodash';
 
 export interface CodeOwnerShipSettings {
@@ -11,8 +10,6 @@ export interface CodeOwnerShipSettings {
 }
 
 function Settings(props: { settings: CodeOwnerShipSettings; setSettings: (newSettings: CodeOwnerShipSettings) => void }) {
-  const state = useSelector((state: CodeOwnershipState) => state);
-
   const [branchOptions, setBranchOptions] = useState([
     <option key={-1} value={''}>
       Select a Branch
@@ -43,7 +40,7 @@ function Settings(props: { settings: CodeOwnerShipSettings; setSettings: (newSet
 
   useEffect(() => {
     setBranches();
-  }, [props.settings.allBranches, state.allBranches]);
+  }, [props.settings, props.settings.allBranches]);
 
   return (
     <>
@@ -59,6 +56,7 @@ function Settings(props: { settings: CodeOwnerShipSettings; setSettings: (newSet
               props.setSettings({
                 displayMode: e.target.value,
                 allBranches: props.settings.allBranches,
+                currentBranch: props.settings.currentBranch,
               })
             }>
             <option value={'absolute'}>absolute</option>
@@ -70,7 +68,7 @@ function Settings(props: { settings: CodeOwnerShipSettings; setSettings: (newSet
             <span className="label-text">Branch:</span>
           </div>
           <select
-            value={state.branch}
+            value={props.settings.currentBranch}
             className="select select-bordered select-sm"
             onChange={(e) => {
               setCurrentBranch(toNumber(e.target.value));
