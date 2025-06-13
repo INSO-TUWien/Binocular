@@ -6,7 +6,6 @@ import { useState, useEffect } from 'react';
 import _ from 'lodash';
 import { CodeOwnerShipSettings } from '../settings/settings.tsx';
 import { Properties } from '../../../../interfaces/visualizationPluginInterfaces/properties.ts';
-import { DataPluginCommit } from '../../../../interfaces/dataPluginInterfaces/dataPluginCommits.ts';
 import { Palette } from '../../../../../types/data/authorType.ts';
 import { FileOwnershipCollection, OwnershipData, PreviousFileData } from '../../../../../types/data/ownershipType.ts';
 import { DataState, setCurrentBranch } from '../reducer';
@@ -44,8 +43,6 @@ function Chart<SettingsType extends CodeOwnerShipSettings, DataType>(props: Prop
   const fileList = props.fileList;
   const previousFilenames: { [id: string]: PreviousFileData[] } = data.previousFilenames;
   const granularity = props.parameters.parametersGeneral.granularity;
-  const excludedCommits: DataPluginCommit[] = [];
-  const excludeCommits = false;
 
   function resize() {
     if (!props.chartContainerRef.current) return;
@@ -122,7 +119,7 @@ function Chart<SettingsType extends CodeOwnerShipSettings, DataType>(props: Prop
           }
 
           if (relevant) {
-            fileCache[file.path] = extractOwnershipFromFileExcludingCommits(file.ownership, excludeCommits ? excludedCommits : []);
+            fileCache[file.path] = extractOwnershipFromFileExcludingCommits(file.ownership, []);
           }
         }
       }

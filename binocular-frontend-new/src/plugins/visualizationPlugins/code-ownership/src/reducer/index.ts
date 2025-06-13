@@ -12,7 +12,6 @@ export enum DataState {
 export interface CodeOwnershipData {
   rawData?: DataPluginOwnership[];
   previousFilenames?: { [p: string]: PreviousFileData[] };
-  //fileOwnership: FileOwnershipCollection;
 }
 
 export interface CodeOwnershipState {

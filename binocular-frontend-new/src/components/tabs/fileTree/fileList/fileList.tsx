@@ -47,6 +47,21 @@ function FileList(props: { orientation?: string; search: string }) {
     if (filesDataPluginId && !fileTrees[filesDataPluginId]) refreshFileTree(dataPlugin);
   }, [currentDataPlugins, filesDataPluginId]);
 
+  useEffect(() => {
+    if (currentDataPlugins.length !== 0) {
+      currentDataPlugins.forEach((dP: DatabaseSettingsDataPluginType) => {
+        if (filesDataPluginId === undefined && dP.isDefault && dP.id !== undefined) {
+          dispatch(setFilesDataPluginId(dP.id));
+        }
+        refreshFileTree(dP);
+      });
+    }
+  }, [currentDataPlugins]);
+
+  useEffect(() => {
+    refreshFileTree(filesDataPluginId);
+  }, [filesDataPluginId]);
+
   globalStore.subscribe(() => {
     if (filesDataPluginId !== undefined) {
       if (globalStore.getState().actions.lastAction === 'REFRESH_PLUGIN') {

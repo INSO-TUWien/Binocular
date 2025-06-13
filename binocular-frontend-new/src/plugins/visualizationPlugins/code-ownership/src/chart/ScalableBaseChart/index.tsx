@@ -113,7 +113,8 @@ export default class ScalableBaseChart extends React.Component<Props, State> {
    * @param brushArea
    * @param area
    */
-  // @ts-ignore
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-expect-error
   resetZoom(scales: any, axes: any, brushArea: any, area: any) {
     throw new NoImplementationException('Base class is abstract and requires implementation!');
   }
@@ -124,7 +125,8 @@ export default class ScalableBaseChart extends React.Component<Props, State> {
    * @param order
    * @returns Stacked chart data for d3 functions and preprocessed data { stackedData, data }
    */
-  // @ts-ignore
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-expect-error
   calculateChartData(data: any, order: any) {
     throw new NoImplementationException('Base class is abstract and requires implementation!');
   }
@@ -140,28 +142,14 @@ export default class ScalableBaseChart extends React.Component<Props, State> {
    * @param brushArea
    * @param scales
    */
-  createdTooltipNode(
-    // @ts-ignore
-    path: any,
-    // @ts-ignore
-    bisectDate: any,
-    // @ts-ignore
-    mouseoverDate: any,
-    // @ts-ignore
-    tooltip: any,
-    // @ts-ignore
-    event: any,
-    // @ts-ignore
-    node: any,
-    // @ts-ignore
-    brushArea: any,
-    // @ts-ignore
-    scales: any,
-  ) {
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-expect-error
+  createdTooltipNode(path: any, bisectDate: any, mouseoverDate: any, tooltip: any, event: any, node: any, brushArea: any, scales: any,) {
     throw new NoImplementationException('Base class is abstract and requires implementation!');
   }
 
-  // @ts-ignore
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-expect-error
   getBrushId(data: any): any {
     throw new NoImplementationException('Base class is abstract and requires implementation!');
   }
@@ -174,7 +162,8 @@ export default class ScalableBaseChart extends React.Component<Props, State> {
    * @param event
    * @param stream
    */
-  // @ts-ignore
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-expect-error
   onMouseover(path: any, tooltip: any, brushArea: any, event: any, stream: any) {
     throw new NoImplementationException('Base class is abstract and requires implementation!');
   }
@@ -187,7 +176,8 @@ export default class ScalableBaseChart extends React.Component<Props, State> {
    * @param event
    * @param stream
    */
-  // @ts-ignore
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-expect-error
   onMouseLeave(path: any, tooltip: any, brushArea: any, event: any, stream: any) {
     throw new NoImplementationException('Base class is abstract and requires implementation!');
   }
@@ -210,7 +200,7 @@ export default class ScalableBaseChart extends React.Component<Props, State> {
     //Only update the chart if there is data for it and the component is mounted.
     //it is not currently in a zoom transition (d3 requirement)
     if (this.state.componentMounted && this.props.content) {
-      this.updateElement();
+      void this.updateElement();
     }
   }
 
@@ -372,7 +362,8 @@ export default class ScalableBaseChart extends React.Component<Props, State> {
    * @returns {{brushArea: *, xAxis: *}} brushArea: Area that has all the contents appended to it,
    *               xAxis: d3 x-Axis for later transitioning (for zooming)
    */
-  // @ts-ignore
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-expect-error
   drawChart(svg: any, area: any, brush: any, yScale: any, scales: any, height: any, width: any, paddings: any) {
     const brushArea = svg.append('g');
     if (!this.tooltipRef) {
@@ -420,7 +411,8 @@ export default class ScalableBaseChart extends React.Component<Props, State> {
    * @param paddings
    * @returns {*}
    */
-  // @ts-ignore
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-expect-error
   createXAxis(brushArea: any, scales: any, width: any, height: any, paddings: any) {
     if (this.props.xAxisCenter) {
       return brushArea
@@ -445,7 +437,8 @@ export default class ScalableBaseChart extends React.Component<Props, State> {
    * @param paddings
    * @returns {*}
    */
-  //@ts-ignore
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-expect-error
   createYAxis(brushArea: any, scales: any, width: any, height: any, paddings: any) {
     const yAxis = brushArea
       .append('g')
@@ -468,7 +461,8 @@ export default class ScalableBaseChart extends React.Component<Props, State> {
    * @param height
    * @param paddings
    */
-  //@ts-expect-error
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-expect-error
   additionalAxes(brushArea: any, scales: any, width: any, height: any, paddings: any) {
     return;
   }
@@ -509,7 +503,8 @@ export default class ScalableBaseChart extends React.Component<Props, State> {
       .on('mouseout', (event: any, stream: any) => {
         return this.onMouseLeave(this, tooltip, brushArea, event, stream);
       })
-      // @ts-ignore
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-expect-error
       .on('mousemove', (event: any, stream: any) => {
         //Calculate values and text for tooltip
         const node = svg.node();
@@ -534,7 +529,8 @@ export default class ScalableBaseChart extends React.Component<Props, State> {
    * @param data
    * @returns {number}
    */
-  //@ts-ignore
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-expect-error
   getLayerStrokeWidth(data: any) {
     return 0;
   }
@@ -544,7 +540,8 @@ export default class ScalableBaseChart extends React.Component<Props, State> {
    * @param data
    * @returns {undefined}
    */
-  //@ts-ignore
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-expect-error
   getLayerStrokeColor(data: any): any {
     return undefined;
   }
@@ -559,7 +556,8 @@ export default class ScalableBaseChart extends React.Component<Props, State> {
    * @param pathStreams
    * @param scales
    */
-  //@ts-ignore
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-expect-error
   additionalPathDefs(brushArea: any, pathStreams: any, scales: any) {
     return;
   }
@@ -573,7 +571,8 @@ export default class ScalableBaseChart extends React.Component<Props, State> {
    * @param area
    * @returns scroll event
    */
-  //@ts-ignore
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-expect-error
   createScrollEvent(svg: any, scales: any, axes: any, brushArea: any, area: any) {
     return (event: any) => {
       // prevent page scrolling
