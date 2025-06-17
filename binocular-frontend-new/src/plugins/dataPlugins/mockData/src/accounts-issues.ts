@@ -11,6 +11,449 @@ export default class AccountsIssues implements DataPluginAccounts {
    */
   public async getAll(): Promise<DataPluginAccount[]> {
     return new Promise<DataPluginAccount[]>((resolve) => {
+      //Scenario A: Isolated Members in Small Teams
+      const scenario_a = [
+        {
+          id: "alice",
+          login: "alice",
+          name: "Alice",
+          avatarUrl:
+            "https://ui-avatars.com/api/?name=Alice&background=random&color=fff",
+          url: "https://example.com/alice",
+          issues: [
+            {
+              id: "1",
+              iid: "1",
+              title: "UI Bug",
+              description: "",
+              createdAt: "2025-01-01T00:00:00.000Z",
+              closedAt: "2025-01-01T00:00:00.000Z",
+              state: "open",
+              webUrl: "https://example.com/issues/1",
+            },
+            {
+              id: "2",
+              iid: "2",
+              title: "Refactor",
+              description: "",
+              createdAt: "2025-01-02T00:00:00.000Z",
+              closedAt: "2025-01-02T00:00:00.000Z",
+              state: "open",
+              webUrl: "https://example.com/issues/2",
+            },
+            {
+              id: "3",
+              iid: "3",
+              title: "UI Bug",
+              description: "",
+              createdAt: "2025-01-01T00:00:00.000Z",
+              closedAt: "2025-01-01T00:00:00.000Z",
+              state: "open",
+              webUrl: "https://example.com/issues/1",
+            },
+            {
+              id: "4",
+              iid: "4",
+              title: "Refactor",
+              description: "",
+              createdAt: "2025-01-02T00:00:00.000Z",
+              closedAt: "2025-01-02T00:00:00.000Z",
+              state: "open",
+              webUrl: "https://example.com/issues/2",
+            },
+          ],
+        },
+        {
+          id: "bob",
+          login: "bob",
+          name: "Bob",
+          avatarUrl:
+            "https://ui-avatars.com/api/?name=Bob&background=random&color=fff",
+          url: "https://example.com/bob",
+          issues: [
+            {
+              id: "1",
+              iid: "1",
+              title: "UI Bug",
+              description: "",
+              createdAt: "2025-01-01T00:00:00.000Z",
+              closedAt: "2025-01-01T00:00:00.000Z",
+              state: "open",
+              webUrl: "https://example.com/issues/1",
+            },
+            {
+              id: "2",
+              iid: "2",
+              title: "Refactor",
+              description: "",
+              createdAt: "2025-01-02T00:00:00.000Z",
+              closedAt: "2025-01-02T00:00:00.000Z",
+              state: "open",
+              webUrl: "https://example.com/issues/2",
+            },
+            {
+              id: "3",
+              iid: "3",
+              title: "UI Bug",
+              description: "",
+              createdAt: "2025-01-01T00:00:00.000Z",
+              closedAt: "2025-01-01T00:00:00.000Z",
+              state: "open",
+              webUrl: "https://example.com/issues/1",
+            },
+            {
+              id: "4",
+              iid: "4",
+              title: "Refactor",
+              description: "",
+              createdAt: "2025-01-02T00:00:00.000Z",
+              closedAt: "2025-01-02T00:00:00.000Z",
+              state: "open",
+              webUrl: "https://example.com/issues/2",
+            },
+          ],
+        },
+        {
+          id: "carol",
+          login: "carol",
+          name: "Carol",
+          avatarUrl:
+            "https://ui-avatars.com/api/?name=Carol&background=random&color=fff",
+          url: "https://example.com/carol",
+          issues: [
+            {
+              id: "2",
+              iid: "2",
+              title: "Refactor",
+              description: "",
+              createdAt: "2025-01-02T00:00:00.000Z",
+              closedAt: "2025-01-02T00:00:00.000Z",
+              state: "open",
+              webUrl: "https://example.com/issues/2",
+            },
+            {
+              id: "3",
+              iid: "3",
+              title: "UI Bug",
+              description: "",
+              createdAt: "2025-01-01T00:00:00.000Z",
+              closedAt: "2025-01-01T00:00:00.000Z",
+              state: "open",
+              webUrl: "https://example.com/issues/1",
+            },
+            {
+              id: "5",
+              iid: "5",
+              title: "Refactor",
+              description: "",
+              createdAt: "2025-01-02T00:00:00.000Z",
+              closedAt: "2025-01-02T00:00:00.000Z",
+              state: "open",
+              webUrl: "https://example.com/issues/2",
+            },
+          ],
+        },
+        {
+          id: "dave",
+          login: "dave",
+          name: "Dave",
+          avatarUrl:
+            "https://ui-avatars.com/api/?name=Dave&background=random&color=fff",
+          url: "https://example.com/dave",
+          issues: [
+            {
+              id: "5",
+              iid: "5",
+              title: "Refactor",
+              description: "",
+              createdAt: "2025-01-02T00:00:00.000Z",
+              closedAt: "2025-01-02T00:00:00.000Z",
+              state: "open",
+              webUrl: "https://example.com/issues/2",
+            },
+          ],
+        },
+        {
+          id: "eve",
+          login: "eve",
+          name: "Eve",
+          avatarUrl:
+            "https://ui-avatars.com/api/?name=Eve&background=random&color=fff",
+          url: "https://example.com/eve",
+          issues: [],
+        },
+      ];
+
+      const scenario_b = [
+        // Frontend team
+        ...["Fiona", "Frank", "Faith", "Felix", "Freya"].map((name) => ({
+          id: name.toLowerCase(),
+          login: name.toLowerCase(),
+          name,
+          avatarUrl: `https://ui-avatars.com/api/?name=${name}&background=random&color=fff`,
+          url: `https://example.com/${name.toLowerCase()}`,
+          issues: [
+            {
+              id: "FE-ISSUE-1",
+              iid: "1001",
+              title: "Frontend: Layout Overhaul",
+              createdAt: "2025-01-01T00:00:00.000Z",
+              closedAt: "2025-01-10T00:00:00.000Z",
+              state: "open",
+              webUrl: "https://example.com/issues/1001",
+            },
+            {
+              id: "FE-ISSUE-2",
+              iid: "1002",
+              title: "Frontend: Component Styling",
+              createdAt: "2025-01-02T00:00:00.000Z",
+              closedAt: "2025-01-11T00:00:00.000Z",
+              state: "open",
+              webUrl: "https://example.com/issues/1002",
+            },
+            {
+              id: "FE-ISSUE-3",
+              iid: "1003",
+              title: "Frontend: UI Testing",
+              createdAt: "2025-01-03T00:00:00.000Z",
+              closedAt: "2025-01-12T00:00:00.000Z",
+              state: "open",
+              webUrl: "https://example.com/issues/1003",
+            },
+          ],
+        })),
+
+        // Backend team
+        ...["Brian", "Bianca", "Boris", "Bella", "Ben"].map((name) => ({
+          id: name.toLowerCase(),
+          login: name.toLowerCase(),
+          name,
+          avatarUrl: `https://ui-avatars.com/api/?name=${name}&background=random&color=fff`,
+          url: `https://example.com/${name.toLowerCase()}`,
+          issues: [
+            {
+              id: "BE-ISSUE-1",
+              iid: "2001",
+              title: "Backend: API Design",
+              createdAt: "2025-01-04T00:00:00.000Z",
+              closedAt: "2025-01-13T00:00:00.000Z",
+              state: "open",
+              webUrl: "https://example.com/issues/2001",
+            },
+            {
+              id: "BE-ISSUE-2",
+              iid: "2002",
+              title: "Backend: Schema Migration",
+              createdAt: "2025-01-05T00:00:00.000Z",
+              closedAt: "2025-01-14T00:00:00.000Z",
+              state: "open",
+              webUrl: "https://example.com/issues/2002",
+            },
+            {
+              id: "BE-ISSUE-3",
+              iid: "2003",
+              title: "Backend: Deployment Pipeline",
+              createdAt: "2025-01-06T00:00:00.000Z",
+              closedAt: "2025-01-15T00:00:00.000Z",
+              state: "open",
+              webUrl: "https://example.com/issues/2003",
+            },
+          ],
+        })),
+
+        // Ian–integrates frontend + backend and integrator-only issue
+        {
+          id: "ian",
+          login: "ian",
+          name: "Ian",
+          avatarUrl:
+            "https://ui-avatars.com/api/?name=Ian&background=random&color=fff",
+          url: "https://example.com/ian",
+          issues: [
+            {
+              id: "FE-ISSUE-1", // shared with frontend
+              iid: "1001",
+              title: "Frontend: Layout Overhaul",
+              createdAt: "2025-01-01T00:00:00.000Z",
+              closedAt: "2025-01-10T00:00:00.000Z",
+              state: "open",
+              webUrl: "https://example.com/issues/1001",
+            },
+            {
+              id: "BE-ISSUE-1", // shared with backend
+              iid: "2001",
+              title: "Backend: API Design",
+              createdAt: "2025-01-04T00:00:00.000Z",
+              closedAt: "2025-01-13T00:00:00.000Z",
+              state: "open",
+              webUrl: "https://example.com/issues/2001",
+            },
+            {
+              id: "INT-ISSUE-1",
+              iid: "3001",
+              title: "Integration: API-UI Sync",
+              createdAt: "2025-01-07T00:00:00.000Z",
+              closedAt: "2025-01-17T00:00:00.000Z",
+              state: "open",
+              webUrl: "https://example.com/issues/3001",
+            },
+          ],
+        },
+
+        // Iris integrates frontend + backend and integrator-only issue
+        {
+          id: "iris",
+          login: "iris",
+          name: "Iris",
+          avatarUrl:
+            "https://ui-avatars.com/api/?name=Iris&background=random&color=fff",
+          url: "https://example.com/iris",
+          issues: [
+            {
+              id: "FE-ISSUE-1", // shared with frontend
+              iid: "1001",
+              title: "Frontend: Layout Overhaul",
+              createdAt: "2025-01-01T00:00:00.000Z",
+              closedAt: "2025-01-10T00:00:00.000Z",
+              state: "open",
+              webUrl: "https://example.com/issues/1001",
+            },
+            {
+              id: "BE-ISSUE-1", // shared with backend
+              iid: "2001",
+              title: "Backend: API Design",
+              createdAt: "2025-01-04T00:00:00.000Z",
+              closedAt: "2025-01-13T00:00:00.000Z",
+              state: "open",
+              webUrl: "https://example.com/issues/2001",
+            },
+            {
+              id: "INT-ISSUE-2",
+              iid: "3002",
+              title: "Integration: Release Planning",
+              createdAt: "2025-01-08T00:00:00.000Z",
+              closedAt: "2025-01-18T00:00:00.000Z",
+              state: "open",
+              webUrl: "https://example.com/issues/3002",
+            },
+          ],
+        },
+      ];
+
+      const scenario_c = [
+        // Core cluster: Dev1–Dev5, heavily interconnected
+        ...["Dev1", "Dev2", "Dev3", "Dev4", "Dev5"].map((name, i) => ({
+          id: name.toLowerCase(),
+          login: name.toLowerCase(),
+          name,
+          avatarUrl: `https://ui-avatars.com/api/?name=${name}&background=random&color=fff`,
+          url: `https://example.com/${name.toLowerCase()}`,
+          issues: [
+            {
+              id: "core-issue-1",
+              iid: "4001",
+              title: "Core Planning",
+              description: "Tight-knit collaboration",
+              createdAt: "2025-01-01T00:00:00.000Z",
+              closedAt: "2025-01-10T00:00:00.000Z",
+              state: "open",
+              webUrl: "https://example.com/issues/4001",
+            },
+            {
+              id: "core-issue-2",
+              iid: "4002",
+              title: "Sprint Review",
+              description: "Tight-knit collaboration",
+              createdAt: "2025-01-02T00:00:00.000Z",
+              closedAt: "2025-01-11T00:00:00.000Z",
+              state: "open",
+              webUrl: "https://example.com/issues/4002",
+            },
+            {
+              id: "core-issue-3",
+              iid: "4003",
+              title: "Refactor Planning",
+              description: "Tight-knit collaboration",
+              createdAt: "2025-01-03T00:00:00.000Z",
+              closedAt: "2025-01-12T00:00:00.000Z",
+              state: "open",
+              webUrl: "https://example.com/issues/4003",
+            },
+          ].slice(0, 2 + (i % 2)), // Dev1,2,3 get 3 issues; 4,5 get 2
+        })),
+
+        // Peripheral devs: Dev6–Dev10, sparse 1:1 or 1:2 connections
+        ...[
+          { name: "Dev6", links: ["link-6-7"] },
+          { name: "Dev7", links: ["link-6-7", "link-7-8"] },
+          { name: "Dev8", links: ["link-7-8"] },
+          { name: "Dev9", links: ["link-9-10"] },
+          { name: "Dev10", links: ["link-9-10"] },
+        ].map(({ name, links }) => ({
+          id: name.toLowerCase(),
+          login: name.toLowerCase(),
+          name,
+          avatarUrl: `https://ui-avatars.com/api/?name=${name}&background=random&color=fff`,
+          url: `https://example.com/${name.toLowerCase()}`,
+          issues: links.map((id, idx) => ({
+            id,
+            iid: `500${idx + name.charCodeAt(3)}`,
+            title: `Sparse Issue ${id}`,
+            description: "Peripheral connection",
+            createdAt: `2025-01-1${idx}T00:00:00.000Z`,
+            closedAt: `2025-01-2${idx}T00:00:00.000Z`,
+            state: "open",
+            webUrl: `https://example.com/issues/${id}`,
+          })),
+        })),
+
+        // Loose triangle: Dev11–Dev13
+        ...["Dev11", "Dev12", "Dev13"].map((name, idx) => ({
+          id: name.toLowerCase(),
+          login: name.toLowerCase(),
+          name,
+          avatarUrl: `https://ui-avatars.com/api/?name=${name}&background=random&color=fff`,
+          url: `https://example.com/${name.toLowerCase()}`,
+          issues: [
+            {
+              id: "triangle-1",
+              iid: "6001",
+              title: "Experimental API",
+              description: "Loose shared work",
+              createdAt: "2025-01-15T00:00:00.000Z",
+              closedAt: "2025-01-18T00:00:00.000Z",
+              state: "open",
+              webUrl: "https://example.com/issues/6001",
+            },
+          ].concat(
+            idx === 0
+              ? []
+              : [
+                  {
+                    id: "triangle-2",
+                    iid: "6002",
+                    title: "Sandbox Task",
+                    description: "Cross-collaboration",
+                    createdAt: "2025-01-19T00:00:00.000Z",
+                    closedAt: "2025-01-21T00:00:00.000Z",
+                    state: "open",
+                    webUrl: "https://example.com/issues/6002",
+                  },
+                ],
+          ),
+        })),
+
+        // Fully isolated: Dev14, Dev15
+        ...["Dev14", "Dev15"].map((name) => ({
+          id: name.toLowerCase(),
+          login: name.toLowerCase(),
+          name,
+          avatarUrl: `https://ui-avatars.com/api/?name=${name}&background=random&color=fff`,
+          url: `https://example.com/${name.toLowerCase()}`,
+          issues: [],
+        })),
+      ];
+
       const accountsIssues: DataPluginAccount[] = [
         // 10 fully connected users
         {
@@ -534,7 +977,7 @@ export default class AccountsIssues implements DataPluginAccounts {
           issues: [],
         },
       ];
-      resolve(accountsIssues);
+      resolve(scenario_c); //scenario_a, scenario_b, scenario_c, accountsIssues
     });
   }
 }
