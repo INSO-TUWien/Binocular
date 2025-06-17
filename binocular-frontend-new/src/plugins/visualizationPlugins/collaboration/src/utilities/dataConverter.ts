@@ -10,9 +10,9 @@ import { NodeType, LinkType } from "../chart/networkChart.tsx";
  */
 export function convertIssuesToGraphData(
   accounts: DataPluginAccount[],
-  props: Pick<Properties<SettingsType, DataPluginAccount>, "settings">,
+  props: Properties<SettingsType, DataPluginAccount>,
 ): {
-  nodes: { id: string; group: string; url: string }[];
+  nodes: { id: string; group: string; url: string; name: string }[];
   links: LinkType[];
 } {
   const { minEdgeValue, maxEdgeValue } = props.settings;
@@ -74,6 +74,7 @@ function initializeNodeMap(
       group: "unassigned",
       url: account.url,
       avatarUrl: account.avatarUrl,
+      name: account.name,
     });
   });
   return map;

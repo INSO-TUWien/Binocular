@@ -1,8 +1,20 @@
+import {
+  put,
+  takeEvery,
+  fork,
+  call,
+  select,
+  throttle,
+} from "redux-saga/effects";
+import {
+  DataState,
+  CollaborationState,
+  setDataState,
+  setDateRange,
+  setAccounts,
+} from "../reducer";
 import { DataPlugin } from "../../../../interfaces/dataPlugin.ts";
-import { put, takeEvery, fork, call } from "redux-saga/effects";
-import { DataState, setDataState, setDateRange, setAccounts } from "../reducer";
 import { DataPluginAccount } from "../../../../interfaces/dataPluginInterfaces/dataPluginAccount.ts";
-import { SagaIterator } from "redux-saga";
 
 export default function* (dataConnection: DataPlugin) {
   yield fork(() => watchRefresh(dataConnection));
@@ -10,21 +22,22 @@ export default function* (dataConnection: DataPlugin) {
 }
 
 function* watchRefresh(dataConnection: DataPlugin) {
-  yield takeEvery("REFRESH", fetchCollaborationData, dataConnection);
+  yield throttle(5000, "REFRESH", () => fetchCollaborationData(dataConnection));
 }
 
 function* watchDateRangeChange(dataConnection: DataPlugin) {
-  yield takeEvery(setDateRange, fetchCollaborationData, dataConnection);
+  yield takeEvery(setDateRange, () => fetchCollaborationData(dataConnection));
 }
 
-function* fetchCollaborationData(dataConnection: DataPlugin): SagaIterator {
+function* fetchCollaborationData(dataConnection: DataPlugin) {
   yield put(setDataState(DataState.FETCHING));
-
+  const state: CollaborationState = yield select();
   const rawAccounts: DataPluginAccount[] = yield call(() =>
-    dataConnection.accountsIssues.getAll(),
+    dataConnection.accountsIssues.getAll(
+      state.dateRange.from,
+      state.dateRange.to,
+    ),
   );
-
   yield put(setAccounts(rawAccounts));
-
   yield put(setDataState(DataState.COMPLETE));
 }

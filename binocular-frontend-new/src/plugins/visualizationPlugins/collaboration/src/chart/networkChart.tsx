@@ -14,6 +14,7 @@ export interface NodeType extends d3.SimulationNodeDatum {
   group: string;
   url: string;
   avatarUrl: string;
+  name: string;
 }
 
 export interface LinkType extends d3.SimulationLinkDatum<NodeType> {
@@ -169,7 +170,7 @@ export const NetworkChart = ({
       .attr("clip-path", "url(#avatar-clip)")
       .style("cursor", "pointer")
       .on("click", (_event, d) => window.open(d.url, "_blank"))
-      .on("mouseover", (_event, d) => showNodeTooltip(d.url))
+      .on("mouseover", (_event, d) => showNodeTooltip(d.name ? d.name : d.url))
       .on("mousemove", (event) => moveTooltip(event.pageX, event.pageY))
       .on("mouseout", () => hideTooltip());
 
@@ -248,9 +249,9 @@ export const NetworkChart = ({
       .style("visibility", "visible");
   }
 
-  function showNodeTooltip(url: string) {
+  function showNodeTooltip(name: string) {
     if (!tooltipRef.current) return;
-    d3.select(tooltipRef.current).text(url).style("visibility", "visible");
+    d3.select(tooltipRef.current).text(name).style("visibility", "visible");
   }
 
   function moveTooltip(x: number, y: number) {
@@ -282,7 +283,12 @@ export const NetworkChart = ({
       )
       .force("charge", d3.forceManyBody().strength(10))
       .force("center", d3.forceCenter(w / 2, h / 2))
-      .force("collide", d3.forceCollide(HULL_RADIUS_OFFSET))
+      .force(
+        "collide",
+        d3.forceCollide(
+          HULL_RADIUS_OFFSET + HULL_RADIUS_OFFSET - NODE_IMAGE_SIZE / 2,
+        ),
+      )
       .alphaTarget(0.0005)
       .restart();
   }
