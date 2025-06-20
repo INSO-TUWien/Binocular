@@ -1,0 +1,32 @@
+.dashboardSelector{
+  display: flex;
+  gap: 1rem;
+  width: 100%;
+}
+
+.dashboardPreviewContainer{
+  position: relative;
+  width: 20rem;
+  height: 20rem;
+  @apply bg-base-300;
+  @apply rounded-md;
+  @apply shadow-md;
+}
+
+.dashboardPreviewItemContainer{
+  position: absolute;
+}
+
+.dashboardPreviewItem{
+  width: calc(100% - 4px);
+  height: calc(100% - 4px);
+  margin: 2px;
+  @apply bg-base-200;
+  @apply rounded-md;
+  @apply shadow-md;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+}
+
