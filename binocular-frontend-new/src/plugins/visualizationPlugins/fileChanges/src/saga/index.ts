@@ -1,5 +1,5 @@
-import { put, takeEvery, fork, call, throttle } from 'redux-saga/effects';
-import { DataState, current_file, setCurrentFileCommits, setDataState, setDateRange, setDateOfOverallFirstCommit, setDateOfOverallLastCommit } from '../reducer';
+import { put, takeEvery, fork, call, throttle, select } from 'redux-saga/effects';
+import { DataState, current_file, setCurrentFileCommits, setDataState, setDateRange, setDateOfOverallFirstCommit, setDateOfOverallLastCommit, ChangesState } from '../reducer';
 import { DataPlugin } from '../../../../interfaces/dataPlugin.ts';
 import { DataPluginCommit } from '../../../../interfaces/dataPluginInterfaces/dataPluginCommits.ts';
 
@@ -18,9 +18,14 @@ function* watchDateRangeChange(dataConnection: DataPlugin) {
 
 function* fetchChangesData(dataConnection: DataPlugin) {
   yield put(setDataState(DataState.FETCHING));
+  const state: ChangesState = yield select();
 
-  const current_file_commits : DataPluginCommit[] = yield call(() => dataConnection.commits.getByFile(current_file));
+  console.log(state);
+  console.log(1);
+  const current_file_commits : DataPluginCommit[] = yield call(() => dataConnection.commits.getByFile(current_file, state.dateRange.from, state.dateRange.to));
+  console.log(current_file_commits);
 
+  console.log(2);
   const dateOfOverallFirstCommit : string = yield call(() => dataConnection.commits.getDateOfFirstCommit());
   const dateOfOverallLastCommit : string = yield call(() => dataConnection.commits.getDateOfLastCommit());
 

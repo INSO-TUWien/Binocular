@@ -22,6 +22,11 @@ function FileSelector({
   const s = useSelector((state: RootState) => state);
   console.log("State:", s);
   const files : DataPluginFile[] = useSelector((state: RootState) => state.files.fileLists);
+  
+  if(files == null) {
+    return <div className="alert alert-warning">No files found</div>;
+  }
+
   const fileListsArray = Object.values(files)[0];
 
   const [searchTerm, setSearchTerm] = React.useState("");

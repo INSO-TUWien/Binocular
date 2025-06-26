@@ -82,7 +82,7 @@ export const StackedAreaChart = ({ width, height, data, scale, palette, sprintLi
       .append('g')
       .attr('class', 'xAxis')
       .attr('transform', 'translate(0,' + boundsHeight + ')')
-      .call(d3.axisBottom(xScale));
+      .call(d3.axisBottom(xScale).ticks(5).tickFormat(d3.timeFormat('%m-%d')));
     svgElement.append('g').call(d3.axisLeft(yScale));
     svgElement.append('g').attr('class', 'brush').call(brush);
 
