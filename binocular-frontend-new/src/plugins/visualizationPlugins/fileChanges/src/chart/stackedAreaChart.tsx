@@ -20,6 +20,7 @@ type AreaChartProps = {
 };
 
 export const StackedAreaChart = ({ width, height, data, scale, palette, sprintList, settings }: AreaChartProps) => {
+  console.log('Rendering StackedAreaChart with data:', data);
   // bounds = area inside the graph axis = calculated by substracting the margins
   const svgRef = useRef(null);
   const tooltipRef = useRef(null);
@@ -43,6 +44,8 @@ export const StackedAreaChart = ({ width, height, data, scale, palette, sprintLi
   function idled() {
     idleTimeout = null;
   }
+
+  console.log("Width:", width, "Height:", height, "Bounds Width:", boundsWidth, "Bounds Height:", boundsHeight);
 
   const brush = d3
     .brushX()
@@ -82,7 +85,8 @@ export const StackedAreaChart = ({ width, height, data, scale, palette, sprintLi
       .append('g')
       .attr('class', 'xAxis')
       .attr('transform', 'translate(0,' + boundsHeight + ')')
-      .call(d3.axisBottom(xScale).ticks(5).tickFormat(d3.timeFormat('%m-%d')));
+      .call(d3.axisBottom(xScale))
+      // .call(d3.axisBottom(xScale).ticks(5).tickFormat(d3.timeFormat('%m-%d')));
     svgElement.append('g').call(d3.axisLeft(yScale));
     svgElement.append('g').attr('class', 'brush').call(brush);
 

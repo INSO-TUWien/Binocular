@@ -20,20 +20,27 @@ function FileSelector({
   onFileChange: (file: string) => void;
 }) {
   const s = useSelector((state: RootState) => state);
-  console.log("State:", s);
-  const files : DataPluginFile[] = useSelector((state: RootState) => state.files.fileLists);
-  
-  if(files == null) {
-    return <div className="alert alert-warning">No files found</div>;
-  }
-
-  const fileListsArray = Object.values(files)[0];
-
+  // console.log("State:", s);
+  const rawFiles = useSelector((state: RootState) => state.files.fileLists);
   const [searchTerm, setSearchTerm] = React.useState("");
 
-  const filteredFiles = fileListsArray.filter((file) =>
-    file.element.path.toLowerCase().includes(searchTerm.toLowerCase()),
-  );
+  // console.log("Raw files:", rawFiles);
+
+  // Handle null or undefined
+  if (!rawFiles || Object.keys(rawFiles).length === 0) {
+    return <div className="alert alert-warning">No files found. Load File Tree first.</div>;
+  }
+
+  // Convert to array safely
+  const files : any[] = Object.values(rawFiles)[0] as any[];
+
+  if (files.length === 0) {
+    return <div className="alert alert-warning">No files found. Load File Tree first.</div>;
+  }
+
+  const filteredFiles = files.filter((file) => {
+    return file.element.path.toLowerCase().includes(searchTerm.toLowerCase());
+  });
 
   //const filteredFiles = files.forEach((file) => {
   //  file.path.toLowerCase().includes(searchTerm.toLowerCase());

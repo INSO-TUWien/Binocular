@@ -7,7 +7,7 @@ import Reducer from "./reducer";
 import Saga from "./saga";
 import Help from "./help/help.tsx";
 
-const FileChanges: VisualizationPlugin<SettingsType> = {
+const FileChanges: VisualizationPlugin<SettingsType, null> = {
   name: "File Changes",
   chartComponent: Chart,
   settingsComponent: Settings,
@@ -16,7 +16,7 @@ const FileChanges: VisualizationPlugin<SettingsType> = {
     file: "README.md",
     splitAdditionsDeletions: true,
     visualizationStyle: "curved",
-    showExtraMetrics: true,
+    showExtraMetrics: false,
   },
   export: {
     getSVGData: getSVGData,

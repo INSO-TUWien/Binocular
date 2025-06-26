@@ -152,7 +152,7 @@ export function convertCommitDataToChangesChartData(
       data.push(obj);
     }
 
-    console.log("data: ", data);
+    // console.log("data: ", data);
 
     //---- STEP 2: CONSTRUCT CHART DATA FROM AGGREGATED COMMITS ----
     if (splitAdditionsDeletions) {
@@ -168,7 +168,7 @@ export function convertCommitDataToChangesChartData(
       commitPalette["others"] = { main: "#555555", secondary: "#777777" };
     }
 
-    console.log("data: ", data);
+    // console.log("data: ", data);
     data.forEach((commit) => {
       //commit has structure {date, statsByAuthor: {}} (see next line)}
       const obj: CommitChartData = { date: commit.date };
@@ -206,18 +206,6 @@ export function convertCommitDataToChangesChartData(
         }
         obj["others"] = 0;
       }
-
-      authors = [
-        ...authors,
-        ...Object.keys(commit.statsByAuthor).map((key) => ({
-          id: -1,
-          user: { gitSignature: key, id: key },
-          selected: true,
-          displayName: "Thimon",
-          color: { main: "#555555", secondary: "#777777" },
-          parent: -1,
-        })),
-      ];
 
       authors.forEach((author) => {
         if (!author.selected) return;
@@ -261,12 +249,12 @@ export function convertCommitDataToChangesChartData(
         }
       });
 
-      console.log("obj: ", obj);
+      // console.log("obj: ", obj);
       commitChartData.push(obj); //Add object to list of objects
     });
     //Output in commitChartData has format [{author1: 123, author2: 123, ...}, ...],
     //e.g. series names are the authors with their corresponding values
-    console.log("commitChartData: ", commitChartData);
+    // console.log("commitChartData: ", commitChartData);
 
     //---- STEP 3: SCALING ----
     commitChartData.forEach((dataPoint) => {

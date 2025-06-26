@@ -1,7 +1,13 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useMemo } from "react";
 import * as d3 from "d3"; // Optional, remove if not needed
 
-export const MetricsChart = ({ width, height, metrics }) => {
+type MetricChartProps = {
+  width: number;
+  height: number;
+  metrics: any;
+};
+
+export const MetricsChart = ({ width, height, metrics }: MetricChartProps) => {
   const svgRef = useRef(null);
   const { mpc, entropy, maxburst, maxchangeset, avgchangeset } = metrics;
 
@@ -29,7 +35,9 @@ export const MetricsChart = ({ width, height, metrics }) => {
       .append("rect")
       .attr("x", 0)
       .attr("y", (d, i) => i * (barHeight + 5))
-      .attr("width", (d) => xScale(d.value))
+      // .attr("width", (d) => xScale(d.value))
+      // .attr("width", width * 4)
+      .attr("width", "100%")
       .attr("height", barHeight)
       .attr("fill", "steelblue");
 
@@ -49,7 +57,8 @@ export const MetricsChart = ({ width, height, metrics }) => {
       .data(data)
       .enter()
       .append("text")
-      .attr("x", width * 0.85)
+      // .attr("x", width * 3.5)
+      .attr("x", "95%")
       .attr("y", (d, i) => i * (barHeight + 5) + barHeight / 1.5)
       .attr("fill", "white")
       .attr("font-size", barHeight / 2 + "px")
@@ -58,9 +67,11 @@ export const MetricsChart = ({ width, height, metrics }) => {
   }, [data]);
 
   return (
-    <div className="absolute bg-white p-6 top-1">
+    <div className="w-full h-full flex flex-col bg-white p-4">
       <h3 className="text-m font-semibold mb-2">Metrics Overview</h3>
-      <svg ref={svgRef} width={width * 0.9} height={height * 0.9}></svg>
+      <div className="flex-1 overflow-auto">
+        <svg ref={svgRef} width={width} height={height - 60} className="h-full w-full"></svg>
+      </div>
     </div>
   );
 };
