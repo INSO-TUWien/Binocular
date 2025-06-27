@@ -8,13 +8,13 @@ import {
   convertCommitDataToMetrics,
 } from "../utilities/dataConverter.ts";
 import { SprintType } from "../../../../../types/data/sprintType.ts";
-import { throttle } from "throttle-debounce";
 import { useDispatch, useSelector } from "react-redux";
 import { ParametersType } from "../../../../../types/parameters/parametersType.ts";
 import { Store } from "@reduxjs/toolkit";
 import { DataState, setDateRange } from "../reducer";
 import { MetricsChart } from "./metricsCharts.tsx";
 import { DataPluginCommit } from "../../../../interfaces/dataPluginInterfaces/dataPluginCommits.ts";
+import { handelPopoutResizing } from '../../../../utils/resizing.ts';
 
 export interface CommitChartData {
   date: number;
@@ -79,24 +79,9 @@ function Chart(props: {
     );
   }, [current_file_total_commits, props.parameters.parametersDateRange]);
 
-  /*
-  Throttle the resize of the svg (refresh rate) to every 1s to not overwhelm the renderer,
-  This isn't really necessary for this visualization, but for bigger visualization this can be quite essential
+  /**
+   * RESIZE Logic START
    */
-  const throttledResize = throttle(
-    1000,
-    () => {
-      if (!props.chartContainerRef.current) return;
-      if (props.chartContainerRef.current?.offsetWidth !== chartWidth) {
-        setChartWidth(props.chartContainerRef.current.offsetWidth);
-      }
-      if (props.chartContainerRef.current?.offsetHeight !== chartHeight) {
-        setChartHeight(props.chartContainerRef.current.offsetHeight);
-      }
-    },
-    { noLeading: false, noTrailing: false },
-  );
-
   function resize() {
     if (!props.chartContainerRef.current) return;
     if (props.chartContainerRef.current?.offsetWidth !== chartWidth) {
@@ -111,15 +96,10 @@ function Chart(props: {
     resize();
   }, [props.chartContainerRef, chartHeight, chartWidth]);
 
-  //Resize Observer -> necessary for dynamically refreshing d3 chart
-  useEffect(() => {
-    if (!props.chartContainerRef.current) return;
-    const resizeObserver = new ResizeObserver(() => {
-      throttledResize();
-    });
-    resizeObserver.observe(props.chartContainerRef.current);
-    return () => resizeObserver.disconnect();
-  }, [props.chartContainerRef, chartHeight, chartWidth]);
+  handelPopoutResizing(props.store, resize);
+  /**
+   * RESIZE Logic END
+   */
 
   //Effect on data change
   useEffect(() => {
@@ -133,6 +113,7 @@ function Chart(props: {
     setChartData(commitChartData);
     setChartScale(commitScale);
     setChartPalette(commitPalette);
+    resize();
   }, [
     current_file_commits,
     props.authorList,
