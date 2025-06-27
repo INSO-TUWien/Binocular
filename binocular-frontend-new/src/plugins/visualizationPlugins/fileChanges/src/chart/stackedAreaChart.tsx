@@ -45,7 +45,7 @@ export const StackedAreaChart = ({ width, height, data, scale, palette, sprintLi
     idleTimeout = null;
   }
 
-  console.log("Width:", width, "Height:", height, "Bounds Width:", boundsWidth, "Bounds Height:", boundsHeight);
+  console.log('Width:', width, 'Height:', height, 'Bounds Width:', boundsWidth, 'Bounds Height:', boundsHeight);
 
   const brush = d3
     .brushX()
@@ -59,7 +59,7 @@ export const StackedAreaChart = ({ width, height, data, scale, palette, sprintLi
       if (!extent) {
         //This Timeout is necessary because it not the reset of the brush would trigger the reset of the domain
         // and the brushing wouldn't work.
-        if (!idleTimeout) return (idleTimeout = setTimeout(idled, 350));
+        if (!idleTimeout) return (idleTimeout = window.setTimeout(idled, 350));
         xScale.domain([xMin || 0, xMax || 0]);
       } else {
         xScale.domain([xScale.invert(extent[0]), xScale.invert(extent[1])]);
@@ -85,8 +85,8 @@ export const StackedAreaChart = ({ width, height, data, scale, palette, sprintLi
       .append('g')
       .attr('class', 'xAxis')
       .attr('transform', 'translate(0,' + boundsHeight + ')')
-      .call(d3.axisBottom(xScale))
-      // .call(d3.axisBottom(xScale).ticks(5).tickFormat(d3.timeFormat('%m-%d')));
+      .call(d3.axisBottom(xScale));
+    // .call(d3.axisBottom(xScale).ticks(5).tickFormat(d3.timeFormat('%m-%d')));
     svgElement.append('g').call(d3.axisLeft(yScale));
     svgElement.append('g').attr('class', 'brush').call(brush);
 

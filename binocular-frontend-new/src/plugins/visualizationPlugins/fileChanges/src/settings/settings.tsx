@@ -1,8 +1,8 @@
-import React from "react";
-import { setGlobalCurrentFileData, setGlobalFiles } from "../reducer";
-import { useSelector } from "react-redux";
-import { RootState } from "../../../../../redux";
-import { DataPluginFile } from "../../../../interfaces/dataPluginInterfaces/dataPluginFiles";
+import React from 'react';
+import { setGlobalCurrentFileData } from '../reducer';
+import { useSelector } from 'react-redux';
+import { RootState } from '../../../../../redux';
+import { FileListElementType } from '../../../../../types/data/fileListType.ts';
 
 export interface SettingsType {
   file: string;
@@ -12,17 +12,10 @@ export interface SettingsType {
   showExtraMetrics: boolean;
 }
 
-function FileSelector({
-  selectedFile,
-  onFileChange,
-}: {
-  selectedFile: string;
-  onFileChange: (file: string) => void;
-}) {
-  const s = useSelector((state: RootState) => state);
+function FileSelector({ selectedFile, onFileChange }: { selectedFile: string; onFileChange: (file: string) => void }) {
   // console.log("State:", s);
   const rawFiles = useSelector((state: RootState) => state.files.fileLists);
-  const [searchTerm, setSearchTerm] = React.useState("");
+  const [searchTerm, setSearchTerm] = React.useState('');
 
   // console.log("Raw files:", rawFiles);
 
@@ -32,7 +25,7 @@ function FileSelector({
   }
 
   // Convert to array safely
-  const files : any[] = Object.values(rawFiles)[0] as any[];
+  const files: FileListElementType[] = Object.values(rawFiles)[0] as FileListElementType[];
 
   if (files.length === 0) {
     return <div className="alert alert-warning">No files found. Load File Tree first.</div>;
@@ -58,13 +51,9 @@ function FileSelector({
       />
 
       {/* Select dropdown */}
-      <select
-        className="select select-sm w-full"
-        value={selectedFile}
-        onChange={(e) => onFileChange(e.target.value)}
-      >
+      <select className="select select-sm w-full" value={selectedFile} onChange={(e) => onFileChange(e.target.value)}>
         {filteredFiles.map((file, index) => (
-          <option key={index} value={file.path}>
+          <option key={index} value={file.element.path}>
             {file.element.path}
           </option>
         ))}
@@ -73,10 +62,7 @@ function FileSelector({
   );
 }
 
-function Settings(props: {
-  settings: SettingsType;
-  setSettings: (newSettings: SettingsType) => void;
-}) {
+function Settings(props: { settings: SettingsType; setSettings: (newSettings: SettingsType) => void }) {
   return (
     <>
       <div>
@@ -85,7 +71,7 @@ function Settings(props: {
             <span className="label-text">File:</span>
           </div>
           <FileSelector
-            selectedFile={(props.settings.file as string) || ""}
+            selectedFile={props.settings.file || ''}
             onFileChange={(file) => {
               setGlobalCurrentFileData(file);
               props.setSettings({
@@ -121,11 +107,10 @@ function Settings(props: {
                 ...props.settings,
                 visualizationStyle: e.target.value,
               })
-            }
-          >
-            <option value={"curved"}>curved</option>
-            <option value={"stepped"}>stepped</option>
-            <option value={"linear"}>linear</option>
+            }>
+            <option value={'curved'}>curved</option>
+            <option value={'stepped'}>stepped</option>
+            <option value={'linear'}>linear</option>
           </select>
         </label>
         <label className="label cursor-pointer">

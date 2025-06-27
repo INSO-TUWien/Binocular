@@ -158,8 +158,6 @@ function clicked(
   // Transition the data on all arcs, even the ones that aren’t visible,
   // so that if this transition is interrupted, entering arcs will start
   // the next transition from the desired position.
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-expect-error
   path
     .transition(t)
     .tween('data', (d) => {

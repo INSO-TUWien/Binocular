@@ -1,6 +1,6 @@
-import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { DataPluginFile } from "../../../../interfaces/dataPluginInterfaces/dataPluginFiles.ts";
-import { DataPluginCommit } from "../../../../interfaces/dataPluginInterfaces/dataPluginCommits.ts";
+import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { DataPluginFile } from '../../../../interfaces/dataPluginInterfaces/dataPluginFiles.ts';
+import { DataPluginCommit } from '../../../../interfaces/dataPluginInterfaces/dataPluginCommits.ts';
 
 export enum DataState {
   EMPTY,
@@ -14,10 +14,10 @@ interface DateRange {
 }
 
 export let files: DataPluginFile[] = [];
-export let current_file: string = "README.md";
+export let current_file: string = 'README.md';
 
 export function setGlobalCurrentFileData(newCurrentFile: string) {
-  console.log("Setting current file to", newCurrentFile);
+  console.log('Setting current file to', newCurrentFile);
   current_file = newCurrentFile;
   setCurrentFile(newCurrentFile);
 }
@@ -39,19 +39,19 @@ export interface ChangesState {
 }
 
 const initialState: ChangesState = {
-  current_file: "README.md",
-  last_current_file: "",
-  current_file_commits : [],
-  current_file_total_commits : [],
+  current_file: 'README.md',
+  last_current_file: '',
+  current_file_commits: [],
+  current_file_total_commits: [],
   files: [],
   dateRange: { from: new Date().toISOString(), to: new Date().toISOString() },
   dataState: DataState.EMPTY,
-  dateOfOverallFirstCommit: "",
-  dateOfOverallLastCommit: "",
+  dateOfOverallFirstCommit: '',
+  dateOfOverallLastCommit: '',
 };
 
 export const changesSlice = createSlice({
-  name: "changes",
+  name: 'changes',
   initialState,
   reducers: {
     setCurrentFileCommits(state, action: PayloadAction<DataPluginCommit[]>) {
@@ -82,5 +82,14 @@ export const changesSlice = createSlice({
   },
 });
 
-export const { setCurrentFileCommits, setCurrentFileTotalCommits, setCurrentFile, setFiles, setDateRange, setDataState, setDateOfOverallFirstCommit, setDateOfOverallLastCommit } = changesSlice.actions;
+export const {
+  setCurrentFileCommits,
+  setCurrentFileTotalCommits,
+  setCurrentFile,
+  setFiles,
+  setDateRange,
+  setDataState,
+  setDateOfOverallFirstCommit,
+  setDateOfOverallLastCommit,
+} = changesSlice.actions;
 export default changesSlice.reducer;

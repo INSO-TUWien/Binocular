@@ -28,6 +28,7 @@ import { formatDate } from '../../utils/dateUtils.ts';
  */
 
 export default class StackedAreaChart extends ScalableBaseChartComponent {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   constructor(props: any) {
     super(props, styles);
   }
@@ -39,6 +40,7 @@ export default class StackedAreaChart extends ScalableBaseChartComponent {
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-expect-error
   getXDims() {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return [d3.min(this.state.data.data, (d: any) => d.date), d3.max(this.state.data.data, (d: any) => d.date)];
   }
 
@@ -51,20 +53,24 @@ export default class StackedAreaChart extends ScalableBaseChartComponent {
    * @param scales
    * @returns {*}
    */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   createAreaFunction(scales: any) {
     //Area generator for the chart
-    return d3
-      .area()
-      .x(function (d: any) {
-        return scales.x(d.data.date);
-      })
-      .y0(function (d) {
-        return scales.y(d[0]);
-      })
-      .y1(function (d) {
-        return scales.y(d[1]);
-      })
-      .curve(d3.curveMonotoneX);
+    return (
+      d3
+        .area()
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        .x(function (d: any) {
+          return scales.x(d.data.date);
+        })
+        .y0(function (d) {
+          return scales.y(d[0]);
+        })
+        .y1(function (d) {
+          return scales.y(d[1]);
+        })
+        .curve(d3.curveMonotoneX)
+    );
   }
 
   /**
@@ -73,12 +79,15 @@ export default class StackedAreaChart extends ScalableBaseChartComponent {
    * @param order
    * @returns Stacked chart data for d3 functions and preprocessed data { stackedData, data }
    */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   calculateChartData(data: any, order: any) {
     //Keys are the names of the developers, date is excluded
     const keys = this.props.keys && this.props.keys.length > 0 ? this.props.keys : Object.keys(data[0]).slice(1);
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let orderedKeys: any[] = [];
     if (order) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       _.each(order, (orderElem: any) => {
         if (keys.includes('(Additions) ' + orderElem) && keys.includes('(Deletions) ' + orderElem)) {
           orderedKeys.push('(Additions) ' + orderElem);
@@ -106,6 +115,7 @@ export default class StackedAreaChart extends ScalableBaseChartComponent {
    * @param brushArea
    * @param area
    */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   resetZoom(scales: any, axes: any, brushArea: any, area: any) {
     scales.x.domain([
       this.state.data.stackedData[0][0].data.date,
@@ -129,8 +139,8 @@ export default class StackedAreaChart extends ScalableBaseChartComponent {
    * @param scales
    * @param stream
    */
-  //@ts-ignore
-  createdTooltipNode(path: any, bisectDate: any, mouseoverDate: any, tooltip: any, event: any, node: any, brushArea: any, scales: any) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  createdTooltipNode(path: any, bisectDate: any, mouseoverDate: any, tooltip: any, event: any, _node: any, brushArea: any, scales: any) {
     const palette = this.state.palette;
     const nearestDateIndex = bisectDate(this.state.data.data, mouseoverDate);
     const candidate1 = this.state.data.data[nearestDateIndex % this.state.data.data.length];
@@ -158,6 +168,7 @@ export default class StackedAreaChart extends ScalableBaseChartComponent {
           palette[key] +
           '">' +
           '</div>' +
+          // eslint-disable-next-line @typescript-eslint/restrict-plus-operands
           text +
           ': ' +
           Math.round((value + Number.EPSILON) * 100) / 100,
@@ -174,33 +185,34 @@ export default class StackedAreaChart extends ScalableBaseChartComponent {
    * @param data
    * @returns {*}
    */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   getBrushId(data: any) {
     return data.key;
   }
 
   /**
    *
-   * @param path
+   * @param _path
    * @param tooltip
-   * @param brushArea
-   * @param event
-   * @param stream
+   * @param _brushArea
+   * @param _event
+   * @param _stream
    */
-  //@ts-ignore
-  onMouseover(path: any, tooltip: any, brushArea: any, event: any, stream: any) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any,@typescript-eslint/no-unused-vars
+  onMouseover(_path: any, tooltip: any, _brushArea: any, _event: any, _stream: any) {
     tooltip.style('display', 'inline');
   }
 
   /**
    *
-   * @param path
+   * @param _path
    * @param tooltip
    * @param brushArea
-   * @param event
-   * @param stream
+   * @param _event
+   * @param _stream
    */
-  //@ts-ignore
-  onMouseLeave(path: any, tooltip: any, brushArea: any, event: any, stream: any) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any,@typescript-eslint/no-unused-vars
+  onMouseLeave(_path: any, tooltip: any, brushArea: any, _event: any, _stream: any) {
     tooltip.style('display', 'none');
     brushArea.select('.' + this.styles.indicatorLine).remove();
     brushArea.selectAll('.' + this.styles.indicatorCircle).remove();
@@ -213,7 +225,9 @@ export default class StackedAreaChart extends ScalableBaseChartComponent {
    * @param timeValue
    * @returns {{y1: *, y2: *}}
    */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   findChartValues(data: any, key: any, timeValue: any) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let foundValues: any[] = [];
     _.each(data, (series) => {
       if (series.key === key) {

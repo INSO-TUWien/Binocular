@@ -30,6 +30,7 @@ export async function getFilenamesForBranch(branchName: string, dataConnection: 
   return dataConnection.files.getFilenamesForBranch(branchName);
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function getPreviousFilenames(filenames: any, branch: any, dataConnection: DataPlugin) {
   //if this branch tracks file renames, we first have to find out how the relevant files were named in the past
   let filePathsWithPreviousNames: { path: string; previousFileNames: PreviousFileData[] }[] = [];
@@ -38,6 +39,7 @@ export async function getPreviousFilenames(filenames: any, branch: any, dataConn
     filePathsWithPreviousNames = await dataConnection.files.getPreviousFilenamesForFilesOnBranch(branch.branch);
     //we only care about files that were renamed
     filePathsWithPreviousNames = filePathsWithPreviousNames.filter(
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (pfn: { previousFileNames: string | any[] }) => pfn.previousFileNames.length !== 0,
     );
     //we only care about the previous names of selected files

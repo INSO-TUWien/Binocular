@@ -2,6 +2,7 @@
 
 const token = 'Binocular';
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const hash = async (value: any) => {
   'use strict';
 
