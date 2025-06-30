@@ -1,10 +1,19 @@
+<<<<<<<< HEAD:binocular-backend-new/infrastructure-arangodb/src/main/kotlin/com/inso_world/binocular/infrastructure/arangodb/persistence/entity/edges/CommitBuildConnectionEntity.kt
 package com.inso_world.binocular.infrastructure.arangodb.persistence.entity.edges
+========
+package com.inso_world.binocular.web.persistence.entity.arangodb.edges
+>>>>>>>> e1bd9a8ab (#304: graphql with generic dao interfaces to support arangodb and sq - work on sql repos):binocular-backend-new/web/src/main/kotlin/com/inso_world/binocular/web/persistence/entity/arangodb/edges/CommitBuildConnectionEntity.kt
 
 import com.arangodb.springframework.annotation.Edge
 import com.arangodb.springframework.annotation.From
 import com.arangodb.springframework.annotation.To
+<<<<<<<< HEAD:binocular-backend-new/infrastructure-arangodb/src/main/kotlin/com/inso_world/binocular/infrastructure/arangodb/persistence/entity/edges/CommitBuildConnectionEntity.kt
 import com.inso_world.binocular.infrastructure.arangodb.persistence.entity.BuildEntity
 import com.inso_world.binocular.infrastructure.arangodb.persistence.entity.CommitEntity
+========
+import com.inso_world.binocular.web.persistence.entity.arangodb.BuildEntity
+import com.inso_world.binocular.web.persistence.entity.arangodb.CommitEntity
+>>>>>>>> e1bd9a8ab (#304: graphql with generic dao interfaces to support arangodb and sq - work on sql repos):binocular-backend-new/web/src/main/kotlin/com/inso_world/binocular/web/persistence/entity/arangodb/edges/CommitBuildConnectionEntity.kt
 import org.springframework.data.annotation.Id
 
 /**
@@ -14,5 +23,9 @@ import org.springframework.data.annotation.Id
 data class CommitBuildConnectionEntity(
     @Id var id: String? = null,
     @From var from: CommitEntity,
+<<<<<<<< HEAD:binocular-backend-new/infrastructure-arangodb/src/main/kotlin/com/inso_world/binocular/infrastructure/arangodb/persistence/entity/edges/CommitBuildConnectionEntity.kt
     @To var to: BuildEntity,
+========
+    @To var to: BuildEntity
+>>>>>>>> e1bd9a8ab (#304: graphql with generic dao interfaces to support arangodb and sq - work on sql repos):binocular-backend-new/web/src/main/kotlin/com/inso_world/binocular/web/persistence/entity/arangodb/edges/CommitBuildConnectionEntity.kt
 )
