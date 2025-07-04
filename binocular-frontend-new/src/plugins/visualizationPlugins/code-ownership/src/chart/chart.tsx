@@ -5,14 +5,14 @@ import * as d3 from 'd3';
 import { useState, useEffect } from 'react';
 import _ from 'lodash';
 import { CodeOwnerShipSettings } from '../settings/settings.tsx';
-import { Properties } from '../../../../interfaces/visualizationPluginInterfaces/properties.ts';
 import { Palette } from '../../../../../types/data/authorType.ts';
 import { FileOwnershipCollection, OwnershipData, PreviousFileData } from '../../../../../types/data/ownershipType.ts';
 import { DataState, setCurrentBranch } from '../reducer';
 import { getBranches } from '../saga/helper.ts';
 import { handelPopoutResizing } from '../../../../utils/resizing.ts';
+import { VisualizationPluginProperties } from '../../../../interfaces/visualizationPluginInterfaces/visualizationPluginProperties.ts';
 
-function Chart<SettingsType extends CodeOwnerShipSettings, DataType>(props: Properties<SettingsType, DataType>) {
+function Chart<SettingsType extends CodeOwnerShipSettings, DataType>(props: VisualizationPluginProperties<SettingsType, DataType>) {
   // /!*
   //  * Creating Dispatch and Root State for interaction with the reducer State
   //  *!/

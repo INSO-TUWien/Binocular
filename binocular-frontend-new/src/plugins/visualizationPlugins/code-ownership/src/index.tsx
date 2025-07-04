@@ -5,6 +5,7 @@ import Saga from './saga';
 import Reducer from './reducer';
 import { VisualizationPlugin } from '../../../interfaces/visualizationPlugin.ts';
 import PreviewImage from '../assets/thumbnail.svg';
+import { VisualizationPluginMetadataCategory } from '../../../interfaces/visualizationPluginInterfaces/visualizationPluginMetadata.ts';
 
 const CodeOwnership: VisualizationPlugin<CodeOwnerShipSettings, null> = {
   name: 'Code Ownership',
@@ -27,6 +28,9 @@ const CodeOwnership: VisualizationPlugin<CodeOwnerShipSettings, null> = {
   },
   images: {
     thumbnail: PreviewImage,
+  },
+  metadata: {
+    category: VisualizationPluginMetadataCategory.Ownership,
   },
   reducer: Reducer,
   saga: Saga,

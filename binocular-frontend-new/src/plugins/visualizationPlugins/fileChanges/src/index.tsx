@@ -6,6 +6,7 @@ import { getSVGData } from './utilities/utilities.ts';
 import Reducer from './reducer';
 import Saga from './saga';
 import Help from './help/help.tsx';
+import { VisualizationPluginMetadataCategory } from '../../../interfaces/visualizationPluginInterfaces/visualizationPluginMetadata.ts';
 
 const FileChanges: VisualizationPlugin<SettingsType, null> = {
   name: 'File Changes',
@@ -27,6 +28,9 @@ const FileChanges: VisualizationPlugin<SettingsType, null> = {
   },
   images: {
     thumbnail: PreviewImage,
+  },
+  metadata: {
+    category: VisualizationPluginMetadataCategory.Commits,
   },
   reducer: Reducer,
   saga: Saga,
