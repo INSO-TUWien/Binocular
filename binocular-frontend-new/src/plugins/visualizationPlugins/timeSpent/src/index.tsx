@@ -6,7 +6,7 @@ import Reducer from './reducer';
 import { convertToChartData } from './utilities/dataConverter.ts';
 import Saga from './saga';
 import Help from './help/help.tsx';
-import { DataPluginNote } from '../../../interfaces/dataPluginInterfaces/dataPluginNote.ts';
+import { DataPluginNote } from '../../../interfaces/dataPluginInterfaces/dataPluginNotes.ts';
 
 const TimeSpent: VisualizationPlugin<SettingsType, DataPluginNote> = {
   name: 'Time Spent',

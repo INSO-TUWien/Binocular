@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { DataPluginNote } from '../../../../interfaces/dataPluginInterfaces/dataPluginNote.ts';
+import { DataPluginNote } from '../../../../interfaces/dataPluginInterfaces/dataPluginNotes.ts';
 
 export enum DataState {
   EMPTY,

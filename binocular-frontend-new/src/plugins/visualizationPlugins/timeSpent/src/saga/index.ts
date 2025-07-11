@@ -1,7 +1,7 @@
 import { put, takeEvery, fork, call, select, throttle } from 'redux-saga/effects';
 import { TimeSpentState, DataState, setNotes, setDataState, setDateRange } from '../reducer';
 import { DataPlugin } from '../../../../interfaces/dataPlugin.ts';
-import { DataPluginNote } from '../../../../interfaces/dataPluginInterfaces/dataPluginNote.ts';
+import { DataPluginNote } from '../../../../interfaces/dataPluginInterfaces/dataPluginNotes.ts';
 
 export default function* (dataConnection: DataPlugin) {
   yield fork(() => watchRefresh(dataConnection));
