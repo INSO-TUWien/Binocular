@@ -1,0 +1,30 @@
+@import "../../variables.scss";
+
+.infoTooltipp{
+  background: transparent;
+  width: 100vw;
+  max-width: 100vw;
+  height: 100vh;
+  max-height: 100vh;
+  position: fixed;
+  margin: 0;
+  overflow: hidden;
+}
+
+.infoTooltipp::backdrop{
+  background: transparent;
+}
+
+.infoTooltipp>div{
+  position: absolute;
+  top:100px;
+}
+
+.infoTooltipp>div>div{
+  @apply menu;
+  @apply bg-base-100;
+  @apply rounded;
+  @apply w-56;
+  @apply text-neutral-content;
+  box-shadow: $shadow-default;
+}
