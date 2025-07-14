@@ -19,6 +19,35 @@ import LayoutReducer from './reducer/general/layoutReducer';
 const logger = createLogger({
   collapsed: () => true,
 });
+// Simple change frequency reducer for global store
+const changeFrequencyReducer = (
+  state = {
+    state: {
+      currentPath: '',
+      hierarchyStack: [],
+    },
+    hierarchyData: [],
+    loading: false,
+    config: {
+      commitSpan: [new Date(0).toISOString(), new Date().toISOString()],
+    },
+  },
+  action: any,
+) => {
+  switch (action.type) {
+    case 'changeFrequency/setGlobalState':
+      return { ...state, state: { ...state.state, ...action.payload } };
+    case 'changeFrequency/setGlobalHierarchyData':
+      return { ...state, hierarchyData: action.payload };
+    case 'changeFrequency/setGlobalLoading':
+      return { ...state, loading: action.payload };
+    case 'changeFrequency/setGlobalConfig':
+      return { ...state, config: { ...state.config, ...action.payload } };
+    default:
+      return state;
+  }
+};
+
 export const store = configureStore({
   reducer: {
     dashboard: DashboardReducer,
@@ -33,6 +62,7 @@ export const store = configureStore({
     notifications: NotificationsReducer,
     tabs: TabsReducer,
     actions: ActionsReducer,
+    changeFrequency: changeFrequencyReducer,
   },
   middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(actionsMiddleware(), logger),
 });
