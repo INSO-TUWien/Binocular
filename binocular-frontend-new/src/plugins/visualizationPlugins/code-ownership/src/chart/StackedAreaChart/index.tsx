@@ -1,8 +1,9 @@
 import styles from './stackedAreaChart.module.scss';
-import ScalableBaseChartComponent from '../ScalableBaseChart';
+import ScalableBaseChartComponent, { Props } from '../ScalableBaseChart';
 import * as d3 from 'd3';
 import * as _ from 'lodash';
 import { formatDate } from '../../utils/dateUtils.ts';
+import { Series } from 'd3';
 
 /**
  * Stacked area chart
@@ -27,9 +28,25 @@ import { formatDate } from '../../utils/dateUtils.ts';
  *  - order (optional) (Format: [string, string, ...]) Strings containing the keys in desired order (largest to smallest).
  */
 
-export default class StackedAreaChart extends ScalableBaseChartComponent {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  constructor(props: any) {
+export interface Axes {
+  x?: d3.Selection<SVGGElement, CODataType, null, undefined> | undefined;
+  y?: d3.Selection<SVGGElement, CODataType, null, undefined> | undefined;
+}
+
+export interface Scales {
+  x: d3.ScaleTime<number, number, never>;
+  y: d3.ScaleLinear<number, number, never>;
+}
+
+export interface CODataType {
+  data?: {
+    date?: number;
+  };
+  [id: number]: number;
+}
+
+export default class StackedAreaChart extends ScalableBaseChartComponent<CODataType> {
+  constructor(props: Props) {
     super(props, styles);
   }
 
@@ -37,11 +54,8 @@ export default class StackedAreaChart extends ScalableBaseChartComponent {
    *
    * @returns {[]}
    */
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-expect-error
-  getXDims() {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return [d3.min(this.state.data.data, (d: any) => d.date), d3.max(this.state.data.data, (d: any) => d.date)];
+  getXDims(): number[] {
+    return [d3.min(this.state.data.data, (d: { date: number }) => d.date)!, d3.max(this.state.data.data, (d: { date: number }) => d.date)!];
   }
 
   getYDims() {
@@ -53,24 +67,20 @@ export default class StackedAreaChart extends ScalableBaseChartComponent {
    * @param scales
    * @returns {*}
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  createAreaFunction(scales: any) {
+  createAreaFunction(scales: Scales): d3.Area<CODataType> {
     //Area generator for the chart
-    return (
-      d3
-        .area()
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        .x(function (d: any) {
-          return scales.x(d.data.date);
-        })
-        .y0(function (d) {
-          return scales.y(d[0]);
-        })
-        .y1(function (d) {
-          return scales.y(d[1]);
-        })
-        .curve(d3.curveMonotoneX)
-    );
+    return d3
+      .area<CODataType>()
+      .x(function (d: CODataType) {
+        return scales.x(d.data!.date!);
+      })
+      .y0(function (d: CODataType) {
+        return scales.y(d[0]);
+      })
+      .y1(function (d: CODataType) {
+        return scales.y(d[1]);
+      })
+      .curve(d3.curveMonotoneX);
   }
 
   /**
@@ -79,16 +89,13 @@ export default class StackedAreaChart extends ScalableBaseChartComponent {
    * @param order
    * @returns Stacked chart data for d3 functions and preprocessed data { stackedData, data }
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  calculateChartData(data: any, order: any) {
+  calculateChartData(data: { [id: string]: number; date: number }[], order: string[]) {
     //Keys are the names of the developers, date is excluded
     const keys = this.props.keys && this.props.keys.length > 0 ? this.props.keys : Object.keys(data[0]).slice(1);
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    let orderedKeys: any[] = [];
+    let orderedKeys: string[] = [];
     if (order) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      _.each(order, (orderElem: any) => {
+      _.each(order, (orderElem: string) => {
         if (keys.includes('(Additions) ' + orderElem) && keys.includes('(Deletions) ' + orderElem)) {
           orderedKeys.push('(Additions) ' + orderElem);
           orderedKeys.push('(Deletions) ' + orderElem);
@@ -104,7 +111,7 @@ export default class StackedAreaChart extends ScalableBaseChartComponent {
     const stack = d3.stack().offset(this.props.d3offset).order(d3.stackOrderReverse).keys(orderedKeys);
 
     //Data formatted for d3
-    const stackedData = stack(data);
+    const stackedData: Array<Series<{ [p: string]: number }, string>> = stack(data);
     return { stackedData, data };
   }
 
@@ -115,14 +122,13 @@ export default class StackedAreaChart extends ScalableBaseChartComponent {
    * @param brushArea
    * @param area
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  resetZoom(scales: any, axes: any, brushArea: any, area: any) {
+  resetZoom(scales: Scales, axes: Axes, brushArea: d3.Selection<SVGGElement, CODataType, null, undefined>, area: d3.Area<CODataType>) {
     scales.x.domain([
-      this.state.data.stackedData[0][0].data.date,
-      this.state.data.stackedData[0][this.state.data.stackedData[0].length - 1].data.date,
+      this.state.data.stackedData[0][0].data!.date!,
+      this.state.data.stackedData[0][this.state.data.stackedData[0].length - 1].data!.date!,
     ]);
-    axes.x.call(d3.axisBottom(scales.x));
-    brushArea.selectAll('.layer').attr('d', area);
+    axes.x!.call(d3.axisBottom(scales.x));
+    brushArea.selectAll('.layer').attr('d', area as unknown as readonly number[]);
     this.setState({ zoomed: false });
   }
 
@@ -134,25 +140,32 @@ export default class StackedAreaChart extends ScalableBaseChartComponent {
    * @param tooltip
    * @param tooltip
    * @param event
-   * @param node
+   * @param _node
    * @param brushArea
    * @param scales
-   * @param stream
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  createdTooltipNode(path: any, bisectDate: any, mouseoverDate: any, tooltip: any, event: any, _node: any, brushArea: any, scales: any) {
+  createdTooltipNode(
+    path: string,
+    bisectDate: (array: ArrayLike<{ date: number }>, x: unknown, lo?: number, hi?: number) => number,
+    mouseoverDate: Date,
+    tooltip: d3.Selection<HTMLDivElement, CODataType, null, undefined>,
+    event: { layerX: number; layerY: number },
+    _node: SVGSVGElement | null,
+    brushArea: d3.Selection<SVGGElement, CODataType, null, undefined>,
+    scales: Scales,
+  ) {
     const palette = this.state.palette;
     const nearestDateIndex = bisectDate(this.state.data.data, mouseoverDate);
     const candidate1 = this.state.data.data[nearestDateIndex % this.state.data.data.length];
     const candidate2 = this.state.data.data[nearestDateIndex - 1];
     let nearestDataPoint;
-    if (Math.abs(mouseoverDate - candidate1.date) < Math.abs(mouseoverDate - candidate2.date)) {
+    if (Math.abs(mouseoverDate.getTime() - candidate1.date) < Math.abs(mouseoverDate.getTime() - candidate2.date)) {
       nearestDataPoint = candidate1;
     } else {
       nearestDataPoint = candidate2;
     }
     const key = d3.select(path).attr('id');
-    const text = key.split(' <', 1); //Remove git signature email
+    const text = key.split(' <', 1)[0]; //Remove git signature email
     let value = nearestDataPoint[key];
     const chartValues = this.findChartValues(this.state.data.stackedData, key, nearestDataPoint.date);
     const formattedDate = formatDate(new Date(nearestDataPoint.date), this.props.resolution);
@@ -168,7 +181,6 @@ export default class StackedAreaChart extends ScalableBaseChartComponent {
           palette[key] +
           '">' +
           '</div>' +
-          // eslint-disable-next-line @typescript-eslint/restrict-plus-operands
           text +
           ': ' +
           Math.round((value + Number.EPSILON) * 100) / 100,
@@ -176,7 +188,6 @@ export default class StackedAreaChart extends ScalableBaseChartComponent {
       .style('position', 'absolute')
       .style('left', event.layerX - 20 + 'px')
       .style('top', event.layerY - 70 + 'px');
-
     this.paintDataPoint(brushArea, scales.x(nearestDataPoint.date), scales.y(chartValues.y1), scales.y(chartValues.y2), palette[key]);
   }
 
@@ -185,34 +196,27 @@ export default class StackedAreaChart extends ScalableBaseChartComponent {
    * @param data
    * @returns {*}
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  getBrushId(data: any) {
+  getBrushId(data: { key: string }) {
     return data.key;
   }
 
   /**
    *
-   * @param _path
    * @param tooltip
-   * @param _brushArea
-   * @param _event
-   * @param _stream
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any,@typescript-eslint/no-unused-vars
-  onMouseover(_path: any, tooltip: any, _brushArea: any, _event: any, _stream: any) {
+  onMouseover(tooltip: d3.Selection<HTMLDivElement, CODataType, null, undefined>) {
     tooltip.style('display', 'inline');
   }
 
   /**
    *
-   * @param _path
    * @param tooltip
    * @param brushArea
-   * @param _event
-   * @param _stream
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any,@typescript-eslint/no-unused-vars
-  onMouseLeave(_path: any, tooltip: any, brushArea: any, _event: any, _stream: any) {
+  onMouseLeave(
+    tooltip: d3.Selection<HTMLDivElement, CODataType, null, undefined>,
+    brushArea: d3.Selection<SVGGElement, CODataType, null, undefined>,
+  ) {
     tooltip.style('display', 'none');
     brushArea.select('.' + this.styles.indicatorLine).remove();
     brushArea.selectAll('.' + this.styles.indicatorCircle).remove();
@@ -225,14 +229,12 @@ export default class StackedAreaChart extends ScalableBaseChartComponent {
    * @param timeValue
    * @returns {{y1: *, y2: *}}
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  findChartValues(data: any, key: any, timeValue: any) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    let foundValues: any[] = [];
+  findChartValues(data: (CODataType[] & { key: string })[], key: string, timeValue: number) {
+    let foundValues: { [id: number]: number } = [];
     _.each(data, (series) => {
       if (series.key === key) {
         _.each(series, (dataPoint) => {
-          if (dataPoint.data.date === timeValue) {
+          if (dataPoint.data!.date === timeValue) {
             foundValues = dataPoint;
             return false;
           }

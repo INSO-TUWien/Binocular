@@ -6,6 +6,8 @@ import * as baseStyles from './scalable-base-chart.module.scss';
 import { NoImplementationException } from '../../utils/exception/NoImplementationException.ts';
 import { hash } from '../../utils/cryptoUtils.ts';
 import { Palette } from '../../../../../../types/data/authorType.ts';
+import { BaseType, BrushBehavior } from 'd3';
+import { Axes, Scales } from '../StackedAreaChart';
 
 /**
  * ScalableBaseChartComponent
@@ -30,10 +32,9 @@ import { Palette } from '../../../../../../types/data/authorType.ts';
  *  - order (optional) (Format: [string, string, ...]) Strings containing the keys in desired order (largest to smallest).
  */
 
-interface Props {
+export interface Props {
   content: { [id: string]: number }[];
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  d3offset: any;
+  d3offset: () => void;
   displayNegative?: boolean;
   keys: string[];
   order: string[];
@@ -49,7 +50,7 @@ interface Props {
   hideVertical?: boolean;
 }
 
-interface State {
+interface State<T> {
   content: { [id: string]: number }[];
   palette: Palette;
   componentMounted: boolean;
@@ -57,19 +58,28 @@ interface State {
   zoomedDims: number[];
   zoomedVertical: boolean;
   verticalZoomDims: number[];
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  d3offset: any;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  data: any;
+  d3offset: () => void;
+  data: {
+    data: { [id: string]: number; date: number }[];
+    stackedData: (T[] & { key: string })[];
+    hash?: string;
+    keysHash?: string;
+    orderHash?: string;
+  };
 }
 
-export default class ScalableBaseChart extends React.Component<Props, State> {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  protected styles: any;
+interface Paddings {
+  top: number;
+  left: number;
+  right: number;
+  bottom: number;
+}
+
+export default class ScalableBaseChart<T> extends React.Component<Props, State<T>> {
+  protected styles: CSSModuleClasses;
   private svgRef: SVGSVGElement | null | undefined;
   private tooltipRef: HTMLDivElement | null | undefined;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  constructor(props: Props | Readonly<Props>, styles: any) {
+  constructor(props: Props | Readonly<Props>, styles: CSSModuleClasses) {
     super(props);
 
     this.styles = Object.freeze(Object.assign({}, baseStyles, styles));
@@ -85,8 +95,6 @@ export default class ScalableBaseChart extends React.Component<Props, State> {
       d3offset: props.d3offset,
       data: { data: [], stackedData: [] },
     };
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any,@typescript-eslint/no-misused-promises
-    window.addEventListener('resize', () => this.updateElement());
   }
 
   /**
@@ -98,8 +106,7 @@ export default class ScalableBaseChart extends React.Component<Props, State> {
    * @returns {*}
    * @param _scales
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any,@typescript-eslint/no-unused-vars
-  createAreaFunction(_scales: any) {
+  createAreaFunction(_scales: Scales): d3.Area<T> {
     throw new NoImplementationException('Base class is abstract and requires implementation!');
   }
 
@@ -118,8 +125,7 @@ export default class ScalableBaseChart extends React.Component<Props, State> {
    * @param _brushArea
    * @param _area
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any,@typescript-eslint/no-unused-vars
-  resetZoom(_scales: any, _axes: any, _brushArea: any, _area: any) {
+  resetZoom(_scales: Scales, _axes: Axes, _brushArea: d3.Selection<SVGGElement, T, null, undefined>, _area: d3.Area<T>) {
     throw new NoImplementationException('Base class is abstract and requires implementation!');
   }
 
@@ -129,8 +135,10 @@ export default class ScalableBaseChart extends React.Component<Props, State> {
    * @param _data
    * @param _order
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any,@typescript-eslint/no-unused-vars
-  calculateChartData(_data: any, _order: any) {
+  calculateChartData(
+    _data: { [id: string]: number }[],
+    _order: string[],
+  ): { data: { [id: string]: number; date: number }[]; stackedData: (T[] & { key: string })[] } {
     throw new NoImplementationException('Base class is abstract and requires implementation!');
   }
 
@@ -146,54 +154,36 @@ export default class ScalableBaseChart extends React.Component<Props, State> {
    * @param _scales
    */
   createdTooltipNode(
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any,@typescript-eslint/no-unused-vars
-    _path: any,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any,@typescript-eslint/no-unused-vars
-    _bisectDate: any,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any,@typescript-eslint/no-unused-vars
-    _mouseoverDate: any,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any,@typescript-eslint/no-unused-vars
-    _tooltip: any,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any,@typescript-eslint/no-unused-vars
-    _event: any,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any,@typescript-eslint/no-unused-vars
-    _node: any,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any,@typescript-eslint/no-unused-vars
-    _brushArea: any,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any,@typescript-eslint/no-unused-vars
-    _scales: any,
+    _path: string,
+    _bisectDate: (array: ArrayLike<{ date: number }>, x: unknown, lo?: number, hi?: number) => number,
+    _mouseoverDate: Date,
+    _tooltip: d3.Selection<HTMLDivElement, T, null, undefined>,
+    _event: Event & { layerX: number; layerY: number },
+    _node: SVGSVGElement | null,
+    _brushArea: d3.Selection<SVGGElement, T, null, undefined>,
+    _scales: Scales,
   ) {
     throw new NoImplementationException('Base class is abstract and requires implementation!');
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any,@typescript-eslint/no-unused-vars
-  getBrushId(_data: any): any {
+  getBrushId(_data: T[] & { key: string }): string {
     throw new NoImplementationException('Base class is abstract and requires implementation!');
   }
 
   /**
    *
-   * @param path
-   * @param tooltip
-   * @param brushArea
-   * @param event
-   * @param stream
+   * @param _tooltip
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any,@typescript-eslint/no-unused-vars
-  onMouseover(_path: any, _tooltip: any, _brushArea: any, _event: any, _stream: any) {
+  onMouseover(_tooltip: d3.Selection<HTMLDivElement, T, null, undefined>) {
     throw new NoImplementationException('Base class is abstract and requires implementation!');
   }
 
   /**
    *
-   * @param _path
    * @param _tooltip
    * @param _brushArea
-   * @param _event
-   * @param _stream
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any,@typescript-eslint/no-unused-vars
-  onMouseLeave(_path: any, _tooltip: any, _brushArea: any, _event: any, _stream: any) {
+  onMouseLeave(_tooltip: d3.Selection<HTMLDivElement, T, null, undefined>, _brushArea: d3.Selection<SVGGElement, T, null, undefined>) {
     throw new NoImplementationException('Base class is abstract and requires implementation!');
   }
 
@@ -229,7 +219,7 @@ export default class ScalableBaseChart extends React.Component<Props, State> {
   }
 
   async hasUpdate() {
-    const keysHash = await hash(this.props.keys || []);
+    const keysHash = await hash(JSON.stringify(this.props.keys));
     return {
       hashes: { keysHash },
       hasChanges: this.state.data.keysHash !== keysHash || this.state.d3offset !== this.props.d3offset,
@@ -243,8 +233,8 @@ export default class ScalableBaseChart extends React.Component<Props, State> {
     //Initialization
     // stringify important, otherwise `[object Object],[object Object]` etc. will be hashed,
     // leading to skipped updates despite content changes
-    const contentHash = await hash(JSON.stringify(this.props.content) || []);
-    const orderHash = await hash(this.props.order || []);
+    const contentHash = await hash(JSON.stringify(this.props.content));
+    const orderHash = await hash(JSON.stringify(this.props.order));
     const { hashes, hasChanges } = await this.hasUpdate();
 
     //Get d3-friendly data
@@ -261,8 +251,7 @@ export default class ScalableBaseChart extends React.Component<Props, State> {
           ),
           d3offset: this.props.d3offset,
         },
-        // eslint-disable-next-line @typescript-eslint/unbound-method
-        this.visualizeData,
+        this.visualizeData.bind(this),
       );
     } else {
       this.visualizeData();
@@ -279,7 +268,7 @@ export default class ScalableBaseChart extends React.Component<Props, State> {
       return;
     }
     const yScale = this.props.yScale; //Multiplicator for the values on the y-scale
-    const svg = d3.select(this.svgRef); //Select parent svg from render method
+    const svg: d3.Selection<SVGSVGElement, T, null, undefined> = d3.select(this.svgRef); //Select parent svg from render method
     const { width, height, paddings } = this.getDimsAndPaddings(svg); //Get width and height of svg in browser
 
     //Get and set all required scales, which translate data values into pixel values
@@ -287,10 +276,10 @@ export default class ScalableBaseChart extends React.Component<Props, State> {
       height - paddings.bottom,
       paddings.top,
     ]);
-    const area = this.createAreaFunction(scales);
+    const area: d3.Area<T> = this.createAreaFunction(scales);
 
     //Brush generator for brush-zoom functionality, with referenced callback-function
-    const brush = d3.brushX().extent([
+    const brush: BrushBehavior<T> = d3.brushX<T>().extent([
       [paddings.left, 0],
       [width - paddings.right, height],
     ]);
@@ -302,9 +291,9 @@ export default class ScalableBaseChart extends React.Component<Props, State> {
     const { brushArea, axes } = this.drawChart(svg, area, brush, yScale, scales, height, width, paddings);
 
     //Set callback for brush-zoom functionality
-    brush.on('end', (event) => this.updateZoom(event.selection, scales, axes, brush, brushArea, area));
+    brush.on('end', (event) => this.updateZoom(event.selection, scales, axes, brush, brushArea!, area));
     //Set callback to reset zoom on double-click
-    svg.on('dblclick', () => this.resetZoom(scales, axes, brushArea, area));
+    svg.on('dblclick', () => this.resetZoom(scales, axes, brushArea!, area));
   }
 
   /**
@@ -313,11 +302,18 @@ export default class ScalableBaseChart extends React.Component<Props, State> {
    * @returns {width, height, {paddings: {top: *, left: *, bottom: *, right: *}, width: *, height: *}}
    *          Values self-explanatory. All values in pixels.
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  getDimsAndPaddings(svg: any) {
-    const paddings = this.props.paddings || { left: 0, right: 0, top: 0, bottom: 0 };
-    const node = !svg || typeof svg.node !== 'function' ? { getBoundingClientRec: () => ({}) } : svg.node();
-    const clientRect = node ? node.getBoundingClientRect() : {};
+  getDimsAndPaddings(svg: d3.Selection<SVGSVGElement, T, null, undefined>) {
+    const paddings = this.props.paddings || {
+      left: 0,
+      right: 0,
+      top: 0,
+      bottom: 0,
+    };
+    const node =
+      !svg || typeof svg.node !== 'function'
+        ? { getBoundingClientRect: (): { width: number; height: number } => ({ width: 0, height: 0 }) }
+        : svg.node();
+    const clientRect: { width?: number; height?: number } = node ? node.getBoundingClientRect() : {};
     const width = this.props.width ? this.props.width : clientRect.width || 0;
     const height = this.props.height ? this.props.height : clientRect.height || 0;
 
@@ -337,17 +333,17 @@ export default class ScalableBaseChart extends React.Component<Props, State> {
    *               e.g. width-paddingBottom and yTop should be e.g. paddingTop)
    * @returns {{x: *, y: *}} d3 x and y scales. x scale as time scale, y scale as linear scale.
    */
-  createScales(xDims: number[], xRange: number[], yDims: number[], yRange: number[]) {
+  createScales(xDims: number[], xRange: number[], yDims: number[], yRange: number[]): Scales {
     const x = d3.scaleTime().domain(xDims).range(xRange);
 
-    if (this.state.zoomed === true) {
+    if (this.state.zoomed) {
       x.domain(this.state.zoomedDims);
     }
 
     //Y axis scaled with the maximum amount of change (half in each direction)
     const y = d3.scaleLinear().domain(yDims).range(yRange);
 
-    if (this.state.zoomedVertical === true) {
+    if (this.state.zoomedVertical) {
       y.domain(this.state.verticalZoomDims);
     }
     return { x, y };
@@ -358,8 +354,7 @@ export default class ScalableBaseChart extends React.Component<Props, State> {
    * @param d
    * @returns {*}
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  getColor(d: any) {
+  getColor(d: T[] & { key: string }): string {
     if (!this.props.palette) {
       return '#000000';
     }
@@ -380,27 +375,32 @@ export default class ScalableBaseChart extends React.Component<Props, State> {
    * @returns {{brushArea: *, xAxis: *}} brushArea: Area that has all the contents appended to it,
    *               xAxis: d3 x-Axis for later transitioning (for zooming)
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any,@typescript-eslint/no-unused-vars
-  drawChart(svg: any, area: any, brush: any, _yScale: any, scales: any, height: any, width: any, paddings: any) {
-    const brushArea = svg.append('g');
+  drawChart(
+    svg: d3.Selection<SVGSVGElement, T, null, undefined>,
+    area: d3.Area<T>,
+    brush: d3.BrushBehavior<T>,
+    _yScale: number[] | undefined,
+    scales: Scales,
+    height: number,
+    width: number,
+    paddings: Paddings,
+  ) {
+    const brushArea: d3.Selection<SVGGElement, T, null, undefined> = svg.append('g');
     if (!this.tooltipRef) {
       return { brushArea: undefined, axes: { x: undefined, y: undefined } };
     }
-    const tooltip = d3.select(this.tooltipRef);
+    const tooltip: d3.Selection<HTMLDivElement, T, null, undefined> = d3.select(this.tooltipRef);
 
     this.setBrushArea(brushArea.append('g'), brush, area, tooltip, svg, scales);
 
     //Append visible x-axis on the bottom, with an offset so it's actually visible
-    const axes = Object.assign(
-      {
-        x: this.createXAxis(brushArea, scales, width, height, paddings),
-        y: this.createYAxis(brushArea, scales, width, height, paddings),
-      },
-      this.additionalAxes(brushArea, scales, width, height, paddings),
-    );
+    const axes = Object.assign({
+      x: this.createXAxis(brushArea, scales, width, height, paddings),
+      y: this.createYAxis(brushArea, scales, width, height, paddings),
+    });
 
     // set vertical zoom option if available
-    svg.on('wheel', !this.props.disableVerticalZoom ? this.createScrollEvent(svg, scales, axes, brushArea, area) : null);
+    if (this.props.disableVerticalZoom) svg.on('wheel', this.createScrollEvent(svg, scales, axes, brushArea, area));
 
     // required to support event handling
     svg
@@ -428,8 +428,13 @@ export default class ScalableBaseChart extends React.Component<Props, State> {
    * @param paddings
    * @returns {*}
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any,@typescript-eslint/no-unused-vars
-  createXAxis(brushArea: any, scales: any, _width: any, height: any, paddings: any) {
+  createXAxis(
+    brushArea: d3.Selection<SVGGElement, T, null, undefined>,
+    scales: Scales,
+    _width: number,
+    height: number,
+    paddings: Paddings,
+  ): d3.Selection<SVGGElement, T, null, undefined> {
     if (this.props.xAxisCenter) {
       return brushArea
         .append('g')
@@ -453,17 +458,22 @@ export default class ScalableBaseChart extends React.Component<Props, State> {
    * @param paddings
    * @returns {*}
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any,@typescript-eslint/no-unused-vars
-  createYAxis(brushArea: any, scales: any, _width: any, _height: any, paddings: any) {
+  createYAxis(
+    brushArea: d3.Selection<SVGGElement, T, null, undefined>,
+    scales: Scales,
+    _width: number,
+    _height: number,
+    paddings: Paddings,
+  ) {
     const yAxis = brushArea
       .append('g')
       .attr('class', this.styles.axis)
       .attr('transform', 'translate(' + paddings.left + ',0)');
 
     if (!this.props.hideVertical) {
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore
-      yAxis.call(d3.axisLeft(scales.y).tickFormat((d) => (this.props.displayNegative ? d : Math.abs(d))));
+      yAxis.call(
+        d3.axisLeft(scales.y).tickFormat((d) => (this.props.displayNegative ? d.valueOf().toString() : Math.abs(d.valueOf()).toString())),
+      );
     }
     return yAxis;
   }
@@ -476,8 +486,13 @@ export default class ScalableBaseChart extends React.Component<Props, State> {
    * @param _height
    * @param _paddings
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any,@typescript-eslint/no-unused-vars
-  additionalAxes(_brushArea: any, _scales: any, _width: any, _height: any, _paddings: any) {
+  additionalAxes(
+    _brushArea: d3.Selection<SVGGElement, T, null, undefined>,
+    _scales: Scales,
+    _width: number,
+    _height: number,
+    _paddings: Paddings,
+  ) {
     return;
   }
 
@@ -490,42 +505,40 @@ export default class ScalableBaseChart extends React.Component<Props, State> {
    * @param svg
    * @param scales
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any,@typescript-eslint/no-unused-vars
-  setBrushArea(brushArea: any, brush: any, area: any, tooltip: any, svg: any, scales: any) {
+  setBrushArea(
+    brushArea: d3.Selection<SVGGElement, T, null, undefined>,
+    brush: d3.BrushBehavior<T>,
+    area: d3.Area<T>,
+    tooltip: d3.Selection<HTMLDivElement, T, null, undefined>,
+    svg: d3.Selection<SVGSVGElement, T, null, undefined>,
+    scales: Scales,
+  ) {
     brushArea.append('g').attr('class', 'brush').call(brush);
-
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any,@typescript-eslint/unbound-method
-    const bisectDate = d3.bisector((d: any) => d.date).left;
+    const bisectDate = d3.bisector((d: { date: number }) => d.date).left.bind(this);
     //Append data to svg using the area generator and palette
     const pathStreams = brushArea
       .append('g')
       .selectAll('path')
-      .data(this.state.data.stackedData)
+      .data<T[] & { key: string }>(this.state.data.stackedData)
       .enter()
       .append('path')
       .attr('class', () => `layers ${this.getBrushClass()}`)
       .classed(this.styles.layer, !!this.styles.layer)
       .classed('layer', true)
-      // eslint-disable-next-line @typescript-eslint/unbound-method
-      .attr('id', this.getBrushId)
+      .attr('id', this.getBrushId.bind(this))
       //Color palette with the form {author1: color1, ...}
       .style('fill', this.getColor.bind(this))
       .attr('stroke-width', this.getLayerStrokeWidth.bind(this))
       .attr('stroke', this.getLayerStrokeColor.bind(this))
-      .attr('d', area)
+      .attr('d', area as unknown as readonly number[])
       //.attr('clip-path', 'url(#clip)')
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any,@typescript-eslint/no-unused-vars
-      .on('mouseenter', (event: any, stream: any) => {
-        return this.onMouseover(this, tooltip, brushArea, event, stream);
+      .on('mouseenter', () => {
+        return this.onMouseover(tooltip);
       })
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any,@typescript-eslint/no-unused-vars
-      .on('mouseout', (event: any, stream: any) => {
-        return this.onMouseLeave(this, tooltip, brushArea, event, stream);
+      .on('mouseout', () => {
+        return this.onMouseLeave(tooltip, brushArea);
       })
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-expect-error
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any,@typescript-eslint/no-unused-vars
-      .on('mousemove', (event: any, stream: any) => {
+      .on('mousemove', (event: Event & { target: string; layerX: number; layerY: number }, _stream: T[] & { key: string }) => {
         //Calculate values and text for tooltip
         const node = svg.node();
         const pointer = d3.pointer(event, node);
@@ -549,8 +562,7 @@ export default class ScalableBaseChart extends React.Component<Props, State> {
    * @returns {number}
    * @param _data
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any,@typescript-eslint/no-unused-vars
-  getLayerStrokeWidth(_data: any) {
+  getLayerStrokeWidth(_data: T[] & { key: string }) {
     return 0;
   }
 
@@ -559,9 +571,8 @@ export default class ScalableBaseChart extends React.Component<Props, State> {
    * @returns {undefined}
    * @param _data
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any,@typescript-eslint/no-unused-vars
-  getLayerStrokeColor(_data: any): any {
-    return undefined;
+  getLayerStrokeColor(_data: T[] & { key: string }): string {
+    return '';
   }
 
   getBrushClass() {
@@ -574,8 +585,11 @@ export default class ScalableBaseChart extends React.Component<Props, State> {
    * @param _pathStreams
    * @param _scales
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any,@typescript-eslint/no-unused-vars
-  additionalPathDefs(_brushArea: any, _pathStreams: any, _scales: any) {
+  additionalPathDefs(
+    _brushArea: d3.Selection<SVGGElement, T, null, undefined>,
+    _pathStreams: d3.Selection<SVGPathElement, T[] & { key: string }, SVGGElement, T>,
+    _scales: Scales,
+  ) {
     return;
   }
 
@@ -588,10 +602,14 @@ export default class ScalableBaseChart extends React.Component<Props, State> {
    * @param area
    * @returns scroll event
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any,@typescript-eslint/no-unused-vars
-  createScrollEvent(_svg: any, scales: any, axes: any, brushArea: any, area: any) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return (event: any) => {
+  createScrollEvent(
+    _svg: d3.Selection<SVGSVGElement, T, null, undefined>,
+    scales: Scales,
+    axes: Axes,
+    brushArea: d3.Selection<SVGGElement, T, null, undefined>,
+    area: d3.Area<T>,
+  ) {
+    return (event: Event & { deltaY: number }) => {
       // prevent page scrolling
       event.preventDefault();
 
@@ -641,12 +659,17 @@ export default class ScalableBaseChart extends React.Component<Props, State> {
    * @param area Area that the paths are drawn on
    * @param areaGenerator Area generator for those paths
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  updateVerticalZoom(dims: any, scales: any, axes: any, area: any, areaGenerator: any) {
+  updateVerticalZoom(
+    dims: number[],
+    scales: Scales,
+    axes: Axes,
+    area: d3.Selection<SVGGElement, T, null, undefined>,
+    areaGenerator: d3.Area<T>,
+  ) {
     scales.y.domain(dims);
 
-    axes.y.call(d3.axisLeft(scales.y));
-    area.selectAll('.layer').attr('d', areaGenerator);
+    axes.y!.call(d3.axisLeft(scales.y));
+    area.selectAll('.layer').attr('d', areaGenerator as unknown as readonly number[]);
     this.setState({ zoomedVertical: true, verticalZoomDims: dims });
   }
 
@@ -654,15 +677,14 @@ export default class ScalableBaseChart extends React.Component<Props, State> {
    * Reset the vertical zoom to default values.
    * @param scales Y-Scale from d3
    * @param axes Y-Axis from d3
-   * @param area Area that the paths are drawn on
+   * @param brushArea Area that the paths are drawn on
    * @param areaGenerator Area generator for those paths
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  resetVerticalZoom(scales: any, axes: any, area: any, areaGenerator: any) {
+  resetVerticalZoom(scales: Scales, axes: Axes, brushArea: d3.Selection<SVGGElement, T, null, undefined>, areaGenerator: d3.Area<T>) {
     scales.y.domain(this.getYDims());
 
-    axes.y.call(d3.axisLeft(scales.y));
-    area.selectAll('.layer').attr('d', areaGenerator);
+    axes.y!.call(d3.axisLeft(scales.y));
+    brushArea.selectAll('.layer').attr('d', areaGenerator as unknown as readonly number[]);
 
     this.setState({ zoomedVertical: false, verticalZoomDims: [0, 0] });
   }
@@ -676,19 +698,25 @@ export default class ScalableBaseChart extends React.Component<Props, State> {
    * @param brushArea Area that the path, x/y-Axis and brush-functionality live on (see drawChart)
    * @param area d3 Area generator (for area graphs)
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  updateZoom(extent: any, scales: any, axes: any, brush: any, brushArea: any, area: any) {
+  updateZoom(
+    extent: number[],
+    scales: Scales,
+    axes: Axes,
+    brush: d3.BrushBehavior<T>,
+    brushArea: d3.Selection<SVGGElement, T, null, undefined>,
+    area: d3.Area<T>,
+  ) {
     let zoomedDims;
     if (extent) {
-      zoomedDims = [scales.x.invert(extent[0]), scales.x.invert(extent[1])];
+      zoomedDims = [scales.x.invert(extent[0]).getTime(), scales.x.invert(extent[1]).getTime()];
       scales.x.domain(zoomedDims);
-      brushArea.select('.brush').call(brush.move, null);
+      brushArea.select<SVGGElement>('.brush').call(brush.move.bind(this), null);
     } else {
       return;
     }
 
-    axes.x.call(d3.axisBottom(scales.x));
-    brushArea.selectAll('.layer').attr('d', area);
+    axes.x!.call(d3.axisBottom(scales.x));
+    brushArea.selectAll<BaseType, T>('.layer').attr('d', area as unknown as readonly number[]);
     this.setState({ zoomed: true, zoomedDims: zoomedDims });
   }
 
@@ -701,8 +729,7 @@ export default class ScalableBaseChart extends React.Component<Props, State> {
    * @param y1 contains upper y referring to the y axis
    * @param color defines the color or the cycles
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  paintDataPoint(brushArea: any, x: any, y0: any, y1: any, color: any) {
+  paintDataPoint(brushArea: d3.Selection<SVGGElement, T, null, undefined>, x: number, y0: number, y1: number, color: string) {
     brushArea.append('line').attr('class', this.styles.indicatorLine).attr('x1', x).attr('x2', x).attr('y1', y0).attr('y2', y1);
     //.attr('clip-path', 'url(#clip)');
 
