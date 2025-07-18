@@ -40,4 +40,10 @@ export default class Accounts implements DataPluginAccounts {
     });
     return accountList;
   }
+
+  // TODO: Implement this method, when new backend is ready
+  public async saveAccountUserRelation(relation: DataPluginAccount) {
+    console.log(`Saving Account-User Relation: ${JSON.stringify(relation)}`);
+    return await Promise.resolve(true);
+  }
 }

@@ -7,6 +7,7 @@ import { convertToChartData } from './utilities/dataConverter.ts';
 import Saga from './saga';
 import Help from './help/help.tsx';
 import { DataPluginNote } from '../../../interfaces/dataPluginInterfaces/dataPluginNotes.ts';
+import { VisualizationPluginMetadataCategory } from '../../../interfaces/visualizationPluginInterfaces/visualizationPluginMetadata.ts';
 
 const TimeSpent: VisualizationPlugin<SettingsType, DataPluginNote> = {
   name: 'Time Spent',
@@ -25,6 +26,11 @@ const TimeSpent: VisualizationPlugin<SettingsType, DataPluginNote> = {
   },
   images: {
     thumbnail: PreviewImage,
+  },
+  metadata: {
+    category: VisualizationPluginMetadataCategory.AuthorBehaviour,
+    recommended: false,
+    description: '(Gitlab only) A line chart that visualizes the amount of hours spent/removed over time.',
   },
   reducer: Reducer,
   saga: Saga,

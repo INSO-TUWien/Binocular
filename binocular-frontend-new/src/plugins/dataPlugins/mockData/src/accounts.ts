@@ -23,4 +23,15 @@ export default class Accounts implements DataPluginAccounts {
       resolve(users);
     });
   }
+
+  public async saveAccountUserRelation(relation: DataPluginAccount) {
+    console.log(`Saving Account-User Relation: ${JSON.stringify(relation)}`);
+    return new Promise((resolve) => {
+      // Simulate saving the relation
+      setTimeout(() => {
+        console.log('Account relation saved successfully');
+        resolve(true);
+      }, 10);
+    });
+  }
 }

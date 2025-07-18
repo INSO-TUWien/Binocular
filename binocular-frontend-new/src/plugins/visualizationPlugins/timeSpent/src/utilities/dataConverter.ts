@@ -2,12 +2,13 @@ import moment from 'moment/moment';
 import chroma from 'chroma-js';
 import _ from 'lodash';
 import { SettingsType } from '../settings/settings.tsx';
-import { Properties } from '../../../../interfaces/visualizationPluginInterfaces/properties.ts';
 import { DataPluginNote } from '../../../../interfaces/dataPluginInterfaces/dataPluginNotes.ts';
 import { DataPluginMergeRequest } from '../../../../interfaces/dataPluginInterfaces/dataPluginMergeRequests.ts';
 import { DataPluginAccount } from '../../../../interfaces/dataPluginInterfaces/dataPluginAccounts.ts';
 import { DataPluginIssue } from '../../../../interfaces/dataPluginInterfaces/dataPluginIssues.ts';
 import distinctColors from 'distinct-colors';
+import { VisualizationPluginProperties } from '../../../../interfaces/visualizationPluginInterfaces/visualizationPluginProperties.ts';
+import { AuthorType } from '../../../../../types/data/authorType.ts';
 
 interface TimeSpentChartData {
   date: number;
@@ -34,7 +35,7 @@ interface Palette {
 
 export function convertToChartData(
   notes: DataPluginNote[],
-  props: Properties<SettingsType, DataPluginNote>,
+  props: VisualizationPluginProperties<SettingsType, DataPluginNote>,
 ): {
   chartData: TimeSpentChartData[];
   scale: number[];
@@ -66,7 +67,7 @@ export function convertToChartData(
   return returnValue;
 }
 function getDataByIssue(
-  props: Properties<SettingsType, DataPluginNote>,
+  props: VisualizationPluginProperties<SettingsType, DataPluginNote>,
   firstTimestamp: string,
   lastTimestamp: string,
   sortedData: TimeTrackingData[],
@@ -230,7 +231,7 @@ function getDataByIssue(
 }
 
 function getDataByAuthor(
-  props: Properties<SettingsType, DataPluginNote>,
+  props: VisualizationPluginProperties<SettingsType, DataPluginNote>,
   firstTimestamp: string,
   lastTimestamp: string,
   sortedData: TimeTrackingData[],
@@ -321,14 +322,14 @@ function getDataByAuthor(
       obj['others'] = 0;
     }
 
-    props.authorList.forEach((author) => {
+    props.authorList.forEach((author: AuthorType) => {
       if (!author.selected) return;
       const name =
         author.parent === -1
           ? author.displayName || author.user.gitSignature
           : author.parent === 0
             ? 'others'
-            : props.authorList.filter((a) => a.id === author.parent)[0].user.gitSignature;
+            : props.authorList.filter((a: AuthorType) => a.id === author.parent)[0].user.gitSignature;
       if (props.settings.splitSpentRemoved) {
         if (author.user.id in object.statsBySortingObject) {
           //Insert number of changes with the author name as key,
