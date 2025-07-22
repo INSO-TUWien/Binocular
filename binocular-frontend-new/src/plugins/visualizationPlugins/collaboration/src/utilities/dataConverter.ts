@@ -1,7 +1,6 @@
 import { DataPluginAccount } from "../../../../interfaces/dataPluginInterfaces/dataPluginAccount.ts";
 import { DataPluginIssue } from "../../../../interfaces/dataPluginInterfaces/dataPluginIssues.ts";
 import { SettingsType } from "../settings/settings.tsx";
-import { Properties } from "../../../../interfaces/visualizationPluginInterfaces/properties.ts";
 import { NodeType, LinkType } from "../chart/networkChart.tsx";
 
 /**
@@ -10,12 +9,18 @@ import { NodeType, LinkType } from "../chart/networkChart.tsx";
  */
 export function convertIssuesToGraphData(
   accounts: DataPluginAccount[],
-  props: Properties<SettingsType, DataPluginAccount>,
+  settings: SettingsType,
 ): {
-  nodes: { id: string; group: string; url: string; name: string }[];
+  nodes: {
+    id: string;
+    group: string;
+    url: string;
+    name: string;
+    avatarUrl: string;
+  }[];
   links: LinkType[];
 } {
-  const { minEdgeValue, maxEdgeValue } = props.settings;
+  const { minEdgeValue, maxEdgeValue } = settings;
 
   const issueAccountMap = buildIssueMap(accounts);
   const nodeMap = initializeNodeMap(accounts);

@@ -2,12 +2,6 @@ import { useEffect, useRef, useState } from "react";
 import * as d3 from "d3";
 import { DataPluginIssue } from "../../../../interfaces/dataPluginInterfaces/dataPluginIssues.ts";
 
-/**
- * TODO: credit https://www.react-graph-gallery.com?
- */
-
-const MARGIN = { top: 10, right: 10, bottom: 0, left: 0 };
-
 // Types
 export interface NodeType extends d3.SimulationNodeDatum {
   id: string;
@@ -33,22 +27,14 @@ type NetworkChartProps = {
   width: number;
   height: number;
   data: NetworkData;
-  /** A default colour string used to style hull strokes—actual hull colour is based on node.group */
-  color: string;
 };
 
-export const NetworkChart = ({
-  width,
-  height,
-  data,
-  color,
-}: NetworkChartProps) => {
+export const NetworkChart = ({ width, height, data }: NetworkChartProps) => {
   const svgRef = useRef<SVGElement | null>(null);
   const tooltipRef = useRef<HTMLDivElement | null>(null);
   const [isVisible, setIsVisible] = useState(false);
+  let selectedLink: any = null;
   // inner drawing bounds
-  const boundsWidth = width - MARGIN.right - MARGIN.left;
-  const boundsHeight = height - MARGIN.top - MARGIN.bottom;
 
   if (!data || !data.nodes || !data.links) {
     console.error("No data nodes found");
@@ -94,9 +80,7 @@ export const NetworkChart = ({
       .attr("cx", 0)
       .attr("cy", 0);
 
-    const container = svgElement
-      .append("g")
-      .attr("transform", `translate(${MARGIN.left}, ${MARGIN.top})`);
+    const container = svgElement.append("g");
 
     const zoomBehavior = d3
       .zoom<SVGSVGElement, unknown>()
@@ -114,8 +98,8 @@ export const NetworkChart = ({
     const simulation = initializeForceSimulation(
       data.nodes,
       data.links,
-      boundsWidth,
-      boundsHeight,
+      width,
+      height,
     );
 
     const linkSelection = container
@@ -128,8 +112,24 @@ export const NetworkChart = ({
       .enter()
       .append("line")
       .attr("stroke-width", (d) => Math.sqrt(d.value))
-      .on("mouseover", (_event, d) => showLinkTooltip(d))
-      .on("mouseout", () => hideTooltip());
+      .on("mouseover", (_event, d) => {
+        if (!selectedLink) showLinkTooltip(d);
+      })
+      .on("mouseout", () => {
+        if (!selectedLink) hideTooltip();
+      })
+      .on("click", (event, d) => {
+        event.stopPropagation();
+        selectedLink = d;
+        showLinkTooltip(d);
+      });
+
+    document.body.addEventListener("click", () => {
+      if (selectedLink) {
+        selectedLink = null;
+        hideTooltip();
+      }
+    });
 
     //draw node groups
     const nodeSelection = container
@@ -222,7 +222,7 @@ export const NetworkChart = ({
     return () => {
       simulation.stop();
     };
-  }, [data, boundsWidth, boundsHeight, color]);
+  }, [data, width, height]);
 
   //helper values/constants
   const NODE_IMAGE_SIZE = 30; // px
@@ -293,7 +293,6 @@ export const NetworkChart = ({
       .restart();
   }
 
-  //computes a smooth hull path
   function computeHullPath(nodes: NodeType[]): string {
     //construct set of sample points around each node
     const points: [number, number][] = [];
@@ -323,8 +322,8 @@ export const NetworkChart = ({
             position: "absolute",
             top: 0,
             left: 0,
-            width: boundsWidth,
-            height: boundsHeight,
+            width: width,
+            height: height,
             backgroundColor: "rgba(255, 255, 255, 0.85)",
             display: "flex",
             alignItems: "center",
@@ -339,8 +338,8 @@ export const NetworkChart = ({
       )}
       <svg
         ref={svgRef}
-        width={boundsWidth}
-        height={boundsHeight}
+        width={width}
+        height={height}
         style={{ opacity: isVisible ? 1 : 0, display: "block" }}
       />
     </div>

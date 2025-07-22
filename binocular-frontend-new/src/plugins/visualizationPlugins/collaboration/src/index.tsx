@@ -18,7 +18,6 @@ const CollaborationVisualization: VisualizationPlugin<
   settingsComponent: Settings,
   helpComponent: Help,
   defaultSettings: {
-    color: "#007AFF",
     minEdgeValue: 1,
     maxEdgeValue: 999,
   },
