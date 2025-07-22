@@ -6,14 +6,15 @@ import { convertIssuesToGraphData } from "../utilities/dataConverter.ts";
 import { DataState } from "../reducer";
 import { DataPluginAccount } from "../../../../interfaces/dataPluginInterfaces/dataPluginAccount.ts";
 
-export default function Chart(
-  props: {
-    settings: SettingsType;
-    dataConnection: any;
-    chartContainerRef: RefObject<HTMLDivElement>;
-    showAfterCooldown: boolean;
-  } & { store: Store },
-) {
+type ChartProps = {
+  settings: SettingsType;
+  dataConnection: any;
+  chartContainerRef: RefObject<HTMLDivElement>;
+  showAfterCooldown: boolean;
+  store: Store;
+};
+
+export default function Chart(props: ChartProps) {
   const chartContainerRef = props.chartContainerRef;
 
   // force re-render on change
@@ -36,7 +37,7 @@ export default function Chart(
   const { accounts, dataState } = state;
 
   const graphData = useMemo(
-    () => convertIssuesToGraphData(accounts, { settings: props.settings }),
+    () => convertIssuesToGraphData(accounts, props.settings),
     [accounts, props.settings.minEdgeValue, props.settings.maxEdgeValue],
   );
 
@@ -61,7 +62,6 @@ export default function Chart(
           }}
           width={chartContainerRef.current!.offsetWidth}
           height={chartContainerRef.current!.offsetHeight}
-          color={props.settings.color}
         />
       </div>
     </>
