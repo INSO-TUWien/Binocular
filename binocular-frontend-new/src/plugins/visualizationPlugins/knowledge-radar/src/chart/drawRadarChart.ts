@@ -92,6 +92,19 @@ const drawRadarChart = (
   // Create scales - adjust to ensure small values are visible and start from center circle
   const rScale = d3.scaleLinear().domain([0, 1]).range([centerRadius, radius]);
 
+  // Add background circle
+  svg
+    .append("circle")
+    .attr("class", "radar-background")
+    .attr("cx", 0)
+    .attr("cy", 0)
+    .attr("r", radius)
+    .style("fill", "#f0f0f0") // Light grey color
+    .style("opacity", 0)
+    .transition()
+    .duration(800)
+    .style("opacity", 1);
+
   // Draw axis lines
   const axisGrid = svg.append("g").attr("class", "axis-grid");
 
@@ -347,7 +360,7 @@ const drawRadarChart = (
       .enter()
       .append("text")
       .attr("class", `score-label score-label-dev-${index}`)
-      .attr("x", (d, i) => {
+      .attr("x", (d, _) => {
         // Find the original index in the unfiltered array
         const originalIndex = devChartData.findIndex(
           (item) => item.name === d.name,
@@ -357,7 +370,7 @@ const drawRadarChart = (
           Math.cos(angles[originalIndex] - Math.PI / 2)
         );
       })
-      .attr("y", (d, i) => {
+      .attr("y", (d, _) => {
         // Find the original index in the unfiltered array
         const originalIndex = devChartData.findIndex(
           (item) => item.name === d.name,

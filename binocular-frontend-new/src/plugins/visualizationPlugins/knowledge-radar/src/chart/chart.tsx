@@ -123,6 +123,7 @@ function RadarChart(
 
     // Reset navigation
     resetNavigation();
+
     setIsProcessingSelection(false);
   }, [data, properties, selectedDevelopers]);
 
@@ -181,10 +182,33 @@ function RadarChart(
   ]);
 
   function resetNavigation() {
-    setSelectedPackage(null);
-    setPackageHistory([]);
-    setBreadcrumbs(["./"]);
-    setCurrentView("topLevel");
+    // Only reset if we have a selected package and it's not in any of the new developer data
+    if (selectedPackage && currentView === "subpackage") {
+      const packagePath = breadcrumbs.slice(1);
+      let packageExists = false;
+
+      // Check if the package exists in any of the selected developers' data
+      for (const [, packages] of individualDeveloperData.entries()) {
+        if (findPackageByPath(packages, packagePath)) {
+          packageExists = true;
+          break;
+        }
+      }
+
+      // Only reset if the package doesn't exist in any developer's data
+      if (!packageExists) {
+        setSelectedPackage(null);
+        setPackageHistory([]);
+        setBreadcrumbs(["./"]);
+        setCurrentView("topLevel");
+      }
+    } else if (!selectedPackage) {
+      // Always reset if no package is selected
+      setSelectedPackage(null);
+      setPackageHistory([]);
+      setBreadcrumbs(["./"]);
+      setCurrentView("topLevel");
+    }
   }
 
   // Updated to handle multiple developers
@@ -239,7 +263,9 @@ function RadarChart(
 
   const handleBackNavigation = () => {
     if (packageHistory.length === 0) {
-      resetNavigation();
+      setCurrentView("topLevel");
+      setSelectedPackage(null);
+      setBreadcrumbs(["/"]);
     } else {
       const newHistory = [...packageHistory];
       const lastItem = newHistory.pop();
@@ -322,6 +348,24 @@ function RadarChart(
       </>
     );
   }
+}
+
+function findPackageByPath(
+  packages: Package[],
+  path: string[],
+): Package | null {
+  if (path.length === 0 || packages.length === 0) return null;
+
+  const targetName = path[0];
+  const pkg = packages.find((p) => p.name === targetName);
+
+  if (!pkg) return null;
+
+  if (path.length === 1) return pkg;
+
+  if (!pkg.subpackages || pkg.subpackages.length === 0) return null;
+
+  return findPackageByPath(pkg.subpackages as Package[], path.slice(1));
 }
 
 // Updated to handle multiple developers with the correct data structure
@@ -478,24 +522,6 @@ function drawChart(
     }
     return [];
   };
-
-  function findPackageByPath(
-    packages: Package[],
-    path: string[],
-  ): Package | null {
-    if (path.length === 0 || packages.length === 0) return null;
-
-    const targetName = path[0];
-    const pkg = packages.find((p) => p.name === targetName);
-
-    if (!pkg) return null;
-
-    if (path.length === 1) return pkg;
-
-    if (!pkg.subpackages || pkg.subpackages.length === 0) return null;
-
-    return findPackageByPath(pkg.subpackages as Package[], path.slice(1));
-  }
 
   const developersDataForChart = formatDevelopersData();
 
