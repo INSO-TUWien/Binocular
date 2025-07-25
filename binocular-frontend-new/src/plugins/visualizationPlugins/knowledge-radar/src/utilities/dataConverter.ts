@@ -1,12 +1,12 @@
 import { Package, SubPackage } from "../chart/type.ts";
-import { DataPluginCommitFile } from "../../../../interfaces/dataPluginInterfaces/dataPluginCommits.ts";
+import { DataPluginCommit } from "../../../../interfaces/dataPluginInterfaces/dataPluginCommits.ts";
 import _ from "lodash";
 
 /**
  * Extracts file paths touched by a specific developer
  */
 export function extractTouchedFiles(
-  commits: DataPluginCommitFile[],
+  commits: DataPluginCommit[],
   developer: string,
 ): Set<string> {
   const developerCommits = commits.filter(
@@ -16,9 +16,9 @@ export function extractTouchedFiles(
   const touchedFiles = new Set<string>();
 
   for (const commit of developerCommits) {
-    if (!commit.files || !Array.isArray(commit.files)) continue;
+    if (!commit.files.data || !Array.isArray(commit.files.data)) continue;
 
-    for (const fileEntry of commit.files) {
+    for (const fileEntry of commit.files.data) {
       if (fileEntry.file?.path) {
         touchedFiles.add(fileEntry.file.path);
       }
@@ -32,8 +32,8 @@ export function extractTouchedFiles(
  * Filters out merge commits from the given commits
  */
 function filterNonMergeCommits(
-  commits: DataPluginCommitFile[],
-): DataPluginCommitFile[] {
+  commits: DataPluginCommit[],
+): DataPluginCommit[] {
   return commits.filter(
     (commit) => !commit.message?.toLowerCase().includes("merge"),
   );
@@ -43,17 +43,17 @@ function filterNonMergeCommits(
  * Processes file paths for a developer's commits
  */
 function processCommitFiles(
-  commits: DataPluginCommitFile[],
+  commits: DataPluginCommit[],
   developerTouchedFiles: Set<string>,
 ): {
-  packageCommits: Map<string, DataPluginCommitFile[]>;
+  packageCommits: Map<string, DataPluginCommit[]>;
   packageFiles: Map<string, Set<string>>;
 } {
-  const packageCommits = new Map<string, DataPluginCommitFile[]>();
+  const packageCommits = new Map<string, DataPluginCommit[]>();
   const packageFiles = new Map<string, Set<string>>();
 
   for (const commit of commits) {
-    for (const fileChange of commit.files) {
+    for (const fileChange of commit.files.data) {
       if (!developerTouchedFiles.has(fileChange.file.path)) continue;
 
       const filePath = fileChange.file.path;
@@ -82,12 +82,12 @@ function processCommitFiles(
  * Calculates total commit counts per package
  */
 function calculateTotalCommits(
-  commits: DataPluginCommitFile[],
+  commits: DataPluginCommit[],
 ): Map<string, number> {
   const totalPackageCommits = new Map<string, number>();
 
   for (const commit of commits) {
-    for (const fileChange of commit.files) {
+    for (const fileChange of commit.files.data) {
       const filePath = fileChange.file.path;
       const pathParts = filePath.split("/").filter((part) => part.length > 0);
 
@@ -109,7 +109,7 @@ function calculateTotalCommits(
  * Calculates ownership scores for packages
  */
 function calculateOwnershipScores(
-  packageCommits: Map<string, DataPluginCommitFile[]>,
+  packageCommits: Map<string, DataPluginCommit[]>,
   packageFiles: Map<string, Set<string>>,
   totalPackageCommits: Map<string, number>,
 ): Map<string, number> {
@@ -131,7 +131,7 @@ function calculateOwnershipScores(
  * Calculates Expertise Browser scores based on academic literature
  */
 export function calculateExpertiseBrowserScores(
-  commits: DataPluginCommitFile[],
+  commits: DataPluginCommit[],
   targetDeveloper: string,
 ): Package[] {
   // Filter out merge commits

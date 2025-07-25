@@ -24,7 +24,6 @@ const drawRadarChart = (
     handleBackNavigation?: () => void;
   },
 ) => {
-  console.log(developersData);
   const {
     isSubpackageView = false,
     handlePackageSelect,

@@ -11,21 +11,18 @@ import {
   PackageHistory,
   SubPackage,
 } from "./type.ts";
-import { Properties } from "../../../../interfaces/visualizationPluginInterfaces/properties.ts";
+import { VisualizationPluginProperties } from "../../../../interfaces/visualizationPluginInterfaces/visualizationPluginProperties.ts";
 import { SettingsType } from "../settings/settings.tsx";
 import AuthorSelection from "./authorSelection.tsx";
 import { AuthorType } from "../../../../../types/data/authorType.ts";
 import { useDispatch, useSelector } from "react-redux";
 import { dataSlice, DataState } from "../reducer";
-// Removing unused imports
-// import chroma from "chroma-js";
-// import { FileListElementType } from "../../../../../types/data/fileListType.ts";
-import { DataPluginCommitFile } from "../../../../interfaces/dataPluginInterfaces/dataPlugins.ts";
 import _ from "lodash";
 import { calculateExpertiseBrowserScores } from "../utilities/dataConverter.ts";
+import { DataPluginCommit } from "../../../../interfaces/dataPluginInterfaces/dataPluginCommits.ts";
 
 function RadarChart(
-  properties: Properties<SettingsType, DataPluginCommitFile>,
+  properties: VisualizationPluginProperties<SettingsType, DataPluginCommit>,
 ) {
   const chartSizeFactor = 0.62;
 
@@ -35,8 +32,8 @@ function RadarChart(
   const useAppDispatch = () => useDispatch<AppDispatch>();
   const dispatch: AppDispatch = useAppDispatch();
 
-  const data = useSelector((state: RootState) => state.data);
-  const dataState = useSelector((state: RootState) => state.dataState);
+  const data = useSelector((state: RootState) => state.plugin.data);
+  const dataState = useSelector((state: RootState) => state.plugin.dataState);
 
   // Chart state
   const [dimensions, setDimensions] = useState<Dimensions>({
@@ -98,33 +95,28 @@ function RadarChart(
     dispatch({ type: "REFRESH" });
   }, [properties.dataConnection]);
 
-  // Updated: Process data for multiple selected developers without merging
   useEffect(() => {
     if (selectedDevelopers.length === 0) return;
 
     setIsProcessingSelection(true);
 
-    // Use setTimeout to allow UI to update before heavy processing
-
     // Calculate data for each developer and store individually
     const newIndividualData = new Map<string, Package[]>();
+    if (data != undefined) {
+      selectedDevelopers.forEach((developer) => {
+        const devData = calculateExpertiseBrowserScores(
+          data,
+          developer.user.gitSignature,
+        );
+        newIndividualData.set(developer.user.gitSignature, devData);
+      });
+      setIndividualDeveloperData(newIndividualData);
 
-    selectedDevelopers.forEach((developer) => {
-      const devData = calculateExpertiseBrowserScores(
-        data,
-        developer.user.gitSignature,
-      );
-      newIndividualData.set(developer.user.gitSignature, devData);
-    });
-    console.log("////////////////////////////");
-    console.log(newIndividualData);
-    console.log("////////////////////////////");
-    setIndividualDeveloperData(newIndividualData);
+      // Reset navigation
+      resetNavigation();
 
-    // Reset navigation
-    resetNavigation();
-
-    setIsProcessingSelection(false);
+      setIsProcessingSelection(false);
+    }
   }, [data, properties, selectedDevelopers]);
 
   // Handle author list changes

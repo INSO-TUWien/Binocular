@@ -1,4 +1,5 @@
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { DataPluginCommit } from "../../../../interfaces/dataPluginInterfaces/dataPluginCommits.ts";
 
 export enum DataState {
   EMPTY,
@@ -11,23 +12,23 @@ interface DateRange {
   to: string;
 }
 
-export interface State<DataType> {
-  data: DataType[];
+export interface State {
+  data: DataPluginCommit[];
   dateRange: DateRange;
   dataState: DataState;
 }
 
-const initialState: State<unknown> = {
+const initialState: State = {
   data: [],
   dateRange: { from: new Date().toISOString(), to: new Date().toISOString() },
   dataState: DataState.EMPTY,
 };
 
 export const dataSlice = createSlice({
-  name: 'knowledge-radar',
+  name: "knowledge-radar",
   initialState,
   reducers: {
-    setData: <DataType>(state: State<DataType>, action: PayloadAction<DataType[]>) => {
+    setData: (state: State, action: PayloadAction<DataPluginCommit[]>) => {
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore
       state.data = action.payload;

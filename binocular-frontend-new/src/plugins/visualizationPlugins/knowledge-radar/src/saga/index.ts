@@ -1,29 +1,36 @@
-import { put, takeEvery, fork, call, select } from 'redux-saga/effects';
-import { State, DataState, dataSlice } from '../reducer';
-import { DataPlugin } from '../../../../interfaces/dataPlugin.ts';
-import {DataPluginFiles, DataPluginFile} from "../../../../interfaces/dataPluginInterfaces/dataPluginFiles.ts";
-import _ from 'lodash';
+import { put, takeEvery, fork, call, select } from "redux-saga/effects";
+import { State, DataState, dataSlice } from "../reducer";
+import { DataPlugin } from "../../../../interfaces/dataPlugin.ts";
+import { DataPluginCommit } from "../../../../interfaces/dataPluginInterfaces/dataPluginCommits.ts";
+import _ from "lodash";
 
-export default function* <DataType>(dataConnection: DataPlugin) {
-  yield fork(() => watchRefresh<DataType>(dataConnection));
-  yield fork(() => watchDateRangeChange<DataType>(dataConnection));
+export default function* (dataConnection: DataPlugin) {
+  yield fork(() => watchRefresh(dataConnection));
+  yield fork(() => watchDateRangeChange(dataConnection));
 }
 
-function* watchRefresh<DataType>(dataConnection: DataPlugin) {
-  yield takeEvery('REFRESH', () => fetchChangesData<DataType>(dataConnection));
+function* watchRefresh(dataConnection: DataPlugin) {
+  yield takeEvery("REFRESH", () => fetchChangesData(dataConnection));
 }
 
-function* watchDateRangeChange<DataType>(dataConnection: DataPlugin) {
-  yield takeEvery(dataSlice.actions.setDateRange, () => fetchChangesData<DataType>(dataConnection));
+function* watchDateRangeChange(dataConnection: DataPlugin) {
+  yield takeEvery(dataSlice.actions.setDateRange, () =>
+    fetchChangesData(dataConnection),
+  );
 }
 
-function* fetchChangesData<DataType>(dataConnection: DataPlugin) {
+function* fetchChangesData(dataConnection: DataPlugin) {
   const { setData, setDataState } = dataSlice.actions;
   yield put(setDataState(DataState.FETCHING));
-  const state: State<DataType> = yield select();
+  const state: State = yield select();
 
-  // Fetch data
-  const commitFiles: DataPluginFile[] = yield call(() => dataConnection.commits.getCommitsWithFiles(state.dateRange.from, state.dateRange.to));
+  const commitFiles: DataPluginCommit[] = yield call(() =>
+    dataConnection.commits.getCommitsWithFiles(
+      state.plugin.dateRange.from,
+      state.plugin.dateRange.to,
+    ),
+  );
+
   yield put(setData(commitFiles));
   yield put(setDataState(DataState.COMPLETE));
 }
