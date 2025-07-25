@@ -1,11 +1,11 @@
-export interface SettingsType {
+import { DefaultSettings } from '../../../simpleVisualizationPlugin/src/settings/settings';
+
+export interface TimeSpentSettings extends DefaultSettings {
   splitTimePerIssue: boolean;
   splitSpentRemoved: boolean;
-  visualizationStyle: string;
-  showSprints: boolean;
 }
 
-function Settings(props: { settings: SettingsType; setSettings: (newSettings: SettingsType) => void }) {
+function Settings(props: { settings: TimeSpentSettings; setSettings: (newSettings: TimeSpentSettings) => void }) {
   return (
     <>
       <div>

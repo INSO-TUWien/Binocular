@@ -1,8 +1,8 @@
-export interface IssueSettings {
+import { DefaultSettings } from '../../../simpleVisualizationPlugin/src/settings/settings';
+
+export interface IssueSettings extends DefaultSettings {
   splitIssuesPerAuthor: boolean;
   breakdown: boolean;
-  visualizationStyle: string;
-  showSprints: boolean;
 }
 
 function Settings(props: { settings: IssueSettings; setSettings: (newSettings: IssueSettings) => void }) {

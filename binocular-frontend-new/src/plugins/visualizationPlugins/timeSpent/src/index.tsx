@@ -1,5 +1,5 @@
 import PreviewImage from '../assets/thumbnail.svg';
-import Settings, { SettingsType } from './settings/settings.tsx';
+import Settings, { TimeSpentSettings } from './settings/settings.tsx';
 import { VisualizationPlugin } from '../../../interfaces/visualizationPlugin.ts';
 import { getSVGData } from './utilities/utilities.ts';
 import Reducer from './reducer';
@@ -9,7 +9,7 @@ import Help from './help/help.tsx';
 import { DataPluginNote } from '../../../interfaces/dataPluginInterfaces/dataPluginNotes.ts';
 import { VisualizationPluginMetadataCategory } from '../../../interfaces/visualizationPluginInterfaces/visualizationPluginMetadata.ts';
 
-const TimeSpent: VisualizationPlugin<SettingsType, DataPluginNote> = {
+const TimeSpent: VisualizationPlugin<TimeSpentSettings, DataPluginNote> = {
   name: 'Time Spent',
   chartComponent: undefined,
   settingsComponent: Settings,
