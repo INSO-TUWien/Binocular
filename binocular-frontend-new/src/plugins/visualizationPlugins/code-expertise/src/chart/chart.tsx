@@ -1,20 +1,21 @@
-"use strict";
+'use strict';
 
-import { useState, useEffect, useRef } from "react";
-import _ from "lodash";
-import * as zoomUtils from "../../../../../components/utils/zoom";
-import Segment from "./Segment";
-import { SettingsType } from "../settings/settings.tsx";
-import { useSelector, useDispatch } from "react-redux";
-import styles from "../styles.module.scss";
-import { dataSlice, DataState } from "../reducer";
-import { DevData } from "./Segment";
-import { DataPluginCommitBuild } from "../../../../interfaces/dataPluginInterfaces/dataPluginCommitsBuilds.ts";
-import { VisualizationPluginProperties } from "../../../../interfaces/visualizationPluginInterfaces/visualizationPluginProperties.ts";
+import { useState, useEffect, useRef } from 'react';
+import _ from 'lodash';
+import * as zoomUtils from '../../../../../components/utils/zoom';
+import Segment from './Segment';
+import { SettingsType } from '../settings/settings.tsx';
+import { useSelector, useDispatch } from 'react-redux';
+import styles from '../styles.module.scss';
+import { dataSlice, DataState } from '../reducer';
+import { DevData } from './Segment';
+import { DataPluginCommitBuild } from '../../../../interfaces/dataPluginInterfaces/dataPluginCommitsBuilds.ts';
+import { VisualizationPluginProperties } from '../../../../interfaces/visualizationPluginInterfaces/visualizationPluginProperties.ts';
 
 // Define types
 export interface ChartData {
   date: number;
+
   [signature: string]: number;
 }
 
@@ -27,12 +28,7 @@ interface Center {
   y: number;
 }
 
-function Chart(
-  properties: VisualizationPluginProperties<
-    SettingsType,
-    DataPluginCommitBuild
-  >,
-) {
+function Chart(properties: VisualizationPluginProperties<SettingsType, DataPluginCommitBuild>) {
   const chartSizeFactor = 0.68;
 
   type RootState = ReturnType<typeof properties.store.getState>;
@@ -41,12 +37,8 @@ function Chart(
   const dispatch: AppDispatch = useAppDispatch();
 
   // Local state
-  const [dimensions, setDimensions] = useState<zoomUtils.Dimensions>(
-    zoomUtils.initialDimensions(),
-  );
-  const [radius, setRadius] = useState<number>(
-    (Math.min(dimensions.height, dimensions.width) / 2) * chartSizeFactor,
-  );
+  const [dimensions, setDimensions] = useState<zoomUtils.Dimensions>(zoomUtils.initialDimensions());
+  const [radius, setRadius] = useState<number>((Math.min(dimensions.height, dimensions.width) / 2) * chartSizeFactor);
   const [segments, setSegments] = useState<JSX.Element[]>([]);
 
   const [chartData, setChartData] = useState<ChartData[]>([]);
@@ -86,28 +78,21 @@ function Chart(
 
   // Update radius when dimensions change
   useEffect(() => {
-    setRadius(
-      (Math.min(dimensions.height, dimensions.width) / 2) * chartSizeFactor,
-    );
+    setRadius((Math.min(dimensions.height, dimensions.width) / 2) * chartSizeFactor);
   }, [dimensions]);
 
   useEffect(() => {
     dispatch({
-      type: "REFRESH",
+      type: 'REFRESH',
     });
   }, [properties.dataConnection]);
 
   useEffect(() => {
-    dispatch(
-      dataSlice.actions.setDateRange(properties.parameters.parametersDateRange),
-    );
+    dispatch(dataSlice.actions.setDateRange(properties.parameters.parametersDateRange));
   }, [properties.parameters]);
 
   useEffect(() => {
-    const { chartData, scale, palette } = properties.dataConverter(
-      data,
-      properties,
-    );
+    const { chartData, scale, palette } = properties.dataConverter(data, properties);
     console.log(chartData);
     setChartData(chartData);
     setChartPalette(palette);
@@ -115,8 +100,7 @@ function Chart(
 
   // Process chartData into devData format
   useEffect(() => {
-    if (!chartData || chartData.length === 0 || !data || data.length === 0)
-      return;
+    if (!chartData || chartData.length === 0 || !data || data.length === 0) return;
 
     // Extract the data point (we're only using one timestamp)
     const dataPoint = chartData[0];
@@ -124,17 +108,17 @@ function Chart(
     // Get unique developer names from the data
     const developerNames = new Set<string>();
     Object.keys(dataPoint).forEach((key) => {
-      if (key === "date") return;
+      if (key === 'date') return;
 
       // Extract developer name from the key (format: "Developer Name - Metric")
-      const parts = key.split(" - ");
+      const parts = key.split(' - ');
       if (parts.length === 2) {
         developerNames.add(parts[0]);
       }
     });
 
     // Group commits by developer
-    const commitsByDev = _.groupBy(data, "user.gitSignature");
+    const commitsByDev = _.groupBy(data, 'user.gitSignature');
 
     // Create a map of developer data
     const devDataMap: Record<string, DevData> = {};
@@ -158,15 +142,10 @@ function Chart(
     let totalPercent = 0;
 
     // Calculate total additions for percentage calculation
-    const totalAdditions = Object.values(devDataMap).reduce(
-      (total, dev) => total + (dev.additions || 0),
-      0,
-    );
+    const totalAdditions = Object.values(devDataMap).reduce((total, dev) => total + (dev.additions || 0), 0);
 
     // Sort developers by additions to ensure consistent ordering
-    const sortedDevs = Object.entries(devDataMap).sort(
-      (a, b) => (b[1].additions || 0) - (a[1].additions || 0),
-    );
+    const sortedDevs = Object.entries(devDataMap).sort((a, b) => (b[1].additions || 0) - (a[1].additions || 0));
 
     // Create a segment for each developer with additions
     sortedDevs.forEach(([devName, devData]) => {
@@ -181,7 +160,7 @@ function Chart(
 
       // Get color from palette
       const metricKey = `${devName}`;
-      const devColor = palette[metricKey]?.main || "#cccccc";
+      const devColor = palette[metricKey]?.main || '#cccccc';
       newSegments.push(
         <Segment
           key={devName}
@@ -204,8 +183,7 @@ function Chart(
       <div
         ref={properties.chartContainerRef}
         className={styles.chartContainer}
-        style={{ width: "100%", height: "100%", position: "relative" }}
-      >
+        style={{ width: '100%', height: '100%', position: 'relative' }}>
         {dataState === DataState.EMPTY && <div>NoData</div>}
         {dataState === DataState.FETCHING && (
           <div className="flex justify-center items-center h-full">
@@ -218,17 +196,10 @@ function Chart(
             width="100%"
             height="100%"
             viewBox={`0 0 ${dimensions.width} ${dimensions.height}`}
-            preserveAspectRatio="xMidYMid meet"
-          >
+            preserveAspectRatio="xMidYMid meet">
             <g transform={`translate(${center.x}, ${center.y})`}>
               {segments}
-              <circle
-                cx="0"
-                cy="0"
-                r={radius / 3}
-                stroke="black"
-                fill="white"
-              />
+              <circle cx="0" cy="0" r={radius / 3} stroke="black" fill="white" />
             </g>
           </svg>
         )}

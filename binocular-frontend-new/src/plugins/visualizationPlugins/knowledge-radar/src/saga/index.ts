@@ -1,8 +1,8 @@
-import { put, takeEvery, fork, call, select } from "redux-saga/effects";
-import { State, DataState, dataSlice } from "../reducer";
-import { DataPlugin } from "../../../../interfaces/dataPlugin.ts";
-import { DataPluginCommit } from "../../../../interfaces/dataPluginInterfaces/dataPluginCommits.ts";
-import _ from "lodash";
+import { put, takeEvery, fork, call, select } from 'redux-saga/effects';
+import { State, DataState, dataSlice } from '../reducer';
+import { DataPlugin } from '../../../../interfaces/dataPlugin.ts';
+import { DataPluginCommit } from '../../../../interfaces/dataPluginInterfaces/dataPluginCommits.ts';
+import _ from 'lodash';
 
 export default function* (dataConnection: DataPlugin) {
   yield fork(() => watchRefresh(dataConnection));
@@ -10,13 +10,11 @@ export default function* (dataConnection: DataPlugin) {
 }
 
 function* watchRefresh(dataConnection: DataPlugin) {
-  yield takeEvery("REFRESH", () => fetchChangesData(dataConnection));
+  yield takeEvery('REFRESH', () => fetchChangesData(dataConnection));
 }
 
 function* watchDateRangeChange(dataConnection: DataPlugin) {
-  yield takeEvery(dataSlice.actions.setDateRange, () =>
-    fetchChangesData(dataConnection),
-  );
+  yield takeEvery(dataSlice.actions.setDateRange, () => fetchChangesData(dataConnection));
 }
 
 function* fetchChangesData(dataConnection: DataPlugin) {
@@ -25,10 +23,7 @@ function* fetchChangesData(dataConnection: DataPlugin) {
   const state: State = yield select();
 
   const commitFiles: DataPluginCommit[] = yield call(() =>
-    dataConnection.commits.getCommitsWithFiles(
-      state.plugin.dateRange.from,
-      state.plugin.dateRange.to,
-    ),
+    dataConnection.commits.getCommitsWithFiles(state.plugin.dateRange.from, state.plugin.dateRange.to),
   );
 
   yield put(setData(commitFiles));

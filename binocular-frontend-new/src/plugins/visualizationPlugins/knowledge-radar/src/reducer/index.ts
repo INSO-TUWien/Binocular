@@ -1,5 +1,5 @@
-import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { DataPluginCommit } from "../../../../interfaces/dataPluginInterfaces/dataPluginCommits.ts";
+import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { DataPluginCommit } from '../../../../interfaces/dataPluginInterfaces/dataPluginCommits.ts';
 
 export enum DataState {
   EMPTY,
@@ -25,7 +25,7 @@ const initialState: State = {
 };
 
 export const dataSlice = createSlice({
-  name: "knowledge-radar",
+  name: 'knowledge-radar',
   initialState,
   reducers: {
     setData: (state: State, action: PayloadAction<DataPluginCommit[]>) => {

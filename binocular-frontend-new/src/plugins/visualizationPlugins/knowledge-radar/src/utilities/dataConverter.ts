@@ -1,17 +1,12 @@
-import { Package, SubPackage } from "../chart/type.ts";
-import { DataPluginCommit } from "../../../../interfaces/dataPluginInterfaces/dataPluginCommits.ts";
-import _ from "lodash";
+import { Package, SubPackage } from '../chart/type.ts';
+import { DataPluginCommit } from '../../../../interfaces/dataPluginInterfaces/dataPluginCommits.ts';
+import _ from 'lodash';
 
 /**
  * Extracts file paths touched by a specific developer
  */
-export function extractTouchedFiles(
-  commits: DataPluginCommit[],
-  developer: string,
-): Set<string> {
-  const developerCommits = commits.filter(
-    (commit) => commit.user.gitSignature === developer,
-  );
+export function extractTouchedFiles(commits: DataPluginCommit[], developer: string): Set<string> {
+  const developerCommits = commits.filter((commit) => commit.user.gitSignature === developer);
 
   const touchedFiles = new Set<string>();
 
@@ -31,12 +26,8 @@ export function extractTouchedFiles(
 /**
  * Filters out merge commits from the given commits
  */
-function filterNonMergeCommits(
-  commits: DataPluginCommit[],
-): DataPluginCommit[] {
-  return commits.filter(
-    (commit) => !commit.message?.toLowerCase().includes("merge"),
-  );
+function filterNonMergeCommits(commits: DataPluginCommit[]): DataPluginCommit[] {
+  return commits.filter((commit) => !commit.message?.toLowerCase().includes('merge'));
 }
 
 /**
@@ -57,14 +48,12 @@ function processCommitFiles(
       if (!developerTouchedFiles.has(fileChange.file.path)) continue;
 
       const filePath = fileChange.file.path;
-      const pathParts = filePath.split("/").filter((part) => part.length > 0);
+      const pathParts = filePath.split('/').filter((part) => part.length > 0);
 
       // Process each level of the path
-      let currentPath = "";
+      let currentPath = '';
       for (let i = 0; i < pathParts.length; i++) {
-        currentPath = currentPath
-          ? `${currentPath}/${pathParts[i]}`
-          : pathParts[i];
+        currentPath = currentPath ? `${currentPath}/${pathParts[i]}` : pathParts[i];
 
         // Track commits for this path level
         if (!packageCommits.has(currentPath)) {
@@ -81,23 +70,18 @@ function processCommitFiles(
 /**
  * Calculates total commit counts per package
  */
-function calculateTotalCommits(
-  commits: DataPluginCommit[],
-): Map<string, number> {
+function calculateTotalCommits(commits: DataPluginCommit[]): Map<string, number> {
   const totalPackageCommits = new Map<string, number>();
 
   for (const commit of commits) {
     for (const fileChange of commit.files.data) {
       const filePath = fileChange.file.path;
-      const pathParts = filePath.split("/").filter((part) => part.length > 0);
+      const pathParts = filePath.split('/').filter((part) => part.length > 0);
 
-      let currentPath = "";
+      let currentPath = '';
       for (const part of pathParts) {
         currentPath = currentPath ? `${currentPath}/${part}` : part;
-        totalPackageCommits.set(
-          currentPath,
-          (totalPackageCommits.get(currentPath) || 0) + 1,
-        );
+        totalPackageCommits.set(currentPath, (totalPackageCommits.get(currentPath) || 0) + 1);
       }
     }
   }
@@ -130,38 +114,23 @@ function calculateOwnershipScores(
 /**
  * Calculates Expertise Browser scores based on academic literature
  */
-export function calculateExpertiseBrowserScores(
-  commits: DataPluginCommit[],
-  targetDeveloper: string,
-): Package[] {
+export function calculateExpertiseBrowserScores(commits: DataPluginCommit[], targetDeveloper: string): Package[] {
   // Filter out merge commits
   const nonMergeCommits = filterNonMergeCommits(commits);
 
   // Get all files touched by this developer
-  const developerTouchedFiles = extractTouchedFiles(
-    nonMergeCommits,
-    targetDeveloper,
-  );
+  const developerTouchedFiles = extractTouchedFiles(nonMergeCommits, targetDeveloper);
 
-  const developerCommits = nonMergeCommits.filter(
-    (commit) => commit.user.gitSignature === targetDeveloper,
-  );
+  const developerCommits = nonMergeCommits.filter((commit) => commit.user.gitSignature === targetDeveloper);
 
   // Process commit files
-  const { packageCommits, packageFiles } = processCommitFiles(
-    developerCommits,
-    developerTouchedFiles,
-  );
+  const { packageCommits, packageFiles } = processCommitFiles(developerCommits, developerTouchedFiles);
 
   // Calculate total commits per package
   const totalPackageCommits = calculateTotalCommits(nonMergeCommits);
 
   // Calculate ownership scores
-  const packageScores = calculateOwnershipScores(
-    packageCommits,
-    packageFiles,
-    totalPackageCommits,
-  );
+  const packageScores = calculateOwnershipScores(packageCommits, packageFiles, totalPackageCommits);
 
   return buildPackageHierarchy(packageScores);
 }
@@ -169,18 +138,16 @@ export function calculateExpertiseBrowserScores(
 /**
  * Builds a hierarchical package structure from flat path scores
  */
-export function buildPackageHierarchy(
-  packageScores: Map<string, number>,
-): Package[] {
+export function buildPackageHierarchy(packageScores: Map<string, number>): Package[] {
   const rootPackages: Package[] = [];
   const packageMap = new Map<string, Package | SubPackage>();
 
   // Create all package objects
   packageScores.forEach((score, path) => {
-    const pathParts = path.split("/").filter((part) => part.length > 0);
+    const pathParts = path.split('/').filter((part) => part.length > 0);
     if (pathParts.length === 0) return;
 
-    let currentPath = "";
+    let currentPath = '';
     let parentPackage: Package | SubPackage | null = null;
 
     pathParts.forEach((part, index) => {

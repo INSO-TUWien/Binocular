@@ -35,9 +35,9 @@ interface SegmentProps {
 function Segment({ rad, startPercent, endPercent, devName, devData, devColor, maxCommitsPerDev }: SegmentProps): JSX.Element {
   // Mock configuration that was previously from Redux
   const config = {
-    details: '',  // No developer selected by default
+    details: '', // No developer selected by default
     onlyDisplayOwnership: false,
-    mode: 'files'
+    mode: 'files',
   };
 
   //local state
@@ -74,7 +74,9 @@ function Segment({ rad, startPercent, endPercent, devName, devData, devColor, ma
   const [badCommitsArc, setBadCommitsArc] = useState<d3.Arc<any, any>>(d3.arc().innerRadius(0).outerRadius(0).startAngle(0).endAngle(0));
   const [additionsArc, setAdditionsArc] = useState<d3.Arc<any, any>>(d3.arc().innerRadius(0).outerRadius(0).startAngle(0).endAngle(0));
   const [ownershipArc, setOwnershipArc] = useState<d3.Arc<any, any>>(d3.arc().innerRadius(0).outerRadius(0).startAngle(0).endAngle(0));
-  const [additionsTextArc, setAdditionsTextArc] = useState<d3.Arc<any, any>>(d3.arc().innerRadius(0).outerRadius(0).startAngle(0).endAngle(0));
+  const [additionsTextArc, setAdditionsTextArc] = useState<d3.Arc<any, any>>(
+    d3.arc().innerRadius(0).outerRadius(0).startAngle(0).endAngle(0),
+  );
   const [devNameArc, setDevNameArc] = useState<d3.Arc<any, any>>(d3.arc().innerRadius(0).outerRadius(0).startAngle(0).endAngle(0));
   const [commitsPath, setCommitsPath] = useState<d3.Path>(d3.path());
   const [devNameCoordinates, setDevNameCoordiantes] = useState<[number, number]>([0, 0]);
@@ -128,7 +130,7 @@ function Segment({ rad, startPercent, endPercent, devName, devData, devColor, ma
   }
 
   //additions/ownership arc text
-  let additionsText = (devData.additions !== undefined ? devData.additions : '0');
+  let additionsText = devData.additions !== undefined ? devData.additions : '0';
 
   // #### FUNCTIONS ####
 
@@ -150,7 +152,7 @@ function Segment({ rad, startPercent, endPercent, devName, devData, devColor, ma
   //attributeNames and newAttributes should both be arrays
   const animate = (ref: React.RefObject<SVGElement>, attributeNames: string[], newAttributes: any[]): void => {
     if (!ref.current) return;
-    
+
     let selection = d3.select(ref.current);
 
     //anly animate a smooth transition if the flag is set
@@ -257,8 +259,12 @@ function Segment({ rad, startPercent, endPercent, devName, devData, devColor, ma
   //this sets the bounds for this section of the chart
   const buildWeight = radius * 0.2;
   const commitsNumber = devData.commits.length;
-  const goodCommits = devData.commits.filter((c) => c.builds !== undefined && (c.builds.length>0) && c.builds[0]?.status === 'success').length;
-  const badCommits = devData.commits.filter((c) => c.builds !== undefined && (c.builds.length>0) && c.builds[0]?.status !== 'success').length;
+  const goodCommits = devData.commits.filter(
+    (c) => c.builds !== undefined && c.builds.length > 0 && c.builds[0]?.status === 'success',
+  ).length;
+  const badCommits = devData.commits.filter(
+    (c) => c.builds !== undefined && c.builds.length > 0 && c.builds[0]?.status !== 'success',
+  ).length;
 
   const setCommitPath = (): void => {
     const goodCommitsRadius = radius + buildWeight * (goodCommits / commitsNumber);
@@ -375,7 +381,7 @@ function Segment({ rad, startPercent, endPercent, devName, devData, devColor, ma
       )}
 
       {/*actual segment*/}
-      
+
       {/*hatch pattern for the middle arc*/}
       <defs>{HatchPattern(devColorDark, `hatch_${devNameId}`)}</defs>
 
