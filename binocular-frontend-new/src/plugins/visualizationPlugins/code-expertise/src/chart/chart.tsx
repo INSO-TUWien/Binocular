@@ -8,8 +8,8 @@ import { SettingsType } from '../settings/settings.tsx';
 import { useDispatch, useSelector } from 'react-redux';
 import styles from '../styles.module.scss';
 import { dataSlice, DataState } from '../reducer';
-import { DataPluginCommitBuild } from '../../../../interfaces/dataPluginInterfaces/dataPluginCommitsBuilds.ts';
 import { VisualizationPluginProperties } from '../../../../interfaces/visualizationPluginInterfaces/visualizationPluginProperties.ts';
+import {DataPluginCommit} from "../../../../interfaces/dataPluginInterfaces/dataPluginCommits.ts";
 
 // Define types
 export interface ChartData {
@@ -27,7 +27,7 @@ interface Center {
   y: number;
 }
 
-function Chart(properties: VisualizationPluginProperties<SettingsType, DataPluginCommitBuild>) {
+function Chart(properties: VisualizationPluginProperties<SettingsType, DataPluginCommit>) {
   const chartSizeFactor = 0.68;
 
   type RootState = ReturnType<typeof properties.store.getState>;
@@ -91,6 +91,7 @@ function Chart(properties: VisualizationPluginProperties<SettingsType, DataPlugi
   }, [properties.parameters]);
 
   useEffect(() => {
+    // @ts-ignore
     const { chartData, palette } = properties.dataConverter(data, properties);
     console.log(chartData);
     setChartData(chartData);

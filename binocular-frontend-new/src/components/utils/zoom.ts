@@ -1,5 +1,7 @@
 'use strict';
 
+import { ScaleContinuousNumeric } from 'd3-scale';
+
 // Define interfaces for better type safety
 export interface Dimensions {
   fullWidth: number;
@@ -11,32 +13,38 @@ export interface Dimensions {
 }
 
 export interface Scales {
-  x: any; // d3 scale type
-  y: any; // d3 scale type
-  scaledX?: any;
-  scaledY?: any;
+  x: ScaleContinuousNumeric<number, number>;
+  y: ScaleContinuousNumeric<number, number>;
+  scaledX?: ScaleContinuousNumeric<number, number>;
+  scaledY?: ScaleContinuousNumeric<number, number>;
 }
 
 export interface ComponentWithScales {
   scales?: Scales;
-  setState: (state: any) => void;
+  setState: (state: {
+    dimensions?: Dimensions;
+    transform?: ZoomTransform;
+    dirty?: boolean;
+  }) => void;
   state: {
     dimensions: Dimensions;
-    transform?: any;
+    transform?: ZoomTransform;
     dirty?: boolean;
   };
 }
 
+export interface ZoomTransform {
+  k: number;
+  x: number;
+  y: number;
+  rescaleX: (scale: ScaleContinuousNumeric<number, number>) => ScaleContinuousNumeric<number, number>;
+  rescaleY: (scale: ScaleContinuousNumeric<number, number>) => ScaleContinuousNumeric<number, number>;
+  invertX: (x: number) => number;
+  invertY: (y: number) => number;
+}
+
 export interface ZoomEvent {
-  transform: {
-    k: number;
-    x: number;
-    y: number;
-    rescaleX: (scale: any) => any;
-    rescaleY: (scale: any) => any;
-    invertX: (x: number) => number;
-    invertY: (y: number) => number;
-  };
+  transform: ZoomTransform;
 }
 
 export interface ZoomOptions {
@@ -135,11 +143,11 @@ export function updateZoomFactory(): (this: ComponentWithScales, evt: ZoomEvent)
   };
 }
 
-export function constrainZoomFactory(margin: number = 0): (this: ComponentWithScales, t: ZoomEvent['transform']) => void {
-  return function constrainZoom(this: ComponentWithScales, t: ZoomEvent['transform']): void {
+export function constrainZoomFactory(margin: number = 0): (this: ComponentWithScales, t: ZoomTransform) => void {
+  return function constrainZoom(this: ComponentWithScales, t: ZoomTransform): void {
     const dims = this.state.dimensions;
-    const [xMin, xMax] = this.scales!.x.domain().map((d: any) => this.scales!.x(d));
-    const [yMin, yMax] = this.scales!.y.domain().map((d: any) => this.scales!.y(d));
+    const [xMin, xMax] = this.scales!.x.domain().map((d: number) => this.scales!.x(d));
+    const [yMin, yMax] = this.scales!.y.domain().map((d: number) => this.scales!.y(d));
 
     if (t.invertX(xMin) < -margin) {
       t.x = -(xMin - margin) * t.k;

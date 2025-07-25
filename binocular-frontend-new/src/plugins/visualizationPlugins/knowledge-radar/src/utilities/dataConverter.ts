@@ -120,7 +120,7 @@ export function calculateExpertiseBrowserScores(commits: DataPluginCommit[], tar
   const developerCommits = nonMergeCommits.filter((commit) => commit.user.gitSignature === targetDeveloper);
 
   // Process commit files
-  const packageCommits  = processCommitFiles(developerCommits, developerTouchedFiles);
+  const packageCommits = processCommitFiles(developerCommits, developerTouchedFiles);
 
   // Calculate total commits per package
   const totalPackageCommits = calculateTotalCommits(nonMergeCommits);

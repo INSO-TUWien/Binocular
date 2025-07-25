@@ -32,6 +32,7 @@ const getChartColors = (colorScheme: string, range: number[]): string[] => {
 };
 
 // Custom legend item component
+// eslint-disable-next-line react/prop-types
 const LegendItem: React.FC<{ color: string; color2?: string; color3?: string; text: string }> = ({ color, color2, color3, text }) => {
   const ICON_WIDTH = 15;
   const ICON_HEIGHT = 15;
@@ -62,6 +63,7 @@ const LegendItem: React.FC<{ color: string; color2?: string; color3?: string; te
 };
 
 // Chart Legend Component
+// eslint-disable-next-line react/prop-types
 const ChartLegend: React.FC<{ mode?: string }> = ({ mode = 'files' }) => {
   const legendGoodCommitsColor = chroma('green').brighten().brighten().hex();
   const legendBadCommitsColor = chroma('red').brighten().brighten().hex();

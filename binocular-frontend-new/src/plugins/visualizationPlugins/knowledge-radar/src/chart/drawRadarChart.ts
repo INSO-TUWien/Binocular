@@ -24,9 +24,7 @@ const drawRadarChart = (
   const { isSubpackageView = false, handlePackageSelect, handleBackNavigation } = options;
 
   // Clear existing gradients
-  d3.select(svg.node()?.parentNode)
-    .selectAll('defs')
-    .remove();
+  d3.select(svg.node()?.parentNode).selectAll('defs').remove();
 
   // Create defs for multiple gradients
   const defs = d3.select(svg.node()?.parentNode).append('defs');
@@ -51,7 +49,7 @@ const drawRadarChart = (
   const primaryDevData = developersData[0].data;
 
   // For subpackage view, we need a single package as the parent
-  const parentPackage = isSubpackageView ? (primaryDevData[0] as Package | SubPackage) : null;
+  const parentPackage = isSubpackageView ? primaryDevData[0] : null;
 
   // Use appropriate data based on view type
   const chartData = isSubpackageView ? parentPackage?.subpackages || [] : (primaryDevData as Package[]);
@@ -190,7 +188,7 @@ const drawRadarChart = (
   });
 
   // Add label background sized to text and account for indicator circle
-  axisLabels.each(function (this: SVGGElement, d: string) {
+  axisLabels.each(function (d: string) {
     const textElement = this.querySelector('.label-text') as SVGTextElement;
     const textWidth = textElement.getBBox().width;
     const padding = 10; // Padding on each side

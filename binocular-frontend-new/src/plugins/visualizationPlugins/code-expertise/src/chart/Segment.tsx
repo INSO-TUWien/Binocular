@@ -1,20 +1,10 @@
 import * as d3 from 'd3';
 import chroma from 'chroma-js';
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import DotsPattern from '../../../../../components/svg/patterns/dots';
 import HatchPattern from '../../../../../components/svg/patterns/hatch';
-import { DataPluginCommit } from '../../../../interfaces/dataPluginInterfaces/dataPluginCommits.ts';
-import { DataPluginCommitBuild } from '../../../../interfaces/dataPluginInterfaces/dataPluginCommitsBuilds.ts';
+import { DataPluginCommitBuild } from '../../../../interfaces/dataPluginInterfaces/dataPluginCommits';
 
-// Define interfaces for props and data
-interface Commit {
-  sha: string;
-  message: string;
-  additions: number;
-  deletions: number;
-  status: string;
-  build?: string | null;
-}
 
 export interface DevData {
   commits: DataPluginCommitBuild[];
@@ -41,7 +31,7 @@ function Segment({ rad, startPercent, endPercent, devName, devData, devColor, ma
   };
 
   //local state
-  const [isDevSelected, setIsDevSelected] = useState(config.details === devName);
+  const [isDevSelected] = useState(config.details === devName);
   const [radius, setRadius] = useState(rad);
   const [focus, setFocus] = useState(false);
   const [readyToAnimate, setReadyToAnimate] = useState(false);
@@ -49,7 +39,6 @@ function Segment({ rad, startPercent, endPercent, devName, devData, devColor, ma
   // #### COLORS ####
 
   const devColorDark = chroma(devColor).darken().hex();
-  const devColorLight = chroma(devColor).brighten().hex();
   const goodCommitsColor = chroma('green').brighten().brighten().hex();
   const badCommitsColor = chroma('red').brighten().brighten().hex();
 
@@ -130,7 +119,7 @@ function Segment({ rad, startPercent, endPercent, devName, devData, devColor, ma
   }
 
   //additions/ownership arc text
-  let additionsText = devData.additions !== undefined ? devData.additions : '0';
+  const additionsText = devData.additions !== undefined ? devData.additions : '0';
 
   // #### FUNCTIONS ####
 
