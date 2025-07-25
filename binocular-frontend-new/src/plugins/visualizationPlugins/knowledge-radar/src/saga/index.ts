@@ -2,7 +2,6 @@ import { put, takeEvery, fork, call, select } from 'redux-saga/effects';
 import { State, DataState, dataSlice } from '../reducer';
 import { DataPlugin } from '../../../../interfaces/dataPlugin.ts';
 import { DataPluginCommit } from '../../../../interfaces/dataPluginInterfaces/dataPluginCommits.ts';
-import _ from 'lodash';
 
 export default function* (dataConnection: DataPlugin) {
   yield fork(() => watchRefresh(dataConnection));

@@ -1,6 +1,5 @@
 import { Package, SubPackage } from '../chart/type.ts';
 import { DataPluginCommit } from '../../../../interfaces/dataPluginInterfaces/dataPluginCommits.ts';
-import _ from 'lodash';
 
 /**
  * Extracts file paths touched by a specific developer
@@ -38,10 +37,8 @@ function processCommitFiles(
   developerTouchedFiles: Set<string>,
 ): {
   packageCommits: Map<string, DataPluginCommit[]>;
-  packageFiles: Map<string, Set<string>>;
 } {
   const packageCommits = new Map<string, DataPluginCommit[]>();
-  const packageFiles = new Map<string, Set<string>>();
 
   for (const commit of commits) {
     for (const fileChange of commit.files.data) {
@@ -64,7 +61,7 @@ function processCommitFiles(
     }
   }
 
-  return { packageCommits, packageFiles };
+  return packageCommits;
 }
 
 /**
@@ -94,7 +91,6 @@ function calculateTotalCommits(commits: DataPluginCommit[]): Map<string, number>
  */
 function calculateOwnershipScores(
   packageCommits: Map<string, DataPluginCommit[]>,
-  packageFiles: Map<string, Set<string>>,
   totalPackageCommits: Map<string, number>,
 ): Map<string, number> {
   const packageScores = new Map<string, number>();
@@ -124,13 +120,13 @@ export function calculateExpertiseBrowserScores(commits: DataPluginCommit[], tar
   const developerCommits = nonMergeCommits.filter((commit) => commit.user.gitSignature === targetDeveloper);
 
   // Process commit files
-  const { packageCommits, packageFiles } = processCommitFiles(developerCommits, developerTouchedFiles);
+  const packageCommits  = processCommitFiles(developerCommits, developerTouchedFiles);
 
   // Calculate total commits per package
   const totalPackageCommits = calculateTotalCommits(nonMergeCommits);
 
   // Calculate ownership scores
-  const packageScores = calculateOwnershipScores(packageCommits, packageFiles, totalPackageCommits);
+  const packageScores = calculateOwnershipScores(packageCommits, totalPackageCommits);
 
   return buildPackageHierarchy(packageScores);
 }

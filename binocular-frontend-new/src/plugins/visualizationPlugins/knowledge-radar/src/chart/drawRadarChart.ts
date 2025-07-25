@@ -13,7 +13,7 @@ const drawRadarChart = (
     data: Package[] | SubPackage[];
   }[],
   radius: number,
-  colorScheme: any,
+  colorScheme: unknown,
   options: {
     isSubpackageView?: boolean;
     parentName?: string;
@@ -24,12 +24,12 @@ const drawRadarChart = (
   const { isSubpackageView = false, handlePackageSelect, handleBackNavigation } = options;
 
   // Clear existing gradients
-  d3.select(svg.node()?.parentNode as any)
+  d3.select(svg.node()?.parentNode)
     .selectAll('defs')
     .remove();
 
   // Create defs for multiple gradients
-  const defs = d3.select(svg.node()?.parentNode as any).append('defs');
+  const defs = d3.select(svg.node()?.parentNode).append('defs');
 
   // Create gradient for each developer
   developersData.forEach((devData, index) => {
@@ -241,7 +241,7 @@ const drawRadarChart = (
 
   // Draw radar paths for each developer with animation
   const radarLine = d3
-    .lineRadial<any>()
+    .lineRadial<unknown>()
     .angle((_, i) => angles[i])
     .radius((d) => rScale(d.score || 0)) // Handle undefined scores
     .curve(d3.curveCardinalClosed.tension(0.7));
@@ -272,12 +272,12 @@ const drawRadarChart = (
       .enter()
       .append('circle')
       .attr('class', `radar-point radar-point-dev-${index}`)
-      .attr('cx', (d, i) => {
+      .attr('cx', (d) => {
         // Find the original index in the unfiltered array
         const originalIndex = devChartData.findIndex((item) => item.name === d.name);
         return rScale(d.score || 0) * Math.cos(angles[originalIndex] - Math.PI / 2);
       })
-      .attr('cy', (d, i) => {
+      .attr('cy', (d) => {
         // Find the original index in the unfiltered array
         const originalIndex = devChartData.findIndex((item) => item.name === d.name);
         return rScale(d.score || 0) * Math.sin(angles[originalIndex] - Math.PI / 2);
@@ -453,7 +453,7 @@ export const drawTopLevel = (
     data: Package[];
   }[],
   radius: number,
-  colorScheme: any,
+  colorScheme: unknown,
   handlePackageSelect: (pkg: Package | SubPackage, parentName: string) => void,
 ) => {
   drawRadarChart(svg, developersData, radius, colorScheme, {
@@ -469,7 +469,7 @@ export const drawSubpackages = (
     data: Package[] | SubPackage[];
   }[],
   radius: number,
-  colorScheme: any,
+  colorScheme: unknown,
   handleBackNavigation: () => void,
   handlePackageSelect: (pkg: Package | SubPackage, parentName: string) => void,
 ) => {

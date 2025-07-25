@@ -41,7 +41,7 @@ function RadarChart(properties: VisualizationPluginProperties<SettingsType, Data
   const [breadcrumbs, setBreadcrumbs] = useState<string[]>(['./']);
 
   // Data state
-  const [developerKnowledge, setDeveloperKnowledge] = useState<Package[]>([]);
+  const [developerKnowledge] = useState<Package[]>([]);
   // Store individual developer data for multi-developer view
   const [individualDeveloperData, setIndividualDeveloperData] = useState<Map<string, Package[]>>(new Map());
   const [authorList, setAuthorList] = useState<AuthorType[]>(properties.authorList);
@@ -329,7 +329,7 @@ function drawChart(
     developerKnowledge: Package[];
     individualDeveloperData: Map<string, Package[]>;
     selectedDevelopers: AuthorType[];
-    colorScheme: any;
+    colorScheme: unknown;
     handlePackageSelect: (pkg: Package | SubPackage, parentName: string) => void;
     handleBackNavigation: () => void;
   },
@@ -341,7 +341,6 @@ function drawChart(
     currentView,
     selectedPackage,
     breadcrumbs,
-    developerKnowledge,
     individualDeveloperData,
     selectedDevelopers,
     colorScheme,
@@ -434,7 +433,7 @@ function drawChart(
         const devPackage = findPackageByPath(devData, breadcrumbs.slice(1));
 
         // If developer has this package, align its subpackages with the unified structure
-        let alignedSubpackages: SubPackage[] = [];
+        let alignedSubpackages: SubPackage[];
         if (devPackage && devPackage.subpackages) {
           alignedSubpackages = unifiedSubpackages.map((unifiedSub) => {
             const devSub = devPackage.subpackages.find((s) => s.name === unifiedSub.name);

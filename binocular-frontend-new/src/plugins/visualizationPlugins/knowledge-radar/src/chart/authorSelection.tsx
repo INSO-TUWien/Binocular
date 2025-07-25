@@ -127,9 +127,6 @@ const AuthorSelection: React.FC<AuthorSelectionProps> = ({ authorList, selectedA
     return `${Math.max(0.25, Math.min(0.6, containerWidth / 600))}em`;
   };
 
-  // For display in the closed dropdown, use the confirmed selection
-  const displayAuthors = isOpen ? tempSelectedAuthors : selectedAuthors;
-
   return (
     <div
       ref={containerRef}

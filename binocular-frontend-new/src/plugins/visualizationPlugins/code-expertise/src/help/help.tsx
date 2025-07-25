@@ -3,34 +3,41 @@ import * as d3 from 'd3';
 import chroma from 'chroma-js';
 import DotsPattern from '../../../../../components/svg/patterns/dots';
 import HatchPattern from '../../../../../components/svg/patterns/hatch';
-import styles from '../styles.module.scss';
 
 // Implement getChartColors function
 const getChartColors = (colorScheme: string, range: number[]): string[] => {
   let colorScale;
-  
+
   switch (colorScheme.toLowerCase()) {
-    case 'spectral': colorScale = d3.scaleSequential(d3.interpolateSpectral); break;
-    case 'viridis': colorScale = d3.scaleSequential(d3.interpolateViridis); break;
-    case 'blues': colorScale = d3.scaleSequential(d3.interpolateBlues); break;
-    case 'reds': colorScale = d3.scaleSequential(d3.interpolateReds); break;
-    default: colorScale = d3.scaleSequential(d3.interpolateSpectral);
+    case 'spectral':
+      colorScale = d3.scaleSequential(d3.interpolateSpectral);
+      break;
+    case 'viridis':
+      colorScale = d3.scaleSequential(d3.interpolateViridis);
+      break;
+    case 'blues':
+      colorScale = d3.scaleSequential(d3.interpolateBlues);
+      break;
+    case 'reds':
+      colorScale = d3.scaleSequential(d3.interpolateReds);
+      break;
+    default:
+      colorScale = d3.scaleSequential(d3.interpolateSpectral);
   }
-  
-  return range.map(i => {
+
+  return range.map((i) => {
     const normalizedValue = i / (range.length - 1 || 1);
     return colorScale(normalizedValue);
   });
 };
 
 // Custom legend item component
-const LegendItem: React.FC<{ color: string, color2?: string, color3?: string, text: string }> = 
-  ({ color, color2, color3, text }) => {
+const LegendItem: React.FC<{ color: string; color2?: string; color3?: string; text: string }> = ({ color, color2, color3, text }) => {
   const ICON_WIDTH = 15;
   const ICON_HEIGHT = 15;
-  
+
   const rects = [];
-  
+
   if (color2) {
     if (color3) {
       rects.push(<rect width={ICON_WIDTH / 3} height={ICON_HEIGHT} fill={color} key={`${color}-1`} />);
@@ -74,11 +81,9 @@ const ChartLegend: React.FC<{ mode?: string }> = ({ mode = 'files' }) => {
       <LegendItem text="Good Commits rel. to all Commits of Dev" color={legendGoodCommitsColor} />
       <LegendItem text="Bad Commits rel. to all Commits of Dev" color={legendBadCommitsColor} />
       <LegendItem text="# of Commits rel. to others" color={`url(#${legendDotsId})`} />
-      
-      {mode === 'issues' && 
-        <LegendItem text="Added lines of code" color={`url(#${legendHatchId})`} />
-      }
-      
+
+      {mode === 'issues' && <LegendItem text="Added lines of code" color={`url(#${legendHatchId})`} />}
+
       {!(mode === 'issues') && (
         <>
           <LegendItem text="Added lines of code" color={`url(#${legendHatchId})`} color2={legendColor} />
@@ -93,13 +98,13 @@ function Help() {
   return (
     <>
       <h2>Code Expertise Help</h2>
-      
+
       <h3>Data</h3>
       <p>
-        This chart shows data points to assess developer expertise across the codebase, 
-        including code contributions, ownership, and commit quality.
+        This chart shows data points to assess developer expertise across the codebase, including code contributions, ownership, and commit
+        quality.
       </p>
-      
+
       <h3>Chart Elements</h3>
       <div>
         <ul className={'list-disc ml-5'}>
@@ -125,10 +130,10 @@ function Help() {
           </li>
         </ul>
       </div>
-      
+
       <h3>Chart Legend</h3>
       <ChartLegend />
-      
+
       <h3>Interaction</h3>
       <div>
         <ul className={'list-disc ml-5'}>

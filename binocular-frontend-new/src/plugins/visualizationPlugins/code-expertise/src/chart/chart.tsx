@@ -1,14 +1,13 @@
 'use strict';
 
-import { useState, useEffect, useRef } from 'react';
+import { useEffect, useState } from 'react';
 import _ from 'lodash';
 import * as zoomUtils from '../../../../../components/utils/zoom';
-import Segment from './Segment';
+import Segment, { DevData } from './Segment';
 import { SettingsType } from '../settings/settings.tsx';
-import { useSelector, useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import styles from '../styles.module.scss';
 import { dataSlice, DataState } from '../reducer';
-import { DevData } from './Segment';
 import { DataPluginCommitBuild } from '../../../../interfaces/dataPluginInterfaces/dataPluginCommitsBuilds.ts';
 import { VisualizationPluginProperties } from '../../../../interfaces/visualizationPluginInterfaces/visualizationPluginProperties.ts';
 
@@ -92,7 +91,7 @@ function Chart(properties: VisualizationPluginProperties<SettingsType, DataPlugi
   }, [properties.parameters]);
 
   useEffect(() => {
-    const { chartData, scale, palette } = properties.dataConverter(data, properties);
+    const { chartData, palette } = properties.dataConverter(data, properties);
     console.log(chartData);
     setChartData(chartData);
     setChartPalette(palette);
