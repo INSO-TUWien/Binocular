@@ -1,5 +1,5 @@
 import PreviewImage from '../assets/thumbnail.svg';
-import Settings, { SettingsType } from './settings/settings.tsx';
+import Settings, { IssueSettings } from './settings/settings.tsx';
 import { VisualizationPlugin } from '../../../interfaces/visualizationPlugin.ts';
 import { getSVGData } from './utilities/utilities.ts';
 import Reducer from './reducer';
@@ -7,8 +7,9 @@ import { convertToChartData } from './utilities/dataConverter.ts';
 import Saga from './saga';
 import Help from './help/help.tsx';
 import { DataPluginIssue } from '../../../interfaces/dataPluginInterfaces/dataPluginIssues.ts';
+import { VisualizationPluginMetadataCategory } from '../../../interfaces/visualizationPluginInterfaces/visualizationPluginMetadata.ts';
 
-const Issues: VisualizationPlugin<SettingsType, DataPluginIssue> = {
+const Issues: VisualizationPlugin<IssueSettings, DataPluginIssue> = {
   name: 'Issues',
   chartComponent: undefined,
   settingsComponent: Settings,
@@ -25,6 +26,11 @@ const Issues: VisualizationPlugin<SettingsType, DataPluginIssue> = {
   },
   images: {
     thumbnail: PreviewImage,
+  },
+  metadata: {
+    category: VisualizationPluginMetadataCategory.Issues,
+    recommended: true,
+    description: 'A line chart that visualizes the amount of issues open and closed.',
   },
   reducer: Reducer,
   saga: Saga,
