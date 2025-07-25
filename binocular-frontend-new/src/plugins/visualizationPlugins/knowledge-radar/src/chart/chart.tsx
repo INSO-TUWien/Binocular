@@ -1,8 +1,8 @@
-import { useState, useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import * as d3 from 'd3';
 import styles from '../styles.module.scss';
 import { colorScheme } from './colorScheme';
-import { drawTopLevel, drawSubpackages } from './drawRadarChart.ts';
+import { drawSubpackages, drawTopLevel } from './drawRadarChart.ts';
 import { createGradients, drawBreadcrumbs } from './utils';
 import { Center, Dimensions, Package, PackageHistory, SubPackage } from './type.ts';
 import { VisualizationPluginProperties } from '../../../../interfaces/visualizationPluginInterfaces/visualizationPluginProperties.ts';
@@ -179,11 +179,11 @@ function RadarChart(properties: VisualizationPluginProperties<SettingsType, Data
     );
   }
 
-  function setupResizeObserver(element: HTMLElement, setDimensions: Function) {
+  function setupResizeObserver(element: HTMLElement, setDimensions: (updater: (prevDimensions: Dimensions) => Dimensions) => void) {
     const resizeObserver = new ResizeObserver((entries) => {
       for (const entry of entries) {
         const { width, height } = entry.contentRect;
-        setDimensions((prevDimensions: Dimensions) => ({
+        setDimensions((prevDimensions) => ({
           ...prevDimensions,
           width,
           height,
@@ -463,7 +463,16 @@ function drawChart(
 
   // Draw appropriate chart view with properly formatted data
   if (currentView === 'topLevel') {
-    drawTopLevel(svg, developersDataForChart as { developer: AuthorType; data: Package[] }[], radius, colorScheme, handlePackageSelect);
+    drawTopLevel(
+      svg,
+      developersDataForChart as {
+        developer: AuthorType;
+        data: Package[];
+      }[],
+      radius,
+      colorScheme,
+      handlePackageSelect,
+    );
   } else if (currentView === 'subpackage' && selectedPackage) {
     drawSubpackages(
       svg,

@@ -9,7 +9,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import styles from '../styles.module.scss';
 import { dataSlice, DataState } from '../reducer';
 import { VisualizationPluginProperties } from '../../../../interfaces/visualizationPluginInterfaces/visualizationPluginProperties.ts';
-import {DataPluginCommit} from "../../../../interfaces/dataPluginInterfaces/dataPluginCommits.ts";
+import { DataPluginCommit } from '../../../../interfaces/dataPluginInterfaces/dataPluginCommits.ts';
 
 // Define types
 export interface ChartData {
@@ -91,9 +91,8 @@ function Chart(properties: VisualizationPluginProperties<SettingsType, DataPlugi
   }, [properties.parameters]);
 
   useEffect(() => {
-    // @ts-ignore
+    //ts-expect-error
     const { chartData, palette } = properties.dataConverter(data, properties);
-    console.log(chartData);
     setChartData(chartData);
     setChartPalette(palette);
   }, [data, properties]);

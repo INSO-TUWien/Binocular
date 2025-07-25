@@ -1,6 +1,6 @@
 'use strict';
 
-import { ScaleContinuousNumeric } from 'd3-scale';
+import { ScaleContinuousNumeric } from 'd3-scale'; // Define interfaces for better type safety
 
 // Define interfaces for better type safety
 export interface Dimensions {
@@ -21,11 +21,7 @@ export interface Scales {
 
 export interface ComponentWithScales {
   scales?: Scales;
-  setState: (state: {
-    dimensions?: Dimensions;
-    transform?: ZoomTransform;
-    dirty?: boolean;
-  }) => void;
+  setState: (state: { dimensions?: Dimensions; transform?: ZoomTransform; dirty?: boolean }) => void;
   state: {
     dimensions: Dimensions;
     transform?: ZoomTransform;
@@ -63,7 +59,16 @@ export function initialDimensions(): Dimensions {
   };
 }
 
-export function onResizeFactory(wPct: number, hPct: number): (this: ComponentWithScales, dimensions: { width: number; height: number }) => void {
+export function onResizeFactory(
+  wPct: number,
+  hPct: number,
+): (
+  this: ComponentWithScales,
+  dimensions: {
+    width: number;
+    height: number;
+  },
+) => void {
   return function onResize(dimensions: { width: number; height: number }): void {
     const fullWidth = dimensions.width;
     const fullHeight = dimensions.height;
@@ -121,7 +126,7 @@ export function onZoomFactory(options: ZoomOptions = {}): (this: ComponentWithSc
 
   if (constrain) {
     const constrainZoom = constrainZoomFactory(margin);
-    return function(this: ComponentWithScales, evt: ZoomEvent): void {
+    return function (this: ComponentWithScales, evt: ZoomEvent): void {
       constrainZoom.call(this, evt.transform);
       updateZoom.call(this, evt);
     };

@@ -5,7 +5,6 @@ import DotsPattern from '../../../../../components/svg/patterns/dots';
 import HatchPattern from '../../../../../components/svg/patterns/hatch';
 import { DataPluginCommitBuild } from '../../../../interfaces/dataPluginInterfaces/dataPluginCommits';
 
-
 export interface DevData {
   commits: DataPluginCommitBuild[];
   additions?: number;
@@ -59,14 +58,24 @@ function Segment({ rad, startPercent, endPercent, devName, devData, devColor, ma
   // #### D3 PATHS ####
 
   const [circleSegment, setCircleSegment] = useState<d3.Path>(d3.path());
-  const [goodCommitsArc, setGoodCommitsArc] = useState<d3.Arc<any, any>>(d3.arc().innerRadius(0).outerRadius(0).startAngle(0).endAngle(0));
-  const [badCommitsArc, setBadCommitsArc] = useState<d3.Arc<any, any>>(d3.arc().innerRadius(0).outerRadius(0).startAngle(0).endAngle(0));
-  const [additionsArc, setAdditionsArc] = useState<d3.Arc<any, any>>(d3.arc().innerRadius(0).outerRadius(0).startAngle(0).endAngle(0));
-  const [ownershipArc, setOwnershipArc] = useState<d3.Arc<any, any>>(d3.arc().innerRadius(0).outerRadius(0).startAngle(0).endAngle(0));
-  const [additionsTextArc, setAdditionsTextArc] = useState<d3.Arc<any, any>>(
-    d3.arc().innerRadius(0).outerRadius(0).startAngle(0).endAngle(0),
+  const [goodCommitsArc, setGoodCommitsArc] = useState<d3.Arc<unknown, unknown>>(
+    d3.arc<unknown, unknown>().innerRadius(0).outerRadius(0).startAngle(0).endAngle(0),
   );
-  const [devNameArc, setDevNameArc] = useState<d3.Arc<any, any>>(d3.arc().innerRadius(0).outerRadius(0).startAngle(0).endAngle(0));
+  const [badCommitsArc, setBadCommitsArc] = useState<d3.Arc<unknown, unknown>>(
+    d3.arc<unknown, unknown>().innerRadius(0).outerRadius(0).startAngle(0).endAngle(0),
+  );
+  const [additionsArc, setAdditionsArc] = useState<d3.Arc<unknown, unknown>>(
+    d3.arc<unknown, unknown>().innerRadius(0).outerRadius(0).startAngle(0).endAngle(0),
+  );
+  const [ownershipArc, setOwnershipArc] = useState<d3.Arc<unknown, unknown>>(
+    d3.arc<unknown, unknown>().innerRadius(0).outerRadius(0).startAngle(0).endAngle(0),
+  );
+  const [additionsTextArc, setAdditionsTextArc] = useState<d3.Arc<unknown, unknown>>(
+    d3.arc<unknown, unknown>().innerRadius(0).outerRadius(0).startAngle(0).endAngle(0),
+  );
+  const [devNameArc, setDevNameArc] = useState<d3.Arc<unknown, unknown>>(
+    d3.arc<unknown, unknown>().innerRadius(0).outerRadius(0).startAngle(0).endAngle(0),
+  );
   const [commitsPath, setCommitsPath] = useState<d3.Path>(d3.path());
   const [devNameCoordinates, setDevNameCoordiantes] = useState<[number, number]>([0, 0]);
   const [animationFlag, setAnimationFlag] = useState(false);
@@ -139,21 +148,21 @@ function Segment({ rad, startPercent, endPercent, devName, devData, devColor, ma
 
   //smoothly animate the d3 components
   //attributeNames and newAttributes should both be arrays
-  const animate = (ref: React.RefObject<SVGElement>, attributeNames: string[], newAttributes: any[]): void => {
+  const animate = (ref: React.RefObject<SVGElement>, attributeNames: string[], newAttributes: unknown[]): void => {
     if (!ref.current) return;
 
     let selection = d3.select(ref.current);
 
     //anly animate a smooth transition if the flag is set
     if (readyToAnimate) {
-      selection = selection.transition().duration(animationDuration) as any;
+      selection = selection.transition().duration(animationDuration);
     }
 
     const length = Math.min(attributeNames.length, newAttributes.length);
     for (let i = 0; i < length; i++) {
       const name = attributeNames[i];
       const value = newAttributes[i];
-      selection = selection.attr(name, value) as any;
+      selection = selection.attr(name, value);
     }
   };
 
@@ -259,9 +268,13 @@ function Segment({ rad, startPercent, endPercent, devName, devData, devColor, ma
     const goodCommitsRadius = radius + buildWeight * (goodCommits / commitsNumber);
     const badCommitsRadius = radius - buildWeight * (badCommits / commitsNumber);
 
-    setGoodCommitsArc(d3.arc().innerRadius(radius).outerRadius(goodCommitsRadius).startAngle(arcStartAngle).endAngle(arcEndAngle));
+    setGoodCommitsArc(
+      d3.arc<unknown, unknown>().innerRadius(radius).outerRadius(goodCommitsRadius).startAngle(arcStartAngle).endAngle(arcEndAngle),
+    );
 
-    setBadCommitsArc(d3.arc().innerRadius(badCommitsRadius).outerRadius(radius).startAngle(arcStartAngle).endAngle(arcEndAngle));
+    setBadCommitsArc(
+      d3.arc<unknown, unknown>().innerRadius(badCommitsRadius).outerRadius(radius).startAngle(arcStartAngle).endAngle(arcEndAngle),
+    );
   };
 
   // #### ADDITIONS AND OWNERSHIP ARCS ####
@@ -272,7 +285,12 @@ function Segment({ rad, startPercent, endPercent, devName, devData, devColor, ma
     const additionsArcOuterRadius = radius * 0.7 + additionsArcWeight;
 
     setAdditionsArc(
-      d3.arc().innerRadius(additionsArcInnerRadius).outerRadius(additionsArcOuterRadius).startAngle(arcStartAngle).endAngle(arcEndAngle),
+      d3
+        .arc<unknown, unknown>()
+        .innerRadius(additionsArcInnerRadius)
+        .outerRadius(additionsArcOuterRadius)
+        .startAngle(arcStartAngle)
+        .endAngle(arcEndAngle),
     );
 
     let ownershipEndAngle;
@@ -291,7 +309,7 @@ function Segment({ rad, startPercent, endPercent, devName, devData, devColor, ma
 
     setOwnershipArc(
       d3
-        .arc()
+        .arc<unknown, unknown>()
         .innerRadius(additionsArcInnerRadius)
         .outerRadius(additionsArcOuterRadius)
         .startAngle(arcStartAngle)
@@ -302,7 +320,7 @@ function Segment({ rad, startPercent, endPercent, devName, devData, devColor, ma
 
     setAdditionsTextArc(
       d3
-        .arc()
+        .arc<unknown, unknown>()
         .innerRadius(additionsTextArcRadius)
         .outerRadius(additionsTextArcRadius)
         .startAngle(reverseText ? arcEndAngle : arcStartAngle)
@@ -337,7 +355,7 @@ function Segment({ rad, startPercent, endPercent, devName, devData, devColor, ma
 
     setDevNameArc(
       d3
-        .arc()
+        .arc<unknown, unknown>()
         .innerRadius(devNameRadius)
         .outerRadius(devNameRadius)
         .startAngle(reverseText ? arcEndAngle : arcStartAngle)
@@ -372,7 +390,7 @@ function Segment({ rad, startPercent, endPercent, devName, devData, devColor, ma
       {/*actual segment*/}
 
       {/*hatch pattern for the middle arc*/}
-      <defs>{HatchPattern(devColorDark, `hatch_${devNameId}`)}</defs>
+      <defs>{HatchPattern({ color: devColorDark, id: `hatch_${devNameId}` })}</defs>
 
       {/*outer border*/}
       <path ref={segmentRef} stroke="black" fill="white" />
@@ -410,7 +428,7 @@ function Segment({ rad, startPercent, endPercent, devName, devData, devColor, ma
       <path ref={goodCommitsArcRef} fill={goodCommitsColor} />
 
       {/*inner commits path with dot-pattern*/}
-      <defs>{DotsPattern(devColor, `dots_${devNameId}`)}</defs>
+      <defs>{DotsPattern({ color: devColor, id: `dots_${devNameId}` })}</defs>
       <path id={devName + '_commitsPath'} ref={commitsRef} fill={`url(#dots_${devNameId})`} />
 
       {/*outer border without fill, just for contours*/}

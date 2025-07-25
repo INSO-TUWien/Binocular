@@ -247,7 +247,7 @@ const drawRadarChart = (
   // Draw radar paths for each developer
   developersData.forEach((devData, index) => {
     // Get the developer's data
-    const devChartData = isSubpackageView ? (devData.data[0] as Package | SubPackage)?.subpackages || [] : (devData.data as Package[]);
+    const devChartData = isSubpackageView ? devData.data[0]?.subpackages || [] : devData.data;
 
     // Create path for animation
     const radarPath = svg
