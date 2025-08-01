@@ -1,7 +1,7 @@
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { DataPluginOwnership } from '../../../../interfaces/dataPluginInterfaces/dataPluginCommits.ts';
-import { PreviousFileData } from '../../../../../types/data/ownershipType.ts';
-import { DataPluginBranch } from '../../../../interfaces/dataPluginInterfaces/dataPluginBranches.ts';
+import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
+import type {DataPluginOwnership} from '../../../../interfaces/dataPluginInterfaces/dataPluginCommits.ts';
+import type {PreviousFileData} from '../../../../../types/data/ownershipType.ts';
+import type {DataPluginBranch} from '../../../../interfaces/dataPluginInterfaces/dataPluginBranches.ts';
 
 export enum DataState {
   EMPTY,

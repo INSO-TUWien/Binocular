@@ -1,4 +1,5 @@
-@import "../../variables.scss";
+@use "../../variables.scss" as *;
+@reference "../../index.scss";
 
 .infoTooltipp{
   background: transparent;

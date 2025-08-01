@@ -1,5 +1,5 @@
-import { FileOwnershipCollection, OwnershipData, OwnershipResult } from '../../../../../types/data/ownershipType.ts';
-import { DataPluginFileOwnership } from '../../../../interfaces/dataPluginInterfaces/dataPluginCommits.ts';
+import type {FileOwnershipCollection, OwnershipData, OwnershipResult} from '../../../../../types/data/ownershipType.ts';
+import type {DataPluginFileOwnership} from '../../../../interfaces/dataPluginInterfaces/dataPluginCommits.ts';
 
 export function extractOwnershipFromFileExcludingCommits(
   fileOwnershipData: DataPluginFileOwnership[],

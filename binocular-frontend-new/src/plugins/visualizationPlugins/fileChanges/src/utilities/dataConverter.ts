@@ -1,10 +1,10 @@
 import moment from 'moment/moment';
-import { AuthorType } from '../../../../../types/data/authorType.ts';
+import type {AuthorType} from '../../../../../types/data/authorType.ts';
 import chroma from 'chroma-js';
-import { CommitChartData, Palette } from '../chart/chart.tsx';
-import { ParametersType } from '../../../../../types/parameters/parametersType.ts';
+import type {CommitChartData, Palette} from '../chart/chart.tsx';
+import type {ParametersType} from '../../../../../types/parameters/parametersType.ts';
 import _ from 'lodash';
-import { DataPluginCommit } from '../../../../interfaces/dataPluginInterfaces/dataPluginCommits.ts';
+import type {DataPluginCommit} from '../../../../interfaces/dataPluginInterfaces/dataPluginCommits.ts';
 
 export function convertCommitDataToChangesChartData(
   commits: DataPluginCommit[],

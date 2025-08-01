@@ -1,16 +1,16 @@
 import { StackedAreaChart } from './stackedAreaChart.tsx';
-import { RefObject, useEffect, useState, useMemo } from 'react';
-import { DataPlugin } from '../../../../interfaces/dataPlugin.ts';
-import { SettingsType } from '../settings/settings.tsx';
-import { AuthorType } from '../../../../../types/data/authorType.ts';
+import {type RefObject, useEffect, useState, useMemo } from 'react';
+import type {DataPlugin} from '../../../../interfaces/dataPlugin.ts';
+import type {SettingsType} from '../settings/settings.tsx';
+import type {AuthorType} from '../../../../../types/data/authorType.ts';
 import { convertCommitDataToChangesChartData, convertCommitDataToMetrics } from '../utilities/dataConverter.ts';
-import { SprintType } from '../../../../../types/data/sprintType.ts';
+import type {SprintType} from '../../../../../types/data/sprintType.ts';
 import { useDispatch, useSelector } from 'react-redux';
-import { ParametersType } from '../../../../../types/parameters/parametersType.ts';
-import { Store } from '@reduxjs/toolkit';
+import type {ParametersType} from '../../../../../types/parameters/parametersType.ts';
+import type {Store} from '@reduxjs/toolkit';
 import { DataState, setDateRange } from '../reducer';
 import { MetricsChart } from './metricsCharts.tsx';
-import { DataPluginCommit } from '../../../../interfaces/dataPluginInterfaces/dataPluginCommits.ts';
+import type {DataPluginCommit} from '../../../../interfaces/dataPluginInterfaces/dataPluginCommits.ts';
 import { handelPopoutResizing } from '../../../../utils/resizing.ts';
 
 export interface CommitChartData {

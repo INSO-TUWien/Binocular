@@ -9,8 +9,8 @@ import {
   setDateOfOverallLastCommit,
   setCurrentFile,
 } from '../reducer';
-import { DataPlugin } from '../../../../interfaces/dataPlugin.ts';
-import { DataPluginCommit } from '../../../../interfaces/dataPluginInterfaces/dataPluginCommits.ts';
+import type {DataPlugin} from '../../../../interfaces/dataPlugin.ts';
+import type {DataPluginCommit} from '../../../../interfaces/dataPluginInterfaces/dataPluginCommits.ts';
 
 export default function* (dataConnection: DataPlugin) {
   yield fork(() => watchRefresh(dataConnection));

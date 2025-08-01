@@ -1,4 +1,4 @@
-import { RecommendedDashboard } from '../../../../../types/general/recommendedDashboardType.ts';
+import type {RecommendedDashboard} from '../../../../../types/general/recommendedDashboardType.ts';
 
 const dashboard: RecommendedDashboard = {
   name: 'Default',
