@@ -25,7 +25,6 @@ function* fetchChangesData(dataConnection: DataPlugin) {
   const commits: DataPluginCommit[] = yield call(() =>
     dataConnection.commits.getAll(state.plugin.dateRange.from, state.plugin.dateRange.to),
   );
-  console.log(commits);
   const users: DataPluginUser[] = yield call(() => dataConnection.users.getAll());
   const issues: DataPluginIssue[] = yield call(() => dataConnection.issues.getAll(state.plugin.dateRange.from, state.plugin.dateRange.to));
   const builds: DataPluginBuild[] = yield call(() => dataConnection.builds.getAll(state.plugin.dateRange.from, state.plugin.dateRange.to));
