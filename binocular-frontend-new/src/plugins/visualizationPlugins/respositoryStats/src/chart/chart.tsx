@@ -6,7 +6,6 @@ import { RefObject, useEffect, useState } from 'react';
 import { Store } from '@reduxjs/toolkit';
 import { useDispatch, useSelector } from 'react-redux';
 import { DataState, setDateRange } from '../reducer';
-import { throttle } from 'throttle-debounce';
 
 export interface Palette {
   [signature: string]: { main: string; secondary: string };
@@ -24,11 +23,11 @@ function Chart(props: {
   const useAppDispatch = () => useDispatch<AppDispatch>();
   const dispatch: AppDispatch = useAppDispatch();
 
-  const commitNumber = useSelector((state: RootState) => state.commitNumber);
-  const userNumber = useSelector((state: RootState) => state.userNumber);
-  const issueNumber = useSelector((state: RootState) => state.issueNumber);
-  const buildNumber = useSelector((state: RootState) => state.buildNumber);
-  const dataState = useSelector((state: RootState) => state.dataState);
+  const commitNumber = useSelector((state: RootState) => state.plugin.commitNumber);
+  const userNumber = useSelector((state: RootState) => state.plugin.userNumber);
+  const issueNumber = useSelector((state: RootState) => state.plugin.issueNumber);
+  const buildNumber = useSelector((state: RootState) => state.plugin.buildNumber);
+  const dataState = useSelector((state: RootState) => state.plugin.dataState);
   //React Component State
   const [chartWidth, setChartWidth] = useState(100);
   const [chartHeight, setChartHeight] = useState(100);
@@ -38,32 +37,21 @@ function Chart(props: {
   const [issues, setIssues] = useState<number>(0);
   const [builds, setBuilds] = useState<number>(0);
 
-  /*
-Throttle the resize of the svg (refresh rate) to every 1s to not overwhelm the renderer,
-This isn't really necessary for this visualization, but for bigger visualization this can be quite essential
- */
-  const throttledResize = throttle(
-    1000,
-    () => {
-      if (!props.chartContainerRef.current) return;
-      if (props.chartContainerRef.current?.offsetWidth !== chartWidth) {
-        setChartWidth(props.chartContainerRef.current.offsetWidth);
-      }
-      if (props.chartContainerRef.current?.offsetHeight !== chartHeight) {
-        setChartHeight(props.chartContainerRef.current.offsetHeight);
-      }
-    },
-    { noLeading: false, noTrailing: false },
-  );
-
-  //Resize Observer -> necessary for dynamically refreshing d3 chart
-  useEffect(() => {
+  /**
+   * RESIZE Logic START
+   */
+  function resize() {
     if (!props.chartContainerRef.current) return;
-    const resizeObserver = new ResizeObserver(() => {
-      throttledResize();
-    });
-    resizeObserver.observe(props.chartContainerRef.current);
-    return () => resizeObserver.disconnect();
+    if (props.chartContainerRef.current?.offsetWidth !== chartWidth) {
+      setChartWidth(props.chartContainerRef.current.offsetWidth);
+    }
+    if (props.chartContainerRef.current?.offsetHeight !== chartHeight) {
+      setChartHeight(props.chartContainerRef.current.offsetHeight);
+    }
+  }
+
+  useEffect(() => {
+    resize();
   }, [props.chartContainerRef, chartHeight, chartWidth]);
 
   // Effect on data change
@@ -72,7 +60,7 @@ This isn't really necessary for this visualization, but for bigger visualization
     setUsers(userNumber);
     setIssues(issueNumber);
     setBuilds(buildNumber);
-  }, [commitNumber, users, props.parameters]);
+  }, [commitNumber, users, props.parameters, userNumber, issueNumber, buildNumber]);
 
   //Set Global state when parameters change. This will also conclude in a refresh of the data.
   useEffect(() => {

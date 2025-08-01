@@ -1,5 +1,5 @@
 import { put, takeEvery, fork, call, select } from 'redux-saga/effects';
-import { ChangesState, DataState, setCommits, setDataState, setDateRange, setIssues, setUsers, setBuilds } from '../reducer';
+import { RepoStatsState, DataState, setCommits, setDataState, setDateRange, setIssues, setUsers, setBuilds } from '../reducer';
 import { DataPlugin } from '../../../../interfaces/dataPlugin.ts';
 import { DataPluginUser } from '../../../../interfaces/dataPluginInterfaces/dataPluginUsers.ts';
 import { DataPluginCommit } from '../../../../interfaces/dataPluginInterfaces/dataPluginCommits.ts';
@@ -21,11 +21,14 @@ function* watchDateRangeChange(dataConnection: DataPlugin) {
 
 function* fetchChangesData(dataConnection: DataPlugin) {
   yield put(setDataState(DataState.FETCHING));
-  const state: ChangesState = yield select();
-  const commits: DataPluginCommit[] = yield call(() => dataConnection.commits.getAll(state.dateRange.from, state.dateRange.to));
+  const state: { plugin: RepoStatsState } = yield select();
+  const commits: DataPluginCommit[] = yield call(() =>
+    dataConnection.commits.getAll(state.plugin.dateRange.from, state.plugin.dateRange.to),
+  );
+  console.log(commits);
   const users: DataPluginUser[] = yield call(() => dataConnection.users.getAll());
-  const issues: DataPluginIssue[] = yield call(() => dataConnection.issues.getAll(state.dateRange.from, state.dateRange.to));
-  const builds: DataPluginBuild[] = yield call(() => dataConnection.builds.getAll(state.dateRange.from, state.dateRange.to));
+  const issues: DataPluginIssue[] = yield call(() => dataConnection.issues.getAll(state.plugin.dateRange.from, state.plugin.dateRange.to));
+  const builds: DataPluginBuild[] = yield call(() => dataConnection.builds.getAll(state.plugin.dateRange.from, state.plugin.dateRange.to));
   yield put(setCommits(commits.length));
   yield put(setUsers(users.length));
   yield put(setIssues(issues.length));

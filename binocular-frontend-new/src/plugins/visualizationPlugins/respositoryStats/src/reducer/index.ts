@@ -11,7 +11,7 @@ interface DateRange {
   to: string;
 }
 
-export interface ChangesState {
+export interface RepoStatsState {
   commitNumber: number;
   userNumber: number;
   issueNumber: number;
@@ -20,7 +20,7 @@ export interface ChangesState {
   dataState: DataState;
 }
 
-const initialState: ChangesState = {
+const initialState: RepoStatsState = {
   commitNumber: 0,
   userNumber: 0,
   issueNumber: 0,

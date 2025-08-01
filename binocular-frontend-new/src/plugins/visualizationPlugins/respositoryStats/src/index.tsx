@@ -5,8 +5,9 @@ import { VisualizationPlugin } from '../../../interfaces/visualizationPlugin.ts'
 import Reducer from './reducer';
 import Saga from './saga';
 import Help from './help/help.tsx';
+import { VisualizationPluginMetadataCategory } from '../../../interfaces/visualizationPluginInterfaces/visualizationPluginMetadata.ts';
 
-const RepositoryStats: VisualizationPlugin<SettingsType> = {
+const RepositoryStats: VisualizationPlugin<SettingsType, unknown> = {
   name: 'Repository Stats',
   chartComponent: Chart,
   settingsComponent: Settings,
@@ -24,5 +25,10 @@ const RepositoryStats: VisualizationPlugin<SettingsType> = {
   },
   reducer: Reducer,
   saga: Saga,
+  metadata: {
+    category: VisualizationPluginMetadataCategory.Statistics,
+    recommended: false,
+    description: 'Statistics about the repository.',
+  },
 };
 export default RepositoryStats;
