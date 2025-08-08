@@ -1,4 +1,4 @@
-import { DefaultSettings } from '../../../simpleVisualizationPlugin/src/settings/settings';
+import type { DefaultSettings } from '../../../simpleVisualizationPlugin/src/settings/settings';
 
 export interface IssueSettings extends DefaultSettings {
   splitIssuesPerAuthor: boolean;

@@ -212,8 +212,18 @@ export default class ScalableBaseChart<T> extends React.Component<Props, State<T
   render() {
     return (
       <div className={this.styles.chartDiv + 'h-full w-full'}>
-        <svg className={this.styles.chartSvg} ref={(svg) => (this.svgRef = svg)} />
-        <div className={this.styles.tooltip} ref={(div) => (this.tooltipRef = div)} />
+        <svg
+          className={this.styles.chartSvg}
+          ref={(svg) => {
+            this.svgRef = svg;
+          }}
+        />
+        <div
+          className={this.styles.tooltip}
+          ref={(div) => {
+            this.tooltipRef = div;
+          }}
+        />
       </div>
     );
   }

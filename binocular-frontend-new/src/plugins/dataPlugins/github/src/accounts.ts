@@ -1,4 +1,4 @@
-import { DataPluginAccount, DataPluginAccounts } from '../../../interfaces/dataPluginInterfaces/dataPluginAccounts.ts';
+import type { DataPluginAccount, DataPluginAccounts } from '../../../interfaces/dataPluginInterfaces/dataPluginAccounts.ts';
 
 export default class Accounts implements DataPluginAccounts {
   constructor() {}

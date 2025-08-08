@@ -1,14 +1,14 @@
 import moment from 'moment/moment';
 import chroma from 'chroma-js';
 import _ from 'lodash';
-import { SettingsType } from '../settings/settings.tsx';
-import { DataPluginNote } from '../../../../interfaces/dataPluginInterfaces/dataPluginNotes.ts';
-import { DataPluginMergeRequest } from '../../../../interfaces/dataPluginInterfaces/dataPluginMergeRequests.ts';
-import { DataPluginAccount } from '../../../../interfaces/dataPluginInterfaces/dataPluginAccounts.ts';
-import { DataPluginIssue } from '../../../../interfaces/dataPluginInterfaces/dataPluginIssues.ts';
+import type { TimeSpentSettings } from '../settings/settings.tsx';
+import type { DataPluginNote } from '../../../../interfaces/dataPluginInterfaces/dataPluginNotes.ts';
+import type { DataPluginMergeRequest } from '../../../../interfaces/dataPluginInterfaces/dataPluginMergeRequests.ts';
+import type { DataPluginAccount } from '../../../../interfaces/dataPluginInterfaces/dataPluginAccounts.ts';
+import type { DataPluginIssue } from '../../../../interfaces/dataPluginInterfaces/dataPluginIssues.ts';
 import distinctColors from 'distinct-colors';
-import { VisualizationPluginProperties } from '../../../../interfaces/visualizationPluginInterfaces/visualizationPluginProperties.ts';
-import { AuthorType } from '../../../../../types/data/authorType.ts';
+import type { VisualizationPluginProperties } from '../../../../interfaces/visualizationPluginInterfaces/visualizationPluginProperties.ts';
+import type { AuthorType } from '../../../../../types/data/authorType.ts';
 
 interface TimeSpentChartData {
   date: number;
@@ -35,7 +35,7 @@ interface Palette {
 
 export function convertToChartData(
   notes: DataPluginNote[],
-  props: VisualizationPluginProperties<SettingsType, DataPluginNote>,
+  props: VisualizationPluginProperties<TimeSpentSettings, DataPluginNote>,
 ): {
   chartData: TimeSpentChartData[];
   scale: number[];
@@ -67,7 +67,7 @@ export function convertToChartData(
   return returnValue;
 }
 function getDataByIssue(
-  props: VisualizationPluginProperties<SettingsType, DataPluginNote>,
+  props: VisualizationPluginProperties<TimeSpentSettings, DataPluginNote>,
   firstTimestamp: string,
   lastTimestamp: string,
   sortedData: TimeTrackingData[],
@@ -110,14 +110,14 @@ function getDataByIssue(
           title: '#' + sortedData[i].issue?.iid + ': ' + sortedData[i].issue?.title,
           color: { main: '', secondary: '' },
         };
-        !issuesAndMRs.some((item) => item.id === issueOrMR.id) && issuesAndMRs.push(issueOrMR);
+        if (!issuesAndMRs.some((item) => item.id === issueOrMR.id)) issuesAndMRs.push(issueOrMR);
       } else if (sortedData[i].mergeRequest !== null) {
         issueOrMR = {
           id: sortedData[i].mergeRequest?.id + '',
           title: '!' + sortedData[i].mergeRequest?.iid + ': ' + sortedData[i].mergeRequest?.title,
           color: { main: '', secondary: '' },
         };
-        !issuesAndMRs.some((item) => item.id === issueOrMR.id) && issuesAndMRs.push(issueOrMR);
+        if (!issuesAndMRs.some((item) => item.id === issueOrMR.id)) issuesAndMRs.push(issueOrMR);
       } else {
         issueOrMR = { id: '-1', title: '', color: { main: '', secondary: '' } };
       }
@@ -231,7 +231,7 @@ function getDataByIssue(
 }
 
 function getDataByAuthor(
-  props: VisualizationPluginProperties<SettingsType, DataPluginNote>,
+  props: VisualizationPluginProperties<TimeSpentSettings, DataPluginNote>,
   firstTimestamp: string,
   lastTimestamp: string,
   sortedData: TimeTrackingData[],

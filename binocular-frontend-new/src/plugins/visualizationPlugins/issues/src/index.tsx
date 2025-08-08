@@ -1,12 +1,12 @@
 import PreviewImage from '../assets/thumbnail.svg';
-import Settings, { IssueSettings } from './settings/settings.tsx';
-import { VisualizationPlugin } from '../../../interfaces/visualizationPlugin.ts';
+import Settings, { type IssueSettings } from './settings/settings.tsx';
+import type { VisualizationPlugin } from '../../../interfaces/visualizationPlugin.ts';
 import { getSVGData } from './utilities/utilities.ts';
 import Reducer from './reducer';
 import { convertToChartData } from './utilities/dataConverter.ts';
 import Saga from './saga';
 import Help from './help/help.tsx';
-import { DataPluginIssue } from '../../../interfaces/dataPluginInterfaces/dataPluginIssues.ts';
+import type { DataPluginIssue } from '../../../interfaces/dataPluginInterfaces/dataPluginIssues.ts';
 import { VisualizationPluginMetadataCategory } from '../../../interfaces/visualizationPluginInterfaces/visualizationPluginMetadata.ts';
 
 const Issues: VisualizationPlugin<IssueSettings, DataPluginIssue> = {

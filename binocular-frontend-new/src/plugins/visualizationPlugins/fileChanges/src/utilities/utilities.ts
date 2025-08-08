@@ -1,4 +1,4 @@
-import { RefObject } from 'react';
+import type { RefObject } from 'react';
 
 export function getSVGData(chartContainerRef: RefObject<HTMLDivElement | undefined>): string {
   const svgData = chartContainerRef.current?.children[1].outerHTML;

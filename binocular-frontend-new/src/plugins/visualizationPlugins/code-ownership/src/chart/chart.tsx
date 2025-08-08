@@ -300,6 +300,8 @@ function Chart<SettingsType extends CodeOwnerShipSettings, DataType>(props: Visu
             height={chartHeight}
             width={chartWidth}
             yDims={chartScale}
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-expect-error
             d3offset={props.settings.displayMode === 'relative' ? d3.stackOffsetExpand : d3.stackOffsetNone}
             resolution={granularity}
             keys={keys}
