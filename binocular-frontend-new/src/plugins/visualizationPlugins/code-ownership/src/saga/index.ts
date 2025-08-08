@@ -1,8 +1,8 @@
 import { put, takeLatest, fork, call, select } from 'redux-saga/effects';
 import { DataState, setDataState, setData, type CodeOwnershipData, type CodeOwnershipState, setCurrentBranch } from '../reducer';
-import type {DataPlugin} from '../../../../interfaces/dataPlugin.ts';
+import type { DataPlugin } from '../../../../interfaces/dataPlugin.ts';
 import { getCommitDataForSha, getDefaultBranch, getFilenamesForBranch, getOwnershipForCommits, getPreviousFilenames } from './helper.ts';
-import type {PreviousFileData} from '../../../../../types/data/ownershipType.ts';
+import type { PreviousFileData } from '../../../../../types/data/ownershipType.ts';
 
 export default function* (dataConnection: DataPlugin) {
   yield fork(() => watchRefresh(dataConnection));

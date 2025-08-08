@@ -1,4 +1,4 @@
-export interface SettingsType {}
+export type SettingsType = object;
 
 function Settings() {
   return <></>;

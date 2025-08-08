@@ -1,9 +1,9 @@
-import {type MutableRefObject, useEffect, useMemo, useRef } from 'react';
+import { type MutableRefObject, useEffect, useMemo, useRef } from 'react';
 import * as d3 from 'd3';
-import {type ScaleLinear, type ScaleTime, symbol, symbolTriangle } from 'd3';
-import type {CommitChartData, Palette} from './chart.tsx';
-import type {SprintType} from '../../../../../types/data/sprintType.ts';
-import type {SettingsType} from '../settings/settings.tsx';
+import { type ScaleLinear, type ScaleTime, symbol, symbolTriangle } from 'd3';
+import type { CommitChartData, Palette } from './chart.tsx';
+import type { SprintType } from '../../../../../types/data/sprintType.ts';
+import type { SettingsType } from '../settings/settings.tsx';
 import { PositiveNegativeSide, splitPositiveNegativeData } from '../utilities/dataConverter.ts';
 import { round } from 'lodash';
 
@@ -63,10 +63,10 @@ export const StackedAreaChart = ({ width, height, data, scale, palette, sprintLi
         xScale.domain([xMin || 0, xMax || 0]);
       } else {
         xScale.domain([xScale.invert(extent[0]), xScale.invert(extent[1])]);
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-expect-error
-        // eslint-disable-next-line @typescript-eslint/unbound-method
+
         svgElement.select('.brush').call(brush.move, null);
       }
       // d3/typescript sometimes does weird things and throws an error where no error is.

@@ -1,9 +1,9 @@
 import styles from './stackedAreaChart.module.scss';
-import ScalableBaseChartComponent, {type Props } from '../ScalableBaseChart';
+import ScalableBaseChartComponent, { type Props } from '../ScalableBaseChart';
 import * as d3 from 'd3';
 import * as _ from 'lodash';
 import { formatDate } from '../../utils/dateUtils.ts';
-import type {Series} from 'd3';
+import type { Series } from 'd3';
 
 /**
  * Stacked area chart

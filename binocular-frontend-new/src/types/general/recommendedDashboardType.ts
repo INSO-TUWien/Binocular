@@ -1,4 +1,4 @@
-import type {DashboardItemType} from './dashboardItemType.ts';
+import type { DashboardItemType } from './dashboardItemType.ts';
 
 export interface RecommendedDashboard {
   name: string;

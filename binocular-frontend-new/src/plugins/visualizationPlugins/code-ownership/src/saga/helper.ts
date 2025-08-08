@@ -1,10 +1,10 @@
 'use strict';
 
 import { getHistoryForCommit } from '../utils/dbUtils.ts';
-import type {DataPlugin} from '../../../../interfaces/dataPlugin.ts';
-import type {DataPluginCommit} from '../../../../interfaces/dataPluginInterfaces/dataPluginCommits.ts';
-import type {PreviousFileData} from '../../../../../types/data/ownershipType.ts';
-import type {DataPluginBranch} from '../../../../interfaces/dataPluginInterfaces/dataPluginBranches.ts';
+import type { DataPlugin } from '../../../../interfaces/dataPlugin.ts';
+import type { DataPluginCommit } from '../../../../interfaces/dataPluginInterfaces/dataPluginCommits.ts';
+import type { PreviousFileData } from '../../../../../types/data/ownershipType.ts';
+import type { DataPluginBranch } from '../../../../interfaces/dataPluginInterfaces/dataPluginBranches.ts';
 
 export async function getOwnershipForCommits(latestBranchCommit: DataPluginCommit, dataConnection: DataPlugin) {
   // first get all commits (with parent data)

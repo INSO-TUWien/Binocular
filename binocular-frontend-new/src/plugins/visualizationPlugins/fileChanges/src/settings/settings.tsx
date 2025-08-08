@@ -1,8 +1,8 @@
 import React from 'react';
 import { setGlobalCurrentFileData } from '../reducer';
 import { useSelector } from 'react-redux';
-import type {RootState} from '../../../../../redux';
-import type {FileListElementType} from '../../../../../types/data/fileListType.ts';
+import type { RootState } from '../../../../../redux';
+import type { FileListElementType } from '../../../../../types/data/fileListType.ts';
 
 export interface SettingsType {
   file: string;

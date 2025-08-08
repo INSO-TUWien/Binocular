@@ -1,5 +1,5 @@
 import dashboardPreviewStyles from './dashboardPreview.module.scss';
-import type {DashboardItemType} from '../../../../../types/general/dashboardItemType.ts';
+import type { DashboardItemType } from '../../../../../types/general/dashboardItemType.ts';
 
 function DashboardPreview(props: { dashboardItems: DashboardItemType[] }) {
   return (

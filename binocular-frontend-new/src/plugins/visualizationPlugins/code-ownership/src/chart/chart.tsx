@@ -4,19 +4,13 @@ import StackedAreaChart from './StackedAreaChart';
 import * as d3 from 'd3';
 import { useState, useEffect } from 'react';
 import _ from 'lodash';
-import type {CodeOwnerShipSettings} from '../settings/settings.tsx';
-import type {Palette} from '../../../../../types/data/authorType.ts';
-import type {
-  FileOwnershipCollection,
-  OwnershipData,
-  PreviousFileData
-} from '../../../../../types/data/ownershipType.ts';
+import type { CodeOwnerShipSettings } from '../settings/settings.tsx';
+import type { Palette } from '../../../../../types/data/authorType.ts';
+import type { FileOwnershipCollection, OwnershipData, PreviousFileData } from '../../../../../types/data/ownershipType.ts';
 import { DataState, setCurrentBranch } from '../reducer';
 import { getBranches } from '../saga/helper.ts';
 import { handelPopoutResizing } from '../../../../utils/resizing.ts';
-import type {
-  VisualizationPluginProperties
-} from '../../../../interfaces/visualizationPluginInterfaces/visualizationPluginProperties.ts';
+import type { VisualizationPluginProperties } from '../../../../interfaces/visualizationPluginInterfaces/visualizationPluginProperties.ts';
 
 function Chart<SettingsType extends CodeOwnerShipSettings, DataType>(props: VisualizationPluginProperties<SettingsType, DataType>) {
   // /!*
