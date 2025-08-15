@@ -16,7 +16,7 @@ const Issues: VisualizationPlugin<IssueSettings, DataPluginIssue> = {
   dataConnectionName: 'issues',
   dataConverter: convertToChartData,
   helpComponent: Help,
-  defaultSettings: { splitBuildsPerAuthor: false, visualizationStyle: 'curved', showSprints: false },
+  defaultSettings: { splitIssuesPerAuthor: false, visualizationStyle: 'curved', showSprints: false },
   export: {
     getSVGData: getSVGData,
   },

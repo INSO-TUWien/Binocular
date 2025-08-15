@@ -75,7 +75,10 @@ function getDataByIssue(
   palette: Palette,
   chartData: TimeSpentChartData[],
 ) {
-  const data: Array<{ date: number; statsBySortingObject: { [signature: string]: { spent: number; removed: number } } }> = [];
+  const data: Array<{
+    date: number;
+    statsBySortingObject: { [signature: string]: { spent: number; removed: number; aggregatedSpent: number; aggregatedRemoved: number } };
+  }> = [];
   //---- STEP 1: AGGREGATE COMMITS GROUPED BY AUTHORS PER TIME INTERVAL ----
   const granularity = getGranularity(props.parameters.parametersGeneral.granularity);
   const curr = moment(firstTimestamp)
@@ -86,6 +89,8 @@ function getDataByIssue(
     .add(1, <moment.unitOfTime.DurationConstructor>props.parameters.parametersGeneral.granularity);
   const next = moment(curr).add(1, <moment.unitOfTime.DurationConstructor>props.parameters.parametersGeneral.granularity);
   let issuesAndMRs: IssueAndMR[] = [];
+  const cumulativeTotals: { [id: string]: { spent: number; removed: number } } = {};
+
   for (
     let i = 0;
     curr.isSameOrBefore(end);
@@ -95,7 +100,10 @@ function getDataByIssue(
     //Iterate through time buckets
     const currTimestamp = curr.toDate().getTime();
     const nextTimestamp = next.toDate().getTime();
-    const obj: { date: number; statsBySortingObject: { [signature: string]: { spent: number; removed: number } } } = {
+    const obj: {
+      date: number;
+      statsBySortingObject: { [signature: string]: { spent: number; removed: number; aggregatedSpent: number; aggregatedRemoved: number } };
+    } = {
       date: currTimestamp,
       statsBySortingObject: {},
     }; //Save date of time bucket, create object
@@ -121,24 +129,41 @@ function getDataByIssue(
       } else {
         issueOrMR = { id: '-1', title: '', color: { main: '', secondary: '' } };
       }
-      if (sortedData[i].timeSpent > 0) {
-        spent = sortedData[i].timeSpent;
-      } else if (sortedData[i].timeSpent < 0) {
-        removed = sortedData[i].timeSpent;
-      }
-      if (issueOrMR && issueOrMR.id in obj.statsBySortingObject) {
-        obj.statsBySortingObject[issueOrMR.id] = {
-          spent: obj.statsBySortingObject[issueOrMR.id].spent + spent,
-          removed: obj.statsBySortingObject[issueOrMR.id].removed + removed,
-        };
-      } else {
-        //Else create new values
-        obj.statsBySortingObject[issueOrMR.id] = { spent: spent, removed: removed };
+      const id = sortedData[i].issue?.id || sortedData[i].mergeRequest?.id;
+      if (id !== undefined && id !== null) {
+        if (sortedData[i].timeSpent > 0) {
+          spent = sortedData[i].timeSpent;
+        } else if (sortedData[i].timeSpent < 0) {
+          removed = sortedData[i].timeSpent;
+        }
+
+        // Update cumulative totals, is done everytime to avoid undefined values
+        if (!cumulativeTotals[id]) {
+          cumulativeTotals[id] = { spent: 0, removed: 0 };
+        }
+        cumulativeTotals[id].spent += spent;
+        cumulativeTotals[id].removed += removed;
+
+        if (id in obj.statsBySortingObject) {
+          obj.statsBySortingObject[issueOrMR.id] = {
+            spent: obj.statsBySortingObject[issueOrMR.id].spent + spent,
+            removed: obj.statsBySortingObject[issueOrMR.id].removed + removed,
+            aggregatedSpent: cumulativeTotals[issueOrMR.id]?.spent,
+            aggregatedRemoved: cumulativeTotals[issueOrMR.id]?.removed,
+          };
+        } else {
+          // Else create new values
+          obj.statsBySortingObject[issueOrMR.id] = {
+            spent: spent,
+            removed: removed,
+            aggregatedSpent: cumulativeTotals[issueOrMR.id]?.spent,
+            aggregatedRemoved: cumulativeTotals[issueOrMR.id]?.removed,
+          };
+        }
       }
     }
     data.push(obj);
   }
-
   const colors = distinctColors({ count: issuesAndMRs.length, lightMin: 50 });
   issuesAndMRs = issuesAndMRs.map((item, index) => ({
     ...item,
@@ -146,6 +171,7 @@ function getDataByIssue(
   }));
 
   //---- STEP 2: CONSTRUCT CHART DATA FROM AGGREGATED NOTES ----
+  const previousTotals: { [id: string]: { spent: number; removed: number } } = {};
   data.forEach((object) => {
     //commit has structure {date, statsByAuthor: {}} (see next line)}
     const obj: TimeSpentChartData = { date: object.date };
@@ -162,6 +188,15 @@ function getDataByIssue(
         obj['(Spent) ' + issueOrMR.title] = 0.001;
         obj['(Removed) ' + issueOrMR.title] = -0.001; //-0.001 for stack layout to realize it belongs on the bottom
       }
+    } else if (props.settings.breakdown && !props.settings.splitSpentRemoved) {
+      for (const issueOrMR of issuesAndMRs) {
+        palette[issueOrMR.title] = {
+          main: chroma(issueOrMR.color.main).hex(),
+          secondary: chroma(issueOrMR.color.secondary).hex(),
+        };
+        obj[issueOrMR.title] = 0;
+      }
+      obj['others'] = 0;
     } else {
       for (const issueOrMR of issuesAndMRs) {
         palette[issueOrMR.title] = {
@@ -188,6 +223,29 @@ function getDataByIssue(
             //-0.001 for stack layout to realize it belongs on the bottom
             obj['(Removed) ' + name] = object.statsBySortingObject[issueOrMR.id].removed - 0.001;
           }
+        }
+      }
+      if (props.settings.breakdown) {
+        let currentSpent = 0;
+        let currentRemoved = 0;
+        if (issueOrMR.id in object.statsBySortingObject) {
+          currentSpent = object.statsBySortingObject[issueOrMR.id].aggregatedSpent;
+          currentRemoved = object.statsBySortingObject[issueOrMR.id].aggregatedRemoved;
+        }
+        // Never decrease totals, only increase them
+        if (previousTotals[issueOrMR.id]?.spent !== undefined && currentSpent < previousTotals[issueOrMR.id].spent) {
+          currentSpent = previousTotals[issueOrMR.id].spent;
+        }
+        if (previousTotals[issueOrMR.id]?.removed !== undefined && currentRemoved > previousTotals[issueOrMR.id].removed) {
+          currentRemoved = previousTotals[issueOrMR.id].removed;
+        }
+        previousTotals[issueOrMR.id] = { spent: currentSpent, removed: currentRemoved };
+        if (!props.settings.splitSpentRemoved) {
+          obj[issueOrMR.title] = currentSpent + currentRemoved;
+        } else {
+          obj['(Spent) ' + issueOrMR.title] = currentSpent;
+          //-0.001 for stack layout to realize it belongs on the bottom
+          obj['(Removed) ' + issueOrMR.title] = currentRemoved - 0.001;
         }
       } else {
         if (issueOrMR.id in object.statsBySortingObject) {
@@ -239,7 +297,10 @@ function getDataByAuthor(
   palette: Palette,
   chartData: TimeSpentChartData[],
 ) {
-  const data: Array<{ date: number; statsBySortingObject: { [signature: string]: { spent: number; removed: number } } }> = [];
+  const data: Array<{
+    date: number;
+    statsBySortingObject: { [signature: string]: { spent: number; removed: number; aggregatedSpent: number; aggregatedRemoved: number } };
+  }> = [];
   //---- STEP 1: AGGREGATE COMMITS GROUPED BY AUTHORS PER TIME INTERVAL ----
   const granularity = getGranularity(props.parameters.parametersGeneral.granularity);
   const curr = moment(firstTimestamp)
@@ -249,7 +310,10 @@ function getDataByAuthor(
     .endOf(granularity.unit as moment.unitOfTime.StartOf)
     .add(1, <moment.unitOfTime.DurationConstructor>props.parameters.parametersGeneral.granularity);
   const next = moment(curr).add(1, <moment.unitOfTime.DurationConstructor>props.parameters.parametersGeneral.granularity);
-  const totalNotesPerAuthor: { [signature: string]: number } = {};
+
+  // Cumulative totals for aggregation
+  const cumulativeTotals: { [authorId: string]: { spent: number; removed: number } } = {};
+
   for (
     let i = 0;
     curr.isSameOrBefore(end);
@@ -259,35 +323,44 @@ function getDataByAuthor(
     //Iterate through time buckets
     const currTimestamp = curr.toDate().getTime();
     const nextTimestamp = next.toDate().getTime();
-    const obj: { date: number; statsBySortingObject: { [signature: string]: { spent: number; removed: number } } } = {
+    const obj: {
+      date: number;
+      statsBySortingObject: { [signature: string]: { spent: number; removed: number; aggregatedSpent: number; aggregatedRemoved: number } };
+    } = {
       date: currTimestamp,
       statsBySortingObject: {},
     }; //Save date of time bucket, create object
     for (; i < sortedData.length && Date.parse(sortedData[i].createdAt) < nextTimestamp; i++) {
-      //Iterate through commits that fall into this time bucket
       let spent = 0;
       let removed = 0;
-
-      if (sortedData[i].author.user !== null) {
-        const author = sortedData[i].author.user!.id;
+      const authorId = sortedData[i].author.user?.id;
+      if (authorId !== undefined && authorId !== null) {
         if (sortedData[i].timeSpent > 0) {
           spent = sortedData[i].timeSpent;
         } else if (sortedData[i].timeSpent < 0) {
           removed = sortedData[i].timeSpent;
         }
-        if (totalNotesPerAuthor[author] === undefined) {
-          totalNotesPerAuthor[author] = 0;
+        // Update cumulative totals
+        if (!cumulativeTotals[authorId]) {
+          cumulativeTotals[authorId] = { spent: 0, removed: 0 };
         }
-        totalNotesPerAuthor[author] += 1;
+        cumulativeTotals[authorId].spent += spent;
+        cumulativeTotals[authorId].removed += removed;
 
-        if (author in obj.statsBySortingObject) {
-          obj.statsBySortingObject[author] = {
-            spent: obj.statsBySortingObject[author].spent + spent,
-            removed: obj.statsBySortingObject[author].removed + removed,
+        if (authorId in obj.statsBySortingObject) {
+          obj.statsBySortingObject[authorId] = {
+            spent: obj.statsBySortingObject[authorId].spent + spent,
+            removed: obj.statsBySortingObject[authorId].removed + removed,
+            aggregatedSpent: cumulativeTotals[authorId]?.spent,
+            aggregatedRemoved: cumulativeTotals[authorId]?.removed,
           };
         } else {
-          //Else create new values
-          obj.statsBySortingObject[author] = { spent: spent, removed: removed };
+          obj.statsBySortingObject[authorId] = {
+            spent: spent,
+            removed: removed,
+            aggregatedSpent: cumulativeTotals[authorId]?.spent,
+            aggregatedRemoved: cumulativeTotals[authorId]?.removed,
+          };
         }
       }
     }
@@ -295,8 +368,8 @@ function getDataByAuthor(
   }
 
   //---- STEP 2: CONSTRUCT CHART DATA FROM AGGREGATED NOTES ----
+  const previousTotals: { [authorId: string]: { spent: number; removed: number } } = {};
   data.forEach((object) => {
-    //commit has structure {date, statsByAuthor: {}} (see next line)}
     const obj: TimeSpentChartData = { date: object.date };
     if (props.settings.splitSpentRemoved) {
       for (const author of props.authorList) {
@@ -311,6 +384,15 @@ function getDataByAuthor(
         obj['(Spent) ' + (author.displayName || author.user.gitSignature)] = 0.001;
         obj['(Removed) ' + (author.displayName || author.user.gitSignature)] = -0.001; //-0.001 for stack layout to realize it belongs on the bottom
       }
+    } else if (props.settings.breakdown) {
+      for (const author of props.authorList) {
+        palette['(Total) ' + (author.displayName || author.user.gitSignature)] = {
+          main: chroma(author.color.main).hex(),
+          secondary: chroma(author.color.secondary).hex(),
+        };
+        obj['(Total) ' + (author.displayName || author.user.gitSignature)] = 0;
+      }
+      obj['others'] = 0;
     } else {
       for (const author of props.authorList) {
         palette[author.displayName || author.user.gitSignature] = {
@@ -344,6 +426,29 @@ function getDataByAuthor(
             obj['(Removed) ' + name] = object.statsBySortingObject[author.user.id].removed - 0.001;
           }
         }
+      }
+      if (props.settings.breakdown) {
+        let currentSpent = 0;
+        let currentRemoved = 0;
+        if (author.user.id in object.statsBySortingObject) {
+          currentSpent = object.statsBySortingObject[author.user.id].aggregatedSpent;
+          currentRemoved = object.statsBySortingObject[author.user.id].aggregatedRemoved;
+        }
+        // Never decrease totals, only increase them
+        if (previousTotals[author.user.id]?.spent !== undefined && currentSpent < previousTotals[author.user.id].spent) {
+          currentSpent = previousTotals[author.user.id].spent;
+        }
+        if (previousTotals[author.user.id]?.removed !== undefined && currentRemoved > previousTotals[author.user.id].removed) {
+          currentRemoved = previousTotals[author.user.id].removed;
+        }
+        previousTotals[author.user.id] = { spent: currentSpent, removed: currentRemoved };
+        if (!props.settings.splitSpentRemoved) {
+          obj['(Total) ' + (author.displayName || author.user.gitSignature)] = currentSpent + currentRemoved;
+        } else {
+          obj['(Spent) ' + (author.displayName || author.user.gitSignature)] = currentSpent;
+          //-0.001 for stack layout to realize it belongs on the bottom
+          obj['(Removed) ' + (author.displayName || author.user.gitSignature)] = currentRemoved - 0.001;
+        }
       } else {
         if (author.user.id in object.statsBySortingObject) {
           if (name in obj) {
@@ -359,7 +464,6 @@ function getDataByAuthor(
   });
   //Output in chartData has format [{author1: 123, author2: 123, ...}, ...],
   //e.g. series names are the authors with their corresponding values
-
   //---- STEP 3: SCALING ----
   chartData.forEach((dataPoint) => {
     let positiveTotals = 0;
@@ -382,6 +486,7 @@ function getDataByAuthor(
       scale[0] = negativeTotals;
     }
   });
+  console.log(chartData);
   return { chartData: chartData, scale: scale, palette: palette };
 }
 

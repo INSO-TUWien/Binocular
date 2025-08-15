@@ -48,12 +48,10 @@ function Settings(props: { settings: CodeOwnerShipSettings; setSettings: (newSet
   return (
     <>
       <div>
-        <label className="form-control w-full max-w-xs">
-          <div className="label">
-            <span className="label-text">Display Mode:</span>
-          </div>
+        <label className="label cursor-pointer flex w-full justify-between items-center mt-0.5">
+          <span className="label-text">Display Mode:</span>
           <select
-            className="select select-bordered select-sm"
+            className={'select select-bordered select-xs w-24'}
             defaultValue={props.settings.displayMode}
             onChange={(e) =>
               props.setSettings({
@@ -65,13 +63,11 @@ function Settings(props: { settings: CodeOwnerShipSettings; setSettings: (newSet
             <option value={'relative'}>relative</option>
           </select>
         </label>
-        <label className="form-control w-full max-w-xs">
-          <div className="label">
-            <span className="label-text">Branch:</span>
-          </div>
+        <label className="label cursor-pointer flex w-full justify-between items-center mt-0.5">
+          <span className="label-text">Branch:</span>
           <select
             value={props.settings.currentBranch ? props.settings.currentBranch : ''}
-            className="select select-bordered select-sm"
+            className="select select-bordered select-xs w-36"
             onChange={(e) => {
               setCurrentBranch(toNumber(e.target.value));
               props.setSettings({

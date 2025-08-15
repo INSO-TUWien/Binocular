@@ -16,7 +16,13 @@ const TimeSpent: VisualizationPlugin<TimeSpentSettings, DataPluginNote> = {
   helpComponent: Help,
   dataConnectionName: 'notes',
   dataConverter: convertToChartData,
-  defaultSettings: { splitTimePerIssue: false, splitAdditionsDeletions: true, visualizationStyle: 'curved', showSprints: false },
+  defaultSettings: {
+    splitTimePerIssue: false,
+    splitSpentRemoved: false,
+    breakdown: false,
+    visualizationStyle: 'curved',
+    showSprints: false,
+  },
   export: {
     getSVGData: getSVGData,
   },

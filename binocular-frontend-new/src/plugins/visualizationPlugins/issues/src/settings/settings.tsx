@@ -9,7 +9,41 @@ function Settings(props: { settings: IssueSettings; setSettings: (newSettings: I
   return (
     <>
       <div>
-        <label className="label cursor-pointer">
+        <label className="label cursor-pointer flex w-full justify-between items-center mt-0.5">
+          <span className="label-text">Show Sprints:</span>
+          <input
+            type="checkbox"
+            className="toggle toggle-accent toggle-sm"
+            defaultChecked={props.settings.showSprints}
+            onChange={(event) =>
+              props.setSettings({
+                splitIssuesPerAuthor: props.settings.splitIssuesPerAuthor,
+                breakdown: props.settings.breakdown,
+                visualizationStyle: props.settings.visualizationStyle,
+                showSprints: event.target.checked,
+              })
+            }
+          />
+        </label>
+        <label className="label cursor-pointer flex w-full justify-between items-center mt-0.5">
+          <span className="label-text">Visualization Style:</span>
+          <select
+            className={'select select-bordered select-xs w-24'}
+            defaultValue={props.settings.visualizationStyle}
+            onChange={(e) =>
+              props.setSettings({
+                splitIssuesPerAuthor: props.settings.splitIssuesPerAuthor,
+                breakdown: props.settings.breakdown,
+                visualizationStyle: e.target.value,
+                showSprints: props.settings.showSprints,
+              })
+            }>
+            <option value={'curved'}>curved</option>
+            <option value={'stepped'}>stepped</option>
+            <option value={'linear'}>linear</option>
+          </select>
+        </label>
+        <label className="label cursor-pointer flex w-full justify-between items-center mt-0.5">
           <span className="label-text">Split Issues per Assignee:</span>
           <input
             type="checkbox"
@@ -25,7 +59,7 @@ function Settings(props: { settings: IssueSettings; setSettings: (newSettings: I
             }
           />
         </label>
-        <label className="label cursor-pointer">
+        <label className="label cursor-pointer flex w-full justify-between items-center mt-0.5">
           <span className="label-text">Breakdown (Total Open Issues):</span>
           <input
             type="checkbox"
@@ -37,42 +71,6 @@ function Settings(props: { settings: IssueSettings; setSettings: (newSettings: I
                 breakdown: event.target.checked,
                 visualizationStyle: props.settings.visualizationStyle,
                 showSprints: props.settings.showSprints,
-              })
-            }
-          />
-        </label>
-        <label className="form-control w-full max-w-xs">
-          <div className="label">
-            <span className="label-text">Visualization Style:</span>
-          </div>
-          <select
-            className="select select-bordered select-sm"
-            defaultValue={props.settings.visualizationStyle}
-            onChange={(e) =>
-              props.setSettings({
-                splitIssuesPerAuthor: props.settings.splitIssuesPerAuthor,
-                breakdown: props.settings.breakdown,
-                visualizationStyle: e.target.value,
-                showSprints: props.settings.showSprints,
-              })
-            }>
-            <option value={'curved'}>curved</option>
-            <option value={'stepped'}>stepped</option>
-            <option value={'linear'}>linear</option>
-          </select>
-        </label>
-        <label className="label cursor-pointer">
-          <span className="label-text">Show Sprints:</span>
-          <input
-            type="checkbox"
-            className="toggle toggle-accent toggle-sm"
-            defaultChecked={props.settings.showSprints}
-            onChange={(event) =>
-              props.setSettings({
-                splitIssuesPerAuthor: props.settings.splitIssuesPerAuthor,
-                breakdown: props.settings.breakdown,
-                visualizationStyle: props.settings.visualizationStyle,
-                showSprints: event.target.checked,
               })
             }
           />

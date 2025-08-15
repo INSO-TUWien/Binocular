@@ -40,7 +40,7 @@ function FileSelector({ selectedFile, onFileChange }: { selectedFile: string; on
   //});
 
   return (
-    <div className="w-full max-w-xs border rounded-lg input-bordered">
+    <div className="w-full max-w-xs rounded-lg bg-base-200 p-3 shadow mb-1">
       {/* Search input */}
       <input
         type="text"
@@ -66,6 +66,36 @@ function Settings(props: { settings: SettingsType; setSettings: (newSettings: Se
   return (
     <>
       <div>
+        <label className="label cursor-pointer flex w-full justify-between items-center mt-0.5">
+          <span className="label-text">Show Sprints:</span>
+          <input
+            type="checkbox"
+            className="toggle toggle-accent toggle-sm"
+            defaultChecked={props.settings.showSprints}
+            onChange={(event) =>
+              props.setSettings({
+                ...props.settings,
+                showSprints: event.target.checked,
+              })
+            }
+          />
+        </label>
+        <label className="label cursor-pointer flex w-full justify-between items-center mt-0.5">
+          <span className="label-text">Visualization Style:</span>
+          <select
+            className={'select select-bordered select-xs w-24'}
+            defaultValue={props.settings.visualizationStyle}
+            onChange={(e) =>
+              props.setSettings({
+                ...props.settings,
+                visualizationStyle: e.target.value,
+              })
+            }>
+            <option value={'curved'}>curved</option>
+            <option value={'stepped'}>stepped</option>
+            <option value={'linear'}>linear</option>
+          </select>
+        </label>
         <label className="form-control w-full max-w-xs">
           <div className="label">
             <span className="label-text">File:</span>
@@ -81,7 +111,7 @@ function Settings(props: { settings: SettingsType; setSettings: (newSettings: Se
             }}
           />
         </label>
-        <label className="label cursor-pointer">
+        <label className="label cursor-pointer flex w-full justify-between items-center mt-0.5">
           <span className="label-text">Split Additions and Deletions:</span>
           <input
             type="checkbox"
@@ -95,39 +125,7 @@ function Settings(props: { settings: SettingsType; setSettings: (newSettings: Se
             }
           />
         </label>
-        <label className="form-control w-full max-w-xs">
-          <div className="label">
-            <span className="label-text">Visualization Style:</span>
-          </div>
-          <select
-            className="select select-bordered select-sm"
-            defaultValue={props.settings.visualizationStyle}
-            onChange={(e) =>
-              props.setSettings({
-                ...props.settings,
-                visualizationStyle: e.target.value,
-              })
-            }>
-            <option value={'curved'}>curved</option>
-            <option value={'stepped'}>stepped</option>
-            <option value={'linear'}>linear</option>
-          </select>
-        </label>
-        <label className="label cursor-pointer">
-          <span className="label-text">Show Sprints:</span>
-          <input
-            type="checkbox"
-            className="toggle toggle-accent toggle-sm"
-            defaultChecked={props.settings.showSprints}
-            onChange={(event) =>
-              props.setSettings({
-                ...props.settings,
-                showSprints: event.target.checked,
-              })
-            }
-          />
-        </label>
-        <label className="label cursor-pointer">
+        <label className="label cursor-pointer flex w-full justify-between items-center mt-0.5">
           <span className="label-text">Show extra Metrics</span>
           <input
             type="checkbox"
@@ -148,6 +146,7 @@ function Settings(props: { settings: SettingsType; setSettings: (newSettings: Se
 
 export default Settings;
 
+// TODO delete?
 //<select
 //
 //  className="select select-bordered select-sm"

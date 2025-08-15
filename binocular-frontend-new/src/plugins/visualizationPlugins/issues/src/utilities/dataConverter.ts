@@ -339,9 +339,6 @@ function getDataByAuthors(
         if (!(assignee in obj.statsBySortingObject)) {
           obj.statsBySortingObject[assignee] = { OPENED: 0, CLOSED: 0 };
         }
-        if (!(assignee in obj.statsBySortingObject)) {
-          obj.statsBySortingObject[assignee] = { OPENED: 0, CLOSED: 0 };
-        }
       }
     }
     data.push(obj);
