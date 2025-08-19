@@ -1,153 +1,162 @@
+import React, { useState } from 'react';
+
 type FileChange = {
   file: { path: string };
-  stats: {
-    additions: number;
-    deletions: number;
-  };
+  stats: { additions: number; deletions: number };
 };
 
-type FileChangeWithRatio = FileChange & {
+type FileChangeWithRatio = FileChange & { changeRatio: number };
+
+type FolderWithRatio = {
+  name: string;
+  subfolders: { [key: string]: FolderWithRatio };
+  files: FileChangeWithRatio[];
+  stats: { additions: number; deletions: number };
   changeRatio: number;
-};
-
-type GroupedResult = {
-  [folder: string]: {
-    files: FileChangeWithRatio[];
-    folderChangeRatio: number;
-  };
 };
 
 const MARGIN = { top: 30, right: 30, bottom: 30, left: 30 };
 
-type Props = {
-  width: number;
-  height: number;
-  data: FileChange[];
+const updateFolderStats = (folder: FolderWithRatio, file: FileChangeWithRatio) => {
+  folder.changeRatio += file.changeRatio;
+  folder.stats.additions += file.stats.additions;
+  folder.stats.deletions += file.stats.deletions;
 };
 
-export const CommitByFileViz: React.FC<Props> = ({ width, height, data }: Props) => {
-  const grouped = groupByTopLevelFolderWithRatios(data);
+const flattenFolders = (folder: FolderWithRatio): FolderWithRatio => {
+  const flattenedSubfolders: { [key: string]: FolderWithRatio } = {};
+  for (const [, subfolder] of Object.entries(folder.subfolders)) {
+    const flattened = flattenFolders(subfolder);
+    flattenedSubfolders[flattened.name] = flattened;
+  }
 
-  const boundsWidth = width - MARGIN.right - MARGIN.left;
-  const boundsHeight = height - MARGIN.top - MARGIN.bottom;
-  const isVertical = width < height;
+  folder.subfolders = flattenedSubfolders;
+  if (folder.files.length === 0 && Object.keys(folder.subfolders).length === 1) {
+    const onlyChild = Object.values(folder.subfolders)[0];
 
-  const rootGroup = grouped['root'];
-  const otherGroups = Object.entries(grouped).filter(([key]) => key !== 'root');
-  const spaceReduction = rootGroup ? 10 * (rootGroup.files.length + otherGroups.length) : 10 * otherGroups.length;
+    return {
+      ...onlyChild,
+      name: folder.name + '/' + onlyChild.name,
+    };
+  }
 
+  return folder;
+};
+
+const buildFolderTree = (files: FileChange[]): FolderWithRatio => {
+  const totalChangeCount = files.reduce((sum, f) => sum + f.stats.additions + f.stats.deletions, 0);
+  const fileChangesWithRatios: FileChangeWithRatio[] = files.map((f) => ({
+    ...f,
+    changeRatio: totalChangeCount === 0 ? 0 : (f.stats.additions + f.stats.deletions) / totalChangeCount,
+  }));
+
+  const rootFolder: FolderWithRatio = { name: '', subfolders: {}, files: [], stats: { additions: 0, deletions: 0 }, changeRatio: 0 };
+
+  for (const fileChange of fileChangesWithRatios) {
+    const filePathParts = fileChange.file.path.split('/');
+    let currentFolder = rootFolder;
+
+    for (let i = 0; i < filePathParts.length - 1; i++) {
+      const filePathPart = filePathParts[i];
+      if (!currentFolder.subfolders[filePathPart]) {
+        currentFolder.subfolders[filePathPart] = {
+          name: filePathPart,
+          subfolders: {},
+          files: [],
+          stats: { additions: 0, deletions: 0 },
+          changeRatio: 0,
+        };
+      }
+      updateFolderStats(currentFolder, fileChange);
+      currentFolder = currentFolder.subfolders[filePathPart];
+    }
+    updateFolderStats(currentFolder, fileChange);
+    currentFolder.files.push(fileChange);
+  }
+
+  return flattenFolders(rootFolder);
+};
+
+const getFolderByPath = (folder: FolderWithRatio, path: string[]): FolderWithRatio => {
+  return path.reduce((n, part) => n.subfolders[part], folder);
+};
+
+const getFileColour = (add: number, del: number) => {
+  const total = add + del;
+  const ratio = add / total;
+  const vividness = Math.abs(0.5 - ratio) * 2;
+  if (add === del) {
+    return 'rgb(230, 230, 230)';
+  } else if (add < del) {
+    return `rgb(${230 + vividness * 25}, ${255 - vividness * 255}, ${255 - vividness * 255})`;
+  } else {
+    return `rgb(${255 - vividness * 255}, ${230 + vividness * 25}, ${255 - vividness * 255})`;
+  }
+};
+
+const FolderView: React.FC<{
+  folder: FolderWithRatio;
+  isVertical: boolean;
+  boundsWidth: number;
+  boundsHeight: number;
+  onNavigate: (folderName: string) => void;
+}> = ({ folder, isVertical, boundsWidth, boundsHeight, onNavigate }) => {
   return (
     <div
       style={{
-        width: `${boundsWidth}px`,
         height: `${boundsHeight}px`,
+        width: `${boundsWidth}px`,
         display: 'flex',
         flexDirection: isVertical ? 'column' : 'row',
         gap: '4px',
-        flexWrap: 'wrap',
       }}>
-      {rootGroup?.files.map((file) => {
-        const fileStyle = !isVertical
-          ? {
-              height: '100%',
-              width: `${file.changeRatio * (boundsWidth - spaceReduction)}px`,
-            }
-          : {
-              width: '100%',
-              height: `${file.changeRatio * (boundsHeight - spaceReduction)}px`,
-            };
-
-        const bgColor = getFileColor(file.stats.additions, file.stats.deletions);
-
+      {folder.files.map((file) => {
+        const ratio = file.changeRatio / folder.changeRatio;
+        const style = isVertical ? { height: `${ratio * 100}%`, width: '100%' } : { width: `${ratio * 100}%`, height: '100%' };
         return (
           <div
             key={file.file.path}
             style={{
-              ...fileStyle,
-              backgroundColor: bgColor,
+              ...style,
+              backgroundColor: getFileColour(file.stats.additions, file.stats.deletions),
               display: 'flex',
+              cursor: 'default',
               alignItems: 'center',
               justifyContent: 'center',
               fontSize: '0.7rem',
               borderRadius: '10px',
             }}
             title={`${file.file.path} — +${file.stats.additions} / -${file.stats.deletions}`}>
-            <p style={{ fontWeight: 'bold' }}>{file.file.path.split('/').pop()}</p>
+            {file.file.path.split('/').pop()}
           </div>
         );
       })}
 
-      {otherGroups.map(([folderName, { files, folderChangeRatio }]) => {
-        const folderStyle = isVertical
-          ? {
-              width: '100%',
-              height: `${folderChangeRatio * (boundsHeight - spaceReduction)}px`,
-            }
-          : {
-              height: '100%',
-              width: `${folderChangeRatio * (boundsWidth - spaceReduction)}px`,
-            };
+      {Object.entries(folder.subfolders).map(([childName, childNode]) => {
+        const ratio = childNode.changeRatio / folder.changeRatio;
+        const style = isVertical ? { height: `${ratio * 100}%`, width: '100%' } : { width: `${ratio * 100}%`, height: '100%' };
 
         return (
           <div
-            key={folderName}
+            key={childName}
             style={{
-              ...folderStyle,
-              padding: '4px',
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'space-between',
-              flexDirection: isVertical ? 'row' : 'column',
-              position: 'relative',
-              borderRadius: '10px',
+              ...style,
+              backgroundColor: getFileColour(childNode.stats.additions, childNode.stats.deletions),
               border: '2px solid #3182ce',
+              borderRadius: '10px',
+              padding: '4px',
+              position: 'relative',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: '0.8rem',
+              fontWeight: 'bold',
+              color: '#1a202c',
             }}
-            title={`${folderName} — +${files.reduce((acc, file) => acc + file.stats.additions, 0)} / -${files.reduce((acc, file) => acc + file.stats.deletions, 0)}`}>
-            <div
-              style={{
-                position: 'absolute',
-                top: 2,
-                left: 4,
-                fontSize: '0.75rem',
-                fontWeight: 'bold',
-                color: '#2c5282',
-                backgroundColor: 'white',
-                padding: '0 4px',
-                cursor: 'default',
-              }}>
-              {folderName}
-            </div>
-
-            {files.map((file) => {
-              const fileStyle = isVertical
-                ? {
-                    height: '100%',
-                    width: `${(file.changeRatio / folderChangeRatio) * 98}%`,
-                  }
-                : {
-                    width: '100%',
-                    height: `${(file.changeRatio / folderChangeRatio) * 98}%`,
-                  };
-
-              const bgColor = getFileColor(file.stats.additions, file.stats.deletions);
-
-              return (
-                <div
-                  key={file.file.path}
-                  style={{
-                    ...fileStyle,
-                    backgroundColor: bgColor,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    fontSize: '0.7rem',
-                    borderRadius: '10px',
-                  }}
-                  title={`${file.file.path} — +${file.stats.additions} / -${file.stats.deletions}`}>
-                  <p style={{ fontWeight: 'bold' }}>{file.file.path.split('/').pop()}</p>
-                </div>
-              );
-            })}
+            title={`Folder ${childName}  — +${childNode.stats.additions} / -${childNode.stats.deletions}`}
+            onClick={() => onNavigate(childName)}>
+            📁 {childName}
           </div>
         );
       })}
@@ -155,57 +164,51 @@ export const CommitByFileViz: React.FC<Props> = ({ width, height, data }: Props)
   );
 };
 
-const groupByTopLevelFolderWithRatios = (files: FileChange[]): GroupedResult => {
-  const totalChanges = files.reduce((sum, file) => sum + file.stats.additions + file.stats.deletions, 0);
+export const CommitByFileViz: React.FC<{
+  width: number;
+  height: number;
+  data: FileChange[];
+}> = ({ width, height, data }) => {
+  const root = buildFolderTree(data);
+  const [currentPath, setCurrentPath] = useState<string[]>([]);
+  const isVertical = width < height;
+  const boundsWidth = width - MARGIN.left - MARGIN.right;
+  const boundsHeight = height - MARGIN.top - MARGIN.bottom;
 
-  const filesWithRatios: FileChangeWithRatio[] = files.map((file) => {
-    const changes = file.stats.additions + file.stats.deletions;
-    return {
-      ...file,
-      changeRatio: totalChanges === 0 ? 0 : changes / totalChanges,
-    };
-  });
+  const currentFolder = getFolderByPath(root, currentPath);
 
-  const groups: GroupedResult = {};
+  return (
+    <div style={{ width: boundsWidth, height: boundsHeight, position: 'relative' }}>
+      {currentFolder.name !== '' && (
+        <>
+          <button
+            onClick={() => setCurrentPath(currentPath.slice(0, -1))}
+            style={{
+              position: 'absolute',
+              top: 4,
+              left: 4,
+              zIndex: 1,
+              padding: '4px 8px',
+              borderRadius: '6px',
+              background: '#3182ce',
+              color: 'white',
+              border: 'none',
+              cursor: 'pointer',
+              fontSize: '0.8rem',
+            }}>
+            &lt; {currentPath.slice(0, -1).join('/')}
+            {currentFolder.name}
+          </button>
+        </>
+      )}
 
-  for (const file of filesWithRatios) {
-    const folder = file.file.path.split('/')[1] === undefined ? 'root' : file.file.path.split('/')[0];
-
-    if (!groups[folder]) {
-      groups[folder] = {
-        files: [],
-        folderChangeRatio: 0,
-      };
-    }
-
-    groups[folder].files.push(file);
-    groups[folder].folderChangeRatio += file.changeRatio;
-  }
-
-  return groups;
-};
-
-const getFileColor = (additions: number, deletions: number) => {
-  const total = additions + deletions;
-  if (total === 0) return '#e2e8f0';
-
-  const ratio = additions / total;
-
-  const vividness = Math.abs(0.5 - ratio) * 2;
-
-  const blend = (start: number, end: number, weight: number) => Math.round(start + (end - start) * weight);
-
-  let r: number, g: number, b: number;
-
-  if (ratio > 0.5) {
-    r = blend(226, 56, vividness);
-    g = blend(232, 161, vividness);
-    b = blend(240, 105, vividness);
-  } else {
-    r = blend(226, 229, vividness);
-    g = blend(232, 62, vividness);
-    b = blend(240, 62, vividness);
-  }
-
-  return `rgb(${r}, ${g}, ${b})`;
+      <FolderView
+        folder={currentFolder}
+        isVertical={isVertical}
+        boundsWidth={boundsWidth}
+        boundsHeight={boundsHeight}
+        onNavigate={(folderName) => setCurrentPath([...currentPath, folderName])}
+      />
+    </div>
+  );
 };

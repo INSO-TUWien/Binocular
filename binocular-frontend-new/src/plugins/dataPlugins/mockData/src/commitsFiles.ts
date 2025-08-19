@@ -5,10 +5,14 @@ export default class CommitsFiles implements DataPluginCommitsFiles {
     switch (sha) {
       case '1':
         return Promise.resolve([
-          {
-            file: { path: 'Frontend/file1.ts' },
-            stats: { additions: 32, deletions: 0 },
-          },
+          // {
+          //   file: { path: 'Frontend/test/2/file1.ts' },
+          //   stats: { additions: 32, deletions: 0 },
+          // },
+          // {
+          //   file: { path: 'Frontend/test/1/file2.ts' },
+          //   stats: { additions: 0, deletions: 32 },
+          // },
           {
             file: { path: 'Backend/file2.java' },
             stats: { additions: 0, deletions: 8 },
@@ -17,10 +21,10 @@ export default class CommitsFiles implements DataPluginCommitsFiles {
             file: { path: 'Backend/file3.java' },
             stats: { additions: 4, deletions: 4 },
           },
-          {
-            file: { path: 'DevOps/file.java' },
-            stats: { additions: 12, deletions: 4 },
-          },
+          // {
+          //   file: { path: 'DevOps/file.java' },
+          //   stats: { additions: 12, deletions: 4 },
+          // },
         ]);
       case '2':
         return Promise.resolve([
