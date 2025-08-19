@@ -14,11 +14,19 @@ export default class CommitsFiles implements DataPluginCommitsFiles {
           //   stats: { additions: 0, deletions: 32 },
           // },
           {
-            file: { path: 'Backend/file2.java' },
+            file: { path: 'Backend/t1/file2.java' },
             stats: { additions: 0, deletions: 8 },
           },
           {
-            file: { path: 'Backend/file3.java' },
+            file: { path: 'Backend/t1/file3.java' },
+            stats: { additions: 4, deletions: 4 },
+          },
+          {
+            file: { path: 'Backend/t1/a/file2.java' },
+            stats: { additions: 0, deletions: 8 },
+          },
+          {
+            file: { path: 'Backend/t1/b/file3.java' },
             stats: { additions: 4, deletions: 4 },
           },
           // {
