@@ -3,7 +3,7 @@ import { RefObject, useEffect, useMemo, useState } from "react";
 import { SettingsType } from "../settings/settings.tsx";
 import { Store } from "@reduxjs/toolkit";
 import { convertIssuesToGraphData } from "../utilities/dataConverter.ts";
-import { DataState } from "../reducer";
+import { DataState, DateRange, setDateRange } from "../reducer";
 import { DataPluginAccount } from "../../../../interfaces/dataPluginInterfaces/dataPluginAccount.ts";
 
 type ChartProps = {
@@ -12,6 +12,10 @@ type ChartProps = {
   chartContainerRef: RefObject<HTMLDivElement>;
   showAfterCooldown: boolean;
   store: Store;
+
+  parameters?: {
+    parametersDateRange?: DateRange;
+  };
 };
 
 export default function Chart(props: ChartProps) {
@@ -24,6 +28,12 @@ export default function Chart(props: ChartProps) {
     [props.store],
   );
 
+  useEffect(() => {
+    if (props.parameters?.parametersDateRange) {
+      props.store.dispatch(setDateRange(props.parameters.parametersDateRange));
+    }
+  }, [props.parameters, props.store]);
+
   // dispatch your refresh
   useEffect(() => {
     props.store.dispatch({ type: "REFRESH" });
@@ -33,6 +43,7 @@ export default function Chart(props: ChartProps) {
   const state = props.store.getState() as {
     accounts: DataPluginAccount[];
     dataState: DataState;
+    dateRange: DateRange;
   };
   const { accounts, dataState } = state;
 

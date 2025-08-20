@@ -15,17 +15,21 @@ export default class AccountsIssues implements DataPluginAccounts {
   /**
    * Retrieves all accounts with their related issues from the backend.
    */
-  public async getAll(): Promise<DataPluginAccount[]> {
-    console.log("Getting all Accounts with Issues");
+  public async getAll(from: string, to: string): Promise<DataPluginAccount[]> {
+    console.log(`Getting all Accounts with Issues from:${from} to:${to}:`);
     const relationships: DataPluginAccount[] = [];
-
     // Page fetcher function for issues-accounts
-    const getPage =
-      () =>
+    const getAccountsIssuesPage =
+      (from?: string, to?: string) =>
       async (page: number, perPage: number = 50) => {
         const response = await this.graphQl.client.query({
           query: gql`
-            query ($page: Int, $perPage: Int) {
+            query (
+              $page: Int
+              $perPage: Int
+              $from: Timestamp
+              $to: Timestamp
+            ) {
               accounts(page: $page, perPage: $perPage) {
                 count
                 page
@@ -36,7 +40,7 @@ export default class AccountsIssues implements DataPluginAccounts {
                   name
                   url
                   avatarUrl
-                  issues {
+                  issues(from: $from, to: $to) {
                     id
                     iid
                     title
@@ -50,12 +54,13 @@ export default class AccountsIssues implements DataPluginAccounts {
               }
             }
           `,
-          variables: { page, perPage },
+          variables: { page, perPage, from, to },
         });
+        console.log(response);
         return response.data.accounts;
       };
 
-    await traversePages(getPage(), (record: any) => {
+    await traversePages(getAccountsIssuesPage(from, to), (record: any) => {
       relationships.push({
         id: record.login,
         login: record.login,
@@ -75,7 +80,6 @@ export default class AccountsIssues implements DataPluginAccounts {
       });
     });
 
-    //TODO: console log?!
     return relationships;
   }
 }

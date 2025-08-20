@@ -2,11 +2,11 @@ import React, { useCallback, useRef } from "react";
 
 export interface SettingsType {
   data: {
-    from: string;
-    to: string;
     nodes: { id: string; group: string; url: string }[];
     links: { source: string; target: string; value: number }[];
   };
+  from: string;
+  to: string;
   minEdgeValue: number;
   maxEdgeValue: number;
 }

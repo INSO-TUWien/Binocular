@@ -7,10 +7,10 @@ export enum DataState {
   COMPLETE,
 }
 
-interface DateRange {
+export type DateRange = {
   from: string;
   to: string;
-}
+};
 
 /**
  * Redux state for collaboration visualization
