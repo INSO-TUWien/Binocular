@@ -1,7 +1,9 @@
-import React, { useCallback, useEffect, useRef } from "react";
+import React, { useCallback, useRef } from "react";
 
 export interface SettingsType {
   data: {
+    from: string;
+    to: string;
     nodes: { id: string; group: string; url: string }[];
     links: { source: string; target: string; value: number }[];
   };
@@ -11,54 +13,14 @@ export interface SettingsType {
 const MIN_POSSIBLE = 1;
 const MAX_POSSIBLE = Infinity;
 
-interface Props {
+interface SettingsProps {
   settings: SettingsType;
   setSettings: (newSettings: SettingsType) => void;
 }
 
-export default function Settings(props: Props) {
-  const { settings, setSettings } = props;
+export default function Settings({ settings, setSettings }: SettingsProps) {
   const { minEdgeValue, maxEdgeValue } = settings;
-
-  //TODO: hack to remove global parameters like dateRange since they are not used in the visualization
-  // alternate solution would be to add a flag to the generic DashboardItem that allows plugins to
-  // (de)activate global settings
   const rootRef = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    if (!rootRef.current) return;
-
-    const labelsToHide = [
-      "Date Range:",
-      "Ignore Global Parameters:",
-      "General:",
-    ];
-
-    labelsToHide.forEach((labelText) => {
-      const matchingElements = Array.from(
-        rootRef.current!.parentElement?.querySelectorAll("div") || [],
-      ).filter((div) =>
-        Array.from(div.children).some(
-          (child) => child.textContent?.trim() === labelText,
-        ),
-      );
-
-      matchingElements.forEach((el) => {
-        const parent = el.closest("div");
-        if (parent instanceof HTMLElement) {
-          parent.style.display = "none";
-
-          // Remove next sibling <hr> if present
-          let next = parent.nextElementSibling;
-          while (next && next.tagName !== "HR") {
-            next = next.nextElementSibling;
-          }
-          if (next?.tagName === "HR") {
-            (next as HTMLElement).style.display = "none";
-          }
-        }
-      });
-    });
-  }, []);
 
   const handleMinChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
