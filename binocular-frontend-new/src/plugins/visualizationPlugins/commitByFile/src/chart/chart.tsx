@@ -26,11 +26,6 @@ function Chart(props: Readonly<Properties<SettingsType, DataPluginCommitFile>>) 
   const [selectedCommit, setSelectedCommit] = useState<{ value: string; label: string } | null>(null);
 
   useEffect(() => {
-    dispatch(setSha(props.settings.sha));
-    setSelectedCommit(null);
-  }, [props.settings]);
-
-  useEffect(() => {
     dispatch({
       type: 'REFRESH',
     });

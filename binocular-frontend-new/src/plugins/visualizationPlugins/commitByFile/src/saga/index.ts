@@ -14,7 +14,11 @@ function* watchRefresh(dataConnection: DataPlugin) {
 }
 
 function* watchShaChange(dataConnection: DataPlugin) {
-  yield takeEvery(setSha, () => fetchCommitsAndCommitByFileData(dataConnection));
+  yield takeEvery(setSha, () => fetchCommitData(dataConnection));
+}
+
+function* fetchCommitData(dataConnection: DataPlugin) {
+  yield* fetchCommitByFileData(dataConnection);
 }
 
 function* fetchCommitsAndCommitByFileData(dataConnection: DataPlugin) {
@@ -33,8 +37,14 @@ function* fetchCommitsAndCommitByFileData(dataConnection: DataPlugin) {
   } else {
     yield put(setCommits(commits));
   }
+
+  yield* fetchCommitByFileData(dataConnection);
+}
+
+function* fetchCommitByFileData(dataConnection: DataPlugin) {
   const state: CommitByFileState = yield select();
   const commitByFile: DataPluginCommitFile[] = yield call(() => dataConnection.commitByFile.getAll(state.sha));
+
   if (commitByFile.length === 0) {
     yield put(setDataState(DataState.EMPTY));
   } else {
