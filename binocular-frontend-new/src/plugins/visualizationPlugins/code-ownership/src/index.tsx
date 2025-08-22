@@ -31,6 +31,8 @@ const CodeOwnership: VisualizationPlugin<CodeOwnerShipSettings, null> = {
   },
   metadata: {
     category: VisualizationPluginMetadataCategory.Ownership,
+    recommended: false,
+    description: 'Shows how many lines are owned by which author over time.',
   },
   reducer: Reducer,
   saga: Saga,

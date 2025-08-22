@@ -486,7 +486,6 @@ function getDataByAuthor(
       scale[0] = negativeTotals;
     }
   });
-  console.log(chartData);
   return { chartData: chartData, scale: scale, palette: palette };
 }
 

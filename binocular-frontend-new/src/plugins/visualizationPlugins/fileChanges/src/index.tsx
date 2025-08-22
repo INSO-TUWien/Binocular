@@ -31,6 +31,9 @@ const FileChanges: VisualizationPlugin<SettingsType, null> = {
   },
   metadata: {
     category: VisualizationPluginMetadataCategory.Commits,
+    recommended: false,
+    description:
+      'A line chart that visualizes the amount of additions and deletion and what author is responsible for them over time for an individual file.',
   },
   reducer: Reducer,
   saga: Saga,
