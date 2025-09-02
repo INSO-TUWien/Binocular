@@ -1,61 +1,61 @@
 import { NetworkChart } from "./networkChart.tsx";
-import { RefObject, useEffect, useMemo, useState } from "react";
+import {
+  RefObject,
+  useEffect,
+  useMemo,
+  useState,
+  useSyncExternalStore,
+} from "react";
 import { SettingsType } from "../settings/settings.tsx";
 import { Store } from "@reduxjs/toolkit";
 import { convertIssuesToGraphData } from "../utilities/dataConverter.ts";
 import { DataState, DateRange, setDateRange } from "../reducer";
 import { DataPluginAccountIssues } from "../../../../interfaces/dataPluginInterfaces/dataPluginAccountsIssues.ts";
 
+type RootState = {
+  accounts: DataPluginAccountIssues[];
+  dataState: DataState;
+  dateRange: DateRange;
+};
+
 type ChartProps = {
   settings: SettingsType;
   dataConnection: any;
   chartContainerRef: RefObject<HTMLDivElement>;
-  showAfterCooldown: boolean;
-  store: Store;
-
+  store: Store<RootState>;
   parameters?: {
     parametersDateRange?: DateRange;
   };
 };
 
 export default function Chart(props: ChartProps) {
-  const chartContainerRef = props.chartContainerRef;
-
-  // force re-render on change
-  const [, forceUpdate] = useState(0);
-  useEffect(
-    () => props.store.subscribe(() => forceUpdate((v) => v + 1)),
-    [props.store],
+  const { store, chartContainerRef, settings } = props;
+  const state = useSyncExternalStore(
+    store.subscribe,
+    () => store.getState() as RootState,
+    () => store.getState() as RootState,
   );
+  const { accounts, dataState } = state;
 
   useEffect(() => {
     if (props.parameters?.parametersDateRange) {
-      props.store.dispatch(setDateRange(props.parameters.parametersDateRange));
+      store.dispatch(setDateRange(props.parameters.parametersDateRange));
     }
-  }, [props.parameters, props.store]);
+  }, [props.parameters, store]);
 
-  // dispatch your refresh
   useEffect(() => {
-    props.store.dispatch({ type: "REFRESH" });
-  }, [props.store]);
-
-  // read slice from store
-  const state = props.store.getState() as {
-    accounts: DataPluginAccountIssues[];
-    dataState: DataState;
-    dateRange: DateRange;
-  };
-  const { accounts, dataState } = state;
+    store.dispatch({ type: "REFRESH" });
+  }, [store]);
 
   const graphData = useMemo(
-    () => convertIssuesToGraphData(accounts, props.settings),
-    [accounts, props.settings.minEdgeValue, props.settings.maxEdgeValue],
+    () => convertIssuesToGraphData(accounts, settings),
+    [accounts, settings.minEdgeValue, settings.maxEdgeValue],
   );
 
   if (dataState !== DataState.COMPLETE || accounts.length === 0) {
     return (
       <div
-        ref={props.chartContainerRef}
+        ref={chartContainerRef}
         className="w-full h-full flex items-center justify-center"
       >
         Loading graph…
@@ -71,8 +71,8 @@ export default function Chart(props: ChartProps) {
             nodes: graphData.nodes,
             links: graphData.links,
           }}
-          width={chartContainerRef.current!.offsetWidth}
-          height={chartContainerRef.current!.offsetHeight}
+          width={chartContainerRef.current!.clientWidth}
+          height={chartContainerRef.current!.clientHeight}
         />
       </div>
     </>
