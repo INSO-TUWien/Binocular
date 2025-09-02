@@ -1,4 +1,4 @@
-import { DataPluginAccount } from "../../../../interfaces/dataPluginInterfaces/dataPluginAccount.ts";
+import { DataPluginAccountIssues } from "../../../../interfaces/dataPluginInterfaces/dataPluginAccountsIssues.ts";
 import { DataPluginIssue } from "../../../../interfaces/dataPluginInterfaces/dataPluginIssues.ts";
 import { SettingsType } from "../settings/settings.tsx";
 import { NodeType, LinkType } from "../chart/networkChart.tsx";
@@ -8,7 +8,7 @@ import { NodeType, LinkType } from "../chart/networkChart.tsx";
  * Filters links by issue count, then assigns connected-component groups.
  */
 export function convertIssuesToGraphData(
-  accounts: DataPluginAccount[],
+  accounts: DataPluginAccountIssues[],
   settings: SettingsType,
 ): {
   nodes: {
@@ -44,7 +44,7 @@ export function convertIssuesToGraphData(
  * For each issue across all accounts, collect the set of participating account IDs
  */
 function buildIssueMap(
-  accounts: DataPluginAccount[],
+  accounts: DataPluginAccountIssues[],
 ): Map<string, { participants: Set<string>; issue: DataPluginIssue }> {
   const map = new Map<
     string,
@@ -70,7 +70,7 @@ function buildIssueMap(
  * Initialize a map from account ID to GraphNode with default group "unassigned"
  */
 function initializeNodeMap(
-  accounts: DataPluginAccount[],
+  accounts: DataPluginAccountIssues[],
 ): Map<string, NodeType> {
   const map = new Map<string, NodeType>();
   accounts.forEach((account) => {

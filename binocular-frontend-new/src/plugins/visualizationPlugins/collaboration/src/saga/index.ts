@@ -14,7 +14,7 @@ import {
   setAccounts,
 } from "../reducer";
 import { DataPlugin } from "../../../../interfaces/dataPlugin.ts";
-import { DataPluginAccount } from "../../../../interfaces/dataPluginInterfaces/dataPluginAccount.ts";
+import { DataPluginAccountIssues } from "../../../../interfaces/dataPluginInterfaces/dataPluginAccountsIssues.ts";
 
 export default function* (dataConnection: DataPlugin) {
   yield fork(() => watchRefresh(dataConnection));
@@ -32,7 +32,7 @@ function* watchDateRangeChange(dataConnection: DataPlugin) {
 function* fetchCollaborationData(dataConnection: DataPlugin) {
   yield put(setDataState(DataState.FETCHING));
   const state: CollaborationState = yield select();
-  const rawAccounts: DataPluginAccount[] = yield call(() =>
+  const rawAccounts: DataPluginAccountIssues[] = yield call(() =>
     dataConnection.accountsIssues.getAll(
       state.dateRange.from,
       state.dateRange.to,

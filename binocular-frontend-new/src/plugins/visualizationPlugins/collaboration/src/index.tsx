@@ -6,7 +6,7 @@ import Reducer from "./reducer";
 import Saga from "./saga";
 import Help from "./help/help.tsx";
 import { getSVGData } from "./utilities/utilities.ts";
-import { DataPluginAccount } from "../../../interfaces/dataPluginInterfaces/dataPluginAccount.ts";
+import { DataPluginAccount } from "../../../interfaces/dataPluginInterfaces/dataPluginAccountsIssues.ts";
 import { convertIssuesToGraphData } from "./utilities/dataConverter.ts";
 
 const CollaborationVisualization: VisualizationPlugin<

@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { DataPluginAccount } from "../../../../interfaces/dataPluginInterfaces/dataPluginAccount.ts";
+import { DataPluginAccountIssues } from "../../../../interfaces/dataPluginInterfaces/dataPluginAccountsIssues.ts";
 
 export enum DataState {
   EMPTY,
@@ -16,7 +16,7 @@ export type DateRange = {
  * Redux state for collaboration visualization
  */
 export interface CollaborationState {
-  accounts: DataPluginAccount[];
+  accounts: DataPluginAccountIssues[];
   dateRange: DateRange;
   dataState: DataState;
 }
@@ -32,7 +32,7 @@ export const collaborationSlice = createSlice({
   initialState,
   reducers: {
     /** Replace the entire accounts list */
-    setAccounts: (state, action: PayloadAction<DataPluginAccount[]>) => {
+    setAccounts: (state, action: PayloadAction<DataPluginAccountIssues[]>) => {
       state.accounts = action.payload;
     },
     /** Update the date range for fetching data */

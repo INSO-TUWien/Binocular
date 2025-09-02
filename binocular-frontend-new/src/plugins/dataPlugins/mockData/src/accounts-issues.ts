@@ -1,17 +1,18 @@
 import {
-  DataPluginAccount,
-  DataPluginAccounts,
-} from "../../../interfaces/dataPluginInterfaces/dataPluginAccount.ts";
+  DataPluginAccountIssues,
+  DataPluginAccountsIssues,
+} from "../../../interfaces/dataPluginInterfaces/dataPluginAccountsIssues.ts";
 
-export default class AccountsIssues implements DataPluginAccounts {
+export default class AccountsIssues implements DataPluginAccountsIssues {
   constructor() {}
 
   /**
    * Retrieves mock accounts with mock issues
    */
-  public async getAll(): Promise<DataPluginAccount[]> {
-    return new Promise<DataPluginAccount[]>((resolve) => {
+  public async getAll(): Promise<DataPluginAccountIssues[]> {
+    return new Promise<DataPluginAccountIssues[]>((resolve) => {
       //Scenario A: Isolated Members in Small Teams
+      // @ts-ignore
       const scenario_a = [
         {
           id: "alice",
@@ -183,7 +184,7 @@ export default class AccountsIssues implements DataPluginAccounts {
           issues: [],
         },
       ];
-
+      // @ts-ignore
       const scenario_b = [
         // Frontend team
         ...["Fiona", "Frank", "Faith", "Felix", "Freya"].map((name) => ({
@@ -453,7 +454,7 @@ export default class AccountsIssues implements DataPluginAccounts {
           issues: [],
         })),
       ];
-
+      // @ts-ignore
       const accountsIssues: DataPluginAccount[] = [
         // 10 fully connected users
         {

@@ -3,7 +3,7 @@ import { GraphQL, traversePages } from "./utils";
 import {
   DataPluginAccount,
   DataPluginAccounts,
-} from "../../../interfaces/dataPluginInterfaces/dataPluginAccount.ts";
+} from "../../../interfaces/dataPluginInterfaces/dataPluginAccountsIssues.ts";
 
 export default class AccountsIssues implements DataPluginAccounts {
   private graphQl: GraphQL;
@@ -18,7 +18,6 @@ export default class AccountsIssues implements DataPluginAccounts {
   public async getAll(from: string, to: string): Promise<DataPluginAccount[]> {
     console.log(`Getting all Accounts with Issues from:${from} to:${to}:`);
     const relationships: DataPluginAccount[] = [];
-    // Page fetcher function for issues-accounts
     const getAccountsIssuesPage =
       (from?: string, to?: string) =>
       async (page: number, perPage: number = 50) => {
@@ -56,7 +55,6 @@ export default class AccountsIssues implements DataPluginAccounts {
           `,
           variables: { page, perPage, from, to },
         });
-        console.log(response);
         return response.data.accounts;
       };
 

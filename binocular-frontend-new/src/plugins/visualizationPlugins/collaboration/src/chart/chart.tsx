@@ -4,7 +4,7 @@ import { SettingsType } from "../settings/settings.tsx";
 import { Store } from "@reduxjs/toolkit";
 import { convertIssuesToGraphData } from "../utilities/dataConverter.ts";
 import { DataState, DateRange, setDateRange } from "../reducer";
-import { DataPluginAccount } from "../../../../interfaces/dataPluginInterfaces/dataPluginAccount.ts";
+import { DataPluginAccountIssues } from "../../../../interfaces/dataPluginInterfaces/dataPluginAccountsIssues.ts";
 
 type ChartProps = {
   settings: SettingsType;
@@ -41,7 +41,7 @@ export default function Chart(props: ChartProps) {
 
   // read slice from store
   const state = props.store.getState() as {
-    accounts: DataPluginAccount[];
+    accounts: DataPluginAccountIssues[];
     dataState: DataState;
     dateRange: DateRange;
   };
