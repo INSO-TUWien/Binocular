@@ -1,45 +1,52 @@
 import { NetworkChart } from "./networkChart.tsx";
-import {
-  RefObject,
-  useEffect,
-  useMemo,
-  useState,
-  useSyncExternalStore,
-} from "react";
-import { SettingsType } from "../settings/settings.tsx";
-import { Store } from "@reduxjs/toolkit";
+import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import { convertIssuesToGraphData } from "../utilities/dataConverter.ts";
-import { DataState, DateRange, setDateRange } from "../reducer";
-import { DataPluginAccountIssues } from "../../../../interfaces/dataPluginInterfaces/dataPluginAccountsIssues.ts";
+import { DataState, type DateRange, setDateRange } from "../reducer";
+import type { DataPluginAccountIssues } from "../../../../interfaces/dataPluginInterfaces/dataPluginAccountsIssues.ts";
+import type { VisualizationPluginProperties } from "../../../../interfaces/visualizationPluginInterfaces/visualizationPluginProperties.ts";
+import type { CollaborationSettings } from "../settings/settings.tsx";
+import { handelPopoutResizing } from "../../../../utils/resizing.ts";
 
 type RootState = {
-  accounts: DataPluginAccountIssues[];
-  dataState: DataState;
-  dateRange: DateRange;
-};
-
-type ChartProps = {
-  settings: SettingsType;
-  dataConnection: any;
-  chartContainerRef: RefObject<HTMLDivElement>;
-  store: Store<RootState>;
-  parameters?: {
-    parametersDateRange?: DateRange;
+  plugin: {
+    accounts: DataPluginAccountIssues[];
+    dataState: DataState;
+    dateRange: DateRange;
   };
 };
 
-export default function Chart(props: ChartProps) {
+export default function Chart<
+  SettingsType extends CollaborationSettings,
+  DataType,
+>(props: VisualizationPluginProperties<SettingsType, DataType>) {
   const { store, chartContainerRef, settings } = props;
   const state = useSyncExternalStore(
     store.subscribe,
     () => store.getState() as RootState,
     () => store.getState() as RootState,
   );
-  const { accounts, dataState } = state;
+  const accounts = state.plugin.accounts ?? [];
+  const dataState = state.plugin.dataState;
+  const [chartWidth, setChartWidth] = useState(100);
+  const [chartHeight, setChartHeight] = useState(150);
+
+  function resize() {
+    const el = chartContainerRef.current as HTMLDivElement | null;
+    if (!el) return;
+    if (el.offsetWidth !== chartWidth) setChartWidth(el.offsetWidth);
+    if (el.offsetHeight !== chartHeight) setChartHeight(el.offsetHeight);
+  }
+  handelPopoutResizing(store, () => resize());
 
   useEffect(() => {
     if (props.parameters?.parametersDateRange) {
+      // only dispatch if it's a full DateRange
+      console.log(props.parameters.parametersDateRange);
       store.dispatch(setDateRange(props.parameters.parametersDateRange));
+    } else {
+      // ensure we always have a valid object with strings
+      const now = new Date().toISOString();
+      store.dispatch(setDateRange({ from: now, to: now }));
     }
   }, [props.parameters, store]);
 
@@ -47,22 +54,21 @@ export default function Chart(props: ChartProps) {
     store.dispatch({ type: "REFRESH" });
   }, [store]);
 
-  const graphData = useMemo(
-    () => convertIssuesToGraphData(accounts, settings),
-    [accounts, settings.minEdgeValue, settings.maxEdgeValue],
-  );
+  const graphData = useMemo(() => {
+    if (!accounts || accounts.length === 0) return { nodes: [], links: [] };
+    return convertIssuesToGraphData(accounts, settings);
+  }, [accounts, settings.minEdgeValue, settings.maxEdgeValue]);
 
-  if (dataState !== DataState.COMPLETE || accounts.length === 0) {
+  if (dataState === DataState.FETCHING) {
     return (
       <div
         ref={chartContainerRef}
         className="w-full h-full flex items-center justify-center"
       >
-        Loading graph…
+        <span className="loading loading-spinner loading-lg text-accent" />
       </div>
     );
   }
-
   return (
     <>
       <div className={"w-full h-full"} ref={chartContainerRef}>
@@ -71,8 +77,8 @@ export default function Chart(props: ChartProps) {
             nodes: graphData.nodes,
             links: graphData.links,
           }}
-          width={chartContainerRef.current!.clientWidth}
-          height={chartContainerRef.current!.clientHeight}
+          width={chartWidth}
+          height={chartHeight}
         />
       </div>
     </>

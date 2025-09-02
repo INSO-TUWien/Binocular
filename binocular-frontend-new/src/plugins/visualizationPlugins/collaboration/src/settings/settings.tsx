@@ -1,6 +1,7 @@
 import React, { useCallback, useRef } from "react";
+import type { DefaultSettings } from "../../../simpleVisualizationPlugin/src/settings/settings";
 
-export interface SettingsType {
+export interface CollaborationSettings extends DefaultSettings {
   data: {
     nodes: { id: string; group: string; url: string }[];
     links: { source: string; target: string; value: number }[];
@@ -14,8 +15,8 @@ const MIN_POSSIBLE = 1;
 const MAX_POSSIBLE = Infinity;
 
 interface SettingsProps {
-  settings: SettingsType;
-  setSettings: (newSettings: SettingsType) => void;
+  settings: CollaborationSettings;
+  setSettings: (newSettings: CollaborationSettings) => void;
 }
 
 export default function Settings({ settings, setSettings }: SettingsProps) {

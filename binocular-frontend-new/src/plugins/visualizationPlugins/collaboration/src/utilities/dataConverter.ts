@@ -1,7 +1,7 @@
-import { DataPluginAccountIssues } from "../../../../interfaces/dataPluginInterfaces/dataPluginAccountsIssues.ts";
-import { DataPluginIssue } from "../../../../interfaces/dataPluginInterfaces/dataPluginIssues.ts";
-import { SettingsType } from "../settings/settings.tsx";
-import { NodeType, LinkType } from "../chart/networkChart.tsx";
+import type { DataPluginAccountIssues } from "../../../../interfaces/dataPluginInterfaces/dataPluginAccountsIssues.ts";
+import type { DataPluginIssue } from "../../../../interfaces/dataPluginInterfaces/dataPluginIssues.ts";
+import type { CollaborationSettings } from "../settings/settings.tsx";
+import type { NodeType, LinkType } from "../chart/networkChart.tsx";
 
 /**
  * Convert accounts and shared issues into graph data consisting of nodes and links.
@@ -9,7 +9,7 @@ import { NodeType, LinkType } from "../chart/networkChart.tsx";
  */
 export function convertIssuesToGraphData(
   accounts: DataPluginAccountIssues[],
-  settings: SettingsType,
+  settings: CollaborationSettings,
 ): {
   nodes: {
     id: string;
@@ -21,7 +21,6 @@ export function convertIssuesToGraphData(
   links: LinkType[];
 } {
   const { minEdgeValue, maxEdgeValue } = settings;
-
   const issueAccountMap = buildIssueMap(accounts);
   const nodeMap = initializeNodeMap(accounts);
   const allLinks = buildLinks(issueAccountMap);
@@ -92,6 +91,7 @@ function buildLinks(
   issueMap: Map<string, { participants: Set<string>; issue: DataPluginIssue }>,
 ): LinkType[] {
   const linkMap = new Map<string, LinkType>();
+  // @ts-ignore
   for (const { participants, issue } of issueMap.values()) {
     const ids = Array.from(participants).sort();
     for (let i = 0; i < ids.length; i++) {
@@ -104,8 +104,8 @@ function buildLinks(
           existingLink.issues.push(issue);
         } else {
           linkMap.set(key, {
-            source: source,
-            target: target,
+            source: source as string,
+            target: target as string,
             value: 1,
             issues: [issue],
           });
@@ -120,6 +120,7 @@ function buildLinks(
 function buildAdjacencyMap(nodeMap: Map<string, NodeType>, links: LinkType[]) {
   const adjacency = new Map<string, Set<string>>();
   //empty neighbor sets for every node
+  // @ts-ignore
   for (const id of nodeMap.keys()) {
     adjacency.set(id, new Set());
   }
@@ -145,6 +146,7 @@ function assignGroups(
   let nextGroupId = 1;
   const visited = new Set<string>();
 
+  // @ts-ignore
   for (const startId of nodeMap.keys()) {
     if (visited.has(startId)) continue;
 
@@ -155,6 +157,7 @@ function assignGroups(
       const current = queue.shift()!;
       nodeMap.get(current)!.group = nextGroupId.toString();
 
+      // @ts-ignore
       for (const neighbor of adjacency.get(current)!) {
         if (!visited.has(neighbor)) {
           visited.add(neighbor);
@@ -169,5 +172,5 @@ function assignGroups(
 
 export const dataConverter = (
   data: DataPluginAccountIssues[],
-  props: { settings: SettingsType },
+  props: { settings: CollaborationSettings },
 ) => convertIssuesToGraphData(data, props.settings);

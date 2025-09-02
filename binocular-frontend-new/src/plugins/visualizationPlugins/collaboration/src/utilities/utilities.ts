@@ -1,7 +1,7 @@
-import { RefObject } from "react";
+import type { RefObject } from "react";
 
 export function getSVGData(
-  chartContainerRef: RefObject<HTMLDivElement | undefined>,
+  chartContainerRef: RefObject<HTMLDivElement | null>,
 ): string {
   const svgData = chartContainerRef.current?.children[1].outerHTML;
   if (svgData === undefined) {

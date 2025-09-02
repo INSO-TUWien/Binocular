@@ -1,6 +1,6 @@
-import { useEffect, useId, useRef, useState } from "react";
+import { useEffect, useId, useMemo, useRef, useState } from "react";
 import * as d3 from "d3";
-import { DataPluginIssue } from "../../../../interfaces/dataPluginInterfaces/dataPluginIssues.ts";
+import type { DataPluginIssue } from "../../../../interfaces/dataPluginInterfaces/dataPluginIssues.ts";
 
 // Types
 export interface NodeType extends d3.SimulationNodeDatum {
@@ -67,10 +67,12 @@ export const NetworkChart = ({ width, height, data }: NetworkChartProps) => {
     setIsVisible(false);
   }, [data]);
 
-  const colorScale = d3
-    .scaleOrdinal<string>()
-    .domain([...new Set(data.nodes.map((node) => node.group))])
-    .range(d3.schemeCategory10);
+  const colorScale = useMemo(() => {
+    return d3
+      .scaleOrdinal<string>()
+      .domain(Array.from(new Set(data.nodes.map((n) => n.group))))
+      .range(d3.schemeTableau10); // more distinct than Category10
+  }, [data.nodes]);
 
   //clip avatars to circles
   useEffect(() => {
@@ -354,12 +356,14 @@ export const NetworkChart = ({ width, height, data }: NetworkChartProps) => {
           Simulating graph layout...
         </div>
       )}
-      <svg
-        ref={svgRef}
-        width={width}
-        height={height}
-        style={{ opacity: isVisible ? 1 : 0, display: "block" }}
-      />
+      <>
+        <svg
+          ref={svgRef}
+          width={width}
+          height={height}
+          style={{ opacity: isVisible ? 1 : 0, display: "block" }}
+        />
+      </>
     </div>
   );
 };

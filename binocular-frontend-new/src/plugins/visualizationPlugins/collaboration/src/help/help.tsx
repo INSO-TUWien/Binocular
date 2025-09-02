@@ -1,7 +1,7 @@
 function Help() {
   return (
     <>
-      <h2>Collaboration Visualization — Help</h2>
+      <h2>Collaboration Visualization - Help</h2>
 
       <p>
         This view shows how authors work together based on shared issues. Each
