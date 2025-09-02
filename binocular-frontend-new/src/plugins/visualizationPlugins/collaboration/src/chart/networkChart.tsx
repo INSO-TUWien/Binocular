@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import * as d3 from "d3";
 import { DataPluginIssue } from "../../../../interfaces/dataPluginInterfaces/dataPluginIssues.ts";
 
@@ -31,10 +31,11 @@ type NetworkChartProps = {
 
 export const NetworkChart = ({ width, height, data }: NetworkChartProps) => {
   const svgRef = useRef<SVGElement | null>(null);
-  const tooltipRef = useRef<HTMLDivElement | null>(null);
+  const tooltipElRef = useRef<HTMLDivElement | null>(null);
   const [isVisible, setIsVisible] = useState(false);
-  let selectedLink: any = null;
-  // inner drawing bounds
+  const selectedLinkRef = useRef<LinkType | null>(null);
+  const clipId = useId();
+  //let selectedLink: any = null;
 
   if (!data || !data.nodes || !data.links) {
     console.error("No data nodes found");
@@ -54,8 +55,8 @@ export const NetworkChart = ({ width, height, data }: NetworkChartProps) => {
       .style("z-index", "9999")
       .style("font-size", "12px")
       .style("visibility", "hidden");
-    tooltipRef.current = tooltip.node() as HTMLDivElement;
 
+    tooltipElRef.current = tooltip.node() as HTMLDivElement;
     return () => {
       tooltip.remove();
     };
@@ -66,21 +67,27 @@ export const NetworkChart = ({ width, height, data }: NetworkChartProps) => {
     setIsVisible(false);
   }, [data]);
 
-  useEffect(() => {
-    const svgElement = d3.select(svgRef.current);
-    svgElement.selectAll("*").remove();
+  const colorScale = d3
+    .scaleOrdinal<string>()
+    .domain([...new Set(data.nodes.map((node) => node.group))])
+    .range(d3.schemeCategory10);
 
-    svgElement
+  //clip avatars to circles
+  useEffect(() => {
+    const svg = d3.select(svgRef.current);
+    svg.selectAll("*").remove();
+
+    svg
       .append("defs")
       .append("clipPath")
-      .attr("id", "avatar-clip")
+      .attr("id", `avatar-clip-${clipId}`)
       .attr("clipPathUnits", "userSpaceOnUse")
       .append("circle")
       .attr("r", NODE_IMAGE_SIZE / 2)
       .attr("cx", 0)
       .attr("cy", 0);
 
-    const container = svgElement.append("g");
+    const container = svg.append("g");
 
     const zoomBehavior = d3
       .zoom<SVGSVGElement, unknown>()
@@ -88,12 +95,7 @@ export const NetworkChart = ({ width, height, data }: NetworkChartProps) => {
       .on("zoom", (event) => {
         container.attr("transform", event.transform);
       });
-    svgElement.call(zoomBehavior as any);
-
-    const colorScale = d3
-      .scaleOrdinal<string>()
-      .domain([...new Set(data.nodes.map((node) => node.group))])
-      .range(d3.schemeCategory10); //TODO: add option to select colors in settings
+    svg.call(zoomBehavior as any);
 
     const simulation = initializeForceSimulation(
       data.nodes,
@@ -111,24 +113,33 @@ export const NetworkChart = ({ width, height, data }: NetworkChartProps) => {
       .data(data.links)
       .enter()
       .append("line")
-      .attr("stroke-width", (d) => Math.sqrt(d.value))
-      .on("mouseover", (_event, d) => {
-        if (!selectedLink) showLinkTooltip(d);
+      .attr("stroke-width", (d) => Math.max(1, Math.sqrt(d.value || 0)))
+      .style("cursor", "pointer")
+      .on("mousemove", (event, d) => {
+        if (!selectedLinkRef.current) {
+          showLinkTooltip(d);
+          moveTooltip(...d3.pointer(event, document.body));
+        }
       })
       .on("mouseout", () => {
-        if (!selectedLink) hideTooltip();
+        if (!selectedLinkRef.current) hideTooltip();
       })
       .on("click", (event, d) => {
         event.stopPropagation();
-        selectedLink = d;
+        selectedLinkRef.current = d;
         showLinkTooltip(d);
       });
 
-    document.body.addEventListener("click", () => {
-      if (selectedLink) {
-        selectedLink = null;
+    const bodyClick = () => {
+      if (selectedLinkRef.current) {
+        selectedLinkRef.current = null;
         hideTooltip();
       }
+    };
+
+    //remove tooltip when click on sth else
+    document.body.addEventListener("click", () => {
+      bodyClick();
     });
 
     //draw node groups
@@ -162,16 +173,24 @@ export const NetworkChart = ({ width, height, data }: NetworkChartProps) => {
     //append clipped images to each node
     nodeSelection
       .append("image")
-      .attr("xlink:href", (d) => d.avatarUrl)
+      .attr("href", (d) => d.avatarUrl)
       .attr("width", NODE_IMAGE_SIZE)
       .attr("height", NODE_IMAGE_SIZE)
       .attr("x", -NODE_IMAGE_SIZE / 2)
       .attr("y", -NODE_IMAGE_SIZE / 2)
-      .attr("clip-path", "url(#avatar-clip)")
+      .attr("clip-path", `url(#avatar-clip-${clipId})`)
+      .attr("tabindex", 0)
+      .attr("role", "link")
+      .attr("aria-label", (d) => d.name || d.url)
       .style("cursor", "pointer")
       .on("click", (_event, d) => window.open(d.url, "_blank"))
+      .on("keydown", (e, d) => {
+        if (e.key === "Enter" || e.key === " ") window.open(d.url, "_blank");
+      })
       .on("mouseover", (_event, d) => showNodeTooltip(d.name ? d.name : d.url))
-      .on("mousemove", (event) => moveTooltip(event.pageX, event.pageY))
+      .on("mousemove", (event) =>
+        moveTooltip(...d3.pointer(event, document.body)),
+      )
       .on("mouseout", () => hideTooltip());
 
     const hullGroup = container.append("g").attr("class", "hull-group");
@@ -212,17 +231,16 @@ export const NetworkChart = ({ width, height, data }: NetworkChartProps) => {
           ),
         (exit) => exit.remove(),
       );
-
-      //when simulation has cooled down mark as visible
-      if (simulation.alpha() < 0.005 && !isVisible) {
-        setIsVisible(true);
-      }
     });
+
+    simulation.on("end", () => setIsVisible(true));
 
     return () => {
       simulation.stop();
+      svg.on(".zoom", null);
+      document.body.removeEventListener("click", bodyClick);
     };
-  }, [data, width, height]);
+  }, [data, width, height, height, colorScale, clipId]);
 
   //helper values/constants
   const NODE_IMAGE_SIZE = 30; // px
@@ -232,8 +250,8 @@ export const NetworkChart = ({ width, height, data }: NetworkChartProps) => {
   const HULL_RADIUS_OFFSET = NODE_IMAGE_SIZE / 2 + 5;
 
   function showLinkTooltip(link: LinkType) {
-    if (!tooltipRef.current) return;
-    const tooltip = d3.select(tooltipRef.current);
+    if (!tooltipElRef.current) return;
+    const tooltip = d3.select(tooltipElRef.current);
     const count = link.value;
     const title = count > 1 ? "Issues" : "Issue";
     const issueList = link.issues
@@ -250,20 +268,20 @@ export const NetworkChart = ({ width, height, data }: NetworkChartProps) => {
   }
 
   function showNodeTooltip(name: string) {
-    if (!tooltipRef.current) return;
-    d3.select(tooltipRef.current).text(name).style("visibility", "visible");
+    if (!tooltipElRef.current) return;
+    d3.select(tooltipElRef.current).text(name).style("visibility", "visible");
   }
 
   function moveTooltip(x: number, y: number) {
-    if (!tooltipRef.current) return;
-    d3.select(tooltipRef.current)
+    if (!tooltipElRef.current) return;
+    d3.select(tooltipElRef.current)
       .style("left", `${x + 10}px`)
       .style("top", `${y + 10}px`);
   }
 
   function hideTooltip() {
-    if (!tooltipRef.current) return;
-    d3.select(tooltipRef.current).style("visibility", "hidden");
+    if (!tooltipElRef.current) return;
+    d3.select(tooltipElRef.current).style("visibility", "hidden");
   }
 
   function initializeForceSimulation(
