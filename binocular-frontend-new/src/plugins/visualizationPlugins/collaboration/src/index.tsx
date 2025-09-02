@@ -6,12 +6,12 @@ import Reducer from "./reducer";
 import Saga from "./saga";
 import Help from "./help/help.tsx";
 import { getSVGData } from "./utilities/utilities.ts";
-import { DataPluginAccount } from "../../../interfaces/dataPluginInterfaces/dataPluginAccountsIssues.ts";
-import { convertIssuesToGraphData } from "./utilities/dataConverter.ts";
+import { DataPluginAccountIssues } from "../../../interfaces/dataPluginInterfaces/dataPluginAccountsIssues.ts";
+import { dataConverter } from "./utilities/dataConverter.ts";
 
 const CollaborationVisualization: VisualizationPlugin<
   SettingsType,
-  DataPluginAccount
+  DataPluginAccountIssues
 > = {
   name: "Collaboration",
   chartComponent: Chart,
@@ -19,9 +19,10 @@ const CollaborationVisualization: VisualizationPlugin<
   helpComponent: Help,
   defaultSettings: {
     minEdgeValue: 1,
-    maxEdgeValue: 999,
+    maxEdgeValue: 99,
   },
-  dataConverter: convertIssuesToGraphData,
+  // @ts-ignore
+  dataConverter,
   dataConnectionName: "accountsIssues",
   export: {
     getSVGData: getSVGData,

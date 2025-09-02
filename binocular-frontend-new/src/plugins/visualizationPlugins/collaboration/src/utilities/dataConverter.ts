@@ -166,3 +166,8 @@ function assignGroups(
     nextGroupId += 1;
   }
 }
+
+export const dataConverter = (
+  data: DataPluginAccountIssues[],
+  props: { settings: SettingsType },
+) => convertIssuesToGraphData(data, props.settings);
