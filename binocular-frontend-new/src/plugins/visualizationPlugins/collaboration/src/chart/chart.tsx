@@ -1,11 +1,11 @@
-import { NetworkChart } from "./networkChart.tsx";
-import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
-import { convertIssuesToGraphData } from "../utilities/dataConverter.ts";
-import { DataState, type DateRange, setDateRange } from "../reducer";
-import type { DataPluginAccountIssues } from "../../../../interfaces/dataPluginInterfaces/dataPluginAccountsIssues.ts";
-import type { VisualizationPluginProperties } from "../../../../interfaces/visualizationPluginInterfaces/visualizationPluginProperties.ts";
-import type { CollaborationSettings } from "../settings/settings.tsx";
-import { handelPopoutResizing } from "../../../../utils/resizing.ts";
+import { NetworkChart } from './networkChart.tsx';
+import { useEffect, useMemo, useState, useSyncExternalStore } from 'react';
+import { convertIssuesToGraphData } from '../utilities/dataConverter.ts';
+import { DataState, type DateRange, setDateRange } from '../reducer';
+import type { DataPluginAccountIssues } from '../../../../interfaces/dataPluginInterfaces/dataPluginAccountsIssues.ts';
+import type { VisualizationPluginProperties } from '../../../../interfaces/visualizationPluginInterfaces/visualizationPluginProperties.ts';
+import type { CollaborationSettings } from '../settings/settings.tsx';
+import { handelPopoutResizing } from '../../../../utils/resizing.ts';
 
 type RootState = {
   plugin: {
@@ -15,10 +15,9 @@ type RootState = {
   };
 };
 
-export default function Chart<
-  SettingsType extends CollaborationSettings,
-  DataType,
->(props: VisualizationPluginProperties<SettingsType, DataType>) {
+export default function Chart<SettingsType extends CollaborationSettings, DataType>(
+  props: VisualizationPluginProperties<SettingsType, DataType>,
+) {
   const { store, chartContainerRef, settings } = props;
   const state = useSyncExternalStore(
     store.subscribe,
@@ -51,27 +50,24 @@ export default function Chart<
   }, [props.parameters, store]);
 
   useEffect(() => {
-    store.dispatch({ type: "REFRESH" });
+    store.dispatch({ type: 'REFRESH' });
   }, [store]);
 
   const graphData = useMemo(() => {
     if (!accounts || accounts.length === 0) return { nodes: [], links: [] };
     return convertIssuesToGraphData(accounts, settings);
-  }, [accounts, settings.minEdgeValue, settings.maxEdgeValue]);
+  }, [accounts, settings]);
 
   if (dataState === DataState.FETCHING) {
     return (
-      <div
-        ref={chartContainerRef}
-        className="w-full h-full flex items-center justify-center"
-      >
+      <div ref={chartContainerRef} className="w-full h-full flex items-center justify-center">
         <span className="loading loading-spinner loading-lg text-accent" />
       </div>
     );
   }
   return (
     <>
-      <div className={"w-full h-full"} ref={chartContainerRef}>
+      <div className={'w-full h-full'} ref={chartContainerRef}>
         <NetworkChart
           data={{
             nodes: graphData.nodes,

@@ -1,5 +1,5 @@
-import React, { useCallback, useRef } from "react";
-import type { DefaultSettings } from "../../../simpleVisualizationPlugin/src/settings/settings";
+import React, { useCallback, useRef } from 'react';
+import type { DefaultSettings } from '../../../simpleVisualizationPlugin/src/settings/settings';
 
 export interface CollaborationSettings extends DefaultSettings {
   data: {
@@ -47,9 +47,7 @@ export default function Settings({ settings, setSettings }: SettingsProps) {
 
   return (
     <div className="mt-6 space-y-4" ref={rootRef}>
-      <label className="block text-sm font-medium dark:text-white">
-        Collaboration Strength Range
-      </label>
+      <label className="block text-sm font-medium dark:text-white">Collaboration Strength Range</label>
       <div className="flex items-center space-x-4">
         <div className="flex items-center space-x-2">
           <span className="text-sm w-12">Min</span>

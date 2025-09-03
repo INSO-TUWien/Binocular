@@ -1,7 +1,13 @@
-import type { DataPluginAccountIssues } from "../../../../interfaces/dataPluginInterfaces/dataPluginAccountsIssues.ts";
-import type { DataPluginIssue } from "../../../../interfaces/dataPluginInterfaces/dataPluginIssues.ts";
-import type { CollaborationSettings } from "../settings/settings.tsx";
-import type { NodeType, LinkType } from "../chart/networkChart.tsx";
+import type { DataPluginAccountIssues } from '../../../../interfaces/dataPluginInterfaces/dataPluginAccountsIssues.ts';
+import type { DataPluginIssue } from '../../../../interfaces/dataPluginInterfaces/dataPluginIssues.ts';
+import type { CollaborationSettings } from '../settings/settings.tsx';
+import type { NodeType, LinkType } from '../chart/networkChart.tsx';
+import type { VisualizationPluginProperties } from '../../../../interfaces/visualizationPluginInterfaces/visualizationPluginProperties';
+import type { ChartData, Palette } from '../../../simpleVisualizationPlugin/src/chart/chart.tsx';
+
+const DUMMY_CHART_DATA = [] as unknown as ChartData[]; // or real type if you have it
+const DUMMY_SCALE = [] as number[];
+const DUMMY_PALETTE = {} as unknown as Palette;
 
 /**
  * Convert accounts and shared issues into graph data consisting of nodes and links.
@@ -19,15 +25,16 @@ export function convertIssuesToGraphData(
     avatarUrl: string;
   }[];
   links: LinkType[];
+  chartData: ChartData[];
+  scale: number[];
+  palette: Palette;
 } {
   const { minEdgeValue, maxEdgeValue } = settings;
   const issueAccountMap = buildIssueMap(accounts);
   const nodeMap = initializeNodeMap(accounts);
   const allLinks = buildLinks(issueAccountMap);
 
-  const filteredLinks = allLinks.filter(
-    ({ value }) => value >= minEdgeValue && value <= maxEdgeValue,
-  );
+  const filteredLinks = allLinks.filter(({ value }) => value >= minEdgeValue && value <= maxEdgeValue);
 
   const adjacencyMap = buildAdjacencyMap(nodeMap, filteredLinks);
 
@@ -36,19 +43,18 @@ export function convertIssuesToGraphData(
   return {
     nodes: Array.from(nodeMap.values()),
     links: filteredLinks,
+    // ---- dummies to satisfy the expected return type ----
+    chartData: DUMMY_CHART_DATA,
+    scale: DUMMY_SCALE,
+    palette: DUMMY_PALETTE,
   };
 }
 
 /**
  * For each issue across all accounts, collect the set of participating account IDs
  */
-function buildIssueMap(
-  accounts: DataPluginAccountIssues[],
-): Map<string, { participants: Set<string>; issue: DataPluginIssue }> {
-  const map = new Map<
-    string,
-    { participants: Set<string>; issue: DataPluginIssue }
-  >();
+function buildIssueMap(accounts: DataPluginAccountIssues[]): Map<string, { participants: Set<string>; issue: DataPluginIssue }> {
+  const map = new Map<string, { participants: Set<string>; issue: DataPluginIssue }>();
   for (const account of accounts) {
     for (const issue of account.issues) {
       const entry = map.get(issue.id);
@@ -68,14 +74,12 @@ function buildIssueMap(
 /**
  * Initialize a map from account ID to GraphNode with default group "unassigned"
  */
-function initializeNodeMap(
-  accounts: DataPluginAccountIssues[],
-): Map<string, NodeType> {
+function initializeNodeMap(accounts: DataPluginAccountIssues[]): Map<string, NodeType> {
   const map = new Map<string, NodeType>();
   accounts.forEach((account) => {
     map.set(account.id, {
       id: account.id,
-      group: "unassigned",
+      group: 'unassigned',
       url: account.url,
       avatarUrl: account.avatarUrl,
       name: account.name,
@@ -87,11 +91,8 @@ function initializeNodeMap(
 /**
  * Builds an array of all links between the given participants according to shared issues
  */
-function buildLinks(
-  issueMap: Map<string, { participants: Set<string>; issue: DataPluginIssue }>,
-): LinkType[] {
+function buildLinks(issueMap: Map<string, { participants: Set<string>; issue: DataPluginIssue }>): LinkType[] {
   const linkMap = new Map<string, LinkType>();
-  // @ts-ignore
   for (const { participants, issue } of issueMap.values()) {
     const ids = Array.from(participants).sort();
     for (let i = 0; i < ids.length; i++) {
@@ -120,7 +121,6 @@ function buildLinks(
 function buildAdjacencyMap(nodeMap: Map<string, NodeType>, links: LinkType[]) {
   const adjacency = new Map<string, Set<string>>();
   //empty neighbor sets for every node
-  // @ts-ignore
   for (const id of nodeMap.keys()) {
     adjacency.set(id, new Set());
   }
@@ -139,14 +139,10 @@ function buildAdjacencyMap(nodeMap: Map<string, NodeType>, links: LinkType[]) {
 /**
  * Perform a BFS over each unvisited node to assign a “group” (stringified incremental ID)
  */
-function assignGroups(
-  nodeMap: Map<string, NodeType>,
-  adjacency: Map<string, Set<string>>,
-): void {
+function assignGroups(nodeMap: Map<string, NodeType>, adjacency: Map<string, Set<string>>): void {
   let nextGroupId = 1;
   const visited = new Set<string>();
 
-  // @ts-ignore
   for (const startId of nodeMap.keys()) {
     if (visited.has(startId)) continue;
 
@@ -157,7 +153,6 @@ function assignGroups(
       const current = queue.shift()!;
       nodeMap.get(current)!.group = nextGroupId.toString();
 
-      // @ts-ignore
       for (const neighbor of adjacency.get(current)!) {
         if (!visited.has(neighbor)) {
           visited.add(neighbor);
@@ -172,5 +167,5 @@ function assignGroups(
 
 export const dataConverter = (
   data: DataPluginAccountIssues[],
-  props: { settings: CollaborationSettings },
+  props: VisualizationPluginProperties<CollaborationSettings, DataPluginAccountIssues>,
 ) => convertIssuesToGraphData(data, props.settings);

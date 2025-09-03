@@ -1,5 +1,5 @@
-import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
-import type { DataPluginAccountIssues } from "../../../../interfaces/dataPluginInterfaces/dataPluginAccountsIssues.ts";
+import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
+import type { DataPluginAccountIssues } from '../../../../interfaces/dataPluginInterfaces/dataPluginAccountsIssues.ts';
 
 export enum DataState {
   EMPTY,
@@ -28,7 +28,7 @@ const initialState: CollaborationState = {
 };
 
 export const collaborationSlice = createSlice({
-  name: "collaboration",
+  name: 'collaboration',
   initialState,
   reducers: {
     /** Replace the entire accounts list */
@@ -46,6 +46,5 @@ export const collaborationSlice = createSlice({
   },
 });
 
-export const { setAccounts, setDateRange, setDataState } =
-  collaborationSlice.actions;
+export const { setAccounts, setDateRange, setDataState } = collaborationSlice.actions;
 export default collaborationSlice.reducer;
