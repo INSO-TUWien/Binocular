@@ -5,7 +5,8 @@ import type { NodeType, LinkType } from '../chart/networkChart.tsx';
 import type { VisualizationPluginProperties } from '../../../../interfaces/visualizationPluginInterfaces/visualizationPluginProperties';
 import type { ChartData, Palette } from '../../../simpleVisualizationPlugin/src/chart/chart.tsx';
 
-const DUMMY_CHART_DATA = [] as unknown as ChartData[]; // or real type if you have it
+//these are wanted by the framework but not needed by this chart
+const DUMMY_CHART_DATA = [] as unknown as ChartData[];
 const DUMMY_SCALE = [] as number[];
 const DUMMY_PALETTE = {} as unknown as Palette;
 
