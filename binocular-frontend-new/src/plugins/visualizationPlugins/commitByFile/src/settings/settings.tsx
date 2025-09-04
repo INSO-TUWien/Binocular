@@ -1,5 +1,7 @@
 export interface SettingsType {}
 
-function Settings() {}
+function Settings() {
+  return <></>;
+}
 
 export default Settings;
