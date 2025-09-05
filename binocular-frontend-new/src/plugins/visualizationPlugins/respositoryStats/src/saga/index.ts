@@ -1,10 +1,21 @@
 import { put, takeEvery, fork, call, select } from 'redux-saga/effects';
-import { RepoStatsState, DataState, setCommits, setDataState, setDateRange, setIssues, setUsers, setBuilds } from '../reducer';
-import { DataPlugin } from '../../../../interfaces/dataPlugin.ts';
-import { DataPluginUser } from '../../../../interfaces/dataPluginInterfaces/dataPluginUsers.ts';
-import { DataPluginCommit } from '../../../../interfaces/dataPluginInterfaces/dataPluginCommits.ts';
-import { DataPluginIssue } from '../../../../interfaces/dataPluginInterfaces/dataPluginIssues.ts';
-import { DataPluginBuild } from '../../../../interfaces/dataPluginInterfaces/dataPluginBuilds.ts';
+import {
+  type RepoStatsState,
+  DataState,
+  setDateRange,
+  setDataState,
+  setCommits,
+  setUsers,
+  setIssues,
+  setBuilds,
+  setMergeRequests,
+} from '../reducer';
+import type { DataPlugin } from '../../../../interfaces/dataPlugin.ts';
+import type { DataPluginUser } from '../../../../interfaces/dataPluginInterfaces/dataPluginUsers.ts';
+import type { DataPluginCommit } from '../../../../interfaces/dataPluginInterfaces/dataPluginCommits.ts';
+import type { DataPluginIssue } from '../../../../interfaces/dataPluginInterfaces/dataPluginIssues.ts';
+import type { DataPluginBuild } from '../../../../interfaces/dataPluginInterfaces/dataPluginBuilds.ts';
+import type { DataPluginMergeRequest } from '../../../../interfaces/dataPluginInterfaces/dataPluginMergeRequests';
 
 export default function* (dataConnection: DataPlugin) {
   yield fork(() => watchRefresh(dataConnection));
@@ -12,14 +23,14 @@ export default function* (dataConnection: DataPlugin) {
 }
 
 function* watchRefresh(dataConnection: DataPlugin) {
-  yield takeEvery('REFRESH', () => fetchChangesData(dataConnection));
+  yield takeEvery('REFRESH', () => fetchData(dataConnection));
 }
 
 function* watchDateRangeChange(dataConnection: DataPlugin) {
-  yield takeEvery(setDateRange, () => fetchChangesData(dataConnection));
+  yield takeEvery(setDateRange, () => fetchData(dataConnection));
 }
 
-function* fetchChangesData(dataConnection: DataPlugin) {
+function* fetchData(dataConnection: DataPlugin) {
   yield put(setDataState(DataState.FETCHING));
   const state: { plugin: RepoStatsState } = yield select();
   const commits: DataPluginCommit[] = yield call(() =>
@@ -28,9 +39,11 @@ function* fetchChangesData(dataConnection: DataPlugin) {
   const users: DataPluginUser[] = yield call(() => dataConnection.users.getAll());
   const issues: DataPluginIssue[] = yield call(() => dataConnection.issues.getAll(state.plugin.dateRange.from, state.plugin.dateRange.to));
   const builds: DataPluginBuild[] = yield call(() => dataConnection.builds.getAll(state.plugin.dateRange.from, state.plugin.dateRange.to));
+  const mergeRequests: DataPluginMergeRequest[] = yield call(() => dataConnection.mergeRequests.getAll(state.plugin.dateRange.from, state.plugin.dateRange.to));
   yield put(setCommits(commits.length));
   yield put(setUsers(users.length));
   yield put(setIssues(issues.length));
   yield put(setBuilds(builds.length));
+  yield put(setMergeRequests(mergeRequests.length));
   yield put(setDataState(DataState.COMPLETE));
 }

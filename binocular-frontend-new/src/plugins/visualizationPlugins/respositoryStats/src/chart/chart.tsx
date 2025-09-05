@@ -1,9 +1,9 @@
 import styles from './chartStyles.module.scss';
-import { SettingsType } from '../settings/settings.tsx';
-import { DataPlugin } from '../../../../interfaces/dataPlugin.ts';
-import { ParametersType } from '../../../../../types/parameters/parametersType.ts';
-import { RefObject, useEffect, useState } from 'react';
-import { Store } from '@reduxjs/toolkit';
+import type { SettingsType } from '../settings/settings.tsx';
+import type { DataPlugin } from '../../../../interfaces/dataPlugin.ts';
+import type { ParametersType } from '../../../../../types/parameters/parametersType.ts';
+import { type RefObject, useEffect, useState } from 'react';
+import type { Store } from '@reduxjs/toolkit';
 import { useDispatch, useSelector } from 'react-redux';
 import { DataState, setDateRange } from '../reducer';
 
@@ -15,7 +15,7 @@ function Chart(props: {
   settings: SettingsType;
   dataConnection: DataPlugin;
   parameters: ParametersType;
-  chartContainerRef: RefObject<HTMLDivElement>;
+  chartContainerRef: RefObject<HTMLDivElement | null>;
   store: Store;
 }) {
   type RootState = ReturnType<typeof props.store.getState>;
@@ -27,6 +27,7 @@ function Chart(props: {
   const userNumber = useSelector((state: RootState) => state.plugin.userNumber);
   const issueNumber = useSelector((state: RootState) => state.plugin.issueNumber);
   const buildNumber = useSelector((state: RootState) => state.plugin.buildNumber);
+  const mergeRequestNumber = useSelector((state: RootState) => state.plugin.mergeRequestNumber);
   const dataState = useSelector((state: RootState) => state.plugin.dataState);
   //React Component State
   const [chartWidth, setChartWidth] = useState(100);
@@ -36,6 +37,7 @@ function Chart(props: {
   const [users, setUsers] = useState<number>(0);
   const [issues, setIssues] = useState<number>(0);
   const [builds, setBuilds] = useState<number>(0);
+  const [mergeRequests, setMergeRequests] = useState<number>(0);
 
   /**
    * RESIZE Logic START
@@ -60,6 +62,7 @@ function Chart(props: {
     setUsers(userNumber);
     setIssues(issueNumber);
     setBuilds(buildNumber);
+    setMergeRequests(mergeRequestNumber);
   }, [commitNumber, users, props.parameters, userNumber, issueNumber, buildNumber]);
 
   //Set Global state when parameters change. This will also conclude in a refresh of the data.
@@ -108,6 +111,12 @@ function Chart(props: {
                 <div className="stat">
                   <div className="stat-title">Builds</div>
                   <div className="stat-value text-primary">{builds}</div>
+                </div>
+              )}
+              {props.settings.mergeRequests && (
+                <div className="stat">
+                  <div className="stat-title">Merge requests</div>
+                  <div className="stat-value text-primary">{mergeRequests}</div>
                 </div>
               )}
             </div>

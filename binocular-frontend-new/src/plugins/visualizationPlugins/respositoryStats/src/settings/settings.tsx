@@ -3,6 +3,7 @@ export interface SettingsType {
   contributors: boolean;
   issues: boolean;
   builds: boolean;
+  mergeRequests: boolean;
 }
 
 function Settings(props: { settings: SettingsType; setSettings: (newSettings: SettingsType) => void }) {
@@ -21,6 +22,7 @@ function Settings(props: { settings: SettingsType; setSettings: (newSettings: Se
                 contributors: event.target.checked,
                 issues: props.settings.issues,
                 builds: props.settings.builds,
+                mergeRequests: props.settings.mergeRequests,
               })
             }
           />
@@ -37,6 +39,7 @@ function Settings(props: { settings: SettingsType; setSettings: (newSettings: Se
                 contributors: props.settings.contributors,
                 issues: props.settings.issues,
                 builds: props.settings.builds,
+                mergeRequests: props.settings.mergeRequests,
               })
             }
           />
@@ -53,6 +56,7 @@ function Settings(props: { settings: SettingsType; setSettings: (newSettings: Se
                 contributors: props.settings.contributors,
                 issues: event.target.checked,
                 builds: props.settings.builds,
+                mergeRequests: props.settings.mergeRequests,
               })
             }
           />
@@ -69,6 +73,24 @@ function Settings(props: { settings: SettingsType; setSettings: (newSettings: Se
                 contributors: props.settings.contributors,
                 issues: props.settings.issues,
                 builds: event.target.checked,
+                mergeRequests: props.settings.mergeRequests,
+              })
+            }
+          />
+        </label>
+        <label className="label cursor-pointer">
+          <span className="label-text">Show merge requests:</span>
+          <input
+            type="checkbox"
+            className="toggle toggle-accent toggle-sm"
+            defaultChecked={props.settings.mergeRequests}
+            onChange={(event) =>
+              props.setSettings({
+                commits: props.settings.commits,
+                contributors: props.settings.contributors,
+                issues: props.settings.issues,
+                builds: props.settings.builds,
+                mergeRequests: event.target.checked,
               })
             }
           />
