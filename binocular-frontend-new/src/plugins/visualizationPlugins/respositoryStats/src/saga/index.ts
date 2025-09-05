@@ -39,7 +39,9 @@ function* fetchData(dataConnection: DataPlugin) {
   const users: DataPluginUser[] = yield call(() => dataConnection.users.getAll());
   const issues: DataPluginIssue[] = yield call(() => dataConnection.issues.getAll(state.plugin.dateRange.from, state.plugin.dateRange.to));
   const builds: DataPluginBuild[] = yield call(() => dataConnection.builds.getAll(state.plugin.dateRange.from, state.plugin.dateRange.to));
-  const mergeRequests: DataPluginMergeRequest[] = yield call(() => dataConnection.mergeRequests.getAll(state.plugin.dateRange.from, state.plugin.dateRange.to));
+  const mergeRequests: DataPluginMergeRequest[] = yield call(() =>
+    dataConnection.mergeRequests.getAll(state.plugin.dateRange.from, state.plugin.dateRange.to),
+  );
   yield put(setCommits(commits.length));
   yield put(setUsers(users.length));
   yield put(setIssues(issues.length));
