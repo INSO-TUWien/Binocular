@@ -1,33 +1,45 @@
 import PreviewImage from '../assets/thumbnail.svg';
+import Settings, { type SprintSettings } from './settings/settings.tsx';
 import type { VisualizationPlugin } from '../../../interfaces/visualizationPlugin.ts';
-import { VisualizationPluginMetadataCategory } from '../../../interfaces/visualizationPluginInterfaces/visualizationPluginMetadata.ts';
+import { getSVGData } from './utilities/utilities.ts';
 import Reducer from './reducer';
+import { convertToChartData } from './utilities/dataConverter.ts';
 import Saga from './saga';
+import Help from './help/help.tsx';
+import type { DataPluginIssue } from '../../../interfaces/dataPluginInterfaces/dataPluginIssues.ts';
+import { VisualizationPluginMetadataCategory } from '../../../interfaces/visualizationPluginInterfaces/visualizationPluginMetadata.ts';
+import Chart from './chart/Chart.tsx';
 
-const Issues: VisualizationPlugin<unknown, unknown> = {
+const Sprints: VisualizationPlugin<SprintSettings, DataPluginIssue> = {
   name: 'Sprints',
-  chartComponent: undefined,
-  settingsComponent: () => null,
-  dataConnectionName: 'sprints',
-  dataConverter: undefined,
-  helpComponent: () => null,
-  defaultSettings: {},
+  chartComponent: Chart,
+  settingsComponent: Settings,
+  dataConnectionName: 'issues',
+  dataConverter: convertToChartData,
+  helpComponent: Help,
+  defaultSettings: {
+    splitIssuesPerAuthor: false,
+    visualizationStyle: 'curved',
+    showSprints: false,
+  },
   export: {
-    getSVGData: () => '',
+    getSVGData: getSVGData,
   },
   capabilities: {
-    popoutOnly: true,
-    export: true,
+    popoutOnly: false,
+    export: false,
   },
-  images: { thumbnail: PreviewImage },
+  images: {
+    thumbnail: PreviewImage,
+  },
   metadata: {
     category: VisualizationPluginMetadataCategory.Issues,
     recommended: false,
     description:
-      'A line chart that visualizes the amount of issues open and closed.',
+      'A bar chart that visualizes issues in relation to the defined sprints.',
   },
   reducer: Reducer,
   saga: Saga,
 };
 
-export default Issues;
+export default Sprints;
