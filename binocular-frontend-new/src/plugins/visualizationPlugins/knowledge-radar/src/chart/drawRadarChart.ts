@@ -2,10 +2,71 @@ import * as d3 from 'd3';
 import { Package, SubPackage } from './type.ts';
 import { AuthorType } from '../../../../../types/data/authorType.ts';
 import chroma from 'chroma-js';
+import { round } from 'lodash';
 
-/**
- * Draws a radar chart for multiple developers with their respective data
- */
+type ColorScheme = {
+  grid: string;
+  text: string;
+};
+
+// Helper functions for tooltip
+function positionTooltip(tooltip: d3.Selection<HTMLDivElement, unknown, null, undefined>, svgRef: SVGGElement, e: MouseEvent) {
+  const visRect = svgRef.getBoundingClientRect();
+  const middleX = visRect.x + visRect.width / 2;
+  const middleY = visRect.y + visRect.height / 2;
+  const tooltipRect = (tooltip.node() as HTMLDivElement).getBoundingClientRect();
+
+  if (middleX < e.pageX) {
+    tooltip.style('left', e.pageX - tooltipRect.width + 'px');
+  } else {
+    tooltip.style('left', e.pageX + 'px');
+  }
+  if (middleY < e.pageY) {
+    tooltip.style('top', e.pageY - tooltipRect.height + 'px');
+  } else {
+    tooltip.style('top', e.pageY + 20 + 'px');
+  }
+}
+
+function setTooltipContent(
+  tooltip: d3.Selection<HTMLDivElement, unknown, null, undefined>,
+  packageName: string,
+  developersData: { developer: AuthorType; score: number }[],
+) {
+  tooltip.select('.tooltip-label').text(packageName);
+
+  const developersContainer = tooltip.select('.tooltip-developers');
+  developersContainer.selectAll('*').remove();
+
+  developersData
+    .filter((d) => d.score > 0)
+    .sort((a, b) => b.score - a.score)
+    .forEach(({ developer, score }) => {
+      const devDiv = developersContainer
+        .append('div')
+        .style('display', 'flex')
+        .style('justify-content', 'space-between')
+        .style('align-items', 'center')
+        .style('margin', '2px 0')
+        .style('padding', '2px 4px')
+        .style('border-radius', '4px')
+        .style('background-color', chroma(developer.color.main).alpha(0.05).css());
+
+      devDiv
+        .append('span')
+        .style('font-size', '10px')
+        .style('color', chroma(developer.color.main).darken(1).hex())
+        .style('font-weight', 'bold')
+        .text(developer.user.gitSignature);
+
+      devDiv
+        .append('span')
+        .style('font-size', '10px')
+        .style('color', chroma(developer.color.main).darken(3).hex())
+        .text(`${round(score * 100)}%`);
+    });
+}
+
 const drawRadarChart = (
   svg: d3.Selection<SVGGElement, unknown, null, undefined>,
   developersData: {
@@ -13,94 +74,169 @@ const drawRadarChart = (
     data: Package[] | SubPackage[];
   }[],
   radius: number,
-  colorScheme: unknown,
+  colorScheme: ColorScheme,
   options: {
     isSubpackageView?: boolean;
     parentName?: string;
     handlePackageSelect: (pkg: Package | SubPackage, parentName: string) => void;
     handleBackNavigation?: () => void;
+    tooltipRef?: React.MutableRefObject<HTMLDivElement | null>;
+    individualDeveloperData?: Map<string, Package[]>;
+    selectedDevelopers?: AuthorType[];
+    breadcrumbs?: string[];
   },
 ) => {
-  const { isSubpackageView = false, handlePackageSelect, handleBackNavigation } = options;
+  const {
+    isSubpackageView = false,
+    handlePackageSelect,
+    handleBackNavigation,
+    tooltipRef,
+    individualDeveloperData,
+    selectedDevelopers,
+    breadcrumbs,
+  } = options;
 
-  // Clear existing gradients
-  d3.select(svg.node()?.parentNode).selectAll('defs').remove();
+  const fadeRadarPath = true;
+  const fadePoints = true;
+  const fadeScoreLabels = true;
 
-  // Create defs for multiple gradients
-  const defs = d3.select(svg.node()?.parentNode).append('defs');
+  const parentNode = svg.node()?.parentNode as SVGElement | null;
+  if (parentNode) d3.select(parentNode).selectAll('defs').remove();
 
-  // Create gradient for each developer
-  developersData.forEach((devData, index) => {
-    const gradientId = `radar-area-gradient-${index}`;
-    const gradient = defs
-      .append('linearGradient')
-      .attr('id', gradientId)
-      .attr('x1', '0%')
-      .attr('y1', '0%')
-      .attr('x2', '100%')
-      .attr('y2', '100%');
+  const hasDevelopers = developersData.length > 0;
+  const primaryColor = hasDevelopers ? developersData[0].developer.color.main : colorScheme.grid;
 
-    gradient.append('stop').attr('offset', '0%').attr('stop-color', chroma(devData.developer.color.main).alpha(0.7).css());
+  // Helper function to find package by path
+  const findPackageByPath = (packages: Package[], path: string[]): Package | null => {
+    if (path.length === 0 || packages.length === 0) return null;
+    const targetName = path[0];
+    const pkg = packages.find((p) => p.name === targetName);
+    if (!pkg) return null;
+    if (path.length === 1) return pkg;
+    if (!pkg.subpackages || pkg.subpackages.length === 0) return null;
+    return findPackageByPath(pkg.subpackages as Package[], path.slice(1));
+  };
 
-    gradient.append('stop').attr('offset', '100%').attr('stop-color', chroma(devData.developer.color.secondary).alpha(0.1).css());
-  });
+  // Helper function to get developer expertise for a package
+  const getDeveloperExpertise = (packageName: string): { developer: AuthorType; score: number }[] => {
+    if (!individualDeveloperData || !selectedDevelopers) return [];
 
-  // Use the first developer's data for axis and structure
-  const primaryDevData = developersData[0].data;
+    return selectedDevelopers.map((developer) => {
+      const devData = individualDeveloperData.get(developer.user.gitSignature) || [];
+      let score = 0;
 
-  // For subpackage view, we need a single package as the parent
-  const parentPackage = isSubpackageView ? primaryDevData[0] : null;
+      if (!isSubpackageView) {
+        const pkg = devData.find((p) => p.name === packageName);
+        score = pkg?.score || 0;
+      } else {
+        const parentPath = breadcrumbs?.slice(1) || [];
+        const parentPkg = findPackageByPath(devData, parentPath);
+        const subPkg = parentPkg?.subpackages?.find((sp) => sp.name === packageName);
+        score = subPkg?.score || 0;
+      }
 
-  // Use appropriate data based on view type
-  const chartData = isSubpackageView ? parentPackage?.subpackages || [] : (primaryDevData as Package[]);
+      return { developer, score };
+    });
+  };
 
-  const features = chartData.map((d) => d.name);
-  const n = features.length;
+  // Gradients per developer (for radar areas)
+  if (hasDevelopers && parentNode) {
+    const defs = d3.select(parentNode).append('defs');
+    developersData.forEach((devData, index) => {
+      const gradientId = `radar-area-gradient-${index}`;
+      defs.append('linearGradient').attr('id', gradientId).attr('x1', '0%').attr('y1', '0%').attr('x2', '100%').attr('y2', '100%');
 
-  // Calculate angles for each axis
-  const angles = features.map((_, i) => i * ((2 * Math.PI) / n));
+      d3.select(`#${gradientId}`)
+        .append('stop')
+        .attr('offset', '0%')
+        .attr('stop-color', chroma(devData.developer.color.main).alpha(0.7).css());
 
-  // Define center circle radius
+      d3.select(`#${gradientId}`)
+        .append('stop')
+        .attr('offset', '100%')
+        .attr('stop-color', chroma(devData.developer.color.secondary).alpha(0.1).css());
+    });
+  }
+
+  // Geometry
   const centerRadius = radius * 0.25;
-
-  // Create scales - adjust to ensure small values are visible and start from center circle
   const rScale = d3.scaleLinear().domain([0, 1]).range([centerRadius, radius]);
 
-  // Add background circle
+  // Helpers: subpackage availability across selected developers
+  const hasTopLevelSubpackagesForAnyDev = (pkgName: string): boolean =>
+    developersData.some((dev) => {
+      const pkg = (dev.data as Package[]).find((p) => p.name === pkgName);
+      return !!pkg?.subpackages && pkg.subpackages.length > 0;
+    });
+
+  const findTopLevelPkgWithSubpackages = (pkgName: string): Package | undefined =>
+    developersData
+      .map((dev) => (dev.data as Package[]).find((p) => p.name === pkgName))
+      .find((pkg): pkg is Package => !!pkg && !!pkg.subpackages && pkg.subpackages.length > 0);
+
+  const hasNestedSubpackagesForAnyDev = (parentPkgName: string, subpkgName: string): boolean =>
+    developersData.some((dev) => {
+      const parentPkg = (dev.data as Package[]).find((p) => p.name === parentPkgName);
+      const sub = parentPkg?.subpackages?.find((sp) => sp.name === subpkgName);
+      return !!sub?.subpackages && sub.subpackages.length > 0;
+    });
+
+  const findNestedSubpackageWithSubpackages = (parentPkgName: string, subpkgName: string): SubPackage | undefined =>
+    developersData
+      .map((dev) => {
+        const parentPkg = (dev.data as Package[]).find((p) => p.name === parentPkgName);
+        return parentPkg?.subpackages?.find((sp) => sp.name === subpkgName);
+      })
+      .find((sp): sp is SubPackage => !!sp && !!sp.subpackages && sp.subpackages.length > 0);
+
+  // Axes/features reference (order)
+  let features: string[] = [];
+  if (hasDevelopers) {
+    if (!isSubpackageView) {
+      features = (developersData[0].data as Package[]).map((p) => p.name);
+    } else {
+      const parentName = options.parentName ?? (developersData[0].data as Package[])[0]?.name ?? '';
+      const refParent = developersData
+        .map((dev) => (dev.data as Package[]).find((p) => p.name === parentName))
+        .find((p): p is Package => !!p);
+      features = refParent?.subpackages?.map((sp) => sp.name) ?? [];
+    }
+  }
+  const n = features.length > 0 ? features.length : 8;
+  const angles = features.length
+    ? features.map((_, i) => i * ((2 * Math.PI) / features.length))
+    : d3.range(n).map((i) => i * ((2 * Math.PI) / n));
+
+  // Background circle (static)
   svg
     .append('circle')
     .attr('class', 'radar-background')
     .attr('cx', 0)
     .attr('cy', 0)
     .attr('r', radius)
-    .style('fill', '#f0f0f0') // Light grey color
-    .style('opacity', 0)
-    .transition()
-    .duration(800)
+    .style('fill', '#f0f0f0')
     .style('opacity', 1);
 
-  // Draw axis lines
+  // Axis grid (static)
   const axisGrid = svg.append('g').attr('class', 'axis-grid');
 
+  // Spokes
   axisGrid
     .selectAll('.axis-line')
     .data(angles)
     .enter()
     .append('line')
     .attr('class', 'axis-line')
-    .attr('x1', (d) => centerRadius * Math.cos(d - Math.PI / 2))
-    .attr('y1', (d) => centerRadius * Math.sin(d - Math.PI / 2))
+    .attr('x1', (d) => rScale(0) * Math.cos(d - Math.PI / 2))
+    .attr('y1', (d) => rScale(0) * Math.sin(d - Math.PI / 2))
     .attr('x2', (d) => rScale(1.1) * Math.cos(d - Math.PI / 2))
     .attr('y2', (d) => rScale(1.1) * Math.sin(d - Math.PI / 2))
     .style('stroke', colorScheme.grid)
     .style('stroke-width', '1px')
     .style('stroke-dasharray', '3,3')
-    .style('opacity', 0)
-    .transition()
-    .duration(800)
     .style('opacity', 0.7);
 
-  // Draw concentric circles
+  // Level circles
   const levels = 5;
   axisGrid
     .selectAll('.level')
@@ -108,16 +244,12 @@ const drawRadarChart = (
     .enter()
     .append('circle')
     .attr('class', 'level')
-    .attr('r', 0)
+    .attr('r', (d) => rScale(d))
     .style('fill', 'none')
     .style('stroke', colorScheme.grid)
-    .style('stroke-width', '0.5px')
-    .transition()
-    .duration(800)
-    .delay((_, i) => i * 100)
-    .attr('r', (d) => rScale(d));
+    .style('stroke-width', '0.5px');
 
-  // Add level labels (percentages)
+  // Level labels
   axisGrid
     .selectAll('.level-label')
     .data(d3.range(0, levels + 1).map((i) => i / levels))
@@ -129,130 +261,137 @@ const drawRadarChart = (
     .attr('dy', '0.35em')
     .style('font-size', `${centerRadius * 0.15}px`)
     .style('fill', colorScheme.text)
-    .style('opacity', 0)
-    .text((d) => `${Math.round(d * 100)}%`)
-    .transition()
-    .duration(800)
-    .delay((_, i) => 500 + i * 100)
-    .style('opacity', 0.7);
+    .style('opacity', 0.7)
+    .text((d) => `${Math.round(d * 100)}%`);
 
-  // Add axis labels with background
-  const axisLabels = axisGrid
-    .selectAll<SVGGElement, string>('.axis-label-group')
-    .data(features)
-    .enter()
-    .append('g')
-    .attr('class', 'axis-label-group')
-    .attr('transform', (_: string, i: number) => {
-      const x = rScale(1.4) * Math.cos(angles[i] - Math.PI / 2);
-      const y = rScale(1.4) * Math.sin(angles[i] - Math.PI / 2);
-      return `translate(${x}, ${y})`;
-    })
-    .style('cursor', (d: string) => {
-      const subpkg = chartData.find((p) => p.name === d);
-      return subpkg && subpkg.subpackages && subpkg.subpackages.length > 0 ? 'pointer' : 'default';
-    })
-    .style('opacity', 0)
-    .on('click', (_event: MouseEvent, d: string) => {
-      if (isSubpackageView) {
-        const subpkg = chartData.find((p) => p.name === d);
-        if (subpkg && subpkg.subpackages && subpkg.subpackages.length > 0) {
-          handlePackageSelect(subpkg, parentPackage?.name || 'Unknown');
-        }
-      } else {
-        const pkg = chartData.find((p) => p.name === d);
-        if (pkg && pkg.subpackages && pkg.subpackages.length > 0) {
-          handlePackageSelect(pkg, './');
-        }
-      }
-    });
-
-  // Add text first (to measure it)
-  axisLabels
-    .append('text')
-    .attr('text-anchor', 'middle')
-    .attr('dy', '0.35em')
-    .attr('class', 'label-text')
-    .text((d: string) => {
-      // Truncate text if longer than 10 characters
-      return d.length > 15 ? d.substring(0, 15) + '...' : d;
-    })
-    .style('font-size', `${Math.min(centerRadius * 0.25, 12)}px`)
-    .style('font-weight', 'bold')
-    .style('fill', colorScheme.text);
-
-  // Add tooltip for truncated text
-  axisLabels.append('title').text((d: string) => {
-    const pkg = chartData.find((p) => p.name === d);
-    return d + ' > ' + (pkg?.score !== undefined ? pkg.score * 100 + '%' : 'N/A');
-  });
-
-  // Add label background sized to text and account for indicator circle
-  axisLabels.each(function (d: string) {
-    const textElement = this.querySelector('.label-text') as SVGTextElement;
-    const textWidth = textElement.getBBox().width;
-    const padding = 10; // Padding on each side
-
-    // Check if this package has subpackages (needs indicator)
-    const pkg = chartData.find((p) => p.name === d);
-    const hasSubpackages = pkg && pkg.subpackages && pkg.subpackages.length > 0;
-
-    // Add extra width for the indicator circle if needed
-    const indicatorSpace = hasSubpackages ? 10 : 0; // Space for circle + margin
-
-    d3.select<SVGGElement, string>(this)
-      .insert('rect', 'text')
-      .attr('x', -textWidth / 2 - padding)
-      .attr('y', -10)
-      .attr('width', textWidth + padding * 2 + indicatorSpace)
-      .attr('height', 20)
-      .attr('rx', 10)
-      .attr('ry', 10)
-      .style('fill', 'white')
-      .style('stroke', () => {
-        return hasSubpackages ? chroma(developersData[0].developer.color.main).hex() : colorScheme.grid;
+  // Axis labels (static placement, dynamic clickability with tooltip)
+  if (hasDevelopers && features.length > 0) {
+    const axisLabels = axisGrid
+      .selectAll<SVGGElement, string>('.axis-label-group')
+      .data(features)
+      .enter()
+      .append('g')
+      .attr('class', 'axis-label-group')
+      .attr('transform', (_: string, i: number) => {
+        const x = rScale(1.4) * Math.cos(angles[i] - Math.PI / 2);
+        const y = rScale(1.4) * Math.sin(angles[i] - Math.PI / 2);
+        return `translate(${x}, ${y})`;
       })
-      .style('stroke-width', '2px')
-      .style('opacity', 0.8);
-  });
+      .style('cursor', (d: string) => {
+        if (!isSubpackageView) return hasTopLevelSubpackagesForAnyDev(d) ? 'pointer' : 'default';
+        const parentName = options.parentName ?? '';
+        return hasNestedSubpackagesForAnyDev(parentName, d) ? 'pointer' : 'default';
+      })
+      .style('opacity', 1)
+      .on('click', (_event: MouseEvent, d: string) => {
+        if (!handlePackageSelect) return;
+        if (!isSubpackageView) {
+          if (!hasTopLevelSubpackagesForAnyDev(d)) return;
+          const pkg = findTopLevelPkgWithSubpackages(d);
+          if (!pkg) return;
+          handlePackageSelect(pkg, pkg.name);
+        } else {
+          const parentName = options.parentName ?? '';
+          if (!hasNestedSubpackagesForAnyDev(parentName, d)) return;
+          const sub = findNestedSubpackageWithSubpackages(parentName, d);
+          if (!sub) return;
+          handlePackageSelect(sub, parentName);
+        }
+      })
+      .on('mouseover', function (_event: MouseEvent, d: string) {
+        if (!tooltipRef?.current) return;
+        const tooltip = d3.select(tooltipRef.current);
+        const expertise = getDeveloperExpertise(d);
+        setTooltipContent(tooltip, d, expertise);
+        tooltip.style('visibility', 'visible');
+      })
+      .on('mousemove', function (event: MouseEvent) {
+        if (!tooltipRef?.current) return;
+        const tooltip = d3.select(tooltipRef.current);
+        const svgNode = svg.node()?.closest('svg') as SVGSVGElement;
+        if (svgNode) {
+          positionTooltip(tooltip, svgNode, event);
+        }
+      })
+      .on('mouseout', function () {
+        if (!tooltipRef?.current) return;
+        d3.select(tooltipRef.current).style('visibility', 'hidden');
+      });
 
-  // Add nested indicator for packages with subpackages
-  axisLabels
-    .append('circle')
-    .attr('cx', function (this: SVGCircleElement, _d: string) {
-      const parentNode = this.parentNode as SVGGElement;
-      const textElement = parentNode.querySelector('.label-text') as SVGTextElement;
+    axisLabels
+      .append('text')
+      .attr('text-anchor', 'middle')
+      .attr('dy', '0.35em')
+      .attr('class', 'label-text')
+      .text((d: string) => (d.length > 15 ? `${d.substring(0, 15)}...` : d))
+      .style('font-size', `${Math.min(centerRadius * 0.25, 12)}px`)
+      .style('font-weight', 'bold')
+      .style('fill', colorScheme.text);
+
+    axisLabels.each(function (this: SVGGElement, d: string) {
+      const textElement = this.querySelector('.label-text') as SVGTextElement;
       const textWidth = textElement.getBBox().width;
-      return textWidth / 2 + 5; // Position circle at the end of text + 5px
-    })
-    .attr('cy', 0)
-    .attr('r', 3)
-    .style('fill', (d: string) => {
-      const pkg = chartData.find((p) => p.name === d);
-      return pkg && pkg.subpackages && pkg.subpackages.length > 0
-        ? chroma(developersData[0].developer.color.main).saturate(5).hex()
-        : 'transparent';
+      const padding = 10;
+
+      const clickable = !isSubpackageView ? hasTopLevelSubpackagesForAnyDev(d) : hasNestedSubpackagesForAnyDev(options.parentName ?? '', d);
+
+      d3.select(this)
+        .insert('rect', 'text')
+        .attr('x', -textWidth / 2 - padding)
+        .attr('y', -10)
+        .attr('width', textWidth + padding * 2 + (clickable ? 10 : 0))
+        .attr('height', 20)
+        .attr('rx', 10)
+        .attr('ry', 10)
+        .style('fill', 'white')
+        .style('stroke', () => (clickable ? chroma(primaryColor).hex() : colorScheme.grid))
+        .style('stroke-width', '2px')
+        .style('opacity', 0.8);
     });
 
-  // Apply transition to the group
-  axisLabels.transition().duration(800).delay(300).style('opacity', 1);
+    axisLabels
+      .append('circle')
+      .attr('cx', function (this: SVGCircleElement) {
+        const parent = this.parentNode as SVGGElement;
+        const textElement = parent.querySelector('.label-text') as SVGTextElement;
+        const textWidth = textElement.getBBox().width;
+        return textWidth / 2 + 5;
+      })
+      .attr('cy', 0)
+      .attr('r', 3)
+      .style('fill', (d: string) => {
+        const clickable = !isSubpackageView
+          ? hasTopLevelSubpackagesForAnyDev(d)
+          : hasNestedSubpackagesForAnyDev(options.parentName ?? '', d);
+        return clickable ? chroma(primaryColor).saturate(5).hex() : 'transparent';
+      });
+  }
 
-  // Draw radar paths for each developer with animation
+  // Radar area path (gradient) + fade
   const radarLine = d3
-    .lineRadial<unknown>()
-    .angle((_, i) => angles[i])
-    .radius((d) => rScale(d.score || 0)) // Handle undefined scores
+    .lineRadial<Package | SubPackage>()
+    .angle((_, i: number) => angles[i])
+    .radius((d) => rScale(d.score ?? 0))
     .curve(d3.curveCardinalClosed.tension(0.7));
 
-  // Draw radar paths for each developer
   developersData.forEach((devData, index) => {
-    // Get the developer's data
-    const devChartData = isSubpackageView ? devData.data[0]?.subpackages || [] : devData.data;
+    // Developer-specific data in current layer
+    const devChartData: (Package | SubPackage)[] = !isSubpackageView
+      ? (devData.data as Package[]) ?? []
+      : (devData.data as Package[]).find((p) => p.name === (options.parentName ?? ''))?.subpackages ?? [];
 
-    // Create path for animation
+    // Order data by global feature order; fill missing with score 0
+    const orderedData: (Package | SubPackage)[] = features.length
+      ? features.map((name) => {
+          const found = devChartData.find((d) => d.name === name);
+          if (found) return found;
+          return { name, score: 0 } as unknown as Package | SubPackage;
+        })
+      : devChartData;
+
     const radarPath = svg
       .append('path')
-      .datum(devChartData)
+      .datum(orderedData)
       .attr('class', `radar-path radar-path-dev-${index}`)
       .attr('d', radarLine)
       .style('fill', `url(#radar-area-gradient-${index})`)
@@ -260,106 +399,113 @@ const drawRadarChart = (
       .style('stroke-width', '2px')
       .style('opacity', 0);
 
-    // Animate the path
-    radarPath.transition().duration(1000).style('opacity', 0.6);
+    if (fadeRadarPath) {
+      radarPath.transition().duration(800).style('opacity', 0.6);
+    }
 
-    // Add data points with animation
-    svg
-      .selectAll(`.radar-point-dev-${index}`)
-      .data(devChartData.filter((d) => (d.score || 0) > 0)) // Filter out zero scores
+    // Datapoints + delayed fade (per-developer color) with tooltip
+    const pointsData = orderedData.filter((d) => (d.score ?? 0) > 0);
+    const points = svg
+      .selectAll<SVGCircleElement, Package | SubPackage>(`.radar-point-dev-${index}`)
+      .data(pointsData)
       .enter()
       .append('circle')
       .attr('class', `radar-point radar-point-dev-${index}`)
       .attr('cx', (d) => {
-        // Find the original index in the unfiltered array
-        const originalIndex = devChartData.findIndex((item) => item.name === d.name);
-        return rScale(d.score || 0) * Math.cos(angles[originalIndex] - Math.PI / 2);
+        const i = features.indexOf(d.name);
+        const angle = i >= 0 ? angles[i] : 0;
+        return rScale(d.score ?? 0) * Math.cos(angle - Math.PI / 2);
       })
       .attr('cy', (d) => {
-        // Find the original index in the unfiltered array
-        const originalIndex = devChartData.findIndex((item) => item.name === d.name);
-        return rScale(d.score || 0) * Math.sin(angles[originalIndex] - Math.PI / 2);
+        const i = features.indexOf(d.name);
+        const angle = i >= 0 ? angles[i] : 0;
+        return rScale(d.score ?? 0) * Math.sin(angle - Math.PI / 2);
       })
-      .attr('r', 0)
+      .attr('r', 5)
       .style('fill', chroma(devData.developer.color.main).saturate(5).hex())
       .style('stroke', 'white')
       .style('stroke-width', '2px')
+      .style('opacity', 0)
       .style('cursor', (d) => {
-        return d.subpackages && d.subpackages.length > 0 ? 'pointer' : 'default';
+        if (!isSubpackageView) return hasTopLevelSubpackagesForAnyDev(d.name) ? 'pointer' : 'default';
+        const parentName = options.parentName ?? '';
+        return hasNestedSubpackagesForAnyDev(parentName, d.name) ? 'pointer' : 'default';
       })
-      .transition()
-      .duration(800)
-      .delay(300)
-      .attr('r', 6)
-      .on('end', function () {
-        d3.select(this)
-          .transition()
-          .duration(1000)
-          .attr('r', 5)
-          .transition()
-          .duration(1000)
-          .attr('r', 6)
-          .on('end', function () {
-            d3.select(this).transition().duration(1000).attr('r', 5);
-          });
+      .on('mouseover', function (_event: MouseEvent, d) {
+        if (!tooltipRef?.current) return;
+        const tooltip = d3.select(tooltipRef.current);
+        const expertise = getDeveloperExpertise(d.name);
+        setTooltipContent(tooltip, d.name, expertise);
+        tooltip.style('visibility', 'visible');
+      })
+      .on('mousemove', function (event: MouseEvent) {
+        if (!tooltipRef?.current) return;
+        const tooltip = d3.select(tooltipRef.current);
+        const svgNode = svg.node()?.closest('svg') as SVGSVGElement;
+        if (svgNode) {
+          positionTooltip(tooltip, svgNode, event);
+        }
+      })
+      .on('mouseout', function () {
+        if (!tooltipRef?.current) return;
+        d3.select(tooltipRef.current).style('visibility', 'hidden');
       });
 
-    // Add score labels with animation - only for non-zero scores
-    svg
-      .selectAll(`.score-label-dev-${index}`)
-      .data(devChartData.filter((d) => (d.score || 0) > 0)) // Filter out zero scores
+    if (fadePoints) {
+      points.transition().duration(700).delay(300).style('opacity', 1);
+    }
+
+    // Score labels + fade (per-developer color)
+    const labels = svg
+      .selectAll<SVGTextElement, Package | SubPackage>(`.score-label-dev-${index}`)
+      .data(pointsData)
       .enter()
       .append('text')
       .attr('class', `score-label score-label-dev-${index}`)
-      .attr('x', (d, _) => {
-        // Find the original index in the unfiltered array
-        const originalIndex = devChartData.findIndex((item) => item.name === d.name);
-        return rScale((d.score || 0) + 0.15) * Math.cos(angles[originalIndex] - Math.PI / 2);
+      .attr('x', (d) => {
+        const i = features.indexOf(d.name);
+        const angle = i >= 0 ? angles[i] : 0;
+        return rScale((d.score ?? 0) + 0.15) * Math.cos(angle - Math.PI / 2);
       })
-      .attr('y', (d, _) => {
-        // Find the original index in the unfiltered array
-        const originalIndex = devChartData.findIndex((item) => item.name === d.name);
-        return rScale((d.score || 0) + 0.15) * Math.sin(angles[originalIndex] - Math.PI / 2);
+      .attr('y', (d) => {
+        const i = features.indexOf(d.name);
+        const angle = i >= 0 ? angles[i] : 0;
+        return rScale((d.score ?? 0) + 0.15) * Math.sin(angle - Math.PI / 2);
       })
       .attr('dy', '0.35em')
       .attr('text-anchor', 'middle')
-      .text((d) => `${Math.round((d.score || 0) * 100)}%`)
+      .text((d) => `${Math.round((d.score ?? 0) * 100)}%`)
       .style('font-size', '10px')
       .style('font-weight', 'bold')
       .style('fill', chroma(devData.developer.color.main).darken().hex())
-      .style('opacity', 0)
-      .transition()
-      .duration(800)
-      .delay(1000)
-      .style('opacity', 1);
+      .style('opacity', 0);
+
+    if (fadeScoreLabels) {
+      labels.transition().duration(700).delay(600).style('opacity', 1);
+    }
   });
 
-  // Add center circle
+  // Center group (static)
   const centerGroup = svg.append('g').attr('class', 'center-group');
 
-  // Add click handler for back navigation if in subpackage view
   if (isSubpackageView && handleBackNavigation) {
     centerGroup.style('cursor', 'pointer').on('click', handleBackNavigation);
   }
 
-  // Center circle background
+  const mainColor = hasDevelopers ? developersData[0].developer.color.main : colorScheme.grid;
+
   centerGroup
     .append('circle')
     .attr('cx', 0)
     .attr('cy', 0)
-    .attr('r', 0)
+    .attr('r', centerRadius)
     .style('fill', 'white')
-    .style('stroke', developersData[0].developer.color.main)
-    .style('stroke-width', '3px')
-    .transition()
-    .duration(800)
-    .attr('r', centerRadius);
+    .style('stroke', mainColor)
+    .style('stroke-width', '3px');
 
   if (isSubpackageView && handleBackNavigation) {
-    // Add a back button for subpackage view
-    const backButton = centerGroup.append('g').attr('class', 'back-button').style('opacity', 0);
+    const backButton = centerGroup.append('g').attr('class', 'back-button').style('opacity', 1);
 
-    // Button background
     backButton
       .append('rect')
       .attr('x', -centerRadius * 0.7)
@@ -368,10 +514,9 @@ const drawRadarChart = (
       .attr('height', 30)
       .attr('rx', 15)
       .attr('ry', 15)
-      .style('fill', developersData[0].developer.color.main)
+      .style('fill', mainColor)
       .style('opacity', 0.9);
 
-    // Back text
     backButton
       .append('text')
       .attr('x', 0)
@@ -382,36 +527,7 @@ const drawRadarChart = (
       .style('font-size', '14px')
       .style('font-weight', 'bold')
       .style('fill', 'white');
-
-    // Animate the back button
-    backButton
-      .transition()
-      .duration(800)
-      .delay(400)
-      .style('opacity', 1)
-      .on('end', function () {
-        // Add pulsing animation to the button
-        d3.select(this)
-          .select('rect')
-          .transition()
-          .duration(1000)
-          .style('opacity', 0.7)
-          .transition()
-          .duration(1000)
-          .style('opacity', 0.9)
-          .on('end', function repeat() {
-            d3.select(this)
-              .transition()
-              .duration(1000)
-              .style('opacity', 0.7)
-              .transition()
-              .duration(1000)
-              .style('opacity', 0.9)
-              .on('end', repeat);
-          });
-      });
   } else {
-    // Add center text for top-level view
     centerGroup
       .append('text')
       .attr('x', 0)
@@ -421,10 +537,6 @@ const drawRadarChart = (
       .style('font-weight', 'bold')
       .style('fill', colorScheme.text)
       .text('Knowledge')
-      .style('opacity', 0)
-      .transition()
-      .duration(800)
-      .delay(400)
       .style('opacity', 1);
 
     centerGroup
@@ -435,15 +547,10 @@ const drawRadarChart = (
       .style('font-size', `${centerRadius * 0.25}px`)
       .style('fill', colorScheme.text)
       .text('Overview')
-      .style('opacity', 0)
-      .transition()
-      .duration(800)
-      .delay(600)
       .style('opacity', 1);
   }
 };
 
-// Export convenience functions that use the main function with appropriate settings
 export const drawTopLevel = (
   svg: d3.Selection<SVGGElement, unknown, null, undefined>,
   developersData: {
@@ -451,12 +558,18 @@ export const drawTopLevel = (
     data: Package[];
   }[],
   radius: number,
-  colorScheme: unknown,
+  colorScheme: ColorScheme,
   handlePackageSelect: (pkg: Package | SubPackage, parentName: string) => void,
+  tooltipRef?: React.MutableRefObject<HTMLDivElement | null>,
+  individualDeveloperData?: Map<string, Package[]>,
+  selectedDevelopers?: AuthorType[],
 ) => {
   drawRadarChart(svg, developersData, radius, colorScheme, {
     isSubpackageView: false,
     handlePackageSelect,
+    tooltipRef,
+    individualDeveloperData,
+    selectedDevelopers,
   });
 };
 
@@ -467,14 +580,24 @@ export const drawSubpackages = (
     data: Package[] | SubPackage[];
   }[],
   radius: number,
-  colorScheme: unknown,
+  colorScheme: ColorScheme,
   handleBackNavigation: () => void,
   handlePackageSelect: (pkg: Package | SubPackage, parentName: string) => void,
+  tooltipRef?: React.MutableRefObject<HTMLDivElement | null>,
+  individualDeveloperData?: Map<string, Package[]>,
+  selectedDevelopers?: AuthorType[],
+  breadcrumbs?: string[],
 ) => {
+  // Best-effort parent name from first entry if not provided upstream
+  const inferredParent = (developersData[0]?.data as Package[] | undefined)?.[0]?.name ?? '';
   drawRadarChart(svg, developersData, radius, colorScheme, {
     isSubpackageView: true,
-    parentName: developersData[0].data[0]?.name,
+    parentName: inferredParent,
     handlePackageSelect,
     handleBackNavigation,
+    tooltipRef,
+    individualDeveloperData,
+    selectedDevelopers,
+    breadcrumbs,
   });
 };

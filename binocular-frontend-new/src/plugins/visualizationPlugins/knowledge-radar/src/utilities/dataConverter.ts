@@ -111,21 +111,16 @@ function calculateOwnershipScores(
  * Calculates Expertise Browser scores based on academic literature
  */
 export function calculateExpertiseBrowserScores(commits: DataPluginCommit[], targetDeveloper: string): Package[] {
-  // Filter out merge commits
   const nonMergeCommits = filterNonMergeCommits(commits);
 
-  // Get all files touched by this developer
   const developerTouchedFiles = extractTouchedFiles(nonMergeCommits, targetDeveloper);
 
   const developerCommits = nonMergeCommits.filter((commit) => commit.user.gitSignature === targetDeveloper);
 
-  // Process commit files
   const packageCommits = processCommitFiles(developerCommits, developerTouchedFiles);
 
-  // Calculate total commits per package
   const totalPackageCommits = calculateTotalCommits(nonMergeCommits);
 
-  // Calculate ownership scores
   const packageScores = calculateOwnershipScores(packageCommits, totalPackageCommits);
 
   return buildPackageHierarchy(packageScores);
