@@ -4,7 +4,7 @@ import styles from '../styles.module.scss';
 import { colorScheme } from './colorScheme';
 import { drawSubpackages, drawTopLevel } from './drawRadarChart.ts';
 import { createGradients, drawBreadcrumbs } from './utils';
-import { Center, Dimensions, Package, PackageHistory, SubPackage } from './type.ts';
+import { Center, Dimensions, Package, SubPackage } from './type.ts';
 import { VisualizationPluginProperties } from '../../../../interfaces/visualizationPluginInterfaces/visualizationPluginProperties.ts';
 import { SettingsType } from '../settings/settings.tsx';
 import AuthorSelection from './authorSelection.tsx';
@@ -20,6 +20,22 @@ type ColorScheme = {
   text: string;
 };
 
+/**
+ * Extended package history type that includes navigation state information.
+ */
+type ExtendedPackageHistory = {
+  package: Package | SubPackage;
+  view: 'topLevel' | 'subpackage';
+  breadcrumbs: string[];
+};
+
+/**
+ * Main radar chart component for visualizing developer knowledge across packages.
+ * Provides interactive navigation between top-level packages and subpackages.
+ *
+ * @param properties - Visualization plugin properties containing data connection, settings, and refs
+ * @returns JSX element containing the complete radar chart interface
+ */
 function RadarChart(properties: VisualizationPluginProperties<SettingsType, DataPluginCommit>) {
   const chartSizeFactor = 0.62;
 
@@ -36,7 +52,7 @@ function RadarChart(properties: VisualizationPluginProperties<SettingsType, Data
 
   const [currentView, setCurrentView] = useState<'topLevel' | 'subpackage'>('topLevel');
   const [selectedPackage, setSelectedPackage] = useState<Package | SubPackage | null>(null);
-  const [packageHistory, setPackageHistory] = useState<PackageHistory[]>([]);
+  const [packageHistory, setPackageHistory] = useState<ExtendedPackageHistory[]>([]);
   const [breadcrumbs, setBreadcrumbs] = useState<string[]>(['./']);
 
   const [developerKnowledge] = useState<Package[]>([]);
@@ -49,16 +65,26 @@ function RadarChart(properties: VisualizationPluginProperties<SettingsType, Data
   const center: Center = { x: dimensions.width / 2, y: dimensions.height / 2 };
   const tooltipRef = useRef<HTMLDivElement>(null);
 
+  /**
+   * Updates the date range in the data slice when parameters change.
+   */
   useEffect(() => {
     if (properties.dataConnection && properties.parameters.parametersDateRange) {
       dispatch(dataSlice.actions.setDateRange(properties.parameters.parametersDateRange));
     }
   }, [properties.parameters]);
 
+  /**
+   * Triggers data refresh when data connection changes.
+   */
   useEffect(() => {
     dispatch({ type: 'REFRESH' });
   }, [properties.dataConnection]);
 
+  /**
+   * Processes selected developers and calculates their expertise scores.
+   * Updates individual developer data map with calculated expertise.
+   */
   useEffect(() => {
     if (selectedDevelopers.length === 0) return;
 
@@ -76,11 +102,17 @@ function RadarChart(properties: VisualizationPluginProperties<SettingsType, Data
     }
   }, [data, properties, selectedDevelopers]);
 
+  /**
+   * Updates author list and selected developers when author list changes.
+   */
   useEffect(() => {
     setAuthorList(properties.authorList);
     updateSelectedDevelopers(properties.authorList);
   }, [properties.authorList]);
 
+  /**
+   * Sets up resize observer for responsive chart sizing.
+   */
   useEffect(() => {
     if (!properties.chartContainerRef.current) return;
     setupResizeObserver(properties.chartContainerRef.current, setDimensions);
@@ -91,10 +123,16 @@ function RadarChart(properties: VisualizationPluginProperties<SettingsType, Data
     };
   }, [properties.chartContainerRef]);
 
+  /**
+   * Updates chart radius when dimensions change.
+   */
   useEffect(() => {
     setRadius((Math.min(dimensions.height, dimensions.width) / 2) * chartSizeFactor);
   }, [dimensions]);
 
+  /**
+   * Redraws the chart when any relevant state changes.
+   */
   useEffect(() => {
     if (!svgRef.current) return;
     drawChart(svgRef.current, {
@@ -124,6 +162,10 @@ function RadarChart(properties: VisualizationPluginProperties<SettingsType, Data
     selectedDevelopers,
   ]);
 
+  /**
+   * Resets navigation state when selected package no longer exists in current data.
+   * Ensures UI consistency when developer selection changes affect available packages.
+   */
   function resetNavigation() {
     if (selectedPackage && currentView === 'subpackage') {
       const packagePath = breadcrumbs.slice(1);
@@ -149,12 +191,26 @@ function RadarChart(properties: VisualizationPluginProperties<SettingsType, Data
     }
   }
 
+  /**
+   * Updates selected developers list based on current author list.
+   * Removes developers that are no longer in the author list.
+   *
+   * @param authorList - Current list of available authors
+   */
   function updateSelectedDevelopers(authorList: AuthorType[]) {
     setSelectedDevelopers((prev) =>
       prev.filter((developer) => authorList.some((author) => author.user.gitSignature === developer.user.gitSignature)),
     );
   }
 
+  /**
+   * Sets up a ResizeObserver to monitor container size changes.
+   * Updates dimensions state when the container is resized.
+   *
+   * @param element - HTML element to observe for size changes
+   * @param setDimensions - State setter function for updating dimensions
+   * @returns Cleanup function to unobserve the element
+   */
   function setupResizeObserver(element: HTMLElement, setDimensions: (updater: (prev: Dimensions) => Dimensions) => void) {
     const resizeObserver = new ResizeObserver((entries) => {
       for (const entry of entries) {
@@ -166,10 +222,22 @@ function RadarChart(properties: VisualizationPluginProperties<SettingsType, Data
     return () => resizeObserver.unobserve(element);
   }
 
+  /**
+   * Handles changes in author selection from the AuthorSelection component.
+   * Updates selected developers only if the selection has actually changed.
+   *
+   * @param authors - New array of selected authors
+   */
   const handleAuthorsChange = (authors: AuthorType[]): void => {
     setSelectedDevelopers((prev) => (_.isEqual(prev, authors) ? prev : authors));
   };
 
+  /**
+   * Handles package selection for drilling down into subpackages.
+   * Saves current state to history and navigates to subpackage view.
+   *
+   * @param pkg - Package or subpackage that was selected
+   */
   const handlePackageSelect = (pkg: Package | SubPackage) => {
     if (selectedPackage) {
       setPackageHistory([
@@ -186,6 +254,10 @@ function RadarChart(properties: VisualizationPluginProperties<SettingsType, Data
     setBreadcrumbs([...breadcrumbs, pkg.name]);
   };
 
+  /**
+   * Handles navigation back to previous view.
+   * Restores previous state from history or returns to top level.
+   */
   const handleBackNavigation = () => {
     if (packageHistory.length === 0) {
       setCurrentView('topLevel');
@@ -203,21 +275,12 @@ function RadarChart(properties: VisualizationPluginProperties<SettingsType, Data
     }
   };
 
-  return (
-    <div
-      ref={properties.chartContainerRef}
-      className={styles.chartContainer}
-      style={{
-        width: '100%',
-        height: '100%',
-        display: 'flex',
-        flexDirection: 'column',
-        overflow: 'hidden',
-      }}>
-      {renderContent()}
-    </div>
-  );
-
+  /**
+   * Renders the appropriate content based on current data state.
+   * Shows loading spinner, no data message, or the main chart interface.
+   *
+   * @returns JSX element for the current state
+   */
   function renderContent() {
     if (dataState === DataState.EMPTY) {
       return <div>NoData</div>;
@@ -258,8 +321,31 @@ function RadarChart(properties: VisualizationPluginProperties<SettingsType, Data
       </>
     );
   }
+
+  return (
+    <div
+      ref={properties.chartContainerRef}
+      className={styles.chartContainer}
+      style={{
+        width: '100%',
+        height: '100%',
+        display: 'flex',
+        flexDirection: 'column',
+        overflow: 'hidden',
+      }}>
+      {renderContent()}
+    </div>
+  );
 }
 
+/**
+ * Recursively finds a package by following a hierarchical path.
+ * Navigates through package structure using breadcrumb-style path array.
+ *
+ * @param packages - Array of packages to search in
+ * @param path - Array of package names representing the navigation path
+ * @returns The found package or null if path doesn't exist
+ */
 function findPackageByPath(packages: Package[], path: string[]): Package | null {
   if (path.length === 0 || packages.length === 0) return null;
   const targetName = path[0];
@@ -270,6 +356,13 @@ function findPackageByPath(packages: Package[], path: string[]): Package | null 
   return findPackageByPath(pkg.subpackages as Package[], path.slice(1));
 }
 
+/**
+ * Main chart drawing function that orchestrates the visualization rendering.
+ * Clears previous content and draws appropriate chart based on current view state.
+ *
+ * @param svgElement - SVG element to draw the chart in
+ * @param options - Configuration object containing all chart parameters and handlers
+ */
 function drawChart(
   svgElement: SVGSVGElement,
   options: {
@@ -303,6 +396,7 @@ function drawChart(
     tooltipRef,
   } = options;
 
+  // Clear previous chart content
   d3.select(svgElement).selectAll('*').remove();
 
   const svg = d3
@@ -323,18 +417,29 @@ function drawChart(
     });
   }
 
+  /**
+   * Formats developer data for chart rendering based on current view.
+   * Aligns data across all developers to ensure consistent chart structure.
+   *
+   * @returns Array of developer data formatted for chart rendering
+   */
   const formatDevelopersData = () => {
     if (currentView === 'topLevel') {
+      // Collect all unique package names across developers
       const allPackageNames = new Set<string>();
       selectedDevelopers.forEach((developer) => {
         const devData = individualDeveloperData.get(developer.user.gitSignature) || [];
         devData.forEach((pkg) => allPackageNames.add(pkg.name));
       });
+
+      // Create unified package structure
       const unifiedPackages = Array.from(allPackageNames).map((name) => ({
         name,
         score: 0,
         subpackages: [] as SubPackage[],
       }));
+
+      // Align each developer's data to unified structure
       return selectedDevelopers.map((developer) => {
         const devData = individualDeveloperData.get(developer.user.gitSignature) || [];
         const alignedData = unifiedPackages.map((unifiedPkg) => {
@@ -344,17 +449,22 @@ function drawChart(
         return { developer, data: alignedData };
       });
     } else if (currentView === 'subpackage' && selectedPackage) {
+      // Collect all unique subpackage names across developers
       const allSubpackageNames = new Set<string>();
       selectedDevelopers.forEach((developer) => {
         const devData = individualDeveloperData.get(developer.user.gitSignature) || [];
         const devPackage = findPackageByPath(devData, breadcrumbs.slice(1));
         devPackage?.subpackages?.forEach((subPkg) => allSubpackageNames.add(subPkg.name));
       });
+
+      // Create unified subpackage structure
       const unifiedSubpackages = Array.from(allSubpackageNames).map((name) => ({
         name,
         score: 0,
         subpackages: [] as SubPackage[],
       }));
+
+      // Align each developer's subpackage data to unified structure
       return selectedDevelopers.map((developer) => {
         const devData = individualDeveloperData.get(developer.user.gitSignature) || [];
         const devPackage = findPackageByPath(devData, breadcrumbs.slice(1));
@@ -373,6 +483,7 @@ function drawChart(
 
   const developersDataForChart = formatDevelopersData();
 
+  // Render appropriate chart based on current view
   if (currentView === 'topLevel') {
     drawTopLevel(
       svg,

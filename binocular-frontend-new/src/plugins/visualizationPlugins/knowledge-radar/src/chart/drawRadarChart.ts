@@ -9,7 +9,14 @@ type ColorScheme = {
   text: string;
 };
 
-// Helper functions for tooltip
+/**
+ * Positions a tooltip relative to the mouse cursor and SVG boundaries.
+ * Ensures the tooltip stays within visible bounds by adjusting position based on cursor location.
+ *
+ * @param tooltip - D3 selection of the tooltip element
+ * @param svgRef - Reference to the SVG element for boundary calculations
+ * @param e - Mouse event containing cursor position
+ */
 function positionTooltip(tooltip: d3.Selection<HTMLDivElement, unknown, null, undefined>, svgRef: SVGGElement, e: MouseEvent) {
   const visRect = svgRef.getBoundingClientRect();
   const middleX = visRect.x + visRect.width / 2;
@@ -28,6 +35,14 @@ function positionTooltip(tooltip: d3.Selection<HTMLDivElement, unknown, null, un
   }
 }
 
+/**
+ * Sets the content of a tooltip with package name and developer expertise data.
+ * Displays developers sorted by score with color-coded information.
+ *
+ * @param tooltip - D3 selection of the tooltip element
+ * @param packageName - Name of the package to display
+ * @param developersData - Array of developer expertise data with scores
+ */
 function setTooltipContent(
   tooltip: d3.Selection<HTMLDivElement, unknown, null, undefined>,
   packageName: string,
@@ -67,6 +82,16 @@ function setTooltipContent(
     });
 }
 
+/**
+ * Main function for drawing a radar chart visualization of developer knowledge.
+ * Creates an interactive radar chart with tooltips, click handlers, and animations.
+ *
+ * @param svg - D3 selection of the SVG group element to draw on
+ * @param developersData - Array of developer data with their package expertise
+ * @param radius - Radius of the radar chart
+ * @param colorScheme - Color scheme for grid and text elements
+ * @param options - Configuration options for the chart behavior
+ */
 const drawRadarChart = (
   svg: d3.Selection<SVGGElement, unknown, null, undefined>,
   developersData: {
@@ -106,7 +131,13 @@ const drawRadarChart = (
   const hasDevelopers = developersData.length > 0;
   const primaryColor = hasDevelopers ? developersData[0].developer.color.main : colorScheme.grid;
 
-  // Helper function to find package by path
+  /**
+   * Recursively finds a package by following a path through the package hierarchy.
+   *
+   * @param packages - Array of packages to search in
+   * @param path - Array of package names representing the path
+   * @returns The found package or null if not found
+   */
   const findPackageByPath = (packages: Package[], path: string[]): Package | null => {
     if (path.length === 0 || packages.length === 0) return null;
     const targetName = path[0];
@@ -117,7 +148,13 @@ const drawRadarChart = (
     return findPackageByPath(pkg.subpackages as Package[], path.slice(1));
   };
 
-  // Helper function to get developer expertise for a package
+  /**
+   * Gets developer expertise scores for a specific package.
+   * Returns expertise data for all selected developers.
+   *
+   * @param packageName - Name of the package to get expertise for
+   * @returns Array of developer expertise data with scores
+   */
   const getDeveloperExpertise = (packageName: string): { developer: AuthorType; score: number }[] => {
     if (!individualDeveloperData || !selectedDevelopers) return [];
 
@@ -162,18 +199,36 @@ const drawRadarChart = (
   const centerRadius = radius * 0.25;
   const rScale = d3.scaleLinear().domain([0, 1]).range([centerRadius, radius]);
 
-  // Helpers: subpackage availability across selected developers
+  /**
+   * Checks if any developer has subpackages for a given top-level package.
+   *
+   * @param pkgName - Name of the package to check
+   * @returns True if any developer has subpackages for this package
+   */
   const hasTopLevelSubpackagesForAnyDev = (pkgName: string): boolean =>
     developersData.some((dev) => {
       const pkg = (dev.data as Package[]).find((p) => p.name === pkgName);
       return !!pkg?.subpackages && pkg.subpackages.length > 0;
     });
 
+  /**
+   * Finds the first top-level package with subpackages for a given name.
+   *
+   * @param pkgName - Name of the package to find
+   * @returns The package with subpackages or undefined
+   */
   const findTopLevelPkgWithSubpackages = (pkgName: string): Package | undefined =>
     developersData
       .map((dev) => (dev.data as Package[]).find((p) => p.name === pkgName))
       .find((pkg): pkg is Package => !!pkg && !!pkg.subpackages && pkg.subpackages.length > 0);
 
+  /**
+   * Checks if any developer has nested subpackages for a given subpackage.
+   *
+   * @param parentPkgName - Name of the parent package
+   * @param subpkgName - Name of the subpackage to check
+   * @returns True if any developer has nested subpackages
+   */
   const hasNestedSubpackagesForAnyDev = (parentPkgName: string, subpkgName: string): boolean =>
     developersData.some((dev) => {
       const parentPkg = (dev.data as Package[]).find((p) => p.name === parentPkgName);
@@ -181,6 +236,13 @@ const drawRadarChart = (
       return !!sub?.subpackages && sub.subpackages.length > 0;
     });
 
+  /**
+   * Finds the first nested subpackage with subpackages.
+   *
+   * @param parentPkgName - Name of the parent package
+   * @param subpkgName - Name of the subpackage to find
+   * @returns The subpackage with nested subpackages or undefined
+   */
   const findNestedSubpackageWithSubpackages = (parentPkgName: string, subpkgName: string): SubPackage | undefined =>
     developersData
       .map((dev) => {
@@ -485,7 +547,6 @@ const drawRadarChart = (
     }
   });
 
-  // Center group (static)
   const centerGroup = svg.append('g').attr('class', 'center-group');
 
   if (isSubpackageView && handleBackNavigation) {
@@ -551,6 +612,18 @@ const drawRadarChart = (
   }
 };
 
+/**
+ * Draws a top-level radar chart showing package-level developer expertise.
+ *
+ * @param svg - D3 selection of the SVG group element to draw on
+ * @param developersData - Array of developer data with their package expertise
+ * @param radius - Radius of the radar chart
+ * @param colorScheme - Color scheme for grid and text elements
+ * @param handlePackageSelect - Callback function for package selection
+ * @param tooltipRef - Reference to the tooltip element
+ * @param individualDeveloperData - Map of individual developer data
+ * @param selectedDevelopers - Array of currently selected developers
+ */
 export const drawTopLevel = (
   svg: d3.Selection<SVGGElement, unknown, null, undefined>,
   developersData: {
@@ -573,6 +646,20 @@ export const drawTopLevel = (
   });
 };
 
+/**
+ * Draws a subpackage-level radar chart showing detailed developer expertise within a package.
+ *
+ * @param svg - D3 selection of the SVG group element to draw on
+ * @param developersData - Array of developer data with their subpackage expertise
+ * @param radius - Radius of the radar chart
+ * @param colorScheme - Color scheme for grid and text elements
+ * @param handleBackNavigation - Callback function for navigating back to parent view
+ * @param handlePackageSelect - Callback function for package selection
+ * @param tooltipRef - Reference to the tooltip element
+ * @param individualDeveloperData - Map of individual developer data
+ * @param selectedDevelopers - Array of currently selected developers
+ * @param breadcrumbs - Array representing the current navigation path
+ */
 export const drawSubpackages = (
   svg: d3.Selection<SVGGElement, unknown, null, undefined>,
   developersData: {
@@ -588,7 +675,6 @@ export const drawSubpackages = (
   selectedDevelopers?: AuthorType[],
   breadcrumbs?: string[],
 ) => {
-  // Best-effort parent name from first entry if not provided upstream
   const inferredParent = (developersData[0]?.data as Package[] | undefined)?.[0]?.name ?? '';
   drawRadarChart(svg, developersData, radius, colorScheme, {
     isSubpackageView: true,
