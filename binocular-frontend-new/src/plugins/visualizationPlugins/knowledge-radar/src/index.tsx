@@ -20,7 +20,7 @@ const KnowledgeRadar: VisualizationPlugin<SettingsType, DataPluginCommit> = {
   },
   capabilities: {
     popoutOnly: false,
-    export: true,
+    export: false,
   },
   images: {
     thumbnail: PreviewImage,

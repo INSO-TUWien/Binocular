@@ -41,7 +41,10 @@ export function drawBreadcrumbs(
   },
 ) {
   const { radius, dimensions, breadcrumbs, center, selectedDeveloper } = options;
-  const titleY = -radius * 1.35;
+
+  // Position breadcrumbs at the top of the container with fixed padding
+  const topPadding = 30; // Fixed distance from container top
+  const titleY = -dimensions.height / 2 + topPadding;
 
   const titleGroup = d3.select(svgElement).append('g').attr('class', 'title-group');
 

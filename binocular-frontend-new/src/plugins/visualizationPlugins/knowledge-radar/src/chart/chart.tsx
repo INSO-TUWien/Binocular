@@ -37,7 +37,7 @@ type ExtendedPackageHistory = {
  * @returns JSX element containing the complete radar chart interface
  */
 function RadarChart(properties: VisualizationPluginProperties<SettingsType, DataPluginCommit>) {
-  const chartSizeFactor = 0.62;
+  const chartSizeFactor = 0.8;
 
   type RootState = ReturnType<typeof properties.store.getState>;
   type AppDispatch = typeof properties.store.dispatch;
@@ -127,7 +127,27 @@ function RadarChart(properties: VisualizationPluginProperties<SettingsType, Data
    * Updates chart radius when dimensions change.
    */
   useEffect(() => {
-    setRadius((Math.min(dimensions.height, dimensions.width) / 2) * chartSizeFactor);
+    const baseLabelPadding = Math.max(dimensions.width * 0.08, 40);
+    const baseBottomPadding = Math.max(dimensions.height * 0.03, 15);
+    const labelOverflow = Math.max(dimensions.height * 0.05, 20);
+
+    // Calculate available space more intelligently
+    const availableHeight = dimensions.height - baseLabelPadding - baseBottomPadding - labelOverflow;
+    const availableWidth = dimensions.width - baseLabelPadding * 2;
+
+    // For tall containers, prioritize height; for wide containers, prioritize width
+    const aspectRatio = dimensions.width / dimensions.height;
+    let maxRadius;
+
+    if (aspectRatio > 1.2) {
+      // Wide container: use height as constraint but ensure width fits
+      maxRadius = Math.min(availableHeight / 2, availableWidth / 2) * chartSizeFactor;
+    } else {
+      // Tall or square container: use available space more effectively
+      maxRadius = Math.min(availableHeight / 2, availableWidth / 2) * chartSizeFactor;
+    }
+
+    setRadius(Math.max(maxRadius, 100)); // Ensure minimum radius
   }, [dimensions]);
 
   /**
@@ -399,10 +419,33 @@ function drawChart(
   // Clear previous chart content
   d3.select(svgElement).selectAll('*').remove();
 
-  const svg = d3
-    .select(svgElement)
-    .append('g')
-    .attr('transform', `translate(${center.x}, ${center.y + radius * 0.2})`);
+  const labelPadding = Math.max(dimensions.width * 0.08, 40);
+  const bottomPadding = Math.max(dimensions.height * 0.03, 15);
+
+  // Reserve extra space for bottom labels that extend beyond radius
+  const labelOverflow = Math.min(dimensions.height * 0.05, 0); // Space for labels that stick out below the chart
+
+  const chartCenterX = center.x;
+
+  const aspectRatio = dimensions.width / dimensions.height;
+  let chartCenterY;
+  if (aspectRatio > 1.2) {
+    // Wide container: center vertically
+    chartCenterY = dimensions.height / 2;
+  } else {
+    // Tall container: position to use available space efficiently
+    const topSpace = labelPadding;
+    const bottomSpace = bottomPadding + labelOverflow;
+    const availableVerticalSpace = dimensions.height - topSpace - bottomSpace;
+    chartCenterY = topSpace + availableVerticalSpace / 2;
+  }
+
+  // Ensure chart doesn't go outside bounds
+  const minY = radius + labelPadding;
+  const maxY = dimensions.height - radius - bottomPadding - labelOverflow;
+  const finalY = Math.max(minY, Math.min(chartCenterY, maxY));
+
+  const svg = d3.select(svgElement).append('g').attr('transform', `translate(${chartCenterX}, ${finalY})`);
 
   const primaryDeveloper = selectedDevelopers[0] ?? undefined;
   if (primaryDeveloper) {

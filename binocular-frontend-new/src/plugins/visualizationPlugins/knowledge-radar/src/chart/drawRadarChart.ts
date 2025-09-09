@@ -123,7 +123,6 @@ const drawRadarChart = (
 
   const fadeRadarPath = true;
   const fadePoints = true;
-  const fadeScoreLabels = true;
 
   const parentNode = svg.node()?.parentNode as SVGElement | null;
   if (parentNode) d3.select(parentNode).selectAll('defs').remove();
@@ -335,8 +334,10 @@ const drawRadarChart = (
       .append('g')
       .attr('class', 'axis-label-group')
       .attr('transform', (_: string, i: number) => {
-        const x = rScale(1.4) * Math.cos(angles[i] - Math.PI / 2);
-        const y = rScale(1.4) * Math.sin(angles[i] - Math.PI / 2);
+        // Reduce the multiplier from 1.4 to 1.15 for closer label positioning
+        const labelDistance = Math.max(radius * 0.15, 20); // Dynamic distance based on radius
+        const x = (radius + labelDistance) * Math.cos(angles[i] - Math.PI / 2);
+        const y = (radius + labelDistance) * Math.sin(angles[i] - Math.PI / 2);
         return `translate(${x}, ${y})`;
       })
       .style('cursor', (d: string) => {
@@ -494,7 +495,7 @@ const drawRadarChart = (
     }
 
     // Score labels + fade (per-developer color)
-    const labels = svg
+    /*const labels = svg
       .selectAll<SVGTextElement, Package | SubPackage>(`.score-label-dev-${index}`)
       .data(pointsData)
       .enter()
@@ -520,7 +521,7 @@ const drawRadarChart = (
 
     if (fadeScoreLabels) {
       labels.transition().duration(700).delay(600).style('opacity', 1);
-    }
+    }*/
   });
 
   const centerGroup = svg.append('g').attr('class', 'center-group');
