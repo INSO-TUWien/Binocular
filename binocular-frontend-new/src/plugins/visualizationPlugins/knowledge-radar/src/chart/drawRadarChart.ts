@@ -124,8 +124,15 @@ const drawRadarChart = (
   const fadeRadarPath = true;
   const fadePoints = true;
 
-  const parentNode = svg.node()?.parentNode as SVGElement | null;
-  if (parentNode) d3.select(parentNode).selectAll('defs').remove();
+  // Detect if we're in a popout window
+  const isInPopout =
+    svg.node()?.closest('body')?.querySelector('.popout-container') !== null || window.name.includes('popout') || window.opener !== null;
+
+  // Find the root SVG element for defs creation
+  const rootSvg = svg.node()?.closest('svg');
+  if (rootSvg) {
+    d3.select(rootSvg).selectAll('defs').remove();
+  }
 
   const hasDevelopers = developersData.length > 0;
   const primaryColor = hasDevelopers ? developersData[0].developer.color.main : colorScheme.grid;
@@ -175,22 +182,25 @@ const drawRadarChart = (
     });
   };
 
-  // Gradients per developer (for radar areas)
-  if (hasDevelopers && parentNode) {
-    const defs = d3.select(parentNode).append('defs');
+  // Gradients per developer (for radar areas) - create in root SVG
+  if (hasDevelopers && rootSvg) {
+    const defs = d3.select(rootSvg).append('defs');
     developersData.forEach((devData, index) => {
-      const gradientId = `radar-area-gradient-${index}`;
-      defs.append('linearGradient').attr('id', gradientId).attr('x1', '0%').attr('y1', '0%').attr('x2', '100%').attr('y2', '100%');
+      const gradientId = `radar-area-gradient-${index}-${Date.now()}`;
+      const gradient = defs
+        .append('linearGradient')
+        .attr('id', gradientId)
+        .attr('x1', '0%')
+        .attr('y1', '0%')
+        .attr('x2', '100%')
+        .attr('y2', '100%');
 
-      d3.select(`#${gradientId}`)
-        .append('stop')
-        .attr('offset', '0%')
-        .attr('stop-color', chroma(devData.developer.color.main).alpha(0.7).css());
+      gradient.append('stop').attr('offset', '0%').attr('stop-color', chroma(devData.developer.color.main).alpha(0.7).css());
 
-      d3.select(`#${gradientId}`)
-        .append('stop')
-        .attr('offset', '100%')
-        .attr('stop-color', chroma(devData.developer.color.secondary).alpha(0.1).css());
+      gradient.append('stop').attr('offset', '100%').attr('stop-color', chroma(devData.developer.color.secondary).alpha(0.1).css());
+
+      // Store gradient ID for later use
+      devData.gradientId = gradientId;
     });
   }
 
@@ -430,7 +440,7 @@ const drawRadarChart = (
       });
   }
 
-  // Radar area path (gradient) + fade
+  // Radar area path (gradient) + fade with popout-aware animations
   const radarLine = d3
     .lineRadial<Package | SubPackage>()
     .angle((_, i: number) => angles[i])
@@ -457,16 +467,17 @@ const drawRadarChart = (
       .datum(orderedData)
       .attr('class', `radar-path radar-path-dev-${index}`)
       .attr('d', radarLine)
-      .style('fill', `url(#radar-area-gradient-${index})`)
+      .style('fill', devData.gradientId ? `url(#${devData.gradientId})` : chroma(devData.developer.color.main).alpha(0.3).css())
       .style('stroke', chroma(devData.developer.color.secondary).darken(2).hex())
       .style('stroke-width', '2px')
       .style('opacity', 0);
 
     if (fadeRadarPath) {
-      radarPath.transition().duration(800).style('opacity', 0.6);
+      const animationDelay = isInPopout ? 300 : 0;
+      radarPath.transition().duration(800).delay(animationDelay).style('opacity', 0.6);
     }
 
-    // Datapoints + delayed fade (per-developer color)
+    // Datapoints + delayed fade (per-developer color) with popout-aware timing
     const pointsData = orderedData.filter((d) => (d.score ?? 0) > 0);
     const points = svg
       .selectAll<SVGCircleElement, Package | SubPackage>(`.radar-point-dev-${index}`)
@@ -491,37 +502,9 @@ const drawRadarChart = (
       .style('opacity', 0);
 
     if (fadePoints) {
-      points.transition().duration(700).delay(300).style('opacity', 1);
+      const animationDelay = isInPopout ? 600 : 300;
+      points.transition().duration(700).delay(animationDelay).style('opacity', 1);
     }
-
-    // Score labels + fade (per-developer color)
-    /*const labels = svg
-      .selectAll<SVGTextElement, Package | SubPackage>(`.score-label-dev-${index}`)
-      .data(pointsData)
-      .enter()
-      .append('text')
-      .attr('class', `score-label score-label-dev-${index}`)
-      .attr('x', (d) => {
-        const i = features.indexOf(d.name);
-        const angle = i >= 0 ? angles[i] : 0;
-        return rScale((d.score ?? 0) + 0.15) * Math.cos(angle - Math.PI / 2);
-      })
-      .attr('y', (d) => {
-        const i = features.indexOf(d.name);
-        const angle = i >= 0 ? angles[i] : 0;
-        return rScale((d.score ?? 0) + 0.15) * Math.sin(angle - Math.PI / 2);
-      })
-      .attr('dy', '0.35em')
-      .attr('text-anchor', 'middle')
-      .text((d) => `${Math.round((d.score ?? 0) * 100)}%`)
-      .style('font-size', '10px')
-      .style('font-weight', 'bold')
-      .style('fill', chroma(devData.developer.color.main).darken().hex())
-      .style('opacity', 0);
-
-    if (fadeScoreLabels) {
-      labels.transition().duration(700).delay(600).style('opacity', 1);
-    }*/
   });
 
   const centerGroup = svg.append('g').attr('class', 'center-group');
