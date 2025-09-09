@@ -465,7 +465,7 @@ const drawRadarChart = (
       radarPath.transition().duration(800).style('opacity', 0.6);
     }
 
-    // Datapoints + delayed fade (per-developer color) with tooltip
+    // Datapoints + delayed fade (per-developer color)
     const pointsData = orderedData.filter((d) => (d.score ?? 0) > 0);
     const points = svg
       .selectAll<SVGCircleElement, Package | SubPackage>(`.radar-point-dev-${index}`)
@@ -487,31 +487,7 @@ const drawRadarChart = (
       .style('fill', chroma(devData.developer.color.main).saturate(5).hex())
       .style('stroke', 'white')
       .style('stroke-width', '2px')
-      .style('opacity', 0)
-      .style('cursor', (d) => {
-        if (!isSubpackageView) return hasTopLevelSubpackagesForAnyDev(d.name) ? 'pointer' : 'default';
-        const parentName = options.parentName ?? '';
-        return hasNestedSubpackagesForAnyDev(parentName, d.name) ? 'pointer' : 'default';
-      })
-      .on('mouseover', function (_event: MouseEvent, d) {
-        if (!tooltipRef?.current) return;
-        const tooltip = d3.select(tooltipRef.current);
-        const expertise = getDeveloperExpertise(d.name);
-        setTooltipContent(tooltip, d.name, expertise);
-        tooltip.style('visibility', 'visible');
-      })
-      .on('mousemove', function (event: MouseEvent) {
-        if (!tooltipRef?.current) return;
-        const tooltip = d3.select(tooltipRef.current);
-        const svgNode = svg.node()?.closest('svg') as SVGSVGElement;
-        if (svgNode) {
-          positionTooltip(tooltip, svgNode, event);
-        }
-      })
-      .on('mouseout', function () {
-        if (!tooltipRef?.current) return;
-        d3.select(tooltipRef.current).style('visibility', 'hidden');
-      });
+      .style('opacity', 0);
 
     if (fadePoints) {
       points.transition().duration(700).delay(300).style('opacity', 1);
