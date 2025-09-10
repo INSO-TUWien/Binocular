@@ -4,12 +4,15 @@ import { useEffect, useState } from 'react';
 import _ from 'lodash';
 import * as zoomUtils from '../../../../../components/utils/zoom';
 import Segment, { DevData } from './Segment';
-import { SettingsType } from '../settings/settings.tsx';
+import { BranchSettings } from '../settings/settings.tsx';
 import { useDispatch, useSelector } from 'react-redux';
 import styles from '../styles.module.scss';
-import { dataSlice, DataState } from '../reducer';
+import { DataState } from '../reducer';
 import { VisualizationPluginProperties } from '../../../../interfaces/visualizationPluginInterfaces/visualizationPluginProperties.ts';
 import { DataPluginCommit } from '../../../../interfaces/dataPluginInterfaces/dataPluginCommits.ts';
+import { getBranches } from '../saga/helper.ts';
+import { setCurrentBranch } from '../reducer';
+import chroma from 'chroma-js';
 
 // Define types
 export interface ChartData {
@@ -27,7 +30,7 @@ interface Center {
   y: number;
 }
 
-function Chart(properties: VisualizationPluginProperties<SettingsType, DataPluginCommit>) {
+function Chart(properties: VisualizationPluginProperties<BranchSettings, DataPluginCommit>) {
   const chartSizeFactor = 0.68;
 
   type RootState = ReturnType<typeof properties.store.getState>;
@@ -39,9 +42,6 @@ function Chart(properties: VisualizationPluginProperties<SettingsType, DataPlugi
   const [dimensions, setDimensions] = useState<zoomUtils.Dimensions>(zoomUtils.initialDimensions());
   const [radius, setRadius] = useState<number>((Math.min(dimensions.height, dimensions.width) / 2) * chartSizeFactor);
   const [segments, setSegments] = useState<JSX.Element[]>([]);
-
-  const [chartData, setChartData] = useState<ChartData[]>([]);
-  const [palette, setChartPalette] = useState<Palette>({});
 
   const data = useSelector((state: RootState) => state.plugin.data);
   const dataState = useSelector((state: RootState) => state.plugin.dataState);
@@ -87,79 +87,57 @@ function Chart(properties: VisualizationPluginProperties<SettingsType, DataPlugi
   }, [properties.dataConnection]);
 
   useEffect(() => {
-    dispatch(dataSlice.actions.setDateRange(properties.parameters.parametersDateRange));
-  }, [properties.parameters]);
+    void getBranches(properties.dataConnection).then((branches) => (properties.settings.allBranches = branches));
+  }, [properties.dataConnection]);
 
   useEffect(() => {
-    //ts-expect-error
-    const { chartData, palette } = properties.dataConverter(data, properties);
-    setChartData(chartData);
-    setChartPalette(palette);
-  }, [data, properties]);
+    dispatch(setCurrentBranch(properties.settings.currentBranch ? properties.settings.currentBranch : 0));
+  }, [properties.settings.currentBranch]);
 
-  // Process chartData into devData format
   useEffect(() => {
-    if (!chartData || chartData.length === 0 || !data || data.length === 0) return;
+    if (!data?.ownership || data.ownership.length === 0) return;
 
-    // Extract the data point (we're only using one timestamp)
-    const dataPoint = chartData[0];
-
-    // Get unique developer names from the data
-    const developerNames = new Set<string>();
-    Object.keys(dataPoint).forEach((key) => {
-      if (key === 'date') return;
-
-      // Extract developer name from the key (format: "Developer Name - Metric")
-      const parts = key.split(' - ');
-      if (parts.length === 2) {
-        developerNames.add(parts[0]);
-      }
-    });
-
-    // Group commits by developer
-    const commitsByDev = _.groupBy(data, 'user.gitSignature');
-
-    // Create a map of developer data
+    const { currentOwnership, totalLinesAdded } = calculateOwnershipMetrics(data.ownership);
     const devDataMap: Record<string, DevData> = {};
     let maxCommitsPerDev = 0;
-    // Initialize devData for each developer
-    developerNames.forEach((devName) => {
+
+    // Group builds by developer
+    const commitsByDev = _.groupBy(data.builds, 'user.gitSignature');
+    const devsWithCommits = Object.entries(commitsByDev).filter(([, commits]) => commits.length > 0);
+
+    // Create DevData for each developer with commits
+    Object.keys(currentOwnership).forEach((devName) => {
       const devCommits = commitsByDev[devName] || [];
+
+      // Skip developers with no commits
+      if (devCommits.length === 0) return;
 
       devDataMap[devName] = {
         commits: devCommits,
-        additions: dataPoint[`${devName} - Total Additions`] || 0,
-        linesOwned: dataPoint[`${devName} - Lines Owned`] || 0,
+        additions: totalLinesAdded[devName] || 0,
+        linesOwned: currentOwnership[devName] || 0,
       };
-      // Calculate max commits per developer
+
       if (devCommits.length > maxCommitsPerDev) {
         maxCommitsPerDev = devCommits.length;
       }
     });
-    // Create segments
+
     const newSegments: JSX.Element[] = [];
     let totalPercent = 0;
 
-    // Calculate total additions for percentage calculation
     const totalAdditions = Object.values(devDataMap).reduce((total, dev) => total + (dev.additions || 0), 0);
-
-    // Sort developers by additions to ensure consistent ordering
     const sortedDevs = Object.entries(devDataMap).sort((a, b) => (b[1].additions || 0) - (a[1].additions || 0));
 
-    // Create a segment for each developer with additions
     sortedDevs.forEach(([devName, devData]) => {
-      // Skip developers with no additions
       if (!devData.additions || devData.additions === 0) return;
 
-      // Calculate segment percentages
       const segmentSize = devData.additions / totalAdditions;
       const startPercent = totalPercent;
       const endPercent = totalPercent + segmentSize;
       totalPercent = endPercent;
-
-      // Get color from palette
-      const metricKey = `${devName}`;
-      const devColor = palette[metricKey]?.main || '#cccccc';
+      const palette = generatePalette(properties.authorList);
+      const devColor = palette[devName]?.main || '#cccccc';
       newSegments.push(
         <Segment
           key={devName}
@@ -175,7 +153,7 @@ function Chart(properties: VisualizationPluginProperties<SettingsType, DataPlugi
     });
 
     setSegments(newSegments);
-  }, [chartData, palette, radius, data, properties.settings]);
+  }, [radius, data, properties.settings, properties.plugin?.branch]);
 
   return (
     <>
@@ -189,7 +167,10 @@ function Chart(properties: VisualizationPluginProperties<SettingsType, DataPlugi
             <span className="loading loading-spinner loading-lg text-accent"></span>
           </div>
         )}
-        {dataState === DataState.COMPLETE && (
+        {dataState === DataState.COMPLETE && (!data?.ownership || data.ownership.length === 0) && (
+          <div>No data available for this branch</div>
+        )}
+        {dataState === DataState.COMPLETE && data?.ownership && data.ownership.length > 0 && (
           <svg
             className={styles.chart}
             width="100%"
@@ -205,6 +186,82 @@ function Chart(properties: VisualizationPluginProperties<SettingsType, DataPlugi
       </div>
     </>
   );
+}
+
+function calculateOwnershipMetrics(ownershipData: DataPluginOwnership[]): {
+  currentOwnership: { [developer: string]: number };
+  totalLinesAdded: { [developer: string]: number };
+} {
+  const currentOwnership: { [filePath: string]: { [developer: string]: number } } = {};
+  const developerCurrentTotals: { [developer: string]: number } = {};
+  const developerAddedTotals: { [developer: string]: number } = {};
+
+  for (const commit of ownershipData) {
+    for (const file of commit.files) {
+      if (!currentOwnership[file.path]) {
+        currentOwnership[file.path] = {};
+      }
+
+      if (file.action === 'deleted') {
+        delete currentOwnership[file.path];
+        continue;
+      }
+
+      const fileOwnership: { [developer: string]: number } = {};
+
+      for (const ownership of file.ownership) {
+        if (!fileOwnership[ownership.user]) {
+          fileOwnership[ownership.user] = 0;
+        }
+
+        for (const hunk of ownership.hunks) {
+          for (const lineRange of hunk.lines) {
+            const lineCount = lineRange.to - lineRange.from + 1;
+            fileOwnership[ownership.user] += lineCount;
+
+            if (!developerAddedTotals[ownership.user]) {
+              developerAddedTotals[ownership.user] = 0;
+            }
+            developerAddedTotals[ownership.user] += lineCount;
+          }
+        }
+      }
+
+      currentOwnership[file.path] = fileOwnership;
+    }
+  }
+
+  for (const filePath in currentOwnership) {
+    for (const developer in currentOwnership[filePath]) {
+      if (!developerCurrentTotals[developer]) {
+        developerCurrentTotals[developer] = 0;
+      }
+      developerCurrentTotals[developer] += currentOwnership[filePath][developer];
+    }
+  }
+
+  return {
+    currentOwnership: developerCurrentTotals,
+    totalLinesAdded: developerAddedTotals,
+  };
+}
+
+function generatePalette(authors: AuthorType[]): Palette {
+  const palette: Palette = {};
+
+  authors.forEach((author) => {
+    if (!author.selected) return;
+
+    const displayName = author.displayName || author.user.gitSignature;
+
+    // Create palette entries for each metric
+    palette[`${displayName}`] = {
+      main: chroma(author.color.main).hex(),
+      secondary: chroma(author.color.secondary).hex(),
+    };
+  });
+
+  return palette;
 }
 
 export default Chart;

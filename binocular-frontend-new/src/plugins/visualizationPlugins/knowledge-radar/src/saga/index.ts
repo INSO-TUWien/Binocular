@@ -19,7 +19,7 @@ function* watchDateRangeChange(dataConnection: DataPlugin) {
 function* fetchChangesData(dataConnection: DataPlugin) {
   const { setData, setDataState } = dataSlice.actions;
   yield put(setDataState(DataState.FETCHING));
-  const state: State = yield select();
+  const state: { plugin: State } = yield select();
 
   const commitFiles: DataPluginCommit[] = yield call(() =>
     dataConnection.commits.getCommitsWithFiles(state.plugin.dateRange.from, state.plugin.dateRange.to),

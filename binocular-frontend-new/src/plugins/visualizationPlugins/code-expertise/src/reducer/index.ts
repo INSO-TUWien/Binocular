@@ -6,20 +6,15 @@ export enum DataState {
   COMPLETE,
 }
 
-interface DateRange {
-  from: string;
-  to: string;
-}
-
 export interface State<DataType> {
   data: DataType[];
-  dateRange: DateRange;
+  branch?: number;
   dataState: DataState;
 }
 
 const initialState: State<unknown> = {
   data: [],
-  dateRange: { from: new Date().toISOString(), to: new Date().toISOString() },
+  branch: undefined,
   dataState: DataState.EMPTY,
 };
 
@@ -32,8 +27,8 @@ export const dataSlice = createSlice({
       // @ts-ignore
       state.data = action.payload;
     },
-    setDateRange: (state, action: PayloadAction<DateRange>) => {
-      state.dateRange = action.payload;
+    setCurrentBranch: <DataType>(state: State<DataType>, action: PayloadAction<number | undefined>) => {
+      state.branch = action.payload;
     },
     setDataState: (state, action: PayloadAction<DataState>) => {
       state.dataState = action.payload;
@@ -41,5 +36,5 @@ export const dataSlice = createSlice({
   },
 });
 
-//export const { setData, setDateRange, setDataState } = dataSlice.actions;
+export const { setData, setCurrentBranch, setDataState } = dataSlice.actions;
 export default dataSlice.reducer;

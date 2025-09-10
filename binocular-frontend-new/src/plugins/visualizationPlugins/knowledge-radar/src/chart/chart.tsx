@@ -306,14 +306,6 @@ function RadarChart(properties: VisualizationPluginProperties<SettingsType, Data
       return <div>NoData</div>;
     }
 
-    if (dataState === DataState.FETCHING || isProcessingSelection) {
-      return (
-        <div className="flex justify-center items-center h-full">
-          <span className="loading loading-spinner loading-lg"></span>
-        </div>
-      );
-    }
-
     return (
       <>
         <div
@@ -335,7 +327,13 @@ function RadarChart(properties: VisualizationPluginProperties<SettingsType, Data
         <div className={styles.authorSelectorContainer} style={{ padding: '8px 0', display: 'flex', justifyContent: 'center' }}>
           <AuthorSelection selectedAuthors={selectedDevelopers} authorList={authorList} onAuthorsChange={handleAuthorsChange} />
         </div>
+
         <div style={{ flex: 1, position: 'relative', minHeight: 0 }}>
+          {(dataState === DataState.FETCHING || isProcessingSelection) && (
+            <div className="absolute inset-0 flex justify-center items-center z-10 bg-base-100 bg-opacity-75">
+              <span className="loading loading-spinner loading-lg"></span>
+            </div>
+          )}
           <svg ref={svgRef} width="100%" height="100%" style={{ display: 'block' }} xmlns="http://www.w3.org/2000/svg" />
         </div>
       </>
