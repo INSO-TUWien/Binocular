@@ -140,9 +140,6 @@ function Help() {
       <div>
         <ul className={'list-disc ml-5'}>
           <li>Hover over segments to view absolute line counts</li>
-          <li>Click on segments to open the details panel</li>
-          <li>Details panel shows comprehensive developer commit information</li>
-          <li>Select different developers via the dropdown menu in the details panel</li>
         </ul>
       </div>
     </>

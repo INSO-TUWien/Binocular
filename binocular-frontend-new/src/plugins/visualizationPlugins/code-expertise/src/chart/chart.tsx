@@ -7,19 +7,14 @@ import Segment, { DevData } from './Segment';
 import { BranchSettings } from '../settings/settings.tsx';
 import { useDispatch, useSelector } from 'react-redux';
 import styles from '../styles.module.scss';
-import { DataState } from '../reducer';
+import { DataState, ExpertiseData } from '../reducer';
 import { VisualizationPluginProperties } from '../../../../interfaces/visualizationPluginInterfaces/visualizationPluginProperties.ts';
-import { DataPluginCommit } from '../../../../interfaces/dataPluginInterfaces/dataPluginCommits.ts';
+import { DataPluginCommitBuild, DataPluginOwnership } from '../../../../interfaces/dataPluginInterfaces/dataPluginCommits.ts';
 import { getBranches } from '../saga/helper.ts';
 import { setCurrentBranch } from '../reducer';
 import chroma from 'chroma-js';
-
-// Define types
-export interface ChartData {
-  date: number;
-
-  [signature: string]: number;
-}
+import { AuthorType } from '../../../../../types/data/authorType.ts';
+import { FileListElementType } from '../../../../../types/data/fileListType.ts';
 
 export interface Palette {
   [signature: string]: { main: string; secondary: string };
@@ -30,7 +25,7 @@ interface Center {
   y: number;
 }
 
-function Chart(properties: VisualizationPluginProperties<BranchSettings, DataPluginCommit>) {
+function Chart(properties: VisualizationPluginProperties<BranchSettings, ExpertiseData>) {
   const chartSizeFactor = 0.68;
 
   type RootState = ReturnType<typeof properties.store.getState>;
@@ -58,26 +53,28 @@ function Chart(properties: VisualizationPluginProperties<BranchSettings, DataPlu
     const resizeObserver = new ResizeObserver((entries) => {
       for (const entry of entries) {
         const { width, height } = entry.contentRect;
-        setDimensions((prevDimensions) => ({
-          ...prevDimensions,
-          width,
-          height,
-        }));
+        // Only update if dimensions are valid
+        if (width > 0 && height > 0) {
+          setDimensions((prevDimensions) => ({
+            ...prevDimensions,
+            width,
+            height,
+          }));
+        }
       }
     });
 
     resizeObserver.observe(properties.chartContainerRef.current);
 
     return () => {
-      if (properties.chartContainerRef.current) {
-        resizeObserver.unobserve(properties.chartContainerRef.current);
-      }
+      resizeObserver.disconnect();
     };
   }, [properties.chartContainerRef]);
 
   // Update radius when dimensions change
   useEffect(() => {
-    setRadius((Math.min(dimensions.height, dimensions.width) / 2) * chartSizeFactor);
+    const newRadius = (Math.min(dimensions.height, dimensions.width) / 2) * chartSizeFactor;
+    setRadius(Math.max(newRadius, 10));
   }, [dimensions]);
 
   useEffect(() => {
@@ -95,15 +92,18 @@ function Chart(properties: VisualizationPluginProperties<BranchSettings, DataPlu
   }, [properties.settings.currentBranch]);
 
   useEffect(() => {
-    if (!data?.ownership || data.ownership.length === 0) return;
+    if (!data?.ownershipData?.rawData || data.ownershipData.rawData.length === 0) return;
 
-    const { currentOwnership, totalLinesAdded } = calculateOwnershipMetrics(data.ownership);
+    const { currentOwnership, totalLinesAdded } = calculateOwnershipMetrics(
+      data.ownershipData.rawData,
+      data.buildsData,
+      properties.fileList,
+    );
     const devDataMap: Record<string, DevData> = {};
     let maxCommitsPerDev = 0;
 
     // Group builds by developer
-    const commitsByDev = _.groupBy(data.builds, 'user.gitSignature');
-    const devsWithCommits = Object.entries(commitsByDev).filter(([, commits]) => commits.length > 0);
+    const commitsByDev = _.groupBy(data.buildsData, 'user.gitSignature');
 
     // Create DevData for each developer with commits
     Object.keys(currentOwnership).forEach((devName) => {
@@ -153,7 +153,7 @@ function Chart(properties: VisualizationPluginProperties<BranchSettings, DataPlu
     });
 
     setSegments(newSegments);
-  }, [radius, data, properties.settings, properties.plugin?.branch]);
+  }, [dimensions, radius, data, properties.settings]);
 
   return (
     <>
@@ -161,16 +161,15 @@ function Chart(properties: VisualizationPluginProperties<BranchSettings, DataPlu
         ref={properties.chartContainerRef}
         className={styles.chartContainer}
         style={{ width: '100%', height: '100%', position: 'relative' }}>
-        {dataState === DataState.EMPTY && <div>NoData</div>}
         {dataState === DataState.FETCHING && (
           <div className="flex justify-center items-center h-full">
             <span className="loading loading-spinner loading-lg text-accent"></span>
           </div>
         )}
-        {dataState === DataState.COMPLETE && (!data?.ownership || data.ownership.length === 0) && (
+        {dataState === DataState.COMPLETE && (!data?.ownershipData?.rawData || data.ownershipData.rawData.length === 0) && (
           <div>No data available for this branch</div>
         )}
-        {dataState === DataState.COMPLETE && data?.ownership && data.ownership.length > 0 && (
+        {dataState === DataState.COMPLETE && data?.ownershipData?.rawData && data.ownershipData.rawData.length > 0 && (
           <svg
             className={styles.chart}
             width="100%"
@@ -188,55 +187,87 @@ function Chart(properties: VisualizationPluginProperties<BranchSettings, DataPlu
   );
 }
 
-function calculateOwnershipMetrics(ownershipData: DataPluginOwnership[]): {
+function calculateOwnershipMetrics(
+  ownershipData: DataPluginOwnership[],
+  commitsWithBuilds: DataPluginCommitBuild[],
+  fileList: FileListElementType[],
+): {
   currentOwnership: { [developer: string]: number };
   totalLinesAdded: { [developer: string]: number };
 } {
-  const currentOwnership: { [filePath: string]: { [developer: string]: number } } = {};
   const developerCurrentTotals: { [developer: string]: number } = {};
   const developerAddedTotals: { [developer: string]: number } = {};
 
-  for (const commit of ownershipData) {
-    for (const file of commit.files) {
-      if (!currentOwnership[file.path]) {
-        currentOwnership[file.path] = {};
-      }
+  // Extract file paths from FileListElementType[] where checked is true
+  const checkedFilePaths = fileList.filter((item) => item.checked).map((item) => item.element.path);
+  const activeFiles: { [id: string]: boolean } = {};
+  fileList.forEach((item) => {
+    activeFiles[item.element.path] = item.checked;
+  });
 
-      if (file.action === 'deleted') {
-        delete currentOwnership[file.path];
-        continue;
-      }
+  // Calculate total additions from commits with builds
+  for (const commit of commitsWithBuilds) {
+    const developer = commit.user.gitSignature;
 
-      const fileOwnership: { [developer: string]: number } = {};
+    if (!developerAddedTotals[developer]) {
+      developerAddedTotals[developer] = 0;
+    }
 
-      for (const ownership of file.ownership) {
-        if (!fileOwnership[ownership.user]) {
-          fileOwnership[ownership.user] = 0;
-        }
+    if (commit.files.data.length === 0) continue;
 
-        for (const hunk of ownership.hunks) {
-          for (const lineRange of hunk.lines) {
-            const lineCount = lineRange.to - lineRange.from + 1;
-            fileOwnership[ownership.user] += lineCount;
+    const affectedFiles = commit.files?.data?.filter((file) => checkedFilePaths.includes(file.file.path)) || [];
 
-            if (!developerAddedTotals[ownership.user]) {
-              developerAddedTotals[ownership.user] = 0;
-            }
-            developerAddedTotals[ownership.user] += lineCount;
-          }
-        }
-      }
-
-      currentOwnership[file.path] = fileOwnership;
+    if (affectedFiles.length > 0) {
+      developerAddedTotals[developer] += commit.stats.additions || 0;
     }
   }
 
-  for (const filePath in currentOwnership) {
-    for (const developer in currentOwnership[filePath]) {
+  // Stores the current ownership distribution for each file
+  const fileCache: { [filePath: string]: { [developer: string]: number } } = {};
+
+  // Step through the commits sequentially, starting with the oldest one
+  for (const commit of ownershipData) {
+    // Update fileCache for each file this commit touches
+    for (const file of commit.files) {
+      // If the file was deleted in this commit, delete it from the filecache
+      if (file.action === 'deleted') {
+        delete fileCache[file.path];
+      } else {
+        // If the file was either added or modified, we add it to the filecache (if it is relevant)
+        const relevant = activeFiles[file.path];
+
+        if (relevant) {
+          // Reset file ownership for this commit
+          const fileOwnership: { [developer: string]: number } = {};
+
+          // Process ownership data using the new structure
+          for (const ownership of file.ownership) {
+            if (!fileOwnership[ownership.user]) {
+              fileOwnership[ownership.user] = 0;
+            }
+
+            // Sum up lines from all hunks for this user
+            for (const hunk of ownership.hunks) {
+              for (const lineRange of hunk.lines) {
+                const lineCount = lineRange.to - lineRange.from + 1;
+                fileOwnership[ownership.user] += lineCount;
+              }
+            }
+          }
+
+          fileCache[file.path] = fileOwnership;
+        }
+      }
+    }
+  }
+
+  // Now fileCache stores the final ownership for each file that exists and is active
+  for (const [, fileOwnershipData] of Object.entries(fileCache)) {
+    for (const [developer, ownedLines] of Object.entries(fileOwnershipData)) {
       if (!developerCurrentTotals[developer]) {
         developerCurrentTotals[developer] = 0;
       }
-      developerCurrentTotals[developer] += currentOwnership[filePath][developer];
+      developerCurrentTotals[developer] += ownedLines;
     }
   }
 

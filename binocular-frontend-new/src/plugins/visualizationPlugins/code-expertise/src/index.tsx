@@ -6,10 +6,10 @@ import { dataSlice } from './reducer';
 import Saga from './saga/index';
 import Help from './help/help';
 import Chart from './chart/chart';
-import { DataPluginCommitBuild } from '../../../interfaces/dataPluginInterfaces/dataPluginCommits.ts.ts';
 import { VisualizationPluginMetadataCategory } from '../../../interfaces/visualizationPluginInterfaces/visualizationPluginMetadata.ts';
+import { ExpertiseData } from './reducer';
 
-const CodeExpertise: VisualizationPlugin<BranchSettings, DataPluginCommitBuild> = {
+const CodeExpertise: VisualizationPlugin<BranchSettings, ExpertiseData> = {
   name: 'Code Expertise',
   chartComponent: Chart,
   settingsComponent: Settings,

@@ -109,7 +109,6 @@ function RadarChart(properties: VisualizationPluginProperties<SettingsType, Data
     setAuthorList(properties.authorList);
     updateSelectedDevelopers(properties.authorList);
   }, [properties.authorList]);
-
   /**
    * Sets up resize observer for responsive chart sizing.
    */

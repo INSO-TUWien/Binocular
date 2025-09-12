@@ -128,7 +128,7 @@ function Segment({ rad, startPercent, endPercent, devName, devData, devColor, ma
   }
 
   //additions/ownership arc text
-  const additionsText = devData.additions !== undefined ? devData.additions : '0';
+  const additionsText = devData.additions !== undefined ? `${devData.linesOwned || 0}/${devData.additions}` : '0/0';
 
   // #### FUNCTIONS ####
 
