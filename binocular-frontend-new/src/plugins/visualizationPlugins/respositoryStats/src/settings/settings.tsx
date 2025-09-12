@@ -10,7 +10,7 @@ function Settings(props: { settings: SettingsType; setSettings: (newSettings: Se
   return (
     <>
       <div>
-        <label className="label cursor-pointer">
+        <label className="label cursor-pointer flex w-full justify-between items-center mt-0.5">
           <span className="label-text">Show contributors:</span>
           <input
             type="checkbox"
@@ -27,7 +27,7 @@ function Settings(props: { settings: SettingsType; setSettings: (newSettings: Se
             }
           />
         </label>
-        <label className="label cursor-pointer">
+        <label className="label cursor-pointer flex w-full justify-between items-center mt-0.5">
           <span className="label-text">Show commits:</span>
           <input
             type="checkbox"
@@ -44,7 +44,7 @@ function Settings(props: { settings: SettingsType; setSettings: (newSettings: Se
             }
           />
         </label>
-        <label className="label cursor-pointer">
+        <label className="label cursor-pointer flex w-full justify-between items-center mt-0.5">
           <span className="label-text">Show issues:</span>
           <input
             type="checkbox"
@@ -61,7 +61,7 @@ function Settings(props: { settings: SettingsType; setSettings: (newSettings: Se
             }
           />
         </label>
-        <label className="label cursor-pointer">
+        <label className="label cursor-pointer flex w-full justify-between items-center mt-0.5">
           <span className="label-text">Show builds:</span>
           <input
             type="checkbox"
@@ -78,7 +78,7 @@ function Settings(props: { settings: SettingsType; setSettings: (newSettings: Se
             }
           />
         </label>
-        <label className="label cursor-pointer">
+        <label className="label cursor-pointer flex w-full justify-between items-center mt-0.5">
           <span className="label-text">Show merge requests:</span>
           <input
             type="checkbox"

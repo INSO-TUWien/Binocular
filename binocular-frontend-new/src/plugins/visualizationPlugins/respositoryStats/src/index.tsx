@@ -29,6 +29,7 @@ const RepositoryStats: VisualizationPlugin<SettingsType, unknown> = {
     category: VisualizationPluginMetadataCategory.Statistics,
     recommended: false,
     description: 'Statistics about the repository.',
+    defaultSize: [8, 12],
   },
 };
 export default RepositoryStats;
