@@ -21,6 +21,7 @@ const Sprints: VisualizationPlugin<SprintSettings, DataPluginIssue> = {
     splitIssuesPerAuthor: false,
     visualizationStyle: 'curved',
     showSprints: false,
+    coloringMode: 'author',
   },
   export: {
     getSVGData: getSVGData,

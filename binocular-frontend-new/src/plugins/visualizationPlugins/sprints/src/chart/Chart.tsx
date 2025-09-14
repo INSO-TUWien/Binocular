@@ -111,7 +111,7 @@ const Chart = (
         )}
         {dataState === DataState.COMPLETE &&
           (chartData.length !== 0 ? (
-            <SprintChart data={data}/>
+            <SprintChart authors={props.authorList} data={data} coloringMode={props.settings.coloringMode} />
           ) : (
             <div>No Data matching the selected Parameters!</div>
           ))}

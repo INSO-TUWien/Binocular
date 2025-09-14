@@ -2,6 +2,8 @@ import * as React from 'react';
 import type { DataPluginIssue } from '../../../../interfaces/dataPluginInterfaces/dataPluginIssues';
 import * as d3 from 'd3';
 import classes from './sprintChart.module.css';
+import type { AuthorType } from '../../../../../types/data/authorType';
+import type { SprintSettings } from '../settings/settings';
 
 const findMinMaxDate = (dates: Date[]) =>
   dates.reduce(
@@ -19,9 +21,12 @@ const findMinMaxDate = (dates: Date[]) =>
 
 const maxOpenEvents = 60;
 
-export const SprintChart: React.FC<{ data: DataPluginIssue[] }> = ({
-  data,
-}) => {
+export const SprintChart: React.FC<
+  {
+    authors: AuthorType[];
+    data: DataPluginIssue[];
+  } & Pick<SprintSettings, 'coloringMode'>
+> = ({ authors, coloringMode, data }) => {
   const [{ width = 0, height = 0 } = {}, setDomRect] =
     React.useState<Partial<DOMRect>>();
   const [zoom, setZoom] = React.useState(1);
@@ -63,6 +68,10 @@ export const SprintChart: React.FC<{ data: DataPluginIssue[] }> = ({
     .range([20, Math.abs(width - 20)])
     .domain([minDate, maxDate]);
 
+  const authorColorMap = new Map(
+    authors.map((a) => [a.user.gitSignature, a.color] as const),
+  );
+
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
@@ -81,6 +90,12 @@ export const SprintChart: React.FC<{ data: DataPluginIssue[] }> = ({
           const y =
             (30 + (i * height - 110) / maxOpenEvents - 2) * zoom + offset;
 
+          const color =
+            coloringMode === 'author'
+              ? (authorColorMap.get(d.author.user?.gitSignature ?? '')?.main ??
+                'lightgray')
+              : 'lightgray';
+
           return (
             <g key={d.iid}>
               <rect
@@ -92,10 +107,10 @@ export const SprintChart: React.FC<{ data: DataPluginIssue[] }> = ({
                 height={h}
                 x={x}
                 y={y}
-                fill={'green'}
+                fill={color}
                 strokeWidth={2}
                 rx={'0.2rem'}
-                stroke={'#FFF'}
+                stroke={color}
               />
               <text
                 x={x + 4}
