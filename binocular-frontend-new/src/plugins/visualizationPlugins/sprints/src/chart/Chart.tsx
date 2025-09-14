@@ -111,7 +111,7 @@ const Chart = (
         )}
         {dataState === DataState.COMPLETE &&
           (chartData.length !== 0 ? (
-            <SprintChart />
+            <SprintChart data={data}/>
           ) : (
             <div>No Data matching the selected Parameters!</div>
           ))}
