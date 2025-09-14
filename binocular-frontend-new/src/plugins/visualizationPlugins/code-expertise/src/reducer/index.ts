@@ -1,5 +1,6 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { DataPluginCommitBuild, DataPluginOwnership } from '../../../../interfaces/dataPluginInterfaces/dataPluginCommits.ts';
+import { PreviousFileData } from '../../../../../types/data/ownershipType.ts';
 
 export enum DataState {
   EMPTY,
@@ -8,8 +9,13 @@ export enum DataState {
 }
 
 export interface ExpertiseData {
-  ownershipData: DataPluginOwnership[];
+  ownershipData: CodeOwnershipData;
   buildsData: DataPluginCommitBuild[];
+}
+
+interface CodeOwnershipData {
+  rawData?: DataPluginOwnership[];
+  previousFilenames?: { [p: string]: PreviousFileData[] };
 }
 
 export interface State {
@@ -28,7 +34,7 @@ export const dataSlice = createSlice({
   name: 'code-expertise',
   initialState,
   reducers: {
-    setData: (state: State, action: PayloadAction<ExpertiseData[]>) => {
+    setData: (state: State, action: PayloadAction<ExpertiseData>) => {
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore
       state.data = action.payload;

@@ -25,6 +25,13 @@ interface Center {
   y: number;
 }
 
+/**
+ * Main chart component that renders a pie chart visualization showing code ownership and expertise metrics.
+ * Uses segments to represent different developers' contributions with sizing based on lines added.
+ *
+ * @param properties - Visualization plugin properties containing settings, data connection, and store
+ * @returns JSX element containing the chart visualization
+ */
 function Chart(properties: VisualizationPluginProperties<BranchSettings, ExpertiseData>) {
   const chartSizeFactor = 0.68;
 
@@ -187,6 +194,15 @@ function Chart(properties: VisualizationPluginProperties<BranchSettings, Experti
   );
 }
 
+/**
+ * Calculates ownership metrics for developers based on commit history and current file ownership.
+ * Processes ownership data sequentially to determine current line ownership and total additions.
+ *
+ * @param ownershipData - Array of ownership data from commits showing file ownership changes
+ * @param commitsWithBuilds - Array of commits with build information for calculating additions
+ * @param fileList - List of files with selection status to filter relevant files
+ * @returns Object containing current ownership totals and total lines added per developer
+ */
 function calculateOwnershipMetrics(
   ownershipData: DataPluginOwnership[],
   commitsWithBuilds: DataPluginCommitBuild[],
@@ -277,6 +293,13 @@ function calculateOwnershipMetrics(
   };
 }
 
+/**
+ * Generates a color palette for chart visualization based on selected authors.
+ * Creates main and secondary color entries for each selected author.
+ *
+ * @param authors - Array of author objects with selection status and color information
+ * @returns Palette object mapping author names to color schemes
+ */
 function generatePalette(authors: AuthorType[]): Palette {
   const palette: Palette = {};
 

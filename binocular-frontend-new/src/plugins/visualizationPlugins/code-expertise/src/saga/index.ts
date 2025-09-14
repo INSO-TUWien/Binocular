@@ -1,7 +1,7 @@
 import { put, takeEvery, fork, call, select, takeLatest } from 'redux-saga/effects';
-import { State, DataState, dataSlice, setCurrentBranch } from '../reducer';
+import { State, DataState, dataSlice, setCurrentBranch, ExpertiseData } from '../reducer';
 import { DataPlugin } from '../../../../interfaces/dataPlugin.ts';
-import { DataPluginCommitBuild } from '../../../../interfaces/dataPluginInterfaces/dataPluginCommitsBuilds.ts';
+import { DataPluginCommitBuild } from '../../../../interfaces/dataPluginInterfaces/dataPluginCommits.ts';
 import { getCommitDataForSha, getDefaultBranch, getFilenamesForBranch, getOwnershipForCommits, getPreviousFilenames } from './helper.ts';
 import { CodeOwnershipData } from '../../../code-ownership/src/reducer/index.ts';
 import { PreviousFileData } from '../../../../../types/data/ownershipType.ts';
@@ -80,7 +80,7 @@ function* fetchExpertiseData(dataConnection: DataPlugin) {
     dataConnection.commits.getCommitsWithBuilds(new Date(0).toISOString(), new Date().toISOString()),
   );
   const commitsBuildsFiltered = commitsBuilds.filter((cb) => codeOwnershipData.rawData?.find((o) => cb.sha === o.sha));
-
-  yield put(setData({ ownershipData: codeOwnershipData, buildsData: commitsBuildsFiltered }));
+  const result: ExpertiseData = { ownershipData: codeOwnershipData, buildsData: commitsBuildsFiltered };
+  yield put(setData(result));
   yield put(setDataState(DataState.COMPLETE));
 }
