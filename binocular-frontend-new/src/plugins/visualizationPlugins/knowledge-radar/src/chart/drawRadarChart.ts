@@ -450,8 +450,8 @@ const drawRadarChart = (
   developersData.forEach((devData, index) => {
     // Developer-specific data in current layer
     const devChartData: (Package | SubPackage)[] = !isSubpackageView
-      ? (devData.data as Package[]) ?? []
-      : (devData.data as Package[]).find((p) => p.name === (options.parentName ?? ''))?.subpackages ?? [];
+      ? ((devData.data as Package[]) ?? [])
+      : ((devData.data as Package[]).find((p) => p.name === (options.parentName ?? ''))?.subpackages ?? []);
 
     // Order data by global feature order; fill missing with score 0
     const orderedData: (Package | SubPackage)[] = features.length
