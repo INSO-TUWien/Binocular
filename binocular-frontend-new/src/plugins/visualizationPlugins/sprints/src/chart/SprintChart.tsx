@@ -91,10 +91,13 @@ export const SprintChart: React.FC<
             (30 + (i * height - 110) / maxOpenEvents - 2) * zoom + offset;
 
           const color =
-            coloringMode === 'author'
-              ? (authorColorMap.get(d.author.user?.gitSignature ?? '')?.main ??
-                'lightgray')
-              : 'lightgray';
+            authorColorMap.get(
+              (coloringMode === 'author'
+                ? d.author.user?.gitSignature
+                : coloringMode === 'assignee'
+                  ? d.assignee?.user?.gitSignature
+                  : undefined) ?? '',
+            )?.main ?? 'lightgray';
 
           return (
             <g key={d.iid}>
