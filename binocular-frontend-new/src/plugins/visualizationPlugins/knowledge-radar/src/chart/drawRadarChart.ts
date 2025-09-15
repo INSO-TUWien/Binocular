@@ -1,6 +1,6 @@
 import * as d3 from 'd3';
-import { Package, SubPackage } from './type.ts';
-import { AuthorType } from '../../../../../types/data/authorType.ts';
+import type { Package, SubPackage } from './type.ts';
+import type { AuthorType } from '../../../../../types/data/authorType.ts';
 import chroma from 'chroma-js';
 import { round } from 'lodash';
 

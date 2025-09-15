@@ -9,7 +9,7 @@
 //  So it is not enough that `allCommits` contains all commits with date <= the date of the commit in question.
 //  To be safe, `allCommits` should really contain all commits of the project.
 //  Otherwise, this function may return wrong results (if there are commits in the history that have a `date` > the `commit` date).
-import { DataPluginCommit, DataPluginOwnership } from '../../../../interfaces/dataPluginInterfaces/dataPluginCommits.ts';
+import type { DataPluginCommit, DataPluginOwnership } from '../../../../interfaces/dataPluginInterfaces/dataPluginCommits.ts';
 
 export const getHistoryForCommit = (commit: DataPluginCommit, allCommits: DataPluginOwnership[]) => {
   // each commit only has the hash of the parent. Build a map, so we can get the actual commit for a given sha.

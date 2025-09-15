@@ -177,15 +177,11 @@ function drawChart(options: {
   setSegments: React.Dispatch<React.SetStateAction<React.JSX.Element[]>>;
 }): void {
   const { data, props, radius, setSegments } = options;
-  console.log(data);
-  console.log(props.fileList);
   const { currentOwnership, totalLinesAdded } = calculateOwnershipMetrics(
     data.ownershipData.rawData || [],
     data.buildsData,
     props.fileList,
   );
-  console.log('Current Ownership:', currentOwnership);
-  console.log('Total Lines Added:', totalLinesAdded);
   const devDataMap: Record<string, DevData> = {};
   let maxCommitsPerDev = 0;
 

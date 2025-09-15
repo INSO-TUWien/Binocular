@@ -1,5 +1,5 @@
-import { AuthorType } from '../../../../../types/data/authorType.ts';
-import { Center, Dimensions } from './type.ts';
+import type { AuthorType } from '../../../../../types/data/authorType.ts';
+import type { Center, Dimensions } from './type.ts';
 import * as d3 from 'd3';
 import chroma from 'chroma-js';
 

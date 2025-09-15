@@ -1,5 +1,5 @@
-import { Package, SubPackage } from '../chart/type.ts';
-import { DataPluginCommit } from '../../../../interfaces/dataPluginInterfaces/dataPluginCommits.ts';
+import type { Package, SubPackage } from '../chart/type.ts';
+import type { DataPluginCommit } from '../../../../interfaces/dataPluginInterfaces/dataPluginCommits.ts';
 
 /**
  * Extracts file paths touched by a specific developer

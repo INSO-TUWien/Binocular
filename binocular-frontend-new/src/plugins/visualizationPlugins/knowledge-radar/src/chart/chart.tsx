@@ -4,16 +4,16 @@ import styles from '../styles.module.scss';
 import { colorScheme } from './colorScheme';
 import { drawSubpackages, drawTopLevel } from './drawRadarChart.ts';
 import { createGradients, drawBreadcrumbs } from './utils';
-import { Center, Dimensions, Package, SubPackage } from './type.ts';
-import { VisualizationPluginProperties } from '../../../../interfaces/visualizationPluginInterfaces/visualizationPluginProperties.ts';
-import { SettingsType } from '../settings/settings.tsx';
+import type { Center, Dimensions, Package, SubPackage } from './type.ts';
+import type { VisualizationPluginProperties } from '../../../../interfaces/visualizationPluginInterfaces/visualizationPluginProperties.ts';
+import type { SettingsType } from '../settings/settings.tsx';
 import AuthorSelection from './authorSelection.tsx';
-import { AuthorType } from '../../../../../types/data/authorType.ts';
+import type { AuthorType } from '../../../../../types/data/authorType.ts';
 import { useDispatch, useSelector } from 'react-redux';
 import { dataSlice, DataState } from '../reducer';
 import _ from 'lodash';
 import { calculateExpertiseBrowserScores } from '../utilities/dataConverter.ts';
-import { DataPluginCommit } from '../../../../interfaces/dataPluginInterfaces/dataPluginCommits.ts';
+import type { DataPluginCommit } from '../../../../interfaces/dataPluginInterfaces/dataPluginCommits.ts';
 
 type ColorScheme = {
   grid: string;
@@ -37,7 +37,7 @@ type ExtendedPackageHistory = {
  * @returns JSX element containing the complete radar chart interface
  */
 function RadarChart(properties: VisualizationPluginProperties<SettingsType, DataPluginCommit>) {
-  const chartSizeFactor = 0.8;
+  const chartSizeFactor = 0.7;
 
   type RootState = ReturnType<typeof properties.store.getState>;
   type AppDispatch = typeof properties.store.dispatch;
