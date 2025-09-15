@@ -117,7 +117,6 @@ function Chart(props: VisualizationPluginProperties<BranchSettings, ExpertiseDat
     drawChart({
       data: rawData,
       props,
-      dimensions,
       radius,
       setSegments,
     });
@@ -178,13 +177,15 @@ function drawChart(options: {
   setSegments: React.Dispatch<React.SetStateAction<React.JSX.Element[]>>;
 }): void {
   const { data, props, radius, setSegments } = options;
-
+  console.log(data);
+  console.log(props.fileList);
   const { currentOwnership, totalLinesAdded } = calculateOwnershipMetrics(
     data.ownershipData.rawData || [],
     data.buildsData,
     props.fileList,
   );
-
+  console.log('Current Ownership:', currentOwnership);
+  console.log('Total Lines Added:', totalLinesAdded);
   const devDataMap: Record<string, DevData> = {};
   let maxCommitsPerDev = 0;
 
@@ -247,13 +248,13 @@ function drawChart(options: {
  *
  * @param ownershipData - Array of ownership data from commits showing file ownership changes
  * @param commitsWithBuilds - Array of commits with build information for calculating additions
- * @param fileList - List of files with selection status to filter relevant files
+ * @param fileList - List of files with selection status to filter relevant files (optional)
  * @returns Object containing current ownership totals and total lines added per developer
  */
 function calculateOwnershipMetrics(
   ownershipData: DataPluginOwnership[],
   commitsWithBuilds: DataPluginCommitBuild[],
-  fileList: FileListElementType[],
+  fileList?: FileListElementType[],
 ): {
   currentOwnership: { [developer: string]: number };
   totalLinesAdded: { [developer: string]: number };
@@ -279,7 +280,8 @@ function calculateOwnershipMetrics(
       if (file.action === 'deleted') {
         delete fileCache[file.path];
       } else {
-        const relevant = fileList.find((item) => item.element.path === file.path)?.checked;
+        // If fileList is not defined, include all files; otherwise check if file is selected
+        const relevant = !fileList || fileList.find((item) => item.element.path === file.path)?.checked;
         if (relevant) {
           const fileOwnership: { [developer: string]: number } = {};
           for (const ownership of file.ownership) {

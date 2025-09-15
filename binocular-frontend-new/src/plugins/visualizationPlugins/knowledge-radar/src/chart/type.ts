@@ -29,8 +29,3 @@ export interface Dimensions {
   width: number;
   height: number;
 }
-
-export interface RadarChartProps {
-  chartContainerRef: React.RefObject<HTMLDivElement>;
-  developerName?: string;
-}
