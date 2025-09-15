@@ -100,10 +100,10 @@ export function drawBreadcrumbs(
     .attr('text-anchor', 'middle')
     .attr('dominant-baseline', 'middle')
     .style('font-size', `${responsiveFontSize}px`)
-    .style('fill', '#333')
+    .style('fill', 'var(--color-base-content)')
     .style('font-weight', 'bold')
     .text(shortenedBreadcrumbs)
-    .style('opacity', 0)
+    .style('opacity', 0.7)
     .transition()
     .duration(600)
     .style('opacity', 1);

@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import styles from '../styles.module.scss';
-import { colorScheme } from './colorScheme.ts';
-import { AuthorType } from '../../../../../types/data/authorType.ts';
+import type { AuthorType } from '../../../../../types/data/authorType.ts';
 
 interface AuthorSelectionProps {
   authorList: AuthorType[];
@@ -92,7 +91,7 @@ const AuthorSelection: React.FC<AuthorSelectionProps> = ({ authorList, selectedA
     }
   };
 
-  const handleRemoveAuthor = (authorId: string, event: React.MouseEvent) => {
+  const handleRemoveAuthor = (authorId: string | number, event: React.MouseEvent) => {
     event.stopPropagation(); // Prevent closing dropdown
     setTempSelectedAuthors(tempSelectedAuthors.filter((a) => a.id !== authorId));
   };
@@ -142,12 +141,12 @@ const AuthorSelection: React.FC<AuthorSelectionProps> = ({ authorList, selectedA
         className={`${styles.authorSelectorToggle || ''}`}
         onClick={handleToggleDropdown}
         style={{
-          backgroundColor: colorScheme.background,
+          backgroundColor: 'var(--color-base-100)',
           borderWidth: '1px',
           borderStyle: 'solid',
-          borderColor: isOpen ? colorScheme.primary : colorScheme.grid,
-          boxShadow: isOpen ? `0 0 0 2px ${colorScheme.primary}20` : 'none',
-          color: colorScheme.text,
+          borderColor: isOpen ? 'var(--color-accent)' : 'var(--color-base-300)',
+          boxShadow: isOpen ? '0 0 0 2px color-mix(in srgb, var(--color-accent) 20%, transparent)' : 'none',
+          color: 'var(--color-base-content)',
           padding: getPadding(),
           borderRadius: '0.375em',
           cursor: 'pointer',
@@ -176,12 +175,13 @@ const AuthorSelection: React.FC<AuthorSelectionProps> = ({ authorList, selectedA
                   style={{
                     display: 'flex',
                     alignItems: 'center',
-                    backgroundColor: `${author.color.main}15`,
+                    backgroundColor: 'var(--color-base-200)',
                     borderRadius: '1em',
                     padding: '0.2em 0.4em',
                     maxWidth: '100px',
                     overflow: 'hidden',
                     textOverflow: 'ellipsis',
+                    border: '1px solid var(--color-base-300)',
                   }}>
                   <div
                     style={{
@@ -211,7 +211,7 @@ const AuthorSelection: React.FC<AuthorSelectionProps> = ({ authorList, selectedA
             )}
           </div>
         ) : (
-          <span style={{ color: 'gray' }}>Select authors</span>
+          <span style={{ color: 'var(--color-neutral-content)' }}>Select authors</span>
         )}
         <div style={{ marginLeft: 'auto' }}>
           <svg
@@ -242,16 +242,16 @@ const AuthorSelection: React.FC<AuthorSelectionProps> = ({ authorList, selectedA
             borderRadius: '0.375em',
             boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
             overflow: 'hidden',
-            backgroundColor: colorScheme.background,
+            backgroundColor: 'var(--color-base-100)',
             borderWidth: '1px',
             borderStyle: 'solid',
-            borderColor: colorScheme.grid,
+            borderColor: 'var(--color-base-300)',
             animation: 'dropdownFadeIn 0.2s ease-out forwards',
           }}>
           <div
             style={{
               padding: getPadding(),
-              backgroundColor: colorScheme.background,
+              backgroundColor: 'var(--color-base-100)',
               display: 'flex',
               flexDirection: 'column',
               gap: '0.5em',
@@ -267,10 +267,10 @@ const AuthorSelection: React.FC<AuthorSelectionProps> = ({ authorList, selectedA
                 padding: getPadding(),
                 borderWidth: '1px',
                 borderStyle: 'solid',
-                borderColor: colorScheme.grid,
+                borderColor: 'var(--color-base-300)',
                 borderRadius: '0.375em',
-                color: colorScheme.text,
-                backgroundColor: colorScheme.background,
+                color: 'var(--color-base-content)',
+                backgroundColor: 'var(--color-base-100)',
                 fontSize: '1em',
                 outline: 'none',
               }}
@@ -292,10 +292,10 @@ const AuthorSelection: React.FC<AuthorSelectionProps> = ({ authorList, selectedA
                     style={{
                       display: 'flex',
                       alignItems: 'center',
-                      backgroundColor: `${author.color.main}15`,
+                      backgroundColor: 'var(--color-base-200)',
                       borderRadius: '1em',
                       padding: '0.2em 0.6em',
-                      border: `1px solid ${author.color.main}30`,
+                      border: '1px solid var(--color-base-300)',
                     }}>
                     <div
                       style={{
@@ -318,7 +318,7 @@ const AuthorSelection: React.FC<AuthorSelectionProps> = ({ authorList, selectedA
                       onClick={(e) => handleRemoveAuthor(author.id, e)}
                       style={{
                         cursor: 'pointer',
-                        color: '#666',
+                        color: 'var(--color-neutral-content)',
                         fontWeight: 'bold',
                         fontSize: '1.1em',
                         lineHeight: '1em',
@@ -335,7 +335,7 @@ const AuthorSelection: React.FC<AuthorSelectionProps> = ({ authorList, selectedA
             style={{
               maxHeight: '180px',
               overflowY: 'auto',
-              backgroundColor: colorScheme.background,
+              backgroundColor: 'var(--color-base-100)',
             }}>
             {filteredAuthors.length > 0 ? (
               filteredAuthors.map((author) => {
@@ -349,20 +349,20 @@ const AuthorSelection: React.FC<AuthorSelectionProps> = ({ authorList, selectedA
                       alignItems: 'center',
                       padding: getPadding(),
                       cursor: 'pointer',
-                      backgroundColor: isSelected ? `${author.color.main}15` : 'transparent',
+                      backgroundColor: isSelected ? 'var(--color-base-200)' : 'transparent',
                       borderLeftWidth: '3px',
                       borderLeftStyle: 'solid',
                       borderLeftColor: isSelected ? author.color.main : 'transparent',
                       transition: 'background-color 0.2s ease-in-out',
                     }}
                     onMouseEnter={(e) => {
-                      e.currentTarget.style.backgroundColor = `${author.color.main}10`;
+                      e.currentTarget.style.backgroundColor = 'var(--color-base-200)';
                     }}
                     onMouseLeave={(e) => {
                       if (!isSelected) {
                         e.currentTarget.style.backgroundColor = 'transparent';
                       } else {
-                        e.currentTarget.style.backgroundColor = `${author.color.main}15`;
+                        e.currentTarget.style.backgroundColor = 'var(--color-base-200)';
                       }
                     }}>
                     <div
@@ -384,7 +384,7 @@ const AuthorSelection: React.FC<AuthorSelectionProps> = ({ authorList, selectedA
                       <div
                         style={{
                           marginLeft: 'auto',
-                          color: author.color.main,
+                          color: 'var(--color-success)',
                         }}>
                         ✓
                       </div>
@@ -397,7 +397,7 @@ const AuthorSelection: React.FC<AuthorSelectionProps> = ({ authorList, selectedA
                 style={{
                   padding: getPadding(),
                   textAlign: 'center',
-                  color: colorScheme.text,
+                  color: 'var(--color-base-content)',
                 }}>
                 No authors found
               </div>
@@ -409,7 +409,7 @@ const AuthorSelection: React.FC<AuthorSelectionProps> = ({ authorList, selectedA
               display: 'flex',
               justifyContent: 'space-between',
               padding: getPadding(),
-              borderTop: `1px solid ${colorScheme.grid}`,
+              borderTop: '1px solid var(--color-base-300)',
             }}>
             {tempSelectedAuthors.length > 0 ? (
               <button
@@ -417,7 +417,7 @@ const AuthorSelection: React.FC<AuthorSelectionProps> = ({ authorList, selectedA
                 style={{
                   background: 'none',
                   border: 'none',
-                  color: colorScheme.primary,
+                  color: 'var(--color-accent)',
                   cursor: 'pointer',
                   padding: '0.3em 0.6em',
                   fontSize: '0.9em',
@@ -432,8 +432,8 @@ const AuthorSelection: React.FC<AuthorSelectionProps> = ({ authorList, selectedA
               onMouseEnter={() => setButtonHover(true)}
               onMouseLeave={() => setButtonHover(false)}
               style={{
-                backgroundColor: buttonHover ? `${colorScheme.primary}e0` : colorScheme.primary,
-                color: 'white',
+                backgroundColor: buttonHover ? 'color-mix(in srgb, var(--color-accent) 90%, black)' : 'var(--color-accent)',
+                color: 'var(--color-accent-content)',
                 border: 'none',
                 borderRadius: '0.375em',
                 padding: '0.4em 0.9em',

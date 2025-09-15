@@ -3,7 +3,7 @@ import chroma from 'chroma-js';
 import React, { useEffect, useRef, useState } from 'react';
 import DotsPattern from '../../../../../components/svg/patterns/dots';
 import HatchPattern from '../../../../../components/svg/patterns/hatch';
-import { DataPluginCommitBuild } from '../../../../interfaces/dataPluginInterfaces/dataPluginCommits';
+import type { DataPluginCommitBuild } from '../../../../interfaces/dataPluginInterfaces/dataPluginCommits';
 
 export interface DevData {
   commits: DataPluginCommitBuild[];
@@ -22,6 +22,10 @@ interface SegmentProps {
 }
 
 function Segment({ rad, startPercent, endPercent, devName, devData, devColor, maxCommitsPerDev }: SegmentProps): JSX.Element {
+  // Theme-based colors
+  const textColor = 'var(--color-base-content)';
+  const backgroundColor = 'var(--color-base-100)';
+  const strokeColor = 'var(--color-base-300)';
   // Mock configuration that was previously from Redux
   const config = {
     details: '', // No developer selected by default
@@ -373,7 +377,7 @@ function Segment({ rad, startPercent, endPercent, devName, devData, devColor, ma
           <defs>
             <path ref={devNameArcRef} id={devNameId + '_namePath'} />
           </defs>
-          <text>
+          <text fill={textColor}>
             <textPath href={'#' + devNameId + '_namePath'} startOffset="25%" textAnchor="middle" alignmentBaseline="middle">
               {displayName}
             </textPath>
@@ -382,7 +386,7 @@ function Segment({ rad, startPercent, endPercent, devName, devData, devColor, ma
       )}
 
       {smallSegment && (
-        <text ref={devNameTextRef} textAnchor={textAnchorStart ? 'start' : 'end'} alignmentBaseline="middle">
+        <text ref={devNameTextRef} textAnchor={textAnchorStart ? 'start' : 'end'} alignmentBaseline="middle" fill={textColor}>
           {displayName}
         </text>
       )}
@@ -393,7 +397,7 @@ function Segment({ rad, startPercent, endPercent, devName, devData, devColor, ma
       <defs>{HatchPattern({ color: devColorDark, id: `hatch_${devNameId}` })}</defs>
 
       {/*outer border*/}
-      <path ref={segmentRef} stroke="black" fill="white" />
+      <path ref={segmentRef} stroke={strokeColor} fill={backgroundColor} />
 
       {/*additions arc*/}
       <path ref={additionsArcRef} fill={`url(#hatch_${devNameId})`} />
@@ -413,7 +417,7 @@ function Segment({ rad, startPercent, endPercent, devName, devData, devColor, ma
             textAnchor="middle"
             alignmentBaseline="middle"
             stroke={devColorDark}
-            fill="white"
+            fill="var(--color-accent-content)"
             strokeWidth={3}
             paintOrder="stroke">
             {additionsText}
@@ -432,7 +436,7 @@ function Segment({ rad, startPercent, endPercent, devName, devData, devColor, ma
       <path id={devName + '_commitsPath'} ref={commitsRef} fill={`url(#dots_${devNameId})`} />
 
       {/*outer border without fill, just for contours*/}
-      <path ref={contourRef} stroke="black" fill="none" />
+      <path ref={contourRef} stroke={strokeColor} fill="none" />
     </g>
   );
 }

@@ -77,7 +77,7 @@ function setTooltipContent(
       devDiv
         .append('span')
         .style('font-size', '10px')
-        .style('color', chroma(developer.color.main).darken(3).hex())
+        .style('color', 'var(--color-base-content)')
         .text(`${round(score * 100)}%`);
     });
 }
@@ -285,7 +285,7 @@ const drawRadarChart = (
     .attr('cx', 0)
     .attr('cy', 0)
     .attr('r', radius)
-    .style('fill', '#f0f0f0')
+    .style('fill', 'var(--color-base-200)')
     .style('opacity', 1);
 
   // Axis grid (static)
@@ -302,10 +302,10 @@ const drawRadarChart = (
     .attr('y1', (d) => rScale(0) * Math.sin(d - Math.PI / 2))
     .attr('x2', (d) => rScale(1.1) * Math.cos(d - Math.PI / 2))
     .attr('y2', (d) => rScale(1.1) * Math.sin(d - Math.PI / 2))
-    .style('stroke', colorScheme.grid)
+    .style('stroke', 'var(--color-base-content)')
     .style('stroke-width', '1px')
     .style('stroke-dasharray', '3,3')
-    .style('opacity', 0.7);
+    .style('opacity', 0.3);
 
   // Level circles
   const levels = 5;
@@ -317,7 +317,8 @@ const drawRadarChart = (
     .attr('class', 'level')
     .attr('r', (d) => rScale(d))
     .style('fill', 'none')
-    .style('stroke', colorScheme.grid)
+    .style('stroke', 'var(--color-base-content)')
+    .style('opacity', 0.08)
     .style('stroke-width', '0.5px');
 
   // Level labels
@@ -331,7 +332,7 @@ const drawRadarChart = (
     .attr('y', (d) => -rScale(d) - 5)
     .attr('dy', '0.35em')
     .style('font-size', `${centerRadius * 0.15}px`)
-    .style('fill', colorScheme.text)
+    .style('fill', 'var(--color-base-content)')
     .style('opacity', 0.7)
     .text((d) => `${Math.round(d * 100)}%`);
 
@@ -399,7 +400,7 @@ const drawRadarChart = (
       .text((d: string) => (d.length > 15 ? `${d.substring(0, 15)}...` : d))
       .style('font-size', `${Math.min(centerRadius * 0.25, 12)}px`)
       .style('font-weight', 'bold')
-      .style('fill', colorScheme.text);
+      .style('fill', 'var(--color-base-content)');
 
     axisLabels.each(function (this: SVGGElement, d: string) {
       const textElement = this.querySelector('.label-text') as SVGTextElement;
@@ -416,10 +417,10 @@ const drawRadarChart = (
         .attr('height', 20)
         .attr('rx', 10)
         .attr('ry', 10)
-        .style('fill', 'white')
-        .style('stroke', () => (clickable ? chroma(primaryColor).hex() : colorScheme.grid))
+        .style('fill', 'var(--color-base-200)')
+        .style('stroke', () => (clickable ? chroma(primaryColor).hex() : 'var(--color-base-300)'))
         .style('stroke-width', '2px')
-        .style('opacity', 0.8);
+        .style('opacity', 1);
     });
 
     axisLabels
@@ -520,7 +521,7 @@ const drawRadarChart = (
     .attr('cx', 0)
     .attr('cy', 0)
     .attr('r', centerRadius)
-    .style('fill', 'white')
+    .style('fill', 'var(--color-base-100)')
     .style('stroke', mainColor)
     .style('stroke-width', '3px');
 
@@ -556,9 +557,9 @@ const drawRadarChart = (
       .attr('text-anchor', 'middle')
       .style('font-size', `${centerRadius * 0.28}px`)
       .style('font-weight', 'bold')
-      .style('fill', colorScheme.text)
+      .style('fill', 'var(--color-base-content)')
       .text('Knowledge')
-      .style('opacity', 1);
+      .style('opacity', 0.8);
 
     centerGroup
       .append('text')
@@ -566,9 +567,9 @@ const drawRadarChart = (
       .attr('y', 15)
       .attr('text-anchor', 'middle')
       .style('font-size', `${centerRadius * 0.25}px`)
-      .style('fill', colorScheme.text)
+      .style('fill', 'var(--color-base-content)')
       .text('Overview')
-      .style('opacity', 1);
+      .style('opacity', 0.8);
   }
 };
 
