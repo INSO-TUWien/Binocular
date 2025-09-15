@@ -59,7 +59,6 @@ function RadarChart(properties: VisualizationPluginProperties<SettingsType, Data
   const [individualDeveloperData, setIndividualDeveloperData] = useState<Map<string, Package[]>>(new Map());
   const [authorList, setAuthorList] = useState<AuthorType[]>(properties.authorList);
   const [selectedDevelopers, setSelectedDevelopers] = useState<AuthorType[]>([]);
-  const [isProcessingSelection, setIsProcessingSelection] = useState(false);
 
   const svgRef = useRef<SVGSVGElement>(null);
   const center: Center = { x: dimensions.width / 2, y: dimensions.height / 2 };
@@ -86,20 +85,17 @@ function RadarChart(properties: VisualizationPluginProperties<SettingsType, Data
    * Updates individual developer data map with calculated expertise.
    */
   useEffect(() => {
-    if (selectedDevelopers.length === 0) return;
-
-    setIsProcessingSelection(true);
-
     const newIndividualData = new Map<string, Package[]>();
-    if (data != undefined && data.length > 0) {
+
+    if (selectedDevelopers.length > 0 && data != undefined && data.length > 0) {
       selectedDevelopers.forEach((developer) => {
         const devData = calculateExpertiseBrowserScores(data, developer.user.gitSignature);
         newIndividualData.set(developer.user.gitSignature, devData);
       });
-      setIndividualDeveloperData(newIndividualData);
-      resetNavigation();
-      setIsProcessingSelection(false);
     }
+
+    setIndividualDeveloperData(newIndividualData);
+    resetNavigation();
   }, [data, properties, selectedDevelopers]);
 
   /**
@@ -324,11 +320,13 @@ function RadarChart(properties: VisualizationPluginProperties<SettingsType, Data
         </div>
 
         <div className={styles.authorSelectorContainer} style={{ padding: '8px 0', display: 'flex', justifyContent: 'center' }}>
-          <AuthorSelection selectedAuthors={selectedDevelopers} authorList={authorList} onAuthorsChange={handleAuthorsChange} />
+          {dataState !== DataState.FETCHING && (
+            <AuthorSelection selectedAuthors={selectedDevelopers} authorList={authorList} onAuthorsChange={handleAuthorsChange} />
+          )}
         </div>
 
         <div style={{ flex: 1, position: 'relative', minHeight: 0 }}>
-          {(dataState === DataState.FETCHING || isProcessingSelection) && (
+          {dataState === DataState.FETCHING && (
             <div className="absolute inset-0 flex justify-center items-center bg-base-100 bg-opacity-75">
               <span className="loading loading-spinner loading-lg"></span>
             </div>
