@@ -2,7 +2,6 @@
 
 import React, { useEffect, useState } from 'react';
 import _ from 'lodash';
-import * as zoomUtils from '../../../../../components/utils/zoom';
 import Segment from './Segment';
 import { useDispatch, useSelector } from 'react-redux';
 import styles from '../styles.module.scss';
@@ -27,6 +26,11 @@ interface Center {
   y: number;
 }
 
+interface Dimensions {
+  width: number;
+  height: number;
+}
+
 /**
  * Main chart component that renders a pie chart visualization showing code ownership and expertise metrics.
  * Uses segments to represent different developers' contributions with sizing based on lines added.
@@ -47,7 +51,7 @@ function Chart(props: VisualizationPluginProperties<BranchSettings, ExpertiseDat
 
   // Local state for processed data
   const [rawData, setrawData] = useState<ExpertiseData | null>(null);
-  const [dimensions, setDimensions] = useState<zoomUtils.Dimensions>(zoomUtils.initialDimensions());
+  const [dimensions, setDimensions] = useState<Dimensions>({ width: 800, height: 600 });
   const [radius, setRadius] = useState<number>((Math.min(dimensions.height, dimensions.width) / 2) * chartSizeFactor);
   const [segments, setSegments] = useState<React.JSX.Element[]>([]);
 
