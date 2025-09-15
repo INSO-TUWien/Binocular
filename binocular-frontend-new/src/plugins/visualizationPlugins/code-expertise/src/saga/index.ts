@@ -1,10 +1,10 @@
-import { put, takeEvery, fork, call, select, takeLatest } from 'redux-saga/effects';
-import { State, DataState, dataSlice, setCurrentBranch, ExpertiseData } from '../reducer';
-import { DataPlugin } from '../../../../interfaces/dataPlugin.ts';
-import { DataPluginCommitBuild } from '../../../../interfaces/dataPluginInterfaces/dataPluginCommits.ts';
+import { put, fork, call, select, takeLatest } from 'redux-saga/effects';
+import { type State, DataState, setDataState, setData, setCurrentBranch, type ExpertiseData } from '../reducer';
+import type { DataPlugin } from '../../../../interfaces/dataPlugin.ts';
+import type { DataPluginCommitBuild } from '../../../../interfaces/dataPluginInterfaces/dataPluginCommits.ts';
 import { getCommitDataForSha, getDefaultBranch, getFilenamesForBranch, getOwnershipForCommits, getPreviousFilenames } from './helper.ts';
-import { CodeOwnershipData } from '../../../code-ownership/src/reducer/index.ts';
-import { PreviousFileData } from '../../../../../types/data/ownershipType.ts';
+import type { CodeOwnershipData } from '../../../code-ownership/src/reducer/index.ts';
+import type { PreviousFileData } from '../../../../../types/data/ownershipType.ts';
 
 export default function* (dataConnection: DataPlugin) {
   yield fork(() => watchRefresh(dataConnection));
@@ -12,7 +12,7 @@ export default function* (dataConnection: DataPlugin) {
 }
 
 function* watchRefresh(dataConnection: DataPlugin) {
-  yield takeEvery('REFRESH', () => fetchExpertiseData(dataConnection));
+  yield takeLatest('REFRESH', () => fetchExpertiseData(dataConnection));
 }
 
 function* watchBranchChange(dataConnection: DataPlugin) {
@@ -20,9 +20,8 @@ function* watchBranchChange(dataConnection: DataPlugin) {
 }
 
 function* fetchExpertiseData(dataConnection: DataPlugin) {
-  const { setData, setDataState } = dataSlice.actions;
-  yield put(setDataState(DataState.FETCHING));
   const state: { plugin: State } = yield select();
+  yield put(setDataState(DataState.FETCHING));
   const branchId = state.plugin.branch;
 
   const codeOwnershipData: CodeOwnershipData = yield call(async () => {

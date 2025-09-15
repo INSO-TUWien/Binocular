@@ -91,7 +91,7 @@ function RadarChart(properties: VisualizationPluginProperties<SettingsType, Data
     setIsProcessingSelection(true);
 
     const newIndividualData = new Map<string, Package[]>();
-    if (data != undefined) {
+    if (data != undefined && data.length > 0) {
       selectedDevelopers.forEach((developer) => {
         const devData = calculateExpertiseBrowserScores(data, developer.user.gitSignature);
         newIndividualData.set(developer.user.gitSignature, devData);
@@ -329,7 +329,7 @@ function RadarChart(properties: VisualizationPluginProperties<SettingsType, Data
 
         <div style={{ flex: 1, position: 'relative', minHeight: 0 }}>
           {(dataState === DataState.FETCHING || isProcessingSelection) && (
-            <div className="absolute inset-0 flex justify-center items-center z-10 bg-base-100 bg-opacity-75">
+            <div className="absolute inset-0 flex justify-center items-center bg-base-100 bg-opacity-75">
               <span className="loading loading-spinner loading-lg"></span>
             </div>
           )}

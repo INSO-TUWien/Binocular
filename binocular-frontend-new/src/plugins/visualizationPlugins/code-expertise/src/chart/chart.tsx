@@ -45,7 +45,8 @@ function Chart(props: VisualizationPluginProperties<BranchSettings, ExpertiseDat
   const data = useSelector((state: RootState) => state.plugin.data);
   const dataState = useSelector((state: RootState) => state.plugin.dataState);
 
-  // Local state
+  // Local state for processed data
+  const [rawData, setrawData] = useState<ExpertiseData | null>(null);
   const [dimensions, setDimensions] = useState<zoomUtils.Dimensions>(zoomUtils.initialDimensions());
   const [radius, setRadius] = useState<number>((Math.min(dimensions.height, dimensions.width) / 2) * chartSizeFactor);
   const [segments, setSegments] = useState<React.JSX.Element[]>([]);
@@ -54,6 +55,16 @@ function Chart(props: VisualizationPluginProperties<BranchSettings, ExpertiseDat
     x: dimensions.width / 2,
     y: dimensions.height / 2,
   };
+
+  // Process Redux data into local state when it changes
+  useEffect(() => {
+    if (data && data.ownershipData && data.buildsData && data.ownershipData.rawData) {
+      setrawData({
+        ownershipData: data.ownershipData,
+        buildsData: data.buildsData,
+      });
+    }
+  }, [data]);
 
   // Use ResizeObserver to update dimensions when container size changes
   useEffect(() => {
@@ -101,16 +112,16 @@ function Chart(props: VisualizationPluginProperties<BranchSettings, ExpertiseDat
   }, [props.settings.currentBranch]);
 
   useEffect(() => {
-    if (!data?.ownershipData?.rawData || data.ownershipData.rawData.length === 0) return;
+    if (!rawData?.ownershipData?.rawData || rawData.ownershipData.rawData.length === 0) return;
 
     drawChart({
-      data,
+      data: rawData,
       props,
       dimensions,
       radius,
       setSegments,
     });
-  }, [dimensions, radius, data, props]);
+  }, [dimensions, radius, rawData, props]);
 
   /**
    * Renders the appropriate content based on current data state.
@@ -125,11 +136,12 @@ function Chart(props: VisualizationPluginProperties<BranchSettings, ExpertiseDat
       );
     }
 
-    if (dataState !== DataState.FETCHING && (!data?.ownershipData?.rawData || data.ownershipData.rawData.length === 0)) {
+    // Check rawData instead of data for rendering decisions
+    if (dataState !== DataState.FETCHING && (!rawData?.ownershipData?.rawData || rawData.ownershipData.rawData.length === 0)) {
       return <div>No data available for this branch</div>;
     }
 
-    if (dataState !== DataState.FETCHING && data?.ownershipData?.rawData && data.ownershipData.rawData.length > 0) {
+    if (dataState !== DataState.FETCHING && rawData?.ownershipData?.rawData && rawData.ownershipData.rawData.length > 0) {
       return (
         <svg
           className={styles.chart}

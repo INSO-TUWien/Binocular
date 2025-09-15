@@ -1,6 +1,6 @@
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { DataPluginCommitBuild, DataPluginOwnership } from '../../../../interfaces/dataPluginInterfaces/dataPluginCommits.ts';
-import { PreviousFileData } from '../../../../../types/data/ownershipType.ts';
+import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
+import { type DataPluginCommitBuild, type DataPluginOwnership } from '../../../../interfaces/dataPluginInterfaces/dataPluginCommits.ts';
+import { type PreviousFileData } from '../../../../../types/data/ownershipType.ts';
 
 export enum DataState {
   EMPTY,
@@ -19,24 +19,25 @@ interface CodeOwnershipData {
 }
 
 export interface State {
-  data: ExpertiseData[];
+  data: ExpertiseData;
   branch?: number;
   dataState: DataState;
 }
 
 const initialState: State = {
-  data: [],
+  data: {
+    ownershipData: {},
+    buildsData: [],
+  },
   branch: undefined,
   dataState: DataState.EMPTY,
 };
 
 export const dataSlice = createSlice({
-  name: 'code-expertise',
+  name: 'codeExpertise',
   initialState,
   reducers: {
     setData: (state: State, action: PayloadAction<ExpertiseData>) => {
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore
       state.data = action.payload;
     },
     setCurrentBranch: (state: State, action: PayloadAction<number | undefined>) => {

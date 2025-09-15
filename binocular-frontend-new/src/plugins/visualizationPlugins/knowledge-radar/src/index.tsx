@@ -27,6 +27,8 @@ const KnowledgeRadar: VisualizationPlugin<SettingsType, DataPluginCommit> = {
   },
   metadata: {
     category: VisualizationPluginMetadataCategory.Expertise,
+    recommended: false,
+    description: 'Visualize knowledge and expertise across the project, compare between different developers.',
   },
   reducer: dataSlice.reducer,
   saga: Saga,
