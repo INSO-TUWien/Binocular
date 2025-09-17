@@ -20,6 +20,7 @@ export interface Palette {
 const Chart = (
   props: VisualizationPluginProperties<SprintSettings, DataPluginIssue>,
 ) => {
+  console.log(props);
   /*
    * Creating Dispatch and Root State for interaction with the reducer State
    */
@@ -31,8 +32,11 @@ const Chart = (
    * -----------------------------
    */
   //Redux Global State
-  const data = useSelector<RootState, IssuesState['issues']>(
-    (state) => state.plugin.issues,
+  const issues = useSelector<RootState, IssuesState['issues']>(
+    (data) => data.plugin.issues,
+  );
+  const mergeRequests = useSelector<RootState, IssuesState['mergeRequests']>(
+    (data) => data.plugin.mergeRequests,
   );
   const dataState = useSelector<RootState, IssuesState['dataState']>(
     (state: RootState) => state.plugin.dataState,
@@ -71,7 +75,10 @@ const Chart = (
   useEffect(() => {
     try {
       if (props.dataConverter) {
-        const { chartData, scale, palette } = props.dataConverter(data, props);
+        const { chartData, scale, palette } = props.dataConverter(
+          issues,
+          props,
+        );
         setChartData(chartData);
         setChartScale(scale);
         setChartPalette(palette);
@@ -79,7 +86,7 @@ const Chart = (
     } catch (e) {
       console.error(e);
     }
-  }, [data, props]);
+  }, [issues, props]);
 
   //Set Global state when parameters change. This will also conclude in a refresh of the data.
   useEffect(() => {
@@ -111,7 +118,12 @@ const Chart = (
         )}
         {dataState === DataState.COMPLETE &&
           (chartData.length !== 0 ? (
-            <SprintChart authors={props.authorList} data={data} coloringMode={props.settings.coloringMode} />
+            <SprintChart
+              authors={props.authorList}
+              issues={issues}
+              mergeRequests={mergeRequests}
+              coloringMode={props.settings.coloringMode}
+            />
           ) : (
             <div>No Data matching the selected Parameters!</div>
           ))}

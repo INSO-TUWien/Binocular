@@ -8,6 +8,7 @@ import {
 } from '../reducer';
 import type { DataPlugin } from '../../../../interfaces/dataPlugin.ts';
 import type { DataPluginIssue } from '../../../../interfaces/dataPluginInterfaces/dataPluginIssues.ts';
+import type { DataPluginMergeRequest } from '../../../../interfaces/dataPluginInterfaces/dataPluginMergeRequests.ts';
 
 export default function* (dataConnection: DataPlugin) {
   yield fork(() => watchRefresh(dataConnection));
@@ -31,7 +32,13 @@ function* fetchChangesData(dataConnection: DataPlugin) {
       state.plugin.dateRange.to,
     ),
   );
+  const mergeRequests: DataPluginMergeRequest[] = yield call(() =>
+    dataConnection.mergeRequests.getAll(
+      state.plugin.dateRange.from,
+      state.plugin.dateRange.to,
+    ),
+  );
 
-  yield put(setIssues(issues));
+  yield put(setIssues({ issues, mergeRequests }));
   yield put(setDataState(DataState.COMPLETE));
 }
