@@ -8,19 +8,20 @@ import {
   extractTimeTrackingDataFromNotes,
   type TimeTrackingData,
 } from '../../../timeSpent/src/utilities/dataConverter';
+import moment, { type Moment } from 'moment';
 
-const findMinMaxDate = (dates: Date[]) =>
+const findMinMaxDate = (dates: Moment[]) =>
   dates.reduce(
     (acc, cur) => {
-      if (cur.valueOf() > acc.max.valueOf()) {
+      if (cur.isAfter(acc.max.valueOf())) {
         acc.max = cur;
       }
-      if (cur.valueOf() < acc.min.valueOf()) {
+      if (cur.isBefore(acc.min.valueOf())) {
         acc.min = cur;
       }
       return acc;
     },
-    { min: new Date(), max: new Date() },
+    { min: moment(), max: moment() },
   );
 
 const findAuthorWithMaxSpentTime = (d: Map<string, number>) => {
@@ -60,7 +61,40 @@ const aggregateTimeTrackingData = (timeTrackingData: TimeTrackingData[]) => {
   return { aggregatedTimeTrackingData, totalTime };
 };
 
-const maxOpenEvents = 60;
+type MappedDataPluginIssue = Omit<DataPluginIssue, 'createdAt' | 'closedAt'> &
+  Record<'createdAt' | 'closedAt', Moment>;
+
+const groupIntoTracks = ([head, ...tail]: MappedDataPluginIssue[]) => {
+  if (!head) {
+    return [];
+  }
+
+  // Initialize tracks with the first issue in the list.
+  // Simplifies the for-of loop
+  const tracks: MappedDataPluginIssue[][] = [[head]];
+  for (const issue of tail) {
+    // Search for a track, that can hold the current issue.
+    const openTrack = tracks.find((track) =>
+      // A track is considered open, if none of the issues it holds overlaps with the new issue.
+      track.every(
+        (ti) =>
+          !issue.createdAt.isBetween(ti.createdAt, ti.closedAt) &&
+          !issue.closedAt.isBetween(ti.createdAt, ti.closedAt),
+      ),
+    );
+
+    // If a track was found, append the issue.
+    if (openTrack) {
+      openTrack.push(issue);
+      continue;
+    }
+
+    // Otherwise open a new track.
+    tracks.push([issue]);
+  }
+
+  return tracks;
+};
 
 export const SprintChart: React.FC<
   {
@@ -77,8 +111,9 @@ export const SprintChart: React.FC<
 
   const mappedData = data.map((d) => ({
     ...d,
-    createdAt: new Date(d.createdAt),
-    closedAt: d.closedAt ? new Date(d.closedAt) : undefined,
+
+    createdAt: moment(d.createdAt),
+    closedAt: d.closedAt ? moment(d.closedAt) : moment(),
   }));
 
   React.useEffect(() => {
@@ -99,10 +134,10 @@ export const SprintChart: React.FC<
   }, []);
 
   const { min: minDate, max: maxDate } = findMinMaxDate(
-    mappedData
-      .flatMap((d) => [d.createdAt, d.closedAt ? d.closedAt : undefined])
-      .filter((d) => !!d),
+    mappedData.flatMap((d) => [d.createdAt, d.closedAt]).filter((d) => !!d),
   );
+
+  const groupedIssues = groupIntoTracks(mappedData);
 
   const scale = d3
     .scaleUtc()
@@ -124,59 +159,65 @@ export const SprintChart: React.FC<
     >
       {height > 0 &&
         width > 0 &&
-        mappedData.map((d, i) => {
-          const h = Math.max(0, ((height - 110) / maxOpenEvents - 2) * zoom);
+        groupedIssues.map((group, i) =>
+          group.map((d) => {
+            const h = Math.max(
+              0,
+              ((height - 110) / groupedIssues.length - 2) * zoom,
+            );
 
-          const x = scale(d.createdAt);
-          const y =
-            (30 + (i * height - 110) / maxOpenEvents - 2) * zoom + offset;
+            const x = scale(d.createdAt);
+            const y =
+              (30 + (i * height - 110) / groupedIssues.length - 2) * zoom +
+              offset;
 
-          const { aggregatedTimeTrackingData } = aggregateTimeTrackingData(
-            extractTimeTrackingDataFromNotes(d.notes),
-          );
+            const { aggregatedTimeTrackingData } = aggregateTimeTrackingData(
+              extractTimeTrackingDataFromNotes(d.notes),
+            );
 
-          const color =
-            authorColorMap.get(
-              (coloringMode === 'author'
-                ? d.author.user?.gitSignature
-                : coloringMode === 'assignee'
-                  ? d.assignee?.user?.gitSignature
-                  : coloringMode === 'time-spent'
-                    ? findAuthorWithMaxSpentTime(aggregatedTimeTrackingData)
-                    : undefined) ?? '',
-            )?.main ?? 'lightgray';
+            const color =
+              authorColorMap.get(
+                (coloringMode === 'author'
+                  ? d.author.user?.gitSignature
+                  : coloringMode === 'assignee'
+                    ? d.assignee?.user?.gitSignature
+                    : coloringMode === 'time-spent'
+                      ? findAuthorWithMaxSpentTime(aggregatedTimeTrackingData)
+                      : undefined) ?? '',
+              )?.main ?? 'lightgray';
 
-          return (
-            <g key={d.iid}>
-              <rect
-                width={Math.max(
-                  scale(d.closedAt ?? new Date()) - scale(d.createdAt) - 4,
-                  h / maxOpenEvents - 2,
-                  4,
-                )}
-                height={h}
-                x={x}
-                y={y}
-                fill={color}
-                strokeWidth={2}
-                rx={'0.2rem'}
-                stroke={color}
-              />
-              <text
-                x={x + 4}
-                y={y + 20}
-                width={Math.max(
-                  scale(d.closedAt ?? new Date()) - scale(d.createdAt) - 4,
-                  1,
-                )}
-                height={h}
-                style={{ display: h > 25 ? undefined : 'none' }}
-              >
-                #{d.iid}
-              </text>
-            </g>
-          );
-        })}
+            return (
+              <g key={d.iid}>
+                <rect
+                  width={Math.max(
+                    scale(d.closedAt) - scale(d.createdAt) - 4,
+                    h / groupedIssues.length - 2,
+                    4,
+                  )}
+                  height={h}
+                  x={x}
+                  y={y}
+                  fill={color}
+                  strokeWidth={2}
+                  rx={'0.2rem'}
+                  stroke={color}
+                />
+                <text
+                  x={x + 4}
+                  y={y + 20}
+                  width={Math.max(
+                    scale(d.closedAt) - scale(d.createdAt) - 4,
+                    1,
+                  )}
+                  height={h}
+                  style={{ display: h > 25 ? undefined : 'none' }}
+                >
+                  #{d.iid}
+                </text>
+              </g>
+            );
+          }),
+        )}
     </svg>
   );
 };
