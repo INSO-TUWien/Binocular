@@ -9,6 +9,7 @@ import {
 import { findAuthorWithMaxSpentTime } from '../helper/findAuthorWithMaxSpentTime';
 import { aggregateTimeTrackingData } from '../helper/aggregateTimeTrackingData';
 import type { MappedDataPluginIssue } from '../types';
+import classes from './sprintChartIssue.module.css'
 
 export const SprintChartIssue: React.FC<
   MappedDataPluginIssue &
@@ -56,7 +57,7 @@ export const SprintChartIssue: React.FC<
     )?.main ?? 'lightgray';
 
   return (
-    <g key={d.iid}>
+    <g key={d.iid} className={classes.issue}>
       <rect
         width={Math.max(
           scale(d.closedAt) - scale(d.createdAt) - 4,
@@ -67,9 +68,9 @@ export const SprintChartIssue: React.FC<
         x={x}
         y={y}
         fill={color}
+        stroke={color}
         strokeWidth={2}
         rx={'0.2rem'}
-        stroke={color}
       />
       <text
         x={x + 4}

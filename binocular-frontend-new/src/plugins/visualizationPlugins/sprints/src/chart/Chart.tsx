@@ -20,7 +20,6 @@ export interface Palette {
 const Chart = (
   props: VisualizationPluginProperties<SprintSettings, DataPluginIssue>,
 ) => {
-  console.log(props);
   /*
    * Creating Dispatch and Root State for interaction with the reducer State
    */

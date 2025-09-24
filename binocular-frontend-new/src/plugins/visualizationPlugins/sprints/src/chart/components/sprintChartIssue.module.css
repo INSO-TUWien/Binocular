@@ -1,6 +1,7 @@
 .issue {
-  &:active {
-    fill: green;
+  &:hover rect {
     cursor: pointer;
+
+    opacity: 0.75;
   }
 }
