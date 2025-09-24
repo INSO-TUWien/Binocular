@@ -4,6 +4,9 @@ import { margin } from '../SprintChart';
 import type { MappedDataPluginMergeRequest } from '../types';
 import moment, { type Moment } from 'moment';
 import { AuthorType } from '../../../../../../types/data/authorType';
+import classes from './sprintChartLegend.module.css';
+
+console.log(classes)
 
 export const SprintChartLegend: React.FC<{
   height: number;
@@ -60,6 +63,7 @@ export const SprintChartLegend: React.FC<{
       return (
         <circle
           key={head.iid}
+          className={classes['merge-request']}
           cx={x}
           cy={height - margin + 10}
           r={6}
