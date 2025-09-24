@@ -1,0 +1,6 @@
+.issue {
+  &:active {
+    fill: green;
+    cursor: pointer;
+  }
+}
