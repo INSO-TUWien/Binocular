@@ -3,13 +3,11 @@ import * as React from 'react';
 import type { AuthorType } from '../../../../../../types/data/authorType';
 import { extractTimeTrackingDataFromNotes } from '../../../../timeSpent/src/utilities/dataConverter';
 import type { SprintSettings } from '../../settings/settings';
-import {
-  margin,
-} from '../SprintChart';
+import { margin } from '../SprintChart';
 import { findAuthorWithMaxSpentTime } from '../helper/findAuthorWithMaxSpentTime';
 import { aggregateTimeTrackingData } from '../helper/aggregateTimeTrackingData';
 import type { MappedDataPluginIssue } from '../types';
-import classes from './sprintChartIssue.module.css'
+import classes from './sprintChartIssue.module.css';
 
 export const SprintChartIssue: React.FC<
   MappedDataPluginIssue &
@@ -22,6 +20,7 @@ export const SprintChartIssue: React.FC<
       trackNmbr: number;
       scale: d3.ScaleTime<number, number>;
       personColorMap: Map<string, AuthorType['color']>;
+      onClick: (e: React.MouseEvent<SVGElement>, iid: number) => void;
     }
 > = ({
   height,
@@ -33,6 +32,7 @@ export const SprintChartIssue: React.FC<
   trackNmbr,
   personColorMap,
   coloringMode,
+  onClick,
   ...d
 }) => {
   const h = Math.max(0, ((height - 110) / availableTracks - 2) * zoom);
@@ -54,10 +54,18 @@ export const SprintChartIssue: React.FC<
           : coloringMode === 'time-spent'
             ? findAuthorWithMaxSpentTime(aggregatedTimeTrackingData)
             : undefined) ?? '',
-    )?.main ?? 'lightgray';
+    )?.main ?? 'lightgrey';
 
   return (
-    <g key={d.iid} className={classes.issue}>
+    <g
+      key={d.iid}
+      className={classes.issue}
+      onClick={(e) => {
+        e.stopPropagation();
+
+        onClick(e, d.iid);
+      }}
+    >
       <rect
         width={Math.max(
           scale(d.closedAt) - scale(d.createdAt) - 4,

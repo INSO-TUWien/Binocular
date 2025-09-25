@@ -3,10 +3,8 @@ import * as React from 'react';
 import { margin } from '../SprintChart';
 import type { MappedDataPluginMergeRequest } from '../types';
 import moment, { type Moment } from 'moment';
-import { AuthorType } from '../../../../../../types/data/authorType';
+import type { AuthorType } from '../../../../../../types/data/authorType';
 import classes from './sprintChartLegend.module.css';
-
-console.log(classes)
 
 export const SprintChartLegend: React.FC<{
   height: number;
@@ -17,6 +15,7 @@ export const SprintChartLegend: React.FC<{
   groupedMergeRequests: MappedDataPluginMergeRequest[][];
   personColorMap: Map<string, AuthorType['color']>;
   coloringMode: string;
+  onClickMergeRequest: (e: React.MouseEvent<SVGElement>, iid: number) => void;
 }> = ({
   height,
   width,
@@ -26,6 +25,7 @@ export const SprintChartLegend: React.FC<{
   groupedMergeRequests,
   personColorMap,
   coloringMode,
+  onClickMergeRequest,
 }) => (
   <>
     <rect
@@ -58,7 +58,7 @@ export const SprintChartLegend: React.FC<{
             : coloringMode === 'assignee'
               ? head.assignee?.user?.gitSignature
               : undefined) ?? '',
-        )?.main ?? 'lightgray';
+        )?.main ?? 'lightgrey';
 
       return (
         <circle
@@ -67,8 +67,13 @@ export const SprintChartLegend: React.FC<{
           cx={x}
           cy={height - margin + 10}
           r={6}
-          fill={tail.length === 0 ? color : 'lightgray'}
+          fill={tail.length === 0 ? color : 'lightgrey'}
           stroke={'darkgray'}
+          onClick={(e) => {
+            e.stopPropagation();
+
+            onClickMergeRequest(e, head.iid);
+          }}
         />
       );
     })}

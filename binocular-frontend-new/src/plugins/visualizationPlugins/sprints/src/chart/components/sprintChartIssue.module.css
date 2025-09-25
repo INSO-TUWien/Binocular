@@ -1,7 +1,7 @@
 .issue {
-  &:hover rect {
-    cursor: pointer;
+  cursor: pointer;
 
+  &:hover rect {
     opacity: 0.75;
   }
 }
