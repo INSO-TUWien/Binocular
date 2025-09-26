@@ -64,7 +64,6 @@ export const SprintChart: React.FC<
     createdAt: moment(mr.createdAt),
     closedAt: mr.closedAt ? moment(mr.closedAt) : moment(),
   }));
-  console.log(mappedIssues);
 
   React.useEffect(() => {
     const { current: svg } = svgChartRef;

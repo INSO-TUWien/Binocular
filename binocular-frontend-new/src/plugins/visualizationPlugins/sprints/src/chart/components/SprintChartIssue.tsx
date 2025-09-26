@@ -39,7 +39,9 @@ export const SprintChartIssue: React.FC<
 
   const x = scale(d.createdAt);
   const y =
-    (30 + (trackNmbr * height - 110) / availableTracks - 2) * zoom + offset;
+    (margin + (trackNmbr * (height - 110)) / availableTracks - 2) * zoom +
+    offset +
+    trackNmbr * 8;
 
   const { aggregatedTimeTrackingData } = aggregateTimeTrackingData(
     extractTimeTrackingDataFromNotes(d.notes),
