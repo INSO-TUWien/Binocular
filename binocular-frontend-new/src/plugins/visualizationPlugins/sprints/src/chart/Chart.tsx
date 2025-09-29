@@ -7,6 +7,7 @@ import type { VisualizationPluginProperties } from '../../../../interfaces/visua
 import { SprintChart } from './SprintChart.tsx';
 import type { DataPluginIssue } from '../../../../interfaces/dataPluginInterfaces/dataPluginIssues.ts';
 import { getDataSlice } from '../../../simpleVisualizationPlugin/src/reducer/index.ts';
+import moment from 'moment';
 
 export interface ChartData {
   date: number;
@@ -122,6 +123,10 @@ const Chart = (
               issues={issues}
               mergeRequests={mergeRequests}
               coloringMode={props.settings.coloringMode}
+              sprints={props.sprintList}
+              minDate={moment(props.parameters.parametersDateRange.from)}
+              maxDate={moment(props.parameters.parametersDateRange.to)}
+              showSprints={props.settings.showSprints}
             />
           ) : (
             <div>No Data matching the selected Parameters!</div>

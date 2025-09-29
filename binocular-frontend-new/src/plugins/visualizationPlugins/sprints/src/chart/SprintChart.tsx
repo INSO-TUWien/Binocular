@@ -11,20 +11,8 @@ import { groupIntoTracks } from './helper/groupIntoTracks';
 import { groupMergeRequests } from './helper/groupMergeRequests';
 import { SprintChartLegend } from './components/SprintChartLegend';
 import { TooltipIssue, TooltipMergeRequestGroup } from './components/Tooltip';
-
-const findMinMaxDate = (dates: Moment[]) =>
-  dates.reduce(
-    (acc, cur) => {
-      if (cur.isAfter(acc.max.valueOf())) {
-        acc.max = cur;
-      }
-      if (cur.isBefore(acc.min.valueOf())) {
-        acc.min = cur;
-      }
-      return acc;
-    },
-    { min: moment(), max: moment() },
-  );
+import { SprintAreas } from './components/SprintAreas';
+import type { SprintType } from '../../../../../types/data/sprintType';
 
 export const margin = 20;
 
@@ -33,8 +21,21 @@ export const SprintChart: React.FC<
     authors: AuthorType[];
     issues: DataPluginIssue[];
     mergeRequests: DataPluginMergeRequest[];
+    sprints: SprintType[];
+    minDate: Moment;
+    maxDate: Moment;
+    showSprints: boolean;
   } & Pick<SprintSettings, 'coloringMode'>
-> = ({ authors, coloringMode, issues, mergeRequests }) => {
+> = ({
+  authors,
+  coloringMode,
+  issues,
+  mergeRequests,
+  sprints,
+  minDate,
+  maxDate,
+  showSprints,
+}) => {
   const [{ width = 0, height = 0 } = {}, setDomRect] =
     React.useState<Partial<DOMRect>>();
   const [zoom, setZoom] = React.useState(1);
@@ -54,7 +55,7 @@ export const SprintChart: React.FC<
     iid: Number.parseInt(i.iid as unknown as string, 10),
 
     createdAt: moment(i.createdAt),
-    closedAt: i.closedAt ? moment(i.closedAt) : moment(),
+    closedAt: i.closedAt ? moment(i.closedAt) : maxDate,
   }));
   const mappedMergeRequests = mergeRequests.map((mr) => ({
     ...mr,
@@ -62,7 +63,7 @@ export const SprintChart: React.FC<
     iid: Number.parseInt(mr.iid as unknown as string, 10),
 
     createdAt: moment(mr.createdAt),
-    closedAt: mr.closedAt ? moment(mr.closedAt) : moment(),
+    closedAt: mr.closedAt ? moment(mr.closedAt) : maxDate,
   }));
 
   React.useEffect(() => {
@@ -83,10 +84,6 @@ export const SprintChart: React.FC<
       });
     d3.select(svg).call(zoom);
   }, []);
-
-  const { min: minDate, max: maxDate } = findMinMaxDate(
-    mappedIssues.flatMap((d) => [d.createdAt, d.closedAt]).filter((d) => !!d),
-  );
 
   const groupedIssues = groupIntoTracks(mappedIssues);
 
@@ -161,6 +158,10 @@ export const SprintChart: React.FC<
                 })
               }
             />
+
+            {showSprints && (
+              <SprintAreas sprints={sprints} scale={scale} height={height} />
+            )}
           </>
         )}
       </svg>
