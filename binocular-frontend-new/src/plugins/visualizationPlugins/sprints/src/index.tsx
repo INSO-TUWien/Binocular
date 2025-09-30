@@ -18,8 +18,6 @@ const Sprints: VisualizationPlugin<SprintSettings, DataPluginIssue> = {
   dataConverter: convertToChartData,
   helpComponent: Help,
   defaultSettings: {
-    splitIssuesPerAuthor: false,
-    visualizationStyle: 'curved',
     showSprints: false,
     coloringMode: 'author',
   },
