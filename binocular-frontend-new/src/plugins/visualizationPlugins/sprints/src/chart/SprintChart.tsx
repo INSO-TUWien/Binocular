@@ -49,14 +49,18 @@ export const SprintChart: React.FC<
 
   const svgChartRef = React.useRef<SVGSVGElement>(null);
 
-  const mappedIssues = issues.map((i) => ({
-    ...i,
+  const mappedIssues = issues.map((i) => {
+    const closedAt = i.closedAt ? moment(i.closedAt) : maxDate;
 
-    iid: Number.parseInt(i.iid as unknown as string, 10),
+    return {
+      ...i,
 
-    createdAt: moment(i.createdAt),
-    closedAt: i.closedAt ? moment(i.closedAt) : maxDate,
-  }));
+      iid: Number.parseInt(i.iid as unknown as string, 10),
+
+      createdAt: moment(i.createdAt),
+      closedAt: closedAt.isAfter(maxDate) ? maxDate : closedAt,
+    };
+  });
   const mappedMergeRequests = mergeRequests.map((mr) => ({
     ...mr,
 
