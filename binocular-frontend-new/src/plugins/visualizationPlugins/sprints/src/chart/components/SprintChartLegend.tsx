@@ -31,8 +31,15 @@ export const SprintChartLegend: React.FC<{
     <rect
       x={margin}
       y={height - margin * 2}
+      height={1}
       width={width - margin * 2}
-      height={80}
+    />
+
+    <rect
+      x={margin}
+      y={height - margin * 2 + 1}
+      width={width - margin * 2}
+      height={40}
       fill={'#EEE'}
     />
 
@@ -40,11 +47,20 @@ export const SprintChartLegend: React.FC<{
       const x = scale(t);
 
       return (
-        <text key={t.toISOString()} x={x} y={height - margin} fontSize={10}>
-          {moment(t).format(
-            maxDate.diff(minDate, 'years') > 1 ? 'YYYY' : 'MM.YYYY',
-          )}
-        </text>
+        <g key={t.toISOString()}>
+          <rect
+            x={x}
+            y={height - margin * 2}
+            width={1}
+            height={8}
+            fill={'#000'}
+          />
+          <text x={x} y={height - margin} fontSize={10} textAnchor={'middle'}>
+            {moment(t).format(
+              maxDate.diff(minDate, 'years') > 1 ? 'YYYY' : 'MM.YYYY',
+            )}
+          </text>
+        </g>
       );
     })}
 
