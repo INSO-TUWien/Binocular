@@ -25,6 +25,8 @@ export const SprintChart: React.FC<
     minDate: Moment;
     maxDate: Moment;
     showSprints: boolean;
+    width: number;
+    height: number;
   } & Pick<SprintSettings, 'coloringMode'>
 > = ({
   authors,
@@ -35,9 +37,9 @@ export const SprintChart: React.FC<
   minDate,
   maxDate,
   showSprints,
+  height,
+  width,
 }) => {
-  const [{ width = 0, height = 0 } = {}, setDomRect] =
-    React.useState<Partial<DOMRect>>();
   const [zoom, setZoom] = React.useState(1);
   const [offset, setOffset] = React.useState(0);
 
@@ -76,8 +78,6 @@ export const SprintChart: React.FC<
       return;
     }
 
-    setDomRect(svg.getBoundingClientRect() ?? {});
-
     const zoom = d3
       .zoom<SVGSVGElement, unknown>()
       .on('zoom', (e: d3.D3ZoomEvent<SVGSVGElement, unknown>) => {
@@ -93,7 +93,7 @@ export const SprintChart: React.FC<
 
   const scale = d3
     .scaleUtc()
-    .range([20, Math.abs(width - margin)])
+    .range([margin, Math.abs(width - margin)])
     .domain([minDate, maxDate]);
 
   const personColorMap = new Map(
@@ -106,7 +106,7 @@ export const SprintChart: React.FC<
       : mappedMergeRequests.map((mr) => [mr]);
 
   return (
-    <div style={{ height: '100%', width: '100%', position: 'relative' }}>
+    <div style={{ height, width, position: 'relative' }}>
       <svg
         xmlns="http://www.w3.org/2000/svg"
         ref={svgChartRef}
