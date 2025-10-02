@@ -1,4 +1,4 @@
-package com.inso_world.binocular.core.integration.base
+package base
 
 import java.io.BufferedReader
 import java.io.InputStream

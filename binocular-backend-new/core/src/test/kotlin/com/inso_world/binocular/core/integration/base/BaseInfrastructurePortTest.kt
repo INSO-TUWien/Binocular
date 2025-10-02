@@ -1,4 +1,4 @@
-package com.inso_world.binocular.core.integration.base
+package base
 
 import com.inso_world.binocular.model.Account
 import com.inso_world.binocular.model.Branch
