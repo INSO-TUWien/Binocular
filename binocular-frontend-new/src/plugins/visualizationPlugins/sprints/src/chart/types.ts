@@ -1,6 +1,7 @@
-import type { Moment } from "moment";
-import type { DataPluginIssue } from "../../../../interfaces/dataPluginInterfaces/dataPluginIssues";
-import type { DataPluginMergeRequest } from "../../../../interfaces/dataPluginInterfaces/dataPluginMergeRequests";
+import type { Moment } from 'moment';
+import type { DataPluginIssue } from '../../../../interfaces/dataPluginInterfaces/dataPluginIssues';
+import type { DataPluginMergeRequest } from '../../../../interfaces/dataPluginInterfaces/dataPluginMergeRequests';
+import type { SprintType } from '../../../../../types/data/sprintType';
 
 export type MappedDataPluginIssue = Omit<
   DataPluginIssue,
@@ -13,3 +14,6 @@ export type MappedDataPluginMergeRequest = Omit<
   'createdAt' | 'closedAt'
 > &
   Record<'createdAt' | 'closedAt', Moment>;
+
+export type MappedSprintType = Omit<SprintType, 'startDate' | 'endDate'> &
+  Record<'startDate' | 'endDate', Moment>;

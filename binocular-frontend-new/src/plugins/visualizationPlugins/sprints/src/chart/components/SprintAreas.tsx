@@ -1,12 +1,14 @@
 import type React from 'react';
-import type { SprintType } from '../../../../../../types/data/sprintType';
 import { symbol, symbolTriangle } from 'd3';
+import classes from './sprintArea.module.css';
+import type { MappedSprintType } from '../types';
 
 export const SprintAreas: React.FC<{
-  sprints: SprintType[];
+  sprints: MappedSprintType[];
   scale: d3.ScaleTime<number, number>;
   height: number;
-}> = ({ sprints, scale, height }) => (
+  onClick: (e: React.MouseEvent<SVGGElement>, sprint: MappedSprintType) => void;
+}> = ({ sprints, scale, height, onClick }) => (
   <>
     <defs>
       <pattern
@@ -24,14 +26,14 @@ export const SprintAreas: React.FC<{
     </defs>
 
     {sprints.map((s) => {
-      const xStart = scale(new Date(s.startDate));
+      const xStart = scale(s.startDate);
       const yStart = 0;
 
-      const xEnd = scale(new Date(s.endDate));
+      const xEnd = scale(s.endDate);
       const yEnd = 0;
 
       return (
-        <g key={s.id}>
+        <g key={s.id} className={classes['sprint-area']}>
           <rect
             x={xStart}
             y={yStart}
@@ -61,7 +63,13 @@ export const SprintAreas: React.FC<{
             transform={`translate(${xEnd - 3}, ${yEnd + 5}) rotate(-90)`}
           />
 
-          <g>
+          <g
+            onClick={(e) => {
+              e.stopPropagation();
+
+              onClick(e, s);
+            }}
+          >
             <rect
               x={xStart}
               y={Math.max(0, height - 40 - 15)}

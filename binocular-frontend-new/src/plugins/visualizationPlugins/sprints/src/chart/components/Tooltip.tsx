@@ -6,7 +6,9 @@ import { margin } from '../SprintChart';
 import type {
   MappedDataPluginIssue,
   MappedDataPluginMergeRequest,
+  MappedSprintType,
 } from '../types';
+import { groupBy } from 'lodash';
 
 const TooltipLayout: React.FC<
   React.PropsWithChildren<{
@@ -43,6 +45,8 @@ const TooltipLayout: React.FC<
             : left,
         width: tooltipWidth,
         display: visible ? 'none' : undefined,
+        maxHeight: 600,
+        overflow: 'auto',
       }}
     >
       {children}
@@ -194,6 +198,81 @@ export const TooltipMergeRequestGroup: React.FC<{
       <p>
         <em>Creator:</em> {mr?.author.name}
       </p>
+    </TooltipLayout>
+  );
+};
+
+export const TooltipSprintArea: React.FC<
+  MappedSprintType & {
+    issues: MappedDataPluginIssue[];
+
+    anchor: SVGElement;
+
+    onClickClose: React.MouseEventHandler;
+  }
+> = ({ anchor, startDate, endDate, issues, onClickClose }) => {
+  const groupedByAssignee = groupBy(
+    issues,
+    (i) => i.assignee?.name ?? 'No Assignee',
+  );
+
+  const groupedByStatus = groupBy(issues, (i) => i.state);
+
+  return (
+    <TooltipLayout visible={false} anchor={anchor} onClickClose={onClickClose}>
+      <h2 className={'card-title'}>
+        {startDate.format('L')} - {endDate.format('L')}
+      </h2>
+
+      <div className={'divider'} />
+
+      <h6>Issues by Assignees:</h6>
+      <ul>
+        {Object.entries(groupedByAssignee).map(([key, value]) => (
+          <li key={key}>
+            <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
+              <em>{key}</em>
+
+              {value.map((i) => (
+                <a
+                  key={i.iid}
+                  href={i.webUrl}
+                  className={'link'}
+                  target={'_blank'}
+                  style={{ wordBreak: 'keep-all' }}
+                >
+                  {i.iid}
+                </a>
+              ))}
+            </div>
+          </li>
+        ))}
+      </ul>
+
+      <div className={'divider'} />
+
+      <h6>Issues by State:</h6>
+      <ul>
+        {Object.entries(groupedByStatus).map(([key, value]) => (
+          <li key={key}>
+            <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
+              <i>{key}</i>
+
+              {value.map((i) => (
+                <a
+                  key={i.iid}
+                  href={i.webUrl}
+                  className={'link'}
+                  target={'_blank'}
+                  style={{ wordBreak: 'keep-all' }}
+                >
+                  {i.iid}
+                </a>
+              ))}
+            </div>
+          </li>
+        ))}
+      </ul>
     </TooltipLayout>
   );
 };

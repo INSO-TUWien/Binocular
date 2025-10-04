@@ -10,11 +10,26 @@ import { SprintChartIssue } from './components/SprintChartIssue';
 import { groupIntoTracks } from './helper/groupIntoTracks';
 import { groupMergeRequests } from './helper/groupMergeRequests';
 import { SprintChartLegend } from './components/SprintChartLegend';
-import { TooltipIssue, TooltipMergeRequestGroup } from './components/Tooltip';
+import {
+  TooltipIssue,
+  TooltipMergeRequestGroup,
+  TooltipSprintArea,
+} from './components/Tooltip';
 import { SprintAreas } from './components/SprintAreas';
 import type { SprintType } from '../../../../../types/data/sprintType';
+import type { MappedSprintType } from './types';
 
 export const margin = 20;
+
+type TooltipState = {
+  anchor: SVGElement;
+} & (
+  | {
+      variant: 'merge-request' | 'issue';
+      iid: number;
+    }
+  | ({ variant: 'sprint-area' } & MappedSprintType)
+);
 
 export const SprintChart: React.FC<
   {
@@ -43,11 +58,7 @@ export const SprintChart: React.FC<
   const [zoom, setZoom] = React.useState(1);
   const [offset, setOffset] = React.useState(0);
 
-  const [tooltipState, setTooltipState] = React.useState<{
-    variant: 'merge-request' | 'issue';
-    iid: number;
-    anchor: SVGElement;
-  }>();
+  const [tooltipState, setTooltipState] = React.useState<TooltipState>();
 
   const svgChartRef = React.useRef<SVGSVGElement>(null);
 
@@ -70,6 +81,12 @@ export const SprintChart: React.FC<
 
     createdAt: moment(mr.createdAt),
     closedAt: mr.closedAt ? moment(mr.closedAt) : maxDate,
+  }));
+  const mappedSprints = sprints.map((s) => ({
+    ...s,
+
+    startDate: moment(s.startDate),
+    endDate: moment(s.endDate),
   }));
 
   React.useEffect(() => {
@@ -164,7 +181,18 @@ export const SprintChart: React.FC<
             />
 
             {showSprints && (
-              <SprintAreas sprints={sprints} scale={scale} height={height} />
+              <SprintAreas
+                sprints={mappedSprints}
+                scale={scale}
+                height={height}
+                onClick={({ currentTarget }, sprint) =>
+                  setTooltipState({
+                    variant: 'sprint-area',
+                    anchor: currentTarget,
+                    ...sprint,
+                  })
+                }
+              />
             )}
           </>
         )}
@@ -191,6 +219,30 @@ export const SprintChart: React.FC<
               prev ? { ...prev, iid: Number.parseInt(value, 10) } : prev,
             )
           }
+        />
+      ) : tooltipState?.variant === 'sprint-area' ? (
+        <TooltipSprintArea
+          {...tooltipState}
+          startDate={tooltipState.startDate}
+          endDate={tooltipState.endDate}
+          issues={mappedIssues.filter((i) => {
+            const { startDate, endDate } = tooltipState;
+
+            const x =
+              (i.createdAt.isBefore(startDate) &&
+                i.closedAt.isAfter(endDate)) ||
+              i.createdAt.isBetween(
+                tooltipState.startDate,
+                tooltipState.endDate,
+              ) ||
+              i.closedAt.isBetween(
+                tooltipState.startDate,
+                tooltipState.endDate,
+              );
+
+            return x;
+          })}
+          onClickClose={() => setTooltipState(undefined)}
         />
       ) : null}
     </div>
