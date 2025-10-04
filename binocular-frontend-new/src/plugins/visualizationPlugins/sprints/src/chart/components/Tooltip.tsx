@@ -142,6 +142,16 @@ export const TooltipIssue: React.FC<{
         <em>Deletions:</em>{' '}
         {i?.commits.reduce((acc, { deletions }) => acc + deletions, 0)}
       </p>
+
+      <div className={'divider'} />
+
+      <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
+        {i?.labels.map((l) => (
+          <span key={l} className={'badge'}>
+            {l}
+          </span>
+        ))}
+      </div>
     </TooltipLayout>
   );
 };
@@ -256,7 +266,7 @@ export const TooltipSprintArea: React.FC<
         {Object.entries(groupedByStatus).map(([key, value]) => (
           <li key={key}>
             <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
-              <i>{key}</i>
+              <em>{key}</em>
 
               {value.map((i) => (
                 <a
