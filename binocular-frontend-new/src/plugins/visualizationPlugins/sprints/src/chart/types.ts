@@ -5,9 +5,11 @@ import type { SprintType } from '../../../../../types/data/sprintType';
 
 export type MappedDataPluginIssue = Omit<
   DataPluginIssue,
-  'createdAt' | 'closedAt'
+  'createdAt' | 'closedAt' | 'labels'
 > &
-  Record<'createdAt' | 'closedAt', Moment>;
+  Record<'createdAt' | 'closedAt', Moment> & {
+    labels: { name: string; color: string }[];
+  };
 
 export type MappedDataPluginMergeRequest = Omit<
   DataPluginMergeRequest,

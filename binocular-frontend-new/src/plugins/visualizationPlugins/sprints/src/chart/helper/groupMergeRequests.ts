@@ -5,7 +5,9 @@ import type { MappedDataPluginMergeRequest } from '../types';
  * @param mergeRequests
  * @returns An array of merge request groups.
  */
-export const groupMergeRequests = (mergeRequests: MappedDataPluginMergeRequest[]) => {
+export const groupMergeRequests = (
+  mergeRequests: MappedDataPluginMergeRequest[],
+) => {
   const map = new Map<String, MappedDataPluginMergeRequest[]>();
   for (const mr of mergeRequests) {
     const key = mr.createdAt.format('YYYY-MM');

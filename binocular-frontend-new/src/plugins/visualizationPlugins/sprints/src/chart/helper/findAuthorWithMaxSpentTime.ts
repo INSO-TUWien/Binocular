@@ -1,4 +1,3 @@
-
 export const findAuthorWithMaxSpentTime = (d: Map<string, number>) => {
   const entries = d.entries();
   let max = entries.next().value;

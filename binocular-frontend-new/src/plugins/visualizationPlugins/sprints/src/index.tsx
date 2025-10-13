@@ -16,6 +16,8 @@ const Sprints: VisualizationPlugin<SprintSettings, DataPluginIssue> = {
   helpComponent: Help,
   defaultSettings: {
     showSprints: false,
+    maxNumberOfDifferencesBetweenLabels: 3,
+    minNumberOfLabelsPerGroup: 1,
     coloringMode: 'author',
   },
   export: {

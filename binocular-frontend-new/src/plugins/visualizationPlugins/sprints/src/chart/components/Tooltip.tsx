@@ -9,6 +9,7 @@ import type {
   MappedSprintType,
 } from '../types';
 import { groupBy } from 'lodash';
+import chroma from 'chroma-js'
 
 const TooltipLayout: React.FC<
   React.PropsWithChildren<{
@@ -51,7 +52,7 @@ const TooltipLayout: React.FC<
     >
       {children}
 
-      <div className={'card-actions justify-end'}>
+      <div className={'card-actions justify-end mt-1'}>
         <button className={'btn btn-xs'} onClick={onClickClose}>
           Close
         </button>
@@ -147,8 +148,15 @@ export const TooltipIssue: React.FC<{
 
       <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
         {i?.labels.map((l) => (
-          <span key={l} className={'badge'}>
-            {l}
+          <span
+            key={l.name}
+            className={'badge badge-soft'}
+            style={{
+              backgroundColor: l.color,
+              color: chroma.contrast(l.color, 'black') > 4.5 ? 'black' : 'white',
+            }}
+          >
+            {l.name}
           </span>
         ))}
       </div>
