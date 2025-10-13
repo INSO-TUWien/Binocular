@@ -1,23 +1,23 @@
 import { createRef, useEffect, useState } from 'react';
 import { CommitByFileViz } from './commitByFileViz.tsx';
-import { Properties } from '../../../../interfaces/visualizationPluginInterfaces/properties.ts';
-import { SettingsType } from '../settings/settings.tsx';
-import { DataPluginCommitFile } from '../../../../interfaces/dataPluginInterfaces/dataPluginCommitsFiles.ts';
+import type { SettingsType } from '../settings/settings.tsx';
+import type { DataPluginCommitFile } from '../../../../interfaces/dataPluginInterfaces/dataPluginCommitsFiles.ts';
 import { DataState, setSha } from '../reducer';
 import { useDispatch, useSelector } from 'react-redux';
 import Select from 'react-select';
-import { DataPluginCommitShort } from '../../../../interfaces/dataPluginInterfaces/dataPluginCommits.ts';
+import type { DataPluginCommitShort } from '../../../../interfaces/dataPluginInterfaces/dataPluginCommits.ts';
+import type { VisualizationPluginProperties } from '../../../../interfaces/visualizationPluginInterfaces/visualizationPluginProperties';
 
-function Chart(props: Readonly<Properties<SettingsType, DataPluginCommitFile>>) {
+function Chart(props: Readonly<VisualizationPluginProperties<SettingsType, DataPluginCommitFile>>) {
   type RootState = ReturnType<typeof props.store.getState>;
   type AppDispatch = typeof props.store.dispatch;
   const useAppDispatch = () => useDispatch<AppDispatch>();
   const dispatch: AppDispatch = useAppDispatch();
 
-  const data = useSelector((state: RootState) => state.commitFiles);
-  const dataState = useSelector((state: RootState) => state.dataState);
-  const commits = useSelector((state: RootState) => state.commits);
-
+  const data = useSelector((state: RootState) => state.plugin.commitFiles);
+  const dataState = useSelector((state: RootState) => state.plugin.dataState);
+  const commits = useSelector((state: RootState) => state.plugin.commits);
+  console.log(data);
   const commitOptions = commits.map((commit: DataPluginCommitShort) => ({
     value: commit.sha,
     label: `${commit.messageHeader} (${commit.sha.slice(0, 7)})`,

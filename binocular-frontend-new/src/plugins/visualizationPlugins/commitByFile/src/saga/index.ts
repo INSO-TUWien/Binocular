@@ -1,8 +1,8 @@
-import { DataPlugin } from '../../../../interfaces/dataPlugin.ts';
+import type { DataPlugin } from '../../../../interfaces/dataPlugin.ts';
 import { call, fork, put, select, takeEvery, throttle } from 'redux-saga/effects';
-import { CommitByFileState, DataState, setCommitFiles, setCommits, setDataState, setSha } from '../reducer';
-import { DataPluginCommitFile } from '../../../../interfaces/dataPluginInterfaces/dataPluginCommitsFiles.ts';
-import { DataPluginCommitShort } from '../../../../interfaces/dataPluginInterfaces/dataPluginCommits.ts';
+import { type CommitByFileState, DataState, setCommitFiles, setCommits, setDataState, setSha } from '../reducer';
+import type { DataPluginCommitFile } from '../../../../interfaces/dataPluginInterfaces/dataPluginCommitsFiles.ts';
+import type { DataPluginCommitShort } from '../../../../interfaces/dataPluginInterfaces/dataPluginCommits.ts';
 
 export default function* (dataConnection: DataPlugin) {
   yield fork(watchRefresh, dataConnection);
@@ -24,6 +24,7 @@ function* fetchCommitData(dataConnection: DataPlugin) {
 function* fetchCommitsAndCommitByFileData(dataConnection: DataPlugin) {
   yield put(setDataState(DataState.FETCHING));
   const commits: DataPluginCommitShort[] = yield call(() => dataConnection.commits.getAllShort());
+  console.log(commits);
   if (commits.length === 0) {
     yield put(
       setCommits([
@@ -42,8 +43,9 @@ function* fetchCommitsAndCommitByFileData(dataConnection: DataPlugin) {
 }
 
 function* fetchCommitByFileData(dataConnection: DataPlugin) {
-  const state: CommitByFileState = yield select();
-  const commitByFile: DataPluginCommitFile[] = yield call(() => dataConnection.commitByFile.getAll(state.sha));
+  const state: { plugin: CommitByFileState } = yield select();
+  console.log(state);
+  const commitByFile: DataPluginCommitFile[] = yield call(() => dataConnection.commitByFile.getAll(state.plugin.sha));
 
   if (commitByFile.length === 0) {
     yield put(setDataState(DataState.EMPTY));

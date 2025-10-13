@@ -1,11 +1,12 @@
 import PreviewImage from '../assets/thumbnail.svg';
-import Settings, { SettingsType } from './settings/settings.tsx';
-import { VisualizationPlugin } from '../../../interfaces/visualizationPlugin.ts';
+import Settings, { type SettingsType } from './settings/settings.tsx';
+import type { VisualizationPlugin } from '../../../interfaces/visualizationPlugin.ts';
 import Reducer from './reducer';
 import Saga from './saga';
 import Help from './help/help.tsx';
-import { DataPluginCommitFile } from '../../../interfaces/dataPluginInterfaces/dataPluginCommitsFiles.ts';
+import type { DataPluginCommitFile } from '../../../interfaces/dataPluginInterfaces/dataPluginCommitsFiles.ts';
 import Chart from './chart/chart.tsx';
+import { VisualizationPluginMetadataCategory } from '../../../interfaces/visualizationPluginInterfaces/visualizationPluginMetadata';
 
 const CommitByFile: VisualizationPlugin<SettingsType, DataPluginCommitFile> = {
   name: 'Commit By File',
@@ -23,6 +24,11 @@ const CommitByFile: VisualizationPlugin<SettingsType, DataPluginCommitFile> = {
   },
   images: {
     thumbnail: PreviewImage,
+  },
+  metadata: {
+    category: VisualizationPluginMetadataCategory.Commits,
+    recommended: false,
+    description: 'A tree map that visualizes the changes in a selected commit.',
   },
   reducer: Reducer,
   saga: Saga,
