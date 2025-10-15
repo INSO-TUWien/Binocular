@@ -55,8 +55,13 @@ export async function getPreviousFilenames(filenames: string[], branch: DataPlug
   return previousFilenameObjects;
 }
 
-export function getDefaultBranch(branches: DataPluginBranch[]): DataPluginBranch {
-  let branch = branches.find((branch) => branch.branch == 'develop' || branch.branch == 'dev');
-  if (!branch) branch = branches.find((branch) => branch.branch == 'main' || branch.branch == 'master');
-  return branch ? branch : branches[0];
+export async function getLatestBranch(branches: DataPluginBranch[], dataConnection: DataPlugin) {
+  const commits = await dataConnection.commits.getAll(new Date(0).toISOString(), new Date(Date.now()).toISOString());
+  const latestCommit = commits.filter((d: DataPluginCommit) => branches.find((branch) => branch.latestCommit == d.sha) != undefined).pop();
+
+  return branches[
+    branches.findIndex((branch) => branch.latestCommit == latestCommit?.sha) != -1
+      ? branches.findIndex((branch) => branch.latestCommit == latestCommit?.sha)
+      : 0
+  ];
 }

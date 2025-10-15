@@ -1,7 +1,7 @@
 import { put, takeLatest, fork, call, select } from 'redux-saga/effects';
 import { DataState, setDataState, setData, type CodeOwnershipData, type CodeOwnershipState, setCurrentBranch } from '../reducer';
 import type { DataPlugin } from '../../../../interfaces/dataPlugin.ts';
-import { getCommitDataForSha, getDefaultBranch, getFilenamesForBranch, getOwnershipForCommits, getPreviousFilenames } from './helper.ts';
+import { getCommitDataForSha, getFilenamesForBranch, getLatestBranch, getOwnershipForCommits, getPreviousFilenames } from './helper.ts';
 import type { PreviousFileData } from '../../../../../types/data/ownershipType.ts';
 import type { DataPluginBranch } from '../../../../interfaces/dataPluginInterfaces/dataPluginBranches.ts';
 
@@ -26,7 +26,7 @@ function* fetchCodeOwnershipData(dataConnection: DataPlugin) {
     if (!dataConnection.branches) return;
     const branches = (await dataConnection.branches.getAllBranches()).sort((a, b) => a.branch.localeCompare(b.branch));
     let currentBranch: DataPluginBranch | null | undefined = undefined;
-    if (!branchId) currentBranch = getDefaultBranch(branches);
+    if (!branchId) currentBranch = await getLatestBranch(branches, dataConnection);
     else currentBranch = branches[branchId];
 
     const result: CodeOwnershipData = { rawData: [], previousFilenames: {} };

@@ -2,9 +2,10 @@ import { put, fork, call, select, takeLatest } from 'redux-saga/effects';
 import { type State, DataState, setDataState, setData, setCurrentBranch, type ExpertiseData } from '../reducer';
 import type { DataPlugin } from '../../../../interfaces/dataPlugin.ts';
 import type { DataPluginCommitBuild } from '../../../../interfaces/dataPluginInterfaces/dataPluginCommits.ts';
-import { getCommitDataForSha, getDefaultBranch, getFilenamesForBranch, getOwnershipForCommits, getPreviousFilenames } from './helper.ts';
+import { getCommitDataForSha, getFilenamesForBranch, getLatestBranch, getOwnershipForCommits, getPreviousFilenames } from './helper.ts';
 import type { CodeOwnershipData } from '../../../code-ownership/src/reducer/index.ts';
 import type { PreviousFileData } from '../../../../../types/data/ownershipType.ts';
+import type { DataPluginBranch } from '../../../../interfaces/dataPluginInterfaces/dataPluginBranches';
 
 export default function* (dataConnection: DataPlugin) {
   yield fork(() => watchRefresh(dataConnection));
@@ -27,8 +28,8 @@ function* fetchExpertiseData(dataConnection: DataPlugin) {
   const codeOwnershipData: CodeOwnershipData = yield call(async () => {
     if (!dataConnection.branches) return;
     const branches = (await dataConnection.branches.getAllBranches()).sort((a, b) => a.branch.localeCompare(b.branch));
-    let currentBranch = undefined;
-    if (!branchId) currentBranch = getDefaultBranch(branches);
+    let currentBranch: DataPluginBranch | undefined = undefined;
+    if (!branchId) currentBranch = await getLatestBranch(branches, dataConnection);
     else currentBranch = branches[branchId];
 
     const result: CodeOwnershipData = { rawData: [], previousFilenames: {} };
@@ -44,12 +45,12 @@ function* fetchExpertiseData(dataConnection: DataPlugin) {
           throw new Error('Latest branch commit not found');
         }
 
-        const activeFiles = await getFilenamesForBranch(currentBranch.branch, dataConnection);
+        const activeFiles = await getFilenamesForBranch(currentBranch!.branch, dataConnection);
 
         //get previous filenames for all active files
         const previousFilenames: { [p: string]: PreviousFileData[] } = await getPreviousFilenames(
           activeFiles,
-          currentBranch,
+          currentBranch!,
           dataConnection,
         );
         //get actual ownership data for all commits on the selected branch
