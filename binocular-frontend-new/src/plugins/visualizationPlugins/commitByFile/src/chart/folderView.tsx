@@ -1,5 +1,5 @@
 import React from 'react';
-import folderIcon from '../../assets/folder-open-regular-full.svg'
+import folderIcon from '../../assets/folder-open-regular-full.svg';
 import { FolderWithRatio } from './commitByFileViz.tsx';
 
 type FolderViewProps = {
