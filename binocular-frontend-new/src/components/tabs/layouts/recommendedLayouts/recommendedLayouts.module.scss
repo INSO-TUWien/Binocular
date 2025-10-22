@@ -1,0 +1,41 @@
+@use "../../../../variables.scss" as *;
+@reference "../../../../index.scss";
+
+.selector{
+  max-width: 100%;
+  display: flex;
+  align-items: center;
+  padding-right: .5rem;
+}
+
+.selectorHorizontal{
+  box-shadow: $shadow-default-inset;
+  border-radius: $border-radius-default;
+  height: 3rem;
+}
+
+.selectorVertical{
+  box-shadow: $shadow-default-inset;
+  border-radius: $border-radius-default;
+}
+
+.dashboardCard {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  width: max-content;
+  height: 2rem;
+  margin: 0.5rem;
+  padding: 0.2rem;
+  box-shadow: $shadow-default;
+  border-radius: $border-radius-small;
+  transition: scale ease-in-out .2s;
+  @apply bg-base-100;
+}
+
+.dashboardCard>span{
+  margin: 0.5rem;
+  height: 2rem;
+  line-height: 2rem;
+  font-size: 1rem;
+}

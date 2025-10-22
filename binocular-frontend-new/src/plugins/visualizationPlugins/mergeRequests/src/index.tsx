@@ -29,7 +29,7 @@ const MergeRequests: VisualizationPlugin<MergeRequestsSettings, DataPluginMergeR
   },
   metadata: {
     category: VisualizationPluginMetadataCategory.Issues,
-    recommended: true,
+    recommended: false,
     description: 'A line chart that visualizes the amount of merge requests open and closed.',
   },
   reducer: Reducer,
