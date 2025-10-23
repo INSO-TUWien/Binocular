@@ -9,9 +9,11 @@ import { useSelector } from 'react-redux';
 import { useState } from 'react';
 import { addCustomLayout } from '../../../../redux/reducer/general/layoutReducer';
 import type { DashboardItemType } from '../../../../types/general/dashboardItemType';
+import { showConfirmationDialog } from '../../../confirmationDialog/confirmationDialog';
 
 function RecommendedLayouts(props: { orientation?: string }) {
   const dispatch: AppDispatch = useAppDispatch();
+  const defaultDataPluginItemId = useSelector((state: RootState) => state.settings.database.defaultDataPluginItemId);
   const dashboard = useSelector((state: RootState) => state.dashboard.dashboardItems);
   const customLayouts = useSelector((state: RootState) => state.layout.customLayouts);
 
@@ -32,8 +34,6 @@ function RecommendedLayouts(props: { orientation?: string }) {
     setLayoutName('');
   };
 
-  const defaultDataPluginItemId: number = 1; // TODO
-
   return (
     <div className="flex gap-2">
       <div
@@ -49,14 +49,37 @@ function RecommendedLayouts(props: { orientation?: string }) {
               <button
                 key={`basicDashboard-${i}`}
                 className={recommendedLayoutsStyles.dashboardCard}
-                onClick={() => {
-                  dispatch(
-                    clearDashboardAndSetState(
-                      layout.items.map((item: DashboardItemType) => ({
-                        ...item,
-                        dataPluginId: defaultDataPluginItemId,
-                      })),
-                    ),
+                onClick={(e) => {
+                  const rect = (e.target as HTMLInputElement).getBoundingClientRect();
+                  const dialogWidth = 350;
+                  const dialogHeight = 90;
+                  const x = rect.left + rect.width / 2 - dialogWidth / 2 + window.scrollX;
+                  const y = rect.top + rect.height / 2 + dialogHeight / 2 + window.scrollY;
+                  showConfirmationDialog(
+                    x,
+                    y,
+                    dialogWidth,
+                    `This will remove the current dashboard layout and will replace it with this one! Are you sure?`,
+                    [
+                      {
+                        label: 'Yes',
+                        icon: null,
+                        function: () =>
+                          dispatch(
+                            clearDashboardAndSetState(
+                              layout.items.map((item: DashboardItemType) => ({
+                                ...item,
+                                dataPluginId: defaultDataPluginItemId,
+                              })),
+                            ),
+                          ),
+                      },
+                      {
+                        label: 'No',
+                        icon: null,
+                        function: () => {},
+                      },
+                    ],
                   );
                 }}>
                 <span>{layout.name}</span>
