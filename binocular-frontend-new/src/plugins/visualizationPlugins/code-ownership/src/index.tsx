@@ -33,6 +33,7 @@ const CodeOwnership: VisualizationPlugin<CodeOwnerShipSettings, null> = {
     category: VisualizationPluginMetadataCategory.Ownership,
     recommended: false,
     description: 'Shows how many lines are owned by which author over time.',
+    compatibility: { binocularBackend: true, githubAPI: false, mockData: true, pouchDB: true, github: true, gitlab: true },
   },
   reducer: Reducer,
   saga: Saga,

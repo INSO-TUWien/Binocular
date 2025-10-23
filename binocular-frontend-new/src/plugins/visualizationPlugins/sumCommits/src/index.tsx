@@ -32,6 +32,7 @@ const SumCommits: VisualizationPlugin<SettingsType, DataPluginCommit> = {
     category: VisualizationPluginMetadataCategory.Commits,
     recommended: true,
     description: 'A line chart that visualizes the amount of additions and deletion and what author is responsible for them over time.',
+    compatibility: { binocularBackend: true, githubAPI: true, mockData: true, pouchDB: true, github: true, gitlab: true },
   },
   reducer: Reducer,
   saga: Saga,

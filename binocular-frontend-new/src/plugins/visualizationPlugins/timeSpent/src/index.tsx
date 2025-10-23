@@ -37,6 +37,7 @@ const TimeSpent: VisualizationPlugin<TimeSpentSettings, DataPluginNote> = {
     category: VisualizationPluginMetadataCategory.AuthorBehaviour,
     recommended: false,
     description: '(Gitlab only) A line chart that visualizes the amount of hours spent/removed over time.',
+    compatibility: { binocularBackend: true, githubAPI: false, mockData: true, pouchDB: true, github: false, gitlab: true },
   },
   reducer: Reducer,
   saga: Saga,
