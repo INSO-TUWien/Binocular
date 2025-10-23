@@ -1,18 +1,23 @@
 function Help() {
   return (
     <>
-      <h2>Builds Help</h2>
+      <h2>Time Spent Help</h2>
       <h3>Data</h3>
-      <p>
-        The builds visualization provides an overview of the build statuses. It allows users to track the outcomes of builds, including
-        successful, failed, and cancelled builds.
-      </p>
+      <p>(Gitlab only) The time spent visualization provides an overview of the time tracked by users on issues.</p>
       <h3>Parameters</h3>
       <div>
         <ul className={'list-disc ml-5'}>
           <li>
-            <span className={'font-bold'}>Split Authors per Build:</span> Change the mode of visualization to either show all builds grouped
-            by status or split the builds by authors. Negative builds are all builds, which are not successful.
+            <span className={'font-bold'}>Split Time per Issue:</span>
+            When enabled, the chart will display separate lines for each issue, allowing you to see how much time was spent on each issue.
+          </li>
+          <li>
+            <span className={'font-bold'}>Split Spent Removed:</span>
+            When enabled, the chart will display separate lines for time spent and time removed.
+          </li>
+          <li>
+            <span className={'font-bold'}>Breakdown Mode:</span>
+            Choose between viewing the total time spent or the time spent per time interval.
           </li>
           <li>
             <span className={'font-bold'}>Visualization Style:</span> Change the style of how the lines are calculated into either curved

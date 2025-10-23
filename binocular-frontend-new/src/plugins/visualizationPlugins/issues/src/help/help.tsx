@@ -1,18 +1,21 @@
 function Help() {
   return (
     <>
-      <h2>Builds Help</h2>
+      <h2>Issues Help</h2>
       <h3>Data</h3>
       <p>
-        The builds visualization provides an overview of the build statuses. It allows users to track the outcomes of builds, including
-        successful, failed, and cancelled builds.
+        The Issues visualization displays the number of issues assigned to each assignee over time. It helps track workload distribution and
+        identify trends in issue assignments.
       </p>
       <h3>Parameters</h3>
       <div>
         <ul className={'list-disc ml-5'}>
           <li>
-            <span className={'font-bold'}>Split Authors per Build:</span> Change the mode of visualization to either show all builds grouped
-            by status or split the builds by authors. Negative builds are all builds, which are not successful.
+            <span className={'font-bold'}>Split Issues per Assignee:</span>
+            When enabled, the chart will display separate lines for each assignee, allowing you to see how many issues are assigned to each
+          </li>
+          <li>
+            <span className={'font-bold'}>Breakdown Mode:</span> Choose between viewing the total number of issues assigned to each assignee or the current number of issues
           </li>
           <li>
             <span className={'font-bold'}>Visualization Style:</span> Change the style of how the lines are calculated into either curved

@@ -40,7 +40,6 @@ export default function Chart<SettingsType extends CollaborationSettings, DataTy
   useEffect(() => {
     if (props.parameters?.parametersDateRange) {
       // only dispatch if it's a full DateRange
-      console.log(props.parameters.parametersDateRange);
       store.dispatch(setDateRange(props.parameters.parametersDateRange));
     } else {
       // ensure we always have a valid object with strings
