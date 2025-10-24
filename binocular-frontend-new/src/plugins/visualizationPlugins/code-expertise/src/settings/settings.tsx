@@ -1,4 +1,4 @@
-import { DataPluginBranch } from '../../../../interfaces/dataPluginInterfaces/dataPluginBranches.ts';
+import type { DataPluginBranch } from '../../../../interfaces/dataPluginInterfaces/dataPluginBranches.ts';
 import { useEffect, useState } from 'react';
 import { setCurrentBranch } from '../reducer';
 import { useSelector } from 'react-redux';
