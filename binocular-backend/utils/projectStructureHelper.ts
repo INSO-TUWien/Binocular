@@ -51,7 +51,7 @@ export function writeContextToFrontend(context: typeof Context) {
   }
 
   getData(context).then((data) => {
-    fs.writeFileSync(__dirname + '/../../binocular-frontend/config/context.json', JSON.stringify(data));
+    fs.writeFileSync(__dirname + '/../../binocular-frontend-new/config/context.json', JSON.stringify(data));
   });
 }
 
