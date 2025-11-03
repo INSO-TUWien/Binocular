@@ -15,7 +15,8 @@ function Help() {
             When enabled, the chart will display separate lines for each assignee, allowing you to see how many issues are assigned to each
           </li>
           <li>
-            <span className={'font-bold'}>Breakdown Mode:</span> Choose between viewing the total number of issues assigned to each assignee or the current number of issues
+            <span className={'font-bold'}>Breakdown Mode:</span> Choose between viewing the total number of issues assigned to each assignee
+            or the current number of issues
           </li>
           <li>
             <span className={'font-bold'}>Visualization Style:</span> Change the style of how the lines are calculated into either curved

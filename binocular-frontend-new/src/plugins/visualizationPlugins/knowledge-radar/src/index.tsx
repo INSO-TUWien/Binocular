@@ -28,6 +28,7 @@ const KnowledgeRadar: VisualizationPlugin<SettingsType, DataPluginCommit> = {
   metadata: {
     category: VisualizationPluginMetadataCategory.Expertise,
     recommended: false,
+    defaultSize: [12, 14],
     description: 'Visualize knowledge and expertise across the project, compare between different developers.',
   },
   reducer: dataSlice.reducer,
