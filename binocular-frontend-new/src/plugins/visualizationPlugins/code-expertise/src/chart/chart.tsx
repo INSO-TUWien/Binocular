@@ -264,11 +264,14 @@ function calculateOwnershipMetrics(
 
   // Sum up all additions per developer from all commitsWithBuilds
   for (const commit of commitsWithBuilds) {
-    const developer = commit.user.gitSignature;
-    if (!developerAddedTotals[developer]) {
-      developerAddedTotals[developer] = 0;
+    // safety check so website does not crash if commit has no user
+    if (commit.user) {
+      const developer = commit.user.gitSignature;
+      if (!developerAddedTotals[developer]) {
+        developerAddedTotals[developer] = 0;
+      }
+      developerAddedTotals[developer] += commit.stats.additions || 0;
     }
-    developerAddedTotals[developer] += commit.stats.additions || 0;
   }
 
   // Stores the current ownership distribution for each file
