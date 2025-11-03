@@ -24,7 +24,6 @@ function* fetchCommitData(dataConnection: DataPlugin) {
 function* fetchCommitsAndCommitByFileData(dataConnection: DataPlugin) {
   yield put(setDataState(DataState.FETCHING));
   const commits: DataPluginCommitShort[] = yield call(() => dataConnection.commits.getAllShort());
-  console.log(commits);
   if (commits.length === 0) {
     yield put(
       setCommits([
@@ -44,7 +43,6 @@ function* fetchCommitsAndCommitByFileData(dataConnection: DataPlugin) {
 
 function* fetchCommitByFileData(dataConnection: DataPlugin) {
   const state: { plugin: CommitByFileState } = yield select();
-  console.log(state);
   const commitByFile: DataPluginCommitFile[] = yield call(() => dataConnection.commitByFile.getAll(state.plugin.sha));
 
   if (commitByFile.length === 0) {

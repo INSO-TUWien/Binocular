@@ -17,7 +17,6 @@ function Chart(props: Readonly<VisualizationPluginProperties<SettingsType, DataP
   const data = useSelector((state: RootState) => state.plugin.commitFiles);
   const dataState = useSelector((state: RootState) => state.plugin.dataState);
   const commits = useSelector((state: RootState) => state.plugin.commits);
-  console.log(data);
   const commitOptions = commits.map((commit: DataPluginCommitShort) => ({
     value: commit.sha,
     label: `${commit.messageHeader} (${commit.sha.slice(0, 7)})`,

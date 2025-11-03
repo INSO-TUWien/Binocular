@@ -149,5 +149,5 @@ const buildFolderTree = (files: FileChange[]): FolderWithRatio => {
 };
 
 const getFolderByPath = (folder: FolderWithRatio, path: string[]): FolderWithRatio => {
-  return path.reduce((n, part) => n.subfolders[part], folder);
+  return path.reduce((n, part) => n?.subfolders[part], folder);
 };
