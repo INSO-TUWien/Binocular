@@ -81,8 +81,6 @@ const Chart = (
     props.settings.minNumberOfLabelsPerGroup,
   );
 
-  console.log(groupedLabels);
-
   return (
     <>
       <div
@@ -92,7 +90,7 @@ const Chart = (
         {dataState === DataState.EMPTY && <div>NoData</div>}
         {dataState === DataState.FETCHING && (
           <div>
-            <span className="loading loading-spinner loading-lg text-accent"></span>
+            <span className="loading loading-spinner loading-lg text-accent" />
           </div>
         )}
         {dataState === DataState.COMPLETE &&
