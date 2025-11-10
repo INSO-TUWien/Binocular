@@ -10,11 +10,7 @@ import { SprintChartIssue } from './components/SprintChartIssue';
 import { groupIntoTracks } from './helper/groupIntoTracks';
 import { groupMergeRequests } from './helper/groupMergeRequests';
 import { SprintChartLegend } from './components/SprintChartLegend';
-import {
-  TooltipIssue,
-  TooltipMergeRequestGroup,
-  TooltipSprintArea,
-} from './components/Tooltip';
+import { TooltipIssue, TooltipMergeRequestGroup, TooltipSprintArea } from './components/Tooltip';
 import { SprintAreas } from './components/SprintAreas';
 import type { SprintType } from '../../../../../types/data/sprintType';
 import type { MappedSprintType } from './types';
@@ -45,14 +41,8 @@ const stringToColor = (string: string) => {
   const subStringLength = partLength === 1 ? 1 : 2;
 
   const red = stringWithInvalidCharsReplaced.substring(0, subStringLength);
-  const green = stringWithInvalidCharsReplaced.substring(
-    partLength,
-    partLength + subStringLength,
-  );
-  const blue = stringWithInvalidCharsReplaced.substring(
-    partLength * 2,
-    partLength * 2 + subStringLength,
-  );
+  const green = stringWithInvalidCharsReplaced.substring(partLength, partLength + subStringLength);
+  const blue = stringWithInvalidCharsReplaced.substring(partLength * 2, partLength * 2 + subStringLength);
 
   return `#${red}${green}${blue}`;
 };
@@ -70,19 +60,7 @@ export const SprintChart: React.FC<
     height: number;
     groupedLabels: Map<number, string[]>;
   } & Pick<SprintSettings, 'coloringMode'>
-> = ({
-  authors,
-  coloringMode,
-  issues,
-  mergeRequests,
-  sprints,
-  minDate,
-  maxDate,
-  showSprints,
-  height,
-  width,
-  groupedLabels,
-}) => {
+> = ({ authors, coloringMode, issues, mergeRequests, sprints, minDate, maxDate, showSprints, height, width, groupedLabels }) => {
   const [zoom, setZoom] = React.useState(1);
   const [offset, setOffset] = React.useState(0);
 
@@ -90,11 +68,7 @@ export const SprintChart: React.FC<
 
   const svgChartRef = React.useRef<SVGSVGElement>(null);
 
-  const colorsForLabelGroups = new Map(
-    [...groupedLabels].map(
-      ([key, values]) => [key, stringToColor(values.join(''))] as const,
-    ),
-  );
+  const colorsForLabelGroups = new Map([...groupedLabels].map(([key, values]) => [key, stringToColor(values.join(''))] as const));
 
   const mappedIssues = issues.map((i) => {
     const closedAt = i.closedAt ? moment(i.closedAt) : maxDate;
@@ -108,12 +82,11 @@ export const SprintChart: React.FC<
       closedAt: closedAt.isAfter(maxDate) ? maxDate : closedAt,
 
       labels: i.labels.map((l) => {
-        const [groupId] =
-          [...groupedLabels].find(([, values]) => values.includes(l)) ?? [];
+        const [groupId] = [...groupedLabels].find(([, values]) => values.includes(l)) ?? [];
 
         return {
           name: l,
-          color: colorsForLabelGroups.get(groupId ?? Number.POSITIVE_INFINITY)??'lightgrey',
+          color: colorsForLabelGroups.get(groupId ?? Number.POSITIVE_INFINITY) ?? 'lightgrey',
         };
       }),
     };
@@ -139,14 +112,12 @@ export const SprintChart: React.FC<
       return;
     }
 
-    const zoom = d3
-      .zoom<SVGSVGElement, unknown>()
-      .on('zoom', (e: d3.D3ZoomEvent<SVGSVGElement, unknown>) => {
-        setZoom(e.transform.k);
-        setOffset(e.transform.y);
+    const zoom = d3.zoom<SVGSVGElement, unknown>().on('zoom', (e: d3.D3ZoomEvent<SVGSVGElement, unknown>) => {
+      setZoom(e.transform.k);
+      setOffset(e.transform.y);
 
-        setTooltipState(undefined);
-      });
+      setTooltipState(undefined);
+    });
     d3.select(svg).call(zoom);
   }, []);
 
@@ -157,14 +128,10 @@ export const SprintChart: React.FC<
     .range([margin, Math.abs(width - margin)])
     .domain([minDate, maxDate]);
 
-  const personColorMap = new Map(
-    authors.map((a) => [a.user.gitSignature, a.color] as const),
-  );
+  const personColorMap = new Map(authors.map((a) => [a.user.gitSignature, a.color] as const));
 
   const groupedMergeRequests =
-    maxDate.diff(minDate, 'years') >= 1
-      ? groupMergeRequests(mappedMergeRequests)
-      : mappedMergeRequests.map((mr) => [mr]);
+    maxDate.diff(minDate, 'years') >= 1 ? groupMergeRequests(mappedMergeRequests) : mappedMergeRequests.map((mr) => [mr]);
 
   return (
     <div style={{ height, width, position: 'relative' }}>
@@ -175,8 +142,7 @@ export const SprintChart: React.FC<
         height={'100%'}
         viewBox={`0, 0, ${width}, ${height}`}
         className={classes.container}
-        onClick={() => setTooltipState(undefined)}
-      >
+        onClick={() => setTooltipState(undefined)}>
         {height > 0 && width > 0 && (
           <>
             {groupedIssues.map((group, i) =>
@@ -252,16 +218,10 @@ export const SprintChart: React.FC<
       ) : tooltipState?.variant === 'merge-request' ? (
         <TooltipMergeRequestGroup
           {...tooltipState}
-          mergeRequests={
-            groupedMergeRequests.find((group) =>
-              group.some((mr) => mr.iid === tooltipState.iid),
-            ) ?? []
-          }
+          mergeRequests={groupedMergeRequests.find((group) => group.some((mr) => mr.iid === tooltipState.iid)) ?? []}
           onClickClose={() => setTooltipState(undefined)}
           onChangeMergeRequest={({ target: { value } }) =>
-            setTooltipState((prev) =>
-              prev ? { ...prev, iid: Number.parseInt(value, 10) } : prev,
-            )
+            setTooltipState((prev) => (prev ? { ...prev, iid: Number.parseInt(value, 10) } : prev))
           }
         />
       ) : tooltipState?.variant === 'sprint-area' ? (
@@ -273,12 +233,8 @@ export const SprintChart: React.FC<
             const { startDate, endDate } = tooltipState;
 
             return (
-              (i.createdAt.isBefore(startDate) &&
-                i.closedAt.isAfter(endDate)) ||
-              i.createdAt.isBetween(
-                tooltipState.startDate,
-                tooltipState.endDate,
-              ) ||
+              (i.createdAt.isBefore(startDate) && i.closedAt.isAfter(endDate)) ||
+              i.createdAt.isBetween(tooltipState.startDate, tooltipState.endDate) ||
               i.closedAt.isBetween(tooltipState.startDate, tooltipState.endDate)
             );
           })}

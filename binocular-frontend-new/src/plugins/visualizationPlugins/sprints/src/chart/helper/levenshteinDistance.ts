@@ -25,5 +25,5 @@ export const levenshteinDistance = (a: string, b: string) => {
     }
   }
 
-  return dpTable.at(-1)?.at(-1) ?? 0;
+  return dpTable.reverse()[0]?.reverse()[0] ?? 0;
 };

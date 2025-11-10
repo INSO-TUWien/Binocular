@@ -22,31 +22,13 @@ export const SprintChartIssue: React.FC<
       personColorMap: Map<string, AuthorType['color']>;
       onClick: (e: React.MouseEvent<SVGElement>, iid: number) => void;
     }
-> = ({
-  height,
-  zoom,
-  width,
-  offset,
-  scale,
-  availableTracks,
-  trackNmbr,
-  personColorMap,
-  coloringMode,
-  onClick,
-  labels,
-  ...d
-}) => {
+> = ({ height, zoom, offset, scale, availableTracks, trackNmbr, personColorMap, coloringMode, onClick, labels, ...d }) => {
   const h = Math.max(0, ((height - 110) / availableTracks - 2) * zoom);
 
   const x = scale(d.createdAt);
-  const y =
-    (margin + (trackNmbr * (height - 110)) / availableTracks - 2) * zoom +
-    offset +
-    trackNmbr * 8;
+  const y = (margin + (trackNmbr * (height - 110)) / availableTracks - 2) * zoom + offset + trackNmbr * 8;
 
-  const { aggregatedTimeTrackingData } = aggregateTimeTrackingData(
-    extractTimeTrackingDataFromNotes(d.notes),
-  );
+  const { aggregatedTimeTrackingData } = aggregateTimeTrackingData(extractTimeTrackingDataFromNotes(d.notes));
 
   const color =
     personColorMap.get(
@@ -67,14 +49,9 @@ export const SprintChartIssue: React.FC<
         e.stopPropagation();
 
         onClick(e, d.iid);
-      }}
-    >
+      }}>
       <rect
-        width={Math.max(
-          scale(d.closedAt) - scale(d.createdAt) - 4,
-          h / availableTracks - 2,
-          4,
-        )}
+        width={Math.max(scale(d.closedAt) - scale(d.createdAt) - 4, h / availableTracks - 2, 4)}
         height={h}
         x={x}
         y={y}
@@ -91,8 +68,7 @@ export const SprintChartIssue: React.FC<
         style={{ display: h > 25 ? undefined : 'none' }}
         paintOrder={'stroke'}
         stroke={'white'}
-        strokeWidth={2}
-      >
+        strokeWidth={2}>
         #{d.iid}
       </text>
     </g>
@@ -106,18 +82,9 @@ export const SprintChartIssue: React.FC<
           patternUnits={'userSpaceOnUse'}
           patternTransform={'rotate(45)'}
           width={8 * labels.length}
-          height={'8'}
-        >
+          height={'8'}>
           {labels.map(({ color }, i) => (
-            <rect
-              key={color}
-              x={8 * i}
-              y={'0'}
-              width={8}
-              height={'15'}
-              stroke={'none'}
-              fill={color}
-            />
+            <rect key={color} x={8 * i} y={'0'} width={8} height={'15'} stroke={'none'} fill={color} />
           ))}
         </pattern>
       </defs>

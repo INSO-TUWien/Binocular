@@ -16,49 +16,20 @@ export const SprintChartLegend: React.FC<{
   personColorMap: Map<string, AuthorType['color']>;
   coloringMode: string;
   onClickMergeRequest: (e: React.MouseEvent<SVGElement>, iid: number) => void;
-}> = ({
-  height,
-  width,
-  scale,
-  maxDate,
-  minDate,
-  groupedMergeRequests,
-  personColorMap,
-  coloringMode,
-  onClickMergeRequest,
-}) => (
+}> = ({ height, width, scale, maxDate, minDate, groupedMergeRequests, personColorMap, coloringMode, onClickMergeRequest }) => (
   <>
-    <rect
-      x={margin}
-      y={height - margin * 2}
-      height={1}
-      width={width - margin * 2}
-    />
+    <rect x={margin} y={height - margin * 2} height={1} width={width - margin * 2} />
 
-    <rect
-      x={margin}
-      y={height - margin * 2 + 1}
-      width={width - margin * 2}
-      height={40}
-      fill={'#EEE'}
-    />
+    <rect x={margin} y={height - margin * 2 + 1} width={width - margin * 2} height={40} fill={'#EEE'} />
 
     {scale.ticks().map((t) => {
       const x = scale(t);
 
       return (
         <g key={t.toISOString()}>
-          <rect
-            x={x}
-            y={height - margin * 2}
-            width={1}
-            height={8}
-            fill={'#000'}
-          />
+          <rect x={x} y={height - margin * 2} width={1} height={8} fill={'#000'} />
           <text x={x} y={height - margin} fontSize={10} textAnchor={'middle'}>
-            {moment(t).format(
-              maxDate.diff(minDate, 'years') > 1 ? 'YYYY' : 'MM.YYYY',
-            )}
+            {moment(t).format(maxDate.diff(minDate, 'years') > 1 ? 'YYYY' : 'MM.YYYY')}
           </text>
         </g>
       );

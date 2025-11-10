@@ -75,14 +75,5 @@ export const groupSimilarLabels = (strings: string[], epsilon = 3, minPoints = 2
   return map;
 };
 
-const rangeQuery = (
-  current: Point,
-  data: Point[],
-  epsilon: number,
-  matrix: Map<string, Map<string, number>>,
-) =>
-  data.filter(
-    (point) =>
-      (matrix.get(point.value)?.get(current.value) ??
-        Number.POSITIVE_INFINITY) <= epsilon,
-  );
+const rangeQuery = (current: Point, data: Point[], epsilon: number, matrix: Map<string, Map<string, number>>) =>
+  data.filter((point) => (matrix.get(point.value)?.get(current.value) ?? Number.POSITIVE_INFINITY) <= epsilon);

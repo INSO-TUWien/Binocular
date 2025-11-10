@@ -3,13 +3,9 @@ import type { AuthorType } from '../../../../../../types/data/authorType';
 import { extractTimeTrackingDataFromNotes } from '../../../../timeSpent/src/utilities/dataConverter';
 import { aggregateTimeTrackingData } from '../helper/aggregateTimeTrackingData';
 import { margin } from '../SprintChart';
-import type {
-  MappedDataPluginIssue,
-  MappedDataPluginMergeRequest,
-  MappedSprintType,
-} from '../types';
+import type { MappedDataPluginIssue, MappedDataPluginMergeRequest, MappedSprintType } from '../types';
 import { groupBy } from 'lodash';
-import chroma from 'chroma-js'
+import chroma from 'chroma-js';
 
 const TooltipLayout: React.FC<
   React.PropsWithChildren<{
@@ -36,20 +32,13 @@ const TooltipLayout: React.FC<
       style={{
         position: 'absolute',
         top: top <= halfwayDivider ? top : undefined,
-        bottom:
-          top > halfwayDivider
-            ? (svgRect?.bottom ?? 0) - anchorRect.bottom + anchorRect.height + 4
-            : undefined,
-        left:
-          left + tooltipWidth > (svgRect?.right ?? 0)
-            ? left - (left + tooltipWidth - (svgRect?.right ?? 0)) - margin * 2
-            : left,
+        bottom: top > halfwayDivider ? (svgRect?.bottom ?? 0) - anchorRect.bottom + anchorRect.height + 4 : undefined,
+        left: left + tooltipWidth > (svgRect?.right ?? 0) ? left - (left + tooltipWidth - (svgRect?.right ?? 0)) - margin * 2 : left,
         width: tooltipWidth,
         display: visible ? 'none' : undefined,
         maxHeight: 600,
         overflow: 'auto',
-      }}
-    >
+      }}>
       {children}
 
       <div className={'card-actions justify-end mt-1'}>
@@ -71,17 +60,12 @@ export const TooltipIssue: React.FC<{
 }> = ({ issues, anchor, personColorMap, iid, onClickClose }) => {
   const i = issues.find((i) => i.iid === iid);
 
-  const { aggregatedTimeTrackingData, totalTime } = aggregateTimeTrackingData(
-    extractTimeTrackingDataFromNotes(i?.notes ?? []),
-  );
+  const { aggregatedTimeTrackingData, totalTime } = aggregateTimeTrackingData(extractTimeTrackingDataFromNotes(i?.notes ?? []));
 
   return (
     <TooltipLayout visible={!i} anchor={anchor} onClickClose={onClickClose}>
-      <h2
-        className={'card-title'}
-        style={{ display: 'inline', wordBreak: 'break-word' }}
-      >
-        <a href={i?.webUrl} target={'_blank'}>
+      <h2 className={'card-title'} style={{ display: 'inline', wordBreak: 'break-word' }}>
+        <a href={i?.webUrl} target={'_blank'} rel="noreferrer">
           <span>#{i?.iid} </span>
           <strong>{i?.title}</strong>
         </a>
@@ -91,10 +75,7 @@ export const TooltipIssue: React.FC<{
         <em>Created:</em> {i?.createdAt.format('lll')}
       </p>
       <p>
-        <em>Closed:</em>{' '}
-        {i?.state.toLowerCase() === 'closed'
-          ? i?.closedAt.format('lll')
-          : 'open'}
+        <em>Closed:</em> {i?.state.toLowerCase() === 'closed' ? i?.closedAt.format('lll') : 'open'}
       </p>
       <p>
         <em>Creator:</em> {i?.author.name}
@@ -121,8 +102,7 @@ export const TooltipIssue: React.FC<{
                 style={{
                   width: `${(100 / totalTime) * value}%`,
                   backgroundColor: personColorMap.get(key)?.main ?? 'lightgrey',
-                }}
-              >
+                }}>
                 {value}
               </li>
             ))}
@@ -136,12 +116,10 @@ export const TooltipIssue: React.FC<{
         <em>Linked Commits:</em> {i?.commits.length}
       </p>
       <p>
-        <em>Additions:</em>{' '}
-        {i?.commits.reduce((acc, { additions }) => acc + additions, 0)}
+        <em>Additions:</em> {i?.commits.reduce((acc, { additions }) => acc + additions, 0)}
       </p>
       <p>
-        <em>Deletions:</em>{' '}
-        {i?.commits.reduce((acc, { deletions }) => acc + deletions, 0)}
+        <em>Deletions:</em> {i?.commits.reduce((acc, { deletions }) => acc + deletions, 0)}
       </p>
 
       <div className={'divider'} />
@@ -154,8 +132,7 @@ export const TooltipIssue: React.FC<{
             style={{
               backgroundColor: l.color,
               color: chroma.contrast(l.color, 'black') > 4.5 ? 'black' : 'white',
-            }}
-          >
+            }}>
             {l.name}
           </span>
         ))}
@@ -179,12 +156,7 @@ export const TooltipMergeRequestGroup: React.FC<{
       {mergeRequests.length > 1 && (
         <fieldset className={'fieldset'} style={{ width: '100%' }}>
           <legend className={'fieldset-legend'}>Merge Requests</legend>
-          <select
-            value={iid}
-            className={'select select-xs'}
-            style={{ width: '100%' }}
-            onChange={onChangeMergeRequest}
-          >
+          <select value={iid} className={'select select-xs'} style={{ width: '100%' }} onChange={onChangeMergeRequest}>
             {mergeRequests.map((mr) => (
               <option key={mr.iid} value={mr.iid}>
                 {mr.title}
@@ -194,11 +166,8 @@ export const TooltipMergeRequestGroup: React.FC<{
         </fieldset>
       )}
 
-      <h2
-        className={'card-title'}
-        style={{ display: 'inline', wordBreak: 'break-word' }}
-      >
-        <a href={mr?.webUrl} target={'_blank'}>
+      <h2 className={'card-title'} style={{ display: 'inline', wordBreak: 'break-word' }}>
+        <a href={mr?.webUrl} target={'_blank'} rel="noreferrer">
           <span>#{mr?.iid} </span>
           <strong>{mr?.title}</strong>
         </a>
@@ -208,10 +177,7 @@ export const TooltipMergeRequestGroup: React.FC<{
         <em>Created:</em> {mr?.createdAt.format('lll')}
       </p>
       <p>
-        <em>Closed:</em>{' '}
-        {mr?.state.toLowerCase() === 'closed'
-          ? mr?.closedAt.format('lll')
-          : 'open'}
+        <em>Closed:</em> {mr?.state.toLowerCase() === 'closed' ? mr?.closedAt.format('lll') : 'open'}
       </p>
       <p>
         <em>Creator:</em> {mr?.author.name}
@@ -229,10 +195,7 @@ export const TooltipSprintArea: React.FC<
     onClickClose: React.MouseEventHandler;
   }
 > = ({ anchor, startDate, endDate, issues, onClickClose }) => {
-  const groupedByAssignee = groupBy(
-    issues,
-    (i) => i.assignee?.name ?? 'No Assignee',
-  );
+  const groupedByAssignee = groupBy(issues, (i) => i.assignee?.name ?? 'No Assignee');
 
   const groupedByStatus = groupBy(issues, (i) => i.state);
 
@@ -252,13 +215,7 @@ export const TooltipSprintArea: React.FC<
               <em>{key}</em>
 
               {value.map((i) => (
-                <a
-                  key={i.iid}
-                  href={i.webUrl}
-                  className={'link'}
-                  target={'_blank'}
-                  style={{ wordBreak: 'keep-all' }}
-                >
+                <a key={i.iid} href={i.webUrl} className={'link'} target={'_blank'} style={{ wordBreak: 'keep-all' }} rel="noreferrer">
                   {i.iid}
                 </a>
               ))}
@@ -277,13 +234,7 @@ export const TooltipSprintArea: React.FC<
               <em>{key}</em>
 
               {value.map((i) => (
-                <a
-                  key={i.iid}
-                  href={i.webUrl}
-                  className={'link'}
-                  target={'_blank'}
-                  style={{ wordBreak: 'keep-all' }}
-                >
+                <a key={i.iid} href={i.webUrl} className={'link'} target={'_blank'} style={{ wordBreak: 'keep-all' }} rel="noreferrer">
                   {i.iid}
                 </a>
               ))}

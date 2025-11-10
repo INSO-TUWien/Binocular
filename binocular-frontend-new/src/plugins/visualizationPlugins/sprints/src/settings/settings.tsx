@@ -20,9 +20,7 @@ const Settings = ({ settings, setSettings }: Props) => (
           type="checkbox"
           className="toggle toggle-accent toggle-sm"
           defaultChecked={settings.showSprints}
-          onChange={(event) =>
-            setSettings({ ...settings, showSprints: event.target.checked })
-          }
+          onChange={(event) => setSettings({ ...settings, showSprints: event.target.checked })}
         />
       </label>
       <label className="label cursor-pointer flex w-full justify-between items-center mt-0.5">
@@ -35,8 +33,7 @@ const Settings = ({ settings, setSettings }: Props) => (
               ...settings,
               coloringMode: e.target.value as SprintSettings['coloringMode'],
             })
-          }
-        >
+          }>
           <option value={'author'}>Author</option>
           <option value={'assignee'}>Assignee</option>
           <option value={'time-spent'}>Most Spent Time (Gitlab only)</option>
@@ -58,9 +55,7 @@ const Settings = ({ settings, setSettings }: Props) => (
               onChange={(e) =>
                 setSettings({
                   ...settings,
-                  maxNumberOfDifferencesBetweenLabels: Number.parseInt(
-                    e.target.value,
-                  ),
+                  maxNumberOfDifferencesBetweenLabels: Number.parseInt(e.target.value),
                 })
               }
               style={{ width: 56 }}

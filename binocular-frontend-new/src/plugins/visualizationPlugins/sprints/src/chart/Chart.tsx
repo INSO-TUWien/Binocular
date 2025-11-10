@@ -11,9 +11,7 @@ import moment from 'moment';
 import * as React from 'react';
 import { groupSimilarLabels } from './helper/groupSimilarLabels.ts';
 
-const Chart = (
-  props: VisualizationPluginProperties<SprintSettings, DataPluginIssue>,
-) => {
+const Chart = (props: VisualizationPluginProperties<SprintSettings, DataPluginIssue>) => {
   /*
    * Creating Dispatch and Root State for interaction with the reducer State
    */
@@ -29,15 +27,9 @@ const Chart = (
    * -----------------------------
    */
   //Redux Global State
-  const issues = useSelector<RootState, IssuesState['issues']>(
-    (data) => data.plugin.issues,
-  );
-  const mergeRequests = useSelector<RootState, IssuesState['mergeRequests']>(
-    (data) => data.plugin.mergeRequests,
-  );
-  const dataState = useSelector<RootState, IssuesState['dataState']>(
-    (state: RootState) => state.plugin.dataState,
-  );
+  const issues = useSelector<RootState, IssuesState['issues']>((data) => data.plugin.issues);
+  const mergeRequests = useSelector<RootState, IssuesState['mergeRequests']>((data) => data.plugin.mergeRequests);
+  const dataState = useSelector<RootState, IssuesState['dataState']>((state: RootState) => state.plugin.dataState);
 
   /**
    * RESIZE Logic START
@@ -63,11 +55,7 @@ const Chart = (
 
   //Set Global state when parameters change. This will also conclude in a refresh of the data.
   useEffect(() => {
-    dispatch(
-      getDataSlice(props.dataName!).actions.setDateRange(
-        props.parameters.parametersDateRange,
-      ),
-    );
+    dispatch(getDataSlice(props.dataName!).actions.setDateRange(props.parameters.parametersDateRange));
   }, [props.parameters]);
 
   //Trigger Refresh when dataConnection changes
@@ -83,10 +71,7 @@ const Chart = (
 
   return (
     <>
-      <div
-        className={'w-full h-full flex justify-center items-center'}
-        ref={props.chartContainerRef}
-      >
+      <div className={'w-full h-full flex justify-center items-center'} ref={props.chartContainerRef}>
         {dataState === DataState.EMPTY && <div>NoData</div>}
         {dataState === DataState.FETCHING && (
           <div>

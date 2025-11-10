@@ -31,12 +31,7 @@ export const issuesSlice = createSlice({
   name: 'sprints',
   initialState,
   reducers: {
-    setIssues: (
-      state,
-      {
-        payload: { issues, mergeRequests },
-      }: PayloadAction<Pick<IssuesState, 'issues' | 'mergeRequests'>>,
-    ) => {
+    setIssues: (state, { payload: { issues, mergeRequests } }: PayloadAction<Pick<IssuesState, 'issues' | 'mergeRequests'>>) => {
       state.issues = issues;
       state.mergeRequests = mergeRequests;
     },
