@@ -33,8 +33,7 @@ const Sprints: VisualizationPlugin<SprintSettings, DataPluginIssue> = {
   metadata: {
     category: VisualizationPluginMetadataCategory.Issues,
     recommended: false,
-    description:
-      'A bar chart that visualizes issues in relation to the defined sprints.',
+    description: 'A bar chart that visualizes issues in relation to the defined sprints.',
   },
   reducer: Reducer,
   saga: Saga,
