@@ -62,7 +62,7 @@ const Settings = ({ settings, setSettings }: Props) => (
             />
           </label>
           <label className="label cursor-pointer flex w-full justify-between items-center mt-0.5">
-            <span className="label-text">Minimum group size:</span>
+            <span className="label-text">Min group size:</span>
             <input
               type="number"
               min={0}
