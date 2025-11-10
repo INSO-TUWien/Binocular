@@ -7,7 +7,7 @@ export const SprintAreas: React.FC<{
   sprints: MappedSprintType[];
   scale: d3.ScaleTime<number, number>;
   height: number;
-  onClick: (e: React.MouseEvent<SVGGElement>, sprint: MappedSprintType) => void;
+  onClick?: (e: React.MouseEvent<SVGGElement>, sprint: MappedSprintType) => void;
 }> = ({ sprints, scale, height, onClick }) => (
   <>
     <defs>
@@ -46,7 +46,7 @@ export const SprintAreas: React.FC<{
             onClick={(e) => {
               e.stopPropagation();
 
-              onClick(e, s);
+              onClick?.(e, s);
             }}>
             <rect x={xStart} y={Math.max(0, height - 40 - 15)} height={15} width={xEnd - xStart} fill={'white'} />
             <rect
