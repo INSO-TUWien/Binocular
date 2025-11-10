@@ -24,7 +24,7 @@ const Sprints: VisualizationPlugin<SprintSettings, DataPluginIssue> = {
     getSVGData: () => '',
   },
   capabilities: {
-    popoutOnly: false,
+    popoutOnly: import.meta.env.PROD,
     export: false,
   },
   images: {
