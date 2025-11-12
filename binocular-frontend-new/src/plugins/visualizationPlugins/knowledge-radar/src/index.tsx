@@ -30,6 +30,7 @@ const KnowledgeRadar: VisualizationPlugin<SettingsType, DataPluginCommit> = {
     recommended: false,
     defaultSize: [12, 14],
     description: 'Visualize knowledge and expertise across the project, compare between different developers.',
+    compatibility: { binocularBackend: true, githubAPI: false, mockData: true, pouchDB: true, github: true, gitlab: true },
   },
   reducer: dataSlice.reducer,
   saga: Saga,

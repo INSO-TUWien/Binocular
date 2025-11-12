@@ -379,7 +379,7 @@ function Segment({ rad, startPercent, endPercent, devName, devData, devColor, ma
           </defs>
           <text fill={textColor}>
             <textPath href={'#' + devNameId + '_namePath'} startOffset="25%" textAnchor="middle" alignmentBaseline="middle">
-              {displayName}
+              {endPercent - startPercent > 0.01 && displayName}
             </textPath>
           </text>
         </g>
@@ -387,7 +387,7 @@ function Segment({ rad, startPercent, endPercent, devName, devData, devColor, ma
 
       {smallSegment && (
         <text ref={devNameTextRef} textAnchor={textAnchorStart ? 'start' : 'end'} alignmentBaseline="middle" fill={textColor}>
-          {displayName}
+          {endPercent - startPercent > 0.01 && displayName}
         </text>
       )}
 

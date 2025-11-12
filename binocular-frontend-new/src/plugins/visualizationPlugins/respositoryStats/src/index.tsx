@@ -30,6 +30,7 @@ const RepositoryStats: VisualizationPlugin<SettingsType, unknown> = {
     recommended: false,
     description: 'Statistics about the repository.',
     defaultSize: [8, 12],
+    compatibility: { binocularBackend: true, githubAPI: false, mockData: true, pouchDB: true, github: true, gitlab: true },
   },
 };
 export default RepositoryStats;

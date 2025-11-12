@@ -34,6 +34,7 @@ const FileChanges: VisualizationPlugin<SettingsType, null> = {
     recommended: false,
     description:
       'A line chart that visualizes the amount of additions and deletion and what author is responsible for them over time for an individual file.',
+    compatibility: { binocularBackend: true, githubAPI: false, mockData: true, pouchDB: true, github: true, gitlab: true },
   },
   reducer: Reducer,
   saga: Saga,

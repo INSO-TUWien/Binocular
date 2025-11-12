@@ -31,6 +31,7 @@ const Issues: VisualizationPlugin<IssueSettings, DataPluginIssue> = {
     category: VisualizationPluginMetadataCategory.Issues,
     recommended: true,
     description: 'A line chart that visualizes the amount of issues open and closed.',
+    compatibility: { binocularBackend: true, githubAPI: false, mockData: true, pouchDB: true, github: true, gitlab: true },
   },
   reducer: Reducer,
   saga: Saga,

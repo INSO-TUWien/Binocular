@@ -34,6 +34,7 @@ const CodeExpertise: VisualizationPlugin<BranchSettings, ExpertiseData> = {
     category: VisualizationPluginMetadataCategory.Expertise,
     recommended: false,
     description: 'Shows expertise of developers over the scope of the whole project.',
+    compatibility: { binocularBackend: true, githubAPI: false, mockData: true, pouchDB: true, github: true, gitlab: true },
   },
   reducer: Reducer,
   saga: Saga,

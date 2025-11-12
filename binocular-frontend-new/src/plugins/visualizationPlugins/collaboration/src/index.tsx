@@ -35,7 +35,8 @@ const CollaborationVisualization: VisualizationPlugin<CollaborationSettings, Dat
   metadata: {
     category: VisualizationPluginMetadataCategory.AuthorBehaviour,
     recommended: false,
-    description: '',
+    description: 'Shows connections between all contributors of the project.',
+    compatibility: { binocularBackend: true, githubAPI: false, mockData: true, pouchDB: true, github: true, gitlab: true },
   },
   reducer: Reducer,
   saga: Saga,
