@@ -30,14 +30,22 @@ export function showInfoTooltipp(x: number, y: number, content: infoTooltippCont
   contentElement.appendChild(headline);
   contentElement.appendChild(text);
   if (compatibilityInfo) {
-    const divider = document.createElement('div');
-    divider.setAttribute('class', 'divider');
-    contentElement.appendChild(divider);
-    const text2 = document.createElement('h3');
-    text2.innerText = 'Compatibility';
-    const text3 = document.createElement('p');
-    text3.innerText = 'GitHub: ' + compatibilityInfo.github + '\nGitLab: ' + compatibilityInfo.gitlab
-    contentElement.appendChild(text2);
-    contentElement.appendChild(text3);
+    const compatibility = document.createElement('div');
+    compatibility.innerHTML = `<h3>Compatibility</h3>
+      <div id="compatibility">
+        <div>
+          <p><b>Datatypes</b></p>
+          <p>GitHub: ${compatibilityInfo.github ? 'yes' : 'no'}<br>
+          GitLab: ${compatibilityInfo.gitlab ? 'yes' : 'no'}</p>
+        </div>
+        <div>
+          <p><b>Databases</b></p>
+          <p>Binocular Backend: ${compatibilityInfo.binocularBackend ? 'yes' : 'no'}<br>
+          PouchDB: ${compatibilityInfo.pouchDB ? 'yes' : 'no'}<br>
+          Mock Data: ${compatibilityInfo.mockData ? 'yes' : 'no'}<br>
+          GitHub API: ${compatibilityInfo.githubAPI ? 'yes' : 'no'}</p>
+        </div>
+      </div>`;
+    contentElement.appendChild(compatibility);
   }
 }
