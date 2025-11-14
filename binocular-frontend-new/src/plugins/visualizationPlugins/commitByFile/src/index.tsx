@@ -29,6 +29,7 @@ const CommitByFile: VisualizationPlugin<SettingsType, DataPluginCommitFile> = {
     category: VisualizationPluginMetadataCategory.Commits,
     recommended: false,
     description: 'A tree map that visualizes the changes in a selected commit.',
+    defaultSize: [14, 8],
     compatibility: { binocularBackend: true, githubAPI: false, mockData: true, pouchDB: false, github: true, gitlab: true },
   },
   reducer: Reducer,

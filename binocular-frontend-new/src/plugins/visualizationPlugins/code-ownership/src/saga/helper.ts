@@ -19,7 +19,7 @@ export async function getOwnershipForCommits(latestBranchCommit: DataPluginCommi
 }
 
 export async function getBranches(dataConnection: DataPlugin) {
-  return await dataConnection.branches!.getAllBranches();
+  return await dataConnection.branches!.getAll();
 }
 
 export async function getCommitDataForSha(sha: string, dataConnection: DataPlugin) {

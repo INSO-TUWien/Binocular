@@ -27,7 +27,7 @@ function* fetchExpertiseData(dataConnection: DataPlugin) {
 
   const codeOwnershipData: CodeOwnershipData = yield call(async () => {
     if (!dataConnection.branches) return;
-    const branches = (await dataConnection.branches.getAllBranches()).sort((a, b) => a.branch.localeCompare(b.branch));
+    const branches = (await dataConnection.branches.getAll()).sort((a, b) => a.branch.localeCompare(b.branch));
     let currentBranch: DataPluginBranch | undefined = undefined;
     if (!branchId) currentBranch = await getLatestBranch(branches, dataConnection);
     else currentBranch = branches[branchId];
