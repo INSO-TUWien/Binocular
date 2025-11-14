@@ -1,6 +1,6 @@
 import * as d3 from 'd3';
 import chroma from 'chroma-js';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { type JSX, type ReactNode, type RefObject, useEffect, useRef, useState } from 'react';
 import DotsPattern from '../../../../../components/svg/patterns/dots';
 import HatchPattern from '../../../../../components/svg/patterns/hatch';
 import type { DataPluginCommitBuild } from '../../../../interfaces/dataPluginInterfaces/dataPluginCommits';
@@ -159,14 +159,14 @@ function Segment({ rad, startPercent, endPercent, devName, devData, devColor, ma
 
     //anly animate a smooth transition if the flag is set
     if (readyToAnimate) {
-      selection = selection.transition().duration(animationDuration);
+      selection = selection.transition().duration(animationDuration).selection();
     }
 
     const length = Math.min(attributeNames.length, newAttributes.length);
     for (let i = 0; i < length; i++) {
       const name = attributeNames[i];
       const value = newAttributes[i];
-      selection = selection.attr(name, value);
+      selection = selection.attr(name, value as string);
     }
   };
 
@@ -190,19 +190,19 @@ function Segment({ rad, startPercent, endPercent, devName, devData, devColor, ma
   //is called when the animation flag changes.
   //this means that the d3 components have changed and need to be animated to display their new state.
   useEffect(() => {
-    animate(segmentRef, ['d'], [circleSegment.toString()]);
-    animate(contourRef, ['d'], [circleSegment]);
-    animate(goodCommitsArcRef, ['d'], [goodCommitsArc]);
-    animate(badCommitsArcRef, ['d'], [badCommitsArc]);
-    animate(commitsRef, ['d'], [commitsPath]);
-    animate(additionsArcRef, ['d'], [additionsArc]);
-    animate(ownershipArcRef, ['d'], [ownershipArc]);
-    animate(additionsTextArcRef, ['d'], [additionsTextArc]);
-    animate(devNameArcRef, ['d'], [devNameArc]);
-    animate(devNameTextRef, ['x', 'y'], devNameCoordinates);
+    animate(segmentRef as RefObject<SVGElement>, ['d'], [circleSegment.toString()]);
+    animate(contourRef as RefObject<SVGElement>, ['d'], [circleSegment]);
+    animate(goodCommitsArcRef as RefObject<SVGElement>, ['d'], [goodCommitsArc]);
+    animate(badCommitsArcRef as RefObject<SVGElement>, ['d'], [badCommitsArc]);
+    animate(commitsRef as RefObject<SVGElement>, ['d'], [commitsPath]);
+    animate(additionsArcRef as RefObject<SVGElement>, ['d'], [additionsArc]);
+    animate(ownershipArcRef as RefObject<SVGElement>, ['d'], [ownershipArc]);
+    animate(additionsTextArcRef as RefObject<SVGElement>, ['d'], [additionsTextArc]);
+    animate(devNameArcRef as RefObject<SVGElement>, ['d'], [devNameArc]);
+    animate(devNameTextRef as RefObject<SVGElement>, ['x', 'y'], devNameCoordinates);
 
     //text fades in when segment is focused
-    animate(additionsTextRef, ['opacity'], focus ? [1] : [0]);
+    animate(additionsTextRef as RefObject<SVGTextElement>, ['opacity'], focus ? [1] : [0]);
 
     //allow animations after first time of displaying the chart
     if (radius !== 0 && !readyToAnimate) {
@@ -379,7 +379,7 @@ function Segment({ rad, startPercent, endPercent, devName, devData, devColor, ma
           </defs>
           <text fill={textColor}>
             <textPath href={'#' + devNameId + '_namePath'} startOffset="25%" textAnchor="middle" alignmentBaseline="middle">
-              {endPercent - startPercent > 0.01 && displayName}
+              {(endPercent - startPercent > 0.01 || focus) && displayName}
             </textPath>
           </text>
         </g>
@@ -387,14 +387,14 @@ function Segment({ rad, startPercent, endPercent, devName, devData, devColor, ma
 
       {smallSegment && (
         <text ref={devNameTextRef} textAnchor={textAnchorStart ? 'start' : 'end'} alignmentBaseline="middle" fill={textColor}>
-          {endPercent - startPercent > 0.01 && displayName}
+          {(endPercent - startPercent > 0.01 || focus) && displayName}
         </text>
       )}
 
       {/*actual segment*/}
 
       {/*hatch pattern for the middle arc*/}
-      <defs>{HatchPattern({ color: devColorDark, id: `hatch_${devNameId}` })}</defs>
+      <defs>{HatchPattern({ color: devColorDark, id: `hatch_${devNameId}` }) as ReactNode}</defs>
 
       {/*outer border*/}
       <path ref={segmentRef} stroke={strokeColor} fill={backgroundColor} />
@@ -432,7 +432,7 @@ function Segment({ rad, startPercent, endPercent, devName, devData, devColor, ma
       <path ref={goodCommitsArcRef} fill={goodCommitsColor} />
 
       {/*inner commits path with dot-pattern*/}
-      <defs>{DotsPattern({ color: devColor, id: `dots_${devNameId}` })}</defs>
+      <defs>{DotsPattern({ color: devColor, id: `dots_${devNameId}` }) as ReactNode}</defs>
       <path id={devName + '_commitsPath'} ref={commitsRef} fill={`url(#dots_${devNameId})`} />
 
       {/*outer border without fill, just for contours*/}
