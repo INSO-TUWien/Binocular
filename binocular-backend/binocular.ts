@@ -390,7 +390,12 @@ function runBackend() {
       // export db if required
       if (context.argv.export) {
         projectStructureHelper.deleteDbExport(__dirname + '/../binocular-frontend-new/src');
-        projectStructureHelper.createAndFillDbExportFolder(context.db, __dirname + '/../binocular-frontend-new/src');
+        projectStructureHelper.createAndFillDbExportFolder(
+          context.db,
+          __dirname + '/../binocular-frontend-new/src',
+          context.vcsUrlProvider.baseUrl + context.vcsUrlProvider.project,
+          context.ciUrlProvider.provider,
+        );
       }
 
       if (activeProviders.length < 1) {
