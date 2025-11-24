@@ -452,8 +452,6 @@ function preprocessNotes(
   mergeRequests: JSONObject[],
   issues: JSONObject[],
 ) {
-  console.log(users);
-  console.log(noteUserConnection);
   const rawUser = binarySearch(users, noteUserConnection.to, '_id');
   if (rawUser == null) {
     return _.assign(note, { manualRun: true });
