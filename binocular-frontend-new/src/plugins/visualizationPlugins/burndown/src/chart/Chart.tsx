@@ -6,7 +6,7 @@ import { handelPopoutResizing } from '../../../../utils/resizing.ts';
 import type { VisualizationPluginProperties } from '../../../../interfaces/visualizationPluginInterfaces/visualizationPluginProperties.ts';
 import type { DataPluginIssue } from '../../../../interfaces/dataPluginInterfaces/dataPluginIssues.ts';
 import { getDataSlice } from '../../../simpleVisualizationPlugin/src/reducer/index.ts';
-import moment from 'moment';
+import moment, { type unitOfTime } from 'moment';
 import * as React from 'react';
 import { BurndownChart } from './BurndownChart.tsx';
 
@@ -80,6 +80,7 @@ const Chart = (props: VisualizationPluginProperties<BurndownSettings, DataPlugin
               showSprints={props.settings.showSprints}
               width={chartWidth}
               height={chartHeight}
+              granularity={props.parameters.parametersGeneral.granularity as unitOfTime.Base}
             />
           ) : (
             <div>No Data matching the selected Parameters!</div>

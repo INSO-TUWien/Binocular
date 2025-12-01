@@ -1,0 +1,12 @@
+.section:hover {
+  cursor: pointer;
+
+  & > rect {
+    fill: lightgrey;
+    stroke: lightgrey;
+  }
+
+  & > line {
+    stroke-width: 2px;
+  }
+}
