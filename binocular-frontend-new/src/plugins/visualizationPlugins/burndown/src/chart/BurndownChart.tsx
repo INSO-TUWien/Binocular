@@ -145,7 +145,7 @@ export const BurndownChart: React.FC<
               return (
                 <g key={t}>
                   <rect x={margin * 2 - 8} y={y} width={8} height={1} fill={'#000'} />
-                  <text x={margin} y={y} fontSize={10} textAnchor={'middle'}>
+                  <text x={margin} y={y} fontSize={10} textAnchor={'middle'} alignmentBaseline={'central'}>
                     {t}
                   </text>
                 </g>
