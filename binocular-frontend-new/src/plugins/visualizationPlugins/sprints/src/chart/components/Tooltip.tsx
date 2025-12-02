@@ -7,14 +7,14 @@ import type { MappedDataPluginIssue, MappedDataPluginMergeRequest, MappedSprintT
 import { groupBy } from 'lodash';
 import chroma from 'chroma-js';
 
-const TooltipLayout: React.FC<
+export const TooltipLayout: React.FC<
   React.PropsWithChildren<{
     anchor: SVGElement;
-    visible: boolean;
+    invisible: boolean;
 
     onClickClose: React.MouseEventHandler;
   }>
-> = ({ children, anchor, visible, onClickClose }) => {
+> = ({ children, anchor, invisible, onClickClose }) => {
   const svg = anchor.closest('svg');
   const svgRect = svg?.getBoundingClientRect();
   const anchorRect = anchor.getBoundingClientRect();
@@ -35,7 +35,7 @@ const TooltipLayout: React.FC<
         bottom: top > halfwayDivider ? (svgRect?.bottom ?? 0) - anchorRect.bottom + anchorRect.height + 4 : undefined,
         left: left + tooltipWidth > (svgRect?.right ?? 0) ? left - (left + tooltipWidth - (svgRect?.right ?? 0)) - margin * 2 : left,
         width: tooltipWidth,
-        display: visible ? 'none' : undefined,
+        display: invisible ? 'none' : undefined,
         maxHeight: 600,
         overflow: 'auto',
       }}>
@@ -63,7 +63,7 @@ export const TooltipIssue: React.FC<{
   const { aggregatedTimeTrackingData, totalTime } = aggregateTimeTrackingData(extractTimeTrackingDataFromNotes(i?.notes ?? []));
 
   return (
-    <TooltipLayout visible={!i} anchor={anchor} onClickClose={onClickClose}>
+    <TooltipLayout invisible={!i} anchor={anchor} onClickClose={onClickClose}>
       <h2 className={'card-title'} style={{ display: 'inline', wordBreak: 'break-word' }}>
         <a href={i?.webUrl} target={'_blank'} rel="noreferrer">
           <span>#{i?.iid} </span>
@@ -152,7 +152,7 @@ export const TooltipMergeRequestGroup: React.FC<{
   const mr = mergeRequests.find((i) => i.iid === iid);
 
   return (
-    <TooltipLayout visible={!mr} anchor={anchor} onClickClose={onClickClose}>
+    <TooltipLayout invisible={!mr} anchor={anchor} onClickClose={onClickClose}>
       {mergeRequests.length > 1 && (
         <fieldset className={'fieldset'} style={{ width: '100%' }}>
           <legend className={'fieldset-legend'}>Merge Requests</legend>
@@ -200,7 +200,7 @@ export const TooltipSprintArea: React.FC<
   const groupedByStatus = groupBy(issues, (i) => i.state);
 
   return (
-    <TooltipLayout visible={false} anchor={anchor} onClickClose={onClickClose}>
+    <TooltipLayout invisible={false} anchor={anchor} onClickClose={onClickClose}>
       <h2 className={'card-title'}>
         {startDate.format('L')} - {endDate.format('L')}
       </h2>

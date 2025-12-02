@@ -6,6 +6,7 @@ import moment, { type Moment, type unitOfTime } from 'moment';
 import type { SprintType } from '../../../../../types/data/sprintType';
 import { SprintAreas } from '../../../sprints/src/chart/components/SprintAreas';
 import classes from './burndownChart.module.css';
+import { TooltipLayout } from '../../../sprints/src/chart/components/Tooltip';
 
 const legendBarHeight = 40;
 
@@ -16,29 +17,47 @@ interface MappedIssue extends Omit<DataPluginIssue, 'createdAt' | 'closedAt'> {
   closedAt: Moment;
 }
 
-function* eachDayInInterval(start: Moment, end: Moment, issues: MappedIssue[], granularity: unitOfTime.Base) {
-  let d = start.clone();
+interface IssuesGroupedByGranularity {
+  id: number;
+  date: Moment;
+  issues: MappedIssue[];
+}
+
+function* groupIssuesByGranularity(start: Moment, end: Moment, issues: MappedIssue[], granularity: unitOfTime.Base) {
+  let date = start.clone();
+
+  let id = 0;
 
   do {
-    yield [
-      d,
-      issues.filter((i) => (granularity === 'years' ? d.isSame(i.createdAt, 'year') : d.isBetween(i.createdAt, i.closedAt))).length,
-    ] as const;
+    yield {
+      id,
+      date,
+      issues: issues.filter((i) => (granularity === 'years' ? date.isSame(i.createdAt, 'year') : date.isBetween(i.createdAt, i.closedAt))),
+    } as IssuesGroupedByGranularity;
 
-    d = d.clone().add(1, granularity).startOf(granularity);
+    date = date.clone().add(1, granularity).startOf(granularity);
+    id += 1;
 
-    if (d.isAfter(end)) {
+    if (date.isAfter(end)) {
       break;
     }
   } while (true);
 }
 
-function* pairUpDataPoints(data: Readonly<[date: Moment, numberOfIssues: number]>[], maxDate: Moment) {
+function* pairUpDataPoints(data: IssuesGroupedByGranularity[], maxDate: Moment) {
   for (let i = 1; i < data.length; i++) {
     yield [data[i - 1], data[i]] as const;
   }
 
-  yield [data[data.length - 1], [maxDate, data[data.length - 1][1]]] as const;
+  const lastDataPoint = data[data.length - 1];
+
+  yield [
+    data[data.length - 1],
+    {
+      ...lastDataPoint,
+      date: maxDate,
+    },
+  ] as const;
 }
 
 export const BurndownChart: React.FC<
@@ -62,27 +81,29 @@ export const BurndownChart: React.FC<
 
       iid: Number.parseInt(i.iid as unknown as string, 10),
 
-      createdAt: moment(i.createdAt),
-      closedAt: closedAt.isAfter(maxDate) ? maxDate : closedAt,
+      createdAt: moment(i.createdAt).startOf('day'),
+      closedAt: closedAt.isAfter(maxDate) ? maxDate.clone().startOf('day') : closedAt.startOf('day'),
     };
   });
 
-  const numberOfIssuesPerDay = [...eachDayInInterval(minDate, maxDate, mappedIssues, granularity)];
-  const minNumberOfIssuesPerGranularity = numberOfIssuesPerDay.reduce(
-    (min, [, curr]) => (min > curr ? curr : min),
+  const issuesPerGranularity = [...groupIssuesByGranularity(minDate, maxDate, mappedIssues, granularity)];
+  const minNumberOfIssuesPerGranularity = issuesPerGranularity.reduce(
+    (min, { issues }) => (min > issues.length ? issues.length : min),
     Number.MAX_SAFE_INTEGER,
   );
-  const maxNumberOfIssuesPerGranularity = numberOfIssuesPerDay.reduce(
-    (max, [, curr]) => (max < curr ? curr : max),
+  const maxNumberOfIssuesPerGranularity = issuesPerGranularity.reduce(
+    (max, { issues }) => (max < issues.length ? issues.length : max),
     Number.MIN_SAFE_INTEGER,
   );
 
   const mappedSprints = sprints.map((s) => ({
     ...s,
 
-    startDate: moment(s.startDate),
-    endDate: moment(s.endDate),
+    startDate: moment(s.startDate).startOf('day'),
+    endDate: moment(s.endDate).startOf('day'),
   }));
+
+  const pairedUpDataPoints = [...pairUpDataPoints(issuesPerGranularity, maxDate)];
 
   const xScale = d3
     .scaleUtc()
@@ -91,24 +112,49 @@ export const BurndownChart: React.FC<
   const yScale = d3
     .scaleLinear()
     .range([height - 40, 0])
-    .domain([minNumberOfIssuesPerGranularity, maxNumberOfIssuesPerGranularity + 5]);
+    .domain([minNumberOfIssuesPerGranularity - 2, maxNumberOfIssuesPerGranularity + 5]);
+
+  const [tooltipState, setTooltipState] = React.useState<{
+    anchor: SVGElement;
+    id: number;
+  }>();
 
   return (
     <div style={{ height, width, position: 'relative' }}>
       <svg xmlns="http://www.w3.org/2000/svg" ref={svgChartRef} width={'100%'} height={'100%'} viewBox={`0, 0, ${width}, ${height}`}>
         {height > 0 && width > 0 && (
           <>
-            {[...pairUpDataPoints(numberOfIssuesPerDay, maxDate)].map(([[aDate, aNumberOfIssues], [bDate, bNumberOfIssues]]) => (
+            {pairedUpDataPoints.map(([{ id: aId, date: aDate, issues: aIssues }, { id: bId, date: bDate, issues: bIssues }], i) => (
               <g key={bDate.format()} className={classes.section}>
-                <rect x={xScale(aDate)} width={xScale(bDate) - xScale(aDate)} height={height} stroke={'transparent'} fill={'transparent'} />
-
                 <line
                   x1={xScale(aDate)}
-                  y1={yScale(aNumberOfIssues)}
+                  y1={yScale(aIssues.length)}
                   x2={xScale(bDate)}
-                  y2={yScale(bNumberOfIssues)}
-                  stroke={'blue'}
-                  fill={'blue'}
+                  y2={yScale(bIssues.length)}
+                  stroke={'lightblue'}
+                  fill={'lightblue'}
+                  shapeRendering={'geometricPrecision'}
+                  strokeWidth={2}
+                />
+
+                {i === 0 && (
+                  <circle
+                    r={4}
+                    cx={xScale(aDate)}
+                    cy={yScale(aIssues.length)}
+                    fill={'blue'}
+                    stroke={'blue'}
+                    onClick={({ currentTarget }) => setTooltipState({ anchor: currentTarget, id: aId })}
+                  />
+                )}
+
+                <circle
+                  r={4}
+                  cx={xScale(bDate)}
+                  cy={yScale(bIssues.length)}
+                  fill={'lightblue'}
+                  stroke={'lightblue'}
+                  onClick={({ currentTarget }) => setTooltipState({ anchor: currentTarget, id: bId })}
                 />
               </g>
             ))}
@@ -156,6 +202,60 @@ export const BurndownChart: React.FC<
           </>
         )}
       </svg>
+
+      {tooltipState?.anchor && (
+        <BurndownTooltip
+          {...tooltipState}
+          onClickClose={() => setTooltipState(undefined)}
+          issuesPerGranularity={issuesPerGranularity}
+          minDate={minDate}
+          maxDate={maxDate}
+          granularity={granularity}
+          nmbrOfIssues={issues.length}
+          maxNumberOfIssuesPerGranularity={maxNumberOfIssuesPerGranularity}
+        />
+      )}
     </div>
+  );
+};
+const BurndownTooltip: React.FC<{
+  anchor: SVGElement;
+  id: number;
+  issuesPerGranularity: IssuesGroupedByGranularity[];
+  onClickClose: React.MouseEventHandler;
+  minDate: Moment;
+  maxDate: Moment;
+  granularity: unitOfTime.Base;
+  maxNumberOfIssuesPerGranularity: number;
+  nmbrOfIssues: number;
+}> = ({ anchor, id, issuesPerGranularity, maxNumberOfIssuesPerGranularity, maxDate, granularity, onClickClose }) => {
+  const value = issuesPerGranularity.find((ipg) => ipg.id === id);
+  const previousValue = issuesPerGranularity.find((ipg) => ipg.id === id - 1);
+  const differenceWithPreviousValue = value && previousValue ? value.issues.length - previousValue.issues.length : 0;
+
+  const idealStepSize = maxNumberOfIssuesPerGranularity / issuesPerGranularity.length;
+  const differenceWithIdeal = Math.round(value ? value.issues.length - (maxDate.diff(value.date, granularity) ?? 0) * idealStepSize : 0);
+
+  return (
+    <TooltipLayout anchor={anchor} onClickClose={onClickClose} invisible={!value}>
+      <h2 className={'card-title'} style={{ display: 'inline', wordBreak: 'break-word' }}>
+        {value?.date.format('ll')}
+      </h2>
+      <p>
+        <em>Open issues:</em> <span>{value?.issues.length}</span>
+      </p>
+      <p>
+        <em>Difference with previous:</em>{' '}
+        <span className={classes['tooltip-difference']} data-sign={Math.sign(differenceWithPreviousValue)}>
+          {differenceWithPreviousValue}
+        </span>
+      </p>
+      <p>
+        <em>Difference with ideal:</em>{' '}
+        <span className={classes['tooltip-difference']} data-sign={Math.sign(differenceWithIdeal)}>
+          {differenceWithIdeal}
+        </span>
+      </p>
+    </TooltipLayout>
   );
 };

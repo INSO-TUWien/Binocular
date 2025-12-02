@@ -1,12 +1,20 @@
-.section:hover {
-  cursor: pointer;
-
-  & > rect {
-    fill: lightgrey;
-    stroke: lightgrey;
+.section {
+  & > circle:hover {
+    cursor: pointer;
+    r: 6px;
+    fill: lightblue;
   }
+}
 
-  & > line {
-    stroke-width: 2px;
+.tooltip-difference {
+  &[data-sign="-1"] {
+    color: green;
+  }
+  &[data-sign="1"] {
+    &::before {
+      content: "+";
+    }
+
+    color: red;
   }
 }
