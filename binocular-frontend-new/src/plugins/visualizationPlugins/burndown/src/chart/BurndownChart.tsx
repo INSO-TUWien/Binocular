@@ -128,7 +128,7 @@ export const BurndownChart: React.FC<
         {height > 0 && width > 0 && (
           <>
             {pairedUpDataPoints.map(([{ id: aId, date: aDate, issues: aIssues }, { id: bId, date: bDate, issues: bIssues }], i) => (
-              <g key={`${aId}_${bId}`} className={classes.section}>
+              <g key={`${aId}_${bId}`} className={classes['data-point']}>
                 <line
                   x1={xScale(aDate)}
                   y1={yScale(aIssues.length)}
@@ -148,6 +148,7 @@ export const BurndownChart: React.FC<
                     fill={'lightblue'}
                     stroke={'lightblue'}
                     onClick={({ currentTarget }) => setTooltipState({ anchor: currentTarget, id: aId })}
+                    className={[classes['data-point'], aId === tooltipState?.id ? classes.active : ''].join(' ')}
                   />
                 )}
 
@@ -158,6 +159,7 @@ export const BurndownChart: React.FC<
                   fill={'lightblue'}
                   stroke={'lightblue'}
                   onClick={({ currentTarget }) => setTooltipState({ anchor: currentTarget, id: bId })}
+                  className={[classes['data-point'], bId === tooltipState?.id ? classes.active : ''].join(' ')}
                 />
               </g>
             ))}

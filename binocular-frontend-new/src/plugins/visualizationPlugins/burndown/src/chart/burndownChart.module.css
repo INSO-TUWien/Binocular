@@ -1,18 +1,17 @@
-.section {
-  & > circle:hover {
-    cursor: pointer;
-    r: 6px;
-    fill: lightblue;
-  }
+circle.data-point:hover,
+circle.data-point.active {
+  cursor: pointer;
+  r: 6px;
+  fill: lightblue;
 }
 
 .tooltip-difference {
-  &[data-sign="-1"] {
+  &[data-sign='-1'] {
     color: green;
   }
-  &[data-sign="1"] {
+  &[data-sign='1'] {
     &::before {
-      content: "+";
+      content: '+';
     }
 
     color: red;
