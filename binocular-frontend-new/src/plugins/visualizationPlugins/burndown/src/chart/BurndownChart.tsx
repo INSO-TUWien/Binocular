@@ -28,36 +28,39 @@ function* groupIssuesByGranularity(start: Moment, end: Moment, issues: MappedIss
 
   let id = 0;
 
+  const cond = (date: Moment) => (i: MappedIssue) =>
+    granularity === 'years' ? date.isSame(i.createdAt, 'year') : date.isBetween(i.createdAt, i.closedAt, undefined, '[]');
+
   do {
     yield {
       id,
       date,
-      issues: issues.filter((i) => (granularity === 'years' ? date.isSame(i.createdAt, 'year') : date.isBetween(i.createdAt, i.closedAt))),
+      issues: issues.filter(cond(date)),
     } as IssuesGroupedByGranularity;
+
+    const dateForLastYield = date.clone();
 
     date = date.clone().add(1, granularity).startOf(granularity);
     id += 1;
 
     if (date.isAfter(end)) {
+      // append one last entry.
+      // fixes the graph being cut off before the end is reached.
+      yield {
+        id: id + 1,
+        date: end,
+        issues: issues.filter(cond(dateForLastYield)),
+      } as IssuesGroupedByGranularity;
+
       break;
     }
   } while (true);
 }
 
-function* pairUpDataPoints(data: IssuesGroupedByGranularity[], maxDate: Moment) {
+function* pairUpDataPoints(data: IssuesGroupedByGranularity[], _maxDate: Moment) {
   for (let i = 1; i < data.length; i++) {
     yield [data[i - 1], data[i]] as const;
   }
-
-  const lastDataPoint = data[data.length - 1];
-
-  yield [
-    data[data.length - 1],
-    {
-      ...lastDataPoint,
-      date: maxDate,
-    },
-  ] as const;
 }
 
 export const BurndownChart: React.FC<
@@ -125,7 +128,7 @@ export const BurndownChart: React.FC<
         {height > 0 && width > 0 && (
           <>
             {pairedUpDataPoints.map(([{ id: aId, date: aDate, issues: aIssues }, { id: bId, date: bDate, issues: bIssues }], i) => (
-              <g key={bDate.format()} className={classes.section}>
+              <g key={`${aId}_${bId}`} className={classes.section}>
                 <line
                   x1={xScale(aDate)}
                   y1={yScale(aIssues.length)}
@@ -142,8 +145,8 @@ export const BurndownChart: React.FC<
                     r={4}
                     cx={xScale(aDate)}
                     cy={yScale(aIssues.length)}
-                    fill={'blue'}
-                    stroke={'blue'}
+                    fill={'lightblue'}
+                    stroke={'lightblue'}
                     onClick={({ currentTarget }) => setTooltipState({ anchor: currentTarget, id: aId })}
                   />
                 )}
@@ -218,6 +221,7 @@ export const BurndownChart: React.FC<
     </div>
   );
 };
+
 const BurndownTooltip: React.FC<{
   anchor: SVGElement;
   id: number;
@@ -228,13 +232,17 @@ const BurndownTooltip: React.FC<{
   granularity: unitOfTime.Base;
   maxNumberOfIssuesPerGranularity: number;
   nmbrOfIssues: number;
-}> = ({ anchor, id, issuesPerGranularity, maxNumberOfIssuesPerGranularity, maxDate, granularity, onClickClose }) => {
+}> = ({ anchor, id, issuesPerGranularity, maxNumberOfIssuesPerGranularity, minDate, maxDate, granularity, onClickClose }) => {
   const value = issuesPerGranularity.find((ipg) => ipg.id === id);
   const previousValue = issuesPerGranularity.find((ipg) => ipg.id === id - 1);
   const differenceWithPreviousValue = value && previousValue ? value.issues.length - previousValue.issues.length : 0;
 
-  const idealStepSize = maxNumberOfIssuesPerGranularity / issuesPerGranularity.length;
-  const differenceWithIdeal = Math.round(value ? value.issues.length - (maxDate.diff(value.date, granularity) ?? 0) * idealStepSize : 0);
+  const localGranularity = ['years', 'year'].includes(granularity) ? 'months' : granularity;
+
+  const idealStepSize = maxNumberOfIssuesPerGranularity / maxDate.diff(minDate, localGranularity);
+  const differenceWithIdeal = Math.round(
+    value ? value.issues.length - (maxDate.diff(value.date, localGranularity) ?? 0) * idealStepSize : 0,
+  );
 
   return (
     <TooltipLayout anchor={anchor} onClickClose={onClickClose} invisible={!value}>
@@ -247,13 +255,13 @@ const BurndownTooltip: React.FC<{
       <p>
         <em>Difference with previous:</em>{' '}
         <span className={classes['tooltip-difference']} data-sign={Math.sign(differenceWithPreviousValue)}>
-          {differenceWithPreviousValue}
+          {Number.isNaN(differenceWithPreviousValue) ? 0 : differenceWithPreviousValue}
         </span>
       </p>
       <p>
         <em>Difference with ideal:</em>{' '}
         <span className={classes['tooltip-difference']} data-sign={Math.sign(differenceWithIdeal)}>
-          {differenceWithIdeal}
+          {Number.isNaN(differenceWithIdeal) ? 0 : differenceWithIdeal}
         </span>
       </p>
     </TooltipLayout>
