@@ -50,7 +50,7 @@ function Chart(props: VisualizationPluginProperties<BranchSettings, ExpertiseDat
   const dataState = useSelector((state: RootState) => state.plugin.dataState);
 
   // Local state for processed data
-  const [rawData, setrawData] = useState<ExpertiseData | null>(null);
+  const [rawData, setRawData] = useState<ExpertiseData | null>(null);
   const [dimensions, setDimensions] = useState<Dimensions>({ width: 800, height: 600 });
   const [radius, setRadius] = useState<number>((Math.min(dimensions.height, dimensions.width) / 2) * chartSizeFactor);
   const [segments, setSegments] = useState<React.JSX.Element[]>([]);
@@ -63,7 +63,7 @@ function Chart(props: VisualizationPluginProperties<BranchSettings, ExpertiseDat
   // Process Redux data into local state when it changes
   useEffect(() => {
     if (data && data.ownershipData && data.buildsData && data.ownershipData.rawData) {
-      setrawData({
+      setRawData({
         ownershipData: data.ownershipData,
         buildsData: data.buildsData,
       });

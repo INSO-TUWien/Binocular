@@ -12,7 +12,7 @@ export const reducerSlice = createSlice({
   name: 'reducer',
   initialState,
   reducers: {
-    setTest: (state, action: PayloadAction<boolean>) => {
+    setData: (state, action: PayloadAction<boolean>) => {
       state.test = action.payload;
     },
   },

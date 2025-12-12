@@ -3,7 +3,7 @@ import { type State, DataState, setDataState, setData, setCurrentBranch, type Ex
 import type { DataPlugin } from '../../../../interfaces/dataPlugin.ts';
 import type { DataPluginCommitBuild } from '../../../../interfaces/dataPluginInterfaces/dataPluginCommits.ts';
 import { getCommitDataForSha, getFilenamesForBranch, getLatestBranch, getOwnershipForCommits, getPreviousFilenames } from './helper.ts';
-import type { CodeOwnershipData } from '../../../code-ownership/src/reducer/index.ts';
+import type { CodeOwnershipData } from '../../../codeOwnership/src/reducer/index.ts';
 import type { PreviousFileData } from '../../../../../types/data/ownershipType.ts';
 import type { DataPluginBranch } from '../../../../interfaces/dataPluginInterfaces/dataPluginBranches';
 
