@@ -1,4 +1,4 @@
-import type { VisualizationPluginProperties } from '../../../../interfaces/visualizationPluginInterfaces/visualizationPluginProperties';
+import type { VisualizationPluginProperties } from '../../../../../interfaces/visualizationPluginInterfaces/visualizationPluginProperties';
 import type { RepositoryActivitySettings } from '../settings/settings';
 import { type AnyActivityDataPlugin, isDataPluginCommit } from './types';
 

@@ -5,7 +5,7 @@ import * as d3 from 'd3';
 import * as baseStyles from './scalable-base-chart.module.scss';
 import { NoImplementationException } from '../../utils/exception/NoImplementationException.ts';
 import { hash } from '../../utils/cryptoUtils.ts';
-import type { Palette } from '../../../../../../types/data/authorType.ts';
+import type { Palette } from '../../../../../../../types/data/authorType.ts';
 import type { BaseType, BrushBehavior } from 'd3';
 import type { Axes, Scales } from '../StackedAreaChart';
 

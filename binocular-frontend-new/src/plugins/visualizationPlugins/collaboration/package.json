@@ -1,9 +1,0 @@
-{
-  "name": "collaboration",
-  "version": "1.0.0",
-  "description": "Presents each developer as a node with the issues they share as edges between them",
-  "main": "src/index.tsx",
-  "scripts": {
-  },
-  "private": true
-}

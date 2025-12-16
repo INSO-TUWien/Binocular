@@ -2,7 +2,7 @@ import { type MutableRefObject, useEffect, useMemo, useRef } from 'react';
 import * as d3 from 'd3';
 import { type ScaleLinear, type ScaleTime, symbol, symbolTriangle } from 'd3';
 import type { CommitChartData, Palette } from './chart.tsx';
-import type { SprintType } from '../../../../../types/data/sprintType.ts';
+import type { SprintType } from '../../../../../../types/data/sprintType.ts';
 import type { SettingsType } from '../settings/settings.tsx';
 import { PositiveNegativeSide, splitPositiveNegativeData } from '../utilities/dataConverter.ts';
 import { round } from 'lodash';

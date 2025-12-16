@@ -1,13 +1,18 @@
 import PreviewImage from '../assets/thumbnail.svg';
+<<<<<<<< HEAD:binocular-frontend-new/src/plugins/visualizationPlugins/sumCommits/src/index.tsx
 import Settings, { type SettingsType } from './settings/settings.tsx';
 import type { VisualizationPlugin } from '../../../interfaces/visualizationPlugin.ts';
+========
+import Settings, { type ChangesSettings } from './settings/settings.tsx';
+import type { VisualizationPlugin } from '../../../../interfaces/visualizationPlugin.ts';
+>>>>>>>> 0ff374e9b (#385 (New Frontend) Repository Activity:):binocular-frontend-new/src/plugins/visualizationPlugins/commits/changes/src/index.tsx
 import { getSVGData } from './utilities/utilities.ts';
-import Reducer from '../../simpleVisualizationPlugin/src/reducer';
+import Reducer from '../../../simpleVisualizationPlugin/src/reducer';
 import Saga from './saga';
 import Help from './help/help.tsx';
 import { convertToChartData } from './utilities/dataConverter.ts';
-import type { DataPluginCommit } from '../../../interfaces/dataPluginInterfaces/dataPluginCommits.ts';
-import { VisualizationPluginMetadataCategory } from '../../../interfaces/visualizationPluginInterfaces/visualizationPluginMetadata.ts';
+import type { DataPluginCommit } from '../../../../interfaces/dataPluginInterfaces/dataPluginCommits.ts';
+import { VisualizationPluginMetadataCategory } from '../../../../interfaces/visualizationPluginInterfaces/visualizationPluginMetadata.ts';
 
 const SumCommits: VisualizationPlugin<SettingsType, DataPluginCommit> = {
   name: 'SumCommits',
