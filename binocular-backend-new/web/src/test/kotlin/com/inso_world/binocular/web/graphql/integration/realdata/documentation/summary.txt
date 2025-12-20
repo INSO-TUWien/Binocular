@@ -1,0 +1,40 @@
+Summary of missing / non-working features in the new GraphQL endpoint
+
+1. Missing common query arguments
+   - Pagination & filtering arguments are not supported on many root fields:
+     - since, until (Timestamp filters)
+     - sort (ASC / DESC)
+     - page, perPage
+   - A shared Sort input type is completely missing from the schema.
+
+2. Incompatible query signatures
+   - Several root queries changed their required arguments:
+     - branch now requires an id instead of supporting branchName
+     - file requires id instead of supporting path
+   - Existing client queries relying on name/path based lookup no longer work.
+
+3. Missing connection-style response structures
+   - data fields expected by the tests are missing:
+     - commits.data
+     - files.data
+     - branch.files.data
+   - This breaks list-style access patterns used throughout the old API.
+
+4. Missing fields on core domain types
+   - The following fields are not exposed anymore:
+     - MergeRequest: sourceBranch, targetBranch, author, assignee, assignees
+     - Issue: author, assignee, assignees
+     - Note: author
+   - These fields are required for ownership, issue, and MR visualizations.
+
+5. Sorting not implemented on list queries
+   - sort is rejected on:
+     - builds
+     - commits
+     - branches
+   - Ordering guarantees used by existing visualizations are lost.
+
+6. Backward-incompatible schema changes
+   - The new schema is not a drop-in replacement:
+     - Filters, sorting, pagination, and nested structures differ
+     - Existing clients and tests cannot run without query rewrites
