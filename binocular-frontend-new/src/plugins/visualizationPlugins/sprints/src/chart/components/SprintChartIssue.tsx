@@ -33,7 +33,7 @@ export const SprintChartIssue: React.FC<
   const color =
     personColorMap.get(
       (coloringMode === 'author'
-        ? d.author.user?.gitSignature
+        ? d.author?.user?.gitSignature
         : coloringMode === 'assignee'
           ? d.assignee?.user?.gitSignature
           : coloringMode === 'time-spent'

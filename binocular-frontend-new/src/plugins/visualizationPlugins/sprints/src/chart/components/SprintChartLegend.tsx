@@ -41,7 +41,7 @@ export const SprintChartLegend: React.FC<{
       const color =
         personColorMap.get(
           (coloringMode === 'author'
-            ? head.author.user?.gitSignature
+            ? head.author?.user?.gitSignature
             : coloringMode === 'assignee'
               ? head.assignee?.user?.gitSignature
               : undefined) ?? '',

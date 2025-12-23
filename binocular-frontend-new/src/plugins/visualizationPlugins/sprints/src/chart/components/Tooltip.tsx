@@ -78,7 +78,7 @@ export const TooltipIssue: React.FC<{
         <em>Closed:</em> {i?.state.toLowerCase() === 'closed' ? i?.closedAt.format('lll') : 'open'}
       </p>
       <p>
-        <em>Creator:</em> {i?.author.name}
+        <em>Creator:</em> {i?.author?.name}
       </p>
 
       <div className="divider" />
@@ -180,7 +180,7 @@ export const TooltipMergeRequestGroup: React.FC<{
         <em>Closed:</em> {mr?.state.toLowerCase() === 'closed' ? mr?.closedAt.format('lll') : 'open'}
       </p>
       <p>
-        <em>Creator:</em> {mr?.author.name}
+        <em>Creator:</em> {mr?.author?.name}
       </p>
     </TooltipLayout>
   );
