@@ -19,13 +19,7 @@ export const margin = 20;
 
 type TooltipState = {
   anchor: SVGElement;
-} & (
-  | {
-      variant: 'merge-request' | 'issue';
-      iid: number;
-    }
-  | ({ variant: 'sprint-area' } & MappedSprintType)
-);
+} & ({ variant: 'merge-request' | 'issue'; iid: number } | ({ variant: 'sprint-area' } & MappedSprintType));
 
 const stringToColor = (string: string) => {
   let stringWithInvalidCharsReplaced = string
@@ -76,8 +70,6 @@ export const SprintChart: React.FC<
     return {
       ...i,
 
-      iid: Number.parseInt(i.iid as unknown as string, 10),
-
       createdAt: moment(i.createdAt),
       closedAt: closedAt.isAfter(maxDate) ? maxDate : closedAt,
 
@@ -93,8 +85,6 @@ export const SprintChart: React.FC<
   });
   const mappedMergeRequests = mergeRequests.map((mr) => ({
     ...mr,
-
-    iid: Number.parseInt(mr.iid as unknown as string, 10),
 
     createdAt: moment(mr.createdAt),
     closedAt: mr.closedAt ? moment(mr.closedAt) : maxDate,

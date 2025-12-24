@@ -82,8 +82,6 @@ export const BurndownChart: React.FC<
     return {
       ...i,
 
-      iid: Number.parseInt(i.iid as unknown as string, 10),
-
       createdAt: moment(i.createdAt).startOf('day'),
       closedAt: closedAt.isAfter(maxDate) ? maxDate.clone().startOf('day') : closedAt.startOf('day'),
     };
