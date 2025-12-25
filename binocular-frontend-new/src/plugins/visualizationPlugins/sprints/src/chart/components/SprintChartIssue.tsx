@@ -9,6 +9,9 @@ import { aggregateTimeTrackingData } from '../helper/aggregateTimeTrackingData';
 import type { MappedDataPluginIssue } from '../types';
 import classes from './sprintChartIssue.module.css';
 
+const spaceBetweenIssues = 4;
+const marginBetweenLeftIssueBorderAndText = 4;
+
 export const SprintChartIssue: React.FC<
   MappedDataPluginIssue &
     Pick<SprintSettings, 'coloringMode'> & {
@@ -51,7 +54,7 @@ export const SprintChartIssue: React.FC<
         onClick(e, d.iid);
       }}>
       <rect
-        width={Math.max(xScale(d.closedAt) - xScale(d.createdAt) - 4, h / availableTracks - 2, 4)}
+        width={Math.max(xScale(d.closedAt) - xScale(d.createdAt) - spaceBetweenIssues, h / availableTracks - 2, 4)}
         height={h}
         x={x}
         y={y}
@@ -61,9 +64,9 @@ export const SprintChartIssue: React.FC<
         rx={'0.2rem'}
       />
       <text
-        x={x + 4}
+        x={x + marginBetweenLeftIssueBorderAndText}
         y={y + margin}
-        width={Math.max(xScale(d.closedAt) - xScale(d.createdAt) - 4, 1)}
+        width={Math.max(xScale(d.closedAt) - xScale(d.createdAt) - spaceBetweenIssues, 1)}
         height={h}
         style={{ display: h > 25 ? undefined : 'none' }}
         paintOrder={'stroke'}
