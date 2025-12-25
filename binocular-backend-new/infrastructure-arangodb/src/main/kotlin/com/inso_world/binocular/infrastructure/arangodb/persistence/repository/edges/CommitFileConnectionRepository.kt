@@ -22,6 +22,31 @@ interface CommitFileConnectionRepository : ArangoRepository<CommitFileConnection
 
     @Query(
         """
+FOR c IN commits
+  FILTER c._key == @commitId
+  RETURN {
+    additions: TO_NUMBER(c.stats.additions OR 0),
+    deletions: TO_NUMBER(c.stats.deletions OR 0)
+  }
+"""
+    )
+    fun findCommitStats(commitId: String): List<Map<String, Any>>
+
+    @Query(
+        """
+    FOR c IN `commits-files`
+        FILTER c._from == CONCAT('commits/', @commitId)
+        RETURN {
+          fileId: PARSE_IDENTIFIER(c._to).key,
+          additions: TO_NUMBER(c.stats.additions OR 0),
+          deletions: TO_NUMBER(c.stats.deletions OR 0)
+        }
+""",
+    )
+    fun findFileStatsByCommit(commitId: String): List<Map<String, Any>>
+
+    @Query(
+        """
     FOR c IN `commits-files`
         FILTER c._from == CONCAT('commits/', @commitId)
         FOR f IN files
