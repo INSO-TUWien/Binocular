@@ -9,21 +9,21 @@ import classes from './sprintChartLegend.module.css';
 export const SprintChartLegend: React.FC<{
   height: number;
   width: number;
-  scale: d3.ScaleTime<number, number>;
+  xScale: d3.ScaleTime<number, number>;
   maxDate: Moment;
   minDate: Moment;
   groupedMergeRequests: MappedDataPluginMergeRequest[][];
   personColorMap: Map<string, AuthorType['color']>;
   coloringMode: string;
   onClickMergeRequest: (e: React.MouseEvent<SVGElement>, iid: number) => void;
-}> = ({ height, width, scale, maxDate, minDate, groupedMergeRequests, personColorMap, coloringMode, onClickMergeRequest }) => (
+}> = ({ height, width, xScale, maxDate, minDate, groupedMergeRequests, personColorMap, coloringMode, onClickMergeRequest }) => (
   <>
     <rect x={margin} y={height - margin * 2} height={1} width={width - margin * 2} />
 
     <rect x={margin} y={height - margin * 2 + 1} width={width - margin * 2} height={40} fill={'#EEE'} />
 
-    {scale.ticks().map((t) => {
-      const x = scale(t);
+    {xScale.ticks().map((t) => {
+      const x = xScale(t);
 
       return (
         <g key={t.toISOString()}>
@@ -36,7 +36,7 @@ export const SprintChartLegend: React.FC<{
     })}
 
     {groupedMergeRequests.map(([head, ...tail]) => {
-      const x = scale(head.createdAt);
+      const x = xScale(head.createdAt);
 
       const color =
         personColorMap.get(

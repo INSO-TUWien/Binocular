@@ -18,14 +18,14 @@ export const SprintChartIssue: React.FC<
       offset: number;
       availableTracks: number;
       trackNmbr: number;
-      scale: d3.ScaleTime<number, number>;
+      xScale: d3.ScaleTime<number, number>;
       personColorMap: Map<string, AuthorType['color']>;
       onClick: (e: React.MouseEvent<SVGElement>, iid: number) => void;
     }
-> = ({ height, zoom, offset, scale, availableTracks, trackNmbr, personColorMap, coloringMode, onClick, labels, ...d }) => {
+> = ({ height, zoom, offset, xScale, availableTracks, trackNmbr, personColorMap, coloringMode, onClick, labels, ...d }) => {
   const h = Math.max(0, ((height - 110) / availableTracks - 2) * zoom);
 
-  const x = scale(d.createdAt);
+  const x = xScale(d.createdAt);
   const y = (margin + (trackNmbr * (height - 110)) / availableTracks - 2) * zoom + offset + trackNmbr * 8;
 
   const { aggregatedTimeTrackingData } = aggregateTimeTrackingData(extractTimeTrackingDataFromNotes(d.notes));
@@ -51,7 +51,7 @@ export const SprintChartIssue: React.FC<
         onClick(e, d.iid);
       }}>
       <rect
-        width={Math.max(scale(d.closedAt) - scale(d.createdAt) - 4, h / availableTracks - 2, 4)}
+        width={Math.max(xScale(d.closedAt) - xScale(d.createdAt) - 4, h / availableTracks - 2, 4)}
         height={h}
         x={x}
         y={y}
@@ -63,7 +63,7 @@ export const SprintChartIssue: React.FC<
       <text
         x={x + 4}
         y={y + margin}
-        width={Math.max(scale(d.closedAt) - scale(d.createdAt) - 4, 1)}
+        width={Math.max(xScale(d.closedAt) - xScale(d.createdAt) - 4, 1)}
         height={h}
         style={{ display: h > 25 ? undefined : 'none' }}
         paintOrder={'stroke'}

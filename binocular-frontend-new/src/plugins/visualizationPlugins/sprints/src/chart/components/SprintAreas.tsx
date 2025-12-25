@@ -5,10 +5,10 @@ import type { MappedSprintType } from '../types';
 
 export const SprintAreas: React.FC<{
   sprints: MappedSprintType[];
-  scale: d3.ScaleTime<number, number>;
+  xScale: d3.ScaleTime<number, number>;
   height: number;
   onClick?: (e: React.MouseEvent<SVGGElement>, sprint: MappedSprintType) => void;
-}> = ({ sprints, scale, height, onClick }) => (
+}> = ({ sprints, xScale, height, onClick }) => (
   <>
     <defs>
       <pattern id={'diagonalHatch'} patternUnits={'userSpaceOnUse'} width={8} height={8}>
@@ -17,10 +17,10 @@ export const SprintAreas: React.FC<{
     </defs>
 
     {sprints.map((s) => {
-      const xStart = scale(s.startDate);
+      const xStart = xScale(s.startDate);
       const yStart = 0;
 
-      const xEnd = scale(s.endDate);
+      const xEnd = xScale(s.endDate);
       const yEnd = 0;
 
       return (

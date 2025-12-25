@@ -113,7 +113,7 @@ export const SprintChart: React.FC<
 
   const groupedIssues = groupIntoTracks(mappedIssues);
 
-  const scale = d3
+  const xScale = d3
     .scaleUtc()
     .range([margin, Math.abs(width - margin)])
     .domain([minDate, maxDate]);
@@ -146,7 +146,7 @@ export const SprintChart: React.FC<
                   zoom={zoom}
                   width={width}
                   offset={offset}
-                  scale={scale}
+                  xScale={xScale}
                   personColorMap={personColorMap}
                   coloringMode={coloringMode}
                   onClick={({ currentTarget }, iid) => {
@@ -165,7 +165,7 @@ export const SprintChart: React.FC<
             <SprintChartLegend
               height={height}
               width={width}
-              scale={scale}
+              xScale={xScale}
               maxDate={maxDate}
               minDate={minDate}
               groupedMergeRequests={groupedMergeRequests}
@@ -183,7 +183,7 @@ export const SprintChart: React.FC<
             {showSprints && (
               <SprintAreas
                 sprints={mappedSprints}
-                scale={scale}
+                xScale={xScale}
                 height={height}
                 onClick={({ currentTarget }, sprint) =>
                   setTooltipState({
