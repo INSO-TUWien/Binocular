@@ -11,6 +11,7 @@ import classes from './sprintChartIssue.module.css';
 
 const spaceBetweenIssues = 4;
 const marginBetweenLeftIssueBorderAndText = 4;
+const verticalSpaceBetweenIssueTracks = 8;
 
 export const SprintChartIssue: React.FC<
   MappedDataPluginIssue &
@@ -26,10 +27,10 @@ export const SprintChartIssue: React.FC<
       onClick: (e: React.MouseEvent<SVGElement>, iid: number) => void;
     }
 > = ({ height, zoom, offset, xScale, availableTracks, trackNmbr, personColorMap, coloringMode, onClick, labels, ...d }) => {
-  const h = Math.max(0, ((height - 110) / availableTracks - 2) * zoom);
+  const h = Math.max(0, (height / availableTracks) * zoom);
 
   const x = xScale(d.createdAt);
-  const y = (margin + (trackNmbr * (height - 110)) / availableTracks - 2) * zoom + offset + trackNmbr * 8;
+  const y = (margin + (trackNmbr * height) / availableTracks) * zoom + offset + trackNmbr * verticalSpaceBetweenIssueTracks;
 
   const { aggregatedTimeTrackingData } = aggregateTimeTrackingData(extractTimeTrackingDataFromNotes(d.notes));
 
