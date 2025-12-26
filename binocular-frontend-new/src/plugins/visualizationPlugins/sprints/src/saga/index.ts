@@ -10,14 +10,14 @@ export default function* (dataConnection: DataPlugin) {
 }
 
 function* watchRefresh(dataConnection: DataPlugin) {
-  yield takeEvery('REFRESH', () => fetchChangesData(dataConnection));
+  yield takeEvery('REFRESH', () => fetchIssuesAndMergeRequestsData(dataConnection));
 }
 
 function* watchDateRangeChange(dataConnection: DataPlugin) {
-  yield takeEvery(setDateRange, () => fetchChangesData(dataConnection));
+  yield takeEvery(setDateRange, () => fetchIssuesAndMergeRequestsData(dataConnection));
 }
 
-function* fetchChangesData(dataConnection: DataPlugin) {
+function* fetchIssuesAndMergeRequestsData(dataConnection: DataPlugin) {
   yield put(setDataState(DataState.FETCHING));
   const state: { plugin: IssuesState } = yield select();
   const issues: DataPluginIssue[] = yield call(() => dataConnection.issues.getAll(state.plugin.dateRange.from, state.plugin.dateRange.to));
