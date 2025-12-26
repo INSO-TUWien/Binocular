@@ -28,6 +28,7 @@ export const SprintChartIssue: React.FC<
     }
 > = ({ height, zoom, offset, xScale, availableTracks, trackNmbr, personColorMap, coloringMode, onClick, labels, ...d }) => {
   const h = Math.max(0, (height / availableTracks) * zoom);
+  const w = Math.max(xScale(d.closedAt) - xScale(d.createdAt) - spaceBetweenIssues, 4);
 
   const x = xScale(d.createdAt);
   const y = (margin + (trackNmbr * height) / availableTracks) * zoom + offset + trackNmbr * verticalSpaceBetweenIssueTracks;
@@ -55,7 +56,7 @@ export const SprintChartIssue: React.FC<
         onClick(e, d.iid);
       }}>
       <rect
-        width={Math.max(xScale(d.closedAt) - xScale(d.createdAt) - spaceBetweenIssues, h / availableTracks - 2, 4)}
+        width={w}
         height={h}
         x={x}
         y={y}
@@ -67,7 +68,7 @@ export const SprintChartIssue: React.FC<
       <text
         x={x + marginBetweenLeftIssueBorderAndText}
         y={y + margin}
-        width={Math.max(xScale(d.closedAt) - xScale(d.createdAt) - spaceBetweenIssues, 1)}
+        width={w}
         height={h}
         style={{ display: h > 25 ? undefined : 'none' }}
         paintOrder={'stroke'}
