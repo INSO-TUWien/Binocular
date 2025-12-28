@@ -93,6 +93,11 @@
         </dependency>
         <dependency>
             <groupId>com.inso-world.binocular</groupId>
+            <artifactId>jgit</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.inso-world.binocular</groupId>
             <artifactId>infrastructure-sql</artifactId>
             <version>${project.version}</version>
         </dependency>
