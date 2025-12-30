@@ -3,7 +3,7 @@ import type { AuthorType } from '../../../../../../types/data/authorType';
 import { extractTimeTrackingDataFromNotes } from '../../../../timeSpent/src/utilities/dataConverter';
 import { aggregateTimeTrackingData } from '../helper/aggregateTimeTrackingData';
 import { margin } from '../SprintChart';
-import type { MappedDataPluginIssue, MappedDataPluginMergeRequest, MappedSprintType } from '../types';
+import type { MappedDataPluginIssue, MappedDataPluginMergeRequest, MappedSprint } from '../types';
 import { groupBy } from 'lodash';
 import chroma from 'chroma-js';
 
@@ -187,7 +187,7 @@ export const TooltipMergeRequestGroup: React.FC<{
 };
 
 export const TooltipSprintArea: React.FC<
-  MappedSprintType & {
+  MappedSprint & {
     issues: MappedDataPluginIssue[];
 
     anchor: SVGElement;

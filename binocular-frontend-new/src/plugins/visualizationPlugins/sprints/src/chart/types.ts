@@ -11,4 +11,4 @@ export type MappedDataPluginIssue = Omit<DataPluginIssue, 'createdAt' | 'closedA
 export type MappedDataPluginMergeRequest = Omit<DataPluginMergeRequest, 'createdAt' | 'closedAt'> &
   Record<'createdAt' | 'closedAt', Moment>;
 
-export type MappedSprintType = Omit<SprintType, 'startDate' | 'endDate'> & Record<'startDate' | 'endDate', Moment>;
+export type MappedSprint = Omit<SprintType, 'startDate' | 'endDate'> & Record<'startDate' | 'endDate', Moment>;

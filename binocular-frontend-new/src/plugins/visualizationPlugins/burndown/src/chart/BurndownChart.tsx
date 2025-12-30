@@ -201,7 +201,7 @@ export const BurndownChart: React.FC<
               );
             })}
 
-            {showSprints && <SprintAreas sprints={mappedSprints} scale={xScale} height={height} />}
+            {showSprints && <SprintAreas sprints={mappedSprints} xScale={xScale} height={height} />}
           </>
         )}
       </svg>

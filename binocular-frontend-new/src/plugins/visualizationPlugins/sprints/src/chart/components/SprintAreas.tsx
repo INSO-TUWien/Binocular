@@ -1,13 +1,13 @@
 import type React from 'react';
 import { symbol, symbolTriangle } from 'd3';
 import classes from './sprintArea.module.css';
-import type { MappedSprintType } from '../types';
+import type { MappedSprint } from '../types';
 
 export const SprintAreas: React.FC<{
-  sprints: MappedSprintType[];
+  sprints: MappedSprint[];
   xScale: d3.ScaleTime<number, number>;
   height: number;
-  onClick?: (e: React.MouseEvent<SVGGElement>, sprint: MappedSprintType) => void;
+  onClick?: (e: React.MouseEvent<SVGGElement>, sprint: MappedSprint) => void;
 }> = ({ sprints, xScale, height, onClick }) => (
   <>
     <defs>

@@ -13,13 +13,13 @@ import { SprintChartLegend } from './components/SprintChartLegend';
 import { TooltipIssue, TooltipMergeRequestGroup, TooltipSprintArea } from './components/Tooltip';
 import { SprintAreas } from './components/SprintAreas';
 import type { SprintType } from '../../../../../types/data/sprintType';
-import type { MappedSprintType } from './types';
+import type { MappedDataPluginIssue, MappedDataPluginMergeRequest, MappedSprint } from './types';
 
 export const margin = 20;
 
 type TooltipState = {
   anchor: SVGElement;
-} & ({ variant: 'merge-request' | 'issue'; iid: number } | ({ variant: 'sprint-area' } & MappedSprintType));
+} & ({ variant: 'merge-request' | 'issue'; iid: number } | ({ variant: 'sprint-area' } & MappedSprint));
 
 const stringToColor = (string: string) => {
   let stringWithInvalidCharsReplaced = string
@@ -40,6 +40,46 @@ const stringToColor = (string: string) => {
 
   return `#${red}${green}${blue}`;
 };
+
+const mapIssue = (maxDate: Moment, groupedLabels: Map<number, string[]>, colorsForLabelGroups: Map<number, string>) => {
+  const keyValueGroupedLabels = [...groupedLabels];
+
+  return (i: DataPluginIssue): MappedDataPluginIssue => {
+    const closedAt = i.closedAt ? moment(i.closedAt) : maxDate;
+
+    return {
+      ...i,
+
+      createdAt: moment(i.createdAt),
+      closedAt: closedAt.isAfter(maxDate) ? maxDate : closedAt,
+
+      labels: i.labels.map((l) => {
+        const [groupId] = keyValueGroupedLabels.find(([, values]) => values.includes(l)) ?? [];
+
+        return {
+          name: l,
+          color: colorsForLabelGroups.get(groupId ?? Number.POSITIVE_INFINITY) ?? 'lightgrey',
+        };
+      }),
+    };
+  };
+};
+
+const mapMergeRequest =
+  (maxDate: Moment) =>
+  (mr: DataPluginMergeRequest): MappedDataPluginMergeRequest => ({
+    ...mr,
+
+    createdAt: moment(mr.createdAt),
+    closedAt: mr.closedAt ? moment(mr.closedAt) : maxDate,
+  });
+
+const mapSprint = (s: SprintType): MappedSprint => ({
+  ...s,
+
+  startDate: moment(s.startDate),
+  endDate: moment(s.endDate),
+});
 
 export const SprintChart: React.FC<
   {
@@ -64,37 +104,9 @@ export const SprintChart: React.FC<
 
   const colorsForLabelGroups = new Map([...groupedLabels].map(([key, values]) => [key, stringToColor(values.join(''))] as const));
 
-  const mappedIssues = issues.map((i) => {
-    const closedAt = i.closedAt ? moment(i.closedAt) : maxDate;
-
-    return {
-      ...i,
-
-      createdAt: moment(i.createdAt),
-      closedAt: closedAt.isAfter(maxDate) ? maxDate : closedAt,
-
-      labels: i.labels.map((l) => {
-        const [groupId] = [...groupedLabels].find(([, values]) => values.includes(l)) ?? [];
-
-        return {
-          name: l,
-          color: colorsForLabelGroups.get(groupId ?? Number.POSITIVE_INFINITY) ?? 'lightgrey',
-        };
-      }),
-    };
-  });
-  const mappedMergeRequests = mergeRequests.map((mr) => ({
-    ...mr,
-
-    createdAt: moment(mr.createdAt),
-    closedAt: mr.closedAt ? moment(mr.closedAt) : maxDate,
-  }));
-  const mappedSprints = sprints.map((s) => ({
-    ...s,
-
-    startDate: moment(s.startDate),
-    endDate: moment(s.endDate),
-  }));
+  const mappedIssues = issues.map(mapIssue(maxDate, groupedLabels, colorsForLabelGroups));
+  const mappedMergeRequests = mergeRequests.map(mapMergeRequest(maxDate));
+  const mappedSprints = sprints.map(mapSprint);
 
   React.useEffect(() => {
     const { current: svg } = svgChartRef;
