@@ -33,8 +33,6 @@ export const SprintChartIssue: React.FC<
   const x = xScale(d.createdAt);
   const y = (margin + (trackNmbr * height) / availableTracks) * zoom + offset + trackNmbr * verticalSpaceBetweenIssueTracks;
 
-  const { aggregatedTimeTrackingData } = aggregateTimeTrackingData(extractTimeTrackingDataFromNotes(d.notes));
-
   const color =
     personColorMap.get(
       (coloringMode === 'author'
@@ -42,7 +40,7 @@ export const SprintChartIssue: React.FC<
         : coloringMode === 'assignee'
           ? d.assignee?.user?.gitSignature
           : coloringMode === 'time-spent'
-            ? findAuthorWithMaxSpentTime(aggregatedTimeTrackingData)
+            ? findAuthorWithMaxSpentTime(aggregateTimeTrackingData(extractTimeTrackingDataFromNotes(d.notes)).aggregatedTimeTrackingData)
             : undefined) ?? '',
     )?.main ?? 'lightgrey';
 
