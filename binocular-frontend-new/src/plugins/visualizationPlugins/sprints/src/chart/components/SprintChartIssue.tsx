@@ -26,39 +26,41 @@ export const SprintChartIssue: React.FC<
       personColorMap: Map<string, AuthorType['color']>;
       onClick: (e: React.MouseEvent<SVGElement>, iid: number) => void;
     }
-> = ({ height, zoom, offset, xScale, availableTracks, trackNmbr, personColorMap, coloringMode, onClick, labels, ...d }) => {
+> = ({ height, zoom, offset, xScale, availableTracks, trackNmbr, personColorMap, coloringMode, onClick, labels, ...issue }) => {
   const h = Math.max(0, (height / availableTracks) * zoom);
-  const w = Math.max(xScale(d.closedAt) - xScale(d.createdAt) - spaceBetweenIssues, 4);
+  const w = Math.max(xScale(issue.closedAt) - xScale(issue.createdAt) - spaceBetweenIssues, 4);
 
-  const x = xScale(d.createdAt);
+  const x = xScale(issue.createdAt);
   const y = margin + offset + trackNmbr * h + trackNmbr * verticalSpaceBetweenIssueTracks;
 
   const personColor =
     personColorMap.get(
       (coloringMode === 'author'
-        ? d.author?.user?.gitSignature
+        ? issue.author?.user?.gitSignature
         : coloringMode === 'assignee'
-          ? d.assignee?.user?.gitSignature
+          ? issue.assignee?.user?.gitSignature
           : coloringMode === 'time-spent'
-            ? findAuthorWithMaxSpentTime(aggregateTimeTrackingData(extractTimeTrackingDataFromNotes(d.notes)).aggregatedTimeTrackingData)
+            ? findAuthorWithMaxSpentTime(
+                aggregateTimeTrackingData(extractTimeTrackingDataFromNotes(issue.notes)).aggregatedTimeTrackingData,
+              )
             : undefined) ?? '',
     )?.main ?? 'lightgrey';
 
-  const issue = (
+  const issueElement = (
     <g
-      key={d.iid}
+      key={issue.iid}
       className={classes.issue}
       onClick={(e) => {
         e.stopPropagation();
 
-        onClick(e, d.iid);
+        onClick(e, issue.iid);
       }}>
       <rect
         width={w}
         height={h}
         x={x}
         y={y}
-        fill={coloringMode === 'labels' ? `url(#hatch-${d.iid})` : personColor}
+        fill={coloringMode === 'labels' ? `url(#hatch-${issue.iid})` : personColor}
         stroke={personColor}
         strokeWidth={2}
         rx={'0.2rem'}
@@ -72,7 +74,7 @@ export const SprintChartIssue: React.FC<
         paintOrder={'stroke'}
         stroke={'white'}
         strokeWidth={2}>
-        #{d.iid}
+        #{issue.iid}
       </text>
     </g>
   );
@@ -81,7 +83,7 @@ export const SprintChartIssue: React.FC<
     <>
       <defs>
         <pattern
-          id={`hatch-${d.iid}`}
+          id={`hatch-${issue.iid}`}
           patternUnits={'userSpaceOnUse'}
           patternTransform={'rotate(45)'}
           width={8 * labels.length}
@@ -91,9 +93,9 @@ export const SprintChartIssue: React.FC<
           ))}
         </pattern>
       </defs>
-      {issue}
+      {issueElement}
     </>
   ) : (
-    issue
+    issueElement
   );
 };
