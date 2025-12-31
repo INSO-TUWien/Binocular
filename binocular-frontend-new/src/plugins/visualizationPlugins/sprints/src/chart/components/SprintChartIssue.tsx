@@ -31,7 +31,7 @@ export const SprintChartIssue: React.FC<
   const w = Math.max(xScale(d.closedAt) - xScale(d.createdAt) - spaceBetweenIssues, 4);
 
   const x = xScale(d.createdAt);
-  const y = (margin + (trackNmbr * height) / availableTracks) * zoom + offset + trackNmbr * verticalSpaceBetweenIssueTracks;
+  const y = margin + offset + trackNmbr * h + trackNmbr * verticalSpaceBetweenIssueTracks;
 
   const color =
     personColorMap.get(
