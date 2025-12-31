@@ -147,7 +147,7 @@ export const SprintChart: React.FC<
         onClick={() => setTooltipState(undefined)}>
         {height > 0 && width > 0 && (
           <>
-            {groupedIssues.map((group, i) =>
+            {groupedIssues.flatMap((group, i) =>
               group.map((d) => (
                 <SprintChartIssue
                   key={d.iid}
