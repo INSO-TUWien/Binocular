@@ -1,14 +1,9 @@
 import type { MappedDataPluginIssue } from '../types';
 
-export const groupIntoTracks = ([head, ...tail]: MappedDataPluginIssue[]) => {
-  if (!head) {
-    return [];
-  }
+export const groupIntoTracks = (issues: MappedDataPluginIssue[]) => {
+  const tracks: MappedDataPluginIssue[][] = [];
 
-  // Initialize tracks with the first issue in the list.
-  // Simplifies the for-of loop
-  const tracks: MappedDataPluginIssue[][] = [[head]];
-  for (const issue of tail) {
+  for (const issue of issues) {
     // Search for a track, that can hold the current issue.
     const openTrack = tracks.find((track) =>
       // A track is considered open, if none of the issues it holds overlaps with the new issue.
