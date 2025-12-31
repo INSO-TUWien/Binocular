@@ -33,7 +33,7 @@ export const SprintChartIssue: React.FC<
   const x = xScale(d.createdAt);
   const y = margin + offset + trackNmbr * h + trackNmbr * verticalSpaceBetweenIssueTracks;
 
-  const color =
+  const personColor =
     personColorMap.get(
       (coloringMode === 'author'
         ? d.author?.user?.gitSignature
@@ -58,8 +58,8 @@ export const SprintChartIssue: React.FC<
         height={h}
         x={x}
         y={y}
-        fill={coloringMode === 'labels' ? `url(#hatch-${d.iid})` : color}
-        stroke={color}
+        fill={coloringMode === 'labels' ? `url(#hatch-${d.iid})` : personColor}
+        stroke={personColor}
         strokeWidth={2}
         rx={'0.2rem'}
       />
