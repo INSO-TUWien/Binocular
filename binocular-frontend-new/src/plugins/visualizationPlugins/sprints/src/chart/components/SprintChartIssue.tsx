@@ -46,49 +46,46 @@ export const SprintChartIssue: React.FC<
             : undefined) ?? '',
     )?.main ?? 'lightgrey';
 
-  const issueElement = (
-    <g key={issue.iid} className={classes.issue} onClick={onClick}>
-      <rect
-        width={w}
-        height={h}
-        x={x}
-        y={y}
-        fill={coloringMode === 'labels' ? `url(#hatch-${issue.iid})` : personColor}
-        stroke={personColor}
-        strokeWidth={2}
-        rx={'0.2rem'}
-      />
-      <text
-        x={x + marginBetweenLeftIssueBorderAndText}
-        y={y + margin}
-        width={w}
-        height={h}
-        style={{ display: h > 25 ? undefined : 'none' }}
-        paintOrder={'stroke'}
-        stroke={'white'}
-        strokeWidth={2}>
-        #{issue.iid}
-      </text>
-    </g>
-  );
-
-  return coloringMode === 'labels' ? (
+  return (
     <>
-      <defs>
-        <pattern
-          id={`hatch-${issue.iid}`}
-          patternUnits={'userSpaceOnUse'}
-          patternTransform={'rotate(45)'}
-          width={8 * labels.length}
-          height={'8'}>
-          {labels.map(({ color }, i) => (
-            <rect key={color} x={8 * i} y={'0'} width={8} height={'15'} stroke={'none'} fill={color} />
-          ))}
-        </pattern>
-      </defs>
-      {issueElement}
+      {coloringMode === 'labels' && (
+        <defs>
+          <pattern
+            id={`hatch-${issue.iid}`}
+            patternUnits={'userSpaceOnUse'}
+            patternTransform={'rotate(45)'}
+            width={8 * labels.length}
+            height={'8'}>
+            {labels.map(({ color }, i) => (
+              <rect key={color} x={8 * i} y={'0'} width={8} height={'15'} stroke={'none'} fill={color} />
+            ))}
+          </pattern>
+        </defs>
+      )}
+
+      <g key={issue.iid} className={classes.issue} onClick={onClick}>
+        <rect
+          width={w}
+          height={h}
+          x={x}
+          y={y}
+          fill={coloringMode === 'labels' ? `url(#hatch-${issue.iid})` : personColor}
+          stroke={personColor}
+          strokeWidth={2}
+          rx={'0.2rem'}
+        />
+        <text
+          x={x + marginBetweenLeftIssueBorderAndText}
+          y={y + margin}
+          width={w}
+          height={h}
+          style={{ display: h > 25 ? undefined : 'none' }}
+          paintOrder={'stroke'}
+          stroke={'white'}
+          strokeWidth={2}>
+          #{issue.iid}
+        </text>
+      </g>
     </>
-  ) : (
-    issueElement
   );
 };
