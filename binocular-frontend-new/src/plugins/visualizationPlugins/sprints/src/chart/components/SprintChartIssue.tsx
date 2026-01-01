@@ -24,7 +24,7 @@ export const SprintChartIssue: React.FC<
       trackNmbr: number;
       xScale: d3.ScaleTime<number, number>;
       personColorMap: Map<string, AuthorType['color']>;
-      onClick: (e: React.MouseEvent<SVGElement>, iid: number) => void;
+      onClick: React.MouseEventHandler<SVGGElement>;
     }
 > = ({ height, zoom, offset, xScale, availableTracks, trackNmbr, personColorMap, coloringMode, onClick, labels, ...issue }) => {
   const h = Math.max(0, (height / availableTracks) * zoom);
@@ -47,14 +47,7 @@ export const SprintChartIssue: React.FC<
     )?.main ?? 'lightgrey';
 
   const issueElement = (
-    <g
-      key={issue.iid}
-      className={classes.issue}
-      onClick={(e) => {
-        e.stopPropagation();
-
-        onClick(e, issue.iid);
-      }}>
+    <g key={issue.iid} className={classes.issue} onClick={onClick}>
       <rect
         width={w}
         height={h}

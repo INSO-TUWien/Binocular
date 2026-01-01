@@ -148,10 +148,10 @@ export const SprintChart: React.FC<
         {height > 0 && width > 0 && (
           <>
             {groupedIssues.flatMap((group, trackNmbr) =>
-              group.map((d) => (
+              group.map((issue) => (
                 <SprintChartIssue
-                  key={d.iid}
-                  {...d}
+                  key={issue.iid}
+                  {...issue}
                   trackNmbr={trackNmbr}
                   availableTracks={groupedIssues.length}
                   height={height}
@@ -161,14 +161,15 @@ export const SprintChart: React.FC<
                   xScale={xScale}
                   personColorMap={personColorMap}
                   coloringMode={coloringMode}
-                  onClick={({ currentTarget }, iid) => {
-                    const anchor = currentTarget.closest('g');
+                  onClick={(e) => {
+                    // Stop propagation, otherwise the tooltip isn't placed
+                    e.stopPropagation();
 
-                    if (!anchor) {
+                    if (!(e.currentTarget instanceof SVGGElement)) {
                       return;
                     }
 
-                    setTooltipState({ variant: 'issue', iid, anchor });
+                    setTooltipState({ variant: 'issue', iid: issue.iid, anchor: e.currentTarget });
                   }}
                 />
               )),
