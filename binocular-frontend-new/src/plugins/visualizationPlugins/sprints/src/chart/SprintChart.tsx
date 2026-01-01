@@ -14,6 +14,7 @@ import { TooltipIssue, TooltipMergeRequestGroup, TooltipSprintArea } from './com
 import { SprintAreas } from './components/SprintAreas';
 import type { SprintType } from '../../../../../types/data/sprintType';
 import type { MappedDataPluginIssue, MappedDataPluginMergeRequest, MappedSprint } from './types';
+import { SprintChartMergeRequest } from './components/SprintChartMergeRequest';
 
 export const margin = 20;
 
@@ -165,33 +166,30 @@ export const SprintChart: React.FC<
                     // Stop propagation, otherwise the tooltip isn't placed
                     e.stopPropagation();
 
-                    if (!(e.currentTarget instanceof SVGGElement)) {
-                      return;
-                    }
-
                     setTooltipState({ variant: 'issue', iid: issue.iid, anchor: e.currentTarget });
                   }}
                 />
               )),
             )}
 
-            <SprintChartLegend
-              height={height}
-              width={width}
-              xScale={xScale}
-              maxDate={maxDate}
-              minDate={minDate}
-              groupedMergeRequests={groupedMergeRequests}
-              personColorMap={personColorMap}
-              coloringMode={coloringMode}
-              onClickMergeRequest={({ currentTarget }, iid) =>
-                setTooltipState({
-                  variant: 'merge-request',
-                  iid,
-                  anchor: currentTarget,
-                })
-              }
-            />
+            <SprintChartLegend height={height} width={width} xScale={xScale} maxDate={maxDate} minDate={minDate} />
+
+            {groupedMergeRequests.map((group) => (
+              <SprintChartMergeRequest
+                key={group[0].iid}
+                height={height}
+                xScale={xScale}
+                mergeRequestGroup={group}
+                personColorMap={personColorMap}
+                coloringMode={coloringMode}
+                onClick={(e) => {
+                  // Stop propagation, otherwise the tooltip isn't placed
+                  e.stopPropagation();
+
+                  setTooltipState({ variant: 'merge-request', iid: group[0].iid, anchor: e.currentTarget });
+                }}
+              />
+            ))}
 
             {showSprints && (
               <SprintAreas
