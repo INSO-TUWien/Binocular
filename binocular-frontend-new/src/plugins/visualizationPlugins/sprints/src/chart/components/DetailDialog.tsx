@@ -7,7 +7,9 @@ import type { MappedDataPluginIssue, MappedDataPluginMergeRequest, MappedSprint 
 import { groupBy } from 'lodash';
 import chroma from 'chroma-js';
 
-export const TooltipLayout: React.FC<
+const detailDialogWidth = 400;
+
+export const DetailDialogLayout: React.FC<
   React.PropsWithChildren<{
     anchor: SVGElement;
     invisible: boolean;
@@ -18,8 +20,6 @@ export const TooltipLayout: React.FC<
   const svg = anchor.closest('svg');
   const svgRect = svg?.getBoundingClientRect();
   const anchorRect = anchor.getBoundingClientRect();
-
-  const tooltipWidth = 400;
 
   const top = anchorRect.top - (svgRect?.top ?? 0) + anchorRect.height + 4;
   const left = anchorRect.left - (svgRect?.left ?? 0);
@@ -33,8 +33,9 @@ export const TooltipLayout: React.FC<
         position: 'absolute',
         top: top <= halfwayDivider ? top : undefined,
         bottom: top > halfwayDivider ? (svgRect?.bottom ?? 0) - anchorRect.bottom + anchorRect.height + 4 : undefined,
-        left: left + tooltipWidth > (svgRect?.right ?? 0) ? left - (left + tooltipWidth - (svgRect?.right ?? 0)) - margin * 2 : left,
-        width: tooltipWidth,
+        left:
+          left + detailDialogWidth > (svgRect?.right ?? 0) ? left - (left + detailDialogWidth - (svgRect?.right ?? 0)) - margin * 2 : left,
+        width: detailDialogWidth,
         display: invisible ? 'none' : undefined,
         maxHeight: 600,
         overflow: 'auto',
@@ -50,7 +51,7 @@ export const TooltipLayout: React.FC<
   );
 };
 
-export const TooltipIssue: React.FC<{
+export const DetailDialogIssue: React.FC<{
   iid: number;
   anchor: SVGElement;
   issues: MappedDataPluginIssue[];
@@ -63,7 +64,7 @@ export const TooltipIssue: React.FC<{
   const { aggregatedTimeTrackingData, totalTime } = aggregateTimeTrackingData(extractTimeTrackingDataFromNotes(i?.notes ?? []));
 
   return (
-    <TooltipLayout invisible={!i} anchor={anchor} onClickClose={onClickClose}>
+    <DetailDialogLayout invisible={!i} anchor={anchor} onClickClose={onClickClose}>
       <h2 className={'card-title'} style={{ display: 'inline', wordBreak: 'break-word' }}>
         <a href={i?.webUrl} target={'_blank'} rel="noreferrer">
           <span>#{i?.iid} </span>
@@ -137,11 +138,11 @@ export const TooltipIssue: React.FC<{
           </span>
         ))}
       </div>
-    </TooltipLayout>
+    </DetailDialogLayout>
   );
 };
 
-export const TooltipMergeRequestGroup: React.FC<{
+export const DetailDialogMergeRequestGroup: React.FC<{
   iid: number;
   anchor: SVGElement;
   mergeRequests: MappedDataPluginMergeRequest[];
@@ -152,7 +153,7 @@ export const TooltipMergeRequestGroup: React.FC<{
   const mr = mergeRequests.find((i) => i.iid === iid);
 
   return (
-    <TooltipLayout invisible={!mr} anchor={anchor} onClickClose={onClickClose}>
+    <DetailDialogLayout invisible={!mr} anchor={anchor} onClickClose={onClickClose}>
       {mergeRequests.length > 1 && (
         <fieldset className={'fieldset'} style={{ width: '100%' }}>
           <legend className={'fieldset-legend'}>Merge Requests</legend>
@@ -182,11 +183,11 @@ export const TooltipMergeRequestGroup: React.FC<{
       <p>
         <em>Creator:</em> {mr?.author?.name}
       </p>
-    </TooltipLayout>
+    </DetailDialogLayout>
   );
 };
 
-export const TooltipSprintArea: React.FC<
+export const DetailDialogSprintArea: React.FC<
   MappedSprint & {
     issues: MappedDataPluginIssue[];
 
@@ -200,7 +201,7 @@ export const TooltipSprintArea: React.FC<
   const groupedByStatus = groupBy(issues, (i) => i.state);
 
   return (
-    <TooltipLayout invisible={false} anchor={anchor} onClickClose={onClickClose}>
+    <DetailDialogLayout invisible={false} anchor={anchor} onClickClose={onClickClose}>
       <h2 className={'card-title'}>
         {startDate.format('L')} - {endDate.format('L')}
       </h2>
@@ -242,6 +243,6 @@ export const TooltipSprintArea: React.FC<
           </li>
         ))}
       </ul>
-    </TooltipLayout>
+    </DetailDialogLayout>
   );
 };

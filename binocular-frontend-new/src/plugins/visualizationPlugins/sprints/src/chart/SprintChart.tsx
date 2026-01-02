@@ -10,7 +10,7 @@ import { SprintChartIssue } from './components/SprintChartIssue';
 import { groupIntoTracks } from './helper/groupIntoTracks';
 import { groupMergeRequests } from './helper/groupMergeRequests';
 import { SprintChartLegend } from './components/SprintChartLegend';
-import { TooltipIssue, TooltipMergeRequestGroup, TooltipSprintArea } from './components/Tooltip';
+import { DetailDialogIssue, DetailDialogMergeRequestGroup, DetailDialogSprintArea } from './components/DetailDialog';
 import { SprintAreas } from './components/SprintAreas';
 import type { SprintType } from '../../../../../types/data/sprintType';
 import type { MappedDataPluginIssue, MappedDataPluginMergeRequest, MappedSprint } from './types';
@@ -18,7 +18,7 @@ import { SprintChartMergeRequest } from './components/SprintChartMergeRequest';
 
 export const margin = 20;
 
-type TooltipState = {
+type DetailDialogState = {
   anchor: SVGElement;
 } & ({ variant: 'merge-request' | 'issue'; iid: number } | ({ variant: 'sprint-area' } & MappedSprint));
 
@@ -99,7 +99,7 @@ export const SprintChart: React.FC<
   const [zoom, setZoom] = React.useState(1);
   const [offset, setOffset] = React.useState(0);
 
-  const [tooltipState, setTooltipState] = React.useState<TooltipState>();
+  const [detailDialogState, setDetailDialogState] = React.useState<DetailDialogState>();
 
   const svgChartRef = React.useRef<SVGSVGElement>(null);
 
@@ -119,7 +119,7 @@ export const SprintChart: React.FC<
       setZoom(e.transform.k);
       setOffset(e.transform.y);
 
-      setTooltipState(undefined);
+      setDetailDialogState(undefined);
     });
     d3.select(svg).call(zoom);
   }, []);
@@ -145,7 +145,7 @@ export const SprintChart: React.FC<
         height={'100%'}
         viewBox={`0, 0, ${width}, ${height}`}
         className={classes.container}
-        onClick={() => setTooltipState(undefined)}>
+        onClick={() => setDetailDialogState(undefined)}>
         {height > 0 && width > 0 && (
           <>
             {groupedIssues.flatMap((group, trackNmbr) =>
@@ -166,7 +166,7 @@ export const SprintChart: React.FC<
                     // Stop propagation, otherwise the tooltip isn't placed
                     e.stopPropagation();
 
-                    setTooltipState({ variant: 'issue', iid: issue.iid, anchor: e.currentTarget });
+                    setDetailDialogState({ variant: 'issue', iid: issue.iid, anchor: e.currentTarget });
                   }}
                 />
               )),
@@ -186,7 +186,7 @@ export const SprintChart: React.FC<
                   // Stop propagation, otherwise the tooltip isn't placed
                   e.stopPropagation();
 
-                  setTooltipState({ variant: 'merge-request', iid: group[0].iid, anchor: e.currentTarget });
+                  setDetailDialogState({ variant: 'merge-request', iid: group[0].iid, anchor: e.currentTarget });
                 }}
               />
             ))}
@@ -199,7 +199,7 @@ export const SprintChart: React.FC<
                 onClick={(sprint) => (e) => {
                   e.stopPropagation();
 
-                  setTooltipState({ variant: 'sprint-area', anchor: e.currentTarget, ...sprint });
+                  setDetailDialogState({ variant: 'sprint-area', anchor: e.currentTarget, ...sprint });
                 }}
               />
             )}
@@ -207,37 +207,37 @@ export const SprintChart: React.FC<
         )}
       </svg>
 
-      {tooltipState?.variant === 'issue' ? (
-        <TooltipIssue
-          {...tooltipState}
+      {detailDialogState?.variant === 'issue' ? (
+        <DetailDialogIssue
+          {...detailDialogState}
           issues={mappedIssues}
           personColorMap={personColorMap}
-          onClickClose={() => setTooltipState(undefined)}
+          onClickClose={() => setDetailDialogState(undefined)}
         />
-      ) : tooltipState?.variant === 'merge-request' ? (
-        <TooltipMergeRequestGroup
-          {...tooltipState}
-          mergeRequests={groupedMergeRequests.find((group) => group.some((mr) => mr.iid === tooltipState.iid)) ?? []}
-          onClickClose={() => setTooltipState(undefined)}
+      ) : detailDialogState?.variant === 'merge-request' ? (
+        <DetailDialogMergeRequestGroup
+          {...detailDialogState}
+          mergeRequests={groupedMergeRequests.find((group) => group.some((mr) => mr.iid === detailDialogState.iid)) ?? []}
+          onClickClose={() => setDetailDialogState(undefined)}
           onChangeMergeRequest={({ target: { value } }) =>
-            setTooltipState((prev) => (prev ? { ...prev, iid: Number.parseInt(value, 10) } : prev))
+            setDetailDialogState((prev) => (prev ? { ...prev, iid: Number.parseInt(value, 10) } : prev))
           }
         />
-      ) : tooltipState?.variant === 'sprint-area' ? (
-        <TooltipSprintArea
-          {...tooltipState}
-          startDate={tooltipState.startDate}
-          endDate={tooltipState.endDate}
+      ) : detailDialogState?.variant === 'sprint-area' ? (
+        <DetailDialogSprintArea
+          {...detailDialogState}
+          startDate={detailDialogState.startDate}
+          endDate={detailDialogState.endDate}
           issues={mappedIssues.filter((i) => {
-            const { startDate, endDate } = tooltipState;
+            const { startDate, endDate } = detailDialogState;
 
             return (
               (i.createdAt.isBefore(startDate) && i.closedAt.isAfter(endDate)) ||
-              i.createdAt.isBetween(tooltipState.startDate, tooltipState.endDate) ||
-              i.closedAt.isBetween(tooltipState.startDate, tooltipState.endDate)
+              i.createdAt.isBetween(detailDialogState.startDate, detailDialogState.endDate) ||
+              i.closedAt.isBetween(detailDialogState.startDate, detailDialogState.endDate)
             );
           })}
-          onClickClose={() => setTooltipState(undefined)}
+          onClickClose={() => setDetailDialogState(undefined)}
         />
       ) : null}
     </div>

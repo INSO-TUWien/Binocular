@@ -31,27 +31,29 @@ export const SprintAreas: React.FC<{
         const yEnd = 0;
 
         return (
-          <g key={s.id} className={classes['sprint-area']}>
-            <line x1={xStart} y1={yStart} x2={xStart} y2={height - margin * 2} width={1} stroke={'#4CD964'} />
-            <path
-              d={trianglePath}
-              width={triangleDimensions}
-              height={triangleDimensions}
-              fill={'#4CD964'}
-              // sub offset for the x direction, otherwise the triangle doesn't connect with the line.
-              transform={`translate(${xStart + triangleDimensions / 2 - 2}, ${yStart + triangleDimensions / 2}) rotate(90)`}
-            />
-            <line x1={xEnd} y1={yEnd} x2={xEnd} y2={height - margin * 2} width={1} stroke={'#FF3B30'} />
-            <path
-              d={trianglePath}
-              width={triangleDimensions}
-              height={triangleDimensions}
-              fill={'#FF3B30'}
-              // add offset for the x direction, otherwise the triangle doesn't connect with the line.
-              transform={`translate(${xEnd - triangleDimensions / 2 + 2}, ${yEnd + triangleDimensions / 2}) rotate(-90)`}
-            />
+          <g key={s.id}>
+            <g>
+              <line x1={xStart} y1={yStart} x2={xStart} y2={height - margin * 2} width={1} stroke={'#4CD964'} />
+              <path
+                d={trianglePath}
+                width={triangleDimensions}
+                height={triangleDimensions}
+                fill={'#4CD964'}
+                // sub offset for the x direction, otherwise the triangle doesn't connect with the line.
+                transform={`translate(${xStart + triangleDimensions / 2 - 2}, ${yStart + triangleDimensions / 2}) rotate(90)`}
+              />
+              <line x1={xEnd} y1={yEnd} x2={xEnd} y2={height - margin * 2} width={1} stroke={'#FF3B30'} />
+              <path
+                d={trianglePath}
+                width={triangleDimensions}
+                height={triangleDimensions}
+                fill={'#FF3B30'}
+                // add offset for the x direction, otherwise the triangle doesn't connect with the line.
+                transform={`translate(${xEnd - triangleDimensions / 2 + 2}, ${yEnd + triangleDimensions / 2}) rotate(-90)`}
+              />
+            </g>
 
-            <g onClick={onClick?.(s)}>
+            <g onClick={onClick?.(s)} className={classes['sprint-area']}>
               <rect x={xStart} y={Math.max(0, height - margin * 2 - rectHeight)} height={rectHeight} width={xEnd - xStart} fill={'white'} />
               <rect
                 x={xStart}
