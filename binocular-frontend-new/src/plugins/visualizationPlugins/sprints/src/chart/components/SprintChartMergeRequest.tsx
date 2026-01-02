@@ -29,7 +29,7 @@ export const SprintChartMergeRequest: React.FC<{
       key={head.iid}
       className={classes['merge-request']}
       cx={x}
-      cy={height - margin + 10}
+      cy={height - margin / 2}
       r={6}
       fill={tail.length === 0 ? color : 'lightgrey'}
       stroke={'darkgray'}
