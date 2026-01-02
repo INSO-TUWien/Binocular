@@ -196,13 +196,11 @@ export const SprintChart: React.FC<
                 sprints={mappedSprints}
                 xScale={xScale}
                 height={height}
-                onClick={({ currentTarget }, sprint) =>
-                  setTooltipState({
-                    variant: 'sprint-area',
-                    anchor: currentTarget,
-                    ...sprint,
-                  })
-                }
+                onClick={(sprint) => (e) => {
+                  e.stopPropagation();
+
+                  setTooltipState({ variant: 'sprint-area', anchor: e.currentTarget, ...sprint });
+                }}
               />
             )}
           </>
