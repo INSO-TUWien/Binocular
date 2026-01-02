@@ -2,6 +2,10 @@ import type React from 'react';
 import { symbol, symbolTriangle } from 'd3';
 import classes from './sprintArea.module.css';
 import type { MappedSprint } from '../types';
+import { margin } from '../SprintChart';
+
+const rectHeight = 15;
+const triangleDimensions = 10;
 
 export const SprintAreas: React.FC<{
   sprints: MappedSprint[];
@@ -28,35 +32,43 @@ export const SprintAreas: React.FC<{
 
         return (
           <g key={s.id} className={classes['sprint-area']}>
-            <rect x={xStart} y={yStart} height={height - 40} width={1} fill={'#4CD964'} />
+            <line x1={xStart} y1={yStart} x2={xStart} y2={height - margin * 2} width={1} stroke={'#4CD964'} />
             <path
               d={trianglePath}
-              width={10}
-              height={10}
+              width={triangleDimensions}
+              height={triangleDimensions}
               fill={'#4CD964'}
-              transform={`translate(${xStart + 4}, ${yStart + 5}) rotate(90)`}
+              // sub offset for the x direction, otherwise the triangle doesn't connect with the line.
+              transform={`translate(${xStart + triangleDimensions / 2 - 2}, ${yStart + triangleDimensions / 2}) rotate(90)`}
             />
-            <rect x={xEnd} y={yEnd} height={height - 40} width={1} fill={'#FF3B30'} />
-            <path d={trianglePath} width={10} height={10} fill={'#FF3B30'} transform={`translate(${xEnd - 3}, ${yEnd + 5}) rotate(-90)`} />
+            <line x1={xEnd} y1={yEnd} x2={xEnd} y2={height - margin * 2} width={1} stroke={'#FF3B30'} />
+            <path
+              d={trianglePath}
+              width={triangleDimensions}
+              height={triangleDimensions}
+              fill={'#FF3B30'}
+              // add offset for the x direction, otherwise the triangle doesn't connect with the line.
+              transform={`translate(${xEnd - triangleDimensions / 2 + 2}, ${yEnd + triangleDimensions / 2}) rotate(-90)`}
+            />
 
             <g onClick={onClick?.(s)}>
-              <rect x={xStart} y={Math.max(0, height - 40 - 15)} height={15} width={xEnd - xStart} fill={'white'} />
+              <rect x={xStart} y={Math.max(0, height - margin * 2 - rectHeight)} height={rectHeight} width={xEnd - xStart} fill={'white'} />
               <rect
                 x={xStart}
-                y={Math.max(0, height - 40 - 15)}
-                height={15}
+                y={Math.max(0, height - margin * 2 - rectHeight)}
+                height={rectHeight}
                 width={xEnd - xStart}
                 fill={'url(#sprints-diagonal-hatch)'}
                 stroke={'#FF3B30'}
               />
               <text
                 x={xStart + 4}
-                y={Math.max(0, height - 40 - 4)}
-                height={10}
+                // sub offset for the y direction so the text is positioned correctly
+                y={Math.max(0, height - margin * 2 - 3)}
                 fontSize={'0.75rem'}
                 paintOrder={'stroke'}
                 stroke={'white'}
-                strokeWidth={4}>
+                strokeWidth={2}>
                 {s.name}
               </text>
             </g>
