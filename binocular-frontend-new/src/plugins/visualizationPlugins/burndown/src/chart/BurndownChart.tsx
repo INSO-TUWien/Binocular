@@ -6,7 +6,7 @@ import moment, { type Moment, type unitOfTime } from 'moment';
 import type { SprintType } from '../../../../../types/data/sprintType';
 import { SprintAreas } from '../../../sprints/src/chart/components/SprintAreas';
 import classes from './burndownChart.module.css';
-import { TooltipLayout } from '../../../sprints/src/chart/components/Tooltip';
+import { DetailDialogLayout } from '../../../sprints/src/chart/components/DetailDialog';
 
 const legendBarHeight = 40;
 
@@ -245,7 +245,7 @@ const BurndownTooltip: React.FC<{
   );
 
   return (
-    <TooltipLayout anchor={anchor} onClickClose={onClickClose} invisible={!value}>
+    <DetailDialogLayout anchor={anchor} onClickClose={onClickClose} invisible={!value}>
       <h2 className={'card-title'} style={{ display: 'inline', wordBreak: 'break-word' }}>
         {value?.date.format('ll')}
       </h2>
@@ -264,6 +264,6 @@ const BurndownTooltip: React.FC<{
           {Number.isNaN(differenceWithIdeal) ? 0 : differenceWithIdeal}
         </span>
       </p>
-    </TooltipLayout>
+    </DetailDialogLayout>
   );
 };
