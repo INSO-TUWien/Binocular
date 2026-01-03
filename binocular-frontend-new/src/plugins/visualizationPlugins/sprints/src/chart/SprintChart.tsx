@@ -23,11 +23,13 @@ type DetailDialogState = {
 } & ({ variant: 'merge-request' | 'issue'; iid: number } | ({ variant: 'sprint-area' } & MappedSprint));
 
 const stringToColor = (string: string) => {
+  // Remove all non hex characters from the string.
   let stringWithInvalidCharsReplaced = string
     .split('')
     .map((c) => (/[0-9A-F]/gi.test(c) ? c : 0))
     .join('');
 
+  // Pad the string with '0', so the length of it is a multiple of 3.
   while (stringWithInvalidCharsReplaced.length % 3 !== 0) {
     stringWithInvalidCharsReplaced += '0';
   }
@@ -35,6 +37,8 @@ const stringToColor = (string: string) => {
   const partLength = stringWithInvalidCharsReplaced.length / 3;
   const subStringLength = partLength === 1 ? 1 : 2;
 
+  // Split up string intio the three color channels.
+  // Only take the first two chars of each part.
   const red = stringWithInvalidCharsReplaced.substring(0, subStringLength);
   const green = stringWithInvalidCharsReplaced.substring(partLength, partLength + subStringLength);
   const blue = stringWithInvalidCharsReplaced.substring(partLength * 2, partLength * 2 + subStringLength);
