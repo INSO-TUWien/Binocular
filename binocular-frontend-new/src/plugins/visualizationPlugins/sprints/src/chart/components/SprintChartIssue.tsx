@@ -55,9 +55,9 @@ export const SprintChartIssue: React.FC<
             patternUnits={'userSpaceOnUse'}
             patternTransform={'rotate(45)'}
             width={8 * labels.length}
-            height={'8'}>
+            height={8}>
             {labels.map(({ color }, i) => (
-              <rect key={color} x={8 * i} y={'0'} width={8} height={'15'} stroke={'none'} fill={color} />
+              <rect key={color} x={8 * i} y={'0'} width={8} height={8} stroke={'none'} fill={color} />
             ))}
           </pattern>
         </defs>
