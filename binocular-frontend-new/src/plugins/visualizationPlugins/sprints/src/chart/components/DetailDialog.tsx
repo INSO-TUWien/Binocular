@@ -9,7 +9,7 @@ import chroma from 'chroma-js';
 
 const detailDialogWidth = 400;
 
-export const DetailDialogLayout: React.FC<
+export const BaseDetailDialogLayout: React.FC<
   React.PropsWithChildren<{
     anchor: SVGElement;
     invisible: boolean;
@@ -64,7 +64,7 @@ export const DetailDialogIssue: React.FC<{
   const { aggregatedTimeTrackingData, totalTime } = aggregateTimeTrackingData(extractTimeTrackingDataFromNotes(i?.notes ?? []));
 
   return (
-    <DetailDialogLayout invisible={!i} anchor={anchor} onClickClose={onClickClose}>
+    <BaseDetailDialogLayout invisible={!i} anchor={anchor} onClickClose={onClickClose}>
       <h2 className={'card-title'} style={{ display: 'inline', wordBreak: 'break-word' }}>
         <a href={i?.webUrl} target={'_blank'} rel="noreferrer">
           <span>#{i?.iid} </span>
@@ -138,7 +138,7 @@ export const DetailDialogIssue: React.FC<{
           </span>
         ))}
       </div>
-    </DetailDialogLayout>
+    </BaseDetailDialogLayout>
   );
 };
 
@@ -153,7 +153,7 @@ export const DetailDialogMergeRequestGroup: React.FC<{
   const mr = mergeRequests.find((i) => i.iid === iid);
 
   return (
-    <DetailDialogLayout invisible={!mr} anchor={anchor} onClickClose={onClickClose}>
+    <BaseDetailDialogLayout invisible={!mr} anchor={anchor} onClickClose={onClickClose}>
       {mergeRequests.length > 1 && (
         <fieldset className={'fieldset'} style={{ width: '100%' }}>
           <legend className={'fieldset-legend'}>Merge Requests</legend>
@@ -183,7 +183,7 @@ export const DetailDialogMergeRequestGroup: React.FC<{
       <p>
         <em>Creator:</em> {mr?.author?.name}
       </p>
-    </DetailDialogLayout>
+    </BaseDetailDialogLayout>
   );
 };
 
@@ -201,7 +201,7 @@ export const DetailDialogSprintArea: React.FC<
   const groupedByStatus = groupBy(issues, (i) => i.state);
 
   return (
-    <DetailDialogLayout invisible={false} anchor={anchor} onClickClose={onClickClose}>
+    <BaseDetailDialogLayout invisible={false} anchor={anchor} onClickClose={onClickClose}>
       <h2 className={'card-title'}>
         {startDate.format('L')} - {endDate.format('L')}
       </h2>
@@ -243,6 +243,6 @@ export const DetailDialogSprintArea: React.FC<
           </li>
         ))}
       </ul>
-    </DetailDialogLayout>
+    </BaseDetailDialogLayout>
   );
 };
