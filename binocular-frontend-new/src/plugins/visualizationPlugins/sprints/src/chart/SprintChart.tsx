@@ -224,7 +224,9 @@ export const SprintChart: React.FC<
           mergeRequests={groupedMergeRequests.find((group) => group.some((mr) => mr.iid === detailDialogState.iid)) ?? []}
           onClickClose={() => setDetailDialogState(undefined)}
           onChangeMergeRequest={({ target: { value } }) =>
-            setDetailDialogState((prev) => (prev ? { ...prev, iid: Number.parseInt(value, 10) } : prev))
+            // Cast value type so the type is correct.
+            // There seems to be a mismatch between the type of iid and the value of the actual iid property.
+            setDetailDialogState((prev) => (prev ? { ...prev, iid: value as unknown as number } : prev))
           }
         />
       ) : detailDialogState?.variant === 'sprint-area' ? (

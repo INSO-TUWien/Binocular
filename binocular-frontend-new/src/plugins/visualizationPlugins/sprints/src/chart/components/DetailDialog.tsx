@@ -150,7 +150,7 @@ export const DetailDialogMergeRequestGroup: React.FC<{
   onClickClose: React.MouseEventHandler;
   onChangeMergeRequest: React.ChangeEventHandler<HTMLSelectElement>;
 }> = ({ mergeRequests, anchor, iid, onClickClose, onChangeMergeRequest }) => {
-  const mr = mergeRequests.find((i) => i.iid === iid);
+  const mr = mergeRequests.find((mr) => mr.iid === iid);
 
   return (
     <BaseDetailDialogLayout invisible={!mr} anchor={anchor} onClickClose={onClickClose}>
