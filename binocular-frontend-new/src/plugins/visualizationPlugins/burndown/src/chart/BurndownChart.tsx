@@ -74,8 +74,6 @@ export const BurndownChart: React.FC<
     granularity: unitOfTime.Base;
   } & Pick<BurndownSettings, 'showSprints'>
 > = ({ issues, minDate, maxDate, showSprints, height, width, sprints, granularity }) => {
-  const svgChartRef = React.useRef<SVGSVGElement>(null);
-
   const mappedIssues = issues.map((i) => {
     const closedAt = i.closedAt ? moment(i.closedAt) : maxDate;
 
@@ -122,7 +120,7 @@ export const BurndownChart: React.FC<
 
   return (
     <div style={{ height, width, position: 'relative' }}>
-      <svg xmlns="http://www.w3.org/2000/svg" ref={svgChartRef} width={'100%'} height={'100%'} viewBox={`0, 0, ${width}, ${height}`}>
+      <svg xmlns="http://www.w3.org/2000/svg" width={'100%'} height={'100%'} viewBox={`0, 0, ${width}, ${height}`}>
         {height > 0 && width > 0 && (
           <>
             {pairedUpDataPoints.map(([{ id: aId, date: aDate, issues: aIssues }, { id: bId, date: bDate, issues: bIssues }], i) => (
