@@ -237,6 +237,7 @@ export const SprintChart: React.FC<
           issues={mappedIssues.filter((i) => {
             const { startDate, endDate } = detailDialogState;
 
+            // Only select issues, that are either fully or partially overlap with the selected sprint.
             return (
               (i.createdAt.isBefore(startDate) && i.closedAt.isAfter(endDate)) ||
               i.createdAt.isBetween(detailDialogState.startDate, detailDialogState.endDate) ||
