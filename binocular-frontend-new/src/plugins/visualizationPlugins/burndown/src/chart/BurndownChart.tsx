@@ -64,7 +64,7 @@ function* groupIssuesByGranularity(
   };
 }
 
-function* pairUpDataPoints(data: IssuesGroupedByGranularity[], _maxDate: Moment) {
+function* pairUpDataPoints(data: IssuesGroupedByGranularity[]) {
   for (let i = 1; i < data.length; i++) {
     yield [data[i - 1], data[i]] as const;
   }
@@ -100,7 +100,7 @@ export const BurndownChart: React.FC<
     endDate: moment(s.endDate).startOf('day'),
   }));
 
-  const pairedUpDataPoints = [...pairUpDataPoints(issuesPerGranularity, maxDate)];
+  const pairedUpDataPoints = [...pairUpDataPoints(issuesPerGranularity)];
 
   const xScale = d3
     .scaleUtc()
