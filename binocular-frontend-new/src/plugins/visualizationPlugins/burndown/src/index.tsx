@@ -30,7 +30,7 @@ const Burndown: VisualizationPlugin<BurndownSettings, DataPluginIssue> = {
   metadata: {
     category: VisualizationPluginMetadataCategory.Issues,
     recommended: false,
-    description: 'A chart that visualizes the opening and closing of issues in relation to the selected time.',
+    description: 'A chart that visualizes the number of open issues in relation to the selected date range.',
   },
   reducer: Reducer,
   saga: Saga,

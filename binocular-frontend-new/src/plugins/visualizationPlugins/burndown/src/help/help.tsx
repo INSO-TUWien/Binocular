@@ -1,4 +1,4 @@
-const Help: React.FC = () => (
+const Help = () => (
   <>
     <h2>Burndown Help</h2>
 
