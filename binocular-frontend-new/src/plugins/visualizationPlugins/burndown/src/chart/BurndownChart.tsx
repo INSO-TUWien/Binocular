@@ -23,38 +23,45 @@ interface IssuesGroupedByGranularity {
   issues: MappedIssue[];
 }
 
-function* groupIssuesByGranularity(start: Moment, end: Moment, issues: MappedIssue[], granularity: unitOfTime.Base) {
+const mapIssue = (maxDate: moment.Moment) => (i: DataPluginIssue) => {
+  const closedAt = i.closedAt ? moment(i.closedAt) : maxDate;
+
+  return {
+    ...i,
+
+    createdAt: moment(i.createdAt).startOf('day'),
+    closedAt: closedAt.isAfter(maxDate) ? maxDate.clone().startOf('day') : closedAt.startOf('day'),
+  };
+};
+
+const cond = (granularity: unitOfTime.Base, date: Moment) => (i: MappedIssue) =>
+  granularity === 'years' ? date.isSame(i.createdAt, 'year') : date.isBetween(i.createdAt, i.closedAt, undefined, '[]');
+function* groupIssuesByGranularity(
+  start: Moment,
+  end: Moment,
+  issues: MappedIssue[],
+  granularity: unitOfTime.Base,
+): Generator<IssuesGroupedByGranularity> {
   let date = start.clone();
 
   let id = 0;
-
-  const cond = (date: Moment) => (i: MappedIssue) =>
-    granularity === 'years' ? date.isSame(i.createdAt, 'year') : date.isBetween(i.createdAt, i.closedAt, undefined, '[]');
 
   do {
     yield {
       id,
       date,
-      issues: issues.filter(cond(date)),
-    } as IssuesGroupedByGranularity;
-
-    const dateForLastYield = date.clone();
+      issues: issues.filter(cond(granularity, date)),
+    };
 
     date = date.clone().add(1, granularity).startOf(granularity);
     id += 1;
+  } while (date.isBefore(end));
 
-    if (date.isAfter(end)) {
-      // append one last entry.
-      // fixes the graph being cut off before the end is reached.
-      yield {
-        id: id + 1,
-        date: end,
-        issues: issues.filter(cond(dateForLastYield)),
-      } as IssuesGroupedByGranularity;
-
-      break;
-    }
-  } while (true);
+  yield {
+    id,
+    date: end,
+    issues: issues.filter(cond(granularity, end)),
+  };
 }
 
 function* pairUpDataPoints(data: IssuesGroupedByGranularity[], _maxDate: Moment) {
@@ -74,16 +81,7 @@ export const BurndownChart: React.FC<
     granularity: unitOfTime.Base;
   } & Pick<BurndownSettings, 'showSprints'>
 > = ({ issues, minDate, maxDate, showSprints, height, width, sprints, granularity }) => {
-  const mappedIssues = issues.map((i) => {
-    const closedAt = i.closedAt ? moment(i.closedAt) : maxDate;
-
-    return {
-      ...i,
-
-      createdAt: moment(i.createdAt).startOf('day'),
-      closedAt: closedAt.isAfter(maxDate) ? maxDate.clone().startOf('day') : closedAt.startOf('day'),
-    };
-  });
+  const mappedIssues = issues.map(mapIssue(maxDate));
 
   const issuesPerGranularity = [...groupIssuesByGranularity(minDate, maxDate, mappedIssues, granularity)];
   const minNumberOfIssuesPerGranularity = issuesPerGranularity.reduce(
