@@ -58,6 +58,8 @@ function* groupIssuesByGranularity(
     id += 1;
   } while (date.isBefore(end));
 
+  // yield one additional data entry.
+  // Fixes the current day not being visible when selecting week, month or year granularities.
   yield {
     id,
     date: end,
