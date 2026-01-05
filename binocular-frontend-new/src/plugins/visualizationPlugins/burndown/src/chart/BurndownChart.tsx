@@ -53,6 +53,7 @@ function* groupIssuesByGranularity(
       issues: issues.filter(cond(granularity, date)),
     };
 
+    // .clone() call is necessary, otherwise the visualization no longer works because every date would be the same day.
     date = date.clone().add(1, granularity).startOf(granularity);
     id += 1;
   } while (date.isBefore(end));
