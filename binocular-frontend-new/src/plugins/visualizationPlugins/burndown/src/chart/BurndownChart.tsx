@@ -6,22 +6,15 @@ import moment, { type Moment, type unitOfTime } from 'moment';
 import type { SprintType } from '../../../../../types/data/sprintType';
 import { SprintAreas } from '../../../sprints/src/chart/components/SprintAreas';
 import classes from './burndownChart.module.css';
-import { BaseDetailDialogLayout } from '../../../sprints/src/chart/components/DetailDialog';
+import { BurndownChartYAxisLegend } from './components/BurndownChartYAxisLegend';
+import { BurndownChartXAxisLegend } from './components/BurndownChartXAxisLegend';
+import { BurndownChartDetailDialog } from './components/BurndownChartDetailDialog';
+import { groupIssuesByGranularity } from './helper/groupIssuesByGranularity';
+import { pairUpDataPoints } from './helper/pairUpDataPoints';
 
-const legendBarHeight = 40;
+export const legendBarHeight = 40;
 
-const margin = 20;
-
-interface MappedIssue extends Omit<DataPluginIssue, 'createdAt' | 'closedAt'> {
-  createdAt: Moment;
-  closedAt: Moment;
-}
-
-interface IssuesGroupedByGranularity {
-  id: number;
-  date: Moment;
-  issues: MappedIssue[];
-}
+export const margin = 20;
 
 const mapIssue = (maxDate: moment.Moment) => (i: DataPluginIssue) => {
   const closedAt = i.closedAt ? moment(i.closedAt) : maxDate;
@@ -33,45 +26,6 @@ const mapIssue = (maxDate: moment.Moment) => (i: DataPluginIssue) => {
     closedAt: closedAt.isAfter(maxDate) ? maxDate.clone().startOf('day') : closedAt.startOf('day'),
   };
 };
-
-const cond = (granularity: unitOfTime.Base, date: Moment) => (i: MappedIssue) =>
-  granularity === 'years' ? date.isSame(i.createdAt, 'year') : date.isBetween(i.createdAt, i.closedAt, undefined, '[]');
-function* groupIssuesByGranularity(
-  start: Moment,
-  end: Moment,
-  issues: MappedIssue[],
-  granularity: unitOfTime.Base,
-): Generator<IssuesGroupedByGranularity> {
-  let date = start.clone();
-
-  let id = 0;
-
-  do {
-    yield {
-      id,
-      date,
-      issues: issues.filter(cond(granularity, date)),
-    };
-
-    // .clone() call is necessary, otherwise the visualization no longer works because every date would be the same day.
-    date = date.clone().add(1, granularity).startOf(granularity);
-    id += 1;
-  } while (date.isBefore(end));
-
-  // yield one additional data entry.
-  // Fixes the current day not being visible when selecting week, month or year granularities.
-  yield {
-    id,
-    date: end,
-    issues: issues.filter(cond(granularity, end)),
-  };
-}
-
-function* pairUpDataPoints(data: IssuesGroupedByGranularity[]) {
-  for (let i = 1; i < data.length; i++) {
-    yield [data[i - 1], data[i]] as const;
-  }
-}
 
 export const BurndownChart: React.FC<
   {
@@ -170,35 +124,8 @@ export const BurndownChart: React.FC<
               fill={'green'}
             />
 
-            <rect x={margin * 2} y={height - legendBarHeight} height={1} width={width - margin * 3} />
-            <rect x={margin * 2} y={height + 1 - legendBarHeight} width={width - margin * 3} height={40} fill={'#EEE'} />
-            {xScale.ticks().map((t) => {
-              const x = xScale(t);
-
-              return (
-                <g key={t.toISOString()}>
-                  <rect x={x} y={height - legendBarHeight} width={1} height={8} fill={'#000'} />
-                  <text x={x} y={height - legendBarHeight / 2} fontSize={10} textAnchor={'middle'}>
-                    {moment(t).format(maxDate.diff(minDate, 'years') > 1 ? 'YYYY' : 'MM.YYYY')}
-                  </text>
-                </g>
-              );
-            })}
-
-            <rect x={margin * 2} y={0} height={height - margin * 2} width={1} />
-            <rect x={0} y={0} width={margin * 2} height={height} fill={'#EEE'} />
-            {yScale.ticks().map((t) => {
-              const y = yScale(t);
-
-              return (
-                <g key={t}>
-                  <rect x={margin * 2 - 8} y={y} width={8} height={1} fill={'#000'} />
-                  <text x={margin} y={y} fontSize={10} textAnchor={'middle'} alignmentBaseline={'central'}>
-                    {t}
-                  </text>
-                </g>
-              );
-            })}
+            <BurndownChartXAxisLegend height={height} width={width} xScale={xScale} maxDate={maxDate} minDate={minDate} />
+            <BurndownChartYAxisLegend height={height} yScale={yScale} />
 
             {showSprints && <SprintAreas sprints={mappedSprints} xScale={xScale} height={height} />}
           </>
@@ -206,7 +133,7 @@ export const BurndownChart: React.FC<
       </svg>
 
       {tooltipState?.anchor && (
-        <BurndownTooltip
+        <BurndownChartDetailDialog
           {...tooltipState}
           onClickClose={() => setTooltipState(undefined)}
           issuesPerGranularity={issuesPerGranularity}
@@ -218,51 +145,5 @@ export const BurndownChart: React.FC<
         />
       )}
     </div>
-  );
-};
-
-const BurndownTooltip: React.FC<{
-  anchor: SVGElement;
-  id: number;
-  issuesPerGranularity: IssuesGroupedByGranularity[];
-  onClickClose: React.MouseEventHandler;
-  minDate: Moment;
-  maxDate: Moment;
-  granularity: unitOfTime.Base;
-  maxNumberOfIssuesPerGranularity: number;
-  nmbrOfIssues: number;
-}> = ({ anchor, id, issuesPerGranularity, maxNumberOfIssuesPerGranularity, minDate, maxDate, granularity, onClickClose }) => {
-  const value = issuesPerGranularity.find((ipg) => ipg.id === id);
-  const previousValue = issuesPerGranularity.find((ipg) => ipg.id === id - 1);
-  const differenceWithPreviousValue = value && previousValue ? value.issues.length - previousValue.issues.length : 0;
-
-  const localGranularity = ['years', 'year'].includes(granularity) ? 'months' : granularity;
-
-  const idealStepSize = maxNumberOfIssuesPerGranularity / maxDate.diff(minDate, localGranularity);
-  const differenceWithIdeal = Math.round(
-    value ? value.issues.length - (maxDate.diff(value.date, localGranularity) ?? 0) * idealStepSize : 0,
-  );
-
-  return (
-    <BaseDetailDialogLayout anchor={anchor} onClickClose={onClickClose} invisible={!value}>
-      <h2 className={'card-title'} style={{ display: 'inline', wordBreak: 'break-word' }}>
-        {value?.date.format('ll')}
-      </h2>
-      <p>
-        <em>Open issues:</em> <span>{value?.issues.length}</span>
-      </p>
-      <p>
-        <em>Difference with previous:</em>{' '}
-        <span className={classes['tooltip-difference']} data-sign={Math.sign(differenceWithPreviousValue)}>
-          {Number.isNaN(differenceWithPreviousValue) ? 0 : differenceWithPreviousValue}
-        </span>
-      </p>
-      <p>
-        <em>Difference with ideal:</em>{' '}
-        <span className={classes['tooltip-difference']} data-sign={Math.sign(differenceWithIdeal)}>
-          {Number.isNaN(differenceWithIdeal) ? 0 : differenceWithIdeal}
-        </span>
-      </p>
-    </BaseDetailDialogLayout>
   );
 };

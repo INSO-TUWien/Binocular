@@ -1,0 +1,12 @@
+.tooltip-difference {
+  &[data-sign='-1'] {
+    color: green;
+  }
+  &[data-sign='1'] {
+    &::before {
+      content: '+';
+    }
+
+    color: red;
+  }
+}
