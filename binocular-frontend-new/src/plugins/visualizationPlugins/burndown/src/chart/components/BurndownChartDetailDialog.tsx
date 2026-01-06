@@ -2,6 +2,7 @@ import type { Moment, unitOfTime } from 'moment';
 import { BaseDetailDialogLayout } from '../../../../sprints/src/chart/components/DetailDialog';
 import type { IssuesGroupedByGranularity } from '../types';
 import classes from './burndownChartDetailDialog.module.css';
+import * as React from 'react';
 
 export const BurndownChartDetailDialog: React.FC<{
   anchor: SVGElement;
