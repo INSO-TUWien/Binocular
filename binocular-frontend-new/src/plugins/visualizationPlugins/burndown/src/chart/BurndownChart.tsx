@@ -111,7 +111,7 @@ export const BurndownChart: React.FC<
     .domain([minDate, maxDate]);
   const yScale = d3
     .scaleLinear()
-    .range([height - 40, 0])
+    .range([height - margin * 2, 0])
     .domain([minNumberOfIssuesPerGranularity - 2, maxNumberOfIssuesPerGranularity + 5]);
 
   const [tooltipState, setTooltipState] = React.useState<{
