@@ -1,5 +1,5 @@
 import * as d3 from 'd3';
-import * as moment from 'moment';
+import moment, { type Moment } from 'moment';
 import * as React from 'react';
 import { margin, legendBarHeight } from '../BurndownChart';
 
@@ -7,8 +7,8 @@ export const BurndownChartXAxisLegend: React.FC<{
   height: number;
   width: number;
   xScale: d3.ScaleTime<number, number, never>;
-  maxDate: moment.Moment;
-  minDate: moment.Moment;
+  maxDate: Moment;
+  minDate: Moment;
 }> = ({ height, maxDate, minDate, width, xScale }) => (
   <>
     <rect x={margin * 2} y={height - legendBarHeight} height={1} width={width - margin * 3} />
