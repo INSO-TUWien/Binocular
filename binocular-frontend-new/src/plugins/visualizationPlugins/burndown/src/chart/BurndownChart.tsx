@@ -5,12 +5,12 @@ import type { BurndownSettings } from '../settings/settings';
 import moment, { type Moment, type unitOfTime } from 'moment';
 import type { SprintType } from '../../../../../types/data/sprintType';
 import { SprintAreas } from '../../../sprints/src/chart/components/SprintAreas';
-import classes from './burndownChart.module.css';
 import { BurndownChartYAxisLegend } from './components/BurndownChartYAxisLegend';
 import { BurndownChartXAxisLegend } from './components/BurndownChartXAxisLegend';
 import { BurndownChartDetailDialog } from './components/BurndownChartDetailDialog';
 import { groupIssuesByGranularity } from './helper/groupIssuesByGranularity';
 import { pairUpDataPoints } from './helper/pairUpDataPoints';
+import { BurndownChartDataPoint } from './components/BurndownChartDataPoint';
 
 export const legendBarHeight = 40;
 
@@ -79,7 +79,16 @@ export const BurndownChart: React.FC<
         {height > 0 && width > 0 && (
           <>
             {pairedUpDataPoints.map(([{ id: aId, date: aDate, issues: aIssues }, { id: bId, date: bDate, issues: bIssues }], i) => (
-              <g key={`${aId}_${bId}`} className={classes['data-point']}>
+              <g key={`${aId}_${bId}`}>
+                {i === 0 && (
+                  <BurndownChartDataPoint
+                    cx={xScale(aDate)}
+                    cy={yScale(aIssues.length)}
+                    onClick={({ currentTarget }) => setTooltipState({ anchor: currentTarget, id: aId })}
+                    active={aId === tooltipState?.id}
+                  />
+                )}
+
                 <line
                   x1={xScale(aDate)}
                   y1={yScale(aIssues.length)}
@@ -91,26 +100,11 @@ export const BurndownChart: React.FC<
                   strokeWidth={2}
                 />
 
-                {i === 0 && (
-                  <circle
-                    r={4}
-                    cx={xScale(aDate)}
-                    cy={yScale(aIssues.length)}
-                    fill={'lightblue'}
-                    stroke={'lightblue'}
-                    onClick={({ currentTarget }) => setTooltipState({ anchor: currentTarget, id: aId })}
-                    className={[classes['data-point'], aId === tooltipState?.id ? classes.active : ''].join(' ')}
-                  />
-                )}
-
-                <circle
-                  r={4}
+                <BurndownChartDataPoint
                   cx={xScale(bDate)}
                   cy={yScale(bIssues.length)}
-                  fill={'lightblue'}
-                  stroke={'lightblue'}
                   onClick={({ currentTarget }) => setTooltipState({ anchor: currentTarget, id: bId })}
-                  className={[classes['data-point'], bId === tooltipState?.id ? classes.active : ''].join(' ')}
+                  active={bId === tooltipState?.id}
                 />
               </g>
             ))}
