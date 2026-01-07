@@ -36,13 +36,13 @@ export const BurndownChartDetailDialog: React.FC<{
       </p>
       <p>
         <em>Difference with previous:</em>{' '}
-        <span className={classes['tooltip-difference']} data-sign={Math.sign(differenceWithPreviousValue)}>
+        <span className={classes['detail-dialog-difference']} data-sign={Math.sign(differenceWithPreviousValue)}>
           {Number.isNaN(differenceWithPreviousValue) ? 0 : differenceWithPreviousValue}
         </span>
       </p>
       <p>
         <em>Difference with ideal:</em>{' '}
-        <span className={classes['tooltip-difference']} data-sign={Math.sign(differenceWithIdeal)}>
+        <span className={classes['detail-dialog-difference']} data-sign={Math.sign(differenceWithIdeal)}>
           {Number.isNaN(differenceWithIdeal) ? 0 : differenceWithIdeal}
         </span>
       </p>

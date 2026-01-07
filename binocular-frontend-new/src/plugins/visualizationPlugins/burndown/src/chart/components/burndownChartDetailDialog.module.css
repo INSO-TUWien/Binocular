@@ -1,4 +1,4 @@
-.tooltip-difference {
+.detail-dialog-difference {
   &[data-sign='-1'] {
     color: green;
   }
