@@ -2,12 +2,14 @@ import * as React from 'react';
 import type { AuthorType } from '../../../../../../types/data/authorType';
 import { extractTimeTrackingDataFromNotes } from '../../../../timeSpent/src/utilities/dataConverter';
 import { aggregateTimeTrackingData } from '../helper/aggregateTimeTrackingData';
-import { margin } from '../SprintChart';
 import type { MappedDataPluginIssue, MappedDataPluginMergeRequest, MappedSprint } from '../types';
 import { groupBy } from 'lodash';
 import chroma from 'chroma-js';
 
 const detailDialogWidth = 400;
+const detailDialogDefaultHeight = 600;
+
+const marginBetweenDialogAndAnchor = 4;
 
 export const BaseDetailDialogLayout: React.FC<
   React.PropsWithChildren<{
@@ -18,29 +20,44 @@ export const BaseDetailDialogLayout: React.FC<
   }>
 > = ({ children, anchor, invisible, onClickClose }) => {
   const svg = anchor.closest('svg');
+  if (!svg) {
+    return null;
+  }
+
   const svgRect = svg?.getBoundingClientRect();
   const anchorRect = anchor.getBoundingClientRect();
 
-  const top = anchorRect.top - (svgRect?.top ?? 0) + anchorRect.height + 4;
-  const left = anchorRect.left - (svgRect?.left ?? 0);
+  const top = anchorRect.top - svgRect.top + anchorRect.height + marginBetweenDialogAndAnchor;
+  const bottom = svgRect.bottom - anchorRect.bottom + anchorRect.height + marginBetweenDialogAndAnchor;
+  const left = anchorRect.left - svgRect.left;
+  const right = 0;
+  const useLeftPositioning = left + detailDialogWidth <= svgRect.width;
 
-  const halfwayDivider = (svgRect?.height ?? 0) / 2;
+  const maxHeightForTopPositioning = Math.min(svgRect.height - top, detailDialogDefaultHeight);
+  const maxHeightForBottomPositioning = Math.min(svgRect.height - bottom, detailDialogDefaultHeight);
+  const useTopPositioning = maxHeightForTopPositioning > maxHeightForBottomPositioning;
 
   return (
     <div
       className={'card bg-base-100 shadow-xl rounded border-2 p-2 break-all'}
       style={{
         position: 'absolute',
-        top: top <= halfwayDivider ? top : undefined,
-        bottom: top > halfwayDivider ? (svgRect?.bottom ?? 0) - anchorRect.bottom + anchorRect.height + 4 : undefined,
-        left:
-          left + detailDialogWidth > (svgRect?.right ?? 0) ? left - (left + detailDialogWidth - (svgRect?.right ?? 0)) - margin * 2 : left,
+        top: useTopPositioning ? top : undefined,
+        bottom: useTopPositioning ? undefined : bottom,
+        left: useLeftPositioning ? left : undefined,
+        right: useLeftPositioning ? undefined : right,
+
+        maxHeight: useTopPositioning ? maxHeightForTopPositioning : maxHeightForBottomPositioning,
         width: detailDialogWidth,
+
         display: invisible ? 'none' : undefined,
-        maxHeight: 600,
         overflow: 'auto',
       }}>
-      {children}
+      {(useTopPositioning && maxHeightForTopPositioning < 100) || (!useTopPositioning && maxHeightForBottomPositioning < 100) ? (
+        <p>Dialog is too small to display content correctly.</p>
+      ) : (
+        children
+      )}
 
       <div className={'card-actions justify-end mt-1'}>
         <button className={'btn btn-xs'} onClick={onClickClose}>
