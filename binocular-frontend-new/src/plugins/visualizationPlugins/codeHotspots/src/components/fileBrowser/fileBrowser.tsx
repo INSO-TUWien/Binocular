@@ -59,7 +59,7 @@ function FileBrowser(props: { files: FileListElementType[]; onSetFile: (path?: s
   }, [filteredData.length, props.files]);
 
   return (
-    <div>
+    <div style={{ height: '100%' }}>
       <div className={'label'}>Files:</div>
       <div id={'fileSearch'} style={{ margin: '1rem 0', height: '3rem' }}>
         <SearchBar
@@ -96,7 +96,7 @@ function FileStruct(props: { data: ConvertedData; foldOut: boolean; onSetFile: (
           return (
             <div
               className={styles.button + ' ' + (i % 2 === 0 ? styles.BCEven : styles.BCOdd)}
-              key={data.name}
+              key={'file' + i + '-' + data.path}
               onClick={() => {
                 clickFile(data.url, data.path);
               }}>
@@ -105,13 +105,13 @@ function FileStruct(props: { data: ConvertedData; foldOut: boolean; onSetFile: (
           );
         } else if (data.type === ConvertedDataElementType.folder) {
           return (
-            <div key={data.name}>
+            <div key={'folder' + i + '-' + data.path}>
               <button
                 className={styles.button + ' ' + (i % 2 === 0 ? styles.ACEven : styles.ACOdd)}
                 onClick={(e) => {
                   const target = e.currentTarget;
-                  const panel = target.nextSibling;
-                  if (panel instanceof HTMLElement) {
+                  const panel = target.nextElementSibling as HTMLDivElement;
+                  if (panel !== null) {
                     if (panel.style.display === 'block') {
                       panel.style.display = 'none';
                       target.innerHTML = "<span class='" + styles.icon + "'>" + folder_white + '</span>' + data.name;

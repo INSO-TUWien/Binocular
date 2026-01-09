@@ -4,7 +4,7 @@ export interface DataPluginBranches {
 
 export interface DataPluginBranch {
   branch: string;
-  active: boolean;
-  tracksFileRenames: boolean;
+  active: string;
+  tracksFileRenames: string;
   latestCommit: string;
 }
