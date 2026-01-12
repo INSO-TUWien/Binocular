@@ -118,7 +118,7 @@ export const BurndownChart: React.FC<
               fill={'green'}
             />
 
-            <BurndownChartXAxisLegend height={height} width={width} xScale={xScale} maxDate={maxDate} minDate={minDate} />
+            <BurndownChartXAxisLegend height={height} width={width} xScale={xScale} />
             <BurndownChartYAxisLegend height={height} yScale={yScale} />
 
             {showSprints && <SprintAreas sprints={mappedSprints} xScale={xScale} height={height} />}

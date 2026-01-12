@@ -176,7 +176,7 @@ export const SprintChart: React.FC<
               )),
             )}
 
-            <SprintChartLegend height={height} width={width} xScale={xScale} maxDate={maxDate} minDate={minDate} />
+            <SprintChartLegend height={height} width={width} xScale={xScale} />
 
             {groupedMergeRequests.map((group) => (
               <SprintChartMergeRequest
