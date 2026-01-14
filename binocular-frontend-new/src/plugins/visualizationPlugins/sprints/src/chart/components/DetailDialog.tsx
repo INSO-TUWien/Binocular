@@ -93,7 +93,7 @@ export const DetailDialogIssue: React.FC<{
         <em>Created:</em> {i?.createdAt.format('lll')}
       </p>
       <p>
-        <em>Closed:</em> {i?.state.toLowerCase() === 'closed' ? i?.closedAt.format('lll') : 'open'}
+        <em>Closed:</em> {i?.state.toLowerCase() === 'closed' ? i?.closedAt?.format('lll') : 'open'}
       </p>
       <p>
         <em>Creator:</em> {i?.author?.name}
