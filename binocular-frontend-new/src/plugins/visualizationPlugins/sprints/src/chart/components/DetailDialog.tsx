@@ -25,23 +25,33 @@ export const BaseDetailDialogLayout: React.FC<
   }
 
   const svgRect = svg?.getBoundingClientRect();
+  // we can assume the visualization is in popout mode if the svg starts at 0,0
+  const isPopout = svgRect.left == 0;
   const anchorRect = anchor.getBoundingClientRect();
 
-  const top = anchorRect.top - svgRect.top + anchorRect.height + marginBetweenDialogAndAnchor;
-  const bottom = svgRect.bottom - anchorRect.bottom + anchorRect.height + marginBetweenDialogAndAnchor;
-  const left = anchorRect.left - svgRect.left;
-  const right = 0;
-  const useLeftPositioning = left + detailDialogWidth <= svgRect.width;
+  const top = isPopout
+    ? anchorRect.top - svgRect.top + anchorRect.height + marginBetweenDialogAndAnchor
+    : anchorRect.top + anchorRect.height + marginBetweenDialogAndAnchor;
+  const bottom = isPopout
+    ? svgRect.bottom - anchorRect.bottom + anchorRect.height + marginBetweenDialogAndAnchor
+    : innerHeight - anchorRect.bottom + anchorRect.height + marginBetweenDialogAndAnchor;
+  const left = isPopout ? anchorRect.left - svgRect.left : anchorRect.left;
+  const right = isPopout ? 0 : innerWidth - anchorRect.right;
 
-  const maxHeightForTopPositioning = Math.min(svgRect.height - top, detailDialogDefaultHeight);
-  const maxHeightForBottomPositioning = Math.min(svgRect.height - bottom, detailDialogDefaultHeight);
-  const useTopPositioning = maxHeightForTopPositioning > maxHeightForBottomPositioning;
+  const useLeftPositioning = isPopout ? left + detailDialogWidth <= svgRect.width : left + detailDialogWidth <= innerWidth;
+  const maxHeightForTopPositioning = isPopout
+    ? Math.min(svgRect.height - top, detailDialogDefaultHeight)
+    : Math.min(innerHeight - top, detailDialogDefaultHeight);
+  const maxHeightForBottomPositioning = isPopout
+    ? Math.min(svgRect.height - bottom, detailDialogDefaultHeight)
+    : Math.min(innerHeight - bottom, detailDialogDefaultHeight);
+  const useTopPositioning = maxHeightForTopPositioning >= maxHeightForBottomPositioning;
 
   return (
     <div
       className={'card bg-base-100 shadow-xl rounded border-2 p-2 break-all'}
       style={{
-        position: 'absolute',
+        position: isPopout ? 'absolute' : 'fixed',
         top: useTopPositioning ? top : undefined,
         bottom: useTopPositioning ? undefined : bottom,
         left: useLeftPositioning ? left : undefined,
@@ -52,6 +62,7 @@ export const BaseDetailDialogLayout: React.FC<
 
         display: invisible ? 'none' : undefined,
         overflow: 'auto',
+        zIndex: 1,
       }}>
       {(useTopPositioning && maxHeightForTopPositioning < 100) || (!useTopPositioning && maxHeightForBottomPositioning < 100) ? (
         <p>Dialog is too small to display content correctly.</p>
