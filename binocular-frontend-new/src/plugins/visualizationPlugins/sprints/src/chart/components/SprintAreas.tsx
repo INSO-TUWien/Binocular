@@ -7,6 +7,8 @@ import { margin } from '../SprintChart';
 const rectHeight = 15;
 const triangleDimensions = 10;
 
+const patternId = 'sprints-diagonal-hatch';
+
 export const SprintAreas: React.FC<{
   sprints: MappedSprint[];
   xScale: d3.ScaleTime<number, number>;
@@ -18,7 +20,7 @@ export const SprintAreas: React.FC<{
   return (
     <>
       <defs>
-        <pattern id={'sprints-diagonal-hatch'} patternUnits={'userSpaceOnUse'} width={8} height={8}>
+        <pattern id={patternId} patternUnits={'userSpaceOnUse'} width={8} height={8}>
           <path d={'M-1,1 l2,-2 M0,8 l8,-8 M3,5 l2,-2'} stroke={'#FF3B30'} strokeWidth={1} />
         </pattern>
       </defs>
@@ -60,7 +62,7 @@ export const SprintAreas: React.FC<{
                 y={Math.max(0, height - margin * 2 - rectHeight)}
                 height={rectHeight}
                 width={xEnd - xStart}
-                fill={'url(#sprints-diagonal-hatch)'}
+                fill={`url(#${patternId})`}
                 stroke={'#FF3B30'}
               />
               <text
