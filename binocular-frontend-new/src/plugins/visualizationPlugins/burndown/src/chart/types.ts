@@ -3,7 +3,7 @@ import type { DataPluginIssue } from '../../../../interfaces/dataPluginInterface
 
 export interface MappedIssue extends Omit<DataPluginIssue, 'createdAt' | 'closedAt'> {
   createdAt: Moment;
-  closedAt: Moment;
+  closedAt?: Moment;
 }
 
 export interface IssuesGroupedByGranularity {

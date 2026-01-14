@@ -75,8 +75,8 @@ const Chart = (props: VisualizationPluginProperties<BurndownSettings, DataPlugin
             <BurndownChart
               issues={issues}
               sprints={props.sprintList}
-              minDate={moment(props.parameters.parametersDateRange.from)}
-              maxDate={moment(props.parameters.parametersDateRange.to)}
+              fromDate={moment(props.parameters.parametersDateRange.from)}
+              toDate={moment(props.parameters.parametersDateRange.to)}
               showSprints={props.settings.showSprints}
               width={chartWidth}
               height={chartHeight}

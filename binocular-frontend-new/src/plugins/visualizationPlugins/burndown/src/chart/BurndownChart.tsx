@@ -11,19 +11,20 @@ import { BurndownChartDetailDialog } from './components/BurndownChartDetailDialo
 import { groupIssuesByGranularity } from './helper/groupIssuesByGranularity';
 import { pairUpDataPoints } from './helper/pairUpDataPoints';
 import { BurndownChartDataPoint } from './components/BurndownChartDataPoint';
+import type { MappedIssue } from './types';
 
 export const legendBarHeight = 40;
 
 export const margin = 20;
 
-const mapIssue = (maxDate: moment.Moment) => (i: DataPluginIssue) => {
-  const closedAt = i.closedAt ? moment(i.closedAt) : maxDate;
+const mapIssue = (i: DataPluginIssue): MappedIssue => {
+  const closedAt = i.closedAt ? moment(i.closedAt).startOf('day') : undefined;
 
   return {
     ...i,
 
     createdAt: moment(i.createdAt).startOf('day'),
-    closedAt: closedAt.isAfter(maxDate) ? maxDate.clone().startOf('day') : closedAt.startOf('day'),
+    closedAt,
   };
 };
 
@@ -31,14 +32,17 @@ export const BurndownChart: React.FC<
   {
     issues: DataPluginIssue[];
     sprints: SprintType[];
-    minDate: Moment;
-    maxDate: Moment;
+    fromDate: Moment;
+    toDate: Moment;
     width: number;
     height: number;
     granularity: unitOfTime.Base;
   } & Pick<BurndownSettings, 'showSprints'>
-> = ({ issues, minDate, maxDate, showSprints, height, width, sprints, granularity }) => {
-  const mappedIssues = issues.map(mapIssue(maxDate));
+> = ({ issues, fromDate, toDate, showSprints, height, width, sprints, granularity }) => {
+  const mappedIssues = issues.map(mapIssue);
+
+  const minDate = mappedIssues.reduce((acc, { createdAt }) => (createdAt.isBefore(acc) ? createdAt : acc), toDate);
+  const maxDate = mappedIssues.reduce((acc, { closedAt }) => (closedAt?.isAfter(acc) ? closedAt : acc), fromDate);
 
   const issuesPerGranularity = [...groupIssuesByGranularity(minDate, maxDate, mappedIssues, granularity)];
   const minNumberOfIssuesPerGranularity = issuesPerGranularity.reduce(
@@ -110,9 +114,9 @@ export const BurndownChart: React.FC<
             ))}
 
             <line
-              x1={xScale(minDate)}
+              x1={xScale(fromDate)}
               y1={yScale(maxNumberOfIssuesPerGranularity)}
-              x2={xScale(maxDate)}
+              x2={xScale(toDate)}
               y2={yScale(minNumberOfIssuesPerGranularity)}
               stroke={'green'}
               fill={'green'}
@@ -131,8 +135,8 @@ export const BurndownChart: React.FC<
           {...tooltipState}
           onClickClose={() => setTooltipState(undefined)}
           issuesPerGranularity={issuesPerGranularity}
-          minDate={minDate}
-          maxDate={maxDate}
+          minDate={fromDate}
+          maxDate={toDate}
           granularity={granularity}
           nmbrOfIssues={issues.length}
           maxNumberOfIssuesPerGranularity={maxNumberOfIssuesPerGranularity}
