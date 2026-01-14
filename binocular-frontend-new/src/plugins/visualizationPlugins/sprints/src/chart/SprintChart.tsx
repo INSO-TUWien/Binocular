@@ -46,17 +46,17 @@ const stringToColor = (string: string) => {
   return `#${red}${green}${blue}`;
 };
 
-const mapIssue = (maxDate: Moment, groupedLabels: Map<number, string[]>, colorsForLabelGroups: Map<number, string>) => {
+const mapIssue = (groupedLabels: Map<number, string[]>, colorsForLabelGroups: Map<number, string>) => {
   const keyValueGroupedLabels = [...groupedLabels];
 
   return (i: DataPluginIssue): MappedDataPluginIssue => {
-    const closedAt = i.closedAt ? moment(i.closedAt) : maxDate;
+    const closedAt = i.closedAt ? moment(i.closedAt) : undefined;
 
     return {
       ...i,
 
       createdAt: moment(i.createdAt),
-      closedAt: closedAt.isAfter(maxDate) ? maxDate : closedAt,
+      closedAt,
 
       labels: i.labels.map((l) => {
         const [groupId] = keyValueGroupedLabels.find(([, values]) => values.includes(l)) ?? [];
@@ -92,14 +92,14 @@ export const SprintChart: React.FC<
     issues: DataPluginIssue[];
     mergeRequests: DataPluginMergeRequest[];
     sprints: SprintType[];
-    minDate: Moment;
-    maxDate: Moment;
+    fromDate: Moment;
+    toDate: Moment;
     showSprints: boolean;
     width: number;
     height: number;
     groupedLabels: Map<number, string[]>;
   } & Pick<SprintSettings, 'coloringMode'>
-> = ({ authors, coloringMode, issues, mergeRequests, sprints, minDate, maxDate, showSprints, height, width, groupedLabels }) => {
+> = ({ authors, coloringMode, issues, mergeRequests, sprints, fromDate, toDate, showSprints, height, width, groupedLabels }) => {
   const [zoom, setZoom] = React.useState(1);
   const [offset, setOffset] = React.useState(0);
 
@@ -109,8 +109,8 @@ export const SprintChart: React.FC<
 
   const colorsForLabelGroups = new Map([...groupedLabels].map(([key, values]) => [key, stringToColor(values.join(''))] as const));
 
-  const mappedIssues = issues.map(mapIssue(maxDate, groupedLabels, colorsForLabelGroups));
-  const mappedMergeRequests = mergeRequests.map(mapMergeRequest(maxDate));
+  const mappedIssues = issues.map(mapIssue(groupedLabels, colorsForLabelGroups));
+  const mappedMergeRequests = mergeRequests.map(mapMergeRequest(toDate));
   const mappedSprints = sprints.map(mapSprint);
 
   React.useEffect(() => {
@@ -128,7 +128,8 @@ export const SprintChart: React.FC<
     d3.select(svg).call(zoom);
   }, []);
 
-  const groupedIssues = groupIntoTracks(mappedIssues);
+  const minDate = mappedIssues.reduce((acc, { createdAt }) => (createdAt.isBefore(acc) ? createdAt : acc), toDate);
+  const maxDate = mappedIssues.reduce((acc, { closedAt }) => (closedAt?.isAfter(acc) ? closedAt : acc), fromDate);
 
   const xScale = d3
     .scaleUtc()
@@ -138,7 +139,9 @@ export const SprintChart: React.FC<
   const personColorMap = new Map(authors.map((a) => [a.user.gitSignature, a.color] as const));
 
   const groupedMergeRequests =
-    maxDate.diff(minDate, 'years') >= 1 ? groupMergeRequests(mappedMergeRequests) : mappedMergeRequests.map((mr) => [mr]);
+    toDate.diff(fromDate, 'years') >= 1 ? groupMergeRequests(mappedMergeRequests) : mappedMergeRequests.map((mr) => [mr]);
+
+  const groupedIssues = groupIntoTracks(mappedIssues, maxDate);
 
   return (
     <div style={{ height, width, position: 'relative' }}>
@@ -163,6 +166,7 @@ export const SprintChart: React.FC<
                   zoom={zoom}
                   width={width}
                   offset={offset}
+                  maxDate={maxDate}
                   xScale={xScale}
                   personColorMap={personColorMap}
                   coloringMode={coloringMode}
@@ -170,7 +174,11 @@ export const SprintChart: React.FC<
                     // Stop propagation, otherwise the tooltip isn't placed
                     e.stopPropagation();
 
-                    setDetailDialogState({ variant: 'issue', iid: issue.iid, anchor: e.currentTarget });
+                    setDetailDialogState({
+                      variant: 'issue',
+                      iid: issue.iid,
+                      anchor: e.currentTarget,
+                    });
                   }}
                 />
               )),
@@ -190,7 +198,11 @@ export const SprintChart: React.FC<
                   // Stop propagation, otherwise the tooltip isn't placed
                   e.stopPropagation();
 
-                  setDetailDialogState({ variant: 'merge-request', iid: group[0].iid, anchor: e.currentTarget });
+                  setDetailDialogState({
+                    variant: 'merge-request',
+                    iid: group[0].iid,
+                    anchor: e.currentTarget,
+                  });
                 }}
               />
             ))}
@@ -203,7 +215,11 @@ export const SprintChart: React.FC<
                 onClick={(sprint) => (e) => {
                   e.stopPropagation();
 
-                  setDetailDialogState({ variant: 'sprint-area', anchor: e.currentTarget, ...sprint });
+                  setDetailDialogState({
+                    variant: 'sprint-area',
+                    anchor: e.currentTarget,
+                    ...sprint,
+                  });
                 }}
               />
             )}
@@ -234,14 +250,14 @@ export const SprintChart: React.FC<
           {...detailDialogState}
           startDate={detailDialogState.startDate}
           endDate={detailDialogState.endDate}
-          issues={mappedIssues.filter((i) => {
+          issues={mappedIssues.filter(({ createdAt, closedAt = maxDate }) => {
             const { startDate, endDate } = detailDialogState;
 
             // Only select issues, that are either fully or partially overlap with the selected sprint.
             return (
-              (i.createdAt.isBefore(startDate) && i.closedAt.isAfter(endDate)) ||
-              i.createdAt.isBetween(detailDialogState.startDate, detailDialogState.endDate) ||
-              i.closedAt.isBetween(detailDialogState.startDate, detailDialogState.endDate)
+              (createdAt.isBefore(startDate) && closedAt.isAfter(endDate)) ||
+              createdAt.isBetween(detailDialogState.startDate, detailDialogState.endDate) ||
+              closedAt.isBetween(detailDialogState.startDate, detailDialogState.endDate)
             );
           })}
           onClickClose={() => setDetailDialogState(undefined)}

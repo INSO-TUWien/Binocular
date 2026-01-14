@@ -8,6 +8,7 @@ import { findAuthorWithMaxSpentTime } from '../helper/findAuthorWithMaxSpentTime
 import { aggregateTimeTrackingData } from '../helper/aggregateTimeTrackingData';
 import type { MappedDataPluginIssue } from '../types';
 import classes from './sprintChartIssue.module.css';
+import type { Moment } from 'moment';
 
 const spaceBetweenIssues = 4;
 const marginBetweenLeftIssueBorderAndText = 4;
@@ -22,27 +23,44 @@ export const SprintChartIssue: React.FC<
       offset: number;
       availableTracks: number;
       trackNmbr: number;
+      maxDate: Moment;
       xScale: d3.ScaleTime<number, number>;
       personColorMap: Map<string, AuthorType['color']>;
       onClick: React.MouseEventHandler<SVGGElement>;
     }
-> = ({ height, zoom, offset, xScale, availableTracks, trackNmbr, personColorMap, coloringMode, onClick, labels, ...issue }) => {
+> = ({
+  height,
+  zoom,
+  offset,
+  xScale,
+  availableTracks,
+  trackNmbr,
+  personColorMap,
+  coloringMode,
+  labels,
+  maxDate,
+  iid,
+  createdAt,
+  closedAt = maxDate,
+  author,
+  assignee,
+  notes,
+  onClick,
+}) => {
   const h = Math.max(0, (height / availableTracks) * zoom);
-  const w = Math.max(xScale(issue.closedAt) - xScale(issue.createdAt) - spaceBetweenIssues, 4);
+  const w = Math.max(xScale(closedAt) - xScale(createdAt) - spaceBetweenIssues, 4);
 
-  const x = xScale(issue.createdAt);
+  const x = xScale(createdAt);
   const y = margin + offset + trackNmbr * h + trackNmbr * verticalSpaceBetweenIssueTracks;
 
   const personColor =
     personColorMap.get(
       (coloringMode === 'author'
-        ? issue.author?.user?.gitSignature
+        ? author?.user?.gitSignature
         : coloringMode === 'assignee'
-          ? issue.assignee?.user?.gitSignature
+          ? assignee?.user?.gitSignature
           : coloringMode === 'time-spent'
-            ? findAuthorWithMaxSpentTime(
-                aggregateTimeTrackingData(extractTimeTrackingDataFromNotes(issue.notes)).aggregatedTimeTrackingData,
-              )
+            ? findAuthorWithMaxSpentTime(aggregateTimeTrackingData(extractTimeTrackingDataFromNotes(notes)).aggregatedTimeTrackingData)
             : undefined) ?? '',
     )?.main ?? 'lightgrey';
 
@@ -50,12 +68,7 @@ export const SprintChartIssue: React.FC<
     <>
       {coloringMode === 'labels' && (
         <defs>
-          <pattern
-            id={`hatch-${issue.iid}`}
-            patternUnits={'userSpaceOnUse'}
-            patternTransform={'rotate(45)'}
-            width={8 * labels.length}
-            height={8}>
+          <pattern id={`hatch-${iid}`} patternUnits={'userSpaceOnUse'} patternTransform={'rotate(45)'} width={8 * labels.length} height={8}>
             {labels.map(({ color }, i) => (
               <rect key={color} x={8 * i} y={'0'} width={8} height={8} stroke={'none'} fill={color} />
             ))}
@@ -63,13 +76,13 @@ export const SprintChartIssue: React.FC<
         </defs>
       )}
 
-      <g key={issue.iid} className={classes.issue} onClick={onClick}>
+      <g key={iid} className={classes.issue} onClick={onClick}>
         <rect
           width={w}
           height={h}
           x={x}
           y={y}
-          fill={coloringMode === 'labels' ? `url(#hatch-${issue.iid})` : personColor}
+          fill={coloringMode === 'labels' ? `url(#hatch-${iid})` : personColor}
           stroke={personColor}
           strokeWidth={2}
           rx={'0.2rem'}
@@ -83,7 +96,7 @@ export const SprintChartIssue: React.FC<
           paintOrder={'stroke'}
           stroke={'white'}
           strokeWidth={2}>
-          #{issue.iid}
+          #{iid}
         </text>
       </g>
     </>
