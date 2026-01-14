@@ -68,6 +68,17 @@ export const BaseDetailDialogLayout: React.FC<
   );
 };
 
+/**
+ * @param time Floating point number for the hours.
+ * @returns The `time` formatted as `'XXh YYmin'`.
+ */
+const formatHours = (time: number) => {
+  const hours = Math.floor(time);
+  const minutes = Math.round((time % 1) * 60);
+
+  return `${hours}h ${minutes}min`;
+};
+
 export const DetailDialogIssue: React.FC<{
   iid: number;
   anchor: SVGElement;
@@ -121,7 +132,7 @@ export const DetailDialogIssue: React.FC<{
                   width: `${(100 / totalTime) * value}%`,
                   backgroundColor: personColorMap.get(key)?.main ?? 'lightgrey',
                 }}>
-                {value}
+                {formatHours(value)}
               </li>
             ))}
           </ul>
