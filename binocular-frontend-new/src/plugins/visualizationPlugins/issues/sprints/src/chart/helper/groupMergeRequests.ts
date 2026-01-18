@@ -9,7 +9,7 @@ export const groupMergeRequests = (mergeRequests: MappedDataPluginMergeRequest[]
   const map = new Map<string, MappedDataPluginMergeRequest[]>();
   for (const mr of mergeRequests) {
     const key = mr.createdAt.format('YYYY-MM');
-    if (!map.has(mr.createdAt.format(key))) {
+    if (!map.has(key)) {
       map.set(key, [mr]);
       continue;
     }
