@@ -37,7 +37,7 @@ const stringToColor = (string: string) => {
   const partLength = stringWithInvalidCharsReplaced.length / 3;
   const subStringLength = partLength === 1 ? 1 : 2;
 
-  // Split up string intio the three color channels.
+  // Split up string into the three color channels.
   // Only take the first two chars of each part.
   const red = stringWithInvalidCharsReplaced.substring(0, subStringLength);
   const green = stringWithInvalidCharsReplaced.substring(partLength, partLength + subStringLength);
