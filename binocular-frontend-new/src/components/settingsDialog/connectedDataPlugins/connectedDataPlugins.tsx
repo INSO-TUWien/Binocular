@@ -11,6 +11,7 @@ function ConnectedDataPlugins(props: { interactable: boolean }) {
   const dispatch: AppDispatch = useAppDispatch();
 
   const dataPlugins = useSelector((state: RootState) => state.settings.database.dataPlugins);
+  //const data = useSelector((state: RootState) => state);
 
   return (
     <>
@@ -24,6 +25,16 @@ function ConnectedDataPlugins(props: { interactable: boolean }) {
               className={'card w-96 bg-base-100 shadow-md mb-3 mr-3 border border-base-300 min-w-96'}
               style={{ background: settingsDatabaseDataPlugin.color }}
               key={`settingsDatabasePlugin${settingsDatabaseDataPlugin.id}`}>
+              <button
+                className="button"
+                onClick={() => {
+                  DataPluginStorage.getDataPlugin(settingsDatabaseDataPlugin).then((dataPlugin: any) => {
+                      dataPlugin.database.export();
+                    }
+                  );
+                }}>
+                export
+              </button>
               <div className="card-body">
                 <div>
                   {settingsDatabaseDataPlugin.name == 'PouchDb' && (
