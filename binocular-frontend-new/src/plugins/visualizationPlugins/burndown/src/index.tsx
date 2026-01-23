@@ -21,7 +21,7 @@ const Burndown: VisualizationPlugin<BurndownSettings, DataPluginIssue> = {
     getSVGData: () => '',
   },
   capabilities: {
-    popoutOnly: import.meta.env.PROD,
+    popoutOnly: false,
     export: false,
   },
   images: {
