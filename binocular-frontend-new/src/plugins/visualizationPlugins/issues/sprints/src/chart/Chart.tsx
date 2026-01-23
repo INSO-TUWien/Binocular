@@ -9,7 +9,6 @@ import type { DataPluginIssue } from '../../../../../interfaces/dataPluginInterf
 import { getDataSlice } from '../../../../simpleVisualizationPlugin/src/reducer';
 import moment from 'moment';
 import * as React from 'react';
-import { groupSimilarLabels } from './helper/groupSimilarLabels.ts';
 
 const Chart = (props: VisualizationPluginProperties<SprintSettings, DataPluginIssue>) => {
   /*
@@ -63,12 +62,6 @@ const Chart = (props: VisualizationPluginProperties<SprintSettings, DataPluginIs
     dispatch({ type: 'REFRESH' });
   }, [props.dataConnection]);
 
-  const groupedLabels = groupSimilarLabels(
-    [...new Set(issues.flatMap((i) => i.labels))],
-    props.settings.maxNumberOfDifferencesBetweenLabels,
-    props.settings.minNumberOfLabelsPerGroup,
-  );
-
   return (
     <>
       <div className={'w-full h-full flex justify-center items-center'} ref={props.chartContainerRef}>
@@ -91,7 +84,8 @@ const Chart = (props: VisualizationPluginProperties<SprintSettings, DataPluginIs
               showSprints={props.settings.showSprints}
               width={chartWidth}
               height={chartHeight}
-              groupedLabels={groupedLabels}
+              maxNumberOfDifferencesBetweenLabels={props.settings.maxNumberOfDifferencesBetweenLabels}
+              minNumberOfLabelsPerGroup={props.settings.minNumberOfLabelsPerGroup}
             />
           ) : (
             <div>No Data matching the selected Parameters!</div>

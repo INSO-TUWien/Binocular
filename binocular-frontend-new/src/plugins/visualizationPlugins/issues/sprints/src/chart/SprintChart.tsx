@@ -15,6 +15,7 @@ import { SprintAreas } from './components/SprintAreas';
 import type { SprintType } from '../../../../../../types/data/sprintType';
 import type { MappedDataPluginIssue, MappedDataPluginMergeRequest, MappedSprint } from './types';
 import { SprintChartMergeRequest } from './components/SprintChartMergeRequest';
+import { groupSimilarLabels } from './helper/groupSimilarLabels';
 
 export const margin = 20;
 
@@ -97,9 +98,23 @@ export const SprintChart: React.FC<
     showSprints: boolean;
     width: number;
     height: number;
-    groupedLabels: Map<number, string[]>;
+    maxNumberOfDifferencesBetweenLabels?: number;
+    minNumberOfLabelsPerGroup?: number;
   } & Pick<SprintSettings, 'coloringMode'>
-> = ({ authors, coloringMode, issues, mergeRequests, sprints, fromDate, toDate, showSprints, height, width, groupedLabels }) => {
+> = ({
+  authors,
+  coloringMode,
+  issues,
+  mergeRequests,
+  sprints,
+  fromDate,
+  toDate,
+  showSprints,
+  height,
+  width,
+  maxNumberOfDifferencesBetweenLabels,
+  minNumberOfLabelsPerGroup,
+}) => {
   const [zoom, setZoom] = React.useState(1);
   const [offset, setOffset] = React.useState(0);
 
@@ -107,6 +122,11 @@ export const SprintChart: React.FC<
 
   const svgChartRef = React.useRef<SVGSVGElement>(null);
 
+  const groupedLabels = groupSimilarLabels(
+    [...new Set(issues.flatMap((i) => i.labels))],
+    maxNumberOfDifferencesBetweenLabels,
+    minNumberOfLabelsPerGroup,
+  );
   const colorsForLabelGroups = new Map([...groupedLabels].map(([key, values]) => [key, stringToColor(values.join(''))] as const));
 
   const mappedIssues = issues.map(mapIssue(groupedLabels, colorsForLabelGroups));
