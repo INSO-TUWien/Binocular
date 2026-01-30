@@ -1,11 +1,11 @@
 import PreviewImage from '../assets/thumbnail.svg';
 import Settings, { type SprintSettings } from './settings/settings.tsx';
-import type { VisualizationPlugin } from '../../../interfaces/visualizationPlugin.ts';
+import type { VisualizationPlugin } from '../../../../interfaces/visualizationPlugin.ts';
 import Reducer from './reducer';
 import Saga from './saga';
 import Help from './help/help.tsx';
-import type { DataPluginIssue } from '../../../interfaces/dataPluginInterfaces/dataPluginIssues.ts';
-import { VisualizationPluginMetadataCategory } from '../../../interfaces/visualizationPluginInterfaces/visualizationPluginMetadata.ts';
+import type { DataPluginIssue } from '../../../../interfaces/dataPluginInterfaces/dataPluginIssues.ts';
+import { VisualizationPluginMetadataCategory } from '../../../../interfaces/visualizationPluginInterfaces/visualizationPluginMetadata.ts';
 import Chart from './chart/Chart.tsx';
 
 const Sprints: VisualizationPlugin<SprintSettings, DataPluginIssue> = {

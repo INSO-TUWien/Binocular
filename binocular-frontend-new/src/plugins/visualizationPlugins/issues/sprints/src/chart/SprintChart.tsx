@@ -1,18 +1,18 @@
 import * as React from 'react';
-import type { DataPluginIssue } from '../../../../interfaces/dataPluginInterfaces/dataPluginIssues';
+import type { DataPluginIssue } from '../../../../../interfaces/dataPluginInterfaces/dataPluginIssues';
 import * as d3 from 'd3';
 import classes from './sprintChart.module.css';
-import type { AuthorType } from '../../../../../types/data/authorType';
+import type { AuthorType } from '../../../../../../types/data/authorType';
 import type { SprintSettings } from '../settings/settings';
 import moment, { type Moment } from 'moment';
-import type { DataPluginMergeRequest } from '../../../../interfaces/dataPluginInterfaces/dataPluginMergeRequests';
+import type { DataPluginMergeRequest } from '../../../../../interfaces/dataPluginInterfaces/dataPluginMergeRequests';
 import { SprintChartIssue } from './components/SprintChartIssue';
 import { groupIntoTracks } from './helper/groupIntoTracks';
 import { groupMergeRequests } from './helper/groupMergeRequests';
 import { SprintChartLegend } from './components/SprintChartLegend';
 import { DetailDialogIssue, DetailDialogMergeRequestGroup, DetailDialogSprintArea } from './components/DetailDialog';
 import { SprintAreas } from './components/SprintAreas';
-import type { SprintType } from '../../../../../types/data/sprintType';
+import type { SprintType } from '../../../../../../types/data/sprintType';
 import type { MappedDataPluginIssue, MappedDataPluginMergeRequest, MappedSprint } from './types';
 import { SprintChartMergeRequest } from './components/SprintChartMergeRequest';
 

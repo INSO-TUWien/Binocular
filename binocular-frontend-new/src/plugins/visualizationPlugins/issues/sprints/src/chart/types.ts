@@ -1,7 +1,7 @@
 import type { Moment } from 'moment';
-import type { DataPluginIssue } from '../../../../interfaces/dataPluginInterfaces/dataPluginIssues';
-import type { DataPluginMergeRequest } from '../../../../interfaces/dataPluginInterfaces/dataPluginMergeRequests';
-import type { SprintType } from '../../../../../types/data/sprintType';
+import type { DataPluginIssue } from '../../../../../interfaces/dataPluginInterfaces/dataPluginIssues';
+import type { DataPluginMergeRequest } from '../../../../../interfaces/dataPluginInterfaces/dataPluginMergeRequests';
+import type { SprintType } from '../../../../../../types/data/sprintType';
 
 export type MappedDataPluginIssue = Omit<DataPluginIssue, 'createdAt' | 'closedAt' | 'labels'> & {
   createdAt: Moment;

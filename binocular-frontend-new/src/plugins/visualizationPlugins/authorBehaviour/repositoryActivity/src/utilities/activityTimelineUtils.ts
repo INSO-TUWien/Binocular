@@ -25,6 +25,7 @@ export function convertToActivityTimelineFormat(
   chartData: Array<{ date: Date; value: number; tooltip?: string }>;
 } {
   const activityPerDay = new Map<string, DayActivityData>();
+  console.log(data);
 
   data.forEach((d) => {
     const date = getActivityDate(d);
@@ -41,6 +42,7 @@ export function convertToActivityTimelineFormat(
     dayData.total += 1;
     dayData.counts[activityType] += 1;
   });
+  console.log(activityPerDay);
 
   // Convert map to array of objects
   const chartData = Array.from(activityPerDay.entries()).map(([dateStr, dayData]) => {

@@ -1,6 +1,0 @@
-circle.data-point:hover,
-circle.data-point.active {
-  cursor: pointer;
-  r: 6px;
-  fill: lightblue;
-}
