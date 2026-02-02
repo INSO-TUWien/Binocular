@@ -27,12 +27,9 @@ export const levenshteinDistance = (a: string, b: string) => {
       const replaceOpCost = dpTable[i - 1][j - 1];
       const insertOpCost = dpTable[i - 1][j];
 
-      // The minimum cost is the operation chosen.
-      const minOpCost = Math.min(deleteOpCost, replaceOpCost, insertOpCost);
-
-      // Set new cost.
+      // Set new cost to the minimum cost of all operations.
       // If the current char of a and b are the same, no operation is needed.
-      dpTable[i][j] = a[i - 1] === b[j - 1] ? minOpCost : minOpCost + 1;
+      dpTable[i][j] = Math.min(deleteOpCost + 1, replaceOpCost + 1, a[i - 1] === b[j - 1] ? insertOpCost : insertOpCost + 1);
     }
   }
 
