@@ -37,5 +37,5 @@ export const levenshteinDistance = (a: string, b: string) => {
   }
 
   // Access the last cell and return it.
-  return dpTable.reverse()[0]?.reverse()[0] ?? 0;
+  return dpTable[a.length][b.length] ?? 0;
 };
