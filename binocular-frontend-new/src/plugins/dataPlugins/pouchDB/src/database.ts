@@ -143,6 +143,7 @@ export default class Database {
 
     return new Promise((resolve) => {
       keys.forEach(async (name) => {
+        if (setUploadInfo) setUploadInfo(`${imported}/${keys.length} importing ${name}`);
         if (name.includes('-')) {
           await this.importEdge(name, dbObjects[name]);
         } else {
