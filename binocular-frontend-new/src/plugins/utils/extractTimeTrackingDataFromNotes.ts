@@ -11,7 +11,7 @@ export interface TimeTrackingData {
   mergeRequest: DataPluginMergeRequest | null;
 }
 
-export function convertTime(timeString: string) {
+function convertTime(timeString: string) {
   const timeParts = timeString.split(' ');
   let time = 0;
   timeParts.forEach((part) => {

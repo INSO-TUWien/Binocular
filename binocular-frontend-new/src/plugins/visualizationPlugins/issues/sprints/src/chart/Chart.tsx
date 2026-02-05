@@ -1,14 +1,14 @@
-import { useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { DataState, type IssuesState } from '../reducer';
-import type { SprintSettings } from '../settings/settings.tsx';
-import { handelPopoutResizing } from '../../../../../utils/resizing.ts';
-import type { VisualizationPluginProperties } from '../../../../../interfaces/visualizationPluginInterfaces/visualizationPluginProperties.ts';
-import { SprintChart } from './SprintChart.tsx';
-import type { DataPluginIssue } from '../../../../../interfaces/dataPluginInterfaces/dataPluginIssues.ts';
-import { getDataSlice } from '../../../../simpleVisualizationPlugin/src/reducer';
 import moment from 'moment';
 import * as React from 'react';
+import { useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import type { DataPluginIssue } from '../../../../../interfaces/dataPluginInterfaces/dataPluginIssues.ts';
+import type { VisualizationPluginProperties } from '../../../../../interfaces/visualizationPluginInterfaces/visualizationPluginProperties.ts';
+import { handelPopoutResizing } from '../../../../../utils/resizing.ts';
+import { getDataSlice } from '../../../../simpleVisualizationPlugin/src/reducer';
+import { DataState, type IssuesState } from '../reducer';
+import type { SprintSettings } from '../settings/settings.tsx';
+import { SprintChart } from './SprintChart.tsx';
 
 const Chart = (props: VisualizationPluginProperties<SprintSettings, DataPluginIssue>) => {
   /*

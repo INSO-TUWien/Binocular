@@ -1,21 +1,21 @@
-import * as React from 'react';
-import type { DataPluginIssue } from '../../../../../interfaces/dataPluginInterfaces/dataPluginIssues';
 import * as d3 from 'd3';
-import classes from './sprintChart.module.css';
-import type { AuthorType } from '../../../../../../types/data/authorType';
-import type { SprintSettings } from '../settings/settings';
 import moment, { type Moment } from 'moment';
+import * as React from 'react';
+import type { AuthorType } from '../../../../../../types/data/authorType';
+import type { SprintType } from '../../../../../../types/data/sprintType';
+import type { DataPluginIssue } from '../../../../../interfaces/dataPluginInterfaces/dataPluginIssues';
 import type { DataPluginMergeRequest } from '../../../../../interfaces/dataPluginInterfaces/dataPluginMergeRequests';
-import { SprintChartIssue } from './components/SprintChartIssue';
-import { groupIntoTracks } from './helper/groupIntoTracks';
-import { groupMergeRequests } from './helper/groupMergeRequests';
-import { SprintChartLegend } from './components/SprintChartLegend';
+import type { SprintSettings } from '../settings/settings';
 import { DetailDialogIssue, DetailDialogMergeRequestGroup, DetailDialogSprintArea } from './components/DetailDialog';
 import { SprintAreas } from './components/SprintAreas';
-import type { SprintType } from '../../../../../../types/data/sprintType';
-import type { MappedDataPluginIssue, MappedDataPluginMergeRequest, MappedSprint } from './types';
+import { SprintChartIssue } from './components/SprintChartIssue';
+import { SprintChartLegend } from './components/SprintChartLegend';
 import { SprintChartMergeRequest } from './components/SprintChartMergeRequest';
+import { groupIntoTracks } from './helper/groupIntoTracks';
+import { groupMergeRequests } from './helper/groupMergeRequests';
 import { groupSimilarLabels } from './helper/groupSimilarLabels';
+import classes from './sprintChart.module.css';
+import type { MappedDataPluginIssue, MappedDataPluginMergeRequest, MappedSprint } from './types';
 
 export const margin = 20;
 

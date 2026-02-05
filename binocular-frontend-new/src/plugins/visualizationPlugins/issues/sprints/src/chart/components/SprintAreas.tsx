@@ -1,8 +1,8 @@
-import type React from 'react';
 import { symbol, symbolTriangle } from 'd3';
-import classes from './sprintArea.module.css';
-import type { MappedSprint } from '../types';
+import type React from 'react';
 import { margin } from '../SprintChart';
+import type { MappedSprint } from '../types';
+import classes from './sprintArea.module.css';
 
 const rectHeight = 15;
 const triangleDimensions = 10;

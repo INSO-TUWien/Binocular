@@ -1,8 +1,8 @@
 import * as d3 from 'd3';
 import * as React from 'react';
+import type { AuthorType } from '../../../../../../../types/data/authorType';
 import { margin } from '../SprintChart';
 import type { MappedDataPluginMergeRequest } from '../types';
-import type { AuthorType } from '../../../../../../../types/data/authorType';
 import classes from './sprintChartMergeRequest.module.css';
 
 export const SprintChartMergeRequest: React.FC<{
