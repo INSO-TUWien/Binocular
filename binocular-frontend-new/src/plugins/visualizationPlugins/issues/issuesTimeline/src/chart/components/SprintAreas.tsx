@@ -1,6 +1,6 @@
 import { symbol, symbolTriangle } from 'd3';
 import type React from 'react';
-import { margin } from '../SprintChart';
+import { margin } from '../IssuesTimelineChart';
 import type { MappedSprint } from '../types';
 import classes from './sprintArea.module.css';
 
