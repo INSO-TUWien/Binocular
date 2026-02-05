@@ -1,7 +1,0 @@
-.issue {
-  cursor: pointer;
-
-  &:hover rect {
-    opacity: 0.75;
-  }
-}
