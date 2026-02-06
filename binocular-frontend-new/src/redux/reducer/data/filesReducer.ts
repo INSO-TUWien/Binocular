@@ -95,6 +95,13 @@ export const filesSlice = createSlice({
       const newState = JSON.stringify(state);
       writeFileListToStorage(newState);
     },
+    removeFileList: (state, action: PayloadAction<number>) => {
+      delete state.fileLists[action.payload];
+      delete state.fileTrees[action.payload];
+      delete state.fileCounts[action.payload];
+      const newState = JSON.stringify(state);
+      fileHandle.createWritable().then((access) => access.write(newState).then(() => access.close()));
+    },
     clearFileStorage: () => {
       clearFileStorage();
     },
