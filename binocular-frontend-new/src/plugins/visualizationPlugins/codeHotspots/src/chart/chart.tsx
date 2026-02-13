@@ -13,6 +13,7 @@ import { type CodeHotspotsState, setFile } from '../reducer';
 import CodeViewer from './codeViewer/codeViewer';
 import HeatMap from './heatmap/heatMap';
 import { EditorView } from '@codemirror/view';
+import ColumnOverview from './columnOverview/columnOverview';
 
 function Chart(props: {
   settings: SettingsType;
@@ -30,6 +31,8 @@ function Chart(props: {
   const [chartHeight, setChartHeight] = useState(100);
 
   const leftOffset = 35;
+
+  const columnOverviewHeight = 100;
 
   /**
    * RESIZE Logic START
@@ -61,7 +64,7 @@ function Chart(props: {
   const codeViewerRef = useRef<EditorView>(null);
 
   const data: CodeHotspotsState = useSelector((state: State) => state.plugin);
-  console.log(data);
+
   return (
     <>
       <div className={'w-full h-full flex flex-row'} ref={chartContainerRef}>
@@ -76,16 +79,40 @@ function Chart(props: {
         </div>
         <div style={{ flexGrow: 1 }}>
           <div
-            style={{ width: '100%', height: '100%', position: 'relative', overflowY: 'scroll' }}
+            style={{ width: '100%', height: `100%`, position: 'relative', overflowY: 'scroll' }}
             onScroll={() => {
               if (codeViewerRef.current) {
                 codeViewerRef.current.requestMeasure();
               }
             }}>
-            <div style={{ width: `calc(100% - ${leftOffset}px`, height: '100%', position: 'absolute', top: 0, left: `${leftOffset}px` }}>
+            <div
+              style={{
+                width: `calc(100% - ${leftOffset}px`,
+                height: `${columnOverviewHeight}px`,
+                position: 'absolute',
+                left: `${leftOffset}px`,
+              }}>
+              <ColumnOverview
+                file={data.selectedFile}
+                commits={data.commits}
+                onSetFile={(url, path) => {
+                  console.log(url, path);
+                  if (url && path) {
+                    dispatch(setFile({ url: url, path: path }));
+                  }
+                }}></ColumnOverview>
+            </div>
+            <div
+              style={{
+                width: `calc(100% - ${leftOffset}px`,
+                height: '100%',
+                position: 'absolute',
+                top: `${columnOverviewHeight}px`,
+                left: `${leftOffset}px`,
+              }}>
               <HeatMap file={data.selectedFile} commits={data.commits}></HeatMap>
             </div>
-            <div style={{ width: '100%', height: '100%', position: 'absolute', top: 0, left: 0 }}>
+            <div style={{ width: '100%', height: '100%', position: 'absolute', top: `${columnOverviewHeight}px`, left: 0 }}>
               <CodeViewer ref={codeViewerRef} file={data.selectedFile} currentBranch={data.currentBranch}></CodeViewer>
             </div>
           </div>

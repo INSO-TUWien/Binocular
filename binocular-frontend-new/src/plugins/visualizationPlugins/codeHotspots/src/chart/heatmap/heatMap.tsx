@@ -16,7 +16,9 @@ function HeatMap(props: { commits: DataPluginCommit[]; file: SelectedFile | null
             left: `${(100 / props.commits.length) * i}%`,
             top: 0,
           }}>
-          <HeatMapColumn hunks={commit.files?.data.find((file) => file.file.path === props.file?.path)?.hunks}></HeatMapColumn>
+          <HeatMapColumn
+            hunks={commit.files?.data.find((file) => file.file.path === props.file?.path)?.hunks}
+            commit={commit}></HeatMapColumn>
         </div>
       ))}
     </div>
