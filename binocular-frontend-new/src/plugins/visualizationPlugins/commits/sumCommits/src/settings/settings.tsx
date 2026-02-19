@@ -53,7 +53,7 @@ function Settings({ settings, setSettings }: SettingsProps) {
 
   const uncombineUsers = () => {
     const newCombinedUsers = combinedUsers.filter((group) => {
-      !group.every((u) => selectedUsers.includes(u));
+      return !group.some((u) => selectedUsers.includes(u));
     });
 
     setSettings({
