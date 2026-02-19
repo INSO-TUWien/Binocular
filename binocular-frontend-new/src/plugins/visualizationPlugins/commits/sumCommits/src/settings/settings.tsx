@@ -1,4 +1,6 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import type { RootState } from '../../../../../../redux';
+import { useSelector } from 'react-redux';
 
 export interface SettingsType {
   showMean: boolean;
@@ -9,13 +11,25 @@ export interface SettingsType {
 interface SettingsProps {
   settings: SettingsType;
   setSettings: (newSettings: SettingsType) => void;
-  users: string[];
 }
 
-function Settings({ settings, setSettings, users }: SettingsProps) {
+function Settings({ settings, setSettings }: SettingsProps) {
+  const authors = useSelector((s: RootState) => {
+    const id = s.authors.dataPluginId;
+
+    return id == null ? [] : (s.authors.authorLists[id] ?? []);
+  });
+
+  const users = useMemo(
+    () => authors.map((a) => a.displayName ?? a.user?.gitSignature ?? a.user?.name ?? a.user?.id).filter(Boolean) as string[],
+    [authors],
+  );
+
   const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
 
-  useEffect(() => setSelectedUsers(users), [users]);
+  useEffect(() => {
+    setSelectedUsers(users);
+  }, [users]);
 
   const toggleUser = (user: string) => {
     if (selectedUsers.includes(user)) {
@@ -100,7 +114,7 @@ function Settings({ settings, setSettings, users }: SettingsProps) {
       </div>
 
       <button
-        className="btn btn-accent btn-sm"
+        className="btn btn-accent btn-sm mt-6"
         disabled={selectedUsers.length < 2}
         onClick={() => {
           combineUsers();
@@ -108,7 +122,7 @@ function Settings({ settings, setSettings, users }: SettingsProps) {
         Combine
       </button>
 
-      <button className="btn btn-accent btn-sm" onClick={uncombineUsers} style={{ marginLeft: '0.5rem' }}>
+      <button className="btn btn-accent btn-sm mt-6" onClick={uncombineUsers} style={{ marginLeft: '0.5rem' }}>
         Uncombine
       </button>
     </>

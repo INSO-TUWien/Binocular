@@ -1,8 +1,8 @@
 import columnChartStyles from './columnChart.module.scss';
-import { MutableRefObject, useEffect, useMemo, useRef, useState } from 'react';
+import { type MutableRefObject, useEffect, useMemo, useRef, useState } from 'react';
 import * as d3 from 'd3';
-import { BarChartData, Palette } from './chart.tsx';
-import { SumSettings } from '../settings/settings.tsx';
+import type { BarChartData, Palette } from './chart.tsx';
+import type { SumSettings } from '../settings/settings.tsx';
 
 const MARGIN = { top: 30, right: 30, bottom: 50, left: 50 };
 
@@ -128,9 +128,8 @@ export const ColumnChart = ({ width, height, data, scale, palette, settings }: B
       //Needed to fix the brush being called endlessly leading to a stack overflow
       if (extent) {
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-expect-error
-        // eslint-disable-next-line @typescript-eslint/unbound-method
+
         svgElement.select('.brush').call(brush.move, null);
       }
       // d3/typescript sometimes does weird things and throws an error where no error is.

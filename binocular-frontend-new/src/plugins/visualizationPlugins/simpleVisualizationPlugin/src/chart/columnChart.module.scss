@@ -1,3 +1,6 @@
+@use "../../../../../variables.scss" as *;
+@reference "../../../../../index.scss";
+
 .infoBox {
   position: absolute;
   top: 1rem;
@@ -39,7 +42,6 @@
 }
 
 .selectBox {
-  @apply select select-bordered select-xs;
   max-width: 12rem;
   min-width: 0;
   white-space: nowrap;

@@ -1,7 +1,7 @@
 import { put, takeEvery, fork, call, select, throttle } from 'redux-saga/effects';
-import { SumCommitsState, DataState, setCommits, setDataState, setDateRange } from '../reducer';
-import { DataPlugin } from '../../../../interfaces/dataPlugin.ts';
-import { DataPluginCommit } from '../../../../interfaces/dataPluginInterfaces/dataPluginCommits.ts';
+import { type SumCommitsState, DataState, setCommits, setDataState, setDateRange } from '../reducer';
+import type { DataPlugin } from '../../../../../interfaces/dataPlugin.ts';
+import type { DataPluginCommit } from '../../../../../interfaces/dataPluginInterfaces/dataPluginCommits.ts';
 
 export default function* (dataConnection: DataPlugin) {
   yield fork(() => watchRefresh(dataConnection));
