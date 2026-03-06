@@ -4,7 +4,7 @@ import _ from 'lodash';
 import type { DataPluginCommit } from '../../../../../interfaces/dataPluginInterfaces/dataPluginCommits.ts';
 import type { AuthorType } from '../../../../../../types/data/authorType.ts';
 import type { VisualizationPluginProperties } from '../../../../../interfaces/visualizationPluginInterfaces/visualizationPluginProperties.ts';
-import type { SettingsType } from '../settings/settings.tsx';
+import type { SumSettings } from '../settings/settings.tsx';
 
 interface BarChartData {
   user: string;
@@ -19,7 +19,7 @@ interface Palette {
 
 export function convertToChartData(
   commits: DataPluginCommit[],
-  props: VisualizationPluginProperties<SettingsType, DataPluginCommit>,
+  props: VisualizationPluginProperties<SumSettings, DataPluginCommit>,
 ): {
   chartData: BarChartData[];
   scale: number[];

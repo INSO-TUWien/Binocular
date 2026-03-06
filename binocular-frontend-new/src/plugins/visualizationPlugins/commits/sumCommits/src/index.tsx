@@ -10,7 +10,7 @@ import type { DataPluginCommit } from '../../../../interfaces/dataPluginInterfac
 import { VisualizationPluginMetadataCategory } from '../../../../interfaces/visualizationPluginInterfaces/visualizationPluginMetadata';
 
 const SumCommits: VisualizationPlugin<SumSettings, DataPluginCommit> = {
-  name: 'SumCommits',
+  name: 'Sum Commits',
   chartComponent: undefined,
   settingsComponent: Settings,
   helpComponent: Help,
