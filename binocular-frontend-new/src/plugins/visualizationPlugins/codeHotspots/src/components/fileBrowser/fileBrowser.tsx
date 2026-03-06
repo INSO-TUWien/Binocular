@@ -82,11 +82,11 @@ function FileBrowser(props: { files: FileListElementType[]; onSetFile: (path?: s
 }
 export default FileBrowser;
 
-function FileStruct(props: { data: ConvertedData; foldOut: boolean; onSetFile: (url?: string, path?: string) => void }) {
+function FileStruct(props: { data: ConvertedData; foldOut: boolean; onSetFile: (path?: string, url?: string) => void }) {
   props.data.content.sort((a, b) => (a.type > b.type ? 1 : -1)).reverse();
 
-  function clickFile(url?: string, path?: string) {
-    props.onSetFile(url, path);
+  function clickFile(path?: string, url?: string) {
+    props.onSetFile(path, url);
   }
 
   return (
@@ -98,7 +98,7 @@ function FileStruct(props: { data: ConvertedData; foldOut: boolean; onSetFile: (
               className={styles.button + ' ' + (i % 2 === 0 ? styles.BCEven : styles.BCOdd)}
               key={'file' + i + '-' + data.path}
               onClick={() => {
-                clickFile(data.url, data.path);
+                clickFile(data.path, data.url);
               }}>
               {data.name}
             </div>

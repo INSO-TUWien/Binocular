@@ -3,7 +3,9 @@ import type { DataPluginCommit } from '../../../../../interfaces/dataPluginInter
 
 function HeatMapColumn(props: { hunks: DataPluginHunk[] | undefined; commit: DataPluginCommit; lineHeight: number; topOffset: number }) {
   return (
-    <div style={{ width: '100%', height: '100%', position: 'absolute', top: `${props.topOffset}px`, left: 0 }}>
+    <div
+      key={`heatmapColumn${props.commit.sha}`}
+      style={{ width: '100%', height: '100%', position: 'absolute', top: `${props.topOffset}px`, left: 0 }}>
       {props.hunks &&
         props.hunks.map((hunk, i) => (
           <>

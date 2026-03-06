@@ -14,8 +14,8 @@ interface DateRange {
 }
 
 export interface SelectedFile {
-  url: string;
   path: string;
+  url: string;
 }
 
 export interface CodeHotspotsState {

@@ -75,9 +75,9 @@ function Chart(props: {
         <div style={{ width: '20rem', height: '100%' }}>
           <FileBrowser
             files={props.fileList}
-            onSetFile={(url, path) => {
-              if (url && path) {
-                dispatch(setFile({ url: url, path: path }));
+            onSetFile={(path, url) => {
+              if (path && url) {
+                dispatch(setFile({ path: path, url: url }));
               }
             }}></FileBrowser>
         </div>
@@ -96,7 +96,14 @@ function Chart(props: {
                 position: 'absolute',
                 left: `${leftOffset}px`,
               }}>
-              <ColumnOverview file={data.selectedFile} commits={data.commits}></ColumnOverview>
+              <ColumnOverview
+                file={data.selectedFile}
+                commits={data.commits}
+                onSetFile={(path, url) => {
+                  if (path && url) {
+                    dispatch(setFile({ path: path, url: url }));
+                  }
+                }}></ColumnOverview>
             </div>
             <div
               style={{
@@ -126,7 +133,11 @@ function Chart(props: {
                 top: `${columnOverviewHeight}px`,
                 right: `0px`,
               }}>
-              <RowOverview file={data.selectedFile} commits={data.commits}  lineHeight={lineHeight} topOffset={heatmapTopOffset}></RowOverview>
+              <RowOverview
+                file={data.selectedFile}
+                commits={data.commits}
+                lineHeight={lineHeight}
+                topOffset={heatmapTopOffset}></RowOverview>
             </div>
           </div>
         </div>

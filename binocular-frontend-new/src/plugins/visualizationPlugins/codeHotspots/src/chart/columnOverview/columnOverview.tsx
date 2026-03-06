@@ -8,7 +8,11 @@ import CommitHunks from '../../components/tooltipComponents/commitHunks';
 import CommitOtherFiles from '../../components/tooltipComponents/commitOtherFiles';
 import chroma from 'chroma-js';
 
-function ColumnOverview(props: { commits: DataPluginCommit[]; file: SelectedFile | null }) {
+function ColumnOverview(props: {
+  commits: DataPluginCommit[];
+  file: SelectedFile | null;
+  onSetFile: (path?: string, url?: string) => void;
+}) {
   const maxChanges = findMaxChanged(props.commits);
   const tooltipRef = useRef<HTMLDivElement>(null);
 
@@ -61,7 +65,6 @@ function ColumnOverview(props: { commits: DataPluginCommit[]; file: SelectedFile
                   headline: commit.sha,
                   reactContent: (
                     <>
-                      <button className={"btn"} onClick={() => console.log('test')}>Test</button>
                       <details className="collapse collapse-arrow bg-base-100 border border-base-300 mb-1" name="tooltip-accordeon" open>
                         <summary className="collapse-title font-semibold">Info</summary>
                         <div className="collapse-content text-sm">
@@ -77,7 +80,7 @@ function ColumnOverview(props: { commits: DataPluginCommit[]; file: SelectedFile
                       <details className="collapse collapse-arrow bg-base-100 border border-base-300" name="tooltip-accordeon">
                         <summary className="collapse-title font-semibold">Other Edited Files</summary>
                         <div className="collapse-content text-sm">
-                          <CommitOtherFiles files={commit.files?.data || []} />
+                          <CommitOtherFiles files={commit.files?.data || []} onSetFile={props.onSetFile} />
                         </div>
                       </details>
                     </>
