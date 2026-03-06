@@ -1,4 +1,4 @@
-import type { DataPluginCommit } from '../../../../../../interfaces/dataPluginInterfaces/dataPluginCommits';
+import type { DataPluginCommit } from '../../../../../interfaces/dataPluginInterfaces/dataPluginCommits';
 
 function CommitInfo({ commit }: { commit: DataPluginCommit }) {
   const formattedDate = new Intl.DateTimeFormat('en-GB', {

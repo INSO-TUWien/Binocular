@@ -2,19 +2,17 @@ import type { DataPluginCommit } from '../../../../../interfaces/dataPluginInter
 import type { SelectedFile } from '../../reducer';
 import { useRef } from 'react';
 import InfoTooltip from '../../../../../../components/infoTooltip/infoTooltip';
-import { showInfoTooltip } from '../../../../../../components/infoTooltip/infoTooltipHelper';
-import CommitInfo from './tooltipComponents/commitInfo';
-import CommitHunks from './tooltipComponents/commitHunks';
-import CommitOtherFiles from './tooltipComponents/commitOtherFiles';
-import chroma from "chroma-js";
+import { hideInfoTooltip, showInfoTooltip } from '../../../../../../components/infoTooltip/infoTooltipHelper';
+import CommitInfo from '../../components/tooltipComponents/commitInfo';
+import CommitHunks from '../../components/tooltipComponents/commitHunks';
+import CommitOtherFiles from '../../components/tooltipComponents/commitOtherFiles';
+import chroma from 'chroma-js';
 
-function ColumnOverview(props: {
-  commits: DataPluginCommit[];
-  file: SelectedFile | null;
-  onSetFile: (path?: string, url?: string) => void;
-}) {
+function ColumnOverview(props: { commits: DataPluginCommit[]; file: SelectedFile | null }) {
   const maxChanges = findMaxChanged(props.commits);
   const tooltipRef = useRef<HTMLDivElement>(null);
+
+  const tooltipVisibleFlagRef = useRef(false);
 
   function findMaxChanged(commits: DataPluginCommit[]) {
     let maxChanges = 0;
@@ -36,7 +34,7 @@ function ColumnOverview(props: {
 
   return (
     <>
-      <InfoTooltip ref={tooltipRef}></InfoTooltip>
+      <InfoTooltip ref={tooltipRef} tooltipVisibleFlagRef={tooltipVisibleFlagRef}></InfoTooltip>
       <div id={'columnOverview'} style={{ width: '100%', height: '100%', position: 'relative' }}>
         {props.commits.map((commit: DataPluginCommit, i: number) => {
           const changes = calcChangedLines(commit);
@@ -51,14 +49,19 @@ function ColumnOverview(props: {
                 left: `${(100 / props.commits.length) * i}%`,
                 top: 0,
               }}
+              onMouseLeave={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                hideInfoTooltip(tooltipRef, tooltipVisibleFlagRef);
+              }}
               onMouseEnter={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
-
-                showInfoTooltip(tooltipRef, e.clientX + 10, e.clientY + 20, {
+                showInfoTooltip(tooltipRef, tooltipVisibleFlagRef, e.clientX + 10, e.clientY + 20, {
                   headline: commit.sha,
                   reactContent: (
                     <>
+                      <button className={"btn"} onClick={() => console.log('test')}>Test</button>
                       <details className="collapse collapse-arrow bg-base-100 border border-base-300 mb-1" name="tooltip-accordeon" open>
                         <summary className="collapse-title font-semibold">Info</summary>
                         <div className="collapse-content text-sm">
@@ -74,7 +77,7 @@ function ColumnOverview(props: {
                       <details className="collapse collapse-arrow bg-base-100 border border-base-300" name="tooltip-accordeon">
                         <summary className="collapse-title font-semibold">Other Edited Files</summary>
                         <div className="collapse-content text-sm">
-                          <CommitOtherFiles files={commit.files?.data || []} onSetFile={props.onSetFile} />
+                          <CommitOtherFiles files={commit.files?.data || []} />
                         </div>
                       </details>
                     </>

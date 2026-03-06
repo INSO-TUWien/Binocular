@@ -14,6 +14,7 @@ import CodeViewer from './codeViewer/codeViewer';
 import HeatMap from './heatmap/heatMap';
 import { EditorView } from '@codemirror/view';
 import ColumnOverview from './columnOverview/columnOverview';
+import RowOverview from './rowOverview/rowOverview';
 
 function Chart(props: {
   settings: SettingsType;
@@ -31,6 +32,9 @@ function Chart(props: {
   const [chartHeight, setChartHeight] = useState(100);
 
   const leftOffset = 35;
+  const rowOverviewWidth = 35;
+  const lineHeight = 18;
+  const heatmapTopOffset = 4;
 
   const columnOverviewHeight = 100;
 
@@ -87,33 +91,42 @@ function Chart(props: {
             }}>
             <div
               style={{
-                width: `calc(100% - ${leftOffset}px`,
+                width: `calc(100% - ${leftOffset}px - ${rowOverviewWidth}px)`,
                 height: `${columnOverviewHeight}px`,
                 position: 'absolute',
                 left: `${leftOffset}px`,
               }}>
-              <ColumnOverview
-                file={data.selectedFile}
-                commits={data.commits}
-                onSetFile={(url, path) => {
-                  console.log(url, path);
-                  if (url && path) {
-                    dispatch(setFile({ url: url, path: path }));
-                  }
-                }}></ColumnOverview>
+              <ColumnOverview file={data.selectedFile} commits={data.commits}></ColumnOverview>
             </div>
             <div
               style={{
-                width: `calc(100% - ${leftOffset}px`,
+                width: `calc(100% - ${leftOffset}px - ${rowOverviewWidth}px)`,
                 height: '100%',
                 position: 'absolute',
                 top: `${columnOverviewHeight}px`,
                 left: `${leftOffset}px`,
               }}>
-              <HeatMap file={data.selectedFile} commits={data.commits}></HeatMap>
+              <HeatMap file={data.selectedFile} commits={data.commits} lineHeight={lineHeight} topOffset={heatmapTopOffset}></HeatMap>
             </div>
-            <div style={{ width: '100%', height: '100%', position: 'absolute', top: `${columnOverviewHeight}px`, left: 0 }}>
+            <div
+              style={{
+                width: `calc(100% - ${rowOverviewWidth}px)`,
+                height: '100%',
+                position: 'absolute',
+                top: `${columnOverviewHeight}px`,
+                left: 0,
+              }}>
               <CodeViewer ref={codeViewerRef} file={data.selectedFile} currentBranch={data.currentBranch}></CodeViewer>
+            </div>
+            <div
+              style={{
+                width: `${rowOverviewWidth}px`,
+                height: `100%`,
+                position: 'absolute',
+                top: `${columnOverviewHeight}px`,
+                right: `0px`,
+              }}>
+              <RowOverview file={data.selectedFile} commits={data.commits}  lineHeight={lineHeight} topOffset={heatmapTopOffset}></RowOverview>
             </div>
           </div>
         </div>

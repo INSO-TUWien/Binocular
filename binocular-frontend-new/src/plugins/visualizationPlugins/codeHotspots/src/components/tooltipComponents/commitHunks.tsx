@@ -1,4 +1,4 @@
-import type { DataPluginHunk } from '../../../../../../interfaces/dataPluginInterfaces/dataPluginFiles';
+import type { DataPluginHunk } from '../../../../../interfaces/dataPluginInterfaces/dataPluginFiles';
 
 function CommitHunks({ hunks }: { hunks?: DataPluginHunk[] }) {
   return (
@@ -13,18 +13,6 @@ function CommitHunks({ hunks }: { hunks?: DataPluginHunk[] }) {
                   <table className="table text-base-content">
                     <tbody>
                       <tr>
-                        <td>New Start</td>
-                        <td>
-                          <span>{hunk.newStart}</span>
-                        </td>
-                      </tr>
-                      <tr>
-                        <td>New Lines</td>
-                        <td>
-                          <span>{hunk.newLines}</span>
-                        </td>
-                      </tr>
-                      <tr>
                         <td>Old Start</td>
                         <td>
                           <span>{hunk.oldStart}</span>
@@ -34,6 +22,18 @@ function CommitHunks({ hunks }: { hunks?: DataPluginHunk[] }) {
                         <td>Old Lines</td>
                         <td>
                           <span>{hunk.oldLines}</span>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td>New Start</td>
+                        <td>
+                          <span>{hunk.newStart}</span>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td>New Lines</td>
+                        <td>
+                          <span>{hunk.newLines}</span>
                         </td>
                       </tr>
                     </tbody>

@@ -1,6 +1,6 @@
-import type { DataPluginFileInCommit } from '../../../../../../interfaces/dataPluginInterfaces/dataPluginFiles';
+import type { DataPluginFileInCommit } from '../../../../../interfaces/dataPluginInterfaces/dataPluginFiles';
 
-function CommitOtherFiles(props: { files: DataPluginFileInCommit[]; onSetFile: (path?: string, url?: string) => void }) {
+function CommitOtherFiles(props: { files: DataPluginFileInCommit[] }) {
   return (
     <>
       <div className="rounded-box border border-base-content/5 bg-base-100">

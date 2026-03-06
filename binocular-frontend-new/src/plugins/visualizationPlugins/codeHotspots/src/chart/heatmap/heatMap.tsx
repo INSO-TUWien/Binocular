@@ -2,7 +2,7 @@ import type { DataPluginCommit } from '../../../../../interfaces/dataPluginInter
 import HeatMapColumn from './heatMapColumn';
 import type { SelectedFile } from '../../reducer';
 
-function HeatMap(props: { commits: DataPluginCommit[]; file: SelectedFile | null }) {
+function HeatMap(props: { commits: DataPluginCommit[]; file: SelectedFile | null; lineHeight: number; topOffset: number }) {
   return (
     <div id={'heatMap'} style={{ width: '100%', height: '100%', position: 'relative' }}>
       {props.commits.map((commit: DataPluginCommit, i: number) => (
@@ -18,7 +18,9 @@ function HeatMap(props: { commits: DataPluginCommit[]; file: SelectedFile | null
           }}>
           <HeatMapColumn
             hunks={commit.files?.data.find((file) => file.file.path === props.file?.path)?.hunks}
-            commit={commit}></HeatMapColumn>
+            commit={commit}
+            lineHeight={props.lineHeight}
+            topOffset={props.topOffset}></HeatMapColumn>
         </div>
       ))}
     </div>
