@@ -17,9 +17,10 @@
 
   padding: 0.5rem;
   border-radius: 5px;
-  --tw-bg-opacity: 1;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
-  background-color: var(--fallback-b1,oklch(var(--b1)/var(--tw-bg-opacity)));
+  background-color: var(--color-base-100);
+  color: var(--color-base-content);
+  border: 1px solid var(--color-base-300);
 
   z-index: 1;
 

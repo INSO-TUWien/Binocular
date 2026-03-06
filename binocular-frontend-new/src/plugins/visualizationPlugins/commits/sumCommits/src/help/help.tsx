@@ -36,7 +36,7 @@ function Help() {
             <span className={'font-bold'}>Avg Commits per week:</span> Average of all commits pushed by the author in a week.
           </li>
           <li>
-            <span className={'font-bold'}>Diff to:</span> Shows the difference to the commits of  a selected author.
+            <span className={'font-bold'}>Diff to:</span> Shows the difference to the commits of a selected author.
           </li>
           <li>
             <span className={'font-bold'}>Sum with:</span> Shows the sum of commits by the author and additional selected authors.
