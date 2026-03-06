@@ -1,19 +1,16 @@
 import { useEffect, useMemo, useState } from 'react';
+import type { DefaultSettings } from '../../../../simpleVisualizationPlugin/src/settings/settings';
 import type { RootState } from '../../../../../../redux';
 import { useSelector } from 'react-redux';
+import type { AuthorType } from '../../../../../../types/data/authorType';
 
-export interface SettingsType {
+export interface SumSettings extends DefaultSettings {
   showMean: boolean;
   showOther: boolean;
   combinedUsers: string[][];
 }
 
-interface SettingsProps {
-  settings: SettingsType;
-  setSettings: (newSettings: SettingsType) => void;
-}
-
-function Settings({ settings, setSettings }: SettingsProps) {
+function Settings(props: { settings: SumSettings; setSettings: (newSettings: SumSettings) => void }) {
   const authors = useSelector((s: RootState) => {
     const id = s.authors.dataPluginId;
 
@@ -21,7 +18,7 @@ function Settings({ settings, setSettings }: SettingsProps) {
   });
 
   const users = useMemo(
-    () => authors.map((a) => a.displayName ?? a.user?.gitSignature ?? a.user?.name ?? a.user?.id).filter(Boolean) as string[],
+    () => authors.map((a: AuthorType) => a.id ?? a.displayName ?? a.user.gitSignature ?? a.user.account?.name).filter(Boolean) as string[],
     [authors],
   );
 
@@ -39,13 +36,13 @@ function Settings({ settings, setSettings }: SettingsProps) {
     }
   };
 
-  const combinedUsers = settings.combinedUsers ?? [];
+  const combinedUsers = props.settings.combinedUsers ?? [];
 
   const combineUsers = () => {
     if (selectedUsers.length < 2) return;
 
-    setSettings({
-      ...settings,
+    props.setSettings({
+      ...props.settings,
       combinedUsers: [...combinedUsers, [...selectedUsers]],
     });
     setSelectedUsers([]);
@@ -56,8 +53,8 @@ function Settings({ settings, setSettings }: SettingsProps) {
       return !group.some((u) => selectedUsers.includes(u));
     });
 
-    setSettings({
-      ...settings,
+    props.setSettings({
+      ...props.settings,
       combinedUsers: newCombinedUsers,
     });
     setSelectedUsers([]);
@@ -71,10 +68,10 @@ function Settings({ settings, setSettings }: SettingsProps) {
           <input
             type="checkbox"
             className="toggle toggle-accent toggle-sm"
-            defaultChecked={settings.showMean}
+            defaultChecked={props.settings.showMean}
             onChange={(event) =>
-              setSettings({
-                ...settings,
+              props.setSettings({
+                ...props.settings,
                 showMean: event.target.checked,
               })
             }
@@ -85,10 +82,10 @@ function Settings({ settings, setSettings }: SettingsProps) {
           <input
             type="checkbox"
             className="toggle toggle-accent toggle-sm"
-            defaultChecked={settings.showOther}
+            defaultChecked={props.settings.showOther}
             onChange={(event) =>
-              setSettings({
-                ...settings,
+              props.setSettings({
+                ...props.settings,
                 showOther: event.target.checked,
               })
             }
