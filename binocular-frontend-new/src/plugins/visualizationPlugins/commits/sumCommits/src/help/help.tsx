@@ -1,28 +1,45 @@
 function Help() {
   return (
     <>
-      <h2>Changes Help</h2>
+      <h2>Sum Commits Help</h2>
       <h3>Data</h3>
       <p>
-        The sum commits visualization is designed to show the amount of commits that were done to the repository by the individual authors.
-        It displays the absolute amount of all commits per author per time period. The visualization is designed to show an overview of all
-        contributors and their commits over the span of the project. Authors can be combined together to show their combined amount in
-        contrast to other authors or groups of authors.
+        The sum commits visualization is designed to show the amount of commits that were pushed to the repository by the individual authors
+        and, optionally, external authors. It displays the absolute amount of all commits per author per time period, allowing for easy
+        tracking of pushed code.
       </p>
       <h3>Parameters</h3>
       <div>
         <ul className={'list-disc ml-5'}>
           <li>
-            <span className={'font-bold'}>Split Additions and Deletions:</span> Change the mode of the visualization to either show all
-            changes or split the changes into additions and deletions while additions are displayed in the positive direction and deletions
-            in the negative direction.
+            <span className={'font-bold'}>Show mean:</span> Shows the mean of all pushed commits from every author, represented by a red
+            dashed line.
           </li>
           <li>
-            <span className={'font-bold'}>Visualization Style:</span> Change the style of how the lines are calculated into either curved
-            (default), stepped or linear.
+            <span className={'font-bold'}>Show other authors:</span> Turns displaying of external authors on or off, if any have been added.
+            They&#39;re represented by a black bar.
           </li>
           <li>
-            <span className={'font-bold'}>Show Sprints:</span> Overlay the in the dashboard defined sprints onto the chart.
+            <span className={'font-bold'}>Combine users:</span> Combines or uncombines selected users, stacking their respective bars on top
+            of one another and adding the pushed commits together.
+          </li>
+        </ul>
+      </div>
+      <h3>Author details</h3>
+      <p>Clicking on a bar displays additional information about an author:</p>
+      <div>
+        <ul className={'list-disc ml-5'}>
+          <li>
+            <span className={'font-bold'}>Sum Commits:</span> The sum of commits pushed to the repository with the selected author.
+          </li>
+          <li>
+            <span className={'font-bold'}>Avg Commits per week:</span> Average of all commits pushed by the author in a week.
+          </li>
+          <li>
+            <span className={'font-bold'}>Diff to:</span> Shows the difference to the commits of  a selected author.
+          </li>
+          <li>
+            <span className={'font-bold'}>Sum with:</span> Shows the sum of commits by the author and additional selected authors.
           </li>
         </ul>
       </div>
