@@ -80,7 +80,13 @@ function ColumnOverview(props: {
                       <details className="collapse collapse-arrow bg-base-100 border border-base-300" name="tooltip-accordeon">
                         <summary className="collapse-title font-semibold">Other Edited Files</summary>
                         <div className="collapse-content text-sm">
-                          <CommitOtherFiles files={commit.files?.data || []} onSetFile={props.onSetFile} />
+                          <CommitOtherFiles
+                            files={commit.files?.data || []}
+                            onSetFile={(path, url) => {
+                              hideInfoTooltip(tooltipRef, tooltipVisibleFlagRef);
+                              props.onSetFile(path, url);
+                            }}
+                          />
                         </div>
                       </details>
                     </>

@@ -9,28 +9,32 @@ function HeatMapColumn(props: { hunks: DataPluginHunk[] | undefined; commit: Dat
       {props.hunks &&
         props.hunks.map((hunk, i) => (
           <>
-            <div
-              key={`${props.commit.sha}OldHunk${i}`}
-              style={{
-                position: 'absolute',
-                top: `${props.lineHeight * (hunk.oldStart - 1)}px`,
-                left: '0',
-                width: 'calc(100% - 1px)',
-                height: `${props.lineHeight * (hunk.oldLines + 1)}px`,
-                backgroundColor: '#0088ff55',
-                border: '1px solid #0088ff55',
-              }}></div>
-            <div
-              key={`${props.commit.sha}NewHunk${i}`}
-              style={{
-                position: 'absolute',
-                top: `${props.lineHeight * (hunk.newStart - 1)}px`,
-                left: '0',
-                width: 'calc(100% - 1px)',
-                height: `${props.lineHeight * (hunk.newLines + 1)}px`,
-                backgroundColor: '#0088ff55',
-                border: '1px solid #0088ff55',
-              }}></div>
+            {hunk.oldStart !== 0 && (
+              <div
+                key={`${props.commit.sha}OldHunk${i}`}
+                style={{
+                  position: 'absolute',
+                  top: `${props.lineHeight * (hunk.oldStart - 1)}px`,
+                  left: '0',
+                  width: 'calc(100% - 1px)',
+                  height: `${props.lineHeight * hunk.oldLines}px`,
+                  backgroundColor: '#0088ff55',
+                  border: '1px solid #0088ff55',
+                }}></div>
+            )}
+            {hunk.newStart !== 0 && (
+              <div
+                key={`${props.commit.sha}NewHunk${i}`}
+                style={{
+                  position: 'absolute',
+                  top: `${props.lineHeight * (hunk.newStart - 1)}px`,
+                  left: '0',
+                  width: 'calc(100% - 1px)',
+                  height: `${props.lineHeight * hunk.newLines}px`,
+                  backgroundColor: '#0088ff55',
+                  border: '1px solid #0088ff55',
+                }}></div>
+            )}
           </>
         ))}
     </div>

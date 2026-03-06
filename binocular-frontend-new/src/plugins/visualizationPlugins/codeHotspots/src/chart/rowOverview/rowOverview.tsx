@@ -4,8 +4,7 @@ import { useRef } from 'react';
 import InfoTooltip from '../../../../../../components/infoTooltip/infoTooltip';
 import chroma from 'chroma-js';
 import { hideInfoTooltip, showInfoTooltip } from '../../../../../../components/infoTooltip/infoTooltipHelper';
-import CommitInfo from '../../components/tooltipComponents/commitInfo';
-import CommitHunks from '../../components/tooltipComponents/commitHunks';
+import CommitsList from '../../components/tooltipComponents/commitsList';
 
 interface RowInfo {
   changes: number;
@@ -28,6 +27,9 @@ function RowOverview(props: { commits: DataPluginCommit[]; file: SelectedFile | 
   }
 
   function addToRowInfos(startLine: number, lines: number, commit: DataPluginCommit) {
+    if (startLine === 0) {
+      return;
+    }
     for (let i = startLine; i <= startLine + lines; i++) {
       if (rowInfos[`Row#${i}`] == undefined) {
         rowInfos[`Row#${i}`] = { changes: 1, rowNumber: i, commits: [commit] };
@@ -52,7 +54,9 @@ function RowOverview(props: { commits: DataPluginCommit[]; file: SelectedFile | 
   return (
     <>
       <InfoTooltip ref={tooltipRef} tooltipVisibleFlagRef={tooltipVisibleFlagRef}></InfoTooltip>
-      <div id={'columnOverview'} style={{ width: '100%', height: '100%', position: 'relative' }}>
+      <div
+        id={'columnOverview'}
+        style={{ width: `${props.lineHeight}px`, height: '100%', left: `${props.lineHeight / 2}px`, position: 'relative' }}>
         <div style={{ width: '100%', height: '100%', position: 'absolute', top: `${props.topOffset}px`, left: 0 }}>
           {Object.values(rowInfos).map((rowInfo) => (
             <div
@@ -61,8 +65,8 @@ function RowOverview(props: { commits: DataPluginCommit[]; file: SelectedFile | 
                 width: '100%',
                 height: `${props.lineHeight}px`,
                 position: 'absolute',
-                top: `${(rowInfo.rowNumber-1) * props.lineHeight}px`,
-                left: '2px',
+                top: `${(rowInfo.rowNumber - 1) * props.lineHeight}px`,
+                left: '0',
                 border: '1px solid #0088ff55',
                 backgroundColor: chroma.mix('#0088ff22', '#0088ffff', (1.0 / maxChanges) * rowInfo.changes).hex(),
               }}
@@ -79,29 +83,19 @@ function RowOverview(props: { commits: DataPluginCommit[]; file: SelectedFile | 
                   headline: `Row ${rowInfo.rowNumber}`,
                   reactContent: (
                     <>
-                      {rowInfo.commits.map((commit: DataPluginCommit, i: number) => {
-                        return (
-                          <details
-                            key={`rowOverviewTooltipCommit${i}`}
-                            className="collapse collapse-arrow bg-base-100 border border-base-300 mb-1"
-                            name="tooltip-accordeon">
-                            <summary className="collapse-title font-semibold">{commit.sha}</summary>
-                            <div className="collapse-content text-sm">
-                              <div>
-                                <CommitInfo commit={commit} />
-                              </div>
-                              <details
-                                className="collapse collapse-arrow bg-base-100 border border-base-300 mb-1"
-                                name="tooltip-sub-accordeon">
-                                <summary className="collapse-title font-semibold">Hunks</summary>
-                                <div className="collapse-content text-sm">
-                                  <CommitHunks hunks={commit.files?.data.find((file) => file.file.path === props.file?.path)?.hunks} />
-                                </div>
-                              </details>
-                            </div>
-                          </details>
-                        );
-                      })}
+                      <div className="rounded-box border border-base-content/5 bg-base-100 mb-2">
+                        <table className="table text-base-content">
+                          <tbody>
+                            <tr>
+                              <td>Changes</td>
+                              <td>
+                                <span style={{ maxWidth: '20rem' }}>{rowInfo.changes}</span>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                      <CommitsList commits={rowInfo.commits} file={props.file} />
                     </>
                   ),
                 });

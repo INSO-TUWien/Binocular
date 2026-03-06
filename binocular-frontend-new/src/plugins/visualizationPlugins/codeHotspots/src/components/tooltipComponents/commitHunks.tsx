@@ -1,12 +1,12 @@
 import type { DataPluginHunk } from '../../../../../interfaces/dataPluginInterfaces/dataPluginFiles';
 
-function CommitHunks({ hunks }: { hunks?: DataPluginHunk[] }) {
+function CommitHunks(props: { hunks?: DataPluginHunk[] }) {
   return (
     <>
       <div className="rounded-box border border-base-content/5 bg-base-100">
         <table className="table text-base-content">
           <tbody>
-            {hunks?.map((hunk: DataPluginHunk, index: number) => (
+            {props.hunks?.map((hunk: DataPluginHunk, index: number) => (
               <tr key={index}>
                 <td>{index}</td>
                 <td>

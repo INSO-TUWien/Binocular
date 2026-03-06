@@ -31,9 +31,9 @@ function Chart(props: {
   const [chartWidth, setChartWidth] = useState(100);
   const [chartHeight, setChartHeight] = useState(100);
 
-  const leftOffset = 35;
-  const rowOverviewWidth = 35;
   const lineHeight = 18;
+  const leftOffset = 35;
+  const rowOverviewWidth = lineHeight *2;
   const heatmapTopOffset = 4;
 
   const columnOverviewHeight = 100;

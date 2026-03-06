@@ -1,6 +1,6 @@
 import type { DataPluginCommit } from '../../../../../interfaces/dataPluginInterfaces/dataPluginCommits';
 
-function CommitInfo({ commit }: { commit: DataPluginCommit }) {
+function CommitInfo(props: { commit: DataPluginCommit }) {
   const formattedDate = new Intl.DateTimeFormat('en-GB', {
     day: '2-digit',
     month: '2-digit',
@@ -10,7 +10,7 @@ function CommitInfo({ commit }: { commit: DataPluginCommit }) {
     second: '2-digit',
     hour12: false,
   })
-    .format(new Date(commit.date))
+    .format(new Date(props.commit.date))
     .replace(/\//g, '.')
     .replace(',', '');
 
@@ -20,9 +20,9 @@ function CommitInfo({ commit }: { commit: DataPluginCommit }) {
         <table className="table text-base-content">
           <tbody>
             <tr>
-              <td>Message</td>
+              <td style={{ minWidth: '10rem' }}>Message</td>
               <td>
-                <span style={{ maxWidth: '20rem' }}>{commit.message}</span>
+                <span style={{ maxWidth: '20rem' }}>{props.commit.message}</span>
               </td>
             </tr>
             <tr>
@@ -32,14 +32,14 @@ function CommitInfo({ commit }: { commit: DataPluginCommit }) {
             <tr>
               <td>Url</td>
               <td>
-                <a href={commit.webUrl} target={'_blank'} rel="noreferrer">
-                  {commit.webUrl}
+                <a href={props.commit.webUrl} target={'_blank'} rel="noreferrer">
+                  {props.commit.webUrl}
                 </a>
               </td>
             </tr>
             <tr>
               <td>Committer</td>
-              <td>{commit.user.gitSignature}</td>
+              <td>{props.commit.user.gitSignature}</td>
             </tr>
             <tr>
               <td>Stats</td>
@@ -49,13 +49,13 @@ function CommitInfo({ commit }: { commit: DataPluginCommit }) {
                     <tr>
                       <td>Additions</td>
                       <td>
-                        <span>{commit.stats.additions}</span>
+                        <span>{props.commit.stats.additions}</span>
                       </td>
                     </tr>
                     <tr>
                       <td>Deletions</td>
                       <td>
-                        <span>{commit.stats.deletions}</span>
+                        <span>{props.commit.stats.deletions}</span>
                       </td>
                     </tr>
                   </tbody>
