@@ -18,7 +18,7 @@ function Settings(props: { settings: SumSettings; setSettings: (newSettings: Sum
   });
 
   const users = useMemo(
-    () => authors.map((a: AuthorType) => a.id ?? a.displayName ?? a.user.gitSignature ?? a.user.account?.name).filter(Boolean) as string[],
+    () => authors.map((a: AuthorType) => a.displayName ?? a.user.account?.name ?? a.user.gitSignature ?? a.id).filter(Boolean) as string[],
     [authors],
   );
 
