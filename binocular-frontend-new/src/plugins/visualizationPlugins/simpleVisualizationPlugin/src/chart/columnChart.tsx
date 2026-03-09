@@ -2,7 +2,7 @@ import columnChartStyles from './columnChart.module.scss';
 import { type MutableRefObject, useEffect, useMemo, useRef, useState } from 'react';
 import * as d3 from 'd3';
 import type { BarChartData, Palette } from './chart.tsx';
-import type { SumSettings } from '../settings/settings.tsx';
+import type { SumSettings } from '../../../commits/sumCommits/src/settings/settings';
 
 const MARGIN = { top: 30, right: 30, bottom: 50, left: 50 };
 
