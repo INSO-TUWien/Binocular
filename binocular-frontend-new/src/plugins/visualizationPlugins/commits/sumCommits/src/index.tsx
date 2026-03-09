@@ -1,4 +1,4 @@
-import PreviewImage from '../assets/thumbnail.svg';
+import PreviewImage from '../assets/bar-chart.svg';
 import Settings, { type SumSettings } from './settings/settings.tsx';
 import type { VisualizationPlugin } from '../../../../interfaces/visualizationPlugin.ts';
 import { getSVGData } from './utilities/utilities.ts';
