@@ -6,7 +6,7 @@ import type { AuthorType } from '../../../../../../types/data/authorType.ts';
 import type { VisualizationPluginProperties } from '../../../../../interfaces/visualizationPluginInterfaces/visualizationPluginProperties.ts';
 import type { SumSettings } from '../settings/settings.tsx';
 
-interface BarChartData {
+interface ColumnChartData {
   user: string;
   value: number;
   avgCommitsPerWeek: number;
@@ -21,7 +21,7 @@ export function convertToChartData(
   commits: DataPluginCommit[],
   props: VisualizationPluginProperties<SumSettings, DataPluginCommit>,
 ): {
-  chartData: BarChartData[];
+  chartData: ColumnChartData[];
   scale: number[];
   palette: Palette;
 } {
@@ -67,7 +67,7 @@ export function convertToChartData(
   /**
    * Create the chart data
    */
-  const chartData: BarChartData[] = [];
+  const chartData: ColumnChartData[] = [];
   const palette: Palette = {};
 
   /**
