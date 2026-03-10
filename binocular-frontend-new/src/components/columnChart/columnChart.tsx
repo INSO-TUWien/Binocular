@@ -1,15 +1,15 @@
 import columnChartStyles from './columnChart.module.scss';
 import { type MutableRefObject, useEffect, useMemo, useRef, useState } from 'react';
 import * as d3 from 'd3';
-import type { BarChartData, Palette } from './chart.tsx';
-import type { SumSettings } from '../../../commits/sumCommits/src/settings/settings';
+import type { Palette } from '../stackedAreaChart/StackedAreaChart';
+import type { SumSettings } from '../../plugins/visualizationPlugins/commits/sumCommits/src/settings/settings';
 
 const MARGIN = { top: 30, right: 30, bottom: 50, left: 50 };
 
-type BarChartProps = {
+type ColumnChartProps = {
   width: number;
   height: number;
-  data: BarChartData[];
+  data: ColumnChartData[];
   scale: number[];
   palette: Palette;
   settings: SumSettings;
@@ -22,7 +22,13 @@ interface InfoState {
   segments?: { label: string; value: number }[];
 }
 
-export const ColumnChart = ({ width, height, data, scale, palette, settings }: BarChartProps) => {
+export interface ColumnChartData {
+  user: string;
+  value: number;
+  avgCommitsPerWeek: number;
+}
+
+export const ColumnChart = ({ width, height, data, scale, palette, settings }: ColumnChartProps) => {
   // bounds = area inside the graph axis = ccalculated by substracting the margins
   const svgRef = useRef(null);
   const tooltipRef = useRef(null);
@@ -419,7 +425,7 @@ function updateBars(
   const barOffset = x.bandwidth() / 4;
 
   const zoomedBars = svg
-    .selectAll<SVGRectElement, BarChartData>('.bar.main')
+    .selectAll<SVGRectElement, ColumnChartData>('.bar.main')
     .data(data, (d) => d.user)
     .join(
       (enter) =>
