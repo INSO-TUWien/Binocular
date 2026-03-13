@@ -13,6 +13,7 @@ import Help from './help/help.tsx';
 import { convertToChartData } from './utilities/dataConverter.ts';
 import type { DataPluginCommit } from '../../../../interfaces/dataPluginInterfaces/dataPluginCommits.ts';
 import { VisualizationPluginMetadataCategory } from '../../../../interfaces/visualizationPluginInterfaces/visualizationPluginMetadata.ts';
+import { VisualizationPluginDependencyType } from '../../../../interfaces/visualizationPluginInterfaces/visualizationPluginDependencies.ts';
 
 const SumCommits: VisualizationPlugin<SettingsType, DataPluginCommit> = {
   name: 'SumCommits',
@@ -29,6 +30,12 @@ const SumCommits: VisualizationPlugin<SettingsType, DataPluginCommit> = {
   capabilities: {
     popoutOnly: false,
     export: true,
+  },
+  dependencies: {
+    authors: VisualizationPluginDependencyType.Recalculate,
+    files: VisualizationPluginDependencyType.Recalculate,
+    generalParameters: VisualizationPluginDependencyType.Recalculate,
+    dateRange: VisualizationPluginDependencyType.Refresh,
   },
   images: {
     thumbnail: PreviewImage,
