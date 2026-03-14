@@ -1,10 +1,12 @@
 import { put, takeEvery, fork, call, select, throttle } from 'redux-saga/effects';
-import { type CodeHotspotsState, DataState, setBranches, setCommits, setDataState, setDateRange, setFile } from '../reducer';
+import { type CodeHotspotsState, DataState, setBranches, setCommits, setDataState, setDateRange, setFile, setFiles } from '../reducer';
 import type { DataPlugin } from '../../../../interfaces/dataPlugin.ts';
 import type { DataPluginCommit } from '../../../../interfaces/dataPluginInterfaces/dataPluginCommits.ts';
 import type { DataPluginBranch } from '../../../../interfaces/dataPluginInterfaces/dataPluginBranches';
+import type { DataPluginFile } from '../../../../interfaces/dataPluginInterfaces/dataPluginFiles';
 
 export default function* (dataConnection: DataPlugin) {
+  yield call(() => fetchFilesData(dataConnection));
   yield fork(() => watchRefresh(dataConnection));
   yield fork(() => watchDateRangeChange(dataConnection));
   yield fork(() => watchFileChange(dataConnection));
@@ -20,6 +22,14 @@ function* watchDateRangeChange(dataConnection: DataPlugin) {
 
 function* watchFileChange(dataConnection: DataPlugin) {
   yield takeEvery(setFile, () => fetchChangesData(dataConnection));
+}
+
+function* fetchFilesData(dataConnection: DataPlugin) {
+  yield put(setDataState(DataState.FETCHING));
+  const files: DataPluginFile[] = yield call(() => dataConnection.files.getAll());
+  yield put(setFiles(files));
+
+  yield put(setDataState(DataState.COMPLETE));
 }
 
 function* fetchChangesData(dataConnection: DataPlugin) {

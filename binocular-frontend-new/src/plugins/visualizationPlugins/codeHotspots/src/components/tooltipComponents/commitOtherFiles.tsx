@@ -1,26 +1,14 @@
 import type { DataPluginFileInCommit } from '../../../../../interfaces/dataPluginInterfaces/dataPluginFiles';
 import { useState } from 'react';
+import SearchBar from '../../../../../../components/searchBar/searchBar';
 
 function CommitOtherFiles(props: { files: DataPluginFileInCommit[]; onSetFile: (path?: string, url?: string) => void }) {
   const [files, setFiles] = useState<DataPluginFileInCommit[]>(props.files);
   return (
     <>
-      <label className="input">
-        <svg className="h-[1em] opacity-50" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-          <g strokeLinejoin="round" strokeLinecap="round" strokeWidth="2.5" fill="none" stroke="currentColor">
-            <circle cx="11" cy="11" r="8"></circle>
-            <path d="m21 21-4.3-4.3"></path>
-          </g>
-        </svg>
-        <input
-          type="search"
-          required
-          placeholder="Search"
-          onChange={(e) => {
-            setFiles(props.files.filter((file) => file.file.path.toLowerCase().includes(e.target.value.toLowerCase())));
-          }}
-        />
-      </label>
+      <SearchBar
+        onSearch={(search) => setFiles(props.files.filter((file) => file.file.path.toLowerCase().includes(search.toLowerCase())))}
+      />
       <div className="rounded-box border border-base-content/5 bg-base-100">
         <table className="table text-base-content">
           <tbody>
