@@ -3,7 +3,7 @@ import CommitInfo from './commitInfo';
 import CommitHunks from './commitHunks';
 import type { SelectedFile } from '../../reducer';
 import { useState } from 'react';
-import SearchBar from "../../../../../../components/searchBar/searchBar";
+import SearchBar from '../../../../../../components/searchBar/searchBar';
 
 function CommitsList(props: { commits: DataPluginCommit[]; file: SelectedFile | null }) {
   const [commits, setCommits] = useState<DataPluginCommit[]>(props.commits);
