@@ -187,13 +187,13 @@ export default class Database {
       }
     });
     db_export!.file(collectionName + '.json', JSON.stringify(data));
-    zip.generateAsync({ type: 'blob' }).then((file) => {
+    zip.generateAsync({ type: 'blob', compression: 'DEFLATE', compressionOptions: { level: 9 } }).then((file) => {
       const a = document.createElement('a');
       document.body.appendChild(a);
       a.style = 'display: none';
       const url = window.URL.createObjectURL(file);
       a.href = url;
-      a.download = 'export.zip';
+      a.download = 'db_export.zip';
       a.click();
       window.URL.revokeObjectURL(url);
     });
