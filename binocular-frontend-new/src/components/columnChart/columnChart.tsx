@@ -210,7 +210,7 @@ export const ColumnChart = ({ width, height, data, scale, palette, settings }: C
           fontSize: '.75rem',
           zIndex: +1,
         }}>
-        Tooltipp
+        Tooltip
       </div>
 
       <div style={{ position: 'relative', width, height }}>
