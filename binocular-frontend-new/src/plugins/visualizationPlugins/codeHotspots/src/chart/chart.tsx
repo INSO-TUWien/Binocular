@@ -21,6 +21,8 @@ import type { DataPluginBranch } from '../../../../interfaces/dataPluginInterfac
 import { OverLaySettings } from '../components/overLaySettings/overLaySettings';
 import type { CodeHotspotsGitlabSettings } from '../types/CodeHotspotsGitlabSettings';
 
+const CODE_HOTSPOTS_GITLAB_SETTINGS_KEY = 'code_hotspots_gitlab_settings';
+
 function Chart(props: {
   settings: SettingsType;
   dataConnection: DataPlugin;
@@ -106,11 +108,29 @@ function Chart(props: {
   const overLaySettingsRef = useRef<HTMLDialogElement>(null);
   const [gitlabSettings, setGitlabSettings] = useState<CodeHotspotsGitlabSettings>({ serverUrl: '', projectId: '', apiKey: '' });
 
+  useEffect(() => {
+    const loadedGitlabSettings = localStorage.getItem(CODE_HOTSPOTS_GITLAB_SETTINGS_KEY);
+
+    if (loadedGitlabSettings) {
+      try {
+        setGitlabSettings(JSON.parse(loadedGitlabSettings));
+      } catch (err) {
+        console.error(err);
+      }
+    }
+  }, []);
+
+  const [selectedSha, setSelectedSha] = useState<string | undefined>();
+
   return (
     <div className={'bg-base-100'}>
       <OverLaySettings
         ref={overLaySettingsRef}
-        onGitLabSettingsChange={(newGitlabSettings) => setGitlabSettings(newGitlabSettings)}></OverLaySettings>
+        gitlabSettings={gitlabSettings}
+        onGitLabSettingsChange={(newGitlabSettings) => {
+          setGitlabSettings(newGitlabSettings);
+          localStorage.setItem(CODE_HOTSPOTS_GITLAB_SETTINGS_KEY, JSON.stringify(newGitlabSettings));
+        }}></OverLaySettings>
       {data.dataState === DataState.FETCHING && (
         <div className={'p-1 fixed w-full border border-base-300 card bg-base-100 shadow-sm'} style={{ zIndex: '+1', bottom: '0' }}>
           <progress className="progress progress-accent w-full"></progress>
@@ -118,22 +138,41 @@ function Chart(props: {
       )}
       <div className={'w-full h-full flex flex-row p-1'} ref={chartContainerRef}>
         <div style={{ width: '20rem', height: '100%', display: 'flex', flexDirection: 'column' }}>
-          <button className="btn btn-circle btn-sm" onClick={() => overLaySettingsRef.current?.showModal()}>
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              strokeWidth={1.5}
-              stroke="currentColor"
-              className="size-6">
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.325.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 0 1 1.37.49l1.296 2.247a1.125 1.125 0 0 1-.26 1.431l-1.003.827c-.293.241-.438.613-.43.992a7.723 7.723 0 0 1 0 .255c-.008.378.137.75.43.991l1.004.827c.424.35.534.955.26 1.43l-1.298 2.247a1.125 1.125 0 0 1-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.47 6.47 0 0 1-.22.128c-.331.183-.581.495-.644.869l-.213 1.281c-.09.543-.56.94-1.11.94h-2.594c-.55 0-1.019-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 0 1-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 0 1-1.369-.49l-1.297-2.247a1.125 1.125 0 0 1 .26-1.431l1.004-.827c.292-.24.437-.613.43-.991a6.932 6.932 0 0 1 0-.255c.007-.38-.138-.751-.43-.992l-1.004-.827a1.125 1.125 0 0 1-.26-1.43l1.297-2.247a1.125 1.125 0 0 1 1.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.086.22-.128.332-.183.582-.495.644-.869l.214-1.28Z"
-              />
-              <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
-            </svg>
-          </button>
+          <div className={'flex items-center space-x-2'}>
+            <button className="btn btn-circle btn-sm" onClick={() => overLaySettingsRef.current?.showModal()}>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                strokeWidth={1.5}
+                stroke="currentColor"
+                className="size-6 h-2/3">
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.325.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 0 1 1.37.49l1.296 2.247a1.125 1.125 0 0 1-.26 1.431l-1.003.827c-.293.241-.438.613-.43.992a7.723 7.723 0 0 1 0 .255c-.008.378.137.75.43.991l1.004.827c.424.35.534.955.26 1.43l-1.298 2.247a1.125 1.125 0 0 1-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.47 6.47 0 0 1-.22.128c-.331.183-.581.495-.644.869l-.213 1.281c-.09.543-.56.94-1.11.94h-2.594c-.55 0-1.019-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 0 1-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 0 1-1.369-.49l-1.297-2.247a1.125 1.125 0 0 1 .26-1.431l1.004-.827c.292-.24.437-.613.43-.991a6.932 6.932 0 0 1 0-.255c.007-.38-.138-.751-.43-.992l-1.004-.827a1.125 1.125 0 0 1-.26-1.43l1.297-2.247a1.125 1.125 0 0 1 1.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.086.22-.128.332-.183.582-.495.644-.869l.214-1.28Z"
+                />
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+              </svg>
+            </button>
+            {selectedBranch && (
+              <button
+                className={'btn mb-1 btn-outline btn-sm'}
+                disabled={selectedSha === undefined}
+                onClick={() => setSelectedSha(undefined)}>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth={1.5}
+                  stroke="currentColor"
+                  className="size-6 h-2/3">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 15 3 9m0 0 6-6M3 9h12a6 6 0 0 1 0 12h-3" />
+                </svg>
+                Return to branch {selectedBranch.branch}
+              </button>
+            )}
+          </div>
           <h2>Branch</h2>
           <div className={'p-2'}>
             {data.currentBranch && data.branches.length > 0 ? (
@@ -169,6 +208,7 @@ function Chart(props: {
                   setFileTree({ ...fileTree });
                 }
                 if (element.type === FileTreeElementTypeType.File && element.element !== undefined) {
+                  setSelectedSha(undefined);
                   dispatch(setFile({ path: element.element.path, url: element.element.webUrl }));
                 }
               }}
@@ -197,7 +237,8 @@ function Chart(props: {
                   if (path && url) {
                     dispatch(setFile({ path: path, url: url }));
                   }
-                }}></ColumnOverview>
+                }}
+                onSelectCommit={(sha) => setSelectedSha(sha)}></ColumnOverview>
             </div>
             <div
               style={{
@@ -220,7 +261,8 @@ function Chart(props: {
                 file={data.selectedFile}
                 currentBranch={data.currentBranch}
                 selectedBranch={selectedBranch}
-                gitlabSettings={gitlabSettings}></CodeViewer>
+                gitlabSettings={gitlabSettings}
+                selectedSha={selectedSha}></CodeViewer>
             </div>
             <div
               style={{

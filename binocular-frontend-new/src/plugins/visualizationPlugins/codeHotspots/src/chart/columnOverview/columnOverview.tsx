@@ -12,6 +12,7 @@ function ColumnOverview(props: {
   commits: DataPluginCommit[];
   file: SelectedFile | null;
   onSetFile: (path?: string, url?: string) => void;
+  onSelectCommit: (sha: string) => void;
 }) {
   const maxChanges = findMaxChanged(props.commits);
   const tooltipRef = useRef<HTMLDivElement>(null);
@@ -65,6 +66,24 @@ function ColumnOverview(props: {
                   headline: commit.sha,
                   reactContent: (
                     <>
+                      <button className={'btn mb-1 btn-outline'} onClick={() => props.onSelectCommit(commit.sha)}>
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          width="24"
+                          height="24"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          className="lucide lucide-git-commit-horizontal-icon lucide-git-commit-horizontal">
+                          <circle cx="12" cy="12" r="3" />
+                          <line x1="3" x2="9" y1="12" y2="12" />
+                          <line x1="15" x2="21" y1="12" y2="12" />
+                        </svg>
+                        View file at commit
+                      </button>
                       <details className="collapse collapse-arrow bg-base-100 border border-base-300 mb-1" name="tooltip-accordeon" open>
                         <summary className="collapse-title font-semibold">Info</summary>
                         <div className="collapse-content text-sm">
@@ -101,7 +120,7 @@ function ColumnOverview(props: {
                   height: `${(100 / maxChanges) * changes}%`,
                   bottom: '0',
                   border: '1px solid #0088ff55',
-                  backgroundColor: chroma.mix('#0088ff22', '#0088ffff', (1.0 / maxChanges) * changes).hex(),
+                  backgroundColor: chroma.mix('#0088ff22', '#0088ffcc', (1.0 / maxChanges) * changes).hex(),
                 }}></div>
             </div>
           );

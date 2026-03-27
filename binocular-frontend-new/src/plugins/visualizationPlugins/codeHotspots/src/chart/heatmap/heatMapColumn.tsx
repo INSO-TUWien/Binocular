@@ -8,10 +8,9 @@ function HeatMapColumn(props: { hunks: DataPluginHunk[] | undefined; commit: Dat
       style={{ width: '100%', height: '100%', position: 'absolute', top: `${props.topOffset}px`, left: 0 }}>
       {props.hunks &&
         props.hunks.map((hunk, i) => (
-          <>
+          <div key={`${props.commit.sha}Hunk${i}`}>
             {hunk.oldStart !== 0 && (
               <div
-                key={`${props.commit.sha}OldHunk${i}`}
                 style={{
                   position: 'absolute',
                   top: `${props.lineHeight * (hunk.oldStart - 1)}px`,
@@ -24,7 +23,6 @@ function HeatMapColumn(props: { hunks: DataPluginHunk[] | undefined; commit: Dat
             )}
             {hunk.newStart !== 0 && (
               <div
-                key={`${props.commit.sha}NewHunk${i}`}
                 style={{
                   position: 'absolute',
                   top: `${props.lineHeight * (hunk.newStart - 1)}px`,
@@ -35,7 +33,7 @@ function HeatMapColumn(props: { hunks: DataPluginHunk[] | undefined; commit: Dat
                   border: '1px solid #0088ff55',
                 }}></div>
             )}
-          </>
+          </div>
         ))}
     </div>
   );

@@ -40,9 +40,9 @@ function RowOverview(props: { commits: DataPluginCommit[]; file: SelectedFile | 
         }
         rowInfos[`Row#${i}`].commits = commits;
         rowInfos[`Row#${i}`].changes = rowInfos[`Row#${i}`].changes + 1;
-        if (rowInfos[`Row#${i}`].changes > maxChanges) {
-          maxChanges = rowInfos[`Row#${i}`].changes;
-        }
+      }
+      if (rowInfos[`Row#${i}`].changes > maxChanges) {
+        maxChanges = rowInfos[`Row#${i}`].changes;
       }
     }
   }
@@ -68,7 +68,7 @@ function RowOverview(props: { commits: DataPluginCommit[]; file: SelectedFile | 
                 top: `${(rowInfo.rowNumber - 1) * props.lineHeight}px`,
                 left: '0',
                 border: '1px solid #0088ff55',
-                backgroundColor: chroma.mix('#0088ff22', '#0088ffff', (1.0 / maxChanges) * rowInfo.changes).hex(),
+                backgroundColor: chroma.mix('#0088ff22', '#0088ffcc', (1.0 / maxChanges) * rowInfo.changes).hex(),
               }}
               onMouseLeave={(e) => {
                 e.preventDefault();

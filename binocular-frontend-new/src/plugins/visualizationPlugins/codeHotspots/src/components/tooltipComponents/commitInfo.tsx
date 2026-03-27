@@ -42,6 +42,10 @@ function CommitInfo(props: { commit: DataPluginCommit }) {
               <td>{props.commit.user.gitSignature}</td>
             </tr>
             <tr>
+              <td>Branch</td>
+              <td>{props.commit.branch}</td>
+            </tr>
+            <tr>
               <td>Stats</td>
               <td>
                 <table className="table text-base-content">

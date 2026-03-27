@@ -16,6 +16,7 @@ function CodeViewer(props: {
   currentBranch: DataPluginBranch | undefined;
   selectedBranch: DataPluginBranch | undefined;
   gitlabSettings: CodeHotspotsGitlabSettings;
+  selectedSha: string | undefined;
 }) {
   const [sourceCode, setSourceCode] = useState('No Source code loaded.');
   const [language, setLanguage] = useState('tsx');
@@ -28,13 +29,13 @@ function CodeViewer(props: {
         props.file.path,
         props.currentBranch.branch,
         props.selectedBranch ? props.selectedBranch.branch : props.currentBranch.branch,
-        '',
+        props.selectedSha,
         props.gitlabSettings.projectId,
         props.gitlabSettings.apiKey,
         props.gitlabSettings.serverUrl,
       ).then((newSourceCode) => setSourceCode(newSourceCode));
     }
-  }, [props.file, props.currentBranch, props.selectedBranch, props.gitlabSettings]);
+  }, [props.file, props.currentBranch, props.selectedBranch, props.gitlabSettings, props.selectedSha]);
 
   const alternatingLinesTheme = EditorView.theme({
     '.cm-line:nth-child(odd)': {

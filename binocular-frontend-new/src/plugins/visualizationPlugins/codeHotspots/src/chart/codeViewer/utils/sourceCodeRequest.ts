@@ -4,7 +4,7 @@ export default class SourceCodeRequest {
     path: string,
     checkedOutBranch: string,
     branch: string,
-    sha: string,
+    sha: string | undefined,
     gitlabProjectID: string,
     apiKey: string,
     gitlabServer: string,
@@ -21,7 +21,7 @@ export default class SourceCodeRequest {
             '/repository/files/' +
             path.replaceAll('/', '%2F') +
             '/raw?ref=' +
-            (sha === '' ? branch : sha),
+            (sha ? sha : branch),
         );
         sourceCodeRequest.setRequestHeader('PRIVATE-TOKEN', apiKey);
         sourceCodeRequest.onload = function () {
@@ -49,7 +49,7 @@ export default class SourceCodeRequest {
           fileUrl
             .replace('github.com', 'raw.githubusercontent.com')
             .replace('/blob', '')
-            .replace(checkedOutBranch, sha === '' ? branch : sha),
+            .replace(checkedOutBranch, sha ? sha : branch),
           true,
         );
         sourceCodeRequest.onload = function () {
