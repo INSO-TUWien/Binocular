@@ -6,7 +6,7 @@ import type { DataPluginBranch } from '../../../../interfaces/dataPluginInterfac
 import type { DataPluginFile } from '../../../../interfaces/dataPluginInterfaces/dataPluginFiles';
 
 export default function* (dataConnection: DataPlugin) {
-  yield call(() => fetchFilesData(dataConnection));
+  yield call(() => fetchGeneralData(dataConnection));
   yield fork(() => watchRefresh(dataConnection));
   yield fork(() => watchDateRangeChange(dataConnection));
   yield fork(() => watchFileChange(dataConnection));
@@ -24,10 +24,14 @@ function* watchFileChange(dataConnection: DataPlugin) {
   yield takeEvery(setFile, () => fetchChangesData(dataConnection));
 }
 
-function* fetchFilesData(dataConnection: DataPlugin) {
+function* fetchGeneralData(dataConnection: DataPlugin) {
   yield put(setDataState(DataState.FETCHING));
+
   const files: DataPluginFile[] = yield call(() => dataConnection.files.getAll());
   yield put(setFiles(files));
+
+  const branches: DataPluginBranch[] = yield call(() => dataConnection.branches.getAll());
+  yield put(setBranches(branches));
 
   yield put(setDataState(DataState.COMPLETE));
 }
@@ -39,10 +43,8 @@ function* fetchChangesData(dataConnection: DataPlugin) {
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-expect-error
     const commits: DataPluginCommit[] = yield call(() => dataConnection.commits.getByFile(state.plugin.selectedFile.path));
-    const branches: DataPluginBranch[] = yield call(() => dataConnection.branches.getAll());
 
     yield put(setCommits(commits));
-    yield put(setBranches(branches));
   }
 
   yield put(setDataState(DataState.COMPLETE));

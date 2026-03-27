@@ -17,7 +17,7 @@ export default class SourceCodeRequest {
           'GET',
           gitlabServer +
             'api/v4/projects/' +
-            gitlabProjectID +
+            gitlabProjectID.replaceAll('/', '%2F') +
             '/repository/files/' +
             path.replaceAll('/', '%2F') +
             '/raw?ref=' +
