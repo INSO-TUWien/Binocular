@@ -7,6 +7,9 @@ import type { JSX } from 'react';
 // Mock DataPluginStorage to prevent pluginRegistry → PouchDB initialization from hanging in jsdom
 vi.mock('../../../utils/dataPluginStorage', () => ({ default: {} }));
 
+// Mock DataPluginStorage to prevent pluginRegistry → PouchDB initialization from hanging in jsdom
+vi.mock('../../../utils/dataPluginStorage', () => ({ default: {} }));
+
 // Stub OPFS before module loads
 vi.stubGlobal('navigator', {
   storage: {
