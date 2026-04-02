@@ -1297,6 +1297,73 @@ src/test/unit/
 
 ---
 
+## U55 — `utils/dataPluginStorage`
+**File**: `src/test/unit/utils/dataPluginStorage.test.ts`
+**Source**: `src/utils/dataPluginStorage.ts`
+
+> Static cache wrapper over `pluginRegistry.dataPlugins`. `pluginRegistry` mocked via `vi.hoisted` + `vi.mock`. Static cache reset in `beforeEach`.
+
+| # | Description | Input | Expected |
+|---|---|---|---|
+| U55.1 | `addDataPlugin` is a no-op when `id` is undefined | `{ id: undefined, name: 'FakeName', ... }` | `init` not called; cache empty |
+| U55.2 | `addDataPlugin` calls `init` on the matched plugin class | `{ id: 1, name: 'FakeName', ... }` | `mockInit` called once |
+| U55.3 | `addDataPlugin` stores instance under `name+id` key | `{ id: 7, name: 'FakeName', ... }` | `cache['FakeName7']` is `FakePlugin` instance |
+| U55.4 | `addDataPlugin` passes apiKey, endpoint, fileName, progressUpdate to `init` | `params: { apiKey: 'k', endpoint: 'u', fileName: 'f.json' }` | `init('k', 'u', { name: 'f.json', file: undefined, dbObjects: undefined }, undefined)` |
+| U55.5 | `addDataPlugin` does nothing when no plugin class matches the name | `{ id: 1, name: 'Unknown', ... }` | cache stays empty |
+| U55.6 | `getDataPlugin` returns `undefined` when `id` is undefined | `{ id: undefined, ... }` | `undefined` |
+| U55.7 | `getDataPlugin` creates and returns a plugin instance on cache miss | `{ id: 1, name: 'FakeName', ... }` | returns `FakePlugin` instance |
+| U55.8 | `getDataPlugin` returns `undefined` when no plugin class matches | `{ id: 1, name: 'NoSuchPlugin', ... }` | `undefined` |
+| U55.9 | `getDataPlugin` stores the created instance under `name+id` key | `{ id: 2, name: 'FakeName', ... }` | `cache['FakeName2']` is `FakePlugin` |
+| U55.10 | `getDataPlugin` returns the cached instance from a prior `addDataPlugin` without re-calling `init` | `addDataPlugin` then `getDataPlugin` with same descriptor | same instance; `init` called exactly once |
+
+---
+
+## U56 — `utils/json-utils`
+**File**: `src/test/unit/utils/jsonUtils.test.ts`
+**Source**: `src/utils/json-utils.ts`
+
+> Pure functions, no external dependencies. Tests exercise all branches of `compressJson` and `decompressJson` via the public API.
+
+| # | Description | Input | Expected |
+|---|---|---|---|
+| U56.1 | `compressJson` plain collection strips `_key` | `[{ _id: 'commits/x', _key: 'x', _rev: '_r' }]` | no `_key` in result |
+| U56.2 | `compressJson` plain collection strips `_rev` | same | no `_rev` in result |
+| U56.3 | `compressJson` plain collection removes collection prefix from `_id` | `_id: 'commits/abc'` | `_id: 'abc'` |
+| U56.4 | `compressJson` plain collection preserves other fields | `{ sha: 'abc' }` | `sha` unchanged |
+| U56.5 | `compressJson` plain collection handles empty input | `[]` | `[]` |
+| U56.6 | `decompressJson` plain collection restores collection prefix to `_id` | `[{ _id: 'abc' }]`, collection `'commits'` | `_id: 'commits/abc'` |
+| U56.7 | `decompressJson` skips decompression when `_id` already contains `/` | `[{ _id: 'commits/abc' }]` | returned unchanged |
+| U56.8 | `decompressJson` plain collection handles empty input | `[]` | `[]` |
+| U56.9 | `compressJson` simple connection strips `_from` prefix | `_from: 'commits/a'`, collection `'commits-files'` | `_from: 'a'` |
+| U56.10 | `compressJson` simple connection strips `_to` prefix | `_to: 'files/b'` | `_to: 'b'` |
+| U56.11 | `decompressJson` simple connection restores `_from` prefix | `_from: 'a'`, collection `'commits-files'` | `_from: 'commits/a'` |
+| U56.12 | `decompressJson` simple connection restores `_to` prefix | `_to: 'b'` | `_to: 'files/b'` |
+| U56.13 | `compressJson` registered 3-part connection strips `_from` | `_from: 'commits-files/cf1'`, collection `'commits-files-users'` | `_from: 'cf1'` |
+| U56.14 | `compressJson` registered 3-part connection strips `_to` | `_to: 'users/u1'` | `_to: 'u1'` |
+| U56.15 | `compressJson` unregistered 3-part connection leaves `_from` untouched | collection `'foo-bar-baz'` | `_from` unchanged |
+| U56.16 | `compressJson` unregistered 3-part connection leaves `_to` untouched | collection `'foo-bar-baz'` | `_to` unchanged |
+| U56.17 | `decompressJson` registered 3-part restores `_from` via connections map | collection `'commits-files-users'` | `_from: 'commits-files/cf1'` |
+| U56.18 | `decompressJson` registered 3-part restores `_to` via connections map | collection `'commits-files-users'` | `_to: 'users/u1'` |
+| U56.19 | `compressJson` ownership hunks renames `originalCommit` → `oc` | hunk with `originalCommit: 'sha1'` | `oc: 'sha1'`; no `originalCommit` |
+| U56.20 | `compressJson` ownership hunks encodes lines as `"from,to"` strings | `lines: [{ from: 1, to: 5 }]` | `lines: ['1,5']` |
+| U56.21 | `decompressJson` ownership hunks renames `oc` → `originalCommit` | `oc: 'sha1'` | `originalCommit: 'sha1'`; no `oc` |
+| U56.22 | `decompressJson` ownership hunks decodes strings to `{ from, to }` | `lines: ['1,5']` | `lines: [{ from: '1', to: '5' }]` |
+| U56.23 | Roundtrip plain collection restores `_id` prefix; drops `_key`/`_rev` | compress then decompress | `_id` restored; no `_key`/`_rev` |
+| U56.24 | Roundtrip simple connection restores `_from` and `_to` | compress then decompress `'commits-files'` | `_from: 'commits/a'`; `_to: 'files/b'` |
+| U56.25 | Roundtrip registered 3-part restores all fields including hunks | compress then decompress `'commits-files-users'` | `_from`, `_to`, `originalCommit`, `lines` all restored |
+
+---
+
+## Unit test file locations (utils/)
+
+```
+src/test/unit/utils/
+├── dataPluginStorage.test.ts    (U55)
+└── jsonUtils.test.ts            (U56)
+```
+
+---
+
 # React Component Tests
 
 **Framework**: Vitest + React Testing Library (`@testing-library/react`)
