@@ -3,13 +3,10 @@ import PouchDBFind from 'pouchdb-find';
 import PouchDBAdapterMemory from 'pouchdb-adapter-memory';
 import _ from 'lodash';
 import type { DataPluginFileOwnership } from '../../../interfaces/dataPluginInterfaces/dataPluginCommits.ts';
+import type { JSONObject } from '../../../interfaces/dataPluginInterfaces/dataPluginFiles.ts';
 
 PouchDB.plugin(PouchDBFind);
 PouchDB.plugin(PouchDBAdapterMemory);
-
-interface JSONObject {
-  [key: string]: unknown;
-}
 
 // ###################### GENERAL SEARCH FUNCTIONS ######################
 
