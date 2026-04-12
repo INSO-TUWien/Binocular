@@ -3,6 +3,7 @@ import { useSelector } from 'react-redux';
 import type { RootState } from '../../redux';
 import type { DatabaseSettingsDataPluginType } from '../../types/settings/databaseSettingsType.ts';
 import StatusBarDataPlugin from './statusBarDataPlugin/statusBarDataPlugin.tsx';
+import LogoIcon from '../../assets/logo_icon.svg';
 
 function StatusBar() {
   const currentDataPlugins = useSelector((state: RootState) => state.settings.database.dataPlugins);
@@ -11,7 +12,10 @@ function StatusBar() {
     return (
       <>
         <div className={statusBarStyles.statusBar}>
-          <div className={statusBarStyles.statusLeft}>No DataPlugins Configured</div>
+          <div className={statusBarStyles.statusLeft}>
+            <img src={LogoIcon} alt={'Binocular'} className={'h-5 mr-2'} />
+            No DataPlugins Configured
+          </div>
         </div>
       </>
     );
@@ -21,6 +25,7 @@ function StatusBar() {
     <>
       <div className={statusBarStyles.statusBar}>
         <div className={statusBarStyles.statusLeft}>
+          <img src={LogoIcon} alt={'Binocular'} className={'h-5 mr-2'} />
           {currentDataPlugins.map((dataPlugin: DatabaseSettingsDataPluginType) => (
             <StatusBarDataPlugin key={dataPlugin.id} dataPlugin={dataPlugin} />
           ))}
