@@ -41,10 +41,37 @@ open class Index(
             required = true,
             description = "Custom name of the project.",
         ) @NotNull @NotEmpty projectName: String,
+        @Option(
+            longNames = ["lizard-active"],
+            shortNames = ['l'],
+            required = false,
+            description = "If lizard should be used",
+        ) lizardActive: Boolean,
+        @Option(
+            longNames = ["lizard_include"],
+            shortNames = ['x'],
+            required = false,
+            defaultValue = "backend\\src, frontend\\src",
+            description = "Optional folders to be analzyed by lizard, there are default values",
+        ) lizardInclude: String?,
+        @Option(
+            longNames = ["lizard_threads"],
+            shortNames = ['t'],
+            required = false,
+            defaultValue = "1",
+            description = "How many threads should be used for lizard",
+        ) lizardThreads: Int,
     ) {
         val path = repoPath.let { Paths.get(it).toRealPath() }
         logger.trace(">>> index($path, $branchName)")
         logger.debug("Project '$projectName'")
+        if (lizardActive) {
+            logger.debug("Lizard active")
+            logger.debug("Lizards scope includes path(s): [{}]", lizardInclude)
+            logger.debug("Lizard number of threads: {}", lizardThreads)
+        } else {
+            logger.debug("Lizard inactive")
+        }
         val project = this.projectService.getOrCreateProject(projectName)
         vcsService.indexRepository(path.toString(), branchName, project)
         logger.trace("<<< index($path, $branchName)")
