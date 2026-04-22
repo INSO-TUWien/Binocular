@@ -27,6 +27,7 @@ interface InfoState {
 
 export interface ColumnChartData {
   user: string;
+  gitSignature: string;
   value: number;
   avgCommitsPerWeek: number;
 }
@@ -171,6 +172,7 @@ export const ColumnChart = ({ width, height, data, scale, palette, settings }: C
       .attr('transform', `translate(0,${boundsHeight})`)
       .call(d3.axisBottom(xScale).tickFormat(ellipsis))
       .selectAll('text')
+      .append('title')
       .style('text-anchor', 'middle');
 
     svg
@@ -320,7 +322,7 @@ export const ColumnChart = ({ width, height, data, scale, palette, settings }: C
 
 function generateBars(
   palette: Palette,
-  data: { user: string; value: number; avgCommitsPerWeek: number; segments?: { label: string; value: number }[] }[],
+  data: { user: string; gitSignature: string; value: number; avgCommitsPerWeek: number; segments?: { label: string; value: number }[] }[],
   x: d3.ScaleBand<string>,
   y: d3.ScaleLinear<number, number>,
   svgRef: MutableRefObject<null>,
@@ -341,16 +343,16 @@ function generateBars(
     .attr('width', barWidth)
     .attr('y', y(0))
     .attr('height', 0)
-    .attr('fill', (d) => palette[d.user]?.main)
+    .attr('fill', (d) => palette[d.gitSignature]?.main)
     .on('mouseover', () => d3.select(tooltipRef.current).style('visibility', 'visible'))
     .on('mousemove', (e, d) =>
       d3
         .select(tooltipRef.current)
         .style('top', 20 + e.pageY + 'px')
         .style('left', e.pageX + 'px')
-        .style('background', palette[d.user]?.secondary)
-        .style('border-color', palette[d.user]?.secondary)
-        .text(`${d.user}: ${d.value} Commits`),
+        .style('background', palette[d.gitSignature]?.secondary)
+        .style('border-color', palette[d.gitSignature]?.secondary)
+        .text(`${d.gitSignature}: ${d.value} Commits`),
     )
     .on('mouseout', () => d3.select(tooltipRef.current).style('visibility', 'hidden'))
     .on('mousedown', (e) => e.stopPropagation())
@@ -416,7 +418,7 @@ function generateBars(
 
 function updateBars(
   palette: Palette,
-  data: { user: string; value: number; avgCommitsPerWeek: number; segments?: { label: string; value: number }[] }[],
+  data: { user: string; gitSignature: string; value: number; avgCommitsPerWeek: number; segments?: { label: string; value: number }[] }[],
   x: d3.ScaleBand<string>,
   y: d3.ScaleLinear<number, number>,
   svgRef: MutableRefObject<null>,
@@ -439,7 +441,7 @@ function updateBars(
           .attr('y', y(0))
           .attr('width', barWidth)
           .attr('height', 0)
-          .attr('fill', (d) => palette[d.user]?.main)
+          .attr('fill', (d) => palette[d.gitSignature]?.main)
           .transition()
           .duration(600)
           .attr('y', (d) => y(d.value))
@@ -464,8 +466,8 @@ function updateBars(
         .select(tooltipRef.current)
         .style('top', 20 + e.pageY + 'px')
         .style('left', e.pageX + 'px')
-        .style('background', palette[d.user]?.secondary)
-        .style('border-color', palette[d.user]?.secondary)
+        .style('background', palette[d.gitSignature]?.secondary)
+        .style('border-color', palette[d.gitSignature]?.secondary)
         .text(`${d.user}: ${d.value} Commits`),
     )
     .on('mouseout', () => d3.select(tooltipRef.current).style('visibility', 'hidden'))

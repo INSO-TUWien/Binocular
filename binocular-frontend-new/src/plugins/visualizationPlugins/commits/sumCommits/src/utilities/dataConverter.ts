@@ -8,6 +8,7 @@ import type { SumSettings } from '../settings/settings.tsx';
 
 interface ColumnChartData {
   user: string;
+  gitSignature?: string;
   value: number;
   avgCommitsPerWeek: number;
   segments?: { label: string; value: number }[];
@@ -78,8 +79,27 @@ export function convertToChartData(
   props.authorList.forEach((author: AuthorType) => {
     if (!author.selected) return;
 
-    const label = author.displayName || author.user.gitSignature;
+    const label = trimLabel(author.user.gitSignature);
     const total = countsByUser[author.user.gitSignature] ?? 0;
+
+    function trimLabel(label: string): string {
+      const maxLength = 15;
+      const trimmed = label.trim();
+      const match = trimmed.match(/^(.+?)\s*<([^>]+)>$/);
+
+      let result = trimmed;
+      if (match) {
+        const name = match[1].trim();
+        const email = match[2].trim();
+        result = name || email;
+      }
+
+      if (result.length <= maxLength) {
+        return result;
+      }
+
+      return result.slice(0, maxLength) + '...';
+    }
 
     selectedIds.add(author.user.id);
 
@@ -91,7 +111,12 @@ export function convertToChartData(
     const isGrouped = combinedGroups.some((group) => group.includes(author.user.gitSignature));
     if (isGrouped) return;
 
-    chartData.push({ user: label, value: total, avgCommitsPerWeek: avgCommitsPerWeek(commitsByUser[author.user.gitSignature] ?? []) });
+    chartData.push({
+      user: label,
+      gitSignature: author.user.gitSignature,
+      value: total,
+      avgCommitsPerWeek: avgCommitsPerWeek(commitsByUser[author.user.gitSignature] ?? []),
+    });
   });
 
   combinedGroups.forEach((group) => {
