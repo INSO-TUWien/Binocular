@@ -8,7 +8,7 @@ import type { SumSettings } from '../settings/settings.tsx';
 
 interface ColumnChartData {
   user: string;
-  gitSignature?: string;
+  gitSignature: string;
   value: number;
   avgCommitsPerWeek: number;
   segments?: { label: string; value: number }[];
@@ -76,30 +76,31 @@ export function convertToChartData(
    */
   const selectedIds = new Set<string>();
   const knownIds = new Set(props.authorList.map((a) => a.user.id));
+
+  function trimLabel(label: string): string {
+    const maxLength = 15;
+    const trimmed = label.trim();
+    const match = trimmed.match(/^(.+?)\s*<([^>]+)>$/);
+
+    let result = trimmed;
+    if (match) {
+      const name = match[1].trim();
+      const email = match[2].trim();
+      result = name || email;
+    }
+
+    if (result.length <= maxLength) {
+      return result;
+    }
+
+    return result.slice(0, maxLength) + '...';
+  }
+
   props.authorList.forEach((author: AuthorType) => {
     if (!author.selected) return;
 
     const label = trimLabel(author.user.gitSignature);
     const total = countsByUser[author.user.gitSignature] ?? 0;
-
-    function trimLabel(label: string): string {
-      const maxLength = 15;
-      const trimmed = label.trim();
-      const match = trimmed.match(/^(.+?)\s*<([^>]+)>$/);
-
-      let result = trimmed;
-      if (match) {
-        const name = match[1].trim();
-        const email = match[2].trim();
-        result = name || email;
-      }
-
-      if (result.length <= maxLength) {
-        return result;
-      }
-
-      return result.slice(0, maxLength) + '...';
-    }
 
     selectedIds.add(author.user.id);
 
@@ -135,7 +136,7 @@ export function convertToChartData(
       value: countsByUser[sig] ?? 0,
     }));
 
-    chartData.push({ user: label, value, avgCommitsPerWeek: avgCommitsPerWeek(commitsByGroup), segments });
+    chartData.push({ user: label, gitSignature: label, value, avgCommitsPerWeek: avgCommitsPerWeek(commitsByGroup), segments });
   });
 
   /**
@@ -144,7 +145,12 @@ export function convertToChartData(
   if (props.settings.showOther) {
     const unknown = commits.filter((c) => !knownIds.has(c.user.id));
     if (unknown.length > 0) {
-      chartData.push({ user: 'others', value: unknown.length, avgCommitsPerWeek: avgCommitsPerWeek(unknown) });
+      chartData.push({
+        user: 'others',
+        value: unknown.length,
+        avgCommitsPerWeek: avgCommitsPerWeek(unknown),
+        gitSignature: 'others',
+      });
       palette['others'] = { main: '#555555', secondary: '#777777' };
     }
   }
