@@ -16,7 +16,6 @@ import GitHubITSIndexer from '../indexers/its/GitHubITSIndexer';
 import Issue from '../models/models/Issue';
 import MergeRequest from '../models/models/MergeRequest';
 import User from '../models/models/User';
-import IssueUserConnection from '../models/connections/IssueUserConnection';
 import sinon from 'sinon';
 import Milestone from '../models/models/Milestone';
 import IssueMilestoneConnection from '../models/connections/IssueMilestoneConnection';
@@ -59,7 +58,6 @@ describe('its', function () {
     Issue,
     MergeRequest,
     User,
-    IssueUserConnection,
     Milestone,
     IssueMilestoneConnection,
     MergeRequestMilestoneConnection,

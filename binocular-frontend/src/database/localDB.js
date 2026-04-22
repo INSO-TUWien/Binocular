@@ -33,7 +33,6 @@ import commitsUsers from '../../db_export/commits-users.json';
 import commits from '../../db_export/commits.json';
 import files from '../../db_export/files.json';
 import issuesCommits from '../../db_export/issues-commits.json';
-import issuesUsers from '../../db_export/issues-users.json';
 import issues from '../../db_export/issues.json';
 import modulesFiles from '../../db_export/modules-files.json';
 import modulesModules from '../../db_export/modules-modules.json';
@@ -62,7 +61,6 @@ const relations = {
   'commits-modules': commitsModules,
   'commits-users': commitsUsers,
   'issues-commits': issuesCommits,
-  'issues-users': issuesUsers,
   'issues-accounts': issuesAccounts,
   'issues-milestones': issuesMilestones,
   'modules-files': modulesFiles,
@@ -253,7 +251,6 @@ export default class LocalDB {
     database.commits_modules = relations['commits-modules'];
     database.commits_users = relations['commits-users'];
     database.issues_commits = relations['issues-commits'];
-    database.issues_users = relations['issues-users'];
     database.issues_accounts = relations['issues-accounts'];
     database.issues_milestones = relations['issues-milestones'];
     database.modules_files = relations['modules-files'];

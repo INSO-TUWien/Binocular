@@ -527,7 +527,7 @@ function preprocessAccount(account: JSONObject, accountsUsersConnection: JSONObj
   if (user === null) {
     return _.assign(account, { id: account._id });
   }
-  return _.assign(account, { id: account._id, user: user });
+  return _.assign(account, { id: account._id, user: _.assign(user, { id: user._id }) });
 }
 
 export async function findAllAccountsIssues(database: PouchDB.Database, relations: PouchDB.Database) {
@@ -586,7 +586,11 @@ async function findAllIssuesOrMergeRequests(database: PouchDB.Database, relation
 
   // get issues-accounts connections and sort by the issues ids
   const issuesAccounts = sortByAttributeString((await findAll(relations, `${type}-accounts`)).docs, 'from');
-  const accounts = sortByAttributeString((await findAll(database, 'accounts')).docs, '_id');
+  const users = (await findAll(database, 'users')).docs;
+  const accountsUsersConnection = sortByAttributeString((await findAccountUserConnections(relations)).docs, 'from');
+  const rawAccounts = await findAll(database, 'accounts');
+  rawAccounts.docs = await Promise.all(rawAccounts.docs.map((a) => preprocessAccount(a, accountsUsersConnection, users)));
+  const accounts = sortByAttributeString(rawAccounts.docs, '_id');
 
   // get relevant connections for notes
   // notes array should already be sorted by _id
@@ -614,8 +618,8 @@ async function findAllIssuesOrMergeRequests(database: PouchDB.Database, relation
     });
 
     // related accounts
-    i.author = {};
-    i.assignee = {};
+    i.author = null;
+    i.assignee = null;
     i.assignees = [];
     // find all related accounts
     const relevantAccConnections = binarySearchArray(issuesAccounts, i._id, 'from');

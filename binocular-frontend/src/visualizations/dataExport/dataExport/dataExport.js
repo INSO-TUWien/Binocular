@@ -30,7 +30,6 @@ export default class DataExport extends React.Component {
         commits_modules: [],
         commits_users: [],
         issues_commits: [],
-        issues_users: [],
         modules_files: [],
         modules_modules: [],
       },
@@ -225,7 +224,6 @@ export default class DataExport extends React.Component {
       relations.commits_files_users = database.commits_files_users;
       relations.commits_users = database.commits_users;
       relations.issues_commits = database.issues_commits;
-      relations.issues_users = database.issues_users;
       relations.modules_files = database.modules_files;
       relations.modules_modules = database.modules_modules;
 

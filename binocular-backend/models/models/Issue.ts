@@ -3,15 +3,8 @@
 import _ from 'lodash';
 import { aql } from 'arangojs';
 import Model from '../Model';
-import User from './User';
-import IssueUserConnection from '../connections/IssueUserConnection';
-
-import debug from 'debug';
 import Mention from '../../types/supportingTypes/Mention';
 import IssueDto from '../../types/dtos/IssueDto';
-import IssueAccountConnection from '../connections/IssueAccountConnection.ts';
-import { findBestUserMatch } from '../utils.ts';
-const log = debug('db:Issue');
 
 export interface IssueDataType {
   id: string;
@@ -45,77 +38,6 @@ class Issue extends Model<IssueDataType> {
     delete issueData.timeStats;
 
     return this.ensureByExample({ id: issueData.id }, issueData, {});
-  }
-
-  async deduceUsers() {
-    if (this.rawDb === undefined) {
-      throw Error('Database undefined!');
-    }
-    return Promise.resolve(
-      this.rawDb.query(
-        aql`FOR issue IN issues
-        LET users = (FOR user
-                            IN
-                            INBOUND issue ${IssueUserConnection.collection}
-                            RETURN user)
-        LET a = FIRST(
-              FOR
-              account, edge
-              IN
-              OUTBOUND issue ${IssueAccountConnection.collection}
-              FILTER edge.role == "author"
-              RETURN account
-        )
-        FILTER LENGTH(users) == 0
-        COLLECT author = a INTO issuesPerAuthor = issue
-        RETURN {
-          "author": author,
-          "issues": issuesPerAuthor
-        }`,
-      ),
-    )
-      .then((cursor) => cursor.all())
-      .then((authors) => {
-        return authors.map((issuesPerAuthor) =>
-          User.findOneBy('gitlabID', issuesPerAuthor.author?.id) // TODO create an new class of unassigned issues
-            .then(function (user) {
-              if (!user) {
-                log('No existing user found for gitlabId %o', issuesPerAuthor.author.id);
-                return findBestUserMatch(issuesPerAuthor.author).then(function (user) {
-                  if (!user) {
-                    return;
-                  }
-
-                  log('Best user match: %o', user.toString());
-
-                  user.gitlabId = issuesPerAuthor.author.id;
-                  user.gitlabName = issuesPerAuthor.author.name;
-                  user.gitlabWebUrl = issuesPerAuthor.author.web_url;
-                  user.gitlabAvatarUrl = issuesPerAuthor.author.avatar_url;
-                  return user.save();
-                });
-              }
-
-              return user;
-            })
-            .then((user) => {
-              if (!user) {
-                log('No user match found for %o', issuesPerAuthor.author.name);
-                return;
-              }
-              return issuesPerAuthor.issues.map((issueData) => {
-                if (issueData === null) {
-                  return;
-                }
-                const issue = this.parse(issueData);
-                if (issue === null) {
-                  return;
-                }
-                return IssueUserConnection.connect({}, { from: issue, to: user });
-              });
-            }),
-        );
-      });
   }
 
   deleteMentionsAttribute() {

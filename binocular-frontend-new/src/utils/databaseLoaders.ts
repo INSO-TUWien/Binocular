@@ -28,7 +28,6 @@ import commitsUsers from '../db_export/commits-users.json';
 import commits from '../db_export/commits.json';
 import files from '../db_export/files.json';
 import issuesCommits from '../db_export/issues-commits.json';
-import issuesUsers from '../db_export/issues-users.json';
 import issues from '../db_export/issues.json';
 import modulesFiles from '../db_export/modules-files.json';
 import modulesModules from '../db_export/modules-modules.json';
@@ -70,7 +69,6 @@ const dbObjects: { [key: string]: JSONObject[] } = {
   commits: commits,
   files: files,
   'issues-commits': issuesCommits,
-  'issues-users': issuesUsers,
   issues: issues,
   'modules-files': modulesFiles,
   'modules-modules': modulesModules,
