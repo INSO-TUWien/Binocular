@@ -2,16 +2,17 @@ import PreviewImage from '../assets/bar-chart.svg';
 import Settings, { type SumSettings } from './settings/settings.tsx';
 import type { VisualizationPlugin } from '../../../../interfaces/visualizationPlugin.ts';
 import { getSVGData } from './utilities/utilities.ts';
-import Reducer from '../../../simpleVisualizationPlugin/src/reducer';
+import Reducer from './reducer';
 import Saga from './saga';
 import Help from './help/help.tsx';
 import { convertToChartData } from './utilities/dataConverter.ts';
 import type { DataPluginCommit } from '../../../../interfaces/dataPluginInterfaces/dataPluginCommits.ts';
 import { VisualizationPluginMetadataCategory } from '../../../../interfaces/visualizationPluginInterfaces/visualizationPluginMetadata';
+import Chart from './chart/chart.tsx';
 
 const SumCommits: VisualizationPlugin<SumSettings, DataPluginCommit> = {
   name: 'Sum Commits',
-  chartComponent: undefined,
+  chartComponent: Chart,
   settingsComponent: Settings,
   helpComponent: Help,
   dataConverter: convertToChartData,

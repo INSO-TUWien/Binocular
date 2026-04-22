@@ -1,10 +1,13 @@
 import columnChartStyles from './columnChart.module.scss';
 import { type MutableRefObject, useEffect, useMemo, useRef, useState } from 'react';
 import * as d3 from 'd3';
-import type { Palette } from '../stackedAreaChart/StackedAreaChart';
-import type { SumSettings } from '../../plugins/visualizationPlugins/commits/sumCommits/src/settings/settings';
+import type { SumSettings } from '../settings/settings';
 
 const MARGIN = { top: 30, right: 30, bottom: 50, left: 50 };
+
+export interface Palette {
+  [signature: string]: { main: string; secondary: string };
+}
 
 type ColumnChartProps = {
   width: number;

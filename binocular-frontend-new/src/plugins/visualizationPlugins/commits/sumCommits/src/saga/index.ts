@@ -1,5 +1,5 @@
 import { put, takeEvery, fork, call, select, throttle } from 'redux-saga/effects';
-import { type SumCommitsState, DataState, setCommits, setDataState, setDateRange } from '../reducer';
+import { DataState, setCommits, setDataState, setDateRange, type SumCommitsState } from '../reducer';
 import type { DataPlugin } from '../../../../../interfaces/dataPlugin.ts';
 import type { DataPluginCommit } from '../../../../../interfaces/dataPluginInterfaces/dataPluginCommits.ts';
 
@@ -18,8 +18,12 @@ function* watchDateRangeChange(dataConnection: DataPlugin) {
 
 function* fetchSumCommitsData(dataConnection: DataPlugin) {
   yield put(setDataState(DataState.FETCHING));
-  const state: SumCommitsState = yield select();
-  const commits: DataPluginCommit[] = yield call(() => dataConnection.commits.getAll(state.dateRange.from, state.dateRange.to));
+  const state: { plugin: SumCommitsState } = yield select();
+  const commits: DataPluginCommit[] = yield call(
+    [dataConnection.commits, dataConnection.commits.getAll],
+    state.plugin.dateRange.from,
+    state.plugin.dateRange.to,
+  );
   yield put(setCommits(commits));
   yield put(setDataState(DataState.COMPLETE));
 }
