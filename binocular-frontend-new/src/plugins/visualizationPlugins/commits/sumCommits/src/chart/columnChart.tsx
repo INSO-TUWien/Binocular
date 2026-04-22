@@ -79,7 +79,14 @@ export const ColumnChart = ({ width, height, data, scale, palette, settings }: C
 
   // Y axis
   const yScale = useMemo(() => {
-    return d3.scaleLinear().domain([scale[0], scale[1]]).range([boundsHeight, 0]);
+    const max = scale[1] ?? 0;
+    const paddedMax = max === 0 ? 1 : max * 1.1;
+
+    return d3
+      .scaleLinear()
+      .domain([0, paddedMax || 1])
+      .nice()
+      .range([boundsHeight, 0]);
   }, [boundsHeight, scale]);
 
   // X axis
@@ -178,12 +185,7 @@ export const ColumnChart = ({ width, height, data, scale, palette, settings }: C
     svg
       .append('g')
       .attr('class', 'yAxis')
-      .call(
-        d3
-          .axisLeft(yScale)
-          .ticks(scale[1] - scale[0])
-          .tickFormat(d3.format('d')),
-      );
+      .call(d3.axisLeft(yScale).ticks(6).tickFormat(d3.format('d')));
 
     svg.append('g').attr('class', 'brush').call(brush);
 
