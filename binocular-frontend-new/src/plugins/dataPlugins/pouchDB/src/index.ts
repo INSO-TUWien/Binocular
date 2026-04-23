@@ -95,10 +95,8 @@ class PouchDb implements DataPlugin {
   }
 
   public async getCollection(name: string): Promise<JSONObject[]> {
-    if (name.includes('-'))
-      return (await findAll(this.database.edgeStore, name)).docs;
-    else
-      return (await findAll(this.database.documentStore, name)).docs;
+    if (name.includes('-')) return (await findAll(this.database.edgeStore, name)).docs;
+    else return (await findAll(this.database.documentStore, name)).docs;
   }
 }
 
