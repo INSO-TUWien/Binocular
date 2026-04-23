@@ -1,98 +1,48 @@
-.button{
-  background-color: white;
-  height: 3rem;
-  padding: 0 4rem;
-}
-
-.button:hover{
-  border-bottom-color:  #3273dc;
-  /*background-color: lightgray;*/
-}
-
-.selected{
-  background:  #3273dc;
-  color: white !important;
-}
-
-.icon{
-  display: inline-block;
-  height: 2rem;
-  position: relative;
-  top: 0.5rem;
-  margin-left: 1rem;
-}
-
-.previewTableContainer{
+.previewTableContainer {
   height: 50vh;
   overflow: scroll;
 }
 
-.previewTable{
+.previewTable {
 }
 
-.previewTableCell{
+.previewTableCell {
   border: 1px solid lightgrey;
 }
 
-.previewTableHeader{
+.previewTableHeader {
 }
 
-.previewTableHeaderEven{
+.previewTableHeaderEven {
   border: 1px solid lightgrey;
   background: #eeeeee;
 }
 
-.previewTableHeaderOdd{
+.previewTableHeaderOdd {
   border: 1px solid lightgrey;
   background: #cccccc;
 }
 
-.sectionArrowContainer{
-  display: inline;
-  float:left;
-  height: 3rem;
-  position: relative;
-}
-.sectionArrowStem{
-  position: absolute;
-  left: calc(2rem - 1px);
-  width: 2px;
-  height: 100%;
-  background: #cccccc;
-}
-
-.sectionArrowHead{
-  position: absolute;
-  bottom:0;
-  left: 1rem;
-  width: 1rem;
-  height: 1rem;
-  border-bottom: 3px solid #cccccc;
-  border-right: 3px solid #cccccc;
-  transform: rotate(45deg);
-  transform-origin: bottom right;
-}
-
-.section{
-  margin-left: 4rem;
-}
-
-.chartContainer{
+.chartContainer {
   position: relative;
   height: 100%;
   overflow-y: scroll;
   overflow-x: hidden;
 
-  h1{
-    font-weight: bold;
-    font-size: 2em;
-  }
-  h2{
+  h1 {
     font-weight: bold;
     font-size: 1.5em;
+    margin-bottom: 0.5rem;
+    margin-top: 1rem;
+  }
+
+  h2 {
+    font-weight: bold;
+    font-size: 1.1em;
+    margin-bottom: 0.5rem;
   }
 }
 
-.mg1{
+.mg1 {
   margin: 1rem;
 }
