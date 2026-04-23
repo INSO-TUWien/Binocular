@@ -7,10 +7,7 @@ import downloadIcon from '../../assets/arrow_down_gray.svg';
 import type { DatabaseSettingsDataPluginType } from '../../types/settings/databaseSettingsType.ts';
 import { useEffect, useState } from 'react';
 import DataPluginStorage from '../../utils/dataPluginStorage.ts';
-import PouchDb from '../../plugins/dataPlugins/pouchDB/src/index.ts';
 import type { JSONObject } from '../../plugins/interfaces/dataPluginInterfaces/dataPluginFiles.ts';
-import type { DataPlugin } from '../../plugins/interfaces/dataPlugin.ts';
-import type BinocularBackend from '../../plugins/dataPlugins/binocularBackend/src/index.ts';
 
 function ExportDialog() {
   const exportType = useSelector((state: RootState) => state.export.exportType);
@@ -70,39 +67,34 @@ function ExportDialog() {
     setState(initialState);
   }, [selectedDataPlugin]);
 
-  async function loadData(name: string) {
+  async function loadData() {
+
     const dP = selectedDataPlugin ? await DataPluginStorage.getDataPlugin(selectedDataPlugin) : undefined;
     let data;
     if (dP) {
       switch (dP.name) {
         case 'PouchDb':
-          data = await (dP as PouchDb).getCollection(name);
+          //data = await (dP as PouchDb).getCollection();
           break;
         case 'Binocular Backend':
-          // eslint-disable-next-line
-          const currentDataConnection = dP[name as keyof DataPlugin];
-          if (
-            typeof currentDataConnection !== 'boolean' &&
-            typeof currentDataConnection !== 'string' &&
-            'getAll' in currentDataConnection!
-          ) {
-            data = await currentDataConnection.getAll(new Date(0).toISOString(), new Date().toISOString());
-          }
-          console.log(data);
-
-          if (name == 'commits') {
-            data = await (dP as BinocularBackend).export_temp.getAll();
-            console.log(data);
-          }
-
+            const xhr = new XMLHttpRequest();
+            xhr.open('GET', window.location.protocol + '//' + window.location.hostname + ':48763/api/db-export', false);
+            xhr.send();
+            data = JSON.parse(xhr.responseText);
+            
           break;
         default:
-          data = [];
+          data = initialState;
           break;
       }
-      const newState = { ...state };
-      if (name.includes('-')) newState.relations[name as keyof typeof state.relations] = data;
-      else newState.collections[name as keyof typeof state.collections] = data;
+      const newState = { collections: {}, relations: {}, previewTable: state.previewTable, exportType: state };
+      for (const [key, value] of Object.entries(data)) {
+        if (key.includes('_')) {
+          newState.relations[key.replace('_', '-') as keyof typeof state.relations] = value;
+        } else {
+          newState.collections[key as keyof typeof state.collections] = value;
+        }
+      }
       setState(newState);
       console.log(state);
     }
@@ -187,6 +179,7 @@ function ExportDialog() {
                       key={`settingsDatabasePlugin${dP.id}`}
                       onClick={() => {
                         setSelectedDataPlugin(dP);
+                        loadData();
                       }}>
                       <div className="card-body">
                         <div>
@@ -254,7 +247,6 @@ function ExportDialog() {
                         className={dataExportStyles.icon}
                         src={viewIcon}
                         onClick={async () => {
-                          await loadData(c);
                           setState({ ...state, previewTable: state.collections[c as keyof typeof state.collections] });
                           setPreviewTableHeader(Object.keys(state.collections[c as keyof typeof state.collections][0]) ?? []);
                         }}></img>

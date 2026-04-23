@@ -103,6 +103,10 @@ module.exports = new gql.GraphQLObjectType({
         type: gql.GraphQLString,
         description: 'Web-url of this build',
       },
+      tag: {
+        type: gql.GraphQLString,
+        description: 'Tag of this build',
+      },
       createdAt: {
         type: Timestamp,
         description: 'Creation date of the build',
